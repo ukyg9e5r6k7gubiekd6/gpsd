@@ -8,100 +8,108 @@ from subprocess import Popen, PIPE, call
 from os import access, F_OK
 from leapsecond import save_leapseconds, make_leapsecond_include
 
-# Warn user of current set of build options.
-if os.path.exists('.scons-option-cache'):
-    optfile = file('.scons-option-cache')
-    optxt = optfile.read().replace("\n", ", ")
-    optfile.close()
-    if optxt:
-        print "Saved options:", optxt[:-2]
-
 #
 # Build-control options
 #
 
-opts = Variables('.scons-option-cache')
-opts.AddVariables(
-    #
-    # Feature options
-    #
-    # GPS types
-    BoolVariable("ashtech",       "Ashtech support", True),
-    BoolVariable("earthmate",     "DeLorme EarthMate Zodiac support", True),
-    BoolVariable("evermore",      "EverMore binary support", True),
-    BoolVariable("fv18",          "San Jose Navigation FV-18 support", True),
-    BoolVariable("garmin",        "Garmin kernel driver support", True),
-    BoolVariable("garmintxt",     "Garmin Simple Text support", True),
-    BoolVariable("geostar",       "Geostar Protocol support", True),
-    BoolVariable("itrax",         "iTrax hardware support", True),
-    BoolVariable("mtk3301",       "MTK-3301 support", True),
-    BoolVariable("navcom",        "Navcom support", True),
-    BoolVariable("nmea",          "NMEA support", True),
-    BoolVariable("oncore",        "Motorola OnCore chipset support", True),
-    BoolVariable("sirf",          "SiRF chipset support", True),
-    BoolVariable("superstar2",    "Novatel SuperStarII chipset support", True),
-    BoolVariable("tnt",           "True North Technologies support", True),
-    BoolVariable("tripmate",      "DeLorme TripMate support", True),
-    BoolVariable("tsip",          "Trimble TSIP support", True),
-    BoolVariable("ubx",           "UBX Protocol support", True),
+def internalize(s):
+    return s.replace('-', '_')
+
+boolopts = (
+    ("ashtech",       "Ashtech support", True),
+    ("earthmate",     "DeLorme EarthMate Zodiac support", True),
+    ("evermore",      "EverMore binary support", True),
+    ("fv18",          "San Jose Navigation FV-18 support", True),
+    ("garmin",        "Garmin kernel driver support", True),
+    ("garmintxt",     "Garmin Simple Text support", True),
+    ("geostar",       "Geostar Protocol support", True),
+    ("itrax",         "iTrax hardware support", True),
+    ("mtk3301",       "MTK-3301 support", True),
+    ("navcom",        "Navcom support", True),
+    ("nmea",          "NMEA support", True),
+    ("oncore",        "Motorola OnCore chipset support", True),
+    ("sirf",          "SiRF chipset support", True),
+    ("superstar2",    "Novatel SuperStarII chipset support", True),
+    ("tnt",           "True North Technologies support", True),
+    ("tripmate",      "DeLorme TripMate support", True),
+    ("tsip",          "Trimble TSIP support", True),
+    ("ubx",           "UBX Protocol support", True),
     # Non-GPS protcols
-    BoolVariable("aivdm",         "AIVDM support", True),
-    BoolVariable("gpsclock",      "GPSClock support", True),
-    BoolVariable("ntrip",         "NTRIP support", True),
-    BoolVariable("oceanserver",   "OceanServer support", True),
-    BoolVariable("rtcm104v2",     "rtcm104v2 support", True),
-    BoolVariable("rtcm104v3",     "rtcm104v3 support", False),
+    ("aivdm",         "AIVDM support", True),
+    ("gpsclock",      "GPSClock support", True),
+    ("ntrip",         "NTRIP support", True),
+    ("oceanserver",   "OceanServer support", True),
+    ("rtcm104v2",     "rtcm104v2 support", True),
+    ("rtcm104v3",     "rtcm104v3 support", False),
     # Time service
-    BoolVariable("ntpshm",        "NTP time hinting support", True),
-    BoolVariable("pps",           "PPS time syncing support", True),
-    BoolVariable("pps_on_cts",    "PPS pulse on CTS rather than DCD", False),
+    ("ntpshm",        "NTP time hinting support", True),
+    ("pps",           "PPS time syncing support", True),
+    ("pps_on_cts",    "PPS pulse on CTS rather than DCD", False),
     # Export methods
-    BoolVariable("socket_export", "data export over sockets", True),
-    BoolVariable("dbus_export",   "enable DBUS export support", True),
-    BoolVariable("shm_export",    "export via shared memory", True),
+    ("socket-export", "data export over sockets", True),
+    ("dbus-export",   "enable DBUS export support", True),
+    ("shm-export",    "export via shared memory", True),
     # Communication
-    BoolVariable("bluetooth",     "BlueZ support for Bluetooth devices", False),
-    BoolVariable("ipv6",          "build IPv6 support", True),
+    ("bluetooth",     "BlueZ support for Bluetooth devices", False),
+    ("ipv6",          "build IPv6 support", True),
     # Client-side options
-    BoolVariable("clientdebug",   "client debugging support", True),
-    BoolVariable("oldstyle",      "oldstyle (pre-JSON) protocol support", True),
-    BoolVariable("libgpsmm",      "build C++ bindings", True),
-    BoolVariable("libQgpsmm",     "build QT bindings", False),
-    # Performance-tuning
-    ("limited_max_clients",       "compile with limited maximum clients", -1),
-    ("limited_max_devices",       "compile with maximum allowed devices", -1),
-    BoolVariable("reconfigure",   "allow gpsd to change device settings", True),
-    BoolVariable("controlsend",   "allow gpsctl/gpsmon to change device settings", True),
-    BoolVariable("cheapfloats",   "float ops are cheap, compute all error estimates", True),
-    BoolVariable("squelch",       "squelch gpsd_report/gpsd_hexdump to save cpu", False),
-    ("fixed_port_speed",          "compile with fixed serial port speed", None),
+    ("clientdebug",   "client debugging support", True),
+    ("oldstyle",      "oldstyle (pre-JSON) protocol support", True),
+    ("libgpsmm",      "build C++ bindings", True),
+    ("libQgpsmm",     "build QT bindings", False),
+    ("reconfigure",   "allow gpsd to change device settings", True),
+    ("controlsend",   "allow gpsctl/gpsmon to change device settings", True),
+    ("cheapfloats",   "float ops are cheap, compute all error estimates", True),
+    ("squelch",       "squelch gpsd_report/gpsd_hexdump to save cpu", False),
     # Miscellaneous
-    BoolVariable("profiling",     "Build with profiling enabled", True),
-    BoolVariable("timing",        "latency timing support", True),
-    BoolVariable("control_socket","control socket for hotplug notifications", True),
-    ("gpsd_user",   "privilege revocation user", ""),
-    ("gpsd_group",  "privilege revocation group if /dev/ttyS0 not found.", ""),
+    ("profiling",     "Build with profiling enabled", True),
+    ("timing",        "latency timing support", True),
+    ("control-socket","control socket for hotplug notifications", True)
     )
+for (name, help, default) in boolopts:
+    internal_name = internalize(name)
+    if default:
+        AddOption('--disable-'+ name,
+                  dest=internal_name,
+                  default=True,
+                  action="store_false",
+                  help=help)
+    else:
+        AddOption('--enable-'+ name,
+                  dest=internal_name,
+                  default=False,
+                  action="store_true",
+                  help=help)
 
-env = Environment(tools=["default", "tar"], options=opts)
+nonboolopts = (
+    ("gpsd-user",           "USER",    "privilege revocation user",   ""),
+    ("gpsd-group",          "GROUP",   "privilege revocation group",  ""),
+    ("limited-max-clients", "CLIENTS", "maximum allowed clients",     0),
+    ("limited-max-devices", "DEVICES", "maximum allowed devices",     0),
+    ("fixed-port-speed",    "SPEED",   "fixed serial port speed",     0),
+    )
+for (name, metavar, help, default) in nonboolopts:
+        internal_name = internalize(name)
+        AddOption('--enable-'+ name,
+                  dest=internal_name,
+                  metavar=metavar,
+                  default=default,
+                  nargs=1, type='string',
+                  help=help)
 
-opts.Save('.scons-option-cache', env)
+#
+# Environment creation
+#
+
+env = Environment(tools=["default", "tar"])
 env.SConsignFile(".sconsign.dblite")
 
 # Should we build with profiling?
-if ARGUMENTS.get('profiling'):
+if GetOption('profiling'):
     env.Append(CCFLAGS=['-pg'])
     env.Append(LDFLAGS=['-pg'])
 
 ## Build help
-
-Help("""Arguments may be a mixture of switches and targets in any order.
-Switches apply to the entire build regardless of where they are in the order.
-
-Options are cached in a file named .scons-option-cache and persist to later
-invocations.  The file is editable.  Delete it to start fresh.  Current option
-values can be listed with 'scons -h'.
-""" + opts.GenerateHelpText(env, sort=cmp))
 
 if GetOption("help"):
     Return()
@@ -156,17 +164,17 @@ else:
     confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
     bluezlibs = ["bluez"]
 
-keys = filter(lambda key: key.islower() and not key.startswith("_"),
-              env.Dictionary().keys())
+keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)
 keys.sort()
 for key in keys:
-    value = env.Dictionary()[key]
+    key = internalize(key)
+    value = GetOption(key)
     if type(value) == type(True):
         if value:
             confdefs.append("#define %s_ENABLE 1\n\n" % key.upper())
         else:
             confdefs.append("/* #undef %s_ENABLE */\n\n" % key.upper())
-    elif value in (-1, ""):
+    elif value in (0, ""):
         confdefs.append("/* #undef %s */\n\n" % key.upper())
     else:
         if type(value) == type(-1):
