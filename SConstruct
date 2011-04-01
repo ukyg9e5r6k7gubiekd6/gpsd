@@ -68,8 +68,8 @@ opts.AddVariables(
     BoolVariable("libgpsmm",      "build C++ bindings", True),
     BoolVariable("libQgpsmm",     "build QT bindings", False),
     # Performance-tuning
-    ("max_clients",               "compile with limited maximum clients", None),
-    ("max_devices",               "compile with maximum allowed devices", None),
+    ("limited_max_clients",       "compile with limited maximum clients", -1),
+    ("limited_max_devices",       "compile with maximum allowed devices", -1),
     BoolVariable("reconfigure",   "allow gpsd to change device settings", True),
     BoolVariable("controlsend",   "allow gpsctl/gpsmon to change device settings", True),
     BoolVariable("cheapfloats",   "float ops are cheap, compute all error estimates", True),
@@ -79,8 +79,8 @@ opts.AddVariables(
     BoolVariable("profiling",     "Build with profiling enabled", True),
     BoolVariable("timing",        "latency timing support", True),
     BoolVariable("control_socket","control socket for hotplug notifications", True),
-    ("gpsd_user",   "privilege revocation user", "nobody"),
-    ("gpsd_group",  "privilege revocation group if /dev/ttyS0 not found.", "nogroup"),
+    ("gpsd_user",   "privilege revocation user", ""),
+    ("gpsd_group",  "privilege revocation group if /dev/ttyS0 not found.", ""),
     )
 
 env = Environment(tools=["default", "tar"], options=opts)
@@ -156,17 +156,25 @@ else:
     confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
     bluezlibs = ["bluez"]
 
-for (key, value) in env.Dictionary().items():
-    if key.replace("_", '').islower() and not key.startswith("_"):
-        if type(value) == type(True):
-            if value:
-                confdefs.append("#define %s_ENABLE 1\n\n" % key.upper())
-            else:
-                confdefs.append("/* #undef %s_ENABLE */\n\n" % key.upper())
+keys = filter(lambda key: key.islower() and not key.startswith("_"),
+              env.Dictionary().keys())
+keys.sort()
+for key in keys:
+    value = env.Dictionary()[key]
+    if type(value) == type(True):
+        if value:
+            confdefs.append("#define %s_ENABLE 1\n\n" % key.upper())
         else:
-            print (key, value)
-
-
+            confdefs.append("/* #undef %s_ENABLE */\n\n" % key.upper())
+    elif value in (-1, ""):
+        confdefs.append("/* #undef %s */\n\n" % key.upper())
+    else:
+        if type(value) == type(-1):
+            confdefs.append("#define %d %s\n\n" % value)
+        elif type(value) == type(""):
+            confdefs.append("#define %d \"%s\"\n\n" % value)
+        else:
+            raise ValueError
 
 sys.stdout.writelines(confdefs)
 
