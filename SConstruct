@@ -10,8 +10,10 @@ from os import access, F_OK
 # Warn user of current set of build options.
 if os.path.exists('.scons-option-cache'):
     optfile = file('.scons-option-cache')
-    print "Saved options:", optfile.read().replace("\n", ", ")[:-2]
+    optxt = optfile.read().replace("\n", ", ")
     optfile.close()
+    if optxt:
+        print "Saved options:", optxt[:-2]
 
 #
 # Build-control options
@@ -73,6 +75,7 @@ opts.AddVariables(
     BoolVariable("squelch",       "squelch gpsd_report/gpsd_hexdump to save cpu", False),
     ("fixed_port_speed",          "compile with fixed serial port speed", None),
     # Miscellaneous
+    BoolVariable("profiling",     "Build with profiling enabled", True),
     BoolVariable("timing",        "latency timing support", True),
     BoolVariable("control_socket","control socket for hotplug notifications", True),
     ("gpsd_user",   "privilege revocation user", "nobody"),
@@ -83,6 +86,11 @@ env = Environment(tools=["default", "tar"], options=opts)
 
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
+
+# Should we build with profiling?
+if ARGUMENTS.get('profiling'):
+    env.Append(CCFLAGS=['-pg'])
+    env.Append(LDFLAGS=['-pg'])
 
 ## Build help
 
@@ -96,6 +104,60 @@ values can be listed with 'scons -h'.
 
 if GetOption("help"):
     Return()
+
+## Configuration
+
+config = Configure(env)
+
+confdefs = []
+
+if not config.CheckCXX():
+    print('!! Your compiler and/or environment is not correctly configured.')
+    Exit(0)
+
+if not config.CheckLib('libncurses'):
+    ncurseslibs = []
+else:
+    ncurseslibs = ["ncurses"]
+
+if not config.CheckLib('libusb'):
+    confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
+    usblibs = []
+else:
+    confdefs.append("#define HAVE_LIBUSB 1\n\n")
+    usblibs = ["usb"]
+    
+if not config.CheckLib('libpthread'):
+    confdefs.append("/* #undef HAVE_LIBPTHREAD */\n\n")
+    pthreadlibs = []
+else:
+    confdefs.append("#define HAVE_LIBPTHREAD\n\n")
+    pthreadlibs = ["pthread"]
+    
+if not config.CheckLib('librt'):
+    confdefs.append("/* #undef HAVE_LIBRT */\n\n")
+    rtlibs = []
+else:
+    confdefs.append("#define HAVE_LIBRT 1\n\n")
+    rtlibs = ["rt"]
+    
+if not config.CheckLib('libdbus'):
+    confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
+    dbuslibs = []
+else:
+    confdefs.append("#define HAVE_LIBDBUS 1\n\n")
+    dbuslibs = ["dbus"]
+    
+if not config.CheckLib('libbluez'):
+    confdefs.append("/* #undef HAVE_BLUEZ */\n\n")
+    bluezlibs = []
+else:
+    confdefs.append("#define HAVE_BLUEZ 1\n\n")
+    bluezlibs = ["bluez"]
+
+sys.stdout.writelines(confdefs)
+
+env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
@@ -155,13 +217,6 @@ env.Library(target="gpsd", source=[
 
 # The libraries have dependencies on system libraries 
 
-# TODO: conditionalize these properly
-pthreadlibs = ["pthreads"]
-rtlibs = ["rt"]
-dbuslibs = ["dbus"]
-usblibs = ["usb"]
-bluezlibs = ["bluez"]
-
 gpslibs = ["gps", "m"]
 gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 
@@ -172,13 +227,15 @@ gpsd = env.Program('gpsd', ['gpsd.c', 'gpsd_dbus.c'],
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs)
 gpsmon = env.Program('gpsmon', ['gpsmon.c'], LIBS=gpsdlibs)
-
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbuslibs)
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
-cgps = env.Program('cgps', ['cgps.c'], LIBS=gpslibs)
+cgps = env.Program('cgps', ['cgps.c'], LIBS=gpslibs + ncurseslibs)
 
-env.Default(gpsd, gpsdecode, gpsctl, gpsmon, gpspipe, gpxlogger, lcdgps, cgps)
+default_targets = [gpsd, gpsdecode, gpsctl, gpsmon, gpspipe, gpxlogger, lcdgps]
+if ncurseslibs:
+    default_targets.append(cgps)
+env.Default(*default_targets)
 
 # Test programs
 testprogs = ["test_float", "test_trig", "test_bits", "test_packet",
