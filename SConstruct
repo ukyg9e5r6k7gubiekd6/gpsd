@@ -236,13 +236,6 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 with open("gpsd_config.h", "w") as ofp:
     ofp.writelines(confdefs)
 
-if not os.path.exists('leapseconds.cache'):
-    try:
-        print "retrieving leapseconds.cache"
-        save_leapseconds('leapseconds.cache')
-    except:
-        print "Failed to retrieve leapseconds"
-
 env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
