@@ -316,8 +316,8 @@ gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 ## Production programs
 gpsd = env.Program('gpsd', ['gpsd.c', 'gpsd_dbus.c'],
                    LIBS = gpsdlibs + pthreadlibs + rtlibs + dbuslibs)
-gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs)
-gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs)
+gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
+gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsmon = env.Program('gpsmon', ['gpsmon.c'], LIBS=gpsdlibs)
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbuslibs)
