@@ -270,8 +270,9 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"strl.c",
 ])
 
+bits = env.Object("bits.c")
 compiled_gpsdlib = env.Library(target="gpsd", source=[
-	"bits.c",
+	bits,
 	"bsd-base64.c",
 	"crc24q.c",
 	"gpsd_json.c",
@@ -337,12 +338,11 @@ test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
 test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
 test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
-test_bits = env.Program('test_bits', ['test_bits.c'], LIBS=gpslibs)
+test_bits = env.Program('test_bits', ['test_bits.c',bits], LIBS="m")
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json]
 
 env.Depends(test_packet,compiled_gpslib)
-env.Depends(test_bits,compiled_gpslib)
 env.Alias("buildtest",testprogs)
 
 # Python programs
