@@ -256,10 +256,6 @@ env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
-shm_export = env.Object([
-	"shmexport.c",
-        ])
-
 compiled_gpslib = env.Library(target="gps", source=[
 	"ais_json.c",
 	"daemon.c",
@@ -277,7 +273,6 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"rtcm2_json.c",
 	"shared_json.c",
 	"strl.c",
-        shm_export,
 ])
 
 bits = env.Object("bits.c")
@@ -325,7 +320,7 @@ gpslibs = ["gps", "m"]
 gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 
 ## Production programs
-gpsd = env.Program('gpsd', ['gpsd.c', 'gpsd_dbus.c'],
+gpsd = env.Program('gpsd', ['gpsd.c', 'shmexport.c', 'dbusexport.c'],
                    LIBS = gpsdlibs + pthreadlibs + rtlibs + dbuslibs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
