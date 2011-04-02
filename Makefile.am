@@ -439,7 +439,7 @@ endif
 # Build test_bits tester
 #
 test_bits_SOURCES = test_bits.c
-test_bits_LDADD = $(LIBC) libgps.la $(LIBUSB_LIBS)
+test_bits_LDADD = $(LIBC) bits.o libgps.la $(LIBUSB_LIBS)
 
 #
 # Build packets tester

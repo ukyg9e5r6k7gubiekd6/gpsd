@@ -152,7 +152,8 @@ else:
 if config.CheckLib('libusb-1.0'):
     confdefs.append("#define HAVE_LIBUSB 1\n\n")
     env.MergeFlags(['!pkg-config libusb-1.0 --cflags'])
-    usblibs = ["usb"]
+    flags = env.ParseFlags('!pkg-config libusb-1.0 --libs')
+    usblibs = flags['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
@@ -173,10 +174,11 @@ else:
     confdefs.append("/* #undef HAVE_LIBRT */\n\n")
     rtlibs = []
 
-if config.CheckLib('libdbus'):
+if config.CheckLib('dbus-1'):
     confdefs.append("#define HAVE_LIBDBUS 1\n\n")
-    env.MergeFlags(['!pkg-config libdbus --cflags'])
-    dbuslibs = ["dbus"]
+    env.MergeFlags(['!pkg-config dbus-1 --cflags'])
+    flags = env.ParseFlags('!pkg-config dbus-1 --libs')
+    dbuslibs = flags['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
     dbuslibs = []
@@ -184,7 +186,8 @@ else:
 if config.CheckLib('libbluez'):
     confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
     env.MergeFlags(['!pkg-config bluez --cflags'])
-    bluezlibs = ["bluez"]
+    flags = env.ParseFlags('!pkg-config bluez --libs')
+    bluezlibs = flags['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
     bluezlibs = []
@@ -253,6 +256,15 @@ env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
+shm_export = env.Object([
+	"libgps_shm.c",
+	"shmexport.c",
+        ])
+
+socket_export = env.Object([
+	"libgps_sock.c",
+        ])
+
 compiled_gpslib = env.Library(target="gps", source=[
 	"ais_json.c",
 	"daemon.c",
@@ -268,10 +280,13 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"rtcm2_json.c",
 	"shared_json.c",
 	"strl.c",
+        shm_export,
+        socket_export,
 ])
 
+bits = env.Object("bits.c")
 compiled_gpsdlib = env.Library(target="gpsd", source=[
-	"bits.c",
+	bits,
 	"bsd-base64.c",
 	"crc24q.c",
 	"gpsd_json.c",
@@ -337,12 +352,10 @@ test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
 test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
 test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
-test_bits = env.Program('test_bits', ['test_bits.c'], LIBS=gpslibs)
+test_bits = env.Program('test_bits', ['test_bits.c',bits], LIBS="m")
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json]
 
-env.Depends(test_packet,compiled_gpslib)
-env.Depends(test_bits,compiled_gpslib)
 env.Alias("buildtest",testprogs)
 
 # Python programs

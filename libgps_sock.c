@@ -30,6 +30,7 @@
 #include <QTcpSocket>
 #endif /* USE_QT */
 
+#include "gps.h"
 #include "gpsd.h"
 #include "gps_json.h"
 
