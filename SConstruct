@@ -152,8 +152,8 @@ else:
 if config.CheckLib('libusb-1.0'):
     confdefs.append("#define HAVE_LIBUSB 1\n\n")
     env.MergeFlags(['!pkg-config libusb-1.0 --cflags'])
-    usbflags = env.ParseFlags('!pkg-config libusb-1.0 --libs')
-    usblibs = usbflags['LIBS']
+    flags = env.ParseFlags('!pkg-config libusb-1.0 --libs')
+    usblibs = flags['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
@@ -174,10 +174,11 @@ else:
     confdefs.append("/* #undef HAVE_LIBRT */\n\n")
     rtlibs = []
 
-if config.CheckLib('libdbus'):
+if config.CheckLib('dbus-1'):
     confdefs.append("#define HAVE_LIBDBUS 1\n\n")
-    env.MergeFlags(['!pkg-config libdbus --cflags'])
-    dbuslibs = ["dbus"]
+    env.MergeFlags(['!pkg-config dbus-1 --cflags'])
+    flags = env.ParseFlags('!pkg-config dbus-1 --libs')
+    dbuslibs = flags['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
     dbuslibs = []
@@ -185,7 +186,8 @@ else:
 if config.CheckLib('libbluez'):
     confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
     env.MergeFlags(['!pkg-config bluez --cflags'])
-    bluezlibs = ["bluez"]
+    flags = env.ParseFlags('!pkg-config bluez --libs')
+    bluezlibs = flags['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
     bluezlibs = []
