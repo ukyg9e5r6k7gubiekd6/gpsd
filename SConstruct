@@ -354,7 +354,6 @@ test_bits = env.Program('test_bits', ['test_bits.c',bits], LIBS="m")
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json]
 
-env.Depends(test_packet,compiled_gpslib)
 env.Alias("buildtest",testprogs)
 
 # Python programs
