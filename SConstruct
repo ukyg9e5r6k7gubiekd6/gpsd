@@ -1,6 +1,7 @@
 ### SCons build recipe for the GPSD project
 
 # Unfinished items:
+# * Something is not right with the DBUS detection.
 # * PPS dependency checks.
 # * Check for Python development libraries
 # * Python module build
@@ -62,7 +63,7 @@ boolopts = (
     ("dbus-export",   True,  "enable DBUS export support"),
     ("shm-export",    True,  "export via shared memory"),
     # Communication
-    ("bluetooth",     False, "BlueZ support for Bluetooth devices"),
+    ("bluez",         False, "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
@@ -205,15 +206,22 @@ else:
     confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
     bluezlibs = []
 
+# Map options to libraries required to support them that might be absent. 
+optionrequires = {
+    "dbus_export" : "libdbus",
+    "bluez": "libbluez",
+    }
+
 keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)
 keys.sort()
 for key in keys:
     key = internalize(key)
     value = GetOption(key)
 
-#TODO: This information as well as interdependancies between drivers needs captured in a table or somewhere else
-    if(key == "dbus_export"):
-        if not config.CheckLib('libdbus'):
+    if value and key in optionrequires:
+        required = optionrequires[key]
+        if not config.CheckLib(required):
+            print "%s not found, %s cannot be enabled." % (required, key)
             value = False
 
     if type(value) == type(True):
