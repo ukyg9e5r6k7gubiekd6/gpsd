@@ -264,6 +264,7 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"json.c",
 	"libgps_core.c",
 	"libgps_json.c",
+	"libgps_sock.c",
 	"netlib.c",
 	"rtcm2_json.c",
 	"shared_json.c",
