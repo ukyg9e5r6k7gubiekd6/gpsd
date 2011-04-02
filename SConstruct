@@ -1,5 +1,18 @@
 ### SCons build recipe for the GPSD project
 
+# Unfinished items:
+# * PPS dependency checks.
+# * Check for Python development libraries
+# * Python module build
+# * Documentation build
+# * C++ binding
+# * Qt binding
+# * PYTHONPATH adjustment for Gentoo
+# * Utility and test productions
+# * Installation
+# * Link libraries to their distribution sonames
+# * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
+
 EnsureSConsVersion(1,1,0)
 
 import os, sys, shutil, re, commands
