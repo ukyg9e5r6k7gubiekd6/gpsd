@@ -257,12 +257,7 @@ env = config.Finish()
 ## Two shared libraries provide most of the code for the C programs
 
 shm_export = env.Object([
-	"libgps_shm.c",
 	"shmexport.c",
-        ])
-
-socket_export = env.Object([
-	"libgps_sock.c",
         ])
 
 compiled_gpslib = env.Library(target="gps", source=[
@@ -276,12 +271,13 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"json.c",
 	"libgps_core.c",
 	"libgps_json.c",
+	"libgps_shm.c",
+        "libgps_sock.c",
 	"netlib.c",
 	"rtcm2_json.c",
 	"shared_json.c",
 	"strl.c",
         shm_export,
-        socket_export,
 ])
 
 bits = env.Object("bits.c")
