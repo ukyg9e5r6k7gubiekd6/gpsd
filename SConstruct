@@ -339,6 +339,10 @@ test_bits = env.Program('test_bits', ['test_bits.c'], LIBS=gpslibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json]
 
+env.Depends(test_packet,compiled_gpslib)
+env.Depends(test_bits,compiled_gpslib)
+env.Alias("buildtest",testprogs)
+
 # Python programs
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
 python_modules = ["__init__.py", "misc.py", "fake.py", "gps.py", "client.py"]
