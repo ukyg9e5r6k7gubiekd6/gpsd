@@ -105,6 +105,8 @@ for (name, metavar, help, default) in nonboolopts:
 env = Environment(tools=["default", "tar"], toolpath = ["scons"])
 env.SConsignFile(".sconsign.dblite")
 
+env.Append(LIBPATH=['.'])
+
 # Enable all GCC warnings except uninitialized and
 # missing-field-initializers, which we can't help triggering because
 # of the way some of the JSON code is generated.
