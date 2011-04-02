@@ -152,7 +152,8 @@ else:
 if config.CheckLib('libusb-1.0'):
     confdefs.append("#define HAVE_LIBUSB 1\n\n")
     env.MergeFlags(['!pkg-config libusb-1.0 --cflags'])
-    usblibs = ["usb"]
+    usbflags = env.ParseFlags('!pkg-config libusb-1.0 --libs')
+    usblibs = usbflags['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
