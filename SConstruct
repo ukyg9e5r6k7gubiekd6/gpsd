@@ -275,9 +275,8 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"strl.c",
 ])
 
-bits = env.Object("bits.c")
 compiled_gpsdlib = env.Library(target="gpsd", source=[
-	bits,
+	"bits.c",
 	"bsd-base64.c",
 	"crc24q.c",
 	"gpsd_json.c",
@@ -343,7 +342,7 @@ test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
 test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
 test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
-test_bits = env.Program('test_bits', ['test_bits.c',bits], LIBS="m")
+test_bits = env.Program('test_bits', ['test_bits.c'], LIBS=gpsdlibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json]
 
