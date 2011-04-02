@@ -192,6 +192,12 @@ keys.sort()
 for key in keys:
     key = internalize(key)
     value = GetOption(key)
+
+#TODO: This information as well as interdependancies between drivers needs captured in a table or somewhere else
+    if(key == "dbus_export"):
+        if not config.CheckLib('libdbus'):
+            value = False
+
     if type(value) == type(True):
         if value:
             confdefs.append("#define %s_ENABLE 1\n\n" % key.upper())
