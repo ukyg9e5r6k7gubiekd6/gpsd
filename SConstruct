@@ -83,6 +83,7 @@ for (name, default, help) in boolopts:
 nonboolopts = (
     ("gpsd-user",           "USER",     "privilege revocation user",     ""),
     ("gpsd-group",          "GROUP",    "privilege revocation group",    ""),
+    ("prefix",              "PREFIX",   "installation path prefix",      "/usr/local/"),
     ("sysconfdir",          "SYCONFDIR","system configuration directory","/etc"),
     ("limited-max-clients", "CLIENTS",  "maximum allowed clients",       0),
     ("limited-max-devices", "DEVICES",  "maximum allowed devices",       0),
@@ -101,7 +102,7 @@ for (name, metavar, help, default) in nonboolopts:
 # Environment creation
 #
 
-env = Environment(tools=["default", "tar"])
+env = Environment(tools=["default", "tar"], toolpath = ["scons"])
 env.SConsignFile(".sconsign.dblite")
 
 # Enable all GCC warnings except uninitialized and
@@ -385,6 +386,27 @@ env.Command(target="revision.h", source="gpsd_config.h", action='''
 env.Command(target="leapseconds.cache", source="leapsecond.py",
             action='python $SOURCE -f $TARGET')
 
+# Instantiate some file templates.  We'd like to use the Substfile builtin
+# but it doesn't seem to work in scons 1.20
+def substituter(target, source, env):
+    substmap = (
+        ('@VERSION@', gpsd_version),
+        ('@prefix@',  GetOption('prefix')),
+        ('@PYTHON@',  "python"),
+        )
+    with open(str(source[0])) as sfp:
+        content = sfp.read()
+    for (s, t) in substmap:
+        content = content.replace(s, t)
+    with open(str(target[0]), "w") as tfp:
+        tfp.write(content)
+for fn in ("packaging/rpm/gpsd.spec.in", "libgps.pc.in", "libgpsd.pc.in",
+       "jsongen.py.in", "maskaudit.py.in", "valgrind-audit.in"):
+    builder = env.Command(source=fn, target=fn[:-3], action=substituter)
+    post1 = env.AddPostAction(builder, 'chmod -w $TARGET')
+    if fn.endswith(".py.in"):
+        env.AddPostAction(post1, 'chmod +x $TARGET')
+    
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
