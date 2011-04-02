@@ -141,7 +141,7 @@ for f in ("daemon", "strlcpy", "strlcat"):
         confdefs.append("#define HAVE_%s 1\n\n" % f.upper())
     else:
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
-    
+
 if config.CheckLib('libncurses'):
     ncurseslibs = ["ncurses"]
 else:
@@ -154,7 +154,7 @@ if config.CheckLib('libusb-1.0'):
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
-    
+
 if config.CheckLib('libpthread'):
     confdefs.append("#define HAVE_LIBPTHREAD 1\n\n")
     # System library - no special flags
@@ -162,7 +162,7 @@ if config.CheckLib('libpthread'):
 else:
     confdefs.append("/* #undef HAVE_LIBPTHREAD */\n\n")
     pthreadlibs = []
-    
+
 if config.CheckLib('librt'):
     confdefs.append("#define HAVE_LIBRT 1\n\n")
     # System library - no special flags
@@ -170,7 +170,7 @@ if config.CheckLib('librt'):
 else:
     confdefs.append("/* #undef HAVE_LIBRT */\n\n")
     rtlibs = []
-    
+
 if config.CheckLib('libdbus'):
     confdefs.append("#define HAVE_LIBDBUS 1\n\n")
     env.MergeFlags(['!pkg-config libdbus --cflags'])
@@ -178,7 +178,7 @@ if config.CheckLib('libdbus'):
 else:
     confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
     dbuslibs = []
-    
+
 if config.CheckLib('libbluez'):
     confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
     env.MergeFlags(['!pkg-config bluez --cflags'])
@@ -300,7 +300,7 @@ compiled_gpsdlib = env.Library(target="gpsd", source=[
 
 env.Default(compiled_gpsdlib, compiled_gpslib)
 
-# The libraries have dependencies on system libraries 
+# The libraries have dependencies on system libraries
 
 gpslibs = ["gps", "m"]
 gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
@@ -349,7 +349,7 @@ env.Command(target = "packet_names.h", source="packet_states.h", action="""
 
 env.Command(target="timebase.h", source="leapseconds.cache",
             action='python leapsecond.py -h $SOURCE >$TARGET')
- 
+
 env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
 	rm -f $TARGET &&\
 	echo \"/* This file is generated.  Do not hand-hack it! */\" >$TARGET &&\
@@ -357,16 +357,16 @@ env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
 	cat gpsd_config.h >>$TARGET &&\
 	cat $TARGET-tail >>$TARGET &&\
 	chmod a-w $TARGET""")
-Depends(target="gpsd.h", dependency="gpsd.h-head") 
-Depends(target="gpsd.h", dependency="gpsd.h-tail") 
+Depends(target="gpsd.h", dependency="gpsd.h-head")
+Depends(target="gpsd.h", dependency="gpsd.h-tail")
 
 # TO-DO: The '.' in the command may break out-of-directory builds.
 env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
 	rm -f $TARGET &&\
         python $SOURCE -c . >$TARGET &&\
         chmod a-w $TARGET''')
-Depends(target="gps_maskdump.c", dependency="gps.h") 
-Depends(target="gps_maskdump.c", dependency="gpsd.h") 
+Depends(target="gps_maskdump.c", dependency="gps.h")
+Depends(target="gps_maskdump.c", dependency="gpsd.h")
 
 env.Command(target="ais_json.i", source="jsongen.py", action='''\
 	rm -f $TARGET &&\
@@ -406,7 +406,7 @@ for fn in ("packaging/rpm/gpsd.spec.in", "libgps.pc.in", "libgpsd.pc.in",
     post1 = env.AddPostAction(builder, 'chmod -w $TARGET')
     if fn.endswith(".py.in"):
         env.AddPostAction(post1, 'chmod +x $TARGET')
-    
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
