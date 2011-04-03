@@ -401,6 +401,8 @@ testprogs = [test_float, test_trig, test_bits, test_packet,
 
 env.Alias("buildtest",testprogs)
 
+env.Default(testprogs)
+
 # Python programs
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
 python_modules = ["__init__.py", "misc.py", "fake.py", "gps.py", "client.py"]
