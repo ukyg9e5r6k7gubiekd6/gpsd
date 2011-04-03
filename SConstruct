@@ -329,7 +329,6 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"strl.c",
 ])
 
-# TO-DO: Move ntpshm.c out of here to gpsd.c's private modules. 
 compiled_gpsdlib = env.Library(target="gpsd", source=[
 	"bits.c",
 	"bsd-base64.c",
@@ -340,7 +339,6 @@ compiled_gpsdlib = env.Library(target="gpsd", source=[
 	"net_dgpsip.c",
 	"net_gnss_dispatch.c",
 	"net_ntrip.c",
-	"ntpshm.c",
 	"packet.c",
 	"pseudonmea.c",
 	"serial.c",
@@ -374,7 +372,7 @@ gpslibs = ["gps", "m"]
 gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 
 ## Production programs
-gpsd = env.Program('gpsd', ['gpsd.c', 'shmexport.c', 'dbusexport.c'],
+gpsd = env.Program('gpsd', ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c'],
                    LIBS = gpsdlibs + pthreadlibs + rtlibs + dbuslibs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)

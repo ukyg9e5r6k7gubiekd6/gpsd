@@ -84,7 +84,7 @@ gpxlogger_LDADD = $(DBUS_GLIB_LIBS) libgps.la $(LIBM)
 #
 # Build gpsd
 #
-gpsd_c_sources = gpsd.c gpsd_dbus.c
+gpsd_c_sources = gpsd.c dbusexport.c shmexport.c ntpshm.c
 gpsd_SOURCES = $(gpsd_c_sources) gpsd_dbus.h
 gpsd_LDADD = libgpsd.la libgps.la $(LIBM) $(LIBPTHREAD) $(LIBUSB_LIBS) $(BLUEZ_LIBS) $(DBUS_LIBS) $(LIBM)
 
@@ -175,11 +175,9 @@ libgpsd_c_sources = \
 	net_dgpsip.c \
 	net_gnss_dispatch.c \
 	net_ntrip.c \
-	ntpshm.c \
 	packet.c \
 	pseudonmea.c \
 	serial.c \
-	shmexport.c \
 	srecord.c \
 	subframe.c \
 	drivers.c \
