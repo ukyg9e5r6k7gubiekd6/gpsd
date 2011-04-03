@@ -507,7 +507,7 @@ base_manpages = {
     "libgpsd.3" : "libgpsd.xml",
     "gpsmon.1": "gpsmon.xml",
     "gpsctl.1" : "gpsctl.xml",
-    "gpspipe.1" : "gps.xml",
+    "gpspipe.1" : "gpspipe.xml",
     "gpsdecode.1" : "gpsdecode.xml",
     "srec.5" : "srec.xml",
     }
