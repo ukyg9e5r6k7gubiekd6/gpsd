@@ -1,7 +1,6 @@
 ### SCons build recipe for the GPSD project
 
 # Unfinished items:
-# * Something is not right with the DBUS detection.  Use pkg-config --exists?
 # * Check for Python development libraries
 # * Python module build
 # * C++ binding
@@ -191,10 +190,11 @@ else:
     rtlibs = []
 
 if config.CheckLib('dbus-1'):
-    confdefs.append("#define HAVE_LIBDBUS 1\n\n")
-    env.MergeFlags(['!pkg-config dbus-1 --cflags'])
-    flags = env.ParseFlags('!pkg-config dbus-1 --libs')
-    dbuslibs = flags['LIBS']
+    env.MergeFlags(['!pkg-config --cflags dbus-glib-1'])
+    dbus_xmit = env.ParseFlags('!pkg-config --libs dbus-1')
+    dbus_xmit_libs = dbus_xmit['LIBS']
+    dbus_recv = env.ParseFlags('!pkg-config --libs dbus-glib-1')
+    dbus_recv_libs = dbus_recv['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
     dbuslibs = []
@@ -222,7 +222,7 @@ else:
 optionrequires = {
     "bluez": "libbluez",
     "pps" : "librt",
-    "dbus_export" : "libdbus",
+    #"dbus_export" : "libdbus",
     }
 
 keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)
@@ -377,12 +377,12 @@ gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 
 ## Production programs
 gpsd = env.Program('gpsd', ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c'],
-                   LIBS = gpsdlibs + pthreadlibs + rtlibs + dbuslibs)
+                   LIBS = gpsdlibs + pthreadlibs + rtlibs + dbus_xmit_libs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsmon = env.Program('gpsmon', ['gpsmon.c'], LIBS=gpsdlibs)
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
-gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbuslibs)
+gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbus_recv_libs)
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
 cgps = env.Program('cgps', ['cgps.c'], LIBS=gpslibs + ncurseslibs)
 
