@@ -261,7 +261,7 @@ dnl fi
 
 dnl Manually configure DBUS until we figure out a
 dnl distro-independent was to check for both libraries and headers
-AC_ARG_ENABLE(dbus,
+AC_ARG_ENABLE(dbus-export,
     AC_HELP_STRING([--enable-dbus-export],
 		[enable DBUS export support]),
     [ac_dbus_export=$enableval], [ac_dbus_export=no])
