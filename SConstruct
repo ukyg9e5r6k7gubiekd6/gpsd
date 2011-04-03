@@ -8,15 +8,17 @@
 # * PYTHONPATH adjustment for Gentoo
 # * Utility and test productions
 # * Installation and uninstallation
-# * distribution tarballs
 # * Link libraries to their distribution sonames
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
+
+# Release identification begins here
+gpsd_version="3.0~dev"
+# Release identification ends here
 
 EnsureSConsVersion(1,2,0)
 
 import os, sys, commands, glob
 
-gpsd_version="3.0~dev"
 
 #
 # Build-control options
@@ -116,6 +118,8 @@ for (name, metavar, help, default) in nonboolopts:
 
 env = Environment(tools=["default", "tar"], toolpath = ["scons"])
 env.SConsignFile(".sconsign.dblite")
+
+env['VERSION'] = gpsd_version
 
 env.Append(LIBPATH=['.'])
 
@@ -315,7 +319,7 @@ env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
-compiled_gpslib = env.Library(target="gps", source=[
+compiled_gpslib = env.SharedLibrary(target="gps", source=[
 	"ais_json.c",
 	"daemon.c",
 	"gpsutils.c",
@@ -334,7 +338,7 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"strl.c",
 ])
 
-compiled_gpsdlib = env.Library(target="gpsd", source=[
+compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=[
 	"bits.c",
 	"bsd-base64.c",
 	"crc24q.c",
@@ -447,6 +451,10 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
 	python $SOURCE --ais --target=parser >$TARGET &&\
 	chmod a-w $TARGET''')
 
+generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
+                     'gps_maskdump.c', 'ais_json.c']
+#env.Clean(generated_sources)
+
 # Under autotools this depended on Makefile. We need it to depend
 # on the state of the build-system variables.
 env.Command(target="revision.h", source="gpsd_config.h", action='''
@@ -505,6 +513,9 @@ python_manpages = {
     "xgpsspeed.1" : "gps.xml",
     "xgps.1" : "gps.xml",
     }
+qt_manpages = {
+    "libQgpsmm.3" : "libQgpsmm.xml",
+    }
 
 manpage_targets = []
 for (man, xml) in base_manpages.items():
@@ -517,6 +528,7 @@ def Utility(target, source, action):
     target = env.Command(target=target, source=source, action=action)
     env.AlwaysBuild(target)
     env.Precious(target)
+    return target
 
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck --template gcc --all --force $SRCDIR")
@@ -524,6 +536,8 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),
 	"for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
+
+## MORE GOES HERE
 
 #
 # Regression tests begin here
@@ -548,6 +562,73 @@ Utility('gps-makeregress', [gpsd],
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
 #	regress-driver -b test/daemon/foo.log
+
+## MORE GOES HERE
+
+# Productions for setting up and performing udev tests.
+#
+# Requires root. Do "udev-install", then "tail -f /var/log/syslog" in
+# another window, then run 'make udev-test', then plug and unplug the
+# GPS ad libitum.  All is well when you get fix reports each time a GPS
+# is plugged in.
+
+Utility('udev-install', '', [
+	'cp $(srcdir)/gpsd.rules /lib/udev/rules.d/25-gpsd.rules',
+	'cp $(srcdir)/gpsd.hotplug $(srcdir)/gpsd.hotplug.wrapper /lib/udev/',
+	'chmod a+x /lib/udev/gpsd.hotplug /lib/udev/gpsd.hotplug.wrapper',
+        ])
+
+Utility('udev-uninstall', '', [
+	'rm -f /lib/udev/{gpsd.hotplug,gpsd.hotplug.wrapper}',
+	'rm -f /lib/udev/rules.d/25-gpsd.rules',
+        ])
+
+Utility('udev-test', '', [
+	'$(srcdir)/gpsd -N -n -F /var/run/gpsd.sock -D 5',
+        ])
+        
+# Release machinery begins here
+#
+
+distfiles = commands.getoutput(r"git ls-files |egrep -v '^(www|devtools|packaging|repo)'")
+distfiles = distfiles.split()
+distfiles.remove(".gitignore")
+distfiles += generated_sources
+distfiles += base_manpages.keys() + python_manpages.keys() + qt_manpages.keys()
+
+tarball = env.Command('tarball', distfiles, [
+    '@tar -czf gpsd-${VERSION}.tar.gz $SOURCES',
+    '@ls -l gpsd-${VERSION}.tar.gz',
+    ])
+#env.Clean("gpsd-${VERSION}.tar.gz")
+
+# Make RPM from the specfile in packaging
+Utility('dist-rpm', tarball, 'rpm -ta $SOURCE')
+
+# This is how to ship a release to Berlios incoming.
+# It requires developer access verified via ssh.
+#
+Utility('upload-ftp', tarball, [
+	'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
+	'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
+        ])
+
+#
+# This is how to tag a release.
+# It requires developer access verified via ssh.
+#
+Utility("release-tag", '', [
+	'git tag -s -m "Tagged for external release $VERSION" release-$VERSION',
+	'git push --tags'
+        ])
+
+#
+# Ship a release, providing all regression tests pass.
+# The clean is necessary so that dist will remake revision.h
+# with the current revision level in it.
+#
+#Utility('ship', '', [testregress, tarball, upload-ftp, release-tag])
+
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
