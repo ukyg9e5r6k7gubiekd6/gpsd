@@ -6,6 +6,7 @@
 # * Utility and test productions
 # * Installation and uninstallation
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
+# * C++ build is turned off until we figure out how to coerce the linker
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -66,7 +67,7 @@ boolopts = (
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
-    ("libgpsmm",      True,  "build C++ bindings"),
+    ("libgpsmm",      False,  "build C++ bindings"),
     ("libQgpsmm",     False, "build QT bindings"),
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
@@ -340,13 +341,11 @@ libgps_sources = [
 	"shared_json.c",
 	"strl.c",
 ]
-if cxx:
+if cxx and GetOption('libgpsmm'):
     libgps_sources.append("libgpsmm.cpp")
 
-libgps_soname = "%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
-compiled_gpslib = env.SharedLibrary(target="gps",
-                                    LDFLAGS = '--version ' + libgps_soname,
-                                    source=libgps_sources)
+libgps_soname = "gps-%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
+compiled_gpslib = env.SharedLibrary(target=libgps_soname, source=libgps_sources)
 
 compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=[
 	"bits.c",
@@ -428,7 +427,7 @@ test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], LIBS=gpslibs)
 test_libgps = env.Program('test_libgps', ['test_libgps.c'], LIBS=gpslibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json, test_libgps]
-if cxx:
+if cxx and GetOption("libgpsmm"):
     testprogs.append(test_gpsmm)
 
 env.Alias("buildtest",testprogs)
