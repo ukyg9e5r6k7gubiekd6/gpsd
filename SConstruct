@@ -393,7 +393,16 @@ gpsd = env.Program('gpsd', ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c'],
                    LIBS = gpsdlibs + pthreadlibs + rtlibs + dbus_xmit_libs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
-gpsmon = env.Program('gpsmon', ['gpsmon.c'], LIBS=gpsdlibs)
+gpsmon = env.Program('gpsmon', [
+                     'gpsmon.c',
+                     'monitor_italk.c',
+                     'monitor_nmea.c',
+                     'monitor_oncore.c',
+                     'monitor_sirf.c',
+                     'monitor_superstar2.c',
+                     'monitor_tnt.c',
+                     'monitor_ubx.c',
+                     ], LIBS=gpsdlibs)
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbus_recv_libs)
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
@@ -401,7 +410,7 @@ cgps = env.Program('cgps', ['cgps.c'], LIBS=gpslibs + ncurseslibs)
 
 default_targets = [gpsd, gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
-    default_targets + [cgps, gpsmon]
+    default_targets += [cgps, gpsmon]
 env.Default(*default_targets)
 
 # Test programs
