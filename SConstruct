@@ -3,7 +3,6 @@
 # Unfinished items:
 # * Check for Python development libraries
 # * Python module build
-# * C++ binding
 # * Qt binding
 # * PYTHONPATH adjustment for Gentoo
 # * Utility and test productions
@@ -321,10 +320,7 @@ env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
-libgps_soname = "%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
-compiled_gpslib = env.SharedLibrary(target="gps",
-                                    LDFLAGS = '--version ' + libgps_soname,
-                                    source=[
+libgps_sources = [
 	"ais_json.c",
 	"daemon.c",
 	"gpsutils.c",
@@ -341,7 +337,14 @@ compiled_gpslib = env.SharedLibrary(target="gps",
 	"rtcm2_json.c",
 	"shared_json.c",
 	"strl.c",
-])
+]
+if cxx:
+    libgps_sources.append("libgpsmm.cpp")
+
+libgps_soname = "%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
+compiled_gpslib = env.SharedLibrary(target="gps",
+                                    LDFLAGS = '--version ' + libgps_soname,
+                                    source=libgps_sources)
 
 compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=[
 	"bits.c",
@@ -410,8 +413,11 @@ test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
 test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
 test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
 test_bits = env.Program('test_bits', ['test_bits.c', "bits.c"])
+test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], LIBS=gpslibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json]
+if cxx:
+    testprogs.append(test_gpsmm)
 
 env.Alias("buildtest",testprogs)
 
