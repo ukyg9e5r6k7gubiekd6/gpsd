@@ -200,7 +200,8 @@ if config.CheckLib('dbus-1'):
     dbus_recv_libs = dbus_recv['LIBS']
 else:
     confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
-    dbuslibs = []
+    dbus_xmit_libs = []
+    dbus_recv_libs = []
 
 if config.CheckLib('libbluez'):
     confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
