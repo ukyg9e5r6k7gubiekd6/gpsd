@@ -8,11 +8,13 @@
 # * PYTHONPATH adjustment for Gentoo
 # * Utility and test productions
 # * Installation and uninstallation
-# * Link libraries to their distribution sonames
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
-gpsd_version="3.0~dev"
+gpsd_version = "3.0~dev"
+libgps_major = 20
+libgps_minor = 0
+libgps_age   = 0
 # Release identification ends here
 
 EnsureSConsVersion(1,2,0)
@@ -319,7 +321,10 @@ env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
-compiled_gpslib = env.SharedLibrary(target="gps", source=[
+libgps_soname = "%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
+compiled_gpslib = env.SharedLibrary(target="gps",
+                                    LDFLAGS = '--version ' + libgps_soname,
+                                    source=[
 	"ais_json.c",
 	"daemon.c",
 	"gpsutils.c",
@@ -404,7 +409,7 @@ test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
 test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
 test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
-test_bits = env.Program('test_bits', ['test_bits.c'], LIBS=gpsdlibs)
+test_bits = env.Program('test_bits', ['test_bits.c', "bits.c"])
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json]
 
