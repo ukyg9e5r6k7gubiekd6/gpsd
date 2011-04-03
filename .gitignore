@@ -49,9 +49,10 @@ srec.html
 *.sum
 *.i
 *.o
+*.a
 *.lo
-*.so
 *.la
+*.so
 *~
 *.swp
 # Built sources
