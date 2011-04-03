@@ -224,7 +224,7 @@ else:
 optionrequires = {
     "bluez": ["libbluez"],
     "pps" : ["librt"],
-    "dbus_export" : ["libdbus", "libdbus-glib"],
+    "dbus_export" : ["libdbus-1", "libdbus-glib-1"],
     }
 
 keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)

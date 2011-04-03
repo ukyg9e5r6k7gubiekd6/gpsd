@@ -8,6 +8,8 @@
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <ctype.h>
+
 #include "gpsd.h"
 
 #ifndef S_SPLINT_S
