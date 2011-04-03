@@ -8,13 +8,14 @@
 # * Qt binding
 # * PYTHONPATH adjustment for Gentoo
 # * Utility and test productions
-# * Installation
+# * Installation and uninstallation
+# * distribution tarballs
 # * Link libraries to their distribution sonames
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 EnsureSConsVersion(1,2,0)
 
-import os, sys, shutil, re, commands
+import os, sys, commands, glob
 
 gpsd_version="3.0~dev"
 
@@ -50,8 +51,8 @@ boolopts = (
     ("gpsclock",      True,  "GPSClock support"),
     ("ntrip",         True,  "NTRIP support"),
     ("oceanserver",   True,  "OceanServer support"),
-    ("rtcm2",         True,  "rtcm104v2 support"),
-    ("rtcm3",         True,  "rtcm104v3 support"),
+    ("rtcm104v2",     True,  "rtcm104v2 support"),
+    ("rtcm104v3",     True,  "rtcm104v3 support"),
     # Time service
     ("ntpshm",        True,  "NTP time hinting support"),
     ("pps",           True,  "PPS time syncing support"),
@@ -506,6 +507,46 @@ manpage_targets = []
 for (man, xml) in base_manpages.items():
     manpage_targets.append(env.Man(source=xml, target=man))
 env.Default(*manpage_targets)
+
+# Utility productions
+# TO-DO: splint, deheader, reindent are not covered
+
+def Utility(target, source, action):
+    target = env.Command(target=target, source=source, action=action)
+    env.AlwaysBuild(target)
+    env.Precious(target)
+
+# TO-DO: dot in command may be issue for out-of-directory builds
+Utility("cppcheck", ["gpsd.h", "packet_names.h"],
+        "cppcheck --template gcc --all --force .")
+
+# Check the documentation for bogons, too
+Utility("xmllint", glob.glob("*.xml"),
+	"for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
+
+#
+# Regression tests begin here
+#
+# Note that the *-makeregress targets re-create the *.log.chk source
+# files from the *.log source files.
+
+# Regression-test the daemon
+Utility("gps-regress", [gpsd],
+        './regress-driver test/daemon/*.log')
+
+# Test that super-raw mode works. Compare each logfile against itself 
+# dumped through the daemon running in R=2 mode.  (This test is not
+# included in the normal regressions.)
+Utility("raw-regress", [gpsd],
+	'./regress-driver test/daemon/*.log')
+
+# Build the regression tests for the daemon.
+Utility('gps-makeregress', [gpsd],
+	'./regress-driver -b test/daemon/*.log')
+
+# To build an individual test for a load named foo.log, put it in
+# test/daemon and do this:
+#	./regress-driver -b test/daemon/foo.log
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
