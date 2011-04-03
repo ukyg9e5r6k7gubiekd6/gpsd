@@ -5,7 +5,6 @@
 # * PPS dependency checks.
 # * Check for Python development libraries
 # * Python module build
-# * Documentation build
 # * C++ binding
 # * Qt binding
 # * PYTHONPATH adjustment for Gentoo
@@ -14,7 +13,7 @@
 # * Link libraries to their distribution sonames
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
-EnsureSConsVersion(1,1,0)
+EnsureSConsVersion(1,2,0)
 
 import os, sys, shutil, re, commands
 
@@ -273,8 +272,6 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 with open("gpsd_config.h", "w") as ofp:
     ofp.writelines(confdefs)
 
-# Documentation
-
 if WhereIs("xsltproc"):
     docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/' 
     docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
@@ -283,13 +280,21 @@ if WhereIs("xsltproc"):
     if not os.path.exists(testpage):
         print "What!? Test page is missing!"
         sys.exit(1)
-    cmd = "xsltproc --nonet --noout '%s' %s" % (docbook_man_uri, testpage)
-    if commands.getstatusoutput(cmd)[0] == 0:
-        print "xsltproc is available"
+    probe = "xsltproc --nonet --noout '%s' %s" % (docbook_man_uri, testpage)
+    if commands.getstatusoutput(probe)[0] == 0:
+        build = "xsltproc --nonet %s $SOURCE"
+        htmlbuilder = build % docbook_html_uri
+        manbuilder = build % docbook_man_uri
     elif WhereIs("xmlto"):
         print "xmlto is available"
+        htmlbuilder = "xmlto html-nochunks $SOURCE"
+        manbuilder = "xmlto man $SOURCE"
     else:
-        print "Neither xsltproc nor xmlto found, documentation cannot be built"
+        print "Neither xsltproc nor xmlto found, documentation cannot be built."
+        sys.exit(0)
+env['BUILDERS']["Man"] = Builder(action=manbuilder)
+env['BUILDERS']["HTML"] = Builder(action=manbuilder,
+                                  src_suffix=".xml", suffix=".html")
 
 env = config.Finish()
 
@@ -460,6 +465,35 @@ for fn in ("packaging/rpm/gpsd.spec.in", "libgps.pc.in", "libgpsd.pc.in",
     post1 = env.AddPostAction(builder, 'chmod -w $TARGET')
     if fn.endswith(".py.in"):
         env.AddPostAction(post1, 'chmod +x $TARGET')
+
+# Documentation
+
+base_manpages = {
+    "gpsd.8" : "gpsd.xml",
+    "gpsd_json.5" : "gpsd_json.xml",
+    "gps.1" : "gps.xml",
+    "cgps.1" : "gps.xml",
+    "lcdgps.1" : "gps.xml",
+    "libgps.3" : "libgps.xml",
+    "libgpsmm.3" : "libgpsmm.xml",
+    "libgpsd.3" : "libgpsd.xml",
+    "gpsmon.1": "gpsmon.xml",
+    "gpsctl.1" : "gpsctl.xml",
+    "gpspipe.1" : "gps.xml",
+    "gpsdecode.1" : "gpsdecode.xml",
+    "srec.5" : "srec.xml",
+    }
+python_manpages = {
+    "gpsprof.1" : "gpsprof.xml",
+    "gpsfake.1" : "gpsfake.xml",
+    "gpscat.1" : "gpscat.xml",
+    "xgpsspeed.1" : "gps.xml",
+    "xgps.1" : "gps.xml",
+    }
+manpage_targets = []
+for (man, xml) in base_manpages.items():
+    manpage_targets.append(env.Man(source=xml, target=man))
+env.Default(*manpage_targets)
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
