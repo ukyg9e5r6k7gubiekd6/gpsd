@@ -2,7 +2,6 @@
 
 # Unfinished items:
 # * Something is not right with the DBUS detection.  Use pkg-config --exists?
-# * PPS dependency checks.
 # * Check for Python development libraries
 # * Python module build
 # * C++ binding
@@ -205,10 +204,21 @@ else:
     confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
     bluezlibs = []
 
+if config.CheckHeader("pps.h"):
+    confdefs.append("#define HAVE_PPS_H 1\n\n")
+else:
+    confdefs.append("/* #undef HAVE_PPS_H */\n\n")
+
+if config.CheckHeader("sys/timepps.h"):
+    confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n\n")
+else:
+    confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n\n")
+
 # Map options to libraries required to support them that might be absent. 
 optionrequires = {
-    "dbus_export" : "libdbus",
     "bluez": "libbluez",
+    "pps" : "librt",
+    "dbus_export" : "libdbus",
     }
 
 keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)
@@ -319,13 +329,13 @@ compiled_gpslib = env.Library(target="gps", source=[
 	"strl.c",
 ])
 
+# TO-DO: Move ntpshm.c out of here to gpsd.c's private modules. 
 compiled_gpsdlib = env.Library(target="gpsd", source=[
 	"bits.c",
 	"bsd-base64.c",
 	"crc24q.c",
 	"gpsd_json.c",
 	"isgps.c",
-	"timebase.c",
 	"libgpsd_core.c",
 	"net_dgpsip.c",
 	"net_gnss_dispatch.c",
@@ -336,6 +346,7 @@ compiled_gpsdlib = env.Library(target="gpsd", source=[
 	"serial.c",
 	"srecord.c",
 	"subframe.c",
+	"timebase.c",
 	"drivers.c",
 	"driver_aivdm.c",
 	"driver_evermore.c",
