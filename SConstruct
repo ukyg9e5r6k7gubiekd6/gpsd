@@ -4,7 +4,6 @@
 # * Check for Python development libraries
 # * Python module build
 # * Qt binding
-# * PYTHONPATH adjustment for Gentoo
 # * Utility and test productions
 # * Installation and uninstallation
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
@@ -315,6 +314,11 @@ if WhereIs("xsltproc"):
 env['BUILDERS']["Man"] = Builder(action=manbuilder)
 env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                   src_suffix=".xml", suffix=".html")
+
+# Gentoo systems can have a problem with the Python path
+if os.path.exists("/etc/gentoo-release"):
+    print "This is a Gentoo system."
+    print "Adjust your PYTHONPATH to see library directories under /usr/local/lib" 
 
 env = config.Finish()
 
