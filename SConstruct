@@ -293,7 +293,7 @@ if WhereIs("xsltproc"):
         print "Neither xsltproc nor xmlto found, documentation cannot be built."
         sys.exit(0)
 env['BUILDERS']["Man"] = Builder(action=manbuilder)
-env['BUILDERS']["HTML"] = Builder(action=manbuilder,
+env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                   src_suffix=".xml", suffix=".html")
 
 env = config.Finish()
@@ -490,6 +490,7 @@ python_manpages = {
     "xgpsspeed.1" : "gps.xml",
     "xgps.1" : "gps.xml",
     }
+
 manpage_targets = []
 for (man, xml) in base_manpages.items():
     manpage_targets.append(env.Man(source=xml, target=man))
