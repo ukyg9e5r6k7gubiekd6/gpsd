@@ -49,6 +49,7 @@ srec.html
 *.sum
 *.i
 *.o
+*.os
 *.a
 *.lo
 *.la

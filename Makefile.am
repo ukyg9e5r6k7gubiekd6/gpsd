@@ -43,7 +43,7 @@ bin_PROGRAMS = $(CURSESPROGS) gpsdecode gpsctl gpspipe gpxlogger lcdgps
 sbin_PROGRAMS = gpsd
 
 # to-do: Add programs to TESTS if not already used.
-check_PROGRAMS = test_float test_trig test_bits test_packet test_mkgmtime test_geoid test_json
+check_PROGRAMS = test_float test_trig test_bits test_packet test_mkgmtime test_geoid test_json test_libgps
 if LIBGPSMM_ENABLE
 check_PROGRAMS += test_gpsmm
 endif
@@ -465,6 +465,11 @@ test_mkgmtime_LDADD = $(LIBC) libgps.la $(LIBM)
 test_json_SOURCES = test_json.c
 test_json_LDADD = $(LIBC) libgps.la $(LIBM)
 
+#
+# Build libgps tester
+test_libgps_SOURCES = test_libgps.c
+test_libgps_LDADD = $(LIBC) libgps.la $(LIBM)
+
 MANPAGES_BASE = \
 	gpsd.8 \
 	gpsd_json.5 \
@@ -631,11 +636,6 @@ CLEANFILES += $(BUILT_SOURCES) *.core $(PYEXTENSIONS) $(BUILT_MANPAGES)
 
 pkgconfig_DATA = libgps.pc libgpsd.pc
 pkgconfigdir = $(libdir)/pkgconfig
-
-# These are not distributed
-libgps: libgps_core.c gps.h .libs/libgps.a
-	$(CC) $(CFLAGS) -o libgps $(LIBM) -DTESTMAIN $(LIBPTHREAD) -g libgps_core.c .libs/libgps.a
-
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
@@ -823,12 +823,12 @@ time-regress: test_mkgmtime
 	$(srcdir)/test_mkgmtime
 
 # Regression test the unpacking code in libgps
-unpack-regress: libgps
+unpack-regress: test_libgps
 	@echo "Testing the client-library sentence decoder..."
 	$(run_regress_driver) -c $(srcdir)/test/clientlib/*.log
 
 # Build the regression test for the sentence unpacker
-unpack-makeregress: libgps
+unpack-makeregress: test_libgps
 	@echo "Rebuilding the client sentence-unpacker tests..."
 	$(run_regress_driver) -c -b $(srcdir)/test/clientlib/*.log
 

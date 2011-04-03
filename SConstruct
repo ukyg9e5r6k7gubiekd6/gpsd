@@ -1,7 +1,6 @@
 ### SCons build recipe for the GPSD project
 
 # Unfinished items:
-# * Check for Python development libraries
 # * Python module build
 # * Qt binding
 # * Utility and test productions
@@ -18,7 +17,6 @@ libgps_age   = 0
 EnsureSConsVersion(1,2,0)
 
 import os, sys, commands, glob
-
 
 #
 # Build-control options
@@ -427,8 +425,9 @@ test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
 test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
 test_bits = env.Program('test_bits', ['test_bits.c', "bits.c"])
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], LIBS=gpslibs)
+test_libgps = env.Program('test_libgps', ['test_libgps.c'], LIBS=gpslibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
-             test_mkgmtime, test_geoid, test_json]
+             test_mkgmtime, test_geoid, test_json, test_libgps]
 if cxx:
     testprogs.append(test_gpsmm)
 
