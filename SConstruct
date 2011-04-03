@@ -1,7 +1,7 @@
 ### SCons build recipe for the GPSD project
 
 # Unfinished items:
-# * Something is not right with the DBUS detection.
+# * Something is not right with the DBUS detection.  Use pkg-config --exists?
 # * PPS dependency checks.
 # * Check for Python development libraries
 # * Python module build
@@ -272,6 +272,24 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 with open("gpsd_config.h", "w") as ofp:
     ofp.writelines(confdefs)
+
+# Documentation
+
+if WhereIs("xsltproc"):
+    docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/' 
+    docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
+    docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
+    testpage = 'libgpsmm.xml'
+    if not os.path.exists(testpage):
+        print "What!? Test page is missing!"
+        sys.exit(1)
+    cmd = "xsltproc --nonet --noout '%s' %s" % (docbook_man_uri, testpage)
+    if commands.getstatusoutput(cmd)[0] == 0:
+        print "xsltproc is available"
+    elif WhereIs("xmlto"):
+        print "xmlto is available"
+    else:
+        print "Neither xsltproc nor xmlto found, documentation cannot be built"
 
 env = config.Finish()
 
