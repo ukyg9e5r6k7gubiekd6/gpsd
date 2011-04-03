@@ -120,6 +120,9 @@ env.SConsignFile(".sconsign.dblite")
 
 env.Append(LIBPATH=['.'])
 
+# Placeholder so we can kluge together something like VPATH builds
+env['SRCDIR'] = '.'
+
 # Enable all GCC warnings except uninitialized and
 # missing-field-initializers, which we can't help triggering because
 # of the way some of the JSON code is generated.
@@ -431,10 +434,9 @@ env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
 Depends(target="gpsd.h", dependency="gpsd.h-head")
 Depends(target="gpsd.h", dependency="gpsd.h-tail")
 
-# TO-DO: The '.' in the command may break out-of-directory builds.
 env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
 	rm -f $TARGET &&\
-        python $SOURCE -c . >$TARGET &&\
+        python $SOURCE -c $SRCDIR >$TARGET &&\
         chmod a-w $TARGET''')
 Depends(target="gps_maskdump.c", dependency="gps.h")
 Depends(target="gps_maskdump.c", dependency="gpsd.h")
@@ -509,16 +511,14 @@ for (man, xml) in base_manpages.items():
 env.Default(*manpage_targets)
 
 # Utility productions
-# TO-DO: splint, deheader, reindent are not covered
 
 def Utility(target, source, action):
     target = env.Command(target=target, source=source, action=action)
     env.AlwaysBuild(target)
     env.Precious(target)
 
-# TO-DO: dot in command may be issue for out-of-directory builds
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
-        "cppcheck --template gcc --all --force .")
+        "cppcheck --template gcc --all --force $SRCDIR")
 
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),
@@ -532,21 +532,21 @@ Utility("xmllint", glob.glob("*.xml"),
 
 # Regression-test the daemon
 Utility("gps-regress", [gpsd],
-        './regress-driver test/daemon/*.log')
+        '$SRCDIR/regress-driver test/daemon/*.log')
 
 # Test that super-raw mode works. Compare each logfile against itself 
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 Utility("raw-regress", [gpsd],
-	'./regress-driver test/daemon/*.log')
+	'$SRCDIR/regress-driver test/daemon/*.log')
 
 # Build the regression tests for the daemon.
 Utility('gps-makeregress', [gpsd],
-	'./regress-driver -b test/daemon/*.log')
+	'$SRCDIR/regress-driver -b test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
-#	./regress-driver -b test/daemon/foo.log
+#	regress-driver -b test/daemon/foo.log
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
