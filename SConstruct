@@ -220,9 +220,9 @@ else:
 
 # Map options to libraries required to support them that might be absent. 
 optionrequires = {
-    "bluez": "libbluez",
-    "pps" : "librt",
-    #"dbus_export" : "libdbus",
+    "bluez": ["libbluez"],
+    "pps" : ["librt"],
+    "dbus_export" : ["libdbus", "libdbus-glib"],
     }
 
 keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)
@@ -232,10 +232,11 @@ for key in keys:
     value = GetOption(key)
 
     if value and key in optionrequires:
-        required = optionrequires[key]
-        if not config.CheckLib(required):
-            print "%s not found, %s cannot be enabled." % (required, key)
-            value = False
+        for required in optionrequires[key]:
+            if not config.CheckLib(required):
+                print "%s not found, %s cannot be enabled." % (required, key)
+                value = False
+                break
 
     if type(value) == type(True):
         if value:
