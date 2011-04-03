@@ -344,10 +344,7 @@ libgps_sources = [
 if cxx and GetOption('libgpsmm'):
     libgps_sources.append("libgpsmm.cpp")
 
-libgps_soname = "gps-%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
-compiled_gpslib = env.SharedLibrary(target=libgps_soname, source=libgps_sources)
-
-compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=[
+libgpsd_sources = [
 	"bits.c",
 	"bsd-base64.c",
 	"crc24q.c",
@@ -380,7 +377,12 @@ compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=[
 	"driver_tsip.c",
 	"driver_ubx.c",
 	"driver_zodiac.c",
-])
+]
+
+libgps_soname = "gps-%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
+compiled_gpslib = env.SharedLibrary(target=libgps_soname, source=libgps_sources)
+
+compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
 
 env.Default(compiled_gpsdlib, compiled_gpslib)
 
@@ -389,21 +391,27 @@ env.Default(compiled_gpsdlib, compiled_gpslib)
 gpslibs = ["gps", "m"]
 gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 
+# Source groups
+
+gpsd_sources = ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c']
+
+gpsmon_sources = [
+    'gpsmon.c',
+    'monitor_italk.c',
+    'monitor_nmea.c',
+    'monitor_oncore.c',
+    'monitor_sirf.c',
+    'monitor_superstar2.c',
+    'monitor_tnt.c',
+    'monitor_ubx.c',
+    ]
+
 ## Production programs
-gpsd = env.Program('gpsd', ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c'],
+gpsd = env.Program('gpsd', gpsd_sources,
                    LIBS = gpsdlibs + pthreadlibs + rtlibs + dbus_xmit_libs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
-gpsmon = env.Program('gpsmon', [
-                     'gpsmon.c',
-                     'monitor_italk.c',
-                     'monitor_nmea.c',
-                     'monitor_oncore.c',
-                     'monitor_sirf.c',
-                     'monitor_superstar2.c',
-                     'monitor_tnt.c',
-                     'monitor_ubx.c',
-                     ], LIBS=gpsdlibs)
+gpsmon = env.Program('gpsmon', gpsmon_sources, LIBS=gpsdlibs)
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbus_recv_libs)
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
@@ -551,6 +559,38 @@ def Utility(target, source, action):
     env.AlwaysBuild(target)
     env.Precious(target)
     return target
+
+# Report splint warnings
+# Note: test_bits.c is unsplintable because of the PRI64 macros.
+env['SPLINTOPTS'] = "-I/usr/include/dbus-1.0/ -I/usr/include/libusb-1.0 +quiet"
+Utility("splint", ["gpsd.h", "packet_names.h"], [
+        '@echo "Running splint on daemon..."',
+        '-splint $SPLINTOPTS -exportlocal -redef ' + " ".join(gpsd_sources),
+        '@echo "Running splint on libgpsd..."',
+        '-splint $SPLINTOPTS -exportlocal -redef ' + " ".join(libgpsd_sources),
+        '@echo "Running splint on user-side libraries..."',
+        '-splint $SPLINTOPTS -exportlocal -redef ' + " ".join(libgps_sources),
+        '@echo "Running splint on cgps..."',
+        '-splint $SPLINTOPTS -exportlocal cgps.c',
+        '@echo "Running splint on gpsctl..."',
+        '-splint $SPLINTOPTS gpsctl.c',
+        '@echo "Running splint on gpsmon..."',
+        '-splint $SPLINTOPTS -exportlocal ' + " ".join(gpsmon_sources),
+        '@echo "Running splint on gpspipe..."',
+        '-splint $SPLINTOPTS gpspipe.c',
+        '@echo "Running splint on gpsdecode..."',
+        '-splint $SPLINTOPTS gpsdecode.c',
+        '@echo "Running splint on gpxlogger..."',
+        '-splint $SPLINTOPTS gpxlogger.c',
+        '@echo "Running splint on test_packet test harness..."',
+        '-splint $SPLINTOPTS test_packet.c',
+        '@echo "Running splint on test_mkgmtime test harness..."',
+        '-splint $SPLINTOPTS test_mkgmtime.c',
+        '@echo "Running splint on test_geoid test harness..."',
+        '-splint $SPLINTOPTS test_geoid.c',
+        '@echo "Running splint on test_json test harness..."',
+        '-splint $SPLINTOPTS test_json.c',
+        ])
 
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck --template gcc --all --force $SRCDIR")
