@@ -125,16 +125,20 @@ env.Append(LIBPATH=['.'])
 # Placeholder so we can kluge together something like VPATH builds
 env['SRCDIR'] = '.'
 
-# Enable all GCC warnings except uninitialized and
-# missing-field-initializers, which we can't help triggering because
-# of the way some of the JSON code is generated.
-# Also not including -Wcast-qual
 if env['CC'] == 'gcc':
+    # Enable all GCC warnings except uninitialized and
+    # missing-field-initializers, which we can't help triggering because
+    # of the way some of the JSON code is generated.
+    # Also not including -Wcast-qual
     env.Append(CFLAGS=Split('''-Wextra -Wall -Wno-uninitialized
                             -Wno-missing-field-initializers -Wcast-align
                             -Wmissing-declarations -Wmissing-prototypes
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
                             -D_GNU_SOURCE'''))
+    # Tell generated binaries to look in the current directory for
+    # shared libraries.  Without this they fail to load, but it's very
+    # much a GCCism. There's probably a more graceful way to do this.
+    env.Append(LINKFLAGS='-Wl,-rpath=.')
 
 # Should we build with profiling?
 if GetOption('profiling'):
@@ -385,8 +389,10 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-libgps_soname = "gps-%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
-compiled_gpslib = env.SharedLibrary(target=libgps_soname, source=libgps_sources)
+# TO-DO: Link to this name on installation 
+#libgps_soname = "gps-%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
+
+compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
 env.Library(target='gps', source=libgps_sources)
 
 libgpsd_soname = "gpsd"
