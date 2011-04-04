@@ -8,6 +8,10 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
 # * gpsd_config.h defines difference PPS_ON_CTS_ENABLE (scons) vs PPS_ON_CTS (make/code)
+# * SYSCONFDIR defined in different places btw scons/make
+# * Discrepancy on HAVE_BLUEZ HAVE_LIBBLUEZ BLUEZ_ENABLED
+# * Discrepancy in how we detect/enable HAVE_DBUS and DBUS_EXPORT_ENABLED
+# * no code actually uses HAVE_PPS_H
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
