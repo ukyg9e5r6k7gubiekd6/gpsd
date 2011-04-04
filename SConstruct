@@ -143,6 +143,10 @@ if env['CC'] == 'gcc':
 env.Append( LINKFLAGS = Split('-z origin') )
 env.Append( RPATH = env.Literal('\\$$ORIGIN'))
 
+# Give deheader a way to set compiler flags
+if 'MORECFLAGS' in os.environ:
+    env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
+
 # Should we build with profiling?
 if GetOption('profiling'):
     env.Append(CCFLAGS=['-pg'])
@@ -619,6 +623,12 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),
 	"for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
+
+# Use deheader to remove headers not required.  If the statistics line
+# ends with other than '0 removed' there's work to be done.
+Utility("deheader", generated_sources, [
+	'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons"',
+        ])
 
 ## MORE GOES HERE
 
