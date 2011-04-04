@@ -382,15 +382,18 @@ libgpsd_sources = [
 
 libgps_soname = "gps-%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 compiled_gpslib = env.SharedLibrary(target=libgps_soname, source=libgps_sources)
+env.Library(target='gps', source=libgps_sources)
 
-compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
+libgpsd_soname = "gpsd"
+compiled_gpsdlib = env.SharedLibrary(target=libgpsd_soname, source=libgpsd_sources)
+env.Library(target='gpsd', source=libgpsd_sources)
 
 env.Default(compiled_gpsdlib, compiled_gpslib)
 
 # The libraries have dependencies on system libraries
 
-gpslibs = ["gps", "m"]
-gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
+gpslibs = [libgps_soname, "m"]
+gpsdlibs = [libgpsd_soname] + usblibs + bluezlibs + gpslibs
 
 # Source groups
 
