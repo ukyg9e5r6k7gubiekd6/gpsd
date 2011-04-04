@@ -424,7 +424,7 @@ gpsd = env.Program('gpsd', gpsd_sources,
                    LIBS = gpsdlibs + pthreadlibs + rtlibs + dbus_xmit_libs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
-gpsmon = env.Program('gpsmon', gpsmon_sources, LIBS=gpsdlibs)
+gpsmon = env.Program('gpsmon', gpsmon_sources, LIBS=gpsdlibs + ncurseslibs)
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbus_recv_libs)
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
