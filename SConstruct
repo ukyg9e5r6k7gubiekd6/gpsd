@@ -229,9 +229,10 @@ optionrequires = {
     "dbus_export" : ["libdbus-1", "libdbus-glib-1"],
     }
 
-keys = map(lambda x: x[0], boolopts) + map(lambda x: x[0], nonboolopts)
+keys = map(lambda x: (x[0],x[2]), boolopts) + map(lambda x: (x[0],x[2]), nonboolopts)
 keys.sort()
-for key in keys:
+print keys
+for (key,help) in keys:
     key = internalize(key)
     value = GetOption(key)
 
@@ -242,6 +243,7 @@ for key in keys:
                 value = False
                 break
 
+    confdefs.append("/* %s */\n"%help)
     if type(value) == type(True):
         if value:
             confdefs.append("#define %s_ENABLE 1\n\n" % key.upper())
