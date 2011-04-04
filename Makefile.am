@@ -344,9 +344,6 @@ QTLIB_sources = gpsutils.c \
 		gpsd.h \
 		$(QTLIB_DIST)
 
-QTXML = libQgpsmm.xml
-QTPAGES = libQgpsmm.3
-
 QMAKE_OPTS = "PREFIX=${prefix}" \
 	     "MAKE=$(MAKE)" \
              "ABS_BUILDDIR=`cd $(abs_builddir); pwd`" \
@@ -363,7 +360,7 @@ libQgpsmm/Makefile: libQgpsmm/libQgpsmm.pro gpsd.h ais_json.i
 stamp-qt: $(QTLIB_sources) libQgpsmm/Makefile
 	$(MAKE) -C $(srcdir)/libQgpsmm
 	touch $@
-CLEANFILES += $(QTPAGES) stamp-qt
+CLEANFILES += stamp-qt
 endif
 
 clean-local:
@@ -538,7 +535,7 @@ endif
 
 # Strictly speaking the following should be conditionalized on Python:
 # gpscat.xml, gpsfake.xml, gpsprof.xml, xgps.xml, xgpsspeed.xml
-BASE_XML = \
+XML = \
 	gpsd.xml \
 	gpsd_json.xml \
 	gps.xml \
@@ -553,8 +550,6 @@ BASE_XML = \
 	gpscat.xml \
 	gpspipe.xml \
 	srec.xml
-
-XML = $(BASE_XML) $(QTXML)
 
 # Note: packaging/rpm/gpsd.spec is generated, but it needs to be in the
 # tarball in order for 'make dist-rpm' to work.  The BUILT_SOURCES

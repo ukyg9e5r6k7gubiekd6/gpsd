@@ -544,9 +544,6 @@ python_manpages = {
     "xgpsspeed.1" : "gps.xml",
     "xgps.1" : "gps.xml",
     }
-qt_manpages = {
-    "libQgpsmm.3" : "libQgpsmm.xml",
-    }
 
 manpage_targets = []
 for (man, xml) in base_manpages.items():
@@ -657,7 +654,7 @@ distfiles = commands.getoutput(r"git ls-files |egrep -v '^(www|devtools|packagin
 distfiles = distfiles.split()
 distfiles.remove(".gitignore")
 distfiles += generated_sources
-distfiles += base_manpages.keys() + python_manpages.keys() + qt_manpages.keys()
+distfiles += base_manpages.keys() + python_manpages.keys()
 
 tarball = env.Command('tarball', distfiles, [
     '@tar -czf gpsd-${VERSION}.tar.gz $SOURCES',
