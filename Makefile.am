@@ -639,7 +639,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
-SPLINTOPTS = -I/usr/include/dbus-1.0/ -DSYSCONFDIR=\"$(sysconfdir)\" $(LIBUSB_CFLAGS) +quiet
+SPLINTOPTS = -DSYSCONFDIR=\"$(sysconfdir)\" $(LIBUSB_CFLAGS) +quiet
 splint: gpsd.h packet_names.h
 	@echo "Running splint on daemon..."
 	-splint $(SPLINTOPTS) -exportlocal -redef $(gpsd_c_sources)

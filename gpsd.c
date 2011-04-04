@@ -42,9 +42,9 @@
 
 #include "gpsd_config.h"
 
-#ifdef DBUS_EXPORT_ENABLE
+#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
 #include "gpsd_dbus.h"
-#endif
+#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 
 #include "gpsd.h"
 #include "sockaddr.h"
@@ -1524,17 +1524,17 @@ static void consume_packets(struct gps_device_t *device)
 		    if (dgnss != device)
 			netgnss_report(&context, device, dgnss);
 	    }
-#ifdef DBUS_EXPORT_ENABLE
+#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
 	    if (device->gpsdata.fix.mode > MODE_NO_FIX)
 		send_dbus_fix(device);
-#endif /* DBUS_EXPORT_ENABLE */
+#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 	}
 
 #ifdef SHM_EXPORT_ENABLE
 	if ((changed & (REPORT_IS|GST_SET|SATELLITE_SET|SUBFRAME_SET|
 			ATTITUDE_SET|RTCM2_SET|RTCM3_SET|AIS_SET)) != 0)
 	    shm_update(&context, &device->gpsdata);
-#endif /* DBUS_EXPORT_ENABLE */
+#endif /* SHM_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
 	/* update all subscribers associated with this device */
@@ -1883,7 +1883,7 @@ int main(int argc, char *argv[])
 #endif /* FORCE_NOWAIT */
 #endif /* NTPSHM_ENABLE */
 
-#ifdef DBUS_EXPORT_ENABLE
+#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
     /* we need to connect to dbus as root */
     if (initialize_dbus_connection()) {
 	/* the connection could not be started */
@@ -1891,7 +1891,7 @@ int main(int argc, char *argv[])
     } else
 	gpsd_report(LOG_PROG,
 		    "successfully connected to the DBUS system bus\n");
-#endif /* DBUS_EXPORT_ENABLE */
+#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 
 #ifdef SHM_EXPORT_ENABLE
     /* create the shared segment as root so readers can't mess with it */
@@ -1899,7 +1899,7 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_ERROR, "shared-segment creation failed,\n");
     } else
 	gpsd_report(LOG_PROG, "shared-segment creation succeeded,\n");
-#endif /* DBUS_EXPORT_ENABLE */
+#endif /* SHM_EXPORT_ENABLE */
 
     if (getuid() == 0 && go_background) {
 	struct passwd *pw;

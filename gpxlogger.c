@@ -181,7 +181,7 @@ static void quit_handler(int signum)
     exit(0);
 }
 
-#ifdef DBUS_EXPORT_ENABLE
+#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
 /**************************************************************************
  *
  * Doing it with D-Bus
@@ -290,7 +290,7 @@ static int dbus_mainloop(void)
     return 0;
 }
 
-#endif /* DBUS_EXPORT_ENABLE */
+#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 
 #ifdef SOCKET_EXPORT_ENABLE
 /**************************************************************************
@@ -379,9 +379,9 @@ struct method_t
 };
 
 static struct method_t methods[] = {
-#ifdef DBUS_EXPORT_ENABLE
+#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
     {"dbus", dbus_mainloop, "DBUS broadcast"},
-#endif /* DBUS_EXPORT_ENABLE */
+#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 #ifdef SHM_EXPORT_ENABLE
     {"shm", shm_mainloop, "shared memory"},
 #endif /* SOCKET_EXPORT_ENABLE */

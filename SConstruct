@@ -562,7 +562,7 @@ def Utility(target, source, action):
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
-env['SPLINTOPTS'] = "-I/usr/include/dbus-1.0/ -I/usr/include/libusb-1.0 +quiet"
+env['SPLINTOPTS'] = "-I/usr/include/libusb-1.0 +quiet"
 Utility("splint", ["gpsd.h", "packet_names.h"], [
         '@echo "Running splint on daemon..."',
         '-splint $SPLINTOPTS -exportlocal -redef ' + " ".join(gpsd_sources),
