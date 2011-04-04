@@ -10,7 +10,6 @@ lcdgps
 gpxlogger
 cgpxlogger
 gpspipe
-libgps
 gpspacket.so
 # These are built from .in files
 gpscat
@@ -29,6 +28,7 @@ test_mkgmtime
 test_geoid
 test_json
 test_trig
+test_libgps
 # Other generated files
 gps.html
 gpscat.html
