@@ -587,35 +587,33 @@ def Utility(target, source, action):
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
-env['SPLINTOPTS'] = "-I/usr/include/libusb-1.0 +quiet"
-Utility("splint", ["gpsd.h", "packet_names.h"], [
-        '@echo "Running splint on daemon..."',
-        '-splint $SPLINTOPTS -exportlocal -redef ' + " ".join(gpsd_sources),
-        '@echo "Running splint on libgpsd..."',
-        '-splint $SPLINTOPTS -exportlocal -redef ' + " ".join(libgpsd_sources),
-        '@echo "Running splint on user-side libraries..."',
-        '-splint $SPLINTOPTS -exportlocal -redef ' + " ".join(libgps_sources),
-        '@echo "Running splint on cgps..."',
-        '-splint $SPLINTOPTS -exportlocal cgps.c',
-        '@echo "Running splint on gpsctl..."',
-        '-splint $SPLINTOPTS gpsctl.c',
-        '@echo "Running splint on gpsmon..."',
-        '-splint $SPLINTOPTS -exportlocal ' + " ".join(gpsmon_sources),
-        '@echo "Running splint on gpspipe..."',
-        '-splint $SPLINTOPTS gpspipe.c',
-        '@echo "Running splint on gpsdecode..."',
-        '-splint $SPLINTOPTS gpsdecode.c',
-        '@echo "Running splint on gpxlogger..."',
-        '-splint $SPLINTOPTS gpxlogger.c',
-        '@echo "Running splint on test_packet test harness..."',
-        '-splint $SPLINTOPTS test_packet.c',
-        '@echo "Running splint on test_mkgmtime test harness..."',
-        '-splint $SPLINTOPTS test_mkgmtime.c',
-        '@echo "Running splint on test_geoid test harness..."',
-        '-splint $SPLINTOPTS test_geoid.c',
-        '@echo "Running splint on test_json test harness..."',
-        '-splint $SPLINTOPTS test_json.c',
-        ])
+env['SPLINTOPTS'] = "-I/usr/include/libusb-1.0 +quiet -DSYSCONFDIR='\"./\"' "
+
+def Splint(target,sources, description, params):
+    return Utility(target,sources,[
+            '@echo "Running splint on %s..."'%description,
+            '-splint $SPLINTOPTS %s %s'%(" ".join(params)," ".join(sources)),
+            ])
+
+splint_table = [
+    ('splint-daemon',gpsd_sources,'daemon', ['-exportlocal', '-redef']),
+    ('splint-libgpsd',libgpsd_sources,'libgpsd', ['-exportlocal', '-redef']),
+    ('splint-libgps',libgps_sources,'user-side libraries', ['-exportlocal', '-redef']),
+    ('splint-cgps',['cgps.c'],'cgps', ['-exportlocal']),
+    ('splint-gpsctl',['gpsctl.c'],'gpsctl', ['']),
+    ('splint-gpsmon',gpsmon_sources,'gpsmon', ['-exportlocal']),
+    ('splint-gpspipe',['gpspipe.c'],'gpspipe', ['']),
+    ('splint-gpsdecode',['gpsdecode.c'],'gpsdecode', ['']),
+    ('splint-gpxlogger',['gpxlogger.c'],'gpxlogger', ['']),
+    ('splint-test_packet',['test_packet.c'],'test_packet test harness', ['']),
+    ('splint-test_mkgmtime',['test_mkgmtime.c'],'test_mkgmtime test harness', ['']),
+    ('splint-test_geoid',['test_geoid.c'],'test_geoid test harness', ['']),
+    ('splint-test_json',['test_json.c'],'test_json test harness', ['']),
+    ]
+
+for (target,sources,description,params) in splint_table:
+    env.Alias('splint',Splint(target,sources,description,params))
+
 
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck --template gcc --all --force $SRCDIR")
