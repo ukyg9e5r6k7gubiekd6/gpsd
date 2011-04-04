@@ -7,6 +7,7 @@
 # * Installation and uninstallation
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
+# * make check equivalent.
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -300,6 +301,7 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 with open("gpsd_config.h", "w") as ofp:
     ofp.writelines(confdefs)
 
+manbuilder = None
 if WhereIs("xsltproc"):
     docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/' 
     docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
@@ -319,10 +321,10 @@ if WhereIs("xsltproc"):
         manbuilder = "xmlto man $SOURCE"
     else:
         print "Neither xsltproc nor xmlto found, documentation cannot be built."
-        sys.exit(0)
-env['BUILDERS']["Man"] = Builder(action=manbuilder)
-env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
-                                  src_suffix=".xml", suffix=".html")
+if manbuilder:
+    env['BUILDERS']["Man"] = Builder(action=manbuilder)
+    env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
+                                      src_suffix=".xml", suffix=".html")
 
 # Gentoo systems can have a problem with the Python path
 if os.path.exists("/etc/gentoo-release"):
@@ -393,18 +395,14 @@ libgpsd_sources = [
 #libgps_soname = "gps-%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 
 compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
-env.Library(target='gps', source=libgps_sources)
-
-libgpsd_soname = "gpsd"
-compiled_gpsdlib = env.SharedLibrary(target=libgpsd_soname, source=libgpsd_sources)
-env.Library(target='gpsd', source=libgpsd_sources)
+compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
 
 env.Default(compiled_gpsdlib, compiled_gpslib)
 
 # The libraries have dependencies on system libraries
 
-gpslibs = [libgps_soname, "m"]
-gpsdlibs = [libgpsd_soname] + usblibs + bluezlibs + gpslibs
+gpslibs = ["gps", "m"]
+gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
 
 # Source groups
 
@@ -559,10 +557,11 @@ python_manpages = {
     "xgps.1" : "gps.xml",
     }
 
-manpage_targets = []
-for (man, xml) in base_manpages.items():
-    manpage_targets.append(env.Man(source=xml, target=man))
-env.Default(*manpage_targets)
+if manbuilder:
+    manpage_targets = []
+    for (man, xml) in base_manpages.items():
+        manpage_targets.append(env.Man(source=xml, target=man))
+    env.Default(*manpage_targets)
 
 # Utility productions
 
