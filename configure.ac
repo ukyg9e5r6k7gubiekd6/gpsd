@@ -309,7 +309,7 @@ AC_ARG_ENABLE(bluetooth, AC_HELP_STRING([--enable-bluetooth], [Enable support fo
 AC_MSG_CHECKING([for BlueZ support])
 if test x"$ac_bluetooth" = x"yes"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_LIBBLUEZ,1,[Define if we have Bluez])
+    AC_DEFINE(HAVE_BLUEZ,1,[Define if we have Bluez])
     # Older versions of autotools barf and die on this.
     #PKG_CHECK_MODULES(BLUEZ, bluez )
     BLUEZ_CFLAGS=`pkg-config --cflags bluez`

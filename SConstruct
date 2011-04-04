@@ -8,8 +8,6 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
 # * SYSCONFDIR defined in different places btw scons/make
-# * Discrepancy on HAVE_BLUEZ HAVE_LIBBLUEZ BLUEZ_ENABLED
-# * Discrepancy in how we detect/enable HAVE_DBUS and DBUS_EXPORT_ENABLED
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -197,23 +195,24 @@ else:
 
 dbus_export_value = GetOption(internalize('dbus-export'))
 if type(dbus_export_value) == type(True) and dbus_export_value and config.CheckLib('dbus-1'):
+    confdefs.append("#define HAVE_DBUS 1\n\n")
     env.MergeFlags(['!pkg-config --cflags dbus-glib-1'])
     dbus_xmit = env.ParseFlags('!pkg-config --libs dbus-1')
     dbus_xmit_libs = dbus_xmit['LIBS']
     dbus_recv = env.ParseFlags('!pkg-config --libs dbus-glib-1')
     dbus_recv_libs = dbus_recv['LIBS']
 else:
-    confdefs.append("/* #undef HAVE_LIBDBUS */\n\n")
+    confdefs.append("/* #undef HAVE_DBUS */\n\n")
     dbus_xmit_libs = []
     dbus_recv_libs = []
 
 if config.CheckLib('libbluez'):
-    confdefs.append("#define HAVE_LIBBLUEZ 1\n\n")
+    confdefs.append("#define HAVE_BLUEZ 1\n\n")
     env.MergeFlags(['!pkg-config bluez --cflags'])
     flags = env.ParseFlags('!pkg-config bluez --libs')
     bluezlibs = flags['LIBS']
 else:
-    confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
+    confdefs.append("/* #undef HAVE_BLUEZ */\n\n")
     bluezlibs = []
 
 if config.CheckHeader("sys/timepps.h"):
