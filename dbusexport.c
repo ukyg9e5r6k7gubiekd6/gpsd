@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include "gpsd_config.h"
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-#include "gpsd_dbus.h"
+#include "dbusexport.h"
 
 static DBusConnection *connection = NULL;
 

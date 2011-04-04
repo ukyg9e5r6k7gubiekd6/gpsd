@@ -1,4 +1,4 @@
-<sect1 id="gpsd_dbus.c"><title><filename>gpsd_dbus.c</filename></title>
+<sect1 id="dbusexport.c"><title><filename>dbusexport.c</filename></title>
 <informaltable frame='all' pgwide='1'>
 <tgroup cols='2'>
 <colspec colname='c1'></colspec>

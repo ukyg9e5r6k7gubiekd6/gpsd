@@ -5,6 +5,7 @@
 <!ENTITY homepage        "http://gpsd.berlios.de">
 
 <!ENTITY bits.h                   SYSTEM "explan_bits.h.xml">
+<!ENTITY dbusexport.c             SYSTEM "explan_dbusexport.c.xml">
 <!ENTITY driver_nmea.c            SYSTEM "explan_driver_nmea.c.xml">
 <!ENTITY driver_proto.c           SYSTEM "explan_driver_proto.c.xml">
 <!ENTITY driver_rtcm2.c           SYSTEM "explan_driver_rtcm2.c.xml">
@@ -13,7 +14,6 @@
 <!ENTITY gps.h                    SYSTEM "explan_gps.h.xml">
 <!ENTITY gpsd.c                   SYSTEM "explan_gpsd.c.xml">
 <!ENTITY gpsd.h                   SYSTEM "explan_gpsd.h.xml">
-<!ENTITY gpsd_dbus.c              SYSTEM "explan_gpsd_dbus.c.xml">
 <!ENTITY gpsd_report.c            SYSTEM "explan_gpsd_report.c.xml">
 <!ENTITY gpsdclient.c             SYSTEM "explan_gpsdclient.c.xml">
 <!ENTITY gpsutils.c               SYSTEM "explan_gpsutils.c.xml">
@@ -86,6 +86,7 @@ is not yet documented here.</para>
 </articleinfo>
 
 &bits.h;
+&dbusexport.c;
 &driver_nmea.c;
 &driver_proto.c;
 &driver_rtcm2.c;
@@ -94,7 +95,6 @@ is not yet documented here.</para>
 &gps.h;
 &gpsd.c;
 &gpsd.h;
-&gpsd_dbus.c;
 &gpsd_report.c;
 &gpsdclient.c;
 &gpsutils.c;
