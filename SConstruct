@@ -629,16 +629,25 @@ Utility("deheader", generated_sources, [
 	'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
         ])
 
-## MORE GOES HERE
-
 #
 # Regression tests begin here
 #
 # Note that the *-makeregress targets re-create the *.log.chk source
 # files from the *.log source files.
+#
+# TO-DO: Regression tests 2,3,4 need the Python modules
+
+# Check that all Python modules compile properly 
+def check_compile(target, source, env):
+    for pyfile in source:
+        'cp %s tmp.py'%(pyfile)
+        'python -tt -m py_compile tmp.py'
+        'rm -f tmp.py tmp.pyc'
+python_compilation_regress = Utility('python-comilation-regress',
+        Glob('*.py') + Glob('gps/*.py') + python_progs + ['SConstruct'], check_compile)
 
 # Regression-test the daemon
-Utility("gps-regress", [gpsd],
+gps_regress = Utility("gps-regress", [gpsd],
         '$SRCDIR/regress-driver test/daemon/*.log')
 
 # Test that super-raw mode works. Compare each logfile against itself 
@@ -657,13 +666,65 @@ Utility('gps-makeregress', [gpsd],
 
 ## MORE GOES HERE
 
-def check_compile(target, source, env):
-    for pyfile in source:
-        'cp %s tmp.py'%(pyfile)
-        'python -tt -m py_compile tmp.py'
-        'rm -f tmp.py tmp.pyc'
-Utility('python-indentation-regress',
-        Glob('*.py') + Glob('gps/*.py') + python_progs + ['SConstruct'], check_compile)
+# Regression-test the packet getter.
+packet_regress = Utility('packet-regress', [test_packet], [
+    '@echo "Testing detection of invalid packets..."',
+    '$SRCDIR/test_packet | diff -u $SRCDIR/test/packet.test.chk -',
+    ])
+
+# Rebuild the packet-getter regression test
+Utility('packet-makeregress', [test_packet], [
+    '$SRCDIR/test_packet >$SRCDIR/test/packet.test.chk',
+    ])
+
+# Rebuild the packet-getter regression test
+Utility('geoid-makeregress', [test_geoid], [
+    '$SRCDIR/test_geoid 37.371192 122.014965 >$SRCDIR/test/geoid.test.chk'])
+
+# Regression-test the geoid tester.
+geoid_regress = Utility('geoid-regress', [test_geoid], [
+    '@echo "Testing the geoid model..."',
+    '$SRCDIR/test_geoid 37.371192 122.014965 | diff -u $SRCDIR/test/geoid.test.chk -',
+    ])
+
+# Regression-test the calendar functions
+time_regress = Utility('time-regress', [test_mkgmtime], [
+    '$SRCDIR/test_mkgmtime'
+    ])
+
+# Regression test the unpacking code in libgps
+unpack_regress = Utility('unpack-regress', [test_libgps], [
+    '@echo "Testing the client-library sentence decoder..."',
+    '$SRCDIR/regress-driver -c $SRCDIR/test/clientlib/*.log',
+    ])
+
+# Build the regression test for the sentence unpacker
+Utility('unpack-makeregress', [test_libgps], [
+    '@echo "Rebuilding the client sentence-unpacker tests..."',
+    '$SRCDIR/regress-driver -c -b $SRCDIR/test/clientlib/*.log'
+    ])
+
+# Unit-test the JSON parsing
+json_regress = Utility('json-regress', [test_json], [
+    '$SRCDIR/test_json'
+    ])
+
+# Unit-test the bitfield extractor - not in normal tests
+bits_regress = Utility('bits-regress', [test_bits], [
+    '$SRCDIR/test_bits'
+    ])
+
+# Run all normal regression tests
+env.Alias('testregress', [
+    python_compilation_regress,
+    #gps_regress,
+    packet_regress,
+    geoid_regress,
+    time_regress,
+    unpack_regress,
+    json_regress])
+
+## MORE GOES HERE (website directory build)
 
 # Productions for setting up and performing udev tests.
 #
@@ -704,6 +765,13 @@ tarball = env.Command('tarball', distfiles, [
 
 # Make RPM from the specfile in packaging
 Utility('dist-rpm', tarball, 'rpm -ta $SOURCE')
+
+# Make sure build-from-tarball works.
+Utility('testbuild', [tarball], [
+    'tar -xzvf gpsd-${VERSION}.tar.gz',
+    'cd gpsd-${VERSION}; ./configure; make',
+    'rm -fr gpsd-${VERSION}',
+    ])
 
 # This is how to ship a release to Berlios incoming.
 # It requires developer access verified via ssh.
