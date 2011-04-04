@@ -137,7 +137,7 @@ if env['CC'] == 'gcc':
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
                             -D_GNU_SOURCE'''))
 # Tell generated binaries to look in the current directory for
-# shared libraries. Should be handles sanly by scons on all systems.
+# shared libraries. Should be handles sanely by scons on all systems.
 # At install time we should use chrpath to remove RPATH from the executables
 # again.
 env.Append( LINKFLAGS = Split('-z origin') )
@@ -656,8 +656,8 @@ Utility('gps-makeregress', [gpsd],
 # is plugged in.
 
 Utility('udev-install', '', [
-	'cp $(srcdir)/gpsd.rules /lib/udev/rules.d/25-gpsd.rules',
-	'cp $(srcdir)/gpsd.hotplug $(srcdir)/gpsd.hotplug.wrapper /lib/udev/',
+	'cp $SRCDIR/gpsd.rules /lib/udev/rules.d/25-gpsd.rules',
+	'cp $SRCDIR/gpsd.hotplug $SRCDIR/gpsd.hotplug.wrapper /lib/udev/',
 	'chmod a+x /lib/udev/gpsd.hotplug /lib/udev/gpsd.hotplug.wrapper',
         ])
 
@@ -667,7 +667,7 @@ Utility('udev-uninstall', '', [
         ])
 
 Utility('udev-test', '', [
-	'$(srcdir)/gpsd -N -n -F /var/run/gpsd.sock -D 5',
+	'$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5',
         ])
         
 # Release machinery begins here
