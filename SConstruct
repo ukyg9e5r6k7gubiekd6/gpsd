@@ -7,7 +7,6 @@
 # * Installation and uninstallation
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
-# * SYSCONFDIR defined in different places btw scons/make
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -239,6 +238,13 @@ for (key,help) in keys:
                 print "%s not found, %s cannot be enabled." % (required, key)
                 value = False
                 break
+
+    # This is a kluge.  It's meant to make the behavior of this recipe be
+    # plug-compatible with the autotools build.  When we discard the autotools
+    # build, it can be removed.
+    if key == "sysconfdir":
+        env.Append(CFLAGS='-DSYSCONFDIR=\'"%s"\'' % value)
+        continue
 
     confdefs.append("/* %s */\n"%help)
     if type(value) == type(True):
