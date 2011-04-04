@@ -7,6 +7,7 @@
 # * Installation and uninstallation
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
+# * gpsd_config.h defines difference PPS_ON_CTS_ENABLE (scons) vs PPS_ON_CTS (make/code)
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
