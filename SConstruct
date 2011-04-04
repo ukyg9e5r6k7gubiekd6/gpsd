@@ -663,7 +663,7 @@ def check_compile(target, source, env):
         'rm -f tmp.py tmp.pyc'
 
 
-Utility('python-indentation-regress',PYTHONSCRIPTS_DIST + PYTHONMODULES_DIST + PYTHON_OTHER, check_compile)
+Utility('python-indentation-regress',Glob('*.py') + Glob('gps/*.py') + PYTHONSCRIPTS_DIST + ['SConstruct'], check_compile)
 
 
 # The following sets edit modes for GNU EMACS
