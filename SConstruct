@@ -648,6 +648,14 @@ Utility('gps-makeregress', [gpsd],
 
 ## MORE GOES HERE
 
+def check_compile(target, source, env):
+    for pyfile in source:
+        'cp %s tmp.py'%(pyfile)
+        'python -tt -m py_compile tmp.py'
+        'rm -f tmp.py tmp.pyc'
+Utility('python-indentation-regress',
+        Glob('*.py') + Glob('gps/*.py') + python_progs + ['SConstruct'], check_compile)
+
 # Productions for setting up and performing udev tests.
 #
 # Requires root. Do "udev-install", then "tail -f /var/log/syslog" in
@@ -711,19 +719,6 @@ Utility("release-tag", '', [
 # with the current revision level in it.
 #
 #Utility('ship', '', [testregress, tarball, upload-ftp, release-tag])
-
-PYTHONSCRIPTS_DIST = ['gpscat', 'gpsfake', 'gpsprof', 'xgps', 'xgpsspeed']
-PYTHONMODULES_DIST = ['gps/__init__.py', 'gps/misc.py', 'gps/fake.py', 'gps/gps.py', 'gps/client.py']
-PYTHON_OTHER = ['leapsecond.py', 'jsongen.py', 'gpssim.py', 'gpscap.py', 'maskaudit.py']
-
-def check_compile(target, source, env):
-    for pyfile in source:
-        'cp %s tmp.py'%(pyfile)
-        'python2.6 -tt -m py_compile tmp.py'
-        'rm -f tmp.py tmp.pyc'
-
-
-Utility('python-indentation-regress',Glob('*.py') + Glob('gps/*.py') + PYTHONSCRIPTS_DIST + ['SConstruct'], check_compile)
 
 
 # The following sets edit modes for GNU EMACS
