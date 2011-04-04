@@ -630,6 +630,8 @@ Utility("deheader", generated_sources, [
 	'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons"',
         ])
 
+env.Alias('checkall', ['cppcheck','xmllint','splint'])
+
 ## MORE GOES HERE
 
 #
@@ -655,6 +657,8 @@ Utility('gps-makeregress', [gpsd],
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
 #	regress-driver -b test/daemon/foo.log
+
+env.Alias('regress-all', ['gps-regress','raw-regress','gps-makeregress'])
 
 ## MORE GOES HERE
 
