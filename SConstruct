@@ -238,7 +238,7 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n\n")
 
-# Map options to libraries required to support them that might be absent. 
+# Map options to libraries required to support them that might be absent.
 optionrequires = {
     "bluez": ["libbluez"],
     "pps" : ["librt"],
@@ -317,7 +317,7 @@ with open("gpsd_config.h", "w") as ofp:
 
 manbuilder = None
 if WhereIs("xsltproc"):
-    docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/' 
+    docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
     docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
     docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
     testpage = 'libgpsmm.xml'
@@ -343,7 +343,7 @@ if manbuilder:
 # Gentoo systems can have a problem with the Python path
 if os.path.exists("/etc/gentoo-release"):
     print "This is a Gentoo system."
-    print "Adjust your PYTHONPATH to see library directories under /usr/local/lib" 
+    print "Adjust your PYTHONPATH to see library directories under /usr/local/lib"
 
 env = config.Finish()
 
@@ -405,7 +405,7 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-# TO-DO: Link to this name on installation 
+# TO-DO: Link to this name on installation
 #libgps_soname = "gps-%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 
 compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
@@ -642,7 +642,7 @@ Utility("deheader", generated_sources, [
 Utility("gps-regress", [gpsd],
         '$SRCDIR/regress-driver test/daemon/*.log')
 
-# Test that super-raw mode works. Compare each logfile against itself 
+# Test that super-raw mode works. Compare each logfile against itself
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 Utility("raw-regress", [gpsd],
@@ -687,7 +687,7 @@ Utility('udev-uninstall', '', [
 Utility('udev-test', '', [
 	'$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5',
         ])
-        
+
 # Release machinery begins here
 #
 
