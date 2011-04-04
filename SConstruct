@@ -241,7 +241,6 @@ else:
 # Map options to libraries required to support them that might be absent. 
 optionrequires = {
     "bluez": ["libbluez"],
-    "pps" : ["librt"],
     "dbus_export" : ["libdbus-1", "libdbus-glib-1"],
     }
 
@@ -627,7 +626,7 @@ Utility("xmllint", glob.glob("*.xml"),
 # Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
 Utility("deheader", generated_sources, [
-	'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons"',
+	'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
         ])
 
 ## MORE GOES HERE
