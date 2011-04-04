@@ -528,7 +528,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timeval  tv;
     struct timespec ts;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
-#if defined(PPS_ON_CTS)
+#if defined(PPS_ON_CTS_ENABLE)
     int pps_device = TIOCM_CTS;
 #define pps_device_str "CTS"
 #else

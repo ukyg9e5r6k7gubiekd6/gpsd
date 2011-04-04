@@ -823,7 +823,7 @@ AC_ARG_ENABLE(pps-on-cts,
 AC_MSG_CHECKING([for PPS pulse on CTS rather than DCD])
 if test x"$ac_ppsoncts" = "xyes"; then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([PPS_ON_CTS], 1, [PPS on CTS rather than DCD])
+  AC_DEFINE([PPS_ON_CTS_ENABLE], 1, [PPS on CTS rather than DCD])
 else
   AC_MSG_RESULT([no])
 fi
