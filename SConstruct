@@ -380,7 +380,7 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-libgps_soname = "gps-%d:%d:%d" % (libgps_major, libgps_minor, libgps_age)
+libgps_soname = "gps-%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 compiled_gpslib = env.SharedLibrary(target=libgps_soname, source=libgps_sources)
 
 compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
