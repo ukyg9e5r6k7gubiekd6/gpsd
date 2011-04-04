@@ -475,6 +475,7 @@ MANPAGES_BASE = \
 	lcdgps.1 \
 	libgps.3 \
 	libgpsmm.3 \
+	libQgpsmm.3 \
 	libgpsd.3 \
 	gpsmon.1 \
 	gpsctl.1 \
@@ -485,13 +486,11 @@ MANPAGES_BASE = \
 if HAVE_XSLT_PROCESSOR
 MANPAGES_DIST = \
 	$(MANPAGES_BASE) \
-	$(PYTHONPAGES_DIST) \
-	$(QTPAGES)
+	$(PYTHONPAGES_DIST)
 
 man_MANS = \
 	$(MANPAGES_BASE) \
-	$(PYTHONPAGES) \
-	$(QTPAGES)
+	$(PYTHONPAGES)
 
 #
 # Create Manpages
