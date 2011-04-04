@@ -64,7 +64,7 @@ boolopts = (
     ("pps_on_cts",    False, "PPS pulse on CTS rather than DCD"),
     # Export methods
     ("socket-export", True,  "data export over sockets"),
-    ("dbus-export",   True,  "enable DBUS export support"),
+    ("dbus-export",   False,  "enable DBUS export support"),
     ("shm-export",    True,  "export via shared memory"),
     # Communication
     ("bluez",         False, "BlueZ support for Bluetooth devices"),
@@ -197,7 +197,8 @@ else:
     confdefs.append("/* #undef HAVE_LIBRT */\n\n")
     rtlibs = []
 
-if config.CheckLib('dbus-1'):
+dbus_export_value = GetOption(internalize('dbus-export'))
+if type(dbus_export_value) == type(True) and dbus_export_value and config.CheckLib('dbus-1'):
     env.MergeFlags(['!pkg-config --cflags dbus-glib-1'])
     dbus_xmit = env.ParseFlags('!pkg-config --libs dbus-1')
     dbus_xmit_libs = dbus_xmit['LIBS']
