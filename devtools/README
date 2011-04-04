@@ -73,6 +73,10 @@ looking for ones that break the build.
 Walk through a pair of text files looking for where they begin to differ.
 May be useful for comparing logs when regression tests break.
 
+== reindent ==
+
+Try to reindent the code in a uniform style.
+
 == sizes ==
 
 Test-build interesting versions of the daemon and display their sizes.

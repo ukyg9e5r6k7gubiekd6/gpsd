@@ -679,34 +679,6 @@ deheader:
 	deheader $(NOHEADCHECK) -i gpsd_config.h -i gpsd.h -m "MORECFLAGS='-Werror -Wfatal-errors $(ENABLES)' make -e"
 	make --quiet clean
 
-# Re-indent the codebase in a uniform style for readability.
-INDENT_FILES = $(gpsd_c_sources) $(libgpsd_c_sources) $(libgps_c_sources) \
-	$(cgps_SOURCES) $(gpsmon_SOURCES) $(gpspipe_SOURCES) \
-	$(gpxlogger_SOURCES) $(gpsdecode_SOURCES) \
-	$(test_bits_SOURCES) $(test_packet_SOURCES) \
-	$(test_mkgmtime_SOURCES)  $(test_geoid_SOURCES) $(test_json_SOURCES)
-INDENT_OPTIONS = --indent-level4 \
-		--honour-newlines \
-		--dont-break-procedure-type \
-		--cuddle-else \
-		--braces-on-if-line \
-		--case-brace-indentation0 \
-		--brace-indent0 \
-		--no-space-after-casts \
-		--no-space-after-function-call-names \
-		--start-left-side-of-comments \
-		--dont-format-comments
-indent:
-	chmod u+w *maskdump.c
-	indent $(INDENT_OPTIONS) $(INDENT_FILES)
-	for f in $(INDENT_FILES); \
-		do \
-			sed <$${f} >/tmp/reindent$$$$ -e 's/@ \*/@*/' ; \
-			mv /tmp/reindent$$$$ $${f} ; \
-		done
-	chmod u-w *maskdump.c
-	@echo "Diff lines:" `git diff | wc -l`
-
 version:
 	@echo $(PACKAGE_VERSION)
 
