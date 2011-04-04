@@ -236,7 +236,6 @@ optionrequires = {
 
 keys = map(lambda x: (x[0],x[2]), boolopts) + map(lambda x: (x[0],x[2]), nonboolopts)
 keys.sort()
-print keys
 for (key,help) in keys:
     key = internalize(key)
     value = GetOption(key)
