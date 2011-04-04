@@ -136,10 +136,12 @@ if env['CC'] == 'gcc':
                             -Wmissing-declarations -Wmissing-prototypes
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
                             -D_GNU_SOURCE'''))
-    # Tell generated binaries to look in the current directory for
-    # shared libraries.  Without this they fail to load, but it's very
-    # much a GCCism. There's probably a more graceful way to do this.
-    env.Append(LINKFLAGS='-Wl,-rpath=.')
+# Tell generated binaries to look in the current directory for
+# shared libraries. Should be handles sanly by scons on all systems.
+# At install time we should use chrpath to remove RPATH from the executables
+# again.
+env.Append( LINKFLAGS = Split('-z origin') )
+env.Append( RPATH = env.Literal('\\$$ORIGIN'))
 
 # Should we build with profiling?
 if GetOption('profiling'):
