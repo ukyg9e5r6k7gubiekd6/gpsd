@@ -10,7 +10,6 @@
 # * SYSCONFDIR defined in different places btw scons/make
 # * Discrepancy on HAVE_BLUEZ HAVE_LIBBLUEZ BLUEZ_ENABLED
 # * Discrepancy in how we detect/enable HAVE_DBUS and DBUS_EXPORT_ENABLED
-# * no code actually uses HAVE_PPS_H
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -216,11 +215,6 @@ if config.CheckLib('libbluez'):
 else:
     confdefs.append("/* #undef HAVE_LIBBLUEZ */\n\n")
     bluezlibs = []
-
-if config.CheckHeader("pps.h"):
-    confdefs.append("#define HAVE_PPS_H 1\n\n")
-else:
-    confdefs.append("/* #undef HAVE_PPS_H */\n\n")
 
 if config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n\n")
