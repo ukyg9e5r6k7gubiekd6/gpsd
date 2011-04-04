@@ -114,6 +114,7 @@ if __name__ == '__main__':
     for (switch, val) in options:
         if (switch == '-1'):
             singleshot = True
+        elif (switch == '-f'):
             port = fakeport()
         elif (switch == '-b'):
             progress = True
