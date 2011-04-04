@@ -699,7 +699,7 @@ Utility('dist-rpm', tarball, 'rpm -ta $SOURCE')
 # This is how to ship a release to Berlios incoming.
 # It requires developer access verified via ssh.
 #
-Utility('upload-ftp', tarball, [
+upload_ftp = Utility('upload-ftp', tarball, [
 	'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
 	'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
         ])
@@ -708,7 +708,7 @@ Utility('upload-ftp', tarball, [
 # This is how to tag a release.
 # It requires developer access verified via ssh.
 #
-Utility("release-tag", '', [
+release_tag = Utility("release-tag", '', [
 	'git tag -s -m "Tagged for external release $VERSION" release-$VERSION',
 	'git push --tags'
         ])
@@ -718,7 +718,7 @@ Utility("release-tag", '', [
 # The clean is necessary so that dist will remake revision.h
 # with the current revision level in it.
 #
-#Utility('ship', '', [testregress, tarball, upload-ftp, release-tag])
+#Utility('ship', '', [testregress, tarball, upload_ftp, release_tag])
 
 
 # The following sets edit modes for GNU EMACS
