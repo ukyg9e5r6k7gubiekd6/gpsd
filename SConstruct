@@ -532,17 +532,25 @@ PYEXTENSIONS = ["gpspacket.so", "gpslib.so"]
 # configured to use different directories, but we want to use the
 # produced files within the regress-driver script - therefore we
 # need to build them in directories we know about.
-# TODO: distutils uses a temporary directory; pass in an appopriate
-# path so that it is under the build directory, not the source
-# directory.  For now, chmod +w the source directory because it's
-# better to have the VPATH build work than to have purity (so that
-# distcheck can work).
-# TODO: the way shlibs are put in the gps directory of the source tree
-# and used for regression is wrong for VPATH builds.  regress-driver
-# should instead load from PYTHON_DISTUTILS_LIBDIR, and then this symlink
-# hack can be removed.  For now, try to be parallel.
+#
 # TODO:  Should the dependency on libgps.la be enforced inside
 # setup.py?  (See the variable 'needed_files' in setup.py.)
+#
+# The following to-do items are remnants from the autotools build.
+# They may no longer be relevant given the differences in the scons
+# build model.
+#
+# TO-DO: distutils uses a temporary directory; pass in an appopriate
+# path so that it is under the build directory, not the source
+# directory.  For now, chmod +w the source directory because it's
+# better to have the VPATH build work than to have purity so that
+# distcheck can work.
+#
+# TO-DO: the way shlibs are put in the gps directory of the source tree
+# and used for regression is wrong for VPATH builds.  regress-driver
+# should instead load from pylibdir, and then this symlink
+# hack can be removed.  For now, try to be parallel.
+#
 abs_builddir = os.getcwd()
 pylibdir    = "build/lib.%s-%s"  % (get_platform(), sys.version[0:3])
 pyscriptdir = "build/scripts-%s" % sys.version[0:3]
