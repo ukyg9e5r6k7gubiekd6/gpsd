@@ -488,7 +488,7 @@ gpsmon_sources = [
 
 ## Production programs
 gpsd = env.Program('gpsd', gpsd_sources,
-                   CFLAGS = "-pthread",
+                   LINKFLAGS = "-pthread",
                    LIBS = gpsdlibs + rtlibs + dbus_xmit_libs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+rtlibs)
