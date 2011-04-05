@@ -94,10 +94,11 @@ for (name, default, help) in boolopts:
                   help=help)
 
 nonboolopts = (
-    ("gpsd-user",           "USER",     "privilege revocation user",     ""),
-    ("gpsd-group",          "GROUP",    "privilege revocation group",    ""),
-    ("prefix",              "PREFIX",   "installation path prefix",      "/usr/local/"),
-    ("sysconfdir",          "SYCONFDIR","system configuration directory","/etc"),
+    ("gpsd-user",   "USER",     "privilege revocation user",     ""),
+    ("gpsd-group",  "GROUP",    "privilege revocation group",    ""),
+    
+    ("prefix",      "PREFIX",   "",      "/usr/local/"),
+
     ("limited-max-clients", "CLIENTS",  "maximum allowed clients",       0),
     ("limited-max-devices", "DEVICES",  "maximum allowed devices",       0),
     ("fixed-port-speed",    "SPEED",    "fixed serial port speed",       0),
@@ -105,11 +106,40 @@ nonboolopts = (
 for (name, metavar, help, default) in nonboolopts:
         internal_name = internalize(name)
         AddOption('--enable-'+ name,
+                  type='string',
                   dest=internal_name,
                   metavar=metavar,
                   default=default,
-                  nargs=1, type='string',
+                  nargs=1,
+                  action="store",
                   help=help)
+
+AddOption("--prefix",
+          type="string",
+          dest="prefix",
+          metavar="PREFIX",
+          default="/usr/local",
+          nargs=1,
+          action="store",
+          help="installation path prefix")
+
+pathopts = (
+    ("sysconfdir",  "SYCONFDIR","system configuration directory","/etc"),
+    ("bindir",      "BINDIR",   "application binaries directory","/bin"),
+    ("libdir",      "LIBDIR",   "dystem libraries",              "/lib"),
+    ("sbindir",     "SBINDIR",  "system binaries directory",     "/sbin"),
+    ("mandir",      "MANDIR",   "manual pages directory",        "/share/man"),
+    ("docdir",      "DOCDIR",   "documents directory",           "/share/doc"),
+    )
+for (name, metavar, help, default) in pathopts:
+    internal_name = internalize(name)
+    AddOption('--' + name,
+              type='string',
+              metavar=metavar,
+              default=default,
+              nargs=1,
+              action="store",
+              help=help)
 
 #
 # Environment creation
@@ -243,7 +273,7 @@ optionrequires = {
     "dbus_export" : ["libdbus-1", "libdbus-glib-1"],
     }
 
-keys = map(lambda x: (x[0],x[2]), boolopts) + map(lambda x: (x[0],x[2]), nonboolopts)
+keys = map(lambda x: (x[0],x[2]), boolopts) + map(lambda x: (x[0],x[2]), nonboolopts) + map(lambda x: (x[0],x[2]), pathopts)
 keys.sort()
 for (key,help) in keys:
     key = internalize(key)
@@ -576,15 +606,14 @@ if manbuilder:
     env.Default(*manpage_targets)
 
 # Installation and deinstallation
-# TO-DO: install Python modules, man pages, and libs under sonames.
+# TO-DO: install Python programs and modules using setup.py
+# Also install man pages, and libs under sonames.
 
-bindir = os.path.join(GetOption('prefix'), 'bin') 
-sbindir = os.path.join(GetOption('prefix'), 'sbin')
-libdir = os.path.join(GetOption('prefix'), 'lib')
+for (name, metavar, help, default) in pathopts:
+    exec name + " = os.path.join(GetOption('prefix') + GetOption('%s'))" % name
 
 env.Install(sbindir, gpsd)
-env.Install(bindir, [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps])
-env.Install(bindir, python_progs)
+env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps])
 if ncurseslibs:
     env.Install(bindir, [cgps, gpsmon])
 env.AddPostAction(env.Install(libdir, [compiled_gpslib, compiled_gpsdlib]),
