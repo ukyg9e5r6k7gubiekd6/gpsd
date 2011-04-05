@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <locale.h>
+#include <pthread.h>
 #ifndef S_SPLINT_S
 #include <netdb.h>
 #ifndef AF_UNSPEC
