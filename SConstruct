@@ -190,9 +190,18 @@ if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
 # Should we build with profiling?
-if GetOption('profiling'):
+if ARGUMENTS.get('profiling', 0):
     env.Append(CCFLAGS=['-pg'])
     env.Append(LDFLAGS=['-pg'])
+
+
+# Should we build with debug symbols?
+if ARGUMENTS.get('debug', 0):
+    env.Append(CCFLAGS=['-g'])
+    env.Append(CCFLAGS=['-O0'])
+else:
+    env.Append(CCFLAGS=['-O2'])
+
 
 ## Build help
 
@@ -666,21 +675,25 @@ env.Default(*build)
 for (name, metavar, help, default) in pathopts:
     exec name + " = os.path.join(GetOption('prefix') + GetOption('%s'))" % name
 
-env.Install(sbindir, gpsd)
-env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps])
+binaryinstall = []
+binaryinstall.append(env.Install(sbindir, gpsd))
+binaryinstall.append(env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]))
 if ncurseslibs:
-    env.Install(bindir, [cgps, gpsmon])
+    binaryinstall.append(env.Install(bindir, [cgps, gpsmon]))
 libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
-env.InstallAs(source=compiled_gpslib,
-              target=os.path.join(libdir, "libgps.so." + libversion))
-env.InstallAs(source=compiled_gpsdlib,
-              target=os.path.join(libdir, "libgpsd.so." + libversion))
+binaryinstall.append(env.InstallAs(source=compiled_gpslib,
+              target=os.path.join(libdir, "libgps.so." + libversion)))
+binaryinstall.append(env.InstallAs(source=compiled_gpsdlib,
+              target=os.path.join(libdir, "libgpsd.so." + libversion)))
+if not (ARGUMENTS.get('debug', 0) or ARGUMENTS.get('profiling', 0)):
+    env.AddPostAction(binaryinstall, 'strip $TARGET')
+
 maninstall = []
 for manpage in base_manpages:
     section = manpage.split(".")[1]
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
-install = env.Alias('install', [sbindir, bindir, libdir] + maninstall)
+install = env.Alias('install', binaryinstall + maninstall)
 env.AddPostAction(install, ['ldconfig'])
 
 def Uninstall(nodes):
