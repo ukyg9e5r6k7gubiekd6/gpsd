@@ -1,5 +1,18 @@
 ### SCons build recipe for the GPSD project
 
+# Important targets:
+#
+# build     - build the software (default)
+# dist      - make distribution tarball
+# install   - install programs, libraties, and manual pages
+# uninstall - undo an install
+#
+# check     - run regression and unit tests.
+# splint    - run the splint static tester on the code
+# cppcheck  - run the cppcheck static tester on the code
+# xmllint   - run xmllint on the documentation
+# testbuild - test-build the code from a tarball
+
 # Unfinished items:
 # * Qt binding
 # * C++ build is turned off until we figure out how to coerce the linker
@@ -440,8 +453,6 @@ libgpsd_sources = [
 compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
 compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
 
-env.Default(compiled_gpsdlib, compiled_gpslib)
-
 # The libraries have dependencies on system libraries
 
 gpslibs = ["gps", "m"]
@@ -473,10 +484,9 @@ gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbus_recv_lib
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
 cgps = env.Program('cgps', ['cgps.c'], LIBS=gpslibs + ncurseslibs)
 
-default_targets = [gpsd, gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]
+binaries = [gpsd, gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
-    default_targets += [cgps, gpsmon]
-env.Default(*default_targets)
+    binaries += [cgps, gpsmon]
 
 # Test programs
 # TODO: conditionally add test_gpsmm and test_qgpsmm
@@ -540,7 +550,6 @@ python_parts = env.Command('python-parts',
     "mkdir -p gps && cd gps && rm -f *.so && " +
     "ln -s %s/%s/gps/*.so . ) " % (abs_builddir, pylibdir)
     ])
-env.Default(python_parts)
 
 #
 # Special dependencies to make generated files
@@ -640,13 +649,18 @@ python_manpages = {
     "xgps.1" : "gps.xml",
     }
 
+manpage_targets = []
 if manbuilder:
-    manpage_targets = []
     for (man, xml) in base_manpages.items():
         manpage_targets.append(env.Man(source=xml, target=man))
-    env.Default(*manpage_targets)
 
-# Installation and deinstallation
+## Where it all comes together
+
+build = env.Alias('build', binaries + python_parts + manpage_targets)
+env.Default(*build)
+
+## Installation and deinstallation
+
 # Not here because too distro-specific: udev rules, desktop files, init scripts
 # TO-DO: install Python programs and modules using setup.py
 # TO-DO: Not sure how will handle C++ support yet
