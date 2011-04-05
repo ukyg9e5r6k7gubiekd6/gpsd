@@ -629,8 +629,6 @@ Utility("deheader", generated_sources, [
 
 env.Alias('checkall', ['cppcheck','xmllint','splint'])
 
-## MORE GOES HERE
-
 #
 # Regression tests begin here
 #
@@ -677,7 +675,7 @@ rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
 		'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
 	'done;',
 	'@echo "Testing idempotency of JSON dump/decode for RTCM2"',
-	'@$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; '
+	'$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; '
 		'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - /tmp/test-$$$$.chk; '
 		'rm /tmp/test-$$$$.chk',
         ])
@@ -687,6 +685,27 @@ Utility('rtcm-makeregress', [gpsdecode], [
 	'for f in $SRCDIR/test/*.rtcm2; do '
 		'$SRCDIR/gpsdecode -j < ${f} > ${f}.chk; '
 	'done'
+        ])
+
+# Regression-test the AIVDM decoder.
+aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
+	'@echo "Testing AIVDM decoding..."',
+	'for f in $SRCDIR/test/*.aivdm; do '
+		'echo "Testing $${f}..."; '
+		'$SRCDIR/gpsdecode -u -c <$${f} >/tmp/test-$$$$.chk; '
+		'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
+	'done;',
+	'@echo "Testing idempotency of JSON dump/decode for AIS"',
+	'$SRCDIR/gpsdecode -e -j <$SRCDIR/test/synthetic-ais.json >/tmp/test-$$$$.chk; '
+		'grep -v "^#" $SRCDIR/test/synthetic-ais.json | diff -ub - /tmp/test-$$$$.chk; '
+		'rm /tmp/test-$$$$.chk',
+        ])
+
+# Rebuild the AIVDM regression tests.
+Utility('aivdm-makeregress', [gpsdecode], [
+	'for f in $SRCDIR/test/*.aivdm; do '
+		'$SRCDIR/gpsdecode -u -c <$${f} > $${f}.chk; '
+	'done',
         ])
 
 # Regression-test the packet getter.
@@ -742,6 +761,7 @@ env.Alias('testregress', [
     python_compilation_regress,
     #gps_regress,
     rtcm_regress,
+    aivdm_regress,
     packet_regress,
     geoid_regress,
     time_regress,
