@@ -812,7 +812,18 @@ env.Command('www/hardware.html', ['gpscap.py',
                                   'www/hardware-tail.html'],
             ['(cat www/hardware-head.html; python gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
 
-## MORE GOES HERE (pydoc)
+
+# Experimenting with pydoc.  Not yet fired by any other productions.
+
+env.Alias('pydoc', "www/pydoc/index.html")
+
+# We need to run epydoc with the Python version we built the modules for.
+# So we define our own epydoc instead of using /usr/bin/epydoc
+EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
+env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glob("gps/*.py"), [
+	'mkdir -p www/pydoc',
+	EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
+        ])
 
 # Productions for setting up and performing udev tests.
 #
