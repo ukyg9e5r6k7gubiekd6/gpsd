@@ -260,14 +260,6 @@ else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
 
-if config.CheckLib('libpthread'):
-    confdefs.append("#define HAVE_LIBPTHREAD 1\n\n")
-    # System library - no special flags
-    pthreadlibs = ["pthread"]
-else:
-    confdefs.append("/* #undef HAVE_LIBPTHREAD */\n\n")
-    pthreadlibs = []
-
 if config.CheckLib('librt'):
     confdefs.append("#define HAVE_LIBRT 1\n\n")
     # System library - no special flags
@@ -496,9 +488,10 @@ gpsmon_sources = [
 
 ## Production programs
 gpsd = env.Program('gpsd', gpsd_sources,
-                   LIBS = gpsdlibs + pthreadlibs + rtlibs + dbus_xmit_libs)
-gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
-gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+pthreadlibs+rtlibs)
+                   CFLAGS = "-pthread",
+                   LIBS = gpsdlibs + rtlibs + dbus_xmit_libs)
+gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+rtlibs)
+gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+rtlibs)
 gpsmon = env.Program('gpsmon', gpsmon_sources, LIBS=gpsdlibs + ncurseslibs)
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbus_recv_libs)
