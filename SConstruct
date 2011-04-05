@@ -17,6 +17,7 @@ libgps_age   = 0
 EnsureSConsVersion(1,2,0)
 
 import os, sys, commands, glob
+from distutils.util import get_platform
 
 #
 # Build-control options
@@ -153,6 +154,9 @@ env.Append(LIBPATH=['.'])
 
 # Placeholder so we can kluge together something like VPATH builds
 env['SRCDIR'] = '.'
+
+# TO-DO: We probably need to be cleverer about this
+env["PYTHON"] = 'python'
 
 if env['CC'] == 'gcc':
     # Enable all GCC warnings except uninitialized and
@@ -495,7 +499,52 @@ env.Default(testprogs)
 
 # Python programs
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
-python_modules = ["__init__.py", "misc.py", "fake.py", "gps.py", "client.py"]
+python_modules = ["gps/__init__.py", "gps/misc.py", "gps/fake.py",
+                  "gps/gps.py", "gps/client.py"]
+
+# Build Python binding
+#
+PYEXTENSIONS = ["gpspacket.so", "gpslib.so"]
+
+# Build Python modules and scripts using distutils via setup.py.
+# We define build-lib and build-scripts as distutils might have been
+# configured to use different directories, but we want to use the
+# produced files within the regress-driver script - therefore we
+# need to build them in directories we know about.
+# TODO: distutils uses a temporary directory; pass in an appopriate
+# path so that it is under the build directory, not the source
+# directory.  For now, chmod +w the source directory because it's
+# better to have the VPATH build work than to have purity (so that
+# distcheck can work).
+# TODO: the way shlibs are put in the gps directory of the source tree
+# and used for regression is wrong for VPATH builds.  regress-driver
+# should instead load from PYTHON_DISTUTILS_LIBDIR, and then this symlink
+# hack can be removed.  For now, try to be parallel.
+# TODO:  Should the dependency on libgps.la be enforced inside
+# setup.py?  (See the variable 'needed_files' in setup.py.)
+abs_builddir = os.getcwd()
+pylibdir    = "build/lib.%s-%s"  % (get_platform(), sys.version[0:3])
+pyscriptdir = "build/scripts-%s" % sys.version[0:3]
+mangenerator = manbuilder or ''
+python_parts = env.Command('python-parts',
+                           ["gpspacket.c",
+                            "gpsclient.c",
+                            "setup.py",
+                            compiled_gpslib,
+                            compiled_gpsdlib]
+                           + python_progs
+                           + python_modules, [
+    "(cd $SRCDIR; chmod a+w .; "
+    "env version=" + gpsd_version + " abs_builddir=" + abs_builddir + " MAKE=scons "
+    "$PYTHON setup.py build " +
+    "--build-lib " + os.path.join(abs_builddir, pylibdir) + " " +
+    "--build-scripts " + os.path.join(abs_builddir, pyscriptdir) + " " +
+    ("--mangenerator '%s') && " % mangenerator) +
+    ("(cd '%s' && " % abs_builddir) +
+    "mkdir -p gps && cd gps && rm -f *.so && " +
+    "ln -s %s/%s/gps/*.so . ) " % (abs_builddir, pylibdir)
+    ])
+env.Default(python_parts)
 
 #
 # Special dependencies to make generated files
@@ -508,7 +557,7 @@ env.Command(target = "packet_names.h", source="packet_states.h", action="""
 	chmod a-w $TARGET""")
 
 env.Command(target="timebase.h", source="leapseconds.cache",
-            action='python leapsecond.py -h $SOURCE >$TARGET')
+            action='$PYTHON leapsecond.py -h $SOURCE >$TARGET')
 
 env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
 	rm -f $TARGET &&\
@@ -522,14 +571,14 @@ Depends(target="gpsd.h", dependency="gpsd.h-tail")
 
 env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
 	rm -f $TARGET &&\
-        python $SOURCE -c $SRCDIR >$TARGET &&\
+        $PYTHON $SOURCE -c $SRCDIR >$TARGET &&\
         chmod a-w $TARGET''')
 Depends(target="gps_maskdump.c", dependency="gps.h")
 Depends(target="gps_maskdump.c", dependency="gpsd.h")
 
 env.Command(target="ais_json.i", source="jsongen.py", action='''\
 	rm -f $TARGET &&\
-	python $SOURCE --ais --target=parser >$TARGET &&\
+	$PYTHON $SOURCE --ais --target=parser >$TARGET &&\
 	chmod a-w $TARGET''')
 
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
@@ -540,14 +589,14 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
 # on the state of the build-system variables.
 env.Command(target="revision.h", source="gpsd_config.h", action='''
 	rm -f $TARGET &&\
-	python -c \'from datetime import datetime; print "#define REVISION \\"%s\\"\\n" % (datetime.now().isoformat()[:-4])\' >$TARGET &&\
+	$PYTHON -c \'from datetime import datetime; print "#define REVISION \\"%s\\"\\n" % (datetime.now().isoformat()[:-4])\' >$TARGET &&\
 	chmod a-w revision.h''')
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
 env.Command(target="leapseconds.cache", source="leapsecond.py",
-            action='python $SOURCE -f $TARGET')
+            action='$PYTHON $SOURCE -f $TARGET')
 
 # Instantiate some file templates.  We'd like to use the Substfile builtin
 # but it doesn't seem to work in scons 1.20
@@ -555,7 +604,7 @@ def substituter(target, source, env):
     substmap = (
         ('@VERSION@', gpsd_version),
         ('@prefix@',  GetOption('prefix')),
-        ('@PYTHON@',  "python"),
+        ('@PYTHON@',  "$PYTHON"),
         )
     with open(str(source[0])) as sfp:
         content = sfp.read()
@@ -698,30 +747,28 @@ env.Alias('checkall', ['cppcheck','xmllint','splint'])
 #
 # Note that the *-makeregress targets re-create the *.log.chk source
 # files from the *.log source files.
-#
-# TO-DO: Regression tests 2,3,4 need the Python modules
 
 # Check that all Python modules compile properly 
 def check_compile(target, source, env):
     for pyfile in source:
         'cp %s tmp.py'%(pyfile)
-        'python -tt -m py_compile tmp.py'
+        '$PYTHON -tt -m py_compile tmp.py'
         'rm -f tmp.py tmp.pyc'
 python_compilation_regress = Utility('python-comilation-regress',
         Glob('*.py') + Glob('gps/*.py') + python_progs + ['SConstruct'], check_compile)
 
 # Regression-test the daemon
-gps_regress = Utility("gps-regress", [gpsd],
+gps_regress = Utility("gps-regress", [gpsd, python_parts],
         '$SRCDIR/regress-driver test/daemon/*.log')
 
 # Test that super-raw mode works. Compare each logfile against itself
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
-Utility("raw-regress", [gpsd],
+Utility("raw-regress", [gpsd, python_parts],
 	'$SRCDIR/regress-driver test/daemon/*.log')
 
 # Build the regression tests for the daemon.
-Utility('gps-makeregress', [gpsd],
+Utility('gps-makeregress', [gpsd, python_parts],
 	'$SRCDIR/regress-driver -b test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
@@ -821,7 +868,7 @@ bits_regress = Utility('bits-regress', [test_bits], [
 # Run all normal regression tests
 testregress = env.Alias('testregress', [
     python_compilation_regress,
-    #gps_regress,
+    gps_regress,
     rtcm_regress,
     aivdm_regress,
     packet_regress,
@@ -872,7 +919,7 @@ env.Command('www/hardware.html', ['gpscap.py',
                                   'www/hardware-head.html',
                                   'gpscap.ini',
                                   'www/hardware-tail.html'],
-            ['(cat www/hardware-head.html; python gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
+            ['(cat www/hardware-head.html; $PYTHON gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
 
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
