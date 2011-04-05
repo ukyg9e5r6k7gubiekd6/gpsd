@@ -433,9 +433,6 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-# TO-DO: Link to this name on installation
-#libgps_soname = "gps-%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
-
 compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
 compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
 
@@ -607,7 +604,6 @@ if manbuilder:
 
 # Installation and deinstallation
 # TO-DO: install Python programs and modules using setup.py
-# Also install man pages, and libs under sonames.
 
 for (name, metavar, help, default) in pathopts:
     exec name + " = os.path.join(GetOption('prefix') + GetOption('%s'))" % name
@@ -616,10 +612,18 @@ env.Install(sbindir, gpsd)
 env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps])
 if ncurseslibs:
     env.Install(bindir, [cgps, gpsmon])
-env.AddPostAction(env.Install(libdir, [compiled_gpslib, compiled_gpsdlib]),
-                  'ldconfig')
-
-env.Alias('install', [sbindir, bindir, libdir])
+libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
+env.InstallAs(source=compiled_gpslib,
+              target=os.path.join(libdir, "libgps.so." + libversion))
+env.InstallAs(source=compiled_gpsdlib,
+              target=os.path.join(libdir, "libgpsd.so." + libversion))
+maninstall = []
+for manpage in base_manpages:
+    section = manpage.split(".")[1]
+    dest = os.path.join(mandir, "man"+section, manpage)
+    maninstall.append(env.InstallAs(source=manpage, target=dest))
+env.AddPostAction(env.Alias('install', [sbindir, bindir, libdir] + maninstall),
+                                    'ldconfig')
 
 # Utility productions
 
