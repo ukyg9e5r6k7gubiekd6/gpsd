@@ -15,7 +15,6 @@
 
 # Unfinished items:
 # * Qt binding
-# * C++ build is turned off until we figure out how to coerce the linker
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
@@ -78,7 +77,7 @@ boolopts = (
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
-    ("libgpsmm",      False,  "build C++ bindings"),
+    ("libgpsmm",      True,  "build C++ bindings"),
     ("libQgpsmm",     False, "build QT bindings"),
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
@@ -662,8 +661,6 @@ env.Default(*build)
 ## Installation and deinstallation
 
 # Not here because too distro-specific: udev rules, desktop files, init scripts
-# TO-DO: install Python programs and modules using setup.py
-# TO-DO: Not sure how will handle C++ support yet
 # Possible bug: scons install -n doesn't show ldconfig postaction
 
 for (name, metavar, help, default) in pathopts:
