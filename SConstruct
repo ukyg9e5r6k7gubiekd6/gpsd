@@ -155,7 +155,7 @@ for (name, metavar, help, default) in pathopts:
 # Environment creation
 #
 
-env = Environment(tools=["default", "tar"], toolpath = ["scons"])
+env = Environment(tools=["default", "tar"])
 env.SConsignFile(".sconsign.dblite")
 
 env['VERSION'] = gpsd_version
