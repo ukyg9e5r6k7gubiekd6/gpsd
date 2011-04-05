@@ -163,10 +163,18 @@ env['VERSION'] = gpsd_version
 env.Append(LIBPATH=['.'])
 
 # Placeholder so we can kluge together something like VPATH builds
+# $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
 
-# TO-DO: We probably need to be cleverer about this
-env["PYTHON"] = 'python'
+# Because absolute paths are safer
+for variant in ['python2.7', 'python2.6', 'python2.5', 'python2.4', "python"]:
+    python = WhereIs(variant)
+    if python:
+        env["PYTHON"] = python
+        break
+else:
+    print "No Python - how are you running this script?"
+    Exit(1)
 
 if env['CC'] == 'gcc':
     # Enable all GCC warnings except uninitialized and
@@ -178,12 +186,13 @@ if env['CC'] == 'gcc':
                             -Wmissing-declarations -Wmissing-prototypes
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
                             -D_GNU_SOURCE'''))
+
 # Tell generated binaries to look in the current directory for
-# shared libraries. Should be handles sanely by scons on all systems.
+# shared libraries. Should be handled sanely by scons on all systems.
+# Not good to use '.' or a relative path here; it's a security risk.
 # At install time we should use chrpath to remove RPATH from the executables
 # again.
-env.Append( LINKFLAGS = Split('-z origin') )
-env.Append( RPATH = env.Literal('\\$$ORIGIN'))
+env.Append(RPATH=os.path.realpath(os.curdir))
 
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
@@ -236,10 +245,8 @@ for f in ("daemon", "strlcpy", "strlcat"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
 
-if config.CheckPKG('ncurses'):
-    env.MergeFlags(['!pkg-config ncurses --cflags'])
-    flags = env.ParseFlags('!pkg-config ncurses --libs')
-    ncurseslibs = flags['LIBS']
+if config.CheckLib('ncurses'):
+    ncurseslibs = ['ncurses']
 else:
     ncurseslibs = []
 
@@ -323,7 +330,8 @@ for (key,help) in keys:
     # plug-compatible with the autotools build.  When we discard the autotools
     # build, it can be removed.
     if key == "sysconfdir":
-        env.Append(CFLAGS='-DSYSCONFDIR=\'"%s"\'' % value)
+        env.Append(CFLAGS='-DSYSCONFDIR=\'"%s"\'' \
+                   % os.path.join(GetOption("prefix"), value))
         continue
 
     confdefs.append("/* %s */\n"%help)
@@ -379,26 +387,19 @@ with open("gpsd_config.h", "w") as ofp:
 manbuilder = None
 mangenerator = ''
 if WhereIs("xsltproc"):
+    mangenerator = 'xsltproc'
     docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
     docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
     docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
-    testpage = 'libgpsmm.xml'
-    if not os.path.exists(testpage):
-        print "What!? Test page is missing!"
-        sys.exit(1)
-    probe = "xsltproc --nonet --noout '%s' %s" % (docbook_man_uri, testpage)
-    if commands.getstatusoutput(probe)[0] == 0:
-        build = "xsltproc --nonet %s $SOURCE >$TARGET"
-        htmlbuilder = build % docbook_html_uri
-        manbuilder = build % docbook_man_uri
-        mangenerator = 'xsltproc'
-    elif WhereIs("xmlto"):
-        print "xmlto is available"
-        htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
-        manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
-        mangenerator = 'xmlto'
-    else:
-        print "Neither xsltproc nor xmlto found, documentation cannot be built."
+    build = "xsltproc --nonet %s $SOURCE >$TARGET"
+    htmlbuilder = build % docbook_html_uri
+    manbuilder = build % docbook_man_uri
+elif WhereIs("xmlto"):
+    mangenerator = 'xmlto'
+    htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
+    manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
+else:
+    print "Neither xsltproc nor xmlto found, documentation cannot be built."
 if manbuilder:
     env['BUILDERS']["Man"] = Builder(action=manbuilder)
     env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
@@ -560,7 +561,7 @@ python_parts = env.Command('python-parts',
                            + python_progs
                            + python_modules, [
     "(cd $SRCDIR; chmod a+w .; "
-    "env version=" + gpsd_version + " abs_builddir=" + abs_builddir + " MAKE=scons "
+    "env version=" + gpsd_version + " abs_builddir=" + abs_builddir + " MAKE='scons -Q' "
     "$PYTHON setup.py build " +
     "--build-lib " + os.path.join(abs_builddir, pylibdir) + " " +
     "--build-scripts " + os.path.join(abs_builddir, pyscriptdir) + " " +
@@ -729,6 +730,10 @@ def Utility(target, source, action):
     env.AlwaysBuild(target)
     env.Precious(target)
     return target
+
+# setup.py needs this
+Utility('version' '', [],
+        '@echo ' + gpsd_version + "\n")
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
