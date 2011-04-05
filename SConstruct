@@ -310,7 +310,8 @@ for (key,help) in keys:
     # plug-compatible with the autotools build.  When we discard the autotools
     # build, it can be removed.
     if key == "sysconfdir":
-        env.Append(CFLAGS='-DSYSCONFDIR=\'"%s"\'' % value)
+        env.Append(CFLAGS='-DSYSCONFDIR=\'"%s"\'' \
+                   % os.path.join(GetOption("prefix"), value))
         continue
 
     confdefs.append("/* %s */\n"%help)
