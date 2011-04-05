@@ -540,7 +540,7 @@ python_parts = env.Command('python-parts',
                            + python_progs
                            + python_modules, [
     "(cd $SRCDIR; chmod a+w .; "
-    "env version=" + gpsd_version + " abs_builddir=" + abs_builddir + " MAKE=scons "
+    "env version=" + gpsd_version + " abs_builddir=" + abs_builddir + " MAKE='scons -Q' "
     "$PYTHON setup.py build " +
     "--build-lib " + os.path.join(abs_builddir, pylibdir) + " " +
     "--build-scripts " + os.path.join(abs_builddir, pyscriptdir) + " " +
@@ -703,6 +703,10 @@ def Utility(target, source, action):
     env.AlwaysBuild(target)
     env.Precious(target)
     return target
+
+# setup.py needs this
+Utility('version' '', [],
+        '@echo ' + gpsd_version + "\n")
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
