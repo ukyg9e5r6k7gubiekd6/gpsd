@@ -325,7 +325,7 @@ if WhereIs("xsltproc"):
         sys.exit(1)
     probe = "xsltproc --nonet --noout '%s' %s" % (docbook_man_uri, testpage)
     if commands.getstatusoutput(probe)[0] == 0:
-        build = "xsltproc --nonet %s $SOURCE"
+        build = "xsltproc --nonet %s $SOURCE >$TARGET"
         htmlbuilder = build % docbook_html_uri
         manbuilder = build % docbook_man_uri
     elif WhereIs("xmlto"):
@@ -757,7 +757,7 @@ bits_regress = Utility('bits-regress', [test_bits], [
     ])
 
 # Run all normal regression tests
-env.Alias('testregress', [
+testregress = env.Alias('testregress', [
     python_compilation_regress,
     #gps_regress,
     rtcm_regress,
@@ -768,7 +768,53 @@ env.Alias('testregress', [
     unpack_regress,
     json_regress])
 
-## MORE GOES HERE (website directory build)
+# The website directory
+#
+# None of these productions are fired by default.
+
+env.Alias('website', Split('''
+    www/gpscat.html www/gpsctl.html www/gpsdecode.html 
+    www/gpsd.html www/gpsfake.html www/gpsmon.html 
+    www/gpspipe.html www/gpsprof.html www/gps.html 
+    www/libgpsd.html www/libgpsmm.html www/libgps.html
+    www/srec.html
+    www/AIVDM.html www/NMEA.html
+    www/protocol-evolution.html www/protocol-transition.html
+    www/client-howto.html www/writing-a-driver.html
+    www/index.html www/hardware.html
+    www/performance/performance.html
+    www/internals.html
+    '''))
+
+# asciidoc documents
+for stem in ['AIVDM', 'NMEA',
+             'protocol-evolution', 'protocol-transition'
+             'client-howto']:
+    env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
+            ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
+
+# DocBook documents
+for stem in ['writing-a-driver']:
+    env.HTML('www/%s.html' % stem, 'www/%s.xml' % stem)
+
+# The index page
+env.Command('www/index.html', 'www/index.html.in',
+            ['sed -e "/@DATE@/s//`date \'+%B %d, %Y\'`/" <$SOURCE >$TARGET'])
+
+env.Command('www/hardware.html', ['gpscap.py',
+                                  'www/hardware-head.html',
+                                  'gpscap.ini',
+                                  'www/hardware-tail.html'],
+            ['(cat www/hardware-head.html; python gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
+
+env.Command('www/performance/performance.html',
+            ['www/performance/performance.xml'],
+            ['cd www/performance; xmlto xhtml-nochunks performance.xml'])
+
+env.Command('www/internals.html', glob.glob('$SRCDIR/doc/*.xml'),
+	['cd doc; xmlto xhtml-nochunks explanation.xml; cp explanation.html ../www/internals.html'])
+
+## MORE GOES HERE (pydoc)
 
 # Productions for setting up and performing udev tests.
 #
@@ -839,8 +885,7 @@ release_tag = Utility("release-tag", '', [
 # The clean is necessary so that dist will remake revision.h
 # with the current revision level in it.
 #
-#Utility('ship', '', [testregress, tarball, upload_ftp, release_tag])
-
+Utility('ship', '', [testregress, tarball, upload_ftp, release_tag])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
