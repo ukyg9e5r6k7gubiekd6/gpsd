@@ -3,7 +3,6 @@
 # Unfinished items:
 # * Python module build
 # * Qt binding
-# * Utility and test productions
 # * Installation and uninstallation
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
@@ -330,8 +329,8 @@ if WhereIs("xsltproc"):
         manbuilder = build % docbook_man_uri
     elif WhereIs("xmlto"):
         print "xmlto is available"
-        htmlbuilder = "xmlto html-nochunks $SOURCE"
-        manbuilder = "xmlto man $SOURCE"
+        htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
+        manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
     else:
         print "Neither xsltproc nor xmlto found, documentation cannot be built."
 if manbuilder:
@@ -576,6 +575,23 @@ if manbuilder:
         manpage_targets.append(env.Man(source=xml, target=man))
     env.Default(*manpage_targets)
 
+# Installation and deinstallation
+# TO-DO: install Python modules, man pages, and libs under sonames.
+
+bindir = os.path.join(GetOption('prefix'), 'bin') 
+sbindir = os.path.join(GetOption('prefix'), 'sbin')
+libdir = os.path.join(GetOption('prefix'), 'lib')
+
+env.Install(sbindir, gpsd)
+env.Install(bindir, [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps])
+env.Install(bindir, python_progs)
+if ncurseslibs:
+    env.Install(bindir, [cgps, gpsmon])
+env.AddPostAction(env.Install(libdir, [compiled_gpslib, compiled_gpsdlib]),
+                  'ldconfig')
+
+env.Alias('install', [sbindir, bindir, libdir])
+
 # Utility productions
 
 def Utility(target, source, action):
@@ -663,8 +679,6 @@ Utility('gps-makeregress', [gpsd],
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
 #	regress-driver -b test/daemon/foo.log
-
-## MORE GOES HERE
 
 # Regression-test the RTCM decoder.
 rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
