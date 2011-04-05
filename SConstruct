@@ -3,7 +3,6 @@
 # Unfinished items:
 # * Python module build
 # * Qt binding
-# * Installation and uninstallation
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
 # * make check equivalent.
@@ -603,8 +602,10 @@ if manbuilder:
     env.Default(*manpage_targets)
 
 # Installation and deinstallation
+# Not here because too distro-specific: udev rules, desktop files, init scripts
 # TO-DO: install Python programs and modules using setup.py
 # TO-DO: Not sure how will handle C++ support yet
+# Possible bug: scons install -n doesn't show ldconfig postaction
 
 for (name, metavar, help, default) in pathopts:
     exec name + " = os.path.join(GetOption('prefix') + GetOption('%s'))" % name
@@ -635,6 +636,7 @@ def Uninstall(nodes):
             deletes.append(Delete(str(node)))
     return deletes
 uninstall = env.Command('uninstall', '', Flatten(Uninstall(Alias("install"))) or "")
+env.AddPostAction(uninstall, ['ldconfig'])
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)
 
