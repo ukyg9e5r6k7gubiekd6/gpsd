@@ -604,6 +604,7 @@ if manbuilder:
 
 # Installation and deinstallation
 # TO-DO: install Python programs and modules using setup.py
+# TO-DO: Not sure how will handle C++ support yet
 
 for (name, metavar, help, default) in pathopts:
     exec name + " = os.path.join(GetOption('prefix') + GetOption('%s'))" % name
@@ -622,8 +623,20 @@ for manpage in base_manpages:
     section = manpage.split(".")[1]
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
-env.AddPostAction(env.Alias('install', [sbindir, bindir, libdir] + maninstall),
-                                    'ldconfig')
+install = env.Alias('install', [sbindir, bindir, libdir] + maninstall)
+env.AddPostAction(install, ['ldconfig'])
+
+def Uninstall(nodes):
+    deletes = []
+    for node in nodes:
+        if node.__class__ == install[0].__class__:
+            deletes.append(Uninstall(node.sources))
+        else:
+            deletes.append(Delete(str(node)))
+    return deletes
+uninstall = env.Command('uninstall', '', Flatten(Uninstall(Alias("install"))) or "")
+env.AlwaysBuild(uninstall)
+env.Precious(uninstall)
 
 # Utility productions
 
