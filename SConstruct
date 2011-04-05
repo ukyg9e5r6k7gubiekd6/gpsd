@@ -203,6 +203,9 @@ if GetOption('profiling'):
     env.Append(CCFLAGS=['-pg'])
     env.Append(LDFLAGS=['-pg'])
 
+# Get a slight speedup by not doing automatic RCS and SCCS fetches.
+env.SourceCode('.', None)
+
 ## Build help
 
 if GetOption("help"):
@@ -972,52 +975,55 @@ Utility('udev-test', '', [
 
 # Release machinery begins here
 #
+# We need to be in the actual project repo (i.e. not doing a -Y build)
+# for these productions to work.
 
-distfiles = commands.getoutput(r"git ls-files |egrep -v '^(www|devtools|packaging|repo)'")
-distfiles = distfiles.split()
-distfiles.remove(".gitignore")
-distfiles += generated_sources
-distfiles += base_manpages.keys() + python_manpages.keys()
+if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
+    distfiles = commands.getoutput(r"git ls-files |egrep -v '^(www|devtools|packaging|repo)'")
+    distfiles = distfiles.split()
+    distfiles.remove(".gitignore")
+    distfiles += generated_sources
+    distfiles += base_manpages.keys() + python_manpages.keys()
 
-dist = env.Command('dist', distfiles, [
-    '@tar -czf gpsd-${VERSION}.tar.gz $SOURCES',
-    '@ls -l gpsd-${VERSION}.tar.gz',
-    ])
-env.Clean(dist, "gpsd-${VERSION}.tar.gz")
+    dist = env.Command('dist', distfiles, [
+        '@tar -czf gpsd-${VERSION}.tar.gz $SOURCES',
+        '@ls -l gpsd-${VERSION}.tar.gz',
+        ])
+    env.Clean(dist, "gpsd-${VERSION}.tar.gz")
 
-# Make RPM from the specfile in packaging
-Utility('dist-rpm', dist, 'rpm -ta $SOURCE')
+    # Make RPM from the specfile in packaging
+    Utility('dist-rpm', dist, 'rpm -ta $SOURCE')
 
-# Make sure build-from-tarball works.
-Utility('testbuild', [dist], [
-    'tar -xzvf gpsd-${VERSION}.tar.gz',
-    'cd gpsd-${VERSION}; ./configure; make',
-    'rm -fr gpsd-${VERSION}',
-    ])
-
-# This is how to ship a release to Berlios incoming.
-# It requires developer access verified via ssh.
-#
-upload_ftp = Utility('upload-ftp', dist, [
-	'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
-	'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
+    # Make sure build-from-tarball works.
+    Utility('testbuild', [dist], [
+        'tar -xzvf gpsd-${VERSION}.tar.gz',
+        'cd gpsd-${VERSION}; ./configure; make',
+        'rm -fr gpsd-${VERSION}',
         ])
 
-#
-# This is how to tag a release.
-# It requires developer access verified via ssh.
-#
-release_tag = Utility("release-tag", '', [
-	'git tag -s -m "Tagged for external release $VERSION" release-$VERSION',
-	'git push --tags'
-        ])
+    # This is how to ship a release to Berlios incoming.
+    # It requires developer access verified via ssh.
+    #
+    upload_ftp = Utility('upload-ftp', dist, [
+            'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
+            'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
+            ])
 
-#
-# Ship a release, providing all regression tests pass.
-# The clean is necessary so that dist will remake revision.h
-# with the current revision level in it.
-#
-Utility('ship', '', [check, dist, upload_ftp, release_tag])
+    #
+    # This is how to tag a release.
+    # It requires developer access verified via ssh.
+    #
+    release_tag = Utility("release-tag", '', [
+            'git tag -s -m "Tagged for external release $VERSION" release-$VERSION',
+            'git push --tags'
+            ])
+
+    #
+    # Ship a release, providing all regression tests pass.
+    # The clean is necessary so that dist will remake revision.h
+    # with the current revision level in it.
+    #
+    Utility('ship', '', [check, dist, upload_ftp, release_tag])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
