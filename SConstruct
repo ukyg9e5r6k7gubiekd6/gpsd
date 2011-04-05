@@ -163,10 +163,18 @@ env['VERSION'] = gpsd_version
 env.Append(LIBPATH=['.'])
 
 # Placeholder so we can kluge together something like VPATH builds
+# $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
 
-# TO-DO: We probably need to be cleverer about this
-env["PYTHON"] = 'python'
+# Because absolute paths are safer
+for variant in ['python2.7', 'python2.6', 'python2.5', 'python2.4', "python"]:
+    python = WhereIs(variant)
+    if python:
+        env["PYTHON"] = python
+        break
+else:
+    print "No Python - how are you running this script?"
+    Exit(1)
 
 if env['CC'] == 'gcc':
     # Enable all GCC warnings except uninitialized and
