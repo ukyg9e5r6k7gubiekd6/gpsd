@@ -794,25 +794,23 @@ for stem in ['AIVDM', 'NMEA',
             ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
 
 # DocBook documents
-for stem in ['writing-a-driver']:
+for stem in ['writing-a-driver', 'performance/performance']:
     env.HTML('www/%s.html' % stem, 'www/%s.xml' % stem)
+
+# The internals manual.
+# Doesn't capture dependencies on the subpages
+env.HTML('www/internals.html', '$SRCDIR/doc/explanation.xml')
 
 # The index page
 env.Command('www/index.html', 'www/index.html.in',
             ['sed -e "/@DATE@/s//`date \'+%B %d, %Y\'`/" <$SOURCE >$TARGET'])
 
+# The hardware page
 env.Command('www/hardware.html', ['gpscap.py',
                                   'www/hardware-head.html',
                                   'gpscap.ini',
                                   'www/hardware-tail.html'],
             ['(cat www/hardware-head.html; python gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
-
-env.Command('www/performance/performance.html',
-            ['www/performance/performance.xml'],
-            ['cd www/performance; xmlto xhtml-nochunks performance.xml'])
-
-env.Command('www/internals.html', glob.glob('$SRCDIR/doc/*.xml'),
-	['cd doc; xmlto xhtml-nochunks explanation.xml; cp explanation.html ../www/internals.html'])
 
 ## MORE GOES HERE (pydoc)
 
