@@ -367,26 +367,19 @@ with open("gpsd_config.h", "w") as ofp:
 manbuilder = None
 mangenerator = ''
 if WhereIs("xsltproc"):
+    mangenerator = 'xsltproc'
     docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
     docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
     docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
-    testpage = 'libgpsmm.xml'
-    if not os.path.exists(testpage):
-        print "What!? Test page is missing!"
-        sys.exit(1)
-    probe = "xsltproc --nonet --noout '%s' %s" % (docbook_man_uri, testpage)
-    if commands.getstatusoutput(probe)[0] == 0:
-        build = "xsltproc --nonet %s $SOURCE >$TARGET"
-        htmlbuilder = build % docbook_html_uri
-        manbuilder = build % docbook_man_uri
-        mangenerator = 'xsltproc'
-    elif WhereIs("xmlto"):
-        print "xmlto is available"
-        htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
-        manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
-        mangenerator = 'xmlto'
-    else:
-        print "Neither xsltproc nor xmlto found, documentation cannot be built."
+    build = "xsltproc --nonet %s $SOURCE >$TARGET"
+    htmlbuilder = build % docbook_html_uri
+    manbuilder = build % docbook_man_uri
+elif WhereIs("xmlto"):
+    mangenerator = 'xmlto'
+    htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
+    manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
+else:
+    print "Neither xsltproc nor xmlto found, documentation cannot be built."
 if manbuilder:
     env['BUILDERS']["Man"] = Builder(action=manbuilder)
     env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
