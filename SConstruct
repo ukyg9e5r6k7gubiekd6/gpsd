@@ -186,8 +186,10 @@ if env['CC'] == 'gcc':
                             -Wmissing-declarations -Wmissing-prototypes
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
                             -D_GNU_SOURCE'''))
+
 # Tell generated binaries to look in the current directory for
-# shared libraries. Should be handles sanely by scons on all systems.
+# shared libraries. Should be handled sanely by scons on all systems.
+# Not good to use '.' or a relative path here; it's a security risk.
 # At install time we should use chrpath to remove RPATH from the executables
 # again.
 env.Append(RPATH=os.path.realpath(os.curdir))
