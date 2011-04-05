@@ -1,11 +1,10 @@
 ### SCons build recipe for the GPSD project
 
 # Unfinished items:
-# * Python module build
 # * Qt binding
-# * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * C++ build is turned off until we figure out how to coerce the linker
-# * make check equivalent.
+# * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
+# * clean files
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -493,10 +492,6 @@ testprogs = [test_float, test_trig, test_bits, test_packet,
 if cxx and GetOption("libgpsmm"):
     testprogs.append(test_gpsmm)
 
-env.Alias("buildtest",testprogs)
-
-env.Default(testprogs)
-
 # Python programs
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
 python_modules = ["gps/__init__.py", "gps/misc.py", "gps/fake.py",
@@ -866,7 +861,7 @@ bits_regress = Utility('bits-regress', [test_bits], [
     ])
 
 # Run all normal regression tests
-testregress = env.Alias('testregress', [
+check = env.Alias('check', [
     python_compilation_regress,
     gps_regress,
     rtcm_regress,
@@ -876,6 +871,8 @@ testregress = env.Alias('testregress', [
     time_regress,
     unpack_regress,
     json_regress])
+
+env.Alias('testregress', check)
 
 # The website directory
 #
@@ -1003,7 +1000,7 @@ release_tag = Utility("release-tag", '', [
 # The clean is necessary so that dist will remake revision.h
 # with the current revision level in it.
 #
-Utility('ship', '', [testregress, tarball, upload_ftp, release_tag])
+Utility('ship', '', [check, tarball, upload_ftp, release_tag])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
