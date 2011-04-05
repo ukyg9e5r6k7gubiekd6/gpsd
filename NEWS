@@ -8,7 +8,8 @@
   shared-memory export from the daemon that can be accessed through 
   the C and C++ client libraries.  xgps and cgps may now display
   the Maidehead grid locator for current lat/lon.  xgps displays
-  GST noise statistics if they are available.
+  GST noise statistics if they are available. Codebase now has
+  an scons build recipe.
 
 * Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.

@@ -64,10 +64,15 @@ the prerequisites is: "apt-get build-dep gpsd"
 
 If you are going to modify the build, you will need these:
 
+scons 1.2.0 or later
 autoconf 2.61 or later
 automake 1.10 or later
 libtool 2.26 or later
 pkg-config
+
+Yes, that's both scons and autotools.  Presently we have two build systems.
+When the scons build has been field-tested enough, autotools will be dropped.
+If you change the build recipe, you must do it in both systems.
 
 Once you have fetched the software prerequisites:
 

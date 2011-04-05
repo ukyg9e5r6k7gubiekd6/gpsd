@@ -560,6 +560,7 @@ XML = \
 EXTRA_DIST = \
 	revision.h \
 	autogen.sh \
+	scons \
 	README \
 	INSTALL \
 	COPYING \
