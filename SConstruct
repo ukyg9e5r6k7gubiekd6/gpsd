@@ -4,7 +4,6 @@
 # * Qt binding
 # * C++ build is turned off until we figure out how to coerce the linker
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
-# * clean files
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -346,6 +345,7 @@ with open("gpsd_config.h", "w") as ofp:
     ofp.writelines(confdefs)
 
 manbuilder = None
+mangenerator = ''
 if WhereIs("xsltproc"):
     docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
     docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
@@ -359,10 +359,12 @@ if WhereIs("xsltproc"):
         build = "xsltproc --nonet %s $SOURCE >$TARGET"
         htmlbuilder = build % docbook_html_uri
         manbuilder = build % docbook_man_uri
+        mangenerator = 'xsltproc'
     elif WhereIs("xmlto"):
         print "xmlto is available"
         htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
         manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
+        mangenerator = 'xmlto'
     else:
         print "Neither xsltproc nor xmlto found, documentation cannot be built."
 if manbuilder:
@@ -520,7 +522,6 @@ PYEXTENSIONS = ["gpspacket.so", "gpslib.so"]
 abs_builddir = os.getcwd()
 pylibdir    = "build/lib.%s-%s"  % (get_platform(), sys.version[0:3])
 pyscriptdir = "build/scripts-%s" % sys.version[0:3]
-mangenerator = manbuilder or ''
 python_parts = env.Command('python-parts',
                            ["gpspacket.c",
                             "gpsclient.c",
@@ -578,7 +579,6 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
 
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
                      'gps_maskdump.c', 'ais_json.c']
-#env.Clean(generated_sources)
 
 # Under autotools this depended on Makefile. We need it to depend
 # on the state of the build-system variables.
@@ -624,6 +624,7 @@ base_manpages = {
     "lcdgps.1" : "gps.xml",
     "libgps.3" : "libgps.xml",
     "libgpsmm.3" : "libgpsmm.xml",
+    "libQgpsmm.3" : "libgpsmm.xml",
     "libgpsd.3" : "libgpsd.xml",
     "gpsmon.1": "gpsmon.xml",
     "gpsctl.1" : "gpsctl.xml",
@@ -962,17 +963,17 @@ distfiles.remove(".gitignore")
 distfiles += generated_sources
 distfiles += base_manpages.keys() + python_manpages.keys()
 
-tarball = env.Command('tarball', distfiles, [
+dist = env.Command('dist', distfiles, [
     '@tar -czf gpsd-${VERSION}.tar.gz $SOURCES',
     '@ls -l gpsd-${VERSION}.tar.gz',
     ])
-#env.Clean("gpsd-${VERSION}.tar.gz")
+env.Clean(dist, "gpsd-${VERSION}.tar.gz")
 
 # Make RPM from the specfile in packaging
-Utility('dist-rpm', tarball, 'rpm -ta $SOURCE')
+Utility('dist-rpm', dist, 'rpm -ta $SOURCE')
 
 # Make sure build-from-tarball works.
-Utility('testbuild', [tarball], [
+Utility('testbuild', [dist], [
     'tar -xzvf gpsd-${VERSION}.tar.gz',
     'cd gpsd-${VERSION}; ./configure; make',
     'rm -fr gpsd-${VERSION}',
@@ -981,7 +982,7 @@ Utility('testbuild', [tarball], [
 # This is how to ship a release to Berlios incoming.
 # It requires developer access verified via ssh.
 #
-upload_ftp = Utility('upload-ftp', tarball, [
+upload_ftp = Utility('upload-ftp', dist, [
 	'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
 	'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
         ])
@@ -1000,7 +1001,7 @@ release_tag = Utility("release-tag", '', [
 # The clean is necessary so that dist will remake revision.h
 # with the current revision level in it.
 #
-Utility('ship', '', [check, tarball, upload_ftp, release_tag])
+Utility('ship', '', [check, dist, upload_ftp, release_tag])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
