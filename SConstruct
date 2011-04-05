@@ -666,9 +666,28 @@ Utility('gps-makeregress', [gpsd],
 # test/daemon and do this:
 #	regress-driver -b test/daemon/foo.log
 
-env.Alias('regress-all', ['gps-regress','raw-regress','gps-makeregress'])
-
 ## MORE GOES HERE
+
+# Regression-test the RTCM decoder.
+rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
+	'@echo "Testing RTCM decoding..."',
+	'for f in $SRCDIR/test/*.rtcm2; do '
+		'echo "Testing $${f}..."; '
+		'$SRCDIR/gpsdecode -j <$${f} >/tmp/test-$$$$.chk; '
+		'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
+	'done;',
+	'@echo "Testing idempotency of JSON dump/decode for RTCM2"',
+	'@$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; '
+		'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - /tmp/test-$$$$.chk; '
+		'rm /tmp/test-$$$$.chk',
+        ])
+
+# Rebuild the RTCM regression tests.
+Utility('rtcm-makeregress', [gpsdecode], [
+	'for f in $SRCDIR/test/*.rtcm2; do '
+		'$SRCDIR/gpsdecode -j < ${f} > ${f}.chk; '
+	'done'
+        ])
 
 # Regression-test the packet getter.
 packet_regress = Utility('packet-regress', [test_packet], [
@@ -722,6 +741,7 @@ bits_regress = Utility('bits-regress', [test_bits], [
 env.Alias('testregress', [
     python_compilation_regress,
     #gps_regress,
+    rtcm_regress,
     packet_regress,
     geoid_regress,
     time_regress,
