@@ -190,8 +190,7 @@ if env['CC'] == 'gcc':
 # shared libraries. Should be handles sanely by scons on all systems.
 # At install time we should use chrpath to remove RPATH from the executables
 # again.
-env.Append( LINKFLAGS = Split('-z origin') )
-env.Append( RPATH = env.Literal('\\$$ORIGIN'))
+env.Append(RPATH=os.path.realpath(os.curdir))
 
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
@@ -229,10 +228,8 @@ for f in ("daemon", "strlcpy", "strlcat"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
 
-if config.CheckPKG('ncurses'):
-    env.MergeFlags(['!pkg-config ncurses --cflags'])
-    flags = env.ParseFlags('!pkg-config ncurses --libs')
-    ncurseslibs = flags['LIBS']
+if config.CheckLib('ncurses'):
+    ncurseslibs = ['ncurses']
 else:
     ncurseslibs = []
 
