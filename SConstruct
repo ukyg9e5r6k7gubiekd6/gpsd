@@ -775,7 +775,9 @@ def Splint(target,sources, description, params):
 splint_table = [
     ('splint-daemon',gpsd_sources,'daemon', ['-exportlocal', '-redef']),
     ('splint-libgpsd',libgpsd_sources,'libgpsd', ['-exportlocal', '-redef']),
-    ('splint-libgps',libgps_sources,'user-side libraries', ['-exportlocal', '-redef']),
+    ('splint-libgps',libgps_sources,'user-side libraries', ['-exportlocal',
+                                                            '-fileextensions',
+                                                            '-redef']),
     ('splint-cgps',['cgps.c'],'cgps', ['-exportlocal']),
     ('splint-gpsctl',['gpsctl.c'],'gpsctl', ['']),
     ('splint-gpsmon',gpsmon_sources,'gpsmon', ['-exportlocal']),

@@ -5,11 +5,11 @@
  * file "COPYING" in the top-level directory of the disribution for details.
  *
  */
+
+#ifndef S_SPLINT_S
 #include <cstdlib>
-
-#include "gpsd_config.h"
 #include "libgpsmm.h"
-
+#include "gpsd_config.h"
 
 struct gps_data_t* gpsmm::gps_inner_open(const char *host, const char *port) 
 {
@@ -85,3 +85,4 @@ gpsmm::~gpsmm()
 		delete to_user;
 	}
 }
+#endif /* S_SPLINT_S */

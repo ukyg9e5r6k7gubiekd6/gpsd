@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pthread.h>
 #ifndef S_SPLINT_S
 #include <sys/wait.h>
 #include <sys/socket.h>
@@ -904,9 +905,9 @@ void ntpd_link_activate(struct gps_device_t *session)
 	 * transitions
 	 */
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0) {
-	    /*@-unrecog@*/
+	    /*@-compdef -nullpass@*/
 	    (void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
-	    /*@+unrecog@*/
+	    /*@+compdef +nullpass@*/
 	} else {
 	    gpsd_report(LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
 	}

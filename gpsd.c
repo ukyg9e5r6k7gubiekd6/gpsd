@@ -1723,7 +1723,9 @@ int main(int argc, char *argv[])
     const struct gps_type_t **dp;
 
 #ifdef PPS_ENABLE
-    pthread_mutex_init(&report_mutex, NULL);
+    /*@-nullpass@*/
+    (void)pthread_mutex_init(&report_mutex, NULL);
+    /*@+nullpass@*/
 #endif /* PPS_ENABLE */
 
     (void)setlocale(LC_NUMERIC, "C");
