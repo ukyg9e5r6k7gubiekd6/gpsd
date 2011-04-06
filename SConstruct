@@ -953,6 +953,7 @@ env.Alias('testregress', check)
 # The website directory
 #
 # None of these productions are fired by default.
+# The content they handle is the GPSD website, not included in release tarballs.
 
 env.Alias('website', Split('''
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
@@ -969,11 +970,12 @@ env.Alias('website', Split('''
     '''))
 
 # asciidoc documents
-for stem in ['AIVDM', 'NMEA',
-             'protocol-evolution', 'protocol-transition'
-             'client-howto']:
-    env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
-            ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
+if env.WhereIs('asciidoc'):
+    for stem in ['AIVDM', 'NMEA',
+                 'protocol-evolution', 'protocol-transition'
+                 'client-howto']:
+        env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
+                ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
 
 if htmlbuilder:
     # DocBook documents
