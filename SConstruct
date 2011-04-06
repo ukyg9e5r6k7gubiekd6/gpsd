@@ -579,7 +579,7 @@ PYEXTENSIONS = ["gpspacket.so", "gpslib.so"]
 abs_builddir = os.getcwd()
 pylibdir    = "build/lib.%s-%s"  % (get_platform(), sys.version[0:3])
 pyscriptdir = "build/scripts-%s" % sys.version[0:3]
-python_parts = env.Command('python-parts',
+python_parts = env.Command('stamp-python',
                            ["gpspacket.c",
                             "gpsclient.c",
                             "setup.py",
@@ -587,6 +587,8 @@ python_parts = env.Command('python-parts',
                             compiled_gpsdlib]
                            + python_progs
                            + python_modules, [
+    "rm -f ${TARGET} ${TARGET}.tmp",
+    "date +'%s %N' >${TARGET}.tmp",
     "(cd $SRCDIR; chmod a+w .; "
     "env version=" + gpsd_version + " abs_builddir=" + abs_builddir + " MAKE='scons -Q' "
     "$PYTHON setup.py build " +
@@ -595,8 +597,10 @@ python_parts = env.Command('python-parts',
     ("--mangenerator '%s') && " % mangenerator) +
     ("(cd '%s' && " % abs_builddir) +
     "mkdir -p gps && cd gps && rm -f *.so && " +
-    "ln -s %s/%s/gps/*.so . ) " % (abs_builddir, pylibdir)
+    ("ln -s %s/%s/gps/*.so . ) && " % (abs_builddir, pylibdir)) +
+    "mv -f ${TARGET}.tmp ${TARGET}",
     ])
+env.Clean(python_parts, ["stamp-python", "stamp-python.tmp"])
 
 #
 # Special dependencies to make generated files
@@ -703,7 +707,7 @@ if manbuilder:
 
 ## Where it all comes together
 
-build = env.Alias('build', binaries + python_parts + manpage_targets)
+build = env.Alias('build', [binaries, python_parts, manpage_targets])
 env.Default(*build)
 
 ## Installation and deinstallation
