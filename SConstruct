@@ -107,7 +107,7 @@ nonboolopts = (
     ("gpsd-user",   "USER",     "privilege revocation user",     ""),
     ("gpsd-group",  "GROUP",    "privilege revocation group",    ""),
     
-    ("prefix",      "PREFIX",   "",      "/usr/local/"),
+    ("prefix",      "PREFIX",   "installation directory prefix", "/usr/local/"),
 
     ("limited-max-clients", "CLIENTS",  "maximum allowed clients",       0),
     ("limited-max-devices", "DEVICES",  "maximum allowed devices",       0),
