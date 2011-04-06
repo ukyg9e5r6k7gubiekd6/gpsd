@@ -944,13 +944,14 @@ for stem in ['AIVDM', 'NMEA',
     env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
             ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
 
-# DocBook documents
-for stem in ['writing-a-driver', 'performance/performance']:
-    env.HTML('www/%s.html' % stem, 'www/%s.xml' % stem)
+if htmlbuilder:
+    # DocBook documents
+    for stem in ['writing-a-driver', 'performance/performance']:
+        env.HTML('www/%s.html' % stem, 'www/%s.xml' % stem)
 
-# The internals manual.
-# Doesn't capture dependencies on the subpages
-env.HTML('www/internals.html', '$SRCDIR/doc/explanation.xml')
+    # The internals manual.
+    # Doesn't capture dependencies on the subpages
+    env.HTML('www/internals.html', '$SRCDIR/doc/explanation.xml')
 
 # The index page
 env.Command('www/index.html', 'www/index.html.in',
