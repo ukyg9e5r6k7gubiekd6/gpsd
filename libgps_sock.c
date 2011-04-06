@@ -94,7 +94,7 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
 }
 /*@+branchstate@*/
 
-bool gps_waiting(struct gps_data_t * gpsdata, int timeout)
+bool gps_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* is there input waiting from the GPS? */
 {
 #ifndef USE_QT
@@ -467,7 +467,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 }
 /*@ +compdef @*/
 
-const char /*@observer@*/ *gps_data(struct gps_data_t *gpsdata)
+const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata)
 /* return the contents of the client data buffer */
 {
     return PRIVATE(gpsdata)->buffer;

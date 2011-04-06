@@ -1396,6 +1396,7 @@ struct gps_data_t {
 
     struct policy_t policy;	/* our listening policy */
 
+    /* should be moved to privdata sometday */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
     /* pack things never reported together to reduce structure size */ 
@@ -1429,9 +1430,9 @@ extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *, const char *, ... );
 extern int gps_read(/*@out@*/struct gps_data_t *);
 extern int gps_unpack(char *, struct gps_data_t *);
-extern bool gps_waiting(struct gps_data_t *, int);
+extern bool gps_waiting(const struct gps_data_t *, int);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
-extern const char /*@observer@*/ *gps_data(struct gps_data_t *);
+extern const char /*@observer@*/ *gps_data(const struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
 extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *, 

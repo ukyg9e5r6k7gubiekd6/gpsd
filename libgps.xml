@@ -43,12 +43,12 @@ C:
 </funcprototype>
 <funcprototype>
 <funcdef>bool <function>gps_waiting</function></funcdef>
-    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>const struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
     <paramdef>int <parameter>timeout</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>void <function>gps_data</function></funcdef>
-    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>const struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>int <function>gps_unpack</function></funcdef>
