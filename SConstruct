@@ -384,15 +384,33 @@ if WhereIs("xsltproc"):
     docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
     docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
     docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
-    build = "xsltproc --nonet %s $SOURCE >$TARGET"
-    htmlbuilder = build % docbook_html_uri
-    manbuilder = build % docbook_man_uri
-elif WhereIs("xmlto"):
-    mangenerator = 'xmlto'
-    htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
-    manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
-else:
-    print "Neither xsltproc nor xmlto found, documentation cannot be built."
+    with open("xmltest.xml", "w") as ofp:
+        ofp.write('''
+       <refentry id="foo.1">
+	  <refmeta>
+	    <refentrytitle>foo</refentrytitle>
+	    <manvolnum>1</manvolnum>
+	    <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
+	  </refmeta>
+	  <refnamediv id='name'>
+	    <refname>foo</refname>
+	    <refpurpose>check man page generation from docbook source</refpurpose>
+	  </refnamediv>
+	</refentry>
+''')
+    probe = "xsltproc --nonet --noout '%s' xmltest.xml" % (docbook_man_uri,)
+    docbook_uri_good = commands.getstatusoutput(probe)[0] == 0
+    os.remove("xmltest.xml")
+    if docbook_uri_good:
+        build = "xsltproc --nonet %s $SOURCE >$TARGET"
+        htmlbuilder = build % docbook_html_uri
+        manbuilder = build % docbook_man_uri
+    elif WhereIs("xmlto"):
+        mangenerator = 'xmlto'
+        htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
+        manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
+    else:
+        print "Neither xsltproc nor xmlto found, documentation cannot be built."
 if manbuilder:
     env['BUILDERS']["Man"] = Builder(action=manbuilder)
     env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
