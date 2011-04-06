@@ -16,6 +16,9 @@
 # Unfinished items:
 # * Qt binding
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
+#
+# Setting the DESTDIR environment variable will prefix the install destinations
+# without changing the --preix prefix.
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -175,6 +178,9 @@ for variant in ['python2.7', 'python2.6', 'python2.5', 'python2.4', "python"]:
 else:
     print "No Python - how are you running this script?"
     Exit(1)
+
+# DESTDIR environment variable means user wants to prefix the installation root.
+DESTDIR = os.environ.get('DESTDIR', '')
 
 if env['CC'] == 'gcc':
     # Enable all GCC warnings except uninitialized and
@@ -716,7 +722,7 @@ env.Default(*build)
 # Possible bug: scons install -n doesn't show ldconfig postaction
 
 for (name, metavar, help, default) in pathopts:
-    exec name + " = os.path.join(GetOption('prefix') + GetOption('%s'))" % name
+    exec name + " = DESTDIR + GetOption('prefix') + GetOption('%s')" % name
 
 binaryinstall = []
 binaryinstall.append(env.Install(sbindir, gpsd))
