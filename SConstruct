@@ -518,9 +518,11 @@ gpsmon_sources = [
     ]
 
 ## Production programs
-gpsd = env.Program('gpsd', gpsd_sources,
-                   LINKFLAGS = "-pthread",
-                   LIBS = gpsdlibs + rtlibs + dbus_xmit_libs)
+# Don't lose the RPATH when building gpsd
+gpsd_env = env.Clone()
+gpsd_env.MergeFlags("-pthread")
+gpsd = gpsd_env.Program('gpsd', gpsd_sources,
+                        LIBS = gpsdlibs + rtlibs + dbus_xmit_libs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+rtlibs)
 gpsmon = env.Program('gpsmon', gpsmon_sources, LIBS=gpsdlibs + ncurseslibs)
