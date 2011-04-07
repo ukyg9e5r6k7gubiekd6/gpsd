@@ -412,8 +412,7 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 with open("gpsd_config.h", "w") as ofp:
     ofp.writelines(confdefs)
 
-manbuilder = None
-mangenerator = ''
+manbuilder = mangenerator = htmlbuilder = None
 if config.CheckXsltproc():
     mangenerator = 'xsltproc'
     build = "xsltproc --nonet %s $SOURCE >$TARGET"
