@@ -94,7 +94,6 @@ stamp-*
 .libs
 .deps
 libtool
-NEWS
 ChangeLog
 m4
 # SCons cruft
