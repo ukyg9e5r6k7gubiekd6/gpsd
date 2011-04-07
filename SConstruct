@@ -18,7 +18,7 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
-# without changing the --preix prefix.
+# without changing the --prefix prefix.
 
 # Release identification begins here
 gpsd_version = "3.0~dev"
@@ -238,6 +238,7 @@ def CheckChrpath(context):
     context.Result( ret )
     return ret
 
+# Stylesheet URLs for making HTML and man pages from DocBook XML.
 docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
 docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
 docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
