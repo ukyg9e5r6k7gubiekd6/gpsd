@@ -511,13 +511,21 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-if qtlibs:
-    libQgpsmm_sources=copy.deepcopy(libgps_sources)
-    libQgpsmm_sources.append("libgpsmm.cpp")
-    compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm", source=libQgpsmm_sources, LIBS=qtlibs)
-
 compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
 compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
+
+if qtlibs:
+    qtobjects = []
+    # Qt binding object files have to be renamed as they're built to avoid
+    # name clashes with the plain non-Qt object files. This prevents the
+    # infamous "Two environments with different actions were specified
+    # for the same target" error.
+    for src in libgps_sources:
+        qtobjects.append(qt_env.Object(src[:-2] + '-qt', src))
+    qtobjects.append(qt_env.Object("libgpsmm", "libgpsmm.cpp"))
+    compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm",
+                                              source=qtobjects,
+                                              LIBS=qtlibs)
 
 # The libraries have dependencies on system libraries
 
