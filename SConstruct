@@ -433,13 +433,17 @@ if manbuilder:
     env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                       src_suffix=".xml", suffix=".html")
 
+qt_network = config.CheckPKG('QtNetwork')
+
+env = config.Finish()
+
 # Gentoo systems can have a problem with the Python path
 if os.path.exists("/etc/gentoo-release"):
     print "This is a Gentoo system."
     print "Adjust your PYTHONPATH to see library directories under /usr/local/lib"
 
-
-if cxx and GetOption('libQgpsmm') and config.CheckPKG('QtNetwork'):
+# Should we build the Qt binding?
+if cxx and GetOption('libQgpsmm') and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
     qt_env.MergeFlags(['!pkg-config QtNetwork --cflags'])
@@ -447,8 +451,6 @@ if cxx and GetOption('libQgpsmm') and config.CheckPKG('QtNetwork'):
     qtlibs = flags['LIBS']
 else:
     qtlibs = []
-
-env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
 
