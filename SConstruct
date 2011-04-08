@@ -262,6 +262,7 @@ def CheckXsltproc(context):
     probe = "xsltproc --nonet --noout '%s' xmltest.xml" % (docbook_man_uri,)
     ret = context.TryAction(probe)[0]
     os.remove("xmltest.xml")
+    os.remove("foo.1")
     context.Result( ret )
     return ret
 
@@ -623,22 +624,18 @@ env.Command(target = "packet_names.h", source="packet_states.h", action="""
 env.Command(target="timebase.h", source="leapseconds.cache",
             action='$PYTHON leapsecond.py -h $SOURCE >$TARGET')
 
-env.Command(target="gpsd.h", source="gpsd_config.h", action="""\
+env.Command(target="gpsd.h", source=["gpsd.h-head", "gpsd_config.h", "gpsd.h-tail"], action="""\
 	rm -f $TARGET &&\
 	echo \"/* This file is generated.  Do not hand-hack it! */\" >$TARGET &&\
 	cat $TARGET-head >>$TARGET &&\
 	cat gpsd_config.h >>$TARGET &&\
 	cat $TARGET-tail >>$TARGET &&\
 	chmod a-w $TARGET""")
-Depends(target="gpsd.h", dependency="gpsd.h-head")
-Depends(target="gpsd.h", dependency="gpsd.h-tail")
 
-env.Command(target="gps_maskdump.c", source="maskaudit.py", action='''
+env.Command(target="gps_maskdump.c", source=["maskaudit.py", "gps.h", "gpsd.h"], action='''
 	rm -f $TARGET &&\
         $PYTHON $SOURCE -c $SRCDIR >$TARGET &&\
         chmod a-w $TARGET''')
-Depends(target="gps_maskdump.c", dependency="gps.h")
-Depends(target="gps_maskdump.c", dependency="gpsd.h")
 
 env.Command(target="ais_json.i", source="jsongen.py", action='''\
 	rm -f $TARGET &&\
