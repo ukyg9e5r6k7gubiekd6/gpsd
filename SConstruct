@@ -446,6 +446,7 @@ if os.path.exists("/etc/gentoo-release"):
 if cxx and GetOption('libQgpsmm') and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
+    qt_env['CC'] = 'g++'
     qt_env.MergeFlags(['!pkg-config QtNetwork --cflags'])
     flags = env.ParseFlags('!pkg-config QtNetwork --libs')
     qtlibs = flags['LIBS']
