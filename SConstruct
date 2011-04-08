@@ -262,7 +262,8 @@ def CheckXsltproc(context):
     probe = "xsltproc --nonet --noout '%s' xmltest.xml" % (docbook_man_uri,)
     ret = context.TryAction(probe)[0]
     os.remove("xmltest.xml")
-    os.remove("foo.1")
+    if os.path.exists("foo.1"):
+        os.remove("foo.1")
     context.Result( ret )
     return ret
 
