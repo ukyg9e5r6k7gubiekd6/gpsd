@@ -29,7 +29,7 @@ libgps_age   = 0
 
 EnsureSConsVersion(1,2,0)
 
-import os, sys, commands, glob
+import copy, os, sys, commands, glob
 from distutils.util import get_platform
 
 #
@@ -87,7 +87,8 @@ boolopts = (
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
     # Miscellaneous
-    ("profiling",     False, "Build with profiling enabled"),
+    ("debug",	      False, "include debug information in build"),
+    ("profiling",     False, "build with profiling enabled"),
     ("timing",        True,  "latency timing support"),
     ("control-socket",True,  "control socket for hotplug notifications")
     )
@@ -205,7 +206,7 @@ if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
 # Should we build with profiling?
-if ARGUMENTS.get('profiling', 0):
+if GetOption('profiling'):
     env.Append(CCFLAGS=['-pg'])
     env.Append(LDFLAGS=['-pg'])
 
@@ -213,7 +214,7 @@ if ARGUMENTS.get('profiling', 0):
 env.SourceCode('.', None)
 
 # Should we build with debug symbols?
-if ARGUMENTS.get('debug', 0):
+if GetOption('debug'):
     env.Append(CCFLAGS=['-g'])
     env.Append(CCFLAGS=['-O0'])
 else:
@@ -327,6 +328,7 @@ else:
     confdefs.append("/* #undef HAVE_BLUEZ */\n\n")
     bluezlibs = []
 
+
 if config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n\n")
 else:
@@ -436,6 +438,16 @@ if os.path.exists("/etc/gentoo-release"):
     print "This is a Gentoo system."
     print "Adjust your PYTHONPATH to see library directories under /usr/local/lib"
 
+
+if cxx and GetOption('libQgpsmm') and config.CheckPKG('QtNetwork'):
+    qt_env = env.Clone()
+    qt_env.MergeFlags('-DUSE_QT')
+    qt_env.MergeFlags(['!pkg-config QtNetwork --cflags'])
+    flags = env.ParseFlags('!pkg-config QtNetwork --libs')
+    qtlibs = flags['LIBS']
+else:
+    qtlibs = []
+
 env = config.Finish()
 
 ## Two shared libraries provide most of the code for the C programs
@@ -458,6 +470,7 @@ libgps_sources = [
 	"shared_json.c",
 	"strl.c",
 ]
+
 if cxx and GetOption('libgpsmm'):
     libgps_sources.append("libgpsmm.cpp")
 
@@ -495,6 +508,11 @@ libgpsd_sources = [
 	"driver_ubx.c",
 	"driver_zodiac.c",
 ]
+
+if qtlibs:
+    libQgpsmm_sources=copy.deepcopy(libgps_sources)
+    libQgpsmm_sources.append("libgpsmm.cpp")
+    compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm", source=libQgpsmm_sources, LIBS=qtlibs)
 
 compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
 compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
@@ -716,6 +734,10 @@ if manbuilder:
 build = env.Alias('build', [binaries, python_parts, manpage_targets])
 env.Default(*build)
 
+if qtlibs:
+    build_qt = qt_env.Alias('build', [compiled_qgpsmmlib])
+    qt_env.Default(*build_qt)
+
 ## Installation and deinstallation
 
 # Not here because too distro-specific: udev rules, desktop files, init scripts
@@ -734,9 +756,13 @@ binaryinstall.append(env.InstallAs(source=compiled_gpslib,
               target=os.path.join(libdir, "libgps.so." + libversion)))
 binaryinstall.append(env.InstallAs(source=compiled_gpsdlib,
               target=os.path.join(libdir, "libgpsd.so." + libversion)))
+#if qtlibs:
+#    binaryinstall.append(qt_env.InstallAs(source=compiled_qgpsmmlib,
+#              target=os.path.join(libdir, "libQgpsmm.so." + libversion)))
+
 if have_chrpath:
     env.AddPostAction(binaryinstall, 'chrpath -d $TARGET')
-if not (ARGUMENTS.get('debug', 0) or ARGUMENTS.get('profiling', 0)):
+if not GetOption('debug') or GetOption('profiling'):
     env.AddPostAction(binaryinstall, 'strip $TARGET')
 
 maninstall = []
