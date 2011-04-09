@@ -1,3 +1,4 @@
+= GPSD Installation Instructions =
 
 Here are the steps for installing gpsd and verifying its performance:
 
@@ -9,6 +10,7 @@ Necessary components for any build:
 
 C compiler			-> gpsd and client library are written in C
 Python				-> some code is generated from python scripts
+scons                           -> for the build recipe 
 Python GTK-2 and cairo bindings	-> the main test client, xgps, needs this
 
 C99 conformance is required in the compiler. The C code depends on one
@@ -26,8 +28,11 @@ GPSD is 2.4-compatible except that you need either the json library
 module from 2.6 or the functionally equivalent simplejson backport.
 Note that while Python is required to *build* GPSD (the build uses
 some code generators in Python), it is not required to run the service
-daemon.  In particular, you can cross-compile onto an embeddeed system
+daemon.  In particular, you can cross-compile onto an embedded system
 without having to take Python with you.
+
+You will need scons version 1.2.0 or later to build the code. The
+autotools build from 2.96 and earlier versions has been dropped.
 
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
@@ -46,7 +51,7 @@ Linux kernel team).
 
 For working with DBUS, you'll need the DBUS development
 headers and libraries installed.  Under Debian/Ubuntu these
-are the packages ibdbus-1-dev and libdbus-glib-1-dev.
+are the packages libdbus-1-dev and libdbus-glib-1-dev.
 
 For building from the source tree, or if you change the man page
 source, xslt and docbook xsl style files are used to generate nroff
@@ -61,18 +66,6 @@ be able to tell from configure messages which extensions you will get.
 
 Under Ubuntu and most other Debian-derived, an easy way to pick up
 the prerequisites is: "apt-get build-dep gpsd"
-
-If you are going to modify the build, you will need these:
-
-scons 1.2.0 or later
-autoconf 2.61 or later
-automake 1.10 or later
-libtool 2.26 or later
-pkg-config
-
-Yes, that's both scons and autotools.  Presently we have two build systems.
-When the scons build has been field-tested enough, autotools will be dropped.
-If you change the build recipe, you must do it in both systems.
 
 Once you have fetched the software prerequisites:
 
@@ -122,7 +115,7 @@ are in the same group.
 
 3. Install prerequisites
 
-Under Debian and Ubuntu ou can get all the build prerequisites
+Under Debian and Ubuntu you can get all the build prerequisites
 installed with "apt-get build-dep gpsd".
 
 Note: if you are going to use the RTCM-104 support, you should compile
@@ -132,11 +125,13 @@ command.  The rtcm2.c file confuses the gcc-3.4.[23] optimizer
 at -O2 level, making it generate incorrect code.
 
 4. Build gpsd from source (skip this step if you have installed GPSD 
-from a binary package).  As usual, the sequence is:
+from a binary package). The build requires scons.  Simply calling
+'scons' in a working-directory copy should do it.
 
-     ./configure && make
-
-Mac OS X users may need to do "./configure --x-includes=/usr/X11R6/include"
+By giving command-line options to scons you can configure certain rarely-used
+optional features in, or compile standard features out to reduce gpsd's 
+footprint. "scons --help" will tell the story; look under "Local Options"
+and consult the source code if in doubt.
 
 5. Start gpsd.  You'll need to give it as an argument a path to 
 a serial or USB port with a GPS attached to it.
@@ -155,13 +150,15 @@ thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
-9. Now that you've verified that the code is working, "make install" 
-will install it it in the system directories.  "make uninstall" will
-undo this.
+9. Now that you've verified that the code is working, "scons install" 
+will install it it in the system directories. "scons uninstall" will
+undo this. Note: because scons is a single-phase build system, this
+may recompile everything. If you want feature-configuration options,
+you need to specify them here.
 
-(You won't need to "make install" if you installed from a binary package.)
+(You won't need to "scons install" if you installed from a binary package.)
 
-10. To enable hotplugging of USB GPSes under Linux, do a 'make udev-install' or
+10. To enable hotplugging of USB GPSes under Linux, do a 'scons udev-install' or
 equivalent to put the appropriate udev rules and wrapper files in place.
 
 11. Check out the list of supported hardware at 
@@ -196,20 +193,13 @@ to be available on all the Qt supported platforms.  Please see
 http://qt.nokia.com/doc/4.6/supported-platforms.html for a status of
 Qt supported platforms as of version 4.6.
 
-You can build libQgpsmm if you have qmake and Qt (specifically the
-(specifically QtCore and QtNetwork modules) version 4.5.3 or higher.
-You will also need a C++ compiler supported by Qt (tested on GCC
-4.4.0/mingw on Windows and GCC 4.1.2 on linux).
-
-Building is done through a standard Qt .pro project file:
-- Go to the libQgpsmm subdirectory of gpsd and execute "qmake" 
-  to create the Makefiles
-- execute "make" to build the library
-- execute "make install" or equivalent to copy libgpsmm.h and the library 
-  to the appropriate location for your platform.
+You can build libQgpsmm if you have Qt (specifically the (specifically
+QtCore and QtNetwork modules) version 4.5.3 or higher.  You will also
+need a C++ compiler supported by Qt (tested on GCC 4.4.0/mingw on
+Windows and GCC 4.1.2 on linux).
 
 Specifically for linux: You can specify the installation prefix by
-running "qmake PREFIX=<installation_root>". Default value is
+running "scons --prefix=<installation_root>". Default value is
 "/usr/local".
 
 Please refer to Qt's documentation at
@@ -218,7 +208,7 @@ building documentation
 
 16. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
-regression tests, first build gpsd from sources, and then run "make
+regression tests, first build gpsd from sources, and then run "scons
 check".  It is not necessary to install first, but you do need
 to have "." in your $PATH to run regressions uninstalled.  Python is
 required for regression tests.

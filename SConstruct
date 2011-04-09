@@ -75,13 +75,13 @@ boolopts = (
     ("dbus-export",   False,  "enable DBUS export support"),
     ("shm-export",    True,  "export via shared memory"),
     # Communication
-    ("bluez",         False, "BlueZ support for Bluetooth devices"),
+    ("bluez",         True,  "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
     ("libgpsmm",      True,  "build C++ bindings"),
-    ("libQgpsmm",     False, "build QT bindings"),
+    ("libQgpsmm",     True,  "build QT bindings"),
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
@@ -357,14 +357,6 @@ for (key,help) in keys:
                 print "%s not found, %s cannot be enabled." % (required, key)
                 value = False
                 break
-
-    # This is a kluge.  It's meant to make the behavior of this recipe be
-    # plug-compatible with the autotools build.  When we discard the autotools
-    # build, it can be removed.
-    if key == "sysconfdir":
-        env.Append(CFLAGS='-DSYSCONFDIR=\'"%s"\'' \
-                   % os.path.join(GetOption("prefix"), value))
-        continue
 
     confdefs.append("/* %s */\n"%help)
     if type(value) == type(True):

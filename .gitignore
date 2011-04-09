@@ -78,27 +78,11 @@ xgpsc
 xgpsspeedc
 # Developer sandbox directory for patches that haven't been applied yet
 patches
-# autotools cruft
-configure
-Makefile.in
-Makefile
-config.*
-aclocal.m4
-py-compile
-ltmain.sh
-missing
-autom4te.cache
-depcomp
-install-sh
-stamp-*
-.libs
-.deps
-libtool
-ChangeLog
-m4
 # SCons cruft
+config.log
 .sconsign.dblite
 .sconf_temp
+stamp-python
 # Documentation
 www/AIVDM.html
 www/NMEA.html

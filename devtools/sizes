@@ -2,6 +2,9 @@
 #
 # sizes -- explore the sizes of static gpsd binaries
 #
+# Note: won't include size of shared libraries until we teeak the scons
+# recipe to produce static build of gpsd.
+#
 import os
 
 # NMEA variants other than vanilla NMEA
@@ -52,9 +55,7 @@ debugging = [
 def sizeit(legend, tag, options):
     print legend + ":"
     print "Options:", " ".join(options)
-    os.system("make clean >/dev/null")
-    os.system("configure --disable-shared " + " ".join(options) + " >/dev/null")
-    os.system("make gpsd >/dev/null")
+    os.system("scons " + " ".join(options) + " >/dev/null")
     os.rename("gpsd", "gpsd-" + tag + "-build")
 
 # Main sequence

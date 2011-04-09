@@ -1,5 +1,7 @@
 # Copyright 2005 Amaury Jacquot
 # Author: Amaury Jacquot <sxpert@esitcom.org>
+#
+# WARNING: This is out of date! GPSD uses an scons build now.
 
 DESCRIPTION="gpsd is a daemon that listens to a GPS or Loran receiver and
 translates the positional data into a simplified format that can be more easily
