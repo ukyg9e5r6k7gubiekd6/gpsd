@@ -686,8 +686,8 @@ env.Command(target="revision.h", source="gpsd_config.h", action='''
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
-env.Command(target="leapseconds.cache", source="leapsecond.py",
-            action='$PYTHON $SOURCE -f $TARGET')
+env.NoClean(env.Command(target="leapseconds.cache", source="leapsecond.py",
+            action='$PYTHON $SOURCE -f $TARGET'))
 
 # Instantiate some file templates.  We'd like to use the Substfile builtin
 # but it doesn't seem to work in scons 1.20
