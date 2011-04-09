@@ -87,6 +87,7 @@ boolopts = (
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
     # Miscellaneous
+    ("shared",	      True,  "build shared libraries, not static"),
     ("debug",	      False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     ("timing",        True,  "latency timing support"),
@@ -503,8 +504,13 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-compiled_gpslib = env.SharedLibrary(target="gps", source=libgps_sources)
-compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
+if not GetOption("shared"):
+    Library = env.StaticLibrary
+else:
+    Library = env.SharedLibrary
+
+compiled_gpslib = Library(target="gps", source=libgps_sources)
+compiled_gpsdlib = Library(target="gpsd", source=libgpsd_sources)
 
 if qtlibs:
     qtobjects = []
