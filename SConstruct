@@ -368,12 +368,10 @@ for (key,help) in keys:
     elif value in (0, ""):
         confdefs.append("/* #undef %s */\n\n" % key.upper())
     else:
-        if type(value) == type(-1):
-            confdefs.append("#define %d %s\n\n" % (key.upper(), value))
-        elif type(value) == type(""):
-            confdefs.append("#define %s \"%s\"\n\n" % (key.upper(), value))
+        if value.isdigit():
+            confdefs.append("#define %s %s\n\n" % (key.upper(), value))
         else:
-            raise ValueError
+            confdefs.append("#define %s \"%s\"\n\n" % (key.upper(), value))
 
 confdefs.append('''
 /* will not handle pre-Intel Apples that can run big-endian */
