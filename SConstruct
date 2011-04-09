@@ -446,7 +446,6 @@ if os.path.exists("/etc/gentoo-release"):
 if cxx and GetOption('libQgpsmm') and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
-    qt_env['CC'] = 'g++'
     qt_env.MergeFlags(['!pkg-config QtNetwork --cflags'])
     flags = env.ParseFlags('!pkg-config QtNetwork --libs')
     qtlibs = flags['LIBS']
@@ -517,13 +516,23 @@ compiled_gpsdlib = env.SharedLibrary(target="gpsd", source=libgpsd_sources)
 
 if qtlibs:
     qtobjects = []
+    qt_flags = qt_env['CFLAGS']
+    for c_only in ('-Wmissing-prototypes', '-Wstrict-prototypes'):
+        if c_only in qt_flags:
+            qt_flags.remove(c_only)
     # Qt binding object files have to be renamed as they're built to avoid
     # name clashes with the plain non-Qt object files. This prevents the
     # infamous "Two environments with different actions were specified
     # for the same target" error.
     for src in libgps_sources:
-        qtobjects.append(qt_env.Object(src[:-2] + '-qt', src))
-    qtobjects.append(qt_env.Object("libgpsmm", "libgpsmm.cpp"))
+        if src in ("gpsutils.c", "libgps_sock.c"):
+            compile_with = qt_env['CXX']
+            compile_flags = qt_flags
+        else:
+            compile_with = qt_env['CC']
+            compile_flags = qt_env['CFLAGS']
+        qtobjects.append(qt_env.SharedObject(src[:-2] + '-qt', src,
+                                       CC=compile_with, CFLAGS=compile_flags))
     compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm",
                                               source=qtobjects,
                                               LIBS=qtlibs)
