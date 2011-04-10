@@ -313,8 +313,9 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream)
     (void)snprintf(buf, sizeof(buf),
 	    "GET / HTTP/1.1\r\n"
 	    "User-Agent: NTRIP gpsd/%s\r\n"
+	    "Host: %s\r\n"
 	    "Connection: close\r\n"
-	    "\r\n", VERSION);
+	    "\r\n", VERSION, stream->url);
     r = write(dsock, buf, strlen(buf));
     if (r != (ssize_t)strlen(buf)) {
 	gpsd_report(LOG_ERROR, "ntrip stream write error %d on fd %d during probe request %zd\n",
@@ -367,10 +368,11 @@ static int ntrip_stream_get_req(const struct ntrip_stream_t *stream)
     (void)snprintf(buf, sizeof(buf),
 	    "GET /%s HTTP/1.1\r\n"
 	    "User-Agent: NTRIP gpsd/%s\r\n"
+	    "Host: %s\r\n"
 	    "Accept: rtk/rtcm, dgps/rtcm\r\n"
 	    "%s"
 	    "Connection: close\r\n"
-	    "\r\n", stream->mountpoint, VERSION, stream->authStr);
+	    "\r\n", stream->mountpoint, VERSION, stream->url, stream->authStr);
     if (write(dsock, buf, strlen(buf)) != (ssize_t) strlen(buf)) {
 	gpsd_report(LOG_ERROR, "ntrip stream write error %d on fd %d during get request\n", errno,
 		dsock);
