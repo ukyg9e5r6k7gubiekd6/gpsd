@@ -1086,11 +1086,12 @@ Utility('udev-test', '', [
 # for these productions to work.
 
 if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
-    distfiles = commands.getoutput(r"git ls-files |egrep -v '^(www|devtools|packaging|repo)'")
-    distfiles = distfiles.split()
+    distfiles = commands.getoutput(r"git ls-files").split()
     distfiles.remove(".gitignore")
     distfiles += generated_sources
     distfiles += base_manpages.keys() + python_manpages.keys()
+    if "packaging/rpm/gpsd.spec" not in disfiles:
+        distfiles.append("packaging/rpm/gpsd.spec")
 
     dist = env.Command('dist', distfiles, [
         '@tar -czf gpsd-${VERSION}.tar.gz $SOURCES',
