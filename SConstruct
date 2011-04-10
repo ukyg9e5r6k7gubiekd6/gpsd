@@ -508,7 +508,13 @@ else:
     Library = env.SharedLibrary
 
 compiled_gpslib = Library(target="gps", source=libgps_sources)
-compiled_gpsdlib = Library(target="gpsd", source=libgpsd_sources)
+
+gpsdlib_env = env.Clone()
+# Tell the Mac OS X linker to resolve undefined symbols with dynamic lookup.
+if sys.platform == 'darwin':
+    gpsdlib_env.Append(LINKFLAGS='-undefined dynamic_lookup')
+
+compiled_gpsdlib = Library(target="gpsd", source=libgpsd_sources, LINKFLAGS=gpsdlib_env['LINKFLAGS'])
 
 if qtlibs:
     qtobjects = []
