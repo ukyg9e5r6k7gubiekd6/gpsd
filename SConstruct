@@ -1090,7 +1090,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     distfiles.remove(".gitignore")
     distfiles += generated_sources
     distfiles += base_manpages.keys() + python_manpages.keys()
-    if "packaging/rpm/gpsd.spec" not in disfiles:
+    if "packaging/rpm/gpsd.spec" not in distfiles:
         distfiles.append("packaging/rpm/gpsd.spec")
 
     dist = env.Command('dist', distfiles, [
