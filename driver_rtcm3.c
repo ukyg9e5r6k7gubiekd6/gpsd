@@ -46,12 +46,13 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 /* scaling constants for RTCM3 real number types */
 #define GPS_PSEUDORANGE_RESOLUTION	0.2	/* DF011 */
 #define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012,DF042 */
-#define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015 */
+#define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015, DF045, DF50 */
 #define ANTENNA_POSITION_RESOLUTION	0.0001	/* DF025-027 */
 #define GLONASS_PSEUDORANGE_RESOLUTION	0.02	/* DF041 */
 #define ANTENNA_DEGREE_RESOLUTION	25e-6	/* DF062 */
 #define GPS_EPOCH_TIME_RESOLUTION	0.1	/* DF065 */
 #define PHASE_CORRECTION_RESOLUTION	0.5	/* DF069-070 */
+
 
 /* Other magic values */
 #define GPS_INVALID_PSEUDORANGE		0x80000	/* DF012 */
@@ -330,7 +331,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    RANGEDIFF(R1012.L1, 20);
 	    R1012.L1.locktime =	(unsigned char)ugrab(7);
 	    R1012.L1.ambiguity = (unsigned char)ugrab(7);
-	    R1012.L1.CNR = (unsigned char)ugrab(8);
+	    R1012.L1.CNR = (unsigned char)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    R1012.L2.indicator = (bool)ugrab(2);
 	    rangeincr = ugrab(14);
 	    if (rangeincr == GLONASS_INVALID_RANGEINCR)
@@ -339,7 +340,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 		R1012.L2.pseudorange = R1012.L1.pseudorange + (rangeincr * GLONASS_PSEUDORANGE_RESOLUTION);
 	    RANGEDIFF(R1012.L2, 20);
 	    R1012.L2.locktime =	(unsigned char)sgrab(7);
-	    R1012.L2.CNR = (unsigned char)ugrab(8);
+	    R1012.L2.CNR = (unsigned char)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 #undef R1012
 	break;

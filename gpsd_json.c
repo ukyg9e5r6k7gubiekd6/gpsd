@@ -1038,7 +1038,6 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	break;
 
     case 1005:
-    case 1006:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"system\":[",
 		       rtcm->rtcmtypes.rtcm3_1005.station_id);
@@ -1058,10 +1057,31 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       rtcm->rtcmtypes.rtcm3_1005.ecef_x,
 		       rtcm->rtcmtypes.rtcm3_1005.ecef_y,
 		       rtcm->rtcmtypes.rtcm3_1005.ecef_z);
-	if (rtcm->type == 1006)
-	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"h\":%.4f,",
-			   rtcm->rtcmtypes.rtcm3_1006.height);
+	break;
+
+    case 1006:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"station_id\":%u,\"system\":[",
+		       rtcm->rtcmtypes.rtcm3_1006.station_id);
+	if ((rtcm->rtcmtypes.rtcm3_1006.system & 0x04)!=0)
+	    (void)strlcat(buf, "\"GPS\",", buflen - strlen(buf));
+	if ((rtcm->rtcmtypes.rtcm3_1006.system & 0x02)!=0)
+	    (void)strlcat(buf, "\"GLONASS\",", buflen - strlen(buf));
+	if ((rtcm->rtcmtypes.rtcm3_1006.system & 0x01)!=0)
+	    (void)strlcat(buf, "\"GALILEO\",", buflen - strlen(buf));
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "],\"refstation\":%s,\"sro\":%s,"
+		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",
+		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1006.reference_station),
+		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1006.single_receiver),
+		       rtcm->rtcmtypes.rtcm3_1006.ecef_x,
+		       rtcm->rtcmtypes.rtcm3_1006.ecef_y,
+		       rtcm->rtcmtypes.rtcm3_1006.ecef_z);
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"h\":%.4f,",
+		       rtcm->rtcmtypes.rtcm3_1006.height);
 	break;
 
     case 1007:
