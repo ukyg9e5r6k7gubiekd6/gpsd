@@ -82,6 +82,7 @@ patches
 config.log
 .sconsign.dblite
 .sconf_temp
+.scons-option-cache
 stamp-python
 # Documentation
 www/AIVDM.html
