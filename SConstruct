@@ -730,6 +730,7 @@ if manbuilder:
 ## Where it all comes together
 
 build = env.Alias('build', [binaries, python_parts, manpage_targets])
+env.Clean(build, glob.glob("*.o") + glob.glob("*.os"))
 env.Default(*build)
 
 if qtlibs:
