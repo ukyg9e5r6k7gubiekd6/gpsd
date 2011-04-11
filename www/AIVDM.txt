@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.29, Mar 2011
+v1.30, Apr 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -47,8 +47,9 @@ technically difficult and impeded by legal barriers.
 ITU Recommendation M.1371, "Technical Characteristics for a Universal
 Shipborne Automatic Identification System Using Time Division Multiple
 Access" <<ITU1371>>, issued in 2001, describes the bit-level format of
-AIS radio messages. It is proprietary, expensive, and surrounded by
-attack lawyers.  I have not looked at it.
+AIS radio messages. This standard was proprietary and expensive for
+a long time. It became available for free download, apparently at
+some point in 2011, well after most of ths document was assembled.
 
 ITU-R M.1371 is expanded and clarified by "IALA Technical
 Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
@@ -3238,11 +3239,10 @@ Identification System]
   Carriage Requirements]
 
 - [[[ITU1371]]]
-  http://www.itu.int/rec/R-REC-M.1371-2-200603-I/en[ITU-R M.1371:
+  http://www.itu.int/rec/R-REC-M.1371-4-201004-I/en:
   ITU Recommendation on the Technical Characteristics for a Universal
   Shipborne Automatic Identification System (AIS) using Time Division
   Multiple Access in the Maritime Mobile Band]. 
-  Reference included for completeness; I have not looked at it.
 
 - [[[IALA]]]  http://www.ialathree.org/iala/pages/AIS/IALATech1.5.pdf[IALA
   Technical Clarifications on Recommendation ITU-R M.1371-1]
@@ -3382,3 +3382,5 @@ Version 1.28 merges updates from IMO 289, communicated by Kurt Schwehr.
 
 Version 1.29 added much information on WMO special message format in
 types 6 and 8.
+
+Version 1.30 was revised because M.1371-4 is now a free download.
