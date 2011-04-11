@@ -889,7 +889,6 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 {
     /*@-mustfreefresh@*/
     char buf1[JSON_VAL_MAX * 2 + 1];
-    const char *systems[] = { "GPS", "Glonass", "Galileo", "unknown" };
     unsigned short i;
     unsigned int n;
 
@@ -1041,11 +1040,19 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
     case 1005:
     case 1006:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"station_id\":%u,\"system\":\"%s\","
-		       "\"refstation\":\"%s\",\"sro\":\"%s\","
+		       "\"station_id\":%u,\"system\":[",
+		       rtcm->rtcmtypes.rtcm3_1005.station_id);
+	if ((rtcm->rtcmtypes.rtcm3_1005.system & 0x04)!=0)
+	    (void)strlcat(buf, "\"GPS\",", buflen - strlen(buf));
+	if ((rtcm->rtcmtypes.rtcm3_1005.system & 0x02)!=0)
+	    (void)strlcat(buf, "\"GLONASS\",", buflen - strlen(buf));
+	if ((rtcm->rtcmtypes.rtcm3_1005.system & 0x01)!=0)
+	    (void)strlcat(buf, "\"GALILEO\",", buflen - strlen(buf));
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "],\"refstation\":\"%s\",\"sro\":\"%s\","
 		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",
-		       rtcm->rtcmtypes.rtcm3_1005.station_id,
-		       systems[rtcm->rtcmtypes.rtcm3_1005.system],
 		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1005.reference_station),
 		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1005.single_receiver),
 		       rtcm->rtcmtypes.rtcm3_1005.ecef_x,
@@ -1186,10 +1193,10 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1012 rtcm->rtcmtypes.rtcm3_1012.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"channel\":%u,\"prange\":%8.1f,"
+			   "\"L1\":{\"ind\":%u,\"channel\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},"
-			   "\"L2\":{\"ind\":%u,\"prange\":%8.1f,"
+			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},"
 			   "},",

@@ -22,6 +22,8 @@ passing RTCM corrections to a GPS, which normally should just be
 passed an entire correction packet for processing by their internal
 firmware.
 
+Decodes of the following types have been verified: 1005
+
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 
@@ -29,7 +31,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include "gpsd_config.h"
 #ifndef S_SPLINT_S
 #include <sys/types.h>
@@ -47,13 +48,14 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012,DF042 */
 #define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015 */
 #define ANTENNA_POSITION_RESOLUTION	0.0001	/* DF025-027 */
-#define GLONASS_PSEUDORANGE_RESOLUTION	0.2	/* DF041 */
+#define GLONASS_PSEUDORANGE_RESOLUTION	0.02	/* DF041 */
 #define ANTENNA_DEGREE_RESOLUTION	25e-6	/* DF062 */
 #define GPS_EPOCH_TIME_RESOLUTION	0.1	/* DF065 */
 #define PHASE_CORRECTION_RESOLUTION	0.5	/* DF069-070 */
 
 /* Other magic values */
 #define GPS_INVALID_PSEUDORANGE		0x80000	/* DF012 */
+#define GLONASS_INVALID_RANGEINCR	0x2000	/* DF047 */
 
 /* Large case statements make GNU indent very confused */
 /* *INDENT-OFF* */
@@ -111,8 +113,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1001.L1.locktime =	(unsigned char)sgrab(7);
 	}
 #undef R1001
-	assert(bitcount ==
-	       64 + 58 * rtcm->rtcmtypes.rtcm3_1001.header.satcount);
 	break;
 
     case 1002:			/* GPS Extended RTK, L1 Only */
@@ -133,8 +133,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1002.L1.CNR = (ugrab(8)) * CARRIER_NOISE_RATIO_UNITS;
 	}
 #undef R1002
-	assert(bitcount ==
-	       64 + 74 * rtcm->rtcmtypes.rtcm3_1002.header.satcount);
 	break;
 
     case 1003:			/* GPS Basic RTK, L1 & L2 */
@@ -162,8 +160,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1003.L2.locktime =	(unsigned char)sgrab(7);
 	}
 #undef R1003
-	assert(bitcount ==
-	       64 + 101 * rtcm->rtcmtypes.rtcm3_1003.header.satcount);
 	break;
 
     case 1004:			/* GPS Extended RTK, L1 & L2 */
@@ -190,8 +186,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1004.L2.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 #undef R1004
-	assert(bitcount ==
-	       64 + 125 * rtcm->rtcmtypes.rtcm3_1004.header.satcount);
 	break;
 
     case 1005:			/* Stationary Antenna Reference Point, No Height Information */
@@ -218,14 +212,8 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     case 1006:			/* Stationary Antenna Reference Point, with Height Information */
 #define R1006 rtcm->rtcmtypes.rtcm3_1006
 	R1006.station_id = (unsigned short)ugrab(12);
-	ugrab(6);		/* reserved */
-	temp = ugrab(3);
-	if ((temp & 0x04)!=0)
-	    R1006.system = NAVSYSTEM_GPS;
-	if ((temp & 0x02)!=0)
-	    R1006.system = NAVSYSTEM_GLONASS;
-	if ((temp & 0x01)!=0)
-	    R1006.system = NAVSYSTEM_GALILEO;
+	(void)ugrab(6);		/* reserved */
+	R1006.system = ugrab(3);
 	R1006.reference_station = (bool)ugrab(1);
 	R1006.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	R1006.single_receiver = ugrab(1);
@@ -235,7 +223,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	R1006.ecef_z = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	R1006.height = ugrab(16) * ANTENNA_POSITION_RESOLUTION;
 #undef R1006
-	assert(bitcount == 168);
 	break;
 
     case 1007:			/* Antenna Descriptor */
@@ -245,7 +232,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1007.descriptor[n] = '\0';
 	bitcount += 8 * n;
 	rtcm->rtcmtypes.rtcm3_1007.setup_id = ugrab(8);
-	assert(bitcount == (int)(40 + 8 * n));
 	break;
 
     case 1008:			/* Antenna Descriptor & Serial Number */
@@ -259,7 +245,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 6 + n, n2);
 	rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
 	bitcount += 8 * n2;
-	assert(bitcount == (int)(48 + 8 * (n + n2)));
 	break;
 
     case 1009:			/* GLONASS Basic RTK, L1 Only */
@@ -280,8 +265,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1009.L1.locktime =	(unsigned char)sgrab(7);
 	}
 #undef R1009
-	assert(bitcount ==
-	       61 + 64 * rtcm->rtcmtypes.rtcm3_1009.header.satcount);
 	break;
 
     case 1010:			/* GLONASS Extended RTK, L1 Only */
@@ -304,8 +287,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1010.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 #undef R1010
-	assert(bitcount ==
-	       61 + 79 * rtcm->rtcmtypes.rtcm3_1010.header.satcount);
 	break;
 
     case 1011:			/* GLONASS Basic RTK, L1 & L2 */
@@ -335,8 +316,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1011.L2.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 #undef R1011
-	assert(bitcount ==
-	       61 + 107 * rtcm->rtcmtypes.rtcm3_1011.header.satcount);
 	break;
 
     case 1012:			/* GLONASS Extended RTK, L1 & L2 */
@@ -349,20 +328,26 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1012.header.interval = (ushort)ugrab(3);
 #define R1012 rtcm->rtcmtypes.rtcm3_1012.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1012.header.satcount; i++) {
+	    unsigned int rangeincr;
 	    R1012.ident = (ushort)ugrab(6);
 	    R1012.L1.indicator = (bool)ugrab(1);
 	    R1012.L1.channel = (ushort)ugrab(5);
 	    R1012.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    RANGEDIFF(R1012.L1, 20);
-	    R1012.L1.locktime =	(unsigned char)sgrab(7);
-	    R1012.L2.indicator = (bool)ugrab(1);
-	    R1012.L2.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
+	    R1012.L1.locktime =	(unsigned char)ugrab(7);
+	    R1012.L1.ambiguity = (unsigned char)ugrab(7);
+	    R1012.L1.CNR = (unsigned char)ugrab(8);
+	    R1012.L2.indicator = (bool)ugrab(2);
+	    rangeincr = ugrab(14);
+	    if (rangeincr == GLONASS_INVALID_RANGEINCR)
+		R1012.L2.pseudorange = 0;
+	    else
+		R1012.L2.pseudorange = R1012.L1.pseudorange + (rangeincr * GLONASS_PSEUDORANGE_RESOLUTION);
 	    RANGEDIFF(R1012.L2, 20);
 	    R1012.L2.locktime =	(unsigned char)sgrab(7);
+	    R1012.L2.CNR = (unsigned char)ugrab(8);
 	}
 #undef R1012
-	assert(bitcount ==
-	       61 + 130 * rtcm->rtcmtypes.rtcm3_1012.header.satcount);
 	break;
 
     case 1013:			/* System Parameters */
@@ -378,7 +363,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1013.interval = (unsigned short)ugrab(16);
 	}
 #undef R1013
-	assert(bitcount == 70 + 29 * rtcm->rtcmtypes.rtcm3_1013.ncount);
 	break;
 
     case 1014:
@@ -392,7 +376,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1014.d_lon =
 	    (unsigned short)ugrab(21) * ANTENNA_DEGREE_RESOLUTION;
 	rtcm->rtcmtypes.rtcm3_1014.d_alt = (unsigned short)ugrab(23) / 1000;
-	assert(bitcount == 117);
 	break;
 
     case 1015:
