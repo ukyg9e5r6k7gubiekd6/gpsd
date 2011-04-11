@@ -917,7 +917,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1001.header.satcount; i++) {
 #define R1001 rtcm->rtcmtypes.rtcm3_1001.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"ind\":%u,\"prange\":%8.1f,"
+			   "{\"ident\":%u,\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u},",
 			   R1001.ident,
 			   CODE(R1001.L1.indicator),
@@ -944,7 +944,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1002.header.satcount; i++) {
 #define R1002 rtcm->rtcmtypes.rtcm3_1002.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"ind\":%u,\"prange\":%8.1f,"
+			   "{\"ident\":%u,\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},",
 			   R1002.ident,
@@ -975,9 +975,9 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1003 rtcm->rtcmtypes.rtcm3_1003.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"prange\":%8.1f,"
+			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u},"
-			   "\"L2\":{\"ind\":%u,\"prange\":%8.1f,"
+			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u},"
 			   "},",
 			   R1003.ident,
@@ -1010,10 +1010,10 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1004 rtcm->rtcmtypes.rtcm3_1004.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"prange\":%8.1f,"
+			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,"
 			   "\"amb\":%u,\"CNR\":%.2f}"
-			   "\"L2\":{\"ind\":%u,\"prange\":%8.1f,"
+			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,"
 			   "\"amb\":%u,\"CNR\":%.2f}"
 			   "},",
@@ -1118,7 +1118,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1009 rtcm->rtcmtypes.rtcm3_1009.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
-			   "\"prange\":%8.1f,\"delta\":%6.4f,\"lockt\":%u},",
+			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},",
 			   R1009.ident,
 			   CODE(R1009.L1.indicator),
 			   INT(R1009.L1.channel),
@@ -1146,7 +1146,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1010 rtcm->rtcmtypes.rtcm3_1010.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
-			   "\"prange\":%8.1f,\"delta\":%6.4f,\"lockt\":%u,"
+			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u,"
 			   "\"amb\":%u,\"CNR\":%.2f},",
 			   R1010.ident,
 			   CODE(R1010.L1.indicator),
@@ -1178,8 +1178,8 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,"
 			   "\"L1\":{\"ind\":%u,\"channel\":%u,"
-			   "\"prange\":%8.1f,\"delta\":%6.4f,\"lockt\":%u},"
-			   "\"L2:{\"ind\":%u,\"prange\":%8.1f,"
+			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},"
+			   "\"L2:{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u}"
 			   "}",
 			   R1011.ident,
