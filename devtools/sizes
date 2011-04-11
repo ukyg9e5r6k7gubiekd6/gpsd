@@ -6,64 +6,64 @@ import os
 
 # NMEA variants other than vanilla NMEA
 nmea_variants = [
-  "--disable-fv18",
-  "--disable-mtk3301",
-  "--disable-tnt",
-  "--disable-oceanserver",
-  "--disable-gpsclock",
+  "fv18=no",
+  "mtk3301=no",
+  "tnt=no",
+  "oceanserver=no",
+  "gpsclock=no",
 ]
 
 # Binary GPS protocols
 binary_gps = [
-  "--disable-oncore",
-  "--disable-sirf",
-  "--disable-superstar2",
-  "--disable-tsip",
-  "--disable-tripmate",
-  "--disable-earthmate",
-  "--disable-itrax",
-  "--disable-ashtech",
-  "--disable-navcom",
-  "--disable-garmin",
-  "--disable-garmintxt",
-  "--disable-ubx",
-  "--disable-geostar",
-  "--disable-evermore",
+  "oncore=no",
+  "sirf=no",
+  "superstar2=no",
+  "tsip=no",
+  "tripmate=no",
+  "earthmate=no",
+  "itrax=no",
+  "ashtech=no",
+  "navcom=no",
+  "garmin=no",
+  "garmintxt=no",
+  "ubx=no",
+  "geostar=no",
+  "evermore=no",
 ]
 
 # Differential correction and AIVDM
 non_gps = [
-  "--disable-rtcm104v2",
-  "--disable-rtcm104v3",
-  "--disable-ntrip",
-  "--disable-aivdm",
+  "rtcm104v2=no",
+  "rtcm104v3=no",
+  "ntrip=no",
+  "aivdm=no",
   ]
 
 # Time service
-time_service = ["--disable-ntpshm", "--disable-pps"]
+time_service = ["ntpshm=no", "pps=no"]
 
 # Debugging and profiling
 debugging = [
-  "--disable-timing",
-  "--disable-clientdebug",
-  "--disable-oldstyle",
+  "timing=no",
+  "clientdebug=no",
+  "oldstyle=no",
   ]
 
 def sizeit(legend, tag, options):
     print legend + ":"
     print "Options:", " ".join(options)
-    os.system("scons --disable-shared " + " ".join(options) + " >/dev/null")
+    os.system("scons shared=no " + " ".join(options) + " >/dev/null")
     os.rename("gpsd", "gpsd-" + tag + "-build")
 
 # Main sequence
 os.system("uname -a")
 sizeit("Minimalist build, stripped to NMEA only with shm interface",
        "minimalist",
-       ["--disable-socket-export",
-        "--disable-control-socket",
-        "--disable-ipv6",
-        "--enable-fixed-port-speed=9600",
-        "--enable-limited-max-devices=1",
+       ["socket-export=no",
+        "control=no-socket",
+        "ipv6=no",
+        "fixed_port_speed=9600",
+        "limited_max_devices=1",
         ] + nmea_variants+binary_gps+non_gps+time_service+debugging)
 sizeit("Normal build, configure options defaulted", "normal", [])
 os.system("size gpsd-*-build")

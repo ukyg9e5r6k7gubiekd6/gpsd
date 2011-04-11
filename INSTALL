@@ -105,7 +105,7 @@ and with 0660 permissions.
 
 When gpsd drops privileges, its default is to set uid to 'nobody' and
 group to the owning group of the prototype device (the configure
-option --enable-gpsd-user=foo will cause gpsd to change to 'foo'
+option gpsd-user=foo will cause gpsd to change to 'foo'
 instead).
 
 If your system has the Linux hotplug facility installed you can skip
@@ -173,11 +173,11 @@ hardware already supported.
 
 12. Note for small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
---disable-pps.  You'll lose support for updating the clock from PPS pulses.
+pps=no.  You'll lose support for updating the clock from PPS pulses.
 
 13. Note for systems using DBUS: gpsd includes support for shipping fixes
 as DBUS notifications, but it is not compiled in by default.  Configure 
-with the option "--enable-dbus" to get it working.
+with the option "dbus=yes" to get it working.
 
 14. The distribution includes a PHP script that you can use to
 generate a PHP status page for your GPS.  You will need php and php-gd
@@ -199,7 +199,7 @@ need a C++ compiler supported by Qt (tested on GCC 4.4.0/mingw on
 Windows and GCC 4.1.2 on linux).
 
 Specifically for linux: You can specify the installation prefix by
-running "scons --prefix=<installation_root>". Default value is
+running "scons prefix=<installation_root>". Default value is
 "/usr/local".
 
 Please refer to Qt's documentation at

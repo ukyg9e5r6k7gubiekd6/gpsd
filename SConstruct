@@ -36,8 +36,8 @@ from distutils.util import get_platform
 # Build-control options
 #
 
-def internalize(s):
-    return s.replace('-', '_')
+# Start by reading configuration variables from the cache
+opts = Variables('.scons-option-cache')
 
 boolopts = (
     # GPS protocols
@@ -71,9 +71,9 @@ boolopts = (
     ("pps",           True,  "PPS time syncing support"),
     ("pps_on_cts",    False, "PPS pulse on CTS rather than DCD"),
     # Export methods
-    ("socket-export", True,  "data export over sockets"),
-    ("dbus-export",   False,  "enable DBUS export support"),
-    ("shm-export",    True,  "export via shared memory"),
+    ("socket_export", True,  "data export over sockets"),
+    ("dbus_export",   False,  "enable DBUS export support"),
+    ("shm_export",    True,  "export via shared memory"),
     # Communication
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
@@ -91,76 +91,40 @@ boolopts = (
     ("debug",	      False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     ("timing",        True,  "latency timing support"),
-    ("control-socket",True,  "control socket for hotplug notifications")
+    ("control_socket",True,  "control socket for hotplug notifications")
     )
 for (name, default, help) in boolopts:
-    internal_name = internalize(name)
-    if default:
-        AddOption('--disable-'+ name,
-                  dest=internal_name,
-                  default=True,
-                  action="store_false",
-                  help=help)
-    else:
-        AddOption('--enable-'+ name,
-                  dest=internal_name,
-                  default=False,
-                  action="store_true",
-                  help=help)
+    opts.Add(BoolVariable(name, help, default))
 
 nonboolopts = (
-    ("gpsd-user",   "USER",     "privilege revocation user",     ""),
-    ("gpsd-group",  "GROUP",    "privilege revocation group",    ""),
-    
-    ("prefix",      "PREFIX",   "installation directory prefix", "/usr/local/"),
-
-    ("limited-max-clients", "CLIENTS",  "maximum allowed clients",       0),
-    ("limited-max-devices", "DEVICES",  "maximum allowed devices",       0),
-    ("fixed-port-speed",    "SPEED",    "fixed serial port speed",       0),
+    ("gpsd_user",           "privilege revocation user",     ""),
+    ("gpsd_group",          "privilege revocation group",    ""),
+    ("prefix",              "installation directory prefix", "/usr/local/"),
+    ("limited_max_clients", "maximum allowed clients",       "4"),
+    ("limited_max_devices", "maximum allowed devices",       "4"),
+    ("fixed_port_speed",    "fixed serial port speed",       "0"),
     )
-for (name, metavar, help, default) in nonboolopts:
-        internal_name = internalize(name)
-        AddOption('--enable-'+ name,
-                  type='string',
-                  dest=internal_name,
-                  metavar=metavar,
-                  default=default,
-                  nargs=1,
-                  action="store",
-                  help=help)
-
-AddOption("--prefix",
-          type="string",
-          dest="prefix",
-          metavar="PREFIX",
-          default="/usr/local",
-          nargs=1,
-          action="store",
-          help="installation path prefix")
+for (name, help, default) in nonboolopts:
+    opts.Add(name, help, default)
 
 pathopts = (
-    ("sysconfdir",  "SYCONFDIR","system configuration directory","/etc"),
-    ("bindir",      "BINDIR",   "application binaries directory","/bin"),
-    ("libdir",      "LIBDIR",   "dystem libraries",              "/lib"),
-    ("sbindir",     "SBINDIR",  "system binaries directory",     "/sbin"),
-    ("mandir",      "MANDIR",   "manual pages directory",        "/share/man"),
-    ("docdir",      "DOCDIR",   "documents directory",           "/share/doc"),
+    ("sysconfdir",  "system configuration directory",        "/etc"),
+    ("bindir",      "application binaries directory",        "/bin"),
+    ("libdir",      "dystem libraries",                      "/lib"),
+    ("sbindir",     "system binaries directory",             "/sbin"),
+    ("mandir",      "manual pages directory",                "/share/man"),
+    ("docdir",      "documents directory",                   "/share/doc"),
     )
-for (name, metavar, help, default) in pathopts:
-    internal_name = internalize(name)
-    AddOption('--' + name,
-              type='string',
-              metavar=metavar,
-              default=default,
-              nargs=1,
-              action="store",
-              help=help)
+for (name, help, default) in pathopts:
+    opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
+
 
 #
 # Environment creation
 #
 
-env = Environment(tools=["default", "tar"])
+env = Environment(tools=["default", "tar"], options=opts)
+opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
 env['VERSION'] = gpsd_version
@@ -207,7 +171,7 @@ if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
 # Should we build with profiling?
-if GetOption('profiling'):
+if env['profiling']:
     env.Append(CCFLAGS=['-pg'])
     env.Append(LDFLAGS=['-pg'])
 
@@ -215,7 +179,7 @@ if GetOption('profiling'):
 env.SourceCode('.', None)
 
 # Should we build with debug symbols?
-if GetOption('debug'):
+if env['debug']:
     env.Append(CCFLAGS=['-g'])
     env.Append(CCFLAGS=['-O0'])
 else:
@@ -223,7 +187,19 @@ else:
 
 ## Build help
 
-if GetOption("help"):
+Help("""Arguments may be a mixture of switches and targets in any order.
+Switches apply to the entire build regardless of where they are in the order.
+Important switches include:
+
+    prefix=/usr     probably what you want for production tools
+
+Options are cached in a file named .scons-option-cache and persist to later
+invocations.  The file is editable.  Delete it to start fresh.  Current option
+values can be listed with 'scons -h'.
+
+""" + opts.GenerateHelpText(env, sort=cmp))
+
+if "help" in ARGLIST:
     Return()
 
 ## Configuration
@@ -246,7 +222,7 @@ docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
 docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
 
 def CheckXsltproc(context):
-    context.Message( 'Checking that xsltproc can make man pages... ')
+    context.Message('Checking that xsltproc can make man pages... ')
     with open("xmltest.xml", "w") as ofp:
         ofp.write('''
        <refentry id="foo.1">
@@ -307,7 +283,7 @@ else:
     confdefs.append("/* #undef HAVE_LIBRT */\n\n")
     rtlibs = []
 
-dbus_export_value = GetOption(internalize('dbus-export'))
+dbus_export_value = env['dbus_export']
 if type(dbus_export_value) == type(True) and dbus_export_value and config.CheckPKG('dbus-1') and config.CheckPKG('dbus-glib-1'):
     confdefs.append("#define HAVE_DBUS 1\n\n")
     env.MergeFlags(['!pkg-config --cflags dbus-glib-1 dbus-1'])
@@ -349,9 +325,7 @@ optionrequires = {
 keys = map(lambda x: (x[0],x[2]), boolopts) + map(lambda x: (x[0],x[2]), nonboolopts) + map(lambda x: (x[0],x[2]), pathopts)
 keys.sort()
 for (key,help) in keys:
-    key = internalize(key)
-    value = GetOption(key)
-
+    value = env[key]
     if value and key in optionrequires:
         for required in optionrequires[key]:
             if not config.CheckLib(required):
@@ -434,7 +408,7 @@ if os.path.exists("/etc/gentoo-release"):
     print "Adjust your PYTHONPATH to see library directories under /usr/local/lib"
 
 # Should we build the Qt binding?
-if cxx and GetOption('libQgpsmm') and qt_network:
+if cxx and env['libQgpsmm'] and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
     qt_env.MergeFlags(['!pkg-config QtNetwork --cflags'])
@@ -464,7 +438,7 @@ libgps_sources = [
 	"strl.c",
 ]
 
-if cxx and GetOption('libgpsmm'):
+if cxx and env['libgpsmm']:
     libgps_sources.append("libgpsmm.cpp")
 
 libgpsd_sources = [
@@ -502,7 +476,7 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-if not GetOption("shared"):
+if not env["shared"]:
     Library = env.StaticLibrary
 else:
     Library = env.SharedLibrary
@@ -512,7 +486,7 @@ compiled_gpslib = Library(target="gps", source=libgps_sources)
 gpsdlib_env = env.Clone()
 # Tell the Mac OS X linker to resolve undefined symbols 
 # with dynamic lookup when building shared library.
-if GetOption("shared"):
+if env["shared"]:
     if sys.platform == 'darwin':
         gpsdlib_env.Append(LINKFLAGS='-undefined dynamic_lookup')
 
@@ -592,7 +566,7 @@ test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], LIBS=gpslibs)
 test_libgps = env.Program('test_libgps', ['test_libgps.c'], LIBS=gpslibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json, test_libgps]
-if cxx and GetOption("libgpsmm"):
+if cxx and env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
 # Python programs
@@ -706,7 +680,7 @@ env.NoClean(env.Command(target="leapseconds.cache", source="leapsecond.py",
 def substituter(target, source, env):
     substmap = (
         ('@VERSION@', gpsd_version),
-        ('@prefix@',  GetOption('prefix')),
+        ('@prefix@',  env['prefix']),
         ('@PYTHON@',  "$PYTHON"),
         )
     with open(str(source[0])) as sfp:
@@ -767,8 +741,8 @@ if qtlibs:
 # Not here because too distro-specific: udev rules, desktop files, init scripts
 # Possible bug: scons install -n doesn't show ldconfig postaction
 
-for (name, metavar, help, default) in pathopts:
-    exec name + " = DESTDIR + GetOption('prefix') + GetOption('%s')" % name
+for (name, help, default) in pathopts:
+    exec name + " = DESTDIR + env['prefix'] + env['%s']" % name
 
 binaryinstall = []
 binaryinstall.append(env.Install(sbindir, gpsd))
@@ -786,7 +760,7 @@ binaryinstall.append(env.InstallAs(source=compiled_gpsdlib,
 
 if have_chrpath:
     env.AddPostAction(binaryinstall, 'chrpath -d $TARGET')
-if not GetOption('debug') or GetOption('profiling'):
+if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, 'strip $TARGET')
 
 maninstall = []
