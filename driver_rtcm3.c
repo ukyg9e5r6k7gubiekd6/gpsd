@@ -22,7 +22,7 @@ passing RTCM corrections to a GPS, which normally should just be
 passed an entire correction packet for processing by their internal
 firmware.
 
-Decodes of the following types have been verified: 1005
+Decodes of the following types have been verified: 1029,
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
@@ -192,13 +192,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 #define R1005 rtcm->rtcmtypes.rtcm3_1005
 	R1005.station_id = (unsigned short)ugrab(12);
 	ugrab(6);		/* reserved */
-	temp = ugrab(3);
-	if ((temp & 0x04)!=0)
-	    R1005.system = NAVSYSTEM_GPS;
-	if ((temp & 0x02)!=0)
-	    R1005.system = NAVSYSTEM_GLONASS;
-	if ((temp & 0x01)!=0)
-	    R1005.system = NAVSYSTEM_GALILEO;
+	R1005.system = ugrab(3);
 	R1005.reference_station = (bool)ugrab(1);
 	R1005.ecef_x = sgrab(38) * ANTENNA_POSITION_RESOLUTION;
 	R1005.single_receiver = ugrab(1);

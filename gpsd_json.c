@@ -1051,7 +1051,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "],\"refstation\":\"%s\",\"sro\":\"%s\","
+		       "],\"refstation\":%s,\"sro\":%s,"
 		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",
 		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1005.reference_station),
 		       JSON_BOOL(rtcm->rtcmtypes.rtcm3_1005.single_receiver),
