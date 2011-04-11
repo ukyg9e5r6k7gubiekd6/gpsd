@@ -73,7 +73,7 @@ int64_t sbits(char buf[], unsigned int start, unsigned int width)
     (void)fprintf(stderr, "sbits(%d, %d) extracts %llx\n", start, width, fld);
 #endif /* __UNUSED_DEBUG__ */
     /*@ +relaxtypes */
-    if (fld & (1 << (width - 1))) {
+    if (fld & (1LL << (width - 1))) {
 #ifdef __UNUSED_DEBUG__
 	(void)fprintf(stderr, "%llx is signed\n", fld);
 #endif /* __UNUSED_DEBUG__ */
