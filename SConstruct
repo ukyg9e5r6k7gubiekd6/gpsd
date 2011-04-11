@@ -342,7 +342,7 @@ else:
 
 # Map options to libraries required to support them that might be absent.
 optionrequires = {
-    "bluez": ["libbluez"],
+    "bluez": ["libbluetooth"],
     "dbus_export" : ["libdbus-1", "libdbus-glib-1"],
     }
 
