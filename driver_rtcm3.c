@@ -22,7 +22,7 @@ passing RTCM corrections to a GPS, which normally should just be
 passed an entire correction packet for processing by their internal
 firmware.
 
-Decodes of the following types have been verified: 1005, 1029
+Decodes of the following types have been verified: 1004, 1005, 1029
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
@@ -44,7 +44,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #ifdef RTCM104V3_ENABLE
 
 /* scaling constants for RTCM3 real number types */
-#define GPS_PSEUDORANGE_RESOLUTION	0.2	/* DF011 */
+#define GPS_PSEUDORANGE_RESOLUTION	0.02	/* DF011 */
 #define PSEUDORANGE_DIFF_RESOLUTION	0.0005	/* DF012,DF042 */
 #define CARRIER_NOISE_RATIO_UNITS	0.25	/* DF015, DF045, DF50 */
 #define ANTENNA_POSITION_RESOLUTION	0.0001	/* DF025-027 */
@@ -183,7 +183,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    GPS_PSEUDORANGE(R1004.L2, 14);
 	    RANGEDIFF(R1004.L2, 20);
 	    R1004.L2.locktime =	(unsigned char)sgrab(7);
-	    R1004.L2.ambiguity = (unsigned char)ugrab(8);
 	    R1004.L2.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	}
 #undef R1004
