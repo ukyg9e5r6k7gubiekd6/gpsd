@@ -513,8 +513,8 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[]):
                           '-Wl,--out-implib,${TARGET.base}.a' ]
     elif platform == 'darwin':
         shlib_suffix = '.' + libversion + shlib_suffix
-        shlink_flags += [ '-dynamiclib',
-                          '-current-version %s' % libversion ]
+        shlink_flags += [ '-current_version', '%s' % libversion,
+                          '-undefined', 'dynamic_lookup' ]
 
     lib = env.SharedLibrary(libname,lib_objs,
                             SHLIBSUFFIX=shlib_suffix,
