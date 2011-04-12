@@ -29,8 +29,9 @@ libgps_age   = 0
 
 EnsureSConsVersion(1,2,0)
 
-import copy, os, sys, commands, glob
+import copy, os, sys, commands, glob, re
 from distutils.util import get_platform
+import SCons
 
 #
 # Build-control options
@@ -476,22 +477,120 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
+# Cope wth scons's failure to set SONAME in its builtins.
+# Code inspired by Richard Levitte. See
+# http://markmail.org/message/spttz3o4xrsftofr
+
+def VersionedSharedLibrary(env, libname, libversion, lib_objs=[]):
+    platform = env.subst('$PLATFORM')
+    shlib_pre_action = None
+    shlib_suffix = env.subst('$SHLIBSUFFIX')
+    shlib_post_action = None
+    shlink_flags = SCons.Util.CLVar(env.subst('$SHLINKFLAGS'))
+
+    if platform == 'posix':
+        shlib_post_action = ['rm -f $TARGET','ln -s ${SOURCE.file} $TARGET']
+        shlib_post_action_output_re = [
+            '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
+            shlib_suffix ]
+        shlib_suffix += '.' + libversion
+        shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=${TARGET}' ]
+    elif platform == 'aix':
+        shlib_pre_action = [
+            "nm -Pg $SOURCES &gt; ${TARGET}.tmp1",
+            "grep ' [BDT] ' &lt; ${TARGET}.tmp1 &gt; ${TARGET}.tmp2",
+            "cut -f1 -d' ' &lt; ${TARGET}.tmp2 &gt; ${TARGET}",
+            "rm -f ${TARGET}.tmp[12]" ]
+        shlib_pre_action_output_re = [ '$', '.exp' ]
+        shlib_post_action = [ 'rm -f $TARGET', 'ln -s $SOURCE $TARGET' ]
+        shlib_post_action_output_re = [
+            '%s\\.[0-9\\.]*' % re.escape(shlib_suffix),
+            shlib_suffix ]
+        shlib_suffix += '.' + libversion
+        shlink_flags += ['-G', '-bE:${TARGET}.exp', '-bM:SRE']
+    elif platform == 'cygwin':
+        shlink_flags += [ '-Wl,-Bsymbolic',
+                          '-Wl,--out-implib,${TARGET.base}.a' ]
+    elif platform == 'darwin':
+        shlib_suffix = '.' + libversion + shlib_suffix
+        shlink_flags += [ '-dynamiclib',
+                          '-current-version %s' % libversion ]
+
+    lib = env.SharedLibrary(libname,lib_objs,
+                            SHLIBSUFFIX=shlib_suffix,
+                            SHLINKFLAGS=shlink_flags)
+
+    if shlib_pre_action:
+        shlib_pre_action_output = re.sub(shlib_pre_action_output_re[0],
+                                         shlib_pre_action_output_re[1],
+                                         str(lib[0]))
+        env.Command(shlib_pre_action_output, [ lib_objs ],
+                     shlib_pre_action)
+        env.Depends(lib, shlib_pre_action_output)
+    if shlib_post_action:
+        shlib_post_action_output = re.sub(shlib_post_action_output_re[0],
+                                          shlib_post_action_output_re[1],
+                                          str(lib[0]))
+        env.Command(shlib_post_action_output, lib, shlib_post_action)
+    return lib
+
+def InstallVersionedSharedLibrary(env, destination, lib):
+    platform = env.subst('$PLATFORM')
+    shlib_suffix = env.subst('$SHLIBSUFFIX')
+    shlib_install_pre_action = None
+    shlib_install_post_action = None
+
+    if platform == 'posix':
+	shlib_post_action = [ 'rm -f $TARGET',
+			      'ln -s ${SOURCE.file} $TARGET' ]
+	shlib_post_action_output_re = [
+	    '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
+	    shlib_suffix ]
+	shlib_install_post_action = shlib_post_action
+	shlib_install_post_action_output_re = shlib_post_action_output_re
+
+    ilib = env.Install('$LIBDIR',lib)
+
+    if shlib_install_pre_action:
+	shlib_install_pre_action_output = re.sub(shlib_install_pre_action_output_re[0],
+                                                 shlib_install_pre_action_output_re[1],
+                                                 str(ilib[0]))
+	env.Command(shlib_install_pre_action_output, ilib,
+		     shlib_install_pre_action)
+	env.Depends(shlib_install_pre_action_output, ilib)
+    if shlib_install_post_action:
+	shlib_install_post_action_output = re.sub(shlib_install_post_action_output_re[0],
+						  shlib_install_post_action_output_re[1],
+						  str(ilib[0]))
+	env.Command(shlib_install_post_action_output, ilib,
+                    shlib_install_post_action)
+
 if not env["shared"]:
-    Library = env.StaticLibrary
+    Library = lambda env, target, sources, version: \
+              env.StaticLibrary(target, sources)
+    LibraryInstall = lambda env, libdir, sources: env.Install(libdir, sources)
 else:
-    Library = env.SharedLibrary
+    Library = lambda env, target, sources, version: \
+              VersionedSharedLibrary(env=env,
+                                     libname=target,
+                                     libversion=version,
+                                     lib_objs=sources)
+    LibraryInstall = lambda env, libdir, sources: \
+                     InstallVersionedSharedLibrary(env, libdir, sources)
 
-libversion = ".%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
-compiled_gpslib = Library(target="gps"+libversion, source=libgps_sources)
+# Klugery to handle sonames ends
 
-gpsdlib_env = env.Clone()
-# Tell the Mac OS X linker to resolve undefined symbols 
-# with dynamic lookup when building shared library.
-if env["shared"]:
-    if sys.platform == 'darwin':
-        gpsdlib_env.Append(LINKFLAGS='-undefined dynamic_lookup')
+libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 
-compiled_gpsdlib = Library(target="gpsd"+libversion, source=libgpsd_sources, LINKFLAGS=gpsdlib_env['LINKFLAGS'])
+compiled_gpslib = Library(env=env,
+                          target="gps",
+                          sources=libgps_sources,
+                          version=libversion)
+
+compiled_gpsdlib = Library(env=env,
+                           target="gpsd",
+                           sources=libgpsd_sources,
+                           version=libversion)
 
 if qtlibs:
     qtobjects = []
@@ -555,7 +654,6 @@ if ncurseslibs:
     binaries += [cgps, gpsmon]
 
 # Test programs
-# TODO: conditionally add test_gpsmm and test_qgpsmm
 test_float = env.Program('test_float', ['test_float.c'])
 test_geoid = env.Program('test_geoid', ['test_geoid.c'], LIBS=gpslibs)
 test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
