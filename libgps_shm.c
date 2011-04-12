@@ -43,7 +43,11 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 	/* attach failed for sume unknown reason */
 	return -2;
     }
+#ifndef USE_QT
     gpsdata->gps_fd = -1;
+#else
+    gpsdata->gps_fd = (void *)(intptr_t)-1;
+#endif /* USE_QT */
     return 0;
 }
 
