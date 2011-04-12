@@ -510,7 +510,7 @@ if qtlibs:
         else:
             compile_with = qt_env['CC']
             compile_flags = qt_env['CFLAGS']
-        qtobjects.append(qt_env.SharedObject(src[:-2] + '-qt', src,
+        qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
                                        CC=compile_with, CFLAGS=compile_flags))
     compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm"+libversion,
                                               source=qtobjects,
