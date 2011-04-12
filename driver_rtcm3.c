@@ -22,7 +22,8 @@ passing RTCM corrections to a GPS, which normally should just be
 passed an entire correction packet for processing by their internal
 firmware.
 
-Decodes of the following types have been verified: 1004, 1005, 1012, 1013, 1029.
+Decodes of the following types have been verified: 1004, 1005, 1008, 
+1012, 1013, 1029.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
@@ -231,12 +232,12 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     case 1008:			/* Antenna Descriptor & Serial Number */
 	rtcm->rtcmtypes.rtcm3_1008.station_id = (unsigned short)ugrab(12);
 	n = (unsigned long)ugrab(8);
-	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.descriptor, buf + 4, n);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.descriptor, buf + 7, n);
 	rtcm->rtcmtypes.rtcm3_1008.descriptor[n] = '\0';
 	bitcount += 8 * n;
 	rtcm->rtcmtypes.rtcm3_1008.setup_id = ugrab(8);
 	n2 = (unsigned long)ugrab(8);
-	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 6 + n, n2);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 9 + n, n2);
 	rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
 	bitcount += 8 * n2;
 	break;
