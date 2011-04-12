@@ -88,8 +88,8 @@ boolopts = (
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
     # Miscellaneous
-    ("shared",	      True,  "build shared libraries, not static"),
-    ("debug",	      False, "include debug information in build"),
+    ("shared",        True,  "build shared libraries, not static"),
+    ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications")
@@ -227,16 +227,16 @@ def CheckXsltproc(context):
     with open("xmltest.xml", "w") as ofp:
         ofp.write('''
        <refentry id="foo.1">
-	  <refmeta>
-	    <refentrytitle>foo</refentrytitle>
-	    <manvolnum>1</manvolnum>
-	    <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
-	  </refmeta>
-	  <refnamediv id='name'>
-	    <refname>foo</refname>
-	    <refpurpose>check man page generation from docbook source</refpurpose>
-	  </refnamediv>
-	</refentry>
+      <refmeta>
+        <refentrytitle>foo</refentrytitle>
+        <manvolnum>1</manvolnum>
+        <refmiscinfo class='date'>9 Aug 2004</refmiscinfo>
+      </refmeta>
+      <refnamediv id='name'>
+        <refname>foo</refname>
+        <refpurpose>check man page generation from docbook source</refpurpose>
+      </refnamediv>
+    </refentry>
 ''')
     probe = "xsltproc --nonet --noout '%s' xmltest.xml" % (docbook_man_uri,)
     ret = context.TryAction(probe)[0]
@@ -421,60 +421,60 @@ else:
 ## Two shared libraries provide most of the code for the C programs
 
 libgps_sources = [
-	"ais_json.c",
-	"daemon.c",
-	"gpsutils.c",
-	"geoid.c",
-	"gpsdclient.c",
-	"gps_maskdump.c",
-	"hex.c",
-	"json.c",
-	"libgps_core.c",
-	"libgps_json.c",
-	"libgps_shm.c",
-        "libgps_sock.c",
-	"netlib.c",
-	"rtcm2_json.c",
-	"shared_json.c",
-	"strl.c",
+    "ais_json.c",
+    "daemon.c",
+    "gpsutils.c",
+    "geoid.c",
+    "gpsdclient.c",
+    "gps_maskdump.c",
+    "hex.c",
+    "json.c",
+    "libgps_core.c",
+    "libgps_json.c",
+    "libgps_shm.c",
+    "libgps_sock.c",
+    "netlib.c",
+    "rtcm2_json.c",
+    "shared_json.c",
+    "strl.c",
 ]
 
 if cxx and env['libgpsmm']:
     libgps_sources.append("libgpsmm.cpp")
 
 libgpsd_sources = [
-	"bits.c",
-	"bsd-base64.c",
-	"crc24q.c",
-	"gpsd_json.c",
-	"isgps.c",
-	"libgpsd_core.c",
-	"net_dgpsip.c",
-	"net_gnss_dispatch.c",
-	"net_ntrip.c",
-	"packet.c",
-	"pseudonmea.c",
-	"serial.c",
-	"srecord.c",
-	"subframe.c",
-	"timebase.c",
-	"drivers.c",
-	"driver_aivdm.c",
-	"driver_evermore.c",
-	"driver_garmin.c",
-	"driver_garmin_txt.c",
-	"driver_geostar.c",
-	"driver_italk.c",
-	"driver_navcom.c",
-	"driver_nmea.c",
-	"driver_oncore.c",
-	"driver_rtcm2.c",
-	"driver_rtcm3.c",
-	"driver_sirf.c",
-	"driver_superstar2.c",
-	"driver_tsip.c",
-	"driver_ubx.c",
-	"driver_zodiac.c",
+    "bits.c",
+    "bsd-base64.c",
+    "crc24q.c",
+    "gpsd_json.c",
+    "isgps.c",
+    "libgpsd_core.c",
+    "net_dgpsip.c",
+    "net_gnss_dispatch.c",
+    "net_ntrip.c",
+    "packet.c",
+    "pseudonmea.c",
+    "serial.c",
+    "srecord.c",
+    "subframe.c",
+    "timebase.c",
+    "drivers.c",
+    "driver_aivdm.c",
+    "driver_evermore.c",
+    "driver_garmin.c",
+    "driver_garmin_txt.c",
+    "driver_geostar.c",
+    "driver_italk.c",
+    "driver_navcom.c",
+    "driver_nmea.c",
+    "driver_oncore.c",
+    "driver_rtcm2.c",
+    "driver_rtcm3.c",
+    "driver_sirf.c",
+    "driver_superstar2.c",
+    "driver_tsip.c",
+    "driver_ubx.c",
+    "driver_zodiac.c",
 ]
 
 # Cope with scons's failure to set SONAME in its builtins.
@@ -541,28 +541,28 @@ def InstallVersionedSharedLibrary(env, destination, lib):
     shlib_install_post_action = None
 
     if platform == 'posix':
-	shlib_post_action = [ 'rm -f $TARGET',
-			      'ln -s ${SOURCE.file} $TARGET' ]
-	shlib_post_action_output_re = [
-	    '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
-	    shlib_suffix ]
-	shlib_install_post_action = shlib_post_action
-	shlib_install_post_action_output_re = shlib_post_action_output_re
+        shlib_post_action = [ 'rm -f $TARGET',
+                              'ln -s ${SOURCE.file} $TARGET' ]
+        shlib_post_action_output_re = ['%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
+                                       shlib_suffix ]
+        shlib_install_post_action = shlib_post_action
+        shlib_install_post_action_output_re = shlib_post_action_output_re
 
     ilib = env.Install(destination, lib)
 
     if shlib_install_pre_action:
-	shlib_install_pre_action_output = re.sub(shlib_install_pre_action_output_re[0],
+        shlib_install_pre_action_output = re.sub(shlib_install_pre_action_output_re[0],
                                                  shlib_install_pre_action_output_re[1],
                                                  str(ilib[0]))
-	env.Command(shlib_install_pre_action_output, ilib,
-		     shlib_install_pre_action)
-	env.Depends(shlib_install_pre_action_output, ilib)
+        env.Command(shlib_install_pre_action_output, ilib,
+                    shlib_install_pre_action)
+        env.Depends(shlib_install_pre_action_output, ilib)
+
     if shlib_install_post_action:
-	shlib_install_post_action_output = re.sub(shlib_install_post_action_output_re[0],
-						  shlib_install_post_action_output_re[1],
-						  str(ilib[0]))
-	env.Command(shlib_install_post_action_output, ilib,
+        shlib_install_post_action_output = re.sub(shlib_install_post_action_output_re[0],
+                                                  shlib_install_post_action_output_re[1],
+                                                  str(ilib[0]))
+        env.Command(shlib_install_post_action_output, ilib,
                     shlib_install_post_action)
     return ilib
 
@@ -734,30 +734,30 @@ env.Clean(python_parts, ["stamp-python", "stamp-python.tmp"])
 #
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
-	rm -f $TARGET &&\
-	sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\1\",/' <$SOURCE >$TARGET &&\
-	chmod a-w $TARGET""")
+    rm -f $TARGET &&\
+    sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\1\",/' <$SOURCE >$TARGET &&\
+    chmod a-w $TARGET""")
 
 env.Command(target="timebase.h", source="leapseconds.cache",
             action='$PYTHON leapsecond.py -h $SOURCE >$TARGET')
 
 env.Command(target="gpsd.h", source=["gpsd.h-head", "gpsd_config.h", "gpsd.h-tail"], action="""\
-	rm -f $TARGET &&\
-	echo \"/* This file is generated.  Do not hand-hack it! */\" >$TARGET &&\
-	cat $TARGET-head >>$TARGET &&\
-	cat gpsd_config.h >>$TARGET &&\
-	cat $TARGET-tail >>$TARGET &&\
-	chmod a-w $TARGET""")
+    rm -f $TARGET &&\
+    echo \"/* This file is generated.  Do not hand-hack it! */\" >$TARGET &&\
+    cat $TARGET-head >>$TARGET &&\
+    cat gpsd_config.h >>$TARGET &&\
+    cat $TARGET-tail >>$TARGET &&\
+    chmod a-w $TARGET""")
 
 env.Command(target="gps_maskdump.c", source=["maskaudit.py", "gps.h", "gpsd.h"], action='''
-	rm -f $TARGET &&\
+    rm -f $TARGET &&\
         $PYTHON $SOURCE -c $SRCDIR >$TARGET &&\
         chmod a-w $TARGET''')
 
 env.Command(target="ais_json.i", source="jsongen.py", action='''\
-	rm -f $TARGET &&\
-	$PYTHON $SOURCE --ais --target=parser >$TARGET &&\
-	chmod a-w $TARGET''')
+    rm -f $TARGET &&\
+    $PYTHON $SOURCE --ais --target=parser >$TARGET &&\
+    chmod a-w $TARGET''')
 
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
                      'gps_maskdump.c', 'ais_json.c']
@@ -765,9 +765,9 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
 # Under autotools this depended on Makefile. We need it to depend
 # on the state of the build-system variables.
 env.Command(target="revision.h", source="gpsd_config.h", action='''
-	rm -f $TARGET &&\
-	$PYTHON -c \'from datetime import datetime; print "#define REVISION \\"%s\\"\\n" % (datetime.now().isoformat()[:-4])\' >$TARGET &&\
-	chmod a-w revision.h''')
+    rm -f $TARGET &&\
+    $PYTHON -c \'from datetime import datetime; print "#define REVISION \\"%s\\"\\n" % (datetime.now().isoformat()[:-4])\' >$TARGET &&\
+    chmod a-w revision.h''')
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
@@ -927,12 +927,12 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
 
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),
-	"for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
+    "for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
 
 # Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
 Utility("deheader", generated_sources, [
-	'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
+    'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
         ])
 
 env.Alias('checkall', ['cppcheck','xmllint','splint'])
@@ -960,56 +960,56 @@ gps_regress = Utility("gps-regress", [gpsd, python_parts],
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
 Utility("raw-regress", [gpsd, python_parts],
-	'$SRCDIR/regress-driver test/daemon/*.log')
+    '$SRCDIR/regress-driver test/daemon/*.log')
 
 # Build the regression tests for the daemon.
 Utility('gps-makeregress', [gpsd, python_parts],
-	'$SRCDIR/regress-driver -b test/daemon/*.log')
+    '$SRCDIR/regress-driver -b test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
-#	regress-driver -b test/daemon/foo.log
+#    regress-driver -b test/daemon/foo.log
 
 # Regression-test the RTCM decoder.
 rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
-	'@echo "Testing RTCM decoding..."',
-	'for f in $SRCDIR/test/*.rtcm2; do '
-		'echo "Testing $${f}..."; '
-		'$SRCDIR/gpsdecode -j <$${f} >/tmp/test-$$$$.chk; '
-		'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
-	'done;',
-	'@echo "Testing idempotency of JSON dump/decode for RTCM2"',
-	'$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; '
-		'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - /tmp/test-$$$$.chk; '
-		'rm /tmp/test-$$$$.chk',
+    '@echo "Testing RTCM decoding..."',
+    'for f in $SRCDIR/test/*.rtcm2; do '
+        'echo "Testing $${f}..."; '
+        '$SRCDIR/gpsdecode -j <$${f} >/tmp/test-$$$$.chk; '
+        'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
+    'done;',
+    '@echo "Testing idempotency of JSON dump/decode for RTCM2"',
+    '$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; '
+        'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - /tmp/test-$$$$.chk; '
+        'rm /tmp/test-$$$$.chk',
         ])
 
 # Rebuild the RTCM regression tests.
 Utility('rtcm-makeregress', [gpsdecode], [
-	'for f in $SRCDIR/test/*.rtcm2; do '
-		'$SRCDIR/gpsdecode -j < ${f} > ${f}.chk; '
-	'done'
+    'for f in $SRCDIR/test/*.rtcm2; do '
+        '$SRCDIR/gpsdecode -j < ${f} > ${f}.chk; '
+    'done'
         ])
 
 # Regression-test the AIVDM decoder.
 aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
-	'@echo "Testing AIVDM decoding..."',
-	'for f in $SRCDIR/test/*.aivdm; do '
-		'echo "Testing $${f}..."; '
-		'$SRCDIR/gpsdecode -u -c <$${f} >/tmp/test-$$$$.chk; '
-		'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
-	'done;',
-	'@echo "Testing idempotency of JSON dump/decode for AIS"',
-	'$SRCDIR/gpsdecode -e -j <$SRCDIR/test/synthetic-ais.json >/tmp/test-$$$$.chk; '
-		'grep -v "^#" $SRCDIR/test/synthetic-ais.json | diff -ub - /tmp/test-$$$$.chk; '
-		'rm /tmp/test-$$$$.chk',
+    '@echo "Testing AIVDM decoding..."',
+    'for f in $SRCDIR/test/*.aivdm; do '
+        'echo "Testing $${f}..."; '
+        '$SRCDIR/gpsdecode -u -c <$${f} >/tmp/test-$$$$.chk; '
+        'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
+    'done;',
+    '@echo "Testing idempotency of JSON dump/decode for AIS"',
+    '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/synthetic-ais.json >/tmp/test-$$$$.chk; '
+        'grep -v "^#" $SRCDIR/test/synthetic-ais.json | diff -ub - /tmp/test-$$$$.chk; '
+        'rm /tmp/test-$$$$.chk',
         ])
 
 # Rebuild the AIVDM regression tests.
 Utility('aivdm-makeregress', [gpsdecode], [
-	'for f in $SRCDIR/test/*.aivdm; do '
-		'$SRCDIR/gpsdecode -u -c <$${f} > $${f}.chk; '
-	'done',
+    'for f in $SRCDIR/test/*.aivdm; do '
+        '$SRCDIR/gpsdecode -u -c <$${f} > $${f}.chk; '
+    'done',
         ])
 
 # Regression-test the packet getter.
@@ -1130,8 +1130,8 @@ env.Alias('pydoc', "www/pydoc/index.html")
 # So we define our own epydoc instead of using /usr/bin/epydoc
 EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
 env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glob("gps/*.py"), [
-	'mkdir -p www/pydoc',
-	EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
+    'mkdir -p www/pydoc',
+    EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
         ])
 
 # Productions for setting up and performing udev tests.
@@ -1142,18 +1142,18 @@ env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glo
 # is plugged in.
 
 Utility('udev-install', '', [
-	'cp $SRCDIR/gpsd.rules /lib/udev/rules.d/25-gpsd.rules',
-	'cp $SRCDIR/gpsd.hotplug $SRCDIR/gpsd.hotplug.wrapper /lib/udev/',
-	'chmod a+x /lib/udev/gpsd.hotplug /lib/udev/gpsd.hotplug.wrapper',
+    'cp $SRCDIR/gpsd.rules /lib/udev/rules.d/25-gpsd.rules',
+    'cp $SRCDIR/gpsd.hotplug $SRCDIR/gpsd.hotplug.wrapper /lib/udev/',
+    'chmod a+x /lib/udev/gpsd.hotplug /lib/udev/gpsd.hotplug.wrapper',
         ])
 
 Utility('udev-uninstall', '', [
-	'rm -f /lib/udev/{gpsd.hotplug,gpsd.hotplug.wrapper}',
-	'rm -f /lib/udev/rules.d/25-gpsd.rules',
+    'rm -f /lib/udev/{gpsd.hotplug,gpsd.hotplug.wrapper}',
+    'rm -f /lib/udev/rules.d/25-gpsd.rules',
         ])
 
 Utility('udev-test', '', [
-	'$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5',
+    '$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5',
         ])
 
 # Release machinery begins here
