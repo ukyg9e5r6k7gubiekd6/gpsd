@@ -55,7 +55,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 
 /* Other magic values */
-#define GPS_INVALID_PSEUDORANGE		0x80000	/* DF012 */
+#define GPS_INVALID_PSEUDORANGE		0x80000	/* DF012, DF018 */
 #define GLONASS_INVALID_RANGEINCR	0x2000	/* DF047 */
 
 /* Large case statements make GNU indent very confused */
@@ -180,7 +180,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    R1004.L1.ambiguity = (unsigned char)ugrab(8);
 	    R1004.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    R1004.L2.indicator = (unsigned char)ugrab(2);
-	    GPS_PSEUDORANGE(R1004.L2, 24);
+	    GPS_PSEUDORANGE(R1004.L2, 14);
 	    RANGEDIFF(R1004.L2, 20);
 	    R1004.L2.locktime =	(unsigned char)sgrab(7);
 	    R1004.L2.ambiguity = (unsigned char)ugrab(8);
