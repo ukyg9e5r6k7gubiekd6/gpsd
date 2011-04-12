@@ -892,7 +892,7 @@ Utility('version' '', [],
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
-env['SPLINTOPTS'] = "-I/usr/include/libusb-1.0 +quiet -DSYSCONFDIR='\"./\"' "
+env['SPLINTOPTS'] = "-I/usr/include/libusb-1.0 +quiet"
 
 def Splint(target,sources, description, params):
     return Utility(target,sources,[
