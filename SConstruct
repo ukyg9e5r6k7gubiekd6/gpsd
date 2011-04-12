@@ -724,7 +724,7 @@ python_manpages = {
 
 manpage_targets = []
 if manbuilder:
-    for (man, xml) in base_manpages.items():
+    for (man, xml) in base_manpages.items() + python_manpages.items():
         manpage_targets.append(env.Man(source=xml, target=man))
 
 ## Where it all comes together
@@ -1077,7 +1077,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         distfiles.append("packaging/rpm/gpsd.spec")
 
     dist = env.Command('dist', distfiles, [
-        '@tar -czf gpsd-${VERSION}.tar.gz $SOURCES',
+        '@tar --transform "s:^:gpsd-${VERSION}/:" -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
         ])
     env.Clean(dist, "gpsd-${VERSION}.tar.gz")
