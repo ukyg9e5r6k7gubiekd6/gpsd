@@ -477,8 +477,8 @@ libgpsd_sources = [
 	"driver_zodiac.c",
 ]
 
-# Cope wth scons's failure to set SONAME in its builtins.
-# Code inspired by Richard Levitte. See
+# Cope with scons's failure to set SONAME in its builtins.
+# Inspired by Richard Levitte's (slightly buggy) code at
 # http://markmail.org/message/spttz3o4xrsftofr
 
 def VersionedSharedLibrary(env, libname, libversion, lib_objs=[]):
@@ -549,7 +549,7 @@ def InstallVersionedSharedLibrary(env, destination, lib):
 	shlib_install_post_action = shlib_post_action
 	shlib_install_post_action_output_re = shlib_post_action_output_re
 
-    ilib = env.Install('$LIBDIR',lib)
+    ilib = env.Install(destination, lib)
 
     if shlib_install_pre_action:
 	shlib_install_pre_action_output = re.sub(shlib_install_pre_action_output_re[0],
@@ -564,6 +564,7 @@ def InstallVersionedSharedLibrary(env, destination, lib):
 						  str(ilib[0]))
 	env.Command(shlib_install_post_action_output, ilib,
                     shlib_install_post_action)
+    return ilib
 
 if not env["shared"]:
     Library = lambda env, target, sources, version: \
@@ -848,17 +849,10 @@ binaryinstall.append(env.Install(sbindir, gpsd))
 binaryinstall.append(env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]))
 if ncurseslibs:
     binaryinstall.append(env.Install(bindir, [cgps, gpsmon]))
-binaryinstall.append(env.Install(libdir, compiled_gpslib))
-binaryinstall.append(env.Install(libdir, compiled_gpsdlib))
-if qtlibs:
-    binaryinstall.append(qt_env.Install(source=compiled_qgpsmmlib))
-binaryinstall.append(env.InstallAs(source=compiled_gpslib,
-              target=os.path.join(libdir, "libgps.so")))
-binaryinstall.append(env.InstallAs(source=compiled_gpsdlib,
-              target=os.path.join(libdir, "libgpsd.so")))
-if qtlibs:
-    binaryinstall.append(qt_env.InstallAs(source=compiled_qgpsmmlib,
-              target=os.path.join(libdir, "libQgpsmm.so")))
+binaryinstall.append(LibraryInstall(env, libdir, compiled_gpslib))
+binaryinstall.append(LibraryInstall(env, libdir, compiled_gpsdlib))
+#if qtlibs:
+#    binaryinstall.append(LibraryInstall(qt_env, libdir, compiled_qgpsmmlib))
 
 if have_chrpath:
     env.AddPostAction(binaryinstall, 'chrpath -d $TARGET')
