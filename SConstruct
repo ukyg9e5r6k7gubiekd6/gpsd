@@ -1083,7 +1083,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     env.Clean(dist, "gpsd-${VERSION}.tar.gz")
 
     # Make RPM from the specfile in packaging
-    Utility('dist-rpm', dist, 'rpm -ta $SOURCE')
+    Utility('dist-rpm', dist, 'rpmbuild -ta $SOURCE')
 
     # Make sure build-from-tarball works.
     Utility('testbuild', [dist], [
