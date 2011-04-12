@@ -101,9 +101,9 @@ nonboolopts = (
     ("gpsd_user",           "privilege revocation user",     ""),
     ("gpsd_group",          "privilege revocation group",    ""),
     ("prefix",              "installation directory prefix", "/usr/local/"),
-    ("limited_max_clients", "maximum allowed clients",       "4"),
-    ("limited_max_devices", "maximum allowed devices",       "4"),
-    ("fixed_port_speed",    "fixed serial port speed",       "0"),
+    ("limited_max_clients", "maximum allowed clients",       0),
+    ("limited_max_devices", "maximum allowed devices",       0),
+    ("fixed_port_speed",    "fixed serial port speed",       0),
     )
 for (name, help, default) in nonboolopts:
     opts.Add(name, help, default)
