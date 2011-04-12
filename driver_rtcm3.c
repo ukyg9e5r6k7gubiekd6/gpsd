@@ -23,7 +23,13 @@ passed an entire correction packet for processing by their internal
 firmware.
 
 Decodes of the following types have been verified: 1004, 1005, 1006,
-1008, 1012, 1013, 1029.
+1008, 1012, 1013, 1029. There is good reason to believe the 1007 code
+is correct, as it's identical to 1008 up to where it ends.
+
+The 1033 decode was arrived at by looking at an rtcminspect dump and noting
+that it carries an information superset of the 1008.  There are additional
+Receiver and Firmware fields we don't know how to decode without access
+to an RTCM3 standard at revision 4 or later.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
@@ -216,7 +222,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     case 1007:			/* Antenna Descriptor */
 	rtcm->rtcmtypes.rtcm3_1007.station_id = (unsigned short)ugrab(12);
 	n = (unsigned long)ugrab(8);
-	(void)memcpy(rtcm->rtcmtypes.rtcm3_1007.descriptor, buf + 4, n);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1007.descriptor, buf + 7, n);
 	rtcm->rtcmtypes.rtcm3_1007.descriptor[n] = '\0';
 	bitcount += 8 * n;
 	rtcm->rtcmtypes.rtcm3_1007.setup_id = ugrab(8);
@@ -392,6 +398,19 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1029.unicode_units = (size_t)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, 
 		     buf + 12, rtcm->rtcmtypes.rtcm3_1029.unicode_units);
+	break;
+
+    case 1033:			/* see note in header */
+	rtcm->rtcmtypes.rtcm3_1033.station_id = (unsigned short)ugrab(12);
+	n = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.descriptor, buf + 7, n);
+	rtcm->rtcmtypes.rtcm3_1033.descriptor[n] = '\0';
+	bitcount += 8 * n;
+	rtcm->rtcmtypes.rtcm3_1033.setup_id = ugrab(8);
+	n2 = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.serial, buf + 9 + n, n2);
+	rtcm->rtcmtypes.rtcm3_1033.serial[n2] = '\0';
+	bitcount += 8 * n2;
 	break;
 
     default:
