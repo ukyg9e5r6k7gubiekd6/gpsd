@@ -22,7 +22,7 @@ passing RTCM corrections to a GPS, which normally should just be
 passed an entire correction packet for processing by their internal
 firmware.
 
-Decodes of the following types have been verified: 1004, 1005, 1029
+Decodes of the following types have been verified: 1004, 1005, 1012, 1013, 1029.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.

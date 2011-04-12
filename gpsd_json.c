@@ -1015,7 +1015,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   "\"amb\":%u,\"CNR\":%.2f}"
 			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,"
-			   "\"amb\":%u,\"CNR\":%.2f}"
+			   "\"CNR\":%.2f}"
 			   "},",
 			   R1004.ident,
 			   CODE(R1004.L1.indicator),
@@ -1028,7 +1028,6 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   R1004.L2.pseudorange,
 			   R1004.L2.rangediff,
 			   INT(R1004.L2.locktime),
-			   INT(R1004.L2.ambiguity),
 			   R1004.L2.CNR);
 #undef R1004
 	}
@@ -1217,7 +1216,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},"
 			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
+			   "\"delta\":%6.4f,\"lockt\":%u,"
 			   "\"CNR\":%.2f},"
 			   "},",
 			   R1012.ident,
@@ -1232,7 +1231,6 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   R1012.L2.pseudorange,
 			   R1012.L2.rangediff,
 			   INT(R1012.L2.locktime),
-			   INT(R1012.L2.ambiguity),
 			   R1012.L2.CNR);
 #undef R1012
 	}

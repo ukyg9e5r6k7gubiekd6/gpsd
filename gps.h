@@ -399,9 +399,9 @@ struct rtcm3_t {
 	    unsigned char leapsecs;	/* Leap Seconds, GPS-UTC */
 	    unsigned char ncount;	/* Count of announcements to follow */
 	    struct {
-		unsigned short id;
+		unsigned short id;		/* message type ID */
 		bool sync;
-		unsigned short interval;
+		unsigned short interval;	/* interval in 0.1sec units */
 	    } announcements[RTCM3_MAX_ANNOUNCEMENTS];
 	} rtcm3_1013;
 	/* 1014-1017 were added in the 3.1 version */
@@ -508,6 +508,11 @@ struct rtcm3_t {
 	char data[1024];		/* Max RTCM3 msg length is 1023 bytes */
     } rtcmtypes;
 };
+
+/* RTCM3 scaling constants */
+#define GPS_AMBIGUITY_MODULUS		299792.458	/* 1004, DF014*/
+#define GLONASS_AMBIGUITY_MODULUS	599584.916	/* 1012, DF044 */
+#define MESSAGE_INTERVAL_UNITS		0.1		/* 1013, DF047 */
 
 /*
  * Raw IS_GPS subframe data
