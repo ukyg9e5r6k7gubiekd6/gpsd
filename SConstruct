@@ -740,7 +740,6 @@ if qtlibs:
 ## Installation and deinstallation
 
 # Not here because too distro-specific: udev rules, desktop files, init scripts
-# Possible bug: scons install -n doesn't show ldconfig postaction
 
 for (name, help, default) in pathopts:
     exec name + " = DESTDIR + env['prefix'] + env['%s']" % name
@@ -770,7 +769,6 @@ for manpage in base_manpages:
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
 install = env.Alias('install', binaryinstall + maninstall)
-env.AddPostAction(install, ['ldconfig'])
 
 def Uninstall(nodes):
     deletes = []
@@ -781,7 +779,6 @@ def Uninstall(nodes):
             deletes.append(Delete(str(node)))
     return deletes
 uninstall = env.Command('uninstall', '', Flatten(Uninstall(Alias("install"))) or "")
-env.AddPostAction(uninstall, ['ldconfig'])
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)
 
