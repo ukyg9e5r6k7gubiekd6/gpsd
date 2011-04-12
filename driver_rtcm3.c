@@ -336,7 +336,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    if (rangeincr == GLONASS_INVALID_RANGEINCR)
 		R1012.L2.pseudorange = 0;
 	    else
-		R1012.L2.pseudorange = R1012.L1.pseudorange + (rangeincr * GLONASS_PSEUDORANGE_RESOLUTION);
+		R1012.L2.pseudorange = (rangeincr * GLONASS_PSEUDORANGE_RESOLUTION);
 	    RANGEDIFF(R1012.L2, 20);
 	    R1012.L2.locktime =	(unsigned char)sgrab(7);
 	    R1012.L2.CNR = (unsigned char)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
