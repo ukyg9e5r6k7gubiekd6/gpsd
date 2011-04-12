@@ -481,7 +481,8 @@ if not env["shared"]:
 else:
     Library = env.SharedLibrary
 
-compiled_gpslib = Library(target="gps", source=libgps_sources)
+libversion = ".%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
+compiled_gpslib = Library(target="gps"+libversion, source=libgps_sources)
 
 gpsdlib_env = env.Clone()
 # Tell the Mac OS X linker to resolve undefined symbols 
@@ -490,7 +491,7 @@ if env["shared"]:
     if sys.platform == 'darwin':
         gpsdlib_env.Append(LINKFLAGS='-undefined dynamic_lookup')
 
-compiled_gpsdlib = Library(target="gpsd", source=libgpsd_sources, LINKFLAGS=gpsdlib_env['LINKFLAGS'])
+compiled_gpsdlib = Library(target="gpsd"+libversion, source=libgpsd_sources, LINKFLAGS=gpsdlib_env['LINKFLAGS'])
 
 if qtlibs:
     qtobjects = []
@@ -749,11 +750,12 @@ binaryinstall.append(env.Install(sbindir, gpsd))
 binaryinstall.append(env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]))
 if ncurseslibs:
     binaryinstall.append(env.Install(bindir, [cgps, gpsmon]))
-libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
+binaryinstall.append(env.Install(libdir, compiled_gpslib))
+binaryinstall.append(env.Install(libdir, compiled_gpsdlib))
 binaryinstall.append(env.InstallAs(source=compiled_gpslib,
-              target=os.path.join(libdir, "libgps.so." + libversion)))
+              target=os.path.join(libdir, "libgps.so")))
 binaryinstall.append(env.InstallAs(source=compiled_gpsdlib,
-              target=os.path.join(libdir, "libgpsd.so." + libversion)))
+              target=os.path.join(libdir, "libgpsd.so")))
 #if qtlibs:
 #    binaryinstall.append(qt_env.InstallAs(source=compiled_qgpsmmlib,
 #              target=os.path.join(libdir, "libQgpsmm.so." + libversion)))
