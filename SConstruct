@@ -512,7 +512,7 @@ if qtlibs:
             compile_flags = qt_env['CFLAGS']
         qtobjects.append(qt_env.SharedObject(src[:-2] + '-qt', src,
                                        CC=compile_with, CFLAGS=compile_flags))
-    compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm",
+    compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm"+libversion,
                                               source=qtobjects,
                                               LIBS=qtlibs)
 
@@ -752,13 +752,15 @@ if ncurseslibs:
     binaryinstall.append(env.Install(bindir, [cgps, gpsmon]))
 binaryinstall.append(env.Install(libdir, compiled_gpslib))
 binaryinstall.append(env.Install(libdir, compiled_gpsdlib))
+if qtlibs:
+    binaryinstall.append(qt_env.Install(source=compiled_qgpsmmlib))
 binaryinstall.append(env.InstallAs(source=compiled_gpslib,
               target=os.path.join(libdir, "libgps.so")))
 binaryinstall.append(env.InstallAs(source=compiled_gpsdlib,
               target=os.path.join(libdir, "libgpsd.so")))
-#if qtlibs:
-#    binaryinstall.append(qt_env.InstallAs(source=compiled_qgpsmmlib,
-#              target=os.path.join(libdir, "libQgpsmm.so." + libversion)))
+if qtlibs:
+    binaryinstall.append(qt_env.InstallAs(source=compiled_qgpsmmlib,
+              target=os.path.join(libdir, "libQgpsmm.so")))
 
 if have_chrpath:
     env.AddPostAction(binaryinstall, 'chrpath -d $TARGET')
