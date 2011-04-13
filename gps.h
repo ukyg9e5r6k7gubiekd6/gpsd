@@ -259,7 +259,7 @@ struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
 
 struct rtcm3_basic_rtk {
     unsigned char indicator;	/* Indicator */
-    unsigned char channel;	/* Satellite Frequency Channel Number 
+    short channel;		/* Satellite Frequency Channel Number 
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */
     double rangediff;		/* PhaseRange – Pseudorange in meters */
@@ -268,7 +268,7 @@ struct rtcm3_basic_rtk {
 
 struct rtcm3_extended_rtk {
     unsigned char indicator;	/* Indicator */
-    unsigned char channel;	/* Satellite Frequency Channel Number 
+    short channel;		/* Satellite Frequency Channel Number 
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */
     double rangediff;		/* PhaseRange – L1 Pseudorange */

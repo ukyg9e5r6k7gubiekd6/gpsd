@@ -59,6 +59,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 /* Other magic values */
 #define GPS_INVALID_PSEUDORANGE		0x80000	/* DF012, DF018 */
 #define GLONASS_INVALID_RANGEINCR	0x2000	/* DF047 */
+#define GLONASS_CHANNEL_BASE		7	/* DF040 */
 
 /* Large case statements make GNU indent very confused */
 /* *INDENT-OFF* */
@@ -255,7 +256,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1009.header.satcount; i++) {
 	    R1009.ident = (ushort)ugrab(6);
 	    R1009.L1.indicator = (bool)ugrab(1);
-	    R1009.L1.channel = (ushort)ugrab(5);
+	    R1009.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1009.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    RANGEDIFF(R1009.L1, 20);
 	    R1009.L1.locktime =	(unsigned char)sgrab(7);
@@ -275,7 +276,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1010.header.satcount; i++) {
 	    R1010.ident = (ushort)ugrab(6);
 	    R1010.L1.indicator = (bool)ugrab(1);
-	    R1010.L1.channel = (ushort)ugrab(5);
+	    R1010.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1010.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    RANGEDIFF(R1010.L1, 20);
 	    R1010.L1.locktime =	(unsigned char)sgrab(7);
@@ -297,14 +298,14 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1011.header.satcount; i++) {
 	    R1011.ident = (ushort)ugrab(6);
 	    R1011.L1.indicator = (bool)ugrab(1);
-	    R1011.L1.channel = (ushort)ugrab(5);
+	    R1011.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1011.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    RANGEDIFF(R1011.L1, 20);
 	    R1011.L1.locktime =	(unsigned char)sgrab(7);
 	    R1011.L1.ambiguity = (unsigned char)ugrab(7);
 	    R1011.L1.CNR = ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
 	    R1011.L2.indicator = (bool)ugrab(1);
-	    R1011.L2.channel = (ushort)ugrab(5);
+	    R1011.L2.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1011.L2.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    RANGEDIFF(R1011.L2, 20);
 	    R1011.L2.locktime =	(unsigned char)sgrab(7);
@@ -327,7 +328,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    unsigned int rangeincr;
 	    R1012.ident = (ushort)ugrab(6);
 	    R1012.L1.indicator = (bool)ugrab(1);
-	    R1012.L1.channel = (ushort)ugrab(5);
+	    R1012.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1012.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
 	    RANGEDIFF(R1012.L1, 20);
 	    R1012.L1.locktime =	(unsigned char)ugrab(7);

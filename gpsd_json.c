@@ -1116,11 +1116,11 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1009.header.satcount; i++) {
 #define R1009 rtcm->rtcmtypes.rtcm3_1009.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
+			   "{\"ident\":%u,\"ind\":%u,\"channel\":%hd,"
 			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},",
 			   R1009.ident,
 			   CODE(R1009.L1.indicator),
-			   INT(R1009.L1.channel),
+			   R1009.L1.channel,
 			   R1009.L1.pseudorange,
 			   R1009.L1.rangediff,
 			   INT(R1009.L1.locktime));
@@ -1144,12 +1144,12 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1010.header.satcount; i++) {
 #define R1010 rtcm->rtcmtypes.rtcm3_1010.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
+			   "{\"ident\":%u,\"ind\":%u,\"channel\":%hd,"
 			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u,"
 			   "\"amb\":%u,\"CNR\":%.2f},",
 			   R1010.ident,
 			   CODE(R1010.L1.indicator),
-			   INT(R1010.L1.channel),
+			   R1010.L1.channel,
 			   R1010.L1.pseudorange,
 			   R1010.L1.rangediff,
 			   INT(R1010.L1.locktime),
@@ -1176,14 +1176,14 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1011 rtcm->rtcmtypes.rtcm3_1011.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"channel\":%u,"
+			   "\"L1\":{\"ind\":%u,\"channel\":%hd,"
 			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},"
 			   "\"L2:{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u}"
 			   "}",
 			   R1011.ident,
 			   CODE(R1011.L1.indicator), 
-			   INT(R1011.L1.channel),
+			   R1011.L1.channel,
 			   R1011.L1.pseudorange,
 			   R1011.L1.rangediff,
 			   INT(R1011.L1.locktime),
@@ -1211,8 +1211,8 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1012.header.satcount; i++) {
 #define R1012 rtcm->rtcmtypes.rtcm3_1012.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"channel\":%u,\"prange\":%8.2f,"
+			   "{\"ident\":%u,\"channel\":%hd,"
+			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},"
 			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
@@ -1220,8 +1220,8 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   "\"CNR\":%.2f},"
 			   "},",
 			   R1012.ident,
+			   R1012.L1.channel,
 			   CODE(R1012.L1.indicator),
-			   INT(R1012.L1.channel),
 			   R1012.L1.pseudorange,
 			   R1012.L1.rangediff,
 			   INT(R1012.L1.locktime),
