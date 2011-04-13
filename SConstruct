@@ -111,7 +111,7 @@ for (name, help, default) in nonboolopts:
 pathopts = (
     ("sysconfdir",  "system configuration directory",        "/etc"),
     ("bindir",      "application binaries directory",        "/bin"),
-    ("libdir",      "dystem libraries",                      "/lib"),
+    ("libdir",      "system libraries",                      "/lib"),
     ("sbindir",     "system binaries directory",             "/sbin"),
     ("mandir",      "manual pages directory",                "/share/man"),
     ("docdir",      "documents directory",                   "/share/doc"),
@@ -165,8 +165,7 @@ env.Prepend(RPATH=[os.path.join(env['prefix'], 'lib')])
 # Tell generated binaries to look in the current directory for
 # shared libraries. Should be handled sanely by scons on all systems.
 # Not good to use '.' or a relative path here; it's a security risk.
-# At install time we should use chrpath to remove RPATH from the executables
-# again.
+# At install time we should use chrpath to edit this out of RPATH.
 env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 
@@ -858,7 +857,7 @@ binaryinstall.append(LibraryInstall(env, libdir, compiled_gpsdlib))
 #    binaryinstall.append(LibraryInstall(qt_env, libdir, compiled_qgpsmmlib))
 
 if have_chrpath:
-    env.AddPostAction(binaryinstall, 'chrpath -d $TARGET')
+    env.AddPostAction(binaryinstall, 'chrpath -r $LIBDIR $TARGET')
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, 'strip $TARGET')
 
