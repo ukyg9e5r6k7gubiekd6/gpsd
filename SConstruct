@@ -405,6 +405,23 @@ qt_network = config.CheckPKG('QtNetwork')
 
 env = config.Finish()
 
+# Be explicit about what we're doing.
+changelatch = False 
+for (name, default, help) in boolopts:
+    if env[name] != default:
+        if not changelatch:
+            print "Altered configuration variables:"
+            changelatch = True
+        print "%s = %s (default %s): %s" % (name, env[name], default, help)
+for (name, help, default) in nonboolopts + pathopts:
+    if env[name] != default:
+        if not changelatch:
+            print "Altered configuration variables:"
+            changelatch = True
+        print "%s = %s (default %s): %s" % (name, env[name], default, help)
+if not changelatch:
+    print "All configuration flags are defaulted."
+
 # Gentoo systems can have a problem with the Python path
 if os.path.exists("/etc/gentoo-release"):
     print "This is a Gentoo system."
