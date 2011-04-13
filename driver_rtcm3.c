@@ -375,24 +375,6 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1014.d_alt = (unsigned short)ugrab(23) / 1000;
 	break;
 
-    case 1015:
-	break;
-
-    case 1016:
-	break;
-
-    case 1017:
-	break;
-
-    case 1018:
-	break;
-
-    case 1019:
-	break;
-
-    case 1020:
-	break;
-
     case 1029:
 	rtcm->rtcmtypes.rtcm3_1029.station_id = (unsigned short)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
