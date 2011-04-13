@@ -78,6 +78,9 @@ boolopts = (
     # Communication
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
+    # Other daemon options
+    ("timing",        True,  "latency timing support"),
+    ("control_socket",True,  "control socket for hotplug notifications")
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
@@ -87,12 +90,10 @@ boolopts = (
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
-    # Miscellaneous
+    # Build control
     ("shared",        True,  "build shared libraries, not static"),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
-    ("timing",        True,  "latency timing support"),
-    ("control_socket",True,  "control socket for hotplug notifications")
     )
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
