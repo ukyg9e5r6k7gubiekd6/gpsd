@@ -1175,15 +1175,14 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1011.header.satcount; i++) {
 #define R1011 rtcm->rtcmtypes.rtcm3_1011.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"channel\":%hd,"
+			   "{\"ident\":%u,\"channel\":%hd,"
+			   "\"L1\":{\"ind\":%u,"
 			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},"
 			   "\"L2:{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u}"
 			   "}",
-			   R1011.ident,
+			   R1011.ident,R1011.L1.channel,
 			   CODE(R1011.L1.indicator), 
-			   R1011.L1.channel,
 			   R1011.L1.pseudorange,
 			   R1011.L1.rangediff,
 			   INT(R1011.L1.locktime),
