@@ -130,9 +130,7 @@ env.SConsignFile(".sconsign.dblite")
 
 env['VERSION'] = gpsd_version
 
-env.Append(LIBPATH=['.'])
-
-# Placeholder so we can kluge together something like VPATH builds
+# Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
 
@@ -160,12 +158,17 @@ if env['CC'] == 'gcc':
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
                             -D_GNU_SOURCE'''))
 
+# Honor the specified installation prefix in link paths.
+env.Prepend(LIBPATH=[os.path.join(env['prefix'], 'lib')])
+env.Prepend(RPATH=[os.path.join(env['prefix'], 'lib')])
+
 # Tell generated binaries to look in the current directory for
 # shared libraries. Should be handled sanely by scons on all systems.
 # Not good to use '.' or a relative path here; it's a security risk.
 # At install time we should use chrpath to remove RPATH from the executables
 # again.
-env.Append(RPATH=os.path.realpath(os.curdir))
+env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
+env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
