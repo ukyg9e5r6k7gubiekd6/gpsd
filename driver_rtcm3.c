@@ -28,8 +28,10 @@ is correct, as it's identical to 1008 up to where it ends.
 
 The 1033 decode was arrived at by looking at an rtcminspect dump and noting
 that it carries an information superset of the 1008.  There are additional
-Receiver and Firmware fields we don't know how to decode without access
-to an RTCM3 standard at revision 4 or later.
+Receiver and Firmware fields we're not certain to decode without access
+to an RTCM3 standard at revision 4 or later, but the guess in the code
+has been observed to correctly analyze a message with a nonempty Receiver
+field.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
@@ -65,7 +67,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
-    unsigned int n, n2;
+    unsigned int n, n2, n3, n4;
     int bitcount = 0;
     unsigned int i;
     signed long temp;
@@ -411,6 +413,14 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.serial, buf + 9 + n, n2);
 	rtcm->rtcmtypes.rtcm3_1033.serial[n2] = '\0';
 	bitcount += 8 * n2;
+	n3 = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.receiver, buf + 10+n+n2, n3);
+	rtcm->rtcmtypes.rtcm3_1033.receiver[n3] = '\0';
+	bitcount += 8 * n3;
+	n4 = (unsigned long)ugrab(8);
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.firmware, buf + 11+n+n2+n3, n3);
+	rtcm->rtcmtypes.rtcm3_1033.firmware[n4] = '\0';
+	bitcount += 8 * n4;
 	break;
 
     default:

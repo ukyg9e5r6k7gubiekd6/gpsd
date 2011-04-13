@@ -1304,6 +1304,19 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	/*@+formatcode@*/
 	break;
 
+    case 1033:
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"station_id\":%u,\"desc\":\"%s\","
+		       "\"setup-id\":%u,\"serial\":\"%s\","
+		       "\"receiver\":%s,\"firmware\":\"%s\"",
+		       rtcm->rtcmtypes.rtcm3_1033.station_id,
+		       rtcm->rtcmtypes.rtcm3_1033.descriptor,
+		       INT(rtcm->rtcmtypes.rtcm3_1033.setup_id),
+		       rtcm->rtcmtypes.rtcm3_1033.serial,
+		       rtcm->rtcmtypes.rtcm3_1033.receiver,
+		       rtcm->rtcmtypes.rtcm3_1033.firmware);
+	break;
+
     default:
 	(void)strlcat(buf, "\"data\":[", buflen);
 	for (n = 0; n < rtcm->length; n++)

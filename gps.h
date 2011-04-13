@@ -505,6 +505,14 @@ struct rtcm3_t {
 	    size_t unicode_units;	/* # Unicode units in text */
 	    unsigned char text[128];
 	} rtcm3_1029;
+	struct rtcm3_1033_t {
+	    unsigned int station_id;			/* Reference Station ID */
+	    char descriptor[RTCM3_MAX_DESCRIPTOR+1];	/* Description string */
+	    unsigned char setup_id;
+	    char serial[RTCM3_MAX_DESCRIPTOR+1];	/* Serial # string */
+	    char receiver[RTCM3_MAX_DESCRIPTOR+1];	/* Receiver string */
+	    char firmware[RTCM3_MAX_DESCRIPTOR+1];	/* Firmware string */
+	} rtcm3_1033;
 	char data[1024];		/* Max RTCM3 msg length is 1023 bytes */
     } rtcmtypes;
 };
