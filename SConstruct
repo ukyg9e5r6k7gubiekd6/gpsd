@@ -80,7 +80,7 @@ boolopts = (
     ("ipv6",          True,  "build IPv6 support"),
     # Other daemon options
     ("timing",        True,  "latency timing support"),
-    ("control_socket",True,  "control socket for hotplug notifications")
+    ("control_socket",True,  "control socket for hotplug notifications"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
