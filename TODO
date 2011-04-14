@@ -16,12 +16,30 @@ See the GPSD bug tracker at https://developer.berlios.de/bugs/?group_id=2116
 but don't be surprised if it's empty or very sparse.  Our rate of new defects
 per month is quite low.
 
+* Conversion to scons needs finishing touches.  
+
+Python modules and shared-library installation need work.  Jon
+Schleuter and Bernd Zeimetz are on top of this one.
+
 *** Driver issues
 
 **** gpsctl -b should work on UBX, but does not.
 
 Presently this means there's no way to kick a UBX into returning
-binary data.
+binary data.  Chris Kuethe is supposed to fix this one.
+
+**** RTCM3 analysis is incomplete
+
+We can presently decode RTCM3 messages of type 1004, 1005, 1006, 1008, 1012, 
+1013, and 1029.  This is not the complete set. We need more test data with
+different types in them, and a copy of the RTCM3 standard at latest revision
+(all we have is revision 3).
+
+**** Reporting code for specialized Type 6 and 8 AIS messages.
+
+This one is mine and Kurt Schwehr's.  Kurt: I still need Area Notice
+and Environmental descriptions merged into AIVDM.txt before I can
+complete this.
 
 ** Ports
 
@@ -30,6 +48,12 @@ binary data.
 Partially complete. David Ludlow <dave@adsllc.com> is working on it.
 
 ** To do:
+
+***  Make subframe reports available in the C API.
+
+gpsd now reports subframes when they're available, but the
+C client library doesn't yet parse them. Gary Miller has this
+in his queue.
 
 *** Write advanced features for TNT Revolution device
 
@@ -41,6 +65,11 @@ for possibilities.
 
 Jon Schlueter has one of these on a flock machine, so testing 
 shouldn't be difficult.
+
+*** Enable flocktest on the Debian server farm
+
+Debian server farm boxes have a screwy chrooted envoronment setup.
+flocktest needs to be modified to deal with it.
 
 *** Finish gpssim
 
