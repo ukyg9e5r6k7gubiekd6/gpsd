@@ -105,6 +105,7 @@ nonboolopts = (
     ("limited_max_clients", "maximum allowed clients",       0),
     ("limited_max_devices", "maximum allowed devices",       0),
     ("fixed_port_speed",    "fixed serial port speed",       0),
+    ("target",              "cross-development target",      ""),
     )
 for (name, help, default) in nonboolopts:
     opts.Add(name, help, default)
@@ -188,6 +189,33 @@ if env['debug']:
     env.Append(CCFLAGS=['-O0'])
 else:
     env.Append(CCFLAGS=['-O2'])
+
+## Cross-development
+
+devenv = (("ADDR2LINE", "addr2line"),
+          ("AR","ar"),
+          ("AS","as"),
+          ("CXX","c++"),
+          ("CXXFILT","c++filt"),
+          ("CPP","cpp"),
+          ("GXX","g++"),
+          ("CC","gcc"),
+          ("GCCBUG","gccbug"),
+          ("GCOV","gcov"),
+          ("GPROF","gprof"),
+          ("LD", "ld"),
+          ("NM", "nm"),
+          ("OBJCOPY","objcopy"),
+          ("OBJDUMP","objdump"),
+          ("RANLIB", "ranlib"),
+          ("READELF","readelf"),
+          ("SIZE", "size"),
+          ("STRINGS", "strings"),
+          ("STRIP", "strip"))
+
+if env['target']:
+    for (name, toolname) in devenv:
+        env[name] = env['target'] + '-' + toolname
 
 ## Build help
 
