@@ -300,7 +300,7 @@ else:
     dbus_xmit_libs = []
     dbus_recv_libs = []
 
-if config.CheckPKG('bluez'):
+if env['bluez'] and config.CheckPKG('bluez'):
     confdefs.append("#define HAVE_BLUEZ 1\n\n")
     env.MergeFlags(['!pkg-config bluez --cflags'])
     flags = env.ParseFlags('!pkg-config bluez --libs')
