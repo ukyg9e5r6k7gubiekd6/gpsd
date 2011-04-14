@@ -1500,7 +1500,7 @@ static void consume_packets(struct gps_device_t *device)
 	    else
 		offset = device->device_type->ntp_offset(device);
 	    (void)ntpshm_put(device, device->newdata.time, offset);
-	    //device->last_fixtime = device->newdata.time;
+	    device->last_fixtime = device->newdata.time;
 	}
 #endif /* NTPSHM_ENABLE */
 
