@@ -54,6 +54,7 @@ srec.html
 *.lo
 *.la
 *.so
+*.so.[0-9.]*
 *~
 *.swp
 # Built sources
