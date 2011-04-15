@@ -76,6 +76,7 @@ boolopts = (
     ("dbus_export",   False,  "enable DBUS export support"),
     ("shm_export",    True,  "export via shared memory"),
     # Communication
+    ('usb',           True,  "libusb support for USB devices"),
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
     # Other daemon options
@@ -126,7 +127,7 @@ for (name, help, default) in pathopts:
 # Environment creation
 #
 
-env = Environment(tools=["default", "tar"], options=opts)
+env = Environment(tools=["default", "tar", "textfile"], options=opts)
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
@@ -293,16 +294,14 @@ for f in ("daemon", "strlcpy", "strlcat"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
 
-if config.CheckLib('ncurses'):
-    ncurseslibs = ['ncurses']
+if config.CheckPKG('ncurses'):
+    ncurseslibs = ['!pkg-config ncurses --cflags --libs']
 else:
     ncurseslibs = []
 
-if config.CheckPKG('libusb-1.0'):
+if env['usb'] and config.CheckPKG('libusb-1.0'):
     confdefs.append("#define HAVE_LIBUSB 1\n\n")
-    env.MergeFlags(['!pkg-config libusb-1.0 --cflags'])
-    flags = env.ParseFlags('!pkg-config libusb-1.0 --libs')
-    usblibs = flags['LIBS']
+    usblibs = ['!pkg-config libusb-1.0 --cflags --libs']
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
@@ -310,19 +309,15 @@ else:
 if config.CheckLib('librt'):
     confdefs.append("#define HAVE_LIBRT 1\n\n")
     # System library - no special flags
-    rtlibs = ["rt"]
+    rtlibs = ["-lrt"]
 else:
     confdefs.append("/* #undef HAVE_LIBRT */\n\n")
     rtlibs = []
 
-dbus_export_value = env['dbus_export']
-if type(dbus_export_value) == type(True) and dbus_export_value and config.CheckPKG('dbus-1') and config.CheckPKG('dbus-glib-1'):
+if env['dbus_export'] and config.CheckPKG('dbus-1') and config.CheckPKG('dbus-glib-1'):
     confdefs.append("#define HAVE_DBUS 1\n\n")
-    env.MergeFlags(['!pkg-config --cflags dbus-glib-1 dbus-1'])
-    dbus_xmit = env.ParseFlags('!pkg-config --libs dbus-1')
-    dbus_xmit_libs = dbus_xmit['LIBS']
-    dbus_recv = env.ParseFlags('!pkg-config --libs dbus-glib-1')
-    dbus_recv_libs = dbus_recv['LIBS']
+    dbus_xmit_libs = ['!pkg-config --libs --cflags dbus-1']
+    dbus_recv_libs = ['pkg-config --libs --cflags dbus-glib-1']
 else:
     confdefs.append("/* #undef HAVE_DBUS */\n\n")
     dbus_xmit_libs = []
@@ -330,9 +325,7 @@ else:
 
 if env['bluez'] and config.CheckPKG('bluez'):
     confdefs.append("#define HAVE_BLUEZ 1\n\n")
-    env.MergeFlags(['!pkg-config bluez --cflags'])
-    flags = env.ParseFlags('!pkg-config bluez --libs')
-    bluezlibs = flags['LIBS']
+    bluezlibs = ['!pkg-config bluez --cflags --libs']
 else:
     confdefs.append("/* #undef HAVE_BLUEZ */\n\n")
     bluezlibs = []
@@ -379,6 +372,7 @@ for (key,help) in keys:
         else:
             confdefs.append("#define %s \"%s\"\n\n" % (key.upper(), value))
 
+
 confdefs.append('''
 /* will not handle pre-Intel Apples that can run big-endian */
 #if defined __BIG_ENDIAN__
@@ -410,8 +404,6 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #define GPSD_CONFIG_H
 ''')
 
-with open("gpsd_config.h", "w") as ofp:
-    ofp.writelines(confdefs)
 
 manbuilder = mangenerator = htmlbuilder = None
 if config.CheckXsltproc():
@@ -460,11 +452,7 @@ if os.path.exists("/etc/gentoo-release"):
 if cxx and env['libQgpsmm'] and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
-    qt_env.MergeFlags(['!pkg-config QtNetwork --cflags'])
-    flags = env.ParseFlags('!pkg-config QtNetwork --libs')
-    qtlibs = flags['LIBS']
-else:
-    qtlibs = []
+    qt_env.MergeFlags(['!pkg-config QtNetwork --cflags --libs'])
 
 ## Two shared libraries provide most of the code for the C programs
 
@@ -529,7 +517,7 @@ libgpsd_sources = [
 # Inspired by Richard Levitte's (slightly buggy) code at
 # http://markmail.org/message/spttz3o4xrsftofr
 
-def VersionedSharedLibrary(env, libname, libversion, lib_objs=[]):
+def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]):
     platform = env.subst('$PLATFORM')
     shlib_pre_action = None
     shlib_suffix = env.subst('$SHLIBSUFFIX')
@@ -566,7 +554,7 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[]):
 
     lib = env.SharedLibrary(libname,lib_objs,
                             SHLIBSUFFIX=shlib_suffix,
-                            SHLINKFLAGS=shlink_flags)
+                            SHLINKFLAGS=shlink_flags, parse_flags=parse_flags)
 
     if shlib_pre_action:
         shlib_pre_action_output = re.sub(shlib_pre_action_output_re[0],
@@ -615,15 +603,16 @@ def InstallVersionedSharedLibrary(env, destination, lib):
     return ilib
 
 if not env["shared"]:
-    Library = lambda env, target, sources, version: \
-              env.StaticLibrary(target, sources)
+    def Library(env, target, sources, version, parse_flags=[]):
+        return env.StaticLibrary(target, sources, parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: env.Install(libdir, sources)
 else:
-    Library = lambda env, target, sources, version: \
-              VersionedSharedLibrary(env=env,
+    def Library(env, target, sources, version, parse_flags=[]):
+        return VersionedSharedLibrary(env=env,
                                      libname=target,
                                      libversion=version,
-                                     lib_objs=sources)
+                                     lib_objs=sources,
+                                     parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: \
                      InstallVersionedSharedLibrary(env, libdir, sources)
 
@@ -639,9 +628,9 @@ compiled_gpslib = Library(env=env,
 compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
-                           version=libversion)
+                           version=libversion, parse_flags=usblibs + rtlibs + bluezlibs)
 
-if qtlibs:
+if qt_env:
     qtobjects = []
     qt_flags = qt_env['CFLAGS']
     for c_only in ('-Wmissing-prototypes', '-Wstrict-prototypes'):
@@ -661,13 +650,12 @@ if qtlibs:
         qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
                                        CC=compile_with, CFLAGS=compile_flags))
     compiled_qgpsmmlib = qt_env.SharedLibrary(target="Qgpsmm"+libversion,
-                                              source=qtobjects,
-                                              LIBS=qtlibs)
+                                              source=qtobjects)
 
 # The libraries have dependencies on system libraries
 
-gpslibs = ["gps", "m"]
-gpsdlibs = ["gpsd"] + usblibs + bluezlibs + gpslibs
+gpslibs = ["-lgps", "-lm"]
+gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
 # Source groups
 
@@ -689,14 +677,14 @@ gpsmon_sources = [
 gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 gpsd = gpsd_env.Program('gpsd', gpsd_sources,
-                        LIBS = gpsdlibs + rtlibs + dbus_xmit_libs)
-gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], LIBS=gpsdlibs+rtlibs)
-gpsctl = env.Program('gpsctl', ['gpsctl.c'], LIBS=gpsdlibs+rtlibs)
-gpsmon = env.Program('gpsmon', gpsmon_sources, LIBS=gpsdlibs + ncurseslibs)
-gpspipe = env.Program('gpspipe', ['gpspipe.c'], LIBS=gpslibs)
-gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], LIBS=gpslibs+dbus_recv_libs)
-lcdgps = env.Program('lcdgps', ['lcdgps.c'], LIBS=gpslibs)
-cgps = env.Program('cgps', ['cgps.c'], LIBS=gpslibs + ncurseslibs)
+                        parse_flags = gpsdlibs + rtlibs + dbus_xmit_libs)
+gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs+rtlibs)
+gpsctl = env.Program('gpsctl', ['gpsctl.c'], parse_flags=gpsdlibs+rtlibs)
+gpsmon = env.Program('gpsmon', gpsmon_sources, parse_flags=gpsdlibs + ncurseslibs)
+gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
+gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], parse_flags=gpslibs+dbus_recv_libs)
+lcdgps = env.Program('lcdgps', ['lcdgps.c'], parse_flags=gpslibs)
+cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 
 binaries = [gpsd, gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
@@ -704,14 +692,14 @@ if ncurseslibs:
 
 # Test programs
 test_float = env.Program('test_float', ['test_float.c'])
-test_geoid = env.Program('test_geoid', ['test_geoid.c'], LIBS=gpslibs)
-test_json = env.Program('test_json', ['test_json.c'], LIBS=gpslibs)
-test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], LIBS=gpslibs)
-test_trig = env.Program('test_trig', ['test_trig.c'], LIBS=["m"])
-test_packet = env.Program('test_packet', ['test_packet.c'], LIBS=gpsdlibs)
+test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpslibs)
+test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
+test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], parse_flags=gpslibs)
+test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
+test_packet = env.Program('test_packet', ['test_packet.c'], parse_flags=gpsdlibs)
 test_bits = env.Program('test_bits', ['test_bits.c', "bits.c"])
-test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], LIBS=gpslibs)
-test_libgps = env.Program('test_libgps', ['test_libgps.c'], LIBS=gpslibs)
+test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], parse_flags=gpslibs)
+test_libgps = env.Program('test_libgps', ['test_libgps.c'], parse_flags=gpslibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json, test_libgps]
 if cxx and env["libgpsmm"]:
@@ -789,13 +777,8 @@ env.Command(target = "packet_names.h", source="packet_states.h", action="""
 env.Command(target="timebase.h", source="leapseconds.cache",
             action='$PYTHON leapsecond.py -h $SOURCE >$TARGET')
 
-env.Command(target="gpsd.h", source=["gpsd.h-head", "gpsd_config.h", "gpsd.h-tail"], action="""\
-    rm -f $TARGET &&\
-    echo \"/* This file is generated.  Do not hand-hack it! */\" >$TARGET &&\
-    cat $TARGET-head >>$TARGET &&\
-    cat gpsd_config.h >>$TARGET &&\
-    cat $TARGET-tail >>$TARGET &&\
-    chmod a-w $TARGET""")
+env.Textfile(target="gpsd_config.h", source=confdefs)
+env.Textfile(target="gpsd.h", source=[File("gpsd.h-head"), File("gpsd_config.h"), File("gpsd.h-tail")])
 
 env.Command(target="gps_maskdump.c", source=["maskaudit.py", "gps.h", "gpsd.h"], action='''
     rm -f $TARGET &&\
@@ -881,7 +864,7 @@ build = env.Alias('build', [binaries, python_parts, manpage_targets])
 env.Clean(build, glob.glob("*.o") + glob.glob("*.os"))
 env.Default(*build)
 
-if qtlibs:
+if qt_env:
     build_qt = qt_env.Alias('build', [compiled_qgpsmmlib])
     qt_env.Default(*build_qt)
 
