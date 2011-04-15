@@ -9,6 +9,7 @@
 
 typedef enum {t_integer, t_uinteger, t_real,
 	      t_string, t_boolean, t_character,
+	      t_timestamp,
 	      t_object, t_structobject, t_array,
 	      t_check} json_type;
 
