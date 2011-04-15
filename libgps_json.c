@@ -177,6 +177,7 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
     }
     /*@+usedef@*/
 
+    gpsdata->set &= ~UNION_SET;
     gpsdata->set |= GST_SET;
     return 0;
 }
@@ -321,6 +322,9 @@ static int json_att_read(const char *buf, struct gps_data_t *gpsdata,
     /*@ +fullinitblock @*/
 
     return json_read_object(buf, json_attrs_1, endptr);
+
+    gpsdata->set &= ~UNION_SET;
+    gpsdata->set |= ATTITUDE_SET;
 }
 
 static int json_devicelist_read(const char *buf, struct gps_data_t *gpsdata,
