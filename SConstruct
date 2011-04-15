@@ -296,10 +296,10 @@ for f in ("daemon", "strlcpy", "strlcat"):
 
 if config.CheckPKG('ncurses'):
     ncurseslibs = ['!pkg-config ncurses --cflags --libs']
-elif config.CheckExecutable('ncurses5-config', 'ncurses5-config'):
+elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
     ncurseslibs = ['!ncurses5-config --libs --cflags']
 else:
-    ncurseslibse= []
+    ncurseslibs= []
 
 if env['usb'] and config.CheckPKG('libusb-1.0'):
     confdefs.append("#define HAVE_LIBUSB 1\n\n")
