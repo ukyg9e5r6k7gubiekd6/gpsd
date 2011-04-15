@@ -731,7 +731,7 @@ lengths = {
     24: (160, 168),
     25: 168,
     26: (60, 1004),
-    27, 96,
+    27: 96,
     }
 
 field_groups = (
@@ -1030,25 +1030,25 @@ if __name__ == "__main__":
     verbose = 0
     skiperr = True
     for (switch, val) in options:
-        if switch == '-c':
+        if switch == '-c':        # Report in DSV format rather than JSON
             dsv = True
-        elif switch == '-d':
+        elif switch == '-d':      # Dump in a more human-readable format
             dump = True
-        elif switch == '-h':
+        elif switch == '-h':      # Make a histogram of type frequencies
             histogram = True
-        elif switch == '-j':
+        elif switch == '-j':      # Dump JSON
             json = True
-        elif switch == '-m':
+        elif switch == '-m':      # Dump malformed AIVDM/AIVDO packets raw
             malformed = True
-        elif switch == '-q':
+        elif switch == '-q':      # Suppress output
             quiet = True
-        elif switch == '-s':
+        elif switch == '-s':      # Report AIS in scaled form
             scaled = True
-        elif switch == '-t':
+        elif switch == '-t':      # Filter for a comma-separated list of types
             types = map(int, val.split(","))
-        elif switch == '-v':
+        elif switch == '-v':      # Dump raw packet before JSON or DSV.
             verbose += 1
-        elif switch == '-x':
+        elif switch == '-x':      # Skip decoding errors
             skiperr = False
 
     if not dsv and not histogram and not json and not malformed and not quiet:
