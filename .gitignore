@@ -10,7 +10,6 @@ lcdgps
 gpxlogger
 cgpxlogger
 gpspipe
-gpspacket.so
 # These are built from .in files
 gpscat
 gpsfake
@@ -55,6 +54,7 @@ srec.html
 *.la
 *.so
 *.so.[0-9.]*
+*.dylib
 *~
 *.swp
 # Built sources
