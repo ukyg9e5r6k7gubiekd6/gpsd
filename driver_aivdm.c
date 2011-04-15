@@ -240,7 +240,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type1.raim		= UBITS(148, 1)!=0;
 	    ais->type1.radio		= UBITS(149, 20);
 	    gpsd_report(LOG_INF,
-			"Nav=%d TURN=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d TH=%d Sec=%d\n",
+			"Nav=%d TURN=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d TH=%d Sec=%d\n",
 			ais->type1.status,
 			ais->type1.turn,
 			ais->type1.speed,
@@ -462,7 +462,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type9.raim		= UBITS(147, 1)!=0;
 	    ais->type9.radio		= UBITS(148, 19);
 	    gpsd_report(LOG_INF,
-			"Alt=%d SPEED=%d Q=%d Lon=%d Lat=%d COURSE=%d Sec=%d\n",
+			"Alt=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d Sec=%d\n",
 			ais->type9.alt,
 			ais->type9.speed,
 			(uint)ais->type9.accuracy,
@@ -882,6 +882,24 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			ais->type26.dest_mmsi,
 			ais->type26.app_id,
 			ais->type26.bitcount);
+	    break;
+	case 27:	/* Long Range AIS Broadcast message */
+	    ais->type27.accuracy        = (bool)UBITS(38, 1);
+	    ais->type27.raim		= UBITS(39, 1)!=0;
+	    ais->type27.status		= UBITS(40, 4);
+	    ais->type27.lon		= SBITS(44, 18);
+	    ais->type27.lat		= SBITS(62, 17);
+	    ais->type27.speed		= UBITS(79, 6);
+	    ais->type27.course		= UBITS(85, 9);
+	    ais->type27.gnss            = (bool)UBITS(94, 1);
+	    gpsd_report(LOG_INF,
+			"Nav=%d SOG=%d Q=%d Lon=%d Lat=%d COG=%d\n",
+			ais->type27.status,
+			ais->type27.speed,
+			(uint)ais->type27.accuracy,
+			ais->type27.lon,
+			ais->type27.lat,
+			ais->type27.course);
 	    break;
 	default:
 	    gpsd_report(LOG_INF, "\n");

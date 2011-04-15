@@ -2154,6 +2154,20 @@ void json_aivdm_dump(const struct ais_t *ais,
 				    (ais->type26.bitcount + 7) / 8),
 		       ais->type26.radio);
 	break;
+    case 27:			/* Long Range AIS Broadcast message */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"status\":\"%s\","
+		       "\"accuracy\":%s,\"lon\":%.1f,\"lat\":%.1f,"
+		       "\"speed\":%u,\"course\":%u,raim\":%s,\"gnss\":%s}\r\n",
+		       nav_legends[ais->type27.status],
+		       JSON_BOOL(ais->type27.accuracy),
+		       ais->type27.lon / AIS_LONGRANGE_LATLON_SCALE,
+		       ais->type27.lat / AIS_LONGRANGE_LATLON_SCALE,
+		       ais->type27.speed,
+		       ais->type27.course,
+		       JSON_BOOL(ais->type27.raim),
+		       JSON_BOOL(ais->type27.gnss));
+	break;
     default:
 	if (buf[strlen(buf) - 1] == ',')
 	    buf[strlen(buf) - 1] = '\0';

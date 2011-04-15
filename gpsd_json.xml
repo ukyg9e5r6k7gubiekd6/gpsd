@@ -2212,9 +2212,9 @@ performed for JSON output.  Latitudes and longitudes are scaled to
 decimal degrees rather than the native AIS unit of 1/10000th of a
 minute of arc.  Ship (but not air) speeds are scaled to knots rather
 than tenth-of-knot units.  Navigation status and positioning-system
-type are dumped as text strings rather than IAS numeric codes. Rate of
+type are dumped as text strings rather than AIS numeric codes. Rate of
 turn may appear as "nan" if is unavailable, or as one of the strings
-"fastright" or "fastleft" if it is out of the IAS encoding range;
+"fastright" or "fastleft" if it is out of the AIS encoding range;
 otherwise it is quadratically mapped back to the turn sensor number in
 degrees per minute. Vessel draughts are converted to decimal meters
 rather than native AIS decimeters. Various other scaling conversions

@@ -51,19 +51,20 @@ technically difficult and impeded by legal barriers.
 
 ITU Recommendation M.1371, "Technical Characteristics for a Universal
 Shipborne Automatic Identification System Using Time Division Multiple
-Access" <<ITU1371>>, issued in 2001, describes the bit-level format of
-AIS radio messages. This standard was proprietary and expensive for
-a long time. It became available for free download, apparently at
-some point in 2011, well after most of ths document was assembled.
+Access" <<ITU1371>>, issued in 2001, first described the bit-level
+format of AIS radio messages. This standard was proprietary and
+expensive. I did not have access to it or any of its followup
+revisions while assembling versions of this document up to 1.29.
 
-ITU-R M.1371 is expanded and clarified by "IALA Technical
+ITU-R M.1371 was expanded and clarified by "IALA Technical
 Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
 is freely available.
 
-There have been two minor revisions of ITU-R M.1371 since it was
+There have been three minor revisions of ITU-R M.1371 since it was
 originally issued.  These add interpretations to packet bitfields that
-were previously marked "spare" and "regional reserved".  I have not
-seen these either, but have been passed information on them.
+were previously marked "spare" and "regional reserved". ITU-R M.1371
+revision 4 became available for free download, apparently at some
+point in early 2011, well after most of this document was assembled.
 
 The ASCII format for AIVDM/AIVDO representations of AIS radio messages
 seems to have been set by IEC-PAS 61162-100, "Maritime navigation and
@@ -96,6 +97,8 @@ ITU-1371-3.
 
 Descriptions of messages 25 and 26 are based on AIS transceiver vendor
 documentation forwarded to me by a source wishing to remain anonymous.
+Message type 27 was described in ITU1371-4 and added here after that
+became a freely available download.
 
 Should you set out to write a decoder using this document, you are
 likely to find that one of your challenges is finding enough AIS
@@ -130,7 +133,7 @@ relevant proprietary standards.  If you are such a person, please help
 by reporting the following to be included in future versions of this
 document:
 
-* Sample sentences of types 16-17, 22-23, and 25-26.
+* Sample sentences of types 16-17, 22-23, and 25-27.
 
 * Sample sentences of type 6 and 8 conforming to <<IMO236>> and <<IMO289>>.
 
@@ -418,6 +421,7 @@ types are as follows:
 |24 |Class B CS Static Data Report
 |25 |Binary Message, Single Slot
 |26 |Binary Message, Multiple Slot
+|27 |Position report for  long-range applications 
 |======================================================
 
 In normal operation, an AIS transceiver will broadcast a position report
@@ -458,7 +462,7 @@ are derived from <<IALA>>. Message type 23 was decribed to me by Mike
 Greene based on <<IEC-62287>>.  Message type 24 was described to me by
 <<Schwehr>>, whose Python toolkit decodes it. Message types 25-26 are
 reported by <<Schwehr>>, who observes they were added in Version 3 of
-<<ITU1371>>.
+<<ITU1371>>. Message type 27 is direct from <<ITU1371>> version 4.
 
 The "Member" column in these tables is not derived from any of the ITU
 standards or amendments.  I have invented it in order to be able to
@@ -471,7 +475,7 @@ set to use.
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
 1-15, 18-21, and 24.  Described but unchecked are 16-17, 22-23, and 
-25-26. Also, the interpretation of IMO extension subtypes of messages
+25-27. Also, the interpretation of IMO extension subtypes of messages
 6 and 8 has yet to be tested. 
 
 Bit lengths and length ranges are given because decoders should check
@@ -559,7 +563,7 @@ Speed over ground is in 0.1-knot resolution from 0 to 102 knots.
 value 1023 indicates speed is not available, value 1022 indicates
 102.2 knots or higher.
 
-Position accuracy flag indicates the accuracy of the fix.  A value of
+The position accuracy flag indicates the accuracy of the fix.  A value of
 1 indicates a DGPS-quality fix with an accuracy of < 10ms.  0, the
 default, indicates an unaugmented GNSS fix with accuracy > 10m.
 
@@ -2167,8 +2171,10 @@ than 9, and (c) end padding changes from 6 to 10 bits.
 |38-39   |  2 |Spare              |            |Not used
 |40-55   | 16 |DAC/FID            |            |DAC = 001 FID = 11
 |56-80   | 25 |Longitude          |lon         |Signed: unit minutes * 0.001
+|        |    |                   |            |East positive, West negative
 |        |    |                   |            |181000 = N/A (default)
 |81-104  | 24 |Latitude           |lat         |Signed: unit minutes * 0.001
+|        |    |                   |            |North positive, South negative
 |        |    |                   |            |91000 = N/A (default)
 |105-105 |  1 |Fix quality        |accuracy    |As in Common Navigation Block
 |106-110 |  5 |Day                |day         |1-31, 0=N/A (default)
@@ -2932,7 +2938,7 @@ Takes up 60-1064 bits (up to 5 slots).
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len   |Description           | Member      | Units
-|0-5     |  6   | Message Type         | type        | Unsigned integer: 25
+|0-5     |  6   | Message Type         | type        | Unsigned integer: 26
 |6-7     |  2   | Repeat Indicator     | repeat      | As in CNB
 |8-37    | 30   | MMSI                 | mmsi        | Unsigned integer: 9 digits
 |38      |  1   | Destination indicator| addressed   | 0=broadcast,1=addressed
@@ -2956,6 +2962,39 @@ whether it should be interpretred as a SOTDMA or ITDMA state.
 
 Note: Type 26 is extremely rare. As of March 2010 it has not been
 observed even in long-duration samples from AISHub.
+
+=== Type 27: Long Range AIS Broadcast message  ===
+
+ITU-1371-4 says this message is primarily intended for long-range
+detection of AIS Class A equipped vessels (typically by
+satellite). This message has a similar content to Messages 1, 2 and 3,
+but the total number of bits has been compressed to allow for
+increased propagation delays associated with long-range detection
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len   |Description         |Member   |Units
+|0-5     |  6   |Message Type        |type     |Unsigned integer: 27
+|6-7     |  2   |Repeat Indicator    |repeat   |As in CNB
+|8-37    | 30   |MMSI                |mmsi     |Unsigned integer: 9 digits
+|38-38   | 1    |Position Accuracy   |accuracy |See Common Navigation Block
+|39-39   | 1    |RAIM flag           |raim     |See Common Navigation Block
+|40-43   | 4    |Navigation Status   |status   |See Common Navigation Block
+|44-61   | 18   |Longitude           |lon      |Signed: minutes/10
+|        |      |                    |         |East positive, West negative
+|        |      |                    |         |181000 = N/A (default)
+|62-78   | 17   |Latitude            |lat      |Signed: minutes/10
+|        |      |                    |         |North positive, South negative
+|        |      |                    |         |91000 = N/A (default)
+|79-84   | 6    |Speed Over Ground   |speed    |Knots (0-62); 63 = N/A (default)
+|85-93   | 9    |Course Over Ground  |course   |0 to 359 degrees,
+|        |      |                    |         |511 = not available
+|94-94   | 1    |GNSS Position status|gnss     |0 = current GNSS position
+|        |      |                    |         |1 = not GNSS position (default)
+|95-95   | 1    |Spare               |         |Not used
+|==============================================================================
+
+Note: Type 27 has not been observed in the wild as of early 2011.
 
 == Local extensions ==
 
@@ -3177,7 +3216,7 @@ controlled-vocabulary fields. An AIS-JSON object may have the optional
 attribute "scaled":true to signify that the rest of its fields are
 scaled; if this attribute has the value 'false' or is omitted, no
 scaling has been performed.  Message types for which the unscaled and
-scaled dumps will differ are 1-5, 9, 11, 17-19, and 21-24.
+scaled dumps will differ are 1-5, 9, 11, 17-19, 21-24, and 27.
 
 5. In unscaled mode, float-valued fields are dumped in their unscaled
 integer form. In scaled mode, division or other specified scaling is
@@ -3212,6 +3251,7 @@ integer indices.  In scaled mode, the values are dumped as strings.
 | 21     | lon, lat                         | aid_type, epfd
 | 22-23  | ne_lon,ne_lat, sw_lon, sw_lat    | -
 | 24     | -                                | shiptype
+| 27     | lon, lat                         | -
 |===========================================================================
 
 As the Beaufort scale is usually quoted numerically, conforming implementations
@@ -3387,8 +3427,8 @@ Version 1.27 describes the sometime U.S. practice of omitting the leading
   
 Version 1.28 merges updates from IMO 289, communicated by Kurt Schwehr.
 
-Version 1.29 added much information on WMO special message format in
+Version 1.29 added much information on WMO special message formats in
 types 6 and 8.
 
 Version 1.30 was revised because M.1371-4 is now a free download.
-Also, we describe "pilot plugs".
+Also, we describe "pilot plugs" and AIS message type 27.

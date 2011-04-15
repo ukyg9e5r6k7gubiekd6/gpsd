@@ -19,7 +19,7 @@
 #   we have test data.
 #
 # Decoding for 1-15, 18-21, and 24 have been tested against live data.
-# Decoding for 16-17, 22-23, and 25-26 have not.
+# Decoding for 16-17, 22-23, and 25-27 have not.
 
 # Here are the pseudoinstructions in the pseudolanguage.
 
@@ -672,6 +672,22 @@ type25 = (
 # No type 26 handling yet, we'd need new machinery to constrain how many
 # bits the data spec eats in order to recover the radio bits after it.
 
+type27 = (
+    bitfield("accuracy", 1,  'unsigned', None,      "Position Accuracy"),
+    bitfield("raim",     1,  'unsigned', None,      "RAIM flag"),
+    bitfield("status",   4,  'unsigned', 0,         "Navigation Status",
+             formatter=cnb_status_legends),
+    bitfield("lon",      18, 'signed',   0x1a838,   "Longitude",
+             formatter=short_latlon_format),
+    bitfield("lat",      17, 'signed',   0xd548,    "Latitude",
+             formatter=short_latlon_format),
+    bitfield("speed",     6, 'unsigned', 63,        "Speed Over Ground",
+             formatter=cnb_speed_format),
+    bitfield("course",    9, 'unsigned', 511,       "Course Over Ground"),
+    bitfield("GNSS",      1, 'unsigned', None,      "GNSS flag"),
+    spare(1),  
+    )
+
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
         validator=lambda n: n > 0 and n <= 26),
@@ -683,7 +699,7 @@ aivdm_decode = (
                               type10, type4,  type12,  type7,  type14,
                               type15, type16, type17,  type18, type19,
                               type20, type21, type22,  type23, type24,
-                              type25]),
+                              type25, None,   type27]),
     )
 
 # Length ranges.  We use this for integrity checking.
@@ -715,6 +731,7 @@ lengths = {
     24: (160, 168),
     25: 168,
     26: (60, 1004),
+    27, 96,
     }
 
 field_groups = (

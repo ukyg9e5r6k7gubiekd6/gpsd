@@ -1221,6 +1221,22 @@ struct ais_t
 	    char bitdata[(AIS_TYPE26_BINARY_MAX + 7) / 8];
 	    unsigned int radio;		/* radio status bits */
 	} type26;
+	/* Type 27 - Long Range AIS Broadcast message */
+	struct {
+	    bool accuracy;		/* position accuracy */
+	    bool raim;			/* RAIM flag */
+	    unsigned int status;	/* navigation status */
+#define AIS_LONGRANGE_LATLON_SCALE	600.0
+	    int lon;			/* longitude */
+#define AIS_LONGRANGE_LON_NOT_AVAILABLE	0x1a838
+	    int lat;			/* latitude */
+#define AIS_LONGRANGE_LAT_NOT_AVAILABLE	0xd548
+	    unsigned int speed;		/* speed over ground in deciknots */
+#define AIS_LONGRANGE_SPEED_NOT_AVAILABLE 63
+	    unsigned int course;	/* course over ground */
+#define AIS_LONGRANGE_COURSE_NOT_AVAILABLE 511
+	    bool gnss;			/* are we reporting GNSS position? */
+	} type27;
     };
 };
 

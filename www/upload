@@ -9,7 +9,7 @@ webdir=shell.berlios.de:/home/groups/gpsd/htdocs
 #cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
 # Ensure all derived HTML and checksums are up to date.
-(cd ..; make website)
+(cd ..; scons website)
 
 
 if [ $1 ]

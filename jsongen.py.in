@@ -394,6 +394,22 @@ ais_specs = (
         ),
     "stringbuffered":("data",),
     },
+    {
+    "initname" : "json_ais27",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type27",
+    "fieldmap":(
+        # fieldname   type        default
+        ('status',   'uinteger', '0'),
+        ('speed',    'uinteger', 'AIS_LONGRANGE_SPEED_NOT_AVAILABLE'),
+        ('accuracy', 'boolean',  'false'),
+        ('lon',      'integer',  'AIS_LONGRANGE_LON_NOT_AVAILABLE'),
+        ('lat',      'integer',  'AIS_LONGRANGE_LAT_NOT_AVAILABLE'),
+        ('course',   'uinteger', 'AIS_LONGRANGE_COURSE_NOT_AVAILABLE'),
+        ('raim',     'boolean',  'false'),
+        ('gnss',     'boolean',  'true'),
+        ),
+    },
 )
 
 
