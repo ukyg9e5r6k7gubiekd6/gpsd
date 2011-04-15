@@ -28,11 +28,16 @@ and all passenger vessels; see <<SOLAS>> for details.  Individual
 maritime nations may have stricter and more detailed rules: for those
 obtaining in U.S. waters, see <<US-REQUIREMENTS>>.
 
-AIS receivers report ASCII data packets over serial or USB lines,
-using the NMEA 0183 data format and physical network standards. AIS
-packets have the introducer "!AIVDM" or "!AIVDO"; AIVDM packets are
-reports from other ships and AIVDO packets are reports from your own
-ship.
+AIS receivers report ASCII data packets as a byte stream over serial
+or USB lines, using the NMEA 0183 or NMEA 2000 data formats. The RS422
+variant of serial specified as a physical layer by NMEA 0183 is common
+in marine navigation systems; there may be a "pilot plug"
+<<PILOTPLUG>> which converts to USB. Alternatively, newer AIS
+receivers may report directly over RS232 or USB.
+
+AIS packets have the introducer "!AIVDM" or "!AIVDO"; AIVDM packets
+are reports from other ships and AIVDO packets are reports from your
+own ship.
 
 A lengthy description of AIS, focusing on the goals and history of the
 system, but not describing the data protocols in any detail, can be
@@ -3290,6 +3295,8 @@ Identification System]
 
 - [[[AISHUB]]] http://www.aishub.net/[AIS Hub, the AIS data sharing center]
 
+- [[[PILOTPLUG]]] http://www.pilotplug.com/
+
 == Change history ==
 
 Version 1.0 was the initial release covering messages 1-3, 4, and 5.
@@ -3384,3 +3391,4 @@ Version 1.29 added much information on WMO special message format in
 types 6 and 8.
 
 Version 1.30 was revised because M.1371-4 is now a free download.
+Also, we describe "pilot plugs".
