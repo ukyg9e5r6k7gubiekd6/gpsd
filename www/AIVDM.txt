@@ -46,15 +46,16 @@ found at <<AIS>>.
 == Standards ==
 
 Multiple standards bear on the AIVDM/AIVDO format.  This document
-exists because assembling them into a complete picture is both
-technically difficult and impeded by legal barriers.
+exists because assembling them into a complete picture is technically
+difficult and was long impeded by legal barriers as well.
 
 ITU Recommendation M.1371, "Technical Characteristics for a Universal
 Shipborne Automatic Identification System Using Time Division Multiple
 Access" <<ITU1371>>, issued in 2001, first described the bit-level
 format of AIS radio messages. This standard was proprietary and
-expensive. I did not have access to it or any of its followup
-revisions while assembling versions of this document up to 1.29.
+expensive when issued. I did not have access to it or any of its
+followup revisions while assembling versions of this document up to
+1.29.
 
 ITU-R M.1371 was expanded and clarified by "IALA Technical
 Clarifications on Recommendation ITU-R M.1371-1" <<IALA>>, which
@@ -2195,7 +2196,7 @@ Supersedes an <<IMO236>> message with the same title but FID = 11 and
 a different binary layout.  The exact differences are: (a) The
 addition of the Position Accuracy field, (b) water level has 12 bits
 of precision rather than 9 (units of centimeters rather than
-decimeters) , and (c) end padding changes from 6 to 10 bits.
+decimeters), and (c) end padding changes from 6 to 10 bits.
 
 [frame="topbot",options="header"]
 |==============================================================================
