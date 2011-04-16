@@ -362,7 +362,7 @@ int libgps_json_unpack(const char *buf,
 	return -1;
 #define STARTSWITH(str, prefix)	strncmp(str, prefix, sizeof(prefix)-1)==0
     if (STARTSWITH(classtag, "\"class\":\"TPV\"")) {
-	int status = json_tpv_read(buf, gpsdata, end);
+	status = json_tpv_read(buf, gpsdata, end);
 	gpsdata->status = STATUS_FIX;
 	gpsdata->set = STATUS_SET;
 	if (isnan(gpsdata->fix.time) == 0)
@@ -402,7 +402,7 @@ int libgps_json_unpack(const char *buf,
 	}
 	return status;
     } else if (STARTSWITH(classtag, "\"class\":\"SKY\"")) {
-	int status = json_sky_read(buf, gpsdata, end);
+	status = json_sky_read(buf, gpsdata, end);
 	if (status == 0)
 	    gpsdata->set |= SATELLITE_SET;
 	return status;
