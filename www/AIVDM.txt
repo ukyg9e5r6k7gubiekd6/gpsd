@@ -1714,8 +1714,8 @@ length: 360 bits.
 
 ==== Weather observation report from ship ====
 
-There are two variants of this message.  They are distinguashed by bit 56,
-the WMO bit.  Field layouts after that bit vary dependiong on it.
+There are two variants of this message.  They are distinguished by bit 56,
+the WMO bit.  Field layouts after that bit vary depending on it.
 
 A message 8 subtype described in <<IMO289>>. DAC = 001 FID = 21. Fixed
 length: 360 bits.
