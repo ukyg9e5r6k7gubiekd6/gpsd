@@ -147,6 +147,17 @@ else:
     print "No Python - how are you running this script?"
     Exit(1)
 
+
+# define a helper function for pkg-config - we need to pass
+# --static for static linking, too.
+if env["shared"]:
+    pkg_config = lambda pkg: ['!pkg-config --cflags --libs %s' %(pkg, )]
+else:
+    pkg_config = lambda pkg: ['!pkg-config --cflags --libs --static %s' %(pkg, )]
+
+
+
+
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
@@ -295,7 +306,7 @@ for f in ("daemon", "strlcpy", "strlcat"):
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
 
 if config.CheckPKG('ncurses'):
-    ncurseslibs = ['!pkg-config ncurses --cflags --libs']
+    ncurseslibs = pkg_config('ncurses')
 elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
     ncurseslibs = ['!ncurses5-config --libs --cflags']
 else:
@@ -303,7 +314,7 @@ else:
 
 if env['usb'] and config.CheckPKG('libusb-1.0'):
     confdefs.append("#define HAVE_LIBUSB 1\n\n")
-    usblibs = ['!pkg-config libusb-1.0 --cflags --libs']
+    usblibs = pkg_config('libusb-1.0')
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n\n")
     usblibs = []
@@ -318,8 +329,8 @@ else:
 
 if env['dbus_export'] and config.CheckPKG('dbus-1') and config.CheckPKG('dbus-glib-1'):
     confdefs.append("#define HAVE_DBUS 1\n\n")
-    dbus_xmit_libs = ['!pkg-config --libs --cflags dbus-1']
-    dbus_recv_libs = ['pkg-config --libs --cflags dbus-glib-1']
+    dbus_xmit_libs = pkg_config('dbus-1')
+    dbus_recv_libs = pkg_config('dbus-glib-1')
 else:
     confdefs.append("/* #undef HAVE_DBUS */\n\n")
     dbus_xmit_libs = []
@@ -327,7 +338,7 @@ else:
 
 if env['bluez'] and config.CheckPKG('bluez'):
     confdefs.append("#define HAVE_BLUEZ 1\n\n")
-    bluezlibs = ['!pkg-config bluez --cflags --libs']
+    bluezlibs = pkg_config('bluez')
 else:
     confdefs.append("/* #undef HAVE_BLUEZ */\n\n")
     bluezlibs = []
@@ -454,7 +465,7 @@ if os.path.exists("/etc/gentoo-release"):
 if cxx and env['libQgpsmm'] and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
-    qt_env.MergeFlags(['!pkg-config QtNetwork --cflags --libs'])
+    qt_env.MergeFlags(pkg_config('QtNetwork'))
 else:
     qt_env = None
 
