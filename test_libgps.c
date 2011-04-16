@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	case '?':
 	case 'h':
 	default:
-	    (void)fputs("usage: libgps [-b] [-d lvl] [-s]\n", stderr);
+	    (void)fputs("usage: test_libgps [-b] [-D lvl] [-s]\n", stderr);
 	    exit(1);
 	}
     }
