@@ -281,6 +281,8 @@ static int json_internal_read_object(const char *cp,
 		    maxlen = (int)cursor->len - 1;
 		else if (cursor->type == t_check)
 		    maxlen = (int)strlen(cursor->dflt.check);
+		else if (cursor->type == t_time)
+		    maxlen = JSON_VAL_MAX;
 		else if (cursor->map != NULL)
 		    maxlen = (int)sizeof(valbuf) - 1;
 		pval = valbuf;

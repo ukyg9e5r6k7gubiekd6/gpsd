@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <getopt.h>
 
 #include "gpsd.h"
 #include "gps_json.h"
@@ -211,6 +212,20 @@ static const struct json_attr_t json_attrs_8[] = {
 int main(int argc UNUSED, char *argv[]UNUSED)
 {
     int status = 0;
+    int option;
+
+    while ((option = getopt(argc, argv, "hD:?")) != -1) {
+	switch (option) {
+	case 'D':
+	    gps_enable_debug(atoi(optarg), stdout);
+	    break;
+	case '?':
+	case 'h':
+	default:
+	    (void)fputs("usage: test_json [-D lvl]\n", stderr);
+	    exit(1);
+	}
+    }
 
     (void)fprintf(stderr, "JSON unit test ");
 

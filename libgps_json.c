@@ -34,8 +34,6 @@ PERMISSIONS
 static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			 /*@null@*/ const char **endptr)
 {
-    int status;
-    char tbuf[JSON_DATE_MAX+1];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
@@ -44,8 +42,8 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			         .len = sizeof(gpsdata->dev.path)},
 	{"tag",    t_string,  .addr.string = gpsdata->tag,
 			         .len = sizeof(gpsdata->tag)},
-	{"time",   t_string,  .addr.string = tbuf,
-			         .len = sizeof(tbuf)},
+	{"time",   t_time,    .addr.real = &gpsdata->fix.time,
+			         .dflt.real = NAN},
 	{"time",   t_real,    .addr.real = &gpsdata->fix.time,
 			         .dflt.real = NAN},
 	{"ept",    t_real,    .addr.real = &gpsdata->fix.ept,
@@ -81,27 +79,12 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
     };
     /*@ +fullinitblock @*/
 
-    tbuf[0] = '\0';
-    status = json_read_object(buf, json_attrs_1, endptr);
-
-    if (status == 0) {
-	/*@-usedef@*/
-	if (isnan(gpsdata->fix.time)!=0) {
-	    if (tbuf[0] == '\0')
-		gpsdata->fix.time = NAN;
-	    else
-		gpsdata->fix.time = iso8601_to_unix(tbuf);
-	}
-	/*@+usedef@*/
-    }
-    return status;
+    return json_read_object(buf, json_attrs_1, endptr);
 }
 
 static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
                            /*@null@*/ const char **endptr)
 {
-    int status;
-    char tbuf[JSON_DATE_MAX+1];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
@@ -110,8 +93,8 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 			         .len = sizeof(gpsdata->dev.path)},
 	{"tag",    t_string,  .addr.string = gpsdata->tag,
 			         .len = sizeof(gpsdata->tag)},
-	{"time",   t_string,  .addr.string = tbuf,
-			         .len = sizeof(tbuf)},
+	{"time",   t_time,    .addr.real = &gpsdata->gst.utctime,
+			         .dflt.real = NAN},
 	{"time",   t_real,    .addr.real = &gpsdata->gst.utctime,
 			         .dflt.real = NAN},
 	{"rms",    t_real,    .addr.real = &gpsdata->gst.rms_deviation,
@@ -133,27 +116,13 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
     };
     /*@ +fullinitblock @*/
 
-    tbuf[0] = '\0';
-    status = json_read_object(buf, json_attrs_1, endptr);
-    if (status != 0)
-	return status;
-
-    /*@-usedef@*/
-    if (isnan(gpsdata->fix.time)!=0) {
-	if (tbuf[0] == '\0')
-	    gpsdata->gst.utctime = NAN;
-	else
-	    gpsdata->gst.utctime = iso8601_to_unix(tbuf);
-    }
-    /*@+usedef@*/
-    return 0;
+    return json_read_object(buf, json_attrs_1, endptr);
 }
 
 static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 			 /*@null@*/ const char **endptr)
 {
     bool usedflags[MAXCHANNELS];
-    char tbuf[JSON_DATE_MAX+1];
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_2_1[] = {
 	/* *INDENT-OFF* */
@@ -172,8 +141,8 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	                             .len = sizeof(gpsdata->dev.path)},
 	{"tag",	       t_string,  .addr.string  = gpsdata->tag,
 	                             .len = sizeof(gpsdata->tag)},
-	{"time",       t_string,  .addr.string = tbuf,
-			             .len = sizeof(tbuf)},
+	{"time",       t_time,    .addr.real = &gpsdata->skyview_time,
+	      	                     .dflt.real = NAN},
 	{"time",       t_real,    .addr.real = &gpsdata->skyview_time,
 	      	                     .dflt.real = NAN},
 	{"hdop",       t_real,    .addr.real    = &gpsdata->dop.hdop,
@@ -205,19 +174,10 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	usedflags[i] = false;
     }
 
-    tbuf[0] = '\0';
     status = json_read_object(buf, json_attrs_2, endptr);
     if (status != 0)
 	return status;
 
-    /*@-usedef@*/
-    if (isnan(gpsdata->fix.time)!=0) {
-	if (tbuf[0] == '\0')
-	    gpsdata->skyview_time = NAN;
-	else
-	    gpsdata->skyview_time = iso8601_to_unix(tbuf);
-    }
-    /*@+usedef@*/
     gpsdata->satellites_used = 0;
     gpsdata->satellites_visible = 0;
     (void)memset(gpsdata->used, '\0', sizeof(gpsdata->used));
