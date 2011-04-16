@@ -455,6 +455,8 @@ if cxx and env['libQgpsmm'] and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
     qt_env.MergeFlags(['!pkg-config QtNetwork --cflags --libs'])
+else:
+    qt_env = None
 
 ## Two shared libraries provide most of the code for the C programs
 
