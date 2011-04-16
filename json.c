@@ -121,7 +121,7 @@ static /*@null@*/ char *json_target_address(const struct json_attr_t *cursor,
 	case t_uinteger:
 	    targetaddr = (char *)&cursor->addr.uinteger[offset];
 	    break;
-	case t_timestamp:
+	case t_time:
 	case t_real:
 	    targetaddr = (char *)&cursor->addr.real[offset];
 	    break;
@@ -199,7 +199,7 @@ static int json_internal_read_object(const char *cp,
 		case t_uinteger:
 		    *((unsigned int *)lptr) = cursor->dflt.uinteger;
 		    break;
-		case t_timestamp:
+		case t_time:
 		case t_real:
 		    *((double *)lptr) = cursor->dflt.real;
 		    break;
@@ -386,7 +386,7 @@ static int json_internal_read_object(const char *cp,
 	     */
 	    for (;;) {
 		int seeking = cursor->type;
-		if (value_quoted && (cursor->type == t_string || cursor->type == t_timestamp))
+		if (value_quoted && (cursor->type == t_string || cursor->type == t_time))
 		    break;
 		if ((strcmp(valbuf, "true")==0 || strcmp(valbuf, "false")==0)
 			&& seeking == t_boolean)
@@ -406,7 +406,7 @@ static int json_internal_read_object(const char *cp,
 	    }
 	    if (value_quoted
 		&& (cursor->type != t_string && cursor->type != t_character
-		    && cursor->type != t_check && cursor->type != t_timestamp 
+		    && cursor->type != t_check && cursor->type != t_time 
 		    && cursor->map == 0)) {
 		json_debug_trace((1,
 				  "Saw quoted value when expecting non-string.\n"));
@@ -414,7 +414,7 @@ static int json_internal_read_object(const char *cp,
 	    }
 	    if (!value_quoted
 		&& (cursor->type == t_string || cursor->type == t_check
-		    || cursor->type == t_timestamp || cursor->map != 0)) {
+		    || cursor->type == t_time || cursor->map != 0)) {
 		json_debug_trace((1,
 				  "Didn't see quoted value when expecting string.\n"));
 		return JSON_ERR_NONQSTRING;
@@ -439,7 +439,7 @@ static int json_internal_read_object(const char *cp,
 		case t_uinteger:
 		    *((unsigned int *)lptr) = (unsigned)atoi(valbuf);
 		    break;
-		case t_timestamp:
+		case t_time:
 		    *((double *)lptr) = iso8601_to_unix(valbuf);
 		    break;
 		case t_real:
@@ -562,7 +562,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    break;
 	case t_integer:
 	case t_uinteger:
-	case t_timestamp:
+	case t_time:
 	case t_real:
 	case t_boolean:
 	case t_character:
