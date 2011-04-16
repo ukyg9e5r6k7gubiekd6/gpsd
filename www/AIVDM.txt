@@ -891,8 +891,8 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |172-176 |  5 |ETA day              |nday      |1-31, 0=N/A (default)
 |177-181 |  5 |ETA hour             |nhour     |0-23, 24=N/A (default)
 |182-187 |  6 |ETA minute           |nminute   |0-59, 60=N/A (default)
-|188-307 |120 |Main Dangerous Good  |dangerous |20 6-bit characcters
-|308-331 | 24 |IMD Category         |imdcat    |4  6-bit characcters
+|188-307 |120 |Main Dangerous Good  |dangerous |20 6-bit characters
+|308-331 | 24 |IMD Category         |imdcat    |4  6-bit characters
 |332-344 | 13 |UN Number            |unid      |1-3363 UN Number
 |345-354 | 10 |Amount of Cargo      |amount    |Unsigned integer
 |355-356 |  2 |Unit of Quantity     |unit      |cargounit
@@ -1074,9 +1074,9 @@ bit is on.
 |127-131 |  5 |Hour               |hour         |0-23; 24 = N/A (default)
 |132-137 |  6 |Minute             |minute       |0-59; 60 = N/A (default)
 |138-138 |  1 |Services Availability|availability|0 = services types unknown
-|               |    |                                  |            |1 = services types are known
+|        |    |                     |            |1 = services types are known
 |139-140 |  2 |Agent              |agent        |Service status value
-|141-142 |  2 |Bunker/fuel       |fuel         |Service status value
+|141-142 |  2 |Bunker/fuel        |fuel         |Service status value
 |143-144 |  2 |Chandler           |chandler     |Service status value
 |145-146 |  2 |Stevedore          |stevedore    |Service status value
 |147-148 |  2 |Electrical         |electrical   |Service status value
@@ -1157,6 +1157,7 @@ with a different layout, deprecated in <<IMO289>>.
 |72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 25
 |88-89   |  2 |Unit of Quantity     |unit      |cargounit
 |90-99   | 10 |Amount of Cargo      |amount    |Unsigned integer
+|        |    |                     |          |0 = N/A (default)
 |100-103 |  4 |Cargo code           |code      |cargocode
 |104-116 | 13 |Cargo subtype        |subtype   |Unsigned integer
 |==============================================================================
@@ -1284,18 +1285,18 @@ via the Message Linkage ID field.
 
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len    |Description          |Member    |Units
-|0-5     |  6    |Message Type         |type      |Unsigned integer: 6
-|6-7     |  2    |Repeat Indicator     |repeat    |As in Common Navigation Block
-|8-37    | 30    |Source MMSI          |mmsi      |Unsigned integer: 9 digits
-|38-39   |  2    |Sequence Number      |seqno     |Unsigned integer 0-3
-|40-69   | 30    |Destination MMSI     |dest_mmsi |Unsigned integer: 9 digits
-|70-70   |  1    |Retransmit flag      |retransmit|0 = no retransmission (default)
-|        |       |                     |          |1 = retransmitted
-|71-71   |  1    |Spare                |          |Not used
-|72-87   | 16    |DAC/FID              |            |DAC = 001 FID = 30
-|88-97   | 10    |Message Linkage ID   |linkage     |Unsigned integer
-|98-?    | 6-930 |Description          |description |String
+|Field   |Len    |Description       |Member     |Units
+|0-5     |  6    |Message Type      |type       |Unsigned integer: 6
+|6-7     |  2    |Repeat Indicator  |repeat     |As in Common Navigation Block
+|8-37    | 30    |Source MMSI       |mmsi       |Unsigned integer: 9 digits
+|38-39   |  2    |Sequence Number   |seqno      |Unsigned integer 0-3
+|40-69   | 30    |Destination MMSI  |dest_mmsi  |Unsigned integer: 9 digits
+|70-70   |  1    |Retransmit flag   |retransmit |0 = no retransmission (default)
+|        |       |                  |           |1 = retransmitted
+|71-71   |  1    |Spare             |           |Not used
+|72-87   | 16    |DAC/FID           |           |DAC = 001 FID = 30
+|88-97   | 10    |Message Linkage ID|linkage    |Unsigned integer
+|98-?    | 6-930 |Description       |description|String
 |==============================================================================
 
 There is an equivalent subtype of message 8 that is a broadcast description.
@@ -1330,7 +1331,8 @@ different bit widths for the latitude and longitude fields.
 |151-156 |  6 |From UTC Minute        |from_min  |0-59, 60 = N/A (default)
 |157-161 |  5 |To UTC Hour            |to_hour   |0-23, 24 = N/A (default)
 |162-167 |  6 |To UTC Minute          |to_min    |0-59, 60 = N/A (default)
-|168-176 |  9 |Current Dir. Predicted |cdir      |0-359 deg, 360-N/A (default)
+|168-176 |  9 |Current Dir. Predicted |cdir      |0-359 degrees from true north 
+|        |    |                       |          |360 = N/A (default)
 |177-184 |  8 |Current Speed Predicted|cspeed    |0-250, uniits of 0.1 knots.
 |        |    |                       |          |251 = speed >= 25.1 knots
 |        |    |                       |          |255 = N/A (default)
@@ -1435,7 +1437,8 @@ Breakdowns of selected Message 8 subtypes from <<IMO289>> follow.
 A message 8 subtype. DAC = 001 FID = 11. Fixed length, 352 bits.
 This is in use and described in <<IMO236>>, but has been deprecated by
 <<289>> in favor of a message with the same title but FID = 31 and a
-different binary layout.
+different binary layout. <<IMO236>> specifies a maximum interval between
+broadcast of this message of 12 minutes.
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -1450,53 +1453,82 @@ different binary layout.
 |80-104  | 25 |Longitude          |lon         |Signed: unit minutes * 0.001
 |        |    |                   |            |181000 = N/A (default)
 |105-109 |  5 |Day                |day         |1-31, 0=N/A (default)
-|110-114 |  5 |Hour               |hour        |0-23, 24=N/A (default)
-|115-120 |  6 |Minute             |minute      |0-59, 60=N/A (default)
+|110-114 |  5 |Hour               |hour        |0-23, >=24=N/A (default)
+|115-120 |  6 |Minute             |minute      |0-59, >=60=N/A (default)
 |121-127 |  7 |Average Wind Speed |wspeed      |10-min avg wind speed, knots
 |        |    |                   |            |127 = N/A (default)
 |128-134 |  7 |Gust Speed         |wgust       |10-min max wind speed, knots
+|        |    |                   |            |127 = N/A (default)
 |135-143 |  9 |Wind Direction     |wdir        |0-359, degrees fom true north
-|        |    |                   |            |360 = N/A (default)
+|        |    |                   |            |>=360 = N/A (default)
 |144-152 |  9 |Wind Gust Direction|wgustdir    |0-359, degrees fom true north
+|        |    |                   |            |>=360 = N/A (default)
 |153-163 | 11 |Air Temperature    |temperature |Dry bulb temperature, 0.1 deg C
 |        |    |                   |            |-60.0 to +60.0,
+|        |    |                   |            |-1024 = N/A (default)
 |164-170 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
 |        |    |                   |            |127 = N/A (default)
 |171-180 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
 |181-189 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
+|        |    |                   |            |402 = pressure >= 1201 hPa
+|        |    |                   |            |403 - N/A (default)
+|        |    |                   |            |Otherwise, add 400 to value
 |190-191 |  2 |Pressure Tendency  |pressuretend|0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
 |192-199 |  8 |Horiz. Visibility  |visibility  |0.1 nautical miles
 |200-208 |  9 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.1m
+|        |    |                   |            |1923 = N/A (default)
+|        |    |                   |            |Otherwise, -10m after scaling
 |209-210 |  2 |Water Level Trend  |leveltrend  |0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
 |211-218 |  8 |Surface Current Speed     |curspeed  |0.0-25.0 knots, units 0.1 knot
 |219-227 |  9 |Surface Current Direction |curdir    |0-359, degrees fom true north
+|        |    |                          |          |>=360 = N/A (default)
 |228-235 |  8 |Current Speed #2     |curspeed2 |0.0-25.0 knots, units 0.1 knot
+|        |    |                     |          |>=251 = N/A (default)
 |236-244 |  9 |Current Direction #2 |curdir2   |0-359, degrees fom true north
+|        |    |                     |          |>=360 = N/A (default)
 |245-249 |  5 |Measurement Depth #2 |curdepth2 |0-30m down, units 0.1m
+|        |    |                     |          |31 = N/A (default)
 |250-257 |  8 |Current Speed #3     |curspeed3 |0.0-25.0 knots, units 0.1 knot
+|        |    |                     |          |>=251 = N/A (default)
 |258-266 |  9 |Current Direction #3 |curdir3   |0-359, degrees fom true north
+|        |    |                     |          |>=360 = N/A (default)
 |267-271 |  5 |Measurement Depth #3 |curdepth3 |0-30m down, units 0.1m
+|        |    |                     |          |31 = N/A (default)
 |272-279 |  8 |Wave height          |waveheight|0-25m, units 0.1m
+|        |    |                     |          |>=251 = N/A (default)
 |280-285 |  6 |Wave period          |waveperiod|Seconds, 0-60, units 1s
+|        |    |                     |          |>= 61 = N/A (default)
 |286-294 |  9 |Wave direction       |wavedir   |0-359, degrees fom true north
+|        |    |                     |          |>=360 = N/A (default)
 |295-302 |  8 |Swell height         |swellheight|0-25m, units 0.1m
+|        |    |                     |           |>=251 = N/A (default)
 |303-308 |  6 |Swell period         |swellperiod|Seconds, 0-60, units 1s
+|        |    |                     |           |>= 61 = N/A (default)
 |309-317 |  9 |Swell direction      |swelldir   |0-359, degrees fom true north
+|        |    |                     |           |>=360 = N/A (default)
 |318-321 |  4 |Sea state            |seastate   |Beaufort scale, 0-12
+|        |    |                     |           |>=13 = N/A (default)
 |322-331 | 10 |Water Temperature    |watertemp  |-10.0 to 50.0 C, 0.1 deg
+|        |    |                     |           |>=601 = N/A (default)
+|        |    |                     |           |Otherwise -10.0m after scaling
 |332-334 |  3 |Precipitation        |precipitation  |preciptype
 |335-343 |  9 |Salinity             |salinity   |0.0-50.0%, units of 0.1%
+|        |    |                     |           |>=500 = N/A (default)
 |344-345 |  2 |Ice                  |ice        |Yes/No
 |346-351 |  6 |Spare                |           |Not used
 |==============================================================================
 
 <<IMO236>> says "If there is no data available, default value to be
 transmitted is the highest available binary value for that particular
-data field."
+data field." aand no defaults are explicitly specified.  However, the
+replacement FID=31 message has default values which do not obey this
+rule. It would be good practice for a decoder to treat any
+out-of-bounds value as N/A; the N/A formulas in the table above
+reflect this.
 
 <<IMO236>> gives the length of this message as 352, but lists only 336 
 payload bits.
@@ -1751,12 +1783,14 @@ length: 360 bits.
 |277-285 |   9 |Air Pressure          |pressure  |800-1200hPa, 1hPa
 |        |     |                      |          |402 = pressure >= 1201 hPa
 |        |     |                      |          |403 - N/A (default)
+|        |     |                      |          |Otherwise, add 400 to value
 |286-289 |   4 |Pressure Tendency     |pressuretend|WMO FM13 code
 |290-300 |  11 |Air Temperature       |airtemp   |Dry bulb temperature, 0.1degC
 |        |     |                      |          |-60.0 to +60.0
 |        |     |                      |          |-1024 = N/A (default)
 |301-310 |  10 |Water Temperature     |watertemp |-10.0 to 50.0 C, 0.1 deg
-|        |     |                      |          |501 = N/A (default)
+|        |     |                      |          |601 = N/A (default)
+|        |     |                      |          |Otherwuse -10m after scaling
 |311-316 |  6  |Wave period           |waveperiod|Seconds, 0-60, units 1s
 |        |     |                      |          |63 = N/A (default)
 |317-324 |  8  |Wave height           |waveheight|0-25m, units 0.1m
@@ -1996,7 +2030,7 @@ Intended to be used to associate a text annotation with another message
 via the Message Linkage ID field.
 
 [frame="topbot",options="header"]
-|==============================================================================
+|=============================================================================
 |Field   |Len    |Description          |Member      |Units
 |0-5     |  6    |Message Type         |type        |Unsigned integer: 8
 |6-7     |  2    |Repeat Indicator     |repeat      |As in Common Navigation Block
@@ -2157,10 +2191,11 @@ The lshiptype field uses Lloyd's Register STATCODE 5 encoding.
 ==== Meteorological and Hydrological Data (IMO289) ===
 
 A message 8 subtype. DAC = 001 FID = 31. Fixed length, 360 bits.
-Supersedes an <<IMO236>> message with the same title but FID = 11 and a
-different binary layout.  The exact differences are: (a) The addition of the
-Position Accuracy field, (b) water level has 12 bits of precision rather
-than 9, and (c) end padding changes from 6 to 10 bits.
+Supersedes an <<IMO236>> message with the same title but FID = 11 and
+a different binary layout.  The exact differences are: (a) The
+addition of the Position Accuracy field, (b) water level has 12 bits
+of precision rather than 9 (units of centimeters rather than
+decimeters) , and (c) end padding changes from 6 to 10 bits.
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -2181,42 +2216,76 @@ than 9, and (c) end padding changes from 6 to 10 bits.
 |111-115 |  5 |Hour               |hour        |0-23, 24=N/A (default)
 |116-121 |  6 |Minute             |minute      |0-59, 60=N/A (default)
 |122-128 |  7 |Average Wind Speed |wspeed      |10-min avg wind speed, knots
+|        |    |                   |            |126 = wind >= 126 knots
+|        |    |                   |            |17 = N/A (default)
 |129-135 |  7 |Gust Speed         |wgust       |10-min max wind speed, knots
+|        |    |                   |            |126 = wind >= 126 knots
+|        |    |                   |            |17 = N/A (default)
 |136-144 |  9 |Wind Direction     |wdir        |0-359, degrees fom true north
+|        |    |                   |            |360 = N/A (default)
 |145-153 |  9 |Wind Gust Direction|wgustdir    |0-359, degrees fom true north
+|        |    |                   |            |360 = N/A (default)
 |154-164 | 11 |Air Temperature    |temperature |Dry bulb temperature, 0.1 deg C
 |        |    |                   |            |-60.0 to +60.0,
+|        |    |                   |            |-1024 = N/A (default)
 |165-171 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
+|        |    |                   |            |101 = N/A (default)
 |172-181 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
+|        |    |                   |            |501 = N/A (default)
 |182-190 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
+|        |    |                   |            |0 = pressure <= 799hPa 
+|        |    |                   |            |402 = pressure >= 1201 hPa
+|        |    |                   |            |403 = N/A (default)
 |191-192 |  2 |Pressure Tendency  |pressuretend|0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
 |193-200 |  8 |Horiz. Visibility  |visibility  |0.1 nautical miles
-|201-212 | 12 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.1m
+|201-212 | 12 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.01m
 |        |    |                   |            |Subtract 10.0m after scaling
 |        |    |                   |            |40001 = N/A (default)
 |213-214 |  2 |Water Level Trend  |leveltrend  |0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
-|215-222 |  8 |Surface Current Speed     |curspeed  |0.0-25.0 knots, units 0.1 knot
-|223-231 |  9 |Surface Current Direction |curdir    |0-359, degrees fom true north
+|215-222 |  8 |Surface Current Speed     |curspeed  |0.0-25.0, units 0.1 knot
+|        |    |                          |          |251 = speed >= 25.1 knots
+|        |    |                          |          |255 N/A (default)
+|223-231 |  9 |Surface Current Direction |curdir    |0-359, deg. fom true north
+|        |    |                          |          |360 = N/A (default)
 |232-239 |  8 |Current Speed #2     |curspeed2 |0.0-25.0 knots, units 0.1 knot
+|        |    |                     |          |251 = speed >= 25.1 knots
+|        |    |                     |          |255 N/A (default)
 |240-248 |  9 |Current Direction #2 |curdir2   |0-359, degrees fom true north
+|        |    |                     |          |360 = N/A (default)
 |249-253 |  5 |Measurement Depth #2 |curdepth2 |0-30m down, units 0.1m
 |254-261 |  8 |Current Speed #3     |curspeed3 |0.0-25.0 knots, units 0.1 knot
+|        |    |                     |          |251 = speed >= 25.1 knots
+|        |    |                     |          |255 N/A (default)
 |262-270 |  9 |Current Direction #3 |curdir3   |0-359, degrees fom true north
+|        |    |                     |          |360 = N/A (default)
 |271-275 |  5 |Measurement Depth #3 |curdepth3 |0-30m down, units 0.1m
 |276-283 |  8 |Wave height          |waveheight|0-25m, units 0.1m
+|        |    |                     |          |251 = height >= 25.1m
+|        |    |                     |          |255 N/A (default)
 |284-289 |  6 |Wave period          |waveperiod|Seconds, 0-60, units 1s
 |290-298 |  9 |Wave direction       |wavedir   |0-359, degrees fom true north
+|        |    |                     |           |360 = N/A (default)
 |299-306 |  8 |Swell height         |swellheight|0-25m, units 0.1m
+|        |    |                     |           |251 = height >= 25.1m
+|        |    |                     |           |255 N/A (default)
 |307-312 |  6 |Swell period         |swellperiod|Seconds, 0-60, units 1s
+|        |    |                     |           |360 = N/A (default)
 |313-321 |  9 |Swell direction      |swelldir   |0-359, degrees fom true north
+|        |    |                     |           |360 = N/A (default)
 |322-325 |  4 |Sea state            |seastate   |Beaufort scale, 0-12
+|        |    |                     |           |>= 13 = N/A (default)
 |326-335 | 10 |Water Temperature    |watertemp  |-10.0 to 50.0 C, 0.1 deg
+|        |    |                     |           |601 = N/A (default)
+|        |    |                     |           |Otherwise -10m after scaling
 |336-338 |  3 |Precipitation        |precipitation  |preciptype
 |339-347 |  9 |Salinity             |salinity   |0.0-50.0%, units of 0.1%
+|        |    |                     |           |501 = salinity >= 50.1% 
+|        |    |                     |           |510 = N/A (default)
+|        |    |                     |           |511 - sensor not available
 |348-349 |  2 |Ice                  |ice        |Yes/No
 |350-359 | 10 |Spare                |           |Not used
 |==============================================================================
@@ -3431,4 +3500,5 @@ Version 1.29 added much information on WMO special message formats in
 types 6 and 8.
 
 Version 1.30 was revised because M.1371-4 is now a free download.
-Also, we describe "pilot plugs" and AIS message type 27.
+Also, we describe "pilot plugs" and AIS message type 27.  We get
+much more explicit about defaults in IMO236 and IMO289 messages.
