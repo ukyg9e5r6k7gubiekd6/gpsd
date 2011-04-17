@@ -79,6 +79,7 @@ PyDoc_STRVAR(module_doc,
 "Python wrapper for selected libgps library routines.\n\
 ");
 
+/* banishes a pointless compiler warning */
 extern PyMODINIT_FUNC initclienthelpers(void);
 
 PyMODINIT_FUNC

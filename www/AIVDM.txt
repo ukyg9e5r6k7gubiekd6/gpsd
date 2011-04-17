@@ -1470,7 +1470,7 @@ broadcast of this message of 12 minutes.
 |        |    |                   |            |Otherwise, -60deg after scaling.
 |164-170 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
 |        |    |                   |            |127 = N/A (default)
-|171-180 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
+|171-180 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0.1 deg C
 |        |    |                   |            |1023 = N/A (default)
 |        |    |                   |            |Otherwise -20.0deg after scaling
 |181-189 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
@@ -2235,7 +2235,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |        |    |                   |            |-1024 = N/A (default)
 |165-171 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
 |        |    |                   |            |101 = N/A (default)
-|172-181 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
+|172-181 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0.1 deg C
 |        |    |                   |            |501 = N/A (default)
 |182-190 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
 |        |    |                   |            |0 = pressure <= 799hPa 
