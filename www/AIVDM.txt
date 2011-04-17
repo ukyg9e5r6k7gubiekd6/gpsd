@@ -978,7 +978,7 @@ A message 6 subtype. DAC = 001 FID = 16.
 |69-71   |  3 |Spare                |          |Not used
 |==============================================================================
 
-Note that though this is a message 6 subtype and descrubed in
+Note that though this is a message 6 subtype and described in
 <<IMO236>> with the attribute "addressed", there is no destination
 address.  A strikeout in <<IMO236>> suggests that this was originally
 a subtype of 8.  It would be good defensive implementation for a
