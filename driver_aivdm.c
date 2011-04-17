@@ -21,6 +21,13 @@
  * Parse the data from the device
  */
 
+#define DAC1FID31_AIRTEMP_OFFSET		600
+#define DAC1FID31_DEWPOINT_OFFSET		200
+#define DAC1FID31_PRESSURE_OFFSET		800
+#define DAC1FID11_LEVEL_OFFSET			10
+#define DAC1FID31_LEVEL_OFFSET			100
+#define DAC1FID31_WATERTEMP_OFFSET		100
+
 static void from_sixbit(char *bitvec, uint start, int count, char *to)
 {
     /*@ +type @*/
@@ -80,6 +87,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
     unsigned char *data, *cp;
     unsigned char ch, pad;
     struct aivdm_context_t *ais_context;
+    bool imo;
     int i;
 
     if (buflen == 0)
@@ -229,7 +237,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type1.status		= UBITS(38, 4);
 	    ais->type1.turn		= SBITS(42, 8);
 	    ais->type1.speed		= UBITS(50, 10);
-	    ais->type1.accuracy	        = (bool)UBITS(60, 1);
+	    ais->type1.accuracy	        = UBITS(60, 1)!=0;
 	    ais->type1.lon		= SBITS(61, 28);
 	    ais->type1.lat		= SBITS(89, 27);
 	    ais->type1.course		= UBITS(116, 12);
@@ -324,14 +332,37 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    }
 	    ais->type6.seqno          = UBITS(38, 2);
 	    ais->type6.dest_mmsi      = UBITS(40, 30);
-	    ais->type6.retransmit     = (bool)UBITS(70, 1);
+	    ais->type6.retransmit     = UBITS(70, 1)!=0;
 	    //ais->type6.spare        = UBITS(71, 1);
 	    ais->type6.dac            = UBITS(72, 10);
 	    ais->type6.fid            = UBITS(82, 6);
 	    ais->type6.bitcount       = ais_context->bitlen - 88;
-	    (void)memcpy(ais->type6.bitdata,
-			 (char *)ais_context->bits + (88 / BITS_PER_BYTE),
-			 (ais->type6.bitcount + 7) / 8);
+	    imo = false;
+	    if (ais->type8.dac == 1)
+		switch (ais->type8.fid) {
+		case 12:	/* IMO236 -Dangerous cargo indication */
+		    break;
+		case 14:	/* IMO236 - Tidal window */
+		    break;
+		case 16:	/* IMO236 - Number of persons on board */
+		    ais->type6.dac1fid16.persons = UBITS(55, 13);
+		    imo = true;
+		    break;
+		case 18:	/* IMO289 - Clearance time to enter port */
+		    break;
+		case 25:	/* IMO289 = Dangerous cargo indication */
+		    break;
+		case 28:	/* IMO289 - Route info - addressed */
+		    break;
+		case 30:	/* IMO289 - Text description - addressed */
+		    break;
+		case 32:	/* IMO289 - Tidal Window */
+		    break;
+		}
+	    if (!imo)
+		(void)memcpy(ais->type6.bitdata,
+			     (char *)ais_context->bits + (88 / BITS_PER_BYTE),
+			     (ais->type6.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "seqno=%d, dest=%u, dac=%u, fid=%u, cnt=%zd\n",
 			ais->type6.seqno,
 			ais->type6.dest_mmsi,
@@ -373,70 +404,136 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type8.dac            = UBITS(40, 10);
 	    ais->type8.fid            = UBITS(40, 6);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
-#ifdef __UNUSED__
+	    imo = false;
 	    if (ais->type8.dac == 1)
-		/*
-		 * The strange order in which these FIDs occur is
-		 * direct from IMO circular 289.
-		 */
 		switch (ais->type8.fid) {
-		case 31:        /* Meteorological-Hydrological data */
-		    ais->type8.dac1fid31.lon		= SBITS(56, 25);
-		    ais->type8.dac1fid31.lat		= SBITS(81, 24);
+		case 11:        /* IMO236 - Meteorological/Hydrological data */
+		    /* layout is almost identical to FID=31 from IMO289 */
+		    ais->type8.dac1fid31.lat		= SBITS(56, 24);
+		    ais->type8.dac1fid31.lon		= SBITS(80, 25);
+		    ais->type8.dac1fid31.accuracy       = false;
+		    ais->type8.dac1fid31.day		= UBITS(105, 5);
+		    ais->type8.dac1fid31.hour		= UBITS(110, 5);
+		    ais->type8.dac1fid31.minute		= UBITS(115, 6);
+		    ais->type8.dac1fid31.wspeed		= UBITS(121, 7);
+		    ais->type8.dac1fid31.wgust		= UBITS(128, 7);
+		    ais->type8.dac1fid31.wdir		= UBITS(135, 9);
+		    ais->type8.dac1fid31.wgustdir	= UBITS(144, 9); 
+		    ais->type8.dac1fid31.temperature	= SBITS(153, 11)
+			- DAC1FID31_AIRTEMP_OFFSET;
+		    ais->type8.dac1fid31.humidity	= UBITS(164, 7);
+		    ais->type8.dac1fid31.dewpoint	= UBITS(171, 10)
+			- DAC1FID31_DEWPOINT_OFFSET;
+		    ais->type8.dac1fid31.pressure	= UBITS(181, 9)
+			- DAC1FID31_PRESSURE_OFFSET;
+		    ais->type8.dac1fid31.pressuretend	= UBITS(190, 2);
+		    ais->type8.dac1fid31.visgreater	= false;
+		    ais->type8.dac1fid31.visibility	= UBITS(192, 8);
+		    ais->type8.dac1fid31.waterlevel	= UBITS(200, 9)
+			- DAC1FID11_LEVEL_OFFSET;
+		    ais->type8.dac1fid31.leveltrend	= UBITS(209, 2);
+		    ais->type8.dac1fid31.curspeed	= UBITS(211, 8);
+		    ais->type8.dac1fid31.curdir		= UBITS(219, 9);
+		    ais->type8.dac1fid31.curspeed2	= UBITS(228, 8);
+		    ais->type8.dac1fid31.curdir2	= UBITS(236, 9);
+		    ais->type8.dac1fid31.curdepth2	= UBITS(245, 5);
+		    ais->type8.dac1fid31.curspeed3	= UBITS(250, 8);
+		    ais->type8.dac1fid31.curdir3	= UBITS(258, 9);
+		    ais->type8.dac1fid31.curdepth3	= UBITS(267, 5);
+		    ais->type8.dac1fid31.waveheight	= UBITS(272, 8);
+		    ais->type8.dac1fid31.waveperiod	= UBITS(280, 6);
+		    ais->type8.dac1fid31.wavedir	= UBITS(286, 9);
+		    ais->type8.dac1fid31.swellheight	= UBITS(295, 8);
+		    ais->type8.dac1fid31.swellperiod	= UBITS(303, 6);
+		    ais->type8.dac1fid31.swelldir	= UBITS(309, 9);
+		    ais->type8.dac1fid31.seastate	= UBITS(318, 4);
+		    ais->type8.dac1fid31.watertemp	= UBITS(322, 10)
+			- DAC1FID31_WATERTEMP_OFFSET;
+		    ais->type8.dac1fid31.preciptype	= UBITS(332, 3);
+		    ais->type8.dac1fid31.salinity	= UBITS(335, 9);
+		    ais->type8.dac1fid31.ice		= UBITS(344, 2);
+		    imo = true;
+		    break;
+		case 13:        /* IMO236 - Fairway closed */
+		    break;
+		case 15:        /* IMO236 - Extended ship and voyage */
+		    break;
+		case 17:        /* IMO289 - VTS-generated/synthetic targets */
+		    break;
+		case 19:        /* IMO289 - Marine Traffic Signal */
+		    break;
+		case 20:        /* IMO289 - Berthing Data */
+		    break;
+		case 21:        /* IMO289 - Weather obs. report from ship */
+		    break;
+		case 22:        /* IMO289 - Area notice - broadcast */
+		    break;
+		case 23:        /* IMO289 - Area notice - addressed */
+		    break;
+		case 24:        /* IMO289 - Extended ship static & voyage-related data */
+		    break;
+		case 25:        /* IMO289 - Dangerous Cargo Indication */
+		    break;
+		case 27:        /* IMO289 - Route information - broadcast */
+		    break;
+		case 29:        /* IMO289 - Text Description - broadcast */
+		    break;
+		case 30:        /* IMO289 - Text Description - addressed */
+		    break;
+		case 31:        /* IMO289 - Meteorological/Hydrological data */
+		    ais->type8.dac1fid31.lat		= SBITS(56, 24);
+		    ais->type8.dac1fid31.lon		= SBITS(80, 25);
 		    ais->type8.dac1fid31.accuracy       = (bool)UBITS(105, 1);
 		    ais->type8.dac1fid31.day		= UBITS(106, 5);
 		    ais->type8.dac1fid31.hour		= UBITS(111, 5);
 		    ais->type8.dac1fid31.minute		= UBITS(116, 6);
 		    ais->type8.dac1fid31.wspeed		= UBITS(122, 7);
 		    ais->type8.dac1fid31.wgust		= UBITS(129, 7);
-		    ais->type8.dac1fid31.wdir		= UBITS(129, 7);
-		    ais->type8.dac1fid31.wgustdir	= UBITS(136, 7); 
-		    ais->type8.dac1fid31.temperature	= SBITS(143, 11);
-		    ais->type8.dac1fid31.humidity	= UBITS(154, 7);
-		    ais->type8.dac1fid31.dewpoint	= SBITS(154, 10);
-		    ais->type8.dac1fid31.pressure	= UBITS(164, 9);
-		    ais->type8.dac1fid31.pressuretend	= UBITS(173, 3);
-		    ais->type8.dac1fid31.visgreater	= (bool)UBITS(174, 1);
-		    ais->type8.dac1fid31.visibility	= UBITS(175, 8);
-		    ais->type8.dac1fid31.waterlevel	= UBITS(183, 12);
-		    goto nocopy;
-		case 25:        /* Dangerous Cargo Indication */
-		    goto nocopy;
+		    ais->type8.dac1fid31.wdir		= UBITS(136, 9);
+		    ais->type8.dac1fid31.wgustdir	= UBITS(145, 9); 
+		    ais->type8.dac1fid31.temperature	= SBITS(154, 11)
+			- DAC1FID31_AIRTEMP_OFFSET;
+		    ais->type8.dac1fid31.humidity	= UBITS(165, 7);
+		    ais->type8.dac1fid31.dewpoint	= UBITS(172, 10)
+			- DAC1FID31_DEWPOINT_OFFSET;
+		    ais->type8.dac1fid31.pressure	= UBITS(182, 9)
+			- DAC1FID31_PRESSURE_OFFSET;
+		    ais->type8.dac1fid31.pressuretend	= UBITS(191, 2);
+		    ais->type8.dac1fid31.visgreater	= UBITS(193, 1);
+		    ais->type8.dac1fid31.visibility	= UBITS(194, 6);
+		    ais->type8.dac1fid31.waterlevel	= UBITS(200, 12)
+			- DAC1FID31_LEVEL_OFFSET;
+		    ais->type8.dac1fid31.leveltrend	= UBITS(213, 2);
+		    ais->type8.dac1fid31.curspeed	= UBITS(215, 8);
+		    ais->type8.dac1fid31.curdir		= UBITS(223, 9);
+		    ais->type8.dac1fid31.curspeed2	= UBITS(232, 8);
+		    ais->type8.dac1fid31.curdir2	= UBITS(240, 9);
+		    ais->type8.dac1fid31.curdepth2	= UBITS(249, 5);
+		    ais->type8.dac1fid31.curspeed3	= UBITS(254, 8);
+		    ais->type8.dac1fid31.curdir3	= UBITS(262, 9);
+		    ais->type8.dac1fid31.curdepth3	= UBITS(271, 5);
+		    ais->type8.dac1fid31.waveheight	= UBITS(276, 8);
+		    ais->type8.dac1fid31.waveperiod	= UBITS(284, 6);
+		    ais->type8.dac1fid31.wavedir	= UBITS(290, 9);
+		    ais->type8.dac1fid31.swellheight	= UBITS(299, 8);
+		    ais->type8.dac1fid31.swellperiod	= UBITS(307, 6);
+		    ais->type8.dac1fid31.swelldir	= UBITS(313, 9);
+		    ais->type8.dac1fid31.seastate	= UBITS(322, 4);
+		    ais->type8.dac1fid31.watertemp	= UBITS(326, 10)
+			- DAC1FID31_WATERTEMP_OFFSET;
+		    ais->type8.dac1fid31.preciptype	= UBITS(336, 3);
+		    ais->type8.dac1fid31.salinity	= UBITS(339, 9);
+		    ais->type8.dac1fid31.ice		= UBITS(348, 2);
+		    imo = true;
+		    break;
 		case 32:        /* Tidal Window */
-		    goto nocopy;
-		case 24:        /* Extended ship static & voyage-related data */
-		    goto nocopy;
-		case 16:        /* Number of persons on board */
-		    goto nocopy;
-		case 17:        /* VTS-generated/synthetic targets */
-		    goto nocopy;
-		case 18:        /* Clearance time to enter port */
-		    goto nocopy;
-		case 19:        /* Marine Traffic Signal */
-		    goto nocopy;
-		case 20:        /* Berthing Data */
-		    goto nocopy;
-		case 21:        /* Weather observation report from ship */
-		    goto nocopy;
-		case 22:        /* Area notice - broadcast */
-		    goto nocopy;
-		case 23:        /* Area notice - addressed */
-		    goto nocopy;
-		case 27:        /* Route information - broadcast */
-		    goto nocopy;
-		case 29:        /* Text Description - broadcast */
-		    goto nocopy;
-		case 30:        /* Text Description - addressed */
-		    goto nocopy;
+		    break;
 		}
 	    /* land here if we failed to match a known DAC/FID */
-#endif /* __UNUSED_ */
-	    (void)memcpy(ais->type8.bitdata,
+	    if (!imo)
+		(void)memcpy(ais->type8.bitdata,
 			 (char *)ais_context->bits + (56 / BITS_PER_BYTE),
-			 (ais->type8.bitcount + 7) / 8);
-#ifdef __UNUSED__
-	nocopy:
-#endif /* __UNUSED_ */
+			     (ais->type8.bitcount + 7) / 8);
 	    gpsd_report(LOG_INF, "dac=%u, fid=%u, cnt=%zd\n",
 			ais->type8.dac,
 			ais->type8.fid,

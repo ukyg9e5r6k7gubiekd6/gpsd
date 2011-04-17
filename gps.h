@@ -926,7 +926,13 @@ struct ais_t
 	    unsigned int fid;           /* Functional ID */
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
 	    size_t bitcount;		/* bit count of the data */
-	    char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
+	    union {
+		char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
+		/* IMO236 - Number of Persons on board */
+		struct {
+		    unsigned persons;	/* number of persons */
+		} dac1fid16;
+	    };
 	} type6;
 	/* Type 7 - Binary Acknowledge */
 	struct {
@@ -938,6 +944,7 @@ struct ais_t
 	} type7;
 	/* Type 8 - Broadcast Binary Message */
 	struct {
+	    /* IMO236 & IMO289 - Meteorological-Hydrological data */
 	    //unsigned int spare;	spare bit(s) */
 	    unsigned int dac;       	/* Designated Area Code */
 	    unsigned int fid;       	/* Functional ID */
@@ -945,14 +952,13 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
-#ifdef __UNUSED__
 		struct {
+		    bool accuracy;	/* position accuracy, <10m if true */
 #define DAC1FID31_LATLON_SCALE	1000
 		    int lon;		/* longitude in minutes * .001 */
 #define DAC1FID31_LON_NOT_AVAILABLE	(181*60*DAC1FID31_LATLON_SCALE)
 		    int lat;		/* longitude in minutes * .001 */
 #define DAC1FID31_LAT_NOT_AVAILABLE	(91*60*DAC1FID31_LATLON_SCALE)
-		    bool accuracy;	/* position accuracy, <10m if true */
 		    unsigned int day;		/* UTC day */
 		    unsigned int hour;		/* UTC hour */
 		    unsigned int minute;	/* UTC minute */
@@ -964,7 +970,7 @@ struct ais_t
 		    unsigned int wgustdir;	/* wind gust direction */
 #define DAC1FID31_DIR_NOT_AVAILABLE		360
 		    int temperature;		/* temperature, units 0.1C */
-#define DAC1FID31_AIRTEMP_NOT_AVAILABLE		-1024
+#define DAC1FID31_AIRTEMP_NOT_AVAILABLE		-1084
 		    unsigned int humidity;	/* relative humidity, % */
 #define DAC1FID31_HUMIDITY_NOT_AVAILABLE	101
 		    int dewpoint;		/* dew point, units 0.1C */
@@ -976,10 +982,30 @@ struct ais_t
 		    bool visgreater;		/* vis. > than following */
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID31_VISIBILITY_NOT_AVAILABLE	127
-		    unsigned int waterlevel;	/* decimeters + 100 */
-#define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	4001
+		    unsigned int waterlevel;	/* decimeters or cm */
+#define DAC1FID11_WATERLEVEL_NOT_AVAILABLE	4001
+#define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	40001
+		    unsigned int leveltrend;	/* water level trend code */
+		    unsigned int curspeed;	/* current speed in deciknots */
+		    unsigned int curdir;	/* current dir., degrees */
+		    unsigned int curspeed2;	/* current speed in deciknots */
+		    unsigned int curdir2;	/* current dir., degrees */
+		    unsigned int curdepth2;	/* measurement depth, 0.1m */
+		    unsigned int curspeed3;	/* current speed in deciknots */
+		    unsigned int curdir3;	/* current dir., degrees */
+		    unsigned int curdepth3;	/* measurement depth, 0.1m */
+		    unsigned int waveheight;	/* in decimeters */
+		    unsigned int waveperiod;	/* in seconds */
+		    unsigned int wavedir;	/* direction in degrees */
+		    unsigned int swellheight;	/* in decimeters */
+		    unsigned int swellperiod;	/* in seconds */
+		    unsigned int swelldir;	/* direction in degrees */
+		    unsigned int seastate;	/* Beaufort scale, 0-12 */
+		    int watertemp;		/* units 0.1deg Celsius */
+		    unsigned char preciptype;	/* 0-7, enumerated */
+		    unsigned int salinity;	/* units of 0.1% */
+		    bool ice;			/* is there sea ice? */
 		} dac1fid31;
-#endif /* __UNUSED_ */
 	    };
 	} type8;
 	/* Type 9 - Standard SAR Aircraft Position Report */
