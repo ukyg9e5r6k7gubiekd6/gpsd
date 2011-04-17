@@ -133,8 +133,20 @@ opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
 env['VERSION'] = gpsd_version
-
 env['PYTHON'] = sys.executable
+
+# set defaults from environment
+env['STRIP'] = "strip"
+env['CHRPATH'] = 'chrpath'
+for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP", "CHRPATH", "LD", "TAR"]:
+    if os.environ.has_key(i):
+        if i == "LD":
+            i = "SHLINK"
+        env[i]=os.getenv(i)
+for flags in ["LDFLAGS", "CPPFLAGS"]:
+    if os.environ.has_key(flags):
+        env.MergeFlags([os.getenv(flags)])
+
 
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
@@ -342,7 +354,7 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n\n")
 
-if config.CheckExecutable('chrpath -v', 'chrpath'):
+if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     have_chrpath = True
 else:
     have_chrpath = False
@@ -876,9 +888,9 @@ if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, libdir, compiled_qgpsmmlib))
 
 if have_chrpath:
-    env.AddPostAction(binaryinstall, 'chrpath -r $LIBDIR $TARGET')
+    env.AddPostAction(binaryinstall, '$CHRPATH -r $LIBDIR $TARGET')
 if not env['debug'] or env['profiling']:
-    env.AddPostAction(binaryinstall, 'strip $TARGET')
+    env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
 maninstall = []
 for manpage in base_manpages:
