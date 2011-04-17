@@ -1467,9 +1467,12 @@ broadcast of this message of 12 minutes.
 |153-163 | 11 |Air Temperature    |temperature |Dry bulb temperature, 0.1 deg C
 |        |    |                   |            |-60.0 to +60.0,
 |        |    |                   |            |-1024 = N/A (default)
+|        |    |                   |            |Otherwise, -60deg after scaling.
 |164-170 |  7 |Relative Humidity  |humidity    |0-100%, units of 1%
 |        |    |                   |            |127 = N/A (default)
 |171-180 | 10 |Dew Point          |dewpoint    |-20.0 to +50.0, 0,1 deg C
+|        |    |                   |            |1023 = N/A (default)
+|        |    |                   |            |Otherwise -20.0deg after scaling
 |181-189 |  9 |Air Pressure       |pressure    |800-1200hPa, 1hPa
 |        |    |                   |            |402 = pressure >= 1201 hPa
 |        |    |                   |            |403 - N/A (default)
@@ -1477,7 +1480,8 @@ broadcast of this message of 12 minutes.
 |190-191 |  2 |Pressure Tendency  |pressuretend|0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
-|192-199 |  8 |Horiz. Visibility  |visibility  |0.1 nautical miles
+|192-199 |  8 |Horiz. Visibility  |visibility  |0-25.0, units of 0.1nm
+|        |    |                   |            |>= 250 = N/A (default)
 |200-208 |  9 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.1m
 |        |    |                   |            |1923 = N/A (default)
 |        |    |                   |            |Otherwise, -10m after scaling
