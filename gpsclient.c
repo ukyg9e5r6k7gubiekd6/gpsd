@@ -15,7 +15,7 @@
  */
 
 static PyObject *
-gpsclient_deg_to_str(PyObject *self, PyObject *args)
+gpsclient_deg_to_str(PyObject *self UNUSED, PyObject *args)
 {
     int fmt;
     double degrees;
@@ -26,7 +26,7 @@ gpsclient_deg_to_str(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-gpsclient_gpsd_units(PyObject *self, PyObject *args)
+gpsclient_gpsd_units(PyObject *self UNUSED, PyObject *args)
 {
     if (!PyArg_ParseTuple(args, ""))
 	return NULL;
@@ -38,7 +38,7 @@ gpsclient_gpsd_units(PyObject *self, PyObject *args)
  */
 
 static PyObject *
-gpsclient_wgs84_separation(PyObject *self, PyObject *args)
+gpsclient_wgs84_separation(PyObject *self UNUSED, PyObject *args)
 {
     const double lat, lon;
     double sep;
@@ -50,7 +50,7 @@ gpsclient_wgs84_separation(PyObject *self, PyObject *args)
 }
 
 static PyObject *
-gpsclient_maidenhead(PyObject *self, PyObject *args)
+gpsclient_maidenhead(PyObject *self UNUSED, PyObject *args)
 {
     const double lat, lon;
     char *gs;
@@ -78,6 +78,8 @@ static PyMethodDef gpsclient_methods[] = {
 PyDoc_STRVAR(module_doc,
 "Python wrapper for selected libgps library routines.\n\
 ");
+
+extern PyMODINIT_FUNC initclienthelpers(void);
 
 PyMODINIT_FUNC
 initclienthelpers(void)

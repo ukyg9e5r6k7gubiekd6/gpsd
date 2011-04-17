@@ -50,7 +50,7 @@ typedef struct {
 } LexerObject;
 
 static LexerObject *
-newLexerObject(PyObject *arg)
+newLexerObject(PyObject *arg UNUSED)
 {
     LexerObject *self;
     self = PyObject_New(LexerObject, &Lexer_Type);
@@ -175,7 +175,7 @@ static PyTypeObject Lexer_Type = {
 /* Function of no arguments returning new Lexer object */
 
 static PyObject *
-gpspacket_new(PyObject *self, PyObject *args)
+gpspacket_new(PyObject *self UNUSED, PyObject *args UNUSED)
 {
     LexerObject *rv;
 
@@ -193,7 +193,7 @@ PyDoc_STRVAR(register_report__doc__,
 callback must be a callable object expecting a string as parameter.");
 
 static PyObject *
-register_report(LexerObject *self, PyObject *args)
+register_report(LexerObject *self UNUSED, PyObject *args)
 {
     PyObject *callback = NULL;
 
@@ -240,6 +240,9 @@ the integer packet type and string packet value.  On end of file it returns\n\
 for debug message reporting.  The callback will get two arguments, the error\n\
 level of the message and the message itself.\n\
 ");
+
+/* banishes a pointless compiler warning */
+extern PyMODINIT_FUNC initpacket(void);
 
 PyMODINIT_FUNC
 initpacket(void)
