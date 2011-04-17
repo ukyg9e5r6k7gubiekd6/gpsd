@@ -932,6 +932,19 @@ struct ais_t
 		struct {
 		    unsigned persons;	/* number of persons */
 		} dac1fid16;
+		/* IMO236 & IMO289 - Tidal Window */
+		struct {
+		    unsigned int month;		/* month of year */
+		    unsigned int day;		/* day of month */
+		    signed int lon;		/* fairway latitude */
+		    signed int lat;		/* fairway longitude */
+		    unsigned int from_hour;	/* window opens at hour */
+		    unsigned int from_min;	/* window opens at minute */
+		    unsigned int to_hour;	/* window closes at hour */
+		    unsigned int to_min;	/* window closes at minute */
+		    unsigned int cdir;		/* predicted current dir. */
+		    unsigned int cspeed;	/* predicted current speed */
+		} dac1fid32;
 	    };
 	} type6;
 	/* Type 7 - Binary Acknowledge */

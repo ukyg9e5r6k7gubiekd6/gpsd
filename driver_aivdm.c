@@ -343,6 +343,17 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 12:	/* IMO236 -Dangerous cargo indication */
 		    break;
 		case 14:	/* IMO236 - Tidal window */
+		    /* use IMO289 structure because layount is nearly same */ 
+		    ais->type6.dac1fid32.month     = UBITS(88, 4);
+		    ais->type6.dac1fid32.day       = UBITS(92, 5);
+		    ais->type6.dac1fid32.lon       = UBITS(97, 25);
+		    ais->type6.dac1fid32.lat       = UBITS(122, 24);
+		    ais->type6.dac1fid32.from_hour = UBITS(146, 5);
+		    ais->type6.dac1fid32.from_min  = UBITS(151, 6);
+		    ais->type6.dac1fid32.to_hour   = UBITS(157, 5);
+		    ais->type6.dac1fid32.to_min    = UBITS(162, 6);
+		    ais->type6.dac1fid32.cdir      = UBITS(168, 9);
+		    ais->type6.dac1fid32.cspeed    = UBITS(177, 7);
 		    break;
 		case 16:	/* IMO236 - Number of persons on board */
 		    if (ais->type6.bitcount == 136)
@@ -360,6 +371,16 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 30:	/* IMO289 - Text description - addressed */
 		    break;
 		case 32:	/* IMO289 - Tidal Window */
+		    ais->type6.dac1fid32.month     = UBITS(88, 4);
+		    ais->type6.dac1fid32.day       = UBITS(92, 5);
+		    ais->type6.dac1fid32.lat       = UBITS(97, 27);
+		    ais->type6.dac1fid32.lon       = UBITS(124, 28);
+		    ais->type6.dac1fid32.from_hour = UBITS(152, 5);
+		    ais->type6.dac1fid32.from_min  = UBITS(152, 6);
+		    ais->type6.dac1fid32.to_hour   = UBITS(157, 5);
+		    ais->type6.dac1fid32.to_min    = UBITS(163, 6);
+		    ais->type6.dac1fid32.cdir      = UBITS(174, 9);
+		    ais->type6.dac1fid32.cspeed    = UBITS(183, 7);
 		    break;
 		}
 	    if (!imo)
