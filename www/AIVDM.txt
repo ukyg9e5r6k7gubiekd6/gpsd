@@ -982,7 +982,7 @@ Note that though this is a message 6 subtype and described in
 <<IMO236>> with the attribute "addressed", there is no destination
 address.  A strikeout in <<IMO236>> suggests that this was originally
 a subtype of 8.  It would be good defensive implementation for a
-decoder to accept either.
+decoder to accept either.  Bit length may be used to distinguish them.
 
 <<IMO289>> describes a fixed-length, 136-bit message with this layout:
 
@@ -997,7 +997,7 @@ decoder to accept either.
 |70-70   |  1 |Retransmit flag      |retransmit|0 = no retransmission (default)
 |        |    |                     |          |1 = retransmitted
 |71-71   |  1 |Spare                |          |Not used
-|72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 23
+|72-87   | 16 |DAC/FID              |          |DAC = 001 FID = 16
 |88-100  | 13 |# persons on board   |persons   |Unsigned integer
 |        |    |                     |          |0 = N/A (default)
 |        |    |                     |          |8191 = >= 8191 persons.

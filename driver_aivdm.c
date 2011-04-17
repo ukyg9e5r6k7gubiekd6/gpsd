@@ -345,7 +345,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 14:	/* IMO236 - Tidal window */
 		    break;
 		case 16:	/* IMO236 - Number of persons on board */
-		    ais->type6.dac1fid16.persons = UBITS(55, 13);
+		    if (ais->type6.bitcount == 136)
+			ais->type6.dac1fid16.persons = UBITS(88, 13);/* 289 */
+		    else
+			ais->type6.dac1fid16.persons = UBITS(55, 13);/* 236 */
 		    imo = true;
 		    break;
 		case 18:	/* IMO289 - Clearance time to enter port */
