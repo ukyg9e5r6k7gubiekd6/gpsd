@@ -744,8 +744,16 @@ for i in range(len(vars)):
     if vars[i] is None:
         vars[i] = ""
 (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy) = vars
-python_env['CC'] = cc
-python_env['CXX'] = cxx
+# in case CC/CXX was set to the scan-build wrapper,
+# ensure that we build the python modules with scan-build, too
+if env['CC'].find('scan-build') < 0:
+    python_env['CC'] = cc
+else:
+    python_env['CC'] = ' '.join([env['CC']] + cc.split()[1:])
+if env['CXX'].find('scan-build') < 0:
+    python_env['CXX'] = cxx
+else:
+    python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])
 
 python_env['SHLINKFLAGS'] = []
 python_env['SHLINK'] = ldshared
