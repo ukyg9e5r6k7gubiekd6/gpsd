@@ -14,7 +14,8 @@
 # testbuild - test-build the code from a tarball
 
 # Unfinished items:
-# * Qt binding
+# * Qt binding (needs to build .pc, .prl files)
+# * Python build (.egg-info file, install, allow to build for multiple python versions)
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
@@ -133,19 +134,11 @@ env.SConsignFile(".sconsign.dblite")
 
 env['VERSION'] = gpsd_version
 
+env['PYTHON'] = sys.executable
+
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
-
-# Because absolute paths are safer
-for variant in ['python2.7', 'python2.6', 'python2.5', 'python2.4', "python"]:
-    python = WhereIs(variant)
-    if python:
-        env["PYTHON"] = python
-        break
-else:
-    print "No Python - how are you running this script?"
-    Exit(1)
 
 
 # define a helper function for pkg-config - we need to pass
@@ -726,70 +719,49 @@ python_modules = ["gps/__init__.py", "gps/misc.py", "gps/fake.py",
 
 # Build Python binding
 #
-PYEXTENSIONS = ["gpspacket.so", "gpslib.so"]
+python_extensions = {
+    "gps" + os.sep + "packet" : ["gpspacket.c", "packet.c", "isgps.c",
+                                    "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"],
+    "gps" + os.sep + "clienthelpers" : ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"]
+}
+ 
+python_env = env.Clone()
+from distutils import sysconfig
+vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY')
+for i in range(len(vars)):
+    if vars[i] is None:
+        vars[i] = ""
+(cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy) = vars
+python_env['CC'] = cc
+python_env['CXX'] = cxx
 
-# Build Python modules and scripts using distutils via setup.py.
-# We define build-lib and build-scripts as distutils might have been
-# configured to use different directories, but we want to use the
-# produced files within the regress-driver script - therefore we
-# need to build them in directories we know about.
-#
-# TODO:  Should the dependency on libgps.la be enforced inside
-# setup.py?  (See the variable 'needed_files' in setup.py.)
-#
-# The following to-do items are remnants from the autotools build.
-# They may no longer be relevant given the differences in the scons
-# build model.
-#
-# TO-DO: distutils uses a temporary directory; pass in an appopriate
-# path so that it is under the build directory, not the source
-# directory.  For now, chmod +w the source directory because it's
-# better to have the VPATH build work than to have purity so that
-# distcheck can work.
-#
-# TO-DO: the way shlibs are put in the gps directory of the source tree
-# and used for regression is wrong for VPATH builds.  regress-driver
-# should instead load from pylibdir, and then this symlink
-# hack can be removed.  For now, try to be parallel.
-#
-abs_builddir = os.getcwd()
-pylibdir    = "build/lib.%s-%s"  % (get_platform(), sys.version[0:3])
-pyscriptdir = "build/scripts-%s" % sys.version[0:3]
-python_parts = env.Command('stamp-python',
-                           ["gpspacket.c",
-                            "gpsclient.c",
-                            "setup.py",
-                            compiled_gpslib,
-                            compiled_gpsdlib]
-                           + python_progs
-                           + python_modules, [
-    "rm -f ${TARGET} ${TARGET}.tmp",
-    "date +'%s %N' >${TARGET}.tmp",
-    "(cd $SRCDIR; chmod a+w .; "
-    "env version=" + gpsd_version + " abs_builddir=" + abs_builddir + " MAKE='scons -Q' "
-    "$PYTHON setup.py build " +
-    "--build-lib " + os.path.join(abs_builddir, pylibdir) + " " +
-    "--build-scripts " + os.path.join(abs_builddir, pyscriptdir) + " " +
-    ("--mangenerator '%s') && " % mangenerator) +
-    ("(cd '%s' && " % abs_builddir) +
-    "mkdir -p gps && cd gps && rm -f *.so && " +
-    ("ln -s %s/%s/gps/*.so . ) && " % (abs_builddir, pylibdir)) +
-    "mv -f ${TARGET}.tmp ${TARGET}",
-    ])
-env.Clean(python_parts, ["stamp-python", "stamp-python.tmp"])
-
-#
-# Special dependencies to make generated files
-# TO-DO: Inline the Python scripts.
-#
+python_env['SHLINKFLAGS'] = []
+python_env['SHLINK'] = ldshared
+python_env['SHLIBPREFIX']=""
+python_env['SHLIBSUFFIX']=so_ext
+python_env['CPPPATH'] =[includepy]
+python_env['CPPFLAGS']=basecflags + " " + opt
+python_objects={}
+python_compiled_libs = {}
+for ext, sources in python_extensions.iteritems():
+    python_objects[ext] = []
+    for src in sources:
+        python_objects[ext].append(python_env.SharedObject(src.split(".")[0] + '-py', src))
+    python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
+python_parts = python_compiled_libs.values()
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
     sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\1\",/' <$SOURCE >$TARGET &&\
     chmod a-w $TARGET""")
 
+# build timebase.h
+def timebase_h(target, source, env):
+    from leapsecond import make_leapsecond_include
+    with open(target[0].abspath, 'w') as f:
+        f.write(make_leapsecond_include(source[0].abspath))
 env.Command(target="timebase.h", source="leapseconds.cache",
-            action='$PYTHON leapsecond.py -h $SOURCE >$TARGET')
+            action=timebase_h)
 
 env.Textfile(target="gpsd_config.h", source=confdefs)
 env.Textfile(target="gpsd.h", source=[File("gpsd.h-head"), File("gpsd_config.h"), File("gpsd.h-tail")])
@@ -807,18 +779,19 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
                      'gps_maskdump.c', 'ais_json.c']
 
-# Under autotools this depended on Makefile. We need it to depend
-# on the state of the build-system variables.
-env.Command(target="revision.h", source="gpsd_config.h", action='''
-    rm -f $TARGET &&\
-    $PYTHON -c \'from datetime import datetime; print "#define REVISION \\"%s\\"\\n" % (datetime.now().isoformat()[:-4])\' >$TARGET &&\
-    chmod a-w revision.h''')
+
+# generate revision.h
+from datetime import datetime
+revision='#define REVISION "%s"' %(datetime.now().isoformat()[:-4], )
+env.Textfile(target="revision.h", source=[revision])
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
+from leapsecond import save_leapseconds
+leapseconds_cache = lambda target, source, env: save_leapseconds(target[0].abspath)
 env.NoClean(env.Command(target="leapseconds.cache", source="leapsecond.py",
-            action='$PYTHON $SOURCE -f $TARGET'))
+            action=leapseconds_cache))
 
 # Instantiate some file templates.  We'd like to use the Substfile builtin
 # but it doesn't seem to work in scons 1.20
@@ -826,7 +799,7 @@ def substituter(target, source, env):
     substmap = (
         ('@VERSION@', gpsd_version),
         ('@prefix@',  env['prefix']),
-        ('@PYTHON@',  "$PYTHON"),
+        ('@PYTHON@',  sys.executable),
         )
     with open(str(source[0])) as sfp:
         content = sfp.read()
@@ -881,6 +854,9 @@ env.Default(*build)
 if qt_env:
     build_qt = qt_env.Alias('build', [compiled_qgpsmmlib])
     qt_env.Default(*build_qt)
+
+build_python = python_env.Alias('build', [python_parts])
+python_env.Default(*build_python)
 
 ## Installation and deinstallation
 
@@ -992,7 +968,7 @@ env.Alias('checkall', ['cppcheck','xmllint','splint'])
 def check_compile(target, source, env):
     for pyfile in source:
         'cp %s tmp.py'%(pyfile)
-        '$PYTHON -tt -m py_compile tmp.py'
+        '%s -tt -m py_compile tmp.py' %(sys.executable, )
         'rm -f tmp.py tmp.pyc'
 python_compilation_regress = Utility('python-comilation-regress',
         Glob('*.py') + Glob('gps/*.py') + python_progs + ['SConstruct'], check_compile)
