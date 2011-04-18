@@ -651,12 +651,12 @@ type24b = (
              validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     bitfield("vendorid",     42, 'string',   None, "Vendor ID"),
-    dispatch("mmsi", [type24b1, type24b2], lambda m: 1 if `m`[:2]=='98' else 0),
+    dispatch("mmsi", {0:type24b1, 1:type24b2}, lambda m: 1 if `m`[:2]=='98' else 0),
     )
 
 type24 = (
     bitfield('partno', 2, 'unsigned', None, "Part Number"),
-    dispatch('partno', [type24a, type24b]),
+    dispatch('partno', {0:type24a, 1:type24b}),
     )
 
 type25 = (
@@ -694,16 +694,16 @@ aivdm_decode = (
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     # This is the master dispatch on AIS message type
-    dispatch('msgtype',      [None,   cnb,    cnb,    cnb,    type4,
-                              type5,  type6,  type7,   type8,  type9,
-                              type10, type4,  type12,  type7,  type14,
-                              type15, type16, type17,  type18, type19,
-                              type20, type21, type22,  type23, type24,
-                              type25, None,   type27]),
+    dispatch('msgtype',      {0:None,    1:cnb,    2:cnb,     3:cnb,    4:type4,
+                              5:type5,   6:type6,  7:type7,   8:type8,  9:type9,
+                              10:type10, 11:type4, 12:type12, 13:type7, 14:type14,
+                              15:type15, 16:type16,17:type17, 18:type18,19:type19,
+                              20:type20, 21:type21,22:type22, 23:type23,24:type24,
+                              25:type25, 26:None,  27:type27}),
     )
 
 # Length ranges.  We use this for integrity checking.
-# When a renge is a tuple, it's (minimum, maximum).
+# When a range is a tuple, it's (minimum, maximum).
 lengths = {
     1:  168,
     2:  168,
