@@ -3315,16 +3315,22 @@ integer indices.  In scaled mode, the values are dumped as strings.
 | 4, 11  | lon, lat                         | epfd
 | 5      | draught                          | shiptype, epfd
 | 6(1/12)| cargounit                        | cargounit
-| 6(1/14)| lon, lat, cdir, cspeed           |
+| 6(1/14)| lon, lat, cspeed                 | -
 | 6(1/20)| berth_lon, berth_lat, berth_depth| position
 | 6(1/25)| cargounit                        | cargounit
 | 6(1/25)| cargocode                        | cargocode
-| 6(1/28)| lon, lat                         |
-| 6(1/32)| lon, lat, cdir, cspeed           |
-| 8(1/11)| lon, lat                         | preciptype
-| 8(1/17)| lon, lat                         |
+| 6(1/28)| lon, lat                         | -
+| 6(1/32)| lon, lat, cspeed                 | -
+| 8(1/11)| lon, lat, airtemp, dewpoint,     | preciptype
+|        | visibility, waterlevel, cspeed,  |
+|        | cspeed2, cspeed3, waveheight,    |
+|        | swellheight, salinity            |
+| 8(1/17)| lon, lat                         | -
 | 8(1/27)| airdraught                       | iceclass
-| 8(1/31)| lon, lat                         | preciptype
+| 8(1/31)| lon, lat, airtemp, dewpoint,     | preciptype
+|        | visibility, waterlevel, cspeed,  |
+|        | cspeed2, cspeed3, waveheight,    |
+|        | swellheight, salinity            |
 | 9      | alt, speed                       | -
 | 17-18  | lon, lat                         | -
 | 19     | lon, lat                         | shiptype, epfd
