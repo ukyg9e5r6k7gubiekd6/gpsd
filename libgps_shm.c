@@ -90,6 +90,13 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 			 (void *)&noclobber, 
 			 sizeof(struct gps_data_t));
 	    /*@i1@*/gpsdata->privdata = private_save;
+	    if ((gpsdata->set & REPORT_IS)!=0) {
+		if (gpsdata->fix.mode >= 2)
+		    gpsdata->status = STATUS_FIX;
+		else
+		    gpsdata->status = STATUS_NO_FIX;
+		gpsdata->set = STATUS_SET;
+	    }
 	    return (int)sizeof(struct gps_data_t);
 	}
     }
