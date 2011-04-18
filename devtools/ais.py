@@ -1058,7 +1058,7 @@ if __name__ == "__main__":
             msgtype = parsed[0][1]
             if types and msgtype not in types:
                 continue
-            if verbose >= 1:
+            if verbose >= 1 or (bogon and malformed):
                 sys.stdout.write(raw)
             if not bogon:
                 if json:
@@ -1071,8 +1071,6 @@ if __name__ == "__main__":
                     for (inst, value) in parsed:
                         print "%-25s: %s" % (inst.legend, value)
                     print "%%"
-            elif malformed:
-                sys.stdout.write(raw)
             sys.stdout.flush()
         if histogram:
             keys = frequencies.keys()
