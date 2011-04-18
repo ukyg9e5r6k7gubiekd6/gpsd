@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.30, Apr 2011
+v1.31, Apr 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -1480,6 +1480,7 @@ broadcast of this message of 12 minutes.
 |190-191 |  2 |Pressure Tendency  |pressuretend|0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
+|        |    |                   |            |3 - N/A (default)
 |192-199 |  8 |Horiz. Visibility  |visibility  |0-25.0, units of 0.1nm
 |        |    |                   |            |>= 250 = N/A (default)
 |200-208 |  9 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.1m
@@ -1488,18 +1489,19 @@ broadcast of this message of 12 minutes.
 |209-210 |  2 |Water Level Trend  |leveltrend  |0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
-|211-218 |  8 |Surface Current Speed     |curspeed  |0.0-25.0 knots, units 0.1 knot
-|219-227 |  9 |Surface Current Direction |curdir    |0-359, degrees fom true north
+|        |    |                   |            |3 - N/A (default)
+|211-218 |  8 |Surface Current Speed     |cspeed  |0.0-25.0 knots, units 0.1 knot
+|219-227 |  9 |Surface Current Direction |cdir    |0-359, degrees fom true north
 |        |    |                          |          |>=360 = N/A (default)
-|228-235 |  8 |Current Speed #2     |curspeed2 |0.0-25.0 knots, units 0.1 knot
+|228-235 |  8 |Current Speed #2     |cspeed2   |0.0-25.0 knots, units 0.1 knot
 |        |    |                     |          |>=251 = N/A (default)
-|236-244 |  9 |Current Direction #2 |curdir2   |0-359, degrees fom true north
+|236-244 |  9 |Current Direction #2 |cdir2     |0-359, degrees fom true north
 |        |    |                     |          |>=360 = N/A (default)
-|245-249 |  5 |Measurement Depth #2 |curdepth2 |0-30m down, units 0.1m
+|245-249 |  5 |Measurement Depth #2 |cdepth2   |0-30m down, units 0.1m
 |        |    |                     |          |31 = N/A (default)
-|250-257 |  8 |Current Speed #3     |curspeed3 |0.0-25.0 knots, units 0.1 knot
+|250-257 |  8 |Current Speed #3     |cspeed3   |0.0-25.0 knots, units 0.1 knot
 |        |    |                     |          |>=251 = N/A (default)
-|258-266 |  9 |Current Direction #3 |curdir3   |0-359, degrees fom true north
+|258-266 |  9 |Current Direction #3 |cdir3     |0-359, degrees fom true north
 |        |    |                     |          |>=360 = N/A (default)
 |267-271 |  5 |Measurement Depth #3 |curdepth3 |0-30m down, units 0.1m
 |        |    |                     |          |31 = N/A (default)
@@ -2244,6 +2246,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |191-192 |  2 |Pressure Tendency  |pressuretend|0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
+|        |    |                   |            |3 - N/A (default)
 |193-200 |  8 |Horiz. Visibility  |visibility  |0.1 nautical miles
 |201-212 | 12 |Water Level        |waterlevel  |-10.0 to +30.0 in 0.01m
 |        |    |                   |            |Subtract 10.0m after scaling
@@ -2251,23 +2254,26 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |213-214 |  2 |Water Level Trend  |leveltrend  |0 = steady
 |        |    |                   |            |1 = decreasing
 |        |    |                   |            |2 = increasing
-|215-222 |  8 |Surface Current Speed     |curspeed  |0.0-25.0, units 0.1 knot
+|        |    |                   |            |3 - N/A (default)
+|215-222 |  8 |Surface Current Speed     |cspeed    |0.0-25.0, units 0.1 knot
 |        |    |                          |          |251 = speed >= 25.1 knots
 |        |    |                          |          |255 N/A (default)
-|223-231 |  9 |Surface Current Direction |curdir    |0-359, deg. fom true north
+|223-231 |  9 |Surface Current Direction |cdir      |0-359, deg. fom true north
 |        |    |                          |          |360 = N/A (default)
-|232-239 |  8 |Current Speed #2     |curspeed2 |0.0-25.0 knots, units 0.1 knot
+|232-239 |  8 |Current Speed #2     |cspeed2 |0.0-25.0 knots, units 0.1 knot
 |        |    |                     |          |251 = speed >= 25.1 knots
 |        |    |                     |          |255 N/A (default)
-|240-248 |  9 |Current Direction #2 |curdir2   |0-359, degrees fom true north
+|240-248 |  9 |Current Direction #2 |cdir2     |0-359, degrees fom true north
 |        |    |                     |          |360 = N/A (default)
-|249-253 |  5 |Measurement Depth #2 |curdepth2 |0-30m down, units 0.1m
-|254-261 |  8 |Current Speed #3     |curspeed3 |0.0-25.0 knots, units 0.1 knot
+|249-253 |  5 |Measurement Depth #2 |cdepth2   |0-30m down, units 0.1m
+|        |    |                     |          |31 = N/A (default)
+|254-261 |  8 |Current Speed #3     |cspeed3   |0.0-25.0 knots, units 0.1 knot
 |        |    |                     |          |251 = speed >= 25.1 knots
 |        |    |                     |          |255 N/A (default)
-|262-270 |  9 |Current Direction #3 |curdir3   |0-359, degrees fom true north
+|262-270 |  9 |Current Direction #3 |cdir3     |0-359, degrees fom true north
 |        |    |                     |          |360 = N/A (default)
-|271-275 |  5 |Measurement Depth #3 |curdepth3 |0-30m down, units 0.1m
+|271-275 |  5 |Measurement Depth #3 |cdepth3   |0-30m down, units 0.1m
+|        |    |                     |          |31 = N/A (default)
 |276-283 |  8 |Wave height          |waveheight|0-25m, units 0.1m
 |        |    |                     |          |251 = height >= 25.1m
 |        |    |                     |          |255 N/A (default)
@@ -3507,3 +3513,7 @@ types 6 and 8.
 Version 1.30 was revised because M.1371-4 is now a free download.
 Also, we describe "pilot plugs" and AIS message type 27.  We get
 much more explicit about defaults in IMO236 and IMO289 messages.
+
+Version 1.31 shortened some C names in the Meterological/Hydrological 
+messages and fixed typos.
+

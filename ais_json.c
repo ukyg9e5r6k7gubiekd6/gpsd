@@ -58,6 +58,7 @@ int json_ais_read(const char *buf,
 
     memset(ais, '\0', sizeof(struct ais_t));
 
+    /*@-usedef@*/
     if (strstr(buf, "\"type\":1,") != NULL
 	|| strstr(buf, "\"type\":2,") != NULL
 	|| strstr(buf, "\"type\":3,") != NULL) {
@@ -92,18 +93,36 @@ int json_ais_read(const char *buf,
 			 &ais->type5.hour, &ais->type5.minute);
 	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
-	status = json_read_object(buf, json_ais6, endptr);
-	if (status == 0)
-	    lenhex_unpack(data, &ais->type6.bitcount,
-			  ais->type6.bitdata, sizeof(ais->type6.bitdata));
+	bool imo = false;
+	if (strstr(buf, "\"fid\":16,") != NULL) {
+	    status = json_read_object(buf, json_ais6_fid16, endptr);
+	    imo = true;
+	}
+	else if (strstr(buf, "\"fid\":32,") != NULL || strstr(buf, "\"fid\":14,") != NULL) {
+	    status = json_read_object(buf, json_ais6_fid32, endptr);
+	    imo = true;
+	}
+	if (!imo) {
+	    status = json_read_object(buf, json_ais6, endptr);
+	    if (status == 0)
+		lenhex_unpack(data, &ais->type6.bitcount,
+			      ais->type6.bitdata, sizeof(ais->type6.bitdata));
+	}
     } else if (strstr(buf, "\"type\":7,") != NULL
 	       || strstr(buf, "\"type\":13,") != NULL) {
 	status = json_read_object(buf, json_ais7, endptr);
     } else if (strstr(buf, "\"type\":8,") != NULL) {
-	status = json_read_object(buf, json_ais8, endptr);
-	if (status == 0)
-	    lenhex_unpack(data, &ais->type8.bitcount,
-			  ais->type8.bitdata, sizeof(ais->type8.bitdata));
+	bool imo = false;
+	if (strstr(buf, "\"fid\":31,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
+	    status = json_read_object(buf, json_ais8_fid31, endptr);
+	    imo = true;
+	}
+	if (!imo) {
+	    status = json_read_object(buf, json_ais8, endptr);
+	    if (status == 0)
+		lenhex_unpack(data, &ais->type8.bitcount,
+			      ais->type8.bitdata, sizeof(ais->type8.bitdata));
+	}
     } else if (strstr(buf, "\"type\":9,") != NULL) {
 	status = json_read_object(buf, json_ais9, endptr);
     } else if (strstr(buf, "\"type\":10,") != NULL) {
@@ -148,8 +167,8 @@ int json_ais_read(const char *buf,
 	    *endptr = NULL;
 	return JSON_ERR_MISC;
     }
-    /*@+compdef +nullstate@*/
     return status;
+    /*@+compdef +usedef +nullstate@*/
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 

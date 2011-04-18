@@ -982,7 +982,7 @@ struct ais_t
 		    unsigned int wdir;		/* wind direction */
 		    unsigned int wgustdir;	/* wind gust direction */
 #define DAC1FID31_DIR_NOT_AVAILABLE		360
-		    int temperature;		/* temperature, units 0.1C */
+		    int airtemp;		/* temperature, units 0.1C */
 #define DAC1FID31_AIRTEMP_NOT_AVAILABLE		-1084
 		    unsigned int humidity;	/* relative humidity, % */
 #define DAC1FID31_HUMIDITY_NOT_AVAILABLE	101
@@ -992,31 +992,39 @@ struct ais_t
 #define DAC1FID31_PRESSURE_NOT_AVAILABLE	511
 #define DAC1FID31_PRESSURE_HIGH			402
 		    unsigned int pressuretend;	/* tendency */
-		    bool visgreater;		/* vis. > than following */
+#define DAC1FID31_PRESSURETREND_NOT_AVAILABLE	3
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID31_VISIBILITY_NOT_AVAILABLE	127
-		    unsigned int waterlevel;	/* decimeters or cm */
+		    int waterlevel;		/* decimeters or cm */
 #define DAC1FID11_WATERLEVEL_NOT_AVAILABLE	4001
 #define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	40001
 		    unsigned int leveltrend;	/* water level trend code */
-		    unsigned int curspeed;	/* current speed in deciknots */
-		    unsigned int curdir;	/* current dir., degrees */
-		    unsigned int curspeed2;	/* current speed in deciknots */
-		    unsigned int curdir2;	/* current dir., degrees */
-		    unsigned int curdepth2;	/* measurement depth, 0.1m */
-		    unsigned int curspeed3;	/* current speed in deciknots */
-		    unsigned int curdir3;	/* current dir., degrees */
-		    unsigned int curdepth3;	/* measurement depth, 0.1m */
+#define DAC1FID31_LEVELTREND_NOT_AVAILABLE	3
+		    unsigned int cspeed;	/* current speed in deciknots */
+#define DAC1FID31_CSPEED_NOT_AVAILABLE		255
+		    unsigned int cdir;		/* current dir., degrees */
+		    unsigned int cspeed2;	/* current speed in deciknots */
+		    unsigned int cdir2;		/* current dir., degrees */
+		    unsigned int cdepth2;	/* measurement depth, 0.1m */
+#define DAC1FID31_CDEPTH_NOT_AVAILABLE		301
+		    unsigned int cspeed3;	/* current speed in deciknots */
+		    unsigned int cdir3;		/* current dir., degrees */
+		    unsigned int cdepth3;	/* measurement depth, 0.1m */
 		    unsigned int waveheight;	/* in decimeters */
+#define DAC1FID31_HEIGHT_NOT_AVAILABLE		31
 		    unsigned int waveperiod;	/* in seconds */
+#define DAC1FID31_PERIOD_NOT_AVAILABLE		63
 		    unsigned int wavedir;	/* direction in degrees */
 		    unsigned int swellheight;	/* in decimeters */
 		    unsigned int swellperiod;	/* in seconds */
 		    unsigned int swelldir;	/* direction in degrees */
 		    unsigned int seastate;	/* Beaufort scale, 0-12 */
+#define DAC1FID31_SEASTATE_NOT_AVAILABLE	15
 		    int watertemp;		/* units 0.1deg Celsius */
-		    unsigned char preciptype;	/* 0-7, enumerated */
+#define DAC1FID31_PRECIPTYPE_NOT_AVAILABLE	7
+		    unsigned int preciptype;	/* 0-7, enumerated */
 		    unsigned int salinity;	/* units of 0.1% */
+#define DAC1FID31_SALINITY_NOT_AVAILABLE	510
 		    bool ice;			/* is there sea ice? */
 		} dac1fid31;
 	    };

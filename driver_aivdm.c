@@ -443,7 +443,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid31.wgust		= UBITS(128, 7);
 		    ais->type8.dac1fid31.wdir		= UBITS(135, 9);
 		    ais->type8.dac1fid31.wgustdir	= UBITS(144, 9); 
-		    ais->type8.dac1fid31.temperature	= SBITS(153, 11)
+		    ais->type8.dac1fid31.airtemp	= SBITS(153, 11)
 			- DAC1FID31_AIRTEMP_OFFSET;
 		    ais->type8.dac1fid31.humidity	= UBITS(164, 7);
 		    ais->type8.dac1fid31.dewpoint	= UBITS(171, 10)
@@ -451,19 +451,18 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid31.pressure	= UBITS(181, 9)
 			- DAC1FID31_PRESSURE_OFFSET;
 		    ais->type8.dac1fid31.pressuretend	= UBITS(190, 2);
-		    ais->type8.dac1fid31.visgreater	= false;
 		    ais->type8.dac1fid31.visibility	= UBITS(192, 8);
 		    ais->type8.dac1fid31.waterlevel	= UBITS(200, 9)
 			- DAC1FID11_LEVEL_OFFSET;
 		    ais->type8.dac1fid31.leveltrend	= UBITS(209, 2);
-		    ais->type8.dac1fid31.curspeed	= UBITS(211, 8);
-		    ais->type8.dac1fid31.curdir		= UBITS(219, 9);
-		    ais->type8.dac1fid31.curspeed2	= UBITS(228, 8);
-		    ais->type8.dac1fid31.curdir2	= UBITS(236, 9);
-		    ais->type8.dac1fid31.curdepth2	= UBITS(245, 5);
-		    ais->type8.dac1fid31.curspeed3	= UBITS(250, 8);
-		    ais->type8.dac1fid31.curdir3	= UBITS(258, 9);
-		    ais->type8.dac1fid31.curdepth3	= UBITS(267, 5);
+		    ais->type8.dac1fid31.cspeed		= UBITS(211, 8);
+		    ais->type8.dac1fid31.cdir		= UBITS(219, 9);
+		    ais->type8.dac1fid31.cspeed2	= UBITS(228, 8);
+		    ais->type8.dac1fid31.cdir2		= UBITS(236, 9);
+		    ais->type8.dac1fid31.cdepth2	= UBITS(245, 5);
+		    ais->type8.dac1fid31.cspeed3	= UBITS(250, 8);
+		    ais->type8.dac1fid31.cdir3		= UBITS(258, 9);
+		    ais->type8.dac1fid31.cdepth3	= UBITS(267, 5);
 		    ais->type8.dac1fid31.waveheight	= UBITS(272, 8);
 		    ais->type8.dac1fid31.waveperiod	= UBITS(280, 6);
 		    ais->type8.dac1fid31.wavedir	= UBITS(286, 9);
@@ -515,7 +514,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid31.wgust		= UBITS(129, 7);
 		    ais->type8.dac1fid31.wdir		= UBITS(136, 9);
 		    ais->type8.dac1fid31.wgustdir	= UBITS(145, 9); 
-		    ais->type8.dac1fid31.temperature	= SBITS(154, 11)
+		    ais->type8.dac1fid31.airtemp	= SBITS(154, 11)
 			- DAC1FID31_AIRTEMP_OFFSET;
 		    ais->type8.dac1fid31.humidity	= UBITS(165, 7);
 		    ais->type8.dac1fid31.dewpoint	= UBITS(172, 10)
@@ -523,19 +522,18 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid31.pressure	= UBITS(182, 9)
 			- DAC1FID31_PRESSURE_OFFSET;
 		    ais->type8.dac1fid31.pressuretend	= UBITS(191, 2);
-		    ais->type8.dac1fid31.visgreater	= UBITS(193, 1);
-		    ais->type8.dac1fid31.visibility	= UBITS(194, 6);
+		    ais->type8.dac1fid31.visibility	= UBITS(193, 7);
 		    ais->type8.dac1fid31.waterlevel	= UBITS(200, 12)
 			- DAC1FID31_LEVEL_OFFSET;
 		    ais->type8.dac1fid31.leveltrend	= UBITS(213, 2);
-		    ais->type8.dac1fid31.curspeed	= UBITS(215, 8);
-		    ais->type8.dac1fid31.curdir		= UBITS(223, 9);
-		    ais->type8.dac1fid31.curspeed2	= UBITS(232, 8);
-		    ais->type8.dac1fid31.curdir2	= UBITS(240, 9);
-		    ais->type8.dac1fid31.curdepth2	= UBITS(249, 5);
-		    ais->type8.dac1fid31.curspeed3	= UBITS(254, 8);
-		    ais->type8.dac1fid31.curdir3	= UBITS(262, 9);
-		    ais->type8.dac1fid31.curdepth3	= UBITS(271, 5);
+		    ais->type8.dac1fid31.cspeed		= UBITS(215, 8);
+		    ais->type8.dac1fid31.cdir		= UBITS(223, 9);
+		    ais->type8.dac1fid31.cspeed2	= UBITS(232, 8);
+		    ais->type8.dac1fid31.cdir2		= UBITS(240, 9);
+		    ais->type8.dac1fid31.cdepth2	= UBITS(249, 5);
+		    ais->type8.dac1fid31.cspeed3	= UBITS(254, 8);
+		    ais->type8.dac1fid31.cdir3		= UBITS(262, 9);
+		    ais->type8.dac1fid31.cdepth3	= UBITS(271, 5);
 		    ais->type8.dac1fid31.waveheight	= UBITS(276, 8);
 		    ais->type8.dac1fid31.waveperiod	= UBITS(284, 6);
 		    ais->type8.dac1fid31.wavedir	= UBITS(290, 9);

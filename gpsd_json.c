@@ -1344,6 +1344,7 @@ void json_aivdm_dump(const struct ais_t *ais,
     char buf1[JSON_VAL_MAX * 2 + 1];
     char buf2[JSON_VAL_MAX * 2 + 1];
     char buf3[JSON_VAL_MAX * 2 + 1];
+    bool imo;
 
     static char *nav_legends[] = {
 	"Under way using engine",
@@ -1709,16 +1710,74 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 6:			/* Binary Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"seqno\":%u,\"dest_mmsi\":%u,"
-		       "\"retransmit\":%s,\"dac\":%u,\"fid\":%u,"
-		       "\"data\":\"%zd:%s\"}\r\n",
+		       "\"retransmit\":%s,\"dac\":%u,\"fid\":%u,",
 		       ais->type6.seqno,
 		       ais->type6.dest_mmsi,
 		       JSON_BOOL(ais->type6.retransmit),
 		       ais->type6.dac,
-		       ais->type6.fid,
-		       ais->type6.bitcount,
-		       gpsd_hexdump(ais->type6.bitdata,
-				    (ais->type6.bitcount + 7) / 8));
+		       ais->type6.fid);
+	imo = false;
+	if (ais->type6.dac == 1)
+	    switch (ais->type6.fid) {
+	    case 12:	/* IMO236 -Dangerous cargo indication */
+		break;
+	    case 14:	/* IMO236 - Tidal window */
+	    case 32:	/* IMO289 - Tidal Window */
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"month\":%u,\"day\":%u,"
+				   "\"lon\":%.4f,\"lat\":%.4f,"
+				   "\"from_hour\":%u,\"from_min\":%u,"
+				   "\"to_hour\":%u,\"to_min\":%u,"
+				   "\"cdir\":%u,\"cspeed\":%.1f,",
+				   ais->type6.dac1fid32.month,
+				   ais->type6.dac1fid32.day,
+				   ais->type6.dac1fid32.lon * 0.01,
+				   ais->type6.dac1fid32.lat * 0.01,
+				   ais->type6.dac1fid32.from_hour,
+				   ais->type6.dac1fid32.from_min,
+				   ais->type6.dac1fid32.to_hour,
+				   ais->type6.dac1fid32.to_min,
+				   ais->type6.dac1fid32.cdir,
+				   ais->type6.dac1fid32.cspeed * 0.1);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"month\":%u,\"day\":%u,"
+				   "\"lon\":%d,\"lat\":%.d,"
+				   "\"from_hour\":%u,\"from_min\":%u,"
+				   "\"to_hour\":%u,\"to_min\":%u,"
+				   "\"cdir\":%u,\"cspeed\":%u,",
+				   ais->type6.dac1fid32.month,
+				   ais->type6.dac1fid32.day,
+				   ais->type6.dac1fid32.lon,
+				   ais->type6.dac1fid32.lat,
+				   ais->type6.dac1fid32.from_hour,
+				   ais->type6.dac1fid32.from_min,
+				   ais->type6.dac1fid32.to_hour,
+				   ais->type6.dac1fid32.to_min,
+				   ais->type6.dac1fid32.cdir,
+				   ais->type6.dac1fid32.cspeed);
+		break;
+	    case 16:	/* IMO236 - Number of persons on board */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"persons\":%u", ais->type6.dac1fid16.persons);
+		imo = true;
+		break;
+	    case 18:	/* IMO289 - Clearance time to enter port */
+		break;
+	    case 25:	/* IMO289 = Dangerous cargo indication */
+		break;
+	    case 28:	/* IMO289 - Route info - addressed */
+		break;
+	    case 30:	/* IMO289 - Text description - addressed */
+		break;
+	    }
+	if (!imo)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"data\":\"%zd:%s\"}\r\n",
+			   ais->type6.bitcount,
+			   gpsd_hexdump(ais->type6.bitdata,
+					(ais->type6.bitcount + 7) / 8));
 	break;
     case 7:			/* Binary Acknowledge */
     case 13:			/* Safety Related Acknowledge */
@@ -1728,13 +1787,172 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type7.mmsi2, ais->type7.mmsi3, ais->type7.mmsi4);
 	break;
     case 8:			/* Binary Broadcast Message */
+	imo = false;
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"dac\":%u,\"fid\":%u,\"data\":\"%zd:%s\"}\r\n",
-		       ais->type8.dac,
-		       ais->type8.fid,
-		       ais->type8.bitcount,
-		       gpsd_hexdump(ais->type8.bitdata,
-				    (ais->type8.bitcount + 7) / 8));
+		       "\"dac\":%u,\"fid\":%u,",ais->type8.dac,ais->type8.fid);
+	if (ais->type8.dac == 1)
+	    switch (ais->type8.fid) {
+	    case 11:        /* IMO236 - Meteorological/Hydrological data */
+	    case 31:        /* IMO289 - Meteorological/Hydrological data */
+		/* layout is almost identical to FID=31 from IMO289 */
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"lat\":%.4f,\"lat\":%.4f,",
+				   ais->type8.dac1fid31.lat / AIS_LATLON_SCALE,
+				   ais->type8.dac1fid31.lon / AIS_LATLON_SCALE);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"lat\":%d,\"lat\":%d,",
+				   ais->type8.dac1fid31.lat,
+				   ais->type8.dac1fid31.lon);
+		if (ais->type8.fid == 31)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"accuracy\":%s,",
+				   JSON_BOOL(ais->type8.dac1fid31.accuracy));
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"day\":%u,\"hour\":%u,\"minute\":%u,"
+			       "\"wapeed\":%u,\"wgust\":%u,\"wdir\":%u,"
+			       "\"wgustdir\":%u,\"humidity\":%u",
+			       ais->type8.dac1fid31.day,
+			       ais->type8.dac1fid31.hour,
+			       ais->type8.dac1fid31.minute,
+			       ais->type8.dac1fid31.wspeed,
+			       ais->type8.dac1fid31.wgust,
+			       ais->type8.dac1fid31.wdir,
+			       ais->type8.dac1fid31.wgustdir,
+			       ais->type8.dac1fid31.humidity);
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"airtemp\":%1f,\"dewpoint\":%1f,",
+				   ais->type8.dac1fid31.airtemp * 0.1,
+				   ais->type8.dac1fid31.dewpoint * 0.1);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"airtemp\":%d,\"dewpoint\":%d,",
+				   ais->type8.dac1fid31.airtemp,
+				   ais->type8.dac1fid31.dewpoint);
+
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"pressure\":%u,\"pressuretend\":%u,",
+			       ais->type8.dac1fid31.pressure,
+			       ais->type8.dac1fid31.pressuretend);
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"visibility\":%1f,",
+				   ais->type8.dac1fid31.visibility * 0.1);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"visibility\":%u,:",
+				   ais->type8.dac1fid31.visibility);
+		if (!scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"waterlevel\":%d,",
+				   ais->type8.dac1fid31.waterlevel);
+		else if (ais->type8.fid == 31)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"waterlevel\":%.1f,:",
+				   ais->type8.dac1fid31.waterlevel * 0.01);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"waterlevel\":%.1f,:",
+				   ais->type8.dac1fid31.waterlevel * 0.1);
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"leveltrend\":%u,",
+			       ais->type8.dac1fid31.leveltrend);
+
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"cspeed\":%.1f,\"cdir\":%u"
+				   "\"cspeed2\":%.1f,\"cdir2\":%u,\"cdepth2\":%u,"
+				   "\"cspeed3\":%.1f,\"cdir3\":%u,\"cdepth3\":%u,"
+				   "\"waveheight\":%.1f,\"waveperiod\":%u,\"wavedir\":%u,"
+				   "\"swellheight\":%.1f,\"swellperiod\":%u,\"swelldir\":%u,"
+				   "\"seastate\":%u,\"watertemp\":%.1f,"
+				   "\"preciptype\":%u,\"salinity\":%.1f,\"ice\":%s",
+				   ais->type8.dac1fid31.cspeed * 0.1,
+				   ais->type8.dac1fid31.cdir,
+				   ais->type8.dac1fid31.cspeed2 * 0.1,
+				   ais->type8.dac1fid31.cdir2,
+				   ais->type8.dac1fid31.cdepth2,
+				   ais->type8.dac1fid31.cspeed3 * 0.1,
+				   ais->type8.dac1fid31.cdir3,
+				   ais->type8.dac1fid31.cdepth3,
+				   ais->type8.dac1fid31.waveheight * 0.1,
+				   ais->type8.dac1fid31.waveperiod,
+				   ais->type8.dac1fid31.wavedir,
+				   ais->type8.dac1fid31.swellheight * 0.1,
+				   ais->type8.dac1fid31.swellperiod,
+				   ais->type8.dac1fid31.swelldir,
+				   ais->type8.dac1fid31.seastate,
+				   ais->type8.dac1fid31.watertemp * 0.1,
+				   ais->type8.dac1fid31.preciptype,
+				   ais->type8.dac1fid31.salinity * 0.1,
+				   JSON_BOOL(ais->type8.dac1fid31.ice));
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"cspeed\":%u,\"cdir\":%u"
+				   "\"cspeed2\":%u,\"cdir2\":%u,\"cdepth2\":%u,"
+				   "\"cspeed3\":%u,\"cdir3\":%u,\"cdepth3\":%u,"
+				   "\"waveheight\":%u,\"waveperiod\":%u,\"wavedir\":%u,"
+				   "\"swellheight\":%u,\"swellperiod\":%u,\"swelldir\":%u,"
+				   "\"seastate\":%u,\"watertemp\":%d,"
+				   "\"preciptype\":%u,\"salinity\":%u,\"ice\":%s",
+				   ais->type8.dac1fid31.cspeed,
+				   ais->type8.dac1fid31.cdir,
+				   ais->type8.dac1fid31.cspeed2,
+				   ais->type8.dac1fid31.cdir2,
+				   ais->type8.dac1fid31.cdepth2,
+				   ais->type8.dac1fid31.cspeed3,
+				   ais->type8.dac1fid31.cdir3,
+				   ais->type8.dac1fid31.cdepth3,
+				   ais->type8.dac1fid31.waveheight,
+				   ais->type8.dac1fid31.waveperiod,
+				   ais->type8.dac1fid31.wavedir,
+				   ais->type8.dac1fid31.swellheight,
+				   ais->type8.dac1fid31.swellperiod,
+				   ais->type8.dac1fid31.swelldir,
+				   ais->type8.dac1fid31.seastate,
+				   ais->type8.dac1fid31.watertemp,
+				   ais->type8.dac1fid31.preciptype,
+				   ais->type8.dac1fid31.salinity,
+				   JSON_BOOL(ais->type8.dac1fid31.ice));
+		imo = true;
+		break;
+	    case 13:        /* IMO236 - Fairway closed */
+		break;
+	    case 15:        /* IMO236 - Extended ship and voyage */
+		break;
+	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
+		break;
+	    case 19:        /* IMO289 - Marine Traffic Signal */
+		break;
+	    case 20:        /* IMO289 - Berthing Data */
+		break;
+	    case 21:        /* IMO289 - Weather obs. report from ship */
+		break;
+	    case 22:        /* IMO289 - Area notice - broadcast */
+		break;
+	    case 23:        /* IMO289 - Area notice - addressed */
+		break;
+	    case 24:        /* IMO289 - Extended ship static & voyage-related data */
+		break;
+	    case 25:        /* IMO289 - Dangerous Cargo Indication */
+		break;
+	    case 27:        /* IMO289 - Route information - broadcast */
+		break;
+	    case 29:        /* IMO289 - Text Description - broadcast */
+		break;
+	    case 30:        /* IMO289 - Text Description - addressed */
+		break;
+	    case 32:        /* Tidal Window */
+		break;
+	    }
+	if (!imo)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"data\":\"%zd:%s\"}\r\n",
+			   ais->type8.bitcount,
+			   gpsd_hexdump(ais->type8.bitdata,
+					(ais->type8.bitcount + 7) / 8));
 	break;
     case 9:			/* Standard SAR Aircraft Position Report */
 	if (scaled) {
