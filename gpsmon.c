@@ -405,9 +405,12 @@ static bool switch_type(const struct gps_type_t *devtype)
 {
     const struct monitor_object_t **trial, **newobject;
     newobject = NULL;
-    for (trial = monitor_objects; *trial; trial++)
-	if ((*trial)->driver == devtype)
+    for (trial = monitor_objects; *trial; trial++) {
+	if (strcmp((*trial)->driver->type_name, devtype->type_name)==0) {
 	    newobject = trial;
+	    break;
+	}
+    }
     if (newobject) {
 	int leftover;
 	if (LINES < (*newobject)->min_y + 1 || COLS < (*newobject)->min_x) {
