@@ -446,7 +446,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 	return true;
     }
 
-    monitor_complain("No matching monitor type.");
+    monitor_complain("No monitor matches %s.", devtype->type_name);
     return false;
 }
 
