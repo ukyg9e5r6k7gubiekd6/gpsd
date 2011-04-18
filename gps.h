@@ -932,6 +932,12 @@ struct ais_t
 		struct {
 		    unsigned persons;	/* number of persons */
 		} dac1fid16;
+		/* IMO289 - Text message (addressed) */
+		struct {
+		    unsigned int linkage;
+#define AIS_DAC1FID30_TEXT_MAX	154	/* 920 bits of six-bit, plus NUL */
+		    char text[AIS_DAC1FID30_TEXT_MAX];
+		} dac1fid30;
 		/* IMO236 & IMO289 - Tidal Window */
 		struct {
 		    unsigned int month;		/* month of year */

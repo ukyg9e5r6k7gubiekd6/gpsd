@@ -1770,6 +1770,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 28:	/* IMO289 - Route info - addressed */
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"linkage\":%u,\"text\":\"%s\"}\r\n",
+		       ais->type6.dac1fid30.linkage,
+		       json_stringify(buf1, sizeof(buf1), 
+				      ais->type6.dac1fid30.text));
 		break;
 	    }
 	if (!imo)

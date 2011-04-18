@@ -369,6 +369,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 28:	/* IMO289 - Route info - addressed */
 		    break;
 		case 30:	/* IMO289 - Text description - addressed */
+		    ais->type6.dac1fid30.linkage   = UBITS(88, 10);
+		    from_sixbit((char *)ais_context->bits,
+				98, ais_context->bitlen-98,
+				ais->type6.dac1fid30.text);
 		    break;
 		case 32:	/* IMO289 - Tidal Window */
 		    ais->type6.dac1fid32.month     = UBITS(88, 4);

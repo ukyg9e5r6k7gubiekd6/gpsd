@@ -109,6 +109,22 @@ ais_specs = (
         ),
     },
     {
+    "initname" : "json_ais6_fid30",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type6",
+    "fieldmap":(
+        # fieldname               type             default
+        ('seqno',                 'uinteger',      '0'),
+        ('dest_mmsi',             'uinteger',      '0'),
+        ('retransmit',            'boolean',       'false'),
+        ('dac',                   'uinteger',      '0'),
+        ('fid',                   'uinteger',      '0'),
+        ('dac1fid30.linkage',     'uinteger',      '0'),
+        ('dac1fid30.text',        'string',        '0'),
+        ),
+    "stringbuffered":("dacfid31.text",),
+    },
+    {
     "initname" : "json_ais6_fid32",
     "header": "\tAIS_HEADER,",
     "structname": "ais->type6",
