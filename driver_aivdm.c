@@ -364,7 +364,9 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    break;
 		case 18:	/* IMO289 - Clearance time to enter port */
 		    break;
-		case 25:	/* IMO289 = Dangerous cargo indication */
+		case 23:        /* IMO289 - Area notice - addressed */
+		    break;
+		case 25:	/* IMO289 - Dangerous cargo indication */
 		    break;
 		case 28:	/* IMO289 - Route info - addressed */
 		    break;
@@ -495,11 +497,9 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    break;
 		case 22:        /* IMO289 - Area notice - broadcast */
 		    break;
-		case 23:        /* IMO289 - Area notice - addressed */
-		    break;
 		case 24:        /* IMO289 - Extended ship static & voyage-related data */
 		    break;
-		case 25:        /* IMO289 - Dangerous Cargo Indication */
+		case 26:        /* IMO289 - Environmental */
 		    break;
 		case 27:        /* IMO289 - Route information - broadcast */
 		    break;

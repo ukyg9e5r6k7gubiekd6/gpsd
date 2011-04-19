@@ -847,6 +847,7 @@ in use for type 6.
 |   1 | 16 |     | <<IMO236>>  | Deprecated/In Use| Num persons on board
 |   1 | 16 |     | <<IMO289>>  | Standard         | Num persons on board
 |   1 | 18 |     | <<IMO289>>  | Standard         | Clearance time to enter port
+|   1 | 23 |     | <<IMO289>>  | In use           | Area notice (addressed)
 |   1 | 25 |     | <<IMO289>>  | Standard         | Dangerous Cargo indication
 |   1 | 28 |     | <<IMO289>>  | Standard         | Route info addressed
 |   1 | 30 |     | <<IMO289>>  | Standard         | Text description addressed
@@ -1399,7 +1400,7 @@ DAC-FID pairs in use for type 8:
 |   1     | 17 |     | <<IMO89>>  | In use     | VTS-Generated/Synthetic targets
 |   1     | 19 |     | <<IMO289>> | Standard   | Marine traffic signals
 |   1     | 20 |     | <<IMO289>> | Standard   | Berthing data
-|   1     | 21 |     | <<IMO289>> | Standard   | Weather obs from ship
+|   1     | 21 |     | <<IMO289>> | Standard   | Weather observation from ship
 |   1     | 22 |     | <<IMO289>> | In use     | Area notice broadcast
 |   1     | 24 |     | <<IMO289>> | Standard   | Extended ship and voyage
 |   1     | 26 |     | <<IMO289>> | Standard   | Environmental
