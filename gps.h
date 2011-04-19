@@ -963,7 +963,6 @@ struct ais_t
 	} type7;
 	/* Type 8 - Broadcast Binary Message */
 	struct {
-	    /* IMO236 & IMO289 - Meteorological-Hydrological data */
 	    //unsigned int spare;	spare bit(s) */
 	    unsigned int dac;       	/* Designated Area Code */
 	    unsigned int fid;       	/* Functional ID */
@@ -971,6 +970,13 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
+		/* IMO289 - Text message (broadcast) */
+		struct {
+		    unsigned int linkage;
+#define AIS_DAC1FID29_TEXT_MAX	162	/* 920 bits of six-bit, plus NUL */
+		    char text[AIS_DAC1FID29_TEXT_MAX];
+		} dac1fid29;
+		/* IMO236 & IMO289 - Meteorological-Hydrological data */
 		struct {
 		    bool accuracy;	/* position accuracy, <10m if true */
 #define DAC1FID31_LATLON_SCALE	1000

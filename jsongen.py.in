@@ -122,7 +122,7 @@ ais_specs = (
         ('dac1fid30.linkage',     'uinteger',      '0'),
         ('dac1fid30.text',        'string',        '0'),
         ),
-    "stringbuffered":("dacfid31.text",),
+    "stringbuffered":("dacfid30.text",),
     },
     {
     "initname" : "json_ais6_fid32",
@@ -170,6 +170,19 @@ ais_specs = (
         ('data',          'string',        None),
         ),
     "stringbuffered":("data",),
+    },
+    {
+    "initname" : "json_ais8_fid29",
+    "header": "\tAIS_HEADER,",
+    "structname": "ais->type8",
+    "fieldmap":(
+        # fieldname               type             default
+        ('dac',                   'uinteger',      '0'),
+        ('fid',                   'uinteger',      '0'),
+        ('dac1fid29.linkage',     'uinteger',      '0'),
+        ('dac1fid29.text',        'string',        '0'),
+        ),
+    "stringbuffered":("dacfid29.text",),
     },
     {
     "initname" : "json_ais8_fid31",

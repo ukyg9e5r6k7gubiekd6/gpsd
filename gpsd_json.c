@@ -1765,6 +1765,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 18:	/* IMO289 - Clearance time to enter port */
 		break;
+	    case 23:    /* IMO289 - Area notice - addressed */
+		break;
 	    case 25:	/* IMO289 = Dangerous cargo indication */
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
@@ -1910,7 +1912,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   preciptypes[ais->type8.dac1fid31.preciptype],
 				   ais->type8.dac1fid31.salinity * 0.1,
 				   JSON_BOOL(ais->type8.dac1fid31.ice));
-		}else
+		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"leveltrend\":%u,"
 				   "\"cspeed\":%u,\"cdir\":%u"
@@ -1956,8 +1958,6 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 22:        /* IMO289 - Area notice - broadcast */
 		break;
-	    case 23:        /* IMO289 - Area notice - addressed */
-		break;
 	    case 24:        /* IMO289 - Extended ship static & voyage-related data */
 		break;
 	    case 25:        /* IMO289 - Dangerous Cargo Indication */
@@ -1965,10 +1965,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 27:        /* IMO289 - Route information - broadcast */
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
-		break;
-	    case 30:        /* IMO289 - Text Description - addressed */
-		break;
-	    case 32:        /* Tidal Window */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "\"linkage\":%u,\"text\":\"%s\"}\r\n",
+		       ais->type8.dac1fid29.linkage,
+		       json_stringify(buf1, sizeof(buf1), 
+				      ais->type8.dac1fid29.text));
 		break;
 	    }
 	}

@@ -441,7 +441,7 @@ location transmission in military exercises. It is also used for
 unencrypted structured extension messages by local authorities such as
 the St. Lawrence Seaway and PAWSS. This document describes all of the
 Class 8 special message formats approved for use in <<IMO236>> and
-<<IMO289>> except Area Report (FID = 22) and Environmental (FID=26).
+<<IMO289>> except Area Notices (FID = 22,23) and Environmental (FID=26).
 
 Classes 12 and 14 are used for safety-related text messaging.
 
@@ -2031,7 +2031,7 @@ Information (addressed)" message (DAC=1, FID=28).
 
 ==== Text description (broadcast) ====
 
-A message 8 subtype. DAC = 001 FID = 29. Variable length: 72-1034 bits.
+A message 8 subtype. DAC = 001 FID = 29. Variable length: 72-1032 bits.
 
 Intended to be used to associate a text annotation with another message 
 via the Message Linkage ID field.
@@ -2045,7 +2045,7 @@ via the Message Linkage ID field.
 |38-39   |  2    |Spare                |            |Not used
 |40-55   | 16    |DAC/FID              |            |DAC = 001 FID = 29
 |56-65   | 10    |Message Linkage ID   |linkage     |Unsigned integer
-|66-?    | 6-930 |Description          |description |String
+|66-?    | 6-966 |Description          |description |String
 |==============================================================================
 
 There is an equivalent subtype of message 6 that is an addressed description.

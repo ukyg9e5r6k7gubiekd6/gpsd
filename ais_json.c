@@ -117,7 +117,11 @@ int json_ais_read(const char *buf,
 	status = json_read_object(buf, json_ais7, endptr);
     } else if (strstr(buf, "\"type\":8,") != NULL) {
 	bool imo = false;
-	if (strstr(buf, "\"fid\":31,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
+	if (strstr(buf, "\"fid\":29,") != NULL) {
+	    status = json_read_object(buf, json_ais8_fid29, endptr);
+	    imo = true;
+	}
+	else if (strstr(buf, "\"fid\":31,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
 	    status = json_read_object(buf, json_ais8_fid31, endptr);
 	    imo = true;
 	}
