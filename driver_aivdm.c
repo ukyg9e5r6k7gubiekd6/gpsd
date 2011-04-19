@@ -509,7 +509,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 				56, ais_context->bitlen-56,
 				ais->type8.dac1fid29.text);
 		    break;
-		    break;
 		case 31:        /* IMO289 - Meteorological/Hydrological data */
 		    ais->type8.dac1fid31.lat		= SBITS(56, 24);
 		    ais->type8.dac1fid31.lon		= SBITS(80, 25);
