@@ -6,7 +6,7 @@ import sys, getopt
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "tc")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:")
     except getopt.GetoptError, msg:
         print "tablecheck.py: " + str(msg)
         raise SystemExit, 1
@@ -14,6 +14,7 @@ if __name__ == '__main__':
     for (switch, val) in options:
         if switch == '-c':
             generate = True     # Logic for this is not yet implemented.
+            prefix = val
         elif switch == '-t':
             maketable = True
 
@@ -60,6 +61,14 @@ if __name__ == '__main__':
         # Writes the corrected table to standard output.
         for (i, t) in enumerate(table):
             print "|" + offsets[i] + t[owidth+1:].rstrip()
-
+    elif generate:
+        # Writes calls to bit-extraction macros to standard output
+        for (i, t) in enumerate(table):
+            fields = map(lambda s: s.strip(), t.split('|'))
+            name = fields[4]
+            if name:
+                offset = offsets[i].split('-')[0]
+                width = fields[2]
+                print "\t%s.%s\t= UBITS(%s, %s);" % (prefix, name, offset, width)
 
     
