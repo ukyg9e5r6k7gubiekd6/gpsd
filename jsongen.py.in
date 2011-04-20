@@ -12,10 +12,17 @@ import sys, getopt
 
 #
 # Here is the information that makes it all work - attribute, type, and
-# defult information for all fields.  We can generate either a JSON
-# parser template spec or the C code for the corresponding dump functio
-# from this information. Doing it this way guarantees consistency.
+# defult information for all fields.  We generate a JSON
+# parser template spec. Doing it this way guarantees consistency.
 #
+# Notes on the fields:
+# initname: becomes the name of the generated structure initializer
+# header: common header to include in front of the structure template
+# structname: gets prepended to all fieldnames in the generated C
+# fieldmap: each member fills an initializer slot
+# stringbuffered: list strings that should be buffered rather than copied
+#                 directly into the structure.
+
 ais_specs = (
     {
     "initname" : "json_ais1",
@@ -118,7 +125,7 @@ ais_specs = (
         ('dac1fid12.unid',       'uinteger', '0'),
         ('dac1fid12.amount',     'uinteger', '0'),
         ('dac1fid12.unit',       'uinteger', '0'),
-    ),
+        ),
     },
     {
     "initname" : "json_ais6_fid16",
