@@ -8,11 +8,11 @@ import sys, getopt
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:d:S:E:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:d:S:E:r:")
     except getopt.GetoptError, msg:
         print "tablecheck.py: " + str(msg)
         raise SystemExit, 1
-    generate = maketable = makestruct = makedump = False
+    generate = maketable = makestruct = makedump = readgen = False
     after = before = None
     for (switch, val) in options:
         if switch == '-c':
@@ -26,12 +26,15 @@ if __name__ == '__main__':
         elif switch == '-d':
             makedump = True
             structname = val
+        elif switch == '-r':
+            readgen = True
+            structname = val
         elif switch == '-S':
             after = val
         elif switch == '-E':
             before = val
 
-    if not generate and not maketable and not makestruct and not makedump:
+    if not generate and not maketable and not makestruct and not makedump and not readgen:
         print >>sys.stderr, "tablecheck.py: no mode selected"
         sys.exit(1)
 
@@ -230,7 +233,64 @@ if __name__ == '__main__':
                     print arg + ','
                 else:
                     print arg + ';'
-
+    elif readgen:
+        # Write a stanza for jsongen.py.in describing how to generate a
+        # JSON parser initializer from this table. You need to fill in
+        # __INITIALIZER__ and default values after this is generated.
+        baseindent = " " * 8
+        step = " " * 4
+        record = after is None
+        stringbuffered = []
+        print '''\
+{
+    "initname" : "__INITIALIZER__",
+    "header": "\tAIS_HEADER,",
+    "structname": "%s",
+    "fieldmap":(
+        # fieldname    type        default''' % (structname,)
+        for (i, t) in enumerate(table):
+            if '|' in t:
+                fields = map(lambda s: s.strip(), t.split('|'))
+                name = fields[4]
+                ftype = fields[5]
+                if after == name:
+                    record = True
+                    continue
+                if before == name:
+                    record = False
+                    continue
+                if ftype == 'x' or not record:
+                    continue
+                # Depends on the assumption that the resd code
+                # always sees unscaled JSON.
+                readtype = {
+                    'u': "uinteger",
+                    'U': "uinteger",
+                    'i': "integer",
+                    'I': "integer",
+                    'b': "boolean",
+                    't': "string",
+                    'd': "string",
+                    }[ftype[0]]
+                default = {
+                    'u': "PUT_DEFAULT_HERE",
+                    'U': "PUT_DEFAULT_HERE",
+                    'i': "PUT_DEFAULT_HERE",
+                    'I': "PUT_DEFAULT_HERE",
+                    'b': "\'false\'",
+                    't': "None",
+                    }[ftype[0]]
+                if ftype == 't':
+                    stringbuffered.append(name)
+                print "        ('%s',%s '%s',%s %s)," % (name,
+                                                         " "*(10-len(name)),
+                                                         readtype,
+                                                         " "*(8-len(readtype)),
+                                                         default)
+        print "    ),"
+        if stringbuffered:
+            print "    stringbuffered :", repr(tuple(stringbuffered)) + ","
+        print "},"
 
 # end
   
