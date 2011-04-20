@@ -28,7 +28,7 @@
 #
 # This generates almost all the code required to support a new message type.
 # It's not quite "Look, ma, no handhacking!" You'll need to add default
-# values to the Python stanza. If the structure definition contains cgaracter
+# values to the Python stanza. If the structure definition contains character
 # arrays, you'll have to fill in the dimensions by hand.  You'll need to add
 # a bit of glue to ais_json.c so that json_ais_read() actually calls the parser
 # handing it the specification structure as a control argument.
