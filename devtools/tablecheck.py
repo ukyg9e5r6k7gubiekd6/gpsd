@@ -88,43 +88,67 @@ if __name__ == '__main__':
                 print t.rstrip()
     elif generate:
         # Writes calls to bit-extraction macros to standard output.
-        # Requites UBITS and SBITS to act as they do in the AIVDM driver.
+        # Requites UBITS, SBITS, UCHARS to act as they do in the AIVDM driver.
+        record = after is None
         for (i, t) in enumerate(table):
             if '|' in t:
                 fields = map(lambda s: s.strip(), t.split('|'))
                 width = fields[2]
                 name = fields[4]
                 ftype = fields[5]
+                if after == name:
+                    record = True
+                    continue
+                if before == name:
+                    record = False
+                    continue
+                if not record:
+                    continue
                 if ftype == 'x':
-                    print "\t/* skip %s bits */" % width
-                elif ftype in ('u', 'i'):
-                    offset = offsets[i].split('-')[0]
+                    print "\t/* skip %s bit%s */" % (width, ["", "s"][width>'1'])
+                    continue
+                offset = offsets[i].split('-')[0]
+                if ftype[0] in ('u', 'i'):
                     print "\t%s.%s\t= %sBITS(%s, %s);" % \
-                          (structname, name, {'u':'U', 'i':'S'}[ftype.tolower()], offset, width)
+                          (structname, name, {'u':'U', 'i':'S'}[ftype[0].lower()], offset, width)
+                elif ftype == 't':
+                    print "\tUCHARS(%s, %s.%s);" % (offset, structname, name)
                 else:
                     print "\t/* %s bits of type %s */" % (width, ftype)
     elif makestruct:
         # Write a structure definition correponding to the table.
-        print "\tstruct {"
+        record = after is None
+        baseindent = 8
+        step = 4
+        def tabify(n):
+            return ('\t' * (n / 8)) + (" " * (n % 8)) 
+        print tabify(baseindent) + "struct {"
         for (i, t) in enumerate(table):
             if '|' in t:
                 fields = map(lambda s: s.strip(), t.split('|'))
                 description = fields[3].strip()
                 name = fields[4]
                 ftype = fields[5]
-                if ftype == 'x':
+                if after == name:
+                    record = True
+                    continue
+                if before == name:
+                    record = False
+                    continue
+                if ftype == 'x' or not record:
                     continue
                 if ftype == 'u' or ftype[0] == 'U':
-                    print "\t\tunsigned int %s;\t/* %s*/" % (name, description)
+                    decl = "unsigned int %s;\t/* %s */" % (name, description)
                 elif ftype == 'i' or ftype[0] == 'I':
-                    print "\t\tint %s;\t/* %s*/" % (name, description)
+                    decl = "signed int %s;\t/* %s */" % (name, description)
                 elif ftype == 'b':
-                    print "\t\tint %s;\t/* %s*/" % (name, description)
+                    decl = "signed int %s;\t/* %s */" % (name, description)
                 elif ftype == 't':
-                    print "\t\tchar %s[];\t/* %s*/" % (name, description)
+                    decl = "char %s[];\t/* %s */" % (name, description)
                 else:
-                    print "\t/* %s bits of type %s */" % (width, ftype)
-        print "\t} %s;" % structname
+                    decl += "/* %s bits of type %s */" % (width, ftype)
+                print tabify(baseindent + step) + decl
+        print tabify(baseindent) + "} %s;" % structname
     elif makedump:
         # Write the skeleton of a JSON dump corresponding to the table
         baseindent = " " * 8
@@ -209,9 +233,9 @@ if __name__ == '__main__':
             print (baseindent + step) + '"%s",' % unscaled
             for (i, n) in enumerate(names):
                 if i < len(names) - 1:
-                    print (baseindent + step) + '%s,' % n
+                    print (baseindent + step) + structname + '.%s,' % n
                 else:
-                    print (baseindent + step) + '%s);' % n
+                    print (baseindent + step) + structname + '.%s);' % n
         else:
             print (baseindent + step) + "if (scaled)"
             print (baseindent + step*2) + header
@@ -244,7 +268,7 @@ if __name__ == '__main__':
         print '''\
 {
     "initname" : "__INITIALIZER__",
-    "header": "\tAIS_HEADER,",
+    "header": "\\tAIS_HEADER,",
     "structname": "%s",
     "fieldmap":(
         # fieldname    type        default''' % (structname,)
@@ -273,10 +297,10 @@ if __name__ == '__main__':
                     'd': "string",
                     }[ftype[0]]
                 default = {
-                    'u': "PUT_DEFAULT_HERE",
-                    'U': "PUT_DEFAULT_HERE",
-                    'i': "PUT_DEFAULT_HERE",
-                    'I': "PUT_DEFAULT_HERE",
+                    'u': "'PUT_DEFAULT_HERE'",
+                    'U': "'PUT_DEFAULT_HERE'",
+                    'i': "'PUT_DEFAULT_HERE'",
+                    'I': "'PUT_DEFAULT_HERE'",
                     'b': "\'false\'",
                     't': "None",
                     }[ftype[0]]

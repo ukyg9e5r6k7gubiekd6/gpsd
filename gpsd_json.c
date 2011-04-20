@@ -1720,6 +1720,28 @@ void json_aivdm_dump(const struct ais_t *ais,
 	if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
 	    case 12:	/* IMO236 -Dangerous cargo indication */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"lastport\":\"%s\",\"lmonth\":%u,\"lday\":%u,"
+			       "\"lhour\":%u,\"lminute\":%u,"
+			       "\"nextport\":\"%s\",\"nmonth\":%u,\"nday\":%u,"
+			       "\"nhour\":%u,\"nminute\":%u,"
+			       "\"dangerous\":\"%s\",\"imdcat\":\"%s\","
+			       "\"unid\":%u,\"amount\":%u,\"unit\":%u",
+			       ais->type6.dac1fid12.lastport,
+			       ais->type6.dac1fid12.lmonth,
+			       ais->type6.dac1fid12.lday,
+			       ais->type6.dac1fid12.lhour,
+			       ais->type6.dac1fid12.lminute,
+			       ais->type6.dac1fid12.nextport,
+			       ais->type6.dac1fid12.nmonth,
+			       ais->type6.dac1fid12.nday,
+			       ais->type6.dac1fid12.nhour,
+			       ais->type6.dac1fid12.nminute,
+			       ais->type6.dac1fid12.dangerous,
+			       ais->type6.dac1fid12.imdcat,
+			       ais->type6.dac1fid12.unid,
+			       ais->type6.dac1fid12.amount,
+			       ais->type6.dac1fid12.unit);
 		break;
 	    case 14:	/* IMO236 - Tidal window */
 	    case 32:	/* IMO289 - Tidal Window */

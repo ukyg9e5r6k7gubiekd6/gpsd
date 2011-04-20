@@ -341,9 +341,25 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    if (ais->type8.dac == 1)
 		switch (ais->type8.fid) {
 		case 12:	/* IMO236 -Dangerous cargo indication */
+		    UCHARS(88, ais->type6.dac1fid12.lastport);
+		    ais->type6.dac1fid12.lmonth		= UBITS(118, 4);
+		    ais->type6.dac1fid12.lday		= UBITS(122, 5);
+		    ais->type6.dac1fid12.lhour		= UBITS(127, 5);
+		    ais->type6.dac1fid12.lminute	= UBITS(132, 6);
+		    UCHARS(138, ais->type6.dac1fid12.nextport);
+		    ais->type6.dac1fid12.nmonth		= UBITS(168, 4);
+		    ais->type6.dac1fid12.nday		= UBITS(172, 5);
+		    ais->type6.dac1fid12.nhour		= UBITS(177, 5);
+		    ais->type6.dac1fid12.nminute	= UBITS(182, 6);
+		    UCHARS(188, ais->type6.dac1fid12.dangerous);
+		    UCHARS(308, ais->type6.dac1fid12.imdcat);
+		    ais->type6.dac1fid12.unid		= UBITS(332, 13);
+		    ais->type6.dac1fid12.amount		= UBITS(345, 10);
+		    ais->type6.dac1fid12.unit		= UBITS(355, 2);
+		    /* skip 3 bits */
 		    break;
 		case 14:	/* IMO236 - Tidal window */
-		    /* use IMO289 structure because layount is nearly same */ 
+		    /* use IMO289 structure because layout is nearly same */ 
 		    ais->type6.dac1fid32.month     = UBITS(88, 4);
 		    ais->type6.dac1fid32.day       = UBITS(92, 5);
 		    ais->type6.dac1fid32.lon       = UBITS(97, 25);

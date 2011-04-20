@@ -898,7 +898,7 @@ struct ais_t
 	struct {
 	    unsigned int ais_version;	/* AIS version level */
 	    unsigned int imo;		/* IMO identification */
-	    char callsign[8];		/* callsign */ 
+	    char callsign[7+1];		/* callsign */ 
 #define AIS_SHIPNAME_MAXLEN	20
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];	/* vessel name */
 	    unsigned int shiptype;	/* ship type code */
@@ -912,7 +912,7 @@ struct ais_t
 	    unsigned int hour;		/* UTC hour */
 	    unsigned int minute;	/* UTC minute */
 	    unsigned int draught;	/* draft in meters */
-	    char destination[21];	/* ship destination */
+	    char destination[20+1];	/* ship destination */
 	    unsigned int dte;		/* data terminal enable */
 	    //unsigned int spare;	spare bits */
 	} type5;
@@ -928,6 +928,24 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
+		/* IMO236 - Dangerous Cargo Indication */
+		struct {
+		    char lastport[5+1];		/* Last Port Of Call */
+		    unsigned int lmonth;	/* ETA month */
+		    unsigned int lday;		/* ETA day */
+		    unsigned int lhour;		/* ETA hour */
+		    unsigned int lminute;	/* ETA minute */
+		    char nextport[5+1];		/* Next Port Of Call */
+		    unsigned int nmonth;	/* ETA month */
+		    unsigned int nday;		/* ETA day */
+		    unsigned int nhour;		/* ETA hour */
+		    unsigned int nminute;	/* ETA minute */
+		    char dangerous[20+1];	/* Main Dangerous Good */
+		    char imdcat[4+1];		/* IMD Category */
+		    unsigned int unid;		/* UN Number */
+		    unsigned int amount;	/* Amount of Cargo */
+		    unsigned int unit;		/* Unit of Quantity */
+		} dac1fid12;
 		/* IMO236 - Number of Persons on board */
 		struct {
 		    unsigned persons;	/* number of persons */

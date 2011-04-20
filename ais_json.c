@@ -94,7 +94,11 @@ int json_ais_read(const char *buf,
 	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
 	bool imo = false;
-	if (strstr(buf, "\"fid\":16,") != NULL) {
+	if (strstr(buf, "\"fid\":12,") != NULL) {
+	    status = json_read_object(buf, json_ais6_fid12, endptr);
+	    imo = true;
+	}
+	else if (strstr(buf, "\"fid\":16,") != NULL) {
 	    status = json_read_object(buf, json_ais6_fid16, endptr);
 	    imo = true;
 	}
