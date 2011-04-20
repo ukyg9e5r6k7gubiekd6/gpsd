@@ -48,7 +48,19 @@ int json_ais_read(const char *buf,
 	{"repeat",         t_uinteger, .addr.uinteger = &ais->repeat}, \
 	{"scaled",         t_boolean,  .addr.boolean = &scaled, \
 		                          .dflt.boolean = false}, \
-	{"mmsi",           t_uinteger, .addr.uinteger = &ais->mmsi}
+	{"mmsi",           t_uinteger, .addr.uinteger = &ais->mmsi},
+
+#define AIS_TYPE6 \
+	{"seqno",         t_uinteger,  .addr.uinteger = &ais->type6.seqno,\
+                                       .dflt.uinteger = 0},\
+	{"dest_mmsi",     t_uinteger,  .addr.uinteger = &ais->type6.dest_mmsi,\
+                                       .dflt.uinteger = 0},\
+	{"retransmit",    t_boolean,   .addr.boolean = &ais->type6.retransmit,\
+                                       .dflt.boolean = false},\
+	{"dac",           t_uinteger,  .addr.uinteger = &ais->type6.dac,\
+                                       .dflt.uinteger = 0},\
+	{"fid",           t_uinteger,  .addr.uinteger = &ais->type6.fid,\
+                                       .dflt.uinteger = 0},
 
     int status;
 

@@ -26,7 +26,7 @@ import sys, getopt
 ais_specs = (
     {
     "initname" : "json_ais1",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type1",
     "fieldmap":(
         # fieldname   type        default
@@ -47,7 +47,7 @@ ais_specs = (
     # Message types 2 and 3 duplicate 1
     {
     "initname" : "json_ais4",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type4",
     "fieldmap":(
         # fieldname   type        default
@@ -63,7 +63,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais5",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type5",
     "fieldmap":(
         # fieldname        type            default
@@ -86,30 +86,20 @@ ais_specs = (
     },
     {
     "initname" : "json_ais6",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6",
     "fieldmap":(
         # fieldname       type             default
-        ('seqno',         'uinteger',      '0'),
-        ('dest_mmsi',     'uinteger',      '0'),
-        ('retransmit',    'boolean',       'false'),
-        ('dac',           'uinteger',      '0'),
-        ('fid',           'uinteger',      '0'),
         ('data',          'string',        None),
         ),
     "stringbuffered":("data",),
     },
     {
     "initname" : "json_ais6_fid12",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6",
     "fieldmap":(
         # fieldname    type      default
-        ('seqno',                'uinteger',  '0'),
-        ('dest_mmsi',            'uinteger',  '0'),
-        ('retransmit',           'boolean',  'false'),
-        ('dac',                  'uinteger', '0'),
-        ('fid',                  'uinteger', '0'),
         ('dac1fid12.lastport',   'string',   None),
         ('dac1fid12.lmonth',     'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
         ('dac1fid12.lday',       'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
@@ -129,29 +119,19 @@ ais_specs = (
     },
     {
     "initname" : "json_ais6_fid16",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6",
     "fieldmap":(
         # fieldname           type             default
-        ('seqno',             'uinteger',      '0'),
-        ('dest_mmsi',         'uinteger',      '0'),
-        ('retransmit',        'boolean',       'false'),
-        ('dac',               'uinteger',      '0'),
-        ('fid',               'uinteger',      '0'),
         ('dac1fid16.persons', 'uinteger',      '0'),
         ),
     },
     {
     "initname" : "json_ais6_fid30",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6",
     "fieldmap":(
         # fieldname               type             default
-        ('seqno',                 'uinteger',      '0'),
-        ('dest_mmsi',             'uinteger',      '0'),
-        ('retransmit',            'boolean',       'false'),
-        ('dac',                   'uinteger',      '0'),
-        ('fid',                   'uinteger',      '0'),
         ('dac1fid30.linkage',     'uinteger',      '0'),
         ('dac1fid30.text',        'string',        '0'),
         ),
@@ -159,15 +139,10 @@ ais_specs = (
     },
     {
     "initname" : "json_ais6_fid32",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6",
     "fieldmap":(
         # fieldname               type             default
-        ('seqno',                 'uinteger',      '0'),
-        ('dest_mmsi',             'uinteger',      '0'),
-        ('retransmit',            'boolean',       'false'),
-        ('dac',                   'uinteger',      '0'),
-        ('fid',                   'uinteger',      '0'),
         ('dac1fid32.month',       'uinteger',      '0'),
         ('dac1fid32.day',         'uinteger',      '0'),
         ('dac1fid32.lon',         'integer',       '0'),
@@ -182,7 +157,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais7",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type7",
     "fieldmap":(
         # fieldname       type             default
@@ -194,7 +169,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais8",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type8",
     "fieldmap":(
         # fieldname       type             default
@@ -206,7 +181,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais8_fid29",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type8",
     "fieldmap":(
         # fieldname               type             default
@@ -219,7 +194,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais8_fid31",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type8",
     "fieldmap":(
         # fieldname             type         default
@@ -265,7 +240,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais9",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type9",
     "fieldmap":(
         # fieldname       type             default
@@ -284,7 +259,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais10",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type10",
     "fieldmap":(
         # fieldname       type             default
@@ -294,7 +269,7 @@ ais_specs = (
     # Message type 11 duplicates 4
     {
     "initname" : "json_ais12",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type12",
     "fieldmap":(
         # fieldname       type             default
@@ -307,7 +282,7 @@ ais_specs = (
     # Message type 13 duplicates 7 
     {
     "initname" : "json_ais14",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type14",
     "fieldmap":(
         # fieldname       type             default
@@ -316,7 +291,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais15",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type15",
     "fieldmap":(
         # fieldname       type             default
@@ -332,7 +307,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais16",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type16",
     "fieldmap":(
         # fieldname       type             default
@@ -346,7 +321,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais17",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type17",
     "fieldmap":(
         # fieldname       type             default
@@ -358,7 +333,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais18",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type18",
     "fieldmap":(
         # fieldname       type             default
@@ -382,7 +357,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais19",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type19",
     "fieldmap":(
         # fieldname       type             default
@@ -409,7 +384,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais20",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type20",
     "fieldmap":(
         # fieldname       type             default
@@ -433,7 +408,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais21",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type21",
     "fieldmap":(
         # fieldname       type             default
@@ -456,7 +431,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais22",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type22",
     "fieldmap":(
         # fieldname       type             default
@@ -478,7 +453,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais23",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type23",
     "fieldmap":(
         # fieldname       type             default
@@ -495,7 +470,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais24",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type24",
     "fieldmap":(
         # fieldname             type             default
@@ -512,7 +487,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais25",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type25",
     "fieldmap":(
         # fieldname       type             default
@@ -526,7 +501,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais26",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type26",
     "fieldmap":(
         # fieldname       type             default
@@ -541,7 +516,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais27",
-    "header": "\tAIS_HEADER,",
+    "headers": ("AIS_HEADER",),
     "structname": "ais->type27",
     "fieldmap":(
         # fieldname   type        default
@@ -568,8 +543,9 @@ def generate(spec):
                 report += "    char %s[JSON_VAL_MAX+1];\n" % attr
                 outboard.append(attr)
     report += "    const struct json_attr_t %s[] = {\n" % spec["initname"]
-    if "header" in spec:
-        report += spec["header"] + "\n"
+    if "headers" in spec:
+        for header in spec["headers"]:
+            report += '\t' + header + "\n"
     for (attr, itype, default) in spec["fieldmap"]:
         structname = spec["structname"]
         if itype == "string":
