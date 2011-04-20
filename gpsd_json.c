@@ -1845,11 +1845,13 @@ void json_aivdm_dump(const struct ais_t *ais,
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"airtemp\":%d,\"dewpoint\":%d,"
-				   "\"pressure\":%u,\"pressuretend\":%u,",
+				   "\"pressure\":%u,\"pressuretend\":%u,"
+				   "\"visgreater\":%s,",
 				   ais->type8.dac1fid31.airtemp,
 				   ais->type8.dac1fid31.dewpoint,
 				   ais->type8.dac1fid31.pressure,
-				   ais->type8.dac1fid31.pressuretend);
+				   ais->type8.dac1fid31.pressuretend,
+				   JSON_BOOL(ais->type8.dac1fid31.visgreater));
 
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),

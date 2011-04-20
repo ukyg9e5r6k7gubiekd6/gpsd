@@ -1005,6 +1005,7 @@ struct ais_t
 #define DAC1FID31_PRESSURE_HIGH			402
 		    unsigned int pressuretend;	/* tendency */
 #define DAC1FID31_PRESSURETREND_NOT_AVAILABLE	3
+		    bool visgreater;            /* visibility greater than */
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID31_VISIBILITY_NOT_AVAILABLE	127
 		    int waterlevel;		/* decimeters or cm */

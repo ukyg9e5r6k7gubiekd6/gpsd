@@ -457,6 +457,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid31.pressure	= UBITS(181, 9)
 			- DAC1FID31_PRESSURE_OFFSET;
 		    ais->type8.dac1fid31.pressuretend	= UBITS(190, 2);
+		    ais->type8.dac1fid31.visgreater     = false;
 		    ais->type8.dac1fid31.visibility	= UBITS(192, 8);
 		    ais->type8.dac1fid31.waterlevel	= UBITS(200, 9)
 			- DAC1FID11_LEVEL_OFFSET;
@@ -528,7 +529,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid31.pressure	= UBITS(182, 9)
 			- DAC1FID31_PRESSURE_OFFSET;
 		    ais->type8.dac1fid31.pressuretend	= UBITS(191, 2);
-		    ais->type8.dac1fid31.visibility	= UBITS(193, 7);
+		    ais->type8.dac1fid31.visgreater	= UBITS(193, 1);
+		    ais->type8.dac1fid31.visibility	= UBITS(194, 7);
 		    ais->type8.dac1fid31.waterlevel	= UBITS(200, 12)
 			- DAC1FID31_LEVEL_OFFSET;
 		    ais->type8.dac1fid31.leveltrend	= UBITS(213, 2);
