@@ -8,11 +8,12 @@ import sys, getopt
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:d:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:d:S:E:")
     except getopt.GetoptError, msg:
         print "tablecheck.py: " + str(msg)
         raise SystemExit, 1
     generate = maketable = makestruct = makedump = False
+    after = before = None
     for (switch, val) in options:
         if switch == '-c':
             generate = True     # Logic for this is not yet implemented.
@@ -25,6 +26,10 @@ if __name__ == '__main__':
         elif switch == '-d':
             makedump = True
             structname = val
+        elif switch == '-S':
+            after = val
+        elif switch == '-E':
+            before = val
 
     if not generate and not maketable and not makestruct and not makedump:
         print >>sys.stderr, "tablecheck.py: no mode selected"
@@ -125,13 +130,20 @@ if __name__ == '__main__':
         scaled = ""
         has_scale = []
         names = []
+        record = after is None
         header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
         for (i, t) in enumerate(table):
             if '|' in t:
                 fields = map(lambda s: s.strip(), t.split('|'))
                 name = fields[4]
                 ftype = fields[5]
-                if ftype == 'x':
+                if after == name:
+                    record = True
+                    continue
+                if before == name:
+                    record = False
+                    continue
+                if ftype == 'x' or not record:
                     continue
                 fmt = r'\"%s\":' % name
                 if ftype == 'u':
@@ -166,13 +178,13 @@ if __name__ == '__main__':
                     has_scale.append(False)
                 elif ftype[0] == 'U':
                     names.append(name)
-                    scaled += "%%.%sf" % ftype[1]
-                    unscaled += "%u"
+                    scaled += fmt + "%%.%sf" % ftype[1]
+                    unscaled += fmt + "%u"
                     has_scale.append(True)
                 elif ftype[0] == 'I':
                     names.append(name)
-                    scaled += "%%.%sf" % ftype[1]
-                    unscaled += "%d"
+                    scaled += fmt + "%%.%sf" % ftype[1]
+                    unscaled += fmt + "%d"
                     has_scale.append(True)
                 scaled += ","
                 unscaled += ","
