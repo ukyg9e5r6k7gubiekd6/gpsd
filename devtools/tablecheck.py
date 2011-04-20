@@ -40,7 +40,12 @@ if __name__ == '__main__':
         if keep:
             table.append(line)
     table = table[2:]
-    widths = map(lambda s: s.split('|')[2].strip(), table)
+    widths = []
+    for line in table:
+        if '|' in line:
+            widths.append(line.split('|')[2].strip())
+        else:
+            widths.append('')
 
     # Compute offsets for an AIVDM message breakdown, given the bit widths.
     offsets = []
@@ -52,23 +57,33 @@ if __name__ == '__main__':
             w = int(w)
             offsets.append("%d-%d" % (base, base + w - 1))
             base += w
-    print >>sys.stderr, "Total bits:", base 
     owidth = max(*map(len, offsets)) 
     for (i, off) in enumerate(offsets):
         offsets[i] += " " * (owidth - len(offsets[i]))
 
     if maketable:
         # Writes the corrected table to standard output.
+        print >>sys.stderr, "Total bits:", base 
         for (i, t) in enumerate(table):
-            print "|" + offsets[i] + t[owidth+1:].rstrip()
+            if offsets[i]:
+                print "|" + offsets[i] + t[owidth+1:].rstrip()
+            else:
+                print t.rstrip()
     elif generate:
         # Writes calls to bit-extraction macros to standard output
         for (i, t) in enumerate(table):
-            fields = map(lambda s: s.strip(), t.split('|'))
-            name = fields[4]
-            if name:
-                offset = offsets[i].split('-')[0]
+            if '|' in t:
+                fields = map(lambda s: s.strip(), t.split('|'))
                 width = fields[2]
-                print "\t%s.%s\t= UBITS(%s, %s);" % (prefix, name, offset, width)
+                name = fields[4]
+                ftype = fields[5]
+                if ftype == 'x':
+                    print "\t/* skip %s bits */" % width
+                elif ftype in ('u', 'i'):
+                    offset = offsets[i].split('-')[0]
+                    print "\t%s.%s\t= %sBITS(%s, %s);" % \
+                          (prefix, name, {'u':'U', 'i':'S'}[ftype], offset, width)
+                else:
+                    print "\t/* %s bits of type %s */" % (width, ftype)
 
     
