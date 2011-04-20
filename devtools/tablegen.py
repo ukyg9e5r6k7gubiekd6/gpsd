@@ -47,6 +47,248 @@
 
 import sys, getopt
 
+def correct_table(wfp):
+    # Writes the corrected table to standard output.
+    print >>sys.stderr, "Total bits:", base 
+    for (i, t) in enumerate(table):
+        if offsets[i]:
+            print >>wfp, "|" + offsets[i] + t[owidth+1:].rstrip()
+        else:
+            print >>wfp, t.rstrip()
+
+def make_driver_code(wfp):
+    # Writes calls to bit-extraction macros to standard output.
+    # Requites UBITS, SBITS, UCHARS to act as they do in the AIVDM driver.
+    record = after is None
+    for (i, t) in enumerate(table):
+        if '|' in t:
+            fields = map(lambda s: s.strip(), t.split('|'))
+            width = fields[2]
+            name = fields[4]
+            ftype = fields[5]
+            if after == name:
+                record = True
+                continue
+            if before == name:
+                record = False
+                continue
+            if not record:
+                continue
+            if ftype == 'x':
+                print >>wfp,"\t/* skip %s bit%s */" % (width, ["", "s"][width>'1'])
+                continue
+            offset = offsets[i].split('-')[0]
+            if ftype[0] in ('u', 'i'):
+                print >>wfp,"\t%s.%s\t= %sBITS(%s, %s);" % \
+                      (structname, name, {'u':'U', 'i':'S'}[ftype[0].lower()], offset, width)
+            elif ftype == 't':
+                print >>wfp,"\tUCHARS(%s, %s.%s);" % (offset, structname, name)
+            else:
+                print >>wfp,"\t/* %s bits of type %s */" % (width, ftype)
+
+def make_structure(wfp):
+    # Write a structure definition correponding to the table.
+    record = after is None
+    baseindent = 8
+    step = 4
+    def tabify(n):
+        return ('\t' * (n / 8)) + (" " * (n % 8)) 
+    print >>wfp, tabify(baseindent) + "struct {"
+    for (i, t) in enumerate(table):
+        if '|' in t:
+            fields = map(lambda s: s.strip(), t.split('|'))
+            description = fields[3].strip()
+            name = fields[4]
+            ftype = fields[5]
+            if after == name:
+                record = True
+                continue
+            if before == name:
+                record = False
+                continue
+            if ftype == 'x' or not record:
+                continue
+            if ftype == 'u' or ftype[0] == 'U':
+                decl = "unsigned int %s;\t/* %s */" % (name, description)
+            elif ftype == 'i' or ftype[0] == 'I':
+                decl = "signed int %s;\t/* %s */" % (name, description)
+            elif ftype == 'b':
+                decl = "signed int %s;\t/* %s */" % (name, description)
+            elif ftype == 't':
+                decl = "char %s[];\t/* %s */" % (name, description)
+            else:
+                decl += "/* %s bits of type %s */" % (width, ftype)
+            print >>wfp, tabify(baseindent + step) + decl
+    print >>wfp, tabify(baseindent) + "} %s;" % structname
+
+def make_json_dumper(wfp):
+    # Write the skeleton of a JSON dump corresponding to the table
+    baseindent = " " * 8
+    step = " " * 4
+    unscaled = ""
+    scaled = ""
+    has_scale = []
+    names = []
+    record = after is None
+    header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
+    for (i, t) in enumerate(table):
+        if '|' in t:
+            fields = map(lambda s: s.strip(), t.split('|'))
+            name = fields[4]
+            ftype = fields[5]
+            if after == name:
+                record = True
+                continue
+            if before == name:
+                record = False
+                continue
+            if ftype == 'x' or not record:
+                continue
+            fmt = r'\"%s\":' % name
+            if ftype == 'u':
+                names.append(name)
+                fmt += "%u"
+                scaled += fmt
+                unscaled += fmt
+                has_scale.append(False)
+            elif ftype == 'i':
+                names.append(name)
+                fmt += "%d"
+                scaled += fmt
+                unscaled += fmt
+                has_scale.append(False)
+            elif ftype == 'i':
+                names.append(name)
+                fmt += "%d"
+                scaled += fmt
+                unscaled += fmt
+                has_scale.append(False)
+            elif ftype == 't':
+                names.append(name)
+                fmt += r'\"%s\"'
+                scaled += fmt
+                unscaled += fmt
+                has_scale.append(False)
+            elif ftype == 'b':
+                names.append("JSON_BOOL(" + name + ")")
+                fmt += "%d"
+                scaled += fmt
+                unscaled += fmt
+                has_scale.append(False)
+            elif ftype[0] == 'd':
+                names.append("/* data length */")
+                names.append("gpsd_hexdump(" + name + ")")
+                fmt + "%zd:%s"
+                scaled += fmt
+                unscaled += fmt
+                has_scale.append(False)
+                has_scale.append(False)
+            elif ftype[0] == 'U':
+                names.append(name)
+                scaled += fmt + "%%.%sf" % ftype[1]
+                unscaled += fmt + "%u"
+                has_scale.append(True)
+            elif ftype[0] == 'I':
+                names.append(name)
+                scaled += fmt + "%%.%sf" % ftype[1]
+                unscaled += fmt + "%d"
+                has_scale.append(True)
+            else:
+                print >>sys.stderr, "Unknown type code", ftype
+                sys.exit(0)
+            scaled += ","
+            unscaled += ","
+    scaled = scaled[:-1]
+    unscaled = unscaled[:-1]
+    if scaled == unscaled:
+        print >>wfp, baseindent + header
+        print >>wfp, (baseindent + step) + '"%s",' % unscaled
+        for (i, n) in enumerate(names):
+            if i < len(names) - 1:
+                print >>wfp, (baseindent + step) + structname + '.%s,' % n
+            else:
+                print >>wfp, (baseindent + step) + structname + '.%s);' % n
+    else:
+        print >>wfp, (baseindent + step) + "if (scaled)"
+        print >>wfp, (baseindent + step*2) + header
+        print >>wfp, (baseindent + step*3) + '"%s",' % scaled
+        for (i, n) in enumerate(names):
+            if has_scale[i]:
+                n += " * SCALE"
+            arg = (baseindent + step*3) + structname + '.%s' % n
+            if i < len(names) - 1:
+                print >>wfp, arg + ","
+            else:
+                print >>wfp, arg + ";"
+        print >>wfp, (baseindent + step) + "else"
+        print >>wfp, (baseindent + step*2) + header
+        print >>wfp, (baseindent + step*3) + '"%s",' % unscaled
+        for (i, n) in enumerate(names):
+            arg = (baseindent + step*3) + structname + '.%s' % n
+            if i < len(names) - 1:
+                print >>wfp, arg + ','
+            else:
+                print >>wfp, arg + ';'
+
+def make_json_generator(wfp):
+    # Write a stanza for jsongen.py.in describing how to generate a
+    # JSON parser initializer from this table. You need to fill in
+    # __INITIALIZER__ and default values after this is generated.
+    baseindent = " " * 8
+    step = " " * 4
+    record = after is None
+    stringbuffered = []
+    print >>wfp, '''\
+    {
+        "initname" : "__INITIALIZER__",
+        "headers": ("AIS_HEADER,",),
+        "structname": "%s",
+        "fieldmap":(
+            # fieldname    type        default''' % (structname,)
+    for (i, t) in enumerate(table):
+        if '|' in t:
+            fields = map(lambda s: s.strip(), t.split('|'))
+            name = fields[4]
+            ftype = fields[5]
+            if after == name:
+                record = True
+                continue
+            if before == name:
+                record = False
+                continue
+            if ftype == 'x' or not record:
+                continue
+            # Depends on the assumption that the resd code
+            # always sees unscaled JSON.
+            readtype = {
+                'u': "uinteger",
+                'U': "uinteger",
+                'i': "integer",
+                'I': "integer",
+                'b': "boolean",
+                't': "string",
+                'd': "string",
+                }[ftype[0]]
+            default = {
+                'u': "'PUT_DEFAULT_HERE'",
+                'U': "'PUT_DEFAULT_HERE'",
+                'i': "'PUT_DEFAULT_HERE'",
+                'I': "'PUT_DEFAULT_HERE'",
+                'b': "\'false\'",
+                't': "None",
+                }[ftype[0]]
+            if ftype == 't':
+                stringbuffered.append(name)
+            print >>wfp, "            ('%s',%s '%s',%s %s)," % (name,
+                                                     " "*(10-len(name)),
+                                                     readtype,
+                                                     " "*(8-len(readtype)),
+                                                     default)
+    print >>wfp, "        ),"
+    if stringbuffered:
+        print >>wfp, "    stringbuffered :", repr(tuple(stringbuffered)) + ","
+    print >>wfp, "    },"
+
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:d:S:E:r:")
@@ -120,242 +362,14 @@ if __name__ == '__main__':
 
     # Here's where we generate useful output.
     if maketable:
-        # Writes the corrected table to standard output.
-        print >>sys.stderr, "Total bits:", base 
-        for (i, t) in enumerate(table):
-            if offsets[i]:
-                print "|" + offsets[i] + t[owidth+1:].rstrip()
-            else:
-                print t.rstrip()
+        correct_table(sys.stdout)
     elif generate:
-        # Writes calls to bit-extraction macros to standard output.
-        # Requites UBITS, SBITS, UCHARS to act as they do in the AIVDM driver.
-        record = after is None
-        for (i, t) in enumerate(table):
-            if '|' in t:
-                fields = map(lambda s: s.strip(), t.split('|'))
-                width = fields[2]
-                name = fields[4]
-                ftype = fields[5]
-                if after == name:
-                    record = True
-                    continue
-                if before == name:
-                    record = False
-                    continue
-                if not record:
-                    continue
-                if ftype == 'x':
-                    print "\t/* skip %s bit%s */" % (width, ["", "s"][width>'1'])
-                    continue
-                offset = offsets[i].split('-')[0]
-                if ftype[0] in ('u', 'i'):
-                    print "\t%s.%s\t= %sBITS(%s, %s);" % \
-                          (structname, name, {'u':'U', 'i':'S'}[ftype[0].lower()], offset, width)
-                elif ftype == 't':
-                    print "\tUCHARS(%s, %s.%s);" % (offset, structname, name)
-                else:
-                    print "\t/* %s bits of type %s */" % (width, ftype)
+        make_driver_code(sys.stdout)
     elif makestruct:
-        # Write a structure definition correponding to the table.
-        record = after is None
-        baseindent = 8
-        step = 4
-        def tabify(n):
-            return ('\t' * (n / 8)) + (" " * (n % 8)) 
-        print tabify(baseindent) + "struct {"
-        for (i, t) in enumerate(table):
-            if '|' in t:
-                fields = map(lambda s: s.strip(), t.split('|'))
-                description = fields[3].strip()
-                name = fields[4]
-                ftype = fields[5]
-                if after == name:
-                    record = True
-                    continue
-                if before == name:
-                    record = False
-                    continue
-                if ftype == 'x' or not record:
-                    continue
-                if ftype == 'u' or ftype[0] == 'U':
-                    decl = "unsigned int %s;\t/* %s */" % (name, description)
-                elif ftype == 'i' or ftype[0] == 'I':
-                    decl = "signed int %s;\t/* %s */" % (name, description)
-                elif ftype == 'b':
-                    decl = "signed int %s;\t/* %s */" % (name, description)
-                elif ftype == 't':
-                    decl = "char %s[];\t/* %s */" % (name, description)
-                else:
-                    decl += "/* %s bits of type %s */" % (width, ftype)
-                print tabify(baseindent + step) + decl
-        print tabify(baseindent) + "} %s;" % structname
+        make_structure(sys.stdout)
     elif makedump:
-        # Write the skeleton of a JSON dump corresponding to the table
-        baseindent = " " * 8
-        step = " " * 4
-        unscaled = ""
-        scaled = ""
-        has_scale = []
-        names = []
-        record = after is None
-        header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
-        for (i, t) in enumerate(table):
-            if '|' in t:
-                fields = map(lambda s: s.strip(), t.split('|'))
-                name = fields[4]
-                ftype = fields[5]
-                if after == name:
-                    record = True
-                    continue
-                if before == name:
-                    record = False
-                    continue
-                if ftype == 'x' or not record:
-                    continue
-                fmt = r'\"%s\":' % name
-                if ftype == 'u':
-                    names.append(name)
-                    fmt += "%u"
-                    scaled += fmt
-                    unscaled += fmt
-                    has_scale.append(False)
-                elif ftype == 'i':
-                    names.append(name)
-                    fmt += "%d"
-                    scaled += fmt
-                    unscaled += fmt
-                    has_scale.append(False)
-                elif ftype == 'i':
-                    names.append(name)
-                    fmt += "%d"
-                    scaled += fmt
-                    unscaled += fmt
-                    has_scale.append(False)
-                elif ftype == 't':
-                    names.append(name)
-                    fmt += r'\"%s\"'
-                    scaled += fmt
-                    unscaled += fmt
-                    has_scale.append(False)
-                elif ftype == 'b':
-                    names.append("JSON_BOOL(" + name + ")")
-                    fmt += "%d"
-                    scaled += fmt
-                    unscaled += fmt
-                    has_scale.append(False)
-                elif ftype[0] == 'd':
-                    names.append("/* data length */")
-                    names.append("gpsd_hexdump(" + name + ")")
-                    fmt + "%zd:%s"
-                    scaled += fmt
-                    unscaled += fmt
-                    has_scale.append(False)
-                    has_scale.append(False)
-                elif ftype[0] == 'U':
-                    names.append(name)
-                    scaled += fmt + "%%.%sf" % ftype[1]
-                    unscaled += fmt + "%u"
-                    has_scale.append(True)
-                elif ftype[0] == 'I':
-                    names.append(name)
-                    scaled += fmt + "%%.%sf" % ftype[1]
-                    unscaled += fmt + "%d"
-                    has_scale.append(True)
-                else:
-                    print >>sys.stderr, "Unknown type code", ftype
-                    sys.exit(0)
-                scaled += ","
-                unscaled += ","
-        scaled = scaled[:-1]
-        unscaled = unscaled[:-1]
-        if scaled == unscaled:
-            print baseindent + header
-            print (baseindent + step) + '"%s",' % unscaled
-            for (i, n) in enumerate(names):
-                if i < len(names) - 1:
-                    print (baseindent + step) + structname + '.%s,' % n
-                else:
-                    print (baseindent + step) + structname + '.%s);' % n
-        else:
-            print (baseindent + step) + "if (scaled)"
-            print (baseindent + step*2) + header
-            print (baseindent + step*3) + '"%s",' % scaled
-            for (i, n) in enumerate(names):
-                if has_scale[i]:
-                    n += " * SCALE"
-                arg = (baseindent + step*3) + structname + '.%s' % n
-                if i < len(names) - 1:
-                    print arg + ","
-                else:
-                    print arg + ";"
-            print (baseindent + step) + "else"
-            print (baseindent + step*2) + header
-            print (baseindent + step*3) + '"%s",' % unscaled
-            for (i, n) in enumerate(names):
-                arg = (baseindent + step*3) + structname + '.%s' % n
-                if i < len(names) - 1:
-                    print arg + ','
-                else:
-                    print arg + ';'
+        make_json_dumper(sys.stdout)
     elif readgen:
-        # Write a stanza for jsongen.py.in describing how to generate a
-        # JSON parser initializer from this table. You need to fill in
-        # __INITIALIZER__ and default values after this is generated.
-        baseindent = " " * 8
-        step = " " * 4
-        record = after is None
-        stringbuffered = []
-        print '''\
-    {
-        "initname" : "__INITIALIZER__",
-        "headers": ("AIS_HEADER,",),
-        "structname": "%s",
-        "fieldmap":(
-            # fieldname    type        default''' % (structname,)
-        for (i, t) in enumerate(table):
-            if '|' in t:
-                fields = map(lambda s: s.strip(), t.split('|'))
-                name = fields[4]
-                ftype = fields[5]
-                if after == name:
-                    record = True
-                    continue
-                if before == name:
-                    record = False
-                    continue
-                if ftype == 'x' or not record:
-                    continue
-                # Depends on the assumption that the resd code
-                # always sees unscaled JSON.
-                readtype = {
-                    'u': "uinteger",
-                    'U': "uinteger",
-                    'i': "integer",
-                    'I': "integer",
-                    'b': "boolean",
-                    't': "string",
-                    'd': "string",
-                    }[ftype[0]]
-                default = {
-                    'u': "'PUT_DEFAULT_HERE'",
-                    'U': "'PUT_DEFAULT_HERE'",
-                    'i': "'PUT_DEFAULT_HERE'",
-                    'I': "'PUT_DEFAULT_HERE'",
-                    'b': "\'false\'",
-                    't': "None",
-                    }[ftype[0]]
-                if ftype == 't':
-                    stringbuffered.append(name)
-                print "            ('%s',%s '%s',%s %s)," % (name,
-                                                         " "*(10-len(name)),
-                                                         readtype,
-                                                         " "*(8-len(readtype)),
-                                                         default)
-        print "        ),"
-        if stringbuffered:
-            print "    stringbuffered :", repr(tuple(stringbuffered)) + ","
-        print "    },"
-
+        make_json_generator(sys.stdout)
 # end
   
