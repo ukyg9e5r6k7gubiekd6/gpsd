@@ -176,6 +176,14 @@ if __name__ == '__main__':
                     scaled += fmt
                     unscaled += fmt
                     has_scale.append(False)
+                elif ftype[0] == 'd':
+                    names.append("/* data length */")
+                    names.append("gpsd_hexdump(" + name + ")")
+                    fmt + "%zd:%s"
+                    scaled += fmt
+                    unscaled += fmt
+                    has_scale.append(False)
+                    has_scale.append(False)
                 elif ftype[0] == 'U':
                     names.append(name)
                     scaled += fmt + "%%.%sf" % ftype[1]
@@ -186,6 +194,9 @@ if __name__ == '__main__':
                     scaled += fmt + "%%.%sf" % ftype[1]
                     unscaled += fmt + "%d"
                     has_scale.append(True)
+                else:
+                    print >>sys.stderr, "Unknown type code", ftype
+                    sys.exit(0)
                 scaled += ","
                 unscaled += ","
         scaled = scaled[:-1]
@@ -205,18 +216,20 @@ if __name__ == '__main__':
             for (i, n) in enumerate(names):
                 if has_scale[i]:
                     n += " * SCALE"
+                arg = (baseindent + step*3) + structname + '.%s' % n
                 if i < len(names) - 1:
-                    print (baseindent + step*4) + '%s,' % n
+                    print arg + ","
                 else:
-                    print (baseindent + step*4) + '%s);' % n
+                    print arg + ";"
             print (baseindent + step) + "else"
             print (baseindent + step*2) + header
             print (baseindent + step*3) + '"%s",' % unscaled
             for (i, n) in enumerate(names):
+                arg = (baseindent + step*3) + structname + '.%s' % n
                 if i < len(names) - 1:
-                    print (baseindent + step*4) + '%s,' % n
+                    print arg + ','
                 else:
-                    print (baseindent + step*4) + '%s);' % n
+                    print arg + ';'
 
 
 # end
