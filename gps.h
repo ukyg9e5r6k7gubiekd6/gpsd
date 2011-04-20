@@ -946,6 +946,10 @@ struct ais_t
 		    unsigned int amount;	/* Amount of Cargo */
 		    unsigned int unit;		/* Unit of Quantity */
 		} dac1fid12;
+		/* IMO236 - Extended Ship Static and Voyage Related Data */
+		struct {
+		    unsigned int airdraught;	/* Air Draught */
+		} dac1fid15;
 		/* IMO236 - Number of Persons on board */
 		struct {
 		    unsigned persons;	/* number of persons */

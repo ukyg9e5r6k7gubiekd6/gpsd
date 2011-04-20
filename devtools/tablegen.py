@@ -307,12 +307,12 @@ if __name__ == '__main__':
         record = after is None
         stringbuffered = []
         print '''\
-{
-    "initname" : "__INITIALIZER__",
-    "header": "\\tAIS_HEADER,",
-    "structname": "%s",
-    "fieldmap":(
-        # fieldname    type        default''' % (structname,)
+    {
+        "initname" : "__INITIALIZER__",
+        "headers": ("AIS_HEADER,",),
+        "structname": "%s",
+        "fieldmap":(
+            # fieldname    type        default''' % (structname,)
         for (i, t) in enumerate(table):
             if '|' in t:
                 fields = map(lambda s: s.strip(), t.split('|'))
@@ -347,15 +347,15 @@ if __name__ == '__main__':
                     }[ftype[0]]
                 if ftype == 't':
                     stringbuffered.append(name)
-                print "        ('%s',%s '%s',%s %s)," % (name,
+                print "            ('%s',%s '%s',%s %s)," % (name,
                                                          " "*(10-len(name)),
                                                          readtype,
                                                          " "*(8-len(readtype)),
                                                          default)
-        print "    ),"
+        print "        ),"
         if stringbuffered:
             print "    stringbuffered :", repr(tuple(stringbuffered)) + ","
-        print "},"
+        print "    },"
 
 # end
   

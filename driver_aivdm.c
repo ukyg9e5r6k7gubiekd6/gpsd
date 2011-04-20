@@ -371,6 +371,9 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type6.dac1fid32.cdir      = UBITS(168, 9);
 		    ais->type6.dac1fid32.cspeed    = UBITS(177, 7);
 		    break;
+		case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
+		    dac1fid15.airdraught	= UBITS(56, 11);
+		    break
 		case 16:	/* IMO236 - Number of persons on board */
 		    if (ais->type6.bitcount == 136)
 			ais->type6.dac1fid16.persons = UBITS(88, 13);/* 289 */

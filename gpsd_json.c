@@ -1780,7 +1780,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type6.dac1fid32.cdir,
 				   ais->type6.dac1fid32.cspeed);
 		break;
-	    case 16:	/* IMO236 - Number of persons on board */
+	    case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"airdraught\":%u",
+		    ais->type6.dac1fid15.airdraught);
+	    case 16:	/* IMO236 - Number of persons on board */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"persons\":%u", ais->type6.dac1fid16.persons);
 		imo = true;
