@@ -8,11 +8,11 @@ import sys, getopt
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:d:")
     except getopt.GetoptError, msg:
         print "tablecheck.py: " + str(msg)
         raise SystemExit, 1
-    generate = maketable = makestruct = False
+    generate = maketable = makestruct = makedump = False
     for (switch, val) in options:
         if switch == '-c':
             generate = True     # Logic for this is not yet implemented.
@@ -22,8 +22,11 @@ if __name__ == '__main__':
             structname = val
         elif switch == '-t':
             maketable = True
+        elif switch == '-d':
+            makedump = True
+            structname = val
 
-    if not generate and not maketable and not makestruct:
+    if not generate and not maketable and not makestruct and not makedump:
         print >>sys.stderr, "tablecheck.py: no mode selected"
         sys.exit(1)
 
@@ -89,7 +92,7 @@ if __name__ == '__main__':
                 elif ftype in ('u', 'i'):
                     offset = offsets[i].split('-')[0]
                     print "\t%s.%s\t= %sBITS(%s, %s);" % \
-                          (structname, name, {'u':'U', 'i':'S'}[ftype], offset, width)
+                          (structname, name, {'u':'U', 'i':'S'}[ftype.tolower()], offset, width)
                 else:
                     print "\t/* %s bits of type %s */" % (width, ftype)
     elif makestruct:
@@ -103,9 +106,9 @@ if __name__ == '__main__':
                 ftype = fields[5]
                 if ftype == 'x':
                     continue
-                if ftype == 'u':
+                if ftype == 'u' or ftype[0] == 'U':
                     print "\t\tunsigned int %s;\t/* %s*/" % (name, description)
-                elif ftype == 'i':
+                elif ftype == 'i' or ftype[0] == 'I':
                     print "\t\tint %s;\t/* %s*/" % (name, description)
                 elif ftype == 'b':
                     print "\t\tint %s;\t/* %s*/" % (name, description)
@@ -114,6 +117,95 @@ if __name__ == '__main__':
                 else:
                     print "\t/* %s bits of type %s */" % (width, ftype)
         print "\t} %s;" % structname
+    elif makedump:
+        # Write the skeleton of a JSON dump corresponding to the table
+        baseindent = " " * 8
+        step = " " * 4
+        unscaled = ""
+        scaled = ""
+        has_scale = []
+        names = []
+        header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
+        for (i, t) in enumerate(table):
+            if '|' in t:
+                fields = map(lambda s: s.strip(), t.split('|'))
+                name = fields[4]
+                ftype = fields[5]
+                if ftype == 'x':
+                    continue
+                fmt = r'\"%s\":' % name
+                if ftype == 'u':
+                    names.append(name)
+                    fmt += "%u"
+                    scaled += fmt
+                    unscaled += fmt
+                    has_scale.append(False)
+                elif ftype == 'i':
+                    names.append(name)
+                    fmt += "%d"
+                    scaled += fmt
+                    unscaled += fmt
+                    has_scale.append(False)
+                elif ftype == 'i':
+                    names.append(name)
+                    fmt += "%d"
+                    scaled += fmt
+                    unscaled += fmt
+                    has_scale.append(False)
+                elif ftype == 't':
+                    names.append(name)
+                    fmt += r'\"%s\"'
+                    scaled += fmt
+                    unscaled += fmt
+                    has_scale.append(False)
+                elif ftype == 'b':
+                    names.append("JSON_BOOL(" + name + ")")
+                    fmt += "%d"
+                    scaled += fmt
+                    unscaled += fmt
+                    has_scale.append(False)
+                elif ftype[0] == 'U':
+                    names.append(name)
+                    scaled += "%%.%sf" % ftype[1]
+                    unscaled += "%u"
+                    has_scale.append(True)
+                elif ftype[0] == 'I':
+                    names.append(name)
+                    scaled += "%%.%sf" % ftype[1]
+                    unscaled += "%d"
+                    has_scale.append(True)
+                scaled += ","
+                unscaled += ","
+        scaled = scaled[:-1]
+        unscaled = unscaled[:-1]
+        if scaled == unscaled:
+            print baseindent + header
+            print (baseindent + step) + '"%s",' % unscaled
+            for (i, n) in enumerate(names):
+                if i < len(names) - 1:
+                    print (baseindent + step) + '%s,' % n
+                else:
+                    print (baseindent + step) + '%s);' % n
+        else:
+            print (baseindent + step) + "if (scaled)"
+            print (baseindent + step*2) + header
+            print (baseindent + step*3) + '"%s",' % scaled
+            for (i, n) in enumerate(names):
+                if has_scale[i]:
+                    n += " * SCALE"
+                if i < len(names) - 1:
+                    print (baseindent + step*4) + '%s,' % n
+                else:
+                    print (baseindent + step*4) + '%s);' % n
+            print (baseindent + step) + "else"
+            print (baseindent + step*2) + header
+            print (baseindent + step*3) + '"%s",' % unscaled
+            for (i, n) in enumerate(names):
+                if i < len(names) - 1:
+                    print (baseindent + step*4) + '%s,' % n
+                else:
+                    print (baseindent + step*4) + '%s);' % n
+
 
 # end
   
