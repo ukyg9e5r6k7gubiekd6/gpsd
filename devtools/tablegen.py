@@ -2,7 +2,7 @@
 #
 # This tool is intended to automate away the drudgery in bring up support
 # for a new AIS message type.  It parses the tabular description of a message
-# and generates various useful code snippets from that.  It cam also be used to
+# and generates various useful code snippets from that.  It can also be used to
 # correct offsets in the tables themselves.
 #
 # Requires the AIVDM.txt file on standard input. Takes a single argument,
@@ -42,6 +42,8 @@
 # The -S and -E options allow you to generate code only for a specified span
 # of fields in the table.  This may be useful for dealing with groups of
 # messages that have a common head section.
+#
+# TO-DO: generate code for ais.py.
 
 import sys, getopt
 
