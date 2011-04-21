@@ -16,7 +16,9 @@
 #   addressed field is located *after* the variant parts. Grrrr... 
 # * Message type 26 is presently unsupported. It hasn't been observed
 #   in the wild yet as of Jan 2010; not a lot of point in trying util
-#   we have test data.
+#   we have test data.  We'd need new machinery to constrain how many
+#   bits the data spec eats in order to recover the radio bits after it.
+# * No support for IMO236 and IMO289 special messages in types 6 and 8 yet.
 #
 # Decoding for 1-15, 18-21, and 24 have been tested against live data.
 # Decoding for 16-17, 22-23, and 25-27 have not.
@@ -669,8 +671,7 @@ type25 = (
     bitfield("data",       None, 'raw',         None, "Data"),
     )
 
-# No type 26 handling yet, we'd need new machinery to constrain how many
-# bits the data spec eats in order to recover the radio bits after it.
+# No type 26 handling yet,
 
 type27 = (
     bitfield("accuracy", 1,  'unsigned', None,      "Position Accuracy"),
