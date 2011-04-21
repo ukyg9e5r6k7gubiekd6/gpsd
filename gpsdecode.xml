@@ -26,6 +26,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-e</arg>
       <arg choice='opt'>-j</arg>
+      <arg choice='opt'>-t <replaceable>typelist</replaceable></arg>
       <arg choice='opt'>-u</arg>
       <arg choice='opt'>-v</arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
@@ -71,6 +72,12 @@ to JSON (the default behavior).</para>
 encode JSON on standard input to JSON on standard output. This option
 is only useful for regression-testing of the JSON dumping and parsing
 code.</para>
+
+<para>The <option>-t</option> accepts a comma-separated list of
+numeric types.  Packets with a numeric AIS, RTCM2, or RTCM3 type are
+passed through and output only if they match a type in the
+list. Packets of other kinds (in particular GPS packets) are
+passed through unconditionally.</para>
 
 <para>The <option>-u</option> suppresses scaling of AIS data to float
 quantities and text expansion of numeric codes.  A dump with this

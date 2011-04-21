@@ -17,6 +17,8 @@
 static int verbose = 0;
 static bool scaled = true;
 static bool json = true;
+static int ntypes = 0;
+static int typelist[32];
 
 /**************************************************************************
  *
@@ -36,7 +38,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			ap);
 	va_end(ap);
-	(void)fputs(buf, stdout);
+	(void)fputs(buf, stderr);
     }
 }
 
@@ -358,6 +360,29 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 }
 #endif
 
+static bool filter(gps_mask_t changed, struct gps_device_t *session)
+/* say whether a given message should be visible */
+{
+    if (ntypes == 0)
+	return true;
+    else {
+	int i, t;
+
+	if ((changed & AIS_SET)!=0)
+	    t = session->gpsdata.ais.type;
+	else if ((changed & RTCM2_SET)!=0)
+	    t = session->gpsdata.rtcm2.type;
+	else if ((changed & RTCM3_SET)!=0)
+	    t = session->gpsdata.rtcm3.type;
+	else
+	    return true;
+	for (i = 0; i < ntypes; i++)
+	    if (t == typelist[i])
+		return true;
+    }
+    return false;
+}
+
 /*@ -compdestroy -compdef -usedef -uniondef @*/
 static void decode(FILE *fpin, FILE*fpout)
 /* sensor data on fpin to dump format on fpout */
@@ -386,6 +411,8 @@ static void decode(FILE *fpin, FILE*fpout)
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
 	    (void)fputs((char *)session.packet.outbuffer, fpout);
 	if ((changed & (REPORT_IS|SUBFRAME_SET|AIS_SET|RTCM2_SET|RTCM3_SET)) == 0)
+	    continue;
+	if (!filter(changed, &session))
 	    continue;
 	else if (json) {
 	    json_data_report(changed, 
@@ -441,7 +468,7 @@ int main(int argc, char **argv)
     enum
     { doencode, dodecode } mode = dodecode;
 
-    while ((c = getopt(argc, argv, "cdejpuvVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "cdejpt:uvVD:")) != EOF) {
 	switch (c) {
 	case 'c':
 	    json = false;
@@ -457,6 +484,16 @@ int main(int argc, char **argv)
 
 	case 'j':
 	    json = true;
+	    break;
+
+	case 't':
+	    typelist[ntypes++] = atoi(strtok(optarg, ","));
+	    for(;;) {
+		char *next = strtok(NULL, ",");
+		if (next == NULL)
+		    break;
+		typelist[ntypes++] = atoi(next);
+	    }
 	    break;
 
 	case 'u':
