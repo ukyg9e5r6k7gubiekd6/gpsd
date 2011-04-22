@@ -1,10 +1,8 @@
-# WARNING: This is out of date! GPSD uses an scons build now.
-
 %{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
 Name: gpsd
 Version: @VERSION@
-Release: 3%{?dist}
+Release: 1%{?dist}
 Summary: Service daemon for mediating access to a GPS
 
 Group: System Environment/Daemons
@@ -13,16 +11,22 @@ URL: http://developer.berlios.de/projects/gpsd/
 Source0: http://download.berlios.de/gpsd/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: dbus-devel dbus-glib-devel ncurses-devel xmlto python-devel
-BuildRequires: libXaw-devel desktop-file-utils
+BuildRequires: dbus-devel
+BuildRequires: dbus-glib-devel
+BuildRequires: desktop-file-utils
+BuildRequires: libXaw-devel
+BuildRequires: ncurses-devel
+BuildRequires: python-devel
 BuildRequires: qt-devel
+BuildRequires: scons
+BuildRequires: xmlto
 
 Requires: udev
 Requires(post): /sbin/ldconfig
 Requires(post): /sbin/chkconfig
+Requires(postun): /sbin/ldconfig
 Requires(preun): initscripts
 Requires(preun): /sbin/chkconfig
-Requires(postun): /sbin/ldconfig
 
 %description 
 gpsd is a service daemon that mediates access to a GPS sensor
@@ -58,8 +62,27 @@ for Qt applications
 %package clients
 Summary: Clients for gpsd
 Group: Applications/System
+Requires: clients-x11 = %{version}-%{release}
+Requires: clients-cli = %{version}-%{release}
+
+%package clients-x11
+Summary: Clients for gpsd
+Group: Applications/System
+Requires: xorg-x11-xinit
+
+%package clients-cli
+Summary: Clients for gpsd
+Group: Applications/System
+
+%package clients-httpd
+Summary: Clients for gpsd
+Group: Applications/System
+Requires: httpd
 
 %description clients
+Installs X11 and Command Line Interface clients.
+
+%description clients-x11
 xgps is a simple test client for gpsd with an X interface. It displays
 current GPS position/time/velocity information and (for GPSes that
 support the feature) the locations of accessible satellites.
@@ -69,66 +92,70 @@ It accepts an -h option and optional argument as for gps, or a -v option
 to dump the package version and exit. Additionally, it accepts -rv
 (reverse video) and -nc (needle color) options.
 
+%description clients-cli
 cgps resembles xgps, but without the pictorial satellite display.  It
 can run on a serial terminal or terminal emulator.
+
+%description clients-httpd
+pgps is a Perl CGI client for gpsd. It displays current GPS
+position/time/velocity information and (for GPSes that support the
+feature) the locations of accessible satellites. This package installs
+the CGI scripts at http://localhost/gpsd/.
 
 %prep
 %setup -q
 
 %build
-%configure \
-	--enable-dbus \
-	--disable-static
-sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-
-make %{?_smp_mflags}
+scons build
 
 %install
-rm -rf %{buildroot}
-make DESTDIR=%{buildroot} pythondir=%{python_sitearch} install
+rm -rf $RPM_BUILD_ROOT
+
+scons install \
+      install_prefix=$RPM_BUILD_ROOT%{_prefix} \
+      bindir=$RPM_BUILD_ROOT%{_bindir} \
+      sbindir=$RPM_BUILD_ROOT%{_sbindir} \
+      datadir=$RPM_BUILD_ROOT%{_datadir}/%{name}
+
+find $RPM_BUILD_ROOT
 
 # init scripts
-%{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/init.d
-%{__install} -p -m 0755 packaging/rpm/gpsd.init \
-	%{buildroot}%{_sysconfdir}/init.d/gpsd
+%{__install} -d -m 0755 $RPM_BUILD_ROOT%{_sysconfdir}/init.d
+%{__install} -p -m 0755 packaging/rpm/gpsd.init $RPM_BUILD_ROOT%{_sysconfdir}/init.d/gpsd
 
-%{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/sysconfig
-%{__install} -p -m 0644 packaging/rpm/gpsd.sysconfig \
-	%{buildroot}%{_sysconfdir}/sysconfig/gpsd
+%{__install} -d -m 0755 $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig
+%{__install} -p -m 0644 packaging/rpm/gpsd.sysconfig $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/gpsd
 
 # udev rules
-%{__install} -d -m 0755 %{buildroot}%{_sysconfdir}/udev/rules.d
-%{__install} -p -m 0644 gpsd.rules \
-	%{buildroot}%{_sysconfdir}/udev/rules.d/99-gpsd.rules
+%{__install} -d -m 0755 $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d
+%{__install} -p -m 0644 gpsd.rules $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/99-gpsd.rules
 
 # hotplug script
-%{__install} -d -m 0755 %{buildroot}/lib/udev
-%{__install} -p -m 0755 gpsd.hotplug gpsd.hotplug.wrapper \
-	%{buildroot}/lib/udev
+%{__install} -d -m 0755 $RPM_BUILD_ROOT/lib/udev
+%{__install} -p -m 0755 gpsd.hotplug gpsd.hotplug.wrapper $RPM_BUILD_ROOT/lib/udev
 
 # remove .la files
-rm -f %{buildroot}%{_libdir}/libgps*.la
+#rm -f $RPM_BUILD_ROOT%{_libdir}/libgps*.la
 
 # fix non-executable python script
-%{__chmod} +x %{buildroot}%{python_sitearch}/gps/gps.py
+#%{__chmod} +x $RPM_BUILD_ROOT%{python_sitearch}/gps/gps.py
 
 # Install the .desktop files
 desktop-file-install --vendor fedora \
-	--dir %{buildroot}%{_datadir}/applications \
+	--dir $RPM_BUILD_ROOT%{_datadir}/applications \
 	--add-category X-Fedora \
 	packaging/X11/xgps.desktop
 desktop-file-install --vendor fedora \
-	--dir %{buildroot}%{_datadir}/applications \
+	--dir $RPM_BUILD_ROOT%{_datadir}/applications \
 	--add-category X-Fedora \
 	packaging/X11/xgpsspeed.desktop
 
 # Install logo icon for .desktop files
-%{__install} -d -m 0755 %{buildroot}%{_datadir}/gpsd
-%{__install} -p -m 0644 packaging/X11/gpsd-logo.png %{buildroot}%{_datadir}/gpsd/gpsd-logo.png
+%{__install} -d -m 0755 $RPM_BUILD_ROOT%{_datadir}/gpsd
+%{__install} -p -m 0644 packaging/X11/gpsd-logo.png $RPM_BUILD_ROOT%{_datadir}/gpsd/gpsd-logo.png
 
 %clean
-rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
 
 %post
 /sbin/ldconfig
@@ -183,27 +210,46 @@ fi
 
 %files clients
 %defattr(-,root,root,-)
+%{_mandir}/man1/gps.1*
+
+%files clients-x11
+%defattr(-,root,root,-)
+%{_bindir}/xgps
+%{_bindir}/xgpsspeed
+%{_mandir}/man1/xgps.1*
+%{_mandir}/man1/xgpsspeed.1*
+%{_datadir}/applications/*.desktop
+%dir %{_datadir}/gpsd
+%{_datadir}/gpsd/gpsd-logo.png
+
+%files clients-cli
+%defattr(-,root,root,-)
 %{_bindir}/cgps
 %{_bindir}/gpscat
 %{_bindir}/gpsdecode
 %{_bindir}/gpspipe
 %{_bindir}/gpxlogger
 %{_bindir}/lcdgps
-%{_bindir}/xgps
-%{_bindir}/xgpsspeed
-%{_mandir}/man1/gps.1*
+%{_mandir}/man1/cgps.1*
+%{_mandir}/man1/gpscat.1*
 %{_mandir}/man1/gpsdecode.1*
 %{_mandir}/man1/gpspipe.1*
 %{_mandir}/man1/lcdgps.1*
-%{_mandir}/man1/xgps.1*
-%{_mandir}/man1/xgpsspeed.1*
-%{_mandir}/man1/cgps.1*
-%{_mandir}/man1/gpscat.1*
-%{_datadir}/applications/*.desktop
-%dir %{_datadir}/gpsd
-%{_datadir}/gpsd/gpsd-logo.png
+%{_mandir}/man1/gpxlogger.1*
+
+%files clients-httpd
+%defattr(-,root,root,-)
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/gpsd.conf
+%dir %{_var}/www/html/gpsd/
+%{_var}/www/html/gpsd/skyview.cgi
+%{_var}/www/html/gpsd/pgps.cgi
 
 %changelog
+* Mon Apr 18 2011 Michael R. Davis <mrdvt@cpan.org> 3.0-1
+- Updates to support SCons software construction tool
+- Added httpd Perl client
+- %{_buildrootdir} does not exist in EPEL 4 & 5
+
 * Mon Jul 05 2010 Michael R. Davis <mrdvt@cpan.org> - 2.95-3
 - Updated to move rpm files to packaging/rpm folder
 - Renamed gpsd-qt to libQgpsmm
