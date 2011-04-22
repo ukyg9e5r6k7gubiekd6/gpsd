@@ -746,11 +746,11 @@ for i in range(len(vars)):
 (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy) = vars
 # in case CC/CXX was set to the scan-build wrapper,
 # ensure that we build the python modules with scan-build, too
-if env['CC'].find('scan-build') < 0:
+if env['CC'] is None or env['CC'].find('scan-build') < 0:
     python_env['CC'] = cc
 else:
     python_env['CC'] = ' '.join([env['CC']] + cc.split()[1:])
-if env['CXX'].find('scan-build') < 0:
+if env['CXX'] is None or env['CXX'].find('scan-build') < 0:
     python_env['CXX'] = cxx
 else:
     python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])
