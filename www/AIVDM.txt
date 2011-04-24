@@ -408,11 +408,11 @@ types are as follows:
 |10 |UTC and Date Inquiry
 |11 |UTC and Date Response
 |12 |Addressed Safety Related Message
-|13 |Safety Related Acknowledge
+|13 |Safety Related Acknowledgement
 |14 |Safety Related Broadcast Message
 |15 |Interrogation
 |16 |Assigned Mode Command
-|17 |GNSS Binary Broadcast Message
+|17 |DGNSS Binary Broadcast Message
 |18 |Standard Class B CS Position Report
 |19 |Extended Class B Equipment Position Report
 |20 |Data Link Management
@@ -825,9 +825,10 @@ values.
 
 Message type 6 is an addressed point-to-point message with unspecified
 binary payload.  The St. Lawrence Seaway AIS system and the USG PAWSS
-system use this payload for local extension messages. It is variable
-in length up to a maximum of 1008 bits (up to 5 AIVDM sentence
-payloads).
+system use this payload for local extension messages. <<IMO236>> and
+<<IMO289>> describe payload use as international extension messages.
+This type is variable in length up to a maximum of 1008 bits (up to 5
+AIVDM sentence payloads).
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -1401,8 +1402,10 @@ MMSIs included.
 
 Message type 8 is a broadcast message with unspecified binary payload.
 The St. Lawrence Seaway AIS system and the USG PAWSS system use this
-payload for local extension messages. It is variable in length up to a
-maximum of 1008 bits (up to 5 AIVDM sentence payloads).
+payload for local extension messages. <<IMO236>> and <<IMO289>>
+describe payload use as international extension messages. This type is
+variable in length up to a maximum of 1008 bits (up to 5 AIVDM
+sentence payloads).
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -2417,7 +2420,7 @@ number of bits is 72.
 
 Identical to message 4, with the semantics of a response to inquiry.
 
-=== Type 12: Safety-Related Message ===
+=== Type 12: Addressed Safety-Related Message ===
 
 This is a point-to-point text message.  The payload is interpreted as
 six-bit text.  This message is variable in length up to a maximum of
@@ -2449,7 +2452,7 @@ Such apparently garbled content does *not* mean there is an error in
 your decoder. It may indicate faulty encoders, operator error, or even
 the use of private encodings for non-ASCII character sets.
 
-=== Type 13: Safety-Related Acknowledge ===
+=== Type 13: Safety-Related Acknowledgement ===
 
 Message type 13 is a receipt acknowledgement to senders of
 previous messages of type 12.  The message layout is identical to
@@ -2570,7 +2573,7 @@ Note: While the 96-bit form of Type 16 is not uncommon, the 144-bit
 form is extremely rare. As of March 2010 it has not been observed even
 in long-duration samples from AISHub.
 
-=== Type 17: GNSS Broadcast Binary Message ===
+=== Type 17: DGNSS Broadcast Binary Message ===
 
 Message type 17 is used to broadcast differential corrections for GPS.
 The data in the payload is intended to be passed directly to GPS
@@ -2638,13 +2641,15 @@ understand these fields."
                                                of the marine channel.
 |145-145 | 1  |Message 22 flag    |msg22    |u|If 1, unit can accept a channel
                                                assignment via Message Type 22.
-|146-146 | 1  |Assigned           |assigned |b|Assigned-mode flag
+|146-146 | 1  |Assigned           |assigned |b|Assigned-mode flag:
+                                               0 = autonomous mode (default),
+                                               1 = assigned mode.
 |147-147 | 1  |RAIM flag          |raim     |b|As for common navigation block
 |148-167 |20  |Radio status       |radio    |u|See <<IALA>> for details.
 |==============================================================================
 
 The radio status is 20 bits rather than 19 because an extra first bit
-selects whether it should be interpretred as a SOTDMA or ITDMA state.
+selects whether it should be interpreted as a SOTDMA or ITDMA state.
 
 === Type 19: Extended Class B CS Position Report ===
 
@@ -2801,10 +2806,10 @@ and 16-31 for floating aids to navigation.  The detailed list is as follows:
 |31   |Light Vessel / LANBY / Rigs
 |====================================================================
 
-The name field is 6-bit ASCII.  If this field is full (has no trailing
-@ characters) the decoder should interpret the Name Extension field
-later in the message (no more than 14 6-bit characters) and
-concatenate it to this one to obtain the full name.
+The name field is up to 20 characters of 6-bit ASCII.  If this field
+is full (has no trailing @ characters) the decoder should interpret
+the Name Extension field later in the message (no more than 14 6-bit
+characters) and concatenate it to this one to obtain the full name.
 
 <<IALA>> describes bits 219-248 As "Dimension/Reference for Position",
 implying that it is vessel dimensions as in message type 5.
@@ -2847,10 +2852,10 @@ network.
 |52-63    |12  |Channel B        |channel_b |u|Channel number
 |64-67    | 4  |Tx/Rx mode       |txrx      |u|Transmit/receive mode
 |68-68    | 1  |Power            |power     |b|Low=0, high=1
-|69-86    |18  |NE Longitude     |ne_lon    |u|NE longitude to 0.1 minutes
-|87-103   |17  |NE Latitude      |ne_lat    |I4|NE latitude to 0.1 minutes
-|104-121  |18  |SW Longitude     |sw_lon    |I4|SW longitude to 0.1 minutes
-|122-138  |17  |SW Latitude      |sw_lat    |I4|SW latitude to 0.1 minutes
+|69-86    |18  |NE Longitude     |ne_lon    |I1|NE longitude to 0.1 minutes
+|87-103   |17  |NE Latitude      |ne_lat    |I1|NE latitude to 0.1 minutes
+|104-121  |18  |SW Longitude     |sw_lon    |I1|SW longitude to 0.1 minutes
+|122-138  |17  |SW Latitude      |sw_lat    |I1|SW latitude to 0.1 minutes
 |69-98    |30  |MMSI1            |dest1     |u|MMSI of destination 1
 |104-133  |30  |MMSI2            |dest2     |u|MMSI of destination 2
 |139-139  | 1  |Addressed        |addressed |b|0=Broadcast, 1=Addressed
@@ -2877,6 +2882,9 @@ jurisdiction area over which control parameters are to be set.  If it
 is addressed (addressed field is 1), the same span of data is
 interpreted as two 30-bit MMSIs beginning at at bit offsets 69 and 104
 respectively.
+
+Yes, the addressed bit is *after* the fields it controls the
+interpretation of.
 
 Note that the 'not available' values for longitude and latitudes
 match the short ones used in message 17, not the long ones used in the
@@ -3030,8 +3038,8 @@ the MID and X is any figure from 0 to 9.
 
 === Type 25: Binary Message, Single Slot  ===
 
-Maximum of 168 bits (a single slots). Fields after the Destination
-MMSI are at variable offsets depending on tht flag and the Destination
+Maximum of 168 bits (a single slot). Fields after the Destination
+MMSI are at variable offsets depending on that flag and the Destination
 Indicator; they always occur in the same order but some may be omitted.
 
 [frame="topbot",options="header"]
@@ -3058,7 +3066,7 @@ extracted; this field is to be interpreted as a 10 bit DAC and 6-bit
 FID as in message types 6 and 8.  Otherwise that field span becomes
 part of the message payload.
 
-The data fields is not, in contrast to message type 26, followed by a
+The data fields are not, in contrast to message type 26, followed by a
 radio status block.
 
 Note: Type 25 is extremely rare. As of March 2010 it has not been
@@ -3449,21 +3457,21 @@ Identification System]
 
 - [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
 
-- [[[IMO236]]] http://www.imo.org/includes/blastData.asp/doc_id=4503/236.pdf[IMO
-  Circular 236: Guidance on the Application of AIS Binary Messages (May 2004)]
-
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
 
+- [[[IMO236]]] http://www.imo.org/includes/blastData.asp/doc_id=4503/236.pdf[IMO
+  Circular 236: Guidance on the Application of AIS Binary Messages (May 2004)]
+
 - [[[IMO289]]]
   http://vislab-ccom.unh.edu/~schwehr/papers/2010-IMO-SN.1-Circ.289.pdf[IMO
-  SN.1/Circ.289 GUIDANCE ON THE USE OF AIS APPLICATION-SPECIFIC MESSAGES 
+  289: Guidance on the Use of AIS Application-Specific Messages 
   (June 2010)]
 
 - [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
 
 - [[[IEC-PAS]]] IEC-PAS 61162-100, "Maritime navigation and
-  radiocommunication equipment and systems"  The six-bit encoding
+  radiocommunication equipment and systems"  The ASCII armoring
   is described on page 26 of Annex C, Table C-1. Communicated by 
   Kurt Schwehr; I have not looked at it.
 
