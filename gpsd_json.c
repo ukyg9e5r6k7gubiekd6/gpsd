@@ -1345,6 +1345,7 @@ void json_aivdm_dump(const struct ais_t *ais,
     char buf2[JSON_VAL_MAX * 2 + 1];
     char buf3[JSON_VAL_MAX * 2 + 1];
     bool imo;
+    int i;
 
     static char *nav_legends[] = {
 	"Under way using engine",
@@ -1727,7 +1728,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"lastport\":\"%s\",\"departure\":\"%02u-%02uT%02u:%02uZ\","
 			       "\"nextport\":\"%s\",\"eta\":\"%02u-%02uT%02u:%02uZ\","
 			       "\"dangerous\":\"%s\",\"imdcat\":\"%s\","
-			       "\"unid\":%u,\"amount\":%u,\"unit\":%u",
+			       "\"unid\":%u,\"amount\":%u,\"unit\":%u}\r\n",
 			       ais->type6.dac1fid12.lastport,
 			       ais->type6.dac1fid12.lmonth,
 			       ais->type6.dac1fid12.lday,
@@ -1752,7 +1753,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"lon\":%.4f,\"lat\":%.4f,"
 				   "\"from_hour\":%u,\"from_min\":%u,"
 				   "\"to_hour\":%u,\"to_min\":%u,"
-				   "\"cdir\":%u,\"cspeed\":%.1f,",
+				   "\"cdir\":%u,\"cspeed\":%.1f}r\n",
 				   ais->type6.dac1fid32.month,
 				   ais->type6.dac1fid32.day,
 				   ais->type6.dac1fid32.lon * 0.01,
@@ -1769,7 +1770,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"lon\":%d,\"lat\":%.d,"
 				   "\"from_hour\":%u,\"from_min\":%u,"
 				   "\"to_hour\":%u,\"to_min\":%u,"
-				   "\"cdir\":%u,\"cspeed\":%u,",
+				   "\"cdir\":%u,\"cspeed\":%u}\r\n",
 				   ais->type6.dac1fid32.month,
 				   ais->type6.dac1fid32.day,
 				   ais->type6.dac1fid32.lon,
@@ -1783,8 +1784,9 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"airdraught\":%u",
+		    "\"airdraught\":%u}\r\n",
 		    ais->type6.dac1fid15.airdraught);
+		break;
 	    case 16:	/* IMO236 - Number of persons on board */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"persons\":%u", ais->type6.dac1fid16.persons);
@@ -1795,6 +1797,19 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 23:    /* IMO289 - Area notice - addressed */
 		break;
 	    case 25:	/* IMO289 - Dangerous cargo indication */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"unit\":%u,\"amount\":%u,\"cargos\":[",
+			       ais->type6.dac1fid25.unit,
+			       ais->type6.dac1fid25.amount);
+		for (i = 0; i < (int)ais->type6.dac1fid25.ncargos; i++)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "{\"code\":%u,\"subtype\":%u},",
+
+				   ais->type6.dac1fid25.cargos[i].code,
+				   ais->type6.dac1fid25.cargos[i].subtype);
+		if (buf[strlen(buf) - 1] == ',')
+		    buf[strlen(buf) - 1] = '\0';
+		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		break;
@@ -1972,6 +1987,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.preciptype,
 				   ais->type8.dac1fid31.salinity,
 				   JSON_BOOL(ais->type8.dac1fid31.ice));
+		(void)strlcat(buf, "}\r\n", buflen - strlen(buf));
 		imo = true;
 		break;
 	    case 13:        /* IMO236 - Fairway closed */

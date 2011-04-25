@@ -291,14 +291,17 @@ def make_json_generator(wfp):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "tc:s:d:S:E:r:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "a:tc:s:d:S:E:r:")
     except getopt.GetoptError, msg:
         print "tablecheck.py: " + str(msg)
         raise SystemExit, 1
-    generate = maketable = makestruct = makedump = readgen = False
+    generate = maketable = makestruct = makedump = readgen = all = False
     after = before = None
     for (switch, val) in options:
-        if switch == '-c':
+        if switch == '-a':
+            all = True
+            structname = val
+        elif switch == '-c':
             generate = True
             structname = val
         elif switch == '-s':
@@ -317,7 +320,7 @@ if __name__ == '__main__':
         elif switch == '-E':
             before = val
 
-    if not generate and not maketable and not makestruct and not makedump and not readgen:
+    if not generate and not maketable and not makestruct and not makedump and not readgen and not all:
         print >>sys.stderr, "tablecheck.py: no mode selected"
         sys.exit(1)
 
@@ -361,7 +364,12 @@ if __name__ == '__main__':
         offsets[i] += " " * (owidth - len(offsets[i]))
 
     # Here's where we generate useful output.
-    if maketable:
+    if all:
+        make_driver_code(open(structname + ".c", "w"))
+        make_structure(open(structname + ".h", "w"))
+        make_json_dumper(open(structname + "_json.c", "w"))
+        make_json_generator(open(structname + ".py", "w"))
+    elif maketable:
         correct_table(sys.stdout)
     elif generate:
         make_driver_code(sys.stdout)

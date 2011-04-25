@@ -386,6 +386,13 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 23:        /* IMO289 - Area notice - addressed */
 		    break;
 		case 25:	/* IMO289 - Dangerous cargo indication */
+		    ais->type6.dac1fid25.unit 	= UBITS(88, 2);
+		    ais->type6.dac1fid25.amount	= UBITS(90, 10);
+		    for (i = 0;	100 + i*17 < (int)ais_context->bitlen; i++) {
+			ais->type6.dac1fid25.cargos[i].code 	= UBITS(100 + i*17, 4);
+			ais->type6.dac1fid25.cargos[i].subtype	= UBITS(104 + i*17, 13);
+		    }
+		    ais->type6.dac1fid25.ncargos = i;
 		    break;
 		case 28:	/* IMO289 - Route info - addressed */
 		    break;

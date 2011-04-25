@@ -954,6 +954,16 @@ struct ais_t
 		struct {
 		    unsigned persons;	/* number of persons */
 		} dac1fid16;
+		/* IMO289 - Dangerous Cargo Indication */
+		struct {
+		    unsigned int unit;	/* Unit of Quantity */
+		    unsigned int amount;	/* Amount of Cargo */
+		    unsigned int ncargos;
+		    struct {
+			unsigned int code;	/* Cargo code */
+			unsigned int subtype;	/* Cargo subtype */
+		    } cargos[28];
+		} dac1fid25;
 		/* IMO289 - Text message (addressed) */
 		struct {
 		    unsigned int linkage;
