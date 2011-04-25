@@ -13,6 +13,7 @@ representations to libgps structures.
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #include "gpsd.h"
 #ifdef SOCKET_EXPORT_ENABLE
@@ -138,6 +139,10 @@ int json_ais_read(const char *buf,
 	}
 	else if (strstr(buf, "\"fid\":16,") != NULL) {
 	    status = json_read_object(buf, json_ais6_fid16, endptr);
+	    imo = true;
+	}
+	else if (strstr(buf, "\"fid\":25,") != NULL) {
+	    status = json_read_object(buf, json_ais6_fid25, endptr);
 	    imo = true;
 	}
 	else if (strstr(buf, "\"fid\":32,") != NULL || strstr(buf, "\"fid\":14,") != NULL) {

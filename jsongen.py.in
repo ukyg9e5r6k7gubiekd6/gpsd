@@ -131,6 +131,20 @@ ais_specs = (
         ),
     },
     {
+        "initname" : "json_ais6_fid25",
+        "headers": ("AIS_HEADER",),
+        "structname": "ais->type6.dac1fid25",
+        "fieldmap":(
+            # fieldname    type        default
+            ('unit',       'uinteger', '0'),
+            ('amount',     'uinteger', '0'),
+            ('cargos',     'array',    (
+                ('code',       'uinteger', '0'),
+                ('subtype',    'uinteger', '0'),
+                )),
+            ),
+    },
+    {
     "initname" : "json_ais6_fid30",
     "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6.dac1fid30",
@@ -538,40 +552,68 @@ ais_specs = (
 
 def generate(spec):
     global outboard
+    def member(spec, attr, itype, default):
+        return report
+
     report = ""
+    leader = " " * 39
+    # Utter storage declarations for any fields that are declared to be
+    # stringbuffered. These will need to be postprocessed in json_ais_read().
     for (attr, itype, default) in spec["fieldmap"]:
         if attr in spec.get("stringbuffered", []):
             if attr not in outboard:
                 report += "    char %s[JSON_VAL_MAX+1];\n" % attr
                 outboard.append(attr)
+    structname = spec["structname"]
+    # If there are structarrays describing array sobobjects, we need to make
+    # a separate parse control initializer for each one.  Assumes that the
+    # attribute name is a plural {foo}s; the substructure name has to be
+    # struct {foo} and the array name {foo}s.
+    pacify_splint = False
+    for (attr, itype, arrayparts) in spec["fieldmap"]:
+        if itype == 'array':
+            pacify_splint = True
+            report += "    const struct json_attr_t %s_subtype[] = {\n" % attr
+            for (subattr, subitype, default) in arrayparts:
+                report += '\t{"%s",%st_%s,%sSTRUCTOBJECT(struct %s_t, %s),\n' % \
+                       (subattr, " "*(14-len(subattr)), subitype, " "*(8-len(itype)), attr[:-1], subattr)
+                report += leader + ".dflt.%s = %s},\n" % (subitype, default)
+            report += "    };\n"
+    # Generate the main structure definition describing this parse.
+    # It may have object subarrays.
+    if pacify_splint:
+        report += "/*@-type@*//* STRUCTARRAY confuses splint */\n"
     report += "    const struct json_attr_t %s[] = {\n" % spec["initname"]
     if "headers" in spec:
         for header in spec["headers"]:
             report += '\t' + header + "\n"
     for (attr, itype, default) in spec["fieldmap"]:
-        structname = spec["structname"]
-        if itype == "string":
-            deref = ""
+        if itype == 'array':
+            report += '\t{"%s",%st_array,     STRUCTARRAY(%s.%s, %s_subtype, &%s.n%s)},\n' \
+                      % (attr, " "*(14-len(attr)), structname, attr, attr, structname, attr)
         else:
-            deref = "&"
-        if attr in spec.get("stringbuffered", []):
-            target = attr
-        else:
-            target = structname + "." + attr
-        if "." in attr:
-            attr = attr[attr.rfind(".")+1:]
-        report += '\t{"%s",%st_%s,%s.addr.%s = %s%s,\n' % \
-               (attr, " "*(14-len(attr)), itype, " "*(10-len(itype)), itype, deref, target)
-        leader = " " * 39
-        if itype == "string":
-            report += leader + ".len = sizeof(%s)},\n" % target
-        else:
-            report += leader + ".dflt.%s = %s},\n" % (itype, default)
-
+            if itype == "string":
+                deref = ""
+            else:
+                deref = "&"
+            if attr in spec.get("stringbuffered", []):
+                target = attr
+            else:
+                target = structname + "." + attr
+            if "." in attr:
+                attr = attr[attr.rfind(".")+1:]
+            report += '\t{"%s",%st_%s,%s.addr.%s = %s%s,\n' % \
+                   (attr, " "*(14-len(attr)), itype, " "*(10-len(itype)), itype, deref, target)
+            if itype == "string":
+                report += leader + ".len = sizeof(%s)},\n" % target
+            else:
+                report += leader + ".dflt.%s = %s},\n" % (itype, default)
     report += """\
 	{NULL}
     };
 """
+    if pacify_splint:
+        report += "/*@+type@*/\n"
     print report
 
 if __name__ == '__main__':

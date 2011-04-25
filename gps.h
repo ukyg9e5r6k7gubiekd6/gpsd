@@ -958,8 +958,8 @@ struct ais_t
 		struct {
 		    unsigned int unit;	/* Unit of Quantity */
 		    unsigned int amount;	/* Amount of Cargo */
-		    unsigned int ncargos;
-		    struct {
+		    int ncargos;
+		    struct cargo_t {
 			unsigned int code;	/* Cargo code */
 			unsigned int subtype;	/* Cargo subtype */
 		    } cargos[28];
