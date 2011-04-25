@@ -1187,6 +1187,7 @@ with a different layout, deprecated in <<IMO289>>.
                                                   0 = N/A (default)
 |100-103 |  4 |Cargo code           |code      |u|cargocode
 |104-116 | 13 |Cargo subtype        |subtype   |u|Unsigned integer
+                                                  0 = N/A (default)
 |==============================================================================
 
 The last two fields may repeat to describe up to 28 subcargos. The count
