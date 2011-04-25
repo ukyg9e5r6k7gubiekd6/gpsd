@@ -17,8 +17,8 @@
 static int verbose = 0;
 static bool scaled = true;
 static bool json = true;
-static int ntypes = 0;
-static int typelist[32];
+static unsigned int ntypes = 0;
+static unsigned int typelist[32];
 
 /**************************************************************************
  *
@@ -366,7 +366,7 @@ static bool filter(gps_mask_t changed, struct gps_device_t *session)
     if (ntypes == 0)
 	return true;
     else {
-	int i, t;
+	unsigned int i, t;
 
 	if ((changed & AIS_SET)!=0)
 	    t = session->gpsdata.ais.type;
@@ -487,13 +487,15 @@ int main(int argc, char **argv)
 	    break;
 
 	case 't':
-	    typelist[ntypes++] = atoi(strtok(optarg, ","));
+	    /*@-nullpass@*/
+	    typelist[ntypes++] = (unsigned int)atoi(strtok(optarg, ","));
 	    for(;;) {
 		char *next = strtok(NULL, ",");
 		if (next == NULL)
 		    break;
-		typelist[ntypes++] = atoi(next);
+		typelist[ntypes++] = (unsigned int)atoi(next);
 	    }
+	    /*@+nullpass@*/
 	    break;
 
 	case 'u':
