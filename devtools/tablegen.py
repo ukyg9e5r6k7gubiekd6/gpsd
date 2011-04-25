@@ -241,7 +241,7 @@ def make_json_generator(wfp):
     print >>wfp, '''\
     {
         "initname" : "__INITIALIZER__",
-        "headers": ("AIS_HEADER,",),
+        "headers": ("AIS_HEADER",),
         "structname": "%s",
         "fieldmap":(
             # fieldname    type        default''' % (structname,)
