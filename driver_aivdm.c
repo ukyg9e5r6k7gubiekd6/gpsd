@@ -533,7 +533,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 29:        /* IMO289 - Text Description - broadcast */
 		    ais->type8.dac1fid29.linkage   = UBITS(56, 10);
 		    from_sixbit((char *)ais_context->bits,
-				56, ais_context->bitlen-56,
+				66, ais_context->bitlen-66,
 				ais->type8.dac1fid29.text);
 		    break;
 		case 31:        /* IMO289 - Meteorological/Hydrological data */
