@@ -90,7 +90,8 @@ int json_ais_read(const char *buf,
 			 &ais->type4.month,
 			 &ais->type4.day,
 			 &ais->type4.hour,
-			 &ais->type4.minute, &ais->type4.second);
+			 &ais->type4.minute, 
+			 &ais->type4.second);
 	}
     } else if (strstr(buf, "\"type\":5,") != NULL) {
 	status = json_read_object(buf, json_ais5, endptr);
@@ -102,12 +103,33 @@ int json_ais_read(const char *buf,
 	    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 			 &ais->type5.month,
 			 &ais->type5.day,
-			 &ais->type5.hour, &ais->type5.minute);
+			 &ais->type5.hour, 
+			 &ais->type5.minute);
 	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
 	bool imo = false;
 	if (strstr(buf, "\"fid\":12,") != NULL) {
 	    status = json_read_object(buf, json_ais6_fid12, endptr);
+	    if (status == 0) {
+		ais->type6.dac1fid12.lmonth = AIS_MONTH_NOT_AVAILABLE;
+		ais->type6.dac1fid12.lday = AIS_DAY_NOT_AVAILABLE;
+		ais->type6.dac1fid12.lhour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type6.dac1fid12.lminute = AIS_MINUTE_NOT_AVAILABLE;
+		(void)sscanf(departure, "%02u-%02uT%02u:%02uZ",
+			     &ais->type6.dac1fid12.lmonth,
+			     &ais->type6.dac1fid12.lday,
+			     &ais->type6.dac1fid12.lhour, 
+			     &ais->type6.dac1fid12.lminute);
+		ais->type6.dac1fid12.nmonth = AIS_MONTH_NOT_AVAILABLE;
+		ais->type6.dac1fid12.nday = AIS_DAY_NOT_AVAILABLE;
+		ais->type6.dac1fid12.nhour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type6.dac1fid12.nminute = AIS_MINUTE_NOT_AVAILABLE;
+		(void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
+			     &ais->type6.dac1fid12.nmonth,
+			     &ais->type6.dac1fid12.nday,
+			     &ais->type6.dac1fid12.nhour, 
+			     &ais->type6.dac1fid12.nminute);
+	    }
 	    imo = true;
 	}
 	else if (strstr(buf, "\"fid\":15,") != NULL) {
@@ -143,6 +165,15 @@ int json_ais_read(const char *buf,
 	}
 	else if (strstr(buf, "\"fid\":31,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
 	    status = json_read_object(buf, json_ais8_fid31, endptr);
+	    if (status == 0) {
+		ais->type5.day = AIS_DAY_NOT_AVAILABLE;
+		ais->type5.hour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type5.minute = AIS_MINUTE_NOT_AVAILABLE;
+		(void)sscanf(eta, "%02uT%02u:%02uZ",
+			     &ais->type5.day,
+			     &ais->type5.hour, 
+			     &ais->type5.minute);
+	    }
 	    imo = true;
 	}
 	if (!imo) {

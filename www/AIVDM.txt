@@ -650,12 +650,12 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |0-5     |  6  |Message Type     |type     |u|Constant: 4
 |6-7     |  2  |Repeat Indicator |repeat   |u|Unknown
 |8-37    | 30  |MMSI             |mmsi     |u|9 decimal digits
-|38-51   | 14  |Year             |year     |u|UTC, 1-999, 0 = N/A (default)
-|52-55   |  4  |Month            |month    |u|1-12; 0 = N/A (default)
-|56-60   |  5  |Day              |day      |u|1-31; 0 = N/A (default)
-|61-65   |  5  |Hour             |hour     |u|0-23; 24 = N/A (default)
-|66-71   |  6  |Minute           |minute   |u|0-59; 60 = N/A (default)
-|72-77   |  6  |Second           |second   |u|0-59; 60 = N/A (default)
+|38-51   | 14  |Year (UTC)       |year     |u|UTC, 1-999, 0 = N/A (default)
+|52-55   |  4  |Month (UTC)      |month    |u|1-12; 0 = N/A (default)
+|56-60   |  5  |Day (UTC)        |day      |u|1-31; 0 = N/A (default)
+|61-65   |  5  |Hour (UTC)       |hour     |u|0-23; 24 = N/A (default)
+|66-71   |  6  |Minute (UTC)     |minute   |u|0-59; 60 = N/A (default)
+|72-77   |  6  |Second (UTC)     |second   |u|0-59; 60 = N/A (default)
 |78-78   |  1  |Fix quality      |accuracy |b|As in Common Navigation Block
 |79-106  | 28  |Longitude        |lon      |I4|As in Common Navigation Block
 |107-133 | 27  |Latitude         |lat      |I4|As in Common Navigation Block
@@ -710,10 +710,10 @@ humans rather than gathered automatically from sensors.
 |258-263 |  6 |Dimension to Port      |to_port      |u|Meters
 |264-269 |  6 |Dimension to Starboard |to_starboard |u|Meters
 |270-273 |  4 |Position Fix Type      |epfd         |u|As in Type 4 EPSD codes
-|274-277 |  4 |ETA month              |month        |u|1-12, 0=N/A (default)
-|278-282 |  5 |ETA day                |day          |u|1-31, 0=N/A (default)
-|283-287 |  5 |ETA hour               |hour         |u|0-23, 24=N/A (default)
-|288-293 |  6 |ETA minute             |minute       |u|0-59, 60=N/A (default)
+|274-277 |  4 |ETA month (UTC)        |month        |u|1-12, 0=N/A (default)
+|278-282 |  5 |ETA day (UTC)          |day          |u|1-31, 0=N/A (default)
+|283-287 |  5 |ETA hour (UTC)         |hour         |u|0-23, 24=N/A (default)
+|288-293 |  6 |ETA minute (UTC)       |minute       |u|0-59, 60=N/A (default)
 |294-301 |  8 |Draught                |draught      |U1|Meters/10
 |302-421 |120 |Destination            |destination  |t|20 6-bit characters
 |422-422 |  1 |DTE                    |dte          |b|0=Data terminal ready,
@@ -903,15 +903,15 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |72-81   | 10 |DAC                  |dac       |u|DAC = 001
 |82-87   |  6 |FID                  |fid       |u|FID = 12
 |88-117  | 30 |Last Port Of Call    |lastport  |t|5 6-bit characters, UN locode
-|118-121 |  4 |ETA month            |lmonth    |u|1-12, 0=N/A (default)
-|122-126 |  5 |ETA day              |lday      |u|1-31, 0=N/A (default)
-|127-131 |  5 |ETA hour             |lhour     |u|0-23, 24=N/A (default)
-|132-137 |  6 |ETA minute           |lminute   |u|0-59, 60=N/A (default)
+|118-121 |  4 |ETA month (UTC)      |lmonth    |u|1-12, 0=N/A (default)
+|122-126 |  5 |ETA day (UTC)         |lday      |u|1-31, 0=N/A (default)
+|127-131 |  5 |ETA hour (UTC)       |lhour     |u|0-23, 24=N/A (default)
+|132-137 |  6 |ETA minute (UTC)     |lminute   |u|0-59, 60=N/A (default)
 |138-167 | 30 |Next Port Of Call    |nextport  |t|5 6-bit characters, UN locode
-|168-171 |  4 |ETA month            |nmonth    |u|1-12, 0=N/A (default)
-|172-176 |  5 |ETA day              |nday      |u|1-31, 0=N/A (default)
-|177-181 |  5 |ETA hour             |nhour     |u|0-23, 24=N/A (default)
-|182-187 |  6 |ETA minute           |nminute   |u|0-59, 60=N/A (default)
+|168-171 |  4 |ETA month (UTC)      |nmonth    |u|1-12, 0=N/A (default)
+|172-176 |  5 |ETA day (UTC)        |nday      |u|1-31, 0=N/A (default)
+|177-181 |  5 |ETA hour (UTC)       |nhour     |u|0-23, 24=N/A (default)
+|182-187 |  6 |ETA minute (UTC)     |nminute   |u|0-59, 60=N/A (default)
 |188-307 |120 |Main Dangerous Good  |dangerous |t|20 6-bit characters
 |308-331 | 24 |IMD Category         |imdcat    |t|4  6-bit characters
 |332-344 | 13 |UN Number            |unid      |u|1-3363 UN Number
@@ -1049,10 +1049,10 @@ A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 |72-81   | 10 |DAC                  |dac        |u|DAC = 001
 |82-87   |  6 |FID                  |fid        |u|FID = 18
 |88-97   | 10 |Message Linkage ID   |linkage    |u|Unsigned integer
-|98-101  |  4 |Month                |month      |u|1-12; 0 = N/A (default)
-|102-106 |  5 |Day                  |day        |u|1-31; 0 = N/A (default)
-|107-111 |  5 |Hour                 |hour       |u|0-23; 24 = N/A (default)
-|112-117 |  6 |Minute               |minute     |u|0-59; 60 = N/A (default)
+|98-101  |  4 |Month (UTC)          |month      |u|1-12; 0 = N/A (default)
+|102-106 |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
+|107-111 |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
+|112-117 |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
 |118-237 |120 |Name of Port & Berth |portname   |u|20 6-bit characters
 |238-267 | 30 |Destination          |destination|u|5 6-bit characters
 |268-292 | 25 |Longitude            |lon        |I3|Unit = minutes * 0.001,
@@ -1095,10 +1095,10 @@ bit is on.
                                                   255 = >= 25.5m
                                                   0 = N/A (default)
 |115-117 |  3 |Mooring Position   |position    |u|See below
-|118-121 |  4 |Month              |month       |u|1-12; 0 = N/A (default)
-|122-126 |  5 |Day                |day         |u|1-31; 0 = N/A (default)
-|127-131 |  5 |Hour               |hour        |u|0-23; 24 = N/A (default)
-|132-137 |  6 |Minute             |minute      |u|0-59; 60 = N/A (default)
+|118-121 |  4 |Month (UTC)        |month       |u|1-12; 0 = N/A (default)
+|122-126 |  5 |Day (UTC)          |day         |u|1-31; 0 = N/A (default)
+|127-131 |  5 |Hour (UTC)         |hour        |u|0-23; 24 = N/A (default)
+|132-137 |  6 |Minute (UTC)       |minute      |u|0-59; 60 = N/A (default)
 |138-138 |  1 |Services Availability|availability|u|0 = services types unknown
                                                     1 = services types are known
 |139-140 |  2 |Agent              |agent       |u|Service status value
@@ -1267,10 +1267,10 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
                                                1 = authority,
                                                27 = reserved for future use
 |101-105 |  5 |Route Type        |rtype     |u|See table below
-|106-109 |  4 |Start month       |month     |u|1-12, 0=N/A (default)
-|110-114 |  5 |Start day         |day       |u|1-31, 0=N/A (default)
-|115-119 |  5 |Start hour        |hour      |u|0-23, 24=N/A (default)
-|120-125 |  6 |Start minute      |minute    |u|0-59, 60=N/A (default)
+|106-109 |  4 |Start month (UTC) |month     |u|1-12, 0=N/A (default)
+|110-114 |  5 |Start day (UTC)   |day       |u|1-31, 0=N/A (default)
+|115-119 |  5 |Start hour (UTC)  |hour      |u|0-23, 24=N/A (default)
+|120-125 |  6 |Start minute (UTC)|minute    |u|0-59, 60=N/A (default)
 |126-143 | 18 |Duration          |duration  |u|Minutes from start time,
                                                0 = cancel route,
                                                262,143 = N/A (default),
@@ -1490,9 +1490,9 @@ broadcast of this message of 12 minutes.
 |80-104  | 25 |Longitude          |lon         |I3|Unit = minutes * 0.001,
                                                   181000 = N/A (default),
                                                   N positive, S negative.
-|105-109 |  5 |Day                |day         |u|1-31, 0=N/A (default)
-|110-114 |  5 |Hour               |hour        |u|0-23, >=24=N/A (default)
-|115-120 |  6 |Minute             |minute      |u|0-59, >=60=N/A (default)
+|105-109 |  5 |Day (UTC)          |day         |u|1-31, 0=N/A (default)
+|110-114 |  5 |Hour (UTC)         |hour        |u|0-23, >=24=N/A (default)
+|115-120 |  6 |Minute (UTC)       |minute      |u|0-59, >=60=N/A (default)
 |121-127 |  7 |Average Wind Speed |wspeed      |u|10-min avg wind speed, knots,
                                                   127 = N/A (default).
 |128-134 |  7 |Gust Speed         |wgust       |u|10-min max wind speed, knots,
@@ -1651,14 +1651,14 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 |296-415 |120 |Location of Closing To  |dangerous|t|20 6-bit characcters
 |416-425 | 10 |Radius extension        |radius   |u|0-1000, 10001 = N/A (default)
 |426-427 |  2 |Unit of extension       |extunit  |u|0=m, 1=km, 2=nm, 3=cables
-|428-432 |  5 |From day                |fday     |u|1-31, 0=N/A (default)
-|433-436 |  4 |From month              |fmonth   |u|1-12, 0=N/A (default)
-|437-441 |  5 |From hour               |fhour    |u|0-23, 24=N/A (default)
-|442-447 |  6 |From minute             |fminute  |u|0-59, 60=N/A (default)
-|448-452 |  5 |To day                  |tday     |u|1-31, 0=N/A (default)
-|453-456 |  4 |To month                |tmonth   |u|1-12, 0=N/A (default)
-|457-461 |  5 |To hour                 |thour    |u|0-23, 24=N/A (default)
-|462-467 |  6 |To minute               |tminute  |u|0-59, 60=N/A (default)
+|428-432 |  5 |From day (UTC)          |fday     |u|1-31, 0=N/A (default)
+|433-436 |  4 |From month (UTC)        |fmonth   |u|1-12, 0=N/A (default)
+|437-441 |  5 |From hour (UTC)         |fhour    |u|0-23, 24=N/A (default)
+|442-447 |  6 |From minute (UTC)       |fminute  |u|0-59, 60=N/A (default)
+|448-452 |  5 |To day (UTC)            |tday     |u|1-31, 0=N/A (default)
+|453-456 |  4 |To month (UTC)          |tmonth   |u|1-12, 0=N/A (default)
+|457-461 |  5 |To hour (UTC)           |thour    |u|0-23, 24=N/A (default)
+|462-467 |  6 |To minute (UTC)         |tminute  |u|0-59, 60=N/A (default)
 |468-471 |  4 |Spare                   |         |x|Not used
 |==============================================================================
 
@@ -3348,10 +3348,20 @@ The general ground rules for JSON-AIS encoding are as follows:
 2. When multiple kinds of JSON objects may occur in a data stream, AIS 
 objects have the attribute "class":"AIS".
 
-3. Collections of fields aggregating to a timestamp are dumped in
-ISO8601 format. Messages for which this rule is relevant are type 4;
-type 5; type 6 with DAC = 1 and FID = 12, 14, 28, 32; type 8 with DAC
-1 and FID = 11, 13.
+3. Some collections of fields aggregating to a timestamp are dumped in
+ISO8601 format. 
+
+.Timestamp fields
+[frame="topbot",options="header"]
+|===========================================================================
+|Message| ITU/IMO fields                   | JSON ISO8601 | Format
+|   4   | year,month,day,hour,minute,second| timestamp    | %4u-%02u-%02uT%02u:%02u:%02uZ
+|   5   | month,day,hour,minute            | eta          | %02u-%02uT%02u:%02uZ
+|6(1/12)| lmonth,lday,lhour,lminute        | departure    | %02u-%02uT%02u:%02uZ
+|       | nmonth,nday,nhour,nminute        | eta          | %02u-%02uT%02u:%02uZ
+|8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
+|8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
+|===========================================================================
 
 4. There are two variants of the encoding, one scaled and one
 unscaled, which differ in the treatment of float and
@@ -3389,7 +3399,7 @@ integer indices.  In scaled mode, the values are dumped as strings.
 |        | swellheight, watertemp salinity      |
 | 8(1/17)| lon, lat                             | -
 | 8(1/18)| lon, lat                             | -
-| 8(1/21)| lon. lat, visibility, airtemp,       | -
+| 8(1/21)| lon, lat, visibility, airtemp,       | -
 |        | watertemp, waveheight,               |
 |        | swellheight, speed, pressure, pdelta,|
 |        | rwindspeed, mgustspeed, airtemp,     |

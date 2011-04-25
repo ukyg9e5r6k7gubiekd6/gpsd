@@ -1621,9 +1621,10 @@ void json_aivdm_dump(const struct ais_t *ais,
 	break;
     case 4:			/* Base Station Report */
     case 11:			/* UTC/Date Response */
+	/* some fields have beem merged to an ISO8601 date */
 	if (scaled) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"timestamp\":\"%4u:%02u:%02uT%02u:%02u:%02uZ\","
+			   "\"timestamp\":\"%4u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
 			   "\"epfd\":\"%s\",\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
@@ -1656,6 +1657,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	}
 	break;
     case 5:			/* Ship static and voyage related data */
+	/* some fields have beem merged to an ISO8601 partial date */
 	if (scaled) {
             /* *INDENT-OFF* */
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1720,11 +1722,10 @@ void json_aivdm_dump(const struct ais_t *ais,
 	if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
 	    case 12:	/* IMO236 -Dangerous cargo indication */
+		/* some fields have beem merged to an ISO8601 partial date */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "\"lastport\":\"%s\",\"lmonth\":%u,\"lday\":%u,"
-			       "\"lhour\":%u,\"lminute\":%u,"
-			       "\"nextport\":\"%s\",\"nmonth\":%u,\"nday\":%u,"
-			       "\"nhour\":%u,\"nminute\":%u,"
+			       "\"lastport\":\"%s\",\"departure\":\"%02u-%02uT%02u:%02uZ\","
+			       "\"nextport\":\"%s\",\"eta\":\"%02u-%02uT%02u:%02uZ\","
 			       "\"dangerous\":\"%s\",\"imdcat\":\"%s\","
 			       "\"unid\":%u,\"amount\":%u,\"unit\":%u",
 			       ais->type6.dac1fid12.lastport,
@@ -1793,7 +1794,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 23:    /* IMO289 - Area notice - addressed */
 		break;
-	    case 25:	/* IMO289 = Dangerous cargo indication */
+	    case 25:	/* IMO289 - Dangerous cargo indication */
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		break;
@@ -1833,6 +1834,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    switch (ais->type8.fid) {
 	    case 11:        /* IMO236 - Meteorological/Hydrological data */
 	    case 31:        /* IMO289 - Meteorological/Hydrological data */
+		/* some fields have beem merged to an ISO8601 partial date */
 		/* layout is almost identical to FID=31 from IMO289 */
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1849,7 +1851,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"accuracy\":%s,",
 				   JSON_BOOL(ais->type8.dac1fid31.accuracy));
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "\"day\":%u,\"hour\":%u,\"minute\":%u,"
+			       "\"timestamp\":\"%02uT%02u:%02uZ\","
 			       "\"wapeed\":%u,\"wgust\":%u,\"wdir\":%u,"
 			       "\"wgustdir\":%u,\"humidity\":%u",
 			       ais->type8.dac1fid31.day,
