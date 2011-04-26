@@ -340,7 +340,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    imo = false;
 	    if (ais->type8.dac == 1)
 		switch (ais->type8.fid) {
-		case 12:	/* IMO236 -Dangerous cargo indication */
+		case 12:	/* IMO236 - Dangerous cargo indication */
 		    UCHARS(88, ais->type6.dac1fid12.lastport);
 		    ais->type6.dac1fid12.lmonth		= UBITS(118, 4);
 		    ais->type6.dac1fid12.lday		= UBITS(122, 5);
@@ -382,6 +382,16 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    imo = true;
 		    break;
 		case 18:	/* IMO289 - Clearance time to enter port */
+		    ais->type6.dac1fid18.linkage	= UBITS(88, 10);
+		    ais->type6.dac1fid18.month	= UBITS(98, 4);
+		    ais->type6.dac1fid18.day	= UBITS(102, 5);
+		    ais->type6.dac1fid18.hour	= UBITS(107, 5);
+		    ais->type6.dac1fid18.minute	= UBITS(112, 6);
+		    UCHARS(118, ais->type6.dac1fid18.portname);
+		    UCHARS(238, ais->type6.dac1fid18.destination);
+		    ais->type6.dac1fid18.lon	= SBITS(268, 25);
+		    ais->type6.dac1fid18.lat	= SBITS(293, 24);
+	/* skip 43 bits */
 		    break;
 		case 23:        /* IMO289 - Area notice - addressed */
 		    break;

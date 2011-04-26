@@ -954,6 +954,18 @@ struct ais_t
 		struct {
 		    unsigned persons;	/* number of persons */
 		} dac1fid16;
+		/* IMO289 - Clearance Time To Enter Port */
+		struct {
+		    unsigned int linkage;	/* Message Linkage ID */
+		    unsigned int month;	/* Month (UTC) */
+		    unsigned int day;	/* Day (UTC) */
+		    unsigned int hour;	/* Hour (UTC) */
+		    unsigned int minute;	/* Minute (UTC) */
+		    char portname[20+1];	/* Name of Port & Berth */
+		    char destination[5+1];	/* Destination */
+		    signed int lon;	/* Longitude */
+		    signed int lat;	/* Latitude */
+		} dac1fid18;
 		/* IMO289 - Dangerous Cargo Indication */
 		struct {
 		    unsigned int unit;	/* Unit of Quantity */

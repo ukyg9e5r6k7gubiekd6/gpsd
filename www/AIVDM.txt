@@ -975,7 +975,7 @@ different widths for the latitude, longitude, and current-speed fields
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information. 
 
-==== Number of persons on board ====
+==== IMO236 Number of persons on board ====
 
 This message should be used by a ship to report the number of persons
 on board, e.g. on request by a competent authority.  Acknowledgement
@@ -1027,7 +1027,7 @@ decoder to accept either.  Bit length may be used to distinguish them.
 |101-135 | 35 |Spare                |          |x|Not used
 |==============================================================================
 
-==== Clearance Time To Enter Port ====
+==== IMO289 Clearance Time To Enter Port ====
 
 This message provides specific ships with information on the port to call and
 time to enter.  It should be transmitted by an authority competent to grant
@@ -1053,11 +1053,11 @@ A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 |102-106 |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
 |107-111 |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
 |112-117 |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
-|118-237 |120 |Name of Port & Berth |portname   |u|20 6-bit characters
-|238-267 | 30 |Destination          |destination|u|5 6-bit characters
-|268-292 | 25 |Longitude            |lon        |I3|Unit = minutes * 0.001,
+|118-237 |120 |Name of Port & Berth |portname   |t|20 6-bit characters
+|238-267 | 30 |Destination          |destination|t|5 6-bit characters
+|268-292 | 25 |Longitude            |lon        |I3|Unit = minutes * 0.0001,
                                                    181000 = N/A (default).
-|293-316 | 24 |Latitude             |lat        |I3|Unit = minutes * 0.001,
+|293-316 | 24 |Latitude             |lat        |I3|Unit = minutes * 0.0001,
                                                    91000 = N/A (default).
 |317-359 | 43 |Spare                |           |x|Not used
 |==============================================================================
@@ -3360,6 +3360,7 @@ ISO8601 format.
 |   5   | month,day,hour,minute            | eta          | %02u-%02uT%02u:%02uZ
 |6(1/12)| lmonth,lday,lhour,lminute        | departure    | %02u-%02uT%02u:%02uZ
 |       | nmonth,nday,nhour,nminute        | eta          | %02u-%02uT%02u:%02uZ
+|6(1/18)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |===========================================================================

@@ -141,6 +141,19 @@ int json_ais_read(const char *buf,
 	    status = json_read_object(buf, json_ais6_fid16, endptr);
 	    imo = true;
 	}
+	else if (strstr(buf, "\"fid\":18,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
+	    status = json_read_object(buf, json_ais6_fid18, endptr);
+	    if (status == 0) {
+		ais->type6.dac1fid18.day = AIS_DAY_NOT_AVAILABLE;
+		ais->type6.dac1fid18.hour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type6.dac1fid18.minute = AIS_MINUTE_NOT_AVAILABLE;
+		(void)sscanf(eta, "%02uT%02u:%02uZ",
+			     &ais->type6.dac1fid18.day,
+			     &ais->type6.dac1fid18.hour, 
+			     &ais->type6.dac1fid18.minute);
+	    }
+	    imo = true;
+	}
 	else if (strstr(buf, "\"fid\":25,") != NULL) {
 	    status = json_read_object(buf, json_ais6_fid25, endptr);
 	    imo = true;
@@ -171,13 +184,13 @@ int json_ais_read(const char *buf,
 	else if (strstr(buf, "\"fid\":31,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
 	    status = json_read_object(buf, json_ais8_fid31, endptr);
 	    if (status == 0) {
-		ais->type5.day = AIS_DAY_NOT_AVAILABLE;
-		ais->type5.hour = AIS_HOUR_NOT_AVAILABLE;
-		ais->type5.minute = AIS_MINUTE_NOT_AVAILABLE;
+		ais->type8.dac1fid31.day = AIS_DAY_NOT_AVAILABLE;
+		ais->type8.dac1fid31.hour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type8.dac1fid31.minute = AIS_MINUTE_NOT_AVAILABLE;
 		(void)sscanf(eta, "%02uT%02u:%02uZ",
-			     &ais->type5.day,
-			     &ais->type5.hour, 
-			     &ais->type5.minute);
+			     &ais->type8.dac1fid31.day,
+			     &ais->type8.dac1fid31.hour, 
+			     &ais->type8.dac1fid31.minute);
 	    }
 	    imo = true;
 	}

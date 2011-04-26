@@ -1793,6 +1793,25 @@ void json_aivdm_dump(const struct ais_t *ais,
 		imo = true;
 		break;
 	    case 18:	/* IMO289 - Clearance time to enter port */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"linkage\":%u,\"arrival\":\"%u-%uT%u:%uZ\",\"portname\":\"%s\",\"destination\":\"%s\",",
+			       ais->type6.dac1fid18.linkage,
+			       ais->type6.dac1fid18.month,
+			       ais->type6.dac1fid18.day,
+				   ais->type6.dac1fid18.hour,
+			       ais->type6.dac1fid18.minute,
+			       ais->type6.dac1fid18.portname,
+			       ais->type6.dac1fid18.destination);
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"lon\":%.3f,\"lat\":%.3f",
+				   ais->type6.dac1fid18.lon * AIS_LATLON_SCALE,
+				   ais->type6.dac1fid18.lat * AIS_LATLON_SCALE);
+            else
+                (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"lon\":%d,\"lat\":%d",
+			       ais->type6.dac1fid18.lon,
+			       ais->type6.dac1fid18.lat);
 		break;
 	    case 23:    /* IMO289 - Area notice - addressed */
 		break;

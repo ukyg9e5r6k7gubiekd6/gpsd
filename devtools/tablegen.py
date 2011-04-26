@@ -78,7 +78,7 @@ def make_driver_code(wfp):
                 print >>wfp,"\t/* skip %s bit%s */" % (width, ["", "s"][width>'1'])
                 continue
             offset = offsets[i].split('-')[0]
-            if ftype[0] in ('u', 'i'):
+            if ftype[0].lower() in ('u', 'i'):
                 print >>wfp,"\t%s.%s\t= %sBITS(%s, %s);" % \
                       (structname, name, {'u':'U', 'i':'S'}[ftype[0].lower()], offset, width)
             elif ftype == 't':
@@ -97,6 +97,7 @@ def make_structure(wfp):
     for (i, t) in enumerate(table):
         if '|' in t:
             fields = map(lambda s: s.strip(), t.split('|'))
+            width = fields[2]
             description = fields[3].strip()
             name = fields[4]
             ftype = fields[5]
@@ -115,7 +116,8 @@ def make_structure(wfp):
             elif ftype == 'b':
                 decl = "signed int %s;\t/* %s */" % (name, description)
             elif ftype == 't':
-                decl = "char %s[];\t/* %s */" % (name, description)
+                stl = int(width)/6
+                decl = "char %s[%d+1];\t/* %s */" % (name, stl, description)
             else:
                 decl += "/* %s bits of type %s */" % (width, ftype)
             print >>wfp, tabify(baseindent + step) + decl
@@ -148,12 +150,6 @@ def make_json_dumper(wfp):
             if ftype == 'u':
                 names.append(name)
                 fmt += "%u"
-                scaled += fmt
-                unscaled += fmt
-                has_scale.append(False)
-            elif ftype == 'i':
-                names.append(name)
-                fmt += "%d"
                 scaled += fmt
                 unscaled += fmt
                 has_scale.append(False)

@@ -145,6 +145,21 @@ ais_specs = (
             ),
     },
     {
+        "initname" : "json_ais6_fid18",
+        "headers": ("AIS_HEADER",),
+        "structname": "ais->type6.dac1fid18",
+        "fieldmap":(
+            # fieldname    type        default
+            ('linkage',    'uinteger', '0'),
+            ('arrival',    'string',   None),
+            ('portname',   'string',   None),
+            ('destination','string',   None),
+            ('lon',        'integer',  'AIS_LON_NOT_AVAILABLE'),
+            ('lat',        'integer',  'AIS_LAT_NOT_AVAILABLE'),
+        ),
+    'stringbuffered' : ('arrival',),
+    },
+    {
     "initname" : "json_ais6_fid30",
     "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6.dac1fid30",
