@@ -215,7 +215,7 @@ def make_json_dumper(wfp):
             if i < len(names) - 1:
                 print >>wfp, arg + ","
             else:
-                print >>wfp, arg + ";"
+                print >>wfp, arg + ");"
         print >>wfp, (baseindent + step) + "else"
         print >>wfp, (baseindent + step*2) + header
         print >>wfp, (baseindent + step*3) + '"%s",' % unscaled
