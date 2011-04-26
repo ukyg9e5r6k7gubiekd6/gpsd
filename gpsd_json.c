@@ -1805,8 +1805,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lon\":%.3f,\"lat\":%.3f",
-				   ais->type6.dac1fid18.lon * AIS_LATLON3_UNIT,
-				   ais->type6.dac1fid18.lat * AIS_LATLON3_UNIT);
+				   ais->type6.dac1fid18.lon / AIS_LATLON3_SCALE,
+				   ais->type6.dac1fid18.lat / AIS_LATLON3_SCALE);
             else
                 (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"lon\":%d,\"lat\":%d",
@@ -1870,14 +1870,14 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"berth_lon\":%.3f,"
 			       "\"berth_lat\":%.3f,"
 			       "\"berth_depth\":%.1f,}\r\n",
-			       ais->type6.dac1fid20.berth_lon * AIS_LATLON3_UNIT,
-			       ais->type6.dac1fid20.berth_lat * AIS_LATLON3_UNIT,
+			       ais->type6.dac1fid20.berth_lon / AIS_LATLON3_SCALE,
+			       ais->type6.dac1fid20.berth_lat / AIS_LATLON3_SCALE,
 			       ais->type6.dac1fid20.berth_depth * 0.1);
             else
                 (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"berth_lon\":%d,"
 			       "\"berth_lat\":%d,"
-			       "\"berth_depth\":%d}\r\n",
+			       "\"berth_depth\":%u}\r\n",
 			       ais->type6.dac1fid20.berth_lon,
 			       ais->type6.dac1fid20.berth_lat,
 			       ais->type6.dac1fid20.berth_depth);
@@ -1942,8 +1942,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lat\":%.3f,\"lon\":%.3f,",
-				   ais->type8.dac1fid31.lat * AIS_LATLON3_UNIT,
-				   ais->type8.dac1fid31.lon * AIS_LATLON3_UNIT);
+				   ais->type8.dac1fid31.lat / AIS_LATLON3_SCALE,
+				   ais->type8.dac1fid31.lon / AIS_LATLON3_SCALE);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lat\":%d,\"lon\":%d,",
