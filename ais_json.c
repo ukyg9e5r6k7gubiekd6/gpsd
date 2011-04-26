@@ -147,7 +147,7 @@ int json_ais_read(const char *buf,
 		ais->type6.dac1fid18.day = AIS_DAY_NOT_AVAILABLE;
 		ais->type6.dac1fid18.hour = AIS_HOUR_NOT_AVAILABLE;
 		ais->type6.dac1fid18.minute = AIS_MINUTE_NOT_AVAILABLE;
-		(void)sscanf(eta, "%02uT%02u:%02uZ",
+		(void)sscanf(arrival, "%02uT%02u:%02uZ",
 			     &ais->type6.dac1fid18.day,
 			     &ais->type6.dac1fid18.hour, 
 			     &ais->type6.dac1fid18.minute);
@@ -161,7 +161,7 @@ int json_ais_read(const char *buf,
 		ais->type6.dac1fid20.day = AIS_DAY_NOT_AVAILABLE;
 		ais->type6.dac1fid20.hour = AIS_HOUR_NOT_AVAILABLE;
 		ais->type6.dac1fid20.minute = AIS_MINUTE_NOT_AVAILABLE;
-		(void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
+		(void)sscanf(arrival, "%02u-%02uT%02u:%02uZ",
 			     &ais->type6.dac1fid20.month,
 			     &ais->type6.dac1fid20.day,
 			     &ais->type6.dac1fid20.hour, 

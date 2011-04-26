@@ -3361,6 +3361,7 @@ ISO8601 format.
 |6(1/12)| lmonth,lday,lhour,lminute        | departure    | %02u-%02uT%02u:%02uZ
 |       | nmonth,nday,nhour,nminute        | eta          | %02u-%02uT%02u:%02uZ
 |6(1/18)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
+|6(1/20)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |===========================================================================
