@@ -154,6 +154,21 @@ int json_ais_read(const char *buf,
 	    }
 	    imo = true;
 	}
+	else if (strstr(buf, "\"fid\":20,") != NULL) {
+	    status = json_read_object(buf, json_ais6_fid20, endptr);
+	    if (status == 0) {
+		ais->type6.dac1fid20.month = AIS_MONTH_NOT_AVAILABLE;
+		ais->type6.dac1fid20.day = AIS_DAY_NOT_AVAILABLE;
+		ais->type6.dac1fid20.hour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type6.dac1fid20.minute = AIS_MINUTE_NOT_AVAILABLE;
+		(void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
+			     &ais->type6.dac1fid20.month,
+			     &ais->type6.dac1fid20.day,
+			     &ais->type6.dac1fid20.hour, 
+			     &ais->type6.dac1fid20.minute);
+	    }
+	    imo = true;
+	}
 	else if (strstr(buf, "\"fid\":25,") != NULL) {
 	    status = json_read_object(buf, json_ais6_fid25, endptr);
 	    imo = true;
@@ -219,8 +234,6 @@ int json_ais_read(const char *buf,
 			  ais->type17.bitdata, sizeof(ais->type17.bitdata));
     } else if (strstr(buf, "\"type\":18,") != NULL) {
 	status = json_read_object(buf, json_ais18, endptr);
-    } else if (strstr(buf, "\"type\":18,") != NULL) {
-	status = json_read_object(buf, json_ais17, endptr);
     } else if (strstr(buf, "\"type\":19,") != NULL) {
 	status = json_read_object(buf, json_ais19, endptr);
     } else if (strstr(buf, "\"type\":20,") != NULL) {

@@ -957,10 +957,10 @@ different widths for the latitude, longitude, and current-speed fields
 |82-87   |  6 |FID                    |fid       |u|FID = 14
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
-|97-123  | 27 |Latitude               |lat       |I3|Unit = minutes * 0.001,
+|97-123  | 27 |Latitude               |lat       |I4|Unit = minutes * 0.0001,
                                                     91000 = N/A (default),
                                                     N positive, S negative.
-|124-151 | 28 |Longitude              |lon       |I3|Unit = minutes * 0.001,
+|124-151 | 28 |Longitude              |lon       |I4|Unit = minutes * 0.0001,
                                                     181000 = N/A (default),
                                                     E positive, W negative.
 |152-156 |  5 |From UTC Hour          |from_hour |u|0-23, 24 = N/A (default)
@@ -1099,8 +1099,8 @@ bit is on.
 |122-126 |  5 |Day (UTC)          |day         |u|1-31; 0 = N/A (default)
 |127-131 |  5 |Hour (UTC)         |hour        |u|0-23; 24 = N/A (default)
 |132-137 |  6 |Minute (UTC)       |minute      |u|0-59; 60 = N/A (default)
-|138-138 |  1 |Services Availability|availability|u|0 = services types unknown
-                                                    1 = services types are known
+|138-138 |  1 |Services Availability|availability|u|0 = services unknown (default)
+                                                    1 = services known
 |139-140 |  2 |Agent              |agent       |u|Service status value
 |141-142 |  2 |Bunker/fuel        |fuel        |u|Service status value
 |143-144 |  2 |Chandler           |chandler    |u|Service status value
@@ -1118,7 +1118,7 @@ bit is on.
 |167-168 |  2 |Surveyor           |surveyor    |u|Service status value
 |169-170 |  2 |Steam              |steam       |u|Service status value
 |171-172 |  2 |Tugs               |tugs        |u|Service status value
-|173-174 |  2 |Waste disposal (solid)    |soldwaste     |u|Service status value
+|173-174 |  2 |Waste disposal (solid)    |solidwaste    |u|Service status value
 |175-176 |  2 |Waste disposal (liquid)   |liquidwaste   |u|Service status value
 |177-178 |  2 |Waste disposal (hazardous)|hazardouswaste|u|Service status value
 |179-180 |  2 |Reserved ballast exchange |ballast       |u|Service status value

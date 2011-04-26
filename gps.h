@@ -836,6 +836,16 @@ typedef /*@unsignedintegraltype@*/ unsigned long long gps_mask_t;
  */
 #define AIS_AUXILIARY_MMSI(n)	((n) / 10000000 == 98)
 
+/* N/A values and scaling constant for 25/24 bit lon/lat pairs */
+#define AIS_LON3_NOT_AVAILABLE	181000
+#define AIS_LAT3_NOT_AVAILABLE	91000
+#define AIS_LATLON3_UNIT	0.001
+
+/* N/A values and scaling constant for 28/27 bit lon/lat pairs */
+#define AIS_LON4_NOT_AVAILABLE	1810000
+#define AIS_LAT4_NOT_AVAILABLE	910000
+#define AIS_LATLON4_UNIT	0.0001
+
 struct ais_t
 {
     unsigned int	type;		/* message type */
@@ -966,6 +976,47 @@ struct ais_t
 		    signed int lon;	/* Longitude */
 		    signed int lat;	/* Latitude */
 		} dac1fid18;
+		/* IMO289 - Berthing Data (addressed) */
+		struct {
+		    unsigned int linkage;	/* Message Linkage ID */
+		    unsigned int berth_length;	/* Berth length */
+		    unsigned int berth_depth;	/* Berth Water Depth */
+		    unsigned int position;	/* Mooring Position */
+		    unsigned int month;	/* Month (UTC) */
+		    unsigned int day;	/* Day (UTC) */
+		    unsigned int hour;	/* Hour (UTC) */
+		    unsigned int minute;	/* Minute (UTC) */
+		    unsigned int availability;	/* Services Availability */
+		    unsigned int agent;	/* Agent */
+		    unsigned int fuel;	/* Bunker/fuel */
+		    unsigned int chandler;	/* Chandler */
+		    unsigned int stevedore;	/* Stevedore */
+		    unsigned int electrical;	/* Electrical */
+		    unsigned int water;	/* Potable water */
+		    unsigned int customs;	/* Customs house */
+		    unsigned int cartage;	/* Cartage */
+		    unsigned int crane;	/* Crane(s) */
+		    unsigned int lift;	/* Lift(s) */
+		    unsigned int medical;	/* Medical facilities */
+		    unsigned int navrepair;	/* Navigation repair */
+		    unsigned int provisions;	/* Provisions */
+		    unsigned int shiprepair;	/* Ship repair */
+		    unsigned int surveyor;	/* Surveyor */
+		    unsigned int steam;	/* Steam */
+		    unsigned int tugs;	/* Tugs */
+		    unsigned int solidwaste;	/* Waste disposal (solid) */
+		    unsigned int liquidwaste;	/* Waste disposal (liquid) */
+		    unsigned int hazardouswaste;	/* Waste disposal (hazardous) */
+		    unsigned int ballast;	/* Reserved ballast exchange */
+		    unsigned int additional;	/* Additional services */
+		    unsigned int regional1;	/* Regional reserved 1 */
+		    unsigned int regional2;	/* Regional reserved 2 */
+		    unsigned int future1;	/* Reserved for future */
+		    unsigned int future2;	/* Reserved for future */
+		    char berth_name[20+1];	/* Name of Berth */
+		    signed int berth_lon;	/* Longitude */
+		    signed int berth_lat;	/* Latitude */
+		} dac1fid20;
 		/* IMO289 - Dangerous Cargo Indication */
 		struct {
 		    unsigned int unit;	/* Unit of Quantity */

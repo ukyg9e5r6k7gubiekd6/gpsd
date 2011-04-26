@@ -391,7 +391,47 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    UCHARS(238, ais->type6.dac1fid18.destination);
 		    ais->type6.dac1fid18.lon	= SBITS(268, 25);
 		    ais->type6.dac1fid18.lat	= SBITS(293, 24);
-	/* skip 43 bits */
+		    /* skip 43 bits */
+		    break;
+		case 20:	/* IMO289 - Berthing data - addressed */
+		    ais->type6.dac1fid20.linkage	= UBITS(88, 10);
+		    ais->type6.dac1fid20.berth_length	= UBITS(98, 9);
+		    ais->type6.dac1fid20.berth_depth	= UBITS(107, 8);
+		    ais->type6.dac1fid20.position	= UBITS(115, 3);
+		    ais->type6.dac1fid20.month	= UBITS(118, 4);
+		    ais->type6.dac1fid20.day	= UBITS(122, 5);
+		    ais->type6.dac1fid20.hour	= UBITS(127, 5);
+		    ais->type6.dac1fid20.minute	= UBITS(132, 6);
+		    ais->type6.dac1fid20.availability	= UBITS(138, 1);
+		    ais->type6.dac1fid20.agent	= UBITS(139, 2);
+		    ais->type6.dac1fid20.fuel	= UBITS(141, 2);
+		    ais->type6.dac1fid20.chandler	= UBITS(143, 2);
+		    ais->type6.dac1fid20.stevedore	= UBITS(145, 2);
+		    ais->type6.dac1fid20.electrical	= UBITS(147, 2);
+		    ais->type6.dac1fid20.water	= UBITS(149, 2);
+		    ais->type6.dac1fid20.customs	= UBITS(151, 2);
+		    ais->type6.dac1fid20.cartage	= UBITS(153, 2);
+		    ais->type6.dac1fid20.crane	= UBITS(155, 2);
+		    ais->type6.dac1fid20.lift	= UBITS(157, 2);
+		    ais->type6.dac1fid20.medical	= UBITS(159, 2);
+		    ais->type6.dac1fid20.navrepair	= UBITS(161, 2);
+		    ais->type6.dac1fid20.provisions	= UBITS(163, 2);
+		    ais->type6.dac1fid20.shiprepair	= UBITS(165, 2);
+		    ais->type6.dac1fid20.surveyor	= UBITS(167, 2);
+		    ais->type6.dac1fid20.steam	= UBITS(169, 2);
+		    ais->type6.dac1fid20.tugs	= UBITS(171, 2);
+		    ais->type6.dac1fid20.solidwaste	= UBITS(173, 2);
+		    ais->type6.dac1fid20.liquidwaste	= UBITS(175, 2);
+		    ais->type6.dac1fid20.hazardouswaste	= UBITS(177, 2);
+		    ais->type6.dac1fid20.ballast	= UBITS(179, 2);
+		    ais->type6.dac1fid20.additional	= UBITS(181, 2);
+		    ais->type6.dac1fid20.regional1	= UBITS(183, 2);
+		    ais->type6.dac1fid20.regional2	= UBITS(185, 2);
+		    ais->type6.dac1fid20.future1	= UBITS(187, 2);
+		    ais->type6.dac1fid20.future2	= UBITS(189, 2);
+		    UCHARS(191, ais->type6.dac1fid20.berth_name);
+		    ais->type6.dac1fid20.berth_lon	= SBITS(311, 25);
+		    ais->type6.dac1fid20.berth_lat	= SBITS(336, 24);
 		    break;
 		case 23:        /* IMO289 - Area notice - addressed */
 		    break;
@@ -527,8 +567,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		    break;
 		case 19:        /* IMO289 - Marine Traffic Signal */
-		    break;
-		case 20:        /* IMO289 - Berthing Data */
 		    break;
 		case 21:        /* IMO289 - Weather obs. report from ship */
 		    break;

@@ -1756,8 +1756,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"cdir\":%u,\"cspeed\":%.1f}r\n",
 				   ais->type6.dac1fid32.month,
 				   ais->type6.dac1fid32.day,
-				   ais->type6.dac1fid32.lon * 0.01,
-				   ais->type6.dac1fid32.lat * 0.01,
+				   ais->type6.dac1fid32.lon / AIS_LATLON_SCALE,
+				   ais->type6.dac1fid32.lat / AIS_LATLON_SCALE,
 				   ais->type6.dac1fid32.from_hour,
 				   ais->type6.dac1fid32.from_min,
 				   ais->type6.dac1fid32.to_hour,
@@ -1805,13 +1805,82 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lon\":%.3f,\"lat\":%.3f",
-				   ais->type6.dac1fid18.lon * AIS_LATLON_SCALE,
-				   ais->type6.dac1fid18.lat * AIS_LATLON_SCALE);
+				   ais->type6.dac1fid18.lon * AIS_LATLON3_UNIT,
+				   ais->type6.dac1fid18.lat * AIS_LATLON3_UNIT);
             else
                 (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"lon\":%d,\"lat\":%d",
 			       ais->type6.dac1fid18.lon,
 			       ais->type6.dac1fid18.lat);
+		break;
+	    case 20:        /* IMO289 - Berthing Data */
+                (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"linkage\":%u,\"berth_length\":%u,"
+			       "\"position\":%u,\"arrival\":\"%u-%uT%u:%u\","
+			       "\"availability\":%u,"
+			       "\"agent\":%u,\"fuel\":%u,\"chandler\":%u,"
+			       "\"stevedore\":%u,\"electrical\":%u,"
+			       "\"water\":%u,\"customs\":%u,\"cartage\":%u,"
+			       "\"crane\":%u,\"lift\":%u,\"medical\":%u,"
+			       "\"navrepair\":%u,\"provisions\":%u,"
+			       "\"shiprepair\":%u,\"surveyor\":%u,"
+			       "\"steam\":%u,\"tugs\":%u,\"solidwaste\":%u,"
+			       "\"liquidwaste\":%u,\"hazardouswaste\":%u,"
+			       "\"ballast\":%u,\"additional\":%u,\""
+			       "\"regional1\":%u,\"regional2\":%u,"
+			       "\"future1\":%u,\"future2\":%u,"
+			       "\"berth_name\":\"%s\",",
+			       ais->type6.dac1fid20.linkage,
+			       ais->type6.dac1fid20.berth_length,
+			       ais->type6.dac1fid20.position,
+			       ais->type6.dac1fid20.month,
+			       ais->type6.dac1fid20.day,
+			       ais->type6.dac1fid20.hour,
+			       ais->type6.dac1fid20.minute,
+			       ais->type6.dac1fid20.availability,
+			       ais->type6.dac1fid20.agent,
+			       ais->type6.dac1fid20.fuel,
+			       ais->type6.dac1fid20.chandler,
+			       ais->type6.dac1fid20.stevedore,
+			       ais->type6.dac1fid20.electrical,
+			       ais->type6.dac1fid20.water,
+			       ais->type6.dac1fid20.customs,
+			       ais->type6.dac1fid20.cartage,
+			       ais->type6.dac1fid20.crane,
+			       ais->type6.dac1fid20.lift,
+			       ais->type6.dac1fid20.medical,
+			       ais->type6.dac1fid20.navrepair,
+			       ais->type6.dac1fid20.provisions,
+			       ais->type6.dac1fid20.shiprepair,
+			       ais->type6.dac1fid20.surveyor,
+			       ais->type6.dac1fid20.steam,
+			       ais->type6.dac1fid20.tugs,
+			       ais->type6.dac1fid20.solidwaste,
+			       ais->type6.dac1fid20.liquidwaste,
+			       ais->type6.dac1fid20.hazardouswaste,
+			       ais->type6.dac1fid20.ballast,
+			       ais->type6.dac1fid20.additional,
+			       ais->type6.dac1fid20.regional1,
+			       ais->type6.dac1fid20.regional2,
+			       ais->type6.dac1fid20.future1,
+			       ais->type6.dac1fid20.future2,
+			       ais->type6.dac1fid20.berth_name);
+            if (scaled)
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"berth_lon\":%.3f,"
+			       "\"berth_lat\":%.3f,"
+			       "\"berth_depth\":%.1f,}\r\n",
+			       ais->type6.dac1fid20.berth_lon * AIS_LATLON3_UNIT,
+			       ais->type6.dac1fid20.berth_lat * AIS_LATLON3_UNIT,
+			       ais->type6.dac1fid20.berth_depth * 0.1);
+            else
+                (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"berth_lon\":%d,"
+			       "\"berth_lat\":%d,"
+			       "\"berth_depth\":%d}\r\n",
+			       ais->type6.dac1fid20.berth_lon,
+			       ais->type6.dac1fid20.berth_lat,
+			       ais->type6.dac1fid20.berth_depth);
 		break;
 	    case 23:    /* IMO289 - Area notice - addressed */
 		break;
@@ -1872,9 +1941,9 @@ void json_aivdm_dump(const struct ais_t *ais,
 		/* layout is almost identical to FID=31 from IMO289 */
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"lat\":%.4f,\"lon\":%.4f,",
-				   ais->type8.dac1fid31.lat / AIS_LATLON_SCALE,
-				   ais->type8.dac1fid31.lon / AIS_LATLON_SCALE);
+				   "\"lat\":%.3f,\"lon\":%.3f,",
+				   ais->type8.dac1fid31.lat * AIS_LATLON3_UNIT,
+				   ais->type8.dac1fid31.lon * AIS_LATLON3_UNIT);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lat\":%d,\"lon\":%d,",
@@ -2016,8 +2085,6 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
-		break;
-	    case 20:        /* IMO289 - Berthing Data */
 		break;
 	    case 21:        /* IMO289 - Weather obs. report from ship */
 		break;
