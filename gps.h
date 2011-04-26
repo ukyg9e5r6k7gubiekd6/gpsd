@@ -839,12 +839,12 @@ typedef /*@unsignedintegraltype@*/ unsigned long long gps_mask_t;
 /* N/A values and scaling constant for 25/24 bit lon/lat pairs */
 #define AIS_LON3_NOT_AVAILABLE	181000
 #define AIS_LAT3_NOT_AVAILABLE	91000
-#define AIS_LATLON3_UNIT	0.001
+#define AIS_LATLON3_SCALE	60000.0
 
 /* N/A values and scaling constant for 28/27 bit lon/lat pairs */
 #define AIS_LON4_NOT_AVAILABLE	1810000
 #define AIS_LAT4_NOT_AVAILABLE	910000
-#define AIS_LATLON4_UNIT	0.0001
+#define AIS_LATLON4_SCALE	600000.0
 
 struct ais_t
 {
