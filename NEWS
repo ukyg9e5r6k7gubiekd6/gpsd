@@ -9,7 +9,9 @@
   the C and C++ client libraries.  xgps and cgps may now display
   the Maidehead grid locator for current lat/lon.  xgps displays
   GST noise statistics if they are available. Codebase now has
-  an scons build recipe.
+  an scons build recipe. Direct support for activation of gpsd from
+  Mac OS/X systemd. gpsdecode can now filoter reports by RTCM2, RTCM3,
+  or AIS message type.
 
 * Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
