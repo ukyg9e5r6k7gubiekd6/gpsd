@@ -52,6 +52,10 @@
 #include "gps_json.h"
 #include "revision.h"
 
+#if defined(SYSTEMD_ENABLE)
+#include "sd_socket.h"
+#endif
+
 /*
  * The name of a tty device from which to pick up whatever the local
  * owning group for tty devices is.  Used when we drop privileges.
@@ -145,6 +149,7 @@ static bool nowait = false;
 #endif /* FORCE_NOWAIT */
 static jmp_buf restartbuf;
 static struct gps_context_t context;
+static int sd_socket_count = 0;
 
 static volatile sig_atomic_t signalled;
 
@@ -464,6 +469,15 @@ static int passivesocks(char *service, char *tcp_or_udp,
 
     for (i = 0; i < AFCOUNT; i++)
 	socks[i] = -1;
+
+#if defined(SYSTEMD_ENABLE)
+    if (sd_socket_count > 0) {
+        for (i = 0; i < AFCOUNT && i < sd_socket_count - 1; i++) {
+            socks[i] = SD_SOCKET_FDS_START + i + 1;
+        }
+        return sd_socket_count - 1;
+    }
+#endif
 
     if (AF_UNSPEC == af || (AF_INET == af))
 	socks[0] = passivesock_af(AF_INET, service, tcp_or_udp, qlen);
@@ -1798,8 +1812,17 @@ int main(int argc, char *argv[])
 	}
     }
 
+#ifdef SYSTEMD_ENABLE
+    sd_socket_count = sd_get_socket_count();
+    if (sd_socket_count > 0 && control_socket) {
+        gpsd_report(LOG_WARN,
+                    "control socket passed on command line ignored\n");
+        control_socket = NULL;
+    }
+#endif
+
 #ifdef CONTROL_SOCKET_ENABLE
-    if (!control_socket && optind >= argc) {
+    if (!control_socket && optind >= argc && sd_socket_count <= 0) {
 	gpsd_report(LOG_ERROR,
 		    "can't run with neither control socket nor devices\n");
 	exit(1);
@@ -1810,6 +1833,13 @@ int main(int argc, char *argv[])
      * avoid a race condition in which hotplug scripts can try opening
      * the socket before it's created.
      */
+#ifdef SYSTEMD_ENABLE
+    if (sd_socket_count > 0) {
+        csock = SD_SOCKET_FDS_START;
+        FD_SET(csock, &all_fds);
+        adjust_max_fd(csock, true);
+    }
+#endif
     if (control_socket) {
 	(void)unlink(control_socket);
 	if ((csock = filesock(control_socket)) == -1) {

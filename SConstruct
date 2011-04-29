@@ -83,6 +83,7 @@ boolopts = (
     # Other daemon options
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
+    ("systemd",       True,   "systemd socket activation"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
@@ -679,6 +680,9 @@ gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 # Source groups
 
 gpsd_sources = ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c']
+
+if env['systemd']:
+    gpsd_sources.append("sd_socket.c")
 
 gpsmon_sources = [
     'gpsmon.c',
