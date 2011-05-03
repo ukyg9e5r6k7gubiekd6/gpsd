@@ -132,7 +132,7 @@ ais_specs = (
     },
     {
         "initname" : "json_ais6_fid25",
-        "headers": ("AIS_HEADER",),
+        "headers": ("AIS_HEADER","AIS_TYPE6",),
         "structname": "ais->type6.dac1fid25",
         "fieldmap":(
             # fieldname    type        default
@@ -146,7 +146,7 @@ ais_specs = (
     },
     {
         "initname" : "json_ais6_fid18",
-        "headers": ("AIS_HEADER",),
+        "headers": ("AIS_HEADER","AIS_TYPE6",),
         "structname": "ais->type6.dac1fid18",
         "fieldmap":(
             # fieldname    type        default
@@ -161,7 +161,7 @@ ais_specs = (
     },
     {
         "initname" : "json_ais6_fid20",
-        "headers": ("AIS_HEADER",),
+        "headers": ("AIS_HEADER","AIS_TYPE6",),
         "structname": "ais->type6.dac1fid20",
         "fieldmap":(
             # fieldname    type        default
