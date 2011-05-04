@@ -923,9 +923,12 @@ python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
                                                 python_built_extensions)
 if not env['debug'] or env['profiling']:
     python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
+
 python_modules_install = python_env.Install( DESTDIR + python_module_dir,
                                             python_modules)
-python_install = [python_extensions_install, python_modules_install]
+
+python_progs_install = python_env.Install(bindir, python_progs)
+python_install = [python_extensions_install, python_modules_install, python_progs_install]
 
 pymoduledir = sysconfig.get_python_lib(plat_specific=1,
                                        standard_lib=0,
