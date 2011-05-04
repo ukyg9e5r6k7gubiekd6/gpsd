@@ -246,24 +246,42 @@ ais_specs = (
     },
     {
     "initname" : "json_ais8",
-    "headers": ("AIS_HEADER",),
+    "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8",
     "fieldmap":(
         # fieldname       type             default
-        ('dac',           'uinteger',      '0'),
-        ('fid',           'uinteger',      '0'),
         ('data',          'string',        None),
         ),
     "stringbuffered":("data",),
     },
     {
+        "initname" : "json_ais8_fid13",
+        "headers": ("AIS_HEADER","AIS_TYPE8",),
+        "structname": "ais->type8.dac1fid13",
+        "fieldmap":(
+            # fieldname    type        default
+            ('reason',     'string',   None),
+            ('closefrom',  'string',   None),
+            ('closeto',    'string',   None),
+            ('radius',     'uinteger', 'AIS_DAC1FID13_RADIUS_NOT_AVAILABLE'),
+            ('extunit',    'uinteger', 'AIS_DAC1FID13_EXTUNIT_NOT_AVAILABLE'),
+            ('fday',       'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
+            ('fmonth',     'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
+            ('fhour',      'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
+            ('fminute',    'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+            ('tday',       'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
+            ('tmonth',     'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
+            ('thour',      'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
+            ('tminute',    'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+        ),
+    'stringbuffered' : ('from', 'to'),
+    },
+    {
     "initname" : "json_ais8_fid29",
-    "headers": ("AIS_HEADER",),
+    "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8",
     "fieldmap":(
         # fieldname               type             default
-        ('dac',                   'uinteger',      '0'),
-        ('fid',                   'uinteger',      '0'),
         ('dac1fid29.linkage',     'uinteger',      '0'),
         ('dac1fid29.text',        'string',        '0'),
         ),
@@ -271,12 +289,10 @@ ais_specs = (
     },
     {
     "initname" : "json_ais8_fid31",
-    "headers": ("AIS_HEADER",),
+    "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8",
     "fieldmap":(
         # fieldname             type         default
-        ('dac',                'uinteger',  '0'),
-        ('fid',                'uinteger',  '0'),
         ('dac1fid31.lon',      'integer',   'DAC1FID31_LON_NOT_AVAILABLE'),
         ('dac1fid31.lat',      'integer',   'DAC1FID31_LAT_NOT_AVAILABLE'),
         ('dac1fid31.accuracy', 'boolean',   'false'),

@@ -561,6 +561,20 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    imo = true;
 		    break;
 		case 13:        /* IMO236 - Fairway closed */
+		    UCHARS(56, ais->type8.dac1fid13.reason);
+		    UCHARS(176, ais->type8.dac1fid13.closefrom);
+		    UCHARS(296, ais->type8.dac1fid13.closeto);
+		    ais->type8.dac1fid13.radius 	= UBITS(416, 10);
+		    ais->type8.dac1fid13.extunit	= UBITS(426, 2);
+		    ais->type8.dac1fid13.fday   	= UBITS(428, 5);
+		    ais->type8.dac1fid13.fmonth 	= UBITS(433, 4);
+		    ais->type8.dac1fid13.fhour  	= UBITS(437, 5);
+		    ais->type8.dac1fid13.fminute	= UBITS(442, 6);
+		    ais->type8.dac1fid13.tday   	= UBITS(448, 5);
+		    ais->type8.dac1fid13.tmonth 	= UBITS(453, 4);
+		    ais->type8.dac1fid13.thour  	= UBITS(457, 5);
+		    ais->type8.dac1fid13.tminute	= UBITS(462, 6);
+		    /* skip 4 bits */
 		    break;
 		case 15:        /* IMO236 - Extended ship and voyage */
 		    break;

@@ -1647,9 +1647,9 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 |38-39   |  2 |Spare                   |         |x|Not used
 |40-49   | 10 |DAC                     |dac      |u|DAC = 001
 |50-55   |  6 |FID                     |fid      |u|FID = 13
-|56-175  |120 |Reason For Closing      |dangerous|t|20 6-bit characcters
-|176-295 |120 |Location Of Closing From|dangerous|t|20 6-bit characcters
-|296-415 |120 |Location of Closing To  |dangerous|t|20 6-bit characcters
+|56-175  |120 |Reason For Closing      |reason   |t|20 6-bit characcters
+|176-295 |120 |Location Of Closing From|closefrom|t|20 6-bit characcters
+|296-415 |120 |Location of Closing To  |closeto  |t|20 6-bit characcters
 |416-425 | 10 |Radius extension        |radius   |u|0-1000, 10001 = N/A (default)
 |426-427 |  2 |Unit of extension       |extunit  |u|0=m, 1=km, 2=nm, 3=cables
 |428-432 |  5 |From day (UTC)          |fday     |u|1-31, 0=N/A (default)
@@ -1662,6 +1662,8 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 |462-467 |  6 |To minute (UTC)         |tminute  |u|0-59, 60=N/A (default)
 |468-471 |  4 |Spare                   |         |x|Not used
 |==============================================================================
+
+No default is specified for the radius field in the standard.
 
 ==== IMO236 Extended Ship Static and Voyage Related Data ====
 
@@ -3364,6 +3366,8 @@ ISO8601 format.
 |6(1/20)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
+|8(1/13)| fmonth,fday,fhour,fminute        | from         | %02u-%02uT%02u:%02uZ
+|8(1/13)| tmonth,tday,thour,tminute        | to           | %02u-%02uT%02u:%02uZ
 |===========================================================================
 
 4. There are two variants of the encoding, one scaled and one
