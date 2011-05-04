@@ -42,8 +42,7 @@ import SCons
 # Start by reading configuration variables from the cache
 opts = Variables('.scons-option-cache')
 
-# Being on a Mac changes one of the natural defaults.
-os_x = (sys.platform == "darwin")
+systemd = os.path.exists("/usr/share/systemd/system")
 
 boolopts = (
     # GPS protocols
@@ -87,7 +86,7 @@ boolopts = (
     # Other daemon options
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
-    ("systemd",       os_x,  "systemd socket activation"),
+    ("systemd",       systemd, "systemd socket activation"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
