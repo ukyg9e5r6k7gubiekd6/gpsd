@@ -57,6 +57,7 @@ srec.html
 *.dylib
 *~
 *.swp
+*.egg-info
 # Built sources
 gps_maskdump.c
 gpsd_maskdump.c
