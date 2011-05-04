@@ -15,7 +15,7 @@
 
 # Unfinished items:
 # * Qt binding (needs to build .pc, .prl files)
-# * Python build (.egg-info file, install, allow to build for multiple python versions)
+# * Python build (.egg-info file, allow building for multiple python versions)
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
@@ -31,6 +31,7 @@ libgps_age   = 0
 EnsureSConsVersion(1,2,0)
 
 import copy, os, sys, commands, glob, re
+from distutils import sysconfig
 from distutils.util import get_platform
 from distutils import sysconfig
 import SCons
@@ -41,6 +42,8 @@ import SCons
 
 # Start by reading configuration variables from the cache
 opts = Variables('.scons-option-cache')
+
+systemd = os.path.exists("/usr/share/systemd/system")
 
 boolopts = (
     # GPS protocols
@@ -84,7 +87,7 @@ boolopts = (
     # Other daemon options
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
-    ("systemd",       True,   "systemd socket activation"),
+    ("systemd",       systemd, "systemd socket activation"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
@@ -94,6 +97,7 @@ boolopts = (
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
+    ("ncurses",       True,  "build with ncurses"),
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
     ("debug",         False, "include debug information in build"),
@@ -142,9 +146,10 @@ env['STRIP'] = "strip"
 env['CHRPATH'] = 'chrpath'
 for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP", "CHRPATH", "LD", "TAR"]:
     if os.environ.has_key(i):
+        j = i
         if i == "LD":
             i = "SHLINK"
-        env[i]=os.getenv(i)
+        env[j]=os.getenv(i)
 for flags in ["LDFLAGS", "CPPFLAGS"]:
     if os.environ.has_key(flags):
         env.MergeFlags([os.getenv(flags)])
@@ -312,10 +317,13 @@ for f in ("daemon", "strlcpy", "strlcat"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
 
-if config.CheckPKG('ncurses'):
-    ncurseslibs = pkg_config('ncurses')
-elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
-    ncurseslibs = ['!ncurses5-config --libs --cflags']
+if env['ncurses']:
+    if config.CheckPKG('ncurses'):
+        ncurseslibs = pkg_config('ncurses')
+    elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
+        ncurseslibs = ['!ncurses5-config --libs --cflags']
+    else:
+        ncurseslibs= []
 else:
     ncurseslibs= []
 
@@ -804,8 +812,11 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
 
 
 # generate revision.h
-from datetime import datetime
-revision='#define REVISION "%s"' %(datetime.now().isoformat()[:-4], )
+(st, rev) = commands.getstatusoutput('git describe')
+if st != 0:
+    from datetime import datetime
+    rev = datetime.now().isoformat()[:-4]
+revision='#define REVISION "%s"' %(rev.strip(),)
 env.Textfile(target="revision.h", source=[revision])
 
 # leapseconds.cache is a local cache for information on leapseconds issued
@@ -908,14 +919,18 @@ python_module_dir = sysconfig.get_python_lib(
                 standard_lib=0,
                 prefix=env['prefix']
             ) + os.sep + 'gps'
-python_extensions_install = python_env.Install( python_module_dir,
+python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
                                                 python_built_extensions)
 if not env['debug'] or env['profiling']:
     python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
-python_modules_install = python_env.Install( python_module_dir,
+python_modules_install = python_env.Install( DESTDIR + python_module_dir,
                                             python_modules)
 python_install = [python_extensions_install, python_modules_install]
 
+pymoduledir = sysconfig.get_python_lib(plat_specific=1,
+                                       standard_lib=0,
+                                       prefix=DESTDIR+env['prefix'])
+pymoduleinstall = env.Install(pymoduledir, "gps")
 
 maninstall = []
 for manpage in base_manpages:

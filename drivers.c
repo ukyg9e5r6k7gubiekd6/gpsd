@@ -1033,7 +1033,7 @@ static gps_mask_t processMTK3301(struct gps_device_t *session)
     mask = generic_parse_input(session);
 
     if (session->packet.type == NMEA_PACKET 
-	&& strncmp(session->driver.nmea.field[0], "$PMTK", 5) == 0)
+	&& strncmp(session->driver.nmea.field[0], "PMTK", 4) == 0)
     {
 	msg = atoi(&(session->driver.nmea.field[0])[4]);
 	switch (msg) {

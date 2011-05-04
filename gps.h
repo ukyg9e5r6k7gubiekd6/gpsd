@@ -1065,6 +1065,28 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
+		/* IMO236 - Fairway Closed */
+		struct {
+		    char reason[20+1];	/* Reason For Closing */
+		    char closefrom[20+1];	/* Location Of Closing From */
+		    char closeto[20+1];	/* Location of Closing To */
+		    unsigned int radius;	/* Radius extension */
+#define AIS_DAC1FID13_RADIUS_NOT_AVAILABLE 10001
+		    unsigned int extunit;	/* Unit of extension */
+#define AIS_DAC1FID13_EXTUNIT_NOT_AVAILABLE 0
+		    unsigned int fday;	/* From day (UTC) */
+		    unsigned int fmonth;	/* From month (UTC) */
+		    unsigned int fhour;	/* From hour (UTC) */
+		    unsigned int fminute;	/* From minute (UTC) */
+		    unsigned int tday;	/* To day (UTC) */
+		    unsigned int tmonth;	/* To month (UTC) */
+		    unsigned int thour;	/* To hour (UTC) */
+		    unsigned int tminute;	/* To minute (UTC) */
+		} dac1fid13;
+	        /* IMO236 - Extended ship and voyage data */
+		struct {
+		    unsigned int airdraught;	/* Air Draught */
+		} dac1fid15;
 		/* IMO289 - Text message (broadcast) */
 		struct {
 		    unsigned int linkage;

@@ -2079,8 +2079,30 @@ void json_aivdm_dump(const struct ais_t *ais,
 		imo = true;
 		break;
 	    case 13:        /* IMO236 - Fairway closed */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"reason\":\"%s\",\"closefrom\":\"%s\","
+			       "\"closeto\":\"%s\",\"radius\":%u,"
+			       "\"extunit\":%u,"
+			       "\"from\":\"%02u-%02uT%02u:%02u\","
+			       "\"to\":\"%02u-%02uT%02u:%02u\"}\r\n",
+			       ais->type8.dac1fid13.reason,
+			       ais->type8.dac1fid13.closefrom,
+			       ais->type8.dac1fid13.closeto,
+			       ais->type8.dac1fid13.radius,
+			       ais->type8.dac1fid13.extunit,
+			       ais->type8.dac1fid13.fmonth,
+			       ais->type8.dac1fid13.fday,
+			       ais->type8.dac1fid13.fhour,
+			       ais->type8.dac1fid13.fminute,
+			       ais->type8.dac1fid13.tmonth,
+			       ais->type8.dac1fid13.tday,
+			       ais->type8.dac1fid13.thour,
+			       ais->type8.dac1fid13.tminute);
 		break;
 	    case 15:        /* IMO236 - Extended ship and voyage */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"airdraught\":%u",
+			       ais->type8.dac1fid15.airdraught);
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		break;

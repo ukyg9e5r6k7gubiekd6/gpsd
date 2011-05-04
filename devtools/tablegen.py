@@ -26,6 +26,9 @@
 # * -t: A corrected version of the table.  It will redo all the offsets to be
 #   in conformance with the bit widths.  
 #
+# * -a: Generate all of the above, not to stdout but to files named with
+#   the argument as a distinguishing part of the stem.
+#
 # This generates almost all the code required to support a new message type.
 # It's not quite "Look, ma, no handhacking!" You'll need to add default
 # values to the Python stanza. If the structure definition contains character
@@ -33,7 +36,7 @@
 # a bit of glue to ais_json.c so that json_ais_read() actually calls the parser
 # handing it the specification structure as a control argument.
 #
-# The -c, -s, -d, and -r modes all take an argument, which should be a
+# The -a, -c, -s, -d, and -r modes all take an argument, which should be a
 # structure reference prefix to be prepended (before a dot) to each fieldname.
 # Usually you'll need this to look something like "ais->typeN", but it could be
 # "ais->typeN.FOO" if the generated code has to operate on a union member
@@ -233,7 +236,6 @@ def make_json_generator(wfp):
     baseindent = " " * 8
     step = " " * 4
     record = after is None
-    stringbuffered = []
     print >>wfp, '''\
     {
         "initname" : "__INITIALIZER__",
@@ -273,16 +275,12 @@ def make_json_generator(wfp):
                 'b': "\'false\'",
                 't': "None",
                 }[ftype[0]]
-            if ftype == 't':
-                stringbuffered.append(name)
             print >>wfp, "            ('%s',%s '%s',%s %s)," % (name,
                                                      " "*(10-len(name)),
                                                      readtype,
                                                      " "*(8-len(readtype)),
                                                      default)
     print >>wfp, "        ),"
-    if stringbuffered:
-        print >>wfp, "    stringbuffered :", repr(tuple(stringbuffered)) + ","
     print >>wfp, "    },"
 
 if __name__ == '__main__':

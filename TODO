@@ -16,11 +16,6 @@ See the GPSD bug tracker at https://developer.berlios.de/bugs/?group_id=2116
 but don't be surprised if it's empty or very sparse.  Our rate of new defects
 per month is quite low.
 
-* Conversion to scons needs finishing touches.  
-
-Python modules and shared-library installation need work.  Jon
-Schleuter and Bernd Zeimetz are on top of this one.
-
 *** Driver issues
 
 **** gpsctl -b should work on UBX, but does not.
