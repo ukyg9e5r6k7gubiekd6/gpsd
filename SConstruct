@@ -83,7 +83,7 @@ boolopts = (
     # Other daemon options
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
-    ("systemd",       True,   "systemd socket activation"),
+    ("systemd",       False, "systemd socket activation"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
