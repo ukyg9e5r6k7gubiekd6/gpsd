@@ -15,7 +15,7 @@
 
 # Unfinished items:
 # * Qt binding (needs to build .pc, .prl files)
-# * Python build (.egg-info file, install, allow to build for multiple python versions)
+# * Python build (.egg-info file, allow building for multiple python versions)
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
@@ -31,6 +31,7 @@ libgps_age   = 0
 EnsureSConsVersion(1,2,0)
 
 import copy, os, sys, commands, glob, re
+from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
 
@@ -745,7 +746,6 @@ python_extensions = {
 }
  
 python_env = env.Clone()
-from distutils import sysconfig
 vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY')
 for i in range(len(vars)):
     if vars[i] is None:
@@ -910,12 +910,17 @@ if have_chrpath:
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
+pymoduledir = sysconfig.get_python_lib(plat_specific=1,
+                                       standard_lib=0,
+                                       prefix=DESTDIR+env['prefix'])
+pymoduleinstall = env.Install(pymoduledir, "gps")
+
 maninstall = []
 for manpage in base_manpages:
     section = manpage.split(".")[1]
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
-install = env.Alias('install', binaryinstall + maninstall)
+install = env.Alias('install', binaryinstall + pymoduleinstall + maninstall)
 
 def Uninstall(nodes):
     deletes = []
