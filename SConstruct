@@ -41,6 +41,9 @@ import SCons
 # Start by reading configuration variables from the cache
 opts = Variables('.scons-option-cache')
 
+# Being on a Mac changes one of the natural defaults.
+os_x = (sys.platform == "darwin")
+
 boolopts = (
     # GPS protocols
     ("nmea",          True,  "NMEA support"),
@@ -83,7 +86,7 @@ boolopts = (
     # Other daemon options
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
-    ("systemd",       False, "systemd socket activation"),
+    ("systemd",       os_x,  "systemd socket activation"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
