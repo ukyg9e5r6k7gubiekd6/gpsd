@@ -577,6 +577,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    /* skip 4 bits */
 		    break;
 		case 15:        /* IMO236 - Extended ship and voyage */
+		    ais->type8.dac1fid15.airdraught	= UBITS(56, 11);
+		    /* skip 5 bits */
 		    break;
 		case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		    break;

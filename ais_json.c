@@ -224,6 +224,10 @@ int json_ais_read(const char *buf,
 		}
 		imo = true;
 	    }
+	    else if (strstr(buf, "\"fid\":15,") != NULL) {
+		status = json_read_object(buf, json_ais8_fid15, endptr);
+		imo = true;
+	    }
 	    else if (strstr(buf, "\"fid\":29,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid29, endptr);
 		imo = true;

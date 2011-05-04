@@ -276,6 +276,15 @@ ais_specs = (
     'stringbuffered' : ('from', 'to'),
     },
     {
+        "initname" : "json_ais8_fid15",
+        "headers": ("AIS_HEADER","AIS_TYPE8",),
+        "structname": "ais->type8.dac1fid15",
+        "fieldmap":(
+            # fieldname    type        default
+            ('airdraught', 'uinteger', '0'),
+        ),
+    },
+    {
     "initname" : "json_ais8_fid29",
     "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8.dac1fid29",

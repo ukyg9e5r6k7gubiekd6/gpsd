@@ -2100,6 +2100,9 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type8.dac1fid13.tminute);
 		break;
 	    case 15:        /* IMO236 - Extended ship and voyage */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"airdraught\":%u",
+			       ais->type8.dac1fid15.airdraught);
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		break;

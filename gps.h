@@ -1083,6 +1083,10 @@ struct ais_t
 		    unsigned int thour;	/* To hour (UTC) */
 		    unsigned int tminute;	/* To minute (UTC) */
 		} dac1fid13;
+	        /* IMO236 - Extended ship and voyage data */
+		struct {
+		    unsigned int airdraught;	/* Air Draught */
+		} dac1fid15;
 		/* IMO289 - Text message (broadcast) */
 		struct {
 		    unsigned int linkage;
