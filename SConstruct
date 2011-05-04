@@ -15,7 +15,7 @@
 
 # Unfinished items:
 # * Qt binding (needs to build .pc, .prl files)
-# * Python build (.egg-info file, allow building for multiple python versions)
+# * Allow building for multiple python versions)
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
@@ -781,6 +781,19 @@ for ext, sources in python_extensions.iteritems():
     python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
 python_built_extensions = python_compiled_libs.values()
 
+python_egg_info_source = """Metadata-Version: 1.0
+Name: gps
+Version: %s
+Summary: Python libraries for the gpsd service daemon
+Home-page: http://gpsd.berlios.de/
+Author: the GPSD project
+Author-email: gpsd-dev@lists.berlios.de
+License: BSD
+Description: The gpsd service daemon can monitor one or more GPS devices connected to a host computer, making all data on the location and movements of the sensors available to be queried on TCP port 2947.
+Platform: UNKNOWN
+""" %(gpsd_version, )
+python_egg_info = python_env.Textfile(target="gps-%s.egg-info" %(gpsd_version, ), source=python_egg_info_source)
+
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
     sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\1\",/' <$SOURCE >$TARGET &&\
@@ -914,11 +927,12 @@ if have_chrpath:
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
-python_module_dir = sysconfig.get_python_lib(
+python_lib_dir = sysconfig.get_python_lib(
                 plat_specific=1,
                 standard_lib=0,
                 prefix=env['prefix']
-            ) + os.sep + 'gps'
+            )
+python_module_dir = python_lib_dir + os.sep + 'gps'
 python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
                                                 python_built_extensions)
 if not env['debug'] or env['profiling']:
@@ -928,12 +942,13 @@ python_modules_install = python_env.Install( DESTDIR + python_module_dir,
                                             python_modules)
 
 python_progs_install = python_env.Install(bindir, python_progs)
-python_install = [python_extensions_install, python_modules_install, python_progs_install]
 
-pymoduledir = sysconfig.get_python_lib(plat_specific=1,
-                                       standard_lib=0,
-                                       prefix=DESTDIR+env['prefix'])
-pymoduleinstall = env.Install(pymoduledir, "gps")
+python_egg_info_install = python_env.Install(DESTDIR + python_lib_dir, python_egg_info)
+python_install = [  python_extensions_install,
+                    python_modules_install,
+                    python_progs_install,
+                    python_egg_info_install]
+
 
 maninstall = []
 for manpage in base_manpages:
