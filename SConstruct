@@ -949,13 +949,15 @@ python_install = [  python_extensions_install,
                     python_progs_install,
                     python_egg_info_install]
 
+pkgconfigdir = libdir + os.sep + 'pkgconfig'
+pc_install = [ env.Install(pkgconfigdir, "libgps.pc") ]
 
 maninstall = []
 for manpage in base_manpages:
     section = manpage.split(".")[1]
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
-install = env.Alias('install', binaryinstall + maninstall + python_install)
+install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install)
 
 def Uninstall(nodes):
     deletes = []
