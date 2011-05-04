@@ -97,6 +97,7 @@ boolopts = (
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
+    ("ncurses",       True,  "build with ncurses"),
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
     ("debug",         False, "include debug information in build"),
@@ -145,9 +146,10 @@ env['STRIP'] = "strip"
 env['CHRPATH'] = 'chrpath'
 for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP", "CHRPATH", "LD", "TAR"]:
     if os.environ.has_key(i):
+        j = i
         if i == "LD":
             i = "SHLINK"
-        env[i]=os.getenv(i)
+        env[j]=os.getenv(i)
 for flags in ["LDFLAGS", "CPPFLAGS"]:
     if os.environ.has_key(flags):
         env.MergeFlags([os.getenv(flags)])
@@ -315,10 +317,13 @@ for f in ("daemon", "strlcpy", "strlcat"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n\n" % f.upper())
 
-if config.CheckPKG('ncurses'):
-    ncurseslibs = pkg_config('ncurses')
-elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
-    ncurseslibs = ['!ncurses5-config --libs --cflags']
+if env['ncurses']:
+    if config.CheckPKG('ncurses'):
+        ncurseslibs = pkg_config('ncurses')
+    elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
+        ncurseslibs = ['!ncurses5-config --libs --cflags']
+    else:
+        ncurseslibs= []
 else:
     ncurseslibs= []
 
