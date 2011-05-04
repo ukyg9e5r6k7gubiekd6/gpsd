@@ -808,8 +808,11 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
 
 
 # generate revision.h
-from datetime import datetime
-revision='#define REVISION "%s"' %(datetime.now().isoformat()[:-4], )
+(st, rev) = commands.getstatusoutput('git describe')
+if st != 0:
+    from datetime import datetime
+    rev = datetime.now().isoformat()[:-4]
+revision='#define REVISION "%s"' %(rev.strip(),)
 env.Textfile(target="revision.h", source=[revision])
 
 # leapseconds.cache is a local cache for information on leapseconds issued
