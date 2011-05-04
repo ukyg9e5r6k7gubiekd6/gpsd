@@ -812,7 +812,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 
 }
 
-#if defined(HAVE_LIBUSB) || defined(S_SPLINT_S)
+#if defined(HAVE_LIBUSB)
 /*
  * is_usb_device() - is a specified device USB matching given vendor/product?
  *
@@ -872,7 +872,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 }
 
 /*@-compdef -usedef -nullpass@*/
-#endif /* HAVE_LIBUSB || S_SPLINT_S */
+#endif /* HAVE_LIBUSB */
 
 /*
  * garmin_usb_detect() - detect a Garmin USB device connected to session fd.
@@ -917,7 +917,7 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 #else
 	return false;
 #endif /* HAVE_LIBUSB */
-
+	/*@-unreachable@*/
 	if (!gpsd_set_raw(session)) {
 	    gpsd_report(LOG_ERROR,
 			"Garmin: garmin_usb_detect: error changing port attributes: %s\n",
