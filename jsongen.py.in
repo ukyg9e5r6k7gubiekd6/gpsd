@@ -212,7 +212,6 @@ ais_specs = (
         ('linkage',     'uinteger',      '0'),
         ('text',        'string',        '0'),
         ),
-    "stringbuffered":("dacfid30.text",),
     },
     {
     "initname" : "json_ais6_fid32",
@@ -285,7 +284,6 @@ ais_specs = (
         ('linkage',     'uinteger',      '0'),
         ('text',        'string',        '0'),
         ),
-    "stringbuffered":("dacfid29.text",),
     },
     {
     "initname" : "json_ais8_fid31",
