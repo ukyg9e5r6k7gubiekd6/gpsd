@@ -32,6 +32,7 @@ EnsureSConsVersion(1,2,0)
 
 import copy, os, sys, commands, glob, re
 from distutils.util import get_platform
+from distutils import sysconfig
 import SCons
 
 #
@@ -730,8 +731,7 @@ if cxx and env["libgpsmm"]:
 
 # Python programs
 python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
-python_modules = ["gps/__init__.py", "gps/misc.py", "gps/fake.py",
-                  "gps/gps.py", "gps/client.py"]
+python_modules = Glob('gps/*.py') 
 
 # Build Python binding
 #
@@ -742,7 +742,6 @@ python_extensions = {
 }
  
 python_env = env.Clone()
-from distutils import sysconfig
 vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY')
 for i in range(len(vars)):
     if vars[i] is None:
@@ -772,7 +771,7 @@ for ext, sources in python_extensions.iteritems():
     for src in sources:
         python_objects[ext].append(python_env.SharedObject(src.split(".")[0] + '-py', src))
     python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
-python_parts = python_compiled_libs.values()
+python_built_extensions = python_compiled_libs.values()
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
@@ -871,7 +870,7 @@ if manbuilder:
 
 ## Where it all comes together
 
-build = env.Alias('build', [binaries, python_parts, manpage_targets])
+build = env.Alias('build', [binaries, python_built_extensions, manpage_targets])
 env.Clean(build, glob.glob("*.o") + glob.glob("*.os"))
 env.Default(*build)
 
@@ -879,7 +878,7 @@ if qt_env:
     build_qt = qt_env.Alias('build', [compiled_qgpsmmlib])
     qt_env.Default(*build_qt)
 
-build_python = python_env.Alias('build', [python_parts])
+build_python = python_env.Alias('build', [python_built_extensions])
 python_env.Default(*build_python)
 
 ## Installation and deinstallation
@@ -904,12 +903,26 @@ if have_chrpath:
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
+python_module_dir = sysconfig.get_python_lib(
+                plat_specific=1,
+                standard_lib=0,
+                prefix=env['prefix']
+            ) + os.sep + 'gps'
+python_extensions_install = python_env.Install( python_module_dir,
+                                                python_built_extensions)
+if not env['debug'] or env['profiling']:
+    python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
+python_modules_install = python_env.Install( python_module_dir,
+                                            python_modules)
+python_install = [python_extensions_install, python_modules_install]
+
+
 maninstall = []
 for manpage in base_manpages:
     section = manpage.split(".")[1]
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
-install = env.Alias('install', binaryinstall + maninstall)
+install = env.Alias('install', binaryinstall + maninstall + python_install)
 
 def Uninstall(nodes):
     deletes = []
@@ -930,10 +943,6 @@ def Utility(target, source, action):
     env.AlwaysBuild(target)
     env.Precious(target)
     return target
-
-# setup.py needs this
-Utility('version' '', [],
-        '@echo ' + gpsd_version + "\n")
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
@@ -995,20 +1004,20 @@ def check_compile(target, source, env):
         '%s -tt -m py_compile tmp.py' %(sys.executable, )
         'rm -f tmp.py tmp.pyc'
 python_compilation_regress = Utility('python-comilation-regress',
-        Glob('*.py') + Glob('gps/*.py') + python_progs + ['SConstruct'], check_compile)
+        Glob('*.py') + python_modules + python_progs + ['SConstruct'], check_compile)
 
 # Regression-test the daemon
-gps_regress = Utility("gps-regress", [gpsd, python_parts],
+gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
         '$SRCDIR/regress-driver test/daemon/*.log')
 
 # Test that super-raw mode works. Compare each logfile against itself
 # dumped through the daemon running in R=2 mode.  (This test is not
 # included in the normal regressions.)
-Utility("raw-regress", [gpsd, python_parts],
+Utility("raw-regress", [gpsd, python_built_extensions],
     '$SRCDIR/regress-driver test/daemon/*.log')
 
 # Build the regression tests for the daemon.
-Utility('gps-makeregress', [gpsd, python_parts],
+Utility('gps-makeregress', [gpsd, python_built_extensions],
     '$SRCDIR/regress-driver -b test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
