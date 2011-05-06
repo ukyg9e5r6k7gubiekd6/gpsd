@@ -176,28 +176,45 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 /*@ +observertrans -statictrans +mustfreeonly +branchstate +kepttrans @*/
 
 char *maidenhead(double n, double e)
-/* lat/lon to Maidenhead (from QGrid - http://users.pandora.be/on4qz/qgrid/) */
+/* lat/lon to Maidenhead */
 {
+    /*
+     * Specification at
+     * http://en.wikipedia.org/wiki/Maidenhead_Locator_System
+     *
+     * There's a fair amount of slop in how Maidenhead converters operate
+     * that can make it look like this one is wrong.  
+     *
+     * 1. Many return caps for paces 5 and 6 when according to the spwec
+     *    they should return smalls.
+     *
+     * 2. Some converters, including QGrid from which this code was originally
+     *    derived, add an 0.5 offset to the divided e and n just before it
+     *    is cast to integer and used for places 5 and 6. This appears to be 
+     *    intended as a round-to-nearest hack (as opposed to the implicit
+     *    round down from the cast). If I'm reading the spec right it
+     *    is not correct to do this.
+     */
     static char buf[7];
 
     int t1;
     e=e+180.0;
     t1=(int)(e/20);
-    buf[0]=(char)t1+'@';
+    buf[0]=(char)t1+'A';
     e-=(float)t1*20.0;
     t1=(int)e/2;
-    buf[2]=(char)t1+'/';
+    buf[2]=(char)t1+'0';
     e-=(float)t1*2;
-    buf[4]=(char)(int)(e*12.0+0.5)+'`';
+    buf[4]=(char)(int)(e*12.0)+'a';
 
     n=n+90.0;
     t1=(int)(n/10.0);
-    buf[1]=(char)t1+'@';
+    buf[1]=(char)t1+'A';
     n-=(float)t1*10.0;
-    buf[3]=(char)n+'/';
+    buf[3]=(char)n+'0';
     n-=(int)n;
     n*=24; // convert to 24 division
-    buf[5]=(char)(int)(n+0.5)+'`';
+    buf[5]=(char)(int)(n)+'a';
     buf[6] = '\0';
  
     return buf;

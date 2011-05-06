@@ -28,7 +28,6 @@ test_geoid
 test_json
 test_trig
 test_libgps
-test_maidenhead_locator
 # Other generated files
 gps.html
 gpscat.html
