@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.32, May 2011
+v1.32+, May 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -441,7 +441,7 @@ location transmission in military exercises. It is also used for
 unencrypted structured extension messages by local authorities such as
 the St. Lawrence Seaway and PAWSS. This document describes all of the
 Class 8 special message formats approved for use in <<IMO236>> and
-<<IMO289>> except Environmental (FID=26).
+<<IMO289>>.
 
 Classes 12 and 14 are used for safety-related text messaging.
 
@@ -486,8 +486,8 @@ type descriptions.
 |I|   Signed integer with scale - renders as float, suffix is decimal places
 |b|   Boolean
 |x|   Spare or reserved bit
-|t|   String
-|d|   Data
+|t|   String (packed six-bit ASCII)
+|d|   Data (uninterpreted binary)
 |==============================================================================
 
 The field breakdowns in this document have been checked against live
@@ -904,7 +904,7 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |82-87   |  6 |FID                  |fid       |u|FID = 12
 |88-117  | 30 |Last Port Of Call    |lastport  |t|5 6-bit characters, UN locode
 |118-121 |  4 |ETA month (UTC)      |lmonth    |u|1-12, 0=N/A (default)
-|122-126 |  5 |ETA day (UTC)         |lday      |u|1-31, 0=N/A (default)
+|122-126 |  5 |ETA day (UTC)        |lday      |u|1-31, 0=N/A (default)
 |127-131 |  5 |ETA hour (UTC)       |lhour     |u|0-23, 24=N/A (default)
 |132-137 |  6 |ETA minute (UTC)     |lminute   |u|0-59, 60=N/A (default)
 |138-167 | 30 |Next Port Of Call    |nextport  |t|5 6-bit characters, UN locode
@@ -1557,7 +1557,7 @@ the cargotype is 5 = MARPOL Annex II).
 |5-7  | reserved for future use
 |===================================
 
-==== IMO 289 Route Information (addressed) ====
+==== IMO289 Route Information (addressed) ====
 
 The content of this message is a time and a list of waypoints describing a
 course. It has a broadcast equivalent that is a message 8 subtype.
@@ -2360,7 +2360,7 @@ This should be used to broadcast time- and location-dependent information about
 hazards to navigation.  For information-lifetime restrictions and usage 
 guidance, refer to <<ITU1371>>.
 
-A message 8 subtype. DAC = 001 FID = 23. 196 to 981 bits.  There is a
+A message 8 subtype. DAC = 001 FID = 22. 196 to 981 bits.  There is a
 related Message 6 subtype for addressed use.
 
 The message consists of a fixed-length header of 111 bits, followed by 1 to
@@ -2390,6 +2390,160 @@ is the message header format:
 
 The sub-area indications are as described under the addressed form, 
 message type 6 with DAC = 1 and FID = 23.
+
+==== IMO289 Environmental ====
+
+A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
+It begins with the foillowing fixed header:
+
+.Environmental message header
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|0-5     |  6 |Message Type         |type       |u|Constant: 6
+|6-7     |  2 |Repeat Indicator     |repeat     |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI          |mmsi       |u|9 decimal digits
+|38-39   |  2 |Spare                |           |x|Not used
+|40-49   | 10 |DAC                  |dac        |u|DAC = 001
+|50-55   |  6 |FID                  |fid        |u|FID = 26
+|==============================================================================
+
+The header is followed by 1-5 sensor records, each 112 bits long.  The framework
+record for each sensor looks like this:
+
+.Sensor framework record
+[frame="topbot",options="header"]
+|==============================================================================
+|0-3     |  4 |Sensor Report Type   |sensor     |u|See table velow
+|4-8     |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
+|9-13    |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
+|14-19   |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
+|20-26   |  7 |Site ID              |site       |u|Binary ID of sensor site
+|27-111  | 85 |Sensor payload       |payload    |d|Sensor payload data
+|==============================================================================
+
+.Sensor report types
+[frame="topbot",options="header"]
+|==============================================================================
+| 0 | Site location
+| 1 | Station ID
+| 2 | Wind
+| 3 | Water level
+| 4 | Current flow (2D)
+| 5 | Current flow (3D)
+| 6 | Horizontal current flow
+| 7 | Sea state
+| 8 | Salinity
+| 9 | Weather
+| 10| Air gap/Air draft
+| 11| (reserved for future use)
+|==============================================================================
+
+Here are the payload types for each variant:
+
+.Site location payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description      |Member   |T|Units
+|0-27    | 28 |Longitude        |lon      |I4|As in Common Navigation Block
+|28-54   | 27 |Latitude         |lat      |I4|As in Common Navigation Block
+|55-65   | 11 |Altitude         |alt      |u|Sensor altitude above MSL,
+                                             0-200 in units of 0.1m,
+                                             2001 = 200.1 m or higher,
+                                             2002 = N/A (default),
+                                             2003-2046 reserved.
+|66-69   |  4 |Sensor owner     |owner    |u|See owner codes table below
+|70-72   |  3 |Data timeout     |timeout  |u|See timeout codes table below
+|73-84   | 12 |Spare            |         |x|Not used
+|==============================================================================
+
+.Sensor owner codes
+[frame="topbot",options="header"]
+|==============================================================================
+|   0  | Unknown (default)
+|   1  | Hydrographic office
+|   2  | Inland waterway authority
+|   3  | Coastal directorate
+|   4  | Meteorological service
+|   5  | Port Authority
+|   6  | Coast guard
+| 7-13 | (reserved for future use)
+|  14  | (reserved for regional use)
+|==============================================================================
+
+.Data timeout codes
+[frame="topbot",options="header"]
+|==============================================================================
+|   0  | No time period (default)
+|   1  | 10 minutes
+|   2  | 1 hour
+|   3  | 6 hours
+|   4  | 12 hours
+|   5  | 24 hours
+|  6-7 | (reserved for future use)
+|==============================================================================
+
+.Station ID payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|  0     | 84 |Name                 |name       |t|14 chars of six-bit ASCII.
+|  84    |  1 |Spare                |           |x|Not used
+|==============================================================================
+
+.Wind report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Water level report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Current flow (2D) report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Current flow (3D) payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Horizontal current report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Sea state report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Salinity report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Weather report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
+
+.Air Gap/Air Draft report payload
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|==============================================================================
 
 ==== Route Information (broadcast) ====
 
@@ -3816,6 +3970,7 @@ subarrays with names as follows:
 |8(1/17)          | targets
 |8(1/22) polyline | waypoints
 |8(1/22) polygon  | vertices
+|8(1/26)          | reports
 |8(1/27)          | waypoints
 |===========================================================================
 
