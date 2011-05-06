@@ -2494,7 +2494,56 @@ Here are the payload types for each variant:
 .Wind report payload
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len |Description          |Member     |T|Units
+|Field   |Len |Description        |Member      |T|Units
+|0-6     |  7 |Average Wind Speed |wspeed      |u|10-min avg wind speed,
+                                                  0-120 in 1-knot units,
+                                                  121 = 121 knots or greater,
+                                                  122 = N/A (default),
+                                                  123-126 = reserved.
+|7-13   |  7 |Wind Gust          |wgust       |u|10-min max wind speed,
+                                                  0-120 in 1-knot units,
+                                                  121 = 121 knots or greater,
+                                                  122 = N/A (default),
+                                                  123-126 = reserved.
+|14-22  |  9 |Wind Direction     |wdir        |u|0-359, degrees fom true north
+                                                   >=360 = N/A (default)
+|23-31  |  9 |Wind Gust Direction|wgustdir    |u|0-359, degrees fom true north
+                                                   >=360 = N/A (default)
+|32-34  |  3 |Sensor Description |sensortype  |u|See Sensor Types table
+|35-41  |  7 |Forecast Wind Speed|fwspeed     |u|Predicted average wind speed,
+                                                  0-120 in 1-knot units,
+                                                  121 = 121 knots or greater,
+                                                  122 = N/A (default),
+                                                  123-126 = reserved.
+|42-48  |  7 |Forecast Wind Gust |fwgust      |u|Predicted max wind speed,
+                                                  0-120 in 1-knot units,
+                                                  121 = 121 knots or greater,
+                                                  122 = N/A (default),
+                                                  123-126 = reserved.
+|49-57  |  9 |Forecast Wind Direction|fwdir   |u|0-359, degrees fom true north
+                                                   >=360 = N/A (default)
+|58-62  |  5 |Day (UTC)            |day       |u|1-31; 0 = N/A (default)
+|63-67  |  5 |Hour (UTC)           |hour      |u|0-23; 24 = N/A (default)
+|68-73  |  6 |Minute (UTC)         |minute    |u|0-59; 60 = N/A (default)
+|74-81  |  8 |Duration             |duration  |u|Forecast duration in minutes,
+                                                  262143 = N/A (default),
+                                                  0 = cancel forecast.
+|82-84  |  3 |Spare                |          |x|Not used
+|==============================================================================
+
+The timestamp group is intended as a valid time of forecast.
+
+.Sensor type codes
+[frame="topbot",options="header"]
+|==============================================================================
+|   0  | No data (default)
+|   1  | Raw real time
+|   2  | Real time with quality control
+|   3  | Predicted (based on historical statistics)
+|   4  | Forecast (predicted, refined with real-time information)
+|   5  | Nowcast (a continuous forecast)
+|   6  | (reserved for future use)
+|   7  | Sensor not available
 |==============================================================================
 
 .Water level report payload
