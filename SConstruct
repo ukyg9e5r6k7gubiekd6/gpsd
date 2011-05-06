@@ -725,6 +725,7 @@ if ncurseslibs:
 # Test programs
 test_float = env.Program('test_float', ['test_float.c'])
 test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpslibs)
+test_maidenhead_locator = env.Program('test_maidenhead_locator', ['test_maidenhead_locator.c'], parse_flags=gpslibs)
 test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], parse_flags=gpslibs)
 test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
@@ -733,7 +734,7 @@ test_bits = env.Program('test_bits', ['test_bits.c', "bits.c"])
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], parse_flags=gpslibs)
 test_libgps = env.Program('test_libgps', ['test_libgps.c'], parse_flags=gpslibs)
 testprogs = [test_float, test_trig, test_bits, test_packet,
-             test_mkgmtime, test_geoid, test_json, test_libgps]
+             test_mkgmtime, test_geoid, test_maidenhead_locator, test_json, test_libgps]
 if cxx and env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
@@ -1004,6 +1005,7 @@ splint_table = [
     ('splint-test_packet',['test_packet.c'],'test_packet test harness', ['']),
     ('splint-test_mkgmtime',['test_mkgmtime.c'],'test_mkgmtime test harness', ['']),
     ('splint-test_geoid',['test_geoid.c'],'test_geoid test harness', ['']),
+    ('splint-test_maidenhead_locator',['test_maidenhead_locator.c'],'test_maidenhead_locator test harness', ['']),
     ('splint-test_json',['test_json.c'],'test_json test harness', ['']),
     ]
 
@@ -1112,7 +1114,7 @@ Utility('packet-makeregress', [test_packet], [
     '$SRCDIR/test_packet >$SRCDIR/test/packet.test.chk',
     ])
 
-# Rebuild the packet-getter regression test
+# Rebuild the geoid test
 Utility('geoid-makeregress', [test_geoid], [
     '$SRCDIR/test_geoid 37.371192 122.014965 >$SRCDIR/test/geoid.test.chk'])
 
@@ -1120,6 +1122,16 @@ Utility('geoid-makeregress', [test_geoid], [
 geoid_regress = Utility('geoid-regress', [test_geoid], [
     '@echo "Testing the geoid model..."',
     '$SRCDIR/test_geoid 37.371192 122.014965 | diff -u $SRCDIR/test/geoid.test.chk -',
+    ])
+
+# Rebuild the Maidenhead Locator test
+Utility('maidenhead-locator-makeregress', [test_maidenhead_locator], [
+    '$SRCDIR/test_maidenhead_locator 37.371192 122.014965 >$SRCDIR/test/maidenhead_locator.test.chk'])
+
+# Regression-test the Maidenhead Locator
+maidenhead_locator_regress = Utility('maidenhead-locator-regress', [test_maidenhead_locator], [
+    '@echo "Testing the Maidenhead Locator..."',
+    '$SRCDIR/test_maidenhead_locator 37.371192 122.014965 | diff -u $SRCDIR/test/maidenhead_locator.test.chk -',
     ])
 
 # Regression-test the calendar functions
@@ -1157,6 +1169,7 @@ check = env.Alias('check', [
     aivdm_regress,
     packet_regress,
     geoid_regress,
+    maidenhead_locator_regress,
     time_regress,
     unpack_regress,
     json_regress])
