@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.31+, Apr 2011
+v1.32, May 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -441,7 +441,7 @@ location transmission in military exercises. It is also used for
 unencrypted structured extension messages by local authorities such as
 the St. Lawrence Seaway and PAWSS. This document describes all of the
 Class 8 special message formats approved for use in <<IMO236>> and
-<<IMO289>> except Area Notices (FID = 22,23) and Environmental (FID=26).
+<<IMO289>> except Environmental (FID=26).
 
 Classes 12 and 14 are used for safety-related text messaging.
 
@@ -1088,7 +1088,7 @@ is the message header format:
                                                    1 = retransmitted.
 |71-71   |  1 |Spare                |           |x|Not used
 |72-81   | 10 |DAC                  |dac        |u|DAC = 001
-|82-87   |  6 |FID                  |fid        |u|FID = 18
+|82-87   |  6 |FID                  |fid        |u|FID = 23
 |88-97   | 10 |Message Linkage ID   |linkage    |u|Unsigned integer
 |98-104  |  7 |Notice Description   |notice     |u|See table below
 |105-108 |  4 |Month (UTC)          |month      |u|1-12; 0 = N/A (default)
@@ -1267,9 +1267,113 @@ Subarea types are as follows:
 |54-56   |  3 |Precision          |precision   |u|Decimal places of precision
                                                   (defaults to 4)
 |57-68   | 12 |Radius             |radius      |u|Radius of area
-                                                  0 = point (default,
-                                                  else 1-4095 * 10^scale
+                                                  0 = point (default),
+                                                  else 1-4095 * 10^scale m
 |69-86   | 18 |Spare              |            |x|Not used
+|==============================================================================
+
+.Rectangle
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member/Type |T|Units
+|0-2     | 3  |Shape of area      |shape       |u|Constant: 1
+|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
+                                                  1 = meters (default)
+|5-29    | 25 |Longitude          |lon         |I3|Longitude of SW corner
+                                                   Unit = minutes * 0.0001,
+                                                   181000 = N/A (default).
+|30-53   | 24 |Latitude           |lat         |I3|Latitude of SW corner
+                                                   Unit = minutes * 0.0001,
+                                                   91000 = N/A (default).
+|54-56   |  3 |Precision          |precision   |u|Decimal places of precision
+                                                  (defaults to 4)
+|57-64   |  8 |E dimension        |east        |u|Box dimension east
+                                                  0 = N/S line (default),
+                                                  else 1-255 * 10^scale m
+|65-72   |  8 |N dimension        |north       |u|Box dimension north
+                                                  0 = E/W line (default),
+                                                  else 1-255 * 10^scale m
+|73-81   |  9 |Orientation        |orientation |u|Degrees clockwise from true N,
+                                                  0 = no rotation (default),
+                                                  else 1-359,
+                                                  360-511 reserved.
+|82-86   |  5 |Spare              |            |x|Not used
+|==============================================================================
+
+.Sector
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member/Type |T|Units
+|0-2     | 3  |Shape of area      |shape       |u|Constant: 2
+|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
+                                                  1 = meters (default)
+|5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
+                                                   Unit = minutes * 0.0001,
+                                                   181000 = N/A (default).
+|30-53   | 24 |Latitude           |lat         |I3|Latitude of center point,
+                                                   Unit = minutes * 0.0001,
+                                                   91000 = N/A (default).
+|54-56   |  3 |Precision          |precision   |u|Decimal places of precision
+                                                  (defaults to 4)
+|57-68   | 12 |Radius             |radius      |u|Radius of area
+                                                  0 = point (default),
+                                                  else 1-4095 * 10^scale m
+|69-77   |  9 |Left boundary      |left       |u|Degrees clockwise from true N,
+                                                  0 = no rotation (default),
+                                                  else 1-359,
+                                                  360-511 reserved.
+|78-86   |  9 |Right boundary     |right      |u|Degrees clockwise from true N,
+                                                  0 = no rotation (default),
+                                                  else 1-359,
+                                                  360-511 reserved.
+|==============================================================================
+
+.Polyline
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member/Type |T|Units
+|0-2     | 3  |Shape of area      |shape       |u|Constant: 3
+|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
+                                                  1 = meters (default)
+|5-14    |10  |Bearing            |bearing     |u|True bearing in half-degree
+                                                  steps from previous waypoint;
+                                                  720 = N/A (default).
+|15-24   |10  |Distance           |distance    |u|Distance from prev. waypoint,
+                                                  0 = no point (default),
+                                                  else 1-1023 * 10^scale m
+|==============================================================================
+
+The last two fields are repeated 4 times; the final 2 bits of 87 are
+unused.  A polyline must be preceded by either (a) a circle, in which
+case the first bearing is from the center, or (b) a polyline, in which
+case the first beariing is from the implied last point.
+
+.Polygon
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member/Type |T|Units
+|0-2     | 3  |Shape of area      |shape       |u|Constant: 4
+|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
+                                                  1 = meters (default)
+|5-14    |10  |Bearing            |bearing     |u|True bearing in half-degree
+                                                  steps from previous vertex;
+                                                  720 = N/A (default).
+|15-24   |10  |Distance           |distance    |u|Distance from prev. vertex,
+                                                  0 = no point (default),
+                                                  else 1-1023 * 10^scale m
+|==============================================================================
+
+The last two fields are repeated 4 times; the final 2 bits of 87 are
+unused.  A polygon must be preceded by a circle; the first bearing is
+from the circle center, which is treated as the zero vertex.  There is
+an implied boundary from the last polygon vertex to the zero vertex.
+
+.Associated text
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member/Type |T|Units
+|0-2     | 3  |Shape of area      |shape       |u|Constant: 5
+|3-87    |84  |Text               |text        |t|14 chars of packed 6-bit.
 |==============================================================================
 
 ==== IMO 289 Berthing Data (addressed) ====
@@ -1645,7 +1749,7 @@ DAC-FID pairs in use for type 8:
 |   1     | 19 |     | <<IMO289>> | Standard   | Marine traffic signals
 |   1     | 20 |     | <<IMO289>> | Standard   | Berthing data
 |   1     | 21 |     | <<IMO289>> | Standard   | Weather observation from ship
-|   1     | 22 |     | <<IMO289>> | In use     | Area notice broadcast
+|   1     | 22 |     | <<IMO289>> | In use     | Area notice (broadcast)
 |   1     | 24 |     | <<IMO289>> | Standard   | Extended ship and voyage
 |   1     | 26 |     | <<IMO289>> | Standard   | Environmental
 |   1     | 27 |     | <<IMO289>> | Standard   | Route info broadcast
@@ -1941,7 +2045,7 @@ unclear how "bit zero" is to be interpreted, but it is not possible to
 reconcile interpreting it as the leading bit of the field with AIS
 big-endian encoding. Settling this awaits live testing.
 
-The trailing three fields may be repeated up to 3 times (for a total of 1 to 4
+The trailing eight fields may be repeated up to 3 times (for a total of 1 to 4
 field groups) to represent up to 4 targets.
 
 ==== Marine Traffic Signal ====
@@ -2249,6 +2353,43 @@ In <<IMO289>>, the Latitude formula is given as "Lat = (value / 100) – 9000".
 This is incorrect; the decrement needs to be 90 for the range to be -90..+90.
 
 Swell directions are arrival directions.
+
+==== IMO289 Area Notice (broadcawt) ====
+
+This should be used to broadcast time- and location-dependent information about 
+hazards to navigation.  For information-lifetime restrictions and usage 
+guidance, refer to <<ITU1371>>.
+
+A message 8 subtype. DAC = 001 FID = 23. 196 to 981 bits.  There is a
+related Message 6 subtype for addressed use.
+
+The message consists of a fixed-length header of 111 bits, followed by 1 to
+10 sub-area indications which are fixed-length records 87 bits long. Here
+is the message header format:
+
+.Area Notice (addressed) message header
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|0-5     |  6 |Message Type         |type       |u|Constant: 6
+|6-7     |  2 |Repeat Indicator     |repeat     |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI          |mmsi       |u|9 decimal digits
+|38-39   |  2 |Spare                |           |x|Not used
+|40-49   | 10 |DAC                  |dac        |u|DAC = 001
+|50-55   |  6 |FID                  |fid        |u|FID = 22
+|56-65   | 10 |Message Linkage ID   |linkage    |u|Unsigned integer
+|66-72   |  7 |Notice Description   |notice     |u|See table below
+|73-76   |  4 |Month (UTC)          |month      |u|1-12; 0 = N/A (default)
+|77-81   |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
+|82-86   |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
+|87-92   |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
+|93-110  | 18 |Duration             |duration   |In minutes,
+                                                 262143 = N/A (default),
+                                                 0 = cancel this notice.
+|==============================================================================
+
+The sub-area indications are as described under the addressed form, 
+message type 6 with DAC = 1 and FID = 23.
 
 ==== Route Information (broadcast) ====
 
@@ -3574,10 +3715,12 @@ ISO8601 format.
 |       | nmonth,nday,nhour,nminute        | eta          | %02u-%02uT%02u:%02uZ
 |6(1/18)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
 |6(1/20)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
+|6(1/23)| month,day,hour,minute            | timestamp    | %02u-%02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |8(1/13)| fmonth,fday,fhour,fminute        | from         | %02u-%02uT%02u:%02uZ
 |8(1/13)| tmonth,tday,thour,tminute        | to           | %02u-%02uT%02u:%02uZ
+|8(1/22)| month,day,hour,minute            | timestamp    | %02u-%02uT%02u:%02uZ
 |===========================================================================
 
 4. There are two variants of the encoding, one scaled and one
@@ -3607,6 +3750,7 @@ integer indices.  In scaled mode, the values are dumped as strings.
 | 6(1/14)| lon, lat, cspeed                     | -
 | 6(1/18)| lon, lat                             | -
 | 6(1/20)| berth_lon, berth_lat, berth_depth    | position
+| 6(1/22)| lon, lat                             | -
 | 6(1/25)| cargocode                            | cargocode
 | 6(1/28)| lon, lat                             | -
 | 6(1/32)| lon, lat, cspeed                     | -
@@ -3622,6 +3766,7 @@ integer indices.  In scaled mode, the values are dumped as strings.
 |        | rwindspeed, mgustspeed, airtemp,     |
 |        | surftemp, cloudbase,                 |
 |        | swheight1, swheight2                 | 
+| 8(1/22)| lon, lat                             | -
 | 8(1/25)| -                                    | iceclass
 | 8(1/27)| lon, lat                             |
 | 8(1/31)| lon, lat, airtemp, dewpoint,         | preciptype
@@ -3655,6 +3800,23 @@ should do so rather than exoanding to its controlled vocabulary.
 | 1-3    | speed     | "nan" = not available, "fast" = speed >= 102.3 knots
 |  9     | alt       | "nan" = not available, "high" = alt >= 4094 meters 
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
+|===========================================================================
+
+7. Certain IMO messages have trailing parts that are arrays of
+repeated objects.  The JSON encoding will render these as object
+subarrays with names as follows:
+
+.Tailing aeeay names
+[frame="topbot",options="header"]
+|===========================================================================
+|Message          | Name
+|6(1/23) polyline | waypoints
+|6(1/23) polygon  | vertices
+|6(1/28)          | waypoints
+|8(1/17)          | targets
+|8(1/22) polyline | waypoints
+|8(1/22) polygon  | vertices
+|8(1/27)          | waypoints
 |===========================================================================
 
 == References ==
@@ -3825,3 +3987,5 @@ much more explicit about defaults in IMO236 and IMO289 messages.
 Version 1.31 shortened some C names in the Meterological/Hydrological 
 messages and fixed typos.
 
+Version 1.32 adds descriptions of IMO Area Notice messages.  It adds
+explicit type information to the tables.
