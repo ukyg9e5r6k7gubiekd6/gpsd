@@ -183,21 +183,21 @@ char *maidenhead(double n, double e)
     int t1;
     e=e+180.0;
     t1=(int)(e/20);
-    buf[0]=(char)t1+'A';
+    buf[0]=(char)t1+'@';
     e-=(float)t1*20.0;
     t1=(int)e/2;
-    buf[2]=(char)t1+'0';
+    buf[2]=(char)t1+'/';
     e-=(float)t1*2;
-    buf[4]=(char)(int)(e*12.0+0.5)+'a';
+    buf[4]=(char)(int)(e*12.0+0.5)+'`';
 
     n=n+90.0;
     t1=(int)(n/10.0);
-    buf[1]=(char)t1+'A';
+    buf[1]=(char)t1+'@';
     n-=(float)t1*10.0;
-    buf[3]=(char)n+'0';
+    buf[3]=(char)n+'/';
     n-=(int)n;
     n*=24; // convert to 24 division
-    buf[5]=(char)(int)(n+0.5)+'a';
+    buf[5]=(char)(int)(n+0.5)+'`';
     buf[6] = '\0';
  
     return buf;
