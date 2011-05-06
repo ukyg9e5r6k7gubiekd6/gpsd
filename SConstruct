@@ -121,6 +121,7 @@ for (name, help, default) in nonboolopts:
 pathopts = (
     ("sysconfdir",  "system configuration directory",        "/etc"),
     ("bindir",      "application binaries directory",        "/bin"),
+    ("includedir",  "header file directory",                 "/include"),
     ("libdir",      "system libraries",                      "/lib"),
     ("sbindir",     "system binaries directory",             "/sbin"),
     ("mandir",      "manual pages directory",                "/share/man"),
@@ -913,6 +914,8 @@ python_env.Default(*build_python)
 for (name, help, default) in pathopts:
     exec name + " = DESTDIR + env['prefix'] + env['%s']" % name
 
+headerinstall = [ env.Install(includedir, x) for x in ("libgpsmm.h", "gps.h")]
+
 binaryinstall = []
 binaryinstall.append(env.Install(sbindir, gpsd))
 binaryinstall.append(env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]))
@@ -920,6 +923,7 @@ if ncurseslibs:
     binaryinstall.append(env.Install(bindir, [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, libdir, compiled_gpslib))
 binaryinstall.append(LibraryInstall(env, libdir, compiled_gpsdlib))
+
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, libdir, compiled_qgpsmmlib))
 
@@ -958,7 +962,7 @@ for manpage in base_manpages:
     section = manpage.split(".")[1]
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
-install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install)
+install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install + headerinstall)
 
 def Uninstall(nodes):
     deletes = []
