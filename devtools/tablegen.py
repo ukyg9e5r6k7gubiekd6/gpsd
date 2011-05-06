@@ -54,7 +54,7 @@ def correct_table(wfp):
     # Writes the corrected table to standard output.
     print >>sys.stderr, "Total bits:", base 
     for (i, t) in enumerate(table):
-        if offsets[i]:
+        if offsets[i].strip():
             print >>wfp, "|" + offsets[i] + t[owidth+1:].rstrip()
         else:
             print >>wfp, t.rstrip()
