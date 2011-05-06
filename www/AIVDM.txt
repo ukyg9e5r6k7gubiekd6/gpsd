@@ -1062,6 +1062,184 @@ A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 |317-359 | 43 |Spare                |           |x|Not used
 |==============================================================================
 
+==== IMO289 Area Notice (addressed) ====
+
+This should be used to convey time- and location-dependent information about 
+hazards to navigation.  For information-lifetime restrictions and usage 
+guidance, refer to <<ITU1371>>.
+
+A message 6 subtype. DAC = 001 FID = 23. 230 to 1013 bits.  There is a
+related Message 8 subtype for broadcast use.
+
+The message consists of a fixed-length header of 143 bits, followed by 1 to
+10 sub-area indications which are fixed-length records 87 bits long. Here
+is the message header format:
+
+.Area Notice (addressed) message header
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description          |Member     |T|Units
+|0-5     |  6 |Message Type         |type       |u|Constant: 6
+|6-7     |  2 |Repeat Indicator     |repeat     |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI          |mmsi       |u|9 decimal digits
+|38-39   |  2 |Sequence Number      |seqno      |u|Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI     |dest_mmsi  |u|9 decimal digits
+|70-70   |  1 |Retransmit flag      |retransmit |b|0 = no retransmit (default),
+                                                   1 = retransmitted.
+|71-71   |  1 |Spare                |           |x|Not used
+|72-81   | 10 |DAC                  |dac        |u|DAC = 001
+|82-87   |  6 |FID                  |fid        |u|FID = 18
+|88-97   | 10 |Message Linkage ID   |linkage    |u|Unsigned integer
+|333-333 |  7 |Notice Description   |notice     |u|See table below
+|98-101  |  4 |Month (UTC)          |month      |u|1-12; 0 = N/A (default)
+|102-106 |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
+|107-111 |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
+|112-117 |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
+|333-333 | 18 |Duration             |duration   |In minutes, 
+                                                 262143 = N/A (default),
+                                                 0 = cancel this notice.
+|==============================================================================
+
+The Message Linkage field is, as usual, for linking to a textual explanatory 
+message sent with the same linkage ID. The standard says that in this context 
+it has the semantics of being an identifier of or reference to an area.
+
+Notice description types are as follows:
+
+[frame="topbot",options="header"]
+|==============================================================================
+|  0| Caution Area: Marine mammals habitat
+|  1| Caution Area: Marine mammals in area - reduce speed 
+|  2| Caution Area: Marine mammals in area - stay clear
+|  3| Caution Area: Marine mammals in area - report sightings
+|  4| Caution Area: Protected habitat - reduce speed
+|  5| Caution Area: Protected habitat - stay clear
+|  6| Caution Area: Protected habitat - no fisging or anchoring
+|  7| Caution Area: Derelicts (drifting objects)
+|  8| Caution Area: Traffic congestion
+|  9| Caution Area: Marine event
+| 10| Caution Area: Divers down
+| 11| Caution Area: Swim area
+| 12| Caution Area: Dredge operations
+| 13| Caution Area: Survey operations
+| 14| Caution Area: Underwater operation 
+| 15| Caution Area: Seaplane operations 
+| 16| Caution Area: Fishery – nets in water 
+| 17| Caution Area: Cluster of fishing vessels
+| 18| Caution Area: Fairway closed
+| 19| Caution Area: Harbour closed 
+| 20| Caution Area: Risk (define in associated text field) 
+| 21| Caution Area: Underwater vehicle operation 
+| 22| (reserved for future use)
+| 23| Environmental Caution Area: Storm front (line squall) 
+| 24| Environmental Caution Area: Hazardous sea ice 
+| 25| Environmental Caution Area: Storm warning (storm cell or line of storms) 
+| 26| Environmental Caution Area: High wind 
+| 27| Environmental Caution Area: High waves
+| 28| Environmental Caution Area: Restricted visibility (fog, rain, etc.) 
+| 29| Environmental Caution Area: Strong currents 
+| 30| Environmental Caution Area: Heavy icing
+| 31| (reserved for future use)
+| 32| Restricted Area: Fishing prohibited 
+| 33| Restricted Area: No anchoring. 
+| 34| Restricted Area: Entry approval required prior to transit 
+| 35| Restricted Area: Entry prohibited 
+| 36| Restricted Area: Active military OPAREA 
+| 37| Restricted Area: Firing – danger area. 
+| 38| Restricted Area: Drifting Mines 
+| 39| (reserved for future use)
+| 40| Anchorage Area: Anchorage open 
+| 41| Anchorage Area: Anchorage closed
+| 42| Anchorage Area: Anchorage prohibited 
+| 43| Anchorage Area: Deep draft anchorage 
+| 44| Anchorage Area: Shallow draft anchorage 
+| 45| Anchorage Area: Vessel transfer operations 
+| 46| (reserved for future use)
+| 47| (reserved for future use)
+| 48| (reserved for future use)
+| 49| (reserved for future use)
+| 50| (reserved for future use)
+| 51| (reserved for future use)
+| 52| (reserved for future use)
+| 53| (reserved for future use)
+| 54| (reserved for future use)
+| 55| (reserved for future use)
+| 56| Security Alert - Level 1
+| 57| Security Alert - Level 2
+| 57| Security Alert - Level 3
+| 59| (reserved for future use)
+| 60| (reserved for future use)
+| 61| (reserved for future use)
+| 62| (reserved for future use)
+| 63| (reserved for future use)
+| 64| Distress Area: Vessel disabled and adrift 
+| 65| Distress Area: Vessel sinking 
+| 66| Distress Area: Vessel abandoning ship 
+| 67| Distress Area: Vessel requests medical assistance 
+| 68| Distress Area: Vessel flooding 
+| 69| Distress Area: Vessel fire/explosion 
+| 70| Distress Area: Vessel grounding 
+| 71| Distress Area: Vessel collision 
+| 72| Distress Area: Vessel listing/capsizing 
+| 73| Distress Area: Vessel under assault 
+| 74| Distress Area: Person overboard
+| 75| Distress Area: SAR area 
+| 76| Distress Area: Pollution response area 
+| 77| (reserved for future use)
+| 78| (reserved for future use)
+| 79| (reserved for future use)
+| 80| Instruction: Contact VTS at this point/juncture 
+| 81| Instruction: Contact Port Administration at this point/juncture 
+| 82| Instruction: Do not proceed beyond this point/juncture 
+| 83| Instruction: Await instructions prior to proceeding beyond this point/juncture 
+| 84| Proceed to this location – await instructions 
+| 85| Clearance granted – proceed to berth 
+| 86| (reserved for future use)
+| 87| (reserved for future use)
+| 88| Information: Pilot boarding position 
+| 89| Information: Icebreaker waiting area 
+| 90| Information: Places of refuge 
+| 91| Information: Position of icebreakers 
+| 92| Information: Location of response units
+| 93| VTS active target 
+| 94| Rogue or suspicious vessel 
+| 95| Vessel requesting non-distress assistance
+| 96| Chart Feature: Sunken vessel
+| 97| Chart Feature: Submerged object
+| 98| Chart Feature:Semi-submerged object
+| 99| Chart Feature: Shoal area
+|100| Chart Feature: Shoal area due north
+|101| Chart Feature: Shoal area due east
+|102| Chart Feature: Shoal area due south
+|103| Chart Feature: Shoal area due west
+|104| Chart Feature: Channel obstruction
+|105| Chart Feature: Reduced vertical clearance
+|106| Chart Feature: Bridge closed
+|107| Chart Feature: Bridge partially open
+|108| Chart Feature: Bridge fully open
+|109| (reserved for future use)
+|110| (reserved for future use)
+|111| (reserved for future use)
+|112| Report from ship: Icing info
+|113| (reserved for future use)
+|114| Report from ship: Miscellaneous information – define in associated text field
+|115| (reserved for future use)
+|116| (reserved for future use)
+|117| (reserved for future use)
+|118| (reserved for future use)
+|119| (reserved for future use)
+|120| Route: Recommended route
+|121| Route: Alternative route
+|122| Route: Recommended route through ice
+|123| (reserved for future use)
+|124| (reserved for future use)
+|125| Other – Define in associated text field
+|126| Cancellation – cancel area as identified by Message Linkage ID
+|127| Undefined (default)
+|==============================================================================
+
+// Still missing: the subarea types
+
 ==== IMO 289 Berthing Data (addressed) ====
 
 This message provides information on the ship's berth. If sent from a
