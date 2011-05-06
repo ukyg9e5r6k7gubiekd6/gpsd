@@ -1090,12 +1090,12 @@ is the message header format:
 |72-81   | 10 |DAC                  |dac        |u|DAC = 001
 |82-87   |  6 |FID                  |fid        |u|FID = 18
 |88-97   | 10 |Message Linkage ID   |linkage    |u|Unsigned integer
-|333-333 |  7 |Notice Description   |notice     |u|See table below
-|98-101  |  4 |Month (UTC)          |month      |u|1-12; 0 = N/A (default)
-|102-106 |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
-|107-111 |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
-|112-117 |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
-|333-333 | 18 |Duration             |duration   |In minutes, 
+|98-104  |  7 |Notice Description   |notice     |u|See table below
+|105-108 |  4 |Month (UTC)          |month      |u|1-12; 0 = N/A (default)
+|109-113 |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
+|114-118 |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
+|119-124 |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
+|125-142 | 18 |Duration             |duration   |In minutes,
                                                  262143 = N/A (default),
                                                  0 = cancel this notice.
 |==============================================================================
@@ -1238,7 +1238,39 @@ Notice description types are as follows:
 |127| Undefined (default)
 |==============================================================================
 
-// Still missing: the subarea types
+Subarea types are as follows:
+
+[frame="topbot",options="header"]
+|==============================================================================
+|  0  | Circle or point
+|  1  | Rectangle
+|  2  | Sector
+|  3  | Polyline
+|  4  | Polygon
+|  5  | Associated text
+| 6-7 | Reserved
+|==============================================================================
+
+.Circle or Point
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member/Type |T|Units
+|0-2     | 3  |Shape of area      |shape       |u|Constant: 0
+|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
+                                                  1 = meters (default)
+|5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
+                                                   Unit = minutes * 0.0001,
+                                                   181000 = N/A (default).
+|30-53   | 24 |Latitude           |lat         |I3|Latitude of center point,
+                                                   Unit = minutes * 0.0001,
+                                                   91000 = N/A (default).
+|54-56   |  3 |Precision          |precision   |u|Decimal places of precision
+                                                  (defaults to 4)
+|57-68   | 12 |Radius             |radius      |u|Radius of area
+                                                  0 = point (default,
+                                                  else 1-4095 * 10^scale
+|69-86   | 18 |Spare              |            |x|Not used
+|==============================================================================
 
 ==== IMO 289 Berthing Data (addressed) ====
 
