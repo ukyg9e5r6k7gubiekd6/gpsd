@@ -168,16 +168,13 @@ if env["shared"]:
 else:
     pkg_config = lambda pkg: ['!pkg-config --cflags --libs --static %s' %(pkg, )]
 
-
-
-
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
 if env['CC'] == 'gcc':
     # Enable all GCC warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
-    # of the way some of the JSON code is generated.
+    # of the way some of the JSON-parsing code is generated.
     # Also not including -Wcast-qual
     env.Append(CFLAGS=Split('''-Wextra -Wall -Wno-uninitialized
                             -Wno-missing-field-initializers -Wcast-align
