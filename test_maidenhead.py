@@ -20,6 +20,7 @@ for (lat, lon, maidenhead, location) in [
     if converted != maidenhead:
         print >>sys.stderr, "maidenhead test: from %s %s (%s) expected %s got %s" \
               % (lat, lon, location, maidenhead, converted)
+        errors += 1
     else:
         print "%s OK" % location
 
