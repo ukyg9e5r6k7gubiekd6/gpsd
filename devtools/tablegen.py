@@ -334,6 +334,10 @@ if __name__ == '__main__':
         elif line.startswith("|="):
             keep = False
         if keep:
+            if line[0] == '|':
+                fields = line.split("|")
+                fields[1] = " " * len(fields[1])
+                line = "|".join(fields)
             table.append(line)
     table = table[2:]
     widths = []
