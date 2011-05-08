@@ -1679,7 +1679,7 @@ different bit widths for the latitude and longitude fields.
 |151-156 |  6 |From UTC Minute        |from_min  |u|0-59, 60 = N/A (default)
 |157-161 |  5 |To UTC Hour            |to_hour   |u|0-23, 24 = N/A (default)
 |162-167 |  6 |To UTC Minute          |to_min    |u|0-59, 60 = N/A (default)
-|168-176 |  9 |Current Dir. Predicted |cdir      |u|0-359 deg. from true north, 
+|168-176 |  9 |Current Dir. Predicted |cdir      |u|0-359 true bearing, 
                                                     360 = N/A (default).
 |177-184 |  8 |Current Speed Predicted|cspeed    |U1|0-250, units of 0.1 knots,
                                                     251 = speed >= 25.1 knots,
@@ -2737,8 +2737,55 @@ The timestamp group is intended as a valid time of forecast.
 .Sea state report payload
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len |Description          |Member     |T|Units
+|Field   |Len |Description                |Member     |T|Units
+|0-7     |  8 |Swell Height               |swheight   |U1|Units 0.1m: 0.0-24.5m,
+                                                         246 = height >= 24,6m,
+                                                         247 = N/A (default),
+                                                         248-255 reserved,
+                                                         else h = (value * 0.5).
+|8-13    |  6 |Swell Period               |swperiod   |u|Period in seconds:
+                                                         0-60,
+                                                         61 = N/A (default),
+                                                         62-63 (reserved).
+|14-22   |  9 |Swell Direction            |swelldir   |u|0-359 deg:
+                                                         0-359 true bearing,
+                                                         360 = N/A (default),
+                                                         361-511 reserved,
+|23-26   |  4 |Sea State                  |seastate   |u|Beaufort scale: 0-12
+                                                       >= 13 = N/A (default)
+|27-29   |  3 |Swell Sensor Description   |swelltype  |u|See Sensor Types table
+|30-39   | 10 |Water Temperature          |watertemp  |U1|-10.0 to 50.0:
+                                                      units 0.1 C,
+                                                      >=601 = N/A (default).
+                                                      602-1023 reserved,
+                                                      else -10.0m after scaling.
+|40-46   |  7 |Water Temperature Depth    |distance1  |u|0.0-12.0m: 0.1m units,
+                                                      121 = 12.1m or greater,
+                                                      122 = N/A (default),
+                                                      123-126 (reserved).
+|47-49   |  3 |Depth Sensor Description   |depthtype  |u|See Sensor Types table
+
+|50-57   |  8 |Wave Height                |waveheight|U1|Height 0.0-24.5m:
+                                                         units 0.1m,
+                                                         246 = height >= 24.6m,
+                                                         247 N/A (default),
+                                                         248-255 reserved.
+|58-63   |  6 |Wave Period                |waveperiod|u|0-60: units of seconds,
+                                                        61 = N/A (default),
+                                                        62-63 reserved.
+|64-72   |  9 |Wave Direction             |wavedir   |u|0-359: true bearing,
+                                                        360 = N/A (default),
+                                                        361-511 reserved.
+|73-75   |  3 |Wave Sensor Description    |wavetype  |u|See Sensor Types table
+|76-84   |  9 |Salinity                   |salinity  |U1|0.0-50.0%:
+                                                         units of 0.1%
+                                                         501 = salinity >= 50.1%
+                                                         502 = N/A (default)
+                                                         503 - sensor not available,
+                                                         504-511 reserved.
 |==============================================================================
+
+The standard does not fix the meaing of a water temperature depth of 127.
 
 .Salinity report payload
 [frame="topbot",options="header"]
@@ -3003,9 +3050,9 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |129-135 |  7 |Gust Speed         |wgust       |u|10-min max wind speed: knots,
                                                   126 = wind >= 126 knots,
                                                   17 = N/A (default).
-|136-144 |  9 |Wind Direction     |wdir        |u|0-359, deg. from true north,
+|136-144 |  9 |Wind Direction     |wdir        |u|0-359, true bearing,
                                                   360 = N/A (default).
-|145-153 |  9 |Wind Gust Direction|wgustdir    |u|0-359, deg. from true north,
+|145-153 |  9 |Wind Gust Direction|wgustdir    |u|0-359, true bearing,
                                                   360 = N/A (default).
 |154-164 | 11 |Air Temperature    |airtemp     |U1|Dry bulb temp: units 0.1C,
                                                 -60.0 to +60.0,
@@ -3040,32 +3087,32 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |232-239 |  8 |Current Speed #2     |cspeed2  |U1|0.0-25.0 knots: units 0.1 knot,
                                                  251 = speed >= 25.1 knots,
                                                  255 N/A (default).
-|240-248 |  9 |Current Direction #2 |cdir2    |u|0-359: deg. from true north,
+|240-248 |  9 |Current Direction #2 |cdir2    |u|0-359: true bearing,
                                                  360 = N/A (default).
 |249-253 |  5 |Measurement Depth #2 |cdepth2  |U1|0-30m down: units 0.1m,
                                                  31 = N/A (default).
 |254-261 |  8 |Current Speed #3     |cspeed3  |U1|0.0-25.0 knots: units 0.1 knot,
                                                  251 = speed >= 25.1 knots,
                                                  255 N/A (default).
-|262-270 |  9 |Current Direction #3 |cdir3    |u|0-359: deg. from true north,
+|262-270 |  9 |Current Direction #3 |cdir3    |u|0-359: true bearing,
                                                  360 = N/A (default).
 |271-275 |  5 |Measurement Depth #3 |cdepth3  |u|0-30m down: units 0.1m,
                                                  31 = N/A (default).
-|276-283 |  8 |Wave height          |waveheight|U1|Height 0-25m: units 0.1m,
+|276-283 |  8 |Wave Height          |waveheight|U1|Height 0-25m: units 0.1m,
                                                   251 = height >= 25.1m,
                                                   255 N/A (default).
-|284-289 |  6 |Wave period          |waveperiod|u|Seconds, 0-60, units 1s,
+|284-289 |  6 |Wave Period          |waveperiod|u|Seconds, 0-60, units 1s,
                                                   63 = N/A (default).
-|290-298 |  9 |Wave direction       |wavedir   |u|0-359: deg. from true north,
+|290-298 |  9 |Wave Direction       |wavedir   |u|0-359: true bearing,
                                                   360 = N/A (default).
-|299-306 |  8 |Swell height         |swellheight|U1|0-25m: units 0.1m,
+|299-306 |  8 |Swell Height         |swellheight|U1|0-25m: units 0.1m,
                                                    251 = height >= 25.1m,
                                                    255 N/A (default).
-|307-312 |  6 |Swell period         |swellperiod|u|0-60, units 1s
+|307-312 |  6 |Swell Period         |swellperiod|u|0-60, units 1s
                                                    360 = N/A (default)
-|313-321 |  9 |Swell direction      |swelldir   |u|0-359: deg. from true north,
+|313-321 |  9 |Swell Direction      |swelldir   |u|0-359: true bearing,
                                                    360 = N/A (default)
-|322-325 |  4 |Sea state            |seastate   |u|Beaufort scale: 0-12
+|322-325 |  4 |Sea State            |seastate   |u|Beaufort scale: 0-12
                                                    >= 13 = N/A (default)
 |326-335 | 10 |Water Temperature    |watertemp  |U1|-10.0 to 50.0 C: 
                                                    units 0.1 deg,
