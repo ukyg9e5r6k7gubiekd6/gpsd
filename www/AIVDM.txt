@@ -2648,7 +2648,49 @@ The timestamp group is intended as a valid time of forecast.
 .Current flow (3D) payload
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len |Description          |Member     |T|Units
+|Field   |Len |Description                          |Member  |T|Units
+|0-7     |  8 |Current Vector component North (u) #1|cnorth1 |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|8-15    |  8 |Current Vector component East (v) #1|ceast1   |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|16-23   |  8 |Current Vector component Up (z) #1  |cup1     |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|24-32   |  9 |Measurement Depth #1                |cdepth1 |u|0-360m down:
+                                                   units 1m,
+                                                   361 = 361m or greater,
+                                                   362 = N/A (default),
+                                                   363-511 (reserved).
+|33-40   |  8 |Current Vector component North (u) #2|cnorth2 |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|41-48   |  8 |Current Vector component East (v) #2|ceast2   |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|49-56   |  8 |Current Vector component Up (z) #2  |cup2     |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|57-65   |  9 |Measurement Depth #2                |cdepth2 |u|0-360m down:
+                                                   units 1m,
+                                                   361 = 361m or greater,
+                                                   362 = N/A (default),
+                                                   363-511 (reserved).
+|66-68   | 3  |Sensor Description   |sensortype|u|See Sensor Types table
+|69-84   | 16 |Spare                |          |x|Not used
 |==============================================================================
 
 .Horizontal current report payload
