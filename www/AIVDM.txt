@@ -2613,7 +2613,7 @@ The timestamp group is intended as a valid time of forecast.
                                                    246 = speed >= 24.6 knots,
                                                    247 = N/A (default),
                                                    248-255 (reserved).
-|8-16    |  9 |Current Direction #1 |cdir      |u|0-359: deg from true north,
+|8-16    |  9 |Current Direction #1 |cdir1      |u|0-359: deg from true north,
                                                   >=360 = N/A (default).
 |17-25   |  9 |Measurement Depth #1 |cdepth1   |u|0-360m down: units 1m,
                                                    361 = 361m or greater,
@@ -2697,6 +2697,41 @@ The timestamp group is intended as a valid time of forecast.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member     |T|Units
+|0-8     |  9 |Current Bearing #1   |bearing1   |u|0-359: deg from true north,
+                                                  >=360 = N/A (default).
+|9-15    |  7 |Current Distance #1  |distance1  |u|0-120m:
+                                                  121 = 121m or greater,
+                                                  122 = N/A (default),
+                                                  123-127 (reserved).
+|16-23   |  8 |Current Speed #1     |speed1    |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|24-32   |  9 |Current Direction #1 |direction1|u|0-359: deg from true north,
+                                                  >=360 = N/A (default).
+|33-41   |  9 |Measurement Depth #1 |depth1    |u|0-360m down: units 1m,
+                                                   361 = 361m or greater,
+                                                   362 = N/A (default),
+                                                   363-511 (reserved).
+|42-50   |  9 |Current Bearing #2   |bearing1   |u|0-359: deg from true north,
+                                                  >=360 = N/A (default).
+|51-57   |  7 |Current Distance #2  |distance1  |u|0-120m:
+                                                  121 = 121m or greater,
+                                                  122 = N/A (default),
+                                                  123-127 (reserved).
+|58-65   |  8 |Current Speed #2     |speed1    |U1|0.0-24.5 knots:
+                                                   units 0.1 knots,
+                                                   246 = speed >= 24.6 knots,
+                                                   247 = N/A (default),
+                                                   248-255 (reserved).
+|66-74   |  9 |Current Direction #2 |direction1|u|0-359: deg from true north,
+                                                  >=360 = N/A (default).
+|75-83   |  9 |Measurement Depth #2 |depth1    |u|0-360m down: units 1m,
+                                                   361 = 361m or greater,
+                                                   362 = N/A (default),
+                                                   363-511 (reserved).
+|84-84   |  1 |Spare                |          |x|Not used
 |==============================================================================
 
 .Sea state report payload
