@@ -2759,7 +2759,7 @@ The timestamp group is intended as a valid time of forecast.
                                                       >=601 = N/A (default).
                                                       602-1023 reserved,
                                                       else -10.0m after scaling.
-|40-46   |  7 |Water Temperature Depth    |distance1  |u|0.0-12.0m: 0.1m units,
+|40-46   |  7 |Water Temperature Depth    |distance1  |U1|0.0-12.0m: 0.1m units,
                                                       121 = 12.1m or greater,
                                                       122 = N/A (default),
                                                       123-126 (reserved).
@@ -2780,18 +2780,49 @@ The timestamp group is intended as a valid time of forecast.
 |76-84   |  9 |Salinity                   |salinity  |U1|0.0-50.0%:
                                                          units of 0.1%
                                                          501 = salinity >= 50.1%
-                                                         502 = N/A (default)
-                                                         503 - sensor not available,
+                                                         502 = data N/A (default)
+                                                         503 - sensor N/A,
                                                          504-511 reserved.
 |==============================================================================
 
-The standard does not fix the meaing of a water temperature depth of 127.
+The standard does not fix the meaning of a water temperature depth of 127.
 
 .Salinity report payload
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len |Description          |Member     |T|Units
+|Field   |Len |Description        |Member       |T|Units
+|0-9     | 10 |Water Temperature  |watertemp    |U1|-10.0 to 50.0:
+                                                    units 0.1 C,
+                                                    >=601 = N/A (default).
+                                                    602-1023 reserved,
+                                                    else -10.0m after scaling.
+|10-19   | 10 |Conductivity       |conductivity |U1|In Siemens/m, 0.0-7.0,
+                                                    0.1 S/m steps,
+                                                    701 = not less than 7.01,
+                                                    702 = data N/A,
+                                                    703 = sensor N/A (default),
+                                                    704-1023 (reserved).
+|20-35   | 16 |Water Pressure     |pressure    |U1|Water pressure: 0.0-6000.0,
+                                                   0.1 decibar steps,
+                                                   60001 = pressure >= 6000.1,
+                                                   60002 = data N/A,
+                                                   60003 = sensor N/A (default),
+                                                   60004-65536 reserved.
+|36-44   |  9 |Salinity           |salinity    |U1|0.0-50.0%:
+                                                   units of 0.1%
+                                                   501 = salinity >= 50.1%
+                                                   502 = data N/A (default)
+                                                   503 - sensor N/A,
+                                                   504-511 reserved.
+|45-46   |  2 |Salinity Type      |salinitytype|u|0 = measured,
+                                                  1 = calculated using PSS-78,
+                                                  2 = calclated using other method,
+                                                  3 = reserved.
+|47-49   |  3 |Sensor Description |sensortype  |u|See Sensor Types table
+|50-84   | 35 |Spare              |            |x|Not used
 |==============================================================================
+
+No default is specified for salinity type.
 
 .Weather report payload
 [frame="topbot",options="header"]
