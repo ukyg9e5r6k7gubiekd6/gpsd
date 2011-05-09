@@ -2876,8 +2876,31 @@ there is none.
 .Air Gap/Air Draft report payload
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len |Description          |Member     |T|Units
+|Field   |Len |Description         |Member     |T|Units
+|0-12    | 13 |Air Draught         |airdraught |U1|1-81.9m in 0.1m steps,
+                                                   8191 = distance >= 81.91m,
+                                                   0 = N/A (default).
+|13-25   | 13 |Air Gap             |airgap     |U1|1-81.9m in 0.1m steps,
+                                                   8191 = distance >= 81.91m,
+                                                   0 = N/A (default).
+|26-27   |  2 |Air Gap Trend       |gaptrend   |u|0 = steady,
+                                                   1 = rising,
+                                                   2 = falling,
+                                                   3 = N/A (default).
+|28-40   | 13 |Forecast Air Gap    |fairgap     |U1|1-81.9m in 0.1m steps,
+                                                   8191 = distance >= 81.91m,
+                                                   0 = N/A (default).
+|41-45  |  5 |Day (UTC)            |day             |u|1-31; 0 = N/A (default)
+|46-50  |  5 |Hour (UTC)           |hour            |u|0-23; 24 = N/A (default)
+|51-56  |  6 |Minute (UTC)         |minute          |u|0-59; 60 = N/A (default)
+|57-84  | 28 |Spare                |                |x|Not used
 |==============================================================================
+
+Air draught is the vertical distance measured from the ship's
+waterline to the highest point on the ship. Air gap is the vertical
+distance measured from the surface of the water to the sensor.
+
+The timestamp is for the forecast air gap.
 
 ==== Route Information (broadcast) ====
 
@@ -4476,5 +4499,5 @@ much more explicit about defaults in IMO236 and IMO289 messages.
 Version 1.31 shortened some C names in the Meterological/Hydrological 
 messages and fixed typos.
 
-Version 1.32 adds descriptions of IMO Area Notice messages.  It adds
-explicit type information to the tables.
+Version 1.32 adds descriptions of IMO Area Notice and Environmental
+messages.  It adds explicit type information to the tables.
