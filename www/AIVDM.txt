@@ -2828,7 +2828,50 @@ No default is specified for salinity type.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member     |T|Units
+|0-10    | 11 |Air Temperature      |temperature|i|Dry bulb temp: 0.1 deg C
+                                                    -60.0 to +60.0,
+                                                    -1024 = data N/A (default),
+                                                    601-1023 reserved.
+|11-13   |  3 |Temp. Sensor Type    |sensortype |u|See Sensor Types table
+|14-15   |  2 |Precipitation Type   |preciptype |u|0 = rain,
+                                                     1 = rain and snow,
+                                                     2 = rain and snow,
+                                                     3 = other.
+|16-23   |  8 |Horiz. Visibility    |visibility |U1|Units of 0.1 nautical miles,
+                                                  0.0-24.0,
+                                                  241 = visibility >= 24.1nm,
+                                                  242 = data N/A,
+                                                  243 = sensor N/A (default),
+                                                  244-255 reserved.
+|24-33   | 10 |Dew Point           |dewpoint    |i|-20.0 to +50.0: 0.1 deg C,
+                                                  501 = N/A (default),
+                                                  502-511 rsserved,
+                                                  -511--201 rsserved.
+|34-36   |  3 |Dewpoint Sensor Type |dewtype    |u|See Sensor Types table.
+
+
+
+|37-45   |  9 |Air Pressure         |pressure   |u|0 = pressure <= 800hpA,
+                                                   1-401 = 800-1200hPa,
+                                                   402 = pressure >= 1201 hPa,
+                                                   403 - data N/A (default),
+                                                   404-511 reserved.
+|46-47   |  2 |Pressure Tendency  |pressuretend|u|0 = steady,
+                                                  1 = decreasing,
+                                                  2 = increasing,
+                                                  3 - N/A (default).
+|48-50   |  3 |Pressure Sensor Type |pressuretype|u|See Sensor Types table
+|51-59   |  9 |Salinity             |salinity   |U1|0.0-50.0%:
+                                                     units of 0.1%
+                                                     501 = salinity >= 50.1%
+                                                     502 = data N/A (default)
+                                                     503 - sensor N/A,
+                                                     504-511 reserved.
+|60-84   | 25 |Spare                |           |x|Not used
 |==============================================================================
+
+The standard does not specify how to code 'Precipitation Type' when
+there is none.
 
 .Air Gap/Air Draft report payload
 [frame="topbot",options="header"]
