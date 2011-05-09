@@ -1278,7 +1278,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # Make sure build-from-tarball works.
     Utility('testbuild', [dist], [
         'tar -xzvf gpsd-${VERSION}.tar.gz',
-        'cd gpsd-${VERSION}; ./configure; make',
+        'cd gpsd-${VERSION}; scons',
         'rm -fr gpsd-${VERSION}',
         ])
 
