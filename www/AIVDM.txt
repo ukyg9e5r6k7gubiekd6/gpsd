@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.32+, May 2011
+v1.32, May 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -97,9 +97,10 @@ to me by email. He also communicated some critical information from
 ITU-1371-3.
 
 Descriptions of messages 25 and 26 are based on AIS transceiver vendor
-documentation forwarded to me by a source wishing to remain anonymous.
-Message type 27 was described in ITU1371-4 and added here after that
-became a freely available download.
+documentation was originally forwarded to me by a source wishing to
+remain anonymous; I later checked them against ITU1371-4.  Message
+type 27 was described in ITU1371-4 and added here after that became a
+freely available download.
 
 Should you set out to write a decoder using this document, you are
 likely to find that one of your challenges is finding enough AIS
@@ -138,7 +139,7 @@ document:
 
 * Sample sentences of type 6 and 8 conforming to <<IMO236>> and <<IMO289>>.
 
-For verfication purposes, I need the raw sentences together with
+For verification purposes, I need the raw sentences together with
 decoded dumps of their field values.  Please note that sample
 sentences not accompanied by field dumps are *not* useful; I can get
 plenty of those.
@@ -317,7 +318,7 @@ interpreted in one of the following ways:
 Numeric bitfields are interpreted as big-endian twos-complement
 integers; when signed, the sign bit is the highest.  
 
-Float fields usually have an associated divisor which should be applied
+Float fields have an associated divisor which should be applied
 to convert to the correct units. In one case, the ROT field in message
 types 1-3, the scaling operation involves a more laborate formula.
 
@@ -386,10 +387,6 @@ number, including zero.
 Note that many sources use 1-origin numbering for the bits.  We'll
 use 0-origin in this document.
 
-The message type names are somewhat variable across different public
-sources. Whatever ITU-1371 says should be considered authoritative,
-but the variations I have seen appear to have no practical consequences.
-
 The first 6 bits of the payload (0-5) are the message type.  Message
 types are as follows:
 
@@ -400,8 +397,8 @@ types are as follows:
 |02 |Position Report Class A (Assigned schedule)
 |03 |Position Report Class A (Response to interrogation)
 |04 |Base Station Report
-|05 |Ship and Voyage data
-|06 |Addressed Binary Message
+|05 |Static and Voyage Related Data
+|06 |Binary Addressed Message
 |07 |Binary Acknowledge
 |08 |Binary Broadcast Message
 |09 |Standard SAR Aircraft Position Report
@@ -411,7 +408,7 @@ types are as follows:
 |13 |Safety Related Acknowledgement
 |14 |Safety Related Broadcast Message
 |15 |Interrogation
-|16 |Assigned Mode Command
+|16 |Assignment Mode Command
 |17 |DGNSS Binary Broadcast Message
 |18 |Standard Class B CS Position Report
 |19 |Extended Class B Equipment Position Report
@@ -420,9 +417,9 @@ types are as follows:
 |22 |Channel Management
 |23 |Group Assignment Command
 |24 |Class B CS Static Data Report
-|25 |Binary Message, Single Slot
-|26 |Binary Message, Multiple Slot
-|27 |Position report for  long-range applications 
+|25 |Single Slot Binary Message, 
+|26 |Multiple Slot Binary Message With Communications State 
+|27 |Position Report For Long-Range Applications 
 |======================================================
 
 In normal operation, an AIS transceiver will broadcast a position report
@@ -443,7 +440,8 @@ the St. Lawrence Seaway and PAWSS. This document describes all of the
 Class 8 special message formats approved for use in <<IMO236>> and
 <<IMO289>>.
 
-Classes 12 and 14 are used for safety-related text messaging.
+Classes 12 and 14 are used for text messaging, nominally safetty-related
+but also for traffic control and occasionally chatter.
 
 In practice, message types other than 1, 3, 4, 5, 18, and 24 are
 unusual or rare; many AIS transmitters never emit them.  As of
@@ -685,7 +683,7 @@ type value 15 (all field bits 1) is not uncommon in the wild; it
 appears some receivers emit it as the Undefined value. Decoders should
 be prepared to accept this.
 
-=== Type 5: Ship static and voyage related data ===
+=== Type 5: Static and Voyage Related Data ===
 
 Message has a total of 424 bits, occupying two AIVDM sentences.
 
@@ -821,7 +819,7 @@ treat these like value 0 rather than throwing an exception until and
 unless the controlled vocabulary is extended to include the unknown
 values.
 
-=== Type 6: Addressed Binary Message ===
+=== Type 6: Binary Addressed Message ===
 
 Message type 6 is an addressed point-to-point message with unspecified
 binary payload.  The St. Lawrence Seaway AIS system and the USG PAWSS
@@ -3397,7 +3395,7 @@ with the first queried MMSI should be zeroed.
 4. One station is interrogated for two message types, and a second for
 one message type.  Length is 160 bits.
 
-=== Type 16: Assigned Mode Command ===
+=== Type 16: Assignment Mode Command ===
 
 Message type 16 is used by a base station with control authority to
 configure the scheduling of AIS informational messages from
@@ -3901,7 +3899,7 @@ According to <<MMSI>>, an MMSI is associated with an auxiliary craft
 when it is of the form 98MIDXXXX where the digits 3, 4 and 5 represent
 the MID and X is any figure from 0 to 9.
 
-=== Type 25: Binary Message, Single Slot  ===
+=== Type 25: Single Slot Binary Message   ===
 
 Maximum of 168 bits (a single slot). Fields after the Destination
 MMSI are at variable offsets depending on that flag and the Destination
@@ -3915,7 +3913,7 @@ Indicator; they always occur in the same order but some may be omitted.
 |8-37    | 30   | MMSI                  | mmsi        |u|9 digits
 |38      |  1   | Destination indicator | addressed   |b|0=broadcast,
                                                          1=addressed.
-|39      |  1   | Binary data flag      | structured  |u|See below
+|39      |  1   | Binary data flag      | structured  |b|See below
 |40      |0/30  | Destination MMSI      | dest_mmsi   |u|Message destination
 |?       |0/16  | Application ID        | app_id      |u|Unsigned integer
 |?       |0-128 | Data                  | data        |d|Binary data
@@ -3934,10 +3932,10 @@ part of the message payload.
 The data fields are not, in contrast to message type 26, followed by a
 radio status block.
 
-Note: Type 25 is extremely rare. As of March 2010 it has not been
+Note: Type 25 is extremely rare. As of April 2011 it has not been
 observed even in long-duration samples from AISHub.
 
-=== Type 26: Binary Message, Multiple Slot  ===
+=== Type 26: Multiple Slot Binary Message ===
 
 Takes up 60-1064 bits (up to 5 slots).
 
@@ -3967,7 +3965,7 @@ last slot and are in the format specified by <<IALA>>.  The radio
 status is 20 bits rather than 19 because an extra first bit selects
 whether it should be interpretred as a SOTDMA or ITDMA state.
 
-Note: Type 26 is extremely rare. As of March 2010 it has not been
+Note: Type 26 is extremely rare. As of April 2011 it has not been
 observed even in long-duration samples from AISHub.
 
 === Type 27: Long Range AIS Broadcast message  ===
@@ -4002,7 +4000,7 @@ increased propagation delays associated with long-range detection
 |95-95   | 1    |Spare               |         |x|Not used
 |==============================================================================
 
-Note: Type 27 has not been observed in the wild as of early 2011.
+Note: Type 27 has not been observed in the wild as of April 2011.
 
 == Local extensions ==
 
