@@ -483,6 +483,7 @@ type descriptions.
 |i|   Signed integer
 |I|   Signed integer with scale - renders as float, suffix is decimal places
 |b|   Boolean
+|e|   Enumerated type (controlled vocabulary)
 |x|   Spare or reserved bit
 |t|   String (packed six-bit ASCII)
 |d|   Data (uninterpreted binary)
@@ -512,9 +513,9 @@ decoding software. Total of 168 bits, occupying one AIVDM sentence.
 |==============================================================================
 |Field   |Len |Description              |Member    |T|Units
 |0-5     | 6  |Message Type             |type      |u|Constant: 1-3
-|6-7     | 2  |Repeat Indicator         |repeat    |u|See below...
+|6-7     | 2  |Repeat Indicator         |repeat    |u|Message repeat count
 |8-37    |30  |MMSI                     |mmsi      |u|9 decimal digits
-|38-41   | 4  |Navigation Status        |status    |u|See table below
+|38-41   | 4  |Navigation Status        |status    |e|See table below
 |42-49   | 8  |Rate of Turn (ROT)       |turn      |I3|See below
 |50-59   |10  |Speed Over Ground (SOG)  |speed     |U1|See below
 |60-60   | 1  |Position Accuracy        |accuracy  |b|See below
@@ -525,7 +526,7 @@ decoding software. Total of 168 bits, occupying one AIVDM sentence.
 |128-136 | 9  |True Heading (HDG)       |heading   |u|0 to 359 degrees,
                                                       511 = not available.
 |137-142 | 6  |Time Stamp               |second    |u|Second of UTC timestamp
-|143-144 | 2  |Maneuver Indicator       |maneuver  |u|See below
+|143-144 | 2  |Maneuver Indicator       |maneuver  |e|See below
 |145-147 | 3  |Spare                    |          |x|Not used
 |148-148 | 1  |RAIM flag                |raim      |b|See below
 |149-167 |19  |Radio status             |radio     |u|See below
@@ -646,7 +647,7 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |==============================================================================
 |Field   |Len  |Description      |Member   |T|Units
 |0-5     |  6  |Message Type     |type     |u|Constant: 4
-|6-7     |  2  |Repeat Indicator |repeat   |u|Unknown
+|6-7     |  2  |Repeat Indicator |repeat   |e|As in Common Navigation Block
 |8-37    | 30  |MMSI             |mmsi     |u|9 decimal digits
 |38-51   | 14  |Year (UTC)       |year     |u|UTC, 1-999, 0 = N/A (default)
 |52-55   |  4  |Month (UTC)      |month    |u|1-12; 0 = N/A (default)
@@ -657,7 +658,7 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |78-78   |  1  |Fix quality      |accuracy |b|As in Common Navigation Block
 |79-106  | 28  |Longitude        |lon      |I4|As in Common Navigation Block
 |107-133 | 27  |Latitude         |lat      |I4|As in Common Navigation Block
-|134-137 |  4  |Type of EPFD     |epfd     |u|See below
+|134-137 |  4  |Type of EPFD     |epfd     |e|See below
 |138-147 | 10  |Spare            |         |x|Not used
 |148-148 |  1  |RAIM flag        |raim     |b|As for common navigation block
 |149-167 | 19  |SOTDMA state     |radio    |u|As in same bits for Type 1
@@ -702,12 +703,12 @@ humans rather than gathered automatically from sensors.
 |40-69   | 30 |IMO Number             |imo          |u|IMO ship ID number
 |70-111  | 42 |Call Sign              |callsign     |t|7 six-bit characters
 |112-231 |120 |Vessel Name            |shipname     |t|20 six-bit characters
-|232-239 |  8 |Ship Type              |shiptype     |u|See table below
+|232-239 |  8 |Ship Type              |shiptype     |e|See table below
 |240-248 |  9 |Dimension to Bow       |to_bow       |u|Meters
 |249-257 |  9 |Dimension to Stern     |to_stern     |u|Meters
 |258-263 |  6 |Dimension to Port      |to_port      |u|Meters
 |264-269 |  6 |Dimension to Starboard |to_starboard |u|Meters
-|270-273 |  4 |Position Fix Type      |epfd         |u|As in Type 4 EPSD codes
+|270-273 |  4 |Position Fix Type      |epfd         |e|As in Type 4 EPSD codes
 |274-277 |  4 |ETA month (UTC)        |month        |u|1-12, 0=N/A (default)
 |278-282 |  5 |ETA day (UTC)          |day          |u|1-31, 0=N/A (default)
 |283-287 |  5 |ETA hour (UTC)         |hour         |u|0-23, 24=N/A (default)
@@ -914,7 +915,7 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |308-331 | 24 |IMD Category         |imdcat    |t|4  6-bit characters
 |332-344 | 13 |UN Number            |unid      |u|1-3363 UN Number
 |345-354 | 10 |Amount of Cargo      |amount    |u|Unsigned integer
-|355-356 |  2 |Unit of Quantity     |unit      |u|cargounit
+|355-356 |  2 |Unit of Quantity     |unit      |e|cargounit
 |357-359 |  3 |Spare                |          |x|Not used
 |==============================================================================
 
@@ -987,7 +988,7 @@ A message 6 subtype. DAC = 001 FID = 16.
 |==============================================================================
 |Field   |Len |Description          |Member   |T|Units
 |0-5     |  6 |Message Type         |type     |u|Constant: 6
-|6-7     |  2 |Repeat Indicator     |repeat   |u|As in Common Navigation Block
+|6-7     |  2 |Repeat Indicator     |repeat   |e|As in Common Navigation Block
 |8-37    | 30 |Source MMSI          |mmsi     |u|9 decimal digits
 |38-39   |  2 |Spare                |         |x|Not used
 |40-49   | 10 |DAC                  |dac      |u|DAC = 001
@@ -1088,7 +1089,7 @@ is the message header format:
 |72-81   | 10 |DAC                  |dac        |u|DAC = 001
 |82-87   |  6 |FID                  |fid        |u|FID = 23
 |88-97   | 10 |Message Linkage ID   |linkage    |u|Unsigned integer
-|98-104  |  7 |Notice Description   |notice     |u|See table below
+|98-104  |  7 |Notice Description   |notice     |e|See table below
 |105-108 |  4 |Month (UTC)          |month      |u|1-12; 0 = N/A (default)
 |109-113 |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
 |114-118 |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
@@ -1253,7 +1254,7 @@ Subarea types are as follows:
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
-|0-2     | 3  |Shape of area      |shape       |u|Constant: 0
+|0-2     | 3  |Shape of area      |shape       |e|Constant: 0
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
@@ -1274,7 +1275,7 @@ Subarea types are as follows:
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
-|0-2     | 3  |Shape of area      |shape       |u|Constant: 1
+|0-2     | 3  |Shape of area      |shape       |e|Constant: 1
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of SW corner
@@ -1302,7 +1303,7 @@ Subarea types are as follows:
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
-|0-2     | 3  |Shape of area      |shape       |u|Constant: 2
+|0-2     | 3  |Shape of area      |shape       |e|Constant: 2
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
@@ -1330,7 +1331,7 @@ Subarea types are as follows:
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
-|0-2     | 3  |Shape of area      |shape       |u|Constant: 3
+|0-2     | 3  |Shape of area      |shape       |e|Constant: 3
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-14    |10  |Bearing            |bearing     |u|True bearing in half-degree
@@ -1350,7 +1351,7 @@ case the first beariing is from the implied last point.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
-|0-2     | 3  |Shape of area      |shape       |u|Constant: 4
+|0-2     | 3  |Shape of area      |shape       |e|Constant: 4
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-14    |10  |Bearing            |bearing     |u|True bearing in half-degree
@@ -1370,7 +1371,7 @@ an implied boundary from the last polygon vertex to the zero vertex.
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
-|0-2     | 3  |Shape of area      |shape       |u|Constant: 5
+|0-2     | 3  |Shape of area      |shape       |e|Constant: 5
 |3-87    |84  |Text               |text        |t|14 chars of packed 6-bit.
 |==============================================================================
 
@@ -1394,51 +1395,51 @@ bit is on.
 |8-37    | 30 |Source MMSI        |mmsi        |u|9 decimal digits
 |38-39   |  2 |Sequence Number    |seqno       |u|Unsigned integer 0-3
 |40-69   | 30 |Destination MMSI   |dest_mmsi   |u|9 decimal digits
-|70-70   |  1 |Retransmit flag    |retransmit  |u|0 = no retransmit (default)
+|70-70   |  1 |Retransmit flag    |retransmit  |b|0 = no retransmit (default)
                                                   1 = retransmitted
 |71-71   |  1 |Spare              |            |x|Not used
 |72-81   | 10 |DAC                |dac         |u|AC = 001
 |82-87   |  6 |FID                |fid         |u|ID = 20
-|88-97   | 10 |Message Linkage ID |linkage     |u|nsigned integer
-|98-106  |  9 |Berth length       |berth_length|u|-510 m
+|88-97   | 10 |Message Linkage ID |linkage     |u|Unsigned integer
+|98-106  |  9 |Berth length       |berth_length|u|In 1m steps, 1-510m,
                                                   511 = >= 511m
-                                                  0 = N/A (default)
+                                                  0 = N/A (default).
 |107-114 |  8 |Berth Water Depth  |berth_depth |U1|0.1-25.4m in 0.1 steps
                                                   255 = >= 25.5m
                                                   0 = N/A (default)
-|115-117 |  3 |Mooring Position   |position    |u|See below
+|115-117 |  3 |Mooring Position   |position    |e|See below
 |118-121 |  4 |Month (UTC)        |month       |u|1-12; 0 = N/A (default)
 |122-126 |  5 |Day (UTC)          |day         |u|1-31; 0 = N/A (default)
 |127-131 |  5 |Hour (UTC)         |hour        |u|0-23; 24 = N/A (default)
 |132-137 |  6 |Minute (UTC)       |minute      |u|0-59; 60 = N/A (default)
-|138-138 |  1 |Services Availability|availability|u|0 = services unknown (default)
+|138-138 |  1 |Services Availability|availability|b|0 = services unknown (default)
                                                     1 = services known
-|139-140 |  2 |Agent              |agent       |u|Service status value
-|141-142 |  2 |Bunker/fuel        |fuel        |u|Service status value
-|143-144 |  2 |Chandler           |chandler    |u|Service status value
-|145-146 |  2 |Stevedore          |stevedore   |u|Service status value
-|147-148 |  2 |Electrical         |electrical  |u|Service status value
-|149-150 |  2 |Potable water      |water       |u|Service status value
-|151-152 |  2 |Customs house      |customs     |u|Service status value
-|153-154 |  2 |Cartage            |cartage     |u|Service status value
-|155-156 |  2 |Crane(s)           |crane       |u|Service status value
-|157-158 |  2 |Lift(s)            |lift        |u|Service status value
-|159-160 |  2 |Medical facilities |medical     |u|Service status value
-|161-162 |  2 |Navigation repair  |navrepair   |u|Service status value
-|163-164 |  2 |Provisions         |provisions  |u|Service status value
-|165-166 |  2 |Ship repair        |shiprepair  |u|Service status value
-|167-168 |  2 |Surveyor           |surveyor    |u|Service status value
-|169-170 |  2 |Steam              |steam       |u|Service status value
-|171-172 |  2 |Tugs               |tugs        |u|Service status value
-|173-174 |  2 |Waste disposal (solid)    |solidwaste    |u|Service status value
-|175-176 |  2 |Waste disposal (liquid)   |liquidwaste   |u|Service status value
-|177-178 |  2 |Waste disposal (hazardous)|hazardouswaste|u|Service status value
-|179-180 |  2 |Reserved ballast exchange |ballast       |u|Service status value
-|181-182 |  2 |Additional services|additional  |u|Service status value
-|183-184 |  2 |Regional reserved 1|regional1   |u|Service status value
-|185-186 |  2 |Regional reserved 2|regional2   |u|Service status value
-|187-188 |  2 |Reserved for future|future1     |u|Service status value
-|189-190 |  2 |Reserved for future|future1     |u|Service status value
+|139-140 |  2 |Agent              |agent       |e|Service status value
+|141-142 |  2 |Bunker/fuel        |fuel        |e|Service status value
+|143-144 |  2 |Chandler           |chandler    |e|Service status value
+|145-146 |  2 |Stevedore          |stevedore   |e|Service status value
+|147-148 |  2 |Electrical         |electrical  |e|Service status value
+|149-150 |  2 |Potable water      |water       |e|Service status value
+|151-152 |  2 |Customs house      |customs     |e|Service status value
+|153-154 |  2 |Cartage            |cartage     |e|Service status value
+|155-156 |  2 |Crane(s)           |crane       |e|Service status value
+|157-158 |  2 |Lift(s)            |lift        |e|Service status value
+|159-160 |  2 |Medical facilities |medical     |e|Service status value
+|161-162 |  2 |Navigation repair  |navrepair   |e|Service status value
+|163-164 |  2 |Provisions         |provisions  |e|Service status value
+|165-166 |  2 |Ship repair        |shiprepair  |e|Service status value
+|167-168 |  2 |Surveyor           |surveyor    |e|Service status value
+|169-170 |  2 |Steam              |steam       |e|Service status value
+|171-172 |  2 |Tugs               |tugs        |e|Service status value
+|173-174 |  2 |Waste disposal (solid)    |solidwaste    |e|Service status value
+|175-176 |  2 |Waste disposal (liquid)   |liquidwaste   |e|Service status value
+|177-178 |  2 |Waste disposal (hazardous)|hazardouswaste|e|Service status value
+|179-180 |  2 |Reserved ballast exchange |ballast       |e|Service status value
+|181-182 |  2 |Additional services|additional  |e|Service status value
+|183-184 |  2 |Regional reserved 1|regional1   |e|Service status value
+|185-186 |  2 |Regional reserved 2|regional2   |e|Service status value
+|187-188 |  2 |Reserved for future|future1     |e|Service status value
+|189-190 |  2 |Reserved for future|future1     |e|Service status value
 |191-310 |120 |Name of Berth      |berth_name  |t|20 6-bit characters
 |311-335 | 25 |Longitude          |berth_lon   |I3|Minutes * 0.001,
                                                   181000 = N/A (default)
@@ -1494,10 +1495,10 @@ with a different layout, deprecated in <<IMO289>>.
 |71-71   |  1 |Spare                |          |x|Not used
 |72-81   | 10 |DAC                  |dac       |u|DAC = 001
 |82-87   |  6 |FID                  |fid       |u|FID = 25
-|88-89   |  2 |Unit of Quantity     |unit      |u|cargounit
+|88-89   |  2 |Unit of Quantity     |unit      |e|cargounit
 |90-99   | 10 |Amount of Cargo      |amount    |u|Unsigned integer
                                                   0 = N/A (default)
-|100-103 |  4 |Cargo code           |code      |u|cargocode
+|100-103 |  4 |Cargo code           |code      |e|cargocode
 |104-116 | 13 |Cargo subtype        |subtype   |u|Unsigned integer
                                                   0 = N/A (default)
 |==============================================================================
@@ -1579,7 +1580,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 |98-100  |  3 |Sender Class      |sender    |u|0 = ship (default), 
                                                1 = authority,
                                                27 = reserved for future use
-|101-105 |  5 |Route Type        |rtype     |u|See table below
+|101-105 |  5 |Route Type        |rtype     |e|See table below
 |106-109 |  4 |Start month (UTC) |month     |u|1-12, 0=N/A (default)
 |110-114 |  5 |Start day (UTC)   |day       |u|1-31, 0=N/A (default)
 |115-119 |  5 |Start hour (UTC)  |hour      |u|0-23, 24=N/A (default)
@@ -1698,7 +1699,7 @@ MMSIs included.
 |==============================================================================
 |Field   |Len |Description      |Member   |T|Units
 |0-5     |  6 |Message Type     |type     |u|Constant: 7
-|6-7     |  2 |Repeat Indicator |repeat   |u|As in Common Navigation Block
+|6-7     |  2 |Repeat Indicator |repeat   |e|As in Common Navigation Block
 |8-37    | 30 |Source MMSI      |mmsi     |u|9 decimal digits
 |38-39   |  2 |Spare            |         |x|Not used
 |40-69   | 30 |MMSI number 1    |mmsi1    |u|9 decimal digits
@@ -1827,7 +1828,7 @@ broadcast of this message of 12 minutes.
                                                   402 = pressure >= 1201 hPa,
                                                   403 - N/A (default).
                                                   else add 400 to value.
-|190-191 |  2 |Pressure Tendency  |pressuretend|u|0 = steady,
+|190-191 |  2 |Pressure Tendency  |pressuretend|e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
                                                   3 - N/A (default).
@@ -1836,7 +1837,7 @@ broadcast of this message of 12 minutes.
 |200-208 |  9 |Water Level        |waterlevel  |U1|-10.0 to +30.0 in 0.1m,
                                                   1923 = N/A (default).
                                                   else -10m after scaling.
-|209-210 |  2 |Water Level Trend  |leveltrend  |u|0 = steady,
+|209-210 |  2 |Water Level Trend  |leveltrend  |e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
                                                   3 - N/A (default).
@@ -1867,12 +1868,12 @@ broadcast of this message of 12 minutes.
                                                    >= 61 = N/A (default).
 |309-317 |  9 |Swell direction      |swelldir   |u|0-359: deg. fom true north,
                                                    >=360 = N/A (default).
-|318-321 |  4 |Sea state            |seastate   |u|Beaufort scale: 0-12,
+|318-321 |  4 |Sea state            |seastate   |e|Beaufort scale: 0-12,
                                                    >=13 = N/A (default).
 |322-331 | 10 |Water Temperature    |watertemp  |U1|-10.0 to 50.0: units 0.1 C,
                                                    >=601 = N/A (default).
                                                    else -10.0m after scaling.
-|332-334 |  3 |Precipitation        |precipitation  |u|preciptype
+|332-334 |  3 |Precipitation        |preciptype |e|See table below
 |335-343 |  9 |Salinity             |salinity   |U1|0.0-50.0%: units 0.1%,
                                                    >=500 = N/A (default)
 |344-345 |  2 |Ice                  |ice        |b|Yes/No
@@ -1954,7 +1955,7 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 |==============================================================================
 |Field   |Len |Description             |Member   |T|Units
 |0-5     |  6 |Message Type            |type     |u|Constant: 8
-|6-7     |  2 |Repeat Indicator        |repeat   |u|As in Common Navigation Block
+|6-7     |  2 |Repeat Indicator        |repeat   |e|As in Common Navigation Block
 |8-37    | 30 |Source MMSI             |mmsi     |u|9 decimal digits
 |38-39   |  2 |Spare                   |         |x|Not used
 |40-49   | 10 |DAC                     |dac      |u|DAC = 001
@@ -2014,7 +2015,7 @@ bits.  This message is laid out identically in <<IMO236>> and
 |38-39   |  2 |Spare              |           |x|Not used
 |40-49   | 10 |DAC                |dac        |u|DAC = 001
 |50-55   |  6 |FID                |fid        |u|FID = 17
-|56-57   |  2 |Identifier type    |idtype     |u|0 = id is the MMSI number,
+|56-57   |  2 |Identifier type    |idtype     |e|0 = id is the MMSI number,
                                                  1 = id is the IMO number,
                                                  2 = id is the call sign,
                                                  3 = Other (default).
@@ -2077,10 +2078,10 @@ length: 360 bits.
                                                   1 = In regular service
                                                   2 = Irregular service
                                                   3 = Reserved for future use
-|237-241 |   5 |Signal In Service     |signal  |u|See below
+|237-241 |   5 |Signal In Service     |signal  |e|See below
 |242-246 |   5 |UTC hour              |hour    |u|0-23, 24=N/A (default)
 |247-252 |   6 |UTC minute            |minute  |u|0-59, 60=N/A (default)
-|253-257 |   5 |Expected Next Signal  |nextsignal|u|See below
+|253-257 |   5 |Expected Next Signal  |nextsignal|e|See below
 |258-359 | 102 |Spare                 |        |x|Not used
 |==============================================================================
 
@@ -2142,7 +2143,7 @@ length: 360 bits.
 |231-235 |   5 |UTC hour           |hour        |u|0-23, 24=N/A (default)
 |236-241 |   6 |UTC minute         |minute      |u|0-59, 60=N/A (default)
 |242-245 |   4 |Present Weather    |weather     |u|wmocode: 0-15
-|246-246 |   1 |Visibility Limit   |vislimit    |u|See below
+|246-246 |   1 |Visibility Limit   |vislimit    |b|See below
 |247-253 |   7 |Horiz. Visibility  |visibility  |U1|0.0-12.6nm, units = nm*0.1,
                                                    127 = N/A (default).
 |254-260 |   7 |Relative Humidity  |humidity    |u|0-100%: units of 1%,
@@ -2450,8 +2451,8 @@ Here are the payload types for each variant:
                                              2001 = 200.1 m or higher,
                                              2002 = N/A (default),
                                              2003-2046 reserved.
-|66-69   |  4 |Sensor owner     |owner    |u|See owner codes table below
-|70-72   |  3 |Data timeout     |timeout  |u|See timeout codes table below
+|66-69   |  4 |Sensor owner     |owner    |e|See owner codes table below
+|70-72   |  3 |Data timeout     |timeout  |e|See timeout codes table below
 |73-84   | 12 |Spare            |         |x|Not used
 |==============================================================================
 
@@ -2507,7 +2508,7 @@ Here are the payload types for each variant:
                                                    >=360 = N/A (default)
 |23-31  |  9 |Wind Gust Direction|wgustdir    |u|0-359, degrees fom true north
                                                    >=360 = N/A (default)
-|32-34  |  3 |Sensor Description |sensortype  |u|See Sensor Types table
+|32-34  |  3 |Sensor Description |sensortype  |e|See Sensor Types table
 |35-41  |  7 |Forecast Wind Speed|fwspeed     |u|Predicted average wind speed,
                                                   0-120 in 1-knot units,
                                                   121 = 121 knots or greater,
@@ -2559,7 +2560,7 @@ The timestamp group is intended as a valid time of forecast.
                                                        2 = steady,
                                                        3 = N/A (default).
 |19-23   | 5  |Vertical Reference Datum |datum      |u|See table below
-|24-26   | 3  |Sensor Description       |sensortype |u|See Sensor Types table
+|24-26   | 3  |Sensor Description       |sensortype |e|See Sensor Types table
 |27-27   | 1  |Forecast Water Level Type|absolute   |b|False if relative to
                                                        reference datum.
 |28-43   | 16 |Forecast Water Level     |level      |i|In 0.001 meter steps,
@@ -2611,7 +2612,7 @@ The timestamp group is intended as a valid time of forecast.
                                                    246 = speed >= 24.6 knots,
                                                    247 = N/A (default),
                                                    248-255 (reserved).
-|8-16    |  9 |Current Direction #1 |cdir1      |u|0-359: deg from true north,
+|8-16    |  9 |Current Direction #1 |cdir1     |u|0-359: deg from true north,
                                                   >=360 = N/A (default).
 |17-25   |  9 |Measurement Depth #1 |cdepth1   |u|0-360m down: units 1m,
                                                    361 = 361m or greater,
@@ -2639,7 +2640,7 @@ The timestamp group is intended as a valid time of forecast.
                                                   361 = 361m or greater,
                                                   362 = N/A (default),
                                                   363-511 (reserved).
-|78-80   | 3  |Sensor Description   |sensortype|u|See Sensor Types table
+|78-80   | 3  |Sensor Description   |sensortype|e|See Sensor Types table
 |81-84   | 4  |Spare                |          |x|Not used
 |==============================================================================
 
@@ -2687,7 +2688,7 @@ The timestamp group is intended as a valid time of forecast.
                                                    361 = 361m or greater,
                                                    362 = N/A (default),
                                                    363-511 (reserved).
-|66-68   | 3  |Sensor Description   |sensortype|u|See Sensor Types table
+|66-68   | 3  |Sensor Description   |sensortype|e|See Sensor Types table
 |69-84   | 16 |Spare                |          |x|Not used
 |==============================================================================
 
@@ -2751,7 +2752,7 @@ The timestamp group is intended as a valid time of forecast.
                                                          361-511 reserved,
 |23-26   |  4 |Sea State                  |seastate   |u|Beaufort scale: 0-12
                                                        >= 13 = N/A (default)
-|27-29   |  3 |Swell Sensor Description   |swelltype  |u|See Sensor Types table
+|27-29   |  3 |Swell Sensor Description   |swelltype  |e|See Sensor Types table
 |30-39   | 10 |Water Temperature          |watertemp  |U1|-10.0 to 50.0:
                                                       units 0.1 C,
                                                       >=601 = N/A (default).
@@ -2761,7 +2762,7 @@ The timestamp group is intended as a valid time of forecast.
                                                       121 = 12.1m or greater,
                                                       122 = N/A (default),
                                                       123-126 (reserved).
-|47-49   |  3 |Depth Sensor Description   |depthtype  |u|See Sensor Types table
+|47-49   |  3 |Depth Sensor Description   |depthtype  |e|See Sensor Types table
 
 |50-57   |  8 |Wave Height                |waveheight|U1|Height 0.0-24.5m:
                                                          units 0.1m,
@@ -2774,7 +2775,7 @@ The timestamp group is intended as a valid time of forecast.
 |64-72   |  9 |Wave Direction             |wavedir   |u|0-359: true bearing,
                                                         360 = N/A (default),
                                                         361-511 reserved.
-|73-75   |  3 |Wave Sensor Description    |wavetype  |u|See Sensor Types table
+|73-75   |  3 |Wave Sensor Description    |wavetype  |e|See Sensor Types table
 |76-84   |  9 |Salinity                   |salinity  |U1|0.0-50.0%:
                                                          units of 0.1%
                                                          501 = salinity >= 50.1%
@@ -2812,11 +2813,11 @@ The standard does not fix the meaning of a water temperature depth of 127.
                                                    502 = data N/A (default)
                                                    503 - sensor N/A,
                                                    504-511 reserved.
-|45-46   |  2 |Salinity Type      |salinitytype|u|0 = measured,
+|45-46   |  2 |Salinity Type      |salinitytype|e|0 = measured,
                                                   1 = calculated using PSS-78,
                                                   2 = calclated using other method,
                                                   3 = reserved.
-|47-49   |  3 |Sensor Description |sensortype  |u|See Sensor Types table
+|47-49   |  3 |Sensor Description |sensortype  |e|See Sensor Types table
 |50-84   | 35 |Spare              |            |x|Not used
 |==============================================================================
 
@@ -2830,8 +2831,8 @@ No default is specified for salinity type.
                                                     -60.0 to +60.0,
                                                     -1024 = data N/A (default),
                                                     601-1023 reserved.
-|11-13   |  3 |Temp. Sensor Type    |sensortype |u|See Sensor Types table
-|14-15   |  2 |Precipitation Type   |preciptype |u|0 = rain,
+|11-13   |  3 |Temp. Sensor Type    |sensortype |e|See Sensor Types table
+|14-15   |  2 |Precipitation Type   |preciptype |e|0 = rain,
                                                      1 = rain and snow,
                                                      2 = rain and snow,
                                                      3 = other.
@@ -2845,21 +2846,21 @@ No default is specified for salinity type.
                                                   501 = N/A (default),
                                                   502-511 rsserved,
                                                   -511--201 rsserved.
-|34-36   |  3 |Dewpoint Sensor Type |dewtype    |u|See Sensor Types table.
+|34-36   |  3 |Dewpoint Sensor Type|dewtype     |e|See Sensor Types table.
 
 
 
-|37-45   |  9 |Air Pressure         |pressure   |u|0 = pressure <= 800hpA,
+|37-45   |  9 |Air Pressure        |pressure    |u|0 = pressure <= 800hpA,
                                                    1-401 = 800-1200hPa,
                                                    402 = pressure >= 1201 hPa,
                                                    403 - data N/A (default),
                                                    404-511 reserved.
-|46-47   |  2 |Pressure Tendency  |pressuretend|u|0 = steady,
+|46-47   |  2 |Pressure Tendency  |pressuretend |e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
                                                   3 - N/A (default).
-|48-50   |  3 |Pressure Sensor Type |pressuretype|u|See Sensor Types table
-|51-59   |  9 |Salinity             |salinity   |U1|0.0-50.0%:
+|48-50   |  3 |Pressure Sensor Type|pressuretype|e|See Sensor Types table
+|51-59   |  9 |Salinity            |salinity    |U1|0.0-50.0%:
                                                      units of 0.1%
                                                      501 = salinity >= 50.1%
                                                      502 = data N/A (default)
@@ -2881,11 +2882,11 @@ there is none.
 |13-25   | 13 |Air Gap             |airgap     |U1|1-81.9m in 0.1m steps,
                                                    8191 = distance >= 81.91m,
                                                    0 = N/A (default).
-|26-27   |  2 |Air Gap Trend       |gaptrend   |u|0 = steady,
+|26-27   |  2 |Air Gap Trend       |gaptrend   |e|0 = steady,
                                                    1 = rising,
                                                    2 = falling,
                                                    3 = N/A (default).
-|28-40   | 13 |Forecast Air Gap    |fairgap     |U1|1-81.9m in 0.1m steps,
+|28-40   | 13 |Forecast Air Gap    |fairgap    |U1|1-81.9m in 0.1m steps,
                                                    8191 = distance >= 81.91m,
                                                    0 = N/A (default).
 |41-45  |  5 |Day (UTC)            |day             |u|1-31; 0 = N/A (default)
@@ -2911,7 +2912,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
 |==============================================================================
 |Field   |Len |Description       |Member   |T|Units
 |0-5     |  6 |Message Type      |type     |u|Constant: 8
-|6-7     |  2 |Repeat Indicator  |repeat   |u|As in Common Navigation Block
+|6-7     |  2 |Repeat Indicator  |repeat   |e|As in Common Navigation Block
 |8-37    | 30 |Source MMSI       |mmsi     |u|9 decimal digits
 |38-39   |  2 |Spare             |         |u|Not used
 |40-49   | 10 |DAC               |dac      |u|DAC = 001
@@ -2989,33 +2990,33 @@ Replaces a deprecated trial message from <<IMO236>>.
 |79-108  | 30 |Last Port Of Call      |lastport      |t|5 6-bit chars, UN locode
 |109-138 | 30 |Next Port Of Call      |nextport      |t|5 6-bit chars, UN locode
 |139-168 | 30 |Second Port Of Call    |secondport    |t|5 6-bit chars, UN locode
-|169-170 |  2 |AIS Class A            |ais_state     |u|SOLAS status
-|171-172 |  2 |Automatic Tracking Aid |ata_state     |u|SOLAS status
-|173-174 |  2 |BNWAS                  |bnwas_state   |u|SOLAS status
-|175-176 |  2 |ECDIS Back-up          |ecdisb_state  |u|SOLAS status
-|177-178 |  2 |Paper Nautical Chart   |chart_state   |u|SOLAS status
-|179-180 |  2 |Echo sounder           |sounder_state |u|SOLAS status
-|181-182 |  2 |Electronic plotting aid|epaid_state   |u|SOLAS status
-|183-184 |  2 |Emergency steering gear|steer_state   |u|SOLAS status
-|185-186 |  2 |GNSS                   |gnss_state    |u|SOLAS status
-|187-188 |  2 |Gyro compass           |gyro_state    |u|SOLAS status
-|189-190 |  2 |LRIT                   |lrit_state    |u|SOLAS status
-|191-192 |  2 |Magnetic compass       |magcomp_state |u|SOLAS status
-|193-194 |  2 |NAVTEX                 |navtex_state  |u|SOLAS status
-|195-196 |  2 |Radar (ARPA)           |arpa_state    |u|SOLAS status
-|197-198 |  2 |Radar (S-band)         |sband_state   |u|SOLAS status
-|199-200 |  2 |Radar (X-band)         |xband_state   |u|SOLAS status
-|201-202 |  2 |Radio HF               |hfradio_state |u|SOLAS status
-|203-204 |  2 |Radio INMARSAT         |inmarsat_state|u|SOLAS status
-|205-206 |  2 |Radio MF               |mfradio_state |u|SOLAS status
-|207-208 |  2 |Radio VHF              |vhfradio_state|u|SOLAS status
-|209-210 |  2 |Speed Log over ground  |grndlog_state |u|SOLAS status
-|211-212 |  2 |Speed Log through water|waterlog_state|u|SOLAS status
-|213-214 |  2 |THD                    |thd_state     |u|SOLAS status
-|215-216 |  2 |Track control system   |tcs_state     |u|SOLAS status
-|217-218 |  2 |VDR/S-VDR              |vdr_state     |u|SOLAS status
+|169-170 |  2 |AIS Class A            |ais_state     |e|SOLAS status
+|171-172 |  2 |Automatic Tracking Aid |ata_state     |e|SOLAS status
+|173-174 |  2 |BNWAS                  |bnwas_state   |e|SOLAS status
+|175-176 |  2 |ECDIS Back-up          |ecdisb_state  |e|SOLAS status
+|177-178 |  2 |Paper Nautical Chart   |chart_state   |e|SOLAS status
+|179-180 |  2 |Echo sounder           |sounder_state |e|SOLAS status
+|181-182 |  2 |Electronic plotting aid|epaid_state   |e|SOLAS status
+|183-184 |  2 |Emergency steering gear|steer_state   |e|SOLAS status
+|185-186 |  2 |GNSS                   |gnss_state    |e|SOLAS status
+|187-188 |  2 |Gyro compass           |gyro_state    |e|SOLAS status
+|189-190 |  2 |LRIT                   |lrit_state    |e|SOLAS status
+|191-192 |  2 |Magnetic compass       |magcomp_state |e|SOLAS status
+|193-194 |  2 |NAVTEX                 |navtex_state  |e|SOLAS status
+|195-196 |  2 |Radar (ARPA)           |arpa_state    |e|SOLAS status
+|197-198 |  2 |Radar (S-band)         |sband_state   |e|SOLAS status
+|199-200 |  2 |Radar (X-band)         |xband_state   |e|SOLAS status
+|201-202 |  2 |Radio HF               |hfradio_state |e|SOLAS status
+|203-204 |  2 |Radio INMARSAT         |inmarsat_state|e|SOLAS status
+|205-206 |  2 |Radio MF               |mfradio_state |e|SOLAS status
+|207-208 |  2 |Radio VHF              |vhfradio_state|e|SOLAS status
+|209-210 |  2 |Speed Log over ground  |grndlog_state |e|SOLAS status
+|211-212 |  2 |Speed Log through water|waterlog_state|e|SOLAS status
+|213-214 |  2 |THD                    |thd_state     |e|SOLAS status
+|215-216 |  2 |Track control system   |tcs_state     |e|SOLAS status
+|217-218 |  2 |VDR/S-VDR              |vdr_state     |e|SOLAS status
 |219-220 |  2 |Reserved               |              |x|Not used
-|221-224 |  4 |Ice Class              |iceclass      |u|See below
+|221-224 |  4 |Ice Class              |iceclass      |e|See below
 |225-242 | 18 |Shaft Horsepower       |horsepower    |u|Total ship HP: 1hp units,
                                                         262,142 = >= 262,142hp,
                                                         262,143 = N/A (default).
@@ -3025,19 +3026,19 @@ Replaces a deprecated trial message from <<IMO236>>.
 |297-314 | 18 |Gross Tonnage          |tonnage       |u|0-262,141,
                                                         262,142 = >= 262,142hp,
                                                         262,143 = N/A (default).
-|315-316 |  2 |Laden or Ballast       |lading        |u|0 = N/A (default),
+|315-316 |  2 |Laden or Ballast       |lading        |e|0 = N/A (default),
                                                         1 = Laden,
                                                         2 = Ballast,
                                                         3 = Not in use.
-|317-318 |  2 |Heavy Fuel Oil Bunkered|heavyoil      |u|0 = N/A (default),
+|317-318 |  2 |Heavy Fuel Oil Bunkered|heavyoil      |e|0 = N/A (default),
                                                         1 = No,
                                                         2 = Yes,
                                                         3 = Not in use.
-|319-320 |  2 |Light Fuel Oil Bunkered|lightoil      |u|0 = N/A (default),
+|319-320 |  2 |Light Fuel Oil Bunkered|lightoil      |e|0 = N/A (default),
                                                         1 = No,
                                                         2 = Yes,
                                                         3 = Not in use.
-|321-322 |  2 |Diesel Oil Bunkered    |dieseloil     |u|0 = N/A (default),
+|321-322 |  2 |Diesel Oil Bunkered    |dieseloil     |e|0 = N/A (default),
                                                         1 = No,
                                                         2 = Yes,
                                                         3 = Not in use.
@@ -3134,7 +3135,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
                                                   181000 = N/A (default).
 |81-104  | 24 |Latitude           |lat         |I3|Unit = minutes * 0.001,
                                                   N positive, S negative,
-                                                91000 = N/A (default).
+                                                  91000 = N/A (default).
 |105-105 |  1 |Fix quality        |accuracy    |u|As in Common Navigation Block
 |106-110 |  5 |Day                |day         |u|1-31, 0=N/A (default)
 |111-115 |  5 |Hour               |hour        |u|0-23, 24=N/A (default)
@@ -3160,7 +3161,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
                                                   0 = pressure <= 799hPa, 
                                                   402 = pressure >= 1201 hPa,
                                                   403 = N/A (default).
-|191-192 |  2 |Pressure Tendency  |pressuretend|u|0 = steady,
+|191-192 |  2 |Pressure Tendency  |pressuretend|e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
                                                   3 - N/A (default).
@@ -3170,28 +3171,29 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |201-212 | 12 |Water Level        |waterlevel  |U2|-10.0 to +30.0 in 0.01m,
                                                   -10.0m after scaling,
                                                   40001 = N/A (default).
-|213-214 |  2 |Water Level Trend  |leveltrend  |u|0 = steady,
+|213-214 |  2 |Water Level Trend  |leveltrend  |e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
                                                   3 - N/A (default).
-|215-222 |  8 |Surface Current Speed     |cspeed    |U1|0.0-25.0: units 0.1 knot,
-                                                       251 = speed >= 25.1 knots,
-                                                       255 N/A (default).
-|223-231 |  9 |Surface Current Direction |cdir      |u|0-359: deg. fom true north,
+|215-222 |  8 |Surface Current Speed  |cspeed  |U1|0.0-25.0: units 0.1 knot,
+                                                   251 = speed >= 25.1 knots,
+                                                   255 N/A (default).
+|223-231 |  9 |Surface Current Direction |cdir |u|0-359: deg. fom true north,
                                                        360 = N/A (default).
-|232-239 |  8 |Current Speed #2     |cspeed2  |U1|0.0-25.0 knots: units 0.1 knot,
-                                                 251 = speed >= 25.1 knots,
-                                                 255 N/A (default).
-|240-248 |  9 |Current Direction #2 |cdir2    |u|0-359: true bearing,
+|232-239 |  8 |Current Speed #2     |cspeed2   |U1|0.0-25.0 knots:
+                                                   units 0.1 knot,
+                                                   251 = speed >= 25.1 knots,
+                                                   255 N/A (default).
+|240-248 |  9 |Current Direction #2 |cdir2     |u|0-359: true bearing,
                                                  360 = N/A (default).
-|249-253 |  5 |Measurement Depth #2 |cdepth2  |U1|0-30m down: units 0.1m,
+|249-253 |  5 |Measurement Depth #2 |cdepth2   |U1|0-30m down: units 0.1m,
                                                  31 = N/A (default).
-|254-261 |  8 |Current Speed #3     |cspeed3  |U1|0.0-25.0 knots: units 0.1 knot,
+|254-261 |  8 |Current Speed #3     |cspeed3   |U1|0.0-25.0 knots: units 0.1 knot,
                                                  251 = speed >= 25.1 knots,
                                                  255 N/A (default).
-|262-270 |  9 |Current Direction #3 |cdir3    |u|0-359: true bearing,
+|262-270 |  9 |Current Direction #3 |cdir3     |u|0-359: true bearing,
                                                  360 = N/A (default).
-|271-275 |  5 |Measurement Depth #3 |cdepth3  |u|0-30m down: units 0.1m,
+|271-275 |  5 |Measurement Depth #3 |cdepth3   |u|0-30m down: units 0.1m,
                                                  31 = N/A (default).
 |276-283 |  8 |Wave Height          |waveheight|U1|Height 0-25m: units 0.1m,
                                                   251 = height >= 25.1m,
@@ -3207,7 +3209,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
                                                    360 = N/A (default)
 |313-321 |  9 |Swell Direction      |swelldir   |u|0-359: true bearing,
                                                    360 = N/A (default)
-|322-325 |  4 |Sea State            |seastate   |u|Beaufort scale: 0-12
+|322-325 |  4 |Sea State            |seastate   |e|Beaufort scale: 0-12
                                                    >= 13 = N/A (default)
 |326-335 | 10 |Water Temperature    |watertemp  |U1|-10.0 to 50.0 C: 
                                                    units 0.1 deg,
@@ -3240,7 +3242,7 @@ bits is 168.
 |60-60   | 1  |Position Accuracy  |accuracy   |u|See below
 |61-88   |28  |Longitude          |lon        |I4|Minutes/10000 (as in CNB)
 |89-115  |27  |Latitude           |lat        |I4|Minutes/10000 (as in CNB)
-|116-127 |12  |Course Over Ground |course     |U1|In 0.1 degrees from true north.
+|116-127 |12  |Course Over Ground |course     |U1|True bearing, 0.1 degree units
 |128-133 | 6  |Time Stamp         |second     |u|UTC second.
 |134-141 | 8  |Regional reserved  |regional   |x|Reserved
 |142-142 | 1  |DTE                |dte        |b|0=Data terminal ready,
@@ -3297,7 +3299,7 @@ six-bit text.  This message is variable in length up to a maximum of
 |8-37    | 30 |Source MMSI        |mmsi        |u|9 decimal digits
 |38-39   |  2 |Sequence Number    |seqno       |u|Unsigned integer 0-3
 |40-69   | 30 |Destination MMSI   |dest_mmsi   |u|9 decimal digits
-|70      |  1 |Retransmit flag    |retransmit  |u|0 = no retransmit (default),
+|70      |  1 |Retransmit flag    |retransmit  |b|0 = no retransmit (default),
                                                   1 = retransmitted
 |71      |  1 |Spare              |            |x|Not used
 |72      |936 |Text               |text        |t|1-156 chars of six-bit text.
@@ -3480,29 +3482,29 @@ understand these fields."
 |==============================================================================
 |Field   |Len |Description        |Member   |T|Units
 |0-5     | 6  |Message Type       |type     |u|Constant: 18
-|6-7     | 2  |Repeat Indicator   |repeat   |u|As in Common Navigation Block
+|6-7     | 2  |Repeat Indicator   |repeat   |e|As in Common Navigation Block
 |8-37    |30  |MMSI               |mmsi     |u|9 decimal digits
 |38-45   | 8  |Regional Reserved  |reserved |x|Not used
 |46-55   |10  |Speed Over Ground  |speed    |u|As in common navigation block
-|56-56   | 1  |Position Accuracy  |accuracy |u|See below
+|56-56   | 1  |Position Accuracy  |accuracy |b|See below
 |57-84   |28  |Longitude          |lon      |I4|Minutes/10000 (as in CNB)
 |85-111  |27  |Latitude           |lat      |I4|Minutes/10000 (as in CNB)
 |112-123 |12  |Course Over Ground |course   |U1|0.1 degrees from true north
 |124-132 | 9  |True Heading       |heading  |u|0 to 359 degrees, 511 = N/A
 |133-138 | 6  |Time Stamp         |second   |u|Second of UTC timestamp.
-|139-140 | 2  |Regional reserved  |regional |u|
+|139-140 | 2  |Regional reserved  |regional |u|Uninterpreted
 |141-141 | 1  |CS Unit            |cs       |b|0=Class B SOTDMA unit
                                                1=Class B CS (Carrier Sense) unit
-|142-142 | 1  |Display flag       |display  |u|0=No visual display, 
+|142-142 | 1  |Display flag       |display  |b|0=No visual display, 
                                                1=Has display,
                                                (Probably not reliable).
-|143-143 | 1  |DSC Flag           |dsc      |u|If 1, unit is attached to a VHF
+|143-143 | 1  |DSC Flag           |dsc      |b|If 1, unit is attached to a VHF
                                                voice radio with DSC capability.
-|144-144 | 1  |Band flag          |band     |u|Base stations can command units
+|144-144 | 1  |Band flag          |band     |b|Base stations can command units
                                                to switch frequency. If this flag
                                                is 1, the unit can use any part
                                                of the marine channel.
-|145-145 | 1  |Message 22 flag    |msg22    |u|If 1, unit can accept a channel
+|145-145 | 1  |Message 22 flag    |msg22    |b|If 1, unit can accept a channel
                                                assignment via Message Type 22.
 |146-146 | 1  |Assigned           |assigned |b|Assigned-mode flag:
                                                0 = autonomous mode (default),
@@ -3534,7 +3536,7 @@ gathered automatically from sensors.
 |8-37     | 30 |MMSI                   |mmsi         |u|9 digits
 |38-45    |  8 |Regional Reserved      |reserved     |u|
 |46-55    | 10 |Speed Over Ground      |speed        |u|As in CNB.
-|56-56    |  1 |Position Accuracy      |accuracy     |u|See below
+|56-56    |  1 |Position Accuracy      |accuracy     |b|As in CNB.
 |57-84    | 28 |Longitude              |lon          |I4|Minutes/10000 (as in CNB)
 |85-111   | 27 |Latitude               |lat          |I4|Minutes/10000 (as in CNB)
 |112-123  | 12 |Course Over Ground     |course       |U1|Relative to true north,
@@ -3542,16 +3544,16 @@ gathered automatically from sensors.
 |124-132  |  9 |True Heading           |heading      |u|0 to 359 degrees,
                                                         511 = N/A
 |133-138  |  6 |Time Stamp             |second       |u|Second of UTC timestamp.
-|139-142  |  4 |Regional reserved      |regional     |u|
+|139-142  |  4 |Regional reserved      |regional     |u|Uninterpreted
 |143-262  |120 |Name                   |shipname     |s|20 6-bit characters
 |263-270  |  8 |Type of ship and cargo |shiptype     |u|As in Message 5
 |271-279  |  9 |Dimension to Bow       |to_bow       |u|Meters
 |280-288  |  9 |Dimension to Stern     |to_stern     |u|Meters
 |289-294  |  6 |Dimension to Port      |to_port      |u|Meters
 |295-300  |  6 |Dimension to Starboard |to_starboard |u|Meters
-|301-304  |  4 |Position Fix Type      |epfd         |u|As in Type 4 EPFD codes
+|301-304  |  4 |Position Fix Type      |epfd         |e|As in Type 4 EPFD codes
 |305-305  |  1 |RAIM flag              |raim         |b|As in CNB.
-|306-306  |  1 |DTE                    |dte          |u|0=Data terminal ready,
+|306-306  |  1 |DTE                    |dte          |b|0=Data terminal ready,
                                                        1=Not ready (default).
 |307-307  |  1 |Assigned mode flag     |assigned     |u|See <<IALA>> for details
 |308-311  |  4 |Spare                  |             |x|Unused, should be zero
@@ -3607,22 +3609,22 @@ and 360 bits.
 |0-5      | 6  |Message Type           |type        |u|Constant: 21
 |6-7      | 2  |Repeat Indicator       |repeat      |u|As in CNB
 |8-37     |30  |MMSI                   |mmsi        |u|9 digits
-|38-42    | 5  |Aid type               |aid_type    |u|See Below
+|38-42    | 5  |Aid type               |aid_type    |e|See Below
 |43-162  1|120 |Name                   |name        |t|Name in sixbit chars
-|163-163  | 1  |Position Accuracy      |accuracy    |u|As in CNB
+|163-163  | 1  |Position Accuracy      |accuracy    |b|As in CNB
 |164-191  |28  |Longitude              |lon         |I4|Minutes/10000 (as in CNB)
 |192-218  |27  |Latitude               |lat         |I4|Minutes/10000 (as in CNB)
 |219-227  | 9  |Dimension to Bow       |to_bow      |u|Meters
 |228-236  | 9  |Dimension to Stern     |to_stern    |u|Meters
 |237-242  | 6  |Dimension to Port      |to_port     |u|Meters
 |243-248  | 6  |Dimension to Starboard |to_starboard|u|Meters
-|249-252  | 4  |Type of EPFD           |epfd        |u|As in Message Type 4
+|249-252  | 4  |Type of EPFD           |epfd        |e|As in Message Type 4
 |253-258  | 6  |UTC Second             |second      |u|As in Message Type 5
-|259-259  | 1  |Off-Position Indicator |off_position|u|See Below
-|260-267  | 8  |Regional reserved      |regional    |u|
+|259-259  | 1  |Off-Position Indicator |off_position|b|See Below
+|260-267  | 8  |Regional reserved      |regional    |u|Uninterpreted
 |268-268  | 1  |RAIM flag              |raim        |b|As in CNB
-|269-269  | 1  |Virtual-aid flag       |virtual_aid |u|See Below
-|270-270  | 1  |Assigned-mode flag     |assigned    |u|See <<IALA>> for details
+|269-269  | 1  |Virtual-aid flag       |virtual_aid |b|See Below
+|270-270  | 1  |Assigned-mode flag     |assigned    |b|See <<IALA>> for details
 |271-271  | 1  |Spare                  |            |x|Not used
 |272-360  |88  |Name Extension         |            |t|See Below
 |==============================================================================
@@ -3780,11 +3782,13 @@ station network.
 |58-74    |17  |NE Latitude      |ne_lat       |u|Same as broadcast type 22
 |75-92    |18  |SW Longitude     |sw_lon       |u|Same as broadcast type 22
 |93-109   |17  |SW Latitude      |sw_lat       |u|Same as broadcast type 22
-|110-113  | 4  |Station Type     |station_type |u|Unsigned Integer, see below
-|114-121  | 8  |Ship Type        |ship_type    |u|As for Message type 5
+|110-113  | 4  |Station Type     |station_type |e|See table below
+|114-121  | 8  |Ship Type        |ship_type    |e|As for Message type 5
 |122-143  |22  |Spare            |             |x|Not used
-|144-145  | 2  |Tx/Rx Mode       |txrx         |u|Transmit/receive mode; see below,
-|146-149  | 4  |Report Interval  |interval     |u|Station report interval; see below
+|144-145  | 2  |Tx/Rx Mode       |txrx         |u|Transmit/receive mode; 
+                                                  see table below.
+|146-149  | 4  |Report Interval  |interval     |e|Station report interval; 
+                                                  see table below.
 |150-153  | 4  |Quiet Time       |quiet        |u|0 = none, 1-15 quiet time in minutes
 |154-159  | 6  |Spare            |             |x|Not used
 |==============================================================================
@@ -3872,7 +3876,7 @@ is thanks to Kurt Schwehr.
 |38-39   |  2 | Part Number           | partno         |u|0-1
 |40-159  |120 | Vessel Name           | shipname       |t|(Part A) 20 sixbit chars
 |160-167 |  8 | Spare                 |                |x|(Part A) Not used
-|40-47   |  8 | Ship Type             | shiptype       |u|(Part B) As in Message Type 5
+|40-47   |  8 | Ship Type             | shiptype       |e|(Part B) As in Message Type 5
 |48-89   | 42 | Vendor ID             | vendorid       |t|(Part B) 7 six-bit chars
 |90-131  | 42 | Call Sign             | callsign       |t|(Part B) As in Message Type 5
 |132-140 |  9 | Dimension to Bow      | to_bow         |u|(Part B) Meters
@@ -3947,7 +3951,7 @@ Takes up 60-1064 bits (up to 5 slots).
 |8-37    | 30   | MMSI                 | mmsi       |u|9 digits
 |38      |  1   | Destination indicator| addressed  |b|0=broadcast,
                                                        1=addressed.
-|39      |  1   | Binary data flag     | structured |u|See below
+|39      |  1   | Binary data flag     | structured |b|See below
 |40      |0/30  | Destination MMSI     | dest_mmsi  |u|Message destination
 |?       |0/16  | Application ID       | app_id     |u|Unsigned integer
 |?       |0-1004| Data                 | data       |d|Binary data
@@ -3980,7 +3984,7 @@ increased propagation delays associated with long-range detection
 |==============================================================================
 |Field   |Len   |Description         |Member   |u|Units
 |0-5     |  6   |Message Type        |type     |u|Constant: 27
-|6-7     |  2   |Repeat Indicator    |repeat   |u|As in CNB
+|6-7     |  2   |Repeat Indicator    |repeat   |e|As in CNB
 |8-37    | 30   |MMSI                |mmsi     |u|9 decimal digits
 |38-38   | 1    |Position Accuracy   |accuracy |u|See Common Navigation Block
 |39-39   | 1    |RAIM flag           |raim     |u|See Common Navigation Block
