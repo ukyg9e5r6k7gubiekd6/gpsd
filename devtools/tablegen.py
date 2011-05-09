@@ -83,7 +83,7 @@ def make_driver_code(wfp):
             offset = offsets[i].split('-')[0]
             if ftype[0].lower() in ('u', 'i'):
                 print >>wfp,"\t%s.%s\t= %sBITS(%s, %s);" % \
-                      (structname, name, {'u':'U', 'i':'S'}[ftype[0].lower()], offset, width)
+                      (structname, name, {'u':'U', 'e':'U', 'i':'S'}[ftype[0].lower()], offset, width)
             elif ftype == 't':
                 print >>wfp,"\tUCHARS(%s, %s.%s);" % (offset, structname, name)
             else:
@@ -112,7 +112,7 @@ def make_structure(wfp):
                 continue
             if ftype == 'x' or not record:
                 continue
-            if ftype == 'u' or ftype[0] == 'U':
+            if ftype == 'u' or ftype == 'e' or or ftype[0] == 'U':
                 decl = "unsigned int %s;\t/* %s */" % (name, description)
             elif ftype == 'i' or ftype[0] == 'I':
                 decl = "signed int %s;\t/* %s */" % (name, description)
@@ -156,6 +156,12 @@ def make_json_dumper(wfp):
                 scaled += fmt
                 unscaled += fmt
                 has_scale.append(False)
+            elif ftype == 'e':
+                names.append(name)
+                fmt += "%u"
+                scaled += "%u"
+                unscaled += "%s"   # Will throw error at compilation time
+                has_scale.append(True)
             elif ftype == 'i':
                 names.append(name)
                 fmt += "%d"
@@ -180,7 +186,6 @@ def make_json_dumper(wfp):
                 fmt + "%zd:%s"
                 scaled += fmt
                 unscaled += fmt
-                has_scale.append(False)
                 has_scale.append(False)
             elif ftype[0] == 'U':
                 names.append(name)
@@ -261,6 +266,7 @@ def make_json_generator(wfp):
             readtype = {
                 'u': "uinteger",
                 'U': "uinteger",
+                'e': "uinteger",
                 'i': "integer",
                 'I': "integer",
                 'b': "boolean",
@@ -270,6 +276,7 @@ def make_json_generator(wfp):
             default = {
                 'u': "'PUT_DEFAULT_HERE'",
                 'U': "'PUT_DEFAULT_HERE'",
+                'e': "'PUT DEFAYLT HERE'",
                 'i': "'PUT_DEFAULT_HERE'",
                 'I': "'PUT_DEFAULT_HERE'",
                 'b': "\'false\'",
