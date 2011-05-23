@@ -325,7 +325,9 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 	    session.gpsdata.gps_fd = controlfd;
 	}
 
+	context.readonly = false;
 	st = (*active)->driver->control_send(&session, (char *)buf, len);
+	context.readonly = true;
 
 	if (!serial) {
 	    /* stop pretending now */
