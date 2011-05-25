@@ -416,7 +416,7 @@ types are as follows:
 |21 |Aid-to-Navigation Report
 |22 |Channel Management
 |23 |Group Assignment Command
-|24 |Class B CS Static Data Report
+|24 |Static Data Report
 |25 |Single Slot Binary Message, 
 |26 |Multiple Slot Binary Message With Communications State 
 |27 |Position Report For Long-Range Applications 
@@ -3857,10 +3857,12 @@ a quiet time command, it will continue to schedule nominal
 transmission time periods, but is not to transmit message 18 or 24
 during the quiet period.
 
-=== Type 24: Class B CS Static Data Report  ===
+=== Type 24: Static Data Report  ===
 
-Equivalent of a Type 5 message for ships using Class B equipment.  A
-"Type 24" may be in part A or part B format; either is 168 bits.
+Equivalent of a Type 5 message for ships using Class B equipment.  Also
+used to associate an MMSI with a name on either class A or class B equipment.
+
+A"Type 24" may be in part A or part B format; either is 168 bits.
 Parts A and B are expected to be broadcast in adjacent pairs.  The
 interpretation of some fields in Type B format changes depending on
 the range of the Type B MMSI field. 160 bits for part A, 168 bits for
