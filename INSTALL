@@ -128,6 +128,10 @@ at -O2 level, making it generate incorrect code.
 from a binary package). The build requires scons.  Simply calling
 'scons' in a working-directory copy should do it.
 
+Note: If your scons fails with the complaint "No tool named 'textfile'",
+you need to upgrade it.  This feature was introduced during the long
+interval after the 1.2.0 release; 1.2.1 and later versions will have it.
+
 By giving command-line options to scons you can configure certain rarely-used
 optional features in, or compile standard features out to reduce gpsd's 
 footprint. "scons --help" will tell the story; look under "Local Options"
