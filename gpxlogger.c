@@ -27,7 +27,6 @@
 extern struct tm *gmtime_r(const time_t *, /*@out@*/ struct tm *tp);
 #endif /* S_SPLINT_S */
 
-static char *author = "Amaury Jacquot, Chris Kuethe, Eric S. Raymond";
 static char *progname;
 static struct fixsource_t source;
 
@@ -48,15 +47,16 @@ static int debug;
 
 static void print_gpx_header(void)
 {
+    char tbuf[128];
+
     (void)fprintf(logfile,"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-    (void)fprintf(logfile,"<gpx version=\"1.1\" creator=\"navsys logger\"\n");
+    (void)fprintf(logfile,"<gpx version=\"1.1\" creator=\"GPSD %s - http://gpsd.berlios.de/\"\n", VERSION);
     (void)fprintf(logfile,"        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
     (void)fprintf(logfile,"        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
     (void)fprintf(logfile,"        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
     (void)fprintf(logfile,"        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
     (void)fprintf(logfile," <metadata>\n");
-    (void)fprintf(logfile,"  <name>NavSys GPS logger dump</name>\n");
-    (void)fprintf(logfile,"  <author>%s</author>\n", author);
+    (void)fprintf(logfile,"  <time>%s</time>\n", unix_to_iso8601(time(NULL), tbuf, sizeof(tbuf)));
     (void)fprintf(logfile," </metadata>\n");
     (void)fflush(logfile);
 }
@@ -79,6 +79,7 @@ static void print_gpx_footer(void)
 static void print_gpx_trk_start(void)
 {
     (void)fprintf(logfile," <trk>\n");
+    (void)fprintf(logfile,"  <src>GPSD %s</src>\n", VERSION);
     (void)fprintf(logfile,"  <trkseg>\n");
     (void)fflush(logfile);
 }
@@ -87,14 +88,13 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
 {
     char tbuf[128];
 
-    (void)fprintf(logfile,"   <!-- tag=\"%s\"-->\n", gpsdata->tag);
-
     (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
 		 gpsdata->fix.latitude, gpsdata->fix.longitude);
     if ((isnan(gpsdata->fix.altitude) == 0))
 	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altitude);
     (void)fprintf(logfile,"    <time>%s</time>\n",
 		 unix_to_iso8601(time, tbuf, sizeof(tbuf)));
+    (void)fprintf(logfile,"    <src>GPSD tag=\"%s\"<src>\n", gpsdata->tag);
     if (gpsdata->status == STATUS_DGPS_FIX)
 	(void)fprintf(logfile,"    <fix>dgps</fix>\n");
     else
