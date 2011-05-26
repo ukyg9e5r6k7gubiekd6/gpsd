@@ -961,19 +961,19 @@ different widths for the latitude, longitude, and current-speed fields
 |82-87   |  6 |FID                    |fid       |u|FID = 14
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
-|        |    |                       |          |a|Tidal information
-|97-123  | 27 |Latitude               |lat       |I4|Unit = minutes * 0.0001,
+|97      |    |                       |          |a|Tidal information
+|0-26    | 27 |Latitude               |lat       |I4|Unit = minutes * 0.0001,
                                                     91000 = N/A (default),
                                                     N positive, S negative.
-|124-151 | 28 |Longitude              |lon       |I4|Unit = minutes * 0.0001,
+|27-54   | 28 |Longitude              |lon       |I4|Unit = minutes * 0.0001,
                                                     181000 = N/A (default),
                                                     E positive, W negative.
-|152-156 |  5 |From UTC Hour          |from_hour |u|0-23, 24 = N/A (default)
-|157-162 |  6 |From UTC Minute        |from_min  |u|0-59, 60 = N/A (default)
-|163-167 |  5 |To UTC Hour            |to_hour   |u|0-23, 24 = N/A (default)
-|168-173 |  6 |To UTC Minute          |to_min    |u|0-59, 60 = N/A (default)
-|174-182 |  9 |Current Dir. Predicted |cdir      |u|0-359 deg, 360-N/A (default)
-|183-189 |  7 |Current Speed Predicted|cspeed    |U1|0-126, units of 0.1 knots,
+|55-59   |  5 |From UTC Hour          |from_hour |u|0-23, 24 = N/A (default)
+|60-65   |  6 |From UTC Minute        |from_min  |u|0-59, 60 = N/A (default)
+|66-70   |  5 |To UTC Hour            |to_hour   |u|0-23, 24 = N/A (default)
+|71-76   |  6 |To UTC Minute          |to_min    |u|0-59, 60 = N/A (default)
+|77-85   |  9 |Current Dir. Predicted |cdir      |u|0-359 deg, 360-N/A (default)
+|86-92   |  7 |Current Speed Predicted|cspeed    |U1|0-126, units of 0.1 knots,
                                                    127 = N/A (default).
 |=============================================================================
 
@@ -1597,11 +1597,11 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
                                                262,143 = N/A (default),
 |144-148 |  5 |                  |waycount  |u|Waypoint count (1-16),
                                                Values 17-31 are not used.
-|        |    |                  |          |a|Waypoint array
-|149-176 | 28 |Longitude         |lon       |I4|Minutes * 0.0001,
+|149     |    |                  |          |a|Waypoint array
+|0-27    | 28 |Longitude         |lon       |I4|Minutes * 0.0001,
                                                181000 = N/A (default),
                                                E positive, W negative.
-|177-203 | 27 |Latitude          |lat       |I4|Minutes * 0.0001,
+|28-54   | 27 |Latitude          |lat       |I4|Minutes * 0.0001,
                                                91000 = N/A (default),
                                                N positive, S negative.
 |==============================================================================
@@ -1676,20 +1676,20 @@ different bit widths for the latitude and longitude fields.
 |82-87   |  6 |FID                    |fid       |u|FID = 32
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
-|        |    |                       |          |a|Tidal information
-|97-121  | 25 |Longitude              |lon       |I3|Unit = minutes * 0.001,
+|97      |    |                       |          |a|Tidal information
+|0-24    | 25 |Longitude              |lon       |I3|Unit = minutes * 0.001,
                                                     181000 = N/A (default),
                                                     E positive, W negative.
-|122-145 | 24 |Latitude               |lat       |I3|Unit = minutes * 0.001.
+|25-48   | 24 |Latitude               |lat       |I3|Unit = minutes * 0.001.
                                                     91000 = N/A (default),
                                                     N positive, S negative.
-|146-150 |  5 |From UTC Hour          |from_hour |u|0-23, 24 = N/A (default)
-|151-156 |  6 |From UTC Minute        |from_min  |u|0-59, 60 = N/A (default)
-|157-161 |  5 |To UTC Hour            |to_hour   |u|0-23, 24 = N/A (default)
-|162-167 |  6 |To UTC Minute          |to_min    |u|0-59, 60 = N/A (default)
-|168-176 |  9 |Current Dir. Predicted |cdir      |u|0-359 true bearing, 
+|49-53   |  5 |From UTC Hour          |from_hour |u|0-23, 24 = N/A (default)
+|54-59   |  6 |From UTC Minute        |from_min  |u|0-59, 60 = N/A (default)
+|60-64   |  5 |To UTC Hour            |to_hour   |u|0-23, 24 = N/A (default)
+|65-70   |  6 |To UTC Minute          |to_min    |u|0-59, 60 = N/A (default)
+|71-79   |  9 |Current Dir. Predicted |cdir      |u|0-359 true bearing,
                                                     360 = N/A (default).
-|177-184 |  8 |Current Speed Predicted|cspeed    |U1|0-250, units of 0.1 knots,
+|80-87   |  8 |Current Speed Predicted|cspeed    |U1|0-250, units of 0.1 knots,
                                                     251 = speed >= 25.1 knots,
                                                     255 = N/A (default).
 |=============================================================================
@@ -2938,11 +2938,11 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
                                               262,143 = not available (default).
 |112-116 |  5 |                  |waycount |u|Waypoint count (1-16,)
                                               Values 17-31 are not used.
-|        |                       |         |a|Waypoint array
-|117-144 | 28 |Longitude         |lon      |I4|Unit = minutes * 0.0001,
+|117     |    |                  |         |a|Waypoint array
+|0-27    | 28 |Longitude         |lon      |I4|Unit = minutes * 0.0001,
                                               181000 = N/A (default),
                                               E positive, W negative.
-|145-171 | 27 |Latitude          |lat      |I4|Unit = minutes * 0.001,
+|28-54   | 27 |Latitude          |lat      |I4|Unit = minutes * 0.001,
                                               91000 = N/A (default),
                                               N positive, S negative.
 |==============================================================================

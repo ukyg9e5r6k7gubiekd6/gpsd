@@ -350,16 +350,22 @@ if __name__ == '__main__':
     table = table[2:]
     widths = []
     for line in table:
-        if '|' in line:
-            widths.append(line.split('|')[2].strip())
-        else:
+        fields = line.split('|')
+        if '|' not in line:        # Continuation line
             widths.append('')
+        elif fields[5] == 'a':     # Array boundary indicator
+            widths.append(None)
+        else:
+            widths.append(fields[2].strip())
 
     # Compute offsets for an AIVDM message breakdown, given the bit widths.
     offsets = []
     base = 0
     for w in widths:
-        if not w:
+        if w is None:
+            offsets.append(`base`)
+            base = 0
+        elif w == '':
             offsets.append('')
         else:
             w = int(w)
