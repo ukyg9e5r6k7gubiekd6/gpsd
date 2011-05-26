@@ -32,7 +32,6 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 		struct gps_data_t* stream(int); //set watcher and policy flags
 		struct gps_data_t* read(void); //block until gpsd returns new data, then return the updated struct
 		const char *data(void);	// return the client data buffer
-		int close(void);	// close the GPS
 		bool waiting(int);	// blocking check for data waiting
 		void clear_fix(void);
 		void enable_debug(int, FILE*);
