@@ -64,7 +64,7 @@ def make_driver_code(wfp):
     # Requires UBITS, SBITS, UCHARS to act as they do in the AIVDM driver.
     # Also relies on ais_context->bitlen to be the message bit length.
     record = after is None
-    has_array = False
+    arrayname = None
     base = '\t'
     step = " " * 4
     indent = base
@@ -91,11 +91,11 @@ def make_driver_code(wfp):
                 print >>wfp, indent + "for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) <= ais_context->bitlen; i++) {" 
                 indent += step
                 print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*i)" 
-                has_array = True
+                arrayname = name
                 continue
             offset = offsets[i].split('-')[0]
-            if has_array:
-                target = "%s.array[i].%s" % (structname, name)
+            if arrayname:
+                target = "%s.%s[i].%s" % (structname, arrayname, name)
                 offset = "a + " + offset 
             else:
                 target = "%s.%s" % (structname, name)
@@ -106,7 +106,7 @@ def make_driver_code(wfp):
                 print >>wfp, indent + "UCHARS(%s, %s);" % (offset, target)
             else:
                 print >>wfp, indent + "/* %s bits of type %s */" % (width,ftype)
-    if has_array:
+    if arrayname:
         indent = base
         print >>wfp, indent + "}" 
         print >>wfp, "#undef ARRAY_BASE" 
@@ -118,7 +118,7 @@ def make_structure(wfp):
     baseindent = 8
     step = 4
     inwards = step
-    has_array = False
+    arrayname = None
     def tabify(n):
         return ('\t' * (n / 8)) + (" " * (n % 8)) 
     print >>wfp, tabify(baseindent) + "struct {"
@@ -140,7 +140,7 @@ def make_structure(wfp):
             if ftype == 'a':
                 print >>wfp, tabify(baseindent + inwards) + "struct {"
                 inwards += step
-                has_array = True
+                arrayname = name
                 continue
             if ftype == 'u' or ftype == 'e' or ftype[0] == 'U':
                 decl = "unsigned int %s;\t/* %s */" % (name, description)
@@ -154,9 +154,9 @@ def make_structure(wfp):
             else:
                 decl += "/* %s bits of type %s */" % (width, ftype)
             print >>wfp, tabify(baseindent + inwards) + decl
-    if has_array:
+    if arrayname:
         inwards -= step
-        print >>wfp, tabify(baseindent + inwards) + "} array[DIMENSION_UNKNOWN];"
+        print >>wfp, tabify(baseindent + inwards) + "} %s[DIMENSION_UNKNOWN];" % arrayname
     print >>wfp, tabify(baseindent) + "} %s;" % structname
 
 def make_json_dumper(wfp):
