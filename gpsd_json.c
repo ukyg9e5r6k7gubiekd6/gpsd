@@ -1766,43 +1766,6 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type6.dac1fid12.amount,
 			       ais->type6.dac1fid12.unit);
 		break;
-	    case 14:	/* IMO236 - Tidal window */
-	    case 32:	/* IMO289 - Tidal Window */
-		if (scaled)
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"month\":%u,\"day\":%u,"
-				   "\"lon\":%.4f,\"lat\":%.4f,"
-				   "\"from_hour\":%u,\"from_min\":%u,"
-				   "\"to_hour\":%u,\"to_min\":%u,"
-				   "\"cdir\":%u,\"cspeed\":%.1f}r\n",
-				   ais->type6.dac1fid32.month,
-				   ais->type6.dac1fid32.day,
-				   ais->type6.dac1fid32.lon / AIS_LATLON_SCALE,
-				   ais->type6.dac1fid32.lat / AIS_LATLON_SCALE,
-				   ais->type6.dac1fid32.from_hour,
-				   ais->type6.dac1fid32.from_min,
-				   ais->type6.dac1fid32.to_hour,
-				   ais->type6.dac1fid32.to_min,
-				   ais->type6.dac1fid32.cdir,
-				   ais->type6.dac1fid32.cspeed * 0.1);
-		else
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"month\":%u,\"day\":%u,"
-				   "\"lon\":%d,\"lat\":%.d,"
-				   "\"from_hour\":%u,\"from_min\":%u,"
-				   "\"to_hour\":%u,\"to_min\":%u,"
-				   "\"cdir\":%u,\"cspeed\":%u}\r\n",
-				   ais->type6.dac1fid32.month,
-				   ais->type6.dac1fid32.day,
-				   ais->type6.dac1fid32.lon,
-				   ais->type6.dac1fid32.lat,
-				   ais->type6.dac1fid32.from_hour,
-				   ais->type6.dac1fid32.from_min,
-				   ais->type6.dac1fid32.to_hour,
-				   ais->type6.dac1fid32.to_min,
-				   ais->type6.dac1fid32.cdir,
-				   ais->type6.dac1fid32.cspeed);
-		break;
 	    case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		    "\"airdraught\":%u}\r\n",
