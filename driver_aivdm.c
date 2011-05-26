@@ -358,7 +358,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type6.dac1fid12.unit		= UBITS(355, 2);
 		    /* skip 3 bits */
 		    break;
-		case 14:	/* IMO236 - Tidal window */
+		case 14:	/* IMO236 - Tidal Window */
 		    break;
 		case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
 		    ais->type6.dac1fid15.airdraught	= UBITS(56, 11);
@@ -634,8 +634,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid31.salinity	= UBITS(339, 9);
 		    ais->type8.dac1fid31.ice		= UBITS(348, 2);
 		    imo = true;
-		    break;
-		case 32:        /* Tidal Window */
 		    break;
 		}
 	    /* land here if we failed to match a known DAC/FID */
