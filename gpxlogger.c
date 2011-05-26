@@ -94,7 +94,7 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
 	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altitude);
     (void)fprintf(logfile,"    <time>%s</time>\n",
 		 unix_to_iso8601(time, tbuf, sizeof(tbuf)));
-    (void)fprintf(logfile,"    <src>GPSD tag=\"%s\"<src>\n", gpsdata->tag);
+    (void)fprintf(logfile,"    <src>GPSD tag=\"%s\"</src>\n", gpsdata->tag);
     if (gpsdata->status == STATUS_DGPS_FIX)
 	(void)fprintf(logfile,"    <fix>dgps</fix>\n");
     else
