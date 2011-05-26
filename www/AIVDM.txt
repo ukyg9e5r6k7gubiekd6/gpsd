@@ -487,6 +487,7 @@ type descriptions.
 |x|   Spare or reserved bit
 |t|   String (packed six-bit ASCII)
 |d|   Data (uninterpreted binary)
+|a|   Array boundary. Following fields are repeated to end of message
 |==============================================================================
 
 The field breakdowns in this document have been checked against live
@@ -960,6 +961,7 @@ different widths for the latitude, longitude, and current-speed fields
 |82-87   |  6 |FID                    |fid       |u|FID = 14
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
+|        |    |                       |          |a|Tidal information
 |97-123  | 27 |Latitude               |lat       |I4|Unit = minutes * 0.0001,
                                                     91000 = N/A (default),
                                                     N positive, S negative.
@@ -1595,6 +1597,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
                                                262,143 = N/A (default),
 |144-148 |  5 |                  |waycount  |u|Waypoint count (1-16),
                                                Values 17-31 are not used.
+|        |    |                  |          |a|Waypoint array
 |149-176 | 28 |Longitude         |lon       |I4|Minutes * 0.0001,
                                                181000 = N/A (default),
                                                E positive, W negative.
@@ -1673,6 +1676,7 @@ different bit widths for the latitude and longitude fields.
 |82-87   |  6 |FID                    |fid       |u|FID = 32
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
+|        |    |                       |          |a|Tidal information
 |97-121  | 25 |Longitude              |lon       |I3|Unit = minutes * 0.001,
                                                     181000 = N/A (default),
                                                     E positive, W negative.
@@ -2905,7 +2909,7 @@ distance measured from the surface of the water to the sensor.
 
 The timestamp is for the forecast air gap.
 
-==== Route Information (broadcast) ====
+==== IMO289 Route Information (broadcast) ====
 
 The content of this message is a time and a list of waypoints describing a
 course.  It has an addressed equivalent that is a message 6 subtype.
@@ -2934,6 +2938,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
                                               262,143 = not available (default).
 |112-116 |  5 |                  |waycount |u|Waypoint count (1-16,)
                                               Values 17-31 are not used.
+|        |                       |         |a|Waypoint array
 |117-144 | 28 |Longitude         |lon      |I4|Unit = minutes * 0.0001,
                                               181000 = N/A (default),
                                               E positive, W negative.
@@ -2948,7 +2953,7 @@ end with 1 to 16 waypoints.
 For interpretation of the Route Type field, see the table under the "Route
 Information (addressed)" message (DAC=1, FID=28).
 
-==== Text description (broadcast) ====
+==== IMO289 Text description (broadcast) ====
 
 A message 8 subtype. DAC = 001 FID = 29. Variable length: 72-1032 bits.
 
