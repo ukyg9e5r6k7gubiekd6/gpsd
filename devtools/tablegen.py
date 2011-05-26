@@ -94,6 +94,8 @@ def make_structure(wfp):
     record = after is None
     baseindent = 8
     step = 4
+    inwards = step
+    has_array = False
     def tabify(n):
         return ('\t' * (n / 8)) + (" " * (n % 8)) 
     print >>wfp, tabify(baseindent) + "struct {"
@@ -112,6 +114,11 @@ def make_structure(wfp):
                 continue
             if ftype == 'x' or not record:
                 continue
+            if ftype == 'a':
+                print >>wfp, tabify(baseindent + inwards) + "struct {"
+                inwards += step
+                has_array = True
+                continue
             if ftype == 'u' or ftype == 'e' or ftype[0] == 'U':
                 decl = "unsigned int %s;\t/* %s */" % (name, description)
             elif ftype == 'i' or ftype[0] == 'I':
@@ -123,7 +130,10 @@ def make_structure(wfp):
                 decl = "char %s[%d+1];\t/* %s */" % (name, stl, description)
             else:
                 decl += "/* %s bits of type %s */" % (width, ftype)
-            print >>wfp, tabify(baseindent + step) + decl
+            print >>wfp, tabify(baseindent + inwards) + decl
+    if has_array:
+        inwards -= step
+        print >>wfp, tabify(baseindent + inwards) + "} array[DIMENSION_UNKNOWN];"
     print >>wfp, tabify(baseindent) + "} %s;" % structname
 
 def make_json_dumper(wfp):
