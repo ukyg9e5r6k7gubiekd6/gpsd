@@ -56,7 +56,7 @@ static void print_gpx_header(void)
     (void)fprintf(logfile,"        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
     (void)fprintf(logfile,"        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
     (void)fprintf(logfile," <metadata>\n");
-    (void)fprintf(logfile,"  <time>%s</time>\n", unix_to_iso8601(time(NULL), tbuf, sizeof(tbuf)));
+    (void)fprintf(logfile,"  <time>%s</time>\n", unix_to_iso8601((timestamp_t)time(NULL), tbuf, sizeof(tbuf)));
     (void)fprintf(logfile," </metadata>\n");
     (void)fflush(logfile);
 }
