@@ -583,6 +583,16 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		    break;
 		case 19:        /* IMO289 - Marine Traffic Signal */
+		    ais->type8.dac1fid19.linkage	= UBITS(56, 10);
+		    UCHARS(66, ais->type8.dac1fid19.station);
+		    ais->type8.dac1fid19.lon	= SBITS(186, 25);
+		    ais->type8.dac1fid19.lat	= SBITS(211, 24);
+		    ais->type8.dac1fid19.status	= UBITS(235, 2);
+		    /* 5 bits of type e */
+		    ais->type8.dac1fid19.hour	= UBITS(242, 5);
+		    ais->type8.dac1fid19.minute	= UBITS(247, 6);
+		    /* 5 bits of type e */
+		    /* skip 102 bits */
 		    break;
 		case 21:        /* IMO289 - Weather obs. report from ship */
 		    break;

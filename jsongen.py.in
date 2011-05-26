@@ -285,6 +285,23 @@ ais_specs = (
         ),
     },
     {
+        "initname" : "json_ais8_fid19",
+        "headers": ("AIS_HEADER","AIS_TYPE8",),
+        "structname": "ais->type8.dac1fid19",
+        "fieldmap":(
+            # fieldname    type        default
+            ('linkage',    'uinteger', '0'),
+            ('station',    'string',   None),
+            ('lon',        'integer',  'AIS_LON3_NOT_AVAILABLE'),
+            ('lat',        'integer',  'AIS_LAT3_NOT_AVAILABLE'),
+            ('status',     'uinteger', '0'),
+            ('signal',     'uinteger', '0'),
+            ('hour',       'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
+            ('minute',     'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+            ('nextsignal', 'uinteger', '0'),
+        ),
+    },
+    {
     "initname" : "json_ais8_fid29",
     "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8.dac1fid29",

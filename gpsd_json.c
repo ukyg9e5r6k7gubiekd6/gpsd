@@ -1504,7 +1504,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 #define STATIONTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(ship_type_legends)) ? station_type_legends[n] : "INVALID STATION TYPE")
 
     static char *navaid_type_legends[] = {
-	"Unspcified",
+	"Unspecified",
 	"Reference point",
 	"RACON",
 	"Fixed offshore structure",
@@ -1539,6 +1539,27 @@ void json_aivdm_dump(const struct ais_t *ais,
     };
 
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
+
+    static char *signal_legends[] = {
+	"N/A",
+	"Serious emergency – stop or divert according to instructions.",
+	"Vessels shall not proceed.",
+	"Vessels may proceed. One way traffic.",
+	"Vessels may proceed. Two way traffic.",
+	"Vessels shall proceed on specific orders only.",
+	"Vessels in main channel shall not proceed."
+	"Vessels in main channel shall proceed on specific orders only.",
+	"Vessels in main channel shall proceed on specific orders only.",
+	"I = \"in-bound\" only acceptable.",
+	"O = \"out-bound\" only acceptable.",
+	"F = both \"in- and out-bound\" acceptable.",
+	"XI = Code will shift to \"I\" in due time.",
+	"XO = Code will shift to \"O\" in due time.",
+	"X = Vessels shall proceed only on direction.",
+    };
+
+#define SIGNAL_DISPLAY(n) (((n) < (unsigned int)NITEMS(signal_legends[0])) ? signal_legends[n] : "INVALID SIGNAL TYPE")
+
 
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
     if (device != NULL && device[0] != '\0')
@@ -2107,6 +2128,30 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"linkage\":%u,\"station\":\"%s\",\"lon\":%.3f,\"lat\":%.3f,\"status\":%u,\"signal\":\"%s\",\"hour\":%u,\"minute\":%u,\"nextsignal\":\"%s\"}\r\n",
+			ais->type8.dac1fid19.linkage,
+			ais->type8.dac1fid19.station,
+			ais->type8.dac1fid19.lon / AIS_LATLON3_SCALE,
+			ais->type8.dac1fid19.lat / AIS_LATLON3_SCALE,
+			ais->type8.dac1fid19.status,
+			SIGNAL_DISPLAY(ais->type8.dac1fid19.signal),
+			ais->type8.dac1fid19.hour,
+			ais->type8.dac1fid19.minute,
+			SIGNAL_DISPLAY(ais->type8.dac1fid19.nextsignal));
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"linkage\":%u,\"station\":\"%s\",\"lon\":%d,\"lat\":%d,\"status\":%u,\"signal\":%u,\"hour\":%u,\"minute\":%u,\"nextsignal\":%u}\r\n",
+			ais->type8.dac1fid19.linkage,
+			ais->type8.dac1fid19.station,
+			ais->type8.dac1fid19.lon,
+			ais->type8.dac1fid19.lat,
+			ais->type8.dac1fid19.status,
+			ais->type8.dac1fid19.signal,
+			ais->type8.dac1fid19.hour,
+			ais->type8.dac1fid19.minute,
+			ais->type8.dac1fid19.nextsignal);
 		break;
 	    case 21:        /* IMO289 - Weather obs. report from ship */
 		break;

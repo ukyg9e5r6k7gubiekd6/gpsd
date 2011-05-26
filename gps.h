@@ -1087,6 +1087,18 @@ struct ais_t
 		struct {
 		    unsigned int airdraught;	/* Air Draught */
 		} dac1fid15;
+		/* IMO 289 - Marine Traffic Signal */
+		struct {
+		    unsigned int linkage;	/* Message Linkage ID */
+		    char station[20+1];		/* Name of Signal Station */
+		    signed int lon;		/* Longitude */
+		    signed int lat;		/* Latitude */
+		    unsigned int status;	/* Status of Signal */
+		    unsigned int signal;	/* Signal In Service */
+		    unsigned int hour;		/* UTC hour */
+		    unsigned int minute;	/* UTC minute */
+		    unsigned int nextsignal;	/* Expected Next Signal */
+		} dac1fid19;
 		/* IMO289 - Text message (broadcast) */
 		struct {
 		    unsigned int linkage;
