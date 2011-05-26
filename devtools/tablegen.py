@@ -85,7 +85,7 @@ def make_driver_code(wfp):
             if ftype == 'x':
                 print >>wfp,"\t/* skip %s bit%s */" % (width, ["", "s"][width>'1'])
                 continue
-            if ftype == 'a':
+            if ftype[0] == 'a':
                 print >>wfp, '#define ARRAY_BASE %s' % offsets[i].strip()
                 print >>wfp, '#define ELEMENT_SIZE %s' % trailing
                 print >>wfp, indent + "for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) <= ais_context->bitlen; i++) {" 
@@ -137,10 +137,11 @@ def make_structure(wfp):
                 continue
             if ftype == 'x' or not record:
                 continue
-            if ftype == 'a':
+            if ftype[0] == 'a':
                 print >>wfp, tabify(baseindent + inwards) + "struct {"
                 inwards += step
                 arrayname = name
+                arraydim = ftype[1:]
                 continue
             if ftype == 'u' or ftype == 'e' or ftype[0] == 'U':
                 decl = "unsigned int %s;\t/* %s */" % (name, description)
@@ -156,7 +157,7 @@ def make_structure(wfp):
             print >>wfp, tabify(baseindent + inwards) + decl
     if arrayname:
         inwards -= step
-        print >>wfp, tabify(baseindent + inwards) + "} %s[DIMENSION_UNKNOWN];" % arrayname
+        print >>wfp, tabify(baseindent + inwards) + "} %s[%s];" % (arrayname, arraydim)
     print >>wfp, tabify(baseindent) + "} %s;" % structname
 
 def make_json_dumper(wfp):

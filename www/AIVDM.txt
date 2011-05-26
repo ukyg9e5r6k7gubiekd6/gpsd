@@ -487,7 +487,8 @@ type descriptions.
 |x|   Spare or reserved bit
 |t|   String (packed six-bit ASCII)
 |d|   Data (uninterpreted binary)
-|a|   Array boundary. Following fields are repeated to end of message
+|a|   Array boundary, suffix is maximum array size. 
+      Following fields are repeated to end of message
 |==============================================================================
 
 The field breakdowns in this document have been checked against live
@@ -961,7 +962,7 @@ different widths for the latitude, longitude, and current-speed fields
 |82-87   |  6 |FID                    |fid       |u|FID = 14
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
-|97      |    |                       |tidal     |a|Tidal information
+|97      |    |                       |tidal     |a3|Tidal information
 |0-26    | 27 |Latitude               |lat       |I4|Unit = minutes * 0.0001,
                                                     91000 = N/A (default),
                                                     N positive, S negative.
@@ -1597,7 +1598,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
                                                262,143 = N/A (default),
 |144-148 |  5 |                  |waycount  |u|Waypoint count (1-16),
                                                Values 17-31 are not used.
-|149     |    |                  |waypoint  |a|Waypoint array
+|149     |    |                  |waypoint  |a16|Waypoint array
 |0-27    | 28 |Longitude         |lon       |I4|Minutes * 0.0001,
                                                181000 = N/A (default),
                                                E positive, W negative.
@@ -1676,7 +1677,7 @@ different bit widths for the latitude and longitude fields.
 |82-87   |  6 |FID                    |fid       |u|FID = 32
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
-|97      |    |                       |tidal     |a|Tidal information
+|97      |    |                       |tidal     |a3|Tidal information
 |0-24    | 25 |Longitude              |lon       |I3|Unit = minutes * 0.001,
                                                     181000 = N/A (default),
                                                     E positive, W negative.
@@ -2922,7 +2923,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
 |0-5     |  6 |Message Type      |type     |u|Constant: 8
 |6-7     |  2 |Repeat Indicator  |repeat   |u|As in Common Navigation Block
 |8-37    | 30 |Source MMSI       |mmsi     |u|9 decimal digits
-|38-39   |  2 |Spare             |         |u|Not used
+|38-39   |  2 |Spare             |         |x|Not used
 |40-49   | 10 |DAC               |dac      |u|DAC = 001
 |50-55   |  6 |FID               |fid      |u|FID = 27
 |56-65   | 10 |Message Linkage ID|linkage  |u|Unsigned integer
@@ -2936,9 +2937,8 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
 |94-111  | 18 |Duration          |duration |u|Minutes from start time,
                                               0 = cancel route,
                                               262,143 = not available (default).
-|112-116 |  5 |                  |waycount |u|Waypoint count (1-16,)
-                                              Values 17-31 are not used.
-|117     |    |                  |waypoint |a|Waypoint array
+|112-116 |  5 |Waypoint count    |waycount |u|1-16, values 17-31 are not used.
+|117     |    |                  |waypoint |a16|Waypoint array
 |0-27    | 28 |Longitude         |lon      |I4|Unit = minutes * 0.0001,
                                               181000 = N/A (default),
                                               E positive, W negative.
