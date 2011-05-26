@@ -161,14 +161,14 @@ def make_structure(wfp):
 
 def make_json_dumper(wfp):
     # Write the skeleton of a JSON dump corresponding to the table
-    baseindent = " " * 8
-    step = " " * 4
-    unscaled = ""
-    scaled = ""
-    decorator = []
-    names = []
     record = after is None
-    header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
+    # Elements of each tuple:
+    #   1. variable name,
+    #   2. unscaled printf format
+    #   3. wrapper for unscaled variable reference 
+    #   4. scaled printf format
+    #   5. wrapper for scaled variable reference 
+    tuples = []
     for (i, t) in enumerate(table):
         if '|' in t:
             fields = map(lambda s: s.strip(), t.split('|'))
@@ -184,89 +184,82 @@ def make_json_dumper(wfp):
                 continue
             fmt = r'\"%s\":' % name
             if ftype == 'u':
-                names.append(name)
-                fmt += "%u"
-                scaled += fmt
-                unscaled += fmt
-                decorator.append(None)
+                tuples.append((name,
+                               fmt+"%u", "%s",
+                               None, None))
             elif ftype == 'e':
-                names.append(name)
-                scaled += fmt + r"\"%s\""
-                unscaled += fmt + "%u"
-                decorator.append('FOO[%s]')
+                tuples.append((name,
+                               fmt+"%u", "%s",
+                               fmt+r"\"%s\"", 'FOO[%s]'))
             elif ftype == 'i':
-                names.append(name)
-                fmt += "%d"
-                scaled += fmt
-                unscaled += fmt
-                decorator.append(None)
+                tuples.append((name,
+                               fmt+"%d", "%s",
+                               None, None))
             elif ftype == 't':
-                names.append(name)
-                fmt += r'\"%s\"'
-                scaled += fmt
-                unscaled += fmt
-                decorator.append(None)
+                tuples.append((name,
+                               fmt+r'\"%s\"', "%s",
+                               None, None))
             elif ftype == 'b':
-                names.append(name)
-                fmt += "%d"
-                scaled += fmt
-                unscaled += fmt
-                decorator.append('JSON_BOOL(%s)')
+                tuples.append((name,
+                               fmt+r'\"%s\"', "JSON_BOOL(%s)",
+                               None, None))
             elif ftype[0] == 'd':
-                names.append("/* data length */")
-                names.append("gpsd_hexdump(" + name + ")")
-                fmt + "%zd:%s"
-                scaled += fmt
-                unscaled += fmt
-                decorator.append(None)
+                print >>sys.stderr, "Cannot generate code for data members"
+                sys.exit(1)
             elif ftype[0] == 'U':
-                names.append(name)
-                scaled += fmt + "%%.%sf" % ftype[1]
-                unscaled += fmt + "%u"
-                decorator.append('%s / SCALE')
+                tuples.append((name,
+                               fmt+"%u", "%s",
+                               fmt+"%%.%sf" % ftype[1], '%s / SCALE'))
             elif ftype[0] == 'I':
-                names.append(name)
-                scaled += fmt + "%%.%sf" % ftype[1]
-                unscaled += fmt + "%d"
-                decorator.append('%s / SCALE')
+                tuples.append((name,
+                               fmt+"%d", "%s",
+                               fmt+"%%.%sf" % ftype[1], '%s / SCALE'))
             else:
                 print >>sys.stderr, "Unknown type code", ftype
-                sys.exit(0)
-            scaled += ","
-            unscaled += ","
-    scaled = scaled[:-1]
-    unscaled = unscaled[:-1]
-    if scaled == unscaled:
-        print >>wfp, baseindent + header
-        print >>wfp, (baseindent + step) + '"%s",' % unscaled
-        for (i, n) in enumerate(names):
-            if i < len(names) - 1:
-                print >>wfp, (baseindent + step) + structname + '.%s,' % n
+                sys.exit(1)
+    startspan = 0
+    def scaled(i):
+        return tuples[i][3] is not None
+    def tslice(e, i):
+        return map(lambda x: x[i], tuples[startspan:e+1])
+    base = " " * 8
+    step = " " * 4
+    header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
+    for (i, (var, uf, uv, sf, sv)) in enumerate(tuples):
+        endit = i+1 == len(tuples)
+        if endit or scaled(i) != scaled(i+1):
+            if not scaled(i):
+                print >>wfp, base + header
+                print >>wfp, base + step + '"'+','.join(tslice(i,1))+'",'
+                for (j, t) in enumerate(tuples[startspan:i+1]):
+                    ref = structname + "." + t[0]
+                    wfp.write(base + step + t[2] % ref)
+                    if j == i - startspan:
+                        wfp.write(");\n")
+                    else:
+                        wfp.write(",\n")
             else:
-                print >>wfp, (baseindent + step) + structname + '.%s);' % n
-    else:
-        print >>wfp, (baseindent + step) + "if (scaled)"
-        print >>wfp, (baseindent + step*2) + header
-        print >>wfp, (baseindent + step*3) + '"%s",' % scaled
-        for (i, n) in enumerate(names):
-            n = structname + '.%s' % n
-            if decorator[i]:
-                n = decorator[i] % n
-            arg = (baseindent + step*3) + n
-            if i < len(names) - 1:
-                print >>wfp, arg + ","
-            else:
-                print >>wfp, arg + ");"
-        print >>wfp, (baseindent + step) + "else"
-        print >>wfp, (baseindent + step*2) + header
-        print >>wfp, (baseindent + step*3) + '"%s",' % unscaled
-        for (i, n) in enumerate(names):
-            n = structname + '.%s' % n
-            arg = (baseindent + step*3) + n
-            if i < len(names) - 1:
-                print >>wfp, arg + ','
-            else:
-                print >>wfp, arg + ';'
+                print >>wfp, base + "if (scaled)"
+                print >>wfp, base + step + header
+                print >>wfp, base + step*2 + '"'+','.join(tslice(i,3))+'",'
+                for (j, t) in enumerate(tuples[startspan:i+1]):
+                    ref = structname + "." + t[0]
+                    wfp.write(base + step*2 + t[4] % ref)
+                    if j == i - startspan:
+                        wfp.write(");\n")
+                    else:
+                        wfp.write(",\n")
+                print >>wfp, base + "else"
+                print >>wfp, base + step + header
+                print >>wfp, base + step*2 + '"'+','.join(tslice(i,1))+'",'
+                for (j, t) in enumerate(tuples[startspan:i+1]):
+                    ref = structname + "." + t[0]
+                    wfp.write(base + step*2 + t[2] % ref)
+                    if j == i - startspan:
+                        wfp.write(");\n")
+                    else:
+                        wfp.write(",\n")
+            startspan = i+1
 
 def make_json_generator(wfp):
     # Write a stanza for jsongen.py.in describing how to generate a
