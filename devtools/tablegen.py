@@ -51,7 +51,7 @@
 import sys, getopt
 
 def correct_table(wfp):
-    # Writes the corrected table to standard output.
+    # Writes the corrected table.
     print >>sys.stderr, "Total bits:", base 
     for (i, t) in enumerate(table):
         if offsets[i].strip():
@@ -60,9 +60,14 @@ def correct_table(wfp):
             print >>wfp, t.rstrip()
 
 def make_driver_code(wfp):
-    # Writes calls to bit-extraction macros to standard output.
-    # Requites UBITS, SBITS, UCHARS to act as they do in the AIVDM driver.
+    # Writes calls to bit-extraction macros.
+    # Requires UBITS, SBITS, UCHARS to act as they do in the AIVDM driver.
+    # Also relies on ais_context->bitlen to be the message bit length.
     record = after is None
+    has_array = False
+    base = '\t'
+    step = " " * 4
+    indent = base
     for (i, t) in enumerate(table):
         if '|' in t:
             fields = map(lambda s: s.strip(), t.split('|'))
@@ -80,14 +85,32 @@ def make_driver_code(wfp):
             if ftype == 'x':
                 print >>wfp,"\t/* skip %s bit%s */" % (width, ["", "s"][width>'1'])
                 continue
+            if ftype == 'a':
+                print >>wfp, '#define ARRAY_BASE %s' % offsets[i].strip()
+                print >>wfp, '#define ELEMENT_SIZE %s' % trailing
+                print >>wfp, indent + "for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) <= ais_context->bitlen; i++) {" 
+                indent += step
+                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*i)" 
+                has_array = True
+                continue
             offset = offsets[i].split('-')[0]
-            if ftype[0].lower() in ('u', 'i'):
-                print >>wfp,"\t%s.%s\t= %sBITS(%s, %s);" % \
-                      (structname, name, {'u':'U', 'e':'U', 'i':'S'}[ftype[0].lower()], offset, width)
-            elif ftype == 't':
-                print >>wfp,"\tUCHARS(%s, %s.%s);" % (offset, structname, name)
+            if has_array:
+                target = "%s.array[i].%s" % (structname, name)
+                offset = "a + " + offset 
             else:
-                print >>wfp,"\t/* %s bits of type %s */" % (width, ftype)
+                target = "%s.%s" % (structname, name)
+            if ftype[0].lower() in ('u', 'i'):
+                print >>wfp, indent + "%s\t= %sBITS(%s, %s);" % \
+                      (target, {'u':'U', 'e':'U', 'i':'S'}[ftype[0].lower()], offset, width)
+            elif ftype == 't':
+                print >>wfp, indent + "UCHARS(%s, %s);" % (offset, target)
+            else:
+                print >>wfp, indent + "/* %s bits of type %s */" % (width,ftype)
+    if has_array:
+        indent = base
+        print >>wfp, indent + "}" 
+        print >>wfp, "#undef ARRAY_BASE" 
+        print >>wfp, "#undef ELEMENT_SIZE" 
 
 def make_structure(wfp):
     # Write a structure definition correponding to the table.
@@ -336,7 +359,11 @@ if __name__ == '__main__':
         print >>sys.stderr, "tablecheck.py: no mode selected"
         sys.exit(1)
 
-    # First, read in the table
+    # First, read in the table.
+    # Sets the following:
+    #    table - the table lines
+    #    widths - array of table widths
+    #    trailing - bit length of the table or trailing array elemend 
     startline = int(arguments[0])
     table = []
     keep = False
@@ -354,6 +381,7 @@ if __name__ == '__main__':
         if keep:
             if line[0] == '|':
                 fields = line.split("|")
+                trailing = fields[1]
                 fields[1] = " " * len(fields[1])
                 line = "|".join(fields)
             table.append(line)
@@ -367,6 +395,9 @@ if __name__ == '__main__':
             widths.append(None)
         else:
             widths.append(fields[2].strip())
+    if '-' in trailing:
+        trailing = trailing.split('-')[1]
+    trailing = str(int(trailing)+1)
 
     # Compute offsets for an AIVDM message breakdown, given the bit widths.
     offsets = []
