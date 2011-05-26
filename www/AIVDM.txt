@@ -889,7 +889,7 @@ used to identify the port where the documents for the dangerous goods
 cargo can be found, e. g. last and next port of call, and to allow
 the requesting authority to form a danger estimate.
 
-A message 6 subtype. DAC = 001 FID = 12. Fixed length: 360 bits
+A message 6 subtype. DAC = 001 FID = 12. Fixed length: 360 bits.
 This is the <<IMO236>> version, now deprecated; there is a later 
 <<IMO289>> version. 
 
@@ -961,7 +961,7 @@ different widths for the latitude, longitude, and current-speed fields
 |82-87   |  6 |FID                    |fid       |u|FID = 14
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
-|97      |    |                       |          |a|Tidal information
+|97      |    |                       |tidal     |a|Tidal information
 |0-26    | 27 |Latitude               |lat       |I4|Unit = minutes * 0.0001,
                                                     91000 = N/A (default),
                                                     N positive, S negative.
@@ -1597,7 +1597,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
                                                262,143 = N/A (default),
 |144-148 |  5 |                  |waycount  |u|Waypoint count (1-16),
                                                Values 17-31 are not used.
-|149     |    |                  |          |a|Waypoint array
+|149     |    |                  |waypoint  |a|Waypoint array
 |0-27    | 28 |Longitude         |lon       |I4|Minutes * 0.0001,
                                                181000 = N/A (default),
                                                E positive, W negative.
@@ -1676,7 +1676,7 @@ different bit widths for the latitude and longitude fields.
 |82-87   |  6 |FID                    |fid       |u|FID = 32
 |88-91   |  4 |Month                  |month     |u|1-12; 0 = N/A (default)
 |92-96   |  5 |Day                    |day       |u|1-31; 0 = N/A (default)
-|97      |    |                       |          |a|Tidal information
+|97      |    |                       |tidal     |a|Tidal information
 |0-24    | 25 |Longitude              |lon       |I3|Unit = minutes * 0.001,
                                                     181000 = N/A (default),
                                                     E positive, W negative.
@@ -2938,7 +2938,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
                                               262,143 = not available (default).
 |112-116 |  5 |                  |waycount |u|Waypoint count (1-16,)
                                               Values 17-31 are not used.
-|117     |    |                  |         |a|Waypoint array
+|117     |    |                  |waypoint |a|Waypoint array
 |0-27    | 28 |Longitude         |lon      |I4|Unit = minutes * 0.0001,
                                               181000 = N/A (default),
                                               E positive, W negative.
