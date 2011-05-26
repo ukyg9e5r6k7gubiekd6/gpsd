@@ -2023,7 +2023,7 @@ bits.  This message is laid out identically in <<IMO236>> and
                                                  1 = id is the IMO number,
                                                  2 = id is the call sign,
                                                  3 = Other (default).
-|58-99   | 42 |Target identifier  |See below  |u|Target ID data.
+|58-99   | 42 |Target identifier  |id         |u|Target ID data.
 |100-103 |  4 |Spare              |           |x|Not used
 |104-127 | 24 |Latitude           |lat        |I3|Minutes * 0.001,
                                                  91000 = N/A (default),
@@ -2037,10 +2037,10 @@ bits.  This message is laid out identically in <<IMO236>> and
 |168-177 | 10 |Speed Over Ground  |speed      |u|0-254 in knots, 255 = N/A.
 |==============================================================================
 
-The interpretation of the target identifier field depends on the ppreceding type
-key.  For type 2 and 3 it is 6-bit ASCII text, for 0 and 1 it is a big-endian
-binary integer. An unkbnown target is expressed by type 3 and the string
-"@@@@@@@".
+The interpretation of the target identifier field depends on the
+ppreceding type key.  For 0 and 1 it is a big-endian unsigned binary
+integer (as shown above).  For type 2 and 3 it is 6-bit ASCII text. An
+unknown target is expressed by type 3 and the string "@@@@@@@".
 
 <<IMO289>> says: "When MMSI or IMO number is used, the least
 significant bit should equal bit zero of the Target Identifier." It is

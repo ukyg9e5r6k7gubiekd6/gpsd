@@ -112,7 +112,7 @@ def make_structure(wfp):
                 continue
             if ftype == 'x' or not record:
                 continue
-            if ftype == 'u' or ftype == 'e' or or ftype[0] == 'U':
+            if ftype == 'u' or ftype == 'e' or ftype[0] == 'U':
                 decl = "unsigned int %s;\t/* %s */" % (name, description)
             elif ftype == 'i' or ftype[0] == 'I':
                 decl = "signed int %s;\t/* %s */" % (name, description)
