@@ -132,7 +132,7 @@ def make_json_dumper(wfp):
     step = " " * 4
     unscaled = ""
     scaled = ""
-    has_scale = []
+    decorator = []
     names = []
     record = after is None
     header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
@@ -155,48 +155,47 @@ def make_json_dumper(wfp):
                 fmt += "%u"
                 scaled += fmt
                 unscaled += fmt
-                has_scale.append(False)
+                decorator.append(None)
             elif ftype == 'e':
                 names.append(name)
-                fmt += "%u"
-                scaled += "%u"
-                unscaled += "%s"   # Will throw error at compilation time
-                has_scale.append(True)
+                scaled += fmt + r"\"%s\""
+                unscaled += fmt + "%u"
+                decorator.append('FOO[%s]')
             elif ftype == 'i':
                 names.append(name)
                 fmt += "%d"
                 scaled += fmt
                 unscaled += fmt
-                has_scale.append(False)
+                decorator.append(None)
             elif ftype == 't':
                 names.append(name)
                 fmt += r'\"%s\"'
                 scaled += fmt
                 unscaled += fmt
-                has_scale.append(False)
+                decorator.append(None)
             elif ftype == 'b':
-                names.append("JSON_BOOL(" + name + ")")
+                names.append(name)
                 fmt += "%d"
                 scaled += fmt
                 unscaled += fmt
-                has_scale.append(False)
+                decorator.append('JSON_BOOL(%s)')
             elif ftype[0] == 'd':
                 names.append("/* data length */")
                 names.append("gpsd_hexdump(" + name + ")")
                 fmt + "%zd:%s"
                 scaled += fmt
                 unscaled += fmt
-                has_scale.append(False)
+                decorator.append(None)
             elif ftype[0] == 'U':
                 names.append(name)
                 scaled += fmt + "%%.%sf" % ftype[1]
                 unscaled += fmt + "%u"
-                has_scale.append(True)
+                decorator.append('%s / SCALE')
             elif ftype[0] == 'I':
                 names.append(name)
                 scaled += fmt + "%%.%sf" % ftype[1]
                 unscaled += fmt + "%d"
-                has_scale.append(True)
+                decorator.append('%s / SCALE')
             else:
                 print >>sys.stderr, "Unknown type code", ftype
                 sys.exit(0)
@@ -217,9 +216,10 @@ def make_json_dumper(wfp):
         print >>wfp, (baseindent + step*2) + header
         print >>wfp, (baseindent + step*3) + '"%s",' % scaled
         for (i, n) in enumerate(names):
-            if has_scale[i]:
-                n += " * SCALE"
-            arg = (baseindent + step*3) + structname + '.%s' % n
+            n = structname + '.%s' % n
+            if decorator[i]:
+                n = decorator[i] % n
+            arg = (baseindent + step*3) + n
             if i < len(names) - 1:
                 print >>wfp, arg + ","
             else:
@@ -228,7 +228,8 @@ def make_json_dumper(wfp):
         print >>wfp, (baseindent + step*2) + header
         print >>wfp, (baseindent + step*3) + '"%s",' % unscaled
         for (i, n) in enumerate(names):
-            arg = (baseindent + step*3) + structname + '.%s' % n
+            n = structname + '.%s' % n
+            arg = (baseindent + step*3) + n
             if i < len(names) - 1:
                 print >>wfp, arg + ','
             else:
