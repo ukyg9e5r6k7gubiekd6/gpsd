@@ -487,7 +487,8 @@ type descriptions.
 |x|   Spare or reserved bit
 |t|   String (packed six-bit ASCII)
 |d|   Data (uninterpreted binary)
-|a|   Array boundary, suffix is maximum array size. 
+|a|   Array boundary, numeric suffix is maximum array size.
+      ^ before suffix means preceding fields is the length. 
       Following fields are repeated to end of message
 |==============================================================================
 
@@ -1598,7 +1599,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
                                                262,143 = N/A (default),
 |144-148 |  5 |                  |waycount  |u|Waypoint count (1-16),
                                                Values 17-31 are not used.
-|149     |    |                  |waypoint  |a16|Waypoint array
+|149     |    |                  |waypoint  |a^16|Waypoint array
 |0-27    | 28 |Longitude         |lon       |I4|Minutes * 0.0001,
                                                181000 = N/A (default),
                                                E positive, W negative.
@@ -2938,7 +2939,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
                                               0 = cancel route,
                                               262,143 = not available (default).
 |112-116 |  5 |Waypoint count    |waycount |u|1-16, values 17-31 are not used.
-|117     |    |                  |waypoint |a16|Waypoint array
+|117     |    |                  |waypoint |a^16|Waypoint array
 |0-27    | 28 |Longitude         |lon      |I4|Unit = minutes * 0.0001,
                                               181000 = N/A (default),
                                               E positive, W negative.

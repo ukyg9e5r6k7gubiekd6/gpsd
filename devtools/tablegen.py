@@ -401,7 +401,7 @@ if __name__ == '__main__':
         fields = line.split('|')
         if '|' not in line:        # Continuation line
             widths.append('')
-        elif fields[5] == 'a':     # Array boundary indicator
+        elif fields[5][0] == 'a':     # Array boundary indicator
             widths.append(None)
         else:
             widths.append(fields[2].strip())
