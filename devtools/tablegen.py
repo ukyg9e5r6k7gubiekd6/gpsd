@@ -86,12 +86,18 @@ def make_driver_code(wfp):
                 print >>wfp,"\t/* skip %s bit%s */" % (width, ["", "s"][width>'1'])
                 continue
             if ftype[0] == 'a':
+                arrayname = name
+                explicit = ftype[1] == '^'
                 print >>wfp, '#define ARRAY_BASE %s' % offsets[i].strip()
                 print >>wfp, '#define ELEMENT_SIZE %s' % trailing
-                print >>wfp, indent + "for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) <= ais_context->bitlen; i++) {" 
+                if explicit:
+                    lengthfield = last
+                    print >>wfp, indent + "for (i = 0; i < %s; i++) {" % lengthfield 
+                else:
+                    lengthfield = "n" + arrayname + "s"
+                    print >>wfp, indent + "for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) <= ais_context->bitlen; i++) {" 
                 indent += step
                 print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*i)" 
-                arrayname = name
                 continue
             offset = offsets[i].split('-')[0]
             if arrayname:
@@ -106,9 +112,12 @@ def make_driver_code(wfp):
                 print >>wfp, indent + "UCHARS(%s, %s);" % (offset, target)
             else:
                 print >>wfp, indent + "/* %s bits of type %s */" % (width,ftype)
+            last = name
     if arrayname:
         indent = base
-        print >>wfp, indent + "}" 
+        print >>wfp, indent + "}"
+        if not explicit:
+            print >>wfp, indent + "%s.%s = i;" % (structname, lengthfield)
         print >>wfp, "#undef ARRAY_BASE" 
         print >>wfp, "#undef ELEMENT_SIZE" 
 
@@ -138,12 +147,18 @@ def make_structure(wfp):
             if ftype == 'x' or not record:
                 continue
             if ftype[0] == 'a':
+                arrayname = name
+                if ftype[1] == '^':
+                    lengthfield = last
+                    ftype = ftype[1:]
+                else:
+                    lengthfield = "n%ss" % arrayname
+                    print >>wfp, tabify(baseindent + inwards) + "signed int %s;" % lengthfield
                 print >>wfp, tabify(baseindent + inwards) + "struct {"
                 inwards += step
-                arrayname = name
                 arraydim = ftype[1:]
                 continue
-            if ftype == 'u' or ftype == 'e' or ftype[0] == 'U':
+            elif ftype == 'u' or ftype == 'e' or ftype[0] == 'U':
                 decl = "unsigned int %s;\t/* %s */" % (name, description)
             elif ftype == 'i' or ftype[0] == 'I':
                 decl = "signed int %s;\t/* %s */" % (name, description)
@@ -155,6 +170,7 @@ def make_structure(wfp):
             else:
                 decl += "/* %s bits of type %s */" % (width, ftype)
             print >>wfp, tabify(baseindent + inwards) + decl
+        last = name
     if arrayname:
         inwards -= step
         print >>wfp, tabify(baseindent + inwards) + "} %s[%s];" % (arrayname, arraydim)
