@@ -8,6 +8,9 @@
 # Requires the AIVDM.txt file on standard input. Takes a single argument,
 # the line number of a table start.  Things you can generate:
 #
+# * -t: A corrected version of the table.  It will redo all the offsets to be
+#   in conformance with the bit widths.  
+#
 # * -s: A structure definition capturing the message info, with member
 #   names extracted from the table and types computed from it.
 #
@@ -23,11 +26,8 @@
 #   generate the specification structure for a JSON parse that reads JSON
 #   into an instance of the message structure.
 #
-# * -t: A corrected version of the table.  It will redo all the offsets to be
-#   in conformance with the bit widths.  
-#
-# * -a: Generate all of the above, not to stdout but to files named with
-#   the argument as a distinguishing part of the stem.
+# * -a: Generate all of -s, -d, -c, and -r, , not to stdout but to
+#   files named with the argument as a distinguishing part of the stem.
 #
 # This generates almost all the code required to support a new message type.
 # It's not quite "Look, ma, no handhacking!" You'll need to add default
@@ -340,32 +340,43 @@ def make_json_generator(wfp):
                 continue
             if ftype == 'x' or not record:
                 continue
-            # Depends on the assumption that the read code
-            # always sees unscaled JSON.
-            readtype = {
-                'u': "uinteger",
-                'U': "uinteger",
-                'e': "uinteger",
-                'i': "integer",
-                'I': "integer",
-                'b': "boolean",
-                't': "string",
-                'd': "string",
-                }[ftype[0]]
-            default = {
-                'u': "'PUT_DEFAULT_HERE'",
-                'U': "'PUT_DEFAULT_HERE'",
-                'e': "'PUT DEFAULT HERE'",
-                'i': "'PUT_DEFAULT_HERE'",
-                'I': "'PUT_DEFAULT_HERE'",
-                'b': "\'false\'",
-                't': "None",
-                }[ftype[0]]
+            if ftype[0] == 'a':
+                readtype = 'array'
+                dimension = ftype[1:]
+                if dimension[0] == '^':
+                    lengthfield = last
+                    dimension = dimension[1:]
+                else:
+                    lengthfield = "n" + name + "s"
+                default = "('%s', %s)" % (dimension, lengthfield)
+            else:
+                # Depends on the assumption that the read code
+                # always sees unscaled JSON.
+                readtype = {
+                    'u': "uinteger",
+                    'U': "uinteger",
+                    'e': "uinteger",
+                    'i': "integer",
+                    'I': "integer",
+                    'b': "boolean",
+                    't': "string",
+                    'd': "string",
+                    }[ftype[0]]
+                default = {
+                    'u': "'PUT_DEFAULT_HERE'",
+                    'U': "'PUT_DEFAULT_HERE'",
+                    'e': "'PUT DEFAULT HERE'",
+                    'i': "'PUT_DEFAULT_HERE'",
+                    'I': "'PUT_DEFAULT_HERE'",
+                    'b': "\'false\'",
+                    't': "None",
+                    }[ftype[0]]
             print >>wfp, "            ('%s',%s '%s',%s %s)," % (name,
                                                      " "*(10-len(name)),
                                                      readtype,
                                                      " "*(8-len(readtype)),
                                                      default)
+            last = name
     print >>wfp, "        ),"
     print >>wfp, "    },"
 
