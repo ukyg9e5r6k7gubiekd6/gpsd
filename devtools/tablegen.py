@@ -340,7 +340,7 @@ def make_json_generator(wfp):
                 continue
             if ftype == 'x' or not record:
                 continue
-            # Depends on the assumption that the resd code
+            # Depends on the assumption that the read code
             # always sees unscaled JSON.
             readtype = {
                 'u': "uinteger",
@@ -355,7 +355,7 @@ def make_json_generator(wfp):
             default = {
                 'u': "'PUT_DEFAULT_HERE'",
                 'U': "'PUT_DEFAULT_HERE'",
-                'e': "'PUT DEFAYLT HERE'",
+                'e': "'PUT DEFAULT HERE'",
                 'i': "'PUT_DEFAULT_HERE'",
                 'I': "'PUT_DEFAULT_HERE'",
                 'b': "\'false\'",
