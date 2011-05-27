@@ -179,12 +179,18 @@ def make_structure(wfp):
 def make_json_dumper(wfp):
     # Write the skeleton of a JSON dump corresponding to the table
     record = after is None
-    # Elements of each tuple:
+    # Elements of each tuple type except 'a':
     #   1. variable name,
     #   2. unscaled printf format
     #   3. wrapper for unscaled variable reference 
     #   4. scaled printf format
-    #   5. wrapper for scaled variable reference 
+    #   5. wrapper for scaled variable reference
+    # Elements of 'a' tuple:
+    #   1. Name of array field
+    #   2. None
+    #   3. None
+    #   4. None
+    #   5. Name of length field
     tuples = []
     for (i, t) in enumerate(table):
         if '|' in t:
@@ -231,9 +237,17 @@ def make_json_dumper(wfp):
                 tuples.append((name,
                                fmt+"%d", "%s",
                                fmt+"%%.%sf" % ftype[1], '%s / SCALE'))
+            elif ftype[0] == 'a':
+                ftype = ftype[1:]
+                if ftype[0] == '^':
+                    lengthfield = last
+                else:
+                    lengthfield = "n" + name + "s"
+                tuples.append((name, None, None, None, lengthfield))
             else:
                 print >>sys.stderr, "Unknown type code", ftype
                 sys.exit(1)
+        last = name
     startspan = 0
     def scaled(i):
         return tuples[i][3] is not None
@@ -241,15 +255,26 @@ def make_json_dumper(wfp):
         return map(lambda x: x[i], tuples[startspan:e+1])
     base = " " * 8
     step = " " * 4
+    inarray = None
     header = "(void)snprintf(buf + strlen(buf), buflen - strlen(buf),"
     for (i, (var, uf, uv, sf, sv)) in enumerate(tuples):
-        endit = i+1 == len(tuples)
-        if endit or scaled(i) != scaled(i+1):
+        if uf == None:
+            print >>wfp, base + "for (i = 0; i < %s.%s; i++) {" % (structname, sv)
+            inarray = var
+            base = " " * 12
+            startspan = i+1
+            continue
+        # At end of tuples, or if scaled flag changes, or if next op is array,
+        # flush out dump code for a span of fields
+        if i+1 == len(tuples) or scaled(i) != scaled(i+1) or tuples[i+1][1] == None:
             if not scaled(i):
                 print >>wfp, base + header
                 print >>wfp, base + step + '"'+','.join(tslice(i,1))+'",'
                 for (j, t) in enumerate(tuples[startspan:i+1]):
-                    ref = structname + "." + t[0]
+                    if inarray:
+                        ref = structname + "." + inarray + "[i]." + t[0]
+                    else:
+                        ref = structname + "." + t[0]
                     wfp.write(base + step + t[2] % ref)
                     if j == i - startspan:
                         wfp.write(");\n")
@@ -260,7 +285,10 @@ def make_json_dumper(wfp):
                 print >>wfp, base + step + header
                 print >>wfp, base + step*2 + '"'+','.join(tslice(i,3))+'",'
                 for (j, t) in enumerate(tuples[startspan:i+1]):
-                    ref = structname + "." + t[0]
+                    if inarray:
+                        ref = structname + "." + inarray + "[i]." + t[0]
+                    else:
+                        ref = structname + "." + t[0]
                     wfp.write(base + step*2 + t[4] % ref)
                     if j == i - startspan:
                         wfp.write(");\n")
@@ -270,13 +298,20 @@ def make_json_dumper(wfp):
                 print >>wfp, base + step + header
                 print >>wfp, base + step*2 + '"'+','.join(tslice(i,1))+'",'
                 for (j, t) in enumerate(tuples[startspan:i+1]):
-                    ref = structname + "." + t[0]
+                    if inarray:
+                        ref = structname + "." + inarray + "[i]." + t[0]
+                    else:
+                        ref = structname + "." + t[0]
                     wfp.write(base + step*2 + t[2] % ref)
                     if j == i - startspan:
                         wfp.write(");\n")
                     else:
                         wfp.write(",\n")
             startspan = i+1
+    # If we were looking at a trailing array, close scope 
+    if inarray:
+        base = " " * 8     # Not necessary, really.
+        print >>wfp, base + "}"
 
 def make_json_generator(wfp):
     # Write a stanza for jsongen.py.in describing how to generate a
