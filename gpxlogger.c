@@ -52,8 +52,8 @@ static void print_gpx_header(void)
     (void)fprintf(logfile,"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
     (void)fprintf(logfile,"<gpx version=\"1.1\" creator=\"GPSD %s - http://gpsd.berlios.de/\"\n", VERSION);
     (void)fprintf(logfile,"        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-    (void)fprintf(logfile,"        xmlns=\"http://www.topografix.com/GPX/1.1\"\n");
-    (void)fprintf(logfile,"        xsi:schemaLocation=\"http://www.topografix.com/GPS/1/1\n");
+    (void)fprintf(logfile,"        xmlns=\"http://www.topografix.com/GPX/1/1\"\n");
+    (void)fprintf(logfile,"        xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1\n");
     (void)fprintf(logfile,"        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
     (void)fprintf(logfile," <metadata>\n");
     (void)fprintf(logfile,"  <time>%s</time>\n", unix_to_iso8601((timestamp_t)time(NULL), tbuf, sizeof(tbuf)));
