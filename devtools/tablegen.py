@@ -321,8 +321,8 @@ def make_json_generator(wfp):
     # Write a stanza for jsongen.py.in describing how to generate a
     # JSON parser initializer from this table. You need to fill in
     # __INITIALIZER__ and default values after this is generated.
-    baseindent = " " * 8
-    step = " " * 4
+    extra = ""
+    arrayname = None
     record = after is None
     print >>wfp, '''\
     {
@@ -345,14 +345,22 @@ def make_json_generator(wfp):
             if ftype == 'x' or not record:
                 continue
             if ftype[0] == 'a':
+                arrayname = name
+                if arrayname.endswith("s"):
+                    typename = arrayname[:-1]
+                else:
+                    typename = arrayname
                 readtype = 'array'
                 dimension = ftype[1:]
                 if dimension[0] == '^':
                     lengthfield = last
                     dimension = dimension[1:]
                 else:
-                    lengthfield = "n" + name + "s"
-                default = "('%s', %s)" % (dimension, lengthfield)
+                    lengthfield = "n" + arrayname + "s"
+                extra = " " * 8
+                print >>wfp, "            ('%s',%s 'array', (" % \
+                      (arrayname, " "*(10-len(arrayname)))
+                print >>wfp, "                ('%s_t', '%s', (" % (typename, lengthfield)
             else:
                 # Depends on the assumption that the read code
                 # always sees unscaled JSON.
@@ -375,12 +383,14 @@ def make_json_generator(wfp):
                     'b': "\'false\'",
                     't': "None",
                     }[ftype[0]]
-            print >>wfp, "            ('%s',%s '%s',%s %s)," % (name,
+                print >>wfp, extra + "            ('%s',%s '%s',%s %s)," % (name,
                                                      " "*(10-len(name)),
                                                      readtype,
                                                      " "*(8-len(readtype)),
                                                      default)
             last = name
+    if arrayname:
+        print >>wfp, "                    )))),"
     print >>wfp, "        ),"
     print >>wfp, "    },"
 
