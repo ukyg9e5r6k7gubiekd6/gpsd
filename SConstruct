@@ -478,7 +478,12 @@ if os.path.exists("/etc/gentoo-release"):
 if cxx and env['libQgpsmm'] and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
-    qt_env.MergeFlags(pkg_config('QtNetwork'))
+    if qt_network:
+        try:
+            qt_env.MergeFlags(pkg_config('QtNetwork'))
+        except OSError:
+            print "pkg_config is confused about the state of QtNetwork."
+            qt_env = None
 else:
     qt_env = None
 
