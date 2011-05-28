@@ -139,9 +139,10 @@ ais_specs = (
             ('unit',       'uinteger', '0'),
             ('amount',     'uinteger', '0'),
             ('cargos',     'array',    (
-                ('code',       'uinteger', '0'),
-                ('subtype',    'uinteger', '0'),
-                )),
+                ('cargo_t', 'ncargos', (
+                    ('code',       'uinteger', '0'),
+                    ('subtype',    'uinteger', '0'),
+                    )))),
             ),
     },
     {
@@ -645,18 +646,19 @@ def generate(spec):
                 report += "    char %s[JSON_VAL_MAX+1];\n" % attr
                 outboard.append(attr)
     structname = spec["structname"]
-    # If there are structarrays describing array sobobjects, we need to make
-    # a separate parse control initializer for each one.  Assumes that the
-    # attribute name is a plural {foo}s; the substructure name has to be
-    # struct {foo} and the array name {foo}s.
+    # If there are structarrays describing array sobobjects, we need
+    # to make a separate parse control initializer for each one.  The
+    # attribute name is the name of the array; substructure and length
+    # fieldnames must be given in the defaults part.
     pacify_splint = False
     for (attr, itype, arrayparts) in spec["fieldmap"]:
         if itype == 'array':
             pacify_splint = True
+            (innerstruct, lengthfield, elements) = arrayparts
             report += "    const struct json_attr_t %s_subtype[] = {\n" % attr
-            for (subattr, subitype, default) in arrayparts:
-                report += '\t{"%s",%st_%s,%sSTRUCTOBJECT(struct %s_t, %s),\n' % \
-                       (subattr, " "*(14-len(subattr)), subitype, " "*(8-len(itype)), attr[:-1], subattr)
+            for (subattr, subitype, default) in elements:
+                report += '\t{"%s",%st_%s,%sSTRUCTOBJECT(struct %s, %s),\n' % \
+                       (subattr, " "*(14-len(subattr)), subitype, " "*(8-len(itype)), innerstruct, subattr)
                 report += leader + ".dflt.%s = %s},\n" % (subitype, default)
             report += "    };\n"
     # Generate the main structure definition describing this parse.
@@ -669,8 +671,9 @@ def generate(spec):
             report += '\t' + header + "\n"
     for (attr, itype, default) in spec["fieldmap"]:
         if itype == 'array':
-            report += '\t{"%s",%st_array,     STRUCTARRAY(%s.%s, %s_subtype, &%s.n%s)},\n' \
-                      % (attr, " "*(14-len(attr)), structname, attr, attr, structname, attr)
+            (innerstruct, lengthfield, elements) = default;
+            report += '\t{"%s",%st_array,     STRUCTARRAY(%s.%s, %s_subtype, &%s.%s)},\n' \
+                      % (attr, " "*(14-len(attr)), structname, attr, attr, structname, lengthfield)
         else:
             if itype == "string":
                 deref = ""
