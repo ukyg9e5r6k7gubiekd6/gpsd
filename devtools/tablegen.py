@@ -154,7 +154,11 @@ def make_structure(wfp):
                 else:
                     lengthfield = "n%ss" % arrayname
                     print >>wfp, tabify(baseindent + inwards) + "signed int %s;" % lengthfield
-                print >>wfp, tabify(baseindent + inwards) + "struct {"
+                if arrayname.endswith("s"):
+                    typename = arrayname[:-1]
+                else:
+                    typename = arrayname
+                print >>wfp, tabify(baseindent + inwards) + "struct %s_t {" % typename
                 inwards += step
                 arraydim = ftype[1:]
                 continue
