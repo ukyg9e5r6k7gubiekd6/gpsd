@@ -1616,7 +1616,6 @@ end with 1 to 16 waypoints.
 .Route Type Codes
 [width="50%",frame="topbot",options="header"]
 |===================================
-|Code |Position Fix Type
 |0    |Undefined (default)
 |1    |Mandatory
 |2    |Recommended
