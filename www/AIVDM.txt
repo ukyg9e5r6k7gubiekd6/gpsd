@@ -1507,8 +1507,10 @@ with a different layout, deprecated in <<IMO289>>.
 |88-89   |  2 |Unit of Quantity     |unit      |e|See "Cargo Unit Codes"
 |90-99   | 10 |Amount of Cargo      |amount    |u|Unsigned integer
                                                   0 = N/A (default)
-|100-103 |  4 |Cargo code           |code      |e|See "Cargo Codes"
-|104-116 | 13 |Cargo subtype        |subtype   |u|Unsigned integer
+                                                  0 = N/A (default)
+|100     |    |                     |cargos    |a28|Cargo types array
+|0-3     |  4 |Cargo code           |code      |e|See "Cargo Codes"
+|4-16    | 13 |Cargo subtype        |subtype   |u|Unsigned integer
                                                   0 = N/A (default)
 |==============================================================================
 
