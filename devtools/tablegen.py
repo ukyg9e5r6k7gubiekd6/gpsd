@@ -94,14 +94,14 @@ def make_driver_code(wfp):
                     lengthfield = last
                     print >>wfp, indent + "for (i = 0; i < %s; i++) {" % lengthfield 
                 else:
-                    lengthfield = "n" + arrayname + "s"
-                    print >>wfp, indent + "for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) <= ais_context->bitlen; i++) {" 
+                    lengthfield = "n" + arrayname
+                    print >>wfp, indent + "for (u = 0; ARRAY_BASE + (ELEMENT_SIZE*u) <= ais_context->bitlen; u++) {" 
                 indent += step
-                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*i)" 
+                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*u)" 
                 continue
             offset = offsets[i].split('-')[0]
             if arrayname:
-                target = "%s.%s[i].%s" % (structname, arrayname, name)
+                target = "%s.%s[u].%s" % (structname, arrayname, name)
                 offset = "a + " + offset 
             else:
                 target = "%s.%s" % (structname, name)
@@ -152,7 +152,7 @@ def make_structure(wfp):
                     lengthfield = last
                     ftype = ftype[1:]
                 else:
-                    lengthfield = "n%ss" % arrayname
+                    lengthfield = "n%s" % arrayname
                     print >>wfp, tabify(baseindent + inwards) + "signed int %s;" % lengthfield
                 if arrayname.endswith("s"):
                     typename = arrayname[:-1]
@@ -246,7 +246,7 @@ def make_json_dumper(wfp):
                 if ftype[0] == '^':
                     lengthfield = last
                 else:
-                    lengthfield = "n" + name + "s"
+                    lengthfield = "n" + name
                 tuples.append((name, None, None, None, lengthfield))
             else:
                 print >>sys.stderr, "Unknown type code", ftype
@@ -356,7 +356,7 @@ def make_json_generator(wfp):
                     lengthfield = last
                     dimension = dimension[1:]
                 else:
-                    lengthfield = "n" + arrayname + "s"
+                    lengthfield = "n" + arrayname
                 extra = " " * 8
                 print >>wfp, "            ('%s',%s 'array', (" % \
                       (arrayname, " "*(10-len(arrayname)))

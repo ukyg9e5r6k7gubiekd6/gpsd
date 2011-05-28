@@ -215,6 +215,27 @@ ais_specs = (
         ),
     },
     {
+    "initname" : "json_ais6_fid32",
+    "headers": ("AIS_HEADER","AIS_TYPE6"),
+    "structname": "ais->type6.dac1fid32",
+    "fieldmap":(
+        # fieldname    type        default
+        ('month',      'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
+        ('day',        'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
+        ('tidals',     'array', (
+            ('tidal_t', 'ntidals', (
+                ('lon',        'integer',  'AIS_LON3_NOT_AVAILABLE'),
+                ('lat',        'integer',  'AIS_LAT3_NOT_AVAILABLE'),
+                ('from_hour',  'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
+                ('from_min',   'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+                ('to_hour',    'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
+                ('to_min',     'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+                ('cdir',       'uinteger', 'DAC1FID32_CDIR_NOT_AVAILABLE'),
+                ('cspeed',     'uinteger', 'DAC1FID32_CSPEED_NOT_AVAILABLE'),
+                )))),
+        ),
+    },
+    {
     "initname" : "json_ais7",
     "headers": ("AIS_HEADER",),
     "structname": "ais->type7",

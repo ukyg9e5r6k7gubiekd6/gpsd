@@ -1033,6 +1033,32 @@ struct ais_t
 #define AIS_DAC1FID30_TEXT_MAX	154	/* 920 bits of six-bit, plus NUL */
 		    char text[AIS_DAC1FID30_TEXT_MAX];
 		} dac1fid30;
+		/* IMO289 - Tidal Window */
+		struct {
+		    unsigned int type;	/* Message Type */
+		    unsigned int repeat;	/* Repeat Indicator */
+		    unsigned int mmsi;	/* Source MMSI */
+		    unsigned int seqno;	/* Sequence Number */
+		    unsigned int dest_mmsi;	/* Destination MMSI */
+		    signed int retransmit;	/* Retransmit flag */
+		    unsigned int dac;	/* DAC */
+		    unsigned int fid;	/* FID */
+		    unsigned int month;	/* Month */
+		    unsigned int day;	/* Day */
+		    signed int ntidals;
+		    struct tidal_t {
+			signed int lon;	/* Longitude */
+			signed int lat;	/* Latitude */
+			unsigned int from_hour;	/* From UTC Hour */
+			unsigned int from_min;	/* From UTC Minute */
+			unsigned int to_hour;	/* To UTC Hour */
+			unsigned int to_min;	/* To UTC Minute */
+#define DAC1FID32_CDIR_NOT_AVAILABLE		360
+			unsigned int cdir;	/* Current Dir. Predicted */
+#define DAC1FID32_CSPEED_NOT_AVAILABLE		127
+			unsigned int cspeed;	/* Current Speed Predicted */
+		    } tidals[3];
+		} dac1fid32;
 	    };
 	} type6;
 	/* Type 7 - Binary Acknowledge */

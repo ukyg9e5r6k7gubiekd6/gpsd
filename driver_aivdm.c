@@ -89,6 +89,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
     struct aivdm_context_t *ais_context;
     bool imo;
     int i;
+    unsigned int u;
 
     if (buflen == 0)
 	return false;
@@ -442,6 +443,24 @@ bool aivdm_decode(const char *buf, size_t buflen,
 				ais->type6.dac1fid30.text);
 		    break;
 		case 32:	/* IMO289 - Tidal Window */
+		    ais->type6.dac1fid32.month	= UBITS(88, 4);
+		    ais->type6.dac1fid32.day	= UBITS(92, 5);
+#define ARRAY_BASE 97
+#define ELEMENT_SIZE 88
+		    for (u = 0; ARRAY_BASE + (ELEMENT_SIZE*u) <= ais_context->bitlen; u++) {
+			int a = ARRAY_BASE + (ELEMENT_SIZE*u);
+			ais->type6.dac1fid32.tidals[u].lon	= SBITS(a + 0, 25);
+			ais->type6.dac1fid32.tidals[u].lat	= SBITS(a + 25, 24);
+			ais->type6.dac1fid32.tidals[u].from_hour	= UBITS(a + 49, 5);
+			ais->type6.dac1fid32.tidals[u].from_min	= UBITS(a + 54, 6);
+			ais->type6.dac1fid32.tidals[u].to_hour	= UBITS(a + 60, 5);
+			ais->type6.dac1fid32.tidals[u].to_min	= UBITS(a + 65, 6);
+			ais->type6.dac1fid32.tidals[u].cdir	= UBITS(a + 71, 9);
+			ais->type6.dac1fid32.tidals[u].cspeed	= UBITS(a + 80, 8);
+		    }
+		    ais->type6.dac1fid32.ntidals = u;
+#undef ARRAY_BASE
+#undef ELEMENT_SIZE
 		    break;
 		}
 	    if (!imo)

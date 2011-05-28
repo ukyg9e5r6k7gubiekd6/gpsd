@@ -1892,6 +1892,40 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       json_stringify(buf1, sizeof(buf1), 
 				      ais->type6.dac1fid30.text));
 		break;
+	    case 32:	/* IMO289 - Tidal Window */
+	      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		  "\"month\":%u,\"day\":%u",
+		  ais->type6.dac1fid32.month,
+		  ais->type6.dac1fid32.day);
+	      for (i = 0; i < ais->type6.dac1fid32.ntidals; i++) {
+		  const struct tidal_t *tp =  &ais->type6.dac1fid32.tidals[i];
+		  if (scaled)
+		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			  "\"lon\":%.3f,\"lat\":%.3f",
+			  tp->lon / AIS_LATLON3_SCALE,
+			  tp->lat / AIS_LATLON3_SCALE);
+		  else
+		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			  "\"lon\":%d,\"lat\":%d",
+			  tp->lon,
+			  tp->lat);
+		  (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		      "\"from_hour\":%u,\"from_min\":%u,\"to_hour\":%u,\"to_min\":%u,\"cdir\":%u",
+		      tp->from_hour,
+		      tp->from_min,
+		      tp->to_hour,
+		      tp->to_min,
+		      tp->cdir);
+		  if (scaled)
+		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			  "\"cspeed\":%.1f",
+			  tp->cspeed / 10.0);
+		  else
+		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			  "\"cspeed\":%u",
+			  tp->cspeed);
+	      }
+		      break;
 	    }
 	if (!imo)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
