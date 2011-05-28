@@ -2027,22 +2027,23 @@ bits.  This message is laid out identically in <<IMO236>> and
 |38-39   |  2 |Spare              |           |x|Not used
 |40-49   | 10 |DAC                |dac        |u|DAC = 001
 |50-55   |  6 |FID                |fid        |u|FID = 17
-|56-57   |  2 |Identifier type    |idtype     |e|0 = id is the MMSI number,
+|56      |    |                   |targets    |a|Synthetic targets array
+|0-1     |  2 |Identifier type    |idtype     |e|0 = id is the MMSI number,
                                                  1 = id is the IMO number,
                                                  2 = id is the call sign,
                                                  3 = Other (default).
-|58-99   | 42 |Target identifier  |id         |u|Target ID data.
-|100-103 |  4 |Spare              |           |x|Not used
-|104-127 | 24 |Latitude           |lat        |I3|Minutes * 0.001,
+|2-43    | 42 |Target identifier  |id         |u|Target ID data.
+|44-47   |  4 |Spare              |           |x|Not used
+|48-71   | 24 |Latitude           |lat        |I3|Minutes * 0.001,
                                                  91000 = N/A (default),
                                                  N positive, S negative.
-|128-152 | 25 |Longitude          |lon        |I3|Minutes * 0.001,
+|72-96   | 25 |Longitude          |lon        |I3|Minutes * 0.001,
                                                  181000 = N/A (default),
                                                  E positive, W negative.
-|153-161 |  9 |Course Over Ground |course     |u|0-359 deg from true north,
+|97-105  |  9 |Course Over Ground |course     |u|0-359 deg from true north,
                                                  360 = N/A (default).
-|162-167 |  6 |Time Stamp         |second     |u|Second of UTC timestamp.
-|168-177 | 10 |Speed Over Ground  |speed      |u|0-254 in knots, 255 = N/A.
+|106-111 |  6 |Time Stamp         |second     |u|Second of UTC timestamp.
+|112-121 | 10 |Speed Over Ground  |speed      |u|0-254 in knots, 255 = N/A.
 |==============================================================================
 
 The interpretation of the target identifier field depends on the
