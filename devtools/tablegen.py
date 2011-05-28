@@ -97,7 +97,7 @@ def make_driver_code(wfp):
                     lengthfield = "n" + arrayname
                     print >>wfp, indent + "for (u = 0; ARRAY_BASE + (ELEMENT_SIZE*u) <= ais_context->bitlen; u++) {" 
                 indent += step
-                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*u)" 
+                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*u);" 
                 continue
             offset = offsets[i].split('-')[0]
             if arrayname:

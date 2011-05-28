@@ -1892,6 +1892,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       json_stringify(buf1, sizeof(buf1), 
 				      ais->type6.dac1fid30.text));
 		break;
+	    case 14:	/* IMO236 - Tidal Window */
 	    case 32:	/* IMO289 - Tidal Window */
 	      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		  "\"month\":%u,\"day\":%u",

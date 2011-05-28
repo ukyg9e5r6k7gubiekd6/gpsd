@@ -360,6 +360,25 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    /* skip 3 bits */
 		    break;
 		case 14:	/* IMO236 - Tidal Window */
+		    ais->type6.dac1fid32.month	= UBITS(88, 4);
+		    ais->type6.dac1fid32.day	= UBITS(92, 5);
+#define ARRAY_BASE 97
+#define ELEMENT_SIZE 93
+		    for (u = 0; ARRAY_BASE + (ELEMENT_SIZE*u) <= ais_context->bitlen; u++) {
+			int a = ARRAY_BASE + (ELEMENT_SIZE*u);
+			struct tidal_t *tp = &ais->type6.dac1fid32.tidals[u];
+			tp->lat	= SBITS(a + 0, 27);
+			tp->lon	= SBITS(a + 27, 28);
+			tp->from_hour	= UBITS(a + 55, 5);
+			tp->from_min	= UBITS(a + 60, 6);
+			tp->to_hour	= UBITS(a + 66, 5);
+			tp->to_min	= UBITS(a + 71, 6);
+			tp->cdir	= UBITS(a + 77, 9);
+			tp->cspeed	= UBITS(a + 86, 7);
+		    }
+		    ais->type6.dac1fid32.ntidals = i;
+#undef ARRAY_BASE
+#undef ELEMENT_SIZE
 		    break;
 		case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
 		    ais->type6.dac1fid15.airdraught	= UBITS(56, 11);
@@ -449,14 +468,15 @@ bool aivdm_decode(const char *buf, size_t buflen,
 #define ELEMENT_SIZE 88
 		    for (u = 0; ARRAY_BASE + (ELEMENT_SIZE*u) <= ais_context->bitlen; u++) {
 			int a = ARRAY_BASE + (ELEMENT_SIZE*u);
-			ais->type6.dac1fid32.tidals[u].lon	= SBITS(a + 0, 25);
-			ais->type6.dac1fid32.tidals[u].lat	= SBITS(a + 25, 24);
-			ais->type6.dac1fid32.tidals[u].from_hour	= UBITS(a + 49, 5);
-			ais->type6.dac1fid32.tidals[u].from_min	= UBITS(a + 54, 6);
-			ais->type6.dac1fid32.tidals[u].to_hour	= UBITS(a + 60, 5);
-			ais->type6.dac1fid32.tidals[u].to_min	= UBITS(a + 65, 6);
-			ais->type6.dac1fid32.tidals[u].cdir	= UBITS(a + 71, 9);
-			ais->type6.dac1fid32.tidals[u].cspeed	= UBITS(a + 80, 8);
+			struct tidal_t *tp = &ais->type6.dac1fid32.tidals[u];
+			tp->lon	= SBITS(a + 0, 25);
+			tp->lat	= SBITS(a + 25, 24);
+			tp->from_hour	= UBITS(a + 49, 5);
+			tp->from_min	= UBITS(a + 54, 6);
+			tp->to_hour	= UBITS(a + 60, 5);
+			tp->to_min	= UBITS(a + 65, 6);
+			tp->cdir	= UBITS(a + 71, 9);
+			tp->cspeed	= UBITS(a + 80, 8);
 		    }
 		    ais->type6.dac1fid32.ntidals = u;
 #undef ARRAY_BASE
