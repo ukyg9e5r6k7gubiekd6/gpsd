@@ -2060,7 +2060,7 @@ big-endian encoding. Settling this awaits live testing.
 The trailing eight fields may be repeated up to 3 times (for a total of 1 to 4
 field groups) to represent up to 4 targets.
 
-==== Marine Traffic Signal ====
+==== IMO289 Marine Traffic Signal ====
 
 This message provides information on a signal station and status of
 the control signal at the entrance of a harbour or channel where the
@@ -2126,7 +2126,7 @@ length: 360 bits.
 |14-31|Reserved
 |===========================================================================
 
-==== Weather observation report from ship ====
+==== IMO289 Weather observation report from ship ====
 
 There are two variants of this message.  They are distinguished by bit 56,
 the WMO bit.  Field layouts after that bit vary depending on it.
@@ -2366,7 +2366,7 @@ This is incorrect; the decrement needs to be 90 for the range to be -90..+90.
 
 Swell directions are arrival directions.
 
-==== IMO289 Area Notice (broadcawt) ====
+==== IMO289 Area Notice (broadcast) ====
 
 This should be used to broadcast time- and location-dependent information about 
 hazards to navigation.  For information-lifetime restrictions and usage 
