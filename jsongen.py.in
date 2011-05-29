@@ -205,6 +205,27 @@ ais_specs = (
     'stringbuffered' : ('arrival', 'berth_name',),
     },
     {
+    "initname" : "json_ais6_fid28",
+    "headers": ("AIS_HEADER","AIS_TYPE6",),
+    "structname": "ais->type6.dac1fid28",
+    "fieldmap":(
+        # fieldname    type        default
+        ('linkage',    'uinteger', '0'),
+        ('sender',     'uinteger', '0'),
+        ('rtype',      'uinteger', '0'),
+        ('month',      'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
+        ('day',        'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
+        ('hour',       'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
+        ('minute',     'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+        ('duration',   'uinteger', '0'),
+        ('waypoints',  'array', (
+            ('waypoint_t', 'waycount', (
+                ('lon',        'integer',  'AIS_LON4_NOT_AVAILABLE'),
+                ('lat',        'integer',  'AIS_LAT4_NOT_AVAILABLE'),
+                )))),
+        ),
+    },
+    {
     "initname" : "json_ais6_fid30",
     "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6.dac1fid30",

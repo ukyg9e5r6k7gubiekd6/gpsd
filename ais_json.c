@@ -179,6 +179,10 @@ int json_ais_read(const char *buf,
 		status = json_read_object(buf, json_ais6_fid25, endptr);
 		imo = true;
 	    }
+	    else if (strstr(buf, "\"fid\":28,") != NULL) {
+		status = json_read_object(buf, json_ais6_fid28, endptr);
+		imo = true;
+	    }
 	    else if (strstr(buf, "\"fid\":30,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid30, endptr);
 		imo = true;

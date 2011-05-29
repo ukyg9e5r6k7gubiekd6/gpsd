@@ -1027,13 +1027,29 @@ struct ais_t
 			unsigned int subtype;	/* Cargo subtype */
 		    } cargos[28];
 		} dac1fid25;
+		/* IMO289 - Route info (addressed) */
+		struct {
+		    unsigned int linkage;	/* Message Linkage ID */
+		    unsigned int sender;	/* Sender Class */
+		    unsigned int rtype;	/* Route Type */
+		    unsigned int month;	/* Start month (UTC) */
+		    unsigned int day;	/* Start day (UTC) */
+		    unsigned int hour;	/* Start hour (UTC) */
+		    unsigned int minute;	/* Start minute (UTC) */
+		    unsigned int duration;	/* Duration */
+		    int waycount;	/*  */
+		    struct waypoint_t {
+			signed int lon;	/* Longitude */
+			signed int lat;	/* Latitude */
+		    } waypoints[16];
+		} dac1fid28;
 		/* IMO289 - Text message (addressed) */
 		struct {
 		    unsigned int linkage;
 #define AIS_DAC1FID30_TEXT_MAX	154	/* 920 bits of six-bit, plus NUL */
 		    char text[AIS_DAC1FID30_TEXT_MAX];
 		} dac1fid30;
-		/* IMO289 - Tidal Window */
+		/* IMO289 & IMO236 - Tidal Window */
 		struct {
 		    unsigned int type;	/* Message Type */
 		    unsigned int repeat;	/* Repeat Indicator */

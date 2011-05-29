@@ -454,6 +454,24 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type6.dac1fid25.ncargos = i;
 		    break;
 		case 28:	/* IMO289 - Route info - addressed */
+		    ais->type6.dac1fid28.linkage	= UBITS(88, 10);
+		    ais->type6.dac1fid28.sender	= UBITS(98, 3);
+		    /* 5 bits of type e */
+		    ais->type6.dac1fid28.month	= UBITS(106, 4);
+		    ais->type6.dac1fid28.day	= UBITS(110, 5);
+		    ais->type6.dac1fid28.hour	= UBITS(115, 5);
+		    ais->type6.dac1fid28.minute	= UBITS(120, 6);
+		    ais->type6.dac1fid28.duration	= UBITS(126, 18);
+		    ais->type6.dac1fid28.waycount	= UBITS(144, 5);
+#define ARRAY_BASE 149
+#define ELEMENT_SIZE 55
+		    for (i = 0; i < ais->type6.dac1fid28.waycount; i++) {
+			int a = ARRAY_BASE + (ELEMENT_SIZE*i);
+			ais->type6.dac1fid28.waypoints[i].lon = SBITS(a+0, 28);
+			ais->type6.dac1fid28.waypoints[i].lat = SBITS(a+28,27);
+		    }
+#undef ARRAY_BASE
+#undef ELEMENT_SIZE
 		    break;
 		case 30:	/* IMO289 - Text description - addressed */
 		    ais->type6.dac1fid30.linkage   = UBITS(88, 10);

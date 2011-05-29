@@ -1482,7 +1482,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 #define SHIPTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(ship_type_legends)) ? ship_type_legends[n] : "INVALID SHIP TYPE")
 
-    static char *station_type_legends[16] = {
+    static const char *station_type_legends[16] = {
 	"All types of mobiles",
 	"Reserved for future use",
 	"All types of Class B mobile stations",
@@ -1503,7 +1503,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 #define STATIONTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(ship_type_legends)) ? station_type_legends[n] : "INVALID STATION TYPE")
 
-    static char *navaid_type_legends[] = {
+    static const char *navaid_type_legends[] = {
 	"Unspecified",
 	"Reference point",
 	"RACON",
@@ -1540,7 +1540,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
-    static char *signal_legends[] = {
+    static const char *signal_legends[] = {
 	"N/A",
 	"Serious emergency – stop or divert according to instructions.",
 	"Vessels shall not proceed.",
@@ -1560,6 +1560,40 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 #define SIGNAL_DISPLAY(n) (((n) < (unsigned int)NITEMS(signal_legends[0])) ? signal_legends[n] : "INVALID SIGNAL TYPE")
 
+    static const char *route_type[32] = {
+	"Undefined (default)",
+	"Mandatory",
+	"Recommended",
+	"Alternative",
+	"Recommended route through ice",
+	"Ship route plan",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Reserved for future use.",
+	"Cancel route identified by message linkage",
+    };
 
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
     if (device != NULL && device[0] != '\0')
@@ -1884,6 +1918,38 @@ void json_aivdm_dump(const struct ais_t *ais,
 		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"linkage\":%u,\"sender\":%u",
+		    ais->type6.dac1fid28.linkage,
+		    ais->type6.dac1fid28.sender);
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"rtype\":\"%s\"",
+				   route_type[ais->type6.dac1fid28.rtype]);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"rtype\":%u",
+			ais->type6.dac1fid28.rtype);
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"month\":%u,\"day\":%u,\"hour\":%u,\"minute\":%u,\"duration\":%u,\"waycount\":%u",
+		    ais->type6.dac1fid28.month,
+		    ais->type6.dac1fid28.day,
+		    ais->type6.dac1fid28.hour,
+		    ais->type6.dac1fid28.minute,
+		    ais->type6.dac1fid28.duration,
+		    ais->type6.dac1fid28.waycount);
+		for (i = 0; i < ais->type6.dac1fid28.waycount; i++) {
+		    if (scaled)
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"lon\":%.4f,\"lat\":%.4f",
+			    ais->type6.dac1fid28.waypoints[i].lon / AIS_LATLON4_SCALE,
+			    ais->type6.dac1fid28.waypoints[i].lat / AIS_LATLON4_SCALE);
+		    else
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"lon\":%d,\"lat\":%d",
+			    ais->type6.dac1fid28.waypoints[i].lon,
+			    ais->type6.dac1fid28.waypoints[i].lat);
+		}
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
