@@ -1343,10 +1343,11 @@ Subarea types are as follows:
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 3
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
-|5-14    |10  |Bearing            |bearing     |u|True bearing in half-degree
+|5       |    |                   |waypoints   |a4|Waypoints array
+|0-9     |10  |Bearing            |bearing     |u|True bearing in half-degree
                                                   steps from previous waypoint;
                                                   720 = N/A (default).
-|15-24   |10  |Distance           |distance    |u|Distance from prev. waypoint,
+|10-19   |10  |Distance           |distance    |u|Distance from prev. waypoint,
                                                   0 = no point (default),
                                                   else 1-1023 * 10^scale m
 |==============================================================================
@@ -1363,12 +1364,11 @@ case the first beariing is from the implied last point.
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 4
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
-|5-14    |10  |Bearing            |bearing     |u|True bearing in half-degree
+|5       |    |                   |vertices    |a4|Vertices array
+|0-9     |10  |Bearing            |bearing     |u|True bearing in half-degree
                                                   steps from previous vertex;
                                                   720 = N/A (default).
-|15-24   |10  |Distance           |distance    |u|Distance from prev. vertex,
-                                                  0 = no point (default),
-                                                  else 1-1023 * 10^scale m
+|10-19   |10  |Distance           |distance    |u|Distance from prev. vertex,
 |==============================================================================
 
 The last two fields are repeated 4 times; the final 2 bits of 87 are
@@ -2405,7 +2405,6 @@ message type 6 with DAC = 1 and FID = 23.
 ==== IMO289 Environmental ====
 
 A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
-It begins with the foillowing fixed header:
 
 .Environmental message header
 [frame="topbot",options="header"]
@@ -2417,14 +2416,7 @@ It begins with the foillowing fixed header:
 |38-39   |  2 |Spare                |           |x|Not used
 |40-49   | 10 |DAC                  |dac        |u|DAC = 001
 |50-55   |  6 |FID                  |fid        |u|FID = 26
-|==============================================================================
-
-The header is followed by 1-5 sensor records, each 112 bits long.  The framework
-record for each sensor looks like this:
-
-.Sensor framework record
-[frame="topbot",options="header"]
-|==============================================================================
+|56      |    |                     |reports    |a5|Sensor records array
 |0-3     |  4 |Sensor Report Type   |sensor     |u|See table velow
 |4-8     |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
 |9-13    |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
@@ -2432,6 +2424,14 @@ record for each sensor looks like this:
 |20-26   |  7 |Site ID              |site       |u|Binary ID of sensor site
 |27-111  | 85 |Sensor payload       |payload    |d|Sensor payload data
 |==============================================================================
+
+The fixed header is followed by 1-5 sensor records, each 112 bits
+long.  The framework record for each sensor looks like this:
+
+.Sensor framework record
+[frame="topbot",options="header"]
+|==============================================================================
+
 
 .Sensor report types
 [frame="topbot",options="header"]
@@ -4325,24 +4325,6 @@ should do so rather than exoanding to its controlled vocabulary.
 | 1-3    | speed     | "nan" = not available, "fast" = speed >= 102.3 knots
 |  9     | alt       | "nan" = not available, "high" = alt >= 4094 meters 
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
-|===========================================================================
-
-7. Certain IMO messages have trailing parts that are arrays of
-repeated objects.  The JSON encoding will render these as object
-subarrays with names as follows:
-
-.Tailing aeeay names
-[frame="topbot",options="header"]
-|===========================================================================
-|Message          | Name
-|6(1/23) polyline | waypoints
-|6(1/23) polygon  | vertices
-|6(1/28)          | waypoints
-|8(1/17)          | targets
-|8(1/22) polyline | waypoints
-|8(1/22) polygon  | vertices
-|8(1/26)          | reports
-|8(1/27)          | waypoints
 |===========================================================================
 
 == References ==
