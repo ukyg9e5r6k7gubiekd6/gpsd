@@ -846,6 +846,22 @@ typedef /*@unsignedintegraltype@*/ unsigned long long gps_mask_t;
 #define AIS_LAT4_NOT_AVAILABLE	910000
 #define AIS_LATLON4_SCALE	600000.0
 
+struct route_info {
+    unsigned int linkage;	/* Message Linkage ID */
+    unsigned int sender;	/* Sender Class */
+    unsigned int rtype;		/* Route Type */
+    unsigned int month;		/* Start month */
+    unsigned int day;		/* Start day */
+    unsigned int hour;		/* Start hour */
+    unsigned int minute;	/* Start minute */
+    unsigned int duration;	/* Duration */
+    int waycount;		/* Waypoint count */
+    struct waypoint_t {
+	signed int lon;		/* Longitude */
+	signed int lat;		/* Latitude */
+    } waypoints[16];
+};
+
 struct ais_t
 {
     unsigned int	type;		/* message type */
@@ -1028,21 +1044,7 @@ struct ais_t
 		    } cargos[28];
 		} dac1fid25;
 		/* IMO289 - Route info (addressed) */
-		struct {
-		    unsigned int linkage;	/* Message Linkage ID */
-		    unsigned int sender;	/* Sender Class */
-		    unsigned int rtype;	/* Route Type */
-		    unsigned int month;	/* Start month (UTC) */
-		    unsigned int day;	/* Start day (UTC) */
-		    unsigned int hour;	/* Start hour (UTC) */
-		    unsigned int minute;	/* Start minute (UTC) */
-		    unsigned int duration;	/* Duration */
-		    int waycount;	/*  */
-		    struct waypoint_t {
-			signed int lon;	/* Longitude */
-			signed int lat;	/* Latitude */
-		    } waypoints[16];
-		} dac1fid28;
+		struct route_info dac1fid28;
 		/* IMO289 - Text message (addressed) */
 		struct {
 		    unsigned int linkage;
@@ -1128,6 +1130,8 @@ struct ais_t
 		    unsigned int minute;	/* UTC minute */
 		    unsigned int nextsignal;	/* Expected Next Signal */
 		} dac1fid19;
+		/* IMO289 - Route info (broadcast) */
+		struct route_info dac1fid27;
 		/* IMO289 - Text message (broadcast) */
 		struct {
 		    unsigned int linkage;

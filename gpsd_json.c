@@ -2226,6 +2226,29 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 25:        /* IMO289 - Dangerous Cargo Indication */
 		break;
 	    case 27:        /* IMO289 - Route information - broadcast */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"linkage\":%u,\"sender\":%u,\"rtype\":%u,\"month\":%u,\"day\":%u,\"hour\":%u,\"minute\":%u,\"duration\":%u,\"waycount\":%u",
+		    ais->type8.dac1fid27.linkage,
+		    ais->type8.dac1fid27.sender,
+		    ais->type8.dac1fid27.rtype,
+		    ais->type8.dac1fid27.month,
+		    ais->type8.dac1fid27.day,
+		    ais->type8.dac1fid27.hour,
+		    ais->type8.dac1fid27.minute,
+		    ais->type8.dac1fid27.duration,
+		    ais->type8.dac1fid27.waycount);
+		for (i = 0; i < ais->type8.dac1fid27.waycount; i++) {
+		    if (scaled)
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"lon\":%.4f,\"lat\":%.4f",
+			    ais->type8.dac1fid27.waypoints[i].lon / AIS_LATLON4_SCALE,
+			    ais->type8.dac1fid27.waypoints[i].lat / AIS_LATLON4_SCALE);
+		    else
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"lon\":%d,\"lat\":%d",
+			    ais->type8.dac1fid27.waypoints[i].lon,
+			    ais->type8.dac1fid27.waypoints[i].lat);
+		}
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
