@@ -327,6 +327,27 @@ ais_specs = (
         ),
     },
     {
+        "initname" : "json_ais8_fid27",
+        "headers": ("AIS_HEADER","AIS_TYPE8",),
+        "structname": "ais->type8.dac1fid27",
+        "fieldmap":(
+        # fieldname    type        default
+        ('linkage',    'uinteger', '0'),
+        ('sender',     'uinteger', '0'),
+        ('rtype',      'uinteger', '0'),
+        ('month',      'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
+        ('day',        'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
+        ('hour',       'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
+        ('minute',     'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+        ('duration',   'uinteger', '0'),
+        ('waypoints',  'array', (
+            ('waypoint_t', 'waycount', (
+                ('lon',        'integer',  'AIS_LON4_NOT_AVAILABLE'),
+                ('lat',        'integer',  'AIS_LAT4_NOT_AVAILABLE'),
+                )))),
+        ),
+    },
+    {
     "initname" : "json_ais8_fid29",
     "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8.dac1fid29",
@@ -680,6 +701,7 @@ def generate(spec):
 
     report = ""
     leader = " " * 39
+    initname = spec["initname"]
     # Utter storage declarations for any fields that are declared to be
     # stringbuffered. These will need to be postprocessed in json_ais_read().
     for (attr, itype, default) in spec["fieldmap"]:
@@ -697,7 +719,7 @@ def generate(spec):
         if itype == 'array':
             pacify_splint = True
             (innerstruct, lengthfield, elements) = arrayparts
-            report += "    const struct json_attr_t %s_subtype[] = {\n" % attr
+            report += "    const struct json_attr_t %s_%s_subtype[] = {\n" % (initname, attr)
             for (subattr, subitype, default) in elements:
                 report += '\t{"%s",%st_%s,%sSTRUCTOBJECT(struct %s, %s),\n' % \
                        (subattr, " "*(14-len(subattr)), subitype, " "*(8-len(itype)), innerstruct, subattr)
@@ -707,15 +729,15 @@ def generate(spec):
     # It may have object subarrays.
     if pacify_splint:
         report += "/*@-type@*//* STRUCTARRAY confuses splint */\n"
-    report += "    const struct json_attr_t %s[] = {\n" % spec["initname"]
+    report += "    const struct json_attr_t %s[] = {\n" % initname
     if "headers" in spec:
         for header in spec["headers"]:
             report += '\t' + header + "\n"
     for (attr, itype, default) in spec["fieldmap"]:
         if itype == 'array':
             (innerstruct, lengthfield, elements) = default;
-            report += '\t{"%s",%st_array,     STRUCTARRAY(%s.%s, %s_subtype, &%s.%s)},\n' \
-                      % (attr, " "*(14-len(attr)), structname, attr, attr, structname, lengthfield)
+            report += '\t{"%s",%st_array,     STRUCTARRAY(%s.%s, %s_%s_subtype, &%s.%s)},\n' \
+                      % (attr, " "*(14-len(attr)), structname, attr, initname, attr, structname, lengthfield)
         else:
             if itype == "string":
                 deref = ""
