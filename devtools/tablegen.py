@@ -92,16 +92,16 @@ def make_driver_code(wfp):
                 print >>wfp, '#define ELEMENT_SIZE %s' % trailing
                 if explicit:
                     lengthfield = last
-                    print >>wfp, indent + "for (i = 0; i < %s; i++) {" % lengthfield 
+                    print >>wfp, indent + "for (ind = 0; ind < %s; ind++) {" % lengthfield 
                 else:
                     lengthfield = "n" + arrayname
-                    print >>wfp, indent + "for (u = 0; ARRAY_BASE + (ELEMENT_SIZE*u) <= ais_context->bitlen; u++) {" 
+                    print >>wfp, indent + "for (ind = 0; ARRAY_BASE + (ELEMENT_SIZE*ind) <= ais_context->bitlen; ind++) {" 
                 indent += step
-                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*u);" 
+                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*ind);" 
                 continue
             offset = offsets[i].split('-')[0]
             if arrayname:
-                target = "%s.%s[u].%s" % (structname, arrayname, name)
+                target = "%s.%s[ind].%s" % (structname, arrayname, name)
                 offset = "a + " + offset 
             else:
                 target = "%s.%s" % (structname, name)
@@ -117,7 +117,7 @@ def make_driver_code(wfp):
         indent = base
         print >>wfp, indent + "}"
         if not explicit:
-            print >>wfp, indent + "%s.%s = i;" % (structname, lengthfield)
+            print >>wfp, indent + "%s.%s = ind;" % (structname, lengthfield)
         print >>wfp, "#undef ARRAY_BASE" 
         print >>wfp, "#undef ELEMENT_SIZE" 
 
@@ -172,7 +172,7 @@ def make_structure(wfp):
                 stl = int(width)/6
                 decl = "char %s[%d+1];\t/* %s */" % (name, stl, description)
             else:
-                decl += "/* %s bits of type %s */" % (width, ftype)
+                decl = "/* %s bits of type %s */" % (width, ftype)
             print >>wfp, tabify(baseindent + inwards) + decl
         last = name
     if arrayname:
