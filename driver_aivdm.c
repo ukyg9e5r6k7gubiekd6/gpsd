@@ -465,7 +465,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type6.dac1fid28.waycount	= UBITS(144, 5);
 #define ARRAY_BASE 149
 #define ELEMENT_SIZE 55
-		    for (i = 0; i < ais->type6.dac1fid28.waycount; i++) {
+		    for (i = 0; i < ais->type6.dac1fid28.waycount; u++) {
 			int a = ARRAY_BASE + (ELEMENT_SIZE*i);
 			ais->type6.dac1fid28.waypoints[i].lon = SBITS(a+0, 28);
 			ais->type6.dac1fid28.waypoints[i].lat = SBITS(a+28,27);
@@ -639,6 +639,24 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		case 26:        /* IMO289 - Environmental */
 		    break;
 		case 27:        /* IMO289 - Route information - broadcast */
+		    ais->type8.dac1fid27.linkage	= UBITS(56, 10);
+		    ais->type8.dac1fid27.sender	= UBITS(66, 3);
+		    ais->type8.dac1fid27.rtype	= UBITS(69, 5);
+		    ais->type8.dac1fid27.month	= UBITS(74, 4);
+		    ais->type8.dac1fid27.day	= UBITS(78, 5);
+		    ais->type8.dac1fid27.hour	= UBITS(83, 5);
+		    ais->type8.dac1fid27.minute	= UBITS(88, 6);
+		    ais->type8.dac1fid27.duration	= UBITS(94, 18);
+		    ais->type8.dac1fid27.waycount	= UBITS(112, 5);
+#define ARRAY_BASE 117
+#define ELEMENT_SIZE 55
+		    for (i = 0; i < ais->type8.dac1fid27.waycount; i++) {
+			int a = ARRAY_BASE + (ELEMENT_SIZE*i);
+			ais->type8.dac1fid27.waypoints[i].lon	= SBITS(a + 0, 28);
+			ais->type8.dac1fid27.waypoints[i].lat	= SBITS(a + 28, 27);
+		    }
+#undef ARRAY_BASE
+#undef ELEMENT_SIZE
 		    break;
 		case 29:        /* IMO289 - Text Description - broadcast */
 		    ais->type8.dac1fid29.linkage   = UBITS(56, 10);
