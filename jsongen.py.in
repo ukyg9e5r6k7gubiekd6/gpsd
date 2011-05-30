@@ -213,10 +213,7 @@ ais_specs = (
         ('linkage',    'uinteger', '0'),
         ('sender',     'uinteger', '0'),
         ('rtype',      'uinteger', '0'),
-        ('month',      'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
-        ('day',        'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
-        ('hour',       'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
-        ('minute',     'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+        ('start',      'string',   None),
         ('duration',   'uinteger', '0'),
         ('waypoints',  'array', (
             ('waypoint_t', 'waycount', (
@@ -224,6 +221,7 @@ ais_specs = (
                 ('lat',        'integer',  'AIS_LAT4_NOT_AVAILABLE'),
                 )))),
         ),
+    'stringbuffered' : ('start',),
     },
     {
     "initname" : "json_ais6_fid30",
@@ -335,10 +333,7 @@ ais_specs = (
         ('linkage',    'uinteger', '0'),
         ('sender',     'uinteger', '0'),
         ('rtype',      'uinteger', '0'),
-        ('month',      'uinteger', 'AIS_MONTH_NOT_AVAILABLE'),
-        ('day',        'uinteger', 'AIS_DAY_NOT_AVAILABLE'),
-        ('hour',       'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
-        ('minute',     'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
+        ('start',      'string',   None),
         ('duration',   'uinteger', '0'),
         ('waypoints',  'array', (
             ('waypoint_t', 'waycount', (
@@ -346,6 +341,7 @@ ais_specs = (
                 ('lat',        'integer',  'AIS_LAT4_NOT_AVAILABLE'),
                 )))),
         ),
+    'stringbuffered' : ('start',),
     },
     {
     "initname" : "json_ais8_fid29",

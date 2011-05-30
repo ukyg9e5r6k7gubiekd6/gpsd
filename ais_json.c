@@ -181,6 +181,17 @@ int json_ais_read(const char *buf,
 	    }
 	    else if (strstr(buf, "\"fid\":28,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid28, endptr);
+		if (status == 0) {
+		    ais->type6.dac1fid28.month = AIS_MONTH_NOT_AVAILABLE;
+		    ais->type6.dac1fid28.day = AIS_DAY_NOT_AVAILABLE;
+		    ais->type6.dac1fid28.hour = AIS_HOUR_NOT_AVAILABLE;
+		    ais->type6.dac1fid28.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    (void)sscanf(start, "%02u-%02uT%02u:%02uZ",
+				 &ais->type6.dac1fid28.month,
+				 &ais->type6.dac1fid28.day,
+				 &ais->type6.dac1fid28.hour, 
+				 &ais->type6.dac1fid28.minute);
+		}
 		imo = true;
 	    }
 	    else if (strstr(buf, "\"fid\":30,") != NULL) {
@@ -238,6 +249,17 @@ int json_ais_read(const char *buf,
 	    }
 	    else if (strstr(buf, "\"fid\":27,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid27, endptr);
+		if (status == 0) {
+		    ais->type8.dac1fid27.month = AIS_MONTH_NOT_AVAILABLE;
+		    ais->type8.dac1fid27.day = AIS_DAY_NOT_AVAILABLE;
+		    ais->type8.dac1fid27.hour = AIS_HOUR_NOT_AVAILABLE;
+		    ais->type8.dac1fid27.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    (void)sscanf(start, "%02u-%02uT%02u:%02uZ",
+				 &ais->type8.dac1fid27.month,
+				 &ais->type8.dac1fid27.day,
+				 &ais->type8.dac1fid27.hour, 
+				 &ais->type8.dac1fid27.minute);
+		}
 		imo = true;
 	    }
 	    else if (strstr(buf, "\"fid\":29,") != NULL) {

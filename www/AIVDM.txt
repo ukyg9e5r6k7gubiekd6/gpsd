@@ -2932,7 +2932,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
 |56-65   | 10 |Message Linkage ID|linkage  |u|Unsigned integer
 |66-68   |  3 |Sender Class      |sender   |u|0 = ship (default), 1 = authority,
                                               27 = reserved for future use.
-|69-73   |  5 |Route Type        |rtype    |u|See below
+|69-73   |  5 |Route Type        |rtype    |e|See below
 |74-77   |  4 |Start month       |month    |u|1-12, 0=N/A (default)
 |78-82   |  5 |Start day         |day      |u|1-31, 0=N/A (default)
 |83-87   |  5 |Start hour        |hour     |u|0-23, 24=N/A (default)
@@ -4241,11 +4241,13 @@ ISO8601 format.
 |6(1/18)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
 |6(1/20)| month,day,hour,minute            | arrival      | %02u-%02uT%02u:%02uZ
 |6(1/23)| month,day,hour,minute            | timestamp    | %02u-%02uT%02u:%02uZ
+|6(1/28)| month,day,hour,minute            | start        | %02u-%02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |8(1/11)| day,hour,minute                  | timestamp    | %02uT%02u:%02uZ
 |8(1/13)| fmonth,fday,fhour,fminute        | from         | %02u-%02uT%02u:%02uZ
 |8(1/13)| tmonth,tday,thour,tminute        | to           | %02u-%02uT%02u:%02uZ
 |8(1/22)| month,day,hour,minute            | timestamp    | %02u-%02uT%02u:%02uZ
+|8(1/27)| month,day,hour,minute            | start        | %02u-%02uT%02u:%02uZ
 |===========================================================================
 
 4. There are two variants of the encoding, one scaled and one

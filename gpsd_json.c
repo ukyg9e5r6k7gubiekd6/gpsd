@@ -1931,7 +1931,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			"\"rtype\":%u",
 			ais->type6.dac1fid28.rtype);
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"month\":%u,\"day\":%u,\"hour\":%u,\"minute\":%u,\"duration\":%u,\"waycount\":%u",
+		    "\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waycount\":%u",
 		    ais->type6.dac1fid28.month,
 		    ais->type6.dac1fid28.day,
 		    ais->type6.dac1fid28.hour,
@@ -2226,11 +2226,21 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 25:        /* IMO289 - Dangerous Cargo Indication */
 		break;
 	    case 27:        /* IMO289 - Route information - broadcast */
+	    case 28:	/* IMO289 - Route info - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"linkage\":%u,\"sender\":%u,\"rtype\":%u,\"month\":%u,\"day\":%u,\"hour\":%u,\"minute\":%u,\"duration\":%u,\"waycount\":%u",
+		    "\"linkage\":%u,\"sender\":%u",
 		    ais->type8.dac1fid27.linkage,
-		    ais->type8.dac1fid27.sender,
-		    ais->type8.dac1fid27.rtype,
+		    ais->type8.dac1fid27.sender);
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"rtype\":\"%s\"",
+				   route_type[ais->type8.dac1fid27.rtype]);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"rtype\":%u",
+			ais->type8.dac1fid27.rtype);
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waycount\":%u",
 		    ais->type8.dac1fid27.month,
 		    ais->type8.dac1fid27.day,
 		    ais->type8.dac1fid27.hour,
