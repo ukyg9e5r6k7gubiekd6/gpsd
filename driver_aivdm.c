@@ -455,12 +455,12 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    break;
 		case 28:	/* IMO289 - Route info - addressed */
 		    ais->type6.dac1fid28.linkage	= UBITS(88, 10);
-		    ais->type6.dac1fid28.sender	= UBITS(98, 3);
-		    /* 5 bits of type e */
-		    ais->type6.dac1fid28.month	= UBITS(106, 4);
-		    ais->type6.dac1fid28.day	= UBITS(110, 5);
-		    ais->type6.dac1fid28.hour	= UBITS(115, 5);
-		    ais->type6.dac1fid28.minute	= UBITS(120, 6);
+		    ais->type6.dac1fid28.sender		= UBITS(98, 3);
+		    ais->type6.dac1fid28.rtype		= UBITS(101, 5);
+		    ais->type6.dac1fid28.month		= UBITS(106, 4);
+		    ais->type6.dac1fid28.day		= UBITS(110, 5);
+		    ais->type6.dac1fid28.hour		= UBITS(115, 5);
+		    ais->type6.dac1fid28.minute		= UBITS(120, 6);
 		    ais->type6.dac1fid28.duration	= UBITS(126, 18);
 		    ais->type6.dac1fid28.waycount	= UBITS(144, 5);
 #define ARRAY_BASE 149
@@ -515,7 +515,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	case 7: /* Binary acknowledge */
 	case 13: /* Safety Related Acknowledge */
 	{
-	    unsigned int u, mmsi[4];
+	    unsigned int mmsi[4];
 	    if (ais_context->bitlen < 72 || ais_context->bitlen > 168) {
 		gpsd_report(LOG_WARN, "AIVDM message type %d size is out of range (%zd).\n",
 			    ais->type,
@@ -617,6 +617,36 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    /* skip 5 bits */
 		    break;
 		case 17:        /* IMO289 - VTS-generated/synthetic targets */
+#define ARRAY_BASE 56
+#define ELEMENT_SIZE 122
+		    for (u = 0; ARRAY_BASE + (ELEMENT_SIZE*u) <= ais_context->bitlen; u++) {
+			struct target_t *tp = &ais->type8.dac1fid17.targets[u];
+			int a = ARRAY_BASE + (ELEMENT_SIZE*u);
+			tp->idtype = UBITS(a + 0, 2);
+			switch (tp->idtype) {
+			case DAC1FID17_IDTYPE_MMSI:
+			    tp->id.mmsi	= UBITS(a + 2, 42);
+			    break;
+			case DAC1FID17_IDTYPE_IMO:
+			    tp->id.imo	= UBITS(a + 2, 42);
+			    break;
+			case DAC1FID17_IDTYPE_CALLSIGN:
+			    break;
+			    UCHARS(a+2, tp->id.callsign);
+			default:
+			    UCHARS(a+2, tp->id.other);
+			    break;
+			}
+			/* skip 4 bits */
+			tp->lat	= SBITS(a + 48, 24);
+			tp->lon	= SBITS(a + 72, 25);
+			tp->course	= UBITS(a + 97, 9);
+			tp->second	= UBITS(a + 106, 6);
+			tp->speed	= UBITS(a + 112, 10);
+		    }
+		    ais->type8.dac1fid17.ntargets = u;
+#undef ARRAY_BASE
+#undef ELEMENT_SIZE
 		    break;
 		case 19:        /* IMO289 - Marine Traffic Signal */
 		    ais->type8.dac1fid19.linkage	= UBITS(56, 10);
@@ -624,10 +654,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type8.dac1fid19.lon	= SBITS(186, 25);
 		    ais->type8.dac1fid19.lat	= SBITS(211, 24);
 		    ais->type8.dac1fid19.status	= UBITS(235, 2);
-		    /* 5 bits of type e */
+		    ais->type8.dac1fid19.signal	= UBITS(237, 5);
 		    ais->type8.dac1fid19.hour	= UBITS(242, 5);
 		    ais->type8.dac1fid19.minute	= UBITS(247, 6);
-		    /* 5 bits of type e */
+		    ais->type8.dac1fid19.nextsignal	= UBITS(253, 5);
 		    /* skip 102 bits */
 		    break;
 		case 21:        /* IMO289 - Weather obs. report from ship */

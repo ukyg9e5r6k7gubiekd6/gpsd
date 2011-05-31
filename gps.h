@@ -1118,6 +1118,30 @@ struct ais_t
 		struct {
 		    unsigned int airdraught;	/* Air Draught */
 		} dac1fid15;
+		/* IMO289 - VTS-generated/Synthetic Targets */
+		struct {
+		    signed int ntargets;
+		    struct target_t {
+#define DAC1FID17_IDTYPE_MMSI		0
+#define DAC1FID17_IDTYPE_IMO		1
+#define DAC1FID17_IDTYPE_CALLSIGN	2
+#define DAC1FID17_IDTYPE_OTHER		3
+			unsigned int idtype;	/* Identifier type */
+			union {			/* Target identifier */
+			    unsigned int mmsi;
+			    unsigned int imo;
+			    char callsign[7+1];
+			    char other[7+1];
+			} id;
+			signed int lat;		/* Latitude */
+			signed int lon;		/* Longitude */
+#define DAC1FID17_COURSE_NOT_AVAILABLE		360
+			unsigned int course;	/* Course Over Ground */
+			unsigned int second;	/* Time Stamp */
+#define DAC1FID17_SPEED_NOT_AVAILABLE		255
+			unsigned int speed;	/* Speed Over Ground */
+		    } targets[4];
+		} dac1fid17;
 		/* IMO 289 - Marine Traffic Signal */
 		struct {
 		    unsigned int linkage;	/* Message Linkage ID */

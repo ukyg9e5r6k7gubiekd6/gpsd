@@ -1595,6 +1595,13 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Cancel route identified by message linkage",
     };
 
+    static char *idtypes[] = {
+	"mmsi",
+	"imo",
+	"callsign",
+	"other",
+    };
+
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
     if (device != NULL && device[0] != '\0')
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1807,7 +1814,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 16:	/* IMO236 - Number of persons on board */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "\"persons\":%u", ais->type6.dac1fid16.persons);
+			       "\"persons\":%u}\t\n", ais->type6.dac1fid16.persons);
 		imo = true;
 		break;
 	    case 18:	/* IMO289 - Clearance time to enter port */
@@ -1822,12 +1829,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type6.dac1fid18.destination);
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"lon\":%.3f,\"lat\":%.3f",
-				   ais->type6.dac1fid18.lon / AIS_LATLON3_SCALE,
-				   ais->type6.dac1fid18.lat / AIS_LATLON3_SCALE);
-            else
-                (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "\"lon\":%d,\"lat\":%d",
+				   "\"lon\":%.3f,\"lat\":%.3f}\r\n",
+				   ais->type6.dac1fid18.lon/AIS_LATLON3_SCALE,
+				   ais->type6.dac1fid18.lat/AIS_LATLON3_SCALE);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"lon\":%d,\"lat\":%d}\r\n",
 			       ais->type6.dac1fid18.lon,
 			       ais->type6.dac1fid18.lat);
 		break;
@@ -1887,7 +1894,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"berth_lon\":%.3f,"
 			       "\"berth_lat\":%.3f,"
-			       "\"berth_depth\":%.1f,}\r\n",
+			       "\"berth_depth\":%.1f}\r\n",
 			       ais->type6.dac1fid20.berth_lon / AIS_LATLON3_SCALE,
 			       ais->type6.dac1fid20.berth_lat / AIS_LATLON3_SCALE,
 			       ais->type6.dac1fid20.berth_depth * 0.1);
@@ -1919,37 +1926,39 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"linkage\":%u,\"sender\":%u",
+		    "\"linkage\":%u,\"sender\":%u,",
 		    ais->type6.dac1fid28.linkage,
 		    ais->type6.dac1fid28.sender);
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"rtype\":\"%s\"",
+				   "\"rtype\":\"%s\",",
 				   route_type[ais->type6.dac1fid28.rtype]);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"rtype\":%u",
+			"\"rtype\":%u,",
 			ais->type6.dac1fid28.rtype);
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waycount\":%u",
+		    "\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waypoints:[",
 		    ais->type6.dac1fid28.month,
 		    ais->type6.dac1fid28.day,
 		    ais->type6.dac1fid28.hour,
 		    ais->type6.dac1fid28.minute,
-		    ais->type6.dac1fid28.duration,
-		    ais->type6.dac1fid28.waycount);
+		    ais->type6.dac1fid28.duration);
 		for (i = 0; i < ais->type6.dac1fid28.waycount; i++) {
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			    "\"lon\":%.4f,\"lat\":%.4f",
+			    "{\"lon\":%.4f,\"lat\":%.4f},",
 			    ais->type6.dac1fid28.waypoints[i].lon / AIS_LATLON4_SCALE,
 			    ais->type6.dac1fid28.waypoints[i].lat / AIS_LATLON4_SCALE);
 		    else
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			    "\"lon\":%d,\"lat\":%d",
+			    "{\"lon\":%d,\"lat\":%d},",
 			    ais->type6.dac1fid28.waypoints[i].lon,
 			    ais->type6.dac1fid28.waypoints[i].lat);
 		}
+		if (buf[strlen(buf) - 1] == ',')
+		    buf[strlen(buf)-1] = '\0';
+		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1961,19 +1970,19 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 14:	/* IMO236 - Tidal Window */
 	    case 32:	/* IMO289 - Tidal Window */
 	      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		  "\"month\":%u,\"day\":%u",
+		  "\"month\":%u,\"day\":%u,\"tidals\":[",
 		  ais->type6.dac1fid32.month,
 		  ais->type6.dac1fid32.day);
 	      for (i = 0; i < ais->type6.dac1fid32.ntidals; i++) {
 		  const struct tidal_t *tp =  &ais->type6.dac1fid32.tidals[i];
 		  if (scaled)
 		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			  "\"lon\":%.3f,\"lat\":%.3f",
+			  "{\"lon\":%.3f,\"lat\":%.3f,",
 			  tp->lon / AIS_LATLON3_SCALE,
 			  tp->lat / AIS_LATLON3_SCALE);
 		  else
 		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			  "\"lon\":%d,\"lat\":%d",
+			  "{\"lon\":%d,\"lat\":%d,",
 			  tp->lon,
 			  tp->lat);
 		  (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1985,14 +1994,17 @@ void json_aivdm_dump(const struct ais_t *ais,
 		      tp->cdir);
 		  if (scaled)
 		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			  "\"cspeed\":%.1f",
+			  "\"cspeed\":%.1f},",
 			  tp->cspeed / 10.0);
 		  else
 		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			  "\"cspeed\":%u",
+			  "\"cspeed\":%u},",
 			  tp->cspeed);
 	      }
-		      break;
+	      if (buf[strlen(buf) - 1] == ',')
+		  buf[strlen(buf)-1] = '\0';
+	      (void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
+	      break;
 	    }
 	if (!imo)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2026,12 +2038,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 		/* layout is almost identical to FID=31 from IMO289 */
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"lat\":%.3f,\"lon\":%.3f,",
+				   "{\"lat\":%.3f,\"lon\":%.3f,",
 				   ais->type8.dac1fid31.lat / AIS_LATLON3_SCALE,
 				   ais->type8.dac1fid31.lon / AIS_LATLON3_SCALE);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"lat\":%d,\"lon\":%d,",
+				   "{\"lat\":%d,\"lon\":%d,",
 				   ais->type8.dac1fid31.lat,
 				   ais->type8.dac1fid31.lon);
 		if (ais->type8.fid == 31)
@@ -2186,10 +2198,64 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 15:        /* IMO236 - Extended ship and voyage */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "\"airdraught\":%u",
+			       "\"airdraught\":%u}\r\n",
 			       ais->type8.dac1fid15.airdraught);
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
+		(void)strlcat(buf, "\"targets\":[", buflen - strlen(buf));
+		for (i = 0; i < ais->type8.dac1fid17.ntargets; i++) {
+		    if (scaled)
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "{\"idtype\":\"%s\",",
+			    idtypes[ais->type8.dac1fid17.targets[i].idtype]);
+		    else
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "{\"idtype\":%u,",
+			    ais->type8.dac1fid17.targets[i].idtype);
+		    switch (ais->type8.dac1fid17.targets[i].idtype) {
+		    case DAC1FID17_IDTYPE_MMSI:
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"%s\":\"%u\",",
+			    idtypes[ais->type8.dac1fid17.targets[i].idtype],
+			    ais->type8.dac1fid17.targets[i].id.mmsi);
+			break;
+		    case DAC1FID17_IDTYPE_IMO:
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"%s\":\"%u\",",
+			    idtypes[ais->type8.dac1fid17.targets[i].idtype],
+			    ais->type8.dac1fid17.targets[i].id.imo);
+			break;
+		    case DAC1FID17_IDTYPE_CALLSIGN:
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"%s\":\"%s\",",
+			    idtypes[ais->type8.dac1fid17.targets[i].idtype],
+			    ais->type8.dac1fid17.targets[i].id.callsign);
+			break;
+		    default:
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"%s\":\"%s\",",
+			    idtypes[ais->type8.dac1fid17.targets[i].idtype],
+			    ais->type8.dac1fid17.targets[i].id.other);
+		    }
+		    if (scaled)
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"lat\":%.3f,\"lon\":%.3f,",
+			    ais->type8.dac1fid17.targets[i].lat / AIS_LATLON3_SCALE,
+			    ais->type8.dac1fid17.targets[i].lon / AIS_LATLON3_SCALE);
+		    else
+			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			    "\"lat\":%d,\"lon\":%d,",
+			    ais->type8.dac1fid17.targets[i].lat,
+			    ais->type8.dac1fid17.targets[i].lon);
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"course\":%u,\"second\":%u,\"speed\":%u},",
+			ais->type8.dac1fid17.targets[i].course,
+			ais->type8.dac1fid17.targets[i].second,
+			ais->type8.dac1fid17.targets[i].speed);
+		}
+		if (buf[strlen(buf) - 1] == ',')
+		    buf[strlen(buf) - 1] = '\0';
+		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
 		if (scaled)
@@ -2226,39 +2292,40 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 25:        /* IMO289 - Dangerous Cargo Indication */
 		break;
 	    case 27:        /* IMO289 - Route information - broadcast */
-	    case 28:	/* IMO289 - Route info - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"linkage\":%u,\"sender\":%u",
+		    "\"linkage\":%u,\"sender\":%u,",
 		    ais->type8.dac1fid27.linkage,
 		    ais->type8.dac1fid27.sender);
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"rtype\":\"%s\"",
-				   route_type[ais->type8.dac1fid27.rtype]);
+			"\"rtype\":\"%s\",",
+			route_type[ais->type8.dac1fid27.rtype]);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"rtype\":%u",
+			"\"rtype\":%u,",
 			ais->type8.dac1fid27.rtype);
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waycount\":%u",
+			"\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waypoints\":[",
 		    ais->type8.dac1fid27.month,
 		    ais->type8.dac1fid27.day,
 		    ais->type8.dac1fid27.hour,
 		    ais->type8.dac1fid27.minute,
-		    ais->type8.dac1fid27.duration,
-		    ais->type8.dac1fid27.waycount);
+		    ais->type8.dac1fid27.duration);
 		for (i = 0; i < ais->type8.dac1fid27.waycount; i++) {
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			    "\"lon\":%.4f,\"lat\":%.4f",
+			    "{\"lon\":%.4f,\"lat\":%.4f},",
 			    ais->type8.dac1fid27.waypoints[i].lon / AIS_LATLON4_SCALE,
 			    ais->type8.dac1fid27.waypoints[i].lat / AIS_LATLON4_SCALE);
 		    else
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			    "\"lon\":%d,\"lat\":%d",
+			    "{\"lon\":%d,\"lat\":%d},",
 			    ais->type8.dac1fid27.waypoints[i].lon,
 			    ais->type8.dac1fid27.waypoints[i].lat);
 		}
+		if (buf[strlen(buf) - 1] == ',')
+		    buf[strlen(buf) - 1] = '\0';
+		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),

@@ -308,6 +308,27 @@ ais_specs = (
         ),
     },
     {
+    "initname" : "json_ais8_fid17",
+    "headers": ("AIS_HEADER","AIS_TYPE8",),
+    "structname": "ais->type8.dac1fid17",
+    "fieldmap":(
+        # fieldname    type        default
+        ('targets',    'array', (
+            ('target_t', 'ntargets', (
+                ('idtype',     'uinteger', 'DAC1FID17_IDTYPE_OTHER'),
+                ("id.mmsi",    'uinteger', '0'),
+                ("id.imo",     'uinteger', '0'),
+                #("id.callsign",'string',    None),
+                #("id.other",   'string',    None),
+                ('lat',        'integer',  'AIS_LAT3_NOT_AVAILABLE'),
+                ('lon',        'integer',  'AIS_LON3_NOT_AVAILABLE'),
+                ('course',     'uinteger', 'DAC1FID17_COURSE_NOT_AVAILABLE'),
+                ('second',     'uinteger', 'AIS_SECOND_NOT_AVAILABLE'),
+                ('speed',      'uinteger', 'DAC1FID17_SPEED_NOT_AVAILABLE'),
+                )))),
+        ),
+    },
+    {
         "initname" : "json_ais8_fid19",
         "headers": ("AIS_HEADER","AIS_TYPE8",),
         "structname": "ais->type8.dac1fid19",

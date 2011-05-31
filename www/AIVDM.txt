@@ -2026,7 +2026,7 @@ bits.  This message is laid out identically in <<IMO236>> and
 |38-39   |  2 |Spare              |           |x|Not used
 |40-49   | 10 |DAC                |dac        |u|DAC = 001
 |50-55   |  6 |FID                |fid        |u|FID = 17
-|56      |    |                   |targets    |a|Synthetic targets array
+|56      |    |                   |targets    |a4|Synthetic targets array
 |0-1     |  2 |Identifier type    |idtype     |e|0 = id is the MMSI number,
                                                  1 = id is the IMO number,
                                                  2 = id is the call sign,
@@ -4311,7 +4311,7 @@ integer indices.  In scaled mode, the values are dumped as strings.
 | 27     | lon, lat                             | -
 |===========================================================================
 
-This table does not count fields that are scaled by multipliers to integers.
+This table does not include fields that are scaled by multipliers to integers.
 These are reported in the multiplied form in both scaled and unscaled modes.
 
 As the Beaufort scale is usually quoted numerically, conforming implementations
@@ -4328,6 +4328,14 @@ should do so rather than exoanding to its controlled vocabulary.
 |  9     | alt       | "nan" = not available, "high" = alt >= 4094 meters 
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
 |===========================================================================
+
+7. Trailung arrays are dumped as JSON subobject arrays.  The name of the 
+array item is the name given in the 'a' table entry.  Explicit array count 
+fields (presently "waycount" in Route Info messages") are not dumped.
+
+8. In the VTS-Generated/Synthetic Targets message, the id field is
+dumped as the value of an attribute the name of which is specified by
+the idtype field.
 
 == References ==
 
