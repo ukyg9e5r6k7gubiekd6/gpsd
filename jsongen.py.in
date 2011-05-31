@@ -318,8 +318,8 @@ ais_specs = (
                 ('idtype',     'uinteger', 'DAC1FID17_IDTYPE_OTHER'),
                 ("id.mmsi",    'uinteger', '0'),
                 ("id.imo",     'uinteger', '0'),
-                #("id.callsign",'string',    None),
-                #("id.other",   'string',    None),
+                ("id.callsign",'string',   'DAC1FID17_ID_LENGTH'),
+                ("id.other",   'string',   'DAC1FID17_ID_LENGTH'),
                 ('lat',        'integer',  'AIS_LAT3_NOT_AVAILABLE'),
                 ('lon',        'integer',  'AIS_LON3_NOT_AVAILABLE'),
                 ('course',     'uinteger', 'DAC1FID17_COURSE_NOT_AVAILABLE'),
@@ -740,10 +740,13 @@ def generate(spec):
             for (subattr, subitype, default) in elements:
                 report += '\t{"%s",%st_%s,%sSTRUCTOBJECT(struct %s, %s),\n' % \
                        (subattr, " "*(14-len(subattr)), subitype, " "*(8-len(subitype)), innerstruct, subattr)
-                if subitype == "string":
-                    report += leader + ".len = sizeof(%s.%s)},\n" % (structname,subattr)
-                else:
+                if subitype != "string":
                     report += leader + ".dflt.%s = %s},\n" % (subitype, default)
+                elif default:
+                    report += leader + ".len = %s},\n" % (default,)
+                else:
+                    print >>sys.stderr, "explicit length specification required"
+                    raise SystemExit, 1
             report += "    };\n"
     # Generate the main structure definition describing this parse.
     # It may have object subarrays.

@@ -1127,11 +1127,12 @@ struct ais_t
 #define DAC1FID17_IDTYPE_CALLSIGN	2
 #define DAC1FID17_IDTYPE_OTHER		3
 			unsigned int idtype;	/* Identifier type */
-			union {			/* Target identifier */
+			union target_id {	/* Target identifier */
 			    unsigned int mmsi;
 			    unsigned int imo;
-			    char callsign[7+1];
-			    char other[7+1];
+#define DAC1FID17_ID_LENGTH		7
+			    char callsign[DAC1FID17_ID_LENGTH+1];
+			    char other[DAC1FID17_ID_LENGTH+1];
 			} id;
 			signed int lat;		/* Latitude */
 			signed int lon;		/* Longitude */
