@@ -1105,6 +1105,9 @@ is the message header format:
 |125-142 | 18 |Duration             |duration   |In minutes,
                                                  262143 = N/A (default),
                                                  0 = cancel this notice.
+|143     |    |                     |subarea    |a10|Subarea array
+|0-2     |  2 |                     |shape      |u|Subarea shape
+|3-86    | 85 |Subarea Payload      |payload    |d|Subarea payload
 |==============================================================================
 
 The Message Linkage field is, as usual, for linking to a textual explanatory 
@@ -1258,6 +1261,8 @@ Subarea types are as follows:
 |  5  | Associated text
 | 6-7 | Reserved
 |==============================================================================
+
+Subarea payload layouts are as follows:
 
 .Circle or Point
 [frame="topbot",options="header"]
@@ -2397,6 +2402,9 @@ is the message header format:
 |93-110  | 18 |Duration             |duration   |In minutes,
                                                  262143 = N/A (default),
                                                  0 = cancel this notice.
+|143     |    |                     |subarea    |a10|Subarea array
+|0-2     |  2 |                     |shape      |u|Subarea shape
+|3-86    | 85 |Subarea Payload      |payload    |d|Subarea payload
 |==============================================================================
 
 The sub-area indications are as described under the addressed form, 
