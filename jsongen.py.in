@@ -727,7 +727,7 @@ def generate(spec):
                 report += "    char %s[JSON_VAL_MAX+1];\n" % attr
                 outboard.append(attr)
     structname = spec["structname"]
-    # If there are structarrays describing array sobobjects, we need
+    # If there are structarrays describing array subobjects, we need
     # to make a separate parse control initializer for each one.  The
     # attribute name is the name of the array; substructure and length
     # fieldnames must be given in the defaults part.
@@ -739,8 +739,11 @@ def generate(spec):
             report += "    const struct json_attr_t %s_%s_subtype[] = {\n" % (initname, attr)
             for (subattr, subitype, default) in elements:
                 report += '\t{"%s",%st_%s,%sSTRUCTOBJECT(struct %s, %s),\n' % \
-                       (subattr, " "*(14-len(subattr)), subitype, " "*(8-len(itype)), innerstruct, subattr)
-                report += leader + ".dflt.%s = %s},\n" % (subitype, default)
+                       (subattr, " "*(14-len(subattr)), subitype, " "*(8-len(subitype)), innerstruct, subattr)
+                if subitype == "string":
+                    report += leader + ".len = sizeof(%s.%s)},\n" % (structname,subattr)
+                else:
+                    report += leader + ".dflt.%s = %s},\n" % (subitype, default)
             report += "    };\n"
     # Generate the main structure definition describing this parse.
     # It may have object subarrays.
