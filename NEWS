@@ -1,4 +1,4 @@
-* Mon Mar 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0~dev  
+* Wed Jun 1 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0~dev  
   POLL subobject name changes: fixes -> tpv, skyview -> sky.
   Fix a timestamp-clobbering bug in the C library revealed by an
   obscure car-nav device, the MyGuide 3100. The DEVICE 'activated'
@@ -10,7 +10,7 @@
   the Maidehead grid locator for current lat/lon.  xgps displays
   GST noise statistics if they are available. Codebase now has
   an scons build recipe. Direct support for activation of gpsd from
-  Mac OS/X systemd. gpsdecode can now filoter reports by RTCM2, RTCM3,
+  Mac OS/X systemd. gpsdecode can now filter reports by RTCM2, RTCM3,
   or AIS message type.
 
 * Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
