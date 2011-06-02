@@ -32,9 +32,8 @@ different types in them, and a copy of the RTCM3 standard at latest revision
 
 **** Reporting code for specialized Type 6 and 8 AIS messages.
 
-This one is mine and Kurt Schwehr's.  Kurt: I still need Area Notice
-and Environmental descriptions merged into AIVDM.txt before I can
-complete this.
+This one is mine and Kurt Schwehr's. Support is currently nearly complete
+but untested.
 
 ** Ports
 
