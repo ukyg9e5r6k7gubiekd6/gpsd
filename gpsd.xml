@@ -26,8 +26,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <cmdsynopsis>
   <command>gpsd</command>
       <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
-      <!-- arg choice='opt'>-R
-      <replaceable>rtcm-listener-port</replaceable></arg -->
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
       <arg choice='opt'>-b </arg>
       <arg choice='opt'>-l </arg>
