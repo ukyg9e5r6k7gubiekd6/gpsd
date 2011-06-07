@@ -1460,9 +1460,7 @@ static void consume_packets(struct gps_device_t *device)
 		 sub < subscribers + MAXSUBSCRIBERS; sub++)
 		if (sub->active != 0
 		    && sub->policy.watcher
-		    && (sub->policy.devpath[0] == '\0'
-			|| strcmp(sub->policy.devpath,
-				  device->gpsdata.dev.path) == 0))
+		    && subscribed(sub, device))
 		    listeners = true;
 	    if (listeners)
 		(void)awaken(device);
