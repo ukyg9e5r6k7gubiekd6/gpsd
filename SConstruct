@@ -799,7 +799,7 @@ python_egg_info = python_env.Textfile(target="gps-%s.egg-info" %(gpsd_version, )
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
-    sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\1\",/' <$SOURCE >$TARGET &&\
+    sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
     chmod a-w $TARGET""")
 
 # build timebase.h
@@ -832,7 +832,7 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
 if st != 0:
     from datetime import datetime
     rev = datetime.now().isoformat()[:-4]
-revision='#define REVISION "%s"' %(rev.strip(),)
+revision='#define REVISION "%s"\n' %(rev.strip(),)
 env.Textfile(target="revision.h", source=[revision])
 
 # leapseconds.cache is a local cache for information on leapseconds issued
