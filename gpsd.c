@@ -2228,7 +2228,7 @@ int main(int argc, char *argv[])
 		    FD_SET(device->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(device->gpsdata.gps_fd, true);
 		}
-		    }
+	    }
 	} /* devices */
 
 #ifdef __UNUSED_AUTOCONNECT__
