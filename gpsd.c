@@ -95,11 +95,15 @@
  *
  * DEVICE_REAWAKE says how long to wait before repolling after a zero-length
  * read. It's there so we avoid spinning forever on an EOF condition.
+ *
+ * DEVICE_RECONNECT sets interval on retries when (re)connecting to
+ * a device.
  */
 #define COMMAND_TIMEOUT		60*15
 #define NOREAD_TIMEOUT		60*3
 #define RELEASE_TIMEOUT		60
 #define DEVICE_REAWAKE		0.01
+#define DEVICE_RECONNECT	2
 
 #define QLEN			5
 
@@ -2288,51 +2292,60 @@ int main(int argc, char *argv[])
 	    }
 	}
 
-#ifndef FORCE_NOWAIT
 	/*
 	 * Mark devices with an identified packet type but no
 	 * remaining subscribers to be closed in RELEASE_TIME seconds.
 	 * See the explanation of RELEASE_TIME for the reasoning.
+	 *
+	 * Re-poll devices that are disconnected, but have potential
+	 * subscribers in the same cycle.
 	 */
-	if (!nowait) {
-	    for (device = devices; device < devices + MAXDEVICES; device++) {
-		if (allocated_device(device)) {
-		    if (device->packet.type != BAD_PACKET) {
-			bool device_needed = false;
+	for (device = devices; device < devices + MAXDEVICES; device++) {
+#ifdef FORCE_NOWAIT
+	    bool device_needed = true;
+#else
+	    bool device_needed = nowait;
+#endif
 
-			for (sub = subscribers;
-			     sub < subscribers + MAXSUBSCRIBERS; sub++) {
-			    if (sub->active == 0)
-				continue;
-			    else if (subscribed(sub, device)) {
-				device_needed = true;
-				break;
-			    }
-			}
+	    if (!allocated_device(device))
+		continue;
 
-			if (!device_needed && device->gpsdata.gps_fd > -1) {
-			    if (device->releasetime == 0) {
-				device->releasetime = timestamp();
-				gpsd_report(LOG_PROG,
-					    "device %d (fd %d) released\n",
-					    (int)(device - devices),
-					    device->gpsdata.gps_fd);
-			    } else if (timestamp() - device->releasetime >
-				       RELEASE_TIMEOUT) {
-				gpsd_report(LOG_PROG, "device %d closed\n",
-					    (int)(device - devices));
-				gpsd_report(LOG_RAW,
-					    "unflagging descriptor %d\n",
-					    device->gpsdata.gps_fd);
-				deactivate_device(device);
-			    }
-			}
-		    }
+	    if (device_needed != true)
+		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS;
+			sub++) {
+		    if (sub->active == 0)
+			continue;
+		    device_needed = subscribed(sub, device);
+		    if (device_needed)
+			break;
+		}
+
+	    if (!device_needed && device->gpsdata.gps_fd > -1 &&
+		    device->packet.type != BAD_PACKET) {
+		if (device->releasetime == 0) {
+		    device->releasetime = timestamp();
+		    gpsd_report(LOG_PROG, "device %d (fd %d) released\n",
+			(int)(device - devices),
+			device->gpsdata.gps_fd);
+		} else if (timestamp() - device->releasetime >
+			RELEASE_TIMEOUT) {
+		    gpsd_report(LOG_PROG, "device %d closed\n",
+			(int)(device - devices));
+		    gpsd_report(LOG_RAW, "unflagging descriptor %d\n",
+			device->gpsdata.gps_fd);
+		    deactivate_device(device);
 		}
 	    }
+
+	    if (device_needed && device->gpsdata.gps_fd == -1 &&
+		    (device->opentime == 0 ||
+		    timestamp() - device->opentime > DEVICE_RECONNECT)) {
+		device->opentime = timestamp();
+		gpsd_report(LOG_INF, "reconnection attempt on device %d\n",
+		    (int)(device - devices));
+		(void)awaken(device);
+	    }
 	}
-	/* nowait */
-#endif /* FORCE_NOWAIT */
 #endif /* SOCKET_EXPORT_ENABLE */
     }
 
