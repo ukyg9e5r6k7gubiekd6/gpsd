@@ -93,8 +93,10 @@ static void usage(void)
 {
     (void)fprintf(stderr,
 		  "Usage: gpspipe [OPTIONS] [server[:port[:device]]]\n\n"
-		  "-d Run as a daemon.\n" "-f [file] Write output to file.\n"
-		  "-h Show this help.\n" "-r Dump raw NMEA.\n"
+		  "-d Run as a daemon.\n" 
+		  "-o [file] Write output to file.\n"
+		  "-h Show this help.\n" 
+		  "-r Dump raw NMEA.\n"
 		  "-R Dump super-raw mode (GPS binary).\n"
 		  "-w Dump gpsd native data.\n"
 		  "-l Sleep for ten seconds before connecting to gpsd.\n"
