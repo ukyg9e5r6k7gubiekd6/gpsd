@@ -52,6 +52,7 @@ debugging = [
 def sizeit(legend, tag, options):
     print legend + ":"
     print "Options:", " ".join(options)
+    os.system("scons -c > /dev/null; rm -fr .scons*")
     os.system("scons shared=no " + " ".join(options) + " >/dev/null")
     os.rename("gpsd", "gpsd-" + tag + "-build")
 
@@ -68,6 +69,7 @@ sizeit("Minimalist build, stripped to NMEA only with shm interface",
 sizeit("Normal build, configure options defaulted", "normal", [])
 os.system("size gpsd-*-build")
 os.system("rm gpsd-*-build")
+os.system("scons -c > /dev/null; rm -fr .scons*")
 
 #end
 
