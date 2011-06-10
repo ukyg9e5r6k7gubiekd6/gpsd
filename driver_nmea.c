@@ -1027,13 +1027,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	nmea_decoder decoder;
     } nmea_phrase[] = {
 	/*@ -nullassign @*/
-	{
-	"PGRMC", 0, NULL},	/* ignore Garmin Sensor Config */
-	{
-	"PGRME", 7, processPGRME}, {
-	"PGRMI", 0, NULL},	/* ignore Garmin Sensor Init */
-	{
-	"PGRMO", 0, NULL},	/* ignore Garmin Sentence Enable */
+	{"PGRMC", 0, NULL},	/* ignore Garmin Sensor Config */
+	{"PGRME", 7, processPGRME}, 
+	{"PGRMI", 0, NULL},	/* ignore Garmin Sensor Init */
+	{"PGRMO", 0, NULL},	/* ignore Garmin Sentence Enable */
 	    /*
 	     * Basic sentences must come after the PG* ones, otherwise
 	     * Garmins can get stuck in a loop that looks like this:
@@ -1048,29 +1045,24 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     *
 	     * 4. The mode is changed back to NMEA, resulting in an infinite loop.
 	     */
-	{
-	"RMC", 8, processGPRMC}, {
-	"GGA", 13, processGPGGA}, {
-        "GST", 8, processGPGST}, {
-	"GLL", 7, processGPGLL}, {
-	"GSA", 17, processGPGSA}, {
-	"GSV", 0, processGPGSV}, {
-	"VTG", 0, NULL},	/* ignore Velocity Track made Good */
-	{
-	"ZDA", 4, processGPZDA}, {
-	"GBS", 7, processGPGBS},
-        {"HDT", 1, processHDT},
+	{"RMC", 8,  processGPRMC},
+	{"GGA", 13, processGPGGA},
+	{"GST", 8,  processGPGST},
+	{"GLL", 7,  processGPGLL},
+	{"GSA", 17, processGPGSA},
+	{"GSV", 0,  processGPGSV},
+	{"VTG", 0,  NULL},	/* ignore Velocity Track made Good */
+	{"ZDA", 4,  processGPZDA},
+	{"GBS", 7,  processGPGBS},
+        {"HDT", 1,  processHDT},
 #ifdef TNT_ENABLE
-	{
-	"PTNTHTM", 9, processTNTHTM},
+	{"PTNTHTM", 9, processTNTHTM},
 #endif /* TNT_ENABLE */
 #ifdef ASHTECH_ENABLE
-	{
-	"PASHR", 3, processPASHR},	/* general handler for Ashtech */
+	{"PASHR", 3, processPASHR},	/* general handler for Ashtech */
 #endif /* ASHTECH_ENABLE */
 #ifdef OCEANSERVER_ENABLE
-	{
-	"OHPR", 18, processOHPR},
+	{"OHPR", 18, processOHPR},
 #endif /* OCEANSERVER_ENABLE */
 	    /*@ +nullassign @*/
     };
