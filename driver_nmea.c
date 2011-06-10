@@ -774,14 +774,14 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 static gps_mask_t processHDT(int c UNUSED, char *field[],
 				struct gps_device_t *session)
 {
-    /*
-     
-     $HEHDT,341.8,T*21
-     
-     HDT,x.x*hh<cr><lf>
-     Fields in order:
-     1. True heading
-     *hh          mandatory nmea_checksum
+    /* 
+     * $HEHDT,341.8,T*21
+     *
+     * HDT,x.x*hh<cr><lf>
+     * 
+     * The only data field is true heading in degrees.
+     * The following field is required to be 'T' indicating a true heading.
+     * It is followed by a mandatory nmea_checksum.
      */
     gps_mask_t mask;
     mask = ONLINE_SET;
