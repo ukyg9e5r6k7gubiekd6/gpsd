@@ -85,6 +85,7 @@ GPSD Frequently Asked Questions
 <li><a href='#willitwork'>Will this gps work? It's not on the hardware list.</a>
 <li><a href='#nmea2000'>Does gpsd support NMEA2000?.</a><br/>
 <li><a href='#conflict'>Why does GPSD interfere with non-GPS USB devices?</a></br>
+<li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></br>
 </ul>
 
 <h1 id='verify'>How can I verify operation of a new GPS?</h1>
@@ -698,7 +699,7 @@ Some of these go catatonic if you try to set the baud rate, which is
 why we have a -b option that prevents <code>gpsd</code> from trying to
 configure the GPSes it talks to.</p>
 
-<p>On Linux systems, there's trick you can play to simulate fixing the
+<p>On Linux systems, there's a trick you can play to simulate fixing the
 baud rate.  It utilizes the fact that under Linux, setting baud rate 0
 is interpreted as "use the hardware port's existing baud rate without
 change".  The autoconfiguring hunt loop in <code>gpsd</code> always starts
@@ -731,7 +732,7 @@ emit NMEA. Datasheets often indicate which chip the receiver is based on, for
 example a <i>NavCorp NX666</i>. Check to see if other <i>NavCorp</i> receivers
 are listed, either as a vendor or a chipset. Compare this with the output of
 <code>gpsd -l</code> which will list the protocols compiled into gpsd. If your
-receiver doesn't support NMEA and we don't have special driver for the chipset
+receiver doesn't support NMEA and we don't have special driver for the chipset,
 talk to us. But it'll probably just work.</p>
 
 <p>Assuming the receiver has a USB interface, do a web search to see if someone
@@ -799,6 +800,16 @@ enough information about themselves to avoid conflicts.</p>
 it by disabling the GPSD hotplug rules.  Unfortunately, this means
 you will have to start <code>gpsd</code> manually with a device-path
 argument when you want to use a GPS.</p>
+
+<h1 id='efficiency'>What is gpsd's CPU and power overhead?</h1>
+
+<p>The daemon, <code>gpsd</code>, is designed to run light so it can be
+used in low-power embedded-systems deployments. Data throughput from GPSes
+and other navigational sensors is low and tends to be concentrated in bursts
+at about one-second intervals; accordingly, <code>gpsd</code> spends most
+of its time simply waiting in select(2) at effectively zero CPU cost. Even
+with a client session and a GPS active, we have measured gpsd's CPU load
+at steadily less than 1% on a low-power, low-speed ARM SBC.</p>
 
 </div>
 <hr/>
