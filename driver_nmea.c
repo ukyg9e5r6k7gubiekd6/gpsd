@@ -771,6 +771,48 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
     return mask;
 }
 
+static gps_mask_t processHDT(int c UNUSED, char *field[],
+				struct gps_device_t *session)
+{
+    /*
+     
+     $HEHDT,341.8,T*21
+     
+     HDT,x.x*hh<cr><lf>
+     Fields in order:
+     1. True heading
+     *hh          mandatory nmea_checksum
+     */
+    gps_mask_t mask;
+    mask = ONLINE_SET;
+
+    session->gpsdata.attitude.heading = atof(field[1]);
+    session->gpsdata.attitude.mag_st = '\0';
+    session->gpsdata.attitude.pitch = NAN;
+    session->gpsdata.attitude.pitch_st = '\0';
+    session->gpsdata.attitude.roll = NAN;
+    session->gpsdata.attitude.roll_st = '\0';
+    session->gpsdata.attitude.yaw = NAN;
+    session->gpsdata.attitude.yaw_st = '\0';
+    session->gpsdata.attitude.dip = NAN;
+    session->gpsdata.attitude.mag_len = NAN;
+    session->gpsdata.attitude.mag_x = NAN;
+    session->gpsdata.attitude.mag_y = NAN;
+    session->gpsdata.attitude.mag_z = NAN;
+    session->gpsdata.attitude.acc_len = NAN;
+    session->gpsdata.attitude.acc_x = NAN;
+    session->gpsdata.attitude.acc_y = NAN;
+    session->gpsdata.attitude.acc_z = NAN;
+    session->gpsdata.attitude.gyro_x = NAN;
+    session->gpsdata.attitude.gyro_y = NAN;
+    mask |= (ATTITUDE_SET);
+
+    gpsd_report(LOG_RAW, "time %.3f, heading %lf.\n",
+		session->newdata.time,
+		session->gpsdata.attitude.heading);
+    return mask;
+}
+
 #ifdef TNT_ENABLE
 static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
 				struct gps_device_t *session)
@@ -1017,6 +1059,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{
 	"ZDA", 4, processGPZDA}, {
 	"GBS", 7, processGPGBS},
+        {"HDT", 1, processHDT},
 #ifdef TNT_ENABLE
 	{
 	"PTNTHTM", 9, processTNTHTM},
