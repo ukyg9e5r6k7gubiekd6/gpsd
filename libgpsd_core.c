@@ -202,6 +202,7 @@ void gpsd_clear(struct gps_device_t *session)
 int gpsd_open(struct gps_device_t *session)
 /* open a device for access to its data */
 {
+#ifdef NETFEED_ENABLE
     /* special case: source may be a URI to a remote GNSS or DGPS service */
     if (netgnss_uri_check(session->gpsdata.dev.path)) {
 	session->gpsdata.gps_fd = netgnss_uri_open(session,
@@ -258,6 +259,7 @@ int gpsd_open(struct gps_device_t *session)
 	session->sourcetype = source_udp;
 	return session->gpsdata.gps_fd;
     }
+#endif /* NETFEED_ENABLE */
 
     /* fall through to plain serial open */
     return gpsd_serial_open(session);

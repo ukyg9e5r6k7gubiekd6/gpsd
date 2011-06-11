@@ -149,7 +149,9 @@ static bool nowait = false;
 #endif /* FORCE_NOWAIT */
 static jmp_buf restartbuf;
 static struct gps_context_t context;
+#if defined(SYSTEMD_ENABLE)
 static int sd_socket_count = 0;
+#endif
 
 static volatile sig_atomic_t signalled;
 
@@ -1347,6 +1349,7 @@ static void consume_packets(struct gps_device_t *device)
     gpsd_report(LOG_RAW + 1, "polling %d\n",
 	    device->gpsdata.gps_fd);
 
+#ifdef NETFEED_ENABLE
     /*
      * Strange special case - the opening transaction on an NTRIP connection
      * may not yet be completed.  Try to ratchet things forward.
@@ -1369,6 +1372,7 @@ static void consume_packets(struct gps_device_t *device)
 	}
 	return;
     }
+#endif /* NETFEED_ENABLE */
 
     for (fragments = 0; ; fragments++) {
 	changed = gpsd_poll(device);
@@ -1823,8 +1827,18 @@ int main(int argc, char *argv[])
     }
 #endif
 
+#if defined(CONTROL_SOCKET_ENABLE) || defined(SYSTEMD_ENABLE)
+    if (
 #ifdef CONTROL_SOCKET_ENABLE
-    if (!control_socket && optind >= argc && sd_socket_count <= 0) {
+	control_socket == NULL
+#endif
+#if defined(CONTROL_SOCKET_ENABLE) && defined(SYSTEMD_ENABLE)
+	&& 
+#endif
+#ifdef SYSTEMD_ENABLE
+	sd_socket_count <= 0 
+#endif
+	&& optind >= argc) {
 	gpsd_report(LOG_ERROR,
 		    "can't run with neither control socket nor devices\n");
 	exit(1);
@@ -1842,6 +1856,7 @@ int main(int argc, char *argv[])
         adjust_max_fd(csock, true);
     }
 #endif
+#ifdef CONTROL_SOCKET_ENABLE
     if (control_socket) {
 	(void)unlink(control_socket);
 	if ((csock = filesock(control_socket)) == -1) {
@@ -1857,13 +1872,14 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_PROG, "control socket opened at %s\n",
 		    control_socket);
     }
+#endif /* CONTROL_SOCKET_ENABLE */
 #else
     if (optind >= argc) {
 	gpsd_report(LOG_ERROR,
 		    "can't run with no devices specified\n");
 	exit(1);
     }
-#endif /* CONTROL_SOCKET_ENABLE */
+#endif /* defined(CONTROL_SOCKET_ENABLE) || defined(SYSTEMD_ENABLE) */
 
     /* might be time to daemonize */
     if (go_background) {

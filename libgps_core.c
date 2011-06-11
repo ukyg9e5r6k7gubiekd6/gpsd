@@ -26,7 +26,7 @@ void gps_enable_debug(int level, FILE * fp)
 {
     libgps_debuglevel = level;
     debugfp = fp;
-#ifdef CLIENTDEBUG_ENABLE
+#if defined(CLIENTDEBUG_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
     json_enable_debug(level - DEBUG_JSON, fp);
 #endif
 }

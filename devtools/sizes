@@ -53,19 +53,20 @@ def sizeit(legend, tag, options):
     print legend + ":"
     print "Options:", " ".join(options)
     os.system("scons -c > /dev/null; rm -fr .scons*")
-    os.system("scons shared=no " + " ".join(options) + " >/dev/null")
+    os.system("scons shared=no " + " ".join(options) + " gpsd >/dev/null")
     os.rename("gpsd", "gpsd-" + tag + "-build")
 
 # Main sequence
 os.system("uname -a")
 sizeit("Minimalist build, stripped to NMEA only with shm interface",
        "minimalist",
-       ["socket-export=no",
-        "control=no-socket",
+       ["socket_export=no",
+        "control_socket=no",
         "ipv6=no",
+        "netfeed=no",
         "fixed_port_speed=9600",
         "limited_max_devices=1",
-        ] + nmea_variants+binary_gps+non_gps+time_service+debugging)
+        ] + nmea_variants + binary_gps + non_gps + time_service + debugging)
 sizeit("Normal build, configure options defaulted", "normal", [])
 os.system("size gpsd-*-build")
 #os.system("rm gpsd-*-build")

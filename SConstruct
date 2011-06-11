@@ -78,12 +78,13 @@ boolopts = (
     ("pps_on_cts",    False, "PPS pulse on CTS rather than DCD"),
     # Export methods
     ("socket_export", True,  "data export over sockets"),
-    ("dbus_export",   False,  "enable DBUS export support"),
+    ("dbus_export",   False, "enable DBUS export support"),
     ("shm_export",    True,  "export via shared memory"),
     # Communication
     ('usb',           True,  "libusb support for USB devices"),
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
+    ("netfeed",       True,  "build support for handling TCP/IP data sources"),
     # Other daemon options
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
