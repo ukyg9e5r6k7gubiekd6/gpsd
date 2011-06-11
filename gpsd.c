@@ -1534,6 +1534,7 @@ static void consume_packets(struct gps_device_t *device)
 
 	/* a few things are not per-subscriber reports */
 	if ((changed & REPORT_IS) != 0) {
+#ifdef NETFEED_ENABLE
 	    if (device->gpsdata.fix.mode == MODE_3D) {
 		struct gps_device_t *dgnss;
 		/*
@@ -1545,6 +1546,7 @@ static void consume_packets(struct gps_device_t *device)
 		    if (dgnss != device)
 			netgnss_report(&context, device, dgnss);
 	    }
+#endif /* NETFEED_ENABLE */
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
 	    if (device->gpsdata.fix.mode > MODE_NO_FIX)
 		send_dbus_fix(device);
@@ -2172,9 +2174,26 @@ int main(int argc, char *argv[])
 	    if (!allocated_device(device))
 		continue;
 
+/* *INDENT-OFF* */
 	    /* pass the current RTCM correction to the GPS if new */
-	    if (device->device_type != NULL)
-		rtcm_relay(device);
+	    if (device->device_type != NULL) {
+		if (device->gpsdata.gps_fd != -1
+		    && device->context->rtcmbytes > 0
+		    && device->rtcmtime < device->context->rtcmtime
+		    && device->device_type->rtcm_writer != NULL) {
+		    if (device->device_type->rtcm_writer(device,
+							  device->context->rtcmbuf,
+							  device->context->rtcmbytes) ==
+			0)
+			gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
+		    else {
+			device->rtcmtime = timestamp();
+			gpsd_report(LOG_IO, "<= DGPS: %zd bytes of RTCM relayed.\n",
+				    device->context->rtcmbytes);
+		    }
+		}
+	    }
+/* *INDENT-ON* */
 
 	    if (device->gpsdata.gps_fd >= 0) {
 		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))

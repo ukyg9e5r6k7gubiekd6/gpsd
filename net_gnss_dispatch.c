@@ -50,7 +50,6 @@ int netgnss_uri_open(struct gps_device_t *dev, char *netgnss_service)
     return -1;
 #endif
 }
-
 /*@ +branchstate */
 
 void netgnss_report(struct gps_context_t *context,
@@ -64,27 +63,5 @@ void netgnss_report(struct gps_context_t *context,
 	ntrip_report(context, gps, dgnss);
 #endif
 }
-
-/* *INDENT-OFF* */
-void rtcm_relay(struct gps_device_t *session)
-/* pass a DGNSS connection report to a session */
-{
-    if (session->gpsdata.gps_fd != -1
-	&& session->context->rtcmbytes > 0
-	&& session->rtcmtime < session->context->rtcmtime
-	&& session->device_type->rtcm_writer != NULL) {
-	if (session->device_type->rtcm_writer(session,
-					      session->context->rtcmbuf,
-					      session->context->rtcmbytes) ==
-	    0)
-	    gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
-	else {
-	    session->rtcmtime = timestamp();
-	    gpsd_report(LOG_IO, "<= DGPS: %zd bytes of RTCM relayed.\n",
-			session->context->rtcmbytes);
-	}
-    }
-}
-/* *INDENT-ON* */
 
 /* end */

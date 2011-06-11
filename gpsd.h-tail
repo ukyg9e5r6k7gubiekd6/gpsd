@@ -629,9 +629,6 @@ extern void netgnss_report(struct gps_context_t *,
 			 struct gps_device_t *);
 extern void netgnss_autoconnect(struct gps_context_t *, double, double);
 
-extern void rtcm_relay(struct gps_device_t *);
-extern void rtcm2_output_mag(isgps30bits_t *, FILE *);
-
 extern int dgpsip_open(struct gps_device_t *, const char *);
 extern void dgpsip_report(struct gps_context_t *,
 			 struct gps_device_t *,
