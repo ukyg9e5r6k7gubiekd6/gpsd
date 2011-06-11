@@ -595,8 +595,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			    tp->id.imo	= UBITS(a + 2, 42);
 			    break;
 			case DAC1FID17_IDTYPE_CALLSIGN:
-			    break;
 			    UCHARS(a+2, tp->id.callsign);
+			    break;
 			default:
 			    UCHARS(a+2, tp->id.other);
 			    break;
