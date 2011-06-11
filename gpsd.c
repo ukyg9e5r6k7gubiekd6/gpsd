@@ -952,6 +952,7 @@ static void set_serial(struct gps_device_t *device,
 }
 #endif /* RECONFIGURE_ENABLE */
 
+#ifdef SOCKET_EXPORT_ENABLE
 static void json_devicelist_dump(char *reply, size_t replylen)
 {
     struct gps_device_t *devp;
@@ -973,6 +974,7 @@ static void json_devicelist_dump(char *reply, size_t replylen)
 	reply[strlen(reply) - 1] = '\0';
     (void)strlcat(reply, "]}\r\n", replylen);
 }
+#endif /* SOCKET_EXPORT_ENABLE */
 
 static void rstrip(char *str)
 /* strip trailing \r\n\t\SP from a string */

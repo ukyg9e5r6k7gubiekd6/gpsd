@@ -502,10 +502,7 @@ ssize_t gpsd_write(struct gps_device_t * session, char const *buf, size_t len)
 bool gpsd_next_hunt_setting(struct gps_device_t * session)
 /* advance to the next hunt setting  */
 {
-#ifdef FIXED_PORT_SPEED
-    /* just the one fixed port speed... */
-    static unsigned int rates[] = { FIXED_PORT_SPEED };
-#else /* FIXED_PORT_SPEED not defined */
+#ifndef FIXED_PORT_SPEED
     /* every rate we're likely to see on a GPS */
     static unsigned int rates[] =
 	{ 0, 4800, 9600, 19200, 38400, 57600, 115200 };
