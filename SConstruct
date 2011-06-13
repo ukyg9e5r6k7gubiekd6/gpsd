@@ -455,13 +455,7 @@ env = config.Finish()
 
 # Be explicit about what we're doing.
 changelatch = False 
-for (name, default, help) in boolopts:
-    if env[name] != default:
-        if not changelatch:
-            print "Altered configuration variables:"
-            changelatch = True
-        print "%s = %s (default %s): %s" % (name, env[name], default, help)
-for (name, help, default) in nonboolopts + pathopts:
+for (name, default, help) in boolopts + nonboolopts + pathopts:
     if env[name] != default:
         if not changelatch:
             print "Altered configuration variables:"
