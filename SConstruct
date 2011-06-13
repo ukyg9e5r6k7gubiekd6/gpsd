@@ -818,10 +818,6 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     $PYTHON $SOURCE --ais --target=parser >$TARGET &&\
     chmod a-w $TARGET''')
 
-generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h',
-                     'gps_maskdump.c', 'ais_json.c']
-
-
 # generate revision.h
 (st, rev) = commands.getstatusoutput('git describe')
 if st != 0:
@@ -829,6 +825,9 @@ if st != 0:
     rev = datetime.now().isoformat()[:-4]
 revision='#define REVISION "%s"\n' %(rev.strip(),)
 env.Textfile(target="revision.h", source=[revision])
+
+generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
+                     'gps_maskdump.c', 'ais_json.c', 'revision.h']
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
@@ -985,7 +984,7 @@ def Utility(target, source, action):
 env['SPLINTOPTS'] = "-I/usr/include/libusb-1.0 +quiet"
 
 def Splint(target,sources, description, params):
-    return Utility(target,sources,[
+    return Utility(target,sources+generated_sources,[
             '@echo "Running splint on %s..."'%description,
             '-splint $SPLINTOPTS %s %s'%(" ".join(params)," ".join(sources)),
             ])
