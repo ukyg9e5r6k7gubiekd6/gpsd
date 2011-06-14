@@ -258,6 +258,8 @@ initpacket(void)
     PyModule_AddIntConstant(m, "BAD_PACKET", BAD_PACKET);
     PyModule_AddIntConstant(m, "COMMENT_PACKET", COMMENT_PACKET);
     PyModule_AddIntConstant(m, "NMEA_PACKET", NMEA_PACKET);
+    PyModule_AddIntConstant(m, "AIVDM_PACKET", AIVDM_PACKET);
+    PyModule_AddIntConstant(m, "GARMINTXT_PACKET", GARMINTXT_PACKET);
     PyModule_AddIntConstant(m, "SIRF_PACKET", SIRF_PACKET);
     PyModule_AddIntConstant(m, "ZODIAC_PACKET", ZODIAC_PACKET);
     PyModule_AddIntConstant(m, "TSIP_PACKET", TSIP_PACKET);
@@ -265,10 +267,12 @@ initpacket(void)
     PyModule_AddIntConstant(m, "ITALK_PACKET", ITALK_PACKET);
     PyModule_AddIntConstant(m, "GARMIN_PACKET", GARMIN_PACKET);
     PyModule_AddIntConstant(m, "NAVCOM_PACKET", NAVCOM_PACKET);
+    PyModule_AddIntConstant(m, "UBX_PACKET", UBX_PACKET);
+    PyModule_AddIntConstant(m, "SUPERSTAR_PACKET", SUPERSTAR_PACKET);
+    PyModule_AddIntConstant(m, "ONCORE_PACKET", ONCORE_PACKET);
+    PyModule_AddIntConstant(m, "GEOSTAR_PACKET", GEOSTAR_PACKET);
     PyModule_AddIntConstant(m, "RTCM2_PACKET", RTCM2_PACKET);
     PyModule_AddIntConstant(m, "RTCM3_PACKET", RTCM3_PACKET);
-    PyModule_AddIntConstant(m, "UBX_PACKET", UBX_PACKET);
-    PyModule_AddIntConstant(m, "GARMINTXT_PACKET", GARMINTXT_PACKET);
 
     PyModule_AddIntConstant(m, "LOG_IO", LOG_IO);
 }
