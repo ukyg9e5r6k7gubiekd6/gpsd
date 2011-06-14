@@ -46,6 +46,11 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	    session->context->century = year - (year % 100);
 	}
 	return 0;
+#ifdef PASSTHROUGH_ENABLE
+    } else if (session->packet.type == JSON_PACKET) {
+	gpsd_report(LOG_IO, "<= GPS: %s\n", (char *)session->packet.outbuffer);
+	return PASSTHROUGH_IS;
+#endif /* PASSTHROUGH_ENABLE */
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	gps_mask_t st = 0;

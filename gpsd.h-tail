@@ -104,14 +104,15 @@ struct gps_packet_t {
 #define SUPERSTAR2_PACKET	12
 #define ONCORE_PACKET   	13
 #define GEOSTAR_PACKET   	14
-#define MAX_PACKET_TYPE		14	/* increment this as necessary */
+#define MAX_GPSPACKET_TYPE	14	/* increment this as necessary */
 #define RTCM2_PACKET    	15
 #define RTCM3_PACKET    	16
-#define TEXTUAL_PACKET_TYPE(n)	(((n)>=NMEA_PACKET) && ((n)<=MAX_TEXTUAL_TYPE))
-#define GPS_PACKET_TYPE(n)	(((n)>=NMEA_PACKET) && ((n)<=MAX_PACKET_TYPE))
+#define JSON_PACKET    	    	17
+#define TEXTUAL_PACKET_TYPE(n)	((((n)>=NMEA_PACKET) && ((n)<=MAX_TEXTUAL_TYPE)) || (n)==JSON_PACKET)
+#define GPS_PACKET_TYPE(n)	(((n)>=NMEA_PACKET) && ((n)<=MAX_GPSPACKET_TYPE))
 #define LOSSLESS_PACKET_TYPE(n)	(((n)>=RTCM2_PACKET) && ((n)<=RTCM3_PACKET))
 #define PACKET_TYPEMASK(n)	(1 << (n))
-#define GPS_TYPEMASK	(((2<<(MAX_PACKET_TYPE+1))-1) &~ PACKET_TYPEMASK(COMMENT_PACKET))
+#define GPS_TYPEMASK	(((2<<(MAX_GPSPACKET_TYPE+1))-1) &~ PACKET_TYPEMASK(COMMENT_PACKET))
     unsigned int state;
     size_t length;
     unsigned char inbuffer[MAX_PACKET_LENGTH*2+1];
@@ -142,6 +143,10 @@ struct gps_packet_t {
 	isgps30bits_t   buf[RTCM2_WORDS_MAX];   /* packet data */
 	size_t          buflen;                 /* packet length in bytes */
     } isgps;
+#ifdef PASSTHROUGH_ENABLE
+    unsigned int json_depth;
+    unsigned int json_after;
+#endif /* PASSTHROUGH_ENABLE */
 };
 
 extern void packet_init(/*@out@*/struct gps_packet_t *);
@@ -252,6 +257,7 @@ typedef enum {
 #define NODATA_IS	INTERNAL_SET(6)	/* no data read from fd */
 #define PPSTIME_IS	INTERNAL_SET(7)	/* precision time is available */
 #define PERR_IS 	INTERNAL_SET(8)	/* PDOP set */
+#define PASSTHROUGH_IS 	INTERNAL_SET(9)	/* passthrough mode */
 #define DATA_IS	~(ONLINE_SET|PACKET_SET|CLEAR_IS|REPORT_IS)
 
 typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;

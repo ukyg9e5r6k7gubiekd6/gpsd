@@ -834,6 +834,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path, session->packet.type);
 	if (session->packet.type == COMMENT_PACKET) {
 	    gpsd_report (LOG_PROG, "comment, sync lock deferred\n");
+#ifdef PASSTHROUGH_ENABLE
+	} if (session->packet.type == JSON_PACKET) {
+	    gpsd_report (LOG_PROG, "JSON, sync lock deferred\n");
+#endif /* PASSTHROUGH_ENABLE */
 	} else if (session->packet.type > COMMENT_PACKET) {
 	    first_sync = (session->device_type == NULL);
 	    for (dp = gpsd_drivers; *dp; dp++)
@@ -918,6 +922,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->notify_clients = false;
 	    received |= DRIVER_IS;
 	}
+
+	/* Special case, JSON packets get passed through as us */
+#ifdef PASSTHROUGH_ENABLE
+	if (session->packet.type == JSON_PACKET) {
+	    received |= PASSTHROUGH_IS;
+	}
+	else
+#endif /* PASSTHROUGH_ENABLE */
 
 	/* Get data from current packet into the fix structure */
 	if (session->packet.type != COMMENT_PACKET)

@@ -182,4 +182,16 @@
    RTCM3_RECOGNIZED,    /* RTCM3 packet recognized */
 #endif
 
+#ifdef PASSTHROUGH_ENABLE
+   JSON_LEADER,         /* JSON leading { found */
+   JSON_STRINGLITERAL,  /* start of JSON string literal seen */
+   JSON_STRING_SOLIDUS, /* backslash in string */
+   JSON_END_ATTRIBUTE,  /* end of JSON attribute */
+   JSON_EXPECT_VALUE,   /* just after colon */
+   JSON_END_VALUE,      /* end of JSON value */
+   JSON_NUMBER,         /* inside a JSON numeric literal */
+   JSON_SPECIAL,        /* inside a JSON special literal (true,false,null) */
+   JSON_RECOGNIZED,     /* JSON packet recognized */
+#endif
+
 /* end of packet_states.h */

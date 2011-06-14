@@ -85,6 +85,7 @@ boolopts = (
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
     ("netfeed",       True,  "build support for handling TCP/IP data sources"),
+    ("passthrough",   False, "build support for passing through JSON"),
     # Other daemon options
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),

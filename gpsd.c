@@ -1566,6 +1566,16 @@ static void consume_packets(struct gps_device_t *device)
 	    if (sub == NULL || sub->active == 0 || !subscribed(sub, device))
 		continue;
 
+#ifdef PASSTHROUGH_ENABLE
+	    /* this is for passing through JSON packets */
+	    if ((changed & PASSTHROUGH_IS) != 0) {
+		(void)throttled_write(sub, 
+				      (char *)device->packet.outbuffer, 
+				      device->packet.outbuflen);
+		continue;
+	    }
+#endif /* PASSTHROUGH_ENABLE */
+
 	    /* report raw packets to users subscribed to those */
 	    raw_report(sub, device);
 

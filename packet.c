@@ -294,6 +294,12 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    break;
 	}
 #endif /* RTCM104V3_ENABLE */
+#ifdef PASSTHROUGH_ENABLE
+	if (c == '{') {
+	    lexer->state = JSON_LEADER;
+	    character_pushback(lexer);
+	}
+#endif /* PASSTHROUGH_ENABLE */
 	break;
     case COMMENT_BODY:
 	if (c == '\n')
@@ -1187,6 +1193,101 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* RTCM104V2_ENABLE */
+#ifdef PASSTHROUGH_ENABLE
+    case JSON_LEADER:
+	gpsd_report(LOG_RAW + 2, 
+		    "%08ld: JSON parser entered at depth %d with %c\n",
+		    lexer->char_counter, lexer->json_depth, c);
+	if (c == '{' || c == '[') {
+	    lexer->json_depth++;
+	} else if (c == '}' || c == ']') {
+	    if (--lexer->json_depth == 0)
+		lexer->state = JSON_RECOGNIZED;
+	} else if (isspace(c) || c == ',')
+	    break;
+	else if (c == '"') {
+	    lexer->state = JSON_STRINGLITERAL;
+	    lexer->json_after = JSON_END_ATTRIBUTE;
+	} else {
+	    gpsd_report(LOG_RAW + 2, 
+			"%08ld: missing attribute start after header\n",
+			lexer->char_counter);
+	    lexer->state = GROUND_STATE;
+	}
+	break;
+    case JSON_STRINGLITERAL:
+	if (c == '\\')
+	    lexer->state = JSON_STRING_SOLIDUS;
+	else if (c == '"')
+	    lexer->state = lexer->json_after;
+	break;
+    case JSON_STRING_SOLIDUS:
+	lexer->state = JSON_STRINGLITERAL;
+	break;
+    case JSON_END_ATTRIBUTE:
+	if (isspace(c))
+	    break;
+	else if (c == ':')
+	    lexer->state = JSON_EXPECT_VALUE;
+	else
+	    /* saw something other than value start after colon */
+	    lexer->state = GROUND_STATE;
+	break;
+    case JSON_EXPECT_VALUE:
+	if (isspace(c))
+	    break;
+	else if (c == '"') {
+	    lexer->state = JSON_STRINGLITERAL;
+	    lexer->json_after = JSON_END_VALUE;
+	} else if (c == '{' || c == '[') {
+	    lexer->state = JSON_LEADER;
+	    character_pushback(lexer);
+	} else if (strchr("-0123456789", c) != NULL) {
+	    lexer->state = JSON_NUMBER;
+	} else if (c == 't' || c == 'f' || c == 'n')
+	    /*
+	     * This is a bit more permissive than strictly necessary, as
+	     * GPSD JSON does not include the null token.  Still, it's
+	     * futureproofing.
+	     */
+	    lexer->state = JSON_SPECIAL;
+	else
+	    /* couldn't recognize start of value literal */
+	    lexer->state = GROUND_STATE;
+	break;
+    case JSON_NUMBER:
+	/*
+	 * Will recognize some ill-formed numeric literals.
+	 * Should be OK as we're already three stages deep inside
+	 * JSON recognition; odds that we'll actually see an
+	 * ill-formed literal are quite low. and the worst
+	 * possible result if it happens is our JSON parser will
+	 * quietly chuck out the object.
+	 */
+	if (strchr("1234567890.eE+-", c) == NULL) {
+	    lexer->state = JSON_END_VALUE;
+	    character_pushback(lexer);
+	}
+	break;
+    case JSON_SPECIAL:
+	if (strchr("truefalsnil", c) == NULL) {
+	    lexer->state = JSON_END_VALUE;
+	    character_pushback(lexer);
+	}
+	break;
+    case JSON_END_VALUE:
+	if (isspace(c))
+	    break;
+	else if (c == ',')
+	    lexer->state = JSON_LEADER;
+	else if (c == '}' || c == ']') {
+	    lexer->state = JSON_LEADER;
+	    character_pushback(lexer);
+	} else
+	    /* trailing garbage after JSON value */
+	    lexer->state = GROUND_STATE;
+	break;
+#endif /* PASSTHROUGH_ENABLE */
     }
 /*@ -charint +casebreak @*/
 }
@@ -1244,6 +1345,9 @@ void packet_init( /*@out@*/ struct gps_packet_t *lexer)
 {
     lexer->char_counter = 0;
     lexer->retry_counter = 0;
+#ifdef PASSTHROUGH_ENABLE
+    lexer->json_depth = 0;
+#endif /* PASSTHROUGH_ENABLE */
     packet_reset(lexer);
 }
 
@@ -1814,6 +1918,14 @@ void packet_parse(struct gps_packet_t *lexer)
 	    }
 	}
 #endif
+#ifdef PASSTHROUGH_ENABLE
+	else if (lexer->state == JSON_RECOGNIZED) {
+	    packet_accept(lexer, JSON_PACKET);
+	    packet_discard(lexer);
+	    lexer->state = GROUND_STATE;
+	    break;
+	}
+#endif /* PASSTHROUGH_ENABLE */
     }				/* while */
 }
 

@@ -410,14 +410,18 @@ static void decode(FILE *fpin, FILE*fpout)
 	    break;
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
 	    (void)fputs((char *)session.packet.outbuffer, fpout);
-	if ((changed & (REPORT_IS|SUBFRAME_SET|AIS_SET|RTCM2_SET|RTCM3_SET)) == 0)
+	if ((changed & (REPORT_IS|SUBFRAME_SET|AIS_SET|RTCM2_SET|RTCM3_SET|PASSTHROUGH_IS)) == 0)
 	    continue;
 	if (!filter(changed, &session))
 	    continue;
 	else if (json) {
-	    json_data_report(changed, 
-			     &session.gpsdata, &policy, 
-			     buf, sizeof(buf));
+	    if ((changed & PASSTHROUGH_IS) != 0) {
+		(void)fputs((char *)session.packet.outbuffer, fpout);
+		(void)fputs("\n", fpout);
+	    } else
+		json_data_report(changed, 
+				 &session.gpsdata, &policy, 
+				 buf, sizeof(buf));
 	    (void)fputs(buf, fpout);	
 #ifdef AIVDM_ENABLE
 	} else if (session.packet.type == AIVDM_PACKET) {

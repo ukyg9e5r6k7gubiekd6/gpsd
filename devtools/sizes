@@ -65,6 +65,7 @@ sizeit("Minimalist build, stripped to NMEA only with shm interface",
         "control_socket=no",
         "ipv6=no",
         "netfeed=no",
+        "passthrough=no",
         "fixed_port_speed=9600",
         "limited_max_devices=1",
         ] + nmea_variants + binary_gps + non_gps + time_service + debugging)
