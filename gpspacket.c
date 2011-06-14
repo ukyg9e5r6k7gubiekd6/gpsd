@@ -268,7 +268,7 @@ initpacket(void)
     PyModule_AddIntConstant(m, "GARMIN_PACKET", GARMIN_PACKET);
     PyModule_AddIntConstant(m, "NAVCOM_PACKET", NAVCOM_PACKET);
     PyModule_AddIntConstant(m, "UBX_PACKET", UBX_PACKET);
-    PyModule_AddIntConstant(m, "SUPERSTAR_PACKET", SUPERSTAR_PACKET);
+    PyModule_AddIntConstant(m, "SUPERSTAR2_PACKET", SUPERSTAR2_PACKET);
     PyModule_AddIntConstant(m, "ONCORE_PACKET", ONCORE_PACKET);
     PyModule_AddIntConstant(m, "GEOSTAR_PACKET", GEOSTAR_PACKET);
     PyModule_AddIntConstant(m, "RTCM2_PACKET", RTCM2_PACKET);
