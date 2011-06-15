@@ -392,6 +392,8 @@ static void decode(FILE *fpin, FILE*fpout)
     struct policy_t policy;
     char buf[GPS_JSON_RESPONSE_MAX * 4];
 
+    (void)strlcpy(session.gpsdata.dev.path, 
+		  "stdin", sizeof(session.gpsdata.dev.path));
     memset(&policy, '\0', sizeof(policy));
     policy.json = json;
 

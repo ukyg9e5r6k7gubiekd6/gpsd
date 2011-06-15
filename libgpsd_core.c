@@ -30,8 +30,8 @@ static void gpsd_run_device_hook(char *device_name, char *hook)
 {
     struct stat statbuf;
     if (stat(DEVICEHOOKPATH, &statbuf) == -1)
-	gpsd_report(LOG_PROG, "no %s present, skipped running hook\n",
-	    DEVICEHOOKPATH); 
+	gpsd_report(LOG_PROG, "no %s present, skipped running %s hook\n",
+		    DEVICEHOOKPATH, hook); 
     else {
 	char buf[PATH_MAX];
 	int status;
@@ -845,8 +845,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
 		    break;
 		}
-	} else if (session->getcount++ > 1 && !gpsd_next_hunt_setting(session)) {
+	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
 	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
+	    gpsd_report(LOG_INF, "hunt on %s failed (%lf sec since data)\n",
+			session->gpsdata.dev.path,
+			timestamp() - session->gpsdata.online);
 	    return ERROR_SET;
 	}
     }
