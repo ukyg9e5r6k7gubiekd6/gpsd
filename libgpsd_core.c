@@ -835,7 +835,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->packet.type == COMMENT_PACKET) {
 	    gpsd_report (LOG_PROG, "comment, sync lock deferred\n");
 #ifdef PASSTHROUGH_ENABLE
-	} if (session->packet.type == JSON_PACKET) {
+	} else if (session->packet.type == JSON_PACKET) {
 	    gpsd_report (LOG_PROG, "JSON, sync lock deferred\n");
 #endif /* PASSTHROUGH_ENABLE */
 	} else if (session->packet.type > COMMENT_PACKET) {
