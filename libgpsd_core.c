@@ -826,32 +826,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path,
 		    session->device_type->type_name);
     } else {
-	const struct gps_type_t **dp;
-
 	newlen = generic_get(session);
-	gpsd_report(LOG_RAW,
-		    "packet sniff on %s finds type %d\n",
-		    session->gpsdata.dev.path, session->packet.type);
-	if (session->packet.type == COMMENT_PACKET) {
-	    gpsd_report (LOG_PROG, "comment, sync lock deferred\n");
-#ifdef PASSTHROUGH_ENABLE
-	} else if (session->packet.type == JSON_PACKET) {
-	    gpsd_report (LOG_PROG, "JSON, sync lock deferred\n");
-#endif /* PASSTHROUGH_ENABLE */
-	} else if (session->packet.type > COMMENT_PACKET) {
-	    first_sync = (session->device_type == NULL);
-	    for (dp = gpsd_drivers; *dp; dp++)
-		if (session->packet.type == (*dp)->packet_type) {
-		    (void)gpsd_switch_driver(session, (*dp)->type_name);
-		    break;
-		}
-	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
-	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
-	    gpsd_report(LOG_INF, "hunt on %s failed (%lf sec since data)\n",
-			session->gpsdata.dev.path,
-			timestamp() - session->gpsdata.online);
-	    return ERROR_SET;
-	}
     }
 
     /* update the scoreboard structure from the GPS */
@@ -875,7 +850,32 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->gpsdata.online = (timestamp_t)0;
 	}
 	return NODATA_IS;
-    } else if (session->packet.outbuflen == 0) {	/* got new data, but no packet */
+    } else /* (newlen > 0) */ {
+	const struct gps_type_t **dp;
+
+	gpsd_report(LOG_RAW,
+		    "packet sniff on %s finds type %d\n",
+		    session->gpsdata.dev.path, session->packet.type);
+	if (session->packet.type == COMMENT_PACKET) {
+	    gpsd_report (LOG_PROG, "comment, sync lock deferred\n");
+	} else if (session->packet.type > COMMENT_PACKET) {
+	    first_sync = (session->device_type == NULL);
+	    for (dp = gpsd_drivers; *dp; dp++)
+		if (session->packet.type == (*dp)->packet_type) {
+		    (void)gpsd_switch_driver(session, (*dp)->type_name);
+		    break;
+		}
+	    /* FALL THROUGH */
+	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
+	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
+	    gpsd_report(LOG_INF, "hunt on %s failed (%lf sec since data)\n",
+			session->gpsdata.dev.path,
+			timestamp() - session->gpsdata.online);
+	    return ERROR_SET;
+	}
+    }
+
+    if (session->packet.outbuflen == 0) {	/* got new data, but no packet */
 	gpsd_report(LOG_RAW + 3, "New data on %s, not yet a packet\n",
 		    session->gpsdata.dev.path);
 	return ONLINE_SET;
