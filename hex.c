@@ -3,34 +3,39 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <string.h>
+#include <ctype.h>
 
 #include "gpsd.h"
 
-char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
+char /*@ observer @*/ *gpsd_hexdump(char *binbuf, size_t binbuflen)
 {
-    static char hexbuf[MAX_PACKET_LENGTH * 2 + 1];
+    if (isprint(binbuf[binbuflen-1]))
+	return binbuf;
+    else {
+	static char hexbuf[MAX_PACKET_LENGTH * 2 + 1];
 #ifndef SQUELCH_ENABLE
-    size_t i, j = 0;
-    size_t len =
-	(size_t) ((binbuflen >
-		   MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen);
-    const char *ibuf = (const char *)binbuf;
-    const char *hexchar = "0123456789abcdef";
+	size_t i, j = 0;
+	size_t len =
+	    (size_t) ((binbuflen >
+		       MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen);
+	const char *ibuf = (const char *)binbuf;
+	const char *hexchar = "0123456789abcdef";
 
-    if (NULL == binbuf || 0 == binbuflen)
-	return "";
+	if (NULL == binbuf || 0 == binbuflen)
+	    return "";
 
-    /*@ -shiftimplementation @*/
-    for (i = 0; i < len; i++) {
-	hexbuf[j++] = hexchar[(ibuf[i] & 0xf0) >> 4];
-	hexbuf[j++] = hexchar[ibuf[i] & 0x0f];
-    }
-    /*@ +shiftimplementation @*/
-    hexbuf[j] = '\0';
+	/*@ -shiftimplementation @*/
+	for (i = 0; i < len; i++) {
+	    hexbuf[j++] = hexchar[(ibuf[i] & 0xf0) >> 4];
+	    hexbuf[j++] = hexchar[ibuf[i] & 0x0f];
+	}
+	/*@ +shiftimplementation @*/
+	hexbuf[j] = '\0';
 #else /* SQUELCH defined */
-    hexbuf[0] = '\0';
+	hexbuf[0] = '\0';
 #endif /* SQUELCH_ENABLE */
-    return hexbuf;
+	return hexbuf;
+    }
 }
 
 int gpsd_hexpack( /*@in@*/ const char *src, /*@out@ */ char *dst, size_t len)

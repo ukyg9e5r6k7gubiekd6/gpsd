@@ -651,7 +651,7 @@ extern void ntrip_report(struct gps_context_t *,
 extern void gpsd_tty_init(struct gps_device_t *);
 extern int gpsd_serial_open(struct gps_device_t *);
 extern bool gpsd_set_raw(struct gps_device_t *);
-extern ssize_t gpsd_write(struct gps_device_t *, char const *, size_t);
+extern ssize_t gpsd_write(struct gps_device_t *, const char *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
 extern void gpsd_set_speed(struct gps_device_t *, speed_t, char, unsigned int);
@@ -669,8 +669,7 @@ extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int,
 				uint32_t[]);
 extern gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *,
 				unsigned int, uint32_t[]);
-extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/const void *, size_t);
-extern /*@ observer @*/ char *gpsd_hexdump_wrapper(/*@null@*/const void *, size_t, int);
+extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/char *, size_t);
 extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);
 extern int hex2bin(const char *);
 extern ssize_t hex_escapes(/*@out@*/char *, const char *);

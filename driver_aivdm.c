@@ -207,7 +207,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    size_t clen = (ais_context->bitlen + 7) / 8;
 	    gpsd_report(LOG_INF, "AIVDM payload is %zd bits, %zd chars: %s\n",
 			ais_context->bitlen, clen,
-			gpsd_hexdump(ais_context->bits, clen));
+			gpsd_hexdump((char *)ais_context->bits, clen));
 	}
 
         /* clear waiting fragments count */
