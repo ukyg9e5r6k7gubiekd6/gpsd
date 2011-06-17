@@ -4,12 +4,20 @@
  */
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "gpsd.h"
 
 char /*@ observer @*/ *gpsd_hexdump(char *binbuf, size_t binbuflen)
 {
-    if (isprint(binbuf[binbuflen-1]))
+    char *cp;
+    bool printable = true;
+
+    assert(binbuf != NULL);
+    for (cp = binbuf; cp < binbuf + binbuflen; cp++)
+	if (!isprint(*cp) && !isspace(*cp))
+	    printable = false;
+    if (printable)
 	return binbuf;
     else {
 	static char hexbuf[MAX_PACKET_LENGTH * 2 + 1];
