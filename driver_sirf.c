@@ -376,8 +376,8 @@ static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session UNUSED,
      * different double orders, neither IEEE754 */
     /* FIXME - decode the time, since this is the first MID with a
      * good time stamp this will be good for ntpshm time */
-    gpsd_report(LOG_PROG, "SiRF: MID 0x1c, NLMD, gps_tow: %f, %s\n",
-		(double)gps_tow, gpsd_hexdump_wrapper(&gps_tow, 8, LOG_PROG));
+    gpsd_report(LOG_PROG, "SiRF: MID 0x1c, NLMD, gps_tow: %f\n", 
+		(double)gps_tow);
 
     return 0;
 }
@@ -983,8 +983,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     buf += 4;
     len -= 8;
-    gpsd_report(LOG_RAW, "SiRF: Raw packet type 0x%02x length %zd: %s\n",
-		buf[0], len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
+    gpsd_report(LOG_RAW, "SiRF: Raw packet type 0x%02x\n", buf[0]);
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MID%d", (int)buf[0]);
 

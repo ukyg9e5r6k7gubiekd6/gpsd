@@ -894,13 +894,15 @@ static const struct gps_type_t oceanServer = {
 static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 {
     rtcm2_unpack(&session->gpsdata.rtcm2, (char *)session->packet.isgps.buf);
-    gpsd_report(LOG_RAW, "RTCM 2.x packet type 0x%02x length %d words from %zd bytes: %s\n",
-		session->gpsdata.rtcm2.type,
-		session->gpsdata.rtcm2.length + 2,
-		session->packet.isgps.buflen,
-		gpsd_hexdump_wrapper(session->packet.isgps.buf,
-				     (session->gpsdata.rtcm2.length +
-				      2) * sizeof(isgps30bits_t), LOG_RAW));
+    /* extra guard prevents expensive gpsd_hexdump() calls */
+    if (session->context->debug >= LOG_RAW)
+	gpsd_report(LOG_RAW, "RTCM 2.x packet type 0x%02x length %d words from %zd bytes: %s\n",
+		    session->gpsdata.rtcm2.type,
+		    session->gpsdata.rtcm2.length + 2,
+		    session->packet.isgps.buflen,
+		    gpsd_hexdump(session->packet.isgps.buf,
+				 (session->gpsdata.rtcm2.length +
+				  2) * sizeof(isgps30bits_t)));
     session->cycle_end_reliable = true;
     return RTCM2_SET;
 }
@@ -943,12 +945,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 {
     uint16_t type = getbeu16(session->packet.inbuffer, 3) >> 4;
 
-    gpsd_report(LOG_RAW, "RTCM 3.x packet %d type length %zd bytes: %s\n",
-		type,
-		session->packet.outbuflen, 
-		gpsd_hexdump_wrapper(session->packet.outbuffer,
-				     session->packet.outbuflen,
-				     LOG_RAW));
+    gpsd_report(LOG_RAW, "RTCM 3.x packet %d\n", type);
     rtcm3_unpack(&session->gpsdata.rtcm3, (char *)session->packet.outbuffer);
     session->cycle_end_reliable = true;
     return RTCM3_SET;
@@ -1157,7 +1154,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
     if (session->packet.type == AIVDM_PACKET) {
 	if (aivdm_decode
 	    ((char *)session->packet.outbuffer, session->packet.outbuflen,
-	     session->aivdm, &session->gpsdata.ais)) {
+	     session->aivdm, &session->gpsdata.ais, session->context->debug)) {
 	    return ONLINE_SET | AIS_SET;
 	} else
 	    return ONLINE_SET;

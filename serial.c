@@ -485,9 +485,10 @@ ssize_t gpsd_write(struct gps_device_t * session, char const *buf, size_t len)
     status = write(session->gpsdata.gps_fd, buf, len);
     ok = (status == (ssize_t) len);
     (void)tcdrain(session->gpsdata.gps_fd);
-    /* no test here now, always print as hex */
-    gpsd_report(LOG_IO, "=> GPS: %s%s\n",
-		gpsd_hexdump_wrapper(buf, len, LOG_IO), ok ? "" : " FAILED");
+    /* extra guard prevents expensive hexdump calls */
+    if (session->context->debug >= LOG_IO)
+	gpsd_report(LOG_IO, "=> GPS: %s%s\n",
+		    gpsd_hexdump(buf, len), ok ? "" : " FAILED");
     return status;
 }
 

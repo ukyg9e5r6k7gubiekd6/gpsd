@@ -283,8 +283,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
 
     type = (uint) getub(buf, 4);
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw italk packet type 0x%02x length %zu: %s\n",
-		type, len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
+    gpsd_report(LOG_RAW, "raw italk packet type 0x%02x\n", type);
 
     session->cycle_end_reliable = true;
 

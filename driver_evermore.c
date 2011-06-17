@@ -172,8 +172,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     /*@ +usedef @*/
 
     /*@ -usedef -compdef @*/
-    gpsd_report(LOG_RAW, "EverMore packet type 0x%02x, length %zd: %s\n",
-		type, datalen, gpsd_hexdump_wrapper(buf2, datalen, LOG_RAW));
+    gpsd_report(LOG_RAW, "EverMore packet type 0x%02x\n", type);
     /*@ +usedef +compdef @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),

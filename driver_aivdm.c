@@ -62,7 +62,8 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
 /*@ +charint -fixedformalarray -usedef -branchstate @*/
 bool aivdm_decode(const char *buf, size_t buflen,
 		  struct aivdm_context_t ais_contexts[AIVDM_CHANNELS],
-		  struct ais_t *ais)
+		  struct ais_t *ais,
+		  int debug)
 {
 #ifdef __UNUSED_DEBUG__
     char *sixbits[64] = {
@@ -202,10 +203,12 @@ bool aivdm_decode(const char *buf, size_t buflen,
 
     /* time to pass buffered-up data to where it's actually processed? */
     if (ifrag == nfrags) {
-	size_t clen = (ais_context->bitlen + 7) / 8;
-	gpsd_report(LOG_INF, "AIVDM payload is %zd bits, %zd chars: %s\n",
-		    ais_context->bitlen, clen,
-		    gpsd_hexdump_wrapper(ais_context->bits, clen, LOG_INF));
+	if (debug >= LOG_INF) { 
+	    size_t clen = (ais_context->bitlen + 7) / 8;
+	    gpsd_report(LOG_INF, "AIVDM payload is %zd bits, %zd chars: %s\n",
+			ais_context->bitlen, clen,
+			gpsd_hexdump(ais_context->bits, clen));
+	}
 
         /* clear waiting fragments count */
         ais_context->decoded_frags = 0;

@@ -745,7 +745,7 @@ extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int,
 		      /*@null@*/unsigned char *, unsigned short);
 extern bool aivdm_decode(const char *, size_t,
 			 struct aivdm_context_t [],
-			 struct ais_t *);
+			 struct ais_t *, int);
 
 /* debugging apparatus for the client library */
 #if defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE)

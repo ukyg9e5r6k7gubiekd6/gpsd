@@ -360,8 +360,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
     type = ONCTYPE(buf[2], buf[3]);
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw oncore packet type 0x%04x length %zd: %s\n",
-		type, len, gpsd_hexdump_wrapper(buf, len, LOG_RAW));
+    gpsd_report(LOG_RAW, "raw Oncore packet type 0x%04x\n", type);
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "MOT-%c%c", type >> 8, type & 0xff);

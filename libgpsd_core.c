@@ -927,6 +927,17 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    received |= DRIVER_IS;
 	}
 
+	/*
+	 * The guard looks superfluous, but it keeps the rather expensive
+	 * gpsd_hexdump() function from being called even when the debug
+	 * level does not actually require it.
+	 */
+	if (session->context->debug >= LOG_RAW)
+	    gpsd_report(LOG_RAW, "raw packet of type %d, %zd:%s\n",
+			session->packet.type,
+			session->packet.outbuflen,
+			gpsd_hexdump((char *)session->packet.outbuffer, session->packet.outbuflen));
+
 	/* Special case, JSON packets get passed through as us */
 #ifdef PASSTHROUGH_ENABLE
 	if (session->packet.type == JSON_PACKET) {
