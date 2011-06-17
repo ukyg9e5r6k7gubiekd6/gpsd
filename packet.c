@@ -1192,9 +1192,6 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 #endif /* RTCM104V2_ENABLE */
 #ifdef PASSTHROUGH_ENABLE
     case JSON_LEADER:
-	gpsd_report(LOG_RAW + 2, 
-		    "%08ld: JSON parser entered at depth %d with %c\n",
-		    lexer->char_counter, lexer->json_depth, c);
 	if (c == '{' || c == '[') {
 	    lexer->json_depth++;
 	} else if (c == '}' || c == ']') {
@@ -1451,10 +1448,8 @@ void packet_parse(struct gps_packet_t *lexer)
 	    for (n = 0; n < lexer->length - 2; n++)
 		a += (unsigned)lexer->inbuffer[n];
 	    b = (unsigned)getleu16(lexer->inbuffer, lexer->length - 2);
-	    gpsd_report(LOG_IO, "SuperStarII pkt dump: type %u len %u: %s\n",
-			lexer->inbuffer[1], (unsigned int)lexer->length,
-			gpsd_hexdump_wrapper(lexer->inbuffer, lexer->length,
-					     LOG_IO));
+	    gpsd_report(LOG_IO, "SuperStarII pkt dump: type %u len %u\n",
+			lexer->inbuffer[1], (unsigned int)lexer->length);
 	    if (a != b) {
 		gpsd_report(LOG_IO, "REJECT SuperStarII packet type 0x%02x"
 			    "%zd bad checksum 0x%04x, expecting 0x%04x\n",
@@ -1559,10 +1554,6 @@ void packet_parse(struct gps_packet_t *lexer)
 				"Garmin checksum failed: %02x!=0\n", chksum);
 		    goto not_garmin;
 		}
-		/* Debug
-		 * gpsd_report(LOG_IO, "Garmin n= %#02x\n %s\n", n,
-		 * gpsd_hexdump_wrapper(lexer->inbuffer, packetlen, LOG_IO));
-		 */
 		packet_accept(lexer, GARMIN_PACKET);
 		packet_discard(lexer);
 		break;

@@ -548,14 +548,10 @@ bool ubx_write(struct gps_device_t * session,
     /*@ +type @*/
 
     gpsd_report(LOG_IO,
-		"=> GPS: UBX class: %02x, id: %02x, len: %d, data:%s, crc: %02x%02x\n",
+		"=> GPS: UBX class: %02x, id: %02x, len: %d, crc: %02x%02x\n",
 		msg_class, msg_id, data_len,
-		gpsd_hexdump_wrapper(msg, (size_t) data_len, LOG_IO),
 		CK_A, CK_B);
-
-    count = write(session->gpsdata.gps_fd,
-		  session->msgbuf, session->msgbuflen);
-    (void)tcdrain(session->gpsdata.gps_fd);
+    count = gpsd_write(session, session->msgbuf, session->msgbuflen);
     ok = (count == (ssize_t) session->msgbuflen);
     /*@ +nullderef @*/
     return (ok);
