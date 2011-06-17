@@ -550,6 +550,8 @@ int main(int argc, char **argv)
 	    }
 
 	/*@ -mustfreeonly -immediatetrans @*/
+	gps_context_init(&context);
+	context.debug = debuglevel;
 	session.context = &context;
 	gpsd_tty_init(&session);
 	(void)strlcpy(session.gpsdata.dev.path, device, sizeof(session.gpsdata.dev.path));
@@ -576,6 +578,8 @@ int main(int argc, char **argv)
 	static struct gps_context_t	context;	/* start it zeroed */
 	static struct gps_device_t	session;	/* zero this too */
 	/*@ -mustfreeonly -immediatetrans @*/
+	gps_context_init(&context);
+	context.debug = debuglevel;
 	session.context = &context;	/* in case gps_init isn't called */
 
 	if (echo)

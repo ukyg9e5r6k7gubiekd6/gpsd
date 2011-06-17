@@ -54,7 +54,6 @@ WINDOW *devicewin;
 static struct gps_context_t context;
 static int controlfd = -1;
 static bool serial, curses_active;
-static int debuglevel = 0;
 static WINDOW *statwin, *cmdwin;
 /*@null@*/ static WINDOW *packetwin;
 /*@null@*/ static FILE *logfile;
@@ -184,7 +183,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 
     (void)strlcpy(buf, "gpsd:", BUFSIZ);
     (void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
-    if (errlevel <= debuglevel && packetwin != NULL) {
+    if (errlevel <= context.debug && packetwin != NULL) {
 	va_list ap;
 	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
@@ -230,7 +229,7 @@ static ssize_t readpkt(void)
 	longjmp(terminate, TERM_EMPTY_READ);
 
     /* conditional prevents mask dumper from eating CPU */
-    if (debuglevel >= LOG_DATA)
+    if (context.debug >= LOG_DATA)
 	gpsd_report(LOG_DATA,
 		    "packet mask = %s\n",
 		    gps_maskdump(session.gpsdata.set));
@@ -483,7 +482,7 @@ int main(int argc, char **argv)
     while ((option = getopt(argc, argv, "D:F:LVhl:t:?")) != -1) {
 	switch (option) {
 	case 'D':
-	    debuglevel = atoi(optarg);
+	    context.debug = atoi(optarg);
 	    break;
 	case 'F':
 	    controlsock = optarg;
