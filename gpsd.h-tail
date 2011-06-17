@@ -190,6 +190,7 @@ extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
 
 struct gps_context_t {
     int valid;				/* member validity flags */
+    int debug;				/* dehug verbosity level */
     bool readonly;			/* if true, never write to device */
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
 #define GPS_TIME_VALID  	0x02	/* GPS week/tow is valid */

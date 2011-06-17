@@ -141,7 +141,6 @@ static const int af = AF_INET;
 
 static fd_set all_fds;
 static int maxfd;
-static int debuglevel;
 static bool in_background = false;
 static bool listen_global = false;
 #ifndef FORCE_NOWAIT
@@ -183,7 +182,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
 #ifndef SQUELCH_ENABLE
-    if (errlevel <= debuglevel) {
+    if (errlevel <= context.debug) {
 	char buf[BUFSIZ], buf2[BUFSIZ];
 	char *err_str;
 	va_list ap;
@@ -566,7 +565,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 {
     ssize_t status;
 
-    if (debuglevel >= 3) {
+    if (context.debug >= 3) {
 	if (isprint(buf[0]))
 	    gpsd_report(LOG_IO, "=> client(%d): %s\n", sub_index(sub), buf);
 	else {
@@ -1436,7 +1435,7 @@ static void consume_packets(struct gps_device_t *device)
 	    break;
 
 	/* conditional prevents mask dumper from eating CPU */
-	if (debuglevel >= LOG_DATA)
+	if (context.debug >= LOG_DATA)
 	    gpsd_report(LOG_DATA,
 			"packet from %s with %s\n",
 			device->gpsdata.dev.path,
@@ -1583,7 +1582,7 @@ static void consume_packets(struct gps_device_t *device)
 	    if (sub->policy.watcher) {
 		if (changed & DATA_IS) {
 		    /* guard keeps mask dumper from eating CPU */
-		    if (debuglevel >= LOG_PROG)
+		    if (context.debug >= LOG_PROG)
 			gpsd_report(LOG_PROG,
 				    "Changed mask: %s with %sreliable cycle detection\n",
 				    gps_maskdump(changed),
@@ -1761,16 +1760,16 @@ int main(int argc, char *argv[])
 #endif /* PPS_ENABLE */
 
     (void)setlocale(LC_NUMERIC, "C");
-    debuglevel = 0;
+    context.debug = 0;
     gpsd_hexdump_level = 0;
     gps_context_init(&context);
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
 	switch (option) {
 	case 'D':
-	    debuglevel = (int)strtol(optarg, 0, 0);
-	    gpsd_hexdump_level = debuglevel;
+	    context.debug = (int)strtol(optarg, 0, 0);
+	    gpsd_hexdump_level = context.debug;
 #ifdef CLIENTDEBUG_ENABLE
-	    gps_enable_debug(debuglevel, stderr);
+	    gps_enable_debug(context.debug, stderr);
 #endif /* CLIENTDEBUG_ENABLE */
 	    break;
 #ifdef CONTROL_SOCKET_ENABLE
@@ -2070,7 +2069,7 @@ int main(int argc, char *argv[])
 	}
 	/*@ +usedef @*/
 
-	if (debuglevel >= LOG_SPIN) {
+	if (context.debug >= LOG_SPIN) {
 	    char dbuf[BUFSIZ];
 	    dbuf[0] = '\0';
 	    for (i = 0; i < FD_SETSIZE; i++)

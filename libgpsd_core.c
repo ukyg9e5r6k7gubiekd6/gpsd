@@ -85,21 +85,22 @@ void gps_context_init(struct gps_context_t *context)
     /* *INDENT-OFF* */
     /*@ -initallelements -nullassign -nullderef @*/
     struct gps_context_t nullcontext = {
-	.valid	    = 0,
-	.readonly	    = false,
-	.fixcnt	    = 0,
-	.rtcmbytes	    = 0,
-	.rtcmbuf	    = {'\0'},
-	.rtcmtime	    = 0,
+	.valid	        = 0,
+	.debug	        = 0,
+	.readonly	= false,
+	.fixcnt	        = 0,
+	.rtcmbytes	= 0,
+	.rtcmbuf	= {'\0'},
+	.rtcmtime	= 0,
 	.start_time     = 0,
 	.leap_seconds   = 0,
-	.gps_week	    = 0,
+	.gps_week	= 0,
 	.gps_tow        = 0,
-	.century	    = 0,
+	.century	= 0,
 	.rollovers      = 0,
 #ifdef NTPSHM_ENABLE
 	.enable_ntpshm  = false,
-	.shmTime	    = {0},
+	.shmTime	= {0},
 	.shmTimeInuse   = {0},
 # ifdef PPS_ENABLE
 	.shmTimePPS	    = false,
