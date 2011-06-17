@@ -6,25 +6,6 @@
 
 #include "gpsd.h"
 
-int gpsd_hexdump_level = -1;
-/*
- * A wrapper around gpsd_hexdump to prevent wasting cpu time by hexdumping
- * buffers and copying strings that will never be printed. only messages at
- * level "N" and lower will be printed. By way of example, without any -D
- * options, gpsd probably won't ever call the real gpsd_hexdump. At -D2,
- * LOG_PROG (and higher) won't get to call the real gpsd_hexdump. For high
- * speed, chatty protocols, this can save a lot of CPU.
- */
-char *gpsd_hexdump_wrapper(const void *binbuf, size_t binbuflen,
-			   int msg_debug_level)
-{
-#ifndef SQUELCH_ENABLE
-    if (msg_debug_level <= gpsd_hexdump_level)
-	return gpsd_hexdump(binbuf, binbuflen);
-#endif /* SQUELCH_ENABLE */
-    return "";
-}
-
 char /*@ observer @*/ *gpsd_hexdump(const void *binbuf, size_t binbuflen)
 {
     static char hexbuf[MAX_PACKET_LENGTH * 2 + 1];

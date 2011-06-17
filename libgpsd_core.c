@@ -185,6 +185,7 @@ void gpsd_clear(struct gps_device_t *session)
     session->driver.sirf.satcounter = 0;
 #endif /* SIRF_ENABLE */
     packet_init(&session->packet);
+    session->packet.debug = session->context->debug;
     // session->gpsdata.online = 0;
     session->gpsdata.fix.mode = MODE_NOT_SEEN;
     session->gpsdata.status = STATUS_NO_FIX;

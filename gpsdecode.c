@@ -514,7 +514,6 @@ int main(int argc, char **argv)
 		
 	case 'D':
 	    verbose = atoi(optarg);
-	    gpsd_hexdump_level = verbose;
 #if defined(CLIENTDEBUG_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
 	    json_enable_debug(verbose - 2, stderr);
 #endif

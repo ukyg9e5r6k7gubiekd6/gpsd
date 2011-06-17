@@ -124,6 +124,7 @@ struct gps_packet_t {
     unsigned long char_counter;		/* count characters processed */
     unsigned long retry_counter;	/* count sniff retries */
     unsigned counter;			/* packets since last driver switch */
+    int debug;				/* lexer debug level */
     /*
      * ISGPS200 decoding context.
      *
@@ -668,7 +669,6 @@ extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int,
 				uint32_t[]);
 extern gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *,
 				unsigned int, uint32_t[]);
-extern int gpsd_hexdump_level;
 extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/const void *, size_t);
 extern /*@ observer @*/ char *gpsd_hexdump_wrapper(/*@null@*/const void *, size_t, int);
 extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);

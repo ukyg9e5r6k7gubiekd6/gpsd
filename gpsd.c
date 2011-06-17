@@ -1761,13 +1761,11 @@ int main(int argc, char *argv[])
 
     (void)setlocale(LC_NUMERIC, "C");
     context.debug = 0;
-    gpsd_hexdump_level = 0;
     gps_context_init(&context);
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
 	switch (option) {
 	case 'D':
 	    context.debug = (int)strtol(optarg, 0, 0);
-	    gpsd_hexdump_level = context.debug;
 #ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(context.debug, stderr);
 #endif /* CLIENTDEBUG_ENABLE */

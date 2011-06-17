@@ -20,8 +20,6 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     PyObject *args;
     va_list ap;
 
-    gpsd_hexdump_level = errlevel;
-
     if (!report_callback)   /* no callback defined, exit early */
 	return;	
     
