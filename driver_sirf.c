@@ -1053,18 +1053,15 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     case 0x0e:			/* Almanac Data MID 14 */
-	gpsd_report(LOG_PROG, "SiRF: unused ALM  0x0e: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused ALM  0x0e\n");
 	return 0;
 
     case 0x0f:			/* Ephemeris Data MID 15 */
-	gpsd_report(LOG_PROG, "SiRF: unused EPH  0x0f: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused EPH  0x0f\n");
 	return 0;
 
     case 0x11:			/* Differential Corrections MID 17 */
-	gpsd_report(LOG_PROG, "SiRF: unused DIFF 0x11: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused DIFF 0x11\n");
 	return 0;
 
     case 0x12:			/* OK To Send MID 18 */
@@ -1076,38 +1073,31 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return sirf_msg_sysparam(session, buf, len);
 
     case 0x1b:			/* DGPS status (undocumented) MID 27 */
-	gpsd_report(LOG_PROG, "SiRF: unused DGPSF 0x1b %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused DGPSF 0x1b\n");
 	return 0;
 
     case 0x1c:			/* Navigation Library Measurement Data MID 28 */
-	gpsd_report(LOG_PROG, "SiRF: NLMD 0x1c: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: NLMD 0x1c\n");
 	return sirf_msg_nlmd(session, buf, len);
 
     case 0x1d:			/* Navigation Library DGPS Data MID 29 */
-	gpsd_report(LOG_PROG, "SiRF: unused NLDG 0x1d: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused NLDG 0x1d\n");
 	return 0;
 
     case 0x1e:			/* Navigation Library SV State Data MID 30 */
-	gpsd_report(LOG_PROG, "SiRF: unused NLSV 0x1e: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused NLSV 0x1e\n");
 	return 0;
 
     case 0x1f:			/* Navigation Library Initialization Data MID 31 */
-	gpsd_report(LOG_PROG, "SiRF: unused NLID 0x1f: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused NLID 0x1f\n");
 	return 0;
 
     case 0x29:			/* Geodetic Navigation Information MID 41 */
-	gpsd_report(LOG_PROG, "SiRF: unused GND 0x29: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused GND 0x29\n");
 	return 0;
 
     case 0x32:			/* SBAS corrections MID 50 */
-	gpsd_report(LOG_PROG, "SiRF: unused SBAS 0x32: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused SBAS 0x32\n");
 	return 0;
 
     case 0x34:			/* PPS Time MID 52 */
@@ -1135,13 +1125,11 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return sirf_msg_ppstime(session, buf, len);
 
     case 0x62:			/* uBlox Extended Measured Navigation Data MID 98 */
-	gpsd_report(LOG_PROG, "SiRF: uBlox EMND 0x62: %s.\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: uBlox EMND 0x62\n");
 	return sirf_msg_ublox(session, buf, len) | (CLEAR_IS | REPORT_IS);
 
     case 0x80:			/* Initialize Data Source MID 128 */
-	gpsd_report(LOG_PROG, "SiRF: unused INIT 0x80: %s\n",
-		    gpsd_hexdump_wrapper(buf, len, LOG_PROG));
+	gpsd_report(LOG_PROG, "SiRF: unused INIT 0x80\n");
 	return 0;
 
     case 0xe1:			/* Development statistics messages MID 225 */
@@ -1151,8 +1139,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     default:
-	gpsd_report(LOG_WARN, "SiRF: Unknown packet id %d length %zd: %s\n",
-		    buf[0], len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
+	gpsd_report(LOG_WARN, "SiRF: Unknown packet id %d length %zd\n", 
+		    buf[0], len);
 	return 0;
     }
 }

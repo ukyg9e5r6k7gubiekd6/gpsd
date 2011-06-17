@@ -96,9 +96,8 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     rtcm->length = (uint)ugrab(10);
     rtcm->type = (uint)ugrab(12);
 
-    gpsd_report(LOG_RAW, "RTCM3: type %d payload length %d: %s\n",
-		rtcm->type, rtcm->length, 
-		gpsd_hexdump_wrapper(buf+3, rtcm->length, LOG_RAW));
+    gpsd_report(LOG_RAW, "RTCM3: type %d payload length %d\n",
+		rtcm->type, rtcm->length);
 
     switch (rtcm->type) {
     case 1001:			/* GPS Basic RTK, L1 Only */

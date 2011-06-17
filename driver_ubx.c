@@ -479,8 +479,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	gpsd_report(LOG_WARN,
-		    "UBX: unknown packet id 0x%04hx (length %zd) %s\n",
-		    msgid, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
+		    "UBX: unknown packet id 0x%04hx (length %zd)\n",
+		    msgid, len);
     }
 
     if (mask)

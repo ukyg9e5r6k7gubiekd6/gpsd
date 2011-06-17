@@ -300,9 +300,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
 	/* Deliver message to specific decoder based on message type */
 
     default:
-	/* This gets noisy in a hurry. Change once your driver works */
-	gpsd_report(LOG_WARN, "unknown packet id %d length %d: %s\n",
-	    type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
+	gpsd_report(LOG_WARN, "unknown packet id %d length %d\n", type, len);
 	return 0;
     }
 }
@@ -352,8 +350,7 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 
    /* we may need to dump the message */
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
-   gpsd_report(LOG_IO, "writing _proto_ control type %02x:%s\n",
-	       msg[0], gpsd_hexdump_wrapper(session->msgbuf, session->msgbuflen, LOG_IO));
+   gpsd_report(LOG_IO, "writing _proto_ control type %02x\n");
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/

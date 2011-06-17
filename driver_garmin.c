@@ -586,10 +586,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	break;
     default:
 	gpsd_report(LOG_WARN,
-		    "Garmin: Unknown packet id: %#02x, Sz: %#02x, pkt:%s\n",
-		    pkt_id, pkt_len, gpsd_hexdump_wrapper(buf,
-							  (size_t) pkt_len,
-							  LOG_WARN));
+		    "Garmin: Unknown packet id: %#02x, Sz: %#02x\n",
+		    pkt_id, pkt_len);
 	break;
     }
     gpsd_report(LOG_IO, "Garmin: PrintSERPacket(, %#02x, %#02x, )\n",
@@ -720,11 +718,6 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
     } else if (4 == length) {
 	set_int32(buffer + 12, data);
     }
-#if 0
-    gpsd_report(LOG_IO, "Garmin: SendPacket(), writing %d bytes: %s\n",
-		theBytesToWrite,
-		gpsd_hexdump_wrapper(thePacket, theBytesToWrite, LOG_IO));
-#endif
     (void)PrintUSBPacket(session, thePacket);
 
     theBytesReturned = gpsd_write(session, (const char *)thePacket,
@@ -795,12 +788,6 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
     /* we used to say n++ here, but scan-build complains */
     *buffer = (uint8_t) ETX;
 
-#if 1
-    gpsd_report(LOG_IO, "Garmin: SendPacket(), writing %zd bytes: %s\n",
-		theBytesToWrite,
-		gpsd_hexdump_wrapper(thePacket, (size_t) theBytesToWrite,
-				     LOG_IO));
-#endif
     (void)PrintSERPacket(session,
 			 (unsigned char)buffer0[1],
 			 (int)buffer0[2], (unsigned char *)(buffer0 + 3));
@@ -1266,12 +1253,6 @@ static int GetPacket(struct gps_device_t *session)
 	    continue;
 	}
 	gpsd_report(LOG_RAW, "Garmin: got %d bytes\n", theBytesReturned);
-#if 1
-	gpsd_report(LOG_IO, "Garmin: getPacket(), got %d bytes: %s\n",
-		    theBytesReturned,
-		    gpsd_hexdump_wrapper(thePacket, theBytesReturned,
-					 LOG_IO));
-#endif
 
 	session->driver.garmin.BufferLen += theBytesReturned;
 	if (256 <= session->driver.garmin.BufferLen) {

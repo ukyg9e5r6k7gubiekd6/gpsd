@@ -263,11 +263,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
     gps_mask_t mask = 0;
 
-    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %zd\n",
-		session->packet.outbuflen);
-    gpsd_report(LOG_RAW, "%s\n",
-		gpsd_hexdump_wrapper(session->packet.outbuffer,
-				     session->packet.outbuflen, LOG_RAW));
+    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %zd: %s\n",
+		session->packet.outbuflen, (char*)session->packet.outbuffer);
 
     if (session->packet.outbuflen < 54) {
 	/* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */

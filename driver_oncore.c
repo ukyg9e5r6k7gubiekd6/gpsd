@@ -388,10 +388,8 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	/* FIX-ME: This gets noisy in a hurry. Change once your driver works */
-	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length %zd: %s\n",
-		    type >> 8, type & 0xff, len, gpsd_hexdump_wrapper(buf,
-								      len,
-								      LOG_WARN));
+	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length %zd\n",
+		    type >> 8, type & 0xff, len);
 	return 0;
     }
 }
@@ -424,10 +422,7 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
     session->msgbuf[msglen + 4] = '\n';
     session->msgbuflen = msglen + 5;
 
-    gpsd_report(LOG_IO, "writing oncore control type %c%c:%s\n",
-		msg[0], msg[1], gpsd_hexdump_wrapper(session->msgbuf,
-						     session->msgbuflen,
-						     LOG_IO));
+    gpsd_report(LOG_IO, "writing oncore control type %c%c\n", msg[0], msg[1]);
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 

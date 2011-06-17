@@ -370,9 +370,8 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
     c += 0x100;
     msg[(int)msg[3] + 4] = (char)((c >> 8) & 0xff);
     msg[(int)msg[3] + 5] = (char)(c & 0xff);
-    gpsd_report(LOG_IO, "writing superstar2 control type %d len %zu:%s\n",
-		(int)msg[1] & 0x7f, msglen,
-		gpsd_hexdump_wrapper(msg, msglen, LOG_IO));
+    gpsd_report(LOG_IO, "writing superstar2 control type %d len %zu\n",
+		(int)msg[1] & 0x7f, msglen);
     return gpsd_write(session, msg, msglen);
 }
 
@@ -415,8 +414,8 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	gpsd_report(LOG_WARN,
-		    "unknown superstar2 packet id 0x%02x length %zd: %s\n",
-		    type, len, gpsd_hexdump_wrapper(buf, len, LOG_WARN));
+		    "unknown superstar2 packet id 0x%02x length %zd\n",
+		    type, len);
 	return 0;
     }
 }
