@@ -1141,7 +1141,6 @@ const struct gps_type_t mtk3301 = {
 /* *INDENT-ON* */
 #endif /* MTK3301_ENABLE */
 
-
 #ifdef AIVDM_ENABLE
 /**************************************************************************
  *
@@ -1194,6 +1193,47 @@ static const struct gps_type_t aivdm = {
 };
 /* *INDENT-ON* */
 #endif /* AIVDM_ENABLE */
+
+#ifdef PASSTHROUGH_ENABLE
+/**************************************************************************
+ *
+ * JSON passthrough driver
+ *
+ **************************************************************************/
+
+static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
+{
+    return PASSTHROUGH_IS;
+}
+
+/* *INDENT-OFF* */
+const struct gps_type_t json_passthrough = {
+    .type_name      = "JSON slave driver",	/* full name of type */
+    .packet_type    = JSON_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .trigger	    = NULL,		/* it's the default */
+    .channels       = 0,		/* not used */
+    .probe_detect   = NULL,		/* no probe */
+    .get_packet     = generic_get,	/* use generic packet getter */
+    .parse_packet   = json_pass_packet,	/* how to interpret a packet */
+    .rtcm_writer    = NULL,		/* write RTCM data straight */
+    .event_hook     = NULL,		/* lifetime event handler */
+#ifdef RECONFIGURE_ENABLE
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
+    .control_send   = NULL,		/* how to send control strings */
+#endif /* CONTROLSEND_ENABLE */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* NTPSHM_ ENABLE */
+};
+/* *INDENT-ON* */
+
+#endif /* PASSTHROUGH_ENABLE */
 
 extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
 extern const struct gps_type_t geostar_binary;
@@ -1285,6 +1325,11 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef GARMINTXT_ENABLE
     &garmintxt,
 #endif /* GARMINTXT_ENABLE */
+
+#ifdef PASSTHROUGH_ENABLE
+    &json_passthrough,
+#endif /* PASSTHROUGH_ENABLE */
+
     NULL,
 };
 

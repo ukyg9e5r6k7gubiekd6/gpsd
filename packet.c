@@ -1908,7 +1908,12 @@ void packet_parse(struct gps_packet_t *lexer)
 #endif
 #ifdef PASSTHROUGH_ENABLE
 	else if (lexer->state == JSON_RECOGNIZED) {
-	    packet_accept(lexer, JSON_PACKET);
+	    size_t packetlen = lexer->inbufptr - lexer->inbuffer;
+	    if (packetlen >= 11)
+		/* {"class": } */
+		packet_accept(lexer, JSON_PACKET);
+	    else
+		packet_accept(lexer, BAD_PACKET);
 	    packet_discard(lexer);
 	    lexer->state = GROUND_STATE;
 	    break;

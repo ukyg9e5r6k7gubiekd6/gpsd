@@ -939,14 +939,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			session->packet.outbuflen,
 			gpsd_hexdump((char *)session->packet.outbuffer, session->packet.outbuflen));
 
-	/* Special case, JSON packets get passed through as us */
-#ifdef PASSTHROUGH_ENABLE
-	if (session->packet.type == JSON_PACKET) {
-	    received |= PASSTHROUGH_IS;
-	}
-	else
-#endif /* PASSTHROUGH_ENABLE */
-
 	/* Get data from current packet into the fix structure */
 	if (session->packet.type != COMMENT_PACKET)
 	    if (session->device_type != NULL
