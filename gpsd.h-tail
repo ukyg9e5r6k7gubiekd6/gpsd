@@ -322,6 +322,7 @@ typedef enum {source_unknown,
 	      source_pty,	/* PTY: we don't require exclusive access */
 	      source_tcp,	/* TCP/IP stream: case detected but not used */
 	      source_udp,	/* UDP stream: case detected but not used */
+	      source_gpsd,	/* Remote gpsd instance over TCP/IP */
 } sourcetype_t;
 
 /*

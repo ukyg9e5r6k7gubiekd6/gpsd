@@ -1012,6 +1012,7 @@ static void handle_request(struct subscriber_t *sub,
 	json_devicelist_dump(reply, replylen);
     } else if (strncmp(buf, "WATCH", 5) == 0
 	       && (buf[5] == ';' || buf[5] == '=')) {
+	const char *start = buf;
 	buf += 5;
 	if (*buf == ';') {
 	    ++buf;
@@ -1033,8 +1034,13 @@ static void handle_request(struct subscriber_t *sub,
 		if (sub->policy.devpath[0] == '\0') {
 		    /* awaken all devices */
 		    for (devp = devices; devp < devices + MAXDEVICES; devp++)
-			if (allocated_device(devp))
+			if (allocated_device(devp)) {
 			    (void)awaken(devp);
+			    if (devp->sourcetype == source_gpsd) {
+				(void)gpsd_write(devp, "?", 1);
+				(void)gpsd_write(devp, start, (size_t)(end-start));
+			    }
+			}
 		} else {
 		    devp = find_device(sub->policy.devpath);
 		    if (devp == NULL) {
@@ -1043,7 +1049,12 @@ static void handle_request(struct subscriber_t *sub,
 				       sub->policy.devpath);
 			gpsd_report(LOG_ERROR, "response: %s\n", reply);
 			goto bailout;
-		    } else if (!awaken(devp)) {
+		    } else if (awaken(devp)) {
+			if (devp->sourcetype == source_gpsd) {
+			    (void)gpsd_write(devp, "?", 1);
+			    (void)gpsd_write(devp, start, (size_t)(end-start));
+			}
+		    } else {
 			(void)snprintf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"Can't assign %s\"}\r\n",
 				       sub->policy.devpath);
@@ -1568,9 +1579,12 @@ static void consume_packets(struct gps_device_t *device)
 #ifdef PASSTHROUGH_ENABLE
 	    /* this is for passing through JSON packets */
 	    if ((changed & PASSTHROUGH_IS) != 0) {
+		(void)strlcat((char *)device->packet.outbuffer, 
+			      "\r\n",
+			      sizeof(device->packet.outbuffer));
 		(void)throttled_write(sub, 
 				      (char *)device->packet.outbuffer, 
-				      device->packet.outbuflen);
+				      device->packet.outbuflen+2);
 		continue;
 	    }
 #endif /* PASSTHROUGH_ENABLE */

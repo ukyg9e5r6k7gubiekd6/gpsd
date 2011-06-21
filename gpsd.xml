@@ -282,8 +282,20 @@ colon, and an optional colon-separated port number (defaulting to
 2101). The daemon will handshake with the DGPSIP server and
 read RTCM2 correction data from it. Corrections
 from the server will be set to each attached GPS with the capability
-to accept them.Example:
+to accept them. Example:
 <filename>dgpsip://dgps.wsrcc.com:2101</filename>.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Remote gpsd feed</term>
+<listitem>
+<para>A URI with the prefix "gpsd://", followed by a hostname and
+optionally a colony and a port number (if the port is absent the
+default <application>gpsd</application> port will be used). The daemon
+will open a socket to the indicated address and port and emulate a
+<application>gpsd</application> client, collecting JSON reports from
+the remote <application>gpsd</application> instance that will be
+passed to local clients.</para>
 </listitem>
 </varlistentry>
 </variablelist>

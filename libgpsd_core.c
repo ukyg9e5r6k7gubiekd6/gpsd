@@ -262,6 +262,32 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     }
 #endif /* NETFEED_ENABLE */
+#ifdef PASSTHROUGH_ENABLE
+    else if (strncmp(session->gpsdata.dev.path, "gpsd://", 7) == 0) {
+	/*@-branchstate -nullpass@*/
+	char server[GPS_PATH_MAX], *port;
+	socket_t dsock;
+	(void)strlcpy(server, session->gpsdata.dev.path + 7, sizeof(server));
+	session->gpsdata.gps_fd = -1;
+	if ((port = strchr(server, ':')) == NULL) {
+	    port = DEFAULT_GPSD_PORT;
+	} else
+	    *port++ = '\0';
+	gpsd_report(LOG_INF, "opening remote gpsd feed at %s, port %s.\n", server,
+		    port);
+	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	    gpsd_report(LOG_ERROR, "remote gpsd device open error %s.\n",
+			netlib_errstr(dsock));
+	    return -1;
+	} else
+	    gpsd_report(LOG_SPIN, "remote gpsd feed opened on fd %d\n", dsock);
+	/*@+branchstate +nullpass@*/
+	/* watch to remote is issued when WATCH is */
+	session->gpsdata.gps_fd = dsock;
+	session->sourcetype = source_gpsd;
+	return session->gpsdata.gps_fd;
+    }
+#endif /* PASSTHROUGH_ENABLE */
 
     /* fall through to plain serial open */
     return gpsd_serial_open(session);
@@ -860,6 +886,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path, session->packet.type);
 	if (session->packet.type == COMMENT_PACKET) {
 	    gpsd_report (LOG_PROG, "comment, sync lock deferred\n");
+	    /* FALL THROUGH */
 	} else if (session->packet.type > COMMENT_PACKET) {
 	    first_sync = (session->device_type == NULL);
 	    for (dp = gpsd_drivers; *dp; dp++)

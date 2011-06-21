@@ -46,11 +46,6 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	    session->context->century = year - (year % 100);
 	}
 	return 0;
-#ifdef PASSTHROUGH_ENABLE
-    } else if (session->packet.type == JSON_PACKET) {
-	gpsd_report(LOG_IO, "<= GPS: %s\n", (char *)session->packet.outbuffer);
-	return PASSTHROUGH_IS;
-#endif /* PASSTHROUGH_ENABLE */
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
 	gps_mask_t st = 0;
@@ -1203,6 +1198,31 @@ static const struct gps_type_t aivdm = {
 
 static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
 {
+    /* 
+     * Hack the packet to reflect its origin.  This code is supposed
+     * to insert the path naming the remote gpsd instance into the
+     * baginning of the path attribute, followed by a # to separate it
+     * from the device.
+     */
+#define PATHPREFIX	"\"device\":\""
+#define ORIGINAL	session->packet.outbuffer
+    char *deviceloc=strstr((char *)ORIGINAL, PATHPREFIX);
+    gpsd_report(LOG_IO, "<= GPS: %s\n", (char *)ORIGINAL);
+    if (deviceloc != NULL) {
+	char copy[sizeof(ORIGINAL)];
+	(void)strlcpy(copy, (char *)ORIGINAL, sizeof(copy));
+	deviceloc += strlen(PATHPREFIX);
+	(void)strlcpy(deviceloc,
+		      session->gpsdata.dev.path,
+		      sizeof(session->gpsdata.dev.path));
+	(void)strlcat((char *)ORIGINAL, "#", sizeof(ORIGINAL));
+	(void)strlcat((char *)ORIGINAL, 
+		      copy + (deviceloc-(char *)ORIGINAL), 
+		      sizeof(ORIGINAL));
+    }
+    gpsd_report (LOG_PROG, "JSON, passing through %s\n", ORIGINAL);
+#undef ORIGINAL
+#undef PATHPREFIX
     return PASSTHROUGH_IS;
 }
 
