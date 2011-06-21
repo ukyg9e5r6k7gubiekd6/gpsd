@@ -1196,7 +1196,8 @@ static const struct gps_type_t aivdm = {
  *
  **************************************************************************/
 
-static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
+static void path_rewrite(struct gps_device_t *session, char *prefix)
+/* prepend the session path to the value of a specified attribute */
 {
     /* 
      * Hack the packet to reflect its origin.  This code is supposed
@@ -1204,25 +1205,33 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
      * baginning of the path attribute, followed by a # to separate it
      * from the device.
      */
-#define PATHPREFIX	"\"device\":\""
-#define ORIGINAL	session->packet.outbuffer
-    char *deviceloc=strstr((char *)ORIGINAL, PATHPREFIX);
-    gpsd_report(LOG_IO, "<= GPS: %s\n", (char *)ORIGINAL);
+    char *deviceloc = strstr((char *)session->packet.outbuffer, prefix);
     if (deviceloc != NULL) {
-	char copy[sizeof(ORIGINAL)];
-	(void)strlcpy(copy, (char *)ORIGINAL, sizeof(copy));
-	deviceloc += strlen(PATHPREFIX);
+	char copy[sizeof(session->packet.outbuffer)];
+	(void)strlcpy(copy, (char *)session->packet.outbuffer, sizeof(copy));
+	deviceloc += strlen(prefix);
 	(void)strlcpy(deviceloc,
 		      session->gpsdata.dev.path,
 		      sizeof(session->gpsdata.dev.path));
-	(void)strlcat((char *)ORIGINAL, "#", sizeof(ORIGINAL));
-	(void)strlcat((char *)ORIGINAL, 
-		      copy + (deviceloc-(char *)ORIGINAL), 
-		      sizeof(ORIGINAL));
+	(void)strlcat((char *)session->packet.outbuffer, "#", 
+		      sizeof(session->packet.outbuffer));
+	(void)strlcat((char *)session->packet.outbuffer, 
+		      copy + (deviceloc-(char *)session->packet.outbuffer), 
+		      sizeof(session->packet.outbuffer));
+	session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
     }
-    gpsd_report (LOG_PROG, "JSON, passing through %s\n", ORIGINAL);
-#undef ORIGINAL
-#undef PATHPREFIX
+}
+
+static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
+{
+    /* FIX-ME: only tags the first of multiple devices on remote gpsd */
+    gpsd_report(LOG_IO, "<= GPS: %s\n", (char *)session->packet.outbuffer);
+    if (strstr((char *)session->packet.outbuffer, "DEVICE") != NULL)
+	path_rewrite(session, "\"path\":\"");
+    path_rewrite(session, "\"device\":\"");		     
+    gpsd_report (LOG_PROG, 
+		 "JSON, passing through %s\n", 
+		 (char *)session->packet.outbuffer);
     return PASSTHROUGH_IS;
 }
 

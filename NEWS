@@ -11,7 +11,8 @@
   GST noise statistics if they are available. Codebase now has
   an scons build recipe. Direct support for activation of gpsd from
   Mac OS/X systemd. gpsdecode can now filter reports by RTCM2, RTCM3,
-  or AIS message type.  NMEA HEHDT is implemented.
+  or AIS message type. NMEA HEHDT is implemented. Remote gpsd instances
+  ca now be used as data sources via a gpsd:// URL.
 
 * Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
