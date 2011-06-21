@@ -1205,21 +1205,26 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
      * baginning of the path attribute, followed by a # to separate it
      * from the device.
      */
-    char *deviceloc = strstr((char *)session->packet.outbuffer, prefix);
-    if (deviceloc != NULL) {
-	char copy[sizeof(session->packet.outbuffer)];
-	(void)strlcpy(copy, (char *)session->packet.outbuffer, sizeof(copy));
-	deviceloc += strlen(prefix);
-	(void)strlcpy(deviceloc,
-		      session->gpsdata.dev.path,
-		      sizeof(session->gpsdata.dev.path));
-	(void)strlcat((char *)session->packet.outbuffer, "#", 
-		      sizeof(session->packet.outbuffer));
-	(void)strlcat((char *)session->packet.outbuffer, 
-		      copy + (deviceloc-(char *)session->packet.outbuffer), 
-		      sizeof(session->packet.outbuffer));
-	session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
-    }
+    char *prefloc;
+    for (prefloc = (char *)session->packet.outbuffer;
+	 prefloc < (char *)session->packet.outbuffer+session->packet.outbuflen;
+	 prefloc++)
+	if (strncmp(prefloc, prefix, strlen(prefix)) == 0) {
+	    char copy[sizeof(session->packet.outbuffer)];
+	    (void)strlcpy(copy, 
+			  (char *)session->packet.outbuffer, 
+			  sizeof(copy));
+	    prefloc += strlen(prefix);
+	    (void)strlcpy(prefloc,
+			  session->gpsdata.dev.path,
+			  sizeof(session->gpsdata.dev.path));
+	    (void)strlcat((char *)session->packet.outbuffer, "#", 
+			  sizeof(session->packet.outbuffer));
+	    (void)strlcat((char *)session->packet.outbuffer, 
+			  copy + (prefloc-(char *)session->packet.outbuffer), 
+			  sizeof(session->packet.outbuffer));
+	}
+    session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
 }
 
 static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
