@@ -32,7 +32,7 @@
 # ciabot.xmlrpc  = if true, ship notifications via XML-RPC 
 # ciabot.revformat = format in which the revision is shown
 #
-# The ciabot.repo defaults to ciabot.project lowercased. 
+# The ciabot.repo value defaults to ciabot.project lowercased. 
 #
 # The revformat variable may have the following values
 # raw -> full hex ID of commit
@@ -110,7 +110,7 @@ version = "3.5"
 def do(command):
     return commands.getstatusoutput(command)[1]
 
-def report(refname, merged):
+def report(refname, merged, xmlrpc=False):
     "Generate a commit notification to be reported to CIA"
 
     # Try to tinyfy a reference to a web view for this commit.
@@ -151,8 +151,7 @@ def report(refname, merged):
     context.update(globals())
 
     out = xml % context
-
-    message = '''\
+    mail = '''\
 Message-ID: <%(merged)s.%(author)s@%(project)s>
 From: %(fromaddr)s
 To: %(toaddr)s
@@ -161,7 +160,10 @@ Subject: DeliverXML
 
 %(out)s''' % locals()
 
-    return message
+    if xmlrpc:
+        return out
+    else:
+        return mail
 
 if __name__ == "__main__":
     import getopt
@@ -222,7 +224,7 @@ if __name__ == "__main__":
             server = smtplib.SMTP('localhost')
 
     for merged in merges:
-        message = report(refname, merged)
+        message = report(refname, merged, xmlrpc)
         if not notify:
             print message
         elif xmlrpc:
