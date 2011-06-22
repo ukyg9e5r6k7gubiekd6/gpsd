@@ -17,3 +17,7 @@
 	allowdeletetag = false
 	allowmodifytag = false
 	showrev = "git show -C %s; echo"
+[ciabot]
+        project = GPSD
+	# Berlios blocks outbound mail.
+        xmlrpc = true

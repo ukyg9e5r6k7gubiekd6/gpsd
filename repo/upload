@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Upload git configuration from here to the repo
-# Please do not introduce bashims into this script.
+# Please do not introduce bashisms into this script.
 #
 confdir=git.berlios.de:/gitroot/gpsd/
 
