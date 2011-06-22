@@ -37,7 +37,7 @@
 # The revformat variable may have the following values
 # raw -> full hex ID of commit
 # short -> first 12 chars of hex ID
-# describe = -> desescription relative to last tag, falling back to short
+# describe = -> describe relative to last tag, falling back to short
 # The default is 'describe'.
 #
 # Note: the shell ancestors of this script used mail, not XML-RPC, in
@@ -48,6 +48,7 @@
 #
 
 import os, sys, commands, socket, urllib
+from xml.sax.saxutils import escape
 
 # Changeset URL prefix for your repo: when the commit ID is appended
 # to this, it should point at a CGI that will display the commit
@@ -104,7 +105,7 @@ toaddr = "cia@cia.navi.cx"
 # Identify the generator script.
 # Should only change when the script itself gets a new home and maintainer.
 generator = "http://www.catb.org/~esr/ciabot.py"
-version = "3.3"
+version = "3.5"
 
 def do(command):
     return commands.getstatusoutput(command)[1]
@@ -130,12 +131,14 @@ def report(refname, merged):
     if not rev:
         rev = merged[:12]
 
-    # Extract the neta-information for the commit
+    # Extract the meta-information for the commit
     files=do("git diff-tree -r --name-only '"+ merged +"' | sed -e '1d' -e 's-.*-<file>&</file>-'")
     metainfo = do("git log -1 '--pretty=format:%an <%ae>%n%at%n%s' " + merged)
     (author, ts, logmsg) = metainfo.split("\n")
+    logmsg = escape(logmsg)
+    author = escape(author)
 
-    # This discards the part of the authors addrsss after @.
+    # This discards the part of the author's address after @.
     # Might be be nice to ship the full email address, if not
     # for spammers' address harvesters - getting this wrong
     # would make the freenode #commits channel into harvester heaven.
@@ -174,7 +177,7 @@ if __name__ == "__main__":
     fromaddr = "CIABOT-NOREPLY@" + host
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "np:V")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "np:xV")
     except getopt.GetoptError, msg:
         print "ciabot.py: " + str(msg)
         raise SystemExit, 1
@@ -185,6 +188,8 @@ if __name__ == "__main__":
             project = val
         elif switch == '-n':
             notify = False
+        elif switch == '-x':
+            xmlrpc = True
         elif switch == '-V':
             print "ciabot.py: version", version
             sys.exit(0)
