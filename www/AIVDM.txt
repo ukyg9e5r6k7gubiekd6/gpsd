@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.32, May 2011
+v1.32, June 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
@@ -2425,7 +2425,7 @@ A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
 |40-49   | 10 |DAC                  |dac        |u|DAC = 001
 |50-55   |  6 |FID                  |fid        |u|FID = 26
 |56      |    |                     |reports    |a5|Sensor records array
-|0-3     |  4 |Sensor Report Type   |sensor     |u|See table velow
+|0-3     |  4 |Sensor Report Type   |sensor     |u|See table below
 |4-8     |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
 |9-13    |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
 |14-19   |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
@@ -2434,12 +2434,8 @@ A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
 |==============================================================================
 
 The fixed header is followed by 1-5 sensor records, each 112 bits
-long.  The framework record for each sensor looks like this:
-
-.Sensor framework record
-[frame="topbot",options="header"]
-|==============================================================================
-
+long.  The Sensor Reoprt Type is interpreted as follows, and controls
+the interpretation of the sensor payload data.
 
 .Sensor report types
 [frame="topbot",options="header"]
