@@ -1231,6 +1231,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
 {
     gpsd_report(LOG_IO, "<= GPS: %s\n", (char *)session->packet.outbuffer);
 
+    /*@-nullpass@*/ /* required only because splint is buggy */
     /* devices and paths need to be edited to */
     if (strstr((char *)session->packet.outbuffer, "DEVICE") != NULL)
 	path_rewrite(session, "\"path\":\"");
@@ -1252,6 +1253,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
     gpsd_report (LOG_PROG, 
 		 "JSON, passing through %s\n", 
 		 (char *)session->packet.outbuffer);
+    /*@-nullpass@*/
     return PASSTHROUGH_IS;
 }
 
