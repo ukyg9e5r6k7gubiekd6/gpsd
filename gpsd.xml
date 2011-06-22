@@ -793,15 +793,6 @@ supported.</para>
 <para>The ISGPS used for RTCM2 and subframes decoder logic is
 sufficiently convoluted to confuse some compiler optimizers, notably
 in GCC 3.x at -O2, into generating bad code.</para>
-
-<para>The code to pass through JSON from slave
-<application>gpsd</application> instances rewrites any object
-containing a path or device attribute so it is marked as ciming from a
-remote; in particular, this marks TPV, SKY, ATT, DEVICE, and DEVICES
-reports. VERSION and WATCH reports received from a slave, which do not
-contain a path or device attribute, are passed to clients
-unaltered. It is up to the application to track which daemon instance
-issued them.</para>
 </refsect1>
 <refsect1 id='files'><title>FILES</title>
 

@@ -845,6 +845,13 @@ will assert ATT_IS.</para>
 	<entry>numeric</entry>
         <entry>API minor revision level..</entry>
 </row>
+<row>
+	<entry>remote</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Path to the remote daemon reporting this version. If
+        empty, this is the version of the local daemon.</entry>
+</row>
 </tbody>
 </tgroup>
 </table>
@@ -996,6 +1003,13 @@ object.</para>
 	rather than all devices.  Useful with raw and NMEA modes
 	in which device responses aren't tagged. Has no effect when
 	used with enable:false.</entry>
+</row>
+<row>
+	<entry>remote</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Path to the remote daemon reporting the watch set. If
+        empty, this is the version of the local daemon.</entry>
 </row>
 </tbody>
 </tgroup>

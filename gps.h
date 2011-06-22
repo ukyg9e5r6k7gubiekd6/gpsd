@@ -1539,6 +1539,7 @@ struct version_t {
     char release[64];			/* external version */
     char rev[64];			/* internal revision ID */
     int proto_major, proto_minor;	/* API major and minor versions */
+    char remote[GPS_PATH_MAX];		/* could be from a remote device */
 };
 
 struct devconfig_t {
@@ -1566,6 +1567,7 @@ struct policy_t {
     bool timing;			/* requesting timing info */
     int loglevel;			/* requested log level of messages */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */
+    char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
 };
 
 /* 

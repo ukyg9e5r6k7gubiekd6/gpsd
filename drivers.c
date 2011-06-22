@@ -1229,11 +1229,26 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
 
 static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
 {
-    /* FIX-ME: only tags the first of multiple devices on remote gpsd */
     gpsd_report(LOG_IO, "<= GPS: %s\n", (char *)session->packet.outbuffer);
+
+    /* devices and paths need to be edited to */
     if (strstr((char *)session->packet.outbuffer, "DEVICE") != NULL)
 	path_rewrite(session, "\"path\":\"");
     path_rewrite(session, "\"device\":\"");		     
+
+    /* mark certain responses without a path or device attribute */
+    if (strstr((char *)session->packet.outbuffer, "VERSION") != NULL
+	|| strstr((char *)session->packet.outbuffer, "WATCH") != NULL) {
+	session->packet.outbuffer[session->packet.outbuflen] = '\0';	
+	(void)strlcat((char *)session->packet.outbuffer, ",\"remote\":\"", 
+		      sizeof(session->packet.outbuffer));
+	(void)strlcat((char *)session->packet.outbuffer,
+		      session->gpsdata.dev.path,
+		      sizeof(session->packet.outbuffer));
+	(void)strlcat((char *)session->packet.outbuffer, "\"}", 
+		      sizeof(session->packet.outbuffer));
+    }
+
     gpsd_report (LOG_PROG, 
 		 "JSON, passing through %s\n", 
 		 (char *)session->packet.outbuffer);

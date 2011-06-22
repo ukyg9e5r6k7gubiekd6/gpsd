@@ -98,6 +98,8 @@ int json_watch_read(const char *buf,
 	{"timing",         t_boolean,  .addr.boolean = &ccp->timing},
 	{"device",         t_string,   .addr.string = ccp->devpath,
 	                                  .len = sizeof(ccp->devpath)},
+	{"remote",         t_string,   .addr.string = ccp->remote,
+	                                  .len = sizeof(ccp->remote)},
 	{NULL},
     };
     /* *INDENT-ON* */

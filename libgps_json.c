@@ -316,6 +316,8 @@ static int json_version_read(const char *buf, struct gps_data_t *gpsdata,
 	                            .len = sizeof(gpsdata->version.rev)},
 	{"proto_major", t_integer, .addr.integer = &gpsdata->version.proto_major},
 	{"proto_minor", t_integer, .addr.integer = &gpsdata->version.proto_minor},
+	{"remote",    t_string,  .addr.string  = gpsdata->version.remote,
+	                            .len = sizeof(gpsdata->version.remote)},
 	{NULL},
 	/* *INDENT-ON* */
     };
