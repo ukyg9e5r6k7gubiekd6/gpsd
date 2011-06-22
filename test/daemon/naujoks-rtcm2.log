@@ -1,7 +1,7 @@
 # Name: RTCM2 test data
 # Description: Bare RTCM2 data
 # Submitted-by: Andre Naujoks <nautsch2@googlemail.com>
-# Date: Apr 5 2011
+# Date: 05 Apr 2011
 # Note: There's an ASCII dump of the first 22 packets in this data in the
 #       test directory as naujoks-rtcm2.dcd
 #
