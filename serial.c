@@ -521,8 +521,12 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 	if (session->baudindex++ >=
 	    (unsigned int)(sizeof(rates) / sizeof(rates[0])) - 1) {
 	    session->baudindex = 0;
+#ifdef FIXED_STOP_BITS
+	    return false;	/* hunt is over, no sync */
+#else
 	    if (session->gpsdata.dev.stopbits++ >= 2)
 		return false;	/* hunt is over, no sync */
+#endif /* FIXED_STOP_BITS */
 	}
 #endif /* FIXED_PORT_SPEED */
 	gpsd_set_speed(session,
@@ -532,7 +536,12 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 		       rates[session->baudindex],
 #endif /* FIXED_PORT_SPEED */
 		       session->gpsdata.dev.parity,
-		       session->gpsdata.dev.stopbits);
+#ifdef FIXED_STOP_BITS
+		       FIXED_STOP_BITS,
+#else
+		       session->gpsdata.dev.stopbits
+#endif /* FIXED_STOP_BITS */
+	    );
     }
 
     return true;		/* keep hunting */

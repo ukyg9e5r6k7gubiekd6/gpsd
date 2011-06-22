@@ -115,6 +115,7 @@ nonboolopts = (
     ("limited_max_clients", 0,             "maximum allowed clients"),
     ("limited_max_devices", 0,             "maximum allowed devices"),
     ("fixed_port_speed",    0,             "fixed serial port speed"),
+    ("fixed_stop_bits",     0,             "fixed serial port stop bits"),
     ("target",              "",            "cross-development target"),
     )
 for (name, default, help) in nonboolopts:
