@@ -366,7 +366,10 @@ if __name__ == '__main__':
 
     session = gps(**opts)
     session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
-    for report in session:
-        print report
+    try:
+        for report in session:
+            print report
+    except KeyboardInterrupt:
+        print
 
 # gps.py ends here
