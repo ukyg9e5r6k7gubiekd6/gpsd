@@ -398,6 +398,7 @@ static void decode(FILE *fpin, FILE*fpout)
     policy.json = json;
 
     gps_context_init(&context);
+    gpsd_time_init(&context, time(NULL));
     context.readonly = true;
     gpsd_init(&session, &context, NULL);
     gpsd_clear(&session);

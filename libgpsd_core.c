@@ -1036,7 +1036,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		gpsd_report(LOG_WARN,
 			    "date more than a year in the future!\n");
 	    else if (session->newdata.time < 0)
-		gpsd_report(LOG_ERROR, "date is negative!\n");
+		gpsd_report(LOG_ERROR, "date in %s is negative!\n", session->gpsdata.tag);
 	}
 	/*@-relaxtypes -longunsignedintegral@*/
 
