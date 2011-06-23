@@ -411,6 +411,8 @@ static void decode(FILE *fpin, FILE*fpout)
 
 	if (changed == ERROR_SET || changed == NODATA_IS)
 	    break;
+	if (session.packet.type == COMMENT_PACKET)
+	    gpsd_set_century(&session);
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
 	    (void)fputs((char *)session.packet.outbuffer, fpout);
 	if ((changed & (REPORT_IS|SUBFRAME_SET|AIS_SET|RTCM2_SET|RTCM3_SET|PASSTHROUGH_IS)) == 0)

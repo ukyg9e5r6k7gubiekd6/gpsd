@@ -77,6 +77,10 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
 #include "gpsd.h"
 #include "timebase.h"
 
@@ -113,6 +117,25 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 	(void)unix_to_iso8601((timestamp_t)context->start_time, scr, sizeof(scr));
 	gpsd_report(LOG_INF, "startup at %s (%d)\n", 
 		    scr, (int)context->start_time);
+    }
+}
+
+void gpsd_set_century(struct gps_device_t *session)
+/*
+ * Interpret "Date: dd mmm yyyy", setting the session context
+ * century from the year.  We do this so the behavior of the
+ * regression tests won't depend on what century the daemon
+ * started up in.
+ */
+{
+    unsigned char *cp;
+    int year;
+    if (strstr((char *)session->packet.outbuffer, "Date:") != NULL) {
+	cp = session->packet.outbuffer + strlen((char *)session->packet.outbuffer) - 1;
+	while (isspace(*cp))
+	    --cp;
+	year = atoi((char *)cp - 4);
+	session->context->century = year - (year % 100);
     }
 }
 
