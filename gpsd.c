@@ -2310,9 +2310,8 @@ int main(int argc, char *argv[])
 	    if (!allocated_device(device))
 		continue;
 
-	    if (device_needed != true)
-		for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS;
-			sub++) {
+	    if (!device_needed)
+		for (sub=subscribers; sub<subscribers+MAXSUBSCRIBERS; sub++) {
 		    if (sub->active == 0)
 			continue;
 		    device_needed = subscribed(sub, device);
