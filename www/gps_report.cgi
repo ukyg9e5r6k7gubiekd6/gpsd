@@ -343,9 +343,9 @@ print"<em>Location:</em>",$query->textfield(-name=>"location",
 
 print <<EOF;
 
-<p>Day/month/year of the log capture (the receiver will give us
+<p>Year-Month-Day of the log capture (the receiver will give us
 hour/minute/second).
-<br/>Example: <code>20 May 2006</code>.</p>
+<br/>Example: <code>2011-05-14</code>.</p>
 
 
 EOF

@@ -2,7 +2,7 @@
 # Chipset: SiRF-3
 # Description: GPS mouse
 # Submitted-by: George E Farmer <gefgef@hotmail.com>
-# Date: 14 Mar 2011
+# Date: 2011-03-14
 # Location: Aberdeen, SCOTLAND, 57.16N 2.12W
 # Notes: Unit stationary.
 $GPGGA,110518.000,5709.8067,N,00207.2822,W,1,08,1.0,59.3,M,48.2,M,,0000*77

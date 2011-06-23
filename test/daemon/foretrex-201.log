@@ -1,7 +1,7 @@
 # Name: Garmin Foretrex 201
 # Description: A small GPS meant to be worn like a wristwatch
 # Submitted-by: Anders Lund <anders@alweb.dk>
-# Date: 26 Aug 2010
+# Date: 2010-08-26
 # Location: 55.04N 10.25E, Ulbølle, Denmark
 # Notes:  The device was just lying in the window, I used
 # 	  gpscat to sample. The sample was done twice, to get some sentences

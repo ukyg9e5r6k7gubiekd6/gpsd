@@ -1,7 +1,7 @@
 # Name: Ntrip caster
 # Description: RTCM2 data returened by an Ntrip caster
 # Submitted-by: Andre Naujoks <nautsch2@googlemail.com>
-# Date: 22 Feb 2011
+# Date: 2011-02-22
 #
 GET /EPS_NI HTTP/1.1
 User-Agent: NTRIP gpsd/2.96~dev

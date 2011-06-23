@@ -2,7 +2,7 @@
 # Chipset: CH-4701
 # Description: single board 24-channel OEM receiver, GLONASS/GPS systems.
 # Submitted-by: Viktar Palstsiuk <viktar.palstsiuk@promwad.com>
-# Date: 29 May 2008
+# Date: 2008-05-29
 # Location: Minsk, Belarus, 53N 27E
 $GPGGA,123433.000,5356.21442,N,02734.85952,E,1,04,07.2,251.9,M,26.0,M,,*67
 $GPRMC,123434.000,A,5356.21440,N,02734.85946,E,00.00,252.7,290508,,,A*6B

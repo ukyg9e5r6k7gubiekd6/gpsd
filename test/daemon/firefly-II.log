@@ -1,7 +1,7 @@
 # Name: Firefly-IIa
 # Chipset: UBLOX NEO-5Q
 # Submitted-by: Said Jackson <saidjack@aol.com>
-# Date: 07 Jul 2010
+# Date: 2010-07-07
 # Location: Los Gatos, CA, 170 Knowles Drive
 $GPGGA,005947.00,3715.6616,N,12157.6709,W,,11,0.8,86.0,M,-30.1,M,,*54
 $GPRMC,005947.00,A,3715.6616,N,12157.6709,W,0.0,0.0,080710,,*2F

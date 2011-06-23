@@ -122,19 +122,20 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 
 void gpsd_set_century(struct gps_device_t *session)
 /*
- * Interpret "Date: dd mmm yyyy", setting the session context
+ * Interpret "Date: yyyy-mm-dd", setting the session context
  * century from the year.  We do this so the behavior of the
  * regression tests won't depend on what century the daemon
  * started up in.
  */
 {
-    unsigned char *cp;
+    unsigned char *cp; 
+    char *end;
     int year;
     if (strstr((char *)session->packet.outbuffer, "Date:") != NULL) {
-	cp = session->packet.outbuffer + strlen((char *)session->packet.outbuffer) - 1;
+	cp = session->packet.outbuffer + 5;
 	while (isspace(*cp))
 	    --cp;
-	year = atoi((char *)cp - 4);
+	year = strtod((char *)cp, &end);
 	session->context->century = year - (year % 100);
     }
 }

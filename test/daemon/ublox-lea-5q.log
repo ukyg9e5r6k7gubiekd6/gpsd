@@ -1,7 +1,7 @@
 # Name: uBlox LEA-5q
 # Description: OEM module
 # Submitted-by: Thomas Sprinkmeier <thomas.sprinkmeier@gmail.com>
-# Date: 02 Feb 2011
+# Date: 2011-02-02
 # Location: Adelaide, AU, 34.9S, 138.6E
 $GPVTG,,,,,,,,,N*30
 $GPGGA,001901.00,,,,,0,00,99.99,,,,,,*6F

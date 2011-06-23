@@ -3,7 +3,7 @@
 # Chipset: Unknown
 # Description: Car-dash GPS
 # Submitted-by: Gleb Smirnoff <glebius@glebius.int.ru> 
-# Date: 23 Mar 2011
+# Date: 2011-03-23
 # Notes: Contains initial segement of no fix followed by stationary fix.
 #        The 3100 has been end-of-lifed but is still found in the wild.
 #        No database entry for this yet, we haven'y been able to find
