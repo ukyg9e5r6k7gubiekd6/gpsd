@@ -58,6 +58,18 @@ static WINDOW *statwin, *cmdwin;
 /*@null@*/ static WINDOW *packetwin;
 /*@null@*/ static FILE *logfile;
 static char *type_name;
+
+/* no methods, it's all device window */
+extern const struct gps_type_t json_passthrough;
+const struct monitor_object_t json_mmt = {
+    .initialize = NULL,
+    .update = NULL,
+    .command = NULL,
+    .wrap = NULL,
+    .min_y = 0, .min_x = 80,	/* no need for a device window */
+    .driver = &json_passthrough,
+};
+
 /*@ -nullassign @*/
 static const struct monitor_object_t *monitor_objects[] = {
 #ifdef NMEA_ENABLE
@@ -95,6 +107,9 @@ static const struct monitor_object_t *monitor_objects[] = {
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
 #ifdef TNT_ENABLE
     &tnt_mmt,
+#endif /* TNT_ENABLE */
+#ifdef JSON_ENABLE
+    &json_mmt,
 #endif /* TNT_ENABLE */
     NULL,
 };
@@ -419,12 +434,13 @@ static bool switch_type(const struct gps_type_t *devtype)
 			     (*newobject)->min_x, (*newobject)->min_y + 1);
 	} else {
 	    if (active != NULL) {
-		(*active)->wrap();
+		if ((*active)->wrap != NULL)
+		    (*active)->wrap();
 		(void)delwin(devicewin);
 	    }
 	    active = newobject;
 	    devicewin = newwin((*active)->min_y, (*active)->min_x, 1, 0);
-	    if ((devicewin == NULL) || !(*active)->initialize()) {
+	    if ((devicewin == NULL) || ((*active)->initialize != NULL && !(*active)->initialize())) {
 		monitor_complain("Internal initialization failure - screen "
 				 "must be at least 80x24. aborting.");
 		return false;
@@ -705,7 +721,9 @@ int main(int argc, char **argv)
 		(void)wprintw(cmdwin, type_name);
 		(void)wprintw(cmdwin, "> ");
 		(void)wclrtoeol(cmdwin);
-		if (active != NULL && len > 0 && session.packet.outbuflen > 0)
+		if (active != NULL 
+			&& len > 0 && session.packet.outbuflen > 0
+			&& (*active)->update != NULL)
 		    (*active)->update();
 		(void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
 		packet_dump((char *)session.packet.outbuffer,
