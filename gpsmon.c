@@ -108,9 +108,9 @@ static const struct monitor_object_t *monitor_objects[] = {
 #ifdef TNT_ENABLE
     &tnt_mmt,
 #endif /* TNT_ENABLE */
-#ifdef JSON_ENABLE
+#ifdef PASSTHROUGH_ENABLE
     &json_mmt,
-#endif /* TNT_ENABLE */
+#endif /* PASSTHROUGH_ENABLE */
     NULL,
 };
 
