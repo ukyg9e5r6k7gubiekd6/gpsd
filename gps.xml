@@ -89,9 +89,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       </group>
 </cmdsynopsis>
 <cmdsynopsis>
-  <command>gpxlogger</command>
-</cmdsynopsis>
-<cmdsynopsis>
   <command>gpxlogger</command>  
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-d </arg>
@@ -109,6 +106,11 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 	      <group><replaceable>:device</replaceable></group>
 	  </group>
       </group>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>gegps</command>
+      <arg choice='opt'>-d <replaceable>directory</replaceable></arg>
+      <arg choice='opt'>-i </arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -299,6 +301,24 @@ defaulted to, you may give a server-port-device specification as
 arguments.</para>
 
 </refsect2>
+<refsect2><title>gegps</title>
+
+<para>This program collects fixes from <application>gpsd</application>
+and feeds them to a running instance of Google Earth for live location 
+tracking.</para>
+
+<para>The <option>-d</option> argument is the location of the Google
+Earth installation directory.  If not specified, it defaults to the
+current directory.</para>
+
+<para>If you have the free (non-subscription) version, start by
+running with the <option>-i</option> option to drop a clue in the
+Google Earth installation directory, as
+'Open_in_Google_Earth_RT_GPS.kml', then open that file in Places (File
+> Open...). Run <application>gpsd</application> in the normal way
+after that.</para>
+
+</refsect2>
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
@@ -320,7 +340,8 @@ arguments.</para>
 Remco Treffcorn, Derrick Brashear, Russ Nelson &amp; Eric S. Raymond,
 Jeff Francis (cgps). Amaury Jacquot <email>sxpert@sxpert.org</email>
 &amp; Petter Reinholdtsen <email>pere@hungry.com</email> (gpxlogger).
-Chris Kuethe <email>chris.kuethe@gmail.com</email> (gpxlogger).
+Chris Kuethe <email>chris.kuethe@gmail.com</email> (gpxlogger), Chen
+Wei <email>weichen302@aol.com</email> (gegps).
 </para>
 
 <para>This manual page by Eric S. Raymond <email>esr@thyrsus.com</email>.

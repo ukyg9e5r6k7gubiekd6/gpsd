@@ -738,7 +738,7 @@ if cxx and env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
 # Python programs
-python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed"]
+python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed", "gegps"]
 python_modules = Glob('gps/*.py') 
 
 # Build Python binding
@@ -884,6 +884,7 @@ python_manpages = {
     "gpscat.1" : "gpscat.xml",
     "xgpsspeed.1" : "gps.xml",
     "xgps.1" : "gps.xml",
+    "gegps.1" : "gps.xml",
     }
 
 manpage_targets = []
