@@ -7,7 +7,7 @@
   now a documented part of the library API. There is now a
   shared-memory export from the daemon that can be accessed through 
   the C and C++ client libraries.  xgps and cgps may now display
-  the Maidehead grid locator for current lat/lon.  xgps displays
+  the Maidenhead grid locator for current lat/lon.  xgps displays
   GST noise statistics if they are available. Codebase now has
   an scons build recipe. Direct support for activation of gpsd from
   Mac OS/X systemd. gpsdecode can now filter reports by RTCM2, RTCM3,

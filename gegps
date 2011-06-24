@@ -68,9 +68,7 @@ def kmlize(tpv):
 
 if __name__ == "__main__":
     session = gps.gps()
-    # must include gps.WATCH_NEWSTYLE on my system(debian squeeze), otherwise
-    # there is no TPV report
-    session.stream(gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
+    session.stream(gps.WATCH_ENABLE)
 
     kmldir = "."
     initialize = False

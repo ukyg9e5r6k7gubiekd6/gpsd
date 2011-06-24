@@ -324,27 +324,23 @@ class gps(gpsdata, gpsjson):
     def stream(self, flags=0, outfile=None):
         "Ask gpsd to stream reports at your client."
         if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
-            # If we're looking at a daemon that speaks JSON, this
-            # should have been set when we saw the initial VERSION
-            # response.  Note, however, that this requires at
-            # least one read() before stream() is called
-            if self.newstyle or flags & WATCH_NEWSTYLE:
-                flags |= WATCH_JSON
-            else:
-                flags |= WATCH_OLDSTYLE
-        if flags & WATCH_OLDSTYLE:
-            if flags & WATCH_DISABLE:
+            flags |= WATCH_JSON
+        if flags & WATCH_DISABLE:
+            if flags & WATCH_OLDSTYLE:
                 arg = "w-"
                 if flags & WATCH_NMEA:
                     arg += 'r-'
                     return self.send(arg)
-            else: # flags & WATCH_ENABLE:
+            else:
+                gpsjson.stream(self, ~flags)
+        else: # flags & WATCH_ENABLE:
+            if flags & WATCH_OLDSTYLE:
                 arg = 'w+'
                 if (flags & WATCH_NMEA):
                     arg += 'r+'
                     return self.send(arg)
-        else: # flags & WATCH_NEWSTYLE:
-            gpsjson.stream(self, flags)
+            else:
+                gpsjson.stream(self, flags)
 
 if __name__ == '__main__':
     import readline, getopt, sys
@@ -365,7 +361,7 @@ if __name__ == '__main__':
         opts["port"] = arguments[1]
 
     session = gps(**opts)
-    session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
+    session.stream(WATCH_ENABLE)
     try:
         for report in session:
             print report
