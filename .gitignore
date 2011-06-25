@@ -4,6 +4,7 @@ xgps
 rtcmdecode
 gpsmon
 gpsctl
+gpsdctl
 gpsdecode
 cgps
 lcdgps

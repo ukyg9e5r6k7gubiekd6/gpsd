@@ -712,13 +712,14 @@ gpsd = gpsd_env.Program('gpsd', gpsd_sources,
                         parse_flags = gpsdlibs + rtlibs + dbus_xmit_libs)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], parse_flags=gpsdlibs+rtlibs)
+gpsdctl = env.Program('gpsdctl', ['gpsdctl.c'], parse_flags=gpslibs)
 gpsmon = env.Program('gpsmon', gpsmon_sources, parse_flags=gpsdlibs + ncurseslibs)
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], parse_flags=gpslibs+dbus_recv_libs)
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], parse_flags=gpslibs)
 cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 
-binaries = [gpsd, gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]
+binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
     binaries += [cgps, gpsmon]
 
@@ -1000,6 +1001,7 @@ splint_table = [
                                                             '-redef']),
     ('splint-cgps',['cgps.c'],'cgps', ['-exportlocal']),
     ('splint-gpsctl',['gpsctl.c'],'gpsctl', ['']),
+    ('splint-gpsdctl',['gpsdctl.c'],'gpsdctl', ['']),
     ('splint-gpsmon',gpsmon_sources,'gpsmon', ['-exportlocal']),
     ('splint-gpspipe',['gpspipe.c'],'gpspipe', ['']),
     ('splint-gpsdecode',['gpsdecode.c'],'gpsdecode', ['']),
