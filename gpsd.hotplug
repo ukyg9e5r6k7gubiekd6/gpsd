@@ -58,11 +58,11 @@ fi
 # actual wait/hotplug portion in the background.
 
 {
-    logger -t gpsd.hotplug -p daemon.info "waiting for" $DEVNAME
+    #logger -t gpsd.hotplug -p daemon.info "waiting for" $DEVNAME
     while [ -x $DEVNAME ] 
     do
 	sleep 1
     done
-    logger -t gpsd.hotplug -p daemon.info $DEVNAME "is active"
+    #logger -t gpsd.hotplug -p daemon.info $DEVNAME "is active"
     gpsdctl $ACTION $DEVNAME
 } &
