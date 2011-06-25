@@ -117,6 +117,7 @@ static int gpsd_control(char *action, char *argument)
 
 int main(int argc, char *argv[])
 {
+    openlog("gpsdctl", 0, LOG_DAEMON);
     if (argc != 3) {
 	(void)syslog(LOG_ERR, "requires action and argument (%d)", argc);
 	exit(1);

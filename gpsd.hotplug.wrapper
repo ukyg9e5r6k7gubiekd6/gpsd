@@ -1,5 +1,10 @@
 #!/bin/sh
 #
+# This script is the gpsd udev handler for add/remove events on matched USB
+# devices. It expects to see the following environment variables:
+#    ACTION  = either "add" or "remove"
+#    DEVPATH = the full name of the USB device that was just activated
+#
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
@@ -27,12 +32,36 @@ fi
 
 if [ "$ACTION" = "remove" ] ; then
   if echo $DEVLINKS | grep -q /dev/gps; then
-    exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
+    :
+  else
+    exit 0
   fi
-  exit 0
 fi
 
-if [ -x /usr/bin/python ]; then
-  exec /lib/udev/gpsd.hotplug "$ACTION" "$DEVNAME"
+logger -t "gpsd.hotplug" -p daemon.info "$ACTION" "$DEVNAME"
+
+if [ -z "$DEVPATH" ]
+then
+    logger -t gpsd.hotplug -p daemon.err "no device"
+    exit 0
 fi
 
+# In recent versions of udev, the gpsd script runs in series with
+# the task that creates the real /dev/ttyUSBn device
+# node. Unfortunately, the gpsd script runs BEFORE the creation of
+# the node, and the node is not created until after you kill the
+# gpsd script, because the gpsd script waits forever for the node
+# to appear.
+# 
+# This is a race condition, and is best fixed by running the
+# actual wait/hotplug portion in the background.
+
+{
+    logger -t gpsd.hotplug -p daemon.info "waiting for" $DEVNAME
+    while [ -x $DEVNAME ] 
+    do
+	sleep 1
+    done
+    logger -t gpsd.hotplug -p daemon.info $DEVNAME "is active"
+    gpsdctl $ACTION $DEVNAME
+} &

@@ -15,7 +15,6 @@
 # 
 #   /lib/udev/rules.d/25-gpsd.rules
 #   /lib/udev/gpsd.hotplug.wrapper
-#   /lib/udev/gpsd.hotplug
 # 
 # Setting the link in /lib/udev/rules.d activates the rule and determines
 # when to run it on boot (similar to init.d processing).
