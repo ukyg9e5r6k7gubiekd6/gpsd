@@ -6,7 +6,7 @@
 # GPSes don't have their own USB device class.  They're serial-over-USB
 # devices, so what you see is actually the ID of the serial-over-USB chip.
 # Fortunately, just two of these account for over 80% of consumer-grade
-# GPS sensors.  The gpsd.hotplug.wrapper script will tell a running gpsd
+# GPS sensors.  The gpsd.hotplug wrapper script will tell a running gpsd
 # that it should look at the device that just went active, because it
 # might be a GPS.
 #
@@ -14,7 +14,7 @@
 # will apply on other distributions:
 # 
 #   /lib/udev/rules.d/25-gpsd.rules
-#   /lib/udev/gpsd.hotplug.wrapper
+#   /lib/udev/gpsd.hotplug
 # 
 # Setting the link in /lib/udev/rules.d activates the rule and determines
 # when to run it on boot (similar to init.d processing).
@@ -22,24 +22,24 @@
 SUBSYSTEM!="tty", GOTO="gpsd_rules_end"
 
 # Prolific Technology, Inc. PL2303 Serial Port
-ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # ATEN International Co., Ltd UC-232A Serial Port [pl2303]
-ATTRS{idVendor}=="0557", ATTRS{idProduct}=="2008", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="0557", ATTRS{idProduct}=="2008", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # FTDI 8U232AM / FT232
-ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # Cypress M8/CY7C64013 (DeLorme uses these)
-ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0100", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0100", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # PS-360 OEM (Microsoft GPS sold with Street and Trips 2005)
-ATTRS{idVendor}=="067b", ATTRS{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="067b", ATTRS{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # Garmin International GPSmap, various models (tested with Garmin GPS 18 USB)
-ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # Cygnal Integrated Products, Inc. CP210x Composite Device (Used by Holux m241 and Wintec grays2 wbt-201)
-ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # u-blox AG, u-blox 5 (tested with Navilock NL-402U)
-ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # Cygnal Integrated Products, Inc.
-ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea71", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea71", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 
-ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug.wrapper"
+ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug"
 
 LABEL="gpsd_rules_end"

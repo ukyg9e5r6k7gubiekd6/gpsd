@@ -1244,12 +1244,12 @@ env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glo
 
 Utility('udev-install', '', [
     'cp $SRCDIR/gpsd.rules /lib/udev/rules.d/25-gpsd.rules',
-    'cp $SRCDIR/gpsd.hotplug.wrapper /lib/udev/',
-    'chmod a+x /lib/udev/gpsd.hotplug.wrapper',
+    'cp $SRCDIR/gpsd.hotplug /lib/udev/',
+    'chmod a+x /lib/udev/gpsd.hotplug',
         ])
 
 Utility('udev-uninstall', '', [
-    'rm -f /lib/udev/gpsd.hotplug.wrapper',
+    'rm -f /lib/udev/gpsd.hotplug',
     'rm -f /lib/udev/rules.d/25-gpsd.rules',
         ])
 
