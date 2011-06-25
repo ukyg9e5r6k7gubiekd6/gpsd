@@ -176,6 +176,7 @@ fi
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %config(noreplace) %{_sysconfdir}/udev/rules.d/*
 %{_sbindir}/gpsd
+%{_sbindir}/gpsdctl
 %{_bindir}/gpsprof
 %{_bindir}/gpsmon
 %{_bindir}/gpsctl
@@ -245,6 +246,9 @@ fi
 %{_var}/www/html/gpsd/pgps.cgi
 
 %changelog
+* Sat Jun 25 2011 Eric S. Raymond <esr@thyrsus.com> 3.0-2
+- Minor changes from the refactoring of the hotplug system. 
+
 * Mon Apr 18 2011 Michael R. Davis <mrdvt@cpan.org> 3.0-1
 - Updates to support SCons software construction tool
 - Added httpd Perl client

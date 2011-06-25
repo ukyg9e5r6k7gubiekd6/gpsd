@@ -3,7 +3,8 @@
 # This script is the gpsd udev handler for add/remove events on matched USB
 # devices. It expects to see the following environment variables:
 #    ACTION  = either "add" or "remove"
-#    DEVPATH = the full name of the USB device that was just activated
+#    DEVNAME = the full name of the USB device that was just activated
+# It hands off to gpsdctl for the actual communication with the daemon.
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
@@ -40,7 +41,7 @@ fi
 
 logger -t "gpsd.hotplug" -p daemon.info "$ACTION" "$DEVNAME"
 
-if [ -z "$DEVPATH" ]
+if [ -z "$DEVNAME" ]
 then
     logger -t gpsd.hotplug -p daemon.err "no device"
     exit 0
