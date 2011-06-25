@@ -2,9 +2,19 @@
 #
 # This script is the gpsd udev handler for add/remove events on matched USB
 # devices. It expects to see the following environment variables:
+#
 #    ACTION  = either "add" or "remove"
 #    DEVNAME = the full name of the USB device that was just activated
+#
+# It will accept from /etc/sysconfig/gpsd the following config variables:
+#
+#    CONTROL_SOCKET = location of the gpsd control socket
+#    OPTIONS = options to be passed to gpsd on launch
+#
 # It hands off to gpsdctl for the actual communication with the daemon.
+#
+# Do not introduce bashims into this script, as we want it to continue to
+# work under Ubuntu.
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
