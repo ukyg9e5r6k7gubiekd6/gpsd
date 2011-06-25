@@ -739,8 +739,15 @@ static void handle_control(int sfd, char *buf)
     char *stash, *eq;
     struct gps_device_t *devp;
 
+     /*
+      * The only other place in the code that knows about the format
+      * of these commands is the gpsd_control() function in
+      * gpsdctl.c. Be careful about keeping them in sync, or hotplugging
+      * will have mysterious failures.
+      */
     /*@ -sefparams @*/
     if (buf[0] == '-') {
+	/* remove device named after - */
 	(void)snarfline(buf + 1, &stash);
 	gpsd_report(LOG_INF, "<= control(%d): removing %s\n", sfd, stash);
 	if ((devp = find_device(stash))) {
@@ -750,6 +757,7 @@ static void handle_control(int sfd, char *buf)
 	} else
 	    ignore_return(write(sfd, "ERROR\n", 6));
     } else if (buf[0] == '+') {
+	/* add device named after + */
 	(void)snarfline(buf + 1, &stash);
 	if (find_device(stash)) {
 	    gpsd_report(LOG_INF, "<= control(%d): %s already active \n", sfd,
@@ -763,6 +771,7 @@ static void handle_control(int sfd, char *buf)
 		ignore_return(write(sfd, "ERROR\n", 6));
 	}
     } else if (buf[0] == '!') {
+	/* split line after ! into device=string, send string to device */
 	(void)snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
@@ -794,6 +803,7 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     } else if (buf[0] == '&') {
+	/* split line after & into dev=hexdata, send unpacked hexdata to dev */
 	(void)snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
@@ -838,6 +848,7 @@ static void handle_control(int sfd, char *buf)
 	    }
 	}
     } else if (strcmp(buf, "?devices")==0) {
+	/* write back devices list followed by OK */
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    char *path = devp->gpsdata.dev.path;
 	    ignore_return(write(sfd, path, strlen(path)));
