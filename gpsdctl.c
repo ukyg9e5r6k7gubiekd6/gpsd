@@ -33,11 +33,11 @@ static int gpsd_control_connect(bool complain)
     int sock;
 
     if (access(control_socket, F_OK) != 0) {
-	(void)syslog(LOG_ERR, "gpsdctl: socket %s doesn't exist", control_socket);
+	(void)syslog(LOG_ERR, "socket %s doesn't exist", control_socket);
 	return -1;
     } else if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
 	if (complain)
-	    (void)syslog(LOG_ERR, "gpsdctl: socket creation failed");
+	    (void)syslog(LOG_ERR, "socket creation failed");
 	return -1;
     } else {
 	struct sockaddr_un saddr;
@@ -51,7 +51,7 @@ static int gpsd_control_connect(bool complain)
 	/*@-unrecog@*/
 	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
 	    if (complain)
-		(void)syslog(LOG_ERR, "gpsdctl: socket connect failed");
+		(void)syslog(LOG_ERR, "socket connect failed");
 	    return -1;
 	}
 	/*@+unrecog@*/
@@ -69,16 +69,19 @@ static int gpsd_control(char *action, char *argument)
     (void)syslog(LOG_ERR, "gpsd_control(action=%s, arg=%s)", action, argument);
     connect = gpsd_control_connect(false);
     if (connect >= 0)
-	syslog(LOG_INFO, "gpsdctl: reached a running gpsd");
+	syslog(LOG_INFO, "reached a running gpsd");
     else if (strcmp(action, "add") == 0) {
 	(void)snprintf(buf, sizeof(buf),
 		       "gpsd %s -F %s", gpsd_options, control_socket);
-	(void)syslog(LOG_NOTICE, "gpsdctl: launching %s", buf);
-	(void)system(buf);
+	(void)syslog(LOG_NOTICE, "launching %s", buf);
+	if (system(buf) != 0) {
+	    (void)syslog(LOG_ERR, "launch of gpsd failed");
+	    return -1;
+	}
         connect = gpsd_control_connect(true);
     }
     if (connect < 0) {
-	syslog(LOG_ERR, "gpsdctl: can't reach gpsd");
+	syslog(LOG_ERR, "can't reach gpsd");
 	return -1;
     }
     /*
@@ -115,7 +118,7 @@ static int gpsd_control(char *action, char *argument)
 int main(int argc, char *argv[])
 {
     if (argc != 3) {
-	(void)syslog(LOG_ERR, "gpsdctl: requires action and argument");
+	(void)syslog(LOG_ERR, "requires action and argument (%d)", argc);
 	exit(1);
     } else {
 	/*@-observertrans@*/
