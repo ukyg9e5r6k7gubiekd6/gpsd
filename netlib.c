@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */
+#include <sys/un.h>
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
@@ -143,6 +144,32 @@ char /*@observer@*/ *netlib_errstr(const int err)
 	return "can't connect to host/port pair";
     default:
 	return "unknown error";
+    }
+}
+
+socket_t netlib_localsocket(const char *sockfile)
+/* acquire a connection to an existing Unix-domain socket */
+{
+    int sock;
+
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+	return -1;
+    } else {
+	struct sockaddr_un saddr;
+
+	memset(&saddr, 0, sizeof(struct sockaddr_un));
+	saddr.sun_family = AF_UNIX;
+	(void)strlcpy(saddr.sun_path, 
+		      sockfile, 
+		      sizeof(saddr.sun_path));
+
+	/*@-unrecog@*/
+	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
+	    return -1;
+	}
+	/*@+unrecog@*/
+
+	return sock;
     }
 }
 

@@ -8,13 +8,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#ifndef INADDR_ANY
-#include <netinet/in.h>
-#endif /* INADDR_ANY */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #include <syslog.h>
@@ -27,39 +20,6 @@
 static char *control_socket = "/var/run/gpsd.sock"; 
 static char *gpsd_options = "";
 
-static int gpsd_control_connect(bool complain)
-/* acquire a connection to the gpsd control socket */
-{
-    int sock;
-
-    if (access(control_socket, F_OK) != 0) {
-	(void)syslog(LOG_ERR, "socket %s doesn't exist", control_socket);
-	return -1;
-    } else if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
-	if (complain)
-	    (void)syslog(LOG_ERR, "socket creation failed");
-	return -1;
-    } else {
-	struct sockaddr_un saddr;
-
-	memset(&saddr, 0, sizeof(struct sockaddr_un));
-	saddr.sun_family = AF_UNIX;
-	(void)strlcpy(saddr.sun_path, 
-		      control_socket, 
-		      sizeof(saddr.sun_path));
-
-	/*@-unrecog@*/
-	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
-	    if (complain)
-		(void)syslog(LOG_ERR, "socket connect failed");
-	    return -1;
-	}
-	/*@+unrecog@*/
-
-	return sock;
-    }
-}
-
 static int gpsd_control(char *action, char *argument)
 /* pass a command to gpsd; start the daemon if not already running */
 {
@@ -67,7 +27,11 @@ static int gpsd_control(char *action, char *argument)
     char buf[512];
 
     (void)syslog(LOG_ERR, "gpsd_control(action=%s, arg=%s)", action, argument);
-    connect = gpsd_control_connect(false);
+    if (access(control_socket, F_OK) != 0) {
+	(void)syslog(LOG_ERR, "socket %s doesn't exist", control_socket);
+	return -1;
+    }
+    connect = netlib_localsocket(control_socket);
     if (connect >= 0)
 	syslog(LOG_INFO, "reached a running gpsd");
     else if (strcmp(action, "add") == 0) {
@@ -78,7 +42,7 @@ static int gpsd_control(char *action, char *argument)
 	    (void)syslog(LOG_ERR, "launch of gpsd failed");
 	    return -1;
 	}
-        connect = gpsd_control_connect(true);
+        connect = netlib_localsocket(control_socket);
     }
     if (connect < 0) {
 	syslog(LOG_ERR, "can't reach gpsd");
