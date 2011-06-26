@@ -743,7 +743,7 @@ static void handle_control(int sfd, char *buf)
       * The only other place in the code that knows about the format
       * of the + and - commands is the gpsd_control() function in
       * gpsdctl.c. The only other olace that knows about ! is the
-      * control_send(0 function in gpsmon.c. Be careful about keeping
+      * control_send() function in gpsmon.c. Be careful about keeping
       * them in sync, or hotplugging will have mysterious failures.
       */
     /*@ -sefparams @*/
@@ -2187,7 +2187,7 @@ int main(int argc, char *argv[])
 	    FD_CLR(csock, &rfds);
 	}
 
-	/* read any commands that came in over control sockets */
+	/* read any commands that came in over the control socket */
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 	    if (FD_ISSET(cfd, &control_fds)) {
 		char buf[BUFSIZ];
