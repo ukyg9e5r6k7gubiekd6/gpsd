@@ -741,9 +741,10 @@ static void handle_control(int sfd, char *buf)
 
      /*
       * The only other place in the code that knows about the format
-      * of these commands is the gpsd_control() function in
-      * gpsdctl.c. Be careful about keeping them in sync, or hotplugging
-      * will have mysterious failures.
+      * of the + and - commands is the gpsd_control() function in
+      * gpsdctl.c. The only other olace that knows about ! is the
+      * control_send(0 function in gpsmon.c. Be careful about keeping
+      * them in sync, or hotplugging will have mysterious failures.
       */
     /*@ -sefparams @*/
     if (buf[0] == '-') {

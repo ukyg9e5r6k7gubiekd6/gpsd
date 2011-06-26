@@ -90,8 +90,9 @@ static int gpsd_control(char *action, char *argument)
      * device if it's really a GPS and ignore it if it's not.
      *
      * The only other place in the code that knows about the format of
-     * these commands is the handle_control() function in gpsd.c. Be careful
-     * about keeping them in sync, or hotplugging will have nysterious failures.
+     * the add and remove commands is the handle_control() function in
+     * gpsd.c. Be careful about keeping them in sync, or hotplugging
+     * will have nysterious failures.
      */
     if (strcmp(action, "add") == 0) {
 	/*
