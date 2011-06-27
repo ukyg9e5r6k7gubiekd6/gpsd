@@ -33,7 +33,6 @@
 #include "gpsmon.h"
 #include "revision.h"
 
-
 #ifdef S_SPLINT_S
 extern struct tm *localtime_r(const time_t *, /*@out@*/ struct tm *tp);
 #endif /* S_SPLINT_S */
@@ -212,10 +211,9 @@ void gpsd_report(int errlevel, const char *fmt, ...)
     }
 }
 
-/*@ -globstate @*/
 static ssize_t readpkt(void)
 {
-    /*@ -type -shiftnegative -compdef -nullpass @*/
+    /*@ -globstate -type -shiftnegative -compdef -nullpass @*/
     struct timeval timeval;
     fd_set select_set;
     gps_mask_t changed;
@@ -257,10 +255,8 @@ static ssize_t readpkt(void)
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
     return session.packet.outbuflen;
-    /*@ +type +shiftnegative +compdef +nullpass @*/
+    /*@ +globstate +type +shiftnegative +compdef +nullpass @*/
 }
-
-/*@ +globstate @*/
 
 static void packet_dump(const char *buf, size_t buflen)
 {
@@ -360,7 +356,6 @@ void monitor_complain(const char *fmt, ...)
     (void)wgetch(cmdwin);
 }
 
-
 void monitor_log(const char *fmt, ...)
 {
     if (packetwin != NULL) {
@@ -442,23 +437,19 @@ int main(int argc, char **argv)
     int option, status, last_type = BAD_PACKET;
     ssize_t len;
     struct fixsource_t source;
-    char *p, *controlsock = "/var/run/gpsd.sock";
     fd_set select_set;
     unsigned char buf[BUFLEN];
-    char line[80], *explanation;
+    char line[80], *explanation, *p;
     int bailout = 0, matches = 0;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "D:F:LVhl:t:?")) != -1) {
+    while ((option = getopt(argc, argv, "D:LVhl:t:?")) != -1) {
 	switch (option) {
 	case 'D':
 	    context.debug = atoi(optarg);
-	    break;
-	case 'F':
-	    controlsock = optarg;
 	    break;
 	case 'L':		/* list known device types */
 	    (void)
@@ -535,7 +526,7 @@ int main(int argc, char **argv)
 	default:
 	    (void)
 		fputs
-		("usage:  gpsmon [-?hVl] [-D debuglevel] [-F controlsock] [-t type] [server[:port:[device]]]\n",
+		("usage:  gpsmon [-?hVl] [-D debuglevel] [-t type] [server[:port:[device]]]\n",
 		 stderr);
 	    exit(1);
 	}
@@ -723,7 +714,7 @@ int main(int argc, char **argv)
 		} else
 		    arg = line + 1;
 
-		if (active != NULL && (*active)->command != NULL) {
+		if (serial && active != NULL && (*active)->command != NULL) {
 		    status = (*active)->command(line);
 		    if (status == COMMAND_TERMINATE)
 			goto quit;
