@@ -165,6 +165,7 @@ socket_t netlib_localsocket(const char *sockfile)
 
 	/*@-unrecog@*/
 	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
+	    (void)close(sock);
 	    return -1;
 	}
 	/*@+unrecog@*/
