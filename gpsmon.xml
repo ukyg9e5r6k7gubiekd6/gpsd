@@ -134,15 +134,15 @@ GPS.</para>
 <varlistentry>
 <term>i</term>
 <listitem>
-<para>Enable/disable subtype probing and reinitialize the driver. In
-normal operation, <application>gpsmon</application> does not send
-configuration strings to the device (except for wakeup strings needed
-to get it to send data, if any). The command 'i1' causes it to send
-the same sequence of subtype probes that
-<application>gpsd</application> would.  The command 'i0' turns off
-probing; 'i' alone toggles the bit. In either case, the current driver
-is re-selected; if the probe bit is enabled, probes will begin to be
-issued immediately.</para>
+<para>(Direct mode only.) Enable/disable subtype probing and
+reinitialize the driver. In normal operation,
+<application>gpsmon</application> does not send configuration strings
+to the device (except for wakeup strings needed to get it to send
+data, if any). The command 'i1' causes it to send the same sequence of
+subtype probes that <application>gpsd</application> would.  The
+command 'i0' turns off probing; 'i' alone toggles the bit. In either
+case, the current driver is re-selected; if the probe bit is enabled,
+probes will begin to be issued immediately.</para>
 
 <para>Note that enabling probing might flip the device into another
 mode; in particular, it will flip a SiRF chip into binary mode as if
@@ -154,9 +154,10 @@ limitation in the SiRF firmware that we can't fix.</para>
 <varlistentry>
 <term>c</term>
 <listitem>
-<para>Change cycle time. Follow it with a number interpreted as a
-cycle time in seconds. Most devices have a fixed cycle time of 1
-second, so this command may fail with a message.</para>
+<para>(Direct mode only.) Change cycle time. Follow it with a number
+interpreted as a cycle time in seconds. Most devices have a fixed
+cycle time of 1 second, so this command may fail with a
+message.</para>
 </listitem>
 </varlistentry>
 
@@ -176,10 +177,10 @@ correctly.</para>
 <varlistentry>
 <term>n</term>
 <listitem>
-<para>With an argument of 0, switch device to NMEA mode at current
-speed; with an argument of 1, change to binary (native) mode. With no
-argument, toggle the setting. Will show an error if the device doesn't
-have such modes.</para>
+<para>(Direct mode only.) With an argument of 0, switch device to NMEA
+mode at current speed; with an argument of 1, change to binary
+(native) mode. With no argument, toggle the setting. Will show an
+error if the device doesn't have such modes.</para>
 </listitem>
 </varlistentry>
 
@@ -194,12 +195,12 @@ your current interrupt character is, works as well.</para>
 <varlistentry>
 <term>s</term>
 <listitem>
-<para>Change baud rate. Follow it with a number interpreted as bits
-per second, for example "s9600". The speed number may optionally be
-followed by a colon and a wordlength-parity-stopbits specification in
-the traditional style, e.g 8N1 (the default), 7E1, etc.  Some
-devices don't support serial modes other than their default, so
-this command may fail with a message.</para>
+<para>(Direct mode only.) Change baud rate. Follow it with a number
+interpreted as bits per second, for example "s9600". The speed number
+may optionally be followed by a colon and a wordlength-parity-stopbits
+specification in the traditional style, e.g 8N1 (the default), 7E1,
+etc.  Some devices don't support serial modes other than their
+default, so this command may fail with a message.</para>
 
 <para>Use this command with caution.  On USB and Bluetooth GPSes it is
 also possible for serial mode setting to fail either because the
@@ -214,8 +215,8 @@ extreme cases) physically disconnecting the NVRAM backup battery.</para>
 <varlistentry>
 <term>t</term>
 <listitem>
-<para>Force a switch of monitoring type. Follow it with a string that
-is unique to the name of a gpsd driver with
+<para>(Direct mode only.) Force a switch of monitoring type. Follow it
+with a string that is unique to the name of a gpsd driver with
 <application>gpsmon</application> support;
 <application>gpsmon</application> will switch to using that driver and
 display code. Will show an error message if there is no matching gpsd
@@ -227,13 +228,13 @@ support in <application>gpsmon</application>.</para>
 <varlistentry>
 <term>x</term>
 <listitem>
-<para>Send hex payload to device. Following the command letter you may
-type hex digit pairs; end with a newline.  These will become the
-payload of a control packet shipped to the device. The packet will be
-wrapped with headers, trailers, and checksum appropriate for the
-current driver type. The first one or two bytes of the payload may be
-specially interpreted, see the description of the <option>-x</option>
-of
+<para>(Direct mode only.) Send hex payload to device. Following the
+command letter you may type hex digit pairs; end with a newline.
+These will become the payload of a control packet shipped to the
+device. The packet will be wrapped with headers, trailers, and
+checksum appropriate for the current driver type. The first one or two
+bytes of the payload may be specially interpreted, see the description
+of the <option>-x</option> of
 <citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
 </listitem>
 </varlistentry>
@@ -241,9 +242,9 @@ of
 <varlistentry>
 <term>X</term>
 <listitem>
-<para>Send raw hex bytes to device. Following the command letter you
-may type hex digit pairs; end with a newline.  These will be shipped
-to the device.</para>
+<para>(Direct mode only.) Send raw hex bytes to device. Following the
+command letter you may type hex digit pairs; end with a newline.
+These will be shipped to the device.</para>
 </listitem>
 </varlistentry>
 

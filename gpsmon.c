@@ -52,7 +52,6 @@ WINDOW *devicewin;
 
 /* These are private */
 static struct gps_context_t context;
-static int controlfd = -1;
 static bool serial, curses_active;
 static WINDOW *statwin, *cmdwin;
 /*@null@*/ static WINDOW *packetwin;
@@ -223,8 +222,6 @@ static ssize_t readpkt(void)
 
     FD_ZERO(&select_set);
     FD_SET(session.gpsdata.gps_fd, &select_set);
-    if (controlfd > -1)
-	FD_SET(controlfd, &select_set);
     /*
      * If the timeout on this select isn't longer than the device's
      * cycle time, the code will be prone to flaky timing-dependent
@@ -317,40 +314,14 @@ static void announce_log(/*@in@*/ const char *str)
 #ifdef CONTROLSEND_ENABLE
 bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 {
-    if ((controlfd == -1) || (session.gpsdata.dev.path[0] == '\0'))
+    if (session.gpsdata.dev.path[0] == '\0')
 	return false;
     else {
-	int savefd;
 	ssize_t st;
-
-	if (!serial) {
-	    /*@ -sefparams @*/
-	    assert(write(controlfd, "!", 1) != -1);
-	    assert(write
-		   (controlfd, session.gpsdata.dev.path,
-		    strlen(session.gpsdata.dev.path)) != -1);
-	    assert(write(controlfd, "=", 1) != -1);
-	    /*@ +sefparams @*/
-	    /*
-	     * Ugh...temporarily con the libgpsd layer into using the
-	     * socket descriptor.
-	     */
-	    savefd = session.gpsdata.gps_fd;
-	    session.gpsdata.gps_fd = controlfd;
-	}
 
 	context.readonly = false;
 	st = (*active)->driver->control_send(&session, (char *)buf, len);
 	context.readonly = true;
-
-	if (!serial) {
-	    /* stop pretending now */
-	    /*@i1@*/session.gpsdata.gps_fd = savefd;
-	    /* enough room for "ERROR\r\n\0" */
-	    /*@ -sefparams @*/
-	    assert(read(controlfd, buf, 8) != -1);
-	    /*@ +sefparams @*/
-	}
 	monitor_dump_send((const char *)buf, len);
 	return (st != -1);
     }
@@ -358,28 +329,11 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 
 static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 {
-    if ((controlfd == -1) || (session.gpsdata.dev.path[0] == '\0'))
+    if (session.gpsdata.dev.path[0] == '\0')
 	return false;
     else {
 	ssize_t st;
-
-	if (!serial) {
-	    /*@ -sefparams @*/
-	    assert(write(controlfd, "!", 1) != -1);
-	    assert(write(controlfd, session.gpsdata.dev.path,
-			 strlen(session.gpsdata.dev.path)) != -1);
-	    assert(write(controlfd, "=", 1) != -1);
-	    /*@ +sefparams @*/
-	}
-
-	st = write(controlfd, (char *)buf, len);
-
-	if (!serial) {
-	    /* enough room for "ERROR\r\n\0" */
-	    /*@ -sefparams @*/
-	    assert(read(controlfd, buf, 8) != -1);
-	    /*@ +sefparams @*/
-	}
+	st = write(session.gpsdata.gps_fd, (char *)buf, len);
 	monitor_dump_send((const char *)buf, len);
 	return (st > 0 && (size_t) st == len);
     }
@@ -476,6 +430,9 @@ static void onsig(int sig UNUSED)
 {
     longjmp(assertbuf, 1);
 }
+
+#define WATCHRAW	"?WATCH={\"raw\":2}\r\n"
+#define WATCHRAWDEVICE	"?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n"
 
 int main(int argc, char **argv)
 {
@@ -610,11 +567,8 @@ int main(int argc, char **argv)
 			  netlib_errstr(session.gpsdata.gps_fd));
 	    exit(1);
 	}
-	controlfd = open(controlsock, O_RDWR);
 	if (source.device != NULL) {
-	    (void)gps_send(&session.gpsdata,
-			   "?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n",
-			   source.device);
+	    (void)gps_send(&session.gpsdata, WATCHRAWDEVICE, source.device);
 	    /*
 	     *  The gpsdata.dev is filled only in JSON mode,
 	     *  but we in super-raw mode.
@@ -622,7 +576,7 @@ int main(int argc, char **argv)
 	    (void)strlcpy(session.gpsdata.dev.path, source.device,
 			  sizeof(session.gpsdata.dev.path));
 	} else {
-	    (void)gps_send(&session.gpsdata, "?WATCH={\"raw\":2}\r\n");
+	    (void)gps_send(&session.gpsdata, WATCHRAW);
 	    session.gpsdata.dev.path[0] = '\0';
 	}
 	serial = false;
@@ -636,7 +590,6 @@ int main(int argc, char **argv)
 	    exit(2);
 	}
 
-	controlfd = session.gpsdata.gps_fd;
 	serial = true;
     }
     /*@ +boolops */
@@ -783,18 +736,15 @@ int main(int argc, char **argv)
 		case 'c':	/* change cycle time */
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
-		    else if (serial) {
+		    else if (!serial)
+			monitor_complain("Only available in low-level mode.");
+		    else {
 			double rate = strtod(arg, NULL);
 			const struct monitor_object_t **switcher = active;
 
 			if (fallback != NULL && (*fallback)->driver->rate_switcher != NULL)
 			    switcher = fallback;
-			/* Ugh...should have a controlfd slot
-			 * in the session structure, really
-			 */
 			if ((*switcher)->driver->rate_switcher) {
-			    int dfd = session.gpsdata.gps_fd;
-			    session.gpsdata.gps_fd = controlfd;
 			    /* *INDENT-OFF* */
 			    context.readonly = false;
 			    if ((*switcher)->driver->rate_switcher(&session, rate)) {
@@ -803,27 +753,17 @@ int main(int argc, char **argv)
 				monitor_complain("Rate not supported.");
 			    context.readonly = true;
 			    /* *INDENT-ON* */
-			    session.gpsdata.gps_fd = dfd;
 			} else
 			    monitor_complain
 				("Device type has no rate switcher");
-		    } else {
-			line[0] = 'c';
-			/*@ -sefparams @*/
-			assert(write
-			       (session.gpsdata.gps_fd, line,
-				strlen(line)) != -1);
-			/* discard response */
-			assert(read(session.gpsdata.gps_fd, buf, sizeof(buf))
-			       != -1);
-			/*@ +sefparams @*/
 		    }
-		    break;
 #endif /* RECONFIGURE_ENABLE */
-
+		    break;
 		case 'i':	/* start probing for subtype */
 		    if (active == NULL)
 			monitor_complain("No GPS type detected.");
+		    else if (!serial)
+			monitor_complain("Only available in low-level mode.");
 		    else {
 			if (strcspn(line, "01") == strlen(line))
 			    context.readonly = !context.readonly;
@@ -862,17 +802,14 @@ int main(int argc, char **argv)
 			v = (unsigned)atoi(line + 1);
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
-		    else if (serial) {
+		    else if (!serial)
+			monitor_complain("Only available in low-level mode.");
+		    else {
 			const struct monitor_object_t **switcher = active;
 
 			if (fallback != NULL && (*fallback)->driver->mode_switcher != NULL)
 			    switcher = fallback;
-			/* Ugh...should have a controlfd slot
-			 * in the session structure, really
-			 */
 			if ((*switcher)->driver->mode_switcher) {
-			    int dfd = session.gpsdata.gps_fd;
-			    session.gpsdata.gps_fd = controlfd;
 			    context.readonly = false;
 			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
@@ -880,22 +817,9 @@ int main(int argc, char **argv)
 			    announce_log("Mode switcher called");
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
-			    session.gpsdata.gps_fd = dfd;
 			} else
 			    monitor_complain
 				("Device type has no mode switcher");
-		    } else {
-			line[0] = 'n';
-			line[1] = ' ';
-			line[2] = '0' + v;
-			/*@ -sefparams @*/
-			assert(write
-			       (session.gpsdata.gps_fd, line,
-				strlen(line)) != -1);
-			/* discard response */
-			assert(read(session.gpsdata.gps_fd, buf, sizeof(buf))
-			       != -1);
-			/*@ +sefparams @*/
 		    }
 		    break;
 #endif /* RECONFIGURE_ENABLE */
@@ -907,7 +831,9 @@ int main(int argc, char **argv)
 		case 's':	/* change speed */
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
-		    else if (serial) {
+		    else if (!serial)
+			monitor_complain("Only available in low-level mode.");
+		    else {
 			speed_t speed;
 			char parity = session.gpsdata.dev.parity;
 			unsigned int stopbits =
@@ -941,13 +867,8 @@ int main(int argc, char **argv)
 			}
 			/*@ -charint @*/
 			speed = (unsigned)atoi(arg);
-			/* Ugh...should have a controlfd slot
-			 * in the session structure, really
-			 */
 			/* *INDENT-OFF* */
 			if ((*switcher)->driver->speed_switcher) {
-			    int dfd = session.gpsdata.gps_fd;
-			    session.gpsdata.gps_fd = controlfd;
 			    context.readonly = false;
 			    if ((*switcher)->
 				driver->speed_switcher(&session, speed,
@@ -955,7 +876,7 @@ int main(int argc, char **argv)
 						       stopbits)) {
 				announce_log("Speed switcher called.");
 				/*
-				 * See the comment attached to the 'B'
+				 * See the comment attached to the 'DEVICE'
 				 * command in gpsd.  Allow the control
 				 * string time to register at the GPS
 				 * before we do the baud rate switch,
@@ -970,27 +891,18 @@ int main(int argc, char **argv)
 				monitor_complain
 				    ("Speed/mode combination not supported.");
 			    context.readonly = true;
-			    session.gpsdata.gps_fd = dfd;
 			} else
 			    monitor_complain
 				("Device type has no speed switcher");
 			/* *INDENT-ON* */
-		    } else {
-			line[0] = 'b';
-			/*@ -sefparams @*/
-			assert(write
-			       (session.gpsdata.gps_fd, line,
-				strlen(line)) != -1);
-			/* discard response */
-			assert(read(session.gpsdata.gps_fd, buf, sizeof(buf))
-			       != -1);
-			/*@ +sefparams @*/
 		    }
 		    break;
 #endif /* RECONFIGURE_ENABLE */
 
 		case 't':	/* force device type */
-		    if (strlen(arg) > 0) {
+		    if (!serial)
+			monitor_complain("Only available in low-level mode.");
+		    else if (strlen(arg) > 0) {
 			int matchcount = 0;
 			const struct gps_type_t **dp, *forcetype = NULL;
 			for (dp = gpsd_drivers; *dp; dp++) {
@@ -1021,6 +933,8 @@ int main(int argc, char **argv)
 		case 'x':	/* send control packet */
 		    if (active == NULL)
 			monitor_complain("No device defined yet");
+		    else if (!serial)
+			monitor_complain("Only available in low-level mode.");
 		    else {
 			/*@ -compdef @*/
 			int st = gpsd_hexpack(arg, (char *)buf, strlen(arg));
@@ -1037,15 +951,19 @@ int main(int argc, char **argv)
 		    break;
 
 		case 'X':	/* send raw packet */
-		    /*@ -compdef @*/
-		    len =
-			(ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
-		    if (len < 0)
-			monitor_complain("Invalid hex string (error %d)",
-					 len);
-		    else if (!monitor_raw_send(buf, (size_t) len))
-			monitor_complain("Raw send failed.");
-		    /*@ +compdef @*/
+		    if (!serial)
+			monitor_complain("Only available in low-level mode.");
+		    else {
+			/*@ -compdef @*/
+			len =
+			    (ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
+			if (len < 0)
+			    monitor_complain("Invalid hex string (error %d)",
+					     len);
+			else if (!monitor_raw_send(buf, (size_t) len))
+			    monitor_complain("Raw send failed.");
+			/*@ +compdef @*/
+		    }
 		    break;
 #endif /* CONTROLSEND_ENABLE */
 
