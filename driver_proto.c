@@ -285,7 +285,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
     type = GET_MESSAGE_TYPE();
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw _proto_ packet type 0x%02x\n", type));
+    gpsd_report(LOG_RAW, "raw _proto_ packet type 0x%02x\n", type);
 
    /*
     * The tag field is only 8 bytes; be careful you do not overflow.

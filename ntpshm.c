@@ -555,7 +555,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     } sample;
     /* chrony must be started first as chrony insists on creating the socket */
     /* open the chrony socket */
-    int chronyfd;
+    int chronyfd = -1;
     char chrony_path[PATH_MAX];
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");

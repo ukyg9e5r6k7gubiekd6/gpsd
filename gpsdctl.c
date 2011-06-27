@@ -14,7 +14,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef S_SPLINT_S
 #include <sys/socket.h>
+#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 
