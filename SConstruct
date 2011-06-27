@@ -1044,7 +1044,7 @@ def check_compile(target, source, env):
         'cp %s tmp.py'%(pyfile)
         '%s -tt -m py_compile tmp.py' %(sys.executable, )
         'rm -f tmp.py tmp.pyc'
-python_compilation_regress = Utility('python-comilation-regress',
+python_compilation_regress = Utility('python-compilation-regress',
         Glob('*.py') + python_modules + python_progs + ['SConstruct'], check_compile)
 
 # Regression-test the daemon
