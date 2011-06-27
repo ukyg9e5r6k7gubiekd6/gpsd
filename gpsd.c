@@ -736,15 +736,14 @@ static bool add_device(const char *device_name)
 static void handle_control(int sfd, char *buf)
 /* handle privileged commands coming through the control socket */
 {
-    char *stash, *eq;
+    char *stash;
     struct gps_device_t *devp;
 
      /*
       * The only other place in the code that knows about the format
       * of the + and - commands is the gpsd_control() function in
-      * gpsdctl.c. The only other olace that knows about ! is the
-      * control_send() function in gpsmon.c. Be careful about keeping
-      * them in sync, or hotplugging will have mysterious failures.
+      * gpsdctl.c.  Be careful about keeping them in sync, or
+      * hotplugging will have mysterious failures.
       */
     /*@ -sefparams @*/
     if (buf[0] == '-') {
@@ -771,8 +770,10 @@ static void handle_control(int sfd, char *buf)
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
 	}
+#ifdef __UNUSED__
     } else if (buf[0] == '!') {
 	/* split line after ! into device=string, send string to device */
+	char *eq;
 	(void)snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
@@ -805,6 +806,7 @@ static void handle_control(int sfd, char *buf)
 	}
     } else if (buf[0] == '&') {
 	/* split line after & into dev=hexdata, send unpacked hexdata to dev */
+	char *eq;
 	(void)snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
@@ -856,6 +858,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "\n", 1));
 	}
 	ignore_return(write(sfd, "OK\n", 6));
+#endif /* __UNUSED__ */
     } else {
 	/* unknown command */
 	ignore_return(write(sfd, "ERROR\n", 6));
