@@ -14,8 +14,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/socket.h>
 
-#include "gpsd.h"	/* only for the strlcpy() prototype */
+#include "gpsd.h"
 
 static char *control_socket = "/var/run/gpsd.sock"; 
 static char *gpsd_options = "";
@@ -31,7 +32,7 @@ static int gpsd_control(char *action, char *argument)
 	(void)syslog(LOG_ERR, "socket %s doesn't exist", control_socket);
 	return -1;
     }
-    connect = netlib_localsocket(control_socket);
+    connect = netlib_localsocket(control_socket, SOCK_STREAM);
     if (connect >= 0)
 	syslog(LOG_INFO, "reached a running gpsd");
     else if (strcmp(action, "add") == 0) {
@@ -42,7 +43,7 @@ static int gpsd_control(char *action, char *argument)
 	    (void)syslog(LOG_ERR, "launch of gpsd failed");
 	    return -1;
 	}
-        connect = netlib_localsocket(control_socket);
+        connect = netlib_localsocket(control_socket, SOCK_STREAM);
     }
     if (connect < 0) {
 	syslog(LOG_ERR, "can't reach gpsd");

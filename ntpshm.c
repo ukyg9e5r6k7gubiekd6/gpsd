@@ -555,44 +555,38 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     } sample;
     /* chrony must be started first as chrony insists on creating the socket */
     /* open the chrony socket */
-    struct sockaddr_un s;
     int chronyfd;
-    char *chrony_path = NULL;
+    char chrony_path[PATH_MAX];
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
-#ifdef __UNUSED__
-    /* sadly root was dropped very early, until a way if found to run this
-     * before dropping root it will not work. */
-    if( 0 == getuid() ) {
-        /* only root can use /var/run */
-    	chrony_path = "/var/run/chrony";
-    } else
-#endif
-    {
-    	chrony_path = "/tmp/chrony";
-    }
-
-    s.sun_family = AF_UNIX;
-    (void)snprintf(s.sun_path, sizeof (s.sun_path), "%s.%s.sock", chrony_path,
-        basename(session->gpsdata.dev.path));
     /* TODO the socket for root would be
      *   /var/run/chrony.ttyXX.sock
      * for now it is always
      *   /tmp/chrony.ttyXX.sock
      */
+#ifdef __UNUSED__
+    /* sadly root was dropped very early, until a way if found to run this
+     * before dropping root it will not work. */
+    if( 0 == getuid() ) {
+        /* only root can use /var/run */
+	(void)snprintf(chrony_path, sizeof (chrony_path),
+		"/var/run/chrony.%s.sock", basename(session->gpsdata.dev.path));
+    } else
+#endif
+    {
+	(void)snprintf(chrony_path, sizeof (chrony_path),
+		"/tmp/chrony.%s.sock", 	basename(session->gpsdata.dev.path));
+    }
 
-    /* root privs are required for this device open */
-    chronyfd = socket(AF_UNIX, SOCK_DGRAM, 0);
-    if (chronyfd < 0) {
-	gpsd_report(LOG_PROG, "PPS can not open chrony socket: %s\n",
-	    s.sun_path);
-    } else if (connect(chronyfd, (struct sockaddr *)&s, (int)sizeof(s))) {
-	(void)close(chronyfd);
-	chronyfd = -1;
-	gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n", 
-	    s.sun_path);
+    if (access(chrony_path, F_OK) != 0) {
+	gpsd_report(LOG_PROG, "PPS chrony socket %s doesn't exist", chrony_path);
     } else {
-	gpsd_report(LOG_RAW, "PPS using chrony socket: %s\n", s.sun_path);
+	chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
+	if (chronyfd < 0)
+	    gpsd_report(LOG_PROG, "PPS can not connect chrony socket: %s\n",
+		chrony_path);
+	else
+	    gpsd_report(LOG_RAW, "PPS using chrony socket: %s\n", chrony_path);
     }
 
     /* end chrony */

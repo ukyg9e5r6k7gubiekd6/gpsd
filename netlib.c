@@ -147,12 +147,12 @@ char /*@observer@*/ *netlib_errstr(const int err)
     }
 }
 
-socket_t netlib_localsocket(const char *sockfile)
+socket_t netlib_localsocket(const char *sockfile, int socktype)
 /* acquire a connection to an existing Unix-domain socket */
 {
     int sock;
 
-    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+    if ((sock = socket(AF_UNIX, socktype, 0)) < 0) {
 	return -1;
     } else {
 	struct sockaddr_un saddr;
