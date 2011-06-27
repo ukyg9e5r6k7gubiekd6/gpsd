@@ -52,10 +52,10 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     const struct gps_type_t **dp;
     bool identified = (session->device_type != NULL);
 
-    gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", type_name);
     if (identified && strcmp(session->device_type->type_name, type_name) == 0)
 	return 0;
 
+    gpsd_report(LOG_PROG, "switch_driver(%s) called...\n", type_name);
     /*@ -compmempass @*/
     for (dp = gpsd_drivers; *dp; dp++)
 	if (strcmp((*dp)->type_name, type_name) == 0) {
