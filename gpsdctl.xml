@@ -6,7 +6,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
-<refentry id='gpsctl.1'>
+<refentry id='gpsdctl.8'>
 <refentryinfo><date>25 Jun 2011</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpsdctl</refentrytitle>
@@ -21,7 +21,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsctl</command>
+  <command>gpdsctl</command>
  	<arg choice='plain'><replaceable>action</replaceable></arg>
  	<arg choice='plain'><replaceable>device</replaceable></arg>
 </cmdsynopsis>
@@ -48,13 +48,12 @@ control socket.  It defaults to <filename>/var/run/gpsd.sock</filename>.</para>
 <para><envar>GPSD_OPTIONS</envar>
 may be a list of options to be passed to <application>gpsd</application> 
 when this tool launches it.  It defaults to an empty string.</para>
-
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,

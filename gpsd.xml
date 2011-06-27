@@ -888,6 +888,7 @@ D(t)</citetitle></para>
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
+<citerefentry><refentrytitle>gpsdctl</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
 <citerefentry><refentrytitle>gpsd_json</refentrytitle><manvolnum>5</manvolnum></citerefentry>,
