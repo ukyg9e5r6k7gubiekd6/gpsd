@@ -675,7 +675,6 @@ extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/char *, size_t);
 extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);
 extern int hex2bin(const char *);
 extern ssize_t hex_escapes(/*@out@*/char *, const char *);
-extern char /*@observer@*/ *gpsd_id(/*@in@*/struct gps_device_t *);
 extern void gpsd_position_fix_dump(struct gps_device_t *,
 				   /*@out@*/char[], size_t);
 extern void gpsd_clear_data(struct gps_device_t *);

@@ -344,21 +344,6 @@ int gpsd_activate(struct gps_device_t *session)
 
 /*@ +branchstate @*/
 
-char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
-/* full ID of the device for reports, including subtype */
-{
-    static char buf[128];
-    if ((session == NULL) || (session->device_type == NULL) ||
-	(session->device_type->type_name == NULL))
-	return "unknown,";
-    (void)strlcpy(buf, session->device_type->type_name, sizeof(buf));
-    if (session->subtype[0] != '\0') {
-	(void)strlcat(buf, " ", sizeof(buf));
-	(void)strlcat(buf, session->subtype, sizeof(buf));
-    }
-    return (buf);
-}
-
 void clear_dop( /*@out@*/ struct dop_t *dop)
 {
     dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =
