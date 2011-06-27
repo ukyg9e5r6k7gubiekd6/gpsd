@@ -59,7 +59,7 @@ static int gpsd_control(char *action, char *argument)
      * The only other place in the code that knows about the format of
      * the add and remove commands is the handle_control() function in
      * gpsd.c. Be careful about keeping them in sync, or hotplugging
-     * will have nysterious failures.
+     * will have mysterious failures.
      */
     if (strcmp(action, "add") == 0) {
 	/*
@@ -75,10 +75,6 @@ static int gpsd_control(char *action, char *argument)
 	(void)read(connect, buf, 12);
     } else if (strcmp(action, "remove") == 0) {
 	(void)snprintf(buf, sizeof(buf), "-%s\r\n", argument);
-	(void)write(connect, buf, strlen(buf));
-	(void)read(connect, buf, 12);
-    }  else if (strcmp(action, "send") == 0) {
-	(void)snprintf(buf, sizeof(buf), "%s\r\n", argument);
 	(void)write(connect, buf, strlen(buf));
 	(void)read(connect, buf, 12);
     }
