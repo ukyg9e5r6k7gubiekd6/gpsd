@@ -287,13 +287,13 @@ leap-second and local time-zone offsets.</para>
 <varlistentry>
 <term>A</term>
 <listitem>
-<para>Toggle reporting of 50BPS subframe data.</para>
+<para>(Direct mode only.) Toggle reporting of 50BPS subframe data.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term>M</term>
 <listitem>
-<para>Set (M1) or clear (M0) static navigation. The SiRF documentation
+<para>(Direct mode only.) Set (M1) or clear (M0) static navigation. The SiRF documentation
 says <quote>Static navigation is a position filter designed to be used
 with motor vehicles.  When the vehicle's velocity falls below a
 threshold, the position and heading are frozen, and velocity is set to
@@ -312,7 +312,7 @@ zero and position changing in large jumps.</para>
 <varlistentry>
 <term>P</term>
 <listitem>
-<para>Toggle navigation-parameter display mode.  Toggles between
+<para>(Direct mode only.) Toggle navigation-parameter display mode.  Toggles between
 normal display and one that shows selected navigation parameters from
 MID 19, including the Static Navigation bit toggled by the 'M' command.</para>
 </listitem>

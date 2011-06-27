@@ -314,7 +314,7 @@ static void announce_log(/*@in@*/ const char *str)
 #ifdef CONTROLSEND_ENABLE
 bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 {
-    if (session.gpsdata.dev.path[0] == '\0')
+    if (!serial)
 	return false;
     else {
 	ssize_t st;
@@ -329,7 +329,7 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 
 static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 {
-    if (session.gpsdata.dev.path[0] == '\0')
+    if (!serial)
 	return false;
     else {
 	ssize_t st;
@@ -946,8 +946,8 @@ int main(int argc, char **argv)
 				("Device type has no control-send method.");
 			else if (!monitor_control_send(buf, (size_t) st))
 			    monitor_complain("Control send failed.");
+			/*@ +compdef @*/
 		    }
-		    /*@ +compdef @*/
 		    break;
 
 		case 'X':	/* send raw packet */
