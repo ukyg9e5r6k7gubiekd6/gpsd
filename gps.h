@@ -1726,6 +1726,7 @@ extern void libgps_trace(int errlevel, const char *, ...);
 /* dependencies on struct gpsdata_t end hrere */
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
+extern void gps_clear_dop( /*@out@*/ struct dop_t *);
 extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 			  gps_mask_t,
 			  /*@ in @*/struct gps_fix_t *);

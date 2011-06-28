@@ -38,6 +38,12 @@ void gps_clear_fix( /*@out@*/ struct gps_fix_t *fixp)
     fixp->epc = NAN;
 }
 
+void gps_clear_dop( /*@out@*/ struct dop_t *dop)
+{
+    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =
+        dop->gdop = NAN;
+}
+
 void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 		   gps_mask_t transfer,
 		   /*@ in @*/ struct gps_fix_t *from)

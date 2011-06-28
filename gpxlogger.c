@@ -498,10 +498,8 @@ int main(int argc, char **argv)
     /* initializes the some gpsdata data structure */
     gpsdata.status = STATUS_NO_FIX;
     gpsdata.satellites_used = 0;
-    gpsdata.dop.hdop = NAN;
-    gpsdata.dop.vdop = NAN;
-    gpsdata.dop.pdop = NAN;
     gps_clear_fix(&(gpsdata.fix));
+    gps_clear_dop(&(gpsdata.dop));
 
     /* catch all interesting signals */
     (void)signal(SIGTERM, quit_handler);

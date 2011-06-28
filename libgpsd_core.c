@@ -139,11 +139,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     gps_clear_fix(&session->newdata);
     gps_clear_fix(&session->oldfix);
     session->gpsdata.set = 0;
-    session->gpsdata.dop.hdop = NAN;
-    session->gpsdata.dop.vdop = NAN;
-    session->gpsdata.dop.pdop = NAN;
-    session->gpsdata.dop.tdop = NAN;
-    session->gpsdata.dop.gdop = NAN;
+    gps_clear_dop(&session->gpsdata.dop);
     session->gpsdata.epe = NAN;
     session->mag_var = NAN;
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
@@ -343,12 +339,6 @@ int gpsd_activate(struct gps_device_t *session)
 }
 
 /*@ +branchstate @*/
-
-void clear_dop( /*@out@*/ struct dop_t *dop)
-{
-    dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =
-	dop->gdop = NAN;
-}
 
 #ifdef CHEAPFLOATS_ENABLE
 /*****************************************************************************
@@ -1043,5 +1033,5 @@ void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
     (void)memset(out->azimuth, 0, sizeof(out->azimuth));
     (void)memset(out->ss, 0, sizeof(out->ss));
     out->satellites_visible = 0;
-    clear_dop(&out->dop);
+    gps_clear_dop(&out->dop);
 }
