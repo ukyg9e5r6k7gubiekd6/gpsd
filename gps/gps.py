@@ -366,6 +366,6 @@ if __name__ == '__main__':
         for report in session:
             print report
     except KeyboardInterrupt:
-        print
+        pass
 
 # gps.py ends here
