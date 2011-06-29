@@ -5,7 +5,8 @@
  *
  * Code for message types 1-15, 18-21, and 24 has been tested against
  * live data with known-good decodings. Code for message types 16-17,
- * 22-23, and 25-27 has not.
+ * 22-23, and 25-27 has not.  The IMO special messages in types 6 and 8
+ * are also untested.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -381,28 +382,28 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		    ais->type6.dac1fid20.berth_length	= UBITS(98, 9);
 		    ais->type6.dac1fid20.berth_depth	= UBITS(107, 8);
 		    ais->type6.dac1fid20.position	= UBITS(115, 3);
-		    ais->type6.dac1fid20.month	= UBITS(118, 4);
-		    ais->type6.dac1fid20.day	= UBITS(122, 5);
-		    ais->type6.dac1fid20.hour	= UBITS(127, 5);
-		    ais->type6.dac1fid20.minute	= UBITS(132, 6);
+		    ais->type6.dac1fid20.month		= UBITS(118, 4);
+		    ais->type6.dac1fid20.day		= UBITS(122, 5);
+		    ais->type6.dac1fid20.hour		= UBITS(127, 5);
+		    ais->type6.dac1fid20.minute		= UBITS(132, 6);
 		    ais->type6.dac1fid20.availability	= UBITS(138, 1);
-		    ais->type6.dac1fid20.agent	= UBITS(139, 2);
-		    ais->type6.dac1fid20.fuel	= UBITS(141, 2);
+		    ais->type6.dac1fid20.agent		= UBITS(139, 2);
+		    ais->type6.dac1fid20.fuel		= UBITS(141, 2);
 		    ais->type6.dac1fid20.chandler	= UBITS(143, 2);
 		    ais->type6.dac1fid20.stevedore	= UBITS(145, 2);
 		    ais->type6.dac1fid20.electrical	= UBITS(147, 2);
-		    ais->type6.dac1fid20.water	= UBITS(149, 2);
+		    ais->type6.dac1fid20.water		= UBITS(149, 2);
 		    ais->type6.dac1fid20.customs	= UBITS(151, 2);
 		    ais->type6.dac1fid20.cartage	= UBITS(153, 2);
-		    ais->type6.dac1fid20.crane	= UBITS(155, 2);
-		    ais->type6.dac1fid20.lift	= UBITS(157, 2);
+		    ais->type6.dac1fid20.crane		= UBITS(155, 2);
+		    ais->type6.dac1fid20.lift		= UBITS(157, 2);
 		    ais->type6.dac1fid20.medical	= UBITS(159, 2);
 		    ais->type6.dac1fid20.navrepair	= UBITS(161, 2);
 		    ais->type6.dac1fid20.provisions	= UBITS(163, 2);
 		    ais->type6.dac1fid20.shiprepair	= UBITS(165, 2);
 		    ais->type6.dac1fid20.surveyor	= UBITS(167, 2);
-		    ais->type6.dac1fid20.steam	= UBITS(169, 2);
-		    ais->type6.dac1fid20.tugs	= UBITS(171, 2);
+		    ais->type6.dac1fid20.steam		= UBITS(169, 2);
+		    ais->type6.dac1fid20.tugs		= UBITS(171, 2);
 		    ais->type6.dac1fid20.solidwaste	= UBITS(173, 2);
 		    ais->type6.dac1fid20.liquidwaste	= UBITS(175, 2);
 		    ais->type6.dac1fid20.hazardouswaste	= UBITS(177, 2);
