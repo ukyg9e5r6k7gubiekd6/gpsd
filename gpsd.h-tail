@@ -27,6 +27,10 @@ typedef unsigned int speed_t;
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
+#ifndef DEFAULT_GPSD_SOCKET
+#define DEFAULT_GPSD_SOCKET	"/var/run/gpsd.sock"
+#endif 
+
 /* Some internal capabilities depend on which drivers we're compiling. */
 #if !defined(NMEA_ENABLE) && (defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE))
 #define NMEA_ENABLE
