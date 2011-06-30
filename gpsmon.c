@@ -33,10 +33,6 @@
 #include "gpsmon.h"
 #include "revision.h"
 
-#ifdef S_SPLINT_S
-extern struct tm *localtime_r(const time_t *, /*@out@*/ struct tm *tp);
-#endif /* S_SPLINT_S */
-
 #define BUFLEN		2048
 
 /* external capability tables */
