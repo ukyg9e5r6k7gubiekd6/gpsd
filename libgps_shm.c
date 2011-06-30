@@ -66,8 +66,8 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 
 	/*
 	 * Following block of instructions must not be reordered, otherwise 
-	 * havoc will ensue.  asm volatile("sfence") is a GCCism intended
-	 * to prevent reordering.
+	 * havoc will ensue.  The barrier() call should prevent reordering
+	 * of the data accesses.
 	 *
 	 * This is a simple optimistic-concurrency technique.  We wrote
 	 * the second bookend first, then the data, then the first bookend.
