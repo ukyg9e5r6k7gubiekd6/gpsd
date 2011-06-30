@@ -47,7 +47,7 @@ static int debug;
 
 static void print_gpx_header(void)
 {
-    char tbuf[128];
+    char tbuf[CLIENT_DATE_MAX+1];
 
     (void)fprintf(logfile,"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
     (void)fprintf(logfile,"<gpx version=\"1.1\" creator=\"GPSD %s - http://gpsd.berlios.de/\"\n", VERSION);
@@ -86,7 +86,7 @@ static void print_gpx_trk_start(void)
 
 static void print_fix(struct gps_data_t *gpsdata, double time)
 {
-    char tbuf[128];
+    char tbuf[CLIENT_DATE_MAX+1];
 
     (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
 		 gpsdata->fix.latitude, gpsdata->fix.longitude);

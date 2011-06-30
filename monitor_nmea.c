@@ -44,7 +44,7 @@ static bool nmea_initialize(void)
     (void)syncok(cookedwin, true);
     (void)wattrset(cookedwin, A_BOLD);
     (void)mvwaddstr(cookedwin, 1, 1, "Time: ");
-    (void)mvwaddstr(cookedwin, 1, 31, "Lat: ");
+    (void)mvwaddstr(cookedwin, 1, 32, "Lat: ");
     (void)mvwaddstr(cookedwin, 1, 55, "Lon: ");
     (void)mvwaddstr(cookedwin, 2, 34, " Cooked PVT ");
     (void)wattrset(cookedwin, A_NORMAL);
@@ -134,7 +134,7 @@ static void cooked_pvt(void)
 	(void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
-    (void)mvwprintw(cookedwin, 1, 7, "%-22s", scr);
+    (void)mvwprintw(cookedwin, 1, 7, "%-24s", scr);
 
 
     if (session.gpsdata.fix.mode >= MODE_2D
@@ -145,7 +145,7 @@ static void cooked_pvt(void)
 		       (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
-    (void)mvwprintw(cookedwin, 1, 36, "%-17s", scr);
+    (void)mvwprintw(cookedwin, 1, 37, "%-17s", scr);
 
     if (session.gpsdata.fix.mode >= MODE_2D
 	&& isnan(session.gpsdata.fix.longitude) == 0) {

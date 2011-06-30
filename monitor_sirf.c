@@ -271,7 +271,7 @@ static void sirf_update(void)
     unsigned char *buf;
     size_t len;
     uint8_t dgps;
-    char tbuf[128];
+    char tbuf[JSON_DATE_MAX+1];
 
     assert(mid27win != NULL);
     buf = session.packet.outbuffer + 4;
@@ -292,7 +292,7 @@ static void sirf_update(void)
 								  17) / 8);
 	/* line 3 */
 	(void)wmove(mid2win, 3, 7);
-	(void)wprintw(mid2win, "%-22s",
+	(void)wprintw(mid2win, "%-24s",
 			unix_to_iso8601(session.gpsdata.fix.time, tbuf, sizeof(tbuf))
 			);
 	(void)wmove(mid2win, 3, 38);

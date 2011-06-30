@@ -28,5 +28,8 @@ extern void gpsd_source_spec(/*@null@*/const char *fromstring,
 
 char *maidenhead(double n,double e);
 
+/* this needs to match JSON_DATE_MAX in gpsd.h */
+#define CLIENT_DATE_MAX	24
+
 #endif /* _GPSDCLIENT_H_ */
 /* gpsdclient.h ends here */
