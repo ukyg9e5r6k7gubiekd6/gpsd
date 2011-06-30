@@ -510,7 +510,7 @@ if cxx and env['libgpsmm']:
 
 libgpsd_sources = [
     "bits.c",
-    "bsd-base64.c",
+    "bsd_base64.c",
     "crc24q.c",
     "gpsd_json.c",
     "isgps.c",

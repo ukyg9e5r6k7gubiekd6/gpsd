@@ -20,7 +20,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
-#include "bsd-base64.h"
+#include "bsd_base64.h"
 
 #define NTRIP_SOURCETABLE	"SOURCETABLE 200 OK\r\n"
 #define NTRIP_ENDSOURCETABLE	"ENDSOURCETABLE"
