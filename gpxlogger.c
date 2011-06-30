@@ -195,8 +195,6 @@ static void quit_handler(int signum)
 
 #include <glib/gprintf.h>
 
-#define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
-
 DBusConnection *connection;
 
 static char gpsd_devname[BUFSIZ];
@@ -205,7 +203,7 @@ static DBusHandlerResult handle_gps_fix(DBusMessage * message)
 {
     DBusError error;
     /* this packet format was designed before we split eph */
-    double eph = EMIX(gpsdata.fix.epx, gpsdata.fix.epy);
+    double eph;
 
     dbus_error_init(&error);
 
