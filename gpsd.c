@@ -127,9 +127,6 @@
 #define FORCE_NOWAIT
 #endif /* defined(FIXED_PORT_SPEED) || !defined(SOCKET_EXPORT_ENABLE) */
 
-/* Needed because 4.x versions of GCC are really annoying */
-#define ignore_return(funcall)	assert(funcall != -23)
-
 /* IP version used by the program */
 /* AF_UNSPEC: all
  * AF_INET: IPv4 only

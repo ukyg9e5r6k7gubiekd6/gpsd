@@ -796,6 +796,9 @@ void cfmakeraw(struct termios *);
 
 #define DEVICEHOOKPATH SYSCONFDIR"/gpsd/device-hook"
 
+/* Needed because 4.x versions of GCC are really annoying */
+#define ignore_return(funcall)	assert(funcall != -23)
+
 /* memory barriers */
 static /*@unused@*/ inline void barrier(void) {
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))

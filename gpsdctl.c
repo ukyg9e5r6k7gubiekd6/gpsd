@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
 #endif /* S_SPLINT_S */
@@ -71,12 +72,12 @@ static int gpsd_control(char *action, char *argument)
 	if (stat(argument, &sb) != 1)
 	    (void)chmod(argument, sb.st_mode | S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	(void)snprintf(buf, sizeof(buf), "+%s\r\n", argument);
-	(void)write(connect, buf, strlen(buf));
-	(void)read(connect, buf, 12);
+	ignore_return(write(connect, buf, strlen(buf)));
+	ignore_return(read(connect, buf, 12));
     } else if (strcmp(action, "remove") == 0) {
 	(void)snprintf(buf, sizeof(buf), "-%s\r\n", argument);
-	(void)write(connect, buf, strlen(buf));
-	(void)read(connect, buf, 12);
+	ignore_return(write(connect, buf, strlen(buf)));
+	ignore_return(read(connect, buf, 12));
     }
     (void)close(connect);
     //syslog(LOG_DEBUG, "gpsd_control ends");
