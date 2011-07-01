@@ -753,9 +753,9 @@ extern bool aivdm_decode(const char *, size_t,
 			 struct ais_t *, int);
 
 /* debugging apparatus for the client library */
-#if defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE)
+#ifdef CLIENTDEBUG_ENABLE
 #define LIBGPS_DEBUG
-#endif /* defined(TESTMAIN) || defined(CLIENTDEBUG_ENABLE) */
+#endif /* CLIENTDEBUG_ENABLE */
 #ifdef LIBGPS_DEBUG
 #define DEBUG_CALLS	1	/* shallowest debug level */
 #define DEBUG_JSON	5	/* minimum level for verbose JSON debugging */
