@@ -521,7 +521,7 @@ libgpsd_sources = [
     "packet.c",
     "pseudonmea.c",
     "serial.c",
-    "srecord.c",
+    #"srecord.c",
     "subframe.c",
     "timebase.c",
     "drivers.c",
