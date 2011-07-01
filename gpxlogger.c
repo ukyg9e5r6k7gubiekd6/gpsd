@@ -178,6 +178,7 @@ static void quit_handler(int signum)
     if (signum != SIGINT)
 	syslog(LOG_INFO, "exiting, signal %d received", signum);
     print_gpx_footer();
+    (void)gps_close(&gpsdata);
     exit(0);
 }
 
