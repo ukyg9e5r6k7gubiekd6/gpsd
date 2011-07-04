@@ -511,7 +511,7 @@ struct subscriber_t
 #define MAXSUBSCRIBERS	FD_SETSIZE
 #endif
 
-#define subscribed(sub, devp)    (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, devp->gpsdata.dev.path)==0)
+#define subscribed(sub, devp)    (sub->policy.watcher && (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, devp->gpsdata.dev.path)==0))
 
 static struct subscriber_t subscribers[MAXSUBSCRIBERS];	/* indexed by client file descriptor */
 
