@@ -62,6 +62,7 @@ static int gpsd_control(char *action, char *argument)
      * gpsd.c. Be careful about keeping them in sync, or hotplugging
      * will have mysterious failures.
      */
+    /*@ -sefparams @*/
     if (strcmp(action, "add") == 0) {
 	/*
 	 * Force the group-read & group-write bits on, so gpsd will still be
@@ -79,6 +80,7 @@ static int gpsd_control(char *action, char *argument)
 	ignore_return(write(connect, buf, strlen(buf)));
 	ignore_return(read(connect, buf, 12));
     }
+    /*@ +sefparams @*/
     (void)close(connect);
     //syslog(LOG_DEBUG, "gpsd_control ends");
     return 0;
