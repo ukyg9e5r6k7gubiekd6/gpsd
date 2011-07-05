@@ -5,7 +5,7 @@
 
 PROGS=	ashctl binlog binreplay lla2ecef motosend
 
-ADDOBJS=../strl.o
+ADDOBJS=../strl.os
 
 all: $(PROGS)
 

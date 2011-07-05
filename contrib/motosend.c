@@ -3,8 +3,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <sys/types.h>
-#include <machine/endian.h>
-#include <sys/limits.h>
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -14,6 +12,7 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <limits.h>
 
 /* 
  * @@Cj - receiver ID

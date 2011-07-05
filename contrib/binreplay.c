@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
+#include <string.h>
 #ifndef __GLIBC__
   #include <util.h>
-  #include <string.h>
 #else
   #include <stdlib.h>
   #include <pty.h>
