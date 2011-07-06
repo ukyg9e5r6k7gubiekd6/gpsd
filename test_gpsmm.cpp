@@ -98,7 +98,10 @@ int main(void)
 {
     gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
 
-    gps_rec.stream(WATCH_ENABLE|WATCH_JSON);
+    if (gps_rec.stream(WATCH_ENABLE|WATCH_JSON) == NULL) {
+        cerr << "No GPSD running.\n";
+        return 1;
+    }
 
     for (;;) {
 	struct gps_data_t* newdata;
