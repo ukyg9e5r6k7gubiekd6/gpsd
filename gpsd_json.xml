@@ -849,7 +849,7 @@ will assert ATT_IS.</para>
 	<entry>remote</entry>
 	<entry>No</entry>
 	<entry>string</entry>
-        <entry>Path to the remote daemon reporting this version. If
+        <entry>URL of the remote daemon reporting this version. If
         empty, this is the version of the local daemon.</entry>
 </row>
 </tbody>
@@ -899,6 +899,13 @@ following elements:</para>
 	<entry>Yes</entry>
 	<entry>list</entry>
         <entry>List of device descriptions</entry>
+</row>
+<row>
+	<entry>remote</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>URL of the remote daemon reporting the device set. If
+        empty, this is a DEVICES response from the local daemon.</entry>
 </row>
 </tbody>
 </tgroup>
@@ -1008,8 +1015,8 @@ object.</para>
 	<entry>remote</entry>
 	<entry>No</entry>
 	<entry>string</entry>
-        <entry>Path to the remote daemon reporting the watch set. If
-        empty, this is the version of the local daemon.</entry>
+        <entry>URL of the remote daemon reporting the watch set. If
+        empty, this is a WATCH response from the local daemon.</entry>
 </row>
 </tbody>
 </tgroup>

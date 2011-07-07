@@ -21,9 +21,10 @@ typedef unsigned int speed_t;
  * 3.4: Timestamps change from seconds since Unix epoch to ISO8601.
  * 3.5: POLL subobject name changes: fixes -> tpv, skyview -> sky.
  *      DEVICE::activated becomes ISO8601 rather thab real.
+ * 3.6  VERSION, WATCH, and DEVICES from slave gpsds get "remote" attribute.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	4	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	6	/* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
