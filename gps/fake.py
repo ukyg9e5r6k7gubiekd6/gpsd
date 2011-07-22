@@ -144,9 +144,6 @@ class TestLoad:
                     self.serial = (baud, databits, parity, stopbits)
                 elif "UDP" in packet:
                     self.sourcetype = "UDP"
-                elif "%" in packet:
-                    # Pass through for later interpretation 
-                    self.sentences.append(packet)
             else:
                 if type_latch is None:
                     type_latch = ptype

@@ -59,9 +59,27 @@ interleaved in the order the files are specified.</para>
 privileges, and can be run concurrently with a production 
 <application>gpsd</application> instance without causing problems.</para>
 
-<para>The logfiles may be of NMEA, SiRF packets, TSIP packets, or
-Zodiac packets.  Leading lines beginning with # will be treated as
-comments and ignored.</para>
+<para>The logfiles may contain packets in any supported format,
+including in particular NMEA, SiRF, TSIP, or Zodiac.  Leading lines
+beginning with # will be treated as comments and ignored, except in
+the following special cases:</para>
+
+<itemizedlist>
+<listitem><para>
+a comment of the form #Date: yyyy-mm-dd (ISO8601 date format) may be
+used to set the initial date for the log.
+</para></listitem>
+
+<listitem><para>
+a comment of the form #Serial: [0-9]* [78][NOE][12] may be used to set
+serial parameters for the log - baud rate, word length, stop bits.
+</para></listitem>
+
+<listitem><para>
+a comment of the form #Transport: UDP may be used to fake a UDP source
+rather than the normal pty.
+</para></listitem>
+</itemizedlist>
 
 <para>The <application>gpsd</application> instance is run in
 foreground.  The thread sending fake GPS data to the daemon 
