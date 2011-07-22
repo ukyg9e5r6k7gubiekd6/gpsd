@@ -330,7 +330,11 @@ else:
 
 if env['usb'] and config.CheckPKG('libusb-1.0'):
     confdefs.append("#define HAVE_LIBUSB 1\n")
-    usblibs = pkg_config('libusb-1.0')
+    try:
+        usblibs = pkg_config('libusb-1.0')
+    except OSError:
+        print "pkg_config is confused about the state of libusb-1.0."
+        usblibs = []
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n")
     usblibs = []
