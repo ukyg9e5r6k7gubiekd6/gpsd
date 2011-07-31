@@ -512,7 +512,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    }
 	    //ais->type8.spare        = UBITS(38, 2);
 	    ais->type8.dac            = UBITS(40, 10);
-	    ais->type8.fid            = UBITS(40, 6);
+	    ais->type8.fid            = UBITS(50, 6);
 	    ais->type8.bitcount       = ais_context->bitlen - 56;
 	    imo = false;
 	    if (ais->type8.dac == 1)
