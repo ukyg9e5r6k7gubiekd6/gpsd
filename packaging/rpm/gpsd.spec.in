@@ -78,6 +78,11 @@ Group: Applications/System
 Summary: Clients for gpsd
 Group: Applications/System
 Requires: httpd
+Requires: perl
+Requires: perl(Net::GPSD3)
+Requires: perl(GD::Graph::Polar)
+Requires: perl(CGI)
+Requires: perl(CGI::Carp)
 
 %description clients
 Installs X11 and Command Line Interface clients.
@@ -106,18 +111,36 @@ the CGI scripts at http://localhost/gpsd/.
 %setup -q
 
 %build
+### KLUDGE ALERT prefix should be %{_prefix}
+scons %{_smp_mflags}         \
+   prefix=/                  \
+   bindir=%{_bindir}         \
+   includedir=%{_includedir} \
+   libdir=%{_libdir}         \
+   sbindir=%{_sbindir}       \
+   mandir=%{_mandir}         \
+   docdir=%{_docdir}         \
+   PYTHONPATH=%{python_sitearch}
+
 scons build
 
 %install
 rm -rf $RPM_BUILD_ROOT
+export DESTDIR=$RPM_BUILD_ROOT
+scons install
 
-scons install \
-      install_prefix=$RPM_BUILD_ROOT%{_prefix} \
-      bindir=$RPM_BUILD_ROOT%{_bindir} \
-      sbindir=$RPM_BUILD_ROOT%{_sbindir} \
-      datadir=$RPM_BUILD_ROOT%{_datadir}/%{name}
+#Apps need man pages!
+for MAN in gpsprof xgps xgpsspeed gpscat gpxlogger gegps
+do 
+  cp $RPM_BUILD_ROOT%{_mandir}/man1/gps.1 $RPM_BUILD_ROOT%{_mandir}/man1/$MAN.1
+done 
 
-find $RPM_BUILD_ROOT
+#httpd client
+%{__install} -d -m 0755 $RPM_BUILD_ROOT%{_var}/www/html/gpsd
+%{__install} -p -m 0755 packaging/rpm/httpd/skyview.cgi $RPM_BUILD_ROOT%{_var}/www/html/gpsd
+%{__install} -p -m 0755 packaging/rpm/httpd/pgps.cgi $RPM_BUILD_ROOT%{_var}/www/html/gpsd
+%{__install} -d -m 0755 $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d
+%{__install} -p -m 0644 packaging/rpm/httpd/gpsd.conf $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/gpsd.conf
 
 # init scripts
 %{__install} -d -m 0755 $RPM_BUILD_ROOT%{_sysconfdir}/init.d
@@ -131,8 +154,8 @@ find $RPM_BUILD_ROOT
 %{__install} -p -m 0644 gpsd.rules $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/99-gpsd.rules
 
 # hotplug script
-%{__install} -d -m 0755 $RPM_BUILD_ROOT/lib/udev
-%{__install} -p -m 0755 gpsd.hotplug $RPM_BUILD_ROOT/lib/udev
+#%{__install} -d -m 0755 $RPM_BUILD_ROOT/lib/udev
+#%{__install} -p -m 0755 gpsd.hotplug gpsd.hotplug.wrapper $RPM_BUILD_ROOT/lib/udev
 
 # remove .la files
 #rm -f $RPM_BUILD_ROOT%{_libdir}/libgps*.la
@@ -142,13 +165,13 @@ find $RPM_BUILD_ROOT
 
 # Install the .desktop files
 desktop-file-install --vendor fedora \
-	--dir $RPM_BUILD_ROOT%{_datadir}/applications \
-	--add-category X-Fedora \
-	packaging/X11/xgps.desktop
+  --dir $RPM_BUILD_ROOT%{_datadir}/applications \
+  --add-category X-Fedora \
+  packaging/X11/xgps.desktop
 desktop-file-install --vendor fedora \
-	--dir $RPM_BUILD_ROOT%{_datadir}/applications \
-	--add-category X-Fedora \
-	packaging/X11/xgpsspeed.desktop
+  --dir $RPM_BUILD_ROOT%{_datadir}/applications \
+  --add-category X-Fedora \
+  packaging/X11/xgpsspeed.desktop
 
 # Install logo icon for .desktop files
 %{__install} -d -m 0755 $RPM_BUILD_ROOT%{_datadir}/gpsd
@@ -163,11 +186,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %preun
 if [ $1 = 0 ]; then
-	/sbin/service %{name} stop > /dev/null 2>&1 || true
-	/sbin/chkconfig --del %{name}
+  /sbin/service %{name} stop > /dev/null 2>&1 || true
+  /sbin/chkconfig --del %{name}
 fi
 
-%postun -p /sbin/ldconfig
+%postun
+/sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
@@ -180,26 +204,29 @@ fi
 %{_bindir}/gpsprof
 %{_bindir}/gpsmon
 %{_bindir}/gpsctl
+%{_bindir}/gegps
 %{_libdir}/libgps*.so.*
-/lib/udev/gpsd*
+#/lib/udev/gpsd*
 %{python_sitearch}/gps*
-%exclude %{python_sitearch}/gps/fake*
 %{_mandir}/man8/gpsd.8*
+%{_mandir}/man8/gpsdctl.8*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/gpsmon.1*
+%{_mandir}/man1/gegps.1*
 %{_mandir}/man1/gpsctl.1*
+%{_mandir}/man5/gpsd_json.5*
 
 %files devel
 %defattr(-,root,root,-)
 %doc TODO
 %{_bindir}/gpsfake
-%{_libdir}/libgps*.so
+#%{_libdir}/libgps*.so
 %{_libdir}/pkgconfig/*.pc
 %{python_sitearch}/gps/fake*
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
-%{_includedir}/gpsd.h
-%{_mandir}/man1/gpsfake.1*
+#%{_includedir}/gpsd.h
+#%{_mandir}/man1/gpsfake.1*
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
@@ -208,6 +235,7 @@ fi
 %files -n libQgpsmm
 %defattr(-,root,root,-)
 %{_qt4_libdir}/libQgpsmm.so*
+%{_mandir}/man3/libQgpsmm.3*
 
 %files clients
 %defattr(-,root,root,-)
@@ -242,17 +270,28 @@ fi
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/gpsd.conf
 %dir %{_var}/www/html/gpsd/
-%{_var}/www/html/gpsd/skyview.cgi
-%{_var}/www/html/gpsd/pgps.cgi
+%attr(0755,root,root) %{_var}/www/html/gpsd/skyview.cgi
+%attr(0755,root,root) %{_var}/www/html/gpsd/pgps.cgi
 
 %changelog
+* Sun Jul 31 2011 Michael R. Davis <mrdvt@cpan.org> 3.0-2
+- Added gegps, gpsdctl
+- Dropped hotplug wrapper
+- Removed tabs to pass rpmlint tests
+- Updated scons install paths
+- Updated scons build paths
+
 * Sat Jun 25 2011 Eric S. Raymond <esr@thyrsus.com> 3.0-2
 - Minor changes from the refactoring of the hotplug system. 
+
+* Fri May 13 2011 Michael R. Davis <mrdvt@cpan.org> 3.0-1
+- Added httpd Perl client package
+- Separated x11 and cli packages
 
 * Mon Apr 18 2011 Michael R. Davis <mrdvt@cpan.org> 3.0-1
 - Updates to support SCons software construction tool
 - Added httpd Perl client
-- %{_buildrootdir} does not exist in EPEL 4 & 5
+- macro _buildrootdir does not exist in EPEL 4 & 5
 
 * Mon Jul 05 2010 Michael R. Davis <mrdvt@cpan.org> - 2.95-3
 - Updated to move rpm files to packaging/rpm folder
