@@ -1269,7 +1269,8 @@ Utility('udev-test', '', [
 
 if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     distfiles = commands.getoutput(r"git ls-files").split()
-    distfiles.remove(".gitignore")
+    if ".gitignore" in distfiles:
+        distfiles.remove(".gitignore")
     distfiles += generated_sources
     distfiles += base_manpages.keys() + python_manpages.keys()
     if "packaging/rpm/gpsd.spec" not in distfiles:
