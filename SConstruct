@@ -138,7 +138,7 @@ for (name, default, help) in pathopts:
 # Environment creation
 #
 
-env = Environment(tools=["default", "tar", "textfile"], options=opts)
+env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV = {'PATH' : os.environ['PATH']})
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
