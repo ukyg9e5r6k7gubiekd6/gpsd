@@ -962,7 +962,7 @@ pkgconfigdir = libdir + os.sep + 'pkgconfig'
 pc_install = [ env.Install(pkgconfigdir, "libgps.pc") ]
 
 maninstall = []
-for manpage in base_manpages:
+for manpage in base_manpages.keys() + python_manpages.keys():
     section = manpage.split(".")[1]
     dest = os.path.join(mandir, "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
