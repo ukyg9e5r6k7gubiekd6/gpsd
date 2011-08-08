@@ -186,8 +186,8 @@ if env['CC'] == 'gcc':
                             -D_GNU_SOURCE'''))
 
 # Honor the specified installation prefix in link paths.
-env.Prepend(LIBPATH=[os.path.join(env['prefix'], 'lib')])
-env.Prepend(RPATH=[os.path.join(env['prefix'], 'lib')])
+env.Prepend(LIBPATH=[os.path.join(env['prefix'], env['libdir'])])
+env.Prepend(RPATH=[os.path.join(env['prefix'], env['libdir'])])
 
 # Tell generated binaries to look in the current directory for
 # shared libraries. Should be handled sanely by scons on all systems.
