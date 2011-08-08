@@ -850,6 +850,7 @@ def substituter(target, source, env):
     substmap = (
         ('@VERSION@', gpsd_version),
         ('@prefix@',  env['prefix']),
+        ('@libdir@',  env['libdir']),
         ('@PYTHON@',  sys.executable),
         )
     with open(str(source[0])) as sfp:
@@ -961,7 +962,7 @@ python_install = [  python_extensions_install,
                     python_egg_info_install]
 
 pkgconfigdir = libdir + os.sep + 'pkgconfig'
-pc_install = [ env.Install(pkgconfigdir, "libgps.pc") ]
+pc_install = [ env.Install(pkgconfigdir, x) for x in ("libgps.pc", "libgpsd.pc") ]
 
 maninstall = []
 for manpage in base_manpages.keys() + python_manpages.keys():
