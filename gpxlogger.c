@@ -392,9 +392,9 @@ static struct method_t methods[] = {
 static void usage(void)
 {
     fprintf(stderr,
-	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-j casoc] [-f filename] [-m minmove]\n"
+	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-f filename] [-m minmove]\n"
 	    "\t[-e exportmethod] [server[:port:[device]]]\n\n"
-	    "defaults to '%s -i 5 -j 0 -e %s localhost:2947'\n",
+	    "defaults to '%s -i 5 -e %s localhost:2947'\n",
 	    progname, progname, (NITEMS(methods) > 0) ? methods[0].name : "(none)");
     exit(1);
 }
