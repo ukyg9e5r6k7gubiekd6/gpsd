@@ -918,7 +918,9 @@ python_env.Default(*build_python)
 for (name, help, default) in pathopts:
     exec name + " = DESTDIR + env['prefix'] + env['%s']" % name
 
-headerinstall = [ env.Install(includedir, x) for x in ("libgpsmm.h", "gps.h", "gpsd.h")]
+# It's deliberate that we don't install gpsd.h. It's ful of internals that
+# third-party client programs should not see.
+headerinstall = [ env.Install(includedir, x) for x in ("libgpsmm.h", "gps.h")]
 
 binaryinstall = []
 binaryinstall.append(env.Install(sbindir, [gpsd, gpsdctl]))
