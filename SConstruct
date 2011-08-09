@@ -137,6 +137,9 @@ for (name, default, help) in pathopts:
 #
 # Environment creation
 #
+# Contrary to usual practice with scons, we import PATH from the environment.
+# This is necessary in order for tools like ccache and Coverity scan-build to
+# work.
 
 env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV = {'PATH' : os.environ['PATH']})
 opts.Save('.scons-option-cache', env)
@@ -939,11 +942,7 @@ if have_chrpath:
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
-python_lib_dir = sysconfig.get_python_lib(
-                plat_specific=1,
-                standard_lib=0,
-                prefix=env['prefix']
-            )
+python_lib_dir = sysconfig.get_python_lib(plat_specific=1)
 python_module_dir = python_lib_dir + os.sep + 'gps'
 python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
                                                 python_built_extensions)
