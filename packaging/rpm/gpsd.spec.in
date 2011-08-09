@@ -112,9 +112,9 @@ the CGI scripts at http://localhost/gpsd/.
 %setup -q
 
 %build
-### KLUDGE ALERT prefix should be %{_prefix}
 scons %{_smp_mflags}         \
    prefix=/                  \
+   prefix=%{_prefix}         \
    bindir=%{_bindir}         \
    includedir=%{_includedir} \
    libdir=%{_libdir}         \
@@ -227,7 +227,7 @@ fi
 %{_includedir}/gps.h
 %{_includedir}/libgpsmm.h
 #%{_includedir}/gpsd.h
-#%{_mandir}/man1/gpsfake.1*
+%{_mandir}/man1/gpsfake.1*
 %{_mandir}/man3/libgps.3*
 %{_mandir}/man3/libgpsmm.3*
 %{_mandir}/man3/libgpsd.3*
