@@ -21,6 +21,9 @@ BuildRequires: python-devel
 BuildRequires: qt-devel
 BuildRequires: scons
 BuildRequires: xmlto
+%if 0%{?fedora} >= 16
+BuildRequires: pps-tools-devel
+%endif
 
 Requires: udev
 Requires(post): /sbin/ldconfig
