@@ -607,6 +607,7 @@ int json_read_object(const char *cp, const struct json_attr_t *attrs,
     char *savedlocale = setlocale(LC_ALL, NULL);
     int st;
 
+    /* temporary locale setting is required wherever ',' is the decimal point */
     (void)setlocale(LC_ALL, "C");
     json_debug_trace((1, "json_read_object() sees '%s'\n", cp));
     st = json_internal_read_object(cp, attrs, NULL, 0, end);
