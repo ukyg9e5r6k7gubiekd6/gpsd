@@ -1415,11 +1415,11 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <dt>7. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship.
 <ol>
-<li>make testbuild</li>
-<li>make testregress</li>
-<li>make splint</li>
-<li>make cppcheck</li>
-<li>make xmllint</li>
+<li>scons testbuild</li>
+<li>scons testregress</li>
+<li>scons splint</li>
+<li>scons cppcheck</li>
+<li>scons xmllint</li>
 <li>devtools/valgrind-audit</li>
 <li>devtools/flockest</li>
 <li><a href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a></li>
@@ -1427,7 +1427,7 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 </dd>
 
 <dt>8. Ship to Berlios</dt>
-<dd>Make the tarball (make dist) and upload to berlios.de (make upload-ftp),
+<dd>Make the tarball (scons dist) and upload to berlios.de (make upload-ftp),
 and do Berlios's
 <a href="https://developer.berlios.de/project/admin/?group_id=2116">release procedure</a>.</dd>
 

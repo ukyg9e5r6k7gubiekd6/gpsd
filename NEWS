@@ -54,7 +54,7 @@
   libraries.  We now ship a Qt binding for the client library. Note
   a GCC 4.2.1 optimizer bug.  gpsdcode now uses | as a field separator
   in -c mode, as string fields can contain commas.  Corrected error
-  or reporting of AIS rate-of-turn fields.
+  in reporting of AIS rate-of-turn fields.
 
 * Tue Apr 20 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94
   Error-checking in the 50bps subframe code has been greatly improved.
