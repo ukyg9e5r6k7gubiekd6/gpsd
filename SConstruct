@@ -4,7 +4,7 @@
 #
 # build     - build the software (default)
 # dist      - make distribution tarball
-# install   - install programs, libraties, and manual pages
+# install   - install programs, libraries, and manual pages
 # uninstall - undo an install
 #
 # check     - run regression and unit tests.
@@ -33,7 +33,6 @@ EnsureSConsVersion(1,2,0)
 import copy, os, sys, commands, glob, re
 from distutils import sysconfig
 from distutils.util import get_platform
-from distutils import sysconfig
 import SCons
 
 #

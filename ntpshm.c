@@ -8,6 +8,7 @@
  */
 
 #include <string.h>
+#include <libgen.h>
 #include <stdbool.h>
 #include <math.h>
 #include <errno.h>

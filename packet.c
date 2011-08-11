@@ -836,7 +836,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    csum ^= lexer->inbuffer[n];
 	if (csum != c) {
 	    gpsd_report(LOG_IO,
-			"Navcom packet type 0x%hhx bad checksum 0x%hhx, expecting 0x%hx\n",
+			"Navcom packet type 0x%hhx bad checksum 0x%hhx, expecting 0x%x\n",
 			lexer->inbuffer[3], csum, c);
 	    lexer->state = GROUND_STATE;
 	    break;
