@@ -185,7 +185,7 @@ if env['CC'] == 'gcc':
                             -Wno-missing-field-initializers -Wcast-align
                             -Wmissing-declarations -Wmissing-prototypes
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
-                            -D_GNU_SOURCE'''))
+                            -Wimplicit-function-declaration -D_GNU_SOURCE'''))
 
 # Honor the specified installation prefix in link paths.
 env.Prepend(LIBPATH=[os.path.join(env['prefix'], env['libdir'])])

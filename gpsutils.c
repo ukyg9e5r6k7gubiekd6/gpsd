@@ -4,7 +4,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <stdio.h>
-#define _XOPEN_SOURCE /* glibc2 needs this to define the strptime() prototype */
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
