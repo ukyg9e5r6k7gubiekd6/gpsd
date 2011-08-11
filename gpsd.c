@@ -1994,7 +1994,7 @@ int main(int argc, char *argv[])
      *
      * Yes, the test for this is non-orthogonal and ugly.  The problem
      * is that there is a line-discipline setup call in the PPS
-     * support, way later on, that require root (see ntpmshm.c and
+     * support, way later on, that require root (see ntpshm.c and
      * look for "requires root"). We've overloaded -N with the meaning
      * "don't drop privileges" pending a better solution.
      */
