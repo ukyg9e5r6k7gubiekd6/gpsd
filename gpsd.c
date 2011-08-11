@@ -1989,7 +1989,8 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_PROG, "shared-segment creation succeeded,\n");
 #endif /* SHM_EXPORT_ENABLE */
 
-    if (getuid() == 0 && go_background) {
+    /* drop privileges */
+    if (getuid() == 0) {
 	struct passwd *pw;
 	struct stat stb;
 
