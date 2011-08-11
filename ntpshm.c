@@ -129,6 +129,10 @@ static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
 	perms = 0666;
     }
 
+    /* 
+     * Note: this call requires root under BSD,
+     * and possibly on well-secured Linux systems.
+     */
     shmid = shmget((key_t) (NTPD_BASE + unit),
 		   sizeof(struct shmTime), (int)(IPC_CREAT | perms));
     if (shmid == -1) {
@@ -438,6 +442,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     }
     /* Attach the line PPS discipline, so no need to ldattach */
     /* This activates the magic /dev/pps0 device */
+    /* Note: this ioctl() requires root */
     if ( 0 > ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc)) {
 	gpsd_report(LOG_INF, "KPPS cannot set PPS line discipline: %d\n"
 	    , errno);

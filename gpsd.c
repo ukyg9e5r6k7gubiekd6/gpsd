@@ -1989,8 +1989,16 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_PROG, "shared-segment creation succeeded,\n");
 #endif /* SHM_EXPORT_ENABLE */
 
-    /* drop privileges */
-    if (getuid() == 0) {
+    /* 
+     * Drop privileges.
+     *
+     * Yes, the test for this is non-orthogonal and ugly.  The problem
+     * is that there are two calls in the PPS support, way later on,
+     * that require root (see ntpmshm.c and look for "requires
+     * root"). We've overloaded -N with the meaning "don't drop
+     * privileges" pending a better solution.
+     */
+    if (getuid() == 0 && go_background) {
 	struct passwd *pw;
 	struct stat stb;
 

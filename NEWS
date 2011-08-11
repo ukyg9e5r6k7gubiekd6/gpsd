@@ -14,8 +14,7 @@
   or AIS message type. NMEA HEHDT is implemented. Remote gpsd instances
   can now be used as data sources via a gpsd:// URL.  There is a client
   for live-feeding GPSD data to Google Earth. The hotplug sequence no
-  longer requires Python. Privileges are now also dropped when running in
-  foreground, as well as in background,
+  longer requires Python.
 
 * Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
