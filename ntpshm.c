@@ -130,8 +130,9 @@ static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
     }
 
     /* 
-     * Note: this call requires root under BSD,
-     * and possibly on well-secured Linux systems.
+     * Note: this call requires root under BSD, and possibly on
+     * well-secured Linux systems.  This is why ntpsh_init() has to be
+     * called before privilege-dropping.
      */
     shmid = shmget((key_t) (NTPD_BASE + unit),
 		   sizeof(struct shmTime), (int)(IPC_CREAT | perms));
@@ -155,8 +156,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
 }
 
 void ntpshm_init(struct gps_context_t *context, bool enablepps)
-/* attach all NTP SHM segments.  
- * called once at startup, while still root,  although root not required */
+/* Attach all NTP SHM segments. Called once at startup, while still root. */
 {
     int i;
 
