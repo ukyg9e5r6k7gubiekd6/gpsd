@@ -21,7 +21,9 @@ structure members in and out of unions.
 GPSD is normally built and tested with GCC. The shared-memory
 interface relies on one GCCism, but the code is otherwise pretty
 compiler-agnostic.  It is reported that clang produces a gpsd that
-passes all regression tests.
+passes all regression tests. If -Wmissing-field-initializers or
+its non-gcc equivalent is set you will get a lot of warnings; 
+this is due to generated code and cannot be fixed.
 
 You will need Python 2.6 or 2.4+ & simplejson.  The Python code in
 GPSD is 2.4-compatible except that you need either the json library
