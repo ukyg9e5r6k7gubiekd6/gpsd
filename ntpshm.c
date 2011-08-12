@@ -131,7 +131,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
 
     /* 
      * Note: this call requires root under BSD, and possibly on
-     * well-secured Linux systems.  This is why ntpsh_init() has to be
+     * well-secured Linux systems.  This is why ntpshm_init() has to be
      * called before privilege-dropping.
      */
     shmid = shmget((key_t) (NTPD_BASE + unit),
@@ -877,6 +877,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* PPS_ENABLE */
 
 void ntpd_link_deactivate(struct gps_device_t *session)
+/* release ntpshm storage for a session */
 {
     (void)ntpshm_free(session->context, session->shmindex);
     session->shmindex = -1;
@@ -887,6 +888,7 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 }
 
 void ntpd_link_activate(struct gps_device_t *session)
+/* set up ntpshm storage for a session - may fail if not called as root */
 {
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
     pthread_t pt;
