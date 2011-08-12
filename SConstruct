@@ -932,12 +932,14 @@ if ncurseslibs:
     binaryinstall.append(env.Install(bindir, [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, libdir, compiled_gpslib))
 binaryinstall.append(LibraryInstall(env, libdir, compiled_gpsdlib))
-
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, libdir, compiled_qgpsmmlib))
 
 if have_chrpath:
-    env.AddPostAction(binaryinstall, '$CHRPATH -r $LIBDIR $TARGET')
+    if libdir in ['/lib', '/usr/lib']:
+        env.AddPostAction(binaryinstall, '$CHRPATH -d $TARGET')
+    else:
+        env.AddPostAction(binaryinstall, '$CHRPATH -r $LIBDIR $TARGET')
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
