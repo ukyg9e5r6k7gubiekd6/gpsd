@@ -371,7 +371,7 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
 
-if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
+if config.CheckExecutable('chrpath -v', 'chrpath'):
     have_chrpath = True
 else:
     have_chrpath = False
