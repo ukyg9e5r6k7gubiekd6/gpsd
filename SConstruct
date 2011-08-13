@@ -121,7 +121,7 @@ for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
 pathopts = (
-#   ("sysconfdir",          "/etc",        "system configuration directory"),
+    ("sysconfdir",          "/etc",        "system configuration directory"),
     ("bindir",              "/bin",        "application binaries directory"),
     ("includedir",          "/include",    "header file directory"),
     ("libdir",              "/lib",        "system libraries"),
@@ -923,7 +923,7 @@ python_env.Default(*build_python)
 
 for (name, help, default) in pathopts:
     exec name + " = DESTDIR + env['prefix'] + env['%s']" % name
-#sysconfdir = sysconfdir.replace"/usr/etc", "/etc")
+sysconfdir = sysconfdir.replace("/usr/etc", "/etc")
 
 # It's deliberate that we don't install gpsd.h. It's ful of internals that
 # third-party client programs should not see.
