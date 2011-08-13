@@ -371,6 +371,9 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
 
+# If chrpath is not present, the shared-library load path in the
+# built binaries may be left in a state that allows an attack by
+# spoofing the gps or gpsd shared library.
 if config.CheckExecutable('chrpath -v', 'chrpath'):
     have_chrpath = True
 else:

@@ -45,6 +45,7 @@ DBUS                   -> gpsd will issue DBUS notifications
 ncurses                -> a test client and the GPS monitor depend on this
 libusb-1.0.x or later  -> better USB device discovery
 Qt + qmake             -> libQgpsmm depends on this
+chrpath                -> prevents a potential security hole in built binaries
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect
 this and use it to discover Garmin USB GPSes, rather than groveling
