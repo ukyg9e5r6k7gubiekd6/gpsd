@@ -115,8 +115,8 @@ the CGI scripts at http://localhost/gpsd/.
 %setup -q
 
 %build
-#Note: prefix must be set to / since the current scons build only supports relative
-+pathsscons %{_smp_mflags}         \
+#Note: prefix must be set to / since the current scons build only supports relative paths
+scons %{_smp_mflags}         \
    prefix=/                  \
    bindir=%{_bindir}         \
    includedir=%{_includedir} \
