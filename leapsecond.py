@@ -113,12 +113,13 @@ def save_leapseconds(outfile):
     "Fetch the USNO leap-second history data and make a leap-second list."
     skip = True
     leapsecs = []
-    # This code assumes that after 1980, leap-second increments are
-    # always integrally one second and every increment is listed here
-    leapsecs = []
     try:
+        fetchobj = urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat")
+        # This code assumes that after 1980, leap-second increments are
+        # always integrally one second and every increment is listed here
+        leapsecs = []
         fp = open(outfile, "w")
-        for line in urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat"):
+        for line in fetchobj:
             if line.startswith(" 1980"):
                 skip = False
             if skip:
