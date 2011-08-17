@@ -110,7 +110,7 @@ for (name, default, help) in boolopts:
 nonboolopts = (
     ("gpsd_user",           "",            "privilege revocation user",),
     ("gpsd_group",          "",            "privilege revocation group"),
-    ("prefix",              "/usr/local/", "installation directory prefix"),
+    ("prefix",              "/usr/local",  "installation directory prefix"),
     ("limited_max_clients", 0,             "maximum allowed clients"),
     ("limited_max_devices", 0,             "maximum allowed devices"),
     ("fixed_port_speed",    0,             "fixed serial port speed"),
@@ -921,26 +921,27 @@ python_env.Default(*build_python)
 
 # Not here because too distro-specific: udev rules, desktop files, init scripts
 
-for (name, help, default) in pathopts:
-    exec name + " = DESTDIR + env['prefix'] + env['%s']" % name
-sysconfdir = sysconfdir.replace("/usr/etc", "/etc")
+def installdir(dir):
+    wrapped = DESTDIR + env['prefix'] + env[dir]
+    wrapped.replace("/usr/etc", "/etc")
+    return wrapped
 
 # It's deliberate that we don't install gpsd.h. It's ful of internals that
 # third-party client programs should not see.
-headerinstall = [ env.Install(includedir, x) for x in ("libgpsmm.h", "gps.h")]
+headerinstall = [ env.Install(installdir('includedir'), x) for x in ("libgpsmm.h", "gps.h")]
 
 binaryinstall = []
-binaryinstall.append(env.Install(sbindir, [gpsd, gpsdctl]))
-binaryinstall.append(env.Install(bindir,  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]))
+binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
+binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]))
 if ncurseslibs:
-    binaryinstall.append(env.Install(bindir, [cgps, gpsmon]))
-binaryinstall.append(LibraryInstall(env, libdir, compiled_gpslib))
-binaryinstall.append(LibraryInstall(env, libdir, compiled_gpsdlib))
+    binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
+binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib))
+binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib))
 if qt_env:
-    binaryinstall.append(LibraryInstall(qt_env, libdir, compiled_qgpsmmlib))
+    binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
 if have_chrpath:
-    if libdir in ['/lib', '/usr/lib']:
+    if env['libdir'] in ['/lib', '/usr/lib']:
         env.AddPostAction(binaryinstall, '$CHRPATH -d "$TARGET"')
     else:
         env.AddPostAction(binaryinstall, '$CHRPATH -r "$LIBDIR" "$TARGET"')
@@ -957,7 +958,7 @@ if not env['debug'] or env['profiling']:
 python_modules_install = python_env.Install( DESTDIR + python_module_dir,
                                             python_modules)
 
-python_progs_install = python_env.Install(bindir, python_progs)
+python_progs_install = python_env.Install(installdir('bindir'), python_progs)
 
 python_egg_info_install = python_env.Install(DESTDIR + python_lib_dir, python_egg_info)
 python_install = [  python_extensions_install,
@@ -965,13 +966,13 @@ python_install = [  python_extensions_install,
                     python_progs_install,
                     python_egg_info_install]
 
-pkgconfigdir = libdir + os.sep + 'pkgconfig'
+pkgconfigdir = os.path.join(installdir('libdir'), 'pkgconfig')
 pc_install = [ env.Install(pkgconfigdir, x) for x in ("libgps.pc", "libgpsd.pc") ]
 
 maninstall = []
 for manpage in base_manpages.keys() + python_manpages.keys():
     section = manpage.split(".")[1]
-    dest = os.path.join(mandir, "man"+section, manpage)
+    dest = os.path.join(installdir('mandir'), "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
 install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install + headerinstall)
 
