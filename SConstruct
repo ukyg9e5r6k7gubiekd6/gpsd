@@ -173,9 +173,6 @@ if env["shared"]:
 else:
     pkg_config = lambda pkg: ['!pkg-config --cflags --libs --static %s' %(pkg, )]
 
-# DESTDIR environment variable means user wants to prefix the installation root.
-DESTDIR = os.environ.get('DESTDIR', '')
-
 if env['CC'] == 'gcc':
     # Enable all GCC warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
@@ -187,9 +184,17 @@ if env['CC'] == 'gcc':
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
                             -Wimplicit-function-declaration -D_GNU_SOURCE'''))
 
+# DESTDIR environment variable means user wants to prefix the installation root.
+DESTDIR = os.environ.get('DESTDIR', '')
+
+def installdir(dir):
+    wrapped = DESTDIR + env['prefix'] + env[dir]
+    wrapped.replace("/usr/etc", "/etc")
+    return wrapped
+
 # Honor the specified installation prefix in link paths.
-env.Prepend(LIBPATH=[os.path.join(env['prefix'], env['libdir'])])
-env.Prepend(RPATH=[os.path.join(env['prefix'], env['libdir'])])
+env.Prepend(LIBPATH=[os.path.join(env['prefix'], installdir('libdir'))])
+env.Prepend(RPATH=[os.path.join(env['prefix'], installdir('libdir'))])
 
 # Tell generated binaries to look in the current directory for
 # shared libraries. Should be handled sanely by scons on all systems.
@@ -920,11 +925,6 @@ python_env.Default(*build_python)
 ## Installation and deinstallation
 
 # Not here because too distro-specific: udev rules, desktop files, init scripts
-
-def installdir(dir):
-    wrapped = DESTDIR + env['prefix'] + env[dir]
-    wrapped.replace("/usr/etc", "/etc")
-    return wrapped
 
 # It's deliberate that we don't install gpsd.h. It's ful of internals that
 # third-party client programs should not see.
