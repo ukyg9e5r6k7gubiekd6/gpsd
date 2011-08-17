@@ -941,9 +941,9 @@ if qt_env:
 
 if have_chrpath:
     if libdir in ['/lib', '/usr/lib']:
-        env.AddPostAction(binaryinstall, '$CHRPATH -d $TARGET')
+        env.AddPostAction(binaryinstall, '$CHRPATH -d "$TARGET"')
     else:
-        env.AddPostAction(binaryinstall, '$CHRPATH -r $LIBDIR $TARGET')
+        env.AddPostAction(binaryinstall, '$CHRPATH -r "$LIBDIR" "$TARGET"')
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
