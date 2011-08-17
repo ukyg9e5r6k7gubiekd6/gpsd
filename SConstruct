@@ -850,9 +850,12 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
 from leapsecond import save_leapseconds
-leapseconds_cache = lambda target, source, env: save_leapseconds(target[0].abspath)
-env.NoClean(env.Command(target="leapseconds.cache", source="leapsecond.py",
-            action=leapseconds_cache))
+leapseconds_cache_rebuild = lambda target, source, env: save_leapseconds(target[0].abspath)
+leapseconds_cache = env.Command(target="leapseconds.cache",
+                                source="leapsecond.py",
+                                action=leapseconds_cache_rebuild)
+env.NoClean(leapseconds_cache)
+env.Precious(leapseconds_cache)
 
 # Instantiate some file templates.  We'd like to use the Substfile builtin
 # but it doesn't seem to work in scons 1.20
