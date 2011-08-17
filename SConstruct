@@ -941,10 +941,10 @@ if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
 if have_chrpath:
-    if env['libdir'] in ['/lib', '/usr/lib']:
+    if installdir('libdir') in ['/lib', '/usr/lib']:
         env.AddPostAction(binaryinstall, '$CHRPATH -d "$TARGET"')
     else:
-        env.AddPostAction(binaryinstall, '$CHRPATH -r "$LIBDIR" "$TARGET"')
+        env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
 if not env['debug'] or env['profiling']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
