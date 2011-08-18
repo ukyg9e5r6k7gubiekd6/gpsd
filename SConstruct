@@ -573,10 +573,10 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
         shlib_post_action_output_re = [
             '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
             shlib_suffix ]
-        shlib_suffix += '.' + libversion
         (major, age, revision) = libversion.split(".")
         soname = libname + shlib_suffix + "." + major
         shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
+        shlib_suffix += '.' + libversion
     elif platform == 'aix':
         shlib_pre_action = [
             "nm -Pg $SOURCES &gt; ${TARGET}.tmp1",
