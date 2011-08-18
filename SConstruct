@@ -575,7 +575,7 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
             shlib_suffix ]
         shlib_suffix += '.' + libversion
         (major, age, revision) = libversion.split(".")
-        soname = libname + "." + major
+        soname = libname + ".so." + major
         shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
     elif platform == 'aix':
         shlib_pre_action = [
