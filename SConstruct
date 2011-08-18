@@ -643,6 +643,8 @@ compiled_gpsdlib = Library(env=env,
                            sources=libgpsd_sources,
                            version=libversion, parse_flags=usblibs + rtlibs + bluezlibs)
 
+libraries = [compiled_gpslib, compiled_gpsdlib]
+
 if qt_env:
     qtobjects = []
     qt_flags = qt_env['CFLAGS']
@@ -663,6 +665,7 @@ if qt_env:
         qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
                                        CC=compile_with, CFLAGS=compile_flags))
     compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libversion)
+    libraries.append(compiled_qgpsmmlib)
 
 # The libraries have dependencies on system libraries
 
@@ -693,6 +696,7 @@ gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 gpsd = gpsd_env.Program('gpsd', gpsd_sources,
                         parse_flags = gpsdlibs + rtlibs + dbus_xmit_libs)
+
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs+rtlibs)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'], parse_flags=gpsdlibs+rtlibs)
 gpsdctl = env.Program('gpsdctl', ['gpsdctl.c'], parse_flags=gpslibs)
@@ -883,7 +887,7 @@ if manbuilder:
 
 ## Where it all comes together
 
-build = env.Alias('build', [binaries, python_built_extensions, manpage_targets])
+build = env.Alias('build', [libraries, binaries, python_built_extensions, manpage_targets])
 env.Clean(build, glob.glob("*.o") + glob.glob("*.os"))
 env.Default(*build)
 
