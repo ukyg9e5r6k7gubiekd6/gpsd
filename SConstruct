@@ -574,7 +574,9 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
             '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
             shlib_suffix ]
         shlib_suffix += '.' + libversion
-        shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=${TARGET}' ]
+        (major, age, revision) = libversion.split(".")
+        soname = libname + "." + major
+        shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
     elif platform == 'aix':
         shlib_pre_action = [
             "nm -Pg $SOURCES &gt; ${TARGET}.tmp1",
@@ -662,6 +664,7 @@ else:
 
 # Klugery to handle sonames ends
 
+# Must be MAJOR.AGE.REVISION
 libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 
 compiled_gpslib = Library(env=env,
