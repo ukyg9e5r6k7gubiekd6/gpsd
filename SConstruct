@@ -621,22 +621,20 @@ def VersionedSharedLibraryInstall(env, destination, libs):
     shlib_suffix = env.subst('$SHLIBSUFFIX')
     post_action = None
 
-    ilib = env.Install(destination, libs)
+    ilibs = env.Install(destination, libs)
 
     if platform == 'posix':
-        post_action = [ 'rm -f $TARGET',
-                                      'ln -s ${SOURCE.file} $TARGET' ]
-        post_action_output_re = ['%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
-                                               shlib_suffix ]
-
-
-    if post_action:
-        post_action_output = re.sub(post_action_output_re[0],
-                                                  post_action_output_re[1],
-                                                  str(ilib[0]))
-        env.Command(post_action_output, ilib,
-                    post_action)
-    return ilib
+        post_action = [ 'rm -f $TARGET', 'ln -s ${SOURCE} $TARGET' ]
+        suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
+        for lib in map(str, libs):
+            if lib.count(".") != 4:
+                # We need a library fullname in foo.so.x.y.z form to proceed
+                raise ValueError
+            # For libfoo.so.x.y.z, create links libfoo.so and libfoo.so.x
+            for linksuffix in [shlib_suffix, shlib_suffix + "." + lib.split(".")[2]]:
+                linkname = re.sub(suffix_re, linksuffix, lib)
+                env.Command(linkname, lib, post_action)
+    return ilibs
 
 if not env["shared"]:
     def Library(env, target, sources, version, parse_flags=[]):
