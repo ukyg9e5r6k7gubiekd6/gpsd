@@ -616,36 +616,26 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
         env.Command(shlib_post_action_output, lib, shlib_post_action)
     return lib
 
-def InstallVersionedSharedLibrary(env, destination, lib):
+def VersionedSharedLibraryInstall(env, destination, libs):
     platform = env.subst('$PLATFORM')
     shlib_suffix = env.subst('$SHLIBSUFFIX')
-    shlib_install_pre_action = None
-    shlib_install_post_action = None
+    post_action = None
+
+    ilib = env.Install(destination, libs)
 
     if platform == 'posix':
-        shlib_post_action = [ 'rm -f $TARGET',
-                              'ln -s ${SOURCE.file} $TARGET' ]
-        shlib_post_action_output_re = ['%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
-                                       shlib_suffix ]
-        shlib_install_post_action = shlib_post_action
-        shlib_install_post_action_output_re = shlib_post_action_output_re
+        post_action = [ 'rm -f $TARGET',
+                                      'ln -s ${SOURCE.file} $TARGET' ]
+        post_action_output_re = ['%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
+                                               shlib_suffix ]
 
-    ilib = env.Install(destination, lib)
 
-    if shlib_install_pre_action:
-        shlib_install_pre_action_output = re.sub(shlib_install_pre_action_output_re[0],
-                                                 shlib_install_pre_action_output_re[1],
-                                                 str(ilib[0]))
-        env.Command(shlib_install_pre_action_output, ilib,
-                    shlib_install_pre_action)
-        env.Depends(shlib_install_pre_action_output, ilib)
-
-    if shlib_install_post_action:
-        shlib_install_post_action_output = re.sub(shlib_install_post_action_output_re[0],
-                                                  shlib_install_post_action_output_re[1],
+    if post_action:
+        post_action_output = re.sub(post_action_output_re[0],
+                                                  post_action_output_re[1],
                                                   str(ilib[0]))
-        env.Command(shlib_install_post_action_output, ilib,
-                    shlib_install_post_action)
+        env.Command(post_action_output, ilib,
+                    post_action)
     return ilib
 
 if not env["shared"]:
@@ -660,7 +650,7 @@ else:
                                      lib_objs=sources,
                                      parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: \
-                     InstallVersionedSharedLibrary(env, libdir, sources)
+                     VersionedSharedLibraryInstall(env, libdir, sources)
 
 # Klugery to handle sonames ends
 
