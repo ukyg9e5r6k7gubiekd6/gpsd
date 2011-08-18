@@ -36,6 +36,9 @@ without having to take Python with you.
 You will need scons version 1.2.0 or later to build the code. The
 autotools build from 2.96 and earlier versions has been dropped.
 
+Note: parallelized scons builds (-j option) sometimes fail mysteriously.
+We don't know whether this is due to a bug in our recipe or in scons.
+
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
 
