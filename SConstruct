@@ -628,10 +628,12 @@ def VersionedSharedLibraryInstall(env, destination, libs):
         suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
         for lib in map(str, libs):
             if lib.count(".") != 4:
-                # We need a library fullname in foo.so.x.y.z form to proceed
+                # We need a library name in libfoo.so.x.y.z form to proceed
                 raise ValueError
-            # For libfoo.so.x.y.z, create links libfoo.so and libfoo.so.x
-            for linksuffix in [shlib_suffix, shlib_suffix + "." + lib.split(".")[2]]:
+            # For libfoo.so.x.y.z, links libfoo.so libfoo.so.x.y libfoo.so.x
+            major_name = shlib_suffix + "." + lib.split(".")[2]
+            minor_name = major_name + "." + lib.split(".")[3]
+            for linksuffix in [shlib_suffix, major_name, minor_name]:
                 linkname = re.sub(suffix_re, linksuffix, lib)
                 env.Command(linkname, lib, post_action)
     return ilibs
