@@ -577,19 +577,6 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
         soname = "lib" + libname + shlib_suffix + "." + major
         shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
         shlib_suffix += '.' + libversion
-    elif platform == 'aix':
-        shlib_pre_action = [
-            "nm -Pg $SOURCES &gt; ${TARGET}.tmp1",
-            "grep ' [BDT] ' &lt; ${TARGET}.tmp1 &gt; ${TARGET}.tmp2",
-            "cut -f1 -d' ' &lt; ${TARGET}.tmp2 &gt; ${TARGET}",
-            "rm -f ${TARGET}.tmp[12]" ]
-        shlib_pre_action_output_re = [ '$', '.exp' ]
-        shlib_post_action = [ 'rm -f $TARGET', 'ln -s $SOURCE $TARGET' ]
-        shlib_post_action_output_re = [
-            '%s\\.[0-9\\.]*' % re.escape(shlib_suffix),
-            shlib_suffix ]
-        shlib_suffix += '.' + libversion
-        shlink_flags += ['-G', '-bE:${TARGET}.exp', '-bM:SRE']
     elif platform == 'cygwin':
         shlink_flags += [ '-Wl,-Bsymbolic',
                           '-Wl,--out-implib,${TARGET.base}.a' ]
@@ -602,13 +589,6 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
                             SHLIBSUFFIX=shlib_suffix,
                             SHLINKFLAGS=shlink_flags, parse_flags=parse_flags)
 
-    if shlib_pre_action:
-        shlib_pre_action_output = re.sub(shlib_pre_action_output_re[0],
-                                         shlib_pre_action_output_re[1],
-                                         str(lib[0]))
-        env.Command(shlib_pre_action_output, [ lib_objs ],
-                     shlib_pre_action)
-        env.Depends(lib, shlib_pre_action_output)
     if shlib_post_action:
         shlib_post_action_output = re.sub(shlib_post_action_output_re[0],
                                           shlib_post_action_output_re[1],
