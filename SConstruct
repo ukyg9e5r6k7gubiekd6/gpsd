@@ -822,7 +822,7 @@ if st != 0:
     from datetime import datetime
     rev = datetime.now().isoformat()[:-4]
 revision='#define REVISION "%s"\n' %(rev.strip(),)
-env.Textfile(target="revision.h", source=[revision])
+env.NoClean(env.Textfile(target="revision.h", source=[revision]))
 
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
                      'gps_maskdump.c', 'ais_json.c', 'revision.h']
