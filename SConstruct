@@ -569,32 +569,38 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
     shlink_flags = SCons.Util.CLVar(env.subst('$SHLINKFLAGS'))
 
     if platform == 'posix':
-        shlib_post_action = ['rm -f $TARGET','ln -s ${SOURCE.file} $TARGET']
-        shlib_post_action_output_re = [
-            '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix),
-            shlib_suffix ]
+        ilib_suffix = shlib_suffix + '.' + libversion
         (major, age, revision) = libversion.split(".")
         soname = "lib" + libname + shlib_suffix + "." + major
         shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
-        shlib_suffix += '.' + libversion
     elif platform == 'cygwin':
+        ilib_suffix = shlib_suffix
         shlink_flags += [ '-Wl,-Bsymbolic',
                           '-Wl,--out-implib,${TARGET.base}.a' ]
     elif platform == 'darwin':
-        shlib_suffix = '.' + libversion + shlib_suffix
+        ilib_suffix = '.' + libversion + shlib_suffix
         shlink_flags += [ '-current_version', '%s' % libversion,
                           '-undefined', 'dynamic_lookup' ]
 
-    lib = env.SharedLibrary(libname,lib_objs,
-                            SHLIBSUFFIX=shlib_suffix,
+    ilib = env.SharedLibrary(libname,lib_objs,
+                            SHLIBSUFFIX=ilib_suffix,
                             SHLINKFLAGS=shlink_flags, parse_flags=parse_flags)
 
-    if shlib_post_action:
-        shlib_post_action_output = re.sub(shlib_post_action_output_re[0],
-                                          shlib_post_action_output_re[1],
-                                          str(lib[0]))
-        env.Command(shlib_post_action_output, lib, shlib_post_action)
-    return lib
+    if platform == 'posix':
+        if libversion.count(".") != 2:
+            # We need a library name in libfoo.so.x.y.z form to proceed
+            raise ValueError
+        lib = "lib" + libname + ".so." + libversion
+        suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
+        # For libfoo.so.x.y.z, links libfoo.so libfoo.so.x.y libfoo.so.x
+        major_name = shlib_suffix + "." + lib.split(".")[2]
+        minor_name = major_name + "." + lib.split(".")[3]
+        for linksuffix in [shlib_suffix, major_name, minor_name]:
+            linkname = re.sub(suffix_re, linksuffix, lib)
+            env.AddPostAction(ilib, 'rm -f %s; ln -s %s %s' % (
+                linkname, lib, linkname))
+
+    return ilib
 
 def VersionedSharedLibraryInstall(env, destination, libs):
     platform = env.subst('$PLATFORM')
