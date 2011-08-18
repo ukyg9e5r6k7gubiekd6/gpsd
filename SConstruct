@@ -631,9 +631,7 @@ def VersionedSharedLibraryInstall(env, destination, libs):
             minor_name = major_name + "." + lib.split(".")[3]
             for linksuffix in [shlib_suffix, major_name, minor_name]:
                 linkname = re.sub(suffix_re, linksuffix, lib)
-                linkpath = os.path.join(destination, linkname)
-                libpath = os.path.join(destination, lib)
-                env.AddPostAction(ilibs, 'rm -f %s; ln -s %s %s' % (linkpath, libpath, linkpath))
+                env.AddPostAction(ilibs, 'cd %s; rm -f %s; ln -s %s %s' % (destination, linkname, lib, linkname))
     return ilibs
 
 if not env["shared"]:
