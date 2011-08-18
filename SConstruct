@@ -619,12 +619,8 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
 def VersionedSharedLibraryInstall(env, destination, libs):
     platform = env.subst('$PLATFORM')
     shlib_suffix = env.subst('$SHLIBSUFFIX')
-    post_action = None
-
     ilibs = env.Install(destination, libs)
-
     if platform == 'posix':
-        post_action = [ 'rm -f $TARGET', 'ln -s ${SOURCE} $TARGET' ]
         suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
         for lib in map(str, libs):
             if lib.count(".") != 4:
@@ -635,7 +631,9 @@ def VersionedSharedLibraryInstall(env, destination, libs):
             minor_name = major_name + "." + lib.split(".")[3]
             for linksuffix in [shlib_suffix, major_name, minor_name]:
                 linkname = re.sub(suffix_re, linksuffix, lib)
-                env.Command(linkname, lib, post_action)
+                linkpath = os.path.join(destination, linkname)
+                libpath = os.path.join(destination, lib)
+                env.AddPostAction(ilibs, 'rm -f %s; ln -s %s %s' % (linkpath, libpath, linkpath))
     return ilibs
 
 if not env["shared"]:
