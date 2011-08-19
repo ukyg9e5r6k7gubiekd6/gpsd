@@ -22,7 +22,7 @@
 # without changing the --prefix prefix.
 
 # Release identification begins here
-gpsd_version = "3.0~dev"
+gpsd_version = "3.0"
 libgps_major = 20
 libgps_minor = 0
 libgps_age   = 0

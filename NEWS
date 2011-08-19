@@ -1,4 +1,4 @@
-* Wed Aug 11 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0~dev  
+* Fri Aug 19 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0
   POLL subobject name changes: fixes -> tpv, skyview -> sky.
   Fix a timestamp-clobbering bug in the C library revealed by an
   obscure car-nav device, the MyGuide 3100. The DEVICE 'activated'
