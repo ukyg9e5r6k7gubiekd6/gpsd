@@ -1780,6 +1780,7 @@ int main(int argc, char *argv[])
     bool go_background = true;
     struct timeval tv;
     const struct gps_type_t **dp;
+    bool in_restart;
 
 #ifdef PPS_ENABLE
     /*@-nullpass@*/
@@ -1989,16 +1990,22 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_PROG, "shared-segment creation succeeded,\n");
 #endif /* SHM_EXPORT_ENABLE */
 
-    /* 
-     * Drop privileges.
-     *
-     * Yes, the test for this is non-orthogonal and ugly.  The problem
-     * is that there is a line-discipline setup call in the PPS
-     * support, way later on, that require root (see ntpshm.c and
-     * look for "requires root"). We've overloaded -N with the meaning
-     * "don't drop privileges" pending a better solution.
+    /*
+     * We open devices specified on the command line *before* dropping
+     * privileges in case one of them is a serial device with PPS support
+     * and we need to set the line discipline, which requires root.
      */
-    if (getuid() == 0 && go_background) {
+    in_restart = false;
+    for (i = optind; i < argc; i++) {
+	if (!add_device(argv[i])) {
+	    gpsd_report(LOG_ERROR,
+			"initial GPS device %s open failed\n",
+			argv[i]);
+	}
+    }
+
+    /* drop privileges */
+    if (getuid() == 0) {
 	struct passwd *pw;
 	struct stat stb;
 
@@ -2049,6 +2056,7 @@ int main(int argc, char *argv[])
 	    if (allocated_device(&devices[dfd]))
 		(void)gpsd_wrap(&devices[dfd]);
 	}
+	in_restart = true;
 	gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
     }
 
@@ -2072,13 +2080,19 @@ int main(int argc, char *argv[])
     /* initialize the GPS context's time fields */
     gpsd_time_init(&context, time(NULL));
 
-    for (i = optind; i < argc; i++) {
-	if (!add_device(argv[i])) {
-	    gpsd_report(LOG_ERROR,
-			"GPS device %s open failed\n",
-			argv[i]);
+    /*
+     * If we got here via SIGINT, reopen any command-line devices. PPS 
+     * through these won't work, as we've dropped privileges and can
+     * no longer change line disciplines.
+     */
+    if (in_restart)
+	for (i = optind; i < argc; i++) {
+	    if (!add_device(argv[i])) {
+		gpsd_report(LOG_ERROR,
+			    "GPS device %s open failed\n",
+			    argv[i]);
+	    }
 	}
-    }
 
     while (0 == signalled) {
 	(void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));

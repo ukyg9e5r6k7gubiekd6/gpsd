@@ -193,8 +193,8 @@ nonexistent in USB GPSes which lack a DTR line.)</para>
 </varlistentry>
 <varlistentry>
 <term>-N</term>
-<listitem><para>Don't daemonize; run in foreground.  Also suppresses
-privilege-dropping.  This switch is mainly useful for debugging.</para>
+<listitem><para>Don't daemonize; run in foreground. 
+This switch is mainly useful for debugging.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -795,6 +795,12 @@ supported.</para>
 <para>The ISGPS used for RTCM2 and subframes decoder logic is
 sufficiently convoluted to confuse some compiler optimizers, notably
 in GCC 3.x at -O2, into generating bad code.</para>
+
+<para>Devices meant to to use PPS for high-precision timekeeping may
+fail if they are specifed after startup by a control-socket command,
+as opposed to on the daemon's original command line. (Root privileges
+are dropped early, and some Unix varients require them in order to set
+the PPS line discipline.)</para>
 </refsect1>
 <refsect1 id='files'><title>FILES</title>
 
