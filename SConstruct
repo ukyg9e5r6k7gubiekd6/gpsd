@@ -1290,7 +1290,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # This is how to ship a release to Berlios incoming.
     # It requires developer access verified via ssh.
     #
-    upload_ftp = Utility('upload-ftp', dist, [
+    upload_ftp = Utility('upload-ftp', 'gpsd-${VERSION}.tar.gz', [
             'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
             'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
             ])
