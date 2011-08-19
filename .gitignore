@@ -17,7 +17,7 @@ gpsfake
 gpsprof
 jsongen.py
 maskaudit.py
-valgrind-audit
+valgrind-audit.py
 # Unit tests
 test_float
 test_bits
