@@ -208,6 +208,13 @@ reported seems to vary randomly with level of optimization.</p>
 regression-test failures. Dropping back to -O1 or going up to -O3
 restores behavior like GCC 4.4.1's.</p>
 
+<h2 id="scons_cpp">scons doesn't honnor parse_flags in a Program() using C++</h2>
+
+<p>In building test_gpsmm, we should get libgps_dump_state() from the
+client library, but scons has a bug; we can't get it to add -lgps to th,
+apparently because it doesn't honor parse_flags on a Program() build of
+a C++ .cpp file.</p>
+
 <h1>Fixed Problems</h1>
 
 <p>We document these here in case you're running on an older system.
