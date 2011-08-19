@@ -59,6 +59,8 @@ For working with DBUS, you'll need the DBUS development
 headers and libraries installed.  Under Debian/Ubuntu these
 are the packages libdbus-1-dev and libdbus-glib-1-dev.
 
+Under Ubuntu, the ncurses package you want is libncurses5-dev.
+
 For building from the source tree, or if you change the man page
 source, xslt and docbook xsl style files are used to generate nroff
 -man source from docbook xml.  The following packages are used in this

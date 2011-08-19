@@ -1408,11 +1408,16 @@ used for rollover checks with 'scons leapseconds.cache' Note: This will
 require Internet access, and fail (leaving the existing leap-second
 list in place) if that is not available.</dd>
 
-<dt>6. Update the NEWS file</dt>
+<dt>6. Fix compiler and scan-build warnings.</dt>
+<dd>Look for compiler and <a
+href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>
+warnings and fix them.</dd>
+
+<dt>7. Update the NEWS file</dt>
 <dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
-<dt>7. Run the regression tests and other checks</dt>
+<dt>8. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship.
 <ol>
 <li>scons testbuild</li>
@@ -1420,27 +1425,26 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <li>scons splint</li>
 <li>scons cppcheck</li>
 <li>scons xmllint</li>
-<li>devtools/valgrind-audit</li>
+<li>scons valgrind-audit</li>
 <li>devtools/flockest</li>
-<li><a href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a></li>
 </ol>
 </dd>
 
-<dt>8. Ship to Berlios</dt>
+<dt>9. Ship to Berlios</dt>
 <dd>Make the tarball (scons dist) and upload to berlios.de (make upload-ftp),
 and do Berlios's
 <a href="https://developer.berlios.de/project/admin/?group_id=2116">release procedure</a>.</dd>
 
-<dt>9. Tag the release in git</dt>
+<dt>10. Tag the release in git</dt>
 <dd>Doing 'make release-tag' should accomplish this. The tag push
 will trigger mail to the announce list.</dd>
 
-<dt>10. Bump the release number and push that commit</dt>
+<dt>11. Bump the release number and push that commit</dt>
 <dd>Bump the release number in configure.ac, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>11. Announce the release</dt>
+<dt>12. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the dev list.</dd>
 </dl>

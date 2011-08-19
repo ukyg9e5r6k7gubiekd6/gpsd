@@ -854,11 +854,11 @@ def substituter(target, source, env):
     with open(str(target[0]), "w") as tfp:
         tfp.write(content)
 for fn in ("packaging/rpm/gpsd.spec.in", "libgps.pc.in", "libgpsd.pc.in",
-       "jsongen.py.in", "maskaudit.py.in", "valgrind-audit.in"):
+       "jsongen.py.in", "maskaudit.py.in", "valgrind-audit.py.in"):
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
-    post1 = env.AddPostAction(builder, 'chmod -w $TARGET')
+    env.AddPostAction(builder, 'chmod -w $TARGET')
     if fn.endswith(".py.in"):
-        env.AddPostAction(post1, 'chmod +x $TARGET')
+        env.AddPostAction(builder, 'chmod +x $TARGET')
 
 # Documentation
 
@@ -1156,6 +1156,9 @@ json_regress = Utility('json-regress', [test_json], [
 bits_regress = Utility('bits-regress', [test_bits], [
     '$SRCDIR/test_bits'
     ])
+
+# Run a valgrind audit on the daemon  - not in normal tests
+valgrind_audit = Utility('valgrind-audit', ['valgrind-audit.py'], 'valgrind-audit.py')
 
 # Run all normal regression tests
 check = env.Alias('check', [
