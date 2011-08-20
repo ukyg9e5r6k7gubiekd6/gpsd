@@ -90,17 +90,6 @@ src="http://www.ohloh.net/p/3944/widgets/project_cocomo.js"></script>
 </tr>
 </table>
 
-<h1 id='news'>Urgent news for maintainers of <code>gpsd</code> clients</h1>
-
-<p>We've been warning it was coming for years, and it's here: in 2.90,
-the request/response protocol used by <code>gpsd</code> has changed in
-ways that will break your application if you're not careful.  The old
-protocol is gone from the daemon.  It is still supported in the client
-library, but will remain so only for a very limited time.  Read <a
-href="protocol-transition.html">"Moving to GPSD-NG: a Guide for Client
-Developers"</a> to find out why this is happening and what you need to
-do about it.</p>
-
 <h1>About <code>gpsd</code></h1>
 
 <p><code>gpsd</code> is a service daemon that monitors one or more
@@ -386,6 +375,10 @@ GPSD. A slice of what doing software architecture is like in the
 real world, where history can weigh nearly as much as today's
 requirements list.</dd>
 
+<dt><a href="http://esr.ibiblio.org/?p=3617">GPSD 3.0 finally ships. It's been a long epic.</a></dt>
+<dd>What a long strange trip it's been. GPSD 3.0 ships, five years of
+effort pays off, and I think out loud about protocol transitions and
+ubiquity and what it's like to be an infrastructure gnome.</dd>
 </dl>
 
 <h1 id='recipes'>Recipes and related resources</h1>

@@ -24,6 +24,7 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 import os, urllib, re, random, time, calendar, math, sys
+import gps.misc
 
 __locations = [
     (
@@ -243,7 +244,7 @@ def leapbound(year, month):
 
 if __name__ == '__main__':
     import sys, getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "f:g:h:i:n:o:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "f:g:h:i:n:o:I:O:")
     for (switch, val) in options:
         if (switch == '-f'):    # Fetch USNO data to cache locally
             save_leapseconds(val)
@@ -262,6 +263,12 @@ if __name__ == '__main__':
             raise SystemExit, 0
         elif (switch == '-o'):  # Compute RFC822 date from Unix time
             print unix_to_rfc822(float(val))
+            raise SystemExit, 0
+        elif (switch == '-I'):  # Compute Unix time from ISO8601 date
+            print gps.misc.isotime(val)
+            raise SystemExit, 0
+        elif (switch == '-O'):  # Compute ISO8601 date from Unix time
+            print gps.misc.isotime(float(val))
             raise SystemExit, 0
 
         print "Current leap second:", retrieve()
