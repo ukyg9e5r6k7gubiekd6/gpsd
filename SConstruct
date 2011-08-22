@@ -580,6 +580,7 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
     elif platform == 'darwin':
         ilib_suffix = '.' + libversion + shlib_suffix
         shlink_flags += [ '-current_version', '%s' % libversion,
+                          '-compatibility_version', '%s' % libversion,
                           '-undefined', 'dynamic_lookup' ]
 
     ilib = env.SharedLibrary(libname,lib_objs,
