@@ -565,21 +565,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     char chrony_path[PATH_MAX];
 
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
-    /* TODO the socket for root would be
-     *   /var/run/chrony.ttyXX.sock
-     * for now it is always
-     *   /tmp/chrony.ttyXX.sock
-     */
-#ifdef __UNUSED__
-    /* sadly root was dropped very early, until a way if found to run this
-     * before dropping root it will not work. */
-    if( 0 == getuid() ) {
-        /* only root can use /var/run */
+
+    if ( 0 == getuid() ) {
+	/* this case will fire on command-line devices; 
+	 * they're opened before priv-dropping.  Matters because
+         * only root can use /var/run.
+	 */
 	(void)snprintf(chrony_path, sizeof (chrony_path),
 		"/var/run/chrony.%s.sock", basename(session->gpsdata.dev.path));
-    } else
-#endif
-    {
+    } else {
 	(void)snprintf(chrony_path, sizeof (chrony_path),
 		"/tmp/chrony.%s.sock", 	basename(session->gpsdata.dev.path));
     }
