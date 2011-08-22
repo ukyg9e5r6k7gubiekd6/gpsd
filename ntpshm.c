@@ -579,7 +579,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     }
 
     if (access(chrony_path, F_OK) != 0) {
-	gpsd_report(LOG_PROG, "PPS chrony socket %s doesn't exist", chrony_path);
+	gpsd_report(LOG_PROG, "PPS chrony socket %s doesn't exist\n", chrony_path);
     } else {
 	chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
 	if (chronyfd < 0)
