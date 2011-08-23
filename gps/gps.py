@@ -282,7 +282,7 @@ class gps(gpsdata, gpsjson):
             self.fix.epc =       default("epc",   NaN, CLIMBERR_SET)
             self.fix.mode =      default("mode",  0,   MODE_SET)
         elif self.data.get("class") == "SKY":
-            for attrp in "xyvhpg":
+            for attrp in ("x", "y", "v", "h", "p", "g"):
                 setattr(self, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
             if "satellites" in self.data.keys():
                 self.satellites = [] 

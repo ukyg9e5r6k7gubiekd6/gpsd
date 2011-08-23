@@ -64,7 +64,7 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
-import sys, os, time, signal, pty, termios # fcntl, array, struct
+import os, time, signal, pty, termios # fcntl, array, struct
 import exceptions, threading, socket
 import gps
 import packet as sniffer
@@ -115,8 +115,8 @@ class TestLoad:
         #gps.packet.register_report(reporter)
         type_latch = None
         while True:
-            (len, ptype, packet, counter) = getter.get(logfp.fileno())
-            if len <= 0:
+            (plen, ptype, packet, counter) = getter.get(logfp.fileno())
+            if plen <= 0:
                 break
             elif ptype == sniffer.COMMENT_PACKET:
                 # Some comments are magic
