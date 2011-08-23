@@ -208,7 +208,7 @@ if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
 # Don't change CCFLAGS if already set by environment.
-if not 'CCFLAGS' in env:
+if not 'CCFLAGS' in os.environ:
     # Should we build with profiling?
     if env['profiling']:
         env.Append(CCFLAGS=['-pg'])
