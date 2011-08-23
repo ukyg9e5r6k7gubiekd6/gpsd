@@ -321,7 +321,7 @@ class gps(gpsdata, gpsjson):
         else:
             return self.response
 
-    def stream(self, flags=0, outfile=None):
+    def stream(self, flags=0, devpath=None):
         "Ask gpsd to stream reports at your client."
         if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
             flags |= WATCH_JSON
@@ -332,7 +332,7 @@ class gps(gpsdata, gpsjson):
                     arg += 'r-'
                     return self.send(arg)
             else:
-                gpsjson.stream(self, ~flags)
+                gpsjson.stream(self, ~flags, devpath)
         else: # flags & WATCH_ENABLE:
             if flags & WATCH_OLDSTYLE:
                 arg = 'w+'
@@ -340,7 +340,7 @@ class gps(gpsdata, gpsjson):
                     arg += 'r+'
                     return self.send(arg)
             else:
-                gpsjson.stream(self, flags)
+                gpsjson.stream(self, flags, devpath)
 
 if __name__ == '__main__':
     import readline, getopt, sys

@@ -173,6 +173,10 @@ class FakeGPS:
         self.index = 0
         self.progress("gpsfake: %s provides %d sentences\n" % (self.testload.name, len(self.testload.sentences)))
 
+    def write(self, line):
+        "Throw an error if this superclass is ever instantiated."
+        raise ValueError, line
+
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
@@ -429,7 +433,7 @@ class TestSession:
         self.threadlock = None
     def spawn(self):
         for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
-            signal.signal(sig, lambda signal, frame: self.cleanup())
+            signal.signal(sig, lambda unused, dummy: self.cleanup())
         self.daemon.spawn(background=True, prefix=self.prefix, port=self.port, options=self.options)
         self.daemon.wait_pid()
     def set_predicate(self, pred):

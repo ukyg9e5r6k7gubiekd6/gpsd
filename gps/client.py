@@ -144,7 +144,7 @@ class gpsjson(gpscommon):
         if hasattr(self.data, "satellites"):
             self.data.satellites = map(lambda x: dictwrapper(x), self.data.satellites)
 
-    def stream(self, flags=0, outfile=None):
+    def stream(self, flags=0, devpath=None):
         "Control streaming reports from the daemon,"
         if flags & WATCH_DISABLE:
             arg = '?WATCH={"enable":false'
@@ -175,7 +175,7 @@ class gpsjson(gpscommon):
             if flags & WATCH_TIMING:
                 arg += ',"scaled":true'
             if flags & WATCH_DEVICE:
-                arg += ',"device":"%s"' % outfile
+                arg += ',"device":"%s"' % devpath
         return self.send(arg + "}")
 
 class dictwrapper:
