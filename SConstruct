@@ -207,20 +207,21 @@ env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
-# Should we build with profiling?
-if env['profiling']:
-    env.Append(CCFLAGS=['-pg'])
-    env.Append(LDFLAGS=['-pg'])
+# Don't change CCFLAGS if already set by environment.
+if not 'CCFLAGS' in env:
+    # Should we build with profiling?
+    if env['profiling']:
+        env.Append(CCFLAGS=['-pg'])
+        env.Append(LDFLAGS=['-pg'])
+    # Should we build with debug symbols?
+    if env['debug']:
+        env.Append(CCFLAGS=['-g'])
+        env.Append(CCFLAGS=['-O0'])
+    else:
+        env.Append(CCFLAGS=['-O2'])
 
 # Get a slight speedup by not doing automatic RCS and SCCS fetches.
 env.SourceCode('.', None)
-
-# Should we build with debug symbols?
-if env['debug']:
-    env.Append(CCFLAGS=['-g'])
-    env.Append(CCFLAGS=['-O0'])
-else:
-    env.Append(CCFLAGS=['-O2'])
 
 ## Cross-development
 
