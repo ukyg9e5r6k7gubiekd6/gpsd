@@ -113,12 +113,10 @@ def get():
 def save_leapseconds(outfile):
     "Fetch the USNO leap-second history data and make a leap-second list."
     skip = True
-    leapsecs = []
     try:
         fetchobj = urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat")
         # This code assumes that after 1980, leap-second increments are
         # always integrally one second and every increment is listed here
-        leapsecs = []
         fp = open(outfile, "w")
         for line in fetchobj:
             if line.startswith(" 1980"):
@@ -142,11 +140,6 @@ def fetch_leapsecs(filename):
 def make_leapsecond_include(infile):
     leapsecs = fetch_leapsecs(infile)
     leapsecs.append(time.time())          # Add sentinel
-    def label(i):
-        if i == len(leapsecs) - 1:
-            return '?'
-        else:
-            return str(i)
     year = time.strftime("%Y", time.localtime(time.time()))
     return ("#define CENTURY_BASE\t%s00\n" % year[:2]) + ("#define LEAPSECOND_NOW\t%d\n" % (len(leapsecs)-2))
 
@@ -243,7 +236,7 @@ def leapbound(year, month):
     return tv
 
 if __name__ == '__main__':
-    import sys, getopt
+    import getopt
     (options, arguments) = getopt.getopt(sys.argv[1:], "f:g:h:i:n:o:I:O:")
     for (switch, val) in options:
         if (switch == '-f'):    # Fetch USNO data to cache locally

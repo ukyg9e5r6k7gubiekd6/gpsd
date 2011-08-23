@@ -713,8 +713,6 @@ ais_specs = (
 
 def generate(spec):
     global outboard
-    def member(spec, attr, itype, default):
-        return report
 
     report = ""
     leader = " " * 39

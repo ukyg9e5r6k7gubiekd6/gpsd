@@ -1013,9 +1013,12 @@ splint_table = [
 for (target,sources,description,params) in splint_table:
     env.Alias('splint',Splint(target,sources,description,params))
 
-
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck --template gcc --all --force $SRCDIR")
+
+# Sanity-check Python code
+Utility("pychecker", ["jsongen.py", "maskaudit.py"],
+        ["pychecker jsongen.py leapsecond.py maskaudit.py"])
 
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),
