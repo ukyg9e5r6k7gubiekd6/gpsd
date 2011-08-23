@@ -68,7 +68,7 @@ static sourcetype_t gpsd_classify(const char *path)
 	return source_unknown;
 }
 
-#ifdef __UNUSED__
+#ifdef __linux__
 #include <dirent.h>
 #include <ctype.h>
 
@@ -96,8 +96,6 @@ static int fusercount(const char *path)
 	    if (readlink(fdpath, linkpath, sizeof(linkpath)) == -1)
 		continue;
 	    if (strcmp(linkpath, path) == 0) {
-		(void)closedir(procd);
-		//(void)closedir(fdd);
 		++cnt;
 	    }
 	}
@@ -107,7 +105,7 @@ static int fusercount(const char *path)
 
     return cnt;
 }
-#endif /* __UNUSED__ */
+#endif /* __linux__ */
 
 void gpsd_tty_init(struct gps_device_t *session)
 /* to be called on allocating a device */
@@ -413,7 +411,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	 */
 	(void)ioctl(session->gpsdata.gps_fd, (unsigned long)TIOCEXCL);
 
-#ifdef __UNSAFE__
+#ifdef __linux__
 	/*
 	 * Don't touch devices already opened by another process.
 	 */
@@ -425,7 +423,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	    session->gpsdata.gps_fd = -1;
 	    return -1;
 	}
-#endif /* __UNSAFE__ */
+#endif /* __linux__ */
     }
 
 #ifdef FIXED_PORT_SPEED
