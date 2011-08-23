@@ -1019,7 +1019,7 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
 
 # Sanity-check Python code
 Utility("pychecker", ["jsongen.py", "maskaudit.py"],
-        ["pychecker --no-callinit --unusednames jsongen.py leapsecond.py maskaudit.py gps/*.py"])
+        ["ln -s gpsprof gpsprof.py; gpsprof.py; pychecker --no-callinit --unusednames jsongen.py leapsecond.py maskaudit.py gpsprof.py gps/*.py; rm gpsprof.py"])
 
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),

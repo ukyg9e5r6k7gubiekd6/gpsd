@@ -6,7 +6,7 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-import sys, os, time, getopt, tempfile, time, socket, math, copy
+import sys, os, time, getopt, socket, math, copy
 import gps
 
 class Baton:
@@ -57,14 +57,14 @@ class spaceplot:
         res = "# Position uncertainty, %s, %s, %ds cycle\n" % \
                  (title, session.gps_id, session.cycle)
         return res
-    def data(self, session):
+    def data(self, unused):
         res = ""
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
             (raw1, raw2, alt) = self.fixes[i]
             res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
         return res
-    def plot(self, title, session):
+    def plot(self, unused, session):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
@@ -166,7 +166,7 @@ class uninstrumented:
                  (title,
                   session.gps_id, session.baudrate,
                   session.stopbits, session.cycle)
-    def data(self, session):
+    def data(self, unused):
         res = ""
         for seconds in self.stats:
             res += "%2.6lf\n" % seconds
@@ -201,10 +201,9 @@ class rawplot:
         for hn in ("T1", "D1", "E2", "T2", "D2"):
             res += "%-13s" % hn
         res += "\n#------- -----  --------------------"
-        for i in range(0, 5):
-            res += "  " + ("-" * 11)
+        res += ("  " + ("-" * 11)) * 5
         return res + "\n"
-    def data(self, session):
+    def data(self, unused):
         res = ""
         for timings in self.stats:
             res += "% 8s  %4d  %2.9f  %2.9f  %2.9f  %2.9f  %2.9f  %2.9f\n" \
@@ -217,7 +216,7 @@ class rawplot:
                    timings.c_recv - timings.emit,
                    timings.c_decode - timings.c_recv)
         return res
-    def plot(self, file, session):
+    def plot(self, unused, session):
         fmt = '''
 set autoscale
 set key below
@@ -233,8 +232,7 @@ plot \
                       session.gps_id, session.baudrate,
                       session.stopbits, session.cycle)
         res += self.header(session)
-        for dummy in range(0, 5):
-            res += self.data(session) + "e\n"
+        res += (self.data(session) + "e\n") * 5
         return res
 
 class splitplot:
@@ -261,7 +259,7 @@ class splitplot:
         for s in tuple(splitplot.sentences) + ("T1", "D1", "E2", "T2", "D2", "length"):
             res += "---------\t"
         return res + "--------\n"
-    def data(self, session):
+    def data(self, unused):
         res = ""
         for timings in self.stats:
             for s in splitplot.sentences:
@@ -304,8 +302,7 @@ plot \
                    (i+1, self.sentences[i])
         res = fmt[:-1] + "\n"
         res += self.header(session)
-        for dummy in range(sc+5):
-            res += self.data(session) + "e\n"
+        res += (self.data(session) + "e\n") * (sc + 5)
         return res
 
 class cycle:
@@ -323,6 +320,7 @@ class cycle:
             return round(n*100) / 100.0
         intervals = {}
         last_seen = {}
+        last_command = ""
         for timing in self.stats:
             # Throw out everything but the leader in each GSV group
             if timing.tag[-3:] == "GSV" and last_command[-3:] == "GSV":
