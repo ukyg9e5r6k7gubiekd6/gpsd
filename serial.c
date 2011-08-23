@@ -81,7 +81,7 @@ static int fusercount(const char *path)
     int cnt = 0;
 
     if ((procd = opendir("/proc")) == NULL)
-	return false;
+	return -1;
     while ((procentry = readdir(procd)) != NULL) {
 	if (isdigit(procentry->d_name[0])==0)
 	    continue;
@@ -97,7 +97,8 @@ static int fusercount(const char *path)
 		continue;
 	    if (strcmp(linkpath, path) == 0) {
 		(void)closedir(procd);
-		return true;
+		(void)closedir(fdd);
+		++cnt;
 	    }
 	}
 	(void)closedir(fdd);
