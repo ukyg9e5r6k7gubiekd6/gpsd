@@ -155,7 +155,6 @@ for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP"
         j = i
         if i == "LD":
             i = "SHLINK"
-        env[j]=os.getenv(i)
         if i == "CFLAGS" or i == "CCFLAGS":
             env.Replace(**{j: Split(os.getenv(i))})
         else:
@@ -709,17 +708,35 @@ gpsmon_sources = [
 # Don't lose the RPATH when building gpsd
 gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
-gpsd = gpsd_env.Program('gpsd', gpsd_sources,
-                        parse_flags = gpsdlibs + rtlibs + dbus_xmit_libs)
 
-gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs+rtlibs)
-gpsctl = env.Program('gpsctl', ['gpsctl.c'], parse_flags=gpsdlibs+rtlibs)
+gpsd = gpsd_env.Program('gpsd', gpsd_sources,
+                        parse_flags = gpsdlibs + dbus_xmit_libs)
+env.Depends(gpsd, [compiled_gpsdlib, compiled_gpslib])
+
+gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs)
+env.Depends(gpsdecode, [compiled_gpsdlib, compiled_gpslib])
+
+gpsctl = env.Program('gpsctl', ['gpsctl.c'], parse_flags=gpsdlibs)
+env.Depends(gpsctl, [compiled_gpsdlib, compiled_gpslib])
+
 gpsdctl = env.Program('gpsdctl', ['gpsdctl.c'], parse_flags=gpslibs)
-gpsmon = env.Program('gpsmon', gpsmon_sources, parse_flags=gpsdlibs + ncurseslibs)
+env.Depends(gpsdctl, compiled_gpslib)
+
+gpsmon = env.Program('gpsmon', gpsmon_sources,
+                     parse_flags=gpsdlibs + ncurseslibs)
+env.Depends(gpsmon, [compiled_gpsdlib, compiled_gpslib])
+
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
+env.Depends(gpspipe, compiled_gpslib)
+
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], parse_flags=gpslibs+dbus_recv_libs)
+env.Depends(gpspipe, compiled_gpslib)
+
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], parse_flags=gpslibs)
+env.Depends(lcdgps, compiled_gpslib)
+
 cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
+env.Depends(cgps, compiled_gpslib)
 
 binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
@@ -728,13 +745,19 @@ if ncurseslibs:
 # Test programs
 test_float = env.Program('test_float', ['test_float.c'])
 test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpslibs)
+env.Depends(test_geoid, compiled_gpslib)
 test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
+env.Depends(test_json, compiled_gpslib)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], parse_flags=gpslibs)
+env.Depends(test_mkgmtime, compiled_gpslib)
 test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
 test_packet = env.Program('test_packet', ['test_packet.c'], parse_flags=gpsdlibs)
+env.Depends(test_packet, [compiled_gpsdlib, compiled_gpslib])
 test_bits = env.Program('test_bits', ['test_bits.c', "bits.c"])
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], parse_flags=gpslibs)
+env.Depends(test_gpsmm, compiled_gpslib)
 test_libgps = env.Program('test_libgps', ['test_libgps.c'], parse_flags=gpslibs)
+env.Depends(test_libgps, compiled_gpslib)
 testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_json, test_libgps]
 if cxx and env["libgpsmm"]:
