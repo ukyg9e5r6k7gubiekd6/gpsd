@@ -330,26 +330,35 @@ for f in ("daemon", "strlcpy", "strlcat"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
 
+# The actual distinction here is whether the platform has ncurses in the
+# base system or not. If it does, pkg-config is not likely to tell us
+# anything useful. FreeBSD does, Linux doesn't. Most likely other BSDs
+# are like FreeBSD.
+ncurseslibs= []
 if env['ncurses']:
-    if config.CheckPKG('ncurses'):
-        ncurseslibs = pkg_config('ncurses')
-    elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
-        ncurseslibs = ['!ncurses5-config --libs --cflags']
+    if sys.platform == 'linux':
+        if config.CheckPKG('ncurses'):
+            ncurseslibs = pkg_config('ncurses')
+        elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
+            ncurseslibs = ['!ncurses5-config --libs --cflags']
     else:
-        ncurseslibs= []
-else:
-    ncurseslibs= []
+        ncurseslibs= [ '-lncurses' ]
 
-if env['usb'] and config.CheckPKG('libusb-1.0'):
-    confdefs.append("#define HAVE_LIBUSB 1\n")
-    try:
-        usblibs = pkg_config('libusb-1.0')
-    except OSError:
-        print "pkg_config is confused about the state of libusb-1.0."
+if env['usb']:
+    # In FreeBSD, USB libraries are in the base system
+    if sys.platform.startswith("freebsd"):
+        confdefs.append("#define HAVE_LIBUSB 1\n")
+        usblibs = [ "-lusb"]
+    elif config.CheckPKG('libusb-1.0'):
+        confdefs.append("#define HAVE_LIBUSB 1\n")
+        try:
+            usblibs = pkg_config('libusb-1.0')
+        except OSError:
+            print "pkg_config is confused about the state of libusb-1.0."
+            usblibs = []
+    else:
+        confdefs.append("/* #undef HAVE_LIBUSB */\n")
         usblibs = []
-else:
-    confdefs.append("/* #undef HAVE_LIBUSB */\n")
-    usblibs = []
 
 if config.CheckLib('librt'):
     confdefs.append("#define HAVE_LIBRT 1\n")
