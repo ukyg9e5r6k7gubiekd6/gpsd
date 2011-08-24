@@ -156,6 +156,10 @@ for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP"
         if i == "LD":
             i = "SHLINK"
         env[j]=os.getenv(i)
+        if i == "CFLAGS" or i == "CCFLAGS":
+            env.Replace(**{j: Split(os.getenv(i))})
+        else:
+            env.Replace(**{j: os.getenv(i)})
 for flags in ["LDFLAGS", "CPPFLAGS"]:
     if os.environ.has_key(flags):
         env.MergeFlags([os.getenv(flags)])
@@ -173,7 +177,8 @@ if env["shared"]:
 else:
     pkg_config = lambda pkg: ['!pkg-config --cflags --libs --static %s' %(pkg, )]
 
-if env['CC'] == 'gcc':
+# GCC isn't always named gcc, alas.
+if env['CC'] == 'gcc' or (sys.platform.startswith('freebsd') and env['CC'] == 'cc'):
     # Enable all GCC warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
     # of the way some of the JSON-parsing code is generated.
