@@ -39,9 +39,11 @@ static gps_mask_t superstar2_msg_ephemeris(struct gps_device_t *,
  */
 static ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t);
 static void superstar2_event_hook(struct gps_device_t *, event_t);
+static ssize_t superstar2_write(struct gps_device_t *, char *, size_t);
+#ifdef RECONFIGURE_ENABLE
 static bool superstar2_set_speed(struct gps_device_t *, speed_t, char, int);
 static void superstar2_set_mode(struct gps_device_t *, int);
-static ssize_t superstar2_write(struct gps_device_t *, char *, size_t);
+#endif /* RECONFIGURE_ENABLE */
 
 
 /*
@@ -521,7 +523,6 @@ static bool superstar2_set_speed(struct gps_device_t *session,
 	return (superstar2_write(session, (char *)speed_msg, 7) == 7);
     }
 }
-#endif /* RECONFIGURE_ENABLE */
 
 static void superstar2_set_mode(struct gps_device_t *session, int mode)
 {
@@ -538,6 +539,7 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 	session->back_to_nmea = false;
     }
 }
+#endif /* RECONFIGURE_ENABLE */
 
 /* *INDENT-OFF* */
 const struct gps_type_t superstar2_binary = {

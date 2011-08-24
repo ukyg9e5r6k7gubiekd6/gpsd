@@ -259,7 +259,7 @@ int gpsd_open(struct gps_device_t *session)
     }
 #endif /* NETFEED_ENABLE */
 #ifdef PASSTHROUGH_ENABLE
-    else if (strncmp(session->gpsdata.dev.path, "gpsd://", 7) == 0) {
+    if (strncmp(session->gpsdata.dev.path, "gpsd://", 7) == 0) {
 	/*@-branchstate -nullpass@*/
 	char server[GPS_PATH_MAX], *port;
 	socket_t dsock;

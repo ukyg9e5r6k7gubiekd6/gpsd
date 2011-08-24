@@ -398,8 +398,10 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     fv = atof((const char *)cp);
     if (fv < 231) {
 	session->driver.sirf.driverstate |= SIRF_LT_231;
+#ifdef RECONFIGURE_ENABLE
 	if (fv > 200)
 	    sirfbin_mode(session, 0);
+#endif /* RECONFIGURE_ENABLE */
     } else if (fv < 232) {
 	session->driver.sirf.driverstate |= SIRF_EQ_231;
     } else {

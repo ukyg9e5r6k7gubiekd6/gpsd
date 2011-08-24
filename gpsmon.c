@@ -287,7 +287,9 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 	(void)wattrset(packetwin, A_NORMAL);
     }
 }
+#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
+#ifdef RECONFIGURE_ENABLE
 static void announce_log(/*@in@*/ const char *str)
 {
    if (packetwin != NULL) {
@@ -301,7 +303,8 @@ static void announce_log(/*@in@*/ const char *str)
        (void)fprintf(logfile, ">>>%s\n", str);
    }
 }
-#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
+#endif /* RECONFIGURE_ENABLE */
+
 
 #ifdef CONTROLSEND_ENABLE
 bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
@@ -427,9 +430,9 @@ static void onsig(int sig UNUSED)
 
 int main(int argc, char **argv)
 {
-#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
+#ifdef RECONFIGURE_ENABLE
     unsigned int v;
-#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
+#endif /* RECONFIGURE_ENABLE */
     int option, status, last_type = BAD_PACKET;
     ssize_t len;
     struct fixsource_t source;

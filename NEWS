@@ -4,7 +4,8 @@
   in the build recipe. Under Linux, gpsd will refrain from opening
   serial or USB devices that another process has open, avoiding potential 
   problems with class FF USB devices opened by other programs. Parallelized
-  builds now work.
+  builds now work. Small but fatal problems with reconfigure=no and netfeed=no
+  builds have been fixed.
 
 * Fri Aug 19 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0
   POLL subobject name changes: fixes -> tpv, skyview -> sky.

@@ -1087,13 +1087,13 @@ static void handle_request(struct subscriber_t *sub,
     } else if (strncmp(buf, "DEVICE", 6) == 0
 	       && (buf[6] == ';' || buf[6] == '=')) {
 	struct devconfig_t devconf;
-	struct gps_device_t *device;
 	buf += 6;
 	devconf.path[0] = '\0';	/* initially, no device selection */
 	if (*buf == ';') {
 	    ++buf;
 	} else {
 #ifdef RECONFIGURE_ENABLE
+	    struct gps_device_t *device;
 	    /* first, select a device to operate on */
 	    int status = json_device_read(buf + 1, &devconf, &end);
 	    if (end == NULL)

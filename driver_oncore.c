@@ -55,8 +55,10 @@ static gps_mask_t oncore_msg_firmware(struct gps_device_t *, unsigned char *,
  */
 static ssize_t oncore_control_send(struct gps_device_t *, char *, size_t);
 static void oncore_event_hook(struct gps_device_t *, event_t);
+#ifdef RECONFIGURE_ENABLE
 static bool oncore_set_speed(struct gps_device_t *, speed_t, char, int);
 static void oncore_set_mode(struct gps_device_t *, int);
+#endif /* RECONFIGURE_ENABLE */
 
 /*
  * Decode the navigation solution message
