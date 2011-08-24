@@ -181,12 +181,13 @@ if env['CC'] == 'gcc' or (sys.platform.startswith('freebsd') and env['CC'] == 'c
     # Enable all GCC warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
     # of the way some of the JSON-parsing code is generated.
-    # Also not including -Wcast-qual
+    # Also not including -Wcast-qual and -Wimplicit-function-declaration,
+    # because we can't seem to keep scons from psassing it to g++.
     env.Append(CFLAGS=Split('''-Wextra -Wall -Wno-uninitialized
                             -Wno-missing-field-initializers -Wcast-align
                             -Wmissing-declarations -Wmissing-prototypes
                             -Wstrict-prototypes -Wpointer-arith -Wreturn-type
-                            -Wimplicit-function-declaration -D_GNU_SOURCE'''))
+                            -D_GNU_SOURCE'''))
 
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
