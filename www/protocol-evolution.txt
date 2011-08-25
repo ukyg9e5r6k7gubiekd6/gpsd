@@ -403,7 +403,7 @@ extensibility and explicitness*.
 
 One way you can compare protocols is by the amount of overhead they
 incur.  In a binary format this is the percentage of the bit stream 
-that goas to magic numbers, framing bits, padding, checksums, and
+that goes to magic numbers, framing bits, padding, checksums, and
 the like.  In a textual format the equivalent is the percentage
 of the bitstream devoted to field delimiters, sentence start and 
 sentence-end sentinels, and (in protocols like NMEA 0183) textual
