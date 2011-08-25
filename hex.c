@@ -46,28 +46,8 @@ char /*@ observer @*/ *gpsd_hexdump(char *binbuf, size_t binbuflen)
     }
 }
 
-int gpsd_hexpack( /*@in@*/ const char *src, /*@out@ */ char *dst, size_t len)
-{
-/* hex2bin source string to destination - destination can be same as source */
-    int i, k, l;
-
-    /*@ -mustdefine @*/
-    l = (int)(strlen(src) / 2);
-    if ((l < 1) || ((size_t) l > len))
-	return -2;
-
-    for (i = 0; i < l; i++)
-	if ((k = hex2bin(src + i * 2)) != -1)
-	    dst[i] = (char)(k & 0xff);
-	else
-	    return -1;
-    (void)memset(dst + i, '\0', (size_t) (len - i));
-    return l;
-    /*@ +mustdefine @*/
-}
-
 /*@ +charint -shiftimplementation @*/
-int hex2bin(const char *s)
+static int hex2bin(const char *s)
 {
     int a, b;
 
@@ -93,6 +73,26 @@ int hex2bin(const char *s)
 	return -1;
 
     return ((a << 4) + b);
+}
+
+int gpsd_hexpack( /*@in@*/ const char *src, /*@out@ */ char *dst, size_t len)
+/* hex2bin source string to destination - destination can be same as source */
+{
+    int i, k, l;
+
+    /*@ -mustdefine @*/
+    l = (int)(strlen(src) / 2);
+    if ((l < 1) || ((size_t) l > len))
+	return -2;
+
+    for (i = 0; i < l; i++)
+	if ((k = hex2bin(src + i * 2)) != -1)
+	    dst[i] = (char)(k & 0xff);
+	else
+	    return -1;
+    (void)memset(dst + i, '\0', (size_t) (len - i));
+    return l;
+    /*@ +mustdefine @*/
 }
 
 /*@ -charint +shiftimplementation @*/
