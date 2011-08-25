@@ -601,7 +601,17 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
                             SHLIBSUFFIX=ilib_suffix,
                             SHLINKFLAGS=shlink_flags, parse_flags=parse_flags)
 
-    if platform == 'posix':
+    if platform == 'darwin':
+        if libversion.count(".") != 2:
+            # We need a library name in libfoo.x.y.z.dylib form to proceed
+            raise ValueError
+        lib = 'lib' + libname + '.' + libversion + '.dylib'
+        lib_no_ver = 'lib' + libname + '.dylib'
+        # Link libfoo.x.y.z.dylib to libfoo.dylib
+        env.AddPostAction(ilib, 'rm -f %s; ln -s %s %s' % (
+            lib_no_ver, lib, lib_no_ver))
+        env.Clean(lib, lib_no_ver)
+    elif platform == 'posix':
         if libversion.count(".") != 2:
             # We need a library name in libfoo.so.x.y.z form to proceed
             raise ValueError
