@@ -2,10 +2,9 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#include <sys/types.h>
-#include "gpsd_config.h"
+#include "gpsd.h"
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-#include "dbusexport.h"
+#include <dbus/dbus.h>
 
 static DBusConnection *connection = NULL;
 

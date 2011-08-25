@@ -43,10 +43,6 @@
 
 #include "gpsd_config.h"
 
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-#include "dbusexport.h"
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
-
 #include "gpsd.h"
 #include "sockaddr.h"
 #include "gps_json.h"
