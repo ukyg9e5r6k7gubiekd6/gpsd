@@ -9,7 +9,7 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
-import sys, os, signal, time, getopt, socket, random
+import sys, os, time, getopt, socket, random
 import gps.fake
 
 class Baton:
