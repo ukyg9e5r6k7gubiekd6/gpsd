@@ -48,7 +48,7 @@ void send_dbus_fix(struct gps_device_t *channel)
     eph = EMIX(gpsfix->epx, gpsfix->epy);
     gpsd_devname = gpsdata->dev.path;
 
-    /* Send the named signel.  */
+    /* Send the named signal.  */
     message = dbus_message_new_signal("/org/gpsd", "org.gpsd", "fix");
     dbus_message_append_args(message,
 			     DBUS_TYPE_DOUBLE, &(gpsfix->time),
