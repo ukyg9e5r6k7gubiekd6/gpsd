@@ -669,7 +669,7 @@ libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
-                          version=libversion)
+                          version=libversion, parse_flags= ["-lm"])
 
 compiled_gpsdlib = Library(env=env,
                            target="gpsd",
@@ -702,7 +702,7 @@ if qt_env:
 
 # The libraries have dependencies on system libraries
 
-gpslibs = ["-lgps", "-lm"]
+gpslibs = ["-lgps"]
 gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
 # Source groups
