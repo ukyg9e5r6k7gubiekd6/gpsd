@@ -9,6 +9,11 @@
 
 #include "gpsd.h"
 
+void gpsd_report(int errlevel UNUSED, const char *fmt UNUSED, ...)
+{
+    /* stub required to prevent linkage error */
+}
+
 int main(int argc, char **argv)
 {
     double lat, lon;

@@ -519,7 +519,6 @@ libgps_sources = [
     "ais_json.c",
     "daemon.c",
     "gpsutils.c",
-    "geoid.c",
     "gpsdclient.c",
     "gps_maskdump.c",
     "hex.c",
@@ -542,6 +541,7 @@ libgpsd_sources = [
     "bsd_base64.c",
     "crc24q.c",
     "gpsd_json.c",
+    "geoid.c",
     "isgps.c",
     "libgpsd_core.c",
     "net_dgpsip.c",
@@ -764,8 +764,8 @@ if ncurseslibs:
 
 # Test programs
 test_float = env.Program('test_float', ['test_float.c'])
-test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpslibs)
-env.Depends(test_geoid, compiled_gpslib)
+test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpsdlibs)
+env.Depends(test_geoid, compiled_gpsdlib)
 test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
 env.Depends(test_json, compiled_gpslib)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], parse_flags=gpslibs)
