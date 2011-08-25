@@ -717,11 +717,8 @@ extern void shm_update(struct gps_context_t *, struct gps_data_t *);
 
 /* dbusexport.c */
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-#include <dbus/dbus.h>
-
 int initialize_dbus_connection (void);
 void send_dbus_fix (struct gps_device_t* channel);
-
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 
 /* srecord.c */
