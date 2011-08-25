@@ -121,13 +121,14 @@ for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
 pathopts = (
-    ("sysconfdir",          "/etc",        "system configuration directory"),
-    ("bindir",              "/bin",        "application binaries directory"),
-    ("includedir",          "/include",    "header file directory"),
-    ("libdir",              "/lib",        "system libraries"),
-    ("sbindir",             "/sbin",       "system binaries directory"),
-    ("mandir",              "/share/man",  "manual pages directory"),
-    ("docdir",              "/share/doc",  "documents directory"),
+    ("sysconfdir",          "/etc",           "system configuration directory"),
+    ("bindir",              "/bin",           "application binaries directory"),
+    ("includedir",          "/include",       "header file directory"),
+    ("libdir",              "/lib",           "system libraries"),
+    ("sbindir",             "/sbin",          "system binaries directory"),
+    ("mandir",              "/share/man",     "manual pages directory"),
+    ("docdir",              "/share/doc",     "documents directory"),
+    ("pkgconfigdir",        "/lib/pkgconfig", "pkgconfig file directory"),
     )
 for (name, default, help) in pathopts:
     opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
@@ -337,12 +338,12 @@ for f in ("daemon", "strlcpy", "strlcat"):
 # are like FreeBSD.
 ncurseslibs= []
 if env['ncurses']:
-    if config.CheckPKG('ncurses'):
+    if sys.platform.startswith('freebsd'):
+        ncurseslibs= [ '-lncurses' ]
+    elif config.CheckPKG('ncurses'):
         ncurseslibs = pkg_config('ncurses')
     elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
         ncurseslibs = ['!ncurses5-config --libs --cflags']
-    elif 'bsd' in sys.platform:
-        ncurseslibs= [ '-lncurses' ]
 
 if env['usb']:
     # In FreeBSD, USB libraries are in the base system
@@ -999,8 +1000,7 @@ python_install = [  python_extensions_install,
                     python_progs_install,
                     python_egg_info_install]
 
-pkgconfigdir = os.path.join(installdir('libdir'), 'pkgconfig')
-pc_install = [ env.Install(pkgconfigdir, x) for x in ("libgps.pc", "libgpsd.pc") ]
+pc_install = [ env.Install(installdir('pkgconfigdir'), x) for x in ("libgps.pc", "libgpsd.pc") ]
 
 maninstall = []
 for manpage in base_manpages.keys() + python_manpages.keys():
