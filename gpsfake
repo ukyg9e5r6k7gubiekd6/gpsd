@@ -10,7 +10,7 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
 import sys, os, time, getopt, socket, random
-import gps.fake
+import gps, gps.fake as gpsfake   # The "as" pacifies pychecker
 
 class Baton:
     "Ship progress indications to stderr."
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     else:
         print >>sys.stderr, "Processing %s" % ",".join(arguments)
 
-    test = gps.fake.TestSession(prefix=monitor, port=port, options=doptions, udp=udp, verbose=verbose, predump=predump)
+    test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions, udp=udp, verbose=verbose, predump=predump)
 
     if pipe:
         test.reporter = sys.stdout.write
@@ -169,13 +169,13 @@ if __name__ == '__main__':
         for logfile in arguments:
             try:
                 test.gps_add(logfile, speed=speed, pred=fakehook)
-            except gps.fake.TestLoadError, e:
+            except gpsfake.TestLoadError, e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1
-            except gps.fake.PacketError, e:
+            except gpsfake.PacketError, e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1
-            except gps.fake.DaemonError, e:
+            except gpsfake.DaemonError, e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1
             except IOError, e:
