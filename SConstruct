@@ -725,7 +725,13 @@ gpsmon_sources = [
     ]
 
 ## Production programs
-# Don't lose the RPATH when building gpsd
+
+# FIXME: What we really want is for libm to be linked when libgps is.
+# VersionedSharedLibrary accomplishes this for its case, but we don't
+# know how to force it when linking staticly.
+if not env['shared']:
+    env.MergeFlags("-lm")
+
 gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 
