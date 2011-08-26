@@ -240,8 +240,9 @@ is miles per hour. </para>
 satellite display and able to run on a serial terminal or
 terminal emulator.</para>
 
-<para> The <option>-s</option> option prevents <application>cgps</application>
-from displaying the raw data. This display can also be toggled with the s
+<para> The <option>-s</option> option prevents
+<application>cgps</application> from displaying the data coming from
+the daemon. This display can also be toggled with the s
 command.</para>
 
 <para>The <option>-m</option> option will display your magnetic
