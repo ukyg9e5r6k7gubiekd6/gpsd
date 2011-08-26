@@ -1078,7 +1078,9 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
 
 # Sanity-check Python code
 Utility("pychecker", ["jsongen.py", "maskaudit.py"],
-        ["ln -s gpsprof gpsprof.py; ln -s gpscat gpscat.py; ln -s gpsfake gpsfake-driver.py; pychecker --no-callinit --unusednames jsongen.py leapsecond.py maskaudit.py gpsprof.py gpscat.py gpsfake-driver.py gps/*.py; rm gpsprof.py gpscat.py gpsfake-driver.py"])
+        ['''for f in  gpsprof gpscat gpsfake; do ln -s $$f $$f.py; done; \
+        pychecker --no-callinit --unusednames jsongen.py leapsecond.py maskaudit.py gpsprof.py gpscat.py gpsfake.py gps/*.py;
+        for f in  gpsprof gpscat gpsfake; do rm $$f.py $$f.pyc; done'''])
 
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),
