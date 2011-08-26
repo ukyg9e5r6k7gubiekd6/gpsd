@@ -786,7 +786,9 @@ env.Depends(test_gpsmm, compiled_gpslib)
 test_libgps = env.Program('test_libgps', ['test_libgps.c'], parse_flags=gpslibs)
 env.Depends(test_libgps, compiled_gpslib)
 testprogs = [test_float, test_trig, test_bits, test_packet,
-             test_mkgmtime, test_geoid, test_json, test_libgps]
+             test_mkgmtime, test_geoid, test_libgps]
+if env['socket_export']:
+    testprogs.append(test_json)
 if cxx and env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
