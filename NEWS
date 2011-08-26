@@ -2,11 +2,12 @@
   Change -N semantics so it only suppresses backgrounding; privileges
   are now dropped as in normal background operation. Darwin port fixes
   in the build recipe. Under Linux, gpsd will refrain from opening
-  serial or USB devices that another process has open, avoiding potential 
-  problems with class FF USB devices opened by other programs. Parallelized
-  builds now work. Small but fatal problems with reconfigure=no and netfeed=no
-  builds have been fixed.  Build recipe ported for FreeBSD.  libgps now 
-  brings -lm with it.
+  serial or USB devices that another process has open, avoiding
+  potential problems with class FF USB devices opened by other
+  programs. Parallelized builds now work. Small but fatal problems
+  with reconfigure=no and netfeed=no builds have been fixed.  Build
+  recipe ported for FreeBSD and OpenBSD.  libgps now brings -lm with
+  it.
 
 * Fri Aug 19 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0
   POLL subobject name changes: fixes -> tpv, skyview -> sky.
