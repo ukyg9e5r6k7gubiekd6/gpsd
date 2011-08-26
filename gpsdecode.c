@@ -423,10 +423,13 @@ static void decode(FILE *fpin, FILE*fpout)
 	    if ((changed & PASSTHROUGH_IS) != 0) {
 		(void)fputs((char *)session.packet.outbuffer, fpout);
 		(void)fputs("\n", fpout);
-	    } else
+	    } 
+#ifdef SOCKET_EXPORT_ENABLE
+	    else
 		json_data_report(changed, 
 				 &session.gpsdata, &policy, 
 				 buf, sizeof(buf));
+#endif /* SOCKET_EXPORT_ENABLE */
 	    (void)fputs(buf, fpout);	
 #ifdef AIVDM_ENABLE
 	} else if (session.packet.type == AIVDM_PACKET) {
@@ -439,6 +442,7 @@ static void decode(FILE *fpin, FILE*fpout)
     }
 }
 
+#ifdef SOCKET_EXPORT_ENABLE
 static void encode(FILE *fpin, FILE *fpout)
 /* JSON format on fpin to JSON on fpout - idempotency test */
 {
@@ -470,6 +474,7 @@ static void encode(FILE *fpin, FILE *fpout)
     }
 }
 /*@ +compdestroy +compdef +usedef @*/
+#endif /* SOCKET_EXPORT_ENABLE */
 
 int main(int argc, char **argv)
 {
@@ -535,9 +540,14 @@ int main(int argc, char **argv)
     //argc -= optind;
     //argv += optind;
 
-    if (mode == doencode)
+    if (mode == doencode) {
+#ifdef SOCKET_EXPORT_ENABLE
 	encode(stdin, stdout);
-    else
+#else
+	(void)fprintf(stderr, "gpsdecode: encoding support isn't compiled.\n");
+	exit(1);
+#endif /* SOCKET_EXPORT_ENABLE */
+    } else
 	decode(stdin, stdout);
     exit(0);
 }
