@@ -121,7 +121,7 @@ these.</para>
 <para><function>gps_close()</function> ends the session.</para>
 
 <para><function>gps_send()</function> writes a command to the daemon.
-It is not available when using the shared-memory export.
+It does nothing when using the shared-memory export.
 The second argument must be a format string containing elements from
 the command set documented at
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
@@ -142,7 +142,7 @@ socket to the daemon has closed or if the shared-memory segment was
 unavailable, and 0 if no data is available.</para>
 
 <para><function>gps_waiting()</function> can be used to check whether
-there is data from the daemon (it is not available when usng the
+there is data from the daemon (it always returns true when using the
 shared-memory export). The second argument is the maximum amount of
 time to wait (in microseconds) on input before returning.  It returns
 true if there input waiting, false on timeout (no data waiting) or
@@ -158,7 +158,7 @@ Included in case your application wishes to manage socket I/O
 itself.</para>
 
 <para><function>gps_data()</function> returns the contents of the
-client data buffer (not available when using the shared-memory
+client data buffer (it returns NULL when using the shared-memory
 export). Use with care; this may fail to be a NUL-terminated string if
 WATCH_RAW is enabled.</para>
 

@@ -1717,8 +1717,12 @@ extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *,
 		      /*@out@*/struct gps_data_t *);
 extern int gps_sock_read(/*@out@*/struct gps_data_t *);
 extern int gps_sock_close(struct gps_data_t *);
+extern int gps_sock_send(struct gps_data_t *, const char *);
 extern int gps_shm_open(/*@out@*/struct gps_data_t *);
 extern int gps_shm_read(struct gps_data_t *);
+extern bool gps_sock_waiting(const struct gps_data_t *, int);
+extern int gps_sock_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
+extern const char /*@observer@*/ *gps_sock_data(const struct gps_data_t *);
 extern void gps_shm_close(struct gps_data_t *);
 
 extern void libgps_trace(int errlevel, const char *, ...);

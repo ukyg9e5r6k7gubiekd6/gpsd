@@ -7,6 +7,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
@@ -134,6 +135,64 @@ int gps_read(struct gps_data_t *gpsdata)
     /*@ +usedef +compdef +uniondef @*/
 
     return status;
+}
+
+int gps_send(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, const char *fmt CONDITIONALLY_UNUSED, ...)
+/* send a command to the gpsd instance */
+{
+    int status = -1;
+    char buf[BUFSIZ];
+    va_list ap;
+
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf) - 2, fmt, ap);
+    va_end(ap);
+    if (buf[strlen(buf) - 1] != '\n')
+	(void)strlcat(buf, "\n", BUFSIZ);
+
+#ifdef SOCKET_EXPORT_ENABLE
+    status = gps_sock_send(gpsdata, buf);
+#endif /* SOCKET_EXPORT_ENABLE */
+
+    return status;
+}
+
+int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, 
+	unsigned int flags CONDITIONALLY_UNUSED,
+	/*@null@*/ void *d CONDITIONALLY_UNUSED)
+{
+    int status = -1;
+
+#ifdef SOCKET_EXPORT_ENABLE
+    status = gps_sock_stream(gpsdata, flags, d);
+#endif /* SOCKET_EXPORT_ENABLE */
+
+    return status;
+}
+
+const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
+/* return the contents of the client data buffer */
+{
+    const char *bufp = NULL;
+
+#ifdef SOCKET_EXPORT_ENABLE
+    bufp = gps_sock_data(gpsdata);
+#endif /* SOCKET_EXPORT_ENABLE */
+
+    return bufp;
+}
+
+bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int timeout CONDITIONALLY_UNUSED)
+/* is there input waiting from the GPS? */
+{
+    /* this is bogus, but I can't think of a better solution yet */
+    bool waiting = true;
+
+#ifdef SOCKET_EXPORT_ENABLE
+    waiting = gps_sock_waiting(gpsdata, timeout);
+#endif /* SOCKET_EXPORT_ENABLE */
+
+    return waiting;
 }
 
 extern const char /*@observer@*/ *gps_errstr(const int err)

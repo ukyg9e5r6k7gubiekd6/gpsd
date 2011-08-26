@@ -10,7 +10,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include <stdarg.h>
 #include <math.h>
 #include <locale.h>
 #include <assert.h>
@@ -32,6 +31,7 @@
 
 #include "gps.h"
 #include "gpsd.h"
+#ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
 #ifdef S_SPLINT_S
@@ -94,7 +94,7 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
 }
 /*@+branchstate@*/
 
-bool gps_waiting(const struct gps_data_t *gpsdata, int timeout)
+bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* is there input waiting from the GPS? */
 {
 #ifndef USE_QT
@@ -467,23 +467,15 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 }
 /*@ +compdef @*/
 
-const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata)
+const char /*@observer@*/ *gps_sock_data(const struct gps_data_t *gpsdata)
 /* return the contents of the client data buffer */
 {
     return PRIVATE(gpsdata)->buffer;
 }
 
-int gps_send(struct gps_data_t *gpsdata, const char *fmt, ...)
+int gps_sock_send(struct gps_data_t *gpsdata, const char *buf)
 /* send a command to the gpsd instance */
 {
-    char buf[BUFSIZ];
-    va_list ap;
-
-    va_start(ap, fmt);
-    (void)vsnprintf(buf, sizeof(buf) - 2, fmt, ap);
-    va_end(ap);
-    if (buf[strlen(buf) - 1] != '\n')
-	(void)strlcat(buf, "\n", BUFSIZ);
 #ifndef USE_QT
     if (write(gpsdata->gps_fd, buf, strlen(buf)) == (ssize_t) strlen(buf))
 	return 0;
@@ -501,7 +493,7 @@ int gps_send(struct gps_data_t *gpsdata, const char *fmt, ...)
 #endif
 }
 
-int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
+int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 	       /*@null@*/ void *d)
 /* ask gpsd to stream reports at you, hiding the command details */
 {
@@ -568,5 +560,7 @@ int gps_stream(struct gps_data_t *gpsdata, unsigned int flags,
 	return gps_send(gpsdata, buf);
     }
 }
+
+#endif /* SOCKET_EXPORT_ENABLE */
 
 /* end */
