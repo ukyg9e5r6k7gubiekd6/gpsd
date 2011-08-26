@@ -774,13 +774,13 @@ class Base:
                 self.update_gpsdata(self.daemon.data)
             elif self.daemon.data["class"] == "GST":
                 self.noiseview.update(self.daemon.data)
-                if self.noise_latch == False:
+                if not self.noise_latch:
                     self.noise_latch = True
                     self.uimanager.get_widget('/MenuBar/View/Noise').set_active(True)
                     self.noisebox.show()
             elif self.daemon.data["class"] == "AIS":
                 self.aisview.update(self.daemon.data)
-                if self.ais_latch == False:
+                if not self.ais_latch:
                     self.ais_latch = True
                     self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
                     self.aisbox.show()
