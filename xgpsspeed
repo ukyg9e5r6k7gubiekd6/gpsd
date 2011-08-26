@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf8 -*-
 
 import pygtk
 pygtk.require('2.0')
@@ -11,9 +10,9 @@ from math import cos
 from math import sin
 from socket import error as SocketError
 
-__author__ = 'Robin Wittler <real@the-real.org>'
-__license__ = 'BSD'
-__version__ = '0.0.7'
+#__author__ = 'Robin Wittler <real@the-real.org>'
+#__license__ = 'BSD'
+__version__ = '0.0.8'
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
 #TODO
@@ -68,7 +67,7 @@ class Speedometer(gtk.DrawingArea):
         }
 
 
-    def expose_event(self, widget, event, data=None):
+    def expose_event(self, unused, event, empty=None):
         self.cr = self.window.cairo_create()
         self.cr.rectangle(
                 event.area.x,
@@ -269,7 +268,7 @@ class Main(object):
         self.actiongroup = gtk.ActionGroup('gpsspeed-ng')
         self.actiongroup.add_actions(
                 [('Quit', gtk.STOCK_QUIT, '_Quit', None,
-                    'Quit the Program', lambda x: gtk.main_quit()),
+                    'Quit the Program', lambda unused: gtk.main_quit()),
                  ('File', None, '_File'),
                  ('Units', None, '_Units')]
         )
@@ -281,7 +280,7 @@ class Main(object):
                  ('Nautical', None, '_Nautical', '<Control>n',
                      'Nautical Units', 2)
                  ],
-                0, lambda a, v: setattr(self.widget, 'speed_unit', ['mph',
+                0, lambda a, unused: setattr(self.widget, 'speed_unit', ['mph',
                 'kmh', 'knots'][a.get_current_value()])
         )
 
@@ -328,13 +327,13 @@ class Main(object):
             self.update_speed(self.daemon.data)
         return True
 
-    def handle_hangup(self, source, condition):
+    def handle_hangup(self, dummy, unused):
         w = gtk.MessageDialog(
                 type=gtk.MESSAGE_ERROR,
                 flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                 buttons=gtk.BUTTONS_OK
         )
-        w.connect("destroy", lambda w: gtk.main_quit())
+        w.connect("destroy", lambda unused: gtk.main_quit())
         w.set_title('gpsd error')
         w.set_markup("gpsd has stopped sending data.")
         w.run()
@@ -350,7 +349,7 @@ class Main(object):
         #TODO handle all cleanup operations here
         return False
 
-    def destroy(self, widget, data=None):
+    def destroy(self, unused, empty=None):
         gtk.main_quit()
 
     def run(self):
@@ -381,10 +380,10 @@ class Main(object):
 
 
 if __name__ == '__main__':
-    from sys import argv, exit
+    import sys
     from os.path import basename
     from optparse import OptionParser
-    prog = basename(argv[0])
+    prog = basename(sys.argv[0])
     usage = ('%s [-V|--version] [-h|--help] [--debug] [--host] ' +
             '[--port] [--device] [--speedunits {[mph] [kmh] [knots]}] ' +
             '[host [:port [:device]]]') %(prog)
@@ -435,7 +434,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     if options.version:
         print version
-        exit(0)
+        sys.exit(0)
     if args:
         arg = args[0].split(':')
         len_arg = len(arg)
@@ -447,7 +446,7 @@ if __name__ == '__main__':
             (options.host, options.port, options.device) = arg
         else:
             parser.print_help()
-            exit(0)
+            sys.exit(0)
     Main(
             host=options.host,
             port=options.port,
