@@ -346,20 +346,23 @@ if env['ncurses']:
         ncurseslibs = ['!ncurses5-config --libs --cflags']
 
 if env['usb']:
-    # In FreeBSD, USB libraries are in the base system
-    if config.CheckPKG('libusb-1.0'):
+    # In FreeBSD except version 7, USB libraries are in the base system
+    if sys.platform.startswith("freebsd") and not sys.platform.startswith("freebsd7"):
+        confdefs.append("#define HAVE_LIBUSB 1\n")
+        usblibs = [ "-lusb"]
+    elif config.CheckPKG('libusb-1.0'):
         confdefs.append("#define HAVE_LIBUSB 1\n")
         try:
             usblibs = pkg_config('libusb-1.0')
         except OSError:
             print "pkg_config is confused about the state of libusb-1.0."
             usblibs = []
-    elif sys.platform.startswith("freebsd"):
-        confdefs.append("#define HAVE_LIBUSB 1\n")
-        usblibs = [ "-lusb"]
     else:
         confdefs.append("/* #undef HAVE_LIBUSB */\n")
         usblibs = []
+else:
+    confdefs.append("/* #undef HAVE_LIBUSB */\n")
+    usblibs = []
 
 if config.CheckLib('librt'):
     confdefs.append("#define HAVE_LIBRT 1\n")
