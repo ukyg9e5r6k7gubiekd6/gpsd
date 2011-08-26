@@ -1339,7 +1339,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         '@tar --transform "s:^:gpsd-${VERSION}/:" -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
         ])
-    env.Clean(dist, "gpsd-${VERSION}.tar.gz")
+    env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
 
     # Make RPM from the specfile in packaging
     Utility('dist-rpm', dist, 'rpmbuild -ta $SOURCE')
