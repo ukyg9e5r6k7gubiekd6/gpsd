@@ -10,7 +10,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "gps.h"
+#include "gpsd.h"  /* could be gps.h if we didn't need s[lint decorations */
 
 #ifdef USE_QT
 #include <QDateTime>
