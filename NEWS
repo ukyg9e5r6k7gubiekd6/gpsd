@@ -1,13 +1,14 @@
-* Tue Aug 23 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1~dev
-  Change -N semantics so it only suppresses backgrounding; privileges
-  are now dropped as in normal background operation. Darwin port fixes
-  in the build recipe. Under Linux, gpsd will refrain from opening
-  serial or USB devices that another process has open, avoiding
-  potential problems with class FF USB devices opened by other
-  programs. Parallelized builds now work. Small but fatal problems
-  with reconfigure=no and netfeed=no builds have been fixed.  Build
-  recipe ported for FreeBSD and OpenBSD.  libgps now brings -lm with
-  it.
+* Fri Aug 25 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1~dev
+  A snap release mainly to get some scons recipe cleanups out the
+  door.  Parallelized builds now work. Small but fatal problems with
+  reconfigure=no, netfeed=no and sock_export=no builds have been
+  fixed.  Build recipe ported for Darwin, FreeBSD and OpenBSD.  libgps
+  now brings -lm with it. One bug fix: Under Linux, gpsd will refrain
+  from opening serial or USB devices that another process has open,
+  avoiding potential problems with class FF USB devices opened by
+  other programs.  One new feature: Change -N semantics so it only
+  suppresses backgrounding; privileges are now dropped as in normal
+  background operation.
 
 * Fri Aug 19 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0
   POLL subobject name changes: fixes -> tpv, skyview -> sky.
