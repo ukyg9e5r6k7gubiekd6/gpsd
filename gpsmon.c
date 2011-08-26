@@ -560,8 +560,8 @@ int main(int argc, char **argv)
 	if (source.device != NULL) {
 	    (void)gps_send(&session.gpsdata, WATCHRAWDEVICE, source.device);
 	    /*
-	     *  The gpsdata.dev is filled only in JSON mode,
-	     *  but we in super-raw mode.
+	     *  The gpsdata.dev member is filled only in JSON mode,
+	     *  but we are in super-raw mode.
 	     */
 	    (void)strlcpy(session.gpsdata.dev.path, source.device,
 			  sizeof(session.gpsdata.dev.path));
@@ -625,7 +625,6 @@ int main(int argc, char **argv)
     (void)wmove(packetwin, 0, 0);
 
     FD_ZERO(&select_set);
-
 
     if ((bailout = setjmp(terminate)) == 0) {
 	/*@ -observertrans @*/
