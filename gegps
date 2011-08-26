@@ -20,8 +20,8 @@
 # Modified by Chen Wei <weichen302@aol.com> for use with gpsd
 # Cleaned up and adapted for the GPSD project by Eric S. Raymond.
 
-import time, os, gps, getopt
-import sys
+import sys, os, getopt
+import gps
 
 KML_OPEN_IN_GE = '''\
 <?xml version="1.0" encoding="UTF-8"?>
