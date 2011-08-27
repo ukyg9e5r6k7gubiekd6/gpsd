@@ -1402,7 +1402,7 @@ will have a day or so to get their urgent fixes in.</dd>
 <dd>It will need to be modified in SConstruct.  Make sure the 'dev' 
 suffix is gone.</dd>
 
-<dt>5. Rebuild leapcheck.cache.</dt>  
+<dt>5. Rebuild leapseconds.cache.</dt>  
 <dd>Rebuild the leap-second list
 used for rollover checks with 'scons leapseconds.cache' Note: This will
 require Internet access, and fail (leaving the existing leap-second
@@ -1427,7 +1427,7 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <li>scons pychecker</li>
 <li>scons xmllint</li>
 <li>scons valgrind-audit</li>
-<li>devtools/flockest</li>
+<li>cd devtools; flocktest</li>
 </ol>
 </dd>
 

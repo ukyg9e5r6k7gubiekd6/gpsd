@@ -327,8 +327,9 @@ fi
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
 * Tue Mar 31 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2.39-3
-- some of the gpsd client bits went into gpsdclient.h, but that file wasn't getting installed
-  specifically, viking needs that header to build. 
+- some of the gpsd client bits went into gpsdclient.h, but that file wasn't 
+  getting installed
+- specifically, viking needs that header to build. 
 
 * Wed Mar 25 2009 Douglas E. Warner <silfreed@silfreed.net> - 2.39-2
 - adding patch to try to fix parallel make errors
