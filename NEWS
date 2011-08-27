@@ -8,7 +8,7 @@
   USB devices that another process has open, avoiding potential
   problems with class FF USB devices opened by other programs.  One
   new bug fix: we now use an atof() implementation that ignores
-  locale, avoiding problems where decimal point if '.'. One new
+  locale, avoiding problems where decimal point is a comma. One new
   feature: Change -N semantics so it only suppresses backgrounding;
   privileges are now dropped as in normal background operation.
 
