@@ -105,7 +105,7 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
     session->driver.nmea.date.tm_min = DD(hhmmss + 2);
     session->driver.nmea.date.tm_sec = DD(hhmmss + 4);
     session->driver.nmea.subseconds =
-	atof(hhmmss + 4) - session->driver.nmea.date.tm_sec;
+	safe_atof(hhmmss + 4) - session->driver.nmea.date.tm_sec;
 }
 
 static void register_fractional_time(const char *tag, const char *fld,
@@ -114,7 +114,7 @@ static void register_fractional_time(const char *tag, const char *fld,
     if (fld[0] != '\0') {
 	session->driver.nmea.last_frac_time =
 	    session->driver.nmea.this_frac_time;
-	session->driver.nmea.this_frac_time = atof(fld);
+	session->driver.nmea.this_frac_time = safe_atof(fld);
 	session->driver.nmea.latch_frac_time = true;
 	gpsd_report(LOG_DATA, "%s: registers fractional time %.2f\n",
 		    tag, session->driver.nmea.this_frac_time);
@@ -187,8 +187,8 @@ static gps_mask_t processGPRMC(int count, char *field[],
 	}
 	do_lat_lon(&field[3], &session->newdata);
 	mask |= LATLON_SET;
-	session->newdata.speed = atof(field[7]) * KNOTS_TO_MPS;
-	session->newdata.track = atof(field[8]);
+	session->newdata.speed = safe_atof(field[7]) * KNOTS_TO_MPS;
+	session->newdata.track = safe_atof(field[8]);
 	mask |= (TRACK_SET | SPEED_SET);
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
@@ -373,7 +373,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
 		mask |= MODE_SET;
 	    }
 	} else {
-	    session->newdata.altitude = atof(altitude);
+	    session->newdata.altitude = safe_atof(altitude);
 	    mask |= ALTITUDE_SET;
 	    /*
 	     * This is a bit dodgy.  Technically we shouldn't set the mode
@@ -388,7 +388,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
 	    }
 	}
 	if (strlen(field[11]) > 0) {
-	    session->gpsdata.separation = atof(field[11]);
+	    session->gpsdata.separation = safe_atof(field[11]);
 	} else {
 	    session->gpsdata.separation =
 		wgs84_separation(session->newdata.latitude,
@@ -426,7 +426,7 @@ static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *se
       return 0;
     }
 
-#define PARSE_FIELD(n) (*field[n]!='\0' ? atof(field[n]) : NAN)
+#define PARSE_FIELD(n) (*field[n]!='\0' ? safe_atof(field[n]) : NAN)
     session->gpsdata.gst.utctime             = PARSE_FIELD(1);
     session->gpsdata.gst.rms_deviation       = PARSE_FIELD(2);
     session->gpsdata.gst.smajor_deviation    = PARSE_FIELD(3);
@@ -497,9 +497,9 @@ static gps_mask_t processGPGSA(int count, char *field[],
 	else
 	    mask = MODE_SET;
 	gpsd_report(LOG_PROG, "GPGSA sets mode %d\n", session->newdata.mode);
-	session->gpsdata.dop.pdop = atof(field[15]);
-	session->gpsdata.dop.hdop = atof(field[16]);
-	session->gpsdata.dop.vdop = atof(field[17]);
+	session->gpsdata.dop.pdop = safe_atof(field[15]);
+	session->gpsdata.dop.hdop = safe_atof(field[16]);
+	session->gpsdata.dop.vdop = safe_atof(field[17]);
 	session->gpsdata.satellites_used = 0;
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
@@ -647,11 +647,11 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
 	mask = 0;
     } else {
 	session->newdata.epx = session->newdata.epy =
-	    atof(field[1]) * (1 / sqrt(2)) * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	    safe_atof(field[1]) * (1 / sqrt(2)) * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	session->newdata.epv =
-	    atof(field[3]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	    safe_atof(field[3]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	session->gpsdata.epe =
-	    atof(field[5]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	    safe_atof(field[5]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	mask = HERR_SET | VERR_SET | PERR_IS;
     }
 
@@ -686,9 +686,9 @@ static gps_mask_t processGPGBS(int c UNUSED, char *field[],
     if (session->driver.nmea.date.tm_hour == DD(field[1])
 	&& session->driver.nmea.date.tm_min == DD(field[1] + 2)
 	&& session->driver.nmea.date.tm_sec == DD(field[1] + 4)) {
-	session->newdata.epy = atof(field[2]);
-	session->newdata.epx = atof(field[3]);
-	session->newdata.epv = atof(field[4]);
+	session->newdata.epy = safe_atof(field[2]);
+	session->newdata.epx = safe_atof(field[3]);
+	session->newdata.epv = safe_atof(field[4]);
 	gpsd_report(LOG_DATA, "GBS: epx=%.2f epy=%.2f epv=%.2f\n",
 		    session->newdata.epx,
 		    session->newdata.epy,
@@ -786,7 +786,7 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
     gps_mask_t mask;
     mask = ONLINE_SET;
 
-    session->gpsdata.attitude.heading = atof(field[1]);
+    session->gpsdata.attitude.heading = safe_atof(field[1]);
     session->gpsdata.attitude.mag_st = '\0';
     session->gpsdata.attitude.pitch = NAN;
     session->gpsdata.attitude.pitch_st = '\0';
@@ -850,17 +850,17 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
     gps_mask_t mask;
     mask = ONLINE_SET;
 
-    session->gpsdata.attitude.heading = atof(field[1]);
+    session->gpsdata.attitude.heading = safe_atof(field[1]);
     session->gpsdata.attitude.mag_st = *field[2];
-    session->gpsdata.attitude.pitch = atof(field[3]);
+    session->gpsdata.attitude.pitch = safe_atof(field[3]);
     session->gpsdata.attitude.pitch_st = *field[4];
-    session->gpsdata.attitude.roll = atof(field[5]);
+    session->gpsdata.attitude.roll = safe_atof(field[5]);
     session->gpsdata.attitude.roll_st = *field[6];
     session->gpsdata.attitude.yaw = NAN;
     session->gpsdata.attitude.yaw_st = '\0';
-    session->gpsdata.attitude.dip = atof(field[7]);
+    session->gpsdata.attitude.dip = safe_atof(field[7]);
     session->gpsdata.attitude.mag_len = NAN;
-    session->gpsdata.attitude.mag_x = atof(field[8]);
+    session->gpsdata.attitude.mag_x = safe_atof(field[8]);
     session->gpsdata.attitude.mag_y = NAN;
     session->gpsdata.attitude.mag_z = NAN;
     session->gpsdata.attitude.acc_len = NAN;
@@ -906,27 +906,27 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
     gps_mask_t mask;
     mask = ONLINE_SET;
 
-    session->gpsdata.attitude.heading = atof(field[1]);
+    session->gpsdata.attitude.heading = safe_atof(field[1]);
     session->gpsdata.attitude.mag_st = '\0';
-    session->gpsdata.attitude.pitch = atof(field[2]);
+    session->gpsdata.attitude.pitch = safe_atof(field[2]);
     session->gpsdata.attitude.pitch_st = '\0';
-    session->gpsdata.attitude.roll = atof(field[3]);
+    session->gpsdata.attitude.roll = safe_atof(field[3]);
     session->gpsdata.attitude.roll_st = '\0';
     session->gpsdata.attitude.yaw = NAN;
     session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = NAN;
-    session->gpsdata.attitude.temp = atof(field[4]);
-    session->gpsdata.attitude.depth = atof(field[5]) / METERS_TO_FEET;
-    session->gpsdata.attitude.mag_len = atof(field[6]);
-    session->gpsdata.attitude.mag_x = atof(field[7]);
-    session->gpsdata.attitude.mag_y = atof(field[8]);
-    session->gpsdata.attitude.mag_z = atof(field[9]);
-    session->gpsdata.attitude.acc_len = atof(field[10]);
-    session->gpsdata.attitude.acc_x = atof(field[11]);
-    session->gpsdata.attitude.acc_y = atof(field[12]);
-    session->gpsdata.attitude.acc_z = atof(field[13]);
-    session->gpsdata.attitude.gyro_x = atof(field[15]);
-    session->gpsdata.attitude.gyro_y = atof(field[16]);
+    session->gpsdata.attitude.temp = safe_atof(field[4]);
+    session->gpsdata.attitude.depth = safe_atof(field[5]) / METERS_TO_FEET;
+    session->gpsdata.attitude.mag_len = safe_atof(field[6]);
+    session->gpsdata.attitude.mag_x = safe_atof(field[7]);
+    session->gpsdata.attitude.mag_y = safe_atof(field[8]);
+    session->gpsdata.attitude.mag_z = safe_atof(field[9]);
+    session->gpsdata.attitude.acc_len = safe_atof(field[10]);
+    session->gpsdata.attitude.acc_x = safe_atof(field[11]);
+    session->gpsdata.attitude.acc_y = safe_atof(field[12]);
+    session->gpsdata.attitude.acc_z = safe_atof(field[13]);
+    session->gpsdata.attitude.gyro_x = safe_atof(field[15]);
+    session->gpsdata.attitude.gyro_y = safe_atof(field[16]);
     mask |= (ALTITUDE_SET);
 
     gpsd_report(LOG_RAW, "Heading %lf.\n", session->gpsdata.attitude.heading);
@@ -965,14 +965,14 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    merge_hhmmss(field[4], session);
 	    register_fractional_time(field[0], field[4], session);
 	    do_lat_lon(&field[5], &session->newdata);
-	    session->newdata.altitude = atof(field[9]);
-	    session->newdata.track = atof(field[11]);
-	    session->newdata.speed = atof(field[12]) / MPS_TO_KPH;
-	    session->newdata.climb = atof(field[13]);
-	    session->gpsdata.dop.pdop = atof(field[14]);
-	    session->gpsdata.dop.hdop = atof(field[15]);
-	    session->gpsdata.dop.vdop = atof(field[16]);
-	    session->gpsdata.dop.tdop = atof(field[17]);
+	    session->newdata.altitude = safe_atof(field[9]);
+	    session->newdata.track = safe_atof(field[11]);
+	    session->newdata.speed = safe_atof(field[12]) / MPS_TO_KPH;
+	    session->newdata.climb = safe_atof(field[13]);
+	    session->gpsdata.dop.pdop = safe_atof(field[14]);
+	    session->gpsdata.dop.hdop = safe_atof(field[15]);
+	    session->gpsdata.dop.vdop = safe_atof(field[16]);
+	    session->gpsdata.dop.tdop = safe_atof(field[17]);
 	    mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
@@ -994,7 +994,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    session->gpsdata.PRN[i] = p = atoi(field[3 + i * 5 + 0]);
 	    session->gpsdata.azimuth[i] = atoi(field[3 + i * 5 + 1]);
 	    session->gpsdata.elevation[i] = atoi(field[3 + i * 5 + 2]);
-	    session->gpsdata.ss[i] = atof(field[3 + i * 5 + 3]);
+	    session->gpsdata.ss[i] = safe_atof(field[3 + i * 5 + 3]);
 	    if (field[3 + i * 5 + 4][0] == 'U')
 		session->gpsdata.used[u++] = p;
 	}
