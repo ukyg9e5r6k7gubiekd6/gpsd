@@ -151,43 +151,38 @@ static /*@null@*/ char *json_target_address(const struct json_attr_t *cursor,
 
 /*
  * Berkeley implementation of strtod(), inlined to avoid locale problems
- * with the decimal point.
+ * with the decimal point an stripped dowb to an atof()-equivalent.
  */
 
-static int maxExponent = 511;	/* Largest possible base 10 exponent.  Any
-				 * exponent larger than this will already
-				 * produce underflow or overflow, so there's
-				 * no need to worry about additional digits.
-				 */
-static double powersOf10[] = {	/* Table giving binary powers of 10.  Entry */
-    10.,			/* is 10^2^i.  Used to convert decimal */
-    100.,			/* exponents into floating-point numbers. */
-    1.0e4,
-    1.0e8,
-    1.0e16,
-    1.0e32,
-    1.0e64,
-    1.0e128,
-    1.0e256
-};
-
-static double
-c_strtod(string, endPtr)
-    const char *string;		/* A decimal ASCII floating-point number,
-				 * optionally preceded by white space.
-				 * Must have form "-I.FE-X", where I is the
-				 * integer part of the mantissa, F is the
-				 * fractional part of the mantissa, and X
-				 * is the exponent.  Either of the signs
-				 * may be "+", "-", or omitted.  Either I
-				 * or F may be omitted, or both.  The decimal
-				 * point isn't necessary unless F is present.
-				 * The "E" may actually be an "e".  E and X
-				 * may both be omitted (but not just one).
-				 */
-    char **endPtr;		/* If non-NULL, store terminating character's
-				 * address here. */
+static double c_atof(const char *string)
+/* Takes a decimal ASCII floating-point number, optionally
+ * preceded by white space.  Must have form "-I.FE-X",
+ * where I is the integer part of the mantissa, F is
+ * the fractional part of the mantissa, and X is the
+ * exponent.  Either of the signs may be "+", "-", or
+ * omitted.  Either I or F may be omitted, or both.
+ * The decimal point isn't necessary unless F is
+ * present.  The "E" may actually be an "e".  E and X
+ * may both be omitted (but not just one).
+ */
 {
+    static int maxExponent = 511;   /* Largest possible base 10 exponent.  Any
+				     * exponent larger than this will already
+				     * produce underflow or overflow, so there's
+				     * no need to worry about additional digits.
+				     */
+    static double powersOf10[] = {  /* Table giving binary powers of 10.  Entry */
+	10.,			/* is 10^2^i.  Used to convert decimal */
+	100.,			/* exponents into floating-point numbers. */
+	1.0e4,
+	1.0e8,
+	1.0e16,
+	1.0e32,
+	1.0e64,
+	1.0e128,
+	1.0e256
+    };
+
     int sign, expSign = false;
     double fraction, dblExp, *d;
     register const char *p;
@@ -352,10 +347,6 @@ c_strtod(string, endPtr)
     }
 
 done:
-    if (endPtr != NULL) {
-	*endPtr = (char *) p;
-    }
-
     if (sign) {
 	return -fraction;
     }
@@ -659,7 +650,7 @@ static int json_internal_read_object(const char *cp,
 		    *((double *)lptr) = iso8601_to_unix(valbuf);
 		    break;
 		case t_real:
-		    *((double *)lptr) = c_strtod(valbuf, (char **)NULL);
+		    *((double *)lptr) = c_atof(valbuf);
 		    break;
 		case t_string:
 		    if (parent != NULL
