@@ -30,7 +30,7 @@ libgps_age   = 0
 
 EnsureSConsVersion(1,2,0)
 
-import copy, os, sys, commands, glob, re
+import copy, os, sys, commands, glob, re, platform
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
@@ -44,6 +44,13 @@ opts = Variables('.scons-option-cache')
 
 systemd = os.path.exists("/usr/share/systemd/system")
 
+imloads = True
+if sys.platform.startswith('linux'):
+    (distro, version, cutename) = platform.linux_distribution()
+    # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
+    if distro == 'Fedora' and int(version) >= 13:
+        imloads = False
+    
 boolopts = (
     # GPS protocols
     ("nmea",          True,  "NMEA support"),
@@ -101,7 +108,7 @@ boolopts = (
     ("ncurses",       True,  "build with ncurses"),
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
-    ("implicit_link", True,  "implicit linkage is supported in shared libs"),
+    ("implicit_link", imloads,"implicit linkage is supported in shared libs"),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     )
@@ -734,12 +741,8 @@ gpsmon_sources = [
 # VersionedSharedLibrary accomplishes this for its case, but we don't
 # know how to force it when linking staticly.
 #
-# FIXME: It turns out there are two cases where we need to force this.
-# Shared libraries on Fedora versions 13 and later don't do implicit
-# linking by design: see
-#     https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
-# for discussion.  Ubuntu and Debian do this.  Ideally we should compute
-# an intelligent default for implicit_link by inspecting the environment.
+# It turns out there are two cases where we need to force this.  Some
+# distributions don't do implicit linking by design:
 #
 if not env['shared'] or not env["implicit_link"]:
     env.MergeFlags("-lm")
