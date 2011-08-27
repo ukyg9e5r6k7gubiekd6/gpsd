@@ -1104,7 +1104,12 @@ Utility("deheader", generated_sources, [
     'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
         ])
 
-env.Alias('checkall', ['cppcheck','xmllint','splint'])
+# Perform all sanity checks.
+env.Alias('checkall', ['splint',
+                       'cppcheck',
+                       'xmllint',
+                       'pychecker',
+                       'valgrind-audit'])
 
 #
 # Regression tests begin here
