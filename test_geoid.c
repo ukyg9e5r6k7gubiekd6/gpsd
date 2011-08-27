@@ -23,8 +23,8 @@ int main(int argc, char **argv)
 	return 1;
     }
 
-    lat = atof(argv[1]);
-    lon = atof(argv[2]);
+    lat = safe_atof(argv[1]);
+    lon = safe_atof(argv[2]);
 
     if (lat > 90. || lat < -90.) {
 	fprintf(stderr, " -90 <= lat=%s(%.f) <= 90 ?\n", argv[1], lat);

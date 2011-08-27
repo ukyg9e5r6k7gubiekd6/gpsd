@@ -395,7 +395,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 		  sizeof(session->subtype));
     for (cp = buf+1; *cp!=(unsigned char)'\0' && isdigit(*cp)==0; cp++)
 	continue;
-    fv = atof((const char *)cp);
+    fv = safe_atof((const char *)cp);
     if (fv < 231) {
 	session->driver.sirf.driverstate |= SIRF_LT_231;
 #ifdef RECONFIGURE_ENABLE

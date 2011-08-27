@@ -254,12 +254,14 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 	 */
 	char *ns, *sp, *tp;
 
+#ifdef __UNUSED__
 	static char decimal_point = '\0';
 	if (decimal_point == '\0') {
 	    struct lconv *locale_data = localeconv();
 	    if (locale_data != NULL && locale_data->decimal_point[0] != '.')
 		decimal_point = locale_data->decimal_point[0];
 	}
+#endif /* __UNUSED__ */
 
 	for (ns = buf; ns; ns = strstr(ns + 1, "GPSD")) {
 	    if ( /*@i1@*/ strncmp(ns, "GPSD", 4) == 0) {
@@ -273,6 +275,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 		    else
 			*tp = '\0';
 
+#ifdef __UNUSED__
 		    /*
 		     * The daemon always emits the Anglo-American and SI
 		     * decimal point.  Hack these into whatever the
@@ -287,6 +290,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    if (*cp == '.')
 				*cp = decimal_point;
 		    }
+#endif /* __UNUSED__ */
 
 		    /* note, there's a bit of skip logic after the switch */
 
@@ -333,7 +337,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 					    climb,
 					    epd, eps, epc, mode);
 			    if (st >= 14) {
-#define DEFAULT(val) (val[0] == '?') ? NAN : atof(val)
+#define DEFAULT(val) (val[0] == '?') ? NAN : safe_atof(val)
 				/*@ +floatdouble @*/
 				nf.time = DEFAULT(timestr);
 				nf.latitude = DEFAULT(lat);
