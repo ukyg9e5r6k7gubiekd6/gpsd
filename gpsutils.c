@@ -23,6 +23,7 @@
  * with the decimal point and stripped down to an atof()-equivalent.
  */
 
+/*@-shiftimplementation +charint@*/
 double safe_atof(const char *string)
 /* Takes a decimal ASCII floating-point number, optionally
  * preceded by white space.  Must have form "-I.FE-X",
@@ -52,7 +53,7 @@ double safe_atof(const char *string)
 	1.0e256
     };
 
-    int sign, expSign = false;
+    bool sign, expSign = false;
     double fraction, dblExp, *d;
     register const char *p;
     register int c;
@@ -221,6 +222,7 @@ done:
     }
     return fraction;
 }
+/*@+shiftimplementation -charint@*/
 
 #define MONTHSPERYEAR	12	/* months per calendar year */
 
