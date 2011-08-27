@@ -101,6 +101,7 @@ boolopts = (
     ("ncurses",       True,  "build with ncurses"),
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
+    ("implicit_link", True,  "implicit linkage is supported in shared libs"),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     )
@@ -732,7 +733,15 @@ gpsmon_sources = [
 # FIXME: What we really want is for libm to be linked when libgps is.
 # VersionedSharedLibrary accomplishes this for its case, but we don't
 # know how to force it when linking staticly.
-if not env['shared']:
+#
+# FIXME: It turns out there are two cases where we need to force this.
+# Shared libraries on Fedora versions 13 and later don't do implicit
+# linking by design: see
+#     https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
+# for discussion.  Ubuntu and Debian do this.  Ideally we should compute
+# an intelligent default for implicit_link by inspecting the environment.
+#
+if not env['shared'] or not env["implicit_link"]:
     env.MergeFlags("-lm")
 
 gpsd_env = env.Clone()

@@ -58,6 +58,11 @@ are the packages libdbus-1-dev and libdbus-glib-1-dev.
 
 Under Ubuntu, the ncurses package you want is libncurses5-dev.
 
+If your linker runs fails with missing math symbols, see the FIXME comment
+relating to implicit_links in the scons recipe; you probably need to
+build with implicit_links=no.  And report your platform, ideally along
+with a way of identifying it from Python, to the gpsd maintainers.
+
 For building from the source tree, or if you change the man page
 source, xslt and docbook xsl style files are used to generate nroff
 -man source from docbook xml.  The following packages are used in this
