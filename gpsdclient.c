@@ -10,7 +10,6 @@
 #include <strings.h>   /* for strcasecmp() */
 #include <math.h>
 #include <assert.h>
-#include <locale.h>
 
 #include "gpsd_config.h"
 #include "gps.h"
@@ -97,7 +96,6 @@ enum unit gpsd_units(void)
 {
     char *envu = NULL;
 
-    (void)setlocale(LC_NUMERIC, "C");
     if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
 	if (0 == strcasecmp(envu, "imperial")) {
 	    return imperial;

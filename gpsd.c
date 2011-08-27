@@ -24,7 +24,6 @@
 #include <syslog.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <locale.h>
 #include <pthread.h>
 #ifndef S_SPLINT_S
 #include <netdb.h>
@@ -1784,7 +1783,6 @@ int main(int argc, char *argv[])
     /*@+nullpass@*/
 #endif /* PPS_ENABLE */
 
-    (void)setlocale(LC_NUMERIC, "C");
     context.debug = 0;
     gps_context_init(&context);
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
