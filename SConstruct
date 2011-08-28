@@ -1378,21 +1378,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
             'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
             ])
 
-    #
-    # This is how to tag a release.
-    # It requires developer access verified via ssh.
-    #
-    release_tag = Utility("release-tag", '', [
-            'git tag -s -m "Tagged for external release $VERSION" release-$VERSION',
-            'git push --tags'
-            ])
-
-    #
-    # Ship a release, providing all regression tests pass.
-    # The clean is necessary so that dist will remake revision.h
-    # with the current revision level in it.
-    #
-    Utility('ship', '', [check, dist, upload_ftp, release_tag])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:

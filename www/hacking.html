@@ -1402,9 +1402,10 @@ will have a day or so to get their urgent fixes in.</dd>
 <dd>It will need to be modified in SConstruct.  Make sure the 'dev' 
 suffix is gone.</dd>
 
-<dt>5. Rebuild leapseconds.cache.</dt>  
-<dd>Rebuild the leap-second list
-used for rollover checks with 'scons leapseconds.cache' Note: This will
+<dt>5. Remove revision.h and rebuild leapseconds.cache.</dt>  
+<dd>First, remove revision.h so it will be rebuilt correctly
+for the tarball.  Then, rebuild the leap-second list
+used for rollover checks with 'scons leapseconds.cache' Note: The latter will
 require Internet access, and fail (leaving the existing leap-second
 list in place) if that is not available.</dd>
 
@@ -1433,8 +1434,14 @@ and do Berlios's
 <a href="https://developer.berlios.de/project/admin/?group_id=2116">release procedure</a>.</dd>
 
 <dt>10. Tag the release in git</dt>
-<dd>Doing 'make release-tag' should accomplish this. The tag push
-will trigger mail to the announce list.</dd>
+<dd>Do this:
+<ol>
+<li>git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}</li>
+<li>git push --tags</li>
+</ol>
+<p>This has to be done by hand because the PGP query in git tag fails when
+called from scons. The tag push will trigger mail to the announce
+list.</p></dd>
 
 <dt>11. Bump the release number and push that commit</dt>
 <dd>Bump the release number in SConstruct, adding a '~dev' suffix
