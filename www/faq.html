@@ -82,7 +82,7 @@ GPSD Frequently Asked Questions
 <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a><br/>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a><br/>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a><br/>
-<li><a href='#willitwork'>Will this gps work? It's not on the hardware list.</a>
+<li><a href='#willitwork'>Will this GPS work? It's not on the hardware list.</a>
 <li><a href='#nmea2000'>Does gpsd support NMEA2000?.</a><br/>
 <li><a href='#conflict'>Why does GPSD interfere with non-GPS USB devices?</a></br>
 <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></br>
@@ -715,7 +715,8 @@ can set that up like this:</p>
         gpsd -nN /dev/ttyS0
 </pre></code>
 
-<h1 id='willitwork'>Will this gps work? It's not on the hardware list.</h1>
+<h1 id='willitwork'>Will this GPS work? It's not on the hardware list.</h1>
+
 <p>Probably.</p>
 
 <p>Gpsd's support for the NMEA protocol is mature and stable. If the
@@ -795,6 +796,12 @@ application requests data.  We've had reports of this happening with
 USB modems and various microcontroller kits. It's not a problem we can
 solve with clever programming, the devices simply don't yield
 enough information about themselves to avoid conflicts.</p>
+
+<p>Under Linux, <code>gpsd</code> at 3.1 and later versions checks
+each serial and USB device after opening it to see if any other
+process has that device open; if so, it'd dropped.  This should at
+least keep GPSD from usurping data sources belonging to other service
+daemons.</p>
 
 <p>If this sort of conflict becomes a problem, you can work around
 it by disabling the GPSD hotplug rules.  Unfortunately, this means

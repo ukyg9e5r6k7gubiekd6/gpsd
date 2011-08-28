@@ -77,6 +77,8 @@ maintainer, we've tried to kick these upstream.</p>
 <li><a href="#libtool">Multiple definitions of symbol _gpsd_report due to libtool bug</a></li>
 <li><a href="#pyinstall">Defective Python installation in SuSE 10.3rc</a></li>
 <li><a href="#gcc421">Compiler optimizer bugs can produce error-modeling errors<a></li>
+<li><a href="#sconscxx">scons doesn't honor parse_flags in a Program() using C++</li>
+<li><a href="#mfence">Illegal-instruction errors near fence operations</li>
 </ul>
 
 <h1>Links to Fixed Bugs</h1>
@@ -208,12 +210,23 @@ reported seems to vary randomly with level of optimization.</p>
 regression-test failures. Dropping back to -O1 or going up to -O3
 restores behavior like GCC 4.4.1's.</p>
 
-<h2 id="scons_cpp">scons doesn't honnor parse_flags in a Program() using C++</h2>
+<h2 id="scons_cpp">scons doesn't honor parse_flags in a Program() using C++</h2>
 
 <p>In building test_gpsmm, we should get libgps_dump_state() from the
-client library, but scons has a bug; we can't get it to add -lgps to th,
-apparently because it doesn't honor parse_flags on a Program() build of
-a C++ .cpp file.</p>
+client library, but scons 1.2.0 has a bug; we can't get it to add
+-lgps to the link lime, apparently because it doesn't honor
+parse_flags on a Program() build of a C++ .cpp file.</p>
+
+<h2 id="#mfence">Illegal-instruction errors near fence operations</h2>
+
+<p>The shared-memory export relies on being able to generate some
+fence instructions that are processor-specfic.  We have a report that
+under Ubuntu 10.04 running on a 32-bit Athlon processor the daemon
+dies with an illegal instruction error when attempting the fence
+operation.</p>
+
+<p>To work around this, disable the shared-memory export by building
+with "scons shm_export=no".</p>
 
 <h1>Fixed Problems</h1>
 
