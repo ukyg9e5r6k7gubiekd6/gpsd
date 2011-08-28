@@ -1,16 +1,19 @@
 * Sat Aug 26 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1~dev
-  A snap release mainly to get some scons recipe cleanups out the
-  door.  Parallelized builds now work. Small but fatal problems with
-  reconfigure=no, netfeed=no and sock_export=no builds have been
-  fixed.  Build recipe ported for Darwin, FreeBSD and OpenBSD.  libgps
-  now brings -lm with it. One old bug fixed (code was previously present
-  but broken): Under Linux, gpsd will refrain from opening serial or
-  USB devices that another process has open, avoiding potential
-  problems with class FF USB devices opened by other programs.  One
-  new bug fix: we now use an atof() implementation that ignores
-  locale, avoiding problems where decimal point is a comma. One new
-  feature: Change -N semantics so it only suppresses backgrounding;
-  privileges are now dropped as in normal background operation.
+  The Irene release, rocking you like a hurricane and brought to you
+  from the storm shelter in my basement. This is a snap release mainly
+  to get some scons recipe cleanups out the door.  Parallelized builds
+  now work. Small but fatal problems with reconfigure=no, netfeed=no
+  and sock_export=no builds have been fixed.  Build recipe ported for
+  Fedora, Darwin, FreeBSD and OpenBSD.  libgps now brings -lm with it
+  on systems with implicit linking. One old bug fixed (code was
+  previously present but broken): Under Linux, gpsd will refrain from
+  opening serial or USB devices that another process has open,
+  avoiding potential problems with class FF USB devices opened by
+  other programs.  One new bug fix: we now use an atof()
+  implementation that ignores locale, avoiding problems where decimal
+  point is a comma. One new feature: Change -N semantics so it only
+  suppresses backgrounding; privileges are now dropped as in normal
+  background operation.
 
 * Fri Aug 19 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0
   POLL subobject name changes: fixes -> tpv, skyview -> sky.
