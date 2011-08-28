@@ -12,17 +12,17 @@
 # cppcheck  - run the cppcheck static tester on the code
 # xmllint   - run xmllint on the documentation
 # testbuild - test-build the code from a tarball
+#
+# Setting the DESTDIR environment variable will prefix the install destinations
+# without changing the --prefix prefix.
 
 # Unfinished items:
 # * Qt binding (needs to build .pc, .prl files)
 # * Allow building for multiple python versions)
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
-#
-# Setting the DESTDIR environment variable will prefix the install destinations
-# without changing the --prefix prefix.
 
 # Release identification begins here
-gpsd_version = "3.1~dev"
+gpsd_version = "3.1"
 libgps_major = 20
 libgps_minor = 0
 libgps_age   = 0
