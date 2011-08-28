@@ -15,6 +15,7 @@ BuildRequires: bluez-libs-devel
 BuildRequires: dbus-devel
 BuildRequires: dbus-glib-devel
 BuildRequires: desktop-file-utils
+BuildRequires: gcc-c++
 BuildRequires: libXaw-devel
 BuildRequires: ncurses-devel
 BuildRequires: python-devel
@@ -124,7 +125,7 @@ scons %{_smp_mflags}         \
    sbindir=%{_sbindir}       \
    mandir=%{_mandir}         \
    docdir=%{_docdir}         \
-   PYTHONPATH=%{python_sitearch}
+   pkgconfigdir=%{_libdir}/pkgconfig
 
 scons build
 
@@ -224,7 +225,7 @@ fi
 %defattr(-,root,root,-)
 %doc TODO
 %{_bindir}/gpsfake
-#%{_libdir}/libgps*.so
+%{_libdir}/libgps*.so
 %{_libdir}/pkgconfig/*.pc
 %{python_sitearch}/gps/fake*
 %{_includedir}/gps.h
