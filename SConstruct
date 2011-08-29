@@ -44,12 +44,16 @@ opts = Variables('.scons-option-cache')
 
 systemd = os.path.exists("/usr/share/systemd/system")
 
+# Set distribution-specific defaults here
 imloads = True
+pkgconfigdir = "/lib/pkgconfig"
 if sys.platform.startswith('linux'):
     (distro, version, cutename) = platform.linux_distribution()
     # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
-    if distro == 'Fedora' and int(version) >= 13:
-        imloads = False
+    if distro == 'Fedora':
+        pkgconfigdir = "/lib64/pkgconfig"
+        if int(version) >= 13:
+            imloads = False
     
 boolopts = (
     # GPS protocols
@@ -136,7 +140,7 @@ pathopts = (
     ("sbindir",             "/sbin",          "system binaries directory"),
     ("mandir",              "/share/man",     "manual pages directory"),
     ("docdir",              "/share/doc",     "documents directory"),
-    ("pkgconfigdir",        "/lib/pkgconfig", "pkgconfig file directory"),
+    ("pkgconfigdir",        pkgconfigdir,     "pkgconfig file directory"),
     )
 for (name, default, help) in pathopts:
     opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))

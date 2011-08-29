@@ -1,3 +1,6 @@
+* Mon Aug 29 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2~dev
+  In the build recipe, set pkgconfigdir properly for Fredora systems.
+
 * Sun Aug 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1
   The Irene release, rocking you like a hurricane and brought to you
   from the storm shelter in my basement. This is a snap release mainly
