@@ -49,10 +49,11 @@ imloads = True
 pkgconfigdir = "/lib/pkgconfig"
 if sys.platform.startswith('linux'):
     (distro, version, cutename) = platform.linux_distribution()
-    # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
     if distro == 'Fedora':
-        pkgconfigdir = "/lib64/pkgconfig"
+        if os.path.exists("lib64"):
+            pkgconfigdir = "/lib64/pkgconfig"
         if int(version) >= 13:
+            # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
             imloads = False
     
 boolopts = (
