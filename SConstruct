@@ -46,12 +46,9 @@ systemd = os.path.exists("/usr/share/systemd/system")
 
 # Set distribution-specific defaults here
 imloads = True
-pkgconfigdir = "/lib/pkgconfig"
 if sys.platform.startswith('linux'):
     (distro, version, cutename) = platform.linux_distribution()
     if distro == 'Fedora':
-        if os.path.exists("lib64"):
-            pkgconfigdir = "/lib64/pkgconfig"
         if int(version) >= 13:
             # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
             imloads = False
@@ -141,7 +138,7 @@ pathopts = (
     ("sbindir",             "/sbin",          "system binaries directory"),
     ("mandir",              "/share/man",     "manual pages directory"),
     ("docdir",              "/share/doc",     "documents directory"),
-    ("pkgconfigdir",        pkgconfigdir,     "pkgconfig file directory"),
+    ("pkgconfigdir",        "$libdir/pkgconfdir", "pkgconfig file directory"),
     )
 for (name, default, help) in pathopts:
     opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
@@ -157,6 +154,9 @@ for (name, default, help) in pathopts:
 env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV = {'PATH' : os.environ['PATH']})
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
+
+for (name, default, help) in pathopts:
+    env[name] = env.subst(env[name])
 
 env['VERSION'] = gpsd_version
 env['PYTHON'] = sys.executable
@@ -503,11 +503,11 @@ env = config.Finish()
 # Be explicit about what we're doing.
 changelatch = False 
 for (name, default, help) in boolopts + nonboolopts + pathopts:
-    if env[name] != default:
+    if env[name] != env.subst(default):
         if not changelatch:
             print "Altered configuration variables:"
             changelatch = True
-        print "%s = %s (default %s): %s" % (name, env[name], default, help)
+        print "%s = %s (default %s): %s" % (name, env[name], env.subst(default), help)
 if not changelatch:
     print "All configuration flags are defaulted."
 
