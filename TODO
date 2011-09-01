@@ -32,8 +32,9 @@ different types in them, and a copy of the RTCM3 standard at latest revision
 
 **** Reporting code for specialized Type 6 and 8 AIS messages.
 
-This one is mine and Kurt Schwehr's. Support is currently nearly complete
-but untested.
+This one is mine and Kurt Schwehr's. Support is currently nearly
+complete; the only missing cases are a handful of IMO 236 and IMO 289
+message 6 and 8 subtypes.
 
 ** Ports
 
@@ -144,16 +145,6 @@ lightweight protocol, flexible enough to handle all the quantities
 required, and it is actually in use in production reference
 networks. RT-IGS is also a packet-oriented format, rather than a
 file-oriented format like RINEX.
-
-*** RTCM3 support.
-
-Previous plans for more RTCM2 support seem to have been overtaken by
-events, e.g. the world moving to RTCM3. We have support for analyzing
-RTCM3 messages, but it's entirely theoretical - written from the
-standard.  We need to find a pair of files consisting of a
-representative set of RTCM3 sentences and some sort of ASCII dump of
-them so we can test whether our analyzer gets all the bitfield
-boundaries right.
 
 ** Future features (?)
 
