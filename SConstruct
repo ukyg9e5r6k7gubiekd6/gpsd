@@ -905,7 +905,7 @@ revision='#define REVISION "%s"\n' %(rev.strip(),)
 env.NoClean(env.Textfile(target="revision.h", source=[revision]))
 
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
-                     'gps_maskdump.c', 'ais_json.c', 'revision.h']
+                     'gps_maskdump.c', 'revision.h']
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
@@ -934,8 +934,11 @@ def substituter(target, source, env):
         content = content.replace(s, t)
     with open(str(target[0]), "w") as tfp:
         tfp.write(content)
-for fn in ("packaging/rpm/gpsd.spec.in", "libgps.pc.in", "libgpsd.pc.in",
-       "jsongen.py.in", "maskaudit.py.in", "valgrind-audit.py.in"):
+
+templated = ("packaging/rpm/gpsd.spec.in", "libgps.pc.in", "libgpsd.pc.in",
+             "jsongen.py.in", "maskaudit.py.in", "valgrind-audit.py.in")
+
+for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
     env.AddPostAction(builder, 'chmod -w $TARGET')
     if fn.endswith(".py.in"):
@@ -977,7 +980,11 @@ if manbuilder:
 ## Where it all comes together
 
 build = env.Alias('build', [libraries, binaries, python_built_extensions, manpage_targets])
-env.Clean(build, map(glob.glob, ("*.o", "*.os", "*.os.*", "*.a", "*.pyc", "gps/*.pyc")) + ["revision.h", "packaging/rpm/gpsd.spec", ".sconf_temp"])
+env.Clean(build,
+          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.pyc", "gps/*.pyc")) + \
+          generated_sources + \
+          map(lambda f: f[:-3], templated) + \
+          [".sconf_temp"])
 env.Default(*build)
 
 if qt_env:
