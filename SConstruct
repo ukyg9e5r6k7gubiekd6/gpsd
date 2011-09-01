@@ -687,6 +687,7 @@ compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
                           version=libversion, parse_flags= ["-lm"])
+env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
                            target="gpsd",
@@ -914,6 +915,7 @@ leapseconds_cache_rebuild = lambda target, source, env: save_leapseconds(target[
 leapseconds_cache = env.Command(target="leapseconds.cache",
                                 source="leapsecond.py",
                                 action=leapseconds_cache_rebuild)
+env.Clean(leapseconds_cache, "leapsecond.pyc")
 env.NoClean(leapseconds_cache)
 env.Precious(leapseconds_cache)
 
