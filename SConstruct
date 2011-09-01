@@ -977,7 +977,7 @@ if manbuilder:
 ## Where it all comes together
 
 build = env.Alias('build', [libraries, binaries, python_built_extensions, manpage_targets])
-env.Clean(build, map(glob.glob, ("*.o", "*.os", "*.os.*", "*.a", "*.pyc", "gps/*.pyc")) + ["revision.h", "packaging/rpm/gpsd.spec"])
+env.Clean(build, map(glob.glob, ("*.o", "*.os", "*.os.*", "*.a", "*.pyc", "gps/*.pyc")) + ["revision.h", "packaging/rpm/gpsd.spec", ".sconf_temp"])
 env.Default(*build)
 
 if qt_env:
