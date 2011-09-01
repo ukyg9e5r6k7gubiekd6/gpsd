@@ -977,7 +977,7 @@ if manbuilder:
 ## Where it all comes together
 
 build = env.Alias('build', [libraries, binaries, python_built_extensions, manpage_targets])
-env.Clean(build, map(glob.glob, ("*.o", "*.os", "*.os.*", "*.a")) + ["packaging/rpm/gpsd.spec"])
+env.Clean(build, map(glob.glob, ("*.o", "*.os", "*.os.*", "*.a", "*.pyc", "gps/*.pyc")) + ["revision.h", "packaging/rpm/gpsd.spec"])
 env.Default(*build)
 
 if qt_env:
@@ -991,7 +991,7 @@ python_env.Default(*build_python)
 
 # Not here because too distro-specific: udev rules, desktop files, init scripts
 
-# It's deliberate that we don't install gpsd.h. It's ful of internals that
+# It's deliberate that we don't install gpsd.h. It's full of internals that
 # third-party client programs should not see.
 headerinstall = [ env.Install(installdir('includedir'), x) for x in ("libgpsmm.h", "gps.h")]
 
