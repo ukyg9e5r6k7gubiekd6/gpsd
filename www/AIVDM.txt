@@ -1942,7 +1942,7 @@ WMO 306 Code table 4.201 specifies the following precipitatiuon type values:
 |     |               |Crests begin to break; scattered whitecaps.
 |4    |Moderate breeze|Small waves.
 |5    |Fresh breeze   |Moderate (1.2 m) longer waves. Some foam and spray.
-|6    |Strong beeeze  |Large waves with foam crests and some spray.
+|6    |Strong breeze  |Large waves with foam crests and some spray.
 |7    |High wind      |Sea heaps up and foam begins to streak.
 |8    |Gale           |Moderately high waves with breaking crests 
 |     |               |forming spindrift. Streaks of foam.
