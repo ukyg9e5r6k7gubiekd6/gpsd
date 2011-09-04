@@ -51,10 +51,24 @@ devmail    = "gpsd-dev@lists.nongnu.org"
 
 EnsureSConsVersion(2,0,1)
 
-import copy, os, sys, commands, glob, re, platform, time
+import copy, os, sys, glob, re, platform, time
+EnsureSConsVersion(1,2,0)
+
+import copy, os, sys, glob, re, platform
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
+
+# replacement for functions from the commands module, which is deprecated.
+from subprocess import PIPE, STDOUT, Popen
+def _getstatusoutput(cmd, input=None, cwd=None, env=None):
+    pipe = Popen(cmd, shell=True, cwd=cwd, env=env, stdout=PIPE, stderr=STDOUT)
+    (output, errout) = pipe.communicate(input=input)
+    status = pipe.returncode
+    return (status, output)
+def _getoutput(cmd, input=None, cwd=None, env=None):
+    return _getstatusoutput(cmd, input, cwd, env)[1]
+
 
 #
 # Build-control options
@@ -957,7 +971,7 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     chmod a-w $TARGET''')
 
 # generate revision.h
-(st, rev) = commands.getstatusoutput('git describe')
+(st, rev) = _getstatusoutput('git describe')
 if st != 0:
     from datetime import datetime
     rev = datetime.now().isoformat()[:-4]
@@ -1494,7 +1508,7 @@ Utility('udev-test', '', [
 # for these productions to work.
 
 if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
-    distfiles = commands.getoutput(r"git ls-files | grep -v '^www/'").split()
+    distfiles = _getoutput(r"git ls-files | grep -v '^www/'").split()
     if ".gitignore" in distfiles:
         distfiles.remove(".gitignore")
     distfiles += generated_sources
