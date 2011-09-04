@@ -2434,7 +2434,7 @@ A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
 |==============================================================================
 
 The fixed header is followed by 1-5 sensor records, each 112 bits
-long.  The Sensor Reoprt Type is interpreted as follows, and controls
+long.  The Sensor Report Type is interpreted as follows, and controls
 the interpretation of the sensor payload data.
 
 .Sensor report types
