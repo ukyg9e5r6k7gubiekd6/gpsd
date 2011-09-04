@@ -158,28 +158,6 @@ AsteRx and PolaRx, NovAtel Superstar2 and OEMV, Thales (Magellan
 Professional) AC12 and DG14 would all be welcome. Of course, these
 are not $50 USB mice...
 
-*** Audio cues in the client when the fix status changes
-
-Calum writes:
->Is it possible to add functionality (with a switch to enable it to
->avoid annoying those that don't want it) so that beeps indicate NO
->FIX, FIX, and OFFLINE status changes?
->
->For example - I run cgps and my laptop battery doesn't always supply
->my PS2 port-powered GPS device with enough power, and it goes into
->OFFLINE mode. As I can't drive, and check my laptop all the time, if
->it emitted 5 1 second beeps when it went OFFLINE, it would be a handy alert.
->
->Similarly, a PCMCIA "eject" 2 beeps for NO FIX, and a PCMCIA "happy" 2
->beeps when it gets a fix again?
->
->Or something like that.
-
-This is a good idea for supporting hands-free operation, e.g. while driving.
-
-It would be an easy first project for somebody who wants to get into
-the client code.
-
 *** Set the system time zone from latitude/longitude
 
 If we're going to give gpsd the capability to set system time via
