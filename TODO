@@ -96,7 +96,7 @@ there should be a (privileged) command to redirect RTCM connections.
 *** Per-driver restore of changed config settings on exit.
 
 This is a solved problem for generic NMEA, EverMore, TripMate,
-EarthMate, TNTC, Zodiac, and RTCM104 drivers (if only because they
+EarthMate, TNT, Zodiac, and RTCM104 drivers (if only because they
 don't configure any device settings).
 
 The SiRF driver now restores NMEA when necessary.  It also restores
@@ -124,25 +124,24 @@ seem to be any way to query these settings.
 
 *** Industry-standard format dumping of raw satellite data
 
-It would be useful to be able to extract RINEX (or some other standard)
-format data from any GPS device that can report pseudoranges etc.  This
-belongs in the daemon because the device drivers are already doing the
-packet-cracking needed to get the data off the chips.
+It would be useful to be able to report raw GPS data (pseudoranges,
+clock, doppler carrier) from any GPS device that can report
+pseudoranges etc.  This belongs in the daemon because the device
+drivers are already doing the packet-cracking needed to get the data
+off the chips.
 
 Several commodity chipsets (ANTARIS, iTrax3, SiRF and Trimble) readily
 output enough data to make this a chore, rather than a hard problem.
 Probably the best way to do this would be to add support for unscaled
 output of pseudoranges in SKY and add clock and doppler carrier
-phase. This message could then be interpreted by a client program.
+phase. This JSON could then be interpreted by a client program and
+dunmped in various standard formats.
 
-There are numerous formats for this information, and it would be
-easier to adapt to new formats if the formatting and use was handled
-by something other than the gpsd daemon. Currently the RT-IGS format
-is looking like the favorite for implementation; it's a fairly
-lightweight protocol, flexible enough to handle all the quantities
-required, and it is actually in use in production reference
-networks. RT-IGS is also a packet-oriented format, rather than a
-file-oriented format like RINEX.
+Currently the RT-IGS format is looking like the favorite for
+implementation; it's a fairly lightweight protocol, flexible enough to
+handle all the quantities required, and it is actually in use in
+production reference networks. RT-IGS is also a packet-oriented
+format, rather than a file-oriented format like RINEX.
 
 ** Future features (?)
 
