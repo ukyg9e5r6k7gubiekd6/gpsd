@@ -183,12 +183,6 @@ This is a good idea for supporting hands-free operation, e.g. while driving.
 It would be an easy first project for somebody who wants to get into
 the client code.
 
-*** Enable gpsd to open chronyd socket as root in /var/run
-
-At the moment gpsd drops privileges as soon as the command line
-options are parsed.  A way needs to be found to open the chronyd
-sockets in /var/run before dropping root.
-
 *** Enhance libgps to decode SUBFRAME JSON
 
 gpsd now passes along GPS subframe date in JSON.  The libgps needs to
