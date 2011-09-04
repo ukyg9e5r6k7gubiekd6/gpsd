@@ -46,9 +46,9 @@ Partially complete. David Ludlow <dave@adsllc.com> is working on it.
 
 ***  Make subframe reports available in the C API.
 
-gpsd now reports subframes when they're available, but the
-C client library doesn't yet parse them. Gary Miller has this
-in his queue.
+gpsd now reports subframes when they're available, but the C client
+library doesn't yet parse them.  A sample program to dump the SUBFRAME
+data would also be useful. Gary Miller has this in his queue.
 
 *** Write advanced features for TNT Revolution device
 
@@ -182,12 +182,6 @@ This is a good idea for supporting hands-free operation, e.g. while driving.
 
 It would be an easy first project for somebody who wants to get into
 the client code.
-
-*** Enhance libgps to decode SUBFRAME JSON
-
-gpsd now passes along GPS subframe date in JSON.  The libgps needs to
-be extended to decode this data.  A sample program to dump the SUBFRAME
-data would also be useful.
 
 *** Set the system time zone from latitude/longitude
 
