@@ -131,10 +131,8 @@ packet-cracking needed to get the data off the chips.
 
 Several commodity chipsets (ANTARIS, iTrax3, SiRF and Trimble) readily
 output enough data to make this a chore, rather than a hard problem.
-And pseudoranges, if available, are now part of the SKY report.
-
 Probably the best way to do this would be to add support for unscaled
-output of peudoranges in SKY and add clock and doppler carrier
+output of pseudoranges in SKY and add clock and doppler carrier
 phase. This message could then be interpreted by a client program.
 
 There are numerous formats for this information, and it would be
