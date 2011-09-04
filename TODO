@@ -30,7 +30,7 @@ We can presently decode RTCM3 messages of type 1004, 1005, 1006, 1008, 1012,
 different types in them, and a copy of the RTCM3 standard at latest revision
 (all we have is revision 3).
 
-**** Reporting code for specialized Type 6 and 8 AIS messages.
+**** Reporting code for specialized Type 6 and 8 AIS messages is incomplete.
 
 This one is mine and Kurt Schwehr's. Support is currently nearly
 complete; the only missing cases are a handful of IMO 236 and IMO 289
@@ -122,6 +122,8 @@ checking to see if it's already on, and stops navigation methods on
 wrapup.  It also forces the set of sentences issued.  There doesn't
 seem to be any way to query these settings.
 
+** Future features (?)
+
 *** Industry-standard format dumping of raw satellite data
 
 It would be useful to be able to report raw GPS data (pseudoranges,
@@ -142,8 +144,6 @@ implementation; it's a fairly lightweight protocol, flexible enough to
 handle all the quantities required, and it is actually in use in
 production reference networks. RT-IGS is also a packet-oriented
 format, rather than a file-oriented format like RINEX.
-
-** Future features (?)
 
 *** NOFLOAT build
 
