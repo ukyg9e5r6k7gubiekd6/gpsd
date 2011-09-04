@@ -158,58 +158,6 @@ AsteRx and PolaRx, NovAtel Superstar2 and OEMV, Thales (Magellan
 Professional) AC12 and DG14 would all be welcome. Of course, these
 are not $50 USB mice...
 
-*** Set the system time zone from latitude/longitude
-
-If we're going to give gpsd the capability to set system time via
-ntpd, why not let it set timezone as well?  A good thing for hackers
-travelling with laptops!
-
-The major issue here is that I have not yet found code, or a
-database, that would allow mapping from lon/lat to timezone.
-And the rules change from year to year.
-
-Actually this should be built as a specialized client, as some
-people won't want it.
-
-From <http://www.linuxsa.org.au/tips/time.html>:
-
-    The timezone under Linux is set by a symbolic link from
-    /etc/localtime[1] to a file in the /usr/share/zoneinfo[2] directory
-    that corresponds with what timezone you are in. For example, since I'm
-    in South Australia, /etc/localtime is a symlink to
-    /usr/share/zoneinfo/Australia/South. To set this link, type:
-
-    ln -sf ../usr/share/zoneinfo/your/zone /etc/localtime
-
-    Replace your/zone with something like Australia/NSW or
-    Australia/Perth. Have a look in the directories under
-    /usr/share/zoneinfo to see what timezones are available.
-
-    [1] This assumes that /usr/share/zoneinfo is linked to /etc/localtime as it is under Red Hat Linux.
-
-    [2] On older systems, you'll find that /usr/lib/zoneinfo is used
-    instead of /usr/share/zoneinfo.
-
-Changing the hardlink will, of course, update the system timezone for
-all users.  If I were designing this feature, I'd ensure that the
-system timezone can be overridden by a user-set TZ, but I don't know
-if it actually works that way.
-
-If I'm reading the tea leaves correctly, this functionality is actually
-embedded in the GCC library version of tzset(), so the same method will
-work on any system that uses that.
-
-Problem: system daemons use the timezone set when they start up. You
-can't get them to grok a new one short of rebooting.
-
-Sources: 
-
-Sources for Time Zone and Daylight Saving Time Data
-http://www.twinsun.com/tz/tz-link.htm
-
-Free time-zone maps of the U.S.
-http://www.manifold.net/download/freemaps.html
-
 Local variables:
 mode: outline
 paragraph-separate: "[ 	]*$"
