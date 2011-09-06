@@ -161,7 +161,9 @@ for (name, default, help) in pathopts:
 env['VERSION'] = gpsd_version
 env['PYTHON'] = sys.executable
 
-# set defaults from environment
+# Set defaults from environment.  Note that scons doesn't cope well with
+# multi-word CPPFLAGS and LDFLAGS values; you'll have to explicitly quote
+# them or (better yet) use the "=" form of GNU option settings.
 env['STRIP'] = "strip"
 env['CHRPATH'] = 'chrpath'
 for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP", "CHRPATH", "LD", "TAR"]:
