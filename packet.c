@@ -91,6 +91,7 @@ PERMISSIONS
  *      GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *	IN -- Integrated Navigation (Garmin uses this).
+ *	EC -- Electronic Chart Display & Information System (ECDIS)
  *
  */
 
@@ -319,6 +320,8 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = SEATALK_LEAD_1;
 	else if (c == 'A')	/* SiRF Ack */
 	    lexer->state = SIRF_ACK_LEAD_1;
+	else if (c == 'E')	/* ECDIS */
+	    lexer->state = ECDIS_LEAD_1;
 #ifdef OCEANSERVER_ENABLE
 	else if (c == 'C')
 	    lexer->state = NMEA_LEADER_END;
@@ -485,6 +488,12 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	break;
     case SEATALK_LEAD_1:
 	if (c == 'I' || c == 'N')	/* II or IN are accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case ECDIS_LEAD_1:
+	if (c == 'C')		/* ECDIS leader accepted */
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    lexer->state = GROUND_STATE;

@@ -855,10 +855,11 @@ sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA.  It recognizes these
 with either the normal GP talker-ID prefix, or with the GN prefix used
 by GLONASS, or with the II prefix emitted by Seahawk Autohelm marine
 navigation systems, or with the IN prefix emitted by some Garmin
-units.  It recognizes some vendor extensions: the PGRME emitted by some
-Garmin GPS models, the OHPR emitted by Oceanserver digital compasses,
-the PTNTHTM emitted by True North digital compasses, and the PASHR
-sentences emitted by some Ashtech GPSes.</para>
+units, or with the EC prefix emitted by ECDIS units.  It recognizes
+some vendor extensions: the PGRME emitted by some Garmin GPS models,
+the OHPR emitted by Oceanserver digital compasses, the PTNTHTM emitted
+by True North digital compasses, and the PASHR sentences emitted by
+some Ashtech GPSes.</para>
 
 <para>Note that <application>gpsd</application> JSON returns pure decimal
 degrees, not the hybrid degree/minute format described in the NMEA

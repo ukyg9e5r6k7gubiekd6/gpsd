@@ -25,6 +25,7 @@
    AIS_LEAD_2,		/* seen I of possible marine AIS message */
 
    SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
+   ECDIS_LEAD_1,	/* ECDIS packet leader 'E' */
 #endif /* NMEA_ENABLE */
 
    DLE_LEADER,		/* we've seen the TSIP/EverMore leader (DLE) */
