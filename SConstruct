@@ -250,6 +250,7 @@ env.SourceCode('.', None)
 devenv = (("ADDR2LINE", "addr2line"),
           ("AR","ar"),
           ("AS","as"),
+          ("CHRPATH", "chrpath"),
           ("CXX","c++"),
           ("CXXFILT","c++filt"),
           ("CPP","cpp"),
