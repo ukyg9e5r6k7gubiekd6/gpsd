@@ -90,8 +90,9 @@ PERMISSIONS
  *      GL -- GLONASS, according to IEIC 61162-1
  *      GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
- *	IN -- Integrated Navigation (Garmin uses this).
- *	EC -- Electronic Chart Display & Information System (ECDIS)
+ *      IN -- Integrated Navigation (Garmin uses this).
+ *      EC -- Electronic Chart Display & Information System (ECDIS)
+ *      P  -- Vendor-specific sentence
  *
  */
 
