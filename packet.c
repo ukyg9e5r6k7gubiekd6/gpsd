@@ -51,15 +51,19 @@ PERMISSIONS
  *
  * 2) NMEA lines.  These begin with $, and with \r\n, and have a checksum.
  *
- * 3) Binary packets.  These begin with some fixed leader character(s),
- *    have a length embedded in them, and end with a checksum (and possibly)
- *    some fixed trailing bytes.
+ * 3) Checksummed binary packets.  These begin with some fixed leader
+ *    character(s), have a length embedded in them, and end with a
+ *    checksum (and possibly some fixed trailing bytes).
  *
  * 4) ISGPS packets. The input may be a bitstream containing IS-GPS-200
  *    packets.  Each includes a fixed leader byte, a length, and check bits.
  *    In this case, it is not guaranted that packet starts begin on byte
  *    bounaries; the recognizer has to run a separate state machine against
  *    each byte just to achieve synchronization lock with the bitstream.
+ *
+ * 5) Un-checksummed binary packets.  Like case 3, but without
+ *    a checksum it's much easier to get a false match from garbage.
+ *    The packet recognizer gives checksummed types higher priority.
  *
  * Adding support for a new GPS protocol typically reqires adding state
  * transitions to support whatever binary packet structure it has.  The
