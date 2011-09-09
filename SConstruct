@@ -113,6 +113,7 @@ boolopts = (
     ("implicit_link", imloads,"implicit linkage is supported in shared libs"),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
+    ("strip",         True,  "build with stripping of binaries enabled"),       
     )
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
@@ -1021,7 +1022,7 @@ if have_chrpath:
         env.AddPostAction(binaryinstall, '$CHRPATH -d "$TARGET"')
     else:
         env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
-if not env['debug'] or env['profiling']:
+if not env['debug'] and not env['profiling'] and env['strip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
 python_lib_dir = sysconfig.get_python_lib(plat_specific=1)

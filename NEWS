@@ -1,6 +1,7 @@
 * Thu Sep 1 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2~dev
-  In the build recipe, (1) set pkgconfigdir properly for 64-bit Fedora systems,
-  (2) clean up various derived files including *.pyc on scons -c.
+  In the build recipe, (1) set pkgconfigdir properly for 64-bit Fedora
+  systems, (2) clean up various derived files including *.pyc on scons
+  -c, (3) add an option to disable stripping of binaries (strip=no).
   The packet sniffer now accepts NMEA packets with the ECDIS packet
   leader 'EC'.
 
