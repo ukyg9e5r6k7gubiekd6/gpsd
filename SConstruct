@@ -216,8 +216,8 @@ def installdir(dir):
     return wrapped
 
 # Honor the specified installation prefix in link paths.
-env.Prepend(LIBPATH=[os.path.join(env['prefix'], installdir('libdir'))])
-env.Prepend(RPATH=[os.path.join(env['prefix'], installdir('libdir'))])
+env.Prepend(LIBPATH=[installdir('libdir')])
+env.Prepend(RPATH=[installdir('libdir')])
 
 # Tell generated binaries to look in the current directory for
 # shared libraries. Should be handled sanely by scons on all systems.
