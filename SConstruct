@@ -219,13 +219,6 @@ def installdir(dir):
 env.Prepend(LIBPATH=[installdir('libdir')])
 env.Prepend(RPATH=[installdir('libdir')])
 
-# Tell generated binaries to look in the current directory for
-# shared libraries. Should be handled sanely by scons on all systems.
-# Not good to use '.' or a relative path here; it's a security risk.
-# At install time we should use chrpath to edit this out of RPATH.
-env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
-env.Prepend(RPATH=[os.path.realpath(os.curdir)])
-
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
@@ -406,7 +399,6 @@ else:
     confdefs.append("/* #undef HAVE_BLUEZ */\n")
     bluezlibs = []
 
-
 if config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
 else:
@@ -417,6 +409,13 @@ else:
 # spoofing the gps or gpsd shared library.
 if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     have_chrpath = True
+    # Tell generated binaries to look in the current directory for
+    # shared libraries so we can run tests without hassle. Should be
+    # handled sanely by scons on all systems.  Not good to use '.' or
+    # a relative path here; it's a security risk.  At install time we
+    # use chrpath to edit this out of RPATH.
+    env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
+    env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 else:
     have_chrpath = False
 
@@ -1017,11 +1016,12 @@ binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib)
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
+# If chrpath exists, we tweaked the RPATH of the vuild-directory binaries to
+# be support running tests in the build directory. Undo that at installation
+# time so as not to leave a potential secrity hole. 
 if have_chrpath:
-    if installdir('libdir') in ['/lib', '/usr/lib']:
-        env.AddPostAction(binaryinstall, '$CHRPATH -d "$TARGET"')
-    else:
-        env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
+    env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
+
 if not env['debug'] and not env['profiling'] and env['strip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
