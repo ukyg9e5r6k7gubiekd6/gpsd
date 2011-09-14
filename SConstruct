@@ -120,8 +120,8 @@ for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
 
 nonboolopts = (
-    ("gpsd_user",           "",            "privilege revocation user",),
-    ("gpsd_group",          "",            "privilege revocation group"),
+    ("gpsd_user",           "(undefined)", "privilege revocation user",),
+    ("gpsd_group",          "(undefined)", "privilege revocation group"),
     ("prefix",              "/usr/local",  "installation directory prefix"),
     ("limited_max_clients", 0,             "maximum allowed clients"),
     ("limited_max_devices", 0,             "maximum allowed devices"),
@@ -443,7 +443,7 @@ for (key,help) in keys:
             confdefs.append("#define %s_ENABLE 1\n" % key.upper())
         else:
             confdefs.append("/* #undef %s_ENABLE */\n" % key.upper())
-    elif value in (0, ""):
+    elif value in (0, "", "(undefined)"):
         confdefs.append("/* #undef %s */\n" % key.upper())
     else:
         if value.isdigit():
