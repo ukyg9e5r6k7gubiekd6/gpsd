@@ -61,11 +61,6 @@
 #define PROTO_TTY "/dev/ttyS0"	/* correct for Linux */
 #endif
 
-/* Name of (unprivileged) user to change to when we drop privileges. */
-#ifndef GPSD_USER
-#define GPSD_USER	"nobody"
-#endif
-
 /*
  * Timeout policy.  We can't rely on clients closing connections
  * correctly, so we need timeouts to tell us when it's OK to

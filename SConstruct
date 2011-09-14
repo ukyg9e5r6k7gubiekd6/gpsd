@@ -120,7 +120,7 @@ for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
 
 nonboolopts = (
-    ("gpsd_user",           "(undefined)", "privilege revocation user",),
+    ("gpsd_user",           "nobody",      "privilege revocation user",),
     ("gpsd_group",          "(undefined)", "privilege revocation group"),
     ("prefix",              "/usr/local",  "installation directory prefix"),
     ("limited_max_clients", 0,             "maximum allowed clients"),
