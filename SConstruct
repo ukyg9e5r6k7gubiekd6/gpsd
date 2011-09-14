@@ -111,6 +111,7 @@ boolopts = (
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
     ("implicit_link", imloads,"implicit linkage is supported in shared libs"),
+    ("python",        True,  "build Python support and modules."),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     ("strip",         True,  "build with stripping of binaries enabled"),       
@@ -818,50 +819,53 @@ if cxx and env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
 # Python programs
-python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed", "gegps"]
-python_modules = Glob('gps/*.py') 
-
-# Build Python binding
-#
-python_extensions = {
-    "gps" + os.sep + "packet" : ["gpspacket.c", "packet.c", "isgps.c",
-                                    "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"],
-    "gps" + os.sep + "clienthelpers" : ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"]
-}
- 
-python_env = env.Clone()
-vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY')
-for i in range(len(vars)):
-    if vars[i] is None:
-        vars[i] = ""
-(cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy) = vars
-# in case CC/CXX was set to the scan-build wrapper,
-# ensure that we build the python modules with scan-build, too
-if env['CC'] is None or env['CC'].find('scan-build') < 0:
-    python_env['CC'] = cc
+if not env['python']:
+    python_built_extensions = []
 else:
-    python_env['CC'] = ' '.join([env['CC']] + cc.split()[1:])
-if env['CXX'] is None or env['CXX'].find('scan-build') < 0:
-    python_env['CXX'] = cxx
-else:
-    python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])
+    python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed", "gegps"]
+    python_modules = Glob('gps/*.py') 
 
-python_env['SHLINKFLAGS'] = []
-python_env['SHLINK'] = ldshared
-python_env['SHLIBPREFIX']=""
-python_env['SHLIBSUFFIX']=so_ext
-python_env['CPPPATH'] =[includepy]
-python_env['CPPFLAGS']=basecflags + " " + opt
-python_objects={}
-python_compiled_libs = {}
-for ext, sources in python_extensions.iteritems():
-    python_objects[ext] = []
-    for src in sources:
-        python_objects[ext].append(python_env.SharedObject(src.split(".")[0] + '-py', src))
-    python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
-python_built_extensions = python_compiled_libs.values()
+    # Build Python binding
+    #
+    python_extensions = {
+        "gps" + os.sep + "packet" : ["gpspacket.c", "packet.c", "isgps.c",
+                                        "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"],
+        "gps" + os.sep + "clienthelpers" : ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"]
+    }
 
-python_egg_info_source = """Metadata-Version: 1.0
+    python_env = env.Clone()
+    vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY')
+    for i in range(len(vars)):
+        if vars[i] is None:
+            vars[i] = ""
+    (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy) = vars
+    # in case CC/CXX was set to the scan-build wrapper,
+    # ensure that we build the python modules with scan-build, too
+    if env['CC'] is None or env['CC'].find('scan-build') < 0:
+        python_env['CC'] = cc
+    else:
+        python_env['CC'] = ' '.join([env['CC']] + cc.split()[1:])
+    if env['CXX'] is None or env['CXX'].find('scan-build') < 0:
+        python_env['CXX'] = cxx
+    else:
+        python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])
+
+    python_env['SHLINKFLAGS'] = []
+    python_env['SHLINK'] = ldshared
+    python_env['SHLIBPREFIX']=""
+    python_env['SHLIBSUFFIX']=so_ext
+    python_env['CPPPATH'] =[includepy]
+    python_env['CPPFLAGS']=basecflags + " " + opt
+    python_objects={}
+    python_compiled_libs = {}
+    for ext, sources in python_extensions.iteritems():
+        python_objects[ext] = []
+        for src in sources:
+            python_objects[ext].append(python_env.SharedObject(src.split(".")[0] + '-py', src))
+        python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
+    python_built_extensions = python_compiled_libs.values()
+
+    python_egg_info_source = """Metadata-Version: 1.0
 Name: gps
 Version: %s
 Summary: Python libraries for the gpsd service daemon
@@ -872,7 +876,7 @@ License: BSD
 Description: The gpsd service daemon can monitor one or more GPS devices connected to a host computer, making all data on the location and movements of the sensors available to be queried on TCP port 2947.
 Platform: UNKNOWN
 """ %(gpsd_version, )
-python_egg_info = python_env.Textfile(target="gps-%s.egg-info" %(gpsd_version, ), source=python_egg_info_source)
+    python_egg_info = python_env.Textfile(target="gps-%s.egg-info" %(gpsd_version, ), source=python_egg_info_source)
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
@@ -995,8 +999,9 @@ if qt_env:
     build_qt = qt_env.Alias('build', [compiled_qgpsmmlib])
     qt_env.Default(*build_qt)
 
-build_python = python_env.Alias('build', [python_built_extensions])
-python_env.Default(*build_python)
+if env['python']:
+    build_python = python_env.Alias('build', [python_built_extensions])
+    python_env.Default(*build_python)
 
 ## Installation and deinstallation
 
@@ -1025,23 +1030,27 @@ if have_chrpath:
 if not env['debug'] and not env['profiling'] and env['strip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
-python_lib_dir = sysconfig.get_python_lib(plat_specific=1)
-python_module_dir = python_lib_dir + os.sep + 'gps'
-python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
-                                                python_built_extensions)
-if not env['debug'] or env['profiling']:
-    python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
+if not env['python']:
+    python_install = []
+else:
+    python_lib_dir = sysconfig.get_python_lib(plat_specific=1)
+    python_module_dir = python_lib_dir + os.sep + 'gps'
+    python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
+                                                    python_built_extensions)
+    if not env['debug'] or env['profiling']:
+        python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
 
-python_modules_install = python_env.Install( DESTDIR + python_module_dir,
-                                            python_modules)
+    python_modules_install = python_env.Install( DESTDIR + python_module_dir,
+                                                python_modules)
 
-python_progs_install = python_env.Install(installdir('bindir'), python_progs)
+    python_progs_install = python_env.Install(installdir('bindir'), python_progs)
 
-python_egg_info_install = python_env.Install(DESTDIR + python_lib_dir, python_egg_info)
-python_install = [  python_extensions_install,
-                    python_modules_install,
-                    python_progs_install,
-                    python_egg_info_install]
+    python_egg_info_install = python_env.Install(DESTDIR + python_lib_dir,
+                                                 python_egg_info)
+    python_install = [  python_extensions_install,
+                        python_modules_install,
+                        python_progs_install,
+                        python_egg_info_install]
 
 pc_install = [ env.Install(installdir('pkgconfigdir'), x) for x in ("libgps.pc", "libgpsd.pc") ]
 
@@ -1137,13 +1146,16 @@ env.Alias('checkall', ['splint',
 # files from the *.log source files.
 
 # Check that all Python modules compile properly 
-def check_compile(target, source, env):
-    for pyfile in source:
-        'cp %s tmp.py'%(pyfile)
-        '%s -tt -m py_compile tmp.py' %(sys.executable, )
-        'rm -f tmp.py tmp.pyc'
-python_compilation_regress = Utility('python-compilation-regress',
-        Glob('*.py') + python_modules + python_progs + ['SConstruct'], check_compile)
+if env['python']:
+    def check_compile(target, source, env):
+        for pyfile in source:
+            'cp %s tmp.py'%(pyfile)
+            '%s -tt -m py_compile tmp.py' %(sys.executable, )
+            'rm -f tmp.py tmp.pyc'
+    python_compilation_regress = Utility('python-compilation-regress',
+            Glob('*.py') + python_modules + python_progs + ['SConstruct'], check_compile)
+else:
+    python_compilation_regress = None
 
 # Regression-test the daemon
 gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
@@ -1327,15 +1339,16 @@ env.Command('www/hardware.html', ['gpscap.py',
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
 
-env.Alias('pydoc', "www/pydoc/index.html")
+if env['python']:
+    env.Alias('pydoc', "www/pydoc/index.html")
 
-# We need to run epydoc with the Python version we built the modules for.
-# So we define our own epydoc instead of using /usr/bin/epydoc
-EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
-env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glob("gps/*.py"), [
-    'mkdir -p www/pydoc',
-    EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
-        ])
+    # We need to run epydoc with the Python version we built the modules for.
+    # So we define our own epydoc instead of using /usr/bin/epydoc
+    EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
+    env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glob("gps/*.py"), [
+        'mkdir -p www/pydoc',
+        EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
+            ])
 
 # Productions for setting up and performing udev tests.
 #
