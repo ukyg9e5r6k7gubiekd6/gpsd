@@ -2016,18 +2016,19 @@ int main(int argc, char *argv[])
 	 * permissions set.
 	 */
 	/*@-type@*/
+#ifdef GPSD_GROUP
+	{
+	    struct group *grp = getgrnam(GPSD_GROUP);
+	    if (grp)
+		(void)setgid(grp->gr_gid);
+	}
+#else
 	if ((optind < argc && stat(argv[optind], &stb) == 0)
 	    || stat(PROTO_TTY, &stb) == 0) {
 	    gpsd_report(LOG_PROG, "changing to group %d\n", stb.st_gid);
 	    if (setgid(stb.st_gid) != 0)
 		gpsd_report(LOG_ERROR, "setgid() failed, errno %s\n",
 			    strerror(errno));
-	}
-#ifdef GPSD_GROUP
-	else {
-	    struct group *grp = getgrnam(GPSD_GROUP);
-	    if (grp)
-		(void)setgid(grp->gr_gid);
 	}
 #endif
 	pw = getpwnam(GPSD_USER);
