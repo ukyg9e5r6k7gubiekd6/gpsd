@@ -782,7 +782,7 @@ gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
 env.Depends(gpspipe, compiled_gpslib)
 
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], parse_flags=gpslibs+dbus_recv_libs)
-env.Depends(gpspipe, compiled_gpslib)
+env.Depends(gpxlogger, compiled_gpslib)
 
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], parse_flags=gpslibs)
 env.Depends(lcdgps, compiled_gpslib)
