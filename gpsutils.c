@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "gpsd.h"  /* could be gps.h if we didn't need splint decorations */
 
