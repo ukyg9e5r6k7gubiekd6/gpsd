@@ -140,7 +140,7 @@ pathopts = (
     ("sbindir",             "/sbin",          "system binaries directory"),
     ("mandir",              "/share/man",     "manual pages directory"),
     ("docdir",              "/share/doc",     "documents directory"),
-    ("pkgconfigdir",        "$libdir/pkgconfdir", "pkgconfig file directory"),
+    ("pkgconfig",           "$libdir/pkgconfig", "pkgconfig file directory"),
     )
 for (name, default, help) in pathopts:
     opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
@@ -289,7 +289,7 @@ if "help" in ARGLIST:
 
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
-    ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
+    ret = context.TryAction('pkg-config --exists \'%s\' --debug' % name)[0]
     context.Result( ret )
     return ret
 
@@ -1052,13 +1052,14 @@ else:
                         python_progs_install,
                         python_egg_info_install]
 
-pc_install = [ env.Install(installdir('pkgconfigdir'), x) for x in ("libgps.pc", "libgpsd.pc") ]
+pc_install = [ env.Install(installdir('pkgconfig'), x) for x in ("libgps.pc", "libgpsd.pc") ]
 
 maninstall = []
-for manpage in base_manpages.keys() + python_manpages.keys():
-    section = manpage.split(".")[1]
-    dest = os.path.join(installdir('mandir'), "man"+section, manpage)
-    maninstall.append(env.InstallAs(source=manpage, target=dest))
+if manbuilder:
+    for manpage in base_manpages.keys() + python_manpages.keys():
+        section = manpage.split(".")[1]
+        dest = os.path.join(installdir('mandir'), "man"+section, manpage)
+        maninstall.append(env.InstallAs(source=manpage, target=dest))
 install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install + headerinstall)
 
 def Uninstall(nodes):
