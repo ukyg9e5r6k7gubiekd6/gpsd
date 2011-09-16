@@ -289,7 +289,7 @@ if "help" in ARGLIST:
 
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
-    ret = context.TryAction('pkg-config --exists \'%s\' --debug' % name)[0]
+    ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
     context.Result( ret )
     return ret
 
