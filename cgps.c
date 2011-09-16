@@ -632,12 +632,14 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     }
     (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-    /* Fill in receiver type. */
-    for (i = 0; i < gpsdata->devices.ndevices; i++)
-	if (strcmp(gpsdata->devices.list[i].path, gpsdata->dev.path) == 0)
-	   break;
-    (void)snprintf(scr, sizeof(scr), "%s", gpsdata->devices.list[i].driver);
-    (void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
+    if (gpsdata->set & DEVICELIST_SET) {
+	/* Fill in receiver type. */
+	for (i = 0; i < gpsdata->devices.ndevices; i++)
+	    if (strcmp(gpsdata->devices.list[i].path, gpsdata->dev.path) == 0)
+		break;
+	(void)snprintf(scr, sizeof(scr), "%s", gpsdata->devices.list[i].driver);
+	(void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
+    }
     /* Note that the following fields are exceptions to the
      * sizing rule.  The minimum window size does not include these
      * fields, if the window is too small, they get excluded.  This
