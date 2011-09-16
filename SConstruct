@@ -95,6 +95,7 @@ boolopts = (
     ("netfeed",       True,  "build support for handling TCP/IP data sources"),
     ("passthrough",   True,  "build support for passing through JSON"),
     # Other daemon options
+    ("force_global",  False, "force daemon to listen on all addressses"),
     ("timing",        True,  "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
     ("systemd",       systemd, "systemd socket activation"),

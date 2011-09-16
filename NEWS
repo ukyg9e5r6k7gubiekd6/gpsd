@@ -1,11 +1,12 @@
-* Wed Sep 14 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2~dev
-  In the build recipe, (1) set pkgconfigdir properly for 64-bit Fedora
+* Fri Sep 16 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2~dev In
+  the build recipe, (1) set pkgconfig properly for 64-bit Fedora
   systems, (2) clean up various derived files including *.pyc on scons
   -c, (3) add an option to disable stripping of binaries (strip=no),
   (4) for embedded targets, add an option to disable building Python
   support (python=no), (5) make the help for gpsd_group and gpsd_user
-  a little clearer. The packet sniffer now accepts NMEA packets
-  with the ECDIS packet leader 'EC'.
+  a little clearer, (6) add a force_global option to build gpsd to
+  listen to all addresses (rather than just loopback). The packet
+  sniffer now accepts NMEA packets with the ECDIS packet leader 'EC'.
 
 * Sun Aug 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1
   The Irene release, rocking you like a hurricane and brought to you

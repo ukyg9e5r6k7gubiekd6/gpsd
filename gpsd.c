@@ -133,7 +133,9 @@ static const int af = AF_INET;
 static fd_set all_fds;
 static int maxfd;
 static bool in_background = false;
+#ifndef FORCE_GLOBAL_ENABLE
 static bool listen_global = false;
+#endif /* FORCE_GLOBAL_ENABLE */
 #ifndef FORCE_NOWAIT
 static bool nowait = false;
 #endif /* FORCE_NOWAIT */
@@ -246,9 +248,11 @@ static void usage(void)
   -b		     	    = bluetooth-safe: open data sources read-only\n\
   -n			    = don't wait for client connects to poll GPS\n\
   -N			    = don't go into background\n\
-  -F sockfile		    = specify control socket location\n\
-  -G         		    = make gpsd listen on INADDR_ANY\n\
-  -P pidfile	      	    = set file to record process ID \n\
+  -F sockfile		    = specify control socket location\n"
+#ifndef FORCE_GLOBAL_ENABLE
+"  -G         		    = make gpsd listen on INADDR_ANY\n"
+#endif /* FORCE_GLOBAL_ENABLE */
+"  -P pidfile	      	    = set file to record process ID \n\
   -D integer (default 0)    = set debug level \n\
   -S integer (default %s) = set port for daemon \n\
   -h		     	    = help message \n\
@@ -378,10 +382,12 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 
 	memset((char *)&sat.sa_in, 0, sin_len);
 	sat.sa_in.sin_family = (sa_family_t) AF_INET;
+#ifndef FORCE_GLOBAL_ENABLE
 	if (listen_global)
-	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
-	else
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	else
+#endif /* FORCE_GLOBAL_ENABLE */
+	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
 	sat.sa_in.sin_port = htons(port);
 
 	af_str = "IPv4";
@@ -394,10 +400,12 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 
 	memset((char *)&sat.sa_in6, 0, sin_len);
 	sat.sa_in6.sin6_family = (sa_family_t) AF_INET6;
-	if (listen_global)
-	    sat.sa_in6.sin6_addr = in6addr_any;
-	else
+#ifndef FORCE_GLOBAL_ENABLE
+	if (!listen_global)
 	    sat.sa_in6.sin6_addr = in6addr_loopback;
+	else
+#endif /* FORCE_GLOBAL_ENABLE */
+	    sat.sa_in6.sin6_addr = in6addr_any;
 	sat.sa_in6.sin6_port = htons(port);
 
 	/*
@@ -1792,9 +1800,11 @@ int main(int argc, char *argv[])
 	case 'b':
 	    context.readonly = true;
 	    break;
+#ifndef FORCE_GLOBAL_ENABLE
 	case 'G':
 	    listen_global = true;
 	    break;
+#endif /* FORCE_GLOBAL_ENABLE */
 	case 'l':		/* list known device types and exit */
 	    for (dp = gpsd_drivers; *dp; dp++) {
 #ifdef RECONFIGURE_ENABLE
