@@ -16,6 +16,19 @@ See the GPSD bug tracker at https://developer.berlios.de/bugs/?group_id=2116
 but don't be surprised if it's empty or very sparse.  Our rate of new defects
 per month is quite low.
 
+** Dispatcher/network issues
+
+**** -G doesn't work with IPV6, not possible to listen globally.
+
+Bug is in gpsd.c:passivesock_af(). Should be fixable by copying known-good
+code from somewhere.  Test with netstat, Dave Taht knows details.
+
+**** Reading AISHub data via UDP confuses xgps with short writes
+
+To reproduce, "gpsd -D 5 -N -n udp://192.168.1.3:12346" (only
+works inside thyrsus.com) and run xgps. Probably some kind of
+packet aggregation issue.
+
 *** Driver issues
 
 **** gpsctl -b should work on UBX, but does not.
