@@ -63,6 +63,25 @@ relating to implicit_links in the scons recipe; you probably need to
 build with implicit_links=no.  And report your platform, ideally along
 with a way of identifying it from Python, to the gpsd maintainers.
 
+For mice using an RS-232 port (which is no longer common) you will need
+serial-port support compiled into your kernel.  Various USB-to-serial 
+adapter chips found in GPSes require specific drivers. Under a stock
+Linux kernel these will load on demand whren the USB system sees the
+appropriate vendor/product ID combinations.  If you are custom-building
+a Linux kernel for embedded deployment, you will need some subset of
+the following modules:
+
+pl2303        Prolific Technology, Inc. PL2303 Serial Port
+ftdi_sio      FTDI 8U232AM / FT232
+cypress_m8    M8/CY7C64013
+cp210x        Cygnal Integrated Products devices
+garmin_gps    Garmin USB mice including GPS-18
+cdc_am	      USB Communication Device Class Abstract Control Model interface
+
+These are listed in rough order of devices covered; the PL23203 by itself
+accounts for over 70% of deployed USB mice.  We recommend building with
+pl2303, ftdi_sio, cypress_m8, and cp210x.  
+
 For building from the source tree, or if you change the man page
 source, xslt and docbook xsl style files are used to generate nroff
 -man source from docbook xml.  The following packages are used in this
