@@ -2,7 +2,8 @@
  * This is the gpsd driver for SiRF GPSes operating in binary mode.
  * It also handles uBlox, a SiRF derivative.
  *
- * The advantage: Reports climb/sink rate (raw-mode clients won't see this).
+ * The advantages: Reports climb/sink rate (raw-mode clients won't see this).
+ * Also, we can flag DGPS satellites used in the skyview when SBAS is in use. 
  * The disadvantages: Doesn't return PDOP or VDOP, just HDOP.
  *
  * Chris Kuethe, our SiRF expert, tells us:
@@ -511,7 +512,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     session->gpsdata.satellites_visible = st;
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < st; i++) 
-	if (session->gpsdata.PRN[i] > 100 && session->driver.sirf.sbas != 0)
+	if (DGPS_PRN(session->gpsdata.PRN[i]) && session->driver.sirf.sbas != 0)
 	    session->gpsdata.used[i] = true;
 #ifdef NTPSHM_ENABLE
     if (st < 3) {

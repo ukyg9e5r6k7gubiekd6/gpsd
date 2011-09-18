@@ -96,6 +96,17 @@ struct gps_fix_t {
     double epc;		/* Vertical speed uncertainty */
 };
 
+/*
+ * Satellite ID classes.
+ * U.S. GPS authorities reserve PRNs 1-64 for GPS satellites.
+ * GLONASS birds reuse GPS PRNs;  it is a GPSD convention to map them to 
+ * IDs 64 and above (some other programs push them to 33 and above).
+ * All SBAS/WAAS/EGNOS birds have PRNs above 100.
+ */
+#define GNSS_PRN(n)	(((n) >= 1) && ((n) <= 63))	/* GNSS satellite */
+#define GLONASS_PRN(n)	(((n) >= 64) && ((n) <= 96))	/* GLONASS satellite */
+#define DGPS_PRN(n)	((n) >= 100)
+
 /* 
  * The structure describing the pseudorange errors (GPGST)
  */

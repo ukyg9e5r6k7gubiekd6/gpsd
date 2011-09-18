@@ -229,7 +229,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
     }
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < j; i++) 
-	if (session->gpsdata.PRN[i] > 100 && session->driver.sirf.sbas != 0)
+	if (DGPS_PRN(session->gpsdata.PRN[i]) && session->driver.sirf.sbas != 0)
 	    session->gpsdata.used[i] = true;
     session->gpsdata.skyview_time = NAN;
     session->gpsdata.satellites_visible = (int)st;
