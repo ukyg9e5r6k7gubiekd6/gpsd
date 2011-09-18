@@ -479,6 +479,8 @@ struct gps_device_t {
 	    unsigned char degraded_timeout;
 	    unsigned char dr_timeout;
 	    unsigned char track_smooth_mode;
+	    /* fields from DGPS Status */
+	    unsigned char sbas;
 	} sirf;
 #endif /* SIRF_ENABLE */
 #ifdef SUPERSTAR2_ENABLE

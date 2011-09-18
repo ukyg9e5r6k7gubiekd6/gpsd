@@ -137,6 +137,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *, unsigned char *,
 				     size_t);
 static gps_mask_t sirf_msg_sysparam(struct gps_device_t *, unsigned char *,
 				    size_t);
+static gps_mask_t sirf_msg_dgpsstatus(struct gps_device_t *, unsigned char *,
+				      size_t);
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *, unsigned char *,
 				 size_t);
 
@@ -507,6 +509,10 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	    st += 1;
     }
     session->gpsdata.satellites_visible = st;
+    /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
+    for (i = 0; i < st; i++) 
+	if (session->gpsdata.PRN[i] > 100 && session->driver.sirf.sbas != 0)
+	    session->gpsdata.PRN[i] = true;
 #ifdef NTPSHM_ENABLE
     if (st < 3) {
 	gpsd_report(LOG_PROG,
@@ -851,6 +857,14 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
     return 0;
 }
 
+static gps_mask_t sirf_msg_dgpsstatus(struct gps_device_t *session,
+				 unsigned char *buf, size_t len UNUSED)
+/* only documentented from prorocol version 1.7 (2005) onwards */
+{
+    session->driver.sirf.sbas = (unsigned short)getub(buf, 1);
+    return 0;
+}
+
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 				 unsigned char *buf, size_t len UNUSED)
 {
@@ -1073,9 +1087,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x13:			/* Navigation Parameters MID 19 */
 	return sirf_msg_sysparam(session, buf, len);
 
-    case 0x1b:			/* DGPS status (undocumented) MID 27 */
-	gpsd_report(LOG_PROG, "SiRF: unused DGPSF 0x1b\n");
-	return 0;
+    case 0x1b:			/* DGPS status MID 27 */
+	return sirf_msg_dgpsstatus(session, buf, len);
 
     case 0x1c:			/* Navigation Library Measurement Data MID 28 */
 	gpsd_report(LOG_PROG, "SiRF: NLMD 0x1c\n");
