@@ -47,7 +47,7 @@ C:
     <paramdef>int <parameter>timeout</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>void <function>gps_data</function></funcdef>
+<funcdef>char *<function>gps_data</function></funcdef>
     <paramdef>const struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
