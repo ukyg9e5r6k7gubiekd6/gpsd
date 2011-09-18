@@ -567,7 +567,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the altitude. */
-    if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.altitude) == 0)
+    if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.altitude) == 0)
 	(void)snprintf(scr, sizeof(scr), "%.1f %s",
 		       gpsdata->fix.altitude * altfactor, altunits);
     else
@@ -597,7 +597,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the rate of climb. */
-    if (gpsdata->fix.mode == MODE_3D && isnan(gpsdata->fix.climb) == 0)
+    if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.climb) == 0)
 	(void)snprintf(scr, sizeof(scr), "%.1f %s/min",
 		       gpsdata->fix.climb * altfactor * 60, altunits);
     else
@@ -644,7 +644,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
      * sizing rule.  The minimum window size does not include these
      * fields, if the window is too small, they get excluded.  This
      * may or may not change if/when the output for these fields is
-     * fixed and/or people request their permanance.  They're only
+     * fixed and/or people request their permanence.  They're only
      * there in the first place because I arbitrarily thought they
      * sounded interesting. ;^) */
 
