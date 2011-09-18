@@ -147,7 +147,7 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
      * that we've observed that geodetic fix computation is unstable
      * in a way that tends to change low-order digits in invalid
      * fixes. Dumping these tends to cause cross-architecture failures
-     * in the regression tests.  Rgus effect has been seen on SiRF-II
+     * in the regression tests.  This effect has been seen on SiRF-II
      * chips, which are quite common.
      */
     if (gpsdata->fix.mode >= MODE_2D) {
