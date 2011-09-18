@@ -512,7 +512,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < st; i++) 
 	if (session->gpsdata.PRN[i] > 100 && session->driver.sirf.sbas != 0)
-	    session->gpsdata.PRN[i] = true;
+	    session->gpsdata.used[i] = true;
 #ifdef NTPSHM_ENABLE
     if (st < 3) {
 	gpsd_report(LOG_PROG,
