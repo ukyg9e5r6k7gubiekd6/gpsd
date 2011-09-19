@@ -129,6 +129,7 @@ nonboolopts = (
     ("fixed_port_speed",    0,             "fixed serial port speed"),
     ("fixed_stop_bits",     0,             "fixed serial port stop bits"),
     ("target",              "",            "cross-development target"),
+    ("sysroot",             "",            "cross-development system root"),
     )
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
@@ -268,6 +269,10 @@ devenv = (("ADDR2LINE", "addr2line"),
 if env['target']:
     for (name, toolname) in devenv:
         env[name] = env['target'] + '-' + toolname
+
+if env['sysroot']:
+    env.MergeFlags({"CFLAGS": ["--sysroot=%s" % env['sysroot']]})
+    env.MergeFlags({"LINKFLAGS": ["--sysroot=%s" % env['sysroot']]})
 
 ## Build help
 
