@@ -16,7 +16,8 @@ Look there for updates, news, and project mailing lists.  See that
 website for a list of GPS units known to be compatible.
 
 See the file INSTALL for installation instructions and some tips on
-how to troubleshoot your installation.
+how to troubleshoot your installation.  The file build.txt 
+has instructions for building from source.
 
 Distro integrators: An RPM spec file is included in the gpsd
 distribution.  It wants to set up a hotplug script to notify gpsd
