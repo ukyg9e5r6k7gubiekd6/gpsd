@@ -181,7 +181,7 @@ for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP"
             env.Replace(**{j: os.getenv(i)})
 for flags in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
     if os.environ.has_key(flags):
-        env.MergeFlags({flags : os.getenv(flags)})
+        env.MergeFlags({flags : [os.getenv(flags)]})
 
 
 # Placeholder so we can kluge together something like VPATH builds.
