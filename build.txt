@@ -3,6 +3,8 @@
 This is a guide to building GPSD from a bare source tree.  It includes
 guidance on how to cross-build the package.
 
+(This file is marked up in asciidoc.)
+
 == Check your build prerequisites ==
 
 Necessary components for any build:
@@ -67,8 +69,9 @@ to pick up the prerequisites is: "apt-get build-dep gpsd"
 
 == How to build the software from source ==
 
-To build gpsd from source, simply call 'scons' in a working-directory
-copy.
+To build gpsd for your host platform from source, simply call 'scons'
+in a working-directory copy. (Cross-build is described in a later
+section.)
 
 You can specify the installation prefix, as for an autotools build, by
 running "scons prefix=<installation_root>". The default value is
@@ -121,4 +124,68 @@ client library to be available on all the Qt supported platforms.
 Please see http://qt.nokia.com/doc/4.6/supported-platforms.html for a
 status of Qt supported platforms as of version 4.6.
 
+== Cross-building ==
 
+The scons recipe is intended to support cross-building, in particular
+for embedded deployment of the software.  A session transcript
+illustrating how to do that, with some routine messages suppressed and
+replaced with [...].  Notes and explanation follow.
+
+===========================================================================
+$ git clone git://git.berlios.de/gpsd
+Cloning into gpsd...
+remote: Counting objects: 40685, done.
+remote: Compressing objects: 100% (14403/14403), done.
+remote: Total 40685 (delta 30403), reused 30683 (delta 26264)
+Receiving objects: 100% (40685/40685), 10.67 MiB | 190 KiB/s, done.
+Resolving deltas: 100% (30403/30403), done.
+$ cd gpsd
+$ cp ../.scons-option-cache .
+$ cp ../build-file .
+$ cat .scons-option-cache
+libgpsmm = False
+libQgpsmm = False
+python = False
+prefix = '/work/buildroot/output/staging/usr/'
+target = 'arm-indigo-linux-gnueabi'
+$ cat build-file
+export CFLAGS="--sysroot=/work/buildroot/output/staging/"
+export LINKFLAGS='--sysroot=/work/buildroot/output/staging/'
+
+scons build
+$ ./build-file
+scons: Reading SConscript files ...
+[...]
+Altered configuration variables:
+libgpsmm = False (default True): build C++ bindings
+libQgpsmm = False (default True): build QT bindings
+python = False (default True): build Python support and modules.
+prefix = /work/buildroot/output/staging/usr/ (default /usr/local): installation directory prefix
+target = arm-indigo-linux-gnueabi (default ): cross-development target
+scons: done reading SConscript files.
+scons: Building targets ...
+substituter(["jsongen.py"], ["jsongen.py.in"])
+chmod -w jsongen.py
+chmod +x jsongen.py
+rm -f ais_json.i && /usr/bin/python jsongen.py --ais --target=parser > ais_json.i && chmod a-w ais_json.i
+Creating 'gpsd_config.h'
+arm-indigo-linux-gnueabi-gcc -o ais_json.os -c --sysroot=/work/buildroot/output/staging/ -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 -fPIC ais_json.c
+arm-indigo-linux-gnueabi-gcc -o daemon.os -c --sysroot=/work/buildroot/output/staging/ -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 -fPIC daemon.c
+Creating 'gpsd.h'
+[...]
+chmod -w maskaudit.py
+chmod +x maskaudit.py
+rm -f gps_maskdump.c && /usr/bin/python maskaudit.py -c . > gps_maskdump.c && chmod a-w gps_maskdump.c
+arm-indigo-linux-gnueabi-gcc -o gps_maskdump.os -c --sysroot=/work/buildroot/output/staging/ -Wextra -Wall -Wno-uninitialized -Wno-missing-field-initializers -Wcast-align -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wpointer-arith -Wreturn-type -D_GNU_SOURCE -O2 -fPIC gps_maskdump.c
+[..]
+scons: done building targets.
+$ file gpsd
+gpsd: ELF 32-bit LSB executable, ARM, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.36, not stripped
+===========================================================================
+
+The author of this transcript notes:
+
+The --sysroot option is required for target ncurses, you could
+probably build without it or with curses compiled for ARM at
+"prefix". My prefix is pointed at buildroot/output/staging so that my
+client could compile against libgps.so
