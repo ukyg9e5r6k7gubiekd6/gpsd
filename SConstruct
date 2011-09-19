@@ -502,7 +502,7 @@ if manbuilder:
     env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                       src_suffix=".xml", suffix=".html")
 
-qt_network = config.CheckPKG('QtNetwork')
+qt_network = env['libQgpsmm'] and config.CheckPKG('QtNetwork')
 
 env = config.Finish()
 
@@ -523,7 +523,7 @@ if os.path.exists("/etc/gentoo-release"):
     print "Adjust your PYTHONPATH to see library directories under /usr/local/lib"
 
 # Should we build the Qt binding?
-if cxx and env['libQgpsmm'] and qt_network:
+if cxx and qt_network:
     qt_env = env.Clone()
     qt_env.MergeFlags('-DUSE_QT')
     if qt_network:
