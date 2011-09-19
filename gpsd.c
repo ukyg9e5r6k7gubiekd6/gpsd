@@ -404,15 +404,8 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	if (!listen_global)
 	    sat.sa_in6.sin6_addr = in6addr_loopback;	
 #endif /* FORCE_GLOBAL_ENABLE */
-	/* else */
-            /* BAD:  sat.sa_in6.sin6_addr = in6addr_any;
-	     * the simple assignment will not work (except as an initializer)
-	     * because sin6_addr is an array not a simple type
-	     * we could do something like this:
-	     * memcpy(sat.sa_in6.sin6_addr, in6addr_any, sizeof(sin6_addr));
-	     * BUT, all zeros is IPv6 wildcard, and we just zeroed the array
-	     * so really nothing to do here
-	     */
+	else
+	    sat.sa_in6.sin6_addr = in6addr_any;
 	sat.sa_in6.sin6_port = htons(port);
 
 	/*
@@ -425,6 +418,17 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	 */
 	af_str = "IPv6";
 	s = socket(PF_INET6, type, proto);
+
+	/*
+	 * On some network stacks, including Linux's, an IPv6 socket
+	 * defaults to listening on IPv4 as well. Unless we disable
+	 * this, trying to listen on in6addr_any will fail with the
+	 * address-in-use error condition.
+	 */
+	{
+	    int on = 1;
+	    (void)setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
+	}
 	break;
 #endif
     default:
