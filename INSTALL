@@ -1,75 +1,35 @@
 = GPSD Installation Instructions =
 
-Here are the steps for installing gpsd and verifying its performance:
+Here are the steps for installing GPSD and verifying its performance:
 
-0. gpsd has a core set of prerequisites that are required for any
-configuration of the package, and then additional features and tests
-have additional prerequisites.
+== Check that your GPS is live and you can get data from it ==
 
-Necessary components for any build:
+Start by making sure you can get data from your GPS, otherwise the later
+steps will be very frustrating.  In this command
 
-C compiler			-> gpsd and client library are written in C
-Python				-> some code is generated from python scripts
-scons                           -> for the build recipe 
-Python GTK-2 and cairo bindings	-> the main test client, xgps, needs this
+      stty -F /dev/ttyXXX ispeed 4800 && cat </dev/ttyXXX
 
-C99 conformance is required in the compiler. The C code depends on one
-non-C99 feature: anonymous unions.  We could eliminate these, but the
-cost would be source-level interface breakage if we have to move
-structure members in and out of unions.
+replace ttyXXX with the filename of the port.  This will probably be
+either /dev/ttyUSB0 or /dev/ttyS0.  When you run this command, you
+should see text lines beginning with $ come to stdout (possibly after
+a short initial burst of binary garbage).  If you don't see this, you
+may have OS-level problems with your serial support, but more likely
+have the wrong device.  Look again.
 
-GPSD is normally built and tested with GCC. The shared-memory
-interface relies on one GCCism, but the code is otherwise pretty
-compiler-agnostic.  It is reported that clang produces a gpsd that
-passes all regression tests. If -Wmissing-field-initializers or
-its non-gcc equivalent is set you will get a lot of warnings; 
-this is due to generated code and cannot be fixed.
+If you have trouble wuth the preceding step, check your cabling
+first.  Verify that the device is connected and that its power LED
+(if iut has one) is lit.
 
-You will need Python 2.6 or 2.4+ & simplejson.  The Python code in
-GPSD is 2.4-compatible except that you need either the json library
-module from 2.6 or the functionally equivalent simplejson backport.
-Note that while Python is required to *build* GPSD (the build uses
-some code generators in Python), it is not required to run the service
-daemon.  In particular, you can cross-compile onto an embedded system
-without having to take Python with you.
+If you seem to have some sort of serial-device problem, check that
+your kernel properly supports the device you are using.  For GPSes
+using an RS-232 port (which is no longer common) you will need
+serial-port support compiled into your kernel.  Various USB-to-serial
+adapter chips found in GPSes require specific drivers.
 
-You will need scons version 1.2.0 or later to build the code. The
-autotools build from 2.96 and earlier versions has been dropped.
-
-Having the following optional components on your system will enable
-various additional capabilities and extensions:
-
-C++ compiler	       -> libgpsmm C++ wrapper for the library
-pthreads library       -> support for PPS timekeeping on serial GPSes
-DBUS                   -> gpsd will issue DBUS notifications 
-ncurses                -> a test client and the GPS monitor depend on this
-libusb-1.0.x or later  -> better USB device discovery
-Qt + qmake             -> libQgpsmm depends on this
-chrpath                -> prevents a potential security hole in built binaries
-
-If you have libusb-1.0.0 or later, the GPSD build will autodetect
-this and use it to discover Garmin USB GPSes, rather than groveling
-through /proc/bus/usb/devices (which has been deprecated by the
-Linux kernel team).
-
-For working with DBUS, you'll need the DBUS development
-headers and libraries installed.  Under Debian/Ubuntu these
-are the packages libdbus-1-dev and libdbus-glib-1-dev.
-
-Under Ubuntu, the ncurses package you want is libncurses5-dev.
-
-If your linker runs fails with missing math symbols, see the FIXME comment
-relating to implicit_links in the scons recipe; you probably need to
-build with implicit_links=no.  And report your platform, ideally along
-with a way of identifying it from Python, to the gpsd maintainers.
-
-For GPSes using an RS-232 port (which is no longer common) you will
-need serial-port support compiled into your kernel.  Various
-USB-to-serial adapter chips found in GPSes require specific
-drivers. Under a stock Linux kernel these will load on demand whren
+Under a stock Linux kernel these will akll be loaded on demand when
 the USB system sees the appropriate vendor/product ID combinations.
-If you are custom-building a Linux kernel for embedded deployment, you
-will need some subset of the following modules:
+If you have or are custom-building a Linux kernel for embedded
+deployment, you will need some subset of the following modules:
 
 pl2303        Prolific Technology, Inc. PL2303 Serial Port
 ftdi_sio      FTDI 8U232AM / FT232
@@ -82,46 +42,20 @@ These are listed in rough order of devices covered as of 2011; the
 PL23203 by itself accounts for over 70% of deployed USB mice.  We
 recommend building with pl2303, ftdi_sio, cypress_m8, and cp210x.
 
-For building from the source tree, or if you change the man page
-source, xslt and docbook xsl style files are used to generate nroff
--man source from docbook xml.  The following packages are used in this
-process:
+== Check that your system configuration will allow GPSD to work ==
 
-libxslt                -> xsltproc is used to build man pages from xml
-docbook-xsl            -> style file for xml to man translation
-
-The build degrades gracefully in the absence of any of these. You should
-be able to tell from configure messages which extensions you will get.
-
-Under Ubuntu and most other Debian-derived, an easy way to pick up
-the prerequisites is: "apt-get build-dep gpsd"
-
-Once you have fetched the software prerequisites:
-
-1. Start by making sure you can get data from your GPS, otherwise the later
-steps will be very frustrating.  In this command
-
-      stty -F /dev/ttyXXX ispeed 4800 && cat </dev/ttyXXX
-
-replace ttyXXX with the filename of the port.  This will probably be
-either /dev/ttyUSB0 or /dev/ttyS0.  When you run this command, you
-should see text lines beginning with $ come to stdout (possibly after
-a short initial burst of binary garbage).  If you don't see this, you
-may have OS-level problems with your serial support, but more likely
-have the wrong device.  Look again.
-
-2. Ensure that device permissions will enable gpsd to read from and
-write to GPS devices even after it drops root privileges.  If you are
-running Fedora Core or Ubuntu you can skip this step, as the stock
-configuration has the right properties.
+Ensure that device permissions will enable gpsd to read from and write
+to GPS devices even after it drops root privileges.  If you are
+running Fedora Core, Ubuntu, or stock Debian you can skip this step,
+as the stock configuration has the right properties.
 
 gpsd requires two things: (1) that GPS devices have group read and
-write enabled, and (2) all of them are have the same group ID as a 
+write enabled, and (2) all of them are have the same group ID as a
 prototypical device, typically /dev/ttyS0 under Linux or /dev/tty00
-under *BSD. It does not actually matter what the owning group is, 
-as gpsd will look this up on startup.  Alternatively, (3), you can
-set a fallback group with the enable-gpsd-group in case the prototype
-is not found: this should be the "dialout" group (or functional equivalent) 
+under *BSD. It does not actually matter what the owning group is, as
+gpsd will look this up on startup.  Alternatively, (3), you can set a
+fallback group with the gpsd-group option in case the prototype is not
+found: this should be the "dialout" group (or functional equivalent)
 that has write access to serial devices.
 
 Before dropping privileges, gpsd will ensure that it has access to
@@ -142,20 +76,100 @@ the permission-setting part; the hotplug scripts will force the
 permissions for you.  You still have to make sure all the tty devices
 are in the same group.
 
-3. Install prerequisites
+== Check your installation prerequisites ==
 
-Under Debian and Ubuntu you can get all the build prerequisites
-installed with "apt-get build-dep gpsd".
+A minimum build of GPSD can run pretty close to the metal; all it
+absolutely needs is the C runtime support. The test clients and
+various additional features have additional prerequisites:
+
+pthreads library       -> support for PPS timekeeping on serial GPSes
+DBUS                   -> gpsd will issue DBUS notifications 
+ncurses                -> a test client and the GPS monitor depend on this
+libusb-1.0.x or later  -> better USB device discovery
+Qt + qmake             -> libQgpsmm depends on this
+python2.4+             -> required for various clients and utilities
+pgtk-2/cairo bindings  -> the main test client, xgps, needs this
+
+Note that while Python is required to *build* GPSD from source (the
+build uses some code generators in Python), it is not required to run
+the service daemon.  In particular, you can cross-compile onto an
+embedded system without having to take Python with you.
+
+For a full build, including the Python utilities and test clients, you
+will need Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is
+2.4-compatible except that you need either the json library module
+from 2.6 or the functionally equivalent simplejson backport.  
+
+== Check your build prerequisites ==
+
+(Skip this if you are installing GPSD from a binary package rather
+than building from a source tree.)
+
+Necessary components for any build:
+
+C compiler			-> gpsd and client library are written in C
+Python				-> some code is generated from python scripts
+scons                           -> for the build recipe 
+
+C99 conformance is required in the compiler. The C code depends on one
+non-C99 feature: anonymous unions.  We could eliminate these, but the
+cost would be source-level interface breakage if we have to move
+structure members in and out of unions.
+
+GPSD is normally built and tested with GCC. The shared-memory
+interface relies on one GCCism, but the code is otherwise pretty
+compiler-agnostic.  It is reported that clang produces a gpsd that
+passes all regression tests. If -Wmissing-field-initializers or
+its non-gcc equivalent is set you will get a lot of warnings; 
+this is due to generated code and cannot be fixed.
+
+You will need scons version 1.2.0 or later to build the code. The
+autotools build from 2.96 and earlier versions has been dropped.
+
+Having the following optional components on your system will enable
+various additional capabilities and extensions:
+
+C++ compiler	       -> libgpsmm C++ wrapper for the library
+chrpath                -> prevents a potential security hole in built binaries
+
+If you have libusb-1.0.0 or later, the GPSD build will autodetect
+this and use it to discover Garmin USB GPSes, rather than groveling
+through /proc/bus/usb/devices (which has been deprecated by the
+Linux kernel team).
+
+For working with DBUS, you'll need the DBUS development
+headers and libraries installed.  Under Debian/Ubuntu these
+are the packages libdbus-1-dev and libdbus-glib-1-dev.
+
+Under Ubuntu, the ncurses package you want is libncurses5-dev.
+
+For building from the source tree, or if you change the man page
+source, xslt and docbook xsl style files are used to generate nroff
+-man source from docbook xml.  The following packages are used in this
+process:
+
+libxslt                -> xsltproc is used to build man pages from xml
+docbook-xsl            -> style file for xml to man translation
+
+The build degrades gracefully in the absence of any of these. You should
+be able to tell from configure messages which extensions you will get.
+
+Under Ubuntu and most other Debian-derived distributions, an easy way
+to pick up the prerequisites is: "apt-get build-dep gpsd"
+
+== How to build the software from source ==
+
+(Skip this if you are installing GPSD from a binary package rather
+than building from a source tree.)
+
+To build gpsd from source, simply call 'scons' in a working-directory
+copy.
 
 Note: if you are going to use the RTCM-104 support, you should compile
 with gcc4; if you don't have it installed as your default 
 compiler, do this by specifying CC=gcc4 before the configure
 command.  The rtcm2.c file confuses the gcc-3.4.[23] optimizer
 at -O2 level, making it generate incorrect code.
-
-4. Build gpsd from source (skip this step if you have installed GPSD 
-from a binary package). The build requires scons.  Simply calling
-'scons' in a working-directory copy should do it.
 
 Note: If your scons fails with the complaint "No tool named 'textfile'",
 you need to upgrade it.  This feature was introduced during the long
@@ -166,61 +180,20 @@ optional features in, or compile standard features out to reduce gpsd's
 footprint. "scons --help" will tell the story; look under "Local Options"
 and consult the source code if in doubt.
 
-5. Start gpsd.  You'll need to give it as an argument a path to 
-a serial or USB port with a GPS attached to it.
-
-6. Once gpsd is running, telnet to port 2947. You should see a
-greeting line that's a JSON object describing GPSD's version.
-Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
-
-7. Type '?WATCH={"enable":true,"json"};' to start raw and
-watcher modes.  You should see lines beginning with '{' that are
-JSON objects representing reports from your GPS; these are packet
-translations in GPSD protocol.
-
-8. Start the xgps client.  Calling it with no arguments should do the right 
-thing.  You should see a GUI panel with position/velocity-time information,
-and a satellite display.  The displays won't look very interesting until 
-the GPS acquires satellite lock.
-
-9. Now that you've verified that the code is working, "scons install" 
-will install it it in the system directories. "scons uninstall" will
-undo this. Note: because scons is a single-phase build system, this
-may recompile everything. If you want feature-configuration options,
-you need to specify them here.
-
-(You won't need to "scons install" if you installed from a binary package.)
-
-10. To enable hotplugging of USB GPSes under Linux, do a 'scons udev-install' or
-equivalent to put the appropriate udev rules and wrapper files in place.
-
-11. Check out the list of supported hardware at 
-
-   http://gpsd.berlios.de/hardware.html
-
-If your GPS isn't on the list, please send us information to add a new
-line to the table.  Directions are included on that page.
-
-We can also use updates of the latest version number known to work with
-hardware already supported.
-
-12. Note for small embedded systems and those without threading.  It is
+In particular, small embedded systems and those without threading.  It is
 possible to build gpsd without thread support if you configure with
 pps=no.  You'll lose support for updating the clock from PPS pulses.
 
-13. Note for systems using DBUS: gpsd includes support for shipping fixes
+Also, for systems using DBUS: gpsd includes support for shipping fixes
 as DBUS notifications, but it is not compiled in by default.  Configure 
 with the option "dbus=yes" to get it working.
 
-14. The distribution includes a PHP script that you can use to
-generate a PHP status page for your GPS.  You will need php and php-gd
-installed.  To install it, copy the file 'gpsd.php' to your HTTP
-document directory.  The first time it's invoked, it will generate a
-file called 'gpsd_config.inc' containing configuration information;
-edit to taste.  Note that for the Google Maps feature work you need
-to set a valid Google API key in your config file.
+If your linker run fails with missing math symbols, see the FIXME comment
+relating to implicit_links in the scons recipe; you probably need to
+build with implicit_link=no.  And report your platform, ideally along
+with a way of identifying it from Python, to the gpsd maintainers.
 
-15. libQgpsmm is a Qt version of the libgps/libgpsmm pair. Thanks to
+libQgpsmm is a Qt version of the libgps/libgpsmm pair. Thanks to
 the multi-platform approach of Qt, it allows the gpsd client library
 to be available on all the Qt supported platforms.  Please see
 http://qt.nokia.com/doc/4.6/supported-platforms.html for a status of
@@ -239,18 +212,69 @@ Please refer to Qt's documentation at
 http://qt.nokia.com/doc/4.6/platform-specific.html for platform specific
 building documentation
 
-16. There are regression tests to verify proper operation of gpsd, and
+After buiulding, run 'scons testregress' to test the correctness of the
+build.
+
+== How to test the software ==
+
+1. Start gpsd.  You'll need to give it as an argument a path to 
+a serial or USB port with a GPS attached to it.
+
+2. Once gpsd is running, telnet to port 2947. You should see a
+greeting line that's a JSON object describing GPSD's version.
+Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
+
+3. Type '?WATCH={"enable":true,"json"};' to start raw and
+watcher modes.  You should see lines beginning with '{' that are
+JSON objects representing reports from your GPS; these are packet
+translations in GPSD protocol.
+
+4. Start the xgps client.  Calling it with no arguments should do the right 
+thing.  You should see a GUI panel with position/velocity-time information,
+and a satellite display.  The displays won't look very interesting until 
+the GPS acquires satellite lock.
+
+5. Now that you've verified that the code is working, "scons install" 
+will install it it in the system directories. "scons uninstall" will
+undo this. Note: because scons is a single-phase build system, this
+may recompile everything. If you want feature-configuration options,
+you need to specify them here.
+
+(You won't need to "scons install" if you installed from a binary package.)
+
+6. To enable hotplugging of USB GPSes under Linux, do a 'scons udev-install' or
+equivalent to put the appropriate udev rules and wrapper files in place.
+
+7. Check out the list of supported hardware at 
+
+   http://gpsd.berlios.de/hardware.html
+
+If your GPS isn't on the list, please send us information to add a new
+line to the table.  Directions are included on that page.
+
+We can also use updates of the latest version number known to work with
+hardware already supported.
+
+8. The distribution includes a PHP script that you can use to
+generate a PHP status page for your GPS.  You will need php and php-gd
+installed.  To install it, copy the file 'gpsd.php' to your HTTP
+document directory.  The first time it's invoked, it will generate a
+file called 'gpsd_config.inc' containing configuration information;
+edit to taste.  Note that for the Google Maps feature work you need
+to set a valid Google API key in your config file.
+
+9. There are regression tests to verify proper operation of gpsd, and
 it can be useful to run these to verify that all is well.  To run the
 regression tests, first build gpsd from sources, and then run "scons
 check".  It is not necessary to install first, but you do need
 to have "." in your $PATH to run regressions uninstalled.  Python is
 required for regression tests.
 
-17. If you installed from a .deb under Debian or a Debian-derived 
+10. If you installed from a .deb under Debian or a Debian-derived 
 system, you may need to `dpkg-reconfigure -plow gpsd' to enable the
 hotplug magic ("Start gpsd automatically").
 
-18. Note for people using gpsd as time source for ntpd: In case you're
+11. Note for people using gpsd as time source for ntpd: In case you're
 using dhcp3-client to configure your system, make sure you disable
 /etc/dhcp3/dhclient-exit-hooks.d/ntp as dhclient would restart
 ntpd with an automatically created ntp.conf otherwise - and gpsd
