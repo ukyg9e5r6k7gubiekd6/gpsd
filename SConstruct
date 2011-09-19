@@ -1313,12 +1313,16 @@ env.Alias('website', Split('''
 # asciidoc documents
 if env.WhereIs('asciidoc'):
     for stem in ['AIVDM', 'NMEA',
-                 'protocol-evolution', 'protocol-transition'
+                 'protocol-evolution', 'protocol-transition',
                  'client-howto']:
         env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
-                ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
+                    ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
 
 if htmlbuilder:
+    # Manual pages
+    for xml in glob.glob("*.xml"):
+        env.HTML('www/%s.html' % xml[:-4], xml)
+    
     # DocBook documents
     for stem in ['writing-a-driver', 'performance/performance']:
         env.HTML('www/%s.html' % stem, 'www/%s.xml' % stem)
