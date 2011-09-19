@@ -185,7 +185,17 @@ gpsd: ELF 32-bit LSB executable, ARM, version 1 (SYSV), dynamically linked (uses
 
 The author of this transcript notes:
 
-The --sysroot option is required for target ncurses, you could
-probably build without it or with curses compiled for ARM at
-"prefix". My prefix is pointed at buildroot/output/staging so that my
-client could compile against libgps.so
+The --sysroot option tells the compiler and linker to use libraries and
+headers from the given path as if they were placed at / prefix. During
+this build the option allows linking with target ncurses (with option
+of having more packages at --sysroot path) and including correct headers
+without specifying -I and -L options.
+
+In the options cache file gpsd is configured to install to
+/work/buildroot/output/staging/usr path, so gpsd clients could be
+compiled against libgps.so using /work/buildroot/output/staging as
+--sysroot option.
+
+"arm-indigo-linux-gnueabi" as target means that
+arm-indigo-linux-gnueabi-gcc and related tools are available in PATH;
+your cross-compiler is likely to have different target prefix.
