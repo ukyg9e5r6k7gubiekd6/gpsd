@@ -186,7 +186,7 @@ headers without specifying -I and -L options.
 In the options cache file gpsd is configured to install to
 /work/buildroot/output/staging/usr path, so gpsd clients could be
 compiled against libgps.so using /work/buildroot/output/staging as
---sysroot option.
+sysroot option.
 
 "arm-indigo-linux-gnueabi" as target means that
 arm-indigo-linux-gnueabi-gcc and related tools are available in PATH;
