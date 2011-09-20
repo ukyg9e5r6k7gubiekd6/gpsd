@@ -129,31 +129,22 @@ status of Qt supported platforms as of version 4.6.
 The scons recipe is intended to support cross-building, in particular
 for embedded deployment of the software.  A session transcript
 illustrating how to do that, with some routine messages suppressed and
-replaced with [...].  Notes and explanation follow.
+replaced with [...], follows.  Notes and explanation follow the transcript.
 
 ===========================================================================
 $ git clone git://git.berlios.de/gpsd
 Cloning into gpsd...
-remote: Counting objects: 40685, done.
-remote: Compressing objects: 100% (14403/14403), done.
-remote: Total 40685 (delta 30403), reused 30683 (delta 26264)
-Receiving objects: 100% (40685/40685), 10.67 MiB | 190 KiB/s, done.
-Resolving deltas: 100% (30403/30403), done.
+[...]
 $ cd gpsd
 $ cp ../.scons-option-cache .
-$ cp ../build-file .
 $ cat .scons-option-cache
 libgpsmm = False
 libQgpsmm = False
 python = False
 prefix = '/work/buildroot/output/staging/usr/'
+sysroot = '/work/buildroot/output/staging/'
 target = 'arm-indigo-linux-gnueabi'
-$ cat build-file
-export CFLAGS="--sysroot=/work/buildroot/output/staging/"
-export LINKFLAGS='--sysroot=/work/buildroot/output/staging/'
-
-scons build
-$ ./build-file
+$ scons 
 scons: Reading SConscript files ...
 [...]
 Altered configuration variables:
@@ -161,6 +152,7 @@ libgpsmm = False (default True): build C++ bindings
 libQgpsmm = False (default True): build QT bindings
 python = False (default True): build Python support and modules.
 prefix = /work/buildroot/output/staging/usr/ (default /usr/local): installation directory prefix
+sysroot = /work/buildroot/output/staging (default ): cross-development system root
 target = arm-indigo-linux-gnueabi (default ): cross-development target
 scons: done reading SConscript files.
 scons: Building targets ...
@@ -185,11 +177,11 @@ gpsd: ELF 32-bit LSB executable, ARM, version 1 (SYSV), dynamically linked (uses
 
 The author of this transcript notes:
 
-The --sysroot option tells the compiler and linker to use libraries and
+The sysroot option tells the compiler and linker to use libraries and
 headers from the given path as if they were placed at / prefix. During
-this build the option allows linking with target ncurses (with option
-of having more packages at --sysroot path) and including correct headers
-without specifying -I and -L options.
+this build the option allows linking with target ncurses (with the option
+of having more packages at the --sysroot path) and including correct
+headers without specifying -I and -L options.
 
 In the options cache file gpsd is configured to install to
 /work/buildroot/output/staging/usr path, so gpsd clients could be
@@ -198,4 +190,4 @@ compiled against libgps.so using /work/buildroot/output/staging as
 
 "arm-indigo-linux-gnueabi" as target means that
 arm-indigo-linux-gnueabi-gcc and related tools are available in PATH;
-your cross-compiler is likely to have different target prefix.
+your cross-compiler is likely to have a different target prefix.
