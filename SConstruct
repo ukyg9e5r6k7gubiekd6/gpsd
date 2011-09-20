@@ -153,9 +153,16 @@ for (name, default, help) in pathopts:
 #
 # Contrary to usual practice with scons, we import PATH from the environment.
 # This is necessary in order for tools like ccache and Coverity scan-build to
-# work.
+# work. Importing PKG_CONFIG_PATH can be used to solve a problem with where .pc
+# files go in a cross-build, and importing STAGING_PREFIX is required for the
+# OpenWRT build.
 
-env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV = {'PATH' : os.environ['PATH']})
+envs = {}
+for var in ('PATH', 'PKG_CONFIG_PATH', 'STAGING_PREFIX'):
+    if var in os.environ:
+        envs[var] = os.environ[var]
+
+env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV=envs)
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
