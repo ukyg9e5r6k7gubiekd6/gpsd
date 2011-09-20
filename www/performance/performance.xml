@@ -30,6 +30,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.3</revnumber>
+      <date>20 September 2011</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Note that this paper is now only historical.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.2</revnumber>
       <date>27 September 2009</date>
       <authorinitials>esr</authorinitials>
@@ -489,6 +497,15 @@ edge of the SiRF-II's performance envelope.</para>
 <para>One consequence of the new gpsd wire protocol is that client
 applications no longer poll the daemon.  This means the "W' statistic
 is always zero, and is no longer collected when timing sentences.</para>
+
+</sect1>
+<sect1><title>2011 Update</title>
+
+<para>This paper is now mainly of historical interest.  While I believe the
+conclusions it reached are still valid, the timing facilities it relied 
+on will be replaced with a different and simpler set using the
+automatic cycle detection logic introduced in 2.90 to do whole-cycle
+timing rather than per-sentence timing.</para>
 
 </sect1>
 </article>
