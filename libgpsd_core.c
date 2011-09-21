@@ -815,6 +815,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 #ifdef TIMING_ENABLE
     /*
+     * Input just gecame available from a sensor, but no read from the
+     * device has yet been done.
+     *
      * If we ever want a start-of-packet timestamp again, take it here
      * with a test that session->packet.outbuflen is zero.
      *
@@ -852,6 +855,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #define MINIMUM_QUIET_TIME	0.25
     if (session->packet.outbuflen == 0)
     { 
+	/* beginning of a new packet */
 	timestamp_t now = timestamp();
 	if (session->device_type != NULL && session->packet.start_time > 0) {
 	    double quiet_time = (MINIMUM_QUIET_TIME * session->device_type->min_cycle);

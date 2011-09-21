@@ -184,9 +184,9 @@ plot "-" using 0:1 title "Total time" with impulses
         res += self.header(session, device)
         return res + self.data(session)
 
-class rawplot:
+class instrumented:
     "All measurement, no deductions."
-    name = "raw"
+    name = "instrumented"
     def __init__(self):
         self.stats = []
     def gather(self, session):
@@ -198,7 +198,7 @@ class rawplot:
                                time.time()))
         return True
     def header(self, session, device):
-        res = "# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
+        res = "# Instrumented latency data, %s, %s, %dN%d, cycle %ds" % \
               (title,
                device['driver'], device['bps'],
                device['stopbits'], device['cycle'])
@@ -209,15 +209,19 @@ class rawplot:
             res += "% 8s  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, start-time, xmit-start, recv-xmit)
         return res
     def plot(self, unused, session, device):
-        legends = ("Reception delta", "Transmission delta", "Decode time")
+        legends = (
+            "Fix latency",
+            "Transmission delta",
+            "Reception delta",
+                   )
         fmt = '''
 set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
-plot '''
+plot \\\n'''
         for (i, legend) in enumerate(legends):
-            fmt += '"-" using 0:%d title "%s" with impulses, '  % (i+3, legend)
-        fmt = fmt[:-2]
+            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (i+3, legend)
+        fmt = fmt[:-4] + "\n"
         res = fmt % (title,
                device['driver'], device['bps'],
                device['stopbits'], device['cycle'])
@@ -225,7 +229,7 @@ plot '''
         res += (self.data(session) + "e\n") * len(legends)
         return res
 
-formatters = (spaceplot, uninstrumented, rawplot)
+formatters = (spaceplot, uninstrumented, instrumented)
 
 def plotframe(await, fname, threshold, title):
     "Return a string containing a GNUplot script "
@@ -271,6 +275,9 @@ def plotframe(await, fname, threshold, title):
                 if "timing" in options and not session.data.get("timing"):
                     sys.stderr.write("gpsprof: timing is not enabled.\n")
                     sys.exit(1)
+            # Ignore everything but TPVs for the moment
+            if session.data["class"] != "TPV":
+                continue
             # We can get some funky artifacts at start of session
             # apparently due to RS232 buffering effects. Ignore
             # them.

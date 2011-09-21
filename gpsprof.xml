@@ -68,7 +68,6 @@ Currently the following plot types are defined:</para>
 circle.  This data is only meaningful if the GPS is held stationary
 while <application>gpsprof</application> is running. 
 This is the default.</para>
-<para></para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -82,17 +81,54 @@ from reports without fixes is lumped in.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
-<term>raw</term>
+<term>instrumented</term>
 <listitem>
-<para>Plot raw data.</para>
+<para>Plot instrumented profile. 
+Plots various components of the total latency between the GPS's fix time 
+fix and when the client receives the fix.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+<para>For purposes of the description, below, start-of-reporting-cycle
+(SORC) is when a device's reporting cycle begins. This time is
+detected by watching to see when data availability follows a long
+enough amount of quiet time that we can be sure we've seen the gap at
+the end of the sensor's previous report-transmission cycle. Detecting
+this gap requires a device running at 9600bps or faster.</para>
+
+<para>The components of the instrumented plot are as follows:</para>
+
+<variablelist>
+<varlistentry>
+<term>Fix latency</term>
+<listitem>
+<para>Delta between GPS time and SORC.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Transmission delta</term>
+<listitem>
+<para>Delta between SORC and when the daemon is ready to ship a report to 
+the client. Thus period includes both the device-to-daemon transmission 
+time and the daemon's time to recognize the incoming packets and extract
+fix information from them.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Reception delta</term>
+<listitem>
+<para>Shipping time from
+the daemon to when it was received by <application>gpsprof</application>.</para>
 </listitem>
 </varlistentry>
 </variablelist>
 
 <para>Because of RS232 buffering effects, the profiler sometimes
 generates reports of ridiculously high latencies right at the
-beginning of a session.  The -m option lets you set a latency threshold, in
-multiples of the cycle time, above which reports are discarded.</para>
+beginning of a session.  The -m option lets you set a latency
+threshold, in multiples of the cycle time, above which reports are
+discarded.</para>
 
 <para>The -n option sets the number of packets to sample.  The default
 is 100.</para>
