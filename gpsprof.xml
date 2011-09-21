@@ -25,7 +25,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-f <replaceable>plot_type</replaceable></arg>
       <arg choice='opt'>-m <replaceable>threshold</replaceable></arg>
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
-      <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-h</arg>
@@ -91,10 +90,6 @@ multiples of the cycle time, above which reports are discarded.</para>
 
 <para>The -n option sets the number of packets to sample.  The default
 is 100.</para>
-
-<para>The -s option sets the baud rate.  Note, this will only work if
-the chipset accepts a speed-change command (SiRFstarII and SiRFstarIII
-support this feature).</para>
 
 <para>The -t option sets a text string to be included in the plot
 title.</para>

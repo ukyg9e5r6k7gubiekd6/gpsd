@@ -53,9 +53,9 @@ class spaceplot:
         # Watch out for the NaN value from gps.py.
         self.fixes.append((session.fix.latitude, session.fix.longitude, session.fix.altitude))
         return True
-    def header(self, session):
+    def header(self, session, device):
         res = "# Position uncertainty, %s, %s, %ds cycle\n" % \
-                 (title, session.gps_id, session.cycle)
+                 (title, device["driver"], device["cycle"])
         return res
     def data(self, unused):
         res = ""
@@ -64,7 +64,7 @@ class spaceplot:
             (raw1, raw2, alt) = self.fixes[i]
             res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
         return res
-    def plot(self, unused, session):
+    def plot(self, unused, session, device):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
@@ -143,7 +143,7 @@ class spaceplot:
         fmt += ', cx(t, cep95),cy(t, cep95) title "CEP (95%%) = %f meters"' % (cep95_meters)
         fmt += ', cx(t, cep99),cy(t, cep99) title "CEP (99%%) = %f meters"' % (cep99_meters)
         fmt += "\n"
-        fmt += self.header(session)
+        fmt += self.header(session, device)
         fmt += self.data(session)
         if not gps.isnan(alt_avg):
             fmt += "e\n" + self.data(session)
@@ -161,17 +161,17 @@ class uninstrumented:
             return True
         else:
             return False
-    def header(self, session):
+    def header(self, session, device):
         return "# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
                  (title,
-                  session.gps_id, session.baudrate,
-                  session.stopbits, session.cycle)
+                  device["driver"], device["bps"],
+                  device["stopbits"], device["cycle"])
     def data(self, unused):
         res = ""
         for seconds in self.stats:
             res += "%2.6lf\n" % seconds
         return res
-    def plot(self, title, session):
+    def plot(self, title, session, device):
         fmt = '''
 set autoscale
 set key below
@@ -181,12 +181,12 @@ plot "-" using 0:1 title "Total time" with impulses
         res = fmt % (title,
                       session.gps_id, session.baudrate,
                       session.stopbits, session.cycle)
-        res += self.header(session)
+        res += self.header(session, device)
         return res + self.data(session)
 
 formatters = (spaceplot, uninstrumented)
 
-def plotframe(await, fname, speed, threshold, title):
+def plotframe(await, fname, threshold, title):
     "Return a string containing a GNUplot script "
     if fname:
         for formatter in formatters:
@@ -206,21 +206,7 @@ def plotframe(await, fname, speed, threshold, title):
     if session.version == None:
         print >>sys.stderr, "gpsprof: requires gpsd to speak new protocol."
         sys.exit(1)
-    session.send("?DEVICES;")
-    while session.read() != -1:
-        if session.data["class"] == "DEVICES":
-            break
-    if len(session.data.devices) != 1:
-        print >>sys.stderr, "gpsprof: exactly one device must be attached."
-        sys.exit(1)
-    device = session.data.devices[0]
-    path = device["path"]
     # Set parameters
-    if speed:
-        session.send('?DEVICE={"path":"%s","bps:":%d}' % (path, speed))
-        session.read()
-        if session.baudrate != speed:
-            sys.stderr.write("gpsprof: baud rate change failed.\n")
     options = ""
     if formatter not in (spaceplot, uninstrumented):
         options = ',"timing":true'
@@ -234,6 +220,12 @@ def plotframe(await, fname, speed, threshold, title):
                 sys.stderr.write("gpsprof: gpsd has vanished.\n")
                 sys.exit(1)
             baton.twirl()
+            if session.data["class"] == "DEVICES":
+                if len(session.data["devices"]) != 1:
+                    print >>sys.stderr, "exactly one device must be attached.\n"
+                    sys.exit(1)
+                device = copy.copy(session.data["devices"][0])
+                sys.stderr.write("found %s device @%sbps..." % (device["driver"], device["bps"]))
             if session.data["class"] == "WATCH":
                 if "timing" in options and not session.data.get("xmit_time"):
                     sys.stderr.write("gpsprof: timing is not enabled.\n")
@@ -252,7 +244,7 @@ def plotframe(await, fname, speed, threshold, title):
         baton.end()
     finally:
         session.send('?WATCH={"enable":false,"timing":false}')
-    command = plotter.plot(title, session)
+    command = plotter.plot(title, session, device)
     del session
     return command
 
@@ -262,7 +254,6 @@ if __name__ == '__main__':
 
         formatter = "space"
         raw = False
-        speed = 0
         title = time.ctime()
         threshold = 0
         await = 100
@@ -274,8 +265,6 @@ if __name__ == '__main__':
                 threshold = int(val)
             elif (switch == '-n'):
                 await = int(val)
-            elif (switch == '-s'):
-                speed = int(val)
             elif (switch == '-t'):
                 title = val
             elif (switch == '-D'):
@@ -285,7 +274,7 @@ if __name__ == '__main__':
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] \n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title]\n")
                 sys.exit(0)
-        sys.stdout.write(plotframe(await,formatter,speed,threshold,title))
+        sys.stdout.write(plotframe(await,formatter,threshold,title))
     except KeyboardInterrupt:
         pass
 
