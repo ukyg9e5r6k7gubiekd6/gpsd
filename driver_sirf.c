@@ -981,8 +981,9 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	    gpsd_report(LOG_RAW, "SiRF: NTPD just SEEN_UTC_2\n");
 	}
 	gpsd_report(LOG_PROG,
-		    "SiRF: NTPD valid time MID 0x34, seen=0x%02x\n",
-		    session->driver.sirf.time_seen);
+		    "SiRF: NTPD valid time MID 0x34, seen=0x%02x, leap=%d\n",
+		    session->driver.sirf.time_seen,
+		    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 #endif /* NTPSHM_ENABLE */
 	mask |= TIME_SET;
