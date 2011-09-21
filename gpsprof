@@ -205,7 +205,7 @@ class rawplot:
     def data(self, unused):
         res = ""
         for (tag, time, xmit, recv) in self.stats:
-            res += "% 8s  %2.9f  %2.9f  %2.9f\n" % (tag, time, xmit-time, recv-time)
+            res += "% 8s  %2.9f  %2.9f  %2.9f\n" % (tag, time, xmit-time, recv-xmit)
         return res
     def plot(self, unused, session, device):
         fmt = '''
@@ -264,7 +264,7 @@ def plotframe(await, fname, threshold, title):
                     print >>sys.stderr, "exactly one device must be attached.\n"
                     sys.exit(1)
                 device = copy.copy(session.data["devices"][0])
-                sys.stderr.write("found %s device @%sbps..." % (device["driver"], device["bps"]))
+                #sys.stderr.write("found %s device @%sbps..." % (device["driver"], device["bps"]))
             if session.data["class"] == "WATCH":
                 if "timing" in options and not session.data.get("timing"):
                     sys.stderr.write("gpsprof: timing is not enabled.\n")
