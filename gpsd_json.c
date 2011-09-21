@@ -113,8 +113,15 @@ void json_version_dump( /*@out@*/ char *reply, size_t replylen)
 		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
 }
 
+#ifdef TIMING_ENABLE
+#define CONDITIONALLY_UNUSED
+#else
+#define CONDITIONALLY_UNUSED UNUSED
+#endif /* TIMING_ENABLE */
+
+
 void json_tpv_dump(const struct gps_data_t *gpsdata, 
-		   const struct policy_t *policy,
+		   const struct policy_t *policy CONDITIONALLY_UNUSED,
 		   /*@out@*/ char *reply, size_t replylen)
 {
     char tbuf[JSON_DATE_MAX+1];

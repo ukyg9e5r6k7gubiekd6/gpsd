@@ -143,6 +143,9 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->gpsdata.epe = NAN;
     session->mag_var = NAN;
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
+#ifdef TIMING_ENABLE
+    session->gpsdata.cycle_start = 0;
+#endif /* TIMING_ENABLE */
 
     /* tty-level initialization */
     gpsd_tty_init(session);
@@ -810,10 +813,55 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
     gps_clear_fix(&session->newdata);
 
+#ifdef TIMING_ENABLE
     /*
      * If we ever want a start-of-packet timestamp again, take it here
      * with a test that session->packet.outbuflen is zero.
+     *
+     * What we actually do here is trickier.  For latency-timing
+     * purposes, we want to know the time at the start of the current
+     * recording cycle. We rely on the fact that even at 4800bps
+     * there's a quiet time perceptible to the human eye in gpsmon
+     * between when the last character of the last packet in a
+     * 1-second cycle ships and when the next reporting cycle
+     * ships. Because the cycle time is fixed, higher baud rates will
+     * make this gap larger.
+     *
+     * Thus, we look for an inter-character delay much larger than an
+     * average 4800bps sentence time.  How should this delay be set?  Well,
+     * counting framing bits and erring on the side of caution, it's 
+     * about 480 characters per second or 2083 microeconds per character;
+     * that's almost exactly 0.125 seconds per average 60-char sentence.
+     * Doubling this to avoid false positives, we look for an inter-character
+     * delay of greater than 0.250s.
+     *
+     * The above assumes a cycle time of 1 second.  To get the minimum size of 
+     * the quiet period, we multiply by the device cycle time.
+     *
+     * We can sanity-check these calculation by watching logs. If we have set 
+     * MINIMUM_QUIET_TIME correctly, the "transmission pause" message below
+     * will consistently be emitted just before the sentence that shows up
+     * as start-of-cycle in gpsmon, and never emitted at any other point
+     * in the cycle.
      */
+#define MINIMUM_QUIET_TIME	0.25
+    if (session->packet.outbuflen == 0)
+    { 
+	timestamp_t now = timestamp();
+	if (session->device_type != NULL && session->packet.start_time > 0) {
+	    double quiet_time = (MINIMUM_QUIET_TIME * session->device_type->min_cycle);
+	    double gap = now - session->packet.start_time;
+
+	    if (gap > session->device_type->min_cycle)
+		gpsd_report(LOG_WARN, "cycle-start detector failed.\n");
+	    else if (gap > quiet_time) {
+		gpsd_report(LOG_PROG, "transmission pause of %f\n", gap);
+		session->gpsdata.cycle_start = now;
+	    }
+	}
+	session->packet.start_time = now;
+    }
+#endif /* TIMING_ENABLE */
 
     if (session->packet.type >= COMMENT_PACKET) {
 	/*@-shiftnegative@*/

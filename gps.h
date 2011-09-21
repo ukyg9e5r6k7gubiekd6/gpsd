@@ -1688,6 +1688,10 @@ struct gps_data_t {
     /* should be moved to privdata sometday */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
+#ifdef TIMING_ENABLE
+    timestamp_t cycle_start;	/* timestamp start of this reporting cycle */
+#endif /* TIMING_ENABLE */
+
     /* pack things never reported together to reduce structure size */ 
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET|GST_SET|VERSION_SET)
     union {
