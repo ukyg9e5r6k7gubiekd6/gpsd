@@ -298,8 +298,8 @@ timestamp_t timestamp(void)
 timestamp_t realtimestamp(void)
 {
     struct timespec ts;
-    (void)clock_gettime(CLOCK_REALTIME, &ts);
-    return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
+    /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &ts);
+    /*@i3@*/return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
 }
 #endif /* TIMING_ENABLE */
 
