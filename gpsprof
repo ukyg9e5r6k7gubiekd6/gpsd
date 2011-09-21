@@ -179,8 +179,8 @@ set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
 plot "-" using 0:1 title "Total time" with impulses
 '''
         res = fmt % (title,
-                      session.gps_id, session.baudrate,
-                      session.stopbits, session.cycle)
+                      device['driver'], device['bps'],
+                      device['stopbits'], device['cycle'])
         res += self.header(session, device)
         return res + self.data(session)
 
