@@ -119,7 +119,7 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 {
     char tbuf[JSON_DATE_MAX+1];
 #ifdef TIMING_ENABLE
-    timestamp_t xmit_time = realtimestamp();
+    timestamp_t xmit_time = timestamp();
 #endif /* TIMING_ENABLE */
 
     assert(replylen > 2);
