@@ -1110,7 +1110,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(LOG_PROG, "SiRF: unused NLID 0x1f\n");
 	return 0;
 
-    case 0x29:			/* Geodetic Navigation Information MID 41 */
+    case 0x29:			/* Geodetic Navigation Data MID 41 */
 	gpsd_report(LOG_PROG, "SiRF: unused GND 0x29\n");
 	return 0;
 

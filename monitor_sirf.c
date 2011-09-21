@@ -527,8 +527,8 @@ static void sirf_update(void)
 	monitor_log("NL  0x%02x=", buf[0]);
 	break;
 
-    case 0x29:			/* Geodetic Navigation Message */
-	monitor_log("GNM 0x29=");
+    case 0x29:			/* Geodetic Navigation Data */
+	monitor_log("GND 0x29=");
 	break;
 
     case 0x32:			/* SBAS Parameters */
