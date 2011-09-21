@@ -193,6 +193,7 @@ class rawplot:
         if 'xmit_time' in session.data:
             self.stats.append((session.data['tag'],
                                gps.misc.isotime(session.data['time']),
+                               session.data['cycle_start'],
                                session.data['xmit_time'],
                                time.time()))
         return True
@@ -204,8 +205,8 @@ class rawplot:
         return res + "\n"
     def data(self, unused):
         res = ""
-        for (tag, time, xmit, recv) in self.stats:
-            res += "% 8s  %2.9f  %2.9f  %2.9f\n" % (tag, time, xmit-time, recv-xmit)
+        for (tag, time, start, xmit, recv) in self.stats:
+            res += "% 8s  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, start-time, xmit-start, recv-xmit)
         return res
     def plot(self, unused, session, device):
         fmt = '''
@@ -213,14 +214,15 @@ set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \
-     "-" using 0:4 title "Reception delta" with impulses, \
-     "-" using 0:3 title "Transmission delta" with impulses
+     "-" using 0:5 title "Reception delta" with impulses, \
+     "-" using 0:4 title "Transmission delta" with impulses, \
+     "-" using 0:3 title "Decode time" with impulses
 '''
         res = fmt % (title,
                device['driver'], device['bps'],
                device['stopbits'], device['cycle'])
         res += self.header(session, device)
-        res += (self.data(session) + "e\n") * 2
+        res += (self.data(session) + "e\n") * 3
         return res
 
 formatters = (spaceplot, uninstrumented, rawplot)

@@ -843,6 +843,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
      * will consistently be emitted just before the sentence that shows up
      * as start-of-cycle in gpsmon, and never emitted at any other point
      * in the cycle.
+     *
+     * In practice, it seems that edge detection succeeds at 9600bps but
+     * fails at 4800bps.  This is not surprsing, as previous proviling has 
+     * indicated that st 4800bps some devices overrun a 1-second cycle time 
+     * with the data they transmit.
      */
 #define MINIMUM_QUIET_TIME	0.25
     if (session->packet.outbuflen == 0)
