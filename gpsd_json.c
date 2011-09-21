@@ -113,10 +113,14 @@ void json_version_dump( /*@out@*/ char *reply, size_t replylen)
 		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
 }
 
-void json_tpv_dump(const struct gps_data_t *gpsdata,
+void json_tpv_dump(const struct gps_data_t *gpsdata, 
+		   const struct policy_t *policy,
 		   /*@out@*/ char *reply, size_t replylen)
 {
     char tbuf[JSON_DATE_MAX+1];
+#ifdef TIMING_ENABLE
+    timestamp_t xmit_time = realtimestamp();
+#endif /* TIMING_ENABLE */
 
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
@@ -199,6 +203,13 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 	    (void)snprintf(reply + strlen(reply),
 			   replylen - strlen(reply),
 			   "\"epc\":%.2f,", gpsdata->fix.epc);
+#ifdef TIMING_ENABLE
+	if (policy->timing)
+	    (void)snprintf(reply + strlen(reply),
+	        replylen - strlen(reply),
+	        "\"xmit_time\":%f,", 
+	        xmit_time);
+#endif /* TIMING_ENABLE */
     }
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
@@ -2922,7 +2933,7 @@ void json_data_report(gps_mask_t changed,
     buf[0] = '\0';
  
     if ((changed & REPORT_IS) != 0) {
-	json_tpv_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+	json_tpv_dump(datap, policy, buf+strlen(buf), buflen-strlen(buf));
     }
 
     if ((changed & GST_SET) != 0) {

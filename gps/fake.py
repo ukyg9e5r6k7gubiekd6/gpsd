@@ -495,8 +495,6 @@ class TestSession:
         self.progress("gpsfake: gather(%d)\n" % seconds)
         #mark = time.time()
         time.sleep(seconds)
-        #if self.timings.c_recv_time <= mark:
-        #    TestSessionError("no sentences received\n")
     def cleanup(self):
         "We're done, kill the daemon."
         self.progress("gpsfake: cleanup()\n")

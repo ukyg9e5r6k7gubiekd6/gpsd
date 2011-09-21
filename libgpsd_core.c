@@ -810,10 +810,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
     gps_clear_fix(&session->newdata);
 
-#ifdef TIMING_ENABLE
-    if (session->packet.outbuflen == 0)
-	session->d_xmit_time = timestamp();
-#endif /* TIMING_ENABLE */
+    /*
+     * If we ever want a start-of-packet timestamp again, take it here
+     * with a test that session->packet.outbuflen is zero.
+     */
 
     if (session->packet.type >= COMMENT_PACKET) {
 	/*@-shiftnegative@*/
@@ -889,10 +889,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	gpsd_report(LOG_RAW + 3, "Accepted packet on %s.\n",
 		    session->gpsdata.dev.path);
-
-#ifdef TIMING_ENABLE
-	session->d_recv_time = timestamp();
-#endif /* TIMING_ENABLE */
 
 	/* track the packet count since achieving sync on the device */
 	if (first_sync) {
@@ -996,10 +992,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->context->fixcnt++;
 	    session->fixcnt++;
 	}
-
-#ifdef TIMING_ENABLE
-	session->d_decode_time = timestamp();
-#endif /* TIMING_ENABLE */
 
 	/*
 	 * Sanity check.  This catches a surprising number of port and

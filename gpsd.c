@@ -1226,7 +1226,7 @@ static void handle_request(struct subscriber_t *sub,
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK) != 0) {
-		    json_tpv_dump(&devp->gpsdata,
+		    json_tpv_dump(&devp->gpsdata, &sub->policy,
 				  reply + strlen(reply),
 				  replylen - strlen(reply));
 		    rstrip(reply);
@@ -1633,23 +1633,6 @@ static void consume_packets(struct gps_device_t *device)
 			if (buf[0] != '\0')
 			    (void)throttled_write(sub, buf, strlen(buf));
 
-#ifdef TIMING_ENABLE
-			if (buf[0] != '\0' && sub->policy.timing) {
-			    (void)snprintf(buf, sizeof(buf),
-					   "{\"class\":\"TIMING\","
-					   "\"tag\":\"%s\",\"len\":%d,"
-					   "\"xmit\":%lf,\"recv\":%lf,"
-					   "\"decode\":%lf,"
-					   "\"emit\":%lf}\r\n",
-					   device->gpsdata.tag,
-					   (int)device->packet.outbuflen,
-					   device->d_xmit_time,
-					   device->d_recv_time,
-					   device->d_decode_time,
-					   timestamp());
-			    (void)throttled_write(sub, buf, strlen(buf));
-			}
-#endif /* TIMING_ENABLE */
 		    }
 		}
 	    }

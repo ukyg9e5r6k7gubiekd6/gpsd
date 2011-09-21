@@ -491,51 +491,22 @@ only, suspicion should focus here.</p>
 <h2 id="profiling">Profiling</h2>
 
 <p>There is a barely-documented timing policy flag in the WATCH
-command that will cause it to emit a TIMING object on every sentence.
-The TIMING response contains the following attributed:</p>
+command that will cause it to that will cause it to emit timing 
+information on every TPV.  Presently there is exactly one 
+such member:</p>
 
 <ol>
-<li>tag: An identifying sentence tag.</li>
-
-<li>len: The character length of the sentence containing the timestamp
-    data.</li>
-
-<li>timebase: The timestamp associated with the sentence, in seconds since
-    the Unix epoch (this time <em>is</em> leap-second corrected, like UTC).
-    This timestamp may be zero.  If nonzero, it is the base time for
-    the packet.</li>
-
-<li>xmit: An offset from the timestamp telling when gpsd believes the
-    transmission of the current packet started (this is actually
-    recorded just before the first read of the new packet).  If
-    the sentence timestamp was zero, this offset is a full timestamp
-    and the base time of the packet.</li>
-
-<li>recv: An offset from the base time telling when <code>gpsd</code>
-    received the last bytes of the packet.</li>
-
-<li>decode: An offset from the base time telling when gpsd decoded the
-    data.</li>
-
-<li>poll: An offset from the base time taken just before encoding the
-    response &mdash; effectively, when gpsd was polled to transmit the
-    data.</li>
-
-<li>elapsed: An offset from the base time to the time of the TIMING emission.</li>
+<li><p>xmit_time: the time at which the daemon created the TPV for 
+transmission.</p></li>
 </ol>
 
-<p>The TIMING figures measure components of the latency between the GPS's
+<p>Thes attributes measure components of the latency between the GPS's
 time measurement and when the sentence data became available to the
-client. For them to be meaningful, the GPS has to ship timestamps with
-sub-second precision. SiRF-II and Evermore chipsets ship times with
-millisecond resolution.  Your machine's time reference must also be
-accurate to subsecond precision; I recommend using <code>ntpd</code>,
-which will normally give you about 15 microseconds precision (two
-orders of magnitude better than GPSes report).</p>
-
-<p>Note, some inaccuracy is introduced into the start- and end-of-packet
-timestamps by the fact that the last read of a packet may grab a few
-bytes of the next one.</p>
+client. They are collected using get_realtime(3), so they are not
+subject to corrections from ntpd. For the latencty timing to be
+meaningful, the GPS has to ship timestamps with sub-second
+precision. SiRF-II and Evermore chipsets ship times with millisecond
+resolution.</p>
 
 <p>The distribution includes a Python script, <code>gpsprof</code>,
 that uses the timing support to collect profiling information from a

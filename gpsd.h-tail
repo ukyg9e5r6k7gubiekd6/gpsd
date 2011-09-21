@@ -569,15 +569,6 @@ struct gps_device_t {
     struct aivdm_context_t aivdm[AIVDM_CHANNELS];
 #endif /* AIVDM_ENABLE */
 
-#ifdef TIMING_ENABLE
-    /* profiling data for last sentence */
-    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
-    timestamp_t d_xmit_time;		/* beginning of sentence transmission */
-    timestamp_t d_recv_time;		/* daemon receipt time (-> E1+T1) */
-    timestamp_t d_decode_time;	/* daemon end-of-decode time (-> D1) */
-    timestamp_t emit_time;		/* emission time (-> E2) */
-#endif /* TIMING_ENABLE */
-
     /*
      * State of an NTRIP connection.  We don't want to zero this on every
      * activation, otherwise the connection state will get lost.  Information

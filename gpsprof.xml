@@ -34,12 +34,12 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>gpsprof</application> measures the various
-latencies between a GPS and its client. It emits to standard output a
-GNUPLOT program that draws an illustrative graph. It can also be told
-to emit the raw profile data.  The information it provides can be
-useful for establishing an upper bound on latency, and thus on
-position accuracy of a GPS in motion.</para>
+<para><application>gpsprof</application> performs accuracy and latency
+profiling onm a GPS. It emits to standard output a GNUPLOT program
+that draws an illustrative graph. It can also be told to emit the raw
+profile data.  The information it provides can be useful for
+establishing an upper bound on latency, and thus on position accuracy
+of a GPS in motion.</para>
 
 <para><application>gpsprof</application> uses instrumentation built
 into <application>gpsd</application>.</para>
@@ -77,60 +77,9 @@ This is the default.</para>
 <listitem>
 <para>Plot total latency without instrumentation.  Useful mainly as a
 check that the instrumentation is not producing significant
-distortion.  It only plots times for sentences that contain fixes;
+distortion.  It only plots times for reports that contain fixes;
 staircase-like artifacts in the plot are created when elapsed time
-from sentences without fixes is lumped in.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>raw</term>
-<listitem>
-<para>Plot raw data.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>split</term>
-<listitem>
-<para>Each sentence has its RS232 latency time colored differently.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>cycle</term>
-<listitem>
-<para>Report on the set of sentences or packets emitted by the GPS,
-their send intervals, and the basic cycle time. (This report is 
-plain text rather than a gnuplot script.)</para>
-</listitem>
-</varlistentry>
-</variablelist>
-
-<para>The instrumented time plot conveys the following information:</para>
-
-<variablelist>
-<varlistentry>
-<term>RS232 time</term>
-<listitem>
-<para>Time required to send the sentence from the GPS to
-<application>gpsd</application>. This measured from the time of 
-the last zero-length read before the packet to when the packet sniffer
-recognizes a complete sentence, so there is a small amount of
-computational overhead mixed in.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>Decode time</term>
-<listitem>
-<para>Elapsed time between sentence reception and the moment that
-<application>gpsd</application> ships the resulting update to
-the profiling client.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-<term>TCP/IP latency</term>
-<listitem>
-<para>Elapsed time between the moment that
-<application>gpsd</application> ships the update to
-the profiling client and the moment it is decoded and timestamped.</para>
+from reports without fixes is lumped in.</para>
 </listitem>
 </varlistentry>
 </variablelist>

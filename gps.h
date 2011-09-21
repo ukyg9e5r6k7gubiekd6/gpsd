@@ -1751,6 +1751,9 @@ extern /*@observer@*/const char *gps_maskdump(gps_mask_t);
 extern double safe_atof(const char *);
 extern time_t mkgmtime(register struct tm *);
 extern timestamp_t timestamp(void);
+#ifdef TIMING_ENABLE
+extern timestamp_t realtimestamp(void);
+#endif /* TIMING_ENABLE */
 extern timestamp_t iso8601_to_unix(char *);
 extern /*@observer@*/char *unix_to_iso8601(timestamp_t t, /*@ out @*/char[], size_t len);
 extern double earth_distance(double, double, double, double);

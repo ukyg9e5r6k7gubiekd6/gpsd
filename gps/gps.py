@@ -125,7 +125,6 @@ class gpsdata:
         self.devices = []
 
         self.version = None
-        self.timings = None
 
     def __repr__(self):
         st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
@@ -293,10 +292,6 @@ class gps(gpsdata, gpsjson):
                 if sat.used:
                     self.satellites_used += 1
             self.valid = ONLINE_SET | SATELLITE_SET
-        elif self.data.get("class") == "TIMING":
-            self.data["c_recv"] = self.received
-            self.data["c_decode"] = time.time()
-            self.timings = self.data
 
     def read(self):
         "Read and interpret data from the daemon."

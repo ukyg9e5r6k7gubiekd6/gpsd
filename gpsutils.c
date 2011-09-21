@@ -294,6 +294,15 @@ timestamp_t timestamp(void)
     return (timestamp_t)(tv.tv_sec + tv.tv_usec * 1e-6);
 }
 
+#ifdef TIMING_ENABLE
+timestamp_t realtimestamp(void)
+{
+    struct timespec ts;
+    (void)clock_gettime(CLOCK_REALTIME, &ts);
+    return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
+}
+#endif /* TIMING_ENABLE */
+
 time_t mkgmtime(register struct tm * t)
 /* struct tm to seconds since Unix epoch */
 {
