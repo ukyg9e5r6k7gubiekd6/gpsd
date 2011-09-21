@@ -184,7 +184,46 @@ plot "-" using 0:1 title "Total time" with impulses
         res += self.header(session, device)
         return res + self.data(session)
 
-formatters = (spaceplot, uninstrumented)
+class rawplot:
+    "All measurement, no deductions."
+    name = "raw"
+    def __init__(self):
+        self.stats = []
+    def gather(self, session):
+        if 'xmit_time' in session.data:
+            self.stats.append((session.data['tag'],
+                               gps.misc.isotime(session.data['time']),
+                               session.data['xmit_time'],
+                               time.time()))
+        return True
+    def header(self, session, device):
+        res = "# Raw latency data, %s, %s, %dN%d, cycle %ds\n" % \
+              (title,
+               device['driver'], device['bps'],
+               device['stopbits'], device['cycle'])
+        return res + "\n"
+    def data(self, unused):
+        res = ""
+        for (tag, time, xmit, recv) in self.stats:
+            res += "% 8s  %2.9f  %2.9f  %2.9f\n" % (tag, time, xmit-time, recv-time)
+        return res
+    def plot(self, unused, session, device):
+        fmt = '''
+set autoscale
+set key below
+set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
+plot \
+     "-" using 0:4 title "Reception delta" with impulses, \
+     "-" using 0:3 title "Transmission delta" with impulses
+'''
+        res = fmt % (title,
+               device['driver'], device['bps'],
+               device['stopbits'], device['cycle'])
+        res += self.header(session, device)
+        res += (self.data(session) + "e\n") * 2
+        return res
+
+formatters = (spaceplot, uninstrumented, rawplot)
 
 def plotframe(await, fname, threshold, title):
     "Return a string containing a GNUplot script "
@@ -227,7 +266,7 @@ def plotframe(await, fname, threshold, title):
                 device = copy.copy(session.data["devices"][0])
                 sys.stderr.write("found %s device @%sbps..." % (device["driver"], device["bps"]))
             if session.data["class"] == "WATCH":
-                if "timing" in options and not session.data.get("xmit_time"):
+                if "timing" in options and not session.data.get("timing"):
                     sys.stderr.write("gpsprof: timing is not enabled.\n")
                     sys.exit(1)
             # We can get some funky artifacts at start of session

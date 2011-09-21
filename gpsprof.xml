@@ -81,6 +81,12 @@ staircase-like artifacts in the plot are created when elapsed time
 from reports without fixes is lumped in.</para>
 </listitem>
 </varlistentry>
+<varlistentry>
+<term>raw</term>
+<listitem>
+<para>Plot raw data.</para>
+</listitem>
+</varlistentry>
 </variablelist>
 
 <para>Because of RS232 buffering effects, the profiler sometimes
