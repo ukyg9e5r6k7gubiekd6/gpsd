@@ -209,20 +209,20 @@ class rawplot:
             res += "% 8s  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, start-time, xmit-start, recv-xmit)
         return res
     def plot(self, unused, session, device):
+        legends = ("Reception delta", "Transmission delta", "Decode time")
         fmt = '''
 set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
-plot \
-     "-" using 0:5 title "Reception delta" with impulses, \
-     "-" using 0:4 title "Transmission delta" with impulses, \
-     "-" using 0:3 title "Decode time" with impulses
-'''
+plot '''
+        for (i, legend) in enumerate(legends):
+            fmt += '"-" using 0:%d title "%s" with impulses, '  % (i+3, legend)
+        fmt = fmt[:-2]
         res = fmt % (title,
                device['driver'], device['bps'],
                device['stopbits'], device['cycle'])
         res += self.header(session, device)
-        res += (self.data(session) + "e\n") * 3
+        res += (self.data(session) + "e\n") * len(legends)
         return res
 
 formatters = (spaceplot, uninstrumented, rawplot)
