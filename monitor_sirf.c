@@ -467,7 +467,8 @@ static void sirf_update(void)
 
     case 0x1b:
 	/******************************************************************
-	 Not actually documented in any published materials.
+	 Not actually documented in any published materials before the
+	 1.6 version of the SiRF binary protocol manual.
 	 Here is what Chris Kuethe got from the SiRF folks,
 	 (plus some corrections from the GpsPaSsion forums):
 
