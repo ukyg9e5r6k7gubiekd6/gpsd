@@ -207,12 +207,14 @@ class instrumented:
     def data(self, unused, device):
         res = ""
         for (tag, time, chars, start, xmit, recv) in self.stats:
-            res += "% 8s %2.9f  %u  %2.9f  %2.9f  %2.9f\n" % (tag, time, chars, start-time, xmit-start, recv-xmit)
+            rs232_time = (chars * 10.0) / device['bps']
+            res += "% 8s %2.9f  %u  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, chars, start-time, rs232_time, (xmit-start)-rs232_time, recv-xmit)
         return res
     def plot(self, unused, session, device):
         legends = (
             "Fix latency",
-            "Transmission delta",
+            "RS232 time",
+            "Analysis time",
             "Reception delta",
                    )
         fmt = '''

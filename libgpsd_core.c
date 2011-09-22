@@ -867,10 +867,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    else if (gap > quiet_time) {
 		gpsd_report(LOG_PROG, "transmission pause of %f\n", gap);
 		session->gpsdata.cycle_start = now;
+		session->packet.start_char = session->packet.char_counter;
 	    }
 	}
 	session->packet.start_time = now;
-	session->packet.start_char = session->packet.char_counter;
     }
 #endif /* TIMING_ENABLE */
 
@@ -1004,8 +1004,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 #ifdef TIMING_ENABLE
 	/* are we going to generate a report? if so, count characters */
-	if ((received & REPORT_IS) != 0)
-	    session->gpsdata.cycle_count = session->packet.char_counter - session->gpsdata.cycle_count;
+	if ((received & REPORT_IS) != 0) {
+	    session->gpsdata.cycle_count = session->packet.char_counter - session->packet.start_char;
+	}
 #endif /* TIMING_ENABLE */
 
 
