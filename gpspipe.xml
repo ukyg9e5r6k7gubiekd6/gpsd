@@ -32,6 +32,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-s <replaceable>serial-device</replaceable></arg>
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-T <replaceable>timestamp-format</replaceable></arg>
+      <arg choice='opt'>-p</arg>
       <arg choice='opt'>-w</arg>
       <arg choice='opt'>-v</arg>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
@@ -104,6 +105,8 @@ output.</para>
 <para>-T sets the format of the timestamp. See
 <citerefentry><refentrytitle>strftime</refentrytitle><manvolnum>3</manvolnum></citerefentry>
 for the available placeholders. Setting this option implies -t.</para>
+
+<para>-p enables dumping of profiling information in JSON.</para>
 
 <para>-n [count] causes [count] sentences to be output.
 <application>gpspipe</application> will then exit gracefully.</para>

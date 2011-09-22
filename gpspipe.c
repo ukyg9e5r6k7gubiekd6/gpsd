@@ -105,6 +105,7 @@ static void usage(void)
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
 		  "-n [count] exit after count packets.\n"
 		  "-v Print a little spinner.\n"
+		  "-p Include profiling info in the JSON.\n"
 		  "-V Print version and exit.\n\n"
 		  "You must specify one, or more, of -r, -R, or -w\n"
 		  "You must use -o if you use -d.\n");
@@ -123,6 +124,7 @@ int main(int argc, char **argv)
     bool new_line = true;
     bool raw = false;
     bool watch = false;
+    bool profile = false;
     long count = -1;
     int option;
     unsigned int vflag = 0, l = 0;
@@ -136,7 +138,7 @@ int main(int argc, char **argv)
 
     /*@-branchstate@*/
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwtT:vVn:s:o:")) != -1) {
+    while ((option = getopt(argc, argv, "?dD:lhrRwtT:vVn:s:o:p")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -178,6 +180,9 @@ int main(int argc, char **argv)
 	case 'w':
 	    flags |= WATCH_JSON;
 	    watch = true;
+	    break;
+	case 'p':
+	    profile = true;
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
@@ -265,6 +270,8 @@ int main(int argc, char **argv)
     }
     /*@ +nullpass +onlytrans @*/
 
+    if (profile)
+	flags |= WATCH_TIMING;
     if (source.device != NULL)
 	flags |= WATCH_DEVICE;
     (void)gps_stream(&gpsdata, flags, source.device);
