@@ -214,8 +214,10 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 	if (policy->timing)
 	    (void)snprintf(reply + strlen(reply),
 	        replylen - strlen(reply),
-	        "\"cycle_start\":%f,\"xmit_time\":%f,", 
-			   gpsdata->cycle_start, xmit_time);
+	        "\"cycle_start\":%f,\"cycle_count\":%lu,\"xmit_time\":%f,", 
+			   gpsdata->cycle_start, 
+			   gpsdata->cycle_count,
+			   xmit_time);
 #endif /* TIMING_ENABLE */
     }
     if (reply[strlen(reply) - 1] == ',')

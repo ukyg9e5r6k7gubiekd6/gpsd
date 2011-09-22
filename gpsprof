@@ -193,6 +193,7 @@ class instrumented:
         if 'xmit_time' in session.data:
             self.stats.append((session.data['tag'],
                                gps.misc.isotime(session.data['time']),
+                               session.data["cycle_count"],
                                session.data['cycle_start'],
                                session.data['xmit_time'],
                                time.time()))
@@ -205,8 +206,8 @@ class instrumented:
         return res + "\n"
     def data(self, unused):
         res = ""
-        for (tag, time, start, xmit, recv) in self.stats:
-            res += "% 8s  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, start-time, xmit-start, recv-xmit)
+        for (tag, time, chars, start, xmit, recv) in self.stats:
+            res += "% 8s %2.9f  %u  %2.9f  %2.9f  %2.9f\n" % (tag, time, chars, start-time, xmit-start, recv-xmit)
         return res
     def plot(self, unused, session, device):
         legends = (
@@ -220,7 +221,7 @@ set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \\\n'''
         for (i, legend) in enumerate(legends):
-            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (i+3, legend)
+            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (i+4, legend)
         fmt = fmt[:-4] + "\n"
         res = fmt % (title,
                device['driver'], device['bps'],

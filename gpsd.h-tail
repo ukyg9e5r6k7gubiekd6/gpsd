@@ -132,6 +132,7 @@ struct gps_packet_t {
     int debug;				/* lexer debug level */
 #ifdef TIMING_ENABLE
     timestamp_t start_time;		/* timestamp of first input */
+    unsigned long start_char;		/* char counter at first input */
 #endif /* TIMING_ENABLE */
     /*
      * ISGPS200 decoding context.

@@ -1690,6 +1690,7 @@ struct gps_data_t {
 
 #ifdef TIMING_ENABLE
     timestamp_t cycle_start;	/* timestamp start of this reporting cycle */
+    unsigned long cycle_count;	/* characters in the cycle */
 #endif /* TIMING_ENABLE */
 
     /* pack things never reported together to reduce structure size */ 

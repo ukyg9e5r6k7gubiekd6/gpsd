@@ -145,6 +145,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
 #ifdef TIMING_ENABLE
     session->gpsdata.cycle_start = 0;
+    session->gpsdata.cycle_count = 0;
 #endif /* TIMING_ENABLE */
 
     /* tty-level initialization */
@@ -869,6 +870,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 	}
 	session->packet.start_time = now;
+	session->packet.start_char = session->packet.char_counter;
     }
 #endif /* TIMING_ENABLE */
 
@@ -999,6 +1001,13 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (session->device_type != NULL
 		&& session->device_type->parse_packet != NULL)
 		received |= session->device_type->parse_packet(session);
+
+#ifdef TIMING_ENABLE
+	/* are we going to generate a report? if so, count characters */
+	if ((received & REPORT_IS) != 0)
+	    session->gpsdata.cycle_count = session->packet.char_counter - session->gpsdata.cycle_count;
+#endif /* TIMING_ENABLE */
+
 
 	session->gpsdata.set = ONLINE_SET | received;
 
