@@ -208,22 +208,23 @@ class instrumented:
         res = ""
         for (tag, time, chars, start, xmit, recv) in self.stats:
             rs232_time = (chars * 10.0) / device['bps']
-            res += "% 8s %2.9f  %u  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, chars, start-time, rs232_time, (xmit-start)-rs232_time, recv-xmit)
+            res += "% 8s %2.9f  %u  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, chars, start-time, rs232_time, xmit-time, recv-time)
         return res
     def plot(self, unused, session, device):
         legends = (
-            "Fix latency",
-            "RS232 time",
-            "Analysis time",
             "Reception delta",
-                   )
+            "Analysis time",
+            "RS232 time",
+            "Fix latency",
+            )
         fmt = '''
 set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \\\n'''
         for (i, legend) in enumerate(legends):
-            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (i+4, legend)
+            j = len(legends) - i + 3
+            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
         fmt = fmt[:-4] + "\n"
         res = fmt % (title,
                device['driver'], device['bps'],
