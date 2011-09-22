@@ -769,7 +769,6 @@ static void handle_control(int sfd, char *buf)
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
 	}
-#ifdef __UNUSED__
     } else if (buf[0] == '!') {
 	/* split line after ! into device=string, send string to device */
 	char *eq;
@@ -857,7 +856,6 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "\n", 1));
 	}
 	ignore_return(write(sfd, "OK\n", 6));
-#endif /* __UNUSED__ */
     } else {
 	/* unknown command */
 	ignore_return(write(sfd, "ERROR\n", 6));
