@@ -199,16 +199,17 @@ class instrumented:
                                time.time()))
         return True
     def header(self, session, device):
-        res = "# Instrumented latency data, %s, %s, %dN%d, cycle %ds" % \
+        res = "# Instrumented latency data, %s, %s, %dN%d, cycle %ds\n" % \
               (title,
                device['driver'], device['bps'],
                device['stopbits'], device['cycle'])
-        return res + "\n"
+        res += "#- Tag -  ----- Fix time -----  - Chars -  - Latency -  -- RS232 --  --Analysis-  --- Recv --\n"
+        return res
     def data(self, unused, device):
         res = ""
         for (tag, time, chars, start, xmit, recv) in self.stats:
             rs232_time = (chars * 10.0) / device['bps']
-            res += "% 8s %2.9f  %u  %2.9f  %2.9f  %2.9f  %2.9f\n" % (tag, time, chars, start-time, rs232_time, xmit-time, recv-time)
+            res += "% 8s  %.9f  %9u  %.9f  %.9f  %.9f  %.9f\n" % (tag, time, chars, start-time, rs232_time, xmit-time, recv-time)
         return res
     def plot(self, unused, session, device):
         legends = (
