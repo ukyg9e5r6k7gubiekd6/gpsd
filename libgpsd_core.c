@@ -144,7 +144,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->mag_var = NAN;
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
 #ifdef TIMING_ENABLE
-    session->gpsdata.cycle_start = 0;
+    session->gpsdata.cycle_start = 0.0;
     session->gpsdata.cycle_count = 0;
 #endif /* TIMING_ENABLE */
 
