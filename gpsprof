@@ -57,7 +57,7 @@ class spaceplot:
         res = "# Position uncertainty, %s, %s, %ds cycle\n" % \
                  (title, device["driver"], device["cycle"])
         return res
-    def data(self, unused):
+    def data(self, unused, empty):
         res = ""
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
@@ -144,9 +144,9 @@ class spaceplot:
         fmt += ', cx(t, cep99),cy(t, cep99) title "CEP (99%%) = %f meters"' % (cep99_meters)
         fmt += "\n"
         fmt += self.header(session, device)
-        fmt += self.data(session)
+        fmt += self.data(session, device)
         if not gps.isnan(alt_avg):
-            fmt += "e\n" + self.data(session)
+            fmt += "e\n" + self.data(session, device)
         return fmt
 
 class uninstrumented:
@@ -166,7 +166,7 @@ class uninstrumented:
                  (title,
                   device["driver"], device["bps"],
                   device["stopbits"], device["cycle"])
-    def data(self, unused):
+    def data(self, unused, empty):
         res = ""
         for seconds in self.stats:
             res += "%2.6lf\n" % seconds
@@ -182,7 +182,7 @@ plot "-" using 0:1 title "Total time" with impulses
                       device['driver'], device['bps'],
                       device['stopbits'], device['cycle'])
         res += self.header(session, device)
-        return res + self.data(session)
+        return res + self.data(session, device)
 
 class instrumented:
     "All measurement, no deductions."
@@ -204,7 +204,7 @@ class instrumented:
                device['driver'], device['bps'],
                device['stopbits'], device['cycle'])
         return res + "\n"
-    def data(self, unused):
+    def data(self, unused, device):
         res = ""
         for (tag, time, chars, start, xmit, recv) in self.stats:
             res += "% 8s %2.9f  %u  %2.9f  %2.9f  %2.9f\n" % (tag, time, chars, start-time, xmit-start, recv-xmit)
@@ -227,7 +227,7 @@ plot \\\n'''
                device['driver'], device['bps'],
                device['stopbits'], device['cycle'])
         res += self.header(session, device)
-        res += (self.data(session) + "e\n") * len(legends)
+        res += (self.data(session, device) + "e\n") * len(legends)
         return res
 
 formatters = (spaceplot, uninstrumented, instrumented)
