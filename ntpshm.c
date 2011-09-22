@@ -527,6 +527,19 @@ static int init_kernel_pps(struct gps_device_t *session) {
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
+/*
+ * Would also be possible to enable PPS on Data Set Ready and Ring
+ * Indicator with TIOCM_DSR and TIOCM_RI, but no such setup has been
+ * observed in the wild.
+ */
+#if defined(PPS_ON_CTS_ENABLE)
+#define PPS_LINE_TIOC TIOCM_CTS
+#define PPS_LINE_NAME "CTS"
+#else
+#define PPS_LINE_TIOC TIOCM_CAR
+#define PPS_LINE_NAME "DCD"
+#endif
+
 /*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
@@ -535,13 +548,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timeval  tv;
     struct timespec ts;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
-#if defined(PPS_ON_CTS_ENABLE)
-    int pps_device = TIOCM_CTS;
-#define pps_device_str "CTS"
-#else
-    int pps_device = TIOCM_CAR;
-#define pps_device_str "DCD"
-#endif
 #if defined(HAVE_SYS_TIMEPPS_H)
     int kpps_edge = 0;       /* 0 = clear edge, 1 = assert edge */
     int cycle_kpps, duration_kpps;
@@ -610,7 +616,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     /* root privileges are not required after this point */
 
     /* wait for status change on the device's carrier-detect line */
-    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, pps_device) == 0) {
+    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) == 0) {
 	int ok = 0;
 	char *log = NULL;
 
@@ -691,7 +697,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    break;
 	/*@ -ignoresigns */
 
-	state = (int)((state & pps_device) != 0);
+	state = (int)((state & PPS_LINE_TIOC) != 0);
 	/*@ +boolint @*/
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
 	cycle = timediff(tv, pulse[state]);
@@ -706,7 +712,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		unchanged = 0;
 		gpsd_report(LOG_RAW,
 			    "PPS pps-detect (%s) on %s invisible pulse\n",
-			    pps_device_str, session->gpsdata.dev.path);
+			    PPS_LINE_NAME, session->gpsdata.dev.path);
 	    } else if (++unchanged == 10) {
 		unchanged = 1;
 		gpsd_report(LOG_WARN,
@@ -715,7 +721,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    }
 	} else {
 	    gpsd_report(LOG_RAW, "PPS pps-detect (%s) on %s changed to %d\n",
-			pps_device_str, session->gpsdata.dev.path, state);
+			PPS_LINE_NAME, session->gpsdata.dev.path, state);
 	    laststate = state;
 	    unchanged = 0;
 	}
