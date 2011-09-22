@@ -64,7 +64,7 @@ class spaceplot:
             (raw1, raw2, alt) = self.fixes[i]
             res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
         return res
-    def plot(self, unused, session, device):
+    def plot(self, unused, session, device, empty):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
@@ -171,14 +171,16 @@ class uninstrumented:
         for seconds in self.stats:
             res += "%2.6lf\n" % seconds
         return res
-    def plot(self, title, session, device):
-        fmt = '''
+    def plot(self, title, session, device, dump):
+        res = ""
+        if not dump:
+            fmt = '''
 set autoscale
 set key below
 set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
 plot "-" using 0:1 title "Total time" with impulses
 '''
-        res = fmt % (title,
+            res = fmt % (title,
                       device['driver'], device['bps'],
                       device['stopbits'], device['cycle'])
         res += self.header(session, device)
@@ -211,32 +213,35 @@ class instrumented:
             rs232_time = (chars * 10.0) / device['bps']
             res += "% 8s  %.9f  %9u  %.9f  %.9f  %.9f  %.9f\n" % (tag, time, chars, start-time, rs232_time, xmit-time, recv-time)
         return res
-    def plot(self, unused, session, device):
-        legends = (
-            "Reception delta",
-            "Analysis time",
-            "RS232 time",
-            "Fix latency",
-            )
-        fmt = '''
+    def plot(self, unused, session, device, dump):
+        if dump:
+            return self.header(session, device) + self.data(session, device)
+        else:
+            legends = (
+                "Reception delta",
+                "Analysis time",
+                "RS232 time",
+                "Fix latency",
+                )
+            fmt = '''
 set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
 plot \\\n'''
-        for (i, legend) in enumerate(legends):
-            j = len(legends) - i + 3
-            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
-        fmt = fmt[:-4] + "\n"
-        res = fmt % (title,
-               device['driver'], device['bps'],
-               device['stopbits'], device['cycle'])
-        res += self.header(session, device)
-        res += (self.data(session, device) + "e\n") * len(legends)
-        return res
+            for (i, legend) in enumerate(legends):
+                j = len(legends) - i + 3
+                fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
+            fmt = fmt[:-4] + "\n"
+            res = fmt % (title,
+                   device['driver'], device['bps'],
+                   device['stopbits'], device['cycle'])
+            res += self.header(session, device)
+            res += (self.data(session, device) + "e\n") * len(legends)
+            return res
 
 formatters = (spaceplot, uninstrumented, instrumented)
 
-def plotframe(await, fname, threshold, title):
+def plotframe(await, fname, threshold, title, dump):
     "Return a string containing a GNUplot script "
     if fname:
         for formatter in formatters:
@@ -297,13 +302,13 @@ def plotframe(await, fname, threshold, title):
         baton.end()
     finally:
         session.send('?WATCH={"enable":false,"timing":false}')
-    command = plotter.plot(title, session, device)
+    command = plotter.plot(title, session, device, dump)
     del session
     return command
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "f:hm:n:s:t:D:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "df:hm:n:s:t:D:")
 
         formatter = "space"
         raw = False
@@ -311,6 +316,7 @@ if __name__ == '__main__':
         threshold = 0
         await = 100
         verbose = 0
+        dump = False
         for (switch, val) in options:
             if (switch == '-f'):
                 formatter = val
@@ -320,14 +326,16 @@ if __name__ == '__main__':
                 await = int(val)
             elif (switch == '-t'):
                 title = val
+            elif (switch == '-d'):
+                dump = True
             elif (switch == '-D'):
                 verbose = int(val)
             elif (switch == '-h'):
                 sys.stderr.write(\
-                    "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] \n"
+                    "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title]\n")
                 sys.exit(0)
-        sys.stdout.write(plotframe(await,formatter,threshold,title))
+        sys.stdout.write(plotframe(await,formatter,threshold,title,dump))
     except KeyboardInterrupt:
         pass
 
