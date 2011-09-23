@@ -130,7 +130,7 @@ application.  It has the following stages:</para>
 and buffered for transmission via serial link.</para>
 </listitem>
 <listitem>
-<para>The encoding is transmitted via serial link to a buffer in GPSD.</para>
+<para>The encoding is transmitted via serial link to a buffer in <application>gpsd</application>.</para>
 </listitem>
 <listitem>
 <para>The encoding is decoded and translated into a notification in
@@ -476,13 +476,81 @@ whole-cycle latency.  Also, embedding timing statistics in the JSON digest
 of an entire cycle rather than as a $ sentence after each GPS packet
 significantly reduced the overhead of profiling in the report stream.</para>
 
-<!--more here-->
+<para>The model for these measurements is as follows:</para>
 
+<orderedlist>
+<listitem>
+<para>A PVT report is generated in the GPS (at time 'T')</para>
+</listitem>
+<listitem>
+<para>It is encoded into a burst of sentences in NMEA or a vendor
+binary protocol and buffered for transmission via serial link.</para>
+</listitem>
+<listitem>
+<para>The encoding is transmitted via serial link to a buffer in
+<application>gpsd</application>, beginning at a time we shall call
+'S'.</para>
+</listitem>
+<listitem>
+<para>Because it consists of multiple packets, a period combining
+serial transmission time with <application>gpsd</application>
+processing (packet-sniffing and analysis) time will follow.</para>
+</listitem>
+<listitem>
+<para>At the end of this interval (at a time we shall call 'E'),
+<application>gpsd</application> has seen the GPS data it needs and is
+ready to produce a report to ship to clients.</para>
+</listitem>
+<listitem>
+<para>Meanwhile, the GPS may still be transmitting data that GPSD does
+not use.  But when the transmission burst is done, there will be quiet
+time on the link (exception: as we noted in 2005, some devices' transmissions 
+may slightly overflow the 1-second cycle time at 4800bps).</para>
+</listitem>
+<listitem>
+<para>The JSON report is shipped, arriving at the client at a time we
+shall call 'R'.</para>
+</listitem>
+</orderedlist>
+
+<para>We cannot know T directly.  The GPS's timestamp on the fix will
+tell us when it thinks T was, but because we don't know how our local
+clock diverges from GPS's atomic-clock timebase we don't actually know
+what T was in system time (call that T').  If we trust NTP, we then
+believe that the skew between T and T' is no more than 10ms.</para>
+
+<para>We catch time S by recording system time each time data becomes
+available from the device.  If adjacent returns of select(2) are separated 
+by more than 250msec, we have good reason to believe that the second one 
+follows end-of-cycle quiet time.  This guard interval is reliable at 9600bps
+and will only be more so at higher speeds.</para>
+
+<para>We catch time E just before a JSON report is generated from the 
+per-device session structures. This is the wnd of the analysis phase.
+If timing is enabled, extra members carrying S, E and the number
+of characters transmitted during the cycle (C) are included in the JSON.</para>
+
+<para>We catch time R by noting when the JSON arrives at the client.</para>
+
+<para>We know that the transmission-time portion of [S, E] can be
+approximated by the formula (C * 10) / B where B is the
+transmission rate in bits per second.  (Each character costs 8 bits
+plus one parity bit plus one stop bit.)</para>
+
+<para>Knowing this, we can subtract (C * 10) / B from (E-S) to approximate
+the internal proccessing time spent by <application>gpsd</application>.
+Due to other UART overheads, this formula will slightly underestimate
+transmission time and this overestimate procesing time, but even a rough
+comparison of the two is interesting.</para>
 </sect2>
 
 <sect2><title>Data and Analysis</title>
 
-<para>With the new profiling tools, one graph tells the story.  You you can see the exact figures in the <ulink url='profile6.txt'>raw data</ulink></para>
+<para>With the new profiling tools, one graph (made with
+<command>gpsprof -f instrumented -n 100 -T png</command>) tells the
+story.  This is from the same Haicom 204s used in the 2005 tests.  You
+can see the exact figures in the <ulink url='profile6.txt'>raw
+data</ulink>.</para>
 
 <figure><title>Split latency report</title>
 <mediaobject>
@@ -491,6 +559,8 @@ significantly reduced the overhead of profiling in the report stream.</para>
   </imageobject>
 </mediaobject>
 </figure>
+
+<!--more-->
 
 </sect2>
 
