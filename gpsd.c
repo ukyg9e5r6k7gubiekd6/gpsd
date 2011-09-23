@@ -1034,6 +1034,9 @@ static void handle_request(struct subscriber_t *sub,
 	    ++buf;
 	} else {
 	    int status = json_watch_read(buf + 1, &sub->policy, &end);
+#ifndef TIMING_ENABLE
+	    sub->policy.timing = false;
+#endif /* TIMING_ENABLE */
 	    if (end == NULL)
 		buf += strlen(buf);
 	    else {

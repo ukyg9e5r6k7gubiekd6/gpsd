@@ -283,7 +283,7 @@ def plotframe(await, fname, threshold, title, dump):
                 #sys.stderr.write("found %s device @%sbps..." % (device["driver"], device["bps"]))
             if session.data["class"] == "WATCH":
                 if "timing" in options and not session.data.get("timing"):
-                    sys.stderr.write("gpsprof: timing is not enabled.\n")
+                    sys.stderr.write("timing is not enabled.\n")
                     sys.exit(1)
             # Ignore everything but TPVs for the moment
             if session.data["class"] != "TPV":
