@@ -174,7 +174,7 @@ class uninstrumented:
     def plot(self, title, session, device, dump):
         res = ""
         if not dump:
-            fmt = '''
+            fmt = '''\
 set autoscale
 set key below
 set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
@@ -223,7 +223,7 @@ class instrumented:
                 "RS232 time",
                 "Fix latency",
                 )
-            fmt = '''
+            fmt = '''\
 set autoscale
 set key below
 set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
@@ -308,7 +308,7 @@ def plotframe(await, fname, threshold, title, dump):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "df:hm:n:s:t:D:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "df:hm:n:s:t:T:D:")
 
         formatter = "space"
         raw = False
@@ -316,6 +316,7 @@ if __name__ == '__main__':
         threshold = 0
         await = 100
         verbose = 0
+        terminal = None
         dump = False
         for (switch, val) in options:
             if (switch == '-f'):
@@ -326,6 +327,8 @@ if __name__ == '__main__':
                 await = int(val)
             elif (switch == '-t'):
                 title = val
+            elif (switch == '-T'):
+                terminal = val
             elif (switch == '-d'):
                 dump = True
             elif (switch == '-D'):
@@ -333,8 +336,10 @@ if __name__ == '__main__':
             elif (switch == '-h'):
                 sys.stderr.write(\
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
-                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title]\n")
+                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal]\n")
                 sys.exit(0)
+        if terminal:
+            sys.stdout.write("set terminal %s\n" % terminal)
         sys.stdout.write(plotframe(await,formatter,threshold,title,dump))
     except KeyboardInterrupt:
         pass

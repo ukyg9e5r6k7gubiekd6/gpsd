@@ -26,6 +26,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-m <replaceable>threshold</replaceable></arg>
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
+      <arg choice='opt'>-T <replaceable>terminal</replaceable></arg>
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-h</arg>
@@ -51,6 +52,13 @@ this:
 
 <programlisting>
 gpsprof | gnuplot -persist
+</programlisting>
+</para>
+
+<para>To generate an image file:
+
+<programlisting>
+gpsprof -T png | gnuplot >image.png
 </programlisting>
 </para>
 
@@ -145,6 +153,10 @@ is 100.</para>
 
 <para>The -t option sets a text string to be included in the plot
 title.</para>
+
+<para>The -T option generates a terminal type setting into the gnuplot code.
+Typical usage is "-T png" telling gnuplot to write a PNG file.  Without
+this option gnuplot will call its X11 display code.</para>
 
 <para>The -d option suppresses plot generation, dumping the plot data instead.
 This option is a no-op with the space plot.</para>
