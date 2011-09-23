@@ -1657,6 +1657,7 @@ struct gps_data_t {
 #endif
     struct gps_fix_t	fix;	/* accumulated PVT data */
 
+    /* this should move to the per-driver structure */
     double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 
     /* GPS status -- always valid */
