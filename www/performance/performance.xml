@@ -482,7 +482,15 @@ significantly reduced the overhead of profiling in the report stream.</para>
 
 <sect2><title>Data and Analysis</title>
 
-<para></para>
+<para>With the new profiling tools, one graph tells the story.  You you can see the exact figures in the <ulink url='profile6.txt'>raw data</ulink></para>
+
+<figure><title>Split latency report</title>
+<mediaobject>
+  <imageobject>
+    <imagedata fileref='graph6.png'/>
+  </imageobject>
+</mediaobject>
+</figure>
 
 </sect2>
 
