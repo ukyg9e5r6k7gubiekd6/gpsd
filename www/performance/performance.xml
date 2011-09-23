@@ -501,11 +501,10 @@ is always zero, and is no longer collected when timing sentences.</para>
 </sect1>
 <sect1><title>2011 Update</title>
 
-<para>This paper is now mainly of historical interest.  While I believe the
-conclusions it reached are still valid, the timing facilities it relied 
-on will be replaced with a different and simpler set using the
-automatic cycle detection logic introduced in 2.90 to do whole-cycle
-timing rather than per-sentence timing.</para>
+<para>While I believe the conclusions this paper reached are still valid, the
+timing facilities it relied on have been replaced with a different and
+simpler set using the automatic cycle detection logic introduced in
+2.90 to do whole-cycle timing rather than per-sentence timing.</para>
 
 </sect1>
 </article>
