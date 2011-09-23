@@ -425,7 +425,7 @@ else:
 #
 # There's a use_chrpath option, on by default, so it can be turned off.
 # You may need to do this when cross-compiling.  The problem is that,
-# as of version 0.13, chrpath can only edit bonaries for the host
+# as of version 0.13, chrpath can only edit binaries for the host
 # it's running on.  There's an unmerged patch to fix this at:
 # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502259
 #
