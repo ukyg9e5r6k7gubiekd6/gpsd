@@ -64,7 +64,7 @@ class spaceplot:
             (raw1, raw2, alt) = self.fixes[i]
             res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
         return res
-    def plot(self, unused, session, device, empty):
+    def plot(self, session, device, empty):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
@@ -113,7 +113,7 @@ class spaceplot:
             lonstring = "%fE" % self.centroid[1]
         fmt = "set autoscale\n"
         fmt += 'set key below\n'
-        fmt += 'set key title "%s"\n' % time.asctime()
+        fmt += 'set key title "%s"\n' % gps.misc.isotime(int(time.time()))
         fmt += 'set size ratio -1\n'
         fmt += 'set style line 2 pt 1\n'
         fmt += 'set style line 3 pt 2\n'
@@ -161,28 +161,30 @@ class uninstrumented:
             return True
         else:
             return False
+    def whatami(self, unused, device):
+        return "%s, %s, %d %dN%d, cycle %ds" % \
+              (gps.misc.isotime(int(time.time())),
+               device['driver'], device['bps'],
+               9 - device['stopbits'],
+               device['stopbits'], device['cycle']) 
     def header(self, session, device):
-        return "# Uninstrumented total latency, %s, %s, %dN%d, cycle %ds\n" % \
-                 (title,
-                  device["driver"], device["bps"],
-                  device["stopbits"], device["cycle"])
+        return "# Uninstrumented total latency, " + self.whatami(session, device) + "\n"
     def data(self, unused, empty):
         res = ""
         for seconds in self.stats:
             res += "%2.6lf\n" % seconds
         return res
-    def plot(self, title, session, device, dump):
+    def plot(self, session, device, dump):
         res = ""
         if not dump:
             fmt = '''\
 set autoscale
 set key below
-set key title "Uninstrumented total latency, %s, %s, %dN%d, cycle %ds"
+set title "%s"
+set key title "Uninstrumented total latency"
 plot "-" using 0:1 title "Total time" with impulses
 '''
-            res = fmt % (title,
-                      device['driver'], device['bps'],
-                      device['stopbits'], device['cycle'])
+            res = fmt % self.whatami(session, device) 
         res += self.header(session, device)
         return res + self.data(session, device)
 
@@ -200,11 +202,14 @@ class instrumented:
                                session.data['xmit_time'],
                                time.time()))
         return True
-    def header(self, session, device):
-        res = "# Instrumented latency data, %s, %s, %dN%d, cycle %ds\n" % \
-              (title,
+    def whatami(self, unused, device):
+        return "%s, %s, %d %dN%d, cycle %ds" % \
+              (gps.misc.isotime(int(time.time())),
                device['driver'], device['bps'],
-               device['stopbits'], device['cycle'])
+               9 - device['stopbits'],
+               device['stopbits'], device['cycle']) 
+    def header(self, session, device):
+        res = "# Analyzed latency, " + self.whatami(session, device) + "\n"
         res += "#- Tag -  ----- Fix time -----  - Chars -  - Latency -  -- RS232 --  --Analysis-  --- Recv --\n"
         return res
     def data(self, unused, device):
@@ -213,7 +218,7 @@ class instrumented:
             rs232_time = (chars * 10.0) / device['bps']
             res += "% 8s  %.9f  %9u  %.9f  %.9f  %.9f  %.9f\n" % (tag, time, chars, start-time, rs232_time, xmit-time, recv-time)
         return res
-    def plot(self, unused, session, device, dump):
+    def plot(self, session, device, dump):
         if dump:
             return self.header(session, device) + self.data(session, device)
         else:
@@ -225,16 +230,15 @@ class instrumented:
                 )
             fmt = '''\
 set autoscale
+set key title "Analyzed latency"
 set key below
-set key title "Raw latency data, %s, %s, %dN%d, cycle %ds"
+set title "%s"
 plot \\\n'''
             for (i, legend) in enumerate(legends):
                 j = len(legends) - i + 3
                 fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
             fmt = fmt[:-4] + "\n"
-            res = fmt % (title,
-                   device['driver'], device['bps'],
-                   device['stopbits'], device['cycle'])
+            res = fmt % self.whatami(session, device)
             res += self.header(session, device)
             res += (self.data(session, device) + "e\n") * len(legends)
             return res
@@ -302,7 +306,7 @@ def plotframe(await, fname, threshold, title, dump):
         baton.end()
     finally:
         session.send('?WATCH={"enable":false,"timing":false}')
-    command = plotter.plot(title, session, device, dump)
+    command = plotter.plot(session, device, dump)
     del session
     return command
 
@@ -312,7 +316,7 @@ if __name__ == '__main__':
 
         formatter = "space"
         raw = False
-        title = time.ctime()
+        title = None
         threshold = 0
         await = 100
         verbose = 0
@@ -341,6 +345,8 @@ if __name__ == '__main__':
         if terminal:
             sys.stdout.write("set terminal %s\n" % terminal)
         sys.stdout.write(plotframe(await,formatter,threshold,title,dump))
+        if title:
+            sys.stdout.write("set title %s\n" % title)
     except KeyboardInterrupt:
         pass
 
