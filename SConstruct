@@ -115,7 +115,8 @@ boolopts = (
     ("python",        True,  "build Python support and modules."),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
-    ("strip",         True,  "build with stripping of binaries enabled"),       
+    ("strip",         True,  "build with stripping of binaries enabled"),
+    ("use_chrpath",   True,  "turn off to suppress use of chrpath"),
     )
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
@@ -421,7 +422,14 @@ else:
 # If chrpath is not present, the shared-library load path in the
 # built binaries may be left in a state that allows an attack by
 # spoofing the gps or gpsd shared library.
-if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
+#
+# There's a use_chrpath option, on by default, so it can be turned off.
+# You may need to do this when cross-compiling.  The problem is that,
+# as of version 0.13, chrpath can only edit bonaries for the host
+# it's running on.  There's an unmerged patch to fix this at:
+# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502259
+#
+if env['use_chrpath'] and config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     have_chrpath = True
     # Tell generated binaries to look in the current directory for
     # shared libraries so we can run tests without hassle. Should be
