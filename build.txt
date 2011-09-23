@@ -191,3 +191,17 @@ sysroot option.
 "arm-indigo-linux-gnueabi" as target means that
 arm-indigo-linux-gnueabi-gcc and related tools are available in PATH;
 your cross-compiler is likely to have a different target prefix.
+
+Also, a warning about chrpath:
+
+There's a use_chrpath option, on by default, so use of chrpath can be
+turned off.  You may need to do this when cross-compiling.  The
+problem is that, as of version 0.13, chrpath can only edit binaries
+for the host it's running on.  There's an unmerged patch to fix this
+at: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502259
+
+If you have to set use_chrpath=no, be aware that you won't be able 
+to run the binaries in the test directory until you have installed
+the shared libraries somewhere on the search path.
+
+
