@@ -419,10 +419,6 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
 
-# If chrpath is not present, the shared-library load path in the
-# built binaries may be left in a state that allows an attack by
-# spoofing the gps or gpsd shared library.
-#
 # There's a use_chrpath option, on by default, so it can be turned off.
 # You may need to do this when cross-compiling.  The problem is that,
 # as of version 0.13, chrpath can only edit binaries for the host
@@ -439,6 +435,8 @@ if env['use_chrpath'] and config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
     env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 else:
+    print "Warning: Regression tests won't be runnable from the build directory"
+    print "   until the shared libraries have been intalled in system space."
     have_chrpath = False
 
 # Map options to libraries required to support them that might be absent.
