@@ -540,7 +540,7 @@ plus one parity bit plus one stop bit.)</para>
 <para>Knowing this, we can subtract (C * 10) / B from (E-S) to approximate
 the internal proccessing time spent by <application>gpsd</application>.
 Due to other UART overheads, this formula will slightly underestimate
-transmission time and this overestimate procesing time, but even a rough
+transmission time and this overestimate processing time, but even a rough
 comparison of the two is interesting.</para>
 </sect2>
 
@@ -552,7 +552,7 @@ story.  This is from the same Haicom 204s used in the 2005 tests.  You
 can see the exact figures in the <ulink url='profile6.txt'>raw
 data</ulink>.</para>
 
-<figure><title>Split latency report</title>
+<figure><title>Per-cycle latency report, 19200bps</title>
 <mediaobject>
   <imageobject>
     <imagedata fileref='graph6.png'/>
@@ -560,8 +560,44 @@ data</ulink>.</para>
 </mediaobject>
 </figure>
 
-<!--more-->
+<para>Fix latency (S - T, the purple time segment in eaxch sample) is
+consistently about 70msec.  Some of this represents. on-chip
+processing.  Some may represent actual skew between NTP time and GPS
+time.</para>
 
+<para>RS232 time (the blue segment) is the character transmission time
+estimate we computed. It seems steady at around 100ms. This is
+probably a bit low, proportionately speaking.</para>
+
+<para>The green segment is (E-S) with RS232 computed time subtracted.
+It approximates the time required by <application>gpsd</application>
+for itelf. It too seems steady at around 100ms. This is probably a bit
+high, proportionately speaking.</para>
+
+<para>The red dots that are just barely visible at the tops of some
+sample bars represent R-E, the client reception delta. Inspection of
+the raw data reveals that it is on the close order of 1ms.</para>
+
+<para>Total fix latency is steady at about 260ms.</para>
+
+<para>It is instructive to compare this with the graph (and the 
+<ulink url='profile6.txt'>raw data</ulink> from the same device 
+at 9600bps.</para>
+
+<figure><title>Per-cycle latency report, 9600bps</title>
+<mediaobject>
+  <imageobject>
+    <imagedata fileref='graph6.png'/>
+  </imageobject>
+</mediaobject>
+</figure>
+
+<para>As we might expect, RS232 time changes drastically and the other
+components barely change at all.  This gives us reason to be confident that
+computed RS232 time is in fact tracking actual transmission time pretty 
+closely.  It also confirms that the most effective way to decrease total
+fix latency is simply to bump up the transmission speed.
+</para>
 </sect2>
 
 </sect1>
@@ -569,10 +605,10 @@ data</ulink>.</para>
 <sect1><title>Conclusions</title>
 
 <para>All these conclusions apply to the consumer-grade GPS hardware
-generally available in 2005 and today in 2011, e.g. with a cycle time
+generally available back in 2005 and today in 2011, e.g. with a cycle time
 of one second. As it happens, 2005 was just after the point when
 consumer-grade GPS chips stabilized as a technology, and though unit
-prices havdve fallen they have changed very little in technology and
+prices have fallen they have changed very little in technology and
 performance over the intervening six years.</para>
 
 <sect2><title>For Application Programmers</title>
@@ -582,17 +618,20 @@ application resources, Nyquist's Theorem tells us to poll
 <application>gpsd</application> once every half-cycle &mdash; that is,
 on almost all GPSes at time of writing, twice a second.</para>
 
-<para>With the SiRF-II chips used in most consumer-grade GPSes at time of
+<para>With the SiRF chips still used in most consumer-grade GPSes at time of
 writing, 9600bps is the optimal line speed.  4800 is slightly too low,
 not guaranteeing updates within the 1-second cycle time.  9600bps
-yields updates in about 0.5sec.</para>
+yields updates in about 0.45sec, 19600bps in about 0.26sec.</para>
 
 </sect2>
 <sect2><title>For Manufacturer Claims</title>
 
 <para>At the 1-second cycle time of consumer-grade devices, being able
-to operate at 9600bps is useful, but higher speeds would not be worth
-the effort.</para>
+to operate at 9600bps is useful, but higher speeds would probably not
+be worth the extra computation unless your sensor is in rapid motion. Even
+whole-cycle latency, most sensitive to transmission speed, is only cut
+by less than 200ms by going to 19200. Higher speed will exhibit 
+diminishing returns.</para>
 
 <para>Comparing the SiRF-II performance at 4800bps and 9600 shows a
 drop in E1+T1 that looks about linear, suggesting that for a cycle of
