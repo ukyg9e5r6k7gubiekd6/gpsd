@@ -27,7 +27,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
       <arg choice='opt'>-T <replaceable>terminal</replaceable></arg>
-      <arg choice='opt'>-d</arg>
+      <arg choice='opt'>-d  <replaceable>dumpfile</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-h</arg>
 </cmdsynopsis>
@@ -158,8 +158,8 @@ title.</para>
 Typical usage is "-T png" telling gnuplot to write a PNG file.  Without
 this option gnuplot will call its X11 display code.</para>
 
-<para>The -d option suppresses plot generation, dumping the plot data instead.
-This option is a no-op with the space plot.</para>
+<para>The -d option dumps the raw plot data to a specified file for
+pos-analysis.</para>
 
 <para>The -h option makes <application>gpsprof</application> print 
 a usage message and exit.</para>

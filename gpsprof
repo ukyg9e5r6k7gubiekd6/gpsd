@@ -219,7 +219,7 @@ class spaceplot(plotter):
 class uninstrumented(plotter):
     "Total times without instrumentation."
     name = "uninstrumented"
-    requires_time = True
+    requires_time = False
     def __init__(self):
         plotter.__init__(self)
     def sample(self):
@@ -246,7 +246,7 @@ plot "-" using 0:1 title "Total time" with impulses
         return fmt + self.header() + self.data()
 
 class instrumented(plotter):
-    "All measurement, no deductions."
+    "Latency as analyzed by instrumentation."
     name = "instrumented"
     requires_time = True
     def __init__(self):
@@ -292,7 +292,7 @@ formatters = (spaceplot, uninstrumented, instrumented)
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "df:hm:n:s:t:T:D:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:f:hm:n:s:t:T:D:")
 
         plotmode = "space"
         raw = False
@@ -301,7 +301,7 @@ if __name__ == '__main__':
         await = 100
         verbose = 0
         terminal = None
-        dump = False
+        dumpfile = None
         for (switch, val) in options:
             if (switch == '-f'):
                 plotmode = val
@@ -314,7 +314,7 @@ if __name__ == '__main__':
             elif (switch == '-T'):
                 terminal = val
             elif (switch == '-d'):
-                dump = True
+                dumpfile = val
             elif (switch == '-D'):
                 verbose = int(val)
             elif (switch == '-h'):
@@ -322,6 +322,7 @@ if __name__ == '__main__':
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal]\n")
                 sys.exit(0)
+        # Select the plotting mode
         if plotmode:
             for formatter in formatters:
                 if formatter.name == plotmode:
@@ -330,16 +331,19 @@ if __name__ == '__main__':
             else:
                 sys.stderr.write("gpsprof: no such formatter.\n")
                 sys.exit(1)
+        # Get fix data from the GPS
         plotter.collect(verbose)
-        if dump:
-            sys.stdout.write(plotter.dump())
-        else:
-            if terminal:
-                sys.stdout.write("set terminal %s\n" % terminal)
-            sys.stdout.write(plotter.plot())
-            if not title:
-                title = plotter.whatami()
-            sys.stdout.write("set title %s\n" % title)
+        # Save the raw data for post-analysis if required.
+        if dumpfile:
+            with open(dumpfile) as fp:
+                fp.write(plotter.dump())
+        # Ship the plot to standard output
+        if terminal:
+            sys.stdout.write("set terminal %s\n" % terminal)
+        sys.stdout.write(plotter.plot())
+        if not title:
+            title = plotter.whatami()
+        sys.stdout.write("set title %s\n" % title)
     except KeyboardInterrupt:
         pass
 
