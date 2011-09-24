@@ -30,7 +30,7 @@
 
 <revhistory>
    <revision>
-      <revnumber>1.3</revnumber>
+      <revnumber>2.0</revnumber>
       <date>23 September 2011</date>
       <authorinitials>esr</authorinitials>
       <revremark>
@@ -587,7 +587,7 @@ at 9600bps.</para>
 <figure><title>Per-cycle latency report, 9600bps</title>
 <mediaobject>
   <imageobject>
-    <imagedata fileref='graph6.png'/>
+    <imagedata fileref='graph7.png'/>
   </imageobject>
 </mediaobject>
 </figure>
