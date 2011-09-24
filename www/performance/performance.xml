@@ -581,7 +581,7 @@ the raw data reveals that it is on the close order of 1ms.</para>
 <para>Total fix latency is steady at about 260ms.</para>
 
 <para>It is instructive to compare this with the graph (and the 
-<ulink url='profile6.txt'>raw data</ulink> from the same device 
+<ulink url='profile7.txt'>raw data</ulink> from the same device 
 at 9600bps.</para>
 
 <figure><title>Per-cycle latency report, 9600bps</title>
