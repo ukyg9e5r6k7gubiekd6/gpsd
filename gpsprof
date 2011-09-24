@@ -41,30 +41,97 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-class spaceplot:
-    "Spatial scattergram of fixes."
-    name = "space"
+class plotter:
+    "Generic class for gatherling and plotting sensor statistics."
     def __init__(self):
         self.fixes = []
+        self.start_time = int(time.time())
+    def whatami(self):
+        "How do we identify this poltting run?"
+        return "%s, %s, %d %dN%d, cycle %ds" % \
+              (gps.misc.isotime(self.start_time),
+               self.device['driver'], self.device['bps'],
+               9 - self.device['stopbits'],
+               self.device['stopbits'], self.device['cycle']) 
+    def collect(self, verbose):
+        "Collect data from the GPS."
+        try:
+            self.session = gps.gps(verbose=verbose)
+        except socket.error:
+            sys.stderr.write("gpsprof: gpsd unreachable.\n")
+            sys.exit(1)
+        # Initialize
+        self.session.read()
+        if self.session.version == None:
+            print >>sys.stderr, "gpsprof: requires gpsd to speak new protocol."
+            sys.exit(1)
+        # Set parameters
+        options = ""
+        if self.requires_time:
+            options = ',"timing":true'
+        try:
+            self.session.send('?WATCH={"enable":true,"json":true%s}' % options)
+            baton = Baton("gpsprof: looking for fix", "done")
+            countdown = await
+            basetime = time.time()
+            while countdown > 0:
+                if self.session.read() == -1:
+                    sys.stderr.write("gpsprof: gpsd has vanished.\n")
+                    sys.exit(1)
+                baton.twirl()
+                if self.session.data["class"] == "DEVICES":
+                    if len(self.session.data["devices"]) != 1:
+                        print >>sys.stderr, "exactly one device must be attached.\n"
+                        sys.exit(1)
+                    self.device = copy.copy(self.session.data["devices"][0])
+                    #sys.stderr.write("found %s device @%sbps..." % (self.device["driver"], self.device["bps"]))
+                if self.session.data["class"] == "WATCH":
+                    if "timing" in options and not self.session.data.get("timing"):
+                        sys.stderr.write("timing is not enabled.\n")
+                        sys.exit(1)
+                # Ignore everything but TPVs for the moment
+                if self.session.data["class"] != "TPV":
+                    continue
+                # We can get some funky artifacts at start of self.session
+                # apparently due to RS232 buffering effects. Ignore
+                # them.
+                if threshold and time.time()-basetime < self.session.cycle * threshold:
+                    continue
+                if self.session.fix.mode <= gps.MODE_NO_FIX:
+                    continue
+                if countdown == await:
+                    sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time()-basetime,await))
+                if plotter.sample():
+                    countdown -= 1
+            baton.end()
+        finally:
+            self.session.send('?WATCH={"enable":false,"timing":false}')
+    def dump(self):
+        "Dump the raw data for post-analysis."
+        return self.header() + self.data()
+
+class spaceplot(plotter):
+    "Spatial scattergram of fixes."
+    name = "space"
+    requires_time = False
+    def __init__(self):
+        plotter.__init__(self)
     def d(self, a, b):
         return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
-    def gather(self, session):
-        # Include altitude, not used here, for 3D plot experiments.
+    def sample(self):
         # Watch out for the NaN value from gps.py.
-        self.fixes.append((session.fix.latitude, session.fix.longitude, session.fix.altitude))
+        self.fixes.append((self.session.fix.latitude, self.session.fix.longitude, self.session.fix.altitude))
         return True
-    def header(self, session, device):
-        res = "# Position uncertainty, %s, %s, %ds cycle\n" % \
-                 (title, device["driver"], device["cycle"])
-        return res
-    def data(self, unused, empty):
+    def header(self):
+        return "# Position uncertainty, %s\n" % self.whatami()
+    def data(self):
         res = ""
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
             (raw1, raw2, alt) = self.fixes[i]
             res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
         return res
-    def plot(self, session, device, empty):
+    def plot(self):
         if len(self.fixes) == 0:
             sys.stderr.write("No fixes collected, can't estimate accuracy.")
             sys.exit(1)
@@ -143,178 +210,91 @@ class spaceplot:
         fmt += ', cx(t, cep95),cy(t, cep95) title "CEP (95%%) = %f meters"' % (cep95_meters)
         fmt += ', cx(t, cep99),cy(t, cep99) title "CEP (99%%) = %f meters"' % (cep99_meters)
         fmt += "\n"
-        fmt += self.header(session, device)
-        fmt += self.data(session, device)
+        fmt += self.header()
+        fmt += self.data()
         if not gps.isnan(alt_avg):
-            fmt += "e\n" + self.data(session, device)
+            fmt += "e\n" + self.data()
         return fmt
 
-class uninstrumented:
+class uninstrumented(plotter):
     "Total times without instrumentation."
     name = "uninstrumented"
+    requires_time = True
     def __init__(self):
-        self.stats = []
-    def gather(self, session):
-        if session.fix.time:
-            seconds = time.time() - gps.misc.isotime(session.data.time)
-            self.stats.append(seconds)
+        plotter.__init__(self)
+    def sample(self):
+        if self.session.fix.time:
+            seconds = time.time() - gps.misc.isotime(self.session.data.time)
+            self.fixes.append(seconds)
             return True
         else:
             return False
-    def whatami(self, unused, device):
-        return "%s, %s, %d %dN%d, cycle %ds" % \
-              (gps.misc.isotime(int(time.time())),
-               device['driver'], device['bps'],
-               9 - device['stopbits'],
-               device['stopbits'], device['cycle']) 
-    def header(self, session, device):
-        return "# Uninstrumented total latency, " + self.whatami(session, device) + "\n"
-    def data(self, unused, empty):
+    def header(self):
+        return "# Uninstrumented total latency, " + self.whatami() + "\n"
+    def data(self):
         res = ""
-        for seconds in self.stats:
+        for seconds in self.fixes:
             res += "%2.6lf\n" % seconds
         return res
-    def plot(self, session, device, dump):
-        res = ""
-        if not dump:
-            fmt = '''\
+    def plot(self):
+        fmt = '''\
 set autoscale
 set key below
-set title "%s"
 set key title "Uninstrumented total latency"
 plot "-" using 0:1 title "Total time" with impulses
 '''
-            res = fmt % self.whatami(session, device) 
-        res += self.header(session, device)
-        return res + self.data(session, device)
+        return fmt + self.header() + self.data()
 
-class instrumented:
+class instrumented(plotter):
     "All measurement, no deductions."
     name = "instrumented"
+    requires_time = True
     def __init__(self):
-        self.stats = []
-    def gather(self, session):
-        if 'xmit_time' in session.data:
-            self.stats.append((session.data['tag'],
-                               gps.misc.isotime(session.data['time']),
-                               session.data["cycle_count"],
-                               session.data['cycle_start'],
-                               session.data['xmit_time'],
+        plotter.__init__(self)
+    def sample(self):
+        if 'xmit_time' in self.session.data:
+            self.fixes.append((self.session.data['tag'],
+                               gps.misc.isotime(self.session.data['time']),
+                               self.session.data["cycle_count"],
+                               self.session.data['cycle_start'],
+                               self.session.data['xmit_time'],
                                time.time()))
         return True
-    def whatami(self, unused, device):
-        return "%s, %s, %d %dN%d, cycle %ds" % \
-              (gps.misc.isotime(int(time.time())),
-               device['driver'], device['bps'],
-               9 - device['stopbits'],
-               device['stopbits'], device['cycle']) 
-    def header(self, session, device):
-        res = "# Analyzed latency, " + self.whatami(session, device) + "\n"
+    def header(self):
+        res = "# Analyzed latency, " + self.whatami() + "\n"
         res += "#- Tag -  ----- Fix time -----  - Chars -  - Latency -  -- RS232 --  --Analysis-  --- Recv --\n"
         return res
-    def data(self, unused, device):
+    def data(self):
         res = ""
-        for (tag, time, chars, start, xmit, recv) in self.stats:
-            rs232_time = (chars * 10.0) / device['bps']
+        for (tag, time, chars, start, xmit, recv) in self.fixes:
+            rs232_time = (chars * 10.0) / self.device['bps']
             res += "% 8s  %.9f  %9u  %.9f  %.9f  %.9f  %.9f\n" % (tag, time, chars, start-time, rs232_time, xmit-time, recv-time)
         return res
-    def plot(self, session, device, dump):
-        if dump:
-            return self.header(session, device) + self.data(session, device)
-        else:
-            legends = (
-                "Reception delta",
-                "Analysis time",
-                "RS232 time",
-                "Fix latency",
-                )
-            fmt = '''\
+    def plot(self):
+        legends = (
+            "Reception delta",
+            "Analysis time",
+            "RS232 time",
+            "Fix latency",
+            )
+        fmt = '''\
 set autoscale
 set key title "Analyzed latency"
 set key below
-set title "%s"
 plot \\\n'''
-            for (i, legend) in enumerate(legends):
-                j = len(legends) - i + 3
-                fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
-            fmt = fmt[:-4] + "\n"
-            res = fmt % self.whatami(session, device)
-            res += self.header(session, device)
-            res += (self.data(session, device) + "e\n") * len(legends)
-            return res
+        for (i, legend) in enumerate(legends):
+            j = len(legends) - i + 3
+            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
+        fmt = fmt[:-4] + "\n"
+        return fmt + self.header() + (self.data() + "e\n") * len(legends)
 
 formatters = (spaceplot, uninstrumented, instrumented)
-
-def plotframe(await, fname, threshold, title, dump):
-    "Return a string containing a GNUplot script "
-    if fname:
-        for formatter in formatters:
-            if formatter.name == fname:
-                plotter = formatter()
-                break
-        else:
-            sys.stderr.write("gpsprof: no such formatter.\n")
-            sys.exit(1)
-    try:
-        session = gps.gps(verbose=verbose)
-    except socket.error:
-        sys.stderr.write("gpsprof: gpsd unreachable.\n")
-        sys.exit(1)
-    # Initialize
-    session.read()
-    if session.version == None:
-        print >>sys.stderr, "gpsprof: requires gpsd to speak new protocol."
-        sys.exit(1)
-    # Set parameters
-    options = ""
-    if formatter not in (spaceplot, uninstrumented):
-        options = ',"timing":true'
-    try:
-        session.send('?WATCH={"enable":true,"json":true%s}' % options)
-        baton = Baton("gpsprof: looking for fix", "done")
-        countdown = await
-        basetime = time.time()
-        while countdown > 0:
-            if session.read() == -1:
-                sys.stderr.write("gpsprof: gpsd has vanished.\n")
-                sys.exit(1)
-            baton.twirl()
-            if session.data["class"] == "DEVICES":
-                if len(session.data["devices"]) != 1:
-                    print >>sys.stderr, "exactly one device must be attached.\n"
-                    sys.exit(1)
-                device = copy.copy(session.data["devices"][0])
-                #sys.stderr.write("found %s device @%sbps..." % (device["driver"], device["bps"]))
-            if session.data["class"] == "WATCH":
-                if "timing" in options and not session.data.get("timing"):
-                    sys.stderr.write("timing is not enabled.\n")
-                    sys.exit(1)
-            # Ignore everything but TPVs for the moment
-            if session.data["class"] != "TPV":
-                continue
-            # We can get some funky artifacts at start of session
-            # apparently due to RS232 buffering effects. Ignore
-            # them.
-            if threshold and time.time()-basetime < session.cycle * threshold:
-                continue
-            if session.fix.mode <= gps.MODE_NO_FIX:
-                continue
-            if countdown == await:
-                sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time()-basetime,await))
-            if plotter.gather(session):
-                countdown -= 1
-        baton.end()
-    finally:
-        session.send('?WATCH={"enable":false,"timing":false}')
-    command = plotter.plot(session, device, dump)
-    del session
-    return command
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "df:hm:n:s:t:T:D:")
 
-        formatter = "space"
+        plotmode = "space"
         raw = False
         title = None
         threshold = 0
@@ -324,7 +304,7 @@ if __name__ == '__main__':
         dump = False
         for (switch, val) in options:
             if (switch == '-f'):
-                formatter = val
+                plotmode = val
             elif (switch == '-m'):
                 threshold = int(val)
             elif (switch == '-n'):
@@ -342,10 +322,23 @@ if __name__ == '__main__':
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
                      + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal]\n")
                 sys.exit(0)
-        if terminal:
-            sys.stdout.write("set terminal %s\n" % terminal)
-        sys.stdout.write(plotframe(await,formatter,threshold,title,dump))
-        if title:
+        if plotmode:
+            for formatter in formatters:
+                if formatter.name == plotmode:
+                    plotter = formatter()
+                    break
+            else:
+                sys.stderr.write("gpsprof: no such formatter.\n")
+                sys.exit(1)
+        plotter.collect(verbose)
+        if dump:
+            sys.stdout.write(plotter.dump())
+        else:
+            if terminal:
+                sys.stdout.write("set terminal %s\n" % terminal)
+            sys.stdout.write(plotter.plot())
+            if not title:
+                title = plotter.whatami()
             sys.stdout.write("set title %s\n" % title)
     except KeyboardInterrupt:
         pass
