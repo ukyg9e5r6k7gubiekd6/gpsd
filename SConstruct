@@ -157,8 +157,14 @@ for (name, default, help) in pathopts:
 # work. Importing PKG_CONFIG_PATH can be used to solve a problem with where .pc
 # files go in a cross-build, and importing STAGING_PREFIX is required for the
 # OpenWRT build.
-
-envs = {}
+#
+# If chrpath(1) is not available, the RPATH of built binaries won't be
+# set so they can see shared libraries in this build directory. Setting
+# LD_LIBRARY_PATH like this partially solves this problem, ensuring that
+# at least for tests run under scons the local libraries will be found
+# anyway.
+#
+envs = {'LD_LIBRARY_PATH': os.getcwd()}
 for var in ('PATH', 'PKG_CONFIG_PATH', 'STAGING_PREFIX'):
     if var in os.environ:
         envs[var] = os.environ[var]
