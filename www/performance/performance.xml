@@ -110,7 +110,8 @@ reporting cycle, rather than individual packets.</para>
 <para>Both the 2005 and 2011 rounds used the same consumer-grade
 sensor attached via USB to a Linux machine via a USB link, reporting
 to <application>gpsd</application> which is polled via sockets by a
-profiling application.</para>
+profiling application.  In all cases the GPS was stationary at
+approximately 40N 75W.</para>
 
 </sect1>
 <sect1><title>Per-sentence profiling</title>
@@ -560,7 +561,7 @@ data</ulink>.</para>
 </mediaobject>
 </figure>
 
-<para>Fix latency (S - T, the purple time segment in eaxch sample) is
+<para>Fix latency (S - T, the purple time segment in each sample) is
 consistently about 70msec.  Some of this represents. on-chip
 processing.  Some may represent actual skew between NTP time and GPS
 time.</para>
