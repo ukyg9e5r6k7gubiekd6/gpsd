@@ -599,8 +599,37 @@ computed RS232 time is in fact tracking actual transmission time pretty
 closely.  It also confirms that the most effective way to decrease total
 fix latency is simply to bump up the transmission speed.
 </para>
-</sect2>
 
+<para>It is equally instructive to compare these graphs with graphs
+taken from the same GPS, at the dme speed, running in NMEA rather than
+vendor binary mode. Consider, for example, these:</para>
+
+<figure><title>Per-cycle latency report, NMEA mode, 9600bps</title>
+<mediaobject>
+  <imageobject>
+    <imagedata fileref='graph8.png'/>
+  </imageobject>
+</mediaobject>
+</figure>
+
+<para>(Raw data is <ulink url='profile8.txt'>here</ulink>.)</para>
+
+<figure><title>Per-cycle latency report, NMEA mode, 19200bps</title>
+<mediaobject>
+  <imageobject>
+    <imagedata fileref='graph9.png'/>
+  </imageobject>
+</mediaobject>
+</figure>
+
+<para>(Raw data is <ulink url='profile8.txt'>here</ulink>.)</para>
+
+<para>The comb-shaped pattern in these graphs reflect the additional
+transmission time for $GPGSV every 5 cycles. We can see clearly that
+the vendory binary protocol significantly cuts neither latency nor
+total bandwidth required.</para>
+
+</sect2>
 </sect1>
 
 <sect1><title>Conclusions</title>

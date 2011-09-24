@@ -335,15 +335,15 @@ if __name__ == '__main__':
         plotter.collect(verbose)
         # Save the raw data for post-analysis if required.
         if dumpfile:
-            with open(dumpfile) as fp:
+            with open(dumpfile, "w") as fp:
                 fp.write(plotter.dump())
         # Ship the plot to standard output
-        if terminal:
-            sys.stdout.write("set terminal %s\n" % terminal)
-        sys.stdout.write(plotter.plot())
         if not title:
             title = plotter.whatami()
-        sys.stdout.write("set title %s\n" % title)
+        if terminal:
+            sys.stdout.write("set terminal %s\n" % terminal)
+        sys.stdout.write("set title \"%s\"\n" % title)
+        sys.stdout.write(plotter.plot())
     except KeyboardInterrupt:
         pass
 
