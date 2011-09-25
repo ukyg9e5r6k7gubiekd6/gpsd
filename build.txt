@@ -9,9 +9,11 @@ guidance on how to cross-build the package.
 
 Necessary components for any build:
 
-C compiler         -> gpsd and client library are written in C
-Python             -> some code is generated from python scripts
-scons              -> for the build recipe 
+|==============================================================================
+|C compiler         | gpsd and client library are written in C
+|Python             | some code is generated from python scripts
+|scons              | for the build recipe 
+|==============================================================================
 
 C99 conformance is required in the compiler. The C code depends on one
 non-C99 feature: anonymous unions.  We could eliminate these, but the
@@ -31,9 +33,11 @@ autotools build from 2.96 and earlier versions has been dropped.
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
 
-chrpath            -> prevents a potential security hole in built binaries
-C++ compiler	   -> allows building libgpsmm C++ wrapper for client library
-Qt 4.53+           -> allows building libQgpsmm C++ wrapper for client library
+|==============================================================================
+|chrpath            | simplifies running the tools from the build directory
+|C++ compiler	    | allows building libgpsmm C++ wrapper for client library
+|Qt 4.53+           | allows building libQgpsmm C++ wrapper for client library
+|==============================================================================
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect
 this and use it to discover Garmin USB GPSes, rather than groveling
@@ -58,14 +62,32 @@ source, xslt and docbook xsl style files are used to generate nroff
 -man source from docbook xml.  The following packages are used in this
 process:
 
-libxslt            -> xsltproc is used to build man pages from xml
-docbook-xsl        -> style file for xml to man translation
+|==============================================================================
+|libxslt            | xsltproc is used to build man pages from xml
+|docbook-xsl        | style file for xml to man translation
+|==============================================================================
 
 The build degrades gracefully in the absence of any of these. You should
 be able to tell from configure messages which extensions you will get.
 
 Under Ubuntu and most other Debian-derived distributions, an easy way
 to pick up the prerequisites is: "apt-get build-dep gpsd"
+
+If you are custom-building a Linux kernel for embedded deployment, you
+will need some subset of the following modules:
+
+|============================================================================
+|pl2303     | Prolific Technology, Inc. PL2303 Serial Port
+|ftdi_sio   | FTDI 8U232AM / FT232
+|cypress_m8 | M8/CY7C64013
+|cp210x     | Cygnal Integrated Products devices
+|garmin_gps | Garmin USB mice including GPS-18
+|cdc_am     | USB Communication Device Class Abstract Control Model interface
+|============================================================================
+
+These are listed in rough order of devices covered as of 2011; the
+PL23203 by itself accounts for over 70% of deployed USB mice.  We
+recommend building with pl2303, ftdi_sio, cypress_m8, and cp210x.
 
 == How to build the software from source ==
 
@@ -106,6 +128,15 @@ will install it it in the system directories. "scons uninstall" will
 undo this. Note: because scons is a single-phase build system, this
 may recompile everything. If you want feature-configuration options,
 you need to specify them here.
+
+To enable hotplugging of USB GPSes under Linux, you may do 'scons
+udev-install' to put the appropriate udev rules and wrapper files in
+place.
+
+You will need php and php-gd installed to support the PHP web page.
+included with the distribution. To install it, copy the file
+'gpsd.php' to your HTML document directory. Then see the
+post-installation instructions in INSTALL for how to configure it.
 
 == Optional features ==
 
@@ -211,5 +242,4 @@ at: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502259
 If you have to set use_chrpath=no, be aware that you won't be able 
 to run the binaries in the test directory until you have installed
 the shared libraries somewhere on the search path.
-
 
