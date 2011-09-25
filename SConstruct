@@ -1320,7 +1320,7 @@ env.Alias('testregress', check)
 # None of these productions are fired by default.
 # The content they handle is the GPSD website, not included in release tarballs.
 
-env.Alias('website', Split('''
+env.Alias('website', Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
     www/gpsd.html www/gpsfake.html www/gpsmon.html 
     www/gpspipe.html www/gpsprof.html www/gps.html 
@@ -1336,6 +1336,9 @@ env.Alias('website', Split('''
 
 # asciidoc documents
 if env.WhereIs('asciidoc'):
+    env.Command("www/installation.html",
+                "INSTALL",
+                ["asciidoc -o www/installation.html INSTALL"])
     for stem in ['AIVDM', 'NMEA',
                  'protocol-evolution', 'protocol-transition',
                  'client-howto']:

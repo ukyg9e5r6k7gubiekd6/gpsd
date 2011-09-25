@@ -163,11 +163,10 @@ href="https://www.ohloh.net/p/3944">available at Ohloh</a></p>
 the *BSD family.  Presently Linux and OpenBSD are directly supported.
 We'll support proprietary Unixes if it's not too much work (and it
 usually isn't). Apple's OS X is back in our good books, but it is
-critical that you have all your USB drivers updated. Older drivers
-are buggy and prevent <code>gpsd</code> from being able to read from
-USB-serial devices.</p>
-
-<p>No, we don't support Windows &mdash; get a better operating system.</p>
+critical that you have all your USB drivers updated. Older drivers are
+buggy and prevent <code>gpsd</code> from being able to read from
+USB-serial devices. No, we don't support Windows &mdash; get a better
+operating system.</p>
 
 <p>If you represent a GPS manufacturer interested in qualifying your 
 device for use with Linux and other open-source operating systems, 
@@ -176,8 +175,10 @@ documentation, (2) a few (as in, no more than three) eval units, and (3)
 an engineering contact at your firm.  For more, see our page
 <a href='for-vendors.html'>welcoming vendor cooperation</a>.</p>
 
-<p>See the <a href='faq.html'>FAQ</a> for information on how to report
-bugs.</p>
+<p>There are simple <a href="installation.html">installation
+instructions</a> for people running distributions with binary package
+systems. See the <a href='faq.html'>FAQ</a> for information on how to
+report bugs.</p>
 
 <p>All advertising revenue from this site (on the optimistic
 assumption that we ever see any!) will go to the project's fund for

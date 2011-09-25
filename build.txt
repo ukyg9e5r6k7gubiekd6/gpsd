@@ -30,13 +30,18 @@ this is due to generated code and cannot be fixed.
 You will need scons version 1.2.0 or later to build the code. The
 autotools build from 2.96 and earlier versions has been dropped.
 
+While Python is required to build GPSD from source (the build uses
+some code generators in Python), it is not required to run the service
+daemon.  In particular, you can cross-compile onto an embedded system
+without having to take Python with you.
+
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
 
 |==============================================================================
-|chrpath            | simplifies running the tools from the build directory
 |C++ compiler	    | allows building libgpsmm C++ wrapper for client library
 |Qt 4.53+           | allows building libQgpsmm C++ wrapper for client library
+|chrpath            | simplifies running the tools from the build directory
 |==============================================================================
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect

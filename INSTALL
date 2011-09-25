@@ -3,12 +3,6 @@
 Here are the steps for installing GPSD and verifying its performance.
 They assume you have GPSD available as an installable binary package, 
 
-Whatever distribution you are running, the name of the core GPSD
-package containing the service daemon is almost certainly "gpsd".
-However, many distributions break up GPSD into separate installable
-packages for the core daemon and clients; you should search your
-repository index for anything with gpsd as a prefix.
-
 Instructions for building GPSD from source (including cross-building)
 are in the file "build.txt" in the source distribution.
 
@@ -90,14 +84,17 @@ various additional features have additional prerequisites:
 |pgtk-2/cairo bindings  | the main test client, xgps, needs this
 |==========================================================================
 
-Note that while Python is required to *build* GPSD from source (the
-build uses some code generators in Python), it is not required to run
-the service daemon.  In particular, you can cross-compile onto an
-embedded system without having to take Python with you.
-
 The Python code in GPSD is actually compatible back to Python 2.4 except that
 you need either the json library module from 2.6 or the functionally
 equivalent simplejson backport.
+
+== Install the package(s) ==
+
+Whatever distribution you are running, the name of the core GPSD
+package containing the service daemon is almost certainly "gpsd".
+However, many distributions break up GPSD into separate installable
+packages for the core daemon and clients; you should search your
+repository index for anything with gpsd as a prefix.
 
 == How to test the software ==
 
@@ -135,25 +132,20 @@ http://gpsd.berlios.de/faq.html
 system, you may need to `dpkg-reconfigure -plow gpsd' to enable the
 hotplug magic ("Start gpsd automatically").
 
-2. Check out the list of supported hardware at 
-
-   http://gpsd.berlios.de/hardware.html
-
-If your GPS isn't on the list, please send us information to add a new
-line to the table.  Directions are included on that page.
-
-We can also use updates of the latest version number known to work with
-hardware already supported.
+2. Check out the list of supported hardware at our
+http://gpsd.berlios.de/hardware.html[hardware page]. If your GPS isn't
+on the list, please send us information to add a new line to the
+table.  Directions are included on that page. We can also use updates
+of the latest version number known to work with hardware already
+supported.
 
 3. GPSD includes a PHP script that you can use to generate a PHP
 status page for your GPS if you wish. (It may not be in the core
-package.)  
-
-It will be installed in your HTTP document directory. The first time
-it's invoked, it will generate a file called 'gpsd_config.inc' in that
-directory containing configuration information; edit to taste.  Note
-that for the Google Maps feature work you need to set a valid Google
-API key in gpsd_config.inc.
+package.)  It will be installed in your HTTP document directory. The
+first time it's invoked, it will generate a file called
+'gpsd_config.inc' in that directory containing configuration
+information; edit to taste.  Note that for the Google Maps feature
+work you need to set a valid Google API key in gpsd_config.inc.
 
 4. Note for people using gpsd as time source for ntpd: In case you're
 using dhcp3-client to configure your system, make sure you disable
