@@ -95,9 +95,17 @@ confuses the gcc-3.4.[23] optimizer at -O2 level, making it generate
 incorrect code.
 
 After building, please run 'scons testregress' to test the correctness
-of the build.  If any of the tests fail, you probavly have a toolchain
-issue.  The most common such problem is issues with strict C99 conformance
-in floating-point libraries.
+of the build.  It is not necessary to install first, but you do need
+to have "." in your $PATH to run regressions uninstalled.  Python is
+required for regression tests. If any of the tests fail, you probavly
+have a toolchain issue.  The most common such problem is issues with
+strict C99 conformance in floating-point libraries.
+
+Once you have verified that the code is working, "scons install" 
+will install it it in the system directories. "scons uninstall" will
+undo this. Note: because scons is a single-phase build system, this
+may recompile everything. If you want feature-configuration options,
+you need to specify them here.
 
 == Optional features ==
 

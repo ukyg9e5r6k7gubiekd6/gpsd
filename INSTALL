@@ -90,7 +90,7 @@ DBUS                   -> gpsd will issue DBUS notifications
 ncurses                -> a test client and the GPS monitor depend on this
 libusb-1.0.x or later  -> better USB device discovery
 Qt + qmake             -> libQgpsmm depends on this
-python2.4+             -> required for various clients and utilities
+python2.6+             -> required for various clients and utilities
 pgtk-2/cairo bindings  -> the main test client, xgps, needs this
 
 Note that while Python is required to *build* GPSD from source (the
@@ -98,16 +98,16 @@ build uses some code generators in Python), it is not required to run
 the service daemon.  In particular, you can cross-compile onto an
 embedded system without having to take Python with you.
 
-For a full build, including the Python utilities and test clients, you
-will need Python 2.6 or 2.4+ & simplejson.  The Python code in GPSD is
-2.4-compatible except that you need either the json library module
-from 2.6 or the functionally equivalent simplejson backport.  
+The Python code in GPSD is actually compatible back to Python 2.4 except that
+you need either the json library module from 2.6 or the functionally
+equivalent simplejson backport.
 
 == Building and installing the software ==
 
-If you are have GPSD available as a binary package, its name is almost 
-certainly "gpsd"; simply hand that to your installer and go to the
-next step.
+If you have GPSD available as a binary package, its name is almost
+certainly "gpsd".  However, many distributions break up GPSD into
+separate installable packages for the core daemon and clients; you
+should search your repository index for anything with gpsd as a prefix.
 
 Instructions for building from source are in the file "build.txt".
 
@@ -122,21 +122,17 @@ Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
 
 3. Type '?WATCH={"enable":true,"json"};' to start raw and
 watcher modes.  You should see lines beginning with '{' that are
-JSON objects representing reports from your GPS; these are packet
-translations in GPSD protocol.
+JSON objects representing reports from your GPS; these are reports
+in GPSD protocol.
 
 4. Start the xgps client.  Calling it with no arguments should do the right 
 thing.  You should see a GUI panel with position/velocity-time information,
 and a satellite display.  The displays won't look very interesting until 
 the GPS acquires satellite lock.
 
-5. Now that you've verified that the code is working, "scons install" 
-will install it it in the system directories. "scons uninstall" will
-undo this. Note: because scons is a single-phase build system, this
-may recompile everything. If you want feature-configuration options,
-you need to specify them here.
-
-(You won't need to "scons install" if you installed from a binary package.)
+5. Have patience.  If you are cold-starting a new GPS, it may take
+15-20 minutes after it gets a skyview for it to download an ephemeris
+and begin delivering fixes.
 
 6. To enable hotplugging of USB GPSes under Linux, do a 'scons udev-install' or
 equivalent to put the appropriate udev rules and wrapper files in place.
@@ -159,19 +155,12 @@ file called 'gpsd_config.inc' containing configuration information;
 edit to taste.  Note that for the Google Maps feature work you need
 to set a valid Google API key in your config file.
 
-9. There are regression tests to verify proper operation of gpsd, and
-it can be useful to run these to verify that all is well.  To run the
-regression tests, first build gpsd from sources, and then run "scons
-check".  It is not necessary to install first, but you do need
-to have "." in your $PATH to run regressions uninstalled.  Python is
-required for regression tests.
-
-10. If you installed from a .deb under Debian or a Debian-derived 
+9. If you installed from a .deb under Debian or a Debian-derived 
 system, you may need to `dpkg-reconfigure -plow gpsd' to enable the
 hotplug magic ("Start gpsd automatically").
 
-11. Note for people using gpsd as time source for ntpd: In case you're
+10. Note for people using gpsd as time source for ntpd: In case you're
 using dhcp3-client to configure your system, make sure you disable
-/etc/dhcp3/dhclient-exit-hooks.d/ntp as dhclient would restart
+/etc/dhcp3/dhclient-exit-hooks.d/ntp, as dhclient would restart
 ntpd with an automatically created ntp.conf otherwise - and gpsd
-would not be ablt to talk with ntpd anymore.
+would not be able to talk with ntpd anymore.
