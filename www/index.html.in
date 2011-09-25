@@ -132,7 +132,8 @@ href="http://sourceforge.net/projects/opencpn/">opencpn</a>, <a
 href="http://icculus.org/obdgpslogger/">obdgpslogger</a>, <a 
 href="http://www.virtualroadside.com/geoHist/">geohist</a>, <a 
 href="http://wiki.openstreetmap.org/wiki/JOSM/Plugins/LiveGPS">LiveGPS</a>, <a
-href="http://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>,
+href="http://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>, <a
+href="http://www.qlandkarte.org/">qlandkartegt</a>,
 and <a href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>.</p>
 
 <p>Under Linux, <code>gpsd</code> normally runs with zero

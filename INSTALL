@@ -90,6 +90,14 @@ equivalent simplejson backport.
 
 == Install the package(s) ==
 
+Up-to-date gpsd packages are generally available for Linux
+distributions including Debian and derivatives (including Ubuntu and
+Mint), Fedora and derivatives (including CentOS), openSUSE, PCLinuxOS,
+Mageia, and Slackware.  In the embedded space, CeroWRT carries
+GPSD. The GPSD package in the FreeBSD ports tree is also reliably up
+to date.  Even if your distribution is not on this list, it is quite
+likely GPSD has already been packaged for it.
+
 Whatever distribution you are running, the name of the core GPSD
 package containing the service daemon is almost certainly "gpsd".
 However, many distributions break up GPSD into separate installable
