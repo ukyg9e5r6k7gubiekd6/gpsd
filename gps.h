@@ -1754,6 +1754,8 @@ extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 extern void gps_enable_debug(int, FILE *);
 extern /*@observer@*/const char *gps_maskdump(gps_mask_t);
 
+extern int gps_dbus_open(void (*)(struct gps_data_t *), struct gps_data_t *);
+
 extern double safe_atof(const char *);
 extern time_t mkgmtime(register struct tm *);
 extern timestamp_t timestamp(void);

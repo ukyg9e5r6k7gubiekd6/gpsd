@@ -570,6 +570,7 @@ libgps_sources = [
     "hex.c",
     "json.c",
     "libgps_core.c",
+    "libgps_dbus.c",
     "libgps_json.c",
     "libgps_shm.c",
     "libgps_sock.c",
@@ -716,7 +717,7 @@ libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
-                          version=libversion, parse_flags= ["-lm"])
+                          version=libversion, parse_flags= ["-lm"] + dbus_recv_libs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
@@ -806,7 +807,7 @@ env.Depends(gpsmon, [compiled_gpsdlib, compiled_gpslib])
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
 env.Depends(gpspipe, compiled_gpslib)
 
-gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], parse_flags=gpslibs+dbus_recv_libs)
+gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], parse_flags=gpslibs)
 env.Depends(gpxlogger, compiled_gpslib)
 
 lcdgps = env.Program('lcdgps', ['lcdgps.c'], parse_flags=gpslibs)

@@ -189,103 +189,10 @@ static void quit_handler(int signum)
  *
  **************************************************************************/
 
-#include <glib.h>
-#include <dbus/dbus.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#include <dbus/dbus-glib.h>
-
-#include <glib/gprintf.h>
-
-DBusConnection *connection;
-
-static char gpsd_devname[BUFSIZ];
-
-static DBusHandlerResult handle_gps_fix(DBusMessage * message)
-{
-    DBusError error;
-    /* this packet format was designed before we split eph */
-    double eph;
-
-    dbus_error_init(&error);
-
-    dbus_message_get_args(message,
-			  &error,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.time,
-			  DBUS_TYPE_INT32, &gpsdata.fix.mode,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.ept,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.latitude,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.longitude,
-			  DBUS_TYPE_DOUBLE, &eph,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.altitude,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.epv,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.track,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.epd,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.speed,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.eps,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.climb,
-			  DBUS_TYPE_DOUBLE, &gpsdata.fix.epc,
-			  DBUS_TYPE_STRING, &gpsd_devname, DBUS_TYPE_INVALID);
-
-    if (gpsdata.fix.mode > MODE_NO_FIX )
-	gpsdata.status = STATUS_FIX;
-    else
-	gpsdata.status = STATUS_NO_FIX;
-
-    conditionally_log_fix(&gpsdata);
-    return DBUS_HANDLER_RESULT_HANDLED;
-}
-
-/*
- * Message dispatching function
- *
- */
-static DBusHandlerResult signal_handler(DBusConnection * connection,
-					DBusMessage * message)
-{
-    /* dummy, need to use the variable for some reason */
-    connection = NULL;
-
-    if (dbus_message_is_signal(message, "org.gpsd", "fix"))
-	return handle_gps_fix(message);
-    /*
-     * ignore all other messages
-     */
-
-    return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
-}
-
 static int dbus_mainloop(void)
 {
-    GMainLoop *mainloop;
-    DBusError error;
-
-    mainloop = g_main_loop_new(NULL, FALSE);
-
-    dbus_error_init(&error);
-    connection = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
-    if (dbus_error_is_set(&error)) {
-	syslog(LOG_CRIT, "%s: %s", error.name, error.message);
-	return 3;
-    }
-
-    dbus_bus_add_match(connection, "type='signal'", &error);
-    if (dbus_error_is_set(&error)) {
-	syslog(LOG_CRIT, "unable to add match for signals %s: %s", error.name,
-	       error.message);
-	return 4;
-    }
-
-    if (!dbus_connection_add_filter
-	(connection, (DBusHandleMessageFunction) signal_handler, NULL,
-	 NULL)) {
-	syslog(LOG_CRIT, "unable to register filter with the connection");
-	return 5;
-    }
-
-    dbus_connection_setup_with_g_main(connection, NULL);
-
     print_gpx_header();
-    g_main_loop_run(mainloop);
+    gps_dbus_open(conditionally_log_fix, &gpsdata);
     return 0;
 }
 
