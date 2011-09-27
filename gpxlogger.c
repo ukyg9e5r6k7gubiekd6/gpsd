@@ -231,6 +231,7 @@ static int socket_mainloop(void)
 	    conditionally_log_fix(&gpsdata);
 	}
     }
+    print_gpx_footer();
     (void)gps_close(&gpsdata);
     return 0;
 }
@@ -264,6 +265,7 @@ static int shm_mainloop(void)
 	if (status > 0)
 	    conditionally_log_fix(&gpsdata);
     }
+    print_gpx_footer();
     (void)gps_close(&gpsdata);
     return 0;
 }
