@@ -127,8 +127,7 @@ int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout,
 	    if ((*hook)(gpsdata, false) != 0)
 		break;
 	} else {
-	    (void)gps_shm_read(gpsdata);
-	    if ((*hook)(gpsdata, true) != 0)
+	    if (gps_shm_read(gpsdata) == -1 && (*hook)(gpsdata, true) != 0)
 		break;
 	}
     }

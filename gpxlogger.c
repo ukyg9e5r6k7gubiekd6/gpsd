@@ -230,6 +230,7 @@ static int socket_mainloop(void)
     print_gpx_header();
     gps_sock_mainloop(&gpsdata, 5000000, conditionally_log_fix);
     print_gpx_footer();
+    (void)gps_sock_close(&gpsdata);
     return 0;
 }
 /*@+mustfreefresh +compdestroy@*/
@@ -254,16 +255,9 @@ static int shm_mainloop(void)
     }
 
     print_gpx_header();
-    for (;;) {
-	status = gps_read(&gpsdata);
-
-	if (status == -1)
-	    break;
-	if (status > 0)
-	    conditionally_log_fix(&gpsdata, true);
-    }
+    gps_shm_mainloop(&gpsdata, 0, conditionally_log_fix);
     print_gpx_footer();
-    (void)gps_close(&gpsdata);
+    (void)gps_shm_close(&gpsdata);
     return 0;
 }
 

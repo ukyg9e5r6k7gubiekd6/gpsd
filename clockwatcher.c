@@ -43,9 +43,11 @@ static time_t timeout;
 static int debug;
 #endif /* CLIENTDEBUG_ENABLE */
 
-static void conditionally_log_fix(struct gps_data_t *gpsdata UNUSED)
+static int conditionally_log_fix(struct gps_data_t *gpsdata UNUSED, 
+				 bool fix UNUSED)
 {
     /* time logging goes here */
+    return 0;
 }
 
 static void quit_handler(int signum)
@@ -97,16 +99,7 @@ static int socket_mainloop(void)
     if (source.device != NULL)
 	flags |= WATCH_DEVICE;
     (void)gps_stream(&gpsdata, flags, source.device);
-
-    for (;;) {
-	if (!gps_waiting(&gpsdata, 5000000)) {
-	    (void)fprintf(stderr, "%s: error while waiting\n", progname);
-	    break;
-	} else {
-	    (void)gps_read(&gpsdata);
-	    conditionally_log_fix(&gpsdata);
-	}
-    }
+    gps_sock_mainloop(&gpsdata, 5000000, conditionally_log_fix);
     (void)gps_close(&gpsdata);
     return 0;
 }
@@ -131,14 +124,7 @@ static int shm_mainloop(void)
 	return 1;
     }
 
-    for (;;) {
-	status = gps_read(&gpsdata);
-
-	if (status == -1)
-	    break;
-	if (status > 0)
-	    conditionally_log_fix(&gpsdata);
-    }
+    gps_shm_mainloop(&gpsdata, 0, conditionally_log_fix);
     (void)gps_close(&gpsdata);
     return 0;
 }

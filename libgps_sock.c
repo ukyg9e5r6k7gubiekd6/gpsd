@@ -574,12 +574,10 @@ int gps_sock_mainloop(struct gps_data_t *gpsdata, int timeout,
 	    if ((*hook)(gpsdata, false) != 0)
 		break;
 	} else {
-	    (void)gps_sock_read(gpsdata);
-	    if ((*hook)(gpsdata, true) != 0)
+	    if (gps_sock_read(gpsdata) == -1 || (*hook)(gpsdata, true) != 0)
 		break;
 	}
     }
-    (void)gps_close(gpsdata);
     return 0;
 }
 
