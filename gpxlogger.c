@@ -193,10 +193,9 @@ static int dbus_mainloop(void)
 {
     int s;
 
-    print_gpx_header();
     if ((s = gps_dbus_open(&gpsdata)) == 0) {
-	gps_dbus_stream(&gpsdata, 0, conditionally_log_fix);
-	gps_dbus_mainloop();
+	print_gpx_header();
+	gps_dbus_mainloop(&gpsdata, 0, conditionally_log_fix);
     }
     return 0;
 }

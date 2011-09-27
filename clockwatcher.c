@@ -68,8 +68,7 @@ static int dbus_mainloop(void)
 {
     int s;
     if ((s = gps_dbus_open(&gpsdata)) == 0) {
-	gps_dbus_stream(&gpsdata, 0, conditionally_log_fix);
-	gps_dbus_mainloop();
+	gps_dbus_mainloop(&gpsdata, 0, conditionally_log_fix);
     }
     return s;
 }

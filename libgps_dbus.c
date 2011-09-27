@@ -127,23 +127,19 @@ int gps_dbus_open(struct gps_data_t *gpsdata)
     return 0;
 }
 
-int gps_dbus_stream(struct gps_data_t *unused UNUSED, 
-		    unsigned int flags UNUSED,
-		    /*@null@*/ void *handler)
-{
-    /* must refer to the static context here */
-    PRIVATE(share_gpsdata)->handler = (void (*)(struct gps_data_t *))handler;
-    return 0;
-}
-
-void gps_dbus_mainloop(void)
+int gps_dbus_mainloop(struct gps_data_t *gpsdata,
+		       int timeout UNUSED,
+		       void (*hook)(struct gps_data_t *))
 /* run a DBUS main loop with a specified handler */
 {
     GMainLoop *mainloop;
 
+    share_gpsdata = gpsdata;
+    PRIVATE(share_gpsdata)->handler = (void (*)(struct gps_data_t *))hook;
     mainloop = g_main_loop_new(NULL, FALSE);
     dbus_connection_setup_with_g_main(connection, NULL);
     g_main_loop_run(mainloop);
+    return 0;
 }
 
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */

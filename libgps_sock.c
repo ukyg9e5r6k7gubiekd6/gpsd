@@ -565,6 +565,22 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
     }
 }
 
+int gps_sock_mainloop(struct gps_data_t *gpsdata, int timeout, 
+			 void (*hook)(struct gps_data_t *gpsdata))
+/* run a socket main loop with a specified handler */
+{
+    for (;;) {
+	if (!gps_waiting(gpsdata, timeout)) {
+	    return -1;
+	} else {
+	    (void)gps_read(gpsdata);
+	    (*hook)(gpsdata);
+	}
+    }
+    (void)gps_close(gpsdata);
+    return 0;
+}
+
 #endif /* SOCKET_EXPORT_ENABLE */
 
 /* end */
