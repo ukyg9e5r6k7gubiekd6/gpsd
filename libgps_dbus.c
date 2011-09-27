@@ -100,8 +100,6 @@ int gps_dbus_open(void (*handler)(struct gps_data_t *), struct gps_data_t *gpsda
 	return -1;
     PRIVATE(gpsdata)->handler = handler;
 
-    mainloop = g_main_loop_new(NULL, FALSE);
-
     dbus_error_init(&error);
     connection = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
     if (dbus_error_is_set(&error)) {
@@ -123,8 +121,9 @@ int gps_dbus_open(void (*handler)(struct gps_data_t *), struct gps_data_t *gpsda
 	return 5;
     }
 
+    /* This probably needs to be factored out */
+    mainloop = g_main_loop_new(NULL, FALSE);
     dbus_connection_setup_with_g_main(connection, NULL);
-
     g_main_loop_run(mainloop);
     return 0;
 }

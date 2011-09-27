@@ -66,8 +66,7 @@ static void quit_handler(int signum)
 
 static int dbus_mainloop(void)
 {
-    gps_dbus_open(conditionally_log_fix, &gpsdata);
-    return 0;
+    return gps_dbus_open(conditionally_log_fix, &gpsdata);;
 }
 
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
@@ -104,7 +103,6 @@ static int socket_mainloop(void)
 	    conditionally_log_fix(&gpsdata);
 	}
     }
-    print_gpx_footer();
     (void)gps_close(&gpsdata);
     return 0;
 }
@@ -137,7 +135,6 @@ static int shm_mainloop(void)
 	if (status > 0)
 	    conditionally_log_fix(&gpsdata);
     }
-    print_gpx_footer();
     (void)gps_close(&gpsdata);
     return 0;
 }
