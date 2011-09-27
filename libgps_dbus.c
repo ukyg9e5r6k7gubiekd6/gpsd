@@ -128,8 +128,8 @@ int gps_dbus_open(struct gps_data_t *gpsdata)
 }
 
 int gps_dbus_mainloop(struct gps_data_t *gpsdata,
-		       int timeout UNUSED,
-		       void (*hook)(struct gps_data_t *))
+		      int timeout UNUSED,
+		      int (*hook)(struct gps_data_t *, bool))
 /* run a DBUS main loop with a specified handler */
 {
     GMainLoop *mainloop;

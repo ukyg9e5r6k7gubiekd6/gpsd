@@ -173,6 +173,32 @@ int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
     return status;
 }
 
+int gps_mainloop(struct gps_data_t *gpsdata, int timeout, 
+		 int (*hook)(struct gps_data_t *gpsdata, bool))
+/* run a socket main loop with a specified handler */
+{
+    int status;
+
+    libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() begins\n"));
+
+    /*@ -usedef -compdef -uniondef @*/
+#ifdef SHM_EXPORT_ENABLE
+    if ((intptr_t)(gpsdata->gps_fd) == -1) {
+	status = gps_shm_mainloop(gpsdata, timeout, hook);
+    }
+#endif /* SHM_EXPORT_ENABLE */
+
+#ifdef SOCKET_EXPORT_ENABLE
+    if (status == -1) {
+        status = gps_sock_mainloop(gpsdata, timeout, hook);
+    }
+#endif /* SOCKET_EXPORT_ENABLE */
+    /*@ +usedef +compdef +uniondef @*/
+
+    libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() -> %d\n"));
+    return status;
+}
+
 const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 /* return the contents of the client data buffer */
 {
