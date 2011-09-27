@@ -66,7 +66,12 @@ static void quit_handler(int signum)
 
 static int dbus_mainloop(void)
 {
-    return gps_dbus_open(conditionally_log_fix, &gpsdata);;
+    int s;
+    if ((s = gps_dbus_open(&gpsdata)) == 0) {
+	gps_dbus_stream(&gpsdata, 0, conditionally_log_fix);
+	gps_dbus_mainloop();
+    }
+    return s;
 }
 
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
@@ -148,8 +153,7 @@ static int shm_mainloop(void)
  *
  **************************************************************************/
 
-struct method_t
-{
+struct method_t{
     const char *name;
     int (*method)(void);
     const char *description;

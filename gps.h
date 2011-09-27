@@ -1742,9 +1742,13 @@ extern int gps_sock_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
 extern const char /*@observer@*/ *gps_sock_data(const struct gps_data_t *);
 extern void gps_shm_close(struct gps_data_t *);
 
-extern void libgps_trace(int errlevel, const char *, ...);
+extern int gps_dbus_open(struct gps_data_t *);
+extern int gps_dbus_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
+extern void gps_dbus_mainloop(void);
 
 /* dependencies on struct gpsdata_t end hrere */
+
+extern void libgps_trace(int errlevel, const char *, ...);
 
 extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
 extern void gps_clear_dop( /*@out@*/ struct dop_t *);
@@ -1754,7 +1758,6 @@ extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 extern void gps_enable_debug(int, FILE *);
 extern /*@observer@*/const char *gps_maskdump(gps_mask_t);
 
-extern int gps_dbus_open(void (*)(struct gps_data_t *), struct gps_data_t *);
 
 extern double safe_atof(const char *);
 extern time_t mkgmtime(register struct tm *);

@@ -191,8 +191,14 @@ static void quit_handler(int signum)
 
 static int dbus_mainloop(void)
 {
+    int s;
+
     print_gpx_header();
-    return gps_dbus_open(conditionally_log_fix, &gpsdata);
+    if ((s = gps_dbus_open(&gpsdata)) == 0) {
+	gps_dbus_stream(&gpsdata, 0, conditionally_log_fix);
+	gps_dbus_mainloop();
+    }
+    return 0;
 }
 
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
