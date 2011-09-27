@@ -95,7 +95,6 @@ int gps_dbus_open(void (*handler)(struct gps_data_t *), struct gps_data_t *gpsda
     GMainLoop *mainloop;
     DBusError error;
 
-    /* set up for line-buffered I/O over the daemon socket */
     gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
     if (gpsdata->privdata == NULL)
 	return -1;
