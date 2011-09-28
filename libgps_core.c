@@ -88,6 +88,15 @@ int gps_open(/*@null@*/const char *host,
     }
 #endif /* SHM_EXPORT_ENABLE */
 
+#ifdef DBUS_EXPORT_ENABLE
+    if (host != NULL && strcmp(host, GPSD_DBUS_EXPORT) == 0) {
+	status = gps_dbus_open(gpsdata);
+	if (status != 0)
+	    /* FIXME: it would be better not to throw away information here */
+	    status = DBUS_FAILURE;
+    }
+#endif /* DBUS_EXPORT_ENABLE */
+
 #ifdef SOCKET_EXPORT_ENABLE
     if (status == -1) {
         status = gps_sock_open(host, port, gpsdata);
@@ -183,7 +192,6 @@ int gps_send(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, const char *fmt CO
     }
     return status;
 }
-
 int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, 
 	unsigned int flags CONDITIONALLY_UNUSED,
 	/*@null@*/ void *d CONDITIONALLY_UNUSED)
@@ -242,6 +250,39 @@ bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int time
     return waiting;
 }
 
+int gps_mainloop(struct gps_data_t *gpsdata, int timeout, 
+		 void (*hook)(struct gps_data_t *gpsdata))
+{
+    int status = -1;
+
+    libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() begins\n"));
+
+    /*@ -usedef -compdef -uniondef @*/
+    switch (PRIVATE(gpsdata)->export_type) {
+#ifdef SHM_EXPORT_ENABLE
+    case shm:
+	status = gps_shm_mainloop(gpsdata, timeout, hook);
+	break;
+#endif /* SHM_EXPORT_ENABLE */
+#ifdef SOCKET_EXPORT_ENABLE
+    case sockets:
+	status = gps_sock_mainloop(gpsdata, timeout, hook);
+	break;
+#endif /* SOCKET_EXPORT_ENABLE */
+#ifdef DBUS_EXPORT_ENABLE
+    case dbus:
+	status = gps_dbus_mainloop(gpsdata, timeout, hook);
+	break;
+#endif /* DBUS_EXPORT_ENABLE */
+    }
+    /*@ +usedef +compdef +uniondef @*/
+
+    libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() -> %d (%s)\n", 
+			status, gps_maskdump(gpsdata->set)));
+
+    return status;
+}
+
 extern const char /*@observer@*/ *gps_errstr(const int err)
 {
     /* 
@@ -255,6 +296,10 @@ extern const char /*@observer@*/ *gps_errstr(const int err)
     else if (err == SHM_NOATTACH)
 	return "attach failed for unknown reason";
 #endif /* SHM_EXPORT_ENABLE */
+#ifdef DBUS_EXPORT_ENABLE
+    if (err == DBUS_FAILURE)
+	return "DBUS initialization failure";
+#endif /* DBUS_EXPORT_ENABLE */
     return netlib_errstr(err);
 #else
     static char buf[32];

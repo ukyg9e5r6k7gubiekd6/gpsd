@@ -1727,6 +1727,8 @@ extern int gps_read(/*@out@*/struct gps_data_t *);
 extern int gps_unpack(char *, struct gps_data_t *);
 extern bool gps_waiting(const struct gps_data_t *, int);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
+extern int gps_mainloop(struct gps_data_t *, int,
+			void (*)(struct gps_data_t *));
 extern const char /*@observer@*/ *gps_data(const struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
@@ -1786,12 +1788,14 @@ extern double wgs84_separation(double, double);
 #define NL_NOCONNECT	-6	/* can't connect to host/socket pair */
 #define SHM_NOSHARED	-7	/* shared-memory segment not available */
 #define SHM_NOATTACH	-8	/* shared-memory attach failed */
+#define DBUS_FAILURE	-9	/* DBUS initialization failure */
 
 #define DEFAULT_GPSD_PORT	"2947"	/* IANA assignment */
 #define DEFAULT_RTCM_PORT	"2101"	/* IANA assignment */
 
 /* special host values for non-socket exports */ 
 #define GPSD_SHARED_MEMORY	"shared memory"
+#define GPSD_DBUS_EXPORT	"DBUS export"
 
 /*
  * Platform-specific declarations
