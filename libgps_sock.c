@@ -39,6 +39,7 @@
 extern char *strtok_r(char *, const char *, char **);
 #endif /* S_SPLINT_S */
 
+/*@-matchfields@*/
 struct privdata_t
 {
     enum export_t export_type;
@@ -50,6 +51,7 @@ struct privdata_t
     int waitcount;
 #endif /* LIBGPS_DEBUG */
 };
+/*@+matchfields@*/
 #define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
 /*@-branchstate@*/

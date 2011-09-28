@@ -1729,7 +1729,7 @@ extern bool gps_waiting(const struct gps_data_t *, int);
 extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
 extern int gps_mainloop(struct gps_data_t *, int,
 			void (*)(struct gps_data_t *));
-extern const char /*@observer@*/ *gps_data(const struct gps_data_t *);
+extern const char /*@null observer@*/ *gps_data(const struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
 /* dependencies on struct gpsdata_t end hrere */

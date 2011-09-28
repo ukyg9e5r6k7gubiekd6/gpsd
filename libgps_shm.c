@@ -27,11 +27,13 @@ PERMISSIONS
 
 #ifdef SHM_EXPORT_ENABLE
 
+/*@-matchfields@*/
 struct privdata_t
 {
     enum export_t export_type;
     void *shmseg;
 };
+/*@+matchfields@*/
 #define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
 
 

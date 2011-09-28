@@ -74,7 +74,7 @@ int gps_open(/*@null@*/const char *host,
 {
     int status = -1;
 
-    /*@ -branchstate @*/
+    /*@ -branchstate -compdef @*/
     if (!gpsdata)
 	return -1;
 
@@ -90,7 +90,7 @@ int gps_open(/*@null@*/const char *host,
 
 #ifdef DBUS_EXPORT_ENABLE
     if (host != NULL && strcmp(host, GPSD_DBUS_EXPORT) == 0) {
-	status = gps_dbus_open(gpsdata);
+	/*@i@*/status = gps_dbus_open(gpsdata);
 	if (status != 0)
 	    /* FIXME: it would be better not to throw away information here */
 	    status = DBUS_FAILURE;
@@ -108,7 +108,7 @@ int gps_open(/*@null@*/const char *host,
     gps_clear_fix(&gpsdata->fix);
 
     return status;
-    /*@ +branchstate @*/
+    /*@ +branchstate +compdef @*/
 }
 
 int gps_close(struct gps_data_t *gpsdata)
@@ -159,11 +159,11 @@ int gps_read(struct gps_data_t *gpsdata)
     default:
 	status = 0;
     }
-    /*@ +usedef +compdef +uniondef @*/
 
     libgps_debug_trace((DEBUG_CALLS, "gps_read() -> %d (%s)\n", 
 			status, gps_maskdump(gpsdata->set)));
 
+    /*@ +usedef +compdef +uniondef @*/
     return status;
 }
 
@@ -212,7 +212,8 @@ int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
     return status;
 }
 
-const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
+/*@-observertrans -dependenttrans@*/
+const char /*@null observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 /* return the contents of the client data buffer */
 {
     const char *bufp = NULL;
@@ -230,6 +231,7 @@ const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONAL
 
     return bufp;
 }
+/*@+observertrans +dependenttrans@*/
 
 bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int timeout CONDITIONALLY_UNUSED)
 /* is there input waiting from the GPS? */

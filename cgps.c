@@ -474,8 +474,9 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 }
 #endif /* TRUENORTH */
 
-/* This gets called once for each new GPS sentence. */
+/*@-mustfreefresh@*/
 static void update_gps_panel(struct gps_data_t *gpsdata)
+/* This gets called once for each new GPS sentence. */
 {
     int i, j, n;
     int newstate;
@@ -704,8 +705,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     }
 
     /* Be quiet if the user requests silence. */
-    if (!silent_flag && raw_flag) {
-	(void)waddstr(messages, gps_data(gpsdata));
+   if (!silent_flag && raw_flag && (s = gps_data(gpsdata)) != NULL) {
+	(void)waddstr(messages, s);
     }
 
     /* Reset the status_timer if the state has changed. */
@@ -720,6 +721,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	(void)wrefresh(messages);
     }
 }
+/*@+mustfreefresh@*/
 
 static void usage(char *prog)
 {
