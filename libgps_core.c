@@ -18,6 +18,17 @@
 #include "libgps.h"
 #include "gps_json.h"
 
+/*
+ * All privdata structures have export as a first member, 
+ * and can have others that the individual method libraries
+ * know about but this one doesn't.
+ */
+struct privdata_t
+{
+    enum export_t export;
+};
+#define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
+
 #ifdef LIBGPS_DEBUG
 int libgps_debuglevel = 0;
 

@@ -41,6 +41,7 @@ extern char *strtok_r(char *, const char *, char **);
 
 struct privdata_t
 {
+    enum export_t export;
     bool newstyle;
     /* data buffered from the last read */
     ssize_t waiting;
@@ -85,6 +86,7 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
     gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
     if (gpsdata->privdata == NULL)
 	return -1;
+    PRIVATE(gpsdata)->export = sockets;
     PRIVATE(gpsdata)->newstyle = false;
     PRIVATE(gpsdata)->waiting = 0;
 

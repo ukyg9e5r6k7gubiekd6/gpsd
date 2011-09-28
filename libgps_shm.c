@@ -17,6 +17,7 @@ PERMISSIONS
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -25,6 +26,14 @@ PERMISSIONS
 #include "libgps.h"
 
 #ifdef SHM_EXPORT_ENABLE
+
+struct privdata_t
+{
+    enum export_t export;
+    void *shmseg;
+};
+#define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
+
 
 int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 /* open a shared-memory connection to the daemon */
@@ -39,7 +48,11 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 	/* daemon isn't running or failed to create shared segment */
 	return -1;
     } 
-    gpsdata->privdata = shmat(shmid, 0, 0);
+    gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
+    if (gpsdata->privdata == NULL)
+	return -1;
+
+    PRIVATE(gpsdata)->shmseg = shmat(shmid, 0, 0);
     if ((int)(long)gpsdata->privdata == -1) {
 	/* attach failed for sume unknown reason */
 	return -2;
@@ -49,6 +62,7 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 #else
     gpsdata->gps_fd = (void *)(intptr_t)-1;
 #endif /* USE_QT */
+    PRIVATE(gpsdata)->export = shm;
     return 0;
 }
 
@@ -62,7 +76,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
     {
 	int before, after;
 	void *private_save = gpsdata->privdata;
-	volatile struct shmexport_t *shared = (struct shmexport_t *)gpsdata->privdata;
+	volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
 	struct gps_data_t noclobber;
 
 	/*
@@ -106,8 +120,8 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 
 void gps_shm_close(struct gps_data_t *gpsdata)
 {
-    if (gpsdata->privdata != NULL)
-	(void)shmdt((const void *)gpsdata->privdata);
+    if (PRIVATE(gpsdata)->shmseg != NULL)
+	(void)shmdt((const void *)PRIVATE(gpsdata)->shmseg);
 }
 
 int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout UNUSED, 

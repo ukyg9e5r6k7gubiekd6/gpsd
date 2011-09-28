@@ -6,6 +6,13 @@
 #ifndef _GPSD_LIBGPS_H_
 #define _GPSD_LIBGPS_H_
 
+/* 
+ * first member of each kind of privdata structure must be named 
+ * 'export' and must be of this time.  It's how we do runtime 
+ * dispatch to the different transports.
+ */
+enum export_t {sockets, shm, dbus};
+
 extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *, 
 		      /*@out@*/struct gps_data_t *);
 extern int gps_sock_close(struct gps_data_t *);

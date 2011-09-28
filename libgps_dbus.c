@@ -20,6 +20,7 @@
 
 struct privdata_t
 {
+    enum export_t export;
     void (*handler)(struct gps_data_t *);
 };
 #define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
@@ -124,6 +125,7 @@ int gps_dbus_open(struct gps_data_t *gpsdata)
 	return 5;
     }
 
+    PRIVATE(gpsdata)->export = dbus;
     share_gpsdata = gpsdata;
     return 0;
 }
