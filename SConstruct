@@ -717,13 +717,15 @@ libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
 compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
-                          version=libversion, parse_flags= ["-lm"] + dbus_recv_libs)
+                          version=libversion,
+                          parse_flags= ["-lm"] + dbus_recv_libs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
-                           version=libversion, parse_flags=usblibs + rtlibs + bluezlibs)
+                           version=libversion,
+                           parse_flags=usblibs + rtlibs + bluezlibs)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
@@ -745,7 +747,9 @@ if qt_env:
             compile_with = qt_env['CC']
             compile_flags = qt_env['CFLAGS']
         qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
-                                       CC=compile_with, CFLAGS=compile_flags))
+                                             CC=compile_with,
+                                             CFLAGS=compile_flags,
+                                             parse_flags=dbus_recv_libs))
     compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libversion)
     libraries.append(compiled_qgpsmmlib)
 
@@ -820,7 +824,7 @@ binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
     binaries += [cgps, gpsmon]
 
-clockwatcher = env.Program('clockwatcher', ['clockwatcher.c'], parse_flags=gpslibs+dbus_recv_libs)
+clockwatcher = env.Program('clockwatcher', ['clockwatcher.c'], parse_flags=gpslibs)
 env.Depends(clockwatcher, compiled_gpslib)
 
 # Test programs

@@ -13,6 +13,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gps.h"
+#include "libgps.h"
 #include "gpsd_config.h"
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
