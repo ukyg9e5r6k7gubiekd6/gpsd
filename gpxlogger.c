@@ -184,36 +184,17 @@ static void quit_handler(int signum)
 }
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-/**************************************************************************
- *
- * Doing it with D-Bus
- *
- **************************************************************************/
-
-static int dbus_mainloop(void)
+static void dbus_init(void)
 {
-    int s;
-
-    if ((s = gps_dbus_open(&gpsdata)) == 0) {
-	print_gpx_header();
-	gps_dbus_mainloop(&gpsdata, 0, conditionally_log_fix);
-	print_gpx_footer();
-    }
-    (void)gps_close(&gpsdata);
-    return 0;
+    if (gps_open(GPSD_DBUS_EXPORT, NULL, &gpsdata) != 0)
+	exit(1);
 }
 
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 
 #ifdef SOCKET_EXPORT_ENABLE
-/**************************************************************************
- *
- * Doing it with sockets
- *
- **************************************************************************/
-
 /*@-mustfreefresh -compdestroy@*/
-static int socket_mainloop(void)
+static void socket_init(void)
 {
     unsigned int flags = WATCH_ENABLE;
 
@@ -227,39 +208,16 @@ static int socket_mainloop(void)
     if (source.device != NULL)
 	flags |= WATCH_DEVICE;
     (void)gps_stream(&gpsdata, flags, source.device);
-
-    print_gpx_header();
-    gps_sock_mainloop(&gpsdata, 5000000, conditionally_log_fix);
-    print_gpx_footer();
-    (void)gps_close(&gpsdata);
-    return 0;
 }
 /*@+mustfreefresh +compdestroy@*/
 #endif /* SOCKET_EXPORT_ENABLE */
 
 #ifdef SHM_EXPORT_ENABLE
-/**************************************************************************
- *
- * Doing it with shared memory
- *
- **************************************************************************/
-
 /*@-mustfreefresh -compdestroy@*/
-static int shm_mainloop(void)
+static void shm_init(void)
 {
-    int status;
-    if ((status = gps_open(GPSD_SHARED_MEMORY, NULL, &gpsdata)) != 0) {
-	(void)fprintf(stderr,
-		      "%s: shm open failed with status %d.\n",
-		      progname, status);
-	return 1;
-    }
-
-    print_gpx_header();
-    (int)gps_shm_mainloop(&gpsdata, 0, conditionally_log_fix);
-    print_gpx_footer();
-    (void)gps_close(&gpsdata);
-    return 0;
+    if (gps_open(GPSD_SHARED_MEMORY, NULL, &gpsdata) != 0)
+	exit(1);
 }
 
 /*@+mustfreefresh +compdestroy@*/
@@ -274,19 +232,19 @@ static int shm_mainloop(void)
 struct method_t
 {
     const char *name;
-    int (*method)(void);
+    void (*method)(void);
     const char *description;
 };
 
 static struct method_t methods[] = {
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-    {"dbus", dbus_mainloop, "DBUS broadcast"},
+    {"dbus", dbus_init, "DBUS broadcast"},
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 #ifdef SHM_EXPORT_ENABLE
-    {"shm", shm_mainloop, "shared memory"},
+    {"shm", shm_init, "shared memory"},
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef SOCKET_EXPORT_ENABLE
-    {"sockets", socket_mainloop, "JSON via sockets"},
+    {"sockets", socket_init, "JSON via sockets"},
 #endif /* SOCKET_EXPORT_ENABLE */
 };
 
@@ -417,13 +375,21 @@ int main(int argc, char **argv)
 
     //syslog (LOG_INFO, "---------- STARTED ----------");
 
+    /* initialize for some export method */
     if (method != NULL) {
-	exit((*method->method)());
+	(*method->method)();
     } else if (NITEMS(methods)) {
-	exit((methods[0].method)());
+	(methods[0].method)();
     } else {
 	(void)fprintf(stderr, "%s: no export methods.\n", progname);
 	exit(1);
     }
+
+    print_gpx_header();
+    (int)gps_mainloop(&gpsdata, 5000000, conditionally_log_fix);
+    print_gpx_footer();
+    (void)gps_close(&gpsdata);
+
+    exit(0);
 }
 /*@+mustfreefresh +globstate@*/
