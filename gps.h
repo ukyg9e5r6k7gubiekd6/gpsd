@@ -1740,6 +1740,8 @@ extern int gps_sock_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
 extern const char /*@observer@*/ *gps_sock_data(const struct gps_data_t *);
 extern int gps_sock_mainloop(struct gps_data_t *, int timeout,
 			      void (*)(struct gps_data_t *));
+extern int gps_shm_mainloop(struct gps_data_t *, int timeout,
+			      void (*)(struct gps_data_t *));
 
 extern int gps_shm_open(/*@out@*/struct gps_data_t *);
 extern void gps_shm_close(struct gps_data_t *);

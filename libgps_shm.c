@@ -109,6 +109,21 @@ void gps_shm_close(struct gps_data_t *gpsdata)
 	(void)shmdt((const void *)gpsdata->privdata);
 }
 
+int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout UNUSED, 
+			 void (*hook)(struct gps_data_t *gpsdata))
+/* run a shm main loop with a specified handler */
+{
+    for (;;) {
+	int status = gps_shm_read(gpsdata);
+
+	if (status == -1)
+	    return -1;
+	if (status > 0)
+	    (*hook)(gpsdata);
+    }
+    return 0;
+}
+
 #endif /* SHM_EXPORT_ENABLE */
 
 /* end */

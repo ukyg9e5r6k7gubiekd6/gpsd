@@ -261,14 +261,7 @@ static int shm_mainloop(void)
     }
 
     print_gpx_header();
-    for (;;) {
-	status = gps_read(&gpsdata);
-
-	if (status == -1)
-	    break;
-	if (status > 0)
-	    conditionally_log_fix(&gpsdata);
-    }
+    gps_shm_mainloop(&gpsdata, 0, conditionally_log_fix);
     print_gpx_footer();
     (void)gps_close(&gpsdata);
     return 0;
