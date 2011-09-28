@@ -183,46 +183,6 @@ static void quit_handler(int signum)
     exit(0);
 }
 
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-static void dbus_init(void)
-{
-    if (gps_open(GPSD_DBUS_EXPORT, NULL, &gpsdata) != 0)
-	exit(1);
-}
-
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
-
-#ifdef SOCKET_EXPORT_ENABLE
-/*@-mustfreefresh -compdestroy@*/
-static void socket_init(void)
-{
-    unsigned int flags = WATCH_ENABLE;
-
-    if (gps_open(source.server, source.port, &gpsdata) != 0) {
-	(void)fprintf(stderr,
-		      "%s: no gpsd running or network error: %d, %s\n",
-		      progname, errno, gps_errstr(errno));
-	exit(1);
-    }
-
-    if (source.device != NULL)
-	flags |= WATCH_DEVICE;
-    (void)gps_stream(&gpsdata, flags, source.device);
-}
-/*@+mustfreefresh +compdestroy@*/
-#endif /* SOCKET_EXPORT_ENABLE */
-
-#ifdef SHM_EXPORT_ENABLE
-/*@-mustfreefresh -compdestroy@*/
-static void shm_init(void)
-{
-    if (gps_open(GPSD_SHARED_MEMORY, NULL, &gpsdata) != 0)
-	exit(1);
-}
-
-/*@+mustfreefresh +compdestroy@*/
-#endif /* SHM_EXPORT_ENABLE */
-
 /**************************************************************************
  *
  * Main sequence
@@ -232,19 +192,19 @@ static void shm_init(void)
 struct method_t
 {
     const char *name;
-    void (*method)(void);
+    /*@null@*/const char *magic;
     const char *description;
 };
 
 static struct method_t methods[] = {
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-    {"dbus", dbus_init, "DBUS broadcast"},
+    {"dbus", GPSD_DBUS_EXPORT, "DBUS broadcast"},
 #endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
 #ifdef SHM_EXPORT_ENABLE
-    {"shm", shm_init, "shared memory"},
+    {"shm", GPSD_SHARED_MEMORY, "shared memory"},
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef SOCKET_EXPORT_ENABLE
-    {"sockets", socket_init, "JSON via sockets"},
+    {"sockets", NULL, "JSON via sockets"},
 #endif /* SOCKET_EXPORT_ENABLE */
 };
 
@@ -258,14 +218,20 @@ static void usage(void)
     exit(1);
 }
 
-/*@-mustfreefresh -globstate@*/
+/*@-mustfreefresh -mustfreeonly -branchstate -globstate@*/
 int main(int argc, char **argv)
 {
     int ch;
     bool daemonize = false;
     struct method_t *mp, *method = NULL;
+    unsigned int flags = WATCH_ENABLE;
 
     progname = argv[0];
+
+    if (NITEMS(methods) == 0) {
+	(void)fprintf(stderr, "%s: no export methods.\n", progname);
+	exit(1);
+    }
 
     logfile = stdout;
     while ((ch = getopt(argc, argv, "dD:e:f:hi:lm:V")) != -1) {
@@ -344,6 +310,13 @@ int main(int argc, char **argv)
 	exit(1);
     }
 
+    if (method == NULL)
+	method = &methods[0];
+    if (method->magic != NULL) {
+	source.server = method->magic;
+	source.port = NULL;
+    }
+
     if (optind < argc) {
 	gpsd_source_spec(argv[optind], &source);
     } else
@@ -376,14 +349,16 @@ int main(int argc, char **argv)
     //syslog (LOG_INFO, "---------- STARTED ----------");
 
     /* initialize for some export method */
-    if (method != NULL) {
-	(*method->method)();
-    } else if (NITEMS(methods)) {
-	(methods[0].method)();
-    } else {
-	(void)fprintf(stderr, "%s: no export methods.\n", progname);
+    if (gps_open(source.server, source.port, &gpsdata) != 0) {
+	(void)fprintf(stderr,
+		      "%s: no gpsd running or network error: %d, %s\n",
+		      progname, errno, gps_errstr(errno));
 	exit(1);
     }
+
+    if (source.device != NULL)
+	flags |= WATCH_DEVICE;
+    (void)gps_stream(&gpsdata, flags, source.device);
 
     print_gpx_header();
     (int)gps_mainloop(&gpsdata, 5000000, conditionally_log_fix);
@@ -392,4 +367,4 @@ int main(int argc, char **argv)
 
     exit(0);
 }
-/*@+mustfreefresh +globstate@*/
+/*@+mustfreefresh +mustfreeonly +branchstate +globstate@*/
