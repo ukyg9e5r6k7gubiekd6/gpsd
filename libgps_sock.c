@@ -578,8 +578,8 @@ int gps_sock_mainloop(struct gps_data_t *gpsdata, int timeout,
 	    (*hook)(gpsdata);
 	}
     }
-    (void)gps_close(gpsdata);
-    return 0;
+    //(void)gps_close(gpsdata);
+    //return 0;
 }
 
 #endif /* SOCKET_EXPORT_ENABLE */

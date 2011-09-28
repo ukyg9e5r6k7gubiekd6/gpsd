@@ -17,6 +17,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gps.h"
+#include "libgps.h" /* TEMPORARY */
 #include "gpsd_config.h"
 #include "gpsdclient.h"
 #include "revision.h"
@@ -261,7 +262,7 @@ static int shm_mainloop(void)
     }
 
     print_gpx_header();
-    gps_shm_mainloop(&gpsdata, 0, conditionally_log_fix);
+    (int)gps_shm_mainloop(&gpsdata, 0, conditionally_log_fix);
     print_gpx_footer();
     (void)gps_close(&gpsdata);
     return 0;

@@ -122,7 +122,7 @@ int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout UNUSED,
 	if (status > 0)
 	    (*hook)(gpsdata);
     }
-    return 0;
+    //return 0;
 }
 
 #endif /* SHM_EXPORT_ENABLE */
