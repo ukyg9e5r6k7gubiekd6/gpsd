@@ -11,7 +11,18 @@
  * 'export_type' and must be of this time.  It's how we do runtime 
  * dispatch to the different transports.
  */
-enum export_t {sockets, shm, dbus};
+enum export_t {
+#ifdef SOCKET_EXPORT_ENABLE
+    sockets,
+#endif /* SOCKET_EXPORT_ENABLE */
+#ifdef SHM_EXPORT_ENABLE
+    shm, 
+#endif /* SHM_EXPORT_ENABLE */
+#ifdef DBUS_EXPORT_ENABLE
+    dbus,
+#endif /* DBUS_EXPORT_ENABLE */
+};
+
 
 extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *, 
 		      /*@out@*/struct gps_data_t *);
