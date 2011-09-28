@@ -13,6 +13,7 @@
 #include <ctype.h>
 
 #include "gpsd.h"  /* could be gps.h if we didn't need splint decorations */
+#include "libgps.h"
 
 #ifdef USE_QT
 #include <QDateTime>

@@ -1730,27 +1730,6 @@ extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
 extern const char /*@observer@*/ *gps_data(const struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
-extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *, 
-		      /*@out@*/struct gps_data_t *);
-extern int gps_sock_close(struct gps_data_t *);
-extern int gps_sock_send(struct gps_data_t *, const char *);
-extern int gps_sock_read(/*@out@*/struct gps_data_t *);
-extern bool gps_sock_waiting(const struct gps_data_t *, int);
-extern int gps_sock_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
-extern const char /*@observer@*/ *gps_sock_data(const struct gps_data_t *);
-extern int gps_sock_mainloop(struct gps_data_t *, int timeout,
-			      void (*)(struct gps_data_t *));
-extern int gps_shm_mainloop(struct gps_data_t *, int timeout,
-			      void (*)(struct gps_data_t *));
-
-extern int gps_shm_open(/*@out@*/struct gps_data_t *);
-extern void gps_shm_close(struct gps_data_t *);
-extern int gps_shm_read(struct gps_data_t *);
-
-extern int gps_dbus_open(struct gps_data_t *);
-extern int gps_dbus_mainloop(struct gps_data_t *, int timeout,
-			      void (*)(struct gps_data_t *));
-
 /* dependencies on struct gpsdata_t end hrere */
 
 extern void libgps_trace(int errlevel, const char *, ...);
@@ -1762,7 +1741,6 @@ extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
 			  /*@ in @*/struct gps_fix_t *);
 extern void gps_enable_debug(int, FILE *);
 extern /*@observer@*/const char *gps_maskdump(gps_mask_t);
-
 
 extern double safe_atof(const char *);
 extern time_t mkgmtime(register struct tm *);
@@ -1835,5 +1813,5 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 }  /* End of the 'extern "C"' block */
 #endif
 
-/* gps.h ends here */
 #endif /* _GPSD_GPS_H_ */
+/* gps.h ends here */

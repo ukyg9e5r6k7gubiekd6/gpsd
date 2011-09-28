@@ -22,6 +22,7 @@ PERMISSIONS
 #include <sys/shm.h>
 
 #include "gpsd.h"
+#include "libgps.h"
 
 #ifdef SHM_EXPORT_ENABLE
 

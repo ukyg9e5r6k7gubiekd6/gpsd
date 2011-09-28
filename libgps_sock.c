@@ -31,6 +31,7 @@
 
 #include "gps.h"
 #include "gpsd.h"
+#include "libgps.h"
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
