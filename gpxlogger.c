@@ -126,7 +126,7 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
     (void)fflush(logfile);
 }
 
-static int conditionally_log_fix(struct gps_data_t *gpsdata, bool fix UNUSED)
+static void conditionally_log_fix(struct gps_data_t *gpsdata)
 {
     static double int_time, old_int_time;
     static double old_lat, old_lon;
@@ -134,14 +134,14 @@ static int conditionally_log_fix(struct gps_data_t *gpsdata, bool fix UNUSED)
 
     int_time = gpsdata->fix.time;
     if ((int_time == old_int_time) || gpsdata->fix.mode < MODE_2D)
-	return 0;
+	return;
 
     /* may not be worth logging if we've moved only a very short distance */ 
     if (minmove>0 && !first && earth_distance(
 					gpsdata->fix.latitude,
 					gpsdata->fix.longitude,
 					old_lat, old_lon) < minmove)
-	return 0;
+	return;
 
     /* 
      * Make new track if the jump in time is above
@@ -170,8 +170,6 @@ static int conditionally_log_fix(struct gps_data_t *gpsdata, bool fix UNUSED)
 	old_lon = gpsdata->fix.longitude;
     }
     print_fix(gpsdata, int_time);
-
-    return 0;
 }
 
 static void quit_handler(int signum)
@@ -228,9 +226,17 @@ static int socket_mainloop(void)
     (void)gps_stream(&gpsdata, flags, source.device);
 
     print_gpx_header();
-    gps_sock_mainloop(&gpsdata, 5000000, conditionally_log_fix);
+    for (;;) {
+	if (!gps_waiting(&gpsdata, 5000000)) {
+	    (void)fprintf(stderr, "%s: error while waiting\n", progname);
+	    break;
+	} else {
+	    (void)gps_read(&gpsdata);
+	    conditionally_log_fix(&gpsdata);
+	}
+    }
     print_gpx_footer();
-    (void)gps_sock_close(&gpsdata);
+    (void)gps_close(&gpsdata);
     return 0;
 }
 /*@+mustfreefresh +compdestroy@*/
@@ -255,9 +261,16 @@ static int shm_mainloop(void)
     }
 
     print_gpx_header();
-    gps_shm_mainloop(&gpsdata, 0, conditionally_log_fix);
+    for (;;) {
+	status = gps_read(&gpsdata);
+
+	if (status == -1)
+	    break;
+	if (status > 0)
+	    conditionally_log_fix(&gpsdata);
+    }
     print_gpx_footer();
-    (void)gps_shm_close(&gpsdata);
+    (void)gps_close(&gpsdata);
     return 0;
 }
 

@@ -566,18 +566,18 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 }
 
 int gps_sock_mainloop(struct gps_data_t *gpsdata, int timeout, 
-		      int (*hook)(struct gps_data_t *gpsdata, bool))
+			 void (*hook)(struct gps_data_t *gpsdata))
 /* run a socket main loop with a specified handler */
 {
     for (;;) {
-	if (!gps_sock_waiting(gpsdata, timeout)) {
-	    if ((*hook)(gpsdata, false) != 0)
-		break;
+	if (!gps_waiting(gpsdata, timeout)) {
+	    return -1;
 	} else {
-	    if (gps_sock_read(gpsdata) == -1 || (*hook)(gpsdata, true) != 0)
-		break;
+	    (void)gps_read(gpsdata);
+	    (*hook)(gpsdata);
 	}
     }
+    (void)gps_close(gpsdata);
     return 0;
 }
 

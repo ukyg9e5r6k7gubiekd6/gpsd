@@ -51,14 +51,6 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
     return 0;
 }
 
-bool gps_shm_waiting(const struct gps_data_t *gpsdata UNUSED, 
-		     int timeout UNUSED)
-/* is there input waiting from the GPS? */
-{
-    /* someday, actually check a timestamp */
-    return true;
-}
-
 int gps_shm_read(struct gps_data_t *gpsdata)
 /* read an update from the shared-memory segment */
 {
@@ -115,23 +107,6 @@ void gps_shm_close(struct gps_data_t *gpsdata)
 {
     if (gpsdata->privdata != NULL)
 	(void)shmdt((const void *)gpsdata->privdata);
-}
-
-
-int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout, 
-		     int (*hook)(struct gps_data_t *gpsdata, bool fix))
-/* run a shm main loop with a specified handler */
-{
-    for (;;) {
-	if (!gps_shm_waiting(gpsdata, timeout)) {
-	    if ((*hook)(gpsdata, false) != 0)
-		break;
-	} else {
-	    if (gps_shm_read(gpsdata) == -1 && (*hook)(gpsdata, true) != 0)
-		break;
-	}
-    }
-    return 0;
 }
 
 #endif /* SHM_EXPORT_ENABLE */
