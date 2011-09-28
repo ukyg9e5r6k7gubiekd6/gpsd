@@ -197,7 +197,9 @@ static int dbus_mainloop(void)
     if ((s = gps_dbus_open(&gpsdata)) == 0) {
 	print_gpx_header();
 	gps_dbus_mainloop(&gpsdata, 0, conditionally_log_fix);
+	print_gpx_footer();
     }
+    (void)gps_close(&gpsdata);
     return 0;
 }
 
@@ -227,15 +229,7 @@ static int socket_mainloop(void)
     (void)gps_stream(&gpsdata, flags, source.device);
 
     print_gpx_header();
-    for (;;) {
-	if (!gps_waiting(&gpsdata, 5000000)) {
-	    (void)fprintf(stderr, "%s: error while waiting\n", progname);
-	    break;
-	} else {
-	    (void)gps_read(&gpsdata);
-	    conditionally_log_fix(&gpsdata);
-	}
-    }
+    gps_sock_mainloop(&gpsdata, 5000000, conditionally_log_fix);
     print_gpx_footer();
     (void)gps_close(&gpsdata);
     return 0;
