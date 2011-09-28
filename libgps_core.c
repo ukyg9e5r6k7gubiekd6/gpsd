@@ -25,7 +25,7 @@
  */
 struct privdata_t
 {
-    enum export_t export;
+    enum export_t export_type;
 };
 #define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
