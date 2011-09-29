@@ -324,7 +324,7 @@ settings).</para>
 <para>Another effect is to enable a Z command to switch on profiling.
 When profiling is on, each time 
 <application>gpsd</application>
-reports a fix with timestamp (e.g. on GPGGA, GPMRC and GPGLL
+reports a fix with timestamp (e.g. on GPGGA, GPRMC and GPGLL
 sentences) it also reports timing information from five checkpoints 
 inside the daemon.  The client library adds two more checkpoints.</para>
 
@@ -407,7 +407,7 @@ factor.  Consider this table:</para>
 </thead>
 <tbody>
 <row>
-<entry>GPMRC</entry>
+<entry>GPRMC</entry>
 <entry>70</entry>
 <entry>1.01</entry>
 </row>
@@ -457,7 +457,7 @@ gives us this:</para>
 
 <para>This graph looks almost identical to the previous one, except
 for vertical scale &mdash; latency has been cut neatly in half.
-Transmission times for GPMRC go from about 0.15sec to 0.075sec. Oddly,
+Transmission times for GPRMC go from about 0.15sec to 0.075sec. Oddly,
 average E1 is also cut almost in half.  I don't know how to explain
 this, unless a lot of what looks like E1 is actually RS232
 transmission time spent before the first character appears in the
