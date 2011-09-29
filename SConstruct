@@ -443,6 +443,7 @@ if env['use_chrpath'] and config.CheckExecutable('$CHRPATH -v', 'chrpath'):
 else:
     print "Warning: Regression tests won't be runnable from the build directory"
     print "   until the shared libraries have been intalled in system space."
+    print "   If you have problems compiling or running apps install chrpath."
     have_chrpath = False
 
 # Map options to libraries required to support them that might be absent.
