@@ -6,8 +6,8 @@
  * mode.
  *
  * Binary mode would give us atomic fix reports, but it has one large drawback:
- * the Navigation Data Out message doesn't report a leap-second offset, so ut
- * is not actually possible to colloect a leap-second offset from it. Therefore
+ * the Navigation Data Out message doesn't report a leap-second offset, so it
+ * is not actually possible to collect a leap-second offset from it. Therefore
  * we'll normally run the driver in NMEA mode.  
  *
  * About the only thing binary mode gives that NMEA won't is TDOP and raw
