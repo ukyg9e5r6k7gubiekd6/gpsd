@@ -30,6 +30,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>2.1</revnumber>
+      <date>29 September 2011</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Revisions as suggested by Hal Murray.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>2.0</revnumber>
       <date>23 September 2011</date>
       <authorinitials>esr</authorinitials>
@@ -97,7 +105,7 @@ be juxtaposed with one another.</para>
 <para>The first round was performed in 2005 using a version of the
 code very near 2.13.  This was before the JSON protocol change and before
 GPSD developed the capability to do automated cycle detection.
-Consequently the statistics extracted were primarily timings of
+Consequently the statistics extracted were primarily timings of individual
 packets coming over the wire from the GPS.</para>
 
 <para>The second round was performed in 2011 using a version of the
@@ -296,7 +304,7 @@ and rising market share, and the specification sheets I find with
 Web searches back this up. Each profile run used 100 samples.</para>
 
 <para>My host system for the measurements was an Opteron 3400 running an
-"everything" installation of Fedora Core 3.  This is still a
+"everything" installation of Fedora Core 3.  This was still a
 moderately fast machine in early 2005, but average processor
 utilization remained low throughout the tests.</para>
 
@@ -334,6 +342,12 @@ see the effect of profiling overhead.</para>
 </mediaobject>
 </figure>
 
+<para>Uninstrumented total latency is simply the delta from the GPS
+timestamp associated with the packet to the arrival time ofthe end of
+the packet at the profiling client.  The repeated stairstep effect is
+because all packets in a reporting cycle have the same timestamp;
+thus, the impulses cumulate time in the reporting cycle so far.</para>
+
 <para>The first thing to notice here is that the fix latency can be
 just over a second; you can see the exact figures in the <ulink
 url='profile1.txt'>raw data</ulink>.  Where is the time going?  Our next
@@ -348,10 +362,12 @@ graph was generated with <command>gpsprof -T png -t
 </mediaobject>
 </figure>
 
-<para>By comparing this graph to the previous one, it is pretty clear
-that the profiling reports are not introducing any measurable latency.
-But what is more interesting is to notice that D1 + W + E2 + T2 + D2
-vanishes &mdash; at this timescale, all we can see is E1 and T1.</para>
+<para>As in the previous graph, each group of three lines is a single
+GPS reporting cycle. By comparing this graph to the previous one, it
+is pretty clear that the profiling reports are not introducing any
+measurable latency.  But what is more interesting is to notice that D1
++ W + E2 + T2 + D2 vanishes &mdash; at this timescale, all we can see
+is E1 and T1.</para>
 
 <para>The <ulink url='profile2.txt'>raw data</ulink> bears this out.
 All times besides E1 and T1 are so small that they are comparable to
@@ -391,7 +407,7 @@ factor.  Consider this table:</para>
 </thead>
 <tbody>
 <row>
-<entry>GPRMC</entry>
+<entry>GPMRC</entry>
 <entry>70</entry>
 <entry>1.01</entry>
 </row>
@@ -441,7 +457,7 @@ gives us this:</para>
 
 <para>This graph looks almost identical to the previous one, except
 for vertical scale &mdash; latency has been cut neatly in half.
-Transmission times for GPMRC go from about 0.15sec to 0.75sec. Oddly,
+Transmission times for GPMRC go from about 0.15sec to 0.075sec. Oddly,
 average E1 is also cut almost in half.  I don't know how to explain
 this, unless a lot of what looks like E1 is actually RS232
 transmission time spent before the first character appears in the
@@ -626,7 +642,7 @@ vendor binary mode. Consider, for example, these:</para>
 
 <para>The comb-shaped pattern in these graphs reflect the additional
 transmission time for $GPGSV every 5 cycles. We can see clearly that
-the vendory binary protocol significantly cuts neither latency nor
+the vendor binary protocol significantly cuts neither latency nor
 total bandwidth required.</para>
 
 </sect2>
@@ -638,36 +654,36 @@ total bandwidth required.</para>
 generally available back in 2005 and today in 2011, e.g. with a cycle time
 of one second. As it happens, 2005 was just after the point when
 consumer-grade GPS chips stabilized as a technology, and though unit
-prices have fallen they have changed very little in technology and
-performance over the intervening six years.</para>
+prices have fallen they have changed relatively little in technology and
+performance over the intervening six years. The main improvement has been
+in sensitivity, improving operation with a poor skyview but not affecting
+the timing characteristics of the output.</para>
 
 <sect2><title>For Application Programmers</title>
 
 <para>For the best tradeoff between minimizing latency and use of
-application resources, Nyquist's Theorem tells us to poll
-<application>gpsd</application> once every half-cycle &mdash; that is,
-on almost all GPSes at time of writing, twice a second.</para>
+application resources, an argument similar to Nyquist's Theorem tells
+us to poll <application>gpsd</application> once every half-cycle
+&mdash; that is, on almost all GPSes at time of writing, twice a
+second.</para>
 
-<para>With the SiRF chips still used in most consumer-grade GPSes at time of
-writing, 9600bps is the optimal line speed.  4800 is slightly too low,
-not guaranteeing updates within the 1-second cycle time.  9600bps
-yields updates in about 0.45sec, 19600bps in about 0.26sec.</para>
-
-</sect2>
-<sect2><title>For Manufacturer Claims</title>
-
-<para>At the 1-second cycle time of consumer-grade devices, being able
-to operate at 9600bps is useful, but higher speeds would probably not
-be worth the extra computation unless your sensor is in rapid motion. Even
-whole-cycle latency, most sensitive to transmission speed, is only cut
-by less than 200ms by going to 19200. Higher speed will exhibit 
-diminishing returns.</para>
+<para>With the SiRF chips still used in most consumer-grade GPSes at
+time of writing, 9600bps is the optimal line speed.  4800 is slightly
+too low, not guaranteeing updates within the 1-second cycle time.
+9600bps yields updates in about 0.45sec, 19600bps in about 0.26sec.
+Higher speeds would probably not be worth the extra computation unless
+your sensor is in rapid motion. Even whole-cycle latency, most
+sensitive to transmission speed, is only cut by less than 200ms by
+going to 19200. Higher speed will exhibit diminishing returns.</para>
 
 <para>Comparing the SiRF-II performance at 4800bps and 9600 shows a
 drop in E1+T1 that looks about linear, suggesting that for a cycle of
 n seconds, the optimal line speed would be about 9600/n. Since future
 GPS chips are likely to have faster processors and thus less latency,
 this may be considered an upper bound on useful line speed.</para>
+
+</sect2>
+<sect2><title>For Manufacturer Claims</title>
 
 <para>Because 9600bps is readily available, the transmission- and
 decode-time advantages of binary protocols over NMEA are not
