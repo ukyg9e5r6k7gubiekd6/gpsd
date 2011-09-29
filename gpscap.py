@@ -68,11 +68,15 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 <th width='50%%'>Notes</th>
 </tr>
 """
-        vhead = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a></td></tr>\n"
+        vhead1 = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a></td></tr>\n"
+        vhead2 = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a><br/><p>%s</p></td></tr>\n"
         hotpluggables = ("pl2303", "CP2101")
         ofp.write(thead % (len(self.devices), len(self.vendors)))
         for vendor in self.vendors:
-            ofp.write(vhead % (self.get(vendor, "vendor_site"), vendor))
+            if self.has_option(vendor, "notes"):
+                ofp.write(vhead2 % (self.get(vendor, "vendor_site"), vendor, self.get(vendor, "notes")))
+            else:
+                ofp.write(vhead1 % (self.get(vendor, "vendor_site"), vendor))
             relevant = []
             for dev in self.devices:
                 if self.get(dev, "vendor") == vendor:
