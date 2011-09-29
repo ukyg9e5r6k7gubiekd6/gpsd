@@ -116,6 +116,7 @@ class spaceplot(plotter):
     requires_time = False
     def __init__(self):
         plotter.__init__(self)
+        self.recentered = []
     def d(self, a, b):
         return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
     def sample(self):
@@ -125,6 +126,13 @@ class spaceplot(plotter):
     def header(self):
         return "# Position uncertainty, %s\n" % self.whatami()
     def data(self):
+        if not self.recentered:
+            # centroid is just arithmetic avg of lat,lon
+            self.centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
+            # Sort fixes by distance from centroid
+            self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
+            # Convert fixes to offsets from centroid in meters
+            self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
         res = ""
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
@@ -132,15 +140,6 @@ class spaceplot(plotter):
             res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
         return res
     def plot(self):
-        if len(self.fixes) == 0:
-            sys.stderr.write("No fixes collected, can't estimate accuracy.")
-            sys.exit(1)
-	# centroid is just arithmetic avg of lat,lon
-        self.centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
-        # Sort fixes by distance from centroid
-        self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
-        # Convert fixes to offsets from centroid in meters
-        self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
         # Compute CEP(50%)
         cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.50)][:2])
         cep95_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.95)][:2])
