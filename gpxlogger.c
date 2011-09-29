@@ -18,7 +18,6 @@
 
 #include "gps.h"
 #include "gpsd_config.h"
-#include "libgps.h" /* TEMPORARY */
 #include "gpsdclient.h"
 #include "revision.h"
 
@@ -313,7 +312,7 @@ int main(int argc, char **argv)
     if (method == NULL)
 	method = &methods[0];
     if (method->magic != NULL) {
-	source.server = method->magic;
+	source.server = (char *)method->magic;
 	source.port = NULL;
     }
 
@@ -326,7 +325,7 @@ int main(int argc, char **argv)
 		 source.server, source.port, source.device);
 #endif
 
-    /* initializes the some gpsdata data structure */
+    /* initializes the gpsdata fields */
     gpsdata.status = STATUS_NO_FIX;
     gpsdata.satellites_used = 0;
     gps_clear_fix(&(gpsdata.fix));
