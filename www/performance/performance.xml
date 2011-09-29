@@ -662,7 +662,7 @@ the timing characteristics of the output.</para>
 <sect2><title>For Application Programmers</title>
 
 <para>For the best tradeoff between minimizing latency and use of
-application resources, an argument similar to Nyquist's Theorem tells
+application resources, an argument siemilar to Nyquist's Theorem tells
 us to poll <application>gpsd</application> once every half-cycle
 &mdash; that is, on almost all GPSes at time of writing, twice a
 second.</para>
