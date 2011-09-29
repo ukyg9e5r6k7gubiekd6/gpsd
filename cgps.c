@@ -705,7 +705,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     }
 
     /* Be quiet if the user requests silence. */
-   if (!silent_flag && raw_flag && (s = gps_data(gpsdata)) != NULL) {
+    if (!silent_flag && raw_flag && (s = (char *)gps_data(gpsdata)) != NULL) {
 	(void)waddstr(messages, s);
     }
 

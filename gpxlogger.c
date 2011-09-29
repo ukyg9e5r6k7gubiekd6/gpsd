@@ -23,10 +23,6 @@
 
 #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0])) /* from gpsd.h-tail */
 
-#ifdef S_SPLINT_S
-extern struct tm *gmtime_r(const time_t *, /*@out@*/ struct tm *tp);
-#endif /* S_SPLINT_S */
-
 static char *progname;
 static struct fixsource_t source;
 
@@ -296,7 +292,7 @@ int main(int argc, char **argv)
 	    minmove = (double )atoi(optarg);
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "gpxlogger revision " REVISION "\n");
+	    (void)fprintf(stderr, "%s revision " REVISION "\n", progname);
 	    exit(0);
 	default:
 	    usage();
