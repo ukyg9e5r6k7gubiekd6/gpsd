@@ -8,6 +8,15 @@
 
 #ifndef _GPSD_GPSDCLIENT_H_
 #define _GPSD_GPSDCLIENT_H_
+
+struct exportmethod_t
+/* describe an export method */
+{
+    const char *name;
+    /*@null@*/const char *magic;
+    const char *description;
+};
+
 struct fixsource_t 
 /* describe a data source */
 {
@@ -17,6 +26,9 @@ struct fixsource_t
     /*@null@*/char *device;
 };
 
+/*null observer*/struct exportmethod_t *export_lookup(const char *);
+/*null observer*/struct exportmethod_t *export_default(void);
+void export_list(FILE *);
 enum unit {unspecified, imperial, nautical, metric};
 enum unit gpsd_units(void);
 enum deg_str_type { deg_dd, deg_ddmm, deg_ddmmss };

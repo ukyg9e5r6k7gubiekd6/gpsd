@@ -15,6 +15,18 @@
 #include "gps.h"
 #include "gpsdclient.h"
 
+static struct exportmethod_t exportmethods[] = {
+#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
+    {"dbus", GPSD_DBUS_EXPORT, "DBUS broadcast"},
+#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
+#ifdef SHM_EXPORT_ENABLE
+    {"shm", GPSD_SHARED_MEMORY, "shared memory"},
+#endif /* SOCKET_EXPORT_ENABLE */
+#ifdef SOCKET_EXPORT_ENABLE
+    {"sockets", NULL, "JSON via sockets"},
+#endif /* SOCKET_EXPORT_ENABLE */
+};
+
 /* convert double degrees to a static string and return a pointer to it
  *
  * deg_str_type:
@@ -216,6 +228,37 @@ char *maidenhead(double n, double e)
     buf[6] = '\0';
  
     return buf;
+}
+
+#define NITEMS(x) (int)(sizeof(x)/sizeof(x[0])) /* from gpsd.h-tail */
+
+/*null observer*/struct exportmethod_t *export_lookup(const char *name)
+/* Look up an available export method by name */
+{
+    struct exportmethod_t *mp, *method = NULL;
+
+    for (mp = exportmethods;
+	 mp < exportmethods + NITEMS(exportmethods);
+	 mp++)
+	if (strcmp(mp->name, name) == 0)
+	    method = mp;
+    return method;
+}
+
+void export_list(FILE *fp)
+/* list known export methods */
+{
+    struct exportmethod_t *method;
+
+    for (method = exportmethods;
+	 method < exportmethods + NITEMS(exportmethods);
+	 method++)
+	(void)fprintf(fp, "%s: %s\n", method->name, method->description);
+}
+
+/*null observer*/struct exportmethod_t *export_default(void)
+{
+    return (NITEMS(exportmethods) > 0) ? &exportmethods[0] : NULL;
 }
 
 /* gpsclient.c ends here */

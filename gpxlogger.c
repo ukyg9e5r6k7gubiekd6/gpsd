@@ -21,8 +21,6 @@
 #include "gpsdclient.h"
 #include "revision.h"
 
-#define NITEMS(x) (int)(sizeof(x)/sizeof(x[0])) /* from gpsd.h-tail */
-
 static char *progname;
 static struct fixsource_t source;
 
@@ -184,32 +182,13 @@ static void quit_handler(int signum)
  *
  **************************************************************************/
 
-struct method_t
-{
-    const char *name;
-    /*@null@*/const char *magic;
-    const char *description;
-};
-
-static struct method_t methods[] = {
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-    {"dbus", GPSD_DBUS_EXPORT, "DBUS broadcast"},
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
-#ifdef SHM_EXPORT_ENABLE
-    {"shm", GPSD_SHARED_MEMORY, "shared memory"},
-#endif /* SOCKET_EXPORT_ENABLE */
-#ifdef SOCKET_EXPORT_ENABLE
-    {"sockets", NULL, "JSON via sockets"},
-#endif /* SOCKET_EXPORT_ENABLE */
-};
-
 static void usage(void)
 {
     fprintf(stderr,
 	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-f filename] [-m minmove]\n"
 	    "\t[-e exportmethod] [server[:port:[device]]]\n\n"
 	    "defaults to '%s -i 5 -e %s localhost:2947'\n",
-	    progname, progname, (NITEMS(methods) > 0) ? methods[0].name : "(none)");
+	    progname, progname, export_default()->name);
     exit(1);
 }
 
@@ -218,12 +197,12 @@ int main(int argc, char **argv)
 {
     int ch;
     bool daemonize = false;
-    struct method_t *mp, *method = NULL;
     unsigned int flags = WATCH_ENABLE;
+    struct exportmethod_t *method;
 
     progname = argv[0];
 
-    if (NITEMS(methods) == 0) {
+    if (export_default() == NULL) {
 	(void)fprintf(stderr, "%s: no export methods.\n", progname);
 	exit(1);
     }
@@ -242,11 +221,7 @@ int main(int argc, char **argv)
 	    break;
 #endif /* CLIENTDEBUG_ENABLE */
 	case 'e':
-	    for (mp = methods;
-		 mp < methods + NITEMS(methods);
-		 mp++)
-		if (strcmp(mp->name, optarg) == 0)
-		    method = mp;
+	    method = export_lookup(optarg);
 	    if (method == NULL) {
 		(void)fprintf(stderr,
 			      "%s: %s is not a known export method.\n",
@@ -283,11 +258,7 @@ int main(int argc, char **argv)
 			"WARNING: track timeout is an hour or more!\n");
 	    break;
 	case 'l':
-	    for (method = methods;
-		 method < methods + NITEMS(methods);
-		 method++)
-		(void)printf("%s: %s\n", method->name, method->description);
-	    exit(0);
+	    export_list(stderr);
         case 'm':
 	    minmove = (double )atoi(optarg);
 	    break;
@@ -306,7 +277,7 @@ int main(int argc, char **argv)
     }
 
     if (method == NULL)
-	method = &methods[0];
+	method = export_default();
     if (method->magic != NULL) {
 	source.server = (char *)method->magic;
 	source.port = NULL;
