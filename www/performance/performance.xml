@@ -586,7 +586,7 @@ data</ulink>.</para>
 </figure>
 
 <para>Fix latency (S - T, the purple time segment in each sample) is
-consistently about 120msec.  Some of this represents. on-chip
+consistently about 120msec.  Some of this represents on-chip
 processing.  Some may represent actual skew between NTP time and GPS
 time.</para>
 
