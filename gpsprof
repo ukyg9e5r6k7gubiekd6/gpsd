@@ -47,10 +47,10 @@ class plotter:
         self.fixes = []
         self.start_time = int(time.time())
     def whatami(self):
-        "How do we identify this poltting run?"
+        "How do we identify this pollting run?"
         return "%s, %s, %d %dN%d, cycle %ds" % \
               (gps.misc.isotime(self.start_time),
-               self.device['driver'], self.device['bps'],
+               self.device.get('driver', "unknown"), self.device['bps'],
                9 - self.device['stopbits'],
                self.device['stopbits'], self.device['cycle']) 
     def collect(self, verbose):
