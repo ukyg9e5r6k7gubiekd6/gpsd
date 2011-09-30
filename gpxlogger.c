@@ -184,11 +184,13 @@ static void quit_handler(int signum)
 
 static void usage(void)
 {
+    /*@-nullderef@*/
     fprintf(stderr,
 	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-f filename] [-m minmove]\n"
 	    "\t[-e exportmethod] [server[:port:[device]]]\n\n"
 	    "defaults to '%s -i 5 -e %s localhost:2947'\n",
 	    progname, progname, export_default()->name);
+    /*@-nullderef@*/
     exit(1);
 }
 
@@ -198,7 +200,7 @@ int main(int argc, char **argv)
     int ch;
     bool daemonize = false;
     unsigned int flags = WATCH_ENABLE;
-    struct exportmethod_t *method;
+    struct exportmethod_t *method = NULL;
 
     progname = argv[0];
 
@@ -259,6 +261,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'l':
 	    export_list(stderr);
+	    break;
         case 'm':
 	    minmove = (double )atoi(optarg);
 	    break;
@@ -276,12 +279,11 @@ int main(int argc, char **argv)
 	exit(1);
     }
 
-    if (method == NULL)
-	method = export_default();
-    if (method->magic != NULL) {
-	source.server = (char *)method->magic;
-	source.port = NULL;
-    }
+    if (method != NULL)
+	if (method->magic != NULL) {
+	    source.server = (char *)method->magic;
+	    source.port = NULL;
+	}
 
     if (optind < argc) {
 	gpsd_source_spec(argv[optind], &source);

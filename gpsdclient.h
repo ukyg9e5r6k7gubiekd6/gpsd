@@ -26,12 +26,13 @@ struct fixsource_t
     /*@null@*/char *device;
 };
 
-/*null observer*/struct exportmethod_t *export_lookup(const char *);
-/*null observer*/struct exportmethod_t *export_default(void);
+/*@null observer@*/struct exportmethod_t *export_lookup(const char *);
+/*@null observer@*/struct exportmethod_t *export_default(void);
 void export_list(FILE *);
 enum unit {unspecified, imperial, nautical, metric};
 enum unit gpsd_units(void);
 enum deg_str_type { deg_dd, deg_ddmm, deg_ddmmss };
+float true2magnetic(double, double, double);
 
 extern /*@observer@*/ char *deg_to_str( enum deg_str_type type,  double f);
 

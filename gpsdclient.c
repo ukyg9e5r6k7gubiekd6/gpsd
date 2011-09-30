@@ -232,9 +232,10 @@ char *maidenhead(double n, double e)
 
 #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0])) /* from gpsd.h-tail */
 
-/*null observer*/struct exportmethod_t *export_lookup(const char *name)
+/*@null observer@*/struct exportmethod_t *export_lookup(const char *name)
 /* Look up an available export method by name */
 {
+    /*@-globstate@*/
     struct exportmethod_t *mp, *method = NULL;
 
     for (mp = exportmethods;
@@ -243,6 +244,7 @@ char *maidenhead(double n, double e)
 	if (strcmp(mp->name, name) == 0)
 	    method = mp;
     return method;
+    /*@+globstate@*/
 }
 
 void export_list(FILE *fp)
@@ -256,9 +258,77 @@ void export_list(FILE *fp)
 	(void)fprintf(fp, "%s: %s\n", method->name, method->description);
 }
 
-/*null observer*/struct exportmethod_t *export_default(void)
+/*@null observer@*/struct exportmethod_t *export_default(void)
 {
     return (NITEMS(exportmethods) > 0) ? &exportmethods[0] : NULL;
+}
+
+/* Convert true heading to magnetic.  Taken from the Aviation
+   Formulary v1.43.  Valid to within two degrees within the
+   continiental USA except for the following airports: MO49 MO86 MO50
+   3K6 02K and KOOA.  AK correct to better than one degree.  Western
+   Europe correct to within 0.2 deg.
+
+   If you're not in one of these areas, I apologize, I don't have the
+   math to compute your varation.  This is obviously extremely
+   floating-point heavy, so embedded people, beware of using.
+
+   Note that there are issues with using magnetic heading.  This code
+   does not account for the possibility of travelling into or out of
+   an area of valid calculation beyond forcing the magnetic conversion
+   off.  A better way to communicate this to the user is probably
+   desirable (in case the don't notice the subtle change from "(mag)"
+   to "(true)" on their display).
+ */
+float true2magnetic(double lat, double lon, double heading)
+{
+    /* Western Europe */
+    /*@ -evalorder +relaxtypes @*/
+    if ((lat > 36.0) && (lat < 68.0) && (lon > -10.0) && (lon < 28.0)) {
+	heading =
+	    (10.4768771667158 - (0.507385322418858 * lon) +
+	     (0.00753170031703826 * pow(lon, 2))
+	     - (1.40596203924748e-05 * pow(lon, 3)) -
+	     (0.535560699962353 * lat)
+	     + (0.0154348808069955 * lat * lon) -
+	     (8.07756425110592e-05 * lat * pow(lon, 2))
+	     + (0.00976887198864442 * pow(lat, 2)) -
+	     (0.000259163929798334 * lon * pow(lat, 2))
+	     - (3.69056939266123e-05 * pow(lat, 3)) + heading);
+    }
+    /* USA */
+    else if ((lat > 24.0) && (lat < 50.0) && (lon > 66.0) && (lon < 125.0)) {
+	lon = 0.0 - lon;
+	heading =
+	    ((-65.6811) + (0.99 * lat) + (0.0128899 * pow(lat, 2)) -
+	     (0.0000905928 * pow(lat, 3)) + (2.87622 * lon)
+	     - (0.0116268 * lat * lon) - (0.00000603925 * lon * pow(lat, 2)) -
+	     (0.0389806 * pow(lon, 2))
+	     - (0.0000403488 * lat * pow(lon, 2)) +
+	     (0.000168556 * pow(lon, 3)) + heading);
+    }
+    /* AK */
+    else if ((lat > 54.0) && (lon > 130.0) && (lon < 172.0)) {
+	lon = 0.0 - lon;
+	heading =
+	    (618.854 + (2.76049 * lat) - (0.556206 * pow(lat, 2)) +
+	     (0.00251582 * pow(lat, 3)) - (12.7974 * lon)
+	     + (0.408161 * lat * lon) + (0.000434097 * lon * pow(lat, 2)) -
+	     (0.00602173 * pow(lon, 2))
+	     - (0.00144712 * lat * pow(lon, 2)) +
+	     (0.000222521 * pow(lon, 3)) + heading);
+    } else {
+	/* We don't know how to compute magnetic heading for this
+	 * location. */
+	heading = NAN;
+    }
+
+    /* No negative headings. */
+    if (isnan(heading)== 0 && heading < 0.0)
+	heading += 360.0;
+
+    return (heading);
+    /*@ +evalorder -relaxtypes @*/
 }
 
 /* gpsclient.c ends here */
