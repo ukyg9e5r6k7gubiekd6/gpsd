@@ -94,7 +94,9 @@ int gps_open(/*@null@*/const char *host,
 
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
-    gps_clear_fix(&gpsdata->fix);
+    gpsdata->satellites_used = 0;
+    gps_clear_fix(&(gpsdata->fix));
+    gps_clear_dop(&(gpsdata->dop));
 
     return status;
     /*@ +branchstate +compdef @*/

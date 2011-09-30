@@ -33,7 +33,6 @@ struct privdata_t
     void *shmseg;
 };
 /*@+matchfields@*/
-#define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
 
 
 int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)

@@ -294,12 +294,6 @@ int main(int argc, char **argv)
 		 source.server, source.port, source.device);
 #endif
 
-    /* initializes the gpsdata fields */
-    gpsdata.status = STATUS_NO_FIX;
-    gpsdata.satellites_used = 0;
-    gps_clear_fix(&(gpsdata.fix));
-    gps_clear_dop(&(gpsdata.dop));
-
     /* catch all interesting signals */
     (void)signal(SIGTERM, quit_handler);
     (void)signal(SIGQUIT, quit_handler);
@@ -316,7 +310,6 @@ int main(int argc, char **argv)
 
     //syslog (LOG_INFO, "---------- STARTED ----------");
 
-    /* initialize for some export method */
     if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
 		      "%s: no gpsd running or network error: %d, %s\n",

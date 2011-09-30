@@ -48,5 +48,6 @@ extern int gps_dbus_open(struct gps_data_t *);
 extern int gps_dbus_mainloop(struct gps_data_t *, int,
 			      void (*)(struct gps_data_t *));
 
+#define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
 
 #endif /* _GPSD_LIBGPS_H_ */

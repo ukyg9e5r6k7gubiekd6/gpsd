@@ -22,7 +22,6 @@ struct privdata_t
 {
     void (*handler)(struct gps_data_t *);
 };
-#define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
 
 #include <glib.h>
 #include <dbus/dbus.h>

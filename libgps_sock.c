@@ -51,7 +51,6 @@ struct privdata_t
 #endif /* LIBGPS_DEBUG */
 };
 /*@+matchfields@*/
-#define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
 /*@-branchstate@*/
 int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
