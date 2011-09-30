@@ -30,6 +30,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>2.2</revnumber>
+      <date>30 September 2011</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Fix errors in some whole-cycle visualizations.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>2.1</revnumber>
       <date>29 September 2011</date>
       <authorinitials>esr</authorinitials>
@@ -578,24 +586,25 @@ data</ulink>.</para>
 </figure>
 
 <para>Fix latency (S - T, the purple time segment in each sample) is
-consistently about 70msec.  Some of this represents. on-chip
+consistently about 120msec.  Some of this represents. on-chip
 processing.  Some may represent actual skew between NTP time and GPS
 time.</para>
 
 <para>RS232 time (the blue segment) is the character transmission time
-estimate we computed. It seems steady at around 100ms. This is
+estimate we computed. It seems relatively steady at around 125ms. This is
 probably a bit low, proportionately speaking.</para>
 
 <para>The green segment is (E-S) with RS232 computed time subtracted.
 It approximates the time required by <application>gpsd</application>
-for itelf. It too seems steady at around 100ms. This is probably a bit
+for itelf. It seems steady at around 15ms. This is probably a bit
 high, proportionately speaking.</para>
 
 <para>The red dots that are just barely visible at the tops of some
 sample bars represent R-E, the client reception delta. Inspection of
 the raw data reveals that it is on the close order of 1ms.</para>
 
-<para>Total fix latency is steady at about 260ms.</para>
+<para>Total fix latency is steady at about 310ms.  Transmission
+time dominates.</para>
 
 <para>It is instructive to compare this with the graph (and the 
 <ulink url='profile7.txt'>raw data</ulink>) from the same device 
@@ -617,7 +626,7 @@ fix latency is simply to bump up the transmission speed.
 </para>
 
 <para>It is equally instructive to compare these graphs with graphs
-taken from the same GPS, at the dme speed, running in NMEA rather than
+taken from the same GPS, at the same speed, running in NMEA rather than
 vendor binary mode. Consider, for example, these:</para>
 
 <figure><title>Per-cycle latency report, NMEA mode, 9600bps</title>
@@ -715,9 +724,9 @@ magnitude for this to change.</para>
 
 <para>In 2011, with better whole-cycle oriented profiling tools and a
 faster test machine, latency incurred by
-<application>gpsd</application> can be measured.  It is less than 0.1
+<application>gpsd</application> can be measured.  It is less than 15ms
 sec on a 2.66 Intel Core Duo under normal load. How much less depends
-on how the model computations underestimate RS232 transmission time
+on how much the model computations underestimate RS232 transmission time
 for the GPS data.</para>
 </sect2>
 </sect1>

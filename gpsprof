@@ -267,7 +267,7 @@ class instrumented(plotter):
         res = ""
         for (tag, time, chars, start, xmit, recv) in self.fixes:
             rs232_time = (chars * 10.0) / self.device['bps']
-            res += "% 8s  %.9f  %9u  %.9f  %.9f  %.9f  %.9f\n" % (tag, time, chars, start-time, rs232_time, xmit-time, recv-time)
+            res += "% 8s  %.9f  %9u  %.9f  %.9f  %.9f  %.9f\n" % (tag, time, chars, start-time, (start-time)+rs232_time, xmit-time, recv-time)
         return res
     def plot(self):
         legends = (

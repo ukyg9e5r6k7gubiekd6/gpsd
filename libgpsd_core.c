@@ -849,8 +849,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
      * in the cycle.
      *
      * In practice, it seems that edge detection succeeds at 9600bps but
-     * fails at 4800bps.  This is not surprsing, as previous proviling has 
-     * indicated that st 4800bps some devices overrun a 1-second cycle time 
+     * fails at 4800bps.  This is not surprsing, as previous profiling has 
+     * indicated that at 4800bps some devices overrun a 1-second cycle time 
      * with the data they transmit.
      */
 #define MINIMUM_QUIET_TIME	0.25
