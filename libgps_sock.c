@@ -39,10 +39,8 @@
 extern char *strtok_r(char *, const char *, char **);
 #endif /* S_SPLINT_S */
 
-/*@-matchfields@*/
 struct privdata_t
 {
-    enum export_t export_type;
     bool newstyle;
     /* data buffered from the last read */
     ssize_t waiting;
@@ -51,7 +49,6 @@ struct privdata_t
     int waitcount;
 #endif /* LIBGPS_DEBUG */
 };
-/*@+matchfields@*/
 #define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
 
 /*@-branchstate@*/
@@ -88,7 +85,6 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
     gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
     if (gpsdata->privdata == NULL)
 	return -1;
-    PRIVATE(gpsdata)->export_type = sockets;
     PRIVATE(gpsdata)->newstyle = false;
     PRIVATE(gpsdata)->waiting = 0;
 

@@ -30,7 +30,6 @@ PERMISSIONS
 /*@-matchfields@*/
 struct privdata_t
 {
-    enum export_t export_type;
     void *shmseg;
 };
 /*@+matchfields@*/
@@ -64,7 +63,6 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 #else
     gpsdata->gps_fd = (void *)(intptr_t)-1;
 #endif /* USE_QT */
-    PRIVATE(gpsdata)->export_type = shm;
     return 0;
 }
 

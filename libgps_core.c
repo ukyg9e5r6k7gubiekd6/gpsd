@@ -18,17 +18,6 @@
 #include "libgps.h"
 #include "gps_json.h"
 
-/*
- * All privdata structures have export_type as a first member, 
- * and can have others that the individual method libraries
- * know about but this one doesn't.
- */
-struct privdata_t
-{
-    enum export_t export_type;
-};
-#define PRIVATE(gpsdata) ((struct privdata_t *)gpsdata->privdata)
-
 #ifdef LIBGPS_DEBUG
 int libgps_debuglevel = 0;
 
@@ -118,23 +107,20 @@ int gps_close(struct gps_data_t *gpsdata)
 
     libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
 
-    switch (PRIVATE(gpsdata)->export_type) {
 #ifdef SHM_EXPORT_ENABLE
-    case shm:
+    if ((intptr_t)(gpsdata->gps_fd) == -1) {
 	gps_shm_close(gpsdata);
 	status = 0;
-	break;
-#endif /* SHM_EXPORT_ENABLE */
-#ifdef SOCKET_EXPORT_ENABLE
-    case sockets:
-        status = gps_sock_close(gpsdata);
-	break;
-#endif /* SOCKET_EXPORT_ENABLE */
-    default:
-	status = 0;
     }
+#endif /* SHM_EXPORT_ENABLE */
 
-    return status;
+#ifdef SOCKET_EXPORT_ENABLE
+    if (status == -1) {
+        status = gps_sock_close(gpsdata);
+    }
+#endif /* SOCKET_EXPORT_ENABLE */
+
+	return status;
 }
 
 int gps_read(struct gps_data_t *gpsdata)
@@ -145,25 +131,22 @@ int gps_read(struct gps_data_t *gpsdata)
     libgps_debug_trace((DEBUG_CALLS, "gps_read() begins\n"));
 
     /*@ -usedef -compdef -uniondef @*/
-    switch (PRIVATE(gpsdata)->export_type) {
 #ifdef SHM_EXPORT_ENABLE
-    case shm:
+    if ((intptr_t)(gpsdata->gps_fd) == -1) {
 	status = gps_shm_read(gpsdata);
-	break;
-#endif /* SHM_EXPORT_ENABLE */
-#ifdef SOCKET_EXPORT_ENABLE
-    case sockets:
-        status = gps_sock_read(gpsdata);
-	break;
-#endif /* SOCKET_EXPORT_ENABLE */
-    default:
-	status = 0;
     }
+#endif /* SHM_EXPORT_ENABLE */
+
+#ifdef SOCKET_EXPORT_ENABLE
+    if (status == -1) {
+        status = gps_sock_read(gpsdata);
+    }
+#endif /* SOCKET_EXPORT_ENABLE */
+    /*@ +usedef +compdef +uniondef @*/
 
     libgps_debug_trace((DEBUG_CALLS, "gps_read() -> %d (%s)\n", 
 			status, gps_maskdump(gpsdata->set)));
 
-    /*@ +usedef +compdef +uniondef @*/
     return status;
 }
 
@@ -180,74 +163,47 @@ int gps_send(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, const char *fmt CO
     if (buf[strlen(buf) - 1] != '\n')
 	(void)strlcat(buf, "\n", BUFSIZ);
 
-    switch (PRIVATE(gpsdata)->export_type) {
 #ifdef SOCKET_EXPORT_ENABLE
-    case sockets:
-	status = gps_sock_send(gpsdata, buf);
-	break;
+    status = gps_sock_send(gpsdata, buf);
 #endif /* SOCKET_EXPORT_ENABLE */
-    default:
-	status = -1;
-	break;
-    }
+
     return status;
 }
+
 int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, 
 	unsigned int flags CONDITIONALLY_UNUSED,
 	/*@null@*/ void *d CONDITIONALLY_UNUSED)
 {
     int status = -1;
 
-    switch (PRIVATE(gpsdata)->export_type) {
 #ifdef SOCKET_EXPORT_ENABLE
-    case sockets:
-	status = gps_sock_stream(gpsdata, flags, d);
-	break;
+    status = gps_sock_stream(gpsdata, flags, d);
 #endif /* SOCKET_EXPORT_ENABLE */
-    default:
-	status = -1;
-	break;
-    }
 
     return status;
 }
 
-/*@-observertrans -dependenttrans@*/
-const char /*@null observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
+const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 /* return the contents of the client data buffer */
 {
     const char *bufp = NULL;
 
-    switch (PRIVATE(gpsdata)->export_type) {
 #ifdef SOCKET_EXPORT_ENABLE
-    case sockets:
-	bufp = gps_sock_data(gpsdata);
-	break;
+    bufp = gps_sock_data(gpsdata);
 #endif /* SOCKET_EXPORT_ENABLE */
-    default:
-	bufp = NULL;
-	break;
-    }
 
     return bufp;
 }
-/*@+observertrans +dependenttrans@*/
 
 bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int timeout CONDITIONALLY_UNUSED)
 /* is there input waiting from the GPS? */
 {
-    bool waiting;
+    /* this is bogus, but I can't think of a better solution yet */
+    bool waiting = true;
 
-    switch (PRIVATE(gpsdata)->export_type) {
 #ifdef SOCKET_EXPORT_ENABLE
-    case sockets:
-	waiting = gps_sock_waiting(gpsdata, timeout);
-	break;
+    waiting = gps_sock_waiting(gpsdata, timeout);
 #endif /* SOCKET_EXPORT_ENABLE */
-    default:
-	waiting = true;
-	break;
-    }
 
     return waiting;
 }
@@ -260,23 +216,18 @@ int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
     libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() begins\n"));
 
     /*@ -usedef -compdef -uniondef @*/
-    switch (PRIVATE(gpsdata)->export_type) {
 #ifdef SHM_EXPORT_ENABLE
-    case shm:
+    if ((intptr_t)(gpsdata->gps_fd) == -1)
 	status = gps_shm_mainloop(gpsdata, timeout, hook);
-	break;
 #endif /* SHM_EXPORT_ENABLE */
-#ifdef SOCKET_EXPORT_ENABLE
-    case sockets:
-	status = gps_sock_mainloop(gpsdata, timeout, hook);
-	break;
-#endif /* SOCKET_EXPORT_ENABLE */
 #ifdef DBUS_EXPORT_ENABLE
-    case dbus:
+    if ((intptr_t)(gpsdata->gps_fd) == -2)
 	status = gps_dbus_mainloop(gpsdata, timeout, hook);
-	break;
 #endif /* DBUS_EXPORT_ENABLE */
-    }
+#ifdef SOCKET_EXPORT_ENABLE
+    if ((intptr_t)(gpsdata->gps_fd) >= 0)
+	status = gps_sock_mainloop(gpsdata, timeout, hook);
+#endif /* SOCKET_EXPORT_ENABLE */
     /*@ +usedef +compdef +uniondef @*/
 
     libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() -> %d (%s)\n", 
