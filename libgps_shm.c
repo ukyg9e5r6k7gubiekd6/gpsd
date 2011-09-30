@@ -59,9 +59,9 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 	return -2;
     }
 #ifndef USE_QT
-    gpsdata->gps_fd = -1;
+    gpsdata->gps_fd = SHM_PSEUDO_FD;
 #else
-    gpsdata->gps_fd = (void *)(intptr_t)-1;
+    gpsdata->gps_fd = (void *)(intptr_t)SHM_PSEUDO_FD;
 #endif /* USE_QT */
     return 0;
 }

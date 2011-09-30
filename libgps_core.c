@@ -217,11 +217,11 @@ int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
 
     /*@ -usedef -compdef -uniondef @*/
 #ifdef SHM_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == -1)
+    if ((intptr_t)(gpsdata->gps_fd) == SHM_PSEUDO_FD)
 	status = gps_shm_mainloop(gpsdata, timeout, hook);
 #endif /* SHM_EXPORT_ENABLE */
 #ifdef DBUS_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == -2)
+    if ((intptr_t)(gpsdata->gps_fd) == DBUS_PSEUDO_FD)
 	status = gps_dbus_mainloop(gpsdata, timeout, hook);
 #endif /* DBUS_EXPORT_ENABLE */
 #ifdef SOCKET_EXPORT_ENABLE

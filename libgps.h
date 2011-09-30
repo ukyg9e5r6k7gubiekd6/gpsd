@@ -23,6 +23,9 @@ enum export_t {
 #endif /* DBUS_EXPORT_ENABLE */
 };
 
+/* values to poke in the gps_fd member if we get it via something special */ 
+#define SHM_PSEUDO_FD	-1
+#define DBUS_PSEUDO_FD	-2
 
 extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *, 
 		      /*@out@*/struct gps_data_t *);
