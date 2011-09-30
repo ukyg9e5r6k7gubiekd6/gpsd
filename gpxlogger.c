@@ -262,7 +262,6 @@ int main(int argc, char **argv)
 	case 'l':
 	    export_list(stderr);
 	    exit(0);
-	    break;
         case 'm':
 	    minmove = (double )atoi(optarg);
 	    break;

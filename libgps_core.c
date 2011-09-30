@@ -183,9 +183,10 @@ int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
     return status;
 }
 
-const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
+const char /*@null observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 /* return the contents of the client data buffer */
 {
+    /*@-dependenttrans -observertrans@*/
     const char *bufp = NULL;
 
 #ifdef SOCKET_EXPORT_ENABLE
@@ -193,6 +194,7 @@ const char /*@observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDITIONAL
 #endif /* SOCKET_EXPORT_ENABLE */
 
     return bufp;
+    /*@+dependenttrans +observertrans@*/
 }
 
 bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int timeout CONDITIONALLY_UNUSED)
