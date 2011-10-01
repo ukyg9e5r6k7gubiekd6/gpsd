@@ -2277,9 +2277,7 @@ the members of the corresponding JSON object type.</para>
 
 <refsect1 id='maintainer'><title>AUTHOR</title>
 
-<para>The protocol was designed and documented by Eric S. Raymond.  It
-is maintained by the <ulink url="http://gpsd.berlios.de/">GPSD
-project</ulink>.</para>
+<para>The protocol was designed and documented by Eric S. Raymond.</para>
 </refsect1>
 
 </refentry>

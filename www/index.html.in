@@ -209,11 +209,6 @@ href="@DOWNLOAD@">Releases</a>
 <dt><a href="@VIEWREPO@">Browse Code</a></dt>
 <dd>Developer access to master git repository</dd>
 
-<dt><a
-href="http://git.debian.org/?p=users/bzed/mirror/gpsd.git">Debian mirror</a></dt>
-<dd>Debian mirror, updated every 7 minutes.</dd>
-</dl>
-
 <p>If you are using a Debian-based distribution (including Ubuntu) you
 can probably install <code>gpsd</code> through your regular package
 manager or by typing <code>"sudo apt-get gpsd"</code> at the command

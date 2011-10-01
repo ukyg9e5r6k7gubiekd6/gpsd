@@ -96,7 +96,7 @@ included:
    * Support for multiple devices.
    * Other test tools -- gpsfake, gpscat, gpsmon.
 
-Chris Kuethe <ckuethe@mail.berlios.de> maintains the OpenBSD port, shipped
+Chris Kuethe <ckuethe@mainframe.cx> maintains the OpenBSD port, shipped
 the 2.34 release, is our SiRF and low-level protocols expert, and does a 
 lot of general hacking and support.  He has release authority.
 

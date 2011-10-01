@@ -1,10 +1,7 @@
-This subdirectory contains the web pages for the berlios.de repository.
+This subdirectory contains the project web pages.
 
 To upload them after modifying, run "./upload'.  You must have xmlto,
 the docbook DTD (Ver 4.1.2) and asciidoc (Ver 8.5.1+) installed for
 this to work.
-
-Note: The PDFs on the site are not in the code repository, they'd
-just bulk it up.  Be careful not to delete them.
 
 

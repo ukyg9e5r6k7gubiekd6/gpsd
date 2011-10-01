@@ -185,7 +185,7 @@
   and returns, 'rtcm104v2' rather than 'rtcm104'; this is design forward
   for when RTCM104v3 is fully working.
 
-* Sun Feb 17 2008 Chris Kuethe <ckuethe@mail.berlios.de> - 2.37
+* Sun Feb 17 2008 Chris Kuethe <ckuethe@mainframe.cx> - 2.37
   The C++ bindings, Garmin USB support, and multiple instances of ntp
   pps thread starting were fixed. Handling of odd PPS signals was
   improved. The eye candy in the PHP visualizers was fixed.
@@ -263,7 +263,7 @@
 
 * Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
   The 2.27 source tarball somehow got truncated on upload.
-  Due to procedural mechanics at berlios.de, shipping a new release
+  Due to procedural mechanics at Berlios, shipping a new release
   seems to be the least painful way to recover.  This release is
   identical to 2.27 except the roadmap stuff has been added to TODO.
 

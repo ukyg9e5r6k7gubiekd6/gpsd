@@ -302,9 +302,7 @@ indicating the starting execution address.  </para></listitem>
 
 <para>From an anonymous web page, itself claiming to have been derived
 from an old Unix manual page. Now maintained by the GPSD
-project, which added endianness clarifications.
-There is a project page for <application>gpsd</application> <ulink
-url="http://gpsd.berlios.de/">here</ulink>.</para>
+project, which added endianness clarifications.</para>
 
 </refsect1>
 </refentry>
