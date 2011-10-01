@@ -3,7 +3,7 @@
  * Tested with the 'Garmin eTrex Legend' device working in 'Text Out' mode.
  *
  * Protocol info from:
- *	 http://gpsd.berlios.de/vendor-docs/garmin/garmin_simpletext.txt
+ *	 http://www8.garmin.com/support/text_out.html
  *       http://www.garmin.com/support/commProtocol.html
  *
  * Code by: Petr Slansky <slansky@usa.net>
