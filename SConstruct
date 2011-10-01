@@ -28,9 +28,15 @@ libgps_minor = 0
 libgps_age   = 0
 # Release identification ends here
 
+# Hosting information (mainly used for templating web pages) begins here
+website  = "http://catb.org/gpsd" 
+mainpage = "https://savannah.nongnu.org/projects/gpsd/"
+uploadto = "login.ibiblio.org:/public/html/catb/gpsd"
+# Hosting information ends here
+
 EnsureSConsVersion(1,2,0)
 
-import copy, os, sys, commands, glob, re, platform
+import copy, os, sys, commands, glob, re, platform, time
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
@@ -969,6 +975,10 @@ def substituter(target, source, env):
         ('@prefix@',  env['prefix']),
         ('@libdir@',  env['libdir']),
         ('@PYTHON@',  sys.executable),
+        ('@DATE@',    time.asctime()),
+        ('@WEBSITE@', website),
+        ('@MAINPAGE@',mainpage),
+        ('@UPLOADTO@',uploadto),
         )
     with open(str(source[0])) as sfp:
         content = sfp.read()
@@ -977,8 +987,8 @@ def substituter(target, source, env):
     with open(str(target[0]), "w") as tfp:
         tfp.write(content)
 
-templated = ("packaging/rpm/gpsd.spec.in", "libgps.pc.in", "libgpsd.pc.in",
-             "jsongen.py.in", "maskaudit.py.in", "valgrind-audit.py.in")
+templated = glob.glob("*.in") + glob.glob("www/*.in") + \
+            ["packaging/rpm/gpsd.spec.in"]
 
 for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
@@ -1366,10 +1376,6 @@ if htmlbuilder:
     # The internals manual.
     # Doesn't capture dependencies on the subpages
     env.HTML('www/internals.html', '$SRCDIR/doc/explanation.xml')
-
-# The index page
-env.Command('www/index.html', 'www/index.html.in',
-            ['sed -e "/@DATE@/s//`date \'+%B %d, %Y\'`/" <$SOURCE >$TARGET'])
 
 # The hardware page
 env.Command('www/hardware.html', ['gpscap.py',

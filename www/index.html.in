@@ -199,8 +199,8 @@ version) rather than the latest released stable version.</p>
 <h1 id='downloads'>Repository, Downloads and Packages</h1>
 
 <dl>
-<dt><a href='http://developer.berlios.de/projects/gpsd/'>Project page</a>
-<dd>The main project page on Berlios</dd>
+<dt><a href='@MAINPAGE@'>Project page</a> 
+<dd>The main project page</dd>
 
 <dt><a
 href="http://developer.berlios.de/project/showfiles.php?group_id=2116">Releases</a>
@@ -551,6 +551,6 @@ Here</a>.</font></td></tr></table></td></tr></table></noscript>
 
 <!--
 Local Variables:
-compile-command: "(cd ..; make website; cd www; scp index.html shell.berlios.de:/home/groups/gpsd/htdocs)"
+compile-command: "(cd ..; scons website; cd www; scp index.html '@WEBSITE@')"
 End:
 -->
