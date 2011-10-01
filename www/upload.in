@@ -6,7 +6,6 @@
 # No CGI copy yet, hosting site won't let us send mail
 #
 webdir=@UPLOADTO@
-#cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
 # Ensure all derived HTML and checksums are up to date.
 (cd ..; scons website)
@@ -29,7 +28,6 @@ else
     else
         scp $eligible $webdir && touch .upload-stamp
     fi
-    #scp gps_report.cgi $cgidir
 fi
 
 # End

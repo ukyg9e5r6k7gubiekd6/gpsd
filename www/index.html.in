@@ -203,10 +203,10 @@ version) rather than the latest released stable version.</p>
 <dd>The main project page</dd>
 
 <dt><a
-href="http://developer.berlios.de/project/showfiles.php?group_id=2116">Releases</a>
+href="@DOWNLOAD@">Releases</a>
 <dd>Where to get release tarballs</dd>
 
-<dt><a href="http://developer.berlios.de/git/?group_id=2116">Browse Code</a></dt>
+<dt><a href="@VIEWREPO@">Browse Code</a></dt>
 <dd>Developer access to master git repository</dd>
 
 <dt><a
@@ -224,27 +224,22 @@ line.</p>
 <p>There are four project mailing lists:</p>
 
 <ul>
-<li><a
-href="http://lists.berlios.de/mailman/listinfo/gpsd-announce">gpsd-announce</a>
+<li><a href="@MAILMAN@/gpsd-announce">gpsd-announce</a>
 is for release announcements and project news.</li>
-<li><a
-href="http://lists.berlios.de/mailman/listinfo/gpsd-users">gpsd-users</a>
+<li><a href="@MAILMAN@/gpsd-users">gpsd-users</a>
 is for questions and technical support on <code>gpsd</code>, including support
 for application builders using <code>gpsd</code> as a component.</li>
-
-<li><a
-href="http://lists.berlios.de/mailman/listinfo/gpsd-dev">gpsd-dev</a>
+<li><a href="@MAILMAN@/gpsd-dev">gpsd-dev</a>
 is for <code>gpsd</code> developers.</li>
-
-<li><a
-href="https://lists.berlios.de/mailman/listinfo/gpsd-commit-watch">gpsd-commit-watch</a>
+<li><a href="@MAILMAN@/gpsd-commit-watch">gpsd-commit-watch</a>
 sends automatic broadcast notifications of commits to the <code>gpsd</code>
 repository.</li>
 
-<li>We also have searchable archives at <a href="http://marc.info">MARC</a>:
-<a href="http://marc.info/?l=gpsd-users">gpsd-users</a>,
-<a href="http://marc.info/?l=gpsd-dev">gpsd-dev</a> and 
-<a href="http://marc.info/?l=gpsd-commit-watch">gpsd-commit-watch</a>.</li>
+<li>There are searchable archives of the old GPSD mailing lists from
+Berlios at <a href="http://marc.info">MARC</a>: <a
+href="http://marc.info/?l=gpsd-users">gpsd-users</a>, <a
+href="http://marc.info/?l=gpsd-dev">gpsd-dev</a> and <a
+href="http://marc.info/?l=gpsd-commit-watch">gpsd-commit-watch</a>.</li>
 </ul>
 
 <h1 id='documentation'>Documentation</h1>
@@ -417,9 +412,7 @@ of the setup steps and caveats will be the same.</p>
 href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <code>xgps</code> with a Qt look and feel.
 
-<p>We supply a Gentoo Linux ebuild script in the source distribution.</p>
-
-<p>You can find Debian-unstable packages 
+0<p>You can find Debian-unstable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
 <p>There's a Perl client library <a
@@ -510,7 +503,7 @@ Here</a>.</font></td></tr></table></td></tr></table></noscript>
 <img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google" align="middle"></img></a>
 </td>
 <td nowrap="nowrap">
-<input type="hidden" name="domains" value="gpsd.berlios.de"></input>
+<input type="hidden" name="domains" value="@SITESEARCH@"></input>
 <input type="text" name="q" size="31" maxlength="255" value=""></input>
 <input type="submit" name="sa" value="Search"></input>
 </td></tr>
@@ -524,8 +517,8 @@ Here</a>.</font></td></tr></table></td></tr></table></noscript>
 <font size="-1" color="#000000">Web</font>
 </td>
 <td>
-<input type="radio" name="sitesearch" value="gpsd.berlios.de"></input>
-<font size="-1" color="#000000">gpsd.berlios.de</font>
+<input type="radio" name="sitesearch" value="@SITESEARCH@"></input>
+<font size="-1" color="#000000">@SITESEARCH@</font>
 </td>
 </tr>
 </table>

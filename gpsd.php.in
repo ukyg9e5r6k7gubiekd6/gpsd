@@ -1,7 +1,5 @@
 <?php
 
-#$CSK: gpsd.php,v 1.39 2006/11/21 22:31:10 ckuethe Exp $
-
 # Copyright (c) 2006,2010 Chris Kuethe <chris.kuethe@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -482,7 +480,7 @@ EOF;
 {$footer}
 <hr/>
 <p class="administrivia">This script is distributed by the
-<a href="http://gpsd.berlios.de">GPSD project</a>.</p>
+<a href="@WEBSITE@">GPSD project</a>.</p>
 
 </body>
 </html>
@@ -529,7 +527,7 @@ function write_config(){
 \$footer = '';
 \$blurb = <<<EOT
 This is a
-<a href="http://gpsd.berlios.de">gpsd</a>
+<a href="@WEBSITE@">gpsd</a>
 server <blink><font color="red">located someplace</font></blink>.
 
 The hardware is a

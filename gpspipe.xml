@@ -144,9 +144,7 @@ standard output, then exit.</para>
 
 <refsect1 id='maintainer'><title>AUTHOR</title>
 
-<para>Gary E. Miller <email>gem@rellim.com</email>.  There is a
-project page for <application>gpsd</application> <ulink
-url="http://gpsd.berlios.de/">here</ulink>.</para>
+<para>Gary E. Miller <email>gem@rellim.com</email>.</para>
 
 </refsect1>
 

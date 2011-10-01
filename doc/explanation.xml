@@ -2,8 +2,6 @@
 <!DOCTYPE article PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "docbook/docbookx.dtd" [
-<!ENTITY homepage        "http://gpsd.berlios.de">
-
 <!ENTITY bits.h                   SYSTEM "explan_bits.h.xml">
 <!ENTITY dbusexport.c             SYSTEM "explan_dbusexport.c.xml">
 <!ENTITY driver_nmea.c            SYSTEM "explan_driver_nmea.c.xml">

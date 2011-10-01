@@ -79,9 +79,8 @@ that <application>gpsd</application> knows how to speak,
 <application>gpsd</application> and then
 <application>xgps</application>, the X windows test client.</para>
 
-<para>If you have problems, the GPSD project maintains a <ulink
-url="http://gpsd.berlios.de/faq.html">FAQ</ulink> to assist
-troubleshooting.</para>
+<para>If you have problems, the GPSD project maintains a >FAQ to
+assist troubleshooting.</para>
 
 </refsect1>
 <refsect1 id='description'><title>DESCRIPTION</title>

@@ -18,6 +18,8 @@ gpsfake
 gpsprof
 jsongen.py
 maskaudit.py
+upload
+gpsd.php
 valgrind-audit.py
 # Unit tests
 test_float
@@ -91,6 +93,7 @@ stamp-python
 # Documentation
 www/AIVDM.html
 www/NMEA.html
+www/faq.html
 www/gps.html
 www/gpscat.html
 www/gpsctl.html
@@ -100,6 +103,7 @@ www/gpsfake.html
 www/gpsmon.html
 www/gpspipe.html
 www/gpsprof.html
+www/hacking.html
 www/hardware.html
 www/index.html
 www/installation.html

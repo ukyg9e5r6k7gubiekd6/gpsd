@@ -29,9 +29,20 @@ libgps_age   = 0
 # Release identification ends here
 
 # Hosting information (mainly used for templating web pages) begins here
-website  = "http://catb.org/gpsd" 
-mainpage = "https://savannah.nongnu.org/projects/gpsd/"
-uploadto = "login.ibiblio.org:/public/html/catb/gpsd"
+# Each variable foo has a corresponding @FOO@ expanded in .in files.
+sitename   = "Savannah"
+sitesearch = "catb.org"
+website    = "http://catb.org/gpsd" 
+mainpage   = "https://savannah.nongnu.org/projects/gpsd/"
+uploadto   = "login.ibiblio.org:/public/html/catb/gpsd"
+mailman    = "http://lists.nongnu.org/mailman/listinfo/"
+admin      = "https://savannah.nongnu.org/project/admin/?group=gpsd"
+download   = "http://download.savannah.gnu.org/releases/gpsd/"
+bugtracker = "https://savannah.nongnu.org/bugs/?group=gpsd"
+browserepo = "http://git.savannah.gnu.org/cgit/gpsd.git"
+clonerepo  = "https://savannah.nongnu.org/git/?group=gpsd"
+webform    = "https://www.mainframe.cx/cgi-bin/gps_report.cgi"
+devmail    = "gpsd-dev@lists.nongnu.org"
 # Hosting information ends here
 
 EnsureSConsVersion(1,2,0)
@@ -909,13 +920,13 @@ else:
 Name: gps
 Version: %s
 Summary: Python libraries for the gpsd service daemon
-Home-page: http://gpsd.berlios.de/
+Home-page: %s
 Author: the GPSD project
-Author-email: gpsd-dev@lists.berlios.de
+Author-email: %s
 License: BSD
 Description: The gpsd service daemon can monitor one or more GPS devices connected to a host computer, making all data on the location and movements of the sensors available to be queried on TCP port 2947.
 Platform: UNKNOWN
-""" %(gpsd_version, )
+""" %(gpsd_version, website, devmail)
     python_egg_info = python_env.Textfile(target="gps-%s.egg-info" %(gpsd_version, ), source=python_egg_info_source)
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
@@ -953,7 +964,7 @@ revision='#define REVISION "%s"\n' %(rev.strip(),)
 env.NoClean(env.Textfile(target="revision.h", source=[revision]))
 
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
-                     'gps_maskdump.c', 'revision.h']
+                     'gps_maskdump.c', 'revision.h', 'gpsd.php']
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
@@ -971,24 +982,35 @@ env.Precious(leapseconds_cache)
 # but it doesn't seem to work in scons 1.20
 def substituter(target, source, env):
     substmap = (
-        ('@VERSION@', gpsd_version),
-        ('@prefix@',  env['prefix']),
-        ('@libdir@',  env['libdir']),
-        ('@PYTHON@',  sys.executable),
-        ('@DATE@',    time.asctime()),
-        ('@WEBSITE@', website),
-        ('@MAINPAGE@',mainpage),
-        ('@UPLOADTO@',uploadto),
+        ('@VERSION@',    gpsd_version),
+        ('@prefix@',     env['prefix']),
+        ('@libdir@',     env['libdir']),
+        ('@PYTHON@',     sys.executable),
+        ('@DATE@',       time.asctime()),
+        ('@MASTER',      'DO NOT HAND_HACK! THIS FILE IS GENERATED@'),
+        ('@SITENAME@',   sitename),
+        ('@SITESEARCH@', sitesearch),
+        ('@WEBSITE@',    website),
+        ('@MAINPAGE@',   mainpage),
+        ('@UPLOADTO@',   uploadto),
+        ('@ADMIN@',      admin),
+        ('@DOWNLOAD@',   download),
+        ('@BUGTRACKER@', bugtracker),
+        ('@BROWSEREPO@', browserepo),
+        ('@CLONEREPO@',  clonerepo),
+        ('@DEVMAIL@',    devmail),
         )
     with open(str(source[0])) as sfp:
         content = sfp.read()
     for (s, t) in substmap:
         content = content.replace(s, t)
+    m = re.search("@[A-Z]+@", content)
+    if m and m.group(0) not in map(lambda x: x[0], substmap):
+        print >>sys.stderr, "Unknown subst token %s in %s." % (m.group(0), sfp.name)
     with open(str(target[0]), "w") as tfp:
         tfp.write(content)
 
-templated = glob.glob("*.in") + glob.glob("www/*.in") + \
-            ["packaging/rpm/gpsd.spec.in"]
+templated = glob.glob("*.in") + glob.glob("*/*.in")
 
 for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
@@ -1351,7 +1373,7 @@ env.Alias('website', Split('''www/installation.html
     www/index.html www/hardware.html
     www/performance/performance.html
     www/internals.html
-    '''))
+    ''') + map(lambda f: f[:-3], glob.glob("www/*.in")))
 
 # asciidoc documents
 if env.WhereIs('asciidoc'):

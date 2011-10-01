@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- @MASTER@ -->
 <!DOCTYPE html
      PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -1358,9 +1359,8 @@ at state 2 -- you must notify the dev list.</p>
 the following order:</p>
 
 <dl>
-<dt>1. Check the <a
-href="http://developer.berlios.de/bugs/?group_id=2116">Berlios bug
-tracker</a> for release blockers.</dt>  <dd></dd>
+<dt>1. Check the <a href="@BUGTRACKER@">bug tracker</a> for
+release blockers.</dt>  <dd></dd>
 
 <dt>2. Issue the pre-release heads-up</dt>
 <dd>About 48 hours before release, announce that it's coming so people
@@ -1399,10 +1399,10 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 </ol>
 </dd>
 
-<dt>9. Ship to Berlios</dt>
-<dd>Make the tarball (scons dist) and upload to berlios.de (scons upload-ftp),
-and do Berlios's
-<a href="https://developer.berlios.de/project/admin/?group_id=2116">release procedure</a>.</dd>
+<dt>9. Ship to our hosting site</dt>
+<dd>Make the tarball (scons dist), upload it to @SITENAME@,
+(scons upload-ftp), and do <a href="@ADMIN@">release
+procedure</a>.</dd>
 
 <dt>10. Tag the release in git</dt>
 <dd>Do this:

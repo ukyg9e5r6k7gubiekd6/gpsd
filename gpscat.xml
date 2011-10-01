@@ -129,8 +129,6 @@ devices.</para>
 
 <refsect1 id='maintainer'><title>AUTHOR</title> 
 
-<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  There is a
-project page for <application>gpsd</application> <ulink
-url="http://gpsd.berlios.de/">here</ulink>.</para>
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 </refsect1>
 </refentry>
