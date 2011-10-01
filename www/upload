@@ -5,7 +5,7 @@
 #
 # No CGI copy yet, hosting site won't let us send mail
 #
-webdir=shell.berlios.de:/home/groups/gpsd/htdocs
+webdir=login.ibiblio.org:/public/html/catb/gpsd
 #cgidir=shell.berlios.de:/home/groups/gpsd/cgi-bin
 
 # Ensure all derived HTML and checksums are up to date.
