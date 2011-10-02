@@ -73,6 +73,10 @@ the distribution terms evil, but that attack lawyers for the document
 publisher have been known to threaten people who quote it on the
 Web.</p>
 
+<p>This is a selection of the files available at <a
+href="http://code.google.com/p/gpsd/downloads/list">GPSD's Google Code
+document repository</a>
+
 <h1>GPS standards</h1>
 
 <dl>
@@ -259,15 +263,11 @@ Receiver Macro-Component (offsite link)</a> (version E1, April 2003)</dt>
 aspects of the protocol that SiRF has removed from current versions of the
 protocol documentation.</dd>
 
-<dt><a href='vendor-docs/sirf/uBlox.pdf'>u-blox extension to SiRF binary protocol</a> (March 2002)</dt>
+<dt><a href='http://gpsd.googlecode.com/files/sirf/uBlox.pdf'>u-blox extension to SiRF binary protocol</a> (March 2002)</dt>
 <dd>u-blox was an OEM-enhanced firmware variant of the SiRF-1 chip.
 <code>gpsd</code> supports it.  It's been rendered obsolete by the SiRF 2
 and 3 chips.</dd>
 </dl>
-
-<p>For completeness, we carry copies of many ancient manuals for
-various SiRF-based units <a href='vendor-docs/sirf/'>here</a>.  Some of
-these document things SiRF no longer describes in its reference.</p>
 
 <h2>Fastrax</h2>
 
@@ -300,13 +300,6 @@ proprietary sentences PGRMB, PGRME, PGRMF, PGRMM, PGRMT, and PGRMV
 programming purposes, effectively identical to their earlier reference
 on the Garmin 15H and 15L.</dd>
 
-<dt><a href="vendor-docs/garmin/IntfSpec.pdf">GARMIN GPS Interface
-Specification</a> (May 2006)</dt> <dd>The binary protocol used by
-Garmin USB GPSes. We also have the <a
-href="vendor-docs/garmin/garmin-binary.pdf">December 1999</a> version
-here; comparing them may be useful.  Supported by
-<code>gpsd</code>.</dd>
-
 <dt><a href='http://www8.garmin.com/support/text_out.html'>Garmin Simple
 Text Protocol</a></dt> <dd>Some digital cameras are alleged to use
 this very simple textual report format.</dd>
@@ -321,50 +314,13 @@ href='http://gpsd.googlecode.com/files/_Superstar2.pdf'>Novatel Superstar II Use
 material on GPS technology. Doesn't describe control or reporting
 commands.</dd>
 
-<dt><a
-href="http://gpsd.googlecode.com/files/L1-Firmware-Reference-Manual.pdf">Superstar-II-Firmware
-Reference Manual</a></dt> 
-<dd>Describes the Novatel Superstar II binary protocol. This chipset
-is part-supported by GPSD; the driver is in development.</dd>
-</dl>
-
 <h2>San Jose Navigation</h2>
-
-<dd>
-<dt><a href='vendor-docs/furuno/fv-18_manual.pdf'>FV18 user manual</a> (October 2002)</dt>
-<dd>Describes NMEA extensions supported by the San Jose Navigation
-FV-18 GPS chipset. Supported by <code>gpsd</code>.</dd>
 
 <dt><a href='http://gpsd.googlecode.com/san-jose-navigation/fv25_manual.pdf'>FV25 user manual</a> (January 2005)</dt>
 <dd>Describes UBX binary protocol and NMEA extensions supported by the
 San Jose Navigation FV-25 (uBlox ANTARIS) GPS chipset. UBX is now supported
 by <code>gpsd</code>.</dd>
 </dd>
-
-<h2>Trimble</h2>
-
-<dl>
-<dt><a href="vendor-docs/trimble/tsip-reference.pdf">TSIP reference</a>
-(Revision C, 1999)<dt> 
-<dd>Describes the TSIP binary
-protocol. Supported by <code>gpsd</code>.</dd>
-
-<dt><a href="vendor-docs/ytimble/cmr.pdf">CMR reference</a><dt>
-<dd>Describes the CMR protocol used by trimble to ship corrections for RTK
-(real-time kinematic) GPS. Not yet supported by <code>gpsd</code>.</dd>
-</dl>
-
-<p>For completeness, we also carry the manuals for the Trimble
-<a href="vendor-docs/trimble/trimble-ace2.pdf">Ace 2</a>,
-<a href='vendor-docs/trimble/trimble-copernicus.pdf'>Copernicus</a>,
-<a href='vendor-docs/trimble/trimble-lassen-iq.pdf'>Lassen IQ</a>,
-<a href='vendor-docs/trimble/trimble-lassen-pt.pdf'>Lassen PT</a>,
-<a href='vendor-docs/trimble/trimble-lassen-sq.pdf'>Lassen SQ</a>,
-<a href='vendor-docs/trimble/trimble-lassen-pt.pdf'>Lassen PT</a>,
-and
-<a href='vendor-docs/trimble/trimble-lassen-iq.pdf'>SVeeEight</a>
-GPS units.  Some of these are more recent than the TSIP Reference and
-may document programming information that the does not.</p>
 
 <h2>Other Current GPSes</h2>
 
@@ -383,11 +339,6 @@ Module User's Guide</a> (Issue D, August 2003)</dt>
 <dd>Describes the binary protocol emitted
 by EverMore GM-X205 GPS chipset. Supported by <code>gpsd</code>.</dd>
 
-<dt><a href='vendor-docs/jupiter/'>NavMan Jupiter</a> (2005)</dt>
-<dd>Jupiters emit a variant of the obsolete Zodiac binary protocol.
-Probably supported by <code>gpsd</code>, though we have not been able
-to test with one of these yet.</dd>
-
 <dt><a href='http://gpsd.googlecode.com/files/crescent-sdx-3.pdf'>Crescent Integrator's Manual</a> (November 2005)</dt>
 <dd>Reference for the Hemisphere GPS from CSI Wireless.  Has both an NMEA mode 
 and a binary protocol. We have not been able to test with one of these, but the
@@ -400,17 +351,16 @@ of NMEA they call the <quote>standard Ashtech command set</quote>.  We
 have not been able to test with one of these, but the manual suggests
 <code>gpsd</code> should handle the NMEA mode just fine.</dd>
 
-<dt><a href='http://gpsd.googlecode.com/truenorth-reference.pdf'>True North Revolution Compass Technical 
+<dt><a href='http://gpsd.googlecode.com/files/truenorth-reference.pdf'>True North Revolution Compass Technical 
 Reference</a> (Revision B, August 2003)</dt>
 <dd>Interface spec for a digital magnetic compass that reports in NMEA.  <code>gpsd</code> had support for this in versions up to 2.33; whether it keeps
 that status in later releases will depend on whether we can get test hardware.</dd>
 
 <dt><a href='http://gpsd.googlecode.com/files/WD-G-ZX4120.pdf'>WD-G-ZX4120 User's Manual</a> (Version 1.0)</dt>
-<dt><a href='vendor-docs/ZX4125Manual.pdf'>WD-G-ZX4125 User's Manual</a></dt>
-<dd>These files document a couple of modules based on NemeriX chips, and the
+<dd>This file documents a module based on NemeriX chips, and the
 NMEA extensions used. <code>gpsd</code> should just work in NMEA mode.</dd>
 
-<dt><a href='www/vendor-docs/EB-230-Data-Sheet-V1.2.pdf/EB-230-Data-Sheet-V1.2.pdf'>EB-230 User's Manual</a> (Version 1.2)</dt>
+<dt><a href='http://gpsd.googlecode.com/files/EB-230-Data-Sheet-V1.2.pdf/EB-230-Data-Sheet-V1.2.pdf'>EB-230 User's Manual</a> (Version 1.2)</dt>
 <dd>This file documents one elusive Mediatek GPS module, and the proprietary
 NMEA extensions used. <code>gpsd</code> should just work in NMEA mode.</dd>
 
@@ -422,11 +372,6 @@ NMEA extensions used. <code>gpsd</code> should just work in NMEA mode.</dd>
 <dd>This file documents the LocSense binary message protocol. This protocol
 is currently unsupported. <code>gpsd</code> should just work in NMEA mode
 with LocSense based receivers.</dd>
-
-<dt><a href='vendor-docs/furuno/GH-79L4-N.pdf'>Specifications for GPS Receiver GH-79L4-N</a></dt>
-<dd>Technical manual for the Furuno Electric GH-79L4-N.  Probably
-representative for any other GPS using Furuno's chipset, which is
-however not identified.</dd>
 
 <dt><a href='http://gpsd.googlecode.com/files/Navcom%2096-312001-3001%20%28rev%20K%29.pdf'>Navcom Technical Reference Manual</a> (rev. K, Aug 2008)</dt>
 <dd>Technical reference and protocol specifications for Navcom receivers.</dd>
@@ -444,22 +389,6 @@ Supported by <code>gpsd</code>.  Now obsolete; SiRF ate their lunch.</dd>
 <dd>We have archived the most complete available documentation on the Axiom
 Sandpiper II OEM module (discontinued, vendor has gone out of
 business). Supported by <code>gpsd</code>.</dd>
-
-<dt><a href='vendor-docs/motorola'>Motorola Oncore Eval Kit
-documents</a> (Revision 3.2, June 1998)</dt>
-<dd>Describes Motorola's (apparently discontinued)
-OnCore GPS product. Supported by <code>gpsd</code> in NMEA mode
-only.</dd>
-</dl>
-
-<h2>Curiosities</h2>
-
-<dl>
-<dt><a
-href='http://gpsd.googlecode.com/files/Missile-Applications-Condensed-Measurements.pdf'>Missile Applications Condensed Measurements</a></dt> 
-<dd>An application note on a GPS protocol extension designed for
-real-time telemetry from ballistic missiles in flight. The complete
-spec is <a href="vendor-docs/rccstd_264-04_macm.pdf">here</a>.</dd>
 </dl>
 
 <h1>Other</h1>
