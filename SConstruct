@@ -42,6 +42,7 @@ download   = "http://download.savannah.gnu.org/releases/gpsd/"
 bugtracker = "https://savannah.nongnu.org/bugs/?group=gpsd"
 browserepo = "http://git.savannah.gnu.org/cgit/gpsd.git"
 clonerepo  = "https://savannah.nongnu.org/git/?group=gpsd"
+gitrepo    = "git://git.berlios.de/gpsd"
 webform    = "https://www.mainframe.cx/cgi-bin/gps_report.cgi"
 formserver = "www@mainframe.cx"
 devmail    = "gpsd-dev@lists.nongnu.org"
@@ -175,7 +176,7 @@ for (name, default, help) in pathopts:
 # This is necessary in order for tools like ccache and Coverity scan-build to
 # work. Importing PKG_CONFIG_PATH can be used to solve a problem with where .pc
 # files go in a cross-build, and importing STAGING_PREFIX is required for the
-# OpenWRT build.
+# OpenWRT build.  LOGNAME is required for the floctest production.
 #
 # If chrpath(1) is not available, the RPATH of built binaries won't be
 # set so they can see shared libraries in this build directory. Setting
@@ -184,7 +185,7 @@ for (name, default, help) in pathopts:
 # anyway.
 #
 envs = {'LD_LIBRARY_PATH': os.getcwd()}
-for var in ('PATH', 'PKG_CONFIG_PATH', 'STAGING_PREFIX'):
+for var in ('PATH', 'PKG_CONFIG_PATH', 'STAGING_PREFIX', "LOGNAME"):
     if var in os.environ:
         envs[var] = os.environ[var]
 
@@ -1003,6 +1004,7 @@ def substituter(target, source, env):
         ('@BUGTRACKER@', bugtracker),
         ('@BROWSEREPO@', browserepo),
         ('@CLONEREPO@',  clonerepo),
+        ('@GITREPO@',    gitrepo),
         ('@WEBFORM@',    webform),
         ('@FORMSERVER@', formserver),
         ('@DEVMAIL@',    devmail),
@@ -1348,6 +1350,9 @@ bits_regress = Utility('bits-regress', [test_bits], [
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit', ['valgrind-audit.py'], 'valgrind-audit.py')
 
+# Run test builds on remote machines
+flocktest = Utility("flocktest", [], "cd devtools; flocktest " + gitrepo)
+
 # Run all normal regression tests
 check = env.Alias('check', [
     python_compilation_regress,
@@ -1412,7 +1417,6 @@ env.Command('www/hardware.html', ['gpscap.py',
                                   'gpscap.ini',
                                   'www/hardware-tail.html'],
             ['(cat www/hardware-head.html; $PYTHON gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
-
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
 

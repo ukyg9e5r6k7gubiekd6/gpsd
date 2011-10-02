@@ -6,7 +6,7 @@
 """\
 flocktest - shepherd script for the GPSD test flock
 
-usage: flocktest [-c] [-q] [-d subdir] [-k key] -v [-x exclude] [-?]
+usage: flocktest [-c] [-q] [-d subdir] [-k key] -v [-x exclude] [-?] [origin]
 
 The -? makes flocktest prints this help and exits.
 
@@ -31,6 +31,9 @@ are redundant with your local ones.
 
 Known bug: The -k has no atomicity check.  Running it from two
 flocktest instances concurrently could result in a scrambled keyfile.
+
+The origin is the git repo to be pulled from.  Not required if flock.ini
+has an origin attribute.
 """
 
 import os, sys, ConfigParser, getopt, socket, threading, commands, time
@@ -134,7 +137,7 @@ Subject: DeliverXML
   <generator>
     <name>%(project)s Remote Test Flock Driver</name>
     <version>${gitver}</version>
-    <url>$(generator)s</url>
+    <url>$(origin)s/flockdriver</url>
   </generator>
   <source>
     <project>%(project)s</project>
@@ -272,7 +275,7 @@ if __name__ == '__main__':
     for (switch, val) in options:
         if  switch == '-c':	# Dump flocktest configuration
             dumpconf = True
-        elif  switch == '-d':	# Set the test subdirectory name
+        elif switch == '-d':	# Set the test subdirectory name
             subdir = val
         elif  switch == '-k':	# Install the access keys
             copykeys = True
@@ -288,6 +291,11 @@ if __name__ == '__main__':
 
     config = ConfigParser.RawConfigParser()
     config.read(["flocktest.ini", ".flocktest.ini"])
+    if arguments:
+        config.set("DEFAULT", "origin", arguments[0])
+    if not config.has_option("DEFAULT", "origin"):
+        print >>sys.stderr, "flocktest: repository required,"
+        sys.exit(1)
     sites = []
     for site in config.sections():
         newsite = TestSite(site, dict(config.items(site)))
@@ -297,7 +305,6 @@ if __name__ == '__main__':
     flock = TestFlock(sites, verbose)
     if exclusions:
         flock.exclude(exclusions)
-
     if dumpconf:
         config.write(sys.stdout)
     elif copykeys:
