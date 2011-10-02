@@ -12,7 +12,7 @@ The -? makes flocktest prints this help and exits.
 
 The -c option dumps flocktest's configuration and exits
 
-The -k mode installs a specified file of ssh public key on all machines
+The -k mode installs a specified file of ssh public keys on all machines
 
 Otherwise, the remote flockdriver script is executed on each machine.
 
@@ -41,8 +41,6 @@ flockdriver = '''
 # flockdriver - conduct regression tests as an agent for a remote flocktest
 #
 # This file is generated.  Do not hand-hack.
-
-generator="http://gpsd.berlios.de/flockdriver"
 
 quiet=no
 while getopts dq opt
@@ -136,7 +134,7 @@ Subject: DeliverXML
   <generator>
     <name>%(project)s Remote Test Flock Driver</name>
     <version>${gitver}</version>
-    <url>${generator}</url>
+    <url>$(generator)s</url>
   </generator>
   <source>
     <project>%(project)s</project>
