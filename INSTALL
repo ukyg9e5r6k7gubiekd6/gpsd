@@ -131,8 +131,8 @@ lock.
 15-20 minutes after it gets a skyview for it to download an ephemeris
 and begin delivering fixes.
 
-6. A FAQ and troubleshooting instructions can be found at
-http://gpsd.berlios.de/faq.html
+6. A FAQ and troubleshooting instructions can be found at the GPSD 
+project site.
 
 == Once you have verified correct operation ==
 
@@ -140,12 +140,11 @@ http://gpsd.berlios.de/faq.html
 system, you may need to `dpkg-reconfigure -plow gpsd' to enable the
 hotplug magic ("Start gpsd automatically").
 
-2. Check out the list of supported hardware at our
-http://gpsd.berlios.de/hardware.html[hardware page]. If your GPS isn't
-on the list, please send us information to add a new line to the
-table.  Directions are included on that page. We can also use updates
-of the latest version number known to work with hardware already
-supported.
+2. Check out the list of supported hardware at the Hardware page on
+the GPSD project's website. If your GPS isn't on the list, please send
+us information to add a new line to the table.  Directions are
+included on that page. We can also use updates of the latest version
+number known to work with hardware already supported.
 
 3. GPSD includes a PHP script that you can use to generate a PHP
 status page for your GPS if you wish. (It may not be in the core

@@ -1,9 +1,9 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.32, June 2011
+v1.33, November 2011
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
-you can find the original at http://gpsd.berlios.de/AIVDM.txt[]
+you can find the original at the GPSD project website
 
 == Introduction ==
 
@@ -71,10 +71,9 @@ The ASCII format for AIVDM/AIVDO representations of AIS radio messages
 seems to have been set by IEC-PAS 61162-100, "Maritime navigation and
 radiocommunication equipment and systems" <<IEC-PAS>>. It is
 proprietary and I have not looked at it.  Various public sources
-indicate that it has been "harmonized" with some version of NMEA 0183
-<<NMEA>>, which I also have not looked at because it too is
-proprietary and expensive, and surrounded by even more rapacious
-attack lawyers.
+indicate that it has been "harmonized" with some version of NMEA 0183,
+which I also have not looked at because it too is proprietary and
+expensive, and surrounded by even more rapacious attack lawyers.
 
 == Information Sources ==
 
@@ -146,10 +145,9 @@ plenty of those.
 
 == Open-Source Implementations ==
 
-The http://gpsd.berlios.de/[GPSD project] ships an AIVDM/AIVDO
-sentence decoder as part of the daemon. This document was developed to
-be the specification for it, and it will decode all sentence type
-described herein.
+The GPSD project ships an AIVDM/AIVDO sentence decoder as part of the
+daemon. This document was developed to be the specification for it,
+and it will decode all sentence type described herein.
 
 The source-code repository of the GPSD project holds a conforming
 standalone Python decoder, ais.py, that is not included in shipped
@@ -4366,7 +4364,11 @@ Identification System]
 
 - [[[NAVCEN]]] http://www.navcen.uscg.gov/enav/ais/[NAVCEN AIS pages]
 
-- [[[NMEA]]] http://gpsd.berlios.de/standards/NMEA.txt[NMEA sentences]
+- [[[NMEA]]] "NMEA Revealed" This document collects information from
+  public sources on the proprietary NMEA 0183 standard.  It is widely
+  distributed, but due to its hosting site having folded in late 2011,
+  its home location is unstable. It is probably best found by typing
+  the title into a search engine.
 
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
@@ -4511,3 +4513,7 @@ messages and fixed typos.
 
 Version 1.32 adds descriptions of IMO Area Notice and Environmental
 messages.  It adds explicit type information to the tables.
+
+Version 1.33 notes that the home location of "NMEA Revealed" became
+unstable in late 2011.
+

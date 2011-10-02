@@ -173,10 +173,11 @@ status of Qt supported platforms as of version 4.6.
 The scons recipe is intended to support cross-building, in particular
 for embedded deployment of the software.  A session transcript
 illustrating how to do that, with some routine messages suppressed and
-replaced with [...], follows.  Notes and explanation follow the transcript.
+replaced with [...], follows.  The script assumes you're cloning from the 
+GPSD project site or a mirror. Notes and explanation follow the transcript.
 
 ===========================================================================
-$ git clone git://git.berlios.de/gpsd
+$ git clone [...]
 Cloning into gpsd...
 [...]
 $ cd gpsd

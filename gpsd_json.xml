@@ -2222,12 +2222,11 @@ a restricted feature set.</para>
 <para>AIS packets are dumped as JSON objects with class "AIS".  Each
 AIS report object contains a "type" field giving the AIS message type
 and a "scaled" field telling whether the remainder of the fields are
-dumped in scaled or unscaled form. (These will be emitted before 
-any type-specific fields.) It will also contain a "device" field
-naming the data source.  Other fields have names and types
-as specified in the <ulink
-url="http://gpsd.berlios.de/AIVDM.html">"AIVDM/AIVDO Protocol
-Decoding"</ulink> document; each message field table may be directly
+dumped in scaled or unscaled form. (These will be emitted before any
+type-specific fields.) It will also contain a "device" field naming
+the data source.  Other fields have names and types as specified in
+the <citetitle>AIVDM/AIVDO Protocol Decoding</citetitle> document on
+the GPSD project website; each message field table may be directly
 interpreted as a specification for the members of the corresponding
 JSON object type.</para>
 
@@ -2242,9 +2241,7 @@ turn may appear as "nan" if is unavailable, or as one of the strings
 otherwise it is quadratically mapped back to the turn sensor number in
 degrees per minute. Vessel draughts are converted to decimal meters
 rather than native AIS decimeters. Various other scaling conversions
-are described in <ulink
-url="http://gpsd.berlios.de/AIVDM.html">"AIVDM/AIVDO Protocol
-Decoding"</ulink>.</para>
+are described in <citetitle>"AIVDM/AIVDO Protocol Decoding"</citetitle>.</para>
 
 </refsect1>
 <refsect1 id='subframe'><title>SUBFRAME DUMP FORMATS</title>

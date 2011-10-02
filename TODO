@@ -3,18 +3,18 @@ doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a
 will unfold them again.
 
 For contribution guidelines and internals documentation, please see
-<http://gpsd.berlios.de/hacking.html>.
+the "Hacking Guide" on the project website.
 
 The list of bugs exposed by gpsd in other software has moved to
-<http://gpsd.berlios.de/upstream-bugs.html>.
+the "Upstream Bugs" page on the project website.
 
 ** Bugs in gpsd and its clients:
 
 *** Tracker bugs
 
-See the GPSD bug tracker at https://developer.berlios.de/bugs/?group_id=2116
-but don't be surprised if it's empty or very sparse.  Our rate of new defects
-per month is quite low.
+See the GPSD bug tracker on the project website, but don't be
+surprised if it's empty or very sparse.  Our rate of new defects per
+month is quite low.
 
 ** Dispatcher/network issues
 

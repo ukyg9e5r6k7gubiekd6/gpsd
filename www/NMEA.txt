@@ -1,15 +1,15 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.8, Feb 2011
+v2.9, Nov 2011
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
 
-The master of this document is in asciidoc format at
-http://gpsd.berlios.de/NMEA.txt[]; you are probably seeing it as a web
-page.  You may encounter versions of it, in plain ASCII, that do not
-have a revision number and do not list an editor. These are older and
-should probably be considered obsolescent.
+The master of this document is in asciidoc format at the GPSD project
+website; you are probably seeing it as a web page.  You may encounter
+versions of it, in plain ASCII, that do not have a revision number and
+do not list an editor. These are older and should probably be
+considered obsolescent.
 
 == Sources and Applicable Standards ==
 
