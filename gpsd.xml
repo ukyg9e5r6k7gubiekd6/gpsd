@@ -840,12 +840,11 @@ Text following # on a line is ignored.  Blank lines are ignored.</para>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title>
 
 <para>The official NMEA protocol standard is available on paper from
-the <ulink url='http://www.nmea.org/pub/0183/'>National Marine
-Electronics Association</ulink>, but is proprietary and expensive; the
-maintainers of <application>gpsd</application> have made a point of
-not looking at it.  The <ulink url="http://gpsd.berlios.de/">GPSD
-website</ulink> links to several documents that collect publicly
-disclosed information about the protocol.</para>
+the National Marine Electronics Association, but is proprietary and
+expensive; the maintainers of <application>gpsd</application> have
+made a point of not looking at it.  The GPSD project website links to
+several documents that collect publicly disclosed information about
+the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
 sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA.  It recognizes these
@@ -869,20 +868,18 @@ Satellite) Service</citetitle> RTCM Paper 136-2001/SC 104-STD.  The
 applicable standard for RTCM-104 V3 is <citetitle>RTCM Standard
 10403.1 for Differential GNSS Services - Version 3</citetitle> RTCM
 Paper 177-2006-SC104-STD. Ordering instructions for the RTCM standards
-are accessible from the website of the <ulink
-url='http://www.rtcm.org/'>Radio Technical Commission for Maritime
-Services</ulink> under "Publications".</para>
+are accessible from the website of the Radio Technical Commission for Maritime
+Services under "Publications".</para>
 
 <para>AIS is defined by ITU Recommendation M.1371,
 <citetitle>Technical Characteristics for a Universal Shipborne
 Automatic Identification System Using Time Division Multiple
 Access</citetitle>. The AIVDM/AIVDO format understood by this program
 is defined by IEC-PAS 61162-100, <citetitle>Maritime navigation and
-radiocommunication equipment and systems</citetitle>.A more
-accessible description of both can be found at <citetitle><ulink
-url="http://gpsd.berlios.de/AIVDM.html">AIVDM/AIVDO protocol
-decoding</ulink></citetitle> on the references page of the
-GPSD project website.</para>
+radiocommunication equipment and systems</citetitle>.A more accessible
+description of both can be found at <citetitle>AIVDM/AIVDO Protocol
+Decoding</citetitle>, on the references page of the GPSD project
+website.</para>
 
 <para>Subframe data is defined by IS-GPS-200E, <citetitle>GLOBAL
 POSITIONING SYSTEM WING (GPSW) SYSTEMS ENGINEERING &amp; INTEGRATION,
@@ -911,8 +908,7 @@ D(t)</citetitle></para>
 <para>Authors: Eric S. Raymond, Chris Kuethe, Gary Miller.  Former
 authors whose bits have been plowed under by code turnover: Remco
 Treffcorn, Derrick Brashear, Russ Nelson. This manual page by Eric S. Raymond
-<email>esr@thyrsus.com</email>.  There is a <ulink
-url="http://gpsd.berlios.de/">project site</ulink>.</para>
+<email>esr@thyrsus.com</email>.</para>
 </refsect1>
 
 </refentry>
