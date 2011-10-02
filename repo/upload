@@ -3,15 +3,17 @@
 # Upload git configuration from here to the repo
 # Please do not introduce bashisms into this script.
 #
-confdir=git.berlios.de:/gitroot/gpsd/
+# Note: This script does not curently work. It used to, on Berlios.
+# We leave it here because light modifications will probably work
+# on may forges.
 
-# Get around the ssh lockout on git.berlios.de by copying up to 
-# shell.berlios.de and doing a local move. Written so the last
+# Get around the usual ssh lockout on a repo host by copying up to 
+# the shell host and doing a local move. Written so the last
 # move is atomic.
 copy()
 {
-    scp $1 $LOGNAME@shell.berlios.de:STAGE
-    ssh $LOGNAME@git.berlios.de "cp -f STAGE /gitroot/gpsd && mv /gitroot/gpsd/STAGE /gitroot/gpsd/$1"
+    scp $1 $LOGNAME@shell.xyzzy.foo:STAGE
+    ssh $LOGNAME@git.xyzzy.foo "cp -f STAGE /gitroot/gpsd && mv /gitroot/gpsd/STAGE /gitroot/gpsd/$1"
 }
 
 if [ $1 ]

@@ -1,15 +1,11 @@
-The repo directory contains the git configuration files and hooks as
-used at berlios. Here follows a short description of the files and
+The repo directory contains git configuration files and hooks as
+used at Berlios. Here follows a short description of the files and
 what they do:
 
 description: Description of the project as displayed by gitweb/cgit.
 
 config: Repository configuration, including config details for the
         hooks.
-
-hooks/acl.sh: see hooks/update
-
-hooks/ciabot.py: see hooks/update
 
 hooks/post-receive: This script is run after receive-pack has accepted a
                     pack and the repository has been updated.
@@ -26,13 +22,8 @@ hooks/post-update: Runs after the update hook. Executes
                    to update the auxiliary info file to help dumb
                    servers (needed to clone via http)
 
-hooks/update: This script does some sanity checks on the pushed commits
-              before accepting them, see the description on top of the
-              file for details. It also runs hooks/acl.sh, which is a
-              berlios specific script to set/update acls on the
-              repository - usually such a script should not be
-              necessary at all. In case all checks were passed,
-              hooks/ciabot.sh is called to show all commits in #gpsd.
+hooks/update-custom: Append to the standard update hook script.  Calls
+                     ciabot.py, which you must also install.
 
 The executable script "upload" can be used to update the repo copies with
 files from this directory.  Give it arguments to upload specified filenames,

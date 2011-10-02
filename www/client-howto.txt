@@ -1,10 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.11, August 2011
-
-This document is mastered in asciidoc format.  If you are reading it
-in HTML, you can find the original at
-http://gpsd.berlios.de/client-howto.txt[]
+v1.12, August 2011
 
 == Introduction ==
 
@@ -565,5 +561,4 @@ In major versions before 5:
 * There was a set_raw_hook() method in the C and Python bindings, now gone.
   C clients should call gps_data(); the buffer is available directly in Python.
 
-See http://gpsd.berlios.de/future.html#api_cleanup[Client API Cleanup]
-for details.
+See http:future.html#api_cleanup[Client API Cleanup] for details.

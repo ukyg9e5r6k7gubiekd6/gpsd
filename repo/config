@@ -1,15 +1,13 @@
-[core]
-        repositoryformatversion = 0
-        filemode = true
-        bare = true
-        logallrefupdates = true
-	sharedrepository = group
+# Extra attributes to add to git config if the hosting site allows hacking it.
+# When the project was hosted on Berlios, this was what it used.
+# Replace MAILHOST with the mailing list host.
+
 [gitweb]
-	owner = esr dbrashear remco nelsonrn garyemiller ckuethe wkazubski marr jfrancis mick_durkin bzed gdt mledford
+	owner = esr
 [hooks]
-	mailinglist = gpsd-commit-watch@lists.berlios.de
-	announcelist = gpsd-announce@lists.berlios.de
-	envelopesender = gpsd-dev@lists.berlios.de
+	mailinglist = gpsd-commit-watch@MAILHOST
+	announcelist = gpsd-announce@MAILHOST
+	envelopesender = gpsd-dev@MAILHOST
 	emailprefix = ""
 	allowunannotated = true
 	allowdeletebranch = true
@@ -19,5 +17,4 @@
 	showrev = "git show -C %s; echo"
 [ciabot]
         project = GPSD
-	# Berlios blocks outbound mail.
         xmlrpc = true
