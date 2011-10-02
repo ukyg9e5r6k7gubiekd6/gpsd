@@ -19,6 +19,7 @@
 <div id="Menu">
     <img src="gpsd-logo-small.png" alt="Small gpsd Logo" /><br />
     Home<br/>
+    <div>
     <a href="#news">News</a><br/>
     <a href="#downloads">Downloads</a><br/>
     <a href="#mailing-lists">Mailing lists</a><br/>
@@ -37,6 +38,7 @@
     <a href="protocol-transition.html">Application Compatibility</a>
     <a href="history.html">History</a><br/>
     <a href="future.html">Future</a><br/>
+    </div>
 
     <div>&nbsp;</div>
 
@@ -206,7 +208,7 @@ version) rather than the latest released stable version.</p>
 href="@DOWNLOAD@">Releases</a>
 <dd>Where to get release tarballs</dd>
 
-<dt><a href="@VIEWREPO@">Browse Code</a></dt>
+<dt><a href="@BROWSEREPO@">Browse Code</a></dt>
 <dd>Developer access to master git repository</dd>
 
 <p>If you are using a Debian-based distribution (including Ubuntu) you

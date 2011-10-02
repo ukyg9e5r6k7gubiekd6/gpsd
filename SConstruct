@@ -1001,6 +1001,7 @@ def substituter(target, source, env):
         ('@MAINPAGE@',   mainpage),
         ('@WEBUPLOAD@',  webupload),
         ('@SCPUPLOAD@',  scpupload),
+        ('@MAILMAN@',    mailman),
         ('@ADMIN@',      admin),
         ('@DOWNLOAD@',   download),
         ('@BUGTRACKER@', bugtracker),
@@ -1375,7 +1376,7 @@ env.Alias('testregress', check)
 # None of these productions are fired by default.
 # The content they handle is the GPSD website, not included in release tarballs.
 
-env.Alias('website', Split('''www/installation.html
+www = env.Alias('www', Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
     www/gpsd.html www/gpsfake.html www/gpsmon.html 
     www/gpspipe.html www/gpsprof.html www/gps.html 
@@ -1388,6 +1389,13 @@ env.Alias('website', Split('''www/installation.html
     www/performance/performance.html
     www/internals.html
     ''') + map(lambda f: f[:-3], glob.glob("www/*.in")))
+
+# How to update the website
+Utility("webupload", [www], ['rsync --exclude="*.in" -avz www/ ' + webupload])
+
+# When the URL declrations change, so must the generated web pages
+for fn in glob.glob("www/*.in"):
+    env.Depends(fn[:-3], "SConstruct")
 
 # asciidoc documents
 if env.WhereIs('asciidoc'):
