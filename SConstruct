@@ -34,7 +34,8 @@ sitename   = "Savannah"
 sitesearch = "catb.org"
 website    = "http://catb.org/gpsd" 
 mainpage   = "https://savannah.nongnu.org/projects/gpsd/"
-uploadto   = "login.ibiblio.org:/public/html/catb/gpsd"
+webupload  = "login.ibiblio.org:/public/html/catb/gpsd"
+scpupload  = "dl.sv.nongnu.org:/releases/gpsd/"
 mailman    = "http://lists.nongnu.org/mailman/listinfo/"
 admin      = "https://savannah.nongnu.org/project/admin/?group=gpsd"
 download   = "http://download.savannah.gnu.org/releases/gpsd/"
@@ -994,7 +995,8 @@ def substituter(target, source, env):
         ('@SITESEARCH@', sitesearch),
         ('@WEBSITE@',    website),
         ('@MAINPAGE@',   mainpage),
-        ('@UPLOADTO@',   uploadto),
+        ('@WEBUPLOAD@',  webupload),
+        ('@SCPUPLOAD@',  scpupload),
         ('@ADMIN@',      admin),
         ('@DOWNLOAD@',   download),
         ('@BUGTRACKER@', bugtracker),
@@ -1458,6 +1460,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     if "packaging/rpm/gpsd.spec" not in distfiles:
         distfiles.append("packaging/rpm/gpsd.spec")
 
+    # How to build a tarball.
     dist = env.Command('dist', distfiles, [
         '@tar --transform "s:^:gpsd-${VERSION}/:" -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
@@ -1474,12 +1477,13 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         'rm -fr gpsd-${VERSION}',
         ])
 
-    # This is how to ship a release to Berlios incoming.
-    # It requires developer access verified via ssh.
-    #
-    upload_ftp = Utility('upload-ftp', 'gpsd-${VERSION}.tar.gz', [
+    # This is how to ship a release to the hosting site.
+    # The chmod copes with the fact that scp will give a
+    # replacement the files of the *original*...
+    upload_release = Utility('upload-release', 'gpsd-${VERSION}.tar.gz', [
             'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
-            'lftp -c "open ftp://ftp.berlios.de/incoming; mput $SOURCE gpsd-${VERSION}.sum"',
+            'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.sum'
+            'scp $SOURCE gpsd-${VERSION}.sum" ' + scpupload,
             ])
 
 
