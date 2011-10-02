@@ -120,6 +120,6 @@ the iTalk protocol, helping to further development of iTalk support.
 3.X CREDITS
 ===========
 
-The main feature of the 3.x version will be a stabilized and finalized 
+The main feature of the 3.x versions is a stabilized and finalized 
 version of the JSON command/response protocol. This was designed and mainly
 implemented by ESR.  Gary Miller wrote the subframe support.
