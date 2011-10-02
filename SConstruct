@@ -30,6 +30,8 @@ libgps_age   = 0
 
 # Hosting information (mainly used for templating web pages) begins here
 # Each variable foo has a corresponding @FOO@ expanded in .in files.
+# There are no project-dependent URLs or references to the hosting site
+# anywhere else in the distribution; preserve this property!
 sitename   = "Savannah"
 sitesearch = "catb.org"
 website    = "http://catb.org/gpsd" 
@@ -176,7 +178,7 @@ for (name, default, help) in pathopts:
 # This is necessary in order for tools like ccache and Coverity scan-build to
 # work. Importing PKG_CONFIG_PATH can be used to solve a problem with where .pc
 # files go in a cross-build, and importing STAGING_PREFIX is required for the
-# OpenWRT build.  LOGNAME is required for the floctest production.
+# OpenWRT build.  LOGNAME is required for the flocktest production.
 #
 # If chrpath(1) is not available, the RPATH of built binaries won't be
 # set so they can see shared libraries in this build directory. Setting
