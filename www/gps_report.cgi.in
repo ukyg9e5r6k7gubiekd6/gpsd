@@ -1,5 +1,7 @@
 #!/usr/bin/perl -wT
 #
+# @MASTER@
+#
 # This is the CGI that processes the form return from GPS information form.
 # It's in Perl rather than Python because Berlios and many other sites 
 # don't support Python CGIs.
@@ -13,9 +15,9 @@ use strict;
 
 # All information on the project siting, mailing
 # lists, and originating host lives here.
-my $website = 'http://gpsd.berlios.de';
-my $to_address = 'gpsd-dev@berlios.de';
-my $servaddr = 'www@mainframe.cx';
+my $website = '@WEBSITE@';
+my $to_address = '@DEVMAIL@';
+my $servaddr = '@FORMSERVER@';
 
 my $query = new CGI;
 print $query->header;
@@ -310,9 +312,8 @@ this output to a file with the <code>gpscat</code> utility.</p>
 because the device needs some kind of activation sequence written to
 it before it will start reporting.  Some Garmin GPSes (the ones that
 speak Garmin binary protocol rather than NMEA) are like this.  If you
-think you have one of these, ask the <a
-href="mailto:gpsd-dev\@lists.berlios.de">GPSD developers</a> for
-help.</p>
+think you have one of these, ask for help on GPSD's development mailing 
+list</a>.</p>
 
 <p>A log file is most useful when it contains (a) some sentences
 generated when the receiver has no fix, (b) some sentences representing

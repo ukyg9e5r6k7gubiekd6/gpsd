@@ -43,6 +43,7 @@ bugtracker = "https://savannah.nongnu.org/bugs/?group=gpsd"
 browserepo = "http://git.savannah.gnu.org/cgit/gpsd.git"
 clonerepo  = "https://savannah.nongnu.org/git/?group=gpsd"
 webform    = "https://www.mainframe.cx/cgi-bin/gps_report.cgi"
+formserver = "www@mainframe.cx"
 devmail    = "gpsd-dev@lists.nongnu.org"
 # Hosting information ends here
 
@@ -1002,6 +1003,8 @@ def substituter(target, source, env):
         ('@BUGTRACKER@', bugtracker),
         ('@BROWSEREPO@', browserepo),
         ('@CLONEREPO@',  clonerepo),
+        ('@WEBFORM@',    webform),
+        ('@FORMSERVER@', formserver),
         ('@DEVMAIL@',    devmail),
         )
     with open(str(source[0])) as sfp:
