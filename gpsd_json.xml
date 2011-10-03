@@ -30,9 +30,10 @@ location-related and kinematic sensors.</para>
 <para>Clients may communicate with <application>gpsd</application> via
 textual requests and responses over a socket. It is a bad idea for
 applications to speak the protocol directly: rather, they should use
-the <application>libgps</application> client library and take
-appropriate care to conditionalize their code on the major and minor
-protocol version symbols.</para>
+the <application>libgps</application> client library (for C; bindings
+also exist for other languages) and take appropriate care to
+conditionalize their code on the major and minor protocol version
+symbols.</para>
 
 <para>The GPSD protocol is built on top of JSON, JavaScript
 Object Notation. GPSD's use of JSON is restricted in some ways
