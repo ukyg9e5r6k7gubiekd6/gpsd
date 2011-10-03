@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8
 '''
 xgps -- test client for gpsd
 
@@ -85,6 +86,7 @@ class SkyView(gtk.DrawingArea):
         self.cr = None  # New cairo context for each expose event
         self.width  = 0 # Updated in size-allocate handler
         self.height = 0 # Updated in size-allocate handler
+        self.step_of_grid = 45 # default step of polar grid
         self.connect('size-allocate', self.on_size_allocate)
         self.connect('expose-event',  self.on_expose_event)
         self.satellites = []
@@ -185,14 +187,17 @@ class SkyView(gtk.DrawingArea):
         # The zenith marker
         self.draw_circle(self.center_x, self.center_y, 6, filled=False)
 
-        # The circle corresponding to 45 degrees elevation.
-        # There are two ways we could plot this.  Projecting the sphere
-        # on the display plane, the circle would have a diameter of
-        # sin(45) ~ 0.7.  But the naive linear mapping, just splitting
-        # the horizon diameter in half, seems to work better visually.
-        self.draw_circle(self.center_x, self.center_y, self.radius/2, filled=False)
-
         # The horizon circle
+        if self.step_of_grid == 45:
+            # The circle corresponding to 45 degrees elevation.
+            # There are two ways we could plot this.  Projecting the sphere
+            # on the display plane, the circle would have a diameter of
+            # sin(45) ~ 0.7.  But the naive linear mapping, just splitting
+            # the horizon diameter in half, seems to work better visually.
+            self.draw_circle(self.center_x, self.center_y, self.radius/2, filled=False)
+        elif self.step_of_grid == 30:
+            self.draw_circle(self.center_x, self.center_y, self.radius*2/3, filled=False)
+            self.draw_circle(self.center_x, self.center_y, self.radius/3, filled=False)
         self.draw_circle(self.center_x, self.center_y, self.radius, filled=False)
 
         (x1, y1) = self.pol2cart(0, 0)
@@ -456,7 +461,8 @@ class Base:
               'Quit the Program', lambda unused: gtk.main_quit()),
              ('File', None, '_File'),
              ('View', None, '_View'),
-             ('Units', None, '_Units')])
+             ('Units', None, '_Units'),
+             ('Step of grid', None, '_Step of grid')])
         self.actiongroup.add_toggle_actions(
             [('Skyview', None, '_Skyview', '<Control>s',
               'Enable Skyview', lambda a: self.view_toggle(a)),
@@ -479,6 +485,11 @@ class Base:
              ('Metric', None, '_Metric', '<Control>m',
               'Metric Units', 2),
              ], 0, lambda a, unused: self.set_units(['i', 'n', 'm'][a.get_current_value()]))
+        self.actiongroup.add_radio_actions(
+            [('30°', None, '30°', None, '30°', 30),
+             ('45°', None, '45°', None, '45°', 45),
+             ('Off', None, 'Off', None, 'Off', 0),
+             ], 45, lambda a, unused: self.set_step_of_grid(a.get_current_value()))
         self.uimanager.insert_action_group(self.actiongroup, 0)
         self.uimanager.add_ui_from_string('''
 <ui>
@@ -498,6 +509,11 @@ class Base:
         <menuitem action="Imperial"/>
         <menuitem action="Nautical"/>
         <menuitem action="Metric"/>
+      </menu>
+      <menu action="Step of grid">
+        <menuitem action="30°"/>
+        <menuitem action="45°"/>
+        <menuitem action="Off"/>
       </menu>
     </menubar>
 </ui>
@@ -749,6 +765,10 @@ class Base:
     def set_units(self, system):
         "Change the display units."
         self.conversions = unit_adjustments(system)
+
+    def set_step_of_grid(self, system):
+        "Change the step of grid."
+        self.skyview.step_of_grid = system
 
     # I/O monitoring and gtk housekeeping
 
