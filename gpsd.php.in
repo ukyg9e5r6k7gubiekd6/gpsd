@@ -14,7 +14,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-global $head, $blurb, $title, $googlemap, $autorefresh, $footer, $gmap_key;
+global $head, $blurb, $title, $showmap, $autorefresh, $footer, $gmap_key;
 global $server, $advertise, $port, $open, $swap_ew, $testmode;
 $testmode = 1; # leave this set to 1
 
@@ -323,7 +323,7 @@ function dfix($x, $y, $z){
 
 function write_html($resp){
 	global $sock, $errstr, $errno, $server, $port, $head, $body, $open;
-	global $blurb, $title, $autorefresh, $googlemap, $gmap_key, $footer;
+	global $blurb, $title, $autorefresh, $showmap, $gmap_key, $footer;
 	global $testmode, $advertise;
 
 	$GPS = json_decode($resp, true);
@@ -345,11 +345,15 @@ function write_html($resp){
 	else
 		$autorefresh = '';
 
-	$gmap_head = $gmap_body = $gmap_code = '';
-	if ($googlemap){
-		$gmap_head = gen_gmap_head();
-		$gmap_body = 'onload="Load()" onunload="GUnload()"';
-		$gmap_code = gen_gmap_code();
+	$map_head = $map_body = $map_code = '';
+	if ($showmap == 1) {
+		$map_head = gen_gmap_head();
+		$map_body = 'onload="Load()" onunload="GUnload()"';
+		$map_code = gen_map_code();
+	} else if ($showmap == 2) {
+		$map_head = gen_osm_head();
+		$map_body = 'onload="Load()"';
+		$map_code = gen_map_code();
 	}
 	$part1 = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -358,7 +362,7 @@ function write_html($resp){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 {$head}
-{$gmap_head}
+{$map_head}
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <meta http-equiv="Content-Language" content="en,en-us"/>
 <title>{$title} - GPSD Test Station {$lat}, {$lon}</title>
@@ -384,7 +388,7 @@ function write_html($resp){
 </style>
 </head>
 
-<body {$body} {$gmap_body}>
+<body {$body} {$map_body}>
 <center>
 <table border="0">
 <tr><td align="justify">
@@ -510,7 +514,7 @@ function write_config(){
 #\$advertise = 'localhost';
 \$port = 2947;
 \$autorefresh = 0; # number of seconds after which to refresh
-\$googlemap = 0; # set to 1 if you want to have a google map
+\$showmap = 0; # set to 1 if you want to have a google map, set it to 2 if you want a map based on openstreetmap
 \$gmap_key = 'GetYourOwnGoogleKey'; # your google API key goes here
 \$swap_ew = 0; # set to 1 if you don't understand projections
 \$open = 0; # set to 1 to show the form to change the GPSd server
@@ -578,6 +582,50 @@ function Load() {
 </script>
 EOT;
 
+}
+
+function gen_osm_head() {
+global $GPS;
+return <<<EOT
+<script src="http://openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
+<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js" type="text/javascript"></script>
+<script type="text/javascript">
+    <!--
+    // Create a base icon for all of our markers that specifies the shadow, icon
+    // dimensions, etc.
+function Load() {
+	document.getElementById("map").firstChild.data = "";
+	map = new OpenLayers.Map("map", {
+		controls: [
+			new OpenLayers.Control.Navigation(),
+			new OpenLayers.Control.PanZoomBar(),
+			new OpenLayers.Control.ScaleLine(),
+			new OpenLayers.Control.LayerSwitcher()
+		],
+		maxResolution: 156543.0339,
+		numZoomLevels: 20,
+		units: 'm',
+		projection: new OpenLayers.Projection("EPSG:900913"),
+		displayProjection: new OpenLayers.Projection("EPSG:4326")
+	});
+	var layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
+	map.addLayer(layerMapnik);
+
+	var layerTilesAtHome = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
+	map.addLayer(layerTilesAtHome);
+
+	center = new OpenLayers.LonLat({$GLOBALS['lon']}, {$GLOBALS['lat']}).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+
+	markers = new OpenLayers.Layer.Markers( "Markers" );
+	centermarker = new OpenLayers.Marker(center);
+	markers.addMarker(centermarker);
+	map.addLayer(markers);
+
+	map.setCenter(center, 17);
+}
+    -->
+    </script>
+EOT;
 }
 
 function gen_gmap_code() {

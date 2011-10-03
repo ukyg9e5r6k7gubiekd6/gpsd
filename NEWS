@@ -10,7 +10,7 @@
   SBAS satellites are now properly use-flagged in SiRF and UBX skyviews.
   The -G option now works under IPv6. Cross-build is now officially
   supported and instructions included.  gpsprof works again and does
-  whole-cycle profiling.
+  whole-cycle profiling. gpsd.php has Open Strett Map support.
 
 * Sun Aug 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1
   The Irene release, rocking you like a hurricane and brought to you
