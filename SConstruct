@@ -428,14 +428,12 @@ else:
     confdefs.append("/* #undef HAVE_LIBRT */\n")
     rtlibs = []
 
-if env['dbus_export'] and config.CheckPKG('dbus-1') and config.CheckPKG('dbus-glib-1'):
+if env['dbus_export'] and config.CheckPKG('dbus-1'):
     confdefs.append("#define HAVE_DBUS 1\n")
-    dbus_xmit_libs = pkg_config('dbus-1')
-    dbus_recv_libs = pkg_config('dbus-glib-1')
+    dbus_libs = pkg_config('dbus-1')
 else:
     confdefs.append("/* #undef HAVE_DBUS */\n")
-    dbus_xmit_libs = []
-    dbus_recv_libs = []
+    dbus_libs = []
 
 if env['bluez'] and config.CheckPKG('bluez'):
     confdefs.append("#define HAVE_BLUEZ 1\n")
@@ -743,7 +741,7 @@ compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
                           version=libversion,
-                          parse_flags= ["-lm"] + dbus_recv_libs)
+                          parse_flags= ["-lm"] + dbus_libs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
@@ -774,7 +772,7 @@ if qt_env:
         qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
                                              CC=compile_with,
                                              CFLAGS=compile_flags,
-                                             parse_flags=dbus_recv_libs))
+                                             parse_flags=dbus_libs))
     compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libversion)
     libraries.append(compiled_qgpsmmlib)
 
@@ -817,7 +815,7 @@ gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 
 gpsd = gpsd_env.Program('gpsd', gpsd_sources,
-                        parse_flags = gpsdlibs + dbus_xmit_libs)
+                        parse_flags = gpsdlibs + dbus_libs)
 env.Depends(gpsd, [compiled_gpsdlib, compiled_gpslib])
 
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs)
