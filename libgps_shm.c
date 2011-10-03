@@ -31,6 +31,7 @@ PERMISSIONS
 struct privdata_t
 {
     void *shmseg;
+    int tick;
 };
 /*@+matchfields@*/
 
@@ -63,6 +64,18 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
     gpsdata->gps_fd = (void *)(intptr_t)SHM_PSEUDO_FD;
 #endif /* USE_QT */
     return 0;
+}
+
+bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout UNUSED)
+/* check to see if new dayta has been written */
+{
+    volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
+    bool newdata;
+
+    barrier();
+    newdata = (shared->bookend1 == shared->bookend2 && shared->bookend1 > PRIVATE(gpsdata)->tick + timeout);
+    barrier();
+    return newdata;
 }
 
 int gps_shm_read(struct gps_data_t *gpsdata)
@@ -104,6 +117,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 			 (void *)&noclobber, 
 			 sizeof(struct gps_data_t));
 	    /*@i1@*/gpsdata->privdata = private_save;
+	    PRIVATE(gpsdata)->tick = after;
 	    if ((gpsdata->set & REPORT_IS)!=0) {
 		if (gpsdata->fix.mode >= 2)
 		    gpsdata->status = STATUS_FIX;

@@ -22,6 +22,7 @@ PERMISSIONS
 #include <sys/shm.h>
 
 #include "gpsd.h"
+#include "libgps.h" /* for SHM_PSEUDO_FD */
 
 #ifdef SHM_EXPORT_ENABLE
 
@@ -84,9 +85,9 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	       sizeof(struct gps_data_t)); 
 	barrier();
 #ifndef USE_QT
-	shared->gpsdata.gps_fd = -1;
+	shared->gpsdata.gps_fd = SHM_PSEUDO_FD;
 #else
-	shared->gpsdata.gps_fd = (void *)(intptr_t)-1;
+	shared->gpsdata.gps_fd = (void *)(intptr_t)SHM_PSEUDO_FD;
 #endif /* USE_QT */
 	barrier();
 	shared->bookend1 = tick;

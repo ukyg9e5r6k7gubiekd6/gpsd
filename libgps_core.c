@@ -205,8 +205,14 @@ bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int time
     /* this is bogus, but I can't think of a better solution yet */
     bool waiting = true;
 
+#ifdef SHM_EXPORT_ENABLE
+    if ((intptr_t)(gpsdata->gps_fd) == SHM_PSEUDO_FD)
+	waiting = gps_shm_waiting(gpsdata, timeout);
+#endif /* SHM_EXPORT_ENABLE */
+
 #ifdef SOCKET_EXPORT_ENABLE
-    waiting = gps_sock_waiting(gpsdata, timeout);
+    if ((intptr_t)(gpsdata->gps_fd) >= 0)
+	waiting = gps_sock_waiting(gpsdata, timeout);
 #endif /* SOCKET_EXPORT_ENABLE */
 
     return waiting;

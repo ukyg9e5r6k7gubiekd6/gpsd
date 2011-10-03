@@ -150,7 +150,7 @@ error condition. This function is a convenience wrapper around a
 <citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
 call, and zeros <varname>errno</varname> on entry; you can test
 <varname>errno</varname> after exit to get more information about
-error conditions.</para>
+error conditions. The timeout value is in nanoseconds.</para>
 
 <para><function>gps_unpack()</function> parses JSON from the argument
 buffer into the target of the session structure pointer argument.
