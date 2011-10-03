@@ -1498,9 +1498,9 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # The chmod copes with the fact that scp will give a
     # replacement the files of the *original*...
     upload_release = Utility('upload-release', 'gpsd-${VERSION}.tar.gz', [
-            'shasum gpsd-${VERSION}.tar.gz >gpsd-${VERSION}.sum',
-            'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.sum'
-            'scp $SOURCE gpsd-${VERSION}.sum" ' + scpupload,
+            'gpg -b gpsd-${VERSION}.tar.gz;',
+            'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig;',
+            'scp $SOURCE gpsd-${VERSION}.tar.gz.sig ' + scpupload + ';',
             ])
 
 
