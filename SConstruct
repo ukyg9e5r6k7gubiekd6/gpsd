@@ -1498,11 +1498,16 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # The chmod copes with the fact that scp will give a
     # replacement the files of the *original*...
     upload_release = Utility('upload-release', 'gpsd-${VERSION}.tar.gz', [
-            'gpg -b gpsd-${VERSION}.tar.gz;',
-            'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig;',
-            'scp $SOURCE gpsd-${VERSION}.tar.gz.sig ' + scpupload + ';',
+            'gpg -b gpsd-${VERSION}.tar.gz',
+            'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
+            'scp $SOURCE gpsd-${VERSION}.tar.gz.sig ' + scpupload,
             ])
 
+    # How to tag a release
+    tag_release = Utility('tag-release', [], [
+        'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}',
+        'git push --tags'
+        ])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:

@@ -1400,19 +1400,11 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 </dd>
 
 <dt>9. Ship to our hosting site</dt>
-<dd>Make the tarball (scons dist), upload it to @SITENAME@,
-(scons upload-release), and do <a href="@ADMIN@">release
-procedure</a>.</dd>
+<dd>Make the tarball (<code>scons dist</code>), upload it to @SITENAME@,
+(<code>scons upload-release</code>), and notify the announce list.</dd>
 
 <dt>10. Tag the release in git</dt>
-<dd>Do this:
-<ol>
-<li>git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}</li>
-<li>git push --tags</li>
-</ol>
-<p>This has to be done by hand because the PGP query in git tag fails when
-called from scons. The tag push will trigger mail to the announce
-list.</p></dd>
+<dd><p><code>scons tag-relese</code> will do it.</p></dd>
 
 <dt>11. Bump the release number and push that commit</dt>
 <dd>Bump the release number in SConstruct, adding a '~dev' suffix
