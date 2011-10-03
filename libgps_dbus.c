@@ -23,12 +23,7 @@ struct privdata_t
     void (*handler)(struct gps_data_t *);
 };
 
-#include <glib.h>
 #include <dbus/dbus.h>
-#include <dbus/dbus-glib-lowlevel.h>
-#include <dbus/dbus-glib.h>
-
-#include <glib/gprintf.h>
 
 /*
  * Unpleasant that we have to declare a static context pointer here - means
@@ -133,17 +128,15 @@ int gps_dbus_open(struct gps_data_t *gpsdata)
 }
 
 int gps_dbus_mainloop(struct gps_data_t *gpsdata,
-		       int timeout UNUSED,
+		       int timeout,
 		       void (*hook)(struct gps_data_t *))
 /* run a DBUS main loop with a specified handler */
 {
-    GMainLoop *mainloop;
-
     share_gpsdata = gpsdata;
     PRIVATE(share_gpsdata)->handler = (void (*)(struct gps_data_t *))hook;
-    mainloop = g_main_loop_new(NULL, FALSE);
-    dbus_connection_setup_with_g_main(connection, NULL);
-    g_main_loop_run(mainloop);
+    for (;;)
+	if (dbus_connection_read_write_dispatch(connection, timeout * 1000) != TRUE)
+	    return -1;
     return 0;
 }
 
