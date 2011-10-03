@@ -66,16 +66,25 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
     return 0;
 }
 
-bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout UNUSED)
+bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* check to see if new dayta has been written */
 {
     volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
     bool newdata;
+    timestamp_t basetime = timestamp();
 
-    barrier();
-    newdata = (shared->bookend1 == shared->bookend2 && shared->bookend1 > PRIVATE(gpsdata)->tick + timeout);
-    barrier();
-    return newdata;
+    /* busy-waiting sucks, but there's not really an alternative */
+    for (;;) {
+	newdata = false;
+	barrier();
+	if (shared->bookend1 == shared->bookend2 && shared->bookend1 > PRIVATE(gpsdata)->tick + timeout)
+	    newdata = true;
+	barrier();
+	if (newdata || (timestamp() - basetime >= (double)timeout))
+	    break;
+    }
+
+    return true;
 }
 
 int gps_shm_read(struct gps_data_t *gpsdata)
@@ -142,12 +151,16 @@ int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout UNUSED,
 /* run a shm main loop with a specified handler */
 {
     for (;;) {
-	int status = gps_shm_read(gpsdata);
-
-	if (status == -1)
+	if (!gps_shm_waiting(gpsdata, timeout)) {
 	    return -1;
-	if (status > 0)
-	    (*hook)(gpsdata);
+	} else {
+	    int status = gps_shm_read(gpsdata);
+
+	    if (status == -1)
+		return -1;
+	    if (status > 0)
+		(*hook)(gpsdata);
+	}
     }
     //return 0;
 }

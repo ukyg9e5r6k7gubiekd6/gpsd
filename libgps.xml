@@ -142,15 +142,15 @@ socket to the daemon has closed or if the shared-memory segment was
 unavailable, and 0 if no data is available.</para>
 
 <para><function>gps_waiting()</function> can be used to check whether
-there is data from the daemon (it always returns true when using the
-shared-memory export). The second argument is the maximum amount of
-time to wait (in microseconds) on input before returning.  It returns
-true if there input waiting, false on timeout (no data waiting) or
-error condition. This function is a convenience wrapper around a
+there is new data from the daemon. The second argument is the maximum
+amount of time to wait (in microseconds) on input before returning.
+It returns true if there is input waiting, false on timeout (no data
+waiting) or error condition. This function is a convenience wrapper
+around a
 <citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
 call, and zeros <varname>errno</varname> on entry; you can test
 <varname>errno</varname> after exit to get more information about
-error conditions. The timeout value is in microseconds.</para>
+error conditions.</para>
 
 <para><function>gps_unpack()</function> parses JSON from the argument
 buffer into the target of the session structure pointer argument.
