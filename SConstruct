@@ -1394,7 +1394,7 @@ www = env.Alias('www', webpages)
 def validation_list(target, source, env):
     for page in glob.glob("www/*.html"):
         with open(page) as fp:
-            if "Valid XHTML" in fp.read():
+            if "Valid HTML" in fp.read():
                 print os.path.join(website, os.path.basename(page))
 Utility("validation-list", [www], validation_list)
 

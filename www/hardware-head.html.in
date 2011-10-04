@@ -1,48 +1,49 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<html>
+<!-- @MASTER@ -->
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
-   <meta name="Author" content="Eric Raymond"/>
-   <meta name="Description" content="Hardware known to work with GPSD."/>
-   <meta name="Keywords" content="GPS, translator, mxmap, GIS"/>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Eric Raymond">
+   <meta name="Description" content="Hardware known to work with GPSD.">
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
    <title>Compatible GPSes</title>
-   <link rel="stylesheet" href="main.css" type="text/css"/>
+   <link rel="stylesheet" href="main.css" type="text/css">
 </head>
 <body>
 <div id="Header">Compatible Hardware</div>
 
 <div id="Menu">
-    <img src="gpsd-logo-small.png" alt="Small gpsd Logo" /><br />
-    <a href="index.html">Home</a><br/>
-    <a href="index.html#news">News</a><br/>
-    <a href="index.html#downloads">Downloads</a><br/>
-    <a href="index.html#mailing-lists">Mailing lists</a><br/>
-    <a href="index.html#documentation">Documentation</a><br/>
-    <a href="faq.html">FAQ</a><br/>
-    <a href="xgps-sample.html">Screenshots</a><br/>
-    <a href="index.html#recipes">Recipes</a><br/>
-    <a href="index.html#others">Other GPSDs</a><br/>
-    Hardware<br/>
-    <a href="for-vendors.html">For GPS Vendors</a><br/>
-    <a href="wishlist.html">Wish List</a><br/>
-    <a href="hall-of-shame.html">Hall of Shame</a><br/>
-    <a href="hacking.html">Hacker's Guide</a><br/>
-    <a href="troubleshooting.html">Troubleshooting Guide</a><br/>
+    <img src="gpsd-logo-small.png" alt="Small gpsd Logo"><br>
+    <a href="index.html">Home</a><br>
+    <a href="index.html#news">News</a><br>
+    <a href="index.html#downloads">Downloads</a><br>
+    <a href="index.html#mailing-lists">Mailing lists</a><br>
+    <a href="index.html#documentation">Documentation</a><br>
+    <a href="faq.html">FAQ</a><br>
+    <a href="xgps-sample.html">Screenshots</a><br>
+    <a href="index.html#recipes">Recipes</a><br>
+    <a href="index.html#others">Other GPSDs</a><br>
+    Hardware<br>
+    <a href="for-vendors.html">For GPS Vendors</a><br>
+    <a href="wishlist.html">Wish List</a><br>
+    <a href="hall-of-shame.html">Hall of Shame</a><br>
+    <a href="hacking.html">Hacker's Guide</a><br>
+    <a href="troubleshooting.html">Troubleshooting Guide</a><br>
     <a href="protocol-transition.html">Application Compatibility</a>
-    <a href="references.html">References</a><br/>
-    <a href="history.html">History</a><br/>
-    <a href="future.html">Future</a><br/>
+    <a href="references.html">References</a><br>
+    <a href="history.html">History</a><br>
+    <a href="future.html">Future</a><br>
 
     <div>&nbsp;</div>
 
     <a href='http://www.catb.org/hacker-emblem/'><img
     src='http://www.catb.org/hacker-emblem/glider.png'
-    alt='hacker emblem' /></a><br />
+    alt='hacker emblem'></a><br>
 
     <script type="text/javascript" src="http://www.ohloh.net/p/3944/widgets/project_thin_badge.js"></script>
 
-    <hr/>
+    <hr>
     <script type="text/javascript"><!--
     google_ad_client = "pub-1458586455084261";
     google_ad_width = 160;
@@ -54,11 +55,11 @@
     <script type="text/javascript"
       src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
     </script>
-    <hr/>
+    <hr>
 
     <a href="http://validator.w3.org/check/referer"><img
-          src="http://www.w3.org/Icons/valid-xhtml11"
-          alt="Valid XHTML 1.1!" height="31" width="88" /></a>
+          src="http://www.w3.org/Icons/valid-html401"
+          alt="Valid HTML 4.01!" height="31" width="88"></a>
 
 </div>
 <div id="Content">
@@ -72,12 +73,12 @@
 <table border="0">
 <tr><td valign="top" align="left">
 <a href="http://www.google.com/">
-<img src="http://www.google.com/logos/Logo_25wht.gif" style='border:0px' alt="Google"></img></a>
+<img src="http://www.google.com/logos/Logo_25wht.gif" style='border:0px' alt="Google"></a>
 </td>
 <td>
-<input type="hidden" name="domains" value="@SITESEARCH@"></input>
-<input type="text" name="q" size="31" maxlength="255" value=""></input>
-<input type="submit" name="sa" value="Search"></input>
+<input type="hidden" name="domains" value="@SITESEARCH@">
+<input type="text" name="q" size="31" maxlength="255" value="">
+<input type="submit" name="sa" value="Search">
 </td></tr>
 <tr>
 <td>&nbsp;</td>
@@ -85,23 +86,23 @@
 <table>
 <tr>
 <td>
-<input type="radio" name="sitesearch" value=""></input>
+<input type="radio" name="sitesearch" value="">
 Web
 </td>
 <td>
-<input type="radio" name="sitesearch" value="@SITESEARCH@"  checked="checked"></input>
+<input type="radio" name="sitesearch" value="@SITESEARCH@"  checked="checked">
 @SITESEARCH@
 </td>
 </tr>
 </table>
-<input type="hidden" name="client" value="pub-1458586455084261"></input>
-<input type="hidden" name="forid" value="1"></input>
-<input type="hidden" name="ie" value="ISO-8859-1"></input>
-<input type="hidden" name="oe" value="ISO-8859-1"></input>
-<input type="hidden" name="flav" value="0000"></input>
-<input type="hidden" name="sig" value="BCQudoNGuH3P6MJe"></input>
-<input type="hidden" name="cof" value="GALT:#008000;GL:1;DIV:#336699;VLC:663399;AH:center;BGC:FFFFFF;LBGC:336699;ALC:0000FF;LC:0000FF;T:000000;GFNT:0000FF;GIMP:0000FF;FORID:1"></input>
-<input type="hidden" name="hl" value="en"></input>
+<input type="hidden" name="client" value="pub-1458586455084261">
+<input type="hidden" name="forid" value="1">
+<input type="hidden" name="ie" value="ISO-8859-1">
+<input type="hidden" name="oe" value="ISO-8859-1">
+<input type="hidden" name="flav" value="0000">
+<input type="hidden" name="sig" value="BCQudoNGuH3P6MJe">
+<input type="hidden" name="cof" value="GALT:#008000;GL:1;DIV:#336699;VLC:663399;AH:center;BGC:FFFFFF;LBGC:336699;ALC:0000FF;LC:0000FF;T:000000;GFNT:0000FF;GIMP:0000FF;FORID:1">
+<input type="hidden" name="hl" value="en">
 </td></tr></table>
 </form>
 <!-- SiteSearch Google -->
@@ -114,7 +115,7 @@ are some notes on hardware we have tested.  Hyperlinks lead to
 technical information.  The "Works with" column is the last
 <code>gpsd</code> version with which this receiver is known to have
 been successfully tested; A <img src="regression.png" alt="Regression
-icon"/> in this column means we have a regression test load for the
+icon"> in this column means we have a regression test load for the
 device that is checked before each release. Vendors are listed in
 alphabetical order.</p>
 
@@ -130,30 +131,30 @@ of the problem. Where possible, we indicate this in the device table.</p>
 <p>Icons used in the table:</p>
 
 <ul>
-<li><img src="star.png" alt="Star icon"/><img src="star.png" alt="Star
-icon"/><img src="star.png" alt="Star icon"/><img src="star.png"
-alt="Star icon"/> marks devices with <b>Excellent</b> performance: gpsd
+<li><img src="star.png" alt="Star icon"><img src="star.png" alt="Star
+icon"><img src="star.png" alt="Star icon"><img src="star.png"
+alt="Star icon"> marks devices with <b>Excellent</b> performance: gpsd
 recognizes the receiver rapidly and reliably, reports are complete and
 correct.</li>
 
-<li><img src="star.png" alt="Star icon"/><img src="star.png" alt="Star
-icon"/><img src="star.png" alt="Star icon"/> marks devices with
+<li><img src="star.png" alt="Star icon"><img src="star.png" alt="Star
+icon"><img src="star.png" alt="Star icon"> marks devices with
 <b>Good</b> performance: <tt>gpsd</tt> has minor problems or lag
 recognizing the device, but reports are complete and correct.</li>
 
-<li><img src="star.png" alt="Star icon"/><img src="star.png" alt="Star
-icon"/> marks devices with <b>Fair</b> performance: reports have minor
+<li><img src="star.png" alt="Star icon"><img src="star.png" alt="Star
+icon"> marks devices with <b>Fair</b> performance: reports have minor
 dropouts or problems, including occasional transient nonsense
 values.</li>
 
-<li><img src="star.png" alt="Star icon"/> marks devices with
+<li><img src="star.png" alt="Star icon"> marks devices with
 <b>Poor</b> performance: reports frequently have values that are wrong
 or nonsense.</li>
 
-<li><img src="bomb.png" alt="Bomb icon"/> marks devices which are <b>Broken</b>;
+<li><img src="bomb.png" alt="Bomb icon"> marks devices which are <b>Broken</b>;
 gpsd frequently fails to recognize the device at all.</li>
 
-<li><img src="noconfigure.png" alt="No-configure icon"/> marks devices
+<li><img src="noconfigure.png" alt="No-configure icon"> marks devices
 that needed the <code>gpsd -b</code> option when tested. Usually these are
 Bluetooth devices with defective firmware that does not handle
 baud-rate changes properly.  Some poorly-designed USB devices choke if
@@ -161,14 +162,14 @@ they are fed too many probe strings; these may work better with recent
 versions of <code>gpsd</code>, which interleaves probe writes with the
 first few packet reads.</li>
 
-<li><img src="regression.png" alt="Regression-test icon"/> marks
+<li><img src="regression.png" alt="Regression-test icon"> marks
 devices for which we have a regression-test load. These are checked on
 every release.</li>
 
-<li><img src="discontinued.png" alt="Discontinued icon"/> marks
+<li><img src="discontinued.png" alt="Discontinued icon"> marks
 devices that have been discontinued by their manufacturers.</li>
 
-<li><img src="hotplug.png" alt="Hotplug icon"/> marks devices which
+<li><img src="hotplug.png" alt="Hotplug icon"> marks devices which
 will be recognized by the Linux hotplug system when they are plugged
 in. If you installed <code>gpsd</code> from a binary package,or did "make
 udev-install" from the source distribution, this should mean you never
@@ -177,7 +178,7 @@ for you when it sees a device of this kind go active.</li>
 </ul>
 
 <p>Note that in most cases (including the <img src="noconfigure.png"
-alt="No-configure icon"/> bug), poor ratings reflect problems not in
+alt="No-configure icon"> bug), poor ratings reflect problems not in
 <code>gpsd</code> but rather in device design and firmware so badly
 botched that <code>gpsd</code> cannot compensate.</p>
 

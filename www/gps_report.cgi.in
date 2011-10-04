@@ -102,7 +102,7 @@ might be able to find out ourselves, but which are easier for you to determine.
 Every bit of information you can give us about your receiver will help make the
 support for it more reliable.</p>
 
-<hr/>
+<hr>
 <h2>Contact information</h2>
 
 <p><em style='color: #ff0000;'>Important!</em> We prefer a valid email
@@ -111,7 +111,7 @@ the device.  While we won't use your address for anything other than
 asking you questions about your receiver, and maybe asking you to test
 specific changes, this gps report will be sent to the gpsd-dev list
 which is publicly archived.
-<br/>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
+<br>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
 
 EOF
 
@@ -126,12 +126,12 @@ exotic and the information you provide in the rest of this form turns
 out to be insufficient. Or if your browser is broken enough to botch
 the output-sample upload.)</p>
 
-<hr/>
+<hr>
 <h2>Receiver type identification</h2>
 
 <p><em style='color: #ff0000;'>Important!</em> Identify the vendor and model of
 your device.
-<br/>Example: <code>Haicom</code> and <code>303S</code>.</p>
+<br>Example: <code>Haicom</code> and <code>303S</code>.</p>
 
 EOF
 
@@ -146,7 +146,7 @@ vendor's website by giving a search engine the product name.  If it's
 not linked directly from the vendor's page for the individual product,
 look under "Technical Support" or "Product support" on the vendor's
 main page.
-<br/>Example: <code>http://www.haicom.com.tw/gps303s.shtml</code></p>
+<br>Example: <code>http://www.haicom.com.tw/gps303s.shtml</code></p>
 
 <p><em>URL of a technical manual:</em>
 EOF
@@ -182,7 +182,7 @@ print <<EOF;
 may be able to get this from the display of <code>xgps</code>; look for
 a Device Type field or at the window title bar. Alternatively, you may find
 it in the technical manual.
-<br/>Example: <code>SiRF-II</code> and <code>2.31ES</code>.</p>
+<br>Example: <code>SiRF-II</code> and <code>2.31ES</code>.</p>
 EOF
 
 print "<p><em>Chipset:</em>",
@@ -202,7 +202,7 @@ print "<em>NMEA 0183 version emitted:</em>",$query->textfield(-name=>"nmea",
 							    -size=>6);
 
 print <<EOF;
-<hr/>
+<hr>
 <h2>Interfaces</h2>
 
 <p>Please identify the receiver's interface type (USB, RS-232, Bluetooth,
@@ -233,7 +233,7 @@ print"<em>USB-to-serial chip:</em>",$query->textfield(-name=>"usbchip",
 							    -size=>72);
 
 print <<EOF;
-<hr/>
+<hr>
 <h2>GPSD compatibility</h2>
 
 <p>Please tell us what version you tested with.  If you used us a release,
@@ -277,7 +277,7 @@ print "Does the device break if probed or speed switched? " .
 			     -defaults=>[]);
 
 print <<EOF;
-<hr/>
+<hr>
 <h2>Technical notes</h2>
 
 <p>Now tell us the things that didn't fit in the rest of the form.
@@ -294,7 +294,7 @@ EOF
 print $query->textarea(-name=>"notes", -rows=>10, -cols=>72);
 
 print <<EOF;
-<hr/>
+<hr>
 <h2>Output sample</h2>
 
 <p><em style='color: #ff0000;'>Important!</em> We need a sample of the output
@@ -335,7 +335,7 @@ files.</p>
 nearest city or other landmark, state/province, country code, and a
 rough latitude/longitude.  A GPS will give an exact location; we
 want this as a sanity check.
-<br/>Example: <code>Groningen, NL, 53.2N 6.6E</code></p>
+<br>Example: <code>Groningen, NL, 53.2N 6.6E</code></p>
 
 EOF
 
@@ -346,7 +346,7 @@ print <<EOF;
 
 <p>Year-Month-Day of the log capture (the receiver will give us
 hour/minute/second).
-<br/>Example: <code>2011-05-14</code>.</p>
+<br>Example: <code>2011-05-14</code>.</p>
 
 
 EOF
@@ -366,7 +366,7 @@ print $query->textarea(-name=>"sample_notes", -rows=>10, -cols=>72);
 
 print <<EOF;
 
-<hr/>
+<hr>
 <p>Thanks for your help.  Here is a summary of the information you have
 entered so far:</p>
 
@@ -375,74 +375,74 @@ EOF
 print "<table border='0' width='100%'><tr><td align='center'>";
 
 if ($query->param("submitter")) {
-    print "Contact address is <code>". escapeHTML($query->param("submitter")) ."</code><br/>\n";
+    print "Contact address is <code>". escapeHTML($query->param("submitter")) ."</code><br>\n";
 } else {
-    print "<span style='color:#ff0000;'>No contact address.</span><br/>\n";
+    print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
 }
 if ($query->param("vendor")) {
-    print "Vendor is <code>". escapeHTML($query->param("vendor")) ."</code><br/>\n";
+    print "Vendor is <code>". escapeHTML($query->param("vendor")) ."</code><br>\n";
 } else {
-    print "<span style='color:#ff0000;'>No vendor.</span><br/>\n";
+    print "<span style='color:#ff0000;'>No vendor.</span><br>\n";
 }
 if ($query->param("packaging")) {
-    print "Packaging type is <code>". escapeHTML($query->param("packaging")) ."</code><br/>\n";
+    print "Packaging type is <code>". escapeHTML($query->param("packaging")) ."</code><br>\n";
 } else {
-    print "No packaging type specified.<br/>\n";
+    print "No packaging type specified.<br>\n";
 }
 if ($query->param("model")) {
-    print "Model is <code>". escapeHTML($query->param("model")) ."</code><br/>\n";
+    print "Model is <code>". escapeHTML($query->param("model")) ."</code><br>\n";
 } else {
-    print "<span style='color:#ff0000;'>No model specified.</span><br/>\n";
+    print "<span style='color:#ff0000;'>No model specified.</span><br>\n";
 }
 if ($query->param("techdoc")) {
-    print "<a href='". escapeHTML($query->param("techdoc")) ."'>Document URL specified.</a><br/>\n";
+    print "<a href='". escapeHTML($query->param("techdoc")) ."'>Document URL specified.</a><br>\n";
 } else {
-    print "<span style='color:#ff0000;'>No document URL.</span><br/>\n";
+    print "<span style='color:#ff0000;'>No document URL.</span><br>\n";
 }
 if ($output_sample_body) {
     print "Output sample uploaded";
 } else {
-    print "<span style='color:#ff0000;'>No output sample.</span><br/>\n";
+    print "<span style='color:#ff0000;'>No output sample.</span><br>\n";
 }
 
 print "</td><td align='center'>";
 
 if ($query->param("chipset")) {
-    print "Chipset is <code>". escapeHTML($query->param("chipset")) ."</code><br/>\n";
+    print "Chipset is <code>". escapeHTML($query->param("chipset")) ."</code><br>\n";
 } else {
-    print "Chipset not specified.<br/>\n";
+    print "Chipset not specified.<br>\n";
 }
 if ($query->param("firmware")) {
-    print "Firmware is <code>". escapeHTML($query->param("firmware")) ."</code><br/>\n";
+    print "Firmware is <code>". escapeHTML($query->param("firmware")) ."</code><br>\n";
 } else {
-    print "Firmware not specified.<br/>\n";
+    print "Firmware not specified.<br>\n";
 }
 if ($query->param("nmea")) {
-    print "NMEA version is <code>". escapeHTML($query->param("nmea")) ."</code><br/>\n";
+    print "NMEA version is <code>". escapeHTML($query->param("nmea")) ."</code><br>\n";
 } else {
-    print "NMEA version not specified.<br/>\n";
+    print "NMEA version not specified.<br>\n";
 }
 if ($query->param("interfaces")) {
-    print "Interface type is <code>". escapeHTML($query->param("interfaces")) ."</code><br/>\n";
+    print "Interface type is <code>". escapeHTML($query->param("interfaces")) ."</code><br>\n";
     if ($query->param("interfaces") eq "USB") {
 	if ($query->param("usbchip")) {
-	    print "USB chip is <code>". escapeHTML($query->param("usbchip")) ."</code><br/>\n";
+	    print "USB chip is <code>". escapeHTML($query->param("usbchip")) ."</code><br>\n";
 	} else {
-	    print "No USB chip specified.<br/>\n";
+	    print "No USB chip specified.<br>\n";
 	}
     }
 } else {
-    print "No interface type specified.<br/>\n";
+    print "No interface type specified.<br>\n";
 }
 if ($query->param("tested")) {
-    print "Tested with GPSD version <code>". escapeHTML($query->param("tested")) ."</code><br/>\n";
+    print "Tested with GPSD version <code>". escapeHTML($query->param("tested")) ."</code><br>\n";
 } else {
-    print "No GPSD version specified.<br/>\n";
+    print "No GPSD version specified.<br>\n";
 }
 if ($query->param("rating")) {
-    print "GPSD compatibility is <code>". escapeHTML($query->param("rating")) ."</code><br/>\n";
+    print "GPSD compatibility is <code>". escapeHTML($query->param("rating")) ."</code><br>\n";
 } else {
-    print "No GPSD compatiblity specified.<br/>\n";
+    print "No GPSD compatiblity specified.<br>\n";
 }
 if ($query->param("noconfigure")) {
     print "Device can be sent catatonic by baud-rate changes<br>\n";
@@ -453,25 +453,25 @@ if ($query->param("noconfigure")) {
 print "</td><td align='center'>";
 
 if ($query->param("notes")) {
-    print "Technical notes have been entered.<br/>\n";
+    print "Technical notes have been entered.<br>\n";
 } else {
-    print "No technical notes.<br/>\n";
+    print "No technical notes.<br>\n";
 }
 if ($query->param("location")) {
-    print "Sample location <code>". escapeHTML($query->param("location")) ."</code><br/>\n";
+    print "Sample location <code>". escapeHTML($query->param("location")) ."</code><br>\n";
 } else {
-    print "No sample location specified.<br/>\n";
+    print "No sample location specified.<br>\n";
 }
 if ($query->param("date")) {
-    print "Sample date <code>". escapeHTML($query->param("date")) ."</code><br/>\n";
+    print "Sample date <code>". escapeHTML($query->param("date")) ."</code><br>\n";
 } else {
-    print "No sample date specified.<br/>\n";
+    print "No sample date specified.<br>\n";
 }
 
 if ($query->param("sample_notes")) {
-    print "Notes on the sample have been entered.<br/>\n";
+    print "Notes on the sample have been entered.<br>\n";
 } else {
-    print "No notes on the sample.<br/>\n";
+    print "No notes on the sample.<br>\n";
 }
 
 print "</td></tr></table>";
@@ -514,7 +514,7 @@ EOF
 EOF
 }
 
-print "</form>\n<hr/>\n";
+print "</form>\n<hr>\n";
 
 
 print $query->end_html;
