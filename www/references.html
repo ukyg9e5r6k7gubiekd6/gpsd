@@ -1,11 +1,12 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Description" content="Programmer's references for GPSD">
-   <meta name="Keywords" content="GPS, translator, GIS">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+   <meta name="Description" content="Programmer's references for GPSD" />
+   <meta name="Keywords" content="GPS, translator, GIS" />
    <title>Reference links on GPS technology</title>
-   <link rel="stylesheet" href="main.css" type="text/css"/>
+   <link rel="stylesheet" href="main.css" type="text/css" />
 </head>
 <body>
 
@@ -75,7 +76,7 @@ Web.</p>
 
 <p>This is a selection of the files available at <a
 href="http://code.google.com/p/gpsd/downloads/list">GPSD's Google Code
-document repository</a>
+document repository</a>.</p>
 
 <h1>GPS standards</h1>
 
@@ -110,11 +111,10 @@ is complex and nasty.</dd>
 Performance Specification</a> (2008)</dt>
 <dd>This document defines the levels of performance the U.S. Government makes
 available to civil users through the GPS Standard Positioning Service
-(SPS).  The 2001 version is <a href="http://gpsd.googlecode.com/files/global-positioning-system-standard-positioning-service-performance-standard-2001.pdf">here</a>
+(SPS).  The 2001 version is <a href="http://gpsd.googlecode.com/files/global-positioning-system-standard-positioning-service-performance-standard-2001.pdf">here</a>.</dd>
 
 <dt><a href="http://en.wikipedia.org/wiki/World_Geodetic_System">World Geodetic System</a></dt>
 <dd>Technical and historical summary of WGS84.</dd>
-</dd>
 
 <dt><a href='http://gpsd.googlecode.com/files/specification-for-the-wide-area-augmentation-system-2001.pdf'>WAAS System Specification</a></dt>
 <dd>This is the official specification for the FAA's Wide Area
@@ -129,8 +129,8 @@ terms are evil. At least one of the GPSD project members has purchased
 official copies, so we do have full details of the message format.
 Copies of some of these have leaked onto the Web and may be found by
 searching for <a
-href='http://www.google.com/search?hl=en&safe=off&q="RTCM+10402.3"&btnG=Search'>"RTCM
-10402.3"</a> or <a href='http://www.google.com/search?hl=en&safe=off&q="RTCM+10403.1"&btnG=Search'>"RTCM 10403.1"</a>.</dd>
+href='http://www.google.com/search?hl=en&amp;safe=off&amp;q="RTCM+10402.3"&amp;btnG=Search'>"RTCM
+10402.3"</a> or <a href='http://www.google.com/search?hl=en&amp;safe=off&amp;q="RTCM+10403.1"&amp;btnG=Search'>"RTCM 10403.1"</a>.</dd>
 
 <dt><a
 href='http://www.itu.int/rec/recommendation.asp?type=items&amp;lang=e&amp;parent=r-rec-m.823-2-199710-i'>ITU-R M.823-2</a></dt> 
@@ -139,8 +139,9 @@ rtcm-104, the specification used for broadcasting differential-gps
 corrections. Unfortunately, its distribution terms are also evil.</dd>
 
 <dt><a href='http://gpsd.googlecode.com/files/Galileo-SIS-ICD-Open-Service-draft0.pdf'>Galileo Open Service SIS
-ICD</a></dt> <dd>This is draft 0 of the Galileo Open Service Signal In
-Space Interface Control Document. The latest version of the official
+ICD</a></dt> 
+<dd>This is draft 0 of the Galileo Open Service Signal In Space
+Interface Control Document. The latest version of the official
 standard can be requested <a
 href='http://www.galileoju.com/page2.cfm'>here</a>.</dd>
 
@@ -166,10 +167,10 @@ documents.</dd>
 <dt><a href="http://www.itu.int/rec/R-REC-M.1371-4-201004-I/en">M.1371
 : Technical characteristics for an automatic identification system
 using time-division multiple access in the VHF maritime mobile band</a></dt>
-<dd></dd>
+<dd>The official standard descrcribiung AIS.</dd>
 
-<dt><a href='http://www.topografix.com/gpx.asp'>GPX Exchange
-Format</a></dt> <dd>GPX (the GPS Exchange Format) is a light-weight
+<dt><a href='http://www.topografix.com/gpx.asp'>GPX Exchange Format</a></dt> 
+<dd>GPX (the GPS Exchange Format) is a light-weight
 XML data format for the interchange of GPS data (waypoints, routes,
 and tracks) between applications and Web services on the Internet. The
 GPSD suite includes a client, <code>gpxlogger</code>, that makes logs
@@ -313,14 +314,16 @@ href='http://gpsd.googlecode.com/files/_Superstar2.pdf'>Novatel Superstar II Use
 <dd>Describes the OEM board, include some good general overview
 material on GPS technology. Doesn't describe control or reporting
 commands.</dd>
+</dl>
 
 <h2>San Jose Navigation</h2>
 
+<dl>
 <dt><a href='http://gpsd.googlecode.com/san-jose-navigation/fv25_manual.pdf'>FV25 user manual</a> (January 2005)</dt>
 <dd>Describes UBX binary protocol and NMEA extensions supported by the
 San Jose Navigation FV-25 (uBlox ANTARIS) GPS chipset. UBX is now supported
 by <code>gpsd</code>.</dd>
-</dd>
+</dl>
 
 <h2>Other Current GPSes</h2>
 
@@ -347,7 +350,7 @@ manual suggests <code>gpsd</code> should handle the NMEA mode just fine.</dd>
 <dt><a href='http://gpsd.googlecode.com/files/thales-reference.pdf'>Thales A12/B12/C12 Reference Manual</a> (Revision D, 2005)</dt>
 <dd>Reference for a line of Thales GPS modules apparently designed
 for embedded vehicle and cargo tracking.  Uses a very extended dialect
-of NMEA they call the <quote>standard Ashtech command set</quote>.  We
+of NMEA they call the <q>standard Ashtech command set</q>.  We
 have not been able to test with one of these, but the manual suggests
 <code>gpsd</code> should handle the NMEA mode just fine.</dd>
 
@@ -384,7 +387,7 @@ with LocSense based receivers.</dd>
 <dd>Describes the binary protocol used by Rockwell/Conexant Zodiac chipsets.
 Supported by <code>gpsd</code>.  Now obsolete; SiRF ate their lunch.</dd>
 
-<dt><a href='http://code.google.com/p/gpsd/downloads/detail?name=SiRF-Axiom.pdf&can=2&q='>Axiom Sandpiper II Documentation</a> (August 2000)</dt> 
+<dt><a href='http://code.google.com/p/gpsd/downloads/detail?name=SiRF-Axiom.pdf&amp;can=2&amp;q='>Axiom Sandpiper II Documentation</a> (August 2000)</dt> 
 
 <dd>We have archived the most complete available documentation on the Axiom
 Sandpiper II OEM module (discontinued, vendor has gone out of
@@ -406,6 +409,6 @@ Formulary</a></dt>
 
 </div>
 
-<script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
+<script src="datestamp.js" type='text/javascript'></script>
 </body>
 </html>
