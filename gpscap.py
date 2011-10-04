@@ -56,7 +56,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     raise ConfigParser.Error("%s has invalid vendor" % section)
 
     def HTMLDump(self, ofp):
-        thead = """<table border='1' style='font-size:small;' bgcolor='#CCCCCC'>
+        thead = """<table border='1' style='font-size:small;background-color:#CCCCCC'>
 <caption>Listing %s devices from %s vendors</caption>
 <tr>
 <th>Name</th>
@@ -65,7 +65,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 <th>Interface</th>
 <th>Tested with</th>
 <th>NMEA version</th>
-<th width='50%%'>Notes</th>
+<th style='width:50%%'>Notes</th>
 </tr>
 """
         vhead1 = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a></td></tr>\n"
@@ -83,7 +83,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     relevant.append(dev)
             relevant.sort()
             for dev in relevant:
-                rowcolor = "#FFFFFF"
+                rowcolor = "white"
                 if self.get(dev, "packaging") == "OEM module":
                     rowcolor = "LimeGreen"
                 elif self.get(dev, "packaging") == "chipset":
@@ -93,7 +93,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 elif self.get(dev, "packaging") == "hansdfree":
                     rowcolor = "DarkCyan"
 
-                ofp.write("<tr bgcolor='%s'>\n" % rowcolor)
+                ofp.write("<tr style='background-color:%s'>\n" % rowcolor)
                 namefield = dev
                 if self.has_option(dev, "techdoc"):
                     namefield = "<a href='%s'>%s</a>" % (self.get(dev, "techdoc"), dev)

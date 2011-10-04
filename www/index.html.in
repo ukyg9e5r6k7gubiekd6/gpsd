@@ -70,7 +70,7 @@
 
 <div id="Content">
 
-<table class="centered" width="80%" border="1" cellpadding="20" bgcolor="white">
+<table class="centered" width="80%" border="1" cellpadding="20" style="background-color:white" >
 <tr>
 <td>
 <script type="text/javascript"
@@ -496,7 +496,7 @@ Here</a>.</td></tr>
 <div style="text-align: left; margin: 1em auto; width: 50%;">
 <!-- SiteSearch Google -->
 <form method="get" action="http://www.google.com/custom">
-<table border="0" bgcolor="#ffffff">
+<table border="0"  style="background-color:white">
 <tr><td valign="top" align="left">
 <a href="http://www.google.com/">
 <img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google"></img></a>
