@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html
-     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
    <meta name="Description" content="How to bring up a GPS under GPSD"/>
    <meta name="Keywords" content="GPS, translator, GIS"/>
    <title>Troubleshooting GPSD</title>
@@ -123,8 +122,8 @@ don't receive data check for it with <b>lsmod(8)</b>.</p>
 
 <p>On Linux systems with module autoloading disabled or misconfigured,
 it is possible you may need to load the module manually with a command
-such as <code>sudo modprobe usbserial vendor=0Ã—1a86
-product=0Ã—7523</code>.  Do not copy those hex numbers slavishly, they
+such as <code>sudo modprobe usbserial vendor=0×1a86
+product=0×7523</code>.  Do not copy those hex numbers slavishly, they
 are examples.  To get the right numbers, you will need to dig up the
 vendor and product ID of your USB-serial converter device.</p>
 
