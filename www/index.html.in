@@ -1,14 +1,15 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Author" content="Remco Treffkorn">
-   <meta name="Description" content="gpsd is a utility that can listen to a GPS or AIS receiver and re-publish the positional data in a simpler format.">
-   <meta name="Keywords" content="GPS, translator, GIS">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+   <meta name="Author" content="Eric S. Raymond" />
+   <meta name="Description" content="gpsd is a utility that can listen to a GPS or AIS receiver and re-publish the positional data in a simpler format." />
+   <meta name="Keywords" content="GPS, translator, GIS" />
    <!-- the following is a verification tag for Google Analytics -->
    <meta name="verify-v1" content="kb4f3qxJPMaOltYTpJHnvbnteza1PHO4EhrRIfcq2gk=" />
    <title>GPSd &mdash; Put your GPS on the net!</title>
-   <link rel="stylesheet" href="main.css" type="text/css"/>
+   <link rel="stylesheet" href="main.css" type="text/css" />
 </head>
 <body>
 
@@ -106,7 +107,7 @@ the NMEA 0183 emitted by most GPSes.  The <code>gpsd</code>
 distribution includes a linkable C service library, a C++ wrapper
 class, and a Python module that developers of <code>gpsd</code>-aware
 applications can use to encapsulate all communication with
-<code>gpsd</code>.</para>
+<code>gpsd</code>.</p>
 
 <p>Besides <code>gpsd</code> itself, the project provides auxiliary
 tools for diagnostic monitoring and profiling of receivers and feeding
@@ -188,8 +189,6 @@ report bugs.</p>
 assumption that we ever see any!) will go to the project's fund for
 buying <a href="wishlist.html"> test hardware and standards</a>.</p>
 
-<p class="centered">
-
 <h1 id='news'>News</h1>
 
 <p>This web page was last updated on @DATE@.  You can browse the
@@ -201,15 +200,16 @@ version) rather than the latest released stable version.</p>
 <h1 id='downloads'>Repository, Downloads and Packages</h1>
 
 <dl>
-<dt><a href='@MAINPAGE@'>Project page</a> 
+<dt><a href='@MAINPAGE@'>Project page</a></dt> 
 <dd>The main project page</dd>
 
 <dt><a
-href="@DOWNLOAD@">Releases</a>
+href="@DOWNLOAD@">Releases</a></dt>
 <dd>Where to get release tarballs</dd>
 
 <dt><a href="@BROWSEREPO@">Browse Code</a></dt>
 <dd>Developer access to master git repository</dd>
+</dl>
 
 <p>If you are using a Debian-based distribution (including Ubuntu) you
 can probably install <code>gpsd</code> through your regular package
@@ -387,7 +387,7 @@ of the problem.</p>
 
 <p>If you have an Android phone, it is possible to access its onboard
 GPS by pairing it as a Bluetooth device.  Directions from <a
-href="http://bvargo.net/blog/2010/oct/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/">Vargoville. There
+href="http://bvargo.net/blog/2010/oct/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/">Vargoville</a>. There
 is also a <a
 href="http://www.androidzoom.com/android_applications/tools/gps-tether_blgt.html">GPS
 Tether</a> app designed to work with GPSD, but it eems to be in early
@@ -407,9 +407,9 @@ of the setup steps and caveats will be the same.</p>
 
 <p>Diego Berge has written a prototype <a
 href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
-<code>xgps</code> with a Qt look and feel.
+<code>xgps</code> with a Qt look and feel.</p>
 
-0<p>You can find Debian-unstable packages 
+<p>You can find Debian-unstable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
 <p>There's a Perl client library <a
@@ -417,7 +417,7 @@ href="http://search.cpan.org/dist/Net-GPSD3/">on CPAN.</a></p>
 
 <p>A Java binding is <a
 href="http://forge.hoegergroup.de/projects/gpsd4java/">in early
-development</a>.
+development</a>.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
 
@@ -479,43 +479,45 @@ Design, nor the Glatt Plagiarism Self-Detection Program.</p>
 
 <div style="text-align: center;">
 <div style="text-align: left; margin: 1em auto; width: 50%;">
-<script language=javascript type="text/javascript"
+<script type="text/javascript"
 src="http://ss.webring.com/navbar?f=j;y=eric_s_raymond;u=defurl">
-</script><noscript><table bgcolor=gray cellspacing=0
-border=2><tr> <td><table cellpadding=2 cellspacing=0 border=0><tr><td
-align=center> <font face=arial size=-1>This site is a member of
-WebRing. <br/>To browse visit <a
+</script><noscript><table cellspacing="0" border="2">
+<tr><td><table cellpadding="2" cellspacing="0" border="0">
+<tr><td align="center"> 
+This site is a member of WebRing.<br/>
+To browse visit <a
 href="http://ss.webring.com/navbar?f=l;y=eric_s_raymond;u=defurl">
-Here</a>.</font></td></tr></table></td></tr></table></noscript>
+Here</a>.</td></tr>
+</table></td></tr></table></noscript>
 </div>
 </div>
 
 <div style="text-align: center;">
 <div style="text-align: left; margin: 1em auto; width: 50%;">
 <!-- SiteSearch Google -->
-<form method="get" action="http://www.google.com/custom" target="_top">
+<form method="get" action="http://www.google.com/custom">
 <table border="0" bgcolor="#ffffff">
-<tr><td nowrap="nowrap" valign="top" align="left" height="32">
+<tr><td valign="top" align="left">
 <a href="http://www.google.com/">
-<img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google" align="middle"></img></a>
+<img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google"></img></a>
 </td>
-<td nowrap="nowrap">
+<td>
 <input type="hidden" name="domains" value="@SITESEARCH@"></input>
 <input type="text" name="q" size="31" maxlength="255" value=""></input>
 <input type="submit" name="sa" value="Search"></input>
 </td></tr>
 <tr>
 <td>&nbsp;</td>
-<td nowrap="nowrap">
+<td>
 <table>
 <tr>
 <td>
 <input type="radio" name="sitesearch" value="" checked="checked"></input>
-<font size="-1" color="#000000">Web</font>
+Web
 </td>
 <td>
 <input type="radio" name="sitesearch" value="@SITESEARCH@"></input>
-<font size="-1" color="#000000">@SITESEARCH@</font>
+@SITESEARCH@
 </td>
 </tr>
 </table>
@@ -535,7 +537,7 @@ Here</a>.</font></td></tr></table></td></tr></table></noscript>
 
 </div>
 <hr/>
-<script language="JavaScript" src="datestamp.js" type='text/javascript'></script>
+<script src="datestamp.js" type='text/javascript'></script>
 </body>
 </html>
 

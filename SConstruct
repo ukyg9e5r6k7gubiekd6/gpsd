@@ -1374,7 +1374,7 @@ env.Alias('testregress', check)
 # None of these productions are fired by default.
 # The content they handle is the GPSD website, not included in release tarballs.
 
-www = env.Alias('www', Split('''www/installation.html
+webpages = Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
     www/gpsd.html www/gpsfake.html www/gpsmon.html 
     www/gpspipe.html www/gpsprof.html www/gps.html 
@@ -1386,7 +1386,15 @@ www = env.Alias('www', Split('''www/installation.html
     www/index.html www/hardware.html
     www/performance/performance.html
     www/internals.html
-    ''') + map(lambda f: f[:-3], glob.glob("www/*.in")))
+    ''') + map(lambda f: f[:-3], glob.glob("www/*.in"))
+
+www = env.Alias('www', webpages)
+
+# Paste this list to a validator, e.g. 
+def validation_list(target, source, env):
+    for page in webpages:
+        print os.path.join(website, os.path.basename(page))
+Utility("validation-list", [www], validation_list)
 
 # How to update the website
 Utility("webupload", [www], ['rsync --exclude="*.in" -avz www/ ' + webupload])
