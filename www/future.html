@@ -64,73 +64,11 @@
 <div id="Content">
 <p>This page is our roadmap for future features and releases.</p>
 
-<h2 id="new_protocol">The new GPSD protocol</h2>
-
-<p>2.90 has shipped, and with it the redesign of GPSD's wire protocol.
-While this brings many benefits (including, immediately, the ability
-to interpret and report on the output of marine AIS receivers) it
-poses some significant deployment challenges as well.</p>
-
-<p>Over the next few releases we're going to be preoccupied with 
-<a href="protocol-transition.html">managing the transition to the
-new protocol.</a>. See that document for our tentative release schedule:</p>
-
-<p>For more on specific tasks planned for upcoming releases, see our
+<p>For more on pending bugs and lower-level tasks, see our
 <a href="TODO">TODO file</a>.</p>
 
-<h2 id="dbus">Delegating DBUS support to geoclue</h2>
-
-<p>We're going to stop shipping DBUS notifications directly at some point.  
-<b>Note: This is no longer a near-term prospect, as geoclue is reported
-not sufficiently stable to bear the weight.</b></p>
-
-<p>The reason for this is <a
-href="http://www.freedesktop.org/wiki/Software/GeoClue">GeoClue</a>.
-GeoClue is an aggregator that takes geolocation-related information
-from provider programs, including <code>gpsd</code>, and publishes
-it on DBUS.</p>
-
-<p>For us, DBUS support is a dusty backwater in our code.  We don't
-track what the DBUS community is doing or expecting.  Our devteam
-worries about version skew between GPSD's DBUS transmissions and
-client apps, and wouldn't have the knowledge base to fix that quickly
-if it happened.</p>
-
-<p>The GeoClue team, on the other hand, loves DBUS and specializes
-in it. We think it's probably best for both projects if they take
-data from us and handle the DBUS publishing job for us.</p>
-
-<h2 id="api_cleanup">Client API cleanup</h2>
-
-<p>This will happen after 2.95 but before 3.0.</p>
-
-<p>The client API has some historical baggage, unfortunate naming, and
-scar tissue in it.  At some point we're going to bump the API major
-version number to 5 and make the following changes:</p>
-
-<ul>
-<li><p>MAXCHANNELS will increase so we can handle a GPS + GLONASS 
-constellation.  This has become a production issue because of the
-Geostar Geos 1M. (Done in 2.96~dev.)</p></li> 
-
-<li><p>gps_open_r() will be renamed to gps_open(). The existing
-gps_open() will go away. (Done in 2.96~dev.)</p></li>
-
-<li><p>The 'waiting' and 'buffer' members of privdata will move into
-the public part of gps.h. (Done in 2.96~dev.)</p></li>
-
-<li><p>gps_set_raw_hook() will be removed. Instead, clients will simply
-be able to look at the packet buffer directly. (Of course, this is
-only recommended when the PACKET_SET flag is up.) (Done in 2.96~dev.)</p></li>
-
-<li><p>gps_poll() will be renamed to gps_read(). (Done in 2.96~dev.)</p></li>
-
-<li><p>The message 24 structure may be split into part A and B so these
-are in effect separate messages.</p></li>
-</ul>
-
-<p>Client API users will have the API_MAJOR_VERSION symbol available to
-conditionalize their code so it will work with any version.</p>
+<p>No major feature additions or changes implying a compatibility break
+are currently planned.</p>
 
 </div>
 <hr>
