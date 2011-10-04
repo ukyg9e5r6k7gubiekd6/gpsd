@@ -1,14 +1,15 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Author" content="Eric Raymond">
-   <meta name="Description" content="Hardware known to work with GPSD.">
-   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+   <meta name="Author" content="Eric Raymond"/>
+   <meta name="Description" content="Hardware known to work with GPSD."/>
+   <meta name="Keywords" content="GPS, translator, mxmap, GIS"/>
    <title>Compatible GPSes</title>
    <link rel="stylesheet" href="main.css" type="text/css"/>
 </head>
-
+<body>
 <div id="Header">Compatible Hardware</div>
 
 <div id="Menu">
@@ -22,7 +23,7 @@
     <a href="xgps-sample.html">Screenshots</a><br/>
     <a href="index.html#recipes">Recipes</a><br/>
     <a href="index.html#others">Other GPSDs</a><br/>
-    Hardware</a><br/>
+    Hardware<br/>
     <a href="for-vendors.html">For GPS Vendors</a><br/>
     <a href="wishlist.html">Wish List</a><br/>
     <a href="hall-of-shame.html">Hall of Shame</a><br/>
@@ -67,29 +68,29 @@
 <span>Search for hardware information here:</span>
 
 <!-- SiteSearch Google -->
-<form method="get" action="http://www.google.com/custom" target="_top">
-<table border="0" bgcolor="#ffffff">
-<tr><td nowrap="nowrap" valign="top" align="left" height="32">
+<form method="get" action="http://www.google.com/custom">
+<table border="0">
+<tr><td valign="top" align="left">
 <a href="http://www.google.com/">
-<img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google" align="middle"></img></a>
+<img src="http://www.google.com/logos/Logo_25wht.gif" border="0" alt="Google"></img></a>
 </td>
-<td nowrap="nowrap">
+<td>
 <input type="hidden" name="domains" value="@SITESEARCH@"></input>
 <input type="text" name="q" size="31" maxlength="255" value=""></input>
 <input type="submit" name="sa" value="Search"></input>
 </td></tr>
 <tr>
 <td>&nbsp;</td>
-<td nowrap="nowrap">
+<td>
 <table>
 <tr>
 <td>
 <input type="radio" name="sitesearch" value=""></input>
-<font size="-1" color="#000000">Web</font>
+Web
 </td>
 <td>
 <input type="radio" name="sitesearch" value="@SITESEARCH@"  checked="checked"></input>
-<font size="-1" color="#000000">@SITESEARCH@</font>
+@SITESEARCH@
 </td>
 </tr>
 </table>
@@ -111,10 +112,11 @@
 RS232C or USB interface that advertises NMEA-0183 compliance.  Here
 are some notes on hardware we have tested.  Hyperlinks lead to
 technical information.  The "Works with" column is the last
-<code>gpsd</code> version with which this receiver is known to have been
-successfully tested; A <img src="regression.png"/> in this column
-means we have a regression test load for the device that is checked
-before each release. Vendors are listed in alphabetical order.</p>
+<code>gpsd</code> version with which this receiver is known to have
+been successfully tested; A <img src="regression.png" alt="Regression
+icon"/> in this column means we have a regression test load for the
+device that is checked before each release. Vendors are listed in
+alphabetical order.</p>
 
 <p>There is also a <a href="#timing">table of PPS-capable
 receivers</a> which may be appropriate for timing use.</p>
@@ -125,55 +127,59 @@ These bugs may send affected GPSes catatonic.  See this <a
 href="upstream-bugs.html#bluetooth">bug warning</a> for a description
 of the problem. Where possible, we indicate this in the device table.</p>
 
-<p>Icons used in the table:
+<p>Icons used in the table:</p>
 
 <ul>
-<li><img src="star.png"/><img src="star.png"/><img src="star.png"/><img
-src="star.png"> marks devices with <b>Excellent</b> performance: gpsd
+<li><img src="star.png" alt="Star icon"/><img src="star.png" alt="Star
+icon"/><img src="star.png" alt="Star icon"/><img src="star.png"
+alt="Star icon"/> marks devices with <b>Excellent</b> performance: gpsd
 recognizes the receiver rapidly and reliably, reports are complete and
 correct.</li>
 
-<li><img src="star.png"/><img src="star.png"/><img src="star.png"/> marks
-devices with <b>Good</b> performance: <tt>gpsd</tt> has minor problems
-or lag recognizing the device, but reports are complete and
-correct.</li>
+<li><img src="star.png" alt="Star icon"/><img src="star.png" alt="Star
+icon"/><img src="star.png" alt="Star icon"/> marks devices with
+<b>Good</b> performance: <tt>gpsd</tt> has minor problems or lag
+recognizing the device, but reports are complete and correct.</li>
 
-<li><img src="star.png"/><img src="star.png"/> marks devices with
-<b>Fair</b> performance: reports have minor dropouts or problems,
-including occasional transient nonsense values.</li>
+<li><img src="star.png" alt="Star icon"/><img src="star.png" alt="Star
+icon"/> marks devices with <b>Fair</b> performance: reports have minor
+dropouts or problems, including occasional transient nonsense
+values.</li>
 
-<li><img src="star.png"/> marks devices with <b>Poor</b> performance:
-reports frequently have values that are wrong or nonsense.</li>
+<li><img src="star.png" alt="Star icon"/> marks devices with
+<b>Poor</b> performance: reports frequently have values that are wrong
+or nonsense.</li>
 
-<li><img src="bomb.png"/> marks devices which are <b>Broken</b>;
+<li><img src="bomb.png" alt="Bomb icon"/> marks devices which are <b>Broken</b>;
 gpsd frequently fails to recognize the device at all.</li>
 
-<li><img src="noconfigure.png"/> marks devices that needed the
-<tt>gpsd -b</tt> option when tested. Usually these are Bluetooth
-devices with defective firmware that does not handle baud-rate changes
-properly.  Some poorly-designed USB devices choke if they are fed too
-many probe strings; these may work better with recent versions of
-<tt>gpsd</tt>, which interleaves probe writes with the first few 
-packet reads.</li>
+<li><img src="noconfigure.png" alt="No-configure icon"/> marks devices
+that needed the <code>gpsd -b</code> option when tested. Usually these are
+Bluetooth devices with defective firmware that does not handle
+baud-rate changes properly.  Some poorly-designed USB devices choke if
+they are fed too many probe strings; these may work better with recent
+versions of <code>gpsd</code>, which interleaves probe writes with the
+first few packet reads.</li>
 
-<li><img src="regression.png"/> marks devices for which we have a
-regression-test load. These are checked on every release.</li>
+<li><img src="regression.png" alt="Regression-test icon"/> marks
+devices for which we have a regression-test load. These are checked on
+every release.</li>
 
-<li><img src="discontinued.png"/> marks devices that have been
-discontinued by their manufacturers.</li>
+<li><img src="discontinued.png" alt="Discontinued icon"/> marks
+devices that have been discontinued by their manufacturers.</li>
 
-<li><img src="hotplug.png"/> marks devices which will be recognized by
-the Linux hotplug system when they are plugged in. If you installed
-<tt>gpsd</tt> from a binary package,or did "make udev-install" from
-the source distribution, this should mean you never have to launch
-<tt>gpsd</tt> manually; the udev syatem will launch it for you when
-it sees a device of this kind go active.</li>
-</ul></p>
+<li><img src="hotplug.png" alt="Hotplug icon"/> marks devices which
+will be recognized by the Linux hotplug system when they are plugged
+in. If you installed <code>gpsd</code> from a binary package,or did "make
+udev-install" from the source distribution, this should mean you never
+have to launch <code>gpsd</code> manually; the udev syatem will launch it
+for you when it sees a device of this kind go active.</li>  
+</ul>
 
-<p>Note that in most cases (including the <img src="noconfigure.png"/>
-bug), poor ratings reflect problems not in <tt>gpsd</tt> but rather in
-device design and firmware so badly botched that <tt>gpsd</tt> cannot
-compensate.</p>
+<p>Note that in most cases (including the <img src="noconfigure.png"
+alt="No-configure icon"/> bug), poor ratings reflect problems not in
+<code>gpsd</code> but rather in device design and firmware so badly
+botched that <code>gpsd</code> cannot compensate.</p>
 
 <p>This table is generated from a capability database in the
 <code>gpsd</code> source tree. Please help us enrich the database with

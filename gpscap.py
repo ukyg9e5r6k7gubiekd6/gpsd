@@ -98,7 +98,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.has_option(dev, "techdoc"):
                     namefield = "<a href='%s'>%s</a>" % (self.get(dev, "techdoc"), dev)
                 if self.has_option(dev, "discontinued"):
-                    namefield = namefield + "&nbsp;<img title='Device discontinued' src='discontinued.png'/>"
+                    namefield = namefield + "&nbsp;<img title='Device discontinued' src='discontinued.png' alt='Discontinued icon'/>"
                 ofp.write("<td>%s</td>\n" % namefield)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
                 engine = self.get(dev, "engine")
@@ -115,23 +115,23 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.has_option(dev, "tested"):
                     tested = self.get(dev, "tested")
                     if tested == "regression":
-                        testfield += "<img title='Have regression test' src='regression.png'>"
+                        testfield += "<img title='Have regression test' src='regression.png' alt='Regression-test icon'/>"
                     else:
                         testfield += tested
                 if self.has_option(dev, "noconfigure"):
-                    testfield += "<img title='Requires -b option' src='noconfigure.png'>"
+                    testfield += "<img title='Requires -b option' src='noconfigure.png' alt='No-configure icon'/>"
                 if self.get(dev, "rating") == "excellent":
-                    testfield += "<img src='star.png'/><img src='star.png'/><img src='star.png'/><img src='star.png'/>"
+                    testfield += "<img src='star.png' alt='Star icon'/><img src='star.png' alt='Star icon'/><img src='star.png' alt='Star icon'/><img src='star.png' alt='Star icon'/>"
                 elif self.get(dev, "rating") == "good":
-                    testfield += "<img src='star.png'/><img src='star.png'/'><img src='star.png'/>"
+                    testfield += "<img src='star.png' alt='Star icon'/><img src='star.png' alt='Star icon'/><img src='star.png' alt='Star icon'/>"
                 elif self.get(dev, "rating") == "fair":
-                    testfield += "<img src='star.png'/><img src='star.png'/>"
+                    testfield += "<img src='star.png' alt='Star icon'/><img src='star.png' alt='Star icon'/>"
                 elif self.get(dev, "rating") == "poor":
-                    testfield += "<img src='star.png'/>"
+                    testfield += "<img src='star.png' alt='Star icon'/>"
                 elif self.get(dev, "rating") == "broken":
-                    testfield += "<img title='Device is broken' src='bomb.png'/>"
+                    testfield += "<img title='Device is broken' src='bomb.png' alt='Bomb icon'/>"
                 if self.has_option(dev, "usbchip") and self.get(dev, "usbchip") in hotpluggables:
-                    testfield += "<img src='hotplug.png'/>"
+                    testfield += "<img src='hotplug.png' alt='Hotplug icon'/>"
                 ofp.write("<td>%s</td>\n" % testfield)
                 nmea = "&nbsp;"
                 if self.has_option(dev, "nmea"):

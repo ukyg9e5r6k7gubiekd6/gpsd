@@ -1383,7 +1383,7 @@ webpages = Split('''www/installation.html
     www/AIVDM.html www/NMEA.html
     www/protocol-evolution.html www/protocol-transition.html
     www/client-howto.html www/writing-a-driver.html
-    www/index.html www/hardware.html
+    www/hardware.html
     www/performance/performance.html
     www/internals.html
     ''') + map(lambda f: f[:-3], glob.glob("www/*.in"))
@@ -1393,7 +1393,9 @@ www = env.Alias('www', webpages)
 # Paste this list to a validator, e.g. 
 def validation_list(target, source, env):
     for page in webpages:
-        print os.path.join(website, os.path.basename(page))
+        with open(page) as fp:
+            if "Valid XHTML" in fp.read():
+                print os.path.join(website, os.path.basename(page))
 Utility("validation-list", [www], validation_list)
 
 # How to update the website
