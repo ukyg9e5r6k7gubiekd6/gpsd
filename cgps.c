@@ -35,7 +35,7 @@
 /* This is how many display fields are output in the 'datawin' window
    when in GPS mode.  Change this value if you add or remove fields
    from the 'datawin' window for the GPS mode. */
-#define DATAWIN_GPS_FIELDS 9
+#define DATAWIN_GPS_FIELDS 8
 
 /* Count of optional fields that we'll display if we have the room. */
 #define DATAWIN_OPTIONAL_FIELDS 6
@@ -310,7 +310,6 @@ static void windowsetup(void)
 	(void)mvwprintw(datawin, 6, DATAWIN_DESC_OFFSET, "Heading:");
 	(void)mvwprintw(datawin, 7, DATAWIN_DESC_OFFSET, "Climb:");
 	(void)mvwprintw(datawin, 8, DATAWIN_DESC_OFFSET, "Status:");
-	(void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET, "GPS Type:");
 
 	/* Note that the following fields are exceptions to the
 	 * sizing rule.  The minimum window size does not include these
@@ -321,16 +320,16 @@ static void windowsetup(void)
 	 * sounded interesting. ;^) */
 
 	if (window_length == MAX_GPS_DATAWIN_SIZE) {
-	    (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET,
+	    (void)mvwprintw(datawin, 9, DATAWIN_DESC_OFFSET,
 			    "Longitude Err:");
-	    (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET,
+	    (void)mvwprintw(datawin, 10, DATAWIN_DESC_OFFSET,
 			    "Latitude Err:");
-	    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET,
+	    (void)mvwprintw(datawin, 11, DATAWIN_DESC_OFFSET,
 			    "Altitude Err:");
-	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Course Err:");
-	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, "Speed Err:");
+	    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
+	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
 	    /* it's actually esr that thought *this* one was interesting */
-	    (void)mvwprintw(datawin, 15, DATAWIN_DESC_OFFSET, "Grid Square:");
+	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, "Grid Square:");
 	}
 
 	(void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -567,14 +566,6 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     }
     (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-    if (gpsdata->set & DEVICELIST_SET) {
-	/* Fill in receiver type. */
-	for (i = 0; i < gpsdata->devices.ndevices; i++)
-	    if (strcmp(gpsdata->devices.list[i].path, gpsdata->dev.path) == 0)
-		break;
-	(void)snprintf(scr, sizeof(scr), "%s", gpsdata->devices.list[i].driver);
-	(void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
-    }
     /* Note that the following fields are exceptions to the
      * sizing rule.  The minimum window size does not include these
      * fields, if the window is too small, they get excluded.  This
@@ -591,7 +582,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 			   (int)(gpsdata->fix.epx * altfactor), altunits);
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 10, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 9, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 
 	if (isnan(gpsdata->fix.epy) == 0)
@@ -599,7 +590,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 			   (int)(gpsdata->fix.epy * altfactor), altunits);
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 11, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 10, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 
 	/* Fill in the estimated vertical position error. */
@@ -608,7 +599,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 			   (int)(gpsdata->fix.epv * altfactor), altunits);
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 12, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 11, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 
 	/* Fill in the estimated track error. */
@@ -617,7 +608,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 			   (int)(gpsdata->fix.epd));
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 13, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 12, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 
 	/* Fill in the estimated speed error. */
@@ -626,7 +617,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 			   (int)(gpsdata->fix.eps * speedfactor), speedunits);
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
+	(void)mvwprintw(datawin, 13, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 	/* Fill in the grid square (esr thought *this* one was interesting). */
 	/*@-branchstate@*/
@@ -634,7 +625,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	    s = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 	else
 	    s = "n/a";
-	(void)mvwprintw(datawin, 15, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, s);
+	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, s);
 	/*@+branchstate@*/
     }
 
