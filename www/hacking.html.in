@@ -537,9 +537,9 @@ cycle has arrived and been analyzed, but could be earlier if the
 device emits sentences late in the cycle that <code>gpsd</code>
 doesn't use.</para>
 
-<p>Here are the extra attributes. They measure components of the
-latency between the GPS's time measurement and when the sentence data
-became available to the client. For these latency timings to be
+<p>Here are the extra timing attributes. They measure components of
+the latency between the GPS's time measurement and when the sentence
+data became available to the client. For these latency timings to be
 meaningful, the GPS has to ship timestamps with sub-second
 precision. SiRF-II and Evermore chipsets ship time with 0.01
 resolution; iTalk and Navcom chipsets ship times with 0.001
@@ -558,6 +558,12 @@ only to ignore them.</li>
 <li><p>xmit_time: the delta from SOC to RTIME, when the daemon created
 the TPV for transmission.</p></li>
 </ol>
+
+<p>Note: You cannot assume that the entire SOC to RTIME interval is
+processing time! SOC is the GPS's report of its fix time, while RTIME
+is taken from your system clock. Some of the delta may be drift
+between your ntp-corrected system clock and the GPS's atomic-clock
+time. </p>
 
 <p>The distribution includes a Python script, <code>gpsprof</code>,
 that uses the timing support to collect profiling information from a
