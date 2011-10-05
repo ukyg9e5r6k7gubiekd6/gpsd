@@ -528,9 +528,18 @@ quiet time of 250msec or greater.<p>
 </div>
 <div>&nbsp;</div>
 
+<p>While transmission is going on, <code>gpsd</code> is reading the
+sentence burst and interpreting it.  At some point in the cycle
+('RTIME' in the above diagram)
+<code>gpsd</code> will recognize that it has enough data to ship a
+report to clients.  This might be just after the last packet in the
+cycle has arrived and been analyzed, but could be earlier if the
+device emits sentences late in the cycle that <code>gpsd</code>
+doesn't use.</para>
+
 <p>Here are the extra attributes. They measure components of the
 latency between the GPS's time measurement and when the sentence data
-became available to the client. For the latency timing to be
+became available to the client. For these latency timings to be
 meaningful, the GPS has to ship timestamps with sub-second
 precision. SiRF-II and Evermore chipsets ship time with 0.01
 resolution; iTalk and Navcom chipsets ship times with 0.001
@@ -539,20 +548,22 @@ resolution.</p>
 <ol>
 <li><code>cycle_start:</code> The delta from SOC to SOR.</li>
 
-<li><code>cycle_count:</code> Total characters transmitted during the cycle.</li>
-<li><code>sats:</code> Number of satellites used in the fix.</li>
+<li><code>cycle_count:</code> Total characters transmitted between SOC
+and RTIME. Note; this could be fewer than the number of characters in
+in the entire cycle; the packet-sniffer might assemble later packets 
+only to ignore them.</li>
 
-<li><p>xmit_time: the delta from SOC to when the daemon created
+<li><code>sats:</code> Number of satellites used in the cycle's fix.</li>
+
+<li><p>xmit_time: the delta from SOC to RTIME, when the daemon created
 the TPV for transmission.</p></li>
 </ol>
 
 <p>The distribution includes a Python script, <code>gpsprof</code>,
 that uses the timing support to collect profiling information from a
-running GPS instance.  You can use this to measure the latency at each
-stage &mdash; GPS to daemon, daemon to client library &mdash; and to
-estimate the portion of the latency induced by serial transmit time.
-The <code>gpsprof</code> script creates latency plots using
-<code>gnuplot(1)</code>.  It can also report the raw data.</p>
+running GPS instance. The <code>gpsprof</code> script creates latency
+plots using <code>gnuplot(1)</code>.  It can also report the raw
+data.</p>
 
 <h2 id="porting">Porting to weird machines: endianness, width, and signedness issues.</h2>
 
