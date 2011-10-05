@@ -529,7 +529,8 @@ scale the actual gpsd-to-client transmission time would be small </p>
 
 <div>&nbsp;</div>
 <div>
-<img style="display: block;margin-left: auto;margin-right:auto" src="cycle.png">
+<img style="display: block;margin-left: auto;margin-right:auto" 
+src="cycle.png" alt="Cycle timing diagram">
 </div>
 <div>&nbsp;</div>
 
@@ -539,7 +540,7 @@ sentence burst and interpreting it.  At some point in the cycle
 it has enough data to ship a report to clients.  This might be just
 after the last packet in the cycle has arrived and been analyzed, but
 could be earlier if the device emits packets late in the cycle that
-<code>gpsd</code> doesn't use.</para>
+<code>gpsd</code> doesn't use.</p>
 
 <p>Here are the extra timing attributes. They measure components of
 the latency between the GPS's time measurement and when the sentence
