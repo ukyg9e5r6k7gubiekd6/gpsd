@@ -489,23 +489,53 @@ only, suspicion should focus here.</p>
 
 <h2 id="profiling">Profiling</h2>
 
-<p>There is a barely-documented timing policy flag in the WATCH
-command that will cause it to that will cause it to emit timing 
-information on every TPV.  Presently there is exactly one 
-such member:</p>
+<p>There is a timing policy flag in the WATCH command that will cause
+it to that will cause it to emit timing information at the end of
+every reporting cycle from the sensor.</p>
+
+<p>The profiling code relies on the GPS repeatedly spinning through
+a three-phase cycle:</p>
 
 <ol>
-<li><p>xmit_time: the time at which the daemon created the TPV for 
-transmission.</p></li>
+<li>Phase one, computation, begins when the GPS samples satellite
+pseudoranges.  During phase one, the GPS computes a fix from those
+samples and buffers a burst of sentences describing the fix.</li>
+
+<li>In phase two, transmission, the GPS transmits the burst of sentences to the
+listening computer. Phase two ends when the last byte of the last
+sentence is transmitted.</li>
+
+<li>In phase three, quiet time, the GPS transmits nothing.  Note, this
+phase may be nonexistent at 4800bps because the transmission time for
+a whole cycle's worth of data can be a second or longer (this has been
+observed in some NMEA GPSes).  At 9600bps a GPS emitting the normal
+set of {GPRMC,GGA,GPVTG,GPGLL,GSA,GPGSV) will have a quiet time
+minimum duration of 250ms; the pause is readily observable by eyeball
+in <code>gpsmon</code>.  At higher speeds, or with (slightly) denser
+binary protocols, quiet time increases.</li>
 </ol>
 
-<p>Thes attributes measure components of the latency between the GPS's
-time measurement and when the sentence data became available to the
-client. They are collected using get_realtime(3), so they are not
-subject to corrections from ntpd. For the latencty timing to be
+<p>As long as we avoid profiling at 4800bps, then, we can identify the
+start of a reporting cycle (SOR) when data becomes available after
+quiet time of 250msec or greater.<p>
+
+<p>Here are the extra attributes. They measure components of the
+latency between the GPS's time measurement and when the sentence data
+became available to the client. For the latency timing to be
 meaningful, the GPS has to ship timestamps with sub-second
-precision. SiRF-II and Evermore chipsets ship times with millisecond
+precision. SiRF-II and Evermore chipsets ship time with 0.01
+resolution; iTalk and Navcom chipsets ship times with 0.001
 resolution.</p>
+
+<ol>
+<li><code>cycle_start:</code> The delta from fix time to SOC.</li>
+
+<li><code>cycle_count:</code> Total characters transmitted during the cycle.</li>
+<li><code>sats:</code> Number of satellites used in the fix.</li>
+
+<li><p>xmit_time: the delta from fix time to when the daemon created
+the TPV for transmission.</p></li>
+</ol>
 
 <p>The distribution includes a Python script, <code>gpsprof</code>,
 that uses the timing support to collect profiling information from a
@@ -517,10 +547,10 @@ The <code>gpsprof</code> script creates latency plots using
 
 <h2 id="porting">Porting to weird machines: endianness, width, and signedness issues.</h2>
 
-<p>The gpsd code is well-tested on 32- and 64-bit IA chips, also on PPCs.
-Thus, it's known to work on mainstream chips of either 32 or 64 bits
-and either big-endian or little-endian representation with IEE754
-floating point.</p>
+<p>The gpsd code is well-tested on 32- and 64-bit IA chips, also on
+PPCs, also on MIPS.  Thus, it's known to work on mainstream chips of
+either 32 or 64 bits and either big-endian or little-endian
+representation with IEE754 floating point.</p>
 
 <p>Handling of NMEA devices should not be sensitive to the machine's
 internal numeric representations, however, because the binary-protocol
