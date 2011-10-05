@@ -528,11 +528,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
 /*
- * Would also be possible to enable PPS on Data Set Ready and Ring
- * Indicator with TIOCM_DSR and TIOCM_RI, but no such setup has been
- * observed in the wild.
- *
- * Pinouts:
+ * Possible pins for PPS: DCD, CTS, RTS, RI. Pinouts:
  *
  * DB9  DB25  Name      Full name
  * ---  ----  ----      --------------------
