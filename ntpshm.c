@@ -546,13 +546,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
  *  9    22    RI   <-- Ring Indicator
  *  5     7    SG       Signal ground 
  */
-#if defined(PPS_ON_CTS_ENABLE)
-#define PPS_LINE_TIOC TIOCM_CTS
-#define PPS_LINE_NAME "CTS"
-#else
-#define PPS_LINE_TIOC TIOCM_CAR
-#define PPS_LINE_NAME "DCD"
-#endif
+#include "pps_pin.h"
 
 /*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)

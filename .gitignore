@@ -71,6 +71,7 @@ gpsd_config.h
 packet_names.h
 revision.h
 timebase.h
+pps_pin.h
 gpsd.spec
 MANIFEST
 .kdbgrc.*
