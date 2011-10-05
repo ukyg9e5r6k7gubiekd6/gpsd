@@ -95,6 +95,7 @@ boolopts = (
     ("tripmate",      True,  "DeLorme TripMate support"),
     ("tsip",          True,  "Trimble TSIP support"),
     ("ubx",           True,  "UBX Protocol support"),
+    ("fury",          True,  "Jackson Labs Fury and Firefly support"),
     # Non-GPS protocols
     ("aivdm",         True,  "AIVDM support"),
     ("gpsclock",      True,  "GPSClock support"),

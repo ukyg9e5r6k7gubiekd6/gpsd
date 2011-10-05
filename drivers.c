@@ -865,6 +865,67 @@ static const struct gps_type_t oceanServer = {
 /* *INDENT-ON* */
 #endif
 
+#ifdef FURY_ENABLE
+/**************************************************************************
+ *
+ * Jackson Labs Fury, a high-precision laboratory clock
+ *
+ **************************************************************************/
+
+static bool fury_rate_switcher(struct gps_device_t *session, double rate)
+{
+    char buf[78];
+    double inverted;
+
+    /* rate is a frequency, but the command takes interval in # of sedconds */
+    if (rate == 0.0)
+	inverted = 0.0;
+    else
+	inverted = 1.0/rate;
+    if (inverted > 256)
+	return false;
+    (void)snprintf(buf, sizeof(buf), "GPS:GPGGA %d\r\n", (int)inverted);
+    (void)gpsd_write(session, buf, strlen(buf));
+    return true;
+}
+
+static void fury_event_hook(struct gps_device_t *session, event_t event)
+{
+    if (event == event_wakeup && gpsd_get_speed(&session->ttyset) == 115200)
+	(void)fury_rate_switcher(session, 1.0);
+}
+
+
+/* *INDENT-OFF* */
+static const struct gps_type_t fury = {
+    .type_name      = "Jackson Labs Fury", /* full name of type */
+    .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* no rollover or other flags */
+    .trigger	    = NULL,		/* detect their main sentence */
+    .channels       = 0,		/* not an actual GPS at all */
+    .probe_detect   = NULL,
+    .get_packet     = generic_get,	/* how to get a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
+    .rtcm_writer    = NULL,		/* Don't send */
+    .event_hook     = fury_event_hook,
+#ifdef RECONFIGURE_ENABLE
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = fury_rate_switcher,
+    .min_cycle      = 1,		/* has rate switch */
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
+    .control_send   = nmea_write,	/* how to send control strings */
+#endif /* CONTROLSEND_ENABLE */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = NULL,
+#endif /* NTPSHM_ ENABLE */
+};
+/* *INDENT-ON* */
+
+#endif /* FURY_ENABLE */
+
+
 #ifdef RTCM104V2_ENABLE
 /**************************************************************************
  *
@@ -1312,6 +1373,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef TNT_ENABLE
     &trueNorth,
 #endif /* TNT_ENABLE */
+#ifdef FURY_ENABLE
+    &fury,
+#endif /* FURY_ENABLE */
 #ifdef AIVDM_ENABLE
     &aivdm,
 #endif /* AIVDM_ENABLE */

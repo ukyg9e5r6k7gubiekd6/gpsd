@@ -33,7 +33,7 @@ typedef unsigned int speed_t;
 #endif 
 
 /* Some internal capabilities depend on which drivers we're compiling. */
-#if !defined(NMEA_ENABLE) && (defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE))
+#if !defined(NMEA_ENABLE) && (defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE) || defined(FURY_ENABLE))
 #define NMEA_ENABLE
 #endif
 #ifdef EARTHMATE_ENABLE
