@@ -498,12 +498,13 @@ a three-phase cycle:</p>
 
 <ol>
 <li>Phase one, computation, begins when the GPS samples satellite
-pseudoranges.  During phase one, the GPS computes a fix from those
-samples and buffers a burst of sentences describing the fix.</li>
+pseudoranges.  (We'll call this time start-of-cycle or SOC). During
+phase one, the GPS computes a fix from those samples and buffers a
+burst of sentences describing the fix.</li>
 
 <li>In phase two, transmission, the GPS transmits the burst of sentences to the
 listening computer. Phase two ends when the last byte of the last
-sentence is transmitted.</li>
+sentence is transmitted. (We'll call this time end-of-cycle or EOR) </li>
 
 <li>In phase three, quiet time, the GPS transmits nothing.  Note, this
 phase may be nonexistent at 4800bps because the transmission time for
@@ -519,6 +520,14 @@ binary protocols, quiet time increases.</li>
 start of a reporting cycle (SOR) when data becomes available after
 quiet time of 250msec or greater.<p>
 
+<p>Here is a diagram:</p>
+
+<div>&nbsp;</div>
+<div>
+<img style="display: block;margin-left: auto;margin-right:auto" src="cycle.png">
+</div>
+<div>&nbsp;</div>
+
 <p>Here are the extra attributes. They measure components of the
 latency between the GPS's time measurement and when the sentence data
 became available to the client. For the latency timing to be
@@ -528,12 +537,12 @@ resolution; iTalk and Navcom chipsets ship times with 0.001
 resolution.</p>
 
 <ol>
-<li><code>cycle_start:</code> The delta from fix time to SOC.</li>
+<li><code>cycle_start:</code> The delta from SOC to SOR.</li>
 
 <li><code>cycle_count:</code> Total characters transmitted during the cycle.</li>
 <li><code>sats:</code> Number of satellites used in the fix.</li>
 
-<li><p>xmit_time: the delta from fix time to when the daemon created
+<li><p>xmit_time: the delta from SOC to when the daemon created
 the TPV for transmission.</p></li>
 </ol>
 
@@ -1112,11 +1121,10 @@ indicate fix validity after each message; the framework code relies on
 this.  Finally, you must set gpsdata.status to indicate when DGPS
 fixes are available, whether through RTCM or WAAS/Egnos.</p>
 
-<p>Your packet parser is also responsible for setting the tag field
-in the gps_data_t structure.  This is the string that will be emitted
-as the first field of each $ record for profiling.  The packet getter
-will set the sentence-length for you; it will be raw byte length,
-including both payload and header/trailer bytes.</p>
+<p>Your packet parser is also responsible for setting the tag field in
+the gps_data_t structure. The packet getter will set the
+sentence-length for you; it will be raw byte length, including both
+payload and header/trailer bytes.</p>
 
 <p>Note, also, that all the timestamps your driver puts in the session
 structure should be UTC (with leap-second corrections) not just Unix
