@@ -255,19 +255,20 @@ class instrumented(plotter):
             self.fixes.append((self.session.data['tag'],
                                gps.misc.isotime(self.session.data['time']),
                                self.session.data["cycle_count"],
+                               self.session.data['sats'],
                                self.session.data['cycle_start'],
                                self.session.data['xmit_time'],
                                time.time()))
         return True
     def header(self):
         res = "# Analyzed latency, " + self.whatami() + "\n"
-        res += "#- Tag -  -- Fix time --  - Chars -  - Latency -  -- RS232 --  --Analysis-  --- Recv --\n"
+        res += "# Tag   -- Fix time --  - Chars -  --   Latency  - RS232-  Analysis  - Recv -\n"
         return res
     def data(self):
         res = ""
-        for (tag, time, chars, start, xmit, recv) in self.fixes:
+        for (tag, time, chars, sats, start, xmit, recv) in self.fixes:
             rs232_time = (chars * 10.0) / self.device['bps']
-            res += "% 8s  %.3f  %9u  %.9f  %.9f  %.9f  %.9f\n" % (tag, time, chars, start-time, (start-time)+rs232_time, xmit-time, recv-time)
+            res += "%-6s  %.3f  %9u  %2u  %.6f  %.6f  %.6f  %.6f\n" % (tag, time, chars, sats, start-time, (start-time)+rs232_time, xmit-time, recv-time)
         return res
     def plot(self):
         legends = (
