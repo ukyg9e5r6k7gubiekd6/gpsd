@@ -560,8 +560,8 @@ only to ignore them.</li>
 
 <li><code>sats:</code> Number of satellites used in the cycle's fix.</li>
 
-<li><p>xmit_time: the delta from SOC to RTIME, when the daemon created
-the TPV for transmission.</p></li>
+<li><code>xmit_time:</code> The delta from SOC to RTIME, when the daemon created
+the TPV for transmission.</li>
 </ol>
 
 <p>Note: You cannot assume that the entire SOC to RTIME interval is
