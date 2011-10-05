@@ -814,8 +814,8 @@ of its time simply waiting in select(2) at effectively zero CPU cost. Even
 with a client session and a GPS active, we have measured gpsd's CPU load
 at steadily less than 1% on a low-power, low-speed ARM SBC.</p>
 
-</div>
 <hr>
 <script src="datestamp.js" type='text/javascript'></script>
+</div>
 </body>
 </html>
