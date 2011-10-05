@@ -283,7 +283,7 @@ set key title "Analyzed latency"
 set key below
 plot \\\n'''
         for (i, legend) in enumerate(legends):
-            j = len(legends) - i + 3
+            j = len(legends) - i + 4
             fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
         fmt = fmt[:-4] + "\n"
         return fmt + self.header() + (self.data() + "e\n") * len(legends)
