@@ -1485,6 +1485,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         distfiles.remove(".gitignore")
     distfiles += generated_sources
     distfiles += base_manpages.keys() + python_manpages.keys()
+    distfiles.remove("gpsd.h")
     if "packaging/rpm/gpsd.spec" not in distfiles:
         distfiles.append("packaging/rpm/gpsd.spec")
 
