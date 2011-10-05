@@ -172,7 +172,7 @@ have a real <code>gpsd</code> bug.</p>
 <p>If you are using an old version of <code>gpsd</code>, it is
 possible your bug has already been fixed.  Download the latest public
 version from the <a href='@MAINPAGE@'>project page</a> and test it.
-To be really helpful, check out the <a href='@REPOVIEW@'>git head</a>
+To be really helpful, check out the <a href='@BROWSEREPO@'>git head</a>
 and test that.  We don't mind getting bug reports that say "I saw
 version foo had the following bug, but you've fixed it."</p>
 
@@ -216,7 +216,7 @@ all, is the firmware version.  You will want that for your report.</p>
 <h3 id="logformat">8. Annotate the capture log and send us a copy</h3>
 
 <p>We'll describe the annotation steps here for completeness, but the
-easiest way to do this is with <a href="@WEBFORM">our web form</a>.</p>
+easiest way to do this is with <a href="@WEBFORM@">our web form</a>.</p>
 
 <p>A logfile should consist of an identifying header followed by a
 straight unencoded dump of receiver data, whether NMEA or binary. The
@@ -340,7 +340,7 @@ the version.</p>
 <h3>13. Report it on the GPSD bugtracker</h3>
 
 <p>There is a <a
-href="@BUGTRACKER">GPSD bug tracker</a>.
+href="@BUGTRACKER@">GPSD bug tracker</a>.
 Use that.  If your bug narrative does not fit the tracker template well,
 it's acceptable to send an email report to the gpsd-dev list.</p>
 </blockquote>
