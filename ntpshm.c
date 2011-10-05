@@ -531,6 +531,20 @@ static int init_kernel_pps(struct gps_device_t *session) {
  * Would also be possible to enable PPS on Data Set Ready and Ring
  * Indicator with TIOCM_DSR and TIOCM_RI, but no such setup has been
  * observed in the wild.
+ *
+ * Pinouts:
+ *
+ * DB9  DB25  Name      Full name
+ * ---  ----  ----      --------------------
+ *  3     2    TXD  --> Transmit Data
+ *  2     3    RXD  <-- Receive Data
+ *  7     4    RTS  --> Request To Send
+ *  8     5    CTS  <-- Clear To Send
+ *  6     6    DSR  <-- Data Set Ready
+ *  4    20    DTR  --> Data Terminal Ready
+ *  1     8    DCD  <-- Data Carrier Detect
+ *  9    22    RI   <-- Ring Indicator
+ *  5     7    SG       Signal ground 
  */
 #if defined(PPS_ON_CTS_ENABLE)
 #define PPS_LINE_TIOC TIOCM_CTS

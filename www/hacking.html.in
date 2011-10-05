@@ -511,11 +511,11 @@ end-of-reporting or EOR.</li>
 <li>In phase three, quiet time, the GPS transmits nothing.  Note, this
 phase may be nonexistent at 4800bps because the transmission time for
 a whole cycle's worth of data can be a second or longer (this has been
-observed in some NMEA GPSes).  At 9600bps a GPS emitting the normal
-set of {GPRMC,GGA,GPVTG,GPGLL,GSA,GPGSV) will have a quiet time
-minimum duration of 250ms; the pause is readily observable by eyeball
-in <code>gpsmon</code>.  At higher speeds, or with (slightly) denser
-binary protocols, quiet time increases.</li>
+observed in some NMEA GPSes).  At 9600bps a GPS with a 1s cycle time
+emitting the normal set of {GPRMC,GGA,GPVTG,GPGLL,GSA,GPGSV) will have
+a quiet time minimum duration of 250ms; the pause is readily
+observable by eyeball in <code>gpsmon</code>.  At higher speeds, or
+with (slightly) denser binary protocols, quiet time increases.</li>
 </ol>
 
 <p>As long as we avoid profiling at 4800bps, then, we can identify the
@@ -523,9 +523,10 @@ start of a reporting cycle (SOR) when data becomes available after
 quiet time of 250msec or greater.<p>
 
 <p>Here is a diagram of one second in the life of a typical GPS. The
-relative lengths of the boxes have roughly the proportions of actual timing 
-behavior on an NMEA or SiRF-binary GPS at 19200bps, except that on this
-scale the actual gpsd-to-client transmission time would be small </p>
+relative horizontal lengths of the boxes have roughly the proportions
+of actual timing behavior on an NMEA or SiRF-binary GPS at 19200bps,
+except that on this scale the typical gpsd-to-client transmission time
+would be nearly too small to see.</p>
 
 <div>&nbsp;</div>
 <div>
@@ -554,9 +555,9 @@ resolution.</p>
 <li><code>cycle_start:</code> The delta from SOC to SOR.</li>
 
 <li><code>cycle_count:</code> Total characters transmitted between SOC
-and RTIME. Note; this could be fewer than the number of characters in
+and RTIME. Note; this could be fewer than the number of characters
 in the entire cycle; the packet-sniffer might assemble later packets 
-only to ignore them.</li>
+which are not analyzed by the driver.</li>
 
 <li><code>sats:</code> Number of satellites used in the cycle's fix.</li>
 
