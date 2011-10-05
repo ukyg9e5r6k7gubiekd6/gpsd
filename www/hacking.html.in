@@ -502,9 +502,11 @@ pseudoranges.  (We'll call this time start-of-cycle or SOC). During
 phase one, the GPS computes a fix from those samples and buffers a
 burst of sentences describing the fix.</li>
 
-<li>In phase two, transmission, the GPS transmits the burst of sentences to the
-listening computer. Phase two ends when the last byte of the last
-sentence is transmitted. (We'll call this time end-of-cycle or EOR) </li>
+<li>Phase two, transmission, begins at a time we'll call
+start-of-reporting or SOR.  In this phase the GPS transmits the burst
+of sentences to the listening computer. Phase two ends when the last
+byte of the last sentence is transmitted. We'll call this time
+end-of-reporting or EOR.</li>
 
 <li>In phase three, quiet time, the GPS transmits nothing.  Note, this
 phase may be nonexistent at 4800bps because the transmission time for
@@ -520,7 +522,10 @@ binary protocols, quiet time increases.</li>
 start of a reporting cycle (SOR) when data becomes available after
 quiet time of 250msec or greater.<p>
 
-<p>Here is a diagram:</p>
+<p>Here is a diagram of one second in the life of a typical GPS. The
+relative lengths of the boxes have roughly the proportions of actual timing 
+behavior on an NMEA or SiRF-binary GPS at 19200bps, except that on this
+scale the actual gpsd-to-client transmission time would be small </p>
 
 <div>&nbsp;</div>
 <div>
@@ -530,12 +535,11 @@ quiet time of 250msec or greater.<p>
 
 <p>While transmission is going on, <code>gpsd</code> is reading the
 sentence burst and interpreting it.  At some point in the cycle
-('RTIME' in the above diagram)
-<code>gpsd</code> will recognize that it has enough data to ship a
-report to clients.  This might be just after the last packet in the
-cycle has arrived and been analyzed, but could be earlier if the
-device emits sentences late in the cycle that <code>gpsd</code>
-doesn't use.</para>
+('RTIME' in the above diagram) <code>gpsd</code> will recognize that
+it has enough data to ship a report to clients.  This might be just
+after the last packet in the cycle has arrived and been analyzed, but
+could be earlier if the device emits packets late in the cycle that
+<code>gpsd</code> doesn't use.</para>
 
 <p>Here are the extra timing attributes. They measure components of
 the latency between the GPS's time measurement and when the sentence
@@ -563,7 +567,7 @@ the TPV for transmission.</p></li>
 processing time! SOC is the GPS's report of its fix time, while RTIME
 is taken from your system clock. Some of the delta may be drift
 between your ntp-corrected system clock and the GPS's atomic-clock
-time. </p>
+time.</p>
 
 <p>The distribution includes a Python script, <code>gpsprof</code>,
 that uses the timing support to collect profiling information from a
