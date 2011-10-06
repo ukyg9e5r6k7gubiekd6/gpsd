@@ -89,6 +89,9 @@ class plotter:
                     if "timing" in options and not self.session.data.get("timing"):
                         sys.stderr.write("timing is not enabled.\n")
                         sys.exit(1)
+                # Log before filtering - might be good for post-analysis.
+                if logfp:
+                    logfp.write(self.session.response)
                 # Ignore everything but TPVs for the moment
                 if self.session.data["class"] != "TPV":
                     continue
@@ -102,8 +105,6 @@ class plotter:
                 if countdown == await:
                     sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time()-basetime,await))
                 if plotter.sample():
-                    if logfp:
-                        logfp.write(self.session.response)
                     countdown -= 1
             baton.end()
         finally:
