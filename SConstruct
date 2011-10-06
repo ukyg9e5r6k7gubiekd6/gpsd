@@ -1406,12 +1406,14 @@ webpages = Split('''www/installation.html
 
 www = env.Alias('www', webpages)
 
-# Paste this list to a validator, e.g. 
+# Paste 'scons --quiet validation-list' to a batch validator such as
+# http://htmlhelp.com/tools/validator/batch.html.en 
 def validation_list(target, source, env):
     for page in glob.glob("www/*.html"):
-        with open(page) as fp:
-            if "Valid HTML" in fp.read():
-                print os.path.join(website, os.path.basename(page))
+        if not '-head' in page:
+            with open(page) as fp:
+                if "Valid HTML" in fp.read():
+                    print os.path.join(website, os.path.basename(page))
 Utility("validation-list", [www], validation_list)
 
 # How to update the website

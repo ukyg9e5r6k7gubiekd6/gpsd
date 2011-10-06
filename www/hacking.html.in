@@ -505,17 +505,18 @@ burst of sentences describing the fix.</li>
 <li>Phase two, transmission, begins at a time we'll call
 start-of-reporting or SOR.  In this phase the GPS transmits the burst
 of sentences to the listening computer. Phase two ends when the last
-byte of the last sentence is transmitted. We'll call this time
+byte of the last sentence is transmitted' we'll call this time
 end-of-reporting or EOR.</li>
 
-<li>In phase three, quiet time, the GPS transmits nothing.  Note, this
-phase may be nonexistent at 4800bps because the transmission time for
-a whole cycle's worth of data can be a second or longer (this has been
+<li>In phase three, quiet time, the GPS is waiting for its next
+scheduled time to take a fix, and transmits nothing.  Note, this phase
+may be nonexistent at 4800bps because the transmission time for a
+whole cycle's worth of data can be a second or longer (this has been
 observed in some NMEA GPSes).  At 9600bps a GPS with a 1s cycle time
-emitting the normal set of {GPRMC,GGA,GPVTG,GPGLL,GSA,GPGSV) will have
-a quiet time minimum duration of 250ms; the pause is readily
+emitting the normal NMEA set of {GPRMC,GGA,GPVTG,GPGLL,GSA,GPGSV) will
+have a quiet time minimum duration of 250ms; the pause is readily
 observable by eyeball in <code>gpsmon</code>.  At higher speeds, or
-with (slightly) denser binary protocols, quiet time increases.</li>
+with (slightly) more compact binary protocols, quiet time increases.</li>
 </ol>
 
 <p>As long as we avoid profiling at 4800bps, then, we can identify the
@@ -552,7 +553,8 @@ resolution; iTalk and Navcom chipsets ship times with 0.001
 resolution.</p>
 
 <ol>
-<li><code>cycle_start:</code> The delta from SOC to SOR.</li>
+<li><code>cycle_start:</code> SOR as a float quantity in seconds of
+Unix time.</li>
 
 <li><code>cycle_count:</code> Total characters transmitted between SOC
 and RTIME. Note; this could be fewer than the number of characters
@@ -561,8 +563,8 @@ which are not analyzed by the driver.</li>
 
 <li><code>sats:</code> Number of satellites used in the cycle's fix.</li>
 
-<li><code>xmit_time:</code> The delta from SOC to RTIME, when the daemon created
-the TPV for transmission.</li>
+<li><code>xmit_time:</code> RTIME as a float quantity in seconds of
+Unix time, when the daemon created the TPV for transmission.</li>
 </ol>
 
 <p>Note: You cannot assume that the entire SOC to RTIME interval is
@@ -1457,19 +1459,23 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 </ol>
 </dd>
 
-<dt>9. Ship to our hosting site</dt>
+<dt>9.Perform a validation pass on the website content.</dt>
+<dd>See the instructions near validation-list in the scons recipe.  
+Then upload the corrected pages with <code>scons website</code>.</dt>
+
+<dt>10. Ship to our hosting site</dt>
 <dd>Make the tarball (<code>scons dist</code>), upload it to @SITENAME@,
 (<code>scons upload-release</code>), and notify the announce list.</dd>
 
-<dt>10. Tag the release in git</dt>
+<dt>11. Tag the release in git</dt>
 <dd><p><code>scons tag-relese</code> will do it.</p></dd>
 
-<dt>11. Bump the release number and push that commit</dt>
+<dt>12. Bump the release number and push that commit</dt>
 <dd>Bump the release number in SConstruct, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>12. Announce the release</dt>
+<dt>13. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the dev list.</dd>
 </dl>
@@ -1485,8 +1491,3 @@ build controls</a></p>
 </div>
 </body>
 </html>
-<!--
-Local Variables:
-compile-command: "./upload hacking.html"
-End:
--->
