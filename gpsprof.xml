@@ -162,7 +162,7 @@ this option gnuplot will call its X11 display code.</para>
 <para>The -d option dumps the plot data, without attached gnuplot
 code, to a specified file for post-analysis.</para>
 
-<para>The -f option dumps the raw JSON reports collected from the device
+<para>The -l option dumps the raw JSON reports collected from the device
 to a specified file.</para>
 
 <para>The -h option makes <application>gpsprof</application> print 
