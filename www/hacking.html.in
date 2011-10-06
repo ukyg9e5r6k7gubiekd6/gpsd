@@ -315,7 +315,7 @@ go through the following checklist:</p>
     documentation.</li>
 
 <li>If your patch changes executable code in any way that is more than
-    trivial, use the regression-test suite &mdash; "make testregress"
+    trivial, use the regression-test suite &mdash; "scons testregress"
     &mdash; to check that your patch doesn't break the handling of any
     already-supported GPS.</li>
 
@@ -1378,11 +1378,10 @@ encounter in the future.</p>
 <p>State 0 (red): There are known blocker bugs,  Blocker bugs include functional
 regressions in core or driver code.  </p>
 
-<p>State 1 (blue): There are no known blocker bugs.  'make
-testregress' passes, but problem-children (USB Garmin and serial PPS)
-have not been live-tested.</p>
+<p>State 1 (blue): There are no known blocker bugs.  'scons testregress' passes,
+but problem-children (USB Garmin and serial PPS) have not been live-tested.</p>
 
-<p>State 2 (yellow): There are no known blocker bugs.  'make testregress'
+<p>State 2 (yellow): There are no known blocker bugs.  'scons testregress'
 passes.  Problem children have been live-tested.  From this state, we
 drop back to state 1 if anyone commits a logic change to core code or
 the driver for a problem child.  In state 2, devs with release

@@ -171,7 +171,7 @@ devices that have been discontinued by their manufacturers.</li>
 
 <li><img src="hotplug.png" alt="Hotplug icon"> marks devices which
 will be recognized by the Linux hotplug system when they are plugged
-in. If you installed <code>gpsd</code> from a binary package,or did "make
+in. If you installed <code>gpsd</code> from a binary package,or did "scons
 udev-install" from the source distribution, this should mean you never
 have to launch <code>gpsd</code> manually; the udev syatem will launch it
 for you when it sees a device of this kind go active.</li>  

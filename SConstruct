@@ -1471,7 +1471,7 @@ if env['python']:
 # Productions for setting up and performing udev tests.
 #
 # Requires root. Do "udev-install", then "tail -f /var/log/syslog" in
-# another window, then run 'make udev-test', then plug and unplug the
+# another window, then run 'scons udev-test', then plug and unplug the
 # GPS ad libitum.  All is well when you get fix reports each time a GPS
 # is plugged in.
 
