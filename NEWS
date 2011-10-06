@@ -12,7 +12,8 @@
   supported and instructions included.  gpsprof works again and does
   whole-cycle profiling. gpsd.php has Open Street Map support.  The
   pp-on-cts option is replaced by a pps_pin option that lets you
-  specify the pin; the default is still DCD.
+  specify the pin; the default is still DCD. New supported device;
+  the Jackson Labs Fury,
 
 * Sun Aug 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1
   The Irene release, rocking you like a hurricane and brought to you

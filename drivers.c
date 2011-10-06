@@ -870,6 +870,12 @@ static const struct gps_type_t oceanServer = {
  *
  * Jackson Labs Fury, a high-precision laboratory clock
  *
+ * Will also support other Jackon Labs boards, including the Firefly.
+ *
+ * Note: you must either build with fixed_port_speed=115200 or tweak the 
+ * speed on the port to 115200 before running.  The device's default mode
+ * does not stream output, so our hunt loop will simply time out otherwise.
+ *
  **************************************************************************/
 
 static bool fury_rate_switcher(struct gps_device_t *session, double rate)
@@ -893,6 +899,8 @@ static void fury_event_hook(struct gps_device_t *session, event_t event)
 {
     if (event == event_wakeup && gpsd_get_speed(&session->ttyset) == 115200)
 	(void)fury_rate_switcher(session, 1.0);
+    else if (event == event_deactivate)
+	(void)fury_rate_switcher(session, 0.0);
 }
 
 
