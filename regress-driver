@@ -105,7 +105,7 @@ case $mode in
 	    then
 		trap 'rm -f ${TMP}/test-$$.chk; exit $errors' EXIT HUP INT TERM
 		case $testing in
-		daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -f -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
+		daemon) TMPDIR=${TMP} ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -f -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
 		clientlib) ${GPSD_HOME}/test_libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
 		if [ "${ALTFILTER}" ]
@@ -189,4 +189,5 @@ then
     echo "scale=2; ${endtime} - ${starttime}" | bc
 fi
 
+rm -fr ${TMP}
 exit $status

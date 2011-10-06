@@ -300,11 +300,12 @@ class DaemonInstance:
     def __init__(self, control_socket=None):
         self.sockfile = None
         self.pid = None
+        self.tmpdir = os.environ.get('TMPDIR', '/tmp')
         if control_socket:
             self.control_socket = control_socket
         else:
-            self.control_socket = "/tmp/gpsfake-%d.sock" % os.getpid()
-        self.pidfile  = "/tmp/gpsfake_pid-%s" % os.getpid()
+            self.control_socket = "%s/gpsfake-%d.sock" % (self.tmpdir, os.getpid())
+        self.pidfile = "%s/gpsfake-%d.pid" % (self.tmpdir, os.getpid())
     def spawn(self, options, port, background=False, prefix=""):
         "Spawn a daemon instance."
         self.spawncmd = None

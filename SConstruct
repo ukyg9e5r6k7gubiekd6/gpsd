@@ -1267,13 +1267,16 @@ rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
     '@echo "Testing RTCM decoding..."',
     'for f in $SRCDIR/test/*.rtcm2; do '
         'echo "Testing $${f}..."; '
-        '$SRCDIR/gpsdecode -j <$${f} >/tmp/test-$$$$.chk; '
-        'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
+        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
+        'diff -ub $${f}.chk $${TMPFILE}; '
+        'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing idempotency of JSON dump/decode for RTCM2"',
-    '$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >/tmp/test-$$$$.chk; '
-        'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - /tmp/test-$$$$.chk; '
-        'rm /tmp/test-$$$$.chk',
+    'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+    '$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >$${TMPFILE}; '
+        'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - $${TMPFILE}; '
+        'rm -f $${TMPFILE}; ',
         ])
 
 # Rebuild the RTCM regression tests.
@@ -1288,13 +1291,16 @@ aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
     '@echo "Testing AIVDM decoding..."',
     'for f in $SRCDIR/test/*.aivdm; do '
         'echo "Testing $${f}..."; '
-        '$SRCDIR/gpsdecode -u -c <$${f} >/tmp/test-$$$$.chk; '
-        'diff -ub $${f}.chk /tmp/test-$$$$.chk; '
+        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '$SRCDIR/gpsdecode -u -c <$${f} >$${TMPFILE}; '
+        'diff -ub $${f}.chk $${TMPFILE}; '
+        'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing idempotency of JSON dump/decode for AIS"',
-    '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/synthetic-ais.json >/tmp/test-$$$$.chk; '
-        'grep -v "^#" $SRCDIR/test/synthetic-ais.json | diff -ub - /tmp/test-$$$$.chk; '
-        'rm /tmp/test-$$$$.chk',
+    'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+    '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/synthetic-ais.json >$${TMPFILE}; '
+        'grep -v "^#" $SRCDIR/test/synthetic-ais.json | diff -ub - $${TMPFILE}; '
+        'rm -f $${TMPFILE}; ',
         ])
 
 # Rebuild the AIVDM regression tests.
