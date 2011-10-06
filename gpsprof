@@ -125,7 +125,7 @@ class spaceplot(plotter):
         return True
     def header(self):
         return "# Position uncertainty, %s\n" % self.whatami()
-    def data(self):
+    def postprocess(self):
         if not self.recentered:
             # centroid is just arithmetic avg of lat,lon
             self.centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
@@ -133,6 +133,7 @@ class spaceplot(plotter):
             self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
             # Convert fixes to offsets from centroid in meters
             self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
+    def data(self):
         res = ""
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
@@ -230,6 +231,8 @@ class uninstrumented(plotter):
             return False
     def header(self):
         return "# Uninstrumented total latency, " + self.whatami() + "\n"
+    def postprocess(self):
+        pass
     def data(self):
         res = ""
         for seconds in self.fixes:
@@ -264,6 +267,8 @@ class instrumented(plotter):
         res = "# Analyzed latency, " + self.whatami() + "\n"
         res += "# Tag   -- Fix time --  - Chars -  --   Latency  - RS232-  Analysis  - Recv -\n"
         return res
+    def postprocess(self):
+        pass
     def data(self):
         res = ""
         for (tag, time, chars, sats, start, xmit, recv) in self.fixes:
@@ -333,6 +338,7 @@ if __name__ == '__main__':
                 sys.exit(1)
         # Get fix data from the GPS
         plotter.collect(verbose)
+        plotter.postprocess()
         # Save the raw data for post-analysis if required.
         if dumpfile:
             with open(dumpfile, "w") as fp:
