@@ -88,7 +88,7 @@ GPSFILTER="sed -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE
 # logic. Note that as the last attribute mode needs to be handled differently.
 #ALTFILTER="-e s/\"alt\":[^,]*,// -e s/\"ep[vhs]\":[-+0-9.]*// -e s/,\"mode\":[^}]*//"
 
-TMP=/tmp
+TMP=`mktemp -d -t gpsd-test-XXXXXXXXXXXXXX`
 
 # Only twirl the baton on a tty, avoids junk in transcripts.
 if [ -t 1 ]
