@@ -53,7 +53,7 @@ class plotter:
                self.device.get('driver', "unknown"), self.device['bps'],
                9 - self.device['stopbits'],
                self.device['stopbits'], self.device['cycle']) 
-    def collect(self, verbose):
+    def collect(self, verbose, logfp=None):
         "Collect data from the GPS."
         try:
             self.session = gps.gps(verbose=verbose)
@@ -102,6 +102,8 @@ class plotter:
                 if countdown == await:
                     sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time()-basetime,await))
                 if plotter.sample():
+                    if logfp:
+                        logfp.write(self.session.response)
                     countdown -= 1
             baton.end()
         finally:
@@ -297,7 +299,7 @@ formatters = (spaceplot, uninstrumented, instrumented)
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:f:hm:n:s:t:T:D:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:f:hl:m:n:s:t:T:D:")
 
         plotmode = "space"
         raw = False
@@ -307,19 +309,25 @@ if __name__ == '__main__':
         verbose = 0
         terminal = None
         dumpfile = None
+        logfp = None
         for (switch, val) in options:
             if (switch == '-f'):
                 plotmode = val
             elif (switch == '-m'):
                 threshold = int(val)
             elif (switch == '-n'):
-                await = int(val)
+                if val[-1] == 'h':
+                    await = int(val[:-1]) * 360
+                else:
+                    await = int(val)
             elif (switch == '-t'):
                 title = val
             elif (switch == '-T'):
                 terminal = val
             elif (switch == '-d'):
                 dumpfile = val
+            elif (switch == '-l'):
+                logfp = open(val, "w")
             elif (switch == '-D'):
                 verbose = int(val)
             elif (switch == '-h'):
@@ -337,12 +345,14 @@ if __name__ == '__main__':
                 sys.stderr.write("gpsprof: no such formatter.\n")
                 sys.exit(1)
         # Get fix data from the GPS
-        plotter.collect(verbose)
+        plotter.collect(verbose, logfp)
         plotter.postprocess()
-        # Save the raw data for post-analysis if required.
+        # Save the timing data (only) for post-analysis if required.
         if dumpfile:
             with open(dumpfile, "w") as fp:
                 fp.write(plotter.dump())
+        if logfp:
+            logfp.close()
         # Ship the plot to standard output
         if not title:
             title = plotter.whatami()
