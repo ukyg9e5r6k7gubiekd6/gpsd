@@ -513,7 +513,9 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < st; i++) {
 	int prn = session->gpsdata.PRN[i];
-	if (DGPS_PRN(prn) && session->driver.sirf.sbas != 0)
+	if (DGPS_PRN(prn) \
+		&& session->gpsdata.status == STATUS_DGPS_FIX \
+		&& session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
     }
 #ifdef NTPSHM_ENABLE
@@ -864,7 +866,7 @@ static gps_mask_t sirf_msg_dgpsstatus(struct gps_device_t *session,
 				 unsigned char *buf, size_t len UNUSED)
 /* only documentented from prorocol version 1.7 (2005) onwards */
 {
-    session->driver.sirf.sbas = (unsigned int)getub(buf, 1);
+    session->driver.sirf.dgps_source = (unsigned int)getub(buf, 1);
     return 0;
 }
 

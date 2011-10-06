@@ -484,7 +484,12 @@ struct gps_device_t {
 	    unsigned char dr_timeout;
 	    unsigned char track_smooth_mode;
 	    /* fields from DGPS Status */
-	    unsigned int sbas;
+	    unsigned int dgps_source;
+#define SIRF_DGPS_SOURCE_NONE		0 /* No DGPS correction type have been selected */
+#define SIRF_DGPS_SOURCE_SBAS		1 /* SBAS */
+#define SIRF_DGPS_SOURCE_SERIAL		2 /* RTCM corrections */
+#define SIRF_DGPS_SOURCE_BEACON		3 /* Beacon corrections */
+#define SIRF_DGPS_SOURCE_SOFTWARE	4 /*  Software API corrections */
 	} sirf;
 #endif /* SIRF_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
