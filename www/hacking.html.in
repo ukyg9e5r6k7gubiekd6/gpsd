@@ -304,7 +304,7 @@ defect density of the Linux kernel itself.</p>
 <p>This did not happen by accident.  We put a lot of effort into test
 tools and regression tests so we can avoid committing bad code. For
 committers, using those tests isn't just a good idea, it's the law
-&mdash; which is to say that if make a habit of <em>not</em> using
+&mdash; which is to say that if you make a habit of <em>not</em> using
 them when you should, your commit access <em>will</em> be yanked.</p>
 
 <p>Before shipping a patch or committing to the repository, you should
@@ -448,7 +448,7 @@ to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 <h2 id="sizeof">Avoid use of sizeof(&lt;int type&gt;)!</h2>
 
 <p>It's tempting to extract parts of packets with by using a loop of the
-form "<code>for(i = 0; i &amp; len; i += sizeof(long))</code>". Don't do that;
+form "<code>for(i = 0; i &lt; len; i += sizeof(long))</code>". Don't do that;
 not all integer types have the same length across architectures. A long may
 be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
 4 bytes in a packet, then say so (or use sizeof(int32_t)).</p>
@@ -457,10 +457,8 @@ be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
 
 <h2 id="debugging">Debugging</h2>
 
-<p>For debugging purposes, it may be helpful to configure with
-&#x2D;&#x2D;disable-shared.  This turns off all the shared-library crud, making
-it somewhat easier to use gdb. (Don't forget to set CFLAGS=-g in the
-configure environment)</p>
+<p><code>scons debug=yes></code> will build with the right flags to
+enable symbolic debugging.</p>
 
 <p>There is a script called <code>logextract</code> in the devtools
 directory of the source distribution that you can use to strip clean
@@ -490,8 +488,8 @@ only, suspicion should focus here.</p>
 <h2 id="profiling">Profiling</h2>
 
 <p>There is a timing policy flag in the WATCH command that will cause
-it to that will cause it to emit timing information at the end of
-every reporting cycle from the sensor.</p>
+it to emit timing information at the end of every reporting cycle from
+the sensor.</p>
 
 <p>The profiling code relies on the GPS repeatedly spinning through
 a three-phase cycle:</p>
