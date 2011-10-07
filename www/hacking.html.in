@@ -551,17 +551,17 @@ resolution; iTalk and Navcom chipsets ship times with 0.001
 resolution.</p>
 
 <ol>
-<li><code>cycle_start:</code> SOR as a float quantity in seconds of
+<li><code>sor:</code> SOR as a float quantity in seconds of
 Unix time.</li>
 
-<li><code>cycle_count:</code> Total characters transmitted between SOC
+<li><code>chars:</code> Total characters transmitted between SOC
 and RTIME. Note; this could be fewer than the number of characters
 in the entire cycle; the packet-sniffer might assemble later packets 
 which are not analyzed by the driver.</li>
 
 <li><code>sats:</code> Number of satellites used in the cycle's fix.</li>
 
-<li><code>xmit_time:</code> RTIME as a float quantity in seconds of
+<li><code>rtime:</code> RTIME as a float quantity in seconds of
 Unix time, when the daemon created the TPV for transmission.</li>
 </ol>
 
