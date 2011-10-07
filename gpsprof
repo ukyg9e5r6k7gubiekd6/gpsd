@@ -257,13 +257,13 @@ class instrumented(plotter):
     def __init__(self):
         plotter.__init__(self)
     def sample(self):
-        if 'xmit_time' in self.session.data:
+        if 'rtime' in self.session.data:
             self.fixes.append((self.session.data['tag'],
                                gps.misc.isotime(self.session.data['time']),
-                               self.session.data["cycle_count"],
+                               self.session.data["chars"],
                                self.session.data['sats'],
-                               self.session.data['cycle_start'],
-                               self.session.data['xmit_time'],
+                               self.session.data['sor'],
+                               self.session.data['rtime'],
                                time.time()))
         return True
     def header(self):

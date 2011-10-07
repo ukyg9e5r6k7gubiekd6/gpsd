@@ -1690,8 +1690,8 @@ struct gps_data_t {
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
 #ifdef TIMING_ENABLE
-    timestamp_t cycle_start;	/* timestamp start of this reporting cycle */
-    unsigned long cycle_count;	/* characters in the cycle */
+    timestamp_t sor;	/* timestamp start of this reporting cycle */
+    unsigned long chars;	/* characters in the cycle */
 #endif /* TIMING_ENABLE */
 
     /* pack things never reported together to reduce structure size */ 

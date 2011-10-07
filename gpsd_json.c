@@ -126,7 +126,7 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 {
     char tbuf[JSON_DATE_MAX+1];
 #ifdef TIMING_ENABLE
-    timestamp_t xmit_time = timestamp();
+    timestamp_t rtime = timestamp();
 #endif /* TIMING_ENABLE */
 
     assert(replylen > 2);
@@ -214,11 +214,11 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 	if (policy->timing)
 	    (void)snprintf(reply + strlen(reply),
 	        replylen - strlen(reply),
-			   "\"cycle_start\":%f,\"cycle_count\":%lu,\"sats\":%2d,\"xmit_time\":%f,", 
-			   gpsdata->cycle_start, 
-			   gpsdata->cycle_count,
+			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,", 
+			   gpsdata->sor, 
+			   gpsdata->chars,
 			   gpsdata->satellites_used,
-			   xmit_time);
+			   rtime);
 #endif /* TIMING_ENABLE */
     }
     if (reply[strlen(reply) - 1] == ',')

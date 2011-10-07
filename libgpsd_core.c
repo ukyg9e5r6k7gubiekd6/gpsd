@@ -144,8 +144,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->mag_var = NAN;
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
 #ifdef TIMING_ENABLE
-    session->gpsdata.cycle_start = 0.0;
-    session->gpsdata.cycle_count = 0;
+    session->gpsdata.sor = 0.0;
+    session->gpsdata.chars = 0;
 #endif /* TIMING_ENABLE */
 
     /* tty-level initialization */
@@ -866,7 +866,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		gpsd_report(LOG_WARN, "cycle-start detector failed.\n");
 	    else if (gap > quiet_time) {
 		gpsd_report(LOG_PROG, "transmission pause of %f\n", gap);
-		session->gpsdata.cycle_start = now;
+		session->gpsdata.sor = now;
 		session->packet.start_char = session->packet.char_counter;
 	    }
 	}
@@ -1005,7 +1005,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #ifdef TIMING_ENABLE
 	/* are we going to generate a report? if so, count characters */
 	if ((received & REPORT_IS) != 0) {
-	    session->gpsdata.cycle_count = session->packet.char_counter - session->packet.start_char;
+	    session->gpsdata.chars = session->packet.char_counter - session->packet.start_char;
 	}
 #endif /* TIMING_ENABLE */
 
