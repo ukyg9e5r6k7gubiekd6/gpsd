@@ -13,8 +13,8 @@ clients, application interface libraries, and test/profiling tools.
 
 There is a website for GPSD where you can find updates, news, and
 project mailing lists; look for that URL in the scons recipe, the file
-SCons in this top-level directory.  See that website for a list of GPS
-units known to be compatible.
+SConstruct in this top-level directory.  See that website for a list
+of GPS units known to be compatible.
 
 See the file INSTALL for installation instructions and some tips on
 how to troubleshoot your installation.  The file build.txt 
