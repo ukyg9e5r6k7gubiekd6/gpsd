@@ -6,7 +6,7 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-import sys, os, time, getopt, socket, math, copy
+import sys, os, time, getopt, socket, math, copy, signal
 import gps
 
 class Baton:
@@ -70,8 +70,10 @@ class plotter:
         if self.requires_time:
             options = ',"timing":true'
         try:
+            signal.signal(signal.SIGUSR1, lambda empty, unused: sys.stderr.write("%d of %d (%d%%)..." % (await-countdown, await, ((await-countdown)*100.0//await))))
+            signal.siginterrupt(signal.SIGUSR1, False)
             self.session.send('?WATCH={"enable":true,"json":true%s}' % options)
-            baton = Baton("gpsprof: looking for fix", "done")
+            baton = Baton("gpsprof: %d looking for fix" % os.getpid(), "done")
             countdown = await
             basetime = time.time()
             while countdown > 0:
@@ -109,6 +111,7 @@ class plotter:
             baton.end()
         finally:
             self.session.send('?WATCH={"enable":false,"timing":false}')
+            signal.signal(signal.SIGUSR1, signal.SIG_DFL)
     def dump(self):
         "Dump the raw data for post-analysis."
         return self.header() + self.data()
@@ -265,7 +268,9 @@ class instrumented(plotter):
                                self.session.data['sor'],
                                self.session.data['rtime'],
                                time.time()))
-        return True
+            return True
+        else:
+            return False
     def header(self):
         res = "# Analyzed latency, " + self.whatami() + "\n"
         res += "# Tag   -- Fix time --  - Chars -  --   Latency  - RS232-  Analysis  - Recv -\n"

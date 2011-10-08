@@ -170,6 +170,10 @@ a usage message and exit.</para>
 
 <para>The -D sets debug level.</para>
 
+<para>Sending SIGUSR to a running instance causes it to write a
+completion message to standard error and resume processing.  The
+first number in the startup message is the process ID to signal.</para>
+
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
