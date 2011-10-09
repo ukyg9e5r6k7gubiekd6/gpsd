@@ -215,11 +215,15 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if (policy->timing)
 	    (void)snprintf(reply + strlen(reply),
 	        replylen - strlen(reply),
-			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,", 
+			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,\"uxtime\":%lf,\"week\":%d,\"tow\":%.3f,\"rollovers\":%d", 
 			   session->sor, 
 			   session->chars,
 			   gpsdata->satellites_used,
-			   rtime);
+			   rtime,
+			   gpsdata->fix.time,
+			   session->context->gps_week,
+			   session->context->gps_tow,
+			   session->context->rollovers);
 #endif /* TIMING_ENABLE */
     }
     if (reply[strlen(reply) - 1] == ',')
