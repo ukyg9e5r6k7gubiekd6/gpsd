@@ -6,6 +6,7 @@
  */
 #include "gpsd.h"
 #include "gpsmon.h"
+#include "assert.h"
 
 #ifdef TNT_ENABLE
 extern const struct gps_type_t trueNorth;
