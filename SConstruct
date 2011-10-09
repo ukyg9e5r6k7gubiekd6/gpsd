@@ -472,7 +472,7 @@ else:
 # Map options to libraries required to support them that might be absent.
 optionrequires = {
     "bluez": ["libbluetooth"],
-    "dbus_export" : ["libdbus-1", "libdbus-glib-1"],
+    "dbus_export" : ["libdbus-1"],
     }
 
 keys = map(lambda x: (x[0],x[2]), boolopts) + map(lambda x: (x[0],x[2]), nonboolopts) + map(lambda x: (x[0],x[2]), pathopts)
