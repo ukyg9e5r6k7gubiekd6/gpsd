@@ -13,10 +13,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void json_data_report(gps_mask_t, struct gps_data_t *, struct policy_t *,
+void json_data_report(gps_mask_t, struct gps_device_t *, struct policy_t *,
 		      /*@out@*/char *, size_t);
 char *json_stringify(/*@out@*/char *, size_t, /*@in@*/const char *);
-void json_tpv_dump(const struct gps_data_t *, 
+void json_tpv_dump(const struct gps_device_t *, 
 		   const struct policy_t *, /*@out@*/char *, size_t);
 void json_noise_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
 void json_sky_dump(const struct gps_data_t *, /*@out@*/char *, size_t);

@@ -1227,7 +1227,7 @@ static void handle_request(struct subscriber_t *sub,
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK) != 0) {
-		    json_tpv_dump(&devp->gpsdata, &sub->policy,
+		    json_tpv_dump(devp, &sub->policy,
 				  reply + strlen(reply),
 				  replylen - strlen(reply));
 		    rstrip(reply);
@@ -1629,7 +1629,7 @@ static void consume_packets(struct gps_device_t *device)
 			char buf[GPS_JSON_RESPONSE_MAX * 4];
 
 			json_data_report(changed,
-					 &device->gpsdata, &sub->policy,
+					 device, &sub->policy,
 					 buf, sizeof(buf));
 			if (buf[0] != '\0')
 			    (void)throttled_write(sub, buf, strlen(buf));

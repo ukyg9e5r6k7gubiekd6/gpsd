@@ -427,7 +427,7 @@ static void decode(FILE *fpin, FILE*fpout)
 #ifdef SOCKET_EXPORT_ENABLE
 	    else
 		json_data_report(changed, 
-				 &session.gpsdata, &policy, 
+				 &session, &policy, 
 				 buf, sizeof(buf));
 #endif /* SOCKET_EXPORT_ENABLE */
 	    (void)fputs(buf, fpout);	

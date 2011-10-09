@@ -120,11 +120,12 @@ void json_version_dump( /*@out@*/ char *reply, size_t replylen)
 #endif /* TIMING_ENABLE */
 
 
-void json_tpv_dump(const struct gps_data_t *gpsdata, 
+void json_tpv_dump(const struct gps_device_t *session, 
 		   const struct policy_t *policy CONDITIONALLY_UNUSED,
 		   /*@out@*/ char *reply, size_t replylen)
 {
     char tbuf[JSON_DATE_MAX+1];
+    const struct gps_data_t *gpsdata = &session->gpsdata;
 #ifdef TIMING_ENABLE
     timestamp_t rtime = timestamp();
 #endif /* TIMING_ENABLE */
@@ -215,8 +216,8 @@ void json_tpv_dump(const struct gps_data_t *gpsdata,
 	    (void)snprintf(reply + strlen(reply),
 	        replylen - strlen(reply),
 			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,", 
-			   gpsdata->sor, 
-			   gpsdata->chars,
+			   session->sor, 
+			   session->chars,
 			   gpsdata->satellites_used,
 			   rtime);
 #endif /* TIMING_ENABLE */
@@ -2935,15 +2936,16 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 #endif /* COMPASS_ENABLE */
 
 void json_data_report(gps_mask_t changed,
-		 struct gps_data_t *datap,
+		 struct gps_device_t *session,
 		 struct policy_t *policy,
 		 /*@out@*/char *buf, size_t buflen)
 /* report a session state in JSON */
 {
+    struct gps_data_t *datap = &session->gpsdata;
     buf[0] = '\0';
  
     if ((changed & REPORT_IS) != 0) {
-	json_tpv_dump(datap, policy, buf+strlen(buf), buflen-strlen(buf));
+	json_tpv_dump(session, policy, buf+strlen(buf), buflen-strlen(buf));
     }
 
     if ((changed & GST_SET) != 0) {
