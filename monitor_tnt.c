@@ -14,6 +14,10 @@ static WINDOW *thtmwin;
 
 static bool tnt_initialize(void)
 {
+    /* splint pacification */
+    assert(thtmwin != NULL);
+
+    /*@-globstate@*/
     /*@ -onlytrans @*/
     thtmwin = derwin(devicewin, 6, 80, 0, 0);
     (void)wborder(thtmwin, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -32,6 +36,7 @@ static bool tnt_initialize(void)
     (void)wattrset(thtmwin, A_NORMAL);
     /*@ +onlytrans @*/
     return true;
+    /*@+globstate@*/
 }
 
 static void tnt_update(void)

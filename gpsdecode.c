@@ -448,10 +448,11 @@ static void encode(FILE *fpin, FILE *fpout)
 {
     char inbuf[BUFSIZ];
     struct policy_t policy;
-    struct gps_data_t gpsdata;
+    struct gps_device_t session;
     int lineno = 0;
 
     memset(&policy, '\0', sizeof(policy));
+    memset(&session, '\0', sizeof(session));
     policy.json = true;
 
     while (fgets(inbuf, (int)sizeof(inbuf), fpin) != NULL) {
@@ -460,15 +461,15 @@ static void encode(FILE *fpin, FILE *fpout)
 	++lineno;
 	if (inbuf[0] == '#')
 	    continue;
-	status = libgps_json_unpack(inbuf, &gpsdata, NULL);
+	status = libgps_json_unpack(inbuf, &session.gpsdata, NULL);
 	if (status != 0) {
 	    (void)fprintf(stderr,
 			  "gpsdecode: dying with status %d (%s) on line %d\n",
 			  status, json_error_string(status), lineno);
 	    exit(1);
 	}
-	json_data_report(gpsdata.set, 
-			 &gpsdata, &policy, 
+	json_data_report(session.gpsdata.set, 
+			 &session, &policy, 
 			 inbuf, sizeof(inbuf));
 	(void)fputs(inbuf, fpout);	
     }

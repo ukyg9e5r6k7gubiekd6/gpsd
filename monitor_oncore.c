@@ -75,7 +75,11 @@ static const char *pos_hold_mode[] = {
 
 static bool oncore_initialize(void)
 {
+    /*@-globstate@*/
     unsigned int i;
+
+    /* splint pacification */
+    assert(Aywin != NULL);
 
     /*@ -onlytrans @*/
     Ea1win = subwin(devicewin, 5, 80, 1, 0);
@@ -169,6 +173,7 @@ static bool oncore_initialize(void)
     memset(EaSVlines, 0, sizeof(EaSVlines));
 
     return true;
+    /*@+globstate@*/
 }
 
 static void oncore_update(void)

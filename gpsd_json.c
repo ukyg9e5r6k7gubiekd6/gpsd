@@ -2935,13 +2935,13 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 }
 #endif /* COMPASS_ENABLE */
 
-void json_data_report(gps_mask_t changed,
-		 struct gps_device_t *session,
-		 struct policy_t *policy,
+void json_data_report(const gps_mask_t changed,
+		 const struct gps_device_t *session,
+		 const struct policy_t *policy,
 		 /*@out@*/char *buf, size_t buflen)
 /* report a session state in JSON */
 {
-    struct gps_data_t *datap = &session->gpsdata;
+    const struct gps_data_t *datap = &session->gpsdata;
     buf[0] = '\0';
  
     if ((changed & REPORT_IS) != 0) {

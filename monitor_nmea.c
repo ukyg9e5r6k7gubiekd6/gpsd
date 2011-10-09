@@ -38,7 +38,11 @@ static bool nmea_initialize(void)
 {
     int i;
 
-    /*@ -onlytrans @*/
+    /* splint pacification */
+    assert(nmeawin!=NULL && cookedwin!=NULL && satwin!=NULL && gprmcwin!=NULL
+	   && gpggawin!= NULL && gpgstwin!=NULL && gpgsawin!=NULL);
+
+    /*@ -globstate -onlytrans @*/
     cookedwin = derwin(devicewin, 3, 80, 0, 0);
     (void)wborder(cookedwin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(cookedwin, true);
@@ -124,6 +128,7 @@ static bool nmea_initialize(void)
     last_tick = timestamp();
 
     return (nmeawin != NULL);
+    /*@ +globstate @*/
 }
 
 static void cooked_pvt(void)

@@ -269,6 +269,24 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 }
 
 #ifdef PPS_ENABLE
+/*
+ * Possible pins for PPS: DCD, CTS, RTS, RI. Pinouts:
+ *
+ * DB9  DB25  Name      Full name
+ * ---  ----  ----      --------------------
+ *  3     2    TXD  --> Transmit Data
+ *  2     3    RXD  <-- Receive Data
+ *  7     4    RTS  --> Request To Send
+ *  8     5    CTS  <-- Clear To Send
+ *  6     6    DSR  <-- Data Set Ready
+ *  4    20    DTR  --> Data Terminal Ready
+ *  1     8    DCD  <-- Data Carrier Detect
+ *  9    22    RI   <-- Ring Indicator
+ *  5     7    SG       Signal ground 
+ */
+#include "pps_pin.h"
+
+/*@unused@*//* splint is confused here */
 /* put NTP shared memory info based on received PPS pulse
  *
  * good news is that kernel PPS gives us nSec resolution
@@ -526,23 +544,6 @@ static int init_kernel_pps(struct gps_device_t *session) {
     return kernelpps_handle;
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
-
-/*
- * Possible pins for PPS: DCD, CTS, RTS, RI. Pinouts:
- *
- * DB9  DB25  Name      Full name
- * ---  ----  ----      --------------------
- *  3     2    TXD  --> Transmit Data
- *  2     3    RXD  <-- Receive Data
- *  7     4    RTS  --> Request To Send
- *  8     5    CTS  <-- Clear To Send
- *  6     6    DSR  <-- Data Set Ready
- *  4    20    DTR  --> Data Terminal Ready
- *  1     8    DCD  <-- Data Carrier Detect
- *  9    22    RI   <-- Ring Indicator
- *  5     7    SG       Signal ground 
- */
-#include "pps_pin.h"
 
 /*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)

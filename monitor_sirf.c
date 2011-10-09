@@ -63,7 +63,11 @@ static char *dgpsvec[] = {
 
 static bool sirf_initialize(void)
 {
+    /*@-globstate@*/
     unsigned int i;
+
+    /* splint pacification */
+    assert(mid2win!=NULL && mid7win != NULL);
 
     /*@ -onlytrans @*/
     mid2win = subwin(devicewin, 6, 80, 1, 0);
@@ -208,6 +212,7 @@ static bool sirf_initialize(void)
     gpsd_time_init(session.context, time(NULL));
 
     return true;
+    /*@+globstate@*/
 }
 
 static void decode_ecef(double x, double y, double z,
@@ -218,6 +223,9 @@ static void decode_ecef(double x, double y, double z,
     const double e2 = (a * a - b * b) / (a * a);
     const double e_2 = (a * a - b * b) / (b * b);
     double lambda, p, theta, phi, n, h, vnorth, veast, vup, speed, heading;
+
+    /* splint pacification */
+    assert(mid2win!=NULL);
 
     lambda = atan2(y, x);
     /*@ -evalorder @*/
@@ -273,7 +281,9 @@ static void sirf_update(void)
     uint8_t dgps;
     char tbuf[JSON_DATE_MAX+1];
 
-    assert(mid27win != NULL);
+    /* splint pacification */
+    assert(mid2win!=NULL && mid27win != NULL);
+
     buf = session.packet.outbuffer + 4;
     len = session.packet.outbuflen - 8;
     switch (buf[0]) {

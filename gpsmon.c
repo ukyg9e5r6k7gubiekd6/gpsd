@@ -344,6 +344,7 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 void monitor_complain(const char *fmt, ...)
 {
     va_list ap;
+    assert(cmdwin!=NULL);
     (void)wmove(cmdwin, 0, (int)strlen(type_name) + 2);
     (void)wclrtoeol(cmdwin);
     (void)wattrset(cmdwin, A_BOLD | A_BLINK);
