@@ -78,9 +78,6 @@ static bool oncore_initialize(void)
     /*@-globstate@*/
     unsigned int i;
 
-    /* splint pacification */
-    assert(Aywin != NULL);
-
     /*@ -onlytrans @*/
     Ea1win = subwin(devicewin, 5, 80, 1, 0);
     Eawin = subwin(devicewin, MAXTRACKSATS + 3, 27, 6, 0);
@@ -93,7 +90,7 @@ static bool oncore_initialize(void)
     /*@ +onlytrans @*/
 
     if (Ea1win == NULL || Eawin == NULL || Bbwin == NULL || Enwin == NULL
-	|| Bowin == NULL || Aswin == NULL || Atwin == NULL)
+	|| Bowin == NULL || Aswin == NULL || Atwin == NULL || Aywin == NULL)
 	return false;
 
     (void)syncok(Ea1win, true);

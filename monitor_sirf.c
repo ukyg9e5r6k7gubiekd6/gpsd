@@ -66,9 +66,6 @@ static bool sirf_initialize(void)
     /*@-globstate@*/
     unsigned int i;
 
-    /* splint pacification */
-    assert(mid2win!=NULL && mid7win != NULL);
-
     /*@ -onlytrans @*/
     mid2win = subwin(devicewin, 6, 80, 1, 0);
     mid4win = subwin(devicewin, MAXSATS + 3, 30, 7, 0);

@@ -215,7 +215,7 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if (policy->timing)
 	    (void)snprintf(reply + strlen(reply),
 	        replylen - strlen(reply),
-			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,\"uxtime\":%lf,\"week\":%d,\"tow\":%.3f,\"rollovers\":%d", 
+			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,\"uxtime\":%lf,\"week\":%uh,\"tow\":%.3f,\"rollovers\":%d", 
 			   session->sor, 
 			   session->chars,
 			   gpsdata->satellites_used,

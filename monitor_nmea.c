@@ -38,12 +38,9 @@ static bool nmea_initialize(void)
 {
     int i;
 
-    /* splint pacification */
-    assert(nmeawin!=NULL && cookedwin!=NULL && satwin!=NULL && gprmcwin!=NULL
-	   && gpggawin!= NULL && gpgstwin!=NULL && gpgsawin!=NULL);
-
     /*@ -globstate -onlytrans @*/
     cookedwin = derwin(devicewin, 3, 80, 0, 0);
+    assert(cookedwin !=NULL);
     (void)wborder(cookedwin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(cookedwin, true);
     (void)wattrset(cookedwin, A_BOLD);
@@ -54,6 +51,7 @@ static bool nmea_initialize(void)
     (void)wattrset(cookedwin, A_NORMAL);
 
     nmeawin = derwin(devicewin, 3, 80, 3, 0);
+    assert(nmeawin !=NULL);
     (void)wborder(nmeawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(nmeawin, true);
     (void)wattrset(nmeawin, A_BOLD);
@@ -61,6 +59,7 @@ static bool nmea_initialize(void)
     (void)wattrset(nmeawin, A_NORMAL);
 
     satwin = derwin(devicewin, MAXSATS + 3, 20, 6, 0);
+    assert(satwin !=NULL);
     (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0), (void)syncok(satwin, true);
     (void)wattrset(satwin, A_BOLD);
     (void)mvwprintw(satwin, 1, 1, "Ch PRN  Az El S/N");
@@ -70,6 +69,7 @@ static bool nmea_initialize(void)
     (void)wattrset(satwin, A_NORMAL);
 
     gprmcwin = derwin(devicewin, 9, 30, 6, 20);
+    assert(gprmcwin !=NULL);
     (void)wborder(gprmcwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)syncok(gprmcwin, true);
     (void)wattrset(gprmcwin, A_BOLD);
@@ -84,8 +84,9 @@ static bool nmea_initialize(void)
     (void)wattrset(gprmcwin, A_NORMAL);
 
     gpgsawin = derwin(devicewin, 5, 30, 15, 20);
-    (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0),
-	(void)syncok(gpgsawin, true);
+    assert(gpgsawin !=NULL);
+    (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
     (void)mvwprintw(gpgsawin, 1, 1, "Mode: ");
     (void)mvwprintw(gpgsawin, 2, 1, "Sats: ");
@@ -94,8 +95,9 @@ static bool nmea_initialize(void)
     (void)wattrset(gpgsawin, A_NORMAL);
 
     gpggawin = derwin(devicewin, 9, 30, 6, 50);
-    (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0),
-	(void)syncok(gpggawin, true);
+    assert(gpggawin !=NULL);
+    (void)wborder(gpggawin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)syncok(gpggawin, true);
     (void)wattrset(gpggawin, A_BOLD);
     (void)mvwprintw(gpggawin, 1, 1, "Time: ");
     (void)mvwprintw(gpggawin, 2, 1, "Latitude: ");
@@ -108,8 +110,9 @@ static bool nmea_initialize(void)
     (void)wattrset(gpggawin, A_NORMAL);
 
     gpgstwin = derwin(devicewin, 6, 30, 15, 50);
-    (void)wborder(gpgstwin, 0, 0, 0, 0, 0, 0, 0, 0),
-	(void)syncok(gpgstwin, true);
+    assert(gpgstwin !=NULL);
+    (void)wborder(gpgstwin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)syncok(gpgstwin, true);
     (void)wattrset(gpgstwin, A_BOLD);
     (void)mvwprintw(gpgstwin, 1,  1, "UTC: ");
     (void)mvwprintw(gpgstwin, 1, 16, "RMS: ");
@@ -121,7 +124,6 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgstwin, 4, 16, "ALT: ");
     (void)mvwprintw(gpgstwin, 5, 12, " GST ");
     (void)wattrset(gpgstwin, A_NORMAL);
-
 
     /*@ +onlytrans @*/
 
