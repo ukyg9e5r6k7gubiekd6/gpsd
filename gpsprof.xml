@@ -27,8 +27,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
       <arg choice='opt'>-t <replaceable>title</replaceable></arg>
       <arg choice='opt'>-T <replaceable>terminal</replaceable></arg>
-      <arg choice='opt'>-d  <replaceable>dumpfile</replaceable></arg>
-      <arg choice='opt'>-l  <replaceable>logfile</replaceable></arg>
+      <arg choice='opt'>-d <replaceable>dumpfile</replaceable></arg>
+      <arg choice='opt'>-l <replaceable>logfile</replaceable></arg>
+      <arg choice='opt'>-r </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-h</arg>
 </cmdsynopsis>
@@ -164,6 +165,10 @@ code, to a specified file for post-analysis.</para>
 
 <para>The -l option dumps the raw JSON reports collected from the device
 to a specified file.</para>
+
+<para>The -r option replots from a JSON logfile (such as -l produces) 
+on standard input. Both -n and -l options are ignored when this
+one is selected.</para>
 
 <para>The -h option makes <application>gpsprof</application> print 
 a usage message and exit.</para>

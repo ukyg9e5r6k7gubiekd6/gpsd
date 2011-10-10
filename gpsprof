@@ -6,7 +6,7 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-import sys, os, time, getopt, socket, math, copy, signal
+import sys, os, time, getopt, socket, math, copy, signal, json
 import gps
 
 class Baton:
@@ -47,12 +47,12 @@ class plotter:
         self.fixes = []
         self.start_time = int(time.time())
     def whatami(self):
-        "How do we identify this pollting run?"
+        "How do we identify this plotting run?"
         return "%s, %s, %d %dN%d, cycle %ds" % \
-              (gps.misc.isotime(self.start_time),
-               self.device.get('driver', "unknown"), self.device['bps'],
-               9 - self.device['stopbits'],
-               self.device['stopbits'], self.device['cycle']) 
+               (gps.misc.isotime(self.start_time),
+                self.device.get('driver', "unknown"), self.device['bps'],
+                9 - self.device['stopbits'],
+                self.device['stopbits'], self.device['cycle']) 
     def collect(self, verbose, logfp=None):
         "Collect data from the GPS."
         try:
@@ -106,12 +106,25 @@ class plotter:
                     continue
                 if countdown == await:
                     sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time()-basetime,await))
-                if plotter.sample():
+                if self.sample():
                     countdown -= 1
             baton.end()
         finally:
             self.session.send('?WATCH={"enable":false,"timing":false}')
             signal.signal(signal.SIGUSR1, signal.SIG_DFL)
+    def replot(self, infp):
+        "Replot from a JSON log file."
+        baton = Baton("gpsprof: replotting", "done")
+        self.session = gps.gps(host=None)
+        for line in infp:
+            baton.twirl()
+            self.session.unpack(line)
+            if self.session.data["class"] == "DEVICES":
+                self.device = copy.copy(self.session.data["devices"][0])
+            elif self.session.data["class"] != "TPV":
+                continue
+            self.sample()
+        baton.end()
     def dump(self):
         "Dump the raw data for post-analysis."
         return self.header() + self.data()
@@ -305,7 +318,7 @@ formatters = (spaceplot, uninstrumented, instrumented)
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "d:f:hl:m:n:s:t:T:D:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "d:f:hl:m:n:rs:t:T:D:")
 
         plotmode = "space"
         raw = False
@@ -316,6 +329,7 @@ if __name__ == '__main__':
         terminal = None
         dumpfile = None
         logfp = None
+        redo = False
         for (switch, val) in options:
             if (switch == '-f'):
                 plotmode = val
@@ -334,6 +348,8 @@ if __name__ == '__main__':
                 dumpfile = val
             elif (switch == '-l'):
                 logfp = open(val, "w")
+            elif (switch == '-r'):
+                redo = True
             elif (switch == '-D'):
                 verbose = int(val)
             elif (switch == '-h'):
@@ -345,27 +361,30 @@ if __name__ == '__main__':
         if plotmode:
             for formatter in formatters:
                 if formatter.name == plotmode:
-                    plotter = formatter()
+                    plot = formatter()
                     break
             else:
                 sys.stderr.write("gpsprof: no such formatter.\n")
                 sys.exit(1)
         # Get fix data from the GPS
-        plotter.collect(verbose, logfp)
-        plotter.postprocess()
+        if redo:
+            plot.replot(sys.stdin)
+        else:
+            plot.collect(verbose, logfp)
+        plot.postprocess()
         # Save the timing data (only) for post-analysis if required.
         if dumpfile:
             with open(dumpfile, "w") as fp:
-                fp.write(plotter.dump())
+                fp.write(plot.dump())
         if logfp:
             logfp.close()
         # Ship the plot to standard output
         if not title:
-            title = plotter.whatami()
+            title = plot.whatami()
         if terminal:
             sys.stdout.write("set terminal %s\n" % terminal)
         sys.stdout.write("set title \"%s\"\n" % title)
-        sys.stdout.write(plotter.plot())
+        sys.stdout.write(plot.plot())
     except KeyboardInterrupt:
         pass
 
