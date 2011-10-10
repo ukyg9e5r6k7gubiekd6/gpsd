@@ -38,7 +38,7 @@
 #define DATAWIN_GPS_FIELDS 8
 
 /* Count of optional fields that we'll display if we have the room. */
-#define DATAWIN_OPTIONAL_FIELDS 6
+#define DATAWIN_OPTIONAL_FIELDS 7
 
 /* This is how many display fields are output in the 'datawin' window
    when in COMPASS mode.  Change this value if you add or remove fields
@@ -328,8 +328,9 @@ static void windowsetup(void)
 			    "Altitude Err:");
 	    (void)mvwprintw(datawin, 12, DATAWIN_DESC_OFFSET, "Course Err:");
 	    (void)mvwprintw(datawin, 13, DATAWIN_DESC_OFFSET, "Speed Err:");
-	    /* it's actually esr that thought *this* one was interesting */
-	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, "Grid Square:");
+	    /* it's actually esr that thought *these* were interesting */
+	    (void)mvwprintw(datawin, 14, DATAWIN_DESC_OFFSET, "Time offset:");
+	    (void)mvwprintw(datawin, 15, DATAWIN_DESC_OFFSET, "Grid Square:");
 	}
 
 	(void)wborder(datawin, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -619,13 +620,21 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	    (void)snprintf(scr, sizeof(scr), "n/a");
 	(void)mvwprintw(datawin, 13, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
+	/* Fill in the time offset. */
+	if (isnan(gpsdata->fix.time) == 0)
+	    (void)snprintf(scr, sizeof(scr), "%.3f",
+			   (double)(timestamp()-gpsdata->fix.time));
+	else
+	    (void)snprintf(scr, sizeof(scr), "n/a");
+	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, 
+			scr);
 	/* Fill in the grid square (esr thought *this* one was interesting). */
 	/*@-branchstate@*/
 	if (isnan(gpsdata->fix.longitude)==0 && isnan(gpsdata->fix.latitude)==0)
 	    s = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 	else
 	    s = "n/a";
-	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, s);
+	(void)mvwprintw(datawin, 15, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, s);
 	/*@+branchstate@*/
     }
 
