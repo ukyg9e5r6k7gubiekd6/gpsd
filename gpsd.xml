@@ -610,6 +610,18 @@ stanza telling <application>ntpd</application> how to read the GPS
 notifications:</para>
 
 <programlisting>
+server 127.127.28.0 
+fudge 127.127.28.0 time1 0.420 refid GPS
+
+server 127.127.28.1 prefer
+fudge 127.127.28.1 refid GPS1
+</programlisting>
+
+<para>Users of  <application>ntpd</application> older than revision 
+ntp-4.2.5p138 should instead use this  <filename>ntp.conf</filename> 
+snippet:</para>
+
+<programlisting>
 server 127.127.28.0 minpoll 4 maxpoll 4
 fudge 127.127.28.0 time1 0.420 refid GPS
 
