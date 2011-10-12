@@ -630,13 +630,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	 * not uSec like gettimeofday */
 	if ( 0 > clock_gettime(CLOCK_REALTIME, &ts) ) {
 	    /* uh, oh, can not get time! */
-	    continue;
+	    gpsd_report(LOG_ERROR, "PPS clock_gettime() failed\n");
+	    break;
 	}
 	TSTOTV( &tv, &ts);
 #else
 	if ( 0 > gettimeofday(&tv, NULL) ) {
 	    /* uh, oh, can not get time! */
-	    continue;
+	    gpsd_report(LOG_ERROR, "PPS gettimeofday() failed\n");
+	    break;
 	}
 	TVTOTS( &ts, &tv);
 #endif
