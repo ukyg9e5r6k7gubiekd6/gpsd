@@ -355,7 +355,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->receiveTimeStampSec = (time_t) tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
     /* precision is a placebo, ntpd does not really use it
-     * real world accuracty is around 16uS, thus -16 precision */
+     * real world accuracy is around 16uS, thus -16 precision */
     shmTimeP->precision = -16;
     shmTimeP->count++;
     shmTimeP->valid = 1;

@@ -81,6 +81,7 @@ GPSD Frequently Asked Questions
 <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a></li>
 <li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a></li>
 <li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a></li>
+<li><a href='#tiocmwait'>PPS is failing to work under Linux</a></li>
 <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
@@ -571,6 +572,15 @@ based on NAD27 (e.g., USGS topo maps); you may see a displacement of
 as much as 100-150m with respect to WGS84.  While modern datums (e.g.,
 NAD83) are almost all very close to WGS84, typically each area of
 world has an older datum that only agrees at the 100m level.</p>
+
+<h1 id="tiocmwait">PPS is failing to work under Linux</h1>
+
+<p>If you are using the old-style non-kernel PPS that relies on
+ioctl(TIOCMWAIT), you may have tripped over an <a
+href="upstream-bugs.html#tocmwait">obscure kernel bug</a>. There is a
+workaround; use stty to preset your port baud rate to the correct
+value for the device, so the autobaud loop never runs and
+ioctl(TIOCMWAIT) is never called.</p>
 
 <h1 id='time'>How can I improve time reference accuracy from my GPS?</h1>
 

@@ -64,6 +64,7 @@ maintainer, we've tried to kick these upstream.</p>
 <h1>Links to Open User-Visible Problems</h1>
 
 <ul>
+<li><a href="#tiocmwait">ioctl(TIOCMIWAIT) hangs after tcsetattr()</a></li>
 <li><a href="#select">Buggy pl2303 drivers on Mac OS X can make select(2) look broken</a></li>
 <li><a href="#bluetooth">Firmware problems in some Bluetooth and USB devices can hang them</a></li>
 <li><a href="#pl2303">Linux pl2303 driver on openwrt 2.4 kernel can hang when device is read at unexpected speed</a></li>
@@ -97,6 +98,19 @@ with Fedora Core 5 was buggy.</a></li>
 <hr>
 
 <h1>Open User-Visible Problems</h1>
+
+<h2 id="tiocmwait">ioctl(TIOCMIWAIT) hangs after tcsetattr()</h2>
+
+<p>Due to a kernel bug in some versions of Linux 2.6 (recent as of
+2011 - the bug was <a
+href="http://kerneltrap.org/mailarchive/linux-kernel/2010/11/13/4645043">referenced
+in 2010</a>) the tcsetattr() used in our autobauding hunt loop
+prevents any thread(s) currently suspended in ioctl(TIOCMIWAIT) for
+the same device from ever resuming. This interferes with old-style
+(non-kernel) PPS support</p>
+
+<p>The workaround is to use stty to pre-set the serial port to the right
+baud rate so tcsetattr is never called.</p>
 
 <h2 id="select">Buggy pl2303 drivers on Mac OS X can make select(2) look broken</h2>
 

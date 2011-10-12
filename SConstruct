@@ -445,8 +445,10 @@ else:
 
 if config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
+    print "You have kernel PPS available."
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
+    print "You do not have kernel PPS available."
 
 # There's a use_chrpath option, on by default, so it can be turned off.
 # You may need to do this when cross-compiling.  The problem is that,
