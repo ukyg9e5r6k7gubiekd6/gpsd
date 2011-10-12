@@ -665,7 +665,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    kpps_edge = 0;
 		    tv_kpps = pi.clear_timestamp;
 		}
-		gpsd_report(LOG_PROG, "assert %ld.%09ld, sequence: %ld - "
+		gpsd_report(LOG_PROG, "KPPS assert %ld.%09ld, sequence: %ld - "
 		       "clear  %ld.%09ld, sequence: %ld\n",
 		       pi.assert_timestamp.tv_sec,
 		       pi.assert_timestamp.tv_nsec,
@@ -735,7 +735,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    // strange, try again
 	    continue;
 	}
-	gpsd_report(LOG_INF, "PPS  cycle: %7d, duration: %7d @ %lu.%06lu\n",
+	gpsd_report(LOG_INF, "PPS cycle: %7d, duration: %7d @ %lu.%06lu\n",
 		    cycle, duration,
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
@@ -766,6 +766,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     *
 	     */
 
+	    log = "Unknown error";
 	    if (199000 > cycle) {
 		// too short to even be a 5Hz pulse
 		log = "Too short for 5Hz\n";
@@ -784,34 +785,34 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/* looks like PPS pulse or square wave */
 		if (0 == duration) {
 		    ok = 1;
-		    log = "PPS invisible pulse\n";
+		    log = "invisible pulse\n";
 		} else if (499000 > duration) {
 		    /* end of the short "half" of the cycle */
 		    /* aka the trailing edge */
-		    log = "PPS 1Hz trailing edge\n";
+		    log = "1Hz trailing edge\n";
 		} else if (501000 > duration) {
 		    /* looks like 1.0 Hz square wave, ignore trailing edge */
 		    if (state == 1) {
 			ok = 1;
-			log = "PPS square\n";
+			log = "square\n";
 		    }
 		} else {
 		    /* end of the long "half" of the cycle */
 		    /* aka the leading edge */
 		    ok = 1;
-		    log = "PPS 1Hz leading edge\n";
+		    log = "1Hz leading edge\n";
 		}
 	    } else if (1999000 > cycle) {
 		log = "Too long for 1Hz, too short for 2Hz\n";
 	    } else if (2001000 > cycle) {
 		/* looks like 0.5 Hz square wave */
 		if (999000 > duration) {
-		    log = "PPS 0.5 Hz square too short duration\n";
+		    log = "0.5 Hz square too short duration\n";
 		} else if (1001000 > duration) {
 		    ok = 1;
-		    log = "PPS 0.5 Hz square wave\n";
+		    log = "0.5 Hz square wave\n";
 		} else {
-		    log = "PPS 0.5 Hz square too long duration\n";
+		    log = "0.5 Hz square too long duration\n";
 		}
 	    } else {
 		log = "Too long for 0.5Hz\n";
@@ -819,13 +820,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	} else {
 	    /* not a good fix, but a test for an otherwise good PPS
 	     * would go here */
-	    log = "PPS no fix.\n";
+	    log = "no fix.\n";
 	}
 	/*@ -boolint @*/
-	if (NULL != log) {
-	    gpsd_report(LOG_RAW, "%.100s", log);
-	}
 	if (0 != ok) {
+	    gpsd_report(LOG_RAW, "PPS edge accepted %.100s", log);
 	    /* chrony expects tv-sec since Jan 1970 */
 	    /* FIXME!! offset is double of the error from local time */
 	    sample.pulse = 0;
@@ -863,7 +862,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	    if ( 0 <= chronyfd ) {
 		(void)send(chronyfd, &sample, sizeof (sample), 0);
-		gpsd_report(LOG_RAW, "PPS chrony sock %lu.%06lu offset %.9f\n",
+		gpsd_report(LOG_RAW, "PPS edge accepted chrony sock %lu.%06lu offset %.9f\n",
 			    (unsigned long)sample.tv.tv_sec,
 			    (unsigned long)sample.tv.tv_usec,
 			    sample.offset);
@@ -871,7 +870,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    TSTOTV( &tv, &ts );
 	    (void)ntpshm_pps(session, &tv);
 	} else {
-	    gpsd_report(LOG_INF, "PPS edge rejected\n");
+	    gpsd_report(LOG_RAW, "PPS edge rejected %.100s", log);
 	}
 
     }
