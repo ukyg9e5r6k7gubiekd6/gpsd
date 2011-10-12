@@ -1459,7 +1459,7 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
 <dt>9.Perform a validation pass on the website content.</dt>
 <dd>See the instructions near validation-list in the scons recipe.  
-Then upload the corrected pages with <code>scons website</code>.</dt>
+Then upload the corrected pages with <code>scons website</code>.</dd>
 
 <dt>10. Ship to our hosting site</dt>
 <dd>Make the tarball (<code>scons dist</code>), upload it to @SITENAME@,
