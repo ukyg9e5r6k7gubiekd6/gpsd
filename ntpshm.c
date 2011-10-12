@@ -874,7 +874,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 
     }
-
+    gpsd_report(LOG_PROG, "PPS gpsd_ppsmonitor exited???\n");
     return NULL;
 }
 /*@+mustfreefresh +type +unrecog@*/
