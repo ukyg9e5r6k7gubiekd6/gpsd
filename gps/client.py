@@ -160,7 +160,7 @@ class gpsjson(gpscommon):
             if flags & WATCH_SCALED:
                 arg += ',"scaled":false'
             if flags & WATCH_TIMING:
-                arg += ',"scaled":false'
+                arg += ',"timing":false'
         else: # flags & WATCH_ENABLE:
             arg = '?WATCH={"enable":true'
             if flags & WATCH_JSON:
@@ -174,7 +174,7 @@ class gpsjson(gpscommon):
             if flags & WATCH_SCALED:
                 arg += ',"scaled":true'
             if flags & WATCH_TIMING:
-                arg += ',"scaled":true'
+                arg += ',"timing":true'
             if flags & WATCH_DEVICE:
                 arg += ',"device":"%s"' % devpath
         return self.send(arg + "}")
