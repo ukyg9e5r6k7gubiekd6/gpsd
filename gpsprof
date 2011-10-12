@@ -56,23 +56,25 @@ class plotter:
     def collect(self, verbose, logfp=None):
         "Collect data from the GPS."
         try:
-            self.session = gps.gps(verbose=verbose)
+            self.session = gps.gps(host=host, port=port, verbose=verbose)
         except socket.error:
             sys.stderr.write("gpsprof: gpsd unreachable.\n")
             sys.exit(1)
         # Initialize
         self.session.read()
         if self.session.version == None:
-            print >>sys.stderr, "gpsprof: requires gpsd to speak new protocol."
+            sys.stderr.write("gpsprof: requires gpsd to speak new protocol.\n")
             sys.exit(1)
         # Set parameters
-        options = ""
+        flags = gps.WATCH_ENABLE | gps.WATCH_JSON
         if self.requires_time:
-            options = ',"timing":true'
+            flags |= gps.WATCH_TIMING
+        if device:
+            flags |= gps.WATCH_DEVICE
         try:
-            signal.signal(signal.SIGUSR1, lambda empty, unused: sys.stderr.write("%d of %d (%d%%)..." % (await-countdown, await, ((await-countdown)*100.0//await))))
+            signal.signal(signal.SIGUSR1, lambda empty, unused: sys.stderr.write("%d of %d (%d%%)..." % (await-countdown, await, ((await-countdown)*100.0/await))))
             signal.siginterrupt(signal.SIGUSR1, False)
-            self.session.send('?WATCH={"enable":true,"json":true%s}' % options)
+            self.session.stream(flags, device)
             baton = Baton("gpsprof: %d looking for fix" % os.getpid(), "done")
             countdown = await
             basetime = time.time()
@@ -81,12 +83,17 @@ class plotter:
                     sys.stderr.write("gpsprof: gpsd has vanished.\n")
                     sys.exit(1)
                 baton.twirl()
+                if self.session.data["class"] == "ERROR":
+                    sys.stderr.write(" ERROR: %s.\n" % self.session.data["message"])
+                    sys.exit(1)
                 if self.session.data["class"] == "DEVICES":
-                    if len(self.session.data["devices"]) != 1:
-                        print >>sys.stderr, "exactly one device must be attached.\n"
-                        sys.exit(1)
-                    self.device = copy.copy(self.session.data["devices"][0])
-                    #sys.stderr.write("found %s device @%sbps..." % (self.device["driver"], self.device["bps"]))
+                    if len(self.session.data["devices"]) !=1 and not device:
+                       sys.stderr.write(" ERROR: a few devices connected, you must explicitly specify the device.\n")
+                       sys.exit(1)
+                    for i in range(len(self.session.data["devices"])):
+                        self.device = copy.copy(self.session.data["devices"][i])
+                        if self.device['path'] == device:
+                            break
                 if self.session.data["class"] == "WATCH":
                     if "timing" in options and not self.session.data.get("timing"):
                         sys.stderr.write("timing is not enabled.\n")
@@ -110,7 +117,7 @@ class plotter:
                     countdown -= 1
             baton.end()
         finally:
-            self.session.send('?WATCH={"enable":false,"timing":false}')
+            self.session.stream(gps.WATCH_DISABLE | gps.WATCH_TIMING)
             signal.signal(signal.SIGUSR1, signal.SIG_DFL)
     def replot(self, infp):
         "Replot from a JSON log file."
@@ -355,8 +362,19 @@ if __name__ == '__main__':
             elif (switch == '-h'):
                 sys.stderr.write(\
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
-                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal]\n")
+                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal] [server[:port[:device]]]\n")
                 sys.exit(0)
+
+        (host, port, device) = ("localhost", "2947", None)
+        if len(arguments):
+            args = arguments[0].split(":")
+            if len(args) >= 1:
+                host = args[0]
+            if len(args) >= 2:
+                port = args[1]
+            if len(args) >= 3:
+                device = args[2]
+
         # Select the plotting mode
         if plotmode:
             for formatter in formatters:

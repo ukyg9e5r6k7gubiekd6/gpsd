@@ -31,7 +31,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-l <replaceable>logfile</replaceable></arg>
       <arg choice='opt'>-r </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
-      <arg choice='opt'>-h</arg>
+      <arg choice='opt'>-h </arg>
+      <arg choice='opt'>[server[:port[:device]]]</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
