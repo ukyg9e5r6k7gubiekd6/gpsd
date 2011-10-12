@@ -168,7 +168,7 @@
 typedef struct
 {
     uint8_t svid;
-    int16_t snr;		// 0 - 0xffff
+    uint16_t snr;		// 0 - 0xffff
     uint8_t elev;
     uint16_t azmth;
     uint8_t status;		// bit 0, has ephemeris, 1, has diff correction
@@ -535,7 +535,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	gpsd_zero_satellites(&session->gpsdata);
 	for (i = 0, j = 0; i < GARMIN_CHANNELS; i++, sats++) {
 	    gpsd_report(LOG_INF,
-			"Garmin:   Sat %3d, snr: %5d, elev: %2d, Azmth: %3d, Stat: %x\n",
+			"Garmin:   Sat %3d, snr: %5u, elev: %2d, Azmth: %3d, Stat: %x\n",
 			sats->svid, GPSD_LE16TOH(sats->snr), sats->elev, 
 			GPSD_LE16TOH(sats->azmth),
 			sats->status);
