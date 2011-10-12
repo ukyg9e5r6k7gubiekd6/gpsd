@@ -1075,7 +1075,7 @@ if manbuilder:
 
 ## Where it all comes together
 
-build = env.Alias('build', [libraries, binaries, python_built_extensions, manpage_targets])
+build = env.Alias('build', [libraries, binaries, python_built_extensions, "gpsd.php", manpage_targets])
 env.Clean(build,
           map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.pyc", "gps/*.pyc")) + \
           generated_sources + \
