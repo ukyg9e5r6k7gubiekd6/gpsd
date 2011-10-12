@@ -530,6 +530,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	gpsd_report(LOG_PROG, "Garmin: SAT Data Sz: %d\n", pkt_len);
 	sats = (cpo_sat_data *) buf;
 
+	session->gpsdata.satellites_visible = 0;
 	session->gpsdata.satellites_used = 0;
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
 	gpsd_zero_satellites(&session->gpsdata);
@@ -552,8 +553,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    // Garmin does not document this.  snr is in dB*100
 	    // Known, but not seen satellites have a dB value of -1*100
 	    session->gpsdata.ss[j] = (float)(GPSD_LE16TOH(sats->snr) / 100.0);
-	    if (session->gpsdata.ss[j] < 0.0) {
-		session->gpsdata.ss[j] = 0.0;
+	    if (session->gpsdata.ss[j] == -1) {
+		continue;
 	    }
 	    // FIX-ME: Garmin documents this, but Daniel Dorau
 	    // <daniel.dorau@gmx.de> says the behavior on his GPSMap60CSX
@@ -568,7 +569,10 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	}
 	session->gpsdata.skyview_time = NAN;
-	mask |= SATELLITE_SET | USED_IS;
+	if (session->gpsdata.satellites_visible > 0)
+	    mask |= SATELLITE_SET;
+	if (session->gpsdata.satellites_used > 0)
+	    mask |= USED_IS;
 	gpsd_report(LOG_DATA,
 		    "Garmin: SAT_DATA: visible=%d used=%d\n",
 		    session->gpsdata.satellites_visible,
