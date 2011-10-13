@@ -106,8 +106,7 @@ with Fedora Core 5 was buggy.</a></li>
 href="http://kerneltrap.org/mailarchive/linux-kernel/2010/11/13/4645043">referenced
 in 2010</a>) the tcsetattr() used in our autobauding hunt loop
 prevents any thread(s) currently suspended in ioctl(TIOCMIWAIT) for
-the same device from ever resuming. This interferes with old-style
-(non-kernel) PPS support</p>
+the same device from ever resuming. This interferes with PPS support</p>
 
 <p>The workaround is to use stty to pre-set the serial port to the right
 baud rate so tcsetattr is never called.</p>

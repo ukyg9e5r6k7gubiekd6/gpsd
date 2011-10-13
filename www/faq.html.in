@@ -575,8 +575,7 @@ world has an older datum that only agrees at the 100m level.</p>
 
 <h1 id="tiocmwait">PPS is failing to work under Linux</h1>
 
-<p>If you are using the old-style non-kernel PPS that relies on
-ioctl(TIOCMWAIT), you may have tripped over an <a
+<p>You may have tripped over an <a
 href="upstream-bugs.html#tocmwait">obscure kernel bug</a>. There is a
 workaround; use stty to preset your port baud rate to the correct
 value for the device, so the autobaud loop never runs and
