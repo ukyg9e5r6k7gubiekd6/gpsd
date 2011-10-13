@@ -575,14 +575,22 @@ void gpsd_close(struct gps_device_t *session)
 	/* this is the clean way to do it */
 	session->ttyset_old.c_cflag |= HUPCL;
 	/* keep the most recent baud rate */
-	/*@ ignore @*/
-	(void)cfsetispeed(&session->ttyset_old,
-			  (speed_t) session->gpsdata.dev.baudrate);
-	(void)cfsetospeed(&session->ttyset_old,
-			  (speed_t) session->gpsdata.dev.baudrate);
-	/*@ end @*/
-	(void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
-			&session->ttyset_old);
+	/*
+	 * Don't revert the serial parameters if we didn't have to mess with
+	 * them the first time.  Economical, and avoids tripping over an
+	 * obscure Linux 2.6 kernel bug that disables threaded
+	 * ioctl(TIOCMWAIT) on a device after tcsetattr() is called.
+	 */
+	if (session->ttyset_old.c_ispeed != session->ttyset.c_ispeed || (session->ttyset_old.c_cflag & CSTOPB) != (session->ttyset.c_cflag & CSTOPB)) {
+	    /*@ ignore @*/
+	    (void)cfsetispeed(&session->ttyset_old,
+			      (speed_t) session->gpsdata.dev.baudrate);
+	    (void)cfsetospeed(&session->ttyset_old,
+			      (speed_t) session->gpsdata.dev.baudrate);
+	    /*@ end @*/
+	    (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
+			    &session->ttyset_old);
+	}
 	gpsd_report(LOG_SPIN, "close(%d) in gpsd_close(%s)\n",
 		    session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);
