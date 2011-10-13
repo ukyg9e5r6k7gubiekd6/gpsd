@@ -849,7 +849,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 		    libusb_get_device_address(dev));
 
 	/* we match if vendor and product ID are right */
-	if (desc.idVendor == 0x91e && desc.idProduct == 3) {
+	if (desc.idVendor == vendor && desc.idProduct == product) {
 	    found = true;
 	    break;
 	}
