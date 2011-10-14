@@ -200,7 +200,7 @@ timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
 	gpsd_report(LOG_INF, "GPS week 10-bit rollover detected.\n");
 	++session->context->rollovers;
     }
-#endif __UNUSED__
+#endif /* __UNUSED__ */
 
     /*
      * This guard copes with both conventional GPS weeks and the "extended"
