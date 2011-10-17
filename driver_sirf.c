@@ -228,8 +228,10 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char pari
 	parity = (char)0;
 	break;
     }
-    msg[7] = (unsigned char)HI(speed);
-    msg[8] = (unsigned char)LO(speed);
+    msg[5] = (unsigned char)((speed >> 24) & 0xff);
+    msg[6] = (unsigned char)((speed >> 16) & 0xff);
+    msg[7] = (unsigned char)((speed >> 8) & 0xff);
+    msg[8] = (unsigned char)(speed & 0xff);
     msg[10] = (unsigned char)stopbits;
     msg[11] = (unsigned char)parity;
     return (sirf_write(session, msg));
@@ -256,6 +258,12 @@ static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 	0xb0, 0xb3
     };
     /*@ -charint @*/
+
+    if (speed >= 0xffff) {
+	gpsd_report(LOG_ERROR, "SiRF: can't switch from SiRF to NMEA because current speed %u is big.",
+		     speed);
+	return false;
+    }
 
     msg[26] = (unsigned char)HI(speed);
     msg[27] = (unsigned char)LO(speed);
