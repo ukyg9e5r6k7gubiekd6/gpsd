@@ -76,8 +76,6 @@ static bool tsip_detect(struct gps_device_t *session)
     char old_parity;
     unsigned int old_stopbits;
 
-    gpsd_report(LOG_PROG, "Probing TSIP\n");
-
     old_baudrate = session->gpsdata.dev.baudrate;
     old_parity = session->gpsdata.dev.parity;
     old_stopbits = session->gpsdata.dev.stopbits;

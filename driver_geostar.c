@@ -90,8 +90,6 @@ static bool geostar_detect(struct gps_device_t *session)
     fd_set fdset;
     struct timeval to;
 
-    gpsd_report(LOG_PROG, "Probing GeoStar\n");
-
     myfd = session->gpsdata.gps_fd;
 
     /* request firmware revision and look for a valid response */

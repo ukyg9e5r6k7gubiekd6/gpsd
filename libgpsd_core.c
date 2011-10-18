@@ -310,14 +310,19 @@ int gpsd_activate(struct gps_device_t *session)
 
 	    /*@ -mustfreeonly @*/
 	    for (dp = gpsd_drivers; *dp; dp++) {
-		(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
-		if ((*dp)->probe_detect != NULL
-			&& (*dp)->probe_detect(session) != 0) {
-		    gpsd_report(LOG_PROG, "probe found %s driver...\n",
-			    (*dp)->type_name);
-		    session->device_type = *dp;
-		    gpsd_assert_sync(session);
-		    goto foundit;
+		if ((*dp)->probe_detect != NULL) {
+		    gpsd_report(LOG_PROG, "Probing \"%s\" driver...\n",
+				 (*dp)->type_name);
+		    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
+		    if ((*dp)->probe_detect(session) != 0) {
+			gpsd_report(LOG_PROG, "Probe found \"%s\" driver...\n",
+				     (*dp)->type_name);
+			session->device_type = *dp;
+			gpsd_assert_sync(session);
+			goto foundit;
+		    } else
+			gpsd_report(LOG_PROG, "Probe not found \"%s\" driver...\n",
+			             (*dp)->type_name);
 		}
 	    }
 	    /*@ +mustfreeonly @*/
