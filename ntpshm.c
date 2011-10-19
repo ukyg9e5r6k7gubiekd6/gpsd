@@ -424,7 +424,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	} \
     } while (0)
 
-/* convert timeval to timespec, with rounding */
+/* convert timespec to timeval, with rounding */
 #define TSTOTV(tv, ts) \
     do { \
 	(tv)->tv_sec = (ts)->tv_sec; \
@@ -432,7 +432,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
         TV_NORM( tv ); \
     } while (0)
 
-/* convert timespec to timeval */
+/* convert timeval to timespec */
 #define TVTOTS(ts, tv) \
     do { \
 	(ts)->tv_sec = (tv)->tv_sec; \
