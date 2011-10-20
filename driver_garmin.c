@@ -547,7 +547,10 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		continue;
 	    }
 
-	    session->gpsdata.PRN[j] = (int)sats->svid;
+	    if ((int)sats->svid <= 32)
+		session->gpsdata.PRN[j] = (int)sats->svid;	/* GPS */
+	    else
+		session->gpsdata.PRN[j] = (int)sats->svid + 87;	/* SBAS */
 	    session->gpsdata.azimuth[j] = (int)GPSD_LE16TOH(sats->azmth);
 	    session->gpsdata.elevation[j] = (int)sats->elev;
 	    // Garmin does not document this.  snr is in dB*100
@@ -562,7 +565,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    if ((uint8_t) 0 != (sats->status & 4)) {
 		// used in solution?
 		session->gpsdata.used[session->gpsdata.satellites_used++]
-		    = (int)sats->svid;
+		    = session->gpsdata.PRN[j];
 	    }
 	    session->gpsdata.satellites_visible++;
 	    j++;
