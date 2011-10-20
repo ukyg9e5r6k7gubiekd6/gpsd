@@ -290,9 +290,15 @@ void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 
 timestamp_t timestamp(void)
 {
-    struct timespec ts;
-    /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &ts);
-    /*@i3@*/return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
+#ifdef HAVE_CLOCK_GETTIME
+     struct timespec ts;
+     /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &ts);
+     /*@i3@*/return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
+#else
+    struct timeval tv;
+    (void)gettimeofday(&tv, NULL);
+    return (timestamp_t)(tv.tv_sec + tv.tv_usec * 1e-6);
+#endif
 }
 
 time_t mkgmtime(register struct tm * t)

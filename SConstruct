@@ -383,12 +383,6 @@ confdefs.append('#define GPSD_URL "%s"\n' % website)
 
 cxx = config.CheckCXX()
 
-for f in ("daemon", "strlcpy", "strlcat"):
-    if config.CheckFunc(f):
-        confdefs.append("#define HAVE_%s 1\n" % f.upper())
-    else:
-        confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
-
 # The actual distinction here is whether the platform has ncurses in the
 # base system or not. If it does, pkg-config is not likely to tell us
 # anything useful. FreeBSD does, Linux doesn't. Most likely other BSDs
@@ -449,6 +443,14 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
     print "You do not have kernel PPS available."
+
+# check function after libraries, because some function require library
+# for example clock_gettime() require librt on Linux
+for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):
+    if config.CheckFunc(f):
+        confdefs.append("#define HAVE_%s 1\n" % f.upper())
+    else:
+        confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
 
 # There's a use_chrpath option, on by default, so it can be turned off.
 # You may need to do this when cross-compiling.  The problem is that,
