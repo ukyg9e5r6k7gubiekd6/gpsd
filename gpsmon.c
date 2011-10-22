@@ -128,6 +128,7 @@ void monitor_fixframe(WINDOW * win)
     assert(win != NULL);
     getyx(win, ycur, xcur);
     getmaxyx(win, ymax, xmax);
+    assert(xcur > -1 && ymax > 0);  /* squash a compiler warning */
     (void)mvwaddch(win, ycur, xmax - 1, ACS_VLINE);
 }
 
