@@ -1034,7 +1034,7 @@ def substituter(target, source, env):
     with open(str(target[0]), "w") as tfp:
         tfp.write(content)
 
-templated = glob.glob("*.in") + glob.glob("*/*.in")
+templated = glob.glob("*.in") + glob.glob("*/*.in") + glob.glob("*/*/*.in")
 
 for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)

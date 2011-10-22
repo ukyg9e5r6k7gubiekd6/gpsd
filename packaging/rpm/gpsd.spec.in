@@ -12,6 +12,7 @@ Source0: @DOWNLOAD@/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: bluez-libs-devel
+BuildRequires: chrpath
 BuildRequires: dbus-devel
 BuildRequires: dbus-glib-devel
 BuildRequires: desktop-file-utils
