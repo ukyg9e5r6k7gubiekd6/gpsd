@@ -383,7 +383,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	memset((char *)&sat.sa_in, 0, sin_len);
 	sat.sa_in.sin_family = (sa_family_t) AF_INET;
 #ifndef FORCE_GLOBAL_ENABLE
-	if (listen_global)
+	if (!listen_global)
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 	else
 #endif /* FORCE_GLOBAL_ENABLE */
@@ -403,8 +403,8 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 #ifndef FORCE_GLOBAL_ENABLE
 	if (!listen_global)
 	    sat.sa_in6.sin6_addr = in6addr_loopback;	
-#endif /* FORCE_GLOBAL_ENABLE */
 	else
+#endif /* FORCE_GLOBAL_ENABLE */
 	    sat.sa_in6.sin6_addr = in6addr_any;
 	sat.sa_in6.sin6_port = htons(port);
 
