@@ -458,8 +458,14 @@ int gpsd_serial_open(struct gps_device_t *session)
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
 	 * 200 (and possibly other USB GPSes) gets completely hosed
 	 * in the presence of flow control.  Thus, turn off CRTSCTS.
+	 *
+	 * This is not ideal.  Setting no parity here will mean extra
+	 * initialization time for some devices, like certain Trimble
+	 * boards, that want 7O2 or other non-8N1 settings. But starting
+	 * the hunt loop at 8N1 will minimize the average sync time 
+	 * over all devices.
 	 */
-	session->ttyset.c_cflag &= ~(PARENB | PARODD | CRTSCTS);
+	session->ttyset.c_cflag &= ~(PARENB | PARODD | CRTSCTS | CSTOPB);
 	session->ttyset.c_cflag |= CREAD | CLOCAL;
 	session->ttyset.c_iflag = session->ttyset.c_oflag =
 	    session->ttyset.c_lflag = (tcflag_t) 0;
@@ -468,6 +474,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 	session->baudindex = 0;
 #endif /* FIXED_PORT_SPEED */
 	gpsd_set_speed(session, gpsd_get_speed(&session->ttyset_old), 'N', 1);
+	session->gpsdata.dev.parity = 'N';
+	session->gpsdata.dev.stopbits = 1;
     }
     gpsd_report(LOG_SPIN, "open(%s) -> %d in gpsd_serial_open()\n",
 		session->gpsdata.dev.path, session->gpsdata.gps_fd);
