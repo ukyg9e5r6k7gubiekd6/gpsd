@@ -36,7 +36,8 @@
 #define BUFLEN		2048
 
 /* external capability tables */
-extern struct monitor_object_t nmea_mmt, sirf_mmt, garmin_mmt, ashtech_mmt;
+extern struct monitor_object_t nmea_mmt, sirf_mmt, ashtech_mmt;
+extern struct monitor_object_t garmin_mmt, garmin_bin_ser_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mtk3301_mmt;
 extern struct monitor_object_t oncore_mmt, tnt_mmt;
@@ -44,15 +45,17 @@ extern struct monitor_object_t oncore_mmt, tnt_mmt;
 /* These are public */
 struct gps_device_t session;
 WINDOW *devicewin;
+bool serial;
 
 /* These are private */
 static struct gps_context_t context;
-static bool serial, curses_active;
+static bool curses_active;
 static WINDOW *statwin, *cmdwin;
 /*@null@*/ static WINDOW *packetwin;
 /*@null@*/ static FILE *logfile;
 static char *type_name;
 
+#ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
 extern const struct gps_type_t json_passthrough;
 const struct monitor_object_t json_mmt = {
@@ -63,6 +66,7 @@ const struct monitor_object_t json_mmt = {
     .min_y = 0, .min_x = 80,	/* no need for a device window */
     .driver = &json_passthrough,
 };
+#endif /* PASSTHROUGH_ENABLE */
 
 /*@ -nullassign @*/
 static const struct monitor_object_t *monitor_objects[] = {
@@ -71,6 +75,9 @@ static const struct monitor_object_t *monitor_objects[] = {
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
     &garmin_mmt,
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
+#if defined(GARMIN_ENABLE) && defined(BINARY_ENABLE)
+    &garmin_bin_ser_mmt,
+#endif /* defined(GARMIN_ENABLE) && defined(BINARY_ENABLE) */
 #ifdef ASHTECH_ENABLE
     &ashtech_mmt,
 #endif /* ASHTECH_ENABLE */
@@ -637,9 +644,10 @@ int main(int argc, char **argv)
 	    /* *INDENT-ON* */
 	    (void)wattrset(statwin, A_BOLD);
 	    if (serial)
-		display(statwin, 0, 0, "%s %4d %c %d",
+		display(statwin, 0, 0, "%s %u %d%c%d",
 			session.gpsdata.dev.path,
-			gpsd_get_speed(&session.ttyset),
+			session.gpsdata.dev.baudrate,
+			9 - session.gpsdata.dev.stopbits,
 			session.gpsdata.dev.parity,
 			session.gpsdata.dev.stopbits);
 	    else

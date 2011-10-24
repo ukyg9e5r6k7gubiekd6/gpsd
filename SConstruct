@@ -802,6 +802,7 @@ gpsmon_sources = [
     'monitor_superstar2.c',
     'monitor_tnt.c',
     'monitor_ubx.c',
+    'monitor_garmin.c',
     ]
 
 ## Production programs
