@@ -185,6 +185,7 @@ static void nmea_update(void)
 	int ymax, xmax;
 	timestamp_t now;
 	getmaxyx(nmeawin, ymax, xmax);
+	assert(ymax > 0);
 	if (strstr(sentences, fields[0]) == NULL) {
 	    char *s_end = sentences + strlen(sentences);
 	    if ((int)(strlen(sentences) + strlen(fields[0])) < xmax - 2) {

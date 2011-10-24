@@ -148,19 +148,20 @@ static bool garmin_bin_initialize(void)
     /*@+globstate@*/
 }
 
-/*@ -globstate */
+/*@ -globstate -compdef */
 static void garmin_bin_update(uint16_t pkt_id, uint32_t pkt_size UNUSED, unsigned char *pkt_data)
 {
     int i;
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
-    cpo_rcv_data *rmd = NULL;
+    //cpo_rcv_data *rmd = NULL;
     char tbuf[JSON_DATE_MAX+1];
 
     switch (pkt_id) {
     case 0x29:	/* Receiver Measurement Record */
     case 0x34:
-	rmd = (cpo_rcv_data *)pkt_data; /* for future use */
+	/* for future use */
+	//rmd = (cpo_rcv_data *)pkt_data;
 	monitor_log("RMD 0x%02x=", pkt_id);
 	break;
 
@@ -274,7 +275,7 @@ static void garmin_bin_ser_update(void)
 	monitor_log("BAD 0x%02x=", buf[1]);
    }
 }
-/*@ +globstate */
+/*@ +globstate +compdef */
 
 static void garmin_bin_wrap(void)
 {
