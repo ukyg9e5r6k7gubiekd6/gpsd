@@ -1296,7 +1296,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
     if (strstr((char *)session->packet.outbuffer, "VERSION") != NULL
 	|| strstr((char *)session->packet.outbuffer, "WATCH") != NULL
 	|| strstr((char *)session->packet.outbuffer, "DEVICES") != NULL) {
-	session->packet.outbuffer[session->packet.outbuflen] = '\0';	
+	session->packet.outbuffer[session->packet.outbuflen-1] = '\0';	
 	(void)strlcat((char *)session->packet.outbuffer, ",\"remote\":\"", 
 		      sizeof(session->packet.outbuffer));
 	(void)strlcat((char *)session->packet.outbuffer,
