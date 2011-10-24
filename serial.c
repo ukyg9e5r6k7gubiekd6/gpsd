@@ -474,9 +474,14 @@ int gpsd_serial_open(struct gps_device_t *session)
 	session->baudindex = 0;
 #endif /* FIXED_PORT_SPEED */
 	gpsd_set_speed(session, gpsd_get_speed(&session->ttyset_old), 'N', 1);
+    }
+
+    /* required so parity field won't be '\0' if saved speed matches */
+    if (session->sourcetype <= source_blockdev) {
 	session->gpsdata.dev.parity = 'N';
 	session->gpsdata.dev.stopbits = 1;
     }
+
     gpsd_report(LOG_SPIN, "open(%s) -> %d in gpsd_serial_open()\n",
 		session->gpsdata.dev.path, session->gpsdata.gps_fd);
     return session->gpsdata.gps_fd;
