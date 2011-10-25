@@ -1397,7 +1397,7 @@ env.Alias('testregress', check)
 
 webpages = Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
-    www/gpsd.html www/gpsfake.html www/gpsmon.html 
+    www/gpsd.html www/gpsd_json.html www/gpsfake.html www/gpsmon.html 
     www/gpspipe.html www/gpsprof.html www/gps.html 
     www/libgpsd.html www/libgpsmm.html www/libgps.html
     www/srec.html
@@ -1424,7 +1424,7 @@ Utility("validation-list", [www], validation_list)
 # How to update the website
 Utility("webupload", [www], ['rsync --exclude="*.in" -avz www/ ' + webupload])
 
-# When the URL declrations change, so must the generated web pages
+# When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
     env.Depends(fn[:-3], "SConstruct")
 
