@@ -138,7 +138,6 @@ boolopts = (
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     ("strip",         True,  "build with stripping of binaries enabled"),
-    ("use_chrpath",   True,  "turn off to suppress use of chrpath"),
     )
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
@@ -179,13 +178,8 @@ for (name, default, help) in pathopts:
 # This is necessary in order for tools like ccache and Coverity scan-build to
 # work. Importing PKG_CONFIG_PATH can be used to solve a problem with where .pc
 # files go in a cross-build, and importing STAGING_PREFIX is required for the
-# OpenWRT build.  LOGNAME is required for the flocktest production.
-#
-# If chrpath(1) is not available, the RPATH of built binaries won't be
-# set so they can see shared libraries in this build directory. Setting
-# LD_LIBRARY_PATH like this partially solves this problem, ensuring that
-# at least for tests run under scons the local libraries will be found
-# anyway. DISPLATY is required for dia to run.
+# OpenWRT build.  LOGNAME is required for the flocktest production. DISPLAY
+# is required for dia to run.
 #
 envs = {'LD_LIBRARY_PATH': os.getcwd()}
 for var in ('PATH', 'PKG_CONFIG_PATH', 'STAGING_PREFIX', "LOGNAME", "DISPLAY"):
@@ -452,14 +446,12 @@ for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):
     else:
         confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
 
-# There's a use_chrpath option, on by default, so it can be turned off.
-# You may need to do this when cross-compiling.  The problem is that,
-# as of version 0.13, chrpath can only edit binaries for the host
-# it's running on.  There's an unmerged patch to fix this at:
+# The build is fragile when chrpath is not present, so we've made it
+# mandatory.  Unfortunately, of version 0.13, chrpath can only edit binaries 
+# for the host it's running on.  There's an unmerged patch to fix this at:
 # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502259
 #
-if env['use_chrpath'] and config.CheckExecutable('$CHRPATH -v', 'chrpath'):
-    have_chrpath = True
+if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     # Tell generated binaries to look in the current directory for
     # shared libraries so we can run tests without hassle. Should be
     # handled sanely by scons on all systems.  Not good to use '.' or
@@ -468,10 +460,7 @@ if env['use_chrpath'] and config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
     env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 else:
-    print "Warning: Regression tests won't be runnable from the build directory"
-    print "   until the shared libraries have been intalled in system space."
-    print "   If you have problems compiling or running apps install chrpath."
-    have_chrpath = False
+    print "The chrpath utility is required for GPSD to build."
 
 # Map options to libraries required to support them that might be absent.
 optionrequires = {
@@ -1112,11 +1101,7 @@ binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib)
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
-# If chrpath exists, we tweaked the RPATH of the vuild-directory binaries to
-# be support running tests in the build directory. Undo that at installation
-# time so as not to leave a potential secrity hole. 
-if have_chrpath:
-    env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
+env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
 
 if not env['debug'] and not env['profiling'] and env['strip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')

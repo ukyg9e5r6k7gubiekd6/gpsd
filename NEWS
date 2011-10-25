@@ -13,7 +13,8 @@
   whole-cycle profiling. gpsd.php has Open Street Map support.  The
   pp-on-cts option is replaced by a pps_pin option that lets you
   specify the pin; the default is still DCD. New supported device;
-  the Jackson Labs Fury,
+  the Jackson Labs Fury. The chrpath utility has become a build
+  prerequisite.
 
 * Sun Aug 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1
   The Irene release, rocking you like a hurricane and brought to you
