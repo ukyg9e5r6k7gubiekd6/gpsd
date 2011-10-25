@@ -37,6 +37,7 @@ gps.html
 gpscat.html
 gpsctl.html
 gpsd.html
+gpsd_json.html
 gpsdecode.html
 gpsfake.html
 gpsmon.html
