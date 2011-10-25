@@ -89,6 +89,13 @@ enum isgpsstat_t {
  */
 #define GPS_EPOCH	315964800	/* 6 Jan 1981 00:00:00 UTC */
 
+/*
+ * TAI - GPS = 19 seconds.
+ * Needed because some devices (notably Garmin binary GPSes)
+ * report GPS - UTC offset.
+ */
+#define TAI_GPS_OFFSET  19
+
 struct gps_packet_t {
     /* packet-getter internals */
     int	type;
