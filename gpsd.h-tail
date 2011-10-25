@@ -211,7 +211,7 @@ struct gps_context_t {
     timestamp_t rtcmtime;		/* timestamp of last RTCM104 report */
     /* timekeeping */
     time_t start_time;			/* local time of daemon startup */
-    int leap_seconds;			/* Unix seconds to UTC */
+    int leap_seconds;			/* Unix seconds to UTC (GPS-UTC offset) */
     unsigned short gps_week;            /* GPS week, actually 10 bits */
     double gps_tow;                     /* GPS time of week, actually 19 bits */
     int century;			/* for NMEA-only devices without ZDA */
