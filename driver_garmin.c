@@ -368,8 +368,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	// 631065600, unix seconds for 31 Dec 1989 Zulu
 	time_l = (time_t) (631065600 + (GPSD_LE32TOH(pvt->grmn_days) * 86400));
 	// TODO, convert grmn_days to context->gps_week
-	time_l -= GPSD_LE16TOH(pvt->leap_sec) + TAI_GPS_OFFSET;
-	session->context->leap_seconds = (int)GPSD_LE16TOH(pvt->leap_sec) + TAI_GPS_OFFSET;
+	time_l -= GPSD_LE16TOH(pvt->leap_sec);
+	session->context->leap_seconds = (int)GPSD_LE16TOH(pvt->leap_sec);
 	session->context->valid = LEAP_SECOND_VALID;
 	// gps_tow is always like x.999 or x.998 so just round it
 	time_l += (time_t) round(pvt->gps_tow);
@@ -472,7 +472,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		    pvt->alt, pvt->epe, pvt->eph, pvt->epv, GPSD_LE16TOH(pvt->fix),
 		    pvt->gps_tow, session->newdata.latitude,
 		    session->newdata.longitude, pvt->lon_vel, pvt->lat_vel,
-		    pvt->alt_vel, pvt->msl_hght, GPSD_LE16TOH(pvt->leap_sec) + TAI_GPS_OFFSET,
+		    pvt->alt_vel, pvt->msl_hght, GPSD_LE16TOH(pvt->leap_sec),
 		    GPSD_LE32TOH(pvt->grmn_days));
 
 	if (session->newdata.mode > MODE_NO_FIX) {
