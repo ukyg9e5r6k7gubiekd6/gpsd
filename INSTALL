@@ -78,11 +78,15 @@ various additional features have additional prerequisites:
 |pthreads library       | support for PPS timekeeping on serial GPSes
 |DBUS                   | gpsd will issue DBUS notifications 
 |ncurses                | a test client and the GPS monitor depend on this
+|libtinfo5              | shared low-level terminfo library (see below)
 |libusb-1.0.x or later  | better USB device discovery
 |Qt + qmake             | libQgpsmm depends on this
 |python2.6+             | required for various clients and utilities
 |pgtk-2/cairo bindings  | the main test client, xgps, needs this
 |==========================================================================
+
+Some ncurses packages comntain the terminfo library; some break it out
+seperately as libtinfo5 or libtinfo.
 
 The Python code in GPSD is actually compatible back to Python 2.4 except that
 you need either the json library module from 2.6 or the functionally
