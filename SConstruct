@@ -462,6 +462,7 @@ if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 else:
     print "The chrpath utility is required for GPSD to build."
+    quit()
 
 # Map options to libraries required to support them that might be absent.
 optionrequires = {
@@ -1527,12 +1528,25 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # How to tag a release
     tag_release = Utility('tag-release', [], [
-        'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}',
-        'git push --tags'
+        'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}'
         ])
 
-    # All a buildup to this
-    env.Alias("release", [dist, upload_release, tag_release, upload_web])
+    # Release preparation.  Note that tag_release has to fire early,
+    # otherwise the value of REVISION in revision.h won't be right.
+    # This production will require Internet access.
+    # Run it after removing revision.h.
+    releaseprep = env.Alias("releaseprep",
+                            [leapseconds_cache,
+                             tag_release,
+                             tarball])
+    Utility("undoprep", [], ['rm -f gpsd-${VERSION}.tar.gz;',
+                             'git tag -d release-${VERSION};'])
+
+    # All a buildup to this.
+    env.Alias("release", [releaseprep,
+                          upload_release,
+                          'git push --tags',
+                          upload_web])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
