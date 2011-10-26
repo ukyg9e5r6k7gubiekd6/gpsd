@@ -1431,17 +1431,17 @@ will have a day or so to get their urgent fixes in.</dd>
 <dd>It will need to be modified in SConstruct.  Make sure the 'dev' 
 suffix is gone.</dd>
 
-<dt>5. Fix compiler and scan-build warnings.</dt>
+<dt>5. Update the NEWS file</dt>
+<dd>The version number on the top line needs to be match what's in
+SConstruct.</dd>
+
+<dt>6. Fix compiler and scan-build warnings.</dt>
 <dd>Look for compiler and <a
 href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>
 warnings and fix them.</dd>
 
-<dt>6. Update the NEWS file</dt>
-<dd>Also, make sure the topmost entry in the changelog portion of
-gpsd.spec.in is up-to-date and properly timestamped.</dd>
-
 <dt>7. Update packaging/rpm/gpsd.spec.in</dt>
-<dd>Also, make sure the topmost entry in the changelog portion of
+<dd>Make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
 <dt>8. Run the regression tests and other checks</dt>

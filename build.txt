@@ -105,6 +105,10 @@ running "scons prefix=<installation_root>". The default value is
 "/usr/local".  The envoronment variable DESTDIR also works in the 
 usual way.
 
+If your link fails with a message like "/usr/bin/ld: cannot find -lgps",
+you need to install chrpath.  Note that after you have done so, you
+may need to run 'scons --config=force' to override the cached value.
+
 If your scons fails with the complaint "No tool named 'textfile'",
 you need to upgrade it.  This feature was introduced during the long
 interval after the 1.2.0 release; 1.2.1 and later versions will have it.
