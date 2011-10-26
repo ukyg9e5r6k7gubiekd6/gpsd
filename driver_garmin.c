@@ -994,6 +994,8 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     unsigned char chksum = 0;
     gps_mask_t mask = 0;
 
+    session->gpsdata.dev.driver_mode = MODE_BINARY;
+
     gpsd_report(LOG_RAW, "Garmin: garmin_ser_parse()\n");
     if (6 > len) {
 	/* WTF? */
