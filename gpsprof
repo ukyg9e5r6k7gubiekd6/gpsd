@@ -6,7 +6,7 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-import sys, os, time, getopt, socket, math, copy, signal, json
+import sys, os, time, getopt, socket, math, copy, signal
 import gps
 
 class Baton:

@@ -1196,7 +1196,7 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
 # Sanity-check Python code. TODO: add xgps for the complete set.
 Utility("pychecker", ["jsongen.py", "maskaudit.py"],
         ['''for f in  gpsprof gpscat gpsfake gegps; do ln -s $$f $$f.py; done; \
-        pychecker --no-callinit jsongen.py leapsecond.py maskaudit.py gpsprof.py gpscat.py gpsfake.py gegps.py gps/*.py;
+        pychecker --no-classattr --no-callinit jsongen.py leapsecond.py maskaudit.py gpsprof.py gpscat.py gpsfake.py gegps.py gps/*.py;
         for f in gpsprof gpscat gpsfake gegps; do rm $$f.py $$f.pyc; done'''])
 
 # Check the documentation for bogons, too

@@ -1,5 +1,5 @@
-* Thu Sep 22 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2~dev In
-  the build recipe, (1) set pkgconfig properly for 64-bit Fedora
+* Wed Oct 25 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2 
+  In the build recipe, (1) set pkgconfig properly for 64-bit Fedora
   systems, (2) clean up various derived files including *.pyc on scons
   -c, (3) add an option to disable stripping of binaries (strip=no),
   (4) for embedded targets, add an option to disable building Python
@@ -7,14 +7,14 @@
   a little clearer, (6) add a force_global option to build gpsd to
   listen to all addresses (rather than just loopback). The packet
   sniffer now accepts NMEA packets with the ECDIS packet leader 'EC'.
-  SBAS satellites are now properly use-flagged in SiRF and UBX skyviews.
-  The -G option now works under IPv6. Cross-build is now officially
-  supported and instructions included.  gpsprof works again and does
-  whole-cycle profiling. gpsd.php has Open Street Map support.  The
-  pp-on-cts option is replaced by a pps_pin option that lets you
-  specify the pin; the default is still DCD. New supported device;
-  the Jackson Labs Fury. The chrpath utility has become a build
-  prerequisite.
+  SBAS satellites are now properly use-flagged in SiRF and UBX
+  skyviews.  The -G option now works under IPv6. Cross-build is now
+  officially supported and instructions included.  gpsprof works again
+  and does whole-cycle profiling. gpsd.php has Open Street Map
+  support.  The pp-on-cts option is replaced by a pps_pin option that
+  lets you specify the pin; the default is still DCD. New supported
+  device; the Jackson Labs Fury. The chrpath utility has become a
+  build prerequisite.
 
 * Sun Aug 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1
   The Irene release, rocking you like a hurricane and brought to you
