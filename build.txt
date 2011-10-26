@@ -107,7 +107,8 @@ usual way.
 
 If your link fails with a message like "/usr/bin/ld: cannot find -lgps",
 you need to install chrpath.  Note that after you have done so, you
-may need to run 'scons --config=force' to override the cached value.
+may need to run 'scons --config=force' to override the scons 
+configuration cache's belief that chrpath isn't there.
 
 If your scons fails with the complaint "No tool named 'textfile'",
 you need to upgrade it.  This feature was introduced during the long

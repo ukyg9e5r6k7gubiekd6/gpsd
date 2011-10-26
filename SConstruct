@@ -1520,7 +1520,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # This is how to ship a release to the hosting site.
     # The chmod copes with the fact that scp will give a
     # replacement the permissions of the *original*...
-    upload_release = Utility('upload-release', 'gpsd-${VERSION}.tar.gz', [
+    upload_release = Utility('upload-release', [tarball], [
             'gpg -b gpsd-${VERSION}.tar.gz',
             'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
             'scp $SOURCE gpsd-${VERSION}.tar.gz.sig ' + scpupload,
@@ -1531,7 +1531,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}'
         ])
 
-    # Release preparation. Run it after removing revision.h.
+    # Local release preparation. Run it after removing revision.h.
     # This production will require Internet access.
     #
     # Note that tag_release has to fire early, otherwise the value of
@@ -1540,6 +1540,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
                             [leapseconds_cache,
                              tag_release,
                              tarball])
+    # Undo local release preparation
     Utility("undoprep", [], ['rm -f gpsd-${VERSION}.tar.gz;',
                              'git tag -d release-${VERSION};'])
 
