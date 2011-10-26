@@ -181,8 +181,14 @@ for (name, default, help) in pathopts:
 # OpenWRT build.  LOGNAME is required for the flocktest production. DISPLAY
 # is required for dia to run.
 #
-envs = {'LD_LIBRARY_PATH': os.getcwd()}
-for var in ('PATH', 'PKG_CONFIG_PATH', 'STAGING_PREFIX', "LOGNAME", "DISPLAY"):
+import_env = ('PATH',
+              'PKG_CONFIG_PATH',
+              'STAGING_PREFIX',
+              "LOGNAME",
+              "DISPLAY",
+              "HOSTNAME")
+envs = {}
+for var in import_env:
     if var in os.environ:
         envs[var] = os.environ[var]
 
