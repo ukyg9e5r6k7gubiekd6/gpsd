@@ -1212,11 +1212,13 @@ Utility("deheader", generated_sources, [
         ])
 
 # Perform all sanity checks.
-env.Alias('audit', ['splint',
-                       'cppcheck',
-                       'xmllint',
-                       'pychecker',
-                       'valgrind-audit'])
+audit = env.Alias('audit',
+                  ['splint',
+                   'cppcheck',
+                   'xmllint',
+                   'pychecker',
+                   'valgrind-audit',
+                   ])
 
 #
 # Regression tests begin here
@@ -1373,7 +1375,8 @@ check = env.Alias('check', [
     maidenhead_locator_regress,
     time_regress,
     unpack_regress,
-    json_regress])
+    json_regress,
+    ])
 
 env.Alias('testregress', check)
 
@@ -1511,10 +1514,17 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     Utility('dist-rpm', tarball, 'rpmbuild -ta $SOURCE')
 
     # Make sure build-from-tarball works.
-    Utility('testbuild', [tarball], [
+    testbuild = Utility('testbuild', [tarball], [
         'tar -xzvf gpsd-${VERSION}.tar.gz',
         'cd gpsd-${VERSION}; scons',
         'rm -fr gpsd-${VERSION}',
+        ])
+
+    releasecheck = env.Alias('releasecheck', [
+        testbuild,
+        check,
+        audit,
+        flocktest,
         ])
 
     # This is how to ship a release to the hosting site.

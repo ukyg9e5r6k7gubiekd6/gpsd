@@ -1446,13 +1446,7 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
 <dt>8. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship.
-<ol>
-<li>scons testbuild</li>
-<li>scons testregress</li>
-<li>scons audit</li>
-<li>scons flocktest</li>
-</ol>
-</dd>
+Run <code>scons releasecheck</code> and watch for errors.</dd>
 
 <dt>9. Perform a validation pass on the website content.</dt>
 <dd>See the instructions near validation-list in the scons recipe.</dd>
