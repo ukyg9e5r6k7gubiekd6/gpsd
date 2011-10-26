@@ -174,19 +174,16 @@ for (name, default, help) in pathopts:
 #
 # Environment creation
 #
-# Contrary to usual practice with scons, we import PATH from the environment.
-# This is necessary in order for tools like ccache and Coverity scan-build to
-# work. Importing PKG_CONFIG_PATH can be used to solve a problem with where .pc
-# files go in a cross-build, and importing STAGING_PREFIX is required for the
-# OpenWRT build.  LOGNAME is required for the flocktest production. DISPLAY
-# is required for dia to run.
-#
-import_env = ('PATH',
-              'PKG_CONFIG_PATH',
-              'STAGING_PREFIX',
-              "LOGNAME",
-              "DISPLAY",
-              "HOSTNAME")
+import_env = (
+    "DISPLAY",         # Required for dia to run under scons
+    "GROUPS",          # Required by gpg
+    "HOME",            # Required by gpg
+    "HOSTNAME"
+    "LOGNAME",         # LOGNAME is required for the flocktest production.
+    'PATH',            # Required for ccache and Coverity scan-build
+    'PKG_CONFIG_PATH', # Set .pc file directory in a crossbuild
+    'STAGING_PREFIX',  # Required by the OpenWRT build.
+    )
 envs = {}
 for var in import_env:
     if var in os.environ:
