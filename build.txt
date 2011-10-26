@@ -168,6 +168,12 @@ client library to be available on all the Qt supported platforms.
 Please see http://qt.nokia.com/doc/4.6/supported-platforms.html for a
 status of Qt supported platforms as of version 4.6.
 
+== Reverting to a clean state ==
+
+The scons equivalent of 'make clean' is 'scons -c'. This will revert
+your source tree to a clean state as though you had just cloned or
+downloaded it.
+
 == Cross-building ==
 
 The scons recipe is intended to support cross-building, in particular
