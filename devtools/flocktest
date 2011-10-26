@@ -294,7 +294,7 @@ if __name__ == '__main__':
     if arguments:
         config.set("DEFAULT", "origin", arguments[0])
     if not config.has_option("DEFAULT", "origin"):
-        print >>sys.stderr, "flocktest: repository required,"
+        print >>sys.stderr, "flocktest: repository required."
         sys.exit(1)
     sites = []
     for site in config.sections():
