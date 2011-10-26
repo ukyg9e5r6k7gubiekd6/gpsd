@@ -111,7 +111,7 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Type tag associated with this GPS sentence; from an NMEA
-	device this is just the NMEA sentence type..</entry>
+	device this is just the NMEA sentence type.</entry>
 </row>
 <row>
 	<entry>device</entry>
@@ -130,7 +130,7 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Time/date stamp in ISO8601 format, UTC. May have a
-	fractional part of up to .01sec precision. May be absent if mode 
+	fractional part of up to .001sec precision. May be absent if mode 
         is not 2 or 3.</entry>
 </row>
 <row>
@@ -271,7 +271,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Type tag associated with this GPS sentence; from an NMEA
-	device this is just the NMEA sentence type..</entry>
+	device this is just the NMEA sentence type.</entry>
 </row>
 <row>
 	<entry>device</entry>
@@ -284,7 +284,7 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Time/date stamp in ISO8601 format, UTC. May have a
-	fractional part of up to .01sec precision.</entry>
+	fractional part of up to .001sec precision.</entry>
 </row>
 <row>
 	<entry>xdop</entry>
@@ -488,7 +488,7 @@ device this is just the NMEA sentence type.</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Seconds since the Unix epoch, UTC. May have a
-fractional part of up to .01sec precision.</entry>
+fractional part of up to .001sec precision.</entry>
 </row>
 
 <row>
@@ -592,7 +592,7 @@ may be reported or not depending on the specific device type.</para>
 	<entry>Yes</entry>
 	<entry>string</entry>
         <entry>Type tag associated with this GPS sentence; from an NMEA
-	device this is just the NMEA sentence type..</entry>
+	device this is just the NMEA sentence type.</entry>
 </row>
 <row>
 	<entry>device</entry>
@@ -605,7 +605,7 @@ may be reported or not depending on the specific device type.</para>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
         <entry>Seconds since the Unix epoch, UTC. May have a
-	fractional part of up to .01sec precision.</entry>
+	fractional part of up to .001sec precision.</entry>
 </row>
 <row>
 	<entry>heading</entry>
@@ -677,13 +677,13 @@ may be reported or not depending on the specific device type.</para>
 	<entry>mag_y</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Y component of magnetic field strength..</entry>
+        <entry>Y component of magnetic field strength.</entry>
 </row>
 <row>
 	<entry>mag_z</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Z component of magnetic field strength..</entry>
+        <entry>Z component of magnetic field strength.</entry>
 </row>
 <row>
 	<entry>mag_len</entry>
@@ -707,7 +707,7 @@ may be reported or not depending on the specific device type.</para>
 	<entry>acc_z</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Z component of acceleration..</entry>
+        <entry>Z component of acceleration.</entry>
 </row>
 <row>
 	<entry>gyro_x</entry>
@@ -841,13 +841,13 @@ will assert ATT_IS.</para>
 	<entry>proto_major</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>API major revision level..</entry>
+        <entry>API major revision level.</entry>
 </row>
 <row>
 	<entry>proto_minor</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>API minor revision level..</entry>
+        <entry>API minor revision level.</entry>
 </row>
 <row>
 	<entry>remote</entry>
@@ -1089,7 +1089,7 @@ will be reported with a mode field of zero.</para>
 	<entry>Yes</entry>
 	<entry>Numeric</entry>
         <entry>Timestamp in ISO 8601 format. May have a
-	fractional part of up to .01sec precision.</entry>
+	fractional part of up to .001sec precision.</entry>
 </row>
 <row>
 	<entry>active</entry>
@@ -1349,7 +1349,7 @@ will assert the DEVICE_SET bit in the top-level set member.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"DEVICE", "speed":4800,"serialmode":"8N1","native":0}
+{"class":"DEVICE","bps":4800,"parity":"N","stopbits":1,"native":0}
 </programlisting>
 
 </listitem>
