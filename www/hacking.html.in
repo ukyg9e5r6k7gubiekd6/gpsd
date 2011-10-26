@@ -1450,7 +1450,7 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <li>scons testbuild</li>
 <li>scons testregress</li>
 <li>scons audit</li>
-<li>cd devtools; flocktest</li>
+<li>scons flocktest</li>
 </ol>
 </dd>
 

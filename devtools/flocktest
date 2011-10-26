@@ -43,7 +43,7 @@ flockdriver = '''
 #
 # flockdriver - conduct regression tests as an agent for a remote flocktest
 #
-# This file is generated.  Do not hand-hack.
+# This file was generated at %(date)s.  Do not hand-hack.
 
 quiet=no
 while getopts dq opt
@@ -137,7 +137,7 @@ Subject: DeliverXML
   <generator>
     <name>%(project)s Remote Test Flock Driver</name>
     <version>${gitver}</version>
-    <url>$(origin)s/flockdriver</url>
+    <url>%(origin)s/flockdriver</url>
   </generator>
   <source>
     <project>%(project)s</project>
@@ -209,6 +209,7 @@ class TestSite:
         if self.verbose:
             print uploader
         ofp = os.popen(uploader, "w")
+        self.config['date'] = time.ctime() 
         ofp.write(flockdriver % self.config)
         if ofp.close():
             print >>sys.stderr, "flocktest: agent upload failed"
