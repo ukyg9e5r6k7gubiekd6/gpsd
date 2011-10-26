@@ -1531,10 +1531,11 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}'
         ])
 
-    # Release preparation.  Note that tag_release has to fire early,
-    # otherwise the value of REVISION in revision.h won't be right.
+    # Release preparation. Run it after removing revision.h.
     # This production will require Internet access.
-    # Run it after removing revision.h.
+    #
+    # Note that tag_release has to fire early, otherwise the value of
+    # REVISION in revision.h won't be right. 
     releaseprep = env.Alias("releaseprep",
                             [leapseconds_cache,
                              tag_release,

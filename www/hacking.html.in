@@ -1431,18 +1431,16 @@ will have a day or so to get their urgent fixes in.</dd>
 <dd>It will need to be modified in SConstruct.  Make sure the 'dev' 
 suffix is gone.</dd>
 
-<dt>5. Rebuild leapseconds.cache.</dt>  
-<dd>Rebuild the leap-second list used for rollover checks with 'scons
-leapseconds.cache' Note: The latter will require Internet access, and
-fail (leaving the existing leap-second list in place) if that is not
-available.</dd>
-
-<dt>6. Fix compiler and scan-build warnings.</dt>
+<dt>5. Fix compiler and scan-build warnings.</dt>
 <dd>Look for compiler and <a
 href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>
 warnings and fix them.</dd>
 
-<dt>7. Update the NEWS file</dt>
+<dt>6. Update the NEWS file</dt>
+<dd>Also, make sure the topmost entry in the changelog portion of
+gpsd.spec.in is up-to-date and properly timestamped.</dd>
+
+<dt>7. Update packaging/rpm/gpsd.spec.in</dt>
 <dd>Also, make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
@@ -1451,7 +1449,7 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <ol>
 <li>scons testbuild</li>
 <li>scons testregress</li>
-<li>scons audit; splint, cppcheck, pychecker, xmllint, valgrind-audit</li>
+<li>scons audit</li>
 <li>cd devtools; flocktest</li>
 </ol>
 </dd>
@@ -1463,9 +1461,9 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <dd>This step ensures that the release ID in the revision.h that
 goes in the tarball will look right.</dd>
 
-<dt>11. Ship the release</dt>
-<dd><code>scons release</code> will make the tarball, upload it to @SITENAME@,
-and tag the release, and refresh the website.</dd>
+<dt>11. Build and ship the release</dt>
+<dd><code>scons release</code> will tag the release, make the tarball,
+upload it to the hosting site, and refresh the website.</dd>
 
 <dt>12. Bump the release number and push that commit</dt>
 <dd>Bump the release number in SConstruct, adding a '~dev' suffix
