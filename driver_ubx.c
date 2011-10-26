@@ -545,10 +545,11 @@ bool ubx_write(struct gps_device_t * session,
 	CK_B += CK_A;
     }
     /*@ -nullderef @*/
-    for (i = 0; i < data_len; i++) {
-	CK_A += msg[i];
-	CK_B += CK_A;
-    }
+    if (msg != NULL)
+	for (i = 0; i < data_len; i++) {
+	    CK_A += msg[i];
+	    CK_B += CK_A;
+	}
 
     session->msgbuf[6 + data_len] = CK_A;
     session->msgbuf[7 + data_len] = CK_B;
