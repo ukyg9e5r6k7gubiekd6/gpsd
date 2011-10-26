@@ -1408,7 +1408,8 @@ def validation_list(target, source, env):
 Utility("validation-list", [www], validation_list)
 
 # How to update the website
-Utility("upload_web", [www], ['rsync --exclude="*.in" -avz www/ ' + webupload])
+upload_web = Utility("upload_web", [www],
+                     ['rsync --exclude="*.in" -avz www/ ' + webupload])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
@@ -1499,17 +1500,17 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         distfiles.append("packaging/rpm/gpsd.spec")
 
     # How to build a tarball.
-    dist = env.Command('dist', distfiles, [
+    tarball = env.Command('tarball', distfiles, [
         '@tar --transform "s:^:gpsd-${VERSION}/:" -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
         ])
-    env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
+    env.Clean(tarball, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
 
     # Make RPM from the specfile in packaging
-    Utility('dist-rpm', dist, 'rpmbuild -ta $SOURCE')
+    Utility('dist-rpm', tarball, 'rpmbuild -ta $SOURCE')
 
     # Make sure build-from-tarball works.
-    Utility('testbuild', [dist], [
+    Utility('testbuild', [tarball], [
         'tar -xzvf gpsd-${VERSION}.tar.gz',
         'cd gpsd-${VERSION}; scons',
         'rm -fr gpsd-${VERSION}',
