@@ -625,6 +625,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	int ok = 0;
 	char *log = NULL;
 
+/*@-noeffect@*/
 #ifdef HAVE_CLOCK_GETTIME
 	/* using  clock_gettime() here, that is nSec, 
 	 * not uSec like gettimeofday */
@@ -642,6 +643,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 	TVTOTS( &ts, &tv);
 #endif
+/*@+noeffect@*/
 
 #if defined(HAVE_SYS_TIMEPPS_H)
         if ( 0 <= kernelpps_handle ) {
