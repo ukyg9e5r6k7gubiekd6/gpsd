@@ -22,7 +22,7 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
-gpsd_version = "3.2~dev"
+gpsd_version = "3.2"
 libgps_major = 20
 libgps_minor = 0
 libgps_age   = 0
@@ -1488,7 +1488,7 @@ Utility('udev-test', '', [
 # for these productions to work.
 
 if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
-    distfiles = commands.getoutput(r"git ls-files").split()
+    distfiles = commands.getoutput(r"git ls-files | grep -v '^www/'").split()
     if ".gitignore" in distfiles:
         distfiles.remove(".gitignore")
     distfiles += generated_sources
