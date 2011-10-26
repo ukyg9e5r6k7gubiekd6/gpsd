@@ -22,7 +22,7 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
-gpsd_version = "3.2~dev"
+gpsd_version = "3.3~dev"
 libgps_major = 20
 libgps_minor = 0
 libgps_age   = 0
