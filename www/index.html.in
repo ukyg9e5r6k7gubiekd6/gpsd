@@ -434,12 +434,6 @@ that aims to provide a location service layer for all D-Bus-using
 applications. It can use <code>gpsd</code> as a source for location
 info.</p>
 
-<p>The penguin-with-satellites logo is a hacked version of one I found
-<a
-href='http://www.gfz-potsdam.de/pb1/staff/gbeyerle/opengps/'>here</a>.
-This project seems to be defunct, or at least the maintainer is not
-responding to email.</p>
-
 <h1 id='others'>Other GPSDs</h1>
 
 <p>There used to be three Linux-based forks of <code>gpsd</code> in the
