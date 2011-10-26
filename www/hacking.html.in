@@ -1476,7 +1476,10 @@ goes in the tarball will look right.</dd>
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>14. Announce the release</dt>
+<dt>14. Update the website</dt>
+<dd><code>scons webupload</code> will do this.</dd>
+
+<dt>15. Announce the release</dt>
 <dd>Announce the release, and the resumption of regular commits, on
 the dev list.</dd>
 </dl>
