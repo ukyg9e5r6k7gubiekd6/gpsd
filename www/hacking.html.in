@@ -1443,7 +1443,7 @@ href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>
 warnings and fix them.</dd>
 
 <dt>7. Update the NEWS file</dt>
-<dd>Make sure the topmost entry in the changelog portion of
+<dd>Also, make sure the topmost entry in the changelog portion of
 gpsd.spec.in is up-to-date and properly timestamped.</dd>
 
 <dt>8. Run the regression tests and other checks</dt>
@@ -1451,37 +1451,30 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <ol>
 <li>scons testbuild</li>
 <li>scons testregress</li>
-<li>scons checkall; splint, cppcheck, pychecker, xmllint, valgrind-audit</li>
+<li>scons audit; splint, cppcheck, pychecker, xmllint, valgrind-audit</li>
 <li>cd devtools; flocktest</li>
 </ol>
 </dd>
 
 <dt>9. Perform a validation pass on the website content.</dt>
-<dd>See the instructions near validation-list in the scons recipe.  
-Then upload the corrected pages with <code>scons website</code>.</dd>
+<dd>See the instructions near validation-list in the scons recipe.</dd>
 
-<dt>10. Tag the release in git</dt>
-<dd><p><code>scons tag-release</code> will do it.</p></dd>
-
-<dt>11. Remove revision.h (or just do <command>scons -c</command>)</dt>
-<dd>This step ensurered that the release ID in the revision.h that
+<dt>10. Remove revision.h (or just do <command>scons -c</command>)</dt>
+<dd>This step ensures that the release ID in the revision.h that
 goes in the tarball will look right.</dd>
 
-<dt>12. Ship to our hosting site</dt>
-<dd>Make the tarball (<code>scons dist</code>), upload it to @SITENAME@,
-(<code>scons upload-release</code>), and notify the announce list.</dd>
+<dt>11. Ship the release</dt>
+<dd><code>scons release</code> will make the tarball, upload it to @SITENAME@,
+and tag the release, and refresh the website.</dd>
 
-<dt>13. Bump the release number and push that commit</dt>
+<dt>12. Bump the release number and push that commit</dt>
 <dd>Bump the release number in SConstruct, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>14. Update the website</dt>
-<dd><code>scons webupload</code> will do this.</dd>
-
-<dt>15. Announce the release</dt>
-<dd>Announce the release, and the resumption of regular commits, on
-the dev list.</dd>
+<dt>13. Announce the release</dt>
+<dd>Announce the release on the announce list, and the resumption of
+regular commits on the dev list.</dd>
 </dl>
 
 <h2>Packaging links</h2>

@@ -8,10 +8,9 @@
 # uninstall - undo an install
 #
 # check     - run regression and unit tests.
-# splint    - run the splint static tester on the code
-# cppcheck  - run the cppcheck static tester on the code
-# xmllint   - run xmllint on the documentation
+# audit     - run code-auditing tools
 # testbuild - test-build the code from a tarball
+# release   - ship a release
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
 # without changing the --prefix prefix.
@@ -1212,7 +1211,7 @@ Utility("deheader", generated_sources, [
         ])
 
 # Perform all sanity checks.
-env.Alias('checkall', ['splint',
+env.Alias('audit', ['splint',
                        'cppcheck',
                        'xmllint',
                        'pychecker',
@@ -1409,7 +1408,7 @@ def validation_list(target, source, env):
 Utility("validation-list", [www], validation_list)
 
 # How to update the website
-Utility("webupload", [www], ['rsync --exclude="*.in" -avz www/ ' + webupload])
+Utility("upload_web", [www], ['rsync --exclude="*.in" -avz www/ ' + webupload])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
@@ -1518,7 +1517,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # This is how to ship a release to the hosting site.
     # The chmod copes with the fact that scp will give a
-    # replacement the files of the *original*...
+    # replacement the permissions of the *original*...
     upload_release = Utility('upload-release', 'gpsd-${VERSION}.tar.gz', [
             'gpg -b gpsd-${VERSION}.tar.gz',
             'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
@@ -1530,6 +1529,9 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}',
         'git push --tags'
         ])
+
+    # All a buildup to this
+    env.Alias("release", [dist, upload_release, tag_release, upload_web])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
