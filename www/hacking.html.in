@@ -1457,20 +1457,16 @@ gpsd.spec.in is up-to-date and properly timestamped.</dd>
 <dt>9. Perform a validation pass on the website content.</dt>
 <dd>See the instructions near validation-list in the scons recipe.</dd>
 
-<dt>10. Remove revision.h (or just do <command>scons -c</command>)</dt>
-<dd>This step ensures that the release ID in the revision.h that
-goes in the tarball will look right.</dd>
-
-<dt>11. Build and ship the release</dt>
+<dt>10. Build and ship the release</dt>
 <dd><code>scons release</code> will tag the release, make the tarball,
 upload it to the hosting site, and refresh the website.</dd>
 
-<dt>12. Bump the release number and push that commit</dt>
+<dt>11. Bump the release number and push that commit</dt>
 <dd>Bump the release number in SConstruct, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>13. Announce the release</dt>
+<dt>12. Announce the release</dt>
 <dd>Announce the release on the announce list, and the resumption of
 regular commits on the dev list.</dd>
 </dl>

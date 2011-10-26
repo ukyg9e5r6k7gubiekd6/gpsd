@@ -1531,13 +1531,14 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}'
         ])
 
-    # Local release preparation. Run it after removing revision.h.
-    # This production will require Internet access.
+    # Local release preparation. This production will require Internet access,
+    # but it doesn't do any uploads or public repo mods.
     #
-    # Note that tag_release has to fire early, otherwise the value of
-    # REVISION in revision.h won't be right. 
+    # Note that tag_release has to fire early, otherwise the value of REVISION
+    # won't be right when revision.h is generated for the tarball. 
     releaseprep = env.Alias("releaseprep",
-                            [leapseconds_cache,
+                            [Utility("distclean", [], ["rm -f revision.h"]),
+                             leapseconds_cache,
                              tag_release,
                              tarball])
     # Undo local release preparation
