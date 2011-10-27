@@ -47,8 +47,82 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
-#ifdef RECONFIGURE_ENABLE
 /*@ +charint @*/
+/* Poll Software Version MID 132 */
+static unsigned char versionprobe[] = {
+    0xa0, 0xa2, 0x00, 0x02,
+    0x84,		/* MID 132 */
+    0x00,		/* unused */
+    0x00, 0x00, 0xb0, 0xb3
+};
+
+/* Poll Navigation Parameters MID 152
+ * query for MID 19 */
+static unsigned char navparams[] = {
+    0xa0, 0xa2, 0x00, 0x02,
+    0x98,		/* MID 152 */
+    0x00,
+    0x00, 0x00, 0xb0, 0xb3
+};
+
+#ifdef RECONFIGURE_ENABLE
+/* DGPS Source MID 133 */
+static unsigned char dgpscontrol[] = {
+    0xa0, 0xa2, 0x00, 0x07,
+    0x85,		/* MID 133 */
+    0x01,		/* use SBAS */
+    0x00, 0x00,
+    0x00, 0x00, 0x00,
+    0x00, 0x00, 0xb0, 0xb3
+};
+
+/* Set SBAS Parameters MID 170 */
+static unsigned char sbasparams[] = {
+    0xa0, 0xa2, 0x00, 0x06,
+    0xaa,		/* MID 170 */
+    0x00,		/* SBAS PRN */
+    0x01,		/* SBAS Mode */
+    0x00,		/* Auto PRN */
+    0x00, 0x00,
+    0x00, 0x00, 0xb0, 0xb3
+};
+
+/* Set Message Rate MID 166 */
+static unsigned char requestecef[] = {
+    0xa0, 0xa2, 0x00, 0x08,
+    0xa6,		/* MID 166 */
+    0x00,		/* enable 1 */
+    0x02,		/* MID 2 */
+    0x01,		/* once per Sec */
+    0x00, 0x00,		/* unused */
+    0x00, 0x00,		/* unused */
+    0x00, 0x00, 0xb0, 0xb3
+};
+
+/* Set Message Rate MID 166 */
+static unsigned char requesttracker[] = {
+    0xa0, 0xa2, 0x00, 0x08,
+    0xa6,		/* MID 166 */
+    0x00,		/* enable 1 */
+    0x04,		/* MID 4 */
+    0x03,		/* every 3 sec */
+    0x00, 0x00,		/* unused */
+    0x00, 0x00,		/* unused */
+    0x00, 0x00, 0xb0, 0xb3
+};
+
+/* disable MID XX */
+static unsigned char unsetmidXX[] = {
+    0xa0, 0xa2, 0x00, 0x08,
+    0xa6,		/* MID 166 */
+    0x00,		/* enable 1 */
+    0x00,		/* MID 0xXX */
+    0x00,		/* never */
+    0x00, 0x00,		/* unused */
+    0x00, 0x00,		/* unused */
+    0x00, 0x00, 0xb0, 0xb3
+};
+
 /* message to enable:
  *   MID 7 Clock Status
  *   MID 8 50Bps subframe data
@@ -74,6 +148,7 @@ static unsigned char enablesubframe[] = {
     0x00, 0x00, 0xb0, 0xb3
 };
 
+/* disable subframe data */
 static unsigned char disablesubframe[] = {
     0xa0, 0xa2, 0x00, 0x19,
     0x80,			/* MID 128 initialize Data Source */
@@ -89,6 +164,7 @@ static unsigned char disablesubframe[] = {
     0x00, 0x00, 0xb0, 0xb3
 };
 
+/* mode control MID */
 static unsigned char modecontrol[] = {
     0xa0, 0xa2, 0x00, 0x0e,
     0x88,			/* MID 136 Mode Control */
@@ -116,9 +192,8 @@ static unsigned char enablemid52[] = {
     0x00, 0x00, 0x00, 0x00,	/* unused, set to zero */
     0x00, 0xdb, 0xb0, 0xb3
 };
-
-/*@ -charint @*/
 #endif /* RECONFIGURE_ENABLE */
+/*@ -charint @*/
 
 
 static gps_mask_t sirf_msg_debug(unsigned char *, size_t);
@@ -418,13 +493,6 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     } else {
 	session->driver.sirf.driverstate |= SIRF_GE_232;
     }
-#ifdef RECONFIGURE_ENABLE
-    if (!session->context->readonly) {
-	gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
-	(void)sirf_write(session, enablemid52);
-    }
-#endif /* RECONFIGURE_ENABLE */
-
     if (strstr((char *)(buf + 1), "ES"))
 	gpsd_report(LOG_INF, "SiRF: Firmware has XTrac capability\n");
     gpsd_report(LOG_PROG, "SiRF: fv: %0.2f, Driver state flags are: %0x\n",
@@ -432,13 +500,6 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 #ifdef NTPSHM_ENABLE
     session->driver.sirf.time_seen = 0;
 #endif /* NTPSHM_ENABLE */
-#ifdef RECONFIGURE_ENABLE
-    if (!session->context->readonly && session->gpsdata.dev.baudrate >= 38400) {
-        /* some USB devices are also too slow, no way to tell which ones */
-	gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
-	(void)sirf_write(session, enablesubframe);
-    }
-#endif /* RECONFIGURE_ENABLE */
     gpsd_report(LOG_DATA, "SiRF: FV MID 0x06: subtype='%s' mask={DEVICEID}\n",
 		session->subtype);
     return DEVICEID_SET;
@@ -1191,122 +1252,73 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)nmea_send(session,
 			    "$PSRF100,0,%d,8,1,0",
 			    session->gpsdata.dev.baudrate);
+	    (void)usleep(3330); /* guessed settling time */
 	}
-	/* do this every time */
-	{
-	    /*@ +charint @*/
-	    /* Poll Navigation Parameters MID 152
-	     * query for MID 19 */
-	    static unsigned char navparams[] = {
-		0xa0, 0xa2, 0x00, 0x02,
-		0x98,		/* MID 152 */
-		0x00,
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /* DGPS Source MID 133 */
-	    static unsigned char dgpscontrol[] = {
-		0xa0, 0xa2, 0x00, 0x07,
-		0x85,		/* MID 133 */
-		0x01,		/* use SBAS */
-		0x00, 0x00,
-		0x00, 0x00, 0x00,
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /* Set SBAS Parameters MID 170 */
-	    static unsigned char sbasparams[] = {
-		0xa0, 0xa2, 0x00, 0x06,
-		0xaa,		/* MID 170 */
-		0x00,		/* SBAS PRN */
-		0x01,		/* SBAS Mode */
-		0x00,		/* Auto PRN */
-		0x00, 0x00,
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /* Poll Software Version MID 132 */
-	    static unsigned char versionprobe[] = {
-		0xa0, 0xa2, 0x00, 0x02,
-		0x84,		/* MID 132 */
-		0x00,		/* unused */
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /* Set Message Rate MID 166 */
-	    static unsigned char requestecef[] = {
-		0xa0, 0xa2, 0x00, 0x08,
-		0xa6,		/* MID 166 */
-		0x00,		/* enable 1 */
-		0x02,		/* MID 2 */
-		0x01,		/* once per Sec */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /* Set Message Rate MID 166 */
-	    static unsigned char requesttracker[] = {
-		0xa0, 0xa2, 0x00, 0x08,
-		0xa6,		/* MID 166 */
-		0x00,		/* enable 1 */
-		0x04,		/* MID 4 */
-		0x03,		/* every 3 sec */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /* unset MID 29 0x1d */
-	    /* we do not decode it, so don't send it */
-	    static unsigned char unsetmid29[] = {
-		0xa0, 0xa2, 0x00, 0x08,
-		0xa6,		/* MID 166 */
-		0x00,		/* enable 1 */
-		0x1d,		/* MID 29 */
-		0x00,		/* never */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /* unset MID 30 0x1e */
-	    /* we do not decode it, so don't send it */
-	    static unsigned char unsetmid30[] = {
-		0xa0, 0xa2, 0x00, 0x08,
-		0xa6,		/* MID 166 */
-		0x00,		/* enable 1 */
-		0x1e,		/* MID 30 */
-		0x00,		/* never */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00,	/* unused */
-		0x00, 0x00, 0xb0, 0xb3
-	    };
-	    /*@ -charint @*/
 
-	    gpsd_report(LOG_PROG, "SiRF: baudrate: %d\n",
-			session->gpsdata.dev.baudrate);
-	    (void)usleep(3330);	/* guessed settling time */
-	    gpsd_report(LOG_PROG, "SiRF: unset MID 30...\n");
-	    (void)sirf_write(session, unsetmid30);
-	    (void)usleep(3330);	/* guessed settling time */
+	gpsd_report(LOG_PROG, "SiRF: Probing for firmware version...\n");
+	(void)sirf_write(session, versionprobe);
+	(void)usleep(3330); /* guessed settling time */
 
-	    gpsd_report(LOG_PROG,
-			"SiRF: Requesting periodic ecef reports...\n");
-	    (void)sirf_write(session, requestecef);
-	    gpsd_report(LOG_PROG,
-			"SiRF: Requesting periodic tracker reports...\n");
-	    (void)sirf_write(session, requesttracker);
-	    gpsd_report(LOG_PROG,
-			"SiRF: Setting DGPS control to use SBAS...\n");
-	    (void)sirf_write(session, dgpscontrol);
-	    gpsd_report(LOG_PROG,
-			"SiRF: Setting SBAS to auto/integrity mode...\n");
-	    (void)sirf_write(session, sbasparams);
+	gpsd_report(LOG_PROG, "SiRF: Requesting navigation parameters...\n");
+	(void)sirf_write(session, navparams);
+	(void)usleep(3330); /* guessed settling time */
 
-	    gpsd_report(LOG_PROG, "SiRF: unset MID 29...\n");
-	    (void)sirf_write(session, unsetmid29);
+#ifdef RECONFIGURE_ENABLE
+	gpsd_report(LOG_PROG, "SiRF: Requesting periodic ecef reports...\n");
+	(void)sirf_write(session, requestecef);
+	(void)usleep(3330); /* guessed settling time */
 
-	    gpsd_report(LOG_PROG, "SiRF: Probing for firmware version...\n");
-	    (void)sirf_write(session, versionprobe);
-	    gpsd_report(LOG_PROG,
-			"SiRF: Requesting navigation parameters...\n");
-	    (void)sirf_write(session, navparams);
+	gpsd_report(LOG_PROG, "SiRF: Requesting periodic tracker reports...\n");
+	(void)sirf_write(session, requesttracker);
+	(void)usleep(3330); /* guessed settling time */
+
+	gpsd_report(LOG_PROG, "SiRF: Setting DGPS control to use SBAS...\n");
+	(void)sirf_write(session, dgpscontrol);
+	(void)usleep(3330); /* guessed settling time */
+
+	gpsd_report(LOG_PROG, "SiRF: Setting SBAS to auto/integrity mode...\n");
+	(void)sirf_write(session, sbasparams);
+	(void)usleep(3330); /* guessed settling time */
+
+	gpsd_report(LOG_PROG, "SiRF: Enabling PPS message...\n");
+	(void)sirf_write(session, enablemid52);
+	(void)usleep(3330); /* guessed settling time */
+
+	if (session->gpsdata.dev.baudrate >= 38400) {
+	    /* some USB devices are also too slow, no way to tell which ones */
+	    gpsd_report(LOG_PROG, "SiRF: Enabling subframe transmission...\n");
+	    (void)sirf_write(session, enablesubframe);
+	    (void)usleep(3330); /* guessed settling time */
 	}
+
+	/* disable some MIDs. we do not decode it, so don't send it */
+	gpsd_report(LOG_PROG, "SiRF: unset MID 7...\n");
+	putbyte(unsetmidXX, 6, 0x11);
+	(void)sirf_write(session, unsetmidXX);
+	(void)usleep(3330); /* guessed settling time */
+
+	gpsd_report(LOG_PROG, "SiRF: unset MID 28...\n");
+	putbyte(unsetmidXX, 6, 0x1c);
+	(void)sirf_write(session, unsetmidXX);
+	(void)usleep(3330); /* guessed settling time */
+
+	gpsd_report(LOG_PROG, "SiRF: unset MID 29...\n");
+	putbyte(unsetmidXX, 6, 0x1d);
+	(void)sirf_write(session, unsetmidXX);
+	(void)usleep(3330); /* guessed settling time */
+
+	gpsd_report(LOG_PROG, "SiRF: unset MID 30...\n");
+	putbyte(unsetmidXX, 6, 0x1e);
+	(void)sirf_write(session, unsetmidXX);
+	(void)usleep(3330); /* guessed settling time */
+
+	gpsd_report(LOG_PROG, "SiRF: unset MID 31...\n");
+	putbyte(unsetmidXX, 6, 0x1f);
+	(void)sirf_write(session, unsetmidXX);
+	(void)usleep(3330); /* guessed settling time */
+#endif /* RECONFIGURE_ENABLE */
     }
+
     if (event == event_deactivate) {
 
 	/*@ +charint @*/
