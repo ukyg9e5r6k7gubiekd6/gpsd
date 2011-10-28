@@ -90,6 +90,7 @@ class SkyView(gtk.DrawingArea):
         self.connect('size-allocate', self.on_size_allocate)
         self.connect('expose-event',  self.on_expose_event)
         self.satellites = []
+        self.center_x = self.center_y = self.radius = None
 
     def on_size_allocate(self, unused, allocation):
         width = allocation.width
@@ -170,7 +171,7 @@ class SkyView(gtk.DrawingArea):
         az *= (math.pi/180)	# Degrees to radians
         # Exact spherical projection would be like this:
         # el = sin((90.0 - el) * DEG_2_RAD);
-        el = ((90.0 - el) / 90.0);
+        el = ((90.0 - el) / 90.0)
         xout = self.center_x + math.sin(az) * el * self.radius
         yout = self.center_y - math.cos(az) * el * self.radius
         return (xout, yout)
@@ -227,15 +228,15 @@ class SkyView(gtk.DrawingArea):
             elif sat.ss < 30:
                 self.set_color("Red")
             elif sat.ss < 35:
-                self.set_color("Yellow");
+                self.set_color("Yellow")
             elif sat.ss < 40:
-                self.set_color("Green3");
+                self.set_color("Green3")
             else:
-                self.set_color("Green1");
+                self.set_color("Green1")
             if sat.PRN > SkyView.GPS_PRNMAX:
-                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used);
+                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
             else:
-                self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used);
+                self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
 
             self.cr.set_source_rgb(1, 1, 1)
             self.draw_string(x + SkyView.SAT_RADIUS, y + (SkyView.SAT_RADIUS * 2), str(sat.PRN), centered=False)
@@ -465,17 +466,17 @@ class Base:
              ('Step of grid', None, '_Step of grid')])
         self.actiongroup.add_toggle_actions(
             [('Skyview', None, '_Skyview', '<Control>s',
-              'Enable Skyview', lambda a: self.view_toggle(a)),
+              'Enable Skyview', self.view_toggle),
              ('Responses', None, '_Responses', '<Control>r',
-              'Enable Response Reports', lambda a: self.view_toggle(a)),
+              'Enable Response Reports', self.view_toggle),
              ('GPS', None, '_GPS Data', '<Control>g',
-              'Enable GPS Data', lambda a: self.view_toggle(a)),
+              'Enable GPS Data', self.view_toggle),
              ('Noise', None, '_Noise Statistics', '<Control>n',
-              'Enable Noise Statistics', lambda a: self.view_toggle(a)),
+              'Enable Noise Statistics', self.view_toggle),
              ('Maidenhead', None, '_Maidenhead', '<Control>m',
-              'Enable Maidenhead locator', lambda a: self.view_toggle(a)),
+              'Enable Maidenhead locator', self.view_toggle),
              ('AIS', None, '_AIS Data', '<Control>a',
-              'Enable AIS Data', lambda a: self.view_toggle(a)),
+              'Enable AIS Data', self.view_toggle),
              ])
         self.actiongroup.add_radio_actions(
             [('Imperial', None, '_Imperial', '<Control>i',

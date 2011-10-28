@@ -59,7 +59,7 @@ def retrieve():
             m = re.search(regexp, txt)
             if m:
                 return int(m.group(1)) * sign - offset
-        except:
+        except IOError:
             pass
     else:
         return None

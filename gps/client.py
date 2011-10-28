@@ -143,7 +143,7 @@ class gpsjson(gpscommon):
         # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.
         if hasattr(self.data, "satellites"):
-            self.data.satellites = map(lambda x: dictwrapper(x), self.data.satellites)
+            self.data.satellites = map(dictwrapper, self.data.satellites)
 
     def stream(self, flags=0, devpath=None):
         "Control streaming reports from the daemon,"

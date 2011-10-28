@@ -102,7 +102,7 @@ class TestLoad:
     def __init__(self, logfp, predump=False):
         self.sentences = []	# This is the interesting part
         if type(logfp) == type(""):
-            logfp = open(logfp, "r");            
+            logfp = open(logfp, "r")            
         self.name = logfp.name
         self.logfp = logfp
         self.predump = predump
@@ -148,7 +148,7 @@ class TestLoad:
                 if type_latch is None:
                     type_latch = ptype
                 if self.predump:
-                    print `packet`
+                    print repr(packet)
                 if not packet:
                     raise TestLoadError("zero-length packet from %s"%\
                                         logfp.name)                    
