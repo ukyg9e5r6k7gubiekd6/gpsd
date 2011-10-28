@@ -756,7 +756,7 @@ def generate(spec):
             report += '\t' + header + "\n"
     for (attr, itype, default) in spec["fieldmap"]:
         if itype == 'array':
-            (innerstruct, lengthfield, elements) = default;
+            (innerstruct, lengthfield, elements) = default
             report += '\t{"%s",%st_array,     STRUCTARRAY(%s.%s, %s_%s_subtype, &%s.%s)},\n' \
                       % (attr, " "*(14-len(attr)), structname, attr, initname, attr, structname, lengthfield)
         else:

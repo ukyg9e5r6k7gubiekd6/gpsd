@@ -14,7 +14,6 @@
 # The JSON parts of this (which will be reused by any new interface)
 # now live in a different module.
 #
-import time
 from client import *
 from misc import isotime
 
@@ -147,7 +146,7 @@ class gpsdata:
               (self.satellites_used, self.pdop, self.hdop, self.vdop, self.tdop, self.gdop)
         st += "Y: %s satellites in view:\n" % len(self.satellites)
         for sat in self.satellites:
-          st += "    %r\n" % sat
+            st += "    %r\n" % sat
         return st
 
 class gps(gpsdata, gpsjson):
@@ -338,7 +337,7 @@ class gps(gpsdata, gpsjson):
                 gpsjson.stream(self, flags, devpath)
 
 if __name__ == '__main__':
-    import readline, getopt, sys
+    import getopt, sys
     (options, arguments) = getopt.getopt(sys.argv[1:], "v")
     streaming = False
     verbose = False

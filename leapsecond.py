@@ -73,7 +73,7 @@ def last_insertion_time():
     when.tm_mon = 1; jan = int(calendar.timegm(when))
     when.tm_mon = 7; jul = int(calendar.timegm(when))
     # We have the UTC times of the potential insertion points this year.
-    now = time()
+    now = time.time()
     if now > jul:
         return jul
     else:
