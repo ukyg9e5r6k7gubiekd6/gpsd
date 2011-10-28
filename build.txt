@@ -42,6 +42,9 @@ consguences. Whatever its other flawes, libtool successfully hid some
 tricky problems related to dynamic-linkage paths; to address these
 in the scons build, you need chrpath present to edit those paths.
 
+(We previously tried to make chrpath optional.  This turned out to be
+too tricky to get right to be worth it.  So install chrpath. Now.)
+
 Having the following optional components on your system will enable
 various additional capabilities and extensions:
 
