@@ -259,15 +259,6 @@ sysroot option.
 arm-indigo-linux-gnueabi-gcc and related tools are available in PATH;
 your cross-compiler is likely to have a different target prefix.
 
-Also, a warning about chrpath:
-
-This used to be an optional dependency.  We've made it required
-because too many people are confused by what happens when chrpath 
-is not present, and by the workarounds this requires.  
-
-Unfortunarely, this leads to a problem when when cross-compiling.  The
-problem is that, as of version 0.13, chrpath can only edit binaries
-for the host it's running on.  There's an unmerged patch to fix this
-at: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502259
-
-
+When you are cross-compiling, you'll need chrpath at version 0.14 or
+later for cross-architecture support.  If it's not yet packaged for
+your environment, see http://alioth.debian.org/projects/chrpath/

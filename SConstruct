@@ -373,11 +373,7 @@ config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc})
 
-# The build is fragile when chrpath is not present, so we've made it
-# mandatory.  Unfortunately, of version 0.13, chrpath can only edit binaries 
-# for the host it's running on.  There's an unmerged patch to fix this at:
-# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=502259
-#
+# The build is fragile when chrpath is not present, so we've made it mandatory.
 if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     # Tell generated binaries to look in the current directory for
     # shared libraries so we can run tests without hassle. Should be
