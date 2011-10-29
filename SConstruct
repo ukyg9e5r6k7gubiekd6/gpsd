@@ -21,7 +21,7 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
-gpsd_version = "3.3"
+gpsd_version = "3.3~dev"
 libgps_major = 20
 libgps_minor = 0
 libgps_age   = 0
@@ -1540,6 +1540,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     tag_release = Utility('tag-release', [], [
         'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}'
         ])
+    upload_tags = Utility('upload-tags', [], ['git push --tags'])
 
     # Local release preparation. This production will require Internet access,
     # but it doesn't do any uploads or public repo mods.
@@ -1558,7 +1559,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # All a buildup to this.
     env.Alias("release", [releaseprep,
                           upload_release,
-                          'git push --tags',
+                          upload_tags,
                           upload_web])
 
 # The following sets edit modes for GNU EMACS
