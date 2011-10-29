@@ -221,6 +221,9 @@ for flags in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
 
+def announce(msg):
+    # When we find out how to access the --quiet flag, we use that here
+    print msg
 
 # define a helper function for pkg-config - we need to pass
 # --static for static linking, too.
@@ -398,7 +401,7 @@ if env['usb']:
         try:
             usblibs = pkg_config('libusb-1.0')
         except OSError:
-            print "pkg_config is confused about the state of libusb-1.0."
+            announce("pkg_config is confused about the state of libusb-1.0.")
             usblibs = []
     elif sys.platform.startswith("freebsd"):
         confdefs.append("#define HAVE_LIBUSB 1\n")
@@ -434,10 +437,10 @@ else:
 
 if config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
-    print "You have kernel PPS available."
+    announce("You have kernel PPS available.")
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
-    print "You do not have kernel PPS available."
+    announce("You do not have kernel PPS available.")
 
 # check function after libraries, because some function require library
 # for example clock_gettime() require librt on Linux
@@ -477,7 +480,7 @@ for (key,help) in keys:
     if value and key in optionrequires:
         for required in optionrequires[key]:
             if not config.CheckLib(required):
-                print "%s not found, %s cannot be enabled." % (required, key)
+                announce("%s not found, %s cannot be enabled." % (required,key))
                 value = False
                 break
 
@@ -539,7 +542,7 @@ elif WhereIs("xmlto"):
     htmlbuilder = "xmlto html-nochunks $SOURCE; mv `basename $TARGET` $TARGET"
     manbuilder = "xmlto man $SOURCE; mv `basename $TARGET` $TARGET"
 else:
-    print "Neither xsltproc nor xmlto found, documentation cannot be built."
+    announce("Neither xsltproc nor xmlto found, documentation cannot be built.")
 if manbuilder:
     env['BUILDERS']["Man"] = Builder(action=manbuilder)
     env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
@@ -554,16 +557,16 @@ changelatch = False
 for (name, default, help) in boolopts + nonboolopts + pathopts:
     if env[name] != env.subst(default):
         if not changelatch:
-            print "Altered configuration variables:"
+            announce("Altered configuration variables:")
             changelatch = True
-        print "%s = %s (default %s): %s" % (name, env[name], env.subst(default), help)
+        announce("%s = %s (default %s): %s" % (name, env[name], env.subst(default), help))
 if not changelatch:
-    print "All configuration flags are defaulted."
+    announce("All configuration flags are defaulted.")
 
 # Gentoo systems can have a problem with the Python path
 if os.path.exists("/etc/gentoo-release"):
-    print "This is a Gentoo system."
-    print "Adjust your PYTHONPATH to see library directories under /usr/local/lib"
+    announce("This is a Gentoo system.")
+    announce("Adjust your PYTHONPATH to see library directories under /usr/local/lib")
 
 # Should we build the Qt binding?
 if cxx and qt_network:
@@ -573,7 +576,7 @@ if cxx and qt_network:
         try:
             qt_env.MergeFlags(pkg_config('QtNetwork'))
         except OSError:
-            print "pkg_config is confused about the state of QtNetwork."
+            announce("pkg_config is confused about the state of QtNetwork.")
             qt_env = None
 else:
     qt_env = None
