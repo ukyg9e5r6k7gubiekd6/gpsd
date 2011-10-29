@@ -1533,7 +1533,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     upload_release = Utility('upload-release', [tarball], [
             'gpg -b gpsd-${VERSION}.tar.gz',
             'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
-            'scp $SOURCE gpsd-${VERSION}.tar.gz.sig ' + scpupload,
+            'scp gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig ' + scpupload,
             ])
 
     # How to tag a release
