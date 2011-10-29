@@ -49,7 +49,7 @@ formserver = "www@mainframe.cx"
 devmail    = "gpsd-dev@lists.nongnu.org"
 # Hosting information ends here
 
-EnsureSConsVersion(1,2,0)
+EnsureSConsVersion(2,0,1)
 
 import copy, os, sys, commands, glob, re, platform, time
 from distutils import sysconfig
@@ -222,8 +222,8 @@ for flags in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
 env['SRCDIR'] = '.'
 
 def announce(msg):
-    # When we find out how to access the --quiet flag, we use that here
-    print msg
+    if not env.GetOption("silent"):
+        print msg
 
 # define a helper function for pkg-config - we need to pass
 # --static for static linking, too.
