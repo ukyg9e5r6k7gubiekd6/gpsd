@@ -855,7 +855,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, path, strlen(path)));
 	    ignore_return(write(sfd, "\n", 1));
 	}
-	ignore_return(write(sfd, "OK\n", 6));
+	ignore_return(write(sfd, "OK\n", 3));
     } else {
 	/* unknown command */
 	ignore_return(write(sfd, "ERROR\n", 6));
