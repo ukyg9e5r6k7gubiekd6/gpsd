@@ -41,6 +41,8 @@ throwing it out of our build chain was a good thing, but it had
 consguences. Whatever its other flawes, libtool successfully hid some
 tricky problems related to dynamic-linkage paths; to address these
 in the scons build, you need chrpath present to edit those paths.
+If you do not have chrpath available, GPSD binaries will be built
+statically.
 
 (We previously tried to make chrpath optional.  This turned out to be
 too tricky to get right to be worth it.  So install chrpath. Now.)

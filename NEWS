@@ -1,4 +1,8 @@
-* Wed Oct 29 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4~dev
+* Sun Oct 30 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4~dev
+  Don't barf when chrpath is not available, fall back to static linking;
+  helps people notr running Linux.
+
+* Sat Oct 29 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.3
   Improvements to build and release-procedure documentation. Make
   sirf=no build work again. Main reason for this release is to make
   chrpath a mandatory build depedency and explain why in the build
