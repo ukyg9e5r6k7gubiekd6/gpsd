@@ -178,6 +178,8 @@ static void garmin_bin_update(uint16_t pkt_id, uint32_t pkt_size UNUSED, unsigne
 	display(mid51win, 5, 9, "%5.1f", hypot(pvt->lon_vel, pvt->lat_vel));
 	display(mid51win, 6, 9, "%5.1f", pvt->alt_vel);
 	display(mid51win, 7, 8, "%d", (int)GPSD_LE16TOH(pvt->leap_sec));
+	if (GPSD_LE16TOH(pvt->fix) < 2) /* error value is very large when status no fix */
+	   pvt->epe = pvt->eph = pvt->epv = NAN;
 	display(mid51win, 8, 7, "%6.2f", pvt->epe);
 	display(mid51win, 9, 7, "%6.2f", pvt->eph);
 	display(mid51win, 10, 7, "%6.2f", pvt->epv);
