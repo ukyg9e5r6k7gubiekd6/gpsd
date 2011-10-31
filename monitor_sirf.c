@@ -23,7 +23,6 @@ extern const struct gps_type_t sirf_binary;
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win;
 static bool dispmode = false, subframe_enabled = false, ppstime_enabled = false;
-static int nfix, fix[20];
 static int leapseconds;
 
 /*@ -nullassign @*/
@@ -59,7 +58,7 @@ static char *dgpsvec[] = {
 
 #define display	(void)mvwprintw
 
-#define MAXSATS 	12	/* the most satellites we can dump data on */
+#define SIRF_CHANNELS 	12	/* max channels allowed in SiRF format */
 
 static bool sirf_initialize(void)
 {
@@ -68,7 +67,7 @@ static bool sirf_initialize(void)
 
     /*@ -onlytrans @*/
     mid2win = subwin(devicewin, 6, 80, 1, 0);
-    mid4win = subwin(devicewin, MAXSATS + 3, 30, 7, 0);
+    mid4win = subwin(devicewin, SIRF_CHANNELS + 3, 30, 7, 0);
     mid6win = subwin(devicewin, 3, 50, 7, 30);
     mid7win = subwin(devicewin, 4, 50, 13, 30);
     mid9win = subwin(devicewin, 3, 50, 10, 30);
@@ -116,8 +115,8 @@ static bool sirf_initialize(void)
 
     (void)wborder(mid4win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid4win, A_BOLD);
-    display(mid4win, 1, 1, "Ch PRN  Az El Stat  C/N ? A");
-    for (i = 0; i < MAXSATS; i++) {
+    display(mid4win, 1, 1, "Ch PRN  Az El Stat  C/N ? SF");
+    for (i = 0; i < SIRF_CHANNELS; i++) {
 	display(mid4win, (int)(i + 2), 1, "%2d", i);
     }
     display(mid4win, 0, 1, " Measured Tracker ");
@@ -272,7 +271,7 @@ static void decode_ecef(double x, double y, double z,
 /*@ -globstate */
 static void sirf_update(void)
 {
-    int i, j, ch, off, cn;
+    int i, j, ch, sv, off;
     unsigned char *buf;
     size_t len;
     uint8_t dgps;
@@ -310,59 +309,46 @@ static void sirf_update(void)
 	   (void)wprintw(mid2win, "??");
 	(void)wattrset(mid2win, A_NORMAL);
 	/* line 4 */
+	/* HDOP */
 	(void)wmove(mid2win, 4, 59);
-	(void)wprintw(mid2win, "%4.1f", (double)getub(buf, 20) / 5);	/* HDOP */
+	(void)wprintw(mid2win, "%4.1f", (double)getub(buf, 20) / 5);
+	/* Mode 1 */
 	(void)wmove(mid2win, 4, 69);
-	(void)wprintw(mid2win, "%02x", getub(buf, 19));	/* Mode 1 */
+	(void)wprintw(mid2win, "%02x", getub(buf, 19));
+	/* Mode 2 */
 	(void)wmove(mid2win, 4, 77);
-	(void)wprintw(mid2win, "%02x", getub(buf, 21));	/* Mode 2 */
-	(void)wmove(mid2win, 4, 7);
-	nfix = (int)getub(buf, 28);
-	(void)wprintw(mid2win, "%d = ", nfix);	/* SVs in fix */
-	for (i = 0; i < MAXSATS; i++) {	/* SV list */
-	    if (i < nfix)
-		(void)wprintw(mid2win, "%3d", fix[i] =
-			      (int)getub(buf, 29 + i));
-	    else
-		(void)wprintw(mid2win, "   ");
-	}
+	(void)wprintw(mid2win, "%02x", getub(buf, 21));
+	/* SVs in fix */
+	(void)wmove(mid2win, 4, 6);
+	(void)wprintw(mid2win, "%2d =                                     ",
+		      (int)getub(buf, 28));
+	/* SV list */
+	(void)wmove(mid2win, 4, 10);
+	for (i = 0; i < (int)getub(buf, 28); i++)
+	   (void)wprintw(mid2win, " %2d", (int)getub(buf, 29 + i));
 	monitor_log("MND 0x02=");
 	break;
 
     case 0x04:			/* Measured Tracking Data */
 	ch = (int)getub(buf, 7);
 	for (i = 0; i < ch; i++) {
-	    int sv, st;
+	    int az, el, state;
+	    double cn;
 
 	    off = 8 + 15 * i;
 	    (void)wmove(mid4win, i + 2, 3);
+
 	    sv = (int)getub(buf, off);
-	    (void)wprintw(mid4win, " %3d", sv);
-
-	    (void)wprintw(mid4win, " %3d%3d %04x",
-			  ((int)getub(buf, off + 1) * 3) / 2, (int)getub(buf,
-									 off +
-									 2) /
-			  2, (int)getbes16(buf, off + 3));
-
-	    st = ' ';
-	    if ((int)getbeu16(buf, off + 3) == 0xbf)
-		st = 'T';
-	    for (j = 0; j < nfix; j++)
-		if (sv == fix[j]) {
-		    st = 'N';
-		    break;
-		}
-
+	    az = (int)getub(buf, off + 1) * 3 / 2;
+	    el = (int)getub(buf, off + 2) / 2;
+	    state = (int)getbeu16(buf, off + 3);
 	    cn = 0;
-
 	    for (j = 0; j < 10; j++)
 		cn += (int)getub(buf, off + 5 + j);
+	    cn /= 10;
 
-	    (void)wprintw(mid4win, "%5.1f %c", (double)cn / 10, st);
-
-	    if (sv == 0)	/* not tracking? */
-		(void)wprintw(mid4win, "   ");	/* clear other info */
+	    (void)wprintw(mid4win, " %3d %3d %2d %04x %4.1f %c",
+			   sv, az, el, state, cn, state == 0xbf ? 'T' : ' ');
 	}
 	monitor_log("MTD 0x04=");
 	break;
@@ -403,7 +389,8 @@ static void sirf_update(void)
 
     case 0x08:			/* 50 BPS data */
 	ch = (int)getub(buf, 1);
-	display(mid4win, ch + 2, 27, "Y");
+	sv = (int)getub(buf, 2);
+	display(mid4win, ch + 2, 27, "%2d", sv);
 	subframe_enabled = true;
 	monitor_log("50B 0x08=");
 	break;
@@ -428,10 +415,8 @@ static void sirf_update(void)
 	display(mid13win, 1, 1, "%02d =                                            ",
 				 getub(buf, 1));
 	(void)wmove(mid13win, 1, 5);
-	for (i = 0; i < MAXSATS; i++)
-	    (void)wprintw(mid13win, " %2d", getub(buf, 2 + 5 * i));
-	if (MAXSATS < (int)getub(buf, 1))
-	    (void)wprintw(mid13win, " ...");
+	for (i = 0; i < (int)getub(buf, 1); i++)
+	    (void)wprintw(mid13win, " %d", getub(buf, 2 + 5 * i));
 	monitor_log("VL  0x0d=");
 	break;
 
@@ -519,10 +504,10 @@ static void sirf_update(void)
 	/*@ -type @*/
 	display(mid27win, 1, 1, "%8s =                                      ",
 		(CHECK_RANGE(dgpsvec, dgps) ? dgpsvec[dgps] : "???"));
-	(void)wmove(mid27win, 1, 12);
-	for (i = 0; i < MAXSATS; i++)
-	    if (getub(buf, 16 + 3 * i) != '\0')
-		(void)wprintw(mid27win, " %2d", getub(buf, 16+3*i));
+	(void)wmove(mid27win, 1, 11);
+	for (ch = 0; ch < SIRF_CHANNELS; ch++)
+	    if (getub(buf, 16 + 3 * ch) != '\0')
+		(void)wprintw(mid27win, " %d", getub(buf, 16 + 3 * ch));
 	/*@ +type @*/
 	monitor_log("DST 0x1b=");
 	break;
@@ -580,6 +565,12 @@ static void sirf_update(void)
 	(void)monitor_control_send((unsigned char *)"\x98\x00", 2);
     }
 #endif /* CONTROLSEND_ENABLE */
+
+    /* clear the 50bps data field every 6 seconds */
+    if (subframe_enabled && (time(NULL) % 6 == 0)) {
+	for (ch = 0; ch < SIRF_CHANNELS; ch++)
+	   display(mid4win, ch + 2, 27, "  ");
+    }
 
     /*@ -nullpass -nullderef @*/
     if (dispmode) {
