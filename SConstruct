@@ -16,14 +16,16 @@
 # without changing the --prefix prefix.
 
 # Unfinished items:
-# * Qt binding (needs to build .pc, .prl files)
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
 gpsd_version = "3.4~dev"
-libgps_major = 20
-libgps_minor = 0
-libgps_age   = 0
+
+# library version
+libgps_version_current  = 20
+libgps_version_revision = 0
+libgps_version_age      = 0
+
 # Release identification ends here
 
 # Hosting information (mainly used for templating web pages) begins here
@@ -592,6 +594,9 @@ else:
 
 ## Two shared libraries provide most of the code for the C programs
 
+libgps_version_soname = libgps_version_current - libgps_version_age
+libgps_version = "%d.%d.%d" %(libgps_version_soname, libgps_version_age, libgps_version_revision)
+
 libgps_sources = [
     "ais_json.c",
     "daemon.c",
@@ -654,7 +659,7 @@ libgpsd_sources = [
 # Inspired by Richard Levitte's (slightly buggy) code at
 # http://markmail.org/message/spttz3o4xrsftofr
 
-def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]):
+def VersionedSharedLibrary(env, libname, libgps_version, lib_objs=[], parse_flags=[]):
     platform = env.subst('$PLATFORM')
     shlib_pre_action = None
     shlib_suffix = env.subst('$SHLIBSUFFIX')
@@ -662,8 +667,8 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
     shlink_flags = SCons.Util.CLVar(env.subst('$SHLINKFLAGS'))
 
     if platform == 'posix':
-        ilib_suffix = shlib_suffix + '.' + libversion
-        (major, age, revision) = libversion.split(".")
+        ilib_suffix = shlib_suffix + '.' + libgps_version
+        (major, age, revision) = libgps_version.split(".")
         soname = "lib" + libname + shlib_suffix + "." + major
         shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
     elif platform == 'cygwin':
@@ -671,9 +676,9 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
         shlink_flags += [ '-Wl,-Bsymbolic',
                           '-Wl,--out-implib,${TARGET.base}.a' ]
     elif platform == 'darwin':
-        ilib_suffix = '.' + libversion + shlib_suffix
-        shlink_flags += [ '-current_version', '%s' % libversion,
-                          '-compatibility_version', '%s' % libversion,
+        ilib_suffix = '.' + libgps_version + shlib_suffix
+        shlink_flags += [ '-current_version', '%s' % libgps_version,
+                          '-compatibility_version', '%s' % libgps_version,
                           '-undefined', 'dynamic_lookup' ]
 
     ilib = env.SharedLibrary(libname,lib_objs,
@@ -681,20 +686,20 @@ def VersionedSharedLibrary(env, libname, libversion, lib_objs=[], parse_flags=[]
                             SHLINKFLAGS=shlink_flags, parse_flags=parse_flags)
 
     if platform == 'darwin':
-        if libversion.count(".") != 2:
+        if libgps_version.count(".") != 2:
             # We need a library name in libfoo.x.y.z.dylib form to proceed
             raise ValueError
-        lib = 'lib' + libname + '.' + libversion + '.dylib'
+        lib = 'lib' + libname + '.' + libgps_version + '.dylib'
         lib_no_ver = 'lib' + libname + '.dylib'
         # Link libfoo.x.y.z.dylib to libfoo.dylib
         env.AddPostAction(ilib, 'rm -f %s; ln -s %s %s' % (
             lib_no_ver, lib, lib_no_ver))
         env.Clean(lib, lib_no_ver)
     elif platform == 'posix':
-        if libversion.count(".") != 2:
+        if libgps_version.count(".") != 2:
             # We need a library name in libfoo.so.x.y.z form to proceed
             raise ValueError
-        lib = "lib" + libname + ".so." + libversion
+        lib = "lib" + libname + ".so." + libgps_version
         suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
         # For libfoo.so.x.y.z, links libfoo.so libfoo.so.x.y libfoo.so.x
         major_name = shlib_suffix + "." + lib.split(".")[2]
@@ -734,7 +739,7 @@ else:
     def Library(env, target, sources, version, parse_flags=[]):
         return VersionedSharedLibrary(env=env,
                                      libname=target,
-                                     libversion=version,
+                                     libgps_version=version,
                                      lib_objs=sources,
                                      parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: \
@@ -742,20 +747,17 @@ else:
 
 # Klugery to handle sonames ends
 
-# Must be MAJOR.AGE.REVISION
-libversion = "%d.%d.%d" % (libgps_major, libgps_minor, libgps_age)
-
 compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
-                          version=libversion,
+                          version=libgps_version,
                           parse_flags= ["-lm"] + dbus_libs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
-                           version=libversion,
+                           version=libgps_version,
                            parse_flags=usblibs + rtlibs + bluezlibs)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
@@ -781,7 +783,7 @@ if qt_env:
                                              CC=compile_with,
                                              CFLAGS=compile_flags,
                                              parse_flags=dbus_libs))
-    compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libversion)
+    compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libgps_version)
     libraries.append(compiled_qgpsmmlib)
 
 # The libraries have dependencies on system libraries
@@ -1033,6 +1035,7 @@ def substituter(target, source, env):
         ('@WEBFORM@',    webform),
         ('@FORMSERVER@', formserver),
         ('@DEVMAIL@',    devmail),
+        ('@LIBGPSVERSION@', libgps_version),
         )
     with open(str(source[0])) as sfp:
         content = sfp.read()
@@ -1149,6 +1152,10 @@ else:
                         python_egg_info_install]
 
 pc_install = [ env.Install(installdir('pkgconfig'), x) for x in ("libgps.pc", "libgpsd.pc") ]
+if qt_env:
+    pc_install.append(qt_env.Install(installdir('pkgconfig'), 'Qgpsmm.pc'))
+    pc_install.append(qt_env.Install(installdir('libdir'), 'libQgpsmm.prl'))
+
 
 maninstall = []
 if manbuilder:
