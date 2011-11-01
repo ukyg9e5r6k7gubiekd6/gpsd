@@ -17,7 +17,6 @@
 
 # Unfinished items:
 # * Qt binding (needs to build .pc, .prl files)
-# * Allow building for multiple python versions)
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
@@ -927,7 +926,13 @@ else:
     for ext, sources in python_extensions.iteritems():
         python_objects[ext] = []
         for src in sources:
-            python_objects[ext].append(python_env.SharedObject(src.split(".")[0] + '-py', src))
+            python_objects[ext].append(
+                python_env.NoCache(
+                    python_env.SharedObject(
+                        src.split(".")[0] + '-py_' + '_'.join(['%s' %(x,) for x in sys.version_info]), src
+                    )
+                )
+            )
         python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
     python_built_extensions = python_compiled_libs.values()
 
