@@ -381,7 +381,6 @@ config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc})
 
-# The build is fragile when chrpath is not present, so we've made it mandatory.
 if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     # Tell generated binaries to look in the current directory for
     # shared libraries so we can run tests without hassle. Should be
@@ -1127,7 +1126,8 @@ binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib)
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
-env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
+if env["shared"]:
+    env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
 
 if not env['debug'] and not env['profiling'] and env['strip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
