@@ -53,9 +53,6 @@ devmail    = "gpsd-dev@lists.nongnu.org"
 EnsureSConsVersion(2,0,1)
 
 import copy, os, sys, glob, re, platform, time
-EnsureSConsVersion(1,2,0)
-
-import copy, os, sys, glob, re, platform
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
