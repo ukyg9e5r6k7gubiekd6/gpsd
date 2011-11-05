@@ -14,7 +14,15 @@
 #ifndef USE_QT
 class gpsmm {
 #else
-#include "libQgpsmm_global.h"
+
+#include <QtCore/qglobal.h>
+
+#if defined(LIBQGPSMM_LIBRARY)
+#  define LIBQGPSMMSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define LIBQGPSMMSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
 class LIBQGPSMMSHARED_EXPORT gpsmm {
 #endif
 	public:
