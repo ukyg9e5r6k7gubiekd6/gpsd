@@ -41,7 +41,7 @@
 #include <math.h>
 #include "gpsd.h"
 
-#if defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE)
+#if defined(NAVCOM_ENABLE)
 #include "bits.h"
 
 /* Have data which is 24 bits long */
@@ -1306,4 +1306,4 @@ const struct gps_type_t navcom_binary =
 };
 /* *INDENT-ON* */
 
-#endif /* defined(NAVCOM_ENABLE) && defined(BINARY_ENABLE) */
+#endif /* defined(NAVCOM_ENABLE) */
