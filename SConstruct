@@ -978,12 +978,15 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     chmod a-w $TARGET''')
 
 # generate revision.h
-(st, rev) = _getstatusoutput('git describe')
-if st != 0:
-    from datetime import datetime
-    rev = datetime.now().isoformat()[:-4]
+if 'dev' in gpsd_version:
+    (st, rev) = _getstatusoutput('git describe')
+    if st != 0:
+        from datetime import datetime
+        rev = datetime.now().isoformat()[:-4]
+else:
+    rev = gpsd_version
 revision='#define REVISION "%s"\n' %(rev.strip(),)
-env.NoClean(env.Textfile(target="revision.h", source=[revision]))
+env.Textfile(target="revision.h", source=[revision])
 
 # generate pps_pin.h
 pps_pin = env['pps_pin']
