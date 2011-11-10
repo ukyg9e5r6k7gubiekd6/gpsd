@@ -75,6 +75,11 @@ Under Ubuntu, the ncurses package you want is libncurses5-dev.
 Depending on how your distribution packages ncurses you may
 also require libtinfo5, a separate terminfo library.
 
+On some recent versions of Ubuntu (notably 11.10) there is a packaging
+defect that may cause your build to blow up in SCons. It's a missing
+package info file for the tinfo library. To fix this, install the file
+packaging/tinfo.pc in /usr/lib/pkgconfig/tinfo.pc.
+
 For building from the source tree, or if you change the man page
 source, xslt and docbook xsl style files are used to generate nroff
 -man source from docbook xml.  The following packages are used in this
