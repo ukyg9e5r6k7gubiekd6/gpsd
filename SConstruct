@@ -931,7 +931,7 @@ else:
             python_objects[ext].append(
                 python_env.NoCache(
                     python_env.SharedObject(
-                        src.split(".")[0] + '-py_' + '_'.join(['%s' %(x,) for x in sys.version_info]), src
+                        src.split(".")[0] + '-py_' + '_'.join(['%s%s' %(x,so_ext) for x in sys.version_info]), src
                     )
                 )
             )
