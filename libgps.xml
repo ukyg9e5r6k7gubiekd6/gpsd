@@ -295,7 +295,7 @@ libgps interface code from
 <refsect1 id='limitations'><title>LIMITATIONS</title>
 
 <para>On some systems (those which do not support implicit linking in 
-libaries) you may need to add -lm to your link line when you link libgps.
+libraries) you may need to add -lm to your link line when you link libgps.
 It is always safe to do this.</para>
 
 <para>In the C API, incautious use of <function>gps_send()</function>
