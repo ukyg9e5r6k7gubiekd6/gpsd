@@ -1126,8 +1126,10 @@ binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib)
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
+# We don't use installdir here in order to avoid having DESTDIR affect the rpath
 if env["shared"]:
-    env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' % installdir('libdir'))
+    env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' \
+                      % (env['prefix'] + env['libdir']))
 
 if not env['debug'] and not env['profiling'] and env['strip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
