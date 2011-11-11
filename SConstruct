@@ -260,7 +260,8 @@ def installdir(dir):
 
 # Honor the specified installation prefix in link paths.
 env.Prepend(LIBPATH=[installdir('libdir')])
-env.Prepend(RPATH=[installdir('libdir')])
+if env["shared"]:
+    env.Prepend(RPATH=[installdir('libdir')])
 
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
@@ -385,7 +386,8 @@ if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     # a relative path here; it's a security risk.  At install time we
     # use chrpath to edit this out of RPATH.
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
-    env.Prepend(RPATH=[os.path.realpath(os.curdir)])
+    if env["shared"]:
+        env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 else:
     print "chrpath is not available, forcing static linking."
     env["shared"] = False
