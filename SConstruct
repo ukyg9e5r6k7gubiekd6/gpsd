@@ -927,7 +927,7 @@ else:
             python_objects[ext].append(
                 python_env.NoCache(
                     python_env.SharedObject(
-                        src.split(".")[0] + '-py_' + '_'.join(['%s' %(x,) for x in sys.version_info]), src
+                        src.split(".")[0] + '-py_' + '_'.join(['%s' %(x) for x in sys.version_info]) + so_ext, src
                     )
                 )
             )
@@ -1001,12 +1001,13 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
 # build without Internet access.
 from leapsecond import save_leapseconds
 leapseconds_cache_rebuild = lambda target, source, env: save_leapseconds(target[0].abspath)
-leapseconds_cache = env.Command(target="leapseconds.cache",
+if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
+    leapseconds_cache = env.Command(target="leapseconds.cache",
                                 source="leapsecond.py",
                                 action=leapseconds_cache_rebuild)
-env.Clean(leapseconds_cache, "leapsecond.pyc")
-env.NoClean(leapseconds_cache)
-env.Precious(leapseconds_cache)
+    env.Clean(leapseconds_cache, "leapsecond.pyc")
+    env.NoClean(leapseconds_cache)
+    env.Precious(leapseconds_cache)
 
 # Instantiate some file templates.  We'd like to use the Substfile builtin
 # but it doesn't seem to work in scons 1.20
