@@ -16,7 +16,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsdctl</refname>
-<refpurpose></refpurpose>
+<refpurpose>tool for sending commands to gpsd over its control socket</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
