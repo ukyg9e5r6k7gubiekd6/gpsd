@@ -93,10 +93,6 @@ if __name__ == '__main__':
         print "gpsfake: " + str(msg)
         raise SystemExit, 1
 
-    if not arguments:
-        print >>sys.stderr, "gpsfake: requires at least one logfile argument."
-        raise SystemExit, 1
-
     port = None
     progress = False
     cycle = 0
@@ -151,6 +147,10 @@ if __name__ == '__main__':
         elif (switch == '-h'):
             sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
             raise SystemExit,0
+
+    if not arguments:
+        print >>sys.stderr, "gpsfake: requires at least one logfile argument."
+        raise SystemExit, 1
 
     if progress:
         baton = Baton("Processing %s" % ",".join(arguments), "done")
