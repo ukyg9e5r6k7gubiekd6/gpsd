@@ -15,7 +15,7 @@ OLDPWD=`pwd`
 
 cd ${TMPDIR}
 getbuildlog gpsd last || true
-grep -- '--- ./test' * | sed 's,^gpsd_[^_]*_\([^.]*\).*\./test/\([^.]*\).*,\1 \2,' | sort -u
+grep -- '--- test' * | sed 's,^gpsd_[^_]*_\([^.]*\).*\./test/\([^.]*\).*,\1 \2,' | sort -u
 cd ${OLDPWD}
 rm -rf ${TMPDIR}
 
