@@ -593,8 +593,13 @@ void gpsd_close(struct gps_device_t *session)
 	 * them the first time.  Economical, and avoids tripping over an
 	 * obscure Linux 2.6 kernel bug that disables threaded
 	 * ioctl(TIOCMWAIT) on a device after tcsetattr() is called.
+         *
+         * Unfortunately the termios struct doesn't have c_ispeed/c_ospeed
+         * on all architectures. Its missing on sparc, mips/mispel and hurd-i386 at least.
 	 */
+#if defined(_HAVE_STRUCT_TERMIOS_C_ISPEED)
 	if (session->ttyset_old.c_ispeed != session->ttyset.c_ispeed || (session->ttyset_old.c_cflag & CSTOPB) != (session->ttyset.c_cflag & CSTOPB)) {
+#endif
 	    /*@ ignore @*/
 	    (void)cfsetispeed(&session->ttyset_old,
 			      (speed_t) session->gpsdata.dev.baudrate);
@@ -603,7 +608,9 @@ void gpsd_close(struct gps_device_t *session)
 	    /*@ end @*/
 	    (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
 			    &session->ttyset_old);
+#if defined(_HAVE_STRUCT_TERMIOS_C_ISPEED)
 	}
+#endif
 	gpsd_report(LOG_SPIN, "close(%d) in gpsd_close(%s)\n",
 		    session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);
