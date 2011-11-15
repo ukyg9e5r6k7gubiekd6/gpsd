@@ -1762,7 +1762,8 @@ int main(int argc, char *argv[])
     static char *pid_file = NULL;
     struct gps_device_t *device;
     fd_set rfds;
-    int i, option, msocks[2], dfd;
+    int i, option, dfd;
+    int msocks[2] = {-1, -1};
     bool go_background = true;
     struct timeval tv;
     const struct gps_type_t **dp;
