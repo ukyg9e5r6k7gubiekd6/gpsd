@@ -169,13 +169,13 @@ for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
 pathopts = (
-    ("sysconfdir",          "/etc",           "system configuration directory"),
-    ("bindir",              "/bin",           "application binaries directory"),
-    ("includedir",          "/include",       "header file directory"),
-    ("libdir",              "/lib",           "system libraries"),
-    ("sbindir",             "/sbin",          "system binaries directory"),
-    ("mandir",              "/share/man",     "manual pages directory"),
-    ("docdir",              "/share/doc",     "documents directory"),
+    ("sysconfdir",          "etc",           "system configuration directory"),
+    ("bindir",              "bin",           "application binaries directory"),
+    ("includedir",          "include",       "header file directory"),
+    ("libdir",              "lib",           "system libraries"),
+    ("sbindir",             "sbin",          "system binaries directory"),
+    ("mandir",              "share/man",     "manual pages directory"),
+    ("docdir",              "share/doc",     "documents directory"),
     ("pkgconfig",           "$libdir/pkgconfig", "pkgconfig file directory"),
     )
 for (name, default, help) in pathopts:
@@ -253,8 +253,11 @@ if env['CC'] == 'gcc' or (sys.platform.startswith('freebsd') and env['CC'] == 'c
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
-def installdir(dir):
-    wrapped = DESTDIR + env['prefix'] + env[dir]
+def installdir(dir, add_destdir=True):
+    # use os.path.join to handle absolute paths properly.
+    wrapped = os.path.join(env['prefix'], env[dir])
+    if add_destdir:
+        wrapped = os.path.normpath(DESTDIR + os.path.sep + wrapped)
     wrapped.replace("/usr/etc", "/etc")
     return wrapped
 
@@ -1129,7 +1132,7 @@ if qt_env:
 # We don't use installdir here in order to avoid having DESTDIR affect the rpath
 if env["shared"]:
     env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' \
-                      % (env['prefix'] + env['libdir']))
+                      % (installdir('libdir', False), ))
 
 if not env['debug'] and not env['profiling'] and env['strip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
