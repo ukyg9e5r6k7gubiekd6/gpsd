@@ -382,13 +382,13 @@ config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc})
 
+env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 if config.CheckExecutable('$CHRPATH -v', 'chrpath'):
     # Tell generated binaries to look in the current directory for
     # shared libraries so we can run tests without hassle. Should be
     # handled sanely by scons on all systems.  Not good to use '.' or
     # a relative path here; it's a security risk.  At install time we
     # use chrpath to edit this out of RPATH.
-    env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
     if env["shared"]:
         env.Prepend(RPATH=[os.path.realpath(os.curdir)])
 else:
