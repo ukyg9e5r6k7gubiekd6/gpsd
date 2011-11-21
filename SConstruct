@@ -214,8 +214,9 @@ env['PYTHON'] = sys.executable
 # explicitly quote them or (better yet) use the "=" form of GNU option
 # settings.
 env['STRIP'] = "strip"
+env['PKG_CONFIG'] = "pkg-config"
 env['CHRPATH'] = 'chrpath'
-for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP", "CHRPATH", "LD", "TAR"]:
+for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP", "PKG_CONFIG", "CHRPATH", "LD", "TAR"]:
     if os.environ.has_key(i):
         j = i
         if i == "LD":
@@ -339,7 +340,7 @@ if "help" in ARGLIST:
 
 def CheckPKG(context, name):
     context.Message( 'Checking for %s... ' % name )
-    ret = context.TryAction('pkg-config --exists \'%s\'' % name)[0]
+    ret = context.TryAction('%s --exists \'%s\'' % (env['PKG_CONFIG'], name))[0]
     context.Result( ret )
     return ret
 
@@ -406,9 +407,9 @@ cxx = config.CheckCXX()
 # define a helper function for pkg-config - we need to pass
 # --static for static linking, too.
 if env["shared"]:
-    pkg_config = lambda pkg: ['!pkg-config --cflags --libs %s' %(pkg, )]
+    pkg_config = lambda pkg: ['!%s --cflags --libs %s' %(env['PKG_CONFIG'], pkg, )]
 else:
-    pkg_config = lambda pkg: ['!pkg-config --cflags --libs --static %s' %(pkg, )]
+    pkg_config = lambda pkg: ['!%s --cflags --libs --static %s' %(env['PKG_CONFIG'], pkg, )]
 
 # The actual distinction here is whether the platform has ncurses in the
 # base system or not. If it does, pkg-config is not likely to tell us
