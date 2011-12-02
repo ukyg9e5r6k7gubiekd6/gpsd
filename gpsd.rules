@@ -39,6 +39,8 @@ ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="/lib/
 ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea71", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # u-blox AG, u-blox 5 (tested with Navilock NL-402U) [linux module: cdc_acm]
 ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a5", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug"
+# u-blox AG, u-blox 6 (tested with GNSS Evaluation Kit TCXO) [linux module: cdc_acm]
+ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a6", SYMLINK="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 
 ACTION=="remove", RUN+="/lib/udev/gpsd.hotplug"
 
