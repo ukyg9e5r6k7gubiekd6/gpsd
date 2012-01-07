@@ -20,9 +20,9 @@ a short initial burst of binary garbage).  If you don't see this, you
 may have OS-level problems with your serial support, but more likely
 have the wrong device.  Look again.
 
-If you have trouble wuth the preceding step, check your cabling
+If you have trouble with the preceding step, check your cabling
 first.  Verify that the device is connected and that its power LED
-(if iut has one) is lit.
+(if it has one) is lit.
 
 If you seem to have some sort of serial-device problem, check that
 your kernel properly supports the device you are using.  For GPSes
@@ -86,7 +86,7 @@ various additional features have additional prerequisites:
 |==========================================================================
 
 Some ncurses packages comntain the terminfo library; some break it out
-seperately as libtinfo5 or libtinfo.
+separately as libtinfo5 or libtinfo.
 
 The Python code in GPSD is actually compatible back to Python 2.4 except that
 you need either the json library module from 2.6 or the functionally
