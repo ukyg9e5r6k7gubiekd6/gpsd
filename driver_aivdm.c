@@ -314,8 +314,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    ais->type6.fid            = UBITS(82, 6);
 	    ais->type6.bitcount       = ais_context->bitlen - 88;
 	    imo = false;
-	    if (ais->type8.dac == 1)
-		switch (ais->type8.fid) {
+	    if (ais->type6.dac == 1)
+		switch (ais->type6.fid) {
 		case 12:	/* IMO236 - Dangerous cargo indication */
 		    UCHARS(88, ais->type6.dac1fid12.lastport);
 		    ais->type6.dac1fid12.lmonth		= UBITS(118, 4);
