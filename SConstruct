@@ -85,6 +85,8 @@ if sys.platform.startswith('linux'):
         if int(version) >= 13:
             # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
             imloads = False
+        elif os.path.exists("/etc/arch-release"):
+            imloads = False
     
 boolopts = (
     # GPS protocols
@@ -821,7 +823,8 @@ gpsmon_sources = [
 # know how to force it when linking staticly.
 #
 # It turns out there are two cases where we need to force this.  Some
-# distributions don't do implicit linking by design:
+# distributions don't do implicit linking by design.  See the test
+# code for implicit_link.
 #
 if not env['shared'] or not env["implicit_link"]:
     env.MergeFlags("-lm")
