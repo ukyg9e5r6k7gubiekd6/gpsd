@@ -233,22 +233,26 @@ int main(int argc, char **argv)
 	    break;
        case 'f':       /* Output file name. */
             {
-                char    fname[PATH_MAX];
+                char   *fname = NULL;
                 time_t  t;
-                size_t  s;
+                size_t  s = 0;
+                size_t fnamesize = strlen(optarg);
 
                 t = time(NULL);
-                s = strftime(fname, sizeof(fname), optarg, localtime(&t));
-                if (s == 0) {
-                        syslog(LOG_ERR,
-                            "Bad template \"%s\", logging to stdout.", optarg);
-                        break;
+                while (s == 0) {
+                        fnamesize += 1024;
+                        fname = realloc(fname, fnamesize);
+			assert(fname != NULL); /* pacify splint */
+                        s = strftime(fname, fnamesize - 1, optarg, localtime(&t));
                 }
+		assert(fname != NULL); /* pacify splint */
+                fname[s] = '\0';;
                 logfile = fopen(fname, "w");
                 if (logfile == NULL)
                         syslog(LOG_ERR,
                             "Failed to open %s: %s, logging to stdout.",
                             fname, strerror(errno));
+                free(fname);
                 break;
             }
 	case 'i':		/* set polling interfal */
