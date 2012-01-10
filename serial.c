@@ -575,6 +575,7 @@ void gpsd_assert_sync(struct gps_device_t *session)
 void gpsd_close(struct gps_device_t *session)
 {
     if (session->gpsdata.gps_fd != -1) {
+	(void)ioctl(session->gpsdata.gps_fd, (unsigned long)TIOCNXCL);
 	(void)tcdrain(session->gpsdata.gps_fd);
 	if (isatty(session->gpsdata.gps_fd) != 0) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
