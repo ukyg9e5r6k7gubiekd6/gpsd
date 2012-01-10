@@ -423,6 +423,8 @@ if env['ncurses']:
         ncurseslibs = ['!ncurses5-config --libs --cflags']
     elif sys.platform.startswith('freebsd'):
         ncurseslibs= [ '-lncurses' ]
+    elif sys.platform.startswith('openbsd'):
+        ncurseslibs= [ '-lcurses' ]
 
 if env['usb']:
     # In FreeBSD except version 7, USB libraries are in the base system
