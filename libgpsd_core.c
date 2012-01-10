@@ -33,17 +33,29 @@ static void gpsd_run_device_hook(char *device_name, char *hook)
 	gpsd_report(LOG_PROG, "no %s present, skipped running %s hook\n",
 		    DEVICEHOOKPATH, hook); 
     else {
-	char buf[PATH_MAX];
-	int status;
-	(void)snprintf(buf, sizeof(buf), "%s %s %s",
-	    DEVICEHOOKPATH, device_name, hook);
-	gpsd_report(LOG_INF, "running %s\n", buf);
-	status = system(buf);
-	if (status == -1)
-	    gpsd_report(LOG_ERROR, "error running %s\n", buf);
+	/*
+	 * We make an exception to the no-malloc rule here because
+	 * the pointer will never persist outside this small scope
+	 * and can thus never cause a leak or stale-pointer problem. 
+	 */
+	size_t bufsize = strlen(DEVICEHOOKPATH) + 1 + strlen(device_name) + 1 + strlen(hook) + 1;
+	char *buf = malloc(bufsize);
+	if (buf == NULL)
+	    gpsd_report(LOG_ERROR, "error allocating run-hook buffer\n");
 	else
-	    gpsd_report(LOG_INF, "%s returned %d\n", DEVICEHOOKPATH,
-		WEXITSTATUS(status));
+	{
+	    int status;
+	    (void)snprintf(buf, bufsize, "%s %s %s",
+			   DEVICEHOOKPATH, device_name, hook);
+	    gpsd_report(LOG_INF, "running %s\n", buf);
+	    status = system(buf);
+	    if (status == -1)
+		gpsd_report(LOG_ERROR, "error running %s\n", buf);
+	    else
+		gpsd_report(LOG_INF, "%s returned %d\n", DEVICEHOOKPATH,
+			    WEXITSTATUS(status));
+	    free(buf);
+	}
     }
 }
 
