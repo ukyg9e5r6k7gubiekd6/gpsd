@@ -10,6 +10,12 @@ the "Upstream Bugs" page on the project website.
 
 ** Bugs in gpsd and its clients:
 
+*** Old Earthmate support is currently broken
+
+Support for the the pre-2003 version of the Earthmate using Zodiac 
+binary protocol is currently broken.  Sometime after 2.96 the code
+for dealing with the EARTHA handshake came unstuck.
+
 *** Tracker bugs
 
 See the GPSD bug tracker on the project website, but don't be
