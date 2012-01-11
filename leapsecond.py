@@ -138,10 +138,13 @@ def fetch_leapsecs(filename):
     return leapsecs
 
 def make_leapsecond_include(infile):
-    leapsecs = fetch_leapsecs(infile)
-    leapsecs.append(time.time())          # Add sentinel
+    leapjumps = fetch_leapsecs(infile)
     year = time.strftime("%Y", time.localtime(time.time()))
-    return ("#define CENTURY_BASE\t%s00\n" % year[:2]) + ("#define LEAPSECOND_NOW\t%d\n" % (len(leapsecs)-2))
+    leapsecs = 0
+    for leapjump in leapjumps:
+        if leapjump < time.time():
+            leapsecs += 1
+    return ("#define CENTURY_BASE\t%s00\n" % year[:2]) + ("#define LEAPSECOND_NOW\t%d\n" % (leapsecs-1))
 
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."
