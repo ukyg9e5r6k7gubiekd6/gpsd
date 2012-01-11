@@ -241,18 +241,24 @@ int main(int argc, char **argv)
 
                 t = time(NULL);
                 while (s == 0) {
-                        fnamesize += 1024;
-                        fname = realloc(fname, fnamesize);
-			assert(fname != NULL); /* pacify splint */
-                        s = strftime(fname, fnamesize - 1, optarg, localtime(&t));
+		    char *newfname = realloc(fname, fnamesize);
+		    if (newfname == NULL) {
+			syslog(LOG_ERR, "realloc failed.");
+			goto bailout;
+		    } else {
+			fnamesize += 1024;
+			fname = newfname;
+		    }
+		    s = strftime(fname, fnamesize-1, optarg, localtime(&t));
                 }
 		assert(fname != NULL); /* pacify splint */
                 fname[s] = '\0';;
                 logfile = fopen(fname, "w");
                 if (logfile == NULL)
-                        syslog(LOG_ERR,
-                            "Failed to open %s: %s, logging to stdout.",
-                            fname, strerror(errno));
+		    syslog(LOG_ERR,
+			   "Failed to open %s: %s, logging to stdout.",
+			   fname, strerror(errno));
+	    bailout:
                 free(fname);
                 break;
             }
