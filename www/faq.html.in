@@ -829,7 +829,7 @@ enough information about themselves to avoid conflicts.</p>
 
 <p>Under Linux, <code>gpsd</code> at 3.1 and later versions checks
 each serial and USB device after opening it to see if any other
-process has that device open; if so, it'd dropped.  This should at
+process has that device open; if so, it's dropped.  This should at
 least keep GPSD from usurping data sources belonging to other service
 daemons.</p>
 
