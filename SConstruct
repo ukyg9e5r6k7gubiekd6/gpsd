@@ -85,8 +85,8 @@ if sys.platform.startswith('linux'):
         if int(version) >= 13:
             # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
             imloads = False
-        elif os.path.exists("/etc/arch-release"):
-            imloads = False
+    elif os.path.exists("/etc/arch-release"):
+        imloads = False
     
 boolopts = (
     # GPS protocols
