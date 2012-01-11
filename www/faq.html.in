@@ -758,13 +758,14 @@ while it may indicate that the receiver only uses a binary protocol, it often
 means that the receiver cannot be used as data source for a computer, as is
 usually the case with car navigation devices.</p>
 
-<p>We also support many proprietary protocols, in case your receiver doesn't
-emit NMEA. Datasheets often indicate which chip the receiver is based on, for
-example a <i>NavCorp NX666</i>. Check to see if other <i>NavCorp</i> receivers
-are listed, either as a vendor or a chipset. Compare this with the output of
-<code>gpsd -l</code> which will list the protocols compiled into gpsd. If your
-receiver doesn't support NMEA and we don't have special driver for the chipset,
-talk to us. But it'll probably just work.</p>
+<p>We also support many proprietary protocols, in case your receiver
+doesn't emit NMEA. Datasheets often indicate which chip the receiver
+is based on, for example a <i>NavCorp NX666</i>. Check to see if other
+<i>NavCorp</i> receivers are listed, either as a vendor or a
+chipset. Compare this with the output of <code>gpsd -l</code> which
+will list the protocols compiled into gpsd. If your receiver doesn't
+support NMEA and we don't have a special driver for the chipset, talk
+to us. But it'll probably just work.</p>
 
 <p>Assuming the receiver has a USB interface, do a web search to see if someone
 has tried it with linux already, eg. "<code>NavCorp NX666 linux</code>". Search
@@ -786,7 +787,7 @@ serial or USB links. It relies on a message-oriented physical layer
 called Controller Area Network (CAN) that is widely used to network
 automotive electronics.  Without hardware mediation to map the
 message into self-describing packets on a serial link, there's no
-way gpsd will ever see these.</p>
+way gpsd can see these.</p>
 
 <h1 id='conflict'>Why does GPSD interfere with non-GPS USB devices?</h1>
 
