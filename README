@@ -17,15 +17,10 @@ SConstruct in this top-level directory.  See that website for a list
 of GPS units known to be compatible.
 
 See the file INSTALL for installation instructions and some tips on
-how to troubleshoot your installation.  The file build.txt 
-has instructions for building from source.
-
-Distro integrators: An RPM spec file is included in the gpsd
-distribution.  It wants to set up a hotplug script to notify gpsd
-when a potential GPS device goes active and should be polled.  The
-goal is zero configuration; users should never have to tell gpsd how
-to configure itself.  If you can't use RPM, use what you see in the
-specfile as a model.
+how to troubleshoot your installation.  The file build.txt has
+instructions for building from source.  The packaging/ directory
+contains resources and suggestions for packagers and distribution
+integrators.
 
 LICENSE
 =======
