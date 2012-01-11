@@ -867,8 +867,8 @@ do it, too.</p>
 <dl>
 <dt><b>1. Suppress the autobauding loop</b></dt>
 <dd>The autobauding hunt loop in <code>gpsd</code> stresses chipsets and
-drivers in unusual ways, which is why these sorts bugs show up more
-often under <code>gpsd</code> than most other software.  The first 
+drivers in unusual ways, which is why these sorts of bugs show up more
+often under <code>gpsd</code> than most other USB-using software.  The first 
 thing to try is to <a href="#baud">suppress the autobauding loop</a>.</dd>
 
 <dt><b>2. Upgrade your kernel</b></dt>
