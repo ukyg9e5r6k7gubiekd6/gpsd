@@ -1,4 +1,4 @@
-* Sun Oct 30 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4~dev
+* Thu 12 Jan 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4
   Don't barf when chrpath is not available, fall back to static linking;
   helps people not running Linux.
 
