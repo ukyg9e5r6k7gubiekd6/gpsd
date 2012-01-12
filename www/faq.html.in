@@ -640,7 +640,7 @@ one matches your GPS hardware (look in your lsusb output).</p>
 
 <h1 id='clock'>How can I initialize my system clock from a GPS?</h1>
 
-<para>To set the time on a box that has no real-time clock and no
+<p>To set the time on a box that has no real-time clock and no
 network connection, you need to set the clock to any date in the
 currebt century, then run the following:</p>
 
