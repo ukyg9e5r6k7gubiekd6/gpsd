@@ -804,11 +804,11 @@ void cfmakeraw(struct termios *);
 
 /* memory barriers */
 static /*@unused@*/ inline void barrier(void) {
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#if defined(__GNUC__) && defined(__x86_64__)
 #ifndef S_SPLINT_S
 	asm volatile("mfence");
 #endif /* S_SPLINT_S */
-#endif /* defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) */
+#endif /* defined(__GNUC__) && defined(__x86_64__) */
 }
 
 #endif /* _GPSD_H_ */
