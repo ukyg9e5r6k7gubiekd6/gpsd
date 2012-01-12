@@ -45,6 +45,12 @@ some code generators in Python), it is not required to run the service
 daemon.  In particular, you can cross-compile onto an embedded system
 without having to take Python with you.  
 
+You will need both basic Python and (if your package system makes the
+distinction) the Python development package used for building C
+extensions.  Usually these are called "python" and "python-dev". You
+will know you are missing the latter if your compilation fails 
+because of a missing Python.h.
+
 === Scons ===
 
 You will need scons version 2.0.1 or later to build the code. The
