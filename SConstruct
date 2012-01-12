@@ -19,7 +19,7 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 
 # Release identification begins here
-gpsd_version = "3.4"
+gpsd_version = "3.4~dev"
 
 # library version
 libgps_version_current  = 20
@@ -1594,7 +1594,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # won't be right when revision.h is generated for the tarball. 
     releaseprep = env.Alias("releaseprep",
                             [Utility("distclean", [], ["rm -f revision.h"]),
-                             leapseconds_cache,
                              tag_release,
                              tarball])
     # Undo local release preparation
