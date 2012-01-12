@@ -87,6 +87,10 @@ if sys.platform.startswith('linux'):
             imloads = False
     elif os.path.exists("/etc/arch-release"):
         imloads = False
+
+# Does our platform has a working memory-barrier instruction?
+# The shared-memory export won't be reliable without it.
+mfence = (platform.machine() in ('x86_64',))
     
 boolopts = (
     # GPS protocols
@@ -122,7 +126,7 @@ boolopts = (
     # Export methods
     ("socket_export", True,  "data export over sockets"),
     ("dbus_export",   False, "enable DBUS export support"),
-    ("shm_export",    True,  "export via shared memory"),
+    ("shm_export",    mfence,"export via shared memory"),
     # Communication
     ('usb',           True,  "libusb support for USB devices"),
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
@@ -131,7 +135,7 @@ boolopts = (
     ("passthrough",   True,  "build support for passing through JSON"),
     # Other daemon options
     ("force_global",  False, "force daemon to listen on all addressses"),
-    ("timing",        False,  "latency timing support"),
+    ("timing",        False, "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
     ("systemd",       systemd, "systemd socket activation"),
     # Client-side options
