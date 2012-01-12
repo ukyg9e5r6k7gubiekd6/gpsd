@@ -1424,8 +1424,8 @@ release blockers.</dt>  <dd></dd>
 <dd>About 48 hours before release, announce that it's coming so people
 will have a day or so to get their urgent fixes in.</dd>
 
-<dt>3. Code pull from the public repo</dt>
-<dd>This is the revision the release will be built from.</dd>
+<dt>3. Perform a validation pass on the website content.</dt>
+<dd>See the instructions near validation-list in the scons recipe.</dd>
 
 <dt>4. Check that the version number is correct</dt>
 <dd>It will need to be modified in SConstruct.  Make sure the 'dev' 
@@ -1440,27 +1440,23 @@ SConstruct.</dd>
 href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>
 warnings and fix them.</dd>
 
-<dt>7. Update packaging/rpm/gpsd.spec.in</dt>
-<dd>Make sure the topmost entry in the changelog portion of
-gpsd.spec.in is up-to-date and properly timestamped.</dd>
-
-<dt>8. Run the regression tests and other checks</dt>
+<dt>7. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship.
 Run <code>scons releasecheck</code> and watch for errors.</dd>
 
-<dt>9. Perform a validation pass on the website content.</dt>
-<dd>See the instructions near validation-list in the scons recipe.</dd>
+<dt>8. Push and pull from the public repo</dt>
+<dd>This is the revision the release will be built from.</dd>
 
-<dt>10. Build and ship the release</dt>
+<dt>9. Build and ship the release</dt>
 <dd><code>scons release</code> will tag the release, make the tarball,
 upload it to the hosting site, and refresh the website.</dd>
 
-<dt>11. Bump the release number and push that commit</dt>
+<dt>10. Bump the release number and push that commit</dt>
 <dd>Bump the release number in SConstruct, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>12. Announce the release</dt>
+<dt>11. Announce the release</dt>
 <dd>Announce the release on the announce list, and the resumption of
 regular commits on the dev list.</dd>
 </dl>
