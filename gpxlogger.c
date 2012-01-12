@@ -234,6 +234,7 @@ int main(int argc, char **argv)
 	    break;
        case 'f':       /* Output file name. */
             {
+		/*@-usedef@*/
                 char   *fname = NULL;
                 time_t  t;
                 size_t  s = 0;
@@ -261,6 +262,7 @@ int main(int argc, char **argv)
 	    bailout:
                 free(fname);
                 break;
+		/*@+usedef@*/
             }
 	case 'i':		/* set polling interfal */
 	    timeout = (time_t) atoi(optarg);
