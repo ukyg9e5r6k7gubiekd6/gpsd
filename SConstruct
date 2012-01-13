@@ -850,7 +850,7 @@ gpsdctl = env.Program('gpsdctl', ['gpsdctl.c'], parse_flags=gpslibs)
 env.Depends(gpsdctl, compiled_gpslib)
 
 gpsmon = env.Program('gpsmon', gpsmon_sources,
-                     parse_flags=gpsdlibs + ncurseslibs)
+                     parse_flags=gpsdlibs + ncurseslibs + ['-lm'])
 env.Depends(gpsmon, [compiled_gpsdlib, compiled_gpslib])
 
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
