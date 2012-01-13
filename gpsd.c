@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>		/* for select() */
+#include <sys/select.h>
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -1765,7 +1766,11 @@ int main(int argc, char *argv[])
     int i, option, dfd;
     int msocks[2] = {-1, -1};
     bool go_background = true;
+#ifdef COMPAT_SELECT
     struct timeval tv;
+#else
+    sigset_t emptyset, blockset;
+#endif /* COMPAT_SELECT */
     const struct gps_type_t **dp;
     bool in_restart;
 
@@ -2050,6 +2055,14 @@ int main(int argc, char *argv[])
     }
 
     /* Handle some signals */
+#ifndef COMPAT_SELECT
+    (void)sigemptyset(&blockset);
+    (void)sigaddset(&blockset, SIGHUP);
+    (void)sigaddset(&blockset, SIGINT);
+    (void)sigaddset(&blockset, SIGTERM);
+    (void)sigaddset(&blockset, SIGQUIT);
+    (void)sigprocmask(SIG_BLOCK, &blockset, &emptyset);
+#endif /* COMPAT_SELECT */
     signalled = 0;
     (void)signal(SIGHUP, onsig);
     (void)signal(SIGINT, onsig);
@@ -2095,17 +2108,22 @@ int main(int argc, char *argv[])
 	 * select(2) has to poll here as small as possible (for
 	 * low-clock-rate SBCs and the like).
 	 */
-	/*@ -usedef @*/
+	/*@ -usedef -nullpass @*/
+	errno = 0;
+
+#ifdef COMPAT_SELECT
 	tv.tv_sec = 1;
 	tv.tv_usec = 0;
-	errno = 0;
 	if (select(maxfd + 1, &rfds, NULL, NULL, &tv) == -1) {
+#else
+	if (pselect(maxfd + 1, &rfds, NULL, NULL, NULL, &emptyset) == -1) {
+#endif
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
 	    exit(2);
 	}
-	/*@ +usedef @*/
+	/*@ +usedef +nullpass @*/
 
 	if (context.debug >= LOG_SPIN) {
 	    char dbuf[BUFSIZ];

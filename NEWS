@@ -1,3 +1,7 @@
+* Thu 13 Jan 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.5dev
+  Use pselect when it's available to cut down on wakeups and improve
+  signal handling.
+
 * Thu 12 Jan 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4
   Don't barf when chrpath is not available, fall back to static linking;
   helps people not running Linux.

@@ -519,6 +519,10 @@ for (key,help) in keys:
         else:
             confdefs.append("#define %s \"%s\"\n" % (key.upper(), value))
 
+if config.CheckFunc("pselect"):
+    confdefs.append("/* #undef COMPAT_SELECT */\n")
+else:
+    confdefs.append("#define COMPAT_SELECT\n")
 
 confdefs.append('''
 /* will not handle pre-Intel Apples that can run big-endian */
