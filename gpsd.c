@@ -2107,6 +2107,10 @@ int main(int argc, char *argv[])
 	 * of tracking maxfd is to keep the set of descriptors that
 	 * select(2) has to poll here as small as possible (for
 	 * low-clock-rate SBCs and the like).
+	 *
+	 * pselect() is preferable, when we can have it, to eliminate
+	 * the once-per-second wakeup when no sensors are attached.
+	 * This cuts power consumption.
 	 */
 	/*@ -usedef -nullpass @*/
 	errno = 0;
