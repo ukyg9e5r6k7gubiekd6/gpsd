@@ -25,6 +25,7 @@
 #include <syslog.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <pthread.h>
 #ifndef S_SPLINT_S
 #include <netdb.h>
@@ -1769,10 +1770,11 @@ int main(int argc, char *argv[])
 #ifdef COMPAT_SELECT
     struct timeval tv;
 #else
-    sigset_t emptyset, blockset;
+    sigset_t oldset, blockset;
 #endif /* COMPAT_SELECT */
     const struct gps_type_t **dp;
     bool in_restart;
+    struct sigaction sa;
 
 #ifdef PPS_ENABLE
     /*@-nullpass@*/
@@ -2043,6 +2045,25 @@ int main(int argc, char *argv[])
 	subscribers[i].fd = UNALLOCATED_FD;
 #endif /* SOCKET_EXPORT_ENABLE*/
 
+    /* Handle some signals */
+#ifndef COMPAT_SELECT
+    (void)sigemptyset(&blockset);
+    (void)sigaddset(&blockset, SIGHUP);
+    (void)sigaddset(&blockset, SIGINT);
+    (void)sigaddset(&blockset, SIGTERM);
+    (void)sigaddset(&blockset, SIGQUIT);
+    (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
+#endif /* COMPAT_SELECT */
+
+    sa.sa_flags = 0;
+    sa.sa_handler = onsig;
+    (void)sigfillset(&sa.sa_mask);
+    (void)sigaction(SIGHUP, &sa, NULL);
+    (void)sigaction(SIGINT, &sa, NULL);
+    (void)sigaction(SIGTERM, &sa, NULL);
+    (void)sigaction(SIGQUIT, &sa, NULL);
+    (void)signal(SIGPIPE, SIG_IGN);
+
     /* daemon got termination or interrupt signal */
     if (setjmp(restartbuf) > 0) {
 	/* try to undo all device configurations */
@@ -2054,21 +2075,7 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_WARN, "gpsd restarted by SIGHUP\n");
     }
 
-    /* Handle some signals */
-#ifndef COMPAT_SELECT
-    (void)sigemptyset(&blockset);
-    (void)sigaddset(&blockset, SIGHUP);
-    (void)sigaddset(&blockset, SIGINT);
-    (void)sigaddset(&blockset, SIGTERM);
-    (void)sigaddset(&blockset, SIGQUIT);
-    (void)sigprocmask(SIG_BLOCK, &blockset, &emptyset);
-#endif /* COMPAT_SELECT */
     signalled = 0;
-    (void)signal(SIGHUP, onsig);
-    (void)signal(SIGINT, onsig);
-    (void)signal(SIGTERM, onsig);
-    (void)signal(SIGQUIT, onsig);
-    (void)signal(SIGPIPE, SIG_IGN);
 
     for (i = 0; i < AFCOUNT; i++)
 	if (msocks[i] >= 0) {
@@ -2120,7 +2127,7 @@ int main(int argc, char *argv[])
 	tv.tv_usec = 0;
 	if (select(maxfd + 1, &rfds, NULL, NULL, &tv) == -1) {
 #else
-	if (pselect(maxfd + 1, &rfds, NULL, NULL, NULL, &emptyset) == -1) {
+	if (pselect(maxfd + 1, &rfds, NULL, NULL, NULL, &oldset) == -1) {
 #endif
 	    if (errno == EINTR)
 		continue;
