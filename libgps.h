@@ -8,7 +8,7 @@
 
 /* 
  * first member of each kind of privdata structure must be named 
- * 'export_type' and must be of this time.  It's how we do runtime 
+ * 'export_type' and must be of this type.  It's how we do runtime 
  * dispatch to the different transports.
  */
 enum export_t {
