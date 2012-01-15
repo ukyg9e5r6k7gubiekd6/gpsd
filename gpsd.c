@@ -1774,7 +1774,6 @@ int main(int argc, char *argv[])
 #endif /* COMPAT_SELECT */
     const struct gps_type_t **dp;
     bool in_restart;
-    struct sigaction sa;
 
 #ifdef PPS_ENABLE
     /*@-nullpass@*/
@@ -2055,14 +2054,20 @@ int main(int argc, char *argv[])
     (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
 #endif /* COMPAT_SELECT */
 
-    sa.sa_flags = 0;
-    sa.sa_handler = onsig;
-    (void)sigfillset(&sa.sa_mask);
-    (void)sigaction(SIGHUP, &sa, NULL);
-    (void)sigaction(SIGINT, &sa, NULL);
-    (void)sigaction(SIGTERM, &sa, NULL);
-    (void)sigaction(SIGQUIT, &sa, NULL);
-    (void)signal(SIGPIPE, SIG_IGN);
+    /*@-compdef -compdestroy@*/
+    {
+	struct sigaction sa;
+
+	sa.sa_flags = 0;
+	sa.sa_handler = onsig;
+	(void)sigfillset(&sa.sa_mask);
+	(void)sigaction(SIGHUP, &sa, NULL);
+	(void)sigaction(SIGINT, &sa, NULL);
+	(void)sigaction(SIGTERM, &sa, NULL);
+	(void)sigaction(SIGQUIT, &sa, NULL);
+	(void)signal(SIGPIPE, SIG_IGN);
+    }
+    /*@+compdef +compdestroy@*/
 
     /* daemon got termination or interrupt signal */
     if (setjmp(restartbuf) > 0) {
