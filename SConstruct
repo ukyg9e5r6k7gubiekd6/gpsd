@@ -916,11 +916,11 @@ else:
     }
 
     python_env = env.Clone()
-    vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY')
+    vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY', 'LDFLAGS')
     for i in range(len(vars)):
         if vars[i] is None:
-            vars[i] = ""
-    (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy) = vars
+            vars[i] = []
+    (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy, ldflags) = vars
     # in case CC/CXX was set to the scan-build wrapper,
     # ensure that we build the python modules with scan-build, too
     if env['CC'] is None or env['CC'].find('scan-build') < 0:
@@ -932,12 +932,18 @@ else:
     else:
         python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])
 
-    python_env['SHLINKFLAGS'] = []
-    python_env['SHLINK'] = ldshared
-    python_env['SHLIBPREFIX']=""
-    python_env['SHLIBSUFFIX']=so_ext
-    python_env['CPPPATH'] =[includepy]
-    python_env['CPPFLAGS']=basecflags + " " + opt
+    ldshared=ldshared.replace('-fPIE', '')
+    ldshared=ldshared.replace('-pie', '')
+    python_env.Replace(SHLINKFLAGS=[],
+                       LDFLAGS=ldflags,
+                       LINK = ldshared,
+                       SHLIBPREFIX="",
+                       SHLIBSUFFIX=so_ext,
+                       CPPPATH=[includepy],
+                       CPPFLAGS=opt,
+                       CFLAGS=basecflags,
+                       CXXFLAGS=basecflags)
+
     python_objects={}
     python_compiled_libs = {}
     for ext, sources in python_extensions.iteritems():
@@ -952,7 +958,6 @@ else:
             )
         python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
     python_built_extensions = python_compiled_libs.values()
-
     python_egg_info_source = """Metadata-Version: 1.0
 Name: gps
 Version: %s
