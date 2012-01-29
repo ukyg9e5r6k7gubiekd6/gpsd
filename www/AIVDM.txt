@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.33, November 2011
+v1.34, February 2012
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -1719,7 +1719,7 @@ MMSIs included.
 |38-39   |  2 |Spare            |         |x|Not used
 |40-69   | 30 |MMSI number 1    |mmsi1    |u|9 decimal digits
 |70-71   |  2 |Spare            |         |x|Not used
-|62-101  | 30 |MMSI number 2    |mmsi2    |u|9 decimal digits
+|72-101  | 30 |MMSI number 2    |mmsi2    |u|9 decimal digits
 |102-103 |  2 |Spare            |         |x|Not used
 |104-133 | 30 |MMSI number 3    |mmsi3    |u|9 decimal digits
 |134-135 |  2 |Spare            |         |x|Not used
@@ -4517,3 +4517,4 @@ messages.  It adds explicit type information to the tables.
 Version 1.33 notes that the home location of "NMEA Revealed" became
 unstable in late 2011.
 
+Version 1.34 fixes a typo in the MMSI 2 firld offset of message 7.
