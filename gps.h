@@ -693,11 +693,11 @@ struct subframe_t {
 	    uint8_t IODE;
 	    /* Rate of Inclination Angle, 14 bits signed, scale2**-43,
 	     * semi-circles/sec */
-	    uint16_t IDOT;
+	    int16_t IDOT;
 	    double d_IDOT;
 	    /* Cic, Amplitude of the Cosine Harmonic Correction Term to the 
 	     * Angle of Inclination, 16 bits signed, scale 2**-29, radians*/
-	    uint16_t Cic;
+	    int16_t Cic;
 	    double d_Cic;
 	    /* Cis, Amplitude of the Sine Harmonic Correction Term to the
 	     * Angle of Inclination, 16 bits, unsigned, scale 2**-29, radians */

@@ -8,7 +8,7 @@
 #include "gpsd.h"
 
 /* convert unsigned to signed */
-#define uint2int( u, bit) ( u & (1<<bit) ? u - (1<<bit) : u)
+#define uint2int( u, bit) ( u & (1<<(bit-1)) ? u - (1<<bit) : u)
 
 /*@ -usedef @*/
 gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
@@ -214,7 +214,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	session->context->gps_week =
 	    (unsigned short)((words[2] >> 14) & 0x03ff);
 	subp->sub1.WN   = (uint16_t)session->context->gps_week;
-	subp->sub1.l2   = (uint8_t)((words[2] >> 10) & 0x000003); /* L2 Code */
+	subp->sub1.l2   = (uint8_t)((words[2] >> 12) & 0x000003); /* L2 Code */
 	subp->sub1.ura  = (unsigned int)((words[2] >>  8) & 0x00000F); /* URA Index */
 	subp->sub1.hlth = (unsigned int)((words[2] >>  2) & 0x00003F); /* SV health */
 	subp->sub1.IODC = (words[2] & 0x000003); /* IODC 2 MSB */
@@ -227,7 +227,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub1.d_af2  = pow(2.0, -55) * (int)subp->sub1.af2;
 	subp->sub1.af1  = (int16_t)( words[8] & 0x00FFFF);
 	subp->sub1.d_af1  = pow(2.0, -43) * subp->sub1.af1;
-	subp->sub1.af0  = (int32_t)((words[9] >>  1) & 0x03FFFFF);
+	subp->sub1.af0  = (int32_t)((words[9] >>  2) & 0x03FFFFF);
 	subp->sub1.af0  = uint2int(subp->sub1.af0, 22);
 	subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
 	subp->sub1.IODC <<= 8;
@@ -258,7 +258,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub2.M0     = (int32_t)( words[3] & 0x0000FF);
 	subp->sub2.M0   <<= 24;
 	subp->sub2.M0    |= ( words[4] & 0x00FFFFFF);
-	subp->sub2.M0     = uint2int(subp->sub2.M0, 24);
 	subp->sub2.d_M0   = pow(2.0,-31) * subp->sub2.M0 * GPS_PI;
 	subp->sub2.Cuc    = (int16_t)((words[5] >>  8) & 0x00FFFF);
 	subp->sub2.d_Cuc  = pow(2.0,-29) * subp->sub2.Cuc;
@@ -296,7 +295,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	break;
     case 3:
 	/* subframe 3: ephemeris for transmitting SV */
-	subp->sub3.Cic      = ((words[2] >>  8) & 0x00FFFF);
+	subp->sub3.Cic      = (int16_t)((words[2] >>  8) & 0x00FFFF);
 	subp->sub3.d_Cic    = pow(2.0, -29) * subp->sub3.Cic;
 	subp->sub3.Omega0   = (int32_t)(words[2] & 0x0000FF);
 	subp->sub3.Omega0 <<= 24;
@@ -318,7 +317,8 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub3.Omegad   = uint2int(subp->sub3.Omegad, 24);
 	subp->sub3.d_Omegad = pow(2.0, -43) * subp->sub3.Omegad;
 	subp->sub3.IODE     = ((words[9] >> 16) & 0x0000FF);
-	subp->sub3.IDOT     = ((words[9] >>  2) & 0x003FFF);
+	subp->sub3.IDOT     = (int16_t)((words[9] >>  2) & 0x003FFF);
+	subp->sub3.IDOT     = uint2int(subp->sub3.IDOT, 14);
 	subp->sub3.d_IDOT   = pow(2.0, -43) * subp->sub3.IDOT;
 	gpsd_report(LOG_PROG,
 	    "50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e Omega0:%.11e "
