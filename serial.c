@@ -142,8 +142,6 @@ speed_t gpsd_get_speed(const struct termios *ttyctl)
 {
     speed_t code = cfgetospeed(ttyctl);
     switch (code) {
-    case B0:
-	return (0);
     case B300:
 	return (300);
     case B1200:
@@ -160,8 +158,12 @@ speed_t gpsd_get_speed(const struct termios *ttyctl)
 	return (38400);
     case B57600:
 	return (57600);
-    default:
+    case B115200:
 	return (115200);
+    case B230400:
+	return (230400);
+    default: /* B0 */ 
+	return 0;
     }
 }
 
@@ -205,8 +207,10 @@ void gpsd_set_speed(struct gps_device_t *session,
 	rate = B38400;
     else if (speed < 115200)
 	rate = B57600;
-    else
+    else if (speed < 230400)
 	rate = B115200;
+    else
+	rate = B230400;
 
     if (rate != cfgetispeed(&session->ttyset)
 	|| parity != session->gpsdata.dev.parity
@@ -518,7 +522,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 #ifndef FIXED_PORT_SPEED
     /* every rate we're likely to see on a GPS */
     static unsigned int rates[] =
-	{ 0, 4800, 9600, 19200, 38400, 57600, 115200 };
+	{ 0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
 #endif /* FIXED_PORT_SPEED defined */
 
     /* don't waste time in the hunt loop if this is not actually a tty */
