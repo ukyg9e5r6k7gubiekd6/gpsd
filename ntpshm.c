@@ -849,7 +849,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		sample.tv = tv; 	/* structure copy */
 	    } 
 	    /* FIXME!! this is wrong if signal is 5Hz or 10Hz instead of PPS */
-	    /* carefull, unix time to nSec is more precision that a double */
+	    /* careful, Unix time to nSec is more precision than a double */
 	    sample.offset = 1 + session->last_fixtime - ts.tv_sec;
 	    sample.offset -= ts.tv_nsec / 1e9;
 /* was: defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
