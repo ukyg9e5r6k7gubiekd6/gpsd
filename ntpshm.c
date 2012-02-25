@@ -744,7 +744,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
 	/*@ +boolint @*/
-	if (session->ship_to_ntpd) {
+	if (session->ship_to_ntpd || session->context->pps_hook != NULL) {
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge. But we
@@ -872,7 +872,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    sample.offset);
 	    }
 	    TSTOTV( &tv, &ts );
-	    (void)ntpshm_pps(session, &tv);
+	    if (session->ship_to_ntpd)
+		(void)ntpshm_pps(session, &tv);
+	    if (session->context->pps_hook != NULL)
+		session->context->pps_hook(session, &tv);
 	} else {
 	    gpsd_report(LOG_RAW, "PPS edge rejected %.100s", log);
 	}

@@ -22,9 +22,10 @@ typedef unsigned int speed_t;
  * 3.5: POLL subobject name changes: fixes -> tpv, skyview -> sky.
  *      DEVICE::activated becomes ISO8601 rather thab real.
  * 3.6  VERSION, WATCH, and DEVICES from slave gpsds get "remote" attribute.
+ * 3.7  PPS message added to repertoire.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	6	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	7	/* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
@@ -198,6 +199,8 @@ extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
 
 #define AIVDM_CHANNELS	2		/* A, B */
 
+struct gps_device_t;
+
 struct gps_context_t {
     int valid;				/* member validity flags */
     int debug;				/* dehug verbosity level */
@@ -224,6 +227,7 @@ struct gps_context_t {
     bool shmTimeInuse[NTPSHMSEGS];
 # ifdef PPS_ENABLE
     bool shmTimePPS;
+    void (*pps_hook)(struct gps_device_t *, struct timeval *);
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 #ifdef SHM_EXPORT_ENABLE

@@ -585,7 +585,17 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 	}
     }
 
+#if defined(PPS_ENABLE)
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_lock(&report_mutex);
+    /* +unrecog */
+#endif /* PPS_ENABLE */
     status = send(sub->fd, buf, len, 0);
+#if defined(PPS_ENABLE)
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_unlock(&report_mutex);
+    /* +unrecog */
+#endif /* PPS_ENABLE */
     if (status == (ssize_t) len)
 	return status;
     else if (status > -1) {
@@ -1666,6 +1676,22 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
+#ifdef PPS_ENABLE
+static void ship_pps_drift_message(struct gps_device_t *session, 
+				   struct timeval *tv)
+/* on PPS interrupt, ship a drift message to all clients */
+{
+    struct timeval clocktime;
+
+    if (gettimeofday(&clocktime, NULL) == 0)
+	notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_musec\":%ld,\"clock_sec\":%ld,\"clock_musec\":%ld}\r\n",
+			session->gpsdata.dev.path,
+			tv->tv_sec, tv->tv_usec,
+			clocktime.tv_sec, clocktime.tv_usec);
+}
+#endif /* PPS_ENABLE */
+
+
 #ifdef __UNUSED_AUTOCONNECT__
 #define DGPS_THRESHOLD	1600000	/* max. useful dist. from DGPS server (m) */
 #define SERVER_SAMPLE	12	/* # of servers within threshold to check */
@@ -1775,14 +1801,16 @@ int main(int argc, char *argv[])
     const struct gps_type_t **dp;
     bool in_restart;
 
+    context.debug = 0;
+    gps_context_init(&context);
+
 #ifdef PPS_ENABLE
     /*@-nullpass@*/
     (void)pthread_mutex_init(&report_mutex, NULL);
     /*@+nullpass@*/
+    context.pps_hook = ship_pps_drift_message;
 #endif /* PPS_ENABLE */
 
-    context.debug = 0;
-    gps_context_init(&context);
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
 	switch (option) {
 	case 'D':

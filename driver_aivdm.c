@@ -485,7 +485,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	case 13: /* Safety Related Acknowledge */
 	{
 	    unsigned int mmsi[4];
-	    if (ais_context->bitlen < 72 || ais_context->bitlen > 168) {
+	    if (ais_context->bitlen < 72 || ais_context->bitlen > 158) {
 		gpsd_report(LOG_WARN, "AIVDM message type %d size is out of range (%zd).\n",
 			    ais->type,
 			    ais_context->bitlen);

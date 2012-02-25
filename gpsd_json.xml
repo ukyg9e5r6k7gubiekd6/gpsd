@@ -1147,6 +1147,95 @@ into this response.</para>
 </varlistentry>
 
 <varlistentry>
+<term>PPS</term>
+<listitem>
+
+<para>This message is emitted each time the daeon sees a PPS (Pulse Per Second)
+strobe from a device.</para>
+
+<para>A PPS object has the following elements:</para>
+
+<table frame="all" pgwide="0"><title>PPS object</title>
+<tgroup cols="4" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "PPS"</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Name of originating device</entry>
+</row>
+<row>
+	<entry>real_sec</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>seconds from the realtime clock</entry>
+</row>
+<row>
+	<entry>real_musec</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>microseconds from the realtime clock</entry>
+</row>
+<row>
+	<entry>clock_sec</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>seconds from the system clock</entry>
+</row>
+<row>
+	<entry>clock_musec</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>microseconds from the system clock</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>This message is emitted once per second to watchers of a device
+emitting PPS, and is intended to report the drift between the start of
+the GPS second and seconds as reported by the system clock (which may
+be NTP-corrected).</para>
+
+<para>The message contains second/microsecond pairs for two clocks;
+the realtime clock without NTP correction (the result of 
+clock_gettime(CLOCK_REALTIME), but only to microsecond precision) 
+and the ordinary system clock (which may be NTP corrected).</para>
+
+<para>There are various sources of error in the reported clock times.
+For PPS delivered via a real serial-line strobe, serial-interrupt
+latency plus processing time to the timer call should be bounded above
+by about 10 microseconds; USB-to-serial control-line emulation is
+known to add jitter of about 50 microseconds.  (Both figures are for
+GPSD running in non-realtime mode on an x86 with a gigahertz clock and
+are estimates based on measured latency in other applications)</para>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"PPS","device":"/dev/ttyUSB0",
+     "real_sec":1330212592, "real_musec":343182,
+     "clock_sec":1330212592,"clock_musec":343184}
+</programlisting>
+
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>?DEVICE</term>
 <listitem>
 
