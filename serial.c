@@ -367,6 +367,7 @@ int gpsd_serial_open(struct gps_device_t *session)
         str2ba(session->gpsdata.dev.path, &addr.rc_bdaddr);
         if (connect(session->gpsdata.gps_fd, (struct sockaddr *) &addr, sizeof (addr)) == -1) {
 	    if (errno != EINPROGRESS && errno != EAGAIN) {
+		(void)close(session->gpsdata.gps_fd);
 		gpsd_report(LOG_ERROR, "bluetooth socket connect failed: %s\n",
 			    strerror(errno));
 		return -1;
