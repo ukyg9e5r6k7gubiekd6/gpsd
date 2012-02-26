@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.12, August 2011
+v1.13, February 2012
 
 == Introduction ==
 
@@ -81,6 +81,18 @@ packets translate the GPS's stream of datagrams into
 device-type-independent datagrams, but it can't impose timing and
 sequencing regularities on them that the underlying device doesn't
 already obey.
+
+A note to authors of AIVDM clients: Unlike GPS data, you have the
+problem that later sentences of (say) Type 1 don't obsolete the data
+in earlier ones. This is a problem, because the library is designed
+so that read calls pull any JSON reports waiting from the daemon and
+interpret them all.
+
+To avoid losing data, you want to poll the daemon more often than once
+per two seconds (that being the minimum transmission period for the
+most frequently shipped sentences, Type 1/2/3). That way the read
+buffer will never contain both a message and a later message of the
+same type that steps on it.
 
 == What GPSD does, and what it cannot do ==
 
