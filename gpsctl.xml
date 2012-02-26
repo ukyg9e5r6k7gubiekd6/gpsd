@@ -143,10 +143,12 @@ a Navcom NCT or Trimble TSIP device, the first byte is interpreted as
 the command ID and the rest as payload. When sending to a Zodiac
 device, the first two bytes are used as a message ID of type
 little-endian short, and the remainder as payload in byte pairs
-interpreted as little-endian short. C-style backslash escapes in the
-string, notably \xNN for hex, will be interpreted; additionally, \e
-will be replaced with ESC. This switch implies
-<option>-f</option>.</para>
+interpreted as little-endian short. For all other supported binary
+GPSes (notably including SiRF) the string is taken as the entire
+message payload and wrapped with appropriate header, trailer and
+checksum bytes. C-style backslash escapes in the string, notably \xNN
+for hex, will be interpreted; additionally, \e will be replaced with
+ESC. This switch implies <option>-f</option>.</para>
 </listitem>
 </varlistentry>
 
