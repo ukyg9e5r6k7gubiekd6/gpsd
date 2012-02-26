@@ -765,7 +765,7 @@ compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
                           version=libgps_version,
-                          parse_flags= ["-lm"] + dbus_libs)
+                          parse_flags=dbus_libs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
@@ -802,7 +802,7 @@ if qt_env:
 
 # The libraries have dependencies on system libraries
 
-gpslibs = ["-lgps"]
+gpslibs = ["-lgps", "-lm"]
 gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
 # Source groups
