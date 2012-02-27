@@ -246,8 +246,6 @@ struct aivdm_context_t {
     char shipname24[AIS_SHIPNAME_MAXLEN+1]; /* type 24 specific */
 };
 
-struct gps_device_t;
-
 #define MODE_NMEA	0
 #define MODE_BINARY	1
 
