@@ -5,10 +5,11 @@
 #include <sys/ioctl.h>
 #include <string.h>
 #include <stdlib.h>
+#include <getopt.h>
 
 /*
- * Test to see if TIOCMIWAIT can be made to work
- * Call with the serial device name as first argument, mode 012 as second.
+ * Test to see if TIOCMGET/TIOCMIWAIT can be made to work
+ * Call with the serial device name argument,  and possibly -p or -w options
  *
  * Based on code fond here:
  * http://tech.groups.yahoo.com/group/ts-7000/message/803 
@@ -18,18 +19,31 @@ int main(int argc, char **argv)
     int fd;
     struct termios newtio;
     unsigned char rx[132];
-    char *ourDev = argv[1];
-    char *ourMode = argv[2];
+    enum {dump, poll, wait} mode = dump;
+    int option;
+    char *device;
+
+    while ((option = getopt(argc, argv, "pw")) != -1) {
+	switch (option) {
+	case 'p':            /* poll for PPS */
+	    mode = poll;
+	    break;
+	case 'w':            /* wait for PPS state change */ 
+	    mode = wait;
+	    break;	    
+	}
+    }
+    device = argv[optind];
 
     // try to open the serial port
-    fd = open(ourDev, O_RDWR | O_NOCTTY | O_NDELAY);
+    fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
     // how'd that go?
     if (fd < 0) {
 	// not so good
 	perror("Unable to open device /dev/ttyAM0\n");
 	return 1;
     }
-    fprintf(stderr, "Successfully opened serial device %s\n", ourDev);
+    fprintf(stderr, "Successfully opened serial device %s\n", device);
 
     /* initialize the serial port */
     memset(&newtio, '\0', sizeof(newtio));
@@ -41,21 +55,16 @@ int main(int argc, char **argv)
     // line argument.
     //
     // Operating Modes:
-    // mode = 0 - Dump out serial data from port
-    // mode = 1 - Use TIOCMIWAIT to detect changes on the DCD line -
-    // mode = 2 - Use TIOCMGET to detect changes on the DCD line via polling
-
-    // Figure out which mode we are in
-    int mode = 0;
-    if (argc > 2)
-	mode = atoi(ourMode);
+    // mode = dump - Dump out serial data from port
+    // mode = wait - Use TIOCMIWAIT to detect changes on the DCD line -
+    // mode = poll - Use TIOCMGET to detect changes on the DCD line via polling
 
     // Select operation based on mode
     switch (mode) 
     {
-    case 0:
+    case dump:
 	// just dump out any characters arriving on the serial port
-	fprintf(stderr, "Testing Serial Interface. Dumping data from %s\n", ourDev);
+	fprintf(stderr, "Testing Serial Interface. Dumping data from %s\n", device);
 	int readCnt;
 	while (1) {
 	    while (read(fd, rx, 132) > 0) {
@@ -66,27 +75,27 @@ int main(int argc, char **argv)
 	}
 	break;
 
-    case 1:
+    case wait:
 	// wait for DCD transition to be reported via interrupt - fails
-	fprintf(stderr, "Testing TIOCMIWAIT. Waiting for DCD on %s\n", ourDev);
+	fprintf(stderr, "Testing TIOCMIWAIT. Waiting for DCD on %s\n", device);
 	while (ioctl(fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
 	    // Problem: The following lines is never executed
-	    fprintf(stderr, "DCD Transition on %s\n", ourDev);
+	    fprintf(stderr, "DCD Transition on %s\n", device);
 	}
-	fprintf(stderr, "TIOCMIWAIT returns non zero value on %s!\n", ourDev);
+	fprintf(stderr, "TIOCMIWAIT returns non zero value on %s!\n", device);
 	break;
 
-    case 2:
+    case poll:
 	// poll the DCD line looking for transition; when found, report time
 	// and various intervals between successive transitions.
-	fprintf(stderr, "Testing TIOCMGET. Polling DCD on %s\n", ourDev);
+	fprintf(stderr, "Testing TIOCMGET. Polling DCD on %s\n", device);
 
 	struct timeval tv_jw;
 	int state, lastState;
 
 	// get the current state of the DCD line
 	if (ioctl(fd, TIOCMGET, &lastState) != 0) {
-	    fprintf(stderr, "TIOCMGET fails on %s\n", ourDev);
+	    fprintf(stderr, "TIOCMGET fails on %s\n", device);
 	    exit(1);
 	}
 	// turn laststate into a boolean indicating presence or absence of DCD
@@ -103,7 +112,7 @@ int main(int argc, char **argv)
 	    // get the value of the serial lines
 	    if (ioctl(fd, TIOCMGET, &state) != 0) {
 		// abort on error
-		fprintf(stderr, "TIOCMGET fails on %s\n", ourDev);
+		fprintf(stderr, "TIOCMGET fails on %s\n", device);
 		exit(1);
 	    }
 	    // recover DCD state
@@ -132,11 +141,11 @@ int main(int argc, char **argv)
 			samples++;
 			// report on the times associated with this transition
 			fprintf(stderr, "DCD transition on %s: %d: %.6f, %6f, %6f\n",
-				ourDev, state, curTime, diff, total/samples);
+				device, state, curTime, diff, total/samples);
 		    }
 		    else {
 			fprintf(stderr, "DCD transition on %s: %d: %.6f, %6f - wacky diff\n",
-				ourDev, state, curTime, diff);
+				device, state, curTime, diff);
 		    }
 		}
 	    }
@@ -148,9 +157,9 @@ int main(int argc, char **argv)
 	break;
 
     default:
-	fprintf(stderr, "Unknown mode\n");
+	(void)fprintf(stderr, "Unknown mode\n");
     }
 
-    close(fd);
+    (void)close(fd);
     return 0;
 }
