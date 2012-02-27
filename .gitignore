@@ -84,6 +84,7 @@ gpsfakec
 gpsprofc
 xgpsc
 xgpsspeedc
+devtools/ppstest
 # Developer sandbox directory for patches that haven't been applied yet
 patches
 # SCons cruft
