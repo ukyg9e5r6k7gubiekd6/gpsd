@@ -645,8 +645,10 @@ static void deactivate_device(struct gps_device_t *device)
     if (device->gpsdata.gps_fd != -1) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
-#ifdef NTPSHM_ENABLE
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 	pps_thread_deactivate(device);
+#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
+#ifdef NTPSHM_ENABLE
 	ntpd_link_deactivate(device);
 #endif /* NTPSHM_ENABLE */
 	gpsd_deactivate(device);
@@ -1484,7 +1486,7 @@ static void consume_packets(struct gps_device_t *device)
 			device->gpsdata.dev.path,
 			gps_maskdump(device->gpsdata.set));
 
-#ifdef NTPSHM_ENABLE
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 	/*
 	 * This has to be called late becvause of a Linux kernel bug
 	 * in 2.6; the PPS thread will hang if a baud rate change
@@ -1492,7 +1494,7 @@ static void consume_packets(struct gps_device_t *device)
 	 */
 	if ((changed & DRIVER_IS) != 0)
 	    pps_thread_activate(device);
-#endif /* NTPSHM_ENABLE */
+#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 
 
 #ifdef SOCKET_EXPORT_ENABLE
