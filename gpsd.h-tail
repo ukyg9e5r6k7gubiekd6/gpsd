@@ -9,6 +9,10 @@
 #include <stdint.h>
 #include "gps.h"
 
+#if defined(HAVE_SYS_TIMEPPS_H)
+#include <sys/timepps.h>
+#endif
+
 #ifdef _WIN32
 typedef unsigned int speed_t;
 #endif
