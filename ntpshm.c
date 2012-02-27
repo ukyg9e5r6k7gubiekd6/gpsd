@@ -932,10 +932,12 @@ void pps_thread_activate(struct gps_device_t *session)
 /* activate a thread to watch the device's PPS transitions */
 {
     pthread_t pt;
-    if (session->shmTimeP >= 0)
+    if (session->shmTimeP >= 0) {
+	gpsd_report(LOG_PROG, "PPS thread launched\n");
 	/*@-compdef -nullpass@*/
 	(void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
         /*@+compdef +nullpass@*/
+    }
 }
 #else
 void pps_thread_activate(struct gps_device_t *session UNUSED)
@@ -948,8 +950,10 @@ void pps_thread_activate(struct gps_device_t *session UNUSED)
 void pps_thread_deactivate(struct gps_device_t *session)
 /* cleanly terminate device's PPS thread */
 {
-    if (session->kernelpps_handle > 0)
+    if (session->kernelpps_handle > 0) {
+	gpsd_report(LOG_PROG, "PPS descriptor cleaned up\n");
 	time_pps_destroy(session->kernelpps_handle);
+    }
 }
 #else
 void pps_thread_deactivate(struct gps_device_t *session UNUSED)
