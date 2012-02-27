@@ -446,7 +446,6 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 #if defined(HAVE_SYS_TIMEPPS_H)
 /* return handle for kernel pps, or -1 */
 static int init_kernel_pps(struct gps_device_t *session) {
-    int kernelpps_handle = -1;
     int ldisc = 18;   /* the PPS line discipline */
     pps_params_t pp;
     glob_t globbuf;
@@ -454,6 +453,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     char pps_num = 0;     /* /dev/pps[pps_num] is our device */
     char path[GPS_PATH_MAX] = "";
 
+    session->kernelpps_handle = -1;
     if ( !isatty(session->gpsdata.gps_fd) ) {
 	gpsd_report(LOG_INF, "KPPS gps_fd not a tty\n");
     	return -1;
@@ -517,7 +517,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     }
     /* root privs are not required past this point */ 
 
-    if ( 0 > time_pps_create(ret, &kernelpps_handle )) {
+    if ( 0 > time_pps_create(ret, &session->kernelpps_handle )) {
 	gpsd_report(LOG_INF, "KPPS time_pps_create(%d,) failed: %d\n"
 	    , ret, errno);
     	return -1;
@@ -525,7 +525,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     	/* have kernel PPS handle */
         int caps;
 	/* get features  supported */
-        if ( 0 > time_pps_getcap(kernelpps_handle, &caps)) {
+        if ( 0 > time_pps_getcap(session->kernelpps_handle, &caps)) {
 	    gpsd_report(LOG_ERROR, "KPPS time_pps_getcap() failed\n");
         } else {
 	    gpsd_report(LOG_INF, "KPPS caps %0x\n", caps);
@@ -535,13 +535,13 @@ static int init_kernel_pps(struct gps_device_t *session) {
         memset( (void *)&pp, 0, sizeof(pps_params_t));
         pp.mode = PPS_CAPTUREBOTH;
 
-        if ( 0 > time_pps_setparams(kernelpps_handle, &pp)) {
+        if ( 0 > time_pps_setparams(session->kernelpps_handle, &pp)) {
 	    gpsd_report(LOG_ERROR, 
 	    	"KPPS time_pps_setparams() failed, errno:%d\n", errno);
 	    return -1;
         }
     }
-    return kernelpps_handle;
+    return session->kernelpps_handle;
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
@@ -611,8 +611,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* some operations in init_kernel_pps() require root privs */
-    int kernelpps_handle = init_kernel_pps( session );
-    if ( 0 <= kernelpps_handle ) {
+    session->kernelpps_handle = init_kernel_pps( session );
+    if ( 0 <= session->kernelpps_handle ) {
 	gpsd_report(LOG_WARN, "KPPS kernel PPS will be used\n");
     }
     memset( (void *)&pi, 0, sizeof(pps_info_t));
@@ -646,12 +646,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 /*@+noeffect@*/
 
 #if defined(HAVE_SYS_TIMEPPS_H)
-        if ( 0 <= kernelpps_handle ) {
+        if ( 0 <= session->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of 
 	     * latency, and about +/-5uS of jitter over the other method */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
-	    if ( 0 > time_pps_fetch(kernelpps_handle, PPS_TSFMT_TSPEC
+	    if ( 0 > time_pps_fetch(session->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
 		gpsd_report(LOG_ERROR, "KPPS kernel PPS failed\n");
 	    } else {
@@ -835,7 +835,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    sample.leap = 0;
 	    sample.magic = SOCK_MAGIC;
 #if defined(HAVE_SYS_TIMEPPS_H)
-            if ( 0 <= kernelpps_handle ) {
+            if ( 0 <= session->kernelpps_handle) {
 		/* pick the right edge */
 		if ( kpps_edge ) {
 		    ts = pi.assert_timestamp; /* structure copy */
@@ -938,10 +938,17 @@ void pps_thread_activate(struct gps_device_t *session)
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 }
 
-void pps_thread_deactivate(struct gps_device_t *session UNUSED)
-/* Cleanly terminate defive's PPS thread */
+#if defined(HAVE_SYS_TIMEPPS_H)
+void pps_thread_deactivate(struct gps_device_t *session)
+/* cleanly terminate devece's PPS thread */
 {
-    /* FIXME: can this remain a stub? */
+    time_pps_destroy(session->kernelpps_handle);
 }
+#else
+void pps_thread_deactivate(struct gps_device_t *session UNUSED)
+{
+    /* nothing to call */
+}
+#endif
 
 #endif /* NTPSHM_ENABLE */

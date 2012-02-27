@@ -413,6 +413,9 @@ struct gps_device_t {
     bool ship_to_ntpd;
 # ifdef PPS_ENABLE
     int shmTimeP;
+#if defined(HAVE_SYS_TIMEPPS_H)
+    pps_handle_t kernelpps_handle;
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     double mag_var;			/* magnetic variation in degrees */

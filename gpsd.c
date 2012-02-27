@@ -646,6 +646,7 @@ static void deactivate_device(struct gps_device_t *device)
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
 #ifdef NTPSHM_ENABLE
+	pps_thread_deactivate(device);
 	ntpd_link_deactivate(device);
 #endif /* NTPSHM_ENABLE */
 	gpsd_deactivate(device);
