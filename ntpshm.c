@@ -940,7 +940,7 @@ void pps_thread_activate(struct gps_device_t *session)
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 void pps_thread_deactivate(struct gps_device_t *session)
-/* cleanly terminate devece's PPS thread */
+/* cleanly terminate device's PPS thread */
 {
     time_pps_destroy(session->kernelpps_handle);
 }
