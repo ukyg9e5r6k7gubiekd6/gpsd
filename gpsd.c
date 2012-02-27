@@ -907,6 +907,9 @@ static bool awaken(struct gps_device_t *device)
 			device->gpsdata.gps_fd);
 	    FD_SET(device->gpsdata.gps_fd, &all_fds);
 	    adjust_max_fd(device->gpsdata.gps_fd, true);
+#ifdef NTPSHM_ENABLE
+	    pps_thread_activate(device);
+#endif /* NTPSHM_ENABLE */
 	    return true;
 	}
     }
@@ -1493,8 +1496,9 @@ static void consume_packets(struct gps_device_t *device)
 		    && sub->policy.watcher
 		    && subscribed(sub, device))
 		    listeners = true;
-	    if (listeners)
+	    if (listeners) {
 		(void)awaken(device);
+	    }
 	}
 
 	/* handle laggy response to a firmware version query */

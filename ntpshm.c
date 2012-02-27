@@ -901,10 +901,6 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 void ntpd_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session - may fail if not called as root */
 {
-#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-    pthread_t pt;
-#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
-
     /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */
     if (session->context->enable_ntpshm)
 	session->shmindex = ntpshm_alloc(session->context);
@@ -916,17 +912,36 @@ void ntpd_link_activate(struct gps_device_t *session)
 	/* We also have the 1pps capability, allocate a shared-memory segment
 	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
+	 *
+	 * Ideally we'd like to launch the device's PPS thread right after.
+	 * this call succeeds.  But there's a problem - a 2.6 kernel bug.
+	 * The thread watching a TIOCMIWAITed serial will hang if the baud
+	 * rate on the line is changed.  Thus we can't start the thread until
+	 * the hunt loop has done its thing.
 	 */
-	if ((session->shmTimeP = ntpshm_alloc(session->context)) >= 0) {
-	    /*@-compdef -nullpass@*/
-	    (void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
-	    /*@+compdef +nullpass@*/
-	} else {
+	if ((session->shmTimeP = ntpshm_alloc(session->context)) < 0) {
 	    gpsd_report(LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
 	}
-
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
     }
+}
+
+void pps_thread_activate(struct gps_device_t *session)
+/* activate a thread to watch the device's PPS transitions */
+{
+#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
+    pthread_t pt;
+    if (session->shmTimeP >= 0)
+	/*@-compdef -nullpass@*/
+	(void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
+        /*@+compdef +nullpass@*/
+#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
+}
+
+void pps_thread_deactivate(struct gps_device_t *session UNUSED)
+/* Cleanly terminate defive's PPS thread */
+{
+    /* FIXME: can this remain a stub? */
 }
 
 #endif /* NTPSHM_ENABLE */
