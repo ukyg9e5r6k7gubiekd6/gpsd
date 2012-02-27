@@ -31,6 +31,8 @@ ATTRS{idVendor}=="067b", ATTRS{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="/lib/
 ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # Cypress M8/CY7C64013 (Delorme uses these) [linux module: cypress_m8]
 ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0100", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
+# Cypress M8/CY7C64013 (DeLorme LT-40)
+ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0200", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug" 
 # Garmin International GPSmap, various models (tested with Garmin GPS 18 USB)  [linux module: garmin_gps]
 ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="/lib/udev/gpsd.hotplug"
 # Cygnal Integrated Products, Inc. CP210x Composite Device (Used by Holux m241 and Wintec grays2 wbt-201) [linux module: cp210x]
