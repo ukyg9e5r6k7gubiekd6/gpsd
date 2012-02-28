@@ -80,6 +80,7 @@ various additional capabilities and extensions:
 |============================================================================
 |C++ compiler	  | allows building libgpsmm C++ wrapper for client library
 |Qt 4.53+         | allows building libQgpsmm C++ wrapper for client library
+|libcap           | Capabilities library, allows 1PPS support under Linux
 |============================================================================
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect

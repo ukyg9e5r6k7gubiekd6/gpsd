@@ -44,6 +44,11 @@
 
 #include "gpsd_config.h"
 
+#if defined(HAVE_LIBCAP) && !defined(S_SPLINT_S)
+#include <sys/capability.h>
+#include <sys/prctl.h>
+#endif /* HAVE_LIBCAP */
+
 #include "gpsd.h"
 #include "sockaddr.h"
 #include "gps_json.h"
@@ -2046,6 +2051,12 @@ int main(int argc, char *argv[])
 	struct passwd *pw;
 	struct stat stb;
 
+#if defined(HAVE_LIBCAP) && !defined(S_SPLINT_S)
+ 	/* set flag: keep privileges across setuid() call */
+	if (prctl(PR_SET_KEEPCAPS, 1L, 0L, 0L, 0L) == -1)
+	    gpsd_report(LOG_ERR, "prctl(PR_SET_KEEPCAPS, 1L ) failed\n");
+#endif /* HAVE_LIBCAP */
+
 	/* make default devices accessible even after we drop privileges */
 	for (i = optind; i < argc; i++)
 	    if (stat(argv[i], &stb) == 0)
@@ -2081,6 +2092,20 @@ int main(int argc, char *argv[])
     }
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());
+
+#if defined(HAVE_LIBCAP) && !defined(S_SPLINT_S)
+    /* drop root capabilities, except CAP_SYS_TIME for 1PPS support */
+    {
+	cap_t caps = cap_from_text("cap_sys_time=pe");
+
+	if (!caps)
+	    gpsd_report(LOG_ERR, "cap_from_text() failed.\n");
+	else if (cap_set_proc(caps) == -1) {
+	    gpsd_report(LOG_ERR, "cap_set_proc() failed to drop root privs\n");
+	    cap_free(caps);
+	}
+    }
+#endif /* HAVE_LIBCAP */
 
 #ifdef SOCKET_EXPORT_ENABLE
     for (i = 0; i < NITEMS(subscribers); i++)

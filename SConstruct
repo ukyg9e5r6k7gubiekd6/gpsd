@@ -459,6 +459,14 @@ else:
     confdefs.append("/* #undef HAVE_LIBRT */\n")
     rtlibs = []
 
+if config.CheckLib('libcap'):
+    confdefs.append("#define HAVE_LIBCAP 1\n")
+    # System library - no special flags
+    rtlibs = ["-lcap"]
+else:
+    confdefs.append("/* #undef HAVE_LIBCAP */\n")
+    rtlibs = []
+
 if env['dbus_export'] and config.CheckPKG('dbus-1'):
     confdefs.append("#define HAVE_DBUS 1\n")
     dbus_libs = pkg_config('dbus-1')
