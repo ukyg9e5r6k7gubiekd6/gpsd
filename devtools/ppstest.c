@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     struct {char *name; int value;} pin_map[] = {
 	{"CTS", TIOCM_CTS},    /* Clear to send */
 	{"CAR", TIOCM_CAR},    /* Carrier detect */ 
-	{"DCD", TIOCM_CD},     /* Carrier detect (synonym) */ 
+	{"DCD", TIOCM_CD},     /* Carrier detect (synonym - default) */ 
 	{"RI",  TIOCM_RI},     /* Ring Indicator */
 	{"RNG", TIOCM_RNG},    /* Ring Indicator (synonym) */
 	{"DSR", TIOCM_DSR},    /* Data Set Ready */
@@ -81,8 +81,8 @@ int main(int argc, char **argv)
     //
     // Operating Modes:
     // mode = dump - Dump out serial data from port
-    // mode = wait - Use TIOCMIWAIT to detect changes on the DCD line -
-    // mode = poll - Use TIOCMGET to detect changes on the DCD line via polling
+    // mode = wait - Use TIOCMIWAIT to detect changes on the line -
+    // mode = poll - Use TIOCMGET to detect changes on the line via polling
 
     // Select operation based on mode
     switch (mode) 
@@ -101,16 +101,15 @@ int main(int argc, char **argv)
 	break;
 
     case wait:
-	// wait for DCD transition to be reported via interrupt - fails
+	// wait for transition to be reported via interrupt
 	(void)fprintf(stderr, 
-		      "Testing TIOCMIWAIT. Waiting for DCD on %s\n", 
-		      device);
-	while (ioctl(fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
-	    // Problem: The following lines is never executed
-	    (void)fprintf(stderr, "DCD Transition on %s\n", device);
+		      "Testing TIOCMIWAIT. Waiting for %s on %s\n", 
+		      pp->name, device);
+	while (ioctl(fd, TIOCMIWAIT, pp->value) == 0) {
+	    (void)fprintf(stderr, "%s Transition on %s\n", pp->name, device);
 	}
 	(void)fprintf(stderr, 
-		      "TIOCMIWAIT returns non zero value on %s!\n", 
+		      "TIOCMIWAIT returns nonzero value on %s!\n", 
 		      device);
 	break;
 
@@ -120,7 +119,7 @@ int main(int argc, char **argv)
 	    int state, lastState;
 	    double lastTime = 0;
 	    // for computing average length of a second, as derived from the
-	    // rising edge of the DCD pulse
+	    // rising edge of the pulse
 	    double total = 0;
 	    int samples = 0;
 
