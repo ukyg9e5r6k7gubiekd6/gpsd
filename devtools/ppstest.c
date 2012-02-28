@@ -23,14 +23,39 @@ int main(int argc, char **argv)
     int option;
     char *device;
 
-    while ((option = getopt(argc, argv, "pw")) != -1) {
+    struct {char *name; int value;} pin_map[] = {
+	{"CTS", TIOCM_CTS},    /* Clear to send */
+	{"CAR", TIOCM_CAR},    /* Carrier detect */ 
+	{"DCD", TIOCM_CD},     /* Carrier detect (synonym) */ 
+	{"RI",  TIOCM_RI},     /* Ring Indicator */
+	{"RNG", TIOCM_RNG},    /* Ring Indicator (synonym) */
+	{"DSR", TIOCM_DSR},    /* Data Set Ready */
+	{NULL,  0}, 
+    }, *pp = &pin_map[2];
+
+    while ((option = getopt(argc, argv, "pwl:")) != -1) {
 	switch (option) {
 	case 'p':            /* poll for PPS */
 	    mode = poll;
 	    break;
 	case 'w':            /* wait for PPS state change */ 
 	    mode = wait;
-	    break;	    
+	    break;
+	case 'l':            /* set the handshake line to use by name */
+	    for (pp = pin_map; pp->name != NULL; pp++)
+		if (strcmp(pp->name, optarg) == 0) {
+		    break;
+		}
+	    if (pp->name == NULL) {
+		(void)fprintf(stderr, 
+			      "Didn't recognize %s as a handshake.\n",
+			      optarg);
+		exit(1);
+	    }
+	    break;
+	case '?':
+	case 'h':
+	    (void)fprintf(stderr, "usage: ppstest [-p] [-w] [-l CTS|CAR|RI|RNG|DSR] device");
 	}
     }
     device = argv[optind];
@@ -77,84 +102,92 @@ int main(int argc, char **argv)
 
     case wait:
 	// wait for DCD transition to be reported via interrupt - fails
-	fprintf(stderr, "Testing TIOCMIWAIT. Waiting for DCD on %s\n", device);
+	(void)fprintf(stderr, 
+		      "Testing TIOCMIWAIT. Waiting for DCD on %s\n", 
+		      device);
 	while (ioctl(fd, TIOCMIWAIT, TIOCM_CAR) == 0) {
 	    // Problem: The following lines is never executed
-	    fprintf(stderr, "DCD Transition on %s\n", device);
+	    (void)fprintf(stderr, "DCD Transition on %s\n", device);
 	}
-	fprintf(stderr, "TIOCMIWAIT returns non zero value on %s!\n", device);
+	(void)fprintf(stderr, 
+		      "TIOCMIWAIT returns non zero value on %s!\n", 
+		      device);
 	break;
 
     case poll:
-	// poll the DCD line looking for transition; when found, report time
-	// and various intervals between successive transitions.
-	fprintf(stderr, "Testing TIOCMGET. Polling DCD on %s\n", device);
+	{
+	    struct timeval tv_jw;
+	    int state, lastState;
+	    double lastTime = 0;
+	    // for computing average length of a second, as derived from the
+	    // rising edge of the DCD pulse
+	    double total = 0;
+	    int samples = 0;
 
-	struct timeval tv_jw;
-	int state, lastState;
+	    // poll selected line looking for transition; when found, report
+	    // time and various intervals between successive transitions.
+	    (void)fprintf(stderr, 
+			  "Testing TIOCMGET. Polling %s on %s\n", 
+			  pp->name, device);
 
-	// get the current state of the DCD line
-	if (ioctl(fd, TIOCMGET, &lastState) != 0) {
-	    fprintf(stderr, "TIOCMGET fails on %s\n", device);
-	    exit(1);
-	}
-	// turn laststate into a boolean indicating presence or absence of DCD
-	lastState = (int)((lastState & TIOCM_CAR) != 0);
-
-	double lastTime = 0;
-	// for computing average length of a second, as derived from the
-	// rising edge of the DCD pulse
-	double total = 0;
-	int samples = 0;
-
-	// loop forever
-	while (1) {
-	    // get the value of the serial lines
-	    if (ioctl(fd, TIOCMGET, &state) != 0) {
-		// abort on error
-		fprintf(stderr, "TIOCMGET fails on %s\n", device);
+	    // get the current state of the line
+	    if (ioctl(fd, TIOCMGET, &lastState) != 0) {
+		(void)fprintf(stderr, "TIOCMGET fails on %s\n", device);
 		exit(1);
 	    }
-	    // recover DCD state
-	    state = (int)((state & TIOCM_CAR) != 0);
+	    lastState = (int)((lastState & pp->value) != 0);
 
-	    // Transition?
-	    if (state != lastState) {
-		// yes. Update the last state
-		lastState = state;
-		// Is this a leading (rising) edge?
-		if (state == 1) {
-		    // yes. let's call this the top of the second
-		    // note the system time
-		    (void)gettimeofday(&tv_jw,NULL);
-		    // turn it into a double
-		    double curTime = tv_jw.tv_sec + tv_jw.tv_usec/1.0e6;
-		    // how long since the last transition?
-		    double diff = curTime - lastTime;
-		    // Update time of 'last' DCD state transition
-		    lastTime = curTime;
-		    // diff should be (really close to) one second
-		    // is diff within reason? (Sometimes transitions appear to be missed)
-		    if (diff < 1.5) {
-			// update for averaging
-			total += diff;
-			samples++;
-			// report on the times associated with this transition
-			fprintf(stderr, "DCD transition on %s: %d: %.6f, %6f, %6f\n",
-				device, state, curTime, diff, total/samples);
-		    }
-		    else {
-			fprintf(stderr, "DCD transition on %s: %d: %.6f, %6f - wacky diff\n",
-				device, state, curTime, diff);
+	    // loop forever
+	    while (1) {
+		// get the value of the serial lines
+		if (ioctl(fd, TIOCMGET, &state) != 0) {
+		    // abort on error
+		    (void)fprintf(stderr, "TIOCMGET fails on %s\n", device);
+		    exit(1);
+		}
+		// recover line state
+		state = (int)((state & pp->value) != 0);
+
+		// Transition?
+		if (state != lastState) {
+		    // yes. Update the last state
+		    lastState = state;
+		    // Is this a leading (rising) edge?
+		    if (state == 1) {
+			// yes. let's call this the top of the second
+			// note the system time
+			(void)gettimeofday(&tv_jw,NULL);
+			// turn it into a double
+			double curTime = tv_jw.tv_sec + tv_jw.tv_usec/1.0e6;
+			// how long since the last transition?
+			double diff = curTime - lastTime;
+			// Update time of 'last' state transition
+			lastTime = curTime;
+			// diff should be (really close to) one second
+			// is diff within reason? (Sometimes transitions appear to be missed)
+			if (diff < 1.5) {
+			    // update for averaging
+			    total += diff;
+			    samples++;
+			    // report on the times associated with this transition
+			    (void)fprintf(stderr, 
+					  "%s transition on %s: %d: %.6f, %6f, %6f\n",
+					  pp->name, device, state, curTime, diff, total/samples);
+			}
+			else {
+			    (void)fprintf(stderr, 
+					  "%s transition on %s: %d: %.6f, %6f - wacky diff\n",
+					  pp->name, device, state, curTime, diff);
+			}
 		    }
 		}
+		// now sleep for a (very) little while
+		tv_jw.tv_sec = 0;
+		tv_jw.tv_usec = 1;
+		int retval_jw = select(1, NULL, NULL, NULL, &tv_jw);
 	    }
-	    // now sleep for a (very) little while
-	    tv_jw.tv_sec = 0;
-	    tv_jw.tv_usec = 1;
-	    int retval_jw = select(1, NULL, NULL, NULL, &tv_jw);
 	}
-	break;
+    break;
 
     default:
 	(void)fprintf(stderr, "Unknown mode\n");
