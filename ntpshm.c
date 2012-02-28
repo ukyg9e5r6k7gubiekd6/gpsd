@@ -896,6 +896,9 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 # ifdef PPS_ENABLE
     (void)ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
+#ifdef TIOCMIWAIT
+    pps_thread_deactivate(session);
+#endif /* TIOCMIWAIT */
 # endif	/* PPS_ENABLE */
 }
 
@@ -913,16 +916,11 @@ void ntpd_link_activate(struct gps_device_t *session)
 	/* We also have the 1pps capability, allocate a shared-memory segment
 	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
-	 *
-	 * Ideally we'd like to launch the device's PPS thread right after.
-	 * this call succeeds.  But there's a problem - a 2.6 kernel bug.
-	 * The thread watching a TIOCMIWAITed serial will hang if the baud
-	 * rate on the line is changed.  Thus we can't start the thread until
-	 * the hunt loop has done its thing.
 	 */
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) < 0) {
 	    gpsd_report(LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
-	}
+	} else
+	    pps_thread_activate(session);
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
     }
 }
