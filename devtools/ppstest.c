@@ -33,8 +33,11 @@ int main(int argc, char **argv)
 	{NULL,  0}, 
     }, *pp = &pin_map[2];
 
-    while ((option = getopt(argc, argv, "pwl:")) != -1) {
+    while ((option = getopt(argc, argv, "dl:pw")) != -1) {
 	switch (option) {
+	case 'd':            /* dump data from the TTY */
+	    mode = dump;
+	    break;
 	case 'p':            /* poll for PPS */
 	    mode = poll;
 	    break;
@@ -55,7 +58,8 @@ int main(int argc, char **argv)
 	    break;
 	case '?':
 	case 'h':
-	    (void)fprintf(stderr, "usage: ppstest [-p] [-w] [-l CTS|CAR|RI|RNG|DSR] device");
+	    (void)fprintf(stderr, "usage: ppstest [-p] [-w] [-l CTS|CAR|RI|RNG|DSR] device\n");
+	    exit(0);
 	}
     }
     device = argv[optind];
