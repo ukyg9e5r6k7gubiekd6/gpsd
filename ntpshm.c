@@ -865,7 +865,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /*@+noeffect@*/
 #endif
 
-	    if ( 0 <= chronyfd ) {
+	    if ( 0 <= chronyfd && session->ship_to_ntpd) {
 		(void)send(chronyfd, &sample, sizeof (sample), 0);
 		gpsd_report(LOG_RAW, "PPS edge accepted chrony sock %lu.%06lu offset %.9f\n",
 			    (unsigned long)sample.tv.tv_sec,
