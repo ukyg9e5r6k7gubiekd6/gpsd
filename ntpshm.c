@@ -944,7 +944,7 @@ void pps_thread_activate(struct gps_device_t *session UNUSED)
 }
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 
-#if defined(HAVE_SYS_TIMEPPS_H)
+#if defined(PPS_ENABLE) && defined(HAVE_SYS_TIMEPPS_H)
 void pps_thread_deactivate(struct gps_device_t *session)
 /* cleanly terminate device's PPS thread */
 {
@@ -960,4 +960,4 @@ void pps_thread_deactivate(struct gps_device_t *session UNUSED)
 }
 #endif
 
-#endif /* NTPSHM_ENABLE */
+#endif /* defined(PPS_ENABLE) && defined(HAVE_SYS_TIMEPPS_H) */
