@@ -1337,7 +1337,7 @@ rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
 # Rebuild the RTCM regression tests.
 Utility('rtcm-makeregress', [gpsdecode], [
     'for f in $SRCDIR/test/*.rtcm2; do '
-        '$SRCDIR/gpsdecode -j < ${f} > ${f}.chk; '
+        '$SRCDIR/gpsdecode -j <$${f} >$${f}.chk; '
     'done'
         ])
 
