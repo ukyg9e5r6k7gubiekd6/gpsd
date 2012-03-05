@@ -404,6 +404,9 @@ static void decode(FILE *fpin, FILE*fpout)
     gpsd_clear(&session);
     session.gpsdata.gps_fd = fileno(fpin);
     session.gpsdata.dev.baudrate = 38400;     /* hack to enable subframes */
+    (void)strlcpy(session.gpsdata.dev.path, 
+		  "stdin", 
+		  sizeof(session.gpsdata.dev.path));
 
     for (;;)
     {
@@ -453,6 +456,9 @@ static void encode(FILE *fpin, FILE *fpout)
 
     memset(&policy, '\0', sizeof(policy));
     memset(&session, '\0', sizeof(session));
+    (void)strlcpy(session.gpsdata.dev.path, 
+		  "stdin", 
+		  sizeof(session.gpsdata.dev.path));
     policy.json = true;
 
     while (fgets(inbuf, (int)sizeof(inbuf), fpin) != NULL) {
