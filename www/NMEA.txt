@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.9, Nov 2011
+v2.10, Mar 2012
 
 This is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports.
@@ -703,6 +703,8 @@ Field Number:
 5. Depth, Fathoms
 6. F = Fathoms
 7. Checksum
+
+In real-world sensors, sometimes not all three conversions are reported.
 
 === DCN - Decca Position ===
 
