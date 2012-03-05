@@ -1182,7 +1182,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /*
      * The end-of-cycle detector.  This code depends on just one
      * assumption: if a sentence with a timestamp occurs just before
-     * start of cycle, then it is always good to trigger a reort on
+     * start of cycle, then it is always good to trigger a report on
      * that sentence in the future.  For devices with a fixed cycle
      * this should work perfectly, locking in detection after one
      * cycle.  Most split-cycle devices (Garmin 48, for example) will
