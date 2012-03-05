@@ -675,9 +675,8 @@ AIVDM,2,2,1,B,00000000000,2*26
 # gpsdecode: AIVDM message type 24 collision on channel A : Discarding previous sentence 24A from 271041511.
 #
 # 24B from mmsi 271020195:
-# Mmsi mismatch: That packet is discarded and context still hold data from 271040660
+# Saved in context, but without a valid 24A it's never emitted.
 !AIVDM,1,1,,A,H42Mh`lUi2hhljiI=mikk000B050,0*17
-# gpsdecode: AIVDM message type 24 collision on channel A: MMSI mismatch: 271040660 vs 271020195.
 #
 # 24B from mmsi 271040660:
 # Success
