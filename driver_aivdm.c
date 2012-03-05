@@ -1057,10 +1057,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 	    /*
 	     * Not possible to do this right without machinery we
 	     * don't yet have.  The problem is that if the addressed
-	     * bit is on the bitfield start won't be on a byte
+	     * bit is on, the bitfield start won't be on a byte
 	     * boundary. Thus the formulas below (and in message type 26)
-	     * will work perfectly for brodacst messages, but for addressed
-	     * messages the retrieved data will be led by thr 30 bits of
+	     * will work perfectly for broadcast messages, but for addressed
+	     * messages the retrieved data will be led by the 30 bits of
 	     * the destination MMSI
 	     */
 	    ais->type25.bitcount       = ais_context->bitlen - 40 - 16*ais->type25.structured;

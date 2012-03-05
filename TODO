@@ -50,6 +50,10 @@ This one is mine and Kurt Schwehr's. Support is currently nearly
 complete; the only missing cases are a handful of IMO 236 and IMO 289
 message 6 and 8 subtypes.
 
+**** Addressed case of AIS Types 25 and 26 is not handled.
+
+We'd need machinery to shift a byte array 30 bits left...
+
 ** Ports
 
 *** Windows port
