@@ -2077,23 +2077,23 @@ int main(int argc, char *argv[])
 	if (pw)
 	    (void)setuid(pw->pw_uid);
 	/*@+type@*/
+
+ #if defined(HAVE_LIBCAP) && !defined(S_SPLINT_S)
+	/* drop root capabilities, except CAP_SYS_TIME for 1PPS support */
+	{
+	    cap_t caps = cap_from_text("cap_sys_time=pe");
+
+	    if (!caps)
+		gpsd_report(LOG_ERR, "cap_from_text() failed.\n");
+	    else if (cap_set_proc(caps) == -1) {
+		gpsd_report(LOG_ERR, "cap_set_proc() failed to drop root privs\n");
+		cap_free(caps);
+	    }
+	}
+#endif /* HAVE_LIBCAP */
     }
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());
-
-#if defined(HAVE_LIBCAP) && !defined(S_SPLINT_S)
-    /* drop root capabilities, except CAP_SYS_TIME for 1PPS support */
-    {
-	cap_t caps = cap_from_text("cap_sys_time=pe");
-
-	if (!caps)
-	    gpsd_report(LOG_ERR, "cap_from_text() failed.\n");
-	else if (cap_set_proc(caps) == -1) {
-	    gpsd_report(LOG_ERR, "cap_set_proc() failed to drop root privs\n");
-	    cap_free(caps);
-	}
-    }
-#endif /* HAVE_LIBCAP */
 
 #ifdef SOCKET_EXPORT_ENABLE
     for (i = 0; i < NITEMS(subscribers); i++)
