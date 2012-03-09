@@ -1287,7 +1287,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     }
     /* here's where we check for end-of-cycle */
     if ((session->driver.nmea.latch_frac_time || session->driver.nmea.cycle_continue)
-	&& session->driver.nmea.cycle_enders & (1 << thistag)) {
+	&& (session->driver.nmea.cycle_enders & (1 << thistag))!=0) {
 	gpsd_report(LOG_PROG,
 		    "%s ends a reporting cycle.\n",
 		    session->driver.nmea.field[0]);
