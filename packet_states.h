@@ -26,6 +26,7 @@
 
    SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
    ECDIS_LEAD_1,	/* ECDIS packet leader 'E' */
+   SOUNDER_LEAD_1,	/* Depth sounder packet leader 'S' */
 #endif /* NMEA_ENABLE */
 
    DLE_LEADER,		/* we've seen the TSIP/EverMore leader (DLE) */

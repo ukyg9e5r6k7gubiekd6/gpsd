@@ -26,7 +26,8 @@ typedef unsigned int speed_t;
  * 3.5: POLL subobject name changes: fixes -> tpv, skyview -> sky.
  *      DEVICE::activated becomes ISO8601 rather thab real.
  * 3.6  VERSION, WATCH, and DEVICES from slave gpsds get "remote" attribute.
- * 3.7  PPS message added to repertoire.
+ * 3.7  PPS message added to repertoire. SDDBT water depth reported as
+ *      negative altitude with Mode 3 set.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
 #define GPSD_PROTO_MINOR_VERSION	7	/* bump on compatible changes */
@@ -467,6 +468,7 @@ struct gps_device_t {
 	    bool latch_frac_time;
 	    unsigned int lasttag;
 	    unsigned int cycle_enders;
+	    bool cycle_continue;
 #ifdef GPSCLOCK_ENABLE
 	    bool ignore_trailing_edge;
 #endif /* GPSCLOCK_ENABLE */

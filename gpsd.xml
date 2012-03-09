@@ -859,11 +859,13 @@ several documents that collect publicly disclosed information about
 the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
-sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA, GBS, HDT.  It recognizes these
-with either the normal GP talker-ID prefix, or with the GN prefix used
-by GLONASS, or with the II prefix emitted by Seahawk Autohelm marine
-navigation systems, or with the IN prefix emitted by some Garmin
-units, or with the EC prefix emitted by ECDIS units.  It recognizes
+sentences: 
+RMC, GGA, GLL, GSA, GSV, VTG, ZDA, GBS, HDT, DBT.  
+It recognizes these with either the normal GP talker-ID prefix, or
+with the GN prefix used by GLONASS, or with the II prefix emitted by
+Seahawk Autohelm marine navigation systems, or with the IN prefix
+emitted by some Garmin units, or with the EC prefix emitted by ECDIS
+units, or with the SD prefix emitted by depth sounders.  It recognizes
 some vendor extensions: the PGRME emitted by some Garmin GPS models,
 the OHPR emitted by Oceanserver digital compasses, the PTNTHTM emitted
 by True North digital compasses, and the PASHR sentences emitted by

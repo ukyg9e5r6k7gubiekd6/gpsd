@@ -96,6 +96,7 @@ PERMISSIONS
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *      IN -- Integrated Navigation (Garmin uses this).
  *      EC -- Electronic Chart Display & Information System (ECDIS)
+ *      SD -- Depth Sounder
  *      P  -- Vendor-specific sentence
  *
  */
@@ -327,6 +328,8 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = SIRF_ACK_LEAD_1;
 	else if (c == 'E')	/* ECDIS */
 	    lexer->state = ECDIS_LEAD_1;
+	else if (c == 'S')
+	    lexer->state = SOUNDER_LEAD_1;
 #ifdef OCEANSERVER_ENABLE
 	else if (c == 'C')
 	    lexer->state = NMEA_LEADER_END;
@@ -499,6 +502,12 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	break;
     case ECDIS_LEAD_1:
 	if (c == 'C')		/* ECDIS leader accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case SOUNDER_LEAD_1:
+	if (c == 'D')		/* Depth-sounder leader accepted */
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    lexer->state = GROUND_STATE;

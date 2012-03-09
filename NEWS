@@ -1,7 +1,9 @@
-* Thu 13 Jan 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.5dev 
+* Fri 09 Mar 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.5dev 
   Use pselect when it's available to cut down on wakeups and improve
   signal handling.  New PPS message exporting clock drift. The AIVDM
   driver now handles up to 16 interleaved 24A and 24B pair-halves.
+  The NMEA driver interprets depth-sounder returns from SDDBT and
+  reports them as negative altitudes.
 
 * Thu 12 Jan 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4
   Don't barf when chrpath is not available, fall back to static linking;

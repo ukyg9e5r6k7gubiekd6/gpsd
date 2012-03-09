@@ -813,6 +813,53 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
     return mask;
 }
 
+static gps_mask_t processDBT(int c UNUSED, char *field[],
+				struct gps_device_t *session)
+{
+    /*
+     * $SDDBT,7.7,f,2.3,M,1.3,F*05
+     * 1) Depth below sounder in feet
+     * 2) Fixed value 'f' indicating feet
+     * 3) Depth below sounder in meters
+     * 4) Fixed value 'M' indicating meters
+     * 5) Depth below sounder in fathoms
+     * 6) Fixed value 'F' indicating fathoms
+     * 7) Checksum.
+     *
+     * In real-world sensors, sometimes not all three conversions are reported.
+     */
+    gps_mask_t mask;
+    mask = ONLINE_SET;
+
+    if (field[3][0] != '\0') {
+	session->newdata.altitude = -safe_atof(field[3]);
+	mask |= (ALTITUDE_SET);
+    } else if (field[1][0] != '\0') {
+	session->newdata.altitude = -safe_atof(field[1]) / METERS_TO_FEET;
+	mask |= (ALTITUDE_SET);
+    } else if (field[5][0] != '\0') {
+	session->newdata.altitude = -safe_atof(field[5]) / METERS_TO_FATHOMS;
+	mask |= (ALTITUDE_SET);
+    }
+
+    if ((mask & ALTITUDE_SET) != 0) {
+	if (session->newdata.mode < MODE_3D) {
+	    session->newdata.mode = MODE_3D;
+	    mask |= MODE_SET;
+	}
+    }
+
+    /*
+     * Hack: We report depth below keep as negative altitude because there's
+     * no better place to put it.  Should work in practice as nobody is 
+     * likely to be operating a depth sounder at varying altitudes.
+     */
+    gpsd_report(LOG_RAW, "mode %d, depth %lf.\n",
+		session->newdata.mode,
+		session->newdata.altitude);
+    return mask;
+}
+
 #ifdef TNT_ENABLE
 static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
 				struct gps_device_t *session)
@@ -1024,13 +1071,14 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     {
 	char *name;
 	int nf;			/* minimum number of fields required to parse */
+	bool cycle_continue;	/* cycle continuer? */
 	nmea_decoder decoder;
     } nmea_phrase[] = {
 	/*@ -nullassign @*/
-	{"PGRMC", 0, NULL},	/* ignore Garmin Sensor Config */
-	{"PGRME", 7, processPGRME}, 
-	{"PGRMI", 0, NULL},	/* ignore Garmin Sensor Init */
-	{"PGRMO", 0, NULL},	/* ignore Garmin Sentence Enable */
+	{"PGRMC", 0, false, NULL},	/* ignore Garmin Sensor Config */
+	{"PGRME", 7, false, processPGRME}, 
+	{"PGRMI", 0, false, NULL},	/* ignore Garmin Sensor Init */
+	{"PGRMO", 0, false, NULL},	/* ignore Garmin Sentence Enable */
 	    /*
 	     * Basic sentences must come after the PG* ones, otherwise
 	     * Garmins can get stuck in a loop that looks like this:
@@ -1040,29 +1088,32 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     * 2. PGRMC is sent to reconfigure to Garmin binary mode.
 	     *    If successful, the GPS echoes the phrase.
 	     *
-	     * 3. nmea_parse() sees the echo as RMC because the talker ID is
-	     *    ignored, and fails to recognize the echo as PGRMC and ignore it.
+	     * 3. nmea_parse() sees the echo as RMC because the talker
+	     *    ID is ignored, and fails to recognize the echo as
+	     *    PGRMC and ignore it.
 	     *
-	     * 4. The mode is changed back to NMEA, resulting in an infinite loop.
+	     * 4. The mode is changed back to NMEA, resulting in an
+	     *    infinite loop.
 	     */
-	{"RMC", 8,  processGPRMC},
-	{"GGA", 13, processGPGGA},
-	{"GST", 8,  processGPGST},
-	{"GLL", 7,  processGPGLL},
-	{"GSA", 17, processGPGSA},
-	{"GSV", 0,  processGPGSV},
-	{"VTG", 0,  NULL},	/* ignore Velocity Track made Good */
-	{"ZDA", 4,  processGPZDA},
-	{"GBS", 7,  processGPGBS},
-        {"HDT", 1,  processHDT},
+	{"RMC", 8,  false, processGPRMC},
+	{"GGA", 13, false, processGPGGA},
+	{"GST", 8,  false, processGPGST},
+	{"GLL", 7,  false, processGPGLL},
+	{"GSA", 17, false, processGPGSA},
+	{"GSV", 0,  false, processGPGSV},
+	{"VTG", 0,  false, NULL},	/* ignore Velocity Track made Good */
+	{"ZDA", 4,  false, processGPZDA},
+	{"GBS", 7,  false, processGPGBS},
+        {"HDT", 1,  false, processHDT},
+	{"DBT", 7,  true,  processDBT},
 #ifdef TNT_ENABLE
-	{"PTNTHTM", 9, processTNTHTM},
+	{"PTNTHTM", 9, false, processTNTHTM},
 #endif /* TNT_ENABLE */
 #ifdef ASHTECH_ENABLE
-	{"PASHR", 3, processPASHR},	/* general handler for Ashtech */
+	{"PASHR", 3, false, processPASHR},	/* general handler for Ashtech */
 #endif /* ASHTECH_ENABLE */
 #ifdef OCEANSERVER_ENABLE
-	{"OHPR", 18, processOHPR},
+	{"OHPR", 18, false, processOHPR},
 #endif /* OCEANSERVER_ENABLE */
 	    /*@ +nullassign @*/
     };
@@ -1141,6 +1192,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		(void)strlcpy(session->gpsdata.tag, 
 			      nmea_phrase[i].name, 
 			      MAXTAGLEN);
+		if (nmea_phrase[i].cycle_continue)
+		    session->driver.nmea.cycle_continue = true; 
 		/*
 		 * Must force this to be nz, as we're going to rely on a zero
 		 * value to mean "no previous tag" later.
@@ -1192,7 +1245,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      */
     if (session->driver.nmea.latch_frac_time) {
 	gpsd_report(LOG_PROG,
-		    "%s reporting cycle started on %.2f.\n",
+		    "%s sentence timestamped %.2f.\n",
 		    session->driver.nmea.field[0],
 		    session->driver.nmea.this_frac_time);
 	if (!GPS_TIME_EQUAL
@@ -1206,25 +1259,42 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	    /*
 	     * Have we seen a previously timestamped NMEA tag?
 	     * If so, designate as end-of-cycle marker.
+	     * But not if there are continuation sentences;
+	     * those get sorted after the last timestamped sentence
 	     */
 	    if (lasttag > 0
-		&& (session->driver.nmea.cycle_enders & (1 << lasttag)) ==
-		0) {
+		&& (session->driver.nmea.cycle_enders & (1 << lasttag)) == 0
+		&& !session->driver.nmea.cycle_continue) {
 		session->driver.nmea.cycle_enders |= (1 << lasttag);
 		gpsd_report(LOG_PROG,
 			    "tagged %s as a cycle ender.\n",
 			    nmea_phrase[lasttag - 1].name);
 	    }
 	}
-	/* here's where we check for end-of-cycle */
-	if (session->driver.nmea.cycle_enders & (1 << thistag)) {
+    } else {
+	/* extend the cycle to an un-timestamped sentence? */ 
+	if ((session->driver.nmea.lasttag & session->driver.nmea.cycle_enders) != 0)
 	    gpsd_report(LOG_PROG,
-			"%s ends a reporting cycle.\n",
+			"%s is just after a cycle ender.\n",
 			session->driver.nmea.field[0]);
-	    retval |= REPORT_IS;
+	if (session->driver.nmea.cycle_continue) {
+	    gpsd_report(LOG_PROG,
+			"%s extends the reporting cycle.\n",
+			session->driver.nmea.field[0]);
+	    session->driver.nmea.cycle_enders &=~ (1 << session->driver.nmea.lasttag);
+	    session->driver.nmea.cycle_enders |= (1 << thistag);
 	}
-	session->driver.nmea.lasttag = thistag;
     }
+    /* here's where we check for end-of-cycle */
+    if ((session->driver.nmea.latch_frac_time || session->driver.nmea.cycle_continue)
+	&& session->driver.nmea.cycle_enders & (1 << thistag)) {
+	gpsd_report(LOG_PROG,
+		    "%s ends a reporting cycle.\n",
+		    session->driver.nmea.field[0]);
+	retval |= REPORT_IS;
+    }
+    if (session->driver.nmea.latch_frac_time)
+	session->driver.nmea.lasttag = thistag;
 
     /* we might have a reliable end-of-cycle */
     if (session->driver.nmea.cycle_enders != 0)
