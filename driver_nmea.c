@@ -927,7 +927,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
     session->gpsdata.attitude.acc_z = safe_atof(field[13]);
     session->gpsdata.attitude.gyro_x = safe_atof(field[15]);
     session->gpsdata.attitude.gyro_y = safe_atof(field[16]);
-    mask |= (ALTITUDE_SET);
+    mask |= (ATTITUDE_SET);
 
     gpsd_report(LOG_RAW, "Heading %lf.\n", session->gpsdata.attitude.heading);
     return mask;
