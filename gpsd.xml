@@ -859,7 +859,7 @@ several documents that collect publicly disclosed information about
 the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
-sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA.  It recognizes these
+sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA, GBS, HDT.  It recognizes these
 with either the normal GP talker-ID prefix, or with the GN prefix used
 by GLONASS, or with the II prefix emitted by Seahawk Autohelm marine
 navigation systems, or with the IN prefix emitted by some Garmin
