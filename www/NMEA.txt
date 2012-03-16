@@ -1,23 +1,33 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.10, Mar 2012
+v2.11, Mar 2012
 
-This is a list of NMEA 0183 sentences with field descriptions.
-It is primarily intended to help people understand GPS reports.
+NMEA 0183 is a proprietary protocol issued by the National Marine
+Electronics Association for use in boat navigation and control
+systems.  Because early GPS sensors were designed for compatibility
+with these systems, GPS reporting protocols are often a small 
+subset of NMEA 0183 or mutated from such as subset.  AIS, the
+Marine Automatic Identification system, also uses NMEA0183-like
+packet formats.
+
+This document is a list of NMEA 0183 sentences with field descriptions.
+It is primarily intended to help people understand GPS reports. but
+also exists because he author finds life-critical protocols with
+only closed/proprietary documentation deeply offensive.
 
 The master of this document is in asciidoc format at the GPSD project
 website; you are probably seeing it as a web page.  You may encounter
 versions of it, in plain ASCII, that do not have a revision number and
-do not list an editor. These are older and should probably be
-considered obsolescent.
+do not list an editor. These are older and should be considered
+obsolescent.
 
 == Sources and Applicable Standards ==
 
-This collection may originally have been redacted from the document cited as
-<<NMEA2000>>; see the list of sources at the end of this document.
-The official NMEA standard was not consulted at any point, thus this
-document is not a derivative work of that standard and is not
-controlled by the rapacious lawyers of NMEA.
+This collection may originally have been redacted from the document
+cited as <<BETKE>>; see the list of sources at the end of this
+document.  The official NMEA 0183 standard was not consulted at any
+point, thus this document is not a derivative work of that standard
+and is not controlled by the rapacious lawyers of NMEA.
 
 It appears there is an international standard, IEC 61162-1, published
 in 2000, that is essentially NMEA 0183.  <<IEC61162-1>> says it "is closely
@@ -32,17 +42,30 @@ distribution, but adds more information on the following topics:
 * Vendor extensions PRWIZCH and PMGNST
 * FAA Mode Indicator field for RMC, RMB, VTG, GLL, BWC, XTE.
 * New documentation on BWC, DTM, GBS, GNS, GRS, GST, MSK, and MSS sentences.
-* Sentence examples merged from [GIDS]
-* Sentence explanations from [GIDS] and elsewhere
+* Sentence examples merged from <<GIDS>>
+* Sentence explanations from <<GIDS>> and elsewhere
 * Corrected badly mangled ZDA description.
 * Corrected DPT titling
 * Common talker IDs
 * Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from [GLOBALSAT].
-* Sentence PASHR from [PASHR].
+* Sentence PASHR from <<PASHR>>.
 * Satellite IDs: PRN vs NMEA-ID. 
 * Error status indications.
 
-== Physical protocol layer ==
+== Relationship to NMEA 2000 ==
+
+Recently the National Marine Electronics Association has attempted to
+replace NMEA 0183 with a very differently structured protocol named
+NMEA 2000.  It is binary rather than textual, a profile or
+interpretation of the Controller Area Network (CAN) protocol used in
+automotive networking. Unlike NMEA 0183 it is frame-based and cannot
+be transmitted over serial links.
+
+While newer marine electronics uses this protocol, general-purpose
+GPSes have not adopted it.  Thus we do not attempt to document NMEA
+2000 here; see <<CANBUS>>, <<NMEA2000>>, and <<KEVERSOFT>> instead.  
+
+== NMEA 0183 physical protocol layer ==
 
 The NMEA specification requires a physical-level protocol compatible
 with RS422 at 4800bps, 8N1 or 7N2.  It is RS422 rather than RS232
@@ -78,11 +101,11 @@ FAA Mode Indicator
      S = Simulated Mode
      N = Data Not Valid
 
-This field may be empty.  In pre-2.3 versions it is omitted. [NTUM] says
+This field may be empty.  In pre-2.3 versions it is omitted. <<NTUM>> says
 that according to the NMEA specification, it dominates the Status field --
 the Status field will be set to "A" (data valid) for Mode Indicators A
 and D, and to "V" (data invalid) for all other values of the Mode
-Indicator.  This is confirmed by [IEC].
+Indicator.  This is confirmed by <<IEC>>.
 
 In NMEA 3.0, the GBS sentence reports a complete set of error estimates. Note
 however that many receivers claiming to emit "3.0" or "3.01" don't
@@ -115,7 +138,7 @@ exactly 21 seconds.
 Eg. 16708.033 is 167 degrees and 8.033 minutes. ".033" of a minute is
 about 2 seconds.
 
-According to [UNMEA], the NMEA standard requires that a field (such as
+According to <<UNMEA>>, the NMEA standard requires that a field (such as
 altitude, latitude, or longitude) must be left empty when the GPS has
 no valid data for it.  However, many receivers violate this.  It's
 common, for example, to see latitude/longitude/altitude figures filled
@@ -156,10 +179,10 @@ e.g. accurate to within 512 weeks.  Many NMEA GPSes have a wired-in
 assumption about the UTC time of the last rollover and will thus report
 incorrect times outside the rollover period they were designed in.
 
-For these reasons, NMEA GPS should not be considered high-quality
+For these reasons, NMEA GPSes should not be considered high-quality
 references for absolute time.  Some do, however, emit pulse-per-second
 RS232 signals which can be used to improve the precision of an
-external clock. See [PPS] for discussion.
+external clock. See <<PPS>> for discussion.
 
 == Error status indications
 
@@ -229,7 +252,7 @@ reasons, so it may outlast the actual LORAN system.
 
 II - II is emitted by the NMEA interfaces of several widely-used lines
 of marine-navigation electronics. One is the AutoHelm system by
-Raymarine; see also [SEATALK] for the native protocol of these
+Raymarine; see also <<SEATALK>> for the native protocol of these
 devices.
 
 IN -- Some Garmin GPS units use an IN talker ID.
@@ -758,7 +781,7 @@ Field Number:
 3. Checksum
 
 This sentence was incorrectly titled "Heading - Deviation & Variation"
-in [NMEA2000].  It's documented at
+in <<BETKE>>.  It's documented at
 <http://www.humminbird.com/normal.asp?id=853>
 
 === DTM - Datum Reference ===
@@ -818,7 +841,7 @@ Field Number:
 8. Standard deviation of bias estimate
 9. Checksum
 
-Note: Source [MX521] describes a proprietary extension of GBS with
+Note: Source <<MX521>> describes a proprietary extension of GBS with
 a 9th data field. The 8-field version is in NMEA 3.0.
 
 === GGA - Global Positioning System Fix Data ===
@@ -1159,7 +1182,7 @@ Field Number:
 4. Meters (0-100)
 5. Checksum
 
-From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
+From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
 
 === HSC - Heading Steering Command ===
 
@@ -1177,7 +1200,7 @@ Field Number:
 4. M = Magnetic
 5. Checksum
 
-[GLOBALSAT] describes a completely different meaning for this
+<<GLOBALSAT>> describes a completely different meaning for this
 sentence, having to do with water temperature sensors.  It is 
 unclear which is correct.
 
@@ -1195,7 +1218,7 @@ Field Number)
 2. Meters
 3. Checksum.
 
-From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
+From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
 
 === LCD - Loran-C Signal Data ===
 
@@ -1271,7 +1294,7 @@ Field Number:
 2. Unit of Measurement, Celcius
 3. Checksum
 
-[GLOBALSAT] lists this as "Meteorological Temperature of Water", which
+<<GLOBALSAT>> lists this as "Meteorological Temperature of Water", which
 is probably incorrect.
 
 === MWV - Wind Speed and Angle ===
@@ -1579,7 +1602,7 @@ Field Number)
 2. Meters (0-300)
 3. Checksum.
 
-From [GLOBALSAT].  Shown with a "@II" leader rather than "$GP".
+From <<GLOBALSAT>>.  Shown with a "@II" leader rather than "$GP".
 
 === TFI - Trawl Filling Indicator ===
 
@@ -1595,7 +1618,7 @@ Field number:
 2. Catch sensor #2 (0 = off, 1 = on, 2 = no answer)
 3. Catch sensor #3 (0 = off, 1 = on, 2 = no answer)
 
-From [GLOBALSAT].  Shown with a "@II" leader rather than "$GP".
+From <<GLOBALSAT>>.  Shown with a "@II" leader rather than "$GP".
 
 === TPC - Trawl Position Cartesian Coordinates ===
 
@@ -1617,7 +1640,7 @@ Field Number:
 6. Meters
 7. Checksum
 
-From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
+From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
 This entry actually merges their TPC description with another
 entry labeled (apparently incorrectly) TPT, which differs from the
 TPT shown below.
@@ -1640,7 +1663,7 @@ Field Number:
 6. Meters (0-2000)
 7. Checksum
 
-From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
+From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
 
 
 === TPT - Trawl Position True ===
@@ -1661,7 +1684,7 @@ Field Number:
 6. Meters (0-2000)
 7. Checksum
 
-From [GLOBALSAT]. Shown with a "@II" leader rather than "$GP".
+From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
 
 
 === TRF - TRANSIT Fix Data ===
@@ -1718,7 +1741,7 @@ Field Number:
 13. Reference Target
 14. Checksum
 
-[GLOBALSAT] gives this in a slightly different form, with 14th and
+<<GLOBALSAT>> gives this in a slightly different form, with 14th and
 15th fields conveying time of observation and whether target
 acquisition was automatic or manual.
 
@@ -1778,7 +1801,7 @@ Field Number:
 8. K = Kilometers
 9. Checksum
 
-[GLOBALSAT] describes a different format in which the first three
+<<GLOBALSAT>> describes a different format in which the first three
 fields are water-temperature measurements.  It's not clear which 
 is correct.
 
@@ -1855,7 +1878,7 @@ The two forms can be distinguished by field 2, which will be
 the fixed text 'T' in the newer form.  The new form appears
 to have been introduced with NMEA 3.01 in 2002.
 
-Some devices, such as those described in [GLOBALSAT], leave the
+Some devices, such as those described in <<GLOBALSAT>>, leave the
 magnetic-bearing fields 3 and 4 empty.
 
 === VWR - Relative Wind Speed and Angle ===
@@ -2081,10 +2104,12 @@ Field number:
 11. e - IMU Status
 12. hh - Checksum
 
-[PASHR] describes this sentence as NMEA, though other sources say it is Ashtech 
-proprietary and describe a different format.
- 
-Example: $PASHR,085335.000,224.19,T,-01.26,+00.83,+00.00,0.101,0.113,0.267,1,0*06
+<<PASHR>> describes this sentence as NMEA, though other sources say it
+is Ashtech proprietary and describe a different format.  
+
+Example:
+
+$PASHR,085335.000,224.19,T,-01.26,+00.83,+00.00,0.101,0.113,0.267,1,0*06
 
 === PGRME - Garmin Estimated Error ===
 
@@ -2191,10 +2216,22 @@ Only emitted by uBlox Antaris chipset.
 == References ==
 
 [bibliography]
+- [[[BETKE]]]
+    "The NMEA 0183 protocol"
+    http://www.scribd.com/mcocco/d/6365285-The-NMEA-0183-Protocol
+    Probably the ancestor of this document. Compiled by Klaus Betke
+    and dated May 2000 with a revision in 2001.
+
+- [[[CANBUS]]]
+  "Wikipedia: CAN bus" 
+  http://en.wikipedia.org/wiki/CAN_bus
+
 - [[[NMEA2000]]]
-    The NMEA 0183 protocol
-    http://nmeatool.nmea2000.de/download/0183.pdf
-    Probably the ancestor of this document.
+  "Wikipedia: NMEA 2000" 
+  http://en.wikipedia.org/wiki/NMEA_2000
+
+- [[[KEVERSOFT]]]
+  http://www.keversoft.com/downloads/packetlogger_20120305_explain.txt
 
 - [[[DEPRIEST]]]
     "NMEA data"
