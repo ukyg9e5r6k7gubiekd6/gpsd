@@ -777,17 +777,19 @@ Laboratories. These just work.</p>
 
 <h1 id='nmea2000'>Does gpsd support NMEA2000?</h1>
 
-<p>The short answer is 'No'.  The longer answer is 'Only if you have a
-hardware adapter that down-converts it to NMEA 0183 or something else we
-understand.' Such devices do exist, they're used to enable navigation
-software using NMEA 0183 to NMEA 2000 boat networks.</p>
-
-<p>NMEA2000 is not a byte-stream protocol; it can't be shipped over
+<p>Not yet. NMEA2000 is not a byte-stream protocol; it can't be shipped over
 serial or USB links. It relies on a message-oriented physical layer
 called Controller Area Network (CAN) that is widely used to network
 automotive electronics.  Without hardware mediation to map the
 message into self-describing packets on a serial link, there's no
 way gpsd can see these.</p>
+
+<p>There is early-stage Linux kernel support that talks to a CAN
+networking card. As of March 2012 we've had code for NMEA200 support
+submitted, but in a form that is difficult to integrate with GPSD's
+architecture. Merging it is going to take time and some tricky
+refactoring. There are also some headache-inducing issues around 
+how it is to be regression-tested.</p>
 
 <h1 id='conflict'>Why does GPSD interfere with non-GPS USB devices?</h1>
 
@@ -857,11 +859,12 @@ Such problems may persist until the USB port is unplugged and
 replugged, or until all devices in that root hub are unplugged and
 replugged, or even until a reboot.</p>
 
-<p>Bugs in the serial-device layer of your operating system can cause
-problems like this. They may be driver-specific bugs, or they may be
-due to bad interactions between ioctl() and select() in the generic
-tty code. Bugs in the USB chipset on your motherboard or in a hub can
-do it, too.</p>
+<p>This is not a GPSD bug.  Bugs in the serial-device layer of your
+operating system, tickled by gpsd's unusual autobauding loop and
+serial-parameter changes, can cause problems like this. They may be
+driver-specific bugs, or they may be due to bad interactions between
+ioctl() and select() in the generic tty code. Bugs in the USB chipset
+on your motherboard or in a hub can do it, too.</p>
 
 <p>Here are some possible fixes:</p>
 

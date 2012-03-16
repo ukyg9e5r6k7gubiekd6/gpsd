@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.13, February 2012
+v1.14, March 2012
 
 == Introduction ==
 
@@ -550,6 +550,22 @@ DEVICE, etc.) as a string.
 
 For more interesting examples integrated with X and GTK, see xgps and
 xgpsspeed.
+
+== Other Client Bindings ==
+
+There are a couple of client bindings for GPSD that are maintained
+separately from the GPSD distribution. We don't try to document their
+APIs here, but just provide pointers to them.
+
+== Java ==
+
+There is a Java binding, described at http://gpsd4java.forge.hoegergroup.de/
+This binding is available at maven central. See that web page for how
+to use it in a maven build.
+
+== Perl ==
+
+There's a Perl client library at http://search.cpan.org/dist/Net-GPSD3/
 
 == Backward Incompatibility and Future Changes ==
 

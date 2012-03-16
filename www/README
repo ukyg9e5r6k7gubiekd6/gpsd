@@ -1,7 +1,7 @@
 This subdirectory contains the project web pages.
 
-To upload them after modifying, run "./upload'.  You must have xmlto,
-the docbook DTD (Ver 4.1.2) and asciidoc (Ver 8.5.1+) installed for
-this to work.
+To upload them after modifying, run rge web upload production from the
+main SConstruct file.  You must have xmlto, the docbook DTD (Ver
+4.1.2) and asciidoc (Ver 8.5.1+) installed for this to work.
 
 

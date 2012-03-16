@@ -107,7 +107,8 @@ the NMEA 0183 emitted by most GPSes.  The <code>gpsd</code>
 distribution includes a linkable C service library, a C++ wrapper
 class, and a Python module that developers of <code>gpsd</code>-aware
 applications can use to encapsulate all communication with
-<code>gpsd</code>.</p>
+<code>gpsd</code>. Third-party client bindings for Java and Perl 
+also exist.</p>
 
 <p>Besides <code>gpsd</code> itself, the project provides auxiliary
 tools for diagnostic monitoring and profiling of receivers and feeding
@@ -411,13 +412,6 @@ href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 
 <p>You can find Debian-unstable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
-
-<p>There's a Perl client library <a
-href="http://search.cpan.org/dist/Net-GPSD3/">on CPAN.</a></p>
-
-<p>A Java binding is <a
-href="http://forge.hoegergroup.de/projects/gpsd4java/">in early
-development</a>.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
 
