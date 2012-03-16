@@ -241,6 +241,7 @@ fi
 %files -n libQgpsmm
 %defattr(-,root,root,-)
 %{_qt4_libdir}/libQgpsmm.so*
+%{_qt4_libdir}/libQgpsmm.prl
 %{_mandir}/man3/libQgpsmm.3*
 
 %files clients
