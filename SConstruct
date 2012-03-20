@@ -795,7 +795,7 @@ if qt_env:
     # infamous "Two environments with different actions were specified
     # for the same target" error.
     for src in libgps_sources:
-        if src in ("gpsutils.c", "libgps_sock.c"):
+        if src in ("gpsutils.c", "libgps_sock.c", "libgps_core.c", "libgps_shm.c"):
             compile_with = qt_env['CXX']
             compile_flags = qt_flags
         else:
