@@ -367,10 +367,9 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
 	 * If we see this, force mode to 2D at most.
 	 */
 	if (altitude[0] == '\0') {
-	    if (session->newdata.mode == MODE_3D) {
-		session->newdata.mode =
-		    session->gpsdata.status ? MODE_2D : MODE_NO_FIX;
-		mask |= MODE_SET;
+	    if (session->newdata.mode > MODE_2D) {
+		session->newdata.mode = MODE_2D;
+                mask |= MODE_SET;
 	    }
 	} else {
 	    session->newdata.altitude = safe_atof(altitude);
