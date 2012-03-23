@@ -812,6 +812,11 @@ extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies 
 
 #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
 
+/* Ugh - required for build on Solaris */
+#ifndef NAN
+#define NAN (0.0/0.0)
+#endif
+
 /* Cygwin, in addition to NAN, doesn't have cfmakeraw */
 #if defined(__CYGWIN__)
 void cfmakeraw(struct termios *);
