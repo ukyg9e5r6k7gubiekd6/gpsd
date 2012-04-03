@@ -708,7 +708,7 @@ method add this to your /etc/chrony/chrony.conf file (replacing ttyXX
 with your device name): </para> 
 <screen> 
 #refclock PPS
-/dev/pps0 refclock SOCK /tmp/chrony.ttyXX.sock 
+refclock SOCK /tmp/chrony.ttyXX.sock 
 </screen> 
 </refsect1>
 <refsect1 id='dbus'><title>USE WITH D-BUS</title>
