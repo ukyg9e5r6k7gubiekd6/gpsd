@@ -706,6 +706,12 @@ refclock SHM 1 offset 0.0 delay 0.0
 <para>To get chronyd to connect to gpsd using the more precise socket 
 method add this to your /etc/chrony/chrony.conf file (replacing ttyXX
 with your device name): </para> 
+<para>If running as root:</para>
+<screen> 
+#refclock PPS
+refclock SOCK /var/run/chrony.ttyXX.sock 
+</screen> 
+<para>If not running as root:</para>
 <screen> 
 #refclock PPS
 refclock SOCK /tmp/chrony.ttyXX.sock 
