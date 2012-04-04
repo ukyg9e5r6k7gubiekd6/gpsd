@@ -632,7 +632,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
 
         if (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
-	    gpsd_report(LOG_ERROR, "PPS ioctl(TIOCMIWAIT) failed\n");
+	    gpsd_report(LOG_ERROR, "PPS ioctl(TIOCMIWAIT) failed: %d %.40s\n"
+	    	, errno, strerror(errno));
 	    break;
 	}
 
