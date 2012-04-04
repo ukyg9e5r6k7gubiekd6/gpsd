@@ -708,8 +708,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	log = NULL;
 
 	/*@ +ignoresigns */
-	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0)
+	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0) {
+	    gpsd_report(LOG_ERROR, "PPS ioctl(TIOCMGET) failed\n");
 	    break;
+	}
 	/*@ -ignoresigns */
 
 	state = (int)((state & PPS_LINE_TIOC) != 0);
