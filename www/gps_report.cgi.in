@@ -158,7 +158,9 @@ print <<EOF;
 
 <ul>
 <li>A "mouse" is a standalone sensor in a display-less case designed 
-be used as an peripheral to a computer.</li>
+be used as an peripheral cabled to a computer.</li>
+<ii>A "dongle" is a standalone sensor in a display-less case resembling a 
+thumb drive intended to be plugged directly into a USB port.</li>
 <li>A "handset" is a standalone unit with a display and human-usable controls.</li>
 <li>A "handsfree" is a hands-free unit with display designed for mounting 
 on a car windshield or boat dash.</li>
@@ -171,7 +173,7 @@ on a car windshield or boat dash.</li>
 EOF
 
 print $query->radio_group(-name=>'packaging',
-			  -values=>['mouse', 'handset', 'handsfree',
+			  -values=>['mouse', 'dongle', 'handset', 'handsfree',
 				'survey', 'OEM module', 'chipset', 'other'],
 			  -default=>"mouse",
 			  -linebreak=>'false');
