@@ -722,7 +722,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 
     if (field[1][0] == '\0' || field[2][0] == '\0' || field[3][0] == '\0'
 	|| field[4][0] == '\0') {
-	gpsd_report(LOG_WARN, "malformed ZDA\n");
+	gpsd_report(LOG_WARN, "ZDA fields are empty\n");
     } else {
     	int year, mon, mday, century;
 
