@@ -701,7 +701,13 @@ extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int,
 extern gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *,
 				unsigned int, uint32_t[]);
 extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/char *, size_t);
+# ifdef __cplusplus
+extern "C" {
+# endif
 extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);
+# ifdef __cplusplus
+}
+# endif
 extern ssize_t hex_escapes(/*@out@*/char *, const char *);
 extern void gpsd_position_fix_dump(struct gps_device_t *,
 				   /*@out@*/char[], size_t);
