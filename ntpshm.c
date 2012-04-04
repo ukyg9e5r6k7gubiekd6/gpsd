@@ -284,7 +284,6 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
  *  9    22    RI   <-- Ring Indicator
  *  5     7    SG       Signal ground 
  */
-#include "pps_pin.h"
 
 /*@unused@*//* splint is confused here */
 /* put NTP shared memory info based on received PPS pulse
@@ -621,7 +620,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     /* root privileges are not required after this point */
 
-    /* wait for status change on the device's carrier-detect line */
+#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI)
+
+    /* 
+     * Wait for status change on any handshake line. The only assumption here 
+     * is that no GPS lights up more than one of these pins.  By waiting on
+     * all of them we remove a configuration switch.
+     */
     while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) == 0) {
 	int ok = 0;
 	char *log = NULL;
@@ -721,8 +726,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		duration = 0;
 		unchanged = 0;
 		gpsd_report(LOG_RAW,
-			    "PPS pps-detect (%s) on %s invisible pulse\n",
-			    PPS_LINE_NAME, session->gpsdata.dev.path);
+			    "PPS pps-detect on %s invisible pulse\n",
+			    session->gpsdata.dev.path);
 	    } else if (++unchanged == 10) {
 		unchanged = 1;
 		gpsd_report(LOG_WARN,
@@ -730,8 +735,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		(void)sleep(10);
 	    }
 	} else {
-	    gpsd_report(LOG_RAW, "PPS pps-detect (%s) on %s changed to %d\n",
-			PPS_LINE_NAME, session->gpsdata.dev.path, state);
+	    gpsd_report(LOG_RAW, "PPS pps-detect on %s changed to %d\n",
+			session->gpsdata.dev.path, state);
 	    laststate = state;
 	    unchanged = 0;
 	}
