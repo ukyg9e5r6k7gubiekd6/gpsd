@@ -814,7 +814,7 @@ extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies 
 
 /* Ugh - required for build on Solaris */
 #ifndef NAN
-#define NAN (0.0/0.0)
+#define NAN (0.0f/0.0f)
 #endif
 
 /* Cygwin, in addition to NAN, doesn't have cfmakeraw */
