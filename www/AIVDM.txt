@@ -3778,8 +3778,8 @@ see <<IALA>> for full details.
 === Type 23: Group Assignment Command ===
 
 This message is intended to be broadcast by a competent authority (an
-AIS network-control base station) to set to set operational parameters
-for all mobile stations in an AIS coverage region. Length is 160 bits.
+AIS network-control base station) to set operational parameters for
+all mobile stations in an AIS coverage region. Length is 160 bits.
 
 This message contains no navigational information, and is unlikely to
 be of interest unless you are implementing or studying an AIS base
@@ -4320,7 +4320,7 @@ This table does not include fields that are scaled by multipliers to integers.
 These are reported in the multiplied form in both scaled and unscaled modes.
 
 As the Beaufort scale is usually quoted numerically, conforming implementations
-should do so rather than exoanding to its controlled vocabulary.
+should do so rather than expanding to its controlled vocabulary.
 
 .String special values in scaled mode
 [frame="topbot",options="header"]
@@ -4334,7 +4334,7 @@ should do so rather than exoanding to its controlled vocabulary.
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
 |===========================================================================
 
-7. Trailung arrays are dumped as JSON subobject arrays.  The name of the 
+7. Trailing arrays are dumped as JSON subobject arrays.  The name of the 
 array item is the name given in the 'a' table entry.  Explicit array count 
 fields (presently "waycount" in Route Info messages") are not dumped.
 
