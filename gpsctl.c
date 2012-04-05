@@ -83,28 +83,45 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 {
     static fd_set rfds;
     gps_mask_t fieldmask;
+#ifdef COMPAT_SELECT
     struct timeval tv;
+#else
+    struct timespec tv;
+    sigset_t oldset, blockset;
+
+    (void)sigemptyset(&blockset);
+    (void)sigaddset(&blockset, SIGHUP);
+    (void)sigaddset(&blockset, SIGINT);
+    (void)sigaddset(&blockset, SIGTERM);
+    (void)sigaddset(&blockset, SIGQUIT);
+    (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
+#endif /* COMPAT_SELECT */
 
     FD_ZERO(&rfds);
     for (;;) {
 	FD_CLR(session->gpsdata.gps_fd, &rfds);
 
-	/*@ -usedef @*/
+	/*@ -usedef -type -nullpass -compdef @*/
 	/*
 	 * If the timeout on this select isn't longer than the device's
 	 * cycle time, the code will be prone to flaky timing-dependent
 	 * failures.
 	 */
-	tv.tv_sec = 2;
-	tv.tv_usec = 0;
 	errno = 0;
+	tv.tv_sec = 2;
+#ifdef COMPAT_SELECT
+	tv.tv_usec = 0;
 	if (select(session->gpsdata.gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
+#else
+	tv.tv_nsec = 0;
+	if (pselect(session->gpsdata.gps_fd + 1, &rfds, NULL, NULL, &tv, &oldset) == -1) {
+#endif
 	    if (errno == EINTR || !FD_ISSET(session->gpsdata.gps_fd, &rfds))
 		continue;
 	    gpsd_report(LOG_ERROR, "select %s\n", strerror(errno));
 	    exit(2);
 	}
-	/*@ +usedef @*/
+	/*@ +usedef +type +nullpass +compdef @*/
 
 	fieldmask = gpsd_poll(session);
 
@@ -138,10 +155,22 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 /* ship a command and wait on an expected response type */
 {
     static fd_set rfds;
-    struct timeval tv;
     char buf[BUFSIZ];
     va_list ap;
     time_t starttime;
+#ifdef COMPAT_SELECT
+    struct timeval tv;
+#else
+    struct timespec tv;
+    sigset_t oldset, blockset;
+
+    (void)sigemptyset(&blockset);
+    (void)sigaddset(&blockset, SIGHUP);
+    (void)sigaddset(&blockset, SIGINT);
+    (void)sigaddset(&blockset, SIGTERM);
+    (void)sigaddset(&blockset, SIGQUIT);
+    (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
+#endif /* COMPAT_SELECT */
 
     va_start(ap, fmt);
     (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
@@ -163,17 +192,21 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 
 	gpsd_report(LOG_PROG, "waiting...\n");
 
-	/*@ -usedef @*/
+	/*@ -usedef -type -nullpass -compdef @*/
 	tv.tv_sec = 2;
+#ifdef COMPAT_SELECT
 	tv.tv_usec = 0;
-	errno = 0;
 	if (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
+#else
+	tv.tv_nsec = 0;
+	if (pselect(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv, &oldset) == -1) {
+#endif
 	    if (errno == EINTR || !FD_ISSET(gpsdata->gps_fd, &rfds))
 		continue;
 	    gpsd_report(LOG_ERROR, "select %s\n", strerror(errno));
 	    exit(2);
 	}
-	/*@ +usedef @*/
+	/*@ +usedef +type +nullpass +compdef @*/
 
 	gpsd_report(LOG_PROG, "reading...\n");
 
