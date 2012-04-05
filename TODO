@@ -32,6 +32,11 @@ packet aggregation issue.
 
 *** Driver issues
 
+**** There are architecture issues in the binary drivers.
+
+Some fail regression tests on non-x86 architectures (not SiRF or
+NMEA, thankfully).  Bernd Zeimetz has the check logs.
+
 **** gpsctl -b should work on UBX, but does not.
 
 Presently this means there's no way to kick a UBX into returning
