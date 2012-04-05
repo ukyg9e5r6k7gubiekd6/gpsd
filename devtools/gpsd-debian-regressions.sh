@@ -5,6 +5,11 @@
 
 set -e
 
+logs='last'
+if [ -n "$1" ]; then
+    logs=$1
+fi
+
 if [ ! -x /usr/bin/getbuildlog ]; then
 	echo 'Please install the devscripts package!'
 	exit 1
@@ -14,7 +19,7 @@ TMPDIR=`mktemp -d`
 OLDPWD=`pwd`
 
 cd ${TMPDIR}
-getbuildlog gpsd last || true
+getbuildlog gpsd $logs || true
 grep -- '--- test' * | sed 's,^gpsd_[^_]*_\([^.]*\).*\./test/\([^.]*\).*,\1 \2,' | sort -u
 cd ${OLDPWD}
 rm -rf ${TMPDIR}
