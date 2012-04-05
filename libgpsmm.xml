@@ -37,20 +37,16 @@ C++:
     <paramdef>void</paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>struct gps_data_t *<function>query</function></funcdef>
+<funcdef>struct gps_data_t *<function>send</function></funcdef>
     <paramdef>char *<parameter>request</parameter></paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>struct gps_data_t *<function>poll</function></funcdef>
+<funcdef>struct gps_data_t *<function>read</function></funcdef>
     <paramdef>void</paramdef>
 </funcprototype>
 <funcprototype>
-<funcdef>int <function>set_callback</function></funcdef>
-    <paramdef>void (*<parameter>hook</parameter>)(struct gps_data_t *sentence, char *buf)</paramdef>
-</funcprototype>
-<funcprototype>
-<funcdef>int <function>del_callback</function></funcdef>
-    <paramdef>void</paramdef>
+<funcdef>struct gps_data_t *<function>waiting</function></funcdef>
+    <paramdef>int</paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>struct gps_data_t *<function>stream</function></funcdef>
@@ -62,7 +58,7 @@ C++:
 <refsect1 id='description'><title>DESCRIPTION</title>
 
 <para><emphasis remap='B'>libgpsmm and libQgpsmm</emphasis> are mere wrappers over
-	<emphasis remap='B'>libgps</emphasis>. The important difference between the libraries is that libgpsmm is targeted at C++ applications and contained in <emphasis remap='B'>libgps</emphasis>, while libQgpsmm is platform independent by using QTcpSocket to connect to <emphasis remap='B'>gpsd</emphasis> and shipped as an additional library due to the necessary linking to QT.
+<emphasis remap='B'>libgps</emphasis>. The important difference between the libraries is that libgpsmm is targeted at C++ applications and contained in <emphasis remap='B'>libgps</emphasis>, while libQgpsmm is platform independent by using QTcpSocket to connect to <emphasis remap='B'>gpsd</emphasis> and shipped as an additional library due to the necessary linking to QT.
 Method names are the same as
 the analogue C functions. For a detailed description of the functions
 please read

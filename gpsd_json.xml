@@ -1052,8 +1052,7 @@ will assert the POLICY_SET bit in the top-level set member.</para>
 
 <para>The POLL command requests data from the last-seen fixes on all
 active GPS devices.  Devices must previously have been activated by
-?WATCH to be pollable, or have been specified on the GPSD command line
-together with an <option>-n</option> option.</para>
+?WATCH to be pollable.</para>
 
 <para>Polling can lead to possibly surprising results when it is used
 on a device such as an NMEA GPS for which a complete fix has to be

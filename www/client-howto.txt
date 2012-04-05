@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.14, March 2012
+v1.15, April 2012
 
 == Introduction ==
 
@@ -270,6 +270,25 @@ This will enable the daemon to close devices and conserve
 power. Supposing you don't do this, the daemon will time out devices
 with no listeners, so canceling your watch is not strictly necessary.
 But it is good manners.
+
+Another way to use the daemon is with the ?POLL command  To do this, issue
+
+-----------------------------------------------------------------------------
+?WATCH={"enable":true}
+-----------------------------------------------------------------------------
+
+This activates all devices without enabling streaming of reports.  You
+can then say "?POLL;" to poll gpsd's recorded data.
+
+-----------------------------------------------------------------------------
+?POLL;
+{"class":"POLL","time":"2012-04-05T15:00:01.501Z","active":1,
+    "tpv":[{"class":"TPV","tag":"MID7","device":"/dev/ttyUSB0","mode":3,"time":"2012-04-05T15:00:00.000Z","ept":0.005,"lat":40.035083522,"lon":-75.519982905,"alt":166.145,"epx":9.125,"epy":17.778,"epv":34.134,"track":0.0000,"speed":0.000,"climb":0.000,"eps":36.61}],"gst":[{"class":"GST","tag":"MID7","device":"/dev/ttyUSB0","time":"1970-01-01T00:00:00.000Z","rms":0.000,"major":0.000,"minor":0.000,"orient":0.000,"lat":0.000,"lon":0.000,"alt":0.000}],
+     "sky":[{"class":"SKY","tag":"MID7","device":"/dev/ttyUSB0","time":"2012-04-05T15:00:00.000Z","xdop":0.61,"ydop":1.19,"vdop":1.48,"tdop":1.14,"hdop":1.40,"gdop":2.30,"pdop":1.99,"satellites":[{"PRN":26,"el":15,"az":49,"ss":29,"used":true},{"PRN":18,"el":62,"az":315,"ss":31,"used":true},{"PRN":15,"el":60,"az":43,"ss":44,"used":true},{"PRN":21,"el":71,"az":237,"ss":0,"used":false},{"PRN":27,"el":52,"az":94,"ss":40,"used":true},{"PRN":9,"el":48,"az":136,"ss":33,"used":true},{"PRN":22,"el":21,"az":291,"ss":36,"used":true},{"PRN":3,"el":8,"az":303,"ss":25,"used":true}]}]}
+-----------------------------------------------------------------------------
+
+This interface is intended for use with applications like CGI scripts
+that cannot wait on output from the daemon but must poke it into responding.
 
 If you're a clever sort, you're already wondering what the daemon does
 if the application at the other end of the client socket doesn't read data

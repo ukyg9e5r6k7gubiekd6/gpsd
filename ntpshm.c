@@ -627,9 +627,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * is that no GPS lights up more than one of these pins.  By waiting on
      * all of them we remove a configuration switch.
      */
-    while (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) == 0) {
+    while (1) {
 	int ok = 0;
 	char *log = NULL;
+
+        if (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
+	    gpsd_report(LOG_ERROR, "PPS ioctl(TIOCMIWAIT) failed: %d %.40s\n"
+	    	, errno, strerror(errno));
+	    break;
+	}
 
 /*@-noeffect@*/
 #ifdef HAVE_CLOCK_GETTIME
@@ -708,8 +714,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	log = NULL;
 
 	/*@ +ignoresigns */
-	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0)
+	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0) {
+	    gpsd_report(LOG_ERROR, "PPS ioctl(TIOCMGET) failed\n");
 	    break;
+	}
 	/*@ -ignoresigns */
 
 	state = (int)((state & PPS_LINE_TIOC) != 0);
