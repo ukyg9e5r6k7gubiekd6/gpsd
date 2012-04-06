@@ -1615,9 +1615,8 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # Experimental release mechanics using shipper
     # This will ship a freecode metadata update 
-    Utility("ship_release", [tarball], ['shipper -u -m'])
-
-    env.Alias("release", [releaseprep,
+    Utility("ship_release", [tarball], ['shipper -u -m --exclude "login.ibiblio.org:/public/html/catb/esr/"'])
+    env.Alias("ship", [releaseprep,
                           ship_release,
                           upload_tags])
 
