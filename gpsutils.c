@@ -3,6 +3,11 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+/* The strptime prototype is not provided unless explicitly requested.
+ *  So add the define that POSIX says to to avoid: */
+#define _XOPEN_SOURCE
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
