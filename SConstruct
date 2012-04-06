@@ -1613,6 +1613,15 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
                           upload_tags,
                           upload_web])
 
+    # Experimental release mechanics using shipper
+    # This will ship a freecode metadata update 
+    Utility("ship_release", [tarball], ['shipper -u -m'])
+
+    env.Alias("release", [releaseprep,
+                          ship_release,
+                          upload_tags])
+
+
 # The following sets edit modes for GNU EMACS
 # Local Variables:
 # mode:python
