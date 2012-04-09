@@ -5,6 +5,15 @@ guidance on how to cross-build the package.
 
 (This file is marked up in asciidoc.)
 
+== Quick start ==
+
+Under Linux, assuming you have all your build prerequisites in place,
+this line will do:
+
+scons && sudo scons udev-install 
+
+If you get any errors, you need to read the detailed instructions that follow.
+
 == Check your build prerequisites ==
 
 Necessary components for any build:
@@ -202,7 +211,7 @@ footprint. "scons --help" will tell the story; look under "Local Options"
 and consult the source code if in doubt.
 
 Here are a few of the more important feature switches.  Each description
-begins with the default for the xwitch.
+begins with the default for the switch.
 
 pps=yes: for small embedded systems and those without threading,
 it is possible to build gpsd without thread support if you build

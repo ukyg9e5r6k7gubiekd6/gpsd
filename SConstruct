@@ -1524,7 +1524,7 @@ if env['python']:
 # GPS ad libitum.  All is well when you get fix reports each time a GPS
 # is plugged in.
 
-Utility('udev-install', '', [
+Utility('udev-install', 'install', [
     'mkdir -p ' + DESTDIR + '/lib/udev/rules.d',
     'cp $SRCDIR/gpsd.rules ' + DESTDIR + '/lib/udev/rules.d/25-gpsd.rules',
     'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + '/lib/udev/',
