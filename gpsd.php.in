@@ -88,8 +88,9 @@ if (isset($_GET['imgdata']) && $op == 'view'){
 	if ($testmode){
 		$sock = @fsockopen($server, $port, $errno, $errstr, 2);
 		@fwrite($sock, "?WATCH={\"enable\":true}\n");
-		usleep(100);
+		usleep(1000);
 		@fwrite($sock, "?POLL;\n");
+		usleep(1000);
 		for($tries = 0; $tries < 10; $tries++){
 			$resp = @fread($sock, 2000); # SKY can be pretty big
 			if (preg_match('/{"class":"POLL".+}/i', $resp, $m)){
