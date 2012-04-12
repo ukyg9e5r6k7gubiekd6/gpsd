@@ -2296,8 +2296,8 @@ int main(int argc, char *argv[])
 		ssize_t rd;
 
 		while ((rd = read(cfd, buf, sizeof(buf) - 1)) > 0) {
-		    gpsd_report(LOG_IO, "<= control(%d): %s\n", cfd, buf);
 		    buf[rd] = '\0';
+		    gpsd_report(LOG_IO, "<= control(%d): %s\n", cfd, buf);
 		    handle_control(cfd, buf);
 		}
 		gpsd_report(LOG_SPIN, "close(%d) of control socket\n", cfd);
