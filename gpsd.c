@@ -2293,9 +2293,11 @@ int main(int argc, char *argv[])
 	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
 	    if (FD_ISSET(cfd, &control_fds)) {
 		char buf[BUFSIZ];
+		ssize_t rd;
 
-		while (read(cfd, buf, sizeof(buf) - 1) > 0) {
+		while ((rd = read(cfd, buf, sizeof(buf) - 1)) > 0) {
 		    gpsd_report(LOG_IO, "<= control(%d): %s\n", cfd, buf);
+		    buf[rd] = '\0';
 		    handle_control(cfd, buf);
 		}
 		gpsd_report(LOG_SPIN, "close(%d) of control socket\n", cfd);
