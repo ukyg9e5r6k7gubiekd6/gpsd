@@ -6,7 +6,8 @@
 #    ACTION  = either "add" or "remove"
 #    DEVNAME = the full name of the USB device that was just activated
 #
-# It will accept from /etc/sysconfig/gpsd the following config variables:
+# It will accept from /etc/sysconfig/gpsd or /etc/default/gpsd 
+# the following config variables:
 #
 #    CONTROL_SOCKET = location of the gpsd control socket
 #    OPTIONS = options to be passed to gpsd on launch
@@ -24,6 +25,8 @@ export PATH
 
 if [ -r /etc/default/gpsd ]; then
   . /etc/default/gpsd
+  GPSD_OPTIONS=$OPTIONS
+  GPSD_SOCKET=$CONTROL_SOCKET
 elif [ -r /etc/sysconfig/gpsd ]; then
   . /etc/sysconfig/gpsd
   GPSD_OPTIONS=$OPTIONS
