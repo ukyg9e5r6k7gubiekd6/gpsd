@@ -24,7 +24,7 @@ typedef unsigned int speed_t;
  * 3.3: AIS app_id split into DAC and FID
  * 3.4: Timestamps change from seconds since Unix epoch to ISO8601.
  * 3.5: POLL subobject name changes: fixes -> tpv, skyview -> sky.
- *      DEVICE::activated becomes ISO8601 rather thab real.
+ *      DEVICE::activated becomes ISO8601 rather than real.
  * 3.6  VERSION, WATCH, and DEVICES from slave gpsds get "remote" attribute.
  * 3.7  PPS message added to repertoire. SDDBT water depth reported as
  *      negative altitude with Mode 3 set.
