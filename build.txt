@@ -10,7 +10,7 @@ guidance on how to cross-build the package.
 Under Linux, assuming you have all your build prerequisites in place,
 this line will do:
 
-scons && sudo scons udev-install 
+   scons && scons testregress && sudo scons udev-install 
 
 If you get any errors, you need to read the detailed instructions that follow.
 
@@ -227,6 +227,14 @@ pair. Thanks to the multi-platform approach of Qt, it allows the gpsd
 client library to be available on all the Qt supported platforms.
 Please see http://qt.nokia.com/doc/4.6/supported-platforms.html for a
 status of Qt supported platforms as of version 4.6.
+
+== Port and toolchain testing ==
+
+'scons testregress' will run a comprehensive regression-test suite.
+You should do this, at minimum, every time you build from source
+on a new machine type.  GPSD does enough bit-twiddling and floating
+point that it is very sensitive to toolchain problems; you'll want to
+be sure those aren't going to bite you in production.
 
 == Reverting to a clean state ==
 
