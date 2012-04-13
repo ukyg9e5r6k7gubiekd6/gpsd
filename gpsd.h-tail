@@ -214,9 +214,6 @@ struct gps_context_t {
 #define GPS_TIME_VALID  	0x02	/* GPS week/tow is valid */
     /* DGPS status */
     int fixcnt;				/* count of good fixes seen */
-    size_t rtcmbytes;			/* byte count of last RTCM104 report */
-    char rtcmbuf[RTCM_MAX];		/* last RTCM104 report */
-    timestamp_t rtcmtime;		/* timestamp of last RTCM104 report */
     /* timekeeping */
     time_t start_time;			/* local time of daemon startup */
     int leap_seconds;			/* Unix seconds to UTC (GPS-UTC offset) */
@@ -397,7 +394,6 @@ struct gps_device_t {
     struct gps_context_t	*context;
     sourcetype_t sourcetype;
     servicetype_t servicetype;
-    timestamp_t rtcmtime;	/* timestamp of last RTCM104 correction to GPS */
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
 #endif

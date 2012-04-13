@@ -3,7 +3,7 @@
   signal handling.  New PPS message exporting clock drift. The AIVDM
   driver now handles up to 16 interleaved 24A and 24B pair-halves.
   The NMEA driver interprets depth-sounder returns from SDDBT and
-  reports them as negative altitudes. The pps-pin optioon is gone,
+  reports them as negative altitudes. The pps-pin option is gone,
   the PPS code now just accepts any handshake pin.
 
 * Thu 12 Jan 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4

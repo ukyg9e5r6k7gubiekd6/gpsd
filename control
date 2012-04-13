@@ -15,7 +15,8 @@ Description: monitoring daemon for GPSes, AIS radios, and other navigation aids
  distribution includes sample clients, application interface libraries, 
  and test/profiling tools.
 
-XBS-Destinations: savannah, freecode
+XBS-Destinations: ~, savannah, freecode
+XBS-Web-Directory: www
 
 XBS-Project-Tag-List: Communications, Scientific/Engineering, Geographical
 

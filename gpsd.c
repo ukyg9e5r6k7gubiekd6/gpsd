@@ -1517,8 +1517,7 @@ static void consume_packets(struct gps_device_t *device)
 #endif /* SOCKET_EXPORT_ENABLE */
 
 	/*
-	 * If the device provided an RTCM packet, stash it
-	 * in the context structure for use as a future correction.
+	 * If the device provided an RTCM packet, repeat it to all devices.
 	 */
 	if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
 	    if (device->packet.outbuflen > RTCM_MAX) {
@@ -1526,11 +1525,23 @@ static void consume_packets(struct gps_device_t *device)
 			    "overlong RTCM packet (%zd bytes)\n",
 			    device->packet.outbuflen);
 	    } else {
-		context.rtcmbytes = device->packet.outbuflen;
-		memcpy(context.rtcmbuf,
-		       device->packet.outbuffer,
-		       context.rtcmbytes);
-		context.rtcmtime = timestamp();
+		struct gps_device_t *dp;
+		for (dp = devices; dp < devices+MAXDEVICES; dp++) {
+		    if (allocated_device(dp)) {
+/* *INDENT-OFF* */
+			if (dp->device_type->rtcm_writer != NULL) {
+			    if (dp->device_type->rtcm_writer(dp,
+								 (const char *)dp->packet.outbuffer,
+								 dp->packet.outbuflen) == 0)
+				gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
+			    else {
+				gpsd_report(LOG_IO, "<= DGPS: %zd bytes of RTCM relayed.\n",
+					    dp->packet.outbuflen);
+			    }
+			}
+/* *INDENT-ON* */
+		    }
+		}
 	    }
 	}
 
@@ -2312,27 +2323,6 @@ int main(int argc, char *argv[])
 	for (device = devices; device < devices + MAXDEVICES; device++) {
 	    if (!allocated_device(device))
 		continue;
-
-/* *INDENT-OFF* */
-	    /* pass the current RTCM correction to the GPS if new */
-	    if (device->device_type != NULL) {
-		if (device->gpsdata.gps_fd != -1
-		    && device->context->rtcmbytes > 0
-		    && device->rtcmtime < device->context->rtcmtime
-		    && device->device_type->rtcm_writer != NULL) {
-		    if (device->device_type->rtcm_writer(device,
-							  device->context->rtcmbuf,
-							  device->context->rtcmbytes) ==
-			0)
-			gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
-		    else {
-			device->rtcmtime = timestamp();
-			gpsd_report(LOG_IO, "<= DGPS: %zd bytes of RTCM relayed.\n",
-				    device->context->rtcmbytes);
-		    }
-		}
-	    }
-/* *INDENT-ON* */
 
 	    if (device->gpsdata.gps_fd >= 0) {
 		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))
