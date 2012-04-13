@@ -1520,7 +1520,7 @@ with a different layout, deprecated in <<IMO289>>.
 The last two fields may repeat to describe up to 28 subcargos. The count
 of repetitions must be computed from the message payload length.
 
-For cargounit codes, see the description of the IMO236 variant of 
+For cargo unit codes, see the description of the IMO236 variant of 
 this message.
 
 .Cargo Codes
