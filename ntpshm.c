@@ -184,6 +184,7 @@ static int ntpshm_alloc(struct gps_context_t *context)
 
 	    memset((void *)context->shmTime[i], 0, sizeof(struct shmTime));
 	    context->shmTime[i]->mode = 1;
+	    context->shmTime[i]->leap = LEAP_NOTINSYNC;
 	    context->shmTime[i]->precision = -1;	/* initially 0.5 sec */
 	    context->shmTime[i]->nsamples = 3;	/* stages of median filter */
 
@@ -250,6 +251,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
     shmTime->clockTimeStampUSec = (int)microseconds;
     shmTime->receiveTimeStampSec = (time_t) tv.tv_sec;
     shmTime->receiveTimeStampUSec = (int)tv.tv_usec;
+    shmTime->leap = session->context->leap_notify;
     /* setting the precision here does not seem to help anything, too
      * hard to calculate properly anyway.  Let ntpd figure it out.
      * Any NMEA will be about -1 or -2. 
@@ -353,6 +355,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->clockTimeStampUSec = (int)microseconds;
     shmTimeP->receiveTimeStampSec = (time_t) tv->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
+    shmTimeP->leap = session->context->leap_notify;
     /* precision is a placebo, ntpd does not really use it
      * real world accuracy is around 16uS, thus -16 precision */
     shmTimeP->precision = -16;
@@ -846,7 +849,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* chrony expects tv-sec since Jan 1970 */
 	    /* FIXME!! offset is double of the error from local time */
 	    sample.pulse = 0;
-	    sample.leap = 0;
+	    sample.leap = session->context->leap_notify;
 	    sample.magic = SOCK_MAGIC;
 #if defined(HAVE_SYS_TIMEPPS_H)
             if ( 0 <= session->kernelpps_handle) {

@@ -706,10 +706,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_18.DN = (words[8] & 0x0000FF);
 		/* leap second future */
 		subp->sub4_18.lsf = (int8_t)((words[9] >> 16) & 0x0000FF);
-		gpsd_report(LOG_INF,
-		    "50B: SF:4-18 leap-seconds:%d lsf:%d WNlsf:%u "
-		    "DN:%d\n",
-			    subp->sub4_18.leap, subp->sub4_18.lsf, subp->sub4_18.WNlsf, subp->sub4_18.DN);
+
 		gpsd_report(LOG_PROG,
 		    "50B: SF:4-18 a0:%.5g a1:%.5g a2:%.5g a3:%.5g "
 		    "b0:%.5g b1:%.5g b2:%.5g b3:%.5g "
@@ -723,10 +720,20 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 			subp->sub4_18.d_tot, subp->sub4_18.WNt,
 			subp->sub4_18.leap, subp->sub4_18.WNlsf,
 			subp->sub4_18.DN, subp->sub4_18.lsf);
-		if (subp->sub4_18.leap != subp->sub4_18.lsf) {
-		    gpsd_report(LOG_PROG,
-			"50B: SF:4-18 leap-second change coming\n");
-		}
+
+#ifdef NTPSHM_ENABLE
+		if ((subp->sub4_18.WNt == subp->sub4_18.WNlsf) &&
+		    (subp->sub4_18.DN == 1 )) {
+		   if ( subp->sub4_18.leap < subp->sub4_18.lsf )
+			session->context->leap_notify = LEAP_ADDSECOND;
+		   else if ( subp->sub4_18.leap > subp->sub4_18.lsf )
+			session->context->leap_notify = LEAP_DELSECOND;
+		   else
+			session->context->leap_notify = LEAP_NOWARNING;
+		} else
+		   session->context->leap_notify = LEAP_NOWARNING;
+#endif /* NTPSHM_ENABLE */
+
 		session->context->leap_seconds = (int)subp->sub4_18.leap;
 		session->context->valid |= LEAP_SECOND_VALID;
 		break;

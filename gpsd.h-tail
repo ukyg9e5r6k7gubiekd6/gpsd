@@ -217,6 +217,7 @@ struct gps_context_t {
     /* timekeeping */
     time_t start_time;			/* local time of daemon startup */
     int leap_seconds;			/* Unix seconds to UTC (GPS-UTC offset) */
+    int leap_notify;			/* notification state from subframe */
     unsigned short gps_week;            /* GPS week, actually 10 bits */
     double gps_tow;                     /* GPS time of week, actually 19 bits */
     int century;			/* for NMEA-only devices without ZDA */
@@ -837,6 +838,15 @@ static /*@unused@*/ inline void barrier(void) {
 #endif /* S_SPLINT_S */
 #endif /* defined(__GNUC__) && defined(__x86_64__) */
 }
+
+/* ntpshm.c */
+#ifdef NTPSHM_ENABLE
+#define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
+#define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
+#define LEAP_DELSECOND  0x2     /* last minute of day has 59 seconds */
+#define LEAP_NOTINSYNC  0x3     /* overload, clock is free running */
+extern int leap_notify;
+#endif /* NTPSHM_ENABLE */
 
 #endif /* _GPSD_H_ */
 // Local variables:
