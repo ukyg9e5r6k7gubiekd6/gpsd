@@ -1531,12 +1531,12 @@ static void consume_packets(struct gps_device_t *device)
 /* *INDENT-OFF* */
 			if (dp->device_type->rtcm_writer != NULL) {
 			    if (dp->device_type->rtcm_writer(dp,
-								 (const char *)dp->packet.outbuffer,
-								 dp->packet.outbuflen) == 0)
+								 (const char *)device->packet.outbuffer,
+								 device->packet.outbuflen) == 0)
 				gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
 			    else {
 				gpsd_report(LOG_IO, "<= DGPS: %zd bytes of RTCM relayed.\n",
-					    dp->packet.outbuflen);
+					    device->packet.outbuflen);
 			    }
 			}
 /* *INDENT-ON* */
