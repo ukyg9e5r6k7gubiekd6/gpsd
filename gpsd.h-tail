@@ -217,12 +217,12 @@ struct gps_context_t {
     /* timekeeping */
     time_t start_time;			/* local time of daemon startup */
     int leap_seconds;			/* Unix seconds to UTC (GPS-UTC offset) */
-    int leap_notify;			/* notification state from subframe */
     unsigned short gps_week;            /* GPS week, actually 10 bits */
     double gps_tow;                     /* GPS time of week, actually 19 bits */
     int century;			/* for NMEA-only devices without ZDA */
     int rollovers;			/* rollovers since start of run */
 #ifdef NTPSHM_ENABLE
+    int leap_notify;			/* notification state from subframe */
     bool enable_ntpshm;
     /* we need the volatile here to tell the C compiler not to
      * 'optimize' as 'dead code' the writes to SHM */

@@ -103,12 +103,12 @@ void gps_context_init(struct gps_context_t *context)
 	.fixcnt	        = 0,
 	.start_time     = 0,
 	.leap_seconds   = 0,
-	.leap_notify    = LEAP_NOWARNING,
 	.gps_week	= 0,
 	.gps_tow        = 0,
 	.century	= 0,
 	.rollovers      = 0,
 #ifdef NTPSHM_ENABLE
+	.leap_notify    = LEAP_NOWARNING,
 	.enable_ntpshm  = false,
 	.shmTime	= {0},
 	.shmTimeInuse   = {0},
