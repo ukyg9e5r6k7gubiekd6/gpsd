@@ -19,6 +19,7 @@
 extern const struct gps_type_t zodiac_binary;
 extern const struct gps_type_t ubx_binary;
 extern const struct gps_type_t sirf_binary;
+extern const struct gps_type_t nmea2000;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -933,7 +934,6 @@ static const struct gps_type_t fury = {
 
 #endif /* FURY_ENABLE */
 
-
 #ifdef RTCM104V2_ENABLE
 /**************************************************************************
  *
@@ -1389,7 +1389,6 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #endif /* AIVDM_ENABLE */
 #endif /* NMEA_ENABLE */
 
-
 #ifdef EVERMORE_ENABLE
     &evermore_binary,
 #endif /* EVERMORE_ENABLE */
@@ -1425,6 +1424,10 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */
+
+#ifdef NMEA2000_ENABLE
+    &nmea2000,
+#endif /* NMEA2000_ENABLE */
 
 #ifdef RTCM104V2_ENABLE
     &rtcm104v2,

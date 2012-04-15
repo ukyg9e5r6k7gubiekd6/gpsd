@@ -113,6 +113,7 @@ boolopts = (
     ("tsip",          True,  "Trimble TSIP support"),
     ("ubx",           True,  "UBX Protocol support"),
     ("fury",          True,  "Jackson Labs Fury and Firefly support"),
+    ("nmea2000",      True,  "NMEA2000/CAN support"),
     # Non-GPS protocols
     ("aivdm",         True,  "AIVDM support"),
     ("gpsclock",      True,  "GPSClock support"),
@@ -665,7 +666,8 @@ libgpsd_sources = [
     "driver_geostar.c",
     "driver_italk.c",
     "driver_navcom.c",
-    "driver_nmea.c",
+    "driver_nmea0183.c",
+    "driver_nmea2000.c",
     "driver_oncore.c",
     "driver_rtcm2.c",
     "driver_rtcm3.c",
