@@ -1201,6 +1201,14 @@ uninstall = env.Command('uninstall', '', Flatten(Uninstall(Alias("install"))) or
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)
 
+# Target selection for '.' is badly broken. This is a general scons problem,
+# not a glitch in this particular recipe. Avoid triggering the bug.
+
+def error_action(target, source, env):
+    from SCons.Errors import UserError
+    raise UserError, "Target selection for '.' is broken."
+AlwaysBuild(Alias(".", [], error_action))
+
 # Utility productions
 
 def Utility(target, source, action):
@@ -1620,7 +1628,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     env.Alias("ship", [releaseprep,
                           ship_release,
                           upload_tags])
-
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
