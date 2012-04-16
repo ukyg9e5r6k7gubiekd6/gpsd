@@ -181,6 +181,10 @@ by specifying CC=gcc4 before the build command.  The rtcm2.c file
 confuses the gcc-3.4.[23] optimizer at -O2 level, making it generate
 incorrect code.
 
+Do not try to use "scons ."; something in the built-in
+target-selection algorithm for the '.' target is very broken and the
+results will be unexpected and unhappy.
+
 After building, please run 'scons testregress' to test the correctness
 of the build.  It is not necessary to install first, but you do need
 to have "." in your $PATH to run regressions uninstalled.  Python is
@@ -241,6 +245,10 @@ be sure those aren't going to bite you in production.
 The scons equivalent of 'make clean' is 'scons -c'. This will revert
 your source tree to a clean state as though you had just cloned or
 downloaded it.
+
+Do not try to use "scons -c ."; something in the built-in
+target-selection algorithm for the '.' target is very broken and it
+will try to remove installation targets in root space.
 
 == Cross-building ==
 
