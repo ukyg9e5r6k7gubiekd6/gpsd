@@ -1455,6 +1455,7 @@ webpages = Split('''www/installation.html
     www/hardware.html
     www/performance/performance.html
     www/internals.html
+    www/cycle.png
     ''') + map(lambda f: f[:-3], glob.glob("www/*.in"))
 
 www = env.Alias('www', webpages)
