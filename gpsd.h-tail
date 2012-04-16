@@ -224,6 +224,10 @@ struct gps_context_t {
     int rollovers;			/* rollovers since start of run */
 #ifdef NTPSHM_ENABLE
     int leap_notify;			/* notification state from subframe */
+#define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
+#define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
+#define LEAP_DELSECOND  0x2     /* last minute of day has 59 seconds */
+#define LEAP_NOTINSYNC  0x3     /* overload, clock is free running */
     bool enable_ntpshm;
     /* we need the volatile here to tell the C compiler not to
      * 'optimize' as 'dead code' the writes to SHM */
@@ -839,15 +843,6 @@ static /*@unused@*/ inline void barrier(void) {
 #endif /* S_SPLINT_S */
 #endif /* defined(__GNUC__) && defined(__x86_64__) */
 }
-
-/* ntpshm.c */
-#ifdef NTPSHM_ENABLE
-#define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
-#define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
-#define LEAP_DELSECOND  0x2     /* last minute of day has 59 seconds */
-#define LEAP_NOTINSYNC  0x3     /* overload, clock is free running */
-extern int leap_notify;
-#endif /* NTPSHM_ENABLE */
 
 #endif /* _GPSD_H_ */
 // Local variables:
