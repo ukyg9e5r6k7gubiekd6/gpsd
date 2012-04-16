@@ -882,9 +882,6 @@ binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gpxlogger, lcdgps]
 if ncurseslibs:
     binaries += [cgps, gpsmon]
 
-clockwatcher = env.Program('clockwatcher', ['clockwatcher.c'], parse_flags=gpslibs)
-env.Depends(clockwatcher, compiled_gpslib)
-
 # Test programs
 test_float = env.Program('test_float', ['test_float.c'])
 test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpsdlibs)
