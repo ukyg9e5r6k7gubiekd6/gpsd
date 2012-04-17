@@ -6,8 +6,8 @@ for both GPS satellite downlink transmissions and the RTCM104 version 2
 format for broadcasting differential-GPS corrections.
 
 The purpose of this protocol is to support analyzing a serial bit
-stream without byte framing into parity-checked packets.
-Interpretation of the packets is left to an upper layer. Note that
+stream without byte framing into parity-checked 30-bit words.
+Interpretation of the words is left to an upper layer. Note that
 RTCM104 version 3 does *not* use this code; it assumes a byte-oriented
 underlayer.
 

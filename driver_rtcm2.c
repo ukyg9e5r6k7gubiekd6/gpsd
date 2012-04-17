@@ -23,7 +23,7 @@ Specification.  This code relies on the lower-level packet-assembly
 code for that protocol in isgps.c.
 
 The lower layer's job is done when it has assembled a message of up to
-33 words of clean parity-checked data.  At this point this upper layer
+33 30-bit words of clean parity-checked data.  At this point this upper layer
 takes over.  struct rtcm2_msg_t is overlaid on the buffer and the bitfields
 are used to extract pieces of it.  Those pieces are copied and (where
 necessary) reassembled into a struct rtcm2_t.
