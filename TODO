@@ -28,14 +28,17 @@ month is quite low.
 
 To reproduce, "gpsd -D 5 -N -n udp://192.168.1.3:12346" (only
 works inside thyrsus.com) and run xgps. Probably some kind of
-packet aggregation issue.
+packet aggregation issue as it doesn't happen with test logs.
 
 *** Driver issues
 
-**** There are architecture issues in the binary drivers.
+**** There are portability issues in some binary drivers.
 
-Some fail regression tests on non-x86 architectures (not SiRF or
-NMEA, thankfully).  Bernd Zeimetz has the check logs.
+The italk, ntrip, tsip, ublox, and rtcm2 binary drivers fail port
+tests on the following architectures: armel, armhf, mips, powerpc,
+ppc64, s390, s390x, and sparc.  This could indicate toolchain issues,
+endianness/word-length problems, or glitches produced by running a
+32-bit userland over a 64-bit kernel.
 
 **** gpsctl -b should work on UBX, but does not.
 
@@ -53,7 +56,8 @@ different types in them, and a copy of the RTCM3 standard at latest revision
 
 This one is mine and Kurt Schwehr's. Support is currently nearly
 complete; the only missing cases are a handful of IMO 236 and IMO 289
-message 6 and 8 subtypes.
+message 6 and 8 subtypes - specifically, 6/23, 8/21. 8/22, 8/24, and
+8/26.
 
 **** Addressed case of AIS Types 25 and 26 is not handled.
 
