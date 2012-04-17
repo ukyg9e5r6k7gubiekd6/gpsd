@@ -160,7 +160,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     datalen -= 2;
 
     /*@ -usedef @*/
-    buf2[0] = '\0';	/* prevent 'Assigned value is garbage or undefined' from scan-build */
+    /* prevent 'Assigned value is garbage or undefined' from scan-build */
+    memset(buf2, '\0', sizeof(buf2));
     tp = buf2;
     for (i = 0; i < (size_t) datalen; i++) {
 	*tp = *cp++;
