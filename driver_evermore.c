@@ -333,8 +333,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	 * and status for each channel from the chip.  We cannot get
 	 * codephase or carrierphase.
 	 */
-#define SBITS(sat, s, l)	sbits((char *)buf, 10 + (sat*14) + s, l)
-#define UBITS(sat, s, l)	ubits((char *)buf, 10 + (sat*14) + s, l)
+#define SBITS(sat, s, l)	sbebits((char *)buf, 10 + (sat*14) + s, l)
+#define UBITS(sat, s, l)	ubebits((char *)buf, 10 + (sat*14) + s, l)
 	for (k = 0; k < visible; k++) {
 	    int prn = (int)UBITS(k, 4, 5);
 	    /* this is so we can tell which never got set */

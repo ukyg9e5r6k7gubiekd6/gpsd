@@ -20,7 +20,7 @@
 
 #define BITS_PER_BYTE	8
 
-uint64_t ubits(char buf[], unsigned int start, unsigned int width)
+uint64_t ubebits(char buf[], unsigned int start, unsigned int width)
 /* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian uint64_t */
 {
     uint64_t fld = 0;
@@ -34,7 +34,7 @@ uint64_t ubits(char buf[], unsigned int start, unsigned int width)
 	fld |= (unsigned char)buf[i];
     }
 #ifdef DEBUG
-    (void)printf("%d:%d from %s:\n", start, width, gpsd_hexdump(buf, 32));
+    (void)printf("ubebits: %d:%d from %s:\n", start, width, gpsd_hexdump(buf, 32));
 #endif
 
 #ifdef DEBUG
@@ -64,13 +64,13 @@ uint64_t ubits(char buf[], unsigned int start, unsigned int width)
     return fld;
 }
 
-int64_t sbits(char buf[], unsigned int start, unsigned int width)
+int64_t sbebits(char buf[], unsigned int start, unsigned int width)
 /* extract a bitfield from the buffer as a signed big-endian long */
 {
-    uint64_t fld = ubits(buf, start, width);
+    uint64_t fld = ubebits(buf, start, width);
 
 #ifdef __UNUSED_DEBUG__
-    (void)fprintf(stderr, "sbits(%d, %d) extracts %llx\n", start, width, fld);
+    (void)fprintf(stderr, "sbebits(%d, %d) extracts %llx\n", start, width, fld);
 #endif /* __UNUSED_DEBUG__ */
     /*@ +relaxtypes */
     if (fld & (1LL << (width - 1))) {
@@ -82,7 +82,7 @@ int64_t sbits(char buf[], unsigned int start, unsigned int width)
 	/*@ +shiftimplementation @*/
     }
 #ifdef __UNUSED_DEBUG__
-    (void)fprintf(stderr, "sbits(%d, %d) returns %lld\n", start, width,
+    (void)fprintf(stderr, "sbebits(%d, %d) returns %lld\n", start, width,
 		  (int64_t)fld);
 #endif /* __UNUSED_DEBUG__ */
     return (int64_t)fld;
