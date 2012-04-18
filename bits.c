@@ -88,3 +88,53 @@ int64_t sbits(char buf[], unsigned int start, unsigned int width)
     return (int64_t)fld;
     /*@ -relaxtypes */
 }
+
+#ifdef __UNUSED__
+u_int16_t swap_u16(u_int16_t i)
+/* byte-swap a 16-bit unsigned int */
+{
+    u_int8_t c1, c2;
+ 
+    c1 = i & 255;
+    c2 = (i >> 8) & 255;
+ 
+    return (c1 << 8) + c2;
+}
+ 
+u_int32_t swap_u32(u_int32_t i) 
+/* byte-swap a 32-bit unsigned int */
+{
+    u_int8_t c1, c2, c3, c4;    
+ 
+    c1 = i & 255;
+    c2 = (i >> 8) & 255;
+    c3 = (i >> 16) & 255;
+    c4 = (i >> 24) & 255;
+ 
+    return ((u_int32_t)c1 << 24) + ((u_int32_t)c2 << 16) + ((u_int32_t)c3 << 8) + c4;
+}
+ 
+u_int64_t swap_u64(u_int64_t i) 
+/* byte-swap a 64-bit unsigned int */
+{
+    u_int8_t c1, c2, c3, c4, c5, c6, c7, c8; 
+ 
+    c1 = i & 255;
+    c2 = (i >> 8) & 255;
+    c3 = (i >> 16) & 255;
+    c4 = (i >> 24) & 255;
+    c5 = (i >> 32) & 255;
+    c6 = (i >> 40) & 255;
+    c7 = (i >> 48) & 255;
+    c8 = (i >> 56) & 255;
+ 
+    return ((u_int64_t)c1 << 56) + 
+            ((u_int64_t)c2 << 48) + 
+            ((u_int64_t)c3 << 40) + 
+            ((u_int64_t)c4 << 32) + 
+            ((u_int64_t)c5 << 24) + 
+            ((u_int64_t)c6 << 16) + 
+            ((u_int64_t)c7 << 8) + 
+            c8;
+}
+#endif /* __UNUSED__ */
