@@ -7,18 +7,18 @@
  * a byte index - and width is a bit width.  The width is bounded above by
  * 64 bits.
  *
- * The sbebits() function assumes twos-complement
- * arithmetic. ubebits() and sbebits() assume no padding in
- * integers.
+ * The sbits() function assumes twos-complement arithmetic. ubits()
+ * and sbits() assume no padding in integers.
  */
 #include <assert.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "bits.h"
 
 #define BITS_PER_BYTE	8
 
-uint64_t ubebits(char buf[], unsigned int start, unsigned int width)
+uint64_t ubits(char buf[], unsigned int start, unsigned int width, bool le)
 /* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian uint64_t */
 {
     uint64_t fld = 0;
@@ -41,13 +41,29 @@ uint64_t ubebits(char buf[], unsigned int start, unsigned int width)
     fld &= ~(-1LL << width);
     /*@ +shiftimplementation @*/
 
+    /* was extraction as a little-endian requested? */
+    if (le)
+    {
+	unsigned int i;
+	uint64_t reversed = 0;
+
+	for (i = width; i; --i)
+	{
+	    reversed <<= 1;
+	    if (fld & 1)
+		reversed |= 1;
+	    fld >>= 1;
+	}
+	fld = reversed;
+    }
+
     return fld;
 }
 
-int64_t sbebits(char buf[], unsigned int start, unsigned int width)
+int64_t sbits(char buf[], unsigned int start, unsigned int width, bool le)
 /* extract a bitfield from the buffer as a signed big-endian long */
 {
-    uint64_t fld = ubebits(buf, start, width);
+    uint64_t fld = ubits(buf, start, width, le);
 
     /*@ +relaxtypes */
     if (fld & (1LL << (width - 1))) {
