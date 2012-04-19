@@ -127,6 +127,8 @@ int main(void)
 	{buf, 78, 4, 11,    false, "2 bits crossing 8th to 9th byte (0xfefd)"},
 	{buf, 0,  1,  0,    true,  "first bit of first byte"},
 	{buf, 0,  8,  0x80, true,  "first 8 bits"},
+	{buf, 32, 7,  0x20, true, "first seven bits of fifth byte (0x05)"},
+	{buf, 56, 12, 0xf10,true, "12 bits crossing 7th to 8th bytes (0x08ff)"},
 	/* sporadic tests based on found bugs */
 	{(unsigned char *)"\x19\x23\f6",
 	 7, 2, 2, false, "2 bits crossing 1st to 2nd byte (0x1923)"},
