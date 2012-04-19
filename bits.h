@@ -81,7 +81,7 @@ union long_double {
     (void)memcpy(to, from+2*(s)-2, 2*((e)-(s)+1))
 
 /* bitfield extraction */
-extern uint64_t ubebits(char buf[], unsigned int, unsigned int);
-extern int64_t sbebits(char buf[], unsigned int, unsigned int);
+extern uint64_t ubits(char buf[], unsigned int, unsigned int, bool);
+extern int64_t sbits(char buf[], unsigned int, unsigned int, bool);
 
 #endif /* _GPSD_BITS_H_ */

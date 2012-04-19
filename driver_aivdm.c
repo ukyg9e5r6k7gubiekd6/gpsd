@@ -44,7 +44,7 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
 
     /* six-bit to ASCII */
     for (i = 0; i < count - 1; i++) {
-	newchar = sixchr[ubebits(bitvec, start + 6 * i, 6U)];
+	newchar = sixchr[ubits(bitvec, start + 6 * i, 6U, false)];
 	if (newchar == '@')
 	    break;
 	else
@@ -215,8 +215,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
         ais_context->decoded_frags = 0;
 
 #define BITS_PER_BYTE	8
-#define UBITS(s, l)	ubebits((char *)ais_context->bits, s, l)
-#define SBITS(s, l)	sbebits((char *)ais_context->bits, s, l)
+#define UBITS(s, l)	ubits((char *)ais_context->bits, s, l, false)
+#define SBITS(s, l)	sbits((char *)ais_context->bits, s, l, false)
 #define UCHARS(s, to)	from_sixbit((char *)ais_context->bits, s, sizeof(to), to)
 	ais->type = UBITS(0, 6);
 	ais->repeat = UBITS(6, 2);
