@@ -110,6 +110,7 @@ struct unsigned_test
     unsigned char *buf;
     unsigned int start, width;
     uint64_t expected;
+    bool le;
     char *description;
 };
 
@@ -119,14 +120,14 @@ int main(void)
     /*@ -observertrans -usereleased @*/
     struct unsigned_test *up, unsigned_tests[] = {
 	/* tests using the big buffer */
-	{buf, 0, 1, 0, "first bit of first byte"},
-	{buf, 0, 8, 0x01, "first 8 bits"},
-	{buf, 32, 7, 2, "first seven bits of fifth byte"},
-	{buf, 56, 12, 0x8f, "12 bits crossing 7th to 8th bytes (0x08ff)"},
-	{buf, 78, 4, 11, "2 bits crossing 8th to 9th byte (0xfefd)"},
+	{buf, 0,  1,  0,    false, "first bit of first byte"},
+	{buf, 0,  8,  0x01, false, "first 8 bits"},
+	{buf, 32, 7,  0x02, false, "first seven bits of fifth byte"},
+	{buf, 56, 12, 0x8f, false, "12 bits crossing 7th to 8th bytes (0x08ff)"},
+	{buf, 78, 4, 11,    false, "2 bits crossing 8th to 9th byte (0xfefd)"},
 	/* sporadic tests based on found bugs */
 	{(unsigned char *)"\x19\x23\f6",
-	 7, 2, 2, "2 bits crossing 1st to 2nd byte (0x1923)"},
+	 7, 2, 2, false, "2 bits crossing 1st to 2nd byte (0x1923)"},
     };
 
     unsigned char *sp;
@@ -196,10 +197,11 @@ int main(void)
 	 up <
 	 unsigned_tests + sizeof(unsigned_tests) / sizeof(unsigned_tests[0]);
 	 up++) {
-	uint64_t res = ubits((char *)buf, up->start, up->width, false);
-	(void)printf("ubits(%s, %d, %d, false) %s should be %" PRIx64 ", is %" PRIx64 ": %s\n",
+	uint64_t res = ubits((char *)buf, up->start, up->width, up->le);
+	(void)printf("ubits(%s, %d, %d, %s) %s should be %" PRIx64 ", is %" PRIx64 ": %s\n",
 		     hexdump(buf, strlen((char *)buf)),
-		     up->start, up->width, up->description, up->expected, res,
+		     up->start, up->width, up->le ? "true" : "false",
+		     up->description, up->expected, res,
 		     res == up->expected ? "succeeded" : "FAILED");
     }
 
