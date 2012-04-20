@@ -27,7 +27,6 @@ static uint64_t uL1, uL2;
 static float f1;
 static double d1;
 
-
 static char /*@ observer @*/ *hexdump(const void *binbuf, size_t len)
 {
     static char hexbuf[BUFSIZ];
@@ -115,8 +114,11 @@ struct unsigned_test
 };
 
 /*@ -duplicatequals +ignorequals @*/
-int main(void)
+int main(int argc, char *argv[])
 {
+    bool failures = false;
+    bool quiet = (argc > 1) && (strcmp(argv[1], "--quiet") == 0);
+
     /*@ -observertrans -usereleased @*/
     struct unsigned_test *up, unsigned_tests[] = {
 	/* tests using the big buffer */
@@ -143,72 +145,77 @@ int main(void)
     memcpy(buf + 24, "\x40\x49\x0f\xdb", 4);
     /*@ +observertrans +usereleased @*/
 
-    (void)fputs("Test data:", stdout);
-    for (sp = buf; sp < buf + 28; sp++)
-	(void)printf(" %02x", *sp);
-    (void)putc('\n', stdout);
+    if (!quiet) {
+	(void)fputs("Test data:", stdout);
+	for (sp = buf; sp < buf + 28; sp++)
+	    (void)printf(" %02x", *sp);
+	(void)putc('\n', stdout);
 
-    /* big-endian test */
-    /*@-type@*/
-    printf("Big-endian:\n");
-    sb1 = getsb(buf, 0);
-    sb2 = getsb(buf, 8);
-    ub1 = getub(buf, 0);
-    ub2 = getub(buf, 8);
-    sw1 = getbes16(buf, 0);
-    sw2 = getbes16(buf, 8);
-    uw1 = getbeu16(buf, 0);
-    uw2 = getbeu16(buf, 8);
-    sl1 = getbes32(buf, 0);
-    sl2 = getbes32(buf, 8);
-    ul1 = getbeu32(buf, 0);
-    ul2 = getbeu32(buf, 8);
-    sL1 = getbes64(buf, 0);
-    sL2 = getbes64(buf, 8);
-    uL1 = getbeu64(buf, 0);
-    uL2 = getbeu64(buf, 8);
-    f1 = getbef(buf, 24);
-    d1 = getbed(buf, 16);
-    /*@+type@*/
-    bedumpall();
+	/* big-endian test */
+	/*@-type@*/
+	printf("Big-endian:\n");
+	sb1 = getsb(buf, 0);
+	sb2 = getsb(buf, 8);
+	ub1 = getub(buf, 0);
+	ub2 = getub(buf, 8);
+	sw1 = getbes16(buf, 0);
+	sw2 = getbes16(buf, 8);
+	uw1 = getbeu16(buf, 0);
+	uw2 = getbeu16(buf, 8);
+	sl1 = getbes32(buf, 0);
+	sl2 = getbes32(buf, 8);
+	ul1 = getbeu32(buf, 0);
+	ul2 = getbeu32(buf, 8);
+	sL1 = getbes64(buf, 0);
+	sL2 = getbes64(buf, 8);
+	uL1 = getbeu64(buf, 0);
+	uL2 = getbeu64(buf, 8);
+	f1 = getbef(buf, 24);
+	d1 = getbed(buf, 16);
+	/*@+type@*/
+	bedumpall();
 
-    /* little-endian test */
-    printf("Little-endian:\n");
-    /*@-type@*/
-    sb1 = getsb(buf, 0);
-    sb2 = getsb(buf, 8);
-    ub1 = getub(buf, 0);
-    ub2 = getub(buf, 8);
-    sw1 = getles16(buf, 0);
-    sw2 = getles16(buf, 8);
-    uw1 = getleu16(buf, 0);
-    uw2 = getleu16(buf, 8);
-    sl1 = getles32(buf, 0);
-    sl2 = getles32(buf, 8);
-    ul1 = getleu32(buf, 0);
-    ul2 = getleu32(buf, 8);
-    sL1 = getles64(buf, 0);
-    sL2 = getles64(buf, 8);
-    uL1 = getleu64(buf, 0);
-    uL2 = getleu64(buf, 8);
-    f1 = getlef(buf, 24);
-    d1 = getled(buf, 16);
-    /*@+type@*/
-    ledumpall();
+	/* little-endian test */
+	printf("Little-endian:\n");
+	/*@-type@*/
+	sb1 = getsb(buf, 0);
+	sb2 = getsb(buf, 8);
+	ub1 = getub(buf, 0);
+	ub2 = getub(buf, 8);
+	sw1 = getles16(buf, 0);
+	sw2 = getles16(buf, 8);
+	uw1 = getleu16(buf, 0);
+	uw2 = getleu16(buf, 8);
+	sl1 = getles32(buf, 0);
+	sl2 = getles32(buf, 8);
+	ul1 = getleu32(buf, 0);
+	ul2 = getleu32(buf, 8);
+	sL1 = getles64(buf, 0);
+	sL2 = getles64(buf, 8);
+	uL1 = getleu64(buf, 0);
+	uL2 = getleu64(buf, 8);
+	f1 = getlef(buf, 24);
+	d1 = getled(buf, 16);
+	/*@+type@*/
+	ledumpall();
+    }
 
-
-    (void)printf("Testing bitfield extraction:\n");
+    (void)printf("Testing bitfield extraction\n");
     for (up = unsigned_tests;
 	 up <
 	 unsigned_tests + sizeof(unsigned_tests) / sizeof(unsigned_tests[0]);
 	 up++) {
 	uint64_t res = ubits((char *)buf, up->start, up->width, up->le);
-	(void)printf("ubits(%s, %d, %d, %s) %s should be %" PRIx64 ", is %" PRIx64 ": %s\n",
-		     hexdump(buf, strlen((char *)buf)),
-		     up->start, up->width, up->le ? "true" : "false",
-		     up->description, up->expected, res,
-		     res == up->expected ? "succeeded" : "FAILED");
+	bool success = (res == up->expected);
+	if (!success)
+	    failures = true;
+	if (!success || !quiet)
+	    (void)printf("ubits(%s, %d, %d, %s) %s should be %" PRIx64 ", is %" PRIx64 ": %s\n",
+			 hexdump(buf, strlen((char *)buf)),
+			 up->start, up->width, up->le ? "true" : "false",
+			 up->description, up->expected, res,
+			 success ? "succeeded" : "FAILED");
     }
 
-    exit(0);
+    exit(failures ? 1 : 0);
 }

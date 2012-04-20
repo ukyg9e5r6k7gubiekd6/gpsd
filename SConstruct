@@ -1284,6 +1284,11 @@ audit = env.Alias('audit',
 # Note that the *-makeregress targets re-create the *.log.chk source
 # files from the *.log source files.
 
+# Unit-test the bitfield extractor
+bits_regress = Utility('bits-regress', [test_bits], [
+    '$SRCDIR/test_bits --quiet'
+    ])
+
 # Check that all Python modules compile properly 
 if env['python']:
     def check_compile(target, source, env):
@@ -1411,11 +1416,6 @@ json_regress = Utility('json-regress', [test_json], [
     '$SRCDIR/test_json'
     ])
 
-# Unit-test the bitfield extractor - not in normal tests
-bits_regress = Utility('bits-regress', [test_bits], [
-    '$SRCDIR/test_bits'
-    ])
-
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit', ['valgrind-audit.py'], 'valgrind-audit.py')
 
@@ -1425,6 +1425,7 @@ flocktest = Utility("flocktest", [], "cd devtools; flocktest " + gitrepo)
 # Run all normal regression tests
 check = env.Alias('check', [
     python_compilation_regress,
+    bits_regress,
     gps_regress,
     rtcm_regress,
     aivdm_regress,
