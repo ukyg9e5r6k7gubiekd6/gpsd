@@ -755,7 +755,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	}
 	break;
     case 5:
-	/* Pages 0, dummy almanc for dummy SV 0
+	/* Pages 0, dummy almanac for dummy SV 0
 	 * Pages 1 through 24: almanac data for SV 1 through 24
 	 * Page 25: SV health data for SV 1 through 24, the almanac
 	 * reference time, the almanac reference week number.
