@@ -13,10 +13,9 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #include "bits.h"
-
-#define BITS_PER_BYTE	8
 
 uint64_t ubits(char buf[], unsigned int start, unsigned int width, bool le)
 /* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian uint64_t */
@@ -25,16 +24,16 @@ uint64_t ubits(char buf[], unsigned int start, unsigned int width, bool le)
     unsigned int i;
     unsigned end;
 
-    /*@i1@*/ assert(width <= sizeof(uint64_t) * BITS_PER_BYTE);
-    for (i = start / BITS_PER_BYTE;
-	 i < (start + width + BITS_PER_BYTE - 1) / BITS_PER_BYTE; i++) {
-	fld <<= BITS_PER_BYTE;
+    /*@i1@*/ assert(width <= sizeof(uint64_t) * CHAR_BIT);
+    for (i = start / CHAR_BIT;
+	 i < (start + width + CHAR_BIT - 1) / CHAR_BIT; i++) {
+	fld <<= CHAR_BIT;
 	fld |= (unsigned char)buf[i];
     }
 
-    end = (start + width) % BITS_PER_BYTE;
+    end = (start + width) % CHAR_BIT;
     if (end != 0) {
-	fld >>= (BITS_PER_BYTE - end);
+	fld >>= (CHAR_BIT - end);
     }
 
     /*@ -shiftimplementation @*/
