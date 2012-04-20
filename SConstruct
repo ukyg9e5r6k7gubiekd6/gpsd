@@ -621,6 +621,7 @@ libgps_version = "%d.%d.%d" %(libgps_version_soname, libgps_version_age, libgps_
 
 libgps_sources = [
     "ais_json.c",
+    "bits.c",
     "daemon.c",
     "gpsutils.c",
     "gpsdclient.c",
@@ -642,7 +643,6 @@ if cxx and env['libgpsmm']:
     libgps_sources.append("libgpsmm.cpp")
 
 libgpsd_sources = [
-    "bits.c",
     "bsd_base64.c",
     "crc24q.c",
     "gpsd_json.c",
@@ -893,7 +893,7 @@ env.Depends(test_mkgmtime, compiled_gpslib)
 test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
 test_packet = env.Program('test_packet', ['test_packet.c'], parse_flags=gpsdlibs)
 env.Depends(test_packet, [compiled_gpsdlib, compiled_gpslib])
-test_bits = env.Program('test_bits', ['test_bits.c', 'bits.c'])
+test_bits = env.Program('test_bits', ['test_bits.c'], parse_flags=gpslibs)
 env.Depends(test_bits, [compiled_gpsdlib, compiled_gpslib])
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], parse_flags=gpslibs)
 env.Depends(test_gpsmm, compiled_gpslib)
