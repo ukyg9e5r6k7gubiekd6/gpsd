@@ -19,12 +19,14 @@ static double bilinear(double x1, double y1, double x2, double y2, double x,
 {
     double delta;
 
-    if (y1 == y2 && x1 == x2)
+#define EQ(a, b) (fabs((a) - (b)) < 0.001)
+    if (EQ(y1, y2) && EQ(x1, x2))
 	return (z11);
-    if (y1 == y2 && x1 != x2)
+    if (EQ(y1, y2) && !EQ(x1, x2))
 	return (z22 * (x - x1) + z11 * (x2 - x)) / (x2 - x1);
-    if (x1 == x2 && y1 != y2)
+    if (EQ(x1, x2) && !EQ(y1, y2))
 	return (z22 * (y - y1) + z11 * (y2 - y)) / (y2 - y1);
+#undef EQ
 
     delta = (y2 - y1) * (x2 - x1);
 
@@ -82,8 +84,8 @@ double wgs84_separation(double lat, double lon)
     ilat2 = (ilat < GEOID_ROW - 1) ? ilat + 1 : ilat;
     ilon2 = (ilon < GEOID_COL - 1) ? ilon + 1 : ilon;
 
-    return bilinear(ilon1 * 10. - 180., ilat1 * 10. - 90.,
-		    ilon2 * 10. - 180., ilat2 * 10. - 90.,
+    return bilinear(ilon1 * 10.0 - 180.0, ilat1 * 10.0 - 90.0,
+		    ilon2 * 10.0 - 180.0, ilat2 * 10.0 - 90.0,
 		    lon, lat,
 		    (double)geoid_delta[ilon1 + ilat1 * GEOID_COL],
 		    (double)geoid_delta[ilon2 + ilat1 * GEOID_COL],
