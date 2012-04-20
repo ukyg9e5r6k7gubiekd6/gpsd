@@ -127,7 +127,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 
 /*@+mustfreefresh +usedef@*/
 
-char /*@observer@*/ *netlib_errstr(const int err)
+const char /*@observer@*/ *netlib_errstr(const int err)
 {
     switch (err) {
     case NL_NOSERVICE:

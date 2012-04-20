@@ -702,7 +702,7 @@ extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int,
 				uint32_t[]);
 extern gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *,
 				unsigned int, uint32_t[]);
-extern /*@ observer @*/ char *gpsd_hexdump(/*@null@*/char *, size_t);
+extern /*@ observer @*/ const char *gpsd_hexdump(/*@null@*/char *, size_t);
 # ifdef __cplusplus
 extern "C" {
 # endif
@@ -716,7 +716,7 @@ extern void gpsd_position_fix_dump(struct gps_device_t *,
 extern void gpsd_clear_data(struct gps_device_t *);
 extern socket_t netlib_connectsock(int, const char *, const char *, const char *);
 extern socket_t netlib_localsocket(const char *, int);
-extern char /*@observer@*/ *netlib_errstr(const int);
+extern const char /*@observer@*/ *netlib_errstr(const int);
 extern char /*@observer@*/ *netlib_sock2ip(int);
 
 extern void nmea_tpv_dump(struct gps_device_t *, /*@out@*/char[], size_t);

@@ -8,7 +8,7 @@
 
 #include "gpsd.h"
 
-char /*@ observer @*/ *gpsd_hexdump(char *binbuf, size_t binbuflen)
+const char /*@ observer @*/ *gpsd_hexdump(char *binbuf, size_t binbuflen)
 {
     char *cp;
     bool printable = true;
