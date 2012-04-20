@@ -44,7 +44,6 @@ uint64_t ubits(char buf[], unsigned int start, unsigned int width, bool le)
     /* was extraction as a little-endian requested? */
     if (le)
     {
-	unsigned int i;
 	uint64_t reversed = 0;
 
 	for (i = width; i; --i)
