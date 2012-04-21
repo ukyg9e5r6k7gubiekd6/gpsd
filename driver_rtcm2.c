@@ -65,13 +65,16 @@ BSD terms apply: see the file COPYING in the distribution root for details.
  * Structures for interpreting words in an RTCM-104 2.x message (after
  * parity checking and removing inversion).  Note, these structures
  * are overlayed on the raw data in order to decode them into
- * bitfields; this will fail horribly if your C compiler ever
- * introduces padding between or before bit fields, or between
- * 8-bit-aligned bitfields and character arrays.
+ * bitfields; this will fail horribly if your C compiler introduces
+ * padding between or before bit fields, or between 8-bit-aligned
+ * bitfields and character arrays despite #pragma pack(1).  The right
+ * things happen under gcc 4.x on amd64, i386, ia64, all arm and mips
+ * variants, m68k, and powerpc)
  *
  * (In practice, the only class of machines on which this is likely
  * to fail are word-aligned architectures without barrel shifters.
- * Very few of these are left in 2008.)
+ * Very few of these are left in 2012. By test, we know of s390, s390x,
+ * and sparc.)
  *
  * The RTCM 2.1 standard is less explicit than it should be about signed-integer
  * representations.  Two's complement is specified for some but not all.

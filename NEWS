@@ -1,4 +1,4 @@
-* Sat 14 Apr 2012 Eric S. Raymond <esr@snark.thyrsus.com>
+* Sat 21 Apr 2012 Eric S. Raymond <esr@snark.thyrsus.com>
   If a leap-second warning is available from GPS subframe information
   it is passed to ntpd.
 

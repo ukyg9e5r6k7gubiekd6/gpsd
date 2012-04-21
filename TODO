@@ -32,13 +32,11 @@ packet aggregation issue as it doesn't happen with test logs.
 
 *** Driver issues
 
-**** There are portability issues in some binary drivers.
+**** There are portability issues in the rtcm2 driver
 
-The italk, ntrip, tsip, ublox, and rtcm2 binary drivers fail port
-tests on the following architectures: armel, armhf, mips, powerpc,
-ppc64, s390, s390x, and sparc.  This could indicate toolchain issues,
-endianness/word-length problems, or glitches produced by running a
-32-bit userland over a 64-bit kernel.
+The rtcm2 binary driver fails port testing on the following
+architectures: s390, s390x, and sparc. This is probably due 
+to the compiler not honoring #pragma pack(1).
 
 **** gpsctl -b should work on UBX, but does not.
 

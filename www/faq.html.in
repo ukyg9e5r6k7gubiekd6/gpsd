@@ -863,8 +863,8 @@ replugged, or even until a reboot.</p>
 operating system, tickled by gpsd's unusual autobauding loop and
 serial-parameter changes, can cause problems like this. They may be
 driver-specific bugs, or they may be due to bad interactions between
-ioctl() and select() in the generic tty code. Bugs in the USB chipset
-on your motherboard or in a hub can do it, too.</p>
+ioctl() and select() in the kernel's generic tty code. Bugs in the USB
+chipset on your motherboard or in a hub can do it, too.</p>
 
 <p>Here are some possible fixes:</p>
 
@@ -884,7 +884,9 @@ up relatively often and are usually fixed pretty quickly.</dd>
 You probably do not have a a chip-specific problem if you're using
 a PL23203, as those drivers have been tested a lot.  But we've seen
 reports that were definitely chip-specific on less common chipsets
-such as FTDI.</dd>
+such as FTDI. The CP210x chips are also known to be problematic,
+mainly because the vendor refused to release enough programming
+information to allow a decent open-source driver to be written.</dd>
 
 <dt><b>4. Replace your USB hub</b></dt>
 <dd>Some USB hubs are flaky. You may need to replace yours.</dd>
