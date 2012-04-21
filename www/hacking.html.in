@@ -96,6 +96,14 @@ file in the source distribution.</p>
     <li><a href="#error">Error modeling</a></li>
     <li><a href="#ancient">Ancient history</a></li>
   </ol></li>
+  <li><a href="#newsentence">How to add a new sensor type</a>
+    <li><a href="#newdriver">Driver-level support</a></li>
+    <li><a href="#newjson">JSON output</a></li>
+    <li><a href="#newtest">Updating the test suite</a></li>
+    <li><a href="#newclient">Client-side support</a></li>
+    <li><a href="#newdoc">Documentation</a></li>
+    <li><a href="#newstyle">Points for style</a></li>
+  </ol></li>
   <li><a href="#trouble">Known trouble spots</a>
   <ol>
     <li><a href="#y2k1">The Y2.1K problem and other calendar issues</a></li>
@@ -912,6 +920,117 @@ mid-August 2004 (r256) it was kept in CVS, which was mechanically
 upconverted to Subversion. On 12 March 2010 the Subversion repository was
 converted to git. The external releases from the Subversion era
 still exist as tags.</p>
+
+<h1 id="newsentence">How to add a new sensor type</h1>
+
+<p>GPSD is designed to be relatively easily extensible to support new
+sensor types and sentences.  Still, there's a lot of detail work
+involved.  For your patch to be accepted, you need to do enough of the
+steps that the maintainers won't have to spend large amounts of time
+cleaning up after you.  Here are the things we'll be looking for.
+
+<h2 id="newdriver">Driver-level support</h2>
+
+<p>Your first and most obvious step will be driver support.  You'll
+need to parse the sentences coming in from your sensor and unpack them
+into a substructure that lives inside struct gps_data_t in gps.h.</p>
+
+<p>In the most general case this might require you to 
+<a href="writing-a-driver.html">write a new driver</a>.  We won't
+cover that case here; more usually what you'll be doing is
+adding support for a few new NMEA sentence types.</p>
+
+<p>Usually you'll be able to model your sentence parsing on a handler
+for one of the existing sentence types in driver_nmea0183.c. The part
+of this that requires the most time and care is actually designing the
+structures to unpack the sentence data into.</p>
+
+<p>Do not casually modify existing structures.  Doing this causes an
+ABI break and annoys our application developers.  If you must modify
+an existing structure, put your new members at the end of the
+structure rather than at the beginning or in the middle.</p>
+
+<p>Be aware that bits in the data-validity mask are a scarce resource
+and claim as few of them as possible, no more than one per sentence
+type. If you are adding support for a sensor class with a particularly
+complex repertoire of sentences, please claim only one bit for the
+sensor type, then have your own variant mask or sentence-type field in the
+substructure for that sentence. (See as an example the way AIVDM
+sentences from Marine AIS sensors are handled.)</p>
+
+<h2 id="newjson">JSON output</h2>
+
+<p>Your next step is designing and implementing the code that dumps
+the data from your sensor as JSON objects.  In general each new
+sentence type will need to become a distinct JSON object - but there
+might be AIS-like exceptions if your sensor has particularly complex
+behavior.</p>
+
+<p>This part is not usually complicated. The biggest design issue is
+choosing good names for your object classes and field names; once
+you've done that, writing the dump code is pretty easy.</p>
+
+<p>Be aware that the JSON dialect available for report objects is
+restricted in a couple of ways.  You cannot use the JSON null value,
+and arrays must be homogenous - that is, every element of an array
+must have the same attribute set. These restrictions enable the
+JSON content to fit in C structures.</p>
+
+<p>Support for subobjects and subarrays is available but coding for
+these on the client side is subtle and tricky.  Avoid using these if
+possible; they'll make more work for you on the client side.</p>
+
+<h2 id="newtest">Updating the test suite</h2>
+
+<p>You must supply at least one packet log from the device containing
+typical data, to be added to our regression-test suite.</p>
+
+<p>This is <em>absolutely required</em>.  We maintain GPSD's quality
+by being very rigorous about regression testing.  A device for which
+we can't test the code's correctness is a device we won't try to
+support.</p>
+
+<p>See the FAQ material on <a href="faq.html#logformat">annotating a
+test log</a> for how to do this properly.</p>
+
+<h2 id="newclient">Client-side support</h2>
+
+<p>It's not enough that the daemon emits JSON objects corresponding to
+your sentences. Clients need to be able to handle these, and that means
+our client libraries need to know how to unpack the JSON into
+client-side versions of the data structures updated at driver level
+inside the daemon.</p>
+ 
+<p>This is actually the trickiest part of adding a new sentence. For
+bindings other than the core C one the binding maintainers usually
+handle it, but you must write the C support yourself.</p>
+
+<p>This will require that you learn how to tell GPSD's internal JSON
+parser how to unpack your objects.  This will come down to composing 
+C initializers that control the parse; look in libgps_json.c for
+examples of how to do this.</p>
+
+<h2 id="newdoc">Documentation</h2>
+
+<p>Once you have your JSON emitted by the daemon and parsed by libgps,
+you must deascribe it on the gpsd_json(8) page. This is
+<em>required</em>. The job isn't finished until the documentation is
+done.</p>
+
+<h2 id="newstyle">Points for style</h2>
+
+<p>Audit your code with splint and cppcheck (there are productions in
+the SConstruct file).  Patches that are not just clean but properly
+annotated for static checking will give the maintainers warm
+fuzzy feelings and go right to the front of the queue.</p>
+
+<p>Adding sentence support to the Python binding is usually trivial; 
+if you've stuck to a simple enough design of your JSON object(s) you 
+may not have to do any work at all.  If you have any Python chops,
+looking into this yourself will make the maintainers happy.</p>
+
+<p>Enhancing the test clients so they can display data from your new
+sentence type is a good thing, but not required.</p>
 
 <h1 id="trouble">Known trouble spots</h1>
 
