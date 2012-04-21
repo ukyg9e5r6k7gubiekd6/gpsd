@@ -137,8 +137,9 @@ enum unit gpsd_units(void)
 void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 /* standard parsing of a GPS data source spec */
 {
-    source->server = "localhost";
-    source->port = DEFAULT_GPSD_PORT;
+    /* the casts attempt to head off a -Wwrite-strings warning */
+    source->server = (char *)"localhost";
+    source->port = (char *)DEFAULT_GPSD_PORT;
     source->device = NULL;
 
     /*@-usedef@ Sigh, splint is buggy */
