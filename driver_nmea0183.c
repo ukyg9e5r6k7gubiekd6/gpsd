@@ -915,6 +915,8 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
     session->gpsdata.attitude.acc_z = NAN;
     session->gpsdata.attitude.gyro_x = NAN;
     session->gpsdata.attitude.gyro_y = NAN;
+    session->gpsdata.attitude.temp = NAN;
+    session->gpsdata.attitude.depth = NAN;
     mask |= (ATTITUDE_SET);
 
     gpsd_report(LOG_RAW, "time %.3f, heading %lf (%c).\n",
