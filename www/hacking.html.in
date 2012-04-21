@@ -97,6 +97,7 @@ file in the source distribution.</p>
     <li><a href="#ancient">Ancient history</a></li>
   </ol></li>
   <li><a href="#newsentence">How to add a new sensor type</a>
+  <ol>
     <li><a href="#newdriver">Driver-level support</a></li>
     <li><a href="#newjson">JSON output</a></li>
     <li><a href="#newtest">Updating the test suite</a></li>
