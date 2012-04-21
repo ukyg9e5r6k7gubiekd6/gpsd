@@ -95,6 +95,9 @@ PERMISSIONS
  *      GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
  *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *      IN -- Integrated Navigation (Garmin uses this).
+ *      WI -- Weather instrument (Airmar PB200, Radio Ocean ROWIND, Vaisala WXT520).
+ *      HC -- Heading/compass (Airmar PB200).
+ *      TI -- Turn indicator (Airmar PB200).
  *      EC -- Electronic Chart Display & Information System (ECDIS)
  *      SD -- Depth Sounder
  *      P  -- Vendor-specific sentence
@@ -324,6 +327,12 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = NMEA_VENDOR_LEAD;
 	else if (c == 'I')	/* Seatalk */
 	    lexer->state = SEATALK_LEAD_1;
+	else if (c == 'W')	/* Weather instrument */
+	    lexer->state = WEATHER_LEAD_1;
+	else if (c == 'H')	/* Heading/compass */
+	    lexer->state = HEADCOMP_LEAD_1;
+	else if (c == 'T')	/* Turn indicator */
+	    lexer->state = TURN_LEAD_1;
 	else if (c == 'A')	/* SiRF Ack */
 	    lexer->state = SIRF_ACK_LEAD_1;
 	else if (c == 'E')	/* ECDIS */
@@ -496,6 +505,24 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	break;
     case SEATALK_LEAD_1:
 	if (c == 'I' || c == 'N')	/* II or IN are accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case WEATHER_LEAD_1:
+	if (c == 'I')		/* Weather instrument leader accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case HEADCOMP_LEAD_1:
+	if (c == 'C')		/* Heading/compass leader accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case TURN_LEAD_1:
+	if (c == 'I')		/* Turn indicator leader accepted */
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    lexer->state = GROUND_STATE;

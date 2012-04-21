@@ -25,6 +25,9 @@
    AIS_LEAD_2,		/* seen I of possible marine AIS message */
 
    SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
+   WEATHER_LEAD_1,	/* Weather instrument packet leader 'W' */
+   HEADCOMP_LEAD_1,	/* Heading/compass packet leader 'H' */
+   TURN_LEAD_1,		/* Turn indicator packet leader 'T' */
    ECDIS_LEAD_1,	/* ECDIS packet leader 'E' */
    SOUNDER_LEAD_1,	/* Depth sounder packet leader 'S' */
 #endif /* NMEA_ENABLE */
