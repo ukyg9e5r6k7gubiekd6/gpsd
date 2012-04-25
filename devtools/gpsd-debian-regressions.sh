@@ -20,6 +20,7 @@ OLDPWD=`pwd`
 
 cd ${TMPDIR}
 getbuildlog gpsd $logs || true
+grep -c -- '--- test' * | grep -E ':0$' | sed 's,^gpsd_[^_]*_\([^.]*\)\.log:0,\1: no regressions,'
 grep -- '--- test' * | sed 's,^gpsd_[^_]*_\([^.]*\).*\./test/\([^.]*\).*,\1 \2,' | sort -u
 cd ${OLDPWD}
 rm -rf ${TMPDIR}
