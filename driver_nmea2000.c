@@ -349,7 +349,6 @@ gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     int         l1, l2;
-    //gps_mask_t  mask;
 
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
@@ -386,7 +385,6 @@ gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
 gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
-    //double     lat, lon;
     uint32_t   time;
     uint32_t   date;
     time_t     date1;
@@ -683,7 +681,7 @@ const struct gps_type_t nmea2000 = {
     .packet_type    = NMEA2000_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_NOFLAGS,	/* no rollover or other flags */
     .trigger	    = NULL,		/* detect their main sentence */
-    .channels       = 0,		/* not an actual GPS at all */
+    .channels       = 12,		/* not an actual GPS at all */
     .probe_detect   = NULL,
     .get_packet     = nmea2000_get,	/* how to get a packet */
     .parse_packet   = nmea2000_parse_input,	/* how to interpret a packet */
