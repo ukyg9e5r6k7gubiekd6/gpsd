@@ -25,6 +25,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-L </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-n </arg>
       <arg choice='opt'>-l <replaceable>logfile</replaceable></arg>
       <arg choice='opt'>-t <replaceable>driver-prefix</replaceable></arg>
       <arg choice='opt'>
@@ -102,6 +103,9 @@ with individual GPS types.</para>
 immediately on device open.  This may be useful is, for example,
 you want to capture the startup message from a device that displays
 firmware version information there.</para>
+
+<para>The -n option forces gpsmon to request nmea183 packets instead of the
+raw datastream from gpsd.</para>
 
 <para>The -t option sets up a fallback type. Give it a string that
 is a distinguishing prefix of exactly one driver type name; this will

@@ -436,6 +436,8 @@ static void onsig(int sig UNUSED)
 
 #define WATCHRAW	"?WATCH={\"raw\":2}\r\n"
 #define WATCHRAWDEVICE	"?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n"
+#define WATCHNMEA	"?WATCH={\"nmea\":true}\r\n"
+#define WATCHNMEADEVICE	"?WATCH={\"nmea\":true,\"device\":\"%s\"}\r\n"
 
 int main(int argc, char **argv)
 {
@@ -449,12 +451,13 @@ int main(int argc, char **argv)
     unsigned char buf[BUFLEN];
     char line[80], *explanation, *p;
     int bailout = 0, matches = 0;
+    bool nmea = false;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "D:LVhl:t:?")) != -1) {
+    while ((option = getopt(argc, argv, "D:LVhl:nt:?")) != -1) {
 	switch (option) {
 	case 'D':
 	    context.debug = atoi(optarg);
@@ -529,12 +532,15 @@ int main(int argc, char **argv)
 	    }
 	    active = NULL;
 	    break;
+	case 'n':
+	    nmea = true;
+	    break;
 	case 'h':
 	case '?':
 	default:
 	    (void)
 		fputs
-		("usage:  gpsmon [-?hVl] [-D debuglevel] [-t type] [server[:port:[device]]]\n",
+		("usage:  gpsmon [-?hVln] [-D debuglevel] [-t type] [server[:port:[device]]]\n",
 		 stderr);
 	    exit(1);
 	}
@@ -567,7 +573,11 @@ int main(int argc, char **argv)
 	    exit(1);
 	}
 	if (source.device != NULL) {
-	    (void)gps_send(&session.gpsdata, WATCHRAWDEVICE, source.device);
+	    if (nmea) {
+	        (void)gps_send(&session.gpsdata, WATCHNMEADEVICE, source.device);
+	    } else {
+	        (void)gps_send(&session.gpsdata, WATCHRAWDEVICE, source.device);
+	    }
 	    /*
 	     *  The gpsdata.dev member is filled only in JSON mode,
 	     *  but we are in super-raw mode.
@@ -575,8 +585,13 @@ int main(int argc, char **argv)
 	    (void)strlcpy(session.gpsdata.dev.path, source.device,
 			  sizeof(session.gpsdata.dev.path));
 	} else {
-	    (void)gps_send(&session.gpsdata, WATCHRAW);
-	    session.gpsdata.dev.path[0] = '\0';
+	    if (nmea) {
+	        (void)gps_send(&session.gpsdata, WATCHNMEA);
+		session.gpsdata.dev.path[0] = '\0';
+	    } else {
+	        (void)gps_send(&session.gpsdata, WATCHRAW);
+		session.gpsdata.dev.path[0] = '\0';
+	    }
 	}
 	serial = false;
     } else {
