@@ -88,7 +88,6 @@ GPSD Frequently Asked Questions
 <li><a href='#web'>How do I get gpsd data into a web page?</a></li>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
 <li><a href='#willitwork'>Will this GPS work? It's not on the hardware list.</a></li>
-<li><a href='#nmea2000'>Does gpsd support NMEA2000?.</a></li>
 <li><a href='#conflict'>Why does GPSD interfere with non-GPS USB devices?</a></li>
 <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
 <li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a></li>
@@ -774,22 +773,6 @@ drivers for the product - these often hint at which bridge chip is used, if the
 specifications don't say so. A receiver claiming mac compatibility is usually
 based on one of the common bridge chips from FTDI, Prolific or Silicon
 Laboratories. These just work.</p>
-
-<h1 id='nmea2000'>Does gpsd support NMEA2000?</h1>
-
-<p>Not yet. NMEA2000 is not a byte-stream protocol; it can't be shipped over
-serial or USB links. It relies on a message-oriented physical layer
-called Controller Area Network (CAN) that is widely used to network
-automotive electronics.  Without hardware mediation to map the
-message into self-describing packets on a serial link, there's no
-way gpsd can see these.</p>
-
-<p>There is early-stage Linux kernel support that talks to a CAN
-networking card. As of March 2012 we've had code for NMEA200 support
-submitted, but in a form that is difficult to integrate with GPSD's
-architecture. Merging it is going to take time and some tricky
-refactoring. There are also some headache-inducing issues around 
-how it is to be regression-tested.</p>
 
 <h1 id='conflict'>Why does GPSD interfere with non-GPS USB devices?</h1>
 

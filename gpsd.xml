@@ -101,8 +101,9 @@ that speaks either the standard textual NMEA 0183 protocol, or the
 (differing) extended NMEA dialects used by MKT-3301, iTrax, Motorola
 OnCore, Sony CXD2951, and Ashtech/Thales devices.  It can also
 interpret the binary protocols used by EverMore, Garmin, Navcom,
-Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS devices. It can read
-heading and attitude information from the Oceanserver 5000 orv TNT
+Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS devices. Under Linux 
+it can read NMEA2000 packets through the kernel CAN socket. It can read
+heading and attitude information from the Oceanserver 5000 or TNT
 Revolution digital compasses.</para>
 
 <para>The GPS reporting formats supported by your instance of
@@ -857,12 +858,12 @@ Text following # on a line is ignored.  Blank lines are ignored.</para>
 </refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title>
 
-<para>The official NMEA protocol standard is available on paper from
-the National Marine Electronics Association, but is proprietary and
-expensive; the maintainers of <application>gpsd</application> have
-made a point of not looking at it.  The GPSD project website links to
-several documents that collect publicly disclosed information about
-the protocol.</para>
+<para>The official NMEA protocol standards for NMEA0183 and NMEA2000
+are available from the National Marine Electronics Association, but are
+proprietary and expensive; the maintainers of
+<application>gpsd</application> have made a point of not looking at
+them.  The GPSD project website links to several documents that collect
+publicly disclosed information about the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
 sentences: 
@@ -881,8 +882,8 @@ some Ashtech GPSes.</para>
 degrees, not the hybrid degree/minute format described in the NMEA
 standard.</para>
 
-<para>Differential-GPS corrections are conveyed by the RTCM-104
-protocol. The applicable standard for RTCM-104 V2 is <citetitle>RTCM
+<para>Differential-GPS corrections are conveyed by the RTCM
+protocols. The applicable standard for RTCM-104 V2 is <citetitle>RTCM
 Recommended Standards for Differential GNSS (Global Navigation
 Satellite) Service</citetitle> RTCM Paper 136-2001/SC 104-STD.  The
 applicable standard for RTCM-104 V3 is <citetitle>RTCM Standard
@@ -908,7 +909,7 @@ understood by this program is defined in Section 20 (Appendix II) of
 the IS-GPS-200E, <citetitle>GPS NAVIGATION DATA STRUCTURE FOR DATA,
 D(t)</citetitle></para>
 
-<para>The API for PPS time service is speciied by RFC 2783,
+<para>The API for PPS time service is specified by RFC 2783,
 <citetitle>Pulse-Per-Second API for UNIX-like Operating Systems,
 Version 1.0</citetitle></para>
 

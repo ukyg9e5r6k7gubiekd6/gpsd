@@ -1,6 +1,7 @@
 * Sat 21 Apr 2012 Eric S. Raymond <esr@snark.thyrsus.com>
   If a leap-second warning is available from GPS subframe information
-  it is passed to ntpd.
+  it is passed to ntpd. NMEA2000 is now supported via the Linux kernel CAN
+  interface.
 
 * Sat 14 Apr 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.5
   Use pselect when it's available to cut down on wakeups and improve
