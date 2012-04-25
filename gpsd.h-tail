@@ -349,6 +349,7 @@ typedef enum {source_unknown,
 	      source_tcp,	/* TCP/IP stream: case detected but not used */
 	      source_udp,	/* UDP stream: case detected but not used */
 	      source_gpsd,	/* Remote gpsd instance over TCP/IP */
+	      source_nmea2000,	/* potential GPS source, fixed CAN format */
 } sourcetype_t;
 
 /*
@@ -357,7 +358,8 @@ typedef enum {source_unknown,
 typedef enum {service_unknown,
 	      service_sensor,
 	      service_dgpsip,
-	      service_ntrip
+	      service_ntrip,
+	      service_nmea2000
 } servicetype_t;
 
 /*
@@ -576,7 +578,22 @@ struct gps_device_t {
 	    int pps_offset_ns;
 	} oncore;
 #endif /* ONCORE_ENABLE */
-
+#ifdef NMEA2000_ENABLE
+	struct {
+	    unsigned int can_msgcnt;
+	    unsigned int unit;
+	    unsigned int unit_valid;
+	    int mode;
+	    unsigned int mode_valid;
+	    unsigned int idx;
+	    unsigned int ptr;
+	    unsigned int fast_packet_len;
+	    int type;
+	    void *workpgn;
+	    void *pgnlist;
+	    unsigned char sid[8];
+	} nmea2000;
+#endif /* NMEA2000_ENABLE */
 	/*
 	 * This is not conditionalized on RTCM104_ENABLE because we need to
 	 * be able to build gpsdecode even when RTCM support is not
