@@ -124,7 +124,7 @@ static int print_data(unsigned char *buffer, int len, PGN *pgn)
     return(0);
 }
 
-
+#if 0
 static uint32_t get16(uint8_t *bu)
 {
     uint32_t val, x;
@@ -175,6 +175,7 @@ static uint64_t get64(uint8_t *bu)
     x     =  bu[ 7]; x = x << 56; val |=  x;
     return(val);
 }
+#endif
 
 static gps_mask_t get_mode(struct gps_device_t *session)
 {
@@ -235,10 +236,10 @@ gps_mask_t hnd_129025(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    latd = get32(&bu[0]); latd = latd *1e-7;
+    latd = getles32(bu, 0); latd = latd *1e-7;
     session->newdata.latitude = latd;
 
-    lond = get32(&bu[4]); lond = lond *1e-7;
+    lond = getles32(bu, 4); lond = lond *1e-7;
     session->newdata.longitude = lond;
     
     sprintf(session->gpsdata.tag, "129025");
@@ -254,11 +255,11 @@ gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     session->driver.nmea2000.sid[0]  =  bu[0];
 
-    session->newdata.track           =  get16(&bu[2]);
+    session->newdata.track           =  getleu16(bu, 2);
     session->newdata.track          *=  1e-4;
     session->newdata.track          *=  RAD_2_DEG;
 
-    session->newdata.speed           =  get16(&bu[4]);
+    session->newdata.speed           =  getleu16(bu, 4);
     session->newdata.speed          *=  1e-2;
 
     sprintf(session->gpsdata.tag, "129026");
@@ -283,10 +284,10 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     sid        = bu[0];
     source     = bu[1] & 0x0f;
-    date       = get16(&bu[2]);
+    date       = getleu16(bu, 2);
     date1      = date * 24 * 60 * 60;
 
-    time       = get32(&bu[4]);
+    time       = getleu32(bu, 4);
 
     date1      = date1 + time/10000;
 
@@ -318,15 +319,15 @@ gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     session->driver.nmea2000.mode    = mode_tab[(bu[1] >> 3) & 0x07];
 
-    hdop                             = get16(&bu[2]);
+    hdop                             = getleu16(bu, 2);
     hdop                            *= 1e-2;
     session->gpsdata.dop.hdop        = hdop;
 
-    vdop                             = get16(&bu[4]);
+    vdop                             = getleu16(bu, 4);
     vdop                            *= 1e-2;
     session->gpsdata.dop.vdop        = vdop;
 
-    tdop                             = get16(&bu[6]);
+    tdop                             = getleu16(bu, 6);
     tdop                            *= 1e-2;
     session->gpsdata.dop.tdop        = tdop;
 
@@ -364,9 +365,9 @@ gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
         int    svt;
         double azi, elev, snr;
 
-        elev  = get16s(&bu[3+12*l1+1]); elev *= 1e-4; elev *= RAD_2_DEG;
-        azi   = get16 (&bu[3+12*l1+3]); azi  *= 1e-4; azi  *= RAD_2_DEG;
-        snr   = get16s(&bu[3+12*l1+5]); snr  *= 1e-2;
+        elev  = getles16(bu, 3+12*l1+1); elev *= 1e-4; elev *= RAD_2_DEG;
+        azi   = getleu16(bu, 3+12*l1+3); azi  *= 1e-4; azi  *= RAD_2_DEG;
+        snr   = getles16(bu, 3+12*l1+5); snr  *= 1e-2;
 
         svt   = bu[3+12*l1+11] & 0x0f;
 
@@ -395,39 +396,39 @@ gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     mask                             =  0;
     session->driver.nmea2000.sid[3]  =  bu[0];
-    date                             =  get16(&bu[1]);
+    date                             =  getleu16(bu,1);
     date1                            =  date * 24 * 60 * 60;
-    time                             =  get32(&bu[3]);
+    time                             =  getleu32(bu, 3);
 
     date1                            = date1 + time/10000;
     session->newdata.time            = date1;
 
     mask                            |= TIME_SET;
 
-    session->newdata.latitude        = get64(&bu[7]);
+    session->newdata.latitude        = getles64(bu, 7);
     session->newdata.latitude       *= 1e-16;
 
-    session->newdata.longitude       = get64(&bu[15]);
+    session->newdata.longitude       = getles64(bu, 15);
     session->newdata.longitude      *= 1e-16;
 
     mask                            |= LATLON_SET;
 
-    session->newdata.altitude        = get64(&bu[23]);
+    session->newdata.altitude        = getles64(bu, 23);
     session->newdata.altitude       *= 1e-6;
 
     mask                            |= ALTITUDE_SET;
 
-    session->gpsdata.separation      = get32(&bu[38]);
+    session->gpsdata.separation      = getles32(bu ,38);
     session->gpsdata.separation     /= 100.0;
 
     session->newdata.altitude       -= session->gpsdata.separation;
 
     session->gpsdata.satellites_used = bu[33];
 
-    session->gpsdata.dop.hdop        = get16(&bu[34]);
+    session->gpsdata.dop.hdop        = getleu16(bu, 34);
     session->gpsdata.dop.hdop       *= 0.01;
 
-    session->gpsdata.dop.pdop        = get16(&bu[36]);
+    session->gpsdata.dop.pdop        = getleu16(bu, 36);
     session->gpsdata.dop.pdop       *= 0.01;
 
     mask                            |= DOP_SET;
