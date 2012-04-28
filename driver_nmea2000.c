@@ -124,59 +124,6 @@ static int print_data(unsigned char *buffer, int len, PGN *pgn)
     return(0);
 }
 
-#if 0
-static uint32_t get16(uint8_t *bu)
-{
-    uint32_t val, x;
-
-    x     =  bu[ 0]; x = x <<  0; val  =  x;
-    x     =  bu[ 1]; x = x <<  8; val |=  x;
-    return(val);
-}
-
-
-static int32_t get16s(uint8_t  *bu)
-{
-    uint32_t  x;
-    int32_t   val;
-
-    x = get16(bu);
-    if ((x & 0x8000) != 0) {
-        x |= ~0x0ffff;
-    }
-    val = x;
-    return(val);
-}
-
-
-static uint32_t get32(uint8_t *bu)
-{
-    uint32_t val, x;
-
-    x     =  bu[ 0]; x = x <<  0; val  =  x;
-    x     =  bu[ 1]; x = x <<  8; val |=  x;
-    x     =  bu[ 2]; x = x << 16; val |=  x;
-    x     =  bu[ 3]; x = x << 24; val |=  x;
-    return(val);
-}
-
-
-static uint64_t get64(uint8_t *bu)
-{
-    uint64_t val, x;
-
-    x     =  bu[ 0]; x = x <<  0; val  =  x;
-    x     =  bu[ 1]; x = x <<  8; val |=  x;
-    x     =  bu[ 2]; x = x << 16; val |=  x;
-    x     =  bu[ 3]; x = x << 24; val |=  x;
-    x     =  bu[ 4]; x = x << 32; val |=  x;
-    x     =  bu[ 5]; x = x << 40; val |=  x;
-    x     =  bu[ 6]; x = x << 48; val |=  x;
-    x     =  bu[ 7]; x = x << 56; val |=  x;
-    return(val);
-}
-#endif
-
 static gps_mask_t get_mode(struct gps_device_t *session)
 {
     if (session->driver.nmea2000.mode_valid) {
