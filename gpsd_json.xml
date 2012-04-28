@@ -793,7 +793,7 @@ will assert ATT_IS.</para>
 {"class":"ATT","tag":"PTNTHTM","time":1270938096.843,
     "heading":14223.00,"mag_st":"N",
     "pitch":169.00,"pitch_st":"N", "roll":-43.00,"roll_st":"N",
-    "dip":13641.000,"mag_x":2454.000,"temperature":0.000,"depth":0.000}
+    "dip":13641.000,"mag_x":2454.000}
 </programlisting>
 </listitem>
 </varlistentry>
