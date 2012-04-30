@@ -462,10 +462,10 @@ else:
 if config.CheckLib('libcap'):
     confdefs.append("#define HAVE_LIBCAP 1\n")
     # System library - no special flags
-    rtlibs = ["-lcap"]
+    caplibs = ["-lcap"]
 else:
     confdefs.append("/* #undef HAVE_LIBCAP */\n")
-    rtlibs = []
+    caplibs = []
 
 if env['dbus_export'] and config.CheckPKG('dbus-1'):
     confdefs.append("#define HAVE_DBUS 1\n")
@@ -774,7 +774,7 @@ compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
                           version=libgps_version,
-                          parse_flags=dbus_libs)
+                          parse_flags=dbus_libs + rtlibs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
@@ -812,7 +812,7 @@ if qt_env:
 # The libraries have dependencies on system libraries
 
 gpslibs = ["-lgps", "-lm"]
-gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
+gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
 
 # Source groups
 
