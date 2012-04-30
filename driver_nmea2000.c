@@ -23,6 +23,8 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
+#define LOG_FILE 0
+
 typedef struct PGN
     {
     unsigned int  pgn;
@@ -34,7 +36,9 @@ typedef struct PGN
 
 
 int debug = 0x0f;
+#if LOG_FILE
 FILE *logFile = NULL;
+#endif /* of if LOG_FILE */
 
 gps_mask_t hnd_059392(unsigned char*, int len, PGN *pgn, struct gps_device_t *session);
 gps_mask_t hnd_060928(unsigned char*, int len, PGN *pgn, struct gps_device_t *session);
@@ -472,7 +476,6 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 {
     PGN *work;
     uint32_t daddr;
-    int l1;
     unsigned int source_pgn;
     unsigned int source_prio;
     unsigned int source_unit;
@@ -480,6 +483,9 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
     session->driver.nmea2000.workpgn = NULL;
 
     if (frame->can_id & 0x80000000) {
+#if LOG_FILE
+        int l1;
+
         if (logFile != NULL) {
 	    struct timespec  msgTime;
 
@@ -496,6 +502,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	    }
 	    fprintf(logFile, "\n");
 	}
+#endif /* of if LOG_FILE */
 	session->driver.nmea2000.can_msgcnt += 1;
 	source_pgn = (frame->can_id >> 8) & 0x1ffff;
 	source_prio = (frame->can_id >> 26) & 0x7;
