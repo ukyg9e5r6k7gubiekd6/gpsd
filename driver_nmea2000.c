@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "gpsd.h"
+#if defined(NMEA2000_ENABLE)
 #include "bits.h"
 
 #include <linux/can.h>
@@ -658,3 +659,5 @@ const struct gps_type_t nmea2000 = {
 /* *INDENT-ON* */
 
 /* end */
+
+#endif /* of  defined(NMEA2000_ENABLE) */
