@@ -16,6 +16,7 @@
 #endif /* S_SPLINT_S */
 
 #include <sys/socket.h>
+#include <time.h>
 #include <unistd.h>
 #include "gpsd.h"
 #if defined(NMEA2000_ENABLE)
@@ -24,7 +25,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
-#define LOG_FILE 0
+#define LOG_FILE 1
 
 typedef struct PGN
     {
@@ -36,7 +37,6 @@ typedef struct PGN
     } PGN;
 
 
-int debug = 0x0f;
 #if LOG_FILE
 FILE *logFile = NULL;
 #endif /* of if LOG_FILE */
@@ -114,17 +114,24 @@ PGN aispgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 
 static int print_data(unsigned char *buffer, int len, PGN *pgn)
 {
-    int   l1;
+    int   l1, l2, ptr;
+    char  bu[128];
 
-    if ((debug & 0x01) != 0) {
-        printf("got data:%6d:%3d: ", pgn->pgn, len);
+    if ((libgps_debuglevel >= LOG_IO) != 0) {
+        ptr = 0;
+        l2 = sprintf(&bu[ptr], "got data:%6d:%3d: ", pgn->pgn, len);
+	ptr += l2;
         for (l1=0;l1<len;l1++) {
             if (((l1 % 20) == 0) && (l1 != 0)) {
-                printf("\n                   : ");
+	        gpsd_report(LOG_IO,"%s\n", bu);
+		ptr = 0;
+                l2 = sprintf(&bu[ptr], "                   : ");
+		ptr += l2;
             }
-            printf("%02x ", buffer[l1]);
+            l2 = sprintf(&bu[ptr], "%02x ", buffer[l1]);
+	    ptr += l2;
         }
-        printf("\n");
+        gpsd_report(LOG_IO,"%s\n", bu);
     }
     return(0);
 }
@@ -225,8 +232,8 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    uint8_t        sid;
-    uint8_t        source;
+    uint8_t        sid    __attribute__ ((unused));
+    uint8_t        source __attribute__ ((unused));
     int32_t        time;
     int32_t        date;
     time_t         date1;
@@ -261,8 +268,6 @@ gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
-
-    printf("mode:%02x %02x %02x\n", bu[1] & 0x07, (bu[1] >> 3) & 0x07, (bu[1] >> 6) & 0x03);
 
     mask                             = 0;
     session->driver.nmea2000.sid[1]  = bu[0];
@@ -476,9 +481,9 @@ static PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 {
     PGN *work;
-    uint32_t daddr;
+    uint32_t daddr           __attribute__ ((unused));
     unsigned int source_pgn;
-    unsigned int source_prio;
+    unsigned int source_prio __attribute__ ((unused));
     unsigned int source_unit;
 
     session->driver.nmea2000.workpgn = NULL;
