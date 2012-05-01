@@ -232,8 +232,8 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    uint8_t        sid    __attribute__ ((unused));
-    uint8_t        source __attribute__ ((unused));
+    uint8_t        sid    UNUSED;
+    uint8_t        source UNUSED;
     int32_t        time;
     int32_t        date;
     time_t         date1;
@@ -481,9 +481,9 @@ static PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 {
     PGN *work;
-    uint32_t daddr           __attribute__ ((unused));
+    uint32_t daddr           UNUSED;
     unsigned int source_pgn;
-    unsigned int source_prio __attribute__ ((unused));
+    unsigned int source_prio UNUSED;
     unsigned int source_unit;
 
     session->driver.nmea2000.workpgn = NULL;
