@@ -623,7 +623,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     /* root privileges are not required after this point */
 
-#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI)
+#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS)
 
     /* 
      * Wait for status change on any handshake line. The only assumption here 
