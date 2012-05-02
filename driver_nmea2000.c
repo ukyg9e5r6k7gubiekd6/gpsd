@@ -63,6 +63,7 @@ gps_mask_t hnd_129802(unsigned char*, int len, PGN *pgn, struct gps_device_t *se
 gps_mask_t hnd_129809(unsigned char*, int len, PGN *pgn, struct gps_device_t *session);
 gps_mask_t hnd_129810(unsigned char*, int len, PGN *pgn, struct gps_device_t *session);
 
+/*@-usereleased@*/
 const char msg_059392[] = {"ISO  Acknowledgment"};
 const char msg_060928[] = {"ISO  Address Claim"};
 const char msg_126208[] = {"NMEA Command/Request/Acknowledge"};
@@ -113,6 +114,7 @@ PGN aispgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 		{129809, 1, 2, hnd_129809, &msg_129809[0]},
 		{129810, 1, 2, hnd_129810, &msg_129810[0]},
 		{0     , 0, 0, NULL,       &msg_error [0]}};
+/*@+usereleased@*/
 
 static int print_data(unsigned char *buffer, int len, PGN *pgn)
 {
@@ -205,7 +207,7 @@ gps_mask_t hnd_129025(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     lond = getles32(bu, 4); lond = lond *1e-7;
     session->newdata.longitude = lond;
     
-    sprintf(session->gpsdata.tag, "129025");
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129025");
 
     return LATLON_SET | get_mode(session);
 }
@@ -225,7 +227,7 @@ gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     session->newdata.speed           =  getleu16(bu, 4);
     session->newdata.speed          *=  1e-2;
 
-    sprintf(session->gpsdata.tag, "129026");
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129026");
 
     return SPEED_SET | TRACK_SET | get_mode(session);
 }
@@ -256,7 +258,7 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     session->newdata.time = date1;
 
-    sprintf(session->gpsdata.tag, "126992");
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "126992");
 
     return TIME_SET | get_mode(session);
 }
@@ -302,7 +304,7 @@ gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 		session->gpsdata.dop.vdop,
 		session->gpsdata.dop.tdop);
 
-    sprintf(session->gpsdata.tag, "129539");
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129539");
 
     return mask | get_mode(session);
 }
@@ -394,7 +396,7 @@ gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     mask                            |= DOP_SET;
 
-    sprintf(session->gpsdata.tag, "129029");
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129029");
 
     return mask | get_mode(session);
 }
