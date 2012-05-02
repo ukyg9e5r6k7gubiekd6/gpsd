@@ -298,7 +298,7 @@ gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     session->driver.nmea2000.sid[2]           = bu[0];
-    session->gpsdata.satellites_visible       = bu[2];
+    session->gpsdata.satellites_visible       = (int)bu[2];
 
     for (l2=0;l2>MAXCHANNELS;l2++) {
         session->gpsdata.used[l2] = 0;
@@ -314,12 +314,12 @@ gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
         snr   = getles16(bu, 3+12*l1+5) * 1e-2;
 	/*@+type@*/
 
-        svt   = bu[3+12*l1+11] & 0x0f;
+        svt   = (int)(bu[3+12*l1+11] & 0x0f);
 
         session->gpsdata.elevation[l1]  = elev;
         session->gpsdata.azimuth[l1]    = azi;
         session->gpsdata.ss[l1]         = snr;
-        session->gpsdata.PRN[l1]        = bu[3+12*l1+0];
+        session->gpsdata.PRN[l1]        = (int)bu[3+12*l1+0];
 	if ((svt == 2) || (svt == 5)) {
 	    session->gpsdata.used[l2] = session->gpsdata.PRN[l1];
 	    l2 += 1;
@@ -331,9 +331,6 @@ gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
 gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
-    uint32_t   time;
-    uint32_t   date;
-    time_t     date1;
     gps_mask_t mask;
 
     (void)print_data(bu, len, pgn);
@@ -342,11 +339,9 @@ gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     mask                             = 0;
     session->driver.nmea2000.sid[3]  = bu[0];
  
-    date                             = getleu16(bu,1);
-    date1                            = date * 24 * 60 * 60;
-    time                             = getleu32(bu, 3);
-    date1                            = date1 + time/10000;
-    session->newdata.time            = date1;
+    /*@-type@*//* splint has a bug here */
+    session->newdata.time            = getleu16(bu,1) * 24*60*60 + getleu32(bu, 3)/1e4;
+    /*@+type@*/
     mask                            |= TIME_SET;
 
     /*@-type@*//* splint has a bug here */
@@ -360,10 +355,12 @@ gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     /*@+type@*/
     mask                            |= ALTITUDE_SET;
 
+    /*@-type@*//* splint has a bug here */
     session->gpsdata.separation      = getles32(bu, 38) / 100.0;
+    /*@+type@*/
     session->newdata.altitude       -= session->gpsdata.separation;
 
-    session->gpsdata.satellites_used = bu[33];
+    session->gpsdata.satellites_used = (int)bu[33];
 
     /*@-type@*//* splint has a bug here */
     session->gpsdata.dop.hdop        = getleu16(bu, 34) * 0.01;
@@ -441,6 +438,7 @@ gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 }
 
 
+/*@-immediatetrans@*/
 static /*@null@*/ PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 {
     int l1;
@@ -458,19 +456,22 @@ static /*@null@*/ PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 	}
     return work;
 }
+/*@+immediatetrans@*/
 
+/*@-nullstate -branchstate -globstate -mustfreeonly@*/
 static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 {
     PGN *work;
-    uint32_t daddr           UNUSED;
+    unsigned int daddr UNUSED;
     unsigned int source_pgn;
     unsigned int source_prio UNUSED;
     unsigned int source_unit;
 
     session->driver.nmea2000.workpgn = NULL;
 
-    if (frame->can_id & 0x80000000) {
+    /*@ignore@*//* because the CAN include files choke splint */
 #if LOG_FILE
+    if (frame->can_id & 0x80000000) {
         int l1;
 
         if (logFile != NULL) {
@@ -490,10 +491,13 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	    fprintf(logFile, "\n");
 	}
 #endif /* of if LOG_FILE */
+	/*@end@*/
 	session->driver.nmea2000.can_msgcnt += 1;
+	/*@ignore@*//* because the CAN include files choke splint */
 	source_pgn = (frame->can_id >> 8) & 0x1ffff;
 	source_prio = (frame->can_id >> 26) & 0x7;
 	source_unit = frame->can_id & 0x0ff;
+	/*@end@*/
 
 	if ((source_pgn >> 8) < 240) {
 	    daddr  = source_pgn & 0x000ff;
@@ -525,35 +529,35 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	    }
 	    if (work != NULL) {
 	        if (work->fast == 0) {
-		    unsigned int l2;
+		    size_t l2;
 
 		    gpsd_report(LOG_DATA, "pgn %6d:%s \n", work->pgn, work->name);
 		    session->driver.nmea2000.workpgn = (void *) work;
 		    session->driver.nmea2000.idx = 0;
 		    session->driver.nmea2000.ptr = 0;
-		    session->packet.outbuflen =  frame->can_dlc & 0x0f;
+		    /*@i1@*/session->packet.outbuflen =  frame->can_dlc & 0x0f;
 		    for (l2=0;l2<session->packet.outbuflen;l2++) {
-		        session->packet.outbuffer[session->driver.nmea2000.ptr++]= frame->data[l2];
+		        /*@i3@*/session->packet.outbuffer[session->driver.nmea2000.ptr++]= frame->data[l2];
 		    }
 		}
-		else if ((frame->data[0] & 0x1f) == 0) {
+		/*@i2@*/else if ((frame->data[0] & 0x1f) == 0) {
 		    unsigned int l2;
 
-		    session->driver.nmea2000.fast_packet_len = frame->data[1];
-		    session->driver.nmea2000.idx = frame->data[0];
+		    /*@i2@*/session->driver.nmea2000.fast_packet_len = frame->data[1];
+		    /*@i2@*/session->driver.nmea2000.idx = frame->data[0];
 		    session->driver.nmea2000.ptr = 0;
 		    session->driver.nmea2000.idx += 1;
 		    for (l2=2;l2<8;l2++) {
-		        session->packet.outbuffer[session->driver.nmea2000.ptr++]= frame->data[l2];
+		        /*@i3@*/session->packet.outbuffer[session->driver.nmea2000.ptr++]= frame->data[l2];
 		    }
 		    gpsd_report(LOG_DATA, "pgn %6d:%s \n", work->pgn, work->name);
 		}
-		else if (frame->data[0] == session->driver.nmea2000.idx) {
+		/*@i2@*/else if (frame->data[0] == session->driver.nmea2000.idx) {
 		    unsigned int l2;
 
 		    for (l2=1;l2<8;l2++) {
 		        if (session->driver.nmea2000.fast_packet_len > session->driver.nmea2000.ptr) {
-			    session->packet.outbuffer[session->driver.nmea2000.ptr++] = frame->data[l2];
+			    /*@i3@*/session->packet.outbuffer[session->driver.nmea2000.ptr++] = frame->data[l2];
 			}
 		    }
 		    if (session->driver.nmea2000.ptr == session->driver.nmea2000.fast_packet_len) {
@@ -576,6 +580,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	}
     }
 }
+/*@+nullstate +branchstate +globstate +mustfreeonly@*/
 
 
 static ssize_t nmea2000_get(struct gps_device_t *session)
@@ -586,7 +591,7 @@ static ssize_t nmea2000_get(struct gps_device_t *session)
 //  printf("NMEA2000 get: enter\n");
     session->packet.outbuflen = 0;
     status = read(session->gpsdata.gps_fd, &frame, sizeof(frame));
-    if (status == sizeof(frame)) {
+    if (status == (ssize_t)sizeof(frame)) {
         session->packet.type = NMEA2000_PACKET;
 	find_pgn(&frame, session);
 //	printf("NMEA2000 get: exit(%d)\n", status);
@@ -599,6 +604,7 @@ static ssize_t nmea2000_get(struct gps_device_t *session)
     return 0;
 }
 
+/*@-mustfreeonly@*/
 static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
 {    
     gps_mask_t mask;
@@ -609,13 +615,14 @@ static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
     work = (PGN *) session->driver.nmea2000.workpgn;
 
     if (work != NULL) {
-        mask = (work->func)(&session->packet.outbuffer[0], session->packet.outbuflen, work, session);
+        mask = (work->func)(&session->packet.outbuffer[0], (int)session->packet.outbuflen, work, session);
         session->driver.nmea2000.workpgn = NULL;
     }
     session->packet.outbuflen = 0;
 
     return mask;
 }
+/*@+mustfreeonly@*/
 
 /*@+nullassign@*/
 
