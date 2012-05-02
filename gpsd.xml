@@ -298,6 +298,19 @@ the remote <application>gpsd</application> instance that will be
 passed to local clients.</para>
 </listitem>
 </varlistentry>
+<varlistentry>
+<term>NMEA2000 CAN data</term>
+<listitem>
+<para>A URI with the prefix "nmea2000://", followed by a CAN
+devicename. Only Linux socket CAN interfaces are supported. The
+interface must be configured (by a script) to receive CAN messages at
+250 kBit before <application>gpsd</application> can be started. If
+there is more then one unit on the CAN bus that provides GPS data,
+<application>gpsd</application> chooses the unit from which a GPS message
+is first seen. Example: <filename>nmea2000://can0</filename>.
+</para>
+</listitem>
+</varlistentry>
 </variablelist>
 
 <para>(The "ais:://" source type supported in some older versions of
