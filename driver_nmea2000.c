@@ -196,18 +196,15 @@ gps_mask_t hnd_126996(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
 gps_mask_t hnd_129025(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
-    double  latd, lond;
-
     (void)print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    latd = getles32(bu, 0); latd = latd *1e-7;
-    session->newdata.latitude = latd;
+    /*@-type@*//* splint has a bug here */
+    session->newdata.latitude = getles32(bu, 0) * 1e-7;
+    session->newdata.longitude = getles32(bu, 4) * 1e-7;
+    /*@+type@*/
 
-    lond = getles32(bu, 4); lond = lond *1e-7;
-    session->newdata.longitude = lond;
-    
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129025");
+    (void)strlcpy(session->gpsdata.tag, "129025", sizeof(session->gpsdata.tag));
 
     return LATLON_SET | get_mode(session);
 }
@@ -220,14 +217,12 @@ gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     session->driver.nmea2000.sid[0]  =  bu[0];
 
-    session->newdata.track           =  getleu16(bu, 2);
-    session->newdata.track          *=  1e-4;
-    session->newdata.track          *=  RAD_2_DEG;
+    /*@-type@*//* splint has a bug here */
+    session->newdata.track           =  getleu16(bu, 2) * 1e-4 * RAD_2_DEG;
+    session->newdata.speed           =  getleu16(bu, 4) * 1e-2;
+    /*@+type@*/
 
-    session->newdata.speed           =  getleu16(bu, 4);
-    session->newdata.speed          *=  1e-2;
-
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129026");
+    (void)strlcpy(session->gpsdata.tag, "129026", sizeof(session->gpsdata.tag));
 
     return SPEED_SET | TRACK_SET | get_mode(session);
 }
@@ -237,9 +232,6 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 {
     //uint8_t        sid;
     //uint8_t        source;
-    int32_t        time;
-    int32_t        date;
-    time_t         date1;
 
     (void)print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
@@ -249,16 +241,12 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     //sid        = bu[0];
     //source     = bu[1] & 0x0f;
-    date       = getleu16(bu, 2);
-    date1      = date * 24 * 60 * 60;
 
-    time       = getleu32(bu, 4);
+    /*@-type@*//* splint has a bug here */
+    session->newdata.time = getleu16(bu, 2)*24*60*60 + getleu32(bu, 4)/1e3;
+    /*@+type@*/
 
-    date1      = date1 + time/10000;
-
-    session->newdata.time = date1;
-
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "126992");
+    (void)strlcpy(session->gpsdata.tag, "126992", sizeof(session->gpsdata.tag));
 
     return TIME_SET | get_mode(session);
 }
@@ -269,7 +257,6 @@ static const int mode_tab[] = {MODE_NO_FIX, MODE_2D,  MODE_3D, MODE_NO_FIX,
 
 gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
-    double hdop, vdop, tdop;
     gps_mask_t mask;
 
     (void)print_data(bu, len, pgn);
@@ -282,18 +269,11 @@ gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
     session->driver.nmea2000.mode    = mode_tab[(bu[1] >> 3) & 0x07];
 
-    hdop                             = getleu16(bu, 2);
-    hdop                            *= 1e-2;
-    session->gpsdata.dop.hdop        = hdop;
-
-    vdop                             = getleu16(bu, 4);
-    vdop                            *= 1e-2;
-    session->gpsdata.dop.vdop        = vdop;
-
-    tdop                             = getleu16(bu, 6);
-    tdop                            *= 1e-2;
-    session->gpsdata.dop.tdop        = tdop;
-
+    /*@-type@*//* splint has a bug here */
+    session->gpsdata.dop.hdop        = getleu16(bu, 2) * 1e-2;
+    session->gpsdata.dop.vdop        = getleu16(bu, 4) * 1e-2;
+    session->gpsdata.dop.tdop        = getleu16(bu, 6) * 1e-2;
+    /*@+type@*/
     mask                            |= DOP_SET;
 
     gpsd_report(LOG_DATA, "pgn %6d(%3d): sid:%02x hdop:%5.2f vdop:%5.2f tdop:%5.2f\n",
@@ -304,7 +284,7 @@ gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 		session->gpsdata.dop.vdop,
 		session->gpsdata.dop.tdop);
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129539");
+    (void)strlcpy(session->gpsdata.tag, "129539", sizeof(session->gpsdata.tag));
 
     return mask | get_mode(session);
 }
@@ -328,9 +308,11 @@ gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
         int    svt;
         double azi, elev, snr;
 
-        elev  = getles16(bu, 3+12*l1+1); elev *= 1e-4; elev *= RAD_2_DEG;
-        azi   = getleu16(bu, 3+12*l1+3); azi  *= 1e-4; azi  *= RAD_2_DEG;
-        snr   = getles16(bu, 3+12*l1+5); snr  *= 1e-2;
+	/*@-type@*//* splint has a bug here */
+        elev  = getles16(bu, 3+12*l1+1) * 1e-4 * RAD_2_DEG;
+        azi   = getleu16(bu, 3+12*l1+3) * 1e-4 * RAD_2_DEG;
+        snr   = getles16(bu, 3+12*l1+5) * 1e-2;
+	/*@+type@*/
 
         svt   = bu[3+12*l1+11] & 0x0f;
 
@@ -357,46 +339,39 @@ gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     (void)print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    mask                             =  0;
-    session->driver.nmea2000.sid[3]  =  bu[0];
-    date                             =  getleu16(bu,1);
-    date1                            =  date * 24 * 60 * 60;
-    time                             =  getleu32(bu, 3);
-
+    mask                             = 0;
+    session->driver.nmea2000.sid[3]  = bu[0];
+ 
+    date                             = getleu16(bu,1);
+    date1                            = date * 24 * 60 * 60;
+    time                             = getleu32(bu, 3);
     date1                            = date1 + time/10000;
     session->newdata.time            = date1;
-
     mask                            |= TIME_SET;
 
-    session->newdata.latitude        = getles64(bu, 7);
-    session->newdata.latitude       *= 1e-16;
-
-    session->newdata.longitude       = getles64(bu, 15);
-    session->newdata.longitude      *= 1e-16;
-
+    /*@-type@*//* splint has a bug here */
+    session->newdata.latitude        = getles64(bu, 7) * 1e-16;
+    session->newdata.longitude       = getles64(bu, 15) * 1e-16;
+    /*@+type@*/
     mask                            |= LATLON_SET;
 
-    session->newdata.altitude        = getles64(bu, 23);
-    session->newdata.altitude       *= 1e-6;
-
+    /*@-type@*//* splint has a bug here */
+    session->newdata.altitude        = getles64(bu, 23) * 1e-6;
+    /*@+type@*/
     mask                            |= ALTITUDE_SET;
 
-    session->gpsdata.separation      = getles32(bu ,38);
-    session->gpsdata.separation     /= 100.0;
-
+    session->gpsdata.separation      = getles32(bu, 38) / 100.0;
     session->newdata.altitude       -= session->gpsdata.separation;
 
     session->gpsdata.satellites_used = bu[33];
 
-    session->gpsdata.dop.hdop        = getleu16(bu, 34);
-    session->gpsdata.dop.hdop       *= 0.01;
-
-    session->gpsdata.dop.pdop        = getleu16(bu, 36);
-    session->gpsdata.dop.pdop       *= 0.01;
-
+    /*@-type@*//* splint has a bug here */
+    session->gpsdata.dop.hdop        = getleu16(bu, 34) * 0.01;
+    session->gpsdata.dop.pdop        = getleu16(bu, 36) * 0.01;
+    /*@+type@*/
     mask                            |= DOP_SET;
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "129029");
+    (void)strlcpy(session->gpsdata.tag, "129029", sizeof(session->gpsdata.tag));
 
     return mask | get_mode(session);
 }
