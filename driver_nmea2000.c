@@ -11,13 +11,12 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <termios.h>
+#include <time.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
+#include <sys/socket.h>
 #endif /* S_SPLINT_S */
 
-#include <sys/socket.h>
-#include <time.h>
-#include <unistd.h>
 #include "gpsd.h"
 #if defined(NMEA2000_ENABLE)
 #include "bits.h"
@@ -38,6 +37,7 @@ typedef struct PGN
     const char    *name;
     } PGN;
 
+/*@-nullassign@*/
 
 #if LOG_FILE
 FILE *logFile = NULL;
@@ -235,11 +235,8 @@ gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 
 gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
-    (void)print_data(bu, len, pgn);
-    gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
-
-    uint8_t        sid    UNUSED;
-    uint8_t        source UNUSED;
+    //uint8_t        sid;
+    //uint8_t        source;
     int32_t        time;
     int32_t        date;
     time_t         date1;
@@ -247,8 +244,11 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     (void)print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    sid        = bu[0];
-    source     = bu[1] & 0x0f;
+    (void)print_data(bu, len, pgn);
+    gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+
+    //sid        = bu[0];
+    //source     = bu[1] & 0x0f;
     date       = getleu16(bu, 2);
     date1      = date * 24 * 60 * 60;
 
@@ -466,7 +466,7 @@ gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
 }
 
 
-static PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
+static /*@null@*/ PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 {
     int l1;
     PGN *work;
@@ -606,7 +606,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 static ssize_t nmea2000_get(struct gps_device_t *session)
 {   
     struct can_frame frame;
-    int              status;
+    ssize_t          status;
 
 //  printf("NMEA2000 get: enter\n");
     session->packet.outbuflen = 0;
@@ -641,6 +641,8 @@ static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
 
     return mask;
 }
+
+/*@+nullassign@*/
 
 /* *INDENT-OFF* */
 const struct gps_type_t nmea2000 = {
