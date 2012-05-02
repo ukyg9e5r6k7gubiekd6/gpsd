@@ -25,12 +25,12 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
-#ifdef NMEA2000_ENABLE
+#if defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S)
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
-#endif /* NMEA2000_ENABLE */
+#endif /* defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S) */
 
 static void gpsd_run_device_hook(char *device_name, char *hook)
 {
@@ -304,7 +304,7 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     }
 #endif /* PASSTHROUGH_ENABLE */
-#ifdef  NMEA2000_ENABLE
+#if defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S)
     if (strncmp(session->gpsdata.dev.path, "nmea2000://", 11) == 0) {
 	char interface_name[GPS_PATH_MAX];
 	socket_t sock;
@@ -356,7 +356,7 @@ int gpsd_open(struct gps_device_t *session)
 	session->servicetype = service_nmea2000;
 	return session->gpsdata.gps_fd;
     }
-#endif /*  NMEA2000_ENABLE */
+#endif /* defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S) */
     /* fall through to plain serial open */
     return gpsd_serial_open(session);
 }

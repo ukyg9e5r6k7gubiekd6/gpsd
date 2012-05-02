@@ -133,7 +133,7 @@ static int print_data(unsigned char *buffer, int len, PGN *pgn)
                 l2 = sprintf(&bu[ptr], "                   : ");
 		ptr += l2;
             }
-            l2 = sprintf(&bu[ptr], "%02ux ", buffer[l1]);
+            l2 = sprintf(&bu[ptr], "%02ux ", (unsigned int)buffer[l1]);
 	    ptr += l2;
         }
         gpsd_report(LOG_IO,"%s\n", bu);
