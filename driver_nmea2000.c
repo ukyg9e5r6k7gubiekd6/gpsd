@@ -243,7 +243,7 @@ gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t 
     //source     = bu[1] & 0x0f;
 
     /*@-type@*//* splint has a bug here */
-    session->newdata.time = getleu16(bu, 2)*24*60*60 + getleu32(bu, 4)/1e3;
+    session->newdata.time = getleu16(bu, 2)*24*60*60 + getleu32(bu, 4)/1e4;
     /*@+type@*/
 
     (void)strlcpy(session->gpsdata.tag, "126992", sizeof(session->gpsdata.tag));
