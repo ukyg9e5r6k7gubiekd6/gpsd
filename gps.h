@@ -1686,7 +1686,7 @@ struct gps_data_t {
 
     struct policy_t policy;	/* our listening policy */
 
-    /* should be moved to privdata sometday */
+    /* should be moved to privdata someday */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
     /* pack things never reported together to reduce structure size */ 
