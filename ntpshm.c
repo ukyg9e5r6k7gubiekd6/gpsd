@@ -633,6 +633,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     while (1) {
 	int ok = 0;
 	char *log = NULL;
+	char *log1 = NULL;
 
         if (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
 	    gpsd_report(LOG_ERROR, "PPS ioctl(TIOCMIWAIT) failed: %d %.40s\n"
@@ -881,16 +882,23 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /*@+noeffect@*/
 #endif
 
-	    if ( 0 <= chronyfd && session->ship_to_ntpd) {
-		(void)send(chronyfd, &sample, sizeof (sample), 0);
-		gpsd_report(LOG_RAW, "PPS edge accepted chrony sock %lu.%06lu offset %.9f\n",
-			    (unsigned long)sample.tv.tv_sec,
-			    (unsigned long)sample.tv.tv_usec,
-			    sample.offset);
-	    }
 	    TSTOTV( &tv, &ts );
-	    if (session->ship_to_ntpd)
+	    if (session->ship_to_ntpd) {
+	        log1 = "accepted";
+		if ( 0 <= chronyfd ) {
+		    log1 = "accepted chrony sock";
+		    (void)send(chronyfd, &sample, sizeof (sample), 0);
+                }
 		(void)ntpshm_pps(session, &tv);
+	    } else {
+	    	log1 = "skipped ship_to_ntp=0";
+	    }
+	    gpsd_report(LOG_RAW, 
+		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
+		    log1,
+		    (unsigned long)sample.tv.tv_sec,
+		    (unsigned long)sample.tv.tv_usec,
+		    sample.offset);
 	    if (session->context->pps_hook != NULL)
 		session->context->pps_hook(session, &tv);
 	} else {
