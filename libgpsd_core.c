@@ -1127,10 +1127,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * devices output fix packets on a regular basis, even when unable
 	 * to derive a good fix. Such packets should set STATUS_NO_FIX.
 	 */
-	if ((session->gpsdata.set & LATLON_SET) != 0
-	    && session->gpsdata.status > STATUS_NO_FIX) {
-	    session->context->fixcnt++;
-	    session->fixcnt++;
+	if ( 0 != session->gpsdata.set & LATLON_SET) {
+	    if ( session->gpsdata.status > STATUS_NO_FIX) {
+		session->context->fixcnt++;
+		session->fixcnt++;
+            } else {
+		session->context->fixcnt = 0;
+		session->fixcnt = 0;
+            }
 	}
 
 	/*
