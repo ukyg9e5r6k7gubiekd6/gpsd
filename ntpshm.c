@@ -761,8 +761,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    cycle, duration,
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
-	/*@ +boolint @*/
-	if (session->ship_to_ntpd || session->context->pps_hook != NULL) {
+	/*  only listen to PPS after 4 consecutive fixes, otherwise time
+	 *  will be inaccurate.
+	 *  Not sure yet how to handle uBlox UBX_MODE_TMONLY
+	 *  Do not use ship_to_ntp here since it is synced to packets
+	 *  and this thread is asynchonous to packets */
+	if ( 3 < session->fixcnt ) {
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge. But we
