@@ -335,7 +335,7 @@ int main(int argc, char **argv)
     (void)gps_stream(&gpsdata, flags, source.device);
 
     print_gpx_header();
-    (int)gps_mainloop(&gpsdata, 5000000, conditionally_log_fix);
+    (void)gps_mainloop(&gpsdata, 5000000, conditionally_log_fix);
     print_gpx_footer();
     (void)gps_close(&gpsdata);
 
