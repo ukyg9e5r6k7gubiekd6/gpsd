@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <termios.h>
 #include <time.h>
+#include <math.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #include <sys/socket.h>
@@ -243,8 +244,8 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
         svt   = (int)(bu[3+12*l1+11] & 0x0f);
 
-        session->gpsdata.elevation[l1]  = elev;
-        session->gpsdata.azimuth[l1]    = azi;
+        session->gpsdata.elevation[l1]  = (int) (round(elev));
+	session->gpsdata.azimuth[l1]    = (int) (round(azi));
         session->gpsdata.ss[l1]         = snr;
         session->gpsdata.PRN[l1]        = (int)bu[3+12*l1+0];
 	if ((svt == 2) || (svt == 5)) {
