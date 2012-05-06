@@ -889,7 +889,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 #ifdef TIMING_ENABLE
     /*
-     * Input just gecame available from a sensor, but no read from the
+     * Input just became available from a sensor, but no read from the
      * device has yet been done.
      *
      * If we ever want a start-of-packet timestamp again, take it here
