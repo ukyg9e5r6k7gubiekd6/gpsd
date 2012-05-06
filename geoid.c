@@ -72,12 +72,9 @@ double wgs84_separation(double lat, double lon)
     ilon = (int)floor((180. + lon) / 10);
 
     /* sanity checks to prevent segfault on bad data */
-    if ((ilat > 90) || (ilat < -90)) {
-	return 0.0;
-    }
-    if ((ilon > 180) || (ilon < -180)) {
-	return 0.0;
-    }
+    if ((GEOID_ROW <= ilat) || (0 > ilat) ||
+        (GEOID_COL <= ilon) || (0 > ilon))
+        return 0.0;
 
     ilat1 = ilat;
     ilon1 = ilon;
