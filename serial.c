@@ -402,7 +402,7 @@ int gpsd_serial_open(struct gps_device_t *session)
     /*
      * Ideally we want to exclusion-lock the device before doing any reads.
      * It would have been best to do this at open(2) time, but O_EXCL
-     * doesn't work wuthout O_CREAT.
+     * doesn't work without O_CREAT.
      *
      * We have to make an exception for ptys, which are intentionally
      * opened by another process on the master side, otherwise we'll
