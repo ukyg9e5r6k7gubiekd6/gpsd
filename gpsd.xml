@@ -152,10 +152,11 @@ commands that edit the daemon's internal device list.</para>
 </varlistentry>
 <varlistentry>
 <term>-b</term>
-<listitem><para>Broken-device-safety mode, otherwise known as read-only
-mode. Some popular bluetooth and USB receivers lock up or become
-totally inaccessible when probed or reconfigured. This switch prevents
-gpsd from writing to a receiver.  This means that
+<listitem><para>Broken-device-safety mode, otherwise known as
+read-only mode. A few bluetooth and USB receivers lock up or become
+totally inaccessible when probed or reconfigured; thee the hardware
+compatibiklity list on the GPSD project website for details. This
+switch prevents gpsd from writing to a receiver.  This means that
 <application>gpsd</application> cannot configure the receiver for
 optimal performance, but it also means that
 <application>gpsd</application> cannot break the receiver. A better
@@ -827,9 +828,26 @@ in GCC 3.x at -O2, into generating bad code.</para>
 
 <para>Devices meant to to use PPS for high-precision timekeeping may
 fail if they are specified after startup by a control-socket command,
-as opposed to on the daemon's original command line. (Root privileges
+as opposed to on the daemon's original command line. Root privileges
 are dropped early, and some Unix varients require them in order to set
-the PPS line discipline.)</para>
+the PPS line discipline. Under Linux the POSIX capability to set the
+line discipline is retained, but other platforms cannot use this
+code.</para>
+
+<para>USB GPS devices do not identify themselves through the USB
+subsystem; they typically present as the class 00h (undefined) or
+class FFh (vendor-specific) of USB-to-serial adapters. Because of
+this, the Linux hotplug scripts must tell
+<application>gpsd</application> to sniff data from every USB-to-serial
+adapter that goes active and is known to be of a type used in
+GPSes. No such device is sent configuration strings until after it has
+been identified as a GPS, and <application>gpsd</application> never
+opens a device that is opened by another process.  But there is a tiny
+window for non-GPS devices not opened; if the application that wants
+them loses a race with GPSD its device open will fail and have to be
+retried after GPSD sniffs the device (normally less than a second
+later).</para>
+
 </refsect1>
 <refsect1 id='files'><title>FILES</title>
 
