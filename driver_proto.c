@@ -25,7 +25,7 @@
  * If using vi, ":%s/_PROTO_/MYDRIVER/g" and ":%s/_proto_/mydriver/g"
  * should produce a source file that comes very close to being useful.
  * You will also need to add hooks for your new driver to:
- * Makefile.am
+ * SConstruct
  * drivers.c
  * gpsd.h-tail
  * libgpsd_core.c
