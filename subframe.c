@@ -668,10 +668,10 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 
 		sv = -1;
 		/* current leap seconds */
-		subp->sub4_18.alpha0 = (int8_t)((words[2] >> 16) & 0x0000FF);
+		subp->sub4_18.alpha0 = (int8_t)((words[2] >> 8) & 0x0000FF);
 		subp->sub4_18.d_alpha0 = pow(2.0, -30) * (int)subp->sub4_18.alpha0;
-		subp->sub4_18.alpha1 = (int8_t)((words[2] >>  8) & 0x0000FF);
-		subp->sub4_18.d_alpha1 = pow(2.0, -27) * (int)subp->sub4_18.alpha2;
+		subp->sub4_18.alpha1 = (int8_t)((words[2] >> 0) & 0x0000FF);
+		subp->sub4_18.d_alpha1 = pow(2.0, -27) * (int)subp->sub4_18.alpha1;
 		subp->sub4_18.alpha2 = (int8_t)((words[3] >> 16) & 0x0000FF);
 		subp->sub4_18.d_alpha2 = pow(2.0, -24) * (int)subp->sub4_18.alpha2;
 		subp->sub4_18.alpha3 = (int8_t)((words[3] >>  8) & 0x0000FF);
@@ -680,7 +680,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_18.beta0  = (int8_t)((words[3] >>  0) & 0x0000FF);
 		subp->sub4_18.d_beta0 = pow(2.0, 11) * (int)subp->sub4_18.beta0;
 		subp->sub4_18.beta1  = (int8_t)((words[4] >> 16) & 0x0000FF);
-		subp->sub4_18.d_beta1 = pow(2.0, 14) * (int)subp->sub4_18.beta2;
+		subp->sub4_18.d_beta1 = pow(2.0, 14) * (int)subp->sub4_18.beta1;
 		subp->sub4_18.beta2  = (int8_t)((words[4] >>  8) & 0x0000FF);
 		subp->sub4_18.d_beta2 = pow(2.0, 16) * (int)subp->sub4_18.beta2;
 		subp->sub4_18.beta3  = (int8_t)((words[4] >>  0) & 0x0000FF);
@@ -691,13 +691,13 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_18.d_A1   = pow(2.0,-50) * subp->sub4_18.A1;
 		subp->sub4_18.A0     = (int32_t)((words[6] >>  0) & 0xFFFFFF);
 		subp->sub4_18.A0   <<= 8;
-		subp->sub4_18.A0    |= ((words[7] >> 16) & 0x00FFFF);
+		subp->sub4_18.A0    |= ((words[7] >> 16) & 0x0000FF);
 		subp->sub4_18.d_A0   = pow(2.0,-30) * subp->sub4_18.A0;
 
 		/* careful WN is 10 bits, but WNt is 8 bits! */
 		/* WNt (Week Number of LSF) */
 		subp->sub4_18.tot    = ((words[7] >> 8) & 0x0000FF);
-		subp->sub4_18.d_tot  = pow(2.0,12) * subp->sub4_18.d_tot;
+		subp->sub4_18.d_tot  = pow(2.0,12) * subp->sub4_18.tot;
 		subp->sub4_18.WNt    = ((words[7] >> 0) & 0x0000FF);
 		subp->sub4_18.leap  = (int8_t)((words[8] >> 16) & 0x0000FF);
 		subp->sub4_18.WNlsf  = ((words[8] >>  8) & 0x0000FF);
