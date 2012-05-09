@@ -227,7 +227,7 @@ void json_tpv_dump(const struct gps_device_t *session,
     }
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-    (void)strlcat(reply, "}\r\n", sizeof(reply) - strlen(reply));
+    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
 }
 
 void json_noise_dump(const struct gps_data_t *gpsdata,
@@ -268,7 +268,7 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
 
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-    (void)strlcat(reply, "}\r\n", sizeof(reply) - strlen(reply));
+    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
 }
 
 void json_sky_dump(const struct gps_data_t *datap,
