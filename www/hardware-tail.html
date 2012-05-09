@@ -12,12 +12,13 @@
   comparison with the NTP time service and reported by
   <code>gpsd</code>.</p>
 
-  <p>Note that a direct RS-232 connection is required for optimal PPS
-timing. Typical gpsd/PPS users report ntp clock stability on the order
-of 1uS. GPS that use a RS-232 to USB converter that passes the PPS signal
-are reported to be stable on the order of 1mS.GPS that are native USB are
-not PPS capable but gpsd can still extract time information from the
-serial data accurate to about 250mS.</p>
+  <p>Note that either a direct RS-232 connection or the "Magic Macx
+mod" (1PPS on the GPS chip connected to DCD on the serial-to-USB
+adaptor) is required for optimal PPS timing. Typical gpsd/PPS users
+report ntp clock stability on the order of 1uSm for RS232, 1ms for
+USB).gpsd can extract from GPSes that are native USB but not
+PPS-capable time information from the serial data accurate to about
+250mS.</p>
 
 <div>&nbsp;</div>
 
@@ -49,6 +50,12 @@ serial data accurate to about 250mS.</p>
 <tr>
 <td>Motorola<br>iLotus<br>Synergy-GPS M12M</td>
 <td align="center">20ns<br>6ns corrected</td>
+<td align="center">-</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td>Navisys GR601W (Macx-1)</td>
+<td align="center">1ms</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
