@@ -228,7 +228,7 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->driver.nmea2000.sid[2]           = bu[0];
     session->gpsdata.satellites_visible       = (int)bu[2];
 
-    for (l2=0;l2>MAXCHANNELS;l2++) {
+    for (l2=0;l2<MAXCHANNELS;l2++) {
         session->gpsdata.used[l2] = 0;
     }
     l2 = 0;
