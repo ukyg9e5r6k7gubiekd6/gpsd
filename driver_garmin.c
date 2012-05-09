@@ -908,10 +908,7 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 #ifdef HAVE_LIBUSB
 	if (!is_usb_device(session->gpsdata.dev.path, 0x091e, 0x0003))
 	    return false;
-#else
-	return false;
-#endif /* HAVE_LIBUSB */
-	/*@-unreachable@*/
+	
 	if (!gpsd_set_raw(session)) {
 	    gpsd_report(LOG_ERROR,
 			"Garmin: garmin_usb_detect: error changing port attributes: %s\n",
@@ -936,6 +933,9 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 
 	return true;
     }
+#else
+	return false;
+#endif /* HAVE_LIBUSB */
 #else
     return false;
 #endif /* __linux__ || S_SPLINT_S */
