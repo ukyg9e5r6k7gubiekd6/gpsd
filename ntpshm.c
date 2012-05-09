@@ -451,7 +451,7 @@ static int init_kernel_pps(struct gps_device_t *session) {
     int ldisc = 18;   /* the PPS line discipline */
     pps_params_t pp;
     glob_t globbuf;
-    int i;
+    size_t i;             /* to match type of globbuf.gl_pathc */
     char pps_num = 0;     /* /dev/pps[pps_num] is our device */
     char path[GPS_PATH_MAX] = "";
 

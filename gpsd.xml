@@ -154,8 +154,8 @@ commands that edit the daemon's internal device list.</para>
 <term>-b</term>
 <listitem><para>Broken-device-safety mode, otherwise known as
 read-only mode. A few bluetooth and USB receivers lock up or become
-totally inaccessible when probed or reconfigured; thee the hardware
-compatibiklity list on the GPSD project website for details. This
+totally inaccessible when probed or reconfigured; see the hardware
+compatibility list on the GPSD project website for details. This
 switch prevents gpsd from writing to a receiver.  This means that
 <application>gpsd</application> cannot configure the receiver for
 optimal performance, but it also means that
