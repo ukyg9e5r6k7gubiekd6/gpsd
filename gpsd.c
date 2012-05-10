@@ -451,6 +451,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
 		   (int)sizeof(one)) == -1) {
 	gpsd_report(LOG_ERROR, "Error: SETSOCKOPT SO_REUSEADDR\n");
+	(void)close(s);
 	return -1;
     }
     if (bind(s, &sat.sa, sin_len) < 0) {
@@ -459,10 +460,12 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	if (errno == EADDRINUSE) {
 	    gpsd_report(LOG_ERROR, "maybe gpsd is already running!\n");
 	}
+	(void)close(s);
 	return -1;
     }
     if (type == SOCK_STREAM && listen(s, qlen) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on port %s\n", service);
+	(void)close(s);
 	return -1;
     }
 
