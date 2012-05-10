@@ -165,7 +165,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
     size_t blen = BUFSIZ;
     int fd = device->gpsdata.gps_fd;
 
-    while (1) {
+    for (;;) {
 	char *eol;
 	ssize_t rlen;
 

@@ -630,7 +630,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * is that no GPS lights up more than one of these pins.  By waiting on
      * all of them we remove a configuration switch.
      */
-    while (1) {
+    for (;;) {
 	int ok = 0;
 	char *log = NULL;
 	char *log1 = NULL;
