@@ -466,7 +466,7 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
 	return;
 
     /*@-shiftimplementation +ignoresigns@*/
-    if (event == event_identified && event == event_reactivate) {
+    if (event == event_identified || event == event_reactivate) {
 	/* Select binary packets */
 	putbe32(buf, 0, 0xffff0000);
 	putbe32(buf, 4, 0);

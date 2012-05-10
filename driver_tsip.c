@@ -959,7 +959,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
     if (session->context->readonly)
 	return;
     /* FIX-ME: Resending this might not be needed on reactivation */
-    if (event == event_identified && event == event_reactivate) {
+    if (event == event_identified || event == event_reactivate) {
 	unsigned char buf[100];
 
 	/* I/O Options */

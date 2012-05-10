@@ -512,7 +512,7 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 
 bool ubx_write(struct gps_device_t * session,
 	       unsigned int msg_class, unsigned int msg_id,
-	       unsigned char *msg, unsigned short data_len)
+	       unsigned char *msg, size_t data_len)
 {
     unsigned char CK_A, CK_B;
     ssize_t i, count;
@@ -566,8 +566,7 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 {
     return ubx_write(session, (unsigned int)msg[0], (unsigned int)msg[1],
 		     (unsigned char *)msg + 2,
-		     (unsigned short)(data_len - 2)) ? ((ssize_t) (data_len +
-								   7)) : -1;
+		     (size_t)(data_len - 2)) ? ((ssize_t) (data_len + 7)) : -1;
 }
 #endif /* CONTROLSEND_ENABLE */
 
@@ -676,7 +675,7 @@ static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 	buf[14] |= 0x01;	/* turn on UBX output on this port */
     }
     /*@ -charint +usedef @*/
-    (void)ubx_write(session, 0x06u, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+    (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));	/* send back with all other settings intact */
 }
 
 static bool ubx_speed(struct gps_device_t *session,

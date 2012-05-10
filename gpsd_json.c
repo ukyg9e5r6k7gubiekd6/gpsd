@@ -1507,7 +1507,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 #define SHIPTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(ship_type_legends)) ? ship_type_legends[n] : "INVALID SHIP TYPE")
 
-    static const char *station_type_legends[16] = {
+    static const char *station_type_legends[] = {
 	"All types of mobiles",
 	"Reserved for future use",
 	"All types of Class B mobile stations",
