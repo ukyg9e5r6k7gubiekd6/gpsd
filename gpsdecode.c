@@ -428,12 +428,13 @@ static void decode(FILE *fpin, FILE*fpout)
 		(void)fputs("\n", fpout);
 	    } 
 #ifdef SOCKET_EXPORT_ENABLE
-	    else
+	    else {
 		json_data_report(changed, 
 				 &session, &policy, 
 				 buf, sizeof(buf));
+		(void)fputs(buf, fpout);
+	    }
 #endif /* SOCKET_EXPORT_ENABLE */
-	    (void)fputs(buf, fpout);	
 #ifdef AIVDM_ENABLE
 	} else if (session.packet.type == AIVDM_PACKET) {
 	    if ((changed & AIS_SET)!=0) {

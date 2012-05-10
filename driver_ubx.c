@@ -714,7 +714,7 @@ static bool ubx_speed(struct gps_device_t *session,
 	usart_mode |= 0x2000;	/* zero value means 1 stop bit */
     putle32(buf, 4, usart_mode);
     putle32(buf, 8, speed);
-    (void)ubx_write(session, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+    (void)ubx_write(session, 0x06, 0x00, buf, sizeof(buf));	/* send back with all other settings intact */
     /*@ -charint +usedef +compdef */
     return true;
 }

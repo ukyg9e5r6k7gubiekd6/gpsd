@@ -494,12 +494,18 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		(void)strlcpy(device->ntrip.stream.credentials, 
 			      auth, 
 			      sizeof(device->ntrip.stream.credentials));
-	    (void)strlcpy(device->ntrip.stream.url, 
-		    url, 
-		    sizeof(device->ntrip.stream.url));
-	    (void)strlcpy(device->ntrip.stream.port, 
-		    port, 
-		    sizeof(device->ntrip.stream.port));
+	    /* 
+	     * Semantically url and port ought to be non-NULL by now,
+	     * but just in case...this code appeases Coverity.
+	     */
+	    if (url != NULL)
+		(void)strlcpy(device->ntrip.stream.url, 
+			      url, 
+			      sizeof(device->ntrip.stream.url));
+	    if (port != NULL)
+		(void)strlcpy(device->ntrip.stream.port, 
+			      port, 
+			      sizeof(device->ntrip.stream.port));
 
 	    ret = ntrip_stream_req_probe(&device->ntrip.stream);
 	    if (ret == -1) {
