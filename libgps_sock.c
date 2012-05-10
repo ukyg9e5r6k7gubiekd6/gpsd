@@ -400,10 +400,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    gpsdata->satellites_visible = 0;
 			} else {
 			    int j, i1, i2, i3, i5;
-			    int PRN[MAXCHANNELS];
-			    int elevation[MAXCHANNELS], azimuth[MAXCHANNELS];
-			    int used[MAXCHANNELS];
-			    double ss[MAXCHANNELS], f4;
+			    double f4;
 			    char tag[MAXTAGLEN + 1], timestamp[21];
 
 			    (void)sscanf(sp, "Y=%8s %20s %d ",
@@ -413,10 +410,9 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    if (timestamp[0] != '?') {
 				gpsdata->set |= TIME_SET;
 			    }
-			    for (j = 0; j < gpsdata->satellites_visible; j++) {
-				PRN[j] = elevation[j] = azimuth[j] = used[j] =
-				    0;
-				ss[j] = 0.0;
+			    for (j = 0; j < MAXCHANNELS; j++) {
+				gpsdata->PRN[j] = gpsdata->elevation[j] = gpsdata->azimuth[j] = gpsdata->used[j] = 0;
+				gpsdata->ss[j] = 0.0;
 			    }
 			    for (j = 0, gpsdata->satellites_used = 0;
 				 j < gpsdata->satellites_visible; j++) {
@@ -425,24 +421,15 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				    sp++;
 				    (void)sscanf(sp, "%d %d %d %lf %d", &i1,
 						 &i2, &i3, &f4, &i5);
-				    PRN[j] = i1;
-				    elevation[j] = i2;
-				    azimuth[j] = i3;
-				    ss[j] = f4;
-				    used[j] = i5;
+				    gpsdata->PRN[j] = i1;
+				    gpsdata->elevation[j] = i2;
+				    gpsdata->azimuth[j] = i3;
+				    gpsdata->ss[j] = f4;
+				    gpsdata->used[j] = i5;
 				    if (i5 == 1)
 					gpsdata->satellites_used++;
 				}
 			    }
-			    /*@ -compdef @*/
-			    memcpy(gpsdata->PRN, PRN, sizeof(PRN));
-			    memcpy(gpsdata->elevation, elevation,
-				   sizeof(elevation));
-			    memcpy(gpsdata->azimuth, azimuth,
-				   sizeof(azimuth));
-			    memcpy(gpsdata->ss, ss, sizeof(ss));
-			    memcpy(gpsdata->used, used, sizeof(used));
-			    /*@ +compdef @*/
 			}
 			gpsdata->set |= SATELLITE_SET;
 			break;
