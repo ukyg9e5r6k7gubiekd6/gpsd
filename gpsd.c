@@ -295,6 +295,8 @@ static int filesock(char *filename)
 	return -1;
     }
     /*@ +mayaliasunique +usedef @*/
+
+    /* coverity[leaked_handle] This is an intentional allocation */
     return sock;
 }
 #endif /* CONTROL_SOCKET_ENABLE */

@@ -322,6 +322,7 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream)
 		errno, dsock, r);
 	return -1;
     }
+    /* coverity[leaked_handle] This is an intentional allocation */
     return dsock;
 }
 

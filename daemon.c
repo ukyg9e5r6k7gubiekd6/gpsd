@@ -45,6 +45,7 @@ int daemon(int nochdir, int noclose)
 	    (void)close(fd);
     }
     /*@ +nullpass @*/
+    /* coverity[leaked_handle] Intentional handle duplication */
     return 0;
 }
 
