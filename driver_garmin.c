@@ -932,10 +932,10 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 	// expect no return packet !?
 
 	return true;
-    }
 #else
 	return false;
 #endif /* HAVE_LIBUSB */
+    }
 #else
     return false;
 #endif /* __linux__ || S_SPLINT_S */
