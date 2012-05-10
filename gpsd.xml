@@ -304,7 +304,7 @@ passed to local clients.</para>
 <listitem>
 <para>A URI with the prefix "nmea2000://", followed by a CAN
 devicename. Only Linux socket CAN interfaces are supported. The
-interface must be configured to receive CAN messages at
+interface must be configured to receive CAN messages
 before <application>gpsd</application> can be started. If
 there is more then one unit on the CAN bus that provides GPS data,
 <application>gpsd</application> chooses the unit from which a GPS message
