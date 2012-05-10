@@ -39,7 +39,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsect1 id='description'><title>DESCRIPTION</title>
 
 <para><application>gpsprof</application> performs accuracy and latency
-profiling onm a GPS. It emits to standard output a GNUPLOT program
+profiling on a GPS. It emits to standard output a GNUPLOT program
 that draws an illustrative graph. It can also be told to emit the raw
 profile data.  The information it provides can be useful for
 establishing an upper bound on latency, and thus on position accuracy

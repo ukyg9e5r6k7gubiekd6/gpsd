@@ -254,7 +254,7 @@ formulas used are those found in the Aviation Formulary v1.43.</para>
 
 <para><application>cgps</application> terminates when you send it a
 SIGHUP or SIGINT; given default terminal settings this will happen
-when you type Ctl-C at it.  It will also terminate on 'q'</para>
+when you type Ctrl-C at it.  It will also terminate on 'q'</para>
 
 </refsect2>
 <refsect2><title>lcdgps</title>
@@ -289,7 +289,7 @@ than this will not be logged.</para>
 export methods that <application>gpsd</application> supports.
 For a list of these methods, use the <option>-l</option>.
 To force the method, give the <option>-e</option> one of
-the colon-teminated method names from the <option>-l</option>
+the colon-terminated method names from the <option>-l</option>
 table.</para>
 
 <para>If D-Bus support is available on the host, GPSD is configured to

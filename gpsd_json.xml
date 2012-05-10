@@ -207,19 +207,19 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>epd</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Direction error estimate in degrees, 95% confifdence.</entry>
+        <entry>Direction error estimate in degrees, 95% confidence.</entry>
 </row>
 <row>
 	<entry>eps</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Speed error estinmate in meters/sec, 95% confifdence.</entry>
+        <entry>Speed error estinmate in meters/sec, 95% confidence.</entry>
 </row>
 <row>
 	<entry>epc</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Climb/sink error estinmate in meters/sec, 95% confifdence.</entry>
+        <entry>Climb/sink error estimate in meters/sec, 95% confidence.</entry>
 </row>
 
 </tbody>
@@ -1149,8 +1149,8 @@ into this response.</para>
 <term>PPS</term>
 <listitem>
 
-<para>This message is emitted each time the daeon sees a PPS (Pulse Per Second)
-strobe from a device.</para>
+<para>This message is emitted each time the daemon sees a PPS (Pulse
+Per Second) strobe from a device.</para>
 
 <para>A PPS object has the following elements:</para>
 
@@ -1939,7 +1939,7 @@ for each satellite.</para>
 <row>
 	<entry>health_en</entry>
 	<entry>bool</entry>
-        <entry><para>If set to Teue it indicates that the satellite is
+        <entry><para>If set to True it indicates that the satellite is
         healthy even if the satellite navigation data says it is
         unhealthy.</para></entry>
 </row>
@@ -2069,7 +2069,7 @@ but this cannot be true unless the field is 3 bits wide.
         <entry><para>The id of the transmitter. This is not the same
         as the reference id in the header, the latter being the id of
         the reference receiver. <!-- John Sager noted: "However I know
-	of at least one stationthat gets it wrong." --></para></entry>
+	of at least one station that gets it wrong." --></para></entry>
 </row>
 <row>
 	<entry>bitrate</entry>
