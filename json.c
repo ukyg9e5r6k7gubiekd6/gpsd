@@ -259,6 +259,8 @@ static int json_internal_read_object(const char *cp,
 	    }
 	    break;
 	case in_attr:
+	    if (pattr == NULL)
+		return JSON_ERR_NULLPTR;
 	    if (*cp == '"') {
 		*pattr++ = '\0';
 		json_debug_trace((1, "Collected attribute name %s\n",
@@ -320,6 +322,8 @@ static int json_internal_read_object(const char *cp,
 	    }
 	    break;
 	case in_val_string:
+	    if (pval == NULL)
+		return JSON_ERR_NULLPTR;
 	    if (*cp == '\\')
 		state = in_escape;
 	    else if (*cp == '"') {
@@ -334,6 +338,8 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = *cp;
 	    break;
 	case in_escape:
+	    if (pval == NULL)
+		return JSON_ERR_NULLPTR;
 	    switch (*cp) {
 	    case 'b':
 		*pval++ = '\b';
@@ -364,6 +370,8 @@ static int json_internal_read_object(const char *cp,
 	    state = in_val_string;
 	    break;
 	case in_val_token:
+	    if (pval == NULL)
+		return JSON_ERR_NULLPTR;
 	    if (isspace(*cp) || *cp == ',' || *cp == '}') {
 		*pval = '\0';
 		json_debug_trace((1, "Collected token value %s.\n", valbuf));
@@ -635,6 +643,7 @@ const /*@observer@*/ char *json_error_string(int err)
 	"saw quoted value when expecting nonstring",
 	"didn't see quoted value when expecting string",
 	"other data conversion error",
+	"unexpected null value or attribute pointer",
     };
 
     if (err <= 0 || err >= (int)(sizeof(errors) / sizeof(errors[0])))
