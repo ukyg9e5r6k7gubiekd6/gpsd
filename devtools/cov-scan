@@ -19,7 +19,8 @@ cov-build --dir cov-int /usr/bin/scons
 
 echo "Bundling up required metadata..."
 cat >/tmp/README <<EOF
-Username: esr
+Name: Eric S. Raymond
+Email: esr@thyrsus.com
 Project: gpsd
 EOF
 mv cov-int /tmp; 
@@ -31,3 +32,6 @@ scp /tmp/gpsd-scan.tgz $DROP_SCP; rm /tmp/gpsd-scan.tgz
 # Post the URL
 url=$DROP_HTML/gpsd-scan.tgz
 echo $url
+
+# Submit to http://scan.coverity.com/submit.html
+The project's build password is v2tradeC
