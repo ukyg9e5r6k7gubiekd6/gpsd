@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Perform a Coverity self-build on the GPSD code.
+# The build tool gets confused if you try to run it direct from scons.
+#
+# Where the Coverity tools live
+PATH=$PATH:/usr/local/coverity/bin
+#
+# scp destination to drop tarball, can be anywhere web-accessible
+DROP_SCP=esr@login.ibiblio.org:/public/html/catb/esr
+#
+# Public URL for the drop destination
+DROP_HTML=http://catb.org/~esr
+
+echo "Rebuilding and scanning..."
+scons -c
+rm -fr cov-int
+cov-build --dir cov-int /usr/bin/scons
+
+echo "Bundling up required metadata..."
+cat >/tmp/README <<EOF
+Username: esr
+Project: gpsd
+EOF
+mv cov-int /tmp; 
+(cd /tmp; tar -czf gpsd-scan.tgz README cov-int; rm -fr cov-int)
+
+echo "Uploading to where it's publicly visible..." 
+scp /tmp/gpsd-scan.tgz $DROP_SCP; rm /tmp/gpsd-scan.tgz
+
+# Post the URL
+url=$DROP_HTML/gpsd-scan.tgz
+echo $url

@@ -18,6 +18,10 @@ list of AIS types.
 
 Generate an asciidoc table of the six-bit encoding used in AIVDM packets.
 
+== cov-scan ==
+
+Prepare a Coverity self-build of the project.
+
 == cycle_analyzer ==
 
 Finds end-of-cycle sentences from GPS output logs.
