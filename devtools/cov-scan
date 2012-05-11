@@ -11,6 +11,10 @@ DROP_SCP=esr@login.ibiblio.org:/public/html/catb/esr
 #
 # Public URL for the drop destination
 DROP_HTML=http://catb.org/~esr
+#
+# Things we can deduce
+name=`git config core.name`
+email=`git config core.email`
 
 echo "Rebuilding and scanning..."
 scons -c
@@ -19,8 +23,8 @@ cov-build --dir cov-int /usr/bin/scons
 
 echo "Bundling up required metadata..."
 cat >/tmp/README <<EOF
-Name: Eric S. Raymond
-Email: esr@thyrsus.com
+Name: $name
+Email: $email
 Project: gpsd
 EOF
 mv cov-int /tmp; 
@@ -34,4 +38,4 @@ url=$DROP_HTML/gpsd-scan.tgz
 echo $url
 
 # Submit to http://scan.coverity.com/submit.html
-The project's build password is v2tradeC
+# The project's build password is v2tradeC
