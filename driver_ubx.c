@@ -38,7 +38,9 @@
  *
  * see also the FV25 and UBX documents on reference.html
  */
-#define UBX_PREFIX_LEN	6
+#define UBX_PREFIX_LEN		6
+#define UBX_CLASS_OFFSET	2
+#define UBX_TYPE_OFFSET		3
 
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf,
 			    size_t len);
@@ -291,7 +293,7 @@ static void ubx_msg_inf(unsigned char *buf, size_t data_len)
     if (data_len > MAX_PACKET_LENGTH - 1)
 	data_len = MAX_PACKET_LENGTH - 1;
 
-    (void)strlcpy(txtbuf, (char *)buf + 6, MAX_PACKET_LENGTH);
+    (void)strlcpy(txtbuf, (char *)buf + UBX_PREFIX_LEN, MAX_PACKET_LENGTH);
     txtbuf[data_len] = '\0';
     switch (msgid) {
     case UBX_INF_DEBUG:
@@ -324,7 +326,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     gps_mask_t mask = 0;
     int i;
 
-    if (len < 6)		/* the packet at least contains a head of six bytes */
+    /* the packet at least contains a head long enough for an empty message */
+    if (len < UBX_PREFIX_LEN)
 	return 0;
 
     session->cycle_end_reliable = true;
@@ -344,12 +347,12 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_DOP:
 	gpsd_report(LOG_PROG, "UBX_NAV_DOP\n");
-	mask = ubx_msg_nav_dop(session, &buf[6], data_len);
+	mask = ubx_msg_nav_dop(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_SOL:
 	gpsd_report(LOG_PROG, "UBX_NAV_SOL\n");
 	mask =
-	    ubx_msg_nav_sol(session, &buf[6],
+	    ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN],
 			    data_len) | (CLEAR_IS | REPORT_IS);
 	break;
     case UBX_NAV_POSUTM:
@@ -363,7 +366,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_TIMEGPS:
 	gpsd_report(LOG_PROG, "UBX_NAV_TIMEGPS\n");
-	mask = ubx_msg_nav_timegps(session, &buf[6], data_len);
+	mask = ubx_msg_nav_timegps(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_TIMEUTC:
 	gpsd_report(LOG_IO, "UBX_NAV_TIMEUTC\n");
@@ -373,7 +376,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_SVINFO:
 	gpsd_report(LOG_PROG, "UBX_NAV_SVINFO\n");
-	mask = ubx_msg_nav_svinfo(session, &buf[6], data_len);
+	mask = ubx_msg_nav_svinfo(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_DGPS:
 	gpsd_report(LOG_IO, "UBX_NAV_DGPS\n");
@@ -390,7 +393,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(LOG_IO, "UBX_RXM_RAW\n");
 	break;
     case UBX_RXM_SFRB:
-	mask = ubx_msg_sfrb(session, &buf[6]);
+	mask = ubx_msg_sfrb(session, &buf[UBX_PREFIX_LEN]);
 	break;
     case UBX_RXM_SVSI:
 	gpsd_report(LOG_PROG, "UBX_RXM_SVSI\n");
@@ -474,12 +477,14 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
 
     case UBX_ACK_NAK:
-	gpsd_report(LOG_IO, "UBX_ACK_NAK, class: %02x, id: %02x\n", buf[6],
-		    buf[7]);
+	gpsd_report(LOG_IO, "UBX_ACK_NAK, class: %02x, id: %02x\n", 
+		    buf[UBX_CLASS_OFFSET],
+		    buf[UBX_TYPE_OFFSET]);
 	break;
     case UBX_ACK_ACK:
-	gpsd_report(LOG_IO, "UBX_ACK_ACK, class: %02x, id: %02x\n", buf[6],
-		    buf[7]);
+	gpsd_report(LOG_IO, "UBX_ACK_ACK, class: %02x, id: %02x\n",
+		    buf[UBX_CLASS_OFFSET],
+		    buf[UBX_TYPE_OFFSET]);
 	break;
 
     default:
