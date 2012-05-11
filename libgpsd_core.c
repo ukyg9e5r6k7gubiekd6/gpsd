@@ -892,9 +892,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
      * Input just became available from a sensor, but no read from the
      * device has yet been done.
      *
-     * If we ever want a start-of-packet timestamp again, take it here
-     * with a test that session->packet.outbuflen is zero.
-     *
      * What we actually do here is trickier.  For latency-timing
      * purposes, we want to know the time at the start of the current
      * recording cycle. We rely on the fact that even at 4800bps
@@ -922,7 +919,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
      * in the cycle.
      *
      * In practice, it seems that edge detection succeeds at 9600bps but
-     * fails at 4800bps.  This is not surprsing, as previous profiling has 
+     * fails at 4800bps.  This is not surprising, as previous profiling has 
      * indicated that at 4800bps some devices overrun a 1-second cycle time 
      * with the data they transmit.
      */
