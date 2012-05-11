@@ -330,7 +330,7 @@ int gpsd_open(struct gps_device_t *session)
 
 	(void)strlcpy(interface_name, session->gpsdata.dev.path + 11, sizeof(interface_name));
 	/* Locate the interface you wish to use */
-	strcpy(ifr.ifr_name, interface_name);
+	strlcpy(ifr.ifr_name, interface_name, sizeof(ifr.ifr_name));
 	status = ioctl(sock, SIOCGIFINDEX, &ifr); /* ifr.ifr_ifindex gets filled 
 						   * with that device's index */
 
