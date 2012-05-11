@@ -170,7 +170,6 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	ssize_t rlen;
 
 	memset(&buf[len], 0, (size_t) (blen - len));
-	/* coverity[string_null] - guaranteed terminated by previous memset */
 	rlen = read(fd, &buf[len], (size_t) (blen - 1 - len));
 	if (rlen == -1) {
 	    if (errno == EINTR) {
@@ -220,6 +219,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 		     strlen(NTRIP_ENDSOURCETABLE)) == 0)
 		goto done;
 
+	    /* coverity[string_null] - nul-terminated by previous memset */
 	    if (!(eol = strstr(line, NTRIP_BR)))
 		break;
 

@@ -2321,10 +2321,10 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZ];
 		ssize_t rd;
 
-		/* coverity[tainted_scalar] Safe, it's never handed to exec */
 		while ((rd = read(cfd, buf, sizeof(buf) - 1)) > 0) {
 		    buf[rd] = '\0';
 		    gpsd_report(LOG_IO, "<= control(%d): %s\n", cfd, buf);
+		    /* coverity[tainted_scalar] Safe, never handed to exec */
 		    handle_control(cfd, buf);
 		}
 		gpsd_report(LOG_SPIN, "close(%d) of control socket\n", cfd);
