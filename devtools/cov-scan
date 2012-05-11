@@ -13,8 +13,8 @@ DROP_SCP=esr@login.ibiblio.org:/public/html/catb/esr
 DROP_HTML=http://catb.org/~esr
 #
 # Things we can deduce
-name=`git config core.name`
-email=`git config core.email`
+name=`git config user.name`
+email=`git config user.email`
 #
 # Things that are fixed
 project=gpsd
@@ -51,7 +51,7 @@ echo "Post $url to http://scan.coverity.com/submit.html"
     -d project=$project \
     -d password=$password \
     -d email=$email \
-    -d url= $url \
+    -d url=$url \
     http://scan5.coverity.com/cgi-bin/submit_build.py
 : echo "Done. You'll get mail."
 
