@@ -2063,12 +2063,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 		/* layout is almost identical to FID=31 from IMO289 */
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "{\"lat\":%.3f,\"lon\":%.3f,",
+				   "\"lat\":%.3f,\"lon\":%.3f,",
 				   ais->type8.dac1fid31.lat / AIS_LATLON3_SCALE,
 				   ais->type8.dac1fid31.lon / AIS_LATLON3_SCALE);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "{\"lat\":%d,\"lon\":%d,",
+				   "\"lat\":%d,\"lon\":%d,",
 				   ais->type8.dac1fid31.lat,
 				   ais->type8.dac1fid31.lon);
 		if (ais->type8.fid == 31)
@@ -2078,7 +2078,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"timestamp\":\"%02uT%02u:%02uZ\","
 			       "\"wapeed\":%u,\"wgust\":%u,\"wdir\":%u,"
-			       "\"wgustdir\":%u,\"humidity\":%u",
+			       "\"wgustdir\":%u,\"humidity\":%u,",
 			       ais->type8.dac1fid31.day,
 			       ais->type8.dac1fid31.hour,
 			       ais->type8.dac1fid31.minute,
@@ -2112,7 +2112,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.visibility * 0.1);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"visibility\":%u,:",
+				   "\"visibility\":%u,",
 				   ais->type8.dac1fid31.visibility);
 		if (!scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2120,11 +2120,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.waterlevel);
 		else if (ais->type8.fid == 31)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"waterlevel\":%.1f,:",
+				   "\"waterlevel\":%.1f,",
 				   ais->type8.dac1fid31.waterlevel * 0.01);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"waterlevel\":%.1f,:",
+				   "\"waterlevel\":%.1f,",
 				   ais->type8.dac1fid31.waterlevel * 0.1);
 
 		if (scaled) {
@@ -2140,7 +2140,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    };
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"leveltrend\":\"%s\","
-				   "\"cspeed\":%.1f,\"cdir\":%u"
+				   "\"cspeed\":%.1f,\"cdir\":%u,"
 				   "\"cspeed2\":%.1f,\"cdir2\":%u,\"cdepth2\":%u,"
 				   "\"cspeed3\":%.1f,\"cdir3\":%u,\"cdepth3\":%u,"
 				   "\"waveheight\":%.1f,\"waveperiod\":%u,\"wavedir\":%u,"
