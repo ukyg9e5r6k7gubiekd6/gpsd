@@ -434,7 +434,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	 * this, trying to listen on in6addr_any will fail with the
 	 * address-in-use error condition.
 	 */
-	{
+	if (s > -1) {
 	    int on = 1;
 	    (void)setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
 	}
