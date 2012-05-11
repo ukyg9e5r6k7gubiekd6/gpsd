@@ -292,6 +292,7 @@ static int filesock(char *filename)
     (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
     if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
+	(void)close(sock);
 	return -1;
     }
     /*@ +mayaliasunique +usedef @*/
@@ -2320,6 +2321,7 @@ int main(int argc, char *argv[])
 		char buf[BUFSIZ];
 		ssize_t rd;
 
+		/* coverity[tainted_scalar] Safe, it's never handed to exec */
 		while ((rd = read(cfd, buf, sizeof(buf) - 1)) > 0) {
 		    buf[rd] = '\0';
 		    gpsd_report(LOG_IO, "<= control(%d): %s\n", cfd, buf);

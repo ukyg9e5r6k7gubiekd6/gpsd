@@ -389,7 +389,6 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream, int dsock
     char buf[BUFSIZ];
     int opts;
     memset(buf, 0, sizeof(buf));
-    /* coverity[string_null] - guaranteed terminated by previous memset */
     while (read(dsock, buf, sizeof(buf) - 1) == -1) {
 	if (errno == EINTR)
 	    continue;
@@ -399,6 +398,7 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream, int dsock
     }
 
     /* parse 401 Unauthorized */
+    /* coverity[string_null] - guaranteed terminated by the memset above */
     if (strstr(buf, NTRIP_UNAUTH)!=NULL) {
 	gpsd_report(LOG_ERROR,
 		"not authorized for Ntrip stream %s/%s\n", stream->url,

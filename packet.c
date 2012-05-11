@@ -1984,6 +1984,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 
     /*@ -modobserver @*/
     errno = 0;
+    /* coverity[tainted_scalar] Safe, as it's never handed to exec */
     recvd = read(fd, lexer->inbuffer + lexer->inbuflen,
 		 sizeof(lexer->inbuffer) - (lexer->inbuflen));
     /*@ +modobserver @*/
