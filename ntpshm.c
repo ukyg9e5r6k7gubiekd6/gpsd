@@ -911,6 +911,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     }
     gpsd_report(LOG_PROG, "PPS gpsd_ppsmonitor exited???\n");
+    /* pacify Coverity - falling through here is theoretically a handle leak */
+    if (chronyfd)
+	(void)close(chronyfd);
     return NULL;
 }
 /*@+mustfreefresh +type +unrecog@*/

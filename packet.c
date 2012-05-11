@@ -1984,7 +1984,6 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 
     /*@ -modobserver @*/
     errno = 0;
-    /* coverity[tainted_scalar] Safe, as it's never handed to exec */
     recvd = read(fd, lexer->inbuffer + lexer->inbuflen,
 		 sizeof(lexer->inbuffer) - (lexer->inbuflen));
     /*@ +modobserver @*/
@@ -2013,6 +2012,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
      * nothing from the device and there is nothing waiting in the
      * packet input buffer.
      */
+    /* coverity[tainted_scalar] */
     if (recvd <= 0 && packet_buffered_input(lexer) <= 0)
 	return recvd;
 
@@ -2021,6 +2021,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 
     /* if input buffer is full, discard */
     if (sizeof(lexer->inbuffer) == (lexer->inbuflen)) {
+	/* coverity[tainted_scalar] */
 	packet_discard(lexer);
 	lexer->state = GROUND_STATE;
     }

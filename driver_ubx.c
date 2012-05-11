@@ -515,7 +515,8 @@ bool ubx_write(struct gps_device_t * session,
 	       unsigned char *msg, size_t data_len)
 {
     unsigned char CK_A, CK_B;
-    ssize_t i, count;
+    ssize_t count;
+    size_t i;
     bool ok;
 
     /*@ -type @*/
@@ -550,9 +551,8 @@ bool ubx_write(struct gps_device_t * session,
     /*@ +type @*/
 
 
-    /* coverity[pwprintf_arg_mismatch] */
     gpsd_report(LOG_IO,
-		"=> GPS: UBX class: %02x, id: %02x, len: %d, crc: %02x%02x\n",
+		"=> GPS: UBX class: %02x, id: %02x, len: %zd, crc: %02x%02x\n",
 		msg_class, msg_id, data_len,
 		CK_A, CK_B);
     count = gpsd_write(session, session->msgbuf, session->msgbuflen);

@@ -320,7 +320,7 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream)
     if (r != (ssize_t)strlen(buf)) {
 	gpsd_report(LOG_ERROR, "ntrip stream write error %d on fd %d during probe request %zd\n",
 		errno, dsock, r);
-	close(dsock);
+	(int)close(dsock);
 	return -1;
     }
     /* coverity[leaked_handle] This is an intentional allocation */
