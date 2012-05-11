@@ -777,14 +777,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     * been changing for at least 800ms, i.e. it assumes the duty
 	     * cycle is at most 20%.
 	     *
-	     * Some GPS instead output a square wave that is 0.5 Hz and each
+	     * Some GPSes instead output a square wave that is 0.5 Hz and each
 	     * edge denotes the start of a second.
 	     *
-	     * Some GPS, like the Globalsat MR-350P, output a 1uS pulse.
+	     * Some GPSes, like the Globalsat MR-350P, output a 1uS pulse.
 	     * The pulse is so short that TIOCMIWAIT sees a state change
 	     * but by the time TIOCMGET is called the pulse is gone.
 	     *
-	     * A few stupid GPS, like the Furuno GPSClock, output a 1.0 Hz
+	     * A few stupid GPSes, like the Furuno GPSClock, output a 1.0 Hz
 	     * square wave where the leading edge is the start of a second
 	     *
 	     * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to
