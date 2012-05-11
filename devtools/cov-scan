@@ -15,6 +15,12 @@ DROP_HTML=http://catb.org/~esr
 # Things we can deduce
 name=`git config core.name`
 email=`git config core.email`
+#
+# Things that are fixed
+project=gpsd
+password=v2tradeC
+
+# Nothing below this line should require configuration
 
 echo "Rebuilding and scanning..."
 scons -c
@@ -25,17 +31,21 @@ echo "Bundling up required metadata..."
 cat >/tmp/README <<EOF
 Name: $name
 Email: $email
-Project: gpsd
+Project: $project
 EOF
 mv cov-int /tmp; 
-(cd /tmp; tar -czf gpsd-scan.tgz README cov-int; rm -fr cov-int)
+(cd /tmp; tar -czf project-scan.tgz README cov-int; rm -fr cov-int)
 
 echo "Uploading to where it's publicly visible..." 
-scp /tmp/gpsd-scan.tgz $DROP_SCP; rm /tmp/gpsd-scan.tgz
+scp /tmp/project-scan.tgz $DROP_SCP; rm /tmp/project-scan.tgz
 
-# Post the URL
-url=$DROP_HTML/gpsd-scan.tgz
-echo $url
+echo "Posting the analysis request..."
+# Simulates the form at http://scan.coverity.com/submit.html
+curl \
+    -d project=$project \
+    -d password=$password \
+    -d email=$email \
+    -d url=$DROP_HTML/project-scan.tgz \
+    http://scan5.coverity.com/cgi-bin/submit_build.py
 
-# Submit to http://scan.coverity.com/submit.html
-# The project's build password is v2tradeC
+echo "Done."
