@@ -63,8 +63,8 @@ union long_double {
 #define getbes64(buf, off)	((int64_t)(((uint64_t)getbeu32(buf, (off)) << 32) | getbeu32(buf, (off)+4)))
 #define getbeu64(buf, off)	((uint64_t)(((uint64_t)getbeu32(buf, (off)) << 32) | getbeu32(buf, (off)+4)))
 
-#define putbe16(buf,off,w) do {putbyte(buf, (off) ,(w) >> 8); putbyte(buf, (off)+1, (w));} while (0)
-#define putbe32(buf,off,l) do {putbe16(buf, (off) ,(l) >> 16); putbe16(buf, (off)+2, (l));} while (0)
+#define putbe16(buf,off,w) do {putbyte(buf, (off), (w) >> 8); putbyte(buf, (off)+1, (w));} while (0)
+#define putbe32(buf,off,l) do {putbe16(buf, (off), (l) >> 16); putbe16(buf, (off)+2, (l));} while (0)
 
 #define getbef(buf, off)	(i_f.i = getbes32(buf, off), i_f.f)
 #define getbed(buf, off)	(l_d.l = getbes64(buf, off), l_d.d)
