@@ -38,6 +38,7 @@
  *
  * see also the FV25 and UBX documents on reference.html
  */
+#define UBX_PREFIX_LEN	6
 
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf,
 			    size_t len);
@@ -462,10 +463,13 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
     case UBX_CFG_PRT:
 	gpsd_report(LOG_IO, "UBX_CFG_PRT\n");
-	for (i = 6; i < 26; i++)
-	    session->driver.ubx.original_port_settings[i - 6] = buf[i];	/* copy the original port settings */
-	buf[14 + 6] &= ~0x02;	/* turn off NMEA output on this port */
-	(void)ubx_write(session, 0x06, 0x00, &buf[6], 20);	/* send back with all other settings intact */
+	for (i = 0; i < (int)sizeof(session->driver.ubx.port_settings); i++)
+	    session->driver.ubx.port_settings[i] = buf[UBX_PREFIX_LEN+i];
+	/* turn off NMEA output on this port */
+	session->driver.ubx.port_settings[14] &= ~0x02;
+	(void)ubx_write(session, 0x06, 0x00, 
+			session->driver.ubx.port_settings, 
+			sizeof(session->driver.ubx.port_settings));
 	session->driver.ubx.have_port_configuration = true;
 	break;
 
@@ -656,45 +660,36 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 #ifdef RECONFIGURE_ENABLE
 static void ubx_nmea_mode(struct gps_device_t *session, int mode)
 {
-    int i;
-    unsigned char buf[sizeof(session->driver.ubx.original_port_settings)];
-
     if (!session->driver.ubx.have_port_configuration)
 	return;
 
-    /*@ +charint -usedef @*/
-    for (i = 0; i < (int)sizeof(session->driver.ubx.original_port_settings);
-	 i++)
-	buf[i] = session->driver.ubx.original_port_settings[i];	/* copy the original port settings */
-    if (buf[0] == 0x01)		/* set baudrate on serial port only */
-	putle32(buf, 8, session->gpsdata.dev.baudrate);
+    /*@+charint@*/
+    if (session->driver.ubx.port_settings[0] == 0x01)		/* set baudrate on serial port only */
+	putle32(session->driver.ubx.port_settings, 8, session->gpsdata.dev.baudrate);
 
     if (mode == MODE_NMEA) {
-	buf[14] &= ~0x01;	/* turn off UBX output on this port */
-	buf[14] |= 0x02;	/* turn on NMEA output on this port */
+	session->driver.ubx.port_settings[14] &= ~0x01;	/* turn off UBX output on this port */
+	session->driver.ubx.port_settings[14] |= 0x02;	/* turn on NMEA output on this port */
     } else {			/* MODE_BINARY */
-	buf[14] &= ~0x02;	/* turn off NMEA output on this port */
-	buf[14] |= 0x01;	/* turn on UBX output on this port */
+	session->driver.ubx.port_settings[14] &= ~0x02;	/* turn off NMEA output on this port */
+	session->driver.ubx.port_settings[14] |= 0x01;	/* turn on UBX output on this port */
     }
-    /*@ -charint +usedef @*/
-    (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));	/* send back with all other settings intact */
+    /*@ -charint @*/
+    (void)ubx_write(session, 0x06u, 0x00,
+		    session->driver.ubx.port_settings,
+		    sizeof(session->driver.ubx.port_settings));
 }
 
 static bool ubx_speed(struct gps_device_t *session,
 		      speed_t speed, char parity, int stopbits)
 {
-    int i;
-    unsigned char buf[sizeof(session->driver.ubx.original_port_settings)];
     unsigned long usart_mode;
 
-    /*@ +charint -usedef -compdef */
-    for (i = 0; i < (int)sizeof(session->driver.ubx.original_port_settings);
-	 i++)
-	buf[i] = session->driver.ubx.original_port_settings[i];	/* copy the original port settings */
-    if ((!session->driver.ubx.have_port_configuration) || (buf[0] != 0x01))	/* set baudrate on serial port only */
+    /*@+charint@*/
+    if ((!session->driver.ubx.have_port_configuration) || (session->driver.ubx.port_settings[0] != 0x01))	/* set baudrate on serial port only */
 	return false;
 
-    usart_mode = (unsigned long)getleu32(buf, 4);
+    usart_mode = (unsigned long)getleu32(session->driver.ubx.port_settings, 4);
     usart_mode &= ~0xE00;	/* zero bits 11:9 */
     switch (parity) {
     case (int)'E':
@@ -711,13 +706,15 @@ static bool ubx_speed(struct gps_device_t *session,
 	usart_mode |= 0x4;	/* 0x5 would work too */
 	break;
     }
+    /*@-charint@*/
     usart_mode &= ~0x03000;	/* zero bits 13:12 */
     if (stopbits == 2)
 	usart_mode |= 0x2000;	/* zero value means 1 stop bit */
-    putle32(buf, 4, usart_mode);
-    putle32(buf, 8, speed);
-    (void)ubx_write(session, 0x06, 0x00, buf, sizeof(buf));	/* send back with all other settings intact */
-    /*@ -charint +usedef +compdef */
+    putle32(session->driver.ubx.port_settings, 4, usart_mode);
+    putle32(session->driver.ubx.port_settings, 8, speed);
+    (void)ubx_write(session, 0x06, 0x00, 
+		    session->driver.ubx.port_settings,
+		    sizeof(session->driver.ubx.port_settings));
     return true;
 }
 
