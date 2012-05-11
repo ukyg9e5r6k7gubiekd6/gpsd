@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 	if (optenv != NULL)
 	    gpsd_options = optenv;
 
-	/* coverity[string_size] */]
+	/* coverity[string_size] */
 	if (gpsd_control(argv[1], argv[2]) < 0)
 	    exit(1);
 	else
