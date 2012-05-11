@@ -2132,14 +2132,14 @@ int main(int argc, char *argv[])
 	struct sigaction sa;
 
 	sa.sa_flags = 0;
-#ifdef __linux__
+#ifdef __COVERITY__
 	/* 
-	 * Obsolete and unused.  We're really only doing this to pacify Coverity
+	 * Obsolete and unused.  We're only doing this to pacify Coverity
 	 * which otherwise throws an UNINIT event here. Don't swap with the
 	 * handler initialization, they're unioned on some architectures.
 	 */
 	sa.sa_restorer = NULL;
-#endif /* __linux__ */
+#endif /* __COVERITY__ */
 	sa.sa_handler = onsig;
 	(void)sigfillset(&sa.sa_mask);
 	(void)sigaction(SIGHUP, &sa, NULL);
