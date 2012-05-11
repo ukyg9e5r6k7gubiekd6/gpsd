@@ -19,13 +19,15 @@ email=`git config core.email`
 # Things that are fixed
 project=gpsd
 password=v2tradeC
+prebuild=scons -c
+build=scons
 
 # Nothing below this line should require configuration
 
 echo "Rebuilding and scanning..."
-scons -c
+$prebuild
 rm -fr cov-int
-cov-build --dir cov-int /usr/bin/scons
+cov-build --dir cov-int $build
 
 echo "Bundling up required metadata..."
 cat >/tmp/README <<EOF
@@ -48,4 +50,4 @@ curl \
     -d url=$DROP_HTML/project-scan.tgz \
     http://scan5.coverity.com/cgi-bin/submit_build.py
 
-echo "Done."
+echo "Done. You'll get mail."
