@@ -210,11 +210,7 @@ static int json_internal_read_object(const char *cp,
 		    lptr[0] = '\0';
 		    break;
 		case t_boolean:
-		    /* nullbool default says not to set the value at all */
-		    /*@+boolint@*/
-		    if (cursor->dflt.boolean != nullbool)
-			*((bool *) lptr) = cursor->dflt.boolean;
-		    /*@-boolint@*/
+		    *((bool *) lptr) = cursor->dflt.boolean;
 		    break;
 		case t_character:
 		    lptr[0] = cursor->dflt.character;

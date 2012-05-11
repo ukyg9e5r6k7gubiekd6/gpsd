@@ -13,8 +13,6 @@ typedef enum {t_integer, t_uinteger, t_real,
 	      t_object, t_structobject, t_array,
 	      t_check} json_type;
 
-#define nullbool	-1	/* not true, not false */
-
 struct json_enum_t {
     char	*name;
     int		value;
