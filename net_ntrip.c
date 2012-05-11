@@ -170,7 +170,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	ssize_t rlen;
 
 	memset(&buf[len], 0, (size_t) (blen - len));
-
+	/* coverity[string_null] - guaranteed terminated by previous memset */
 	rlen = read(fd, &buf[len], (size_t) (blen - 1 - len));
 	if (rlen == -1) {
 	    if (errno == EINTR) {
@@ -389,6 +389,7 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream, int dsock
     char buf[BUFSIZ];
     int opts;
     memset(buf, 0, sizeof(buf));
+    /* coverity[string_null] - guaranteed terminated by previous memset */
     while (read(dsock, buf, sizeof(buf) - 1) == -1) {
 	if (errno == EINTR)
 	    continue;

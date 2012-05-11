@@ -67,6 +67,7 @@ static int gpsd_control(char *action, char *argument)
 	 */
 	struct stat sb;
 
+	/* coverity[toctou] */
 	if (stat(argument, &sb) != 1)
 	    (void)chmod(argument, sb.st_mode | S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	(void)snprintf(buf, sizeof(buf), "+%s\r\n", argument);
