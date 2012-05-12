@@ -84,7 +84,6 @@ GPSD Frequently Asked Questions
 <li><a href='#tiocmwait'>PPS is failing to work under Linux</a></li>
 <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
-<li><a href='#clock'>How can I initialize my system clock from a GPS?</a></li>
 <li><a href='#web'>How do I get gpsd data into a web page?</a></li>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
 <li><a href='#willitwork'>Will this GPS work? It's not on the hardware list.</a></li>
