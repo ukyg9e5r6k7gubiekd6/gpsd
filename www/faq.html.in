@@ -637,23 +637,6 @@ href="70-persistent-usb-gps.rules">these replacement udev rules</a>,
 and the experience required to patch them so the vendor ID in the last
 one matches your GPS hardware (look in your lsusb output).</p>
 
-<h1 id='clock'>How can I initialize my system clock from a GPS?</h1>
-
-<p>To set the time on a box that has no real-time clock and no
-network connection, you need to set the clock to any date in the
-currebt century, then run the following:</p>
-
-<pre><code>
-date -s 2010.01.01-01:01
-date -s \
- $(echo '?WATCH="enable":true,"json":false,"nmea":true}' \
- | nc  localhost 2947 \
- | awk '/GPRMC/{FS=","; print 20 substr($10,5,2) "." substr ($10,3,2) "."
-substr($10,0,2) "-" substr($2,0,2) ":" substr($2,3,2) ":" substr($
-</code></pre>
-
-<p>(The actual requirt
-
 <h1 id='web'>How do I get gpsd data into a web page?</h1>
 
 <p>The <code>gpsd</code> source-code distribution now includes a PHP
