@@ -283,6 +283,28 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
     /*@+type@*/
     mask                            |= ALTITUDE_SET;
 
+//  printf("mode %x %x\n", (bu[31] >> 4) & 0x0f, bu[31]);
+    switch ((bu[31] >> 4) & 0x0f) {
+    case 0:
+        session->gpsdata.status      = STATUS_NO_FIX;
+	break;
+    case 1:
+        session->gpsdata.status      = STATUS_FIX;
+	break;
+    case 2:
+        session->gpsdata.status      = STATUS_DGPS_FIX;
+	break;
+    case 3:
+    case 4:
+    case 5:
+        session->gpsdata.status      = STATUS_FIX; /* Is this correct ? */
+	break;
+    default:
+        session->gpsdata.status      = STATUS_NO_FIX;
+	break;
+    }
+    mask                            |= STATUS_SET;
+
     /*@-type@*//* splint has a bug here */
     session->gpsdata.separation      = getles32(bu, 38) / 100.0;
     /*@+type@*/
