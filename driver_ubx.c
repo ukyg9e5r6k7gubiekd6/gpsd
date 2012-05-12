@@ -1,10 +1,15 @@
 /*
- * UBX driver
+ * UBX driver.  All capabilities are common to Antaris4 and uBlox6.
+ * Reference manuals are at 
+ * http://www.u-blox.com/en/download/documents-a-resources/u-blox-6-gps-modules-resources.html
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
  * be adding a fixed offset based on a hidden epoch value, in which case 
  * unhappy things will occur on the next rollover.
+ *
+ * For the Antaris 4, the default leap-secoond offset (before getting one from
+ * the sats, one presumes) is 0sec; for the uBlox6 it's 15sec.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
