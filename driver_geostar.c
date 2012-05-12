@@ -545,7 +545,7 @@ static void geostar_mode(struct gps_device_t *session, int mode)
     /*@-shiftimplementation@*/
     if (mode == MODE_NMEA) {
 	/* Switch to NMEA mode */
-	putbe32(buf, 0, (session->driver.geostar.physical_port == 0) ? 1 : 0);
+	putbe32(buf, 0, 1);
 	(void)geostar_write(session, 0x46, buf, 1);
     } else if (mode == MODE_BINARY) {
 	/* Switch to binary mode */
