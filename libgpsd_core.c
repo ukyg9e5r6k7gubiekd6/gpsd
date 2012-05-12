@@ -953,6 +953,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     /* can we get a full packet from the device? */
     if (session->device_type != NULL) {
 	newlen = session->device_type->get_packet(session);
+	/* coverity[deref_ptr] */
 	gpsd_report(LOG_RAW,
 		    "%s is known to be %s\n",
 		    session->gpsdata.dev.path,
