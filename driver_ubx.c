@@ -767,7 +767,7 @@ const struct gps_type_t ubx_binary = {
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
     .parse_packet     = parse_input,    /* Parse message packets */
     .rtcm_writer      = gpsd_write,      /* RTCM handler (using default routine) */
-    .event_hook       = ubx_event_hook,	/* Fiew in variious lifetime events */
+    .event_hook       = ubx_event_hook,	/* Fire on various lifetime events */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
