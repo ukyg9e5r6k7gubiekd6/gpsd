@@ -148,16 +148,9 @@ launching <code>gpsd</code> if needed and telling <code>gpsd</code>
 which device to read data from.  Then, <code>gpsd</code> deduces a
 baud rate and GPS/AIS type by looking at the data stream.</p>
 
-<p><code>gpsd</code> is high-quality, carefully-audited code.  It is
-regularly checked with the standard mode of <a
-href='http://www.splint.org'>splint</a> and <a
-href='http://https://sourceforge.net/apps/mediawiki/cppcheck/'>cppcheck</a>,
-audited with <a href='http://valgrind.org/'>Valgrind</a>, and an
-extensive regression-test suite is used to check correct behavior
-before each release.  This care has paid off in an exceptionally low
-defect rate; our first <a href='http://coverity.com'>Coverity</a>
-scan, in March 2007, turned up only two errors in over 22,000
-LLOC. And in January 2010, the GPSD project <a
+<p><code>gpsd</code> is high-quality, carefully-audited code; see 
+our <a href="reliability.html">notes on reliability engineering</a>. In
+January 2010, the GPSD project <a
 href="http://thedailywtf.com/Articles/Bad-Code-Offsets-Open-Web-Innovation.asp">won</a>
 the first Good Code Grant from the Alliance for Code Excellence.</p>
 
