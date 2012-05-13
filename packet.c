@@ -2012,16 +2012,16 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
      * nothing from the device and there is nothing waiting in the
      * packet input buffer.
      */
-    /* coverity[tainted_scalar] */
     if (recvd <= 0 && packet_buffered_input(lexer) <= 0)
 	return recvd;
 
     /* Otherwise, consume from the packet input buffer */
+    /* coverity[tainted_data] */
     packet_parse(lexer);
 
     /* if input buffer is full, discard */
     if (sizeof(lexer->inbuffer) == (lexer->inbuflen)) {
-	/* coverity[tainted_scalar] */
+	/* coverity[tainted_data] */
 	packet_discard(lexer);
 	lexer->state = GROUND_STATE;
     }

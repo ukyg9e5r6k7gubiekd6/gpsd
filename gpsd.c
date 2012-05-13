@@ -2324,7 +2324,7 @@ int main(int argc, char *argv[])
 		while ((rd = read(cfd, buf, sizeof(buf) - 1)) > 0) {
 		    buf[rd] = '\0';
 		    gpsd_report(LOG_IO, "<= control(%d): %s\n", cfd, buf);
-		    /* coverity[tainted_data_argument] Safe, never handed to exec */
+		    /* coverity[tainted_data] Safe, never handed to exec */
 		    handle_control(cfd, buf);
 		}
 		gpsd_report(LOG_SPIN, "close(%d) of control socket\n", cfd);
