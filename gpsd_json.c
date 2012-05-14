@@ -1526,7 +1526,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Reserved for future use",
     };
 
-#define STATIONTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(ship_type_legends)) ? station_type_legends[n] : "INVALID STATION TYPE")
+#define STATIONTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(station_type_legends)) ? station_type_legends[n] : "INVALID STATION TYPE")
 
     static const char *navaid_type_legends[] = {
 	"Unspecified",
