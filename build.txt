@@ -70,16 +70,37 @@ autotools build from 2.96 and earlier versions has been dropped.
 chrpath is a tool for editing RPATH in object files.
 
 libtool is a messy pile of crocks, and throwing it out of our build
-chain was a good thing, but it had consguences. Whatever its other
-flawes, libtool successfully hid some tricky problems related to
+chain was a good thing, but it had consequences. Whatever its other
+flaws, libtool successfully hid some tricky problems related to
 dynamic-linkage paths; to address these in the scons build, you need
 chrpath present to edit those paths.  
 
 Ubuntu users can do 'apt-get install chrpath' 
 CentOS users can do 'yum install chrpath' from extras.
 
-If you do not have chrpath available, GPSD binaries will be built
-statically.
+Some distribution makers have considered the use of chrpath to be a
+wart on the build recipe.
+
+Here's the problem. Ideally, we want to build build binaries that (a)
+link dynamically, (b) can be tested in the build directory without
+installing to system space (in particular, so we can run the regression
+tests without disturbing a production installation) and (c) won't
+carry a potential exploit into system space when the binaries are
+installed.
+
+The potential exploit is the remnant presence of the build directory in
+the binary's internal list of places it will look for shared libraries.
+We need that to be there for testing purposes, but we want it gone
+in the version of the binary that's copied to /usr/lib.  Otherwise
+there are threat scenarios with a maliciously crafted library.
+
+Without chrpath we can get any two of those three, but we can't get
+all three. Choosing static linking we get (b) and (c), choosing
+dynamic linking without chrpath we get (a) and (b).
+
+If you configure with chrpath=no, you will suppress use of chrpath,
+but this also means you will lose the ability to run regression tests
+in the build directory
 
 === Optional build components ===
 
