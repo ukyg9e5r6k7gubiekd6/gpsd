@@ -488,6 +488,14 @@ else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
     announce("You do not have kernel PPS available.")
 
+if config.CheckHeader("linux/can.h"):
+    confdefs.append("#define HAVE_LINUX_CAN_H 1\n")
+    announce("You have kernel CANbus available.")
+else:
+    confdefs.append("/* #undef HAVE_LINUX_CAN_H */\n")
+    announce("You do not have kernel CANbus available.")
+    env["nmea2000"] = False
+
 # check function after libraries, because some function require library
 # for example clock_gettime() require librt on Linux
 for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):
