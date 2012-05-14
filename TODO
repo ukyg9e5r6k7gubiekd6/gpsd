@@ -88,7 +88,7 @@ shouldn't be difficult.
 
 *** Enable flocktest on the Debian server farm
 
-Debian server farm boxes have a screwy chrooted envoronment setup.
+Debian server farm boxes have a screwy chrooted envorinment setup.
 flocktest needs to be modified to deal with it.
 
 *** Finish gpssim
