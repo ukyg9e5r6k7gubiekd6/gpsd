@@ -224,8 +224,8 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 		err_str = "UNK: ";
 	}
 
-	(void)strlcpy(buf, "gpsd:", BUFSIZ);
-	(void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
+	(void)strlcpy(buf, "gpsd:", sizeof(buf));
+	(void)strncat(buf, err_str, sizeof(buf) - 1 - strlen(buf));
 	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			ap);
