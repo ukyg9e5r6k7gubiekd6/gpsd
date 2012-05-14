@@ -198,7 +198,7 @@ import_env = (
     "LOGNAME",         # LOGNAME is required for the flocktest production.
     'PATH',            # Required for ccache and Coverity scan-build
     'PKG_CONFIG_PATH', # Set .pc file directory in a crossbuild
-    'STAGING_PREFIX',  # Required by the OpenWRT build.
+    'STAGING_DIR',     # Required by the OpenWRT build.
     )
 envs = {}
 for var in import_env:
