@@ -140,7 +140,7 @@ int gps_read(struct gps_data_t *gpsdata)
 #endif /* SHM_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
-    if (status == -1 && gpsdata->gps_fd != -1) {
+    if (status == -1 && (intptr_t)(gpsdata->gps_fd) != -1) {
         status = gps_sock_read(gpsdata);
     }
 #endif /* SOCKET_EXPORT_ENABLE */
