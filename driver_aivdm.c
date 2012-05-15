@@ -60,6 +60,7 @@ static void from_sixbit(char *bitvec, uint start, int count, char *to)
     /*@ -type @*/
 }
 
+/*@ +charint @*/
 static bool ais_binary_decode(struct ais_t *ais,
 			      const unsigned char *bits, size_t bitlen,
 			      struct ais_type24_queue_t *type24_queue)
@@ -964,8 +965,9 @@ static bool ais_binary_decode(struct ais_t *ais,
     /* data is fully decoded */
     return true;
 }
+/*@ -charint @*/
 
-/*@ +charint -fixedformalarray -usedef -branchstate @*/
+/*@ -fixedformalarray -usedef -branchstate @*/
 bool aivdm_decode(const char *buf, size_t buflen,
 		  struct aivdm_context_t ais_contexts[AIVDM_CHANNELS],
 		  struct ais_t *ais,
@@ -1128,7 +1130,6 @@ bool aivdm_decode(const char *buf, size_t buflen,
     ais_context->decoded_frags++;
     return false;
 }
-
-/*@ -charint +fixedformalarray +usedef +branchstate @*/
+/*@ +fixedformalarray +usedef +branchstate @*/
 
 /* driver_aivdm.c ends here */
