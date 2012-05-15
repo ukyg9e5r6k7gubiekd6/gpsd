@@ -351,7 +351,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 			tp->cdir	= UBITS(a + 77, 9);
 			tp->cspeed	= UBITS(a + 86, 7);
 		    }
-		    ais->type6.dac1fid32.ntidals = i;
+		    ais->type6.dac1fid32.ntidals = u;
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
 		    break;
