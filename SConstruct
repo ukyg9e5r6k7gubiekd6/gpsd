@@ -245,18 +245,10 @@ def announce(msg):
     if not env.GetOption("silent"):
         print msg
 
-# GCC isn't always named gcc, alas.
-if env['CC'] == 'gcc' or (sys.platform.startswith('freebsd') and env['CC'] == 'cc'):
-    # Enable all GCC warnings except uninitialized and
-    # missing-field-initializers, which we can't help triggering because
-    # of the way some of the JSON-parsing code is generated.
-    # Also not including -Wcast-qual and -Wimplicit-function-declaration,
-    # because we can't seem to keep scons from passing it to g++.
-    env.Append(CFLAGS=Split('''-Wextra -Wall -Wno-uninitialized
-                            -Wno-missing-field-initializers -Wcast-align
-                            -Wmissing-declarations -Wmissing-prototypes
-                            -Wstrict-prototypes -Wpointer-arith -Wreturn-type
-                            -D_GNU_SOURCE'''))
+# We need to define -D_GNU_SOURCE
+env.Append(CFLAGS='-D_GNU_SOURCE')
+
+
 
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
@@ -386,9 +378,36 @@ def CheckXsltproc(context):
     context.Result( ret )
     return ret
 
+def CheckCompilerOption(context, option):
+    context.Message( 'Checking if compiler accepts %s ...' %(option,) )
+    old_CFLAGS=context.env['CFLAGS']
+    context.env.Append(CFLAGS=option)
+    ret = context.TryLink("""
+        int main(int argc, char **argv) {
+            return 0;
+        }
+    """,'.c')
+    if not ret:
+        context.env.Replace(CFLAGS=old_CFLAGS)
+    context.Result(ret)
+    return ret
+
 config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
-                                         'CheckXsltproc' : CheckXsltproc})
+                                         'CheckXsltproc' : CheckXsltproc,
+                                         'CheckCompilerOption' : CheckCompilerOption})
+
+
+# If supported by the compiler, enable all warnings except uninitialized and
+# missing-field-initializers, which we can't help triggering because
+# of the way some of the JSON-parsing code is generated.
+# Also not including -Wcast-qual and -Wimplicit-function-declaration,
+# because we can't seem to keep scons from passing it to g++.
+for option in ('-Wextra','-Wall', '-Wno-uninitialized','-Wno-missing-field-initializers',
+               '-Wcast-align','-Wmissing-declarations', '-Wmissing-prototypes',
+               '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
+    config.CheckCompilerOption(option)
+
 
 env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 if env["shared"]:
