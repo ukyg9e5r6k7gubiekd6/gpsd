@@ -237,6 +237,11 @@ for flags in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
         env.MergeFlags({flags : [os.getenv(flags)]})
 
 
+# Keep scan-build options in the environment
+for key, value in os.environ.iteritems():
+    if key.startswith('CCC_'):
+        env.Append(ENV={key:value})
+
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
