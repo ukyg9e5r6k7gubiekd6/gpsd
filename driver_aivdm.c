@@ -981,7 +981,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		}
 		/* save incoming 24A shipname/MMSI pairs in a circular queue */
 		{
-		    struct aivdm_type24a_t *saveptr = ais_context->type24names + ais_context->type24_index;
+		    struct ais_type24a_t *saveptr = &ais_context->type24_queue.ships[ais_context->type24_queue.index];
 
 		    gpsd_report(LOG_PROG,
 				"AIVDM channel %c: 24A from %09u stashed.\n",
@@ -989,8 +989,8 @@ bool aivdm_decode(const char *buf, size_t buflen,
 				ais->mmsi);
 		    saveptr->mmsi = ais->mmsi;
 		    UCHARS(40, saveptr->shipname);
-		    ++ais_context->type24_index;
-		    ais_context->type24_index %= MAX_TYPE24_INTERLEAVE;
+		    ++ais_context->type24_queue.index;
+		    ais_context->type24_queue.index %= MAX_TYPE24_INTERLEAVE;
 		}
 		//ais->type24.a.spare	= UBITS(160, 8);
 		return false;	/* data only partially decoded */
@@ -1002,10 +1002,10 @@ bool aivdm_decode(const char *buf, size_t buflen,
 		}
 		/* search the 24A queue for a matching MMSI */
 		for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
-		    if (ais_context->type24names[i].mmsi == ais->mmsi) {
+		    if (ais_context->type24_queue.ships[i].mmsi == ais->mmsi) {
 			(void)strlcpy(ais->type24.shipname,
-				      ais_context->type24names[i].shipname,
-				      sizeof(ais_context->type24names[i].shipname));
+				      ais_context->type24_queue.ships[i].shipname,
+				      sizeof(ais_context->type24_queue.ships[i].shipname));
 			ais->type24.shiptype = UBITS(40, 8);
 			UCHARS(48, ais->type24.vendorid);
 			UCHARS(90, ais->type24.callsign);
@@ -1023,7 +1023,7 @@ bool aivdm_decode(const char *buf, size_t buflen,
 				    field[4][0],
 				    ais->mmsi);
 			/* prevent false match if a 24B is repeated */
-			ais_context->type24names[i].mmsi = 0;
+			ais_context->type24_queue.ships[i].mmsi = 0;
 			return true;
 		    }
 		}

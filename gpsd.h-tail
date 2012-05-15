@@ -245,20 +245,24 @@ struct gps_context_t {
 #endif
 };
 
-
-struct aivdm_type24a_t {
+/* state for resolving interleaved Type 24 packets */
+struct ais_type24a_t {
     unsigned int mmsi;
     char shipname[AIS_SHIPNAME_MAXLEN+1];
 };
 #define MAX_TYPE24_INTERLEAVE	8	/* max number of queued type 24s */
+struct ais_type24_queue_t {
+    struct ais_type24a_t ships[MAX_TYPE24_INTERLEAVE];
+    int index;
+};
 
+/* state for resolving AIVDM decodes */
 struct aivdm_context_t {
     /* hold context for decoding AIDVM packet sequences */
     int decoded_frags;		/* for tracking AIDVM parts in a multipart sequence */
     unsigned char bits[2048];
     size_t bitlen; /* how many valid bits */
-    struct aivdm_type24a_t type24names[MAX_TYPE24_INTERLEAVE];
-    int type24_index;
+    struct ais_type24_queue_t type24_queue;
 };
 
 #define MODE_NMEA	0
