@@ -1,7 +1,8 @@
 /*
- * Driver for AIS/AIVDM messages.
+ * Driver for AIS messages.
  *
  * See the file AIVDM.txt on the GPSD website for documentation and references.
+ * AIVDM de-armoring is handled elsewhere; this is the binary-packet driver.
  *
  * Code for message types 1-15, 18-21, and 24 has been tested against
  * live data with known-good decodings. Code for message types 16-17,

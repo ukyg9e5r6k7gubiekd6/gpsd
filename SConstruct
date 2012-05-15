@@ -691,7 +691,7 @@ libgpsd_sources = [
     "subframe.c",
     "timebase.c",
     "drivers.c",
-    "driver_aivdm.c",
+    "driver_ais.c",
     "driver_evermore.c",
     "driver_garmin.c",
     "driver_garmin_txt.c",
