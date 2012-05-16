@@ -240,7 +240,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	n2 = (unsigned long)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1008.serial, buf + 9 + n, n2);
 	rtcm->rtcmtypes.rtcm3_1008.serial[n2] = '\0';
-	bitcount += 8 * n2;
+	//bitcount += 8 * n2;
 	break;
 
     case 1009:			/* GLONASS Basic RTK, L1 Only */
@@ -402,7 +402,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	n4 = (unsigned long)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.firmware, buf + 11+n+n2+n3, n3);
 	rtcm->rtcmtypes.rtcm3_1033.firmware[n4] = '\0';
-	bitcount += 8 * n4;
+	//bitcount += 8 * n4;
 	break;
 
     default:
