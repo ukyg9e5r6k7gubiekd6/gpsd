@@ -138,7 +138,7 @@ double safe_atof(const char *string)
     }
     if (mantSize == 0) {
 	fraction = 0.0;
-	p = string;
+	//p = string;
 	goto done;
     } else {
 	int frac1, frac2;
