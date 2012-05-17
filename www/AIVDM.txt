@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.35, March 2012
+v1.36, May 2012
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -1060,9 +1060,9 @@ A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 |112-117 |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
 |118-237 |120 |Name of Port & Berth |portname   |t|20 6-bit characters
 |238-267 | 30 |Destination          |destination|t|5 6-bit characters
-|268-292 | 25 |Longitude            |lon        |I3|Unit = minutes * 0.0001,
+|268-292 | 25 |Longitude            |lon        |I3|Unit = minutes * 0.001,
                                                    181000 = N/A (default).
-|293-316 | 24 |Latitude             |lat        |I3|Unit = minutes * 0.0001,
+|293-316 | 24 |Latitude             |lat        |I3|Unit = minutes * 0.001,
                                                    91000 = N/A (default).
 |317-359 | 43 |Spare                |           |x|Not used
 |==============================================================================
@@ -1270,10 +1270,10 @@ Subarea payload layouts are as follows:
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
-                                                   Unit = minutes * 0.0001,
+                                                   Unit = minutes * 0.001,
                                                    181000 = N/A (default).
 |30-53   | 24 |Latitude           |lat         |I3|Latitude of center point,
-                                                   Unit = minutes * 0.0001,
+                                                   Unit = minutes * 0.001,
                                                    91000 = N/A (default).
 |54-56   |  3 |Precision          |precision   |u|Decimal places of precision
                                                   (defaults to 4)
@@ -1291,10 +1291,10 @@ Subarea payload layouts are as follows:
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of SW corner
-                                                   Unit = minutes * 0.0001,
+                                                   Unit = minutes * 0.001,
                                                    181000 = N/A (default).
 |30-53   | 24 |Latitude           |lat         |I3|Latitude of SW corner
-                                                   Unit = minutes * 0.0001,
+                                                   Unit = minutes * 0.001,
                                                    91000 = N/A (default).
 |54-56   |  3 |Precision          |precision   |u|Decimal places of precision
                                                   (defaults to 4)
@@ -1319,10 +1319,10 @@ Subarea payload layouts are as follows:
 |3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
                                                   1 = meters (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
-                                                   Unit = minutes * 0.0001,
+                                                   Unit = minutes * 0.001,
                                                    181000 = N/A (default).
 |30-53   | 24 |Latitude           |lat         |I3|Latitude of center point,
-                                                   Unit = minutes * 0.0001,
+                                                   Unit = minutes * 0.001,
                                                    91000 = N/A (default).
 |54-56   |  3 |Precision          |precision   |u|Decimal places of precision
                                                   (defaults to 4)
@@ -4524,3 +4524,6 @@ Version 1.34 fixes a typo in the MMSI 2 field offset of message 7.
 
 Version 1.35 notes that 24A and 24B messages don't necessarily come
 in neat adjacent pairs and that decoders need to handle this.
+
+Version 1.36 corrects erroneous scale factors in the IMO 289 Area
+Notice and Time to Enter Port descriptions.
