@@ -31,10 +31,11 @@ class Baton:
         if os.isatty(self.stream.fileno()):
             if ch:
                 self.stream.write(ch)
-            else:
+                self.stream.flush()
+            elif self.count % 11 == 0:
                 self.stream.write("-/|\\"[self.count % 4])
                 self.stream.write("\010")
-            self.stream.flush()
+                self.stream.flush()
         self.count = self.count + 1
         return
 
