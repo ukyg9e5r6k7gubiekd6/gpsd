@@ -4511,7 +4511,7 @@ Version 1.30 was revised because M.1371-4 is now a free download.
 Also, we describe "pilot plugs" and AIS message type 27.  We get
 much more explicit about defaults in IMO236 and IMO289 messages.
 
-Version 1.31 shortened some C names in the Meterological/Hydrological 
+Version 1.31 shortened some C names in the Meteorological/Hydrological 
 messages and fixed typos.
 
 Version 1.32 adds descriptions of IMO Area Notice and Environmental
