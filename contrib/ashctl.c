@@ -135,10 +135,12 @@ static void config_raw(int fd){
 static void nmea_add_checksum(char *sentence)
 /* add NMEA checksum to a possibly  *-terminated sentence */
 {
-	unsigned char sum = '\0';
-	char c, *p = sentence;
+	char *p = sentence;
 
 	if (*p == '$') {
+		unsigned char sum = '\0';
+		char c;
+
 		p++;
 		while ( ((c = *p) != '*') && (c != '\0')) {
 			sum ^= c;

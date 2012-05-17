@@ -97,6 +97,7 @@ int json_ais_read(const char *buf,
 	    ais->type4.hour = AIS_HOUR_NOT_AVAILABLE;
 	    ais->type4.minute = AIS_MINUTE_NOT_AVAILABLE;
 	    ais->type4.second = AIS_SECOND_NOT_AVAILABLE;
+	    // cppcheck-suppress uninitvar
 	    (void)sscanf(timestamp, "%4u-%02u-%02uT%02u:%02u:%02uZ",
 			 &ais->type4.year,
 			 &ais->type4.month,
@@ -112,6 +113,7 @@ int json_ais_read(const char *buf,
 	    ais->type5.day = AIS_DAY_NOT_AVAILABLE;
 	    ais->type5.hour = AIS_HOUR_NOT_AVAILABLE;
 	    ais->type5.minute = AIS_MINUTE_NOT_AVAILABLE;
+	    // cppcheck-suppress uninitvar
 	    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 			 &ais->type5.month,
 			 &ais->type5.day,
@@ -128,6 +130,7 @@ int json_ais_read(const char *buf,
 		    ais->type6.dac1fid12.lday = AIS_DAY_NOT_AVAILABLE;
 		    ais->type6.dac1fid12.lhour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type6.dac1fid12.lminute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(departure, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid12.lmonth,
 				 &ais->type6.dac1fid12.lday,
@@ -137,6 +140,7 @@ int json_ais_read(const char *buf,
 		    ais->type6.dac1fid12.nday = AIS_DAY_NOT_AVAILABLE;
 		    ais->type6.dac1fid12.nhour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type6.dac1fid12.nminute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid12.nmonth,
 				 &ais->type6.dac1fid12.nday,
@@ -159,6 +163,7 @@ int json_ais_read(const char *buf,
 		    ais->type6.dac1fid18.day = AIS_DAY_NOT_AVAILABLE;
 		    ais->type6.dac1fid18.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type6.dac1fid18.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(arrival, "%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid18.day,
 				 &ais->type6.dac1fid18.hour, 
@@ -173,6 +178,7 @@ int json_ais_read(const char *buf,
 		    ais->type6.dac1fid20.day = AIS_DAY_NOT_AVAILABLE;
 		    ais->type6.dac1fid20.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type6.dac1fid20.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(arrival, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid20.month,
 				 &ais->type6.dac1fid20.day,
@@ -192,6 +198,7 @@ int json_ais_read(const char *buf,
 		    ais->type6.dac1fid28.day = AIS_DAY_NOT_AVAILABLE;
 		    ais->type6.dac1fid28.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type6.dac1fid28.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(start, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid28.month,
 				 &ais->type6.dac1fid28.day,
@@ -228,6 +235,7 @@ int json_ais_read(const char *buf,
 		    ais->type8.dac1fid13.fday = AIS_DAY_NOT_AVAILABLE;
 		    ais->type8.dac1fid13.fhour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type8.dac1fid13.fminute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(departure, "%02u-%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid13.fmonth,
 				 &ais->type8.dac1fid13.fday,
@@ -237,6 +245,7 @@ int json_ais_read(const char *buf,
 		    ais->type8.dac1fid13.tday = AIS_DAY_NOT_AVAILABLE;
 		    ais->type8.dac1fid13.thour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type8.dac1fid13.tminute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid13.tmonth,
 				 &ais->type8.dac1fid13.tday,
@@ -264,6 +273,7 @@ int json_ais_read(const char *buf,
 		    ais->type8.dac1fid27.day = AIS_DAY_NOT_AVAILABLE;
 		    ais->type8.dac1fid27.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type8.dac1fid27.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(start, "%02u-%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid27.month,
 				 &ais->type8.dac1fid27.day,
@@ -282,6 +292,7 @@ int json_ais_read(const char *buf,
 		    ais->type8.dac1fid31.day = AIS_DAY_NOT_AVAILABLE;
 		    ais->type8.dac1fid31.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type8.dac1fid31.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
 		    (void)sscanf(eta, "%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid31.day,
 				 &ais->type8.dac1fid31.hour, 
