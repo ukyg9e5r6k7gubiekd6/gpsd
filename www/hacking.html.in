@@ -1555,7 +1555,7 @@ suffix is gone.</dd>
 <dd>The version number on the top line needs to be match what's in
 SConstruct.</dd>
 
-<dt>6. Fix compiler and scan-build warnings.</dt>
+<dt>6. Fix compiler, scan-build, and Coverity warnings.</dt>
 <dd>Look for compiler and <a
 href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>
 warnings and fix them.</dd>
