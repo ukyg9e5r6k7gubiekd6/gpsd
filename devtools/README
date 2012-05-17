@@ -63,11 +63,6 @@ list of failed regression tests, sorted by architecture.
 Extract pure NMEA from an emailed gpsd error log. The output can be fed 
 to gpsfake.
 
-== ppstest ==
-
-Simple program to check for PPS coming from a serial or USB device.
-Compile with "make ppstest".  See the header comment for instructions.
-
 == regress-builder ==
 
 This script runs an exhaustive test on combinations of compilation options, 
