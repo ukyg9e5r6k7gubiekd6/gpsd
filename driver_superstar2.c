@@ -245,7 +245,6 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 {
     gps_mask_t mask;
     union long_double l_d;
-    double d;
     struct tm tm;
 
     if (data_len != 65)
@@ -257,6 +256,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 	mask = 0;
     /*@ -charint @*/
     else {
+	double d;
 	/* extract time data */
 	(void)memset(&tm, '\0', sizeof(tm));
 	tm.tm_mday = (int)getsb(buf, 37);

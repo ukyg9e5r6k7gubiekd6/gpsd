@@ -67,7 +67,6 @@ static int tsip_write(struct gps_device_t *session,
 static bool tsip_detect(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
-    unsigned int n;
     bool ret = false;
     int myfd;
     fd_set fdset;
@@ -90,6 +89,7 @@ static bool tsip_detect(struct gps_device_t *session)
     /*@+ignoresigns@*/
     myfd = session->gpsdata.gps_fd;
     if (write(myfd, buf, 4) == 4) {
+	unsigned int n;
 	for (n = 0; n < 3; n++) {
 	    FD_ZERO(&fdset);
 	    FD_SET(myfd, &fdset);

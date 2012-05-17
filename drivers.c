@@ -1078,7 +1078,6 @@ static gps_mask_t processMTK3301(struct gps_device_t *session)
 {
     const char *mtk_reasons[4] =
 	{ "Invalid", "Unsupported", "Valid but Failed", "Valid success" };
-    int msg, reason;
     gps_mask_t mask;
 
     /* try a straight NMEA parse, this will set up fields */ 
@@ -1087,6 +1086,8 @@ static gps_mask_t processMTK3301(struct gps_device_t *session)
     if (session->packet.type == NMEA_PACKET 
 	&& strncmp(session->driver.nmea.field[0], "PMTK", 4) == 0)
     {
+	int msg, reason;
+
 	msg = atoi(&(session->driver.nmea.field[0])[4]);
 	switch (msg) {
 	case 705:			/*  */

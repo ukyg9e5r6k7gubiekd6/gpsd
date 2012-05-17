@@ -838,7 +838,6 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    size_t len;
-	    int st;
 	    *eq++ = '\0';
 	    len = strlen(eq) + 5;
 	    if ((devp = find_device(stash)) != NULL) {
@@ -847,6 +846,7 @@ static void handle_control(int sfd, char *buf)
 				sfd);
 		    ignore_return(write(sfd, "ERROR\n", 6));
                 } else {
+		    int st;
                     /* NOTE: this destroys the original buffer contents */
                     st = gpsd_hexpack(eq, eq, len);
                     if (st <= 0) {

@@ -897,9 +897,9 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	 * with those obtained from the PVT report (handle_0xb1).
 	 * The figures from 0xb1 do agree with the values reported
 	 * by Navcom's PC utility */
-	double ellips_maj = getled(buf, 17);
-	double ellips_min = getled(buf, 25);
-	double ellips_azm = getled(buf, 33);
+	//double ellips_maj = getled(buf, 17);
+	//double ellips_min = getled(buf, 25);
+	//double ellips_azm = getled(buf, 33);
 	double lat_sd = getled(buf, 41);
 	double lon_sd = getled(buf, 49);
 	double alt_sd = getled(buf, 57);

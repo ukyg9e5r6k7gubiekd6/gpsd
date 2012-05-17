@@ -280,8 +280,6 @@ int main(int argc, char **argv)
 	vflag = 0;
 
     for (;;) {
-	int i = 0;
-	int j = 0;
 	int r = 0;
 	struct timeval tv;
 
@@ -305,6 +303,8 @@ int main(int argc, char **argv)
 	errno = 0;
 	r = (int)read(gpsdata.gps_fd, buf, sizeof(buf));
 	if (r > 0) {
+	    int i = 0;
+	    int j = 0;
 	    for (i = 0; i < r; i++) {
 		char c = buf[i];
 		if (j < (int)(sizeof(serbuf) - 1)) {

@@ -84,7 +84,6 @@ static int geostar_write(struct gps_device_t *session,
 static bool geostar_detect(struct gps_device_t *session)
 {
     unsigned char buf[1 * 4];
-    unsigned int n;
     bool ret = false;
     int myfd;
     fd_set fdset;
@@ -97,6 +96,7 @@ static bool geostar_detect(struct gps_device_t *session)
     putbe32(buf, 0, 0);
     /*@+shiftimplementation +ignoresigns@*/
     if (geostar_write(session, 0xc1, buf, 1) == 0) {
+	unsigned int n;
 	for (n = 0; n < 3; n++) {
 	    FD_ZERO(&fdset);
 	    FD_SET(myfd, &fdset);
@@ -437,9 +437,8 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
 static gps_mask_t geostar_parse_input(struct gps_device_t *session)
 {
-    gps_mask_t st;
-
     if (session->packet.type == GEOSTAR_PACKET) {
+	gps_mask_t st;
 	st = geostar_analyze(session);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
