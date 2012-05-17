@@ -1555,10 +1555,10 @@ suffix is gone.</dd>
 <dd>The version number on the top line needs to be match what's in
 SConstruct.</dd>
 
-<dt>6. Fix compiler, scan-build, and Coverity warnings.</dt>
-<dd>Look for compiler and <a
-href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>
-warnings and fix them.</dd>
+<dt>6. Fix fault-scanner warnings.</dt>
+<dd>Look for compiler, <a
+href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>,
+and Coverity warnings and fix them.</dd>
 
 <dt>7. Run the regression tests and other checks</dt>
 <dd>If it doesn't pass regressions, it isn't ready to ship.
