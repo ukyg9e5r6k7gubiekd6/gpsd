@@ -14,6 +14,11 @@ import gps, gps.fake as gpsfake   # The "as" pacifies pychecker
 
 class Baton:
     "Ship progress indications to stderr."
+    # By setting this > 1 we reduce the frequency of the twirl
+    # and speed up test runs.  Should be relatively prime to the
+    # nunber of baton states, otherwise it will cause beat artifacts
+    # in the twirling.
+    SPINNER_INTERVAL = 11
     def __init__(self, prompt, endmsg=None):
         self.stream = sys.stderr
         self.stream.write(prompt + "...")
@@ -32,7 +37,7 @@ class Baton:
             if ch:
                 self.stream.write(ch)
                 self.stream.flush()
-            elif self.count % 11 == 0:
+            elif self.count % Baton.SPINNER_INTERVAL == 0:
                 self.stream.write("-/|\\"[self.count % 4])
                 self.stream.write("\010")
                 self.stream.flush()
