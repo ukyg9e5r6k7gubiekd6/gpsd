@@ -163,11 +163,12 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 static void gpsd_binary_quality_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
 {
-    int i, j;
     char *bufp2 = bufp;
     bool used_valid = (session->gpsdata.set & USED_IS) != 0;
 
     if (session->device_type != NULL && (session->gpsdata.set & MODE_SET) != 0) {
+	int i, j;
+
 	(void)snprintf(bufp, len - strlen(bufp),
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
@@ -224,11 +225,11 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
 {
     struct tm tm;
-    double integral, fractional;
+    double integral;
     time_t integral_time;
 
     if (session->newdata.mode > MODE_NO_FIX) {
-	fractional = modf(session->newdata.time, &integral);
+	double fractional = modf(session->newdata.time, &integral);
 	integral_time = (time_t) integral;
 	(void)gmtime_r(&integral_time, &tm);
 	/*

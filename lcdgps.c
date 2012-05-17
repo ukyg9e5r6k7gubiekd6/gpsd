@@ -180,15 +180,14 @@ static enum deg_str_type deg_type = deg_dd;
 static void update_lcd(struct gps_data_t *gpsdata)
 {
   char tmpbuf[255];
-  int n;
   char *s, *gridsquare;
-  int track;
 
   /* Get our location in Maidenhead. */
   gridsquare = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 
   /* Fill in the latitude and longitude. */
   if (gpsdata->fix.mode >= MODE_2D) {
+    int track;
 
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
     snprintf(tmpbuf, 254, "widget_set gpsd one 1 1 {Lat: %s %c}\n", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
@@ -217,6 +216,7 @@ static void update_lcd(struct gps_data_t *gpsdata)
 
   /* Fill in the altitude and fix status. */
   if (gpsdata->fix.mode == MODE_3D) {
+    int n;
     for(n=0;n<CLIMB-2;n++) climb[n]=climb[n+1];
     climb[CLIMB-1]=gpsdata->fix.climb;
     avgclimb=0.0;

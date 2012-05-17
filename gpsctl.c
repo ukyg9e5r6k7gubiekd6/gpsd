@@ -259,7 +259,7 @@ static char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
 
 int main(int argc, char **argv)
 {
-    int option, status, devcount;
+    int option, status;
     char *device = NULL, *devtype = NULL; 
     char *speed = NULL, *control = NULL, *rate = NULL;
     bool to_binary = false, to_nmea = false, reset = false; 
@@ -398,7 +398,7 @@ int main(int argc, char **argv)
 	}
     }    
 
-    if ((int)to_nmea + (int)to_binary + (int)reset > 1) {
+    if (((int)to_nmea + (int)to_binary + (int)reset) > 1) {
 	gpsd_report(LOG_ERROR, "make up your mind, would you?\n");
 	exit(0);
     }
@@ -419,7 +419,7 @@ int main(int argc, char **argv)
     /*@-nullpass@*/
 
     if (!lowlevel) {
-	int i;
+	int i, devcount;
 
 	/* what devices have we available? */
 	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\n")) {
@@ -444,6 +444,7 @@ int main(int argc, char **argv)
 	    device = gpsdata.dev.path;
 	    i = 0;
 	} else {
+	    int devcount;
 	    assert(device != NULL);
 	    for (i = 0; i < gpsdata.devices.ndevices; i++)
 		if (strcmp(device, gpsdata.devices.list[i].path) == 0) {

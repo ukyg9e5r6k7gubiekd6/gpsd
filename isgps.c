@@ -180,8 +180,6 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 			      bool(*length_check) (struct gps_packet_t *),
 			      size_t maxlen, unsigned int c)
 {
-    enum isgpsstat_t res;
-
     /* ASCII characters 64-127, @ through DEL */
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
 	gpsd_report(ISGPS_ERRLEVEL_BASE + 1,
@@ -222,6 +220,8 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 	}			/* end while */
     }
     if (session->isgps.locked) {
+	enum isgpsstat_t res;
+
 	res = ISGPS_SYNC;
 
 	if (session->isgps.curr_offset > 0) {

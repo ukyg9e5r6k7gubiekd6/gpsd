@@ -1282,7 +1282,7 @@ for (target,sources,description,params) in splint_table:
     env.Alias('splint',Splint(target,sources,description,params))
 
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
-        "cppcheck --template gcc --enable=all --inline-suppr --force $SRCDIR")
+        "cppcheck --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
 
 # Sanity-check Python code. TODO: add xgps for the complete set.
 Utility("pychecker", ["jsongen.py", "maskaudit.py"],
