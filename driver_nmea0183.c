@@ -27,7 +27,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
 
     if (*(p = field[0]) != '\0') {
 	(void)strlcpy(str, p, sizeof(str));
-	(void)sscanf(p, "%lf", &lat);
+	lat = atof(str);
 	m = 100.0 * modf(lat / 100.0, &d);
 	lat = d + m / 60.0;
 	p = field[1];
@@ -37,7 +37,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
     }
     if (*(p = field[2]) != '\0') {
 	(void)strlcpy(str, p, sizeof(str));
-	(void)sscanf(p, "%lf", &lon);
+	lon = atof(str);
 	m = 100.0 * modf(lon / 100.0, &d);
 	lon = d + m / 60.0;
 
@@ -553,7 +553,7 @@ static gps_mask_t processGPGSV(int count, char *field[],
     }
 
     session->driver.nmea.await = atoi(field[1]);
-    if (sscanf(field[2], "%d", &session->driver.nmea.part) < 1) {
+    if ((session->driver.nmea.part = atoi(field[2])) < 1) {
 	gpsd_report(LOG_WARN, "malformed GPGSV - bad part\n");
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
