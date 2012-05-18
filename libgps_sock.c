@@ -391,6 +391,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			if (sp[2] == '?')
 			    gpsdata->online = (timestamp_t)-1;
 			else {
+			    // cppcheck-suppress invalidscanf
 			    (void)sscanf(sp, "X=%lf", &gpsdata->online);
 			    gpsdata->set |= ONLINE_SET;
 			}
@@ -403,6 +404,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    double f4;
 			    char tag[MAXTAGLEN + 1], timestamp[21];
 
+			    // cppcheck-suppress invalidscanf
 			    (void)sscanf(sp, "Y=%8s %20s %d ",
 					 tag, timestamp,
 					 &gpsdata->satellites_visible);
@@ -419,6 +421,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				if ((sp != NULL)
 				    && ((sp = strchr(sp, ':')) != NULL)) {
 				    sp++;
+				    // cppcheck-suppress invalidscanf
 				    (void)sscanf(sp, "%d %d %d %lf %d", &i1,
 						 &i2, &i3, &f4, &i5);
 				    gpsdata->PRN[j] = i1;

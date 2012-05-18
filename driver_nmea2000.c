@@ -46,11 +46,11 @@ FILE *logFile = NULL;
 
 static int print_data(unsigned char *buffer, int len, PGN *pgn)
 {
-    int   l1, l2, ptr;
-    char  bu[128];
-
     /*@-bufferoverflowhigh@*/
     if ((libgps_debuglevel >= LOG_IO) != 0) {
+	int   l1, l2, ptr;
+	char  bu[128];
+
         ptr = 0;
         l2 = sprintf(&bu[ptr], "got data:%6u:%3d: ", pgn->pgn, len);
 	ptr += l2;
@@ -463,17 +463,18 @@ static /*@null@*/ PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 {
     PGN *work;
-    unsigned int daddr UNUSED;
-    unsigned int source_pgn;
-    unsigned int source_prio UNUSED;
-    unsigned int source_unit;
 
     session->driver.nmea2000.workpgn = NULL;
 
     /*@ignore@*//* because the CAN include files choke splint */
 #if LOG_FILE
     if (frame->can_id & 0x80000000) {
-        int l1;
+	// cppcheck-suppress unreadVariable
+	unsigned int source_prio UNUSED;
+	unsigned int source_pgn;
+	unsigned int source_unit;
+	// cppcheck-suppress unreadVariable
+	unsigned int daddr UNUSED;
 
         if (logFile != NULL) {
 	    struct timespec  msgTime;
@@ -485,6 +486,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    (unsigned int)msgTime.tv_nsec/1000,
 		    frame->can_id & 0x1ffffff);
 	    if ((frame->can_dlc & 0x0f) > 0) {
+		int l1;
 	        for(l1=0;l1<(frame->can_dlc & 0x0f);l1++) {
 		    fprintf(logFile, "%02x", frame->data[l1]);
 		}

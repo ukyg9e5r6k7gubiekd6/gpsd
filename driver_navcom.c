@@ -110,8 +110,9 @@ static void navcom_cmd_0x20(struct gps_device_t *session, uint8_t block_id,
 }
 
 /*@ unused @*/
-/* Changes the LED settings in the receiver */
+// cppcheck-suppress unusedFunction
 static void UNUSED navcom_cmd_0x3f(struct gps_device_t *session)
+/* Changes the LED settings in the receiver */
 {
     unsigned char msg[12];
     putbyte(msg, 0, 0x02);

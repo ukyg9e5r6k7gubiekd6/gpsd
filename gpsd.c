@@ -1755,7 +1755,7 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 	char *cp = strchr(buf, '#');
 	if (cp != NULL)
 	    *cp = '\0';
-	if (sscanf(buf, "%lf %lf %256s", &hold.lat, &hold.lon, hold.server) ==
+	if (sscanf(buf, "%32lf %32lf %256s", &hold.lat, &hold.lon, hold.server) ==
 	    3) {
 	    hold.dist = earth_distance(lat, lon, hold.lat, hold.lon);
 	    tp = NULL;

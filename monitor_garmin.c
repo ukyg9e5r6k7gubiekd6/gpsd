@@ -58,6 +58,7 @@ typedef struct
 typedef struct
 {
     uint32_t cycles;
+    // cppcheck-suppress unusedStructMember
     double pr;
     uint16_t phase;
     int8_t slp_dtct;
@@ -67,6 +68,7 @@ typedef struct
 } cpo_rcv_sv_data;
 typedef struct
 {
+    // cppcheck-suppress unusedStructMember
     double rcvr_tow;
     int16_t rcvr_wn;
     cpo_rcv_sv_data sv[GARMIN_CHANNELS];

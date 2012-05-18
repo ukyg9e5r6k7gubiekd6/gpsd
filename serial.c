@@ -546,6 +546,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 #endif /* FIXED_STOP_BITS */
 	}
 #endif /* FIXED_PORT_SPEED */
+	// cppcheck-suppress unreachableCode
 	gpsd_set_speed(session,
 #ifdef FIXED_PORT_SPEED
 		       FIXED_PORT_SPEED,

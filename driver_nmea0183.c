@@ -22,10 +22,11 @@
 static void do_lat_lon(char *field[], struct gps_fix_t *out)
 /* process a pair of latitude/longitude fields starting at field index BEGIN */
 {
-    double lat, lon, d, m;
+    double d, m;
     char str[20], *p;
 
     if (*(p = field[0]) != '\0') {
+	double lat;
 	(void)strlcpy(str, p, sizeof(str));
 	lat = atof(str);
 	m = 100.0 * modf(lat / 100.0, &d);
@@ -36,6 +37,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
 	out->latitude = lat;
     }
     if (*(p = field[2]) != '\0') {
+	double lon;
 	(void)strlcpy(str, p, sizeof(str));
 	lon = atof(str);
 	m = 100.0 * modf(lon / 100.0, &d);

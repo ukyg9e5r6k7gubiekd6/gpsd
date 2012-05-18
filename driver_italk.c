@@ -392,6 +392,7 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 }
 
 #ifdef __future__
+// cppcheck-suppress unusedFunction
 static void italk_ping(struct gps_device_t *session)
 /* send a "ping". it may help us detect an itrax more quickly */
 {

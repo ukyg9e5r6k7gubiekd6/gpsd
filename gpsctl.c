@@ -444,7 +444,6 @@ int main(int argc, char **argv)
 	    device = gpsdata.dev.path;
 	    i = 0;
 	} else {
-	    int devcount;
 	    assert(device != NULL);
 	    for (i = 0; i < gpsdata.devices.ndevices; i++)
 		if (strcmp(device, gpsdata.devices.list[i].path) == 0) {
