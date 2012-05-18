@@ -1690,7 +1690,7 @@ struct gps_data_t {
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
     /* pack things never reported together to reduce structure size */ 
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET|GST_SET|VERSION_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */ 
 	struct rtcm2_t	rtcm2;
