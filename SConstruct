@@ -514,7 +514,7 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
     announce("You do not have kernel PPS available.")
-    env["pps"] = False
+    # Don't turn off PPS here, we might be using the non-kernel version
 
 if config.CheckHeader(["bits/sockaddr.h", "linux/can.h"]):
     confdefs.append("#define HAVE_LINUX_CAN_H 1\n")
