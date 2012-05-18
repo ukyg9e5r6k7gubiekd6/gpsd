@@ -474,6 +474,7 @@ if env['usb']:
 else:
     confdefs.append("/* #undef HAVE_LIBUSB */\n")
     usblibs = []
+    env["usb"] = False
 
 if config.CheckLib('librt'):
     confdefs.append("#define HAVE_LIBRT 1\n")
@@ -497,6 +498,7 @@ if env['dbus_export'] and config.CheckPKG('dbus-1'):
 else:
     confdefs.append("/* #undef HAVE_DBUS */\n")
     dbus_libs = []
+    env["dbus_export"] = False
 
 if env['bluez'] and config.CheckPKG('bluez'):
     confdefs.append("#define HAVE_BLUEZ 1\n")
@@ -504,6 +506,7 @@ if env['bluez'] and config.CheckPKG('bluez'):
 else:
     confdefs.append("/* #undef HAVE_BLUEZ */\n")
     bluezlibs = []
+    env["bluez"] = False
 
 if config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
@@ -511,8 +514,9 @@ if config.CheckHeader("sys/timepps.h"):
 else:
     confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
     announce("You do not have kernel PPS available.")
+    env["pps"] = False
 
-if config.CheckHeader("linux/can.h"):
+if config.CheckHeader(["bits/sockaddr.h", "linux/can.h"]):
     confdefs.append("#define HAVE_LINUX_CAN_H 1\n")
     announce("You have kernel CANbus available.")
 else:
