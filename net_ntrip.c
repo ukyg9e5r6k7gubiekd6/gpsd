@@ -101,7 +101,7 @@ static void ntrip_str_parse(char *str, size_t len,
     s = ntrip_field_iterate(NULL, s, eol);
     /* <carrier> */
     if ((s = ntrip_field_iterate(NULL, s, eol)))
-	(void)sscanf(s, "%d", &hold->carrier);
+	hold->carrier = atoi(s);
     /* <nav-system> */
     s = ntrip_field_iterate(NULL, s, eol);
     /* <network> */
@@ -111,14 +111,14 @@ static void ntrip_str_parse(char *str, size_t len,
     /* <latitude> */
     hold->latitude = NAN;
     if ((s = ntrip_field_iterate(NULL, s, eol)))
-	(void)sscanf(s, "%lf", &hold->latitude);
+	hold->latitude = atof(s);
     /* <longitude> */
     hold->longitude = NAN;
     if ((s = ntrip_field_iterate(NULL, s, eol)))
-	(void)sscanf(s, "%lf", &hold->longitude);
+	hold->longitude = atof(s);
     /* <nmea> */
     if ((s = ntrip_field_iterate(NULL, s, eol))) {
-	(void)sscanf(s, "%d", &hold->nmea);
+	hold->nmea = atoi(s);
     }
     /* <solution> */
     s = ntrip_field_iterate(NULL, s, eol);
@@ -144,11 +144,11 @@ static void ntrip_str_parse(char *str, size_t len,
     }
     /* <fee> */
     if ((s = ntrip_field_iterate(NULL, s, eol))) {
-	(void)sscanf(s, "%d", &hold->fee);
+	hold->fee = atoi(s);
     }
     /* <bitrate> */
     if ((s = ntrip_field_iterate(NULL, s, eol))) {
-	(void)sscanf(s, "%d", &hold->bitrate);
+	hold->bitrate = atoi(s);
     }
     /* ...<misc> */
     while ((s = ntrip_field_iterate(NULL, s, eol)));

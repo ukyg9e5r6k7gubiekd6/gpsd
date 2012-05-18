@@ -385,11 +385,11 @@ static bool switch_type(const struct gps_type_t *devtype)
 	}
     }
     if (newobject) {
-	int leftover;
 	if (LINES < (*newobject)->min_y + 1 || COLS < (*newobject)->min_x) {
 	    monitor_complain("New type requires %dx%d screen",
 			     (*newobject)->min_x, (*newobject)->min_y + 1);
 	} else {
+	    int leftover;
 	    if (active != NULL) {
 		if ((*active)->wrap != NULL)
 		    (*active)->wrap();
