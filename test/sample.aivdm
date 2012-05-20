@@ -231,6 +231,111 @@
 #       FID                 22
 #       Data                256:eb0d4f917a035b2dfca3d4739381735c18ebbe754936f66850037dcacd9538b8
 #
+# Type 8, DAC 1, FID 11 (IMO 236 Met/Hydro message)
+# From Christian Gagneraud:
+# Specific NMEA messages with hard-coded Met/hydro values have been send to a
+# Kanaton, according to it's default input settings ($_HDXX,VAL*CS, where XX is the
+# parameter index, 0 to 30, VAL is the scaled parameter value, and CS the checksum).
+# The resulting AIVDO sentence has been decoded using the Kanaton software.
+# Sent data, kanaton decoder output and gpsd JSON output all match each other.
+#
+# "18/05/2012 18:15:37" !AIVDO,1,1,4,B,8>jR06@0Bk3:wOli;<`WPhh<1rqVBQf2V@Pdt0J82avIM2b<<Rv1t<ot=@1,2*54
+#    AIS channel:1
+#    Message ID=8
+#    Repeat Indicator=0
+#    Source ID (MMSI)=992509977
+#    Spare=0
+#    Binary Data
+#       Application identifier=0x004B(75)
+#          DAC=1(International)
+#          Function identifier =11(Reserved for international operational applications)
+#       Application data:
+#    Latitude=0x30CAFD(53°017.693 N)
+#    Longitude=0x59DA7(006°008.039 W)
+#    Date and time=0x944F(18 17h15m)
+#    Average wind speed=0x3(3 kts)
+#    Wind gust=0x6(6 kt(s))
+#    Wind direction=0xC(12 degree(s))
+#    Wind gust direction=0xF(15 degree(s))
+#    Air temperature=0x2E6(14.2 degree(s) Celcius)
+#    Relative humidity=0x32(50percent)
+#    Dew point=0x143(12.3 degree(s) Celcius)
+#    Air pressure=0xE0(1024 hPa)
+#    Air pressure tendency=0x2(2(increasing))
+#    Horizontal visibility=0x99(15.3 NM)
+#    Water level=0x10(-8.4 m)
+#    Water level trend=0x1(1 hPa)
+#    Surface current speed=0x67(10.3 kts)
+#    Surface current direction=0x100(256 degree(s))
+#    Current speed #2=0x68(10.4 kts)
+#    Current direction #2=0x101(257 degree(s))
+#    Current measuring level #2=0xA(10 m)
+#    Current speed #3=0x7E(12.6 kts)
+#    Current direction #3=0xCB(203 degree(s))
+#    Current measuring level #3=0x14(20 m)
+#    Significant wave height=0x2A(4.2 m)
+#    Wave period=0x23(35 Sec)
+#    Wave direction=19(25 degree(s))
+#    Swell height=0x17(2.3) m
+#    Swell period=0x30(48 Sec)
+#    Swell direction=0x7C(124 degree(s))
+#    Sea state=0x3(3 Beaufort)
+#    Water temperature=0xDF(12.3 degree(s) Celcius)
+#    Precipitation=0x6(6 according to WMO)
+#    Salinity=0x35(5.3 permil)
+#    Ice=0x0(0)
+!AIVDO,1,1,4,B,8>jR06@0Bk3:wOli;<`WPhh<1rqVBQf2V@Pdt0J82avIM2b<<Rv1t<ot=@1,2*54
+# Type 8, DAC 1, FID 11 (IMO 236 Met/Hydro message)
+# From Christian Gagneraud:
+# Same set-up as above, but the NMEA strem to the Kanaton has been stopped,
+# causing the Kanaton to send a message with all bits set to 1, meaning "no
+# data available"
+# "18/05/2012 18:45:37" !AIVDO,1,1,4,B,8>jR06@0Bk3:vOli;L`nwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwt1,2*0E
+#    AIS channel:1
+#    Message ID=8
+#    Repeat Indicator=0
+#    Source ID (MMSI)=992509977
+#    Spare=0
+#    Binary Data
+#       Application identifier=0x004B(75)
+#          DAC=1(International)
+#          Function identifier =11(Reserved for international operational applications)
+#       Application data:
+#    Latitude=0x30CAF9(53°017.689 N)
+#    Longitude=0x59DA5(006°008.037 W)
+#    Date and time=0x946D(18 17h45m)
+#    Average wind speed=0x7F(127 kts)
+#    Wind gust=0x7F(127 kt(s))
+#    Wind direction=0x1FF(511 degree(s))
+#    Wind gust direction=0x1FF(511 degree(s))
+#    Air temperature=0x7FF(144.7 degree(s) Celcius)
+#    Relative humidity=0x7F(127percent)
+#    Dew point=0x3FF(82.3 degree(s) Celcius)
+#    Air pressure=0x1FF(1311 hPa)
+#    Air pressure tendency=0x3(3())
+#    Horizontal visibility=0xFF(25.5 NM)
+#    Water level=0x1FF(41.1 m)
+#    Water level trend=0x3(3 hPa)
+#    Surface current speed=0xFF(25.5 kts)
+#    Surface current direction=0x1FF(511 degree(s))
+#    Current speed #2=0xFF(25.5 kts)
+#    Current direction #2=0x1FF(511 degree(s))
+#    Current measuring level #2=0x1F(31 m)
+#    Current speed #3=0xFF(25.5 kts)
+#    Current direction #3=0x1FF(511 degree(s))
+#    Current measuring level #3=0x1F(31 m)
+#    Significant wave height=0xFF(25.5 m)
+#    Wave period=0x3F(63 Sec)
+#    Wave direction=1FF(511 degree(s))
+#    Swell height=0xFF(25.5) m
+#    Swell period=0x3F(63 Sec)
+#    Swell direction=0x1FF(511 degree(s))
+#    Sea state=0xF(15 Beaufort)
+#    Water temperature=0x3FF(92.3 degree(s) Celcius)
+#    Precipitation=0x7(7 according to WMO)
+#    Salinity=0x1FF(51.1 permil)
+#    Ice=0x3(3)
+!AIVDO,1,1,4,B,8>jR06@0Bk3:vOli;L`nwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwt1,2*0E
 # Type 9:
 # From AISHub. Checked with the noaadata tools.
 !AIVDM,1,1,,A,91b77=h3h00nHt0Q3r@@07000<0b,0*69
