@@ -87,7 +87,7 @@ GPSD Frequently Asked Questions
 <li><a href='#web'>How do I get gpsd data into a web page?</a></li>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
 <li><a href='#willitwork'>Will this GPS work? It's not on the hardware list.</a></li>
-<li><a href='#conflict'>Why does GPSD interfere with non-GPS USB devices?</a></li>
+<li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
 <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
 <li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a></li>
 <li><a href='#nmea2000'>How do I configure GPSD to use NMEA2000?</a></li>
@@ -758,7 +758,7 @@ say so. A receiver claiming Mac compatibility is usually based on one
 of the common bridge chips from FTDI, Prolific or Silicon
 Laboratories. These just work.</p>
 
-<h1 id='conflict'>Why does GPSD interfere with non-GPS USB devices?</h1>
+<h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
 
 <p>Most USB devices have a defined <a
 href="http://www.usb.org/developers/defined_class">device class</a> -
@@ -802,6 +802,12 @@ each serial and USB device after opening it to see if any other
 process has that device open; if so, it's dropped.  This should at
 least keep GPSD from usurping data sources belonging to other service
 daemons.</p>
+
+<p>Note that GPSD never tries to configure USB devices until it has
+identified them as sensors of a known type. Also, it tries to open with
+TIOCEXCL and thus will not open devices that another process already
+has open. So the worst case is a race between GPSD and another process
+to open a device not in use, in which the other process's open fails.</p>
 
 <p>If this sort of conflict becomes a problem, you can work around
 it by disabling the GPSD hotplug rules.  Unfortunately, this means
