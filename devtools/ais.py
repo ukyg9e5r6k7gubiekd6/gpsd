@@ -1067,7 +1067,18 @@ if __name__ == "__main__":
                 elif dsv:
                     print "|".join(map(lambda x: str(x[1]), parsed))
                 elif histogram:
-                    frequencies[msgtype] = frequencies.get(msgtype, 0) + 1
+                    key = "%02d" % msgtype
+                    frequencies[key] = frequencies.get(key, 0) + 1
+                    if msgtype == 6 or msgtype == 8:
+                        dac = 0; fid = 0
+                        if msgtype == 8:
+                            dac = parsed[3][1]
+                            fid = parsed[4][1]
+                        elif msgtype == 6:
+                            dac = parsed[6][1]
+                            fid = parsed[7][1]
+                        key = "%02d_%04d_%02d" % (msgtype, dac, fid)
+                        frequencies[key] = frequencies.get(key, 0) + 1
                 elif dump:
                     for (inst, value) in parsed:
                         print "%-25s: %s" % (inst.legend, value)
@@ -1077,7 +1088,7 @@ if __name__ == "__main__":
             keys = frequencies.keys()
             keys.sort()
             for msgtype in keys:
-                print "%d\t%d" % (msgtype, frequencies[msgtype])
+                print "%-33s\t%d" % (msgtype, frequencies[msgtype])
     except KeyboardInterrupt:
         pass
 # End
