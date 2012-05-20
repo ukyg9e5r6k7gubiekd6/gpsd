@@ -1107,6 +1107,72 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
+		/* IMO236  - Meteorological-Hydrological data
+		 * Trial message, not to be used after January 2013
+		 * Replaced by IMO289 (DAC 1, FID 31)
+		 */
+		struct {
+#define DAC1FID11_LATLON_SCALE			1000
+		    int lon;			/* longitude in minutes * .001 */
+#define DAC1FID11_LON_NOT_AVAILABLE		0x1FFFFFF
+		    int lat;			/* longitude in minutes * .001 */
+#define DAC1FID11_LAT_NOT_AVAILABLE		0xFFFFFF
+		    unsigned int day;		/* UTC day */
+		    unsigned int hour;		/* UTC hour */
+		    unsigned int minute;	/* UTC minute */
+		    unsigned int wspeed;	/* average wind speed */
+		    unsigned int wgust;		/* wind gust */
+#define DAC1FID11_WSPEED_NOT_AVAILABLE		127
+		    unsigned int wdir;		/* wind direction */
+		    unsigned int wgustdir;	/* wind gust direction */
+#define DAC1FID11_WDIR_NOT_AVAILABLE		511
+		    int airtemp;		/* temperature, units 0.1C */
+#define DAC1FID11_AIRTEMP_NOT_AVAILABLE		1447
+		    unsigned int humidity;	/* relative humidity, % */
+#define DAC1FID11_HUMIDITY_NOT_AVAILABLE	127
+		    int dewpoint;		/* dew point, units 0.1C */
+#define DAC1FID11_DEWPOINT_NOT_AVAILABLE	823
+		    unsigned int pressure;	/* air pressure, hpa */
+#define DAC1FID11_PRESSURE_NOT_AVAILABLE	1311
+		    unsigned int pressuretend;	/* tendency */
+#define DAC1FID11_PRESSURETREND_NOT_AVAILABLE	3
+		    unsigned int visibility;	/* units 0.1 nautical miles */
+#define DAC1FID11_VISIBILITY_NOT_AVAILABLE	255
+		    int waterlevel;		/* decimeters */
+#define DAC1FID11_WATERLEVEL_NOT_AVAILABLE	411
+		    unsigned int leveltrend;	/* water level trend code */
+#define DAC1FID11_LEVELTREND_NOT_AVAILABLE	3
+		    unsigned int cspeed;	/* surface current speed in deciknots */
+#define DAC1FID11_CSPEED_NOT_AVAILABLE		255
+		    unsigned int cdir;		/* surface current dir., degrees */
+#define DAC1FID11_CDIR_NOT_AVAILABLE		511
+		    unsigned int cspeed2;	/* current speed in deciknots */
+		    unsigned int cdir2;		/* current dir., degrees */
+		    unsigned int cdepth2;	/* measurement depth, m */
+#define DAC1FID11_CDEPTH_NOT_AVAILABLE		31
+		    unsigned int cspeed3;	/* current speed in deciknots */
+		    unsigned int cdir3;		/* current dir., degrees */
+		    unsigned int cdepth3;	/* measurement depth, m */
+		    unsigned int waveheight;	/* in decimeters */
+#define DAC1FID11_WAVEHEIGHT_NOT_AVAILABLE	255
+		    unsigned int waveperiod;	/* in seconds */
+#define DAC1FID11_WAVEPERIOD_NOT_AVAILABLE	63
+		    unsigned int wavedir;	/* direction in degrees */
+#define DAC1FID11_WAVEDIR_NOT_AVAILABLE		511
+		    unsigned int swellheight;	/* in decimeters */
+		    unsigned int swellperiod;	/* in seconds */
+		    unsigned int swelldir;	/* direction in degrees */
+		    unsigned int seastate;	/* Beaufort scale, 0-12 */
+#define DAC1FID11_SEASTATE_NOT_AVAILABLE	15
+		    int watertemp;		/* units 0.1deg Celsius */
+#define DAC1FID11_WATERTEMP_NOT_AVAILABLE	923
+		    unsigned int preciptype;	/* 0-7, enumerated */
+#define DAC1FID11_PRECIPTYPE_NOT_AVAILABLE	7
+		    unsigned int salinity;	/* units of 0.1ppt */
+#define DAC1FID11_SALINITY_NOT_AVAILABLE	511
+		    unsigned int ice;		/* is there sea ice? */
+#define DAC1FID11_ICE_NOT_AVAILABLE		3
+		} dac1fid11;
 		/* IMO236 - Fairway Closed */
 		struct {
 		    char reason[20+1];	/* Reason For Closing */
@@ -1174,7 +1240,7 @@ struct ais_t
 #define AIS_DAC1FID29_TEXT_MAX	162	/* 920 bits of six-bit, plus NUL */
 		    char text[AIS_DAC1FID29_TEXT_MAX];
 		} dac1fid29;
-		/* IMO236 & IMO289 - Meteorological-Hydrological data */
+		/* IMO289 - Meteorological-Hydrological data */
 		struct {
 		    bool accuracy;	/* position accuracy, <10m if true */
 #define DAC1FID31_LATLON_SCALE	1000
@@ -1207,7 +1273,6 @@ struct ais_t
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID31_VISIBILITY_NOT_AVAILABLE	127
 		    int waterlevel;		/* decimeters or cm */
-#define DAC1FID11_WATERLEVEL_NOT_AVAILABLE	4001
 #define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	40001
 		    unsigned int leveltrend;	/* water level trend code */
 #define DAC1FID31_LEVELTREND_NOT_AVAILABLE	3

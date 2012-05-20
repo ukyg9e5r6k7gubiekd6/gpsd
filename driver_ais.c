@@ -25,10 +25,15 @@
  * Parse the data from the device
  */
 
+#define DAC1FID11_AIRTEMP_OFFSET		600
+#define DAC1FID11_DEWPOINT_OFFSET		200
+#define DAC1FID11_PRESSURE_OFFSET		-800
+#define DAC1FID11_LEVEL_OFFSET			100
+#define DAC1FID11_WATERTEMP_OFFSET		100
+
 #define DAC1FID31_AIRTEMP_OFFSET		600
 #define DAC1FID31_DEWPOINT_OFFSET		200
 #define DAC1FID31_PRESSURE_OFFSET		-800
-#define DAC1FID11_LEVEL_OFFSET			100
 #define DAC1FID31_LEVEL_OFFSET			100
 #define DAC1FID31_WATERTEMP_OFFSET		100
 
@@ -378,49 +383,47 @@ bool ais_binary_decode(struct ais_t *ais,
 	    switch (ais->type8.fid) {
 	    case 11:        /* IMO236 - Meteorological/Hydrological data */
 		/* layout is almost identical to FID=31 from IMO289 */
-		ais->type8.dac1fid31.lat		= SBITS(56, 24);
-		ais->type8.dac1fid31.lon		= SBITS(80, 25);
-		ais->type8.dac1fid31.accuracy       = false;
-		ais->type8.dac1fid31.day		= UBITS(105, 5);
-		ais->type8.dac1fid31.hour		= UBITS(110, 5);
-		ais->type8.dac1fid31.minute		= UBITS(115, 6);
-		ais->type8.dac1fid31.wspeed		= UBITS(121, 7);
-		ais->type8.dac1fid31.wgust		= UBITS(128, 7);
-		ais->type8.dac1fid31.wdir		= UBITS(135, 9);
-		ais->type8.dac1fid31.wgustdir	= UBITS(144, 9); 
-		ais->type8.dac1fid31.airtemp	= UBITS(153, 11)
-		    - DAC1FID31_AIRTEMP_OFFSET;
-		ais->type8.dac1fid31.humidity	= UBITS(164, 7);
-		ais->type8.dac1fid31.dewpoint	= UBITS(171, 10)
-		    - DAC1FID31_DEWPOINT_OFFSET;
-		ais->type8.dac1fid31.pressure	= UBITS(181, 9)
-		    - DAC1FID31_PRESSURE_OFFSET;
-		ais->type8.dac1fid31.pressuretend	= UBITS(190, 2);
-		ais->type8.dac1fid31.visgreater     = false;
-		ais->type8.dac1fid31.visibility	= UBITS(192, 8);
-		ais->type8.dac1fid31.waterlevel	= UBITS(200, 9)
+		ais->type8.dac1fid11.lat		= SBITS(56, 24);
+		ais->type8.dac1fid11.lon		= SBITS(80, 25);
+		ais->type8.dac1fid11.day		= UBITS(105, 5);
+		ais->type8.dac1fid11.hour		= UBITS(110, 5);
+		ais->type8.dac1fid11.minute		= UBITS(115, 6);
+		ais->type8.dac1fid11.wspeed		= UBITS(121, 7);
+		ais->type8.dac1fid11.wgust		= UBITS(128, 7);
+		ais->type8.dac1fid11.wdir		= UBITS(135, 9);
+		ais->type8.dac1fid11.wgustdir	= UBITS(144, 9); 
+		ais->type8.dac1fid11.airtemp	= UBITS(153, 11)
+		    - DAC1FID11_AIRTEMP_OFFSET;
+		ais->type8.dac1fid11.humidity	= UBITS(164, 7);
+		ais->type8.dac1fid11.dewpoint	= UBITS(171, 10)
+		    - DAC1FID11_DEWPOINT_OFFSET;
+		ais->type8.dac1fid11.pressure	= UBITS(181, 9)
+		    - DAC1FID11_PRESSURE_OFFSET;
+		ais->type8.dac1fid11.pressuretend	= UBITS(190, 2);
+		ais->type8.dac1fid11.visibility	= UBITS(192, 8);
+		ais->type8.dac1fid11.waterlevel	= UBITS(200, 9)
 		    - DAC1FID11_LEVEL_OFFSET;
-		ais->type8.dac1fid31.leveltrend	= UBITS(209, 2);
-		ais->type8.dac1fid31.cspeed		= UBITS(211, 8);
-		ais->type8.dac1fid31.cdir		= UBITS(219, 9);
-		ais->type8.dac1fid31.cspeed2	= UBITS(228, 8);
-		ais->type8.dac1fid31.cdir2		= UBITS(236, 9);
-		ais->type8.dac1fid31.cdepth2	= UBITS(245, 5);
-		ais->type8.dac1fid31.cspeed3	= UBITS(250, 8);
-		ais->type8.dac1fid31.cdir3		= UBITS(258, 9);
-		ais->type8.dac1fid31.cdepth3	= UBITS(267, 5);
-		ais->type8.dac1fid31.waveheight	= UBITS(272, 8);
-		ais->type8.dac1fid31.waveperiod	= UBITS(280, 6);
-		ais->type8.dac1fid31.wavedir	= UBITS(286, 9);
-		ais->type8.dac1fid31.swellheight	= UBITS(295, 8);
-		ais->type8.dac1fid31.swellperiod	= UBITS(303, 6);
-		ais->type8.dac1fid31.swelldir	= UBITS(309, 9);
-		ais->type8.dac1fid31.seastate	= UBITS(318, 4);
-		ais->type8.dac1fid31.watertemp	= UBITS(322, 10)
-		    - DAC1FID31_WATERTEMP_OFFSET;
-		ais->type8.dac1fid31.preciptype	= UBITS(332, 3);
-		ais->type8.dac1fid31.salinity	= UBITS(335, 9);
-		ais->type8.dac1fid31.ice		= UBITS(344, 2);
+		ais->type8.dac1fid11.leveltrend	= UBITS(209, 2);
+		ais->type8.dac1fid11.cspeed		= UBITS(211, 8);
+		ais->type8.dac1fid11.cdir		= UBITS(219, 9);
+		ais->type8.dac1fid11.cspeed2	= UBITS(228, 8);
+		ais->type8.dac1fid11.cdir2		= UBITS(236, 9);
+		ais->type8.dac1fid11.cdepth2	= UBITS(245, 5);
+		ais->type8.dac1fid11.cspeed3	= UBITS(250, 8);
+		ais->type8.dac1fid11.cdir3		= UBITS(258, 9);
+		ais->type8.dac1fid11.cdepth3	= UBITS(267, 5);
+		ais->type8.dac1fid11.waveheight	= UBITS(272, 8);
+		ais->type8.dac1fid11.waveperiod	= UBITS(280, 6);
+		ais->type8.dac1fid11.wavedir	= UBITS(286, 9);
+		ais->type8.dac1fid11.swellheight	= UBITS(295, 8);
+		ais->type8.dac1fid11.swellperiod	= UBITS(303, 6);
+		ais->type8.dac1fid11.swelldir	= UBITS(309, 9);
+		ais->type8.dac1fid11.seastate	= UBITS(318, 4);
+		ais->type8.dac1fid11.watertemp	= UBITS(322, 10)
+		    - DAC1FID11_WATERTEMP_OFFSET;
+		ais->type8.dac1fid11.preciptype	= UBITS(332, 3);
+		ais->type8.dac1fid11.salinity	= UBITS(335, 9);
+		ais->type8.dac1fid11.ice		= UBITS(344, 2);
 		imo = true;
 		break;
 	    case 13:        /* IMO236 - Fairway closed */

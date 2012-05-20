@@ -123,12 +123,63 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 8:			/* Binary Broadcast Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%u|%zd:%s",
+		       "%u|%u",
 		       ais->type8.dac,
-		       ais->type8.fid,
-		       ais->type8.bitcount,
-		       gpsd_hexdump(ais->type8.bitdata,
-				    (ais->type8.bitcount + 7) / 8));
+		       ais->type8.fid);
+	int imo = 0;
+	switch(ais->type8.dac) {
+	case 1:			/* International */
+	    switch(ais->type8.fid) {
+	    case 11:		/* IMO236 - Met/Hydro message */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "|%d|%d|%02uT%02u:%02uZ|%u|%u|%u|%u|%d|%u|%d|%u|%u|%u|%d|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%d|%u|%u|%u",
+			       ais->type8.dac1fid11.lon,
+			       ais->type8.dac1fid11.lat,
+			       ais->type8.dac1fid11.day,
+			       ais->type8.dac1fid11.hour,
+			       ais->type8.dac1fid11.minute,
+			       ais->type8.dac1fid11.wspeed,
+			       ais->type8.dac1fid11.wgust,
+			       ais->type8.dac1fid11.wdir,
+			       ais->type8.dac1fid11.wgustdir,
+			       ais->type8.dac1fid11.airtemp,
+			       ais->type8.dac1fid11.humidity,
+			       ais->type8.dac1fid11.dewpoint,
+			       ais->type8.dac1fid11.pressure,
+			       ais->type8.dac1fid11.pressuretend,
+			       ais->type8.dac1fid11.visibility,
+			       ais->type8.dac1fid11.waterlevel,
+			       ais->type8.dac1fid11.leveltrend,
+			       ais->type8.dac1fid11.cspeed,
+			       ais->type8.dac1fid11.cdir,
+			       ais->type8.dac1fid11.cspeed2,
+			       ais->type8.dac1fid11.cdir2,
+			       ais->type8.dac1fid11.cdepth2,
+			       ais->type8.dac1fid11.cspeed3,
+			       ais->type8.dac1fid11.cdir3,
+			       ais->type8.dac1fid11.cdepth3,
+			       ais->type8.dac1fid11.waveheight,
+			       ais->type8.dac1fid11.waveperiod,
+			       ais->type8.dac1fid11.wavedir,
+			       ais->type8.dac1fid11.swellheight,
+			       ais->type8.dac1fid11.swellperiod,
+			       ais->type8.dac1fid11.swelldir,
+			       ais->type8.dac1fid11.seastate,
+			       ais->type8.dac1fid11.watertemp,
+			       ais->type8.dac1fid11.preciptype,
+			       ais->type8.dac1fid11.salinity,
+			       ais->type8.dac1fid11.ice);
+		imo = 1;
+		break;
+	    }
+	    break;
+	}
+	if (imo == 0)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "|%zd:%s",
+			   ais->type8.bitcount,
+			   gpsd_hexdump(ais->type8.bitdata,
+					(ais->type8.bitcount + 7) / 8));
 	break;
     case 9:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),

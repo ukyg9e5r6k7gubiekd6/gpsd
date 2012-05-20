@@ -228,7 +228,21 @@ int json_ais_read(const char *buf,
     } else if (strstr(buf, "\"type\":8,") != NULL) {
 	bool imo = false;
 	if (strstr(buf, "\"dac\":1,") != NULL) {
-	    if (strstr(buf, "\"fid\":13,") != NULL) {
+	    if (strstr(buf, "\"fid\":11,") != NULL) {
+		status = json_read_object(buf, json_ais8_fid11, endptr);
+		if (status == 0) {
+		    ais->type8.dac1fid11.day = AIS_DAY_NOT_AVAILABLE;
+		    ais->type8.dac1fid11.hour = AIS_HOUR_NOT_AVAILABLE;
+		    ais->type8.dac1fid11.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
+		    (void)sscanf(timestamp, "%02uT%02u:%02uZ",
+				 &ais->type8.dac1fid11.day,
+				 &ais->type8.dac1fid11.hour, 
+				 &ais->type8.dac1fid11.minute);
+		}
+		imo = true;
+	    }
+	    else if (strstr(buf, "\"fid\":13,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid13, endptr);
 		if (status == 0) {
 		    ais->type8.dac1fid13.fmonth = AIS_MONTH_NOT_AVAILABLE;
@@ -286,7 +300,7 @@ int json_ais_read(const char *buf,
 		status = json_read_object(buf, json_ais8_fid29, endptr);
 		imo = true;
 	    }
-	    else if (strstr(buf, "\"fid\":31,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
+	    else if (strstr(buf, "\"fid\":31,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid31, endptr);
 		if (status == 0) {
 		    ais->type8.dac1fid31.day = AIS_DAY_NOT_AVAILABLE;
