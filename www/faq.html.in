@@ -296,11 +296,12 @@ still reproducible.</p>
 
 <h3>10. If your bug core-dumps gpsd, send us a stack trace.</h3>
 
-<p>Though it happens seldom (and we had 2 report since about mid-2005),
-badly-formed input from a device with poor standards compliance has been
-known to core-dump gpsd.  If your gpsd has core-dumped, try to use gdb
-or whatever your local symbolic debugger is to generate a stack trace
-("bt full") of the crash, and send us that.</p>
+<p>Though it happens seldom (we've had only 2 such reports since about
+mid-2005), badly-formed input from a device with poor standards
+compliance has been known to core-dump gpsd.  If your gpsd has
+core-dumped, try to use gdb or whatever your local symbolic debugger
+is to generate a stack trace ("bt full") of the crash, and send us
+that.</p>
 
 <h3>11. Try to determine what release introduced the bug</h3>
 
@@ -424,7 +425,7 @@ similar solution.</p>
 <h1 id='kismet'>Why do I get no results when I try to use <code>gpsd</code> with Kismet?</h1>
 
 <p>Your Kismet configuration has to include the setting
-"gps=true"  This is s a surprisingly easy detail to forget.</p>
+"gps=true"  This is a surprisingly easy detail to forget.</p>
 
 <h1 id='bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</h1>
 
@@ -600,6 +601,11 @@ close to 1000 Hz. If it runs at 1000.1 Hz, every 10th second the next
 time-report will come 1 whole millisecond earlier. This will have NTP
 observing something like a 1ms-high sawtooth in the time-reports.</p>
 
+<p>That being said, we've observed excellent 1 millisecond accuracy
+timing performance over USB with a uBlox6+PL2303 combination featuring
+1PPS wired to DCD_IN.  NaviSys sells this as the GR601W, aka the
+Macx-1.</p>
+
 <p>For accurate time reference, use a PPS line over RS232 triggering an
 interrupt. Serial bus interrupt latencies on modern hardware on the
 order of 10 microseconds, roughly a hundred-fold improvement over
@@ -612,7 +618,13 @@ about a millisecond of latency <em>per character</em>; furthermore,
 the Linux kernel will normally delay delivery of characters to your
 application until the next timer tick, about every 4 milliseconds in
 modern kernels. Both USB and RS232 will incur that approximately
-5ms-per-char latency overhead.</p>
+5ms-per-char latency overhead.  You'll have to deal with this
+latency even on chips like the Venus 6 that claim the beginning of
+their reporting burst is synced to PPS.</p>
+
+<p>GPS chips that do not sync their start of reporting to PPS can have
+long-period jitters in the latency between 1PPS and the start of
+reporting. SiRFs, in particular, wobble by 100-170 milliseconds.</p>
 
 <h1 id='sleep'>Why does my GPS get lost when I sleep/wake my laptop?</h1>
 
