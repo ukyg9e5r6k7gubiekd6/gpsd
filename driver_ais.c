@@ -6,8 +6,10 @@
  *
  * Code for message types 1-15, 18-21, and 24 has been tested against
  * live data with known-good decodings. Code for message types 16-17,
- * 22-23, and 25-27 has not.  The IMO special messages in types 6 and 8
- * are also untested.
+ * 22-23, and 25-27 has not.
+ * For the special IMO messages (types 6 and 8), only the following have been
+ * tested against know-good decodings:
+ *  - IMO236 met/hydro message: Type=8, DAC=1, FI=11 
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -25,8 +27,8 @@
 
 #define DAC1FID31_AIRTEMP_OFFSET		600
 #define DAC1FID31_DEWPOINT_OFFSET		200
-#define DAC1FID31_PRESSURE_OFFSET		800
-#define DAC1FID11_LEVEL_OFFSET			10
+#define DAC1FID31_PRESSURE_OFFSET		-800
+#define DAC1FID11_LEVEL_OFFSET			100
 #define DAC1FID31_LEVEL_OFFSET			100
 #define DAC1FID31_WATERTEMP_OFFSET		100
 
@@ -386,7 +388,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid31.wgust		= UBITS(128, 7);
 		ais->type8.dac1fid31.wdir		= UBITS(135, 9);
 		ais->type8.dac1fid31.wgustdir	= UBITS(144, 9); 
-		ais->type8.dac1fid31.airtemp	= SBITS(153, 11)
+		ais->type8.dac1fid31.airtemp	= UBITS(153, 11)
 		    - DAC1FID31_AIRTEMP_OFFSET;
 		ais->type8.dac1fid31.humidity	= UBITS(164, 7);
 		ais->type8.dac1fid31.dewpoint	= UBITS(171, 10)
