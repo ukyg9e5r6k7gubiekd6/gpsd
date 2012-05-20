@@ -328,11 +328,155 @@ type7 = (
     spare(2),
     )
 
+#
+# Type 8 have subtypes identified by DAC (Designated Area Code) and FID (Functional ID)
+#
+
+def type8_latlon_format(n):
+    return str(n / 60000.0)
+
+type8_dac_or_fid_unknown = (
+    bitfield("data",           952, 'raw',      None,  "Data"),
+    )
+
+type8_dispatch = {}
+type8_dispatch[0] = type8_dac_or_fid_unknown
+
+# DAC 1 (international)
+type8_dac1_dispatch = {}
+type8_dac1_dispatch[0] = type8_dac_or_fid_unknown
+
+# DAC 1, FID 11: IMO236 Met/Hydro message
+def type8_dac1_fid11_airtemp_format(n):
+    return str(n * 0.1 - 60)
+
+def type8_dac1_fid11_dewpoint_format(n):
+    return str(n * 0.1 - 20)
+
+def type8_dac1_fid11_pressure_format(n):
+    return str(n + 800)
+
+def type8_dac1_fid11_visibility_format(n):
+    return str(n * 0.1)
+
+def type8_dac1_fid11_waterlevel_format(n):
+    return str(n * 0.1 - 10)
+
+def type8_dac1_fid11_cspeed_format(n):
+    return str(n * 0.1)
+
+def type8_dac1_fid11_waveheight_format(n):
+    return str(n * 0.1)
+
+type8_dac1_fid11_seastate_legend = (
+    "Calm",
+    "Light air",
+    "Light breeze"
+    "Gentle breeze",
+    "Moderate breeze",
+    "Fresh breeze",
+    "Strong breeze",
+    "High wind",
+    "Gale",
+    "Strong gale",
+    "Storm",
+    "Violent storm",
+    "Hurricane force",
+    "Reserved",
+    "Reserved",
+    "Reserved"
+)
+
+def type8_dac1_fid11_watertemp_format(n):
+    return str(n * 0.1 - 10)
+
+type8_dac1_fid11_preciptype_legend = (
+    "Reserved",
+    "Rain",
+    "Thunderstorm",
+    "Freezing rain",
+    "Mixed/ice",
+    "Snow",
+    "Reserved",
+    "Reserved"
+)
+
+def type8_dac1_fid11_salinity_format(n):
+    return str(n * 0.1)
+
+type8_dac1_fid11_ice_legend = (
+    "Yes",
+    "No"
+    )
+
+type8_dac1_fid11 = (
+    bitfield("lat",          24,  "signed", 2**24-1, "Latitude",
+             formatter=type8_latlon_format),
+    bitfield("lon",          25,  "signed", 2**25-1, "Longitude",
+             formatter=type8_latlon_format),
+    bitfield("day",           5, 'unsigned',  0,    "ETA day"),
+    bitfield("hour",          5, 'unsigned', 24,    "ETA hour"),
+    bitfield("minute",        6, 'unsigned', 60,    "ETA minute"),
+    bitfield("wspeed",        7, 'unsigned', 127,   "Wind speed"),
+    bitfield("wgust",         7, 'unsigned', 127,   "Wind gust"),
+    bitfield("wdir",          9, 'unsigned', 511,   "Wind direction"),
+    bitfield("wgustdir",      9, 'unsigned', 511,   "Wind gust direction"),
+    bitfield("airtemp",      11, 'unsigned', 2047,  "Air temperature",
+             formatter=type8_dac1_fid11_airtemp_format),
+    bitfield("humidity",      7, 'unsigned', 127,   "Relative humidity"),
+    bitfield("dewpoint",     10, 'unsigned', 1023,  "Dew point",
+             formatter=type8_dac1_fid11_dewpoint_format),
+    bitfield("pressure",      9, 'unsigned', 511,   "Atmospheric pressure",
+             formatter=type8_dac1_fid11_pressure_format),
+    bitfield("pressuretend",  2, 'unsigned', 3,     "Atmospheric pressure tendency"),
+    bitfield("visibility",    8, 'unsigned', 255,   "Horizontal visibility",
+             formatter=type8_dac1_fid11_visibility_format),
+    bitfield("waterlevel",    9, 'unsigned', 511,    "Water level",
+             formatter=type8_dac1_fid11_waterlevel_format),
+    bitfield("leveltrend",    2, 'unsigned', 3,     "Water level trend"),
+    bitfield("cspeed",        8, 'unsigned', 255,   "Surface current speed",
+             formatter=type8_dac1_fid11_cspeed_format),
+    bitfield("cdir",          9, 'unsigned', 511,   "Surface current direction"),
+    bitfield("cspeed2",       8, 'unsigned', 255,   "Current speed #2",
+             formatter=type8_dac1_fid11_cspeed_format),
+    bitfield("cdir2",         9, 'unsigned', 511,   "Current direction #2"),
+    bitfield("cdepth2",       5, 'unsigned', 31,    "Current measuring level #2"),
+    bitfield("cspeed3",       8, 'unsigned', 255,   "Current speed #3",
+             formatter=type8_dac1_fid11_cspeed_format),
+    bitfield("cdir3",         9, 'unsigned', 511,   "Current direction #3"),
+    bitfield("cdepth3",       5, 'unsigned', 31,    "Current measuring level #3"),
+    bitfield("waveheight",    8, 'unsigned', 255,   "Significant wave height",
+             formatter=type8_dac1_fid11_waveheight_format),
+    bitfield("waveperiod",    6, 'unsigned', 63,    "Significant wave period"),
+    bitfield("wavedir",       9, 'unsigned', 511,   "Significant wave direction"),
+    bitfield("swellheight",   8, 'unsigned', 255,   "Swell height",
+             formatter=type8_dac1_fid11_waveheight_format),
+    bitfield("swellperiod",   6, 'unsigned', 63,    "Swell period"),
+    bitfield("swelldir",      9, 'unsigned', 511,   "Swell direction"),
+    bitfield("seastate",      4, 'unsigned', 15,    "Sea state",
+             formatter=type8_dac1_fid11_seastate_legend),
+    bitfield("watertemp",    10, 'unsigned', 1023,  "Water temperature",
+             formatter=type8_dac1_fid11_watertemp_format),
+    bitfield("preciptype",    3, 'unsigned', 7,     "Precipitation type",
+             formatter=type8_dac1_fid11_preciptype_legend),
+    bitfield("salinity",     9, 'unsigned', 511,    "Salinity",
+             formatter=type8_dac1_fid11_salinity_format),
+    bitfield("ice",          2, 'unsigned', 3,      "Ice?",
+             formatter=type8_dac1_fid11_ice_legend),
+    spare(6)
+    )
+type8_dac1_dispatch[11] = type8_dac1_fid11
+
+type8_dac1 = (
+    dispatch("fid", type8_dac1_dispatch, lambda m: m if m in type8_dac1_dispatch else 0),
+    )
+type8_dispatch[1] = type8_dac1
+
 type8 = (
     spare(2),
     bitfield("dac",            10,  'unsigned', 0,     "DAC"),
     bitfield("fid",            6,   'unsigned', 0,     "Functional ID"),
-    bitfield("data",           952, 'raw',      None,  "Data"),
+    dispatch("dac", type8_dispatch, lambda m: m if m in type8_dispatch else 0),
     )
 
 def type9_alt_format(n):
