@@ -18,7 +18,16 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
-#include "bits.h"
+
+/* Zodiac protocol description uses 1-origin indexing by little-endian word */
+#define get16z(buf, n)	( (buf[2*(n)-2])	\
+		| (buf[2*(n)-1] << 8))
+#define get32z(buf, n)	( (buf[2*(n)-2])	\
+		| (buf[2*(n)-1] << 8) \
+		| (buf[2*(n)+0] << 16) \
+		| (buf[2*(n)+1] << 24))
+#define getstringz(to, from, s, e)			\
+    (void)memcpy(to, from+2*(s)-2, 2*((e)-(s)+1))
 
 #ifdef ZODIAC_ENABLE
 struct header
