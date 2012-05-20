@@ -659,7 +659,8 @@ may be reported or not depending on the specific device type.</para>
 	<entry>dip</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Roll in degrees.</entry>
+        <entry>Local magnedic inclination, degrees, positive when the magnetic
+field points downward (into the Earth).</entry>
 </row>
 <row>
 	<entry>mag_len</entry>
@@ -686,7 +687,7 @@ may be reported or not depending on the specific device type.</para>
         <entry>Z component of magnetic field strength.</entry>
 </row>
 <row>
-	<entry>mag_len</entry>
+	<entry>acc_len</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Scalar acceleration.</entry>
