@@ -69,17 +69,6 @@ union long_double {
 #define getbef(buf, off)	(i_f.i = getbes32(buf, off), i_f.f)
 #define getbed(buf, off)	(l_d.l = getbes64(buf, off), l_d.d)
 
-
-/* Zodiac protocol description uses 1-origin indexing by little-endian word */
-#define get16z(buf, n)	( (buf[2*(n)-2])	\
-		| (buf[2*(n)-1] << 8))
-#define get32z(buf, n)	( (buf[2*(n)-2])	\
-		| (buf[2*(n)-1] << 8) \
-		| (buf[2*(n)+0] << 16) \
-		| (buf[2*(n)+1] << 24))
-#define getstringz(to, from, s, e)			\
-    (void)memcpy(to, from+2*(s)-2, 2*((e)-(s)+1))
-
 /* bitfield extraction */
 extern uint64_t ubits(char buf[], unsigned int, unsigned int, bool);
 extern int64_t sbits(char buf[], unsigned int, unsigned int, bool);
