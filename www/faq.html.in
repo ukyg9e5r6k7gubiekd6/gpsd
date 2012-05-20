@@ -731,7 +731,7 @@ use the stty trick.</p>
 
 <p>Probably.</p>
 
-<p>Gpsd's support for the NMEA protocol is mature and stable. If the
+<p>GPSD's support for the NMEA protocol is mature and stable. If the
 specification for your receiver says "NMEA 0183" (maybe with a version 2.x
 or 3.x qualifier) it should just work.</p>
 
@@ -749,12 +749,13 @@ will list the protocols compiled into gpsd. If your receiver doesn't
 support NMEA and we don't have a special driver for the chipset, talk
 to us. But it'll probably just work.</p>
 
-<p>Assuming the receiver has a USB interface, do a web search to see if someone
-has tried it with linux already, eg. "<code>NavCorp NX666 linux</code>". Search
-for the product and "driver install" to find instructions on installing windows
-drivers for the product - these often hint at which bridge chip is used, if the
-specifications don't say so. A receiver claiming mac compatibility is usually
-based on one of the common bridge chips from FTDI, Prolific or Silicon
+<p>Assuming the receiver has a USB interface, do a web search to see
+if someone has tried it with linux already, eg. "<code>NavCorp NX666
+linux</code>". Search for the product and "driver install" to find
+instructions on installing Windows drivers for the product - these
+often hint at which bridge chip is used, if the specifications don't
+say so. A receiver claiming Mac compatibility is usually based on one
+of the common bridge chips from FTDI, Prolific or Silicon
 Laboratories. These just work.</p>
 
 <h1 id='conflict'>Why does GPSD interfere with non-GPS USB devices?</h1>
