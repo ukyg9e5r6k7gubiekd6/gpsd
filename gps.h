@@ -1100,7 +1100,7 @@ struct ais_t
 	} type7;
 	/* Type 8 - Broadcast Binary Message */
 	struct {
-	    //unsigned int spare;	spare bit(s) */
+	    //unsigned int spare;	/* spare bit(s) */
 	    unsigned int dac;       	/* Designated Area Code */
 	    unsigned int fid;       	/* Functional ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */

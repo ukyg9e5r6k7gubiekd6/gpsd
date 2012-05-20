@@ -1812,7 +1812,7 @@ broadcast of this message of 12 minutes.
 |8-37    | 30 |Source MMSI        |mmsi        |u|9 decimal digits
 |38-39   |  2 |Spare              |            |x|Not used
 |40-49   | 10 |DAC                |dac         |u|DAC = 001
-|50-55   |  6 |FID                |fid         |u|FID = 16
+|50-55   |  6 |FID                |fid         |u|FID = 11
 |56-79   | 24 |Latitude           |lat         |I3|Unit = minutes * 0.001,
                                                   91000 = N/A (default),
                                                   E positive, W negative.
@@ -1896,7 +1896,7 @@ broadcast of this message of 12 minutes.
 
 <<IMO236>> says "If there is no data available, default value to be
 transmitted is the highest available binary value for that particular
-data field." aand no defaults are explicitly specified.  However, the
+data field." and no defaults are explicitly specified. However, the
 replacement FID=31 message has default values which do not obey this
 rule. It would be good practice for a decoder to treat any
 out-of-bounds value as N/A; the N/A formulas in the table above
@@ -4376,7 +4376,7 @@ Identification System]
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
 
-- [[[IMO236]]] http://www.imo.org/includes/blastData.asp/doc_id=4503/236.pdf[IMO
+- [[[IMO236]]] http://www.imo.org/includes/blastData.asp/doc_id=4503&filename=236.pdf[IMO
   Circular 236: Guidance on the Application of AIS Binary Messages (May 2004)]
 
 - [[[IMO289]]]

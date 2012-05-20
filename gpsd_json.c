@@ -2048,10 +2048,10 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 8:			/* Binary Broadcast Message */
 	imo = false;
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"dac\":%u,\"fid\":%u,",ais->type8.dac,ais->type8.fid);
+		       "\"dac\":%u,\"fid\":%u,",ais->type8.dac, ais->type8.fid);
 	if (ais->type8.dac == 1) {
 	    const char *trends[] = {
-		"steaady",
+		"steady",
 		"increasing"
 		"decreasing",
 		"N/A",
@@ -2077,7 +2077,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   JSON_BOOL(ais->type8.dac1fid31.accuracy));
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"timestamp\":\"%02uT%02u:%02uZ\","
-			       "\"wapeed\":%u,\"wgust\":%u,\"wdir\":%u,"
+			       "\"wspeed\":%u,\"wgust\":%u,\"wdir\":%u,"
 			       "\"wgustdir\":%u,\"humidity\":%u,",
 			       ais->type8.dac1fid31.day,
 			       ais->type8.dac1fid31.hour,
@@ -2108,7 +2108,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"visibility\":%1f,",
+				   "\"visibility\":%.1f,",
 				   ais->type8.dac1fid31.visibility * 0.1);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2170,7 +2170,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"leveltrend\":%u,"
-				   "\"cspeed\":%u,\"cdir\":%u"
+				   "\"cspeed\":%u,\"cdir\":%u,"
 				   "\"cspeed2\":%u,\"cdir2\":%u,\"cdepth2\":%u,"
 				   "\"cspeed3\":%u,\"cdir3\":%u,\"cdepth3\":%u,"
 				   "\"waveheight\":%u,\"waveperiod\":%u,\"wavedir\":%u,"
