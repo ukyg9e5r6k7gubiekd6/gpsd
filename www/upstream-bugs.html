@@ -76,7 +76,6 @@ maintainer, we've tried to kick these upstream.</p>
 <h1>Links to Open Toolchain Bugs</h1>
 
 <ul>
-<li><a href="#libtool">Multiple definitions of symbol _gpsd_report due to libtool bug</a></li>
 <li><a href="#pyinstall">Defective Python installation in SuSE 10.3rc</a></li>
 <li><a href="#gcc421">Compiler optimizer bugs can produce error-modeling errors</a></li>
 <li><a href="#sconscxx">scons doesn't honor parse_flags in a Program() using C++</a></li>
@@ -87,8 +86,6 @@ maintainer, we've tried to kick these upstream.</p>
 
 <ul>
 <li><a href="#startup">Distro-dependent problems with gpsd startup</a></li>
-<li><a href="#openmotif">The 2.3.0-beta version of OpenMotif shipped
-with Fedora Core 5 was buggy.</a></li>
 <li><a href="#pysocket">Python socket library barfs on IPV6 notation in the /etc/hosts file</a></li>
 <li><a href="#isgps">isgps.c triggers an optimizer bug in older gcc versions</a></li>
 <li><a href="#fc5_64bit">gpsd build may break on 64-bit systems running Fedora Core 5</a></li>
@@ -255,17 +252,6 @@ Gentoo bug</a>.  This shows up on other distributions as well, but
 not under Fedora Core.  The Gentoo problem can be fixed by creating a
 /var/run/usb directory; this fix may apply to other distributions as
 well.</p>
-
-<h2 id="openmotif">The 2.3.0-beta version of OpenMotif shipped with
-Fedora Core 5 was buggy.</h2>
-
-<p>xgps tickles a bug, described at http://bugs.motifzone.net/ as bugs
-1330 and 1331 and marked FIXED, in some versions of OpenMotif.  The
-symptom is that the satellite-data window in xgps is too small.  Avoid
-by either upgrading to 2.3.0-0.1.9.3 (or later) or dropping back to a
-stable version like 2.2.2.  Alternatively, remove OpenMotif and
-install lesstif. For gpsd's purposes, lesstif is a completely
-compatible drop-in replacement.</p>
 
 <h2 id="pysocket">Python socket library barfs on IPV6 notation in the /etc/hosts file</h2>
 
