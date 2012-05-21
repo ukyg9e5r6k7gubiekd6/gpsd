@@ -1,11 +1,11 @@
-* Sun 20 May 2012 Eric S. Raymond <esr@snark.thyrsus.com>
+* Mon 21 May 2012 Eric S. Raymond <esr@snark.thyrsus.com>
   Code has zero detectible defects under Coverity scanning and
   cppcheck 1.52; this is mainly a cleanup release to get those minor
   fixes into the field.  If a leap-second warning is available from
   GPS subframe information it is passed to ntpd. NMEA2000 is now
   supported via the Linux kernel CAN interface.  There's a chrpath=no
   config option for distribution makers, so chrpath is no longer
-  a build dependencyp see build.txt for explanation.
+  a build dependency; see build.txt for explanation.
 
 * Sat 14 Apr 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.5
   Use pselect when it's available to cut down on wakeups and improve
