@@ -227,7 +227,7 @@ void json_tpv_dump(const struct gps_device_t *session,
     }
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
+    (void)strlcat(reply, "}\r\n", replylen);
 }
 
 void json_noise_dump(const struct gps_data_t *gpsdata,
@@ -268,7 +268,7 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
 
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
-    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
+    (void)strlcat(reply, "}\r\n", replylen);
 }
 
 void json_sky_dump(const struct gps_data_t *datap,
@@ -1088,11 +1088,11 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       "\"station_id\":%u,\"system\":[",
 		       rtcm->rtcmtypes.rtcm3_1006.station_id);
 	if ((rtcm->rtcmtypes.rtcm3_1006.system & 0x04)!=0)
-	    (void)strlcat(buf, "\"GPS\",", buflen - strlen(buf));
+	    (void)strlcat(buf, "\"GPS\",", buflen);
 	if ((rtcm->rtcmtypes.rtcm3_1006.system & 0x02)!=0)
-	    (void)strlcat(buf, "\"GLONASS\",", buflen - strlen(buf));
+	    (void)strlcat(buf, "\"GLONASS\",", buflen);
 	if ((rtcm->rtcmtypes.rtcm3_1006.system & 0x01)!=0)
-	    (void)strlcat(buf, "\"GALILEO\",", buflen - strlen(buf));
+	    (void)strlcat(buf, "\"GALILEO\",", buflen);
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1947,7 +1947,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type6.dac1fid25.cargos[i].subtype);
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf) - 1] = '\0';
-		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
+		(void)strlcat(buf, "]}\r\n,", buflen);
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1983,7 +1983,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		}
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf)-1] = '\0';
-		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
+		(void)strlcat(buf, "]}\r\n,", buflen);
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2028,7 +2028,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	      }
 	      if (buf[strlen(buf) - 1] == ',')
 		  buf[strlen(buf)-1] = '\0';
-	      (void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
+	      (void)strlcat(buf, "]}\r\n,", buflen);
 	      break;
 	    }
 	if (!imo)
@@ -2191,7 +2191,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.preciptype,
 				   ais->type8.dac1fid11.salinity,
 				   ais->type8.dac1fid11.ice);
-		(void)strlcat(buf, "}\r\n", buflen - strlen(buf));
+		(void)strlcat(buf, "}\r\n", buflen);
 		imo = true;
 		break;
 	    case 13:        /* IMO236 - Fairway closed */
@@ -2221,7 +2221,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type8.dac1fid15.airdraught);
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
-		(void)strlcat(buf, "\"targets\":[", buflen - strlen(buf));
+		(void)strlcat(buf, "\"targets\":[", buflen);
 		for (i = 0; i < ais->type8.dac1fid17.ntargets; i++) {
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2274,7 +2274,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		}
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf) - 1] = '\0';
-		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
+		(void)strlcat(buf, "]}\r\n,", buflen);
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
 		if (scaled)
@@ -2344,7 +2344,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		}
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf) - 1] = '\0';
-		(void)strlcat(buf, "]}\r\n,", buflen - strlen(buf));
+		(void)strlcat(buf, "]}\r\n,", buflen);
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2487,7 +2487,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.preciptype,
 				   ais->type8.dac1fid31.salinity,
 				   JSON_BOOL(ais->type8.dac1fid31.ice));
-		(void)strlcat(buf, "}\r\n", buflen - strlen(buf));
+		(void)strlcat(buf, "}\r\n", buflen);
 		imo = true;
 		break;
 	    }
