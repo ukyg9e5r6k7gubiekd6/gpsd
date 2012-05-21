@@ -274,6 +274,12 @@ The following driver types are compiled into this gpsd instance:\n",
     for (dp = gpsd_drivers; *dp; dp++) {
 	(void)printf("    %s\n", (*dp)->type_name);
     }
+#ifdef NTPSHM_ENABLE
+	(void)printf("    NTPSHM\n");
+#endif
+#if defined(PPS_ENABLE)
+	(void)printf("    PPS\n");
+#endif
 }
 
 #ifdef CONTROL_SOCKET_ENABLE
