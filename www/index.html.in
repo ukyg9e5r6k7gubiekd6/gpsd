@@ -283,14 +283,6 @@ standard output.</dd>
 
 <dt><a href="gpsd_json.html">gpsd.5</a></dt>
 <dd>The request/response protocol of the <code>gpsd</code> daemon.</dd>
-
-<!--
-<dt><a href="gpsflash.html">gpsflash(1)</a></dt>
-<dd>The <code>src</code> GPS firmware uploader..</dd>
-
-<dt><a href="srec.html">srec.5</a></dt>
-<dd>The <code>src</code> Motorola S-record and file format.</dd>
--->
 </dl>
 
 <p>Also, see the <a href="faq.html">FAQ</a>.</p>
@@ -314,6 +306,10 @@ href="irc://irc.freenode.net#gpsd">channel #gpsd at irc.freenode.net</a>.</p>
 <h1 id='white_papers'>White Papers</h1>
 
 <dl>
+<dt><a href="http://www.aosabook.org/en/gpsd.html">GPSD</a></dt>
+<dd>An in-depth essay on the architecture and practices of GPSD,
+published in <cite>The Architecture of Open Souerce, Volume 2</cite>.</dd>
+
 <dt><a href="client-howto.html">GPSD Client HOWTO</a></dt>
 <dd>A programmer's guide to interfacing with <code>gpsd</code> from
 client applications. Explains the theory, points at working example
