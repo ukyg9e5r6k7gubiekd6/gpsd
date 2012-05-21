@@ -5,8 +5,10 @@
  */
 
 /* The strptime prototype is not provided unless explicitly requested.
- *  So add the define that POSIX says to to avoid: */
-#define _XOPEN_SOURCE
+ * We also need to set the value high enough to signal inclusion of
+ * newer features (like clock_gettime).  See the POSIX spec for more info:
+ * http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01_02 */
+#define _XOPEN_SOURCE 600
 
 #include <stdio.h>
 #include <time.h>
