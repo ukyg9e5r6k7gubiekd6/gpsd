@@ -1576,7 +1576,11 @@ upload it to the hosting site, and refresh the website.</dd>
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</dd>
 
-<dt>11. Announce the release</dt>
+<dt>11. Close all resolved tracker bugs</dt>
+<dd>Go to <a href="https://savannah.nongnu.org/bugs/?group=gpsd">the tracker</a>
+and close all resolved bugs.</dd>
+
+<dt>12. Announce the release</dt>
 <dd>Announce the release on the announce list, and the resumption of
 regular commits on the dev list.</dd>
 </dl>
