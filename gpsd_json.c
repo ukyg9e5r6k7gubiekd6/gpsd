@@ -434,7 +434,7 @@ void json_watch_dump(const struct policy_t *ccp,
 		       "\"device\":\"%s\",", ccp->devpath);
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';
-    (void)strlcat(reply, "}\r\n", replylen - strlen(reply));
+    (void)strlcat(reply, "}\r\n", replylen);
     /*@+compdef@*/
 }
 
@@ -1066,11 +1066,11 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       "\"station_id\":%u,\"system\":[",
 		       rtcm->rtcmtypes.rtcm3_1005.station_id);
 	if ((rtcm->rtcmtypes.rtcm3_1005.system & 0x04)!=0)
-	    (void)strlcat(buf, "\"GPS\",", buflen - strlen(buf));
+	    (void)strlcat(buf, "\"GPS\",", buflen);
 	if ((rtcm->rtcmtypes.rtcm3_1005.system & 0x02)!=0)
 	    (void)strlcat(buf, "\"GLONASS\",", buflen - strlen(buf));
 	if ((rtcm->rtcmtypes.rtcm3_1005.system & 0x01)!=0)
-	    (void)strlcat(buf, "\"GALILEO\",", buflen - strlen(buf));
+	    (void)strlcat(buf, "\"GALILEO\",", buflen);
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
