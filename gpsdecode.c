@@ -45,6 +45,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 #ifdef AIVDM_ENABLE
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
+    bool imo = false;
     (void)snprintf(buf, buflen, "%u|%u|%09u|", ais->type, ais->repeat,
 		   ais->mmsi);
     /*@ -formatcode @*/
@@ -126,7 +127,6 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       "%u|%u",
 		       ais->type8.dac,
 		       ais->type8.fid);
-	int imo = 0;
 	switch(ais->type8.dac) {
 	case 1:			/* International */
 	    switch(ais->type8.fid) {
@@ -169,12 +169,12 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 			       ais->type8.dac1fid11.preciptype,
 			       ais->type8.dac1fid11.salinity,
 			       ais->type8.dac1fid11.ice);
-		imo = 1;
+		imo = true;
 		break;
 	    }
 	    break;
 	}
-	if (imo == 0)
+	if (!imo)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "|%zd:%s",
 			   ais->type8.bitcount,
