@@ -1364,6 +1364,12 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 }
 /*@ +fixedformalarray +usedef +branchstate @*/
 
+static void aivdm_event_hook(struct gps_device_t *session, event_t event)
+{
+    if (event == event_configure)
+	/*@i1@*/session->aivdm->type24_queue.index = 0;
+}
+
 static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
     if (session->packet.type == AIVDM_PACKET) {
@@ -1393,7 +1399,7 @@ static const struct gps_type_t aivdm = {
     .get_packet       = generic_get,	/* how to get a packet */
     .parse_packet     = aivdm_analyze,	/* how to analyze a packet */
     .rtcm_writer      = NULL,		/* don't send RTCM data,  */
-    .event_hook       = NULL,		/* lifetime event handler */
+    .event_hook       = aivdm_event_hook,/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher   = NULL,		/* no speed switcher */
     .mode_switcher    = NULL,		/* no mode switcher */
