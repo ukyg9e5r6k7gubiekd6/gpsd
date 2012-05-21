@@ -149,7 +149,7 @@ int send_lcd(char *buf) {
   /* TODO:  check return status */
 
   /* read the data */
-  res=sockreadline(sd,rcvbuf,255);
+  res=sockreadline(sd,rcvbuf,sizeof(rcvbuf)-1);
 
   /* null-terminate the string before printing */
   /* rcvbuf[res-1]=0; FIX-ME: not using this at the moment... */
