@@ -8,7 +8,7 @@
  * live data with known-good decodings. Code for message types 16-17,
  * 22-23, and 25-27 has not.
  * For the special IMO messages (types 6 and 8), only the following have been
- * tested against know-good decodings:
+ * tested against known-good decodings:
  *  - IMO236 met/hydro message: Type=8, DAC=1, FI=11 
  *
  * This file is Copyright (c) 2010 by the GPSD project
