@@ -1707,8 +1707,10 @@ three points of tidal information.
 
 ==== AtoN monitoring data (GLA) ====
 
-This message provides AtoN (Aid to navigation) monitoring data for the
-AtoN administration.  It is described in <<IALA-A126>>.
+This message provides AtoN (Aid to navigation) monitoring data for the General
+Lighthouse Authorities (GLA), which consists of Trinity House (England &
+Wales), Northern Lighthouse Board (Scotland) and the Commissioners of Irish
+Lights (Ireland). It is described in <<IALA-A126>>.
 
 A message 6 subtype. DAC = 235 or 250 FID = 10. Fixed length: 136 bits.
 
@@ -1734,13 +1736,13 @@ whilst still providing enough data to enable meaningful diagnostic analysis.
 |71-71   |  1 |Spare             |           |x|Not used
 |72-81   | 10 |DAC               |dac        |u|DAC = 235 or 250
 |82-87   |  6 |FID               |fid        |u|FID = 10
-|88-97   | 10 |Analogue          |ana_int    |u|0.05– 36V 0.05V step 
+|88-97   | 10 |Analogue          |ana_int    |u|0.05-36V, 0.05V step
                                                 Supply voltage to AIS Unit
-                                                0 – Not Used
-|98-107  | 10 |Analogue (ext. #1)|ana_ext1   |u|0.05– 36V 0.05V step
-                                                0 – Not Used
-|108-117 | 10 |Analogue (ext. #2)|ana_ext2   |u|0.05– 36V 0.05V step
-                                                0 – Not Used
+                                                0 = Not Used
+|98-107  | 10 |Analogue (ext. #1)|ana_ext1   |u|0.05-36V, 0.05V step
+                                                0 = Not Used
+|108-117 | 10 |Analogue (ext. #2)|ana_ext2   |u|0.05-36V, 0.05V step
+                                                0 = Not Used
 |118-119 |  2 |RACON status      |racon      |u|00 = no RACON installed
                                                 01 = RACON not monitored
                                                 10 = RACON operational
