@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# cansetup - initialize kernel-CAN interfaces
+#
+candevice=$1
+ 
+case $candevice in
+plx_pci)
+    # For the SJA1000 based PCI or PCI-Express CAN interface
+    modprobe plx_pci;
+    ip link set can0 up;
+    ip link set can0 type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;;
+esd_usb2)
+    # For an esd usb/2 CAN interface
+    modprobe esd_usb2;
+    ip link set can0 up;
+    ip link set can0 type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;;
+vcan)
+    # With this setup, CAN frames can be injected into vcan0 by a test
+    modprobe vcan;
+    ip link add type vcan;
+    ifconfig vcan0 up;;
+*)
+    echo "cansetup: invalid CAN interface $1"
+    exit 1
+esac
+
