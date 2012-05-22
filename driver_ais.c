@@ -973,4 +973,4 @@ bool ais_binary_decode(struct ais_t *ais,
 }
 /*@ -charint @*/
 
-/* driver_aivdm.c ends here */
+/* driver_ais.c ends here */
