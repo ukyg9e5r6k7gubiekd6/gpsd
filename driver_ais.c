@@ -178,7 +178,25 @@ bool ais_binary_decode(struct ais_t *ais,
 	ais->type6.fid            = UBITS(82, 6);
 	ais->type6.bitcount       = bitlen - 88;
 	imo = false;
-	if (ais->type6.dac == 1)
+	/* UK and Republic Of Ireland */
+	if (ais->type6.dac == 235 || ais->type6.dac == 250) {
+	    switch (ais->type6.fid) {
+	    case 10:	/* GLA - AtoN monitoring data */
+		ais->type6.dac235fid10.ana_int		= UBITS(88, 10);
+		ais->type6.dac235fid10.ana_ext1		= UBITS(98, 10);
+		ais->type6.dac235fid10.ana_ext2		= UBITS(108, 10);
+		ais->type6.dac235fid10.racon   = UBITS(118, 2);
+		ais->type6.dac235fid10.light   = UBITS(120, 2);
+		ais->type6.dac235fid10.alarm  = UBITS(122, 1);
+		ais->type6.dac235fid10.stat_ext		= UBITS(123, 8);
+		ais->type6.dac235fid10.off_pos	= UBITS(131, 1);
+		/* skip 4 bits */
+		imo = true;
+	    }
+	    break;
+	}
+	/* International */
+	else if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
 	    case 12:	/* IMO236 - Dangerous cargo indication */
 		UCHARS(88, ais->type6.dac1fid12.lastport);

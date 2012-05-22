@@ -306,6 +306,35 @@ type5 = (
     spare(1),
     )
 
+type6_dac_or_fid_unknown = (
+    bitfield("data",           920, 'raw',      None, "Data"),
+    )
+
+type6_dispatch = {}
+type6_dispatch[0] = type6_dac_or_fid_unknown
+
+# DAC 235 and 250 (UK, Rep. of Ireland)
+type6_dac235_dispatch = {}
+type6_dac235_dispatch[0] = type6_dac_or_fid_unknown
+
+type6_dac235_fid10 = (
+    bitfield("ana_int",        10, 'unsigned', None, "Supply voltage"),
+    bitfield("ana_ext1",       10, 'unsigned', None, "Analogue (Ext#1)"),
+    bitfield("ana_ext2",       10, 'unsigned', None, "Analogue (Ext#2)"),
+    bitfield("racon",           2, 'unsigned', None, "RACON status"),
+    bitfield("light",           2, 'unsigned', None, "Light status"),
+    bitfield("health",          1, 'unsigned', None, "Health"),
+    bitfield("stat_ext",        8, 'unsigned', None, "Status (ext)"),
+    bitfield("off_pos",         1, 'unsigned', None, "Position status"),
+)
+type6_dac235_dispatch[10] = type6_dac235_fid10
+
+type6_dac235 = (
+    dispatch("fid", type6_dac235_dispatch, lambda m: m if m in type6_dac235_dispatch else 0),
+    )
+type6_dispatch[235] = type6_dac235
+type6_dispatch[250] = type6_dac235
+
 type6 = (
     bitfield("seqno",            2, 'unsigned', None, "Sequence Number"),
     bitfield("dest_mmsi",       30, 'unsigned', None, "Destination MMSI"),
@@ -313,7 +342,7 @@ type6 = (
     spare(1),
     bitfield("dac",             10, 'unsigned', 0,    "DAC"),
     bitfield("fid",              6, 'unsigned', 0,    "Functional ID"),
-    bitfield("data",           920, 'raw',      None, "Data"),
+    dispatch("dac", type6_dispatch, lambda m: m if m in type6_dispatch else 0),
     )
 
 type7 = (

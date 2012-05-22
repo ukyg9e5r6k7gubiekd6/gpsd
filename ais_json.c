@@ -216,6 +216,12 @@ int json_ais_read(const char *buf,
 		imo = true;
 	    }
 	}
+	else if (strstr(buf, "\"dac\":235,") != NULL || strstr(buf, "\"dac\":250,") != NULL) {
+	    if (strstr(buf, "\"fid\":10,") != NULL) {
+		status = json_read_object(buf, json_ais6_fid10, endptr);
+		imo = true;
+	    }
+	}
 	if (!imo) {
 	    status = json_read_object(buf, json_ais6, endptr);
 	    if (status == 0)

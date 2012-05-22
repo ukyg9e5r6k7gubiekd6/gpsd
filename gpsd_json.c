@@ -1627,6 +1627,20 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"other",
     };
 
+    static const char *racon_status[] = {
+	"No RACON installed",
+	"RACON not monitored",
+	"RACON operational",
+	"RACON ERROR"
+    };
+
+    static const char *light_status[] = {
+	"No light or no monitoring",
+	"Light ON"
+	"Light OFF"
+	"Light ERROR"
+    };
+
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
     if (device != NULL && device[0] != '\0')
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1807,7 +1821,59 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type6.dac,
 		       ais->type6.fid);
 	imo = false;
-	if (ais->type6.dac == 1)
+
+	if (ais->type6.dac == 235 || ais->type6.dac == 250) {
+	    switch (ais->type6.fid) {
+	    case 10:	/* GLA - AtoN monitoring data */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"off_pos\":%s,\"alarm\":%s,"
+			       "\"stat_ext\":%u,",
+			       JSON_BOOL(ais->type6.dac235fid10.off_pos),
+			       JSON_BOOL(ais->type6.dac235fid10.alarm),
+			       ais->type6.dac235fid10.stat_ext);
+		if (scaled && ais->type6.dac235fid10.ana_int != 0)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"ana_int\":%.2f,",
+				   ais->type6.dac235fid10.ana_int);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"ana_int\":%u,",
+				   ais->type6.dac235fid10.ana_int);
+		if (scaled && ais->type6.dac235fid10.ana_ext1 != 0)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"ana_ext1\":%.2f,",
+				   ais->type6.dac235fid10.ana_ext1);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"ana_ext1\":%u,",
+				   ais->type6.dac235fid10.ana_ext1);
+		if (scaled && ais->type6.dac235fid10.ana_ext2 != 0)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"ana_ext2\":%.2f,",
+				   ais->type6.dac235fid10.ana_ext2);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"ana_ext2\":%u,",
+				   ais->type6.dac235fid10.ana_ext2);
+
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"racon\":%u,\"light\":%u",
+				   racon_status[ais->type6.dac235fid10.racon],
+				   light_status[ais->type6.dac235fid10.light]);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"racon\":%u,\"light\":%u",
+				   ais->type6.dac235fid10.racon,
+				   ais->type6.dac235fid10.light);
+		if (buf[strlen(buf) - 1] == ',')
+		    buf[strlen(buf)-1] = '\0';
+		(void)strlcat(buf, "}\r\n", buflen);
+		imo = true;
+		break;
+	    }
+	}
+	else if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
 	    case 12:	/* IMO236 -Dangerous cargo indication */
 		/* some fields have beem merged to an ISO8601 partial date */

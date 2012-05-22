@@ -95,6 +95,22 @@ ais_specs = (
     "stringbuffered":("data",),
     },
     {
+        "initname" : "json_ais6_fid10",
+        "headers": ("AIS_HEADER", "AIS_TYPE6",),
+        "structname": "ais->type6.dac235fid10",
+        "fieldmap":(
+            # fieldname    type        default
+            ('ana_int',    'uinteger', '0'),
+            ('ana_ext1',   'uinteger', '0'),
+            ('ana_ext2',   'uinteger', '0'),
+            ('racon',      'uinteger', '0'),
+            ('light',      'uinteger', '0'),
+            ('alarm',      'boolean',  'false'),
+            ('stat_ext',   'uinteger', '0'),
+            ('off_pos',    'boolean',  'false'),
+        ),
+    },
+    {
     "initname" : "json_ais6_fid12",
     "headers": ("AIS_HEADER","AIS_TYPE6",),
     "structname": "ais->type6.dac1fid12",

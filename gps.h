@@ -965,6 +965,17 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
+		/* GLA - AtoN monitoring data (UK/ROI) */
+		struct {
+		    unsigned int ana_int;       /* Analogue (internal) */
+		    unsigned int ana_ext1;      /* Analogue (external #1) */
+		    unsigned int ana_ext2;      /* Analogue (external #2) */
+		    unsigned int racon; /* RACON status */
+		    unsigned int light; /* Light status */
+		    bool alarm; /* Health alarm*/
+		    unsigned int stat_ext;      /* Status bits (external) */
+		    bool off_pos;    /* Off position status */
+		} dac235fid10;
 		/* IMO236 - Dangerous Cargo Indication */
 		struct {
 		    char lastport[5+1];		/* Last Port Of Call */

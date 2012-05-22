@@ -105,15 +105,38 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 6:			/* Binary Message */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%u|%u|%u|%u|%zd:%s",
+		       "%u|%u|%u|%u|%u",
 		       ais->type6.seqno,
 		       ais->type6.dest_mmsi,
 		       (uint) ais->type6.retransmit,
 		       ais->type6.dac,
-		       ais->type6.fid,
-		       ais->type6.bitcount,
-		       gpsd_hexdump(ais->type6.bitdata,
-				    (ais->type6.bitcount + 7) / 8));
+		       ais->type6.fid);
+	switch(ais->type6.dac) {
+	case 235:			/* UK */
+	case 250:			/* Rep. Of Ireland */
+	    switch(ais->type6.fid) {
+	    case 10:		/* GLA - AtoN monitoring */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "|%u|%u|%u|%u|%u|%u|%u|%u",
+			       ais->type6.dac235fid10.ana_int,
+			       ais->type6.dac235fid10.ana_ext1,
+			       ais->type6.dac235fid10.ana_ext2,
+			       ais->type6.dac235fid10.racon,
+			       ais->type6.dac235fid10.light,
+			       ais->type6.dac235fid10.alarm,
+			       ais->type6.dac235fid10.stat_ext,
+			       ais->type6.dac235fid10.off_pos);
+		imo = true;
+		break;
+	    }
+	    break;
+	}
+	if (!imo)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "|%zd:%s",
+			   ais->type6.bitcount,
+			   gpsd_hexdump(ais->type6.bitdata,
+					(ais->type6.bitcount + 7) / 8));
 	break;
     case 7:			/* Binary Acknowledge */
     case 13:			/* Safety Related Acknowledge */
