@@ -7,6 +7,7 @@
   There's a chrpath=no config option for distribution makers, so
   chrpath is no longer a build dependency; see build.txt for
   explanation.
+
 * Sat 14 Apr 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.5
   Use pselect when it's available to cut down on wakeups and improve
   signal handling.  New {PPS} message exporting clock drift. The AIVDM
