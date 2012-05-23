@@ -12,6 +12,7 @@
 {"class":"AIS","type":4,"repeat":0,"mmsi":3669702,"scaled":false,"timestamp":"2007-05-14T19:57:39Z","accuracy":true,"lon":-45811417,"lat":22130260,"epfd":7,"raim":false,"radio":67039}
 {"class":"AIS","type":5,"repeat":0,"mmsi":351759000,"scaled":false,"imo":9134270,"ais_version":0,"callsign":"3FOF8","shipname":"EVER DIADEM","shiptype":70,"to_bow":225,"to_stern":70,"to_port":1,"to_starboard":31,"epfd":1,"eta":"05-15T14:00Z","draught":122,"destination":"NEW YORK","dte":0}
 {"class":"AIS","type":6,"repeat":1,"mmsi":150834090,"scaled":false,"seqno":3,"dest_mmsi":313240222,"retransmit":false,"dac":669,"fid":11,"data":"48:eb2f118f7ff1"}
+{"class":"AIS","device":"stdin","type":6,"repeat":0,"mmsi":992509976,"scaled":false,"seqno":0,"dest_mmsi":2500912,"retransmit":false,"dac":235,"fid":10,"off_pos":false,"alarm":false,"stat_ext":0,"ana_int":274,"ana_ext1":1,"ana_ext2":1,"racon":2,"light":2}
 {"class":"AIS","type":6,"repeat":0,"mmsi":265538450,"scaled":false,"seqno":0,"dest_mmsi":2655651,"retransmit":false,"dac":1,"fid":40,"data":"16:0000"}
 {"class":"AIS","type":7,"repeat":0,"mmsi":2655651,"scaled":false,"mmsi1":265538450,"mmsi2":0,"mmsi3":0,"mmsi4":0}
 {"class":"AIS","type":7,"repeat":1,"mmsi":655901842,"scaled":false,"mmsi1":158483613,"mmsi2":321823389,"mmsi3":836359488,"mmsi4":0}

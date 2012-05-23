@@ -159,6 +159,33 @@
 #       FID               11
 #	Data:             48:eb2f118f7ff1
 #
+# Type 6, DAC 235, FID 10 (GLA, Rep. Ireland)
+# From Christian Gagneraud:
+# Decoding with Kanaton software.
+# !AIVDM,1,1,4,B,6>jR0600V:C0>da4P106P00,2*02
+#   AIS channel:1
+#    Message ID=6
+#    Repeat Indicator=0
+#    Source ID (MMSI)=992509976
+#    Sequence number=0
+#    Destination ID (MMSI)=2500912
+#    Retransmit flag =0
+#    Spare =0
+#    Binary Data
+#       Application identifier=0x3ACA(15050)
+#          DAC=235(Specific)
+#          Function identifier =10(GLA)
+#       Application data:
+#          Analogue internal=0x112->13.700V
+#          Analogue input1=0x1->0.050V
+#          Analogue input2=0x1->0.050V
+#          AtoN status=0x14:Racon status=2(RACON operational), Ligth
+#    status=2(light OFF), Good health=0(good health)
+#          Digital status=0x00:In7=0,In6=0,In5=0,In4=0,In3=0,In2=0,In1=0,In0=0
+#          Off position=0x00
+#          Spare=0x00
+!AIVDM,1,1,4,B,6>jR0600V:C0>da4P106P00,2*02
+#
 # From AISHub.  This type 6 has no data.  It's paired with the
 # following type 7; both are verified by the match in the MMSI fields 
 !AIVDM,1,1,,A,63u?;TP0`QJ<06P000,4*43
