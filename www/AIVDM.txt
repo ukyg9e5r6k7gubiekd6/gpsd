@@ -863,17 +863,19 @@ The following is a non-exhaustive list of standardized DAC-FID pairs
 in use for type 6.
 
 |==============================================================================
-| DAC |FID | Sub | Source      | Status           | Description     
-|   1 | 12 |     | <<IMO236>>  | Deprecated       | Dangerous cargo indication
-|   1 | 14 |     | <<IMO236>>  | Deprecated       | Tidal window
-|   1 | 16 |     | <<IMO236>>  | Deprecated/In Use| Num persons on board
-|   1 | 16 |     | <<IMO289>>  | Standard         | Num persons on board
-|   1 | 18 |     | <<IMO289>>  | Standard         | Clearance time to enter port
-|   1 | 23 |     | <<IMO289>>  | In use           | Area notice (addressed)
-|   1 | 25 |     | <<IMO289>>  | Standard         | Dangerous Cargo indication
-|   1 | 28 |     | <<IMO289>>  | Standard         | Route info addressed
-|   1 | 30 |     | <<IMO289>>  | Standard         | Text description addressed
-|   1 | 32 |     | <<IMO289>>  | Standard         | Tidal Window
+| DAC |FID | Source        | Status           | Description     
+|   1 | 12 | <<IMO236>>    | Deprecated       | Dangerous cargo indication
+|   1 | 14 | <<IMO236>>    | Deprecated       | Tidal window
+|   1 | 16 | <<IMO236>>    | Deprecated/In Use| Num persons on board
+|   1 | 16 | <<IMO289>>    | Standard         | Num persons on board
+|   1 | 18 | <<IMO289>>    | Standard         | Clearance time to enter port
+|   1 | 23 | <<IMO289>>    | In use           | Area notice (addressed)
+|   1 | 25 | <<IMO289>>    | Standard         | Dangerous Cargo indication
+|   1 | 28 | <<IMO289>>    | Standard         | Route info addressed
+|   1 | 30 | <<IMO289>>    | Standard         | Text description addressed
+|   1 | 32 | <<IMO289>>    | Standard         | Tidal Window
+| 235 | 10 | <<IALA-A126>> | In use           | AtoN monitoring data (UK)
+| 250 | 10 | <<IALA-A126>> | In use           | AtoN monitoring data (ROI)
 |==============================================================================
 
 DAC/FID pairs are assigned separately per message type.
@@ -1702,6 +1704,59 @@ different bit widths for the latitude and longitude fields.
 
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information. 
+
+==== AtoN monitoring data (GLA) ====
+
+This message provides AtoN (Aid to navigation) monitoring data for the
+AtoN administration.  It is described in <<IALA-A126>>.
+
+A message 6 subtype. DAC = 235 or 250 FID = 10. Fixed length: 136 bits.
+
+DAC and FI are user configurable, DAC=235/FI=10 is used in UK, DAC=250/FI=10
+in the Republic Of Ireland.
+
+The interval between the transmission of these messages will be synchronized
+with message 21, although not necessarily at the same reporting rate. If
+Message 21 is not used at a particular site, then the reporting interval
+should be selected to minimise the power requirement of the transponder,
+whilst still providing enough data to enable meaningful diagnostic analysis.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description       |Member     |T|Units
+|0-5     |  6 |Message Type      |type       |u|Constant: 6
+|6-7     |  2 |Repeat Indicator  |repeat     |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI       |mmsi       |u|9 decimal digits
+|38-39   |  2 |Sequence Number   |seqno      |u|Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI  |dest_mmsi  |u|9 decimal digits
+|70-70   |  1 |Retransmit flag   |retransmit |u|0 = no retransmit (default),
+                                                1 = retransmitted
+|71-71   |  1 |Spare             |           |x|Not used
+|72-81   | 10 |DAC               |dac        |u|DAC = 235 or 250
+|82-87   |  6 |FID               |fid        |u|FID = 10
+|88-97   | 10 |Analogue          |ana_int    |u|0.05– 36V 0.05V step 
+                                                Supply voltage to AIS Unit
+                                                0 – Not Used
+|98-107  | 10 |Analogue (ext. #1)|ana_ext1   |u|0.05– 36V 0.05V step
+                                                0 – Not Used
+|108-117 | 10 |Analogue (ext. #2)|ana_ext2   |u|0.05– 36V 0.05V step
+                                                0 – Not Used
+|118-119 |  2 |RACON status      |racon      |u|00 = no RACON installed
+                                                01 = RACON not monitored
+                                                10 = RACON operational
+						11 = RACON ERROR
+|120-121 |  2 |Light status      |light      |u|00 = no light or no monitoring
+                                                01 = Light ON 
+                                                10 = Light OFF  
+                                                11 = Light ERROR
+|122     |  1 |Health            |health     |b|0 = Good Health, 1 = Alarm
+|123-130 |  8 |Status (external) |stat_ext   |u|7  Digital Input 0=Off, 1=On
+                                                :
+                                                :
+                                                0  Digital Input 0=Off, 1=On
+|131-131 |  1 |Position status   |off_pos    |b|0=On position, 1=Off position
+|132-135 |  4 |Spare             |           |x|Not used
+|==============================================================================
 
 === Type 7: Binary Acknowledge ===
 
@@ -4384,6 +4439,11 @@ Identification System]
   289: Guidance on the Use of AIS Application-Specific Messages 
   (June 2010)]
 
+- [[IALA-A126]] 
+  http://www.ialathree.org/chapo/publications/documentspdf/doc_235_eng.pdf[IALA
+  Recommendation A-126 On The Use of the Automatic Identification System (AIS)
+  in Marine Aids to Navigation Services
+
 - [[[Schwehr]]] http://schwehr.org/blog/[Kurt Schwehr's weblog]
 
 - [[[IEC-PAS]]] IEC-PAS 61162-100, "Maritime navigation and
@@ -4413,6 +4473,8 @@ Identification System]
 - [[[AISHUB]]] http://www.aishub.net/[AIS Hub, the AIS data sharing center]
 
 - [[[PILOTPLUG]]] http://www.pilotplug.com/
+
+- [[[IALA-A126]]] www.iala-aism.org/iala/publications/documentspdf/doc_299_eng.pdf[]
 
 == Change history ==
 
@@ -4527,3 +4589,6 @@ in neat adjacent pairs and that decoders need to handle this.
 
 Version 1.36 corrects erroneous scale factors in the IMO 289 Area
 Notice and Time to Enter Port descriptions.
+
+Version 1.36 adds breakdowns of Aid to Navigation monitoring messages
+used in the UK and the Republic of Ireland.
