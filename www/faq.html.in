@@ -889,7 +889,7 @@ the Socket CAN subsystem.  The nmea2000 driver of gpsd has been tested
 with 2.6.38 and newer kernels.</p>
 
 <p>GPSD expects your CAN interface to be configured to receive CAN
-data at the nmea2000 baudrate of 250kBit/s.  Tou can download an 
+data at the nmea2000 baudrate of 250kBit/s.  You can download an 
 <a href="cansetup">example script</a> that will set this up for
 some of the more common interface types.</p>
 
