@@ -37,6 +37,7 @@ sitesearch = "catb.org"
 website    = "http://catb.org/gpsd" 
 mainpage   = "https://savannah.nongnu.org/projects/gpsd/"
 webupload  = "login.ibiblio.org:/public/html/catb/gpsd"
+cgiupload  = "thyrsus.com:/home/www/thyrsus.com/cgi-bin/"
 scpupload  = "dl.sv.nongnu.org:/releases/gpsd/"
 mailman    = "http://lists.nongnu.org/mailman/listinfo/"
 admin      = "https://savannah.nongnu.org/project/admin/?group=gpsd"
@@ -45,8 +46,8 @@ bugtracker = "https://savannah.nongnu.org/bugs/?group=gpsd"
 browserepo = "http://git.savannah.gnu.org/cgit/gpsd.git"
 clonerepo  = "https://savannah.nongnu.org/git/?group=gpsd"
 gitrepo    = "git://git.savannah.nongnu.org/gpsd.git"
-webform    = "https://www.mainframe.cx/cgi-bin/gps_report.cgi"
-formserver = "www@mainframe.cx"
+webform    = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
+formserver = "www@catb.org"
 devmail    = "gpsd-dev@lists.nongnu.org"
 # Hosting information ends here
 
@@ -1080,6 +1081,7 @@ def substituter(target, source, env):
         ('@WEBSITE@',    website),
         ('@MAINPAGE@',   mainpage),
         ('@WEBUPLOAD@',  webupload),
+        ('@CGIUPLOAD@',  cgiupload),
         ('@SCPUPLOAD@',  scpupload),
         ('@MAILMAN@',    mailman),
         ('@ADMIN@',      admin),
@@ -1509,7 +1511,9 @@ Utility("validation-list", [www], validation_list)
 # How to update the website
 upload_web = Utility("upload_web", [www],
                      ['rsync --exclude="*.in" -avz www/ ' + webupload,
-                      'scp README TODO NEWS ' + webupload])
+                      'scp README TODO NEWS ' + webupload,
+                      'chmod ug+w,a+x www/gps_report.cgi',
+                      'scp www/gps_report.cgi ' + cgiupload + "gps_report.cgi"])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
