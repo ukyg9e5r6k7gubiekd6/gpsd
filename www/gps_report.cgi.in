@@ -24,7 +24,10 @@ form = cgi.FieldStorage()
 print "Content-type: text/html"
 print ""
 
-def hasNeededElements(form):
+def hasRequiredElements(form):
+    for fld in ("submitter", "vendor", "model", "techdoc", "sample"):
+        if not form.getvalue(fld):
+            return False
     return True
 
 formfields = ("submitter",
@@ -46,7 +49,7 @@ formfields = ("submitter",
               "sample_notes",
               )
 
-if hasNeededElements(form) and form.getvalue("action") == "Send Report":
+if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
     print cgi.print_form(form)
     msg = ""
     report = MIMEMultipart()
@@ -54,7 +57,7 @@ if hasNeededElements(form) and form.getvalue("action") == "Send Report":
     report['To'] = to_address
     report.preamble = "Part 1 is form data, part 2 is the sample"
     for field in formfields:
-        if field != "sample":
+        if field != "sample" and form.getvalue(field):
             msg += "%s: %s\n" % (field, form.getvalue(field))
     report.attach(MIMEText(msg))
     report.attach(MIMEText(form.getvalue("sample")))
@@ -480,7 +483,7 @@ print "</td></tr></table>";
 print "<p>To refresh this summary, click <code>Review</code>\n";
 
 # Must have all critical fields to ship
-if hasNeededElements(form):
+if hasRequiredElements(form):
     print '''
 <p>Click the <code>Send Report</code> button to send your report to the GPSD
 developers.  Eventually, your report is likely to appear on our <a
