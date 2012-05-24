@@ -25,17 +25,6 @@ print ""
 def hasNeededElements(form):
     return True
 
-if hasNeededElements(form) and form.getvalue("action") == "Send Report":
-    msg = "This is only a test"
-    smtp = smtplib.SMTP(host="thyrsus.com")
-    #smtp.set_debuglevel(1)
-    smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
-    smtp.quit()
-    print "<p>New device report accepted. Thanks for helping improve GPSD.\n";
-    sys.exit(0)
-
-# Everything below here is page generation
-
 defaults = {"submitter":"",
 	    "vendor": "",
 	    "model": "",
@@ -54,6 +43,24 @@ defaults = {"submitter":"",
             "date": "",
             "sample_notes": "",
 }
+
+if hasNeededElements(form) and form.getvalue("action") == "Send Report":
+    print cgi.print_form(form)
+    msg = ""
+    for field in defaults: 
+        msg += "%s: %s\n" % (field, form.getvalue(field))
+    print "<pre>"
+    print msg
+    print "</pre>"
+    msg = "This is only a test"
+    smtp = smtplib.SMTP(host=servaddr.split("@")[1])
+    #smtp.set_debuglevel(1)
+    smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
+    smtp.quit()
+    print "<p>New device report accepted. Thanks for helping improve GPSD.\n";
+    sys.exit(0)
+
+# Everything below here is page generation
 
 for key in form.keys():
     if key in form.keys():

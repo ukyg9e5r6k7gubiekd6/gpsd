@@ -47,7 +47,7 @@ browserepo = "http://git.savannah.gnu.org/cgit/gpsd.git"
 clonerepo  = "https://savannah.nongnu.org/git/?group=gpsd"
 gitrepo    = "git://git.savannah.nongnu.org/gpsd.git"
 webform    = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
-formserver = "www@catb.org"
+formserver = "www@thyrsus.com"
 devmail    = "gpsd-dev@lists.nongnu.org"
 # Hosting information ends here
 
