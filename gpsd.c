@@ -707,6 +707,13 @@ static bool add_device(const char *device_name)
 {
     struct gps_device_t *devp;
     bool ret = false;
+    /* we can't handle paths longer than GPS_PATH_MAX, so don't try */
+    if (strlen(device_name) >= GPS_PATH_MAX) {
+	gpsd_report(LOG_ERROR,
+		    "ignoring device %s: path length exceeds maximum %d\n",
+		    device_name, GPS_PATH_MAX);
+	return false;
+    }
     /* stash devicename away for probing when the first client connects */
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	if (!allocated_device(devp)) {
