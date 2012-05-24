@@ -5,7 +5,9 @@
 # This is the CGI that processes the form return from GPS information form.
 # We use Python 2.4 because ibiblio doesn't support a later version in CGI.
 #
-import sys, os, smtplib, email
+import sys, os, smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 
@@ -47,10 +49,17 @@ formfields = ("submitter",
 if hasNeededElements(form) and form.getvalue("action") == "Send Report":
     print cgi.print_form(form)
     msg = ""
-    for field in formfields: 
-        msg += "%s: %s\n" % (field, form.getvalue(field))
+    report = MIMEMultipart()
+    report['Subject'] = 'New device report'
+    report['To'] = to_address
+    report.preamble = "Part 1 is form data, part 2 is the sample"
+    for field in formfields:
+        if field != "sample":
+            msg += "%s: %s\n" % (field, form.getvalue(field))
+    report.attach(MIMEText(msg))
+    report.attach(MIMEText(form.getvalue("sample")))
     print "<pre>"
-    print msg
+    print report.as_string()
     print "</pre>"
     msg = "This is only a test"
     #smtp = smtplib.SMTP(host=servaddr.split("@")[1])
