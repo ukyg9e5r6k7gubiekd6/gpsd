@@ -2,23 +2,23 @@
 
 <h2 id="timing">PPS and GPSD:</h2>
 
-<p>Many GPS receivers offer a 1PPS (one pulse per second) output that
-  GPSD is capable of passing along to <code>ntpd</code> for use as an
-  extremely accurate clock source.  The "Claimed Accuracy" are taken
-  from manufacturers' data sheets, and have not been independently
-  verified.</p>
+<p>Some GPS receivers offer a 1PPS (one pulse per second) output that
+GPSD is capable of passing along to <code>ntpd</code> for use as an
+extremely accurate clock source.  The "Claimed Accuracy" figures are taken
+from manufacturers' data sheets, and have not been independently
+verified.</p>
 
-  <p>Where specified, NTP time offsets have been measured by
-  comparison with the NTP time service and reported by
-  <code>gpsd</code>.</p>
+<p>Where specified, NTP time offsets have been measured by
+comparison with the NTP time service and reported by
+<code>gpsd</code>.</p>
 
-  <p>Note that either a direct RS-232 connection or the "Magic Macx
-mod" (1PPS on the GPS chip connected to DCD on the serial-to-USB
-adaptor) is required for optimal PPS timing. Typical gpsd/PPS users
-report ntp clock stability on the order of 1uSm for RS232, 1ms for
-USB).gpsd can extract from GPSes that are native USB but not
-PPS-capable time information from the serial data accurate to about
-250mS.</p>
+<p>Note that either a direct RS-232 connection or the "Magic Macx mod"
+(1PPS on the GPS chip connected to DCD on the serial-to-USB adaptor)
+is required for PPS. Typical gpsd/PPS users report ntp clock stability
+on the order of 1&mu;s (microsecond) for RS232, 1ms (millisecond) for
+USB.  From GPSes that are native USB but not PPS-capable, GPSD can
+extract time information from the serial data accurate to about
+250ms.</p>
 
 <div>&nbsp;</div>
 
@@ -133,7 +133,7 @@ PPS-capable time information from the serial data accurate to about
 </tr>
 <tr>
 <td>Rockwell Jupiter</td>
-<td align="center">1usec</td>
+<td align="center">1&mu;sec</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
