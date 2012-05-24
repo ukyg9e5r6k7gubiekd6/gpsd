@@ -12,7 +12,7 @@ import cgitb; cgitb.enable()  # for troubleshooting
 # All information on the project siting, mailing
 # lists, and originating host lives here.
 website = '@WEBSITE@'
-to_address = '@DEVMAIL@'
+to_address = "esr@thyrsus.com"  #'@DEVMAIL@'
 servaddr = '@FORMSERVER@'
 
 # Get form value, send mail on submission
@@ -25,49 +25,52 @@ print ""
 def hasNeededElements(form):
     return True
 
-defaults = {"submitter":"",
-	    "vendor": "",
-	    "model": "",
-	    "techdoc": "",
-            "packaging": "mouse",
-            "chipset": "",
-            "firmware": "",
-            "nmea": "",
-            "interfaces": "USB",
-            "usbchip": "",
-            "tested": "",
-            "rating": "",
-            "noconfigure": "",
-            "sample": "",
-            "location": "",
-            "date": "",
-            "sample_notes": "",
-}
+formfields = ("submitter",
+              "vendor",
+              "model",
+              "techdoc",
+              "packaging",
+              "chipset",
+              "firmware",
+              "nmea",
+              "interfaces",
+              "usbchip",
+              "tested",
+              "rating",
+              "noconfigure",
+              "sample",
+              "location",
+              "date",
+              "sample_notes",
+              )
 
 if hasNeededElements(form) and form.getvalue("action") == "Send Report":
     print cgi.print_form(form)
     msg = ""
-    for field in defaults: 
+    for field in formfields: 
         msg += "%s: %s\n" % (field, form.getvalue(field))
     print "<pre>"
     print msg
     print "</pre>"
     msg = "This is only a test"
-    smtp = smtplib.SMTP(host=servaddr.split("@")[1])
+    #smtp = smtplib.SMTP(host=servaddr.split("@")[1])
     #smtp.set_debuglevel(1)
-    smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
-    smtp.quit()
+    #smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
+    #smtp.quit()
     print "<p>New device report accepted. Thanks for helping improve GPSD.\n";
     sys.exit(0)
 
 # Everything below here is page generation
 
-for key in form.keys():
+defaults = {}
+for key in formfields:
     if key in form.keys():
-        defaults[key] = form.getvalue(key) 
+        defaults[key] = form.getvalue(key)
+    else:
+        defaults[key] = ""
 defaults['request_uri'] = os.getenv('REQUEST_URI')
 defaults["website"] = website
-defaults["to_address"] = 'esr@thyrsus.com'
+defaults["to_address"] = to_address
 defaults["servaddr"] = servaddr
 
 print '''
@@ -188,12 +191,8 @@ packagetypes = (
     ('other',      'None of the above'),
     )
 
-pkgline = '<input type="radio" name="packaging" value="%s"%s>%s<br/>'
 for (ptype, plegend) in packagetypes:
-    if defaults['packaging'] == ptype:
-        print pkgline % (ptype, " checked", plegend)
-    else:
-        print pkgline % (ptype, "", plegend)
+    print '<input type="radio" name="packaging" value="%s">%s<br/>' % (ptype, plegend)
 
 print '''
 
@@ -237,13 +236,10 @@ tell us about it in "Technical Notes".</p>
 
 ''' % defaults
 
-ifline = '<input type="radio" name="interfaces" value="%s"%s>%s<br/>'
+ifline = '<input type="radio" name="interfaces" value="%s">%s<br/>'
 for itype in ('USB', 'Serial', 'Bluetooth', 'TTL',
               'Compact Flash', 'RS-232', 'Other'):
-    if defaults['interfaces'] == itype:
-        print ifline % (itype, " checked", itype)
-    else:
-        print ifline % (itype, "", itype)
+        print ifline % (itype, itype)
 
 print '''
 <p>If your device is USB, it probably uses a USB-to-serial adapter
