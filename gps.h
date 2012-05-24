@@ -43,7 +43,7 @@ extern "C" {
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
-#define GPS_PATH_MAX	64	/* dev files usually have short names */
+#define GPS_PATH_MAX	128	/* dev files usually have short names */
 #define MAXUSERDEVS	4	/* max devices per user */
 
 /* 
