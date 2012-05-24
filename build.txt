@@ -146,10 +146,11 @@ process:
 |============================================================================
 |libxslt            | xsltproc is used to build man pages from xml
 |docbook-xsl        | style file for xml to man translation
+|xmlto              | DocBook formatter program
 |============================================================================
 
 The build degrades gracefully in the absence of any of these. You should
-be able to tell from configure messages which extensions you will get.
+be able to tell from scons messages which extensions you will get.
 
 Under Ubuntu and most other Debian-derived distributions, an easy way
 to pick up the prerequisites is: "apt-get build-dep gpsd"
@@ -201,6 +202,20 @@ gcc4; if you don't have it installed as your default compiler, do this
 by specifying CC=gcc4 before the build command.  The rtcm2.c file
 confuses the gcc-3.4.[23] optimizer at -O2 level, making it generate
 incorrect code.
+
+If, while building, you see a complaint that looks like this:
+
+--------------------------------------------------------------------
+I/O error : Attempt to load network entity http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd 
+--------------------------------------------------------------------
+
+it means the xmlto document formatter is failing to fetch a stylesheet it
+needs over the network. Probably this means you are doing a source 
+build on a machine without live Internet access.  The workaround
+for this is to temporarily remove xmlto from your command path so GPSD
+won't try building the documentation.  The actual fix is to install 
+DocBook on your machine so there will be a local copy of the
+stylesheet where xmlto can find it.
 
 After building, please run 'scons testregress' to test the correctness
 of the build.  It is not necessary to install first, but you do need
