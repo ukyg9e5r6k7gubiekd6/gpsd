@@ -1822,6 +1822,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type6.fid);
 	imo = false;
 
+#ifdef __UNUSED__
 	if (ais->type6.dac == 235 || ais->type6.dac == 250) {
 	    switch (ais->type6.fid) {
 	    case 10:	/* GLA - AtoN monitoring data */
@@ -1873,7 +1874,9 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    }
 	}
-	else if (ais->type6.dac == 1)
+	else
+#endif /* __UNUSED__ */
+	if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
 	    case 12:	/* IMO236 -Dangerous cargo indication */
 		/* some fields have beem merged to an ISO8601 partial date */
