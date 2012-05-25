@@ -1560,9 +1560,10 @@ SConstruct.</dd>
 href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>,
 and Coverity warnings and fix them.</dd>
 
-<dt>7. Run the regression tests and other checks</dt>
-<dd>If it doesn't pass regressions, it isn't ready to ship.
-Run <code>scons releasecheck</code> and watch for errors.</dd>
+<dt>7. Run the regression tests and other checks</dt> <dd>If it
+doesn't pass regressions, it isn't ready to ship.  Run <code>scons
+releasecheck</code> and watch for errors on a representative selection
+of <a href="http://db.debian.org/machines.cgi">porterboxes</a>.</dd>
 
 <dt>8. Push and pull from the public repo</dt>
 <dd>This is the revision the release will be built from.</dd>
