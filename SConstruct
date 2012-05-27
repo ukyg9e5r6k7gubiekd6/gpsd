@@ -570,11 +570,25 @@ else:
     confdefs.append("#define COMPAT_SELECT\n")
 
 confdefs.append('''
-/* will not handle pre-Intel Apples that can run big-endian */
+/* will not handle pre-Intel Apples that can run big-endian 
+   __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
+  only, probably depending on the architecture. Try to use endian.h if
+  the gcc way fails - endian.h also doesn't seem to be available on all
+  platforms.
+*/
 #if defined __BIG_ENDIAN__
 #define WORDS_BIGENDIAN 1
-#else
+#elif defined __LITTLE_ENDIAN__
 #undef WORDS_BIGENDIAN
+#else
+#include <endian.h>
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define WORDS_BIGENDIAN 1
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+#undef WORDS_BIGENDIAN
+#else
+#error "unable to determine endianess!"
+#endif
 #endif
 
 /* Some libcs do not have strlcat/strlcpy. Local copies are provided */
