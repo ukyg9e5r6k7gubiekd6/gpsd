@@ -509,7 +509,8 @@ else:
     bluezlibs = []
     env["bluez"] = False
 
-if config.CheckHeader("sys/timepps.h"):
+# ntpshm is required for pps support
+if env['pps'] and env['ntpshm'] and config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
     announce("You have kernel PPS available.")
 else:
@@ -1354,19 +1355,21 @@ if env['python']:
 else:
     python_compilation_regress = None
 
-# Regression-test the daemon
-gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
+# using regress-drivers requires socket_export being enabled.
+if env['socket_export']:
+    # Regression-test the daemon
+    gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
+            '$SRCDIR/regress-driver test/daemon/*.log')
+
+    # Test that super-raw mode works. Compare each logfile against itself
+    # dumped through the daemon running in R=2 mode.  (This test is not
+    # included in the normal regressions.)
+    Utility("raw-regress", [gpsd, python_built_extensions],
         '$SRCDIR/regress-driver test/daemon/*.log')
 
-# Test that super-raw mode works. Compare each logfile against itself
-# dumped through the daemon running in R=2 mode.  (This test is not
-# included in the normal regressions.)
-Utility("raw-regress", [gpsd, python_built_extensions],
-    '$SRCDIR/regress-driver test/daemon/*.log')
-
-# Build the regression tests for the daemon.
-Utility('gps-makeregress', [gpsd, python_built_extensions],
-    '$SRCDIR/regress-driver -b test/daemon/*.log')
+    # Build the regression tests for the daemon.
+    Utility('gps-makeregress', [gpsd, python_built_extensions],
+        '$SRCDIR/regress-driver -b test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
