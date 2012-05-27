@@ -1712,6 +1712,7 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 				   struct timeval *tv)
 /* on PPS interrupt, ship a drift message to all clients */
 {
+#ifdef SOCKET_EXPORT_ENABLE
     struct timeval clocktime;
 
     if (gettimeofday(&clocktime, NULL) == 0)
@@ -1719,6 +1720,7 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 			session->gpsdata.dev.path,
 			tv->tv_sec, tv->tv_usec,
 			clocktime.tv_sec, clocktime.tv_usec);
+#endif /* SOCKET_EXPORT_ENABLE */
 }
 #endif /* PPS_ENABLE */
 
