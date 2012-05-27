@@ -870,7 +870,10 @@ will assert the VERSION_SET bit in the top-level set member.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"VERSION","version":"2.40dev","rev":"06f62e14eae9886cde907dae61c124c53eb1101f","proto_major":3,"proto_minor":1}
+{"class":"VERSION","version":"2.40dev",
+    "rev":"06f62e14eae9886cde907dae61c124c53eb1101f",
+    "proto_major":3,"proto_minor":1
+}
 </programlisting>
 
 
@@ -1828,7 +1831,10 @@ without payload fields.</para>
 <para>Here's an example:</para>
 
 <programlisting>
-{"class":"RTCM2","type":3,"station_id":652,"zcount":1657.2,"seqnum":2,"length":4,"station_health":6,"x":3878620.92,"y":670281.40,"z":5002093.59}
+{"class":"RTCM2","type":3,
+    "station_id":652,"zcount":1657.2,"seqnum":2,"length":4,"station_health":6,
+    "x":3878620.92,"y":670281.40,"z":5002093.59
+}
 </programlisting>
 
 </refsect3>
