@@ -576,9 +576,10 @@ confdefs.append('''
   the gcc way fails - endian.h also doesn't seem to be available on all
   platforms.
 */
-#if defined __BIG_ENDIAN__
+#ifdef __BIG_ENDIAN__
 #define WORDS_BIGENDIAN 1
-#elif defined __LITTLE_ENDIAN__
+#else /* __BIG_ENDIAN__ */
+#ifdef __LITTLE_ENDIAN__
 #undef WORDS_BIGENDIAN
 #else
 #include <endian.h>
@@ -588,8 +589,9 @@ confdefs.append('''
 #undef WORDS_BIGENDIAN
 #else
 #error "unable to determine endianess!"
-#endif
-#endif
+#endif /* __BYTE_ORDER */
+#endif /* __LITTLE_ENDIAN__ */
+#endif /* __BIG_ENDIAN__ */
 
 /* Some libcs do not have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
