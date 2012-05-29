@@ -665,7 +665,10 @@ static void deactivate_device(struct gps_device_t *device)
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #ifdef NTPSHM_ENABLE
-	ntpd_link_deactivate(device);
+#if defined(NMEA2000_ENABLE)
+	if (strncmp(device->gpsdata.dev.path, "nmea2000://", 11) != 0)
+#endif /* defined(NMEA2000_ENABLE) */
+            ntpd_link_deactivate(device);
 #endif /* NTPSHM_ENABLE */
 	gpsd_deactivate(device);
     }
@@ -719,8 +722,12 @@ static bool add_device(const char *device_name)
 	     */
 
 	    /* do not start more than one ntp thread */
-	    if (!(devp->shmindex >= 0))
-		ntpd_link_activate(devp);
+	    if (!(devp->shmindex >= 0)) {
+#if defined(NMEA2000_ENABLE)
+	        if (strncmp(devp->gpsdata.dev.path, "nmea2000://", 11) != 0)
+#endif /* defined(NMEA2000_ENABLE) */
+		    ntpd_link_activate(devp);
+	    }
 
 	    gpsd_report(LOG_INF, "NTPD ntpd_link_activate: %d\n",
 			(int)devp->shmindex >= 0);
