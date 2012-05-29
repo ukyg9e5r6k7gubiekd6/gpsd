@@ -659,7 +659,7 @@ may be reported or not depending on the specific device type.</para>
 	<entry>dip</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Local magnedic inclination, degrees, positive when the magnetic
+        <entry>Local magnetic inclination, degrees, positive when the magnetic
 field points downward (into the Earth).</entry>
 </row>
 <row>
