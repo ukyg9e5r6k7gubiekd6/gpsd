@@ -1273,7 +1273,12 @@ def Utility(target, source, action):
 
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
-env['SPLINTOPTS'] = "-I/usr/include/libusb-1.0 +quiet"
+splintopts = "-I/usr/include/libusb-1.0 +quiet"
+# splint does not know about multi-arch, work around that
+ma_status, ma = _getstatusoutput('dpkg-architecture -qDEB_HOST_MULTIARCH')
+if ma_status == 0:
+    splintopts = '-I/usr/include/%s %s' %(ma.strip(),splintopts)
+env['SPLINTOPTS']=splintopts
 
 def Splint(target,sources, description, params):
     return Utility(target,sources+generated_sources,[
