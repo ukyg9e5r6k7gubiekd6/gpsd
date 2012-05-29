@@ -32,12 +32,6 @@ packet aggregation issue as it doesn't happen with test logs.
 
 *** Driver issues
 
-**** There are portability issues in the rtcm2 driver
-
-The rtcm2 binary driver fails port testing on the following
-architectures: s390, s390x, and sparc. This is probably due 
-to the compiler not honoring #pragma pack(1).
-
 **** gpsctl -b should work on UBX, but does not.
 
 Presently this means there's no way to kick a UBX into returning

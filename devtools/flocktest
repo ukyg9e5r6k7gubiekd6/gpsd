@@ -198,6 +198,9 @@ class TestSite:
         self.thread.start()
     def update_keys(self, filename):
         "Upload a specified file to replace the remote authorized keys."
+        if 'debian.org' in self.me:
+            self.error("updating keys on debian.org machines makes no sense.")
+            return 1
         command = "scp '%s' %s:~/.ssh/.authorized_keys" % (os.path.expanduser(filename), self.me)
         if self.verbose:
             print command
