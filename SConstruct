@@ -164,7 +164,7 @@ for (name, default, help) in boolopts:
 
 nonboolopts = (
     ("gpsd_user",           "nobody",      "privilege revocation user",),
-    ("gpsd_group",          "(undefined)", "privilege revocation group"),
+    ("gpsd_group",          "dialout",     "privilege revocation group"),
     ("prefix",              "/usr/local",  "installation directory prefix"),
     ("limited_max_clients", 0,             "maximum allowed clients"),
     ("limited_max_devices", 0,             "maximum allowed devices"),
@@ -200,7 +200,8 @@ import_env = (
     "LOGNAME",         # LOGNAME is required for the flocktest production.
     'PATH',            # Required for ccache and Coverity scan-build
     'PKG_CONFIG_PATH', # Set .pc file directory in a crossbuild
-    'STAGING_DIR',     # Required by the OpenWRT build.
+    'STAGING_DIR',     # Required by the OpenWRT and CeroWrt builds.
+    'STAGING_PREFIX',  # Required by the OpenWRT and CeroWrt builds.
     )
 envs = {}
 for var in import_env:
