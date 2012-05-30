@@ -351,10 +351,12 @@ tell us about it in "Technical Notes".</p>
 
 ''' % defaults
 
-ifline = '<input type="radio" name="interfaces" value="%s">%s<br/>'
+ifline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
+print "<table border='1'><tr>"
 for itype in ('USB', 'Serial', 'Bluetooth', 'TTL',
               'Compact Flash', 'RS-232', 'Other'):
         print ifline % (itype, itype)
+print "</tr></table>"
 
 print '''
 <p>If your device is USB, it probably uses a USB-to-serial adapter
