@@ -118,7 +118,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                         testfield += "<img title='Have regression test' src='regression.png' alt='Regression-test icon'>"
                     else:
                         testfield += tested
-                if self.has_option(dev, "noconfigure"):
+                if self.has_option(dev, "configurable") and self.get(dev, "configurable") == 'insane':
                     testfield += "<img title='Requires -b option' src='noconfigure.png' alt='No-configure icon'>"
                 if self.get(dev, "rating") == "excellent":
                     testfield += "<img src='star.png' alt='Star icon'><img src='star.png' alt='Star icon'><img src='star.png' alt='Star icon'><img src='star.png' alt='Star icon'>"
@@ -142,8 +142,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 else:
                     notes = ""
                 if self.has_option(dev, "submitter"):
-                    notes += " Reported by %s." % self.get(dev, "submitter")
-                notes = notes.replace("@", "&#x40;").replace("<", "&lt;").replace(">", "&gt;")
+                    notes += " Reported by %s." % self.get(dev, "submitter").replace("@", "&#x40;").replace("<", "&lt;").replace(">", "&gt;")
                 ofp.write("<td>%s</td>\n" % notes)
                 ofp.write("</tr>\n")
         ofp.write("</table>\n")

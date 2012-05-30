@@ -58,7 +58,7 @@ formfields = ("submitter",
               "usbchip",
               "tested",
               "rating",
-              "noconfigure",
+              "configurable",
               "output_sample_file",
               "output_sample_content",
               "location",
@@ -80,12 +80,12 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
     report.attach(MIMEText(msg))
 
     # Decorate the log data with some canned headers.
-    # Omitted: nmea, notes, techdoc, tested, usbchip
+    # Omitted: nmea, notes, techdoc, tested, usbchip, configurable,
     header = ''
     header += "# Name: %s %s\n" \
               % (form.getvalue('vendor'), form.getvalue('model'))
     for fld in ("chipset", "firmware", 'date', 'submitter', 'location'):
-        if form.has_key(fld):
+        if form.has_key(fld) and form.getvalue(fld):
             header += "# %s = %s\n" % (fld.capitalize(), form.getvalue(fld))
     if form.has_key('sample_notes') and form.getvalue('sample_notes'):
         header += "# Notes: %s\n" % form.getvalue('sample_notes')
@@ -203,10 +203,12 @@ if form.getvalue("rating"):
     print "GPSD compatibility is <code>"+cgi.escape(form.getvalue("rating"))+"</code><br>\n";
 else:
     print "No GPSD compatiblity specified.<br>\n";
-if form.getvalue("noconfigure"):
-    print "Device can be sent catatonic by baud-rate changes<br>\n";
+if form.getvalue("noconfigure") == 'yes':
+    print "Device can be sent catatonic by baud-rate changes.<br>\n";
+elif form.getvalue("noconfigure") == 'no':
+    print "Device handles baud-rate changes correctly.<br>\n";
 else:
-    print "Device handles baud-rate changes correctly<br>\n";
+    print "How baud-rate changes are handled is unspecified.<br>\n";
 
 print "</td><td align='center'>";
 
@@ -243,11 +245,11 @@ support for it more reliable.</p>
 <hr>
 <h2>Contact information</h2>
 
-<p><em style="color: #ff0000;">Important!</em> We prefer a valid email
+<p><em style="color: #ff0000;">Important!</em> We need a valid email
 address for you in case we need to ask you followup questions about
 the device.  While we won\'t use your address for anything other than
 asking you questions about your receiver, and maybe asking you to test
-specific changes, this gps report will be sent to the gpsd-dev list
+specific changes, this device report will be sent to the gpsd-dev list
 which is publicly archived.</p>
 
 <p>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
@@ -424,12 +426,17 @@ for (rtype, rlegend) in ratings:
     else:
         print rateline % (rtype, "", rlegend)
 
-print '<p>Check this box if the device ceases responding when probed or speed-switched: '
-print '<input type="checkbox" name="noconfigure" value="yes" ', 
-if defaults["noconfigure"] == "yes":
-    print "checked>"
-else:
-    print ">"
+print '<p>Device sanity when probed or speed-switched:<br/>'
+
+sanity = (('sane', 'Sane: accepts baud-rate changes and probes.'),
+          ('insane', 'Insane: goes catatonic on baud-rate changes and probes.'))
+
+saneline = '<input type="radio" name="sanity" value="%s"%s>%s<br/>'
+for (stype, slegend) in sanity:
+    if defaults['configurable'] == stype:
+        print saneline % (stype, " checked", slegend)
+    else:
+        print saneline % (stype, "", slegend)
 
 print '''
 <hr>
