@@ -924,6 +924,10 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 {
     (void)ntpshm_free(session->context, session->shmindex);
     session->shmindex = -1;
+#if defined(NMEA2000_ENABLE)
+    if (strncmp(session->gpsdata.dev.path, "nmea2000://", 11) == 0)
+        return;
+#endif /* defined(NMEA2000_ENABLE) */
 # ifdef PPS_ENABLE
     (void)ntpshm_free(session->context, session->shmTimeP);
     session->shmTimeP = -1;
@@ -944,6 +948,10 @@ void ntpd_link_activate(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
     } else if (session->context->shmTimePPS) {
+#if defined(NMEA2000_ENABLE)
+        if (strncmp(session->gpsdata.dev.path, "nmea2000://", 11) == 0)
+	    return;
+#endif /* defined(NMEA2000_ENABLE) */
 	/* We also have the 1pps capability, allocate a shared-memory segment
 	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
