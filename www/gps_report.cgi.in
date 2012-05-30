@@ -67,24 +67,38 @@ formfields = ("submitter",
               )
 
 if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
-    msg = ""
     report = MIMEMultipart()
     report['Subject'] = 'New device report'
     report['To'] = to_address
     report.preamble = "Part 1 is form data, part 2 is the sample"
+
+    # Ship the form data as an entry for gpscap.ini
+    msg = "[%s]\n" % form.getvalue('model')
     for field in formfields:
-        if form.getvalue(field) and not field.startswith('output_sample'):
+        if form.getvalue(field) and not field == 'model' and not field.startswith('output_sample'):
             msg += "%s: %s\n" % (field, form.getvalue(field))
     report.attach(MIMEText(msg))
-    content = MIMEText(output_sample_content)
+
+    # Decorate the log data with some canned headers
+    # Omitted: nmea, notes, sample_notes, submitter, techdoc, tested, usbchip
+    header = ''
+    header += "# Name: %s %s\n" % (form.getvalue('vendor'), form.getvalue('model'))
+    for fld in ("chipset", "firmware", 'date', 'location'):
+        if form.has_key(fld) and form.getvalue(fld):
+            header += "# %s: %s\n" % (fld.capitalize(), form.getvalue(fld))
+    content = MIMEText(header + output_sample_content)
     encode_base64(content)
     report.attach(content)
+
+    # Ship it.
     msg = report.as_string()
     smtp = smtplib.SMTP(host=servaddr.split("@")[1])
     smtp.set_debuglevel(1)
     smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
     smtp.quit()
-    print "<p>New device report accepted. Thanks for helping improve GPSD.\n";
+    print "<H1>New device report accepted.</H1>\n"
+    print "<p>Your report on the %s %s was successfully recorded. Thanks for helping improve GPSD.\n" \
+          % (form.getvalue('vendor'), form.getvalue('model'))
     sys.exit(0)
 
 # Everything below here is page generation
