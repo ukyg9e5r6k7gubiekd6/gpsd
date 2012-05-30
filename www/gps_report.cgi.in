@@ -232,6 +232,11 @@ else:
 
 print "</td></tr></table>";
 
+if hasRequiredElements(form):
+    print '<p>The report is ready to be submitted.</p>'
+else:
+    print '<p style="color:#ff0000;">Required fields are missing; please fill them in.</p>'
+
 print '''
 <form action="%(request_uri)s" method=POST enctype="multipart/form-data">
 
@@ -335,6 +340,7 @@ the GPS emits only a vendor binary protocol, leave this field blank.</p>
        size="6" 
        value="%(nmea)s"></p>
 
+<hr/>
 <h2>Interfaces</h2>
 
 <p>Please identify the receiver\'s interface type (USB, RS-232, Bluetooth,
