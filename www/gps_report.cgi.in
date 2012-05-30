@@ -120,7 +120,7 @@ defaults["servaddr"] = servaddr
 defaults['output_sample_content'] = output_sample_content
 defaults['armored_sample_content'] = base64.b64encode(output_sample_content)
 
-print '''
+print '''\
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
 <html>
@@ -147,18 +147,10 @@ support of the device.</p>
 
 print "<table border='0' width='100%'><tr><td align='center'>";
 
-if form.getvalue("submitter"):
-    print "Contact address is <code>"+cgi.escape(form.getvalue("submitter"))+"</code><br>\n";
-else:
-    print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
 if form.getvalue("vendor"):
     print "Vendor is <code>"+cgi.escape(form.getvalue("vendor"))+"</code><br>\n";
 else:
     print "<span style='color:#ff0000;'>No vendor.</span><br>\n";
-if form.getvalue("packaging"):
-    print "Packaging type is <code>"+cgi.escape(form.getvalue("packaging"))+"</code><br>\n";
-else:
-    print "No packaging type specified.<br>\n";
 if form.getvalue("model"):
     print "Model is <code>"+cgi.escape(form.getvalue("model"))+"</code><br>\n";
 else:
@@ -171,9 +163,17 @@ if output_sample_content:
     print "Output sample uploaded";
 else:
     print "<span style='color:#ff0000;'>No output sample.</span><br>\n";
+if form.getvalue("submitter"):
+    print "Contact address is <code>"+cgi.escape(form.getvalue("submitter"))+"</code><br>\n";
+else:
+    print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
 
 print "</td><td align='center'>";
 
+if form.getvalue("packaging"):
+    print "Packaging type is <code>"+cgi.escape(form.getvalue("packaging"))+"</code><br>\n";
+else:
+    print "No packaging type specified.<br>\n";
 if form.getvalue("chipset"):
     print "Chipset is <code>"+cgi.escape(form.getvalue("chipset"))+"</code><br>\n";
 else:
@@ -199,6 +199,9 @@ if form.getvalue("tested"):
     print "Tested with GPSD version <code>"+cgi.escape(form.getvalue("tested"))+"</code><br>\n";
 else:
     print "No GPSD version specified.<br>\n";
+
+print "</td><td align='center'>";
+
 if form.getvalue("rating"):
     print "GPSD compatibility is <code>"+cgi.escape(form.getvalue("rating"))+"</code><br>\n";
 else:
@@ -209,9 +212,6 @@ elif form.getvalue("noconfigure") == 'no':
     print "Device handles baud-rate changes correctly.<br>\n";
 else:
     print "How baud-rate changes are handled is unspecified.<br>\n";
-
-print "</td><td align='center'>";
-
 if form.getvalue("notes"):
     print "Technical notes have been entered.<br>\n";
 else:
@@ -241,31 +241,6 @@ model, documentation URL, and output sample.  Other fields represent things we
 might be able to find out ourselves, but which are easier for you to determine.
 Every bit of information you can give us about your receiver will help make the
 support for it more reliable.</p>
-
-<hr>
-<h2>Contact information</h2>
-
-<p><em style="color: #ff0000;">Important!</em> We need a valid email
-address for you in case we need to ask you followup questions about
-the device.  While we won\'t use your address for anything other than
-asking you questions about your receiver, and maybe asking you to test
-specific changes, this device report will be sent to the gpsd-dev list
-which is publicly archived.</p>
-
-<p>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
-
-<p><em>Name and email address: </em>
-<input type="text" 
-       name="submitter" 
-       size="72" 
-       value="%(submitter)s"></p>
-
-<p>(It is not actually very likely we will contact you, but we need to
-be able to do it if we can find no other way of getting information
-about the device.  Expect to hear from us if your receiver is obsolescent or
-exotic and the information you provide in the rest of this form turns
-out to be insufficient. Or if your browser is broken enough to botch
-the output-sample upload.)</p>
 
 <hr>
 <h2>Receiver type identification</h2>
@@ -519,6 +494,31 @@ states, that too is a good thing to note.</p>
 
 <hr>
 
+<h2>Contact information</h2>
+
+<p><em style="color: #ff0000;">Important!</em> We need a valid email
+address for you in case we need to ask you followup questions about
+the device.  While we won\'t use your address for anything other than
+asking you questions about your receiver, and maybe asking you to test
+specific changes, this device report will be sent to the gpsd-dev list
+which is publicly archived.</p>
+
+<p>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
+
+<p><em>Name and email address: </em>
+<input type="text" 
+       name="submitter" 
+       size="72" 
+       value="%(submitter)s"></p>
+
+<p>(It is not actually very likely we will contact you, but we need to
+be able to do it if we can find no other way of getting information
+about the device.  Expect to hear from us if your receiver is obsolescent or
+exotic and the information you provide in the rest of this form turns
+out to be insufficient. Or if your browser is broken enough to botch
+the output-sample upload.)</p>
+
+<hr>
 ''' % defaults
 
 print "<p>To see what you have entered so far, click <code>Review</code>\n";
