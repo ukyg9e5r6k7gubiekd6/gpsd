@@ -8,6 +8,7 @@
 import sys, os, smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.encoders import encode_base64
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 
@@ -24,8 +25,20 @@ form = cgi.FieldStorage()
 print "Content-type: text/html"
 print ""
 
+output_sample_file = form.getvalue('output_sample_file')
+
+print "For output sample file, I see", output_sample_file
+
+output_sample_content = form.getvalue('output_sample_content')
+
+print "For output sample content, I see", output_sample_content
+
+if output_sample_file:
+    print "Setting output sample content."
+    output_sample_content = open(output_sample_file).read()
+
 def hasRequiredElements(form):
-    for fld in ("submitter", "vendor", "model", "techdoc", "sample"):
+    for fld in ("submitter", "vendor", "model", "techdoc", "output_sample_content"):
         if not form.getvalue(fld):
             return False
     return True
@@ -43,7 +56,8 @@ formfields = ("submitter",
               "tested",
               "rating",
               "noconfigure",
-              "sample",
+              "output_sample_file",
+              "output_sample_content",
               "location",
               "date",
               "sample_notes",
@@ -57,10 +71,12 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
     report['To'] = to_address
     report.preamble = "Part 1 is form data, part 2 is the sample"
     for field in formfields:
-        if field != "sample" and form.getvalue(field):
+        if form.getvalue(field):
             msg += "%s: %s\n" % (field, form.getvalue(field))
     report.attach(MIMEText(msg))
-    report.attach(MIMEText(form.getvalue("sample")))
+    content = MIMEText(form.getvalue("output_sample_content"))
+    encode_base64(content)
+    report.attach(content)
     print "<pre>"
     print report.as_string()
     print "</pre>"
@@ -352,7 +368,8 @@ generated when the receiver has no fix, (b) some sentences representing
 a fix with the unit stationary, and (c) some sentences representing
 a fix with the unit moving.</p>
 
-<input type="file" name="sample">
+<input type="file" name="output_sample_file">
+<input type="hidden" name="output_sample_content" value="%(output_sample_content)s">
 
 <p>There is some auxiliary data we like to have in our regression-test
 files.</p>
@@ -417,7 +434,7 @@ if form.getvalue("techdoc"):
     print "<a href='"+cgi.escape(form.getvalue("techdoc"))+"'>Document URL specified.</a><br>\n";
 else:
     print "<span style='color:#ff0000;'>No document URL.</span><br>\n";
-if form.getvalue("sample"):
+if form.getvalue("output_sample_content"):
     print "Output sample uploaded";
 else:
     print "<span style='color:#ff0000;'>No output sample.</span><br>\n";
