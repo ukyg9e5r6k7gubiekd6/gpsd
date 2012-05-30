@@ -97,7 +97,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 namefield = dev
                 if self.has_option(dev, "techdoc"):
                     namefield = "<a href='%s'>%s</a>" % (self.get(dev, "techdoc"), dev)
-                if self.has_option(dev, "discontinued"):
+                if self.has_option(dev, "discontinued") and self.getboolean(dev, "discontinued"):
                     namefield = namefield + "&nbsp;<img title='Device discontinued' src='discontinued.png' alt='Discontinued icon'>"
                 ofp.write("<td>%s</td>\n" % namefield)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
