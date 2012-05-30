@@ -6,7 +6,7 @@
 # We use Python 2.4 because ibiblio doesn't support a later version in CGI.
 #
 # The wackiness with output_sample_com happens because the user has to click
-# through twicew - onece to review and once to submit.  Thus the content has
+# through twice - once to review and once to submit.  Thus the content has
 # to be embedded as a hidden field - and base64-armored, beecause it might
 # otherwise have stuff in it that isn't legal in HTML attribute vakues.
 #
@@ -72,20 +72,23 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
     report['To'] = to_address
     report.preamble = "Part 1 is form data, part 2 is the sample"
 
-    # Ship the form data as an entry for gpscap.ini
-    msg = "[%s]\n" % form.getvalue('model')
+    # Render the form data as an entry for gpscap.ini
+    msg = "[%s]\n" % form.getvalue('model').strip()
     for field in formfields:
         if form.getvalue(field) and not field == 'model' and not field.startswith('output_sample'):
             msg += "%s: %s\n" % (field, form.getvalue(field))
     report.attach(MIMEText(msg))
 
-    # Decorate the log data with some canned headers
-    # Omitted: nmea, notes, sample_notes, submitter, techdoc, tested, usbchip
+    # Decorate the log data with some canned headers.
+    # Omitted: nmea, notes, techdoc, tested, usbchip
     header = ''
-    header += "# Name: %s %s\n" % (form.getvalue('vendor'), form.getvalue('model'))
-    for fld in ("chipset", "firmware", 'date', 'location'):
-        if form.has_key(fld) and form.getvalue(fld):
+    header += "# Name: %s %s\n" \
+              % (form.getvalue('vendor'), form.getvalue('model'))
+    for fld in ("chipset", "firmware", 'date', 'submitter', 'location'):
+        if form.has_key(fld):
             header += "# %s: %s\n" % (fld.capitalize(), form.getvalue(fld))
+    if form.has_key('sample_notes') and form.getvalue('sample_notes'):
+        header += "# Notes: %s\n" % form.getvalue('sample_notes')
     content = MIMEText(header + output_sample_content)
     encode_base64(content)
     report.attach(content)
@@ -106,7 +109,7 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
 defaults = {}
 for key in formfields:
     if key in form.keys():
-        defaults[key] = form.getvalue(key)
+        defaults[key] = form.getvalue(key).strip()
     else:
         defaults[key] = ""
 defaults['request_uri'] = os.getenv('REQUEST_URI')
@@ -133,12 +136,101 @@ print '''
 
 <h1>GPSD Receiver Reporting Form</h1>
 
-<form action="%(request_uri)s" method=POST enctype="multipart/form-data">
-
 <p>Please use this form to report <code>gpsd</code> successes or
 failures with GPS and AIS units, and also to upload a sample of the receiver\'s
 output so we can add it to our regression tests and ensure continued
 support of the device.</p>
+
+<p>Information gathered so far:</p>
+'''
+
+print "<table border='0' width='100%'><tr><td align='center'>";
+
+if form.getvalue("submitter"):
+    print "Contact address is <code>"+cgi.escape(form.getvalue("submitter"))+"</code><br>\n";
+else:
+    print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
+if form.getvalue("vendor"):
+    print "Vendor is <code>"+cgi.escape(form.getvalue("vendor"))+"</code><br>\n";
+else:
+    print "<span style='color:#ff0000;'>No vendor.</span><br>\n";
+if form.getvalue("packaging"):
+    print "Packaging type is <code>"+cgi.escape(form.getvalue("packaging"))+"</code><br>\n";
+else:
+    print "No packaging type specified.<br>\n";
+if form.getvalue("model"):
+    print "Model is <code>"+cgi.escape(form.getvalue("model"))+"</code><br>\n";
+else:
+    print "<span style='color:#ff0000;'>No model specified.</span><br>\n";
+if form.getvalue("techdoc"):
+    print "<a href='"+cgi.escape(form.getvalue("techdoc"))+"'>Document URL specified.</a><br>\n";
+else:
+    print "<span style='color:#ff0000;'>No document URL.</span><br>\n";
+if output_sample_content:
+    print "Output sample uploaded";
+else:
+    print "<span style='color:#ff0000;'>No output sample.</span><br>\n";
+
+print "</td><td align='center'>";
+
+if form.getvalue("chipset"):
+    print "Chipset is <code>"+cgi.escape(form.getvalue("chipset"))+"</code><br>\n";
+else:
+    print "Chipset not specified.<br>\n";
+if form.getvalue("firmware"):
+    print "Firmware is <code>"+cgi.escape(form.getvalue("firmware"))+"</code><br>\n";
+else:
+    print "Firmware not specified.<br>\n";
+if form.getvalue("nmea"):
+    print "NMEA version is <code>"+cgi.escape(form.getvalue("nmea"))+"</code><br>\n";
+else:
+    print "NMEA version not specified.<br>\n";
+if form.getvalue("interfaces"):
+    print "Interface type is <code>"+cgi.escape(form.getvalue("interfaces"))+"</code><br>\n";
+    if form.getvalue("interfaces") == "USB":
+	if form.getvalue("usbchip"):
+	    print "USB chip is <code>"+cgi.escape(form.getvalue("usbchip"))+"</code><br>\n";
+	else:
+	    print "No USB chip specified.<br>\n";
+else:
+    print "No interface type specified.<br>\n";
+if form.getvalue("tested"):
+    print "Tested with GPSD version <code>"+cgi.escape(form.getvalue("tested"))+"</code><br>\n";
+else:
+    print "No GPSD version specified.<br>\n";
+if form.getvalue("rating"):
+    print "GPSD compatibility is <code>"+cgi.escape(form.getvalue("rating"))+"</code><br>\n";
+else:
+    print "No GPSD compatiblity specified.<br>\n";
+if form.getvalue("noconfigure"):
+    print "Device can be sent catatonic by baud-rate changes<br>\n";
+else:
+    print "Device handles baud-rate changes correctly<br>\n";
+
+print "</td><td align='center'>";
+
+if form.getvalue("notes"):
+    print "Technical notes have been entered.<br>\n";
+else:
+    print "No technical notes.<br>\n";
+if form.getvalue("location"):
+    print "Sample location <code>"+cgi.escape(form.getvalue("location"))+"</code><br>\n";
+else:
+    print "No sample location specified.<br>\n";
+if form.getvalue("date"):
+    print "Sample date <code>"+cgi.escape(form.getvalue("date"))+"</code><br>\n";
+else:
+    print "No sample date specified.<br>\n";
+
+if form.getvalue("sample_notes"):
+    print "Notes on the sample have been entered.<br>\n";
+else:
+    print "No notes on the sample.<br>\n";
+
+print "</td></tr></table>";
+
+print '''
+<form action="%(request_uri)s" method=POST enctype="multipart/form-data">
 
 <p>Fields marked <em style="color: #ff0000;">Important!</em> have to be filled
 in for the report to be useful.  These are: submitter contact address, vendor,
@@ -175,7 +267,7 @@ the output-sample upload.)</p>
 <hr>
 <h2>Receiver type identification</h2>
 
-<p><em style=:color: #ff0000;">Important!</em> Identify the vendor and model of
+<p><em style="color: #ff0000;">Important!</em> Identify the vendor and model of
 your device.</p>
 
 <p>Example: <code>Haicom</code> and <code>303S</code>.</p>
@@ -418,97 +510,10 @@ states, that too is a good thing to note.</p>
 <textarea name="sample_notes" rows="10", cols="72"></textarea>
 
 <hr>
-<p>Thanks for your help.  Here is a summary of the information you have
-entered so far:</p>
 
 ''' % defaults
 
-print "<table border='0' width='100%'><tr><td align='center'>";
-
-if form.getvalue("submitter"):
-    print "Contact address is <code>"+cgi.escape(form.getvalue("submitter"))+"</code><br>\n";
-else:
-    print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
-if form.getvalue("vendor"):
-    print "Vendor is <code>"+cgi.escape(form.getvalue("vendor"))+"</code><br>\n";
-else:
-    print "<span style='color:#ff0000;'>No vendor.</span><br>\n";
-if form.getvalue("packaging"):
-    print "Packaging type is <code>"+cgi.escape(form.getvalue("packaging"))+"</code><br>\n";
-else:
-    print "No packaging type specified.<br>\n";
-if form.getvalue("model"):
-    print "Model is <code>"+cgi.escape(form.getvalue("model"))+"</code><br>\n";
-else:
-    print "<span style='color:#ff0000;'>No model specified.</span><br>\n";
-if form.getvalue("techdoc"):
-    print "<a href='"+cgi.escape(form.getvalue("techdoc"))+"'>Document URL specified.</a><br>\n";
-else:
-    print "<span style='color:#ff0000;'>No document URL.</span><br>\n";
-if output_sample_content:
-    print "Output sample uploaded";
-else:
-    print "<span style='color:#ff0000;'>No output sample.</span><br>\n";
-
-print "</td><td align='center'>";
-
-if form.getvalue("chipset"):
-    print "Chipset is <code>"+cgi.escape(form.getvalue("chipset"))+"</code><br>\n";
-else:
-    print "Chipset not specified.<br>\n";
-if form.getvalue("firmware"):
-    print "Firmware is <code>"+cgi.escape(form.getvalue("firmware"))+"</code><br>\n";
-else:
-    print "Firmware not specified.<br>\n";
-if form.getvalue("nmea"):
-    print "NMEA version is <code>"+cgi.escape(form.getvalue("nmea"))+"</code><br>\n";
-else:
-    print "NMEA version not specified.<br>\n";
-if form.getvalue("interfaces"):
-    print "Interface type is <code>"+cgi.escape(form.getvalue("interfaces"))+"</code><br>\n";
-    if form.getvalue("interfaces") == "USB":
-	if form.getvalue("usbchip"):
-	    print "USB chip is <code>"+cgi.escape(form.getvalue("usbchip"))+"</code><br>\n";
-	else:
-	    print "No USB chip specified.<br>\n";
-else:
-    print "No interface type specified.<br>\n";
-if form.getvalue("tested"):
-    print "Tested with GPSD version <code>"+cgi.escape(form.getvalue("tested"))+"</code><br>\n";
-else:
-    print "No GPSD version specified.<br>\n";
-if form.getvalue("rating"):
-    print "GPSD compatibility is <code>"+cgi.escape(form.getvalue("rating"))+"</code><br>\n";
-else:
-    print "No GPSD compatiblity specified.<br>\n";
-if form.getvalue("noconfigure"):
-    print "Device can be sent catatonic by baud-rate changes<br>\n";
-else:
-    print "Device handles baud-rate changes correctly<br>\n";
-
-print "</td><td align='center'>";
-
-if form.getvalue("notes"):
-    print "Technical notes have been entered.<br>\n";
-else:
-    print "No technical notes.<br>\n";
-if form.getvalue("location"):
-    print "Sample location <code>"+cgi.escape(form.getvalue("location"))+"</code><br>\n";
-else:
-    print "No sample location specified.<br>\n";
-if form.getvalue("date"):
-    print "Sample date <code>"+cgi.escape(form.getvalue("date"))+"</code><br>\n";
-else:
-    print "No sample date specified.<br>\n";
-
-if form.getvalue("sample_notes"):
-    print "Notes on the sample have been entered.<br>\n";
-else:
-    print "No notes on the sample.<br>\n";
-
-print "</td></tr></table>";
-
-print "<p>To refresh this summary, click <code>Review</code>\n";
+print "<p>To see what you have entered so far, click <code>Review</code>\n";
 
 # Must have all critical fields to ship
 if hasRequiredElements(form):
@@ -529,8 +534,7 @@ href="%(website)s/hardware.html">Hardware</a> page.</p>
 ''' % defaults
 else:
     print '''
-<p style="color:#ff0000;">Required fields are missing; please fill them in and
-click <code>Review</code>.</p>
+<p style="color:#ff0000;">Required fields are missing; please fill them in.</p>
 
 <table width="100%%" border="0">
 <tr>
