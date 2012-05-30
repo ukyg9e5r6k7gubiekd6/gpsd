@@ -29,17 +29,10 @@ union long_double {
     double d;
 };
 
-#ifndef GET_ORIGIN
-#define GET_ORIGIN	0
-#endif
-#ifndef PUT_ORIGIN
-#define PUT_ORIGIN	0
-#endif
-
 /* these are independent of byte order */
-#define getsb(buf, off)	((int8_t)buf[(off)-(GET_ORIGIN)])
-#define getub(buf, off)	((uint8_t)buf[(off)-(GET_ORIGIN)])
-#define putbyte(buf,off,b) do {buf[(off)-(PUT_ORIGIN)] = (unsigned char)(b);} while (0)
+#define getsb(buf, off)	((int8_t)buf[off])
+#define getub(buf, off)	((uint8_t)buf[off])
+#define putbyte(buf,off,b) do {buf[off] = (unsigned char)(b);} while (0)
 
 /* little-endian access */
 #define getles16(buf, off)	((int16_t)(((uint16_t)getub((buf),   (off)+1) << 8) | (uint16_t)getub((buf), (off))))

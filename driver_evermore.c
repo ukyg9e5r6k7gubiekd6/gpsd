@@ -132,8 +132,6 @@
 #include "gpsd.h"
 #if defined(EVERMORE_ENABLE) && defined(BINARY_ENABLE)
 
-#define GET_ORIGIN 1
-#define PUT_ORIGIN 0
 #include "bits.h"
 
 #define EVERMORE_CHANNELS	12
@@ -169,7 +167,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    cp++;
 	tp++;
     }
-    type = (unsigned char)getub(buf2, 1);
+    type = (unsigned char)getub(buf2, 2);
     /*@ +usedef @*/
 
     /*@ -usedef -compdef @*/
@@ -184,18 +182,18 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     switch (type) {
     case 0x02:			/* Navigation Data Output */
 	session->newdata.time = gpsd_gpstime_resolve(session,
-	  (unsigned short)getleu16(buf2, 2),
-	  (double)getleu32(buf2, 4) * 0.01);
+	  (unsigned short)getleu16(buf2, 3),
+	  (double)getleu32(buf2, 5) * 0.01);
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-			 (double)getles32(buf2, 8) * 1.0, 
-			 (double)getles32(buf2, 12) * 1.0,
-			 (double)getles32(buf2, 16) * 1.0,
-			 (double)getles16(buf2, 20) / 10.0,
-			 (double)getles16(buf2, 22) / 10.0, 
-			 (double)getles16(buf2, 24) / 10.0);
-	used = (unsigned char)getub(buf2, 26) & 0x0f;
-	//visible = (getub(buf2, 26) & 0xf0) >> 4;
-	version = (uint) getleu16(buf2, 27) / 100.0;
+			 (double)getles32(buf2, 9) * 1.0, 
+			 (double)getles32(buf2, 13) * 1.0,
+			 (double)getles32(buf2, 17) * 1.0,
+			 (double)getles16(buf2, 21) / 10.0,
+			 (double)getles16(buf2, 23) / 10.0, 
+			 (double)getles16(buf2, 25) / 10.0);
+	used = (unsigned char)getub(buf2, 27) & 0x0f;
+	//visible = (getub(buf2, 27) & 0xf0) >> 4;
+	version = (uint) getleu16(buf2, 28) / 100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
 	    session->newdata.mode = MODE_NO_FIX;
@@ -222,20 +220,20 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x04:			/* DOP Data Output */
 	session->newdata.time = gpsd_gpstime_resolve(session,
-	    (unsigned short)getleu16(buf2, 2),
-						  (double)getleu32(buf2, 4) * 0.01);
+						     (unsigned short)getleu16(buf2, 3),
+						     (double)getleu32(buf2, 5) * 0.01);
 	/*
 	 * We make a deliberate choice not to clear DOPs from the
 	 * last skyview here, but rather to treat this as a supplement
 	 * to our calculations from the visibility matrix, trusting
 	 * the firmware algorithms over ours.
 	 */
-	session->gpsdata.dop.gdop = (double)getub(buf2, 8) * 0.1;
-	session->gpsdata.dop.pdop = (double)getub(buf2, 9) * 0.1;
-	session->gpsdata.dop.hdop = (double)getub(buf2, 10) * 0.1;
-	session->gpsdata.dop.vdop = (double)getub(buf2, 11) * 0.1;
-	session->gpsdata.dop.tdop = (double)getub(buf2, 12) * 0.1;
-	switch (getub(buf2, 13)) {
+	session->gpsdata.dop.gdop = (double)getub(buf2, 9) * 0.1;
+	session->gpsdata.dop.pdop = (double)getub(buf2, 10) * 0.1;
+	session->gpsdata.dop.hdop = (double)getub(buf2, 11) * 0.1;
+	session->gpsdata.dop.vdop = (double)getub(buf2, 12) * 0.1;
+	session->gpsdata.dop.tdop = (double)getub(buf2, 13) * 0.1;
+	switch (getub(buf2, 14)) {
 	case 0:		/* no position fix */
 	case 1:		/* manual calls this "1D navigation" */
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -266,9 +264,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x06:			/* Channel Status Output */
 	session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
-	    (unsigned short)getleu16(buf2, 2),
-	    (double)getleu32(buf2, 4) * 0.01);
-	session->gpsdata.satellites_visible = (int)getub(buf2, 8);
+	    (unsigned short)getleu16(buf2, 3),
+	    (double)getleu32(buf2, 5) * 0.01);
+	session->gpsdata.satellites_visible = (int)getub(buf2, 9);
 	gpsd_zero_satellites(&session->gpsdata);
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
 	if (session->gpsdata.satellites_visible > 12) {
@@ -281,16 +279,16 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	satcnt = 0;
 	for (i = 0; i < (size_t) session->gpsdata.satellites_visible; i++) {
 	    int prn;
-	    // channel = getub(buf2, 7*i+7+2)
-	    prn = (int)getub(buf2, 7 * i + 7 + 3);
+	    // channel = getub(buf2, 7*i+7+3)
+	    prn = (int)getub(buf2, 7 * i + 7 + 4);
 	    if (prn == 0)
 		continue;	/* satellite record is not valid */
 	    session->gpsdata.PRN[satcnt] = prn;
 	    session->gpsdata.azimuth[satcnt] =
-		(int)getleu16(buf2, 7 * i + 7 + 4);
+		(int)getleu16(buf2, 7 * i + 7 + 5);
 	    session->gpsdata.elevation[satcnt] =
-		(int)getub(buf2, 7 * i + 7 + 6);
-	    session->gpsdata.ss[satcnt] = (float)getub(buf2, 7 * i + 7 + 7);
+		(int)getub(buf2, 7 * i + 7 + 7);
+	    session->gpsdata.ss[satcnt] = (float)getub(buf2, 7 * i + 7 + 8);
 	    /*
 	     * Status bits at offset 8:
 	     * bit0 = 1 satellite acquired
@@ -301,7 +299,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	     * bit5 = 1 ephemeris data collected
 	     * bit6 = 1 used for position fix
 	     */
-	    if (getub(buf2, 7 * i + 7 + 8) & 0x40) {
+	    if (getub(buf2, 7 * i + 7 + 9) & 0x40) {
 		session->gpsdata.used[session->gpsdata.satellites_used++] =
 		    prn;
 	    }
@@ -319,11 +317,11 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x08:			/* Measurement Data Output */
 	/* clock offset is a manufacturer diagnostic */
-	/* (int)getleu16(buf2, 8);  clock offset, 29000..29850 ?? */
+	/* (int)getleu16(buf2, 9);  clock offset, 29000..29850 ?? */
 	session->newdata.time = gpsd_gpstime_resolve(session,
-	    (unsigned short)getleu16(buf2, 2),
-	    (double)getleu32(buf2, 4) * 0.01);
-	visible = (unsigned char)getub(buf2, 10);
+	    (unsigned short)getleu16(buf2, 3),
+	    (double)getleu32(buf2, 5) * 0.01);
+	visible = (unsigned char)getub(buf2, 11);
 	/*
 	 * Note: This code is untested. It was written from the manual.
 	 * The results need to be sanity-checked against a GPS with
@@ -367,7 +365,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return ONLINE_SET;
 
     case 0x38:			/* ACK */
-	gpsd_report(LOG_PROG, "EverMore command %02X ACK\n", getub(buf2, 2));
+	gpsd_report(LOG_PROG, "EverMore command %02X ACK\n", getub(buf2, 3));
 	return ONLINE_SET;
 
     default:
