@@ -5,7 +5,12 @@
 # This is the CGI that processes the form return from GPS information form.
 # We use Python 2.4 because ibiblio doesn't support a later version in CGI.
 #
-import sys, os, smtplib
+# The wackiness with output_sample_com happens because the user has to click
+# through twicew - onece to review and once to submit.  Thus the content has
+# to be embedded as a hidden field - and base64-armored, beecause it might
+# otherwise have stuff in it that isn't legal in HTML attribute vakues.
+#
+import sys, os, smtplib, base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.encoders import encode_base64
@@ -25,20 +30,15 @@ form = cgi.FieldStorage()
 print "Content-type: text/html"
 print ""
 
-if not form.has_key('output_sample_content'):
-    output_sample_content = ''
-    print "<p>output_sample_content = ''</p>"
+if form.has_key('output_sample_content'):
+    output_sample_content = base64.b64decode(form.getvalue('output_sample_content'))
 else:
-    output_sample_content = form.getvalue('output_sample_content')
-    print "<p>output_sample_content fetched from attribute</p>"
+    output_sample_content = ''
 
 if not output_sample_content and form.has_key('output_sample_file'):
     fileitem = form['output_sample_file']
     if fileitem.filename:
-        print "<p>output_sample_content read from %s</p>" % fileitem.filename
         output_sample_content = fileitem.file.read()
-
-print "<p>Final value of content: %s</p>" % repr(output_sample_content)
 
 def hasRequiredElements(form):
     for fld in ("submitter", "vendor", "model", "techdoc"):
@@ -73,7 +73,7 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
     report['Subject'] = 'New device report'
     report['To'] = to_address
     report.preamble = "Part 1 is form data, part 2 is the sample"
-    for field in formfields:
+    for field in formfields and not field.startswith('output_sample'):
         if form.getvalue(field):
             msg += "%s: %s\n" % (field, form.getvalue(field))
     report.attach(MIMEText(msg))
@@ -104,6 +104,7 @@ defaults["website"] = website
 defaults["to_address"] = to_address
 defaults["servaddr"] = servaddr
 defaults['output_sample_content'] = output_sample_content
+defaults['armored_sample_content'] = base64.b64encode(output_sample_content)
 
 print '''
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -373,7 +374,7 @@ a fix with the unit stationary, and (c) some sentences representing
 a fix with the unit moving.</p>
 
 <input type="file" name="output_sample_file">
-<input type="hidden" name="output_sample_content" value="%(output_sample_content)s">
+<input type="hidden" name="output_sample_content" value="%(armored_sample_content)s">
 
 <p>There is some auxiliary data we like to have in our regression-test
 files.</p>
