@@ -360,16 +360,16 @@ print "</tr></table>"
 print '''
 <p>If your device is USB, it probably uses a USB-to-serial adapter
 chip.  Try to find out what this is by looking at the output of
-<code>lsusb(1)</code>.  Likely values are <code>PL2303</code>,
-<code>UC-232A</code>, <code>FTDI 8U232AM</code>, <code>Cypress
-M8</code> or <code>Silicon Labs CP2102</code>.</p>
+<code>lsusb(1)</code>.</p>
+'''
 
-<p><em>USB-to-serial chip:&nbsp;</em>
-<input type="text" 
-       name="usbchip" 
-       size="72" 
-       value="%(usbchip)s"></p>
+cline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
+print "<table border='1'><tr>"
+for ctype in ('PL2303', 'UC-232A', 'FTDI', 'Cypress M8', 'CP210x', 'Other'):
+    print cline % (ctype, ctype)
+print "</tr></table>"
 
+print '''
 <hr>
 <h2>GPSD compatibility</h2>
 
