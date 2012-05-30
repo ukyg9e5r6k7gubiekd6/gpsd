@@ -58,7 +58,7 @@ formfields = ("submitter",
               "usbchip",
               "tested",
               "rating",
-              "noconfigure",
+              "configurable",
               "output_sample_file",
               "output_sample_content",
               "location",
@@ -80,15 +80,16 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
     report.attach(MIMEText(msg))
 
     # Decorate the log data with some canned headers.
-    # Omitted: nmea, notes, techdoc, tested, usbchip
+    # Omitted: nmea, notes, techdoc, tested, usbchip, configurable,
     header = ''
     header += "# Name: %s %s\n" \
               % (form.getvalue('vendor'), form.getvalue('model'))
     for fld in ("chipset", "firmware", 'date', 'submitter', 'location'):
-        if form.has_key(fld):
-            header += "# %s: %s\n" % (fld.capitalize(), form.getvalue(fld))
+        if form.has_key(fld) and form.getvalue(fld):
+            header += "# %s = %s\n" % (fld.capitalize(), form.getvalue(fld))
     if form.has_key('sample_notes') and form.getvalue('sample_notes'):
         header += "# Notes: %s\n" % form.getvalue('sample_notes')
+    header += "type = device\n"
     content = MIMEText(header + output_sample_content)
     encode_base64(content)
     report.attach(content)
@@ -119,7 +120,7 @@ defaults["servaddr"] = servaddr
 defaults['output_sample_content'] = output_sample_content
 defaults['armored_sample_content'] = base64.b64encode(output_sample_content)
 
-print '''
+print '''\
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
 <html>
@@ -146,18 +147,10 @@ support of the device.</p>
 
 print "<table border='0' width='100%'><tr><td align='center'>";
 
-if form.getvalue("submitter"):
-    print "Contact address is <code>"+cgi.escape(form.getvalue("submitter"))+"</code><br>\n";
-else:
-    print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
 if form.getvalue("vendor"):
     print "Vendor is <code>"+cgi.escape(form.getvalue("vendor"))+"</code><br>\n";
 else:
     print "<span style='color:#ff0000;'>No vendor.</span><br>\n";
-if form.getvalue("packaging"):
-    print "Packaging type is <code>"+cgi.escape(form.getvalue("packaging"))+"</code><br>\n";
-else:
-    print "No packaging type specified.<br>\n";
 if form.getvalue("model"):
     print "Model is <code>"+cgi.escape(form.getvalue("model"))+"</code><br>\n";
 else:
@@ -170,9 +163,17 @@ if output_sample_content:
     print "Output sample uploaded";
 else:
     print "<span style='color:#ff0000;'>No output sample.</span><br>\n";
+if form.getvalue("submitter"):
+    print "Contact address is <code>"+cgi.escape(form.getvalue("submitter"))+"</code><br>\n";
+else:
+    print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
 
 print "</td><td align='center'>";
 
+if form.getvalue("packaging"):
+    print "Packaging type is <code>"+cgi.escape(form.getvalue("packaging"))+"</code><br>\n";
+else:
+    print "No packaging type specified.<br>\n";
 if form.getvalue("chipset"):
     print "Chipset is <code>"+cgi.escape(form.getvalue("chipset"))+"</code><br>\n";
 else:
@@ -198,17 +199,19 @@ if form.getvalue("tested"):
     print "Tested with GPSD version <code>"+cgi.escape(form.getvalue("tested"))+"</code><br>\n";
 else:
     print "No GPSD version specified.<br>\n";
+
+print "</td><td align='center'>";
+
 if form.getvalue("rating"):
     print "GPSD compatibility is <code>"+cgi.escape(form.getvalue("rating"))+"</code><br>\n";
 else:
     print "No GPSD compatiblity specified.<br>\n";
-if form.getvalue("noconfigure"):
-    print "Device can be sent catatonic by baud-rate changes<br>\n";
+if form.getvalue("noconfigure") == 'yes':
+    print "Device can be sent catatonic by baud-rate changes.<br>\n";
+elif form.getvalue("noconfigure") == 'no':
+    print "Device handles baud-rate changes correctly.<br>\n";
 else:
-    print "Device handles baud-rate changes correctly<br>\n";
-
-print "</td><td align='center'>";
-
+    print "How baud-rate changes are handled is unspecified.<br>\n";
 if form.getvalue("notes"):
     print "Technical notes have been entered.<br>\n";
 else:
@@ -229,6 +232,11 @@ else:
 
 print "</td></tr></table>";
 
+if hasRequiredElements(form):
+    print '<p>The report is ready to be submitted.</p>'
+else:
+    print '<p style="color:#ff0000;">Required fields are missing; please fill them in.</p>'
+
 print '''
 <form action="%(request_uri)s" method=POST enctype="multipart/form-data">
 
@@ -238,31 +246,6 @@ model, documentation URL, and output sample.  Other fields represent things we
 might be able to find out ourselves, but which are easier for you to determine.
 Every bit of information you can give us about your receiver will help make the
 support for it more reliable.</p>
-
-<hr>
-<h2>Contact information</h2>
-
-<p><em style="color: #ff0000;">Important!</em> We prefer a valid email
-address for you in case we need to ask you followup questions about
-the device.  While we won\'t use your address for anything other than
-asking you questions about your receiver, and maybe asking you to test
-specific changes, this gps report will be sent to the gpsd-dev list
-which is publicly archived.</p>
-
-<p>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
-
-<p><em>Name and email address: </em>
-<input type="text" 
-       name="submitter" 
-       size="72" 
-       value="%(submitter)s"></p>
-
-<p>(It is not actually very likely we will contact you, but we need to
-be able to do it if we can find no other way of getting information
-about the device.  Expect to hear from us if your receiver is obsolescent or
-exotic and the information you provide in the rest of this form turns
-out to be insufficient. Or if your browser is broken enough to botch
-the output-sample upload.)</p>
 
 <hr>
 <h2>Receiver type identification</h2>
@@ -357,6 +340,7 @@ the GPS emits only a vendor binary protocol, leave this field blank.</p>
        size="6" 
        value="%(nmea)s"></p>
 
+<hr/>
 <h2>Interfaces</h2>
 
 <p>Please identify the receiver\'s interface type (USB, RS-232, Bluetooth,
@@ -367,24 +351,25 @@ tell us about it in "Technical Notes".</p>
 
 ''' % defaults
 
-ifline = '<input type="radio" name="interfaces" value="%s">%s<br/>'
-for itype in ('USB', 'Serial', 'Bluetooth', 'TTL',
-              'Compact Flash', 'RS-232', 'Other'):
-        print ifline % (itype, itype)
+ifline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
+print "<table border='1'><tr>"
+for itype in ('USB', 'Bluetooth', 'Compact Flash', 'RS-232', 'TTL', 'Other'):
+    print ifline % (itype, itype)
+print "</tr></table>"
 
 print '''
 <p>If your device is USB, it probably uses a USB-to-serial adapter
 chip.  Try to find out what this is by looking at the output of
-<code>lsusb(1)</code>.  Likely values are <code>PL2303</code>,
-<code>UC-232A</code>, <code>FTDI 8U232AM</code>, <code>Cypress
-M8</code> or <code>Silicon Labs CP2102</code>.</p>
+<code>lsusb(1)</code>.</p>
+'''
 
-<p><em>USB-to-serial chip:&nbsp;</em>
-<input type="text" 
-       name="usbchip" 
-       size="72" 
-       value="%(usbchip)s"></p>
+cline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
+print "<table border='1'><tr>"
+for ctype in ('PL2303', 'UC-232A', 'FTDI', 'Cypress M8', 'CP210x', 'Other'):
+    print cline % (ctype, ctype)
+print "</tr></table>"
 
+print '''
 <hr>
 <h2>GPSD compatibility</h2>
 
@@ -423,12 +408,17 @@ for (rtype, rlegend) in ratings:
     else:
         print rateline % (rtype, "", rlegend)
 
-print '<p>Check this box if the device ceases responding when probed or speed-switched: '
-print '<input type="checkbox" name="noconfigure" value="yes" ', 
-if defaults["noconfigure"] == "yes":
-    print "checked>"
-else:
-    print ">"
+print '<p>Device sanity when probed or speed-switched:<br/>'
+
+sanity = (('sane', 'Sane: accepts baud-rate changes and probes.'),
+          ('insane', 'Insane: goes catatonic on baud-rate changes and probes.'))
+
+saneline = '<input type="radio" name="sanity" value="%s"%s>%s<br/>'
+for (stype, slegend) in sanity:
+    if defaults['configurable'] == stype:
+        print saneline % (stype, " checked", slegend)
+    else:
+        print saneline % (stype, "", slegend)
 
 print '''
 <hr>
@@ -511,6 +501,31 @@ states, that too is a good thing to note.</p>
 
 <hr>
 
+<h2>Contact information</h2>
+
+<p><em style="color: #ff0000;">Important!</em> We need a valid email
+address for you in case we need to ask you followup questions about
+the device.  While we won\'t use your address for anything other than
+asking you questions about your receiver, and maybe asking you to test
+specific changes, this device report will be sent to the gpsd-dev list
+which is publicly archived.</p>
+
+<p>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
+
+<p><em>Name and email address: </em>
+<input type="text" 
+       name="submitter" 
+       size="72" 
+       value="%(submitter)s"></p>
+
+<p>(It is not actually very likely we will contact you, but we need to
+be able to do it if we can find no other way of getting information
+about the device.  Expect to hear from us if your receiver is obsolescent or
+exotic and the information you provide in the rest of this form turns
+out to be insufficient. Or if your browser is broken enough to botch
+the output-sample upload.)</p>
+
+<hr>
 ''' % defaults
 
 print "<p>To see what you have entered so far, click <code>Review</code>\n";
