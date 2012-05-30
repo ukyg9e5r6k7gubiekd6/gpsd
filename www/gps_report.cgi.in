@@ -5,9 +5,15 @@
 # This is the CGI that processes the form return from GPS information form.
 # We use Python 2.4 because ibiblio doesn't support a later version in CGI.
 #
-import sys, os, smtplib
+# The wackiness with output_sample_com happens because the user has to click
+# through twicew - onece to review and once to submit.  Thus the content has
+# to be embedded as a hidden field - and base64-armored, beecause it might
+# otherwise have stuff in it that isn't legal in HTML attribute vakues.
+#
+import sys, os, smtplib, base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.encoders import encode_base64
 import cgi
 import cgitb; cgitb.enable()  # for troubleshooting
 
@@ -24,11 +30,21 @@ form = cgi.FieldStorage()
 print "Content-type: text/html"
 print ""
 
+if form.has_key('output_sample_content'):
+    output_sample_content = base64.b64decode(form.getvalue('output_sample_content'))
+else:
+    output_sample_content = ''
+
+if not output_sample_content and form.has_key('output_sample_file'):
+    fileitem = form['output_sample_file']
+    if fileitem.filename:
+        output_sample_content = fileitem.file.read()
+
 def hasRequiredElements(form):
-    for fld in ("submitter", "vendor", "model", "techdoc", "sample"):
+    for fld in ("submitter", "vendor", "model", "techdoc"):
         if not form.getvalue(fld):
             return False
-    return True
+    return not not output_sample_content 
 
 formfields = ("submitter",
               "vendor",
@@ -43,33 +59,46 @@ formfields = ("submitter",
               "tested",
               "rating",
               "noconfigure",
-              "sample",
+              "output_sample_file",
+              "output_sample_content",
               "location",
               "date",
               "sample_notes",
               )
 
 if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
-    print cgi.print_form(form)
-    msg = ""
     report = MIMEMultipart()
     report['Subject'] = 'New device report'
     report['To'] = to_address
     report.preamble = "Part 1 is form data, part 2 is the sample"
+
+    # Ship the form data as an entry for gpscap.ini
+    msg = "[%s]\n" % form.getvalue('model')
     for field in formfields:
-        if field != "sample" and form.getvalue(field):
+        if form.getvalue(field) and not field == 'model' and not field.startswith('output_sample'):
             msg += "%s: %s\n" % (field, form.getvalue(field))
     report.attach(MIMEText(msg))
-    report.attach(MIMEText(form.getvalue("sample")))
-    print "<pre>"
-    print report.as_string()
-    print "</pre>"
-    msg = "This is only a test"
-    #smtp = smtplib.SMTP(host=servaddr.split("@")[1])
-    #smtp.set_debuglevel(1)
-    #smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
-    #smtp.quit()
-    print "<p>New device report accepted. Thanks for helping improve GPSD.\n";
+
+    # Decorate the log data with some canned headers
+    # Omitted: nmea, notes, sample_notes, submitter, techdoc, tested, usbchip
+    header = ''
+    header += "# Name: %s %s\n" % (form.getvalue('vendor'), form.getvalue('model'))
+    for fld in ("chipset", "firmware", 'date', 'location'):
+        if form.has_key(fld) and form.getvalue(fld):
+            header += "# %s: %s\n" % (fld.capitalize(), form.getvalue(fld))
+    content = MIMEText(header + output_sample_content)
+    encode_base64(content)
+    report.attach(content)
+
+    # Ship it.
+    msg = report.as_string()
+    smtp = smtplib.SMTP(host=servaddr.split("@")[1])
+    smtp.set_debuglevel(1)
+    smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
+    smtp.quit()
+    print "<H1>New device report accepted.</H1>\n"
+    print "<p>Your report on the %s %s was successfully recorded. Thanks for helping improve GPSD.\n" \
+          % (form.getvalue('vendor'), form.getvalue('model'))
     sys.exit(0)
 
 # Everything below here is page generation
@@ -84,6 +113,8 @@ defaults['request_uri'] = os.getenv('REQUEST_URI')
 defaults["website"] = website
 defaults["to_address"] = to_address
 defaults["servaddr"] = servaddr
+defaults['output_sample_content'] = output_sample_content
+defaults['armored_sample_content'] = base64.b64encode(output_sample_content)
 
 print '''
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -101,10 +132,6 @@ print '''
 <div id="Content">
 
 <h1>GPSD Receiver Reporting Form</h1>
-
-<p><b>NOTE: Due to a Perl dependency coming unstuck, this form is in the
-process of being translated to Python and is not presently complete or
-usable.  The management regrets any inconvenience.</b></p>
 
 <form action="%(request_uri)s" method=POST enctype="multipart/form-data">
 
@@ -352,7 +379,8 @@ generated when the receiver has no fix, (b) some sentences representing
 a fix with the unit stationary, and (c) some sentences representing
 a fix with the unit moving.</p>
 
-<input type="file" name="sample">
+<input type="file" name="output_sample_file">
+<input type="hidden" name="output_sample_content" value="%(armored_sample_content)s">
 
 <p>There is some auxiliary data we like to have in our regression-test
 files.</p>
@@ -417,7 +445,7 @@ if form.getvalue("techdoc"):
     print "<a href='"+cgi.escape(form.getvalue("techdoc"))+"'>Document URL specified.</a><br>\n";
 else:
     print "<span style='color:#ff0000;'>No document URL.</span><br>\n";
-if form.getvalue("sample"):
+if output_sample_content:
     print "Output sample uploaded";
 else:
     print "<span style='color:#ff0000;'>No output sample.</span><br>\n";

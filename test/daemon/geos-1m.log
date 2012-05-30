@@ -1,6 +1,6 @@
 # Name: GeoS 1M
 # Description: A combined GPS/GLONASS OEM receiver board, 24 channels
-# Submitted-by: Viktar Palstsiuk <viktar.palstsiuk@promwad.com>
+# Submitter: Viktar Palstsiuk <viktar.palstsiuk@promwad.com>
 # Date: 2010-07-09
 # Location: Minsk, Belarus, 53N 27E 
 # Notes: NMEA output for a few minutes after power-up

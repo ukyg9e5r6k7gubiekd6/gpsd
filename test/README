@@ -5,8 +5,9 @@ regression-test loads for gpsfake -p.
 Structured headers are as follows:
 
 # Name: Product name
-# Chipset: chipset name and (if possible) firmware revision level.
-# Description: product description (optional)
-# Submitted-by: who sent it
+# Chipset: chipset name
+# Firmware: firmware revision level
+# Submitter: who sent it
 # Date: when it was received (ISO8601 yyyy-mm-dd)
 # Location: city, state/province, country, approximate lat/lon
+# Sample-Notes: Notes on how the sample was taken

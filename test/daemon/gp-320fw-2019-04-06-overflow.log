@@ -1,7 +1,7 @@
 # Name: GPS-320FW
 # Chipset: SE4100L + PL-6313
 # Description: OEM module from RF Solutions, Inc
-# Submitted-by: f4eru <f4eru@free.fr> 
+# Submitter: f4eru <f4eru@free.fr> 
 # Date: 2010-10-16
 # Notes: This is the chip in normal operation after warm boot, but
 #        with a sat simulator spoofing it into thinking it is

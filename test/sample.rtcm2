@@ -1,6 +1,6 @@
 # Name: RTCM-104 source from a DGPSIP server
 # Type: RTCM
-# Submitted-by: Wolfgang Rupprecht <wolfgang@dwsrcc.com>
+# Submitter: Wolfgang Rupprecht <wolfgang@dwsrcc.com>
 # Date: 2009-01-21
 # Comments: Has leading garbage, to test parity locking.
 #           The date above is meaningless, added so gpsfake won't choke. 
