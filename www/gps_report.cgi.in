@@ -86,9 +86,10 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
               % (form.getvalue('vendor'), form.getvalue('model'))
     for fld in ("chipset", "firmware", 'date', 'submitter', 'location'):
         if form.has_key(fld):
-            header += "# %s: %s\n" % (fld.capitalize(), form.getvalue(fld))
+            header += "# %s = %s\n" % (fld.capitalize(), form.getvalue(fld))
     if form.has_key('sample_notes') and form.getvalue('sample_notes'):
         header += "# Notes: %s\n" % form.getvalue('sample_notes')
+    header += "type = device\n"
     content = MIMEText(header + output_sample_content)
     encode_base64(content)
     report.attach(content)
