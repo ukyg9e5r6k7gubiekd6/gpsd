@@ -353,9 +353,8 @@ tell us about it in "Technical Notes".</p>
 
 ifline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
 print "<table border='1'><tr>"
-for itype in ('USB', 'Serial', 'Bluetooth', 'TTL',
-              'Compact Flash', 'RS-232', 'Other'):
-        print ifline % (itype, itype)
+for itype in ('USB', 'Bluetooth', 'Compact Flash', 'RS-232', 'TTL', 'Other'):
+    print ifline % (itype, itype)
 print "</tr></table>"
 
 print '''
