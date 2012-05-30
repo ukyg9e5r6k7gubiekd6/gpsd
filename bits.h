@@ -5,9 +5,6 @@
  * bitfields of arbitrary length and size from a message that contains
  * these items in either MSB-first or LSB-first byte order.
  * 
- * By defining the GET_ORIGIN and PUT_ORIGIN macros before including
- * this header, it's possible to change the origin of the indexing.
- *
  * We enforce data sizes of integral types in the casts on these.
  * Both 32- and 64-bit systems with gcc are OK with this set.
  *
