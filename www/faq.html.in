@@ -229,7 +229,7 @@ Here is the beginning of one log file I already have:</p>
 <pre>
 # Name: Magellan eXplorist 210
 # Chipset: unknown
-# Submitted-by: "Paul B van den Berg" &lt;paulberg@wanadoo.nl&gt;
+# Submitter: "Paul B van den Berg" &lt;paulberg@wanadoo.nl&gt;
 # Date: 2006-05-26
 # Location: Groningen, NL, 53.2N 6.6E
 #
@@ -267,7 +267,7 @@ $GPGSV,3,2,10,29,26,162,,18,24,255,42,22,24,298,44,28,10,056,*75
 $GPGSV,3,3,10,14,09,319,,11,03,016,,136,27,157,,124,28,162,*71
 </pre>
 
-<p>The way to fill in the Name, Submitted-by, and Date
+<p>The way to fill in the Name, Submitter, and Date
 headers should be pretty obvious.</p>
 
 <p>Chipset should include the name and (if possible) model and/or

@@ -1,6 +1,6 @@
 # Name: Generic depth sounder
 # Description: Generic depth sounder returning NMEA SDDBT   
-# Submitted-by: John Hawley <johnhawley@blueyonder.co.uk>
+# Submitter: John Hawley <johnhawley@blueyonder.co.uk>
 # Date: 2012-01-19
 $SDDBT,7.7,f,2.3,M,1.3,F*05
 $ECGLL,5119.881,N,00125.169,E,164326,A,D*52

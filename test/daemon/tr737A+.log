@@ -1,7 +1,7 @@
 # Name: 737A+
 # Chipset: MTK MT3329
 # Description: Transystem 737A+ Bluetooth mouse
-# Submitted-by: Gary E. Miller <gem@rellim.com>
+# Submitter: Gary E. Miller <gem@rellim.com>
 # Date: 2011-11-10
 # Location: Bend, Oregon 44N, 121W
 $PMTK010,001*2E

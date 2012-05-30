@@ -1,6 +1,6 @@
 # Name: Garmin 17N
 # Chipset: 
-# Submitted-by: Wojciech Kazubski <wk@ire.pw.edu.pl>
+# Submitter: Wojciech Kazubski <wk@ire.pw.edu.pl>
 # Comment: Only emits GPRMC when it has a fix.
 # Date: 2005-03-12
 #

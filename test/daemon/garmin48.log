@@ -6,7 +6,7 @@
 # from the GPRMC and GPGGA timestamps. Appears to take 2 fixes
 # per cycle, GLL can include a fix update!
 #
-# Submitted-by: Hamish <hamish_nospam@yahoo.com>
+# Submitter: Hamish <hamish_nospam@yahoo.com>
 # Date: 2005-03-11
 #
 # This file is Copyright (c) 2010 by the GPSD project
