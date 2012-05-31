@@ -748,8 +748,6 @@ extern void ntpshm_init(struct gps_context_t *, bool);
 extern int ntpshm_put(struct gps_device_t *, double, double);
 extern void ntpd_link_deactivate(struct gps_device_t *);
 extern void ntpd_link_activate(struct gps_device_t *);
-extern void pps_thread_activate(struct gps_device_t *);
-extern void pps_thread_deactivate(struct gps_device_t *);
 
 extern void ecef_to_wgs84fix(/*@out@*/struct gps_fix_t *,
 			     /*@out@*/double *,
