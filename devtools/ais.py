@@ -1080,7 +1080,7 @@ def packet_scanner(source):
             crc = fields[6].split('*')[1].strip()
         except IndexError:
             if skiperr:
-                sys.stderr.write("%d: malformed line %s\n" % (lc, line.strip()))
+                sys.stderr.write("%d: malformed line: %s\n" % (lc, line.strip()))
                 well_formed = False
             else:
                 raise AISUnpackingException(lc, "checksum", crc)
@@ -1096,6 +1096,7 @@ def packet_scanner(source):
         bits = BitVector()
         bits.from_sixbit(payloads[channel], pad)
         yield (lc, raw, bits)
+        raw = ''
 
 def postprocess(cooked):
     "Postprocess cooked fields from a message."
@@ -1156,7 +1157,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 if not (actual >= expected_range[0] and actual <= expected_range[1]):
                     bogon = True
                     if skiperr:
-                        sys.stderr.write("%d: type %d expected %s bits but saw %s\n" % (lc, values['msgtype'], expected, actual))
+                        sys.stderr.write("%d: type %d expected %s bits but saw %s: %s\n" % (lc, values['msgtype'], expected, actual, raw.strip().split()))
                     else:
                         raise AISUnpackingException(lc, "length", actual)
             # We're done, hand back a decoding
@@ -1169,13 +1170,13 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
             raise GeneratorExit
         except AISUnpackingException, e:
             if skiperr:
-                sys.stderr.write("%s on %s\n" % (`e`, raw.strip()))
+                sys.stderr.write("%s: %s\n" % (`e`, raw.strip().split()))
                 continue
             else:
-                raise e
+                raise
         except:
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
-            sys.stderr.write("Unknown exception on line %d\n" % lc)
+            sys.stderr.write("%d: Unknown exception: %s\n" % (lc, raw.strip().split()))
             if skiperr:
                 continue
             else:
