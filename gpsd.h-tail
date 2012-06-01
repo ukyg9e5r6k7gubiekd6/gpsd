@@ -349,11 +349,11 @@ typedef enum {source_unknown,
 	      source_rs232,	/* potential GPS source, not discoverable */
 	      source_usb,	/* potential GPS source, discoverable */
 	      source_bluetooth,	/* potential GPS source, discoverable */
+	      source_can,	/* potential GPS source, fixed CAN format */
 	      source_pty,	/* PTY: we don't require exclusive access */
 	      source_tcp,	/* TCP/IP stream: case detected but not used */
 	      source_udp,	/* UDP stream: case detected but not used */
 	      source_gpsd,	/* Remote gpsd instance over TCP/IP */
-	      source_nmea2000,	/* potential GPS source, fixed CAN format */
 } sourcetype_t;
 
 /*
@@ -363,7 +363,6 @@ typedef enum {service_unknown,
 	      service_sensor,
 	      service_dgpsip,
 	      service_ntrip,
-	      service_nmea2000
 } servicetype_t;
 
 /*

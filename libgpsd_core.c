@@ -352,8 +352,8 @@ int gpsd_open(struct gps_device_t *session)
 
 	gpsd_switch_driver(session, "NMEA2000");
 	session->gpsdata.gps_fd = sock;
-	session->sourcetype = source_nmea2000;
-	session->servicetype = service_nmea2000;
+	session->sourcetype = source_can;
+	session->servicetype = service_sensors;
 	return session->gpsdata.gps_fd;
     }
 #endif /* defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S) */
