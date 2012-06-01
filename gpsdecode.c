@@ -511,6 +511,7 @@ static void decode(FILE *fpin, FILE*fpout)
     //(void)strlcpy(session.gpsdata.dev.path, "stdin", sizeof(session.gpsdata.dev.path));
     memset(&policy, '\0', sizeof(policy));
     policy.json = json;
+    policy.scaled = scaled;
 
     gps_context_init(&context);
     gpsd_time_init(&context, time(NULL));
@@ -576,6 +577,9 @@ static void encode(FILE *fpin, FILE *fpout)
 		  "stdin", 
 		  sizeof(session.gpsdata.dev.path));
     policy.json = true;
+    /* Parsing is always made in unscaled mode,
+     * this policy applies to the dumping */
+    policy.scaled = scaled;
 
     while (fgets(inbuf, (int)sizeof(inbuf), fpin) != NULL) {
 	int status;

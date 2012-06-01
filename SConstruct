@@ -1387,13 +1387,13 @@ rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
     'for f in $SRCDIR/test/*.rtcm2; do '
         'echo "Testing $${f}..."; '
         'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-        '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
+        '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
         'diff -ub $${f}.chk $${TMPFILE}; '
         'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing idempotency of JSON dump/decode for RTCM2"',
     'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-    '$SRCDIR/gpsdecode -e -j <test/synthetic-rtcm2.json >$${TMPFILE}; '
+    '$SRCDIR/gpsdecode -u -e -j <test/synthetic-rtcm2.json >$${TMPFILE}; '
         'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - $${TMPFILE}; '
         'rm -f $${TMPFILE}; ',
         ])
@@ -1417,7 +1417,7 @@ aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
     'done;',
     '@echo "Testing idempotency of JSON dump/decode for AIS"',
     'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-    '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/synthetic-ais.json >$${TMPFILE}; '
+    '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/synthetic-ais.json >$${TMPFILE}; '
         'grep -v "^#" $SRCDIR/test/synthetic-ais.json | diff -ub - $${TMPFILE}; '
         'rm -f $${TMPFILE}; ',
         ])
