@@ -1100,7 +1100,7 @@ def packet_scanner(source):
 def postprocess(cooked):
     "Postprocess cooked fields from a message."
     # Handle type 21 name extension
-    if cooked[0][1] == 21:
+    if cooked[0][1] == 21 and len(cooked) > 19:
         cooked[4][1] += cooked[19][1]
         cooked.pop(-1)
     return cooked
