@@ -1086,7 +1086,7 @@ def packet_scanner(source):
                 raise AISUnpackingException(lc, "checksum", crc)
         if csum != crc:
             if skiperr:
-                sys.stderr.write("%d: bad checksum %s, expecting %s: %s\n" % (lc, csum, `crc`, line.strip()))
+                sys.stderr.write("%d: bad checksum %s, expecting %s: %s\n" % (lc, `crc`, csum, line.strip()))
                 well_formed = False
             else:
                 raise AISUnpackingException(lc, "checksum", crc)
