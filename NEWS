@@ -1,6 +1,7 @@
 * Repository head
   Port tests now pass on all Debian supported architectures, including
-  the Sparc and s390 that were giving us trouble before.
+  the Sparc and s390 that were giving us trouble before. Pre-2003 Delorme
+  Earthmate works again.
 
 * Wed 23 May 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.6
   It's the Fernando Poo Day release.  Code has zero detectible defects

@@ -1505,7 +1505,8 @@ static void consume_packets(struct gps_device_t *device)
 	/* conditional prevents mask dumper from eating CPU */
 	if (context.debug >= LOG_DATA)
 	    gpsd_report(LOG_DATA,
-			"packet from %s with %s\n",
+			"packet type %d from %s with %s\n",
+			device->packet.type,
 			device->gpsdata.dev.path,
 			gps_maskdump(device->gpsdata.set));
 
