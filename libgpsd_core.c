@@ -232,7 +232,7 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     /* otherwise, could be an TCP data feed */
     } else if (strncmp(session->gpsdata.dev.path, "tcp://", 6) == 0) {
-	char server[GPS_PATH_MAX], *port;
+	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
 	session->gpsdata.gps_fd = -1;
@@ -255,7 +255,7 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     /* or could be UDP */
     } else if (strncmp(session->gpsdata.dev.path, "udp://", 6) == 0) {
-	char server[GPS_PATH_MAX], *port;
+	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
 	session->gpsdata.gps_fd = -1;
@@ -281,7 +281,7 @@ int gpsd_open(struct gps_device_t *session)
 #ifdef PASSTHROUGH_ENABLE
     if (strncmp(session->gpsdata.dev.path, "gpsd://", 7) == 0) {
 	/*@-branchstate -nullpass@*/
-	char server[GPS_PATH_MAX], *port;
+	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 7, sizeof(server));
 	session->gpsdata.gps_fd = -1;
@@ -306,7 +306,7 @@ int gpsd_open(struct gps_device_t *session)
 #endif /* PASSTHROUGH_ENABLE */
 #if defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S)
     if (strncmp(session->gpsdata.dev.path, "nmea2000://", 11) == 0) {
-	char interface_name[GPS_PATH_MAX];
+	char interface_name[strlen(session->gpsdata.dev.path)];
 	socket_t sock;
 	int status;
 	struct ifreq ifr;
