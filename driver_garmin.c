@@ -817,6 +817,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
  * libudev: http://www.kernel.org/pub/linux/utils/kernel/hotplug/libudev/
  */
 /*@-compdef -usedef -nullpass@*/
+// cppcheck-suppress unusedFunction
 static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 {
     // discover devices
