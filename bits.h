@@ -16,16 +16,6 @@
 
 #include <stdint.h>
 
-union int_float {
-    int32_t i;
-    float f;
-};
-
-union long_double {
-    int64_t l;
-    double d;
-};
-
 /* these are independent of byte order */
 #define getsb(buf, off)	((int8_t)buf[off])
 #define getub(buf, off)	((uint8_t)buf[off])
@@ -42,10 +32,9 @@ union long_double {
 #define getles64(buf, off)	((int64_t)(((uint64_t)getleu32(buf, (off)+4) << 32) | getleu32(buf, (off))))
 #define getleu64(buf, off)	((uint64_t)(((uint64_t)getleu32(buf, (off)+4) << 32) | getleu32(buf, (off))))
 
-#define getlef(buf, off)	(i_f.i = getles32(buf, off), i_f.f)
-#define getled(buf, off)	(l_d.l = getles64(buf, off), l_d.d)
+extern float getlef32(const char *, int); 
+extern double getled64(const char *, int);
 
-/* SiRF and most other GPS protocols use big-endian (network byte order) */
 #define getbes16(buf, off)	((int16_t)(((uint16_t)getub(buf, (off)) << 8) | (uint16_t)getub(buf, (off)+1)))
 #define getbeu16(buf, off)	((uint16_t)(((uint16_t)getub(buf, (off)) << 8) | (uint16_t)getub(buf, (off)+1)))
 #define getbes32(buf, off)	((int32_t)(((uint16_t)getbeu16(buf, (off)) << 16) | getbeu16(buf, (off)+2)))
@@ -56,8 +45,10 @@ union long_double {
 #define putbe16(buf,off,w) do {putbyte(buf, (off), (w) >> 8); putbyte(buf, (off)+1, (w));} while (0)
 #define putbe32(buf,off,l) do {putbe16(buf, (off), (l) >> 16); putbe16(buf, (off)+2, (l));} while (0)
 
-#define getbef(buf, off)	(i_f.i = getbes32(buf, off), i_f.f)
-#define getbed(buf, off)	(l_d.l = getbes64(buf, off), l_d.d)
+extern float getbef32(const char *, int); 
+extern double getbed64(const char *, int);
+
+extern void putbef32(char *, int, float);
 
 /* bitfield extraction */
 extern uint64_t ubits(char buf[], unsigned int, unsigned int, bool);

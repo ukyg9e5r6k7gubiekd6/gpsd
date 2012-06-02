@@ -888,22 +888,21 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 {
     if (sizeof(double) == 8) {
 	gps_mask_t mask = TIME_SET;
-	union long_double l_d;
-	unsigned char *buf = session->packet.outbuffer + 3;
+	char *buf = (char *)session->packet.outbuffer + 3;
 	uint16_t week = getleu16(buf, 3);
 	uint32_t tow = getleu32(buf, 5);
-	double rms = getled(buf, 9);
+	double rms = getled64(buf, 9);
 #ifdef __UNUSED__
 	/* Reason why it's unused is these figures do not agree
 	 * with those obtained from the PVT report (handle_0xb1).
 	 * The figures from 0xb1 do agree with the values reported
 	 * by Navcom's PC utility */
-	//double ellips_maj = getled(buf, 17);
-	//double ellips_min = getled(buf, 25);
-	//double ellips_azm = getled(buf, 33);
-	double lat_sd = getled(buf, 41);
-	double lon_sd = getled(buf, 49);
-	double alt_sd = getled(buf, 57);
+	//double ellips_maj = getled64(buf, 17);
+	//double ellips_min = getled64(buf, 25);
+	//double ellips_azm = getled64(buf, 33);
+	double lat_sd = getled64(buf, 41);
+	double lon_sd = getled64(buf, 49);
+	double alt_sd = getled64(buf, 57);
 	double hrms = sqrt(pow(lat_sd, 2) + pow(lon_sd, 2));
 #endif /*  __UNUSED__ */
 	session->gpsdata.epe = rms * 1.96;
@@ -1082,20 +1081,18 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
     //uint32_t tow = getleu32(buf, 5);
     int8_t osc_temp = getsb(buf, 9);
     uint8_t nav_status = getub(buf, 10);
-    union long_double l_d;
     double nav_clock_offset;
-    union int_float i_f;
     float nav_clock_drift;
     float osc_filter_drift_est;
     int32_t time_slew = (int32_t) getles32(buf, 27);
     if (sizeof(double) == 8) {
-	nav_clock_offset = getled(buf, 11);
+	nav_clock_offset = getled64((char *)buf, 11);
     } else {
 	nav_clock_offset = NAN;
     }
     if (sizeof(float) == 4) {
-	nav_clock_drift = getlef(buf, 19);
-	osc_filter_drift_est = getlef(buf, 23);
+	nav_clock_drift = getlef32((char *)buf, 19);
+	osc_filter_drift_est = getlef32((char *)buf, 23);
     } else {
 	nav_clock_drift = NAN;
 	osc_filter_drift_est = NAN;

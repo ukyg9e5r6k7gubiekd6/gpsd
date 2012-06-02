@@ -126,7 +126,6 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     uint16_t uw1, uw2;
     uint32_t ul1, ul2, ul3, ul4, ul5;
     double d1, d2, d3, d4, d5;
-    union long_double l_d;
     unsigned char buf[BUFSIZ];
     char buf2[BUFSIZ];
 
@@ -172,29 +171,29 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "GLONASS sub-frame data\n");
 	break;
     case 0x13:
-	d1 = getled(buf, OFFSET(1));
-	d2 = getled(buf, OFFSET(3));
-	d3 = getled(buf, OFFSET(5));
-	d4 = getled(buf, OFFSET(29)); /* GPS time */
-	d5 = getled(buf, OFFSET(31)); /* GLONASS time */
+	d1 = getled64(buf, OFFSET(1));
+	d2 = getled64(buf, OFFSET(3));
+	d3 = getled64(buf, OFFSET(5));
+	d4 = getled64(buf, OFFSET(29)); /* GPS time */
+	d5 = getled64(buf, OFFSET(31)); /* GLONASS time */
 	gpsd_report(LOG_INF, "ECEF coordinates %g %g %g %f %f\n", d1, d2, d3, d4, d5);
 	break;
     case 0x20:
-	d1 = getled(buf, OFFSET(1)); /* time */
+	d1 = getled64(buf, OFFSET(1)); /* time */
 
 	session->newdata.time = d1 + JAN_2008;
-	session->newdata.latitude = getled(buf, OFFSET(3)) * RAD_2_DEG;
-	session->newdata.longitude = getled(buf, OFFSET(5)) * RAD_2_DEG;
-	session->newdata.altitude = getled(buf, OFFSET(7));
-	session->gpsdata.separation = getled(buf, OFFSET(9));
+	session->newdata.latitude = getled64(buf, OFFSET(3)) * RAD_2_DEG;
+	session->newdata.longitude = getled64(buf, OFFSET(5)) * RAD_2_DEG;
+	session->newdata.altitude = getled64(buf, OFFSET(7));
+	session->gpsdata.separation = getled64(buf, OFFSET(9));
 	session->gpsdata.satellites_used = (int)getles32(buf, OFFSET(11));
-	session->gpsdata.dop.gdop = getled(buf, OFFSET(13));
-	session->gpsdata.dop.pdop = getled(buf, OFFSET(15));
-	session->gpsdata.dop.tdop = getled(buf, OFFSET(17));
-	session->gpsdata.dop.hdop = getled(buf, OFFSET(19));
-	session->gpsdata.dop.vdop = getled(buf, OFFSET(21));
-	session->newdata.speed = getled(buf, OFFSET(31));
-	session->newdata.track = getled(buf, OFFSET(33)) * RAD_2_DEG;
+	session->gpsdata.dop.gdop = getled64(buf, OFFSET(13));
+	session->gpsdata.dop.pdop = getled64(buf, OFFSET(15));
+	session->gpsdata.dop.tdop = getled64(buf, OFFSET(17));
+	session->gpsdata.dop.hdop = getled64(buf, OFFSET(19));
+	session->gpsdata.dop.vdop = getled64(buf, OFFSET(21));
+	session->newdata.speed = getled64(buf, OFFSET(31));
+	session->newdata.track = getled64(buf, OFFSET(33)) * RAD_2_DEG;
 
 	ul1 = getleu32(buf, OFFSET(29)); /* status */
 
@@ -369,9 +368,9 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(LOG_INF, "Response to Query GPS ephemerides\n");
 	break;
     case 0x8b:
-	d1 = getled(buf, OFFSET(23));
-	d2 = getled(buf, OFFSET(25));
-	d3 = getled(buf, OFFSET(27));
+	d1 = getled64(buf, OFFSET(23));
+	d2 = getled64(buf, OFFSET(25));
+	d3 = getled64(buf, OFFSET(27));
 	gpsd_report(LOG_INF, "Response to Query GLONASS ephemerides %g %g %g\n",
 		    d1, d2, d3);
 	break;

@@ -73,6 +73,59 @@ int64_t sbits(char buf[], unsigned int start, unsigned int width, bool le)
     /*@ -relaxtypes */
 }
 
+union int_float {
+    int32_t i;
+    float f;
+};
+
+union long_double {
+    int64_t l;
+    double d;
+};
+
+float getlef32(const char *buf, int off)
+{
+    union int_float i_f;
+
+    i_f.i = getles32(buf, off);
+    return i_f.f;
+}
+ 
+double getled64(const char *buf, int off)
+{
+    union long_double l_d;
+
+    l_d.l = getles64(buf, off);
+    return l_d.d;
+}
+
+float getbef32(const char *buf, int off)
+{
+    union int_float i_f;
+
+    i_f.i = getbes32(buf, off);
+    return i_f.f;
+}
+
+double getbed64(const char *buf, int off)
+{
+    union long_double l_d;
+
+    l_d.l = getbes64(buf, off);
+    return l_d.d;
+}
+
+/*@-shiftimplementation@*/
+void putbef32(char *buf, int off, float val)
+{
+    union int_float i_f;
+
+    i_f.f = val;
+    /* this would be a putbe32 call if not for a signedness issue */ 
+    buf[off] = (char)(((i_f.i) >> 16) >> 8);
+}
+/*@+shiftimplementation@*/
+
 #ifdef __UNUSED__
 // cppcheck-suppress unusedFunction
 u_int16_t swap_u16(u_int16_t i)
@@ -85,7 +138,7 @@ u_int16_t swap_u16(u_int16_t i)
  
     return (c1 << 8) + c2;
 }
- 
+
 // cppcheck-suppress unusedFunction
 u_int32_t swap_u32(u_int32_t i) 
 /* byte-swap a 32-bit unsigned int */

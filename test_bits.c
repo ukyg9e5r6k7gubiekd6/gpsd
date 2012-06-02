@@ -14,8 +14,6 @@
 
 /*@ -duplicatequals -formattype */
 static unsigned char buf[80];
-static union int_float i_f;
-static union long_double l_d;
 static char sb1, sb2;
 static unsigned char ub1, ub2;
 static short sw1, sw2;
@@ -70,8 +68,8 @@ static void bedumpall(void)
     (void)printf("getbeu64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uL1, (uint64_t) uL2,
 		 (uint64_t) getbeu64(buf, 0), (uint64_t) getbeu64(buf, 8));
-    (void)printf("getbef: %f %f\n", f1, getbef(buf, 24));
-    (void)printf("getbed: %.16f %.16f\n", d1, getbed(buf, 16));
+    (void)printf("getbef32: %f %f\n", f1, getbef32(buf, 24));
+    (void)printf("getbed64: %.16f %.16f\n", d1, getbed64(buf, 16));
 }
 
 static void ledumpall(void)
@@ -100,8 +98,8 @@ static void ledumpall(void)
     (void)printf("getleu64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uL1, (uint64_t) uL2,
 		 (uint64_t) getleu64(buf, 0), (uint64_t) getleu64(buf, 8));
-    (void)printf("getlef: %f %f\n", f1, getlef(buf, 24));
-    (void)printf("getled: %.16f %.16f\n", d1, getled(buf, 16));
+    (void)printf("getlef32: %f %f\n", f1, getlef32(buf, 24));
+    (void)printf("getled64: %.16f %.16f\n", d1, getled64(buf, 16));
 }
 
 struct unsigned_test
@@ -170,8 +168,8 @@ int main(int argc, char *argv[])
 	sL2 = getbes64(buf, 8);
 	uL1 = getbeu64(buf, 0);
 	uL2 = getbeu64(buf, 8);
-	f1 = getbef(buf, 24);
-	d1 = getbed(buf, 16);
+	f1 = getbef32(buf, 24);
+	d1 = getbed64(buf, 16);
 	/*@+type@*/
 	bedumpall();
 
@@ -194,8 +192,8 @@ int main(int argc, char *argv[])
 	sL2 = getles64(buf, 8);
 	uL1 = getleu64(buf, 0);
 	uL2 = getleu64(buf, 8);
-	f1 = getlef(buf, 24);
-	d1 = getled(buf, 16);
+	f1 = getlef32(buf, 24);
+	d1 = getled64(buf, 16);
 	/*@+type@*/
 	ledumpall();
     }

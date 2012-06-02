@@ -233,7 +233,6 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 				      unsigned char *buf, size_t len)
 {
     unsigned short flags, n, i;
-    union long_double l_d;
 
     n = (ushort) getleu16(buf, 7 + 4);
     if ((n < 1) || (n > MAXCHANNELS)){
@@ -260,8 +259,8 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 	session->gpsdata.PRN[i] = getleu16(buf, 7 + 26 + (i*36)) & 0xff;
 	session->gpsdata.ss[i] = getleu16(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
 	session->gpsdata.raw.satstat[i] = getleu32(buf, 7 + 26 + (i*36 + 4));
-	session->gpsdata.raw.pseudorange[i] = getled(buf, 7 + 26 + (i*36 + 8));
-	session->gpsdata.raw.doppler[i] = getled(buf, 7 + 26 + (i*36 + 16));
+	session->gpsdata.raw.pseudorange[i] = getled64(buf, 7 + 26 + (i*36 + 8));
+	session->gpsdata.raw.doppler[i] = getled64(buf, 7 + 26 + (i*36 + 16));
 	session->gpsdata.raw.carrierphase[i] = getleu16(buf, 7 + 26 + (i*36 + 28));
 
 	session->gpsdata.raw.mtime[i] = session->newdata.time;

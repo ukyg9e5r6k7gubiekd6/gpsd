@@ -74,8 +74,6 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 {
     gps_mask_t mask;
     unsigned char flags;
-    union int_float i_f;
-    union long_double l_d;
     double d;
     struct tm tm;
 
@@ -95,7 +93,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     (void)memset(&tm, '\0', sizeof(tm));
     tm.tm_hour = (int)getub(buf, 4) & 0x1f;
     tm.tm_min = (int)getub(buf, 5);
-    d = getled(buf, 6);
+    d = getled64((char *)buf, 6);
     tm.tm_sec = (int)d;
     tm.tm_mday = (int)getub(buf, 14);
     tm.tm_mon = (int)getub(buf, 15) - 1;
@@ -104,12 +102,12 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     mask |= TIME_SET | PPSTIME_IS;
 
     /* extract the local tangential plane (ENU) solution */
-    session->newdata.latitude = getled(buf, 18) * RAD_2_DEG;
-    session->newdata.longitude = getled(buf, 26) * RAD_2_DEG;
-    session->newdata.altitude = getlef(buf, 34);
-    session->newdata.speed = getlef(buf, 38);
-    session->newdata.track = getlef(buf, 42) * RAD_2_DEG;
-    session->newdata.climb = getlef(buf, 54);
+    session->newdata.latitude = getled64((char *)buf, 18) * RAD_2_DEG;
+    session->newdata.longitude = getled64((char *)buf, 26) * RAD_2_DEG;
+    session->newdata.altitude = getlef32((char *)buf, 34);
+    session->newdata.speed = getlef32((char *)buf, 38);
+    session->newdata.track = getlef32((char *)buf, 42) * RAD_2_DEG;
+    session->newdata.climb = getlef32((char *)buf, 54);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
 
     session->gpsdata.satellites_used = (int)getub(buf, 71) & 0x0f;
@@ -244,7 +242,6 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 		      size_t data_len)
 {
     gps_mask_t mask;
-    union long_double l_d;
     struct tm tm;
 
     if (data_len != 65)
@@ -265,7 +262,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 
 	tm.tm_hour = (int)getsb(buf, 41);
 	tm.tm_min = (int)getsb(buf, 42);
-	d = getled(buf, 43);
+	d = getled64((char *)buf, 43);
 	tm.tm_sec = (int)d;
 	session->newdata.time = (timestamp_t)timegm(&tm);
 	session->context->leap_seconds = (int)getsb(buf, 20);
@@ -287,7 +284,6 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
     int i, n;
     unsigned long ul;
     double t;
-    union long_double l_d;
 
     gpsd_report(LOG_PROG, "superstar2 #23 - measurement block\n");
 
@@ -296,7 +292,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 	gpsd_report(LOG_INF, "too many measurements\n");
 	return 0;
     }
-    t = getled(buf, 7);		/* measurement time */
+    t = getled64((char *)buf, 7);		/* measurement time */
     for (i = 0; i < n; i++) {
 	session->gpsdata.raw.mtime[i] = t;
 	session->gpsdata.PRN[i] = (int)getub(buf, 11 * i + 15) & 0x1f;
