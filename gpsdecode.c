@@ -123,9 +123,9 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 			       ais->type6.dac235fid10.ana_ext2,
 			       ais->type6.dac235fid10.racon,
 			       ais->type6.dac235fid10.light,
-			       ais->type6.dac235fid10.alarm,
+			       (uint)ais->type6.dac235fid10.alarm,
 			       ais->type6.dac235fid10.stat_ext,
-			       ais->type6.dac235fid10.off_pos);
+			       (uint)ais->type6.dac235fid10.off_pos);
 		imo = true;
 		break;
 	    }
