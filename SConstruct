@@ -1407,18 +1407,40 @@ Utility('rtcm-makeregress', [gpsdecode], [
 
 # Regression-test the AIVDM decoder.
 aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
-    '@echo "Testing AIVDM decoding..."',
+    '@echo "Testing AIVDM decoding w/ CSV format..."',
     'for f in $SRCDIR/test/*.aivdm; do '
         'echo "Testing $${f}..."; '
         'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
         '$SRCDIR/gpsdecode -u -c <$${f} >$${TMPFILE}; '
-        'diff -ub $${f}.chk $${TMPFILE}; '
+        'diff -ub $${f}.chk $${TMPFILE} || echo "Test FAILED!"; '
         'rm -f $${TMPFILE}; '
     'done;',
-    '@echo "Testing idempotency of JSON dump/decode for AIS"',
+    '@echo "Testing AIVDM decoding w/ JSON unscaled format..."',
+    'for f in $SRCDIR/test/*.aivdm; do '
+        'echo "  Testing $${f}..."; '
+        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
+        'diff -ub $${f}.ju.chk $${TMPFILE} || echo "Test FAILED!"; '
+        'rm -f $${TMPFILE}; '
+    'done;',
+    '@echo "Testing AIVDM decoding w/ JSON scaled format..."',
+    'for f in $SRCDIR/test/*.aivdm; do '
+        'echo "  Testing $${f}..."; '
+        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
+        'diff -ub $${f}.js.chk $${TMPFILE} || echo "Test FAILED!"; '
+        'rm -f $${TMPFILE}; '
+    'done;',
+    '@echo "Testing idempotency of unscaled JSON dump/decode for AIS"',
+    '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
+        'grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk | diff -ub - $${TMPFILE}; '
+        'rm -f $${TMPFILE}; ',
+    # Parse the unscaled json reference, dump it as scaled json, 
+    # and finally compare it with the scaled json reference
+    '@echo "Testing idempotency of scaled JSON dump/decode for AIS"',
     'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-    '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/synthetic-ais.json >$${TMPFILE}; '
-        'grep -v "^#" $SRCDIR/test/synthetic-ais.json | diff -ub - $${TMPFILE}; '
+    '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
+        'grep -v "^#" $SRCDIR/test/sample.aivdm.js.chk | diff -ub - $${TMPFILE}; '
         'rm -f $${TMPFILE}; ',
         ])
 
@@ -1426,6 +1448,8 @@ aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
 Utility('aivdm-makeregress', [gpsdecode], [
     'for f in $SRCDIR/test/*.aivdm; do '
         '$SRCDIR/gpsdecode -u -c <$${f} > $${f}.chk; '
+        '$SRCDIR/gpsdecode -u -j <$${f} > $${f}.ju.chk; '
+        '$SRCDIR/gpsdecode -j  <$${f} > $${f}.js.chk; '
     'done',
         ])
 
