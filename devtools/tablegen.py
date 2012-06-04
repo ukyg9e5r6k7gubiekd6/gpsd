@@ -327,7 +327,7 @@ def make_json_dumper(wfp):
         print >>wfp, base + "}"
         print >>wfp, base + "if (buf[strlen(buf) - 1] == ',')"
         print >>wfp, base + step + "buf[strlen(buf)-1] = '\0';"
-        print >>wfp, base + "(void)strlcat(buf, ']}\r\n,', buflen - strlen(buf));"
+        print >>wfp, base + "(void)strlcat(buf, ']}\r\n', buflen - strlen(buf));"
 
 def make_json_generator(wfp):
     # Write a stanza for jsongen.py.in describing how to generate a

@@ -864,7 +864,7 @@ type27 = (
 
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n > 0 and n <= 26),
+        validator=lambda n: n > 0 and n <= 27),
     bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     # This is the master dispatch on AIS message type

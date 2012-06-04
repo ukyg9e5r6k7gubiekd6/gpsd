@@ -4079,7 +4079,7 @@ increased propagation delays associated with long-range detection
 |95-95   | 1    |Spare               |         |x|Not used
 |==============================================================================
 
-Note: Type 27 has not been observed in the wild as of April 2011.
+Note: Type 27 is quite rare, and when seen it is rarely 96-bits long.
 
 == Local extensions ==
 

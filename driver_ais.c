@@ -204,6 +204,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type6.dac1fid12.amount		= UBITS(345, 10);
 		ais->type6.dac1fid12.unit		= UBITS(355, 2);
 		/* skip 3 bits */
+		imo = true;
 		break;
 	    case 14:	/* IMO236 - Tidal Window */
 		ais->type6.dac1fid32.month	= UBITS(88, 4);
@@ -225,9 +226,11 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type6.dac1fid32.ntidals = u;
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
+		imo = true;
 		break;
 	    case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
 		ais->type6.dac1fid15.airdraught	= UBITS(56, 11);
+		imo = true;
 		break;
 	    case 16:	/* IMO236 - Number of persons on board */
 		if (ais->type6.bitcount == 136)
@@ -247,6 +250,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type6.dac1fid18.lon	= SBITS(268, 25);
 		ais->type6.dac1fid18.lat	= SBITS(293, 24);
 		/* skip 43 bits */
+		imo = true;
 		break;
 	    case 20:	/* IMO289 - Berthing data - addressed */
 		ais->type6.dac1fid20.linkage	= UBITS(88, 10);
@@ -287,6 +291,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		UCHARS(191, ais->type6.dac1fid20.berth_name);
 		ais->type6.dac1fid20.berth_lon	= SBITS(311, 25);
 		ais->type6.dac1fid20.berth_lat	= SBITS(336, 24);
+		imo = true;
 		break;
 	    case 23:        /* IMO289 - Area notice - addressed */
 		break;
@@ -298,6 +303,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		    ais->type6.dac1fid25.cargos[u].subtype = UBITS(104+u*17,13);
 		}
 		ais->type6.dac1fid25.ncargos = u;
+		imo = true;
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		ais->type6.dac1fid28.linkage	= UBITS(88, 10);
@@ -318,12 +324,14 @@ bool ais_binary_decode(struct ais_t *ais,
 		}
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
+		imo = true;
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		ais->type6.dac1fid30.linkage   = UBITS(88, 10);
 		from_sixbit((char *)bits,
 			    98, bitlen-98,
 			    ais->type6.dac1fid30.text);
+		imo = true;
 		break;
 	    case 32:	/* IMO289 - Tidal Window */
 		ais->type6.dac1fid32.month	= UBITS(88, 4);
@@ -345,6 +353,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type6.dac1fid32.ntidals = u;
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
+		imo = true;
 		break;
 	    }
 	if (!imo)
@@ -443,10 +452,12 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid13.thour  	= UBITS(457, 5);
 		ais->type8.dac1fid13.tminute	= UBITS(462, 6);
 		/* skip 4 bits */
+		imo = true;
 		break;
 	    case 15:        /* IMO236 - Extended ship and voyage */
 		ais->type8.dac1fid15.airdraught	= UBITS(56, 11);
 		/* skip 5 bits */
+		imo = true;
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 #define ARRAY_BASE 56
@@ -479,6 +490,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid17.ntargets = u;
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
+		imo = true;
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
 		ais->type8.dac1fid19.linkage	= UBITS(56, 10);
@@ -491,6 +503,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid19.minute	= UBITS(247, 6);
 		ais->type8.dac1fid19.nextsignal	= UBITS(253, 5);
 		/* skip 102 bits */
+		imo = true;
 		break;
 	    case 21:        /* IMO289 - Weather obs. report from ship */
 		break;
@@ -519,12 +532,14 @@ bool ais_binary_decode(struct ais_t *ais,
 		}
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
+		imo = true;
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		ais->type8.dac1fid29.linkage   = UBITS(56, 10);
 		from_sixbit((char *)bits,
 			    66, bitlen-66,
 			    ais->type8.dac1fid29.text);
+		imo = true;
 		break;
 	    case 31:        /* IMO289 - Meteorological/Hydrological data */
 		ais->type8.dac1fid31.lon		= SBITS(56, 25);
@@ -807,8 +822,8 @@ bool ais_binary_decode(struct ais_t *ais,
 	    ais->type22.area.sw_lon       = SBITS(104, 18);
 	    ais->type22.area.sw_lat       = SBITS(122, 17);
 	} else {
-	    ais->type22.mmsi.dest1             = SBITS(69, 30);
-	    ais->type22.mmsi.dest2             = SBITS(104, 30);
+	    ais->type22.mmsi.dest1             = UBITS(69, 30);
+	    ais->type22.mmsi.dest2             = UBITS(104, 30);
 	}
 	ais->type22.band_a       = UBITS(140, 1);
 	ais->type22.band_b       = UBITS(141, 1);
@@ -946,6 +961,11 @@ bool ais_binary_decode(struct ais_t *ais,
 		     (ais->type26.bitcount + 7) / 8);
 	break;
     case 27:	/* Long Range AIS Broadcast message */
+	if (bitlen != 96) {
+	    gpsd_report(LOG_WARN, "AIVDM message type 27 size not 96 bits (%zd).\n",
+			bitlen);
+	    return false;
+	}
 	ais->type27.accuracy        = (bool)UBITS(38, 1);
 	ais->type27.raim		= UBITS(39, 1)!=0;
 	ais->type27.status		= UBITS(40, 4);

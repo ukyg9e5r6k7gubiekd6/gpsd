@@ -201,6 +201,14 @@
 #
 # FIX-ME: We need a type 6 test case that requires more than one AIVDM fragment.
 #
+# Type 6:
+# Advertised as DAC 1, FID 12, but full of garbage.
+!AIVDM,1,1,,A,63LBA4;WBevJ04k0=@E=B0td,0*17
+# Advertised as DAC 1, FID 14, but full of garbage
+!AIVDM,1,1,,A,6h2E:81>NmKC04p0J<000?vv20Ru,0*31
+# Advertised as DAC 1, FID 18, but full of 0
+!AIVDM,1,1,,B,6h2E3MDrDRiB0580@00000000000,0*04
+
 # Type 7:
 # From AISHub - reported immediately after the preceding type 6, 
 # which matches it.  One destination MMSI.  noaadata-0.43 fails
@@ -591,7 +599,10 @@
 #	Message type             : 0
 #	Slot offset              : 0
 #
-# FIX-ME: Need an example of the 160-bit variant of type 15 with two MMSIs.
+# Type 15:
+# From Christian Gagneraud via aishub
+# This is the 160-bit variant of type 15 with two MMSIs.
+!AIVDM,1,1,,A,?39a?2PjKFFPD01o:Gq1igvp2<3w,0*0B
 #
 # Type 16:
 # From AISHub. These are only a regression test to check that the C and Python
@@ -792,6 +803,11 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 #        Channel A Band           : 0
 #        Zone size                : 4
 #
+# Type 22:
+# From Christian Gagneraud via aishub
+# Addressed case.
+!AIVDM,1,1,,A,F@@W>gOP00PH=JrN9l000?wB2HH;,0*44
+#
 # Type 23:
 # From AISHub. Only a regression test to check that the C and Python decoders
 # do the same thing, not yet checked against other decoders.
@@ -830,6 +846,51 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 #       dimB:              15
 #       dimC:              0
 #       dimD:              5
+#
+# Type 25:
+# From Christian Gagneraud via aishub
+# Addressed and structured
+!AIVDM,1,1,,A,JB3R0GO7p>vQL8tjw0b5hqpd0706kh9d3lR2vbl0400,2*40
+#
+# Type 25:
+# From Christian Gagneraud via aishub
+# Addressed and not structured
+!AIVDM,1,1,,A,I6SWo?8P00a3PKpEKEVj0?vNP<65,0*73
+#
+# Type 25:
+# From Christian Gagneraud via aishub
+# Broadcast and structured
+!AIVDM,1,1,,A,I8IRGB40QPPa0:<HP::V=gwv0l48,0*0E
+#
+# Type 25:
+# From Christian Gagneraud via aishub
+# Broadcast and not structured
+!AIVDM,1,1,,A,I6SWVNP001a3P8FEKNf=Qb0@00S8,0*6B
+#
+# Type 26:
+# From Christian Gagneraud via aishub
+# Addressed and structured
+!AIVDM,1,1,,A,JB3R0GO7p>vQL8tjw0b5hqpd0706kh9d3lR2vbl0400,2*40
+#
+# Type 26:
+# From Christian Gagneraud via aishub
+# Addressed and not structured
+!AIVDM,1,1,,A,J1@@0IK70PGgT740000000000@000?D0ih1e00006JlPC9C3,0*6B
+#
+# Type 26
+# From Christian Gagneraud via aishub
+# Broadcast and structured
+!AIVDM,1,1,,B,JaL0mr5P000DtRDMddr@0?vF06iD,0*75
+#
+# Type 26
+# From Christian Gagneraud via aishub
+# Broadcast and not structured
+!AIVDM,1,1,,A,J0@00@370>t0Lh3P0000200H:2rN92,4*14
+#
+# Type 27:
+# From Christian Gagneraud via aishub
+# The only message 27 in more than 25 millions messages that is 96 bits long!
+!AIVDM,1,1,,A,KCQ9r=hrFUnH7P00,0*41
 #
 #
 ##############################################################################
@@ -874,3 +935,28 @@ AIVDM,2,2,1,B,00000000000,2*26
 !AIVDM,2,1,2,A,542M92h00001@<7;?G0PD4i@R0<tqA8tj37>220o0h:2240Ht500000000000000,0*3C
 !AIVDM,2,2,2,A,0000002,2*24
 !AIVDM,2,2,6,B,00000000000,2*21
+##############################################################################
+# Error and corner case tests:
+##############################################################################
+# Non printable and control character in data or string fields
+!AIVDM,1,1,,A,647sBv00b=E006P9>0,4*1B
+# Type 4 with date/time set to N/A
+!AIVDM,1,1,,A,402Fha0000Htt<tSF0l4Q@000d20,0*65
+# Type 4 with YYYY/MM/DD OK, but HHmmSS N/A
+!AIVDM,1,1,,B,4028n@iuiPpttwIWI<Hl>8700PS:,0*60
+# Type 4 with year set to 10196 (0x27D4), idempotency use to fail on this one
+# It has a bad epfd as well.
+!AIVDM,1,1,,B,4>O7m7Iu@<9qUfbtm`vSnwvH20S8,0*46
+# Type 22 with MMSI1=4059193694, use to fail due to UBITS() instead of SBITS()
+!AIVDM,1,1,,B,Fe3>>MOD@GDF?ThcoCk02?ioQie4,0*03
+# A type 6, DAC 1, FID 18 with plenty of N/A fields, idempotency use to fail
+!AIVDM,1,1,,B,602E:s0tw@9B0580@00000000000,0*68
+# A type 6, DAC 1, FID 30. use to fail idempotency
+!AIVDM,1,1,,B,6h2E3MPr<buN05p0J00000000000,0*0A
+# A type 6, DAC 1, FID 18, use to fail idempotency
+!AIVDM,1,1,,B,602E:s0tw@9B0580@00000000000,0*68
+# Array of struct. use to crash "gpsdecode -j -e -u"
+!AIVDM,1,1,,A,6h2E3MHrg19P0600@00000000000,0*02
+!AIVDM,1,1,,A,6h2E3N0rThqP0600J00000000000,0*51
+
+

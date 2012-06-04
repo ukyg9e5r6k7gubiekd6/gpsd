@@ -97,8 +97,9 @@ int json_ais_read(const char *buf,
 	    ais->type4.hour = AIS_HOUR_NOT_AVAILABLE;
 	    ais->type4.minute = AIS_MINUTE_NOT_AVAILABLE;
 	    ais->type4.second = AIS_SECOND_NOT_AVAILABLE;
+	    // We use %u for the date to allow for dodgy years (>9999) to go through
 	    // cppcheck-suppress uninitvar
-	    (void)sscanf(timestamp, "%4u-%02u-%02uT%02u:%02u:%02uZ",
+	    (void)sscanf(timestamp, "%u-%02u-%02uT%02u:%02u:%02uZ",
 			 &ais->type4.year,
 			 &ais->type4.month,
 			 &ais->type4.day,
@@ -157,14 +158,15 @@ int json_ais_read(const char *buf,
 		status = json_read_object(buf, json_ais6_fid16, endptr);
 		imo = true;
 	    }
-	    else if (strstr(buf, "\"fid\":18,") != NULL || strstr(buf, "\"fid\":11,") != NULL) {
+	    else if (strstr(buf, "\"fid\":18,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid18, endptr);
 		if (status == 0) {
 		    ais->type6.dac1fid18.day = AIS_DAY_NOT_AVAILABLE;
 		    ais->type6.dac1fid18.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type6.dac1fid18.minute = AIS_MINUTE_NOT_AVAILABLE;
 		    // cppcheck-suppress uninitvar
-		    (void)sscanf(arrival, "%02uT%02u:%02uZ",
+		    (void)sscanf(arrival, "%02u-%02uT%02u:%02uZ",
+				 &ais->type6.dac1fid18.month,
 				 &ais->type6.dac1fid18.day,
 				 &ais->type6.dac1fid18.hour, 
 				 &ais->type6.dac1fid18.minute);
@@ -360,8 +362,14 @@ int json_ais_read(const char *buf,
 	status = json_read_object(buf, json_ais24, endptr);
     } else if (strstr(buf, "\"type\":25,") != NULL) {
 	status = json_read_object(buf, json_ais25, endptr);
+	if (status == 0)
+	    lenhex_unpack(data, &ais->type25.bitcount,
+			  ais->type25.bitdata, sizeof(ais->type25.bitdata));
     } else if (strstr(buf, "\"type\":26,") != NULL) {
 	status = json_read_object(buf, json_ais26, endptr);
+	if (status == 0)
+	    lenhex_unpack(data, &ais->type26.bitcount,
+			  ais->type26.bitdata, sizeof(ais->type26.bitdata));
     } else if (strstr(buf, "\"type\":27,") != NULL) {
 	status = json_read_object(buf, json_ais27, endptr);
     } else {
