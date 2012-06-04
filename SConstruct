@@ -1432,6 +1432,7 @@ aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
         'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing idempotency of unscaled JSON dump/decode for AIS"',
+    'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
     '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
         'grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk | diff -ub - $${TMPFILE}; '
         'rm -f $${TMPFILE}; ',

@@ -54,14 +54,14 @@
 {"class":"AIS","device":"stdin","type":25,"repeat":0,"mmsi":563648328,"scaled":false,"addressed":false,"structured":true,"dest_mmsi":0,"app_id":134,"data":"112:082900a31880a2a636fffe034108"}
 {"class":"AIS","device":"stdin","type":25,"repeat":0,"mmsi":440002170,"scaled":false,"addressed":false,"structured":false,"dest_mmsi":0,"app_id":0,"data":"128:00001a438085956deb8d86a0100008c8"}
 {"class":"AIS","device":"stdin","type":26,"repeat":1,"mmsi":137920605,"scaled":false,"addressed":true,"structured":true,"dest_mmsi":838351848,"app_id":23587,"data":"180:efa1708f32fc0a85c39e2c007006cf026c0f4882faad00","radio":0}
-{"class":"AIS","device":"stdin","type":26,"repeat":0,"mmsi":84148325,"scaled":false,"addressed":true,"structured":false,"dest_mmsi":834699643,"app_id":0,"data":"228:«Ôêq","radio":0}
+{"class":"AIS","device":"stdin","type":26,"repeat":0,"mmsi":84148325,"scaled":false,"addressed":true,"structured":false,"dest_mmsi":834699643,"app_id":0,"data":"228:c70205ef90710000000000000001000000f500c7006d00000019ad204c","radio":0}
 {"class":"AIS","device":"stdin","type":26,"repeat":2,"mmsi":633353704,"scaled":false,"addressed":false,"structured":true,"dest_mmsi":0,"app_id":24576,"data":"92:0014f2251db2ce9000ff9600","radio":0}
-{"class":"AIS","device":"stdin","type":26,"repeat":0,"mmsi":16777280,"scaled":false,"addressed":false,"structured":false,"dest_mmsi":0,"app_id":0,"data":"116:«","radio":0}
+{"class":"AIS","device":"stdin","type":26,"repeat":0,"mmsi":16777280,"scaled":false,"addressed":false,"structured":false,"dest_mmsi":0,"app_id":0,"data":"116:c700ef007300e0000000080018282e","radio":0}
 {"class":"AIS","device":"stdin","type":27,"repeat":1,"mmsi":236091959,"scaled":false,"status":3,"accuracy":false,"lon":-92521,"lat":52239,"speed":0,"course":0,"raim":false,"gnss":false}
 {"class":"AIS","device":"stdin","type":24,"repeat":0,"mmsi":271040660,"scaled":false,"shipname":"GOZDEM-1","shiptype":37,"vendorid":"1C00045","callsign":"YM5504","to_bow":0,"to_stern":24,"to_port":0,"to_starboard":6}
 {"class":"AIS","device":"stdin","type":5,"repeat":0,"mmsi":271010059,"scaled":false,"imo":0,"ais_version":0,"callsign":"TCA2350","shipname":"HEALTH CONTROL 13","shiptype":55,"to_bow":6,"to_stern":10,"to_port":2,"to_starboard":2,"epfd":1,"eta":"00-00T24:60Z","draught":20,"destination":"","dte":0}
 {"class":"AIS","device":"stdin","type":5,"repeat":0,"mmsi":271010059,"scaled":false,"imo":0,"ais_version":0,"callsign":"TCA2350","shipname":"HEALTH CONTROL 13","shiptype":55,"to_bow":6,"to_stern":10,"to_port":2,"to_starboard":2,"epfd":1,"eta":"00-00T24:60Z","draught":20,"destination":"","dte":0}
-{"class":"AIS","device":"stdin","type":6,"repeat":0,"mmsi":276747000,"scaled":false,"seqno":0,"dest_mmsi":2766160,"retransmit":false,"dac":1,"fid":40,"data":"16:\t8"}
+{"class":"AIS","device":"stdin","type":6,"repeat":0,"mmsi":276747000,"scaled":false,"seqno":0,"dest_mmsi":2766160,"retransmit":false,"dac":1,"fid":40,"data":"16:0938"}
 {"class":"AIS","device":"stdin","type":4,"repeat":0,"mmsi":2470052,"scaled":false,"timestamp":"0-00-00T24:60:60Z","accuracy":false,"lon":108600000,"lat":54600000,"epfd":0,"raim":false,"radio":180352}
 {"class":"AIS","device":"stdin","type":4,"repeat":0,"mmsi":2242115,"scaled":false,"timestamp":"2012-06-01T24:60:60Z","accuracy":true,"lon":-5031130,"lat":26021408,"epfd":7,"raim":false,"radio":133322}
 {"class":"AIS","device":"stdin","type":4,"repeat":0,"mmsi":972158237,"scaled":false,"timestamp":"10196-00-24T09:57:37Z","accuracy":true,"lon":123070132,"lat":65599231,"epfd":14,"raim":true,"radio":2248}

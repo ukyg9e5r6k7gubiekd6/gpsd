@@ -2979,7 +2979,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				      ais->type24.callsign));
 	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "mothership_\"mmsi\":%u}\r\n",
+			   "\"mothership_mmsi\":%u}\r\n",
 			   ais->type24.mothership_mmsi);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
