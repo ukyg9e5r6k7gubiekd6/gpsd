@@ -62,7 +62,7 @@ struct json_attr_t {
 };
 
 #define JSON_ATTR_MAX	31	/* max chars in JSON attribute name */
-#define JSON_VAL_MAX	120	/* max chars in JSON value part */
+#define JSON_VAL_MAX	512	/* max chars in JSON value part */
 
 #ifdef __cplusplus
 extern "C" {
