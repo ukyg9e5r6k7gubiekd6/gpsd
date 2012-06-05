@@ -1269,7 +1269,7 @@ struct ais_t
 		    unsigned int wgustdir;	/* wind gust direction */
 #define DAC1FID31_DIR_NOT_AVAILABLE		360
 		    int airtemp;		/* temperature, units 0.1C */
-#define DAC1FID31_AIRTEMP_NOT_AVAILABLE		-1084
+#define DAC1FID31_AIRTEMP_NOT_AVAILABLE		-1024
 		    unsigned int humidity;	/* relative humidity, % */
 #define DAC1FID31_HUMIDITY_NOT_AVAILABLE	101
 		    int dewpoint;		/* dew point, units 0.1C */
@@ -1278,12 +1278,12 @@ struct ais_t
 #define DAC1FID31_PRESSURE_NOT_AVAILABLE	511
 #define DAC1FID31_PRESSURE_HIGH			402
 		    unsigned int pressuretend;	/* tendency */
-#define DAC1FID31_PRESSURETREND_NOT_AVAILABLE	3
+#define DAC1FID31_PRESSURETEND_NOT_AVAILABLE	3
 		    bool visgreater;            /* visibility greater than */
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID31_VISIBILITY_NOT_AVAILABLE	127
 		    int waterlevel;		/* decimeters or cm */
-#define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	40001
+#define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	4001
 		    unsigned int leveltrend;	/* water level trend code */
 #define DAC1FID31_LEVELTREND_NOT_AVAILABLE	3
 		    unsigned int cspeed;	/* current speed in deciknots */
@@ -1307,11 +1307,13 @@ struct ais_t
 		    unsigned int seastate;	/* Beaufort scale, 0-12 */
 #define DAC1FID31_SEASTATE_NOT_AVAILABLE	15
 		    int watertemp;		/* units 0.1deg Celsius */
-#define DAC1FID31_PRECIPTYPE_NOT_AVAILABLE	7
+#define DAC1FID31_WATERTEMP_NOT_AVAILABLE	601
 		    unsigned int preciptype;	/* 0-7, enumerated */
+#define DAC1FID31_PRECIPTYPE_NOT_AVAILABLE	7
 		    unsigned int salinity;	/* units of 0.1% */
 #define DAC1FID31_SALINITY_NOT_AVAILABLE	510
-		    bool ice;			/* is there sea ice? */
+		    unsigned int ice;		/* is there sea ice? */
+#define DAC1FID31_ICE_NOT_AVAILABLE		3
 		} dac1fid31;
 	    };
 	} type8;

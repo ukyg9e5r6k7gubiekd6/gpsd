@@ -313,7 +313,7 @@ int json_ais_read(const char *buf,
 		    ais->type8.dac1fid31.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type8.dac1fid31.minute = AIS_MINUTE_NOT_AVAILABLE;
 		    // cppcheck-suppress uninitvar
-		    (void)sscanf(eta, "%02uT%02u:%02uZ",
+		    (void)sscanf(timestamp, "%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid31.day,
 				 &ais->type8.dac1fid31.hour, 
 				 &ais->type8.dac1fid31.minute);

@@ -2122,6 +2122,23 @@ void json_aivdm_dump(const struct ais_t *ais,
 		"decreasing",
 		"N/A",
 	    };
+	    // WMO 306, Code table 4.201
+	    const char *preciptypes[] = {
+		"reserved",
+		"rain",
+		"thunderstorm",
+		"freezing rain",
+		"mixed/ice",
+		"snow",
+		"reserved",
+		"N/A",
+	    };
+	    const char *ice[] = {
+		"no",
+		"yes",
+		"reserved",
+		"N/A",
+	    };
 	    switch (ais->type8.fid) {
 	    case 11:        /* IMO236 - Meteorological/Hydrological data */
 		/* some fields have been merged to an ISO8601 partial date */
@@ -2183,21 +2200,6 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.waterlevel * 0.1);
 
 		if (scaled) {
-		    const char *preciptypes[] = {
-			"rain",
-			"thunderstorm",
-			"freezing rain",
-			"mixed/ice",
-			"snow",
-			"reserved",
-			"reserved",
-			"N/A",
-		    };
-		    const char *ice[] = {
-			"no",
-			"yes",
-			"N/A",
-		    };
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"leveltrend\":\"%s\","
 				   "\"cspeed\":%.1f,\"cdir\":%u,"
@@ -2450,11 +2452,13 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"airtemp\":%1f,\"dewpoint\":%1f,"
-				   "\"pressure\":%u,\"pressuretend\":\"%s\",",
+				   "\"pressure\":%u,\"pressuretend\":\"%s\","
+				   "\"visgreater\":%s,",
 				   ais->type8.dac1fid31.airtemp * 0.1,
 				   ais->type8.dac1fid31.dewpoint * 0.1,
 				   ais->type8.dac1fid31.pressure,
-				   trends[ais->type8.dac1fid31.pressuretend]);
+				   trends[ais->type8.dac1fid31.pressuretend],
+				   JSON_BOOL(ais->type8.dac1fid31.visgreater));
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"airtemp\":%d,\"dewpoint\":%d,"
@@ -2484,16 +2488,6 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.waterlevel * 0.01);
 
 		if (scaled) {
-		    const char *preciptypes[] = {
-			"rain",
-			"thunderstorm",
-			"freezing rain",
-			"mixed/ice",
-			"snow",
-			"reserved",
-			"reserved",
-			"N/A",
-		    };
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"leveltrend\":\"%s\","
 				   "\"cspeed\":%.1f,\"cdir\":%u,"
@@ -2502,7 +2496,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"waveheight\":%.1f,\"waveperiod\":%u,\"wavedir\":%u,"
 				   "\"swellheight\":%.1f,\"swellperiod\":%u,\"swelldir\":%u,"
 				   "\"seastate\":%u,\"watertemp\":%.1f,"
-				   "\"preciptype\":%s,\"salinity\":%.1f,\"ice\":%s",
+				   "\"preciptype\":\"%s\",\"salinity\":%.1f,\"ice\":\"%s\"",
 				   trends[ais->type8.dac1fid31.leveltrend],
 				   ais->type8.dac1fid31.cspeed * 0.1,
 				   ais->type8.dac1fid31.cdir,
@@ -2522,7 +2516,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.watertemp * 0.1,
 				   preciptypes[ais->type8.dac1fid31.preciptype],
 				   ais->type8.dac1fid31.salinity * 0.1,
-				   JSON_BOOL(ais->type8.dac1fid31.ice));
+				   ice[ais->type8.dac1fid31.ice]);
 		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"leveltrend\":%u,"
@@ -2532,7 +2526,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"waveheight\":%u,\"waveperiod\":%u,\"wavedir\":%u,"
 				   "\"swellheight\":%u,\"swellperiod\":%u,\"swelldir\":%u,"
 				   "\"seastate\":%u,\"watertemp\":%d,"
-				   "\"preciptype\":%u,\"salinity\":%u,\"ice\":%s",
+				   "\"preciptype\":%u,\"salinity\":%u,\"ice\":%u",
 				   ais->type8.dac1fid31.leveltrend,
 				   ais->type8.dac1fid31.cspeed,
 				   ais->type8.dac1fid31.cdir,
@@ -2552,7 +2546,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.watertemp,
 				   ais->type8.dac1fid31.preciptype,
 				   ais->type8.dac1fid31.salinity,
-				   JSON_BOOL(ais->type8.dac1fid31.ice));
+				   ais->type8.dac1fid31.ice);
 		(void)strlcat(buf, "}\r\n", buflen);
 		imo = true;
 		break;

@@ -266,7 +266,7 @@
 # scaled parameter value, and CS the checksum).  The resulting AIVDO
 # sentence has been decoded using the Kanaton software.  Sent data,
 # kanaton decoder output and gpsd JSON output all match each other.
-#
+!AIVDO,1,1,4,B,8>jR06@0Bk3:wOli;<`WPhh<1rqVBQf2V@Pdt0J82avIM2b<<Rv1t<ot=@1,2*54
 # "18/05/2012 18:15:37" !AIVDO,1,1,4,B,8>jR06@0Bk3:wOli;<`WPhh<1rqVBQf2V@Pdt0J82avIM2b<<Rv1t<ot=@1,2*54
 #    AIS channel:1
 #    Message ID=8
@@ -312,12 +312,13 @@
 #    Precipitation=0x6(6 according to WMO)
 #    Salinity=0x35(5.3 permil)
 #    Ice=0x0(0)
-!AIVDO,1,1,4,B,8>jR06@0Bk3:wOli;<`WPhh<1rqVBQf2V@Pdt0J82avIM2b<<Rv1t<ot=@1,2*54
+#
 # Type 8, DAC 1, FID 11 (IMO 236 Met/Hydro message)
 # From Christian Gagneraud:
-# Same set-up as above, but the NMEA strem to the Kanaton has been stopped,
+# Same set-up as above, but the NMEA stream to the Kanaton has been stopped,
 # causing the Kanaton to send a message with all bits set to 1, meaning "no
 # data available"
+!AIVDO,1,1,4,B,8>jR06@0Bk3:vOli;L`nwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwt1,2*0E
 # "18/05/2012 18:45:37" !AIVDO,1,1,4,B,8>jR06@0Bk3:vOli;L`nwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwt1,2*0E
 #    AIS channel:1
 #    Message ID=8
@@ -363,7 +364,57 @@
 #    Precipitation=0x7(7 according to WMO)
 #    Salinity=0x1FF(51.1 permil)
 #    Ice=0x3(3)
-!AIVDO,1,1,4,B,8>jR06@0Bk3:vOli;L`nwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwt1,2*0E
+#
+# Type 8, DAC 1, FID 31 (IMO 289 Met/Hydro message)
+# From Christian Gagneraud:
+# Kanaton3 with all data marked as not available, checked with KanAton3_configV2.0.4.exe
+!AIVDO,1,1,5,A,8>jR06@0Gwli:QQUP3en?wvlFR06EuOwgwl?wnSwe7wvlOwwsAwwnSGmwvh0,0*51   
+# AIS channel:1
+# Message ID=8
+# Repeat Indicator=0
+# Source ID (MMSI)=992509977
+# Spare=0
+# Binary Data
+#    Application identifier=0x005F(95)
+#       DAC=1(International)
+#       Function identifier =31(Reserved for international operational applications)
+#    Application data:
+# Longitude=0x59DAC(006°008.044 W)
+# Latitude=0x30CB00(53°017.696 N)
+# Pos. acc.=0
+# Date and time=0xEDD8(29 23h24m)
+# Average wind speed=0x7F(127 kts)
+# Wind gust=0x7F(127 kt(s))
+# Wind direction=0x168(360 degree(s))
+# Wind gust direction=0x168(360 degree(s))
+# Air temperature=0xFFFFFC00(-102.4 degree(s) Celcius)
+# Relative humidity=0x65(101percent)
+# Dew point=0x1F5(50.1 degree(s) Celcius)
+# Air pressure=0x1FF(1310 hPa)
+# Air pressure tendency=0x3(3(Not available))
+# Horizontal visibility=0x7F(12.7 NM)
+# Water level=0xFA1(30.01 m)
+# Water level trend=0x3(3)
+# Surface current speed=0xFF(25.5 kts)
+# Surface current direction=0x168(360 degree(s))
+# Current speed #2=0xFF(25.5 kts)
+# Current direction #2=0x168(360 degree(s))
+# Current measuring level #2=0x1F(31 m)
+# Current speed #3=0xFF(25.5 kts)
+# Current direction #3=0x168(360 degree(s))
+# Current measuring level #3=0x1F(31 m)
+# Significant wave height=0xFF(25.5 m)
+# Wave period=0x3F(63 Sec)
+# Wave direction=168(360 degree(s))
+# Swell height=0xFF(25.5) m
+# Swell period=0x3F(63 Sec)
+# Swell direction=0x168(360 degree(s))
+# Sea state=0xD(13 Beaufort)
+# Water temperature=0x1F5(50.1 degree(s) Celcius)
+# Precipitation=0x7(7 according to WMO)
+# Salinity=0x1FE(51.0 permil)
+# Ice=0x3(3)
+#
 # Type 9:
 # From AISHub. Checked with the noaadata tools.
 !AIVDM,1,1,,A,91b77=h3h00nHt0Q3r@@07000<0b,0*69

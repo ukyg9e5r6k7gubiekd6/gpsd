@@ -1853,7 +1853,7 @@ update for it in <<IMO289>>.
 Breakdowns of selected Message 8 subtypes from <<IMO289>> follow.
 (These are not yet implemented by GPSD.)
 
-==== Meteorological and Hydrological Data (IMO236) ===
+==== Meteorological and Hydrological Data (IMO236) ====
 
 A message 8 subtype. DAC = 001 FID = 11. Fixed length, 352 bits.
 This is in use and described in <<IMO236>>, but has been deprecated by
@@ -1974,7 +1974,7 @@ WMO 306 Code table 4.201 specifies the following precipitatiuon type values:
 .Precipitation Types
 [width="50%",frame="topbot",options="header"]
 |===================================
-|Code |Position Fix Type
+|Code |Precipitation Type
 |0    |Reserved
 |1    |Rain
 |2    |Thunderstorm
@@ -3207,90 +3207,92 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |81-104  | 24 |Latitude           |lat         |I3|Unit = minutes * 0.001,
                                                   N positive, S negative,
                                                   91000 = N/A (default).
-|105-105 |  1 |Fix quality        |accuracy    |u|As in Common Navigation Block
+|105-105 |  1 |Fix quality        |accuracy    |b|As in Common Navigation Block
 |106-110 |  5 |Day                |day         |u|1-31, 0=N/A (default)
 |111-115 |  5 |Hour               |hour        |u|0-23, 24=N/A (default)
 |116-121 |  6 |Minute             |minute      |u|0-59, 60=N/A (default)
 |122-128 |  7 |Average Wind Speed |wspeed      |u|10-min avg wind speed: knots,
                                                   126 = wind >= 126 knots,
-                                                  17 = N/A (default).
+                                                  127 = N/A (default).
 |129-135 |  7 |Gust Speed         |wgust       |u|10-min max wind speed: knots,
                                                   126 = wind >= 126 knots,
-                                                  17 = N/A (default).
+                                                  127 = N/A (default).
 |136-144 |  9 |Wind Direction     |wdir        |u|0-359, true bearing,
                                                   360 = N/A (default).
 |145-153 |  9 |Wind Gust Direction|wgustdir    |u|0-359, true bearing,
                                                   360 = N/A (default).
-|154-164 | 11 |Air Temperature    |airtemp     |U1|Dry bulb temp: units 0.1C,
+|154-164 | 11 |Air Temperature    |airtemp     |I1|Dry bulb temp: units 0.1C,
                                                 -60.0 to +60.0,
                                                 -1024 = N/A (default).
 |165-171 |  7 |Relative Humidity  |humidity    |u|0-100%: units of 1%,
                                                   101 = N/A (default).
-|172-181 | 10 |Dew Point          |dewpoint    |U1|-20.0 to +50.0: units 0.1C,
+|172-181 | 10 |Dew Point          |dewpoint    |I1|-20.0 to +50.0: units 0.1C,
                                                   501 = N/A (default).
 |182-190 |  9 |Air Pressure       |pressure    |u|800-1200hPa, 1hPa,
                                                   0 = pressure <= 799hPa, 
                                                   402 = pressure >= 1201 hPa,
-                                                  403 = N/A (default).
+                                                  511 = N/A (default).
 |191-192 |  2 |Pressure Tendency  |pressuretend|e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
-                                                  3 - N/A (default).
+                                                  3 = N/A (default).
 |193-193 |  7 |Max. visibility    |visgreater  |b|Visibility greater than.
 |194-200 |  8 |Horiz. Visibility  |visibility  |U1|Units are 0.1 nautical miles,
                                                   127 = N/A (default).
 |201-212 | 12 |Water Level        |waterlevel  |U2|-10.0 to +30.0 in 0.01m,
                                                   -10.0m after scaling,
-                                                  40001 = N/A (default).
+                                                  4001 = N/A (default).
 |213-214 |  2 |Water Level Trend  |leveltrend  |e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
-                                                  3 - N/A (default).
+                                                  3 = N/A (default).
 |215-222 |  8 |Surface Current Speed  |cspeed  |U1|0.0-25.0: units 0.1 knot,
                                                    251 = speed >= 25.1 knots,
-                                                   255 N/A (default).
+                                                   255 = N/A (default).
 |223-231 |  9 |Surface Current Direction |cdir |u|0-359: deg. fom true north,
                                                        360 = N/A (default).
 |232-239 |  8 |Current Speed #2     |cspeed2   |U1|0.0-25.0 knots:
                                                    units 0.1 knot,
                                                    251 = speed >= 25.1 knots,
-                                                   255 N/A (default).
+                                                   255 = N/A (default).
 |240-248 |  9 |Current Direction #2 |cdir2     |u|0-359: true bearing,
                                                  360 = N/A (default).
 |249-253 |  5 |Measurement Depth #2 |cdepth2   |U1|0-30m down: units 0.1m,
                                                  31 = N/A (default).
 |254-261 |  8 |Current Speed #3     |cspeed3   |U1|0.0-25.0 knots: units 0.1 knot,
                                                  251 = speed >= 25.1 knots,
-                                                 255 N/A (default).
+                                                 255 = N/A (default).
 |262-270 |  9 |Current Direction #3 |cdir3     |u|0-359: true bearing,
                                                  360 = N/A (default).
 |271-275 |  5 |Measurement Depth #3 |cdepth3   |u|0-30m down: units 0.1m,
                                                  31 = N/A (default).
 |276-283 |  8 |Wave Height          |waveheight|U1|Height 0-25m: units 0.1m,
                                                   251 = height >= 25.1m,
-                                                  255 N/A (default).
+                                                  255 = N/A (default).
 |284-289 |  6 |Wave Period          |waveperiod|u|Seconds, 0-60, units 1s,
                                                   63 = N/A (default).
 |290-298 |  9 |Wave Direction       |wavedir   |u|0-359: true bearing,
                                                   360 = N/A (default).
 |299-306 |  8 |Swell Height         |swellheight|U1|0-25m: units 0.1m,
                                                    251 = height >= 25.1m,
-                                                   255 N/A (default).
+                                                   255 = N/A (default).
 |307-312 |  6 |Swell Period         |swellperiod|u|0-60, units 1s
                                                    360 = N/A (default)
 |313-321 |  9 |Swell Direction      |swelldir   |u|0-359: true bearing,
                                                    360 = N/A (default)
 |322-325 |  4 |Sea State            |seastate   |e|See "Beaufort scale"
-|326-335 | 10 |Water Temperature    |watertemp  |U1|-10.0 to 50.0 C: 
+|326-335 | 10 |Water Temperature    |watertemp  |I1|-10.0 to 50.0 C:
                                                    units 0.1 deg,
-                                                   601 = N/A (default)
-                                                   Otherwise -10m after scaling
-|336-338 |  3 |Precipitation        |precipitation  |u|preciptype
+                                                   501 = N/A (default)
+|336-338 |  3 |Precipitation        |preciptype  |e|See "Precipitation type"
 |339-347 |  9 |Salinity             |salinity   |U1|0.0-50.0%: units of 0.1%
                                                    501 = salinity >= 50.1% 
                                                    510 = N/A (default)
-                                                   511 - sensor not available
-|348-349 |  2 |Ice                  |ice        |b|Yes/No
+                                                   511 = sensor not available
+|348-349 |  2 |Ice                  |ice        |u| 0 = No
+                                                    1 = Yes
+                                                    2 = (reserved for future use)
+                                                    3 = not available = default
 |350-359 | 10 |Spare                |           |x|Not used
 |==============================================================================
 

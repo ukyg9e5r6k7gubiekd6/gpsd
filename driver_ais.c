@@ -10,6 +10,7 @@
  * For the special IMO messages (types 6 and 8), only the following have been
  * tested against known-good decodings:
  *  - IMO236 met/hydro message: Type=8, DAC=1, FI=11 
+ *  - IMO289 met/hydro message: Type=8, DAC=1, FI=31
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -31,11 +32,8 @@
 #define DAC1FID11_LEVEL_OFFSET			100
 #define DAC1FID11_WATERTEMP_OFFSET		100
 
-#define DAC1FID31_AIRTEMP_OFFSET		600
-#define DAC1FID31_DEWPOINT_OFFSET		200
-#define DAC1FID31_PRESSURE_OFFSET		-800
-#define DAC1FID31_LEVEL_OFFSET			100
-#define DAC1FID31_WATERTEMP_OFFSET		100
+#define DAC1FID31_PRESSURE_OFFSET		-799
+#define DAC1FID31_LEVEL_OFFSET			1000
 
 static void from_sixbit(char *bitvec, uint start, int count, char *to)
 {
@@ -543,8 +541,8 @@ bool ais_binary_decode(struct ais_t *ais,
 			    ais->type8.dac1fid29.text);
 		break;
 	    case 31:        /* IMO289 - Meteorological/Hydrological data */
-		ais->type8.dac1fid31.lat		= SBITS(56, 24);
-		ais->type8.dac1fid31.lon		= SBITS(80, 25);
+		ais->type8.dac1fid31.lon		= SBITS(56, 25);
+		ais->type8.dac1fid31.lat		= SBITS(81, 24);
 		ais->type8.dac1fid31.accuracy       = (bool)UBITS(105, 1);
 		ais->type8.dac1fid31.day		= UBITS(106, 5);
 		ais->type8.dac1fid31.hour		= UBITS(111, 5);
@@ -553,17 +551,15 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid31.wgust		= UBITS(129, 7);
 		ais->type8.dac1fid31.wdir		= UBITS(136, 9);
 		ais->type8.dac1fid31.wgustdir	= UBITS(145, 9); 
-		ais->type8.dac1fid31.airtemp	= SBITS(154, 11)
-		    - DAC1FID31_AIRTEMP_OFFSET;
+		ais->type8.dac1fid31.airtemp	= SBITS(154, 11);
 		ais->type8.dac1fid31.humidity	= UBITS(165, 7);
-		ais->type8.dac1fid31.dewpoint	= UBITS(172, 10)
-		    - DAC1FID31_DEWPOINT_OFFSET;
+		ais->type8.dac1fid31.dewpoint	= SBITS(172, 10);
 		ais->type8.dac1fid31.pressure	= UBITS(182, 9)
 		    - DAC1FID31_PRESSURE_OFFSET;
 		ais->type8.dac1fid31.pressuretend	= UBITS(191, 2);
 		ais->type8.dac1fid31.visgreater	= UBITS(193, 1);
 		ais->type8.dac1fid31.visibility	= UBITS(194, 7);
-		ais->type8.dac1fid31.waterlevel	= UBITS(200, 12)
+		ais->type8.dac1fid31.waterlevel	= UBITS(201, 12)
 		    - DAC1FID31_LEVEL_OFFSET;
 		ais->type8.dac1fid31.leveltrend	= UBITS(213, 2);
 		ais->type8.dac1fid31.cspeed		= UBITS(215, 8);
@@ -581,8 +577,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid31.swellperiod	= UBITS(307, 6);
 		ais->type8.dac1fid31.swelldir	= UBITS(313, 9);
 		ais->type8.dac1fid31.seastate	= UBITS(322, 4);
-		ais->type8.dac1fid31.watertemp	= UBITS(326, 10)
-		    - DAC1FID31_WATERTEMP_OFFSET;
+		ais->type8.dac1fid31.watertemp	= SBITS(326, 10);
 		ais->type8.dac1fid31.preciptype	= UBITS(336, 3);
 		ais->type8.dac1fid31.salinity	= UBITS(339, 9);
 		ais->type8.dac1fid31.ice		= UBITS(348, 2);
