@@ -1871,100 +1871,99 @@ broadcast of this message of 12 minutes.
 |40-49   | 10 |DAC                |dac         |u|DAC = 001
 |50-55   |  6 |FID                |fid         |u|FID = 11
 |56-79   | 24 |Latitude           |lat         |I3|Unit = minutes * 0.001,
-                                                  91000 = N/A (default),
+                                                  0x7FFFFF = N/A (default),
                                                   E positive, W negative.
 |80-104  | 25 |Longitude          |lon         |I3|Unit = minutes * 0.001,
-                                                  181000 = N/A (default),
+                                                  0xFFFFFF = N/A (default),
                                                   N positive, S negative.
-|105-109 |  5 |Day (UTC)          |day         |u|1-31, 0=N/A (default)
-|110-114 |  5 |Hour (UTC)         |hour        |u|0-23, >=24=N/A (default)
-|115-120 |  6 |Minute (UTC)       |minute      |u|0-59, >=60=N/A (default)
+|105-109 |  5 |Day (UTC)          |day         |u|1-31, 31=N/A (default)
+|110-114 |  5 |Hour (UTC)         |hour        |u|0-23, 31=N/A (default)
+|115-120 |  6 |Minute (UTC)       |minute      |u|0-59, 63=N/A (default)
 |121-127 |  7 |Average Wind Speed |wspeed      |u|10-min avg wind speed, knots,
                                                   127 = N/A (default).
 |128-134 |  7 |Gust Speed         |wgust       |u|10-min max wind speed, knots,
                                                   127 = N/A (default).
 |135-143 |  9 |Wind Direction     |wdir        |u|0-359, degrees fom true north
-                                                   >=360 = N/A (default)
+                                                   511 = N/A (default)
 |144-152 |  9 |Wind Gust Direction|wgustdir    |u|0-359, degrees fom true north
-                                                   >=360 = N/A (default)
+                                                   511 = N/A (default)
 |153-163 | 11 |Air Temperature    |temperature |u|Dry bulb temp: 0.1 deg C
                                                   -60.0 to +60.0,
-                                                  -1024 = N/A (default),
-                                                  else -60deg after scaling.
+                                                  2047 = N/A (default),
 |164-170 |  7 |Relative Humidity  |humidity    |u|0-100%, units of 1%,
                                                   127 = N/A (default).
 |171-180 | 10 |Dew Point          |dewpoint    |u|-20.0 to +50.0: 0.1 deg C,
                                                   1023 = N/A (default),
-                                                  else -20.0deg after scaling.
 |181-189 |  9 |Air Pressure       |pressure    |u|800-1200hPa: units 1hPa,
-                                                  402 = pressure >= 1201 hPa,
-                                                  403 - N/A (default).
-                                                  else add 400 to value.
+                                                  511 = N/A (default).
 |190-191 |  2 |Pressure Tendency  |pressuretend|e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
                                                   3 - N/A (default).
 |192-199 |  8 |Horiz. Visibility  |visibility  |U1|0-25.0, units of 0.1nm
-                                                  >= 250 = N/A (default)
+                                                  255 = N/A (default)
 |200-208 |  9 |Water Level        |waterlevel  |U1|-10.0 to +30.0 in 0.1m,
-                                                  1923 = N/A (default).
-                                                  else -10m after scaling.
+                                                  511 = N/A (default).
 |209-210 |  2 |Water Level Trend  |leveltrend  |e|0 = steady,
                                                   1 = decreasing,
                                                   2 = increasing,
                                                   3 - N/A (default).
 |211-218 |  8 |Surface Current Speed     |cspeed  |U1|0.0-25.0 knots: units 0.1 knot
 |219-227 |  9 |Surface Current Direction |cdir    |u|0-359: deg from true north,
-                                                     >=360 = N/A (default)
+                                                     511 = N/A (default)
 |228-235 |  8 |Current Speed #2     |cspeed2   |U1|0.0-25.0 in units of 0.1 knot,
-                                                  >=251 = N/A (default).
+                                                  255 = N/A (default).
 |236-244 |  9 |Current Direction #2 |cdir2     |u|0-359: deg. fom true north,
-                                                  >=360 = N/A (default)
+                                                  511 = N/A (default)
 |245-249 |  5 |Measurement Depth #2 |cdepth2   |U1|0-30m down: units 0.1m,
                                                    31 = N/A (default).
 |250-257 |  8 |Current Speed #3     |cspeed3   |U1|0.0-25.0: units of 0.1 knot,
-                                                   >=251 = N/A (default).
+                                                   255 = N/A (default).
 |258-266 |  9 |Current Direction #3 |cdir3     |u|0-359: degrees fom true north,
-                                                  >=360 = N/A (default).
+                                                  511 = N/A (default).
 |267-271 |  5 |Measurement Depth #3 |cdepth3   |U1|0-30m down: units 0.1m,
                                                   31 = N/A (default).
 |272-279 |  8 |Wave height          |waveheight|U1|0-25m: units of 0.1m,
-                                                  >=251 = N/A (default).
+                                                  255 = N/A (default).
 |280-285 |  6 |Wave period          |waveperiod|u|Seconds 0-60:
-                                                  >= 61 = N/A (default).
+                                                  63 = N/A (default).
 |286-294 |  9 |Wave direction       |wavedir   |u|0-359: deg. fom true north,
-                                                  >=360 = N/A (default).
+                                                  511 = N/A (default).
 |295-302 |  8 |Swell height         |swellheight|U1|0-25m: units of 0.1m
-                                                   >=251 = N/A (default).
+                                                   255 = N/A (default).
 |303-308 |  6 |Swell period         |swellperiod|u|Seconds 0-60:
-                                                   >= 61 = N/A (default).
+                                                   63 = N/A (default).
 |309-317 |  9 |Swell direction      |swelldir   |u|0-359: deg. fom true north,
-                                                   >=360 = N/A (default).
+                                                   511 = N/A (default).
 |318-321 |  4 |Sea state            |seastate   |e|See "Beaufort Scale"
 |322-331 | 10 |Water Temperature    |watertemp  |U1|-10.0 to 50.0: units 0.1 C,
-                                                   >=601 = N/A (default).
-                                                   else -10.0m after scaling.
+                                                   1023 = N/A (default).
 |332-334 |  3 |Precipitation        |preciptype |e|See "Precipitation Types"
 |335-343 |  9 |Salinity             |salinity   |U1|0.0-50.0%: units 0.1%,
-                                                   >=500 = N/A (default)
-|344-345 |  2 |Ice                  |ice        |b|Yes/No
+                                                   511 = N/A (default)
+|344-345 |  2 |Ice                  |ice        |e| 0 = No
+                                                    1 = Yes
+                                                    2 = (reserved for future use)
+                                                    3 = not available = default
 |346-351 |  6 |Spare                |           |x|Not used
 |==============================================================================
 
 <<IMO236>> says "If there is no data available, default value to be
 transmitted is the highest available binary value for that particular
-data field." and no defaults are explicitly specified. However, the
-replacement FID=31 message has default values which do not obey this
-rule. It would be good practice for a decoder to treat any
-out-of-bounds value as N/A; the N/A formulas in the table above
-reflect this.
+data field.", the above table reflects that. 
+The day, hour and minute have to be considered not available when all 
+three are set to their individual "N/A" value.
+For the latitude and the longitude, the highest positive value is used, 
+as the highest available binary value for a signed integer is -1, which 
+would forbid the -0.001/-0.001 position. 
+The replacement FID=31 message has different default values that remove any ambiguities.
 
 <<IMO236>> gives the length of this message as 352, but lists only 336 
 payload bits.
 
 Water level is deviation from local chart datum and includes tide.
 
-The waveheight field is labeled as "Significant" in <<IMO238>>, 
+The waveheight field is labeled as "Significant" in <<IMO236>>, 
 for whatever that means.
 
 The seastate field has a note in <<IMO236>> reading "(manual input?)"?

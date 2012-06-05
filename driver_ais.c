@@ -26,15 +26,6 @@
  * Parse the data from the device
  */
 
-#define DAC1FID11_AIRTEMP_OFFSET		600
-#define DAC1FID11_DEWPOINT_OFFSET		200
-#define DAC1FID11_PRESSURE_OFFSET		-800
-#define DAC1FID11_LEVEL_OFFSET			100
-#define DAC1FID11_WATERTEMP_OFFSET		100
-
-#define DAC1FID31_PRESSURE_OFFSET		-799
-#define DAC1FID31_LEVEL_OFFSET			1000
-
 static void from_sixbit(char *bitvec, uint start, int count, char *to)
 {
     /*@ +type @*/
@@ -408,17 +399,13 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid11.wgust		= UBITS(128, 7);
 		ais->type8.dac1fid11.wdir		= UBITS(135, 9);
 		ais->type8.dac1fid11.wgustdir	= UBITS(144, 9); 
-		ais->type8.dac1fid11.airtemp	= UBITS(153, 11)
-		    - DAC1FID11_AIRTEMP_OFFSET;
+		ais->type8.dac1fid11.airtemp	= UBITS(153, 11);
 		ais->type8.dac1fid11.humidity	= UBITS(164, 7);
-		ais->type8.dac1fid11.dewpoint	= UBITS(171, 10)
-		    - DAC1FID11_DEWPOINT_OFFSET;
-		ais->type8.dac1fid11.pressure	= UBITS(181, 9)
-		    - DAC1FID11_PRESSURE_OFFSET;
+		ais->type8.dac1fid11.dewpoint	= UBITS(171, 10);
+		ais->type8.dac1fid11.pressure	= UBITS(181, 9);
 		ais->type8.dac1fid11.pressuretend	= UBITS(190, 2);
 		ais->type8.dac1fid11.visibility	= UBITS(192, 8);
-		ais->type8.dac1fid11.waterlevel	= UBITS(200, 9)
-		    - DAC1FID11_LEVEL_OFFSET;
+		ais->type8.dac1fid11.waterlevel	= UBITS(200, 9);
 		ais->type8.dac1fid11.leveltrend	= UBITS(209, 2);
 		ais->type8.dac1fid11.cspeed		= UBITS(211, 8);
 		ais->type8.dac1fid11.cdir		= UBITS(219, 9);
@@ -435,8 +422,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid11.swellperiod	= UBITS(303, 6);
 		ais->type8.dac1fid11.swelldir	= UBITS(309, 9);
 		ais->type8.dac1fid11.seastate	= UBITS(318, 4);
-		ais->type8.dac1fid11.watertemp	= UBITS(322, 10)
-		    - DAC1FID11_WATERTEMP_OFFSET;
+		ais->type8.dac1fid11.watertemp	= UBITS(322, 10);
 		ais->type8.dac1fid11.preciptype	= UBITS(332, 3);
 		ais->type8.dac1fid11.salinity	= UBITS(335, 9);
 		ais->type8.dac1fid11.ice		= UBITS(344, 2);
@@ -554,13 +540,11 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid31.airtemp	= SBITS(154, 11);
 		ais->type8.dac1fid31.humidity	= UBITS(165, 7);
 		ais->type8.dac1fid31.dewpoint	= SBITS(172, 10);
-		ais->type8.dac1fid31.pressure	= UBITS(182, 9)
-		    - DAC1FID31_PRESSURE_OFFSET;
+		ais->type8.dac1fid31.pressure	= UBITS(182, 9);
 		ais->type8.dac1fid31.pressuretend	= UBITS(191, 2);
 		ais->type8.dac1fid31.visgreater	= UBITS(193, 1);
 		ais->type8.dac1fid31.visibility	= UBITS(194, 7);
-		ais->type8.dac1fid31.waterlevel	= UBITS(201, 12)
-		    - DAC1FID31_LEVEL_OFFSET;
+		ais->type8.dac1fid31.waterlevel	= UBITS(201, 12);
 		ais->type8.dac1fid31.leveltrend	= UBITS(213, 2);
 		ais->type8.dac1fid31.cspeed		= UBITS(215, 8);
 		ais->type8.dac1fid31.cdir		= UBITS(223, 9);

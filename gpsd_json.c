@@ -2118,7 +2118,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	if (ais->type8.dac == 1) {
 	    const char *trends[] = {
 		"steady",
-		"increasing"
+		"increasing",
 		"decreasing",
 		"N/A",
 	    };
@@ -2169,13 +2169,13 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"airtemp\":%.1f,\"dewpoint\":%.1f,"
 				   "\"pressure\":%u,\"pressuretend\":\"%s\",",
-				   ais->type8.dac1fid11.airtemp * 0.1,
-				   ais->type8.dac1fid11.dewpoint * 0.1,
-				   ais->type8.dac1fid11.pressure,
+				   (ais->type8.dac1fid11.airtemp - DAC1FID11_AIRTEMP_OFFSET) / DAC1FID11_AIRTEMP_SCALE,
+				   (ais->type8.dac1fid11.dewpoint - DAC1FID11_DEWPOINT_OFFSET) / DAC1FID11_DEWPOINT_SCALE,
+				   ais->type8.dac1fid11.pressure - DAC1FID11_PRESSURE_OFFSET,
 				   trends[ais->type8.dac1fid11.pressuretend]);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"airtemp\":%d,\"dewpoint\":%d,"
+				   "\"airtemp\":%u,\"dewpoint\":%u,"
 				   "\"pressure\":%u,\"pressuretend\":%u,",
 				   ais->type8.dac1fid11.airtemp,
 				   ais->type8.dac1fid11.dewpoint,
@@ -2185,19 +2185,19 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%.1f,",
-				   ais->type8.dac1fid11.visibility * 0.1);
+				   ais->type8.dac1fid11.visibility / DAC1FID11_VISIBILITY_SCALE);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%u,",
 				   ais->type8.dac1fid11.visibility);
 		if (!scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"waterlevel\":%d,",
+				   "\"waterlevel\":%u,",
 				   ais->type8.dac1fid11.waterlevel);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"waterlevel\":%.1f,",
-				   ais->type8.dac1fid11.waterlevel * 0.1);
+				   (ais->type8.dac1fid11.waterlevel - DAC1FID11_WATERLEVEL_OFFSET) / DAC1FID11_WATERLEVEL_SCALE);
 
 		if (scaled) {
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2208,26 +2208,26 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"waveheight\":%.1f,\"waveperiod\":%u,\"wavedir\":%u,"
 				   "\"swellheight\":%.1f,\"swellperiod\":%u,\"swelldir\":%u,"
 				   "\"seastate\":%u,\"watertemp\":%.1f,"
-				   "\"preciptype\":%s,\"salinity\":%.1f,\"ice\":%s",
+				   "\"preciptype\":\"%s\",\"salinity\":%.1f,\"ice\":\"%s\"",
 				   trends[ais->type8.dac1fid11.leveltrend],
-				   ais->type8.dac1fid11.cspeed * 0.1,
+				   ais->type8.dac1fid11.cspeed / DAC1FID11_CSPEED_SCALE,
 				   ais->type8.dac1fid11.cdir,
-				   ais->type8.dac1fid11.cspeed2 * 0.1,
+				   ais->type8.dac1fid11.cspeed2 / DAC1FID11_CSPEED_SCALE,
 				   ais->type8.dac1fid11.cdir2,
 				   ais->type8.dac1fid11.cdepth2,
-				   ais->type8.dac1fid11.cspeed3 * 0.1,
+				   ais->type8.dac1fid11.cspeed3 / DAC1FID11_CSPEED_SCALE,
 				   ais->type8.dac1fid11.cdir3,
 				   ais->type8.dac1fid11.cdepth3,
-				   ais->type8.dac1fid11.waveheight * 0.1,
+				   ais->type8.dac1fid11.waveheight / DAC1FID11_WAVEHEIGHT_SCALE,
 				   ais->type8.dac1fid11.waveperiod,
 				   ais->type8.dac1fid11.wavedir,
-				   ais->type8.dac1fid11.swellheight * 0.1,
+				   ais->type8.dac1fid11.swellheight / DAC1FID11_WAVEHEIGHT_SCALE,
 				   ais->type8.dac1fid11.swellperiod,
 				   ais->type8.dac1fid11.swelldir,
 				   ais->type8.dac1fid11.seastate,
-				   ais->type8.dac1fid11.watertemp * 0.1,
+				   (ais->type8.dac1fid11.watertemp - DAC1FID11_WATERTEMP_OFFSET) / DAC1FID11_WATERTEMP_SCALE,
 				   preciptypes[ais->type8.dac1fid11.preciptype],
-				   ais->type8.dac1fid11.salinity * 0.1,
+				   ais->type8.dac1fid11.salinity / DAC1FID11_SALINITY_SCALE,
 				   ice[ais->type8.dac1fid11.ice]);
 		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2237,7 +2237,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"cspeed3\":%u,\"cdir3\":%u,\"cdepth3\":%u,"
 				   "\"waveheight\":%u,\"waveperiod\":%u,\"wavedir\":%u,"
 				   "\"swellheight\":%u,\"swellperiod\":%u,\"swelldir\":%u,"
-				   "\"seastate\":%u,\"watertemp\":%d,"
+				   "\"seastate\":%u,\"watertemp\":%u,"
 				   "\"preciptype\":%u,\"salinity\":%u,\"ice\":%u",
 				   ais->type8.dac1fid11.leveltrend,
 				   ais->type8.dac1fid11.cspeed,
@@ -2451,12 +2451,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type8.dac1fid31.humidity);
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"airtemp\":%1f,\"dewpoint\":%1f,"
+				   "\"airtemp\":%.1f,\"dewpoint\":%.1f,"
 				   "\"pressure\":%u,\"pressuretend\":\"%s\","
 				   "\"visgreater\":%s,",
-				   ais->type8.dac1fid31.airtemp * 0.1,
-				   ais->type8.dac1fid31.dewpoint * 0.1,
-				   ais->type8.dac1fid31.pressure,
+				   ais->type8.dac1fid31.airtemp / DAC1FID31_AIRTEMP_SCALE,
+				   ais->type8.dac1fid31.dewpoint / DAC1FID31_DEWPOINT_SCALE,
+				   ais->type8.dac1fid31.pressure - DAC1FID31_PRESSURE_OFFSET,
 				   trends[ais->type8.dac1fid31.pressuretend],
 				   JSON_BOOL(ais->type8.dac1fid31.visgreater));
 		else
@@ -2473,7 +2473,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%.1f,",
-				   ais->type8.dac1fid31.visibility * 0.1);
+				   ais->type8.dac1fid31.visibility / DAC1FID31_VISIBILITY_SCALE);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%u,",
@@ -2485,7 +2485,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"waterlevel\":%.1f,",
-				   ais->type8.dac1fid31.waterlevel * 0.01);
+				   (ais->type8.dac1fid31.waterlevel - DAC1FID31_WATERLEVEL_OFFSET) / DAC1FID31_WATERLEVEL_SCALE);
 
 		if (scaled) {
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2498,24 +2498,24 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"seastate\":%u,\"watertemp\":%.1f,"
 				   "\"preciptype\":\"%s\",\"salinity\":%.1f,\"ice\":\"%s\"",
 				   trends[ais->type8.dac1fid31.leveltrend],
-				   ais->type8.dac1fid31.cspeed * 0.1,
+				   ais->type8.dac1fid31.cspeed / DAC1FID31_CSPEED_SCALE,
 				   ais->type8.dac1fid31.cdir,
-				   ais->type8.dac1fid31.cspeed2 * 0.1,
+				   ais->type8.dac1fid31.cspeed2 / DAC1FID31_CSPEED_SCALE,
 				   ais->type8.dac1fid31.cdir2,
 				   ais->type8.dac1fid31.cdepth2,
-				   ais->type8.dac1fid31.cspeed3 * 0.1,
+				   ais->type8.dac1fid31.cspeed3 / DAC1FID31_CSPEED_SCALE,
 				   ais->type8.dac1fid31.cdir3,
 				   ais->type8.dac1fid31.cdepth3,
-				   ais->type8.dac1fid31.waveheight * 0.1,
+				   ais->type8.dac1fid31.waveheight / DAC1FID31_HEIGHT_SCALE,
 				   ais->type8.dac1fid31.waveperiod,
 				   ais->type8.dac1fid31.wavedir,
-				   ais->type8.dac1fid31.swellheight * 0.1,
+				   ais->type8.dac1fid31.swellheight / DAC1FID31_HEIGHT_SCALE,
 				   ais->type8.dac1fid31.swellperiod,
 				   ais->type8.dac1fid31.swelldir,
 				   ais->type8.dac1fid31.seastate,
-				   ais->type8.dac1fid31.watertemp * 0.1,
+				   ais->type8.dac1fid31.watertemp / DAC1FID31_WATERTEMP_SCALE,
 				   preciptypes[ais->type8.dac1fid31.preciptype],
-				   ais->type8.dac1fid31.salinity * 0.1,
+				   ais->type8.dac1fid31.salinity / DAC1FID31_SALINITY_SCALE,
 				   ice[ais->type8.dac1fid31.ice]);
 		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
