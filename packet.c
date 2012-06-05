@@ -412,6 +412,8 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
     case NMEA_BANG:
 	if (c == 'A')
 	    lexer->state = AIS_LEAD_1;
+	else if (c == 'B')
+	    lexer->state = AIS_LEAD_ALT1;
 	else
 	    lexer->state = GROUND_STATE;
 	break;
@@ -422,6 +424,18 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
     case AIS_LEAD_2:
+	if (isalpha(c))
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case AIS_LEAD_ALT1:
+	if (c == 'S')
+	    lexer->state = AIS_LEAD_ALT2;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case AIS_LEAD_ALT2:
 	if (isalpha(c))
 	    lexer->state = NMEA_LEADER_END;
 	else
@@ -1466,6 +1480,10 @@ void packet_parse(struct gps_packet_t *lexer)
 	    if (strncmp((char *)lexer->inbuffer, "!AIVDM", 6) == 0)
 		packet_accept(lexer, AIVDM_PACKET);
 	    else if (strncmp((char *)lexer->inbuffer, "!AIVDO", 6) == 0)
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (strncmp((char *)lexer->inbuffer, "!BSVDM", 6) == 0)
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (strncmp((char *)lexer->inbuffer, "!BSVDO", 6) == 0)
 		packet_accept(lexer, AIVDM_PACKET);
 	    else
 #endif /* AIVDM_ENABLE */
