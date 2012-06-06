@@ -529,6 +529,13 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 
     tp = arr->arr.strings.store;
     arrcount = 0;
+
+    /* Check for empty array */
+    while (isspace(*cp))
+	cp++;
+    if (*cp == ']')
+	goto breakout;
+
     for (offset = 0; offset < arr->maxlen; offset++) {
 	json_debug_trace((1, "Looking at %s\n", cp));
 	switch (arr->element_type) {

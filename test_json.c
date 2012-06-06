@@ -206,6 +206,11 @@ static const struct json_attr_t json_attrs_8[] = {
     {"foe",  t_integer, .addr.integer = &foe, .map=enum_table},
     {NULL},
 };
+
+/* Case 9: Like case 6 but w/ an empty array */
+
+static const char *json_str9 = "{\"parts\":[]}";
+
 /*@ +fullinitblock @*/
 /* *INDENT-ON* */
 
@@ -302,6 +307,10 @@ int main(int argc UNUSED, char *argv[]UNUSED)
     assert_integer("fee", fee, 3);
     assert_integer("fie", fie, 6);
     assert_integer("foe", foe, 14);
+
+    status = json_read_object(json_str9, json_attrs_6, NULL);
+    assert_case(9, status);
+    assert_integer("dumbcount", dumbcount, 0);
 
     (void)fprintf(stderr, "succeeded.\n");
 
