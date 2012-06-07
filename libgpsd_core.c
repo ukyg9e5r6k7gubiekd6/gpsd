@@ -15,7 +15,7 @@
 #include <libgen.h>
 #include <math.h>
 #include <string.h>
-#include <fcntl.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
@@ -25,12 +25,9 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
-#if defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S)
-#include <linux/can.h>
-#include <linux/can/raw.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
-#endif /* defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S) */
+#if defined(NMEA2000_ENABLE)
+#include "driver_nmea2000.h"
+#endif /* defined(NMEA2000_ENABLE) */
 
 static void gpsd_run_device_hook(char *device_name, char *hook)
 {
@@ -306,55 +303,7 @@ int gpsd_open(struct gps_device_t *session)
 #endif /* PASSTHROUGH_ENABLE */
 #if defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S)
     if (strncmp(session->gpsdata.dev.path, "nmea2000://", 11) == 0) {
-	char interface_name[strlen(session->gpsdata.dev.path)];
-	socket_t sock;
-	int status;
-	struct ifreq ifr;
-	struct sockaddr_can addr;
-
-	session->gpsdata.gps_fd = -1;
-	/* Create the socket */
-	sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
- 
-	if (sock == -1) {
-	    gpsd_report(LOG_ERROR, "NMEA2000 open: can not get socket.\n");
-	    return -1;
-	}
-
-	status = fcntl(sock, F_SETFL, O_NONBLOCK);
-	if (status != 0) {
-	    gpsd_report(LOG_ERROR, "NMEA2000 open: can not set socket to O_NONBLOCK.\n");
-	    close(sock);
-	    return -1;
-	}
-
-	(void)strlcpy(interface_name, session->gpsdata.dev.path + 11, sizeof(interface_name));
-	/* Locate the interface you wish to use */
-	strlcpy(ifr.ifr_name, interface_name, sizeof(ifr.ifr_name));
-	status = ioctl(sock, SIOCGIFINDEX, &ifr); /* ifr.ifr_ifindex gets filled 
-						   * with that device's index */
-
-	if (status != 0) {
-	    gpsd_report(LOG_ERROR, "NMEA2000 open: can not find CAN device.\n");
-	    close(sock);
-	    return -1;
-	}
-
-	/* Select that CAN interface, and bind the socket to it. */
-	addr.can_family = AF_CAN;
-	addr.can_ifindex = ifr.ifr_ifindex;
-	status = bind(sock, (struct sockaddr*)&addr, sizeof(addr) );
-	if (status != 0) {
-	    gpsd_report(LOG_ERROR, "NMEA2000 open: bind failed.\n");
-	    close(sock);
-	    return -1;
-	}
-
-	gpsd_switch_driver(session, "NMEA2000");
-	session->gpsdata.gps_fd = sock;
-	session->sourcetype = source_can;
-	session->servicetype = service_sensor;
-	return session->gpsdata.gps_fd;
+        return nmea2000_open(session);
     }
 #endif /* defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S) */
     /* fall through to plain serial open */
