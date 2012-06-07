@@ -15,7 +15,7 @@
 #include <libgen.h>
 #include <math.h>
 #include <string.h>
-
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
