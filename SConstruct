@@ -736,7 +736,7 @@ libgpsd_sources = [
 # Inspired by Richard Levitte's (slightly buggy) code at
 # http://markmail.org/message/spttz3o4xrsftofr
 
-def VersionedSharedLibrary(env, libname, libgps_version, lib_objs=[], parse_flags=[]):
+def VersionedSharedLibrary(env, libname, version, lib_objs=[], parse_flags=[]):
     platform = env.subst('$PLATFORM')
     shlib_pre_action = None
     shlib_suffix = env.subst('$SHLIBSUFFIX')
@@ -744,8 +744,8 @@ def VersionedSharedLibrary(env, libname, libgps_version, lib_objs=[], parse_flag
     shlink_flags = SCons.Util.CLVar(env.subst('$SHLINKFLAGS'))
 
     if platform == 'posix':
-        ilib_suffix = shlib_suffix + '.' + libgps_version
-        (major, age, revision) = libgps_version.split(".")
+        ilib_suffix = shlib_suffix + '.' + version
+        (major, age, revision) = version.split(".")
         soname = "lib" + libname + shlib_suffix + "." + major
         shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
     elif platform == 'cygwin':
@@ -753,9 +753,9 @@ def VersionedSharedLibrary(env, libname, libgps_version, lib_objs=[], parse_flag
         shlink_flags += [ '-Wl,-Bsymbolic',
                           '-Wl,--out-implib,${TARGET.base}.a' ]
     elif platform == 'darwin':
-        ilib_suffix = '.' + libgps_version + shlib_suffix
-        shlink_flags += [ '-current_version', '%s' % libgps_version,
-                          '-compatibility_version', '%s' % libgps_version,
+        ilib_suffix = '.' + version + shlib_suffix
+        shlink_flags += [ '-current_version', '%s' % version,
+                          '-compatibility_version', '%s' % version,
                           '-undefined', 'dynamic_lookup' ]
 
     ilib = env.SharedLibrary(libname,lib_objs,
@@ -763,20 +763,20 @@ def VersionedSharedLibrary(env, libname, libgps_version, lib_objs=[], parse_flag
                             SHLINKFLAGS=shlink_flags, parse_flags=parse_flags)
 
     if platform == 'darwin':
-        if libgps_version.count(".") != 2:
+        if version.count(".") != 2:
             # We need a library name in libfoo.x.y.z.dylib form to proceed
             raise ValueError
-        lib = 'lib' + libname + '.' + libgps_version + '.dylib'
+        lib = 'lib' + libname + '.' + version + '.dylib'
         lib_no_ver = 'lib' + libname + '.dylib'
         # Link libfoo.x.y.z.dylib to libfoo.dylib
         env.AddPostAction(ilib, 'rm -f %s; ln -s %s %s' % (
             lib_no_ver, lib, lib_no_ver))
         env.Clean(lib, lib_no_ver)
     elif platform == 'posix':
-        if libgps_version.count(".") != 2:
+        if version.count(".") != 2:
             # We need a library name in libfoo.so.x.y.z form to proceed
             raise ValueError
-        lib = "lib" + libname + ".so." + libgps_version
+        lib = "lib" + libname + ".so." + version
         suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
         # For libfoo.so.x.y.z, links libfoo.so libfoo.so.x.y libfoo.so.x
         major_name = shlib_suffix + "." + lib.split(".")[2]
@@ -816,7 +816,7 @@ else:
     def Library(env, target, sources, version, parse_flags=[]):
         return VersionedSharedLibrary(env=env,
                                      libname=target,
-                                     libgps_version=version,
+                                     version=version,
                                      lib_objs=sources,
                                      parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: \
