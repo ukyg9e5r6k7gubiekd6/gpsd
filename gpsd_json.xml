@@ -343,14 +343,6 @@ yet, only the "class" field will reliably be present.</para>
 	error estimate.</entry>
 </row>
 <row>
-	<entry>xdop</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Longitudinal dilution of precision, a dimensionless
-	factor which should be multiplied by a base UERE to get an
-	error estimate.</entry>
-</row>
-<row>
 	<entry>satellites</entry>
 	<entry>Yes</entry>
 	<entry>list</entry>
