@@ -430,9 +430,9 @@ class Base:
         ("EPX", lambda s, r: s.update_err(r, "epx")),
         ("EPY", lambda s, r: s.update_err(r, "epy")),
         ("EPV", lambda s, r: s.update_err(r, "epv")),
-        ("EPS", lambda s, r: s.update_err(r, "eps")),
-        ("EPC", lambda s, r: s.update_err(r, "epc")),
-        ("EPD", lambda s, r: s.update_err(r, "epd")),
+        ("EPS", lambda s, r: s.update_err_speed(r, "eps")),
+        ("EPC", lambda s, r: s.update_err_speed(r, "epc")),
+        ("EPD", lambda s, r: s.update_err_degrees(r, "epd")),
         )
     def __init__(self, deg_type):
         self.deg_type = deg_type
@@ -713,6 +713,20 @@ class Base:
             return "%.3f %s" % (
                 getattr(data, errtype) * self.conversions.altfactor,
                 self.conversions.altunits)
+        else:
+            return "n/a"
+
+    def update_err_speed(self, data, errtype):
+        if hasattr(data, errtype):
+            return "%.3f %s" % (
+                getattr(data, errtype) * self.conversions.speedfactor,
+                self.conversions.speedunits)
+        else:
+            return "n/a"
+
+    def update_err_degrees(self, data, errtype):
+        if hasattr(data, errtype):
+            return "%.3f °" % ( getattr(data, errtype) )
         else:
             return "n/a"
 
