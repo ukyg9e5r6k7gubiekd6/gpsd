@@ -443,7 +443,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 25:			/* Binary Message, Single Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%u|%u|%u|%zd:%s\r\n",
+		       "%u|%u|%u|%u|%zd:%s",
 		       (uint) ais->type25.addressed,
 		       (uint) ais->type25.structured,
 		       ais->type25.dest_mmsi,
@@ -454,7 +454,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	break;
     case 26:			/* Binary Message, Multiple Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%u|%u|%u|%u|%zd:%s:%u\r\n",
+		       "%u|%u|%u|%u|%zd:%s:%u",
 		       (uint) ais->type26.addressed,
 		       (uint) ais->type26.structured,
 		       ais->type26.dest_mmsi,
@@ -463,6 +463,18 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       gpsd_hexdump(ais->type26.bitdata,
 				    (ais->type26.bitcount + 7) / 8),
 		       ais->type26.radio);
+	break;
+    case 27:			/* Long Range AIS Broadcast message */
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "%u|%u|%d|%d|%u|%u|%u|%u",
+		       ais->type27.status,
+		       (uint)ais->type27.accuracy,
+		       ais->type27.lon,
+		       ais->type27.lat,
+		       ais->type27.speed,
+		       ais->type27.course,
+		       (uint)ais->type27.raim,
+		       (uint)ais->type27.gnss);
 	break;
     default:
 	(void)snprintf(buf + strlen(buf),

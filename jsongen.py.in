@@ -808,7 +808,10 @@ def generate(spec):
                 else:
                     print >>sys.stderr, "explicit length specification required"
                     raise SystemExit, 1
-            report += "    };\n"
+            report += """\
+        {NULL}
+    };
+"""
     # Generate the main structure definition describing this parse.
     # It may have object subarrays.
     if pacify_splint:
