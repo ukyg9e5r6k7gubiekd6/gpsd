@@ -1362,7 +1362,7 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 	if (lexer->debug >= LOG_RAW+1)
 	    gpsd_report(LOG_RAW+1, "Packet type %d accepted %zu = %s\n",
 		    packet_type, packetlen,
-			gpsd_hexdump((char *)lexer->outbuffer, lexer->outbuflen));
+			gpsd_packetdump((char *)lexer->outbuffer, lexer->outbuflen));
     } else {
 	gpsd_report(LOG_ERROR, "Rejected too long packet type %d len %zu\n",
 		    packet_type, packetlen);
@@ -1380,7 +1380,7 @@ static void packet_discard(struct gps_packet_t *lexer)
 	gpsd_report(LOG_RAW + 1,
 		    "Packet discard of %zu, chars remaining is %zu = %s\n",
 		    discard, remaining,
-		    gpsd_hexdump((char *)lexer->inbuffer, lexer->inbuflen));
+		    gpsd_packetdump((char *)lexer->inbuffer, lexer->inbuflen));
 }
 
 static void character_discard(struct gps_packet_t *lexer)
@@ -1391,7 +1391,7 @@ static void character_discard(struct gps_packet_t *lexer)
     if (lexer->debug >= LOG_RAW+1)
 	gpsd_report(LOG_RAW + 1, "Character discarded, buffer %zu chars = %s\n",
 		    lexer->inbuflen,
-		    gpsd_hexdump((char *)lexer->inbuffer, lexer->inbuflen));
+		    gpsd_packetdump((char *)lexer->inbuffer, lexer->inbuflen));
 }
 
 /* get 0-origin big-endian words relative to start of packet buffer */
@@ -2019,7 +2019,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	    gpsd_report(LOG_RAW + 1,
 			"Read %zd chars to buffer offset %zd (total %zd): %s\n",
 			recvd, lexer->inbuflen, lexer->inbuflen + recvd,
-			gpsd_hexdump((char *)lexer->inbufptr, (size_t) recvd));
+			gpsd_packetdump((char *)lexer->inbufptr, (size_t) recvd));
 	lexer->inbuflen += recvd;
     }
     gpsd_report(LOG_SPIN, "packet_get() fd %d -> %zd (%d)\n",

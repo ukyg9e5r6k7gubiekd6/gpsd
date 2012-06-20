@@ -507,7 +507,7 @@ ssize_t gpsd_write(struct gps_device_t * session, const char *buf, size_t len)
     /* extra guard prevents expensive hexdump calls */
     if (session->context->debug >= LOG_IO)
 	gpsd_report(LOG_IO, "=> GPS: %s%s\n",
-		    gpsd_hexdump((char *)buf, len), ok ? "" : " FAILED");
+		    gpsd_packetdump((char *)buf, len), ok ? "" : " FAILED");
     return status;
 }
 
