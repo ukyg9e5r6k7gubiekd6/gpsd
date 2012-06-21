@@ -1729,7 +1729,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    // The use of %u instead of %04u for the year is to allow 
 	    // out-of-band year values. 
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"timestamp\":\"%u-%02u-%02uT%02u:%02u:%02uZ\","
+			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
 			   "\"epfd\":\"%s\",\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
@@ -1745,7 +1745,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type4.raim), ais->type4.radio);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"timestamp\":\"%u-%02u-%02uT%02u:%02u:%02uZ\","
+			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
 			   "\"epfd\":%u,\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
