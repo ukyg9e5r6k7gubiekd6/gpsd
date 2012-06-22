@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.36, May 2012
+v1.37, June 2012
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -1902,7 +1902,7 @@ broadcast of this message of 12 minutes.
                                                   3 - N/A (default).
 |192-199 |  8 |Horiz. Visibility  |visibility  |U1|0-25.0, units of 0.1nm
                                                   255 = N/A (default)
-|200-208 |  9 |Water Level        |waterlevel  |U1|-10.0 to +30.0 in 0.1m,
+|200-208 |  9 |Water Level        |waterlevel  |I1|-10.0 to +30.0 in 0.1m,
                                                   511 = N/A (default).
 |209-210 |  2 |Water Level Trend  |leveltrend  |e|0 = steady,
                                                   1 = decreasing,
@@ -4595,3 +4595,6 @@ Notice and Time to Enter Port descriptions.
 
 Version 1.36 adds breakdowns of Aid to Navigation monitoring messages
 used in the UK and the Republic of Ireland.
+
+Version 1.37 corrects a field signedness error in the IMO236 Met/Hydro
+message.

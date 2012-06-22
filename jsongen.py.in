@@ -311,7 +311,7 @@ ais_specs = (
         ('pressure',     'uinteger',  'DAC1FID11_PRESSURE_NOT_AVAILABLE'),
         ('pressuretend', 'uinteger',  'DAC1FID11_PRESSURETREND_NOT_AVAILABLE'),
         ('visibility',   'uinteger',  'DAC1FID11_VISIBILITY_NOT_AVAILABLE'),
-        ('waterlevel',   'uinteger',  'DAC1FID11_WATERLEVEL_NOT_AVAILABLE'),
+        ('waterlevel',   'integer',   'DAC1FID11_WATERLEVEL_NOT_AVAILABLE'),
         ('leveltrend',   'uinteger',  'DAC1FID11_WATERLEVELTREND_NOT_AVAILABLE'),
         ('cspeed',       'uinteger',  'DAC1FID11_CSPEED_NOT_AVAILABLE'),
         ('cdir',         'uinteger',  'DAC1FID11_CDIR_NOT_AVAILABLE'),
