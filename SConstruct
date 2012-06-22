@@ -269,7 +269,10 @@ def installdir(dir, add_destdir=True):
     return wrapped
 
 # Honor the specified installation prefix in link paths.
-env.Prepend(LIBPATH=[installdir('libdir')])
+if not env["sysroot"]:
+    env.Prepend(LIBPATH=[installdir('libdir')])
+else:
+    env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir')])
 if env["shared"]:
     env.Prepend(RPATH=[installdir('libdir')])
 
