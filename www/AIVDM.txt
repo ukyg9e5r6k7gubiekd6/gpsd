@@ -3238,7 +3238,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |193-193 |  7 |Max. visibility    |visgreater  |b|Visibility greater than.
 |194-200 |  8 |Horiz. Visibility  |visibility  |U1|Units are 0.1 nautical miles,
                                                   127 = N/A (default).
-|201-212 | 12 |Water Level        |waterlevel  |U2|-10.0 to +30.0 in 0.01m,
+|201-212 | 12 |Water Level        |waterlevel  |I2|-10.0 to +30.0 in 0.01m,
                                                   -10.0m after scaling,
                                                   4001 = N/A (default).
 |213-214 |  2 |Water Level Trend  |leveltrend  |e|0 = steady,
@@ -4596,5 +4596,5 @@ Notice and Time to Enter Port descriptions.
 Version 1.36 adds breakdowns of Aid to Navigation monitoring messages
 used in the UK and the Republic of Ireland.
 
-Version 1.37 corrects a field signedness error in the IMO236 Met/Hydro
-message.
+Version 1.37 corrects a field signedness error in the IMO236 and
+IMO289 Met/Hydro messages.
