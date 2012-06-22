@@ -42,7 +42,7 @@ different types in them, and a copy of the RTCM3 standard at latest revision
 
 This one is mine and Kurt Schwehr's. Support is currently nearly
 complete; the only missing cases are a handful of IMO 236 and IMO 289
-message 6 and 8 subtypes - specifically, 6/23, 8/21. 8/22, 8/24, and
+message 6 and 8 subtypes - specifically, 6/23, 8/21, 8/22, 8/24, and
 8/26.
 
 **** Addressed case of AIS Types 25 and 26 is not handled.

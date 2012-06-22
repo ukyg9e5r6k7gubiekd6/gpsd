@@ -881,7 +881,6 @@ in use for type 6.
 DAC/FID pairs are assigned separately per message type.
 
 A list of binary layouts for selected subtypes of message 6 follows.
-(These are not yet implemented by GPSD.)
 
 ==== IMO236 Dangerous Cargo Indication ====
 
@@ -1851,7 +1850,6 @@ the IMO289 1/31.  FID type 17 is in use; there is a proposed
 update for it in <<IMO289>>.
 
 Breakdowns of selected Message 8 subtypes from <<IMO289>> follow.
-(These are not yet implemented by GPSD.)
 
 ==== Meteorological and Hydrological Data (IMO236) ====
 
