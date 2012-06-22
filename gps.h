@@ -1154,7 +1154,7 @@ struct ais_t
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID11_VISIBILITY_NOT_AVAILABLE	255
 #define DAC1FID11_VISIBILITY_SCALE		10.0
-		    unsigned int waterlevel;		/* decimeters */
+		    int waterlevel;		/* decimeters */
 #define DAC1FID11_WATERLEVEL_NOT_AVAILABLE	511
 #define DAC1FID11_WATERLEVEL_OFFSET		100
 #define DAC1FID11_WATERLEVEL_SCALE		10.0
