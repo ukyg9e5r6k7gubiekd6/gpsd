@@ -1136,13 +1136,13 @@ struct ais_t
 		    unsigned int wdir;		/* wind direction */
 		    unsigned int wgustdir;	/* wind gust direction */
 #define DAC1FID11_WDIR_NOT_AVAILABLE		511
-		    unsigned int airtemp;		/* temperature, units 0.1C */
+		    unsigned int airtemp;	/* temperature, units 0.1C */
 #define DAC1FID11_AIRTEMP_NOT_AVAILABLE		2047
 #define DAC1FID11_AIRTEMP_OFFSET		600
 #define DAC1FID11_AIRTEMP_SCALE			10.0
 		    unsigned int humidity;	/* relative humidity, % */
 #define DAC1FID11_HUMIDITY_NOT_AVAILABLE	127
-		    unsigned int dewpoint;		/* dew point, units 0.1C */
+		    unsigned int dewpoint;	/* dew point, units 0.1C */
 #define DAC1FID11_DEWPOINT_NOT_AVAILABLE	1023
 #define DAC1FID11_DEWPOINT_OFFSET		200
 #define DAC1FID11_DEWPOINT_SCALE		10.0
@@ -1184,7 +1184,7 @@ struct ais_t
 		    unsigned int swelldir;	/* direction in degrees */
 		    unsigned int seastate;	/* Beaufort scale, 0-12 */
 #define DAC1FID11_SEASTATE_NOT_AVAILABLE	15
-		    unsigned int watertemp;		/* units 0.1deg Celsius */
+		    unsigned int watertemp;	/* units 0.1deg Celsius */
 #define DAC1FID11_WATERTEMP_NOT_AVAILABLE	1023
 #define DAC1FID11_WATERTEMP_OFFSET		100
 #define DAC1FID11_WATERTEMP_SCALE		10.0
@@ -1198,20 +1198,20 @@ struct ais_t
 		} dac1fid11;
 		/* IMO236 - Fairway Closed */
 		struct {
-		    char reason[20+1];	/* Reason For Closing */
+		    char reason[20+1];		/* Reason For Closing */
 		    char closefrom[20+1];	/* Location Of Closing From */
-		    char closeto[20+1];	/* Location of Closing To */
+		    char closeto[20+1];		/* Location of Closing To */
 		    unsigned int radius;	/* Radius extension */
 #define AIS_DAC1FID13_RADIUS_NOT_AVAILABLE 10001
 		    unsigned int extunit;	/* Unit of extension */
 #define AIS_DAC1FID13_EXTUNIT_NOT_AVAILABLE 0
-		    unsigned int fday;	/* From day (UTC) */
+		    unsigned int fday;		/* From day (UTC) */
 		    unsigned int fmonth;	/* From month (UTC) */
-		    unsigned int fhour;	/* From hour (UTC) */
+		    unsigned int fhour;		/* From hour (UTC) */
 		    unsigned int fminute;	/* From minute (UTC) */
-		    unsigned int tday;	/* To day (UTC) */
+		    unsigned int tday;		/* To day (UTC) */
 		    unsigned int tmonth;	/* To month (UTC) */
-		    unsigned int thour;	/* To hour (UTC) */
+		    unsigned int thour;		/* To hour (UTC) */
 		    unsigned int tminute;	/* To minute (UTC) */
 		} dac1fid13;
 	        /* IMO236 - Extended ship and voyage data */
