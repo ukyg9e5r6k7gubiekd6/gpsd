@@ -2189,7 +2189,6 @@ the WMO bit.  Field layouts after that bit vary depending on it.
 
 A message 8 subtype described in <<IMO289>>. DAC = 001 FID = 21. Fixed
 length: 360 bits.
-
 .Weather observation report from ship: Non-WMO variant
 [frame="topbot",options="header"]
 |==============================================================================
@@ -2231,7 +2230,7 @@ length: 360 bits.
                                                    -1024 = N/A (default).
 |301-310 |  10 |Water Temperature  |watertemp   |U1|-10.0 to 50.0 in 0.1 C,
                                                    601 = N/A (default),
-                                                   else -10m after scaling.
+                                                   else -10C after scaling.
 |311-316 |  6  |Wave period        |waveperiod  |u|Seconds: 0-60,
                                                    63 = N/A (default).
 |317-324 |  8  |Wave height        |waveheight  |U1|0-25m in units of 0.1m,
@@ -2252,11 +2251,12 @@ visibility equipment was reached and the visibility reading shall be
 regarded as > x.x NM.
 
 The standard (<<IMO289>>) does not list the WMO FM13 codes.
+The following table applies:
 
 .Weather observation report from ship: WMO Code 45501
 [width="50%",frame="topbot",options="header"]
 |===========================================================================
-|Code |Position Fix Type
+|Code |Precipitation Type
 |  0  |Clear (no clouds at any level)
 |  1  |Cloudy
 |  2  |Rain
