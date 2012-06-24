@@ -1696,8 +1696,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   turnlegend,
 			   speedlegend,
 			   JSON_BOOL(ais->type1.accuracy),
-			   ais->type1.lon / AIS_LATLON_SCALE,
-			   ais->type1.lat / AIS_LATLON_SCALE,
+			   ais->type1.lon / AIS_LATLON_DIV,
+			   ais->type1.lat / AIS_LATLON_DIV,
 			   ais->type1.course,
 			   ais->type1.heading,
 			   ais->type1.second,
@@ -1739,8 +1739,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type4.minute,
 			   ais->type4.second,
 			   JSON_BOOL(ais->type4.accuracy),
-			   ais->type4.lon / AIS_LATLON_SCALE,
-			   ais->type4.lat / AIS_LATLON_SCALE,
+			   ais->type4.lon / AIS_LATLON_DIV,
+			   ais->type4.lat / AIS_LATLON_DIV,
 			   epfd_legends[ais->type4.epfd],
 			   JSON_BOOL(ais->type4.raim), ais->type4.radio);
 	} else {
@@ -1932,8 +1932,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lon\":%.3f,\"lat\":%.3f}\r\n",
-				   ais->type6.dac1fid18.lon/AIS_LATLON3_SCALE,
-				   ais->type6.dac1fid18.lat/AIS_LATLON3_SCALE);
+				   ais->type6.dac1fid18.lon/AIS_LATLON3_DIV,
+				   ais->type6.dac1fid18.lat/AIS_LATLON3_DIV);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"lon\":%d,\"lat\":%d}\r\n",
@@ -1999,8 +1999,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"berth_lon\":%.3f,"
 			       "\"berth_lat\":%.3f,"
 			       "\"berth_depth\":%.1f}\r\n",
-			       ais->type6.dac1fid20.berth_lon / AIS_LATLON3_SCALE,
-			       ais->type6.dac1fid20.berth_lat / AIS_LATLON3_SCALE,
+			       ais->type6.dac1fid20.berth_lon / AIS_LATLON3_DIV,
+			       ais->type6.dac1fid20.berth_lat / AIS_LATLON3_DIV,
 			       ais->type6.dac1fid20.berth_depth * 0.1);
             else
                 (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2054,8 +2054,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			    "{\"lon\":%.4f,\"lat\":%.4f},",
-			    ais->type6.dac1fid28.waypoints[i].lon / AIS_LATLON4_SCALE,
-			    ais->type6.dac1fid28.waypoints[i].lat / AIS_LATLON4_SCALE);
+			    ais->type6.dac1fid28.waypoints[i].lon / AIS_LATLON4_DIV,
+			    ais->type6.dac1fid28.waypoints[i].lat / AIS_LATLON4_DIV);
 		    else
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			    "{\"lon\":%d,\"lat\":%d},",
@@ -2086,8 +2086,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		  if (scaled)
 		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			  "{\"lon\":%.3f,\"lat\":%.3f,",
-			  tp->lon / AIS_LATLON3_SCALE,
-			  tp->lat / AIS_LATLON3_SCALE);
+			  tp->lon / AIS_LATLON3_DIV,
+			  tp->lat / AIS_LATLON3_DIV);
 		  else
 		      (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			  "{\"lon\":%d,\"lat\":%d,",
@@ -2165,8 +2165,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lat\":%.3f,\"lon\":%.3f,",
-				   ais->type8.dac1fid11.lat / AIS_LATLON3_SCALE,
-				   ais->type8.dac1fid11.lon / AIS_LATLON3_SCALE);
+				   ais->type8.dac1fid11.lat / AIS_LATLON3_DIV,
+				   ais->type8.dac1fid11.lon / AIS_LATLON3_DIV);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lat\":%d,\"lon\":%d,",
@@ -2188,8 +2188,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"airtemp\":%.1f,\"dewpoint\":%.1f,"
 				   "\"pressure\":%u,\"pressuretend\":\"%s\",",
-				   (ais->type8.dac1fid11.airtemp - DAC1FID11_AIRTEMP_OFFSET) / DAC1FID11_AIRTEMP_SCALE,
-				   (ais->type8.dac1fid11.dewpoint - DAC1FID11_DEWPOINT_OFFSET) / DAC1FID11_DEWPOINT_SCALE,
+				   (ais->type8.dac1fid11.airtemp - DAC1FID11_AIRTEMP_OFFSET) / DAC1FID11_AIRTEMP_DIV,
+				   (ais->type8.dac1fid11.dewpoint - DAC1FID11_DEWPOINT_OFFSET) / DAC1FID11_DEWPOINT_DIV,
 				   ais->type8.dac1fid11.pressure - DAC1FID11_PRESSURE_OFFSET,
 				   trends[ais->type8.dac1fid11.pressuretend]);
 		else
@@ -2204,7 +2204,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%.1f,",
-				   ais->type8.dac1fid11.visibility / DAC1FID11_VISIBILITY_SCALE);
+				   ais->type8.dac1fid11.visibility / DAC1FID11_VISIBILITY_DIV);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%u,",
@@ -2216,7 +2216,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"waterlevel\":%.1f,",
-				   (ais->type8.dac1fid11.waterlevel - DAC1FID11_WATERLEVEL_OFFSET) / DAC1FID11_WATERLEVEL_SCALE);
+				   (ais->type8.dac1fid11.waterlevel - DAC1FID11_WATERLEVEL_OFFSET) / DAC1FID11_WATERLEVEL_DIV);
 
 		if (scaled) {
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2229,24 +2229,24 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"seastate\":%u,\"watertemp\":%.1f,"
 				   "\"preciptype\":\"%s\",\"salinity\":%.1f,\"ice\":\"%s\"",
 				   trends[ais->type8.dac1fid11.leveltrend],
-				   ais->type8.dac1fid11.cspeed / DAC1FID11_CSPEED_SCALE,
+				   ais->type8.dac1fid11.cspeed / DAC1FID11_CSPEED_DIV,
 				   ais->type8.dac1fid11.cdir,
-				   ais->type8.dac1fid11.cspeed2 / DAC1FID11_CSPEED_SCALE,
+				   ais->type8.dac1fid11.cspeed2 / DAC1FID11_CSPEED_DIV,
 				   ais->type8.dac1fid11.cdir2,
 				   ais->type8.dac1fid11.cdepth2,
-				   ais->type8.dac1fid11.cspeed3 / DAC1FID11_CSPEED_SCALE,
+				   ais->type8.dac1fid11.cspeed3 / DAC1FID11_CSPEED_DIV,
 				   ais->type8.dac1fid11.cdir3,
 				   ais->type8.dac1fid11.cdepth3,
-				   ais->type8.dac1fid11.waveheight / DAC1FID11_WAVEHEIGHT_SCALE,
+				   ais->type8.dac1fid11.waveheight / DAC1FID11_WAVEHEIGHT_DIV,
 				   ais->type8.dac1fid11.waveperiod,
 				   ais->type8.dac1fid11.wavedir,
-				   ais->type8.dac1fid11.swellheight / DAC1FID11_WAVEHEIGHT_SCALE,
+				   ais->type8.dac1fid11.swellheight / DAC1FID11_WAVEHEIGHT_DIV,
 				   ais->type8.dac1fid11.swellperiod,
 				   ais->type8.dac1fid11.swelldir,
 				   ais->type8.dac1fid11.seastate,
-				   (ais->type8.dac1fid11.watertemp - DAC1FID11_WATERTEMP_OFFSET) / DAC1FID11_WATERTEMP_SCALE,
+				   (ais->type8.dac1fid11.watertemp - DAC1FID11_WATERTEMP_OFFSET) / DAC1FID11_WATERTEMP_DIV,
 				   preciptypes[ais->type8.dac1fid11.preciptype],
-				   ais->type8.dac1fid11.salinity / DAC1FID11_SALINITY_SCALE,
+				   ais->type8.dac1fid11.salinity / DAC1FID11_SALINITY_DIV,
 				   ice[ais->type8.dac1fid11.ice]);
 		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2353,8 +2353,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			    "\"lat\":%.3f,\"lon\":%.3f,",
-			    ais->type8.dac1fid17.targets[i].lat / AIS_LATLON3_SCALE,
-			    ais->type8.dac1fid17.targets[i].lon / AIS_LATLON3_SCALE);
+			    ais->type8.dac1fid17.targets[i].lat / AIS_LATLON3_DIV,
+			    ais->type8.dac1fid17.targets[i].lon / AIS_LATLON3_DIV);
 		    else
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			    "\"lat\":%d,\"lon\":%d,",
@@ -2378,8 +2378,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			ais->type8.dac1fid19.linkage,
 			json_stringify(buf1, sizeof(buf1),
 				       ais->type8.dac1fid19.station),
-			ais->type8.dac1fid19.lon / AIS_LATLON3_SCALE,
-			ais->type8.dac1fid19.lat / AIS_LATLON3_SCALE,
+			ais->type8.dac1fid19.lon / AIS_LATLON3_DIV,
+			ais->type8.dac1fid19.lat / AIS_LATLON3_DIV,
 			ais->type8.dac1fid19.status,
 			SIGNAL_DISPLAY(ais->type8.dac1fid19.signal),
 			ais->type8.dac1fid19.hour,
@@ -2432,8 +2432,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			    "{\"lon\":%.4f,\"lat\":%.4f},",
-			    ais->type8.dac1fid27.waypoints[i].lon / AIS_LATLON4_SCALE,
-			    ais->type8.dac1fid27.waypoints[i].lat / AIS_LATLON4_SCALE);
+			    ais->type8.dac1fid27.waypoints[i].lon / AIS_LATLON4_DIV,
+			    ais->type8.dac1fid27.waypoints[i].lat / AIS_LATLON4_DIV);
 		    else
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			    "{\"lon\":%d,\"lat\":%d},",
@@ -2459,8 +2459,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lat\":%.3f,\"lon\":%.3f,",
-				   ais->type8.dac1fid31.lat / AIS_LATLON3_SCALE,
-				   ais->type8.dac1fid31.lon / AIS_LATLON3_SCALE);
+				   ais->type8.dac1fid31.lat / AIS_LATLON3_DIV,
+				   ais->type8.dac1fid31.lon / AIS_LATLON3_DIV);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"lat\":%d,\"lon\":%d,",
@@ -2486,8 +2486,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"airtemp\":%.1f,\"dewpoint\":%.1f,"
 				   "\"pressure\":%u,\"pressuretend\":\"%s\","
 				   "\"visgreater\":%s,",
-				   ais->type8.dac1fid31.airtemp / DAC1FID31_AIRTEMP_SCALE,
-				   ais->type8.dac1fid31.dewpoint / DAC1FID31_DEWPOINT_SCALE,
+				   ais->type8.dac1fid31.airtemp / DAC1FID31_AIRTEMP_DIV,
+				   ais->type8.dac1fid31.dewpoint / DAC1FID31_DEWPOINT_DIV,
 				   ais->type8.dac1fid31.pressure - DAC1FID31_PRESSURE_OFFSET,
 				   trends[ais->type8.dac1fid31.pressuretend],
 				   JSON_BOOL(ais->type8.dac1fid31.visgreater));
@@ -2505,7 +2505,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%.1f,",
-				   ais->type8.dac1fid31.visibility / DAC1FID31_VISIBILITY_SCALE);
+				   ais->type8.dac1fid31.visibility / DAC1FID31_VISIBILITY_DIV);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"visibility\":%u,",
@@ -2517,7 +2517,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"waterlevel\":%.1f,",
-				   (ais->type8.dac1fid31.waterlevel - DAC1FID31_WATERLEVEL_OFFSET) / DAC1FID31_WATERLEVEL_SCALE);
+				   (ais->type8.dac1fid31.waterlevel - DAC1FID31_WATERLEVEL_OFFSET) / DAC1FID31_WATERLEVEL_DIV);
 
 		if (scaled) {
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2530,24 +2530,24 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"seastate\":%u,\"watertemp\":%.1f,"
 				   "\"preciptype\":\"%s\",\"salinity\":%.1f,\"ice\":\"%s\"",
 				   trends[ais->type8.dac1fid31.leveltrend],
-				   ais->type8.dac1fid31.cspeed / DAC1FID31_CSPEED_SCALE,
+				   ais->type8.dac1fid31.cspeed / DAC1FID31_CSPEED_DIV,
 				   ais->type8.dac1fid31.cdir,
-				   ais->type8.dac1fid31.cspeed2 / DAC1FID31_CSPEED_SCALE,
+				   ais->type8.dac1fid31.cspeed2 / DAC1FID31_CSPEED_DIV,
 				   ais->type8.dac1fid31.cdir2,
 				   ais->type8.dac1fid31.cdepth2,
-				   ais->type8.dac1fid31.cspeed3 / DAC1FID31_CSPEED_SCALE,
+				   ais->type8.dac1fid31.cspeed3 / DAC1FID31_CSPEED_DIV,
 				   ais->type8.dac1fid31.cdir3,
 				   ais->type8.dac1fid31.cdepth3,
-				   ais->type8.dac1fid31.waveheight / DAC1FID31_HEIGHT_SCALE,
+				   ais->type8.dac1fid31.waveheight / DAC1FID31_HEIGHT_DIV,
 				   ais->type8.dac1fid31.waveperiod,
 				   ais->type8.dac1fid31.wavedir,
-				   ais->type8.dac1fid31.swellheight / DAC1FID31_HEIGHT_SCALE,
+				   ais->type8.dac1fid31.swellheight / DAC1FID31_HEIGHT_DIV,
 				   ais->type8.dac1fid31.swellperiod,
 				   ais->type8.dac1fid31.swelldir,
 				   ais->type8.dac1fid31.seastate,
-				   ais->type8.dac1fid31.watertemp / DAC1FID31_WATERTEMP_SCALE,
+				   ais->type8.dac1fid31.watertemp / DAC1FID31_WATERTEMP_DIV,
 				   preciptypes[ais->type8.dac1fid31.preciptype],
-				   ais->type8.dac1fid31.salinity / DAC1FID31_SALINITY_SCALE,
+				   ais->type8.dac1fid31.salinity / DAC1FID31_SALINITY_DIV,
 				   ice[ais->type8.dac1fid31.ice]);
 		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2629,8 +2629,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   altlegend,
 			   speedlegend,
 			   JSON_BOOL(ais->type9.accuracy),
-			   ais->type9.lon / AIS_LATLON_SCALE,
-			   ais->type9.lat / AIS_LATLON_SCALE,
+			   ais->type9.lon / AIS_LATLON_DIV,
+			   ais->type9.lat / AIS_LATLON_DIV,
 			   ais->type9.course / 10.0,
 			   ais->type9.second,
 			   ais->type9.regional,
@@ -2698,8 +2698,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 	if (scaled) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"%zd:%s\"}\r\n",
-			   ais->type17.lon / AIS_GNSS_LATLON_SCALE,
-			   ais->type17.lat / AIS_GNSS_LATLON_SCALE,
+			   ais->type17.lon / AIS_GNSS_LATLON_DIV,
+			   ais->type17.lat / AIS_GNSS_LATLON_DIV,
 			   ais->type17.bitcount,
 			   gpsd_hexdump((char *)ais->type17.bitdata,
 					(ais->type17.bitcount + 7) / 8));
@@ -2724,8 +2724,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type18.reserved,
 			   ais->type18.speed / 10.0,
 			   JSON_BOOL(ais->type18.accuracy),
-			   ais->type18.lon / AIS_LATLON_SCALE,
-			   ais->type18.lat / AIS_LATLON_SCALE,
+			   ais->type18.lon / AIS_LATLON_DIV,
+			   ais->type18.lat / AIS_LATLON_DIV,
 			   ais->type18.course / 10.0,
 			   ais->type18.heading,
 			   ais->type18.second,
@@ -2773,8 +2773,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type19.reserved,
 			   ais->type19.speed / 10.0,
 			   JSON_BOOL(ais->type19.accuracy),
-			   ais->type19.lon / AIS_LATLON_SCALE,
-			   ais->type19.lat / AIS_LATLON_SCALE,
+			   ais->type19.lon / AIS_LATLON_DIV,
+			   ais->type19.lat / AIS_LATLON_DIV,
 			   ais->type19.course / 10.0,
 			   ais->type19.heading,
 			   ais->type19.second,
@@ -2858,8 +2858,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   NAVAIDTYPE_DISPLAY(ais->type21.aid_type),
 			   json_stringify(buf1, sizeof(buf1),
 					  ais->type21.name),
-			   ais->type21.lon / AIS_LATLON_SCALE,
-			   ais->type21.lat / AIS_LATLON_SCALE,
+			   ais->type21.lon / AIS_LATLON_DIV,
+			   ais->type21.lat / AIS_LATLON_DIV,
 			   JSON_BOOL(ais->type21.accuracy),
 			   ais->type21.to_bow, ais->type21.to_stern,
 			   ais->type21.to_port, ais->type21.to_starboard,
@@ -2909,11 +2909,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\",",
-			   ais->type22.area.ne_lon / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type22.area.ne_lat / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type22.area.sw_lon / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type22.area.ne_lon / AIS_CHANNEL_LATLON_DIV,
+			   ais->type22.area.ne_lat / AIS_CHANNEL_LATLON_DIV,
+			   ais->type22.area.sw_lon / AIS_CHANNEL_LATLON_DIV,
 			   ais->type22.area.sw_lat /
-			   AIS_CHANNEL_LATLON_SCALE);
+			   AIS_CHANNEL_LATLON_DIV);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
@@ -2936,10 +2936,10 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
 			   "\"stationtype\":\"%s\",\"shiptype\":\"%s\","
 			   "\"interval\":%u,\"quiet\":%u}\r\n",
-			   ais->type23.ne_lon / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type23.ne_lat / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type23.sw_lon / AIS_CHANNEL_LATLON_SCALE,
-			   ais->type23.sw_lat / AIS_CHANNEL_LATLON_SCALE,
+			   ais->type23.ne_lon / AIS_CHANNEL_LATLON_DIV,
+			   ais->type23.ne_lat / AIS_CHANNEL_LATLON_DIV,
+			   ais->type23.sw_lon / AIS_CHANNEL_LATLON_DIV,
+			   ais->type23.sw_lat / AIS_CHANNEL_LATLON_DIV,
 			   STATIONTYPE_DISPLAY(ais->type23.stationtype),
 			   SHIPTYPE_DISPLAY(ais->type23.shiptype),
 			   ais->type23.interval, ais->type23.quiet);
@@ -3024,8 +3024,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   "\"speed\":%u,\"course\":%u,\"raim\":%s,\"gnss\":%s}\r\n",
 			   nav_legends[ais->type27.status],
 			   JSON_BOOL(ais->type27.accuracy),
-			   ais->type27.lon / AIS_LONGRANGE_LATLON_SCALE,
-			   ais->type27.lat / AIS_LONGRANGE_LATLON_SCALE,
+			   ais->type27.lon / AIS_LONGRANGE_LATLON_DIV,
+			   ais->type27.lat / AIS_LONGRANGE_LATLON_DIV,
 			   ais->type27.speed,
 			   ais->type27.course,
 			   JSON_BOOL(ais->type27.raim),

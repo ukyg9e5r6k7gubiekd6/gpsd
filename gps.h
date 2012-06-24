@@ -850,12 +850,12 @@ typedef /*@unsignedintegraltype@*/ unsigned long long gps_mask_t;
 /* N/A values and scaling constant for 25/24 bit lon/lat pairs */
 #define AIS_LON3_NOT_AVAILABLE	181000
 #define AIS_LAT3_NOT_AVAILABLE	91000
-#define AIS_LATLON3_SCALE	60000.0
+#define AIS_LATLON3_DIV	60000.0
 
 /* N/A values and scaling constant for 28/27 bit lon/lat pairs */
 #define AIS_LON4_NOT_AVAILABLE	1810000
 #define AIS_LAT4_NOT_AVAILABLE	910000
-#define AIS_LATLON4_SCALE	600000.0
+#define AIS_LATLON4_DIV	600000.0
 
 struct route_info {
     unsigned int linkage;	/* Message Linkage ID */
@@ -890,7 +890,7 @@ struct ais_t
 #define AIS_SPEED_NOT_AVAILABLE	1023
 #define AIS_SPEED_FAST_MOVER	1022		/* >= 102.2 knots */
 	    bool accuracy;			/* position accuracy */
-#define AIS_LATLON_SCALE	600000.0
+#define AIS_LATLON_DIV	600000.0
 	    int lon;				/* longitude */
 #define AIS_LON_NOT_AVAILABLE	0x6791AC0
 	    int lat;				/* latitude */
@@ -1226,13 +1226,13 @@ struct ais_t
 		    unsigned int airtemp;	/* temperature, units 0.1C */
 #define DAC1FID11_AIRTEMP_NOT_AVAILABLE		2047
 #define DAC1FID11_AIRTEMP_OFFSET		600
-#define DAC1FID11_AIRTEMP_SCALE			10.0
+#define DAC1FID11_AIRTEMP_DIV			10.0
 		    unsigned int humidity;	/* relative humidity, % */
 #define DAC1FID11_HUMIDITY_NOT_AVAILABLE	127
 		    unsigned int dewpoint;	/* dew point, units 0.1C */
 #define DAC1FID11_DEWPOINT_NOT_AVAILABLE	1023
 #define DAC1FID11_DEWPOINT_OFFSET		200
-#define DAC1FID11_DEWPOINT_SCALE		10.0
+#define DAC1FID11_DEWPOINT_DIV		10.0
 		    unsigned int pressure;	/* air pressure, hpa */
 #define DAC1FID11_PRESSURE_NOT_AVAILABLE	511
 #define DAC1FID11_PRESSURE_OFFSET		-800
@@ -1240,16 +1240,16 @@ struct ais_t
 #define DAC1FID11_PRESSURETREND_NOT_AVAILABLE	3
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID11_VISIBILITY_NOT_AVAILABLE	255
-#define DAC1FID11_VISIBILITY_SCALE		10.0
+#define DAC1FID11_VISIBILITY_DIV		10.0
 		    int waterlevel;		/* decimeters */
 #define DAC1FID11_WATERLEVEL_NOT_AVAILABLE	511
 #define DAC1FID11_WATERLEVEL_OFFSET		100
-#define DAC1FID11_WATERLEVEL_SCALE		10.0
+#define DAC1FID11_WATERLEVEL_DIV		10.0
 		    unsigned int leveltrend;	/* water level trend code */
 #define DAC1FID11_WATERLEVELTREND_NOT_AVAILABLE	3
 		    unsigned int cspeed;	/* surface current speed in deciknots */
 #define DAC1FID11_CSPEED_NOT_AVAILABLE		255
-#define DAC1FID11_CSPEED_SCALE			10.0
+#define DAC1FID11_CSPEED_DIV			10.0
 		    unsigned int cdir;		/* surface current dir., degrees */
 #define DAC1FID11_CDIR_NOT_AVAILABLE		511
 		    unsigned int cspeed2;	/* current speed in deciknots */
@@ -1261,7 +1261,7 @@ struct ais_t
 		    unsigned int cdepth3;	/* measurement depth, m */
 		    unsigned int waveheight;	/* in decimeters */
 #define DAC1FID11_WAVEHEIGHT_NOT_AVAILABLE	255
-#define DAC1FID11_WAVEHEIGHT_SCALE		10.0
+#define DAC1FID11_WAVEHEIGHT_DIV		10.0
 		    unsigned int waveperiod;	/* in seconds */
 #define DAC1FID11_WAVEPERIOD_NOT_AVAILABLE	63
 		    unsigned int wavedir;	/* direction in degrees */
@@ -1274,12 +1274,12 @@ struct ais_t
 		    unsigned int watertemp;	/* units 0.1deg Celsius */
 #define DAC1FID11_WATERTEMP_NOT_AVAILABLE	1023
 #define DAC1FID11_WATERTEMP_OFFSET		100
-#define DAC1FID11_WATERTEMP_SCALE		10.0
+#define DAC1FID11_WATERTEMP_DIV		10.0
 		    unsigned int preciptype;	/* 0-7, enumerated */
 #define DAC1FID11_PRECIPTYPE_NOT_AVAILABLE	7
 		    unsigned int salinity;	/* units of 0.1ppt */
 #define DAC1FID11_SALINITY_NOT_AVAILABLE	511
-#define DAC1FID11_SALINITY_SCALE		10.0
+#define DAC1FID11_SALINITY_DIV		10.0
 		    unsigned int ice;		/* is there sea ice? */
 #define DAC1FID11_ICE_NOT_AVAILABLE		3
 		} dac1fid11;
@@ -1370,12 +1370,12 @@ struct ais_t
 #define DAC1FID31_DIR_NOT_AVAILABLE		360
 		    int airtemp;		/* temperature, units 0.1C */
 #define DAC1FID31_AIRTEMP_NOT_AVAILABLE		-1024
-#define DAC1FID31_AIRTEMP_SCALE			10.0
+#define DAC1FID31_AIRTEMP_DIV			10.0
 		    unsigned int humidity;	/* relative humidity, % */
 #define DAC1FID31_HUMIDITY_NOT_AVAILABLE	101
 		    int dewpoint;		/* dew point, units 0.1C */
 #define DAC1FID31_DEWPOINT_NOT_AVAILABLE	501
-#define DAC1FID31_DEWPOINT_SCALE		10.0
+#define DAC1FID31_DEWPOINT_DIV		10.0
 		    unsigned int pressure;	/* air pressure, hpa */
 #define DAC1FID31_PRESSURE_NOT_AVAILABLE	511
 #define DAC1FID31_PRESSURE_HIGH			402
@@ -1385,16 +1385,16 @@ struct ais_t
 		    bool visgreater;            /* visibility greater than */
 		    unsigned int visibility;	/* units 0.1 nautical miles */
 #define DAC1FID31_VISIBILITY_NOT_AVAILABLE	127
-#define DAC1FID31_VISIBILITY_SCALE		10.0
+#define DAC1FID31_VISIBILITY_DIV		10.0
 		    int waterlevel;		/* cm */
 #define DAC1FID31_WATERLEVEL_NOT_AVAILABLE	4001
 #define DAC1FID31_WATERLEVEL_OFFSET		1000
-#define DAC1FID31_WATERLEVEL_SCALE		100.0
+#define DAC1FID31_WATERLEVEL_DIV		100.0
 		    unsigned int leveltrend;	/* water level trend code */
 #define DAC1FID31_WATERLEVELTREND_NOT_AVAILABLE	3
 		    unsigned int cspeed;	/* current speed in deciknots */
 #define DAC1FID31_CSPEED_NOT_AVAILABLE		255
-#define DAC1FID31_CSPEED_SCALE			10.0
+#define DAC1FID31_CSPEED_DIV			10.0
 		    unsigned int cdir;		/* current dir., degrees */
 		    unsigned int cspeed2;	/* current speed in deciknots */
 		    unsigned int cdir2;		/* current dir., degrees */
@@ -1406,7 +1406,7 @@ struct ais_t
 		    unsigned int cdepth3;	/* measurement depth, 0.1m */
 		    unsigned int waveheight;	/* in decimeters */
 #define DAC1FID31_HEIGHT_NOT_AVAILABLE		31
-#define DAC1FID31_HEIGHT_SCALE			10.0
+#define DAC1FID31_HEIGHT_DIV			10.0
 		    unsigned int waveperiod;	/* in seconds */
 #define DAC1FID31_PERIOD_NOT_AVAILABLE		63
 		    unsigned int wavedir;	/* direction in degrees */
@@ -1417,12 +1417,12 @@ struct ais_t
 #define DAC1FID31_SEASTATE_NOT_AVAILABLE	15
 		    int watertemp;		/* units 0.1deg Celsius */
 #define DAC1FID31_WATERTEMP_NOT_AVAILABLE	601
-#define DAC1FID31_WATERTEMP_SCALE		10.0
+#define DAC1FID31_WATERTEMP_DIV		10.0
 		    unsigned int preciptype;	/* 0-7, enumerated */
 #define DAC1FID31_PRECIPTYPE_NOT_AVAILABLE	7
 		    unsigned int salinity;	/* units of 0.1 permil (ca. PSU) */
 #define DAC1FID31_SALINITY_NOT_AVAILABLE	510
-#define DAC1FID31_SALINITY_SCALE		10.0
+#define DAC1FID31_SALINITY_DIV		10.0
 		    unsigned int ice;		/* is there sea ice? */
 #define DAC1FID31_ICE_NOT_AVAILABLE		3
 		} dac1fid31;
@@ -1497,7 +1497,7 @@ struct ais_t
 	/* Type 17 - GNSS Broadcast Binary Message */
 	struct {
 	    //unsigned int spare;	spare bit(s) */
-#define AIS_GNSS_LATLON_SCALE	600.0
+#define AIS_GNSS_LATLON_DIV	600.0
 	    int lon;			/* longitude */
 	    int lat;			/* latitude */
 	    //unsigned int spare2;	spare bit(s) */
@@ -1597,7 +1597,7 @@ struct ais_t
 	    unsigned int channel_b;	/* Channel B number */
 	    unsigned int txrx;		/* transmit/receive mode */
 	    bool power;			/* high-power flag */
-#define AIS_CHANNEL_LATLON_SCALE	600.0
+#define AIS_CHANNEL_LATLON_DIV	600.0
 	    union {
 		struct {
 		    int ne_lon;		/* NE corner longitude */
@@ -1672,7 +1672,7 @@ struct ais_t
 	    bool accuracy;		/* position accuracy */
 	    bool raim;			/* RAIM flag */
 	    unsigned int status;	/* navigation status */
-#define AIS_LONGRANGE_LATLON_SCALE	600.0
+#define AIS_LONGRANGE_LATLON_DIV	600.0
 	    int lon;			/* longitude */
 #define AIS_LONGRANGE_LON_NOT_AVAILABLE	0x1a838
 	    int lat;			/* latitude */
