@@ -1055,6 +1055,93 @@ struct ais_t
 		    signed int berth_lon;	/* Longitude */
 		    signed int berth_lat;	/* Latitude */
 		} dac1fid20;
+		/* IMO289 - Weather observation report from ship */
+		/*** WORK IN PROGRESS - NOT YET DECODED ***/
+		struct {
+		    bool wmo;			/* true if WMO variant */
+		    union {
+			struct {
+			    char location[20+1];	/* Location */
+			    signed int lon;		/* Longitude */
+			    signed int lat;		/* Latitude */
+			    unsigned int day;		/* Report day */
+			    unsigned int hour;		/* Report hour */
+			    unsigned int minute;	/* Report minute */
+			    bool vislimit;		/* Max range? */
+			    unsigned int visibility;	/* Units of 0.1 nm */
+#define DAC8FID21_VISIBILITY_NOT_AVAILABLE	127
+#define DAC8FID21_VISIBILITY_SCALE		10.0
+			    unsigned humidity;		/* units of 1% */
+			    unsigned int wspeed;	/* average wind speed */
+			    unsigned int wgust;		/* wind gust */
+#define DAC8FID21_WSPEED_NOT_AVAILABLE		127
+			    unsigned int wdir;		/* wind direction */
+#define DAC8FID21_WDIR_NOT_AVAILABLE		360
+			    unsigned int pressure;	/* air pressure, hpa */
+#define DAC8FID21_NONWMO_PRESSURE_NOT_AVAILABLE	403
+#define DAC8FID21_NONWMO_PRESSURE_HIGH		402	/* > 1200hPa */
+#define DAC8FID21_NONWMO_PRESSURE_OFFSET		400	/* N/A */
+			    unsigned int pressuretend;	/* tendency */
+		    	    int airtemp;		/* temp, units 0.1C */
+#define DAC8FID21_AIRTEMP_NOT_AVAILABLE		-1024
+#define DAC8FID21_AIRTEMP_SCALE			10.0
+			    unsigned int watertemp;	/* units 0.1degC */
+#define DAC8FID21_WATERTEMP_NOT_AVAILABLE	501
+#define DAC8FID21_WATERTEMP_SCALE		10.0
+			    unsigned int waveperiod;	/* in seconds */
+#define DAC8FID21_WAVEPERIOD_NOT_AVAILABLE	63
+			    unsigned int wavedir;	/* direction in deg */
+#define DAC8FID21_WAVEDIR_NOT_AVAILABLE		360
+			    unsigned int swellheight;	/* in decimeters */
+			    unsigned int swellperiod;	/* in seconds */
+			    unsigned int swelldir;	/* direction in deg */
+			} nonwmo_obs;
+			struct {
+			    signed int lon;		/* Longitude */
+			    signed int lat;		/* Latitude */
+			    unsigned int month;		/* UTC month */
+			    unsigned int day;		/* Report day */
+			    unsigned int hour;		/* Report hour */
+			    unsigned int minute;	/* Report minute */
+			    unsigned int course;	/* course over ground */
+			    unsigned int speed;		/* speed, m/s */
+#define DAC8FID21_SOG_NOT_AVAILABLE		31
+#define DAC8FID21_SOG_HIGH_SPEED		30
+#define DAC8FID21_SOG_SCALE			2.0
+			    unsigned int heading;	/* true heading */
+#define DAC8FID21_HDG_NOT_AVAILABLE		127
+#define DAC8FID21_HDG_SCALE			5.0
+			    unsigned int pressure;	/* units of hPa * 0.1 */
+#define DAC8FID21_WMO_PRESSURE_SCALE		10
+#define DAC8FID21_WMO_PRESSURE_OFFSET		90.0
+			    unsigned int pdelta;	/* units of hPa * 0.1 */
+#define DAC8FID21_PDELTA_SCALE			10
+#define DAC8FID21_PDELTA_OFFSET			50.0
+			    unsigned int ptend;		/* enumerated */
+			    unsigned int twinddir;	/* in 5 degree steps */
+#define DAC8FID21_TWINDDIR_NOT_AVAILABLE	127
+			    unsigned int twindspeed;	/* meters per second */
+#define DAC8FID21_TWINDSPEED_SCALE		2
+#define DAC8FID21_RWINDSPEED_NOT_AVAILABLE	255
+			    unsigned int rwinddir;	/* in 5 degree steps */
+#define DAC8FID21_RWINDDIR_NOT_AVAILABLE	127
+			    unsigned int rwindspeed;	/* meters per second */
+#define DAC8FID21_RWINDSPEED_SCALE		2
+#define DAC8FID21_RWINDSPEED_NOT_AVAILABLE	255
+			    unsigned int mgustspeed;	/* meters per second */
+#define DAC8FID21_MGUSTSPEED_SCALE		2
+#define DAC8FID21_MGUSTSPEED_NOT_AVAILABLE	255
+			    unsigned int mgustdir;	/* in 5 degree steps */
+#define DAC8FID21_MGUSTDIR_NOT_AVAILABLE	127
+			    unsigned int airtemp;	/* degress K */
+#define DAC8FID21_AIRTEMP_OFFSET		223
+			    unsigned humidity;		/* units of 1% */
+#define DAC8FID21_HUMIDITY_NOT_VAILABLE		127
+			    /* some trailing fields are missing */
+			} wmo_obs;
+		    };
+	        } dac1fid21;
+		/*** WORK IN PROGRESS ENDS HERE ***/
 		/* IMO289 - Dangerous Cargo Indication */
 		struct {
 		    unsigned int unit;	/* Unit of Quantity */
