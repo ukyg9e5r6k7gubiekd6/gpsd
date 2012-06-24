@@ -2211,7 +2211,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.visibility);
 		if (!scaled)
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"waterlevel\":%u,",
+				   "\"waterlevel\":%d,",
 				   ais->type8.dac1fid11.waterlevel);
 		else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
