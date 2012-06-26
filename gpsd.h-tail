@@ -95,6 +95,11 @@ enum isgpsstat_t {
  */
 #define GPS_EPOCH	315964800	/* 6 Jan 1981 00:00:00 UTC */
 
+/* time constant */
+#define SECS_PER_DAY	(60*60*24)		/* seconds per day */
+#define SECS_PER_WEEK	(7*SECS_PER_DAY)	/* seconds per week */
+#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
+
 struct gps_packet_t {
     /* packet-getter internals */
     int	type;

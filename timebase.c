@@ -84,9 +84,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #include "gpsd.h"
 #include "timebase.h"
 
-#define SECS_PER_WEEK	(60*60*24*7)	/* seconds per week */
-#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
-
 void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 /* initialize the GPS context's time fields */
 {
