@@ -389,18 +389,6 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
-#if defined(HAVE_SYS_TIMEPPS_H)
-    /* use RFC 2783 PPS API */
-    /* this needs linux >= 2.6.34 and
-     * CONFIG_PPS=y
-     * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
-     * CONFIG_PPS_CLIENT_LDISC=y
-     */
-    /* get timepps.h from the pps-tools package, or from here:
-     * http://www.mail-archive.com/debian-glibc@lists.debian.org/msg43125.html
-     * RFC2783 says timepps.h is in sys
-     */
-    #include <sys/timepps.h>
     #include <glob.h>
 #endif
 /* and for chrony */

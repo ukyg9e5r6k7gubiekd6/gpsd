@@ -9,7 +9,16 @@
 #include <stdint.h>
 #include "gps.h"
 
+/* use RFC 2782 PPS API */
+/* this needs linux >= 2.6.34 and
+ * CONFIG_PPS=y
+ * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
+ * CONFIG_PPS_CLIENT_LDISC=y
+ */
 #if defined(HAVE_SYS_TIMEPPS_H)
+// include unistd.h here as it is missing on older pps-tools releases.
+// 'close' is not defined otherwise.
+#include <unistd.h>
 #include <sys/timepps.h>
 #endif
 
