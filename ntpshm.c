@@ -389,6 +389,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 #ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
+#if defined(HAVE_SYS_TIMEPPS_H)
     #include <glob.h>
 #endif
 /* and for chrony */
