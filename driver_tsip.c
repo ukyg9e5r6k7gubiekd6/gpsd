@@ -183,9 +183,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (len != 10)
 	    break;
 	session->driver.tsip.last_41 = now;	/* keep timestamp for request */
-	f1 = getbef32(buf, 0);	/* gpstime */
+	f1 = getbef32((char *)buf, 0);	/* gpstime */
 	s1 = getbes16(buf, 4);	/* week */
-	f2 = getbef32(buf, 6);	/* leap seconds */
+	f2 = getbef32((char *)buf, 6);	/* leap seconds */
 	if (f1 >= 0.0 && f2 > 10.0) {
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
@@ -198,21 +198,21 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x42:			/* Single-Precision Position Fix, XYZ ECEF */
 	if (len != 16)
 	    break;
-	f1 = getbef32(buf, 0);	/* X */
-	f2 = getbef32(buf, 4);	/* Y */
-	f3 = getbef32(buf, 8);	/* Z */
-	f4 = getbef32(buf, 12);	/* time-of-fix */
+	f1 = getbef32((char *)buf, 0);	/* X */
+	f2 = getbef32((char *)buf, 4);	/* Y */
+	f3 = getbef32((char *)buf, 8);	/* Z */
+	f4 = getbef32((char *)buf, 12);	/* time-of-fix */
 	gpsd_report(LOG_INF, "GPS Position XYZ %f %f %f %f\n", f1, f2, f3,
 		    f4);
 	break;
     case 0x43:			/* Velocity Fix, XYZ ECEF */
 	if (len != 20)
 	    break;
-	f1 = getbef32(buf, 0);	/* X velocity */
-	f2 = getbef32(buf, 4);	/* Y velocity */
-	f3 = getbef32(buf, 8);	/* Z velocity */
-	f4 = getbef32(buf, 12);	/* bias rate */
-	f5 = getbef32(buf, 16);	/* time-of-fix */
+	f1 = getbef32((char *)buf, 0);	/* X velocity */
+	f2 = getbef32((char *)buf, 4);	/* Y velocity */
+	f3 = getbef32((char *)buf, 8);	/* Z velocity */
+	f4 = getbef32((char *)buf, 12);	/* bias rate */
+	f5 = getbef32((char *)buf, 16);	/* time-of-fix */
 	gpsd_report(LOG_INF, "GPS Velocity XYZ %f %f %f %f %f\n", f1, f2, f3,
 		    f4, f5);
 	break;
@@ -256,7 +256,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	buf2[0] = '\0';
 	for (i = 0; i < count; i++) {
 	    u1 = getub(buf, 5 * i + 1);
-	    if ((f1 = getbef32(buf, 5 * i + 2)) < 0)
+	    if ((f1 = getbef32((char *)buf, 5 * i + 2)) < 0)
 		f1 = 0.0;
 	    for (j = 0; j < TSIP_CHANNELS; j++)
 		if (session->gpsdata.PRN[j] == (int)u1) {
@@ -278,11 +278,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x4a:			/* Single-Precision Position LLA */
 	if (len != 20)
 	    break;
-	session->newdata.latitude = getbef32(buf, 0) * RAD_2_DEG;
-	session->newdata.longitude = getbef32(buf, 4) * RAD_2_DEG;
-	session->newdata.altitude = getbef32(buf, 8);
-	//f1 = getbef32(buf, 12);	clock bias */
-	f2 = getbef32(buf, 16);	/* time-of-fix */
+	session->newdata.latitude = getbef32((char *)buf, 0) * RAD_2_DEG;
+	session->newdata.longitude = getbef32((char *)buf, 4) * RAD_2_DEG;
+	session->newdata.altitude = getbef32((char *)buf, 8);
+	//f1 = getbef32((char *)buf, 12);	clock bias */
+	f2 = getbef32((char *)buf, 16);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time = 
 		gpsd_gpstime_resolve(session,
@@ -350,11 +350,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x56:			/* Velocity Fix, East-North-Up (ENU) */
 	if (len != 20)
 	    break;
-	f1 = getbef32(buf, 0);	/* East velocity */
-	f2 = getbef32(buf, 4);	/* North velocity */
-	f3 = getbef32(buf, 8);	/* Up velocity */
-	f4 = getbef32(buf, 12);	/* clock bias rate */
-	f5 = getbef32(buf, 16);	/* time-of-fix */
+	f1 = getbef32((char *)buf, 0);	/* East velocity */
+	f2 = getbef32((char *)buf, 4);	/* North velocity */
+	f3 = getbef32((char *)buf, 8);	/* Up velocity */
+	f4 = getbef32((char *)buf, 12);	/* clock bias rate */
+	f5 = getbef32((char *)buf, 16);	/* time-of-fix */
 	session->newdata.climb = f3;
 	/*@ -evalorder @*/
 	session->newdata.speed = sqrt(pow(f2, 2) + pow(f1, 2));
@@ -376,7 +376,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    break;
 	u1 = getub(buf, 0);	/* Source of information */
 	u2 = getub(buf, 1);	/* Mfg. diagnostic */
-	f1 = getbef32(buf, 2);	/* gps_time */
+	f1 = getbef32((char *)buf, 2);	/* gps_time */
 	s1 = getbes16(buf, 6);	/* tsip.gps_week */
 	/*@ +charint @*/
 	if (getub(buf, 0) == 0x01)	/* good current fix? */
@@ -391,9 +391,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x5a:			/* Raw Measurement Data */
 	if (len != 29)
 	    break;
-	f1 = getbef32(buf, 5);	/* Signal Level */
-	f2 = getbef32(buf, 9);	/* Code phase */
-	f3 = getbef32(buf, 13);	/* Doppler */
+	f1 = getbef32((char *)buf, 5);	/* Signal Level */
+	f2 = getbef32((char *)buf, 9);	/* Code phase */
+	f3 = getbef32((char *)buf, 13);	/* Doppler */
 	d1 = getbed64(buf, 17);	/* Time of Measurement */
 	gpsd_report(LOG_PROG, "Raw Measurement Data %d %f %f %f %f\n",
 		    getub(buf, 0), f1, f2, f3, d1);
@@ -407,10 +407,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u2 = getub(buf, 1);	/* chan */
 	u3 = getub(buf, 2);	/* Acquisition flag */
 	u4 = getub(buf, 3);	/* Ephemeris flag */
-	f1 = getbef32(buf, 4);	/* Signal level */
-	f2 = getbef32(buf, 8);	/* time of Last measurement */
-	d1 = getbef32(buf, 12) * RAD_2_DEG;	/* Elevation */
-	d2 = getbef32(buf, 16) * RAD_2_DEG;	/* Azimuth */
+	f1 = getbef32((char *)buf, 4);	/* Signal level */
+	f2 = getbef32((char *)buf, 8);	/* time of Last measurement */
+	d1 = getbef32((char *)buf, 12) * RAD_2_DEG;	/* Elevation */
+	d2 = getbef32((char *)buf, 16) * RAD_2_DEG;	/* Azimuth */
 	i = (int)(u2 >> 3);	/* channel number */
 	gpsd_report(LOG_INF,
 		    "Satellite Tracking Status: Ch %2d PRN %3d Res %d Acq %d Eph %2d SNR %4.1f LMT %.04f El %4.1f Az %5.1f\n",
@@ -468,10 +468,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	mask |= MODE_SET;
 #endif /* __UNUSED__ */
 	session->gpsdata.satellites_used = count;
-	session->gpsdata.dop.pdop = getbef32(buf, 1);
-	session->gpsdata.dop.hdop = getbef32(buf, 5);
-	session->gpsdata.dop.vdop = getbef32(buf, 9);
-	session->gpsdata.dop.tdop = getbef32(buf, 13);
+	session->gpsdata.dop.pdop = getbef32((char *)buf, 1);
+	session->gpsdata.dop.hdop = getbef32((char *)buf, 5);
+	session->gpsdata.dop.vdop = getbef32((char *)buf, 9);
+	session->gpsdata.dop.tdop = getbef32((char *)buf, 13);
 	/*@ -evalorder @*/
 	session->gpsdata.dop.gdop =
 	    sqrt(pow(session->gpsdata.dop.pdop, 2) +
@@ -533,7 +533,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	d2 = getbed64(buf, 8);	/* Y */
 	d3 = getbed64(buf, 16);	/* Z */
 	d4 = getbed64(buf, 24);	/* clock bias */
-	f1 = getbef32(buf, 32);	/* time-of-fix */
+	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
 	gpsd_report(LOG_INF, "GPS Position XYZ %f %f %f %f %f\n", d1, d2, d3,
 		    d4, f1);
 	break;
@@ -544,7 +544,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	session->newdata.longitude = getbed64(buf, 8) * RAD_2_DEG;
 	session->newdata.altitude = getbed64(buf, 16);
 	//d1 = getbed64(buf, 24);	clock bias */
-	f1 = getbef32(buf, 32);	/* time-of-fix */
+	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time =
 		gpsd_gpstime_resolve(session,
@@ -764,7 +764,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    session->newdata.latitude = getbed64(buf, 36) * RAD_2_DEG;
 	    session->newdata.longitude = getbed64(buf, 44) * RAD_2_DEG;
 	    session->newdata.altitude = getbed64(buf, 52);
-	    //f1 = getbef32(buf, 16);    clock bias */
+	    //f1 = getbef32((char *)buf, 16);    clock bias */
 
 	    u1 = getub(buf, 12);	/* GPS Decoding Status */
 	    u2 = getub(buf, 1);	/* Receiver Mode */
@@ -843,10 +843,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u2 = getub(buf, 1);	/* Operating Dimension */
 	u3 = getub(buf, 2);	/* DGPS Mode */
 	u4 = getub(buf, 3);	/* Dynamics Code */
-	f1 = getbef32(buf, 5);	/* Elevation Mask */
-	f2 = getbef32(buf, 9);	/* AMU Mask */
-	f3 = getbef32(buf, 13);	/* DOP Mask */
-	f4 = getbef32(buf, 17);	/* DOP Switch */
+	f1 = getbef32((char *)buf, 5);	/* Elevation Mask */
+	f2 = getbef32((char *)buf, 9);	/* AMU Mask */
+	f3 = getbef32((char *)buf, 13);	/* DOP Mask */
+	f4 = getbef32((char *)buf, 17);	/* DOP Switch */
 	u5 = getub(buf, 21);	/* DGPS Age Limit */
 	gpsd_report(LOG_INF,
 		    "Navigation Configuration %u %u %u %u %f %f %f %f %u\n",

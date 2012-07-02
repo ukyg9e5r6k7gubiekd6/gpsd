@@ -126,7 +126,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     uint16_t uw1, uw2;
     uint32_t ul1, ul2, ul3, ul4, ul5;
     double d1, d2, d3, d4, d5;
-    unsigned char buf[BUFSIZ];
+    char buf[BUFSIZ];
     char buf2[BUFSIZ];
 
     if (session->packet.type != GEOSTAR_PACKET) {
