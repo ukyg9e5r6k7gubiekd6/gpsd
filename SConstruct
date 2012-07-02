@@ -1377,6 +1377,10 @@ if env['socket_export']:
         '$SRCDIR/regress-driver test/daemon/*.log')
 
     # Build the regression tests for the daemon.
+    # Note: You'll have to do this whenever the default leap second
+    # changes in timebase.h.  The problem is in the SiRF tests;
+    # that driver relies on the default until it gets the current
+    # offset from subframe data.
     Utility('gps-makeregress', [gpsd, python_built_extensions],
         '$SRCDIR/regress-driver -b test/daemon/*.log')
 

@@ -1565,6 +1565,12 @@ doesn't pass regressions, it isn't ready to ship.  Run <code>scons
 releasecheck</code> and watch for errors on a representative selection
 of <a href="http://db.debian.org/machines.cgi">porterboxes</a>.</dd>
 
+<p>Warning! Whenever the default leap second changes in timebase.h the
+GPS tests will break (times one second off) and the testloads will
+have to be rebuilt.  The problem is in the SiRF tests; that driver
+relies on the default until it gets the current offset from subframe
+data.</p></dd>
+
 <dt>8. Push and pull from the public repo</dt>
 <dd>This is the revision the release will be built from.</dd>
 
