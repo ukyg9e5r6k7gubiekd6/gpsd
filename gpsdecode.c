@@ -155,7 +155,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	    switch(ais->type8.fid) {
 	    case 11:		/* IMO236 - Met/Hydro message */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "|%d|%d|%02uT%02u:%02uZ|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u",
+			       "|%d|%d|%02uT%02u:%02uZ|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%d|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u|%u",
 			       ais->type8.dac1fid11.lon,
 			       ais->type8.dac1fid11.lat,
 			       ais->type8.dac1fid11.day,
