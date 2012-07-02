@@ -394,7 +394,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	f1 = getbef32((char *)buf, 5);	/* Signal Level */
 	f2 = getbef32((char *)buf, 9);	/* Code phase */
 	f3 = getbef32((char *)buf, 13);	/* Doppler */
-	d1 = getbed64(buf, 17);	/* Time of Measurement */
+	d1 = getbed64((char *)buf, 17);	/* Time of Measurement */
 	gpsd_report(LOG_PROG, "Raw Measurement Data %d %f %f %f %f\n",
 		    getub(buf, 0), f1, f2, f3, d1);
 	break;
@@ -529,10 +529,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x83:			/* Double-Precision XYZ Position Fix and Bias Information */
 	if (len != 36)
 	    break;
-	d1 = getbed64(buf, 0);	/* X */
-	d2 = getbed64(buf, 8);	/* Y */
-	d3 = getbed64(buf, 16);	/* Z */
-	d4 = getbed64(buf, 24);	/* clock bias */
+	d1 = getbed64((char *)buf, 0);	/* X */
+	d2 = getbed64((char *)buf, 8);	/* Y */
+	d3 = getbed64((char *)buf, 16);	/* Z */
+	d4 = getbed64((char *)buf, 24);	/* clock bias */
 	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
 	gpsd_report(LOG_INF, "GPS Position XYZ %f %f %f %f %f\n", d1, d2, d3,
 		    d4, f1);
@@ -540,10 +540,10 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     case 0x84:			/* Double-Precision LLA Position Fix and Bias Information */
 	if (len != 36)
 	    break;
-	session->newdata.latitude = getbed64(buf, 0) * RAD_2_DEG;
-	session->newdata.longitude = getbed64(buf, 8) * RAD_2_DEG;
-	session->newdata.altitude = getbed64(buf, 16);
-	//d1 = getbed64(buf, 24);	clock bias */
+	session->newdata.latitude = getbed64((char *)buf, 0) * RAD_2_DEG;
+	session->newdata.longitude = getbed64((char *)buf, 8) * RAD_2_DEG;
+	session->newdata.altitude = getbed64((char *)buf, 16);
+	//d1 = getbed64((char *)buf, 24);	clock bias */
 	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time =
@@ -576,11 +576,11 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    if (len != 43)
 		break;
 	    s1 = getbes16(buf, 1);	/* Datum Index */
-	    d1 = getbed64(buf, 3);	/* DX */
-	    d2 = getbed64(buf, 11);	/* DY */
-	    d3 = getbed64(buf, 19);	/* DZ */
-	    d4 = getbed64(buf, 27);	/* A-axis */
-	    d5 = getbed64(buf, 35);	/* Eccentricity Squared */
+	    d1 = getbed64((char *)buf, 3);	/* DX */
+	    d2 = getbed64((char *)buf, 11);	/* DY */
+	    d3 = getbed64((char *)buf, 19);	/* DZ */
+	    d4 = getbed64((char *)buf, 27);	/* A-axis */
+	    d5 = getbed64((char *)buf, 35);	/* Eccentricity Squared */
 	    gpsd_report(LOG_INF, "Current Datum %d %f %f %f %f %f\n", s1, d1,
 			d2, d3, d4, d5);
 	    break;
@@ -761,9 +761,9 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 		break;
 	    }
-	    session->newdata.latitude = getbed64(buf, 36) * RAD_2_DEG;
-	    session->newdata.longitude = getbed64(buf, 44) * RAD_2_DEG;
-	    session->newdata.altitude = getbed64(buf, 52);
+	    session->newdata.latitude = getbed64((char *)buf, 36) * RAD_2_DEG;
+	    session->newdata.longitude = getbed64((char *)buf, 44) * RAD_2_DEG;
+	    session->newdata.altitude = getbed64((char *)buf, 52);
 	    //f1 = getbef32((char *)buf, 16);    clock bias */
 
 	    u1 = getub(buf, 12);	/* GPS Decoding Status */
@@ -995,13 +995,13 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	    /* - dynamic code: land */
 	    putbyte(buf, 0, 0x01);
 	    /* - elevation mask */
-	    putbef32(buf, 1, 5.0 * DEG_2_RAD);
+	    putbef32((char *)buf, 1, 5.0 * DEG_2_RAD);
 	    /* - signal level mask */
-	    putbef32(buf, 5, 06.0);
+	    putbef32((char *)buf, 5, 06.0);
 	    /* - PDOP mask */
-	    putbef32(buf, 9, 8.0);
+	    putbef32((char *)buf, 9, 8.0);
 	    /* - PDOP switch */
-	    putbef32(buf, 13, 6.0);
+	    putbef32((char *)buf, 13, 6.0);
 	    /*@ +shiftimplementation @*/
 	    (void)tsip_write(session, 0x2c, buf, 17);
 	    /* Set Position Fix Mode (auto 2D/3D) */
