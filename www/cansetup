@@ -20,6 +20,12 @@ vcan)
     modprobe vcan;
     ip link add type vcan;
     ip link set vcan0 up;;
+slcan)
+    device=${2:-/dev/ttyUSB0}
+    modprobe slcan;
+    slcan_attach -f -s5 -o $device;
+    slcand `basename $device`; 
+    ip link set slcan0 up;;
 *)
     echo "cansetup: invalid CAN interface $1"
     exit 1
