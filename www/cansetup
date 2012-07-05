@@ -21,7 +21,9 @@ vcan)
     ip link add type vcan;
     ip link set vcan0 up;;
 slcan)
-    device=${2:-/dev/ttyUSB0}
+    # For a serial line CAN device
+    # No support for devices, that need a setup of the baudrate yet
+    device=${2:-/dev/ttyUSB0};
     modprobe slcan;
     slcan_attach -f -s5 -o $device;
     slcand `basename $device`; 
