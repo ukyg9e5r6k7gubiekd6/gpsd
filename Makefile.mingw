@@ -1,0 +1,124 @@
+CC=gcc
+LD=$(CC)
+SHLIB_SUFFIX=.dll
+BINARY_SUFFIX=.exe
+# ../pthreads-win32
+INCLUDE_DIRS=../pdcurses-win32
+INCLUDES=$(addprefix -I,$(INCLUDE_DIRS))
+# ../pthreads-win32
+LIB_DIRS=../pdcurses-win32
+LIBRARY_NAMES=pdcurses ws2_32
+LIBS=$(addprefix -L,$(LIB_DIRS)) $(addprefix -l,$(LIBRARY_NAMES))
+HEADERS=$(wildcard *.h)
+DEFINES=$(addprefix -D,_WIN32_WINNT=0x0600 __USE_MINGW_ANSI_STDIO=1)
+ANTICIPATED_WARNINGS=$(addprefix -Wno-error=,pointer-sign)
+# -O3
+DEBUGREL=-g3
+CFLAGS=$(DEBUGREL) -std=gnu99 -pthread -mwin32 -mconsole -Wl,--subsystem -Wl,console -Wall -Werror $(ANTICIPATED_WARNINGS) $(DEFINES) $(INCLUDES)
+# -mdll
+CSHARED=-Wl,--dll -shared
+LDFLAGS=-pthread
+LDSHARED=-Wl,--dll -shared
+
+LIBGPS_SOURCES=\
+ais_json.c \
+bits.c \
+daemon.c \
+gmtime_r.c \
+gpsdclient.c \
+gps_maskdump.c \
+gpsutils.c \
+hex.c \
+json.c \
+libgps_core.c \
+libgps_dbus.c \
+libgps_json.c \
+libgps_shm.c \
+libgps_sock.c \
+netlib.c \
+nonblock.c \
+rtcm2_json.c \
+shared_json.c \
+startup.c \
+strl.c \
+usleep.c
+LIBGPS_OBJECTS=$(LIBGPS_SOURCES:.c=.o)
+LIBGPS=$(addsuffix $(SHLIB_SUFFIX),libgps)
+LIBGPS_IMPLIB=libgps.lib
+LIBGPS_DEF=libgps.def
+# Requires local sockets: gpsdctl
+CLIENT_BINARY_NAMES=cgps gpspipe gpxlogger lcdgps test_bits test_float test_json test_libgps test_mkgmtime test_trig
+CLIENT_BINARIES=$(addsuffix .exe,$(CLIENT_BINARY_NAMES))
+
+LIBGPSD_SOURCES=\
+bsd_base64.c \
+crc24q.c \
+gpsd_json.c \
+geoid.c \
+isgps.c \
+libgpsd_core.c \
+net_dgpsip.c \
+net_gnss_dispatch.c \
+net_ntrip.c \
+packet.c \
+pseudonmea.c \
+serial.c \
+subframe.c \
+timebase.c \
+drivers.c \
+driver_ais.c \
+driver_evermore.c \
+driver_garmin.c \
+driver_garmin_txt.c \
+driver_geostar.c \
+driver_italk.c \
+driver_navcom.c \
+driver_nmea0183.c \
+driver_nmea2000.c \
+driver_oncore.c \
+driver_rtcm2.c \
+driver_rtcm3.c \
+driver_sirf.c \
+driver_superstar2.c \
+driver_tsip.c \
+driver_ubx.c \
+driver_zodiac.c
+LIBGPSD_OBJECTS=$(LIBGPSD_SOURCES:.c=.o)
+LIBGPSD=$(addsuffix $(SHLIB_SUFFIX),libgpsd)
+LIBGPSD_IMPLIB=libgpsd.lib
+LIBGPSD_DEF=libgpsd.def
+SERVER_BINARY_NAMES=gpsd gpsdecode gpsctl gpsmon test_geoid test_packet
+SERVER_BINARIES=$(addsuffix .exe,$(SERVER_BINARY_NAMES))
+
+BINARY_NAMES=$(CLIENT_BINARY_NAMES) $(SERVER_BINARY_NAMES)
+BINARIES=$(CLIENT_BINARIES) $(SERVER_BINARIES)
+
+# all: $(BINARIES)
+all: $(CLIENT_BINARIES)
+
+.c.o: $(HEADERS)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(LIBGPS_OBJECTS): %.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) $(CSHARED) -DIN_LIBGPS -c -o $@ $<
+
+$(LIBGPSD_OBJECTS): %.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) $(CSHARED) -DIN_LIBGPSD -c -o $@ $<
+
+$(LIBGPS): $(LIBGPS_OBJECTS)
+	$(LD) $(LDFLAGS) $(LDSHARED) -Wl,--out-implib -Wl,$(LIBGPS_IMPLIB) -Wl,--output-def -Wl,$(LIBGPS_DEF) -o $@ $^ $(LIBS)
+
+$(LIBGPSD): $(LIBGPSD_OBJECTS)
+	$(LD) $(LDFLAGS) $(LDSHARED) -Wl,--out-implib -Wl,$(LIBGPSD_IMPLIB) -Wl,--output-def -Wl,$(LIBGPSD_DEF) -o $@ $^ $(LIBS)
+
+# Each client binary is built from its sole object file and libgps.dll
+$(CLIENT_BINARIES): %.exe: %.o $(LIBGPS)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+# Each server binary is built from its sole object file, libgps.dll and libgpsd.dll
+$(SERVER_BINARIES): %.exe: %.o $(LIBGPS) $(LIBGPSD)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+.PHONY: clean
+clean:
+	rm -f *.o $(BINARIES) $(LIBGPS) $(LIBGPS_DEF) $(LIBGPS_IMPLIB)
