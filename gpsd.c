@@ -144,9 +144,10 @@ static bool in_background = false;
 static bool listen_global = false;
 #endif /* FORCE_GLOBAL_ENABLE */
 #ifndef FORCE_NOWAIT
+#define NOWAIT nowait
 static bool nowait = false;
 #else /* FORCE_NOWAIT */
-#define nowait true 
+#define NOWAIT true 
 #endif /* FORCE_NOWAIT */
 static jmp_buf restartbuf;
 static struct gps_context_t context;
@@ -803,7 +804,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    gpsd_report(LOG_INF, "<= control(%d): adding %s\n", sfd, stash);
-	    if (gpsd_add_device(stash, nowait))
+	    if (gpsd_add_device(stash, NOWAIT))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
@@ -2057,7 +2058,7 @@ int main(int argc, char *argv[])
      */
     in_restart = false;
     for (i = optind; i < argc; i++) {
-      if (!gpsd_add_device(argv[i], nowait)) {
+      if (!gpsd_add_device(argv[i], NOWAIT)) {
 	    gpsd_report(LOG_ERROR,
 			"initial GPS device %s open failed\n",
 			argv[i]);
@@ -2196,7 +2197,7 @@ int main(int argc, char *argv[])
      */
     if (in_restart)
 	for (i = optind; i < argc; i++) {
-	  if (!gpsd_add_device(argv[i], nowait)) {
+	  if (!gpsd_add_device(argv[i], NOWAIT)) {
 		gpsd_report(LOG_ERROR,
 			    "GPS device %s open failed\n",
 			    argv[i]);
@@ -2437,7 +2438,7 @@ int main(int argc, char *argv[])
 	 */
 	for (device = devices; device < devices + MAXDEVICES; device++) {
 
-	    bool device_needed = nowait;
+	    bool device_needed = NOWAIT;
 
 	    if (!allocated_device(device))
 		continue;
