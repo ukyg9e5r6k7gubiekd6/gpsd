@@ -2,25 +2,56 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+#include "gpsd_config.h"
+
 #include <string.h>
 #include <fcntl.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif /* HAVE_NETDB_H */
 #ifndef AF_UNSPEC
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #endif /* AF_UNSPEC */
+#ifdef HAVE_SYS_UN_H
 #include <sys/un.h>
+#endif /* HAVE_SYS_UN_H */
 #ifndef INADDR_ANY
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif /* HAVE_NETINET_IN_H */
 #endif /* INADDR_ANY */
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>     /* for htons() and friends */
+#endif /* HAVE_ARPA_INET_H */
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif /* HAVE_WINSOCK2_H */
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif /* HAVE_WS2TCPIP_H */
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif /* HAVE_WINDOWS_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "sockaddr.h"
+
+int netlib_closesock(socket_t sock)
+{
+#ifdef _WIN32
+	return closesocket(sock);
+#else /* ndef _WIN32 */
+	return close(sock);
+#endif /* ndef _WIN32 */
+}
 
 /*@-mustfreefresh -usedef@*/
 socket_t netlib_connectsock(int af, const char *host, const char *service,
@@ -72,13 +103,14 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     /*@-type@*/
     for (rp = result; rp != NULL; rp = rp->ai_next) {
 	ret = NL_NOCONNECT;
-	if ((s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) < 0)
+	s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	if (BADSOCK(s))
 	    ret = NL_NOSOCK;
 	else if (setsockopt
 		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
 		  sizeof(one)) == -1) {
-	    if (s > -1)
-		(void)close(s);
+	    if (!BADSOCK(s))
+			(void)netlib_closesock(s);
 	    ret = NL_NOSOCKOPT;
 	} else {
 	    if (bind_me) {
@@ -94,8 +126,8 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	    }
 	}
 
-	if (s > -1) {
-	    (void)close(s);
+	if (!BADSOCK(s)) {
+		(void)netlib_closesock(s);
 	}
     }
     /*@+type@*/
@@ -119,7 +151,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 #endif
 
     /* set socket to noblocking */
-    (void)fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
+	nonblock_enable(s);
 
     return s;
     /*@ +type +mustfreefresh @*/
@@ -147,12 +179,13 @@ const char /*@observer@*/ *netlib_errstr(const int err)
     }
 }
 
+#ifdef HAVE_SYS_UN_H
 socket_t netlib_localsocket(const char *sockfile, int socktype)
-/* acquire a connection to an existing Unix-domain socket */
 {
     int sock;
 
-    if ((sock = socket(AF_UNIX, socktype, 0)) < 0) {
+	sock = socket(AF_UNIX, socktype, 0);
+    if (BADSOCK(sock)) {
 	return -1;
     } else {
 	struct sockaddr_un saddr;
@@ -165,7 +198,7 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 
 	/*@-unrecog@*/
 	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
-	    (void)close(sock);
+		(void)netlib_closesock(s);
 	    return -1;
 	}
 	/*@+unrecog@*/
@@ -173,6 +206,7 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 	return sock;
     }
 }
+#endif /* HAVE_SYS_UN_H */
 
 char *netlib_sock2ip(int fd)
 /* retrieve the IP address corresponding to a socket */ 
@@ -187,8 +221,20 @@ char *netlib_sock2ip(int fd)
     if (r == 0) {
 	switch (fsin.sa.sa_family) {
 	case AF_INET:
+#ifdef HAVE_INET_NTOP
 	    r = !inet_ntop(fsin.sa_in.sin_family, &(fsin.sa_in.sin_addr),
 			   ip, sizeof(ip));
+#elif defined(HAVE_INET_NTOA)
+		{
+            char *a;
+			/* FIXME: Thread safety */
+            a = inet_ntoa(fsin.sa_in.sin_addr);
+            strcpy(ip, a);
+			r = 0;
+        }
+#else /* !defined(HAVE_INET_NTOP) && !defined(HAVE_INET_NTOA) */
+#error "Cannot figure out how to convert an IPv4 socket address into a string"
+#endif /* ndef HAVE_INET_NTOP */
 	    break;
 #ifdef IPV6_ENABLE
 	case AF_INET6:

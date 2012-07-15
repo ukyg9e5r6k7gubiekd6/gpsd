@@ -398,7 +398,12 @@ void json_device_dump(const struct gps_device_t *device,
 	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 			   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
 			   device->gpsdata.dev.driver_mode,
-			   (int)gpsd_get_speed(&device->ttyset),
+#ifdef HAVE_TERMIOS_H
+			   (int)gpsd_get_speed(&device->ttyset)
+#else /* ndef HAVE_TERMIOS_H */
+			   0
+#endif /* ndef HAVE_TERMIOS_H */
+			   ,
 			   device->gpsdata.dev.parity,
 			   device->gpsdata.dev.stopbits,
 			   device->gpsdata.dev.cycle);
@@ -1287,7 +1292,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 		       "\"master\":%u,\"aux\":%u,\"lat\":%f,\"lon\":%f,\"alt\":%f,",
 		       rtcm->rtcmtypes.rtcm3_1014.network_id,
 		       rtcm->rtcmtypes.rtcm3_1014.subnetwork_id,
-		       (uint) rtcm->rtcmtypes.rtcm3_1014.stationcount,
+		       (unsigned int) rtcm->rtcmtypes.rtcm3_1014.stationcount,
 		       rtcm->rtcmtypes.rtcm3_1014.master_id,
 		       rtcm->rtcmtypes.rtcm3_1014.aux_id,
 		       rtcm->rtcmtypes.rtcm3_1014.d_lat,

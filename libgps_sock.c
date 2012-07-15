@@ -3,6 +3,9 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -17,13 +20,26 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif /* HAVE_WINSOCK2_H */
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif /* HAVE_WS2TCPIP_H */
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif /* HAVE_WINDOWS_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
 #ifndef USE_QT
 #ifndef S_SPLINT_S
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #endif /* S_SPLINT_S */
 #else
 #include <QTcpSocket>
@@ -64,10 +80,16 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
     libgps_debug_trace((DEBUG_CALLS, "gps_sock_open(%s, %s)\n", host, port));
 
 #ifndef USE_QT
-	if ((gpsdata->gps_fd =
-	    netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
+	gpsdata->gps_fd = netlib_connectsock(AF_UNSPEC, host, port, "tcp");
+	if (BADSOCK(gpsdata->gps_fd)) {
 	    errno = gpsdata->gps_fd;
-	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n", errno));
+	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n",
+#ifdef _WIN32
+		WSAGetLastError()
+#else /* ndef _WIN32 */
+		errno
+#endif /* ndef _WIN32 */
+		));
 	    return -1;
         }
 	else
@@ -125,19 +147,25 @@ bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 int gps_sock_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-#ifndef USE_QT
+#ifdef USE_QT
+    QTcpSocket *sock = (QTcpSocket *) gpsdata->gps_fd;
+    sock->disconnectFromHost();
+    delete sock;
+    gpsdata->gps_fd = NULL;
+    return 0;
+#elif defined(_WIN32)
+	int res = closesocket(gpsdata->gps_fd);
+	if (res) {
+		return WSAGetLastError();
+	}
+	return 0;
+#else
     int status;
 
     free(PRIVATE(gpsdata));
     status = close(gpsdata->gps_fd);
     gpsdata->gps_fd = -1;
     return status;
-#else
-    QTcpSocket *sock = (QTcpSocket *) gpsdata->gps_fd;
-    sock->disconnectFromHost();
-    delete sock;
-    gpsdata->gps_fd = NULL;
-    return 0;
 #endif
 }
 /*@+usereleased +compdef@*/
@@ -149,6 +177,9 @@ int gps_sock_read(/*@out@*/struct gps_data_t *gpsdata)
     char *eol;
     ssize_t response_length;
     int status = -1;
+#ifdef _WIN32
+	int wserr;
+#endif /* _WIN32 */
 
     gpsdata->set &= ~PACKET_SET;
     for (eol = PRIVATE(gpsdata)->buffer;
@@ -165,6 +196,9 @@ int gps_sock_read(/*@out@*/struct gps_data_t *gpsdata)
 	status = (int)recv(gpsdata->gps_fd,
 			   PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting,
 			   sizeof(PRIVATE(gpsdata)->buffer) - PRIVATE(gpsdata)->waiting, 0);
+#ifdef _WIN32
+	wserr = WSAGetLastError();
+#endif /* WIN32 */
 #else
 	status =
 	    ((QTcpSocket *) (gpsdata->gps_fd))->read(PRIVATE(gpsdata)->buffer +
@@ -184,8 +218,11 @@ int gps_sock_read(/*@out@*/struct gps_data_t *gpsdata)
 	     */
 	    if (status == 0)
 		return -1;
-#ifndef USE_QT
 	    /* count transient errors as success, we'll retry later */
+#ifdef _WIN32
+	else if (WSAEINTR == wserr || WSAEWOULDBLOCK == wserr)
+	    return 0;
+#elif !defined(USE_QT)
 	    else if (errno == EINTR || errno == EAGAIN
 		     || errno == EWOULDBLOCK)
 		return 0;

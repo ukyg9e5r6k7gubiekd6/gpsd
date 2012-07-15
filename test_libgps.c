@@ -36,7 +36,9 @@ int main(int argc, char *argv[])
     int debug = 0;
 
     (void)signal(SIGSEGV, onsig);
+#ifdef SIGBUS
     (void)signal(SIGBUS, onsig);
+#endif /* SIGBUS */
 
     while ((option = getopt(argc, argv, "bhsD:?")) != -1) {
 	switch (option) {

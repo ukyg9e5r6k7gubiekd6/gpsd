@@ -33,16 +33,24 @@
 
 #define CLIMB 3
 
+#include "gpsd_config.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif /* HAVE_NETDB_H */
 #ifndef AF_UNSPEC
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #endif /* AF_UNSPEC */
 #endif /* S_SPLINT_S */
 #ifndef INADDR_ANY
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif /* HAVE_NETINET_IN_H */
 #endif /* INADDR_ANY */
 #include <stdlib.h>
 #include <string.h>
@@ -50,9 +58,15 @@
 #include <errno.h>
 #include <stdio.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif /* HAVE_NETINET_IN_H */
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif /* HAVE_ARPA_INET_H */
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
@@ -61,8 +75,8 @@
 #include "revision.h"
 
 /* Prototypes. */
-ssize_t sockreadline(int sockd,void *vptr,size_t maxlen);
-ssize_t sockwriteline(int sockd,const void *vptr,size_t n);
+ssize_t sockreadline(socket_t sockd,void *vptr,size_t maxlen);
+ssize_t sockwriteline(socket_t sockd,const void *vptr,size_t n);
 int send_lcd(char *buf);
 
 static struct fixsource_t source;
@@ -74,10 +88,10 @@ static char *speedunits = "mph";
 double avgclimb, climb[CLIMB];
 
 /* Global socket descriptor for LCDd. */
-int sd;
+socket_t sd;
 
 /*  Read a line from a socket  */
-ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
+ssize_t sockreadline(socket_t sockd,void *vptr,size_t maxlen) {
   ssize_t n,rc;
   char    c,*buffer;
 
@@ -85,7 +99,7 @@ ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
 
   for (n = 1; n < (ssize_t)maxlen; n++) {
 
-    if((rc=read(sockd,&c,1))==1) {
+    if((rc=recv(sockd,&c,1,0))==1) {
       *buffer++=c;
       if(c=='\n')
         break;
@@ -108,7 +122,7 @@ ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
 }
 
 /*  Write a line to a socket  */
-ssize_t sockwriteline(int sockd,const void *vptr,size_t n) {
+ssize_t sockwriteline(socket_t sockd,const void *vptr,size_t n) {
   size_t      nleft;
   ssize_t     nwritten;
   const char *buffer;
@@ -117,7 +131,7 @@ ssize_t sockwriteline(int sockd,const void *vptr,size_t n) {
   nleft=n;
 
   while(nleft>0) {
-    if((nwritten= write(sockd,buffer,nleft))<=0) {
+    if((nwritten=send(sockd,buffer,nleft,0))<=0) {
       if(errno==EINTR)
         nwritten=0;
       else
@@ -375,7 +389,7 @@ int main(int argc, char *argv[])
 
     /* create socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
-    if(sd == -1) {
+    if((int)sd < 0) {
 	perror("cannot open socket ");
 	exit(1);
     }

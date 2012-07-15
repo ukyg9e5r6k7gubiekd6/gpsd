@@ -140,6 +140,7 @@ boolopts = (
     ("timing",        False, "latency timing support"),
     ("control_socket",True,  "control socket for hotplug notifications"),
     ("systemd",       systemd, "systemd socket activation"),
+    ("libcap",        True,  "Capability support"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
@@ -452,7 +453,9 @@ else:
 # are like FreeBSD.
 ncurseslibs= []
 if env['ncurses']:
-    if config.CheckPKG('ncurses'):
+    if 'mingw' in env['target']:
+        ncurseslibs = ['-L../pdcurses-win32 -lpdcurses -I../pdcurses-win32']
+    elif config.CheckPKG('ncurses'):
         ncurseslibs = pkg_config('ncurses')
     elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
         ncurseslibs = ['!ncurses5-config --libs --cflags']
@@ -489,7 +492,15 @@ else:
     confdefs.append("/* #undef HAVE_LIBRT */\n")
     rtlibs = []
 
-if config.CheckLib('libcap'):
+# Some systems require non-default libraries for socket networking.
+if config.CheckLib('ws2_32'):
+    socket_libs = ["-lws2_32"]
+    env.Append(CFLAGS=socket_libs)
+    env.Append(LDFLAGS=socket_libs)
+else:
+    socket_libs = []
+
+if env['libcap'] and config.CheckLib('libcap'):
     confdefs.append("#define HAVE_LIBCAP 1\n")
     # System library - no special flags
     caplibs = ["-lcap"]
@@ -530,13 +541,37 @@ else:
     announce("You do not have kernel CANbus available.")
     env["nmea2000"] = False
 
-# check function after libraries, because some function require library
-# for example clock_gettime() require librt on Linux
-for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):
+for f in ("endian", "termios", "sys/ipc", "sys/shm", "sys/un", "sys/socket", "netdb", "netinet/in", "arpa/inet", "syslog", "windows", "winsock2", "ws2tcpip"):
+    if config.CheckHeader(f + ".h"):
+        confdefs.append("#define HAVE_%s_H 1\n" % f.upper())
+    else:
+        confdefs.append("/* #undef HAVE_%s_H */\n" % f.upper())
+
+# Check functions after libraries, because some functions require non-default libraries.
+# For example clock_gettime() require librt on Linux,
+# and the entire BSD-ish sockets API requires ws2_32.lib on Win32.
+for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r", "localtime_r", "inet_ntop", "inet_pton", "setenv"):
     if config.CheckFunc(f):
         confdefs.append("#define HAVE_%s 1\n" % f.upper())
     else:
         confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
+
+# FIXME: Over-rides for Mingw port
+if 'mingw32' in env['target']:
+    print 'mingw detected'
+    # SCons doesn't find inet_{a,n}to{n,a} above, even though it found -lws2_32 earlier.
+    confdefs.append("#define HAVE_INET_NTOA 1\n")
+    confdefs.append("#define HAVE_INET_ATON 1\n")
+    # SCons detects a 'sleep' from somewhere.
+    # We don't want the deprecated _sleep (which takes millis).
+    confdefs.append("/* #undef HAVE_SLEEP */\n")
+    confdefs.append("/* #undef HAVE_USLEEP */\n")
+else:
+    for f in ("inet_ntoa", "inet_aton"):
+        if config.CheckFunc(f):
+            confdefs.append("#define HAVE_%s 1\n" % f.upper())
+        else:
+            confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
 
 # Map options to libraries required to support them that might be absent.
 optionrequires = {
@@ -581,28 +616,32 @@ confdefs.append('''
   the gcc way fails - endian.h also doesn't seem to be available on all
   platforms.
 */
-#ifdef __BIG_ENDIAN__
-#define WORDS_BIGENDIAN 1
-#else /* __BIG_ENDIAN__ */
-#ifdef __LITTLE_ENDIAN__
-#undef WORDS_BIGENDIAN
-#else
-#include <endian.h>
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define WORDS_BIGENDIAN 1
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-#undef WORDS_BIGENDIAN
-#else
-#error "unable to determine endianess!"
-#endif /* __BYTE_ORDER */
-#endif /* __LITTLE_ENDIAN__ */
-#endif /* __BIG_ENDIAN__ */
+#if defined(__BIG_ENDIAN__)
+# define WORDS_BIGENDIAN 1
+#elif defined(__LITTLE_ENDIAN__)
+# undef WORDS_BIGENDIAN
+#elif defined(HAVE_ENDIAN_H)
+# include <endian.h>
+# if __BYTE_ORDER == __BIG_ENDIAN
+#  define WORDS_BIGENDIAN 1
+# elif __BYTE_ORDER == __LITTLE_ENDIAN
+#  undef WORDS_BIGENDIAN
+# else /* __BYTE_ORDER */
+#  error "This system's endian.h does not define __BYTE_ORDER as expected"
+# endif /* __BYTE_ORDER */
+#elif defined(_WIN32)
+/* FIXME: Remove assumption that Win32 is little-endian */
+# undef WORDS_BIGENDIAN
+#else /* ndef HAVE_ENDIAN_H */
+# error "unable to determine endianess!"
+#endif /* HAVE_ENDIAN_H */
 
 /* Some libcs do not have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
 # ifdef __cplusplus
 extern "C" {
 # endif
+#include <stdlib.h> /* size_t */
 size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # ifdef __cplusplus
 }
@@ -612,11 +651,32 @@ size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # ifdef __cplusplus
 extern "C" {
 # endif
+#include <stdlib.h> /* size_t */
 size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # ifdef __cplusplus
 }
 # endif
 #endif
+
+/* local substitutes for [u]sleep */
+#ifndef HAVE_USLEEP
+extern int usleep(unsigned int usecs);
+#endif /* HAVE_USLEEP */
+#ifndef HAVE_SLEEP
+extern unsigned int sleep(unsigned int secs);
+#endif /* HAVE_SLEEP */
+
+/* local implementation of daemon is also supplied */
+#ifndef HAVE_DAEMON
+extern int daemon(int nochdir, int noclose);
+#endif /* HAVE_DAEMON */
+
+#ifdef _BSD_SOURCE
+/* glibc extends struct tm with additional fields when this is set */
+#define HAVE_EXTENDED_STRUCT_TM 1
+#else /* ndef _BSD_SOURCE */
+/* #undef HAVE_EXTENDED_STRUCT_TM */
+#endif /* _BSD_SOURCE */
 
 #define GPSD_CONFIG_H
 ''')
@@ -681,6 +741,7 @@ libgps_sources = [
     "ais_json.c",
     "bits.c",
     "daemon.c",
+    "gmtime_r.c",
     "gpsutils.c",
     "gpsdclient.c",
     "gps_maskdump.c",
@@ -692,9 +753,12 @@ libgps_sources = [
     "libgps_shm.c",
     "libgps_sock.c",
     "netlib.c",
+    "nonblock.c",
     "rtcm2_json.c",
     "shared_json.c",
+    "startup.c",
     "strl.c",
+    "usleep.c",
 ]
 
 if cxx and env['libgpsmm']:
@@ -746,7 +810,12 @@ def VersionedSharedLibrary(env, libname, version, lib_objs=[], parse_flags=[]):
     shlib_post_action = None
     shlink_flags = SCons.Util.CLVar(env.subst('$SHLINKFLAGS'))
 
-    if platform == 'posix':
+    if 'mingw' in env['target']:
+        ilib_suffix = shlib_suffix
+        shlink_flags += [ '-Wl,-Bsymbolic',
+                          '-Wl,--out-implib,${TARGET.base}.lib',
+                          '-Wl,--output-def,${TARGET.base}.def' ]
+    elif platform == 'posix':
         ilib_suffix = shlib_suffix + '.' + version
         (major, age, revision) = version.split(".")
         soname = "lib" + libname + shlib_suffix + "." + major
@@ -831,14 +900,14 @@ compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
                           version=libgps_version,
-                          parse_flags=dbus_libs + rtlibs)
+                          parse_flags=dbus_libs + rtlibs + socket_libs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
                            version=libgps_version,
-                           parse_flags=usblibs + rtlibs + bluezlibs)
+                           parse_flags=usblibs + rtlibs + bluezlibs + socket_libs)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
@@ -868,8 +937,8 @@ if qt_env:
 
 # The libraries have dependencies on system libraries
 
-gpslibs = ["-lgps", "-lm"]
-gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
+gpslibs = ["-lgps", "-lm"] + socket_libs
+gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs + socket_libs
 
 # Source groups
 
@@ -907,7 +976,7 @@ gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 
 gpsd = gpsd_env.Program('gpsd', gpsd_sources,
-                        parse_flags = gpsdlibs + dbus_libs)
+                        parse_flags = gpsdlibs + dbus_libs + socket_libs)
 env.Depends(gpsd, [compiled_gpsdlib, compiled_gpslib])
 
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs)

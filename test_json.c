@@ -44,7 +44,7 @@ static void assert_integer(char *attr, int fld, int val)
     }
 }
 
-static void assert_uinteger(char *attr, uint fld, uint val)
+static void assert_uinteger(char *attr, unsigned int fld, unsigned int val)
 {
     if (fld != val) {
 	(void)fprintf(stderr,

@@ -13,7 +13,7 @@
 #include "bits.h"
 
 /*@ -duplicatequals -formattype */
-static unsigned char buf[80];
+static char buf[80];
 static char sb1, sb2;
 static unsigned char ub1, ub2;
 static short sw1, sw2;
@@ -104,7 +104,7 @@ static void ledumpall(void)
 
 struct unsigned_test
 {
-    unsigned char *buf;
+    char *buf;
     unsigned int start, width;
     uint64_t expected;
     bool le;
@@ -131,11 +131,11 @@ int main(int argc, char *argv[])
 	{buf, 56, 12, 0xf10,true, "12 bits crossing 7th to 8th bytes (0x08ff)"},
 	{buf, 78, 4,  0xd,  true, "4 bits crossing 8th to 9th byte (0xfefd)"},
 	/* sporadic tests based on found bugs */
-	{(unsigned char *)"\x19\x23\f6",
+	{"\x19\x23\f6",
 	 7, 2, 2, false, "2 bits crossing 1st to 2nd byte (0x1923)"},
     };
 
-    unsigned char *sp;
+    char *sp;
 
     memcpy(buf, "\x01\x02\x03\x04\x05\x06\x07\x08", 8);
     memcpy(buf + 8, "\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8", 8);

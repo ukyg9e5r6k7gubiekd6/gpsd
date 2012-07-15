@@ -17,6 +17,14 @@ extern "C" {
 #  define UNUSED
 #endif
 
+/* These headers must be included in the below order.
+ * The system headers below may include some of them,
+ * so we must include them in the right order beforehand.
+ */
+#ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+#endif /* _WIN32 */
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -1770,12 +1778,15 @@ struct policy_t {
 };
 
 /* 
- * Someday we may support Windows, under which socket_t is a separate type.
- * In the meantime, having a typedef for this semantic kind is no bad thing,
- * as it makes clearer what some declarations are doing without breaking
- * binary compatibility. 
+ * Under Windows, socket_t is a separate type.
  */
+#ifdef _WIN32
+typedef SOCKET socket_t;
+#define BADSOCK(s) (INVALID_SOCKET == (s))
+#else /* ndef _WIN32 */
 typedef int socket_t;
+#define BADSOCK(s) ((s) < 0)
+#endif /* ndef _WIN32 */
 
 /* mode flags for setting streaming policy */
 #define WATCH_ENABLE	0x000001u	/* enable streaming */
@@ -1902,6 +1913,10 @@ struct gps_data_t {
     void *privdata;
 };
 
+extern bool init_libgps(void);
+extern void shutdown_libgps(void);
+extern void nonblock_enable(socket_t s);
+extern void nonblock_disable(socket_t s);
 extern int gps_open(/*@null@*/const char *, /*@null@*/const char *, 
 		      /*@out@*/struct gps_data_t *);
 extern int gps_close(struct gps_data_t *);
@@ -1988,11 +2003,30 @@ extern double wgs84_separation(double, double);
 
 /* Some libc's don't have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
+#include <stdlib.h> /* size_t */
 size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #endif
 #ifndef HAVE_STRLCPY
+#include <stdlib.h> /* size_t */
 size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #endif
+
+/* local implementations provided */
+#ifndef HAVE_GMTIME_R
+#include <time.h>
+#ifdef gmtime_r
+/* FIXME: According to gcc -E, MinGW gets this definition from somewhere: */
+/* #define gmtime_r(a,b) ( ( gmtime( (a) ) ? (*(b) = *gmtime( (a) ), (b) ) : (0) ) */
+#undef gmtime_r
+#endif /* gmtime_r */
+extern struct tm *gmtime_r(const time_t *timep, struct tm *result);
+#endif /* HAVE_GMTIME_R */
+#ifndef HAVE_LOCALTIME_R
+#ifdef localtime_r
+#undef localtime_r
+#endif /* localtime_r */
+extern struct tm *localtime_r(const time_t *timep, struct tm *result);
+#endif /* HAVE_LOCALTIME_R */
 
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */

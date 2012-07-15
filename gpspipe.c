@@ -32,7 +32,9 @@
 #include <string.h>
 #include <strings.h>
 #include <fcntl.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #include <time.h>
 #include <sys/time.h>
 #ifndef S_SPLINT_S
@@ -49,12 +51,15 @@ static void spinner(unsigned int, unsigned int);
 /* NMEA-0183 standard baud rate */
 #define BAUDRATE B4800
 
+#ifdef HAVE_TERMIOS_H
 /* Serial port variables */
 static struct termios oldtio, newtio;
+#endif /* HAVE_TERMIOS_H */
 static int fd_out = 1;		/* output initially goes to standard output */
 static char serbuf[255];
 static int debug;
 
+#ifdef HAVE_TERMIOS_H
 static void open_serial(char *device)
 /* open the serial port and set it up */
 {
@@ -88,6 +93,7 @@ static void open_serial(char *device)
 	exit(1);
     }
 }
+#endif /* HAVE_TERMIOS_H */
 
 static void usage(void)
 {
@@ -257,9 +263,11 @@ int main(int argc, char **argv)
 	}
     }
 
+#ifdef HAVE_TERMIOS_H
     /* Open the serial port and set it up. */
     if (serialport)
 	open_serial(serialport);
+#endif /* HAVE_TERMIOS_H */
 
     /*@ -nullpass -onlytrans @*/
     if (gps_open(source.server, source.port, &gpsdata) != 0) {

@@ -1,8 +1,12 @@
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#ifdef HAVE_SYSLOG
 #include <syslog.h>
+#endif /* HAVE_SYSLOG */
 #include <math.h>
 #include <time.h>
 #include <errno.h>
@@ -13,7 +17,6 @@
 #endif /* S_SPLINT_S */
 
 #include "gps.h"
-#include "gpsd_config.h"
 #include "libgps.h"
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)

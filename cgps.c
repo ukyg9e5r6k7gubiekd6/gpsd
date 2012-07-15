@@ -341,6 +341,7 @@ static void windowsetup(void)
 
 /*@ +globstate @*/
 
+#ifdef SIGWINCH
 static void resize(int sig UNUSED)
 /* cope with terminal resize */
 {
@@ -350,6 +351,7 @@ static void resize(int sig UNUSED)
 	windowsetup();
     }
 }
+#endif /* SIGWINCH */
 
 #ifdef TRUENORTH
 /* This gets called once for each new compass sentence. */
@@ -795,8 +797,12 @@ int main(int argc, char *argv[])
 
     /* note: we're assuming BSD-style reliable signals here */
     (void)signal(SIGINT, die);
+#ifdef SIGHUP
     (void)signal(SIGHUP, die);
+#endif /* SIGHUP */
+#ifdef SIGWINCH
     (void)signal(SIGWINCH, resize);
+#endif /* SIGWINCH */
 
     windowsetup();
 

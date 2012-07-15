@@ -339,7 +339,16 @@ time_t mkgmtime(register struct tm * t)
 timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 /* ISO8601 UTC to Unix UTC */
 {
-#ifndef USE_QT
+#ifdef USE_QT
+    double usec = 0;
+
+    QString t(isotime);
+    QDateTime d = QDateTime::fromString(isotime, Qt::ISODate);
+    QStringList sl = t.split(".");
+    if (sl.size() > 1)
+	usec = sl[1].toInt() / pow(10., (double)sl[1].size());
+    return (timestamp_t)(d.toTime_t() + usec);
+#elif defined(HAVE_STRPTIME)
     char *dp = NULL;
     double usec;
     struct tm tm;
@@ -350,15 +359,22 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
     else
 	usec = 0;
     return (timestamp_t)mkgmtime(&tm) + usec;
-#else
-    double usec = 0;
-
-    QString t(isotime);
-    QDateTime d = QDateTime::fromString(isotime, Qt::ISODate);
-    QStringList sl = t.split(".");
-    if (sl.size() > 1)
-	usec = sl[1].toInt() / pow(10., (double)sl[1].size());
-    return (timestamp_t)(d.toTime_t() + usec);
+#else /* !defined(USE_QT) && !defined(HAVE_STRPTIME) */
+    double usec;
+    struct tm tm;
+    unsigned int year, mon, mday, hour, min, sec;
+    usec = 0;
+    if (6 == sscanf(isotime, "%u-%u-%uT%u:%u:%u", &year, &mon, &mday, &hour, &min, &sec)) {
+        tm.tm_year = year;
+        tm.tm_mon = mon;
+        tm.tm_mday = mday;
+        tm.tm_hour = hour;
+        tm.tm_min = min;
+        tm.tm_sec = sec;
+    } else {
+        memset(&tm, 0, sizeof(tm));
+    }
+    return (timestamp_t)mkgmtime(&tm) + usec;
 #endif
 }
 

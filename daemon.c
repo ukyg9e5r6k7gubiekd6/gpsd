@@ -16,9 +16,15 @@
 #endif
 #endif
 
-int daemon(int nochdir, int noclose)
+extern int daemon(int nochdir, int noclose)
 /* compatible with the daemon(3) found on Linuxes and BSDs */
 {
+#ifdef _WIN32
+	/* TODO: The Windows equivalent of a daemon process is a 'Service' */
+	(void)nochdir;
+	(void)noclose;
+	return -1;
+#else /* ndef _WIN32 */
     int fd;
 
     /*@ -type @*//* weirdly, splint 3.1.2 is confused by fork() */
@@ -47,6 +53,7 @@ int daemon(int nochdir, int noclose)
     /*@ +nullpass @*/
     /* coverity[leaked_handle] Intentional handle duplication */
     return 0;
+#endif /* _WIN32 */
 }
 
 #endif /* HAVE_DAEMON */

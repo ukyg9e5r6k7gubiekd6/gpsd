@@ -12,6 +12,18 @@ gpxlogger
 cgpxlogger
 gpspipe
 clockwatcher
+gpsd.exe
+rtcmdecode.exe
+gpsmon.exe
+gpsctl.exe
+gpsdctl.exe
+gpsdecode.exe
+cgps.exe
+lcdgps.exe
+gpxlogger.exe
+cgpxlogger.exe
+gpspipe.exe
+clockwatcher.exe
 # These are built from .in files
 gpscat
 gpsfake
@@ -32,6 +44,16 @@ test_geoid
 test_json
 test_trig
 test_libgps
+test_float.exe
+test_bits.exe
+test_gpsmm.exe
+test_qgpsmm.exe
+test_packet.exe
+test_mkgmtime.exe
+test_geoid.exe
+test_json.exe
+test_trig.exe
+test_libgps.exe
 # Other generated files
 gps.html
 gpscat.html
@@ -55,11 +77,15 @@ srec.html
 *.o
 *.os
 *.a
+*.lib
 *.lo
 *.la
 *.so
 *.so.[0-9.]*
 *.dylib
+*.dll
+*.def
+*.exp
 *~
 *.swp
 *.egg-info

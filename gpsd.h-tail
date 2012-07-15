@@ -5,7 +5,9 @@
  */
 #endif /* GPSD_CONFIG_H */
 
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #include <stdint.h>
 #include "gps.h"
 
@@ -720,8 +722,10 @@ extern bool gpsd_set_raw(struct gps_device_t *);
 extern ssize_t gpsd_write(struct gps_device_t *, const char *, size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
+#ifdef HAVE_TERMIOS_H
 extern void gpsd_set_speed(struct gps_device_t *, speed_t, char, unsigned int);
 extern speed_t gpsd_get_speed(const struct termios *);
+#endif /* HAVE_TERMIOS_H */
 extern void gpsd_assert_sync(struct gps_device_t *);
 extern void gpsd_close(struct gps_device_t *);
 
@@ -750,7 +754,9 @@ extern void gpsd_position_fix_dump(struct gps_device_t *,
 				   /*@out@*/char[], size_t);
 extern void gpsd_clear_data(struct gps_device_t *);
 extern socket_t netlib_connectsock(int, const char *, const char *, const char *);
+#ifdef HAVE_SYS_UN_H
 extern socket_t netlib_localsocket(const char *, int);
+#endif /* HAVE_SYS_UN_H */
 extern const char /*@observer@*/ *netlib_errstr(const int);
 extern char /*@observer@*/ *netlib_sock2ip(int);
 
