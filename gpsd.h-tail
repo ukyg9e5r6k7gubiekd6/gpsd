@@ -807,7 +807,7 @@ extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
 extern void gpsd_wrap(struct gps_device_t *);
-extern bool gpsd_add_device(const char *device_name);
+extern bool gpsd_add_device(const char *device_name, bool flag_nowait);
 extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
 
 /* exceptional driver methods */
