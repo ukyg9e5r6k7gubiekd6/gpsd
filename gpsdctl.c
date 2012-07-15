@@ -4,6 +4,9 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  */
+
+#include "gpsd_config.h"
+
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>

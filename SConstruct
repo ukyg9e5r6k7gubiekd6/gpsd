@@ -543,14 +543,14 @@ else:
 
 for f in ("endian", "termios", "sys/ipc", "sys/shm", "sys/un", "sys/socket", "netdb", "netinet/in", "arpa/inet", "syslog", "windows", "winsock2", "ws2tcpip"):
     if config.CheckHeader(f + ".h"):
-        confdefs.append("#define HAVE_%s_H 1\n" % f.upper())
+        confdefs.append("#define HAVE_%s_H 1\n" % f.upper().replace('/', '_'))
     else:
-        confdefs.append("/* #undef HAVE_%s_H */\n" % f.upper())
+        confdefs.append("/* #undef HAVE_%s_H */\n" % f.upper().replace('/', '_'))
 
 # Check functions after libraries, because some functions require non-default libraries.
 # For example clock_gettime() require librt on Linux,
 # and the entire BSD-ish sockets API requires ws2_32.lib on Win32.
-for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r", "localtime_r", "inet_ntop", "inet_pton", "setenv"):
+for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r", "localtime_r", "inet_ntop", "inet_pton", "setenv", "fcntl"):
     if config.CheckFunc(f):
         confdefs.append("#define HAVE_%s 1\n" % f.upper())
     else:
@@ -567,7 +567,7 @@ if 'mingw32' in env['target']:
     confdefs.append("/* #undef HAVE_SLEEP */\n")
     confdefs.append("/* #undef HAVE_USLEEP */\n")
 else:
-    for f in ("inet_ntoa", "inet_aton"):
+    for f in ("inet_ntoa", "inet_aton", "sleep", "usleep"):
         if config.CheckFunc(f):
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
         else:

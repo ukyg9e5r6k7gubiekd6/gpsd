@@ -44,7 +44,7 @@
 #include "gpsd.h"
 #include "sockaddr.h"
 
-int netlib_closesock(socket_t sock)
+static int netlib_closesock(socket_t sock)
 {
 #ifdef _WIN32
 	return closesocket(sock);
@@ -198,7 +198,7 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 
 	/*@-unrecog@*/
 	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
-		(void)netlib_closesock(s);
+		(void)netlib_closesock(sock);
 	    return -1;
 	}
 	/*@+unrecog@*/
