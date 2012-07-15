@@ -702,7 +702,7 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
     return true;
 }
 
-static bool add_device(const char *device_name)
+bool gpsd_add_device(const char *device_name)
 /* add a device to the pool; open it right away if in nowait mode */
 {
     struct gps_device_t *devp;
@@ -802,7 +802,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    gpsd_report(LOG_INF, "<= control(%d): adding %s\n", sfd, stash);
-	    if (add_device(stash))
+	    if (gpsd_add_device(stash))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
@@ -2060,7 +2060,7 @@ int main(int argc, char *argv[])
      */
     in_restart = false;
     for (i = optind; i < argc; i++) {
-	if (!add_device(argv[i])) {
+	if (!gpsd_add_device(argv[i])) {
 	    gpsd_report(LOG_ERROR,
 			"initial GPS device %s open failed\n",
 			argv[i]);
@@ -2199,7 +2199,7 @@ int main(int argc, char *argv[])
      */
     if (in_restart)
 	for (i = optind; i < argc; i++) {
-	    if (!add_device(argv[i])) {
+	    if (!gpsd_add_device(argv[i])) {
 		gpsd_report(LOG_ERROR,
 			    "GPS device %s open failed\n",
 			    argv[i]);
