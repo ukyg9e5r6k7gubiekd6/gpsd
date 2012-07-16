@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#ifdef HAVE_SYSLOG
+#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
-#endif /* HAVE_SYSLOG */
+#endif /* HAVE_SYSLOG_H */
 #include <math.h>
 #include <time.h>
 #include <errno.h>
