@@ -246,13 +246,14 @@ typedef struct
 
 // useful funcs to read/write ints
 //  floats and doubles are Intel (little-endian) order only...
-static inline void set_int16(uint8_t * buf, uint32_t value)
+/* FIXME: These should be replaced with routines from bits.[ch] */
+/*@unused@*/ static inline void set_int16(uint8_t * buf, uint32_t value)
 {
     buf[0] = (uint8_t) (0x0FF & value);
     buf[1] = (uint8_t) (0x0FF & (value >> 8));
 }
 
-static inline void set_int32(uint8_t * buf, uint32_t value)
+/*@unused@*/ static inline void set_int32(uint8_t * buf, uint32_t value)
 {
     buf[0] = (uint8_t) (0x0FF & value);
     buf[1] = (uint8_t) (0x0FF & (value >> 8));
@@ -260,13 +261,13 @@ static inline void set_int32(uint8_t * buf, uint32_t value)
     buf[3] = (uint8_t) (0x0FF & (value >> 24));
 }
 
-static inline uint16_t get_uint16(const uint8_t * buf)
+/*@unused@*/ static inline uint16_t get_uint16(const uint8_t * buf)
 {
     return (uint16_t) (0xFF & buf[0])
 	| ((uint16_t) (0xFF & buf[1]) << 8);
 }
 
-static inline uint32_t get_int32(const uint8_t * buf)
+/*@unused@*/ static inline uint32_t get_int32(const uint8_t * buf)
 {
     return (uint32_t) (0xFF & buf[0])
 	| ((uint32_t) (0xFF & buf[1]) << 8)
