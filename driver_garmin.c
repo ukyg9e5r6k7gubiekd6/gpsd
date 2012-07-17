@@ -283,8 +283,10 @@ static inline double radtodeg(double rad)
 static gps_mask_t PrintSERPacket(struct gps_device_t *session,
 				 unsigned char pkt_id, int pkt_len,
 				 unsigned char *buf);
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session,
 				 Packet_t * pkt);
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 			  int pkt_len, unsigned char *buf)
@@ -603,8 +605,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 }
 
 
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 /*@ -branchstate @*/
-// For debugging, decodes and prints some known packets.
+/* For debugging, decodes and prints some known packets. */
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 {
     gps_mask_t mask = 0;
@@ -706,7 +709,6 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 /*@ +branchstate @*/
 
 
-#if defined(__linux__) || defined(S_SPLINT_S)
 /* build and send a packet w/ USB protocol */
 static void Build_Send_USB_Packet(struct gps_device_t *session,
 				  uint32_t layer_id, uint32_t pkt_id,
@@ -745,7 +747,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 	(void)gpsd_write(session, n, 0);
     }
 }
-#endif /* __linux__ || S_SPLINT_S */
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 /* build and send a packet in serial protocol */
 /* layer_id unused */

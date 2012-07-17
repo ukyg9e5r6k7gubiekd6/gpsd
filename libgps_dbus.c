@@ -81,7 +81,7 @@ static DBusHandlerResult signal_handler(DBusConnection * connection,
 					DBusMessage * message)
 {
     /* dummy, need to use the variable for some reason */
-    connection = NULL;
+    (void)connection;
 
     if (dbus_message_is_signal(message, "org.gpsd", "fix"))
 	return handle_gps_fix(message);
