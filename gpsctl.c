@@ -36,7 +36,7 @@ static unsigned int timeout = 8;
  */
 #define REDIRECT_SNIFF	15
 
-void gpsctl_report(int errlevel UNUSED, const char *fmt, va_list ap)
+static void gpsctl_report(int errlevel UNUSED, const char *fmt, va_list ap)
 /* our version of the logger */
 {
     char *err_str;

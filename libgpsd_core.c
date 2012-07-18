@@ -1000,7 +1000,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			session->device_type->type_name,
 			timestamp() - session->opentime,
 #ifdef HAVE_TERMIOS_H
-			speed
+			gpsd_get_speed(&session->ttyset)
 #else /* ndef HAVE_TEMIOS_H */
 			0
 #endif /* ndef HAVE_TERMIOS_H */

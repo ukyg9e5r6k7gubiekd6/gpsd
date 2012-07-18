@@ -162,7 +162,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
-void gpsmon_report(int errlevel, const char *fmt, va_list ap)
+static void gpsmon_report(int errlevel, const char *fmt, va_list ap)
 /* our version of the logger */
 {
     char buf[BUFSIZ]; 

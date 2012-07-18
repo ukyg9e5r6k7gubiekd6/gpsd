@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "gpsd.h"
 
 unsigned int my_alarm(unsigned int timeout, alarm_callback callback);
@@ -9,7 +11,7 @@ unsigned int my_alarm(unsigned int timeout, alarm_callback callback)
 	(void)signal(SIGALRM, callback);
 	(void)alarm(timeout);
     } else {
-	(void)signal(SIGALRM, SIGIGN);
+	(void)signal(SIGALRM, SIG_IGN);
     }
 #elif defined(_WIN32)
     if (callback) {

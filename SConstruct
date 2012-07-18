@@ -541,7 +541,7 @@ else:
     announce("You do not have kernel CANbus available.")
     env["nmea2000"] = False
 
-for f in ("endian", "termios", "sys/ipc", "sys/shm", "sys/un", "sys/wait", "sys/socket", "netdb", "netinet/in", "net/if", "arpa/inet", "syslog", "pwd", "grp", "windows", "winsock2", "ws2tcpip"):
+for f in ("endian", "termios", "sys/ipc", "sys/shm", "sys/un", "sys/wait", "sys/ioctl", "sys/socket", "netdb", "netinet/in", "net/if", "arpa/inet", "syslog", "pwd", "grp", "windows", "winsock2", "ws2tcpip"):
     if config.CheckHeader(f + ".h"):
         confdefs.append("#define HAVE_%s_H 1\n" % f.upper().replace('/', '_'))
     else:

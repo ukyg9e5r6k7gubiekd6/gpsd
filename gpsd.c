@@ -199,7 +199,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
-void gpsd_gpsd_report(int errlevel, const char *fmt, va_list ap)
+static void gpsd_gpsd_report(int errlevel, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
 #ifndef SQUELCH_ENABLE

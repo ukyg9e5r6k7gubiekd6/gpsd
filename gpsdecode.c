@@ -26,7 +26,7 @@ static unsigned int typelist[32];
  *
  **************************************************************************/
 
-void gpsdecode_report(int errlevel, const char *fmt, va_list ap)
+static void gpsdecode_report(int errlevel, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     if (errlevel <= verbose) {

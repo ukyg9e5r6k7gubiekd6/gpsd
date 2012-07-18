@@ -2042,13 +2042,13 @@ extern struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif /* HAVE_SYSLOG_H */
 
 /* Work around lack of C99 %z for size_t */
-#if !defined(_WIN32) && __STDC_VERSION__ >= 199901L
+#if !defined(_WIN32) && (__STDC_VERSION__ >= 199901L || __linux__)
 #define SIZE_T_FORMAT "%zu"
 #define SSIZE_T_FORMAT "%zd"
-#else /* defined(_WIN32) || __STDC_VERSION__ < 199901L */
+#else /* defined(_WIN32) || (__STDC_VERSION__ < 199901L && !__linux__) */
 #define SIZE_T_FORMAT "%u"
 #define SSIZE_T_FORMAT "%d"
-#endif /* defined(WIN32) || __STDC_VERSION__ < 199901L */
+#endif /* defined(WIN32) || (__STDC_VERSION__ < 199901L && !__linux__) */
 
 #ifndef WEXITSTATUS
 #ifdef _WIN32
