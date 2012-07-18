@@ -85,7 +85,7 @@ static bool geostar_detect(struct gps_device_t *session)
 {
     unsigned char buf[1 * 4];
     bool ret = false;
-    int myfd;
+    socket_t myfd;
     fd_set fdset;
     struct timeval to;
 

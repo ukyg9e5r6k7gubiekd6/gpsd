@@ -87,7 +87,7 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
     h.flags = 0;
     h.csum = zodiac_checksum((unsigned short *)&h, 4);
 
-    if (session->gpsdata.gps_fd != -1) {
+    if (!BADSOCK(session->gpsdata.gps_fd)) {
 	size_t hlen, datlen;
 	hlen = sizeof(h);
 	datlen = sizeof(unsigned short) * dlen;
@@ -392,7 +392,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     for (i = 0; i < (int)session->packet.outbuflen; i++)
 	(void)snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
 		       "%02x", (unsigned int)session->packet.outbuffer[i]);
-    gpsd_report(LOG_RAW, "Raw Zodiac packet type %d length %zd: %s\n",
+    gpsd_report(LOG_RAW, "Raw Zodiac packet type %d length " SSIZE_T_FORMAT ": %s\n",
 		id, session->packet.outbuflen, buf);
 
     if (session->packet.outbuflen < 10)

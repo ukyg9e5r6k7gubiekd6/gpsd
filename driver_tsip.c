@@ -68,17 +68,21 @@ static bool tsip_detect(struct gps_device_t *session)
 {
     char buf[BUFSIZ];
     bool ret = false;
-    int myfd;
+    socket_t myfd;
     fd_set fdset;
     struct timeval to;
+#ifdef HAVE_TERMIOS_H
     speed_t old_baudrate;
     char old_parity;
     unsigned int old_stopbits;
+#endif /* HAVE_TERMIOS_H */
 
+#ifdef HAVE_TERMIOS_H
     old_baudrate = session->gpsdata.dev.baudrate;
     old_parity = session->gpsdata.dev.parity;
     old_stopbits = session->gpsdata.dev.stopbits;
     gpsd_set_speed(session, 9600, 'O', 1);
+#endif /* HAVE_TERMIOS_H */
 
     /* request firmware revision and look for a valid response */
     /*@+ignoresigns@*/
@@ -107,9 +111,11 @@ static bool tsip_detect(struct gps_device_t *session)
 	}
     }
 
+#ifdef HAVE_TERMIOS_H
     if (!ret)
 	/* return serial port to original settings */
 	gpsd_set_speed(session, old_baudrate, old_parity, old_stopbits);
+#endif /* HAVE_TERMIOS_H */
 
     return ret;
 }
@@ -569,7 +575,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u1 = (uint8_t) getub(buf, 0);
 	(void)snprintf(session->gpsdata.tag + strlen(session->gpsdata.tag),
 		       sizeof(session->gpsdata.tag) -
-		       strlen(session->gpsdata.tag), "%02x", (uint) u1);
+		       strlen(session->gpsdata.tag), "%02x", (unsigned int) u1);
 	/*@ -charint @*/
 	switch (u1) {		/* sub-packet ID */
 	case 0x15:		/* Current Datum Values */
@@ -981,7 +987,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	     */
 	    session->driver.tsip.parity = session->gpsdata.dev.parity;
 	    session->driver.tsip.stopbits =
-		(uint) session->gpsdata.dev.stopbits;
+		(unsigned int) session->gpsdata.dev.stopbits;
 	    // gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
 	    break;
 
@@ -1020,11 +1026,13 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	}
     }
     if (event == event_deactivate) {
+#ifdef HAVE_TERMIOS_H
 	/* restore saved parity and stopbits when leaving TSIP mode */
 	gpsd_set_speed(session,
 		       session->gpsdata.dev.baudrate,
 		       session->driver.tsip.parity,
 		       session->driver.tsip.stopbits);
+#endif /* HAVE_TERMIOS_H */
     }
 }
 

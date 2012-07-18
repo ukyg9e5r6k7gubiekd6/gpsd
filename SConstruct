@@ -541,7 +541,7 @@ else:
     announce("You do not have kernel CANbus available.")
     env["nmea2000"] = False
 
-for f in ("endian", "termios", "sys/ipc", "sys/shm", "sys/un", "sys/socket", "netdb", "netinet/in", "arpa/inet", "syslog", "windows", "winsock2", "ws2tcpip"):
+for f in ("endian", "termios", "sys/ipc", "sys/shm", "sys/un", "sys/wait", "sys/socket", "netdb", "netinet/in", "net/if", "arpa/inet", "syslog", "pwd", "grp", "windows", "winsock2", "ws2tcpip"):
     if config.CheckHeader(f + ".h"):
         confdefs.append("#define HAVE_%s_H 1\n" % f.upper().replace('/', '_'))
     else:
@@ -550,7 +550,7 @@ for f in ("endian", "termios", "sys/ipc", "sys/shm", "sys/un", "sys/socket", "ne
 # Check functions after libraries, because some functions require non-default libraries.
 # For example clock_gettime() require librt on Linux,
 # and the entire BSD-ish sockets API requires ws2_32.lib on Win32.
-for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r", "localtime_r", "inet_ntop", "inet_pton", "setenv", "fcntl"):
+for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r", "localtime_r", "inet_ntop", "inet_pton", "setenv", "unsetenv", "fcntl", "signal", "sigaction", "timegm", "alarm"):
     if config.CheckFunc(f):
         confdefs.append("#define HAVE_%s 1\n" % f.upper())
     else:
@@ -658,6 +658,11 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # endif
 #endif
 
+#ifndef HAVE_TIMEGM
+#include <time.h>
+time_t timegm(struct tm *tm);
+#endif
+
 /* local substitutes for [u]sleep */
 #ifndef HAVE_USLEEP
 extern int usleep(unsigned int usecs);
@@ -758,6 +763,7 @@ libgps_sources = [
     "shared_json.c",
     "startup.c",
     "strl.c",
+    "timegm.c",
     "usleep.c",
 ]
 
@@ -765,6 +771,7 @@ if cxx and env['libgpsmm']:
     libgps_sources.append("libgpsmm.cpp")
 
 libgpsd_sources = [
+    "alarm.c",
     "bsd_base64.c",
     "crc24q.c",
     "gpsd_json.c",
@@ -938,7 +945,7 @@ if qt_env:
 # The libraries have dependencies on system libraries
 
 gpslibs = ["-lgps", "-lm"] + socket_libs
-gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs + socket_libs
+gpsdlibs = ["-lgps", "-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs + socket_libs
 
 # Source groups
 

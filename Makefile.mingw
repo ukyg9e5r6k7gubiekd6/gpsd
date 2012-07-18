@@ -41,6 +41,7 @@ rtcm2_json.c \
 shared_json.c \
 startup.c \
 strl.c \
+timegm.c \
 usleep.c
 LIBGPS_OBJECTS=$(LIBGPS_SOURCES:.c=.o)
 LIBGPS=$(addsuffix $(SHLIB_SUFFIX),libgps)
@@ -51,6 +52,7 @@ CLIENT_BINARY_NAMES=cgps gpspipe gpxlogger lcdgps test_bits test_float test_json
 CLIENT_BINARIES=$(addsuffix .exe,$(CLIENT_BINARY_NAMES))
 
 LIBGPSD_SOURCES=\
+alarm.c \
 bsd_base64.c \
 crc24q.c \
 gpsd_json.c \
@@ -87,14 +89,26 @@ LIBGPSD_OBJECTS=$(LIBGPSD_SOURCES:.c=.o)
 LIBGPSD=$(addsuffix $(SHLIB_SUFFIX),libgpsd)
 LIBGPSD_IMPLIB=libgpsd.lib
 LIBGPSD_DEF=libgpsd.def
-SERVER_BINARY_NAMES=gpsd gpsdecode gpsctl gpsmon test_geoid test_packet
+SERVER_BINARY_NAMES=gpsd gpsdecode gpsctl test_geoid test_packet
 SERVER_BINARIES=$(addsuffix .exe,$(SERVER_BINARY_NAMES))
+
+GPSMON_SOURCES=\
+gpsmon.c \
+monitor_italk.c \
+monitor_nmea.c \
+monitor_oncore.c \
+monitor_sirf.c \
+monitor_superstar2.c \
+monitor_tnt.c \
+monitor_ubx.c \
+monitor_garmin.c
+GPSMON_OBJECTS=$(GPSMON_SOURCES:.c=.o)
 
 BINARY_NAMES=$(CLIENT_BINARY_NAMES) $(SERVER_BINARY_NAMES)
 BINARIES=$(CLIENT_BINARIES) $(SERVER_BINARIES)
 
-# all: $(BINARIES)
-all: $(CLIENT_BINARIES)
+all: $(BINARIES)
+# all: $(CLIENT_BINARIES)
 
 .c.o: $(HEADERS)
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -108,15 +122,19 @@ $(LIBGPSD_OBJECTS): %.o: %.c $(HEADERS)
 $(LIBGPS): $(LIBGPS_OBJECTS)
 	$(LD) $(LDFLAGS) $(LDSHARED) -Wl,--out-implib -Wl,$(LIBGPS_IMPLIB) -Wl,--output-def -Wl,$(LIBGPS_DEF) -o $@ $^ $(LIBS)
 
-$(LIBGPSD): $(LIBGPSD_OBJECTS)
+$(LIBGPSD): $(LIBGPSD_OBJECTS) $(LIBGPS)
 	$(LD) $(LDFLAGS) $(LDSHARED) -Wl,--out-implib -Wl,$(LIBGPSD_IMPLIB) -Wl,--output-def -Wl,$(LIBGPSD_DEF) -o $@ $^ $(LIBS)
 
 # Each client binary is built from its sole object file and libgps.dll
 $(CLIENT_BINARIES): %.exe: %.o $(LIBGPS)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-# Each server binary is built from its sole object file, libgps.dll and libgpsd.dll
+# Most server binaries are built from its sole object file, libgps.dll and libgpsd.dll
 $(SERVER_BINARIES): %.exe: %.o $(LIBGPS) $(LIBGPSD)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+
+# gpsmon binary is built from its several object files, libgps.dll and libgpsd.dll
+gpsmon.exe: $(GPSMON_OBJECTS) $(LIBGPS) $(LIBGPSD)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 .PHONY: clean

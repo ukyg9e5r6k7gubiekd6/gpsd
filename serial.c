@@ -3,9 +3,13 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include "gpsd_config.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -13,10 +17,11 @@
 #include <errno.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #endif /* S_SPLINT_S */
 
-#include "gpsd_config.h"
 #ifdef HAVE_BLUEZ
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -35,6 +40,7 @@
 #  endif /* CNEW_RTSCTS */
 #endif /* !CRTSCTS */
 
+#ifdef HAVE_TERMIOS_H
 static sourcetype_t gpsd_classify(const char *path)
 /* figure out what kind of device we're looking at */
 {
@@ -44,9 +50,11 @@ static sourcetype_t gpsd_classify(const char *path)
 	return source_unknown;
     else if (S_ISREG(sb.st_mode))
 	return source_blockdev;
+#ifdef HAVE_SYS_UN_H
     /* this assumes we won't get UDP from a filesystem socket */
     else if (S_ISSOCK(sb.st_mode))
 	return source_tcp;
+#endif /* HAVE_SYS_UN_H */
     else if (S_ISCHR(sb.st_mode)) {
 	sourcetype_t devtype = source_rs232;
 #ifdef __linux__
@@ -68,6 +76,7 @@ static sourcetype_t gpsd_classify(const char *path)
     } else
 	return source_unknown;
 }
+#endif /* HAVE_TERMIOS_H */
 
 #ifdef __linux__
 #include <dirent.h>
@@ -139,6 +148,7 @@ void cfmakeraw(struct termios *termios_p)
 }
 #endif /* defined(__CYGWIN__) */
 
+#ifdef HAVE_TERMIOS_H
 speed_t gpsd_get_speed(const struct termios *ttyctl)
 {
     speed_t code = cfgetospeed(ttyctl);
@@ -494,6 +504,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 		session->gpsdata.dev.path, session->gpsdata.gps_fd);
     return session->gpsdata.gps_fd;
 }
+#endif /* HAVE_TERMIOS_H */
 
 ssize_t gpsd_write(struct gps_device_t * session, const char *buf, size_t len)
 {
@@ -504,7 +515,9 @@ ssize_t gpsd_write(struct gps_device_t * session, const char *buf, size_t len)
 	return 0;
     status = write(session->gpsdata.gps_fd, buf, len);
     ok = (status == (ssize_t) len);
+#ifdef HAVE_TERMIOS_H
     (void)tcdrain(session->gpsdata.gps_fd);
+#endif /* HAVE_TERMIOS_H */
     /* extra guard prevents expensive hexdump calls */
     if (session->context->debug >= LOG_IO)
 	gpsd_report(LOG_IO, "=> GPS: %s%s\n",
@@ -512,6 +525,7 @@ ssize_t gpsd_write(struct gps_device_t * session, const char *buf, size_t len)
     return status;
 }
 
+#ifdef HAVE_TERMIOS_H
 /*
  * This constant controls how long the packet sniffer will spend looking
  * for a packet leader before it gives up.  It *must* be larger than
@@ -549,7 +563,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 #endif /* FIXED_STOP_BITS */
 	}
 #endif /* FIXED_PORT_SPEED */
-	// cppcheck-suppress unreachableCode
+	/* cppcheck-suppress unreachableCode */
 	gpsd_set_speed(session,
 #ifdef FIXED_PORT_SPEED
 		       FIXED_PORT_SPEED,
@@ -580,22 +594,30 @@ void gpsd_assert_sync(struct gps_device_t *session)
     if (session->saved_baud == -1)
 	session->saved_baud = (int)cfgetispeed(&session->ttyset);
 }
+#endif /* HAVE_TERMIOS_H */
 
 void gpsd_close(struct gps_device_t *session)
 {
-    if (session->gpsdata.gps_fd != -1) {
+    if (BADSOCK(session->gpsdata.gps_fd)) {
+#ifdef TIOCNXCL
 	(void)ioctl(session->gpsdata.gps_fd, (unsigned long)TIOCNXCL);
+#endif /* TIOCNXCL */
+#ifdef HAVE_TErmKIOS_H
 	(void)tcdrain(session->gpsdata.gps_fd);
+#endif /* HAVE_TERMIOS_H */
 	if (isatty(session->gpsdata.gps_fd) != 0) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
 	    /*@ ignore @*/
+#ifdef HAVE_TERMIOS_H
 	    (void)cfsetispeed(&session->ttyset, (speed_t) B0);
 	    (void)cfsetospeed(&session->ttyset, (speed_t) B0);
 	    /*@ end @*/
 	    (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
 			    &session->ttyset);
+#endif /* HAVE_TERMIOS_H */
 	}
 	/* this is the clean way to do it */
+#ifdef HAVE_TERMIOS_H
 	session->ttyset_old.c_cflag |= HUPCL;
 	/* keep the most recent baud rate */
 	/*
@@ -614,6 +636,7 @@ void gpsd_close(struct gps_device_t *session)
 	    (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
 			    &session->ttyset_old);
 	}
+#endif /* HAVE_TERMIOS_H */
 	gpsd_report(LOG_SPIN, "close(%d) in gpsd_close(%s)\n",
 		    session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);

@@ -17,18 +17,15 @@
 
 static int verbose = 0;
 
-void gpsd_report(int errlevel, const char *fmt, ...)
+void test_packet_report(int errlevel, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     if (errlevel <= verbose) {
 	char buf[BUFSIZ];
-	va_list ap;
 
 	buf[0] = '\0';
-	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			ap);
-	va_end(ap);
 
 	(void)fputs(buf, stderr);
     }
@@ -311,7 +308,7 @@ static void runon_test(struct map *mp)
     (void)fputs(mp->test, stdout);
     do {
 	st = packet_get(nullfd, &packet);
-	//printf("packet_parse() returned %zd\n", st);
+	//printf("packet_parse() returned " SSIZE_T_FORMAT "\n", st);
     } while (st > 0);
     /*@ +compdef +uniondef +usedef +formatcode @*/
 }
@@ -322,6 +319,7 @@ int main(int argc, char *argv[])
     int failcount = 0;
     int option, singletest = 0;
 
+    set_report_callback(test_packet_report);
     verbose = 0;
     while ((option = getopt(argc, argv, "e:t:v:")) != -1) {
 	switch (option) {

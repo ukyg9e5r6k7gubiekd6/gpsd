@@ -1138,7 +1138,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * packets.  This may be a generic bug of all Garmin chipsets.
      */
     if (strlen(sentence) > NMEA_MAX) {
-	gpsd_report(LOG_WARN, "Overlong packet of %zd chars rejected.\n",
+	gpsd_report(LOG_WARN, "Overlong packet of " SSIZE_T_FORMAT " chars rejected.\n",
 		    strlen(sentence));
 	return ONLINE_SET;
     }
@@ -1256,7 +1256,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	if (!GPS_TIME_EQUAL
 	    (session->driver.nmea.this_frac_time,
 	     session->driver.nmea.last_frac_time)) {
-	    uint lasttag = session->driver.nmea.lasttag;
+	    unsigned int lasttag = session->driver.nmea.lasttag;
 	    retval |= CLEAR_IS;
 	    gpsd_report(LOG_PROG,
 			"%s starts a reporting cycle.\n",

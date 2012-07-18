@@ -4,6 +4,9 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  */
+
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -14,7 +17,9 @@
 #include <signal.h>
 #include <time.h>
 #include <sys/time.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -31,13 +36,11 @@ static unsigned int timeout = 8;
  */
 #define REDIRECT_SNIFF	15
 
-void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
+void gpsctl_report(int errlevel UNUSED, const char *fmt, va_list ap)
 /* our version of the logger */
 {
     char *err_str;
     if (errlevel <= debuglevel) {
-	va_list ap;
-	va_start(ap, fmt);
 	switch ( errlevel ) {
 	case LOG_ERROR:
 		err_str = "ERROR: ";
@@ -73,7 +76,6 @@ void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 	(void)fputs("gpsctl:", stderr);
 	(void)fputs(err_str, stderr);
 	(void)vfprintf(stderr, fmt, ap);
-	va_end(ap);
     }
 }
 
@@ -143,9 +145,13 @@ static void settle(struct gps_device_t *session)
     /*
      * See the 'deep black magic' comment in serial.c:set_serial().
      */
+#ifdef HAVE_TERMIOS_H
     (void)tcdrain(session->gpsdata.gps_fd);
+#endif /* HAVE_TERMIOS_H */
     (void)usleep(50000);
+#ifdef HAVE_TERMIOS_H
     (void)tcdrain(session->gpsdata.gps_fd);
+#endif /* HAVE_TERMIOS_H */
 }
 
 static bool gps_query(/*@out@*/struct gps_data_t *gpsdata, 
@@ -233,14 +239,35 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 
 static void onsig(int sig)
 {
+#ifdef SIGALRM
     if (sig == SIGALRM) {
 	gpsd_report(LOG_ERROR, "packet recognition timed out.\n");
 	exit(1);
     } else {
+#endif /* SIGALRM */
 	gpsd_report(LOG_ERROR, "killed by signal %d\n", sig);
 	exit(0);
+#ifdef SIGALRM
     }
+#endif /* SIGALRM */
 }
+
+#ifdef _WIN32
+CALLBACK void onalarm(HWND window, UINT timer_id, UINT timeout, DWORD unknown)
+{
+    (void)window;
+    (void)timer_id;
+    (void)timeout;
+    (void)unknown;
+    gpsd_report(LOG_ERROR, "packet recognition timed out.\n");
+    exit(1);
+}
+#else /* ndef _WIN32 */
+static void onalarm(int signum)
+{
+    onsig(signum);
+}
+#endif /* ndef _WIN32 */
 
 static char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
 /* full ID of the device for reports, including subtype */
@@ -272,6 +299,7 @@ int main(int argc, char **argv)
     ssize_t cooklen = 0;
 #endif /* RECONFIGURE_ENABLE */
 
+    set_report_callback(gpsctl_report);
 #define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-c rate] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
     while ((option = getopt(argc, argv, "bec:fhlnrs:t:x:D:T:V")) != -1) {
 	switch (option) {
@@ -405,7 +433,9 @@ int main(int argc, char **argv)
 
     (void) signal(SIGINT, onsig);
     (void) signal(SIGTERM, onsig);
+#ifdef SIGQUIT
     (void) signal(SIGQUIT, onsig);
+#endif /* SIGQUIT */
 
     /*@-nullpass@*/ /* someday, add null annotation to the gpsopen() params */
     if (!lowlevel) {
@@ -632,8 +662,7 @@ int main(int argc, char **argv)
 	if (echo)
 	    context.readonly = true;
 
-	(void) alarm(timeout);
-	(void) signal(SIGALRM, onsig);
+	my_alarm(timeout, onalarm);
 	/*
 	 * Unless the user has forced a type and only wants to see the
 	 * string (not send it) we now need to try to open the device
@@ -664,7 +693,7 @@ int main(int argc, char **argv)
 		} else if (session.packet.type > COMMENT_PACKET) {
 		    gpsd_report(LOG_IO,
 				"autodetection after %d reads finds packet type %d.\n", seq, session.packet.type);
-		    (void) alarm(0);
+		    (void) my_alarm(0, 0);
 		    break;
 		}
 	    }

@@ -8,6 +8,9 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+#include "gpsd_config.h"
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,8 +22,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif /* HAVE_SYS_WAIT_H */
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
@@ -76,7 +83,9 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 	if (strcmp((*dp)->type_name, type_name) == 0) {
 	    gpsd_report(LOG_PROG, "selecting %s driver...\n",
 			(*dp)->type_name);
+#ifdef HAVE_TERMIOS_H
 	    gpsd_assert_sync(session);
+#endif /* HAVE_TERMIOS_H */
 	    /*@i@*/ session->device_type = *dp;
 #ifdef RECONFIGURE_ENABLE
 	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
@@ -241,7 +250,8 @@ int gpsd_open(struct gps_device_t *session)
 	*port++ = '\0';
 	gpsd_report(LOG_INF, "opening TCP feed at %s, port %s.\n", server,
 		    port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp");
+	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "TCP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
@@ -264,7 +274,8 @@ int gpsd_open(struct gps_device_t *session)
 	*port++ = '\0';
 	gpsd_report(LOG_INF, "opening UDP feed at %s, port %s.\n", server,
 		    port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp")) < 0) {
+	dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp");
+	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "UDP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
@@ -288,7 +299,8 @@ int gpsd_open(struct gps_device_t *session)
 	    *port++ = '\0';
 	gpsd_report(LOG_INF, "opening remote gpsd feed at %s, port %s.\n", server,
 		    port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp");
+	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "remote gpsd device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
@@ -306,8 +318,12 @@ int gpsd_open(struct gps_device_t *session)
         return nmea2000_open(session);
     }
 #endif /* defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S) */
+#ifdef HAVE_TERMIOS_H
     /* fall through to plain serial open */
     return gpsd_serial_open(session);
+#else /* ndef HAVE_TERMIOS_H */
+    return -1;
+#endif /* ndef HAVE_TERMIOS_H */
 }
 
 /*@ -branchstate @*/
@@ -317,7 +333,7 @@ int gpsd_activate(struct gps_device_t *session)
     gpsd_run_device_hook(session->gpsdata.dev.path, "ACTIVATE");
     session->gpsdata.gps_fd = gpsd_open(session);
 
-    if (session->gpsdata.gps_fd < 0)
+    if (BADSOCK(session->gpsdata.gps_fd))
 	return -1;
     else {
 #ifdef NON_NMEA_ENABLE
@@ -330,12 +346,16 @@ int gpsd_activate(struct gps_device_t *session)
 		if ((*dp)->probe_detect != NULL) {
 		    gpsd_report(LOG_PROG, "Probing \"%s\" driver...\n",
 				 (*dp)->type_name);
+#ifdef HAVE_TERMIOS_H
 		    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
+#endif /* HAVE_TERMIOS_H */
 		    if ((*dp)->probe_detect(session) != 0) {
 			gpsd_report(LOG_PROG, "Probe found \"%s\" driver...\n",
 				     (*dp)->type_name);
 			session->device_type = *dp;
+#ifdef HAVE_TERMIOS_H
 			gpsd_assert_sync(session);
+#endif /* HAVE_TERMIOS_H */
 			goto foundit;
 		    } else
 			gpsd_report(LOG_PROG, "Probe not found \"%s\" driver...\n",
@@ -912,10 +932,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(LOG_RAW + 2, "%s sent %zd new characters\n",
+    gpsd_report(LOG_RAW + 2, "%s sent " SSIZE_T_FORMAT " new characters\n",
 		session->gpsdata.dev.path, newlen);
     if (newlen < 0) {		/* read error */
-	gpsd_report(LOG_INF, "GPS on %s returned error %zd (%lf sec since data)\n",
+	gpsd_report(LOG_INF, "GPS on %s returned error " SSIZE_T_FORMAT " (%lf sec since data)\n",
 		    session->gpsdata.dev.path, newlen,
 		    timestamp() - session->gpsdata.online);
 	session->gpsdata.online = (timestamp_t)0;
@@ -949,12 +969,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    break;
 		}
 	    /* FALL THROUGH */
+#ifdef HAVE_TERMIOS_H
 	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
 	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
 	    gpsd_report(LOG_INF, "hunt on %s failed (%lf sec since data)\n",
 			session->gpsdata.dev.path,
 			timestamp() - session->gpsdata.online);
 	    return ERROR_SET;
+#endif /* HAVE_TERMIOS_H */
 	}
     }
 
@@ -971,15 +993,18 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* track the packet count since achieving sync on the device */
 	if (first_sync) {
-	    speed_t speed = gpsd_get_speed(&session->ttyset);
-
 	    /*@-nullderef@*/
 	    gpsd_report(LOG_INF,
 			"%s identified as type %s (%f sec @ %dbps)\n",
 			session->gpsdata.dev.path,
 			session->device_type->type_name,
 			timestamp() - session->opentime,
-			speed);
+#ifdef HAVE_TERMIOS_H
+			speed
+#else /* ndef HAVE_TEMIOS_H */
+			0
+#endif /* ndef HAVE_TERMIOS_H */
+	    );
 	    /*@+nullderef@*/
 	    /* fire the identified hook */
 	    if (session->device_type != NULL
@@ -1011,7 +1036,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * level does not actually require it.
 	 */
 	if (session->context->debug >= LOG_RAW)
-	    gpsd_report(LOG_RAW, "raw packet of type %d, %zd:%s\n",
+	    gpsd_report(LOG_RAW, "raw packet of type %d, " SSIZE_T_FORMAT ":%s\n",
 			session->packet.type,
 			session->packet.outbuflen,
 			gpsd_packetdump((char *)session->packet.outbuffer, session->packet.outbuflen));
@@ -1105,7 +1130,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
-    if (session->gpsdata.gps_fd != -1)
+    if (!BADSOCK(session->gpsdata.gps_fd))
 	gpsd_deactivate(session);
 }
 

@@ -155,7 +155,7 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
 	return -1;
     }
 
-    bzero(buf, (int)sizeof(buf));
+    memset(buf, 0, (int)sizeof(buf));
     (void)strlcpy(buf, data, length);
     gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
 
@@ -223,7 +223,7 @@ static int gar_int_decode(const char *data, const size_t length,
 	return -1;
     }
 
-    bzero(buf, (int)sizeof(buf));
+    memset(buf, 0, (int)sizeof(buf));
     (void)strlcpy(buf, data, length);
     gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
 
@@ -263,7 +263,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
     gps_mask_t mask = 0;
 
-    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %zd: %s\n",
+    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len " SSIZE_T_FORMAT ": %s\n",
 		session->packet.outbuflen, (char*)session->packet.outbuffer);
 
     if (session->packet.outbuflen < 54) {

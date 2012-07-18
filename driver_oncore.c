@@ -4,6 +4,7 @@
  */
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 #include "gpsd.h"
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
@@ -110,7 +111,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	unpacked_date.tm_min = (int)getub(buf, 9);
 	unpacked_date.tm_sec = (int)getub(buf, 10);
 	unpacked_date.tm_isdst = 0;
-	nsec = (uint) getbeu32(buf, 11);
+	nsec = (unsigned int) getbeu32(buf, 11);
 
 	/*@ -unrecog */
 	session->newdata.time = (timestamp_t)timegm(&unpacked_date) + nsec * 1e-9;
@@ -390,7 +391,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	/* FIX-ME: This gets noisy in a hurry. Change once your driver works */
-	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length %zd\n",
+	gpsd_report(LOG_WARN, "unknown packet id @@%c%c length " SSIZE_T_FORMAT "\n",
 		    type >> 8, type & 0xff, len);
 	return 0;
     }

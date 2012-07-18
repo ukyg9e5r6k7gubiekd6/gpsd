@@ -16,12 +16,16 @@
  *
  */
 
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <string.h>
 #include <math.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -203,7 +207,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
     unsigned int i, j, nchan, nsv, st;
 
     if (data_len < 152) {
-	gpsd_report(LOG_PROG, "runt svinfo (datalen=%zd)\n", data_len);
+	gpsd_report(LOG_PROG, "runt svinfo (datalen=" SSIZE_T_FORMAT ")\n", data_len);
 	return 0;
     }
     /*@ +charint @*/
@@ -494,7 +498,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	gpsd_report(LOG_WARN,
-		    "UBX: unknown packet id 0x%04hx (length %zd)\n",
+		    "UBX: unknown packet id 0x%04hx (length " SSIZE_T_FORMAT ")\n",
 		    msgid, len);
     }
 
@@ -566,7 +570,7 @@ bool ubx_write(struct gps_device_t * session,
 
 
     gpsd_report(LOG_IO,
-		"=> GPS: UBX class: %02x, id: %02x, len: %zd, crc: %02x%02x\n",
+		"=> GPS: UBX class: %02x, id: %02x, len: " SSIZE_T_FORMAT ", crc: %02x%02x\n",
 		msg_class, msg_id, data_len,
 		CK_A, CK_B);
     count = gpsd_write(session, session->msgbuf, session->msgbuflen);

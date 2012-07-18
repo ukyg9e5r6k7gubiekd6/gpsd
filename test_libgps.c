@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	case 's':
 	    (void)
 		printf
-		("Sizes: fix=%zd gpsdata=%zd rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd, noise=%zd\n",
+		("Sizes: fix=" SSIZE_T_FORMAT " gpsdata=" SSIZE_T_FORMAT " rtcm2=" SSIZE_T_FORMAT " rtcm3=" SSIZE_T_FORMAT " ais=" SSIZE_T_FORMAT " compass=" SSIZE_T_FORMAT " raw=" SSIZE_T_FORMAT " devices=" SSIZE_T_FORMAT " policy=" SSIZE_T_FORMAT " version=" SSIZE_T_FORMAT ", noise=" SSIZE_T_FORMAT "\n",
 		 sizeof(struct gps_fix_t),
 		 sizeof(struct gps_data_t), sizeof(struct rtcm2_t),
 		 sizeof(struct rtcm3_t), sizeof(struct ais_t),

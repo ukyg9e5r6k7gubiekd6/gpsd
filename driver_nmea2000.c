@@ -4,21 +4,32 @@
  * This file is Copyright (c) 2012 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #include <time.h>
 #include <math.h>
 #include <fcntl.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif /* HAVE_NET_IF_H */
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif /* HAVE_SYS_IOCTL_H */
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"

@@ -6,10 +6,14 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include "gpsd_config.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>		/* for select() */
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif /* HAVE_SYS_SELECT_H */
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -19,30 +23,44 @@
 #include <ctype.h>
 #include <setjmp.h>
 #include <assert.h>
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif /* HAVE_PWD_H */
+#ifdef HAVE_GRP_H
 #include <grp.h>
+#endif /* HAVE_GRP_H */
 #include <math.h>
+#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
+#endif /* HAVE_SYSLOG_H */
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <pthread.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif /* HAVE_NETDB_H */
 #ifndef AF_UNSPEC
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #endif /* AF_UNSPEC */
 #ifndef INADDR_ANY
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif /* HAVE_NETINET_IN_H */
 #endif /* INADDR_ANY */
+#ifdef HAVE_SYS_UN_H
 #include <sys/un.h>
+#endif /* HAVE_SYS_UN_H */
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>     /* for htons() and friends */
+#endif /* HAVE_ARPA_INET_H */
 #endif /* S_SPLINT_S */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
-
-#include "gpsd_config.h"
 
 #if defined(HAVE_LIBCAP) && !defined(S_SPLINT_S)
 #include <sys/capability.h>
@@ -181,14 +199,13 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
-void gpsd_report(int errlevel, const char *fmt, ...)
+void gpsd_gpsd_report(int errlevel, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
 #ifndef SQUELCH_ENABLE
     if (errlevel <= context.debug) {
 	char buf[BUFSIZ], buf2[BUFSIZ];
 	char *err_str;
-	va_list ap;
 
 #if defined(PPS_ENABLE)
 	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
@@ -229,16 +246,16 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 
 	(void)strlcpy(buf, "gpsd:", sizeof(buf));
 	(void)strncat(buf, err_str, sizeof(buf) - 1 - strlen(buf));
-	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			ap);
-	va_end(ap);
 
 	visibilize(buf2, sizeof(buf2), buf);
 
+#ifdef HAVE_SYSLOG
 	if (in_background)
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
 	else
+#endif /* HAVE_SYSLOG */
 	    (void)fputs(buf2, stderr);
 #if defined(PPS_ENABLE)
 	/*@ -unrecog (splint has no pthread declarations as yet) @*/
@@ -288,6 +305,7 @@ The following driver types are compiled into this gpsd instance:\n",
 #ifdef CONTROL_SOCKET_ENABLE
 static int filesock(char *filename)
 {
+#ifdef HAVE_SYS_UN_H
     struct sockaddr_un addr;
     int sock;
 
@@ -308,6 +326,10 @@ static int filesock(char *filename)
 
     /* coverity[leaked_handle] This is an intentional allocation */
     return sock;
+#elif defined(_WIN32)
+    /* TODO: The equivalent of UNIX sockets on Win32 is a named pipe */
+    return -1;
+#endif /* ndef HAVE_SYS_UN_H */
 }
 #endif /* CONTROL_SOCKET_ENABLE */
 
@@ -467,9 +489,23 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	return -1;
     }
     if (bind(s, &sat.sa, sin_len) < 0) {
+#ifdef _WIN32
+	{
+	    int wserr = WSAGetLastError();
+	    gpsd_report(LOG_ERROR, "can't bind to %s port %s, %d\n", af_str,
+			service, wserr);
+	}
+#else /* ndef _WIN32 */
 	gpsd_report(LOG_ERROR, "can't bind to %s port %s, %s\n", af_str,
 		    service, strerror(errno));
-	if (errno == EADDRINUSE) {
+#endif /* ndef _WIN32 */
+	if (errno ==
+#ifdef _WIN32
+	    WSAEADDRINUSE
+#else /* ndef _WIN32 */
+	    EADDRINUSE
+#endif /* ndef _WIN32 */
+	) {
 	    gpsd_report(LOG_ERROR, "maybe gpsd is already running!\n");
 	}
 	(void)close(s);
@@ -565,7 +601,11 @@ static void detach_client(struct subscriber_t *sub)
     if (sub->fd == UNALLOCATED_FD)
 	return;
     c_ip = netlib_sock2ip(sub->fd);
+#ifdef _WIN32
+    (void)shutdown(sub->fd, SD_BOTH);
+#else /* ndef _WIN32 */
     (void)shutdown(sub->fd, SHUT_RDWR);
+#endif /* ndef _WIN32 */
     gpsd_report(LOG_SPIN, "close(%d) in detach_client()\n", sub->fd);
     (void)close(sub->fd);
     gpsd_report(LOG_INF, "detaching %s (sub %d, fd %d) in detach_client\n",
@@ -589,6 +629,9 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 /* write to client -- throttle if it's gone or we're close to buffer overrun */
 {
     ssize_t status;
+#ifdef _WIN32
+    int wserr;
+#endif /* _WIN32 */
 
     if (context.debug >= 3) {
 	if (isprint(buf[0]))
@@ -611,6 +654,9 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
     /* +unrecog */
 #endif /* PPS_ENABLE */
     status = send(sub->fd, buf, len, 0);
+#ifdef _WIN32
+    wserr = WSAGetLastError();
+#endif /* _WIN32 */
 #if defined(PPS_ENABLE)
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     (void)pthread_mutex_unlock(&report_mutex);
@@ -623,16 +669,36 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 		    sub_index(sub));
 	detach_client(sub);
 	return 0;
-    } else if (errno == EAGAIN || errno == EINTR)
+    } else if
+#ifdef _WIN32
+	(WSAEINTR == wserr)
+#else /* ndef _WIN32 */
+	(errno == EAGAIN || errno == EINTR)
+#endif /* ndef _WIN32 */
 	return 0;		/* no data written, and errno says to retry */
-    else if (errno == EBADF)
+    else if
+#ifdef _WIN32
+	(WSAENETRESET == wserr || WSAENOTCONN == wserr || WSAECONNABORTED == wserr || WSAECONNRESET == wserr || WSAETIMEDOUT == wserr)
+#else /* ndef _WIN32 */
+	(errno == EBADF)
+#endif /* ndef _WIN32 */
 	gpsd_report(LOG_WARN, "client(%d) has vanished.\n", sub_index(sub));
-    else if (errno == EWOULDBLOCK
+    else if
+#ifdef _WIN32
+	(WSAEWOULDBLOCK == wserr
+#else /* ndef _WIN32 */
+	(errno == EWOULDBLOCK
+#endif /* ndef _WIN32 */
 	     && timestamp() - sub->active > NOREAD_TIMEOUT)
 	gpsd_report(LOG_INF, "client(%d) timed out.\n", sub_index(sub));
     else
+#ifdef _WIN32
+	gpsd_report(LOG_INF, "client(%d) write: %d\n", sub_index(sub),
+		    wserr);
+#else /* ndef _WIN32 */
 	gpsd_report(LOG_INF, "client(%d) write: %s\n", sub_index(sub),
 		    strerror(errno));
+#endif /* ndef _WIN32 */
     detach_client(sub);
     return status;
 }
@@ -1209,7 +1275,7 @@ static void handle_request(struct subscriber_t *sub,
 		    /* interpret defaults */
 		    if (devconf.baudrate == DEVDEFAULT_BPS)
 			devconf.baudrate =
-			    (uint) gpsd_get_speed(&device->ttyset);
+			    (unsigned int) gpsd_get_speed(&device->ttyset);
 		    if (devconf.parity == DEVDEFAULT_PARITY)
 			devconf.stopbits = device->gpsdata.dev.stopbits;
 		    if (devconf.stopbits == DEVDEFAULT_STOPBITS)
@@ -1544,7 +1610,7 @@ static void consume_packets(struct gps_device_t *device)
 	if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
 	    if (device->packet.outbuflen > RTCM_MAX) {
 		gpsd_report(LOG_ERROR,
-			    "overlong RTCM packet (%zd bytes)\n",
+			    "overlong RTCM packet (" SSIZE_T_FORMAT " bytes)\n",
 			    device->packet.outbuflen);
 	    } else {
 		struct gps_device_t *dp;
@@ -1557,7 +1623,7 @@ static void consume_packets(struct gps_device_t *device)
 								 device->packet.outbuflen) == 0)
 				gpsd_report(LOG_ERROR, "Write to RTCM sink failed\n");
 			    else {
-				gpsd_report(LOG_IO, "<= DGPS: %zd bytes of RTCM relayed.\n",
+				gpsd_report(LOG_IO, "<= DGPS: " SSIZE_T_FORMAT " bytes of RTCM relayed.\n",
 					    device->packet.outbuflen);
 			    }
 			}
@@ -1844,6 +1910,7 @@ int main(int argc, char *argv[])
     const struct gps_type_t **dp;
     bool in_restart;
 
+    set_report_callback(gpsd_gpsd_report);
     context.debug = 0;
     gps_context_init(&context);
 
@@ -2004,7 +2071,9 @@ int main(int argc, char *argv[])
 	}
     }
 
+#ifdef HAVE_SYSLOG
     openlog("gpsd", LOG_PID, LOG_USER);
+#endif /* HAVE_SYSLOG */
     gpsd_report(LOG_INF, "launching (Version %s)\n", VERSION);
 
 #ifdef SOCKET_EXPORT_ENABLE
@@ -2065,6 +2134,7 @@ int main(int argc, char *argv[])
 	}
     }
 
+#if defined(HAVE_PWD_H) && defined(HAVE_GRP_H)
     /* drop privileges */
     if (getuid() == 0) {
 	struct passwd *pw;
@@ -2126,6 +2196,7 @@ int main(int argc, char *argv[])
     }
     gpsd_report(LOG_INF, "running with effective group ID %d\n", getegid());
     gpsd_report(LOG_INF, "running with effective user ID %d\n", geteuid());
+#endif /* HAVE_PWD_H && HAVE_GRP_H */
 
 #ifdef SOCKET_EXPORT_ENABLE
     for (i = 0; i < NITEMS(subscribers); i++)
@@ -2142,6 +2213,7 @@ int main(int argc, char *argv[])
     (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
 #endif /* COMPAT_SELECT */
 
+#ifdef HAVE_SIGACTION
     /*@-compdef -compdestroy@*/
     {
 	struct sigaction sa;
@@ -2164,6 +2236,19 @@ int main(int argc, char *argv[])
 	(void)signal(SIGPIPE, SIG_IGN);
     }
     /*@+compdef +compdestroy@*/
+#elif defined(HAVE_SIGNAL)
+#ifdef SIGHUP
+    (void)signal(SIGHUP, onsig);
+#endif /* SIGHUP */
+    (void)signal(SIGINT, onsig);
+    (void)signal(SIGTERM, onsig);
+#ifdef SIGQUIT
+    (void)signal(SIGQUIT, onsig);
+#endif /* SIGQUIT */
+#ifdef SIGPIPE
+    (void)signal(SIGPIPE, SIG_IGN);
+#endif /* SIGPIPE */
+#endif /* HAVE_SIGNAL */
 
     /* daemon got termination or interrupt signal */
     if (setjmp(restartbuf) > 0) {
@@ -2270,12 +2355,9 @@ int main(int argc, char *argv[])
 		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 		else {
 		    struct subscriber_t *client = NULL;
-		    int opts = fcntl(ssock, F_GETFL);
 		    static struct linger linger = { 1, RELEASE_TIMEOUT };
 
-		    if (opts >= 0)
-			(void)fcntl(ssock, F_SETFL, opts | O_NONBLOCK);
-
+		    nonblock_enable(ssock);
 		    c_ip = netlib_sock2ip(ssock);
 		    client = allocate_client();
 		    if (client == NULL) {
@@ -2482,9 +2564,11 @@ int main(int argc, char *argv[])
     }
 
     /* if we make it here, we got a signal... deal with it */
+#ifdef SIGHUP
     /* restart on SIGHUP, clean up and exit otherwise */
     if (SIGHUP == (int)signalled)
 	longjmp(restartbuf, 1);
+#endif /* SIGHUP */
 
     gpsd_report(LOG_WARN, "received terminating signal %d.\n", signalled);
 

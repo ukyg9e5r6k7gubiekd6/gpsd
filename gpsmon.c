@@ -15,7 +15,9 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <time.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #include <sys/time.h>		/* expected to declare select(2) a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -23,6 +25,7 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
+#include <curses.h>
 
 #include "gpsd_config.h"
 #ifdef HAVE_BLUEZ
@@ -159,7 +162,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
-void gpsd_report(int errlevel, const char *fmt, ...)
+void gpsmon_report(int errlevel, const char *fmt, va_list ap)
 /* our version of the logger */
 {
     char buf[BUFSIZ]; 
@@ -201,10 +204,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
     (void)strlcpy(buf, "gpsd:", BUFSIZ);
     (void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
     if (errlevel <= context.debug && packetwin != NULL) {
-	va_list ap;
-	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
-	va_end(ap);
 	visibilize(buf2, sizeof(buf2), buf);
 	if (!curses_active)
 	    (void)fputs(buf2, stdout);
@@ -453,6 +453,7 @@ int main(int argc, char **argv)
     int bailout = 0, matches = 0;
     bool nmea = false;
 
+    set_report_callback(gpsmon_report);
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/

@@ -193,7 +193,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 			 (double)getles16(buf2, 25) / 10.0);
 	used = (unsigned char)getub(buf2, 27) & 0x0f;
 	//visible = (getub(buf2, 27) & 0xf0) >> 4;
-	version = (uint) getleu16(buf2, 28) / 100.0;
+	version = (unsigned int) getleu16(buf2, 28) / 100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
 	    session->newdata.mode = MODE_NO_FIX;
@@ -357,11 +357,11 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return TIME_SET | PPSTIME_IS | RAW_IS;
 
     case 0x20:			/* LogConfig Info, could be used as a probe for EverMore GPS */
-	gpsd_report(LOG_IO, "LogConfig EverMore packet, length %zd\n", datalen);
+	gpsd_report(LOG_IO, "LogConfig EverMore packet, length " SSIZE_T_FORMAT "\n", datalen);
 	return ONLINE_SET;
 
     case 0x22:			/* LogData */
-	gpsd_report(LOG_IO, "LogData EverMore packet, length %zd\n", datalen);
+	gpsd_report(LOG_IO, "LogData EverMore packet, length " SSIZE_T_FORMAT "\n", datalen);
 	return ONLINE_SET;
 
     case 0x38:			/* ACK */
@@ -370,7 +370,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	gpsd_report(LOG_WARN,
-		    "unknown EverMore packet EID 0x%02x, length %zd\n",
+		    "unknown EverMore packet EID 0x%02x, length " SSIZE_T_FORMAT "\n",
 		    buf2[0], datalen);
 	return 0;
     }

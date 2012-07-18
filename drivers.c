@@ -2,13 +2,18 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -707,7 +712,9 @@ static ssize_t tnt_control_send(struct gps_device_t *session,
 
     tnt_add_checksum(msg);
     status = write(session->gpsdata.gps_fd, msg, strlen(msg));
+#ifdef HAVE_TERMIOS_H
     (void)tcdrain(session->gpsdata.gps_fd);
+#endif /* HAVE_TERMIOS_H */
     return status;
 }
 
@@ -815,7 +822,9 @@ static int oceanserver_send(int fd, const char *fmt, ...)
     va_end(ap);
     (void)strlcat(buf, "", BUFSIZ);
     status = (int)write(fd, buf, strlen(buf));
+#ifdef HAVE_TERMIOS_H
     (void)tcdrain(fd);
+#endif /* HAVE_TERIMOS_H */
     if (status == (int)strlen(buf)) {
 	gpsd_report(LOG_IO, "=> GPS: %s\n", buf);
 	return status;
@@ -898,7 +907,11 @@ static bool fury_rate_switcher(struct gps_device_t *session, double rate)
 
 static void fury_event_hook(struct gps_device_t *session, event_t event)
 {
-    if (event == event_wakeup && gpsd_get_speed(&session->ttyset) == 115200)
+    if (event == event_wakeup
+#ifdef HAVE_TERMIOS_H
+	&& gpsd_get_speed(&session->ttyset) == 115200
+#endif /* HAVE_TERMIOS_H */
+    )
 	(void)fury_rate_switcher(session, 1.0);
     else if (event == event_deactivate)
 	(void)fury_rate_switcher(session, 0.0);
@@ -946,7 +959,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
     rtcm2_unpack(&session->gpsdata.rtcm2, (char *)session->packet.isgps.buf);
     /* extra guard prevents expensive hexdump calls */
     if (session->context->debug >= LOG_RAW)
-	gpsd_report(LOG_RAW, "RTCM 2.x packet type 0x%02x length %d words from %zd bytes: %s\n",
+	gpsd_report(LOG_RAW, "RTCM 2.x packet type 0x%02x length %d words from " SSIZE_T_FORMAT " bytes: %s\n",
 		    session->gpsdata.rtcm2.type,
 		    session->gpsdata.rtcm2.length + 2,
 		    session->packet.isgps.buflen,
@@ -1234,7 +1247,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	return false;
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_PROG, "AIVDM packet length %zd: %s\n", buflen, buf);
+    gpsd_report(LOG_PROG, "AIVDM packet length " SSIZE_T_FORMAT ": %s\n", buflen, buf);
 
     /* first clear the result, making sure we don't return garbage */
     memset(ais, 0, sizeof(*ais));
@@ -1343,7 +1356,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     if (ifrag == nfrags) {
 	if (debug >= LOG_INF) { 
 	    size_t clen = (ais_context->bitlen + 7) / 8;
-	    gpsd_report(LOG_INF, "AIVDM payload is %zd bits, %zd chars: %s\n",
+	    gpsd_report(LOG_INF, "AIVDM payload is " SSIZE_T_FORMAT " bits, " SSIZE_T_FORMAT " chars: %s\n",
 			ais_context->bitlen, clen,
 			gpsd_hexdump((char *)ais_context->bits, clen));
 	}
