@@ -28,6 +28,8 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -35,7 +37,9 @@
 #include <strings.h>
 #include <math.h>
 #include <ctype.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -402,7 +406,7 @@ static gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len)
     char msgbuf[MAX_PACKET_LENGTH * 3 + 2];
     int i;
 
-    bzero(msgbuf, (int)sizeof(msgbuf));
+    memset(msgbuf, 0, sizeof(msgbuf));
 
     /*@ +charint @*/
     if (0xe1 == buf[0]) {	/* Development statistics messages */
@@ -1216,7 +1220,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     default:
-	gpsd_report(LOG_WARN, "SiRF: Unknown packet id %d length %zd\n", 
+	gpsd_report(LOG_WARN, "SiRF: Unknown packet id %d length " SSIZE_T_FORMAT "\n", 
 		    buf[0], len);
 	return 0;
     }

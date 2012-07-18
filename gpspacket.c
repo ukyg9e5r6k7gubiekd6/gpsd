@@ -14,11 +14,10 @@ static PyObject *ErrorObject = NULL;
 
 static PyObject *report_callback = NULL;
 
-void gpsd_report(int errlevel, const char *fmt, ... )
+void gpspacket_report(int errlevel, const char *fmt, va_list ap)
 {
     char buf[BUFSIZ];
     PyObject *args;
-    va_list ap;
 
     if (!report_callback)   /* no callback defined, exit early */
 	return;	
@@ -28,9 +27,7 @@ void gpsd_report(int errlevel, const char *fmt, ... )
 	return;
     }
 
-    va_start(ap, fmt);
     (void)vsnprintf(buf, sizeof(buf), fmt, ap);
-    va_end(ap);
 
     args = Py_BuildValue("(is)", errlevel, buf);
     if (!args)
@@ -247,6 +244,7 @@ initpacket(void)
 {
     PyObject *m;
 
+    set_report_callback(gpspacket_report);
     if (PyType_Ready(&Lexer_Type) < 0)
 	return;
 

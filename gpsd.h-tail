@@ -9,6 +9,7 @@
 #include <termios.h>
 #endif /* HAVE_TERMIOS_H */
 #include <stdint.h>
+#include <stdarg.h>
 #include "gps.h"
 
 /* use RFC 2782 PPS API */
@@ -717,16 +718,20 @@ extern void ntrip_report(struct gps_context_t *,
 			 struct gps_device_t *);
 
 extern void gpsd_tty_init(struct gps_device_t *);
+#ifdef HAVE_TERMIOS_H
 extern int gpsd_serial_open(struct gps_device_t *);
 extern bool gpsd_set_raw(struct gps_device_t *);
+#endif /* HAVE_TERMIOS_H */
 extern ssize_t gpsd_write(struct gps_device_t *, const char *, size_t);
+#ifdef HAVE_TERMIOS_H
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
+#endif /* HAVE_TERMIOS_H */
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
 #ifdef HAVE_TERMIOS_H
 extern void gpsd_set_speed(struct gps_device_t *, speed_t, char, unsigned int);
 extern speed_t gpsd_get_speed(const struct termios *);
-#endif /* HAVE_TERMIOS_H */
 extern void gpsd_assert_sync(struct gps_device_t *);
+#endif /* HAVE_TERMIOS_H */
 extern void gpsd_close(struct gps_device_t *);
 
 extern void gpsd_time_init(struct gps_context_t *, time_t);
@@ -836,7 +841,9 @@ extern void libgps_dump_state(struct gps_data_t *);
 # define libgps_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* LIBGPS_DEBUG */
 
-/* caller should supply this */
+/* A default implementation is supplied, but caller should nonetheless set this using set_report_callback() */
+typedef void (*report_callback_fn)(int errlevel, const char *fmt, va_list argp);
+extern void set_report_callback(report_callback_fn func);
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 __attribute__((__format__(__printf__, 2, 3))) void gpsd_report(int, const char *, ...);
 # else /* not a new enough GCC, use the unprotected prototype */
@@ -864,6 +871,14 @@ extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies 
 #define NAN (0.0f/0.0f)
 #endif
 
+#ifdef _WIN32
+/* typedef CALLBACK TIMERPROC alarm_callback; */
+typedef VOID(CALLBACK *alarm_callback)(HWND,UINT,UINT,DWORD);
+#else /* ndef _WIN32 */
+typedef void (*alarm_callback)(int signum);
+#endif /* ndef _WIN32 */
+unsigned int my_alarm(unsigned int timeout, alarm_callback callback);
+
 /* Cygwin, in addition to NAN, doesn't have cfmakeraw */
 #if defined(__CYGWIN__)
 void cfmakeraw(struct termios *);
@@ -884,6 +899,6 @@ static /*@unused@*/ inline void barrier(void) {
 }
 
 #endif /* _GPSD_H_ */
-// Local variables:
-// mode: c
-// end:
+/* Local variables: */
+/* mode: c */
+/* end: */

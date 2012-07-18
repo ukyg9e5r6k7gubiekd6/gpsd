@@ -3,6 +3,9 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+#include "gpsd_config.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -10,8 +13,12 @@
 #include <string.h>
 #include <fcntl.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif /* HAVE_NETDB_H */
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
@@ -23,7 +30,6 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 {
     char hn[256], buf[BUFSIZ];
     char *colon, *dgpsport = "rtcm-sc104";
-    int opts;
 
     device->dgpsip.reported = false;
     if ((colon = strchr(dgpsserver, ':')) != NULL) {
@@ -35,7 +41,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 
     device->gpsdata.gps_fd =
 	netlib_connectsock(AF_UNSPEC, dgpsserver, dgpsport, "tcp");
-    if (device->gpsdata.gps_fd >= 0) {
+    if (!BADSOCK(device->gpsdata.gps_fd)) {
 	gpsd_report(LOG_PROG, "connection to DGPS server %s established.\n",
 		    dgpsserver);
 	(void)gethostname(hn, sizeof(hn));
@@ -49,10 +55,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 	gpsd_report(LOG_ERROR,
 		    "can't connect to DGPS server %s, netlib error %d.\n",
 		    dgpsserver, device->gpsdata.gps_fd);
-    opts = fcntl(device->gpsdata.gps_fd, F_GETFL);
-
-    if (opts >= 0)
-	(void)fcntl(device->gpsdata.gps_fd, F_SETFL, opts | O_NONBLOCK);
+    nonblock_enable(device->gpsdata.gps_fd);
     device->servicetype = service_dgpsip;
     return device->gpsdata.gps_fd;
 }
@@ -70,7 +73,7 @@ void dgpsip_report(struct gps_context_t *context,
      */
     if (context->fixcnt > 10 && !dgpsip->dgpsip.reported) {
 	dgpsip->dgpsip.reported = true;
-	if (dgpsip->gpsdata.gps_fd > -1) {
+	if (!BADSOCK(dgpsip->gpsdata.gps_fd)) {
 	    char buf[BUFSIZ];
 	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n",
 			   gps->gpsdata.fix.latitude,

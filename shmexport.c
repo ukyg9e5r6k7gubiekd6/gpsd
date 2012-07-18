@@ -35,7 +35,7 @@ bool shm_acquire(struct gps_context_t *context)
 
     shmid = shmget((key_t)GPSD_KEY, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {
-	gpsd_report(LOG_ERROR, "shmget(%ld, %zd, 0666) failed: %s\n",
+	gpsd_report(LOG_ERROR, "shmget(%ld, " SSIZE_T_FORMAT ", 0666) failed: %s\n",
 		    (long int)GPSD_KEY, 
 		    sizeof(struct gps_data_t),
 		    strerror(errno));

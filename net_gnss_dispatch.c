@@ -4,12 +4,16 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include "gpsd_config.h"
+
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 

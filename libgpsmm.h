@@ -8,6 +8,10 @@
  * file "COPYING" in the toop-level directory of the distribution for details.
  *
  */
+#ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+#endif /* _WIN32 */
 #include <sys/types.h>
 #include "gps.h" //the C library we are going to wrap
 

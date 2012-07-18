@@ -8,7 +8,16 @@
 #ifndef _GPSD_GPSMON_H_
 #define _GPSD_GPSMON_H_
 
+#ifdef _WIN32
+/**
+ * FIXME: PDCurses curses.h conflicts with windows.h,
+ * included from winsock2.h, included from gps.h to get SOCKET
+ */
+struct _win;
+typedef struct _win WINDOW;
+#else /* ndef _WIN32 */
 #include <curses.h>
+#endif /* ndef _WIN32 */
 
 #define COMMAND_TERMINATE	-1
 #define COMMAND_MATCH		1

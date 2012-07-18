@@ -283,8 +283,10 @@ static inline double radtodeg(double rad)
 static gps_mask_t PrintSERPacket(struct gps_device_t *session,
 				 unsigned char pkt_id, int pkt_len,
 				 unsigned char *buf);
+#if defined(__linux__) || defined(S_SPLINT_S)
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session,
 				 Packet_t * pkt);
+#endif /* defined(__linux__) || defined(S_SPLINT_S) */
 
 gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 			  int pkt_len, unsigned char *buf)
@@ -602,9 +604,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
     return mask;
 }
 
-
+#if defined(__linux__) || defined(S_SPLINT_S)
 /*@ -branchstate @*/
-// For debugging, decodes and prints some known packets.
+/* For debugging, decodes and prints some known packets. */
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 {
     gps_mask_t mask = 0;
@@ -702,8 +704,8 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 
     return mask;
 }
-
 /*@ +branchstate @*/
+#endif /* defined(__linux__) || defined(S_SPLINT_S) */
 
 
 #if defined(__linux__) || defined(S_SPLINT_S)
@@ -729,7 +731,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 
     theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
-    gpsd_report(LOG_IO, "Garmin: SendPacket(), wrote %zd bytes\n",
+    gpsd_report(LOG_IO, "Garmin: SendPacket(), wrote " SSIZE_T_FORMAT " bytes\n",
 		theBytesReturned);
 
     // Garmin says:
@@ -801,7 +803,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 
     theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
-    gpsd_report(LOG_IO, "Garmin: SendPacket(), wrote %zd bytes\n",
+    gpsd_report(LOG_IO, "Garmin: SendPacket(), wrote " SSIZE_T_FORMAT " bytes\n",
 		theBytesReturned);
 
 }
@@ -842,7 +844,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product)
 	int r = libusb_get_device_descriptor(dev, &desc);
 	if (r < 0) {
 	    gpsd_report(LOG_ERROR,
-			"USB descriptor fetch failed on device %zd.\n", i);
+			"USB descriptor fetch failed on device " SSIZE_T_FORMAT ".\n", i);
 	    continue;
 	}
 
@@ -1003,7 +1005,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 	/* WTF? */
 	/* minimum packet; <DLE> [pkt id] [length=0] [chksum] <DLE> <STX> */
 	Send_NAK();
-	gpsd_report(LOG_RAW + 1, "Garmin: serial too short: %zd\n", len);
+	gpsd_report(LOG_RAW + 1, "Garmin: serial too short: " SSIZE_T_FORMAT "\n", len);
 	return 0;
     }
     /* debug */
@@ -1044,7 +1046,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 	    break;
 	}
 	if (len < n + i) {
-	    gpsd_report(LOG_RAW + 1, "Garmin: Packet too short %zd < %zd\n",
+	    gpsd_report(LOG_RAW + 1, "Garmin: Packet too short " SSIZE_T_FORMAT " < " SSIZE_T_FORMAT "\n",
 			len, n + i);
 	    Send_NAK();
 	    return 0;
@@ -1069,7 +1071,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     if (len < n + i) {
 	Send_NAK();
 	gpsd_report(LOG_RAW + 1,
-		    "Garmin: No checksum, Packet too short %zd < %zd\n", len,
+		    "Garmin: No checksum, Packet too short " SSIZE_T_FORMAT " < " SSIZE_T_FORMAT "\n", len,
 		    n + i);
 	return 0;
     }
@@ -1079,7 +1081,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     if (len < n + i) {
 	Send_NAK();
 	gpsd_report(LOG_RAW + 1,
-		    "Garmin: No final DLE, Packet too short %zd < %zd\n", len,
+		    "Garmin: No final DLE, Packet too short " SSIZE_T_FORMAT " < " SSIZE_T_FORMAT "\n", len,
 		    n + i);
 	return 0;
     }
@@ -1093,7 +1095,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     if (len < n + i) {
 	Send_NAK();
 	gpsd_report(LOG_RAW + 1,
-		    "Garmin: No final ETX, Packet too short %zd < %zd\n", len,
+		    "Garmin: No final ETX, Packet too short " SSIZE_T_FORMAT " < " SSIZE_T_FORMAT "\n", len,
 		    n + i);
 	return 0;
     }

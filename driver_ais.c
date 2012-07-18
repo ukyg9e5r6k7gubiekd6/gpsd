@@ -26,7 +26,7 @@
  * Parse the data from the device
  */
 
-static void from_sixbit(char *bitvec, uint start, int count, char *to)
+static void from_sixbit(char *bitvec, unsigned int start, int count, char *to)
 {
     /*@ +type @*/
 #ifdef S_SPLINT_S
@@ -87,7 +87,7 @@ bool ais_binary_decode(struct ais_t *ais,
     case 2:
     case 3:
 	if (bitlen != 168) {
-	    gpsd_report(LOG_WARN, "AIVDM message type %d size not 168 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type %d size not 168 bits (" SSIZE_T_FORMAT ").\n",
 			ais->type,
 			bitlen);
 	    return false;
@@ -109,7 +109,7 @@ bool ais_binary_decode(struct ais_t *ais,
     case 4: 	/* Base Station Report */
     case 11:	/* UTC/Date Response */
 	if (bitlen != 168) {
-	    gpsd_report(LOG_WARN, "AIVDM message type %d size not 168 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type %d size not 168 bits (" SSIZE_T_FORMAT ").\n",
 			ais->type,
 			bitlen);
 	    return false;
@@ -130,7 +130,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 5: /* Ship static and voyage related data */
 	if (bitlen != 424) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 5 size not 424 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 5 size not 424 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -155,7 +155,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 6: /* Addressed Binary Message */
 	if (bitlen < 88 || bitlen > 1008) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 6 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 6 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -366,7 +366,7 @@ bool ais_binary_decode(struct ais_t *ais,
     {
 	unsigned int mmsi[4];
 	if (bitlen < 72 || bitlen > 158) {
-	    gpsd_report(LOG_WARN, "AIVDM message type %d size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type %d size is out of range (" SSIZE_T_FORMAT ").\n",
 			ais->type,
 			bitlen);
 	    return false;
@@ -386,7 +386,7 @@ bool ais_binary_decode(struct ais_t *ais,
     }
     case 8: /* Binary Broadcast Message */
 	if (bitlen < 56 || bitlen > 1008) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 8 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 8 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -591,7 +591,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 9: /* Standard SAR Aircraft Position Report */
 	if (bitlen != 168) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 9 size not 168 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 9 size not 168 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -611,7 +611,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 10: /* UTC/Date inquiry */
 	if (bitlen != 72) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 10 size not 72 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 10 size not 72 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -621,7 +621,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 12: /* Safety Related Message */
 	if (bitlen < 72 || bitlen > 1008) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 12 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 12 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -635,7 +635,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 14:	/* Safety Related Broadcast Message */
 	if (bitlen < 40 || bitlen > 1008) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 14 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 14 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -646,7 +646,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 15:	/* Interrogation */
 	if (bitlen < 88 || bitlen > 168) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 15 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 15 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -671,7 +671,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 16:	/* Assigned Mode Command */
 	if (bitlen != 96 && bitlen != 144) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 16 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 16 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -688,7 +688,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 17:	/* GNSS Broadcast Binary Message */
 	if (bitlen < 80 || bitlen > 816) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 17 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 17 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -703,7 +703,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 18:	/* Standard Class B CS Position Report */
 	if (bitlen != 168) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 18 size not 168 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 18 size not 168 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -727,7 +727,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 19:	/* Extended Class B CS Position Report */
 	if (bitlen != 312) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 19 size not 312 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 19 size not 312 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -754,7 +754,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 20:	/* Data Link Management Message */
 	if (bitlen < 72 || bitlen > 160) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 20 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 20 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -778,7 +778,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 21:	/* Aid-to-Navigation Report */
 	if (bitlen < 272 || bitlen > 360) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 21 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 21 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -807,7 +807,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 22:	/* Channel Management */
 	if (bitlen != 168) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 22 size not 168 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 22 size not 168 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -831,7 +831,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 23:	/* Group Assignment Command */
 	if (bitlen != 160) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 23 size not 160 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 23 size not 160 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -849,7 +849,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	switch (UBITS(38, 2)) {
 	case 0:
 	    if (bitlen != 160) {
-		gpsd_report(LOG_WARN, "AIVDM message type 24A size not 160 bits (%zd).\n",
+		gpsd_report(LOG_WARN, "AIVDM message type 24A size not 160 bits (" SSIZE_T_FORMAT ").\n",
 			    bitlen);
 		return false;
 	    }
@@ -869,7 +869,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	    return false;	/* data only partially decoded */
 	case 1:
 	    if (bitlen != 168) {
-		gpsd_report(LOG_WARN, "AIVDM message type 24B size not 168 bits (%zd).\n",
+		gpsd_report(LOG_WARN, "AIVDM message type 24B size not 168 bits (" SSIZE_T_FORMAT ").\n",
 			    bitlen);
 		return false;
 	    }
@@ -911,7 +911,7 @@ bool ais_binary_decode(struct ais_t *ais,
     case 25:	/* Binary Message, Single Slot */
 	/* this check and the following one reject line noise */
 	if (bitlen < 40 || bitlen > 168) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 25 size not between 40 to 168 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 25 size not between 40 to 168 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -941,7 +941,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 26:	/* Binary Message, Multiple Slot */
 	if (bitlen < 60 || bitlen > 1004) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 26 size is out of range (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 26 size is out of range (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}
@@ -962,7 +962,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	break;
     case 27:	/* Long Range AIS Broadcast message */
 	if (bitlen != 96) {
-	    gpsd_report(LOG_WARN, "AIVDM message type 27 size not 96 bits (%zd).\n",
+	    gpsd_report(LOG_WARN, "AIVDM message type 27 size not 96 bits (" SSIZE_T_FORMAT ").\n",
 			bitlen);
 	    return false;
 	}

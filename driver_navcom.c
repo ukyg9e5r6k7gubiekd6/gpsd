@@ -1122,7 +1122,7 @@ gps_mask_t navcom_parse(struct gps_device_t * session, unsigned char *buf,
 
     cmd_id = (unsigned char)getub(buf, 3);
     //payload = &buf[6];
-    msg_len = (uint) getleu16(buf, 4);
+    msg_len = (unsigned int) getleu16(buf, 4);
 
     /*@ -usedef -compdef @*/
     gpsd_report(LOG_RAW, "Navcom: packet type 0x%02x\n", cmd_id);

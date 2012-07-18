@@ -3,6 +3,9 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -14,8 +17,12 @@
 #ifndef S_SPLINT_S
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif /* HAVE_NETDB_H */
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
@@ -283,7 +290,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	    line += llen;
 	    len -= llen;
 	    gpsd_report(LOG_RAW,
-		    "Remaining Ntrip source table buffer %zd %s\n", len,
+		    "Remaining Ntrip source table buffer " SSIZE_T_FORMAT " %s\n", len,
 		    line);
 	}
 	/* message too big to fit into buffer */
@@ -318,7 +325,7 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream)
 	    "\r\n", VERSION, stream->url);
     r = write(dsock, buf, strlen(buf));
     if (r != (ssize_t)strlen(buf)) {
-	gpsd_report(LOG_ERROR, "ntrip stream write error %d on fd %d during probe request %zd\n",
+	gpsd_report(LOG_ERROR, "ntrip stream write error %d on fd %d during probe request " SSIZE_T_FORMAT "\n",
 		errno, dsock, r);
 	(int)close(dsock);
 	return -1;
@@ -388,7 +395,6 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream, int dsock
 {
 /*@-nullpass@*/
     char buf[BUFSIZ];
-    int opts;
     memset(buf, 0, sizeof(buf));
     while (read(dsock, buf, sizeof(buf) - 1) == -1) {
 	if (errno == EINTR)
@@ -420,10 +426,7 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream, int dsock
 		stream->url, stream->port, stream->mountpoint);
 	goto close;
     }
-    opts = fcntl(dsock, F_GETFL);
-
-    if (opts >= 0)
-	(void)fcntl(dsock, F_SETFL, opts | O_NONBLOCK);
+    nonblock_enable(dsock);
 
     return dsock;
 close:
@@ -573,7 +576,7 @@ void ntrip_report(struct gps_context_t *context,
      */
     count ++;
     if (caster->ntrip.stream.nmea != 0 && context->fixcnt > 10 && (count % 5)==0) {
-	if (caster->gpsdata.gps_fd > -1) {
+	if (!BADSOCK(caster->gpsdata.gps_fd)) {
 	    char buf[BUFSIZ];
 	    gpsd_position_fix_dump(gps, buf, sizeof(buf));
 	    if (write(caster->gpsdata.gps_fd, buf, strlen(buf)) ==

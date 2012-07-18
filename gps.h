@@ -17,15 +17,6 @@ extern "C" {
 #  define UNUSED
 #endif
 
-/* These headers must be included in the below order.
- * The system headers below may include some of them,
- * so we must include them in the right order beforehand.
- */
-#ifdef _WIN32
-#include <winsock2.h>
-#include <windows.h>
-#endif /* _WIN32 */
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdbool.h>
@@ -1777,13 +1768,24 @@ struct policy_t {
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
 };
 
-/* 
+/*
  * Under Windows, socket_t is a separate type.
  */
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
 typedef SOCKET socket_t;
 #define BADSOCK(s) (INVALID_SOCKET == (s))
+/* FIXME: || SOCKET_ERROR == (s)) ? */
+typedef unsigned short in_port_t;
+#ifdef ADDRESS_FAMILY
+typedef ADDRESS_FAMILY sa_family_t;
+#else /* ndef ADDRESS_FAMILY */
+typedef short sa_family_t;
+#endif /* ndef ADDRESS_FAMILY */
+typedef int socklen_t;
 #else /* ndef _WIN32 */
+/* Assume the BSD sockets-as-fds model */
 typedef int socket_t;
 #define BADSOCK(s) ((s) < 0)
 #endif /* ndef _WIN32 */
@@ -2027,6 +2029,36 @@ extern struct tm *gmtime_r(const time_t *timep, struct tm *result);
 #endif /* localtime_r */
 extern struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif /* HAVE_LOCALTIME_R */
+
+#ifndef HAVE_SYSLOG_H
+#define LOG_EMERG       0
+#define LOG_ALERT       1
+#define LOG_CRIT        2
+#define LOG_ERR         3
+#define LOG_WARNING     4
+#define LOG_NOTICE      5
+#define LOG_INFO        6
+#define LOG_DEBUG       7
+#endif /* HAVE_SYSLOG_H */
+
+/* Work around lack of C99 %z for size_t */
+#if !defined(_WIN32) && __STDC_VERSION__ >= 199901L
+#define SIZE_T_FORMAT "%zu"
+#define SSIZE_T_FORMAT "%zd"
+#else /* defined(_WIN32) || __STDC_VERSION__ < 199901L */
+#define SIZE_T_FORMAT "%u"
+#define SSIZE_T_FORMAT "%d"
+#endif /* defined(WIN32) || __STDC_VERSION__ < 199901L */
+
+#ifndef WEXITSTATUS
+#ifdef _WIN32
+#define WEXITSTATUS(s) (s)
+#else /* ndef _WIN32 */
+#error "Cannot figure out how on this system to ascertain the exit status of a sub-process"
+#endif /* ndef _WIN32 */
+#endif /* WEXITSTATUS */
+
+#define ELEMENTSOF(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */

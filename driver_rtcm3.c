@@ -93,23 +93,23 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     //assert(ugrab(6) == 0x00);
     ugrab(14);
 
-    rtcm->length = (uint)ugrab(10);
-    rtcm->type = (uint)ugrab(12);
+    rtcm->length = (unsigned int)ugrab(10);
+    rtcm->type = (unsigned int)ugrab(12);
 
     gpsd_report(LOG_RAW, "RTCM3: type %d payload length %d\n",
 		rtcm->type, rtcm->length);
 
     switch (rtcm->type) {
     case 1001:			/* GPS Basic RTK, L1 Only */
-	rtcm->rtcmtypes.rtcm3_1001.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1001.header.station_id = (unsigned int)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1001.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1001.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1001.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1001.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1001.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1001.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1001.header.interval = (unsigned short)ugrab(3);
 #define R1001 rtcm->rtcmtypes.rtcm3_1001.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1001.header.satcount; i++) {
-	    R1001.ident = (ushort)ugrab(6);
+	    R1001.ident = (unsigned short)ugrab(6);
 	    R1001.L1.indicator = (unsigned char)ugrab(1);
 	    GPS_PSEUDORANGE(R1001.L1, 24);
 	    RANGEDIFF(R1001.L1, 20);
@@ -119,15 +119,15 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1002:			/* GPS Extended RTK, L1 Only */
-	rtcm->rtcmtypes.rtcm3_1002.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1002.header.station_id = (unsigned int)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1002.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1002.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1002.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1002.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1002.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1002.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1002.header.interval = (unsigned short)ugrab(3);
 #define R1002 rtcm->rtcmtypes.rtcm3_1002.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1002.header.satcount; i++) {
-	    R1002.ident = (ushort)ugrab(6);
+	    R1002.ident = (unsigned short)ugrab(6);
 	    R1002.L1.indicator = (unsigned char)ugrab(1);
 	    GPS_PSEUDORANGE(R1002.L1, 24);
 	    RANGEDIFF(R1002.L1, 20);
@@ -139,15 +139,15 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1003:			/* GPS Basic RTK, L1 & L2 */
-	rtcm->rtcmtypes.rtcm3_1003.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1003.header.station_id = (unsigned int)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1003.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1003.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1003.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1003.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1003.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1003.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1003.header.interval = (unsigned short)ugrab(3);
 #define R1003 rtcm->rtcmtypes.rtcm3_1003.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1003.header.satcount; i++) {
-	    R1003.ident = (ushort)ugrab(6);
+	    R1003.ident = (unsigned short)ugrab(6);
 	    R1003.L1.indicator =
 		(unsigned char)ugrab(1);
 	    GPS_PSEUDORANGE(R1003.L1, 24);
@@ -166,15 +166,15 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1004:			/* GPS Extended RTK, L1 & L2 */
-	rtcm->rtcmtypes.rtcm3_1004.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1004.header.station_id = (unsigned int)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1004.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1004.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1004.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1004.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1004.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1004.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1004.header.interval = (unsigned short)ugrab(3);
 #define R1004 rtcm->rtcmtypes.rtcm3_1004.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1004.header.satcount; i++) {
-	    R1004.ident = (ushort)ugrab(6);
+	    R1004.ident = (unsigned short)ugrab(6);
 	    R1004.L1.indicator = (bool)ugrab(1);
 	    GPS_PSEUDORANGE(R1004.L1, 24);
 	    RANGEDIFF(R1004.L1, 20);
@@ -248,12 +248,12 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    (unsigned short)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1009.header.tow = (time_t)ugrab(27);
 	rtcm->rtcmtypes.rtcm3_1009.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1009.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1009.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1009.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1009.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1009.header.interval = (unsigned short)ugrab(3);
 #define R1009 rtcm->rtcmtypes.rtcm3_1009.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1009.header.satcount; i++) {
-	    R1009.ident = (ushort)ugrab(6);
+	    R1009.ident = (unsigned short)ugrab(6);
 	    R1009.L1.indicator = (bool)ugrab(1);
 	    R1009.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1009.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
@@ -268,12 +268,12 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    (unsigned short)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1010.header.tow = (time_t)ugrab(27);
 	rtcm->rtcmtypes.rtcm3_1010.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1010.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1010.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1010.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1010.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1010.header.interval = (unsigned short)ugrab(3);
 #define R1010 rtcm->rtcmtypes.rtcm3_1010.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1010.header.satcount; i++) {
-	    R1010.ident = (ushort)ugrab(6);
+	    R1010.ident = (unsigned short)ugrab(6);
 	    R1010.L1.indicator = (bool)ugrab(1);
 	    R1010.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1010.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
@@ -290,12 +290,12 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    (unsigned short)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1011.header.tow = (time_t)ugrab(27);
 	rtcm->rtcmtypes.rtcm3_1011.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1011.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1011.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1011.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1011.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1011.header.interval = (unsigned short)ugrab(3);
 #define R1011 rtcm->rtcmtypes.rtcm3_1011.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1011.header.satcount; i++) {
-	    R1011.ident = (ushort)ugrab(6);
+	    R1011.ident = (unsigned short)ugrab(6);
 	    R1011.L1.indicator = (bool)ugrab(1);
 	    R1011.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1011.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;
@@ -319,13 +319,13 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	    (unsigned short)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1012.header.tow = (time_t)ugrab(27);
 	rtcm->rtcmtypes.rtcm3_1012.header.sync = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1012.header.satcount = (ushort)ugrab(5);
+	rtcm->rtcmtypes.rtcm3_1012.header.satcount = (unsigned short)ugrab(5);
 	rtcm->rtcmtypes.rtcm3_1012.header.smoothing = (bool)ugrab(1);
-	rtcm->rtcmtypes.rtcm3_1012.header.interval = (ushort)ugrab(3);
+	rtcm->rtcmtypes.rtcm3_1012.header.interval = (unsigned short)ugrab(3);
 #define R1012 rtcm->rtcmtypes.rtcm3_1012.rtk_data[i]
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1012.header.satcount; i++) {
 	    unsigned int rangeincr;
-	    R1012.ident = (ushort)ugrab(6);
+	    R1012.ident = (unsigned short)ugrab(6);
 	    R1012.L1.indicator = (bool)ugrab(1);
 	    R1012.L1.channel = (short)ugrab(5) - GLONASS_CHANNEL_BASE;
 	    R1012.L1.pseudorange = ugrab(25) * GLONASS_PSEUDORANGE_RESOLUTION;

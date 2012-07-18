@@ -137,7 +137,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(int unit)
     shmid = shmget((key_t) (NTPD_BASE + unit),
 		   sizeof(struct shmTime), (int)(IPC_CREAT | perms));
     if (shmid == -1) {
-	gpsd_report(LOG_ERROR, "NTPD shmget(%ld, %zd, %o) fail: %s\n",
+	gpsd_report(LOG_ERROR, "NTPD shmget(%ld, " SSIZE_T_FORMAT ", %o) fail: %s\n",
 		    (long int)(NTPD_BASE + unit), sizeof(struct shmTime),
 		    (int)perms, strerror(errno));
 	return NULL;

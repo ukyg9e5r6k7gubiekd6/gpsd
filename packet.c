@@ -27,6 +27,9 @@ PERMISSIONS
    BSD terms apply: see the file COPYING in the distribution root for details.
 
 ***************************************************************************/
+
+#include "gpsd_config.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -34,8 +37,12 @@ PERMISSIONS
 #include <string.h>
 #include <errno.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif /* HAVE_NETINET_IN_H */
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>		/* for htons() */
+#endif /* HAVE_ARPA_INET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
@@ -900,8 +907,8 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    csum ^= lexer->inbuffer[n];
 	if (csum != c) {
 	    gpsd_report(LOG_IO,
-			"Navcom packet type 0x%hhx bad checksum 0x%hhx, expecting 0x%x\n",
-			lexer->inbuffer[3], csum, c);
+			"Navcom packet type 0x%x bad checksum 0x%x, expecting 0x%x\n",
+			(unsigned) lexer->inbuffer[3], (unsigned) csum, c);
 	    lexer->state = GROUND_STATE;
 	    break;
 	}
@@ -1360,11 +1367,11 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 	lexer->outbuffer[packetlen] = '\0';
 	lexer->type = packet_type;
 	if (lexer->debug >= LOG_RAW+1)
-	    gpsd_report(LOG_RAW+1, "Packet type %d accepted %zu = %s\n",
+	    gpsd_report(LOG_RAW+1, "Packet type %d accepted " SIZE_T_FORMAT " = %s\n",
 		    packet_type, packetlen,
 			gpsd_packetdump((char *)lexer->outbuffer, lexer->outbuflen));
     } else {
-	gpsd_report(LOG_ERROR, "Rejected too long packet type %d len %zu\n",
+	gpsd_report(LOG_ERROR, "Rejected too long packet type %d len " SIZE_T_FORMAT "\n",
 		    packet_type, packetlen);
     }
 }
@@ -1378,7 +1385,7 @@ static void packet_discard(struct gps_packet_t *lexer)
     lexer->inbuflen = remaining;
     if (lexer->debug >= LOG_RAW+1)
 	gpsd_report(LOG_RAW + 1,
-		    "Packet discard of %zu, chars remaining is %zu = %s\n",
+		    "Packet discard of " SIZE_T_FORMAT ", chars remaining is " SIZE_T_FORMAT " = %s\n",
 		    discard, remaining,
 		    gpsd_packetdump((char *)lexer->inbuffer, lexer->inbuflen));
 }
@@ -1389,7 +1396,7 @@ static void character_discard(struct gps_packet_t *lexer)
     memmove(lexer->inbuffer, lexer->inbuffer + 1, (size_t)-- lexer->inbuflen);
     lexer->inbufptr = lexer->inbuffer;
     if (lexer->debug >= LOG_RAW+1)
-	gpsd_report(LOG_RAW + 1, "Character discarded, buffer %zu chars = %s\n",
+	gpsd_report(LOG_RAW + 1, "Character discarded, buffer " SIZE_T_FORMAT " chars = %s\n",
 		    lexer->inbuflen,
 		    gpsd_packetdump((char *)lexer->inbuffer, lexer->inbuflen));
 }
@@ -1523,7 +1530,7 @@ void packet_parse(struct gps_packet_t *lexer)
 			lexer->inbuffer[1], (unsigned int)lexer->length);
 	    if (a != b) {
 		gpsd_report(LOG_IO, "REJECT SuperStarII packet type 0x%02x"
-			    "%zd bad checksum 0x%04x, expecting 0x%04x\n",
+			    "" SSIZE_T_FORMAT " bad checksum 0x%04x, expecting 0x%04x\n",
 			    lexer->inbuffer[1], lexer->length, a, b);
 		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
@@ -1731,13 +1738,13 @@ void packet_parse(struct gps_packet_t *lexer)
 		    /* pass */ ;
 		else {
 		    gpsd_report(LOG_IO,
-				"TSIP REJECT pkt_id = %#02x, packetlen= %zu\n",
+				"TSIP REJECT pkt_id = %#02x, packetlen= " SIZE_T_FORMAT "\n",
 				pkt_id, packetlen);
 		    goto not_tsip;
 		}
 		/* Debug */
 		gpsd_report(LOG_RAW,
-			    "TSIP pkt_id = %#02x, packetlen= %zu\n",
+			    "TSIP pkt_id = %#02x, packetlen= " SIZE_T_FORMAT "\n",
 			    pkt_id, packetlen);
 		/*@ -charint +ifempty @*/
 		packet_accept(lexer, TSIP_PACKET);
@@ -1813,14 +1820,14 @@ void packet_parse(struct gps_packet_t *lexer)
 		packet_accept(lexer, UBX_PACKET);
 	    else {
 		gpsd_report(LOG_IO,
-			    "UBX checksum 0x%02hhx%02hhx over length %d,"
-			    " expecting 0x%02hhx%02hhx (type 0x%02hhx%02hhx)\n",
-			    ck_a,
-			    ck_b,
+			    "UBX checksum 0x%02x%02x over length %d,"
+			    " expecting 0x%02x%02x (type 0x%02x%02x)\n",
+			    (unsigned) ck_a,
+			    (unsigned) ck_b,
 			    len,
-			    lexer->inbuffer[len - 2],
-			    lexer->inbuffer[len - 1],
-			    lexer->inbuffer[2], lexer->inbuffer[3]);
+			    (unsigned) lexer->inbuffer[len - 2],
+			    (unsigned) lexer->inbuffer[len - 1],
+			    (unsigned) lexer->inbuffer[2], lexer->inbuffer[3]);
 		packet_accept(lexer, BAD_PACKET);
 		lexer->state = GROUND_STATE;
 	    }
@@ -2017,12 +2024,12 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
     } else {
 	if (lexer->debug >= LOG_RAW+1)
 	    gpsd_report(LOG_RAW + 1,
-			"Read %zd chars to buffer offset %zd (total %zd): %s\n",
+			"Read " SSIZE_T_FORMAT " chars to buffer offset " SSIZE_T_FORMAT " (total " SSIZE_T_FORMAT "): %s\n",
 			recvd, lexer->inbuflen, lexer->inbuflen + recvd,
 			gpsd_packetdump((char *)lexer->inbufptr, (size_t) recvd));
 	lexer->inbuflen += recvd;
     }
-    gpsd_report(LOG_SPIN, "packet_get() fd %d -> %zd (%d)\n",
+    gpsd_report(LOG_SPIN, "packet_get() fd %d -> " SSIZE_T_FORMAT " (%d)\n",
 		fd, recvd, errno);
 
     /*

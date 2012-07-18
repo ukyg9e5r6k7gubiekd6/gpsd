@@ -1322,7 +1322,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	/*@-formatcode@*//* splint has a bug */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"mjd\":%u,\"sec\":%u,"
-		       "\"len\":%zd,\"units\":%zd,\"msg\":\"%s\",",
+		       "\"len\":" SSIZE_T_FORMAT ",\"units\":" SSIZE_T_FORMAT ",\"msg\":\"%s\",",
 		       rtcm->rtcmtypes.rtcm3_1029.station_id,
 		       rtcm->rtcmtypes.rtcm3_1029.mjd,
 		       rtcm->rtcmtypes.rtcm3_1029.sod,
@@ -2122,7 +2122,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    }
 	if (!imo)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"data\":\"%zd:%s\"}\r\n",
+			   "\"data\":\"" SSIZE_T_FORMAT ":%s\"}\r\n",
 			   ais->type6.bitcount,
 			   json_stringify(buf1, sizeof(buf1),
 					  gpsd_hexdump((char *)ais->type6.bitdata,
@@ -2591,7 +2591,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	}
 	if (!imo)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"data\":\"%zd:%s\"}\r\n",
+			   "\"data\":\"" SSIZE_T_FORMAT ":%s\"}\r\n",
 			   ais->type8.bitcount,
 			   json_stringify(buf1, sizeof(buf1),
 					  gpsd_hexdump((char *)ais->type8.bitdata,
@@ -2702,7 +2702,7 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 17:
 	if (scaled) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"%zd:%s\"}\r\n",
+			   "\"lon\":%.1f,\"lat\":%.1f,\"data\":\"" SSIZE_T_FORMAT ":%s\"}\r\n",
 			   ais->type17.lon / AIS_GNSS_LATLON_DIV,
 			   ais->type17.lat / AIS_GNSS_LATLON_DIV,
 			   ais->type17.bitcount,
@@ -2710,7 +2710,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 					(ais->type17.bitcount + 7) / 8));
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"lon\":%d,\"lat\":%d,\"data\":\"%zd:%s\"}\r\n",
+			   "\"lon\":%d,\"lat\":%d,\"data\":\"" SSIZE_T_FORMAT ":%s\"}\r\n",
 			   ais->type17.lon,
 			   ais->type17.lat,
 			   ais->type17.bitcount,
@@ -2999,7 +2999,7 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 25:			/* Binary Message, Single Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"addressed\":%s,\"structured\":%s,\"dest_mmsi\":%u,"
-		       "\"app_id\":%u,\"data\":\"%zd:%s\"}\r\n",
+		       "\"app_id\":%u,\"data\":\"" SSIZE_T_FORMAT ":%s\"}\r\n",
 		       JSON_BOOL(ais->type25.addressed),
 		       JSON_BOOL(ais->type25.structured),
 		       ais->type25.dest_mmsi,
@@ -3011,7 +3011,7 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 26:			/* Binary Message, Multiple Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"addressed\":%s,\"structured\":%s,\"dest_mmsi\":%u,"
-		       "\"app_id\":%u,\"data\":\"%zd:%s\",\"radio\":%u}\r\n",
+		       "\"app_id\":%u,\"data\":\"" SSIZE_T_FORMAT ":%s\",\"radio\":%u}\r\n",
 		       JSON_BOOL(ais->type26.addressed),
 		       JSON_BOOL(ais->type26.structured),
 		       ais->type26.dest_mmsi,
