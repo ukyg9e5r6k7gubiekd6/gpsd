@@ -162,7 +162,10 @@ static bool in_background = false;
 static bool listen_global = false;
 #endif /* FORCE_GLOBAL_ENABLE */
 #ifndef FORCE_NOWAIT
+#define NOWAIT nowait
 static bool nowait = false;
+#else /* FORCE_NOWAIT */
+#define NOWAIT true 
 #endif /* FORCE_NOWAIT */
 static jmp_buf restartbuf;
 static struct gps_context_t context;
@@ -768,7 +771,7 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
     return true;
 }
 
-static bool add_device(const char *device_name)
+bool gpsd_add_device(const char *device_name, bool flag_nowait)
 /* add a device to the pool; open it right away if in nowait mode */
 {
     struct gps_device_t *devp;
@@ -801,13 +804,12 @@ static bool add_device(const char *device_name)
 #endif /* NTPSHM_ENABLE */
 	    gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
-#ifndef FORCE_NOWAIT
-	    if (!nowait) {
+	    if (!flag_nowait) {
 		devp->gpsdata.gps_fd = -1;
 		ret = true;
-	    } else
-#endif /* FORCE_NOWAIT */
+	    } else {
 		ret = open_device(devp);
+	    }
 #ifdef SOCKET_EXPORT_ENABLE
 	    notify_watchers(devp,
 			    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
@@ -868,7 +870,7 @@ static void handle_control(int sfd, char *buf)
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
 	    gpsd_report(LOG_INF, "<= control(%d): adding %s\n", sfd, stash);
-	    if (add_device(stash))
+	    if (gpsd_add_device(stash, NOWAIT))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else
 		ignore_return(write(sfd, "ERROR\n", 6));
@@ -2097,11 +2099,7 @@ int main(int argc, char *argv[])
 	if (nice(NICEVAL) == -1 && errno != 0)
 	    gpsd_report(LOG_INF, "NTPD Priority setting failed.\n");
     }
-#ifdef FORCE_NOWAIT
     (void)ntpshm_init(&context, true);
-#else
-    (void)ntpshm_init(&context, nowait);
-#endif /* FORCE_NOWAIT */
 #endif /* NTPSHM_ENABLE */
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
@@ -2129,7 +2127,7 @@ int main(int argc, char *argv[])
      */
     in_restart = false;
     for (i = optind; i < argc; i++) {
-	if (!add_device(argv[i])) {
+      if (!gpsd_add_device(argv[i], NOWAIT)) {
 	    gpsd_report(LOG_ERROR,
 			"initial GPS device %s open failed\n",
 			argv[i]);
@@ -2284,7 +2282,7 @@ int main(int argc, char *argv[])
      */
     if (in_restart)
 	for (i = optind; i < argc; i++) {
-	    if (!add_device(argv[i])) {
+	  if (!gpsd_add_device(argv[i], NOWAIT)) {
 		gpsd_report(LOG_ERROR,
 			    "GPS device %s open failed\n",
 			    argv[i]);
@@ -2521,11 +2519,8 @@ int main(int argc, char *argv[])
 	 * subscribers in the same cycle.
 	 */
 	for (device = devices; device < devices + MAXDEVICES; device++) {
-#ifdef FORCE_NOWAIT
-	    bool device_needed = true;
-#else
-	    bool device_needed = nowait;
-#endif
+
+	    bool device_needed = NOWAIT;
 
 	    if (!allocated_device(device))
 		continue;

@@ -246,13 +246,14 @@ typedef struct
 
 // useful funcs to read/write ints
 //  floats and doubles are Intel (little-endian) order only...
-static inline void set_int16(uint8_t * buf, uint32_t value)
+/* FIXME: These should be replaced with routines from bits.[ch] */
+/*@unused@*/ static inline void set_int16(uint8_t * buf, uint32_t value)
 {
     buf[0] = (uint8_t) (0x0FF & value);
     buf[1] = (uint8_t) (0x0FF & (value >> 8));
 }
 
-static inline void set_int32(uint8_t * buf, uint32_t value)
+/*@unused@*/ static inline void set_int32(uint8_t * buf, uint32_t value)
 {
     buf[0] = (uint8_t) (0x0FF & value);
     buf[1] = (uint8_t) (0x0FF & (value >> 8));
@@ -260,13 +261,13 @@ static inline void set_int32(uint8_t * buf, uint32_t value)
     buf[3] = (uint8_t) (0x0FF & (value >> 24));
 }
 
-static inline uint16_t get_uint16(const uint8_t * buf)
+/*@unused@*/ static inline uint16_t get_uint16(const uint8_t * buf)
 {
     return (uint16_t) (0xFF & buf[0])
 	| ((uint16_t) (0xFF & buf[1]) << 8);
 }
 
-static inline uint32_t get_int32(const uint8_t * buf)
+/*@unused@*/ static inline uint32_t get_int32(const uint8_t * buf)
 {
     return (uint32_t) (0xFF & buf[0])
 	| ((uint32_t) (0xFF & buf[1]) << 8)
@@ -283,10 +284,10 @@ static inline double radtodeg(double rad)
 static gps_mask_t PrintSERPacket(struct gps_device_t *session,
 				 unsigned char pkt_id, int pkt_len,
 				 unsigned char *buf);
-#if defined(__linux__) || defined(S_SPLINT_S)
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session,
 				 Packet_t * pkt);
-#endif /* defined(__linux__) || defined(S_SPLINT_S) */
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 			  int pkt_len, unsigned char *buf)
@@ -604,7 +605,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
     return mask;
 }
 
-#if defined(__linux__) || defined(S_SPLINT_S)
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 /*@ -branchstate @*/
 /* For debugging, decodes and prints some known packets. */
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
@@ -705,10 +706,8 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
     return mask;
 }
 /*@ +branchstate @*/
-#endif /* defined(__linux__) || defined(S_SPLINT_S) */
 
 
-#if defined(__linux__) || defined(S_SPLINT_S)
 /* build and send a packet w/ USB protocol */
 static void Build_Send_USB_Packet(struct gps_device_t *session,
 				  uint32_t layer_id, uint32_t pkt_id,
@@ -747,7 +746,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 	(void)gpsd_write(session, n, 0);
     }
 }
-#endif /* __linux__ || S_SPLINT_S */
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 /* build and send a packet in serial protocol */
 /* layer_id unused */
