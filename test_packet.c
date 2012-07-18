@@ -17,7 +17,7 @@
 
 static int verbose = 0;
 
-void test_packet_report(int errlevel, const char *fmt, va_list ap)
+static void test_packet_report(int errlevel, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
     if (errlevel <= verbose) {

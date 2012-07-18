@@ -155,7 +155,7 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
 	return -1;
     }
 
-    memset(buf, 0, (int)sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     (void)strlcpy(buf, data, length);
     gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
 
@@ -223,7 +223,7 @@ static int gar_int_decode(const char *data, const size_t length,
 	return -1;
     }
 
-    memset(buf, 0, (int)sizeof(buf));
+    memset(buf, 0, sizeof(buf));
     (void)strlcpy(buf, data, length);
     gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
 

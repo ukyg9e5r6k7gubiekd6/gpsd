@@ -2042,7 +2042,10 @@ extern struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif /* HAVE_SYSLOG_H */
 
 /* Work around lack of C99 %z for size_t */
-#if !defined(_WIN32) && (__STDC_VERSION__ >= 199901L || __linux__)
+#ifdef S_SPLINT_S
+#define SIZE_T_FORMAT "%zu"
+#define SSIZE_T_FORMAT "%zd"
+#elif !defined(_WIN32) && (__STDC_VERSION__ >= 199901L || __linux__)
 #define SIZE_T_FORMAT "%zu"
 #define SSIZE_T_FORMAT "%zd"
 #else /* defined(_WIN32) || (__STDC_VERSION__ < 199901L && !__linux__) */
@@ -2051,11 +2054,11 @@ extern struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif /* defined(WIN32) || (__STDC_VERSION__ < 199901L && !__linux__) */
 
 #ifndef WEXITSTATUS
-#ifdef _WIN32
+#if defined(_WIN32) || defined(S_SPLINT_S)
 #define WEXITSTATUS(s) (s)
-#else /* ndef _WIN32 */
+#else /* !_WIN32 && !S_SPLINT_S */
 #error "Cannot figure out how on this system to ascertain the exit status of a sub-process"
-#endif /* ndef _WIN32 */
+#endif /* !_WIN32 && !S_SPLINT_S */
 #endif /* WEXITSTATUS */
 
 #define ELEMENTSOF(arr) (sizeof(arr) / sizeof((arr)[0]))

@@ -759,6 +759,7 @@ libgps_sources = [
     "libgps_sock.c",
     "netlib.c",
     "nonblock.c",
+    "report.c",
     "rtcm2_json.c",
     "shared_json.c",
     "startup.c",
@@ -1050,7 +1051,7 @@ else:
     #
     python_extensions = {
         "gps" + os.sep + "packet" : ["gpspacket.c", "packet.c", "isgps.c",
-                                        "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"],
+                                        "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c", "report.c"],
         "gps" + os.sep + "clienthelpers" : ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"]
     }
 

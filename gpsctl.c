@@ -662,7 +662,7 @@ int main(int argc, char **argv)
 	if (echo)
 	    context.readonly = true;
 
-	my_alarm(timeout, onalarm);
+	(void)my_alarm(timeout, onalarm);
 	/*
 	 * Unless the user has forced a type and only wants to see the
 	 * string (not send it) we now need to try to open the device
@@ -693,7 +693,7 @@ int main(int argc, char **argv)
 		} else if (session.packet.type > COMMENT_PACKET) {
 		    gpsd_report(LOG_IO,
 				"autodetection after %d reads finds packet type %d.\n", seq, session.packet.type);
-		    (void) my_alarm(0, 0);
+		    (void) my_alarm(0, (alarm_callback) NULL);
 		    break;
 		}
 	    }
