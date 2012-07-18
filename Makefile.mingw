@@ -37,6 +37,7 @@ libgps_shm.c \
 libgps_sock.c \
 netlib.c \
 nonblock.c \
+report.c \
 rtcm2_json.c \
 shared_json.c \
 startup.c \
