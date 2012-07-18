@@ -43,6 +43,10 @@
 #endif /* S_SPLINT_S */
 
 #define LOG_FILE 1
+#define NMEA2000_NETS 4
+#define NMEA2000_UNITS 256
+
+static struct gps_device_t *nmea2000_units[NMEA2000_NETS][NMEA2000_UNITS];
 
 typedef struct PGN
     {
@@ -479,8 +483,14 @@ static /*@null@*/ PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 {
     PGN *work;
+    unsigned int can_net;
 
     session->driver.nmea2000.workpgn = NULL;
+    can_net = session->driver.nmea2000.can_net;
+    if (can_net > (NMEA2000_NETS-1)) {
+        gpsd_report(LOG_ERROR, "NMEA2000 find_pgn: Invalid can network %d.\n", can_net);
+        return;
+    }
 
     /*@ignore@*//* because the CAN include files choke splint */
 #if LOG_FILE
@@ -528,6 +538,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	if (session->driver.nmea2000.unit_valid == 0) {
 	    session->driver.nmea2000.unit = source_unit;
 	    session->driver.nmea2000.unit_valid = 1;
+	    nmea2000_units[can_net][source_unit] = session;
 	}
 
 	if (source_unit == session->driver.nmea2000.unit) {
@@ -593,6 +604,8 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		}
 	    } else {
 	        // we got a unknown unit number
+	        if (nmea2000_units[can_net][source_unit] == NULL) {
+		}
 	    }
 	} else {
 	    // we got RTR or 2.0A CAN frame, not used
@@ -656,6 +669,9 @@ int nmea2000_open(struct gps_device_t *session)
     struct sockaddr_can addr;
 
     session->gpsdata.gps_fd = -1;
+
+    session->driver.nmea2000.can_net = 0;
+
     /* Create the socket */
     sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
  
