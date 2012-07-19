@@ -531,6 +531,21 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	}
 
 	if (session->driver.nmea2000.unit_valid == 0) {
+	    unsigned int l1, l2;
+	    
+	    for (l1=0;l1<NMEA2000_NETS;l1++) {
+	        for (l2=0;l2<NMEA2000_UNITS;l2++) {
+		    if (session == nmea2000_units[l1][l2]) {
+		        session->driver.nmea2000.unit = l2;
+		        session->driver.nmea2000.unit_valid = 1;
+			session->driver.nmea2000.can_net = l1;
+			can_net = l1;
+		    }
+		}
+	    }
+	}
+
+	if (session->driver.nmea2000.unit_valid == 0) {
 	    session->driver.nmea2000.unit = source_unit;
 	    session->driver.nmea2000.unit_valid = 1;
 	    nmea2000_units[can_net][source_unit] = session;
