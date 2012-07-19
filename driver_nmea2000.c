@@ -34,8 +34,12 @@
 #define LOG_FILE 1
 #define NMEA2000_NETS 4
 #define NMEA2000_UNITS 256
+#define CAN_NAMELEN 32
+#define MIN(a,b) ((a < b) ? a : b)
+
 
 static struct gps_device_t *nmea2000_units[NMEA2000_NETS][NMEA2000_UNITS];
+static char can_interface_name[NMEA2000_NETS][CAN_NAMELEN];
 
 typedef struct PGN
     {
@@ -51,6 +55,8 @@ typedef struct PGN
 #if LOG_FILE
 FILE *logFile = NULL;
 #endif /* of if LOG_FILE */
+
+extern bool __attribute__ ((weak)) gpsd_add_device(const char *device_name, bool flag_nowait);
 
 static void print_data(unsigned char *buffer, int len, PGN *pgn)
 {
@@ -482,15 +488,15 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
     }
 
     /*@ignore@*//* because the CAN include files choke splint */
-#if LOG_FILE
     if (frame->can_id & 0x80000000) {
 	// cppcheck-suppress unreadVariable
 	unsigned int source_prio UNUSED;
+	unsigned int daddr UNUSED;
+	// cppcheck-suppress unreadVariable
 	unsigned int source_pgn;
 	unsigned int source_unit;
-	// cppcheck-suppress unreadVariable
-	unsigned int daddr UNUSED;
 
+#if LOG_FILE
         if (logFile != NULL) {
 	    struct timespec  msgTime;
 
@@ -592,13 +598,20 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    gpsd_report(LOG_ERROR, "Fast error\n");
 		}
 	    } else {
-	        // we got a unknown unit number
-	        if (nmea2000_units[can_net][source_unit] == NULL) {
-		}
 	    }
 	} else {
-	    // we got RTR or 2.0A CAN frame, not used
+	    // we got a unknown unit number
+	    if (nmea2000_units[can_net][source_unit] == NULL) {
+	        char buffer[strlen(session->gpsdata.dev.path)];
+
+		sprintf(buffer, "nmea2000://%s:%d",can_interface_name[can_net], source_unit);
+		if (gpsd_add_device) {
+		    gpsd_add_device(buffer, true);
+		}
+	    }
 	}
+    } else {
+        // we got RTR or 2.0A CAN frame, not used
     }
 }
 /*@+nullstate +branchstate +globstate +mustfreeonly@*/
@@ -654,12 +667,74 @@ int nmea2000_open(struct gps_device_t *session)
     char interface_name[strlen(session->gpsdata.dev.path)];
     socket_t sock;
     int status;
+    int unit_number;
+    int can_net;
+    unsigned int l;
     struct ifreq ifr;
     struct sockaddr_can addr;
+    char *unit_ptr;
 
     session->gpsdata.gps_fd = -1;
 
     session->driver.nmea2000.can_net = 0;
+    can_net = -1;
+
+    unit_number = -1;
+
+    (void)strlcpy(interface_name, session->gpsdata.dev.path + 11, sizeof(interface_name));
+    unit_ptr = NULL;
+    for (l=0;l<strnlen(interface_name,sizeof(interface_name));l++) {
+        if (interface_name[l] == ':') {
+	    unit_ptr = &interface_name[l+1];
+	    interface_name[l] = 0;
+	    continue;
+	}
+	if (unit_ptr != NULL) {
+	    if (isdigit(interface_name[l]) == 0) {
+	        gpsd_report(LOG_ERROR, "NMEA2000 open: Invalid character in unit number.\n");
+	        return -1;
+	    }
+	}
+    }
+
+    if (unit_ptr != NULL) {
+        unit_number = atoi(unit_ptr);
+	if ((unit_number < 0) || (unit_number > (NMEA2000_UNITS-1))) {
+	    gpsd_report(LOG_ERROR, "NMEA2000 open: Unit number out of range.\n");
+	    return -1;
+	}
+	for (l = 0; l < NMEA2000_NETS; l++) {
+	    if (strncmp(can_interface_name[l], 
+			interface_name,
+			MIN(sizeof(interface_name), sizeof(can_interface_name[l]))) == 0) {
+	        can_net = l;
+		break;
+	    }
+	}
+	if (can_net < 0) {
+	    gpsd_report(LOG_ERROR, "NMEA2000 open: CAN device not open: %s .\n", interface_name);
+	    return -1;
+	}
+    } else {
+	for (l = 0; l < NMEA2000_NETS; l++) {
+	    if (strncmp(can_interface_name[l], 
+			interface_name,
+			MIN(sizeof(interface_name), sizeof(can_interface_name[l]))) == 0) {
+	        gpsd_report(LOG_ERROR, "NMEA2000 open: CAN device duplicate open: %s .\n", interface_name);
+		return -1;
+	    }
+	}
+	for (l = 0; l < NMEA2000_NETS; l++) {
+	    if (can_interface_name[l][0] == 0) {
+	        can_net = l;
+		break;
+	    }
+	}
+	if (can_net < 0) {
+	    gpsd_report(LOG_ERROR, "NMEA2000 open: Too many CAN networks open.\n");
+	    return -1;
+	}
+    }
 
     /* Create the socket */
     sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
@@ -676,7 +751,6 @@ int nmea2000_open(struct gps_device_t *session)
 	return -1;
     }
 
-    (void)strlcpy(interface_name, session->gpsdata.dev.path + 11, sizeof(interface_name));
     /* Locate the interface you wish to use */
     strlcpy(ifr.ifr_name, interface_name, sizeof(ifr.ifr_name));
     status = ioctl(sock, SIOCGIFINDEX, &ifr); /* ifr.ifr_ifindex gets filled 
@@ -702,9 +776,23 @@ int nmea2000_open(struct gps_device_t *session)
     session->gpsdata.gps_fd = sock;
     session->sourcetype = source_can;
     session->servicetype = service_sensor;
+    session->driver.nmea2000.can_net = can_net;
+
+    if (unit_ptr != NULL) {
+        nmea2000_units[can_net][unit_number] = session;
+	session->driver.nmea2000.unit = unit_number;
+	session->driver.nmea2000.unit_valid = 1;
+    } else {
+        strncpy(can_interface_name[can_net],
+		interface_name, 
+		MIN(sizeof(can_interface_name[0]), sizeof(interface_name)));
+	session->driver.nmea2000.unit_valid = 0;
+	for (l=0;l<NMEA2000_UNITS;l++) {
+	    nmea2000_units[can_net][l] = NULL;	  
+	}
+    }
     return session->gpsdata.gps_fd;
 }
-
 #endif /* of ifndef S_SPLINT_S */
 
 /* *INDENT-OFF* */
