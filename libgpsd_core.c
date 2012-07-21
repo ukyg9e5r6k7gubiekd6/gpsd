@@ -327,7 +327,8 @@ int gpsd_activate(struct gps_device_t *session)
     else {
 #ifdef NON_NMEA_ENABLE
 	/* if it's a sensor, it must be probed */
-	if (session->servicetype == service_sensor)  {
+        if ((session->servicetype == service_sensor) && 
+	    (session->sourcetype != source_can)) {
 	    const struct gps_type_t **dp;
 
 	    /*@ -mustfreeonly @*/
