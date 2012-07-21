@@ -187,7 +187,12 @@ void gpsd_deactivate(struct gps_device_t *session)
 #endif /* RECONFIGURE_ENABLE */
     gpsd_report(LOG_INF, "closing GPS=%s (%d)\n",
 		session->gpsdata.dev.path, session->gpsdata.gps_fd);
-    (void)gpsd_close(session);
+#if defined(NMEA2000_ENABLE)
+    if (session->sourcetype == source_can)
+        (void)nmea2000_close(session);
+    else
+#endif /* of defined(NMEA2000_ENABLE) */
+        (void)gpsd_close(session);
     gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");
 }
 

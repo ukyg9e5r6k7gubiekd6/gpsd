@@ -807,6 +807,16 @@ int nmea2000_open(struct gps_device_t *session)
 }
 #endif /* of ifndef S_SPLINT_S */
 
+void nmea2000_close(struct gps_device_t *session)
+{
+    if (session->gpsdata.gps_fd != -1) {
+	gpsd_report(LOG_SPIN, "close(%d) in nmea2000_close(%s)\n",
+		    session->gpsdata.gps_fd, session->gpsdata.dev.path);
+	(void)close(session->gpsdata.gps_fd);
+	session->gpsdata.gps_fd = -1;
+    }
+}
+
 /* *INDENT-OFF* */
 const struct gps_type_t nmea2000 = {
     .type_name      = "NMEA2000",       /* full name of type */
