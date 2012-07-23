@@ -2030,7 +2030,7 @@ int main(int argc, char *argv[])
 	if (nice(NICEVAL) == -1 && errno != 0)
 	    gpsd_report(LOG_INF, "NTPD Priority setting failed.\n");
     }
-    (void)ntpshm_init(&context, true);
+    (void)ntpshm_init(&context, NOWAIT);
 #endif /* NTPSHM_ENABLE */
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
