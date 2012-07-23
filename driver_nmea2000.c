@@ -614,11 +614,15 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	} else {
 	    // we got a unknown unit number
 	    if (nmea2000_units[can_net][source_unit] == NULL) {
-	        char buffer[strlen(session->gpsdata.dev.path)];
+	        char buffer[32];
 
-		sprintf(buffer, "nmea2000://%s:%d",can_interface_name[can_net], source_unit);
-		if (gpsd_add_device) {
-		    gpsd_add_device(buffer, true);
+		(void) snprintf(buffer,
+				sizeof(buffer),
+				"nmea2000://%s:%u",
+				can_interface_name[can_net],
+				source_unit);
+		if (gpsd_add_device != NULL) {
+		    (void) gpsd_add_device(buffer, true);
 		}
 	    }
 	}
