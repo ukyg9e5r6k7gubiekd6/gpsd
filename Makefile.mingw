@@ -42,6 +42,7 @@ rtcm2_json.c \
 shared_json.c \
 startup.c \
 strl.c \
+syslog.c \
 timegm.c \
 usleep.c
 LIBGPS_OBJECTS=$(LIBGPS_SOURCES:.c=.o)

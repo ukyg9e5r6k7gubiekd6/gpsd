@@ -251,11 +251,9 @@ static void gpsd_gpsd_report(int errlevel, const char *fmt, va_list ap)
 
 	visibilize(buf2, sizeof(buf2), buf);
 
-#ifdef HAVE_SYSLOG
 	if (in_background)
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
 	else
-#endif /* HAVE_SYSLOG */
 	    (void)fputs(buf2, stderr);
 #if defined(PPS_ENABLE)
 	/*@ -unrecog (splint has no pthread declarations as yet) @*/
@@ -2071,9 +2069,7 @@ int main(int argc, char *argv[])
 	}
     }
 
-#ifdef HAVE_SYSLOG
     openlog("gpsd", LOG_PID, LOG_USER);
-#endif /* HAVE_SYSLOG */
     gpsd_report(LOG_INF, "launching (Version %s)\n", VERSION);
 
 #ifdef SOCKET_EXPORT_ENABLE

@@ -2031,6 +2031,7 @@ extern struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif /* HAVE_LOCALTIME_R */
 
 #ifndef HAVE_SYSLOG_H
+/* log levels, copied from Mingw's */
 #define LOG_EMERG       0
 #define LOG_ALERT       1
 #define LOG_CRIT        2
@@ -2039,6 +2040,27 @@ extern struct tm *localtime_r(const time_t *timep, struct tm *result);
 #define LOG_NOTICE      5
 #define LOG_INFO        6
 #define LOG_DEBUG       7
+/* log facilities */
+#define LOG_KERN        (0<<3)
+#define LOG_USER        (1<<3)
+#define LOG_MAIL        (2<<3)
+#define LOG_DAEMON      (3<<3)
+#define LOG_AUTH        (4<<3)
+#define LOG_SYSLOG      (5<<3)
+#define LOG_LPR         (6<<3)
+#define LOG_NEWS        (7<<3)
+#define LOG_UUCP        (8<<3)
+#define LOG_CRON        (9<<3)
+#define LOG_AUTHPRIV    (10<<3)
+#define LOG_FTP         (11<<3)
+/* flags for openlog, again copied from Mingw */
+#define LOG_PID         0x01
+#define LOG_CONS        0x02
+#define LOG_ODELAY      0x04
+#define LOG_NDELAY      0x08
+#define LOG_NOWAIT      0x10
+#define LOG_PERROR      0x20
+
 extern void openlog(const char *ident UNUSED, int option UNUSED, int facility UNUSED);
 extern void syslog(int priority UNUSED, const char *format, ...);
 extern void closelog(void);

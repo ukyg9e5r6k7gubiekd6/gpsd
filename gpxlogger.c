@@ -175,12 +175,8 @@ static void conditionally_log_fix(struct gps_data_t *gpsdata)
 static void quit_handler(int signum)
 {
     /* don't clutter the logs on Ctrl-C */
-#ifdef HAVE_SYSLOG_H
     if (signum != SIGINT)
 	syslog(LOG_INFO, "exiting, signal %d received", signum);
-#else /* ndef HAVE_SYSLOG_H */
-    (void)signum;
-#endif /* HAVE_SYSLOG_H */
     print_gpx_footer();
     (void)gps_close(&gpsdata);
     exit(0);
@@ -223,9 +219,7 @@ int main(int argc, char **argv)
     while ((ch = getopt(argc, argv, "dD:e:f:hi:lm:V")) != -1) {
 	switch (ch) {
 	case 'd':
-#ifdef HAVE_SYSLOG_H
 	    openlog(basename(progname), LOG_PID | LOG_PERROR, LOG_DAEMON);
-#endif /* HAVE_SYSLOG_H */
 	    daemonize = true;
 	    break;
 #ifdef CLIENTDEBUG_ENABLE
@@ -255,9 +249,7 @@ int main(int argc, char **argv)
                 while (s == 0) {
 		    char *newfname = realloc(fname, fnamesize);
 		    if (newfname == NULL) {
-#ifdef HAVE_SYSLOG_H
 			syslog(LOG_ERR, "realloc failed.");
-#endif /* HAVE_SYSLOG_H */
 			goto bailout;
 		    } else {
 			fnamesize += 1024;
@@ -268,12 +260,10 @@ int main(int argc, char **argv)
 		assert(fname != NULL); /* pacify splint */
                 fname[s] = '\0';;
                 logfile = fopen(fname, "w");
-#ifdef HAVE_SYSLOG_H
                 if (logfile == NULL)
 		    syslog(LOG_ERR,
 			   "Failed to open %s: %s, logging to stdout.",
 			   fname, strerror(errno));
-#endif /* HAVE_SYSLOG_H */
 	    bailout:
                 free(fname);
                 break;
@@ -303,9 +293,7 @@ int main(int argc, char **argv)
     }
 
     if (daemonize && logfile == stdout) {
-#ifdef HAVE_SYSLOG_H
 	syslog(LOG_ERR, "Daemon mode with no valid logfile name - exiting.");
-#endif /* HAVE_SYSLOG_H */
 	exit(1);
     }
 
