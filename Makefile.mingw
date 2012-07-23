@@ -48,6 +48,21 @@ LIBGPS_OBJECTS=$(LIBGPS_SOURCES:.c=.o)
 LIBGPS=$(addsuffix $(SHLIB_SUFFIX),libgps)
 LIBGPS_IMPLIB=libgps.lib
 LIBGPS_DEF=libgps.def
+
+GPSMON_SOURCES=\
+gpsmon.c \
+monitor_italk.c \
+monitor_nmea.c \
+monitor_oncore.c \
+monitor_sirf.c \
+monitor_superstar2.c \
+monitor_tnt.c \
+monitor_ubx.c \
+monitor_garmin.c
+GPSMON_OBJECTS=$(GPSMON_SOURCES:.c=.o)
+GPSMON_BINARY_NAME=gpsmon
+GPSMON_BINARY=$(addsuffix .exe,$(GPSMON_BINARY_NAME))
+
 # Requires local sockets: gpsdctl
 CLIENT_BINARY_NAMES=cgps gpspipe gpxlogger lcdgps test_bits test_float test_json test_libgps test_mkgmtime test_trig
 CLIENT_BINARIES=$(addsuffix .exe,$(CLIENT_BINARY_NAMES))
@@ -93,20 +108,8 @@ LIBGPSD_DEF=libgpsd.def
 SERVER_BINARY_NAMES=gpsd gpsdecode gpsctl test_geoid test_packet
 SERVER_BINARIES=$(addsuffix .exe,$(SERVER_BINARY_NAMES))
 
-GPSMON_SOURCES=\
-gpsmon.c \
-monitor_italk.c \
-monitor_nmea.c \
-monitor_oncore.c \
-monitor_sirf.c \
-monitor_superstar2.c \
-monitor_tnt.c \
-monitor_ubx.c \
-monitor_garmin.c
-GPSMON_OBJECTS=$(GPSMON_SOURCES:.c=.o)
-
-BINARY_NAMES=$(CLIENT_BINARY_NAMES) $(SERVER_BINARY_NAMES)
-BINARIES=$(CLIENT_BINARIES) $(SERVER_BINARIES)
+BINARY_NAMES=$(CLIENT_BINARY_NAMES) $(SERVER_BINARY_NAMES) $(GPSMON_BINARY_NAME)
+BINARIES=$(CLIENT_BINARIES) $(SERVER_BINARIES) $(GPSMON_BINARY)
 
 all: $(BINARIES)
 # all: $(CLIENT_BINARIES)
@@ -135,7 +138,7 @@ $(SERVER_BINARIES): %.exe: %.o $(LIBGPS) $(LIBGPSD)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 # gpsmon binary is built from its several object files, libgps.dll and libgpsd.dll
-gpsmon.exe: $(GPSMON_OBJECTS) $(LIBGPS) $(LIBGPSD)
+$(GPSMON_BINARY): $(GPSMON_OBJECTS) $(LIBGPS) $(LIBGPSD)
 	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 .PHONY: clean

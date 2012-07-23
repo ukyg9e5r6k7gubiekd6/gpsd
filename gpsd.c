@@ -303,7 +303,7 @@ The following driver types are compiled into this gpsd instance:\n",
 }
 
 #ifdef CONTROL_SOCKET_ENABLE
-static int filesock(char *filename)
+static int filesock(char *filename UNUSED)
 {
 #ifdef HAVE_SYS_UN_H
     struct sockaddr_un addr;
@@ -524,7 +524,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 
 /* *INDENT-OFF* */
 static int passivesocks(char *service, char *tcp_or_udp,
-			int qlen, /*@out@*/int socks[])
+			int qlen, /*@out@*/socket_t socks[])
 {
     int numsocks = AFCOUNT;
     int i;
@@ -548,7 +548,7 @@ static int passivesocks(char *service, char *tcp_or_udp,
 	socks[1] = passivesock_af(AF_INET6, service, tcp_or_udp, qlen);
 
     for (i = 0; i < AFCOUNT; i++)
-	if (socks[i] < 0)
+	if (BADSOCK(socks[i]))
 	    numsocks--;
 
     /* Return the number of succesfully opened sockets
@@ -559,7 +559,7 @@ static int passivesocks(char *service, char *tcp_or_udp,
 
 struct subscriber_t
 {
-    int fd;			/* client file descriptor. -1 if unused */
+    socket_t fd;		/* client file descriptor. -1 if unused */
     timestamp_t active;		/* when subscriber last polled for data */
     struct policy_t policy;	/* configurable bits */
 };
@@ -575,7 +575,7 @@ struct subscriber_t
 
 static struct subscriber_t subscribers[MAXSUBSCRIBERS];	/* indexed by client file descriptor */
 
-#define UNALLOCATED_FD	-1
+#define UNALLOCATED_FD	((socket_t) -1)
 
 static /*@null@*//*@observer@ */ struct subscriber_t *allocate_client(void)
 /* return the address of a subscriber structure allocated for a new session */
@@ -728,7 +728,7 @@ static void deactivate_device(struct gps_device_t *device)
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
 #endif /* SOCKET_EXPORT_ENABLE */
-    if (device->gpsdata.gps_fd != -1) {
+    if (device->gpsdata.gps_fd != (socket_t) -1) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
@@ -984,7 +984,7 @@ static bool awaken(struct gps_device_t *device)
 	}
     }
 
-    if (device->gpsdata.gps_fd != -1) {
+    if (device->gpsdata.gps_fd != (socket_t) -1) {
 	gpsd_report(LOG_PROG,
 		    "device %d (fd=%d, path %s) already active.\n",
 		    (int)(device - devices),
@@ -1493,7 +1493,7 @@ static void consume_packets(struct gps_device_t *device)
 	    && device->ntrip.conn_state != ntrip_conn_established) {
 
 	/* the socket descriptor might change during connection */
-	if (device->gpsdata.gps_fd != -1) {
+	if (device->gpsdata.gps_fd != (socket_t) -1) {
 	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	}
 	(void)ntrip_open(device, "");
@@ -1888,7 +1888,7 @@ int main(int argc, char *argv[])
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef CONTROL_SOCKET_ENABLE
-    static int csock = -1;
+    static socket_t csock = -1;
     fd_set control_fds;
     socket_t cfd;
     static char *control_socket = NULL;
@@ -1900,7 +1900,7 @@ int main(int argc, char *argv[])
     struct gps_device_t *device;
     fd_set rfds;
     int i, option, dfd;
-    int msocks[2] = {-1, -1};
+    socket_t msocks[2] = {-1, -1};
     bool go_background = true;
 #ifdef COMPAT_SELECT
     struct timeval tv;
@@ -2264,7 +2264,7 @@ int main(int argc, char *argv[])
     signalled = 0;
 
     for (i = 0; i < AFCOUNT; i++)
-	if (msocks[i] >= 0) {
+	if (!BADSOCK(msocks[i])) {
 	    FD_SET(msocks[i], &all_fds);
 	    adjust_max_fd(msocks[i], true);
 	}
@@ -2343,15 +2343,15 @@ int main(int argc, char *argv[])
 #ifdef SOCKET_EXPORT_ENABLE
 	/* always be open to new client connections */
 	for (i = 0; i < AFCOUNT; i++) {
-	    if (msocks[i] >= 0 && FD_ISSET(msocks[i], &rfds)) {
+	    if (!BADSOCK(msocks[i]) && FD_ISSET(msocks[i], &rfds)) {
 		socklen_t alen = (socklen_t) sizeof(fsin);
 		char *c_ip;
 		/*@+matchanyintegral@*/
-		int ssock =
+		socket_t ssock =
 		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
 		/*@+matchanyintegral@*/
 
-		if (ssock == -1)
+		if (BADSOCK(ssock))
 		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 		else {
 		    struct subscriber_t *client = NULL;
@@ -2436,7 +2436,7 @@ int main(int argc, char *argv[])
 	    if (!allocated_device(device))
 		continue;
 
-	    if (device->gpsdata.gps_fd >= 0) {
+	    if (!BADSOCK(device->gpsdata.gps_fd)) {
 		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))
 		    /* get data from the device */
 		    consume_packets(device);
@@ -2534,7 +2534,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-	    if (!device_needed && device->gpsdata.gps_fd > -1 &&
+	    if (!device_needed && !BADSOCK(device->gpsdata.gps_fd) &&
 		    device->packet.type != BAD_PACKET) {
 		if (device->releasetime == 0) {
 		    device->releasetime = timestamp();
@@ -2551,7 +2551,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 
-	    if (device_needed && device->gpsdata.gps_fd == -1 &&
+	    if (device_needed && BADSOCK(device->gpsdata.gps_fd) &&
 		    (device->opentime == 0 ||
 		    timestamp() - device->opentime > DEVICE_RECONNECT)) {
 		device->opentime = timestamp();

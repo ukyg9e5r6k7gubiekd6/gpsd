@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <curses.h>
 
 #include "gpsd.h"
 #include "bits.h"

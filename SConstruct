@@ -764,6 +764,7 @@ libgps_sources = [
     "shared_json.c",
     "startup.c",
     "strl.c",
+    "syslog.c",
     "timegm.c",
     "usleep.c",
 ]
@@ -915,7 +916,7 @@ compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
                            version=libgps_version,
-                           parse_flags=usblibs + rtlibs + bluezlibs + socket_libs)
+                           parse_flags=usblibs + rtlibs + bluezlibs + socket_libs + ['-lgps'])
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
@@ -1012,7 +1013,10 @@ env.Depends(lcdgps, compiled_gpslib)
 cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 env.Depends(cgps, compiled_gpslib)
 
-binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gpxlogger, lcdgps]
+binaries = [gpsd, gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]
+if env['control_socket']:
+    binaries += [gpsdctl]
+
 if ncurseslibs:
     binaries += [cgps, gpsmon]
 
@@ -1063,11 +1067,11 @@ else:
     (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy, ldflags) = vars
     # in case CC/CXX was set to the scan-build wrapper,
     # ensure that we build the python modules with scan-build, too
-    if env['CC'] is None or env['CC'].find('scan-build') < 0:
+    if env['CC'] is None or env['CC'].find('scan-build') >= 0:
         python_env['CC'] = cc
     else:
         python_env['CC'] = ' '.join([env['CC']] + cc.split()[1:])
-    if env['CXX'] is None or env['CXX'].find('scan-build') < 0:
+    if env['CXX'] is None or env['CXX'].find('scan-build') >= 0:
         python_env['CXX'] = cxx
     else:
         python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])

@@ -4,6 +4,7 @@
  */
 #include <math.h>
 #include <time.h>
+#include <curses.h>
 
 #include "gpsd.h"
 #include "bits.h"

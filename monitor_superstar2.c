@@ -2,6 +2,8 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+#include <curses.h>
+
 #include "gpsd.h"
 #include "bits.h"
 #include "gpsmon.h"

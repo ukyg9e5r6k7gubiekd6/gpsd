@@ -2039,6 +2039,9 @@ extern struct tm *localtime_r(const time_t *timep, struct tm *result);
 #define LOG_NOTICE      5
 #define LOG_INFO        6
 #define LOG_DEBUG       7
+extern void openlog(const char *ident UNUSED, int option UNUSED, int facility UNUSED);
+extern void syslog(int priority UNUSED, const char *format, ...);
+extern void closelog(void);
 #endif /* HAVE_SYSLOG_H */
 
 /* Work around lack of C99 %z for size_t */

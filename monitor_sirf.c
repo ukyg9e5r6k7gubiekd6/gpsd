@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <time.h>
 #include <sys/time.h>
+#include <curses.h>
 
 #include "gpsd.h"
 #include "bits.h"

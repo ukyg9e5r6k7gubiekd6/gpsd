@@ -7,6 +7,8 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#include "gpsd_config.h"
+
 #include <string.h>
 #include <libgen.h>
 #include <stdbool.h>
@@ -16,8 +18,12 @@
 #include <sys/stat.h>
 #include <pthread.h>
 #ifndef S_SPLINT_S
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif /* HAVE_SYS_WAIT_H */
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif /* HAVE_SYS_SOCKET_H */
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 

@@ -139,7 +139,13 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 }
 /*@ +noret @*/
 
-static void settle(struct gps_device_t *session)
+#ifdef HAVE_TERMIOS_H
+#define USED_WITH_TERMIOS
+#else /* ndef HAVE_TERMIOS_H */
+#define USED_WITH_TERMIOS UNUSED
+#endif /* HAVE_TERMIOS_H */
+
+static void settle(struct gps_device_t *session USED_WITH_TERMIOS)
 /* allow the device to settle after a control operation */
 {
     /*
@@ -253,6 +259,7 @@ static void onsig(int sig)
 }
 
 #ifdef _WIN32
+CALLBACK void onalarm(HWND window, UINT timer_id, UINT timeout, DWORD unknown);
 CALLBACK void onalarm(HWND window, UINT timer_id, UINT timeout, DWORD unknown)
 {
     (void)window;
