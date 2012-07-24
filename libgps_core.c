@@ -110,7 +110,7 @@ int gps_close(struct gps_data_t *gpsdata)
     libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
 
 #ifdef SHM_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == -1) {
+    if (gpsdata->gps_fd == -1) {
 	gps_shm_close(gpsdata);
 	status = 0;
     }
@@ -134,13 +134,13 @@ int gps_read(struct gps_data_t *gpsdata)
 
     /*@ -usedef -compdef -uniondef @*/
 #ifdef SHM_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == -1) {
+    if (gpsdata->gps_fd == -1) {
 	status = gps_shm_read(gpsdata);
     }
 #endif /* SHM_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
-    if (status == -1 && (intptr_t)(gpsdata->gps_fd) != -1) {
+    if (status == -1 && gpsdata->gps_fd != -1) {
         status = gps_sock_read(gpsdata);
     }
 #endif /* SOCKET_EXPORT_ENABLE */
@@ -206,12 +206,12 @@ bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int time
     bool waiting = true;
 
 #ifdef SHM_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == SHM_PSEUDO_FD)
+    if (gpsdata->gps_fd == SHM_PSEUDO_FD)
 	waiting = gps_shm_waiting(gpsdata, timeout);
 #endif /* SHM_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) >= 0)
+    if (gpsdata->gps_fd >= 0)
 	waiting = gps_sock_waiting(gpsdata, timeout);
 #endif /* SOCKET_EXPORT_ENABLE */
 
@@ -227,15 +227,15 @@ int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
 
     /*@ -usedef -compdef -uniondef @*/
 #ifdef SHM_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == SHM_PSEUDO_FD)
+    if (gpsdata->gps_fd == SHM_PSEUDO_FD)
 	status = gps_shm_mainloop(gpsdata, timeout, hook);
 #endif /* SHM_EXPORT_ENABLE */
 #ifdef DBUS_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == DBUS_PSEUDO_FD)
+    if (gpsdata->gps_fd == DBUS_PSEUDO_FD)
 	status = gps_dbus_mainloop(gpsdata, timeout, hook);
 #endif /* DBUS_EXPORT_ENABLE */
 #ifdef SOCKET_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) >= 0)
+    if (gpsdata->gps_fd >= 0)
 	status = gps_sock_mainloop(gpsdata, timeout, hook);
 #endif /* SOCKET_EXPORT_ENABLE */
     /*@ +usedef +compdef +uniondef @*/
