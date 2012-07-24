@@ -110,7 +110,7 @@ int gps_close(struct gps_data_t *gpsdata)
     libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
 
 #ifdef SHM_EXPORT_ENABLE
-    if (gpsdata->gps_fd == -1) {
+    if (BADSOCK(gpsdata->gps_fd)) {
 	gps_shm_close(gpsdata);
 	status = 0;
     }
@@ -134,7 +134,7 @@ int gps_read(struct gps_data_t *gpsdata)
 
     /*@ -usedef -compdef -uniondef @*/
 #ifdef SHM_EXPORT_ENABLE
-    if (gpsdata->gps_fd == -1) {
+    if (BADSOCK(gpsdata->gps_fd)) {
 	status = gps_shm_read(gpsdata);
     }
 #endif /* SHM_EXPORT_ENABLE */
@@ -211,7 +211,7 @@ bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int time
 #endif /* SHM_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
-    if (gpsdata->gps_fd >= 0)
+    if (GOODSOCK(gpsdata->gps_fd))
 	waiting = gps_sock_waiting(gpsdata, timeout);
 #endif /* SOCKET_EXPORT_ENABLE */
 
@@ -235,7 +235,7 @@ int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
 	status = gps_dbus_mainloop(gpsdata, timeout, hook);
 #endif /* DBUS_EXPORT_ENABLE */
 #ifdef SOCKET_EXPORT_ENABLE
-    if (gpsdata->gps_fd >= 0)
+    if (GOODSOCK(gpsdata->gps_fd))
 	status = gps_sock_mainloop(gpsdata, timeout, hook);
 #endif /* SOCKET_EXPORT_ENABLE */
     /*@ +usedef +compdef +uniondef @*/

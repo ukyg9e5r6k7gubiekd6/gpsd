@@ -18,7 +18,7 @@ int sd_get_socket_count(void) {
         return 0;
 
     n = strtoul(env, NULL, 10);
-    if (n == ULONG_MAX || (pid_t)n != getpid())
+    if (n == ULONG_MAX || (pid_t)n != (pid_t)getpid())
         return 0;
 
     env = getenv("LISTEN_FDS");

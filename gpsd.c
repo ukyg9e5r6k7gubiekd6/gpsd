@@ -1923,7 +1923,7 @@ int main(int argc, char *argv[])
 
 #ifdef SYSTEMD_ENABLE
     sd_socket_count = sd_get_socket_count();
-    if (sd_socket_count > 0 && control_socket) {
+    if (sd_socket_count > 0 && control_socket != NULL) {
         gpsd_report(LOG_WARN,
                     "control socket passed on command line ignored\n");
         control_socket = NULL;
