@@ -76,6 +76,8 @@ pps_pin.h
 gpsd.spec
 MANIFEST
 .kdbgrc.*
+.project
+.cproject
 tags
 # Python files
 build
