@@ -266,6 +266,7 @@ static inline uint16_t get_uint16(const uint8_t * buf)
 	| ((uint16_t) (0xFF & buf[1]) << 8);
 }
 
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 static inline uint32_t get_int32(const uint8_t * buf)
 {
     return (uint32_t) (0xFF & buf[0])
@@ -273,6 +274,7 @@ static inline uint32_t get_int32(const uint8_t * buf)
 	| ((uint32_t) (0xFF & buf[2]) << 16)
 	| ((uint32_t) (0xFF & buf[3]) << 24);
 }
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 // convert radians to degrees
 static inline double radtodeg(double rad)
@@ -283,8 +285,10 @@ static inline double radtodeg(double rad)
 static gps_mask_t PrintSERPacket(struct gps_device_t *session,
 				 unsigned char pkt_id, int pkt_len,
 				 unsigned char *buf);
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session,
 				 Packet_t * pkt);
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 			  int pkt_len, unsigned char *buf)
@@ -603,6 +607,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 }
 
 
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 /*@ -branchstate @*/
 // For debugging, decodes and prints some known packets.
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
@@ -702,11 +707,12 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 
     return mask;
 }
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 /*@ +branchstate @*/
 
 
-#if defined(__linux__) || defined(S_SPLINT_S)
+#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
 /* build and send a packet w/ USB protocol */
 static void Build_Send_USB_Packet(struct gps_device_t *session,
 				  uint32_t layer_id, uint32_t pkt_id,
@@ -745,7 +751,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 	(void)gpsd_write(session, n, 0);
     }
 }
-#endif /* __linux__ || S_SPLINT_S */
+#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
 
 /* build and send a packet in serial protocol */
 /* layer_id unused */
@@ -933,13 +939,13 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 	// expect no return packet !?
 
 	return true;
-#else
+#else /* ndef HAVE_LIBUSB */
 	return false;
-#endif /* HAVE_LIBUSB */
+#endif /* ndef HAVE_LIBUSB */
     }
-#else
+#else /* !__linux__ && !S_SPLINT_S */
     return false;
-#endif /* __linux__ || S_SPLINT_S */
+#endif /* !__linux__ && !S_SPLINT_S */
 }
 
 static void garmin_event_hook(struct gps_device_t *session, event_t event)

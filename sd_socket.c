@@ -5,7 +5,9 @@
 
 #include <limits.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifndef S_SPLINT_S
+#include <unistd.h> /* confuses splint ('Internal Bug') */
+#endif /* S_SPLINT_S */
 
 #include "sd_socket.h"
 
