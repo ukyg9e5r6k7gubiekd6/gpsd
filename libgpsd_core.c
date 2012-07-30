@@ -232,7 +232,7 @@ int gpsd_open(struct gps_device_t *session)
 	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCK(session->gpsdata.gps_fd);
 	port = strchr(server, ':');
 	if (port == NULL) {
 	    gpsd_report(LOG_ERROR, "Missing colon in TCP feed spec.\n");
@@ -255,7 +255,7 @@ int gpsd_open(struct gps_device_t *session)
 	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCK(session->gpsdata.gps_fd);
 	port = strchr(server, ':');
 	if (port == NULL) {
 	    gpsd_report(LOG_ERROR, "Missing colon in UDP feed spec.\n");
@@ -264,7 +264,8 @@ int gpsd_open(struct gps_device_t *session)
 	*port++ = '\0';
 	gpsd_report(LOG_INF, "opening UDP feed at %s, port %s.\n", server,
 		    port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp")) < 0) {
+	dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp");
+	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "UDP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
@@ -281,7 +282,7 @@ int gpsd_open(struct gps_device_t *session)
 	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 7, sizeof(server));
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCK(session->gpsdata.gps_fd);
 	if ((port = strchr(server, ':')) == NULL) {
 	    port = DEFAULT_GPSD_PORT;
 	} else
@@ -317,7 +318,7 @@ int gpsd_activate(struct gps_device_t *session)
     gpsd_run_device_hook(session->gpsdata.dev.path, "ACTIVATE");
     session->gpsdata.gps_fd = gpsd_open(session);
 
-    if (session->gpsdata.gps_fd < 0)
+    if (BADSOCK(session->gpsdata.gps_fd))
 	return -1;
     else {
 #ifdef NON_NMEA_ENABLE

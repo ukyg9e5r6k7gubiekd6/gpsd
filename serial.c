@@ -112,7 +112,7 @@ void gpsd_tty_init(struct gps_device_t *session)
 /* to be called on allocating a device */
 {
     /* mark GPS fd closed and its baud rate unknown */
-    session->gpsdata.gps_fd = -1;
+    INVALIDATE_SOCK(session->gpsdata.gps_fd);
     session->saved_baud = -1;
 #ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
@@ -384,15 +384,15 @@ int gpsd_serial_open(struct gps_device_t *session)
     } else 
 #endif /* BLUEZ */
     {
-        if ((session->gpsdata.gps_fd =
-	     open(session->gpsdata.dev.path,
-		      (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
+        session->gpsdata.gps_fd = open(session->gpsdata.dev.path,
+		      (int)(mode | O_NONBLOCK | O_NOCTTY));
+        if (BADSOCK(session->gpsdata.gps_fd)) {
             gpsd_report(LOG_ERROR,
 			    "device open failed: %s - retrying read-only\n",
 			    strerror(errno));
-	    if ((session->gpsdata.gps_fd =
-		 open(session->gpsdata.dev.path,
-			  O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
+	    session->gpsdata.gps_fd = open(session->gpsdata.dev.path,
+			  O_RDONLY | O_NONBLOCK | O_NOCTTY);
+	    if (BADSOCK(session->gpsdata.gps_fd)) {
 		gpsd_report(LOG_ERROR, "read-only device open failed: %s\n",
 				strerror(errno));
 		return -1;
@@ -428,7 +428,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 			"%s already opened by another process\n",
 			session->gpsdata.dev.path);
 	    (void)close(session->gpsdata.gps_fd);
-	    session->gpsdata.gps_fd = -1;
+	    INVALIDATE_SOCK(session->gpsdata.gps_fd);
 	    return -1;
 	}
 #endif /* __linux__ */
@@ -617,6 +617,6 @@ void gpsd_close(struct gps_device_t *session)
 	gpsd_report(LOG_SPIN, "close(%d) in gpsd_close(%s)\n",
 		    session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCK(session->gpsdata.gps_fd);
     }
 }

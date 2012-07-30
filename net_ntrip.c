@@ -573,7 +573,7 @@ void ntrip_report(struct gps_context_t *context,
      */
     count ++;
     if (caster->ntrip.stream.nmea != 0 && context->fixcnt > 10 && (count % 5)==0) {
-	if (caster->gpsdata.gps_fd > -1) {
+	if (GOODSOCK(caster->gpsdata.gps_fd)) {
 	    char buf[BUFSIZ];
 	    gpsd_position_fix_dump(gps, buf, sizeof(buf));
 	    if (write(caster->gpsdata.gps_fd, buf, strlen(buf)) ==

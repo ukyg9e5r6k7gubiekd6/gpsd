@@ -35,7 +35,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 
     device->gpsdata.gps_fd =
 	netlib_connectsock(AF_UNSPEC, dgpsserver, dgpsport, "tcp");
-    if (device->gpsdata.gps_fd >= 0) {
+    if (GOODSOCK(device->gpsdata.gps_fd)) {
 	gpsd_report(LOG_PROG, "connection to DGPS server %s established.\n",
 		    dgpsserver);
 	(void)gethostname(hn, sizeof(hn));
@@ -70,7 +70,7 @@ void dgpsip_report(struct gps_context_t *context,
      */
     if (context->fixcnt > 10 && !dgpsip->dgpsip.reported) {
 	dgpsip->dgpsip.reported = true;
-	if (dgpsip->gpsdata.gps_fd > -1) {
+	if (GOODSOCK(dgpsip->gpsdata.gps_fd)) {
 	    char buf[BUFSIZ];
 	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n",
 			   gps->gpsdata.fix.latitude,

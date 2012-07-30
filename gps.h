@@ -1778,6 +1778,7 @@ struct policy_t {
 typedef int socket_t;
 #define GOODSOCK(s) ((s) >= 0)
 #define BADSOCK(s) ((s) < 0)
+#define INVALIDATE_SOCK(s) do { (s) = -1; } while (0)
 
 /* mode flags for setting streaming policy */
 #define WATCH_ENABLE	0x000001u	/* enable streaming */

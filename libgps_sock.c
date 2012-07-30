@@ -64,8 +64,8 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
     libgps_debug_trace((DEBUG_CALLS, "gps_sock_open(%s, %s)\n", host, port));
 
 #ifndef USE_QT
-	if ((gpsdata->gps_fd =
-	    netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
+	gpsdata->gps_fd = netlib_connectsock(AF_UNSPEC, host, port, "tcp");
+	if (BADSOCK(gpsdata->gps_fd)) {
 	    errno = gpsdata->gps_fd;
 	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n", errno));
 	    return -1;
@@ -130,13 +130,13 @@ int gps_sock_close(struct gps_data_t *gpsdata)
 
     free(PRIVATE(gpsdata));
     status = close(gpsdata->gps_fd);
-    gpsdata->gps_fd = -1;
+    INVALIDATE_SOCK(gpsdata->gps_fd);
     return status;
 #else
     QTcpSocket *sock = (QTcpSocket *) gpsdata->gps_fd;
     sock->disconnectFromHost();
     delete sock;
-    gpsdata->gps_fd = NULL;
+    INVALIDATE_SOCK(gpsdata->gps_fd);
     return 0;
 #endif
 }

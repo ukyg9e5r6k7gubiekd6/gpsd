@@ -657,7 +657,7 @@ int nmea2000_open(struct gps_device_t *session)
     struct ifreq ifr;
     struct sockaddr_can addr;
 
-    session->gpsdata.gps_fd = -1;
+    INVALIDATE_SOCK(session->gpsdata.gps_fd);
 
     session->driver.nmea2000.can_net = 0;
 

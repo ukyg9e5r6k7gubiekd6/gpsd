@@ -739,7 +739,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
 	    gpsd_report(LOG_INF, "stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
 	    if (!flag_nowait) {
-		devp->gpsdata.gps_fd = -1;
+		INVALIDATE_SOCK(devp->gpsdata.gps_fd);
 		ret = true;
 	    } else {
 		ret = open_device(devp);
@@ -2354,7 +2354,7 @@ int main(int argc, char *argv[])
 	    if (!allocated_device(device))
 		continue;
 
-	    if (device->gpsdata.gps_fd >= 0) {
+	    if (GOODSOCK(device->gpsdata.gps_fd)) {
 		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))
 		    /* get data from the device */
 		    consume_packets(device);
@@ -2452,7 +2452,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 
-	    if (!device_needed && device->gpsdata.gps_fd > -1 &&
+	    if (!device_needed && GOODSOCK(device->gpsdata.gps_fd) &&
 		    device->packet.type != BAD_PACKET) {
 		if (device->releasetime == 0) {
 		    device->releasetime = timestamp();
@@ -2469,7 +2469,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 
-	    if (device_needed && device->gpsdata.gps_fd == -1 &&
+	    if (device_needed && BADSOCK(device->gpsdata.gps_fd) &&
 		    (device->opentime == 0 ||
 		    timestamp() - device->opentime > DEVICE_RECONNECT)) {
 		device->opentime = timestamp();

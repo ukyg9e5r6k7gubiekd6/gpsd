@@ -574,7 +574,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     gpsd_report(LOG_PROG, "PPS Create Thread gpsd_ppsmonitor\n");
 
     /* wait for the device to go active - makes this safe to call early */
-    while (session->gpsdata.gps_fd == -1) {
+    while (BADSOCK(session->gpsdata.gps_fd)) {
 	/* should probably remove this once code is verified */
 	gpsd_report(LOG_PROG, "PPS thread awaiting device activation\n");
 	(void)sleep(1);
