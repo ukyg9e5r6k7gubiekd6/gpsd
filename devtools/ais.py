@@ -841,7 +841,7 @@ type25 = (
              conditional=lambda i, v: v["addressed"]),
     bitfield("app_id",       16, 'unsigned',       0, "Application ID",
              conditional=lambda i, v: v["structured"]),
-    bitfield("data",       None, 'raw',         None, "Data"),
+    bitfield("data",          0, 'raw',         None, "Data"),
     )
 
 # No type 26 handling yet,
