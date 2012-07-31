@@ -207,6 +207,7 @@ envs = {}
 for var in import_env:
     if var in os.environ:
         envs[var] = os.environ[var]
+envs["GPSD_HOME"] = os.getcwd()
 
 env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV=envs)
 opts.Save('.scons-option-cache', env)
@@ -1512,7 +1513,7 @@ json_regress = Utility('json-regress', [test_json], [
 
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit',
-    ['$SRCDIR/valgrind-audit.py', python_built_extensions],
+    ['$SRCDIR/valgrind-audit.py', python_built_extensions, gpsd],
     './valgrind-audit.py'
     )
 
