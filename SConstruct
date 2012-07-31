@@ -1483,7 +1483,7 @@ geoid_regress = Utility('geoid-regress', [test_geoid], [
     ])
 
 # Regression-test the Maidenhead Locator
-maidenhead_locator_regress = Utility('maidenhead-locator-regress', [], [
+maidenhead_locator_regress = Utility('maidenhead-locator-regress', [python_built_extensions], [
     '@echo "Testing the Maidenhead Locator conversion..."',
     '$SRCDIR/test_maidenhead.py >/dev/null',
     ])
