@@ -292,7 +292,8 @@ static int filesock(char *filename)
     int sock;
 
     /*@ -mayaliasunique -usedef @*/
-    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    sock = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (BADSOCK(sock)) {
 	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
 	return -1;
     }
@@ -444,7 +445,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	 * this, trying to listen on in6addr_any will fail with the
 	 * address-in-use error condition.
 	 */
-	if (s > -1) {
+	if (GOODSOCK(s)) {
 	    int on = 1;
 	    (void)setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
 	}
@@ -456,7 +457,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
     }
     gpsd_report(LOG_IO, "opening %s socket\n", af_str);
 
-    if (s == -1) {
+    if (BADSOCK(s)) {
 	gpsd_report(LOG_ERROR, "can't create %s socket\n", af_str);
 	return -1;
     }
@@ -1962,7 +1963,8 @@ int main(int argc, char *argv[])
 #ifdef CONTROL_SOCKET_ENABLE
     if (control_socket) {
 	(void)unlink(control_socket);
-	if ((csock = filesock(control_socket)) == -1) {
+	csock = filesock(control_socket);
+	if (BADSOCK(csock)) {
 	    gpsd_report(LOG_ERROR,
 			"control socket create failed, netlib error %d\n",
 			csock);
@@ -2179,7 +2181,7 @@ int main(int argc, char *argv[])
     signalled = 0;
 
     for (i = 0; i < AFCOUNT; i++)
-	if (msocks[i] >= 0) {
+	if (GOODSOCK(msocks[i])) {
 	    FD_SET(msocks[i], &all_fds);
 	    adjust_max_fd(msocks[i], true);
 	}
@@ -2258,7 +2260,7 @@ int main(int argc, char *argv[])
 #ifdef SOCKET_EXPORT_ENABLE
 	/* always be open to new client connections */
 	for (i = 0; i < AFCOUNT; i++) {
-	    if (msocks[i] >= 0 && FD_ISSET(msocks[i], &rfds)) {
+	    if (GOODSOCK(msocks[i]) && FD_ISSET(msocks[i], &rfds)) {
 		socklen_t alen = (socklen_t) sizeof(fsin);
 		char *c_ip;
 		/*@+matchanyintegral@*/
@@ -2266,7 +2268,7 @@ int main(int argc, char *argv[])
 		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
 		/*@+matchanyintegral@*/
 
-		if (ssock == -1)
+		if (BADSOCK(ssock))
 		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 		else {
 		    struct subscriber_t *client = NULL;
@@ -2311,13 +2313,13 @@ int main(int argc, char *argv[])
 
 #ifdef CONTROL_SOCKET_ENABLE
 	/* also be open to new control-socket connections */
-	if (csock > -1 && FD_ISSET(csock, &rfds)) {
+	if (GOODSOCK(csock) && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t) sizeof(fsin);
 	    /*@+matchanyintegral@*/
 	    int ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
 	    /*@-matchanyintegral@*/
 
-	    if (ssock == -1)
+	    if (BADSOCK(ssock))
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		gpsd_report(LOG_INF, "control socket connect on fd %d\n",

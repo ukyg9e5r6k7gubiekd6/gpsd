@@ -30,9 +30,10 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     struct addrinfo hints;
     struct addrinfo *result, *rp;
     int ret, type, proto, one = 1;
-    socket_t s = -1;
+    socket_t s;
     bool bind_me;
 
+    INVALIDATE_SOCK(s);
     /*@-type@*/
     ppe = getprotobyname(protocol);
     if (strcmp(protocol, "udp") == 0) {
@@ -72,7 +73,8 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     /*@-type@*/
     for (rp = result; rp != NULL; rp = rp->ai_next) {
 	ret = NL_NOCONNECT;
-	if ((s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) < 0)
+	s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+	if (BADSOCK(s))
 	    ret = NL_NOSOCK;
 	else if (setsockopt
 		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
@@ -94,7 +96,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	    }
 	}
 
-	if (s > -1) {
+	if (GOODSOCK(s)) {
 	    (void)close(s);
 	}
     }

@@ -664,7 +664,7 @@ int nmea2000_open(struct gps_device_t *session)
     /* Create the socket */
     sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
  
-    if (sock == -1) {
+    if (BADSOCK(sock)) {
         gpsd_report(LOG_ERROR, "NMEA2000 open: can not get socket.\n");
 	return -1;
     }
