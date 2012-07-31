@@ -1316,11 +1316,11 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
 
 # Sanity-check Python code. TODO: add xgps for the complete set.
-Utility("pychecker", ["jsongen.py", "maskaudit.py"],
+Utility("pychecker", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''for f in  gpsprof gpscat gpsfake gegps; do ln -s $$f $$f.py; done; \
         pychecker --no-classattr --no-callinit jsongen.py leapsecond.py maskaudit.py gpsprof.py gpscat.py gpsfake.py gegps.py gps/*.py;
         for f in gpsprof gpscat gpsfake gegps; do rm $$f.py $$f.pyc; done'''])
-Utility("pylint", ["jsongen.py", "maskaudit.py"],
+Utility("pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''pylint --output-format=parseable --reports=n --include-ids=y --disable=F0001,C0103,C0111,C0301,C0302,C0322,C0324,C0323,C0321,R0201,R0902,R0903,R0904,R0911,R0912,R0913,R0914,R0915,W0201,W0401,W0141,W0142,W0603,W0614,W0621,E1101,E1102 jsongen.py leapsecond.py maskaudit.py gpsprof.py gpscat.py gpsfake.py gegps.py gps/*.py xgps'''])
 
 # Check the documentation for bogons, too
