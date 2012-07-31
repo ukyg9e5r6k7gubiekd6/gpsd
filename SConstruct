@@ -942,7 +942,7 @@ if ncurseslibs:
 # Test programs
 test_float = env.Program('test_float', ['test_float.c'])
 test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpsdlibs)
-env.Depends(test_geoid, compiled_gpsdlib)
+env.Depends(test_geoid, compiled_gpsdlib, compiled_gpslib)
 test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
 env.Depends(test_json, compiled_gpslib)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], parse_flags=gpslibs)
