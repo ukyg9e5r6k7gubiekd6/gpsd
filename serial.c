@@ -361,14 +361,15 @@ int gpsd_serial_open(struct gps_device_t *session)
     /*@ +boolops +type @*/
 #ifdef HAVE_BLUEZ
     if (bachk(session->gpsdata.dev.path) == 0) {
-        struct sockaddr_rc addr = { 0, *BDADDR_ANY, 0 };
+        struct sockaddr_rc addr;
+        memset(&addr, 0, sizeof(addr));
         session->gpsdata.gps_fd = socket(AF_BLUETOOTH,
 					 SOCK_STREAM,
 					 BTPROTO_RFCOMM);
         addr.rc_family = AF_BLUETOOTH;
         addr.rc_channel = (uint8_t) 1;
         (void)str2ba(session->gpsdata.dev.path, &addr.rc_bdaddr);
-        if (BADSOCK(connect(session->gpsdata.gps_fd, (struct sockaddr *) &addr, sizeof (addr)))) {
+        if (connect(session->gpsdata.gps_fd, (struct sockaddr *) &addr, sizeof (addr)) < 0) {
 	    if (errno != EINPROGRESS && errno != EAGAIN) {
 		(void)close(session->gpsdata.gps_fd);
 		gpsd_report(LOG_ERROR, "bluetooth socket connect failed: %s\n",

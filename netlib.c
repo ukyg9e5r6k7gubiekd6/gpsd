@@ -79,7 +79,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	else if (setsockopt
 		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
 		  sizeof(one)) == -1) {
-	    if (s > -1)
+	    if (GOODSOCK(s))
 		(void)close(s);
 	    ret = NL_NOSOCKOPT;
 	} else {
@@ -154,7 +154,8 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 {
     int sock;
 
-    if ((sock = socket(AF_UNIX, socktype, 0)) < 0) {
+    sock = socket(AF_UNIX, socktype, 0);
+    if (BADSOCK(sock)) {
 	return -1;
     } else {
 	struct sockaddr_un saddr;
