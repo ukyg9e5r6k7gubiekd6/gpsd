@@ -1511,10 +1511,13 @@ json_regress = Utility('json-regress', [test_json], [
     ])
 
 # Run a valgrind audit on the daemon  - not in normal tests
-valgrind_audit = Utility('valgrind-audit', ['$SRCDIR/valgrind-audit.py'], 'valgrind-audit.py')
+valgrind_audit = Utility('valgrind-audit',
+    ['$SRCDIR/valgrind-audit.py', python_built_extensions],
+    './valgrind-audit.py'
+    )
 
 # Run test builds on remote machines
-flocktest = Utility("flocktest", [], "cd devtools; flocktest " + gitrepo)
+flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 
 # Run all normal regression tests
 check = env.Alias('check', [
