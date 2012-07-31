@@ -20,6 +20,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refname>xgpsspeed</refname>
 <refname>cgps</refname>
 <refname>lcdgps</refname>
+<refname>gegps</refname>
 <refpurpose>test clients for gpsd</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
