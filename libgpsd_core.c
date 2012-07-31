@@ -884,10 +884,15 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* beginning of a new packet */
 	timestamp_t now = timestamp();
 	if (session->device_type != NULL && session->packet.start_time > 0) {
-	    double quiet_time = (MINIMUM_QUIET_TIME * session->device_type->min_cycle);
+#ifdef RECONFIGURE_ENABLE
+	    const time_t min_cycle = session->device_type->min_cycle;
+#else
+	    const time_t min_cycle = 1;
+#endif /* RECONFIGURE_ENABLE */
+	    double quiet_time = (MINIMUM_QUIET_TIME * min_cycle);
 	    double gap = now - session->packet.start_time;
 
-	    if (gap > session->device_type->min_cycle)
+	    if (gap > min_cycle)
 		gpsd_report(LOG_WARN, "cycle-start detector failed.\n");
 	    else if (gap > quiet_time) {
 		gpsd_report(LOG_PROG, "transmission pause of %f\n", gap);
