@@ -241,7 +241,8 @@ int gpsd_open(struct gps_device_t *session)
 	*port++ = '\0';
 	gpsd_report(LOG_INF, "opening TCP feed at %s, port %s.\n", server,
 		    port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp");
+	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "TCP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
@@ -289,7 +290,8 @@ int gpsd_open(struct gps_device_t *session)
 	    *port++ = '\0';
 	gpsd_report(LOG_INF, "opening remote gpsd feed at %s, port %s.\n", server,
 		    port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp");
+	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "remote gpsd device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;

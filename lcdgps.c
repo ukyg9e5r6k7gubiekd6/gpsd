@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
 
     /* create socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
-    if(sd == -1) {
+    if(BADSOCK(sd)) {
 	perror("cannot open socket ");
 	exit(1);
     }
@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 
     /* connect to server */
     rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
-    if(rc == -1) {
+    if(BADSOCK(rc)) {
 	perror("cannot connect ");
 	exit(1);
     }

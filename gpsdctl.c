@@ -27,14 +27,17 @@ static char *gpsd_options = "";
 static int gpsd_control(char *action, char *argument)
 /* pass a command to gpsd; start the daemon if not already running */
 {
-    int connect = -1;
+    int connect;
     char buf[512];
 
+    INVALIDATE_SOCK(connect);
     (void)syslog(LOG_ERR, "gpsd_control(action=%s, arg=%s)", action, argument);
-    if (access(control_socket, F_OK) == 0 && 
-	    (connect = netlib_localsocket(control_socket, SOCK_STREAM)) >= 0)
-	syslog(LOG_INFO, "reached a running gpsd");
-    else if (strcmp(action, "add") == 0) {
+    if (access(control_socket, F_OK) == 0) {
+	connect = netlib_localsocket(control_socket, SOCK_STREAM);
+	if (GOODSOCK(connect)) {
+	    syslog(LOG_INFO, "reached a running gpsd");
+	}
+    } else if (strcmp(action, "add") == 0) {
 	(void)snprintf(buf, sizeof(buf),
 		       "gpsd %s -F %s", gpsd_options, control_socket);
 	(void)syslog(LOG_NOTICE, "launching %s", buf);
@@ -45,7 +48,7 @@ static int gpsd_control(char *action, char *argument)
 	if (access(control_socket, F_OK) == 0)
 	    connect = netlib_localsocket(control_socket, SOCK_STREAM);
     }
-    if (connect < 0) {
+    if (BADSOCK(connect)) {
 	syslog(LOG_ERR, "can't reach gpsd");
 	return -1;
     }
