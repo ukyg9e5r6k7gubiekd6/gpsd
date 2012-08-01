@@ -152,11 +152,11 @@ const char /*@observer@*/ *netlib_errstr(const int err)
 socket_t netlib_localsocket(const char *sockfile, int socktype)
 /* acquire a connection to an existing Unix-domain socket */
 {
-    int sock;
+    socket_t sock;
 
     sock = socket(AF_UNIX, socktype, 0);
     if (BADSOCK(sock)) {
-	return -1;
+	return sock;
     } else {
 	struct sockaddr_un saddr;
 
@@ -169,7 +169,8 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 	/*@-unrecog@*/
 	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
 	    (void)close(sock);
-	    return -1;
+	    INVALIDATE_SOCK(sock);
+	    return sock;
 	}
 	/*@+unrecog@*/
 
@@ -177,7 +178,7 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
     }
 }
 
-char *netlib_sock2ip(int fd)
+char *netlib_sock2ip(socket_t fd)
 /* retrieve the IP address corresponding to a socket */ 
 {
     sockaddr_t fsin;

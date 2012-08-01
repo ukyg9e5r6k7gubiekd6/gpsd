@@ -27,7 +27,7 @@ static char *gpsd_options = "";
 static int gpsd_control(char *action, char *argument)
 /* pass a command to gpsd; start the daemon if not already running */
 {
-    int connect;
+    socket_t connect;
     char buf[512];
 
     INVALIDATE_SOCK(connect);

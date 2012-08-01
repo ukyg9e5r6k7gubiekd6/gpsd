@@ -753,7 +753,7 @@ extern void gpsd_clear_data(struct gps_device_t *);
 extern socket_t netlib_connectsock(int, const char *, const char *, const char *);
 extern socket_t netlib_localsocket(const char *, int);
 extern const char /*@observer@*/ *netlib_errstr(const int);
-extern char /*@observer@*/ *netlib_sock2ip(int);
+extern char /*@observer@*/ *netlib_sock2ip(socket_t);
 
 extern void nmea_tpv_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void nmea_sky_dump(struct gps_device_t *, /*@out@*/char[], size_t);

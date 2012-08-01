@@ -286,10 +286,10 @@ The following driver types are compiled into this gpsd instance:\n",
 }
 
 #ifdef CONTROL_SOCKET_ENABLE
-static int filesock(char *filename)
+static socket_t filesock(char *filename)
 {
     struct sockaddr_un addr;
-    int sock;
+    socket_t sock;
 
     /*@ -mayaliasunique -usedef @*/
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -299,7 +299,11 @@ static int filesock(char *filename)
     }
     (void)strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
     addr.sun_family = (sa_family_t)AF_UNIX;
-    (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
+    if (bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr)) < 0) {
+	gpsd_report(LOG_ERROR, "can't bind to local socket %s\n", filename);
+	(void)close(sock);
+	return -1;
+    }
     if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	(void)close(sock);
@@ -362,10 +366,10 @@ static void adjust_max_fd(int fd, bool on)
 }
 
 #ifdef SOCKET_EXPORT_ENABLE
-static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
+static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 /* bind a passive command socket for the daemon */
 {
-    volatile int s = -1;   /* why gcc warned about this I don't know */
+    volatile socket_t s;   /* why gcc warned about this I don't know */
     /*
      * af = address family,
      * service = IANA protocol name or number.
@@ -380,6 +384,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
     in_port_t port;
     char *af_str = "";
 
+    INVALIDATE_SOCK(s);
     if ((pse = getservbyname(service, tcp_or_udp)))
 	port = ntohs((in_port_t) pse->s_port);
     else if ((port = (in_port_t) atoi(service)) == 0) {
@@ -447,7 +452,11 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	 */
 	if (GOODSOCK(s)) {
 	    int on = 1;
-	    (void)setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
+	    if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
+		gpsd_report(LOG_ERROR, "Error: SETSOCKOPT IPV6_V6ONLY\n");
+		(void)close(s);
+		return -1;
+	    }
 	}
 	break;
 #endif
@@ -489,13 +498,13 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 
 /* *INDENT-OFF* */
 static int passivesocks(char *service, char *tcp_or_udp,
-			int qlen, /*@out@*/int socks[])
+			int qlen, /*@out@*/socket_t socks[])
 {
     int numsocks = AFCOUNT;
     int i;
 
     for (i = 0; i < AFCOUNT; i++)
-	socks[i] = -1;
+	INVALIDATE_SOCK(socks[i]);
 
 #if defined(SYSTEMD_ENABLE)
     if (sd_socket_count > 0) {
@@ -513,7 +522,7 @@ static int passivesocks(char *service, char *tcp_or_udp,
 	socks[1] = passivesock_af(AF_INET6, service, tcp_or_udp, qlen);
 
     for (i = 0; i < AFCOUNT; i++)
-	if (socks[i] < 0)
+	if (BADSOCK(socks[i]))
 	    numsocks--;
 
     /* Return the number of succesfully opened sockets
@@ -919,7 +928,7 @@ static bool awaken(struct gps_device_t *device)
 	}
     }
 
-    if (device->gpsdata.gps_fd != -1) {
+    if (GOODSOCK(device->gpsdata.gps_fd)) {
 	gpsd_report(LOG_PROG,
 		    "device %d (fd=%d, path %s) already active.\n",
 		    (int)(device - devices),
@@ -1428,7 +1437,7 @@ static void consume_packets(struct gps_device_t *device)
 	    && device->ntrip.conn_state != ntrip_conn_established) {
 
 	/* the socket descriptor might change during connection */
-	if (device->gpsdata.gps_fd != -1) {
+	if (GOODSOCK(device->gpsdata.gps_fd)) {
 	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	}
 	(void)ntrip_open(device, "");
@@ -1823,7 +1832,7 @@ int main(int argc, char *argv[])
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef CONTROL_SOCKET_ENABLE
-    static int csock = -1;
+    static socket_t csock;
     fd_set control_fds;
     socket_t cfd;
     static char *control_socket = NULL;
@@ -1835,7 +1844,7 @@ int main(int argc, char *argv[])
     struct gps_device_t *device;
     fd_set rfds;
     int i, option, dfd;
-    int msocks[2] = {-1, -1};
+    socket_t msocks[2];
     bool go_background = true;
 #ifdef COMPAT_SELECT
     struct timeval tv;
@@ -1845,6 +1854,9 @@ int main(int argc, char *argv[])
     const struct gps_type_t **dp;
     bool in_restart;
 
+    INVALIDATE_SOCK(csock);
+    INVALIDATE_SOCK(msocks[0]);
+    INVALIDATE_SOCK(msocks[1]);
     context.debug = 0;
     gps_context_init(&context);
 
@@ -2264,7 +2276,7 @@ int main(int argc, char *argv[])
 		socklen_t alen = (socklen_t) sizeof(fsin);
 		char *c_ip;
 		/*@+matchanyintegral@*/
-		int ssock =
+		socket_t ssock =
 		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
 		/*@+matchanyintegral@*/
 
@@ -2316,7 +2328,7 @@ int main(int argc, char *argv[])
 	if (GOODSOCK(csock) && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t) sizeof(fsin);
 	    /*@+matchanyintegral@*/
-	    int ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
+	    socket_t ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
 	    /*@-matchanyintegral@*/
 
 	    if (BADSOCK(ssock))
