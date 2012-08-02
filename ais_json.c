@@ -97,9 +97,9 @@ int json_ais_read(const char *buf,
 	    ais->type4.hour = AIS_HOUR_NOT_AVAILABLE;
 	    ais->type4.minute = AIS_MINUTE_NOT_AVAILABLE;
 	    ais->type4.second = AIS_SECOND_NOT_AVAILABLE;
-	    // We use %u for the date to allow for dodgy years (>9999) to go through
+	    // We use %09u for the date to allow for dodgy years (>9999) to go through
 	    // cppcheck-suppress uninitvar
-	    (void)sscanf(timestamp, "%u-%02u-%02uT%02u:%02u:%02uZ",
+	    (void)sscanf(timestamp, "%09u-%02u-%02uT%02u:%02u:%02uZ",
 			 &ais->type4.year,
 			 &ais->type4.month,
 			 &ais->type4.day,
