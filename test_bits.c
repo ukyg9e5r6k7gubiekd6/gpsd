@@ -68,8 +68,8 @@ static void bedumpall(void)
     (void)printf("getbeu64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uL1, (uint64_t) uL2,
 		 (uint64_t) getbeu64(buf, 0), (uint64_t) getbeu64(buf, 8));
-    (void)printf("getbef32: %f %f\n", f1, getbef32(buf, 24));
-    (void)printf("getbed64: %.16f %.16f\n", d1, getbed64(buf, 16));
+    (void)printf("getbef32: %f %f\n", f1, getbef32((const char *)buf, 24));
+    (void)printf("getbed64: %.16f %.16f\n", d1, getbed64((const char *)buf, 16));
 }
 
 static void ledumpall(void)
@@ -98,8 +98,8 @@ static void ledumpall(void)
     (void)printf("getleu64: %016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
 		 (uint64_t) uL1, (uint64_t) uL2,
 		 (uint64_t) getleu64(buf, 0), (uint64_t) getleu64(buf, 8));
-    (void)printf("getlef32: %f %f\n", f1, getlef32(buf, 24));
-    (void)printf("getled64: %.16f %.16f\n", d1, getled64(buf, 16));
+    (void)printf("getlef32: %f %f\n", f1, getlef32((const char *)buf, 24));
+    (void)printf("getled64: %.16f %.16f\n", d1, getled64((const char *)buf, 16));
 }
 
 struct unsigned_test
@@ -160,8 +160,8 @@ int main(int argc, char *argv[])
     sL2 = getbes64(buf, 8);
     uL1 = getbeu64(buf, 0);
     uL2 = getbeu64(buf, 8);
-    f1 = getbef32(buf, 24);
-    d1 = getbed64(buf, 16);
+    f1 = getbef32((const char *)buf, 24);
+    d1 = getbed64((const char *)buf, 16);
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
@@ -178,8 +178,8 @@ int main(int argc, char *argv[])
     sL2 = getles64(buf, 8);
     uL1 = getleu64(buf, 0);
     uL2 = getleu64(buf, 8);
-    f1 = getlef32(buf, 24);
-    d1 = getled64(buf, 16);
+    f1 = getlef32((const char *)buf, 24);
+    d1 = getled64((const char *)buf, 16);
     /*@+type@*/
 
     if (!quiet) {
