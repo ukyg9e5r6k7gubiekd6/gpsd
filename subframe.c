@@ -19,7 +19,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
     uint32_t parity;
 
     if (session->subframe_count++ == 0) { 
-	speed_t speed = gpsd_get_speed(&session->ttyset);
+	speed_t speed = gpsd_get_speed(session);
 
 	if (speed < 38400)
 	    gpsd_report(LOG_WARN, "speed less than 38,400 may cause data lag and loss of functionality\n");

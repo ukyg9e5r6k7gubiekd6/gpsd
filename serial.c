@@ -139,7 +139,7 @@ void cfmakeraw(struct termios *termios_p)
 }
 #endif /* defined(__CYGWIN__) */
 
-speed_t gpsd_get_speed(const struct termios *ttyctl)
+static speed_t gpsd_get_speed_termios(const struct termios *ttyctl)
 {
     speed_t code = cfgetospeed(ttyctl);
     switch (code) {
@@ -166,6 +166,16 @@ speed_t gpsd_get_speed(const struct termios *ttyctl)
     default: /* B0 */ 
 	return 0;
     }
+}
+
+speed_t gpsd_get_speed(const struct gps_device_t *dev)
+{
+    return gpsd_get_speed_termios(&dev->ttyset);
+}
+
+speed_t gpsd_get_speed_old(const struct gps_device_t *dev)
+{
+    return gpsd_get_speed_termios(&dev->ttyset_old);
 }
 
 bool gpsd_set_raw(struct gps_device_t * session)
@@ -306,7 +316,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
     gpsd_report(LOG_INF, "speed %u, %d%c%d\n",
-		gpsd_get_speed(&session->ttyset), 9 - stopbits, parity,
+		gpsd_get_speed(session), 9 - stopbits, parity,
 		stopbits);
 
     session->gpsdata.dev.baudrate = (unsigned int)speed;
@@ -482,7 +492,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 #ifndef FIXED_PORT_SPEED
 	session->baudindex = 0;
 #endif /* FIXED_PORT_SPEED */
-	gpsd_set_speed(session, gpsd_get_speed(&session->ttyset_old), 'N', 1);
+	gpsd_set_speed(session, gpsd_get_speed_old(session), 'N', 1);
     }
 
     /* required so parity field won't be '\0' if saved speed matches */
