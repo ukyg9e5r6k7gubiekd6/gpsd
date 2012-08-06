@@ -3,6 +3,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <string.h>
+#include <errno.h>
 #include <fcntl.h>
 #ifndef S_SPLINT_S
 #include <netdb.h>
@@ -33,6 +34,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     socket_t s;
     bool bind_me;
 
+    errno = 0;
     INVALIDATE_SOCK(s);
     /*@-type@*/
     ppe = getprotobyname(protocol);
@@ -79,9 +81,11 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	else if (setsockopt
 		 (s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
 		  sizeof(one)) == -1) {
+	    int tmp_errno = errno;
 	    if (GOODSOCK(s))
 		(void)close(s);
 	    ret = NL_NOSOCKOPT;
+	    errno = tmp_errno;
 	} else {
 	    if (bind_me) {
 		if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0) {
@@ -97,12 +101,18 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	}
 
 	if (GOODSOCK(s)) {
+	    int tmp_errno = errno;
 	    (void)close(s);
+	    errno = tmp_errno;
 	}
     }
     /*@+type@*/
 #ifndef S_SPLINT_S
-    freeaddrinfo(result);
+    {
+	int tmp_errno = errno;
+	freeaddrinfo(result);
+	errno = tmp_errno;
+    }
 #endif /* S_SPLINT_S */
     if (ret)
 	return ret;

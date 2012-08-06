@@ -66,7 +66,6 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
 #ifndef USE_QT
 	gpsdata->gps_fd = netlib_connectsock(AF_UNSPEC, host, port, "tcp");
 	if (BADSOCK(gpsdata->gps_fd)) {
-	    errno = gpsdata->gps_fd;
 	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n", errno));
 	    return -1;
         }
