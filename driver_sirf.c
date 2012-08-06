@@ -347,10 +347,10 @@ static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
 {
-    char parity = '0';
     if (mode == MODE_NMEA) {
 	(void)sirf_to_nmea(session, session->gpsdata.dev.baudrate);
     } else if (mode == MODE_BINARY) {
+	char parity = '0';
 	switch (session->gpsdata.dev.parity) {
 	default:
 	case 'N':

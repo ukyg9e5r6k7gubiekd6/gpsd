@@ -21,7 +21,6 @@
 int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 /* open a connection to a DGPSIP server */
 {
-    char hn[256], buf[BUFSIZ];
     char *colon, *dgpsport = "rtcm-sc104";
     int opts;
 
@@ -36,6 +35,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
     device->gpsdata.gps_fd =
 	netlib_connectsock(AF_UNSPEC, dgpsserver, dgpsport, "tcp");
     if (GOODSOCK(device->gpsdata.gps_fd)) {
+	char hn[256], buf[BUFSIZ];
 	gpsd_report(LOG_PROG, "connection to DGPS server %s established.\n",
 		    dgpsserver);
 	(void)gethostname(hn, sizeof(hn));

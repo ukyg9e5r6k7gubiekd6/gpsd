@@ -632,7 +632,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     while (!gpsd_ppsmonitor_stop) {
 	bool ok = false;
 	char *log = NULL;
-	char *log1 = NULL;
 
 #if defined(TIOCMIWAIT)
 #define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS)
@@ -856,6 +855,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 
 	if (ok) {
+	    char *log1 = NULL;
 	    gpsd_report(LOG_RAW, "PPS edge accepted %.100s", log);
 	    /* chrony expects tv-sec since Jan 1970 */
 	    /* FIXME!! offset is double of the error from local time */

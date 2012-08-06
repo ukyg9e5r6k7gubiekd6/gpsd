@@ -163,7 +163,6 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 /* our version of the logger */
 {
     char buf[BUFSIZ]; 
-    char buf2[BUFSIZ];
     char *err_str;
 
     switch ( errlevel ) {
@@ -201,6 +200,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
     (void)strlcpy(buf, "gpsd:", BUFSIZ);
     (void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
     if (errlevel <= context.debug && packetwin != NULL) {
+	char buf2[BUFSIZ];
 	va_list ap;
 	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);

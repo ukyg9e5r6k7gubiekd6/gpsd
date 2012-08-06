@@ -124,7 +124,6 @@ void json_tpv_dump(const struct gps_device_t *session,
 		   const struct policy_t *policy CONDITIONALLY_UNUSED,
 		   /*@out@*/ char *reply, size_t replylen)
 {
-    char tbuf[JSON_DATE_MAX+1];
     const struct gps_data_t *gpsdata = &session->gpsdata;
 #ifdef TIMING_ENABLE
     timestamp_t rtime = timestamp();
@@ -143,11 +142,13 @@ void json_tpv_dump(const struct gps_device_t *session,
     (void)snprintf(reply + strlen(reply),
 		   replylen - strlen(reply),
 		   "\"mode\":%d,", gpsdata->fix.mode);
-    if (isnan(gpsdata->fix.time) == 0)
+    if (isnan(gpsdata->fix.time) == 0) {
+	char tbuf[JSON_DATE_MAX+1];
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
 		       "\"time\":\"%s\",", 
 		       unix_to_iso8601(gpsdata->fix.time, tbuf, sizeof(tbuf)));
+    }
     if (isnan(gpsdata->fix.ept) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -357,12 +358,12 @@ void json_sky_dump(const struct gps_data_t *datap,
 void json_device_dump(const struct gps_device_t *device,
 		      /*@out@*/ char *reply, size_t replylen)
 {
-    char buf1[JSON_VAL_MAX * 2 + 1];
     struct classmap_t *cmp;
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.dev.path, replylen);
     (void)strlcat(reply, "\",", replylen);
     if (device->gpsdata.online > 0) {	
+	char buf1[JSON_VAL_MAX * 2 + 1];
 	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 		       "\"activated\":\"%s\",", 
 		       unix_to_iso8601(device->gpsdata.online, buf1, sizeof(buf1)));
@@ -444,10 +445,6 @@ void json_subframe_dump(const struct gps_data_t *datap,
     size_t len = 0;
     const struct subframe_t *subframe = &datap->subframe;
     const bool scaled = datap->policy.scaled;
- 
-    /* system message is 24 chars, but they could ALL require escaping,
-     * like \uXXXX for each char */
-    char buf1[25 * 6];
 
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"device\":\"%s\","
 		   "\"tSV\":%u,\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
@@ -629,11 +626,14 @@ void json_subframe_dump(const struct gps_data_t *datap,
 		/* JSON is UTF-8. double quote, backslash and
 		 * control charactores (U+0000 through U+001F).must be
 		 * escaped. */
-		/* system message can be 24 bytes, JSON can escape all
-		 * chars so up to 24*6 long. */
-		(void)json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
-		(void)snprintf(buf + len, buflen - len,
-		    ",\"system_message\":\"%.144s\"", buf1);
+		/* system message is 24 chars, but they could ALL require escaping,
+		* like \uXXXX for each char, so up to 24*6 long */
+		{
+		    char buf1[25 * 6];
+		    (void)json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
+		    (void)snprintf(buf + len, buflen - len,
+			",\"system_message\":\"%.144s\"", buf1);
+		}
 		break;
 	case 56:
 	    if (scaled) {

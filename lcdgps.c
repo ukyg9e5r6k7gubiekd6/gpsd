@@ -180,13 +180,14 @@ static enum deg_str_type deg_type = deg_dd;
 static void update_lcd(struct gps_data_t *gpsdata)
 {
   char tmpbuf[255];
-  char *s, *gridsquare;
+  char *gridsquare;
 
   /* Get our location in Maidenhead. */
   gridsquare = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 
   /* Fill in the latitude and longitude. */
   if (gpsdata->fix.mode >= MODE_2D) {
+    char *s;
     int track;
 
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));

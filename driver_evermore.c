@@ -581,17 +581,16 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */
 {
     /*@ +charint @*/
-    unsigned char evrm_rate_config[] = {
-	0x84,			/* 1: msg ID, Operating Mode Configuration */
-	0x02,			/* 2: normal mode with 1PPS */
-	0x00,			/* 3: navigation update rate */
-	0x00,			/* 4: RF/GPSBBP On Time */
-    };
-
     if (rate < 1 || rate > 10) {
 	gpsd_report(LOG_ERROR, "valid rate range is 1-10.\n");
 	return false;
     } else {
+	unsigned char evrm_rate_config[] = {
+	    0x84,		/* 1: msg ID, Operating Mode Configuration */
+	    0x02,		/* 2: normal mode with 1PPS */
+	    0x00,		/* 3: navigation update rate */
+	    0x00,		/* 4: RF/GPSBBP On Time */
+	};
 	evrm_rate_config[2] = (unsigned char)trunc(rate);
 	return (evermore_control_send(session, (char *)evrm_rate_config,
 				      sizeof(evrm_rate_config)) != -1);

@@ -34,9 +34,9 @@ static unsigned int timeout = 8;
 void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
 /* our version of the logger */
 {
-    char *err_str;
     if (errlevel <= debuglevel) {
 	va_list ap;
+	char *err_str;
 	va_start(ap, fmt);
 	switch ( errlevel ) {
 	case LOG_ERROR:

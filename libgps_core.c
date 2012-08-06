@@ -274,9 +274,6 @@ extern const char /*@observer@*/ *gps_errstr(const int err)
 #ifdef LIBGPS_DEBUG
 void libgps_dump_state(struct gps_data_t *collect)
 {
-    const char *status_values[] = { "NO_FIX", "FIX", "DGPS_FIX" };
-    const char *mode_values[] = { "", "NO_FIX", "MODE_2D", "MODE_3D" };
-
     /* no need to dump the entire state, this is a sanity check */
 #ifndef USE_QT
     /* will fail on a 32-bit machine */
@@ -299,12 +296,16 @@ void libgps_dump_state(struct gps_data_t *collect)
 	(void)fprintf(debugfp, "TRACK: track: %lf\n", collect->fix.track);
     if (collect->set & CLIMB_SET)
 	(void)fprintf(debugfp, "CLIMB: climb: %lf\n", collect->fix.climb);
-    if (collect->set & STATUS_SET)
+    if (collect->set & STATUS_SET) {
+	const char *status_values[] = { "NO_FIX", "FIX", "DGPS_FIX" };
 	(void)fprintf(debugfp, "STATUS: status: %d (%s)\n",
 		      collect->status, status_values[collect->status]);
-    if (collect->set & MODE_SET)
+    }
+    if (collect->set & MODE_SET) {
+	const char *mode_values[] = { "", "NO_FIX", "MODE_2D", "MODE_3D" };
 	(void)fprintf(debugfp, "MODE: mode: %d (%s)\n",
 		      collect->fix.mode, mode_values[collect->fix.mode]);
+    }
     if (collect->set & DOP_SET)
 	(void)fprintf(debugfp,
 		      "DOP: satellites %d, pdop=%lf, hdop=%lf, vdop=%lf\n",

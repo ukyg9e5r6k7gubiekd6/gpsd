@@ -538,10 +538,9 @@ static bool geostar_speed_switch(struct gps_device_t *session,
 
 static void geostar_mode(struct gps_device_t *session, int mode)
 {
-    unsigned char buf[1 * 4];
-
     /*@-shiftimplementation@*/
     if (mode == MODE_NMEA) {
+	unsigned char buf[1 * 4];
 	/* Switch to NMEA mode */
 	putbe32(buf, 0, 1);
 	(void)geostar_write(session, 0x46, buf, 1);

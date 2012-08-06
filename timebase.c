@@ -125,10 +125,10 @@ void gpsd_set_century(struct gps_device_t *session)
  * started up in.
  */
 {
-    unsigned char *cp; 
-    char *end;
     if (strstr((char *)session->packet.outbuffer, "Date:") != NULL) {
 	int year;
+	unsigned char *cp;
+	char *end;
 	cp = session->packet.outbuffer + 5;
 	while (isspace(*cp))
 	    --cp;

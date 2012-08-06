@@ -534,17 +534,16 @@ ssize_t gpsd_write(struct gps_device_t * session, const char *buf, size_t len)
 bool gpsd_next_hunt_setting(struct gps_device_t * session)
 /* advance to the next hunt setting  */
 {
-#ifndef FIXED_PORT_SPEED
-    /* every rate we're likely to see on a GPS */
-    static unsigned int rates[] =
-	{ 0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
-#endif /* FIXED_PORT_SPEED defined */
-
     /* don't waste time in the hunt loop if this is not actually a tty */
     if (isatty(session->gpsdata.gps_fd) == 0)
 	return false;
 
     if (session->packet.retry_counter++ >= SNIFF_RETRIES) {
+#ifndef FIXED_PORT_SPEED
+    /* every rate we're likely to see on a GPS */
+    static unsigned int rates[] =
+	{ 0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
+#endif /* FIXED_PORT_SPEED defined */
 	session->packet.retry_counter = 0;
 #ifdef FIXED_PORT_SPEED
 	return false;

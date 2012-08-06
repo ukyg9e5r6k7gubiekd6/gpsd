@@ -2274,7 +2274,6 @@ int main(int argc, char *argv[])
 	for (i = 0; i < AFCOUNT; i++) {
 	    if (GOODSOCK(msocks[i]) && FD_ISSET(msocks[i], &rfds)) {
 		socklen_t alen = (socklen_t) sizeof(fsin);
-		char *c_ip;
 		/*@+matchanyintegral@*/
 		socket_t ssock =
 		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
@@ -2283,6 +2282,7 @@ int main(int argc, char *argv[])
 		if (BADSOCK(ssock))
 		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 		else {
+		    char *c_ip;
 		    struct subscriber_t *client = NULL;
 		    int opts = fcntl(ssock, F_GETFL);
 		    static struct linger linger = { 1, RELEASE_TIMEOUT };
