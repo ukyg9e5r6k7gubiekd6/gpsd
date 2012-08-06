@@ -193,14 +193,14 @@ static int json_internal_read_object(const char *cp,
 	    if (lptr != NULL)
 		switch (cursor->type) {
 		case t_integer:
-		    *((int *)lptr) = cursor->dflt.integer;
+		    memcpy(lptr, &cursor->dflt.integer, sizeof(int));
 		    break;
 		case t_uinteger:
-		    *((unsigned int *)lptr) = cursor->dflt.uinteger;
+		    memcpy(lptr, &cursor->dflt.uinteger, sizeof(unsigned int));
 		    break;
 		case t_time:
 		case t_real:
-		    *((double *)lptr) = cursor->dflt.real;
+		    memcpy(lptr, &cursor->dflt.real, sizeof(double));
 		    break;
 		case t_string:
 		    if (parent != NULL
@@ -210,7 +210,7 @@ static int json_internal_read_object(const char *cp,
 		    lptr[0] = '\0';
 		    break;
 		case t_boolean:
-		    *((bool *) lptr) = cursor->dflt.boolean;
+		    memcpy(lptr, &cursor->dflt.boolean, sizeof(bool));
 		    break;
 		case t_character:
 		    lptr[0] = cursor->dflt.character;
@@ -439,16 +439,28 @@ static int json_internal_read_object(const char *cp,
 	    if (lptr != NULL)
 		switch (cursor->type) {
 		case t_integer:
-		    *((int *)lptr) = atoi(valbuf);
+		    {
+			int tmp = atoi(valbuf);
+			memcpy(lptr, &tmp, sizeof(int));
+		    }
 		    break;
 		case t_uinteger:
-		    *((unsigned int *)lptr) = (unsigned)atoi(valbuf);
+		    {
+			unsigned int tmp = (unsigned int)atoi(valbuf);
+			memcpy(lptr, &tmp, sizeof(unsigned int));
+		    }
 		    break;
 		case t_time:
-		    *((double *)lptr) = iso8601_to_unix(valbuf);
+		    {
+			double tmp = iso8601_to_unix(valbuf);
+			memcpy(lptr, &tmp, sizeof(double));
+		    }
 		    break;
 		case t_real:
-		    *((double *)lptr) = safe_atof(valbuf);
+		    {
+			double tmp = safe_atof(valbuf);
+			memcpy(lptr, &tmp, sizeof(double));
+		    }
 		    break;
 		case t_string:
 		    if (parent != NULL
@@ -458,7 +470,10 @@ static int json_internal_read_object(const char *cp,
 		    (void)strlcpy(lptr, valbuf, cursor->len);
 		    break;
 		case t_boolean:
-		    *((bool *) lptr) = (strcmp(valbuf, "true") == 0);
+		    {
+			bool tmp = (strcmp(valbuf, "true") == 0);
+			memcpy(lptr, &tmp, sizeof(bool));
+		    }
 		    break;
 		case t_character:
 		    if (strlen(valbuf) > 1)
