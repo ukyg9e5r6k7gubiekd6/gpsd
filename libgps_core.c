@@ -61,8 +61,9 @@ int gps_open(/*@null@*/const char *host,
 	     /*@null@*/const char *port CONDITIONALLY_UNUSED,
 	     /*@out@*/ struct gps_data_t *gpsdata)
 {
-    int status = -1;
+    int saved_errno = 0, status = -1;
 
+    errno = 0;
     /*@ -branchstate -compdef @*/
     if (!gpsdata)
 	return -1;
@@ -70,6 +71,7 @@ int gps_open(/*@null@*/const char *host,
 #ifdef SHM_EXPORT_ENABLE
     if (host != NULL && strcmp(host, GPSD_SHARED_MEMORY) == 0) {
 	status = gps_shm_open(gpsdata);
+	saved_errno = errno;
 	if (status == -1)
 	    status = SHM_NOSHARED;
 	else if (status == -2)
@@ -80,6 +82,7 @@ int gps_open(/*@null@*/const char *host,
 #ifdef DBUS_EXPORT_ENABLE
     if (host != NULL && strcmp(host, GPSD_DBUS_EXPORT) == 0) {
 	/*@i@*/status = gps_dbus_open(gpsdata);
+	saved_errno = errno;
 	if (status != 0)
 	    /* FIXME: it would be better not to throw away information here */
 	    status = DBUS_FAILURE;
@@ -89,6 +92,7 @@ int gps_open(/*@null@*/const char *host,
 #ifdef SOCKET_EXPORT_ENABLE
     if (status == -1) {
         status = gps_sock_open(host, port, gpsdata);
+	saved_errno = errno;
     }
 #endif /* SOCKET_EXPORT_ENABLE */
 
@@ -98,6 +102,8 @@ int gps_open(/*@null@*/const char *host,
     gps_clear_fix(&(gpsdata->fix));
     gps_clear_dop(&(gpsdata->dop));
 
+    errno = saved_errno;
+
     return status;
     /*@ +branchstate +compdef @*/
 }
@@ -105,13 +111,15 @@ int gps_open(/*@null@*/const char *host,
 int gps_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-    int status = -1;
+    int saved_errno = 0, status = -1;
 
+    errno = 0;
     libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
 
 #ifdef SHM_EXPORT_ENABLE
     if (BADSOCK(gpsdata->gps_fd)) {
 	gps_shm_close(gpsdata);
+	saved_errno = errno;
 	status = 0;
     }
 #endif /* SHM_EXPORT_ENABLE */
@@ -119,16 +127,18 @@ int gps_close(struct gps_data_t *gpsdata)
 #ifdef SOCKET_EXPORT_ENABLE
     if (status == -1) {
         status = gps_sock_close(gpsdata);
+	saved_errno = errno;
     }
 #endif /* SOCKET_EXPORT_ENABLE */
 
-	return status;
+    errno = saved_errno;
+    return status;
 }
 
 int gps_read(struct gps_data_t *gpsdata)
 /* read from a gpsd connection */
 {
-    int status = -1;
+    int saved_errno = 0, status = -1;
 
     libgps_debug_trace((DEBUG_CALLS, "gps_read() begins\n"));
 
@@ -136,12 +146,14 @@ int gps_read(struct gps_data_t *gpsdata)
 #ifdef SHM_EXPORT_ENABLE
     if (BADSOCK(gpsdata->gps_fd)) {
 	status = gps_shm_read(gpsdata);
+	saved_errno = errno;
     }
 #endif /* SHM_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
-    if (status == -1 && gpsdata->gps_fd != -1) {
+    if (status == -1 && GOODSOCK(gpsdata->gps_fd)) {
         status = gps_sock_read(gpsdata);
+	saved_errno = errno;
     }
 #endif /* SOCKET_EXPORT_ENABLE */
     /*@ +usedef +compdef +uniondef @*/
@@ -149,13 +161,14 @@ int gps_read(struct gps_data_t *gpsdata)
     libgps_debug_trace((DEBUG_CALLS, "gps_read() -> %d (%s)\n", 
 			status, gps_maskdump(gpsdata->set)));
 
+    errno = saved_errno;
     return status;
 }
 
 int gps_send(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, const char *fmt CONDITIONALLY_UNUSED, ...)
 /* send a command to the gpsd instance */
 {
-    int status = -1;
+    int saved_errno = 0, status = -1;
     char buf[BUFSIZ];
     va_list ap;
 
@@ -167,8 +180,10 @@ int gps_send(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, const char *fmt CO
 
 #ifdef SOCKET_EXPORT_ENABLE
     status = gps_sock_send(gpsdata, buf);
+    saved_errno = errno;
 #endif /* SOCKET_EXPORT_ENABLE */
 
+    errno = saved_errno;
     return status;
 }
 
@@ -176,12 +191,14 @@ int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
 	unsigned int flags CONDITIONALLY_UNUSED,
 	/*@null@*/ void *d CONDITIONALLY_UNUSED)
 {
-    int status = -1;
+    int saved_errno = 0, status = -1;
 
 #ifdef SOCKET_EXPORT_ENABLE
     status = gps_sock_stream(gpsdata, flags, d);
+    saved_errno = errno;
 #endif /* SOCKET_EXPORT_ENABLE */
 
+    errno = saved_errno;
     return status;
 }
 

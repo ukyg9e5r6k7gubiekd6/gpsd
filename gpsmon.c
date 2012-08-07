@@ -569,7 +569,7 @@ int main(int argc, char **argv)
 			  "%s: connection failure on %s:%s, error %d = %s.\n",
 			  argv[0], source.server, source.port,
 			  session.gpsdata.gps_fd,
-			  netlib_errstr(session.gpsdata.gps_fd));
+			  netlib_errstr(errno));
 	    exit(1);
 	}
 	if (source.device != NULL) {
