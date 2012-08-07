@@ -290,24 +290,33 @@ static socket_t filesock(char *filename)
 {
     struct sockaddr_un addr;
     socket_t sock;
+    int saved_errno = 0;
 
     /*@ -mayaliasunique -usedef @*/
     sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (BADSOCK(sock)) {
+	saved_errno = errno;
 	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
-	return -1;
+	errno = saved_errno;
+	return sock;
     }
     (void)strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
     addr.sun_family = (sa_family_t)AF_UNIX;
     if (bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr)) < 0) {
+	saved_errno = errno;
 	gpsd_report(LOG_ERROR, "can't bind to local socket %s\n", filename);
 	(void)close(sock);
-	return -1;
+	INVALIDATE_SOCK(sock);
+	errno = saved_errno;
+	return sock;
     }
     if (listen(sock, QLEN) == -1) {
+	saved_errno = errno;
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	(void)close(sock);
-	return -1;
+	INVALIDATE_SOCK(sock);
+	errno = saved_errno;
+	return sock;
     }
     /*@ +mayaliasunique +usedef @*/
 
@@ -383,13 +392,14 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     int type, proto, one = 1;
     in_port_t port;
     char *af_str = "";
+    int saved_errno = 0;
 
     INVALIDATE_SOCK(s);
     if ((pse = getservbyname(service, tcp_or_udp)))
 	port = ntohs((in_port_t) pse->s_port);
     else if ((port = (in_port_t) atoi(service)) == 0) {
 	gpsd_report(LOG_ERROR, "can't get \"%s\" service entry.\n", service);
-	return -1;
+	return s;
     }
     ppe = getprotobyname(tcp_or_udp);
     if (strcmp(tcp_or_udp, "udp") == 0) {
@@ -453,42 +463,54 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	if (GOODSOCK(s)) {
 	    int on = 1;
 	    if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
+		saved_errno = errno;
 		gpsd_report(LOG_ERROR, "Error: SETSOCKOPT IPV6_V6ONLY\n");
 		(void)close(s);
-		return -1;
+		INVALIDATE_SOCK(s);
+		errno = saved_errno;
+		return s;
 	    }
 	}
 	break;
 #endif
     default:
 	gpsd_report(LOG_ERROR, "unhandled address family %d\n", af);
-	return -1;
+	return s;
     }
     gpsd_report(LOG_IO, "opening %s socket\n", af_str);
 
     if (BADSOCK(s)) {
 	gpsd_report(LOG_ERROR, "can't create %s socket\n", af_str);
-	return -1;
+	return s;
     }
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
 		   (int)sizeof(one)) == -1) {
+	saved_errno = errno;
 	gpsd_report(LOG_ERROR, "Error: SETSOCKOPT SO_REUSEADDR\n");
 	(void)close(s);
-	return -1;
+	INVALIDATE_SOCK(s);
+	errno = saved_errno;
+	return s;
     }
     if (bind(s, &sat.sa, sin_len) < 0) {
+	saved_errno = errno;
 	gpsd_report(LOG_ERROR, "can't bind to %s port %s, %s\n", af_str,
-		    service, strerror(errno));
-	if (errno == EADDRINUSE) {
+		    service, strerror(saved_errno));
+	if (saved_errno == EADDRINUSE) {
 	    gpsd_report(LOG_ERROR, "maybe gpsd is already running!\n");
 	}
 	(void)close(s);
-	return -1;
+	INVALIDATE_SOCK(s);
+	errno = saved_errno;
+	return s;
     }
     if (type == SOCK_STREAM && listen(s, qlen) == -1) {
+	saved_errno = errno;
 	gpsd_report(LOG_ERROR, "can't listen on port %s\n", service);
 	(void)close(s);
-	return -1;
+	INVALIDATE_SOCK(s);
+	errno = saved_errno;
+	return s;
     }
 
     gpsd_report(LOG_SPIN, "passivesock_af() -> %d\n", s);
