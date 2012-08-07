@@ -9,6 +9,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <time.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -244,7 +245,7 @@ int gpsd_open(struct gps_device_t *session)
 	dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp");
 	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "TCP device open error %s.\n",
-			netlib_errstr(dsock));
+			netlib_errstr(errno));
 	    return -1;
 	} else
 	    gpsd_report(LOG_SPIN, "TCP device opened on fd %d\n", dsock);
@@ -268,7 +269,7 @@ int gpsd_open(struct gps_device_t *session)
 	dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp");
 	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "UDP device open error %s.\n",
-			netlib_errstr(dsock));
+			netlib_errstr(errno));
 	    return -1;
 	} else
 	    gpsd_report(LOG_SPIN, "UDP device opened on fd %d\n", dsock);
@@ -293,7 +294,7 @@ int gpsd_open(struct gps_device_t *session)
 	dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp");
 	if (BADSOCK(dsock)) {
 	    gpsd_report(LOG_ERROR, "remote gpsd device open error %s.\n",
-			netlib_errstr(dsock));
+			netlib_errstr(errno));
 	    return -1;
 	} else
 	    gpsd_report(LOG_SPIN, "remote gpsd feed opened on fd %d\n", dsock);
