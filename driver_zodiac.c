@@ -87,7 +87,7 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
     h.flags = 0;
     h.csum = zodiac_checksum((unsigned short *)&h, 4);
 
-    if (session->gpsdata.gps_fd != -1) {
+    if (GOODSOCK(session->gpsdata.gps_fd)) {
 	size_t hlen, datlen;
 	hlen = sizeof(h);
 	datlen = sizeof(unsigned short) * dlen;

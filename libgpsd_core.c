@@ -1109,7 +1109,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
-    if (session->gpsdata.gps_fd != -1)
+    if (GOODSOCK(session->gpsdata.gps_fd))
 	gpsd_deactivate(session);
 }
 

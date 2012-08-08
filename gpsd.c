@@ -694,7 +694,7 @@ static void deactivate_device(struct gps_device_t *device)
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
 #endif /* SOCKET_EXPORT_ENABLE */
-    if (device->gpsdata.gps_fd != -1) {
+    if (GOODSOCK(device->gpsdata.gps_fd)) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
