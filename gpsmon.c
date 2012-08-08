@@ -15,7 +15,6 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <time.h>
-#include <termios.h>
 #include <sys/time.h>		/* expected to declare select(2) a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
