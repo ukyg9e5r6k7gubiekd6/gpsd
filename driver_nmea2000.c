@@ -10,7 +10,6 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
-#include <termios.h>
 #include <time.h>
 #include <math.h>
 #include <fcntl.h>
