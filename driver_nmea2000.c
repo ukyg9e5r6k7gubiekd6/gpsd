@@ -621,7 +621,7 @@ static ssize_t nmea2000_get(struct gps_device_t *session)
 	}
         return frame.can_dlc & 0x0f;
     }
-//  printf("NMEA2000 get: exit(0)\n");
+//  printf("NMEA2000 get: exit(EXIT_SUCCESS)\n");
     return 0;
 }
 

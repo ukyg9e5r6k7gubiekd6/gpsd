@@ -249,7 +249,7 @@ static void usage( char *prog)
                 "                n = Nautical\"\n"
                 , prog);
 
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]) 
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 	switch (option) {
 	case 'V':
 	    (void)fprintf(stderr, "lcdgs revision " REVISION "\n");
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'h':
 	default:
 	    usage(argv[0]);
@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
     h = gethostbyname(LCDDHOST);
     if(h==NULL) {
 	printf("%s: unknown host '%s'\n",argv[0],LCDDHOST);
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     servAddr.sin_family = h->h_addrtype;
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
     sd = socket(AF_INET, SOCK_STREAM, 0);
     if(BADSOCK(sd)) {
 	perror("cannot open socket ");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /* bind any port number */
@@ -390,14 +390,14 @@ int main(int argc, char *argv[])
     if(rc == -1) {
 	printf("%s: cannot bind port TCP %u\n",argv[0],LCDDPORT);
 	perror("error ");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /* connect to server */
     rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
     if(BADSOCK(rc)) {
 	perror("cannot connect ");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /* Do the initial field label setup. */

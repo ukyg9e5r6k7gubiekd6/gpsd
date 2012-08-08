@@ -235,10 +235,10 @@ static void onsig(int sig)
 {
     if (sig == SIGALRM) {
 	gpsd_report(LOG_ERROR, "packet recognition timed out.\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     } else {
 	gpsd_report(LOG_ERROR, "killed by signal %d\n", sig);
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
 }
 
@@ -292,7 +292,7 @@ int main(int argc, char **argv)
 	    if ((cooklen = hex_escapes(cooked, control)) <= 0) {
 		gpsd_report(LOG_ERROR, 
 			    "invalid escape string (error %d)\n", (int)cooklen);
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 #else
 	    gpsd_report(LOG_ERROR, "control_send capability has been conditioned out.\n");	    
@@ -329,7 +329,7 @@ int main(int argc, char **argv)
 #endif /* CONTROLSEND_ENABLE */
 		(void)puts((*dp)->type_name);
 	    }
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'n':		/* switch to NMEA mode */
 #ifdef RECONFIGURE_ENABLE
 	    to_nmea = true;
@@ -400,7 +400,7 @@ int main(int argc, char **argv)
 
     if (((int)to_nmea + (int)to_binary + (int)reset) > 1) {
 	gpsd_report(LOG_ERROR, "make up your mind, would you?\n");
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
 
     (void) signal(SIGINT, onsig);
@@ -425,17 +425,17 @@ int main(int argc, char **argv)
 	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\n")) {
 	    gpsd_report(LOG_ERROR, "no DEVICES response received.\n"); 
 	    (void)gps_close(&gpsdata);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
 	if (gpsdata.devices.ndevices == 0) {
 	    gpsd_report(LOG_ERROR, "no devices connected.\n"); 
 	    (void)gps_close(&gpsdata);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	} else if (gpsdata.devices.ndevices > 1 && device == NULL) {
 	    gpsd_report(LOG_ERROR, 
 			"multiple devices and no device specified.\n");
 	    (void)gps_close(&gpsdata);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
 	gpsd_report(LOG_PROG,"%d device(s) found.\n",gpsdata.devices.ndevices);
 
@@ -451,7 +451,7 @@ int main(int argc, char **argv)
 		}
 	    gpsd_report(LOG_ERROR, "specified device not found in device list.\n");
 	    (void)gps_close(&gpsdata);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	devicelist_entry_matches:;
 	}
 	(void)memcpy(&gpsdata.dev, 
@@ -464,7 +464,7 @@ int main(int argc, char **argv)
 	    if (gps_stream(&gpsdata, WATCH_ENABLE|WATCH_JSON, NULL) == -1) {
 		gpsd_report(LOG_ERROR, "stream set failed.\n");
 		(void)gps_close(&gpsdata);
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 
 	    while (devcount > 0) {
@@ -472,7 +472,7 @@ int main(int argc, char **argv)
 		if (gps_read(&gpsdata) == -1) {
 		    gpsd_report(LOG_ERROR, "data read failed.\n");
 		    (void)gps_close(&gpsdata);
-		    exit(1);
+		    exit(EXIT_FAILURE);
 		}
 
 		if (gpsdata.set & DEVICE_SET) {
@@ -485,7 +485,7 @@ int main(int argc, char **argv)
 	    }
 	    gpsd_report(LOG_ERROR, "data read failed.\n");
 	    (void)gps_close(&gpsdata);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	matching_device_seen:;
 	}
 
@@ -494,7 +494,7 @@ int main(int argc, char **argv)
 	    gpsd_report(LOG_SHOUT, "%s can't be identified.\n",
 			gpsdata.dev.path);
 	    (void)gps_close(&gpsdata);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	}
 
 	/* if no control operation was specified, just ID the device */
@@ -510,7 +510,7 @@ int main(int argc, char **argv)
 	if (reset)
 	{
 	    gpsd_report(LOG_PROG, "cannot reset with gpsd running.\n");
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	}
 
 	/*@-boolops@*/
@@ -593,7 +593,7 @@ int main(int argc, char **argv)
 
 	if (device == NULL || forcetype == NULL) {
 		gpsd_report(LOG_ERROR, "device and type must be specified for the reset operation.\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 
 	/*@ -mustfreeonly -immediatetrans @*/
@@ -617,7 +617,7 @@ int main(int argc, char **argv)
 	    if (session.device_type->mode_switcher)
 		session.device_type->mode_switcher(&session, MODE_NMEA);
 	gpsd_wrap(&session);
-	exit(0);
+	exit(EXIT_SUCCESS);
 	/*@ +mustfreeonly +immediatetrans @*/
 #endif /* RECONFIGURE_ENABLE */
     } else {
@@ -644,7 +644,7 @@ int main(int argc, char **argv)
 
 	    if (device == NULL) {
 		gpsd_report(LOG_ERROR, "device must be specified for low-level access.\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	    gpsd_time_init(&context, time(NULL));
 	    gpsd_init(&session, &context, device);
@@ -695,7 +695,7 @@ int main(int argc, char **argv)
 
 	/* if no control operation was specified, we're done */
 	if (speed==NULL && !to_nmea && !to_binary && control==NULL)
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 
 	/* maybe user wants to see the packet rather than send it */
 	if (echo)

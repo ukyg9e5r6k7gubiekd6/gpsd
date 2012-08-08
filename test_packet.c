@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 	    mp = singletests + atoi(optarg) - 1;
 	    (void)fwrite(mp->test, mp->testlen, sizeof(char), stdout);
 	    (void)fflush(stdout);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 't':
 	    singletest = atoi(optarg);
 	    break;
