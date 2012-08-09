@@ -1241,7 +1241,7 @@ static void handle_request(struct subscriber_t *sub,
 		    /* interpret defaults */
 		    if (devconf.baudrate == DEVDEFAULT_BPS)
 			devconf.baudrate =
-			    (uint) gpsd_get_speed(device);
+			    (unsigned) gpsd_get_speed(device);
 		    if (devconf.parity == DEVDEFAULT_PARITY)
 			devconf.stopbits = device->gpsdata.dev.stopbits;
 		    if (devconf.stopbits == DEVDEFAULT_STOPBITS)

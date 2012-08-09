@@ -280,7 +280,7 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
     if (len == 0)
 	return 0;
 
-    type = (uint) getub(buf, 4);
+    type = (unsigned) getub(buf, 4);
     /* we may need to dump the raw packet */
     gpsd_report(LOG_RAW, "raw italk packet type 0x%02x\n", type);
 

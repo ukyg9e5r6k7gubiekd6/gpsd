@@ -193,7 +193,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 			 (double)getles16(buf2, 25) / 10.0);
 	used = (unsigned char)getub(buf2, 27) & 0x0f;
 	//visible = (getub(buf2, 27) & 0xf0) >> 4;
-	version = (uint) getleu16(buf2, 28) / 100.0;
+	version = (unsigned) getleu16(buf2, 28) / 100.0;
 	/* that's all the information in this packet */
 	if (used < 3)
 	    session->newdata.mode = MODE_NO_FIX;

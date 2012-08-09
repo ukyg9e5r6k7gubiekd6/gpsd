@@ -569,7 +569,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	u1 = (uint8_t) getub(buf, 0);
 	(void)snprintf(session->gpsdata.tag + strlen(session->gpsdata.tag),
 		       sizeof(session->gpsdata.tag) -
-		       strlen(session->gpsdata.tag), "%02x", (uint) u1);
+		       strlen(session->gpsdata.tag), "%02x", (unsigned) u1);
 	/*@ -charint @*/
 	switch (u1) {		/* sub-packet ID */
 	case 0x15:		/* Current Datum Values */
@@ -981,7 +981,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	     */
 	    session->driver.tsip.parity = session->gpsdata.dev.parity;
 	    session->driver.tsip.stopbits =
-		(uint) session->gpsdata.dev.stopbits;
+		(unsigned) session->gpsdata.dev.stopbits;
 	    // gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
 	    break;
 

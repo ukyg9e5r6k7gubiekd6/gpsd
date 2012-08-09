@@ -26,7 +26,7 @@
  * Parse the data from the device
  */
 
-static void from_sixbit(char *bitvec, uint start, int count, char *to)
+static void from_sixbit(char *bitvec, unsigned start, int count, char *to)
 {
     /*@ +type @*/
 #ifdef S_SPLINT_S

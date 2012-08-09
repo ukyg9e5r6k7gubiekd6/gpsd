@@ -93,15 +93,15 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     //assert(ugrab(6) == 0x00);
     ugrab(14);
 
-    rtcm->length = (uint)ugrab(10);
-    rtcm->type = (uint)ugrab(12);
+    rtcm->length = (unsigned)ugrab(10);
+    rtcm->type = (unsigned)ugrab(12);
 
     gpsd_report(LOG_RAW, "RTCM3: type %d payload length %d\n",
 		rtcm->type, rtcm->length);
 
     switch (rtcm->type) {
     case 1001:			/* GPS Basic RTK, L1 Only */
-	rtcm->rtcmtypes.rtcm3_1001.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1001.header.station_id = (unsigned)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1001.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1001.header.sync = (bool)ugrab(1);
 	rtcm->rtcmtypes.rtcm3_1001.header.satcount = (ushort)ugrab(5);
@@ -119,7 +119,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1002:			/* GPS Extended RTK, L1 Only */
-	rtcm->rtcmtypes.rtcm3_1002.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1002.header.station_id = (unsigned)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1002.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1002.header.sync = (bool)ugrab(1);
 	rtcm->rtcmtypes.rtcm3_1002.header.satcount = (ushort)ugrab(5);
@@ -139,7 +139,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1003:			/* GPS Basic RTK, L1 & L2 */
-	rtcm->rtcmtypes.rtcm3_1003.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1003.header.station_id = (unsigned)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1003.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1003.header.sync = (bool)ugrab(1);
 	rtcm->rtcmtypes.rtcm3_1003.header.satcount = (ushort)ugrab(5);
@@ -166,7 +166,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     case 1004:			/* GPS Extended RTK, L1 & L2 */
-	rtcm->rtcmtypes.rtcm3_1004.header.station_id = (uint)ugrab(12);
+	rtcm->rtcmtypes.rtcm3_1004.header.station_id = (unsigned)ugrab(12);
 	rtcm->rtcmtypes.rtcm3_1004.header.tow = (time_t)ugrab(30);
 	rtcm->rtcmtypes.rtcm3_1004.header.sync = (bool)ugrab(1);
 	rtcm->rtcmtypes.rtcm3_1004.header.satcount = (ushort)ugrab(5);
