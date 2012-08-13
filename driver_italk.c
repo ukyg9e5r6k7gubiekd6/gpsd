@@ -46,9 +46,9 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 	return -1;
     }
 
-    flags = (ushort) getleu16(buf, 7 + 4);
-    //cflags = (ushort) getleu16(buf, 7 + 6);
-    pflags = (ushort) getleu16(buf, 7 + 8);
+    flags = (unsigned short) getleu16(buf, 7 + 4);
+    //cflags = (unsigned short) getleu16(buf, 7 + 6);
+    pflags = (unsigned short) getleu16(buf, 7 + 8);
 
     session->gpsdata.status = STATUS_NO_FIX;
     session->newdata.mode = MODE_NO_FIX;
@@ -140,7 +140,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 	    unsigned int off = 7 + 52 + 10 * i;
 	    unsigned short flags;
 
-	    flags = (ushort) getleu16(buf, off);
+	    flags = (unsigned short) getleu16(buf, off);
 	    session->gpsdata.ss[i] = (float)(getleu16(buf, off + 2) & 0xff);
 	    session->gpsdata.PRN[i] = (int)getleu16(buf, off + 4) & 0xff;
 	    session->gpsdata.elevation[i] = (int)getles16(buf, off + 6) & 0xff;
@@ -178,7 +178,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
 	return 0;
     }
 
-    flags = (ushort) getleu16(buf, 7);
+    flags = (unsigned short) getleu16(buf, 7);
     if (0 == (flags & UTC_IONO_MODEL_UTCVALID))
 	return 0;
 
@@ -208,9 +208,9 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
 	return 0;
     }
 
-    flags = (ushort) getleu16(buf, 7 + 4);
-    prn = (ushort) getleu16(buf, 7 + 6);
-    sf = (ushort) getleu16(buf, 7 + 8);
+    flags = (unsigned short) getleu16(buf, 7 + 4);
+    prn = (unsigned short) getleu16(buf, 7 + 6);
+    sf = (unsigned short) getleu16(buf, 7 + 8);
     gpsd_report(LOG_PROG, "iTalk 50B SUBFRAME prn %u sf %u - decode %s %s\n",
 		prn, sf,
 		flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
@@ -233,7 +233,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 {
     unsigned short flags, n, i;
 
-    n = (ushort) getleu16(buf, 7 + 4);
+    n = (unsigned short) getleu16(buf, 7 + 4);
     if ((n < 1) || (n > MAXCHANNELS)){
 	gpsd_report(LOG_INF, "ITALK: bad PSEUDO channel count\n");
 	return 0;
