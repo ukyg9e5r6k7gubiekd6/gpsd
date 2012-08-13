@@ -255,6 +255,9 @@ def announce(msg):
 # We need to define -D_GNU_SOURCE
 env.Append(CFLAGS='-D_GNU_SOURCE')
 
+# Turn compiler warnings into errors.
+env.Append(CFLAGS='-Werror')
+
 
 
 # DESTDIR environment variable means user wants to prefix the installation root.
