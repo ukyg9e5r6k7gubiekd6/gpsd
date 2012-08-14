@@ -117,7 +117,7 @@
      * (1) If we're running with FIXED_PORT_SPEED we're some sort
      * of embedded configuration where we don't want to wait for connect
      *
-     * (2) Socket export has been disabled.  In this case we have no 
+     * (2) Socket export has been disabled.  In this case we have no
      * way to know when client apps are watching the export channels,
      * so we need to be running all the time.
      */
@@ -147,7 +147,7 @@ static bool listen_global = false;
 #define NOWAIT nowait
 static bool nowait = false;
 #else /* FORCE_NOWAIT */
-#define NOWAIT true 
+#define NOWAIT true
 #endif /* FORCE_NOWAIT */
 static jmp_buf restartbuf;
 static struct gps_context_t context;
@@ -437,7 +437,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	sat.sa_in6.sin6_family = (sa_family_t) AF_INET6;
 #ifndef FORCE_GLOBAL_ENABLE
 	if (!listen_global)
-	    sat.sa_in6.sin6_addr = in6addr_loopback;	
+	    sat.sa_in6.sin6_addr = in6addr_loopback;
 	else
 #endif /* FORCE_GLOBAL_ENABLE */
 	    sat.sa_in6.sin6_addr = in6addr_any;
@@ -1681,11 +1681,11 @@ static void consume_packets(struct gps_device_t *device)
 #ifdef PASSTHROUGH_ENABLE
 	    /* this is for passing through JSON packets */
 	    if ((changed & PASSTHROUGH_IS) != 0) {
-		(void)strlcat((char *)device->packet.outbuffer, 
+		(void)strlcat((char *)device->packet.outbuffer,
 			      "\r\n",
 			      sizeof(device->packet.outbuffer));
-		(void)throttled_write(sub, 
-				      (char *)device->packet.outbuffer, 
+		(void)throttled_write(sub,
+				      (char *)device->packet.outbuffer,
 				      device->packet.outbuflen+2);
 		continue;
 	    }
@@ -1750,7 +1750,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 #endif /* SOCKET_EXPORT_ENABLE */
 
 #ifdef PPS_ENABLE
-static void ship_pps_drift_message(struct gps_device_t *session, 
+static void ship_pps_drift_message(struct gps_device_t *session,
 				   struct timeval *tv)
 /* on PPS interrupt, ship a drift message to all clients */
 {
@@ -1971,10 +1971,10 @@ int main(int argc, char *argv[])
 	control_socket == NULL
 #endif
 #if defined(CONTROL_SOCKET_ENABLE) && defined(SYSTEMD_ENABLE)
-	&& 
+	&&
 #endif
 #ifdef SYSTEMD_ENABLE
-	sd_socket_count <= 0 
+	sd_socket_count <= 0
 #endif
 	&& optind >= argc) {
 	gpsd_report(LOG_ERROR,
@@ -2184,7 +2184,7 @@ int main(int argc, char *argv[])
 
 	sa.sa_flags = 0;
 #ifdef __COVERITY__
-	/* 
+	/*
 	 * Obsolete and unused.  We're only doing this to pacify Coverity
 	 * which otherwise throws an UNINIT event here. Don't swap with the
 	 * handler initialization, they're unioned on some architectures.
@@ -2227,7 +2227,7 @@ int main(int argc, char *argv[])
     gpsd_time_init(&context, time(NULL));
 
     /*
-     * If we got here via SIGINT, reopen any command-line devices. PPS 
+     * If we got here via SIGINT, reopen any command-line devices. PPS
      * through these won't work, as we've dropped privileges and can
      * no longer change line disciplines.
      */

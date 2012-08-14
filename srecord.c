@@ -19,12 +19,12 @@
 #include "gpsd.h"
 
 /*
- * See srec(5) for a description of this format.  
+ * See srec(5) for a description of this format.
  * We read and write 4-byte addresses.
  * 	S0: Comments
  * 	S3: Memory Loadable Data, 4byte address
  * 	S5: Count of S1, S2 and S3 Records
- * 	S7: starting execution address interpreted as a 4-byte address 
+ * 	S7: starting execution address interpreted as a 4-byte address
  */
 #define MAX_BYTES_PER_RECORD	16
 

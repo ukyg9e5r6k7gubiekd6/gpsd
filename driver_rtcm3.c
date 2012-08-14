@@ -4,9 +4,9 @@ This is a decoder for RTCM-104 3.x, a serial protocol used for
 broadcasting pseudorange corrections from differential-GPS reference
 stations.  The applicable specification is RTCM 10403.1: RTCM Paper
 177-2006-SC104-STD.  This obsolesces the earlier RTCM-104 2.x
-specifications. The specification document is proprietary; ordering 
+specifications. The specification document is proprietary; ordering
 instructions are accessible from <http://www.rtcm.org/>
-under "Publications".  
+under "Publications".
 
 Unike the RTCM 2.x protocol, RTCM3.x does not use the strange
 sliding-bit-window IS-GPS-200 protocol as a transport layer, but is a
@@ -380,7 +380,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	rtcm->rtcmtypes.rtcm3_1029.sod = (unsigned short)ugrab(17);
 	rtcm->rtcmtypes.rtcm3_1029.len = (unsigned long)ugrab(7);
 	rtcm->rtcmtypes.rtcm3_1029.unicode_units = (size_t)ugrab(8);
-	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text, 
+	(void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text,
 		     buf + 12, rtcm->rtcmtypes.rtcm3_1029.unicode_units);
 	break;
 
@@ -406,7 +406,7 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 	break;
 
     default:
-	/* 
+	/*
 	 * Leader bytes, message length, and checksum won't be copied.
 	 * The first 12 bits of the copied payload will be the type field.
 	 */

@@ -246,7 +246,7 @@ static void nmea_mode_switch(struct gps_device_t *session, int mode)
 	/*@-shiftnegative@*/
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    if ((*dp)->packet_type > 0 && (*dp)->packet_type != session->packet.type &&
-	    	    (session->observed & PACKET_TYPEMASK((*dp)->packet_type))!=0) { 
+	    	    (session->observed & PACKET_TYPEMASK((*dp)->packet_type))!=0) {
 		(*dp)->mode_switcher(session, mode);
 		break;
 	    }
@@ -872,7 +872,7 @@ static const struct gps_type_t oceanServer = {
  *
  * Will also support other Jackon Labs boards, including the Firefly.
  *
- * Note: you must either build with fixed_port_speed=115200 or tweak the 
+ * Note: you must either build with fixed_port_speed=115200 or tweak the
  * speed on the port to 115200 before running.  The device's default mode
  * does not stream output, so our hunt loop will simply time out otherwise.
  *
@@ -1077,10 +1077,10 @@ static gps_mask_t processMTK3301(struct gps_device_t *session)
 {
     gps_mask_t mask;
 
-    /* try a straight NMEA parse, this will set up fields */ 
+    /* try a straight NMEA parse, this will set up fields */
     mask = generic_parse_input(session);
 
-    if (session->packet.type == NMEA_PACKET 
+    if (session->packet.type == NMEA_PACKET
 	&& strncmp(session->driver.nmea.field[0], "PMTK", 4) == 0)
     {
 	int msg, reason;
@@ -1340,7 +1340,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 
     /* time to pass buffered-up data to where it's actually processed? */
     if (ifrag == nfrags) {
-	if (debug >= LOG_INF) { 
+	if (debug >= LOG_INF) {
 	    size_t clen = (ais_context->bitlen + 7) / 8;
 	    gpsd_report(LOG_INF, "AIVDM payload is %zd bits, %zd chars: %s\n",
 			ais_context->bitlen, clen,
@@ -1425,7 +1425,7 @@ static const struct gps_type_t aivdm = {
 static void path_rewrite(struct gps_device_t *session, char *prefix)
 /* prepend the session path to the value of a specified attribute */
 {
-    /* 
+    /*
      * Hack the packet to reflect its origin.  This code is supposed
      * to insert the path naming the remote gpsd instance into the
      * baginning of the path attribute, followed by a # to separate it
@@ -1437,17 +1437,17 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
 	 prefloc++)
 	if (strncmp(prefloc, prefix, strlen(prefix)) == 0) {
 	    char copy[sizeof(session->packet.outbuffer)];
-	    (void)strlcpy(copy, 
-			  (char *)session->packet.outbuffer, 
+	    (void)strlcpy(copy,
+			  (char *)session->packet.outbuffer,
 			  sizeof(copy));
 	    prefloc += strlen(prefix);
 	    (void)strlcpy(prefloc,
 			  session->gpsdata.dev.path,
 			  sizeof(session->gpsdata.dev.path));
-	    (void)strlcat((char *)session->packet.outbuffer, "#", 
+	    (void)strlcat((char *)session->packet.outbuffer, "#",
 			  sizeof(session->packet.outbuffer));
-	    (void)strlcat((char *)session->packet.outbuffer, 
-			  copy + (prefloc-(char *)session->packet.outbuffer), 
+	    (void)strlcat((char *)session->packet.outbuffer,
+			  copy + (prefloc-(char *)session->packet.outbuffer),
 			  sizeof(session->packet.outbuffer));
 	}
     session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
@@ -1461,24 +1461,24 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
     /* devices and paths need to be edited to */
     if (strstr((char *)session->packet.outbuffer, "DEVICE") != NULL)
 	path_rewrite(session, "\"path\":\"");
-    path_rewrite(session, "\"device\":\"");		     
+    path_rewrite(session, "\"device\":\"");
 
     /* mark certain responses without a path or device attribute */
     if (strstr((char *)session->packet.outbuffer, "VERSION") != NULL
 	|| strstr((char *)session->packet.outbuffer, "WATCH") != NULL
 	|| strstr((char *)session->packet.outbuffer, "DEVICES") != NULL) {
-	session->packet.outbuffer[session->packet.outbuflen-1] = '\0';	
-	(void)strlcat((char *)session->packet.outbuffer, ",\"remote\":\"", 
+	session->packet.outbuffer[session->packet.outbuflen-1] = '\0';
+	(void)strlcat((char *)session->packet.outbuffer, ",\"remote\":\"",
 		      sizeof(session->packet.outbuffer));
 	(void)strlcat((char *)session->packet.outbuffer,
 		      session->gpsdata.dev.path,
 		      sizeof(session->packet.outbuffer));
-	(void)strlcat((char *)session->packet.outbuffer, "\"}", 
+	(void)strlcat((char *)session->packet.outbuffer, "\"}",
 		      sizeof(session->packet.outbuffer));
     }
 
-    gpsd_report (LOG_PROG, 
-		 "JSON, passing through %s\n", 
+    gpsd_report (LOG_PROG,
+		 "JSON, passing through %s\n",
 		 (char *)session->packet.outbuffer);
     /*@-nullpass@*/
     return PASSTHROUGH_IS;

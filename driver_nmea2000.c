@@ -274,7 +274,7 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
     mask                             = 0;
     session->driver.nmea2000.sid[3]  = bu[0];
- 
+
     /*@-type@*//* splint has a bug here */
     session->newdata.time            = getleu16(bu,1) * 24*60*60 + getleu32(bu, 3)/1e4;
     /*@+type@*/
@@ -534,7 +534,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	        work = search_pgnlist(source_pgn, session->driver.nmea2000.pgnlist);
 	    } else {
 	        PGN *pgnlist;
-	    
+
 		pgnlist = &gpspgn[0];
 		work = search_pgnlist(source_pgn, pgnlist);
 		if (work == NULL) {
@@ -604,7 +604,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 
 
 static ssize_t nmea2000_get(struct gps_device_t *session)
-{   
+{
     struct can_frame frame;
     ssize_t          status;
 
@@ -626,10 +626,10 @@ static ssize_t nmea2000_get(struct gps_device_t *session)
 
 /*@-mustfreeonly@*/
 static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
-{    
+{
     gps_mask_t mask;
     PGN *work;
- 
+
 //  printf("NMEA2000 parse_input called\n");
     mask = 0;
     work = (PGN *) session->driver.nmea2000.workpgn;
@@ -662,7 +662,7 @@ int nmea2000_open(struct gps_device_t *session)
 
     /* Create the socket */
     sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
- 
+
     if (BADSOCK(sock)) {
         gpsd_report(LOG_ERROR, "NMEA2000 open: can not get socket.\n");
 	return -1;
@@ -678,7 +678,7 @@ int nmea2000_open(struct gps_device_t *session)
     (void)strlcpy(interface_name, session->gpsdata.dev.path + 11, sizeof(interface_name));
     /* Locate the interface you wish to use */
     strlcpy(ifr.ifr_name, interface_name, sizeof(ifr.ifr_name));
-    status = ioctl(sock, SIOCGIFINDEX, &ifr); /* ifr.ifr_ifindex gets filled 
+    status = ioctl(sock, SIOCGIFINDEX, &ifr); /* ifr.ifr_ifindex gets filled
 					       * with that device's index */
 
     if (status != 0) {

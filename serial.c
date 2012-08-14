@@ -86,7 +86,7 @@ static int fusercount(const char *path)
     while ((procentry = readdir(procd)) != NULL) {
 	if (isdigit(procentry->d_name[0])==0)
 	    continue;
-	(void)snprintf(procpath, sizeof(procpath), 
+	(void)snprintf(procpath, sizeof(procpath),
 		       "/proc/%s/fd/", procentry->d_name);
 	if ((fdd = opendir(procpath)) == NULL)
 	    continue;
@@ -163,7 +163,7 @@ static speed_t gpsd_get_speed_termios(const struct termios *ttyctl)
 	return (115200);
     case B230400:
 	return (230400);
-    default: /* B0 */ 
+    default: /* B0 */
 	return 0;
     }
 }
@@ -227,11 +227,11 @@ void gpsd_set_speed(struct gps_device_t *session,
 	|| parity != session->gpsdata.dev.parity
 	|| stopbits != session->gpsdata.dev.stopbits) {
 
-	/* 
+	/*
 	 * Don't mess with this conditional! Speed zero is supposed to mean
 	 * to leave the port speed at whatever it currently is. This leads
 	 * to excellent behavior on Linux, which preserves baudrate across
-	 * serial device closes - it means that if you've opended this 
+	 * serial device closes - it means that if you've opended this
 	 * device before you typically don't have to hunt at all because
 	 * it's still at the same speed you left it - you'll typically
 	 * get packet lock within 1.5 seconds.  Alas, the BSDs and OS X
@@ -331,8 +331,8 @@ void gpsd_set_speed(struct gps_device_t *session,
      * Bluetooth devices may spam devices that aren't GPSes at all and
      * could become confused.
      */
-    if (!session->context->readonly 
-		&& session->sourcetype != source_usb 
+    if (!session->context->readonly
+		&& session->sourcetype != source_usb
 		&& session->sourcetype != source_bluetooth) {
 	if (isatty(session->gpsdata.gps_fd) != 0
 	    && !session->context->readonly) {
@@ -392,7 +392,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	(void)fcntl(session->gpsdata.gps_fd, F_SETFL, (int)mode | O_NONBLOCK);
 	gpsd_report(LOG_PROG, "bluez device open success: %s %s\n",
 		    session->gpsdata.dev.path, strerror(errno));
-    } else 
+    } else
 #endif /* BLUEZ */
     {
         session->gpsdata.gps_fd = open(session->gpsdata.dev.path,
@@ -435,7 +435,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	 * Don't touch devices already opened by another process.
 	 */
 	if (fusercount(session->gpsdata.dev.path) > 1) {
-            gpsd_report(LOG_ERROR, 
+            gpsd_report(LOG_ERROR,
 			"%s already opened by another process\n",
 			session->gpsdata.dev.path);
 	    (void)close(session->gpsdata.gps_fd);
@@ -481,7 +481,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	 * This is not ideal.  Setting no parity here will mean extra
 	 * initialization time for some devices, like certain Trimble
 	 * boards, that want 7O2 or other non-8N1 settings. But starting
-	 * the hunt loop at 8N1 will minimize the average sync time 
+	 * the hunt loop at 8N1 will minimize the average sync time
 	 * over all devices.
 	 */
 	session->ttyset.c_cflag &= ~(PARENB | PARODD | CRTSCTS | CSTOPB);

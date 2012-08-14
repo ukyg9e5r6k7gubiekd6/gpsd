@@ -8,7 +8,7 @@
 /*
  * These versions use memcpy and strlen() because they are often
  * heavily optimized down to assembler level. Thus, likely to be
- * faster even with the function call overhead. 
+ * faster even with the function call overhead.
  */
 
 #ifndef HAVE_STRLCAT

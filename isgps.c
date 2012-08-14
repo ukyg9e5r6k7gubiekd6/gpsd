@@ -2,7 +2,7 @@
 
 This is a decoder for the unnamed protocol described in IS-GPS-200,
 the Navstar GPS Interface Specification, and used as a transport layer
-for both GPS satellite downlink transmissions and the RTCM104 version 2 
+for both GPS satellite downlink transmissions and the RTCM104 version 2
 format for broadcasting differential-GPS corrections.
 
 The purpose of this protocol is to support analyzing a serial bit
@@ -22,12 +22,12 @@ Here are Wolfgang's original rather cryptic notes on this code:
 1) trim and bitflip the input.
 
 While syncing the msb of the input gets shifted into lsb of the
-assembled word.  
-    word <<= 1, or in input >> 5 
+assembled word.
+    word <<= 1, or in input >> 5
     word <<= 1, or in input >> 4
     word <<= 1, or in input >> 3
-    word <<= 1, or in input >> 2 
-    word <<= 1, or in input >> 1 
+    word <<= 1, or in input >> 2
+    word <<= 1, or in input >> 1
     word <<= 1, or in input
 
 At one point it should sync-lock.
@@ -36,7 +36,7 @@ At one point it should sync-lock.
 
 Shift 6 bytes of RTCM data in as such:
 
----> (trim-bits-to-5-bits) ---> (end-for-end-bit-flip) ---> 
+---> (trim-bits-to-5-bits) ---> (end-for-end-bit-flip) --->
 
 ---> shift-into-30-bit-shift-register
               |||||||||||||||||||||||
@@ -48,8 +48,8 @@ Shift 6 bytes of RTCM data in as such:
 
 The code was originally by Wolfgang Rupprecht.  ESR severely hacked
 it, with Wolfgang's help, in order to separate message analysis from
-message dumping and separate this lower layer from the upper layer 
-handing GPS-subframe and RTCM decoding.  
+message dumping and separate this lower layer from the upper layer
+handing GPS-subframe and RTCM decoding.
 
 You are not expected to understand any of this.
 
@@ -144,13 +144,13 @@ unsigned int isgps_parity(isgps30bits_t th)
     return (p);
 }
 
-/* 
+/*
  * ESR found a doozy of a bug...
  *
  * Defining isgps_parityok as a function triggers an optimizer bug in gcc
  * 3.4.2. The symptom is that parity computation is screwed up and the decoder
- * never achieves sync lock.  Something steps on the argument to 
- * isgpsparity(); the lossage appears to be related to the compiler's 
+ * never achieves sync lock.  Something steps on the argument to
+ * isgpsparity(); the lossage appears to be related to the compiler's
  * attempt to fold the isgps_parity() call into isgps_parityok() in some
  * tail-recursion-like manner.  This happens under -O2, but not -O1, on
  * both i386 and amd64.  Disabling all of the individual -O2 suboptions
@@ -255,7 +255,7 @@ enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
 		{
 		    /*
 		     * Guard against a buffer overflow attack.  Just wait for
-		     * the next preamble match and go on from there. 
+		     * the next preamble match and go on from there.
 		     */
 		    if (session->isgps.bufindex >= (unsigned)maxlen) {
 			session->isgps.bufindex = 0;

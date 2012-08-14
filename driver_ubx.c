@@ -1,11 +1,11 @@
 /*
  * UBX driver.  All capabilities are common to Antaris4 and uBlox6.
- * Reference manuals are at 
+ * Reference manuals are at
  * http://www.u-blox.com/en/download/documents-a-resources/u-blox-6-gps-modules-resources.html
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
- * be adding a fixed offset based on a hidden epoch value, in which case 
+ * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
  *
  * For the Antaris 4, the default leap-secoond offset (before getting one from
@@ -183,8 +183,8 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     flags = (unsigned int)getub(buf, 11);
     if ((flags & 0x7) != 0)
 	session->context->leap_seconds = (int)getub(buf, 10);
-    session->newdata.time = gpsd_gpstime_resolve(session, 
-					      (unsigned short int)gw, 
+    session->newdata.time = gpsd_gpstime_resolve(session,
+					      (unsigned short int)gw,
 					      (double)tow / 1000.0);
 
     gpsd_report(LOG_DATA, "TIMEGPS: time=%.2f mask={TIME}\n",
@@ -474,14 +474,14 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->driver.ubx.port_settings[i] = buf[UBX_PREFIX_LEN+i];
 	/* turn off NMEA output on this port */
 	session->driver.ubx.port_settings[14] &= ~0x02;
-	(void)ubx_write(session, 0x06, 0x00, 
-			session->driver.ubx.port_settings, 
+	(void)ubx_write(session, 0x06, 0x00,
+			session->driver.ubx.port_settings,
 			sizeof(session->driver.ubx.port_settings));
 	session->driver.ubx.have_port_configuration = true;
 	break;
 
     case UBX_ACK_NAK:
-	gpsd_report(LOG_IO, "UBX_ACK_NAK, class: %02x, id: %02x\n", 
+	gpsd_report(LOG_IO, "UBX_ACK_NAK, class: %02x, id: %02x\n",
 		    buf[UBX_CLASS_OFFSET],
 		    buf[UBX_TYPE_OFFSET]);
 	break;
@@ -721,7 +721,7 @@ static bool ubx_speed(struct gps_device_t *session,
 	usart_mode |= 0x2000;	/* zero value means 1 stop bit */
     putle32(session->driver.ubx.port_settings, 4, usart_mode);
     putle32(session->driver.ubx.port_settings, 8, speed);
-    (void)ubx_write(session, 0x06, 0x00, 
+    (void)ubx_write(session, 0x06, 0x00,
 		    session->driver.ubx.port_settings,
 		    sizeof(session->driver.ubx.port_settings));
     return true;

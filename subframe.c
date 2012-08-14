@@ -18,7 +18,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
     uint8_t preamble;
     uint32_t parity;
 
-    if (session->subframe_count++ == 0) { 
+    if (session->subframe_count++ == 0) {
 	speed_t speed = gpsd_get_speed(session);
 
 	if (speed < 38400)

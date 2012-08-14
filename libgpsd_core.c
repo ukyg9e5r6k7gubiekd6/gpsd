@@ -1,7 +1,7 @@
 /* libgpsd_core.c -- manage access to sensors
  *
  * Access to the driver layer goes through the entry points in this file.
- * The idea is to present a session as an abstraction from which you get 
+ * The idea is to present a session as an abstraction from which you get
  * fixes (and possibly other data updates) by calling gpsd_poll(). The
  * rest is setup and teardown.
  *
@@ -35,12 +35,12 @@ static void gpsd_run_device_hook(char *device_name, char *hook)
     struct stat statbuf;
     if (stat(DEVICEHOOKPATH, &statbuf) == -1)
 	gpsd_report(LOG_PROG, "no %s present, skipped running %s hook\n",
-		    DEVICEHOOKPATH, hook); 
+		    DEVICEHOOKPATH, hook);
     else {
 	/*
 	 * We make an exception to the no-malloc rule here because
 	 * the pointer will never persist outside this small scope
-	 * and can thus never cause a leak or stale-pointer problem. 
+	 * and can thus never cause a leak or stale-pointer problem.
 	 */
 	size_t bufsize = strlen(DEVICEHOOKPATH) + 1 + strlen(device_name) + 1 + strlen(hook) + 1;
 	char *buf = malloc(bufsize);
@@ -472,9 +472,9 @@ static bool invert(double mat[4][4], /*@out@*/ double inverse[4][4])
     double Det2_13_01 = mat[1][0] * mat[3][1] - mat[1][1] * mat[3][0];
     //double Det2_13_02 = mat[1][0]*mat[3][2] - mat[1][2]*mat[3][0];
     double Det2_13_03 = mat[1][0] * mat[3][3] - mat[1][3] * mat[3][0];
-    //double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1]; 
+    //double Det2_13_12 = mat[1][1]*mat[3][2] - mat[1][2]*mat[3][1];
     double Det2_13_13 = mat[1][1] * mat[3][3] - mat[1][3] * mat[3][1];
-    //double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2]; 
+    //double Det2_13_23 = mat[1][2]*mat[3][3] - mat[1][3]*mat[3][2];
     double Det2_23_01 = mat[2][0] * mat[3][1] - mat[2][1] * mat[3][0];
     double Det2_23_02 = mat[2][0] * mat[3][2] - mat[2][2] * mat[3][0];
     double Det2_23_03 = mat[2][0] * mat[3][3] - mat[2][3] * mat[3][0];
@@ -856,29 +856,29 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
      *
      * Thus, we look for an inter-character delay much larger than an
      * average 4800bps sentence time.  How should this delay be set?  Well,
-     * counting framing bits and erring on the side of caution, it's 
+     * counting framing bits and erring on the side of caution, it's
      * about 480 characters per second or 2083 microeconds per character;
      * that's almost exactly 0.125 seconds per average 60-char sentence.
      * Doubling this to avoid false positives, we look for an inter-character
      * delay of greater than 0.250s.
      *
-     * The above assumes a cycle time of 1 second.  To get the minimum size of 
+     * The above assumes a cycle time of 1 second.  To get the minimum size of
      * the quiet period, we multiply by the device cycle time.
      *
-     * We can sanity-check these calculation by watching logs. If we have set 
+     * We can sanity-check these calculation by watching logs. If we have set
      * MINIMUM_QUIET_TIME correctly, the "transmission pause" message below
      * will consistently be emitted just before the sentence that shows up
      * as start-of-cycle in gpsmon, and never emitted at any other point
      * in the cycle.
      *
      * In practice, it seems that edge detection succeeds at 9600bps but
-     * fails at 4800bps.  This is not surprising, as previous profiling has 
-     * indicated that at 4800bps some devices overrun a 1-second cycle time 
+     * fails at 4800bps.  This is not surprising, as previous profiling has
+     * indicated that at 4800bps some devices overrun a 1-second cycle time
      * with the data they transmit.
      */
 #define MINIMUM_QUIET_TIME	0.25
     if (session->packet.outbuflen == 0)
-    { 
+    {
 	/* beginning of a new packet */
 	timestamp_t now = timestamp();
 	if (session->device_type != NULL && session->packet.start_time > 0) {

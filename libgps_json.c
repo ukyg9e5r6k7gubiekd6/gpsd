@@ -435,7 +435,7 @@ int libgps_json_unpack(const char *buf,
 	}
 	return status;
     } else if (STARTSWITH(classtag, "\"class\":\"VERSION\"")) {
-	status = json_version_read(buf, gpsdata, end); 
+	status = json_version_read(buf, gpsdata, end);
 	if (status ==  0) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= VERSION_SET;

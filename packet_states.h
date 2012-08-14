@@ -13,9 +13,9 @@
    NMEA_PASHR_A,	/* grind through recognizing $PASHR */
    NMEA_PASHR_S,	/* grind through recognizing $PASHR */
    NMEA_PASHR_H,	/* grind through recognizing $PASHR */
-   NMEA_BINARY_BODY,	/* Ashtech-style binary packet body, skip until \r\n */ 
-   NMEA_BINARY_CR,	/* \r on end of Ashtech-style binary packet */ 
-   NMEA_BINARY_NL,	/* \n on end of Ashtech-style binary packet */ 
+   NMEA_BINARY_BODY,	/* Ashtech-style binary packet body, skip until \r\n */
+   NMEA_BINARY_CR,	/* \r on end of Ashtech-style binary packet */
+   NMEA_BINARY_NL,	/* \n on end of Ashtech-style binary packet */
    NMEA_CR,	   	/* seen terminating \r of NMEA packet */
    NMEA_RECOGNIZED,	/* saw trailing \n of NMEA packet */
 
@@ -58,7 +58,7 @@
    SIRF_LENGTH_1,	/* seen first byte of SiRF length */
    SIRF_PAYLOAD,	/* we're in a SiRF payload part */
    SIRF_DELIVERED,	/* saw last byte of SiRF payload/checksum */
-   SIRF_TRAILER_1,	/* saw first byte of SiRF trailer */ 
+   SIRF_TRAILER_1,	/* saw first byte of SiRF trailer */
    SIRF_RECOGNIZED,	/* saw second byte of SiRF trailer */
 #endif /* SIRF_ENABLE */
 

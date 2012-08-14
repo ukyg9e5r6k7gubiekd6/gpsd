@@ -337,14 +337,14 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
      * is only issued once per cycle we can detect this here (it would be
      * nicer to do it on GSA but GSA has no timestamp).
      */
-    session->driver.nmea.latch_mode = strncmp(field[1], 
+    session->driver.nmea.latch_mode = strncmp(field[1],
 					      session->driver.nmea.last_gga_timestamp,
 					      sizeof(session->driver.nmea.last_gga_timestamp))==0;
     if (session->driver.nmea.latch_mode) {
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
     } else
-	(void)strlcpy(session->driver.nmea.last_gga_timestamp, 
+	(void)strlcpy(session->driver.nmea.last_gga_timestamp,
 		       field[1],
 		       sizeof(session->driver.nmea.last_gga_timestamp));
     /* if we have a fix and the mode latch is off, go... */
@@ -760,7 +760,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 		/*
 		 * This looks like a GPS week-counter rollover.
 		 */
-		gpsd_report(LOG_WARN, "ZDA year %d less than clock year, "  
+		gpsd_report(LOG_WARN, "ZDA year %d less than clock year, "
 			    "probable GPS week rollover lossage\n", year);
 	    }
 	    session->driver.nmea.date.tm_year = year - 1900;
@@ -775,11 +775,11 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 static gps_mask_t processHDT(int c UNUSED, char *field[],
 				struct gps_device_t *session)
 {
-    /* 
+    /*
      * $HEHDT,341.8,T*21
      *
      * HDT,x.x*hh<cr><lf>
-     * 
+     *
      * The only data field is true heading in degrees.
      * The following field is required to be 'T' indicating a true heading.
      * It is followed by a mandatory nmea_checksum.
@@ -854,7 +854,7 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
 
     /*
      * Hack: We report depth below keep as negative altitude because there's
-     * no better place to put it.  Should work in practice as nobody is 
+     * no better place to put it.  Should work in practice as nobody is
      * likely to be operating a depth sounder at varying altitudes.
      */
     gpsd_report(LOG_RAW, "mode %d, depth %lf.\n",
@@ -871,9 +871,9 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
      * Proprietary sentence for True North Technologies Magnetic Compass.
      * This may also apply to some Honeywell units since they may have been
      * designed by True North.
-     
+
      $PTNTHTM,14223,N,169,N,-43,N,13641,2454*15
-     
+
      HTM,x.x,a,x.x,a,x.x,a,x.x,x.x*hh<cr><lf>
      Fields in order:
      1. True heading (compass measurement + deviation + variation)
@@ -892,7 +892,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
      7. dip angle
      8. relative magnitude horizontal component of earth's magnetic field
      *hh          mandatory nmea_checksum
-     
+
      By default, angles are reported as 26-bit integers: weirdly, the
      technical manual says either 0 to 65535 or -32768 to 32767 can
      occur as a range.
@@ -937,7 +937,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
 {
     /*
      * Proprietary sentence for OceanServer Magnetic Compass.
-     
+
      OHPR,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x,x.x*hh<cr><lf>
      Fields in order:
      1. Azimuth
@@ -1081,7 +1081,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     } nmea_phrase[] = {
 	/*@ -nullassign @*/
 	{"PGRMC", 0, false, NULL},	/* ignore Garmin Sensor Config */
-	{"PGRME", 7, false, processPGRME}, 
+	{"PGRME", 7, false, processPGRME},
 	{"PGRMI", 0, false, NULL},	/* ignore Garmin Sensor Init */
 	{"PGRMO", 0, false, NULL},	/* ignore Garmin Sentence Enable */
 	    /*
@@ -1194,11 +1194,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		    (nmea_phrase[i].decoder) (count,
 					      session->driver.nmea.field,
 					      session);
-		(void)strlcpy(session->gpsdata.tag, 
-			      nmea_phrase[i].name, 
+		(void)strlcpy(session->gpsdata.tag,
+			      nmea_phrase[i].name,
 			      MAXTAGLEN);
 		if (nmea_phrase[i].cycle_continue)
-		    session->driver.nmea.cycle_continue = true; 
+		    session->driver.nmea.cycle_continue = true;
 		/*
 		 * Must force this to be nz, as we're going to rely on a zero
 		 * value to mean "no previous tag" later.
@@ -1233,7 +1233,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 * Garmins in binary mode; safest to do it in case we're
 	 * talking to a Garmin in text mode.)
 	 */
-	if (session->fixcnt > 3) 
+	if (session->fixcnt > 3)
 	    retval |= PPSTIME_IS;
     }
 
@@ -1277,7 +1277,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	    }
 	}
     } else {
-	/* extend the cycle to an un-timestamped sentence? */ 
+	/* extend the cycle to an un-timestamped sentence? */
 	if ((session->driver.nmea.lasttag & session->driver.nmea.cycle_enders) != 0)
 	    gpsd_report(LOG_PROG,
 			"%s is just after a cycle ender.\n",

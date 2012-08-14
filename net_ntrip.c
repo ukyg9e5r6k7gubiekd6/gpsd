@@ -490,24 +490,24 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		    port = DEFAULT_RTCM_PORT;
 	    }
 
-	    (void)strlcpy(device->ntrip.stream.mountpoint, 
-		    stream, 
+	    (void)strlcpy(device->ntrip.stream.mountpoint,
+		    stream,
 		    sizeof(device->ntrip.stream.mountpoint));
 	    if (auth != NULL)
-		(void)strlcpy(device->ntrip.stream.credentials, 
-			      auth, 
+		(void)strlcpy(device->ntrip.stream.credentials,
+			      auth,
 			      sizeof(device->ntrip.stream.credentials));
-	    /* 
+	    /*
 	     * Semantically url and port ought to be non-NULL by now,
 	     * but just in case...this code appeases Coverity.
 	     */
 	    if (url != NULL)
-		(void)strlcpy(device->ntrip.stream.url, 
-			      url, 
+		(void)strlcpy(device->ntrip.stream.url,
+			      url,
 			      sizeof(device->ntrip.stream.url));
 	    if (port != NULL)
-		(void)strlcpy(device->ntrip.stream.port, 
-			      port, 
+		(void)strlcpy(device->ntrip.stream.port,
+			      port,
 			      sizeof(device->ntrip.stream.port));
 
 	    ret = ntrip_stream_req_probe(&device->ntrip.stream);
@@ -558,7 +558,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 }
 /*@ +branchstate +nullpass @*/
 
-void ntrip_report(struct gps_context_t *context, 
+void ntrip_report(struct gps_context_t *context,
 		  struct gps_device_t *gps,
 		  struct gps_device_t *caster)
     /* may be time to ship a usage report to the Ntrip caster */

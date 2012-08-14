@@ -150,7 +150,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 
     buf2[0] = '\0';
     for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
-	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0') 
+	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0')
 	  || (sp[0] == '\r' && sp[2] == '\0'))
 	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
 	else
@@ -161,7 +161,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 void gpsd_report(int errlevel, const char *fmt, ...)
 /* our version of the logger */
 {
-    char buf[BUFSIZ]; 
+    char buf[BUFSIZ];
     char *err_str;
 
     switch ( errlevel ) {
@@ -521,11 +521,11 @@ int main(int argc, char **argv)
 		    matches++;
 		}
 	    }
-	    if (matches > 1) { 
+	    if (matches > 1) {
 		(void)fprintf(stderr, "-T option matched more than one driver.\n");
 		exit(EXIT_FAILURE);
 	    }
-	    else if (matches == 0) { 
+	    else if (matches == 0) {
 		(void)fprintf(stderr, "-T option didn't match any driver.\n");
 		exit(EXIT_FAILURE);
 	    }
@@ -687,7 +687,7 @@ int main(int argc, char **argv)
 		(void)wprintw(cmdwin, type_name);
 		(void)wprintw(cmdwin, "> ");
 		(void)wclrtoeol(cmdwin);
-		if (active != NULL 
+		if (active != NULL
 			&& len > 0 && session.packet.outbuflen > 0
 			&& (*active)->update != NULL)
 		    (*active)->update();

@@ -9,7 +9,7 @@
  * 22-23, and 25-27 has not.
  * For the special IMO messages (types 6 and 8), only the following have been
  * tested against known-good decodings:
- *  - IMO236 met/hydro message: Type=8, DAC=1, FI=11 
+ *  - IMO236 met/hydro message: Type=8, DAC=1, FI=11
  *  - IMO289 met/hydro message: Type=8, DAC=1, FI=31
  *
  * This file is Copyright (c) 2010 by the GPSD project
@@ -407,7 +407,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid11.wspeed		= UBITS(121, 7);
 		ais->type8.dac1fid11.wgust		= UBITS(128, 7);
 		ais->type8.dac1fid11.wdir		= UBITS(135, 9);
-		ais->type8.dac1fid11.wgustdir	= UBITS(144, 9); 
+		ais->type8.dac1fid11.wgustdir	= UBITS(144, 9);
 		ais->type8.dac1fid11.airtemp	= UBITS(153, 11);
 		ais->type8.dac1fid11.humidity	= UBITS(164, 7);
 		ais->type8.dac1fid11.dewpoint	= UBITS(171, 10);
@@ -551,7 +551,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		ais->type8.dac1fid31.wspeed		= UBITS(122, 7);
 		ais->type8.dac1fid31.wgust		= UBITS(129, 7);
 		ais->type8.dac1fid31.wdir		= UBITS(136, 9);
-		ais->type8.dac1fid31.wgustdir	= UBITS(145, 9); 
+		ais->type8.dac1fid31.wgustdir	= UBITS(145, 9);
 		ais->type8.dac1fid31.airtemp	= SBITS(154, 11);
 		ais->type8.dac1fid31.humidity	= UBITS(165, 7);
 		ais->type8.dac1fid31.dewpoint	= SBITS(172, 10);

@@ -1,14 +1,14 @@
 /*
  *
  * This is the gpsd driver for EverMore GPSes.  They have both an NMEA and
- * a binary reporting mode, with the interesting property that they will 
+ * a binary reporting mode, with the interesting property that they will
  * cheerfully accept binary commands (such as speed changes) while in NMEA
  * mode.
  *
  * Binary mode would give us atomic fix reports, but it has one large drawback:
  * the Navigation Data Out message doesn't report a leap-second offset, so it
  * is not actually possible to collect a leap-second offset from it. Therefore
- * we'll normally run the driver in NMEA mode.  
+ * we'll normally run the driver in NMEA mode.
  *
  * About the only thing binary mode gives that NMEA won't is TDOP and raw
  * pseudoranges, but gpsd does its own DOPs from skyview. By default we'll
@@ -185,11 +185,11 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	  (unsigned short)getleu16(buf2, 3),
 	  (double)getleu32(buf2, 5) * 0.01);
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-			 (double)getles32(buf2, 9) * 1.0, 
+			 (double)getles32(buf2, 9) * 1.0,
 			 (double)getles32(buf2, 13) * 1.0,
 			 (double)getles32(buf2, 17) * 1.0,
 			 (double)getles16(buf2, 21) / 10.0,
-			 (double)getles16(buf2, 23) / 10.0, 
+			 (double)getles16(buf2, 23) / 10.0,
 			 (double)getles16(buf2, 25) / 10.0);
 	used = (unsigned char)getub(buf2, 27) & 0x0f;
 	//visible = (getub(buf2, 27) & 0xf0) >> 4;

@@ -58,7 +58,7 @@ static int debug;
 static void open_serial(char *device)
 /* open the serial port and set it up */
 {
-    /* 
+    /*
      * Open modem device for reading and writing and not as controlling
      * tty.
      */
@@ -93,9 +93,9 @@ static void usage(void)
 {
     (void)fprintf(stderr,
 		  "Usage: gpspipe [OPTIONS] [server[:port[:device]]]\n\n"
-		  "-d Run as a daemon.\n" 
+		  "-d Run as a daemon.\n"
 		  "-o [file] Write output to file.\n"
-		  "-h Show this help.\n" 
+		  "-h Show this help.\n"
 		  "-r Dump raw NMEA.\n"
 		  "-R Dump super-raw mode (GPS binary).\n"
 		  "-w Dump gpsd native data.\n"
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'r':
 	    raw = true;
-	    /* 
+	    /*
 	     * Yes, -r invokes NMEA mode rather than proper raw mode.
 	     * This emulates the behavior under the old protocol.
 	     */

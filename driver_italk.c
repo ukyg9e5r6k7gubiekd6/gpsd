@@ -6,7 +6,7 @@
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
- * be adding a fixed offset based on a hidden epoch value, in which case 
+ * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
  */
 #include <stdio.h>
@@ -199,7 +199,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
 				      unsigned char *buf, size_t len)
 {
     unsigned short flags, prn, sf;
-    unsigned int i; 
+    unsigned int i;
     uint32_t words[10];
 
     if (len != 64) {

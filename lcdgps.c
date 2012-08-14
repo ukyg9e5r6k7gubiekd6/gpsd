@@ -252,7 +252,7 @@ static void usage( char *prog)
   exit(EXIT_FAILURE);
 }
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
     int option, rc;
     struct sockaddr_in localAddr, servAddr;

@@ -3,7 +3,7 @@
 NAME
    shared_json.c - move data between in-core and JSON structures
 
-DESCRIPTION 
+DESCRIPTION
    This module uses the generic JSON parser to get data from JSON
 representations to gps.h structures. These functions are used in both
 the daemon and the client library.
@@ -31,7 +31,7 @@ int json_device_read(const char *buf,
     /* *INDENT-OFF* */
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      t_check,      .dflt.check = "DEVICE"},
-	
+
         {"path",       t_string,     .addr.string  = dev->path,
 	                                .len = sizeof(dev->path)},
 	{"activated",  t_string,     .addr.string = tbuf,
@@ -85,7 +85,7 @@ int json_watch_read(const char *buf,
     /* *INDENT-OFF* */
     struct json_attr_t chanconfig_attrs[] = {
 	{"class",          t_check,    .dflt.check = "WATCH"},
-	
+
 	{"enable",         t_boolean,  .addr.boolean = &ccp->watcher,
                                           .dflt.boolean = true},
 	{"json",           t_boolean,  .addr.boolean = &ccp->json,

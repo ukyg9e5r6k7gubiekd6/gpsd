@@ -5,7 +5,7 @@
  *
  *    x^24+ x^23+ x^18+ x^17+ x^14+ x^11+ x^10+ x^7+ x^6+ x^5+ x^4+ x^3+ x+1
  *
- * This corresponds to a mask of 0x1864CFB.  For a primer on CRC theory, 
+ * This corresponds to a mask of 0x1864CFB.  For a primer on CRC theory,
  * including detailed discussion of how and why the error polynomial is
  * expressed by this mask, see <http://www.ross.net/crc/>.
  *

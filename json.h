@@ -18,7 +18,7 @@ struct json_enum_t {
     int		value;
 };
 
-struct json_array_t { 
+struct json_array_t {
     json_type element_type;
     union {
 	struct {
@@ -58,7 +58,7 @@ struct json_attr_t {
     } dflt;
     size_t len;
     const struct json_enum_t *map;
-    bool nodefault; 
+    bool nodefault;
 };
 
 #define JSON_ATTR_MAX	31	/* max chars in JSON attribute name */
@@ -67,9 +67,9 @@ struct json_attr_t {
 #ifdef __cplusplus
 extern "C" {
 #endif
-int json_read_object(const char *, const struct json_attr_t *, 
+int json_read_object(const char *, const struct json_attr_t *,
 		     /*@null@*/const char **);
-int json_read_array(const char *, const struct json_array_t *, 
+int json_read_array(const char *, const struct json_array_t *,
 		    /*@null@*/const char **);
 const /*@observer@*/char *json_error_string(int);
 
@@ -103,14 +103,14 @@ void json_enable_debug(int, FILE *);
 #define JSON_ERR_NULLPTR	22	/* unexpected null value or attribute pointer */
 
 /*
- * Use the following macros to declare template initializers for structobject 
+ * Use the following macros to declare template initializers for structobject
  * arrays.  Writing the equivalents out by hand is error-prone.
  *
- * STRUCTOBJECT takes a structure name s, and a fieldname f in s. 
+ * STRUCTOBJECT takes a structure name s, and a fieldname f in s.
  *
- * STRUCTARRAY takes the name of a structure array, a pointer to a an 
+ * STRUCTARRAY takes the name of a structure array, a pointer to a an
  * initializer defining the subobject type, and the address of an integer to
- * store the length in. 
+ * store the length in.
  */
 #define STRUCTOBJECT(s, f)	.addr.offset = offsetof(s, f)
 #define STRUCTARRAY(a, e, n) \

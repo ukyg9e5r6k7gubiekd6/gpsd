@@ -6,9 +6,9 @@
 #ifndef _GPSD_LIBGPS_H_
 #define _GPSD_LIBGPS_H_
 
-/* 
- * first member of each kind of privdata structure must be named 
- * 'export_type' and must be of this type.  It's how we do runtime 
+/*
+ * first member of each kind of privdata structure must be named
+ * 'export_type' and must be of this type.  It's how we do runtime
  * dispatch to the different transports.
  */
 enum export_t {
@@ -16,18 +16,18 @@ enum export_t {
     sockets,
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
-    shm, 
+    shm,
 #endif /* SHM_EXPORT_ENABLE */
 #ifdef DBUS_EXPORT_ENABLE
     dbus,
 #endif /* DBUS_EXPORT_ENABLE */
 };
 
-/* values to poke in the gps_fd member if we get it via something special */ 
+/* values to poke in the gps_fd member if we get it via something special */
 #define SHM_PSEUDO_FD	-1
 #define DBUS_PSEUDO_FD	-2
 
-extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *, 
+extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *,
 		      /*@out@*/struct gps_data_t *);
 extern int gps_sock_close(struct gps_data_t *);
 extern int gps_sock_send(struct gps_data_t *, const char *);

@@ -17,7 +17,7 @@ struct exportmethod_t
     const char *description;
 };
 
-struct fixsource_t 
+struct fixsource_t
 /* describe a data source */
 {
     char *spec;		/* pointer to actual storage */
@@ -36,7 +36,7 @@ float true2magnetic(double, double, double);
 
 extern /*@observer@*/ char *deg_to_str( enum deg_str_type type,  double f);
 
-extern void gpsd_source_spec(/*@null@*/const char *fromstring, 
+extern void gpsd_source_spec(/*@null@*/const char *fromstring,
 			     /*@out@*/struct fixsource_t *source);
 
 char *maidenhead(double n,double e);

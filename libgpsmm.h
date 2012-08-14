@@ -32,7 +32,7 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 		}
 #ifdef __UNUSED__
 		// cppcheck-suppress uninitVar
-		gpsmm(void) : to_user(0) 
+		gpsmm(void) : to_user(0)
 		{
 		        gps_inner_open("localhost", DEFAULT_GPSD_PORT);
 		}

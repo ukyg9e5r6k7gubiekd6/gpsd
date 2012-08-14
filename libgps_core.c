@@ -57,7 +57,7 @@ void libgps_trace(int errlevel, const char *fmt, ...)
 #define CONDITIONALLY_UNUSED UNUSED
 #endif /* SOCKET_EXPORT_ENABLE */
 
-int gps_open(/*@null@*/const char *host, 
+int gps_open(/*@null@*/const char *host,
 	     /*@null@*/const char *port CONDITIONALLY_UNUSED,
 	     /*@out@*/ struct gps_data_t *gpsdata)
 {
@@ -158,7 +158,7 @@ int gps_read(struct gps_data_t *gpsdata)
 #endif /* SOCKET_EXPORT_ENABLE */
     /*@ +usedef +compdef +uniondef @*/
 
-    libgps_debug_trace((DEBUG_CALLS, "gps_read() -> %d (%s)\n", 
+    libgps_debug_trace((DEBUG_CALLS, "gps_read() -> %d (%s)\n",
 			status, gps_maskdump(gpsdata->set)));
 
     errno = saved_errno;
@@ -187,7 +187,7 @@ int gps_send(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, const char *fmt CO
     return status;
 }
 
-int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, 
+int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
 	unsigned int flags CONDITIONALLY_UNUSED,
 	/*@null@*/ void *d CONDITIONALLY_UNUSED)
 {
@@ -235,7 +235,7 @@ bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int time
     return waiting;
 }
 
-int gps_mainloop(struct gps_data_t *gpsdata, int timeout, 
+int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
 		 void (*hook)(struct gps_data_t *gpsdata))
 {
     int status = -1;
@@ -257,7 +257,7 @@ int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
 #endif /* SOCKET_EXPORT_ENABLE */
     /*@ +usedef +compdef +uniondef @*/
 
-    libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() -> %d (%s)\n", 
+    libgps_debug_trace((DEBUG_CALLS, "gps_mainloop() -> %d (%s)\n",
 			status, gps_maskdump(gpsdata->set)));
 
     return status;
@@ -265,7 +265,7 @@ int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
 
 extern const char /*@observer@*/ *gps_errstr(const int err)
 {
-    /* 
+    /*
      * We might add our own error codes in the future, e.g for
      * protocol compatibility checks
      */

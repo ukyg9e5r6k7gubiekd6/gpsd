@@ -6,7 +6,7 @@ NAME
 DESCRIPTION
    This is a very lightweight alternative to JSON-over-sockets.  Clients
 won't be able to filter by device, and won't get device activation/deactivation
-notifications.  But both client and daemon will avoid all the marshalling and 
+notifications.  But both client and daemon will avoid all the marshalling and
 unmarshalling overhead.
 
 PERMISSIONS
@@ -36,11 +36,11 @@ bool shm_acquire(struct gps_context_t *context)
     shmid = shmget((key_t)GPSD_KEY, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {
 	gpsd_report(LOG_ERROR, "shmget(%ld, %zd, 0666) failed: %s\n",
-		    (long int)GPSD_KEY, 
+		    (long int)GPSD_KEY,
 		    sizeof(struct gps_data_t),
 		    strerror(errno));
 	return false;
-    } 
+    }
     context->shmexport = (char *)shmat(shmid, 0, 0);
     if ((int)(long)context->shmexport == -1) {
 	gpsd_report(LOG_ERROR, "shmat failed: %s\n", strerror(errno));
@@ -68,7 +68,7 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 
 	++tick;
 	/*
-	 * Following block of instructions must not be reordered, otherwise 
+	 * Following block of instructions must not be reordered, otherwise
 	 * havoc will ensue.  asm volatile("sfence") is a GCCism intended
 	 * to prevent reordering.
 	 *
@@ -82,7 +82,7 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	barrier();
 	memcpy((void *)(context->shmexport + offsetof(struct shmexport_t, gpsdata)),
 	       (void *)gpsdata,
-	       sizeof(struct gps_data_t)); 
+	       sizeof(struct gps_data_t));
 	barrier();
 #ifndef USE_QT
 	shared->gpsdata.gps_fd = SHM_PSEUDO_FD;

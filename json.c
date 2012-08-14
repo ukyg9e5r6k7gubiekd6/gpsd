@@ -20,7 +20,7 @@ advance what the type of each attribute value will be and where the
 parsed value will be stored. The template structures may supply
 default values to be used when an expected attribute is omitted.
 
-   The preceding paragraph told one fib.  A single attribute may 
+   The preceding paragraph told one fib.  A single attribute may
 actually have a span of multiple specifications with different
 syntactically distinguishable types (e.g. string vs. real vs. integer
 vs boolean, but not signed integer vs. unsigned integer or strong vs. map).
@@ -40,7 +40,7 @@ stored as doubles.
 defending on whether the array subtype is declared as object or
 structobject.
 
-   Object arrays take one base address per object subfield, and are 
+   Object arrays take one base address per object subfield, and are
 mapped into parallel C arrays (one per subfield).  Strings are not
 supported in this kind of array, as they don't have a "natural" size
 to use as an offset multiplier.
@@ -411,7 +411,7 @@ static int json_internal_read_object(const char *cp,
 	    }
 	    if (value_quoted
 		&& (cursor->type != t_string && cursor->type != t_character
-		    && cursor->type != t_check && cursor->type != t_time 
+		    && cursor->type != t_check && cursor->type != t_time
 		    && cursor->map == 0)) {
 		json_debug_trace((1,
 				  "Saw quoted value when expecting non-string.\n"));

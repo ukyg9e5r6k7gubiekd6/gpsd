@@ -61,7 +61,7 @@ int json_rtcm2_read(const char *buf,
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
-        {"satellites", t_array,	STRUCTARRAY(rtcm2->gps_ranges.sat, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->gps_ranges.sat,
 					    rtcm1_satellite, &satcount)},
 	{NULL},
     };
@@ -118,7 +118,7 @@ int json_rtcm2_read(const char *buf,
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm5[] = {
 	RTCM2_HEADER
-        {"satellites", t_array,	STRUCTARRAY(rtcm2->conhealth.sat, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->conhealth.sat,
 					    rtcm5_satellite, &satcount)},
 	{NULL},
     };
@@ -143,7 +143,7 @@ int json_rtcm2_read(const char *buf,
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm7[] = {
 	RTCM2_HEADER
-        {"satellites", t_array,	STRUCTARRAY(rtcm2->almanac.station, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->almanac.station,
 					    rtcm7_satellite, &satcount)},
 	{NULL},
     };
@@ -188,7 +188,7 @@ int json_rtcm2_read(const char *buf,
     /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm31[] = {
 	RTCM2_HEADER
-        {"satellites", t_array,	STRUCTARRAY(rtcm2->glonass_ranges.sat, 
+        {"satellites", t_array,	STRUCTARRAY(rtcm2->glonass_ranges.sat,
 					    rtcm31_satellite, &satcount)},
 	{NULL},
     };
