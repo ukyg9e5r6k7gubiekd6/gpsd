@@ -37,9 +37,10 @@ typedef unsigned int speed_t;
  * 3.6  VERSION, WATCH, and DEVICES from slave gpsds get "remote" attribute.
  * 3.7  PPS message added to repertoire. SDDBT water depth reported as
  *      negative altitude with Mode 3 set.
+ * 3.8  AIS course nember becomes float in scaled mode (bug fix).
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	7	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	8	/* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 

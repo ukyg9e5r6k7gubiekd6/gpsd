@@ -1690,7 +1690,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,"
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
-			   "\"course\":%u,\"heading\":%u,\"second\":%u,"
+			   "\"course\":%.1f,\"heading\":%u,\"second\":%u,"
 			   "\"maneuver\":%u,\"raim\":%s,\"radio\":%u}\r\n",
 			   nav_legends[ais->type1.status],
 			   turnlegend,
@@ -1698,7 +1698,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type1.accuracy),
 			   ais->type1.lon / AIS_LATLON_DIV,
 			   ais->type1.lat / AIS_LATLON_DIV,
-			   ais->type1.course,
+			   ais->type1.course / 10.0,
 			   ais->type1.heading,
 			   ais->type1.second,
 			   ais->type1.maneuver,
