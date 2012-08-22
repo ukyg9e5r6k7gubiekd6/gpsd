@@ -1393,7 +1393,7 @@ if env['socket_export']:
 # Regression-test the RTCM decoder.
 rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
     '@echo "Testing RTCM decoding..."',
-    'for f in $SRCDIR/test/*.rtcm2; do '
+    '@for f in $SRCDIR/test/*.rtcm2; do '
         'echo "Testing $${f}..."; '
         'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
         '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
@@ -1401,7 +1401,7 @@ rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
         'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing idempotency of JSON dump/decode for RTCM2"',
-    'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+    '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
     '$SRCDIR/gpsdecode -u -e -j <test/synthetic-rtcm2.json >$${TMPFILE}; '
         'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - $${TMPFILE}; '
         'rm -f $${TMPFILE}; ',
@@ -1417,7 +1417,7 @@ Utility('rtcm-makeregress', [gpsdecode], [
 # Regression-test the AIVDM decoder.
 aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
     '@echo "Testing AIVDM decoding w/ CSV format..."',
-    'for f in $SRCDIR/test/*.aivdm; do '
+    '@for f in $SRCDIR/test/*.aivdm; do '
         'echo "Testing $${f}..."; '
         'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
         '$SRCDIR/gpsdecode -u -c <$${f} >$${TMPFILE}; '
@@ -1425,7 +1425,7 @@ aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
         'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing AIVDM decoding w/ JSON unscaled format..."',
-    'for f in $SRCDIR/test/*.aivdm; do '
+    '@for f in $SRCDIR/test/*.aivdm; do '
         'echo "  Testing $${f}..."; '
         'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
         '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
@@ -1433,7 +1433,7 @@ aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
         'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing AIVDM decoding w/ JSON scaled format..."',
-    'for f in $SRCDIR/test/*.aivdm; do '
+    '@for f in $SRCDIR/test/*.aivdm; do '
         'echo "  Testing $${f}..."; '
         'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
         '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
@@ -1441,14 +1441,14 @@ aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
         'rm -f $${TMPFILE}; '
     'done;',
     '@echo "Testing idempotency of unscaled JSON dump/decode for AIS"',
-    'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+    '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
     '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
         'grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk | diff -ub - $${TMPFILE}; '
         'rm -f $${TMPFILE}; ',
     # Parse the unscaled json reference, dump it as scaled json, 
     # and finally compare it with the scaled json reference
     '@echo "Testing idempotency of scaled JSON dump/decode for AIS"',
-    'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+    '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
     '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
         'grep -v "^#" $SRCDIR/test/sample.aivdm.js.chk | diff -ub - $${TMPFILE}; '
         'rm -f $${TMPFILE}; ',
