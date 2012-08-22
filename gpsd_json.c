@@ -1391,6 +1391,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Reserved",
 	"Not defined",
     };
+
     static char *epfd_legends[] = {
 	"Undefined",
 	"GPS",
@@ -1402,6 +1403,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Surveyed",
 	"Galileo",
     };
+
+#define EPFD_DISPLAY(n) (((n) < (unsigned int)NITEMS(epfd_legends)) ? epfd_legends[n] : "INVALID EPFD")
 
     static char *ship_type_legends[100] = {
 	"Not available",
@@ -1741,7 +1744,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type4.accuracy),
 			   ais->type4.lon / AIS_LATLON_DIV,
 			   ais->type4.lat / AIS_LATLON_DIV,
-			   epfd_legends[ais->type4.epfd],
+			   EPFD_DISPLAY(ais->type4.epfd),
 			   JSON_BOOL(ais->type4.raim), ais->type4.radio);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1782,7 +1785,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   SHIPTYPE_DISPLAY(ais->type5.shiptype),
 			   ais->type5.to_bow, ais->type5.to_stern,
 			   ais->type5.to_port, ais->type5.to_starboard,
-			   epfd_legends[ais->type5.epfd], ais->type5.month,
+			   EPFD_DISPLAY(ais->type5.epfd), ais->type5.month,
 			   ais->type5.day, ais->type5.hour, ais->type5.minute,
 			   ais->type5.draught / 10.0,
 			   json_stringify(buf3, sizeof(buf3),
@@ -2786,7 +2789,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type19.to_stern,
 			   ais->type19.to_port,
 			   ais->type19.to_starboard,
-			   epfd_legends[ais->type19.epfd],
+			   EPFD_DISPLAY(ais->type19.epfd),
 			   JSON_BOOL(ais->type19.raim),
 			   ais->type19.dte, JSON_BOOL(ais->type19.assigned));
 	} else {
@@ -2863,7 +2866,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type21.accuracy),
 			   ais->type21.to_bow, ais->type21.to_stern,
 			   ais->type21.to_port, ais->type21.to_starboard,
-			   epfd_legends[ais->type21.epfd], ais->type21.second,
+			   EPFD_DISPLAY(ais->type21.epfd), ais->type21.second,
 			   ais->type21.regional,
 			   JSON_BOOL(ais->type21.off_position),
 			   JSON_BOOL(ais->type21.raim),
