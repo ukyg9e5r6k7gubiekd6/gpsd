@@ -1241,11 +1241,12 @@ if qt_env:
 
 
 maninstall = []
-if manbuilder:
-    for manpage in base_manpages.keys() + python_manpages.keys():
-        section = manpage.split(".")[1]
-        dest = os.path.join(installdir('mandir'), "man"+section, manpage)
-        maninstall.append(env.InstallAs(source=manpage, target=dest))
+for manpage in base_manpages.keys() + python_manpages.keys():
+    if not manbuilder and not os.path.exists(manpage):
+        continue
+    section = manpage.split(".")[1]
+    dest = os.path.join(installdir('mandir'), "man"+section, manpage)
+    maninstall.append(env.InstallAs(source=manpage, target=dest))
 install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install + headerinstall)
 
 def Uninstall(nodes):
