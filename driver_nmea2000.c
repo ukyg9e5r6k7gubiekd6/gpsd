@@ -106,12 +106,19 @@ static void decode_ais_header(unsigned char *bu, int len, struct ais_t *ais)
     printf("NMEA2000 AIS  message type %2d, MMSI %09d:\n", ais->type, ais->mmsi);
 }
 
+
 static int ais_turn_rate(int rate)
 {
     if (rate < 0) {
         return(-ais_turn_rate(-rate));
     }
     return(4.733 * sqrt(rate * RAD_2_DEG * .0001 * 60.0));
+}
+
+
+static double ais_direction(unsigned int val, double scale)
+{
+    return(val * RAD_2_DEG * 0.0001 * scale);
 }
 
 
@@ -368,15 +375,14 @@ static gps_mask_t hnd_129038(unsigned char *bu, int len, PGN *pgn, struct gps_de
     ais->type1.accuracy	 = (bu[13] >> 0) & 0x01;
     ais->type1.raim	 = (bu[13] >> 1) & 0x01;
     ais->type1.second	 = (bu[13] >> 2) & 0x3f;
-    ais->type1.course	 = getles16(bu, 14) * RAD_2_DEG * 0.001;
-    ais->type1.speed	 = getleu16(bu, 16) * 0.5144 * 0.1;
+    ais->type1.course	 = ais_direction(getleu16(bu, 14), 10.0);
+    ais->type1.speed	 = getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1;
     ais->type1.radio	 = getleu32(bu, 18) & 0x7ffff;
-    ais->type1.heading	 = getles16(bu, 21) * RAD_2_DEG * 0.0001;
+    ais->type1.heading	 = ais_direction(getleu16(bu, 21), 1.0);
     ais->type1.turn	 = ais_turn_rate(getles16(bu, 23));
     ais->type1.status	 = (bu[25] >> 0) & 0xff;
     ais->type1.maneuver	 = 0; /* Not transmitted ???? */
 
-    printf("lon:%10.6f lat:%10.6f\n",  ais->type1.lon/600000.0,   ais->type1.lat/600000.0);
     return(ONLINE_SET | AIS_SET);
 }
 
