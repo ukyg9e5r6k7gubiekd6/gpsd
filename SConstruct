@@ -231,13 +231,13 @@ for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "STRIP"
         j = i
         if i == "LD":
             i = "SHLINK"
-        if i == "CFLAGS" or i == "CCFLAGS":
+        if i in ("CFLAGS", "CCFLAGS", "LINKFLAGS"):
             env.Replace(**{j: Split(os.getenv(i))})
         else:
             env.Replace(**{j: os.getenv(i)})
-for flags in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
-    if os.environ.has_key(flags):
-        env.MergeFlags({flags : [os.getenv(flags)]})
+for flag in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
+    if os.environ.has_key(flag):
+        env.MergeFlag({flag : [os.getenv(flag)]})
 
 
 # Keep scan-build options in the environment
