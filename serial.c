@@ -481,7 +481,19 @@ int gpsd_serial_open(struct gps_device_t *session)
 #ifndef FIXED_PORT_SPEED
 	session->baudindex = 0;
 #endif /* FIXED_PORT_SPEED */
-	gpsd_set_speed(session, gpsd_get_speed(&session->ttyset_old), 'N', 1);
+	gpsd_set_speed(session,
+#ifdef FIXED_PORT_SPEED
+		       FIXED_PORT_SPEED,
+#else
+		       gpsd_get_speed(&session->ttyset_old),
+#endif /* FIXED_PORT_SPEED */
+		       'N',
+#ifdef FIXED_STOP_BITS
+		       FIXED_STOP_BITS
+#else
+		       1
+#endif /* FIXED_STOP_BITS */
+	    );
     }
 
     /* required so parity field won't be '\0' if saved speed matches */
@@ -558,7 +570,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 #endif /* FIXED_PORT_SPEED */
 		       session->gpsdata.dev.parity,
 #ifdef FIXED_STOP_BITS
-		       FIXED_STOP_BITS,
+		       FIXED_STOP_BITS
 #else
 		       session->gpsdata.dev.stopbits
 #endif /* FIXED_STOP_BITS */
