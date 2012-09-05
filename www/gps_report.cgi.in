@@ -7,7 +7,7 @@
 #
 # The wackiness with output_sample_com happens because the user has to click
 # through twice - once to review and once to submit.  Thus the content has
-# to be embedded as a hidden field - and base64-armored, beecause it might
+# to be embedded as a hidden field - and base64-armored, because it might
 # otherwise have stuff in it that isn't legal in HTML attribute vakues.
 #
 import sys, os, smtplib, base64
