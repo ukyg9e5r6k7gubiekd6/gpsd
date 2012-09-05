@@ -98,11 +98,15 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
     msg = report.as_string()
     smtp = smtplib.SMTP(host=servaddr.split("@")[1])
     smtp.set_debuglevel(1)
-    smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
-    smtp.quit()
-    print "<H1>New device report accepted.</H1>\n"
-    print "<p>Your report on the %s %s was successfully recorded. Thanks for helping improve GPSD.\n" \
-          % (form.getvalue('vendor'), form.getvalue('model'))
+    try:
+        smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
+        smtp.quit()
+        print "<H1>New device report accepted.</H1>\n"
+        print "<p>Your report on the %s %s was successfully recorded. Thanks for helping improve GPSD.\n" \
+              % (form.getvalue('vendor'), form.getvalue('model'))
+    except smtplib.SMTPSenderRefused, e:
+        print "<H1>Your submission failed.</H1>\n"
+        print "<p>The error code was %s: %s</p>" % (e.code, e.response)
     sys.exit(0)
 
 # Everything below here is page generation
