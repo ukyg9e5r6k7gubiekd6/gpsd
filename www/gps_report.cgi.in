@@ -558,7 +558,7 @@ else:
 <table width="100%%" border="0">
 <tr>
 <td align="center">
-	<a href="%(request_uri)s"">Reset Form</a>
+	<a href="%(request_uri)s">Reset Form</a>
 	<input type="submit" name="action" value="Review">
 </td>
 </tr>
