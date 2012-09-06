@@ -20,7 +20,7 @@ import cgitb; cgitb.enable()  # for troubleshooting
 # All information on the project siting, mailing
 # lists, and originating host lives here.
 website = '@WEBSITE@'
-to_address = "esr@thyrsus.com"  #'@DEVMAIL@'
+to_address = '@DEVMAIL@'
 servaddr = '@FORMSERVER@'
 
 # Get form value, send mail on submission
