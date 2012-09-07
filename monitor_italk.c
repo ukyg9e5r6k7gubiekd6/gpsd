@@ -83,24 +83,24 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
 	return;
 
 #ifdef __UNUSED__
-    flags = (ushort) getleu16(buf, 7 + 4); */
-    cflags = (ushort) getleu16(buf, 7 + 6);
-    pflags = (ushort) getleu16(buf, 7 + 8);
+    flags = (unsigned short) getleu16(buf, 7 + 4); */
+    cflags = (unsigned short) getleu16(buf, 7 + 6);
+    pflags = (unsigned short) getleu16(buf, 7 + 8);
 #endif /* __UNUSED__ */
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
-    nsv = (ushort) MAX(getleu16(buf, 7 + 12), getleu16(buf, 7 + 14));
-    svlist = (ushort) getleu32(buf, 7 + 16) | getleu32(buf, 7 + 24);
+    nsv = (unsigned short) MAX(getleu16(buf, 7 + 12), getleu16(buf, 7 + 14));
+    svlist = (unsigned short) getleu32(buf, 7 + 16) | getleu32(buf, 7 + 24);
 
-    hour = (ushort) getleu16(buf, 7 + 66);
-    min = (ushort) getleu16(buf, 7 + 68);
-    sec = (ushort) getleu16(buf, 7 + 70);
-    //nsec = (ushort) getleu32(buf, 7 + 72);
-    year = (ushort) getleu16(buf, 7 + 76);
-    mon = (ushort) getleu16(buf, 7 + 78);
-    day = (ushort) getleu16(buf, 7 + 80);
-    gps_week = (ushort) getles16(buf, 7 + 82);
-    tow = (ushort) getleu32(buf, 7 + 84);
+    hour = (unsigned short) getleu16(buf, 7 + 66);
+    min = (unsigned short) getleu16(buf, 7 + 68);
+    sec = (unsigned short) getleu16(buf, 7 + 70);
+    //nsec = (unsigned short) getleu32(buf, 7 + 72);
+    year = (unsigned short) getleu16(buf, 7 + 76);
+    mon = (unsigned short) getleu16(buf, 7 + 78);
+    day = (unsigned short) getleu16(buf, 7 + 80);
+    gps_week = (unsigned short) getles16(buf, 7 + 82);
+    tow = (unsigned short) getleu32(buf, 7 + 84);
 
     epx = (double)(getles32(buf, 7 + 96) / 100.0);
     epy = (double)(getles32(buf, 7 + 100) / 100.0);
