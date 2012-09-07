@@ -982,7 +982,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* track the packet count since achieving sync on the device */
 	if (first_sync) {
-	    speed_t speed = gpsd_get_speed(&session->ttyset);
+	    speed_t speed = gpsd_get_speed(session);
 
 	    /*@-nullderef@*/
 	    gpsd_report(LOG_INF,

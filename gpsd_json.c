@@ -398,7 +398,7 @@ void json_device_dump(const struct gps_device_t *device,
 	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 			   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
 			   device->gpsdata.dev.driver_mode,
-			   (int)gpsd_get_speed(&device->ttyset),
+			   (int)gpsd_get_speed(device),
 			   device->gpsdata.dev.parity,
 			   device->gpsdata.dev.stopbits,
 			   device->gpsdata.dev.cycle);

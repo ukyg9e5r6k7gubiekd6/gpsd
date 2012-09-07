@@ -22,9 +22,12 @@
 gpsd_version = "3.8~dev"
 
 # library version
-libgps_version_current  = 20
-libgps_version_revision = 0
-libgps_version_age      = 0
+libgps_version_current   = 20
+libgps_version_revision  = 0
+libgps_version_age       = 0
+libgpsd_version_current  = 21
+libgpsd_version_revision = 0
+libgpsd_version_age      = 0
 
 # Release identification ends here
 
@@ -677,6 +680,8 @@ else:
 
 libgps_version_soname = libgps_version_current - libgps_version_age
 libgps_version = "%d.%d.%d" %(libgps_version_soname, libgps_version_age, libgps_version_revision)
+libgpsd_version_soname = libgpsd_version_current - libgpsd_version_age
+libgpsd_version = "%d.%d.%d" %(libgpsd_version_soname, libgpsd_version_age, libgpsd_version_revision)
 
 libgps_sources = [
     "ais_json.c",
@@ -838,7 +843,7 @@ env.Clean(compiled_gpslib, "gps_maskdump.c")
 compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
-                           version=libgps_version,
+                           version=libgpsd_version,
                            parse_flags=usblibs + rtlibs + bluezlibs)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
