@@ -72,6 +72,7 @@ GPSD Frequently Asked Questions
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a></li>
 <li><a href='#startup'>Why does getting a fix take so long after powerup?</a></li>
 <li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
+<li><a href='#timelag2'>Why is my GPS time off by exactly one second?</a></li>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a></li>
 <li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a></li>
 <li><a href='#kismet'>Why do I get no results when I try to use <code>gpsd</code> with Kismet?</a></li>
@@ -405,6 +406,26 @@ fail to ship all its reports before the next once-per-second fix,
 producing an accumulating stall.  The symptom of this is sentence times that
 look right at startup but gradually fall behind clock time.  To fix
 this, bump your speed to 9600 or higher.</p>
+
+<h1 id="timelag2">Why is my GPS time off by exactly one second?</h1>
+
+<p>This can happen if (a) there has been a recent <a
+href="ftp://maia.usno.navy.mil/ser7/tai-utc.dat">leap-second
+adjustment</a>, (b) you have a version of GPSD that was built before
+the adjustment, and (c) your GPS doesn't ship the current leap-second
+offset in a form GPSD can see.  If this happens, GPSD will fall back
+to a compiled-in default that is off by one</p>
+
+<p>Some SiRFs have a particularly insidious version of this.  They are
+supposed to ship a MID52 sentence (which GPSD knows how to interpret)
+containing the current leap-second offset.  But there is at least one
+firmware revision that ships a damaged version of MID52 with a garbled
+start sequence or a zero length field.  This GPSD cannot handle.</p>
+
+<p>The bad revision is 2.3.2-GSW2-2.05.024-C1Prod1.1; there may be
+others.  Suspect this if you have persistent off-by-one errors. If you
+are able to identify other bad firmeare versions, please let us
+know about it.</p>
 
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
