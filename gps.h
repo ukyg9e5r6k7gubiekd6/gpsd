@@ -34,7 +34,7 @@ extern "C" {
  * 4.1 - Base version for initial JSON protocol (Dec 2009, release 2.90)
  * 4.2 - AIS application IDs split into DAC and FID (July 2010, release 2.95)
  * 5.0 - MAXCHANNELS bumped from 20 to 32 for GLONASS (Mar 2011, release 2.96)
- *       gps_open() becomes reentrant, what gps_open_r() used to be. 
+ *       gps_open() becomes reentrant, what gps_open_r() used to be.
  *       gps_poll() removed in favor of gps_read().  The raw hook is gone.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
@@ -46,9 +46,9 @@ extern "C" {
 #define GPS_PATH_MAX	128	/* dev files usually have short names */
 #define MAXUSERDEVS	4	/* max devices per user */
 
-/* 
+/*
  * The structure describing an uncertainty volume in kinematic space.
- * This is what GPSes are meant to produce; all the other info is 
+ * This is what GPSes are meant to produce; all the other info is
  * technical impedimenta.
  *
  * All double values use NAN to indicate data not available.
@@ -59,14 +59,14 @@ extern "C" {
  * This covers over 80% of GPS products in early 2005.
  *
  * If you are using a chipset that speaks NMEA, this structure is updated
- * in bits by GPRMC (lat/lon, track, speed), GPGGA (alt, climb), GPGLL 
+ * in bits by GPRMC (lat/lon, track, speed), GPGGA (alt, climb), GPGLL
  * (lat/lon), and GPGSA (eph, epv).  Most NMEA GPSes take a single fix
  * at the beginning of a 1-second cycle and report the same timestamp in
  * GPRMC, GPGGA, and GPGLL; for these, all info is guaranteed correctly
- * synced to the time member, but you'll get different stages of the same 
- * update depending on where in the cycle you poll.  A very few GPSes, 
- * like the Garmin 48, take a new fix before more than one of of 
- * GPRMC/GPGGA/GPGLL during a single cycle; thus, they may have different 
+ * synced to the time member, but you'll get different stages of the same
+ * update depending on where in the cycle you poll.  A very few GPSes,
+ * like the Garmin 48, take a new fix before more than one of of
+ * GPRMC/GPGGA/GPGLL during a single cycle; thus, they may have different
  * timestamps and some data in this structure can be up to 1 cycle (usually
  * 1 second) older than the fix time.
  *
@@ -99,7 +99,7 @@ struct gps_fix_t {
 /*
  * Satellite ID classes.
  * U.S. GPS authorities reserve PRNs 1-64 for GPS satellites.
- * GLONASS birds reuse GPS PRNs;  it is a GPSD convention to map them to 
+ * GLONASS birds reuse GPS PRNs;  it is a GPSD convention to map them to
  * IDs 64 and above (some other programs push them to 33 and above).
  * All SBAS/WAAS/EGNOS birds have PRNs above 100.
  */
@@ -107,7 +107,7 @@ struct gps_fix_t {
 #define GLONASS_PRN(n)	(((n) >= 64) && ((n) <= 96))	/* GLONASS satellite */
 #define DGPS_PRN(n)	((n) >= 100)
 
-/* 
+/*
  * The structure describing the pseudorange errors (GPGST)
  */
 struct gst_t {
@@ -121,7 +121,7 @@ struct gst_t {
     double alt_err_deviation;
 };
 
-/*  
+/*
  * From the RCTM104 2.x standard:
  *
  * "The 30 bit words (as opposed to 32 bit words) coupled with a 50 Hz
@@ -140,7 +140,7 @@ struct gst_t {
 /* RTCM104 doesn't specify this, so give it the largest reasonable value */
 #define MAXHEALTH	(RTCM2_WORDS_MAX-2)
 
-#ifndef S_SPLINT_S 
+#ifndef S_SPLINT_S
 /*
  * A nominally 30-bit word (24 bits of data, 6 bits of parity)
  * used both in the GPS downlink protocol described in IS-GPS-200
@@ -149,8 +149,8 @@ struct gst_t {
 typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
 #endif /* S_SPLINT_S */
 
-/* 
- * Values for "system" fields.  Note, the encoding logic is senstive to the 
+/*
+ * Values for "system" fields.  Note, the encoding logic is senstive to the
  * actual values of these; it's not sufficient that they're distinct.
  */
 #define NAVSYSTEM_GPS   	0
@@ -260,7 +260,7 @@ struct rtcm2_t {
 struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
     /* Used for both GPS and GLONASS, but their timebases differ */
     unsigned int station_id;	/* Reference Station ID */
-    time_t tow;			/* GPS Epoch Time (TOW) in ms, 
+    time_t tow;			/* GPS Epoch Time (TOW) in ms,
 				   or GLONASS Epoch Time in ms */
     bool sync;			/* Synchronous GNSS Message Flag */
     unsigned short satcount;	/* # Satellite Signals Processed */
@@ -270,7 +270,7 @@ struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
 
 struct rtcm3_basic_rtk {
     unsigned char indicator;	/* Indicator */
-    short channel;		/* Satellite Frequency Channel Number 
+    short channel;		/* Satellite Frequency Channel Number
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */
     double rangediff;		/* PhaseRange – Pseudorange in meters */
@@ -279,12 +279,12 @@ struct rtcm3_basic_rtk {
 
 struct rtcm3_extended_rtk {
     unsigned char indicator;	/* Indicator */
-    short channel;		/* Satellite Frequency Channel Number 
+    short channel;		/* Satellite Frequency Channel Number
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */
     double rangediff;		/* PhaseRange – L1 Pseudorange */
     unsigned char locktime;	/* Lock time Indicator */
-    unsigned char ambiguity;	/* Integer Pseudorange 
+    unsigned char ambiguity;	/* Integer Pseudorange
 					   Modulus Ambiguity */
     double CNR;			/* Carrier-to-Noise Ratio */
 };
@@ -303,10 +303,10 @@ struct rtcm3_correction_diff {
     unsigned char ident;	/* satellite ID */
     enum {reserved, correct, widelane, uncertain} ambiguity;
     unsigned char nonsync;
-    double geometric_diff;	/* Geometric Carrier Phase 
+    double geometric_diff;	/* Geometric Carrier Phase
 				   Correction Difference (1016, 1017) */
     unsigned char iode;		/* GPS IODE (1016, 1017) */
-    double ionospheric_diff;	/* Ionospheric Carrier Phase 
+    double ionospheric_diff;	/* Ionospheric Carrier Phase
 				   Correction Difference (1015, 1017) */
 };
 
@@ -537,7 +537,7 @@ struct rtcm3_t {
  * Raw IS_GPS subframe data
  */
 
-/* The almanac is a subset of the clock and ephemeris data, with reduced 
+/* The almanac is a subset of the clock and ephemeris data, with reduced
  * precision. See IS-GPS-200E, Table 20-VI  */
 struct almanac_t
 {
@@ -587,7 +587,7 @@ struct subframe_t {
      * IS-GPS-200E always == 0x1 */
     uint8_t data_id;
     /* SV/page id used for subframes 4 & 5, 6 bits */
-    uint8_t pageid; 
+    uint8_t pageid;
     /* tSVID, SV ID of the sat that transmitted this frame, 6 bits unsigned */
     uint8_t tSVID;
     /* TOW, Time of Week of NEXT message, 17 bits unsigned, scale 6, seconds */
@@ -595,7 +595,7 @@ struct subframe_t {
     long l_TOW17;
     /* integrity, URA bounds flag, 1 bit */
     bool integrity;
-    /* alert, alert flag, SV URA and/or the SV User Differential Range 
+    /* alert, alert flag, SV URA and/or the SV User Differential Range
      * Accuracy (UDRA) may be worse than indicated, 1 bit */
     bool alert;
     /* antispoof, A-S mode is ON in that SV, 1 bit */
@@ -607,7 +607,7 @@ struct subframe_t {
 	struct {
 	    /* WN, Week Number, 10 bits unsigned, scale 1, weeks */
 	    uint16_t WN;
-	    /* IODC, Issue of Data, Clock, 10 bits, unsigned, 
+	    /* IODC, Issue of Data, Clock, 10 bits, unsigned,
 	     * issued in 8 data ranges at the same time */
 	    uint16_t IODC;
 	    /* toc, clock data reference time, 16 bits, unsigned, seconds
@@ -642,7 +642,7 @@ struct subframe_t {
         /* subframe 2, part of ephemeris, see IS-GPS-200E, Table 20-II
 	 * and Table 20-III */
 	struct {
-	    /* Issue of Data (Ephemeris), 
+	    /* Issue of Data (Ephemeris),
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
 	    uint8_t IODE;
 	    /* Age of Data Offset for the NMCT, 6 bits, scale 900,
@@ -656,15 +656,15 @@ struct subframe_t {
 	     * seconds */
 	    uint16_t toe;
 	    long l_toe;
-	    /* Crs, Amplitude of the Sine Harmonic Correction Term to the 
+	    /* Crs, Amplitude of the Sine Harmonic Correction Term to the
 	     * Orbit Radius, 16 bits, scale 2**-5, signed, meters */
 	    int16_t Crs;
 	    double d_Crs;
-	    /* Cus, Amplitude of the Sine Harmonic Correction Term to the 
+	    /* Cus, Amplitude of the Sine Harmonic Correction Term to the
 	     * Argument of Latitude, 16 bits, signed, scale 2**-29, radians */
 	    int16_t Cus;
 	    double d_Cus;
-	    /* Cuc, Amplitude of the Cosine Harmonic Correction Term to the 
+	    /* Cuc, Amplitude of the Cosine Harmonic Correction Term to the
 	     * Argument of Latitude, 16 bits, signed, scale 2**-29, radians */
 	    int16_t Cuc;
 	    double d_Cuc;
@@ -673,7 +673,7 @@ struct subframe_t {
 	     * 16 bits, signed, scale 2**-43, semi-circles/sec */
 	    int16_t deltan;
 	    double d_deltan;
-	    /* M0, Mean Anomaly at Reference Time, 32 bits signed, 
+	    /* M0, Mean Anomaly at Reference Time, 32 bits signed,
 	     * scale 2**-31, semi-circles */
 	    int32_t M0;
 	    double d_M0;
@@ -688,14 +688,14 @@ struct subframe_t {
         /* subframe 3, part of ephemeris, see IS-GPS-200E, Table 20-II,
 	 * Table 20-III */
 	struct {
-	    /* Issue of Data (Ephemeris), 8 bits, unsigned 
+	    /* Issue of Data (Ephemeris), 8 bits, unsigned
 	     * equal to the 8 LSBs of the 10 bit IODC of the same data set */
 	    uint8_t IODE;
 	    /* Rate of Inclination Angle, 14 bits signed, scale2**-43,
 	     * semi-circles/sec */
 	    int16_t IDOT;
 	    double d_IDOT;
-	    /* Cic, Amplitude of the Cosine Harmonic Correction Term to the 
+	    /* Cic, Amplitude of the Cosine Harmonic Correction Term to the
 	     * Angle of Inclination, 16 bits signed, scale 2**-29, radians*/
 	    int16_t Cic;
 	    double d_Cic;
@@ -711,7 +711,7 @@ struct subframe_t {
 	     * scale 2**-31, semi-circles */
 	    int32_t i0;
 	    double d_i0;
-	    /* Omega0, Longitude of Ascending Node of Orbit Plane at Weekly 
+	    /* Omega0, Longitude of Ascending Node of Orbit Plane at Weekly
 	     * Epoch, 32 bits signed, semi-circles */
 	    int32_t Omega0;
 	    double d_Omega0;
@@ -719,7 +719,7 @@ struct subframe_t {
 	     * semi-circles */
 	    int32_t omega;
 	    double d_omega;
-	    /* Omega dot, Rate of Right Ascension, 24 bits signed, 
+	    /* Omega dot, Rate of Right Ascension, 24 bits signed,
 	     * scale 2**-43, semi-circles/sec */
 	    int32_t Omegad;
 	    double d_Omegad;
@@ -743,16 +743,16 @@ struct subframe_t {
 	/* subframe 4, page 18 */
 	struct {
 	    /* ionospheric and UTC data */
-	    /* A0, Bias coefficient of GPS time scale relative to UTC time 
+	    /* A0, Bias coefficient of GPS time scale relative to UTC time
 	     * scale, 32 bits signed, scale 2**-30, seconds */
 	    int32_t A0;
 	    double d_A0;
-	    /* A1, Drift coefficient of GPS time scale relative to UTC time 
+	    /* A1, Drift coefficient of GPS time scale relative to UTC time
 	     * scale, 24 bits signed, scale 2**-50, seconds/second */
 	    int32_t A1;
 	    double d_A1;
 
-	    /* alphaX, the four coefficients of a cubic equation representing 
+	    /* alphaX, the four coefficients of a cubic equation representing
 	     * the amplitude of the vertical delay */
 
 	    /* alpha0, 8 bits signed, scale w**-30, seconds */
@@ -768,7 +768,7 @@ struct subframe_t {
 	    int8_t alpha3;
 	    double d_alpha3;
 
-	    /* betaX, the four coefficients of a cubic equation representing 
+	    /* betaX, the four coefficients of a cubic equation representing
 	     * the period of the model */
 
 	    /* beta0, 8 bits signed, scale w**11, seconds */
@@ -783,11 +783,11 @@ struct subframe_t {
 	    /* beta3, 8 bits signed, scale w**16, seconds/semi-circle**3 */
 	    int8_t beta3;
 	    double d_beta3;
-	    
-	    /* leap (delta t ls), current leap second, 8 bits signed, 
+
+	    /* leap (delta t ls), current leap second, 8 bits signed,
 	     * scale 1, seconds */
 	    int8_t leap;
-	    /* lsf (delta t lsf), future leap second, 8 bits signed, 
+	    /* lsf (delta t lsf), future leap second, 8 bits signed,
 	     * scale 1, seconds */
 	    int8_t lsf;
 
@@ -796,7 +796,7 @@ struct subframe_t {
 	    uint8_t tot;
 	    double d_tot;
 
-	    /* WNt, UTC reference week number, 8 bits unsigned, scale 1, 
+	    /* WNt, UTC reference week number, 8 bits unsigned, scale 1,
 	     * weeks */
 	    uint8_t WNt;
 	    /* WNlsf, Leap second reference Week Number,
@@ -823,7 +823,7 @@ struct subframe_t {
 	     * seconds */
 	    uint8_t toa;
 	    long l_toa;
-	    /* WNa, Week Number almanac, 8 bits, scale 2, GPS Week 
+	    /* WNa, Week Number almanac, 8 bits, scale 2, GPS Week
 	     * Number % 256 */
 	    uint8_t WNa;
 	    /* sv, SV health status, 6 bits, bitmap */
@@ -838,11 +838,11 @@ typedef uint64_t gps_mask_t;
 typedef /*@unsignedintegraltype@*/ unsigned long long gps_mask_t;
 #endif /* S_SPLINT_S */
 
-/* 
+/*
  * Is an MMSI number that of an auxiliary associated with a mother ship?
  * We need to be able to test this for decoding AIS Type 24 messages.
  * According to <http://www.navcen.uscg.gov/marcomms/gmdss/mmsi.htm#format>,
- * auxiliary-craft MMSIs have the form 98MIDXXXX, where MID is a country 
+ * auxiliary-craft MMSIs have the form 98MIDXXXX, where MID is a country
  * code and XXXX the vessel ID.
  */
 #define AIS_AUXILIARY_MMSI(n)	((n) / 10000000 == 98)
@@ -935,7 +935,7 @@ struct ais_t
 	struct {
 	    unsigned int ais_version;	/* AIS version level */
 	    unsigned int imo;		/* IMO identification */
-	    char callsign[7+1];		/* callsign */ 
+	    char callsign[7+1];		/* callsign */
 #define AIS_SHIPNAME_MAXLEN	20
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];	/* vessel name */
 	    unsigned int shiptype;	/* ship type code */
@@ -1762,18 +1762,18 @@ struct policy_t {
     bool json;				/* requesting JSON? */
     bool nmea;				/* requesting dumping as NMEA? */
     int raw;				/* requesting raw data? */
-    bool scaled;			/* requesting report scaling? */ 
+    bool scaled;			/* requesting report scaling? */
     bool timing;			/* requesting timing info */
     int loglevel;			/* requested log level of messages */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
 };
 
-/* 
+/*
  * Someday we may support Windows, under which socket_t is a separate type.
  * In the meantime, having a typedef for this semantic kind is no bad thing,
  * as it makes clearer what some declarations are doing without breaking
- * binary compatibility. 
+ * binary compatibility.
  */
 typedef int socket_t;
 
@@ -1784,13 +1784,13 @@ typedef int socket_t;
 #define WATCH_NMEA	0x000020u	/* output in NMEA */
 #define WATCH_RARE	0x000040u	/* output of packets in hex */
 #define WATCH_RAW	0x000080u	/* output of raw packets */
-#define WATCH_SCALED	0x000100u	/* scale output to floats */ 
+#define WATCH_SCALED	0x000100u	/* scale output to floats */
 #define WATCH_TIMING	0x000200u	/* timing information */
 #define WATCH_DEVICE	0x000800u	/* watch specific device */
 #define WATCH_NEWSTYLE	0x010000u	/* force JSON streaming */
 #define WATCH_OLDSTYLE	0x020000u	/* force old-style streaming */
 
-/* 
+/*
  * Main structure that includes all previous substructures
  */
 
@@ -1832,7 +1832,7 @@ struct gps_data_t {
 				 *
 				 * Note: gpsd clears this time when sentences
 				 * fail to show up within the GPS's normal
-				 * send cycle time. If the host-to-GPS 
+				 * send cycle time. If the host-to-GPS
 				 * link is lossy enough to drop entire
 				 * sentences, this field will be
 				 * prone to false zero values.
@@ -1877,10 +1877,10 @@ struct gps_data_t {
     /* should be moved to privdata someday */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
-    /* pack things never reported together to reduce structure size */ 
+    /* pack things never reported together to reduce structure size */
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET)
     union {
-	/* unusual forms of sensor data that might come up the pipe */ 
+	/* unusual forms of sensor data that might come up the pipe */
 	struct rtcm2_t	rtcm2;
 	struct rtcm3_t	rtcm3;
 	struct subframe_t subframe;
@@ -1902,7 +1902,7 @@ struct gps_data_t {
     void *privdata;
 };
 
-extern int gps_open(/*@null@*/const char *, /*@null@*/const char *, 
+extern int gps_open(/*@null@*/const char *, /*@null@*/const char *,
 		      /*@out@*/struct gps_data_t *);
 extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *, const char *, ... );
@@ -1933,8 +1933,8 @@ extern timestamp_t timestamp(void);
 extern timestamp_t iso8601_to_unix(char *);
 extern /*@observer@*/char *unix_to_iso8601(timestamp_t t, /*@ out @*/char[], size_t len);
 extern double earth_distance(double, double, double, double);
-extern double earth_distance_and_bearings(double, double, double, double, 
-					  /*@null@*//*@out@*/double *, 
+extern double earth_distance_and_bearings(double, double, double, double,
+					  /*@null@*//*@out@*/double *,
 					  /*@null@*//*@out@*/double *);
 extern double wgs84_separation(double, double);
 
@@ -1974,7 +1974,7 @@ extern double wgs84_separation(double, double);
 #define DEFAULT_GPSD_PORT	"2947"	/* IANA assignment */
 #define DEFAULT_RTCM_PORT	"2101"	/* IANA assignment */
 
-/* special host values for non-socket exports */ 
+/* special host values for non-socket exports */
 #define GPSD_SHARED_MEMORY	"shared memory"
 #define GPSD_DBUS_EXPORT	"DBUS export"
 

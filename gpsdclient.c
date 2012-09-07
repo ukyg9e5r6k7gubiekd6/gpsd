@@ -75,19 +75,19 @@ static struct exportmethod_t exportmethods[] = {
     return str;
 }
 
-/* 
+/*
  * check the environment to determine proper GPS units
  *
- * clients should only call this if no user preference is specified on 
+ * clients should only call this if no user preference is specified on
  * the command line or via X resources.
  *
  * return imperial    - Use miles/feet
  *        nautical    - Use knots/feet
  *        metric      - Use km/meters
  *        unspecified - use compiled default
- * 
+ *
  * In order check these environment vars:
- *    GPSD_UNITS one of: 
+ *    GPSD_UNITS one of:
  *            	imperial   = miles/feet
  *              nautical   = knots/feet
  *              metric     = km/meters
@@ -194,14 +194,14 @@ char *maidenhead(double n, double e)
      * http://en.wikipedia.org/wiki/Maidenhead_Locator_System
      *
      * There's a fair amount of slop in how Maidenhead converters operate
-     * that can make it look like this one is wrong.  
+     * that can make it look like this one is wrong.
      *
      * 1. Many return caps for paces 5 and 6 when according to the spwec
      *    they should return smalls.
      *
      * 2. Some converters, including QGrid from which this code was originally
      *    derived, add an 0.5 offset to the divided e and n just before it
-     *    is cast to integer and used for places 5 and 6. This appears to be 
+     *    is cast to integer and used for places 5 and 6. This appears to be
      *    intended as a round-to-nearest hack (as opposed to the implicit
      *    round down from the cast). If I'm reading the spec right it
      *    is not correct to do this.
@@ -227,7 +227,7 @@ char *maidenhead(double n, double e)
     n*=24; // convert to 24 division
     buf[5]=(char)(int)(n)+'a';
     buf[6] = '\0';
- 
+
     return buf;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Prototype file for a gpsmon monitor object.  
+ * Prototype file for a gpsmon monitor object.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -61,7 +61,7 @@ static bool PROTO_initialize(void)
 static void PROTO_update(void)
 {
     /*
-     * Called on each packet received.  The packet will be accessible in 
+     * Called on each packet received.  The packet will be accessible in
      * session.packet.outbuffer and the length in session.packet.outbuflen.
      * If the device is NMEA, session.driver.nmea.fields[] will contain the
      * array of unconverted field strings, including the tag in slot zero
@@ -78,12 +78,12 @@ static int PROTO_command(char line[])
     /*
      * Interpret a command line.  Whatever characters the user types will
      * be echoed in the command buffer at the top right of the display. When
-     * he/she presses enter the command line will be passed to this function  
+     * he/she presses enter the command line will be passed to this function
      * for interpretation.  Note: packet receipt is suspended while this
      * function is executing.
      *
      * This method is optional.  If you set the command method pointer to
-     * NULL, gpsmon will behave sanely, accepting no device-specific commands. 
+     * NULL, gpsmon will behave sanely, accepting no device-specific commands.
      *
      * It is a useful convention to use uppercase letters for
      * driver-specific commands and leave lowercase ones for the
@@ -91,7 +91,7 @@ static int PROTO_command(char line[])
      */
     assert(strlen(line));
 
-    /* 
+    /*
      * Return COMMAND_UNKNOWN to tell gpsmon you can't interpret the line, and
      * it will be passed to the generic command interpreter to be handled there.
      * You can alse return COMMAND_MATCH to tell it you handled the command,
@@ -103,7 +103,7 @@ static int PROTO_command(char line[])
 
 static void PROTO_wrap(void)
 {
-    /* 
+    /*
      * Deinitialize any windows you created in PROTO_initialize.
      * This will be called when gpsmon switches drivers due to seeing
      * a new packet type.
@@ -148,7 +148,7 @@ const struct monitor_object_t PROTO_mmt = {
  *    You get to make sure the message will fit.
  *
  * void monitor_fixframe(WINDOW *win)
- *    Fix the frame of win to the right of the current location by redrawing 
+ *    Fix the frame of win to the right of the current location by redrawing
  *    ACS_VLINE there.  Useful after doing wclrtoeol() and writing on the
  *    line.
  *

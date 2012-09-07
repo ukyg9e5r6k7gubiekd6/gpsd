@@ -178,7 +178,7 @@ int gps_sock_read(/*@out@*/struct gps_data_t *gpsdata)
 	    PRIVATE(gpsdata)->waiting += status;
 	/* buffer is empty - implies no data was read */
 	if (PRIVATE(gpsdata)->waiting == 0) {
-	    /* 
+	    /*
 	     * If we received 0 bytes, other side of socket is closing.
 	     * Return -1 as end-of-data indication.
 	     */
@@ -557,7 +557,7 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
     }
 }
 
-int gps_sock_mainloop(struct gps_data_t *gpsdata, int timeout, 
+int gps_sock_mainloop(struct gps_data_t *gpsdata, int timeout,
 			 void (*hook)(struct gps_data_t *gpsdata))
 /* run a socket main loop with a specified handler */
 {

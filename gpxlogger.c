@@ -131,14 +131,14 @@ static void conditionally_log_fix(struct gps_data_t *gpsdata)
     if ((int_time == old_int_time) || gpsdata->fix.mode < MODE_2D)
 	return;
 
-    /* may not be worth logging if we've moved only a very short distance */ 
+    /* may not be worth logging if we've moved only a very short distance */
     if (minmove>0 && !first && earth_distance(
 					gpsdata->fix.latitude,
 					gpsdata->fix.longitude,
 					old_lat, old_lon) < minmove)
 	return;
 
-    /* 
+    /*
      * Make new track if the jump in time is above
      * timeout.  Handle jumps both forward and
      * backwards in time.  The clock sometimes jumps

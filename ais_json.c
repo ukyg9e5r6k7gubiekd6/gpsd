@@ -22,7 +22,7 @@ representations to libgps structures.
 
 /* FIXME: kluges because we don't want to include gpsd.h here */
 extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);
-int json_ais_read(const char *, char *, size_t, struct ais_t *, 
+int json_ais_read(const char *, char *, size_t, struct ais_t *,
 		  /*@null@*/const char **);
 
 /*@ -mustdefine @*/
@@ -104,7 +104,7 @@ int json_ais_read(const char *buf,
 			 &ais->type4.month,
 			 &ais->type4.day,
 			 &ais->type4.hour,
-			 &ais->type4.minute, 
+			 &ais->type4.minute,
 			 &ais->type4.second);
 	}
     } else if (strstr(buf, "\"type\":5,") != NULL) {
@@ -118,7 +118,7 @@ int json_ais_read(const char *buf,
 	    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 			 &ais->type5.month,
 			 &ais->type5.day,
-			 &ais->type5.hour, 
+			 &ais->type5.hour,
 			 &ais->type5.minute);
 	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
@@ -135,7 +135,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(departure, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid12.lmonth,
 				 &ais->type6.dac1fid12.lday,
-				 &ais->type6.dac1fid12.lhour, 
+				 &ais->type6.dac1fid12.lhour,
 				 &ais->type6.dac1fid12.lminute);
 		    ais->type6.dac1fid12.nmonth = AIS_MONTH_NOT_AVAILABLE;
 		    ais->type6.dac1fid12.nday = AIS_DAY_NOT_AVAILABLE;
@@ -145,7 +145,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid12.nmonth,
 				 &ais->type6.dac1fid12.nday,
-				 &ais->type6.dac1fid12.nhour, 
+				 &ais->type6.dac1fid12.nhour,
 				 &ais->type6.dac1fid12.nminute);
 		}
 		imo = true;
@@ -168,7 +168,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(arrival, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid18.month,
 				 &ais->type6.dac1fid18.day,
-				 &ais->type6.dac1fid18.hour, 
+				 &ais->type6.dac1fid18.hour,
 				 &ais->type6.dac1fid18.minute);
 		}
 		imo = true;
@@ -184,7 +184,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(arrival, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid20.month,
 				 &ais->type6.dac1fid20.day,
-				 &ais->type6.dac1fid20.hour, 
+				 &ais->type6.dac1fid20.hour,
 				 &ais->type6.dac1fid20.minute);
 		}
 		imo = true;
@@ -204,7 +204,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(start, "%02u-%02uT%02u:%02uZ",
 				 &ais->type6.dac1fid28.month,
 				 &ais->type6.dac1fid28.day,
-				 &ais->type6.dac1fid28.hour, 
+				 &ais->type6.dac1fid28.hour,
 				 &ais->type6.dac1fid28.minute);
 		}
 		imo = true;
@@ -245,7 +245,7 @@ int json_ais_read(const char *buf,
 		    // cppcheck-suppress uninitvar
 		    (void)sscanf(timestamp, "%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid11.day,
-				 &ais->type8.dac1fid11.hour, 
+				 &ais->type8.dac1fid11.hour,
 				 &ais->type8.dac1fid11.minute);
 		}
 		imo = true;
@@ -261,7 +261,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(departure, "%02u-%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid13.fmonth,
 				 &ais->type8.dac1fid13.fday,
-				 &ais->type8.dac1fid13.fhour, 
+				 &ais->type8.dac1fid13.fhour,
 				 &ais->type8.dac1fid13.fminute);
 		    ais->type8.dac1fid13.tmonth = AIS_MONTH_NOT_AVAILABLE;
 		    ais->type8.dac1fid13.tday = AIS_DAY_NOT_AVAILABLE;
@@ -271,7 +271,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(eta, "%02u-%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid13.tmonth,
 				 &ais->type8.dac1fid13.tday,
-				 &ais->type8.dac1fid13.thour, 
+				 &ais->type8.dac1fid13.thour,
 				 &ais->type8.dac1fid13.tminute);
 		}
 		imo = true;
@@ -299,7 +299,7 @@ int json_ais_read(const char *buf,
 		    (void)sscanf(start, "%02u-%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid27.month,
 				 &ais->type8.dac1fid27.day,
-				 &ais->type8.dac1fid27.hour, 
+				 &ais->type8.dac1fid27.hour,
 				 &ais->type8.dac1fid27.minute);
 		}
 		imo = true;
@@ -317,7 +317,7 @@ int json_ais_read(const char *buf,
 		    // cppcheck-suppress uninitvar
 		    (void)sscanf(timestamp, "%02uT%02u:%02uZ",
 				 &ais->type8.dac1fid31.day,
-				 &ais->type8.dac1fid31.hour, 
+				 &ais->type8.dac1fid31.hour,
 				 &ais->type8.dac1fid31.minute);
 		}
 		imo = true;

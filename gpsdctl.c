@@ -21,7 +21,7 @@
 
 #include "gpsd.h"
 
-static char *control_socket = DEFAULT_GPSD_SOCKET; 
+static char *control_socket = DEFAULT_GPSD_SOCKET;
 static char *gpsd_options = "";
 
 static int gpsd_control(char *action, char *argument)

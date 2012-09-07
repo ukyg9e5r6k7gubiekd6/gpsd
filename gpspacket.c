@@ -21,8 +21,8 @@ void gpsd_report(int errlevel, const char *fmt, ... )
     va_list ap;
 
     if (!report_callback)   /* no callback defined, exit early */
-	return;	
-    
+	return;
+
     if (!PyCallable_Check(report_callback)) {
 	PyErr_SetString(ErrorObject, "Cannot call Python callback function");
 	return;
@@ -83,8 +83,8 @@ Lexer_get(LexerObject *self, PyObject *args)
 
     return Py_BuildValue("(i, i, s#, i)",
 			 len,
-			 self->lexer.type, 
-			 self->lexer.outbuffer, 
+			 self->lexer.type,
+			 self->lexer.outbuffer,
 			 self->lexer.outbuflen,
 			 self->lexer.char_counter);
 }

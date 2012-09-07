@@ -92,11 +92,11 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->newdata.eps = GET_SPEED_ERROR();
     session->gpsdata.satellites_used = GET_SATELLITES_USED();
     /*
-     * Do *not* clear DOPs in a navigation solution message;  
-     * instead, opportunistically pick up whatever it gives 
-     * us and replace whatever values we computed from the 
+     * Do *not* clear DOPs in a navigation solution message;
+     * instead, opportunistically pick up whatever it gives
+     * us and replace whatever values we computed from the
      * visibility matrix for he last skyview. The reason to trust
-     * the chip returns over what we compute is that some 
+     * the chip returns over what we compute is that some
      * chips have internal deweighting albums to throw out sats
      * that increase DOP.
      */
@@ -115,7 +115,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      */
     mask |= MODE_SET | STATUS_SET | REPORT_IS;
 
-    /* 
+    /*
      * At the end of each packet-cracking function, report at LOG_DATA level
      * the fields it potentially set and the transfer mask. Doing this
      * makes it relatively easy to track down data-management problems.
@@ -339,8 +339,8 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 
    /* CONSTRUCT THE MESSAGE */
 
-   /* 
-    * This copy to a public assembly buffer 
+   /*
+    * This copy to a public assembly buffer
     * enables gpsmon to snoop the control message
     * after it has been sent.
     */
@@ -380,7 +380,7 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 	 */
     }
     if (event == event_configure) {
-	/* 
+	/*
 	 * Change sentence mix and set reporting modes as needed.
 	 * Called immediately after event_identified fires, then just
 	 * after every packet received thereafter, but you probably
@@ -405,7 +405,7 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 	 */
     } else if (event == event_reactivate) {
        /*
-	* Fires when a device is reactivated after having been closed.  
+	* Fires when a device is reactivated after having been closed.
 	* Use this hook for re-establishing device settings that
 	* it doesn't hold through closes.
 	*/
@@ -438,9 +438,9 @@ static gps_mask_t _proto__parse_input(struct gps_device_t *session)
 static bool _proto__set_speed(struct gps_device_t *session,
 			      speed_t speed, char parity, int stopbits)
 {
-    /* 
+    /*
      * Set port operating mode, speed, parity, stopbits etc. here.
-     * Note: parity is passed as 'N'/'E'/'O', but you should program 
+     * Note: parity is passed as 'N'/'E'/'O', but you should program
      * defensively and allow 0/1/2 as well.
      */
 }
@@ -453,9 +453,9 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
     if (mode == MODE_NMEA) {
 	// _proto__to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate); /* send the mode switch control string */
 	session->gpsdata.driver_mode = MODE_NMEA;
-	/* 
+	/*
 	 * Anticipatory switching works only when the packet getter is the
-	 * generic one and it recognizes packets of the type this driver 
+	 * generic one and it recognizes packets of the type this driver
 	 * is expecting.  This should be the normal case.
 	 */
 	(void)gpsd_switch_driver(session, "Generic NMEA");

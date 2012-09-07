@@ -13,7 +13,7 @@
 
 using namespace std;
 
-/* 
+/*
  * We should get libgps_dump_state() from the client library, but
  * scons has a bug; we can't get it to add -lgps to the link line,
  * apparently because it doesn't honor parse_flags on a Program()
@@ -100,7 +100,7 @@ static void libgps_dump_state(struct gps_data_t *collect)
 }
 
 
-int main(void) 
+int main(void)
 {
     gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
 

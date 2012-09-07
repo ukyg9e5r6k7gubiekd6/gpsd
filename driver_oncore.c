@@ -177,7 +177,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		    break;
 		}
 	    st++;
-	    /* bit 7 of the status word: sat used for position */  
+	    /* bit 7 of the status word: sat used for position */
 	    if (status & 0x80)
 		session->gpsdata.used[nsv++] = sv;
 	    /* bit 2 of the status word: using for time solution */
@@ -435,7 +435,7 @@ static void oncore_event_hook(struct gps_device_t *session, event_t event)
     if (session->context->readonly)
 	return;
 
-    /* 
+    /*
      * Some oncore VP variants that have not been used after long
      * power-down will be silent on startup.  Provoke
      * identification by requesting the firmware version.
@@ -460,7 +460,7 @@ static void oncore_event_hook(struct gps_device_t *session, event_t event)
 #ifdef NTPSHM_ENABLE
 static double oncore_ntp_offset(struct gps_device_t *session UNUSED)
 {
-    /* 
+    /*
      * Only one sentence (NAVSOL) ships time.  0.175 seems best at
      * 9600 for UT+, not sure what the fudge should be at other baud
      * rates or for other models.
@@ -474,9 +474,9 @@ static bool oncore_set_speed(struct gps_device_t *session UNUSED,
 			     speed_t speed UNUSED,
 			     char parity UNUSED, int stopbits UNUSED)
 {
-    /* 
+    /*
      * Set port operating mode, speed, parity, stopbits etc. here.
-     * Note: parity is passed as 'N'/'E'/'O', but you should program 
+     * Note: parity is passed as 'N'/'E'/'O', but you should program
      * defensively and allow 0/1/2 as well.
      */
     return false;
@@ -491,9 +491,9 @@ static void oncore_set_mode(struct gps_device_t *session, int mode)
 	/* send the mode switch control string */
 	/* oncore_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate); */
 	session->gpsdata.dev.driver_mode = MODE_NMEA;
-	/* 
+	/*
 	 * Anticipatory switching works only when the packet getter is the
-	 * generic one and it recognizes packets of the type this driver 
+	 * generic one and it recognizes packets of the type this driver
 	 * is expecting.  This should be the normal case.
 	 */
 	(void)gpsd_switch_driver(session, "Generic NMEA");

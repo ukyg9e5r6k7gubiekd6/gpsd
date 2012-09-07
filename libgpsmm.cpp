@@ -11,7 +11,7 @@
 #include "libgpsmm.h"
 #include "gpsd_config.h"
 
-struct gps_data_t* gpsmm::gps_inner_open(const char *host, const char *port) 
+struct gps_data_t* gpsmm::gps_inner_open(const char *host, const char *port)
 {
     const bool err = (gps_open(host, port, gps_state()) != 0);
     if ( err ) {
@@ -24,7 +24,7 @@ struct gps_data_t* gpsmm::gps_inner_open(const char *host, const char *port)
     }
 }
 
-struct gps_data_t* gpsmm::stream(int flags) 
+struct gps_data_t* gpsmm::stream(int flags)
 {
     if (to_user == NULL)
 	return NULL;
@@ -36,7 +36,7 @@ struct gps_data_t* gpsmm::stream(int flags)
     }
 }
 
-struct gps_data_t* gpsmm::send(const char *request) 
+struct gps_data_t* gpsmm::send(const char *request)
 {
     if (gps_send(gps_state(),request)==-1) {
 	return NULL;

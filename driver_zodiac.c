@@ -3,7 +3,7 @@
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
- * be adding a fixed offset based on a hidden epoch value, in which case 
+ * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
  *
  * This file is Copyright (c) 2010 by the GPSD project
@@ -183,8 +183,8 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->newdata.longitude = ((long)getzlong(29)) * RAD_2_DEG * 1e-8;
     /*
      * The Rockwell Jupiter TU30-D140 reports altitude as uncorrected height
-     * above WGS84 geoid.  The Zodiac binary protocol manual does not 
-     * specify whether word 31 is geodetic or WGS 84. 
+     * above WGS84 geoid.  The Zodiac binary protocol manual does not
+     * specify whether word 31 is geodetic or WGS 84.
      */
     session->newdata.altitude = ((long)getzlong(31)) * 1e-2;
     /*@ +type @*/
@@ -195,7 +195,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->mag_var = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
     session->newdata.climb = ((short)getzword(38)) * 1e-2;
     /* map_datum                   = getzword(39); */
-    /* 
+    /*
      * The manual says these are 1-sigma.  Device reports only eph, circular
      * error; no harm in assigning it to both x and y components.
      */
@@ -367,7 +367,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 	const struct gps_type_t **dp;
 	gpsd_report(LOG_PROG, "zodiac_analyze packet type %d\n",
 		    session->packet.type);
-	// Wrong packet type ? 
+	// Wrong packet type ?
 	// Maybe find a trigger just in case it's an Earthmate
 	gpsd_report(LOG_RAW + 4, "Is this a trigger: %s ?\n",
 		    (char *)session->packet.outbuffer);
@@ -401,7 +401,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%u",
 		   id);
 
-    /* 
+    /*
      * Normal cycle for these devices is 1001 1002.
      * We count 1001 as end of cycle because 1002 doesn't
      * carry fix information.

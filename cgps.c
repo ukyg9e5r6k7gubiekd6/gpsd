@@ -13,7 +13,7 @@
 /*
  * The True North compass fails with current gpsd versions for reasons
  * the dev team has been unable to diagnose due to not having test hardware.
- * The support for it is conditioned out in order to simplify moving 
+ * The support for it is conditioned out in order to simplify moving
  * to the new JSON-based protocol and reduce startup time.
  */
 #undef TRUENORTH
@@ -177,13 +177,13 @@ static void windowsetup(void)
 /* inotialize curses and set up screen windows */
 {
     /* Set the window sizes per the following criteria:
-     * 
+     *
      * 1.  Set the window size to display the maximum number of
-     * satellites possible, but not more than can be fit in a 
+     * satellites possible, but not more than can be fit in a
      * window the size of the GPS report window. We have to set
      * the limit that way because MAXCHANNELS has been made large
      * in order to prepare for survey-grade receivers..
-     * 
+     *
      * 2.  If the screen size will not allow for the full complement of
      * satellites to be displayed, set the windows sizes smaller, but
      * not smaller than the number of lines necessary to display all of
@@ -191,7 +191,7 @@ static void windowsetup(void)
      * will be truncated to fit the available window size.  (TODO: If
      * the satellite list is truncated, omit the satellites not used to
      * obtain the current fix.)
-     * 
+     *
      * 3.  If the screen is large enough to display all possible
      * satellites (MAXCHANNELS - 2) with space still left at the bottom,
      * add a window at the bottom in which to scroll raw gpsd data.
@@ -344,7 +344,7 @@ static void windowsetup(void)
 static void resize(int sig UNUSED)
 /* cope with terminal resize */
 {
-    if (!isendwin()) 
+    if (!isendwin())
     {
 	(void)endwin();
 	windowsetup();
@@ -626,7 +626,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 			   (double)(timestamp()-gpsdata->fix.time));
 	else
 	    (void)snprintf(scr, sizeof(scr), "n/a");
-	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, 
+	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 	/* Fill in the grid square (esr thought *this* one was interesting). */
 	/*@-branchstate@*/

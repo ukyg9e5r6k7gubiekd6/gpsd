@@ -483,7 +483,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		CLEAR_IS | REPORT_IS;
 	    /*
 	     * Garmin documentation says we should wait until four good fixes
-	     * have been seen before trying to use the device for precision 
+	     * have been seen before trying to use the device for precision
 	     * time service.
 	     */
 	    if (session->fixcnt > 3)
@@ -516,8 +516,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    gpsd_report(LOG_INF,
 			"Garmin: PVT RMD Sat: %3u, cycles: %9u, pr: %16.6f, "
 			"phase: %7.3f, slp_dtct: %3s, snr: %3u, Valid: %3s\n",
-			(int)rmd->sv[i].svid + 1, 
-			GPSD_LE32TOH(rmd->sv[i].cycles), 
+			(int)rmd->sv[i].svid + 1,
+			GPSD_LE32TOH(rmd->sv[i].cycles),
 			rmd->sv[i].pr,
 			(GPSD_LE16TOH(rmd->sv[i].phase) * 360.0) / 2048.0,
 			rmd->sv[i].slp_dtct != 0 ? "Yes" : "No",
@@ -537,7 +537,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	for (i = 0, j = 0; i < GARMIN_CHANNELS; i++, sats++) {
 	    gpsd_report(LOG_INF,
 			"Garmin:   Sat %3d, snr: %5u, elev: %2d, Azmth: %3d, Stat: %x\n",
-			sats->svid, GPSD_LE16TOH(sats->snr), sats->elev, 
+			sats->svid, GPSD_LE16TOH(sats->snr), sats->elev,
 			GPSD_LE16TOH(sats->azmth),
 			sats->status);
 
@@ -909,7 +909,7 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 #ifdef HAVE_LIBUSB
 	if (!is_usb_device(session->gpsdata.dev.path, 0x091e, 0x0003))
 	    return false;
-	
+
 	if (!gpsd_set_raw(session)) {
 	    gpsd_report(LOG_ERROR,
 			"Garmin: garmin_usb_detect: error changing port attributes: %s\n",

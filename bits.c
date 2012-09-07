@@ -90,7 +90,7 @@ float getlef32(const char *buf, int off)
     i_f.i = getles32(buf, off);
     return i_f.f;
 }
- 
+
 double getled64(const char *buf, int off)
 {
     union long_double l_d;
@@ -121,7 +121,7 @@ void putbef32(char *buf, int off, float val)
     union int_float i_f;
 
     i_f.f = val;
-    /* this would be a putbe32 call if not for a signedness issue */ 
+    /* this would be a putbe32 call if not for a signedness issue */
     buf[off] = (char)(((i_f.i) >> 16) >> 8);
 }
 /*@+shiftimplementation@*/
@@ -132,33 +132,33 @@ u_int16_t swap_u16(u_int16_t i)
 /* byte-swap a 16-bit unsigned int */
 {
     u_int8_t c1, c2;
- 
+
     c1 = i & 255;
     c2 = (i >> 8) & 255;
- 
+
     return (c1 << 8) + c2;
 }
 
 // cppcheck-suppress unusedFunction
-u_int32_t swap_u32(u_int32_t i) 
+u_int32_t swap_u32(u_int32_t i)
 /* byte-swap a 32-bit unsigned int */
 {
-    u_int8_t c1, c2, c3, c4;    
- 
+    u_int8_t c1, c2, c3, c4;
+
     c1 = i & 255;
     c2 = (i >> 8) & 255;
     c3 = (i >> 16) & 255;
     c4 = (i >> 24) & 255;
- 
+
     return ((u_int32_t)c1 << 24) + ((u_int32_t)c2 << 16) + ((u_int32_t)c3 << 8) + c4;
 }
- 
+
 // cppcheck-suppress unusedFunction
-u_int64_t swap_u64(u_int64_t i) 
+u_int64_t swap_u64(u_int64_t i)
 /* byte-swap a 64-bit unsigned int */
 {
-    u_int8_t c1, c2, c3, c4, c5, c6, c7, c8; 
- 
+    u_int8_t c1, c2, c3, c4, c5, c6, c7, c8;
+
     c1 = i & 255;
     c2 = (i >> 8) & 255;
     c3 = (i >> 16) & 255;
@@ -167,14 +167,14 @@ u_int64_t swap_u64(u_int64_t i)
     c6 = (i >> 40) & 255;
     c7 = (i >> 48) & 255;
     c8 = (i >> 56) & 255;
- 
-    return ((u_int64_t)c1 << 56) + 
-            ((u_int64_t)c2 << 48) + 
-            ((u_int64_t)c3 << 40) + 
-            ((u_int64_t)c4 << 32) + 
-            ((u_int64_t)c5 << 24) + 
-            ((u_int64_t)c6 << 16) + 
-            ((u_int64_t)c7 << 8) + 
+
+    return ((u_int64_t)c1 << 56) +
+            ((u_int64_t)c2 << 48) +
+            ((u_int64_t)c3 << 40) +
+            ((u_int64_t)c4 << 32) +
+            ((u_int64_t)c5 << 24) +
+            ((u_int64_t)c6 << 16) +
+            ((u_int64_t)c7 << 8) +
             c8;
 }
 #endif /* __UNUSED__ */

@@ -27,7 +27,7 @@ struct privdata_t
 
 /*
  * Unpleasant that we have to declare a static context pointer here - means
- * you can't have multiple DBUS sessions open (not that this matters 
+ * you can't have multiple DBUS sessions open (not that this matters
  * much in practice). The problem is the DBUS API lacks some hook
  * arguments that it ought to have.
  */

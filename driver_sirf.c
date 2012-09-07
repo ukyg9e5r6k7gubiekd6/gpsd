@@ -3,7 +3,7 @@
  * It also handles uBlox, a SiRF derivative.
  *
  * The advantages: Reports climb/sink rate (raw-mode clients won't see this).
- * Also, we can flag DGPS satellites used in the skyview when SBAS is in use. 
+ * Also, we can flag DGPS satellites used in the skyview when SBAS is in use.
  * The disadvantages: Doesn't return PDOP or VDOP, just HDOP.
  *
  * Chris Kuethe, our SiRF expert, tells us:
@@ -461,7 +461,7 @@ static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session UNUSED,
      * different double orders, neither IEEE754 */
     /* FIXME - decode the time, since this is the first MID with a
      * good time stamp this will be good for ntpshm time */
-    gpsd_report(LOG_PROG, "SiRF: MID 0x1c, NLMD, gps_tow: %f\n", 
+    gpsd_report(LOG_PROG, "SiRF: MID 0x1c, NLMD, gps_tow: %f\n",
 		(double)gps_tow);
 
     return 0;
@@ -525,7 +525,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 #ifdef RECONFIGURE_ENABLE
     if (!session->context->readonly && session->gpsdata.dev.baudrate < 38400) {
         /* some USB are also too slow, no way to tell which ones */
-	gpsd_report(LOG_WARN, 
+	gpsd_report(LOG_WARN,
 		"WARNING: SiRF: link too slow, disabling subframes.\n");
 	(void)sirf_write(session, disablesubframe);
     }
@@ -675,11 +675,11 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	session->gpsdata.used[i] = (int)getub(buf, 29 + i);
     /* position/velocity is bytes 1-18 */
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-		     (double)getbes32(buf, 1) * 1.0, 
+		     (double)getbes32(buf, 1) * 1.0,
 		     (double)getbes32(buf, 5) * 1.0,
-		     (double)getbes32(buf, 9) * 1.0, 
+		     (double)getbes32(buf, 9) * 1.0,
 		     (double)getbes16(buf, 13) / 8.0,
-		     (double)getbes16(buf, 15) / 8.0, 
+		     (double)getbes16(buf, 15) / 8.0,
 		     (double)getbes16(buf, 17) / 8.0);
     /* fix status is byte 19 */
     navtype = (unsigned short)getub(buf, 19);
@@ -1215,7 +1215,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     default:
-	gpsd_report(LOG_WARN, "SiRF: Unknown packet id %d length %zd\n", 
+	gpsd_report(LOG_WARN, "SiRF: Unknown packet id %d length %zd\n",
 		    buf[0], len);
 	return 0;
     }

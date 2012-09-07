@@ -532,8 +532,8 @@ static void decode(FILE *fpin, FILE*fpout)
     gpsd_clear(&session);
     session.gpsdata.gps_fd = fileno(fpin);
     session.gpsdata.dev.baudrate = 38400;     /* hack to enable subframes */
-    (void)strlcpy(session.gpsdata.dev.path, 
-		  "stdin", 
+    (void)strlcpy(session.gpsdata.dev.path,
+		  "stdin",
 		  sizeof(session.gpsdata.dev.path));
 
     for (;;)
@@ -554,11 +554,11 @@ static void decode(FILE *fpin, FILE*fpout)
 	    if ((changed & PASSTHROUGH_IS) != 0) {
 		(void)fputs((char *)session.packet.outbuffer, fpout);
 		(void)fputs("\n", fpout);
-	    } 
+	    }
 #ifdef SOCKET_EXPORT_ENABLE
 	    else {
-		json_data_report(changed, 
-				 &session, &policy, 
+		json_data_report(changed,
+				 &session, &policy,
 				 buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }
@@ -585,8 +585,8 @@ static void encode(FILE *fpin, FILE *fpout)
 
     memset(&policy, '\0', sizeof(policy));
     memset(&session, '\0', sizeof(session));
-    (void)strlcpy(session.gpsdata.dev.path, 
-		  "stdin", 
+    (void)strlcpy(session.gpsdata.dev.path,
+		  "stdin",
 		  sizeof(session.gpsdata.dev.path));
     policy.json = true;
     /* Parsing is always made in unscaled mode,
@@ -606,10 +606,10 @@ static void encode(FILE *fpin, FILE *fpout)
 			  status, json_error_string(status), lineno);
 	    exit(EXIT_FAILURE);
 	}
-	json_data_report(session.gpsdata.set, 
-			 &session, &policy, 
+	json_data_report(session.gpsdata.set,
+			 &session, &policy,
 			 inbuf, sizeof(inbuf));
-	(void)fputs(inbuf, fpout);	
+	(void)fputs(inbuf, fpout);
     }
 }
 /*@ +compdestroy +compdef +usedef @*/
@@ -658,7 +658,7 @@ int main(int argc, char **argv)
 	case 'v':
 	    verbose = 1;
 	    break;
-		
+
 	case 'D':
 	    verbose = atoi(optarg);
 #if defined(CLIENTDEBUG_ENABLE) && defined(SOCKET_EXPORT_ENABLE)

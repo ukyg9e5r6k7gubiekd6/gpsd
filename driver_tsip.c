@@ -4,7 +4,7 @@
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
- * be adding a fixed offset based on a hidden epoch value, in which case 
+ * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
  *
  * This file is Copyright (c) 2010 by the GPSD project
@@ -189,7 +189,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if (f1 >= 0.0 && f2 > 10.0) {
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
-	    session->newdata.time = 
+	    session->newdata.time =
 		gpsd_gpstime_resolve(session, (unsigned short)s1, (double)f1);
 	    mask |= TIME_SET | PPSTIME_IS;
 	}
@@ -284,7 +284,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	//f1 = getbef32((char *)buf, 12);	clock bias */
 	f2 = getbef32((char *)buf, 16);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
-	    session->newdata.time = 
+	    session->newdata.time =
 		gpsd_gpstime_resolve(session,
 				  (unsigned short)session->context->gps_week,
 				  (double)f2);
@@ -548,7 +548,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
 	    session->newdata.time =
 		gpsd_gpstime_resolve(session,
-				  (unsigned short)session->context->gps_week, 
+				  (unsigned short)session->context->gps_week,
 				  (double)f1);
 	    mask |= TIME_SET | PPSTIME_IS;
 	}
@@ -643,17 +643,17 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u4;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    session->newdata.time = gpsd_gpstime_resolve(session, 
-						      (unsigned short)s4, 
+	    session->newdata.time = gpsd_gpstime_resolve(session,
+						      (unsigned short)s4,
 						      (double)ul1 *1e-3);
 	    mask |=
-		TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET | 
+		TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
 		TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS;
 	    gpsd_report(LOG_DATA,
 			"SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 			"speed=%.2f track=%.2f climb=%.2f "
-			"mode=%d status=%d\n", 
+			"mode=%d status=%d\n",
 			session->newdata.time,
 			session->newdata.latitude, session->newdata.longitude,
 			session->newdata.altitude, session->newdata.speed,
@@ -723,7 +723,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 		REPORT_IS;
 	    gpsd_report(LOG_DATA,
 			"SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
-			"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d\n", 
+			"speed=%.2f track=%.2f climb=%.2f mode=%d status=%d\n",
 			session->newdata.time,
 			session->newdata.latitude, session->newdata.longitude,
 			session->newdata.altitude, session->newdata.speed,

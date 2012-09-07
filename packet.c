@@ -1267,7 +1267,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = JSON_STRINGLITERAL;
 	    lexer->json_after = JSON_END_ATTRIBUTE;
 	} else {
-	    gpsd_report(LOG_RAW + 2, 
+	    gpsd_report(LOG_RAW + 2,
 			"%08ld: missing attribute start after header\n",
 			lexer->char_counter);
 	    lexer->state = GROUND_STATE;

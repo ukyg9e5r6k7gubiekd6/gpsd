@@ -40,7 +40,7 @@ static bool tnt_initialize(void)
 
 static void tnt_update(void)
 {
-    /* 
+    /*
      * We have to do our own field parsing because the way this
      * gets called, nmea_parse() is never called on the sentence.
      */
@@ -62,19 +62,19 @@ static int tnt_command(char line[] UNUSED)
     /*
      * Interpret a command line.  Whatever characters the user types will
      * be echoed in the command buffer at the top right of the display. When
-     * he/she presses enter the command line will be passed to this function  
+     * he/she presses enter the command line will be passed to this function
      * for interpretation.  Note: packet receipt is suspended while this
      * function is executing.
      *
      * This method is optional.  If you set the command method pointer to
-     * NULL, gpsmon will behave sanely, accepting no device-specific commands. 
+     * NULL, gpsmon will behave sanely, accepting no device-specific commands.
      *
      * It is a useful convention to use uppercase letters for
      * driver-specific commands and leave lowercase ones for the
      * generic gpsmon ones.
      */
 
-    /* 
+    /*
      * Return COMMAND_UNKNOWN to tell gpsmon you can't interpret the line, and
      * it will be passed to the generic command interpreter to be handled there.
      * You can alse return COMMAND_MATCH to tell it you handled the command,
@@ -122,7 +122,7 @@ const struct monitor_object_t tnt_mmt = {
  *    You get to make sure the message will fit.
  *
  * void monitor_fixframe(WINDOW *win)
- *    Fix the frame of win to the right of the current location by redrawing 
+ *    Fix the frame of win to the right of the current location by redrawing
  *    ACS_VLINE there.  Useful after doing wclrtoeol() and writing on the
  *    line.
  *

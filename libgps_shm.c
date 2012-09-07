@@ -6,7 +6,7 @@ NAME
 DESCRIPTION
    This is a very lightweight alternative to JSON-over-sockets.  Clients
 won't be able to filter by device, and won't get device activation/deactivation
-notifications.  But both client and daemon will avoid all the marshalling and 
+notifications.  But both client and daemon will avoid all the marshalling and
 unmarshalling overhead.
 
 PERMISSIONS
@@ -48,7 +48,7 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
     if (shmid == -1) {
 	/* daemon isn't running or failed to create shared segment */
 	return -1;
-    } 
+    }
     gpsdata->privdata = (void *)malloc(sizeof(struct privdata_t));
     if (gpsdata->privdata == NULL)
 	return -1;
@@ -101,7 +101,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	struct gps_data_t noclobber;
 
 	/*
-	 * Following block of instructions must not be reordered, otherwise 
+	 * Following block of instructions must not be reordered, otherwise
 	 * havoc will ensue.  The barrier() call should prevent reordering
 	 * of the data accesses.
 	 *
@@ -113,17 +113,17 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	 */
 	before = shared->bookend1;
 	barrier();
-	(void)memcpy((void *)&noclobber, 
-		     (void *)&shared->gpsdata, 
+	(void)memcpy((void *)&noclobber,
+		     (void *)&shared->gpsdata,
 		     sizeof(struct gps_data_t));
 	barrier();
 	after = shared->bookend2;
 
-	if (before != after) 
+	if (before != after)
 	    return 0;
 	else {
-	    (void)memcpy((void *)gpsdata, 
-			 (void *)&noclobber, 
+	    (void)memcpy((void *)gpsdata,
+			 (void *)&noclobber,
 			 sizeof(struct gps_data_t));
 	    /*@i1@*/gpsdata->privdata = private_save;
 	    PRIVATE(gpsdata)->tick = after;
@@ -146,7 +146,7 @@ void gps_shm_close(struct gps_data_t *gpsdata)
 	(void)shmdt((const void *)PRIVATE(gpsdata)->shmseg);
 }
 
-int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout UNUSED, 
+int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout UNUSED,
 			 void (*hook)(struct gps_data_t *gpsdata))
 /* run a shm main loop with a specified handler */
 {

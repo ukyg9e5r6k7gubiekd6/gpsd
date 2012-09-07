@@ -12,8 +12,8 @@
 
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
- * to the client in raw mode.  They assume that (a) the public gps.h structure 
- * members are in a valid state, (b) that the private members hours, minutes, 
+ * to the client in raw mode.  They assume that (a) the public gps.h structure
+ * members are in a valid state, (b) that the private members hours, minutes,
  * and seconds have also been filled in, (c) that if the private member
  * mag_var is not NAN it is a magnetic variation in degrees that should be
  * passed on, and (d) if the private member separation does not have the
@@ -237,7 +237,7 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
 	 * incorrect; our sources on ZDA suggest that it should report local
 	 * timezone. But no GPS we've ever seen actually does this, because it
 	 * would require embedding a location-to-TZ database in the receiver.
-	 * And even if we could do that, it would make our regression tests 
+	 * And even if we could do that, it would make our regression tests
 	 * break any time they were run in a timezone different from the one
 	 * where they were generated.
 	 */
@@ -286,7 +286,7 @@ void nmea_tpv_dump(struct gps_device_t *session,
 	gpsd_binary_time_dump(session, bufp + strlen(bufp),
 			      len - strlen(bufp));
     if ((session->gpsdata.set & LATLON_SET) != 0) {
-	gpsd_position_fix_dump(session, bufp + strlen(bufp), 
+	gpsd_position_fix_dump(session, bufp + strlen(bufp),
 			       len - strlen(bufp));
 	gpsd_transit_fix_dump(session, bufp + strlen(bufp),
 			      len - strlen(bufp));

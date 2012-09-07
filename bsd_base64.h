@@ -7,7 +7,7 @@
 
 #ifndef HAVE___B64_NTOP
 # ifndef HAVE_B64_NTOP
-int b64_ntop(unsigned char const *src, size_t srclength, char *target, 
+int b64_ntop(unsigned char const *src, size_t srclength, char *target,
     size_t targsize);
 int b64_pton(char const *src, unsigned char *target, size_t targsize);
 # endif /* !HAVE_B64_NTOP */

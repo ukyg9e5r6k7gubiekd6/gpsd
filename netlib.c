@@ -159,8 +159,8 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 
 	memset(&saddr, 0, sizeof(struct sockaddr_un));
 	saddr.sun_family = AF_UNIX;
-	(void)strlcpy(saddr.sun_path, 
-		      sockfile, 
+	(void)strlcpy(saddr.sun_path,
+		      sockfile,
 		      sizeof(saddr.sun_path));
 
 	/*@-unrecog@*/
@@ -175,7 +175,7 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 }
 
 char *netlib_sock2ip(socket_t fd)
-/* retrieve the IP address corresponding to a socket */ 
+/* retrieve the IP address corresponding to a socket */
 {
     sockaddr_t fsin;
     socklen_t alen = (socklen_t) sizeof(fsin);

@@ -120,7 +120,7 @@ void json_version_dump( /*@out@*/ char *reply, size_t replylen)
 #endif /* TIMING_ENABLE */
 
 
-void json_tpv_dump(const struct gps_device_t *session, 
+void json_tpv_dump(const struct gps_device_t *session,
 		   const struct policy_t *policy CONDITIONALLY_UNUSED,
 		   /*@out@*/ char *reply, size_t replylen)
 {
@@ -146,7 +146,7 @@ void json_tpv_dump(const struct gps_device_t *session,
     if (isnan(gpsdata->fix.time) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
-		       "\"time\":\"%s\",", 
+		       "\"time\":\"%s\",",
 		       unix_to_iso8601(gpsdata->fix.time, tbuf, sizeof(tbuf)));
     if (isnan(gpsdata->fix.ept) == 0)
 	(void)snprintf(reply + strlen(reply),
@@ -216,7 +216,7 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    (void)snprintf(reply + strlen(reply),
 	        replylen - strlen(reply),
 			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,\"week\":%u,\"tow\":%.3f,\"rollovers\":%d",
-			   session->sor, 
+			   session->sor,
 			   session->chars,
 			   gpsdata->satellites_used,
 			   rtime,
@@ -290,7 +290,7 @@ void json_sky_dump(const struct gps_data_t *datap,
     if (isnan(datap->skyview_time) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
-		       "\"time\":\"%s\",", 
+		       "\"time\":\"%s\",",
 		       unix_to_iso8601(datap->skyview_time, tbuf, sizeof(tbuf)));
     if (isnan(datap->dop.xdop) == 0)
 	(void)snprintf(reply + strlen(reply),
@@ -391,7 +391,7 @@ void json_device_dump(const struct gps_device_t *device,
 	}
 	/*@+mustfreefresh@*/
 	/*
-	 * There's an assumption here: Anything that we type service_sensor is 
+	 * There's an assumption here: Anything that we type service_sensor is
 	 * a serial device with the usual control parameters.
 	 */
 	if (device->servicetype == service_sensor) {
@@ -688,20 +688,20 @@ void json_subframe_dump(const struct gps_data_t *datap,
 	{
 	    int i;
 	    (void)snprintf(buf + len, buflen - len,
-			   ",\"HEALTH\":{\"data_id\":%d,", 
+			   ",\"HEALTH\":{\"data_id\":%d,",
 			   (int)subframe->data_id);
 
 		/* 1-index loop to construct json, rather than giant snprintf */
 		for(i = 1 ; i <= 32; i++){
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-				   "\"SV%d\":%d,", 
+				   "\"SV%d\":%d,",
 				   i, (int)subframe->sub4_25.svf[i]);
 		}
 		for(i = 0 ; i < 8; i++){ /* 0-index */
 		    len = strlen(buf);
 		    (void)snprintf(buf + len, buflen - len,
-				   "\"SVH%d\":%d,", 
+				   "\"SVH%d\":%d,",
 				   i+25, (int)subframe->sub4_25.svhx[i]);
 		}
 		len = strlen(buf)-1;
@@ -743,8 +743,8 @@ void json_subframe_dump(const struct gps_data_t *datap,
 }
 
 #if defined(RTCM104V2_ENABLE)
-void json_rtcm2_dump(const struct rtcm2_t *rtcm, 
-		     /*@null@*/const char *device, 
+void json_rtcm2_dump(const struct rtcm2_t *rtcm,
+		     /*@null@*/const char *device,
 		     /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104 message as JSON */
 {
@@ -777,7 +777,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "{\"ident\":%u,\"udre\":%u,\"iod\":%u,\"prc\":%0.3f,\"rrc\":%0.3f},",
 			   rsp->ident,
-			   rsp->udre, rsp->iod, 
+			   rsp->udre, rsp->iod,
 			   rsp->prc, rsp->rrc);
 	}
 	if (buf[strlen(buf) - 1] == ',')
@@ -849,7 +849,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"status\":%s,\"rangeflag\":%s,"
 		       "\"lat\":%.2f,\"lon\":%.2f,\"range\":%u,",
-		       JSON_BOOL(rtcm->xmitter.status), 
+		       JSON_BOOL(rtcm->xmitter.status),
 		       JSON_BOOL(rtcm->xmitter.rangeflag),
 		       rtcm->xmitter.lat,
 		       rtcm->xmitter.lon,
@@ -859,7 +859,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
     case 14:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"week\":%u,\"hour\":%u,\"leapsecs\":%u,",
-		       rtcm->gpstime.week, 
+		       rtcm->gpstime.week,
 		       rtcm->gpstime.hour,
 		       rtcm->gpstime.leapsecs);
 	break;
@@ -880,7 +880,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 			   rsp->ident,
 			   rsp->udre,
 			   JSON_BOOL(rsp->change),
-			   rsp->tod, 
+			   rsp->tod,
 			   rsp->prc, rsp->rrc);
 	}
 	if (buf[strlen(buf) - 1] == ',')
@@ -907,8 +907,8 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 #endif /* defined(RTCM104V2_ENABLE) */
 
 #if defined(RTCM104V3_ENABLE)
-void json_rtcm3_dump(const struct rtcm3_t *rtcm, 
-		     /*@null@*/const char *device, 
+void json_rtcm3_dump(const struct rtcm3_t *rtcm,
+		     /*@null@*/const char *device,
 		     /*@out@*/char buf[], size_t buflen)
 /* dump the contents of a parsed RTCM104v3 message as JSON */
 {
@@ -1149,7 +1149,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   R1009.L1.pseudorange,
 			   R1009.L1.rangediff,
 			   INT(R1009.L1.locktime));
-#undef R1009 
+#undef R1009
 	}
 	if (buf[strlen(buf) - 1] == ',')
 	    buf[strlen(buf) - 1] = '\0';
@@ -1180,7 +1180,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   INT(R1010.L1.locktime),
 			   INT(R1010.L1.ambiguity),
 			   R1010.L1.CNR);
-#undef R1010 
+#undef R1010
 	}
 	if (buf[strlen(buf) - 1] == ',')
 	    buf[strlen(buf) - 1] = '\0';
@@ -1207,11 +1207,11 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   "\"delta\":%6.4f,\"lockt\":%u}"
 			   "}",
 			   R1011.ident,R1011.L1.channel,
-			   CODE(R1011.L1.indicator), 
+			   CODE(R1011.L1.indicator),
 			   R1011.L1.pseudorange,
 			   R1011.L1.rangediff,
 			   INT(R1011.L1.locktime),
-			   CODE(R1011.L2.indicator), 
+			   CODE(R1011.L2.indicator),
 			   R1011.L2.pseudorange,
 			   R1011.L2.rangediff,
 			   INT(R1011.L2.locktime));
@@ -1362,7 +1362,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #endif /* defined(RTCM104V3_ENABLE) */
 
 #if defined(AIVDM_ENABLE)
-void json_aivdm_dump(const struct ais_t *ais, 
+void json_aivdm_dump(const struct ais_t *ais,
 		     /*@null@*/const char *device, bool scaled,
 		     /*@out@*/char *buf, size_t buflen)
 {
@@ -1729,8 +1729,8 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 11:			/* UTC/Date Response */
 	/* some fields have beem merged to an ISO8601 date */
 	if (scaled) {
-	    // The use of %u instead of %04u for the year is to allow 
-	    // out-of-band year values. 
+	    // The use of %u instead of %04u for the year is to allow
+	    // out-of-band year values.
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
@@ -3193,7 +3193,7 @@ void json_data_report(const gps_mask_t changed,
 {
     const struct gps_data_t *datap = &session->gpsdata;
     buf[0] = '\0';
- 
+
     if ((changed & REPORT_IS) != 0) {
 	json_tpv_dump(session, policy, buf+strlen(buf), buflen-strlen(buf));
     }
