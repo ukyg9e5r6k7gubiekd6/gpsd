@@ -90,7 +90,7 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
     nsv = (unsigned short) MAX(getleu16(buf, 7 + 12), getleu16(buf, 7 + 14));
-    svlist = (unsigned short) getleu32(buf, 7 + 16) | getleu32(buf, 7 + 24);
+    svlist = (unsigned int) ((unsigned short) getleu32(buf, 7 + 16) | getleu32(buf, 7 + 24));
 
     hour = (unsigned short) getleu16(buf, 7 + 66);
     min = (unsigned short) getleu16(buf, 7 + 68);
