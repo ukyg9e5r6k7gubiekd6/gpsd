@@ -174,7 +174,7 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
     }
 }
 
-char *netlib_sock2ip(int fd)
+char *netlib_sock2ip(socket_t fd)
 /* retrieve the IP address corresponding to a socket */ 
 {
     sockaddr_t fsin;

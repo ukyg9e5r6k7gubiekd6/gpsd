@@ -286,10 +286,10 @@ The following driver types are compiled into this gpsd instance:\n",
 }
 
 #ifdef CONTROL_SOCKET_ENABLE
-static int filesock(char *filename)
+static socket_t filesock(char *filename)
 {
     struct sockaddr_un addr;
-    int sock;
+    socket_t sock;
 
     /*@ -mayaliasunique -usedef @*/
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
@@ -298,7 +298,11 @@ static int filesock(char *filename)
     }
     (void)strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
     addr.sun_family = (sa_family_t)AF_UNIX;
-    (void)bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr));
+    if (bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr)) < 0) {
+	gpsd_report(LOG_ERROR, "can't bind to local socket %s\n", filename);
+	(void)close(sock);
+	return -1;
+    }
     if (listen(sock, QLEN) == -1) {
 	gpsd_report(LOG_ERROR, "can't listen on local socket %s\n", filename);
 	(void)close(sock);
@@ -361,10 +365,10 @@ static void adjust_max_fd(int fd, bool on)
 }
 
 #ifdef SOCKET_EXPORT_ENABLE
-static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
+static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 /* bind a passive command socket for the daemon */
 {
-    volatile int s = -1;   /* why gcc warned about this I don't know */
+    volatile socket_t s = -1;   /* why gcc warned about this I don't know */
     /*
      * af = address family,
      * service = IANA protocol name or number.
@@ -446,7 +450,11 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 	 */
 	if (s > -1) {
 	    int on = 1;
-	    (void)setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on));
+	    if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
+		gpsd_report(LOG_ERROR, "Error: SETSOCKOPT IPV6_V6ONLY\n");
+		(void)close(s);
+		return -1;
+	    }
 	}
 	break;
 #endif
@@ -488,7 +496,7 @@ static int passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 
 /* *INDENT-OFF* */
 static int passivesocks(char *service, char *tcp_or_udp,
-			int qlen, /*@out@*/int socks[])
+			int qlen, /*@out@*/socket_t socks[])
 {
     int numsocks = AFCOUNT;
     int i;
@@ -1822,7 +1830,7 @@ int main(int argc, char *argv[])
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef CONTROL_SOCKET_ENABLE
-    static int csock = -1;
+    static socket_t csock = -1;
     fd_set control_fds;
     socket_t cfd;
     static char *control_socket = NULL;
@@ -2262,7 +2270,7 @@ int main(int argc, char *argv[])
 		socklen_t alen = (socklen_t) sizeof(fsin);
 		char *c_ip;
 		/*@+matchanyintegral@*/
-		int ssock =
+		socket_t ssock =
 		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
 		/*@+matchanyintegral@*/
 
@@ -2314,7 +2322,7 @@ int main(int argc, char *argv[])
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t) sizeof(fsin);
 	    /*@+matchanyintegral@*/
-	    int ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
+	    socket_t ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
 	    /*@-matchanyintegral@*/
 
 	    if (ssock == -1)
