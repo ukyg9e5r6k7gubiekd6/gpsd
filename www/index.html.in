@@ -400,6 +400,10 @@ of the setup steps and caveats will be the same.</p>
 href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <code>xgps</code> with a Qt look and feel.</p>
 
+<para>Egil Moller has written <a
+hreg="http://redhog.github.com/agpsd">agpsd</a>,
+a gpsd replication and logging daemon with support for KML.</para> 
+
 <p>You can find Debian-unstable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
