@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     openlog("gpsdctl", 0, LOG_DAEMON);
     if (argc != 3) {
 	(void)syslog(LOG_ERR, "requires action and argument (%d)", argc);
-	exit(1);
+	exit(EXIT_FAILURE);
     } else {
 	/*@-observertrans@*/
 	char *sockenv = getenv("GPSD_SOCKET");
@@ -102,9 +102,9 @@ int main(int argc, char *argv[])
 
 	/* coverity[string_size] */
 	if (gpsd_control(argv[1], argv[2]) < 0)
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	else
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	/*@+observertrans@*/
     }
 }

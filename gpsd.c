@@ -1904,7 +1904,7 @@ int main(int argc, char *argv[])
 #endif /* RECONFIGURE_ENABLE */
 		(void)puts((*dp)->type_name);
 	    }
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'S':
 #ifdef SOCKET_EXPORT_ENABLE
 	    gpsd_service = optarg;
@@ -1920,12 +1920,12 @@ int main(int argc, char *argv[])
 	    break;
 	case 'V':
 	    (void)printf("gpsd: %s (revision %s)\n", VERSION, REVISION);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'h':
 	case '?':
 	default:
 	    usage();
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	}
     }
 
@@ -1952,7 +1952,7 @@ int main(int argc, char *argv[])
 	&& optind >= argc) {
 	gpsd_report(LOG_ERROR,
 		    "can't run with neither control socket nor devices\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /*
@@ -1988,7 +1988,7 @@ int main(int argc, char *argv[])
     if (optind >= argc) {
 	gpsd_report(LOG_ERROR,
 		    "can't run with no devices specified\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 #endif /* defined(CONTROL_SOCKET_ENABLE) || defined(SYSTEMD_ENABLE) */
 

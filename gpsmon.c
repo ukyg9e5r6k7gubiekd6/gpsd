@@ -502,15 +502,15 @@ int main(int argc, char **argv)
 		(void)fputs((*active)->driver->type_name, stdout);
 		(void)fputc('\n', stdout);
 	    }
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'V':
 	    (void)printf("gpsmon: %s (revision %s)\n", VERSION, REVISION);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'l':		/* enable logging at startup */
 	    logfile = fopen(optarg, "w");
 	    if (logfile == NULL) {
 		(void)fprintf(stderr, "Couldn't open logfile for writing.\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	    break;
         case 't':
@@ -524,11 +524,11 @@ int main(int argc, char **argv)
 	    }
 	    if (matches > 1) { 
 		(void)fprintf(stderr, "-T option matched more than one driver.\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	    else if (matches == 0) { 
 		(void)fprintf(stderr, "-T option didn't match any driver.\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	    }
 	    active = NULL;
 	    break;
@@ -542,7 +542,7 @@ int main(int argc, char **argv)
 		fputs
 		("usage:  gpsmon [-?hVln] [-D debuglevel] [-t type] [server[:port:[device]]]\n",
 		 stderr);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
     /*@ +branchstate @*/
@@ -570,7 +570,7 @@ int main(int argc, char **argv)
 			  argv[0], source.server, source.port,
 			  session.gpsdata.gps_fd,
 			  netlib_errstr(session.gpsdata.gps_fd));
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
 	if (source.device != NULL) {
 	    if (nmea) {
@@ -624,7 +624,7 @@ int main(int argc, char **argv)
 	(void)endwin();
 	(void)fputs("gpsmon: assertion failure, probable I/O error\n",
 		    stderr);
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     (void)initscr();
@@ -1016,7 +1016,7 @@ int main(int argc, char **argv)
 
     if (explanation != NULL)
 	(void)fputs(explanation, stderr);
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 /* gpsmon.c ends here */

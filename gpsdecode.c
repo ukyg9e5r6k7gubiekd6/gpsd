@@ -604,7 +604,7 @@ static void encode(FILE *fpin, FILE *fpout)
 	    (void)fprintf(stderr,
 			  "gpsdecode: dying with status %d (%s) on line %d\n",
 			  status, json_error_string(status), lineno);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
 	json_data_report(session.gpsdata.set, 
 			 &session, &policy, 
@@ -668,12 +668,12 @@ int main(int argc, char **argv)
 
 	case 'V':
 	    (void)fprintf(stderr, "gpsdecode revision " VERSION "\n");
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 
 	case '?':
 	default:
 	    (void)fputs("gpsdecode [-v]\n", stderr);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
     //argc -= optind;
@@ -684,11 +684,11 @@ int main(int argc, char **argv)
 	encode(stdin, stdout);
 #else
 	(void)fprintf(stderr, "gpsdecode: encoding support isn't compiled.\n");
-	exit(1);
+	exit(EXIT_FAILURE);
 #endif /* SOCKET_EXPORT_ENABLE */
     } else
 	decode(stdin, stdout);
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 /* gpsdecode.c ends here */

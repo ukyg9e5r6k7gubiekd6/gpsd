@@ -21,7 +21,7 @@
 static void onsig(int sig)
 {
     (void)fprintf(stderr, "libgps: died with signal %d\n", sig);
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 /* must start zeroed, otherwise the unit test will try to chase garbage pointer fields. */
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 		 sizeof(struct attitude_t), sizeof(struct rawdata_t),
 		 sizeof(collect.devices), sizeof(struct policy_t),
 		 sizeof(struct version_t), sizeof(struct gst_t));
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'D':
 	    debug = atoi(optarg);
 	    break;
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	case 'h':
 	default:
 	    (void)fputs("usage: test_libgps [-b] [-D lvl] [-s]\n", stderr);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	}
     } else if (gps_open(NULL, 0, &collect) <= 0) {
 	(void)fputs("Daemon is not running.\n", stdout);
-	exit(1);
+	exit(EXIT_FAILURE);
     } else if (optind < argc) {
 	(void)strlcpy(buf, argv[optind], BUFSIZ);
 	(void)strlcat(buf, "\n", BUFSIZ);

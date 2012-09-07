@@ -219,5 +219,5 @@ int main(int argc, char *argv[])
 			 success ? "succeeded" : "FAILED");
     }
 
-    exit(failures ? 1 : 0);
+    exit(failures ? EXIT_FAILURE : EXIT_SUCCESS);
 }

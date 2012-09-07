@@ -64,13 +64,13 @@ static void open_serial(char *device)
      */
     if ((fd_out = open(device, O_RDWR | O_NOCTTY)) == -1) {
 	fprintf(stderr, "gpspipe: error opening serial port\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /* Save current serial port settings for later */
     if (tcgetattr(fd_out, &oldtio) != 0) {
 	fprintf(stderr, "gpspipe: error reading serial port settings\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /* Clear struct for new port settings. */
@@ -85,7 +85,7 @@ static void open_serial(char *device)
     (void)tcflush(fd_out, TCIFLUSH);
     if (tcsetattr(fd_out, TCSANOW, &newtio) != 0) {
 	(void)fprintf(stderr, "gpspipe: error configuring serial port\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 }
 
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 	case 'V':
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
 			  argv[0], VERSION, REVISION);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 's':
 	    serialport = optarg;
 	    break;
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
 	case 'h':
 	default:
 	    usage();
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
     /*@+branchstate@*/
@@ -211,18 +211,18 @@ int main(int argc, char **argv)
 
     if (serialport != NULL && !raw) {
 	(void)fprintf(stderr, "gpspipe: use of '-s' requires '-r'.\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     if (outfile == NULL && daemonize) {
 	(void)fprintf(stderr, "gpspipe: use of '-d' requires '-f'.\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     if (!raw && !watch && !binary) {
 	(void)fprintf(stderr,
 		      "gpspipe: one of '-R', '-r', or '-w' is required.\n");
-	exit(1);
+	exit(EXIT_FAILURE);
     }
 
     /* Daemonize if the user requested it. */
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 	    (void)fprintf(stderr,
 			  "gpspipe: unable to open output file:  %s\n",
 			  outfile);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
 
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
 		      source.server, source.port, strerror(errno), errno);
-	exit(1);
+	exit(EXIT_FAILURE);
     }
     /*@ +nullpass +onlytrans @*/
 
@@ -292,7 +292,7 @@ int main(int argc, char **argv)
 	if (r == -1 && errno != EINTR) {
 	    (void)fprintf(stderr, "gpspipe: select error %s(%d)\n",
 			  strerror(errno), errno);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	} else if (r == 0)
 		continue;
 
@@ -320,13 +320,13 @@ int main(int argc, char **argv)
 			(void)fprintf(stderr,
 				      "gpspipe: write error, %s(%d)\n",
 				      strerror(errno), errno);
-			exit(1);
+			exit(EXIT_FAILURE);
 		    }
 		}
 		if (fputc(c, fp) == EOF) {
 		    fprintf(stderr, "gpspipe: Write Error, %s(%d)\n",
 			    strerror(errno), errno);
-		    exit(1);
+		    exit(EXIT_FAILURE);
 		}
 
 		if (c == '\n') {
@@ -335,7 +335,7 @@ int main(int argc, char **argv)
 			    fprintf(stderr,
 				    "gpspipe: Serial port write Error, %s(%d)\n",
 				    strerror(errno), errno);
-			    exit(1);
+			    exit(EXIT_FAILURE);
 			}
 			j = 0;
 		    }
@@ -346,12 +346,12 @@ int main(int argc, char **argv)
 			(void)fprintf(stderr,
 				      "gpspipe: fflush Error, %s(%d)\n",
 				      strerror(errno), errno);
-			exit(1);
+			exit(EXIT_FAILURE);
 		    }
 		    if (count > 0) {
 			if (0 >= --count) {
 			    /* completed count */
-			    exit(0);
+			    exit(EXIT_SUCCESS);
 			}
 		    }
 		}
@@ -363,9 +363,9 @@ int main(int argc, char **argv)
 		else
 		    (void)fprintf(stderr, "gpspipe: read error %s(%d)\n",
 			      strerror(errno), errno);
-		exit(1);
+		exit(EXIT_FAILURE);
 	    } else {
-		exit(0);
+		exit(EXIT_SUCCESS);
 	    }
 	}
     }
@@ -375,12 +375,12 @@ int main(int argc, char **argv)
 	/* Restore the old serial port settings. */
 	if (tcsetattr(fd_out, TCSANOW, &oldtio) != 0) {
 	    (void)fprintf(stderr, "Error restoring serial port settings\n");
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
 #endif /* __UNUSED__ */
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 /*@ +compdestroy @*/

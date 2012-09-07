@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 	    mp = singletests + atoi(optarg) - 1;
 	    (void)fwrite(mp->test, mp->testlen, sizeof(char), stdout);
 	    (void)fflush(stdout);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 't':
 	    singletest = atoi(optarg);
 	    break;
@@ -350,5 +350,5 @@ int main(int argc, char *argv[])
 	(void)fputs("=== EOF with buffer nonempty test ===\n", stdout);
 	runon_test(&runontests[0]);
     }
-    exit(failcount > 0 ? 1 : 0);
+    exit(failcount > 0 ? EXIT_FAILURE : EXIT_SUCCESS);
 }

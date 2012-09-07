@@ -28,7 +28,7 @@ int daemon(int nochdir, int noclose)
     case 0:			/* child side */
 	break;
     default:			/* parent side */
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
     /*@ +type @*/
 

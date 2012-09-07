@@ -167,7 +167,7 @@ static void die(int sig)
     }
 
     /* Bye! */
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 static enum deg_str_type deg_type = deg_dd;
@@ -672,7 +672,7 @@ static void usage(char *prog)
 		  "         Valid only for USA (Lower 48 + AK) and Western Europe.\n",
 		  prog);
 
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 /*
@@ -755,7 +755,7 @@ int main(int argc, char *argv[])
 	case 'V':
 	    (void)fprintf(stderr, "cgps: %s (revision %s)\n",
 			  VERSION, REVISION);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case 'l':
 	    switch (optarg[0]) {
 	    case 'd':
