@@ -790,7 +790,7 @@ int main(int argc, char *argv[])
 	(void)fprintf(stderr,
 		      "cgps: no gpsd running or network error: %d, %s\n",
 		      errno, gps_errstr(errno));
-	exit(2);
+	exit(EXIT_FAILURE);
     }
 
     /* note: we're assuming BSD-style reliable signals here */

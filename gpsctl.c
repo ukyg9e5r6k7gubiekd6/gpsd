@@ -119,7 +119,7 @@ static gps_mask_t get_packet(struct gps_device_t *session)
 	    if (errno == EINTR || !FD_ISSET(session->gpsdata.gps_fd, &rfds))
 		continue;
 	    gpsd_report(LOG_ERROR, "select %s\n", strerror(errno));
-	    exit(2);
+	    exit(EXIT_FAILURE);
 	}
 	/*@ +usedef +type +nullpass +compdef @*/
 
@@ -204,7 +204,7 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 	    if (errno == EINTR || !FD_ISSET(gpsdata->gps_fd, &rfds))
 		continue;
 	    gpsd_report(LOG_ERROR, "select %s\n", strerror(errno));
-	    exit(2);
+	    exit(EXIT_FAILURE);
 	}
 	/*@ +usedef +type +nullpass +compdef @*/
 
@@ -653,14 +653,14 @@ int main(int argc, char **argv)
 		gpsd_report(LOG_ERROR,
 			      "activation of device %s failed, errno=%d\n",
 			      device, errno);
-		exit(2);
+		exit(EXIT_FAILURE);
 	    }
 	    /* hunt for packet type and serial parameters */
 	    for (seq = 0; session.device_type == NULL; seq++) {
 		if (get_packet(&session) == ERROR_SET) {
 		    gpsd_report(LOG_ERROR,
 				"autodetection failed.\n");
-		    exit(2);
+		    exit(EXIT_FAILURE);
 		} else if (session.packet.type > COMMENT_PACKET) {
 		    gpsd_report(LOG_IO,
 				"autodetection after %d reads finds packet type %d.\n", seq, session.packet.type);

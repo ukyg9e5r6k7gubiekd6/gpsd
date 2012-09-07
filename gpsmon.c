@@ -601,7 +601,7 @@ int main(int argc, char **argv)
 	    gpsd_report(LOG_ERROR,
 			"activation of device %s failed, errno=%d\n",
 			session.gpsdata.dev.path, errno);
-	    exit(2);
+	    exit(EXIT_FAILURE);
 	}
 
 	serial = true;

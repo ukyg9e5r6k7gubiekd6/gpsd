@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
 	(void)fprintf( stderr,
 		       "lcdgps: no gpsd running or network error: %d, %s\n",
 		       errno, gps_errstr(errno));
-	exit(2);
+	exit(EXIT_FAILURE);
     }
 
     /* Connect to LCDd */
@@ -411,7 +411,7 @@ int main(int argc, char *argv[])
     for (;;) { /* heart of the client */
 	if (!gps_waiting(&gpsdata, 50000000)) {
 	    fprintf( stderr, "lcdgps: error while waiting\n");
-	    exit(2);
+	    exit(EXIT_FAILURE);
 	} else {
 	    (void)gps_read(&gpsdata);
 	    update_lcd(&gpsdata);

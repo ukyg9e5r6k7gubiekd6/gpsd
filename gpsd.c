@@ -1974,7 +1974,7 @@ int main(int argc, char *argv[])
 	    gpsd_report(LOG_ERROR,
 			"control socket create failed, netlib error %d\n",
 			csock);
-	    exit(2);
+	    exit(EXIT_FAILURE);
 	} else
 	    gpsd_report(LOG_SPIN, "control socket %s is fd %d\n",
 			control_socket, csock);
@@ -2025,7 +2025,7 @@ int main(int argc, char *argv[])
 	gpsd_report(LOG_ERR,
 		    "command sockets creation failed, netlib errors %d, %d\n",
 		    msocks[0], msocks[1]);
-	exit(2);
+	exit(EXIT_FAILURE);
     }
     gpsd_report(LOG_INF, "listening on port %s\n", gpsd_service);
 #endif /* SOCKET_EXPORT_ENABLE */
@@ -2241,7 +2241,7 @@ int main(int argc, char *argv[])
 	    if (errno == EINTR)
 		continue;
 	    gpsd_report(LOG_ERROR, "select: %s\n", strerror(errno));
-	    exit(2);
+	    exit(EXIT_FAILURE);
 	}
 	/*@ +usedef +nullpass @*/
 
