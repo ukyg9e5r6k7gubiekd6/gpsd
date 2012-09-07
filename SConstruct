@@ -585,7 +585,7 @@ confdefs.append('''
 /* will not handle pre-Intel Apples that can run big-endian 
    __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
   only, probably depending on the architecture. Try to use endian.h if
-  the gcc way fails - endian.h also doesn't seem to be available on all
+  the gcc way fails - endian.h also doesn not seem to be available on all
   platforms.
 */
 #ifdef __BIG_ENDIAN__
