@@ -143,7 +143,7 @@ const char /*@observer@*/ *netlib_errstr(const int err)
     case NL_NOCONNECT:
 	return "can't connect to host/port pair";
     default:
-	return strerror(errno);
+	return "unknown error";
     }
 }
 
