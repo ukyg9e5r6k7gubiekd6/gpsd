@@ -2,39 +2,82 @@
 #
 # cansetup - initialize kernel-CAN interfaces
 #
+# This file is Copyright (c) 2012 by the GPSD project.
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
+
+speed=38400
+net=0
+
+version()
+{
+    echo `basename $0`" : Version v0.20";
+}
+
+usage()
+{
+    version; echo;
+    echo "usage :" `basename $0` "[-n <netnumber>] [-s <serial speed>] <can_module_name> [<interface_name>]";
+    echo "      :" `basename $0` "-v";
+    echo "      :" `basename $0` "-h";
+    echo "  Options include:";
+    echo "  -n              = CAN network number, 0 if not given.";
+    echo "  -s              = Speed of the slcan hardware port, 38400 if not given.";
+    echo "                  = Needed for some slcan modules only.";
+    echo "  -v              = Print version of this script and exit.";
+    echo "  -h              = Print this help message and exit.";
+    echo "  can_module_name = One out of plx_pci, esd_usb2, vcan, slcan, beaglebone.";
+    echo "  interface_name  = The interface, the SLCAN module is connected to, i.e. /dev/ttyS0 or /dev/ttyUSB0.";
+    echo "                  = Needed for the slcan module only. The default is /dev/ttyUSB0.";
+    echo "Root permissions are needed for the first calling option (Enforced by socketCAN subsystem).";
+}
+
+while getopts :n:s:vh opt
+do
+    case ${opt} in
+        n)  net=${OPTARG};;
+        s)  speed=${OPTARG};;
+        v)  version; exit 0;;
+        h)  usage; exit 0;;
+        \?) usage; exit 1;;
+    esac
+done
+
+shift $((${OPTIND} - 1))
+
 candevice=$1
  
-case $candevice in
+case ${candevice} in
 plx_pci)
     # For the SJA1000 based PCI or PCI-Express CAN interface
     modprobe plx_pci;
-    ip link set can0 type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;
-    ip link set can0 up;;
+    ip link set can${net} type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;
+    ip link set can${net} up;;
 esd_usb2)
     # For an esd usb/2 CAN interface
     modprobe esd_usb2;
-    ip link set can0 type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;
-    ip link set can0 up;;
+    ip link set can${net} type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;
+    ip link set can${net} up;;
 vcan)
     # With this setup, CAN frames can be injected into vcan0 by a test
     modprobe vcan;
     ip link add type vcan;
-    ip link set vcan0 up;;
+    ip link set vcan${net} up;;
 slcan)
     # For a serial line CAN device
     # No support for devices, that need a setup of the baudrate yet
     device=${2:-/dev/ttyUSB0};
     modprobe slcan;
-    slcan_attach -f -s5 -o $device;
-    slcand `basename $device`; 
-    ip link set slcan0 up;;
+    slcan_attach -f -s5 -o ${device};
+    slcand `basename ${device}`; 
+    ip link set slcan${net} up;;
 beaglebone)
     # For CAN interface on a BeagleBone
     # The d_can driver is part of the kernel
-    ip link set can0 type can bitrate 250000 sjw 1;
-    ip link set can0 up;;
+    ip link set can${net} type can bitrate 250000 sjw 1;
+    ip link set can${net} up;;
 *)
-    echo "cansetup: invalid CAN interface $1"
+    echo `basename ${0}` ": invalid CAN interface ${1} net${net} device ${2:-(none)}"
     exit 1
 esac
 
