@@ -495,7 +495,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 #ifdef FIXED_PORT_SPEED
 		       FIXED_PORT_SPEED,
 #else
-		       gpsd_get_speed(session),
+		       gpsd_get_speed_old(session),
 #endif /* FIXED_PORT_SPEED */
 		       'N',
 #ifdef FIXED_STOP_BITS
