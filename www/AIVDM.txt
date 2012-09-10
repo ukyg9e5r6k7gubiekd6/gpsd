@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.37, June 2012
+v1.38, September 2012
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -4383,9 +4383,9 @@ should do so rather than expanding to its controlled vocabulary.
 |===========================================================================
 |Message | Fieldname | Special values
 | 1-3    | turn      | 
-"nan" = not available, "fastright" = fast right turn (above 127 degrees),
-"fastleft" = fast left turn (above 127 degrees).
-| 1-3    | speed     | "nan" = not available, "fast" = speed >= 102.3 knots
+"nan" = not available, "fastright" = fast right turn (above 5deg/30sec degrees),
+"fastleft" = fast left turn (above 5deg/30sec degrees).
+| 1-3    | speed     | "nan" = not available, "fast" = speed >= 102.2 knots
 |  9     | alt       | "nan" = not available, "high" = alt >= 4094 meters 
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
 |===========================================================================
@@ -4596,3 +4596,6 @@ used in the UK and the Republic of Ireland.
 
 Version 1.37 corrects a field signedness error in the IMO236 and
 IMO289 Met/Hydro messages.
+
+Version 1.38 corrects a minor bug in the description of the Navigation
+Message ROT field.
