@@ -557,9 +557,14 @@ maximum of three hops. A value of 3 indicates "Do not repeat".
 |11| Reserved for future use
 |12| Reserved for future use
 |13| Reserved for future use
-|14| Reserved for future use
+|14| AIS-SART is active
 |15| Not defined (default)
 |=================================================================
+
+Note, the AIS-SART value was added after <<IALA>> and designates an
+AIS transmitter in an survival craft such as a lifeboat.  See
+see <<AIS-SART>> for the field specification and <<SART>> for
+background.
 
 Turn rate is encoded as follows:
 
@@ -4475,7 +4480,11 @@ Identification System]
 
 - [[[PILOTPLUG]]] http://www.pilotplug.com/
 
-- [[[IALA-A126]]] www.iala-aism.org/iala/publications/documentspdf/doc_299_eng.pdf[]
+- [[[IALA-A126]]] http://www.iala-aism.org/iala/publications/documentspdf/doc_299_eng.pdf[]
+
+- [[[AIS-SART]]] http://www.navcen.uscg.gov/?pageName=AISMessagesA
+
+- [[[SART]]] http://en.wikipedia.org/wiki/AIS-SART
 
 == Change history ==
 
@@ -4598,4 +4607,5 @@ Version 1.37 corrects a field signedness error in the IMO236 and
 IMO289 Met/Hydro messages.
 
 Version 1.38 corrects a minor bug in the description of the Navigation
-Message ROT field.
+Message ROT field. Adds information on AIS-SART.
+
