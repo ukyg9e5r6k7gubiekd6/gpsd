@@ -637,8 +637,9 @@ if config.CheckXsltproc():
     manbuilder = build % docbook_man_uri
 elif WhereIs("xmlto"):
     mangenerator = 'xmlto'
-    htmlbuilder = "xmlto html-nochunks $SOURCE"
-    manbuilder = "xmlto man $SOURCE"
+    xmlto = "xmlto %s $SOURCE || mv `basename $TARGET` `dirname $TARGET`"
+    htmlbuilder = xmlto % "html-nochunks"
+    manbuilder = xmlto % "man"
 else:
     announce("Neither xsltproc nor xmlto found, documentation cannot be built.")
 if manbuilder:
