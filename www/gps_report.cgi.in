@@ -96,8 +96,8 @@ if hasRequiredElements(form) and form.getvalue("action") == "Send Report":
 
     # Ship it.
     msg = report.as_string()
-    smtp = smtplib.SMTP(host=servaddr.split("@")[1])
-    smtp.set_debuglevel(1)
+    smtp = smtplib.SMTP("localhost")
+    #smtp.set_debuglevel(1)
     try:
         smtp.sendmail(servaddr, ["esr@thyrsus.com"], msg)
         smtp.quit()
