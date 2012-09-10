@@ -1611,7 +1611,7 @@ if htmlbuilder:
 
     # The internals manual.
     # Doesn't capture dependencies on the subpages
-    env.HTML('www/internals.html', '$SRCDIR/doc/explanation.xml')
+    env.HTML('www/internals.html', '$SRCDIR/doc/internals.xml')
 
 # The hardware page
 env.Command('www/hardware.html', ['gpscap.py',
