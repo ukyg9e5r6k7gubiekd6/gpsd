@@ -260,9 +260,8 @@ def announce(msg):
 env.Append(CFLAGS='-D_GNU_SOURCE')
 
 # Turn compiler warnings into errors.
-env.Append(CFLAGS='-Werror')
-
-
+# Alas, this is overambitious. Works on x86 but breaks on some other ports. 
+#env.Append(CFLAGS='-Werror')
 
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
