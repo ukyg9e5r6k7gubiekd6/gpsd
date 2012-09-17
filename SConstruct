@@ -259,10 +259,6 @@ def announce(msg):
 # We need to define -D_GNU_SOURCE
 env.Append(CFLAGS='-D_GNU_SOURCE')
 
-# Turn compiler warnings into errors on as many platforms as we can.
-if platform.machine() in ('x86_64',):
-    env.Append(CFLAGS='-Werror')
-
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
