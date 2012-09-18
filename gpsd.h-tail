@@ -867,7 +867,7 @@ extern struct tm *localtime_r(const time_t *,/*@out@*/struct tm *tp)/*@modifies 
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
 
-#define DEVICEHOOKPATH SYSCONFDIR"/gpsd/device-hook"
+#define DEVICEHOOKPATH "/"SYSCONFDIR"/gpsd/device-hook"
 
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall)	assert(funcall != -23)
