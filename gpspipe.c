@@ -215,7 +215,7 @@ int main(int argc, char **argv)
     }
 
     if (outfile == NULL && daemonize) {
-	(void)fprintf(stderr, "gpspipe: use of '-d' requires '-f'.\n");
+	(void)fprintf(stderr, "gpspipe: use of '-d' requires '-o'.\n");
 	exit(EXIT_FAILURE);
     }
 
