@@ -1,3 +1,8 @@
+* Mon 21 Sep Eric S. Raymond <esr@snark.thyrsus.com> - 3.7+
+  Fix various minor errors in the AIVDM/AIVDO description. Repair the
+  xmlto support in the build system. Add two more regression tests. Significant
+  improvements to NMEA2000 support.
+
 * Mon 02 Jul Eric S. Raymond <esr@snark.thyrsus.com> - 3.7
   Snap release to get the midnight change in the default leap-second
   constant out the door.  Port tests now pass on all Debian supported

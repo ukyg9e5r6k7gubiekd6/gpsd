@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.38, September 2012
+v1.39, September 2012
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -2230,10 +2230,10 @@ length: 360 bits.
                                                    403 - N/A (default),
                                                    else add 400 to value,
 |286-289 |   4 |Pressure Tendency  |pressuretend|u|WMO FM13 code
-|290-300 |  11 |Air Temperature    |airtemp     |U1|Dry bulb temp: units 0.1C,
+|290-300 |  11 |Air Temperature    |airtemp     |I1|Dry bulb temp: units 0.1C,
                                                    -60.0 to +60.0,
                                                    -1024 = N/A (default).
-|301-310 |  10 |Water Temperature  |watertemp   |U1|-10.0 to 50.0 in 0.1 C,
+|301-310 |  10 |Water Temperature  |watertemp   |I1|-10.0 to 50.0 in 0.1 C,
                                                    601 = N/A (default),
                                                    else -10C after scaling.
 |311-316 |  6  |Wave period        |waveperiod  |u|Seconds: 0-60,
@@ -4609,3 +4609,6 @@ IMO289 Met/Hydro messages.
 Version 1.38 corrects a minor bug in the description of the Navigation
 Message ROT field. Adds information on AIS-SART.
 
+Version 1.39 corrects signedness errors in the description of the Air
+Temperature and Water Temperature fields in the IMO289 Weather Report
+From Ship message.
