@@ -237,7 +237,7 @@ int gpsd_open(struct gps_device_t *session)
 	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
 	port = strchr(server, ':');
 	if (port == NULL) {
 	    gpsd_report(LOG_ERROR, "Missing colon in TCP feed spec.\n");
@@ -286,7 +286,7 @@ int gpsd_open(struct gps_device_t *session)
 	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 7, sizeof(server));
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
 	if ((port = strchr(server, ':')) == NULL) {
 	    port = DEFAULT_GPSD_PORT;
 	} else
@@ -1116,7 +1116,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {
-    if (session->gpsdata.gps_fd != -1)
+    if (!BAD_SOCKET(session->gpsdata.gps_fd))
 	gpsd_deactivate(session);
 }
 

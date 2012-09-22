@@ -85,19 +85,19 @@ ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
 
   for (n = 1; n < (ssize_t)maxlen; n++) {
 
-    if((rc=read(sockd,&c,1))==1) {
+    if ((rc=read(sockd,&c,1))==1) {
       *buffer++=c;
-      if(c=='\n')
+      if (c=='\n')
         break;
     }
-    else if(rc==0) {
-      if(n==1)
+    else if (rc==0) {
+      if (n==1)
         return(0);
       else
         break;
     }
     else {
-      if(errno==EINTR)
+      if (errno==EINTR)
         continue;
       return(-1);
     }
@@ -116,9 +116,9 @@ ssize_t sockwriteline(int sockd,const void *vptr,size_t n) {
   buffer=vptr;
   nleft=n;
 
-  while(nleft>0) {
-    if((nwritten= write(sockd,buffer,nleft))<=0) {
-      if(errno==EINTR)
+  while (nleft>0) {
+    if ((nwritten= write(sockd,buffer,nleft))<=0) {
+      if (errno==EINTR)
         nwritten=0;
       else
         return(-1);
@@ -139,7 +139,7 @@ int send_lcd(char *buf) {
 
   /* Limit the size of outgoing strings. */
   outlen = strlen(buf);
-  if(outlen > 255) {
+  if (outlen > 255) {
     outlen = 256;
   }
 
@@ -200,7 +200,7 @@ static void update_lcd(struct gps_data_t *gpsdata)
     /* As a pilot, a heading of "0" gives me the heebie-jeebies (ie, 0
        == "invalid heading data", 360 == "North"). */
     track=(int)(gpsdata->fix.track);
-    if(track == 0) track = 360;
+    if (track == 0) track = 360;
 
     snprintf(tmpbuf, 254, "widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
              gpsdata->fix.speed*speedfactor, speedunits,
@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
 
     /* Connect to LCDd */
     h = gethostbyname(LCDDHOST);
-    if(h==NULL) {
+    if (h==NULL) {
 	printf("%s: unknown host '%s'\n",argv[0],LCDDHOST);
 	exit(EXIT_FAILURE);
     }
@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
 
     /* create socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
-    if(sd == -1) {
+    if (BAD_SOCKET(sd)) {
 	perror("cannot open socket ");
 	exit(EXIT_FAILURE);
     }
@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
     localAddr.sin_port = htons(0);
 
     rc = bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr));
-    if(rc == -1) {
+    if (rc == -1) {
 	printf("%s: cannot bind port TCP %u\n",argv[0],LCDDPORT);
 	perror("error ");
 	exit(EXIT_FAILURE);
@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 
     /* connect to server */
     rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
-    if(rc == -1) {
+    if (rc == -1) {
 	perror("cannot connect ");
 	exit(EXIT_FAILURE);
     }

@@ -1776,6 +1776,8 @@ struct policy_t {
  * binary compatibility.
  */
 typedef int socket_t;
+#define BAD_SOCKET(s)	((s) == -1)
+#define INVALIDATE_SOCKET(s)	s = -1
 
 /* mode flags for setting streaming policy */
 #define WATCH_ENABLE	0x000001u	/* enable streaming */

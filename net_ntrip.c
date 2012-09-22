@@ -359,7 +359,7 @@ static int ntrip_stream_get_req(const struct ntrip_stream_t *stream)
     char buf[BUFSIZ];
 
     dsock = netlib_connectsock(AF_UNSPEC, stream->url, stream->port, "tcp");
-    if (dsock == -1) {
+    if (BAD_SOCKET(dsock)) {
 	gpsd_report(LOG_ERROR, "ntrip stream connect error %d\n", dsock);
 	return -1;
     }

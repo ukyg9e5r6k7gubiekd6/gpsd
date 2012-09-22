@@ -33,6 +33,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     socket_t s = -1;
     bool bind_me;
 
+    INVALIDATE_SOCKET(s);
     /*@-type@*/
     ppe = getprotobyname(protocol);
     if (strcmp(protocol, "udp") == 0) {
