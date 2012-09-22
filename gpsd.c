@@ -292,7 +292,7 @@ static socket_t filesock(char *filename)
     socket_t sock;
 
     /*@ -mayaliasunique -usedef @*/
-    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    if (BAD_SOCKET(sock = socket(AF_UNIX, SOCK_STREAM, 0))) {
 	gpsd_report(LOG_ERROR, "Can't create device-control socket\n");
 	return -1;
     }
@@ -368,7 +368,7 @@ static void adjust_max_fd(int fd, bool on)
 static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 /* bind a passive command socket for the daemon */
 {
-    volatile socket_t s = -1;   /* why gcc warned about this I don't know */
+    volatile socket_t s;
     /*
      * af = address family,
      * service = IANA protocol name or number.
@@ -383,6 +383,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     in_port_t port;
     char *af_str = "";
 
+    INVALIDATE_SOCKET(s);
     if ((pse = getservbyname(service, tcp_or_udp)))
 	port = ntohs((in_port_t) pse->s_port);
     else if ((port = (in_port_t) atoi(service)) == 0) {
@@ -464,7 +465,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     }
     gpsd_report(LOG_IO, "opening %s socket\n", af_str);
 
-    if (s == -1) {
+    if (BAD_SOCKET(s)) {
 	gpsd_report(LOG_ERROR, "can't create %s socket\n", af_str);
 	return -1;
     }
@@ -502,7 +503,7 @@ static int passivesocks(char *service, char *tcp_or_udp,
     int i;
 
     for (i = 0; i < AFCOUNT; i++)
-	socks[i] = -1;
+	INVALIDATE_SOCKET(socks[i]);
 
 #if defined(SYSTEMD_ENABLE)
     if (sd_socket_count > 0) {
@@ -670,7 +671,7 @@ static void deactivate_device(struct gps_device_t *device)
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
 #endif /* SOCKET_EXPORT_ENABLE */
-    if (device->gpsdata.gps_fd != -1) {
+    if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
@@ -926,7 +927,7 @@ static bool awaken(struct gps_device_t *device)
 	}
     }
 
-    if (device->gpsdata.gps_fd != -1) {
+    if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
 	gpsd_report(LOG_PROG,
 		    "device %d (fd=%d, path %s) already active.\n",
 		    (int)(device - devices),
@@ -1435,7 +1436,7 @@ static void consume_packets(struct gps_device_t *device)
 	    && device->ntrip.conn_state != ntrip_conn_established) {
 
 	/* the socket descriptor might change during connection */
-	if (device->gpsdata.gps_fd != -1) {
+	if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
 	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	}
 	(void)ntrip_open(device, "");
@@ -1830,7 +1831,7 @@ int main(int argc, char *argv[])
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef CONTROL_SOCKET_ENABLE
-    static socket_t csock = -1;
+    static socket_t csock;
     fd_set control_fds;
     socket_t cfd;
     static char *control_socket = NULL;
@@ -1855,6 +1856,9 @@ int main(int argc, char *argv[])
     context.debug = 0;
     gps_context_init(&context);
 
+#ifdef CONTROL_SOCKET_ENABLE
+    INVALIDATE_SOCKET(csock);
+#endif /* CONTROL_SOCKET_ENABLE */
 #ifdef PPS_ENABLE
     /*@-nullpass@*/
     (void)pthread_mutex_init(&report_mutex, NULL);
@@ -1970,7 +1974,7 @@ int main(int argc, char *argv[])
 #ifdef CONTROL_SOCKET_ENABLE
     if (control_socket) {
 	(void)unlink(control_socket);
-	if ((csock = filesock(control_socket)) == -1) {
+	if (BAD_SOCKET(csock = filesock(control_socket))) {
 	    gpsd_report(LOG_ERROR,
 			"control socket create failed, netlib error %d\n",
 			csock);
@@ -2274,7 +2278,7 @@ int main(int argc, char *argv[])
 		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
 		/*@+matchanyintegral@*/
 
-		if (ssock == -1)
+		if (BAD_SOCKET(ssock))
 		    gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 		else {
 		    struct subscriber_t *client = NULL;
@@ -2325,7 +2329,7 @@ int main(int argc, char *argv[])
 	    socket_t ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
 	    /*@-matchanyintegral@*/
 
-	    if (ssock == -1)
+	    if (BAD_SOCKET(ssock))
 		gpsd_report(LOG_ERROR, "accept: %s\n", strerror(errno));
 	    else {
 		gpsd_report(LOG_INF, "control socket connect on fd %d\n",
@@ -2477,7 +2481,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 
-	    if (device_needed && device->gpsdata.gps_fd == -1 &&
+	    if (device_needed && BAD_SOCKET(device->gpsdata.gps_fd) &&
 		    (device->opentime == 0 ||
 		    timestamp() - device->opentime > DEVICE_RECONNECT)) {
 		device->opentime = timestamp();

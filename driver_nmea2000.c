@@ -834,7 +834,7 @@ int nmea2000_open(struct gps_device_t *session)
     struct sockaddr_can addr;
     char *unit_ptr;
 
-    session->gpsdata.gps_fd = -1;
+    INVALIDATE_SOCKET(session->gpsdata.gps_fd);
 
     session->driver.nmea2000.can_net = 0;
     can_net = -1;
@@ -899,7 +899,7 @@ int nmea2000_open(struct gps_device_t *session)
     /* Create the socket */
     sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
  
-    if (sock == -1) {
+    if (BAD_SOCKET(sock)) {
         gpsd_report(LOG_ERROR, "NMEA2000 open: can not get socket.\n");
 	return -1;
     }
@@ -957,11 +957,11 @@ int nmea2000_open(struct gps_device_t *session)
 
 void nmea2000_close(struct gps_device_t *session)
 {
-    if (session->gpsdata.gps_fd != -1) {
+    if (!BAD_SOCKET(session->gpsdata.gps_fd)) {
 	gpsd_report(LOG_SPIN, "close(%d) in nmea2000_close(%s)\n",
 		    session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
     }
 }
 

@@ -110,7 +110,7 @@ int gps_close(struct gps_data_t *gpsdata)
     libgps_debug_trace((DEBUG_CALLS, "gps_close()\n"));
 
 #ifdef SHM_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == -1) {
+    if (BAD_SOCKET((intptr_t)(gpsdata->gps_fd))) {
 	gps_shm_close(gpsdata);
 	status = 0;
     }
@@ -134,13 +134,13 @@ int gps_read(struct gps_data_t *gpsdata)
 
     /*@ -usedef -compdef -uniondef @*/
 #ifdef SHM_EXPORT_ENABLE
-    if ((intptr_t)(gpsdata->gps_fd) == -1) {
+    if (BAD_SOCKET((intptr_t)(gpsdata->gps_fd))) {
 	status = gps_shm_read(gpsdata);
     }
 #endif /* SHM_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
-    if (status == -1 && (intptr_t)(gpsdata->gps_fd) != -1) {
+    if (status == -1 && BAD_SOCKET((intptr_t)(gpsdata->gps_fd))) {
         status = gps_sock_read(gpsdata);
     }
 #endif /* SOCKET_EXPORT_ENABLE */

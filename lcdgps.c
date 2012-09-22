@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
 
     /* create socket */
     sd = socket(AF_INET, SOCK_STREAM, 0);
-    if(sd == -1) {
+    if(BAD_SOCKET(sd)) {
 	perror("cannot open socket ");
 	exit(EXIT_FAILURE);
     }
