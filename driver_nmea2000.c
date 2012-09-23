@@ -435,6 +435,7 @@ static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/* No test case for this message at the moment */
 static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -546,6 +547,7 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/* No test case for this message at the moment */
 static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -555,12 +557,27 @@ static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
-        return(0);
+        ais->type9.lon       = getles32(bu, 5) * 0.06;
+	ais->type9.lat       = getles32(bu, 9) * 0.06;
+	ais->type9.accuracy  = (bu[13] >> 0) & 0x01;
+	ais->type9.raim      = (bu[13] >> 1) & 0x01;
+	ais->type9.second    = (bu[13] >> 2) & 0x3f;
+	ais->type9.course    = ais_direction(getleu16(bu, 14), 10.0);
+	ais->type9.speed     = getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1;
+	ais->type9.radio     = getleu32(bu, 18) & 0x7ffff;
+	ais->type9.alt       = getleu64(bu, 21)/1000000;
+	ais->type9.regional  = (bu[29] >> 0) & 0xff;
+	ais->type9.dte	     = (bu[30] >> 0) & 0x01;
+/*      ais->type9.spare     = (bu[30] >> 1) & 0x7f; */
+	ais->type9.assigned  = 0; /* Not transmitted ???? */
+
+        return(ONLINE_SET | AIS_SET);
     }
     return(0);
 }
 
 
+/* No test case for this message at the moment */
 static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -570,7 +587,15 @@ static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0x3fffffff) != 0) {
-        return(0);
+        int                   l;
+
+/*      ais->type14.channel = (bu[ 5] >> 0) & 0x1f; */
+	for (l=0;l<36;l++) {
+	    ais->type14.text[l] = bu[6+l];
+	}
+	ais->type14.text[36] = 0;
+
+        return(ONLINE_SET | AIS_SET);
     }
     return(0);
 }
@@ -585,6 +610,22 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+        int                   l;
+	int                   index   =  session->aivdm[0].type24_queue.index;
+        struct ais_type24a_t *saveptr = &session->aivdm[0].type24_queue.ships[index];
+
+	gpsd_report(LOG_PROG, "NMEA2000: AIS message 24A from %09u stashed.\n", ais->mmsi);
+
+	saveptr->mmsi = ais->mmsi;
+
+	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
+	    saveptr->shipname[l] = bu[32+l];
+	}
+	saveptr->shipname[AIS_SHIPNAME_MAXLEN] = 0;
+
+	index += 1;
+	index %= MAX_TYPE24_INTERLEAVE;
+	session->aivdm[0].type24_queue.index = index;
         return(0);
     }
     return(0);
@@ -600,10 +641,54 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+	int i, l;
+
+        for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
+	    if (session->aivdm[0].type24_queue.ships[i].mmsi == ais->mmsi) {
+	        for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
+		    ais->type24.shipname[l] = session->aivdm[0].type24_queue.ships[i].shipname[l];
+		}
+		ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = 0;
+
+		ais->type24.shiptype = (bu[ 5] >> 0) & 0xff;
+
+	        for (l=0;l<7;l++) {
+		    ais->type24.vendorid[7] = bu[ 6+l];
+		}
+		ais->type24.vendorid[7] = 0;
+
+	        for (l=0;l<7;l++) {
+		    ais->type24.callsign[7] = bu[13+l];
+		}
+		ais->type24.callsign[7] = 0;
+
+		if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
+		    ais->type24.mothership_mmsi   = getleu32(bu, 28);
+		} else {
+		    uint16_t length, beam, to_bow, to_starboard;
+
+		    length                        = getleu16(bu, 20);
+		    beam                          = getleu16(bu, 22);
+		    to_bow                        = getleu16(bu, 24);
+		    to_starboard                  = getleu16(bu, 26);
+		    ais->type24.dim.to_bow        = to_bow/10;
+		    ais->type24.dim.to_stern      = (length-to_bow)/10;
+		    ais->type24.dim.to_port       = (beam-to_starboard)/10;
+		    ais->type24.dim.to_starboard  = to_starboard/10;
+		}
+
+		gpsd_report(LOG_PROG, "NMEA2000: AIS 24B from %09u matches a 24A.\n", ais->mmsi);
+		/* prevent false match if a 24B is repeated */
+		session->aivdm[0].type24_queue.ships[i].mmsi = 0;
+		return(ONLINE_SET | AIS_SET);
+	    }
+	}
+	gpsd_report(LOG_WARN, "NMEA2000: AIS 24B from %09u can't be matched to a 24A.\n", ais->mmsi);
         return(0);
     }
     return(0);
 }
+
 
 /*@-usereleased@*/
 static const char msg_059392[] = {"ISO  Acknowledgment"};
