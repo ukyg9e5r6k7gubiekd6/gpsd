@@ -99,19 +99,19 @@ static gps_mask_t get_mode(struct gps_device_t *session)
 static int decode_ais_header(unsigned char *bu, int len, struct ais_t *ais, unsigned int mask)
 {
     if (len > 4) {
-        ais->type   =  bu[0]       & 0x3f;
-	ais->repeat = (bu[0] >> 6) & 0x03;
-	ais->mmsi   = getleu32(bu, 1);
+        ais->type   = (unsigned int) ( bu[0]       & 0x3f);
+	ais->repeat = (unsigned int) ((bu[0] >> 6) & 0x03);
+	ais->mmsi   = (unsigned int)  getleu32(bu, 1);
 	ais->mmsi  &= mask;
-	gpsd_report(LOG_INF, "NMEA2000 AIS  message type %d, MMSI %09d:\n", ais->type, ais->mmsi);
-	printf("NMEA2000 AIS  message type %2d, MMSI %09d:\n", ais->type, ais->mmsi);
+	gpsd_report(LOG_INF, "NMEA2000 AIS  message type %u, MMSI %09d:\n", ais->type, ais->mmsi);
+	printf("NMEA2000 AIS  message type %2u, MMSI %09u:\n", ais->type, ais->mmsi);
 	return(1);
     } else {
         ais->type   =  0;
 	ais->repeat =  0;
 	ais->mmsi   =  0;
-	gpsd_report(LOG_ERROR, "NMEA2000 AIS  message type %d, too short message.\n", ais->type);
-	printf("NMEA2000 AIS  message type %d, too short message.\n", ais->type);
+	gpsd_report(LOG_ERROR, "NMEA2000 AIS  message type %u, too short message.\n", ais->type);
+	printf("NMEA2000 AIS  message type %u, too short message.\n", ais->type);
     }
     return(0);
 }
@@ -122,7 +122,7 @@ static int ais_turn_rate(int rate)
     if (rate < 0) {
         return(-ais_turn_rate(-rate));
     }
-    return(4.733 * sqrt(rate * RAD_2_DEG * .0001 * 60.0));
+    return((int)(4.733 * sqrt(rate * RAD_2_DEG * .0001 * 60.0)));
 }
 
 
@@ -383,17 +383,17 @@ static gps_mask_t hnd_129038(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
-        ais->type1.lon       = getles32(bu, 5) * 0.06;
-	ais->type1.lat       = getles32(bu, 9) * 0.06;
-	ais->type1.accuracy  = (bu[13] >> 0) & 0x01;
-	ais->type1.raim      = (bu[13] >> 1) & 0x01;
-	ais->type1.second    = (bu[13] >> 2) & 0x3f;
-	ais->type1.course    = ais_direction(getleu16(bu, 14), 10.0);
-	ais->type1.speed     = getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1;
-	ais->type1.radio     = getleu32(bu, 18) & 0x7ffff;
-	ais->type1.heading   = ais_direction(getleu16(bu, 21), 1.0);
-	ais->type1.turn      = ais_turn_rate(getles16(bu, 23));
-	ais->type1.status    = (bu[25] >> 0) & 0xff;
+        ais->type1.lon       = (int)          (getles32(bu, 5) * 0.06);
+	ais->type1.lat       = (int)          (getles32(bu, 9) * 0.06);
+	ais->type1.accuracy  = (bool)         ((bu[13] >> 0) & 0x01);
+	ais->type1.raim      = (bool)         ((bu[13] >> 1) & 0x01);
+	ais->type1.second    = (unsigned int) ((bu[13] >> 2) & 0x3f);
+	ais->type1.course    = (unsigned int)  ais_direction((unsigned int)getleu16(bu, 14), 10.0);
+	ais->type1.speed     = (unsigned int) (getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1);
+	ais->type1.radio     = (unsigned int) (getleu32(bu, 18) & 0x7ffff);
+	ais->type1.heading   = (unsigned int)  ais_direction((unsigned int)getleu16(bu, 21), 1.0);
+	ais->type1.turn      =                 ais_turn_rate((int)getles16(bu, 23));
+	ais->type1.status    = (unsigned int) ((bu[25] >> 0) & 0xff);
 	ais->type1.maneuver  = 0; /* Not transmitted ???? */
 
 	return(ONLINE_SET | AIS_SET);
@@ -411,23 +411,23 @@ static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
-        ais->type18.lon      = getles32(bu, 5) * 0.06;
-	ais->type18.lat      = getles32(bu, 9) * 0.06;
-	ais->type18.accuracy = (bu[13] >> 0) & 0x01;
-	ais->type18.raim     = (bu[13] >> 1) & 0x01;
-	ais->type18.second   = (bu[13] >> 2) & 0x3f;
-	ais->type18.course   = ais_direction(getleu16(bu, 14), 10.0);
-	ais->type18.speed    = getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1;
-	ais->type18.radio    = getleu32(bu, 18) & 0x7ffff;
-	ais->type18.heading  = ais_direction(getleu16(bu, 21), 1.0);    
+        ais->type18.lon      = (int)          (getles32(bu, 5) * 0.06);
+	ais->type18.lat      = (int)          (getles32(bu, 9) * 0.06);
+	ais->type18.accuracy = (bool)         ((bu[13] >> 0) & 0x01);
+	ais->type18.raim     = (bool)         ((bu[13] >> 1) & 0x01);
+	ais->type18.second   = (unsigned int) ((bu[13] >> 2) & 0x3f);
+	ais->type18.course   = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 14), 10.0);
+	ais->type18.speed    = (unsigned int) (getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1);
+	ais->type18.radio    = (unsigned int) (getleu32(bu, 18) & 0x7ffff);
+	ais->type18.heading  = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 21), 1.0);    
 	ais->type18.reserved = 0;
-	ais->type18.regional = (bu[24] >> 0) & 0x03;
-	ais->type18.cs	     = (bu[24] >> 2) & 0x01;
-	ais->type18.display  = (bu[24] >> 3) & 0x01;
-	ais->type18.dsc      = (bu[24] >> 4) & 0x01;
-	ais->type18.band     = (bu[24] >> 5) & 0x01;
-	ais->type18.msg22    = (bu[24] >> 6) & 0x01;
-	ais->type18.assigned = (bu[24] >> 7) & 0x01;
+	ais->type18.regional = (unsigned int) ((bu[24] >> 0) & 0x03);
+	ais->type18.cs	     = (bool)         ((bu[24] >> 2) & 0x01);
+	ais->type18.display  = (bool)         ((bu[24] >> 3) & 0x01);
+	ais->type18.dsc      = (bool)         ((bu[24] >> 4) & 0x01);
+	ais->type18.band     = (bool)         ((bu[24] >> 5) & 0x01);
+	ais->type18.msg22    = (bool)         ((bu[24] >> 6) & 0x01);
+	ais->type18.assigned = (bool)         ((bu[24] >> 7) & 0x01);
 
 	return(ONLINE_SET | AIS_SET);
     }
@@ -448,32 +448,32 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
         uint16_t length, beam, to_bow, to_starboard;
 	int l;
 
-        ais->type19.lon          = getles32(bu, 5) * 0.06;
-	ais->type19.lat          = getles32(bu, 9) * 0.06;
-	ais->type19.accuracy     = (bu[13] >> 0) & 0x01;
-	ais->type19.raim         = (bu[13] >> 1) & 0x01;
-	ais->type19.second       = (bu[13] >> 2) & 0x3f;
-	ais->type19.course       = ais_direction(getleu16(bu, 14), 10.0);
-	ais->type19.speed        = getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1;
-	ais->type19.reserved     = (bu[18] >> 0) & 0xff;
-	ais->type19.regional     = (bu[19] >> 0) & 0x0f;;
-	ais->type19.shiptype     = (bu[20] >> 0) & 0xff;
-	ais->type19.heading      = ais_direction(getleu16(bu, 21), 1.0);
-	length                   = getleu16(bu, 24);
-	beam                     = getleu16(bu, 26);
-        to_starboard             = getleu16(bu, 28);
-        to_bow                   = getleu16(bu, 30);
-	ais->type19.to_bow       = to_bow/10;
-	ais->type19.to_stern     = (length-to_bow)/10;
-	ais->type19.to_port      = (beam-to_starboard)/10;
-	ais->type19.to_starboard = to_starboard/10;
-	ais->type19.epfd         = (bu[23] >> 4) & 0x0f;
-	ais->type19.dte          = (bu[52] >> 0) & 0x01;
-	ais->type19.assigned     = (bu[52] >> 1) & 0x01;
+        ais->type19.lon          = (int)          (getles32(bu, 5) * 0.06);
+	ais->type19.lat          = (int)          (getles32(bu, 9) * 0.06);
+	ais->type19.accuracy     = (bool)         ((bu[13] >> 0) & 0x01);
+	ais->type19.raim         = (bool)         ((bu[13] >> 1) & 0x01);
+	ais->type19.second       = (unsigned int) ((bu[13] >> 2) & 0x3f);
+	ais->type19.course       = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 14), 10.0);
+	ais->type19.speed        = (unsigned int) (getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1);
+	ais->type19.reserved     = (unsigned int) ((bu[18] >> 0) & 0xff);
+	ais->type19.regional     = (unsigned int) ((bu[19] >> 0) & 0x0f);
+	ais->type19.shiptype     = (unsigned int) ((bu[20] >> 0) & 0xff);
+	ais->type19.heading      = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 21), 1.0);
+	length                   =                 getleu16(bu, 24);
+	beam                     =                 getleu16(bu, 26);
+        to_starboard             =                 getleu16(bu, 28);
+        to_bow                   =                 getleu16(bu, 30);
+	ais->type19.to_bow       = (unsigned int) (to_bow/10);
+	ais->type19.to_stern     = (unsigned int) ((length-to_bow)/10);
+	ais->type19.to_port      = (unsigned int) ((beam-to_starboard)/10);
+	ais->type19.to_starboard = (unsigned int) (to_starboard/10);
+	ais->type19.epfd         = (unsigned int) ((bu[23] >> 4) & 0x0f);
+	ais->type19.dte          = (unsigned int) ((bu[52] >> 0) & 0x01);
+	ais->type19.assigned     = (bool)         ((bu[52] >> 1) & 0x01);
 	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    ais->type19.shipname[l] = bu[32+l];
+	    ais->type19.shipname[l] = (char) bu[32+l];
 	}
-	ais->type19.shipname[AIS_SHIPNAME_MAXLEN] = 0;
+	ais->type19.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
 	
 	return(ONLINE_SET | AIS_SET);
     }
@@ -496,45 +496,45 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	time_t    date1;
         struct tm date2;
 
-        ais->type5.ais_version   = (bu[73] >> 0) & 0x03;
-	ais->type5.imo           = getleu32(bu,  5);
-	ais->type5.shiptype      = (bu[36] >> 0) & 0xff;
-	length                   = getleu16(bu, 37);
-	beam                     = getleu16(bu, 39);
-        to_starboard             = getleu16(bu, 41);
-        to_bow                   = getleu16(bu, 43);
-	ais->type5.to_bow        = to_bow/10;
-	ais->type5.to_stern      = (length-to_bow)/10;
-	ais->type5.to_port       = (beam-to_starboard)/10;
-	ais->type5.to_starboard  = to_starboard/10;
-	ais->type5.epfd          = (bu[73] >> 2) & 0x0f;
-	date                     = getleu16(bu, 45);
-	time                     = getleu32(bu, 47);
-        date1                    = date*24*60*60;
-	gmtime_r(&date1, &date2);
-	ais->type5.month         = date2.tm_mon+1;
-	ais->type5.day           = date2.tm_mday;
-	ais->type5.minute        = time/(10000*60);
-	ais->type5.hour          = ais->type5.minute/60;
-	ais->type5.minute        = ais->type5.minute-(ais->type5.hour*60);
+        ais->type5.ais_version   = (unsigned int) ((bu[73] >> 0) & 0x03);
+	ais->type5.imo           = (unsigned int)  getleu32(bu,  5);
+	ais->type5.shiptype      = (unsigned int) ((bu[36] >> 0) & 0xff);
+	length                   =                 getleu16(bu, 37);
+	beam                     =                 getleu16(bu, 39);
+        to_starboard             =                 getleu16(bu, 41);
+        to_bow                   =                 getleu16(bu, 43);
+	ais->type5.to_bow        = (unsigned int) (to_bow/10);
+	ais->type5.to_stern      = (unsigned int) ((length-to_bow)/10);
+	ais->type5.to_port       = (unsigned int) ((beam-to_starboard)/10);
+	ais->type5.to_starboard  = (unsigned int) (to_starboard/10);
+	ais->type5.epfd          = (unsigned int) ((bu[73] >> 2) & 0x0f);
+	date                     =                 getleu16(bu, 45);
+	time                     =                 getleu32(bu, 47);
+        date1                    = (time_t)       (date*24*60*60);
+	(void) gmtime_r(&date1, &date2);
+	ais->type5.month         = (unsigned int) (date2.tm_mon+1);
+	ais->type5.day           = (unsigned int) (date2.tm_mday);
+	ais->type5.minute        = (unsigned int) (time/(10000*60));
+	ais->type5.hour          = (unsigned int) (ais->type5.minute/60);
+	ais->type5.minute        = (unsigned int) (ais->type5.minute-(ais->type5.hour*60));
 
-	ais->type5.draught       = getleu16(bu, 51)/10;
-	ais->type5.dte           = (bu[73] >> 6) & 0x01;
+	ais->type5.draught       = (unsigned int) (getleu16(bu, 51)/10);
+	ais->type5.dte           = (unsigned int) ((bu[73] >> 6) & 0x01);
 
 	for (l=0;l<7;l++) {
-	    ais->type5.callsign[l] = bu[9+l];
+	    ais->type5.callsign[l] = (char) bu[9+l];
 	}
-	ais->type5.callsign[7]   = 0;
+	ais->type5.callsign[7]   = (char) 0;
 
 	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    ais->type5.shipname[l] = bu[16+l];
+	    ais->type5.shipname[l] = (char) bu[16+l];
 	}
-	ais->type5.shipname[AIS_SHIPNAME_MAXLEN] = 0;
+	ais->type5.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
 
 	for (l=0;l<20;l++) {
-	    ais->type5.destination[l] = bu[53+l];
+	    ais->type5.destination[l] = (char) bu[53+l];
 	}
-	ais->type5.destination[20] = 0;
+	ais->type5.destination[20] = (char) 0;
 #if 0
 	printf("AIS: MMSI:  %09d\n", ais->mmsi);
 	printf("AIS: name:  %20s i:%8d c:%s b:%6d s:%6d p:%6d s:%6d dr:%4.1f\n", ais->type5.shipname,
@@ -568,17 +568,17 @@ static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
-        ais->type9.lon       = getles32(bu, 5) * 0.06;
-	ais->type9.lat       = getles32(bu, 9) * 0.06;
-	ais->type9.accuracy  = (bu[13] >> 0) & 0x01;
-	ais->type9.raim      = (bu[13] >> 1) & 0x01;
-	ais->type9.second    = (bu[13] >> 2) & 0x3f;
-	ais->type9.course    = ais_direction(getleu16(bu, 14), 10.0);
-	ais->type9.speed     = getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1;
-	ais->type9.radio     = getleu32(bu, 18) & 0x7ffff;
-	ais->type9.alt       = getleu64(bu, 21)/1000000;
-	ais->type9.regional  = (bu[29] >> 0) & 0xff;
-	ais->type9.dte	     = (bu[30] >> 0) & 0x01;
+        ais->type9.lon       = (int)          (getles32(bu, 5) * 0.06);
+	ais->type9.lat       = (int)          (getles32(bu, 9) * 0.06);
+	ais->type9.accuracy  = (bool)         ((bu[13] >> 0) & 0x01);
+	ais->type9.raim      = (bool)         ((bu[13] >> 1) & 0x01);
+	ais->type9.second    = (unsigned int) ((bu[13] >> 2) & 0x3f);
+	ais->type9.course    = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 14), 10.0);
+	ais->type9.speed     = (unsigned int) (getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1);
+	ais->type9.radio     = (unsigned int) (getleu32(bu, 18) & 0x7ffff);
+	ais->type9.alt       = (unsigned int) (getleu64(bu, 21)/1000000);
+	ais->type9.regional  = (unsigned int) ((bu[29] >> 0) & 0xff);
+	ais->type9.dte	     = (unsigned int) ((bu[30] >> 0) & 0x01);
 /*      ais->type9.spare     = (bu[30] >> 1) & 0x7f; */
 	ais->type9.assigned  = 0; /* Not transmitted ???? */
 
@@ -602,9 +602,9 @@ static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 /*      ais->type14.channel = (bu[ 5] >> 0) & 0x1f; */
 	for (l=0;l<36;l++) {
-	    ais->type14.text[l] = bu[6+l];
+	    ais->type14.text[l] = (char) bu[6+l];
 	}
-	ais->type14.text[36] = 0;
+	ais->type14.text[36] = (char) 0;
 
         return(ONLINE_SET | AIS_SET);
     }
@@ -630,9 +630,9 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	saveptr->mmsi = ais->mmsi;
 
 	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    saveptr->shipname[l] = bu[32+l];
+	    saveptr->shipname[l] = (char) bu[32+l];
 	}
-	saveptr->shipname[AIS_SHIPNAME_MAXLEN] = 0;
+	saveptr->shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
 
 	index += 1;
 	index %= MAX_TYPE24_INTERLEAVE;
@@ -657,35 +657,35 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
         for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
 	    if (session->aivdm[0].type24_queue.ships[i].mmsi == ais->mmsi) {
 	        for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-		    ais->type24.shipname[l] = session->aivdm[0].type24_queue.ships[i].shipname[l];
+		    ais->type24.shipname[l] = (char) (session->aivdm[0].type24_queue.ships[i].shipname[l]);
 		}
-		ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = 0;
+		ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
 
-		ais->type24.shiptype = (bu[ 5] >> 0) & 0xff;
-
-	        for (l=0;l<7;l++) {
-		    ais->type24.vendorid[7] = bu[ 6+l];
-		}
-		ais->type24.vendorid[7] = 0;
+		ais->type24.shiptype = (unsigned int) ((bu[ 5] >> 0) & 0xff);
 
 	        for (l=0;l<7;l++) {
-		    ais->type24.callsign[7] = bu[13+l];
+		    ais->type24.vendorid[7] = (char) bu[ 6+l];
 		}
-		ais->type24.callsign[7] = 0;
+		ais->type24.vendorid[7] = (char) 0;
+
+	        for (l=0;l<7;l++) {
+		    ais->type24.callsign[7] = (char) bu[13+l];
+		}
+		ais->type24.callsign[7] = (char )0;
 
 		if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
-		    ais->type24.mothership_mmsi   = getleu32(bu, 28);
+		    ais->type24.mothership_mmsi   = (unsigned int) (getleu32(bu, 28));
 		} else {
 		    uint16_t length, beam, to_bow, to_starboard;
 
-		    length                        = getleu16(bu, 20);
-		    beam                          = getleu16(bu, 22);
-		    to_starboard                  = getleu16(bu, 24);
-		    to_bow                        = getleu16(bu, 26);
-		    ais->type24.dim.to_bow        = to_bow/10;
-		    ais->type24.dim.to_stern      = (length-to_bow)/10;
-		    ais->type24.dim.to_port       = (beam-to_starboard)/10;
-		    ais->type24.dim.to_starboard  = to_starboard/10;
+		    length                        =                 getleu16(bu, 20);
+		    beam                          =                 getleu16(bu, 22);
+		    to_starboard                  =                 getleu16(bu, 24);
+		    to_bow                        =                 getleu16(bu, 26);
+		    ais->type24.dim.to_bow        = (unsigned int) (to_bow/10);
+		    ais->type24.dim.to_stern      = (unsigned int) ((length-to_bow)/10);
+		    ais->type24.dim.to_port       = (unsigned int) ((beam-to_starboard)/10);
+		    ais->type24.dim.to_starboard  = (unsigned int) (to_starboard/10);
 		}
 
 		gpsd_report(LOG_PROG, "NMEA2000: AIS 24B from %09u matches a 24A.\n", ais->mmsi);
