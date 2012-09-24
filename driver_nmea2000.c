@@ -461,8 +461,8 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type19.heading      = ais_direction(getleu16(bu, 21), 1.0);
 	length                   = getleu16(bu, 24);
 	beam                     = getleu16(bu, 26);
-        to_bow                   = getleu16(bu, 28);
-        to_starboard             = getleu16(bu, 30);
+        to_starboard             = getleu16(bu, 28);
+        to_bow                   = getleu16(bu, 30);
 	ais->type19.to_bow       = to_bow/10;
 	ais->type19.to_stern     = (length-to_bow)/10;
 	ais->type19.to_port      = (beam-to_starboard)/10;
@@ -490,17 +490,19 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
-      uint16_t length, beam, to_bow, to_starboard, date;
-	int l;
-	uint32_t time;
+        uint16_t  length, beam, to_bow, to_starboard, date;
+	int       l;
+	uint32_t  time;
+	time_t    date1;
+        struct tm date2;
 
         ais->type5.ais_version   = (bu[73] >> 0) & 0x03;
 	ais->type5.imo           = getleu32(bu,  5);
 	ais->type5.shiptype      = (bu[36] >> 0) & 0xff;
 	length                   = getleu16(bu, 37);
 	beam                     = getleu16(bu, 39);
-        to_bow                   = getleu16(bu, 41);
-        to_starboard             = getleu16(bu, 43);
+        to_starboard             = getleu16(bu, 41);
+        to_bow                   = getleu16(bu, 43);
 	ais->type5.to_bow        = to_bow/10;
 	ais->type5.to_stern      = (length-to_bow)/10;
 	ais->type5.to_port       = (beam-to_starboard)/10;
@@ -508,10 +510,10 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type5.epfd          = (bu[73] >> 2) & 0x0f;
 	date                     = getleu16(bu, 45);
 	time                     = getleu32(bu, 47);
-#if 0
-	ais->type5.month         = UBITS(274, 4);
-	ais->type5.day           = UBITS(278, 5);
-#endif
+        date1                    = date*24*60*60;
+	gmtime_r(&date1, &date2);
+	ais->type5.month         = date2.tm_mon+1;
+	ais->type5.day           = date2.tm_mday;
 	ais->type5.minute        = time/(10000*60);
 	ais->type5.hour          = ais->type5.minute/60;
 	ais->type5.minute        = ais->type5.minute-(ais->type5.hour*60);
@@ -529,18 +531,27 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	}
 	ais->type5.shipname[AIS_SHIPNAME_MAXLEN] = 0;
 
-	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    ais->type19.shipname[l] = bu[32+l];
-	}
-	ais->type19.shipname[AIS_SHIPNAME_MAXLEN] = 0;
-
 	for (l=0;l<20;l++) {
 	    ais->type5.destination[l] = bu[53+l];
 	}
 	ais->type5.destination[20] = 0;
-
-	printf("AIS: arival %s at %d %02d:%02d\n", ais->type5.destination, date, ais->type5.hour, ais->type5.minute);
-
+#if 0
+	printf("AIS: MMSI:  %09d\n", ais->mmsi);
+	printf("AIS: name:  %20s i:%8d c:%s b:%6d s:%6d p:%6d s:%6d dr:%4.1f\n", ais->type5.shipname,
+	                                                                         ais->type5.imo,
+	                                                                         ais->type5.callsign,
+	                                                                         ais->type5.to_bow,
+	                                                                         ais->type5.to_stern,
+	                                                                         ais->type5.to_port,
+	                                                                         ais->type5.to_starboard,
+	                                                                         ais->type5.draught/10.0);
+	printf("AIS: arival:%20s at %02d-%02d-%04d %02d:%02d\n", ais->type5.destination, 
+	                                                         ais->type5.day,
+	                                                         ais->type5.month,
+	                                                         date2.tm_year+1900,
+	                                                         ais->type5.hour,
+	                                                         ais->type5.minute);
+#endif 
         return(ONLINE_SET | AIS_SET);
     }
     return(0);
@@ -669,8 +680,8 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 		    length                        = getleu16(bu, 20);
 		    beam                          = getleu16(bu, 22);
-		    to_bow                        = getleu16(bu, 24);
-		    to_starboard                  = getleu16(bu, 26);
+		    to_starboard                  = getleu16(bu, 24);
+		    to_bow                        = getleu16(bu, 26);
 		    ais->type24.dim.to_bow        = to_bow/10;
 		    ais->type24.dim.to_stern      = (length-to_bow)/10;
 		    ais->type24.dim.to_port       = (beam-to_starboard)/10;
