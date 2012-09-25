@@ -725,7 +725,7 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 #if NMEA2000_DEBUG_AIS
 		printf("AIS: MMSI:  %09u\n",
 		       ais->mmsi);
-		printf("AIS: name:  %-20.20s i:%-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
+		printf("AIS: name:  %-20.20s v:%-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
 		       ais->type24.shipname,
 		       ais->type24.vendorid,
 		       ais->type24.callsign,
