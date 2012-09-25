@@ -36,6 +36,7 @@
 #define CAN_NAMELEN 32
 #define MIN(a,b) ((a < b) ? a : b)
 
+#define NMEA2000_DEBUG_AIS 0
 
 static struct gps_device_t *nmea2000_units[NMEA2000_NETS][NMEA2000_UNITS];
 static char can_interface_name[NMEA2000_NETS][CAN_NAMELEN];
@@ -463,6 +464,14 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	beam                     =                 getleu16(bu, 26);
         to_starboard             =                 getleu16(bu, 28);
         to_bow                   =                 getleu16(bu, 30);
+	if ((length == 0xffff) || (to_bow       == 0xffff)) {
+	    length       = 0;
+	    to_bow       = 0;
+	}
+	if ((beam   == 0xffff) || (to_starboard == 0xffff)) {
+	    beam         = 0;
+	    to_starboard = 0;
+	}
 	ais->type19.to_bow       = (unsigned int) (to_bow/10);
 	ais->type19.to_stern     = (unsigned int) ((length-to_bow)/10);
 	ais->type19.to_port      = (unsigned int) ((beam-to_starboard)/10);
@@ -498,11 +507,22 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
         ais->type5.ais_version   = (unsigned int) ((bu[73] >> 0) & 0x03);
 	ais->type5.imo           = (unsigned int)  getleu32(bu,  5);
+	if (ais->type5.imo == 0xffffffff) {
+	    ais->type5.imo       = 0;
+	}
 	ais->type5.shiptype      = (unsigned int) ((bu[36] >> 0) & 0xff);
 	length                   =                 getleu16(bu, 37);
 	beam                     =                 getleu16(bu, 39);
         to_starboard             =                 getleu16(bu, 41);
         to_bow                   =                 getleu16(bu, 43);
+	if ((length == 0xffff) || (to_bow       == 0xffff)) {
+	    length       = 0;
+	    to_bow       = 0;
+	}
+	if ((beam   == 0xffff) || (to_starboard == 0xffff)) {
+	    beam         = 0;
+	    to_starboard = 0;
+	}
 	ais->type5.to_bow        = (unsigned int) (to_bow/10);
 	ais->type5.to_stern      = (unsigned int) ((length-to_bow)/10);
 	ais->type5.to_port       = (unsigned int) ((beam-to_starboard)/10);
@@ -535,23 +555,26 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    ais->type5.destination[l] = (char) bu[53+l];
 	}
 	ais->type5.destination[20] = (char) 0;
-#if 0
-	printf("AIS: MMSI:  %09d\n", ais->mmsi);
-	printf("AIS: name:  %20s i:%8d c:%s b:%6d s:%6d p:%6d s:%6d dr:%4.1f\n", ais->type5.shipname,
-	                                                                         ais->type5.imo,
-	                                                                         ais->type5.callsign,
-	                                                                         ais->type5.to_bow,
-	                                                                         ais->type5.to_stern,
-	                                                                         ais->type5.to_port,
-	                                                                         ais->type5.to_starboard,
-	                                                                         ais->type5.draught/10.0);
-	printf("AIS: arival:%20s at %02d-%02d-%04d %02d:%02d\n", ais->type5.destination, 
-	                                                         ais->type5.day,
-	                                                         ais->type5.month,
-	                                                         date2.tm_year+1900,
-	                                                         ais->type5.hour,
-	                                                         ais->type5.minute);
-#endif 
+#if NMEA2000_DEBUG_AIS
+	printf("AIS: MMSI:  %09u\n",
+	       ais->mmsi);
+	printf("AIS: name:  %-20.20s i:%8u c:%-8.8s b:%6u s:%6u p:%6u s:%6u dr:%4.1f\n",
+	       ais->type5.shipname,
+	       ais->type5.imo,
+	       ais->type5.callsign,
+	       ais->type5.to_bow,
+	       ais->type5.to_stern,
+	       ais->type5.to_port,
+	       ais->type5.to_starboard,
+	       ais->type5.draught/10.0);
+	printf("AIS: arival:%-20.20s at %02u-%02u-%04d %02u:%0u\n",
+	       ais->type5.destination, 
+	       ais->type5.day,
+	       ais->type5.month,
+	       date2.tm_year+1900,
+	       ais->type5.hour,
+	       ais->type5.minute);
+#endif /* of #if NMEA2000_DEBUG_AIS */
         return(ONLINE_SET | AIS_SET);
     }
     return(0);
@@ -630,7 +653,7 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	saveptr->mmsi = ais->mmsi;
 
 	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    saveptr->shipname[l] = (char) bu[32+l];
+	    saveptr->shipname[l] = (char) bu[ 5+l];
 	}
 	saveptr->shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
 
@@ -664,12 +687,12 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		ais->type24.shiptype = (unsigned int) ((bu[ 5] >> 0) & 0xff);
 
 	        for (l=0;l<7;l++) {
-		    ais->type24.vendorid[7] = (char) bu[ 6+l];
+		    ais->type24.vendorid[l] = (char) bu[ 6+l];
 		}
 		ais->type24.vendorid[7] = (char) 0;
 
 	        for (l=0;l<7;l++) {
-		    ais->type24.callsign[7] = (char) bu[13+l];
+		    ais->type24.callsign[l] = (char) bu[13+l];
 		}
 		ais->type24.callsign[7] = (char )0;
 
@@ -686,11 +709,31 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		    ais->type24.dim.to_stern      = (unsigned int) ((length-to_bow)/10);
 		    ais->type24.dim.to_port       = (unsigned int) ((beam-to_starboard)/10);
 		    ais->type24.dim.to_starboard  = (unsigned int) (to_starboard/10);
+		    if ((length == 0xffff) || (to_bow       == 0xffff)) {
+		        length       = 0;
+			to_bow       = 0;
+		    }
+		    if ((beam   == 0xffff) || (to_starboard == 0xffff)) {
+		        beam         = 0;
+			to_starboard = 0;
+		    }
 		}
 
 		gpsd_report(LOG_PROG, "NMEA2000: AIS 24B from %09u matches a 24A.\n", ais->mmsi);
 		/* prevent false match if a 24B is repeated */
 		session->aivdm[0].type24_queue.ships[i].mmsi = 0;
+#if NMEA2000_DEBUG_AIS
+		printf("AIS: MMSI:  %09u\n",
+		       ais->mmsi);
+		printf("AIS: name:  %-20.20s i:%-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
+		       ais->type24.shipname,
+		       ais->type24.vendorid,
+		       ais->type24.callsign,
+		       ais->type24.dim.to_bow,
+		       ais->type24.dim.to_stern,
+		       ais->type24.dim.to_port,
+		       ais->type24.dim.to_starboard);
+#endif /* of #if NMEA2000_DEBUG_AIS */
 		return(ONLINE_SET | AIS_SET);
 	    }
 	}
