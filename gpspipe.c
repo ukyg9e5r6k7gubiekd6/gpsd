@@ -99,6 +99,7 @@ static void usage(void)
 		  "-r Dump raw NMEA.\n"
 		  "-R Dump super-raw mode (GPS binary).\n"
 		  "-w Dump gpsd native data.\n"
+		  "-S Set scaled flag.\n"
 		  "-l Sleep for ten seconds before connecting to gpsd.\n"
 		  "-t Time stamp the data.\n"
 		  "-T [format] set the timestamp format (strftime(3)-like; implies '-t')\n"
@@ -138,7 +139,7 @@ int main(int argc, char **argv)
 
     /*@-branchstate@*/
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwtT:vVn:s:o:p")) != -1) {
+    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVn:s:o:p")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -180,6 +181,9 @@ int main(int argc, char **argv)
 	case 'w':
 	    flags |= WATCH_JSON;
 	    watch = true;
+	    break;
+	case 'S':
+	    flags |= WATCH_SCALED;
 	    break;
 	case 'p':
 	    profile = true;

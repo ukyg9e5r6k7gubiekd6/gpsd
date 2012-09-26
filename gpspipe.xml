@@ -34,6 +34,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-T <replaceable>timestamp-format</replaceable></arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-w</arg>
+      <arg choice='opt'>-S</arg>
       <arg choice='opt'>-v</arg>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <group>
@@ -99,6 +100,8 @@ if <application>gpspipe</application> is run as a daemon.</para>
 
 <para>-w causes native <application>gpsd</application>sentences to be
 output.</para>
+
+<para>-S sets the scaled flag.</para>
 
 <para>-t adds a timestamp to each sentence output.</para>
 
