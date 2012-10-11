@@ -420,8 +420,10 @@ int gpsd_serial_open(struct gps_device_t *session)
      * We have to make an exception for ptys, which are intentionally
      * opened by another process on the master side, otherwise we'll
      * break all our regression tests.
+     *
+     * We also exclude bluetooth device because the bluetooth daemon opens them.
      */
-    if (session->sourcetype != source_pty) {
+    if (!(session->sourcetype == source_pty || session->sourcetype == source_bluetooth)) {
 	/*
 	 * Try to block other processes from using this device while we
 	 * have it open (later opens should return EBUSY).  Won't work
