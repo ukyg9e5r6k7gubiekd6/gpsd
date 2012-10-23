@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.11, Mar 2012
+v2.12, Oct 2012
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -363,6 +363,28 @@ Here is a table of NMEA-ID allocations above 32 as of March 2010:
 
 In general, NMEA-ID = PRN - 87. Theoretically, all NMEA-emitting
 devices should emit NMEA-IDs. In practice, some pass through PRNs.
+
+Documentation on IDs for GLONASS satellites is scanty and
+contradictory. The manual for one GLONASS-capable receiver has this to
+say (but it is not clear whether the "established convention"
+is obeyed by other devices, which may use different GLONASS offsets):
+
+To avoid possible confusion caused by repetition of satellite ID
+numbers when using multiple satellite systems, the following
+convention has been adopted:
+
+a. GPS satellites are identified by their PRN numbers, which range from 1 to 32.
+
+b. The numbers 33-64 are reserved for WAAS satellites. The WAAS system
+PRN numbers are 120-138. The offset from NMEA WAAS SV ID to WAAS PRN
+number is 87. A WAAS PRN number of 120 minus 87 yields the SV ID of
+33. The addition of 87 to the SV ID yields the WAAS PRN number.
+
+c. The numbers 65-96 are reserved for GLONASS satellites. GLONASS
+satellites are identified by 64+satellite slot number. The slot
+numbers are 1 through 24 for the full constellation of 24 satellites,
+this gives a range of 65 through 88. The numbers 89 through 96 are
+available if slot numbers above 24 are allocated to on-orbit spares.
 
 == Obsolete sentences ==
 

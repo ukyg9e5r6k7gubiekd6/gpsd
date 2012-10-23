@@ -110,8 +110,7 @@ struct gps_fix_t {
  * it is a GPSD convention to map them to IDs 65..96.
  * (some other programs push them to 33 and above).
  */
-#define GLONASS_PRN_MAP	64
-#define GLONASS_PRN(n)	(((n) >= 1 + GLONASS_PRN_MAP) && ((n) <= 32 + GLONASS_PRN_MAP)	/* GLONASS satellite */
+#define GLONASS_PRN_OFFSET	64
 
 /*
  * The structure describing the pseudorange errors (GPGST)
