@@ -169,7 +169,7 @@ static void cooked_pvt(void)
 /*@ -globstate -nullpass (splint is confused) */
 static void nmea_update(void)
 {
-    static char sentences[NMEA_MAX];
+    static char sentences[NMEA_MAX * 2];
     char **fields;
 
     assert(cookedwin != NULL);
