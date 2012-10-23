@@ -179,9 +179,10 @@ static void nmea_update(void)
     assert(gprmcwin != NULL);
     assert(gpgstwin != NULL);
 
+    /* can be NULL if packet was overlong */
     fields = session.driver.nmea.field;
 
-    if (session.packet.outbuffer[0] == (unsigned char)'$') {
+    if (session.packet.outbuffer[0] == (unsigned char)'$' && fields != NULL) {
 	int ymax, xmax;
 	timestamp_t now;
 	getmaxyx(nmeawin, ymax, xmax);
