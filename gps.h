@@ -98,14 +98,20 @@ struct gps_fix_t {
 
 /*
  * Satellite ID classes.
- * U.S. GPS authorities reserve PRNs 1-64 for GPS satellites.
- * GLONASS birds reuse GPS PRNs;  it is a GPSD convention to map them to
- * IDs 64 and above (some other programs push them to 33 and above).
- * All SBAS/WAAS/EGNOS birds have PRNs above 100.
+ * IS-GPS-200 Revision E, paragraph 6.3.6
  */
-#define GNSS_PRN(n)	(((n) >= 1) && ((n) <= 63))	/* GNSS satellite */
-#define GLONASS_PRN(n)	(((n) >= 64) && ((n) <= 96))	/* GLONASS satellite */
-#define DGPS_PRN(n)	((n) >= 100)
+#define GPS_PRN(n)	(((n) >= 1) && ((n) <= 63))	/* U.S. GPS satellite */
+#define GBAS_PRN(n)	((n) >= 64 && ((n) <= 119))	/* Ground Based Augmentation System and other augmentation systems */
+#define SBAS_PRN(n)	((n) >= 120 && ((n) <= 158))	/* Satellite Based Augmentation System */
+#define GNSS_PRN(n)	((n) >= 159 && ((n) <= 210))	/* other Global Navigation Satellite System */
+
+/*
+ * GLONASS birds reuse GPS PRNs.
+ * it is a GPSD convention to map them to IDs 65..96.
+ * (some other programs push them to 33 and above).
+ */
+#define GLONASS_PRN_MAP	64
+#define GLONASS_PRN(n)	(((n) >= 1 + GLONASS_PRN_MAP) && ((n) <= 32 + GLONASS_PRN_MAP)	/* GLONASS satellite */
 
 /*
  * The structure describing the pseudorange errors (GPGST)

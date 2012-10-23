@@ -28,9 +28,9 @@
 
 static int decode_channel_id (uint32_t ch_id) {
 	int num = 0;
-	num = (int)(ch_id & 0x1F);		/* SV ID */
-	if((ch_id & (1<<30)) == 0) num += 64;	/* GLONASS SV */
-	else if (num == 0 ) num = 32;		/* GPS SV */
+	num = (int)(ch_id & 0x1F);				/* SV ID */
+	if((ch_id & (1<<30)) == 0) num += GLONASS_PRN_MAP;	/* GLONASS SV */
+	else if (num == 0 ) num = 32;				/* GPS SV */
 	return num;
 }
 

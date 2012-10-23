@@ -571,6 +571,14 @@ static gps_mask_t processGPGSV(int count, char *field[],
 	}
 	session->gpsdata.PRN[session->gpsdata.satellites_visible] =
 	    atoi(field[fldnum++]);
+	/*
+	 * NMEA-ID (33..64) to SBAS PRN.
+	 * Check SBAS_PRN(NMEA-ID) is required because some GPSes sends RPN instead of NMEA-ID.
+	 */
+	if (session->gpsdata.PRN[session->gpsdata.satellites_visible] >= 33
+		&& session->gpsdata.PRN[session->gpsdata.satellites_visible] <= 64
+		&& !SBAS_PRN(session->gpsdata.PRN[session->gpsdata.satellites_visible]))
+	    session->gpsdata.PRN[session->gpsdata.satellites_visible] += 87;
 	session->gpsdata.elevation[session->gpsdata.satellites_visible] =
 	    atoi(field[fldnum++]);
 	session->gpsdata.azimuth[session->gpsdata.satellites_visible] =
