@@ -304,6 +304,15 @@ core-dumped, try to use gdb or whatever your local symbolic debugger
 is to generate a stack trace ("bt full") of the crash, and send us
 that.</p>
 
+<p>Very occasionally we have also received reports of core dumps in
+gpsfake and gpson.  A stack trace is also useful in those cases.</p>
+
+<p>A good technique in all such cases is to try to reproduce the bug
+by feeding a log with the bad packet in it to gpsdecode.  This utility
+exercises the same packet decoders as gpsd/gpsfake/gpsmon but without
+involving nearly as much other code.  If you can send a test log that
+crashes gpsdecode, you can expect the bug to be fixed very quickly.</p>
+
 <h3>11. Try to determine what release introduced the bug</h3>
 
 <p>If you have upgraded from a previous version of <code>gpsd</code>,
