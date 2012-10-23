@@ -83,14 +83,6 @@ systemd = os.path.exists("/usr/share/systemd/system")
 
 # Set distribution-specific defaults here
 imloads = True
-if sys.platform.startswith('linux'):
-    (distro, version, cutename) = platform.linux_distribution()
-    if distro == 'Fedora':
-        if int(version) >= 13:
-            # See https://fedoraproject.org/wiki/Features/ChangeInImplicitDSOLinking
-            imloads = False
-    elif os.path.exists("/etc/arch-release"):
-        imloads = False
 
 # Does our platform has a working memory-barrier instruction?
 # The shared-memory export won't be reliable without it.
@@ -368,8 +360,8 @@ docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
 
 def CheckXsltproc(context):
     context.Message('Checking that xsltproc can make man pages... ')
-    with open("xmltest.xml", "w") as ofp:
-        ofp.write('''
+    ofp = open("xmltest.xml", "w")
+    ofp.write('''
        <refentry id="foo.1">
       <refmeta>
         <refentrytitle>foo</refentrytitle>
@@ -382,6 +374,7 @@ def CheckXsltproc(context):
       </refnamediv>
     </refentry>
 ''')
+    ofp.close()
     probe = "xsltproc --nonet --noout '%s' xmltest.xml" % (docbook_man_uri,)
     ret = context.TryAction(probe)[0]
     os.remove("xmltest.xml")
@@ -1047,8 +1040,9 @@ env.Command(target = "packet_names.h", source="packet_states.h", action="""
 # build timebase.h
 def timebase_h(target, source, env):
     from leapsecond import make_leapsecond_include
-    with open(target[0].abspath, 'w') as f:
-        f.write(make_leapsecond_include(source[0].abspath))
+    f = open(target[0].abspath, 'w')
+    f.write(make_leapsecond_include(source[0].abspath))
+    f.close()
 env.Command(target="timebase.h", source="leapseconds.cache",
             action=timebase_h)
 
@@ -1121,15 +1115,17 @@ def substituter(target, source, env):
         ('@DEVMAIL@',    devmail),
         ('@LIBGPSVERSION@', libgps_version),
         )
-    with open(str(source[0])) as sfp:
-        content = sfp.read()
+    sfp = open(str(source[0]))
+    content = sfp.read()
+    sfp.close()
     for (s, t) in substmap:
         content = content.replace(s, t)
     m = re.search("@[A-Z]+@", content)
     if m and m.group(0) not in map(lambda x: x[0], substmap):
         print >>sys.stderr, "Unknown subst token %s in %s." % (m.group(0), sfp.name)
-    with open(str(target[0]), "w") as tfp:
-        tfp.write(content)
+    tfp = open(str(target[0]), "w")
+    tfp.write(content)
+    tfp.close()
 
 templated = glob.glob("*.in") + glob.glob("*/*.in") + glob.glob("*/*/*.in")
 
@@ -1569,9 +1565,10 @@ www = env.Alias('www', webpages)
 def validation_list(target, source, env):
     for page in glob.glob("www/*.html"):
         if not '-head' in page:
-            with open(page) as fp:
-                if "Valid HTML" in fp.read():
-                    print os.path.join(website, os.path.basename(page))
+            fp = open(page)
+            if "Valid HTML" in fp.read():
+                print os.path.join(website, os.path.basename(page))
+            fp.close()
 Utility("validation-list", [www], validation_list)
 
 # How to update the website
