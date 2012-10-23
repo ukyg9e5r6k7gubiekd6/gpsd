@@ -130,4 +130,5 @@ www/pydoc
 # Controls for the flock tester
 devtools/.flocktest.ini
 # QT stuff
+libQgpsmm.prl
 libQgpsmm/binaries/*
