@@ -336,11 +336,11 @@ relevant to GPS systems.
 == Satellite IDs ==
 
 Satellites may be identified by one of two different numbers in
-sentences such as GSV: a PRN number associate with their radio code,
+sentences such as GSV: a PRN number associated with their radio code,
 or an NMEA-ID.  
 
 For satellites 1-32, the GPS constellation, these numbers are the
-same. For satellites associated with WAAS (Wide Area Augnmentation
+same. For satellites associated with WAAS (Wide Area Augmentation
 System), EGNOS (European Geostationary Navigation Overlay Service),
 and MSAS (Multi-functional Satellite Augmentation System), they are
 different.
