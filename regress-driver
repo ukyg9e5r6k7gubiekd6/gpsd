@@ -96,6 +96,10 @@ then
     opts="$opts -b"
 fi
 
+# GPS tests can spuriously fail on Linuxes that set the so-called "right"
+# timezones with leap-second offset baked it.
+TZ=/usr/share/zoneinfo/UTC
+
 case $mode in
     regress)
         echo "Testing the $testing..." >&2
