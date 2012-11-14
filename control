@@ -16,7 +16,10 @@ Description: monitoring daemon for GPSes, AIS radios, and other navigation aids
  and test/profiling tools.
 
 XBS-Destinations: ~, savannah, freecode
+
 XBS-Web-Directory: www
+
+XBS-IRC-Channel: irc://chat.freenode.net/#gpsd
 
 XBS-Project-Tag-List: Communications, Scientific/Engineering, Geographical
 
