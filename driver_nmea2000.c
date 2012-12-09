@@ -37,6 +37,7 @@
 #define MIN(a,b) ((a < b) ? a : b)
 
 #define NMEA2000_DEBUG_AIS 0
+#define NMEA2000_FAST_DEBUG 0
 
 static struct gps_device_t *nmea2000_units[NMEA2000_NETS][NMEA2000_UNITS];
 static char can_interface_name[NMEA2000_NETS][CAN_NAMELEN];
@@ -915,11 +916,9 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 
 		    gpsd_report(LOG_DATA, "pgn %6d:%s \n", work->pgn, work->name);
 		    session->driver.nmea2000.workpgn = (void *) work;
-		    session->driver.nmea2000.idx = 0;
-		    session->driver.nmea2000.ptr = 0;
 		    /*@i1@*/session->packet.outbuflen =  frame->can_dlc & 0x0f;
 		    for (l2=0;l2<session->packet.outbuflen;l2++) {
-		        /*@i3@*/session->packet.outbuffer[session->driver.nmea2000.ptr++]= frame->data[l2];
+		        /*@i3@*/session->packet.outbuffer[l2]= frame->data[l2];
 		    }
 		}
 		/*@i2@*/else if ((frame->data[0] & 0x1f) == 0) {
@@ -927,10 +926,16 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 
 		    /*@i2@*/session->driver.nmea2000.fast_packet_len = frame->data[1];
 		    /*@i2@*/session->driver.nmea2000.idx = frame->data[0];
-		    session->driver.nmea2000.ptr = 0;
+#if NMEA2000_FAST_DEBUG
+		    gpsd_report(LOG_ERROR, "Set idx    %2x    %2x %2x %6d\n", frame->data[0],
+                                                                              session->driver.nmea2000.unit,
+				                                              frame->data[1],
+                                                                              source_pgn);
+#endif /* of #if NMEA2000_FAST_DEBUG */
+		    session->packet.inbuflen = 0;
 		    session->driver.nmea2000.idx += 1;
 		    for (l2=2;l2<8;l2++) {
-		        /*@i3@*/session->packet.outbuffer[session->driver.nmea2000.ptr++]= frame->data[l2];
+		        /*@i3@*/session->packet.inbuffer[session->packet.inbuflen++] = frame->data[l2];
 		    }
 		    gpsd_report(LOG_DATA, "pgn %6d:%s \n", work->pgn, work->name);
 		}
@@ -938,23 +943,36 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    unsigned int l2;
 
 		    for (l2=1;l2<8;l2++) {
-		        if (session->driver.nmea2000.fast_packet_len > session->driver.nmea2000.ptr) {
-			    /*@i3@*/session->packet.outbuffer[session->driver.nmea2000.ptr++] = frame->data[l2];
+		        if (session->driver.nmea2000.fast_packet_len > session->packet.inbuflen) {
+			    /*@i3@*/session->packet.inbuffer[session->packet.inbuflen++] = frame->data[l2];
 			}
 		    }
-		    if (session->driver.nmea2000.ptr == session->driver.nmea2000.fast_packet_len) {
-		        session->driver.nmea2000.workpgn = (void *) work;
+		    if (session->packet.inbuflen == session->driver.nmea2000.fast_packet_len) {
+#if NMEA2000_FAST_DEBUG
+		        gpsd_report(LOG_ERROR, "Fast done  %2x %2x %2x %2x %6d\n", session->driver.nmea2000.idx,
+				                                                   frame->data[0],
+				                                                   session->driver.nmea2000.unit,
+				                                                   (unsigned int) session->driver.nmea2000.fast_packet_len,
+				                                                   source_pgn);
+#endif /* of #if  NMEA2000_FAST_DEBUG */
+			session->driver.nmea2000.workpgn = (void *) work;
 		        session->packet.outbuflen = session->driver.nmea2000.fast_packet_len;
+			for(l2=0;l2 < session->packet.outbuflen; l2++) {
+			    session->packet.outbuffer[l2] = session->packet.inbuffer[l2];
+			}
 			session->driver.nmea2000.fast_packet_len = 0;
 		    } else {
 		        session->driver.nmea2000.idx += 1;
 		    }
 		} else {
-		    session->driver.nmea2000.idx = 0;
-		    session->driver.nmea2000.fast_packet_len = 0;
-		    gpsd_report(LOG_ERROR, "Fast error\n");
+		    gpsd_report(LOG_ERROR, "Fast error %2x %2x %2x %2x %6d\n", session->driver.nmea2000.idx,
+				                                               frame->data[0],
+				                                               session->driver.nmea2000.unit,
+				                                               (unsigned int) session->driver.nmea2000.fast_packet_len,
+				                                               source_pgn);
 		}
 	    } else {
+	        gpsd_report(LOG_ERROR, "PGN not found %08d %08x \n", source_pgn, source_pgn);
 	    }
 	} else {
 	    // we got a unknown unit number

@@ -605,7 +605,7 @@ struct gps_device_t {
 	    int mode;
 	    unsigned int mode_valid;
 	    unsigned int idx;
-	    size_t ptr;
+//	    size_t ptr;
 	    size_t fast_packet_len;
 	    int type;
 	    void *workpgn;
