@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.39, September 2012
+v1.40, December 2012
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -191,7 +191,9 @@ multi-sentence messages.
 
 Field 5 (B in this example) is a radio channel code. AIS uses the high
 side of the duplex from two VHF radio channels: AIS Channel A is
-161.975Mhz (87B); AIS Channel B is 162.025Mhz (88B).
+161.975Mhz (87B); AIS Channel B is 162.025Mhz (88B).  In the wild,
+channel codes '1' and '2' may also be encountered; the standards
+do not prescribe an interpretation of these but it's obvious enough..
 
 Field 6 (177KQJ5000G?tO`K>RA1wUbN0TKH in this example) is the data
 payload. We'll describe how to decode this in later sections.
@@ -442,9 +444,7 @@ Classes 12 and 14 are used for text messaging, nominally safetty-related
 but also for traffic control and occasionally chatter.
 
 In practice, message types other than 1, 3, 4, 5, 18, and 24 are
-unusual or rare; many AIS transmitters never emit them.  As of
-November 2009, an overnight capture of a full feed from <<AISHUB>>
-shows no type 25 or type 26 messages at all.
+unusual or rare; many AIS transmitters never emit them.
 
 An MMSI is a Mobile Marine Service Identifier, a unique 9-digit ID for
 the ship's radio(s).  The first three digits convey information about
@@ -1953,13 +1953,13 @@ broadcast of this message of 12 minutes.
 
 <<IMO236>> says "If there is no data available, default value to be
 transmitted is the highest available binary value for that particular
-data field.", the above table reflects that. 
-The day, hour and minute have to be considered not available when all 
-three are set to their individual "N/A" value.
-For the latitude and the longitude, the highest positive value is used, 
-as the highest available binary value for a signed integer is -1, which 
-would forbid the -0.001/-0.001 position. 
-The replacement FID=31 message has different default values that remove any ambiguities.
+data field.", the above table reflects that.  The day, hour and minute
+have to be considered not available when all three are set to their
+individual "N/A" value.  For the latitude and the longitude, the
+highest positive value is used, as the highest available binary value
+for a signed integer is -1, which would forbid the -0.001/-0.001
+position.  The replacement FID=31 message has different default values
+that remove any ambiguities.
 
 <<IMO236>> gives the length of this message as 352, but lists only 336 
 payload bits.
@@ -4612,3 +4612,6 @@ Message ROT field. Adds information on AIS-SART.
 Version 1.39 corrects signedness errors in the description of the Air
 Temperature and Water Temperature fields in the IMO289 Weather Report
 From Ship message.
+
+Version 1.40 notes that AIS channel codes '1' and '2' may be
+encountered in the wild.
