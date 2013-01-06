@@ -14,6 +14,9 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# Changed to Google Maps API v3, requires no API key, and shorter code
+# Sanjeev Gupta <ghane0@gmail.com> 2013-01-05
+
 global $head, $blurb, $title, $showmap, $autorefresh, $footer, $gmap_key;
 global $server, $advertise, $port, $open, $swap_ew, $testmode;
 $testmode = 1; # leave this set to 1
@@ -554,37 +557,31 @@ EOB;
 function gen_gmap_head() {
 global $gmap_key;
 return <<<EOT
-<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={$gmap_key}" type="text/javascript"></script>
+<script src="//maps.googleapis.com/maps/api/js?sensor=false"
+        type="text/javascript">
+</script>
+
 <script type="text/javascript">
-<!--
-// Create a base icon for all of our markers that specifies the shadow, icon
-// dimensions, etc.
-function Load() {
-  if (GBrowserIsCompatible()) {
-    var map = new GMap2(document.getElementById("map"));
-    var point = new GLatLng( {$GLOBALS['lat']}, {$GLOBALS['lon']} );
-    map.setCenter( point, 14);
-    map.addControl(new GLargeMapControl());
-    map.addControl(new GMapTypeControl());
+ <!--
+    function Load() {
+      var map = new google.maps.Map(
+        document.getElementById('map'), {
+          center: new google.maps.LatLng({$GLOBALS['lat']}, {$GLOBALS['lon']}),
+          zoom: 13,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+      });
 
-    var baseIcon = new GIcon();
-    baseIcon.shadow = "http://www.google.com/mapfiles/shadow50.png";
-    baseIcon.iconSize = new GSize(20, 34);
-    baseIcon.shadowSize = new GSize(37, 34);
-    baseIcon.iconAnchor = new GPoint(9, 34);
-    baseIcon.infoWindowAnchor = new GPoint(9, 2);
-    baseIcon.infoShadowAnchor = new GPoint(18, 25);
+      var marker = new google.maps.Marker({
+            position: new google.maps.LatLng({$GLOBALS['lat']}, {$GLOBALS['lon']}),
+            map: map
+      });
 
-    var icon = new GIcon(baseIcon);
-    icon.image = "http://www.google.com/mapfiles/marker.png";
-    var marker = new GMarker(point, icon);
-    map.addOverlay(marker);
-  }
-}
--->
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+ -->
 </script>
 EOT;
-
 }
 
 function gen_osm_head() {
