@@ -115,8 +115,15 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     }
 #endif
 #ifdef TCP_NODELAY
+    /*
+     * This is a good performance enhancement when the socket is going to
+     * be used to pass a lot of short commands.  It prevents them from being
+     * delayed by the Nagle algorithm until they can be aggreagated into
+     * a large packet.  See http://en.wikipedia.org/wiki/Nagle%27s_algorithm
+     * for discussion.
+     */
     if (type == SOCK_STREAM)
-	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof one);
+	setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char *)&one, sizeof(one));
 #endif
 
     /* set socket to noblocking */
