@@ -226,7 +226,7 @@ represents six bits of data.  To recover the six bits, subtract 48
 from the ASCII character value; if the result is greater than 40
 subtract 8. According to <<IEC-PAS>>, the valid ASCII characters for
 this encoding begin with "0" (64) and end with "w" (87); however, the
-intermediate range "X" (58) to "\_" (95) is not used.  
+intermediate range "X" (88) to "\_" (95) is not used.  
 
 .ASCII payload armoring
 [width="25%",frame="topbot",options="header"]
