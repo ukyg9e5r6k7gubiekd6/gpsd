@@ -1129,7 +1129,7 @@ Notice description types are as follows:
 |  3| Caution Area: Marine mammals in area - report sightings
 |  4| Caution Area: Protected habitat - reduce speed
 |  5| Caution Area: Protected habitat - stay clear
-|  6| Caution Area: Protected habitat - no fisging or anchoring
+|  6| Caution Area: Protected habitat - no fishing or anchoring
 |  7| Caution Area: Derelicts (drifting objects)
 |  8| Caution Area: Traffic congestion
 |  9| Caution Area: Marine event
