@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.40, December 2012
+v1.41, January 2012
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -4082,8 +4082,6 @@ increased propagation delays associated with long-range detection
 |95-95   | 1    |Spare               |         |x|Not used
 |==============================================================================
 
-Note: Type 27 is quite rare, and when seen it is rarely 96-bits long.
-
 == Local extensions ==
 
 Some regional authorities extend the AIS message set.
@@ -4615,3 +4613,6 @@ From Ship message.
 
 Version 1.40 notes that AIS channel codes '1' and '2' may be
 encountered in the wild.
+
+Version 1.41 has been slightly amended because type 27s have started
+showing up  on satellite feeds.
