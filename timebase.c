@@ -110,6 +110,7 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     if (context->start_time < GPS_EPOCH)
 	gpsd_report(LOG_ERROR, "system time looks bogus, dates may not be reliable.\n");
     else {
+	/* we've forced the UTC timezone, so this is actually UTC */
 	struct tm *now = localtime(&context->start_time);
 	char scr[128];
 	/*
@@ -170,13 +171,8 @@ timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
     /*
      * If the GPS is reporting a time from before the daemon started, we've
      * had a rollover event while the daemon was running.
-     *
-     * The reason for the 12-hour slop is that our recorded start time is local,
-     * but GPSes deliver time as though in UTC.  This test could be exact if we
-     * counted on knowing our timezone at startup, but since we can't count on
-     * knowing location...
      */
-    if (session->newdata.time + (12*60*60) < (timestamp_t)session->context->start_time) {
+    if (session->newdata.time < (timestamp_t)session->context->start_time) {
 	char scr[128];
 	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
 	gpsd_report(LOG_WARN, "GPS week rollover makes time %s (%f) invalid\n",
