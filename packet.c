@@ -1634,6 +1634,7 @@ void packet_parse(struct gps_packet_t *lexer)
 #ifdef TSIP_ENABLE
 		/* check for some common TSIP packet types:
 		 * 0x13, TSIP Parsing Error Notification
+		 * 0x38, Request SV system data
 		 * 0x41, GPS time, data length 10
 		 * 0x42, Single Precision Fix, data length 16
 		 * 0x43, Velocity Fix, data length 20
@@ -1663,7 +1664,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		/*@ +charint @*/
 		pkt_id = lexer->inbuffer[1];	/* packet ID */
                 /* *INDENT-OFF* */
-		if (!((0x13 == pkt_id) || (0xbb == pkt_id) || (0xbc == pkt_id))
+		if (!((0x13 == pkt_id) || (0xbb == pkt_id) || (0xbc == pkt_id)  || (0x38 == pkt_id))
 		    && ((0x41 > pkt_id) || (0x8f < pkt_id))) {
 		    gpsd_report(LOG_IO,
 				"Packet ID 0x%02x out of range for TSIP\n",
@@ -1673,6 +1674,8 @@ void packet_parse(struct gps_packet_t *lexer)
                 /* *INDENT-ON* */
 		/*@ -ifempty */
 		if ((0x13 == pkt_id) && (0x01 <= packetlen))
+		    /* pass */ ;
+		else if ((0x38 == pkt_id) && (0x02 == packetlen))
 		    /* pass */ ;
 		else if ((0x41 == pkt_id)
 			 && ((0x0e == packetlen) || (0x0f == packetlen)))
