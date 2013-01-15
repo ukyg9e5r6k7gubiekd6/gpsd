@@ -1997,9 +1997,6 @@ int main(int argc, char *argv[])
 #endif /* defined(CONTROL_SOCKET_ENABLE) || defined(SYSTEMD_ENABLE) */
 
 
-    /* gpsd can't work with 'right' timezone when leapseconds inserted */
-    (void)putenv("TZ=UTC");
-
     /* might be time to daemonize */
     if (go_background) {
 	/* not SuS/POSIX portable, but we have our own fallback version */

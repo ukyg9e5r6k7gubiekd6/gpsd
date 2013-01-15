@@ -87,6 +87,13 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 /* initialize the GPS context's time fields */
 {
+    /* 
+     * gpsd can't work with 'right' timezones (leapseconds inserted in
+     * the timezone offset).  Avoid this and all manner of other local
+     * time issues by telling the system we want times returned in UTC.
+     */
+    (void)putenv("TZ=UTC");
+
     /*
      * Provides a start time for getting the century.  Do this, just
      * in case one of our embedded deployments is still in place in
