@@ -16,7 +16,7 @@ See the GPSD bug tracker on the project website, but don't be
 surprised if it's empty or very sparse.  Our rate of new defects per
 month is quite low.
 
-** Dispatcher/network issues
+*** Dispatcher/network issues
 
 **** Reading AISHub data via UDP confuses xgps with short writes
 
@@ -157,12 +157,6 @@ implementation; it's a fairly lightweight protocol, flexible enough to
 handle all the quantities required, and it is actually in use in
 production reference networks. RT-IGS is also a packet-oriented
 format, rather than a file-oriented format like RINEX.
-
-*** NOFLOAT build
-
-We want to be able to build a minimalist version that doesn't require
-floating-point arithmetic, for deployment on low-power ARM devices 
-without FPU.
 
 *** Support for more survey / professional / up-scale receivers.
 
