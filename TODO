@@ -53,8 +53,6 @@ We'd need machinery to shift a byte array 30 bits left...
 
 *** The shared-memory export is not documented
 
-*** The source-build instructions need to mention the init/udev scripts
-
 ** Ports
 
 *** Windows port

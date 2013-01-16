@@ -350,3 +350,16 @@ your cross-compiler is likely to have a different target prefix.
 When you are cross-compiling, you'll need chrpath at version 0.14 or
 later for cross-architecture support.  If it's not yet packaged for
 your environment, see http://alioth.debian.org/projects/chrpath/
+
+== Autostarting the daemon ==
+
+The preferred way to start gpsd is on-demand by a hotplug script 
+detecting USB device activations.  Look at the gpsd.rules and
+gpsd.hotplug files to see how this is accomplished.  Relevant
+productions in the build recipe are "udev-install" and
+"udev-uninstall"; relevant build options include "udevdir".
+
+If you for some reason need to start gpsd unconditionally at
+boot time (in particular, if you need to support RS232 devices)
+there's a model init.d script under packaging/deb and a systemd
+setup under systemd/.
