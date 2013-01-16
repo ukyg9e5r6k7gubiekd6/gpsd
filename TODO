@@ -49,10 +49,6 @@ message 6 and 8 subtypes - specifically, 6/23, 8/21, 8/22, 8/24, and
 
 We'd need machinery to shift a byte array 30 bits left...
 
-** Documentation
-
-*** The shared-memory export is not documented
-
 ** Ports
 
 *** Windows port
