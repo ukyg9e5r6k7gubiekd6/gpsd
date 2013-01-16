@@ -145,8 +145,8 @@ unavailable, and 0 if no data is available.</para>
 there is new data from the daemon. The second argument is the maximum
 amount of time to wait (in microseconds) on input before returning.
 It returns true if there is input waiting, false on timeout (no data
-waiting) or error condition. This function is a convenience wrapper
-around a
+waiting) or error condition. When using the socket export, this
+function is a convenience wrapper around a
 <citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
 call, and zeros <varname>errno</varname> on entry; you can test
 <varname>errno</varname> after exit to get more information about
