@@ -179,6 +179,7 @@ pathopts = (
     ("sbindir",             "sbin",          "system binaries directory"),
     ("mandir",              "share/man",     "manual pages directory"),
     ("docdir",              "share/doc",     "documents directory"),
+    ("udevdir",             "/lib/udev",     "udev rules directory"),
     ("pkgconfig",           "$libdir/pkgconfig", "pkgconfig file directory"),
     )
 for (name, default, help) in pathopts:
@@ -1204,7 +1205,6 @@ binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib)
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
-# We don't use installdir here in order to avoid having DESTDIR affect the rpath
 if env["shared"] and env["chrpath"]:
     env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' \
                       % (installdir('libdir', False), ))
@@ -1637,15 +1637,15 @@ if env['python']:
 # is plugged in.
 
 Utility('udev-install', 'install', [
-    'mkdir -p ' + DESTDIR + '/lib/udev/rules.d',
-    'cp $SRCDIR/gpsd.rules ' + DESTDIR + '/lib/udev/rules.d/25-gpsd.rules',
-    'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + '/lib/udev/',
-    'chmod a+x ' + DESTDIR + '/lib/udev/gpsd.hotplug',
+    'mkdir -p ' + env['udevdir'],
+    'cp $SRCDIR/gpsd.rules ' + env['udevdir'] + '/rules.d/25-gpsd.rules',
+    'cp $SRCDIR/gpsd.hotplug ' + env['udevdir'],
+    'chmod a+x ' + env['udevdir'] + '/gpsd.hotplug',
         ])
 
 Utility('udev-uninstall', '', [
-    'rm -f /lib/udev/gpsd.hotplug',
-    'rm -f /lib/udev/rules.d/25-gpsd.rules',
+    'rm -f %s/gpsd.hotplug' % env['udevdir'],
+    'rm -f %s/rules.d/25-gpsd.rules' % env['udevdir'],
         ])
 
 Utility('udev-test', '', [
