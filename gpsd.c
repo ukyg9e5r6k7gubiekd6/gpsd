@@ -1996,6 +1996,7 @@ int main(int argc, char *argv[])
     }
 #endif /* defined(CONTROL_SOCKET_ENABLE) || defined(SYSTEMD_ENABLE) */
 
+
     /* might be time to daemonize */
     if (go_background) {
 	/* not SuS/POSIX portable, but we have our own fallback version */

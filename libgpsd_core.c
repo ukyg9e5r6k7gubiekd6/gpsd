@@ -1127,5 +1127,13 @@ void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
     (void)memset(out->azimuth, 0, sizeof(out->azimuth));
     (void)memset(out->ss, 0, sizeof(out->ss));
     out->satellites_visible = 0;
+#if 0
+    /*
+     * We used to clear DOPs here, but this causes misbehavior on some
+     * combined GPS/GLONASS/QZSS receivers like the Telit SL869; the
+     * symptom is that the "satellites_used" field in a struct gps_data_t
+     * filled in by gps_read() is always zero.
+     */
     gps_clear_dop(&out->dop);
+#endif
 }

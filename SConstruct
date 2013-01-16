@@ -151,6 +151,7 @@ boolopts = (
     ("python",        True,  "build Python support and modules."),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
+    ("coveraging",    False, "build with code coveraging enabled"),
     ("strip",         True,  "build with stripping of binaries enabled"),
     ("chrpath",       True,  "use chrpath to edit library load paths"),
     )
@@ -179,6 +180,7 @@ pathopts = (
     ("sbindir",             "sbin",          "system binaries directory"),
     ("mandir",              "share/man",     "manual pages directory"),
     ("docdir",              "share/doc",     "documents directory"),
+    ("udevdir",             "/lib/udev",     "udev rules directory"),
     ("pkgconfig",           "$libdir/pkgconfig", "pkgconfig file directory"),
     )
 for (name, default, help) in pathopts:
@@ -239,6 +241,10 @@ for flag in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
 for key, value in os.environ.iteritems():
     if key.startswith('CCC_'):
         env.Append(ENV={key:value})
+
+# FIXME: Set up compilation for gcov - doesn't work yet.
+if env['coveraging']:
+    env['CFLAGS'].append(['-fprofile-arcs', '-ftest-coverage'])
 
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
@@ -901,6 +907,10 @@ gpsmon_sources = [
 if not env['shared'] or not env["implicit_link"]:
     env.MergeFlags("-lm")
 
+# FIXME: Part of an attempt to support coverage testing.
+if env['coveraging']:
+    env.MergeFlags("-lgcov")
+
 gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 
@@ -1172,7 +1182,7 @@ if manbuilder:
 
 build = env.Alias('build', [libraries, binaries, python_built_extensions, "gpsd.php", manpage_targets])
 env.Clean(build,
-          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.pyc", "gps/*.pyc")) + \
+          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
           generated_sources + \
           map(lambda f: f[:-3], templated) + \
           [".sconf_temp"])
@@ -1204,7 +1214,6 @@ binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib)
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
-# We don't use installdir here in order to avoid having DESTDIR affect the rpath
 if env["shared"] and env["chrpath"]:
     env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' \
                       % (installdir('libdir', False), ))
@@ -1637,15 +1646,15 @@ if env['python']:
 # is plugged in.
 
 Utility('udev-install', 'install', [
-    'mkdir -p ' + DESTDIR + '/lib/udev/rules.d',
-    'cp $SRCDIR/gpsd.rules ' + DESTDIR + '/lib/udev/rules.d/25-gpsd.rules',
-    'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + '/lib/udev/',
-    'chmod a+x ' + DESTDIR + '/lib/udev/gpsd.hotplug',
+    'mkdir -p ' + env['udevdir'],
+    'cp $SRCDIR/gpsd.rules ' + env['udevdir'] + '/rules.d/25-gpsd.rules',
+    'cp $SRCDIR/gpsd.hotplug ' + env['udevdir'],
+    'chmod a+x ' + env['udevdir'] + '/gpsd.hotplug',
         ])
 
 Utility('udev-uninstall', '', [
-    'rm -f /lib/udev/gpsd.hotplug',
-    'rm -f /lib/udev/rules.d/25-gpsd.rules',
+    'rm -f %s/gpsd.hotplug' % env['udevdir'],
+    'rm -f %s/rules.d/25-gpsd.rules' % env['udevdir'],
         ])
 
 Utility('udev-test', '', [
