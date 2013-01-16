@@ -78,6 +78,8 @@ beaglebone)
     ip link set can${net} up;;
 *)
     echo `basename ${0}` ": invalid CAN interface ${1} net${net} device ${2:-(none)}"
+    echo;
+    usage;
     exit 1
 esac
 
