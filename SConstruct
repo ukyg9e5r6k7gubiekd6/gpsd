@@ -151,6 +151,7 @@ boolopts = (
     ("python",        True,  "build Python support and modules."),
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
+    ("coveraging",    False, "build with code coveraging enabled"),
     ("strip",         True,  "build with stripping of binaries enabled"),
     ("chrpath",       True,  "use chrpath to edit library load paths"),
     )
@@ -240,6 +241,10 @@ for flag in ["LDFLAGS", "LINKFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
 for key, value in os.environ.iteritems():
     if key.startswith('CCC_'):
         env.Append(ENV={key:value})
+
+# FIXME: Set up compilation for gcov - doesn't work yet.
+if env['coveraging']:
+    env['CFLAGS'].append(['-fprofile-arcs', '-ftest-coverage'])
 
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
@@ -902,6 +907,10 @@ gpsmon_sources = [
 if not env['shared'] or not env["implicit_link"]:
     env.MergeFlags("-lm")
 
+# FIXME: Part of an attempt to support coverage testing.
+if env['coveraging']:
+    env.MergeFlags("-lgcov")
+
 gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 
@@ -1173,7 +1182,7 @@ if manbuilder:
 
 build = env.Alias('build', [libraries, binaries, python_built_extensions, "gpsd.php", manpage_targets])
 env.Clean(build,
-          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.pyc", "gps/*.pyc")) + \
+          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
           generated_sources + \
           map(lambda f: f[:-3], templated) + \
           [".sconf_temp"])
