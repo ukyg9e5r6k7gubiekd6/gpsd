@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+This file is Copyright (c) 2010 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+-->
+<!DOCTYPE refentry PUBLIC
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='cansetup.1'>
+<refentryinfo><date>18 Jan 2013</date></refentryinfo>
+<refmeta>
+<refentrytitle>cansetup</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="source">The GPSD Project</refmiscinfo>
+<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>cansetup</refname>
+<refpurpose>init the can interface of some known CAN hardware for the use with gpsd and NMEA2000</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>cansetup</command>
+      <arg choice='opt'>-n <replaceable>control</replaceable></arg>
+      <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
+      <arg choice='plain'><replaceable>module_name</replaceable></arg>
+      <arg choice='opt'><replaceable>interface_name</replaceable></arg>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>cansetup</command>
+      <arg choice='plain'>-h </arg>
+</cmdsynopsis>
+<cmdsynopsis>
+  <command>cansetup</command>
+      <arg choice='plain'>-v </arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para><application>cansetup</application> will initalise an CAN interface so
+that it can be used as an interface to a NMEA2000 network.
+Note:  It need root permissions to load modules and change the CAN baudrate.</para>
+
+<para></para>
+
+<para></para>
+
+<para>The program accepts the following options:</para>
+<variablelist remap='TP'>
+
+<varlistentry>
+<term>-h</term>
+<listitem>
+<para>Display brief help text.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-v</term>
+<listitem>
+<para>Display version of <application>cansetup</application>.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-n</term>
+<listitem>
+<para>Set the network number. The default is 0.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-s</term>
+<listitem>
+<para>Set the baudrate to communicate with the serial line CAN hardware. The default is 38400 baud.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+The parameter <parameter>module_name</parameter> is mandatory.
+The socket can driver module <parameter>module_name</parameter>.ko will be loaded.
+<command>cansetup</command> recognize the following module names:
+<variablelist>
+<varlistentry><term>plx_pci</term></varlistentry>
+<varlistentry><term>esd_usb2</term></varlistentry>
+<varlistentry><term>vcan</term></varlistentry>
+<varlistentry><term>slcan</term>
+<listitem><para>
+The parameter <parameter>interface_name</parameter> and <parameter>-s <replaceable>speed</replaceable></parameter>
+can used here.
+</para></listitem></varlistentry>
+<varlistentry><term>beaglebone</term>
+<listitem><para>
+The module dcan needed for the beaglebone ist part of the known linux kernels,
+so no module is loaded here.
+</para></listitem>
+</varlistentry>
+</variablelist>
+</para>
+
+<para>
+The parameter <parameter>interface_name</parameter> is needed for slcan hardware only.
+It gives the name of the serial device the SL CAN hardware is connected. The default is /dev/ttyUSB0.
+</para>
+</refsect1>
+
+<refsect1 id='examples'><title>EXAMPLES</title>
+
+<variablelist>
+<varlistentry>
+<term><command>sudo cansetup  plx_pci</command></term>
+<listitem>
+<para>Attempt to load the module plx_pci and initialise net 0 for
+ the connection to a NMEA2000 network. It will set the baudrate to 250kBits.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><command>sudo cansetup  -n 1 plx_pci</command></term>
+<listitem>
+<para>As above, but use net 1.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><command>sudo cansetup  -s 38400 slcan /dev/ttyUSB0</command></term>
+<listitem>
+<para>Attempt to load the module slcan and talk to the hardware with 
+38400 baud connected to port /dev/ttyUSB0.</para>
+</listitem>
+</varlistentry>
+
+
+<varlistentry>
+<term><command>cansetup -h </command></term>
+<listitem>
+<para>Display a brief help..</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term><command>cansetup -v </command></term>
+<listitem>
+<para>Display version of cansetup.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</refsect1>
+
+<refsect1 id='bugs'><title>BUGS</title>
+
+<para>Not known.</para>
+
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+</para>
+</refsect1>
+
+<refsect1 id='maintainer'><title>AUTHOR</title>
+<para>Reinhard Arlt <email>reinhard.arlt@t-online.de</email>.</para>
+</refsect1>
+</refentry>
