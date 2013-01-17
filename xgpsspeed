@@ -26,8 +26,6 @@ __version__ = '0.0.8'
 # testing!
 # cleanup and sanitize code
 
-chenwei = False
-
 class Speedometer(gtk.DrawingArea):
     def __init__(self, speed_unit=None):
         gtk.DrawingArea.__init__(self)
@@ -247,8 +245,6 @@ class Speedometer(gtk.DrawingArea):
     def get_radius(self, width, height):
         return min(width / 2.0, height / 2.0) - 20
 
-# Experimental insertion of Chen Wei's code
-
 HEADING_SAT_GAP = 0.8
 GPS_PRNMAX = 32  # Above this number are SBAS satellites
 SAT_SIZE = 10  # radius of the satellite circle in skyview
@@ -265,7 +261,7 @@ def polar2xy(radius, angle, polex, poley):
     return (polex + cos(angle) * radius, poley - sin(angle) * radius)
 
 
-class Speedometer2(gtk.DrawingArea):
+class SpeedAndTrack(gtk.DrawingArea):
     def __init__(self, speed_unit=None, maxspeed=100):
         gtk.DrawingArea.__init__(self)
         self.connect('expose_event', self.expose_event)
@@ -549,26 +545,24 @@ class Speedometer2(gtk.DrawingArea):
     def get_radius(self, width, height):
         return min(width / 2.0, height / 2.0) - 70
 
-
-# Experimental insertion ends
-
 class Main(object):
     def __init__(self, host='localhost', port='2947', device=None, debug=0,
-                 speed_unit=None, maxspeed=0):
+                 speed_unit=None, maxspeed=0, nautical=False):
         self.host = host
         self.port = port
         self.device = device
         self.debug = debug
         self.speed_unit = speed_unit
         self.maxspeed = maxspeed
+        self.nautical = nautical
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        if chenwei:
+        if self.nautical:
             self.window.set_size_request(500, 550)
         if not self.window.get_display():
             raise Exception("Can't open display")
         self.window.set_title('xgpsspeed')
-        if chenwei:
-            self.widget = Speedometer2(speed_unit=self.speed_unit,
+        if self.nautical:
+            self.widget = SpeedAndTrack(speed_unit=self.speed_unit,
                                        maxspeed=self.maxspeed)
         else:
             self.widget = Speedometer(speed_unit=self.speed_unit)
@@ -642,7 +636,7 @@ class Main(object):
             self.handle_hangup(source, condition)
         if self.daemon.data['class'] == 'TPV':
             self.update_speed(self.daemon.data)
-        if chenwei and self.daemon.data['class'] == 'SKY':
+        if self.nautical and self.daemon.data['class'] == 'SKY':
             self.update_skyview(self.daemon.data)
 
         return True
@@ -664,7 +658,7 @@ class Main(object):
         if hasattr(data, 'speed'):
             self.widget.last_speed = data.speed
             self.widget.queue_draw()
-        if chenwei and hasattr(data, 'track'):
+        if self.nautical and hasattr(data, 'track'):
             self.widget.last_heading = data.track
             self.widget.queue_draw()
 
@@ -674,7 +668,7 @@ class Main(object):
             self.widget.satellites = data.satellites
             self.widget.queue_draw()
 
-    # Used for Speedometer2 only
+    # Used for SpeedAndTrack only
     def update_skyview(self, data):
         "Update the satellite list and skyview."
         if hasattr(data, 'satellites'):
@@ -756,6 +750,13 @@ if __name__ == '__main__':
             help='max speed of the speedmeter [Default 50]'
     )
     parser.add_option(
+            '--nautical',
+            dest='nautical',
+            default=False,
+            action='store_true',
+            help='Enable nautical-style speed and track display.'
+    )
+    parser.add_option(
             '--debug',
             dest='debug',
             default=0,
@@ -793,5 +794,6 @@ if __name__ == '__main__':
             device=options.device,
             speed_unit=options.speedunits,
             maxspeed=options.maxspeed,
+            nautical=options.nautical,
             debug=options.debug
     ).run()

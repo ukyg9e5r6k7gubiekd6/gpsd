@@ -228,10 +228,17 @@ position information from the GPS. It accepts an -h option and
 optional argument as for <application>gps</application>, or a -V
 option to dump the package version and exit.</para>
 
+<para>The default display mode resembles a car speedometer.  With the
+option --nautical you get a more elaborate speed and track presentation
+modeled after a marine navigation display.</para>
+
 <para>The -speedunits option can be used to set the speed units for
 display; follow the keyword with knots for nautical miles per hour,
 kph for kilometres per hour, or mph for miles per hour.  The default
 is miles per hour. </para>
+
+<para>In the nautical mode only, --maxspeed sets the maximum on the
+speedometer.</para>
 
 </refsect2>
 <refsect2><title>cgps</title>
