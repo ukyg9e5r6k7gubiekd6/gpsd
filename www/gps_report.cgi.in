@@ -335,10 +335,11 @@ it in the technical manual.</p>
 
 <p>Please identify, if possible, the NMEA version the receiver emits.  You may
 be able to get this information from the technical manual.  Likely values are
-<code>2.0</code>, <code>2.2</code>, <code>2.3</code>, and <code>3.0</code>.  If
-the GPS emits only a vendor binary protocol, leave this field blank.</p>
+<code>2.0</code>, <code>2.2</code>, <code>2.3</code>, <code>3.0</code>, and
+<code>2000</code> for NMEA2000 devices.  If the GPS emits only a vendor binary
+protocol, leave this field blank.</p>
 
-<p><em>NMEA 0183 version emitted:&nbsp;</em>
+<p><em>NMEA version emitted:&nbsp;</em>
 <input type="text" 
        name="nmea" 
        size="6" 
@@ -348,7 +349,7 @@ the GPS emits only a vendor binary protocol, leave this field blank.</p>
 <h2>Interfaces</h2>
 
 <p>Please identify the receiver\'s interface type (USB, RS-232, Bluetooth,
-Compact Flash, etc.). If the receiver has adapters that support other
+Compact Flash, CAN bus, etc.). If the receiver has adapters that support other
 interfaces, tell us the one you have and mention the adapters in the "Technical
 Notes" box.  If it has an exotic interface not listed here, select "Other" and
 tell us about it in "Technical Notes".</p>
@@ -357,7 +358,7 @@ tell us about it in "Technical Notes".</p>
 
 ifline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
 print "<table border='1'><tr>"
-for itype in ('USB', 'Bluetooth', 'Compact Flash', 'RS-232', 'TTL', 'Other'):
+for itype in ('USB', 'Bluetooth', 'Compact Flash', 'RS-232', 'TTL', 'CAN', 'Other'):
     print ifline % (itype, itype)
 print "</tr></table>"
 
