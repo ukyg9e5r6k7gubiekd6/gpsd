@@ -23,15 +23,6 @@ from socket import error as SocketError
 class Speedometer(gtk.DrawingArea):
     def __init__(self, speed_unit=None):
         gtk.DrawingArea.__init__(self)
-        self.connect('expose_event', self.expose_event)
-        self.long_ticks = (2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8)
-        self.short_ticks = (0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9)
-        self.long_inset = lambda x: 0.1 * x
-        self.middle_inset = lambda x: self.long_inset(x) / 1.5
-        self.short_inset = lambda x: self.long_inset(x) / 3
-        self.res_div = 10.0
-        self.res_div_mul = 1
-        self.last_speed = 0
         self.MPH_UNIT_LABEL = 'mph'
         self.KPH_UNIT_LABEL = 'kmh'
         self.KNOTS_UNIT_LABEL = 'knots'
@@ -46,6 +37,19 @@ class Speedometer(gtk.DrawingArea):
                     '%s is not a valid speed unit'
                     %(repr(speed_unit))
             )
+
+class LandSpeedometer(Speedometer):
+    def __init__(self, speed_unit=None):
+        Speedometer.__init__(self, speed_unit)
+        self.connect('expose_event', self.expose_event)
+        self.long_ticks = (2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8)
+        self.short_ticks = (0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9)
+        self.long_inset = lambda x: 0.1 * x
+        self.middle_inset = lambda x: self.long_inset(x) / 1.5
+        self.short_inset = lambda x: self.long_inset(x) / 3
+        self.res_div = 10.0
+        self.res_div_mul = 1
+        self.last_speed = 0
         self.nums = {
                 -8:  0,
                 -7: 10,
@@ -59,7 +63,6 @@ class Speedometer(gtk.DrawingArea):
                 1:  90,
                 2: 100
         }
-
 
     def expose_event(self, unused, event, empty=None):
         self.cr = self.window.cairo_create()
@@ -236,12 +239,12 @@ class Speedometer(gtk.DrawingArea):
     def get_radius(self, width, height):
         return min(width / 2.0, height / 2.0) - 20
 
-class SpeedAndTrack(gtk.DrawingArea):
+class SpeedAndTrack(Speedometer):
     HEADING_SAT_GAP = 0.8
     GPS_PRNMAX = 32  # Above this number are SBAS satellites
     SAT_SIZE = 10  # radius of the satellite circle in skyview
     def __init__(self, speed_unit=None, maxspeed=100):
-        gtk.DrawingArea.__init__(self)
+        Speedometer.__init__(self, speed_unit)
         self.connect('expose_event', self.expose_event)
         self.long_inset = lambda x: 0.05 * x
         self.mid_inset = lambda x: self.long_inset(x) / 1.5
@@ -252,19 +255,6 @@ class SpeedAndTrack(gtk.DrawingArea):
         self.satellites = []
         self.last_heading = 0
         self.maxspeed = int(maxspeed)
-        self.MPH_UNIT_LABEL = 'mph'
-        self.KPH_UNIT_LABEL = 'kmh'
-        self.KNOTS_UNIT_LABEL = 'knots'
-        self.conversions = {
-                self.MPH_UNIT_LABEL: gps.MPS_TO_MPH,
-                self.KPH_UNIT_LABEL: gps.MPS_TO_KPH,
-                self.KNOTS_UNIT_LABEL: gps.MPS_TO_KNOTS
-        }
-        self.speed_unit = speed_unit or self.MPH_UNIT_LABEL
-        if not self.speed_unit in self.conversions:
-            raise TypeError(
-                    '%s is not a valid speed unit'
-                    % (repr(speed_unit)))
 
     @staticmethod
     def polar2xy(radius, angle, polex, poley):
@@ -553,7 +543,7 @@ class Main(object):
             self.widget = SpeedAndTrack(speed_unit=self.speed_unit,
                                        maxspeed=self.maxspeed)
         else:
-            self.widget = Speedometer(speed_unit=self.speed_unit)
+            self.widget = LandSpeedometer(speed_unit=self.speed_unit)
         self.window.connect('delete_event', self.delete_event)
         self.window.connect('destroy', self.destroy)
         self.widget.show()
@@ -698,7 +688,6 @@ if __name__ == '__main__':
             '[--port] [--device] [--speedunits {[mph] [kmh] [knots]}] ' +
             '[host [:port [:device]]]') %(prog)
     epilog = 'BSD terms apply: see the file COPYING in the distribution root for details.'
-    version = '%s %s' %(prog, __version__)
 
     parser = OptionParser(usage=usage, epilog=epilog)
     parser.add_option(
@@ -746,18 +735,7 @@ if __name__ == '__main__':
             type='int',
             help='Set level of debug. Must be integer. [Default 0]'
     )
-    parser.add_option(
-            '-V',
-            '--version',
-            action='store_true',
-            default=False,
-            dest='version',
-            help='show program\'s version number and exit'
-    )
     (options, args) = parser.parse_args()
-    if options.version:
-        print version
-        sys.exit(0)
     if args:
         arg = args[0].split(':')
         len_arg = len(arg)
