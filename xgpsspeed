@@ -38,16 +38,13 @@ class Speedometer(gtk.DrawingArea):
         self.res_div = 10.0
         self.res_div_mul = 1
         self.last_speed = 0
-        self.MPS_TO_KPH = 3.6000000000000001
-        self.MPS_TO_MPH = 2.2369363
-        self.MPS_TO_KNOTS = 1.9438445
         self.MPH_UNIT_LABEL = 'mph'
         self.KPH_UNIT_LABEL = 'kmh'
         self.KNOTS_UNIT_LABEL = 'knots'
         self.conversions = {
-                self.MPH_UNIT_LABEL: self.MPS_TO_MPH,
-                self.KPH_UNIT_LABEL: self.MPS_TO_KPH,
-                self.KNOTS_UNIT_LABEL: self.MPS_TO_KNOTS
+                self.MPH_UNIT_LABEL: gps.MPS_TO_MPH,
+                self.KPH_UNIT_LABEL: gps.MPS_TO_KPH,
+                self.KNOTS_UNIT_LABEL: gps.MPS_TO_KNOTS
         }
         self.speed_unit = speed_unit or self.MPH_UNIT_LABEL
         if not self.speed_unit in self.conversions:
@@ -554,12 +551,11 @@ class Main(object):
         self.maxspeed = maxspeed
         self.nautical = nautical
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        if self.nautical:
-            self.window.set_size_request(500, 550)
         if not self.window.get_display():
             raise Exception("Can't open display")
         self.window.set_title('xgpsspeed')
         if self.nautical:
+            self.window.set_size_request(500, 550)
             self.widget = SpeedAndTrack(speed_unit=self.speed_unit,
                                        maxspeed=self.maxspeed)
         else:
