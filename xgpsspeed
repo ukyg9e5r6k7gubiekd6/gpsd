@@ -4,6 +4,8 @@
 # Robin Wittler <real@the-real.org> (speedometer mode)
 # and
 # Chen Wei <weichen302@gmx.com> (nautical mode)
+#
+# BSD terms apply: see the file COPYING in the distribution root for details.
 
 import pygtk
 pygtk.require('2.0')
@@ -17,18 +19,6 @@ from math import sin
 from math import sqrt
 from math import radians
 from socket import error as SocketError
-
-
-__version__ = '0.0.8'
-# BSD terms apply: see the file COPYING in the distribution root for details.
-
-#TODO
-# add getopts and handle it
-# add configparser
-# add a config menu entry
-# write unit tests!
-# testing!
-# cleanup and sanitize code
 
 class Speedometer(gtk.DrawingArea):
     def __init__(self, speed_unit=None):
