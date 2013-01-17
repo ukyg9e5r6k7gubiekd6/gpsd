@@ -5,9 +5,12 @@ pygtk.require('2.0')
 import gtk
 import cairo
 import gobject
+import gps
 from math import pi
 from math import cos
 from math import sin
+from math import sqrt
+from math import radians
 from socket import error as SocketError
 
 #__author__ = 'Robin Wittler <real@the-real.org>'
@@ -378,6 +381,461 @@ class Main(object):
         except KeyboardInterrupt:
             self.window.emit('delete_event', gtk.gdk.Event(gtk.gdk.NOTHING))
 
+# Experimental insertion of Chen Wei's code
+
+HEADING_SAT_GAP = 0.8
+GPS_PRNMAX = 32  # Above this number are SBAS satellites
+SAT_SIZE = 10  # radius of the satellite circle in skyview
+
+
+def polar2xy(radius, angle, polex, poley):
+    '''convert Polar coordinate to Cartesian coordinate system
+    the y axis in pygtk points downward
+    Args:
+       radius:
+       angle: azimuth from from Polar coordinate system, in radian
+       polex and poley are the Cartesian coordinate of the pole
+    return a tuple contains (x, y)'''
+    return (polex + cos(angle) * radius, poley - sin(angle) * radius)
+
+
+class Speedometer2(gtk.DrawingArea):
+    def __init__(self, speed_unit=None, maxspeed=100):
+        gtk.DrawingArea.__init__(self)
+        self.connect('expose_event', self.expose_event)
+        self.long_inset = lambda x: 0.05 * x
+        self.mid_inset = lambda x: self.long_inset(x) / 1.5
+        self.short_inset = lambda x: self.long_inset(x) / 3
+        #self.res_div = 10.0
+        #self.res_div_mul = 1
+        self.last_speed = 0
+        self.satellites = []
+        self.last_heading = 0
+        self.maxspeed = int(maxspeed)
+        self.MPH_UNIT_LABEL = 'mph'
+        self.KPH_UNIT_LABEL = 'kmh'
+        self.KNOTS_UNIT_LABEL = 'knots'
+        self.conversions = {
+                self.MPH_UNIT_LABEL: gps.MPS_TO_MPH,
+                self.KPH_UNIT_LABEL: gps.MPS_TO_KPH,
+                self.KNOTS_UNIT_LABEL: gps.MPS_TO_KNOTS
+        }
+        self.speed_unit = speed_unit or self.MPH_UNIT_LABEL
+        if not self.speed_unit in self.conversions:
+            raise TypeError(
+                    '%s is not a valid speed unit'
+                    % (repr(speed_unit)))
+
+    def expose_event(self, unused, event, empty=None):
+        self.cr = self.window.cairo_create()
+        self.cr.rectangle(
+                event.area.x,
+                event.area.y,
+                event.area.width,
+                event.area.height
+        )
+        self.cr.clip()
+        x, y = self.get_x_y()
+        width, height = self.window.get_size()
+        radius = self.get_radius(width, height)
+        self.cr.set_line_width(radius / 100)
+        self.draw_arc_and_ticks(width, height, radius, x, y)
+        self.draw_heading(20, self.last_heading, radius, x, y)
+        for sat in self.satellites:
+            self.draw_sat(sat, radius * HEADING_SAT_GAP, x, y)
+        self.draw_speed(radius, x, y)
+
+    def draw_text(self, x, y, text, fontsize=10):
+        '''draw text at given location
+        Args:
+            x, y is the center of textbox'''
+        txt = str(text)
+        self.cr.new_sub_path()
+        self.cr.set_source_rgba(0, 0, 0)
+        self.cr.select_font_face('Sans',
+                                 cairo.FONT_SLANT_NORMAL,
+                                 cairo.FONT_WEIGHT_BOLD)
+        self.cr.set_font_size(fontsize)
+        (x_bearing, y_bearing,
+         t_width, t_height) = self.cr.text_extents(txt)[:4]
+        # set the center of textbox
+        self.cr.move_to(x - t_width / 2, y + t_height / 2)
+        self.cr.show_text(txt)
+
+    def draw_arc_and_ticks(self, width, height, radius, x, y):
+        '''Draw a serial of circle, with ticks in outmost circle'''
+
+        self.cr.set_source_rgb(1.0, 1.0, 1.0)
+        self.cr.rectangle(0, 0, width, height)
+        self.cr.fill()
+        self.cr.set_source_rgba(0, 0, 0)
+
+        # draw the speedmeter arc
+        rspeed = radius + 50
+        self.cr.arc(x, y, rspeed, 2 * pi / 3, 7 * pi / 3)
+        self.cr.set_source_rgba(0, 0, 0, 1.0)
+        self.cr.stroke()
+        s_long = self.long_inset(rspeed)
+        s_middle = self.mid_inset(radius)
+        s_short = self.short_inset(radius)
+        for i in xrange(11):
+            #draw the large ticks
+            alpha = (8 - i) * pi / 6
+            self.cr.move_to(*polar2xy(rspeed, alpha, x, y))
+            self.cr.set_line_width(radius / 100)
+            self.cr.line_to(*polar2xy(rspeed - s_long, alpha, x, y))
+            self.cr.stroke()
+            self.cr.set_line_width(radius / 200)
+            xf, yf = polar2xy(rspeed + 10, alpha, x, y)
+            stxt = (self.maxspeed / 10) * i
+            self.draw_text(xf, yf, stxt, fontsize=radius / 15)
+
+        for i in xrange(1, 11):
+            # middle tick
+            alpha = (8 - i) * pi / 6
+            beta = (17 - 2 * i) * pi / 12
+            self.cr.move_to(*polar2xy(rspeed, beta, x, y))
+            self.cr.line_to(*polar2xy(rspeed - s_middle, beta, x, y))
+
+            #  short tick
+            for n in xrange(10):
+                gamma = alpha + n * pi / 60
+                self.cr.move_to(*polar2xy(rspeed, gamma, x, y))
+                self.cr.line_to(*polar2xy(rspeed - s_short, gamma, x, y))
+
+        #draw the heading arc
+        self.cr.new_sub_path()
+        self.cr.arc(x, y, radius, 0, 2 * pi)
+        self.cr.stroke()
+        self.cr.arc(x, y, radius - 20, 0, 2 * pi)
+        self.cr.set_source_rgba(0, 0, 0, 0.20)
+        self.cr.fill()
+        self.cr.set_source_rgba(0, 0, 0)
+
+        # heading label 90/180/270
+        for n in xrange(0, 4):
+            label = str(n * 90)
+            #self.cr.set_source_rgba(0, 1, 0)
+                #radius * (1 + HEADING_SAT_GAP),
+            tbox_x, tbox_y = polar2xy(radius * 0.88,
+                                    (1 - n) * pi / 2,
+                                    x, y)
+            self.draw_text(tbox_x, tbox_y,
+                           label, fontsize=radius / 20)
+
+        # draw the satellite arcs
+        skyradius = radius * HEADING_SAT_GAP
+        self.cr.set_line_width(radius / 200)
+        self.cr.set_source_rgba(0, 0, 0)
+        self.cr.arc(x, y, skyradius, 0, 2 * pi)
+        self.cr.set_source_rgba(1, 1, 1)
+        self.cr.fill()
+        self.cr.set_source_rgba(0, 0, 0)
+
+        self.cr.arc(x, y, skyradius * 2 / 3, 0, 2 * pi)
+        self.cr.arc(x, y, skyradius / 3, 0, 2 * pi)
+
+        # draw the cross hair
+        self.cr.move_to(x - skyradius, y)
+        self.cr.line_to(x + skyradius, y)
+        self.cr.move_to(x, y - skyradius)
+        self.cr.line_to(x, y + skyradius)
+        self.cr.set_line_width(radius / 200)
+        self.cr.stroke()
+
+        long_inset = self.long_inset(radius)
+        mid_inset = self.mid_inset(radius)
+        short_inset = self.short_inset(radius)
+
+        #draw the large ticks
+        for i in xrange(12):
+            agllong = i * pi / 6
+            self.cr.move_to(*polar2xy(radius - long_inset, agllong, x, y))
+            self.cr.line_to(*polar2xy(radius, agllong, x, y))
+            self.cr.set_line_width(radius / 100)
+            self.cr.stroke()
+            self.cr.set_line_width(radius / 200)
+
+            # middle tick
+            aglmid = (i + 0.5) * pi / 6
+            self.cr.move_to(*polar2xy(radius - mid_inset, aglmid, x, y))
+            self.cr.line_to(*polar2xy(radius, aglmid, x, y))
+
+            #  short tick
+            for n in xrange(1, 10):
+                aglshrt = agllong + n * pi / 60
+                self.cr.move_to(*polar2xy(radius - short_inset, aglshrt, x, y))
+                self.cr.line_to(*polar2xy(radius, aglshrt, x, y))
+            self.cr.stroke()
+
+    def draw_heading(self, trig_height, heading, radius, x, y):
+        hypo = trig_height * 2 / sqrt(3)
+        h = pi / 2 - radians(heading)  # to xyz
+        self.cr.set_line_width(2)
+        self.cr.set_source_rgba(0, 0.3, 0.2, 0.8)
+
+        # the triangle pointer
+        x0 = x + radius * cos(h)
+        y0 = y - radius * sin(h)
+
+        x1 = x0 + hypo * cos(7 * pi / 6 + h)
+        y1 = y0 - hypo * sin(7 * pi / 6 + h)
+
+        x2 = x0 + hypo * cos(5 * pi / 6 + h)
+        y2 = y0 - hypo * sin(5 * pi / 6 + h)
+
+        self.cr.move_to(x0, y0)
+        self.cr.line_to(x1, y1)
+        self.cr.line_to(x2, y2)
+        self.cr.line_to(x0, y0)
+        self.cr.close_path()
+        self.cr.fill()
+        self.cr.stroke()
+
+        # heading text
+        (tbox_x, tbox_y) = polar2xy(radius * 1.1, h, x, y)
+        self.draw_text(tbox_x, tbox_y, int(heading), fontsize=radius / 15)
+
+        # the ship shape, based on test and try
+        shiplen = radius * HEADING_SAT_GAP / 4
+        xh, yh = polar2xy(shiplen * 2.3, h, x, y)
+        xa, ya = polar2xy(shiplen * 2.2, h + pi - 0.3, x, y)
+        xb, yb = polar2xy(shiplen * 2.2, h + pi + 0.3, x, y)
+        xc, yc = polar2xy(shiplen * 1.4, h - pi / 5, x, y)
+        xd, yd = polar2xy(shiplen * 1.4, h + pi / 5, x, y)
+
+        self.cr.set_source_rgba(0, 0.3, 0.2, 0.5)
+        self.cr.move_to(xa, ya)
+        self.cr.line_to(xb, yb)
+        self.cr.line_to(xc, yc)
+        self.cr.line_to(xh, yh)
+        self.cr.line_to(xd, yd)
+        self.cr.close_path()
+        self.cr.fill()
+        #self.cr.stroke()
+
+    def set_color(self, spec):
+        '''Set foreground color for drawing.'''
+        gdkcolor = gtk.gdk.color_parse(spec)
+        r = gdkcolor.red / 65535.0
+        g = gdkcolor.green / 65535.0
+        b = gdkcolor.blue / 65535.0
+        self.cr.set_source_rgb(r, g, b)
+
+    def draw_sat(self, satsoup, radius, x, y):
+        """given a sat's elevation, azimath, SNR, draw it on the skyview
+        Arg:
+        satsoup: a dictionary {'el': xx, 'az': xx, 'ss': xx}
+        """
+        h = pi / 2 - radians(satsoup['az'])  # to xy
+        self.cr.set_line_width(2)
+        self.cr.set_source_rgb(0, 0, 0)
+
+        x0, y0 = polar2xy(radius * (90 - satsoup['el']) / 90, h, x, y)
+
+        self.cr.new_sub_path()
+        if satsoup['PRN'] > GPS_PRNMAX:
+            self.cr.rectangle(x0 - SAT_SIZE, y0 - SAT_SIZE,
+                              SAT_SIZE * 2, SAT_SIZE * 2)
+        else:
+            self.cr.arc(x0, y0, SAT_SIZE, 0, pi * 2.0)
+
+        if satsoup['ss'] < 10:
+            self.set_color('Gray')
+        elif satsoup['ss'] < 30:
+            self.set_color('Red')
+        elif satsoup['ss'] < 35:
+            self.set_color('Yellow')
+        elif satsoup['ss'] < 40:
+            self.set_color('Green3')
+        else:
+            self.set_color('Green1')
+
+        if satsoup['used']:
+            self.cr.fill()
+        else:
+            self.cr.stroke()
+        self.draw_text(x0, y0, satsoup['PRN'], fontsize=15)
+
+    def draw_speed(self, radius, x, y):
+        self.cr.new_sub_path()
+        self.cr.set_line_width(20)
+        self.cr.set_source_rgba(0, 0, 0, 0.5)
+        speed = self.last_speed * self.conversions.get(self.speed_unit)
+        # cariol arc angle start at polar 0, going clockwise
+        alpha = 4 * pi / 3
+        beta = 2 * pi - alpha
+        theta = 5 * pi * speed / (self.maxspeed * 3)
+
+        self.cr.arc(x, y, radius + 40, beta, beta + theta)
+        self.cr.stroke()
+        #self.cr.close_path()
+        #self.cr.fill()
+        label = '%.2f %s' % (speed, self.speed_unit)
+        self.draw_text(x, y + radius + 40, label, fontsize=20)
+
+    def get_x_y(self):
+        rect = self.get_allocation()
+        x = (rect.x + rect.width / 2.0)
+        y = (rect.y + rect.height / 2.0) - 20
+        return x, y
+
+    def get_radius(self, width, height):
+        return min(width / 2.0, height / 2.0) - 70
+
+
+class Main2(object):
+    def __init__(self, host='localhost', port='2947', device=None, debug=0,
+                 speed_unit=None, maxspeed=0):
+        self.host = host
+        self.port = port
+        self.device = device
+        self.debug = debug
+        self.speed_unit = speed_unit
+        self.maxspeed = maxspeed
+        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window.set_size_request(500, 550)
+        if not self.window.get_display():
+            raise Exception("Can't open display")
+        self.window.set_title('xgpsspeed')
+        self.widget = Speedometer2(speed_unit=self.speed_unit,
+                                  maxspeed=self.maxspeed)
+        self.window.connect('delete_event', self.delete_event)
+        self.window.connect('destroy', self.destroy)
+        self.widget.show()
+        vbox = gtk.VBox(False, 0)
+        self.window.add(vbox)
+
+        self.window.present()
+        self.uimanager = gtk.UIManager()
+        self.accelgroup = self.uimanager.get_accel_group()
+        self.window.add_accel_group(self.accelgroup)
+        self.actiongroup = gtk.ActionGroup('gpsspeed-ng')
+        self.actiongroup.add_actions(
+                [('Quit', gtk.STOCK_QUIT, '_Quit', None,
+                    'Quit the Program', lambda unused: gtk.main_quit()),
+                 ('File', None, '_File'),
+                 ('Units', None, '_Units')]
+        )
+        self.actiongroup.add_radio_actions(
+                [('Imperial', None, '_Imperial', '<Control>i',
+                    'Imperial Units', 0),
+                 ('Metric', None, '_Metric', '<Control>m',
+                     'Metrical Units', 1),
+                 ('Nautical', None, '_Nautical', '<Control>n',
+                     'Nautical Units', 2)
+                 ],
+                0, lambda a, unused: setattr(self.widget, 'speed_unit', ['mph',
+                'kmh', 'knots'][a.get_current_value()])
+        )
+
+        self.uimanager.insert_action_group(self.actiongroup, 0)
+        self.uimanager.add_ui_from_string('''
+<ui>
+    <menubar name='MenuBar'>
+        <menu action='File'>
+            <menuitem action='Quit'/>
+        </menu>
+        <menu action='Units'>
+            <menuitem action='Imperial'/>
+            <menuitem action='Metric'/>
+            <menuitem action='Nautical'/>
+        </menu>
+    </menubar>
+</ui>
+''')
+        self.active_unit_map = {
+                'mph': '/MenuBar/Units/Imperial',
+                'kmh': '/MenuBar/Units/Metric',
+                'knots': '/MenuBar/Units/Nautical'
+        }
+        menubar = self.uimanager.get_widget('/MenuBar')
+        self.uimanager.get_widget(
+                self.active_unit_map.get(self.speed_unit)
+        ).set_active(True)
+        vbox.pack_start(menubar, False, False, 0)
+        vbox.add(self.widget)
+        self.window.show_all()
+
+    def watch(self, daemon, device):
+        self.daemon = daemon
+        self.device = device
+        gobject.io_add_watch(daemon.sock, gobject.IO_IN, self.handle_response)
+        gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_hangup)
+        gobject.io_add_watch(daemon.sock, gobject.IO_HUP, self.handle_hangup)
+        return True
+
+    def handle_response(self, source, condition):
+        if self.daemon.read() == -1:
+            self.handle_hangup(source, condition)
+        if self.daemon.data['class'] == 'TPV':
+            self.update_speed(self.daemon.data)
+        if self.daemon.data['class'] == 'SKY':
+            self.update_skyview(self.daemon.data)
+
+        return True
+
+    def handle_hangup(self, dummy, unused):
+        w = gtk.MessageDialog(
+                type=gtk.MESSAGE_ERROR,
+                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                buttons=gtk.BUTTONS_OK
+        )
+        w.connect("destroy", lambda unused: gtk.main_quit())
+        w.set_title('gpsd error')
+        w.set_markup("gpsd has stopped sending data.")
+        w.run()
+        gtk.main_quit()
+        return True
+
+    def update_speed(self, data):
+        if hasattr(data, 'speed'):
+            self.widget.last_speed = data.speed
+            self.widget.queue_draw()
+        if hasattr(data, 'track'):
+            self.widget.last_heading = data.track
+            self.widget.queue_draw()
+
+    def update_skyview(self, data):
+        "Update the satellite list and skyview."
+        if hasattr(data, 'satellites'):
+            self.widget.satellites = data.satellites
+            self.widget.queue_draw()
+
+    def delete_event(self, widget, event, data=None):
+        #TODO handle all cleanup operations here
+        return False
+
+    def destroy(self, unused, empty=None):
+        gtk.main_quit()
+
+    def run(self):
+        try:
+            daemon = gps.gps(
+                host=self.host,
+                port=self.port,
+                mode=gps.WATCH_ENABLE | gps.WATCH_JSON | gps.WATCH_SCALED,
+                verbose=self.debug
+            )
+            self.watch(daemon, self.device)
+            gtk.main()
+        except SocketError:
+            w = gtk.MessageDialog(
+                    type=gtk.MESSAGE_ERROR,
+                    flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                    buttons=gtk.BUTTONS_OK
+            )
+            w.set_title('socket error')
+            w.set_markup(
+                "could not connect to gpsd socket. make sure gpsd is running."
+            )
+            w.run()
+            w.destroy()
+        except KeyboardInterrupt:
+            self.window.emit('delete_event', gtk.gdk.Event(gtk.gdk.NOTHING))
+
+
+# Experimental insertion ends
 
 if __name__ == '__main__':
     import sys
@@ -416,6 +874,12 @@ if __name__ == '__main__':
             help='The unit of speed. Possible units are: mph, kmh, knots. [Default mph]'
     )
     parser.add_option(
+            '--maxspeed',
+            dest='maxspeed',
+            default='50',
+            help='max speed of the speedmeter [Default 50]'
+    )
+    parser.add_option(
             '--debug',
             dest='debug',
             default=0,
@@ -447,10 +911,11 @@ if __name__ == '__main__':
         else:
             parser.print_help()
             sys.exit(0)
-    Main(
+    Main2(
             host=options.host,
             port=options.port,
             device=options.device,
             speed_unit=options.speedunits,
+            maxspeed=options.maxspeed,
             debug=options.debug
     ).run()
