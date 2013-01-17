@@ -26,6 +26,8 @@ __version__ = '0.0.8'
 # testing!
 # cleanup and sanitize code
 
+chenwei = False
+
 class Speedometer(gtk.DrawingArea):
     def __init__(self, speed_unit=None):
         gtk.DrawingArea.__init__(self)
@@ -244,142 +246,6 @@ class Speedometer(gtk.DrawingArea):
 
     def get_radius(self, width, height):
         return min(width / 2.0, height / 2.0) - 20
-
-
-class Main(object):
-    def __init__(self, host='localhost', port='2947', device=None, debug=0, speed_unit=None):
-        self.host = host
-        self.port = port
-        self.device = device
-        self.debug = debug
-        self.speed_unit = speed_unit
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        if not self.window.get_display():
-            raise Exception("Can't open display")
-        self.window.set_title('xgpsspeed')
-        self.widget = Speedometer(speed_unit=self.speed_unit)
-        self.window.connect('delete_event', self.delete_event)
-        self.window.connect('destroy', self.destroy)
-        self.widget.show()
-        vbox = gtk.VBox(False, 0)
-        self.window.add(vbox)
-
-        self.window.present()
-        self.uimanager = gtk.UIManager()
-        self.accelgroup = self.uimanager.get_accel_group()
-        self.window.add_accel_group(self.accelgroup)
-        self.actiongroup = gtk.ActionGroup('gpsspeed-ng')
-        self.actiongroup.add_actions(
-                [('Quit', gtk.STOCK_QUIT, '_Quit', None,
-                    'Quit the Program', lambda unused: gtk.main_quit()),
-                 ('File', None, '_File'),
-                 ('Units', None, '_Units')]
-        )
-        self.actiongroup.add_radio_actions(
-                [('Imperial', None, '_Imperial', '<Control>i',
-                    'Imperial Units', 0),
-                 ('Metric', None, '_Metric', '<Control>m',
-                     'Metrical Units', 1),
-                 ('Nautical', None, '_Nautical', '<Control>n',
-                     'Nautical Units', 2)
-                 ],
-                0, lambda a, unused: setattr(self.widget, 'speed_unit', ['mph',
-                'kmh', 'knots'][a.get_current_value()])
-        )
-
-        self.uimanager.insert_action_group(self.actiongroup, 0)
-        self.uimanager.add_ui_from_string('''
-<ui>
-    <menubar name='MenuBar'>
-        <menu action='File'>
-            <menuitem action='Quit'/>
-        </menu>
-        <menu action='Units'>
-            <menuitem action='Imperial'/>
-            <menuitem action='Metric'/>
-            <menuitem action='Nautical'/>
-        </menu>
-    </menubar>
-</ui>
-''')
-        self.active_unit_map = {
-                'mph': '/MenuBar/Units/Imperial',
-                'kmh': '/MenuBar/Units/Metric',
-                'knots': '/MenuBar/Units/Nautical'
-        }
-        menubar = self.uimanager.get_widget('/MenuBar')
-        self.uimanager.get_widget(
-                self.active_unit_map.get(self.speed_unit)
-        ).set_active(True)
-        vbox.pack_start(menubar, False, False, 0)
-        vbox.add(self.widget)
-        self.window.show_all()
-
-    def watch(self, daemon, device):
-        self.daemon = daemon
-        self.device = device
-        gobject.io_add_watch(daemon.sock, gobject.IO_IN, self.handle_response)
-        gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_hangup)
-        gobject.io_add_watch(daemon.sock, gobject.IO_HUP, self.handle_hangup)
-        return True
-
-    def handle_response(self, source, condition):
-        if self.daemon.read() == -1:
-            self.handle_hangup(source, condition)
-        if self.daemon.data['class'] == 'TPV':
-            self.update_speed(self.daemon.data)
-        return True
-
-    def handle_hangup(self, dummy, unused):
-        w = gtk.MessageDialog(
-                type=gtk.MESSAGE_ERROR,
-                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                buttons=gtk.BUTTONS_OK
-        )
-        w.connect("destroy", lambda unused: gtk.main_quit())
-        w.set_title('gpsd error')
-        w.set_markup("gpsd has stopped sending data.")
-        w.run()
-        gtk.main_quit()
-        return True
-
-    def update_speed(self, data):
-        if hasattr(data, 'speed'):
-            self.widget.last_speed = data.speed
-            self.widget.queue_draw()
-
-    def delete_event(self, widget, event, data=None):
-        #TODO handle all cleanup operations here
-        return False
-
-    def destroy(self, unused, empty=None):
-        gtk.main_quit()
-
-    def run(self):
-        import gps
-        try:
-            daemon = gps.gps(
-                    host = self.host,
-                    port = self.port,
-                    mode = gps.WATCH_ENABLE|gps.WATCH_JSON|gps.WATCH_SCALED,
-                    verbose = self.debug
-            )
-            self.watch(daemon, self.device)
-            gtk.main()
-        except SocketError:
-            w = gtk.MessageDialog(
-                    type=gtk.MESSAGE_ERROR,
-                    flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                    buttons=gtk.BUTTONS_OK
-            )
-            w.set_title('socket error')
-            w.set_markup(
-                    "could not connect to gpsd socket. make sure gpsd is running."
-            )
-            w.run()
-            w.destroy()
-        except KeyboardInterrupt:
-            self.window.emit('delete_event', gtk.gdk.Event(gtk.gdk.NOTHING))
 
 # Experimental insertion of Chen Wei's code
 
@@ -684,7 +550,9 @@ class Speedometer2(gtk.DrawingArea):
         return min(width / 2.0, height / 2.0) - 70
 
 
-class Main2(object):
+# Experimental insertion ends
+
+class Main(object):
     def __init__(self, host='localhost', port='2947', device=None, debug=0,
                  speed_unit=None, maxspeed=0):
         self.host = host
@@ -694,12 +562,16 @@ class Main2(object):
         self.speed_unit = speed_unit
         self.maxspeed = maxspeed
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_size_request(500, 550)
+        if chenwei:
+            self.window.set_size_request(500, 550)
         if not self.window.get_display():
             raise Exception("Can't open display")
         self.window.set_title('xgpsspeed')
-        self.widget = Speedometer2(speed_unit=self.speed_unit,
-                                  maxspeed=self.maxspeed)
+        if chenwei:
+            self.widget = Speedometer2(speed_unit=self.speed_unit,
+                                       maxspeed=self.maxspeed)
+        else:
+            self.widget = Speedometer(speed_unit=self.speed_unit)
         self.window.connect('delete_event', self.delete_event)
         self.window.connect('destroy', self.destroy)
         self.widget.show()
@@ -770,7 +642,7 @@ class Main2(object):
             self.handle_hangup(source, condition)
         if self.daemon.data['class'] == 'TPV':
             self.update_speed(self.daemon.data)
-        if self.daemon.data['class'] == 'SKY':
+        if chenwei and self.daemon.data['class'] == 'SKY':
             self.update_skyview(self.daemon.data)
 
         return True
@@ -792,10 +664,17 @@ class Main2(object):
         if hasattr(data, 'speed'):
             self.widget.last_speed = data.speed
             self.widget.queue_draw()
-        if hasattr(data, 'track'):
+        if chenwei and hasattr(data, 'track'):
             self.widget.last_heading = data.track
             self.widget.queue_draw()
 
+    def update_skyview(self, data):
+        "Update the satellite list and skyview."
+        if hasattr(data, 'satellites'):
+            self.widget.satellites = data.satellites
+            self.widget.queue_draw()
+
+    # Used for Speedometer2 only
     def update_skyview(self, data):
         "Update the satellite list and skyview."
         if hasattr(data, 'satellites'):
@@ -833,9 +712,6 @@ class Main2(object):
             w.destroy()
         except KeyboardInterrupt:
             self.window.emit('delete_event', gtk.gdk.Event(gtk.gdk.NOTHING))
-
-
-# Experimental insertion ends
 
 if __name__ == '__main__':
     import sys
@@ -911,7 +787,7 @@ if __name__ == '__main__':
         else:
             parser.print_help()
             sys.exit(0)
-    Main2(
+    Main(
             host=options.host,
             port=options.port,
             device=options.device,
