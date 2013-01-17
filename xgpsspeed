@@ -650,12 +650,6 @@ class Main(object):
             self.widget.last_heading = data.track
             self.widget.queue_draw()
 
-    def update_skyview(self, data):
-        "Update the satellite list and skyview."
-        if hasattr(data, 'satellites'):
-            self.widget.satellites = data.satellites
-            self.widget.queue_draw()
-
     # Used for SpeedAndTrack only
     def update_skyview(self, data):
         "Update the satellite list and skyview."
