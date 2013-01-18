@@ -864,8 +864,7 @@ if qt_env:
             compile_with = qt_env['CC']
             compile_flags = qt_env['CFLAGS']
         qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
-                                             CC=compile_with,
-                                             CFLAGS=compile_flags,
+                                             CC=compile_with,                                             CFLAGS=compile_flags,
                                              parse_flags=dbus_libs))
     compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libgps_version)
     libraries.append(compiled_qgpsmmlib)
@@ -874,6 +873,11 @@ if qt_env:
 
 gpslibs = ["-lgps", "-lm"]
 gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
+
+# We need to be able to make a static client library for ad-hoc testing.
+# (None of the normal targets relies on this.)
+
+env.StaticLibrary(target = 'libgps.a', source = libgps_sources)
 
 # Source groups
 
