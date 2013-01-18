@@ -875,7 +875,16 @@ gpslibs = ["-lgps", "-lm"]
 gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
 
 # We need to be able to make a static client library for ad-hoc testing.
-# (None of the normal targets relies on this.)
+# (None of the normal targets relies on this.)  You can use this
+# with a build command like
+#
+# g++ --static streamtest.cpp libgps.a -lrt -o streamtest
+#
+# When you link with this library you will get warnings that look like this:
+# warning: Using 'getprotobyname' in statically linked applications requires
+#          at runtime the shared libraries from the glibc version used for
+#          linking
+# The final executable will build but not be portable.
 
 env.StaticLibrary(target = 'libgps.a', source = libgps_sources)
 
