@@ -972,7 +972,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 				                                               source_pgn);
 		}
 	    } else {
-	        gpsd_report(LOG_ERROR, "PGN not found %08d %08x \n", source_pgn, source_pgn);
+	        gpsd_report(LOG_WARN, "PGN not found %08d %08x \n", source_pgn, source_pgn);
 	    }
 	} else {
 	    // we got a unknown unit number
