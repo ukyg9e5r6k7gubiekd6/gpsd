@@ -282,8 +282,12 @@ standard output.</dd>
 <dt><a href="gpsdecode.html">gpsdecode.1</a></dt>
 <dd>The <code>gpsdecode</code> packet decoder.</dd>
 
-<dt><a href="gpsd_json.html">gpsd.5</a></dt>
-<dd>The request/response protocol of the <code>gpsd</code> daemon.</dd>
+<dt><a href="gpsd_json.html">gpsd.5</a></dt> <dd>The request/response
+protocol of the <code>gpsd</code> daemon.</dd>
+
+<dt><a href="gpsinit.html">gpsinit.8</a></dt>
+<dd>Initialize kernel modules for use with <code>gpsd</code> daemon.</dd>
+</dl>
 </dl>
 
 <p>Also, see the <a href="faq.html">FAQ</a>.</p>

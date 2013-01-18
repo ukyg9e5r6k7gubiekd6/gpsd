@@ -1152,6 +1152,7 @@ base_manpages = {
     "gpsd_json.5" : "gpsd_json.xml",
     "gps.1" : "gps.xml",
     "cgps.1" : "gps.xml",
+    "gpsinit.8": "gpsinit.xml",
     "lcdgps.1" : "gps.xml",
     "libgps.3" : "libgps.xml",
     "libgpsmm.3" : "libgpsmm.xml",
