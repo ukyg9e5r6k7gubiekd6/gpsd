@@ -16,7 +16,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 </refmeta>
 <refnamediv id='name'>
 <refname>cansetup</refname>
-<refpurpose>init the can interface of some known CAN hardware for the use with gpsd and NMEA2000</refpurpose>
+<refpurpose>initialize the can interface of some known CAN hardware for the use with gpsd and NMEA2000</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -39,13 +39,10 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>cansetup</application> will initalise an CAN interface so
-that it can be used as an interface to a NMEA2000 network.
-Note:  It need root permissions to load modules and change the CAN baudrate.</para>
-
-<para></para>
-
-<para></para>
+<para><application>cansetup</application> will initalize a can
+interface so that it can be used as an interface to a NMEA2000
+network.  Note: It needs root permissions to load modules and change
+the interface baudrate.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
@@ -53,14 +50,14 @@ Note:  It need root permissions to load modules and change the CAN baudrate.</pa
 <varlistentry>
 <term>-h</term>
 <listitem>
-<para>Display brief help text.</para>
+<para>Display a brief help text.</para>
 </listitem>
 </varlistentry>
 
 <varlistentry>
 <term>-v</term>
 <listitem>
-<para>Display version of <application>cansetup</application>.</para>
+<para>Display the version of <application>cansetup</application>.</para>
 </listitem>
 </varlistentry>
 
@@ -74,36 +71,41 @@ Note:  It need root permissions to load modules and change the CAN baudrate.</pa
 <varlistentry>
 <term>-s</term>
 <listitem>
-<para>Set the baudrate to communicate with the serial line CAN hardware. The default is 38400 baud.</para>
+<para>Set the baudrate to be used to communicate over the serial line
+to the CAN hardware. The default is 38400 baud.</para>
 </listitem>
 </varlistentry>
 </variablelist>
 
-<para>
-The parameter <parameter>module_name</parameter> is mandatory.
-The socket can driver module <parameter>module_name</parameter>.ko will be loaded.
-<command>cansetup</command> recognize the following module names:
+<para>The parameter <parameter>module_name</parameter> is mandatory.  The
+socket CAN driver module <parameter>module_name</parameter>.ko will be
+loaded.  <command>cansetup</command> recognize the following module
+names:
+
 <variablelist>
 <varlistentry><term>plx_pci</term></varlistentry>
 <varlistentry><term>esd_usb2</term></varlistentry>
 <varlistentry><term>vcan</term></varlistentry>
 <varlistentry><term>slcan</term>
-<listitem><para>
-The parameter <parameter>interface_name</parameter> and <parameter>-s <replaceable>speed</replaceable></parameter>
-can used here.
-</para></listitem></varlistentry>
+<listitem>
+<para>
+The parameter <parameter>interface_name</parameter> and <parameter>-s
+<replaceable>speed</replaceable></parameter> can used here.
+</para>
+</listitem>
+</varlistentry>
 <varlistentry><term>beaglebone</term>
-<listitem><para>
-The module dcan needed for the beaglebone ist part of the known linux kernels,
-so no module is loaded here.
-</para></listitem>
+<listitem>
+<para> The dcan module needed for the beaglebone is part of the Linux kernel,
+so no module is loaded in this case.</para>
+</listitem>
 </varlistentry>
 </variablelist>
 </para>
 
-<para>
-The parameter <parameter>interface_name</parameter> is needed for slcan hardware only.
-It gives the name of the serial device the SL CAN hardware is connected. The default is /dev/ttyUSB0.
+<para>The parameter <parameter>interface_name</parameter> is needed for
+slcan hardware only.  It gives the name of the serial device to which the SL
+CAN hardware is connected. The default is /dev/ttyUSB0.
 </para>
 </refsect1>
 
@@ -113,8 +115,9 @@ It gives the name of the serial device the SL CAN hardware is connected. The def
 <varlistentry>
 <term><command>sudo cansetup  plx_pci</command></term>
 <listitem>
-<para>Attempt to load the module plx_pci and initialise net 0 for
- the connection to a NMEA2000 network. It will set the baudrate to 250kBits.</para>
+<para>Attempt to load the module plx_pci and initialize net 0 for the
+connection to a NMEA2000 network. It will set the baudrate to
+250kBits.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -126,32 +129,24 @@ It gives the name of the serial device the SL CAN hardware is connected. The def
 <varlistentry>
 <term><command>sudo cansetup  -s 38400 slcan /dev/ttyUSB0</command></term>
 <listitem>
-<para>Attempt to load the module slcan and talk to the hardware with 
+<para>Attempt to load the module slcan and talk to the hardware at
 38400 baud connected to port /dev/ttyUSB0.</para>
 </listitem>
 </varlistentry>
 
-
 <varlistentry>
 <term><command>cansetup -h </command></term>
 <listitem>
-<para>Display a brief help..</para>
+<para>Display a brief help message.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
 <term><command>cansetup -v </command></term>
 <listitem>
-<para>Display version of cansetup.</para>
+<para>Display the version of cansetup.</para>
 </listitem>
 </varlistentry>
 </variablelist>
-
-</refsect1>
-
-<refsect1 id='bugs'><title>BUGS</title>
-
-<para>Not known.</para>
-
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
