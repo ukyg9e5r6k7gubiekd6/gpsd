@@ -433,7 +433,7 @@ print '''
 Appropriate things to put here include how to read any LEDs or other
 unlabeled indicators on the device, a warning that the product has
 been discontinued, a list of alternate interfaces, descriptions of
-errors in the documentation, applicable PPS offsets, descriptions of
+errors in the documentation, descriptions of
 special abilities such as the ability to vary the sampling interval,
 and a note if it\'s an OEM module rather than a retail product.
 Anything else you think we need to know should go here too.</p>

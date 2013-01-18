@@ -20,6 +20,10 @@ USB.  From GPSes that are native USB but not PPS-capable, GPSD can
 extract time information from the serial data accurate to about
 250ms.</p>
 
+<p>Most PPS accuracy information has been moved to the main hardware
+table. The following table collects some statistics on older PPS-
+capable devices for which we don't have full information.</p>
+
 <div>&nbsp;</div>
 
 <table border='1'>
@@ -53,11 +57,6 @@ extract time information from the serial data accurate to about
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
-<tr>
-<td>Navisys GR601W (Macx-1)</td>
-<td align="center">1ms</td>
-<td align="center">-</td>
-<td align="center">-</td>
 </tr>
 <tr>
 <td>NavSync CW25-TIM</td>
@@ -72,44 +71,8 @@ extract time information from the serial data accurate to about
 <td align="center">-</td>
 </tr>
 <tr>
-<td>Motorola OnCore UT+</td>
-<td align="center">50ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Trimble Lassen iQ</td>
-<td align="center">50ns</td>
-<td align="center">0.675sec</td>
-<td align="center">-</td>
-</tr>
-<tr>
 <td>Trimble Copernicus</td>
 <td align="center">50ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>ublox Antaris</td>
-<td align="center">50ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>ublox Antaris4</td>
-<td align="center">50ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>ublox Antaris4T</td>
-<td align="center">50ns<br>15ns compensated</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>ublox Antaris 5</td>
-<td align="center">50ns<br>50ns</td>
 <td align="center">-</td>
 <td align="center">-</td>
 </tr>
@@ -120,18 +83,6 @@ extract time information from the serial data accurate to about
 <td align="center">-</td>
 </tr>
 <tr>
-<td>Thales AC12</td>
-<td align="center">250ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Garmin GPS18/LVC</td>
-<td align="center">1usec</td>
-<td align="center">0.125sec</td>
-<td align="center">Must be outside with a clear sky view.<br>At 19200bps; drops to 0.525 at 4800bps</td>
-</tr>
-<tr>
 <td>Rockwell Jupiter</td>
 <td align="center">1&mu;sec</td>
 <td align="center">-</td>
@@ -139,21 +90,10 @@ extract time information from the serial data accurate to about
 </tr>
 <tr>
 <td>SiRFstar2</td>
-<td align="center">1usec</td>
+<td align="center">1&mu;sec</td>
 <td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>SiRFstar3<br>(GlobalSat MR-350P)</td>
-<td align="center">1usec</td>
-<td align="center">-</td>
-<td align="center">May work inside wood frame buildings.</td>
-</tr>
-<tr>
-<td>Jackson Labs Firefly</td>
-<td align="center">50ns</td>
-<td align="center">-</td>
-<td align="center">GPS-disciplined oscillator, so the 1PPS output stays accurate even if GPS receiption is lost.</td>
+<td align="center">Many stock SiRFs have PPS disabled, available only
+as an extra-cost firmware upgrade..</td>
 </tr>
 </table>
 

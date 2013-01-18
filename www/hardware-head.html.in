@@ -182,6 +182,10 @@ alt="No-configure icon"> bug), poor ratings reflect problems not in
 <code>gpsd</code> but rather in device design and firmware so badly
 botched that <code>gpsd</code> cannot compensate.</p>
 
+<p>In the NTP column of the table table, if just one number is given
+it is the manufacturer's claimed timing accuracy. If a second number
+is given it is a measured NTP offset.</p>
+
 <p>This table is generated from a capability database in the
 <code>gpsd</code> source tree. Please help us enrich the database with
 new devices by filling out <a href="@WEBFORM@">this form</a>.</p>

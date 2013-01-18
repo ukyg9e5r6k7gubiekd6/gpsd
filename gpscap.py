@@ -65,6 +65,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 <th>Interface</th>
 <th>Tested with</th>
 <th>NMEA version</th>
+<th>PPS</th>
 <th style='width:50%%'>Notes</th>
 </tr>
 """
@@ -137,6 +138,18 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 if self.has_option(dev, "nmea"):
                     nmea = self.get(dev, "nmea")
                 ofp.write("<td>%s</td>\n" % nmea)
+                if self.has_option(dev, "pps") and self.get(dev, "pps") == "True":
+                    pps_accuracy = ntp_offset = ""
+                    if self.has_option(dev, "pps_accuracy"):
+                        pps_accuracy = self.get(dev, "pps_accuracy")
+                    if self.has_option(dev, "ntp_offset"):
+                        ntp_offset = self.get(dev, "ntp_offset")
+                    if pps_accuracy and ntp_offset:
+                        ofp.write("<td>%s<br/>%s</td>\n" % (pps_accuracy, ntp_offset))
+                    else:
+                        ofp.write("<td>?<br/>\n")
+                else:
+                    ofp.write("<td>&nbsp;</td>\n")
                 if self.has_option(dev, "notes"):
                     notes = self.get(dev, "notes")
                 else:
