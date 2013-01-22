@@ -92,7 +92,9 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
      * the timezone offset).  Avoid this and all manner of other local
      * time issues by telling the system we want times returned in UTC.
      */
+    /*@-observertrans@*/
     (void)putenv("TZ=UTC");
+    /*@+observertrans@*/
 
     /*
      * Provides a start time for getting the century.  Do this, just
