@@ -35,7 +35,7 @@
  *
  * There is one physical link protocol for serial which uses DLE/ETX
  * framing.  There is another physical protocol for USB which relies
- * on the packetization intrinstic to USB bulk pipes.
+ * on the packetization intrinsic to USB bulk pipes.
  *
  * There are several link protocols; all devices implement L000.
  * There are then product-specific protocols; most devices implement
@@ -43,7 +43,7 @@
  * protocol.
  *
  * Application protocols are named A000 and then with different
- * 3-digit numbres.  They are carried over Link protocols.
+ * 3-digit numbers.  They are carried over Link protocols.
  *
  * Thus, much of the higher-level code dealing the data formats is
  * shared between USB Binary and Serial Binary.
