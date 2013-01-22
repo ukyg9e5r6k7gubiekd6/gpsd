@@ -190,19 +190,17 @@ timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
 {
     timestamp_t t;
 
-#ifdef __UNUSED__
     /*
      * This code detects and compensates for week counter rollovers that
      * happen while gpsd is running. It will not save you if there was a
      * rollover that confused the receiver before gpsd booted up.  It *will*
      * work even when Block IIF satellites increase the week counter width
-     * to 13 bits,
+     * to 13 bits.
      */
     if ((int)week < (session->context->gps_week & 0x3ff)) {
 	gpsd_report(LOG_INF, "GPS week 10-bit rollover detected.\n");
 	++session->context->rollovers;
     }
-#endif /* __UNUSED__ */
 
     /*
      * This guard copes with both conventional GPS weeks and the "extended"
