@@ -950,14 +950,14 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    if (session->packet.inbuflen == session->driver.nmea2000.fast_packet_len) {
 #if NMEA2000_FAST_DEBUG
 		        gpsd_report(LOG_ERROR, "Fast done  %2x %2x %2x %2x %6d\n", session->driver.nmea2000.idx,
-				                                                   frame->data[0],
+				                                                   /*@i1@*/frame->data[0],
 				                                                   session->driver.nmea2000.unit,
 				                                                   (unsigned int) session->driver.nmea2000.fast_packet_len,
 				                                                   source_pgn);
 #endif /* of #if  NMEA2000_FAST_DEBUG */
 			session->driver.nmea2000.workpgn = (void *) work;
 		        session->packet.outbuflen = session->driver.nmea2000.fast_packet_len;
-			for(l2=0;l2 < session->packet.outbuflen; l2++) {
+			for(l2=0;l2 < (unsigned int)session->packet.outbuflen; l2++) {
 			    session->packet.outbuffer[l2] = session->packet.inbuffer[l2];
 			}
 			session->driver.nmea2000.fast_packet_len = 0;
@@ -966,7 +966,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    }
 		} else {
 		    gpsd_report(LOG_ERROR, "Fast error %2x %2x %2x %2x %6d\n", session->driver.nmea2000.idx,
-				                                               frame->data[0],
+				                                               /*@i1@*/frame->data[0],
 				                                               session->driver.nmea2000.unit,
 				                                               (unsigned int) session->driver.nmea2000.fast_packet_len,
 				                                               source_pgn);
