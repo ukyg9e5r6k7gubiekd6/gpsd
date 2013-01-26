@@ -1170,6 +1170,9 @@ int nmea2000_open(struct gps_device_t *session)
 	    nmea2000_units[can_net][l] = NULL;	  
 	}
     }
+    session->gpsdata.dev.parity = 'n';
+    session->gpsdata.dev.baudrate = 250000;
+    session->gpsdata.dev.stopbits = 0;
     return session->gpsdata.gps_fd;
 }
 #endif /* of ifndef S_SPLINT_S */
