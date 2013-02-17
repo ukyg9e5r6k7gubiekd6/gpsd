@@ -1,29 +1,54 @@
 #!/usr/bin/env python
-#
-# Usage: leapsecond.py [-i rfcdate] [-o unixdate] [-n MMMYYYY]
+"""
 
-# With no option, get the current leap-second value.  This is the
-# offset between UTC and GPS time, which changes occasionally due to
-# variations in the Earth's rotation.
-#
-# With the -i option, take a date in RFC822 format and convert to Unix
-# local time
-#
-# With the -o option, take a date in Unix local time and convert to RFC822.
-#
-# With -c, generate a C initializer listing leap seconds in Unix time.
-#
-# With -g, generate a plot of the leap-second trend over time. The command
-# you probably want is "leapsecond.py -g leapseconds.cache | gnuplot -persist".
-#
-# With the -n option, compute Unix local time for an IERS leap-second event
-# given as a three-letter English Gregorian month abbreviation followed by
-# a 4-digit year.
-#
-# This file is Copyright (c) 2010 by the GPSD project
-# BSD terms apply: see the file COPYING in the distribution root for details.
-#
+Usage: leapsecond.py [-v] { [-h] | [-f filename] | [-g filename] | [-H filename]
+    | [-I isodate] | [-O unixdate] | [-i rfcdate] | [-o unixdate] | [-n MMMYYYY] }
+
+With no option, get the current leap-second value.  This is the offset between
+UTC and GPS time, which changes occasionally due to variations in the Earth's
+rotation.
+
+Options:
+
+  -I take a date in ISO8601 format and convert to Unix gmt time
+
+  -O take a date in Unix gmt time and convert to ISO8601.
+
+  -i take a date in RFC822 format and convert to Unix gmt time
+
+  -o take a date in Unix gmt time and convert to RFC822.
+
+  -c generate a C initializer listing leap seconds in Unix time.
+
+  -f fetch USNO data and save to local cache file
+
+  -H make leapsecond include
+
+  -h print this help
+
+  -v be verbose
+
+  -g generate a plot of the leap-second trend over time. The command you
+     probably want is "leapsecond.py -g leapseconds.cache | gnuplot -persist".
+
+  -n compute Unix gmt time for an IERS leap-second event given as a three-letter
+     English Gregorian month abbreviation followed by a 4-digit year.
+
+Public urls and local cache file used:
+
+http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat
+ftp://maia.usno.navy.mil/ser7/tai-utc.dat
+file:///var/run/leapsecond
+leapseconds.cache
+
+This file is Copyright (c) 2013 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+
+"""
+
 import os, urllib, re, random, time, calendar, math, sys
+
+verbose = 0
 
 __locations = [
     (
@@ -31,24 +56,24 @@ __locations = [
     "ftp://maia.usno.navy.mil/ser7/tai-utc.dat",
     r" TAI-UTC= +([0-9-]+)[^\n]*\n$",
     1,
-    19,	# Magic TAI-GPS offset
+    19, # Magic TAI-GPS offset -> (leapseconds 1980)
     ),
     (
     # International Earth Rotation Service Bulletin C
     "http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat",
     r" UTC-TAI = ([0-9-]+)",
     -1,
-    19,	# Magic TAI-GPS offset
+    19, # Magic TAI-GPS offset -> (leapseconds 1980)
     ),
 ]
 
 # File containing cached offset data.
 # Two fields: the offset, and the start of the current six-month span
-# between times it might change, in seconds since Unix epoch GMT.
+# between times it might change, in seconds since Unix epoch GMT (1970-01-01T00:00:00).
 __cachepath = "/var/run/leapsecond"
 
 def isotime(s):
-    "Convert timestamps in ISO8661 format to and from Unix time."
+    "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
     if type(s) == type(1):
         return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
     elif type(s) == type(1.0):
@@ -71,16 +96,24 @@ def isotime(s):
 
 def retrieve():
     "Retrieve current leap-second from Web sources."
-    random.shuffle(__locations)	# To spread the load
+    global verbose
+    random.shuffle(__locations) # To spread the load
     for (url, regexp, sign, offset) in __locations:
         try:
-            ifp = urllib.urlopen(url)
+            if os.path.exists(url):
+                ifp = open(url)
+            else:
+                ifp = urllib.urlopen(url)
             txt = ifp.read()
             ifp.close()
+            if verbose:
+                print >>sys.stderr, "%s" % txt
             m = re.search(regexp, txt)
             if m:
                 return int(m.group(1)) * sign - offset
         except IOError:
+            if verbose:
+                print >>sys.stderr, "IOError: %s" % url
             pass
     else:
         return None
@@ -89,10 +122,19 @@ def last_insertion_time():
     "Give last potential insertion time for a leap second."
     # We need the Unix times for midnights Jan 1 and Jul 1 this year.
     when = time.gmtime()
-    when.tm_mday = 1
-    when.tm_hour = when.tm_min = when.tm_sec = 0
-    when.tm_mon = 1; jan = int(calendar.timegm(when))
-    when.tm_mon = 7; jul = int(calendar.timegm(when))
+    (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
+     tm_sec, tm_wday, tm_yday, tm_isdst) = when
+
+    tm_mday = 1
+    tm_hour = tm_min = tm_sec = 0
+    tm_mon = 1;
+    jan = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
+           tm_sec, tm_wday, tm_yday, tm_isdst)
+    jan = int(calendar.timegm(jan))
+    tm_mon = 7;
+    jul = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
+           tm_sec, tm_wday, tm_yday, tm_isdst)
+    jul = int(calendar.timegm(jul))
     # We have the UTC times of the potential insertion points this year.
     now = time.time()
     if now > jul:
@@ -102,7 +144,10 @@ def last_insertion_time():
 
 def get():
     "Fetch GPS offset, from local cache file if possible."
+    global verbose
     stale = False
+    offset = None
+    valid_from = None
     last_insertion = last_insertion_time()
     if not os.path.exists(__cachepath):
         stale = True
@@ -115,24 +160,29 @@ def get():
             if valid_from < last_insertion:
                 stale = True
         except (IOError, OSError, ValueError):
+            if verbose:
+                print >>sys.stderr, "can't read %s" % __cachepath
             stale = True
     # We now know whether the cached data is stale
     if not stale:
-        return offset
+        return (offset, valid_from)
     else:
         current_offset = retrieve()
         # Try to cache this for later
         if current_offset != None:
             try:
                 cfp = open(__cachepath, "w")
-                cfp.write("%d %d\n" % (offset, last_insertion))
+                cfp.write("%d %d\n" % (current_offset, last_insertion))
                 cfp.close()
             except (IOError, OSError):
+                if verbose:
+                    print >>sys.stderr, "can't write %s" % __cachepath
                 pass
-        return current_offset
+        return (current_offset, valid_from)
 
 def save_leapseconds(outfile):
-    "Fetch the USNO leap-second history data and make a leap-second list."
+    "Fetch the USNO leap-second history data and make a leap-second list since Unix epoch GMT (1970-01-01T00:00:00)."
+    global verbose
     skip = True
     try:
         fetchobj = urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat")
@@ -140,13 +190,17 @@ def save_leapseconds(outfile):
         # always integrally one second and every increment is listed here
         fp = open(outfile, "w")
         for line in fetchobj:
+            if verbose:
+                print >>sys.stderr, "%s" % line[:-1]
             if line.startswith(" 1980"):
                 skip = False
             if skip:
                 continue
             fields = line.strip().split()
             md = leapbound(fields[0], fields[1])
-            fp.write(repr(rfc822_to_unix(md)) + "\n")
+            if verbose:
+                print >>sys.stderr, "# %s" % md
+            fp.write(repr(iso_to_unix(md)) + "\t# (" + repr(md)  + ")\n")
         fp.close()
     except IOError:
         print >>sys.stderr, "Fetch from USNO failed, %s not updated." % outfile
@@ -155,12 +209,13 @@ def fetch_leapsecs(filename):
     "Get a list of leap seconds from the local cache of the USNO history"
     leapsecs = []
     for line in open(str(filename)):
-        leapsecs.append(float(line.strip()))
+        leapsecs.append(float(line.strip().split()[0]))
     return leapsecs
 
 def make_leapsecond_include(infile):
+    "Get the current leap second count and century from the local cache usable as c preprocessor #define"
     leapjumps = fetch_leapsecs(infile)
-    year = time.strftime("%Y", time.localtime(time.time()))
+    year = time.strftime("%Y", time.gmtime(time.time()))
     leapsecs = 0
     for leapjump in leapjumps:
         if leapjump < time.time():
@@ -183,13 +238,21 @@ def leastsquares(tuples):
     n = len(tuples)
     c = (-sum_x*sum_xy+sum_xx*sum_y)/(n*sum_xx-sum_x*sum_x)
     b = (-sum_x*sum_y+n*sum_xy)/(n*sum_xx-sum_x*sum_x)
-    # y = b * x + c 
+    # y = b * x + c
     maxerr = 0
     for (x, y) in tuples:
         err = y - (x * b + c)
         if err > maxerr:
             maxerr = err
     return (b, c, maxerr)
+
+def iso_to_unix(tv):
+    "Local Unix time to iso date."
+    return calendar.timegm(time.strptime(tv, "%Y-%m-%dT%H:%M:%S"))
+
+def unix_to_iso(tv):
+    "iso date to gmt Unix time."
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(tv))
 
 def graph_history(filename):
     "Generate a GNUPLOT plot of the leap-second history."
@@ -200,7 +263,7 @@ def graph_history(filename):
     fmt = ''
     fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
-    fmt += '# Maximum residual error is %.2f weeks\n' % e 
+    fmt += '# Maximum residual error is %.2f weeks\n' % e
     fmt += 'set autoscale\n'
     fmt += 'set xlabel "Leap second offset"\n'
     fmt += 'set xrange [0:%d]\n' % (len(dates)-1)
@@ -222,7 +285,7 @@ def rfc822_to_unix(tv):
     return calendar.timegm(time.strptime(tv, "%d %b %Y %H:%M:%S"))
 
 def unix_to_rfc822(tv):
-    "RFC822 date to local Unix time."
+    "RFC822 date to gmt Unix time."
     return time.strftime("%d %b %Y %H:%M:%S", time.gmtime(tv))
 
 def printnext(val):
@@ -235,7 +298,7 @@ def printnext(val):
         month = val[:3].lower()
         if len(val) != 7:
             print >>sys.stderr, "leapsecond.py: -n argument must be of "\
-                  "the form {jun|dec}nnnn."                
+                  "the form {jun|dec}nnnn."
             raise SystemExit, 1
         try:
             year = int(val[3:])
@@ -245,31 +308,42 @@ def printnext(val):
             raise SystemExit, 1
         # Date looks valid
         tv = leapbound(year, month)
-        print "%d	/* %s */" % (rfc822_to_unix(tv), tv)
+        print "%d       /* %s */" % (iso_to_unix(tv), tv)
 
 def leapbound(year, month):
     "Return a leap-second date in RFC822 form."
     # USNO lists JAN and JUL (month following the leap second).
     # IERS lists DEC and JUN (month preceding the leap second).
     if month.upper() == "JAN":
-        tv = "31 Dec %s 23:59:60" % (int(year)-1)
+        tv = "%s-12-31T23:59:60" % (int(year)-1)
     elif month.upper() in ("JUN", "JUL"):
-        tv = "30 Jun %s 23:59:59" % year
+        tv = "%s-06-30T23:59:59" % year
     elif month.upper() == "DEC":
-        tv = "31 Dec %s 23:59:59" % year
+        tv = "%s-12-31T23:59:59" % year
     return tv
+
+"""
+Main part
+"""
+def usage():
+    print __doc__
+    raise SystemExit, 0
 
 if __name__ == '__main__':
     import getopt
-    (options, arguments) = getopt.getopt(sys.argv[1:], "f:g:h:i:n:o:I:O:")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "hvf:g:H:i:n:o:I:O:")
     for (switch, val) in options:
+        if (switch == '-h'):    # help, get usage only
+            usage()
+        if (switch == '-v'):    # be verbose
+            verbose=1
         if (switch == '-f'):    # Fetch USNO data to cache locally
             save_leapseconds(val)
             raise SystemExit, 0
         elif (switch == '-g'):  # Graph the leap_second history
             graph_history(val)
             raise SystemExit, 0
-        elif (switch == '-h'):  # make leapsecond include
+        elif (switch == '-H'):  # make leapsecond include
             sys.stdout.write(make_leapsecond_include(val))
             raise SystemExit, 0
         elif (switch == '-i'):  # Compute Unix time from RFC822 date
@@ -288,7 +362,7 @@ if __name__ == '__main__':
             print isotime(float(val))
             raise SystemExit, 0
 
-        print "Current leap second:", retrieve()
-        raise SystemExit, 0
+    (offset, valid_from) = get()
+    print "Current leap second: %d, valid from %s" % (offset, unix_to_iso(valid_from))
 
 # End
