@@ -14,7 +14,7 @@
 
 /*@ -duplicatequals -formattype */
 static unsigned char buf[80];
-static char sb1, sb2;
+static signed char sb1, sb2;
 static unsigned char ub1, ub2;
 static short sw1, sw2;
 static unsigned short uw1, uw2;
