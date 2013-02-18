@@ -68,9 +68,9 @@ bool ais_binary_decode(struct ais_t *ais,
     int i;
 
 #define BITS_PER_BYTE	8
-#define UBITS(s, l)	ubits((char *)bits, s, l, false)
-#define SBITS(s, l)	sbits((char *)bits, s, l, false)
-#define UCHARS(s, to)	from_sixbit((char *)bits, s, sizeof(to), to)
+#define UBITS(s, l)	ubits((unsigned char *)bits, s, l, false)
+#define SBITS(s, l)	sbits((signed char *)bits, s, l, false)
+#define UCHARS(s, to)	from_sixbit((unsigned char *)bits, s, sizeof(to), to)
     ais->type = UBITS(0, 6);
     ais->repeat = UBITS(6, 2);
     ais->mmsi = UBITS(8, 30);
