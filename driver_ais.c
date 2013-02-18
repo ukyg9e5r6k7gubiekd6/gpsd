@@ -26,7 +26,7 @@
  * Parse the data from the device
  */
 
-static void from_sixbit(char *bitvec, uint start, int count, char *to)
+static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
 {
     /*@ +type @*/
 #ifdef S_SPLINT_S
@@ -328,7 +328,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		ais->type6.dac1fid30.linkage   = UBITS(88, 10);
-		from_sixbit((char *)bits,
+		from_sixbit((unsigned char *)bits,
 			    98, bitlen-98,
 			    ais->type6.dac1fid30.text);
 		imo = true;
@@ -536,7 +536,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		ais->type8.dac1fid29.linkage   = UBITS(56, 10);
-		from_sixbit((char *)bits,
+		from_sixbit((unsigned char *)bits,
 			    66, bitlen-66,
 			    ais->type8.dac1fid29.text);
 		imo = true;
@@ -629,7 +629,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	ais->type12.dest_mmsi      = UBITS(40, 30);
 	ais->type12.retransmit     = (bool)UBITS(70, 1);
 	//ais->type12.spare        = UBITS(71, 1);
-	from_sixbit((char *)bits,
+	from_sixbit((unsigned char *)bits,
 		    72, bitlen-72,
 		    ais->type12.text);
 	break;
@@ -640,7 +640,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	    return false;
 	}
 	//ais->type14.spare          = UBITS(38, 2);
-	from_sixbit((char *)bits,
+	from_sixbit((unsigned char *)bits,
 		    40, bitlen-40,
 		    ais->type14.text);
 	break;
@@ -783,10 +783,10 @@ bool ais_binary_decode(struct ais_t *ais,
 	    return false;
 	}
 	ais->type21.aid_type = UBITS(38, 5);
-	from_sixbit((char *)bits,
+	from_sixbit((unsigned char *)bits,
 		    43, 21, ais->type21.name);
 	if (strlen(ais->type21.name) == 20 && bitlen > 272)
-	    from_sixbit((char *)bits,
+	    from_sixbit((unsigned char *)bits,
 			272, (bitlen - 272)/6,
 			ais->type21.name+20);
 	ais->type21.accuracy     = UBITS(163, 1);

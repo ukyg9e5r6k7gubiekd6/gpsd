@@ -50,7 +50,7 @@ extern double getbed64(const char *, int);
 extern void putbef32(char *, int, float);
 
 /* bitfield extraction */
-extern uint64_t ubits(char buf[], unsigned int, unsigned int, bool);
-extern int64_t sbits(char buf[], unsigned int, unsigned int, bool);
+extern uint64_t ubits(unsigned char buf[], unsigned int, unsigned int, bool);
+extern int64_t sbits(signed char buf[], unsigned int, unsigned int, bool);
 
 #endif /* _GPSD_BITS_H_ */

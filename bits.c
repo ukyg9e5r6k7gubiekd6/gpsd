@@ -17,7 +17,7 @@
 
 #include "bits.h"
 
-uint64_t ubits(char buf[], unsigned int start, unsigned int width, bool le)
+uint64_t ubits(unsigned char buf[], unsigned int start, unsigned int width, bool le)
 /* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian uint64_t */
 {
     uint64_t fld = 0;
@@ -58,10 +58,10 @@ uint64_t ubits(char buf[], unsigned int start, unsigned int width, bool le)
     return fld;
 }
 
-int64_t sbits(char buf[], unsigned int start, unsigned int width, bool le)
+int64_t sbits(signed char buf[], unsigned int start, unsigned int width, bool le)
 /* extract a bitfield from the buffer as a signed big-endian long */
 {
-    uint64_t fld = ubits(buf, start, width, le);
+    uint64_t fld = ubits((unsigned char *)buf, start, width, le);
 
     /*@ +relaxtypes */
     if (fld & (1LL << (width - 1))) {

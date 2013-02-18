@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 	 up <
 	 unsigned_tests + sizeof(unsigned_tests) / sizeof(unsigned_tests[0]);
 	 up++) {
-	uint64_t res = ubits((char *)buf, up->start, up->width, up->le);
+	uint64_t res = ubits((unsigned char *)buf, up->start, up->width, up->le);
 	bool success = (res == up->expected);
 	if (!success)
 	    failures = true;

@@ -74,8 +74,8 @@ void rtcm3_unpack( /*@out@*/ struct rtcm3_t *rtcm, char *buf)
     signed long temp;
 
     /*@ -evalorder -sefparams -mayaliasunique @*/
-#define ugrab(width)	(bitcount += width, ubits(buf, bitcount-width, width, false))
-#define sgrab(width)	(bitcount += width, sbits(buf, bitcount-width, width, false))
+#define ugrab(width)	(bitcount += width, ubits((unsigned char *)buf, bitcount-width, width, false))
+#define sgrab(width)	(bitcount += width, sbits((signed char *)buf, bitcount-width, width, false))
 #define GPS_PSEUDORANGE(fld, len) \
     {temp = (unsigned long)ugrab(len);		\
     if (temp == GPS_INVALID_PSEUDORANGE)	\
