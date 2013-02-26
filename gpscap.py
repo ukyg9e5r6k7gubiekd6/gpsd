@@ -145,9 +145,9 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     if self.has_option(dev, "ntp_offset"):
                         ntp_offset = self.get(dev, "ntp_offset")
                     if pps_accuracy and ntp_offset:
-                        ofp.write("<td>%s<br/>%s</td>\n" % (pps_accuracy, ntp_offset))
+                        ofp.write("<td>%s<br>%s</td>\n" % (pps_accuracy, ntp_offset))
                     else:
-                        ofp.write("<td>?<br/>\n")
+                        ofp.write("<td>?<br>\n")
                 else:
                     ofp.write("<td>&nbsp;</td>\n")
                 if self.has_option(dev, "notes"):

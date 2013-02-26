@@ -288,7 +288,6 @@ protocol of the <code>gpsd</code> daemon.</dd>
 <dt><a href="gpsinit.html">gpsinit.8</a></dt>
 <dd>Initialize kernel modules for use with <code>gpsd</code> daemon.</dd>
 </dl>
-</dl>
 
 <p>Also, see the <a href="faq.html">FAQ</a>.</p>
 
@@ -406,7 +405,7 @@ href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 
 <p>Egil Moller has written <a
 href="http://redhog.github.com/agpsd">agpsd</a>,
-a gpsd replication and logging daemon with support for KML.</para> 
+a gpsd replication and logging daemon with support for KML.</p> 
 
 <p>You can find Debian-unstable packages 
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
