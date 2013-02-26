@@ -238,6 +238,8 @@ static const int mode_tab[] = {MODE_NO_FIX, MODE_2D,  MODE_3D, MODE_NO_FIX,
 static gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     gps_mask_t mask;
+    unsigned int req_mode;
+    unsigned int act_mode;
 
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
@@ -247,7 +249,15 @@ static gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
     session->driver.nmea2000.mode_valid = 1;
 
-    session->driver.nmea2000.mode    = mode_tab[(bu[1] >> 3) & 0x07];
+    req_mode = (unsigned int)((bu[1] >> 0) & 0x07);
+    act_mode = (unsigned int)((bu[1] >> 3) & 0x07);
+
+    /* This is a workaround for some GARMIN plotter, actual mode auto makes no sense for me! */
+    if ((act_mode == 3) && (req_mode != 3)) {
+        act_mode = req_mode;
+    }
+
+    session->driver.nmea2000.mode    = mode_tab[act_mode];
 
     /*@-type@*//* splint has a bug here */
     session->gpsdata.dop.hdop        = getleu16(bu, 2) * 1e-2;
