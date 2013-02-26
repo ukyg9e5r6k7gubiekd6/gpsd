@@ -1,4 +1,4 @@
-* Mon 21 Sep Eric S. Raymond <esr@snark.thyrsus.com> - 3.7+
+* Mon 21 Sep Eric S. Raymond <esr@snark.thyrsus.com> - 3.8
   Fix various minor errors in the AIVDM/AIVDO description. Repair the
   xmlto support in the build system. Add two more regression tests. Significant
   improvements to NMEA2000 support. Upgrade the PHP client to v3 of the
