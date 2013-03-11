@@ -886,7 +886,9 @@ gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
 #          linking
 # The final executable will build but not be portable.
 
-env.StaticLibrary(target = 'libgps.a', source = libgps_sources)
+env.StaticLibrary(target='libgps.a',
+                  source=libgps_sources,
+                  parse_flags=dbus_libs + rtlibs)
 
 # Source groups
 
