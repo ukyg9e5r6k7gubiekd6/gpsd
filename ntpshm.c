@@ -205,6 +205,7 @@ static bool ntpshm_free(struct gps_context_t * context, int segment)
 	return false;
 
     context->shmTimeInuse[segment] = false;
+    segment = -1;
     return true;
 }
 
@@ -582,9 +583,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     /*  Activates PPS support for RS-232 or USB devices only. */
     if (!(session->sourcetype == source_rs232 || session->sourcetype == source_usb)) {
-	gpsd_report(LOG_PROG, "PPS thread deactivationde. Not RS-232 or USB device.\n");
+	gpsd_report(LOG_PROG, "PPS thread deactivation. Not RS-232 or USB device.\n");
 	(void)ntpshm_free(session->context, session->shmTimeP);
-	session->shmTimeP = -1;
 	return NULL;
     }
 
@@ -952,13 +952,10 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
     (void)ntpshm_free(session->context, session->shmindex);
-    session->shmindex = -1;
 #if defined(PPS_ENABLE)
-    if (session->context->shmTimePPS &&
-	    (session->sourcetype == source_rs232 || session->sourcetype == source_usb)) {
+    if (session->context->shmTimePPS && (session->shmTimeP != -1)) {
 	pps_thread_deactivate(session);
 	(void)ntpshm_free(session->context, session->shmTimeP);
-	session->shmTimeP = -1;
     }
 #endif	/* PPS_ENABLE */
 }
