@@ -941,6 +941,12 @@ and remove it.</p>
 a procedure for hunting down the bad app. In this particular case it
 was something called <code>buienradar</a>.
 
+<p>On the Samsung Galaxy SIII, vendor firmware provides a "Remote
+Location" service with a similar bug. You can disable this through
+Settings.  See <a
+href="http://blog.gadgethelpline.com/gpsd-stop-samsung-galaxy-siiis-battery-life/">this
+blog post</a> for a fix.</p>
+
 <hr>
 <script src="datestamp.js" type='text/javascript'></script>
 </div>
