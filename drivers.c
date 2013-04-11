@@ -1328,6 +1328,10 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 		    (1 << (7 - ais_context->bitlen % 8));
 	    }
 	    ais_context->bitlen++;
+	    if (ais_context->bitlen > sizeof(ais_context->bits)) {
+		gpsd_report(LOG_INF, "overlong AIVDM payload truncated.\n");
+		return false;
+	    }
 	}
 	/*@ +shiftnegative @*/
     }
