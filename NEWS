@@ -1,3 +1,8 @@
+* Repository head
+  Armor the AIS driver against an implausible overrun attack.  Minor 
+  improvements to the NMEA2000 driver. New FAQ entry on how to know
+  WAAS/EGNOS is working.
+
 * Mon 25 Feb Eric S. Raymond <esr@snark.thyrsus.com> - 3.8
   Fix various minor errors in the AIVDM/AIVDO description. Repair the
   xmlto support in the build system. Add two more regression tests. Significant
