@@ -1572,7 +1572,7 @@ env.Alias('testregress', check)
 webpages = Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
     www/gpsd.html www/gpsd_json.html www/gpsfake.html www/gpsmon.html 
-    www/gpspipe.html www/gpsprof.html www/gps.html 
+    www/gpspipe.html www/gpsprof.html www/gps.html www/gpsinit.html
     www/libgpsd.html www/libgpsmm.html www/libgps.html
     www/srec.html
     www/AIVDM.html www/NMEA.html
