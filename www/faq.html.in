@@ -92,8 +92,9 @@ GPSD Frequently Asked Questions
 <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
 <li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a></li>
 <li><a href='#nmea2000'>How do I configure GPSD to use NMEA2000?</a></li>
+<li><a href='#garmin'>My Garmin USB GPS doesn't work.</a></li>
 <li><a href='#android'>Android reports that gpsd is draining my battery. Help!</a></li>
-<li><a href='waas'>How can I tell if WAAS/EGNOS is working?</a></li>
+<li><a href='#waas'>How can I tell if WAAS/EGNOS is working?</a></li>
 </ul>
 
 <h1 id='verify'>How can I verify operation of a new GPS?</h1>
@@ -924,6 +925,25 @@ with 2.6.38 and newer kernels.</p>
 data at the nmea2000 baudrate of 250kBit/s.  The distribution includea
 a <tt>cansetup</tt> script that will set this up for some of the more
 common interface types.</p>
+
+<h1 id='garmin'>My Garmin USB GPS doesn't work.</h1>
+
+<p>Garmin binary protocol is weird enough that it can't be handled
+through the regular serial-device layer of Linux - you couldn't tell
+where the packet boundaries are. To deal with it, you need a special
+loadable kernel module called 'garmin_gps'.</p>
+
+<p>The most common cause of problems with these devices is that the
+module is failing to load as it should when the Garmin USB ID is
+recognized. Here is a typical resolution:</p>
+
+<blockquote>
+After several more days of effort I did eventually get it to work
+[under Ubuntu 12.4]. It turned out that garmin_gps was on the black
+list and this needed to be commented out. I then had to 'sudo apt-get
+install gps-clients gpsbabel' and a 'sudo modprobe garmin_gps' and all
+was working.
+</blockquote>
 
 <h1 id='android'>Android reports that gpsd is draining my battery.  Help!</h1>
 
