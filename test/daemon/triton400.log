@@ -1,9 +1,10 @@
 # Name: Magellan Triton 400
-# Chipset = SirfStar III
-# Firmware = GSW3.2.4
-# Date = 2013-03-31
-# Submitter = James Gerlach <jpgerlach@gmail.com>
-# Location = Wellington, FL, USA, 26d39mN 80d15mW
+# Chipset: SirfStar III
+# Firmware: GSW3.2.4
+# Date: 2013-03-31
+# Submitter: = James Gerlach <jpgerlach@gmail.com>
+# Location: Wellington, FL, USA, 26d39mN 80d15mW
+# Note: There's a malformed unterminated GGA packet on line 12
 $GPGSV,3,1,11,08,75,303,44,07,66,172,51,11,51,055,36,28,39,325,36*76
 $GPGSV,3,2,11,17,31,254,51,26,13,295,51,09,12,322,36,19,12,046,51*76
 $GPGSV,3,3,11,20,09,138,36,13,04,183,51,32,03,113,44,,,,*44

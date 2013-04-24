@@ -300,7 +300,7 @@ still reproducible.</p>
 
 <h3>10. If your bug core-dumps gpsd, send us a stack trace.</h3>
 
-<p>Though it happens seldom (we've had only 2 such reports since about
+<p>Though it happens seldom (we've had only 3 such reports since about
 mid-2005), badly-formed input from a device with poor standards
 compliance has been known to core-dump gpsd.  If your gpsd has
 core-dumped, try to use gdb or whatever your local symbolic debugger
@@ -960,7 +960,7 @@ and remove it.</p>
 
 <p>See <a href="http://www.bitdirect.nl/?p=47">this blog post</a> for
 a procedure for hunting down the bad app. In this particular case it
-was something called <code>buienradar</a>.
+was something called <code>buienradar</code></a>.
 
 <p>On the Samsung Galaxy SIII, vendor firmware provides a "Remote
 Location" service with a similar bug. You can disable this through

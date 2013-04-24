@@ -1,5 +1,6 @@
 * Repository head
-  Armor the AIS driver against an implausible overrun attack.  Minor 
+  Armor the AIS driver against an implausible overrun attack.  A fix
+  for our first malformed-packet crash since about 2007. Minor 
   improvements to the NMEA2000 driver. New FAQ entry on how to know
   WAAS/EGNOS is working.
 

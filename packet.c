@@ -485,9 +485,8 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    /* not strictly correct, but helps for interpreting logfiles */
 	    lexer->state = NMEA_RECOGNIZED;
 	else if (c == '$'){
-	    /* faster recovery from missing sentence trailers */
-	    lexer->state = NMEA_DOLLAR;
-	    lexer->inbufptr += (n-1);
+	    lexer->state = GROUND_STATE;
+	    character_pushback(lexer);
 	} else if (!isprint(c))
 	    lexer->state = GROUND_STATE;
 	break;
