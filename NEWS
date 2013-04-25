@@ -1,16 +1,16 @@
 * Repository head
   Note to packagers: this is an urgent release that fixes a possible
   DoS or security hole!  Armor the AIS driver against an implausible
-  overrun attack.  A fix for our first malformed-packet crash since
-  about 2007. Minor improvements to the NMEA2000 driver. New FAQ entry
-  on how to know WAAS/EGNOS is working.
+  overrun attack.  A (different) fix for our first malformed-packet
+  crash since about 2007. Minor improvements to the NMEA2000
+  driver. New FAQ entry on how to know WAAS/EGNOS is working.
 
 * Mon 25 Feb 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.8
   Fix various minor errors in the AIVDM/AIVDO description. Repair the
   xmlto support in the build system. Add two more regression tests. Significant
   improvements to NMEA2000 support. Upgrade the PHP client to v3 of the
   Google Maps API. Support for the Telit SL869 chipset. Added a nautical-style
-  display to xgpsspeed. Minor improvments to leapsecond.py.
+  display to xgpsspeed. Minor improvements to leapsecond.py.
 
 * Mon 02 Jul 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.7
   Snap release to get the midnight change in the default leap-second
