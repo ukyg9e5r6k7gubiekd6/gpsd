@@ -1,8 +1,9 @@
 * Repository head
-  Armor the AIS driver against an implausible overrun attack.  A fix
-  for our first malformed-packet crash since about 2007. Minor 
-  improvements to the NMEA2000 driver. New FAQ entry on how to know
-  WAAS/EGNOS is working.
+  Note to packagers: this is an urgent release that fixes a possible
+  DoS or security hole!  Armor the AIS driver against an implausible
+  overrun attack.  A fix for our first malformed-packet crash since
+  about 2007. Minor improvements to the NMEA2000 driver. New FAQ entry
+  on how to know WAAS/EGNOS is working.
 
 * Mon 25 Feb Eric S. Raymond <esr@snark.thyrsus.com> - 3.8
   Fix various minor errors in the AIVDM/AIVDO description. Repair the
