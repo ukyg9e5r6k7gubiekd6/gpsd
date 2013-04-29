@@ -103,6 +103,7 @@ static void usage(void)
 		  "-l Sleep for ten seconds before connecting to gpsd.\n"
 		  "-t Time stamp the data.\n"
 		  "-T [format] set the timestamp format (strftime(3)-like; implies '-t')\n"
+		  "-u usec time stamp, implies -t. Use -uu to output sec.usec\n"
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
 		  "-n [count] exit after count packets.\n"
 		  "-v Print a little spinner.\n"
@@ -117,7 +118,7 @@ int main(int argc, char **argv)
 {
     char buf[4096];
     bool timestamp = false;
-    char *format = "%c";
+    char *format = "%F %T";
     char tmstr[200];
     bool daemonize = false;
     bool binary = false;
@@ -126,6 +127,7 @@ int main(int argc, char **argv)
     bool raw = false;
     bool watch = false;
     bool profile = false;
+    int option_u = 0;                   // option to show uSeconds
     long count = -1;
     int option;
     unsigned int vflag = 0, l = 0;
@@ -139,7 +141,7 @@ int main(int argc, char **argv)
 
     /*@-branchstate@*/
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVn:s:o:p")) != -1) {
+    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVn:s:o:pu")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -174,6 +176,10 @@ int main(int argc, char **argv)
 	case 'T':
 	    timestamp = true;
 	    format = optarg;
+	    break;
+	case 'u':
+	    timestamp = true;
+	    option_u++;
 	    break;
 	case 'v':
 	    vflag++;
@@ -315,12 +321,27 @@ int main(int argc, char **argv)
 		    serbuf[j++] = buf[i];
 		}
 		if (new_line && timestamp) {
-		    time_t now = time(NULL);
+		    char tmstr_u[20];            // time with "usec" resolution
+		    struct timeval now;
+		    gettimeofday( &now, NULL );
 
-		    struct tm *tmp_now = localtime(&now);
+		    struct tm *tmp_now = localtime(&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;
-		    if (fprintf(fp, "%.24s :", tmstr) <= 0) {
+
+		    switch( option_u ) {
+		      case 2:
+		        sprintf(tmstr_u, " %ld.%06ld", now.tv_sec, now.tv_usec);
+			break;
+		      case 1:
+		        sprintf(tmstr_u, ".%06ld", now.tv_usec);
+			break;
+		      default:
+		        *tmstr_u=0;
+			break;
+		    }
+
+		    if (fprintf(fp, "%.24s%s: ", tmstr, tmstr_u) <= 0) {
 			(void)fprintf(stderr,
 				      "gpspipe: write error, %s(%d)\n",
 				      strerror(errno), errno);

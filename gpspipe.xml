@@ -32,6 +32,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-s <replaceable>serial-device</replaceable></arg>
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-T <replaceable>timestamp-format</replaceable></arg>
+      <arg choice='opt'>-u</arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-w</arg>
       <arg choice='opt'>-S</arg>
@@ -107,7 +108,10 @@ output.</para>
 
 <para>-T sets the format of the timestamp. See
 <citerefentry><refentrytitle>strftime</refentrytitle><manvolnum>3</manvolnum></citerefentry>
-for the available placeholders. Setting this option implies -t.</para>
+for the available placeholders. Setting this option implies -t.
+Default setting is "%F %T"</para>
+
+<para>-u usec resolution time stamp, implies -t. Use -uu to output sec.usec.</para>
 
 <para>-p enables dumping of profiling information in JSON.</para>
 
