@@ -457,6 +457,8 @@ if env['ncurses']:
         ncurseslibs = pkg_config('ncurses')
     elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
         ncurseslibs = ['!ncurses5-config --libs --cflags']
+    elif config.CheckExecutable('ncursesw5-config --version', 'ncursesw5-config'):
+        ncurseslibs = ['!ncursesw5-config --libs --cflags']
     elif sys.platform.startswith('freebsd'):
         ncurseslibs= [ '-lncurses' ]
     elif sys.platform.startswith('openbsd'):
