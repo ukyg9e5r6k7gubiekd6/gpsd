@@ -216,6 +216,7 @@ fi
 %{python_sitearch}/gps*
 %{_mandir}/man8/gpsd.8*
 %{_mandir}/man8/gpsdctl.8*
+%{_mandir}/man8/gpsinit.8.*
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/gpsmon.1*
 %{_mandir}/man1/gegps.1*
