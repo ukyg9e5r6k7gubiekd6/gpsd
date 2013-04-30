@@ -117,10 +117,12 @@ GPSD Frequently Asked Questions
 <li>Miscellaneous FAQs
 <ul>
 <li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a></li>
-<li><a href='#tiocmwait'>PPS is failing to work under Linux</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
 </ul>
 </ul>
+
+<p>If none of these FAQs seems to address your problem, look at the 
+ <a href="upstream-bugs.html">Upstream Bugs</a> page.</p>
 
 <h1 id='verify'>How can I verify operation of a new GPS?</h1>
 
@@ -928,14 +930,6 @@ interface.  It exports a class that encapsulates a GPS session.</p>
 <p>The Bluetooth stack returns 0 for a read from a missing device,
 rather than -1, and doesn't set errno.  This is wrong and needs to be
 fixed at OS level.</p>
-
-<h1 id="tiocmwait">PPS is failing to work under Linux</h1>
-
-<p>You may have tripped over an <a
-href="upstream-bugs.html#tocmwait">obscure kernel bug</a>. There is a
-workaround; use stty to preset your port baud rate to the correct
-value for the device, so the autobaud loop never runs and
-ioctl(TIOCMWAIT) is never called.</p>
 
 <h1 id='sleep'>Why does my GPS get lost when I sleep/wake my laptop?</h1>
 
