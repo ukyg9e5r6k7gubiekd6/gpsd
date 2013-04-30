@@ -68,7 +68,7 @@ GPSD Frequently Asked Questions
 <div id="Content">
 
 <ul>
-<li>Troubleshooting GPSD
+<li>Troubleshooting GPSD: the basics
 <ul>
 <li><a href='#verify'>How can I verify operation of a new GPS?</a></li>
 <li><a href='#willitwork'>Will a GPS not on the GPSD hardware list work?</a></li>
@@ -94,6 +94,14 @@ GPSD Frequently Asked Questions
 </ul>
 </li>
 
+<li>Troubleshooting GPSD: advanced topics
+<ul>
+<li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
+<li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
+<li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
+<li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a></li>
+</ul>
+
 <li>Application development with GPSD
 <ul>
 <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a></li>
@@ -109,10 +117,6 @@ GPSD Frequently Asked Questions
 <li><a href='#tiocmwait'>PPS is failing to work under Linux</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
 <li><a href='#web'>How do I get gpsd data into a web page?</a></li>
-<li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
-<li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
-<li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
-<li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a></li>
 <li><a href='#nmea2000'>How do I configure GPSD to use NMEA2000?</a></li>
 <li><a href='#garmin'>My Garmin USB GPS doesn't work.</a></li>
 <li><a href='#android'>Android reports that gpsd is draining my battery. Help!</a></li>
@@ -595,6 +599,151 @@ reporting. SiRFs, in particular, wobble by 100-170 milliseconds.</p>
 <p>Your Kismet configuration has to include the setting
 "gps=true"  This is a surprisingly easy detail to forget.</p>
 
+<h1 id='baud'>Why is there no option to fix baud rate?</h1>
+
+<p>There is no option to fix baud rate because <code>gpsd</code> is
+designed to (a) be autoconfiguring, and (b) handle multiple devices.
+There are some more philosophical reasons as well; read the
+<a href="hacking.html">Hacker's Guide</a> for discussion.</p>
+
+<p>Unfortunately, this causes problems with some devices (notably
+Bluetooth GPSes) that are designed to operate at fixed baud rates.
+Some of these go catatonic if you try to set the baud rate, which is
+why we have a -b option that prevents <code>gpsd</code> from trying to
+configure the GPSes it talks to.</p>
+
+<p>On Linux systems, there's a trick you can play to simulate fixing the
+baud rate.  It utilizes the fact that under Linux, setting baud rate 0
+is interpreted as "use the hardware port's existing baud rate without
+change".  The autoconfiguring hunt loop in <code>gpsd</code> always starts
+with this behavior.</p>
+
+<p>Accordingly, you can short-circuit the autobaud if you use stty(1) to set
+the bit rate just before starting gpsd.  For example, suppose you know that
+your GPS is on serial port 0 and operates at a fixed bps of 54600.  You
+can set that up like this:</p>
+
+<pre><code>
+        stty speed 54600 &lt;/dev/ttyS0
+        gpsd -nN /dev/ttyS0
+</code></pre>
+
+<p>On *BSD systems, baud rate 0 doesn't have this special meaning -
+the ports open at a fixed speed, usually 9600.  So to suppress the
+hunt loop you have to actually compile at a fixed baud rate and then
+use the stty trick.</p>
+
+<h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
+
+<p>Most USB devices have a defined <a
+href="http://www.usb.org/developers/defined_class">device class</a> -
+mass storage, video, hub, and human interface device are three of the
+more common ones.  Using GPSD will never interfere with such devices,
+nor will they interfere with GPSD.</p>
+
+<p>Unfortunately, there is no device class for USB GPSes. Nor is there
+a device class for USB-to-serial adapter chips.  Both are assigned the
+catch-all class 0xFF, "Vendor Specific". Every USB GPS we've ever seen
+consists of a GPS module with TTL-level RS232 outputs connected to an
+RS232-to-USB adapter chip, and presents the class ID 0xFF to your USB
+subsystem.</p>
+
+<p>When you install GPSD, it puts in place rules that watch for
+hotplug activation events from devices that might be GPSes. When such
+a hotplug event happens, a <code>gpsd</code> instance is started (if
+one is not already running) and puts a copy of the device path in an
+internal stash list. Later, if a client application requests GPS data,
+<code>gpsd</code> will try to read from the device, and discard it
+from the stash list if it is not emitting data that <code>gpsd</code>
+recognizes.</p>
+
+<p>GPSD's notion of "might be a GPS" depends on the fact that all USB
+GPSes are made with one of a small number of USB-to-serial adapter
+chips, the most common of which is the Prolific Logic 2303.  GPSD's
+hotplug rules expect that anything exhibiting the USB vendor:product
+ID pair of one of these chips will be a GPS.</p>
+
+<p>A problem can arise if you have other devices connected to your
+system through one of these specific adaptor chips. When these
+activate, the GPSD hotplug rules will believe they are GPSes, and
+<code>gpsd</code> will try to read from them when a GPS-ware client
+application requests data.  We've had reports of this happening with
+USB modems and various microcontroller kits. It's not a problem we can
+solve with clever programming, the devices simply don't yield
+enough information about themselves to avoid conflicts.</p>
+
+<p>Under Linux, <code>gpsd</code> at 3.1 and later versions checks
+each serial and USB device after opening it to see if any other
+process has that device open; if so, it's dropped.  This should at
+least keep GPSD from usurping data sources belonging to other service
+daemons.</p>
+
+<p>Note that GPSD never tries to configure USB devices until it has
+identified them as sensors of a known type. Also, it tries to open with
+TIOCEXCL and thus will not open devices that another process already
+has open. So the worst case is a race between GPSD and another process
+to open a device not in use, in which the other process's open fails.</p>
+
+<p>If this sort of conflict becomes a problem, you can work around
+it by disabling the GPSD hotplug rules.  Unfortunately, this means
+you will have to start <code>gpsd</code> manually with a device-path
+argument when you want to use a GPS.</p>
+
+<h1 id='efficiency'>What is gpsd's CPU and power overhead?</h1>
+
+<p>The daemon, <code>gpsd</code>, is designed to run light so it can be
+used in low-power embedded-systems deployments. Data throughput from GPSes
+and other navigational sensors is low and tends to be concentrated in bursts
+at about one-second intervals; accordingly, <code>gpsd</code> spends most
+of its time simply waiting in select(2) at effectively zero CPU cost. Even
+with a client session and a GPS active, we have measured gpsd's CPU load
+at steadily less than 1% on a low-power, low-speed ARM SBC.</p>
+
+<h1 id='usblockup'>My USB port becomes unavailable after gpsd uses it.</h1>
+
+<p>Occasionally we get a bug report from a user who says a USB port
+locks up or becomes unavailable after <code>gpsd</code> has closed it.
+Such problems may persist until the USB port is unplugged and
+replugged, or until all devices in that root hub are unplugged and
+replugged, or even until a reboot.</p>
+
+<p>This is not a GPSD bug.  Bugs in the serial-device layer of your
+operating system, tickled by gpsd's unusual autobauding loop and
+serial-parameter changes, can cause problems like this. They may be
+driver-specific bugs, or they may be due to bad interactions between
+ioctl() and select() in the kernel's generic tty code. Bugs in the USB
+chipset on your motherboard or in a hub can do it, too.</p>
+
+<p>Here are some possible fixes:</p>
+
+<dl>
+<dt><b>1. Suppress the autobauding loop</b></dt>
+<dd>The autobauding hunt loop in <code>gpsd</code> stresses chipsets and
+drivers in unusual ways, which is why these sorts of bugs show up more
+often under <code>gpsd</code> than most other USB-using software.  The first 
+thing to try is to <a href="#baud">suppress the autobauding loop</a>.</dd>
+
+<dt><b>2. Upgrade your kernel</b></dt>
+<dd>Upgrading your kernel may help. Obscure tty-layer kernel bugs pop
+up relatively often and are usually fixed pretty quickly.</dd>
+
+<dt><b>3. Try a different USB-to-serial chip</b></dt>
+<dd>Another thing to try is a GPS with a different USB-to-serial chip.  
+You probably do not have a a chip-specific problem if you're using
+a PL23203, as those drivers have been tested a lot.  But we've seen
+reports that were definitely chip-specific on less common chipsets
+such as FTDI. The CP210x chips are also known to be problematic,
+mainly because the vendor refused to release enough programming
+information to allow a decent open-source driver to be written.</dd>
+
+<dt><b>4. Replace your USB hub</b></dt>
+<dd>Some USB hubs are flaky. You may need to replace yours.</dd>
+</dl>
+
+<p>When you have had such a problem with <code>gpsd</code>, and are
+able to work around it or fix it, please inform us so we can 
+improve this FAQ.</p>
+
 <h1 id='why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</h1>
 
 <p>Some applications that use <code>gpsd</code> start raw mode
@@ -793,151 +942,6 @@ srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
   &lt;/items&gt;
 &lt;/Report&gt;
 </code></pre>
-
-<h1 id='baud'>Why is there no option to fix baud rate?</h1>
-
-<p>There is no option to fix baud rate because <code>gpsd</code> is
-designed to (a) be autoconfiguring, and (b) handle multiple devices.
-There are some more philosophical reasons as well; read the
-<a href="hacking.html">Hacker's Guide</a> for discussion.</p>
-
-<p>Unfortunately, this causes problems with some devices (notably
-Bluetooth GPSes) that are designed to operate at fixed baud rates.
-Some of these go catatonic if you try to set the baud rate, which is
-why we have a -b option that prevents <code>gpsd</code> from trying to
-configure the GPSes it talks to.</p>
-
-<p>On Linux systems, there's a trick you can play to simulate fixing the
-baud rate.  It utilizes the fact that under Linux, setting baud rate 0
-is interpreted as "use the hardware port's existing baud rate without
-change".  The autoconfiguring hunt loop in <code>gpsd</code> always starts
-with this behavior.</p>
-
-<p>Accordingly, you can short-circuit the autobaud if you use stty(1) to set
-the bit rate just before starting gpsd.  For example, suppose you know that
-your GPS is on serial port 0 and operates at a fixed bps of 54600.  You
-can set that up like this:</p>
-
-<pre><code>
-        stty speed 54600 &lt;/dev/ttyS0
-        gpsd -nN /dev/ttyS0
-</code></pre>
-
-<p>On *BSD systems, baud rate 0 doesn't have this special meaning -
-the ports open at a fixed speed, usually 9600.  So to suppress the
-hunt loop you have to actually compile at a fixed baud rate and then
-use the stty trick.</p>
-
-<h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
-
-<p>Most USB devices have a defined <a
-href="http://www.usb.org/developers/defined_class">device class</a> -
-mass storage, video, hub, and human interface device are three of the
-more common ones.  Using GPSD will never interfere with such devices,
-nor will they interfere with GPSD.</p>
-
-<p>Unfortunately, there is no device class for USB GPSes. Nor is there
-a device class for USB-to-serial adapter chips.  Both are assigned the
-catch-all class 0xFF, "Vendor Specific". Every USB GPS we've ever seen
-consists of a GPS module with TTL-level RS232 outputs connected to an
-RS232-to-USB adapter chip, and presents the class ID 0xFF to your USB
-subsystem.</p>
-
-<p>When you install GPSD, it puts in place rules that watch for
-hotplug activation events from devices that might be GPSes. When such
-a hotplug event happens, a <code>gpsd</code> instance is started (if
-one is not already running) and puts a copy of the device path in an
-internal stash list. Later, if a client application requests GPS data,
-<code>gpsd</code> will try to read from the device, and discard it
-from the stash list if it is not emitting data that <code>gpsd</code>
-recognizes.</p>
-
-<p>GPSD's notion of "might be a GPS" depends on the fact that all USB
-GPSes are made with one of a small number of USB-to-serial adapter
-chips, the most common of which is the Prolific Logic 2303.  GPSD's
-hotplug rules expect that anything exhibiting the USB vendor:product
-ID pair of one of these chips will be a GPS.</p>
-
-<p>A problem can arise if you have other devices connected to your
-system through one of these specific adaptor chips. When these
-activate, the GPSD hotplug rules will believe they are GPSes, and
-<code>gpsd</code> will try to read from them when a GPS-ware client
-application requests data.  We've had reports of this happening with
-USB modems and various microcontroller kits. It's not a problem we can
-solve with clever programming, the devices simply don't yield
-enough information about themselves to avoid conflicts.</p>
-
-<p>Under Linux, <code>gpsd</code> at 3.1 and later versions checks
-each serial and USB device after opening it to see if any other
-process has that device open; if so, it's dropped.  This should at
-least keep GPSD from usurping data sources belonging to other service
-daemons.</p>
-
-<p>Note that GPSD never tries to configure USB devices until it has
-identified them as sensors of a known type. Also, it tries to open with
-TIOCEXCL and thus will not open devices that another process already
-has open. So the worst case is a race between GPSD and another process
-to open a device not in use, in which the other process's open fails.</p>
-
-<p>If this sort of conflict becomes a problem, you can work around
-it by disabling the GPSD hotplug rules.  Unfortunately, this means
-you will have to start <code>gpsd</code> manually with a device-path
-argument when you want to use a GPS.</p>
-
-<h1 id='efficiency'>What is gpsd's CPU and power overhead?</h1>
-
-<p>The daemon, <code>gpsd</code>, is designed to run light so it can be
-used in low-power embedded-systems deployments. Data throughput from GPSes
-and other navigational sensors is low and tends to be concentrated in bursts
-at about one-second intervals; accordingly, <code>gpsd</code> spends most
-of its time simply waiting in select(2) at effectively zero CPU cost. Even
-with a client session and a GPS active, we have measured gpsd's CPU load
-at steadily less than 1% on a low-power, low-speed ARM SBC.</p>
-
-<h1 id='usblockup'>My USB port becomes unavailable after gpsd uses it.</h1>
-
-<p>Occasionally we get a bug report from a user who says a USB port
-locks up or becomes unavailable after <code>gpsd</code> has closed it.
-Such problems may persist until the USB port is unplugged and
-replugged, or until all devices in that root hub are unplugged and
-replugged, or even until a reboot.</p>
-
-<p>This is not a GPSD bug.  Bugs in the serial-device layer of your
-operating system, tickled by gpsd's unusual autobauding loop and
-serial-parameter changes, can cause problems like this. They may be
-driver-specific bugs, or they may be due to bad interactions between
-ioctl() and select() in the kernel's generic tty code. Bugs in the USB
-chipset on your motherboard or in a hub can do it, too.</p>
-
-<p>Here are some possible fixes:</p>
-
-<dl>
-<dt><b>1. Suppress the autobauding loop</b></dt>
-<dd>The autobauding hunt loop in <code>gpsd</code> stresses chipsets and
-drivers in unusual ways, which is why these sorts of bugs show up more
-often under <code>gpsd</code> than most other USB-using software.  The first 
-thing to try is to <a href="#baud">suppress the autobauding loop</a>.</dd>
-
-<dt><b>2. Upgrade your kernel</b></dt>
-<dd>Upgrading your kernel may help. Obscure tty-layer kernel bugs pop
-up relatively often and are usually fixed pretty quickly.</dd>
-
-<dt><b>3. Try a different USB-to-serial chip</b></dt>
-<dd>Another thing to try is a GPS with a different USB-to-serial chip.  
-You probably do not have a a chip-specific problem if you're using
-a PL23203, as those drivers have been tested a lot.  But we've seen
-reports that were definitely chip-specific on less common chipsets
-such as FTDI. The CP210x chips are also known to be problematic,
-mainly because the vendor refused to release enough programming
-information to allow a decent open-source driver to be written.</dd>
-
-<dt><b>4. Replace your USB hub</b></dt>
-<dd>Some USB hubs are flaky. You may need to replace yours.</dd>
-</dl>
-
-<p>When you have had such a problem with <code>gpsd</code>, and are
-able to work around it or fix it, please inform us so we can 
-improve this FAQ.</p>
 
 <h1 id='nmea2000'>How do I configure GPSD to use NMEA2000?</h1>
 
