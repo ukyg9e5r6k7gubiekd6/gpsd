@@ -1538,27 +1538,28 @@ the following order:</p>
 
 <dl>
 <dt>1. Check the <a href="@BUGTRACKER@">bug tracker</a> for
-release blockers.</dt>  <dd></dd>
+release blockers.</dt>  
+<dd><p>Check support requests, too.</p></dd>
 
 <dt>2. Issue the pre-release heads-up</dt>
-<dd>About 48 hours before release, announce that it's coming so people
-will have a day or so to get their urgent fixes in.</dd>
+<dd><p>About 48 hours before release, announce that it's coming so people
+will have a day or so to get their urgent fixes in.</p></dd>
 
 <dt>3. Perform a validation pass on the website content.</dt>
-<dd>See the instructions near validation-list in the scons recipe.</dd>
+<dd><p>See the instructions near validation-list in the scons recipe.</p></dd>
 
 <dt>4. Check that the version number is correct</dt>
-<dd>It will need to be modified in SConstruct.  Make sure the 'dev' 
-suffix is gone.</dd>
+<dd><p>It will need to be modified in SConstruct.  Make sure the 'dev' 
+suffix is gone.</p></dd>
 
 <dt>5. Update the NEWS file</dt>
-<dd>The version number on the top line needs to be match what's in
-SConstruct.</dd>
+<dd><p>The version number on the top line needs to be match what's in
+SConstruct.</p></dd>
 
 <dt>6. Fix fault-scanner warnings.</dt>
-<dd>Look for compiler, <a
+<dd><p>Look for compiler, <a
 href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>,
-and Coverity warnings and fix them.</dd>
+and Coverity warnings and fix them.</p></dd>
 
 <dt>7. Run the regression tests and other checks</dt> 
 <dd><p>If it doesn't pass regressions, it isn't ready to ship.  Run
@@ -1573,24 +1574,25 @@ relies on the default until it gets the current offset from subframe
 data.</p></dd>
 
 <dt>8. Push and pull from the public repo</dt>
-<dd>This is the revision the release will be built from.</dd>
+<dd><p>This is the revision the release will be built from.</p></dd>
 
 <dt>9. Build and ship the release</dt>
-<dd><code>scons release</code> will tag the release, make the tarball,
-upload it to the hosting site, and refresh the website.</dd>
+<dd><p><code>scons release</code> will tag the release, make the tarball,
+upload it to the hosting site, and refresh the website.</p></dd>
 
 <dt>10. Bump the release number and push that commit</dt>
-<dd>Bump the release number in SConstruct, adding a '~dev' suffix
+<dd><p>Bump the release number in SConstruct, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
-distinguishable from the next public release.</dd>
+distinguishable from the next public release.</p></dd>
 
 <dt>11. Close all resolved tracker bugs</dt>
-<dd>Go to <a href="https://savannah.nongnu.org/bugs/?group=gpsd">the tracker</a>
-and close all resolved bugs.</dd>
+<dd><p>Go to <a
+href="https://savannah.nongnu.org/bugs/?group=gpsd">the tracker</a>
+and close all resolved bugs.</p></dd>
 
 <dt>12. Announce the release</dt>
-<dd>Announce the release on the announce list, and the resumption of
-regular commits on the dev list.</dd>
+<dd><p>Announce the release on the announce list, and the resumption of
+regular commits on the dev list.</p></dd>
 </dl>
 
 <h2>Packaging links</h2>
