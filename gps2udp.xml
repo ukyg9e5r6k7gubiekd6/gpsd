@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+This file is Copyright (c) 2010 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+-->
+<!DOCTYPE refentry PUBLIC
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='gps2udp.1'>
+<refentryinfo><date>01 Marc 2013</date></refentryinfo>
+<refmeta>
+<refentrytitle>gps2udp</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="source">The GPSD Project</refmiscinfo>
+<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>gps2udp</refname>
+<refpurpose>tool to connect to gpsd and push sentences to aishub, marinetraffic, ....</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>gps2udp</command>
+      <arg choice='opt'>-h</arg>
+      <arg choice='opt'>-n</arg>
+      <arg choice='opt'>-j</arg>
+      <arg choice='opt'>-a</arg>
+      <arg choice='opt'>-u <replaceable>hostname:udpport</replaceable></arg>
+      <arg choice='opt'>-c <replaceable>count</replaceable></arg>
+      <arg choice='opt'>-d</arg>
+      <arg choice='opt'>-v</arg>
+      <group>
+	<replaceable>server</replaceable>
+	  <group><replaceable>:port</replaceable>
+	    <group><replaceable>:device</replaceable></group>
+	</group>
+      </group>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para><application>gps2udp</application> is a tool to connect
+to <application>gpsd</application> and output the received
+sentences to one or many UDP host:port destinations.  This makes the program useful to feed AIS information from <application>gpsd</application> to aishub, marinetraffic, shipfinder,... </para>
+
+<para><application>gps2udp</application> does not require root
+privileges, and can be run concurrently with other tools connecting
+to the local <application>gpsd</application> without causing problems.</para>
+
+<para>The output will consist of one or both of NMEA (-n option) or Jason (-j option)
+<application>gpsd</application> sentences. The output are sent to one or many destinations host through a UDP network socket (-u host:port options) .</para>
+
+<para>Optionally a server, TCP/IP port number and remote device can be given.
+If omitted, <application>gps2udp</application> connects to localhost on
+the default port (2947) and watches all devices opened by
+<application>gpsd</application>.</para>
+
+<para><application>gps2udp</application> may be run as a daemon (-b option).</para>
+
+<para><application>gps2udp</application> is design to run smoothly in background, it reconnecte automatically to <application>gpsd</application> is ever this one is restarted. For debug perporse, there is an option to exit gracefully after a given count of packets (-c option).</para>
+
+</refsect1>
+<refsect1 id='options'><title>OPTIONS</title>
+
+<para>-h makes <application>gps2udp</application> print
+a usage message and exit.</para>
+
+<para>-n causes NMEA sentences to be output.</para>
+<para>-j causes JASON sentences to be output.</para>
+<para>-u host:port UDP destination for output sentenses (up to five destinations).</para>
+
+<para>-a output only AIS messages.</para>
+<para>-b causes <application>gps2udp</application> to run as a daemon.</para>
+<para>-n [count] causes [count] sentences to be output.
+<application>gps2udp</application> will then exit gracefully.</para>
+
+<para>-d prints sent packet on stdout.</para>
+<para>-v prints the version, then exits.</para>
+
+</refsect1>
+
+<refsect1 id='exampletitle'><title>EXAMPLE</title>
+<para>With a running <application>gpsd accessible on the network</application> </para>
+
+<para><command>gps2udp -d -n -u data.aishub.net:2222
+</command> will collect data from localhost:gpsd display them on stdout and send a copy to test aishub in NMEA format.</para>
+
+<para><command>gps2udp -a -n -b -u data.aishub.net 2222 -u 5.9.207.224 5321 -u 109.200.19.151 4001 vz-fulup.vpn:2947</command> will collect data from a remote gpsd located on vz-fulup.vpn host, will filter AIS messages and send them to 3 destination [aishub, marinetraffic, shipfinder] in NMEA format, command is running in background mode</para>
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpscat</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpsmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+</refsect1>
+
+<refsect1 id='maintainer'><title>AUTHOR</title>
+
+<para>Fulup Ar Foll <email>fulup (à) sinagot.net</email>.</para>
+
+</refsect1>
+
+</refentry>
+

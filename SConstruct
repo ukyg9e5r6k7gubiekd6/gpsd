@@ -888,9 +888,7 @@ gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
 #          linking
 # The final executable will build but not be portable.
 
-env.StaticLibrary(target='libgps.a',
-                  source=libgps_sources,
-                  parse_flags=dbus_libs + rtlibs)
+env.StaticLibrary(target = 'libgps.a', source = libgps_sources)
 
 # Source groups
 
@@ -951,6 +949,9 @@ env.Depends(gpsmon, [compiled_gpsdlib, compiled_gpslib])
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
 env.Depends(gpspipe, compiled_gpslib)
 
+gps2udp = env.Program('gps2udp', ['gps2udp.c'], parse_flags=gpslibs)
+env.Depends(gps2udp, compiled_gpslib)
+
 gpxlogger = env.Program('gpxlogger', ['gpxlogger.c'], parse_flags=gpslibs)
 env.Depends(gpxlogger, compiled_gpslib)
 
@@ -960,7 +961,7 @@ env.Depends(lcdgps, compiled_gpslib)
 cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 env.Depends(cgps, compiled_gpslib)
 
-binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gpxlogger, lcdgps]
+binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps]
 if ncurseslibs:
     binaries += [cgps, gpsmon]
 
@@ -1179,6 +1180,7 @@ base_manpages = {
     "gpsctl.1" : "gpsctl.xml",
     "gpsdctl.8" : "gpsdctl.xml",
     "gpspipe.1" : "gpspipe.xml",
+    "gps2udp.1" : "gps2udp.xml",
     "gpsdecode.1" : "gpsdecode.xml",
     "srec.5" : "srec.xml",
     }
@@ -1224,7 +1226,7 @@ headerinstall = [ env.Install(installdir('includedir'), x) for x in ("libgpsmm.h
 
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
-binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gpxlogger, lcdgps]))
+binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gps2udp, gpxlogger, lcdgps]))
 if ncurseslibs:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib))
@@ -1330,6 +1332,7 @@ splint_table = [
     ('splint-gpsdctl',['gpsdctl.c'],'gpsdctl', ['']),
     ('splint-gpsmon',gpsmon_sources,'gpsmon', ['-exportlocal']),
     ('splint-gpspipe',['gpspipe.c'],'gpspipe', ['']),
+    ('splint-gps2udp',['gps2udp.c'],'gps2udp', ['']),
     ('splint-gpsdecode',['gpsdecode.c'],'gpsdecode', ['']),
     ('splint-gpxlogger',['gpxlogger.c'],'gpxlogger', ['']),
     ('splint-test_packet',['test_packet.c'],'test_packet test harness', ['']),
@@ -1396,8 +1399,8 @@ else:
 # using regress-drivers requires socket_export being enabled.
 if env['socket_export']:
     # Regression-test the daemon
-    gps_regress = [Utility("gps-regress", [gpsd, python_built_extensions],
-            '$SRCDIR/regress-driver test/daemon/*.log')]
+    gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
+            '$SRCDIR/regress-driver test/daemon/*.log')
 
     # Test that super-raw mode works. Compare each logfile against itself
     # dumped through the daemon running in R=2 mode.  (This test is not
@@ -1412,8 +1415,6 @@ if env['socket_export']:
     # offset from subframe data.
     Utility('gps-makeregress', [gpsd, python_built_extensions],
         '$SRCDIR/regress-driver -b test/daemon/*.log')
-else:
-    gps_regress = []
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
@@ -1554,6 +1555,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 check = env.Alias('check', [
     python_compilation_regress,
     bits_regress,
+    gps_regress,
     rtcm_regress,
     aivdm_regress,
     packet_regress,
@@ -1562,7 +1564,7 @@ check = env.Alias('check', [
     time_regress,
     unpack_regress,
     json_regress,
-    ] + gps_regress)
+    ])
 
 env.Alias('testregress', check)
 
@@ -1574,7 +1576,7 @@ env.Alias('testregress', check)
 webpages = Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
     www/gpsd.html www/gpsd_json.html www/gpsfake.html www/gpsmon.html 
-    www/gpspipe.html www/gpsprof.html www/gps.html www/gpsinit.html
+    www/gpspipe.html www/gps2udp.html www/gpsprof.html www/gps.html 
     www/libgpsd.html www/libgpsmm.html www/libgps.html
     www/srec.html
     www/AIVDM.html www/NMEA.html
@@ -1665,10 +1667,10 @@ if env['python']:
 # is plugged in.
 
 Utility('udev-install', 'install', [
-    'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
-    'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] + '/rules.d/25-gpsd.rules',
-    'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + env['udevdir'],
-    'chmod a+x ' + DESTDIR + env['udevdir'] + '/gpsd.hotplug',
+    'mkdir -p ' + env['udevdir'],
+    'cp $SRCDIR/gpsd.rules ' + env['udevdir'] + '/rules.d/25-gpsd.rules',
+    'cp $SRCDIR/gpsd.hotplug ' + env['udevdir'],
+    'chmod a+x ' + env['udevdir'] + '/gpsd.hotplug',
         ])
 
 Utility('udev-uninstall', '', [
