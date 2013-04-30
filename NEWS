@@ -4,6 +4,7 @@
   overrun attack.  A (different) fix for our first malformed-packet
   crash since about 2007. Minor improvements to the NMEA2000
   driver. New FAQ entry on how to know WAAS/EGNOS is working.
+  New -u and -uu options enable usec timestamps on gpspipe output.
 
 * Mon 25 Feb 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.8
   Fix various minor errors in the AIVDM/AIVDO description. Repair the

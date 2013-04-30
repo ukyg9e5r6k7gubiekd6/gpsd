@@ -118,7 +118,6 @@ GPSD Frequently Asked Questions
 <li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a></li>
 <li><a href='#tiocmwait'>PPS is failing to work under Linux</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
-<li><a href='#web'>How do I get gpsd data into a web page?</a></li>
 <li><a href='#nmea2000'>How do I configure GPSD to use NMEA2000?</a></li>
 <li><a href='#android'>Android reports that gpsd is draining my battery. Help!</a></li>
 </ul>
@@ -939,62 +938,6 @@ give <code>gpsd</code> that device when you invoke it.  You'll need <a
 href="70-persistent-usb-gps.rules">these replacement udev rules</a>,
 and the experience required to patch them so the vendor ID in the last
 one matches your GPS hardware (look in your lsusb output).</p>
-
-<h1 id='web'>How do I get gpsd data into a web page?</h1>
-
-<p>The <code>gpsd</code> source-code distribution now includes a PHP
-script that makes this easy.  The script shows current fix data, a
-satellite view, and can even incorporate a Google Maps display
-if you have a Google API key. Look at the end of the file INSTALL for
-instructions.</p>
-
-<p>Another way is to use a perl CGI script that leverages
-Net::GPSD like this...</p>
-
-<pre><code>
-#!/usr/bin/perl -w
-use strict;
-use Net::GPSD;
-
-my $g=new Net::GPSD;
-my $p=$g->get;
-
-print qq{
-&lt;?xml version='1.0'?&gt;
-&lt;Report xmlns:gml="http://www.opengis.net/gml"&gt;
-  &lt;items&gt;
-    &lt;Item&gt;
-      &lt;ID&gt;35643563245&lt;/ID&gt;
-      &lt;position&gt;
-        &lt;gml:Point srsDimension="2"
-srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
-          &lt;gml:pos&gt;}. $p-&gt;lat. " ". $p-&gt;lon. q{&lt;/gml:pos&gt;
-        &lt;/gml:Point&gt;
-      &lt;/position&gt;
-    &lt;/Item&gt;
-  &lt;/items&gt;
-&lt;/Report&gt;
-};
-&lt;/code&gt;
-</code></pre>
-
-<p>This will return something like:</p>
-
-<pre><code>
-&lt;?xml version='1.0'?&gt;
-&lt;Report xmlns:gml="http://www.opengis.net/gml"&gt;
-  &lt;items&gt;
-    &lt;Item&gt;
-      &lt;ID&gt;35643563245&lt;/ID&gt;
-      &lt;position&gt;
-        &lt;gml:Point srsDimension="2" srsName="urn:ogc:def:crs:EPSG:6.6:4326"&gt;
-          &lt;gml:pos&gt;38.865960 -77.108624&lt;/gml:pos&gt;
-        &lt;/gml:Point&gt;
-      &lt;/position&gt;
-    &lt;/Item&gt;
-  &lt;/items&gt;
-&lt;/Report&gt;
-</code></pre>
 
 <h1 id='nmea2000'>How do I configure GPSD to use NMEA2000?</h1>
 

@@ -155,8 +155,7 @@ status page for your GPS if you wish. (It may not be in the core
 package.)  It will be installed in your HTTP document directory. The
 first time it's invoked, it will generate a file called
 'gpsd_config.inc' in that directory containing configuration
-information; edit to taste.  Note that for the Google Maps feature
-work you need to set a valid Google API key in gpsd_config.inc.
+information; edit to taste.
 
 4. Note for people using gpsd as time source for ntpd: In case you're
 using dhcp3-client to configure your system, make sure you disable
