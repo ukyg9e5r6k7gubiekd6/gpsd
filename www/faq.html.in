@@ -118,7 +118,6 @@ GPSD Frequently Asked Questions
 <li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a></li>
 <li><a href='#tiocmwait'>PPS is failing to work under Linux</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
-<li><a href='#nmea2000'>How do I configure GPSD to use NMEA2000?</a></li>
 <li><a href='#android'>Android reports that gpsd is draining my battery. Help!</a></li>
 </ul>
 </ul>
@@ -938,18 +937,6 @@ give <code>gpsd</code> that device when you invoke it.  You'll need <a
 href="70-persistent-usb-gps.rules">these replacement udev rules</a>,
 and the experience required to patch them so the vendor ID in the last
 one matches your GPS hardware (look in your lsusb output).</p>
-
-<h1 id='nmea2000'>How do I configure GPSD to use NMEA2000?</h1>
-
-<p>This feature requires kernel-level support for CAN (Controller Area
-Network) hardware.  Presently this is available only under Linux using
-the Socket CAN subsystem.  The nmea2000 driver of gpsd has been tested
-with 2.6.38 and newer kernels.</p>
-
-<p>GPSD expects your CAN interface to be configured to receive CAN
-data at the nmea2000 baudrate of 250kBit/s.  The distribution includea
-a <tt>cansetup</tt> script that will set this up for some of the more
-common interface types.</p>
 
 <h1 id='android'>Android reports that gpsd is draining my battery.  Help!</h1>
 
