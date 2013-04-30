@@ -71,6 +71,7 @@ GPSD Frequently Asked Questions
 <li>Troubleshooting GPSD
 <ul>
 <li><a href='#verify'>How can I verify operation of a new GPS?</a></li>
+<li><a href='#willitwork'>Will a GPS not on the GPSD hardware list work?</a></li>
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a></li>
 </ul>
 </li>
@@ -81,6 +82,8 @@ GPSD Frequently Asked Questions
 <li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
 <li><a href='#timelag2'>Why is my GPS time off by exactly one second?</a></li>
 <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a></li>
+<li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a></li>
+<li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
 </ul>
 </li>
 
@@ -103,13 +106,10 @@ GPSD Frequently Asked Questions
 <li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a></li>
 <li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a></li>
 <li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a></li>
-<li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a></li>
 <li><a href='#tiocmwait'>PPS is failing to work under Linux</a></li>
-<li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
 <li><a href='#web'>How do I get gpsd data into a web page?</a></li>
 <li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
-<li><a href='#willitwork'>Will this GPS work? It's not on the hardware list.</a></li>
 <li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
 <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
 <li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a></li>
@@ -173,6 +173,39 @@ vendor and product ID of your USB-serial converter device.</p>
 
 <p>For more detailed troubleshooting instructions, <a
 href="troubleshooting.html">see the Troubleshooting Guide</a>.</p>
+
+<h1 id='willitwork'>Will a GPS not on the GPSD hardware list work?</h1>
+
+<p>Probably.</p>
+
+<p>GPSD's support for the NMEA protocol is mature and stable. If the
+specification for your receiver says "NMEA 0183" (maybe with a version 2.x
+or 3.x qualifier) it should just work.</p>
+
+<p>Beware of receivers that do not say "NMEA" somewhere in the specification;
+while it may indicate that the receiver only uses a binary protocol, it often
+means that the receiver cannot be used as data source for a computer, as is
+usually the case with car navigation devices.</p>
+
+<p>We also support many proprietary protocols, in case your receiver
+doesn't emit NMEA. Datasheets often indicate which chip the receiver
+is based on, for example a <i>NavCorp NX666</i>. Check to see if other
+<i>NavCorp</i> receivers are listed, either as a vendor or a
+chipset. Compare this with the output of <code>gpsd -l</code> which
+will list the protocols compiled into gpsd. If your receiver doesn't
+support NMEA and we don't have a special driver for the chipset, talk
+to us. But it'll probably just work.</p>
+
+<p>Assuming the receiver has a USB interface, do a web search to see
+if someone has tried it with linux already, eg. "<code>NavCorp NX666
+linux</code>". Search for the product and "driver install" to find
+instructions on installing Windows drivers for the product - these
+often hint at which bridge chip is used, if the specifications don't
+say so.
+
+<p>A GPS receiver claiming Macintosh compatibility is usually based on
+one of the common bridge chips from FTDI, Prolific or Silicon
+Laboratories. These will just work.</p>
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 <blockquote>
@@ -473,6 +506,85 @@ poor constellation geometry from dragging your solutions around too
 much. Other receivers may suffer the same problem and may have a
 similar solution.</p>
 
+<h1 id='accuracy'>How can I improve fix accuracy from my GPS?</h1>
+
+<p>Use an antenna, and place the sensor (and/or antenna) properly.</p>
+
+<p>A real antenna can help, especially if you're using PPS as a time
+reference. It should be particularly helpful for reducing timing
+jitter.</p>
+
+<p>One common error is to place the GPS or antenna as high as
+possible.  This will increase <a
+href="http://en.wikipedia.org/wiki/Global_Positioning_System#Multipath_effects">multipath
+effects</a> due to signal bounce from the ground or water, which can
+cause the GPS to mistake its position and the time signal.  The
+correct location for a boat GPS antenna is on the gunwale rail or
+pushpit rail, close to the water and as far from the mast as possible
+(to reduce signal bounce from the mast). If you're outside or in a
+fixed location, put the GPS antenna as far from buildings as possible,
+and on the ground. If you're in a car, don't put the GPS antenna on
+the roof, put it on the towbar or some similar location.</p>
+
+<p>If you're driving in a heavily built up area, you're going to get
+signal bounce off buildings and reduced accuracy. That's just how
+the physics works. Note, however, that as your velocity goes up it
+becomes easier for the convergence filters in your GPS to spot
+and discard delayed signal, so multipath effects are proportionally
+less important in fast-moving vehicles.</p>
+
+<p>If you're using <code>gpsd</code> with software that plots your
+position on a map, and you seem to be getting latitude/longitude that
+is at a fixed offset from reality, it is possible the base datum of
+the map is something other than the WGS84 GPS uses. A
+frequently-occurring case of this is older maps in the United States
+based on NAD27 (e.g., USGS topo maps); you may see a displacement of
+as much as 100-150m with respect to WGS84.  While modern datums (e.g.,
+NAD83) are almost all very close to WGS84, typically each area of
+world has an older datum that only agrees at the 100m level.</p>
+
+<h1 id='time'>How can I improve time reference accuracy from my GPS?</h1>
+
+<p>All the measures you'd take to improve <a href="#accuracy">fix
+accuracy</a> will help. Time referencing at accuracies below
+0.01sec has its own set of issues related to latency in your
+sensor and computer.</p>
+
+<p>In particular, USB transport is not suited for anything
+time-related that requires sub-millisecond accuracy. If a
+USB-connected GPS unit wants to tell the computer it's 12:23:45, it
+will have to wait for the computer to poll it. This polling happens
+1000 times per second, introducing variable latency averaging a
+half-millisecond.  Furthermore, the USB chip might run at anything
+close to 1000 Hz. If it runs at 1000.1 Hz, every 10th second the next
+time-report will come 1 whole millisecond earlier. This will have NTP
+observing something like a 1ms-high sawtooth in the time-reports.</p>
+
+<p>That being said, we've observed excellent 1 millisecond accuracy
+timing performance over USB with a uBlox6+PL2303 combination featuring
+1PPS wired to DCD_IN.  NaviSys sells this as the GR601W, aka the
+Macx-1.</p>
+
+<p>For accurate time reference, use a PPS line over RS232 triggering an
+interrupt. Serial bus interrupt latencies on modern hardware on the
+order of 10 microseconds, roughly a hundred-fold improvement over
+USB.</p>
+
+<p>Don't confuse PPS with conventional, non-PPS data transport over
+RS232; the latency on that is much higher. At one character per ten
+bits (counting framing at stopbits) a 9600-bps serial link introduces
+about a millisecond of latency <em>per character</em>; furthermore,
+the Linux kernel will normally delay delivery of characters to your
+application until the next timer tick, about every 4 milliseconds in
+modern kernels. Both USB and RS232 will incur that approximately
+5ms-per-char latency overhead.  You'll have to deal with this
+latency even on chips like the Venus 6 that claim the beginning of
+their reporting burst is synced to PPS.</p>
+
+<p>GPS chips that do not sync their start of reporting to PPS can have
+long-period jitters in the latency between 1PPS and the start of
+reporting. SiRFs, in particular, wobble by 100-170 milliseconds.</p>
+
 <h1 id='gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</h1>
 
 <p>This is a gpsdrive bug, as you can verify by running
@@ -595,43 +707,6 @@ we know there aren't any published standards for the format of the
 corrections.  So even if we had the signals, GPSD couldn't know what to
 do with them.</p>
 
-<h1 id='accuracy'>How can I improve fix accuracy from my GPS?</h1>
-
-<p>Use an antenna, and place the sensor (and/or antenna) properly.</p>
-
-<p>A real antenna can help, especially if you're using PPS as a time
-reference. It should be particularly helpful for reducing timing
-jitter.</p>
-
-<p>One common error is to place the GPS or antenna as high as
-possible.  This will increase <a
-href="http://en.wikipedia.org/wiki/Global_Positioning_System#Multipath_effects">multipath
-effects</a> due to signal bounce from the ground or water, which can
-cause the GPS to mistake its position and the time signal.  The
-correct location for a boat GPS antenna is on the gunwale rail or
-pushpit rail, close to the water and as far from the mast as possible
-(to reduce signal bounce from the mast). If you're outside or in a
-fixed location, put the GPS antenna as far from buildings as possible,
-and on the ground. If you're in a car, don't put the GPS antenna on
-the roof, put it on the towbar or some similar location.</p>
-
-<p>If you're driving in a heavily built up area, you're going to get
-signal bounce off buildings and reduced accuracy. That's just how
-the physics works. Note, however, that as your velocity goes up it
-becomes easier for the convergence filters in your GPS to spot
-and discard delayed signal, so multipath effects are proportionally
-less important in fast-moving vehicles.</p>
-
-<p>If you're using <code>gpsd</code> with software that plots your
-position on a map, and you seem to be getting latitude/longitude that
-is at a fixed offset from reality, it is possible the base datum of
-the map is something other than the WGS84 GPS uses. A
-frequently-occurring case of this is older maps in the United States
-based on NAD27 (e.g., USGS topo maps); you may see a displacement of
-as much as 100-150m with respect to WGS84.  While modern datums (e.g.,
-NAD83) are almost all very close to WGS84, typically each area of
-world has an older datum that only agrees at the 100m level.</p>
-
 <h1 id="tiocmwait">PPS is failing to work under Linux</h1>
 
 <p>You may have tripped over an <a
@@ -639,48 +714,6 @@ href="upstream-bugs.html#tocmwait">obscure kernel bug</a>. There is a
 workaround; use stty to preset your port baud rate to the correct
 value for the device, so the autobaud loop never runs and
 ioctl(TIOCMWAIT) is never called.</p>
-
-<h1 id='time'>How can I improve time reference accuracy from my GPS?</h1>
-
-<p>All the measures you'd take to improve <a href="#accuracy">fix
-accuracy</a> will help. Time referencing at accuracies below
-0.01sec has its own set of issues related to latency in your
-sensor and computer.</p>
-
-<p>In particular, USB transport is not suited for anything
-time-related that requires sub-millisecond accuracy. If a
-USB-connected GPS unit wants to tell the computer it's 12:23:45, it
-will have to wait for the computer to poll it. This polling happens
-1000 times per second, introducing variable latency averaging a
-half-millisecond.  Furthermore, the USB chip might run at anything
-close to 1000 Hz. If it runs at 1000.1 Hz, every 10th second the next
-time-report will come 1 whole millisecond earlier. This will have NTP
-observing something like a 1ms-high sawtooth in the time-reports.</p>
-
-<p>That being said, we've observed excellent 1 millisecond accuracy
-timing performance over USB with a uBlox6+PL2303 combination featuring
-1PPS wired to DCD_IN.  NaviSys sells this as the GR601W, aka the
-Macx-1.</p>
-
-<p>For accurate time reference, use a PPS line over RS232 triggering an
-interrupt. Serial bus interrupt latencies on modern hardware on the
-order of 10 microseconds, roughly a hundred-fold improvement over
-USB.</p>
-
-<p>Don't confuse PPS with conventional, non-PPS data transport over
-RS232; the latency on that is much higher. At one character per ten
-bits (counting framing at stopbits) a 9600-bps serial link introduces
-about a millisecond of latency <em>per character</em>; furthermore,
-the Linux kernel will normally delay delivery of characters to your
-application until the next timer tick, about every 4 milliseconds in
-modern kernels. Both USB and RS232 will incur that approximately
-5ms-per-char latency overhead.  You'll have to deal with this
-latency even on chips like the Venus 6 that claim the beginning of
-their reporting burst is synced to PPS.</p>
-
-<p>GPS chips that do not sync their start of reporting to PPS can have
-long-period jitters in the latency between 1PPS and the start of
-reporting. SiRFs, in particular, wobble by 100-170 milliseconds.</p>
 
 <h1 id='sleep'>Why does my GPS get lost when I sleep/wake my laptop?</h1>
 
@@ -794,37 +827,6 @@ can set that up like this:</p>
 the ports open at a fixed speed, usually 9600.  So to suppress the
 hunt loop you have to actually compile at a fixed baud rate and then
 use the stty trick.</p>
-
-<h1 id='willitwork'>Will this GPS work? It's not on the hardware list.</h1>
-
-<p>Probably.</p>
-
-<p>GPSD's support for the NMEA protocol is mature and stable. If the
-specification for your receiver says "NMEA 0183" (maybe with a version 2.x
-or 3.x qualifier) it should just work.</p>
-
-<p>Beware of receivers that do not say "NMEA" somewhere in the specification;
-while it may indicate that the receiver only uses a binary protocol, it often
-means that the receiver cannot be used as data source for a computer, as is
-usually the case with car navigation devices.</p>
-
-<p>We also support many proprietary protocols, in case your receiver
-doesn't emit NMEA. Datasheets often indicate which chip the receiver
-is based on, for example a <i>NavCorp NX666</i>. Check to see if other
-<i>NavCorp</i> receivers are listed, either as a vendor or a
-chipset. Compare this with the output of <code>gpsd -l</code> which
-will list the protocols compiled into gpsd. If your receiver doesn't
-support NMEA and we don't have a special driver for the chipset, talk
-to us. But it'll probably just work.</p>
-
-<p>Assuming the receiver has a USB interface, do a web search to see
-if someone has tried it with linux already, eg. "<code>NavCorp NX666
-linux</code>". Search for the product and "driver install" to find
-instructions on installing Windows drivers for the product - these
-often hint at which bridge chip is used, if the specifications don't
-say so. A receiver claiming Mac compatibility is usually based on one
-of the common bridge chips from FTDI, Prolific or Silicon
-Laboratories. These just work.</p>
 
 <h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
 
