@@ -114,7 +114,7 @@ GPSD Frequently Asked Questions
 </ul>
 </li>
 
-<li>Miscellaneous FAQs
+<li>Linux issues
 <ul>
 <li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
@@ -940,7 +940,7 @@ USB/serial adaptor, but on what order you plug devices in: 1st device
 gets /dev/ttyUSB0, 2nd gets /dev/ttyUSB1, etc....</p>
 
 <p>This collides with what happens during a suspend/resume. If you
-suspends while <code>gpsd</code> has a device active, it will hold the
+suspend while <code>gpsd</code> has a device active, it will hold the
 device open while your laptop is asleep - but, meanwhile, the suspend
 logic is shutting down hotpluggable devices to be recreated at
 resume time. On resume, Linux will see that the old device is open
