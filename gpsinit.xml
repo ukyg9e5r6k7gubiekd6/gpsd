@@ -88,10 +88,11 @@ loaded.  <command>gpsinit</command> recognize the following module
 names:
 
 <variablelist>
-<varlistentry><term>plx_pci</term></varlistentry>
-<varlistentry><term>esd_usb2</term></varlistentry>
-<varlistentry><term>vcan</term></varlistentry>
-<varlistentry><term>slcan</term>
+<varlistentry>
+<term>plx_pci</term>
+<term>esd_usb2</term>
+<term>vcan</term>
+<term>slcan</term>
 <listitem>
 <para>
 The parameter <parameter>interface_name</parameter> and <parameter>-s
