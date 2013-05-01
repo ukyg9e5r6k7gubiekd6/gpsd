@@ -85,7 +85,7 @@ int json_rtcm2_read(const char *buf,
      * documented in RTCM 2.1.
      */
     const struct json_enum_t system_table[] = {
-	{"GPS", 0}, {"GLONASS", 1}, {"GALILEO", 2}, {"UNKNOWN", 2}, {NULL}
+	{"GPS", 0}, {"GLONASS", 1}, {"GALILEO", 2}, {"UNKNOWN", 3}, {NULL}
     };
     const struct json_attr_t json_rtcm4[] = {
 	RTCM2_HEADER
