@@ -552,7 +552,6 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 	return false;
 
     if (session->packet.retry_counter++ >= SNIFF_RETRIES) {
-	session->packet.retry_counter = 0;
 #ifdef FIXED_PORT_SPEED
 	return false;
 #else
@@ -585,6 +584,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 		       session->gpsdata.dev.stopbits
 #endif /* FIXED_STOP_BITS */
 	    );
+	session->packet.retry_counter = 0;
     }
 
     return true;		/* keep hunting */
