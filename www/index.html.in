@@ -288,6 +288,10 @@ protocol of the <code>gpsd</code> daemon.</dd>
 
 <dt><a href="gpsinit.html">gpsinit.8</a></dt>
 <dd>Initialize kernel modules for use with <code>gpsd</code> daemon.</dd>
+
+<dt><a href="gps2udp.html">gps2udp.1</a></dt>
+<dd>Feed the take from <code>gpsd</code> to one or more aggregation
+sites via UDP.</dd>
 </dl>
 
 <p>Also, see the <a href="faq.html">FAQ</a>.</p>
