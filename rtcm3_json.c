@@ -52,6 +52,19 @@ int json_rtcm3_read(const char *buf,
 	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1001_t, L1.locktime)},
 	{NULL},
     };
+
+    const struct json_attr_t rtcm1002_satellite[] = {
+	{"ident",     t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, ident)},
+	{"ind",       t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.indicator)},
+	{"prange",    t_real,     STRUCTOBJECT(struct rtcm3_1002_t, L1.pseudorange)},
+	{"delta",     t_real,     STRUCTOBJECT(struct rtcm3_1002_t, L1.rangediff)},
+
+	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.locktime)},
+	{"amb",       t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.ambiguity)},
+	{"CNR",       t_real,    STRUCTOBJECT(struct rtcm3_1002_t, L1.CNR)},
+	{NULL},
+    };
+
     /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1001	&rtcm3->rtcmtypes.rtcm3_1001.header
     const struct json_attr_t json_rtcm1001[] = {
@@ -66,6 +79,22 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1001
+    /*@+type@*/
+
+    /*@-type@*//* STRUCTARRAY confuses splint */
+#define R1002	&rtcm3->rtcmtypes.rtcm3_1002.header
+    const struct json_attr_t json_rtcm1002[] = {
+	RTCM3_HEADER
+	{"station_id",     t_uinteger, .addr.uinteger = R1002.station_id},
+	{"tow",            t_uinteger, .addr.uinteger = (unsigned int *)R1002.tow},
+        {"sync",           t_boolean,  .addr.boolean = R1002.sync},
+        {"smoothing",      t_boolean,  .addr.boolean = R1002.smoothing},
+	{"interval",       t_uinteger, .addr.uinteger = R1002.interval},
+        {"satellites",     t_array,	STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1002.rtk_data,
+					    rtcm1002_satellite, &satcount)},
+	{NULL},
+    };
+#undef R1002
     /*@+type@*/
 
     /*@-type@*//* complex union array initislizations confuses splint */
@@ -90,7 +119,11 @@ int json_rtcm3_read(const char *buf,
     if (strstr(buf, "\"type\":1001,") != NULL) {
 	status = json_read_object(buf, json_rtcm1001, endptr);
 	if (status == 0)
-	    rtcm3->rtcmtypes.rtcm3_1003.header.satcount = (unsigned short)satcount;
+	    rtcm3->rtcmtypes.rtcm3_1001.header.satcount = (unsigned short)satcount;
+    } else if (strstr(buf, "\"type\":1002,") != NULL) {
+	status = json_read_object(buf, json_rtcm1002, endptr);
+	if (status == 0)
+	    rtcm3->rtcmtypes.rtcm3_1002.header.satcount = (unsigned short)satcount;
     } else {
 	int n;
 	status = json_read_object(buf, json_rtcm3_fallback, endptr);

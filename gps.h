@@ -329,9 +329,9 @@ struct rtcm3_t {
 		struct rtcm3_basic_rtk L1;
 	    } rtk_data[RTCM3_MAX_SATELLITES];
 	} rtcm3_1001;
-	struct rtcm3_1002_t {
+	struct {
 	    struct rtcm3_rtk_hdr	header;
-	    struct {
+	    struct rtcm3_1002_t {
 		unsigned ident;			/* Satellite ID */
 		struct rtcm3_extended_rtk L1;
 	    } rtk_data[RTCM3_MAX_SATELLITES];
