@@ -1,4 +1,4 @@
-* Repository head
+* Wed 1 May 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.9
   Note to packagers: this is an urgent release that fixes a possible
   DoS or security hole!  Armor the AIS driver against an implausible
   overrun attack.  A (different) fix for our first malformed-packet
