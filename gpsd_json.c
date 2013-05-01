@@ -124,7 +124,6 @@ void json_tpv_dump(const struct gps_device_t *session,
 		   const struct policy_t *policy CONDITIONALLY_UNUSED,
 		   /*@out@*/ char *reply, size_t replylen)
 {
-    char tbuf[JSON_DATE_MAX+1];
     const struct gps_data_t *gpsdata = &session->gpsdata;
 #ifdef TIMING_ENABLE
     timestamp_t rtime = timestamp();
@@ -143,11 +142,13 @@ void json_tpv_dump(const struct gps_device_t *session,
     (void)snprintf(reply + strlen(reply),
 		   replylen - strlen(reply),
 		   "\"mode\":%d,", gpsdata->fix.mode);
-    if (isnan(gpsdata->fix.time) == 0)
+    if (isnan(gpsdata->fix.time) == 0) {
+	char tbuf[JSON_DATE_MAX+1];
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
 		       "\"time\":\"%s\",",
 		       unix_to_iso8601(gpsdata->fix.time, tbuf, sizeof(tbuf)));
+    }
     if (isnan(gpsdata->fix.ept) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
