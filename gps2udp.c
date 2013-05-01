@@ -456,7 +456,7 @@ int main(int argc, char **argv)
 		    // strtok break original string
 		    (void)strncpy((char *)packet, buffer, sizeof(packet));
 		    for (j=0; j<MAX_INFO; j++) {
-			info[j] = strsep(&adrpkt, ",");
+			info[j] = strsep((char **)&adrpkt, ",");
 		    }
 
 		    for(i=0 ; i < (int)strlen((char *)info[5]); i++)  {
@@ -464,7 +464,7 @@ int main(int argc, char **argv)
 			bitstrings[i] = AISto6bit(info[5][i]);
 		    }
 
-		    mmsi=AISGetInt (bitstrings, 9, 30); 
+		    mmsi = AISGetInt(bitstrings, 9, 30); 
 		    (void)fprintf(stdout," MMSI=%9u", mmsi);
 
 		} 
