@@ -699,6 +699,7 @@ libgps_sources = [
     "libgps_sock.c",
     "netlib.c",
     "rtcm2_json.c",
+    "rtcm3_json.c",
     "shared_json.c",
     "strl.c",
 ]
@@ -859,7 +860,7 @@ if qt_env:
     # infamous "Two environments with different actions were specified
     # for the same target" error.
     for src in libgps_sources:
-        if src not in ('ais_json.c','json.c','libgps_json.c','rtcm2_json.c','shared_json.c'):
+        if src not in ('ais_json.c','json.c','libgps_json.c','rtcm2_json.c','rtcm3_json.c','shared_json.c'):
             compile_with = qt_env['CXX']
             compile_flags = qt_flags
         else:

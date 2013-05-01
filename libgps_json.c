@@ -452,6 +452,17 @@ int libgps_json_unpack(const char *buf,
 	}
 	return status;
 #endif /* RTCM104V2_ENABLE */
+#ifdef RTCM104V3_ENABLE
+    } else if (STARTSWITH(classtag, "\"class\":\"RTCM3\"")) {
+	status = json_rtcm3_read(buf,
+				 gpsdata->dev.path, sizeof(gpsdata->dev.path),
+				 &gpsdata->rtcm3, end);
+	if (status == 0) {
+	    gpsdata->set &= ~UNION_SET;
+	    gpsdata->set |= RTCM3_SET;
+	}
+	return status;
+#endif /* RTCM104V3_ENABLE */
 #ifdef AIVDM_ENABLE
     } else if (STARTSWITH(classtag, "\"class\":\"AIS\"")) {
 	status = json_ais_read(buf,
