@@ -547,12 +547,6 @@ ssize_t gpsd_write(struct gps_device_t * session, const char *buf, size_t len)
 bool gpsd_next_hunt_setting(struct gps_device_t * session)
 /* advance to the next hunt setting  */
 {
-#ifndef FIXED_PORT_SPEED
-    /* every rate we're likely to see on a GPS */
-    static unsigned int rates[] =
-	{ 0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
-#endif /* FIXED_PORT_SPEED defined */
-
     /* don't waste time in the hunt loop if this is not actually a tty */
     if (isatty(session->gpsdata.gps_fd) == 0)
 	return false;
@@ -562,6 +556,10 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 #ifdef FIXED_PORT_SPEED
 	return false;
 #else
+	/* every rate we're likely to see on a GPS */
+	static unsigned int rates[] =
+	    { 0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
+
 	if (session->baudindex++ >=
 	    (unsigned int)(sizeof(rates) / sizeof(rates[0])) - 1) {
 	    session->baudindex = 0;
