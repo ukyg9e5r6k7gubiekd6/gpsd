@@ -357,12 +357,12 @@ void json_sky_dump(const struct gps_data_t *datap,
 void json_device_dump(const struct gps_device_t *device,
 		      /*@out@*/ char *reply, size_t replylen)
 {
-    char buf1[JSON_VAL_MAX * 2 + 1];
     struct classmap_t *cmp;
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.dev.path, replylen);
     (void)strlcat(reply, "\",", replylen);
     if (device->gpsdata.online > 0) {	
+	char buf1[JSON_VAL_MAX * 2 + 1];
 	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 		       "\"activated\":\"%s\",", 
 		       unix_to_iso8601(device->gpsdata.online, buf1, sizeof(buf1)));
@@ -445,10 +445,6 @@ void json_subframe_dump(const struct gps_data_t *datap,
     const struct subframe_t *subframe = &datap->subframe;
     const bool scaled = datap->policy.scaled;
  
-    /* system message is 24 chars, but they could ALL require escaping,
-     * like \uXXXX for each char */
-    char buf1[25 * 6];
-
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"device\":\"%s\","
 		   "\"tSV\":%u,\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
 		   datap->dev.path,
@@ -626,15 +622,19 @@ void json_subframe_dump(const struct gps_data_t *datap,
 	    /*@-charint@*/
 	}
 	case 55:
-		/* JSON is UTF-8. double quote, backslash and
-		 * control charactores (U+0000 through U+001F).must be
-		 * escaped. */
-		/* system message can be 24 bytes, JSON can escape all
-		 * chars so up to 24*6 long. */
+	    /* JSON is UTF-8. double quote, backslash and
+	     * control charactores (U+0000 through U+001F).must be
+	     * escaped. */
+	    /* system message can be 24 bytes, JSON can escape all
+	     * chars so up to 24*6 long. */
+
+	    {
+		char buf1[25 * 6];
 		(void)json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
 		(void)snprintf(buf + len, buflen - len,
-		    ",\"system_message\":\"%.144s\"", buf1);
-		break;
+			       ",\"system_message\":\"%.144s\"", buf1);
+	    }
+	    break;
 	case 56:
 	    if (scaled) {
 		(void)snprintf(buf + len, buflen - len,

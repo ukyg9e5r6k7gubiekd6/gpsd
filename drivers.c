@@ -1075,8 +1075,6 @@ static const struct gps_type_t garmintxt = {
 
 static gps_mask_t processMTK3301(struct gps_device_t *session)
 {
-    const char *mtk_reasons[4] =
-	{ "Invalid", "Unsupported", "Valid but Failed", "Valid success" };
     gps_mask_t mask;
 
     /* try a straight NMEA parse, this will set up fields */
@@ -1098,9 +1096,16 @@ static gps_mask_t processMTK3301(struct gps_device_t *session)
 	    reason = atoi(session->driver.nmea.field[2]);
 	    if (atoi(session->driver.nmea.field[1]) == -1)
 		gpsd_report(LOG_WARN, "MTK NACK: unknown sentence\n");
-	    else if (reason < 3)
+	    else if (reason < 3) {
+		const char *mtk_reasons[] = {
+		    "Invalid",
+		    "Unsupported",
+		    "Valid but Failed",
+		    "Valid success"
+		};
 		gpsd_report(LOG_WARN, "MTK NACK: %s, reason: %s\n", session->driver.nmea.field[1],
 			    mtk_reasons[reason]);
+	    }
 	    else
 		gpsd_report(LOG_WARN, "MTK ACK: %s\n", session->driver.nmea.field[1]);
 	    break;

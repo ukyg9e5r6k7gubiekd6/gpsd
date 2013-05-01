@@ -323,21 +323,24 @@ int main(int argc, char **argv)
 		if (new_line && timestamp) {
 		    char tmstr_u[20];            // time with "usec" resolution
 		    struct timeval now;
-		    gettimeofday( &now, NULL );
+		    struct tm *tmp_now;
 
-		    struct tm *tmp_now = localtime(&(now.tv_sec));
+		    (void)gettimeofday( &now, NULL );
+		    tmp_now = localtime((time_t *)&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;
 
 		    switch( option_u ) {
-		      case 2:
-		        sprintf(tmstr_u, " %ld.%06ld", now.tv_sec, now.tv_usec);
+		    case 2:
+			(void)snprintf(tmstr_u, sizeof(tmstr_u), 
+				       " %ld.%06ld", now.tv_sec, now.tv_usec);
 			break;
-		      case 1:
-		        sprintf(tmstr_u, ".%06ld", now.tv_usec);
+		    case 1:
+			(void)snprintf(tmstr_u, sizeof(tmstr_u), 
+				       ".%06ld", now.tv_usec);
 			break;
-		      default:
-		        *tmstr_u=0;
+		    default:
+			*tmstr_u = '\0';
 			break;
 		    }
 

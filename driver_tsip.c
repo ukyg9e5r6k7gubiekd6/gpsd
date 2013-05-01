@@ -1067,11 +1067,10 @@ static bool tsip_speed_switch(struct gps_device_t *session,
 
 static void tsip_mode(struct gps_device_t *session, int mode)
 {
-    unsigned char buf[16];
-
     if (mode == MODE_NMEA) {
-	/* First turn on the NMEA messages we want */
+	unsigned char buf[16];
 
+	/* First turn on the NMEA messages we want */
 	putbyte(buf, 0, 0x00);	/* subcode 0 */
 	putbyte(buf, 1, 0x01);	/* 1-second fix interval */
 	putbyte(buf, 2, 0x00);	/* Reserved */
