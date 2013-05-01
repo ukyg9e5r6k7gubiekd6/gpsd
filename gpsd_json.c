@@ -1111,16 +1111,16 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 
     case 1007:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"station_id\":%u,\"desc\":\"%s\",\"setup-id\":%u",
+		       "\"station_id\":%u,\"desc\":\"%s\",\"setup_id\":%u",
 		       rtcm->rtcmtypes.rtcm3_1007.station_id,
 		       rtcm->rtcmtypes.rtcm3_1007.descriptor,
-		       INT(rtcm->rtcmtypes.rtcm3_1007.setup_id));
+		       rtcm->rtcmtypes.rtcm3_1007.setup_id);
 	break;
 
     case 1008:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"station_id\":%u,\"desc\":\"%s\","
-		       "\"setup-id\":%u,\"serial\":\"%s\"",
+		       "\"setup_id\":%u,\"serial\":\"%s\"",
 		       rtcm->rtcmtypes.rtcm3_1008.station_id,
 		       rtcm->rtcmtypes.rtcm3_1008.descriptor,
 		       INT(rtcm->rtcmtypes.rtcm3_1008.setup_id),
@@ -1142,7 +1142,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1009.header.satcount; i++) {
 #define R1009 rtcm->rtcmtypes.rtcm3_1009.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"ind\":%u,\"channel\":%hd,"
+			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
 			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},",
 			   R1009.ident,
 			   CODE(R1009.L1.indicator),
@@ -1170,7 +1170,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1010.header.satcount; i++) {
 #define R1010 rtcm->rtcmtypes.rtcm3_1010.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"ind\":%u,\"channel\":%hd,"
+			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
 			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u,"
 			   "\"amb\":%u,\"CNR\":%.2f},",
 			   R1010.ident,
@@ -1201,7 +1201,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1011.header.satcount; i++) {
 #define R1011 rtcm->rtcmtypes.rtcm3_1011.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"channel\":%hd,"
+			   "{\"ident\":%u,\"channel\":%u,"
 			   "\"L1\":{\"ind\":%u,"
 			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},"
 			   "\"L2:{\"ind\":%u,\"prange\":%8.2f,"
@@ -1236,7 +1236,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1012.header.satcount; i++) {
 #define R1012 rtcm->rtcmtypes.rtcm3_1012.rtk_data[i]
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "{\"ident\":%u,\"channel\":%hd,"
+			   "{\"ident\":%u,\"channel\":%u,"
 			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},"
