@@ -38,6 +38,9 @@ We can presently decode RTCM3 messages of type 1004, 1005, 1006, 1008, 1012,
 different types in them, and a copy of the RTCM3 standard at latest revision
 (all we have is revision 3).
 
+There is also currently no support for unpacking RTCM3 sentences in
+the client library.
+
 **** Reporting code for specialized Type 6 and 8 AIS messages is incomplete.
 
 This one is mine and Kurt Schwehr's. Support is currently nearly
