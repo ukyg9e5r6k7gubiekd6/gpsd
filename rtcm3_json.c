@@ -56,8 +56,8 @@ int json_rtcm3_read(const char *buf,
 #define R1001	&rtcm3->rtcmtypes.rtcm3_1001.header
     const struct json_attr_t json_rtcm1001[] = {
 	RTCM3_HEADER
-	//{"station_id",     t_uinteger, .addr.uinteger = R1001.station_id}, \
-	{"tow",            t_uinteger, .addr.uinteger = R1001.tow}, \
+	{"station_id",     t_uinteger, .addr.uinteger = R1001.station_id},
+	//{"tow",            t_uinteger,     .addr.time = R1001.tow},
         {"sync",           t_boolean,  .addr.boolean = R1001.sync},
         {"smoothing",      t_boolean,  .addr.boolean = R1001.smoothing},
 	//{"interval",       t_uinteger, .addr.uinteger = R1001.interval},
@@ -90,20 +90,20 @@ int json_rtcm3_read(const char *buf,
     if (strstr(buf, "\"type\":1001,") != NULL) {
 	status = json_read_object(buf, json_rtcm1001, endptr);
 	if (status == 0)
-	    rtcm3->rtcmtypes.rtcm3_1003.header.satcount = (unsigned)satcount;
+	    rtcm3->rtcmtypes.rtcm3_1003.header.satcount = (unsigned short)satcount;
     } else {
 	int n;
 	status = json_read_object(buf, json_rtcm3_fallback, endptr);
 	for (n = 0; n < NITEMS(rtcm3->rtcmtypes.data); n++) {
 	    if (n >= stringcount) {
-		rtcm3->rtcmtypes.data[n] = 0;
+		rtcm3->rtcmtypes.data[n] = '\0';
 	    } else {
 		unsigned int u;
 		int fldcount = sscanf(stringptrs[n], "0x%02x\n", &u);
 		if (fldcount != 1)
 		    return JSON_ERR_MISC;
 		else
-		    rtcm3->rtcmtypes.data[n] = (unsigned char)u;
+		    rtcm3->rtcmtypes.data[n] = (char)u;
 	    }
 	}
     }
