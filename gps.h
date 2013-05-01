@@ -270,7 +270,7 @@ struct rtcm3_rtk_hdr {		/* header data from 1001, 1002, 1003, 1004 */
     bool sync;			/* Synchronous GNSS Message Flag */
     unsigned short satcount;	/* # Satellite Signals Processed */
     bool smoothing;		/* Divergence-free Smoothing Indicator */
-    unsigned short interval;	/* Smoothing Interval */
+    unsigned int interval;	/* Smoothing Interval */
 };
 
 struct rtcm3_basic_rtk {

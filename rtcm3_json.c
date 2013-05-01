@@ -57,10 +57,10 @@ int json_rtcm3_read(const char *buf,
     const struct json_attr_t json_rtcm1001[] = {
 	RTCM3_HEADER
 	{"station_id",     t_uinteger, .addr.uinteger = R1001.station_id},
-	//{"tow",            t_uinteger,     .addr.time = R1001.tow},
+	{"tow",            t_uinteger, .addr.uinteger = (unsigned int *)R1001.tow},
         {"sync",           t_boolean,  .addr.boolean = R1001.sync},
         {"smoothing",      t_boolean,  .addr.boolean = R1001.smoothing},
-	//{"interval",       t_uinteger, .addr.uinteger = R1001.interval},
+	{"interval",       t_uinteger, .addr.uinteger = R1001.interval},
         {"satellites",     t_array,	STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1001.rtk_data,
 					    rtcm1001_satellite, &satcount)},
 	{NULL},
