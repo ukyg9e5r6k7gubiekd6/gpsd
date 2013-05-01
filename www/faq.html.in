@@ -104,8 +104,8 @@ GPSD Frequently Asked Questions
 <li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
 <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
 <li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a><li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a></li>
-</li>
 </ul>
+</li>
 
 <li>Application development with GPSD
 <ul>
@@ -119,10 +119,11 @@ GPSD Frequently Asked Questions
 <li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a></li>
 <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
 </ul>
+</li>
 </ul>
 
-<p>If none of these FAQs seems to address your problem, look at the 
- <a href="upstream-bugs.html">Upstream Bugs</a> page.</p>
+<p>If none of these FAQs seems to address your problem, look at the <a
+href="upstream-bugs.html">Upstream Bugs</a> page.</p>
 
 <h1 id='verify'>How can I verify operation of a new GPS?</h1>
 
@@ -226,7 +227,7 @@ and remove it.</p>
 
 <p>See <a href="http://www.bitdirect.nl/?p=47">this blog post</a> for
 a procedure for hunting down the bad app. In this particular case it
-was something called <code>buienradar</code></a>.
+was something called <code>buienradar</code></p>.
 
 <p>On the Samsung Galaxy SIII, vendor firmware provides a "Remote
 Location" service with a similar bug. You can disable this through
