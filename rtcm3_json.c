@@ -61,7 +61,7 @@ int json_rtcm3_read(const char *buf,
 
 	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.locktime)},
 	{"amb",       t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.ambiguity)},
-	{"CNR",       t_real,    STRUCTOBJECT(struct rtcm3_1002_t, L1.CNR)},
+	{"CNR",       t_real,     STRUCTOBJECT(struct rtcm3_1002_t, L1.CNR)},
 	{NULL},
     };
 
@@ -73,6 +73,19 @@ int json_rtcm3_read(const char *buf,
 	{"delta",     t_real,     STRUCTOBJECT(struct rtcm3_1009_t, L1.rangediff)},
 
 	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1009_t, L1.locktime)},
+	{NULL},
+    };
+
+    const struct json_attr_t rtcm1010_satellite[] = {
+	{"ident",     t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, ident)},
+	{"ind",       t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.indicator)},
+	{"channel",   t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.channel)},
+	{"prange",    t_real,     STRUCTOBJECT(struct rtcm3_1010_t, L1.pseudorange)},
+	{"delta",     t_real,     STRUCTOBJECT(struct rtcm3_1010_t, L1.rangediff)},
+
+	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.locktime)},
+	{"amb",       t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.ambiguity)},
+	{"CNR",       t_real,     STRUCTOBJECT(struct rtcm3_1010_t, L1.CNR)},
 	{NULL},
     };
 
@@ -149,7 +162,23 @@ int json_rtcm3_read(const char *buf,
 					    rtcm1009_satellite, &satcount)},
 	{NULL},
     };
-#undef R1009
+#undef R1010
+    /*@+type@*/
+
+    /*@-type@*//* STRUCTARRAY confuses splint */
+#define R1010	&rtcm3->rtcmtypes.rtcm3_1010.header
+    const struct json_attr_t json_rtcm1010[] = {
+	RTCM3_HEADER
+	{"station_id",     t_uinteger, .addr.uinteger = R1010.station_id},
+	{"tow",            t_uinteger, .addr.uinteger = (unsigned int *)R1010.tow},
+        {"sync",           t_boolean,  .addr.boolean = R1010.sync},
+        {"smoothing",      t_boolean,  .addr.boolean = R1010.smoothing},
+	{"interval",       t_uinteger, .addr.uinteger = R1010.interval},
+        {"satellites",     t_array,	STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1010.rtk_data,
+					    rtcm1010_satellite, &satcount)},
+	{NULL},
+    };
+#undef R1010
     /*@+type@*/
 
     /*@-type@*//* complex union array initislizations confuses splint */
@@ -185,6 +214,8 @@ int json_rtcm3_read(const char *buf,
 	status = json_read_object(buf, json_rtcm1008, endptr);
     } else if (strstr(buf, "\"type\":1009,") != NULL) {
 	status = json_read_object(buf, json_rtcm1009, endptr);
+    } else if (strstr(buf, "\"type\":1010,") != NULL) {
+	status = json_read_object(buf, json_rtcm1010, endptr);
     } else {
 	int n;
 	status = json_read_object(buf, json_rtcm3_fallback, endptr);
