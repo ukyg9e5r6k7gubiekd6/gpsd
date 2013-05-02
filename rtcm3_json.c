@@ -27,7 +27,6 @@ int json_rtcm3_read(const char *buf,
 		    char *path, size_t pathlen, struct rtcm3_t *rtcm3,
 		    /*@null@*/ const char **endptr)
 {
-
     static char *stringptrs[NITEMS(rtcm3->rtcmtypes.data)];
     static char stringstore[sizeof(rtcm3->rtcmtypes.data) * 2];
     static int stringcount;
@@ -36,58 +35,56 @@ int json_rtcm3_read(const char *buf,
 #define RTCM3_HEADER \
 	{"class",          t_check,    .dflt.check = "RTCM3"}, \
 	{"type",           t_uinteger, .addr.uinteger = &rtcm3->type}, \
-	{"device",         t_string,   .addr.string = path, \
-	                                  .len = pathlen}, \
+	{"device",         t_string,   .addr.string = path, .len = pathlen}, \
 	{"length",         t_uinteger, .addr.uinteger = &rtcm3->length},
 
     int status = 0, satcount = 0;
 
+#define RTCM3FIELD(type, fld)	STRUCTOBJECT(struct rtcm3_ ## type ## _t, fld)
     /*@ -fullinitblock @*/
     const struct json_attr_t rtcm1001_satellite[] = {
-	{"ident",     t_uinteger, STRUCTOBJECT(struct rtcm3_1001_t, ident)},
-	{"ind",       t_uinteger, STRUCTOBJECT(struct rtcm3_1001_t, L1.indicator)},
-	{"prange",    t_real,     STRUCTOBJECT(struct rtcm3_1001_t, L1.pseudorange)},
-	{"delta",     t_real,     STRUCTOBJECT(struct rtcm3_1001_t, L1.rangediff)},
-
-	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1001_t, L1.locktime)},
+	{"ident",     t_uinteger, RTCM3FIELD(1001, ident)},
+	{"ind",       t_uinteger, RTCM3FIELD(1001, L1.indicator)},
+	{"prange",    t_real,     RTCM3FIELD(1001, L1.pseudorange)},
+	{"delta",     t_real,     RTCM3FIELD(1001, L1.rangediff)},
+	{"lockt",     t_uinteger, RTCM3FIELD(1001, L1.locktime)},
 	{NULL},
     };
 
     const struct json_attr_t rtcm1002_satellite[] = {
-	{"ident",     t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, ident)},
-	{"ind",       t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.indicator)},
-	{"prange",    t_real,     STRUCTOBJECT(struct rtcm3_1002_t, L1.pseudorange)},
-	{"delta",     t_real,     STRUCTOBJECT(struct rtcm3_1002_t, L1.rangediff)},
-
-	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.locktime)},
-	{"amb",       t_uinteger, STRUCTOBJECT(struct rtcm3_1002_t, L1.ambiguity)},
-	{"CNR",       t_real,     STRUCTOBJECT(struct rtcm3_1002_t, L1.CNR)},
+	{"ident",     t_uinteger, RTCM3FIELD(1002, ident)},
+	{"ind",       t_uinteger, RTCM3FIELD(1002, L1.indicator)},
+	{"prange",    t_real,     RTCM3FIELD(1002, L1.pseudorange)},
+	{"delta",     t_real,     RTCM3FIELD(1002, L1.rangediff)},
+	{"lockt",     t_uinteger, RTCM3FIELD(1002, L1.locktime)},
+	{"amb",       t_uinteger, RTCM3FIELD(1002, L1.ambiguity)},
+	{"CNR",       t_real,     RTCM3FIELD(1002, L1.CNR)},
 	{NULL},
     };
 
     const struct json_attr_t rtcm1009_satellite[] = {
-	{"ident",     t_uinteger, STRUCTOBJECT(struct rtcm3_1009_t, ident)},
-	{"ind",       t_uinteger, STRUCTOBJECT(struct rtcm3_1009_t, L1.indicator)},
-	{"channel",   t_uinteger, STRUCTOBJECT(struct rtcm3_1009_t, L1.channel)},
-	{"prange",    t_real,     STRUCTOBJECT(struct rtcm3_1009_t, L1.pseudorange)},
-	{"delta",     t_real,     STRUCTOBJECT(struct rtcm3_1009_t, L1.rangediff)},
+	{"ident",     t_uinteger, RTCM3FIELD(1009, ident)},
+	{"ind",       t_uinteger, RTCM3FIELD(1009, L1.indicator)},
+	{"channel",   t_uinteger, RTCM3FIELD(1009, L1.channel)},
+	{"prange",    t_real,     RTCM3FIELD(1009, L1.pseudorange)},
+	{"delta",     t_real,     RTCM3FIELD(1009, L1.rangediff)},
 
-	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1009_t, L1.locktime)},
+	{"lockt",     t_uinteger, RTCM3FIELD(1009, L1.locktime)},
 	{NULL},
     };
 
     const struct json_attr_t rtcm1010_satellite[] = {
-	{"ident",     t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, ident)},
-	{"ind",       t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.indicator)},
-	{"channel",   t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.channel)},
-	{"prange",    t_real,     STRUCTOBJECT(struct rtcm3_1010_t, L1.pseudorange)},
-	{"delta",     t_real,     STRUCTOBJECT(struct rtcm3_1010_t, L1.rangediff)},
-
-	{"lockt",     t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.locktime)},
-	{"amb",       t_uinteger, STRUCTOBJECT(struct rtcm3_1010_t, L1.ambiguity)},
-	{"CNR",       t_real,     STRUCTOBJECT(struct rtcm3_1010_t, L1.CNR)},
+	{"ident",     t_uinteger, RTCM3FIELD(1010, ident)},
+	{"ind",       t_uinteger, RTCM3FIELD(1010, L1.indicator)},
+	{"channel",   t_uinteger, RTCM3FIELD(1010, L1.channel)},
+	{"prange",    t_real,     RTCM3FIELD(1010, L1.pseudorange)},
+	{"delta",     t_real,     RTCM3FIELD(1010, L1.rangediff)},
+	{"lockt",     t_uinteger, RTCM3FIELD(1010, L1.locktime)},
+	{"amb",       t_uinteger, RTCM3FIELD(1010, L1.ambiguity)},
+	{"CNR",       t_real,     RTCM3FIELD(1010, L1.CNR)},
 	{NULL},
     };
+#undef RTCM3FIELD
 
     /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1001	&rtcm3->rtcmtypes.rtcm3_1001.header
