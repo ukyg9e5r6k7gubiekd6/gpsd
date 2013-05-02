@@ -68,7 +68,6 @@ int json_rtcm3_read(const char *buf,
 	{"channel",   t_uinteger, RTCM3FIELD(1009, L1.channel)},
 	{"prange",    t_real,     RTCM3FIELD(1009, L1.pseudorange)},
 	{"delta",     t_real,     RTCM3FIELD(1009, L1.rangediff)},
-
 	{"lockt",     t_uinteger, RTCM3FIELD(1009, L1.locktime)},
 	{NULL},
     };
@@ -90,12 +89,12 @@ int json_rtcm3_read(const char *buf,
 #define R1001	&rtcm3->rtcmtypes.rtcm3_1001.header
     const struct json_attr_t json_rtcm1001[] = {
 	RTCM3_HEADER
-	{"station_id",     t_uinteger, .addr.uinteger = R1001.station_id},
-	{"tow",            t_uinteger, .addr.uinteger = (unsigned int *)R1001.tow},
-        {"sync",           t_boolean,  .addr.boolean = R1001.sync},
-        {"smoothing",      t_boolean,  .addr.boolean = R1001.smoothing},
-	{"interval",       t_uinteger, .addr.uinteger = R1001.interval},
-        {"satellites",     t_array,	STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1001.rtk_data,
+	{"station_id", t_uinteger, .addr.uinteger = R1001.station_id},
+	{"tow",        t_uinteger, .addr.uinteger = (unsigned int *)R1001.tow},
+        {"sync",       t_boolean,  .addr.boolean = R1001.sync},
+        {"smoothing",  t_boolean,  .addr.boolean = R1001.smoothing},
+	{"interval",   t_uinteger, .addr.uinteger = R1001.interval},
+        {"satellites", t_array,     STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1001.rtk_data,
 					    rtcm1001_satellite, &satcount)},
 	{NULL},
     };
@@ -106,12 +105,12 @@ int json_rtcm3_read(const char *buf,
 #define R1002	&rtcm3->rtcmtypes.rtcm3_1002.header
     const struct json_attr_t json_rtcm1002[] = {
 	RTCM3_HEADER
-	{"station_id",     t_uinteger, .addr.uinteger = R1002.station_id},
-	{"tow",            t_uinteger, .addr.uinteger = (unsigned int *)R1002.tow},
-        {"sync",           t_boolean,  .addr.boolean = R1002.sync},
-        {"smoothing",      t_boolean,  .addr.boolean = R1002.smoothing},
-	{"interval",       t_uinteger, .addr.uinteger = R1002.interval},
-        {"satellites",     t_array,	STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1002.rtk_data,
+	{"station_id", t_uinteger, .addr.uinteger = R1002.station_id},
+	{"tow",        t_uinteger, .addr.uinteger = (unsigned int *)R1002.tow},
+        {"sync",       t_boolean,  .addr.boolean = R1002.sync},
+        {"smoothing",  t_boolean,  .addr.boolean = R1002.smoothing},
+	{"interval",   t_uinteger, .addr.uinteger = R1002.interval},
+        {"satellites", t_array,     STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1002.rtk_data,
 					    rtcm1002_satellite, &satcount)},
 	{NULL},
     };
@@ -122,10 +121,10 @@ int json_rtcm3_read(const char *buf,
 #define R1007	rtcm3->rtcmtypes.rtcm3_1007
     const struct json_attr_t json_rtcm1007[] = {
 	RTCM3_HEADER
-	{"station_id",     t_uinteger, .addr.uinteger = &R1007.station_id},
-	{"desc",           t_string,   .addr.string = R1007.descriptor,
+	{"station_id", t_uinteger, .addr.uinteger = &R1007.station_id},
+	{"desc",       t_string,   .addr.string = R1007.descriptor,
 	                                 .len = sizeof(R1007.descriptor)},
-	{"setup_id",       t_uinteger, .addr.uinteger = &R1007.setup_id},
+	{"setup_id",   t_uinteger, .addr.uinteger = &R1007.setup_id},
 	{NULL},
     };
 #undef R1002
@@ -135,13 +134,13 @@ int json_rtcm3_read(const char *buf,
 #define R1008	rtcm3->rtcmtypes.rtcm3_1008
     const struct json_attr_t json_rtcm1008[] = {
 	RTCM3_HEADER
-	{"station_id",     t_uinteger, .addr.uinteger = &R1008.station_id},
-	{"desc",           t_string,   .addr.string = R1008.descriptor,
+	{"station_id", t_uinteger, .addr.uinteger = &R1008.station_id},
+	{"desc",       t_string,   .addr.string = R1008.descriptor,
 	                                 .len = sizeof(R1008.descriptor)},
-	{"setup_id",       t_uinteger, .addr.uinteger = &R1008.setup_id},
-	{NULL},
-	{"serial",         t_string,   .addr.string = R1008.serial,
+	{"setup_id",   t_uinteger, .addr.uinteger = &R1008.setup_id},
+	{"serial",     t_string,   .addr.string = R1008.serial,
 	                                 .len = sizeof(R1008.serial)},
+	{NULL},
     };
 #undef R1008
     /*@+type@*/
@@ -150,12 +149,12 @@ int json_rtcm3_read(const char *buf,
 #define R1009	&rtcm3->rtcmtypes.rtcm3_1009.header
     const struct json_attr_t json_rtcm1009[] = {
 	RTCM3_HEADER
-	{"station_id",     t_uinteger, .addr.uinteger = R1009.station_id},
-	{"tow",            t_uinteger, .addr.uinteger = (unsigned int *)R1009.tow},
-        {"sync",           t_boolean,  .addr.boolean = R1009.sync},
-        {"smoothing",      t_boolean,  .addr.boolean = R1009.smoothing},
-	{"interval",       t_uinteger, .addr.uinteger = R1009.interval},
-        {"satellites",     t_array,	STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1009.rtk_data,
+	{"station_id", t_uinteger, .addr.uinteger = R1009.station_id},
+	{"tow",        t_uinteger, .addr.uinteger = (unsigned int *)R1009.tow},
+        {"sync",       t_boolean,  .addr.boolean = R1009.sync},
+        {"smoothing",  t_boolean,  .addr.boolean = R1009.smoothing},
+	{"interval",   t_uinteger, .addr.uinteger = R1009.interval},
+        {"satellites", t_array,    STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1009.rtk_data,
 					    rtcm1009_satellite, &satcount)},
 	{NULL},
     };
@@ -166,12 +165,12 @@ int json_rtcm3_read(const char *buf,
 #define R1010	&rtcm3->rtcmtypes.rtcm3_1010.header
     const struct json_attr_t json_rtcm1010[] = {
 	RTCM3_HEADER
-	{"station_id",     t_uinteger, .addr.uinteger = R1010.station_id},
-	{"tow",            t_uinteger, .addr.uinteger = (unsigned int *)R1010.tow},
-        {"sync",           t_boolean,  .addr.boolean = R1010.sync},
-        {"smoothing",      t_boolean,  .addr.boolean = R1010.smoothing},
-	{"interval",       t_uinteger, .addr.uinteger = R1010.interval},
-        {"satellites",     t_array,	STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1010.rtk_data,
+	{"station_id", t_uinteger, .addr.uinteger = R1010.station_id},
+	{"tow",        t_uinteger, .addr.uinteger = (unsigned int *)R1010.tow},
+        {"sync",       t_boolean,  .addr.boolean = R1010.sync},
+        {"smoothing",  t_boolean,  .addr.boolean = R1010.smoothing},
+	{"interval",   t_uinteger, .addr.uinteger = R1010.interval},
+        {"satellites", t_array,     STRUCTARRAY(rtcm3->rtcmtypes.rtcm3_1010.rtk_data,
 					    rtcm1010_satellite, &satcount)},
 	{NULL},
     };
@@ -181,7 +180,7 @@ int json_rtcm3_read(const char *buf,
     /*@-type@*//* complex union array initislizations confuses splint */
     const struct json_attr_t json_rtcm3_fallback[] = {
 	RTCM3_HEADER
-	{"data",         t_array, .addr.array.element_type = t_string,
+	{"data",     t_array, .addr.array.element_type = t_string,
 	                             .addr.array.arr.strings.ptrs = stringptrs,
 	                             .addr.array.arr.strings.store = stringstore,
 	                             .addr.array.arr.strings.storelen = sizeof(stringstore),
