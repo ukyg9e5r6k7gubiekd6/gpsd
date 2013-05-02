@@ -194,6 +194,25 @@ int json_rtcm3_read(const char *buf,
 #undef R1014
     /*@+type@*/
 
+    /*@-type@*//* STRUCTARRAY confuses splint */
+#define R1033	rtcm3->rtcmtypes.rtcm3_1033
+    const struct json_attr_t json_rtcm1033[] = {
+	RTCM3_HEADER
+	{"station_id", t_uinteger, .addr.uinteger = &R1033.station_id},
+	{"desc",       t_string,   .addr.string = R1033.descriptor,
+	                                 .len = sizeof(R1033.descriptor)},
+	{"setup_id",   t_uinteger, .addr.uinteger = &R1033.setup_id},
+	{"serial",     t_string,   .addr.string = R1033.serial,
+	                                 .len = sizeof(R1033.serial)},
+	{"receiver",   t_string,   .addr.string = R1033.receiver,
+	                                 .len = sizeof(R1033.receiver)},
+	{"firmware",   t_string,   .addr.string = R1033.firmware,
+	                                 .len = sizeof(R1033.firmware)},
+	{NULL},
+    };
+#undef R1033
+    /*@+type@*/
+
     /*@-type@*//* complex union array initislizations confuses splint */
     const struct json_attr_t json_rtcm3_fallback[] = {
 	RTCM3_HEADER
@@ -231,6 +250,8 @@ int json_rtcm3_read(const char *buf,
 	status = json_read_object(buf, json_rtcm1010, endptr);
     } else if (strstr(buf, "\"type\":1014,") != NULL) {
 	status = json_read_object(buf, json_rtcm1010, endptr);
+    } else if (strstr(buf, "\"type\":1033,") != NULL) {
+	status = json_read_object(buf, json_rtcm1033, endptr);
     } else {
 	int n;
 	status = json_read_object(buf, json_rtcm3_fallback, endptr);
