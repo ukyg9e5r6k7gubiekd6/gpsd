@@ -424,7 +424,7 @@ struct rtcm3_t {
 	struct rtcm3_1014_t {
 	    unsigned int network_id;	/* Network ID */
 	    unsigned int subnetwork_id;	/* Subnetwork ID */
-	    unsigned char stationcount;	/* # auxiliary stations transmitted */
+	    unsigned int stationcount;	/* # auxiliary stations transmitted */
 	    unsigned int master_id;	/* Master Reference Station ID */
 	    unsigned int aux_id;	/* Auxilary Reference Station ID */
 	    double d_lat, d_lon, d_alt;	/* Aux-master location delta */
