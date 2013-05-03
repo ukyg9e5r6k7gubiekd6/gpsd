@@ -214,15 +214,128 @@ static const char *json_str9 = "{\"parts\":[]}";
 /*@ +fullinitblock @*/
 /* *INDENT-ON* */
 
-int main(int argc UNUSED, char *argv[]UNUSED)
+static void jsontest(int i)
 {
     int status = 0;
-    int option;
 
-    while ((option = getopt(argc, argv, "hD:?")) != -1) {
+    switch (i) 
+    {
+    case 1:
+	status = libgps_json_unpack(json_str1, &gpsdata, NULL);
+	assert_case(1, status);
+	assert_string("device", gpsdata.dev.path, "GPS#1");
+	assert_string("tag", gpsdata.tag, "MID2");
+	assert_integer("mode", gpsdata.fix.mode, 3);
+	assert_real("time", gpsdata.fix.time, 1119168761.8900001);
+	assert_real("lon", gpsdata.fix.longitude, 46.498203637);
+	assert_real("lat", gpsdata.fix.latitude, 7.568074350);
+	break;
+
+    case 2:
+	status = libgps_json_unpack(json_str2, &gpsdata, NULL);
+	assert_case(2, status);
+	assert_string("tag", gpsdata.tag, "MID4");
+	assert_integer("used", gpsdata.satellites_used, 6);
+	assert_integer("PRN[0]", gpsdata.PRN[0], 10);
+	assert_integer("el[0]", gpsdata.elevation[0], 45);
+	assert_integer("az[0]", gpsdata.azimuth[0], 196);
+	assert_real("ss[0]", gpsdata.ss[0], 34);
+	assert_integer("used[0]", gpsdata.used[0], 10);
+	assert_integer("used[5]", gpsdata.used[5], 27);
+	assert_integer("PRN[6]", gpsdata.PRN[6], 21);
+	assert_integer("el[6]", gpsdata.elevation[6], 10);
+	assert_integer("az[6]", gpsdata.azimuth[6], 301);
+	assert_real("ss[6]", gpsdata.ss[6], 0);
+	break;
+
+    case 3:
+	status = json_read_array(json_str3, &json_array_3, NULL);
+	assert_case(3, status);
+	assert(stringcount == 3);
+	assert(strcmp(stringptrs[0], "foo") == 0);
+	assert(strcmp(stringptrs[1], "bar") == 0);
+	assert(strcmp(stringptrs[2], "baz") == 0);
+
+    case 4:
+	status = json_read_object(json_str4, json_attrs_4, NULL);
+	assert_case(4, status);
+	assert_integer("dftint", dftinteger, -5);	/* did the default work? */
+	assert_uinteger("dftuint", dftuinteger, 10);	/* did the default work? */
+	assert_real("dftreal", dftreal, 23.17);	/* did the default work? */
+	assert_boolean("flag1", flag1, true);
+	assert_boolean("flag2", flag2, false);
+	break;
+
+    case 5:
+	status = libgps_json_unpack(json_str5, &gpsdata, NULL);
+	assert_case(5, status);
+	assert_string("path", gpsdata.dev.path, "/dev/ttyUSB0");
+	assert_integer("flags", gpsdata.dev.flags, 5);
+	assert_string("driver", gpsdata.dev.driver, "Foonly");
+	break;
+
+    case 6:
+	status = json_read_object(json_str6, json_attrs_6, NULL);
+	assert_case(6, status);
+	assert_integer("dumbcount", dumbcount, 4);
+	assert_string("dumbstruck[0].name", dumbstruck[0].name, "Urgle");
+	assert_string("dumbstruck[1].name", dumbstruck[1].name, "Burgle");
+	assert_string("dumbstruck[2].name", dumbstruck[2].name, "Witter");
+	assert_string("dumbstruck[3].name", dumbstruck[3].name, "Thud");
+	assert_boolean("dumbstruck[0].flag", dumbstruck[0].flag, true);
+	assert_boolean("dumbstruck[1].flag", dumbstruck[1].flag, false);
+	assert_boolean("dumbstruck[2].flag", dumbstruck[2].flag, true);
+	assert_boolean("dumbstruck[3].flag", dumbstruck[3].flag, false);
+	assert_integer("dumbstruck[0].count", dumbstruck[0].count, 3);
+	assert_integer("dumbstruck[1].count", dumbstruck[1].count, 1);
+	assert_integer("dumbstruck[2].count", dumbstruck[2].count, 4);
+	assert_integer("dumbstruck[3].count", dumbstruck[3].count, 1);
+	break;
+
+    case 7:
+	status = libgps_json_unpack(json_str7, &gpsdata, NULL);
+	assert_case(7, status);
+	assert_string("release", gpsdata.version.release, "2.40dev");
+	assert_string("rev", gpsdata.version.rev, "dummy-revision");
+	assert_integer("proto_major", gpsdata.version.proto_major, 3);
+	assert_integer("proto_minor", gpsdata.version.proto_minor, 1);
+	break;
+
+    case 8:
+	status = json_read_object(json_str8, json_attrs_8, NULL);
+	assert_case(8, status);
+	assert_integer("fee", fee, 3);
+	assert_integer("fie", fie, 6);
+	assert_integer("foe", foe, 14);
+	break;
+
+    case 9:
+	/* yes, the '6' in the next line is correct */ 
+	status = json_read_object(json_str9, json_attrs_6, NULL);
+	assert_case(9, status);
+	assert_integer("dumbcount", dumbcount, 0);
+	break;
+
+#define MAXTEST 9
+
+    default:
+	fputs("Unknown test number\n", stderr);
+	break;
+    }
+}
+
+int main(int argc UNUSED, char *argv[]UNUSED)
+{
+    int option, i;
+    int individual = 0;
+
+    while ((option = getopt(argc, argv, "hnD:?")) != -1) {
 	switch (option) {
 	case 'D':
 	    gps_enable_debug(atoi(optarg), stdout);
+	    break;
+	case 'n':
+	    individual = atoi(0);
 	    break;
 	case '?':
 	case 'h':
@@ -234,83 +347,11 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 
     (void)fprintf(stderr, "JSON unit test ");
 
-    status = libgps_json_unpack(json_str1, &gpsdata, NULL);
-    assert_case(1, status);
-    assert_string("device", gpsdata.dev.path, "GPS#1");
-    assert_string("tag", gpsdata.tag, "MID2");
-    assert_integer("mode", gpsdata.fix.mode, 3);
-    assert_real("time", gpsdata.fix.time, 1119168761.8900001);
-    assert_real("lon", gpsdata.fix.longitude, 46.498203637);
-    assert_real("lat", gpsdata.fix.latitude, 7.568074350);
-
-    status = libgps_json_unpack(json_str2, &gpsdata, NULL);
-    assert_case(2, status);
-    assert_string("tag", gpsdata.tag, "MID4");
-    assert_integer("used", gpsdata.satellites_used, 6);
-    assert_integer("PRN[0]", gpsdata.PRN[0], 10);
-    assert_integer("el[0]", gpsdata.elevation[0], 45);
-    assert_integer("az[0]", gpsdata.azimuth[0], 196);
-    assert_real("ss[0]", gpsdata.ss[0], 34);
-    assert_integer("used[0]", gpsdata.used[0], 10);
-    assert_integer("used[5]", gpsdata.used[5], 27);
-    assert_integer("PRN[6]", gpsdata.PRN[6], 21);
-    assert_integer("el[6]", gpsdata.elevation[6], 10);
-    assert_integer("az[6]", gpsdata.azimuth[6], 301);
-    assert_real("ss[6]", gpsdata.ss[6], 0);
-
-    status = json_read_array(json_str3, &json_array_3, NULL);
-    assert_case(3, status);
-    assert(stringcount == 3);
-    assert(strcmp(stringptrs[0], "foo") == 0);
-    assert(strcmp(stringptrs[1], "bar") == 0);
-    assert(strcmp(stringptrs[2], "baz") == 0);
-
-    status = json_read_object(json_str4, json_attrs_4, NULL);
-    assert_case(4, status);
-    assert_integer("dftint", dftinteger, -5);	/* did the default work? */
-    assert_uinteger("dftuint", dftuinteger, 10);	/* did the default work? */
-    assert_real("dftreal", dftreal, 23.17);	/* did the default work? */
-    assert_boolean("flag1", flag1, true);
-    assert_boolean("flag2", flag2, false);
-
-    status = libgps_json_unpack(json_str5, &gpsdata, NULL);
-    assert_case(5, status);
-    assert_string("path", gpsdata.dev.path, "/dev/ttyUSB0");
-    assert_integer("flags", gpsdata.dev.flags, 5);
-    assert_string("driver", gpsdata.dev.driver, "Foonly");
-
-    status = json_read_object(json_str6, json_attrs_6, NULL);
-    assert_case(6, status);
-    assert_integer("dumbcount", dumbcount, 4);
-    assert_string("dumbstruck[0].name", dumbstruck[0].name, "Urgle");
-    assert_string("dumbstruck[1].name", dumbstruck[1].name, "Burgle");
-    assert_string("dumbstruck[2].name", dumbstruck[2].name, "Witter");
-    assert_string("dumbstruck[3].name", dumbstruck[3].name, "Thud");
-    assert_boolean("dumbstruck[0].flag", dumbstruck[0].flag, true);
-    assert_boolean("dumbstruck[1].flag", dumbstruck[1].flag, false);
-    assert_boolean("dumbstruck[2].flag", dumbstruck[2].flag, true);
-    assert_boolean("dumbstruck[3].flag", dumbstruck[3].flag, false);
-    assert_integer("dumbstruck[0].count", dumbstruck[0].count, 3);
-    assert_integer("dumbstruck[1].count", dumbstruck[1].count, 1);
-    assert_integer("dumbstruck[2].count", dumbstruck[2].count, 4);
-    assert_integer("dumbstruck[3].count", dumbstruck[3].count, 1);
-
-    status = libgps_json_unpack(json_str7, &gpsdata, NULL);
-    assert_case(7, status);
-    assert_string("release", gpsdata.version.release, "2.40dev");
-    assert_string("rev", gpsdata.version.rev, "dummy-revision");
-    assert_integer("proto_major", gpsdata.version.proto_major, 3);
-    assert_integer("proto_minor", gpsdata.version.proto_minor, 1);
-
-    status = json_read_object(json_str8, json_attrs_8, NULL);
-    assert_case(8, status);
-    assert_integer("fee", fee, 3);
-    assert_integer("fie", fie, 6);
-    assert_integer("foe", foe, 14);
-
-    status = json_read_object(json_str9, json_attrs_6, NULL);
-    assert_case(9, status);
-    assert_integer("dumbcount", dumbcount, 0);
+    if (individual)
+	jsontest(individual);
+    else
+	for (i = 1; i <= MAXTEST; i++)
+	    jsontest(i);
 
     (void)fprintf(stderr, "succeeded.\n");
 
