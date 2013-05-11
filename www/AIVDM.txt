@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.41, January 2012
+v1.42, May 2013
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -659,7 +659,7 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |0-5     |  6  |Message Type     |type     |u|Constant: 4
 |6-7     |  2  |Repeat Indicator |repeat   |u|As in Common Navigation Block
 |8-37    | 30  |MMSI             |mmsi     |u|9 decimal digits
-|38-51   | 14  |Year (UTC)       |year     |u|UTC, 1-999, 0 = N/A (default)
+|38-51   | 14  |Year (UTC)       |year     |u|UTC, 1-9999, 0 = N/A (default)
 |52-55   |  4  |Month (UTC)      |month    |u|1-12; 0 = N/A (default)
 |56-60   |  5  |Day (UTC)        |day      |u|1-31; 0 = N/A (default)
 |61-65   |  5  |Hour (UTC)       |hour     |u|0-23; 24 = N/A (default)
@@ -4616,3 +4616,5 @@ encountered in the wild.
 
 Version 1.41 has been slightly amended because type 27s have started
 showing up  on satellite feeds.
+
+Version 1.42 fixes a typo in the Type 4 message description.
