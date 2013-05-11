@@ -111,6 +111,7 @@ GPSD Frequently Asked Questions
 <ul>
 <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a></li>
 <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a></li>
+<li><a href='#almanac'>How can my application get almanac/ephemeris/pseudorange data?</a></li>
 </ul>
 </li>
 
@@ -925,6 +926,37 @@ build from source that conditions out all but one of the drivers.</p>
 
 <p>For Python programmers, there is a gps.py module the high-level
 interface.  It exports a class that encapsulates a GPS session.</p>
+
+<h1 id='almanac'>How can my application get almanac/ephemeris/pseudorange data?</h1>
+
+<p>Sorry, there's no easy way to do these things through GPSD yet.
+The reason is that there is no consistent way to make GPS receivers
+report this information.</p>
+
+<p>Many don't ship it at all.  Others (including some but not all
+devices shipping SiRF binary packets) ship it occasionally in SUBFRAME
+information, but you have to know exactly how to grovel through the
+SUBFRAME fields to get it and the documentation of those in
+IS-GPS-200E (the over-the-air protocol used by GPS satellites) is
+extremely obscure.  Still others report varying subsets of
+almanac/ephemeris/pseudorange data in reasonably straightforward ways,
+but in vendor-proprietary sentences that are extremely specific to
+individual receiver types, poorly documented or undocumented, and
+often needing to be activated by control sequences that are equally
+specific and even worse documented.</p>
+
+<p>We'd like to do a better job of extracting this information, but
+handling all the potential variations would be an extremely difficult
+and messy job.  It's hard to know what to do, and even harder to know
+how to test the correctness of the extraction code once you think you
+have it. The spectacularly bad design and documentation of most
+vendor-specific GPS reporting protocols is at its abysmal worst in
+this exact area.</p>
+
+</p>On a SiRF-based device you might be able to get some use out of
+the SUBFRAME JSON.  If you succeed in extracting
+almanac/ephemeris/pseudorange data from those raw fields, we salute
+you - and please share that code with us!</p>
 
 <h1 id='bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</h1>
 
