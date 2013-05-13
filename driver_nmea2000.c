@@ -88,13 +88,17 @@ static void print_data(unsigned char *buffer, int len, PGN *pgn)
 
 static gps_mask_t get_mode(struct gps_device_t *session)
 {
-    if (session->driver.nmea2000.mode_valid) {
+    if (session->driver.nmea2000.mode_valid & 1) {
         session->newdata.mode = session->driver.nmea2000.mode;
     } else {
         session->newdata.mode = MODE_NOT_SEEN;
     }
-
-    return MODE_SET;
+    
+    if (session->driver.nmea2000.mode_valid & 2) {
+        return MODE_SET | USED_IS;
+    } else {
+        return MODE_SET;
+    }
 }
 
 
@@ -247,7 +251,7 @@ static gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_de
     mask                             = 0;
     session->driver.nmea2000.sid[1]  = bu[0];
 
-    session->driver.nmea2000.mode_valid = 1;
+    session->driver.nmea2000.mode_valid |= 1;
 
     req_mode = (unsigned int)((bu[1] >> 0) & 0x07);
     act_mode = (unsigned int)((bu[1] >> 3) & 0x07);
@@ -315,6 +319,7 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    l2 += 1;
 	}
     }
+    session->driver.nmea2000.mode_valid |= 2;
     return  SATELLITE_SET | USED_IS;
 }
 
