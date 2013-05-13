@@ -12,6 +12,7 @@ gpxlogger
 cgpxlogger
 gpspipe
 clockwatcher
+gps2udp
 # These are built from .in files
 gpscat
 gpsfake
