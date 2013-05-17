@@ -1,3 +1,7 @@
+* Repository head
+  Adds gps2udp, a utility for relaying AIS data to AIS aggregation sites.
+  Alpha-stage partial unpacking of RTCM3 JSON in the client library.
+
 * Wed 1 May 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.9
   Note to packagers: this is an urgent release that fixes a possible
   DoS or security hole!  Armor the AIS driver against an implausible
