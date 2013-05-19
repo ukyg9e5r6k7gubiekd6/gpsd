@@ -141,7 +141,13 @@ href="http://www.qlandkarte.org/">qlandkartegt</a>, <a
 href="http://gpredict.oz9aec.net/">gpredict</a>, <a
 href="http://opencpn.org/">OpenCPN</a>, <a
 href="https://github.com/infinet/gpsd-navigator.git">gpsd-navigator</a>,
-and <a href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>.</p>
+and <a
+href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>.</p>
+
+<p>In addition, the Android smartphone operating system (from version
+4.0 onwards and possibly earlier; we don't know for sure when the
+change happened) uses GPSD to monitor the phone's on-board GPS, so
+every location-aware Android app is indirectly a GPSD client.</p>
 
 <p>Under Linux, <code>gpsd</code> normally runs with zero
 configuration.  Binary packages for this program install hotplug
