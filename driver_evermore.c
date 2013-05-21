@@ -167,11 +167,11 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    cp++;
 	tp++;
     }
-    type = (unsigned char)getub(buf2, 2);
+    type = (unsigned char)getub(buf2, 0);
     /*@ +usedef @*/
 
     /*@ -usedef -compdef @*/
-    gpsd_report(LOG_RAW, "EverMore packet type 0x%02x\n", type);
+    gpsd_report(LOG_RAW, "EverMore packet type 0x%02x (%zd bytes)\n", type, tp-buf2);
     /*@ +usedef +compdef @*/
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
