@@ -915,14 +915,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	st = tsip_analyze(session);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
-#ifdef EVERMORE_ENABLE
+#ifdef __UNUSED__
     } else if (session->packet.type == EVERMORE_PACKET) {
 	(void)gpsd_switch_driver(session, "EverMore binary");
 	st = evermore_parse(session, session->packet.outbuffer,
 			    session->packet.outbuflen);
 	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	return st;
-#endif /* EVERMORE_ENABLE */
+#endif /* __UNUSED__ */
 #ifdef SIRF_ENABLE
 	/*
 	 * mrd reported that once every couple of weeks his SiRF was flipping

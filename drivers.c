@@ -191,10 +191,10 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef EVERMORE_ENABLE
 	case 4:
 	    gpsd_report(LOG_PROG, "=> Probing for Evermore\n");
-	    /* Enable checksum and GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT101(1s) */
+	    /* Enable checksum and GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT101(0s) */
 	    /* EverMore will reply with: \x10\x02\x04\x38\x8E\xC6\x10\x03 */
 	    (void)gpsd_write(session,
-			     "\x10\x02\x12\x8E\x7F\x01\x01\x00\x01\x01\x01\x00\x01\x00\x00\x00\x00\x00\x00\x13\x10\x03",
+			     "\x10\x02\x12\x8E\x7F\x01\x01\x00\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x13\x10\x03",
 			     22);
 	    break;
 #endif /* EVERMORE_ENABLE */

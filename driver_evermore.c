@@ -136,6 +136,8 @@
 
 #define EVERMORE_CHANNELS	12
 
+#ifdef __UNUSED__
+
 /*@ +charint @*/
 gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 			  size_t len)
@@ -395,6 +397,8 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#endif /* __UNUSED__ */
+
 /*@ +charint -usedef -compdef @*/
 static ssize_t evermore_control_send(struct gps_device_t *session, char *buf,
 				     size_t len)
@@ -611,7 +615,7 @@ const struct gps_type_t evermore_binary =
     .channels       = EVERMORE_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = NULL,			/* no probe */
     .get_packet     = generic_get,		/* use generic one */
-    .parse_packet   = evermore_parse_input,	/* parse message packets */
+    .parse_packet   = generic_parse_input,	/* parse message packets */
     .rtcm_writer    = gpsd_write,		/* send RTCM data straight */
     .event_hook     = evermore_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
