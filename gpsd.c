@@ -249,10 +249,50 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 #endif /* !SQUELCH_ENABLE */
 }
 
-static void usage(void)
+static void typelist(void)
+/* list installed drivers and enabled features */
 {
     const struct gps_type_t **dp;
 
+    for (dp = gpsd_drivers; *dp; dp++) {
+	if ((*dp)->packet_type == COMMENT_PACKET)
+	    continue;
+#ifdef RECONFIGURE_ENABLE
+	if ((*dp)->mode_switcher != NULL)
+	    (void)fputs("n\t", stdout);
+	else
+	    (void)fputc('\t', stdout);
+	if ((*dp)->speed_switcher != NULL)
+	    (void)fputs("b\t", stdout);
+	else
+	    (void)fputc('\t', stdout);
+	if ((*dp)->rate_switcher != NULL)
+	    (void)fputs("c\t", stdout);
+	else
+	    (void)fputc('\t', stdout);
+#endif /* RECONFIGURE_ENABLE */
+	(void)puts((*dp)->type_name);
+    }
+#if defined(SOCKET_EXPORT_ENABLE)
+    (void)printf("# Socket export enabled.\n");
+#endif
+#if defined(SHM_EXPORT_ENABLE)
+    (void)printf("# Shared memory export enabled.\n");
+#endif
+#if defined(DBUS_EXPORT_ENABLE)
+    (void)printf("# DBUS export enabled\n");
+#endif
+#if defined(NTPSHM_ENABLE)
+    (void)printf("# NTPSHM for NTPd enabled.\n");
+#endif
+#if defined(PPS_ENABLE)
+    (void)printf("# PPS enabled.\n");
+#endif
+    exit(EXIT_SUCCESS);
+}
+
+static void usage(void)
+{
     (void)printf("usage: gpsd [-b] [-n] [-N] [-D n] [-F sockfile] [-G] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
   -b		     	    = bluetooth-safe: open data sources read-only\n\
@@ -274,15 +314,7 @@ in which case it specifies an input source for GPSD, DGPS or ntrip data.\n\
 \n\
 The following driver types are compiled into this gpsd instance:\n",
 		 DEFAULT_GPSD_PORT);
-    for (dp = gpsd_drivers; *dp; dp++) {
-	(void)printf("    %s\n", (*dp)->type_name);
-    }
-#ifdef NTPSHM_ENABLE
-	(void)printf("    NTPSHM\n");
-#endif
-#if defined(PPS_ENABLE)
-	(void)printf("    PPS\n");
-#endif
+    typelist();
 }
 
 #ifdef CONTROL_SOCKET_ENABLE
@@ -1891,24 +1923,8 @@ int main(int argc, char *argv[])
 	    break;
 #endif /* FORCE_GLOBAL_ENABLE */
 	case 'l':		/* list known device types and exit */
-	    for (dp = gpsd_drivers; *dp; dp++) {
-#ifdef RECONFIGURE_ENABLE
-		if ((*dp)->mode_switcher != NULL)
-		    (void)fputs("n\t", stdout);
-		else
-		    (void)fputc('\t', stdout);
-		if ((*dp)->speed_switcher != NULL)
-		    (void)fputs("b\t", stdout);
-		else
-		    (void)fputc('\t', stdout);
-		if ((*dp)->rate_switcher != NULL)
-		    (void)fputs("c\t", stdout);
-		else
-		    (void)fputc('\t', stdout);
-#endif /* RECONFIGURE_ENABLE */
-		(void)puts((*dp)->type_name);
-	    }
-	    exit(EXIT_SUCCESS);
+	    typelist();
+	    break;
 	case 'S':
 #ifdef SOCKET_EXPORT_ENABLE
 	    gpsd_service = optarg;
