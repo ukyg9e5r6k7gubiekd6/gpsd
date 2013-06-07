@@ -205,7 +205,6 @@ static bool ntpshm_free(struct gps_context_t * context, int segment)
 	return false;
 
     context->shmTimeInuse[segment] = false;
-    segment = -1;
     return true;
 }
 
