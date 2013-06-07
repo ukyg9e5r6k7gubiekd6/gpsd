@@ -1348,6 +1348,10 @@ for (target,sources,description,params) in splint_table:
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
 
+# Experimental check with clang analyzer
+Utility("scan-build", ["gpsd.h", "packet_names.h"],
+        "scan-build scons")
+
 # Sanity-check Python code. TODO: add xgps for the complete set.
 Utility("pychecker", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''for f in  gpsprof gpscat gpsfake gegps; do ln -s $$f $$f.py; done; \
