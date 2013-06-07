@@ -249,7 +249,7 @@ int json_rtcm3_read(const char *buf,
     } else if (strstr(buf, "\"type\":1010,") != NULL) {
 	status = json_read_object(buf, json_rtcm1010, endptr);
     } else if (strstr(buf, "\"type\":1014,") != NULL) {
-	status = json_read_object(buf, json_rtcm1010, endptr);
+	status = json_read_object(buf, json_rtcm1014, endptr);
     } else if (strstr(buf, "\"type\":1033,") != NULL) {
 	status = json_read_object(buf, json_rtcm1033, endptr);
     } else {
