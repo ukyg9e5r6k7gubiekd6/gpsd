@@ -32,12 +32,14 @@ non-C99 feature: anonymous unions.  We could eliminate these, but the
 cost would be source-level interface breakage if we have to move
 structure members in and out of unions.
 
-GPSD is normally built and tested with GCC. The shared-memory
-interface relies on one GCCism, but the code is otherwise pretty
-compiler-agnostic.  It is reported that clang produces a gpsd that
-passes all regression tests. If -Wmissing-field-initializers or
-its non-gcc equivalent is set you will get a lot of warnings; 
-this is due to generated code and cannot be fixed.
+GPSD is normally built and tested with GCC. If the option
+-Wmissing-field-initializers or its non-gcc equivalent is set you will
+get a lot of warnings; this is due to generated code and cannot be
+fixed.
+
+The shared-memory interface relies on one GCCism, but the code is
+otherwise pretty compiler-agnostic.  It is reported that clang
+produces a gpsd that passes all regression tests.
 
 Older versions of gcc don't recognize Wno-missing-field-initializers;
 this has been reported from GCC 3.4.6.  We don't recommend building
@@ -111,6 +113,7 @@ various additional capabilities and extensions:
 |C++ compiler	  | allows building libgpsmm C++ wrapper for client library
 |Qt 4.53+         | allows building libQgpsmm C++ wrapper for client library
 |libcap           | Capabilities library, allows 1PPS support under Linux
+|curses           | curses screen-painting library, allows building cgps
 |============================================================================
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect
@@ -137,6 +140,10 @@ On some recent versions of Ubuntu (notably 11.10) there is a packaging
 defect that may cause your build to blow up in SCons. It's a missing
 package info file for the tinfo library. To fix this, install the file
 packaging/tinfo.pc in /usr/lib/pkgconfig/tinfo.pc.
+
+We've seen a report that compiling on the Raspberry Pi fails with 
+a complaint about curses.h not being found.  You need to install
+Raspbian's curses development library if this happens.
 
 For building from the source tree, or if you change the man page
 source, xslt and docbook xsl style files are used to generate nroff
