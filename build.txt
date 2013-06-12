@@ -28,9 +28,10 @@ Necessary components for any build:
 === C compiler ===
 
 C99 conformance is required in the compiler. The C code depends on one
-non-C99 feature: anonymous unions.  We could eliminate these, but the
-cost would be source-level interface breakage if we have to move
-structure members in and out of unions.
+non-C99 feature (supported by GCC, clang, and pretty much any C
+compiler that also speaks C++): anonymous unions.  We could eliminate
+these, but the cost would be source-level interface breakage if we
+have to move structure members in and out of unions.
 
 GPSD is normally built and tested with GCC. If the option
 -Wmissing-field-initializers or its non-gcc equivalent is set you will
