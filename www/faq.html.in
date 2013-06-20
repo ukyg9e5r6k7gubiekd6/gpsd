@@ -74,6 +74,8 @@ GPSD Frequently Asked Questions
 <li><a href='#willitwork'>Will a GPS not on the GPSD hardware list work?</a></li>
 <li><a href='#android'>Android reports that gpsd is draining my battery. Help!</a></li>
 <li><a href='#garmin'>My Garmin USB GPS doesn't work.</a></li>
+<li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a>
+<li><a href='#raspberry'>Time is wrong on my Raspberry Pi</a></li>
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a></li>
 </ul>
 </li>
@@ -87,7 +89,6 @@ GPSD Frequently Asked Questions
 <li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a></li>
 <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
 <li><a href='#waas'>How can I tell if WAAS/EGNOS is working?</a></li>
-<li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a></li>
 </ul>
 </li>
 
@@ -256,6 +257,14 @@ was working.
 
 <p>On the BSDs and Mac OS X, you're out of luck. As of April 2013 we 
 don't know of any shim that makes USB Garmins work on these.</p>
+
+<h1 id='raspberry'>Time is wrong on my Raspberry Pi</h1>
+
+<p>The Raspberry Pi has no real-time clock.  Without this, the GPS may
+not return sufficient information to for GPSD to pin down which GPS
+clock rollover period you are in.  If you set the system clock to
+some date in the current year <em>before</em> launching gpsd you
+will see correct time reports.</p>
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 <blockquote>
