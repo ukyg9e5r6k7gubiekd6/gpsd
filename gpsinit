@@ -26,7 +26,7 @@ usage()
     echo "                  = Needed for some slcan modules only.";
     echo "  -v              = Print version of this script and exit.";
     echo "  -h              = Print this help message and exit.";
-    echo "  can_module_name = One out of plx_pci, esd_usb2, vcan, slcan, beaglebone.";
+    echo "  can_module_name = One out of plx_pci, esd_usb2, usb_8dev, vcan, slcan, beaglebone.";
     echo "  interface_name  = The interface, the SLCAN module is connected to, i.e. /dev/ttyS0 or /dev/ttyUSB0.";
     echo "                  = Needed for the slcan module only. The default is /dev/ttyUSB0.";
     echo "Root permissions are needed for the first calling option (Enforced by socketCAN subsystem).";
@@ -56,6 +56,11 @@ plx_pci)
 esd_usb2)
     # For an esd usb/2 CAN interface
     modprobe esd_usb2;
+    ip link set can${net} type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;
+    ip link set can${net} up;;
+usb_8dev)
+    # For an 8devices usb2can CAN interface
+    modprobe usb_8dev;
     ip link set can${net} type can tq 250 prop-seg 6 phase-seg1 7 phase-seg2 2 sjw 1;
     ip link set can${net} up;;
 vcan)
