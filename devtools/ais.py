@@ -1237,7 +1237,12 @@ if __name__ == "__main__":
                 sys.stdout.write(raw)
             if not bogon:
                 if json:
-                    print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + str(x[1]), parsed)) + "}"
+                    def quotify(x):
+                        if type(x) == type(""):
+                            return '"' + str(x) + '"'
+                        else:
+                            return str(x)
+                    print "{" + ",".join(map(lambda x: '"' + x[0].name + '":' + quotify(x[1]), parsed)) + "}"
                 elif dsv:
                     print "|".join(map(lambda x: str(x[1]), parsed))
                 elif histogram:
