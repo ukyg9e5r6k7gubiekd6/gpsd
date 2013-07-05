@@ -104,7 +104,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	ais->type1.maneuver	= UBITS(143, 2);
 	//ais->type1.spare	= UBITS(145, 3);
 	ais->type1.raim		= UBITS(148, 1)!=0;
-	ais->type1.radio	= UBITS(149, 20);
+	ais->type1.radio	= UBITS(149, 19);
 	break;
     case 4: 	/* Base Station Report */
     case 11:	/* UTC/Date Response */
