@@ -92,19 +92,19 @@ bool ais_binary_decode(struct ais_t *ais,
 			bitlen);
 	    return false;
 	}
-	ais->type1.status		= UBITS(38, 4);
+	ais->type1.status	= UBITS(38, 4);
 	ais->type1.turn		= SBITS(42, 8);
-	ais->type1.speed		= UBITS(50, 10);
-	ais->type1.accuracy	        = UBITS(60, 1)!=0;
+	ais->type1.speed	= UBITS(50, 10);
+	ais->type1.accuracy	= UBITS(60, 1)!=0;
 	ais->type1.lon		= SBITS(61, 28);
 	ais->type1.lat		= SBITS(89, 27);
-	ais->type1.course		= UBITS(116, 12);
-	ais->type1.heading	        = UBITS(128, 9);
-	ais->type1.second		= UBITS(137, 6);
-	ais->type1.maneuver	        = UBITS(143, 2);
-	//ais->type1.spare	        = UBITS(145, 3);
+	ais->type1.course	= UBITS(116, 12);
+	ais->type1.heading	= UBITS(128, 9);
+	ais->type1.second	= UBITS(137, 6);
+	ais->type1.maneuver	= UBITS(143, 2);
+	//ais->type1.spare	= UBITS(145, 3);
 	ais->type1.raim		= UBITS(148, 1)!=0;
-	ais->type1.radio		= UBITS(149, 20);
+	ais->type1.radio	= UBITS(149, 20);
 	break;
     case 4: 	/* Base Station Report */
     case 11:	/* UTC/Date Response */
@@ -115,18 +115,18 @@ bool ais_binary_decode(struct ais_t *ais,
 	    return false;
 	}
 	ais->type4.year		= UBITS(38, 14);
-	ais->type4.month		= UBITS(52, 4);
+	ais->type4.month	= UBITS(52, 4);
 	ais->type4.day		= UBITS(56, 5);
 	ais->type4.hour		= UBITS(61, 5);
-	ais->type4.minute		= UBITS(66, 6);
-	ais->type4.second		= UBITS(72, 6);
-	ais->type4.accuracy		= UBITS(78, 1)!=0;
+	ais->type4.minute	= UBITS(66, 6);
+	ais->type4.second	= UBITS(72, 6);
+	ais->type4.accuracy	= UBITS(78, 1)!=0;
 	ais->type4.lon		= SBITS(79, 28);
 	ais->type4.lat		= SBITS(107, 27);
 	ais->type4.epfd		= UBITS(134, 4);
-	//ais->type4.spare		= UBITS(138, 10);
+	//ais->type4.spare	= UBITS(138, 10);
 	ais->type4.raim		= UBITS(148, 1)!=0;
-	ais->type4.radio		= UBITS(149, 19);
+	ais->type4.radio	= UBITS(149, 19);
 	break;
     case 5: /* Ship static and voyage related data */
 	if (bitlen != 424) {
