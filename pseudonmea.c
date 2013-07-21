@@ -276,6 +276,45 @@ static void gpsd_binary_almanac_dump(struct gps_device_t *session,
     }
 }
 
+#ifdef AIVDM_ENABLE
+static void gpsd_binary_ais_dump(struct gps_device_t *session,
+				     char bufp[], size_t len)
+{
+    static unsigned int number = 0;
+    char type[8] = "!AIVDM";
+    unsigned char data[256];
+    unsigned int msg1, msg2;
+    unsigned char number1;
+    char numc[4];
+    char channel;
+    unsigned int left;
+    unsigned int datalen;
+  
+    msg1 = 1;
+    msg2 = 1;
+    number = -1;
+    numc[0] = 0;
+    data[0] = 0;
+    left = 0;
+    channel = 'A';
+ 
+    memset(data, 0, sizeof(data));
+    datalen = ais_binary_encode(&session->gpsdata.ais, &data[0]);
+
+    (void)snprintf(bufp, len,
+		   "%s,%d,%d,%s,%c,%s,%d",
+		   type,
+		   msg1,
+		   msg2,
+		   numc,
+		   channel,
+		   data,
+		   left);
+
+    nmea_add_checksum(bufp);
+}
+#endif /* AIVDM_ENABLE */
+
 /*@-compdef -mustdefine@*/
 /* *INDENT-OFF* */
 void nmea_tpv_dump(struct gps_device_t *session,
@@ -315,6 +354,17 @@ void nmea_subframe_dump(struct gps_device_t *session,
 	gpsd_binary_almanac_dump(session, bufp + strlen(bufp),
 				   len - strlen(bufp));
 }
+
+#ifdef AIVDM_ENABLE
+void nmea_ais_dump(struct gps_device_t *session,
+		   /*@out@*/ char bufp[], size_t len)
+{
+    bufp[0] = '\0';
+    if ((session->gpsdata.set & AIS_SET) != 0)
+	gpsd_binary_ais_dump(session, bufp + strlen(bufp),
+				   len - strlen(bufp));
+}
+#endif /* AIVDM_ENABLE */
 
 /*@+compdef +mustdefine@*/
 

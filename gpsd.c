@@ -1443,6 +1443,14 @@ static void pseudonmea_report(struct subscriber_t *sub,
 			device->gpsdata.dev.path, buf);
 	    (void)throttled_write(sub, buf, strlen(buf));
 	}
+#ifdef AIVDM_ENABLE
+	if ((changed & AIS_SET) != 0) {
+	    nmea_ais_dump(device, buf, sizeof(buf));
+	    gpsd_report(LOG_IO, "<= AIS (binary ais) %s: %s\n",
+			device->gpsdata.dev.path, buf);
+	    (void)throttled_write(sub, buf, strlen(buf));
+	}
+#endif /* AIVDM_ENABLE */
     }
 }
 #endif /* SOCKET_EXPORT_ENABLE */

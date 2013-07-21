@@ -760,6 +760,8 @@ extern char /*@observer@*/ *netlib_sock2ip(socket_t);
 extern void nmea_tpv_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void nmea_sky_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void nmea_subframe_dump(struct gps_device_t *, /*@out@*/char[], size_t);
+extern void nmea_ais_dump(struct gps_device_t *, /*@out@*/char[], size_t);
+extern unsigned int ais_binary_encode(struct ais_t *ais, /*@out@*/unsigned char *bits);
 
 extern void ntpshm_init(struct gps_context_t *, bool);
 extern int ntpshm_put(struct gps_device_t *, double, double);

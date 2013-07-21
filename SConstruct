@@ -719,6 +719,7 @@ libgpsd_sources = [
     "net_ntrip.c",
     "packet.c",
     "pseudonmea.c",
+    "pseudoais.c",
     "serial.c",
     "subframe.c",
     "timebase.c",
