@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.15, April 2012
+v1.16, July 2013
 
 == Introduction ==
 
@@ -350,7 +350,7 @@ Each library has the following entry points:
   use case for this entry point; if you think you need no use it,
   you have probably failed to understand the rest of the interface.
 
-* Nonblocking check to see if data from the daemon is waiting. Named
+* Blocking check to see if data from the daemon is waiting. Named
   something like "waiting()" and taking a wait timeout as argument.
   Note that choosing a wait timeout of less than twice the cycle time
   of your device will be hazardous, as the receiver will probably not
@@ -379,9 +379,9 @@ Send wire-protocol commands to the daemon. Deprecated and unstable.
 |gps_stream()		|gpsmm.stream()		|gps.stream()		|
 Set watch policy. What you should use instead of send().
 |gps_waiting()		|gpsmm.waiting()	|gps.waiting()		|
-Blocking check with timeout to see in input is waiting.
+Blocking check with timeout to see if input is waiting.
 |gps_read()		|gpsmm.read()		|gps.read()		|
-Nonblocking read for data from the daemon.
+Blocking read for data from the daemon.
 |gps_unpack()		|			|gps.unpack()		|
 Parse JSON from a specified buffer into a session structure
 |gps_close()		|gpsmm.~gpsmm()		|gps.close()		|
