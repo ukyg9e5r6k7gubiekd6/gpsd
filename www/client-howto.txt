@@ -365,6 +365,11 @@ Each library has the following entry points:
 
 * Enable debugging trace messages
 
+The fact that the data-waiting check and the read both block means
+that, if your application has to deal with other input sources than
+the GPS, you will probably have to isolate the read loop in a thread with
+a mutex lock on the gps_data structure.
+
 Here is a complete table of the binding entry points:
 
 .Entry points in client bindings
