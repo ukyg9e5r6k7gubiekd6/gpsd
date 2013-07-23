@@ -73,7 +73,7 @@ radiocommunication equipment and systems" <<IEC-PAS>>. It is
 proprietary and I have not looked at it.  Various public sources
 indicate that it has been "harmonized" with some version of NMEA 0183,
 which I also have not looked at because it too is proprietary and
-expensive, and surrounded by even more rapacious attack lawyers.
+expensive, and surrounded by rapacious attack lawyers.
 
 == Information Sources ==
 
