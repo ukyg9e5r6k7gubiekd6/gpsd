@@ -158,9 +158,17 @@ boolopts = (
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
 
+def_group = "uucp"
+
+# Gentoo, Fedora, opensuse systems use uucp for ttyS* and ttyUSB*
+if os.path.exists("/etc/gentoo-release"):
+   def_group = "uucp"
+else:
+   def_group = "dialout"
+
 nonboolopts = (
     ("gpsd_user",           "nobody",      "privilege revocation user",),
-    ("gpsd_group",          "dialout",     "privilege revocation group"),
+    ("gpsd_group",          def_group,     "privilege revocation group"),
     ("prefix",              "/usr/local",  "installation directory prefix"),
     ("limited_max_clients", 0,             "maximum allowed clients"),
     ("limited_max_devices", 0,             "maximum allowed devices"),
@@ -169,6 +177,7 @@ nonboolopts = (
     ("target",              "",            "cross-development target"),
     ("sysroot",             "",            "cross-development system root"),
     )
+
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
