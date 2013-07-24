@@ -16,6 +16,10 @@
 #include "bits.h"
 #include <stdint.h>
 
+#ifdef AIVDM_ENABLE
+
+#define AIS_MSG_PART2_FLAG 0x100
+
 static unsigned char convtab[] = {"0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVW`abcdefghijklmnopqrstuvw"};
 
 static unsigned char contab1[] = {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
@@ -88,6 +92,20 @@ static unsigned int ais_addchar(unsigned char *bits,
 }
 
 
+static unsigned int ais_adddata(unsigned char *bits,
+				unsigned int   start,
+				unsigned int   len,
+				char          *data)
+{
+    unsigned int l;
+    
+    for(l=0;l<len;l++) {
+	ais_addbits(bits, start+6*l, 6, data[l]); 
+    }
+    return 0;
+}
+
+
 static unsigned int ais_binary_to_ascii(unsigned char *bits, unsigned int len)
 {
     unsigned int l;
@@ -111,11 +129,14 @@ unsigned int ais_binary_encode(struct ais_t *ais,
     unsigned int len;
 
     len = 0;
-
+    
+    if (flag != 0) {
+        flag = AIS_MSG_PART2_FLAG;
+    }
     ais_addbits(bits,  0,  6, ais->type);
     ais_addbits(bits,  6,  2, ais->repeat);
     ais_addbits(bits,  8, 30, ais->mmsi);
-    switch (ais->type) {
+    switch (flag | ais->type) {
     case 1:	/* Position Report */
     case 2:
     case 3:
@@ -233,7 +254,28 @@ unsigned int ais_binary_encode(struct ais_t *ais,
         break;
     case 21:	/* Aid-to-Navigation Report */
         break;
-    case 24:	/* Class B CS Static Data Report */
+    case 24:	/* Class B CS Static Data Report Part 1 */
+        ais_addbits(bits,  38,  2, 0);
+        ais_addchar(bits,  40, 20, ais->type24.shipname);
+/*      ais_addbits(bits, 160,  8, ais->type24.a.spare); */
+	len = 160;
+        break;
+    case 24 | AIS_MSG_PART2_FLAG: /* Class B CS Static Data Report Part 2 */
+        ais_addbits(bits,  38,  2, 1);
+	ais_addbits(bits,  40,  8, ais->type24.shiptype);
+	ais_addchar(bits,  48,  3, &ais->type24.vendorid[0]);
+	ais_adddata(bits,  66,  3, &ais->type24.vendorid[3]);
+	ais_addchar(bits,  90,  7, ais->type24.callsign);
+	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
+	    ais_addbits(bits, 132, 30, ais->type24.mothership_mmsi);
+	} else {
+	    ais_addbits(bits, 132,  9, ais->type24.dim.to_bow);
+	    ais_addbits(bits, 141,  9, ais->type24.dim.to_stern);
+	    ais_addbits(bits, 150,  6, ais->type24.dim.to_port);
+	    ais_addbits(bits, 156,  6, ais->type24.dim.to_starboard);
+	}
+/*      ais_addbits(bits, 162,  6, ais->type24.b.spare); */
+	len = 162 + 6;
         break;
     case 27:	/* Long Range AIS Broadcast message */
         break;
@@ -241,3 +283,4 @@ unsigned int ais_binary_encode(struct ais_t *ais,
     ais_binary_to_ascii(bits, len);
     return len;
 }
+#endif /* AIVDM_ENABLE */
