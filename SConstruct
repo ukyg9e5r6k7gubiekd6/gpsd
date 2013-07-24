@@ -158,8 +158,6 @@ boolopts = (
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
 
-def_group = "uucp"
-
 # Gentoo, Fedora, opensuse systems use uucp for ttyS* and ttyUSB*
 if os.path.exists("/etc/gentoo-release"):
    def_group = "uucp"
