@@ -636,6 +636,7 @@ struct gps_device_t {
      */
 #ifdef AIVDM_ENABLE
     struct aivdm_context_t aivdm[AIVDM_CHANNELS];
+    char aivdm_ais_channel;
 #endif /* AIVDM_ENABLE */
 
     /*

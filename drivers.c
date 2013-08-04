@@ -1205,7 +1205,7 @@ const struct gps_type_t mtk3301 = {
 
 /*@ -fixedformalarray -usedef -branchstate @*/
 static bool aivdm_decode(const char *buf, size_t buflen,
-		  struct aivdm_context_t ais_contexts[AIVDM_CHANNELS],
+		  struct gps_device_t *session,
 		  struct ais_t *ais,
 		  int debug)
 {
@@ -1275,17 +1275,20 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	 */
 	if (strncmp((const char *)field[0], "!AIVDO", 6) != 0)
 	    gpsd_report(LOG_ERROR, "invalid empty AIS channel. Assuming 'A'\n");
-	ais_context = &ais_contexts[0];
+	ais_context = &session->aivdm[0];
+	session->aivdm_ais_channel ='A';
 	break;
     case '1':
 	/*@fallthrough@*/
     case 'A':
-	ais_context = &ais_contexts[0];
+	ais_context = &session->aivdm[0];
+	session->aivdm_ais_channel ='A';
 	break;
     case '2':
 	/*@fallthrough@*/
     case 'B':
-	ais_context = &ais_contexts[1];
+	ais_context = &session->aivdm[1];
+	session->aivdm_ais_channel ='A';
 	break;
     default:
 	gpsd_report(LOG_ERROR, "invalid AIS channel 0x%0X .\n", field[4][0]);
@@ -1380,7 +1383,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
     if (session->packet.type == AIVDM_PACKET) {
 	if (aivdm_decode
 	    ((char *)session->packet.outbuffer, session->packet.outbuflen,
-	     session->aivdm, &session->gpsdata.ais, session->context->debug)) {
+	     session, &session->gpsdata.ais, session->context->debug)) {
 	    return ONLINE_SET | AIS_SET;
 	} else
 	    return ONLINE_SET;

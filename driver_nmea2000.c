@@ -123,6 +123,34 @@ static int decode_ais_header(unsigned char *bu, int len, struct ais_t *ais, unsi
 }
 
 
+static void decode_ais_channel_info(unsigned char *bu,
+				    int len,
+				    unsigned int offset,
+				    struct gps_device_t *session)
+{
+    unsigned int pos, bpos;
+    unsigned char x;
+
+    pos = offset / 8;
+    bpos = offset % 8;
+    if (pos >= (unsigned int)len) {
+        session->aivdm_ais_channel = 'A';
+	return;
+    }
+    x = (bu[pos] >> bpos) & 0x1f;
+    switch (x) {
+    case 1:
+    case 3:
+        session->aivdm_ais_channel = 'B';
+	break;
+    default:
+        session->aivdm_ais_channel = 'A';
+	break;
+    }
+    return;
+}
+
+
 static int ais_turn_rate(int rate)
 {
     if (rate < 0) {
@@ -399,7 +427,7 @@ static gps_mask_t hnd_129038(unsigned char *bu, int len, PGN *pgn, struct gps_de
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+    if (decode_ais_header(bu, len, ais, 0xffffffffU) != 0) {
         ais->type1.lon       = (int)          (getles32(bu, 5) * 0.06);
 	ais->type1.lat       = (int)          (getles32(bu, 9) * 0.06);
 	ais->type1.accuracy  = (bool)         ((bu[13] >> 0) & 0x01);
@@ -412,6 +440,7 @@ static gps_mask_t hnd_129038(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type1.turn      =                 ais_turn_rate((int)getles16(bu, 23));
 	ais->type1.status    = (unsigned int) ((bu[25] >> 0) & 0xff);
 	ais->type1.maneuver  = 0; /* Not transmitted ???? */
+	decode_ais_channel_info(bu, len, 163, session);
 
 	return(ONLINE_SET | AIS_SET);
     }
@@ -427,7 +456,7 @@ static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_de
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+    if (decode_ais_header(bu, len, ais, 0xffffffffU) != 0) {
         ais->type18.lon      = (int)          (getles32(bu, 5) * 0.06);
 	ais->type18.lat      = (int)          (getles32(bu, 9) * 0.06);
 	ais->type18.accuracy = (bool)         ((bu[13] >> 0) & 0x01);
@@ -461,7 +490,7 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+    if (decode_ais_header(bu, len, ais, 0xffffffffU) != 0) {
         uint16_t length, beam, to_bow, to_starboard;
 	int l;
 
@@ -514,7 +543,7 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+    if (decode_ais_header(bu, len, ais, 0xffffffffU) != 0) {
         uint16_t  length, beam, to_bow, to_starboard, date;
 	int       l;
 	uint32_t  time;
@@ -523,7 +552,7 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
         ais->type5.ais_version   = (unsigned int) ((bu[73] >> 0) & 0x03);
 	ais->type5.imo           = (unsigned int)  getleu32(bu,  5);
-	if (ais->type5.imo == 0xffffffff) {
+	if (ais->type5.imo == 0xffffffffU) {
 	    ais->type5.imo       = 0;
 	}
 	ais->type5.shiptype      = (unsigned int) ((bu[36] >> 0) & 0xff);
@@ -606,7 +635,7 @@ static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_de
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+    if (decode_ais_header(bu, len, ais, 0xffffffffU) != 0) {
         ais->type9.lon       = (int)          (getles32(bu, 5) * 0.06);
 	ais->type9.lat       = (int)          (getles32(bu, 9) * 0.06);
 	ais->type9.accuracy  = (bool)         ((bu[13] >> 0) & 0x01);
@@ -659,7 +688,7 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+    if (decode_ais_header(bu, len, ais, 0xffffffffU) != 0) {
         int                   l;
 	int                   index   =  session->aivdm[0].type24_queue.index;
         struct ais_type24a_t *saveptr = &session->aivdm[0].type24_queue.ships[index];
@@ -690,7 +719,7 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
     print_data(bu, len, pgn);
     gpsd_report(LOG_DATA, "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    if (decode_ais_header(bu, len, ais, 0xffffffff) != 0) {
+    if (decode_ais_header(bu, len, ais, 0xffffffffU) != 0) {
 	int i, l;
 
         for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
