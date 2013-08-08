@@ -474,6 +474,7 @@ static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type18.band     = (bool)         ((bu[24] >> 5) & 0x01);
 	ais->type18.msg22    = (bool)         ((bu[24] >> 6) & 0x01);
 	ais->type18.assigned = (bool)         ((bu[24] >> 7) & 0x01);
+	decode_ais_channel_info(bu, len, 163, session);
 
 	return(ONLINE_SET | AIS_SET);
     }
@@ -528,7 +529,8 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    ais->type19.shipname[l] = (char) bu[32+l];
 	}
 	ais->type19.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
-	
+	decode_ais_channel_info(bu, len, 422, session);
+
 	return(ONLINE_SET | AIS_SET);
     }
     return(0);
@@ -620,6 +622,7 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	       ais->type5.hour,
 	       ais->type5.minute);
 #endif /* of #if NMEA2000_DEBUG_AIS */
+	decode_ais_channel_info(bu, len, 592, session);
         return(ONLINE_SET | AIS_SET);
     }
     return(0);
@@ -649,6 +652,7 @@ static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type9.dte	     = (unsigned int) ((bu[30] >> 0) & 0x01);
 /*      ais->type9.spare     = (bu[30] >> 1) & 0x7f; */
 	ais->type9.assigned  = 0; /* Not transmitted ???? */
+	decode_ais_channel_info(bu, len, 163, session);
 
         return(ONLINE_SET | AIS_SET);
     }
@@ -673,6 +677,7 @@ static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    ais->type14.text[l] = (char) bu[6+l];
 	}
 	ais->type14.text[36] = (char) 0;
+	decode_ais_channel_info(bu, len, 40, session);
 
         return(ONLINE_SET | AIS_SET);
     }
@@ -705,6 +710,8 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	index += 1;
 	index %= MAX_TYPE24_INTERLEAVE;
 	session->aivdm[0].type24_queue.index = index;
+	decode_ais_channel_info(bu, len, 200, session);
+
         return(0);
     }
     return(0);
@@ -779,6 +786,8 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		       ais->type24.dim.to_port,
 		       ais->type24.dim.to_starboard);
 #endif /* of #if NMEA2000_DEBUG_AIS */
+
+		decode_ais_channel_info(bu, len, 264, session);
 		return(ONLINE_SET | AIS_SET);
 	    }
 	}
