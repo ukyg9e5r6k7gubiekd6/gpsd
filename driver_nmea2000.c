@@ -129,7 +129,7 @@ static void decode_ais_channel_info(unsigned char *bu,
 				    struct gps_device_t *session)
 {
     unsigned int pos, bpos;
-    unsigned char x;
+    uint16_t x;
 
     pos = offset / 8;
     bpos = offset % 8;
@@ -137,7 +137,8 @@ static void decode_ais_channel_info(unsigned char *bu,
         session->aivdm_ais_channel = 'A';
 	return;
     }
-    x = (bu[pos] >> bpos) & 0x1f;
+    x = getleu16(bu, pos);
+    x = (uint16_t)((x >> bpos) & 0x1f);
     switch (x) {
     case 1:
     case 3:
