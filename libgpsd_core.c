@@ -954,11 +954,18 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    /* FALL THROUGH */
 	} else if (session->packet.type > COMMENT_PACKET) {
 	    first_sync = (session->device_type == NULL);
-	    for (dp = gpsd_drivers; *dp; dp++)
-		if (session->packet.type == (*dp)->packet_type) {
-		    (void)gpsd_switch_driver(session, (*dp)->type_name);
-		    break;
-		}
+	    /*
+	     * Only switch drivers, if we don't already have one with the
+	     * matching packet type.
+	     */
+	    if (first_sync ||
+		session->packet.type != session->device_type->packet_type) {
+		for (dp = gpsd_drivers; *dp; dp++)
+		    if (session->packet.type == (*dp)->packet_type) {
+			(void)gpsd_switch_driver(session, (*dp)->type_name);
+			break;
+		    }
+	    }
 	    /* FALL THROUGH */
 	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
 	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");

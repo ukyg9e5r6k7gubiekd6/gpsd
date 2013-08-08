@@ -65,7 +65,7 @@ then
 	echo "-t <ots>  - Run regression tests w/baton"
 	echo "-r  - run superraw regressions (r=2 mode)"
 	echo "-b  - Rebuild regression check files"
-	echo "-u <opt> - Force UDP"
+	echo "-u - Force UDP"
 	echo "-v  - view result of generating a check file"
 	echo "-o <opt> - Pass options to gpsfake"
 	echo
