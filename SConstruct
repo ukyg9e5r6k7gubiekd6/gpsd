@@ -198,6 +198,7 @@ for (name, default, help) in pathopts:
 # Environment creation
 #
 import_env = (
+    "MACOSX_DEPLOYMENT_TARGET", # Required by MacOSX 10.4 (and probably earlier)
     "DISPLAY",         # Required for dia to run under scons
     "GROUPS",          # Required by gpg
     "HOME",            # Required by gpg
@@ -469,6 +470,8 @@ if env['ncurses']:
     elif sys.platform.startswith('freebsd'):
         ncurseslibs= [ '-lncurses' ]
     elif sys.platform.startswith('openbsd'):
+        ncurseslibs= [ '-lcurses' ]
+    elif sys.platform.startswith('darwin'):
         ncurseslibs= [ '-lcurses' ]
 
 if env['usb']:
