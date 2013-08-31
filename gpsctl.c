@@ -30,52 +30,6 @@ static unsigned int timeout = 8;
  */
 #define REDIRECT_SNIFF	15
 
-void gpsd_report(int errlevel UNUSED, const char *fmt, ... )
-/* our version of the logger */
-{
-    if (errlevel <= debuglevel) {
-	char *err_str;
-	va_list ap;
-	va_start(ap, fmt);
-	switch ( errlevel ) {
-	case LOG_ERROR:
-		err_str = "ERROR: ";
-		break;
-	case LOG_SHOUT:
-		err_str = "SHOUT: ";
-		break;
-	case LOG_WARN:
-		err_str = "WARN: ";
-		break;
-	case LOG_INF:
-		err_str = "INFO: ";
-		break;
-	case LOG_DATA:
-		err_str = "DATA: ";
-		break;
-	case LOG_PROG:
-		err_str = "PROG: ";
-		break;
-	case LOG_IO:
-		err_str = "IO: ";
-		break;
-	case LOG_SPIN:
-		err_str = "SPIN: ";
-		break;
-	case LOG_RAW:
-		err_str = "RAW: ";
-		break;
-	default:
-		err_str = "UNK: ";
-	}
-
-	(void)fputs("gpsctl:", stderr);
-	(void)fputs(err_str, stderr);
-	(void)vfprintf(stderr, fmt, ap);
-	va_end(ap);
-    }
-}
-
 /*@ -noret @*/
 static gps_mask_t get_packet(struct gps_device_t *session)
 /* try to get a well-formed packet from the GPS */
