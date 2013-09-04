@@ -51,15 +51,15 @@ static sourcetype_t gpsd_classify(const char *path)
 	sourcetype_t devtype = source_rs232;
 #ifdef __linux__
 	/* Linux major device numbers live here
-	 * ftp://ftp.kernel.org/pub/linux/docs/device-list/devices-2.6+.txt
+	 * https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Documentation/devices.txt
 	 */
 	int devmajor = major(sb.st_rdev);
         /* 207 are Freescale i.MX UARTs (ttymxc*) */
 	if (devmajor == 4 || devmajor == 204 || devmajor == 207)
 	    devtype = source_rs232;
-	else if (devmajor == 188)
+	else if (devmajor == 188 || devmajor == 166)
 	    devtype = source_usb;
-	else if (devmajor == 216 || devtype == 217)
+	else if (devmajor == 216 || devmajor == 217)
 	    devtype = source_bluetooth;
 	else if (devmajor == 3 || (devmajor >= 136 && devmajor <= 143))
 	    devtype = source_pty;
