@@ -52,7 +52,7 @@
 * Sat Oct 29 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.3
   Improvements to build and release-procedure documentation. Make
   sirf=no build work again. Main reason for this release is to make
-  chrpath a mandatory build depedency and explain why in the build
+  chrpath a mandatory build dependency and explain why in the build
   documentation.
 
 * Wed Oct 25 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2 
