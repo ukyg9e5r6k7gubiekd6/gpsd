@@ -17,6 +17,7 @@
 
 # Unfinished items:
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
+# * Coveraging mode: gcc "-coverage" flag requires a hack for building the python bindings
 
 # Release identification begins here
 gpsd_version = "3.10~dev"
@@ -250,10 +251,6 @@ for key, value in os.environ.iteritems():
     if key.startswith('CCC_'):
         env.Append(ENV={key:value})
 
-# FIXME: Set up compilation for gcov - doesn't work yet.
-if env['coveraging']:
-    env['CFLAGS'].append(['-fprofile-arcs', '-ftest-coverage'])
-
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
@@ -294,9 +291,16 @@ if not 'CCFLAGS' in os.environ:
     if env['profiling']:
         env.Append(CCFLAGS=['-pg'])
         env.Append(LDFLAGS=['-pg'])
+    # Should we build with coveraging?
+    if env['coveraging']:
+        env.Append(CFLAGS=['-coverage'])
+        env.Append(LDFLAGS=['-coverage'])
+        env.Append(LINKFLAGS=['-coverage'])
     # Should we build with debug symbols?
     if env['debug']:
         env.Append(CCFLAGS=['-g'])
+    # Should we build with optimisation?
+    if env['debug'] or env['coveraging']:
         env.Append(CCFLAGS=['-O0'])
     else:
         env.Append(CCFLAGS=['-O2'])
@@ -948,10 +952,6 @@ gpsmon_sources = [
 if not env['shared'] or not env["implicit_link"]:
     env.MergeFlags("-lm")
 
-# FIXME: Part of an attempt to support coverage testing.
-if env['coveraging']:
-    env.MergeFlags("-lgcov")
-
 gpsd_env = env.Clone()
 gpsd_env.MergeFlags("-pthread")
 
@@ -1036,6 +1036,11 @@ else:
         if vars[i] is None:
             vars[i] = []
     (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy, ldflags) = vars
+    # FIXME: build of python wrappers doesn't pickup flags set for coveraging, manually add them here
+    if env['coveraging']:
+        basecflags += ' -coverage'
+        ldflags += ' -coverage'
+        ldshared += ' -coverage'
     # in case CC/CXX was set to the scan-build wrapper,
     # ensure that we build the python modules with scan-build, too
     if env['CC'] is None or env['CC'].find('scan-build') < 0:
