@@ -36,10 +36,10 @@ extern "C" {
  * 5.0 - MAXCHANNELS bumped from 20 to 32 for GLONASS (Mar 2011, release 2.96)
  *       gps_open() becomes reentrant, what gps_open_r() used to be.
  *       gps_poll() removed in favor of gps_read().  The raw hook is gone.
- * 5.1 - GPS_PATH_MAX uses system PATH_MAX.
+ * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
-#define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
+#define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
 
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
@@ -1645,6 +1645,11 @@ struct ais_t
 	/* Type 24 - Class B CS Static Data Report */
 	struct {
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];	/* vessel name */
+	    enum {
+		both,
+		part_a,
+		part_b,
+	    } part;
 	    unsigned int shiptype;	/* ship type code */
 	    char vendorid[8];		/* vendor ID */
 	    char callsign[8];		/* callsign */
@@ -1776,6 +1781,7 @@ struct policy_t {
     int raw;				/* requesting raw data? */
     bool scaled;			/* requesting report scaling? */
     bool timing;			/* requesting timing info */
+    bool split24;			/* requesting split AIS Type 24s */
     int loglevel;			/* requested log level of messages */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
@@ -1801,6 +1807,7 @@ typedef int socket_t;
 #define WATCH_SCALED	0x000100u	/* scale output to floats */
 #define WATCH_TIMING	0x000200u	/* timing information */
 #define WATCH_DEVICE	0x000800u	/* watch specific device */
+#define WATCH_SPLIT24	0x001000u	/* split AIS Type 24s */
 #define WATCH_NEWSTYLE	0x010000u	/* force JSON streaming */
 #define WATCH_OLDSTYLE	0x020000u	/* force old-style streaming */
 

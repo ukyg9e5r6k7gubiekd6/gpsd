@@ -620,6 +620,7 @@ static void detach_client(struct subscriber_t *sub)
     sub->policy.raw = 0;
     sub->policy.scaled = false;
     sub->policy.timing = false;
+    sub->policy.split24 = false;
     sub->policy.devpath[0] = '\0';
     sub->fd = UNALLOCATED_FD;
     /*@+mustfreeonly@*/

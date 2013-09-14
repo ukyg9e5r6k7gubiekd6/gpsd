@@ -4,6 +4,7 @@
   Tweaks of Evermore support remove code and suppress spurious error messages.
   Minor fix to AIVDM unpacking of Type 123 radio field.
   Longer maximum path names (required an object library version bump.
+  New split24 option supports passing through AIS type 24 message halves.
 
 * Wed 1 May 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.9
   Note to packagers: this is an urgent release that fixes a possible

@@ -423,13 +423,14 @@ void json_watch_dump(const struct policy_t *ccp,
 {
     /*@-compdef@*/
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,\"timing\":%s,",
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,\"timing\":%s,\"split24\":%s",
 		   ccp->watcher ? "true" : "false",
 		   ccp->json ? "true" : "false",
 		   ccp->nmea ? "true" : "false",
 		   ccp->raw,
 		   ccp->scaled ? "true" : "false",
-		   ccp->timing ? "true" : "false");
+		   ccp->timing ? "true" : "false",
+		   ccp->split24 ? "true" : "false");
     if (ccp->devpath[0] != '\0')
 	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 		       "\"device\":\"%s\",", ccp->devpath);
@@ -2963,37 +2964,50 @@ void json_aivdm_dump(const struct ais_t *ais,
 	}
 	break;
     case 24:			/* Class B CS Static Data Report */
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"shipname\":\"%s\",",
-		       json_stringify(buf1, sizeof(buf1),
+	if (ais->type24.part != both) {
+	    static char *partnames[] = {"AB", "A", "B"};
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"part\":\"%s\",",
+			   json_stringify(buf1, sizeof(buf1),
+					  partnames[ais->type24.part]));
+	}
+	if (ais->type24.part != part_b)
+	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			   "\"shipname\":\"%s\",",
+			   json_stringify(buf1, sizeof(buf1),
 				      ais->type24.shipname));
-	if (scaled) {
+	if (ais->type24.part != part_a) {
+	    if (scaled) {
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"shiptype\":\"%s\",",
+			       SHIPTYPE_DISPLAY(ais->type24.shiptype));
+	    } else {
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"shiptype\":%u,", ais->type24.shiptype);
+	    }
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"shiptype\":\"%s\",",
-			   SHIPTYPE_DISPLAY(ais->type24.shiptype));
-	} else {
-	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"shiptype\":%u,", ais->type24.shiptype);
+			   "\"vendorid\":\"%s\",\"callsign\":\"%s\",",
+			   json_stringify(buf1, sizeof(buf1),
+					  ais->type24.vendorid),
+			   json_stringify(buf2, sizeof(buf2),
+					  ais->type24.callsign));
+	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"mothership_mmsi\":%u}\r\n",
+			       ais->type24.mothership_mmsi);
+	    } else {
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"to_bow\":%u,\"to_stern\":%u,"
+			       "\"to_port\":%u,\"to_starboard\":%u",
+			       ais->type24.dim.to_bow,
+			       ais->type24.dim.to_stern,
+			       ais->type24.dim.to_port,
+			       ais->type24.dim.to_starboard);
+	    }
 	}
-	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "\"vendorid\":\"%s\",\"callsign\":\"%s\",",
-		       json_stringify(buf1, sizeof(buf1),
-				      ais->type24.vendorid),
-		       json_stringify(buf2, sizeof(buf2),
-				      ais->type24.callsign));
-	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
-	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"mothership_mmsi\":%u}\r\n",
-			   ais->type24.mothership_mmsi);
-	} else {
-	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"to_bow\":%u,\"to_stern\":%u,"
-			   "\"to_port\":%u,\"to_starboard\":%u}\r\n",
-			   ais->type24.dim.to_bow,
-			   ais->type24.dim.to_stern,
-			   ais->type24.dim.to_port,
-			   ais->type24.dim.to_starboard);
-	}
+	if (buf[strlen(buf)-1] == ',')
+	    buf[strlen(buf)-1] = '\0';
+	strncat(buf, "}\r\n", buflen);
 	break;
     case 25:			/* Binary Message, Single Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),

@@ -1207,7 +1207,7 @@ const struct gps_type_t mtk3301 = {
 static bool aivdm_decode(const char *buf, size_t buflen,
 		  struct gps_device_t *session,
 		  struct ais_t *ais,
-		  int debug)
+		  bool split24, int debug)
 {
 #ifdef __UNUSED_DEBUG__
     char *sixbits[64] = {
@@ -1363,7 +1363,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	return ais_binary_decode(ais,
 				 ais_context->bits,
 				 ais_context->bitlen,
-				 &ais_context->type24_queue);
+				 split24 ? NULL : &ais_context->type24_queue);
     }
 
     /* we're still waiting on another sentence */
@@ -1383,7 +1383,9 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
     if (session->packet.type == AIVDM_PACKET) {
 	if (aivdm_decode
 	    ((char *)session->packet.outbuffer, session->packet.outbuflen,
-	     session, &session->gpsdata.ais, session->context->debug)) {
+	     session, &session->gpsdata.ais, 
+	     session->gpsdata.policy.split24,
+	     session->context->debug)) {
 	    return ONLINE_SET | AIS_SET;
 	} else
 	    return ONLINE_SET;

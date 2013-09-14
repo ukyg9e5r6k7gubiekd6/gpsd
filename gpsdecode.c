@@ -17,6 +17,7 @@
 static int verbose = 0;
 static bool scaled = true;
 static bool json = true;
+static bool split24 = false;
 static unsigned int ntypes = 0;
 static unsigned int typelist[32];
 
@@ -532,6 +533,7 @@ static void decode(FILE *fpin, FILE*fpout)
     gpsd_clear(&session);
     session.gpsdata.gps_fd = fileno(fpin);
     session.gpsdata.dev.baudrate = 38400;     /* hack to enable subframes */
+    session.gpsdata.policy.split24 = split24;
     (void)strlcpy(session.gpsdata.dev.path,
 		  "stdin",
 		  sizeof(session.gpsdata.dev.path));
@@ -621,7 +623,7 @@ int main(int argc, char **argv)
     enum
     { doencode, dodecode } mode = dodecode;
 
-    while ((c = getopt(argc, argv, "cdejpt:uvVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "cdejpst:uvVD:")) != EOF) {
 	switch (c) {
 	case 'c':
 	    json = false;
@@ -637,6 +639,10 @@ int main(int argc, char **argv)
 
 	case 'j':
 	    json = true;
+	    break;
+
+	case 's':
+	    split24 = true;
 	    break;
 
 	case 't':

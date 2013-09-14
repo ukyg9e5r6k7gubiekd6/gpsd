@@ -1003,6 +1003,15 @@ object.</para>
 	reports.</entry>
 </row>
 <row>
+	<entry>split24</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>If true, aggregate AIS type24 sentence parts.  If false,
+        report each part as a separatee JSON object, leaving the
+        client to match MMSIs and aggregate.  Default is
+        false. Applies only to AIS reports.</entry>
+</row>
+<row>
 	<entry>device</entry>
 	<entry>No</entry>
 	<entry>string</entry>
