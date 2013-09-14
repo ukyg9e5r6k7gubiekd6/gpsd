@@ -253,6 +253,29 @@ unsigned int ais_binary_encode(struct ais_t *ais,
 	len = 307 + 5;
         break;
     case 21:	/* Aid-to-Navigation Report */
+        ais_addbits(bits,  38,   5,          ais->type21.aid_type);
+	ais_addchar(bits,  43,  20,          ais->type21.name);
+	ais_addbits(bits, 163,   1,          ais->type21.accuracy);
+	ais_addbits(bits, 164,  28,          ais->type21.lon);
+	ais_addbits(bits, 192,  27,          ais->type21.lat);
+	ais_addbits(bits, 219,   9,          ais->type21.to_bow);
+	ais_addbits(bits, 228,   9,          ais->type21.to_stern);
+	ais_addbits(bits, 237,   6,          ais->type21.to_port);
+	ais_addbits(bits, 243,   6,          ais->type21.to_starboard);
+	ais_addbits(bits, 249,   4,          ais->type21.epfd);
+        ais_addbits(bits, 253,   6, 	     ais->type21.second);
+	ais_addbits(bits, 259,   1,          ais->type21.off_position);
+	ais_addbits(bits, 260,   8,          ais->type21.regional);
+	ais_addbits(bits, 268,   1,          ais->type21.raim);
+	ais_addbits(bits, 269,   1,          ais->type21.virtual_aid);
+	ais_addbits(bits, 270,   1,          ais->type21.assigned);
+/*      ais_addbits(bits, 271,   1,          ais->type21.spare);            */
+	len = 271 + 1;
+	if (strlen(ais->type21.name) > 20) {
+	    unsigned int extralen = strlen(ais->type21.name) - 20;
+	    ais_addchar(bits, 272, extralen, ais->type21.name + 20);
+	    len += extralen * 6;
+	}
         break;
     case 24:	/* Class B CS Static Data Report Part 1 */
         ais_addbits(bits,  38,  2, (uint64_t)0);
@@ -274,10 +297,18 @@ unsigned int ais_binary_encode(struct ais_t *ais,
 	    ais_addbits(bits, 150,  6, (uint64_t)ais->type24.dim.to_port);
 	    ais_addbits(bits, 156,  6, (uint64_t)ais->type24.dim.to_starboard);
 	}
-/*      ais_addbits(bits, 162,  6, ais->type24.b.spare); */
+/*      ais_addbits(bits, 162,  6,          ais->type24.b.spare); */
 	len = 162 + 6;
         break;
     case 27:	/* Long Range AIS Broadcast message */
+        ais_addbits(bits,  38,  1,          ais->type27.accuracy);
+	ais_addbits(bits,  39,  1,          ais->type27.raim);
+	ais_addbits(bits,  40,  4,          ais->type27.status);
+	ais_addbits(bits,  44, 18,          ais->type27.lon);
+	ais_addbits(bits,  62, 17,          ais->type27.lat);
+	ais_addbits(bits,  79,  6,          ais->type27.speed);
+	ais_addbits(bits,  85,  9,          ais->type27.course);
+	ais_addbits(bits,  94,  1,          ais->type27.gnss);
         break;
     }
     ais_binary_to_ascii(bits, len);
