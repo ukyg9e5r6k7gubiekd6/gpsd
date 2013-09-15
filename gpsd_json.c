@@ -2986,9 +2986,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"shiptype\":%u,", ais->type24.shiptype);
 	    }
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"vendorid\":\"%s\",\"callsign\":\"%s\",",
+			   "\"vendorid\":\"%s\",\"model\":%u,\"serial\":%u,\"callsign\":\"%s\",",
 			   json_stringify(buf1, sizeof(buf1),
 					  ais->type24.vendorid),
+			   ais->type24.model,
+			   ais->type24.serial,
 			   json_stringify(buf2, sizeof(buf2),
 					  ais->type24.callsign));
 	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {

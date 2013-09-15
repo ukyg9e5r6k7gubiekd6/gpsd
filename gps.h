@@ -36,7 +36,9 @@ extern "C" {
  * 5.0 - MAXCHANNELS bumped from 20 to 32 for GLONASS (Mar 2011, release 2.96)
  *       gps_open() becomes reentrant, what gps_open_r() used to be.
  *       gps_poll() removed in favor of gps_read().  The raw hook is gone.
- * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added.
+ * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added. New
+ *       model and serial members in part B of AIS type 24, conforming
+ *       with ITU-R 1371-4.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
@@ -1652,6 +1654,8 @@ struct ais_t
 	    } part;
 	    unsigned int shiptype;	/* ship type code */
 	    char vendorid[8];		/* vendor ID */
+	    unsigned int model;		/* unit model code */
+	    unsigned int serial;	/* serial number */
 	    char callsign[8];		/* callsign */
 	    union {
 		unsigned int mothership_mmsi;	/* MMSI of main vessel */

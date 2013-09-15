@@ -717,6 +717,8 @@ ais_specs = (
         ('shipname',          'string',        None),	# Part A
         ('shiptype',          'uinteger',      '0'),	# Part B
         ('vendorid',          'string',        None),	# Part B
+        ('model',             'uinteger',      '0'),	# Part B
+        ('serial',            'uinteger',      '0'),	# Part B
         ('callsign',          'string',        None),	# Part B
         ('mothership_mmsi',   'uinteger',      '0'),	# Part B
         ('dim.to_bow',        'uinteger',      '0'),	# Part B

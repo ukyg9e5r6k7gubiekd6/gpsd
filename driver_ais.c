@@ -784,7 +784,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	}
 	ais->type21.aid_type = UBITS(38, 5);
 	from_sixbit((unsigned char *)bits,
-		    43, 20, ais->type21.name);
+		    43, 21, ais->type21.name);
 	if (strlen(ais->type21.name) == 20 && bitlen > 272)
 	    from_sixbit((unsigned char *)bits,
 			272, (bitlen - 272)/6,
@@ -883,7 +883,20 @@ bool ais_binary_decode(struct ais_t *ais,
 		return false;
 	    }
 	    ais->type24.shiptype = UBITS(40, 8);
+	    /*
+	     * In ITU-R 1371-4, there are new model and serial fields 
+	     * carved out of the right-hand end of vendorid, which is
+	     * reduced from 7 chars to 3.  It is not clear in which
+	     * minor revision this change took place.  To cope with
+	     * older AIS implementations, unpack the trailing bits
+	     * *both* ways; truly revision-4-conformant implementations
+	     * will have up to four characters of trailing garbage on
+	     * the vendorid, and older implementations will have
+	     * garbafe in the model and serial fields.
+	     */
 	    UCHARS(48, ais->type24.vendorid);
+	    ais->type24.model = UBITS(66, 4);
+	    ais->type24.serial = UBITS(70, 20);
 	    UCHARS(90, ais->type24.callsign);
 	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 		ais->type24.mothership_mmsi   = UBITS(132, 30);

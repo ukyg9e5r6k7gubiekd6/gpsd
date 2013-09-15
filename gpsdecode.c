@@ -429,7 +429,13 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "%u|", ais->type24.shiptype);
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		       "%s|%s|", ais->type24.vendorid, ais->type24.callsign);
+		       "%s|", ais->type24.vendorid);
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "%u|", ais->type24.model);
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "%u|", ais->type24.serial);
+	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		       "%s|", ais->type24.callsign);
 	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "%u", ais->type24.mothership_mmsi);

@@ -3955,7 +3955,7 @@ is thanks to Kurt Schwehr.
 |40-159  |120 | Vessel Name           | shipname       |t|(Part A) 20 sixbit chars
 |160-167 |  8 | Spare                 |                |x|(Part A) Not used
 |40-47   |  8 | Ship Type             | shiptype       |e|(Part B) See "Ship Types"
-|48-65   | 18 | Manufacturer ID       | manufacturer   |t|(Part B) 3 six-bit chars
+|48-65   | 18 | Vendor ID             | vendorid       |t|(Part B) 3 six-bit chars
 |66-69   |  4 | Unit Model Code       | model          |u|(Part B)
 |70-89   | 20 | Serial Number         | serial         |u|(Part B)
 |90-131  | 42 | Call Sign             | callsign       |t|(Part B) As in Message Type 5
@@ -3974,7 +3974,7 @@ as a Part B; values 2 and 3 are not allowed.
 Bits 48-89 are as described in ITU-R 1371-4.  In some earlier versions
 this was one sixbit-encoded 42-bit string field, the the name of the
 AIS equipment vendor.  It is not clear that field practice has caught
-up with this incompatible change; as of version 3.9, GPSD still treats
+up with this incompatible change. As of version 3.9, GPSD still treats
 this as a single string field named 'vendorid'.
 
 Interpretation of the 30 bits 132-162 in Part B is variable. If the
