@@ -906,8 +906,14 @@ if qt_env:
 gpslibs = ["-lgps", "-lm"]
 gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
 
+
 # We need to be able to make a static client library for ad-hoc testing.
-# (None of the normal targets relies on this.)  You can use this
+# Without this, we can't run regression tests in the build directory 
+# without either (a) having installed the GPSD shared libraries in system
+# space (which requires root) or (b) having either '.' or an absolute
+# path in the shared library load path (which is a security hole).
+#
+# None of the normal targets relies on this library.  You can use it
 # with a build command like
 #
 # g++ --static streamtest.cpp libgps.a -lrt -o streamtest
