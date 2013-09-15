@@ -40,7 +40,7 @@ static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
     char newchar;
 
     /* six-bit to ASCII */
-    for (i = 0; i < count - 1; i++) {
+    for (i = 0; i < count; i++) {
 	newchar = sixchr[ubits(bitvec, start + 6 * i, 6U, false)];
 	if (newchar == '@')
 	    break;
@@ -70,7 +70,8 @@ bool ais_binary_decode(struct ais_t *ais,
 #define BITS_PER_BYTE	8
 #define UBITS(s, l)	ubits((unsigned char *)bits, s, l, false)
 #define SBITS(s, l)	sbits((signed char *)bits, s, l, false)
-#define UCHARS(s, to)	from_sixbit((unsigned char *)bits, s, sizeof(to), to)
+#define UCHARS(s, to)	from_sixbit((unsigned char *)bits, s, sizeof(to)-1, to)
+#define ENDCHARS(s, to)	from_sixbit((unsigned char *)bits, s, bitlen-(s)-1, to)
     ais->type = UBITS(0, 6);
     ais->repeat = UBITS(6, 2);
     ais->mmsi = UBITS(8, 30);
@@ -328,9 +329,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		ais->type6.dac1fid30.linkage   = UBITS(88, 10);
-		from_sixbit((unsigned char *)bits,
-			    98, bitlen-98,
-			    ais->type6.dac1fid30.text);
+		ENDCHARS(98, ais->type6.dac1fid30.text);
 		imo = true;
 		break;
 	    case 32:	/* IMO289 - Tidal Window */
@@ -536,9 +535,7 @@ bool ais_binary_decode(struct ais_t *ais,
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		ais->type8.dac1fid29.linkage   = UBITS(56, 10);
-		from_sixbit((unsigned char *)bits,
-			    66, bitlen-66,
-			    ais->type8.dac1fid29.text);
+		ENDCHARS(66, ais->type8.dac1fid29.text);
 		imo = true;
 		break;
 	    case 31:        /* IMO289 - Meteorological/Hydrological data */
@@ -629,9 +626,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	ais->type12.dest_mmsi      = UBITS(40, 30);
 	ais->type12.retransmit     = (bool)UBITS(70, 1);
 	//ais->type12.spare        = UBITS(71, 1);
-	from_sixbit((unsigned char *)bits,
-		    72, bitlen-72,
-		    ais->type12.text);
+	ENDCHARS(72, ais->type12.text);
 	break;
     case 14:	/* Safety Related Broadcast Message */
 	if (bitlen < 40 || bitlen > 1008) {
@@ -640,9 +635,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	    return false;
 	}
 	//ais->type14.spare          = UBITS(38, 2);
-	from_sixbit((unsigned char *)bits,
-		    40, bitlen-40,
-		    ais->type14.text);
+	ENDCHARS(40, ais->type14.text);
 	break;
     case 15:	/* Interrogation */
 	if (bitlen < 88 || bitlen > 168) {
@@ -784,11 +777,7 @@ bool ais_binary_decode(struct ais_t *ais,
 	}
 	ais->type21.aid_type = UBITS(38, 5);
 	from_sixbit((unsigned char *)bits,
-		    43, 21, ais->type21.name);
-	if (strlen(ais->type21.name) == 20 && bitlen > 272)
-	    from_sixbit((unsigned char *)bits,
-			272, (bitlen - 272)/6,
-			ais->type21.name+20);
+		    43, 20, ais->type21.name);
 	ais->type21.accuracy     = UBITS(163, 1);
 	ais->type21.lon          = SBITS(164, 28);
 	ais->type21.lat          = SBITS(192, 27);
@@ -804,6 +793,8 @@ bool ais_binary_decode(struct ais_t *ais,
 	ais->type21.virtual_aid  = UBITS(269, 1)!=0;
 	ais->type21.assigned     = UBITS(270, 1)!=0;
 	//ais->type21.spare      = UBITS(271, 1);
+	if (strlen(ais->type21.name) == 20 && bitlen > 272)
+	    ENDCHARS(272, ais->type21.name+20);
 	break;
     case 22:	/* Channel Management */
 	if (bitlen != 168) {
