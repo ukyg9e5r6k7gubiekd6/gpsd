@@ -384,6 +384,12 @@ number, including zero.
 
 == AIS Payload Interpretation ==
 
+The following table describes message types that are international
+standards from <<ITU1371>> and its revisions.  There are also local
+and regional extensions used on inland waterways such as the Danube
+and the Thames and in British and Irish coastal waters; pointers
+to some of these are included later in this document.
+
 Note that many sources use 1-origin numbering for the bits.  We'll
 use 0-origin in this document.
 
@@ -833,11 +839,11 @@ values.
 === Type 6: Binary Addressed Message ===
 
 Message type 6 is an addressed point-to-point message with unspecified
-binary payload.  The St. Lawrence Seaway AIS system and the USG PAWSS
-system use this payload for local extension messages. <<IMO236>> and
-<<IMO289>> describe payload use as international extension messages.
-This type is variable in length up to a maximum of 1008 bits (up to 5
-AIVDM sentence payloads).
+binary payload.  The St. Lawrence Seaway AIS system, the USG PAWSS
+system, and the Port Authority of London use this payload for local
+extension messages. <<IMO236>> and <<IMO289>> describe payload use as
+international extension messages.  This type is variable in length up
+to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -862,7 +868,8 @@ Interpretation of the binary payload is controlled by:
   United States.  It uses the same encoding as the area designator in
   MMMSIs; see <<ITU-MID>>. 1 designates international (ITU) messages.
 
-* The FID, which is the Functional ID for a message subtype.
+* The FID, which is the Functional ID for a message subtype. In some
+  sources this is abbreviated FI.
 
 The following is a non-exhaustive list of standardized DAC-FID pairs
 in use for type 6.
@@ -1791,11 +1798,11 @@ MMSIs included.
 === Type 8: Binary Broadcast Message ===
 
 Message type 8 is a broadcast message with unspecified binary payload.
-The St. Lawrence Seaway AIS system and the USG PAWSS system use this
-payload for local extension messages. <<IMO236>> and <<IMO289>>
-describe payload use as international extension messages. This type is
-variable in length up to a maximum of 1008 bits (up to 5 AIVDM
-sentence payloads).
+The St. Lawrence Seaway AIS system, the USG PAWSS system, and the Port
+Authority of London use this payload for local extension
+messages. <<IMO236>> and <<IMO289>> describe payload use as
+international extension messages. This type is variable in length up
+to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -4090,7 +4097,7 @@ increased propagation delays associated with long-range detection
 
 == Local extensions ==
 
-Some regional authorities extend the AIS message set.
+Some regional authorities extend the AIS message set. 
 
 The St. Lawrence Seaway broadcasts hydrological and lock-scheduling
 messages using special encodings of the binary data of message types 6
@@ -4103,8 +4110,18 @@ System) which uses extended AIS binary formats. <<SEAWAY>> says it's
 intercompatible with the St. Lawrence Seaway system and describes three 
 PAWSS-specific messages in its Appendix A.
 
+Since 2007 the Port Authority of London has operated an Thames AIS
+system covering the Thames River; it uses extensions of message types
+6 and 8.  It is describes in <<THAMES>>.
+
+Since 2006 there has been some effort to standardize inland-waterway
+extensions, described in <<INLAND>>.  It is unclear to what extent 
+older deployments such as the PAWS/St. Lawrence systems conform to it.
+There is an AIS extension called "RIS" (River Information System) that
+covers portions of the Danube River and Black Sea which does conform.
+
 <<IMO289>> standardizes some subtypes of messages 6 and 8 similar to
-PAWSS messages for DAC 1, the unternational jurisdiction code. However,
+PAWSS messages for DAC 1, the international jurisdiction code. However,
 in some cases identically named subtypes are assigned different FIDs.
 
 === U.S. Coast Guard Extended AIVDM ===
@@ -4438,8 +4455,12 @@ Identification System]
   its home location is unstable. It is probably best found by typing
   the title into a search engine.
 
+- [[[INLAND]]] http://www.unece.org/fileadmin/DAM/trans/doc/finaldocs/sc3/ECE-TRANS-SC3-176e.pdf[International Standard for tracking and tracing on Inland Waterways]
+
 - [[[SEAWAY]]] http://www.greatlakes-seaway.com/en/pdf/aisdata.pdf[St. Lawrence
   Seaway AIS Data Messaging Formats and Specifications]
+
+- [[[THAMES]]] http://www.pla.co.uk/pdfs/maritime/APPENDIX_I__II_amendment_for_2012_byelaws_FINAL.pdf[Thames AIS - Technical Requirements Specification]
 
 - [[[IMO236]]] http://www.imo.org/includes/blastData.asp/doc_id=4503&filename=236.pdf[IMO
   Circular 236: Guidance on the Application of AIS Binary Messages (May 2004)]
@@ -4626,4 +4647,5 @@ showing up  on satellite feeds.
 Version 1.42 fixes a typo in the Type 4 message description.
 
 Version 1.43 describes the ITU-R 1371-4 breakdown of the Type 24
-Vendor ID field.
+Vendor ID field and adds information on AIS standards for inland
+waterways.
