@@ -1288,7 +1288,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	/*@fallthrough@*/
     case 'B':
 	ais_context = &session->aivdm[1];
-	session->aivdm_ais_channel ='A';
+	session->aivdm_ais_channel ='B';
 	break;
     default:
 	gpsd_report(LOG_ERROR, "invalid AIS channel 0x%0X .\n", field[4][0]);
