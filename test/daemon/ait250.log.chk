@@ -217,7 +217,7 @@ $GPRMC,194936.00,A,5241.99789,N,00517.56508,E,0.014,,010809,,,A*7C
 $GPGBS,194936.00,3.0,1.9,4.2,,,,*4C
 {"class":"TPV","tag":"GBS","mode":2,"time":"2009-08-01T19:49:36.000Z","ept":0.005,"lat":52.699964833,"lon":5.292751333,"epx":1.900,"epy":3.000,"track":0.0000,"speed":0.007}
 !AIVDM,1,1,,B,H3`gaQ4UDBE5847@9nohh01@3220,0*7F
-{"class":"AIS","type":24,"repeat":0,"mmsi":244050308,"scaled":false,"shipname":"TYPHOON","shiptype":37,"vendorid":"TRUEHDG","callsign":"PI6700","to_bow":10,"to_stern":3,"to_port":2,"to_starboard":2}
+{"class":"AIS","type":24,"repeat":0,"mmsi":244050308,"scaled":false,"shipname":"TYPHOON","shiptype":37,"vendorid":"TRUEHDG","model":1,"serial":295175,"callsign":"PI6700","to_bow":10,"to_stern":3,"to_port":2,"to_starboard":2}
 !AIVDO,1,1,,,B3aC3LP00063ai7RNp`03wj5sP06,0*11
 {"class":"AIS","type":18,"repeat":0,"mmsi":244630386,"scaled":false,"reserved":0,"speed":0,"accuracy":false,"lon":3175650,"lat":31619978,"course":0,"heading":511,"second":36,"regional":0,"cs":true,"display":false,"dsc":true,"band":true,"msg22":true,"raim":false,"radio":917510}
 $GPRMC,194937.00,A,5241.99795,N,00517.56519,E,0.008,,010809,,,A*7D
