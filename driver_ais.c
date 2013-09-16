@@ -27,6 +27,7 @@
  */
 
 static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
+/* beginning at bitvec bit start, unpack count sixbit characters */
 {
     /*@ +type @*/
 #ifdef S_SPLINT_S
@@ -71,7 +72,7 @@ bool ais_binary_decode(struct ais_t *ais,
 #define UBITS(s, l)	ubits((unsigned char *)bits, s, l, false)
 #define SBITS(s, l)	sbits((signed char *)bits, s, l, false)
 #define UCHARS(s, to)	from_sixbit((unsigned char *)bits, s, sizeof(to)-1, to)
-#define ENDCHARS(s, to)	from_sixbit((unsigned char *)bits, s, bitlen-(s)-1, to)
+#define ENDCHARS(s, to)	from_sixbit((unsigned char *)bits, s, (bitlen-(s))/6,to)
     ais->type = UBITS(0, 6);
     ais->repeat = UBITS(6, 2);
     ais->mmsi = UBITS(8, 30);
