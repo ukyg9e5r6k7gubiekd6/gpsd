@@ -3978,11 +3978,14 @@ If the Part Number field is 0, the rest of the message is interpreted
 as a Part A; if it is 1, the rest of the message is interpreted
 as a Part B; values 2 and 3 are not allowed.
 
-Bits 48-89 are as described in ITU-R 1371-4.  In some earlier versions
-this was one sixbit-encoded 42-bit string field, the the name of the
-AIS equipment vendor.  It is not clear that field practice has caught
-up with this incompatible change. As of version 3.9, GPSD still treats
-this as a single string field named 'vendorid'.
+Bits 48-89 are as described in ITU-R 1371-4.  In earlier versions to
+1371-3 this was one sixbit-encoded 42-bit (7-character) string field,
+the the name of the AIS equipment vendor.  The last 4 characters of
+the string are reinterpreted as a model/serial numeric pair. It is not
+clear that field practice has caught up with this incompatible change.
+Implementations would be wise to decode that but span in both ways and
+trust human eyes to detect when the final 4 characters of the string
+or the model and serial fields are garbage.
 
 Interpretation of the 30 bits 132-162 in Part B is variable. If the
 MMSI at 8-37 is that of an auxiliary craft, the entry is taken to
@@ -4439,10 +4442,11 @@ Identification System]
   Carriage Requirements]
 
 - [[[ITU1371]]]
-  http://www.itu.int/rec/R-REC-M.1371-4-201004-I/en:
+  http://www.itu.int/rec/R-REC-M.1371/en
   ITU Recommendation on the Technical Characteristics for a Universal
   Shipborne Automatic Identification System (AIS) using Time Division
-  Multiple Access in the Maritime Mobile Band]. 
+  Multiple Access in the Maritime Mobile Band]. All versions are
+  available here.
 
 - [[[IALA]]]  http://www.ialathree.org/iala/pages/AIS/IALATech1.5.pdf[IALA
   Technical Clarifications on Recommendation ITU-R M.1371-1]
