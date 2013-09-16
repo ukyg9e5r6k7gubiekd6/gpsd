@@ -121,8 +121,7 @@ void putbef32(char *buf, int off, float val)
     union int_float i_f;
 
     i_f.f = val;
-    /* this would be a putbe32 call if not for a signedness issue */
-    buf[off] = (char)(((i_f.i) >> 16) >> 8);
+    putbe32(buf, off, i_f.i);
 }
 /*@+shiftimplementation@*/
 
