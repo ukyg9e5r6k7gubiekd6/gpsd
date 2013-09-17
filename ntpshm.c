@@ -563,7 +563,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	double offset;
 	int pulse;
 	int leap;
-	int _pad;	/* unused */
+	/* cppcheck-suppress unusedStructMember */
+	int _pad;
 	int magic;      /* must be SOCK_MAGIC */
     } sample;
     /* chrony must be started first as chrony insists on creating the socket */

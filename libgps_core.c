@@ -179,6 +179,7 @@ int gps_stream(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
     int status = -1;
 
 #ifdef SOCKET_EXPORT_ENABLE
+    /* cppcheck-suppress redundantAssignment */
     status = gps_sock_stream(gpsdata, flags, d);
 #endif /* SOCKET_EXPORT_ENABLE */
 

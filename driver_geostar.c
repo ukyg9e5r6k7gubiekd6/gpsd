@@ -142,6 +142,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     /* put data part of message in buf */
 
     memset(buf, 0, sizeof(buf));
+    /* cppcheck-suppress redundantCopy */
     memcpy(buf, session->packet.outbuffer, session->packet.outbuflen);
 
     buf2[len = 0] = '\0';
