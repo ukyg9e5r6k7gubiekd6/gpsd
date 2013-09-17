@@ -607,23 +607,15 @@ static void ubx_catch_model(struct gps_device_t *session, unsigned char *buf,
 
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
-    static int first = 1;
     if (session->context->readonly)
 	return;
     if (event == event_triggermatch)
 	ubx_catch_model(session,
 			session->packet.outbuffer, session->packet.outbuflen);
-    else if (event == event_driver_switch) {
-       first = 1;
-    } else if (event == event_configure || event == event_reactivate) {
+    else if (event == event_identified) {
 	unsigned char msg[32];
 
-	gpsd_report(LOG_IO, "UBX configure: %d\n", first);
-
-       if (first != 1) {
-          return;
-       }
-       first = 0;
+	gpsd_report(LOG_IO, "UBX configure\n");
 
 	(void)ubx_write(session, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
 
