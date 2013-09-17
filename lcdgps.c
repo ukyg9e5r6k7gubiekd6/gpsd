@@ -33,28 +33,26 @@
 
 #define CLIMB 3
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #ifndef S_SPLINT_S
 #include <netdb.h>
 #ifndef AF_UNSPEC
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */
 #endif /* S_SPLINT_S */
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
+#ifndef S_SPLINT_S
+#include <arpa/inet.h>
+#include <unistd.h>
+#endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <errno.h>
 #include <stdio.h>
-#ifndef S_SPLINT_S
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gps.h"
 #include "gpsdclient.h"

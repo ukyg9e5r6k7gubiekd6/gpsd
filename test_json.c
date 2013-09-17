@@ -255,6 +255,7 @@ static void jsontest(int i)
 	assert(strcmp(stringptrs[0], "foo") == 0);
 	assert(strcmp(stringptrs[1], "bar") == 0);
 	assert(strcmp(stringptrs[2], "baz") == 0);
+	break;
 
     case 4:
 	status = json_read_object(json_str4, json_attrs_4, NULL);
@@ -319,7 +320,7 @@ static void jsontest(int i)
 #define MAXTEST 9
 
     default:
-	fputs("Unknown test number\n", stderr);
+	(int)fputs("Unknown test number\n", stderr);
 	break;
     }
 }

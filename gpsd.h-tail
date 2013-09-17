@@ -822,7 +822,7 @@ extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int,
 		      /*@null@*/unsigned char *, size_t);
 extern bool ais_binary_decode(struct ais_t *,
 			      const unsigned char *, size_t,
-			      struct ais_type24_queue_t *);
+			      /*@null@*/struct ais_type24_queue_t *);
 
 /* debugging apparatus for the client library */
 #ifdef CLIENTDEBUG_ENABLE

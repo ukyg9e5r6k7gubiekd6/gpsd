@@ -1005,6 +1005,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	     * Only switch drivers, if we don't already have one with the
 	     * matching packet type.
 	     */
+	    /*@-nullderef@*/
 	    if (first_sync ||
 		session->packet.type != session->device_type->packet_type) {
 		const struct gps_type_t **dp;
@@ -1015,6 +1016,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			break;
 		    }
 	    }
+	    /*@+nullderef@*/
 	    /* FALL THROUGH */
 	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
 	    gpsd_run_device_hook(session->gpsdata.dev.path, "DEACTIVATE");

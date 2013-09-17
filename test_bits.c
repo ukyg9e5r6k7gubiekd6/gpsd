@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
     ub2 = getub(buf, 8);
+
     sw1 = getbes16(buf, 0);
     sw2 = getbes16(buf, 8);
     uw1 = getbeu16(buf, 0);
@@ -162,10 +163,7 @@ int main(int argc, char *argv[])
     uL2 = getbeu64(buf, 8);
     f1 = getbef32((const char *)buf, 24);
     d1 = getbed64((const char *)buf, 16);
-    sb1 = getsb(buf, 0);
-    sb2 = getsb(buf, 8);
-    ub1 = getub(buf, 0);
-    ub2 = getub(buf, 8);
+
     sw1 = getles16(buf, 0);
     sw2 = getles16(buf, 8);
     uw1 = getleu16(buf, 0);

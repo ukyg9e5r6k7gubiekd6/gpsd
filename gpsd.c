@@ -1891,7 +1891,6 @@ int main(int argc, char *argv[])
 #else
     sigset_t oldset, blockset;
 #endif /* COMPAT_SELECT */
-    const struct gps_type_t **dp;
     bool in_restart;
 
     context.debug = 0;

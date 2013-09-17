@@ -115,15 +115,15 @@ double getbed64(const char *buf, int off)
     return l_d.d;
 }
 
-/*@-shiftimplementation@*/
 void putbef32(char *buf, int off, float val)
 {
     union int_float i_f;
 
     i_f.f = val;
+    /*@-shiftimplementation +ignoresigns@*/
     putbe32(buf, off, i_f.i);
+    /*@+shiftimplementation -ignoresigns@*/
 }
-/*@+shiftimplementation@*/
 
 #ifdef __UNUSED__
 // cppcheck-suppress unusedFunction
