@@ -336,8 +336,8 @@ void gpsd_set_speed(struct gps_device_t *session,
 		&& session->sourcetype != source_bluetooth) {
 	if (isatty(session->gpsdata.gps_fd) != 0
 	    && !session->context->readonly) {
-	    const struct gps_type_t **dp;
 	    if (session->device_type == NULL) {
+		const struct gps_type_t **dp;
 		for (dp = gpsd_drivers; *dp; dp++)
 		    if ((*dp)->event_hook != NULL)
 			(*dp)->event_hook(session, event_wakeup);

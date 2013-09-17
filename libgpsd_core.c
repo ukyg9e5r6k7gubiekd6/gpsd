@@ -993,8 +993,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	}
 	return NODATA_IS;
     } else /* (newlen > 0) */ {
-	const struct gps_type_t **dp;
-
 	gpsd_report(LOG_RAW,
 		    "packet sniff on %s finds type %d\n",
 		    session->gpsdata.dev.path, session->packet.type);
@@ -1009,6 +1007,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	     */
 	    if (first_sync ||
 		session->packet.type != session->device_type->packet_type) {
+		const struct gps_type_t **dp;
+
 		for (dp = gpsd_drivers; *dp; dp++)
 		    if (session->packet.type == (*dp)->packet_type) {
 			(void)gpsd_switch_driver(session, (*dp)->type_name);

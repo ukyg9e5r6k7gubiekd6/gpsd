@@ -286,7 +286,6 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
     char type[8] = "!AIVDM";
     unsigned char data[256];
     unsigned int msg1, msg2;
-    static int number1 = 0;
     char numc[4];
     char channel;
     unsigned int left;
@@ -301,6 +300,7 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
     memset(data, 0, sizeof(data));
     datalen = ais_binary_encode(&session->gpsdata.ais, &data[0], 0);
     if (datalen > 6*60) {
+	static int number1 = 0;
         msg1 = datalen / (6*60);
 	if ((datalen % (6*60)) != 0) {
 	    msg1 += 1;

@@ -326,16 +326,16 @@ static void jsontest(int i)
 
 int main(int argc UNUSED, char *argv[]UNUSED)
 {
-    int option, i;
+    int option;
     int individual = 0;
 
-    while ((option = getopt(argc, argv, "hnD:?")) != -1) {
+    while ((option = getopt(argc, argv, "hn:D:?")) != -1) {
 	switch (option) {
 	case 'D':
 	    gps_enable_debug(atoi(optarg), stdout);
 	    break;
 	case 'n':
-	    individual = atoi(0);
+	    individual = atoi(optarg);
 	    break;
 	case '?':
 	case 'h':
@@ -349,9 +349,11 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 
     if (individual)
 	jsontest(individual);
-    else
+    else {
+	int i;
 	for (i = 1; i <= MAXTEST; i++)
 	    jsontest(i);
+    }
 
     (void)fprintf(stderr, "succeeded.\n");
 
