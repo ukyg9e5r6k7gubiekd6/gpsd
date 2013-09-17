@@ -148,36 +148,6 @@ int main(int argc, char *argv[])
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
     ub2 = getub(buf, 8);
-
-    sw1 = getbes16(buf, 0);
-    sw2 = getbes16(buf, 8);
-    uw1 = getbeu16(buf, 0);
-    uw2 = getbeu16(buf, 8);
-    sl1 = getbes32(buf, 0);
-    sl2 = getbes32(buf, 8);
-    ul1 = getbeu32(buf, 0);
-    ul2 = getbeu32(buf, 8);
-    sL1 = getbes64(buf, 0);
-    sL2 = getbes64(buf, 8);
-    uL1 = getbeu64(buf, 0);
-    uL2 = getbeu64(buf, 8);
-    f1 = getbef32((const char *)buf, 24);
-    d1 = getbed64((const char *)buf, 16);
-
-    sw1 = getles16(buf, 0);
-    sw2 = getles16(buf, 8);
-    uw1 = getleu16(buf, 0);
-    uw2 = getleu16(buf, 8);
-    sl1 = getles32(buf, 0);
-    sl2 = getles32(buf, 8);
-    ul1 = getleu32(buf, 0);
-    ul2 = getleu32(buf, 8);
-    sL1 = getles64(buf, 0);
-    sL2 = getles64(buf, 8);
-    uL1 = getleu64(buf, 0);
-    uL2 = getleu64(buf, 8);
-    f1 = getlef32((const char *)buf, 24);
-    d1 = getled64((const char *)buf, 16);
     /*@+type@*/
 
     if (!quiet) {
@@ -188,10 +158,42 @@ int main(int argc, char *argv[])
 
 	/* big-endian test */
 	printf("Big-endian:\n");
+	/*@-type@*/
+	sw1 = getbes16(buf, 0);
+	sw2 = getbes16(buf, 8);
+	uw1 = getbeu16(buf, 0);
+	uw2 = getbeu16(buf, 8);
+	sl1 = getbes32(buf, 0);
+	sl2 = getbes32(buf, 8);
+	ul1 = getbeu32(buf, 0);
+	ul2 = getbeu32(buf, 8);
+	sL1 = getbes64(buf, 0);
+	sL2 = getbes64(buf, 8);
+	uL1 = getbeu64(buf, 0);
+	uL2 = getbeu64(buf, 8);
+	f1 = getbef32((const char *)buf, 24);
+	d1 = getbed64((const char *)buf, 16);
+	/*@+type@*/
 	bedumpall();
 
 	/* little-endian test */
 	printf("Little-endian:\n");
+	/*@-type@*/
+	sw1 = getles16(buf, 0);
+	sw2 = getles16(buf, 8);
+	uw1 = getleu16(buf, 0);
+	uw2 = getleu16(buf, 8);
+	sl1 = getles32(buf, 0);
+	sl2 = getles32(buf, 8);
+	ul1 = getleu32(buf, 0);
+	ul2 = getleu32(buf, 8);
+	sL1 = getles64(buf, 0);
+	sL2 = getles64(buf, 8);
+	uL1 = getleu64(buf, 0);
+	uL2 = getleu64(buf, 8);
+	f1 = getlef32((const char *)buf, 24);
+	d1 = getled64((const char *)buf, 16);
+	/*@+type@*/
 	ledumpall();
     }
 
