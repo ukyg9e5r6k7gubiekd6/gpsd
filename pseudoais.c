@@ -122,7 +122,7 @@ static void ais_binary_to_ascii(unsigned char *bits, unsigned int len)
 }
 
 
-/*@-compdef +matchanyintegral -type +ignoresigns -mustdefine@*/
+/*@-compdef -mustdefine@*/
 unsigned int ais_binary_encode(struct ais_t *ais,
 			       unsigned char *bits,
                                int flag)
@@ -315,5 +315,5 @@ unsigned int ais_binary_encode(struct ais_t *ais,
     ais_binary_to_ascii(bits, len);
     return len;
 }
-/*@+compdef -matchanyintegral +type -ignoresigns +mustdefine@*/
+/*@+compdef +mustdefine@*/
 #endif /* AIVDM_ENABLE */
