@@ -1,5 +1,7 @@
 /* This file is Copyright (c)2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
+ * Stuff the contents of a specified file into a specified tty.
  */
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -28,31 +30,13 @@ int main( int argc, char **argv){
 	struct termios term;
 	char *buf, tn[32];
 	int ifd, ofd, sfd;
-	int dflag = 0, c, sleeptime, len, rate = 0, speed = 0;
+	int dflag = 0, c, sleeptime, len, speed = 0;
 
 	while((c = getopt(argc, argv, "d:r:s:")) != -1) {
 		switch(c){
 		case 'd':
 			dflag = 1;
 			strncpy(tn, optarg, sizeof(tn)-1);
-			break;
-		case 'r':
-			rate = atoi(optarg);
-			switch (rate) {
-			case 230400:
-			case 115200:
-			case 57600:
-			case 38400:
-			case 28800:
-			case 19200:
-			case 14400:
-			case 9600:
-			case 4800:
-				break;
-			default:
-				fprintf(stderr, "invalid data rate: %d\n", rate);
-				return 1;
-			}
 			break;
 		case 's':
 			speed = atoi(optarg);
@@ -82,16 +66,8 @@ int main( int argc, char **argv){
 	if (argc != 1)
 		usage();
 
-	if (rate > speed){
-		printf("data rate cannot be higher than port speed.\n");
-		return 1;
-	}
-
-	if (0 == rate && 0 != speed)
-		rate = speed;
-
-	if (0 == rate && 0 == speed)
-		rate = speed = 4800;
+	if (0 == speed)
+		speed = 4800;
 
 	printf("opening %s\n", argv[0]);
 	if ((ifd = open(argv[0], O_RDONLY, 0444)) == -1)
@@ -165,6 +141,6 @@ void spinner(int n){
 }
 
 void usage(void){
-	fprintf(stderr, "usage: binreplay [-d <device>] [-r <data_rate>] [-s <port_speed>] <file>\n");
+	fprintf(stderr, "usage: binreplay [-d <device>] [-s <port_speed>] <file>\n");
 	exit(1);
 }
