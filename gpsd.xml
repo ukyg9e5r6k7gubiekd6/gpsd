@@ -188,9 +188,8 @@ is associated with it. Some RS232 GPSes wait in a standby mode
 (drawing less power) when the host machine is not asserting DTR, and
 some cellphone and handheld embedded GPSes have similar behaviors.
 Accordingly, waiting for a watch request to open the device may save
-battery power. (This capability is rare in consumer-grade devices and
-nonexistent in those USB GPSes that lack a DTR line, which is
-most of them.)</para>
+battery power. (This capability is rare in consumer-grade devices).
+</para>
 </listitem>
 </varlistentry>
 <varlistentry>
@@ -596,7 +595,7 @@ century.</para>
 <para>gpsd can provide reference clock information to
 <application>ntpd</application>, to keep the system clock synchronized
 to the time provided by the GPS receiver. If you're going to
-use <application>gpsd</application> you probably want to run it
+use <application>gpsd</application> you are strongly encourage to run gpsd
 <option>-n</option> mode so the clock will be updated even when no
 clients are active.</para>
 
