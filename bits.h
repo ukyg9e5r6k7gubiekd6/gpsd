@@ -48,6 +48,7 @@ extern double getbed64(const char *, int);
 #define putbe32(buf,off,l) do {putbe16(buf, (off), (l) >> 16); putbe16(buf, (off)+2, (l));} while (0)
 
 extern void putbef32(char *, int, float);
+extern void putbed64(char *, int, double);
 
 /* bitfield extraction */
 extern uint64_t ubits(unsigned char buf[], unsigned int, unsigned int, bool);

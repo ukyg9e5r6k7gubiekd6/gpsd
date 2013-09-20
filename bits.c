@@ -127,6 +127,18 @@ void putbef32(char *buf, int off, float val)
 
 #ifdef __UNUSED__
 // cppcheck-suppress unusedFunction
+void putbed64(char *buf, int off, double val)
+{
+    union long_double l_d;
+
+    l_d.d = val;
+    /*@-shiftimplementation +ignoresigns@*/
+    putbe32(buf, (off), (l_d.l) >> 32);
+    putbe32(buf, (off)+4, (l_d.l));
+    /*@+shiftimplementation -ignoresigns@*/
+}
+
+// cppcheck-suppress unusedFunction
 u_int16_t swap_u16(u_int16_t i)
 /* byte-swap a 16-bit unsigned int */
 {
