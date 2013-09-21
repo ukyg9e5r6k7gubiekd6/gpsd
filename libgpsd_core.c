@@ -615,10 +615,14 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
 #ifdef __UNUSED__
     gpsd_report(LOG_INF, "Satellite picture:\n");
     for (k = 0; k < MAXCHANNELS; k++) {
+	bool used_in_solution = false;
+	for (j = 0; j < ; j++)
+	    if (collect->used == i)
+		used_in_solution = true;
 	if (gpsdata->used[k])
 	    gpsd_report(LOG_INF, "az: %d el: %d  SV: %d\n",
 			gpsdata->azimuth[k], gpsdata->elevation[k],
-			gpsdata->used[k]);
+			used_in_solution);
     }
 #endif /* __UNUSED__ */
 
