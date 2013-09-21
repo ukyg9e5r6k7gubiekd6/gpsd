@@ -337,7 +337,7 @@ void libgps_dump_state(struct gps_data_t *collect)
 	    bool used_in_solution = false;
 	    int j;
 	    for (j = 0; j < MAXCHANNELS; j++)
-		if (collect->used == i)
+		if (collect->used[j] == i)
 		    used_in_solution = true;
 	    (void)fprintf(debugfp, "    %2.2d: %2.2d %3.3d %3.0f %c\n",
 			  collect->PRN[i], collect->elevation[i],
