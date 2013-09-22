@@ -1727,6 +1727,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		 */
 		else if (TSIP_ID_AND_LENGTH(0x5f, 66))
 		    /* pass */ ;
+		/* 0x6d is variable length depemding on the sat picture */
 		else if ((0x6d == pkt_id)
 			 && ((0x14 <= packetlen) && (0x20 >= packetlen)))
 		    /* pass */ ;
@@ -1736,9 +1737,8 @@ void packet_parse(struct gps_packet_t *lexer)
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x84, 36))
 		    /* pass */ ;
-		else if ((0x8e == pkt_id))
-		    /* pass */ ;
-		else if ((0x8f == pkt_id))
+		/* super packets, variable length */
+		else if ((0x8e == pkt_id) || (0x8f == pkt_id))
 		    /* pass */ ;
 		/*
 		 * [TSIP] says the 0xbb payload should be 44 bytes, but
