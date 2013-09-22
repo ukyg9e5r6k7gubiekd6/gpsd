@@ -1727,17 +1727,20 @@ void packet_parse(struct gps_packet_t *lexer)
 		else if ((0x5c == pkt_id)
 			 && ((0x1c <= packetlen) && (0x1e >= packetlen)))
 		    /* pass */ ;
-		/* Not in [TSIP] */
 		else if (TSIP_ID_AND_LENGTH(0x5e, 2))
 		    /* pass */ ;
-		else if ((0x5f == pkt_id) && (70 == packetlen))
+		/*
+		 * Not in [TSIP]. It's unclear where this test came from or
+		 * why it's here; the TSIP driver doesn't use type 0x5f.
+		 */
+		else if (TSIP_ID_AND_LENGTH(0x5f, 66))
 		    /* pass */ ;
 		else if ((0x6d == pkt_id)
 			 && ((0x14 <= packetlen) && (0x20 >= packetlen)))
 		    /* pass */ ;
-		else if ((0x82 == pkt_id) && (0x05 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x82, 1))
 		    /* pass */ ;
-		else if (0x83 == pkt_id)
+		else if (TSIP_ID_AND_LENGTH(0x83, 36))
 		    /* pass */ ;
 		else if ((0x84 == pkt_id)
 			 && ((0x28 <= packetlen) && (0x29 >= packetlen)))
