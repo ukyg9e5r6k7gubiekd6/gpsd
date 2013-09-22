@@ -1639,16 +1639,16 @@ void packet_parse(struct gps_packet_t *lexer)
 		 * 0x43, Velocity Fix, data length 20
 		 * 0x45, Software Version Information, data length 10
 		 * 0x46, Health of Receiver, data length 2
-		 * 0x48, GPS System Messages
-		 * 0x49, Almanac Health Page
+		 * 0x48, GPS System Messages, data length 22
+		 * 0x49, Almanac Health Page, data length 32
 		 * 0x4a, LLA Position, data length 20
 		 * 0x4b, Machine Code Status, data length 3
-		 * 0x4c, Operating Parameters Report
-		 * 0x54, One Satellite Bias
+		 * 0x4c, Operating Parameters Report, data length 17
+		 * 0x54, One Satellite Bias, data length 4
 		 * 0x56, Velocity Fix (ENU), data length 20
-		 * 0x57, Last Computed Fix Report
+		 * 0x57, Last Computed Fix Report, data length 8 
 		 * 0x5a, Raw Measurements
-		 * 0x5b, Satellite Ephemeris Status
+		 * 0x5b, Satellite Ephemeris Status, data length 16
 		 * 0x5c, Satellite Tracking Status, data length 24
 		 * 0x5e, Additional Fix Status Report
 		 * 0x6d, All-In-View Satellite Selection, data length 16+numSV
@@ -1659,6 +1659,14 @@ void packet_parse(struct gps_packet_t *lexer)
 		 * 0xbc, Receiver Port Configuration
 		 *
 		 * <DLE>[pkt id] [data] <DLE><ETX>
+		 *
+		 * The best description is in [TSIP], the Trimble Standard 
+		 * Interface Protocol manual; unless otherwise specified
+		 * that is where these type/length notifications are from. 
+		 *
+		 * Note that not all Trimble chips conform perfectly to this
+		 * specification, nor does it cover every packet type we
+		 * may see on the wire.
 		 */
 		/*@ +charint @*/
 		pkt_id = lexer->inbuffer[1];	/* packet ID */
@@ -1672,48 +1680,55 @@ void packet_parse(struct gps_packet_t *lexer)
 		}
                 /* *INDENT-ON* */
 		/*@ -ifempty */
+#define TSIP_ID_AND_LENGTH(id, len)	((id == pkt_id) && (len == packetlen-4))
 		if ((0x13 == pkt_id) && (0x01 <= packetlen))
 		    /* pass */ ;
-		else if ((0x38 == pkt_id) && (0x03 == packetlen))
+		/*
+		 * Not in [TSIP]. Older versions of this code checked for
+		 * a total packet length of 3, which was almost certainly
+		 * wrong.
+		 */
+		else if (TSIP_ID_AND_LENGTH(0x38, 0))
 		    /* pass */ ;
 		else if ((0x41 == pkt_id)
 			 && ((0x0e == packetlen) || (0x0f == packetlen)))
 		    /* pass */ ;
-		else if ((0x42 == pkt_id) && (0x14 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x42, 16))
 		    /* pass */ ;
-		else if ((0x43 == pkt_id) && (0x18 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x43, 20))
 		    /* pass */ ;
-		else if ((0x45 == pkt_id) && (0x0e == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x45, 10))
 		    /* pass */ ;
-		else if ((0x46 == pkt_id) && (0x06 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x46, 2))
 		    /* pass */ ;
-		else if ((0x48 == pkt_id) && (0x1a == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x48, 22))
 		    /* pass */ ;
-		else if ((0x49 == pkt_id) && (0x24 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x49, 32))
 		    /* pass */ ;
-		else if ((0x4a == pkt_id) && (0x18 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x4a, 20))
 		    /* pass */ ;
-		else if ((0x4b == pkt_id) && (0x07 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x4b, 3))
 		    /* pass */ ;
-		else if ((0x4c == pkt_id) && (0x15 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x4c, 17))
 		    /* pass */ ;
-		else if ((0x54 == pkt_id) && (0x10 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x54, 12))
 		    /* pass */ ;
-		else if ((0x55 == pkt_id) && (0x08 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x55, 4))
 		    /* pass */ ;
-		else if ((0x56 == pkt_id) && (0x18 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x56, 20))
 		    /* pass */ ;
-		else if ((0x57 == pkt_id) && (0x0c == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x57, 8))
 		    /* pass */ ;
 		else if ((0x5a == pkt_id)
-			 && ((0x1d <= packetlen) && (0x1f >= packetlen)))
+			 && ((29 <= packetlen) && (31 >= packetlen)))
 		    /* pass */ ;
-		else if ((0x5b == pkt_id) && (0x24 == packetlen))
+		else if (TSIP_ID_AND_LENGTH(0x5b, 16))
 		    /* pass */ ;
 		else if ((0x5c == pkt_id)
 			 && ((0x1c <= packetlen) && (0x1e >= packetlen)))
 		    /* pass */ ;
-		else if ((0x5e == pkt_id) && (0x06 == packetlen))
+		/* Not in [TSIP] */
+		else if (TSIP_ID_AND_LENGTH(0x5e, 2))
 		    /* pass */ ;
 		else if ((0x5f == pkt_id) && (70 == packetlen))
 		    /* pass */ ;
@@ -1739,6 +1754,7 @@ void packet_parse(struct gps_packet_t *lexer)
 				pkt_id, packetlen);
 		    goto not_tsip;
 		}
+#undef TSIP_ID_AND_LENGTH
 		/* Debug */
 		gpsd_report(LOG_RAW,
 			    "TSIP pkt_id = %#02x, packetlen= %zu\n",
