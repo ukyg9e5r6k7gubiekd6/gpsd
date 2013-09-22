@@ -1734,14 +1734,19 @@ void packet_parse(struct gps_packet_t *lexer)
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x83, 36))
 		    /* pass */ ;
-		else if ((0x84 == pkt_id)
-			 && ((0x28 <= packetlen) && (0x29 >= packetlen)))
+		else if (TSIP_ID_AND_LENGTH(0x84, 36))
 		    /* pass */ ;
 		else if ((0x8e == pkt_id))
 		    /* pass */ ;
 		else if ((0x8f == pkt_id))
 		    /* pass */ ;
-		else if ((0xbb == pkt_id) && (0x2c == packetlen))
+		/*
+		 * [TSIP] says the 0xbb payload should be 44 bytes, but
+		 * 40 is the only length the TSIP driver knows how to use.
+		 * We've had a report that the Accutime Gold ships a
+		 * different length.
+		 */
+		else if (TSIP_ID_AND_LENGTH(0xbb, 40))
 		    /* pass */ ;
 		else {
 		    gpsd_report(LOG_IO,
