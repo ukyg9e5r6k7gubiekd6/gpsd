@@ -1683,18 +1683,8 @@ void packet_parse(struct gps_packet_t *lexer)
 #define TSIP_ID_AND_LENGTH(id, len)	((id == pkt_id) && (len == packetlen-4))
 		if ((0x13 == pkt_id) && (0x01 <= packetlen))
 		    /* pass */ ;
-		/*
-		 * Not in [TSIP]. Older versions of this code checked for
-		 * a total packet length of 3, which was almost certainly
-		 * wrong.
-		 */
-		else if (TSIP_ID_AND_LENGTH(0x38, 0))
+		else if (TSIP_ID_AND_LENGTH(0x38, 0))	/* Not in [TSIP] */
 		    /* pass */ ;
-		/*
-		 * Older versions of this packet-getter used to allow a
-		 * data length of 11 for type 0x41; not clear why as the TSIP
-		 * driver only knows the 10-byte format that [TSIP] describes.
-		 */
 		else if (TSIP_ID_AND_LENGTH(0x41, 10))
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x42, 16))
