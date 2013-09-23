@@ -1,6 +1,7 @@
 /*
  * Handle the Trimble TSIP packet format
  * by Rob Janssen, PE1CHL.
+ * Accutime Gold support by Igor Socec <igorsocec@gmail.com>
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
@@ -26,6 +27,9 @@
 #define USE_SUPERPACKET	1	/* use Super Packet mode? */
 
 #define SEMI_2_DEG	(180.0 / 2147483647)	/* 2^-31 semicircle to deg */
+
+void configuration_packets_accutime_gold(struct gps_device_t *session);
+void configuration_packets_generic(struct gps_device_t *session);
 
 #ifdef TSIP_ENABLE
 #define TSIP_CHANNELS	12
@@ -119,7 +123,7 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
     int i, j, len, count;
     gps_mask_t mask = 0;
     unsigned int id;
-    uint8_t u1, u2, u3, u4, u5;
+    uint8_t u1, u2, u3, u4, u5, u6, u7;
     int16_t s1, s2, s3, s4;
     int32_t sl1, sl2, sl3;
     uint32_t ul1, ul2;
@@ -178,6 +182,75 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	    (void)tsip_write(session, 0x8e, buf, 2);
 	}
 #endif /* USE_SUPERPACKET */
+
+	break;
+    case 0x1c: /* Hardware/Software Version Information (Accutime Gold) */
+	/*
+	 * FIXME: We could get both ginds of version info.
+	 */
+	u1 = (uint8_t) getub(buf, 0); 
+	if (u1 == 0x81) { /* Software Version Information */
+		(void)snprintf(session->gpsdata.tag + strlen(session->gpsdata.tag), 
+			sizeof(session->gpsdata.tag) -
+			strlen(session->gpsdata.tag), "%02x", (uint) u1);
+		u2 = getub(buf, 2); /* Major version */
+		u3 = getub(buf, 3); /* Minor version */
+		u4 = getub(buf, 4); /* Build number */
+		u5 = getub(buf, 5); /* Month */
+		u6 = getub(buf, 6); /* Day */
+		s1 = (int16_t)getbeu16(buf, 7); /* Year */
+		u7 = getub(buf, 9); /* Length of first module name */
+		for (i=0; i < (int)u7; i++) {
+		    buf2[i] = (char)getub(buf, 10+i); /* Product name in ASCII */
+		}
+		buf2[i] = '\0';
+
+		/*@ -formattype @*/
+		(void)snprintf(session->subtype, sizeof(session->subtype),
+			       "sw %u %u %u %02u.%02u.%04u %s",
+			       u2, u3, u4, u6, u5, s1, buf2);
+		/*@ +formattype @*/
+		gpsd_report(LOG_INF, "Software version: %s\n", 
+			    session->subtype);
+
+		mask |= DEVICEID_SET;
+	}
+	if (u1 == 0x83) { /* Hardware Version Information */
+		(void)snprintf(session->gpsdata.tag + strlen(session->gpsdata.tag), 
+			sizeof(session->gpsdata.tag) -
+			strlen(session->gpsdata.tag), "%02x", (uint) u1);
+		ul1 = getbeu32(buf, 1); /* Serial number */
+		u2 = getub(buf, 5); /* Build day */
+		u3 = getub(buf, 6); /* Build month */
+		s1 = (int16_t)getbeu16(buf, 7); /* Build year */
+		u4 = getub(buf, 6); /* Build hour */
+		s2 = (int16_t)getbeu16(buf, 10); /* Hardware Code */
+		u5 = getub(buf, 12); /* Length of Hardware ID */
+		for (i=0; i < (int)u5; i++) {
+		    buf2[i] = (char)getub(buf, 13+i); /* Hardware ID in ASCII */
+		}
+		buf2[i] = '\0';
+
+		/*@ -formattype @*/
+		(void)snprintf(session->subtype, sizeof(session->subtype),
+			       "hw %u %02u.%02u.%04u %02u %u %s",
+			       ul1, u2, u3, s1, u4, s2, buf2);
+		gpsd_report(LOG_INF, "Hardware version: %s\n", 
+			    session->subtype);
+
+		mask |= DEVICEID_SET;
+
+		/* Detecting device by Hardware Code */
+		if (s2 == 3001) {
+			gpsd_report(LOG_INF, "This device is Accutime Gold\n");
+			session->driver.tsip.subtype = TSIP_ACCUTIME_GOLD;
+			configuration_packets_accutime_gold(session);
+		}
+		else {
+			configuration_packets_generic(session);
+		}
+		break;
+	}
 	break;
     case 0x41:			/* GPS Time */
 	if (len != 10)
@@ -956,68 +1029,39 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
 	return;
-    /* FIX-ME: Resending this might not be needed on reactivation */
-    if (event == event_identified || event == event_reactivate) {
+    if (event == event_identified) {
 	unsigned char buf[100];
-
-	/* I/O Options */
+	
+	/*
+	 * Set basic configuration, in case no hardware config resonse
+	 * comes back.
+	 */
 	putbyte(buf, 0, 0x1e);	/* Position: DP, MSL, LLA */
 	putbyte(buf, 1, 0x02);	/* Velocity: ENU */
 	putbyte(buf, 2, 0x00);	/* Time: GPS */
 	putbyte(buf, 3, 0x08);	/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
+
+	/* Request Hardware Version Information */
+	putbyte(buf, 0, 0x03); /* Subcode */
+	(void)tsip_write(session, 0x1c, buf, 1);
+	/* 
+	 * After HW information packet is received, a 
+	 * decision is made how to configure the device.
+	 */
     }
-    if (event == event_configure) {
-	unsigned char buf[100];
-
-	switch (session->packet.counter) {
-	case 0:
-	    /*
-	     * TSIP is ODD parity 1 stopbit, save original values and
-	     * change it Thunderbolts and Copernicus use
-	     * 8N1... which isn't exactly a good idea due to the
-	     * fragile wire format.  We must divine a clever
-	     * heuristic to decide if the parity change is required.
-	     */
-	    session->driver.tsip.parity = session->gpsdata.dev.parity;
-	    session->driver.tsip.stopbits =
-		(uint) session->gpsdata.dev.stopbits;
-	    // gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
-	    break;
-
-	case 1:
-	    /*@ -shiftimplementation @*/
-	    /* Request Software Versions */
-	    (void)tsip_write(session, 0x1f, NULL, 0);
-	    /* Request Current Time */
-	    (void)tsip_write(session, 0x21, NULL, 0);
-	    /* Set Operating Parameters */
-	    /* - dynamic code: land */
-	    putbyte(buf, 0, 0x01);
-	    /* - elevation mask */
-	    putbef32((char *)buf, 1, 5.0 * DEG_2_RAD);
-	    /* - signal level mask */
-	    putbef32((char *)buf, 5, 06.0);
-	    /* - PDOP mask */
-	    putbef32((char *)buf, 9, 8.0);
-	    /* - PDOP switch */
-	    putbef32((char *)buf, 13, 6.0);
-	    /*@ +shiftimplementation @*/
-	    (void)tsip_write(session, 0x2c, buf, 17);
-	    /* Set Position Fix Mode (auto 2D/3D) */
-	    putbyte(buf, 0, 0x00);
-	    (void)tsip_write(session, 0x22, buf, 1);
-	    /* Request GPS Systems Message */
-	    (void)tsip_write(session, 0x28, NULL, 0);
-	    /* Request Current Datum Values */
-	    (void)tsip_write(session, 0x37, NULL, 0);
-	    putbyte(buf, 0, 0x15);
-	    (void)tsip_write(session, 0x8e, buf, 1);
-	    /* Request Navigation Configuration */
-	    putbyte(buf, 0, 0x03);
-	    (void)tsip_write(session, 0xbb, buf, 1);
-	    break;
-	}
+    if (event == event_configure && session->packet.counter == 0) {
+	/*
+	 * TSIP is ODD parity 1 stopbit, save original values and
+	 * change it Thunderbolts and Copernicus use
+	 * 8N1... which isn't exactly a good idea due to the
+	 * fragile wire format.  We must divine a clever
+	 * heuristic to decide if the parity change is required.
+	 */
+	session->driver.tsip.parity = session->gpsdata.dev.parity;
+	session->driver.tsip.stopbits =
+	    (uint) session->gpsdata.dev.stopbits;
+	// gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
     }
     if (event == event_deactivate) {
 	/* restore saved parity and stopbits when leaving TSIP mode */
@@ -1118,6 +1162,98 @@ static double tsip_ntp_offset(struct gps_device_t *session UNUSED)
     return 0.075;
 }
 #endif /* NTPSHM_ENABLE */
+
+void configuration_packets_generic(struct gps_device_t *session)
+/* configure generic Trimble TSIP device to a known state */
+{
+	unsigned char buf[100];
+	
+	/* I/O Options */
+	putbyte(buf, 0, 0x1e);	/* Position: DP, MSL, LLA */
+	putbyte(buf, 1, 0x02);	/* Velocity: ENU */
+	putbyte(buf, 2, 0x00);	/* Time: GPS */
+	putbyte(buf, 3, 0x08);	/* Aux: dBHz */
+	(void)tsip_write(session, 0x35, buf, 4);
+	
+	/* Request Software Versions */
+	(void)tsip_write(session, 0x1f, NULL, 0);
+	/* Request Current Time */
+	(void)tsip_write(session, 0x21, NULL, 0);
+	/* Set Operating Parameters */
+	/* - dynamic code: land */
+	putbyte(buf, 0, 0x01);
+	/* - elevation mask */
+	putbef32((char *)buf, 1, (float)5.0 * DEG_2_RAD);
+	/* - signal level mask */
+	putbef32((char *)buf, 5, (float)06.0);
+	/* - PDOP mask */
+	putbef32((char *)buf, 9, (float)8.0);
+	/* - PDOP switch */
+	putbef32((char *)buf, 13, (float)6.0);
+	/*@ +shiftimplementation @*/
+	(void)tsip_write(session, 0x2c, buf, 17);
+	/* Set Position Fix Mode (auto 2D/3D) */
+	putbyte(buf, 0, 0x00);
+	(void)tsip_write(session, 0x22, buf, 1);
+	/* Request GPS Systems Message */
+	(void)tsip_write(session, 0x28, NULL, 0);
+	/* Request Current Datum Values */
+	(void)tsip_write(session, 0x37, NULL, 0);
+	putbyte(buf, 0, 0x15);
+	(void)tsip_write(session, 0x8e, buf, 1);
+	/* Request Navigation Configuration */
+	putbyte(buf, 0, 0x03);
+	(void)tsip_write(session, 0xbb, buf, 1);
+}
+
+void configuration_packets_accutime_gold(struct gps_device_t *session)
+/* configure Accutime Gold to a known state */
+{
+	unsigned char buf[100];
+	/* Request Software Version Information */
+	putbyte(buf, 0, 0x01);
+	(void)tsip_write(session, 0x1c, buf, 1);
+	/* Set Self-Survey Parameters */
+	putbyte(buf, 0, 0xa9); /* Subcode */
+	putbyte(buf, 1, 0x01); /* Self-Survey Enable = enable */
+	putbyte(buf, 2, 0x01); /* Position Save Flag = save position */
+	/*@-shiftimplementation@*/
+	putbe32(buf, 3, 2000); /* Self-Survey Length = 2000 */
+	putbe32(buf, 7, 0); /* Reserved */
+	/*@+shiftimplementation@*/
+	(void)tsip_write(session, 0x8e, buf, 11);
+	/* Set PPS Output Option */
+	putbyte(buf, 0, 0x4e); /* Subcode */
+	putbyte(buf, 1, 2); /* PPS driver switch = 2 (PPS is always output) */
+	(void)tsip_write(session, 0x8e, buf, 2);
+	/* Set Primary Receiver Configuration */
+	putbyte(buf, 0, 0x00); /* Subcode */
+	putbyte(buf, 1, 0x07); /* Operating Dimension = default full position 4, ODCM 7 */
+	putbyte(buf, 2, 0xff); /* Not enabled = unchanged */
+	putbyte(buf, 3, 0x01); /* Dynamics code = default */
+	putbyte(buf, 4, 0x01); /* Solution Mode = default */
+	putbef32(buf, 5, (float)0.1745); /* Elevation Mask = 0.1745 */
+	putbef32(buf, 9, (float)4.0); /* AMU Mask = default is 4.0 */
+	putbef32(buf, 13, (float)8.0); /* PDOP Mask = 8.0 */
+	putbef32(buf, 17, (float)6.0); /* PDOP Switch = 6.0 */
+	putbyte(buf, 21, 0xff); /* N/A */
+	putbyte(buf, 22, 0x0); /* Foliage Mode = default */
+	putbe16(buf, 23, 0xffff); /* Reserved */
+	putbe16(buf, 25, 0x0000); /* Measurement Rate and Position Fix Rate = default */
+	/*@-shiftimplementation@*/
+	putbe32(buf, 27, 0xffffffff); /* Reserved */
+	putbe32(buf, 31, 0xffffffff); /* Reserved */
+	putbe32(buf, 35, 0xffffffff); /* Reserved */
+	putbe32(buf, 39, 0xffffffff); /* Reserved */
+	/*@+shiftimplementation@*/
+	(void)tsip_write(session, 0xbb, buf, 43);
+	/* Set Packet Broadcast Mask */
+	putbyte(buf, 0, 0xa5); /* Subcode */
+	putbe16(buf, 1, 0x32e1); /* Packets bit field = default + Primary timing, Supplemental timing 32e1 */
+	putbyte(buf, 3, 0x00); /* not used */
+	putbyte(buf, 4, 0x00); /* not used */
+	(void)tsip_write(session, 0x8e, buf, 5);
+}
 
 /* this is everything we export */
 /* *INDENT-OFF* */

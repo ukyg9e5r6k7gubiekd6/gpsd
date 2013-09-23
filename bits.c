@@ -126,7 +126,6 @@ void putbef32(char *buf, int off, float val)
 }
 
 #ifdef __UNUSED__
-// cppcheck-suppress unusedFunction
 void putbed64(char *buf, int off, double val)
 {
     union long_double l_d;

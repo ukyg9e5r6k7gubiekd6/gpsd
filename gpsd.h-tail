@@ -553,6 +553,9 @@ struct gps_device_t {
 	    time_t req_compact;
 	    unsigned int stopbits; /* saved RS232 link parameter */
 	    char parity;
+	    int subtype;
+#define TSIP_UNKNOWN    	0
+#definr TSIP_ACCUTIME_GOLD	1
 	} tsip;
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */
