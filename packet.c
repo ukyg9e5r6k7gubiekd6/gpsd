@@ -1634,6 +1634,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		/* check for some common TSIP packet types:
 		 * 0x13, TSIP Parsing Error Notification
 		 * 0x38, Request SV system data
+		 * 0x1c, Hardware/Software Version Information
 		 * 0x41, GPS time, data length 10
 		 * 0x42, Single Precision Fix, data length 16
 		 * 0x43, Velocity Fix, data length 20
@@ -1681,9 +1682,14 @@ void packet_parse(struct gps_packet_t *lexer)
                 /* *INDENT-ON* */
 		/*@ -ifempty */
 #define TSIP_ID_AND_LENGTH(id, len)	((id == pkt_id) && (len == packetlen-4))
-		if ((0x13 == pkt_id) && (0x01 <= packetlen))
+		if ((0x13 == pkt_id) && (1 <= packetlen))
 		    /* pass */ ;
-		else if (TSIP_ID_AND_LENGTH(0x38, 0))	/* Not in [TSIP] */
+		/*
+		 * Not in [TSIP],  Accutime Gold only. Variable length.
+		 */
+		else if ((0x1c == pkt_id) && (11 <= packetlen))
+		    /* pass */ ;
+		else if (TSIP_ID_AND_LENGTH(0x38, 0))        /* Not in [TSIP] */
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x41, 10))
 		    /* pass */ ;
@@ -1727,7 +1733,7 @@ void packet_parse(struct gps_packet_t *lexer)
 		 */
 		else if (TSIP_ID_AND_LENGTH(0x5f, 66))
 		    /* pass */ ;
-		/* 0x6d is variable length depemding on the sat picture */
+		/* 0x6d is variable length depending on the sat picture */
 		else if ((0x6d == pkt_id)
 			 && ((0x14 <= packetlen) && (0x20 >= packetlen)))
 		    /* pass */ ;
