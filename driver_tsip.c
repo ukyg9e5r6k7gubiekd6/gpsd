@@ -837,17 +837,17 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 	}
 	break;
     case 0xbb:			/* Navigation Configuration */
-	if (len != 40)
+	if (len != 40 && len != 43)	/* see packet.c for explamation */
 	    break;
 	u1 = getub(buf, 0);	/* Subcode */
 	u2 = getub(buf, 1);	/* Operating Dimension */
-	u3 = getub(buf, 2);	/* DGPS Mode */
+	u3 = getub(buf, 2);	/* DGPS Mode (not enabled in Accutime Gold) */
 	u4 = getub(buf, 3);	/* Dynamics Code */
 	f1 = getbef32((char *)buf, 5);	/* Elevation Mask */
 	f2 = getbef32((char *)buf, 9);	/* AMU Mask */
 	f3 = getbef32((char *)buf, 13);	/* DOP Mask */
 	f4 = getbef32((char *)buf, 17);	/* DOP Switch */
-	u5 = getub(buf, 21);	/* DGPS Age Limit */
+	u5 = getub(buf, 21);	/* DGPS Age Limit (not in Accutime Gold) */
 	gpsd_report(LOG_INF,
 		    "Navigation Configuration %u %u %u %u %f %f %f %f %u\n",
 		    u1, u2, u3, u4, f1, f2, f3, f4, u5);
