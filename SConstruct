@@ -53,6 +53,9 @@ gitrepo    = "git://git.savannah.nongnu.org/gpsd.git"
 webform    = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
 formserver = "www@thyrsus.com"
 devmail    = "gpsd-dev@lists.nongnu.org"
+tiplink    = "<a href='http://gittip.com/esr'>leave a tip at Gittip</a>"
+tipwidget  = "<script data-gittip-username='esr' \
+	data-gittip-widget='button' src='//gttp.co/v1.js'></script>"
 # Hosting information ends here
 
 EnsureSConsVersion(2,0,1)
@@ -1179,6 +1182,8 @@ def substituter(target, source, env):
         ('@FORMSERVER@', formserver),
         ('@DEVMAIL@',    devmail),
         ('@LIBGPSVERSION@', libgps_version),
+        ('@TIPLINK@',    tiplink),
+        ('@TIPWIDGET@',  tipwidget),
         )
     sfp = open(str(source[0]))
     content = sfp.read()
