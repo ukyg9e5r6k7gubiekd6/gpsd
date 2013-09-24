@@ -84,7 +84,7 @@ static int send_udp (char *nmeastring, size_t ind)
     int  channel;
     ssize_t status;
 
-    /* if string length is unknow make a copy and compute it */
+    /* if string length is unknown make a copy and compute it */
     if (ind == 0) {
 	/* compute message size and add 0x0a 0x0d */
 	for (ind=0; nmeastring [ind] != '\0'; ind ++) {
@@ -96,7 +96,7 @@ static int send_udp (char *nmeastring, size_t ind)
 	}
 	buffer = message;
     } else {
-	/* use directly nmeastring but change terminition */
+	/* use directly nmeastring but change termination */
 	buffer = nmeastring;
 	ind = ind-1;
     }
