@@ -1672,7 +1672,11 @@ void packet_parse(struct gps_packet_t *lexer)
 		/*@ +charint @*/
 		pkt_id = lexer->inbuffer[1];	/* packet ID */
                 /* *INDENT-OFF* */
-		if (!((0x13 == pkt_id) || (0xbb == pkt_id) || (0xbc == pkt_id)  || (0x38 == pkt_id))
+		if (!((0x13 == pkt_id) || 
+		      (0x1c == pkt_id) || 
+		      (0xbb == pkt_id) || 
+		      (0xbc == pkt_id) ||
+		      (0x38 == pkt_id))
 		    && ((0x41 > pkt_id) || (0x8f < pkt_id))) {
 		    gpsd_report(LOG_IO,
 				"Packet ID 0x%02x out of range for TSIP\n",
