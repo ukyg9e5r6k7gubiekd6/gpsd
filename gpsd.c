@@ -1105,6 +1105,8 @@ static void handle_request(struct subscriber_t *sub,
      */
     /*@-nullderef -nullpass@*/
 
+    if (buf[0] == '?')
+	++buf;
     if (strncmp(buf, "DEVICES;", 8) == 0) {
 	buf += 8;
 	json_devicelist_dump(reply, replylen);
@@ -1755,7 +1757,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
     reply[0] = '\0';
     if (buf[0] == '?') {
 	const char *end;
-	for (end = ++buf; *buf != '\0'; buf = end)
+	for (end = buf; *buf != '\0'; buf = end)
 	    if (isspace(*buf))
 		end = buf + 1;
 	    else
