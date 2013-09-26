@@ -33,13 +33,13 @@ struct privdata_t
  */
 static struct gps_data_t *share_gpsdata;
 static DBusConnection *connection;
-static char gpsd_devname[BUFSIZ];
 
 static DBusHandlerResult handle_gps_fix(DBusMessage * message)
 {
     DBusError error;
     /* this packet format was designed before we split eph */
     double eph;
+    const char *gpsd_devname = NULL;
 
     dbus_error_init(&error);
 
