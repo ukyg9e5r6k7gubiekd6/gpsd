@@ -158,6 +158,7 @@ boolopts = (
     ("coveraging",    False, "build with code coveraging enabled"),
     ("strip",         True,  "build with stripping of binaries enabled"),
     ("chrpath",       True,  "use chrpath to edit library load paths"),
+    ("manbuild",      True,  "build help in man and HTML formats"),
     )
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
@@ -645,18 +646,21 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
 
 manbuilder = mangenerator = htmlbuilder = None
-if config.CheckXsltproc():
-    mangenerator = 'xsltproc'
-    build = "xsltproc --nonet %s $SOURCE >$TARGET"
-    htmlbuilder = build % docbook_html_uri
-    manbuilder = build % docbook_man_uri
-elif WhereIs("xmlto"):
-    mangenerator = 'xmlto'
-    xmlto = "xmlto %s $SOURCE || mv `basename $TARGET` `dirname $TARGET`"
-    htmlbuilder = xmlto % "html-nochunks"
-    manbuilder = xmlto % "man"
+if env['manbuild']:
+    if config.CheckXsltproc():
+        mangenerator = 'xsltproc'
+        build = "xsltproc --nonet %s $SOURCE >$TARGET"
+        htmlbuilder = build % docbook_html_uri
+        manbuilder = build % docbook_man_uri
+    elif WhereIs("xmlto"):
+        mangenerator = 'xmlto'
+        xmlto = "xmlto %s $SOURCE || mv `basename $TARGET` `dirname $TARGET`"
+        htmlbuilder = xmlto % "html-nochunks"
+        manbuilder = xmlto % "man"
+    else:
+        announce("Neither xsltproc nor xmlto found, documentation cannot be built.")
 else:
-    announce("Neither xsltproc nor xmlto found, documentation cannot be built.")
+    announce("Build of man and HTML documentation is disabled.")
 if manbuilder:
     env['BUILDERS']["Man"] = Builder(action=manbuilder)
     env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
