@@ -359,6 +359,8 @@ When you are cross-compiling, you'll need chrpath at version 0.14 or
 later for cross-architecture support.  If it's not yet packaged for
 your environment, see http://alioth.debian.org/projects/chrpath/
 
+You may also find it useful to set manbuild=no.
+
 == Autostarting the daemon ==
 
 The preferred way to start gpsd is on-demand by a hotplug script 
