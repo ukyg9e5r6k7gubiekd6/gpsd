@@ -70,7 +70,13 @@ what rollover period we're in, we're utterly hosed. Furthermore, if it's
 not accurate to within a second and only NMEA devices are reporting,
 we don't know what century it is!
 
-Therefore, we must assume the system clock is reliable.
+Therefore, we must assume the system clock is reliable to within a second.
+
+However, none of these caveats affect the usefulness of PPS, which 
+tells us top of second to 50ns accuracy and can be made to condition a
+local NTP instance that does *not* rely on the system clock. The 
+combination of PPS with NTP time should be reliable regardless of
+what the local system clock gets up to.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
