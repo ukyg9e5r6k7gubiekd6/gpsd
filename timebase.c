@@ -3,9 +3,9 @@
 All of gpsd's assumptions about time and GPS time reporting live in this file.
 
 This is a work in progress.  Currently GPSD requires that the host system
-clock be accurate to within one second.  We are attempting to relax this
+clock be accurate to within one second.  It would be nice to relax this
 to "accurate within one GPS rollover period" for receivers reporting
-GPS week+TOW.
+GPS week+TOW, but isn't possible in general.
 
 Date and time in GPS is represented as number of weeks from the start
 of zero second of 6 January 1980, plus number of seconds into the
@@ -79,7 +79,7 @@ local NTP instance that does *not* rely on the system clock. The
 combination of PPS with NTP time should be reliable regardless of
 what the local system clock gets up to. That is, unless NTP clock
 skew goes over 1 second, but this is unlikely to ever happen - and
-if it does the reasons will have nothing to do with GPS idosyncracies.
+if it does the reasons will have nothing to do with GPS idiosyncracies.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
