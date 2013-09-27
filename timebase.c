@@ -73,13 +73,15 @@ we don't even know what century it is!
 
 Therefore, we must assume the system clock is reliable to within a second.
 
-However, none of these caveats affect the usefulness of PPS, which 
-tells us top of second to 50ns accuracy and can be made to condition a
-local NTP instance that does *not* rely on the system clock. The 
-combination of PPS with NTP time should be reliable regardless of
-what the local system clock gets up to. That is, unless NTP clock
-skew goes over 1 second, but this is unlikely to ever happen - and
-if it does the reasons will have nothing to do with GPS idiosyncracies.
+However, none of these caveats affect the usefulness of PPS, which
+tells us top of second to theoretical 50ns accuracy (actually about 1
+microsecond over RS232 and roughly one poll interval over USB) and can
+be made to condition a local NTP instance that does *not* rely on the
+system clock. The combination of PPS with NTP time should be reliable
+regardless of what the local system clock gets up to. That is, unless
+NTP clock skew goes over 1 second, but this is unlikely to ever happen
+- and if it does the reasons will have nothing to do with GPS
+idiosyncracies.
 
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
