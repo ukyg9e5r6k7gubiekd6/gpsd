@@ -63,7 +63,8 @@ available.
 get the device to report it. The latter is not a given; SiRFs before
 firmware rev 2.3.2 don't report it unless special subframe data reporting
 is enabled, which requires 38400bps. Evermore GPSes can't be made to
-report it at all.
+report it at all. Furthermore, before the almanac load the GPS may report
+a fixed (and possibly out of date) offset.
 
 Conclusion: if the system clock isn't accurate enough that we can deduce
 what rollover period we're in, we're utterly hosed. Furthermore, if it's
