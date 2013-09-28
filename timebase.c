@@ -21,7 +21,12 @@ necessarily processed correctly on consumer-grade devices, and will
 not be available at all when a GPS receiver has just
 cold-booted. Thus, UTC time reported from NMEA devices may be slightly
 inaccurate between a cold boot or leap second and the following
-subframe broadcast.
+subframe broadcast. 
+
+It might be best not to trust time for 20 minutes after GPSD startup
+(long enough for an ephemeris to load) but this isn't actually 
+implemented as the divergence will normally be only one second or
+less.
 
 GPS date and time are subject to a rollover problem in the 10-bit week
 number counter, which will re-zero every 1024 weeks (roughly every 20
