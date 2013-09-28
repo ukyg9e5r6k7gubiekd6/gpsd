@@ -24,9 +24,9 @@ inaccurate between a cold boot or leap second and the following
 subframe broadcast. 
 
 It might be best not to trust time for 20 minutes after GPSD startup
-(long enough for an ephemeris to load) but this isn't actually 
-implemented as the divergence will normally be only one second or
-less.
+if it is more than 500ms from current system time (that is long enough
+for an ephemeris to load) but this isn't actually implemented as the
+divergence will normally be only one second or less.
 
 GPS date and time are subject to a rollover problem in the 10-bit week
 number counter, which will re-zero every 1024 weeks (roughly every 20
