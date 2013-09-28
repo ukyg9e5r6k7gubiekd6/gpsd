@@ -23,6 +23,7 @@
 #include <termios.h>
 #include <time.h>
 #include <sys/time.h>
+#include <assert.h>
 
 #ifndef S_SPLINT_S
 #include <unistd.h>
@@ -290,7 +291,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 		retry = 0;
 	    }
 	    if (debug > 0)
-		(void)write (1, ".", 1);
+		ignore_return(write (1, ".", 1));
 	    break;
 
         default:	/* we lost connection with gpsd */

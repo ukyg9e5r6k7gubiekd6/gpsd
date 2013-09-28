@@ -2130,7 +2130,9 @@ int main(int argc, char *argv[])
 	{
 	    struct group *grp = getgrnam(GPSD_GROUP);
 	    if (grp)
-		(void)setgid(grp->gr_gid);
+		if (setgid(grp->gr_gid) != 0)
+		    gpsd_report(LOG_ERROR, "setgid() failed, errno %s\n",
+				strerror(errno));
 	}
 #else
 	if ((optind < argc && stat(argv[optind], &stb) == 0)
@@ -2143,7 +2145,9 @@ int main(int argc, char *argv[])
 #endif
 	pw = getpwnam(GPSD_USER);
 	if (pw)
-	    (void)setuid(pw->pw_uid);
+	    if (setuid(pw->pw_uid) != 0)
+		gpsd_report(LOG_ERROR, "setuid() failed, errno %s\n",
+			    strerror(errno));
 	/*@+type@*/
 
  #if defined(HAVE_LIBCAP) && !defined(S_SPLINT_S)
