@@ -139,7 +139,6 @@ static const int af = AF_INET;
 
 static fd_set all_fds;
 static int maxfd;
-static bool in_background = false;
 #ifndef FORCE_GLOBAL_ENABLE
 static bool listen_global = false;
 #endif /* FORCE_GLOBAL_ENABLE */
@@ -236,7 +235,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 
 	visibilize(buf2, sizeof(buf2), buf);
 
-	if (in_background)
+	if (getpid() == getsid(getpid()))
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
 	else
 	    (void)fputs(buf2, stderr);
@@ -2026,9 +2025,7 @@ int main(int argc, char *argv[])
     /* might be time to daemonize */
     if (go_background) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
-	if (daemon(0, 0) == 0)
-	    in_background = true;
-        else
+	if (daemon(0, 0) != 0)
 	    gpsd_report(LOG_ERROR,"demonization failed: %s\n",strerror(errno));
     }
 
