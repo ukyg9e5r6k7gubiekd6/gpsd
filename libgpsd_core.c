@@ -1107,7 +1107,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * might have picked up a valid partial packet - better to go
 	 * back around the loop and pick up more data.
 	 */
-	} else if (session->badcount++>1 && !session->packet.state && !gpsd_next_hunt_setting(session)) {
+	} else if (session->badcount++>1 && session->packet.state==0 && !gpsd_next_hunt_setting(session)) {
 	    gpsd_report(session->context->debug, LOG_INF,
 			"hunt on %s failed (%lf sec since data)\n",
 			session->gpsdata.dev.path,

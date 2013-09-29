@@ -363,6 +363,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 
 	memset((char *)&sat.sa_in, 0, sin_len);
 	sat.sa_in.sin_family = (sa_family_t) AF_INET;
+#ifndef S_SPLINT_S
 #ifndef FORCE_GLOBAL_ENABLE
 	if (!listen_global)
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
@@ -370,11 +371,13 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 #endif /* FORCE_GLOBAL_ENABLE */
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
 	sat.sa_in.sin_port = htons(port);
+#endif /* S_SPLINT_S */
 
 	af_str = "IPv4";
 	/* see PF_INET6 case below */
 	s = socket(PF_INET, type, proto);
 	break;
+#ifndef S_SPLINT_S
 #ifdef IPV6_ENABLE
     case AF_INET6:
 	sin_len = sizeof(sat.sa_in6);
@@ -387,6 +390,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	else
 #endif /* FORCE_GLOBAL_ENABLE */
 	    sat.sa_in6.sin6_addr = in6addr_any;
+#endif /* S_SPLINT_S */
 	sat.sa_in6.sin6_port = htons(port);
 
 	/*
@@ -1984,12 +1988,14 @@ int main(int argc, char *argv[])
 
 
     /* might be time to daemonize */
+    /*@-unrecog@*/
     if (go_background) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
 	if (daemon(0, 0) != 0)
 	    gpsd_report(context.debug, LOG_ERROR,
 			"demonization failed: %s\n",strerror(errno));
     }
+    /*@+unrecog@*/
 
     if (pid_file) {
 	FILE *fp;

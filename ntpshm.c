@@ -588,10 +588,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		"PPS Create Thread gpsd_ppsmonitor\n");
 
     /* wait for the device to go active - makes this safe to call early */
+    /*@-infloops@*/
     while (BAD_SOCKET(session->gpsdata.gps_fd)) {
 	/* gpsd_report(session->context->debug, LOG_PROG, "PPS thread awaiting device activation\n"); */
 	(void)sleep(1);
     }
+    /*@+infloops@*/
 
     /*  Activates PPS support for RS-232 or USB devices only. */
     if (!(session->sourcetype == source_rs232 || session->sourcetype == source_usb)) {

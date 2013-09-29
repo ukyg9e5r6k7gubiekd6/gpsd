@@ -291,7 +291,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 		retry = 0;
 	    }
 	    if (debug > 0)
-		ignore_return(write (1, ".", 1));
+		/*@i2@*/ignore_return(write (1, ".", 1));
 	    break;
 
         default:	/* we lost connection with gpsd */
