@@ -1134,6 +1134,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    speed_t speed = gpsd_get_speed(session);
 
 	    /*@-nullderef@*/
+	    /* coverity[var_deref_op] */
 	    gpsd_report(session->context->debug, LOG_INF,
 			"%s identified as type %s (%f sec @ %dbps)\n",
 			session->gpsdata.dev.path,
