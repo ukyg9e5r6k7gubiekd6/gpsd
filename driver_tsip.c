@@ -1262,10 +1262,10 @@ void configuration_packets_accutime_gold(struct gps_device_t *session)
 	putbyte(buf, 2, 0xff); /* Not enabled = unchanged */
 	putbyte(buf, 3, 0x01); /* Dynamics code = default */
 	putbyte(buf, 4, 0x01); /* Solution Mode = default */
-	putbef32(buf, 5, (float)0.1745); /* Elevation Mask = 0.1745 */
-	putbef32(buf, 9, (float)4.0); /* AMU Mask = default is 4.0 */
-	putbef32(buf, 13, (float)8.0); /* PDOP Mask = 8.0 */
-	putbef32(buf, 17, (float)6.0); /* PDOP Switch = 6.0 */
+	putbef32((char *)buf, 5, (float)0.1745); /* Elevation Mask = 0.1745 */
+	putbef32((char *)buf, 9, (float)4.0); /* AMU Mask = default is 4.0 */
+	putbef32((char *)buf, 13, (float)8.0); /* PDOP Mask = 8.0 */
+	putbef32((char *)buf, 17, (float)6.0); /* PDOP Switch = 6.0 */
 	putbyte(buf, 21, 0xff); /* N/A */
 	putbyte(buf, 22, 0x0); /* Foliage Mode = default */
 	putbe16(buf, 23, 0xffff); /* Reserved */

@@ -89,7 +89,8 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 static void subframe_almanac(uint8_t tSVID, uint32_t words[],
 			     uint8_t subframe, uint8_t sv,
 			     uint8_t data_id,
-			     /*@out@*/struct almanac_t *almp, const debug)
+			     /*@out@*/struct almanac_t *almp,
+			     const int debug)
 {
     /*@+matchanyintegral -shiftimplementation@*/
     almp->sv     = sv; /* ignore the 0 sv problem for now */

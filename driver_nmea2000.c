@@ -59,7 +59,7 @@ FILE *logFile = NULL;
 
 extern bool __attribute__ ((weak)) gpsd_add_device(const char *device_name, bool flag_nowait);
 
-static void print_data(const gps_context_t *context,
+static void print_data(struct gps_context_t *context,
 		       unsigned char *buffer, int len, PGN *pgn)
 {
 #ifdef LIBGPS_DEBUG
@@ -103,7 +103,7 @@ static gps_mask_t get_mode(struct gps_device_t *session)
 }
 
 
-static int decode_ais_header(const gps_context_t *context,
+static int decode_ais_header(struct gps_context_t *context,
     unsigned char *bu, int len, struct ais_t *ais, unsigned int mask)
 {
     if (len > 4) {
