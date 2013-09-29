@@ -5,7 +5,7 @@
 # Location: Newark, DE
 # Transport: UDP
 #
-# The bard lives inside a Gavia AUV <http://www.gavia.is/>, which was
+# The board lives inside a Gavia AUV <http://www.gavia.is/>, which was
 # placed in the parking log of a university laboratory for the capture
 # of this data. It was completely stationary. Also, this sample
 # contains strings that indicate the date. 
