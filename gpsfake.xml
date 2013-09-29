@@ -39,6 +39,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-r <replaceable>initcmd</replaceable></arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-u</arg>
+      <arg choice='opt'>-t</arg>
       <arg choice='opt'>-v</arg>
       <arg rep='repeat'>
             <arg choice='plain'><replaceable>logfile</replaceable></arg>
@@ -144,9 +145,15 @@ The default is <command>?WATCH={"enable":true,"json":true}</command>.</para>
 <para>The <option>-s</option> sets the baud rate for the slave tty.  The
 default is 4800.</para>
 
-<para>The <option>-u</option> forces the test framework to use UDP rather than
-pty devices. This may be useful for testing from within chroot jails
-where access to pty devices is locked out.</para>
+<para>The <option>-t</option> forces the test framework to use TCP
+rather than pty devices. Besides being a test of TCP source handling,
+this may be useful for testing from within chroot jails where access
+to pty devices is locked out.</para>
+
+<para>The <option>-u</option> forces the test framework to use UDP
+rather than pty devices. Besides being a test of UDP source handling,
+this may be useful for testing from within chroot jails where access
+to pty devices is locked out.</para>
 
 <para>The <option>-v</option> enables verbose progress reports to stderr.  It is
 mainly useful for debugging <application>gpsfake</application>

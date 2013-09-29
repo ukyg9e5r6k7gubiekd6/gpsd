@@ -142,8 +142,10 @@ class TestLoad:
                         raise TestLoadError("bad serial-parameter spec in %s"%\
                                             logfp.name)                    
                     self.serial = (baud, databits, parity, stopbits)
-                elif "UDP" in packet:
+                elif "Transport: UDP" in packet:
                     self.sourcetype = "UDP"
+                elif "Transport: TCP" in packet:
+                    self.sourcetype = "TCP"
             else:
                 if type_latch is None:
                     type_latch = ptype
@@ -266,6 +268,28 @@ class FakePTY(FakeGPS):
     def drain(self):
         "Wait for the associated device to drain (e.g. before closing)."
         termios.tcdrain(self.fd)
+
+class FakeTCP(FakeGPS):
+    "A TCP broadcaster with a test log ready to be cycled to it."
+    def __init__(self, testload,
+                 ipaddr, port,
+                 progress=None):
+        FakeGPS.__init__(self, testload, progress)
+        self.ipaddr = ipaddr
+        self.port = port
+        self.byname = "tcp://" + ipaddr + ":" + port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    def read(self):
+        "Discard control strings written by gpsd."
+        pass
+
+    def write(self, line):
+        self.sock.sendto(line, (self.ipaddr, int(self.port)))
+
+    def drain(self):
+        "Wait for the associated device to drain (e.g. before closing)."
+        pass
 
 class FakeUDP(FakeGPS):
     "A UDP broadcaster with a test log ready to be cycled to it."
@@ -408,7 +432,7 @@ class TestSessionError(exceptions.Exception):
 
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
-    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False):
+    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False, tcp=False):
         "Initialize the test session by launching the daemon."
         self.prefix = prefix
         self.port = port
@@ -416,6 +440,7 @@ class TestSession:
         self.verbose = verbose
         self.predump = predump
         self.udp = udp
+        self.tcp = tcp
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
         self.client_id = 0
@@ -447,6 +472,9 @@ class TestSession:
             testload = TestLoad(logfile, predump=self.predump)
             if testload.sourcetype == "UDP" or self.udp:
                 newgps = FakeUDP(testload, ipaddr="127.0.0.1", port="5000",
+                                   progress=self.progress)
+            if testload.sourcetype == "TCP" or self.tcp:
+                newgps = FakeTCP(testload, ipaddr="127.0.0.1", port="5000",
                                    progress=self.progress)
             else:
                 newgps = FakePTY(testload, speed=speed, 
