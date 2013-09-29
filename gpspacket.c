@@ -14,7 +14,7 @@ static PyObject *ErrorObject = NULL;
 
 static PyObject *report_callback = NULL;
 
-void gpsd_report(int errlevel, const char *fmt, ... )
+void gpsd_report(int unused UNUSED, int errlevel, const char *fmt, ... )
 {
     char buf[BUFSIZ];
     PyObject *args;

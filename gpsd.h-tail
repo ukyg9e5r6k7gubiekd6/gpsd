@@ -190,23 +190,6 @@ extern ssize_t packet_get(int, struct gps_packet_t *);
 extern int packet_sniff(struct gps_packet_t *);
 #define packet_buffered_input(lexer) ((lexer)->inbuffer + (lexer)->inbuflen - (lexer)->inbufptr)
 
-extern void isgps_init(/*@out@*/struct gps_packet_t *);
-enum isgpsstat_t isgps_decode(struct gps_packet_t *,
-			      bool (*preamble_match)(isgps30bits_t *),
-			      bool (*length_check)(struct gps_packet_t *),
-			      size_t,
-			      unsigned int);
-extern unsigned int isgps_parity(isgps30bits_t);
-extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
-
-extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
-extern void json_rtcm2_dump(const struct rtcm2_t *,
-			    /*@null@*/const char *, /*@out@*/char[], size_t);
-extern void rtcm2_unpack(/*@out@*/struct rtcm2_t *, char *);
-extern void json_rtcm3_dump(const struct rtcm3_t *,
-			    /*@null@*/const char *, /*@out@*/char[], size_t);
-extern void rtcm3_unpack(/*@out@*/struct rtcm3_t *, char *);
-
 /* Next, declarations for the core library... */
 
 /* factors for converting among confidence interval units */
@@ -684,6 +667,24 @@ struct gps_device_t {
 
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
 
+/* driver helper functions */
+extern void isgps_init(/*@out@*/struct gps_packet_t *);
+enum isgpsstat_t isgps_decode(struct gps_packet_t *,
+			      bool (*preamble_match)(isgps30bits_t *),
+			      bool (*length_check)(struct gps_packet_t *),
+			      size_t,
+			      unsigned int);
+extern unsigned int isgps_parity(isgps30bits_t);
+extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
+
+extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
+extern void json_rtcm2_dump(const struct rtcm2_t *,
+			    /*@null@*/const char *, /*@out@*/char[], size_t);
+extern void rtcm2_unpack(/*@out@*/struct rtcm2_t *, char *);
+extern void json_rtcm3_dump(const struct rtcm3_t *,
+			    /*@null@*/const char *, /*@out@*/char[], size_t);
+extern void rtcm3_unpack(const int, /*@out@*/struct rtcm3_t *, char *);
+
 /* here are the available GPS drivers */
 extern const struct gps_type_t **gpsd_drivers;
 
@@ -823,7 +824,8 @@ extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
 /* exceptional driver methods */
 extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int,
 		      /*@null@*/unsigned char *, size_t);
-extern bool ais_binary_decode(struct ais_t *,
+extern bool ais_binary_decode(const int debug,
+			      struct ais_t *ais,
 			      const unsigned char *, size_t,
 			      /*@null@*/struct ais_type24_queue_t *);
 
@@ -843,9 +845,9 @@ extern void libgps_dump_state(struct gps_data_t *);
 
 /* caller should supply this */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
-__attribute__((__format__(__printf__, 2, 3))) void gpsd_report(int, const char *, ...);
+__attribute__((__format__(__printf__, 3, 4))) void gpsd_report(const int, const int, const char *, ...);
 # else /* not a new enough GCC, use the unprotected prototype */
-void gpsd_report(int, const char *, ...);
+void gpsd_report(const int, const int, const char *, ...);
 #endif
 
 #ifdef S_SPLINT_S

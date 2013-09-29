@@ -22,7 +22,8 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	speed_t speed = gpsd_get_speed(session);
 
 	if (speed < 38400)
-	    gpsd_report(LOG_WARN, "speed less than 38,400 may cause data lag and loss of functionality\n");
+	    gpsd_report(session->context->debug, LOG_WARN,
+			"speed less than 38,400 may cause data lag and loss of functionality\n");
     }
 
     /*
@@ -43,7 +44,8 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
      * word is inverted.
      *
      */
-    gpsd_report(LOG_IO, "50B: gpsd_interpret_subframe_raw: "
+    gpsd_report(session->context->debug, LOG_IO,
+		"50B: gpsd_interpret_subframe_raw: "
 		"%08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
 		words[0], words[1], words[2], words[3], words[4],
 		words[5], words[6], words[7], words[8], words[9]);
@@ -53,7 +55,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	words[0] ^= 0x3fffffc0;	/* invert */
     } else if (preamble != 0x74) {
 	/* strangely this is very common, so don't log it */
-	gpsd_report(LOG_IO,
+	gpsd_report(session->context->debug, LOG_IO,
 		    "50B: gpsd_interpret_subframe_raw: bad preamble 0x%x\n",
 		    preamble);
 	return 0;
@@ -70,7 +72,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	}
 	parity = (uint32_t)isgps_parity((isgps30bits_t)words[i]);
 	if (parity != (words[i] & 0x3f)) {
-	    gpsd_report(LOG_IO,
+	    gpsd_report(session->context->debug, LOG_IO,
 			"50B: gpsd_interpret_subframe_raw parity fail words[%d] 0x%x != 0x%x\n",
 			i, parity, (words[i] & 0x1));
 	    return 0;
@@ -87,7 +89,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 static void subframe_almanac(uint8_t tSVID, uint32_t words[],
 			     uint8_t subframe, uint8_t sv,
 			     uint8_t data_id,
-			     /*@out@*/struct almanac_t *almp)
+			     /*@out@*/struct almanac_t *almp, const debug)
 {
     /*@+matchanyintegral -shiftimplementation@*/
     almp->sv     = sv; /* ignore the 0 sv problem for now */
@@ -123,7 +125,7 @@ static void subframe_almanac(uint8_t tSVID, uint32_t words[],
     almp->af0     |= ((words[9] >>  2) & 0x000007);
     almp->af0      = (short)uint2int(almp->af0, 11);
     almp->d_af0    = pow(2.0,-20) * almp->af0;
-    gpsd_report(LOG_PROG,
+    gpsd_report(debug, LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
 		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.10g Omega0:%.10e "
 		"omega:%.10e M0:%.11e af0:%.5e af1:%.5e\n",
@@ -162,7 +164,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     uint8_t preamble;
     int i = 0;   /* handy loop counter */
     struct subframe_t *subp = &session->gpsdata.subframe;
-    gpsd_report(LOG_IO,
+    gpsd_report(session->context->debug, LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		tSVID, words[0], words[1], words[2], words[3], words[4],
@@ -175,7 +177,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	words[0] ^= 0xffffff;
     }
     if (preamble != 0x74) {
-	gpsd_report(LOG_WARN,
+	gpsd_report(session->context->debug, LOG_WARN,
 	    "50B: gpsd_interpret_subframe bad preamble: 0x%x header 0x%x\n",
 	    preamble, words[0]);
 	return 0;
@@ -188,7 +190,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     subp->subframe_num = ((words[1] >> 2) & 0x07);
     subp->alert = (bool)((words[1] >> 6) & 0x01);
     subp->antispoof = (bool)((words[1] >> 6) & 0x01);
-    gpsd_report(LOG_PROG,
+    gpsd_report(session->context->debug, LOG_PROG,
 		"50B: SF:%d SV:%2u TOW17:%7lu Alert:%u AS:%u IF:%d\n",
 		subp->subframe_num, subp->tSVID, subp->l_TOW17,
 		(unsigned)subp->alert, (unsigned)subp->antispoof,
@@ -232,7 +234,8 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub1.d_af0  = pow(2.0, -31) * subp->sub1.af0;
 	subp->sub1.IODC <<= 8;
 	subp->sub1.IODC |= ((words[7] >> 16) & 0x00FF);
-	gpsd_report(LOG_PROG, "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
+	gpsd_report(session->context->debug, LOG_PROG,
+		    "50B: SF:1 SV:%2u WN:%4u IODC:%4u"
 		    " L2:%u ura:%u hlth:%u L2P:%u Tgd:%g toc:%lu af2:%.4g"
 		    " af1:%.6e af0:%.7e\n",
 		    subp->tSVID,
@@ -276,7 +279,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub2.fit    = ((words[9] >>  7) & 0x000001);
 	subp->sub2.AODO   = ((words[9] >>  2) & 0x00001F);
 	subp->sub2.u_AODO   = subp->sub2.AODO * 900;
-	gpsd_report(LOG_PROG,
+	gpsd_report(session->context->debug, LOG_PROG,
 		    "50B: SF:2 SV:%2u IODE:%3u Crs:%.6e deltan:%.6e "
 		    "M0:%.11e Cuc:%.6e e:%f Cus:%.6e sqrtA:%.11g "
 		    "toe:%lu FIT:%u AODO:%5u\n",
@@ -320,7 +323,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	subp->sub3.IDOT     = (int16_t)((words[9] >>  2) & 0x003FFF);
 	subp->sub3.IDOT     = uint2int(subp->sub3.IDOT, 14);
 	subp->sub3.d_IDOT   = pow(2.0, -43) * subp->sub3.IDOT;
-	gpsd_report(LOG_PROG,
+	gpsd_report(session->context->debug, LOG_PROG,
 	    "50B: SF:3 SV:%2u IODE:%3u I IDOT:%.6g Cic:%.6e Omega0:%.11e "
 	    " Cis:%.7g i0:%.11e Crc:%.7g omega:%.11e Omegad:%.6e\n",
 		    subp->tSVID, subp->sub3.IODE, subp->sub3.d_IDOT,
@@ -473,15 +476,16 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		}
 		/*@-charint@*/
 
-		gpsd_report(LOG_PROG, "50B: SF:4-13 data_id %d ai:%u "
-		    "ERD1:%d ERD2:%d ERD3:%d ERD4:%d "
-		    "ERD5:%d ERD6:%d ERD7:%d ERD8:%d "
-		    "ERD9:%d ERD10:%d ERD11:%d ERD12:%d "
-		    "ERD13:%d ERD14:%d ERD15:%d ERD16:%d "
-		    "ERD17:%d ERD18:%d ERD19:%d ERD20:%d "
-		    "ERD21:%d ERD22:%d ERD23:%d ERD24:%d "
-		    "ERD25:%d ERD26:%d ERD27:%d ERD28:%d "
-		    "ERD29:%d ERD30:%d\n",
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "50B: SF:4-13 data_id %d ai:%u "
+			    "ERD1:%d ERD2:%d ERD3:%d ERD4:%d "
+			    "ERD5:%d ERD6:%d ERD7:%d ERD8:%d "
+			    "ERD9:%d ERD10:%d ERD11:%d ERD12:%d "
+			    "ERD13:%d ERD14:%d ERD15:%d ERD16:%d "
+			    "ERD17:%d ERD18:%d ERD19:%d ERD20:%d "
+			    "ERD21:%d ERD22:%d ERD23:%d ERD24:%d "
+			    "ERD25:%d ERD26:%d ERD27:%d ERD28:%d "
+			    "ERD29:%d ERD30:%d\n",
 			    subp->data_id, subp->sub4_13.ai,
 			    subp->sub4_13.ERD[1], subp->sub4_13.ERD[2],
 			    subp->sub4_13.ERD[3], subp->sub4_13.ERD[4],
@@ -551,17 +555,18 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_25.svhx[6] = ((words[9] >> 12) & 0x00003F);
 		subp->sub4_25.svhx[7] = ((words[9] >>  6) & 0x00003F);
 
-		gpsd_report(LOG_PROG, "50B: SF:4-25 data_id %d "
-		    "SV1:%u SV2:%u SV3:%u SV4:%u "
-		    "SV5:%u SV6:%u SV7:%u SV8:%u "
-		    "SV9:%u SV10:%u SV11:%u SV12:%u "
-		    "SV13:%u SV14:%u SV15:%u SV16:%u "
-		    "SV17:%u SV18:%u SV19:%u SV20:%u "
-		    "SV21:%u SV22:%u SV23:%u SV24:%u "
-		    "SV25:%u SV26:%u SV27:%u SV28:%u "
-		    "SV29:%u SV30:%u SV31:%u SV32:%u "
-		    "SVH25:%u SVH26:%u SVH27:%u SVH28:%u "
-		    "SVH29:%u SVH30:%u SVH31:%u SVH32:%u\n",
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "50B: SF:4-25 data_id %d "
+			    "SV1:%u SV2:%u SV3:%u SV4:%u "
+			    "SV5:%u SV6:%u SV7:%u SV8:%u "
+			    "SV9:%u SV10:%u SV11:%u SV12:%u "
+			    "SV13:%u SV14:%u SV15:%u SV16:%u "
+			    "SV17:%u SV18:%u SV19:%u SV20:%u "
+			    "SV21:%u SV22:%u SV23:%u SV24:%u "
+			    "SV25:%u SV26:%u SV27:%u SV28:%u "
+			    "SV29:%u SV30:%u SV31:%u SV32:%u "
+			    "SVH25:%u SVH26:%u SVH27:%u SVH28:%u "
+			    "SVH29:%u SVH30:%u SVH31:%u SVH32:%u\n",
 			    subp->data_id,
 			    subp->sub4_25.svf[1],  subp->sub4_25.svf[2],
 			    subp->sub4_25.svf[3],  subp->sub4_25.svf[4],
@@ -657,8 +662,9 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_17.str[i++] = (words[9] >> 8) & 0xff;
 		subp->sub4_17.str[i] = '\0';
 		/*@ +type @*/
-		gpsd_report(LOG_PROG, "50B: SF:4-17 system message: %.24s\n",
-			subp->sub4_17.str);
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "50B: SF:4-17 system message: %.24s\n",
+			    subp->sub4_17.str);
 		break;
 	    case 18:
 	    case 56:
@@ -707,19 +713,19 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		/* leap second future */
 		subp->sub4_18.lsf = (int8_t)((words[9] >> 16) & 0x0000FF);
 
-		gpsd_report(LOG_PROG,
-		    "50B: SF:4-18 a0:%.5g a1:%.5g a2:%.5g a3:%.5g "
-		    "b0:%.5g b1:%.5g b2:%.5g b3:%.5g "
-		    "A1:%.11e A0:%.11e tot:%.5g WNt:%u "
-		    "ls: %d WNlsf:%u DN:%u, lsf:%d\n",
-			subp->sub4_18.d_alpha0, subp->sub4_18.d_alpha1,
-			subp->sub4_18.d_alpha2, subp->sub4_18.d_alpha3,
-			subp->sub4_18.d_beta0, subp->sub4_18.d_beta1,
-			subp->sub4_18.d_beta2, subp->sub4_18.d_beta3,
-			subp->sub4_18.d_A1, subp->sub4_18.d_A0,
-			subp->sub4_18.d_tot, subp->sub4_18.WNt,
-			subp->sub4_18.leap, subp->sub4_18.WNlsf,
-			subp->sub4_18.DN, subp->sub4_18.lsf);
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "50B: SF:4-18 a0:%.5g a1:%.5g a2:%.5g a3:%.5g "
+			    "b0:%.5g b1:%.5g b2:%.5g b3:%.5g "
+			    "A1:%.11e A0:%.11e tot:%.5g WNt:%u "
+			    "ls: %d WNlsf:%u DN:%u, lsf:%d\n",
+			    subp->sub4_18.d_alpha0, subp->sub4_18.d_alpha1,
+			    subp->sub4_18.d_alpha2, subp->sub4_18.d_alpha3,
+			    subp->sub4_18.d_beta0, subp->sub4_18.d_beta1,
+			    subp->sub4_18.d_beta2, subp->sub4_18.d_beta3,
+			    subp->sub4_18.d_A1, subp->sub4_18.d_A0,
+			    subp->sub4_18.d_tot, subp->sub4_18.WNt,
+			    subp->sub4_18.leap, subp->sub4_18.WNlsf,
+			    subp->sub4_18.DN, subp->sub4_18.lsf);
 
 #ifdef NTPSHM_ENABLE
 		/* IS-GPS-200 Revision E, paragraph 20.3.3.5.2.4 */
@@ -746,10 +752,12 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    if ( -1 < sv ) {
 		subp->is_almanac = 1;
 		subframe_almanac(subp->tSVID, words, subp->subframe_num,
-				 (uint8_t)sv, subp->data_id, &subp->sub4.almanac);
+				 (uint8_t)sv, subp->data_id, 
+				 &subp->sub4.almanac,
+				 session->context->debug);
 	    } else if ( -2 == sv ) {
 		/* unknown or secret page */
-		gpsd_report(LOG_PROG,
+		gpsd_report(session->context->debug, LOG_PROG,
 			"50B: SF:4-%d data_id %d\n",
 			subp->pageid, subp->data_id);
 		return 0;
@@ -766,7 +774,8 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	if ( 25 > subp->pageid ) {
 	    subp->is_almanac = 1;
 	    subframe_almanac(subp->tSVID, words, subp->subframe_num,
-		subp->pageid, subp->data_id, &subp->sub5.almanac);
+			     subp->pageid, subp->data_id, &subp->sub5.almanac,
+			     session->context->debug);
 	} else if ( 51 == subp->pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51
 	     * IS-GPS-200E Table 20-V */
@@ -798,14 +807,14 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    subp->sub5_25.sv[22] = ((words[7] >> 12) & 0x00003F);
 	    subp->sub5_25.sv[23] = ((words[7] >>  6) & 0x00003F);
 	    subp->sub5_25.sv[24] = ((words[7] >>  0) & 0x00003F);
-	    gpsd_report(LOG_PROG,
-		"50B: SF:5-25 SV:%2u ID:%u toa:%lu WNa:%u "
-		"SV1:%u SV2:%u SV3:%u SV4:%u "
-		"SV5:%u SV6:%u SV7:%u SV8:%u "
-		"SV9:%u SV10:%u SV11:%u SV12:%u "
-		"SV13:%u SV14:%u SV15:%u SV16:%u "
-		"SV17:%u SV18:%u SV19:%u SV20:%u "
-		"SV21:%u SV22:%u SV23:%u SV24:%u\n",
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"50B: SF:5-25 SV:%2u ID:%u toa:%lu WNa:%u "
+			"SV1:%u SV2:%u SV3:%u SV4:%u "
+			"SV5:%u SV6:%u SV7:%u SV8:%u "
+			"SV9:%u SV10:%u SV11:%u SV12:%u "
+			"SV13:%u SV14:%u SV15:%u SV16:%u "
+			"SV17:%u SV18:%u SV19:%u SV20:%u "
+			"SV21:%u SV22:%u SV23:%u SV24:%u\n",
 			subp->tSVID, subp->data_id,
 			subp->sub5_25.l_toa, subp->sub5_25.WNa,
 			subp->sub5_25.sv[1], subp->sub5_25.sv[2],
@@ -822,8 +831,9 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 			subp->sub5_25.sv[23], subp->sub5_25.sv[24]);
 	} else {
 	    /* unknown page */
-	    gpsd_report(LOG_PROG, "50B: SF:5-%d data_id %d uknown page\n",
-		subp->pageid, subp->data_id);
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"50B: SF:5-%d data_id %d uknown page\n",
+			subp->pageid, subp->data_id);
 	    return 0;
 	}
 	break;

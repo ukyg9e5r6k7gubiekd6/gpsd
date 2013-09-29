@@ -129,17 +129,19 @@ invalid data.
  *
  * examples:
 
- *  gar_decode(cbuf, 9, "EW", 100000.0, &result);
+ *  gar_decode(0, cbuf, 9, "EW", 100000.0, &result);
  *  E01412345 -> +14.12345
 
- *  gar_decode(cbuf, 9, "EW", 100000.0, &result);
+ *  gar_decode(0, cbuf, 9, "EW", 100000.0, &result);
  *  W01412345 -> -14.12345
 
- *  gar_decode(cbuf, 3, "", 10.0, &result);
+ *  gar_decode(0, cbuf, 3, "", 10.0, &result);
  *  123 -> +12.3
 
 **************************************************************************/
-static int gar_decode(const char *data, const size_t length, const char *prefix, const double dividor,	/*@out@*/
+static int gar_decode(const int debug,
+		      const char *data, const size_t length, 
+		      const char *prefix, const double dividor,	/*@out@*/
 		      double *result)
 {
     char buf[10];
@@ -151,13 +153,13 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
     /* splint is buggy here, thinks buf can be a null pointer */
     /*@ -mustdefine -nullderef -nullpass @*/
     if (length >= sizeof(buf)) {
-	gpsd_report(LOG_ERROR, "internal buffer too small\n");
+	gpsd_report(debug, LOG_ERROR, "internal buffer too small\n");
 	return -1;
     }
 
     bzero(buf, (int)sizeof(buf));
     (void)strlcpy(buf, data, length);
-    gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
+    gpsd_report(debug, LOG_RAW + 2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
 	/* value is not valid, ignore it */
@@ -184,13 +186,14 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
 		break;
 	    }
 	}
-	gpsd_report(LOG_WARN, "Unexpected char \"%c\" in data \"%s\"\n",
+	gpsd_report(debug, LOG_WARN,
+		    "Unexpected char \"%c\" in data \"%s\"\n",
 		    buf[0], buf);
 	return -1;
     } while (0);
 
     if (strspn(buf + offset, "0123456789") != length - offset) {
-	gpsd_report(LOG_WARN, "Invalid value %s\n", buf);
+	gpsd_report(debug, LOG_WARN, "Invalid value %s\n", buf);
 	return -1;
     }
     /*@ +mustdefine +nullderef +nullpass @*/
@@ -210,7 +213,8 @@ static int gar_decode(const char *data, const size_t length, const char *prefix,
  *       -1: data error
  *       -2: data not valid
 **************************************************************************/
-static int gar_int_decode(const char *data, const size_t length,
+static int gar_int_decode(const int debug,
+			  const char *data, const size_t length,
 			  const unsigned int min, const unsigned int max,
 			  /*@out@*/ unsigned int *result)
 {
@@ -219,13 +223,13 @@ static int gar_int_decode(const char *data, const size_t length,
 
     /*@ -mustdefine @*/
     if (length >= sizeof(buf)) {
-	gpsd_report(LOG_ERROR, "internal buffer too small\n");
+	gpsd_report(debug, LOG_ERROR, "internal buffer too small\n");
 	return -1;
     }
 
     bzero(buf, (int)sizeof(buf));
     (void)strlcpy(buf, data, length);
-    gpsd_report(LOG_RAW + 2, "Decoded string: %s\n", buf);
+    gpsd_report(debug, LOG_RAW + 2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
 	/* value is not valid, ignore it */
@@ -234,7 +238,7 @@ static int gar_int_decode(const char *data, const size_t length,
 
     /*@ -nullpass @*//* splint bug */
     if (strspn(buf, "0123456789") != length) {
-	gpsd_report(LOG_WARN, "Invalid value %s\n", buf);
+	gpsd_report(debug, LOG_WARN, "Invalid value %s\n", buf);
 	return -1;
     }
 
@@ -243,7 +247,8 @@ static int gar_int_decode(const char *data, const size_t length,
 	*result = res;
 	return 0;		/* SUCCESS */
     } else {
-	gpsd_report(LOG_WARN, "Value %u out of range <%u, %u>\n", res, min,
+	gpsd_report(debug, LOG_WARN,
+		    "Value %u out of range <%u, %u>\n", res, min,
 		    max);
 	return -1;
     }
@@ -263,12 +268,14 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
     gps_mask_t mask = 0;
 
-    gpsd_report(LOG_PROG, "Garmin Simple Text packet, len %zd: %s\n",
+    gpsd_report(session->context->debug, LOG_PROG,
+		"Garmin Simple Text packet, len %zd: %s\n",
 		session->packet.outbuflen, (char*)session->packet.outbuffer);
 
     if (session->packet.outbuflen < 54) {
 	/* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */
-	gpsd_report(LOG_WARN, "Message is too short, rejected.\n");
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "Message is too short, rejected.\n");
 	return ONLINE_SET;
     }
 
@@ -281,32 +288,38 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     do {
 	unsigned int result;
 	char *buf = (char *)session->packet.outbuffer + 1;
-	gpsd_report(LOG_PROG, "Timestamp: %.12s\n", buf);
+	gpsd_report(session->context->debug, LOG_PROG, "Timestamp: %.12s\n", buf);
 
 	/* year */
-	if (0 != gar_int_decode(buf + 0, 2, 0, 99, &result))
+	if (0 != gar_int_decode(session->context->debug,
+				buf + 0, 2, 0, 99, &result))
 	    break;
 	session->driver.garmintxt.date.tm_year =
 	    (session->context->century + (int)result) - 1900;
 	/* month */
-	if (0 != gar_int_decode(buf + 2, 2, 1, 12, &result))
+	if (0 != gar_int_decode(session->context->debug,
+				buf + 2, 2, 1, 12, &result))
 	    break;
 	session->driver.garmintxt.date.tm_mon = (int)result - 1;
 	/* day */
-	if (0 != gar_int_decode(buf + 4, 2, 1, 31, &result))
+	if (0 != gar_int_decode(session->context->debug,
+				buf + 4, 2, 1, 31, &result))
 	    break;
 	session->driver.garmintxt.date.tm_mday = (int)result;
 	/* hour */
-	if (0 != gar_int_decode(buf + 6, 2, 0, 23, &result))
+	if (0 != gar_int_decode(session->context->debug,
+				buf + 6, 2, 0, 23, &result))
 	    break;
 	session->driver.garmintxt.date.tm_hour = (int)result;	/* mday update?? */
 	/* minute */
-	if (0 != gar_int_decode(buf + 8, 2, 0, 59, &result))
+	if (0 != gar_int_decode(session->context->debug,
+				buf + 8, 2, 0, 59, &result))
 	    break;
 	session->driver.garmintxt.date.tm_min = (int)result;
 	/* second */
 	/* second value can be even 60, occasional leap second */
-	if (0 != gar_int_decode(buf + 10, 2, 0, 60, &result))
+	if (0 != gar_int_decode(session->context->debug,
+				buf + 10, 2, 0, 60, &result))
 	    break;
 	session->driver.garmintxt.date.tm_sec = (int)result;
 	session->driver.garmintxt.subseconds = 0;
@@ -331,12 +344,14 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	/* Latitude, [NS]ddmmmmm */
 	/* decode degrees of Latitude */
 	if (0 !=
-	    gar_decode((char *)session->packet.outbuffer + 13, 3, "NS", 1.0,
-		       &lat))
+	    gar_decode(session->context->debug,
+		(char *)session->packet.outbuffer + 13, 3, "NS", 1.0,
+		&lat))
 	    break;
 	/* decode minutes of Latitude */
 	if (0 !=
-	    gar_int_decode((char *)session->packet.outbuffer + 16, 5, 0,
+	    gar_int_decode(session->context->debug,
+			   (char *)session->packet.outbuffer + 16, 5, 0,
 			   99999, &degfrag))
 	    break;
 	lat += degfrag * 100.0 / 60.0 / 100000.0;
@@ -345,12 +360,14 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	/* Longitude, [EW]dddmmmmm */
 	/* decode degrees of Longitude */
 	if (0 !=
-	    gar_decode((char *)session->packet.outbuffer + 21, 4, "EW", 1.0,
+	    gar_decode(session->context->debug,
+		       (char *)session->packet.outbuffer + 21, 4, "EW", 1.0,
 		       &lon))
 	    break;
 	/* decode minutes of Longitude */
 	if (0 !=
-	    gar_int_decode((char *)session->packet.outbuffer + 25, 5, 0,
+	    gar_int_decode(session->context->debug,
+			   (char *)session->packet.outbuffer + 25, 5, 0,
 			   99999, &degfrag))
 	    break;
 	lon += degfrag * 100.0 / 60.0 / 100000.0;
@@ -388,7 +405,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     do {
 	double eph;
 	if (0 !=
-	    gar_decode((char *)session->packet.outbuffer + 31, 3, "", 1.0,
+	    gar_decode(session->context->debug,
+		       (char *)session->packet.outbuffer + 31, 3, "", 1.0,
 		       &eph))
 	    break;
 	/* eph is a circular error, sqrt(epx**2 + epy**2) */
@@ -401,7 +419,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     do {
 	double alt;
 	if (0 !=
-	    gar_decode((char *)session->packet.outbuffer + 34, 6, "+-", 1.0,
+	    gar_decode(session->context->debug,
+		       (char *)session->packet.outbuffer + 34, 6, "+-", 1.0,
 		       &alt))
 	    break;
 	session->newdata.altitude = alt;
@@ -412,11 +431,13 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     do {
 	double ewvel, nsvel, speed, track;
 	if (0 !=
-	    gar_decode((char *)session->packet.outbuffer + 40, 5, "EW", 10.0,
+	    gar_decode(session->context->debug,
+		       (char *)session->packet.outbuffer + 40, 5, "EW", 10.0,
 		       &ewvel))
 	    break;
 	if (0 !=
-	    gar_decode((char *)session->packet.outbuffer + 45, 5, "NS", 10.0,
+	    gar_decode(session->context->debug,
+		       (char *)session->packet.outbuffer + 45, 5, "NS", 10.0,
 		       &nsvel))
 	    break;
 	speed = sqrt(ewvel * ewvel + nsvel * nsvel);	/* is this correct formula? Result is in mps */
@@ -433,14 +454,15 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     do {
 	double climb;
 	if (0 !=
-	    gar_decode((char *)session->packet.outbuffer + 50, 5, "UD", 100.0,
+	    gar_decode(session->context->debug,
+		       (char *)session->packet.outbuffer + 50, 5, "UD", 100.0,
 		       &climb))
 	    break;
 	session->newdata.climb = climb;	/* climb in mps */
 	mask |= CLIMB_SET;
     } while (0);
 
-    gpsd_report(LOG_DATA,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,

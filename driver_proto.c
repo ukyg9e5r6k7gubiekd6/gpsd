@@ -72,7 +72,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     if (data_len != _PROTO__NAVSOL_MSG_LEN)
 	return 0;
 
-    gpsd_report(LOG_IO, "_proto_ NAVSOL - navigation data\n");
+    gpsd_report(session->context->debug, LOG_IO, "_proto_ NAVSOL - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
     if ((flags & _PROTO__SOLUTION_VALID) == 0)
@@ -120,7 +120,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      * the fields it potentially set and the transfer mask. Doing this
      * makes it relatively easy to track down data-management problems.
      */
-    gpsd_report(LOG_DATA, "NAVSOL: time=%.2f, lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
+    gpsd_report(session->context->debug, LOG_DATA, "NAVSOL: time=%.2f, lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
 		session->newdata.time,
 		session->newdata.latitude,
 		session->newdata.longitude,
@@ -142,7 +142,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     if (data_len != UTCTIME_MSG_LEN)
 	return 0;
 
-    gpsd_report(LOG_IO, "_proto_ UTCTIME - navigation data\n");
+    gpsd_report(session->context->debug, LOG_IO, "_proto_ UTCTIME - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
     if ((flags & _PROTO__TIME_VALID) == 0)
@@ -168,7 +168,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     if (data_len != SVINFO_MSG_LEN )
 	return 0;
 
-    gpsd_report(LOG_IO, "_proto_ SVINFO - navigation data\n");
+    gpsd_report(session->context->debug, LOG_IO, "_proto_ SVINFO - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
     if ((flags & _PROTO__SVINFO_VALID) == 0)
@@ -183,7 +183,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
      */
     nchan = GET_NUMBER_OF_CHANNELS();
     if ((nchan < 1) || (nchan > MAXCHANNELS)) {
-	gpsd_report(LOG_INF, "too many channels reported\n");
+	gpsd_report(session->context->debug, LOG_INF, "too many channels reported\n");
 	return 0;
     }
     gpsd_zero_satellites(&session->gpsdata);
@@ -207,7 +207,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.skyview_time = NaN;
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
-    gpsd_report(LOG_DATA,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
@@ -226,7 +226,7 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
     if (data_len != RAW_MSG_LEN )
 	return 0;
 
-    gpsd_report(LOG_IO, "_proto_ RAW - raw measurements\n");
+    gpsd_report(session->context->debug, LOG_IO, "_proto_ RAW - raw measurements\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
     if ((flags & _PROTO__SVINFO_VALID) == 0)
@@ -241,7 +241,7 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
      */
     nchan = GET_NUMBER_OF_CHANNELS();
     if ((nchan < 1) || (nchan > MAXCHANNELS)) {
-	gpsd_report(LOG_INF, "too many channels reported\n");
+	gpsd_report(session->context->debug, LOG_INF, "too many channels reported\n");
 	return 0;
     }
 
@@ -285,7 +285,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
     type = GET_MESSAGE_TYPE();
 
     /* we may need to dump the raw packet */
-    gpsd_report(LOG_RAW, "raw _proto_ packet type 0x%02x\n", type);
+    gpsd_report(session->context->debug, LOG_RAW, "raw _proto_ packet type 0x%02x\n", type);
 
    /*
     * The tag field is only 8 bytes; be careful you do not overflow.
@@ -299,7 +299,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
 	/* Deliver message to specific decoder based on message type */
 
     default:
-	gpsd_report(LOG_WARN, "unknown packet id %d length %d\n", type, len);
+	gpsd_report(session->context->debug, LOG_WARN, "unknown packet id %d length %d\n", type, len);
 	return 0;
     }
 }
@@ -349,7 +349,7 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 
    /* we may need to dump the message */
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
-   gpsd_report(LOG_IO, "writing _proto_ control type %02x\n");
+   gpsd_report(session->context->debug, LOG_IO, "writing _proto_ control type %02x\n");
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 /*@ -charint +usedef +compdef @*/

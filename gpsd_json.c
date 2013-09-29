@@ -350,9 +350,6 @@ void json_sky_dump(const struct gps_data_t *datap,
     if (reply[strlen(reply) - 1] == ',')
 	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
     (void)strlcat(reply, "}\r\n", replylen);
-    if (datap->satellites_visible != reported)
-	gpsd_report(LOG_WARN, "Satellite count %d != PRN count %d\n",
-		    datap->satellites_visible, reported);
 }
 
 void json_device_dump(const struct gps_device_t *device,

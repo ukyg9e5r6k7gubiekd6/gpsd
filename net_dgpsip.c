@@ -36,17 +36,19 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 	netlib_connectsock(AF_UNSPEC, dgpsserver, dgpsport, "tcp");
     if (device->gpsdata.gps_fd >= 0) {
 	char hn[256], buf[BUFSIZ];
-	gpsd_report(LOG_PROG, "connection to DGPS server %s established.\n",
+	gpsd_report(device->context->debug, LOG_PROG,
+		    "connection to DGPS server %s established.\n",
 		    dgpsserver);
 	(void)gethostname(hn, sizeof(hn));
 	/* greeting required by some RTCM104 servers; others will ignore it */
 	(void)snprintf(buf, sizeof(buf), "HELO %s gpsd %s\r\nR\r\n", hn,
 		       VERSION);
 	if (write(device->gpsdata.gps_fd, buf, strlen(buf)) != (ssize_t) strlen(buf))
-	    gpsd_report(LOG_ERROR, "hello to DGPS server %s failed\n",
+	    gpsd_report(device->context->debug, LOG_ERROR,
+			"hello to DGPS server %s failed\n",
 			dgpsserver);
     } else
-	gpsd_report(LOG_ERROR,
+	gpsd_report(device->context->debug, LOG_ERROR,
 		    "can't connect to DGPS server %s, netlib error %d.\n",
 		    dgpsserver, device->gpsdata.gps_fd);
     opts = fcntl(device->gpsdata.gps_fd, F_GETFL);
@@ -78,9 +80,9 @@ void dgpsip_report(struct gps_context_t *context,
 			   gps->gpsdata.fix.altitude);
 	    if (write(dgpsip->gpsdata.gps_fd, buf, strlen(buf)) ==
 		(ssize_t) strlen(buf))
-		gpsd_report(LOG_IO, "=> dgps %s\n", buf);
+		gpsd_report(context->debug, LOG_IO, "=> dgps %s\n", buf);
 	    else
-		gpsd_report(LOG_IO, "write to dgps FAILED\n");
+		gpsd_report(context->debug, LOG_IO, "write to dgps FAILED\n");
 	}
     }
 }

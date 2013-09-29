@@ -27,22 +27,6 @@ static unsigned int typelist[32];
  *
  **************************************************************************/
 
-void gpsd_report(int errlevel, const char *fmt, ...)
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    if (errlevel <= verbose) {
-	char buf[BUFSIZ];
-	va_list ap;
-
-	(void)strlcpy(buf, "gpsdecode: ", BUFSIZ);
-	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
-			ap);
-	va_end(ap);
-	(void)fputs(buf, stderr);
-    }
-}
-
 #ifdef AIVDM_ENABLE
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {

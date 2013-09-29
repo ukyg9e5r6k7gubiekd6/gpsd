@@ -17,10 +17,10 @@
 
 static int verbose = 0;
 
-void gpsd_report(int errlevel, const char *fmt, ...)
+void gpsd_report(int debuglevel, int errlevel, const char *fmt, ...)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
-    if (errlevel <= verbose) {
+    if (errlevel <= debuglevel) {
 	char buf[BUFSIZ];
 	va_list ap;
 

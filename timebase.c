@@ -126,7 +126,8 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     context->rollovers = (int)((context->start_time-GPS_EPOCH) / GPS_ROLLOVER);
 
     if (context->start_time < GPS_EPOCH)
-	gpsd_report(LOG_ERROR, "system time looks bogus, dates may not be reliable.\n");
+	gpsd_report(context->debug, LOG_ERROR,
+		    "system time looks bogus, dates may not be reliable.\n");
     else {
 	/* we've forced the UTC timezone, so this is actually UTC */
 	struct tm *now = localtime(&context->start_time);
@@ -138,7 +139,8 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 	now->tm_year += 1900;
 	context->century = now->tm_year - (now->tm_year % 100);
 	(void)unix_to_iso8601((timestamp_t)context->start_time, scr, sizeof(scr));
-	gpsd_report(LOG_INF, "startup at %s (%d)\n",
+	gpsd_report(context->debug, LOG_INF,
+		    "startup at %s (%d)\n",
 		    scr, (int)context->start_time);
     }
 }
@@ -192,7 +194,8 @@ timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
     if (session->newdata.time < (timestamp_t)session->context->start_time) {
 	char scr[128];
 	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
-	gpsd_report(LOG_WARN, "GPS week rollover makes time %s (%f) invalid\n",
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "GPS week rollover makes time %s (%f) invalid\n",
 		    scr, session->newdata.time);
     }
 
@@ -213,7 +216,8 @@ timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
      * to 13 bits.
      */
     if ((int)week < (session->context->gps_week & 0x3ff)) {
-	gpsd_report(LOG_INF, "GPS week 10-bit rollover detected.\n");
+	gpsd_report(session->context->debug, LOG_INF,
+		    "GPS week 10-bit rollover detected.\n");
 	++session->context->rollovers;
     }
 

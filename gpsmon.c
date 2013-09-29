@@ -158,7 +158,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
-void gpsd_report(int errlevel, const char *fmt, ...)
+void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
 /* our version of the logger */
 {
     char buf[BUFSIZ]; 
@@ -198,7 +198,7 @@ void gpsd_report(int errlevel, const char *fmt, ...)
 
     (void)strlcpy(buf, "gpsd:", BUFSIZ);
     (void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
-    if (errlevel <= context.debug && packetwin != NULL) {
+    if (errlevel <= debuglevel && packetwin != NULL) {
 	char buf2[BUFSIZ];
 	va_list ap;
 	va_start(ap, fmt);
@@ -243,7 +243,7 @@ static ssize_t readpkt(void)
 
     /* conditional prevents mask dumper from eating CPU */
     if (context.debug >= LOG_DATA)
-	gpsd_report(LOG_DATA,
+	gpsd_report(context.debug, LOG_DATA,
 		    "packet mask = %s\n",
 		    gps_maskdump(session.gpsdata.set));
 
@@ -598,7 +598,7 @@ int main(int argc, char **argv)
 	(void)strlcpy(session.gpsdata.dev.path, argv[optind],
 		      sizeof(session.gpsdata.dev.path));
 	if (gpsd_activate(&session) == -1) {
-	    gpsd_report(LOG_ERROR,
+	    gpsd_report(context.debug, LOG_ERROR,
 			"activation of device %s failed, errno=%d\n",
 			session.gpsdata.dev.path, errno);
 	    exit(EXIT_FAILURE);
