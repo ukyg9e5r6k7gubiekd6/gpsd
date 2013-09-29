@@ -336,18 +336,22 @@ int gpsd_open(struct gps_device_t *session)
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
 	port = strchr(server, ':');
 	if (port == NULL) {
-	    gpsd_report(session->context->debug, LOG_ERROR, "Missing colon in TCP feed spec.\n");
+	    gpsd_report(session->context->debug, LOG_ERROR,
+			"Missing colon in TCP feed spec.\n");
 	    return -1;
 	}
 	*port++ = '\0';
-	gpsd_report(session->context->debug, LOG_INF, "opening TCP feed at %s, port %s.\n", server,
+	gpsd_report(session->context->debug, LOG_INF,
+		    "opening TCP feed at %s, port %s.\n", server,
 		    port);
 	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
-	    gpsd_report(session->context->debug, LOG_ERROR, "TCP device open error %s.\n",
+	    gpsd_report(session->context->debug, LOG_ERROR,
+			"TCP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
 	} else
-	    gpsd_report(session->context->debug, LOG_SPIN, "TCP device opened on fd %d\n", dsock);
+	    gpsd_report(session->context->debug, LOG_SPIN, 
+			"TCP device opened on fd %d\n", dsock);
 	session->gpsdata.gps_fd = dsock;
 	session->sourcetype = source_tcp;
 	return session->gpsdata.gps_fd;
@@ -359,18 +363,22 @@ int gpsd_open(struct gps_device_t *session)
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
 	port = strchr(server, ':');
 	if (port == NULL) {
-	    gpsd_report(session->context->debug, LOG_ERROR, "Missing colon in UDP feed spec.\n");
+	    gpsd_report(session->context->debug, LOG_ERROR,
+			"Missing colon in UDP feed spec.\n");
 	    return -1;
 	}
 	*port++ = '\0';
-	gpsd_report(session->context->debug, LOG_INF, "opening UDP feed at %s, port %s.\n", server,
+	gpsd_report(session->context->debug, LOG_INF,
+		    "opening UDP feed at %s, port %s.\n", server,
 		    port);
 	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp")) < 0) {
-	    gpsd_report(session->context->debug, LOG_ERROR, "UDP device open error %s.\n",
+	    gpsd_report(session->context->debug, LOG_ERROR,
+			"UDP device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
 	} else
-	    gpsd_report(session->context->debug, LOG_SPIN, "UDP device opened on fd %d\n", dsock);
+	    gpsd_report(session->context->debug, LOG_SPIN,
+			"UDP device opened on fd %d\n", dsock);
 	session->gpsdata.gps_fd = dsock;
 	session->sourcetype = source_udp;
 	return session->gpsdata.gps_fd;
@@ -387,14 +395,17 @@ int gpsd_open(struct gps_device_t *session)
 	    port = DEFAULT_GPSD_PORT;
 	} else
 	    *port++ = '\0';
-	gpsd_report(session->context->debug, LOG_INF, "opening remote gpsd feed at %s, port %s.\n", server,
-		    port);
+	gpsd_report(session->context->debug, LOG_INF,
+		    "opening remote gpsd feed at %s, port %s.\n",
+		    server, port);
 	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
-	    gpsd_report(session->context->debug, LOG_ERROR, "remote gpsd device open error %s.\n",
+	    gpsd_report(session->context->debug, LOG_ERROR,
+			"remote gpsd device open error %s.\n",
 			netlib_errstr(dsock));
 	    return -1;
 	} else
-	    gpsd_report(session->context->debug, LOG_SPIN, "remote gpsd feed opened on fd %d\n", dsock);
+	    gpsd_report(session->context->debug, LOG_SPIN,
+			"remote gpsd feed opened on fd %d\n", dsock);
 	/*@+branchstate +nullpass@*/
 	/* watch to remote is issued when WATCH is */
 	session->gpsdata.gps_fd = dsock;
@@ -431,22 +442,27 @@ int gpsd_activate(struct gps_device_t *session)
 	    /*@ -mustfreeonly @*/
 	    for (dp = gpsd_drivers; *dp; dp++) {
 		if ((*dp)->probe_detect != NULL) {
-		    gpsd_report(session->context->debug, LOG_PROG, "Probing \"%s\" driver...\n",
+		    gpsd_report(session->context->debug, LOG_PROG,
+				"Probing \"%s\" driver...\n",
 				 (*dp)->type_name);
-		    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);  /* toss stale data */
+		    /* toss stale data */
+		    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
 		    if ((*dp)->probe_detect(session) != 0) {
-			gpsd_report(session->context->debug, LOG_PROG, "Probe found \"%s\" driver...\n",
+			gpsd_report(session->context->debug, LOG_PROG,
+				    "Probe found \"%s\" driver...\n",
 				     (*dp)->type_name);
 			session->device_type = *dp;
 			gpsd_assert_sync(session);
 			goto foundit;
 		    } else
-			gpsd_report(session->context->debug, LOG_PROG, "Probe not found \"%s\" driver...\n",
+			gpsd_report(session->context->debug, LOG_PROG,
+				    "Probe not found \"%s\" driver...\n",
 			             (*dp)->type_name);
 		}
 	    }
 	    /*@ +mustfreeonly @*/
-	    gpsd_report(session->context->debug, LOG_PROG, "no probe matched...\n");
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"no probe matched...\n");
 	}
       foundit:
 #endif /* NON_NMEA_ENABLE */
@@ -668,7 +684,8 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
 	    if (collect->used == i)
 		used_in_solution = true;
 	if (gpsdata->used[k])
-	    gpsd_report(session->context->debug, LOG_INF, "az: %d el: %d  SV: %d\n",
+	    gpsd_report(session->context->debug, LOG_INF,
+			"az: %d el: %d  SV: %d\n",
 			gpsdata->azimuth[k], gpsdata->elevation[k],
 			used_in_solution);
     }
@@ -732,7 +749,8 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
 	 */
 	gpsd_report(debug, LOG_RAW, "inverse:\n");
 	for (k = 0; k < 4; k++) {
-	    gpsd_report(session->context->debug, LOG_RAW, "%f %f %f %f\n",
+	    gpsd_report(session->context->debug, LOG_RAW,
+			"%f %f %f %f\n",
 			inv[k][0], inv[k][1], inv[k][2], inv[k][3]);
 	}
 #endif /* __UNUSED__ */
@@ -997,9 +1015,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    double gap = now - session->packet.start_time;
 
 	    if (gap > min_cycle)
-		gpsd_report(session->context->debug, LOG_WARN, "cycle-start detector failed.\n");
+		gpsd_report(session->context->debug, LOG_WARN,
+			    "cycle-start detector failed.\n");
 	    else if (gap > quiet_time) {
-		gpsd_report(session->context->debug, LOG_PROG, "transmission pause of %f\n", gap);
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "transmission pause of %f\n", gap);
 		session->sor = now;
 		session->packet.start_char = session->packet.char_counter;
 	    }
@@ -1027,10 +1047,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 
     /* update the scoreboard structure from the GPS */
-    gpsd_report(session->context->debug, LOG_RAW + 2, "%s sent %zd new characters\n",
+    gpsd_report(session->context->debug, LOG_RAW + 2,
+		"%s sent %zd new characters\n",
 		session->gpsdata.dev.path, newlen);
     if (newlen < 0) {		/* read error */
-	gpsd_report(session->context->debug, LOG_INF, "GPS on %s returned error %zd (%lf sec since data)\n",
+	gpsd_report(session->context->debug, LOG_INF,
+		    "GPS on %s returned error %zd (%lf sec since data)\n",
 		    session->gpsdata.dev.path, newlen,
 		    timestamp() - session->gpsdata.online);
 	session->gpsdata.online = (timestamp_t)0;
@@ -1041,7 +1063,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * wrong time...
 	 */
 	if (session->gpsdata.online > 0 && timestamp() - session->gpsdata.online >= session->gpsdata.dev.cycle * 2) {
-	    gpsd_report(session->context->debug, LOG_INF, "GPS on %s is offline (%lf sec since data)\n",
+	    gpsd_report(session->context->debug, LOG_INF,
+			"GPS on %s is offline (%lf sec since data)\n",
 			session->gpsdata.dev.path,
 			timestamp() - session->gpsdata.online);
 	    session->gpsdata.online = (timestamp_t)0;
@@ -1141,7 +1164,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * level does not actually require it.
 	 */
 	if (session->context->debug >= LOG_RAW)
-	    gpsd_report(session->context->debug, LOG_RAW, "raw packet of type %d, %zd:%s\n",
+	    gpsd_report(session->context->debug, LOG_RAW,
+			"raw packet of type %d, %zd:%s\n",
 			session->packet.type,
 			session->packet.outbuflen,
 			gpsd_packetdump((char *)session->packet.outbuffer, session->packet.outbuflen));
@@ -1224,7 +1248,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		gpsd_report(session->context->debug, LOG_WARN,
 			    "date more than a year in the future!\n");
 	    else if (session->newdata.time < 0)
-		gpsd_report(session->context->debug, LOG_ERROR, "date in %s is negative!\n", session->gpsdata.tag);
+		gpsd_report(session->context->debug, LOG_ERROR,
+			    "date in %s is negative!\n", session->gpsdata.tag);
 	}
 	/*@-relaxtypes -longunsignedintegral@*/
 
