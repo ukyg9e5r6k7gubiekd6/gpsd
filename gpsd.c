@@ -162,93 +162,6 @@ static void onsig(int sig)
     signalled = (sig_atomic_t) sig;
 }
 
-#if defined(PPS_ENABLE)
-static pthread_mutex_t report_mutex;
-#endif /* PPS_ENABLE */
-
-static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
-{
-    const char *sp;
-
-    buf2[0] = '\0';
-    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
-	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0')
-	  || (sp[0] == '\r' && sp[2] == '\0'))
-	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
-	else
-	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
-			   0x00ff & (unsigned)*sp);
-}
-
-void gpsd_report(const int debuglevel, const int errlevel,
-		 const char *fmt, ...)
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-#ifndef SQUELCH_ENABLE
-    if (errlevel <= debuglevel) {
-	char buf[BUFSIZ], buf2[BUFSIZ];
-	char *err_str;
-	va_list ap;
-
-#if defined(PPS_ENABLE)
-	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
-	(void)pthread_mutex_lock(&report_mutex);
-	/* +unrecog */
-#endif /* PPS_ENABLE */
-	switch ( errlevel ) {
-	case LOG_ERROR:
-		err_str = "ERROR: ";
-		break;
-	case LOG_SHOUT:
-		err_str = "SHOUT: ";
-		break;
-	case LOG_WARN:
-		err_str = "WARN: ";
-		break;
-	case LOG_INF:
-		err_str = "INFO: ";
-		break;
-	case LOG_DATA:
-		err_str = "DATA: ";
-		break;
-	case LOG_PROG:
-		err_str = "PROG: ";
-		break;
-	case LOG_IO:
-		err_str = "IO: ";
-		break;
-	case LOG_SPIN:
-		err_str = "SPIN: ";
-		break;
-	case LOG_RAW:
-		err_str = "RAW: ";
-		break;
-	default:
-		err_str = "UNK: ";
-	}
-
-	(void)strlcpy(buf, "gpsd:", sizeof(buf));
-	(void)strncat(buf, err_str, sizeof(buf) - 1 - strlen(buf));
-	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
-			ap);
-	va_end(ap);
-
-	visibilize(buf2, sizeof(buf2), buf);
-
-	if (getpid() == getsid(getpid()))
-	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
-	else
-	    (void)fputs(buf2, stderr);
-#if defined(PPS_ENABLE)
-	/*@ -unrecog (splint has no pthread declarations as yet) @*/
-	(void)pthread_mutex_unlock(&report_mutex);
-	/* +unrecog */
-#endif /* PPS_ENABLE */
-    }
-#endif /* !SQUELCH_ENABLE */
-}
-
 static void typelist(void)
 /* list installed drivers and enabled features */
 {
@@ -659,17 +572,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 	}
     }
 
-#if defined(PPS_ENABLE)
-    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_lock(&report_mutex);
-    /* +unrecog */
-#endif /* PPS_ENABLE */
     status = send(sub->fd, buf, len, 0);
-#if defined(PPS_ENABLE)
-    /*@ -unrecog (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_unlock(&report_mutex);
-    /* +unrecog */
-#endif /* PPS_ENABLE */
     if (status == (ssize_t) len)
 	return status;
     else if (status > -1) {
@@ -1949,9 +1852,6 @@ int main(int argc, char *argv[])
     INVALIDATE_SOCKET(csock);
 #endif /* CONTROL_SOCKET_ENABLE */
 #ifdef PPS_ENABLE
-    /*@-nullpass@*/
-    (void)pthread_mutex_init(&report_mutex, NULL);
-    /*@+nullpass@*/
     context.pps_hook = ship_pps_drift_message;
 #endif /* PPS_ENABLE */
 

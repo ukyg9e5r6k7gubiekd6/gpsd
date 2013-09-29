@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <syslog.h>
 #ifndef S_SPLINT_S
 #include <sys/wait.h>
 #include <sys/socket.h>
@@ -30,14 +31,39 @@
 #include "driver_nmea2000.h"
 #endif /* defined(NMEA2000_ENABLE) */
 
-void gpsd_report(const int debuglevel, 
-		 const int errlevel, const char *fmt, ... )
-/* our version of the logger */
+#if defined(PPS_ENABLE)
+static pthread_mutex_t report_mutex;
+#endif /* PPS_ENABLE */
+
+static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
+    const char *sp;
+
+    buf2[0] = '\0';
+    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
+	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0')
+	  || (sp[0] == '\r' && sp[2] == '\0'))
+	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
+	else
+	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
+			   0x00ff & (unsigned)*sp);
+}
+
+void gpsd_report(const int debuglevel, const int errlevel,
+		 const char *fmt, ...)
+/* assemble command in printf(3) style, use stderr or syslog */
+{
+#ifndef SQUELCH_ENABLE
     if (errlevel <= debuglevel) {
+	char buf[BUFSIZ], buf2[BUFSIZ];
 	char *err_str;
 	va_list ap;
-	va_start(ap, fmt);
+
+#if defined(PPS_ENABLE)
+	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_lock(&report_mutex);
+	/* +unrecog */
+#endif /* PPS_ENABLE */
 	switch ( errlevel ) {
 	case LOG_ERROR:
 		err_str = "ERROR: ";
@@ -70,11 +96,26 @@ void gpsd_report(const int debuglevel,
 		err_str = "UNK: ";
 	}
 
-	(void)fputs("gpsctl:", stderr);
-	(void)fputs(err_str, stderr);
-	(void)vfprintf(stderr, fmt, ap);
+	(void)strlcpy(buf, "gpsd:", sizeof(buf));
+	(void)strncat(buf, err_str, sizeof(buf) - 1 - strlen(buf));
+	va_start(ap, fmt);
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
+			ap);
 	va_end(ap);
+
+	visibilize(buf2, sizeof(buf2), buf);
+
+	if (getpid() == getsid(getpid()))
+	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
+	else
+	    (void)fputs(buf2, stderr);
+#if defined(PPS_ENABLE)
+	/*@ -unrecog (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_unlock(&report_mutex);
+	/* +unrecog */
+#endif /* PPS_ENABLE */
     }
+#endif /* !SQUELCH_ENABLE */
 }
 
 static void gpsd_run_device_hook(const int debuglevel, 
@@ -180,6 +221,10 @@ void gps_context_init(struct gps_context_t *context)
     /*@ +initallelements +nullassign +nullderef @*/
     /* *INDENT-ON* */
     (void)memcpy(context, &nullcontext, sizeof(struct gps_context_t));
+
+    /*@-nullpass@*/
+    (void)pthread_mutex_init(&report_mutex, NULL);
+    /*@+nullpass@*/
 }
 /*@+compdestroy@*/
 
