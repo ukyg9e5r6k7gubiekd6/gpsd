@@ -356,7 +356,7 @@ int gpsd_open(struct gps_device_t *session)
 	char server[strlen(session->gpsdata.dev.path)], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
-	session->gpsdata.gps_fd = -1;
+	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
 	port = strchr(server, ':');
 	if (port == NULL) {
 	    gpsd_report(session->context->debug, LOG_ERROR, "Missing colon in UDP feed spec.\n");
