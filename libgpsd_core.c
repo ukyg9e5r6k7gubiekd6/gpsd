@@ -49,15 +49,14 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
-void gpsd_report(const int debuglevel, const int errlevel,
-		 const char *fmt, ...)
+void gpsd_labeled_report(const int debuglevel, const int errlevel,
+			 const char *label, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
 {
 #ifndef SQUELCH_ENABLE
     if (errlevel <= debuglevel) {
 	char buf[BUFSIZ], buf2[BUFSIZ];
 	char *err_str;
-	va_list ap;
 
 #if defined(PPS_ENABLE)
 	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
@@ -96,12 +95,9 @@ void gpsd_report(const int debuglevel, const int errlevel,
 		err_str = "UNK: ";
 	}
 
-	(void)strlcpy(buf, "gpsd:", sizeof(buf));
+	(void)strlcpy(buf, label, sizeof(buf));
 	(void)strncat(buf, err_str, sizeof(buf) - 1 - strlen(buf));
-	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
-			ap);
-	va_end(ap);
+	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
 
 	visibilize(buf2, sizeof(buf2), buf);
 

@@ -31,6 +31,17 @@ static struct gps_context_t context;
  */
 #define REDIRECT_SNIFF	15
 
+void gpsd_report(const int debuglevel, const int errlevel,
+		 const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    gpsd_labeled_report(debuglevel, errlevel, "gpsctl:", fmt, ap);
+    va_end(ap);
+			
+}
+
 /*@ -noret @*/
 static gps_mask_t get_packet(struct gps_device_t *session)
 /* try to get a well-formed packet from the GPS */

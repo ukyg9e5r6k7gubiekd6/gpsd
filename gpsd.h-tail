@@ -843,7 +843,8 @@ extern void libgps_dump_state(struct gps_data_t *);
 # define libgps_debug_trace(args) /*@i1@*/do { } while (0)
 #endif /* LIBGPS_DEBUG */
 
-/* caller should supply this */
+void gpsd_labeled_report(const int, const int,
+			 const char *, const char *, va_list)
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 __attribute__((__format__(__printf__, 3, 4))) void gpsd_report(const int, const int, const char *, ...);
 # else /* not a new enough GCC, use the unprotected prototype */

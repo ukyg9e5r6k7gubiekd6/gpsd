@@ -162,6 +162,17 @@ static void onsig(int sig)
     signalled = (sig_atomic_t) sig;
 }
 
+void gpsd_report(const int debuglevel, const int errlevel,
+		 const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    gpsd_labeled_report(debuglevel, errlevel, "gpsd:", fmt, ap);
+    va_end(ap);
+			
+}
+
 static void typelist(void)
 /* list installed drivers and enabled features */
 {

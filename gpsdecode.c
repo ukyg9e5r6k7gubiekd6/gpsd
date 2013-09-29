@@ -27,6 +27,17 @@ static unsigned int typelist[32];
  *
  **************************************************************************/
 
+void gpsd_report(const int debuglevel, const int errlevel,
+		 const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    gpsd_labeled_report(debuglevel, errlevel, "gpsdecode:", fmt, ap);
+    va_end(ap);
+			
+}
+
 #ifdef AIVDM_ENABLE
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
