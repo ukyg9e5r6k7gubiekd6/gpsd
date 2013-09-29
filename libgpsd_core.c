@@ -307,7 +307,7 @@ void gpsd_clear(struct gps_device_t *session)
     session->gpsdata.separation = NAN;
     session->mag_var = NAN;
     session->releasetime = (timestamp_t)0;
-    session->getcount = 0;
+    session->badcount = 0;
 
     /* clear the private data union */
     memset(&session->driver, '\0', sizeof(session->driver));
@@ -1096,8 +1096,18 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    }
 	    }
 	    /*@+nullderef@*/
+	    session->badcount = 0;
 	    /* FALL THROUGH */
-	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
+        /*
+	 * Fail hunt only if we get a second consecutive bad packet
+	 * and the lexer is in ground state.  We don't want to fail on
+	 * a first bad packet because the source might have a burst of
+	 * leading garbage after open.  We don't want to fail if the
+	 * lexer is not in ground state, because that means the read
+	 * might have picked up a valid partial packet - better to go
+	 * back around the loop and pick up more data.
+	 */
+	} else if (session->badcount++>1 && !session->packet.state && !gpsd_next_hunt_setting(session)) {
 	    gpsd_report(session->context->debug, LOG_INF,
 			"hunt on %s failed (%lf sec since data)\n",
 			session->gpsdata.dev.path,

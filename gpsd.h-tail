@@ -412,7 +412,7 @@ struct gps_device_t {
 #endif /* FIXED_PORT_SPEED */
     int saved_baud;
     struct gps_packet_t packet;
-    int getcount;
+    int badcount;
     int subframe_count;
     char subtype[64];			/* firmware version or subtype ID */
     timestamp_t opentime;
