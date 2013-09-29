@@ -1098,9 +1098,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    /*@+nullderef@*/
 	    /* FALL THROUGH */
 	} else if (session->getcount++>1 && !gpsd_next_hunt_setting(session)) {
-	    gpsd_run_device_hook(session->context->debug, 
-				 session->gpsdata.dev.path,
-				 "DEACTIVATE");
 	    gpsd_report(session->context->debug, LOG_INF,
 			"hunt on %s failed (%lf sec since data)\n",
 			session->gpsdata.dev.path,
