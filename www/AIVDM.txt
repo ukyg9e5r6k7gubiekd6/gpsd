@@ -434,17 +434,18 @@ speed while underway, and every 3 minutes while the vessel is at
 anchor and stationary. It will send a type 5 identification every 6
 minutes. (More detail is at <<IALA>>, part 2.3)
 
-Class 6 is used for unencrypted structured extension messages by local
+Class 6 is used for unencrypted structured extension messages systems
+conforming to the Inland AIS standard defined by <<INLAND>>, and by local
 authorities such as the St. Lawrence Seaway and the U.S Coast Guard's 
 PAWSS.  This document describes all of the Class 6 special message
-formats approved for use in <<IMO236>> and <<IMO289>>.
+formats approved for use in <<IMO236>>, <<IMO289>>, and <<INLAND>>.
 
 Class 8 is in common use for private encrypted messages, such as
 location transmission in military exercises. It is also used for
-unencrypted structured extension messages by local authorities such as
-the St. Lawrence Seaway and PAWSS. This document describes all of the
-Class 8 special message formats approved for use in <<IMO236>> and
-<<IMO289>>.
+unencrypted structured extension messages by Inland AIS, and by local
+authorities such as the St. Lawrence Seaway and PAWSS. This document
+describes all of the Class 8 special message formats approved for use
+in <<IMO236>>, <<IMO289>>, and <<INLAND>>.
 
 Classes 12 and 14 are used for text messaging, nominally safetty-related
 but also for traffic control and occasionally chatter.
@@ -629,6 +630,18 @@ The Maneuver Indicator (143-144) may have these values:
 |2 | Special maneuver (such as regional passing arrangement)
 |===========================================================
 
+Riverine and inland navigation systems conforming to <<INLAND>>
+designate this field "Blue Sign" with the following enumerated
+values:
+
+.Blue Sign
+[width="50%",frame="topbot",options="header"]
+|===========================================================
+|0 | Not available (default)
+|1 | No
+|2 | Yes
+|===========================================================
+
 The interpretation of bits 143-147 has been a bit unstable. In
 <<IALA>>. and therefore in the original <<ITU1371>>, they were 
 described like this:
@@ -735,6 +748,14 @@ humans rather than gathered automatically from sensors.
                                                        1=Not ready (default).
 |423-423 |  1 |Spare                  |             |x|Not used
 |==============================================================================
+
+<<INLAND>> specifies the following:
+
+* the IMO Number field should be zeroed for inland vessels.
+* ATIS code should be used for inland vessels
+* ship dimensions should be set to the maximum rectangle size of the convoy
+* draught information should be rounded up to nearest decimeter
+* For the destination, UN/LOCODE and ERI terminal codes should be used
 
 Ship dimensions will be 0 if not available. For the dimensions to bow
 and stern, the special value 511 indicates 511 meters or greater; for
@@ -886,6 +907,9 @@ in use for type 6.
 |   1 | 28 | <<IMO289>>    | Standard         | Route info addressed
 |   1 | 30 | <<IMO289>>    | Standard         | Text description addressed
 |   1 | 32 | <<IMO289>>    | Standard         | Tidal Window
+| 200 | 21 | <<INLAND>>    | Standard         | ETA at lock/bridge/terminal
+| 200 | 22 | <<INLAND>>    | Standard         | RTA at lock/bridge/terminal
+| 200 | 55 | <<INLAND>>    | Standard         | Number of persons on board
 | 235 | 10 | <<IALA-A126>> | In use           | AtoN monitoring data (UK)
 | 250 | 10 | <<IALA-A126>> | In use           | AtoN monitoring data (ROI)
 |==============================================================================
@@ -1716,6 +1740,94 @@ different bit widths for the latitude and longitude fields.
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information. 
 
+==== ETA at lock/bridge/terminal (Inland AIS) ====
+
+A message 6 subtype. DAC = 200 FID = 21. Fixed length, 248 bits.
+
+Should be used by inland vessels only, to send an ETA report to a
+lock, bridge or terminal in order to apply for a time slot in resource
+planning.
+
+An acknowledgement by Inland AIS message 22 should be received within
+15 minutes. Otherwise, the Inland AIS message 21 should be repeated
+once.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member    |T|Units
+|0-5     |  6 |Message Type       |type      |u|Constant: 6
+|6-7     |  2 |Repeat Indicator   |repeat    |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI        |mmsi      |u|9 decimal digits
+|38-39   |  2 |Sequence Number    |seqno     |u|Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI   |dest_mmsi |u|9 decimal digits
+|70      |  1 |Retransmit flag    |retransmit|u|0 = no retransmit (default),
+                                                1 = retransmitted
+|71      |  1 |Spare              |          |x|Not used
+|72-81   | 10 |DAC                |dac       |u|DAC = 200
+|82-87   |  6 |FID                |fid       |u|FID = 21
+|88-99   | 12 |UN Country Code    |country   |t|2 six-bit characters
+|101-118 | 18 |UN/LOCODE          |locode    |t|3 six-bit characters
+|119-148 | 30 |Fairway section    |section   |t|5 six-bit characters
+|149-178 | 30 |Terminal code      |terminal  |t|5 six-bit characters
+|179-208 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
+|209-212 |  4 |ETA month (UTC)    |month     |u|1-12, 0=N/A (default)
+|213-217 |  5 |ETA day (UTC)      |day       |u|1-31, 0=N/A (default)
+|217-221 |  5 |ETA hour (UTC)     |hour      |u|0-23, 24=N/A (default)
+|222-227 |  6 |ETA minute (UTC)   |minute    |u|0-59, 60=N/A (default)
+|228-230 |  3 |Assisting Tugs     |tugs      |u|0-6, 7 = unknown (default)
+|231-242 | 12 |Air Draught        |airdraught|u|0-4000 * 0.01m,
+                                                0 = Unknown (default)
+|243-247 |  5 |Spare              |          |x|Not used
+|==============================================================================
+
+<<INLAND>> says of the Destunation MMSI field "a virtual MMSI number
+should be used for each country, each national AIS network should
+route messages addressed to other countries using this virtual MMSI
+number".
+
+==== RTA at lock/bridge/terminal (Inland AIS) ====
+
+A message 6 subtype. DAC = 200 FID = 22. Fixed length, 232 bits.
+
+This message should be sent by base stations only, to assign a RTA at
+a lock, bridge or terminal to a certain vessel in response to the
+preceding ETA request.
+
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member    |T|Units
+|0-5     |  6 |Message Type       |type      |u|Constant: 6
+|6-7     |  2 |Repeat Indicator   |repeat    |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI        |mmsi      |u|9 decimal digits
+|38-39   |  2 |Sequence Number    |seqno     |u|Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI   |dest_mmsi |u|9 decimal digits
+|70      |  1 |Retransmit flag    |retransmit|u|0 = no retransmit (default),
+                                                1 = retransmitted
+|71      |  1 |Spare              |          |x|Not used
+|72-81   | 10 |DAC                |dac       |u|DAC = 200
+|82-87   |  6 |FID                |fid       |u|FID = 21
+|88-99   | 12 |UN Country Code    |country   |t|2 six-bit characters
+|101-118 | 18 |UN/LOCODE          |locode    |t|3 six-bit characters
+|119-148 | 30 |Fairway section    |section   |t|5 six-bit characters
+|149-178 | 30 |Terminal code      |terminal  |t|5 six-bit characters
+|179-208 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
+|209-212 |  4 |RTA month (UTC)    |month     |u|1-12, 0=N/A (default)
+|213-217 |  5 |RTA day (UTC)      |day       |u|1-31, 0=N/A (default)
+|217-221 |  5 |RTA hour (UTC)     |hour      |u|0-23, 24=N/A (default)
+|222-227 |  6 |RTA minute (UTC)   |minute    |u|0-59, 60=N/A (default)
+|228-229 |  2 |Status             |          |e|See "Status Codes" below
+|230-231 |  2 |Spare              |          |x|Not used
+|==============================================================================
+
+.Lock/Bridge/Terminal status codes
+[frame="topbot",options="header"]
+|==============================================================================
+| 0 | Operational
+| 1 | Limited operation
+| 2 | Out of order
+| 3 | N/A
+|==============================================================================
+
 ==== AtoN monitoring data (GLA) ====
 
 This message provides AtoN (Aid to navigation) monitoring data for the General
@@ -1837,6 +1949,10 @@ DAC-FID pairs in use for type 8:
 |   1     | 27 |     | <<IMO289>> | Standard   | Route info broadcast
 |   1     | 29 |     | <<IMO289>> | Standard   | Text description broadcast
 |   1     | 31 |     | <<IMO289>> | In use     | Meteorological and Hydrological
+|  200    | 10 |     | <<INLAND>> | Standard   | Ship static and voyage related data
+|  200    | 23 |     | <<INLAND>> | Standard   | EMMA warning report
+|  200    | 24 |     | <<INLAND>> | Standard   | Water levels
+|  200    | 40 |     | <<INLAND>> | Standard   | Signal status
 | 316/366 |  1 |   2 | <<SEAWAY>> | In use     | Wind
 | 316/366 |  1 |   1 | <<SEAWAY>> | In use     | Weather station
 | 316/366 |  1 |   3 | <<SEAWAY>> | In use     | Water level
@@ -3307,6 +3423,128 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 
 Precipitation types and Beaufort scale are as for the <<IMO236>> version.
 
+==== Inland ship static and voyage related data (Inland AIS) ====
+
+A message 6 subtype. DAC = 200 FID = 10. Fixed length, 168 bits.
+
+This message should be used by inland vessels only to broadcast ship
+static and voyage related data in addition to message 5. The message
+should be sent as soon as possible (from the AIS point of view) after
+message 5.
+
+[frame="topbot",options="header"]
+|===============================================================================
+|Field   |Len |Description            |Member   |T|Units
+|0-5     |  6 |Message Type           |type     |u|Constant: 6
+|6-7     |  2 |Repeat Indicator       |repeat   |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI            |mmsi     |u|9 decimal digits
+|38-39   |  2 |Spare                  |         |x|Not used
+|40-49   | 10 |Designated Area Code   |dac      |u|Constant: 200
+|50-55   |  6 |Functional ID          |fid      |u|Constant: 10
+|56-103  | 48 |European Vessel ID     |vin      |t|8 six-bit characters
+|104-116 | 13 |Length of ship         |length   |u|1-8000 * 0.1m, default 0
+|117-126 | 10 |Beam of ship           |beam     |u|1-1000 * 0.1m, default 0
+|127-140 | 14 |Ship/combination type  |type     |e|ERI Classification
+|141-143 |  3 |Hazardous cargo        |hazard   |e|See "Hazard Codes" below
+|144-154 | 11 |Draught                |draught  |u|1-200 * 0.01m, default 0
+|155-156 |  2 |Loaded/Unloaded        |loaded   |e|See "Load Status" below
+|157     |  1 |Speed inf. quality     |speed_q  |b|0 = low/GNSS (default)
+                                                   1 = high
+|158     |  1 |Course inf. quality    |course_q |b|0 = low/GNSS (default)
+                                                   1 = high
+|159     |  1 |Heading inf. quality   |heading_q|b|0 = low/GNSS (default)
+                                                   1 = high
+|160-167 |  8 |Spare                  |         |x|Not used
+|==============================================================================
+
+<<INLAND>> is not explicit whether the "Ship/combination type" field is
+to contain full ERI codes with range 8000-8370 or ERI SOLAS codes in
+the range 1-99.  The tables below expand both.
+
+.ERI Classification
+[frame="topbot",options="header"]
+|==============================================================================
+|Code | SOLAS | Description 
+|8000 |  99   | Vessel, type unknown
+|8010 |  79   | Motor freighter
+|8020 |  89   | Motor tanker
+|8021 |  80   | Motor tanker, liquid cargo, type N
+|8022 |  80   | Motor tanker, liquid cargo, type C
+|8023 |  89   | Motor tanker, dry cargo as if liquid (e.g. cement)
+|8030 |  79   | Container vessel
+|8040 |  80   | Gas tanker
+|8050 |  79   | Motor freighter, tug
+|8060 |  89   | Motor tanker, tug
+|8070 |  79   | Motor freighter with one or more ships alongside
+|8080 |  89   | Motor freighter with tanker
+|8090 |  79   | Motor freighter pushing one or more freighters
+|8100 |  89   | Motor freighter pushing at least one tank-ship
+|8110 |  79   | Tug, freighter
+|8120 |  89   | Tug, tanker
+|8130 |  31   | Tug freighter, coupled
+|8140 |  31   | Tug, freighter/tanker, coupled
+|8150 |  99   | Freightbarge
+|8160 |  99   | Tankbarge
+|8161 |  90   | Tankbarge, liquid cargo, type N
+|8162 |  90   | Tankbarge, liquid cargo, type C
+|8163 |  99   | Tankbarge, dry cargo as if liquid (e.g. cement)
+|8170 |  99   | Freightbarge with containers
+|8180 |  90   | Tankbarge, gas
+|8210 |  79   | Pushtow, one cargo barge
+|8220 |  79   | Pushtow, two cargo barges
+|8230 |  79   | Pushtow, three cargo barges
+|8240 |  79   | Pushtow, four cargo barges
+|8250 |  79   | Pushtow, five cargo barges
+|8260 |  79   | Pushtow, six cargo barges
+|8270 |  79   | Pushtow, seven cargo barges
+|8280 |  79   | Pushtow, eigth cargo barges
+|8290 |  79   | Pushtow, nine or more barges
+|8310 |  80   | Pushtow, one tank/gas barge
+|8320 |  80   | Pushtow, two barges at least one tanker or gas barge
+|8330 |  80   | Pushtow, three barges at least one tanker or gas barge
+|8340 |  80   | Pushtow, four barges at least one tanker or gas barge
+|8350 |  80   | Pushtow, five barges at least one tanker or gas barge
+|8360 |  80   | Pushtow, six barges at least one tanker or gas barge
+|8370 |  80   | Pushtow, seven barges at least one tanker or gas barg
+|=============================================================================
+
+.SOLAS ship type, first digit
+[frame="topbot",options="header"]
+|=============================================================================
+| 3 | Vessel
+| 7 | Cargo ship
+| 8 | Tanker
+| 9 | Other types of ship
+|=============================================================================
+
+.SOLAS ship type, second digit
+[frame="topbot",options="header"]
+|=============================================================================
+| 0 | All ships of this type
+| 1 | Towing
+| 8 | Tanker
+| 9 | No additional information
+|=============================================================================
+
+.Hazard code
+[frame="topbot",options="header"]
+|==============================================================================
+| 0 | 0 blue cones/lights
+| 1 | 1 blue cone/light
+| 2 | 2 blue cones/lights
+| 3 | 3 blue cones/lights
+| 4 | 4 B-Flag
+| 5 | Unknown (default)
+|==============================================================================
+
+.Load status
+[frame="topbot",options="header"]
+|==============================================================================
+| 0 | N/A (default)
+| 1 | Unloaded
+| 2 | Loaded
+|==============================================================================
+
 === Type 9: Standard SAR Aircraft Position Report ===
 
 Tracking information for search-and-rescue aircraft.  Total number of
@@ -3907,6 +4145,9 @@ VHF channels as in Message Type 22. The field is interpreted as follows:
 |10-15 |Reserved for future use
 |======================================================
 
+<<INLAND>> specifies 6 (only) as the station type value for inland
+waterways, reserving 7-9 for (other) regional uses.  
+
 Reporting Interval is a 4 bit unsigned integer, how often to report
 while within the area specified by this message. When the dual-channel
 operation is suspended by Tx/Rx mode command 1 or 2, the reporting
@@ -4118,8 +4359,8 @@ system covering the Thames River; it uses extensions of message types
 6 and 8.  It is describes in <<THAMES>>.
 
 Since 2006 there has been some effort to standardize inland-waterway
-extensions, described in <<INLAND>>.  It is unclear to what extent 
-older deployments such as the PAWS/St. Lawrence systems conform to it.
+extensions, described in <<INLAND>>.  It uses different message formats
+and identifiers than the PAWS/St. Lawrence systems, which do not conform.
 There is an AIS extension called "RIS" (River Information System) that
 covers portions of the Danube River and Black Sea which does conform.
 
@@ -4652,4 +4893,4 @@ Version 1.42 fixes a typo in the Type 4 message description.
 
 Version 1.43 describes the ITU-R 1371-4 breakdown of the Type 24
 Vendor ID field and adds information on AIS standards for inland
-waterways.
+waterways. Also Inland AIS standard messages are now covered.
