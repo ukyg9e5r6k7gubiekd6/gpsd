@@ -1176,14 +1176,6 @@ struct ais_t
 		} dac1fid30;
 		/* IMO289 & IMO236 - Tidal Window */
 		struct {
-		    unsigned int type;	/* Message Type */
-		    unsigned int repeat;	/* Repeat Indicator */
-		    unsigned int mmsi;	/* Source MMSI */
-		    unsigned int seqno;	/* Sequence Number */
-		    unsigned int dest_mmsi;	/* Destination MMSI */
-		    signed int retransmit;	/* Retransmit flag */
-		    unsigned int dac;	/* DAC */
-		    unsigned int fid;	/* FID */
 		    unsigned int month;	/* Month */
 		    unsigned int day;	/* Day */
 		    signed int ntidals;
