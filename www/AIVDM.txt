@@ -1877,8 +1877,13 @@ in the Republic Of Ireland.
 The interval between the transmission of these messages will be synchronized
 with message 21, although not necessarily at the same reporting rate. If
 Message 21 is not used at a particular site, then the reporting interval
-should be selected to minimise the power requirement of the transponder,
+should be selected to minimize the power requirement of the transponder,
 whilst still providing enough data to enable meaningful diagnostic analysis.
+
+<<INLAND>> lists a broadcast (type 8) variant of this message, but
+without indicating how the Destination MMSI field is to be set or 
+interpreted.  Robust implementations should accept and process this
+variant.
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -3469,7 +3474,7 @@ message 5.
 [frame="topbot",options="header"]
 |===============================================================================
 |Field   |Len |Description            |Member   |T|Units
-|0-5     |  6 |Message Type           |type     |u|Constant: 6
+|0-5     |  6 |Message Type           |type     |u|Constant: 8
 |6-7     |  2 |Repeat Indicator       |repeat   |u|As in Common Navigation Block
 |8-37    | 30 |Source MMSI            |mmsi     |u|9 decimal digits
 |38-39   |  2 |Spare                  |         |x|Not used
@@ -3578,6 +3583,178 @@ the range 1-99.  The tables below expand both.
 | 1 | Unloaded
 | 2 | Loaded
 |==============================================================================
+
+==== EMMA Warning Report (Inland AIS) ====
+
+A message 6 subtype. DAC = 200 FID = 23. Fixed length, 256 bits.
+
+The EMMA warning is sent by base stations to drive shipboard ECDIS
+displays of heavy weather conditions. The following message is capable
+of transmitting the EMMA data using the AIS channel. It does not
+replace the Notices to Skippers warnings.
+
+[frame="topbot",options="header"]
+|===============================================================================
+|Field   |Len |Description         |Member     |T|Units
+|0-5     |  6 |Message Type        |type       |u|Constant: 8
+|6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI         |mmsi       |u|9 decimal digits
+|38-39   |  2 |Spare               |           |x|Not used
+|40-49   | 10 |Designated Area Code|dac        |u|Constant: 200
+|50-55   |  6 |Functional ID       |fid        |u|Constant: 23
+|56-63   |  8 |Start Year          |start_year |u|1-55, year since 2000
+                                                  0 = N/A (default)
+|64-67   |  4 |Start Month         |start_month|u|1-12; 0 = N/A (default)
+|68-72   |  5 |Start Day           |start_day  |u|1-31; 0 = N/A (default)
+|73-80   |  8 |End Year            |end_year   |u|1-55, year since 2000
+                                                  0 = N/A (default)
+|81-84   |  4 |End Month           |end_month  |u|1-12; 0 = N/A (default)
+|85-89   |  5 |End Day             |end_day    |u|1-31; 0 = N/A (default)
+|90-94   |  5 |Start Hour          |start_hour |u|0-23; 24 = N/A (default)
+|95-100  |  6 |Start Minute        |start_min  |u|0-59; 60 = N/A (default)
+|101-105 |  5 |End Hour            |end_hour   |u|0-23; 24 = N/A (default)
+|106-111 |  6 |End Minute          |end_min    |u|0-59; 60 = N/A (default)
+|112-139 | 28 |Start Longitude     |start_lon  |I4|Minutes/10000 (as in CNB)
+|140-166 | 27 |Start Latitude      |start_lat  |I4|Minutes/10000 (as in CNB)
+|167-194 | 28 |End Longitude       |end_lon    |I4|Minutes/10000 (as in CNB)
+|195-221 | 27 |End Latitude        |end_lat    |I4|Minutes/10000 (as in CNB)
+|222-225 |  4 |Type                |type       |e|See "EMMA Type Codes" below
+|226-234 |  9 |Min value           |min        |i|Signed Integer
+|235-243 |  9 |Min value           |min        |i|Signed Integer
+|244-245 |  2 |Classification      |class      |e|1 = Slight,
+                                                  2 = Medium,
+                                                  3 = Strong
+|246-249 |  4 |Wind Direction      |wind       |e|See "EMMA Winds" below
+|250-255 |  6 |Spare               |           |x|Not used
+|===============================================================================
+
+<<INLAND>> is not explicit about the interpretation of the longitude
+and latitude fields; these semantics are assumed here from 28 and
+27-bit fields in other messages.
+
+.EMMA Type Codes
+[frame="topbot",options="header"]
+|==============================
+|  1 | WI | Wind
+|  2 | RA | Rain
+|  3 | SN | Snow and ice
+|  4 | TH | Thunderstorm
+|  5 | FO | Fog
+|  6 | LT | Low temperature
+|  7 | HT | High temperature
+|  8 | FL | Flood
+|  9 | FI | Forest Fire
+|==============================
+
+.EMMA Winds
+[frame="topbot",options="header"]
+|==============================
+|  1 | N  | North
+|  2 | NE | North East
+|  3 | E  | East
+|  4 | SE | South East
+|  5 | S  | South
+|  6 | SW | South West
+|  7 | W  | West
+|  8 | NW | North West
+|==============================
+
+==== Water Levels (Inland AIS) ====
+
+A message 6 subtype. DAC = 200 FID = 24. Fixed length, 168 bits.
+
+This message should be used to inform skippers about actual water
+levels in their area.  It is additional short-term information to the
+water levels distributed via Notices to Skippers. It is possible to
+transmit the water levels of more than 4 gauges using multiple
+messages.
+
+[frame="topbot",options="header"]
+|===============================================================================
+|Field   |Len |Description         |Member     |T|Units
+|0-5     |  6 |Message Type        |type       |u|Constant: 6
+|6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI         |mmsi       |u|9 decimal digits
+|38-39   |  2 |Spare               |           |x|Not used
+|40-49   | 10 |Designated Area Code|dac        |u|Constant: 200
+|50-55   |  6 |Functional ID       |fid        |u|Constant: 24
+|56-67   | 12 |UN Country Code     |country    |t|2 six-bit characters
+|68-78   | 11 |Gauge ID #1         |gauge1     |u|0=unknown (default)
+|79-92   | 14 |Water Level #1      |level1     |i|cm, 0=unknown (defailt)
+|93-103  | 11 |Gauge ID #2         |gauge2     |u|0=unknown (default)
+|104-117 | 14 |Water Level #2      |level2     |i|cm, 0=unknown (defailt)
+|128-128 | 11 |Gauge ID #3         |gauge3     |u|0=unknown (default)
+|139-142 | 14 |Water Level #3      |level3     |i|cm, 0=unknown (defailt)
+|153-153 | 11 |Gauge ID #4         |gauge4     |u|0=unknown (default)
+|164-167 | 14 |Water Level #4      |level4     |i|cm, 0=unknown (defailt)
+|===============================================================================
+
+Water levels are relative to the local standard, e.g. GIW in Germany 
+and RNW on the Danube.
+
+==== Signal Strength (Inland AIS) ====
+
+A message 8 subtype. DAC = 200 FID = 40. Fixed length, 168 bits.
+
+This message should be sent by base stations only, to inform about the
+status of different light signals to all vessels in a certain
+area. The information should be displayed on an external Inland ECDIS
+display as dynamic symbols. The message should be sent with binary
+message 8 at regular intervals.
+
+[frame="topbot",options="header"]
+|===============================================================================
+|Field   |Len |Description         |Member     |T|Units
+|0-5     |  6 |Message Type        |type       |u|Constant: 8
+|6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI         |mmsi       |u|9 decimal digits
+|38-39   |  2 |Spare               |           |x|Not used
+|40-49   | 10 |Designated Area Code|dac        |u|Constant: 200
+|50-55   |  6 |Functional ID       |fid        |u|Constant: 40
+|56-83   | 28 |Signal Longitude    |lon        |I4|Minutes/10000 (as in CNB)
+|84-110  | 27 |Signal Latitude     |lat        |I4|Minutes/10000 (as in CNB)
+|111-114 |  4 |Signal form         |form       |e|Consult <<INLAND>> Annex C
+|115-123 |  9 |Signal orientation  |facing     |u|0-39 deg, 511= N/A (default)
+|124-126 |  3 |Direction of impact |direction  |e|See "Signal Impact" below
+|127-156 | 30 |Light Status        |status     |u|See "Signal Status" below
+|157-167 | 11 |Spare               |           |x|Not used
+|===============================================================================
+
+<<INLAND>> is not explicit about the interpretation of the longitude
+and latitude fields; these semantics are assumed here from 28 and
+27-bit fields in other messages.
+
+The Signal Form field describes the physical arrangement of the
+signal lights.  Values 0 and 15 indicate the shape is unknown or 
+unspecified.
+
+.Direction of Signal impact
+[frame="topbot",options="header"]
+|===============================================================================
+| 0 | Unknown (default)
+| 1 | Upstream
+| 2 | Downstream
+| 3 | To left bank
+| 4 | To right bank
+|===============================================================================
+
+The Signal Status field is interpreted as 9 decimal digits describing
+the lights as numbered in their Signal Form diagram  - typically left
+to right and then top to bottom - with each digit interpreted in the
+following way:
+
+.Signal Status
+[frame="topbot",options="header"]
+|===============================================================================
+| 0 | Unknown (default)
+| 1 | No light
+| 2 | White
+| 3 | Yellow
+| 4 | Greeen
+| 5 | Red
+| 6 | White flashing
+| 7 | Yellow flashing.
+|===============================================================================
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
