@@ -1854,9 +1854,9 @@ A message 6 subtype. DAC = 200 FID = 55.  Fixed length, 168 bits.
 |8-37    | 30 |Source MMSI          |mmsi      |u|9 decimal digits
 |38-39   |  2 |Sequence Number      |seqno     |u|Unsigned integer 0-3
 |40-69   | 30 |Destination MMSI     |dest_mmsi |u|9 decimal digits
-|70      |  1 |Retransmit flag      |retransmit|u|0 = no retransmit (default),
+|70-70   |  1 |Retransmit flag      |retransmit|u|0 = no retransmit (default),
                                                   1 = retransmitted
-|71      |  1 |Spare                |          |x|Not used
+|71-71   |  1 |Spare                |          |x|Not used
 |72-81   | 10 |DAC                  |dac       |u|DAC = 200
 |82-87   |  6 |FID                  |fid       |u|FID = 55
 |88-95   |  8 |# crew on board      |crew      |u|Unsigned integer

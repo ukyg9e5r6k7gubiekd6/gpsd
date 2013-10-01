@@ -1010,6 +1010,13 @@ struct ais_t
 #define DAC200FID22_STATUS_OUT_OF_ORDER	2
 #define DAC200FID22_STATUS_NOT_AVAILABLE	0
 		} dac200fid22;
+		/* Inland AIS - Number of persons on board */
+		struct {
+		    unsigned int crew;	/* # crew on board */
+		    unsigned int passengers;	/* # passengers on board */
+		    unsigned int personnel;	/* # personnel on board */
+#define DAC200FID55_COUNT_NOT_AVAILABLE	255
+		} dac200fid55;
 		/* GLA - AtoN monitoring data (UK/ROI) */
 		struct {
 		    unsigned int ana_int;       /* Analogue (internal) */

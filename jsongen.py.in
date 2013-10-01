@@ -207,7 +207,7 @@ ais_specs = (
     },
     {
     "initname" : "json_ais6_fid21",
-    "headers": ("AIS_HEADER",),
+    "headers": ("AIS_HEADER","AIS_TYPE6"),
     "structname": "ais->type6.dac200fid21",
     "fieldmap":(
         # fieldname    type        default
@@ -224,7 +224,7 @@ ais_specs = (
     },
     {
         "initname" : "json_ais6_fid22",
-        "headers": ("AIS_HEADER",),
+        "headers": ("AIS_HEADER","AIS_TYPE6"),
         "structname": "ais->type6.dac200fid22",
         "fieldmap":(
             # fieldname    type        default
@@ -301,6 +301,17 @@ ais_specs = (
                 ('cdir',       'uinteger', 'DAC1FID32_CDIR_NOT_AVAILABLE'),
                 ('cspeed',     'uinteger', 'DAC1FID32_CSPEED_NOT_AVAILABLE'),
                 )))),
+        ),
+    },
+    {
+    "initname" : "json_ais6_fid55",
+    "headers": ("AIS_HEADER","AIS_TYPE6"),
+    "structname": "ais->type6.dac200fid55",
+    "fieldmap":(
+        # fieldname    type        default
+        ('crew',       'uinteger', 'DAC200FID55_COUNT_NOT_AVAILABLE'),
+        ('passengers', 'uinteger', 'DAC200FID55_COUNT_NOT_AVAILABLE'),
+        ('personnel',  'uinteger', 'DAC200FID55_COUNT_NOT_AVAILABLE'),
         ),
     },
     {

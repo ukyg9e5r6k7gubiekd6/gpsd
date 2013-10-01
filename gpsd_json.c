@@ -1872,6 +1872,14 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"status\":%u}",
 				   ais->type6.dac200fid22.status);
 		break;
+	    case 55:
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"crew\":%u,\"passengers\":%u,\"personnel\":%u}",
+
+		    ais->type6.dac200fid55.crew,
+		    ais->type6.dac200fid55.passengers,
+		    ais->type6.dac200fid55.personnel);
+		break;
 	    }
 	}
 	else if (ais->type6.dac == 235 || ais->type6.dac == 250) {

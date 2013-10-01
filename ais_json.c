@@ -257,6 +257,10 @@ int json_ais_read(const char *buf,
 				 &ais->type6.dac200fid22.minute);
 		}
 	    }
+	    else if (strstr(buf, "\"fid\":55,") != NULL) {
+		status = json_read_object(buf, json_ais6_fid55, endptr);
+		imo = true;
+	    }
 	}
 	if (!imo) {
 	    status = json_read_object(buf, json_ais6, endptr);

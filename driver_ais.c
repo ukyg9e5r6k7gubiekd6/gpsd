@@ -193,6 +193,27 @@ bool ais_binary_decode(const int debug,
 		/* skip 5 bits */
 		imo = true;
 		break;
+	    case 22:	/* RTA at lock/bridge/terminal */
+		UCHARS(88, ais->type6.dac200fid22.country);
+		UCHARS(100, ais->type6.dac200fid22.locode);
+		UCHARS(118, ais->type6.dac200fid22.section);
+		UCHARS(148, ais->type6.dac200fid22.terminal);
+		UCHARS(178, ais->type6.dac200fid22.hectometre);
+		ais->type6.dac200fid22.month	= UBITS(208, 4);
+		ais->type6.dac200fid22.day	= UBITS(212, 5);
+		ais->type6.dac200fid22.hour	= UBITS(217, 5);
+		ais->type6.dac200fid22.minute	= UBITS(222, 6);
+		ais->type6.dac200fid22.status	= UBITS(228, 2);
+		/* skip 2 bits */
+		imo = true;
+		break;
+	    case 55:	/* Number of Persons On Board */
+		ais->type6.dac200fid55.crew	= UBITS(88, 8);
+		ais->type6.dac200fid55.passengers	= UBITS(96, 13);
+		ais->type6.dac200fid55.personnel	= UBITS(109, 8);
+		/* skip 51 bits */
+		imo = true;
+		break;
 	    }
 	    break;
 	}
