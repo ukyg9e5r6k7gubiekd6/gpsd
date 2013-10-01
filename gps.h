@@ -1319,6 +1319,10 @@ struct ais_t
 		struct {
 		    unsigned int airdraught;	/* Air Draught */
 		} dac1fid15;
+		/* IMO286 - Number of Persons on board */
+		struct {
+		    unsigned persons;	/* number of persons */
+		} dac1fid16;
 		/* IMO289 - VTS-generated/Synthetic Targets */
 		struct {
 		    signed int ntargets;

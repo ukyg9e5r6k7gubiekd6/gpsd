@@ -240,7 +240,7 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac1fid15.airdraught	= UBITS(56, 11);
 		imo = true;
 		break;
-	    case 16:	/* IMO236 - Number of persons on board */
+	    case 16:	/* IMO236 - Number of persons on board */
 		if (ais->type6.bitcount == 136)
 		    ais->type6.dac1fid16.persons = UBITS(88, 13);/* 289 */
 		else
@@ -465,6 +465,13 @@ bool ais_binary_decode(const int debug,
 	    case 15:        /* IMO236 - Extended ship and voyage */
 		ais->type8.dac1fid15.airdraught	= UBITS(56, 11);
 		/* skip 5 bits */
+		imo = true;
+		break;
+	    case 16:	    /* Number of Persons On Board */
+		if (ais->type8.bitcount == 136)
+		    ais->type8.dac1fid16.persons = UBITS(88, 13);/* 289 */
+		else
+		    ais->type8.dac1fid16.persons = UBITS(55, 13);/* 236 */
 		imo = true;
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */

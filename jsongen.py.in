@@ -367,6 +367,15 @@ ais_specs = (
         ),
     },
     {
+    "initname" : "json_ais8_fid16",
+    "headers": ("AIS_HEADER","AIS_TYPE8",),
+    "structname": "ais->type8.dac1fid16",
+    "fieldmap":(
+        # fieldname           type             default
+        ('persons',           'uinteger',      '0'),
+        ),
+    },
+    {
     "initname" : "json_ais8_fid17",
     "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8.dac1fid17",

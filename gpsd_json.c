@@ -2314,6 +2314,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type8.dac1fid15.airdraught);
 		imo = true;
 		break;
+	    case 16:	/* IMO289 - Number of persons on board */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"persons\":%u}\t\n", ais->type6.dac1fid16.persons);
+		imo = true;
+		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		(void)strlcat(buf, "\"targets\":[", buflen);
 		for (i = 0; i < ais->type8.dac1fid17.ntargets; i++) {
