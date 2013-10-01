@@ -1762,7 +1762,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
-			   "\"epfd\":%u,\"epfd_text\":%s,"
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
 			   "\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
 			   ais->type4.month,
@@ -2300,7 +2300,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"waveheight\":%.1f,\"waveperiod\":%u,\"wavedir\":%u,"
 				   "\"swellheight\":%.1f,\"swellperiod\":%u,\"swelldir\":%u,"
 				   "\"seastate\":%u,\"watertemp\":%.1f,"
-				   "\"preciptype\":\"%s\",\"salinity\":%.1f,\"ice\":\"%s\"",
+				   "\"preciptype\":%u,\"preciptype_text\":\"%s\","
+				   "\"salinity\":%.1f,\"ice\":\"%s\"",
 				   trends[ais->type8.dac1fid11.leveltrend],
 				   ais->type8.dac1fid11.cspeed / DAC1FID11_CSPEED_DIV,
 				   ais->type8.dac1fid11.cdir,
@@ -2318,6 +2319,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.swelldir,
 				   ais->type8.dac1fid11.seastate,
 				   (ais->type8.dac1fid11.watertemp - DAC1FID11_WATERTEMP_OFFSET) / DAC1FID11_WATERTEMP_DIV,
+				   ais->type8.dac1fid11.preciptype,
 				   preciptypes[ais->type8.dac1fid11.preciptype],
 				   ais->type8.dac1fid11.salinity / DAC1FID11_SALINITY_DIV,
 				   ice[ais->type8.dac1fid11.ice]);
@@ -2330,7 +2332,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"waveheight\":%u,\"waveperiod\":%u,\"wavedir\":%u,"
 				   "\"swellheight\":%u,\"swellperiod\":%u,\"swelldir\":%u,"
 				   "\"seastate\":%u,\"watertemp\":%u,"
-				   "\"preciptype\":%u,\"salinity\":%u,\"ice\":%u",
+				   "\"preciptype\":%u,\"preciptype_text\":\"%s\","
+				   "\"salinity\":%u,\"ice\":%u",
 				   ais->type8.dac1fid11.leveltrend,
 				   ais->type8.dac1fid11.cspeed,
 				   ais->type8.dac1fid11.cdir,
@@ -2349,6 +2352,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.seastate,
 				   ais->type8.dac1fid11.watertemp,
 				   ais->type8.dac1fid11.preciptype,
+				   preciptypes[ais->type8.dac1fid11.preciptype],
 				   ais->type8.dac1fid11.salinity,
 				   ais->type8.dac1fid11.ice);
 		(void)strlcat(buf, "}\r\n", buflen);
