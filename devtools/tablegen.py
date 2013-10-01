@@ -29,7 +29,8 @@
 #   into an instance of the message structure.
 #
 # * -a: Generate all of -s, -d, -c, and -r, and -t, not to stdout but to
-#   files named with the argument as a distinguishing part of the stem.
+#   files named with 'tablegen' as a distinguishing part of the stem.
+#   The stem name can be overridden with the -o option.
 #
 # This generates almost all the code required to support a new message type.
 # It's not quite "Look, ma, no handhacking!" You'll need to add default
@@ -274,11 +275,11 @@ def make_json_dumper(wfp):
         # flush out dump code for a span of fields.
         if i+1 == len(tuples):
             if not inarray:
-                endit = '}\r\n'
+                endit = '}",\n'
         elif tuples[i+1][1] == None:
             endit = r',\"%s\":['
         elif scaled(i) != scaled(i+1):
-            endit =  '.",'
+            endit =  ',",'
         else:
             endit = None
         if endit:
@@ -418,12 +419,13 @@ def make_json_generator(wfp):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "a:tc:s:d:S:E:r:")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "a:tc:s:d:S:E:r:o:")
     except getopt.GetoptError, msg:
         print "tablecheck.py: " + str(msg)
         raise SystemExit, 1
     generate = maketable = makestruct = makedump = readgen = all = False
     after = before = None
+    filestem = "tablegen"
     for (switch, val) in options:
         if switch == '-a':
             all = True
@@ -446,6 +448,8 @@ if __name__ == '__main__':
             after = val
         elif switch == '-E':
             before = val
+        elif switch == '-o':
+            filestem = val
 
     if not generate and not maketable and not makestruct and not makedump and not readgen and not all:
         print >>sys.stderr, "tablecheck.py: no mode selected"
@@ -524,11 +528,11 @@ if __name__ == '__main__':
     # Here's where we generate useful output.
     if all:
         if corrections:
-            correct_table(open(structname + ".txt", "w"))
-        make_driver_code(open(structname + ".c", "w"))
-        make_structure(open(structname + ".h", "w"))
-        make_json_dumper(open(structname + "_json.c", "w"))
-        make_json_generator(open(structname + ".py", "w"))
+            correct_table(open(filestem + ".txt", "w"))
+        make_driver_code(open(filestem + ".c", "w"))
+        make_structure(open(filestem + ".h", "w"))
+        make_json_dumper(open(filestem + "_json.c", "w"))
+        make_json_generator(open(filestem + ".py", "w"))
     elif maketable:
         correct_table(sys.stdout)
     elif generate:
