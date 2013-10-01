@@ -224,6 +224,24 @@ int json_ais_read(const char *buf,
 		imo = true;
 	    }
 	}
+	else if (strstr(buf, "\"dac\":200,") != NULL) {
+	    if (strstr(buf, "\"fid\":21,") != NULL) {
+		status = json_read_object(buf, json_ais6_fid21, endptr);
+		imo = true;
+		if (status == 0) {
+		    ais->type6.dac200fid21.month = AIS_MONTH_NOT_AVAILABLE;
+		    ais->type6.dac200fid21.day = AIS_DAY_NOT_AVAILABLE;
+		    ais->type6.dac200fid21.hour = AIS_HOUR_NOT_AVAILABLE;
+		    ais->type6.dac200fid21.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
+		    (void)sscanf(start, "%02u-%02uT%02u:%02u",
+				 &ais->type6.dac200fid21.month,
+				 &ais->type6.dac200fid21.day,
+				 &ais->type6.dac200fid21.hour,
+				 &ais->type6.dac200fid21.minute);
+		}
+	    }
+	}
 	if (!imo) {
 	    status = json_read_object(buf, json_ais6, endptr);
 	    if (status == 0)

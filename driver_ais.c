@@ -175,20 +175,42 @@ bool ais_binary_decode(const int debug,
 	ais->type6.fid            = UBITS(82, 6);
 	ais->type6.bitcount       = bitlen - 88;
 	imo = false;
+	/* Inland AIS */
+	if (ais->type6.dac == 200) {
+	    switch (ais->type6.fid) {
+	    case 21:	/* ETA at lock/bridge/terminal */
+		UCHARS(88, ais->type6.dac200fid21.country);
+		UCHARS(100, ais->type6.dac200fid21.locode);
+		UCHARS(118, ais->type6.dac200fid21.section);
+		UCHARS(148, ais->type6.dac200fid21.terminal);
+		UCHARS(178, ais->type6.dac200fid21.hectometre);
+		ais->type6.dac200fid21.month	= UBITS(208, 4);
+		ais->type6.dac200fid21.day	= UBITS(212, 5);
+		ais->type6.dac200fid21.hour	= UBITS(217, 5);
+		ais->type6.dac200fid21.minute	= UBITS(222, 6);
+		ais->type6.dac200fid21.tugs	= UBITS(228, 3);
+		ais->type6.dac200fid21.airdraught	= UBITS(231, 12);
+		/* skip 5 bits */
+		imo = true;
+		break;
+	    }
+	    break;
+	}
 	/* UK and Republic Of Ireland */
-	if (ais->type6.dac == 235 || ais->type6.dac == 250) {
+	else if (ais->type6.dac == 235 || ais->type6.dac == 250) {
 	    switch (ais->type6.fid) {
 	    case 10:	/* GLA - AtoN monitoring data */
-		ais->type6.dac235fid10.ana_int		= UBITS(88, 10);
-		ais->type6.dac235fid10.ana_ext1		= UBITS(98, 10);
-		ais->type6.dac235fid10.ana_ext2		= UBITS(108, 10);
-		ais->type6.dac235fid10.racon   = UBITS(118, 2);
-		ais->type6.dac235fid10.light   = UBITS(120, 2);
-		ais->type6.dac235fid10.alarm  = UBITS(122, 1);
-		ais->type6.dac235fid10.stat_ext		= UBITS(123, 8);
-		ais->type6.dac235fid10.off_pos	= UBITS(131, 1);
+		ais->type6.dac235fid10.ana_int	= UBITS(88, 10);
+		ais->type6.dac235fid10.ana_ext1	= UBITS(98, 10);
+		ais->type6.dac235fid10.ana_ext2	= UBITS(108, 10);
+		ais->type6.dac235fid10.racon    = UBITS(118, 2);
+		ais->type6.dac235fid10.light    = UBITS(120, 2);
+		ais->type6.dac235fid10.alarm    = UBITS(122, 1);
+		ais->type6.dac235fid10.stat_ext	= UBITS(123, 8);
+		ais->type6.dac235fid10.off_pos  = UBITS(131, 1);
 		/* skip 4 bits */
 		imo = true;
+		break;
 	    }
 	    break;
 	}

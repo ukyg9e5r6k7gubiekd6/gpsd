@@ -1768,12 +1768,12 @@ once.
 |72-81   | 10 |DAC                |dac       |u|DAC = 200
 |82-87   |  6 |FID                |fid       |u|FID = 21
 |88-99   | 12 |UN Country Code    |country   |t|2 six-bit characters
-|101-118 | 18 |UN/LOCODE          |locode    |t|3 six-bit characters
-|119-148 | 30 |Fairway section    |section   |t|5 six-bit characters
-|149-178 | 30 |Terminal code      |terminal  |t|5 six-bit characters
-|179-208 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
-|209-212 |  4 |ETA month          |month     |u|1-12, 0=N/A (default)
-|213-217 |  5 |ETA day            |day       |u|1-31, 0=N/A (default)
+|100-117 | 18 |UN/LOCODE          |locode    |t|3 six-bit characters
+|118-147 | 30 |Fairway section    |section   |t|5 six-bit characters
+|148-177 | 30 |Terminal code      |terminal  |t|5 six-bit characters
+|178-207 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
+|208-211 |  4 |ETA month          |month     |u|1-12, 0=N/A (default)
+|212-216 |  5 |ETA day            |day       |u|1-31, 0=N/A (default)
 |217-221 |  5 |ETA hour           |hour      |u|0-23, 24=N/A (default)
 |222-227 |  6 |ETA minute         |minute    |u|0-59, 60=N/A (default)
 |228-230 |  3 |Assisting Tugs     |tugs      |u|0-6, 7 = unknown (default)

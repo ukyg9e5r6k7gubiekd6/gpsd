@@ -1827,7 +1827,26 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type6.fid);
 	imo = false;
 
-	if (ais->type6.dac == 235 || ais->type6.dac == 250) {
+	if (ais->type6.dac == 200) {
+	    switch (ais->type6.fid) {
+	    case 21:
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"country\":\"%s\",\"locode\":\"%s\",\"section\":\"%s\",\"terminal\":\"%s\",\"hectometre\":\"%s\",\"eta\":\"%u-%uT%u:%u\",\"tugs\":%u,\"airdraught\":%u}",
+		    ais->type6.dac200fid21.country,
+		    ais->type6.dac200fid21.locode,
+		    ais->type6.dac200fid21.section,
+		    ais->type6.dac200fid21.terminal,
+		    ais->type6.dac200fid21.hectometre,
+		    ais->type6.dac200fid21.month,
+		    ais->type6.dac200fid21.day,
+		    ais->type6.dac200fid21.hour,
+		    ais->type6.dac200fid21.minute,
+		    ais->type6.dac200fid21.tugs,
+		    ais->type6.dac200fid21.airdraught);
+		break;
+	    }
+	}
+	else if (ais->type6.dac == 235 || ais->type6.dac == 250) {
 	    switch (ais->type6.fid) {
 	    case 10:	/* GLA - AtoN monitoring data */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),

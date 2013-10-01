@@ -979,6 +979,20 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
+		/* Inland AIS - ETA at lock/bridge/terminal */
+		struct {
+		    char country[2+1];	/* UN Country Code */
+		    char locode[3+1];	/* UN/LOCODE */
+		    char section[5+1];	/* Fairway section */
+		    char terminal[5+1];	/* Terminal code */
+		    char hectometre[5+1];	/* Fairway hectometre */
+		    unsigned int month;	/* ETA month */
+		    unsigned int day;	/* ETA day */
+		    unsigned int hour;	/* ETA hour */
+		    unsigned int minute;	/* ETA minute */
+		    unsigned int tugs;	/* Assisting Tugs */
+		    unsigned int airdraught;	/* Air Draught */
+		} dac200fid21;
 		/* GLA - AtoN monitoring data (UK/ROI) */
 		struct {
 		    unsigned int ana_int;       /* Analogue (internal) */
