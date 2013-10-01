@@ -2275,11 +2275,11 @@ ppreceding type key.  For 0 and 1 it is a big-endian unsigned binary
 integer (as shown above).  For type 2 and 3 it is 6-bit ASCII text. An
 unknown target is expressed by type 3 and the string "@@@@@@@".
 
-<<IMO289>> says: "When MMSI or IMO number is used, the least
-significant bit should equal bit zero of the Target Identifier." It is
-unclear how "bit zero" is to be interpreted, but it is not possible to
-reconcile interpreting it as the leading bit of the field with AIS
-big-endian encoding. Settling this awaits live testing.
+OPEN-QUESTION: <<IMO289>> says: "When MMSI or IMO number is used, the
+least significant bit should equal bit zero of the Target Identifier."
+It is unclear how "bit zero" is to be interpreted, but it is not
+possible to reconcile interpreting it as the leading bit of the field
+with AIS big-endian encoding. Settling this awaits live testing.
 
 The trailing eight fields may be repeated up to 3 times (for a total of 1 to 4
 field groups) to represent up to 4 targets.
@@ -3621,8 +3621,8 @@ replace the Notices to Skippers warnings.
 |167-194 | 28 |End Longitude       |end_lon    |I4|Minutes/10000 (as in CNB)
 |195-221 | 27 |End Latitude        |end_lat    |I4|Minutes/10000 (as in CNB)
 |222-225 |  4 |Type                |type       |e|See "EMMA Type Codes" below
-|226-234 |  9 |Min value           |min        |i|Signed Integer
-|235-243 |  9 |Min value           |min        |i|Signed Integer
+|226-234 |  9 |Min value           |min        |i|Signed Integer, see below
+|235-243 |  9 |Max value           |max        |i|Signed Integer, see below
 |244-245 |  2 |Classification      |class      |e|1 = Slight,
                                                   2 = Medium,
                                                   3 = Strong
@@ -3633,6 +3633,15 @@ replace the Notices to Skippers warnings.
 OPEN-QUESTION: <<INLAND>> is not explicit about the interpretation of
 the longitude and latitude fields; these semantics are assumed here
 from 28 and 27-bit fields in other messages.
+
+<<INLAND>> specifies an 8-bit format with 9th leading sign bit for the
+min and max fields. Values 0-253 are interpreted as integer data,
+modified by the leading sign bit. The values +254 and -254 are
+interpreted as "greater that +253" and "less than -253" respectively.
+Both values +255 and -255 are interpreted as "unknown" (default).
+
+OPEN-QUESTION: What are the semantics of the min and max values?  To
+what parameters do they apply?
 
 .EMMA Type Codes
 [frame="topbot",options="header"]
@@ -4907,6 +4916,20 @@ In the <<INLAND>> EMMA Warning and Signal Strength messages, the
 description is not explicit about the interpretation of the longitude
 and latitude fields; these semantics are assumed here from 28 and
 27-bit fields in other messages.
+
+In the <<INLAND>> EMMA Warning, what are the semantics of the min and
+max values?  To what parameters do they apply?
+
+Is the <<IMO236>> versions of Persons On Board, which is supposed to
+be Type 6 and thus addressed, erroneous?  There is no destination
+address field in the layout.
+
+<<IMO289>> says of the "VTS Generated/Synthetic Targets" message:
+"When MMSI or IMO number is used, the least significant bit should
+equal bit zero of the Target Identifier."  It is unclear how "bit
+zero" is to be interpreted, but it is not possible to reconcile
+interpreting it as the leading bit of the field with AIS big-endian
+encoding. Settling this awaits live testing.
 
 == References ==
 
