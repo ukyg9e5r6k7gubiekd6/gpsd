@@ -1623,7 +1623,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Cancel route identified by message linkage",
     };
 
-    static char *idtypes[] = {
+    static const char *idtypes[] = {
 	"mmsi",
 	"imo",
 	"callsign",
@@ -1697,10 +1697,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "%.1f", ais->type1.speed / 10.0);
 
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"status\":\"%s\",\"turn\":%s,\"speed\":%s,"
+			   "\"status\":\"%u\",\"status_text\":\"%s\","
+			   "\"turn\":%s,\"speed\":%s,"
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
 			   "\"course\":%.1f,\"heading\":%u,\"second\":%u,"
 			   "\"maneuver\":%u,\"raim\":%s,\"radio\":%u}\r\n",
+			   ais->type1.status,
 			   nav_legends[ais->type1.status],
 			   turnlegend,
 			   speedlegend,
@@ -1714,11 +1716,13 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type1.raim), ais->type1.radio);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"status\":%u,\"turn\":%d,\"speed\":%u,"
+			   "\"status\":%u,\"status_text\":\"%s\","
+			   "\"turn\":%d,\"speed\":%u,"
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
 			   "\"course\":%u,\"heading\":%u,\"second\":%u,"
 			   "\"maneuver\":%u,\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type1.status,
+			   nav_legends[ais->type1.status],
 			   ais->type1.turn,
 			   ais->type1.speed,
 			   JSON_BOOL(ais->type1.accuracy),
@@ -1740,7 +1744,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
-			   "\"epfd\":\"%s\",\"raim\":%s,\"radio\":%u}\r\n",
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
+			   "\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
 			   ais->type4.month,
 			   ais->type4.day,
@@ -1750,13 +1755,15 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type4.accuracy),
 			   ais->type4.lon / AIS_LATLON_DIV,
 			   ais->type4.lat / AIS_LATLON_DIV,
+			   ais->type4.epfd,
 			   EPFD_DISPLAY(ais->type4.epfd),
 			   JSON_BOOL(ais->type4.raim), ais->type4.radio);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"timestamp\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\","
 			   "\"accuracy\":%s,\"lon\":%d,\"lat\":%d,"
-			   "\"epfd\":%u,\"raim\":%s,\"radio\":%u}\r\n",
+			   "\"epfd\":%u,\"epfd_text\":%s,"
+			   "\"raim\":%s,\"radio\":%u}\r\n",
 			   ais->type4.year,
 			   ais->type4.month,
 			   ais->type4.day,
@@ -1767,6 +1774,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type4.lon,
 			   ais->type4.lat,
 			   ais->type4.epfd,
+			   EPFD_DISPLAY(ais->type4.epfd),
 			   JSON_BOOL(ais->type4.raim), ais->type4.radio);
 	}
 	break;
@@ -1776,9 +1784,11 @@ void json_aivdm_dump(const struct ais_t *ais,
             /* *INDENT-OFF* */
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
-			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
+			   "\"shipname\":\"%s\","
+			   "\"shiptype\":%u,\"shiptype_text\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
-			   "\"to_starboard\":%u,\"epfd\":\"%s\","
+			   "\"to_starboard\":%u,"
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
 			   "\"eta\":\"%02u-%02uT%02u:%02uZ\","
 			   "\"draught\":%.1f,\"destination\":\"%s\","
 			   "\"dte\":%u}\r\n",
@@ -1788,11 +1798,15 @@ void json_aivdm_dump(const struct ais_t *ais,
 					  ais->type5.callsign),
 			   json_stringify(buf2, sizeof(buf2),
 					  ais->type5.shipname),
+			   ais->type5.shiptype,
 			   SHIPTYPE_DISPLAY(ais->type5.shiptype),
 			   ais->type5.to_bow, ais->type5.to_stern,
 			   ais->type5.to_port, ais->type5.to_starboard,
-			   EPFD_DISPLAY(ais->type5.epfd), ais->type5.month,
-			   ais->type5.day, ais->type5.hour, ais->type5.minute,
+			   ais->type5.epfd,
+			   EPFD_DISPLAY(ais->type5.epfd),
+			   ais->type5.month,
+			   ais->type5.day,
+			   ais->type5.hour, ais->type5.minute,
 			   ais->type5.draught / 10.0,
 			   json_stringify(buf3, sizeof(buf3),
 					  ais->type5.destination),
@@ -1801,9 +1815,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"imo\":%u,\"ais_version\":%u,\"callsign\":\"%s\","
-			   "\"shipname\":\"%s\",\"shiptype\":%u,"
+			   "\"shipname\":\"%s\","
+			   "\"shiptype\":%u,\"shiptype_text\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
-			   "\"to_starboard\":%u,\"epfd\":%u,"
+			   "\"to_starboard\":%u,"
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
 			   "\"eta\":\"%02u-%02uT%02u:%02uZ\","
 			   "\"draught\":%u,\"destination\":\"%s\","
 			   "\"dte\":%u}\r\n",
@@ -1813,11 +1829,19 @@ void json_aivdm_dump(const struct ais_t *ais,
 					  ais->type5.callsign),
 			   json_stringify(buf2, sizeof(buf2),
 					  ais->type5.shipname),
-			   ais->type5.shiptype, ais->type5.to_bow,
-			   ais->type5.to_stern, ais->type5.to_port,
-			   ais->type5.to_starboard, ais->type5.epfd,
-			   ais->type5.month, ais->type5.day, ais->type5.hour,
-			   ais->type5.minute, ais->type5.draught,
+			   ais->type5.shiptype,
+			   SHIPTYPE_DISPLAY(ais->type5.shiptype),
+			   ais->type5.to_bow,
+			   ais->type5.to_stern,
+			   ais->type5.to_port,
+			   ais->type5.to_starboard,
+			   ais->type5.epfd,
+			   EPFD_DISPLAY(ais->type5.epfd),
+			   ais->type5.month,
+			   ais->type5.day,
+			   ais->type5.hour,
+			   ais->type5.minute,
+			   ais->type5.draught,
 			   json_stringify(buf3, sizeof(buf3),
 					  ais->type5.destination),
 			   ais->type5.dte);
@@ -1853,24 +1877,22 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 22:
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"country\":\"%s\",\"locode\":\"%s\",\"section\":\"%s\",\"terminal\":\"%s\",\"hectometre\":\"%s\",\"eta\":\"%u-%uT%u:%u\",",
-		    ais->type6.dac200fid22.country,
-		    ais->type6.dac200fid22.locode,
-		    ais->type6.dac200fid22.section,
-		    ais->type6.dac200fid22.terminal,
-		    ais->type6.dac200fid22.hectometre,
-		    ais->type6.dac200fid22.month,
-		    ais->type6.dac200fid22.day,
-		    ais->type6.dac200fid22.hour,
-		    ais->type6.dac200fid22.minute);
-		if (scaled)
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"status\":\"%s\"}",
-				   rta_status[ais->type6.dac200fid22.status]);
-		else
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"status\":%u}",
-				   ais->type6.dac200fid22.status);
+			       "\"country\":\"%s\",\"locode\":\"%s\","
+			       "\"section\":\"%s\","
+			       "\"terminal\":\"%s\",\"hectometre\":\"%s\","
+			       "\"eta\":\"%u-%uT%u:%u\","
+			       "\"status\":%u,\"status_text\":\"%s\"}",
+			       ais->type6.dac200fid22.country,
+			       ais->type6.dac200fid22.locode,
+			       ais->type6.dac200fid22.section,
+			       ais->type6.dac200fid22.terminal,
+			       ais->type6.dac200fid22.hectometre,
+			       ais->type6.dac200fid22.month,
+			       ais->type6.dac200fid22.day,
+			       ais->type6.dac200fid22.hour,
+			       ais->type6.dac200fid22.minute,
+			       ais->type6.dac200fid22.status,
+			       rta_status[ais->type6.dac200fid22.status]);
 		break;
 	    case 55:
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1915,17 +1937,15 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 				   "\"ana_ext2\":%u,",
 				   ais->type6.dac235fid10.ana_ext2);
-
-		if (scaled)
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"racon\":\"%s\",\"light\":\"%s\"",
-				   racon_status[ais->type6.dac235fid10.racon],
-				   light_status[ais->type6.dac235fid10.light]);
-		else
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"racon\":%u,\"light\":%u",
-				   ais->type6.dac235fid10.racon,
-				   ais->type6.dac235fid10.light);
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"racon\":%u,"
+			       "\"racon_text\":\"%s\","
+			       "\"light\":%u"
+			       "\"light_text\":\"%s\"",
+			       ais->type6.dac235fid10.racon,
+			       racon_status[ais->type6.dac235fid10.racon],
+			       ais->type6.dac235fid10.light,
+			       light_status[ais->type6.dac235fid10.light]);
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf)-1] = '\0';
 		(void)strlcat(buf, "}\r\n", buflen);
@@ -2089,24 +2109,20 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"linkage\":%u,\"sender\":%u,",
-		    ais->type6.dac1fid28.linkage,
-		    ais->type6.dac1fid28.sender);
-		if (scaled)
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-				   "\"rtype\":\"%s\",",
-				   route_type[ais->type6.dac1fid28.rtype]);
-		else
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"rtype\":%u,",
-			ais->type6.dac1fid28.rtype);
-		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waypoints\":[",
-		    ais->type6.dac1fid28.month,
-		    ais->type6.dac1fid28.day,
-		    ais->type6.dac1fid28.hour,
-		    ais->type6.dac1fid28.minute,
-		    ais->type6.dac1fid28.duration);
+			       "\"linkage\":%u,\"sender\":%u,"
+			       "\"rtype\":%u,"
+			       "\"rtype_text\":\"%s\","
+			       "\"start\":\"%02u-%02uT%02u:%02uZ\","
+			       "\"duration\":%u,\"waypoints\":[",
+			       ais->type6.dac1fid28.linkage,
+			       ais->type6.dac1fid28.sender,
+			       ais->type6.dac1fid28.rtype,
+			       route_type[ais->type6.dac1fid28.rtype],
+			       ais->type6.dac1fid28.month,
+			       ais->type6.dac1fid28.day,
+			       ais->type6.dac1fid28.hour,
+			       ais->type6.dac1fid28.minute,
+			       ais->type6.dac1fid28.duration);
 		for (i = 0; i < ais->type6.dac1fid28.waycount; i++) {
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2377,14 +2393,10 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		(void)strlcat(buf, "\"targets\":[", buflen);
 		for (i = 0; i < ais->type8.dac1fid17.ntargets; i++) {
-		    if (scaled)
-			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			    "{\"idtype\":\"%s\",",
-			    idtypes[ais->type8.dac1fid17.targets[i].idtype]);
-		    else
-			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			    "{\"idtype\":%u,",
-			    ais->type8.dac1fid17.targets[i].idtype);
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "{\"idtype\":%u,\"idtype_text\":\"%s\",",
+				   ais->type8.dac1fid17.targets[i].idtype,
+				   idtypes[ais->type8.dac1fid17.targets[i].idtype]);
 		    switch (ais->type8.dac1fid17.targets[i].idtype) {
 		    case DAC1FID17_IDTYPE_MMSI:
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2434,32 +2446,26 @@ void json_aivdm_dump(const struct ais_t *ais,
 		imo = true;
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
-		if (scaled)
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"linkage\":%u,\"station\":\"%s\",\"lon\":%.3f,\"lat\":%.3f,\"status\":%u,\"signal\":\"%s\",\"hour\":%u,\"minute\":%u,\"nextsignal\":\"%s\"}\r\n",
-			ais->type8.dac1fid19.linkage,
-			json_stringify(buf1, sizeof(buf1),
-				       ais->type8.dac1fid19.station),
-			ais->type8.dac1fid19.lon / AIS_LATLON3_DIV,
-			ais->type8.dac1fid19.lat / AIS_LATLON3_DIV,
-			ais->type8.dac1fid19.status,
-			SIGNAL_DISPLAY(ais->type8.dac1fid19.signal),
-			ais->type8.dac1fid19.hour,
-			ais->type8.dac1fid19.minute,
-			SIGNAL_DISPLAY(ais->type8.dac1fid19.nextsignal));
-		else
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"linkage\":%u,\"station\":\"%s\",\"lon\":%d,\"lat\":%d,\"status\":%u,\"signal\":%u,\"hour\":%u,\"minute\":%u,\"nextsignal\":%u}\r\n",
-			ais->type8.dac1fid19.linkage,
-			json_stringify(buf1, sizeof(buf1),
-				       ais->type8.dac1fid19.station),
-			ais->type8.dac1fid19.lon,
-			ais->type8.dac1fid19.lat,
-			ais->type8.dac1fid19.status,
-			ais->type8.dac1fid19.signal,
-			ais->type8.dac1fid19.hour,
-			ais->type8.dac1fid19.minute,
-			ais->type8.dac1fid19.nextsignal);
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"linkage\":%u,\"station\":\"%s\","
+			       "\"lon\":%.3f,\"lat\":%.3f,\"status\":%u,"
+			       "\"signal\":%u,\"signal_text\":\"%s\","
+			       "\"hour\":%u,\"minute\":%u,"
+			       "\"nextsignal\":%u"
+			       "\"nextsignal_text\":\"%s\""
+			       "}\r\n",
+			       ais->type8.dac1fid19.linkage,
+			       json_stringify(buf1, sizeof(buf1),
+					      ais->type8.dac1fid19.station),
+			       ais->type8.dac1fid19.lon / AIS_LATLON3_DIV,
+			       ais->type8.dac1fid19.lat / AIS_LATLON3_DIV,
+			       ais->type8.dac1fid19.status,
+			       ais->type8.dac1fid19.signal,
+			       SIGNAL_DISPLAY(ais->type8.dac1fid19.signal),
+			       ais->type8.dac1fid19.hour,
+			       ais->type8.dac1fid19.minute,
+			       ais->type8.dac1fid19.nextsignal,
+			       SIGNAL_DISPLAY(ais->type8.dac1fid19.nextsignal));
 		imo = true;
 		break;
 	    case 21:        /* IMO289 - Weather obs. report from ship */
@@ -2472,24 +2478,20 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 27:        /* IMO289 - Route information - broadcast */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"linkage\":%u,\"sender\":%u,",
-		    ais->type8.dac1fid27.linkage,
-		    ais->type8.dac1fid27.sender);
-		if (scaled)
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"rtype\":\"%s\",",
-			route_type[ais->type8.dac1fid27.rtype]);
-		else
-		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"rtype\":%u,",
-			ais->type8.dac1fid27.rtype);
-		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			"\"start\":\"%02u-%02uT%02u:%02uZ\",\"duration\":%u,\"waypoints\":[",
-		    ais->type8.dac1fid27.month,
-		    ais->type8.dac1fid27.day,
-		    ais->type8.dac1fid27.hour,
-		    ais->type8.dac1fid27.minute,
-		    ais->type8.dac1fid27.duration);
+			       "\"linkage\":%u,\"sender\":%u,"
+			       "\"rtype\":%u,"
+			       "\"rtype_text\":\"%s\","
+			       "\"start\":\"%02u-%02uT%02u:%02uZ\","
+			       "\"duration\":%u,\"waypoints\":[",
+			       ais->type8.dac1fid27.linkage,
+			       ais->type8.dac1fid27.sender,
+			       ais->type8.dac1fid27.rtype,
+			       route_type[ais->type8.dac1fid27.rtype],
+			       ais->type8.dac1fid27.month,
+			       ais->type8.dac1fid27.day,
+			       ais->type8.dac1fid27.hour,
+			       ais->type8.dac1fid27.minute,
+			       ais->type8.dac1fid27.duration);
 		for (i = 0; i < ais->type8.dac1fid27.waycount; i++) {
 		    if (scaled)
 			(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2828,10 +2830,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   "\"reserved\":%u,\"speed\":%.1f,\"accuracy\":%s,"
 			   "\"lon\":%.4f,\"lat\":%.4f,\"course\":%.1f,"
 			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
-			   "\"shipname\":\"%s\",\"shiptype\":\"%s\","
+			   "\"shipname\":\"%s\","
+			   "\"shiptype\":%u,\"shiptype_text\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
-			   "\"to_starboard\":%u,\"epfd\":\"%s\",\"raim\":%s,"
-			   "\"dte\":%u,\"assigned\":%s}\r\n",
+			   "\"to_starboard\":%u,"
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
+			   "\"raim\":%s,\"dte\":%u,\"assigned\":%s}\r\n",
 			   ais->type19.reserved,
 			   ais->type19.speed / 10.0,
 			   JSON_BOOL(ais->type19.accuracy),
@@ -2843,23 +2847,28 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type19.regional,
 			   json_stringify(buf1, sizeof(buf1),
 					  ais->type19.shipname),
+			   ais->type19.shiptype,
 			   SHIPTYPE_DISPLAY(ais->type19.shiptype),
 			   ais->type19.to_bow,
 			   ais->type19.to_stern,
 			   ais->type19.to_port,
 			   ais->type19.to_starboard,
+			   ais->type19.epfd,
 			   EPFD_DISPLAY(ais->type19.epfd),
 			   JSON_BOOL(ais->type19.raim),
-			   ais->type19.dte, JSON_BOOL(ais->type19.assigned));
+			   ais->type19.dte,
+			   JSON_BOOL(ais->type19.assigned));
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"reserved\":%u,\"speed\":%u,\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"course\":%u,"
 			   "\"heading\":%u,\"second\":%u,\"regional\":%u,"
-			   "\"shipname\":\"%s\",\"shiptype\":%u,"
+			   "\"shipname\":\"%s\","
+			   "\"shiptype\":%u,\"shiptype_text\":\"%s\","
 			   "\"to_bow\":%u,\"to_stern\":%u,\"to_port\":%u,"
-			   "\"to_starboard\":%u,\"epfd\":%u,\"raim\":%s,"
-			   "\"dte\":%u,\"assigned\":%s}\r\n",
+			   "\"to_starboard\":%u,"
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
+			   "\"raim\":%s,\"dte\":%u,\"assigned\":%s}\r\n",
 			   ais->type19.reserved,
 			   ais->type19.speed,
 			   JSON_BOOL(ais->type19.accuracy),
@@ -2872,13 +2881,16 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   json_stringify(buf1, sizeof(buf1),
 					  ais->type19.shipname),
 			   ais->type19.shiptype,
+			   SHIPTYPE_DISPLAY(ais->type19.shiptype),
 			   ais->type19.to_bow,
 			   ais->type19.to_stern,
 			   ais->type19.to_port,
 			   ais->type19.to_starboard,
 			   ais->type19.epfd,
+			   EPFD_DISPLAY(ais->type19.epfd),
 			   JSON_BOOL(ais->type19.raim),
-			   ais->type19.dte, JSON_BOOL(ais->type19.assigned));
+			   ais->type19.dte,
+			   JSON_BOOL(ais->type19.assigned));
 	}
 	break;
     case 20:			/* Data Link Management Message */
@@ -2910,13 +2922,15 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 21:			/* Aid to Navigation */
 	if (scaled) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"aid_type\":\"%s\",\"name\":\"%s\",\"lon\":%.4f,"
+			   "\"aid_type\":%u,\"aid_type_text\"\"%s\","
+			   "\"name\":\"%s\",\"lon\":%.4f,"
 			   "\"lat\":%.4f,\"accuracy\":%s,\"to_bow\":%u,"
-			   "\"to_stern\":%u,\"to_port\":%u,"
-			   "\"to_starboard\":%u,\"epfd\":\"%s\","
+			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
+			   "\"epfd\"%u,\"epfd_text:\"%s\","
 			   "\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
+			   ais->type21.aid_type,
 			   NAVAIDTYPE_DISPLAY(ais->type21.aid_type),
 			   json_stringify(buf1, sizeof(buf1),
 					  ais->type21.name),
@@ -2925,20 +2939,25 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type21.accuracy),
 			   ais->type21.to_bow, ais->type21.to_stern,
 			   ais->type21.to_port, ais->type21.to_starboard,
-			   EPFD_DISPLAY(ais->type21.epfd), ais->type21.second,
+			   ais->type21.epfd,
+			   EPFD_DISPLAY(ais->type21.epfd),
+			   ais->type21.second,
 			   ais->type21.regional,
 			   JSON_BOOL(ais->type21.off_position),
 			   JSON_BOOL(ais->type21.raim),
 			   JSON_BOOL(ais->type21.virtual_aid));
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"aid_type\":%u,\"name\":\"%s\",\"accuracy\":%s,"
+			   "\"aid_type\":%u,\"aid_type_text\"\"%s\","
+			   "\"name\":\"%s\",\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
-			   "\"epfd\":%u,\"second\":%u,\"regional\":%u,"
+			   "\"epfd\":%u,\"epfd_text:\"%s\""
+			   "\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
 			   ais->type21.aid_type,
+			   NAVAIDTYPE_DISPLAY(ais->type21.aid_type),
 			   json_stringify(buf1, sizeof(buf1),
 					  ais->type21.name),
 			   JSON_BOOL(ais->type21.accuracy),
@@ -2949,6 +2968,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type21.to_port,
 			   ais->type21.to_starboard,
 			   ais->type21.epfd,
+			   EPFD_DISPLAY(ais->type21.epfd),
 			   ais->type21.second,
 			   ais->type21.regional,
 			   JSON_BOOL(ais->type21.off_position),
@@ -2996,27 +3016,33 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":\"%f\",\"ne_lat\":\"%f\","
 			   "\"sw_lon\":\"%f\",\"sw_lat\":\"%f\","
-			   "\"stationtype\":\"%s\",\"shiptype\":\"%s\","
+			   "\"stationtype\":%u,\"stationtype_text\":\"%s\","
+			   "\"shiptype\":%u,\"shiptype_text\":\"%s\","
 			   "\"interval\":%u,\"quiet\":%u}\r\n",
 			   ais->type23.ne_lon / AIS_CHANNEL_LATLON_DIV,
 			   ais->type23.ne_lat / AIS_CHANNEL_LATLON_DIV,
 			   ais->type23.sw_lon / AIS_CHANNEL_LATLON_DIV,
 			   ais->type23.sw_lat / AIS_CHANNEL_LATLON_DIV,
+			   ais->type23.stationtype,
 			   STATIONTYPE_DISPLAY(ais->type23.stationtype),
+			   ais->type23.shiptype,
 			   SHIPTYPE_DISPLAY(ais->type23.shiptype),
 			   ais->type23.interval, ais->type23.quiet);
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"ne_lon\":%d,\"ne_lat\":%d,"
 			   "\"sw_lon\":%d,\"sw_lat\":%d,"
-			   "\"stationtype\":%u,\"shiptype\":%u,"
+			   "\"stationtype\":%u,\"stationtype_text\":\"%s\","
+			   "\"shiptype\":%u,\"shiptype_text\":\"%s\","
 			   "\"interval\":%u,\"quiet\":%u}\r\n",
 			   ais->type23.ne_lon,
 			   ais->type23.ne_lat,
 			   ais->type23.sw_lon,
 			   ais->type23.sw_lat,
 			   ais->type23.stationtype,
+			   STATIONTYPE_DISPLAY(ais->type23.stationtype),
 			   ais->type23.shiptype,
+			   SHIPTYPE_DISPLAY(ais->type23.shiptype),
 			   ais->type23.interval, ais->type23.quiet);
 	}
 	break;
@@ -3034,16 +3060,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   json_stringify(buf1, sizeof(buf1),
 				      ais->type24.shipname));
 	if (ais->type24.part != part_a) {
-	    if (scaled) {
-		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "\"shiptype\":\"%s\",",
-			       SHIPTYPE_DISPLAY(ais->type24.shiptype));
-	    } else {
-		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			       "\"shiptype\":%u,", ais->type24.shiptype);
-	    }
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"vendorid\":\"%s\",\"model\":%u,\"serial\":%u,\"callsign\":\"%s\",",
+			   "\"shiptype\":%u,\"shiptype_text\":\"%s\","
+			   "\"vendorid\":\"%s\",\"model\":%u,\"serial\":%u,"
+			   "\"callsign\":\"%s\",",
+			   ais->type24.shiptype,
+			   SHIPTYPE_DISPLAY(ais->type24.shiptype),
 			   json_stringify(buf1, sizeof(buf1),
 					  ais->type24.vendorid),
 			   ais->type24.model,
