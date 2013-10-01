@@ -1644,6 +1644,13 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Light ERROR"
     };
 
+    static const char *rta_status[] = {
+	"Operational",
+	"Limited operation",
+	"Out of order",
+	"N/A",
+    };
+
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
     if (device != NULL && device[0] != '\0')
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1843,6 +1850,27 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    ais->type6.dac200fid21.minute,
 		    ais->type6.dac200fid21.tugs,
 		    ais->type6.dac200fid21.airdraught);
+		break;
+	    case 22:
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"country\":\"%s\",\"locode\":\"%s\",\"section\":\"%s\",\"terminal\":\"%s\",\"hectometre\":\"%s\",\"eta\":\"%u-%uT%u:%u\",",
+		    ais->type6.dac200fid22.country,
+		    ais->type6.dac200fid22.locode,
+		    ais->type6.dac200fid22.section,
+		    ais->type6.dac200fid22.terminal,
+		    ais->type6.dac200fid22.hectometre,
+		    ais->type6.dac200fid22.month,
+		    ais->type6.dac200fid22.day,
+		    ais->type6.dac200fid22.hour,
+		    ais->type6.dac200fid22.minute);
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"status\":\"%s\"}",
+				   rta_status[ais->type6.dac200fid22.status]);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+				   "\"status\":%u}",
+				   ais->type6.dac200fid22.status);
 		break;
 	    }
 	}

@@ -234,11 +234,27 @@ int json_ais_read(const char *buf,
 		    ais->type6.dac200fid21.hour = AIS_HOUR_NOT_AVAILABLE;
 		    ais->type6.dac200fid21.minute = AIS_MINUTE_NOT_AVAILABLE;
 		    // cppcheck-suppress uninitvar
-		    (void)sscanf(start, "%02u-%02uT%02u:%02u",
+		    (void)sscanf(eta, "%02u-%02uT%02u:%02u",
 				 &ais->type6.dac200fid21.month,
 				 &ais->type6.dac200fid21.day,
 				 &ais->type6.dac200fid21.hour,
 				 &ais->type6.dac200fid21.minute);
+		}
+	    }
+	    else if (strstr(buf, "\"fid\":22,") != NULL) {
+		status = json_read_object(buf, json_ais6_fid22, endptr);
+		imo = true;
+		if (status == 0) {
+		    ais->type6.dac200fid22.month = AIS_MONTH_NOT_AVAILABLE;
+		    ais->type6.dac200fid22.day = AIS_DAY_NOT_AVAILABLE;
+		    ais->type6.dac200fid22.hour = AIS_HOUR_NOT_AVAILABLE;
+		    ais->type6.dac200fid22.minute = AIS_MINUTE_NOT_AVAILABLE;
+		    // cppcheck-suppress uninitvar
+		    (void)sscanf(rta, "%02u-%02uT%02u:%02u",
+				 &ais->type6.dac200fid22.month,
+				 &ais->type6.dac200fid22.day,
+				 &ais->type6.dac200fid22.hour,
+				 &ais->type6.dac200fid22.minute);
 		}
 	    }
 	}

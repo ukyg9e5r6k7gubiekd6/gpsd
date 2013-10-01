@@ -993,6 +993,23 @@ struct ais_t
 		    unsigned int tugs;	/* Assisting Tugs */
 		    unsigned int airdraught;	/* Air Draught */
 		} dac200fid21;
+		/* Inland AIS - ETA at lock/bridge/terminal */
+		struct {
+		    char country[2+1];	/* UN Country Code */
+		    char locode[3+1];	/* UN/LOCODE */
+		    char section[5+1];	/* Fairway section */
+		    char terminal[5+1];	/* Terminal code */
+		    char hectometre[5+1];	/* Fairway hectometre */
+		    unsigned int month;	/* RTA month */
+		    unsigned int day;	/* RTA day */
+		    unsigned int hour;	/* RTA hour */
+		    unsigned int minute;	/* RTA minute */
+		    unsigned int status;	/* Status */
+#define DAC200FID22_STATUS_OPERATIONAL	0
+#define DAC200FID22_STATUS_LIMITED	1
+#define DAC200FID22_STATUS_OUT_OF_ORDER	2
+#define DAC200FID22_STATUS_NOT_AVAILABLE	0
+		} dac200fid22;
 		/* GLA - AtoN monitoring data (UK/ROI) */
 		struct {
 		    unsigned int ana_int;       /* Analogue (internal) */

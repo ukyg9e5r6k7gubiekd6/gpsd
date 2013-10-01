@@ -1806,26 +1806,28 @@ preceding ETA request.
 |8-37    | 30 |Source MMSI        |mmsi      |u|9 decimal digits
 |38-39   |  2 |Sequence Number    |seqno     |u|Unsigned integer 0-3
 |40-69   | 30 |Destination MMSI   |dest_mmsi |u|9 decimal digits
-|70      |  1 |Retransmit flag    |retransmit|u|0 = no retransmit (default),
+|70-70   |  1 |Retransmit flag    |retransmit|u|0 = no retransmit (default),
                                                 1 = retransmitted
-|71      |  1 |Spare              |          |x|Not used
+|71-71   |  1 |Spare              |          |x|Not used
 |72-81   | 10 |DAC                |dac       |u|DAC = 200
 |82-87   |  6 |FID                |fid       |u|FID = 21
 |88-99   | 12 |UN Country Code    |country   |t|2 six-bit characters
-|101-118 | 18 |UN/LOCODE          |locode    |t|3 six-bit characters
-|119-148 | 30 |Fairway section    |section   |t|5 six-bit characters
-|149-178 | 30 |Terminal code      |terminal  |t|5 six-bit characters
-|179-208 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
-|209-212 |  4 |RTA month          |month     |u|1-12, 0=N/A (default)
-|213-217 |  5 |RTA day            |day       |u|1-31, 0=N/A (default)
+|100-117 | 18 |UN/LOCODE          |locode    |t|3 six-bit characters
+|118-147 | 30 |Fairway section    |section   |t|5 six-bit characters
+|148-177 | 30 |Terminal code      |terminal  |t|5 six-bit characters
+|178-207 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
+|208-211 |  4 |RTA month          |month     |u|1-12, 0=N/A (default)
+|212-216 |  5 |RTA day            |day       |u|1-31, 0=N/A (default)
 |217-221 |  5 |RTA hour           |hour      |u|0-23, 24=N/A (default)
 |222-227 |  6 |RTA minute         |minute    |u|0-59, 60=N/A (default)
-|228-229 |  2 |Status             |          |e|See "Status Codes" below
+|228-229 |  2 |Status             |status    |e|See "Status Codes" below
 |230-231 |  2 |Spare              |          |x|Not used
 |==============================================================================
 
 OPEN-QUESTION: <<INLAND>> does not specify whether ETA time is UTC
 or local. 
+
+OPEN-QUESTION: No default is specified for the Status field.
 
 .Lock/Bridge/Terminal status codes
 [frame="topbot",options="header"]
@@ -4915,6 +4917,9 @@ supposed to be identical to the Type 6 layout, what is to be done
 with the Destination MMSI field?
 
 Are <<INLAND>> time-of-day fields UTC or local?
+
+In <<INLAND>> RTA at lock/bridge/terminal message, no default is
+specified for the Status field.
 
 In Inland Ship Static and Voyage Related Data, which of two possible
 ERI numeric codesets are used for the Type field - the 4-digit codes
