@@ -147,38 +147,6 @@ ais_specs = (
         ),
     },
     {
-    "initname" : "json_ais6_fid21",
-    "headers": ("AIS_HEADER",),
-    "structname": "ais->type6.dac200fid21",
-    "fieldmap":(
-        # fieldname    type        default
-        ('country',    'string',   None),
-        ('locode',     'string',   None),
-        ('section',    'string',   None),
-        ('terminal',   'string',   None),
-        ('hectometre', 'string',   None),
-        ('eta',        'string',   None),
-        ('tugs',       'uinteger', '0'),
-        ('airdraught', 'uinteger', '0'),
-        ),
-    "stringbuffered":("eta",),
-    },
-    {
-        "initname" : "json_ais6_fid25",
-        "headers": ("AIS_HEADER","AIS_TYPE6",),
-        "structname": "ais->type6.dac1fid25",
-        "fieldmap":(
-            # fieldname    type        default
-            ('unit',       'uinteger', '0'),
-            ('amount',     'uinteger', '0'),
-            ('cargos',     'array',    (
-                ('cargo_t', 'ncargos', (
-                    ('code',       'uinteger', '0'),
-                    ('subtype',    'uinteger', '0'),
-                    )))),
-            ),
-    },
-    {
         "initname" : "json_ais6_fid18",
         "headers": ("AIS_HEADER","AIS_TYPE6",),
         "structname": "ais->type6.dac1fid18",
@@ -236,6 +204,38 @@ ais_specs = (
             ('berth_lat',  'integer',  'AIS_LAT3_NOT_AVAILABLE'),
         ),
     'stringbuffered' : ('arrival', 'berth_name',),
+    },
+    {
+    "initname" : "json_ais6_fid21",
+    "headers": ("AIS_HEADER",),
+    "structname": "ais->type6.dac200fid21",
+    "fieldmap":(
+        # fieldname    type        default
+        ('country',    'string',   None),
+        ('locode',     'string',   None),
+        ('section',    'string',   None),
+        ('terminal',   'string',   None),
+        ('hectometre', 'string',   None),
+        ('eta',        'string',   None),
+        ('tugs',       'uinteger', '0'),
+        ('airdraught', 'uinteger', '0'),
+        ),
+    "stringbuffered":("eta",),
+    },
+    {
+        "initname" : "json_ais6_fid25",
+        "headers": ("AIS_HEADER","AIS_TYPE6",),
+        "structname": "ais->type6.dac1fid25",
+        "fieldmap":(
+            # fieldname    type        default
+            ('unit',       'uinteger', '0'),
+            ('amount',     'uinteger', '0'),
+            ('cargos',     'array',    (
+                ('cargo_t', 'ncargos', (
+                    ('code',       'uinteger', '0'),
+                    ('subtype',    'uinteger', '0'),
+                    )))),
+            ),
     },
     {
     "initname" : "json_ais6_fid28",
