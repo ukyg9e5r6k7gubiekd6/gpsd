@@ -9,7 +9,9 @@
 # the line number of a table start.  Things you can generate:
 #
 # * -t: A corrected version of the table.  It will redo all the offsets to be
-#   in conformance with the bit widths.  
+#   in conformance with the bit widths. (The other options rely only on the
+#   bit widths). Id the old and new tables are different, an error message
+#   describing the corrections will be emitted to standard error.
 #
 # * -s: A structure definition capturing the message info, with member
 #   names extracted from the table and types computed from it.
@@ -28,6 +30,7 @@
 #
 # * -a: Generate all of -s, -d, -c, and -r, , not to stdout but to
 #   files named with the argument as a distinguishing part of the stem.
+#   Note that this does not generate a corrected table as in -t.
 #
 # This generates almost all the code required to support a new message type.
 # It's not quite "Look, ma, no handhacking!" You'll need to add default
@@ -52,7 +55,7 @@ import sys, getopt
 
 def correct_table(wfp):
     # Writes the corrected table.
-    print >>sys.stderr, "Total bits:", base 
+    print >>sys.stderr, "Total bits:", base
     for (i, t) in enumerate(table):
         if offsets[i].strip():
             print >>wfp, "|" + offsets[i] + t[owidth+1:].rstrip()
@@ -445,9 +448,11 @@ if __name__ == '__main__':
     # Sets the following:
     #    table - the table lines
     #    widths - array of table widths
-    #    trailing - bit length of the table or trailing array elemend 
+    #    ranges - array of table offsets
+    #    trailing - bit length of the table or trailing array element 
     startline = int(arguments[0])
     table = []
+    ranges = []
     keep = False
     i = 0
     for line in sys.stdin:
@@ -464,10 +469,14 @@ if __name__ == '__main__':
             if line[0] == '|':
                 fields = line.split("|")
                 trailing = fields[1]
+                ranges.append(fields[1].strip())
                 fields[1] = " " * len(fields[1])
                 line = "|".join(fields)
+            else:
+                ranges.append('')
             table.append(line)
     table = table[2:]
+    ranges = ranges[2:]
     widths = []
     for line in table:
         fields = line.split('|')
@@ -494,6 +503,11 @@ if __name__ == '__main__':
             w = int(w)
             offsets.append("%d-%d" % (base, base + w - 1))
             base += w
+    if filter(lambda p: p[0] != p[1], zip(ranges, offsets)):
+        print "Offset corrections:"
+        for (old, new) in zip(ranges, offsets):
+            if old != new:
+                print >>sys.stderr, old, "->", new 
     owidth = max(*map(len, offsets)) 
     for (i, off) in enumerate(offsets):
         offsets[i] += " " * (owidth - len(offsets[i]))
