@@ -1772,10 +1772,10 @@ once.
 |119-148 | 30 |Fairway section    |section   |t|5 six-bit characters
 |149-178 | 30 |Terminal code      |terminal  |t|5 six-bit characters
 |179-208 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
-|209-212 |  4 |ETA month (UTC)    |month     |u|1-12, 0=N/A (default)
-|213-217 |  5 |ETA day (UTC)      |day       |u|1-31, 0=N/A (default)
-|217-221 |  5 |ETA hour (UTC)     |hour      |u|0-23, 24=N/A (default)
-|222-227 |  6 |ETA minute (UTC)   |minute    |u|0-59, 60=N/A (default)
+|209-212 |  4 |ETA month          |month     |u|1-12, 0=N/A (default)
+|213-217 |  5 |ETA day            |day       |u|1-31, 0=N/A (default)
+|217-221 |  5 |ETA hour           |hour      |u|0-23, 24=N/A (default)
+|222-227 |  6 |ETA minute         |minute    |u|0-59, 60=N/A (default)
 |228-230 |  3 |Assisting Tugs     |tugs      |u|0-6, 7 = unknown (default)
 |231-242 | 12 |Air Draught        |airdraught|u|0-4000 * 0.01m,
                                                 0 = Unknown (default)
@@ -1786,6 +1786,9 @@ once.
 should be used for each country, each national AIS network should
 route messages addressed to other countries using this virtual MMSI
 number".
+
+OPEN-QUESTION: <<INLAND>> does not specify whether ETA time is UTC
+or local. 
 
 ==== RTA at lock/bridge/terminal (Inland AIS) ====
 
@@ -1813,13 +1816,16 @@ preceding ETA request.
 |119-148 | 30 |Fairway section    |section   |t|5 six-bit characters
 |149-178 | 30 |Terminal code      |terminal  |t|5 six-bit characters
 |179-208 | 30 |Fairway hectometre |hectometre|t|5 six-bit characters
-|209-212 |  4 |RTA month (UTC)    |month     |u|1-12, 0=N/A (default)
-|213-217 |  5 |RTA day (UTC)      |day       |u|1-31, 0=N/A (default)
-|217-221 |  5 |RTA hour (UTC)     |hour      |u|0-23, 24=N/A (default)
-|222-227 |  6 |RTA minute (UTC)   |minute    |u|0-59, 60=N/A (default)
+|209-212 |  4 |RTA month          |month     |u|1-12, 0=N/A (default)
+|213-217 |  5 |RTA day            |day       |u|1-31, 0=N/A (default)
+|217-221 |  5 |RTA hour           |hour      |u|0-23, 24=N/A (default)
+|222-227 |  6 |RTA minute         |minute    |u|0-59, 60=N/A (default)
 |228-229 |  2 |Status             |          |e|See "Status Codes" below
 |230-231 |  2 |Spare              |          |x|Not used
 |==============================================================================
+
+OPEN-QUESTION: <<INLAND>> does not specify whether ETA time is UTC
+or local. 
 
 .Lock/Bridge/Terminal status codes
 [frame="topbot",options="header"]
@@ -3643,6 +3649,9 @@ Both values +255 and -255 are interpreted as "unknown" (default).
 OPEN-QUESTION: What are the semantics of the min and max values?  To
 what parameters do they apply?
 
+OPEN-QUESTION: <<INLAND>> does not specify whether start and end times
+are UTC or local.
+
 .EMMA Type Codes
 [frame="topbot",options="header"]
 |==============================
@@ -4904,6 +4913,8 @@ of a broadcast (unaddressed) variant of Inland Number of Persons On
 Board. But no field breakdown is given for this variant. If it
 supposed to be identical to the Type 6 layout, what is to be done
 with the Destination MMSI field?
+
+Are <<INLAND>> time-of-day fields UTC or local?
 
 In Inland Ship Static and Voyage Related Data, which of two possible
 ERI numeric codesets are used for the Type field - the 4-digit codes
