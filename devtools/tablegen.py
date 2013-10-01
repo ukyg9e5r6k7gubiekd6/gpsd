@@ -213,6 +213,7 @@ def make_json_dumper(wfp):
             if ftype == 'x' or not record:
                 continue
             fmt = r'\"%s\":' % name
+            fmt_text = r'\"%s_text\":' % name
             if ftype == 'u':
                 tuples.append((name,
                                fmt+"%u", "%s",
@@ -220,7 +221,10 @@ def make_json_dumper(wfp):
             elif ftype == 'e':
                 tuples.append((name,
                                fmt+"%u", "%s",
-                               fmt+r"\"%s\"", 'FOO[%s]'))
+                               None, None))
+                tuples.append((name,
+                               fmt_text+r"\"%s\"", 'FOO[%s]',
+                               None, None))
             elif ftype == 'i':
                 tuples.append((name,
                                fmt+"%d", "%s",
