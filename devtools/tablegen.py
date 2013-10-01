@@ -10,7 +10,7 @@
 #
 # * -t: A corrected version of the table.  It will redo all the offsets to be
 #   in conformance with the bit widths. (The other options rely only on the
-#   bit widths). Id the old and new tables are different, an error message
+#   bit widths). If the old and new tables are different, an error message
 #   describing the corrections will be emitted to standard error.
 #
 # * -s: A structure definition capturing the message info, with member
@@ -28,9 +28,8 @@
 #   generate the specification structure for a JSON parse that reads JSON
 #   into an instance of the message structure.
 #
-# * -a: Generate all of -s, -d, -c, and -r, , not to stdout but to
+# * -a: Generate all of -s, -d, -c, and -r, and -t, not to stdout but to
 #   files named with the argument as a distinguishing part of the stem.
-#   Note that this does not generate a corrected table as in -t.
 #
 # This generates almost all the code required to support a new message type.
 # It's not quite "Look, ma, no handhacking!" You'll need to add default
@@ -493,6 +492,7 @@ if __name__ == '__main__':
     # Compute offsets for an AIVDM message breakdown, given the bit widths.
     offsets = []
     base = 0
+    corrections = False
     for w in widths:
         if w is None:
             offsets.append(`base`)
@@ -504,6 +504,7 @@ if __name__ == '__main__':
             offsets.append("%d-%d" % (base, base + w - 1))
             base += w
     if filter(lambda p: p[0] != p[1], zip(ranges, offsets)):
+        corrections = True
         print "Offset corrections:"
         for (old, new) in zip(ranges, offsets):
             if old != new:
@@ -514,6 +515,8 @@ if __name__ == '__main__':
 
     # Here's where we generate useful output.
     if all:
+        if corrections:
+            correct_table(open(structname + ".txt", "w"))
         make_driver_code(open(structname + ".c", "w"))
         make_structure(open(structname + ".h", "w"))
         make_json_dumper(open(structname + "_json.c", "w"))
