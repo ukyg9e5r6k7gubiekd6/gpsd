@@ -383,7 +383,7 @@ class AISView:
             if self.enter(ais, ais.mmsi):
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
-                    (ais.type, ais.mmsi, "(shore)", ais.timestamp, where, ais.epfd))
+                    (ais.type, ais.mmsi, "(shore)", ais.timestamp, where, ais.epfd_text))
         elif ais.type == 5:
             if self.enter(ais, ais.shipname):
                 self.store.prepend(
@@ -406,12 +406,12 @@ class AISView:
         elif ais.type in (19, 24):
             if self.enter(ais, ais.shipname):
                 self.store.prepend(
-                    (ais.type, ais.shipname, "(class B)", "", "", ais.shiptype))
+                    (ais.type, ais.shipname, "(class B)", "", "", ais.shiptype_text))
         elif ais.type == 21:
             if self.enter(ais, ais.name):
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
-                    (ais.type, ais.name, "(%s navaid)" % ais.epfd, "", where, ais.aid_type))
+                    (ais.type, ais.name, "(%s navaid)" % ais.epfd_text, "", where, ais.aid_type_text))
                     
 class Base:
     COLUMNS = 3
