@@ -272,11 +272,11 @@ def make_json_dumper(wfp):
             continue        
         # At end of tuples, or if scaled flag changes, or if next op is array,
         # flush out dump code for a span of fields.
-        if tuples[i+1][1] == None:
-            endit = r',\"%s\":['
-        elif i+1 == len(tuples):
+        if i+1 == len(tuples):
             if not inarray:
                 endit = '}\r\n'
+        elif tuples[i+1][1] == None:
+            endit = r',\"%s\":['
         elif scaled(i) != scaled(i+1):
             endit =  '.",'
         else:
@@ -388,7 +388,7 @@ def make_json_generator(wfp):
                     't': "string",
                     'd': "string",
                     }[ftype[0]]
-                default = {
+                typedefault = {
                     'u': "'PUT_DEFAULT_HERE'",
                     'U': "'PUT_DEFAULT_HERE'",
                     'e': "'PUT DEFAULT HERE'",
@@ -397,6 +397,14 @@ def make_json_generator(wfp):
                     'b': "\'false\'",
                     't': "None",
                     }[ftype[0]]
+                namedefaults = {
+                    "month": "'0'",
+                    "day": "'0'",
+                    "hour": "'24'",
+                    "minute": "'60'",
+                    "second": "'60'",
+                    }
+                default = namedefaults.get(name) or typedefault
                 print >>wfp, extra + "            ('%s',%s '%s',%s %s)," % (name,
                                                      " "*(10-len(name)),
                                                      readtype,
