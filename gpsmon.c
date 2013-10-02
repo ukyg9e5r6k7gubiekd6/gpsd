@@ -513,6 +513,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	    }
 	    break;
+        case 'T':
         case 't':
 	    fallback = NULL;
 	    for (active = monitor_objects; *active; active++) {
@@ -523,11 +524,11 @@ int main(int argc, char **argv)
 		}
 	    }
 	    if (matches > 1) {
-		(void)fprintf(stderr, "-T option matched more than one driver.\n");
+		(void)fprintf(stderr, "-t option matched more than one driver.\n");
 		exit(EXIT_FAILURE);
 	    }
 	    else if (matches == 0) {
-		(void)fprintf(stderr, "-T option didn't match any driver.\n");
+		(void)fprintf(stderr, "-t option didn't match any driver.\n");
 		exit(EXIT_FAILURE);
 	    }
 	    active = NULL;
@@ -686,6 +687,11 @@ int main(int argc, char **argv)
 
 		/* refresh all windows */
 		(void)wprintw(cmdwin, type_name);
+		if (fallback != NULL) {
+		    waddch(cmdwin, '(');
+		    waddstr(cmdwin, (*fallback)->driver->type_name);
+		    waddch(cmdwin, ')');
+		}
 		(void)wprintw(cmdwin, "> ");
 		(void)wclrtoeol(cmdwin);
 		if (active != NULL
