@@ -417,6 +417,10 @@ def make_json_generator(wfp):
                                                      readtype,
                                                      " "*(8-len(readtype)),
                                                      default)
+                if ftype[0] == 'e':
+                    print >>wfp, extra + "            ('%s_text',%s'ignore',   None)," % \
+                          (name, " "*(6-len(name)))
+
             last = name
     if arrayname:
         print >>wfp, "                    )))),"
