@@ -3473,7 +3473,7 @@ Precipitation types and Beaufort scale are as for the <<IMO236>> version.
 
 ==== Inland ship static and voyage related data (Inland AIS) ====
 
-A message 6 subtype. DAC = 200 FID = 10. Fixed length, 168 bits.
+A message 8 subtype. DAC = 200 FID = 10. Fixed length, 168 bits.
 
 This message should be used by inland vessels only to broadcast ship
 static and voyage related data in addition to message 5. The message
