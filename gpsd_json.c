@@ -1940,7 +1940,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"racon\":%u,"
 			       "\"racon_text\":\"%s\","
-			       "\"light\":%u"
+			       "\"light\":%u,"
 			       "\"light_text\":\"%s\"",
 			       ais->type6.dac235fid10.racon,
 			       racon_status[ais->type6.dac235fid10.racon],
@@ -2926,11 +2926,11 @@ void json_aivdm_dump(const struct ais_t *ais,
     case 21:			/* Aid to Navigation */
 	if (scaled) {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"aid_type\":%u,\"aid_type_text\"\"%s\","
+			   "\"aid_type\":%u,\"aid_type_text\":\"%s\","
 			   "\"name\":\"%s\",\"lon\":%.4f,"
 			   "\"lat\":%.4f,\"accuracy\":%s,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
-			   "\"epfd\"%u,\"epfd_text:\"%s\","
+			   "\"epfd\"%u,\"epfd_text\":\"%s\","
 			   "\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
@@ -2952,11 +2952,11 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type21.virtual_aid));
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-			   "\"aid_type\":%u,\"aid_type_text\"\"%s\","
+			   "\"aid_type\":%u,\"aid_type_text\":\"%s\","
 			   "\"name\":\"%s\",\"accuracy\":%s,"
 			   "\"lon\":%d,\"lat\":%d,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
-			   "\"epfd\":%u,\"epfd_text:\"%s\""
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
 			   "\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
