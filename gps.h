@@ -1121,29 +1121,29 @@ struct ais_t
 			    unsigned int minute;	/* Report minute */
 			    bool vislimit;		/* Max range? */
 			    unsigned int visibility;	/* Units of 0.1 nm */
-#define DAC8FID21_VISIBILITY_NOT_AVAILABLE	127
-#define DAC8FID21_VISIBILITY_SCALE		10.0
+#define DAC1FID21_VISIBILITY_NOT_AVAILABLE	127
+#define DAC1FID21_VISIBILITY_SCALE		10.0
 			    unsigned humidity;		/* units of 1% */
 			    unsigned int wspeed;	/* average wind speed */
 			    unsigned int wgust;		/* wind gust */
-#define DAC8FID21_WSPEED_NOT_AVAILABLE		127
+#define DAC1FID21_WSPEED_NOT_AVAILABLE		127
 			    unsigned int wdir;		/* wind direction */
-#define DAC8FID21_WDIR_NOT_AVAILABLE		360
+#define DAC1FID21_WDIR_NOT_AVAILABLE		360
 			    unsigned int pressure;	/* air pressure, hpa */
-#define DAC8FID21_NONWMO_PRESSURE_NOT_AVAILABLE	403
-#define DAC8FID21_NONWMO_PRESSURE_HIGH		402	/* > 1200hPa */
-#define DAC8FID21_NONWMO_PRESSURE_OFFSET		400	/* N/A */
+#define DAC1FID21_NONWMO_PRESSURE_NOT_AVAILABLE	403
+#define DAC1FID21_NONWMO_PRESSURE_HIGH		402	/* > 1200hPa */
+#define DAC1FID21_NONWMO_PRESSURE_OFFSET		400	/* N/A */
 			    unsigned int pressuretend;	/* tendency */
 		    	    int airtemp;		/* temp, units 0.1C */
-#define DAC8FID21_AIRTEMP_NOT_AVAILABLE		-1024
-#define DAC8FID21_AIRTEMP_SCALE			10.0
+#define DAC1FID21_AIRTEMP_NOT_AVAILABLE		-1024
+#define DAC1FID21_AIRTEMP_SCALE			10.0
 			    unsigned int watertemp;	/* units 0.1degC */
-#define DAC8FID21_WATERTEMP_NOT_AVAILABLE	501
-#define DAC8FID21_WATERTEMP_SCALE		10.0
+#define DAC1FID21_WATERTEMP_NOT_AVAILABLE	501
+#define DAC1FID21_WATERTEMP_SCALE		10.0
 			    unsigned int waveperiod;	/* in seconds */
-#define DAC8FID21_WAVEPERIOD_NOT_AVAILABLE	63
+#define DAC1FID21_WAVEPERIOD_NOT_AVAILABLE	63
 			    unsigned int wavedir;	/* direction in deg */
-#define DAC8FID21_WAVEDIR_NOT_AVAILABLE		360
+#define DAC1FID21_WAVEDIR_NOT_AVAILABLE		360
 			    unsigned int swellheight;	/* in decimeters */
 			    unsigned int swellperiod;	/* in seconds */
 			    unsigned int swelldir;	/* direction in deg */
@@ -1157,38 +1157,38 @@ struct ais_t
 			    unsigned int minute;	/* Report minute */
 			    unsigned int course;	/* course over ground */
 			    unsigned int speed;		/* speed, m/s */
-#define DAC8FID21_SOG_NOT_AVAILABLE		31
-#define DAC8FID21_SOG_HIGH_SPEED		30
-#define DAC8FID21_SOG_SCALE			2.0
+#define DAC1FID21_SOG_NOT_AVAILABLE		31
+#define DAC1FID21_SOG_HIGH_SPEED		30
+#define DAC1FID21_SOG_SCALE			2.0
 			    unsigned int heading;	/* true heading */
-#define DAC8FID21_HDG_NOT_AVAILABLE		127
-#define DAC8FID21_HDG_SCALE			5.0
+#define DAC1FID21_HDG_NOT_AVAILABLE		127
+#define DAC1FID21_HDG_SCALE			5.0
 			    unsigned int pressure;	/* units of hPa * 0.1 */
-#define DAC8FID21_WMO_PRESSURE_SCALE		10
-#define DAC8FID21_WMO_PRESSURE_OFFSET		90.0
+#define DAC1FID21_WMO_PRESSURE_SCALE		10
+#define DAC1FID21_WMO_PRESSURE_OFFSET		90.0
 			    unsigned int pdelta;	/* units of hPa * 0.1 */
-#define DAC8FID21_PDELTA_SCALE			10
-#define DAC8FID21_PDELTA_OFFSET			50.0
+#define DAC1FID21_PDELTA_SCALE			10
+#define DAC1FID21_PDELTA_OFFSET			50.0
 			    unsigned int ptend;		/* enumerated */
 			    unsigned int twinddir;	/* in 5 degree steps */
-#define DAC8FID21_TWINDDIR_NOT_AVAILABLE	127
+#define DAC1FID21_TWINDDIR_NOT_AVAILABLE	127
 			    unsigned int twindspeed;	/* meters per second */
-#define DAC8FID21_TWINDSPEED_SCALE		2
-#define DAC8FID21_RWINDSPEED_NOT_AVAILABLE	255
+#define DAC1FID21_TWINDSPEED_SCALE		2
+#define DAC1FID21_RWINDSPEED_NOT_AVAILABLE	255
 			    unsigned int rwinddir;	/* in 5 degree steps */
-#define DAC8FID21_RWINDDIR_NOT_AVAILABLE	127
+#define DAC1FID21_RWINDDIR_NOT_AVAILABLE	127
 			    unsigned int rwindspeed;	/* meters per second */
-#define DAC8FID21_RWINDSPEED_SCALE		2
-#define DAC8FID21_RWINDSPEED_NOT_AVAILABLE	255
+#define DAC1FID21_RWINDSPEED_SCALE		2
+#define DAC1FID21_RWINDSPEED_NOT_AVAILABLE	255
 			    unsigned int mgustspeed;	/* meters per second */
-#define DAC8FID21_MGUSTSPEED_SCALE		2
-#define DAC8FID21_MGUSTSPEED_NOT_AVAILABLE	255
+#define DAC1FID21_MGUSTSPEED_SCALE		2
+#define DAC1FID21_MGUSTSPEED_NOT_AVAILABLE	255
 			    unsigned int mgustdir;	/* in 5 degree steps */
-#define DAC8FID21_MGUSTDIR_NOT_AVAILABLE	127
+#define DAC1FID21_MGUSTDIR_NOT_AVAILABLE	127
 			    unsigned int airtemp;	/* degress K */
-#define DAC8FID21_AIRTEMP_OFFSET		223
+#define DAC1FID21_AIRTEMP_OFFSET		223
 			    unsigned humidity;		/* units of 1% */
-#define DAC8FID21_HUMIDITY_NOT_VAILABLE		127
+#define DAC1FID21_HUMIDITY_NOT_VAILABLE		127
 			    /* some trailing fields are missing */
 			} wmo_obs;
 		    };
