@@ -114,6 +114,9 @@ static /*@null@*/ char *json_target_address(const struct json_attr_t *cursor,
     if (parent == NULL || parent->element_type != t_structobject) {
 	/* ordinary case - use the address in the cursor structure */
 	switch (cursor->type) {
+	case t_ignore:
+	    targetaddr = NULL;
+	    break;
 	case t_integer:
 	    targetaddr = (char *)&cursor->addr.integer[offset];
 	    break;
@@ -219,6 +222,7 @@ static int json_internal_read_object(const char *cp,
 		case t_structobject:
 		case t_array:
 		case t_check:
+		case t_ignore:
 		    break;
 		}
 	}
@@ -278,7 +282,7 @@ static int json_internal_read_object(const char *cp,
 		    maxlen = (int)cursor->len - 1;
 		else if (cursor->type == t_check)
 		    maxlen = (int)strlen(cursor->dflt.check);
-		else if (cursor->type == t_time)
+		else if (cursor->type == t_time || cursor->type == t_ignore)
 		    maxlen = JSON_VAL_MAX;
 		else if (cursor->map != NULL)
 		    maxlen = (int)sizeof(valbuf) - 1;
@@ -412,7 +416,7 @@ static int json_internal_read_object(const char *cp,
 	    if (value_quoted
 		&& (cursor->type != t_string && cursor->type != t_character
 		    && cursor->type != t_check && cursor->type != t_time
-		    && cursor->map == 0)) {
+		    && cursor->type != t_ignore && cursor->map == 0)) {
 		json_debug_trace((1,
 				  "Saw quoted value when expecting non-string.\n"));
 		return JSON_ERR_QNONSTRING;
@@ -481,6 +485,7 @@ static int json_internal_read_object(const char *cp,
 		    else
 			lptr[0] = valbuf[0];
 		    break;
+		case t_ignore:	/* silences a compiler warning */
 		case t_object:	/* silences a compiler warning */
 		case t_structobject:
 		case t_array:
