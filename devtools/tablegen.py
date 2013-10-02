@@ -113,6 +113,8 @@ def make_driver_code(wfp):
                       (target, {'u':'U', 'e':'U', 'i':'S'}[ftype[0].lower()], offset, width)
             elif ftype == 't':
                 print >>wfp, indent + "UCHARS(%s, %s);" % (offset, target)
+            elif ftype == 'b':
+                print >>wfp, indent + "%s\t= (bool)UBITS(%s, 1);" % (target, offset)
             else:
                 print >>wfp, indent + "/* %s bits of type %s */" % (width,ftype)
             last = name
