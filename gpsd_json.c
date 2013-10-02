@@ -1955,6 +1955,16 @@ void json_aivdm_dump(const struct ais_t *ais,
 	}
 	else if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
+		const char *position_types[8] = {
+		    "Not available",
+		    "Port-side to",
+		    "Starboard-side to",
+		    "Mediterranean (end-on) mooring",
+		    "Mooring buoy",
+		    "Anchorage",
+		    "Reserved for future use",
+		    "Reserved for future use",
+		};
 	    case 12:	/* IMO236 -Dangerous cargo indication */
 		/* some fields have beem merged to an ISO8601 partial date */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2021,7 +2031,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 20:        /* IMO289 - Berthing Data */
                 (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"linkage\":%u,\"berth_length\":%u,"
-			       "\"position\":%u,\"arrival\":\"%u-%uT%u:%u\","
+			       "\"position\":%u,\"position_text\":\"%s\","
+			       "\"arrival\":\"%u-%uT%u:%u\","
 			       "\"availability\":%u,"
 			       "\"agent\":%u,\"fuel\":%u,\"chandler\":%u,"
 			       "\"stevedore\":%u,\"electrical\":%u,"
@@ -2038,6 +2049,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type6.dac1fid20.linkage,
 			       ais->type6.dac1fid20.berth_length,
 			       ais->type6.dac1fid20.position,
+			       position_types[ais->type6.dac1fid20.position],
 			       ais->type6.dac1fid20.month,
 			       ais->type6.dac1fid20.day,
 			       ais->type6.dac1fid20.hour,
@@ -2301,7 +2313,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"swellheight\":%.1f,\"swellperiod\":%u,\"swelldir\":%u,"
 				   "\"seastate\":%u,\"watertemp\":%.1f,"
 				   "\"preciptype\":%u,\"preciptype_text\":\"%s\","
-				   "\"salinity\":%.1f,\"ice\":\"%s\"",
+				   "\"salinity\":%.1f,\"ice\":%u,\"ice_text\":\"%s\"",
 				   trends[ais->type8.dac1fid11.leveltrend],
 				   ais->type8.dac1fid11.cspeed / DAC1FID11_CSPEED_DIV,
 				   ais->type8.dac1fid11.cdir,
@@ -2322,6 +2334,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.preciptype,
 				   preciptypes[ais->type8.dac1fid11.preciptype],
 				   ais->type8.dac1fid11.salinity / DAC1FID11_SALINITY_DIV,
+				   ais->type8.dac1fid11.ice,
 				   ice[ais->type8.dac1fid11.ice]);
 		} else
 		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2333,7 +2346,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   "\"swellheight\":%u,\"swellperiod\":%u,\"swelldir\":%u,"
 				   "\"seastate\":%u,\"watertemp\":%u,"
 				   "\"preciptype\":%u,\"preciptype_text\":\"%s\","
-				   "\"salinity\":%u,\"ice\":%u",
+				   "\"salinity\":%u,\"ice\":%u,\"ice_text\":\"%s\"",
 				   ais->type8.dac1fid11.leveltrend,
 				   ais->type8.dac1fid11.cspeed,
 				   ais->type8.dac1fid11.cdir,
@@ -2354,7 +2367,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.preciptype,
 				   preciptypes[ais->type8.dac1fid11.preciptype],
 				   ais->type8.dac1fid11.salinity,
-				   ais->type8.dac1fid11.ice);
+				   ais->type8.dac1fid11.ice,
+				   ice[ais->type8.dac1fid11.ice]);
 		(void)strlcat(buf, "}\r\n", buflen);
 		imo = true;
 		break;

@@ -4843,13 +4843,13 @@ made integer or string display dependent on the "scaled" flag.)
 | 5      | draught                              | shiptype, epfd
 | 6(1/14)| lon, lat, cspeed                     | -
 | 6(1/18)| lon, lat                             | -
-| 6(1/20)| berth_lon, berth_lat, berth_depth    | position*
+| 6(1/20)| berth_lon, berth_lat, berth_depth    | position
 | 6(1/22)| lon, lat                             | -
 | 6(1/25)| cargocode                            | cargocode*
 | 6(1/28)| lon, lat                             | rtype
 | 6(1/32)| lon, lat, cspeed                     | -
 | 6(235/100) | -                                | racon, light
-| 8(1/11)| lon, lat, airtemp, dewpoint,         | preciptype
+| 8(1/11)| lon, lat, airtemp, dewpoint,         | preciptype, ice
 |        | visibility, waterlevel, cspeed,      |
 |        | cspeed2, cspeed3, waveheight,        |
 |        | swellheight, watertemp salinity      |
