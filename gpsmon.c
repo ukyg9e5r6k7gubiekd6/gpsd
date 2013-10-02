@@ -297,17 +297,23 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 #endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
 #ifdef RECONFIGURE_ENABLE
-static void announce_log(/*@in@*/ const char *str)
+static void announce_log(/*@in@*/ const char *fmt, ...)
 {
+    char buf[BUFSIZ];
+    va_list ap;
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf) - 5, fmt, ap);
+    va_end(ap);
+ 
    if (packetwin != NULL) {
 	(void)wattrset(packetwin, A_BOLD);
 	(void)wprintw(packetwin, ">>>");
-	(void)waddstr(packetwin, str);
+	(void)waddstr(packetwin, buf);
 	(void)wattrset(packetwin, A_NORMAL);
 	(void)wprintw(packetwin, "\n");
    }
    if (logfile != NULL) {
-       (void)fprintf(logfile, ">>>%s\n", str);
+       (void)fprintf(logfile, ">>>%s\n", buf);
    }
 }
 #endif /* RECONFIGURE_ENABLE */
@@ -771,7 +777,7 @@ int main(int argc, char **argv)
 			    /* *INDENT-OFF* */
 			    context.readonly = false;
 			    if ((*switcher)->driver->rate_switcher(&session, rate)) {
-				announce_log("Rate switcher callled.");
+				announce_log("Rate switcher called.");
 			    } else
 				monitor_complain("Rate not supported.");
 			    context.readonly = true;
@@ -837,7 +843,7 @@ int main(int argc, char **argv)
 			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
 			    context.readonly = true;
-			    announce_log("Mode switcher called");
+			    announce_log("Mode switcher called: to mode %d", v);
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
 			} else
