@@ -172,7 +172,7 @@ def make_structure(wfp):
             elif ftype == 'i' or ftype[0] == 'I':
                 decl = "signed int %s;\t/* %s */" % (name, description)
             elif ftype == 'b':
-                decl = "signed int %s;\t/* %s */" % (name, description)
+                decl = "bool %s;\t/* %s */" % (name, description)
             elif ftype == 't':
                 stl = int(width)/6
                 decl = "char %s[%d+1];\t/* %s */" % (name, stl, description)
@@ -347,11 +347,11 @@ def make_json_generator(wfp):
     record = after is None
     print >>wfp, '''\
     {
-        "initname" : "__INITIALIZER__",
-        "headers": ("AIS_HEADER",),
-        "structname": "%s",
-        "fieldmap":(
-            # fieldname    type        default''' % (structname,)
+    "initname" : "__INITIALIZER__",
+    "headers": ("AIS_HEADER",),
+    "structname": "%s",
+    "fieldmap":(
+        # fieldname    type        default''' % (structname,)
     for (i, t) in enumerate(table):
         if '|' in t:
             fields = map(lambda s: s.strip(), t.split('|'))
@@ -379,9 +379,9 @@ def make_json_generator(wfp):
                 else:
                     lengthfield = "n" + arrayname
                 extra = " " * 8
-                print >>wfp, "            ('%s',%s 'array', (" % \
+                print >>wfp, "        ('%s',%s 'array', (" % \
                       (arrayname, " "*(10-len(arrayname)))
-                print >>wfp, "                ('%s_t', '%s', (" % (typename, lengthfield)
+                print >>wfp, "            ('%s_t', '%s', (" % (typename, lengthfield)
             else:
                 # Depends on the assumption that the read code
                 # always sees unscaled JSON.
@@ -412,13 +412,13 @@ def make_json_generator(wfp):
                     "second": "'60'",
                     }
                 default = namedefaults.get(name) or typedefault
-                print >>wfp, extra + "            ('%s',%s '%s',%s %s)," % (name,
+                print >>wfp, extra + "        ('%s',%s '%s',%s %s)," % (name,
                                                      " "*(10-len(name)),
                                                      readtype,
                                                      " "*(8-len(readtype)),
                                                      default)
                 if ftype[0] == 'e':
-                    print >>wfp, extra + "            ('%s_text',%s'ignore',   None)," % \
+                    print >>wfp, extra + "        ('%s_text',%s'ignore',   None)," % \
                           (name, " "*(6-len(name)))
 
             last = name
