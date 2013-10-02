@@ -483,4 +483,16 @@ const struct monitor_object_t mtk3301_mmt = {
 };
 #endif /* MTK3301_ENABLE */
 
+#ifdef AIVDM_ENABLE
+extern const struct gps_type_t aivdm;
+
+const struct monitor_object_t aivdm_mmt = {
+    .initialize = nmea_initialize,
+    .update = nmea_update,
+    .command = NULL,
+    .wrap = nmea_wrap,
+    .min_y = 21,.min_x = 80,
+    .driver = &aivdm,
+};
+#endif /* AIVDM_ENABLE */
 #endif /* NMEA_ENABLE */

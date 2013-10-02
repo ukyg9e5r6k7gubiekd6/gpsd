@@ -1430,7 +1430,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 }
 
 /* *INDENT-OFF* */
-static const struct gps_type_t aivdm = {
+const struct gps_type_t aivdm = {
     /* Full name of type */
     .type_name        = "AIVDM",    	/* associated lexer packet type */
     .packet_type      = AIVDM_PACKET,	/* numeric packet type */

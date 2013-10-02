@@ -39,7 +39,7 @@ extern struct monitor_object_t nmea_mmt, sirf_mmt, ashtech_mmt;
 extern struct monitor_object_t garmin_mmt, garmin_bin_ser_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mtk3301_mmt;
-extern struct monitor_object_t oncore_mmt, tnt_mmt;
+extern struct monitor_object_t oncore_mmt, tnt_mmt, aivdm_mmt;
 
 /* These are public */
 struct gps_device_t session;
@@ -89,6 +89,9 @@ static const struct monitor_object_t *monitor_objects[] = {
 #ifdef MTK3301_ENABLE
     &mtk3301_mmt,
 #endif /* MTK3301_ENABLE */
+#ifdef AIVDM_ENABLE
+    &aivdm_mmt,
+#endif /* AIVDM_ENABLE */
 #endif /* NMEA_ENABLE */
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
     &sirf_mmt,
