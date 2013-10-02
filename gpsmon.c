@@ -452,6 +452,7 @@ int main(int argc, char **argv)
     char line[80], *explanation, *p;
     int bailout = 0, matches = 0;
     bool nmea = false;
+    int promptlen;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -687,10 +688,12 @@ int main(int argc, char **argv)
 
 		/* refresh all windows */
 		(void)wprintw(cmdwin, type_name);
+		promptlen = strlen(type_name);
 		if (fallback != NULL) {
 		    waddch(cmdwin, '(');
 		    waddstr(cmdwin, (*fallback)->driver->type_name);
 		    waddch(cmdwin, ')');
+		    promptlen += strlen((*fallback)->driver->type_name) + 2;
 		}
 		(void)wprintw(cmdwin, "> ");
 		(void)wclrtoeol(cmdwin);
@@ -719,7 +722,7 @@ int main(int argc, char **argv)
 
 	    if (FD_ISSET(0, &select_set)) {
 		char *arg;
-		(void)wmove(cmdwin, 0, (int)strlen(type_name) + 2);
+		(void)wmove(cmdwin, 0, promptlen + 2);
 		(void)wrefresh(cmdwin);
 		(void)echo();
 		/*@ -usedef -compdef @*/
