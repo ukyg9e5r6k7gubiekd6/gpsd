@@ -600,6 +600,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	case t_character:
 	case t_array:
 	case t_check:
+	case t_ignore:
 	    json_debug_trace((1, "Invalid array subtype.\n"));
 	    return JSON_ERR_SUBTYPE;
 	}
