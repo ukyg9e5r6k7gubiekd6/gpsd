@@ -2021,7 +2021,7 @@ DAC/FID pairs 1/23, 1/28, and 1/30 have addressed versions descrubed
 under type 6.
 
 FID types 11-15 are being phased out and are not to be used after 1
-Jan 2013.The deprecated IMO236 1/11 has a different binary layout from
+Jan 2013. The deprecated IMO236 1/11 has a different binary layout from
 the IMO289 1/31.  FID type 17 is in use; there is a proposed
 update for it in <<IMO289>>.
 
@@ -3496,11 +3496,11 @@ message 5.
 |141-143 |  3 |Hazardous cargo        |hazard   |e|See "Hazard Codes" below
 |144-154 | 11 |Draught                |draught  |u|1-200 * 0.01m, default 0
 |155-156 |  2 |Loaded/Unloaded        |loaded   |e|See "Load Status" below
-|157     |  1 |Speed inf. quality     |speed_q  |b|0 = low/GNSS (default)
+|157-157 |  1 |Speed inf. quality     |speed_q  |b|0 = low/GNSS (default)
                                                    1 = high
-|158     |  1 |Course inf. quality    |course_q |b|0 = low/GNSS (default)
+|158-158 |  1 |Course inf. quality    |course_q |b|0 = low/GNSS (default)
                                                    1 = high
-|159     |  1 |Heading inf. quality   |heading_q|b|0 = low/GNSS (default)
+|159-159 |  1 |Heading inf. quality   |heading_q|b|0 = low/GNSS (default)
                                                    1 = high
 |160-167 |  8 |Spare                  |         |x|Not used
 |==============================================================================

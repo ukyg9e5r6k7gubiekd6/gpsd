@@ -2665,6 +2665,107 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    }
 	}
+	else if (ais->type8.dac == 200) {
+	    struct {
+		const int code;
+		const int ais;
+		const char *legend;
+	    } *cp, shiptypes[] = {
+		/*
+		 * The Inland AIS standard is not clear which numbers are
+		 * supposed to be in the type slot.  The ranges are disjoint,
+		 * so we'll match on both.
+		 */
+		{8000, 99, "Vessel, type unknown"},
+		{8010, 79, "Motor freighter"},
+		{8020, 89, "Motor tanker"},
+		{8021, 80, "Motor tanker, liquid cargo, type N"},
+		{8022, 80, "Motor tanker, liquid cargo, type C"},
+		{8023, 89, "Motor tanker, dry cargo as if liquid (e.g. cement)"},
+		{8030, 79, "Container vessel"},
+		{8040, 80, "Gas tanker"},
+		{8050, 79, "Motor freighter, tug"},
+		{8060, 89, "Motor tanker, tug"},
+		{8070, 79, "Motor freighter with one or more ships alongside"},
+		{8080, 89, "Motor freighter with tanker"},
+		{8090, 79, "Motor freighter pushing one or more freighters"},
+		{8100, 89, "Motor freighter pushing at least one tank-ship"},
+		{8110, 79, "Tug, freighter"},
+		{8120, 89, "Tug, tanker"},
+		{8130, 31, "Tug freighter, coupled"},
+		{8140, 31, "Tug, freighter/tanker, coupled"},
+		{8150, 99, "Freightbarge"},
+		{8160, 99, "Tankbarge"},
+		{8161, 90, "Tankbarge, liquid cargo, type N"},
+		{8162, 90, "Tankbarge, liquid cargo, type C"},
+		{8163, 99, "Tankbarge, dry cargo as if liquid (e.g. cement)"},
+		{8170, 99, "Freightbarge with containers"},
+		{8180, 90, "Tankbarge, gas"},
+		{8210, 79, "Pushtow, one cargo barge"},
+		{8220, 79, "Pushtow, two cargo barges"},
+		{8230, 79, "Pushtow, three cargo barges"},
+		{8240, 79, "Pushtow, four cargo barges"},
+		{8250, 79, "Pushtow, five cargo barges"},
+		{8260, 79, "Pushtow, six cargo barges"},
+		{8270, 79, "Pushtow, seven cargo barges"},
+		{8280, 79, "Pushtow, eigth cargo barges"},
+		{8290, 79, "Pushtow, nine or more barges"},
+		{8310, 80, "Pushtow, one tank/gas barge"},
+		{8320, 80, "Pushtow, two barges at least one tanker or gas barge"},
+		{8330, 80, "Pushtow, three barges at least one tanker or gas barge"},
+		{8340, 80, "Pushtow, four barges at least one tanker or gas barge"},
+		{8350, 80, "Pushtow, five barges at least one tanker or gas barge"},
+		{8360, 80, "Pushtow, six barges at least one tanker or gas barge"},
+		{8370, 80, "Pushtow, seven barges at least one tanker or gas barg"},
+		{0, 0, "Illegal ship type value."},
+	    };
+	    const char *hazard_types[] = {
+		"0 blue cones/lights",
+		"1 blue cone/light",
+		"2 blue cones/lights",
+		"3 blue cones/lights",
+		"4 B-Flag",
+		"Unknown",
+	    };
+#define HTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(hazard_types)) ? hazard_types[n] : "INVALID HAZARD TYPE")
+	    const char *lstatus_types[] = {
+		"N/A (default)",
+		"Unloaded",
+		"Loaded",
+	    };
+#define LSTATUS_DISPLAY(n) (((n) < (unsigned int)NITEMS(lstatus_types)) ? lstatus_types[n] : "INVALID LOAD STATUS")
+	    switch (ais->type8.fid) {
+	    case 10:        /* Inland ship static and voyage-related data */
+		for (cp = shiptypes; cp < shiptypes + NITEMS(shiptypes); cp++)
+		    if (cp->code == ais->type8.dac200fid10.type
+			|| cp->ais == ais->type8.dac200fid10.type)
+			break;
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"vin\":\"%s\",\"length\":%u,\"beam\":%u,"
+			       "\"type\":%u,\"type_text\":\"%s\","
+			       "\"hazard\":%u,\"hazard_text\":\"%s\","
+			       "\"draught\":%u,"
+			       "\"loaded\":%u,\"loaded_text\":\"%s\","
+			       "\"speed_q\":\"%s\","
+			       "\"course_q\":\"%s\","
+			       "\"heading_q\":\"%s\"}",
+			       ais->type8.dac200fid10.vin,
+			       ais->type8.dac200fid10.length,
+			       ais->type8.dac200fid10.beam,
+			       ais->type8.dac200fid10.type,
+			       cp->legend,
+			       ais->type8.dac200fid10.hazard,
+			       HTYPE_DISPLAY(ais->type8.dac200fid10.hazard),
+			       ais->type8.dac200fid10.draught,
+			       ais->type8.dac200fid10.loaded,
+			       LSTATUS_DISPLAY(ais->type8.dac200fid10.loaded),
+			       JSON_BOOL(ais->type8.dac200fid10.speed_q),
+			       JSON_BOOL(ais->type8.dac200fid10.course_q),
+			       JSON_BOOL(ais->type8.dac200fid10.heading_q));
+		structured = true;
+		break;
+	    }
+	}
 	if (!structured)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"data\":\"%zd:%s\"}\r\n",

@@ -345,6 +345,27 @@ ais_specs = (
     "stringbuffered":("data",),
     },
     {
+    "initname" : "json_ais8_fid10",
+    "headers": ("AIS_HEADER","AIS_TYPE8",),
+    "structname": "ais->type8.dac200fid10",
+    "fieldmap":(
+        # fieldname    type        default
+        ('vin',        'string',   None),
+        ('length',     'uinteger', '0'),
+        ('beam',       'uinteger', '0'),
+        ('type',       'uinteger', '0'),
+        ('type_text',  'ignore',   None),
+        ('hazard',     'uinteger', '0'),
+        ('hazard_text','ignore',   None),
+        ('draught',    'uinteger', '0'),
+        ('loaded',     'uinteger', '0'),
+        ('loaded_text','ignore',   None),
+        ('speed_q',    'boolean',  'false'),
+        ('course_q',   'boolean',  'false'),
+        ('heading_q',  'boolean',  'false'),
+        ),
+    },
+    {
     "initname" : "json_ais8_fid11",
     "headers": ("AIS_HEADER","AIS_TYPE8",),
     "structname": "ais->type8.dac1fid11",

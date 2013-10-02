@@ -1248,6 +1248,19 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    union {
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
+		/* Inland static ship and voyage-related data */
+		struct {
+		    char vin[8+1];	/* European Vessel ID */
+		    unsigned int length;	/* Length of ship */
+		    unsigned int beam;	/* Beam of ship */
+		    unsigned int type;	/* Ship/combination type */
+		    unsigned int hazard;	/* Hazardous cargo */
+		    unsigned int draught;	/* Draught */
+		    unsigned int loaded;	/* Loaded/Unloaded */
+		    bool speed_q;	/* Speed inf. quality */
+		    bool course_q;	/* Course inf. quality */
+		    bool heading_q;	/* Heading inf. quality */
+		} dac200fid10;
 		/* IMO236  - Meteorological-Hydrological data
 		 * Trial message, not to be used after January 2013
 		 * Replaced by IMO289 (DAC 1, FID 31)
