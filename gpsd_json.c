@@ -1651,6 +1651,17 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"N/A",
     };
 
+    const char *position_types[8] = {
+	"Not available",
+	"Port-side to",
+	"Starboard-side to",
+	"Mediterranean (end-on) mooring",
+	"Mooring buoy",
+	"Anchorage",
+	"Reserved for future use",
+	"Reserved for future use",
+    };
+
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
     if (device != NULL && device[0] != '\0')
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1954,16 +1965,6 @@ void json_aivdm_dump(const struct ais_t *ais,
 	}
 	else if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
-		const char *position_types[8] = {
-		    "Not available",
-		    "Port-side to",
-		    "Starboard-side to",
-		    "Mediterranean (end-on) mooring",
-		    "Mooring buoy",
-		    "Anchorage",
-		    "Reserved for future use",
-		    "Reserved for future use",
-		};
 	    case 12:	/* IMO236 -Dangerous cargo indication */
 		/* some fields have beem merged to an ISO8601 partial date */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
