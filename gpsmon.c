@@ -849,12 +849,11 @@ int main(int argc, char **argv)
 			if (fallback != NULL && (*fallback)->driver->mode_switcher != NULL)
 			    switcher = fallback;
 			if ((*switcher)->driver->mode_switcher) {
+			    announce_log("Mode switcher called: to mode %d", v);
 			    context.readonly = false;
 			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
 			    context.readonly = true;
-			    announce_log("Mode switcher called: to mode %d", v);
-			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
 			} else
 			    monitor_complain
