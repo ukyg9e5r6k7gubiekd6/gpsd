@@ -593,32 +593,10 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 }
 #endif /* CONTROLSEND_ENABLE */
 
-static void ubx_catch_model(struct gps_device_t *session, unsigned char *buf,
-			    size_t len)
-{
-    /*@ +charint */
-    unsigned char *ip = &buf[19];
-    unsigned char *op = (unsigned char *)session->subtype;
-    size_t end = ((len - 19) < 63) ? (len - 19) : 63;
-    size_t i;
-
-    for (i = 0; i < end; i++) {
-	if ((*ip == 0x00) || (*ip == '*')) {
-	    *op = 0x00;
-	    break;
-	}
-	*(op++) = *(ip++);
-    }
-    /*@ -charint */
-}
-
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
 	return;
-    if (event == event_triggermatch)
-	ubx_catch_model(session,
-			session->packet.outbuffer, session->packet.outbuflen);
     else if (event == event_identified) {
 	unsigned char msg[32];
 
@@ -769,7 +747,7 @@ const struct gps_type_t ubx_binary = {
     .type_name        = "uBlox UBX binary",    /* Full name of type */
     .packet_type      = UBX_PACKET,	/* associated lexer packet type */
     .flags	      = DRIVER_NOFLAGS,	/* no flags set */
-    .trigger          = "$GPTXT,01,01,02",
+    .trigger          = "$GPTXT,01,01",
     .channels         = 50,             /* Number of satellite channels supported by the device */
     .probe_detect     = NULL,           /* Startup-time device detector */
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
