@@ -675,7 +675,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 }
 
 #ifdef RECONFIGURE_ENABLE
-static void ubx_nmea_mode(struct gps_device_t *session, int mode)
+static void ubx_mode(struct gps_device_t *session, int mode)
 {
     if (!session->driver.ubx.have_port_configuration)
 	return;
@@ -778,7 +778,7 @@ const struct gps_type_t ubx_binary = {
     .event_hook       = ubx_event_hook,	/* Fire on various lifetime events */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
-    .mode_switcher    = ubx_nmea_mode,  /* Switch to NMEA mode */
+    .mode_switcher    = ubx_mode,       /* Mode switcher */
     .rate_switcher    = ubx_rate,       /* Message delivery rate switcher */
     .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
 #endif /* RECONFIGURE_ENABLE */
