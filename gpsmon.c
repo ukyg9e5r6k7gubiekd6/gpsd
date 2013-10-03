@@ -461,7 +461,7 @@ int main(int argc, char **argv)
     char line[80], *explanation, *p;
     int bailout = 0, matches = 0;
     bool nmea = false;
-    int promptlen;
+    size_t promptlen = 0;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -699,9 +699,9 @@ int main(int argc, char **argv)
 		(void)wprintw(cmdwin, type_name);
 		promptlen = strlen(type_name);
 		if (fallback != NULL) {
-		    waddch(cmdwin, '(');
-		    waddstr(cmdwin, (*fallback)->driver->type_name);
-		    waddch(cmdwin, ')');
+		    (void)waddch(cmdwin, (chtype)'(');
+		    (void)waddstr(cmdwin, (*fallback)->driver->type_name);
+		    (void)waddch(cmdwin, (chtype)')');
 		    promptlen += strlen((*fallback)->driver->type_name) + 2;
 		}
 		(void)wprintw(cmdwin, "> ");
@@ -731,7 +731,7 @@ int main(int argc, char **argv)
 
 	    if (FD_ISSET(0, &select_set)) {
 		char *arg;
-		(void)wmove(cmdwin, 0, promptlen + 2);
+		(void)wmove(cmdwin, 0, (int)promptlen + 2);
 		(void)wrefresh(cmdwin);
 		(void)echo();
 		/*@ -usedef -compdef @*/

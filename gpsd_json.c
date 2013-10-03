@@ -2668,8 +2668,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 	}
 	else if (ais->type8.dac == 200) {
 	    struct {
-		const int code;
-		const int ais;
+		const unsigned int code;
+		const unsigned int ais;
 		const char *legend;
 	    } *cp, shiptypes[] = {
 		/*
