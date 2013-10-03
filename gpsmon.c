@@ -300,17 +300,23 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 #endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
 #ifdef RECONFIGURE_ENABLE
-static void announce_log(/*@in@*/ const char *str)
+static void announce_log(/*@in@*/ const char *fmt, ...)
 {
+    char buf[BUFSIZ];
+    va_list ap;
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf) - 5, fmt, ap);
+    va_end(ap);
+ 
    if (packetwin != NULL) {
 	(void)wattrset(packetwin, A_BOLD);
 	(void)wprintw(packetwin, ">>>");
-	(void)waddstr(packetwin, str);
+	(void)waddstr(packetwin, buf);
 	(void)wattrset(packetwin, A_NORMAL);
 	(void)wprintw(packetwin, "\n");
    }
    if (logfile != NULL) {
-       (void)fprintf(logfile, ">>>%s\n", str);
+       (void)fprintf(logfile, ">>>%s\n", buf);
    }
 }
 #endif /* RECONFIGURE_ENABLE */
@@ -455,6 +461,7 @@ int main(int argc, char **argv)
     char line[80], *explanation, *p;
     int bailout = 0, matches = 0;
     bool nmea = false;
+    int promptlen;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -516,6 +523,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	    }
 	    break;
+        case 'T':
         case 't':
 	    fallback = NULL;
 	    for (active = monitor_objects; *active; active++) {
@@ -526,11 +534,11 @@ int main(int argc, char **argv)
 		}
 	    }
 	    if (matches > 1) {
-		(void)fprintf(stderr, "-T option matched more than one driver.\n");
+		(void)fprintf(stderr, "-t option matched more than one driver.\n");
 		exit(EXIT_FAILURE);
 	    }
 	    else if (matches == 0) {
-		(void)fprintf(stderr, "-T option didn't match any driver.\n");
+		(void)fprintf(stderr, "-t option didn't match any driver.\n");
 		exit(EXIT_FAILURE);
 	    }
 	    active = NULL;
@@ -689,6 +697,13 @@ int main(int argc, char **argv)
 
 		/* refresh all windows */
 		(void)wprintw(cmdwin, type_name);
+		promptlen = strlen(type_name);
+		if (fallback != NULL) {
+		    waddch(cmdwin, '(');
+		    waddstr(cmdwin, (*fallback)->driver->type_name);
+		    waddch(cmdwin, ')');
+		    promptlen += strlen((*fallback)->driver->type_name) + 2;
+		}
 		(void)wprintw(cmdwin, "> ");
 		(void)wclrtoeol(cmdwin);
 		if (active != NULL
@@ -716,7 +731,7 @@ int main(int argc, char **argv)
 
 	    if (FD_ISSET(0, &select_set)) {
 		char *arg;
-		(void)wmove(cmdwin, 0, (int)strlen(type_name) + 2);
+		(void)wmove(cmdwin, 0, promptlen + 2);
 		(void)wrefresh(cmdwin);
 		(void)echo();
 		/*@ -usedef -compdef @*/
@@ -765,7 +780,7 @@ int main(int argc, char **argv)
 			    /* *INDENT-OFF* */
 			    context.readonly = false;
 			    if ((*switcher)->driver->rate_switcher(&session, rate)) {
-				announce_log("Rate switcher callled.");
+				announce_log("Rate switcher called.");
 			    } else
 				monitor_complain("Rate not supported.");
 			    context.readonly = true;
@@ -831,7 +846,7 @@ int main(int argc, char **argv)
 			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
 			    context.readonly = true;
-			    announce_log("Mode switcher called");
+			    announce_log("Mode switcher called: to mode %d", v);
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
 			} else

@@ -1369,7 +1369,7 @@ void json_aivdm_dump(const struct ais_t *ais,
     char buf2[JSON_VAL_MAX * 2 + 1];
     char buf3[JSON_VAL_MAX * 2 + 1];
     char buf4[JSON_VAL_MAX * 2 + 1];
-    bool imo;
+    bool structured;
     int i;
 
     static char *nav_legends[] = {
@@ -1651,6 +1651,17 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"N/A",
     };
 
+    const char *position_types[8] = {
+	"Not available",
+	"Port-side to",
+	"Starboard-side to",
+	"Mediterranean (end-on) mooring",
+	"Mooring buoy",
+	"Anchorage",
+	"Reserved for future use",
+	"Reserved for future use",
+    };
+
     (void)snprintf(buf, buflen, "{\"class\":\"AIS\",");
     if (device != NULL && device[0] != '\0')
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1856,8 +1867,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       JSON_BOOL(ais->type6.retransmit),
 		       ais->type6.dac,
 		       ais->type6.fid);
-	imo = false;
-
+	structured = false;
 	if (ais->type6.dac == 200) {
 	    switch (ais->type6.fid) {
 	    case 21:
@@ -1949,22 +1959,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf)-1] = '\0';
 		(void)strlcat(buf, "}\r\n", buflen);
-		imo = true;
+		structured = true;
 		break;
 	    }
 	}
 	else if (ais->type6.dac == 1)
 	    switch (ais->type6.fid) {
-		const char *position_types[8] = {
-		    "Not available",
-		    "Port-side to",
-		    "Starboard-side to",
-		    "Mediterranean (end-on) mooring",
-		    "Mooring buoy",
-		    "Anchorage",
-		    "Reserved for future use",
-		    "Reserved for future use",
-		};
 	    case 12:	/* IMO236 -Dangerous cargo indication */
 		/* some fields have beem merged to an ISO8601 partial date */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -1991,18 +1991,18 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type6.dac1fid12.unid,
 			       ais->type6.dac1fid12.amount,
 			       ais->type6.dac1fid12.unit);
-		imo = true;
+		structured = true;
 		break;
 	    case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		    "\"airdraught\":%u}\r\n",
 		    ais->type6.dac1fid15.airdraught);
-		imo = true;
+		structured = true;
 		break;
 	    case 16:	/* IMO236 - Number of persons on board */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"persons\":%u}\t\n", ais->type6.dac1fid16.persons);
-		imo = true;
+		structured = true;
 		break;
 	    case 18:	/* IMO289 - Clearance time to enter port */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2026,7 +2026,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"lon\":%d,\"lat\":%d}\r\n",
 			       ais->type6.dac1fid18.lon,
 			       ais->type6.dac1fid18.lat);
-		imo = true;
+		structured = true;
 		break;
 	    case 20:        /* IMO289 - Berthing Data */
                 (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2099,7 +2099,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type6.dac1fid20.berth_lon,
 			       ais->type6.dac1fid20.berth_lat,
 			       ais->type6.dac1fid20.berth_depth);
-		imo = true;
+		structured = true;
 		break;
 	    case 23:    /* IMO289 - Area notice - addressed */
 		break;
@@ -2117,7 +2117,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf) - 1] = '\0';
 		(void)strlcat(buf, "]}\r\n", buflen);
-		imo = true;
+		structured = true;
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2150,7 +2150,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf)-1] = '\0';
 		(void)strlcat(buf, "]}\r\n", buflen);
-		imo = true;
+		structured = true;
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2158,7 +2158,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type6.dac1fid30.linkage,
 		       json_stringify(buf1, sizeof(buf1),
 				      ais->type6.dac1fid30.text));
-		imo = true;
+		structured = true;
 		break;
 	    case 14:	/* IMO236 - Tidal Window */
 	    case 32:	/* IMO289 - Tidal Window */
@@ -2197,10 +2197,10 @@ void json_aivdm_dump(const struct ais_t *ais,
 	      if (buf[strlen(buf) - 1] == ',')
 		  buf[strlen(buf)-1] = '\0';
 	      (void)strlcat(buf, "]}\r\n", buflen);
-	      imo = true;
+	      structured = true;
 	      break;
 	    }
-	if (!imo)
+	if (!structured)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"data\":\"%zd:%s\"}\r\n",
 			   ais->type6.bitcount,
@@ -2216,7 +2216,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type7.mmsi2, ais->type7.mmsi3, ais->type7.mmsi4);
 	break;
     case 8:			/* Binary Broadcast Message */
-	imo = false;
+	structured = false;
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		       "\"dac\":%u,\"fid\":%u,",ais->type8.dac, ais->type8.fid);
 	if (ais->type8.dac == 1) {
@@ -2370,7 +2370,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid11.ice,
 				   ice[ais->type8.dac1fid11.ice]);
 		(void)strlcat(buf, "}\r\n", buflen);
-		imo = true;
+		structured = true;
 		break;
 	    case 13:        /* IMO236 - Fairway closed */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2395,18 +2395,18 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type8.dac1fid13.tday,
 			       ais->type8.dac1fid13.thour,
 			       ais->type8.dac1fid13.tminute);
-		imo = true;
+		structured = true;
 		break;
 	    case 15:        /* IMO236 - Extended ship and voyage */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"airdraught\":%u}\r\n",
 			       ais->type8.dac1fid15.airdraught);
-		imo = true;
+		structured = true;
 		break;
 	    case 16:	/* IMO289 - Number of persons on board */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"persons\":%u}\t\n", ais->type6.dac1fid16.persons);
-		imo = true;
+		structured = true;
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		(void)strlcat(buf, "\"targets\":[", buflen);
@@ -2461,7 +2461,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf) - 1] = '\0';
 		(void)strlcat(buf, "]}\r\n", buflen);
-		imo = true;
+		structured = true;
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2484,7 +2484,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type8.dac1fid19.minute,
 			       ais->type8.dac1fid19.nextsignal,
 			       SIGNAL_DISPLAY(ais->type8.dac1fid19.nextsignal));
-		imo = true;
+		structured = true;
 		break;
 	    case 21:        /* IMO289 - Weather obs. report from ship */
 		break;
@@ -2525,7 +2525,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (buf[strlen(buf) - 1] == ',')
 		    buf[strlen(buf) - 1] = '\0';
 		(void)strlcat(buf, "]}\r\n", buflen);
-		imo = true;
+		structured = true;
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -2533,7 +2533,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type8.dac1fid29.linkage,
 		       json_stringify(buf1, sizeof(buf1),
 				      ais->type8.dac1fid29.text));
-		imo = true;
+		structured = true;
 		break;
 	    case 31:        /* IMO289 - Meteorological/Hydrological data */
 		/* some fields have been merged to an ISO8601 partial date */
@@ -2662,11 +2662,112 @@ void json_aivdm_dump(const struct ais_t *ais,
 				   ais->type8.dac1fid31.salinity,
 				   ais->type8.dac1fid31.ice);
 		(void)strlcat(buf, "}\r\n", buflen);
-		imo = true;
+		structured = true;
 		break;
 	    }
 	}
-	if (!imo)
+	else if (ais->type8.dac == 200) {
+	    struct {
+		const int code;
+		const int ais;
+		const char *legend;
+	    } *cp, shiptypes[] = {
+		/*
+		 * The Inland AIS standard is not clear which numbers are
+		 * supposed to be in the type slot.  The ranges are disjoint,
+		 * so we'll match on both.
+		 */
+		{8000, 99, "Vessel, type unknown"},
+		{8010, 79, "Motor freighter"},
+		{8020, 89, "Motor tanker"},
+		{8021, 80, "Motor tanker, liquid cargo, type N"},
+		{8022, 80, "Motor tanker, liquid cargo, type C"},
+		{8023, 89, "Motor tanker, dry cargo as if liquid (e.g. cement)"},
+		{8030, 79, "Container vessel"},
+		{8040, 80, "Gas tanker"},
+		{8050, 79, "Motor freighter, tug"},
+		{8060, 89, "Motor tanker, tug"},
+		{8070, 79, "Motor freighter with one or more ships alongside"},
+		{8080, 89, "Motor freighter with tanker"},
+		{8090, 79, "Motor freighter pushing one or more freighters"},
+		{8100, 89, "Motor freighter pushing at least one tank-ship"},
+		{8110, 79, "Tug, freighter"},
+		{8120, 89, "Tug, tanker"},
+		{8130, 31, "Tug freighter, coupled"},
+		{8140, 31, "Tug, freighter/tanker, coupled"},
+		{8150, 99, "Freightbarge"},
+		{8160, 99, "Tankbarge"},
+		{8161, 90, "Tankbarge, liquid cargo, type N"},
+		{8162, 90, "Tankbarge, liquid cargo, type C"},
+		{8163, 99, "Tankbarge, dry cargo as if liquid (e.g. cement)"},
+		{8170, 99, "Freightbarge with containers"},
+		{8180, 90, "Tankbarge, gas"},
+		{8210, 79, "Pushtow, one cargo barge"},
+		{8220, 79, "Pushtow, two cargo barges"},
+		{8230, 79, "Pushtow, three cargo barges"},
+		{8240, 79, "Pushtow, four cargo barges"},
+		{8250, 79, "Pushtow, five cargo barges"},
+		{8260, 79, "Pushtow, six cargo barges"},
+		{8270, 79, "Pushtow, seven cargo barges"},
+		{8280, 79, "Pushtow, eigth cargo barges"},
+		{8290, 79, "Pushtow, nine or more barges"},
+		{8310, 80, "Pushtow, one tank/gas barge"},
+		{8320, 80, "Pushtow, two barges at least one tanker or gas barge"},
+		{8330, 80, "Pushtow, three barges at least one tanker or gas barge"},
+		{8340, 80, "Pushtow, four barges at least one tanker or gas barge"},
+		{8350, 80, "Pushtow, five barges at least one tanker or gas barge"},
+		{8360, 80, "Pushtow, six barges at least one tanker or gas barge"},
+		{8370, 80, "Pushtow, seven barges at least one tanker or gas barg"},
+		{0, 0, "Illegal ship type value."},
+	    };
+	    const char *hazard_types[] = {
+		"0 blue cones/lights",
+		"1 blue cone/light",
+		"2 blue cones/lights",
+		"3 blue cones/lights",
+		"4 B-Flag",
+		"Unknown",
+	    };
+#define HTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(hazard_types)) ? hazard_types[n] : "INVALID HAZARD TYPE")
+	    const char *lstatus_types[] = {
+		"N/A (default)",
+		"Unloaded",
+		"Loaded",
+	    };
+#define LSTATUS_DISPLAY(n) (((n) < (unsigned int)NITEMS(lstatus_types)) ? lstatus_types[n] : "INVALID LOAD STATUS")
+	    switch (ais->type8.fid) {
+	    case 10:        /* Inland ship static and voyage-related data */
+		for (cp = shiptypes; cp < shiptypes + NITEMS(shiptypes); cp++)
+		    if (cp->code == ais->type8.dac200fid10.type
+			|| cp->ais == ais->type8.dac200fid10.type)
+			break;
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"vin\":\"%s\",\"length\":%u,\"beam\":%u,"
+			       "\"type\":%u,\"type_text\":\"%s\","
+			       "\"hazard\":%u,\"hazard_text\":\"%s\","
+			       "\"draught\":%u,"
+			       "\"loaded\":%u,\"loaded_text\":\"%s\","
+			       "\"speed_q\":\"%s\","
+			       "\"course_q\":\"%s\","
+			       "\"heading_q\":\"%s\"}",
+			       ais->type8.dac200fid10.vin,
+			       ais->type8.dac200fid10.length,
+			       ais->type8.dac200fid10.beam,
+			       ais->type8.dac200fid10.type,
+			       cp->legend,
+			       ais->type8.dac200fid10.hazard,
+			       HTYPE_DISPLAY(ais->type8.dac200fid10.hazard),
+			       ais->type8.dac200fid10.draught,
+			       ais->type8.dac200fid10.loaded,
+			       LSTATUS_DISPLAY(ais->type8.dac200fid10.loaded),
+			       JSON_BOOL(ais->type8.dac200fid10.speed_q),
+			       JSON_BOOL(ais->type8.dac200fid10.course_q),
+			       JSON_BOOL(ais->type8.dac200fid10.heading_q));
+		structured = true;
+		break;
+	    }
+	}
+	if (!structured)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"data\":\"%zd:%s\"}\r\n",
 			   ais->type8.bitcount,

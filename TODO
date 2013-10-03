@@ -33,13 +33,15 @@ binary data.  Chris Kuethe is supposed to fix this one.
 
 **** RTCM3 analysis is incomplete
 
-We can presently decode RTCM3 messages of type 1004, 1005, 1006, 1008, 1012, 
-1013, and 1029.  This is not the complete set. We need more test data with
-different types in them, and a copy of the RTCM3 standard at latest revision
-(all we have is revision 3).
+We can presently decode RTCM3 messages of type 1001-1014, 1029, and
+1033.  This is not the complete set. We need more test data with
+different types in them, and a copy of the RTCM3 standard at latest
+revision (all we have is revision 3).
 
-There is also currently no support for unpacking RTCM3 sentences in
-the client library.
+The support for unpacking RTCM3 sentences in the client library is
+limited to 1001, 1002, 1007, 1008, 1009, 1010, 1014, and 1033. There
+are some design issues with the baby JSON parser that are going to 
+make extending this set difficult.
 
 **** Reporting code for specialized Type 6 and 8 AIS messages is incomplete.
 
@@ -63,7 +65,7 @@ for the full proposal.
 
 *** Windows port
 
-Partially complete. David Ludlow <dave@adsllc.com> is working on it.
+Partial. David Ludlow <dave@adsllc.com> is working on it.
 
 ** To do:
 
@@ -86,7 +88,7 @@ shouldn't be difficult.
 
 *** Enable flocktest on the Debian server farm
 
-Debian server farm boxes have a screwy chrooted envorinment setup.
+Debian server farm boxes have a screwy chrooted environment setup.
 flocktest needs to be modified to deal with it.
 
 *** Finish gpssim

@@ -689,11 +689,13 @@ static const struct gps_type_t earthmate = {
  *
  **************************************************************************/
 
-static void tnt_add_checksum(char *sentence)
-/* add NMEA-style CRC checksum to a command */
+static ssize_t tnt_control_send(struct gps_device_t *session,
+				char *msg, size_t len UNUSED)
+/* send a control string in TNT native formal */
 {
+    ssize_t status;
     unsigned char sum = '\0';
-    char c, *p = sentence;
+    char c, *p = msg;
 
     if (*p == '@') {
 	p++;
@@ -701,7 +703,7 @@ static void tnt_add_checksum(char *sentence)
 #ifdef __UNUSED__
     else {
 	gpsd_report(session->context->debug, LOG_ERROR,
-		    "Bad TNT sentence: '%s'\n", sentence);
+		    "Bad TNT sentence: '%s'\n", msg);
     }
 #endif /* __UNUSED__ */
     while (((c = *p) != '\0')) {
@@ -709,18 +711,8 @@ static void tnt_add_checksum(char *sentence)
 	p++;
     }
     (void)snprintf(p, 6, "*%02X\r\n", (unsigned int)sum);
-}
 
-
-static ssize_t tnt_control_send(struct gps_device_t *session,
-				char *msg, size_t len UNUSED)
-/* send a control string in TNT native formal */
-{
-    ssize_t status;
-
-    tnt_add_checksum(msg);
-    status = write(session->gpsdata.gps_fd, msg, strlen(msg));
-    (void)tcdrain(session->gpsdata.gps_fd);
+    status = gpsd_write(session, msg, strlen(msg));
     return status;
 }
 

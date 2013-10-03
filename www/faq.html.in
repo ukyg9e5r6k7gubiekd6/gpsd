@@ -150,7 +150,12 @@ Technology PL2303.  Then run "dmesg", looking for a message indicating
 a new USB device of that kind and giving you the device path -
 <code>/dev/ttyUSBn</code> for some number n.</p>
 
-<p>3b. For a Bluetooth device, see our <a href="bt.html">Bluetooth
+<p>3b. If your receiver lists in lsusb(1) doesn't show up as a ttyUSBx
+device, don't lose hope.  It might be a ttyACM device, probably
+/dev/ttyACM0; some receivers, including for example the uBlox TCX0 
+evaluation kit, announce themselves as USB modems.</p>
+
+<p>3c. For a Bluetooth device, see our <a href="bt.html">Bluetooth
 instructions</a>.</p>
 
 <p>4. If you have installed a GPSD binary package on a Linux system and

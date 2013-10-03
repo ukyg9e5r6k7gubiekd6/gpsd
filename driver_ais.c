@@ -639,6 +639,23 @@ bool ais_binary_decode(const int debug,
 		imo = true;
 		break;
 	    }
+	else if (ais->type8.dac == 200) {
+	    switch (ais->type8.fid) {
+	    case 21:	/* Inland ship static and voyage related data */
+		UCHARS(56, ais->type8.dac200fid10.vin);
+		ais->type8.dac200fid10.length	= UBITS(104, 13);
+		ais->type8.dac200fid10.beam	= UBITS(117, 10);
+		ais->type8.dac200fid10.type	= UBITS(127, 14);
+		ais->type8.dac200fid10.hazard	= UBITS(141, 3);
+		ais->type8.dac200fid10.draught	= UBITS(144, 11);
+		ais->type8.dac200fid10.loaded	= UBITS(155, 2);
+		ais->type8.dac200fid10.speed_q	= (bool)UBITS(157, 1);
+		ais->type8.dac200fid10.course_q	= (bool)UBITS(158, 1);
+		ais->type8.dac200fid10.heading_q	= (bool)UBITS(159, 1);
+		/* skip 8 bits */
+		break;
+	    }
+	}
 	/* land here if we failed to match a known DAC/FID */
 	if (!imo)
 	    (void)memcpy(ais->type8.bitdata,
