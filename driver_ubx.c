@@ -516,19 +516,14 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
 static gps_mask_t parse_input(struct gps_device_t *session)
 {
-    gps_mask_t st = 0;
-
     if (session->packet.type == UBX_PACKET) {
-	st = ubx_parse(session, session->packet.outbuffer,
-		       session->packet.outbuflen);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
+	return ubx_parse(session, session->packet.outbuffer,
+			 session->packet.outbuflen);
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.dev.driver_mode = MODE_NMEA;
+	return nmea_parse((char *)session->packet.outbuffer, session);
 #endif /* NMEA_ENABLE */
     }
-    return st;
 }
 
 bool ubx_write(struct gps_device_t * session,

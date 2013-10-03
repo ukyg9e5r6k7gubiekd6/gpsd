@@ -1106,6 +1106,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    }
 	    /*@+nullderef@*/
 	    session->badcount = 0;
+	    session->gpsdata.dev.driver_mode = (session->packet.type > NMEA_PACKET) ? MODE_BINARY : MODE_NMEA;
 	    /* FALL THROUGH */
         /*
 	 * Fail hunt only if we get a second consecutive bad packet

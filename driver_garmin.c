@@ -1030,9 +1030,6 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     unsigned char chksum = 0;
     gps_mask_t mask = 0;
 
-    if (session->packet.type == GARMIN_PACKET)
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-
     gpsd_report(session->context->debug, LOG_RAW, "Garmin: garmin_ser_parse()\n");
     if (6 > len) {
 	/* WTF? */
@@ -1195,7 +1192,6 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	    gpsd_report(session->context->debug, LOG_IO,
 			"Garmin: => GPS: turn off binary %02x %02x %02x... \n",
 			switcher[0], switcher[1], switcher[2]);
-	    session->gpsdata.dev.driver_mode = MODE_NMEA;
 	} else {
 	    gpsd_report(session->context->debug, LOG_ERROR,
 			"Garmin: => GPS: FAILED\n");
@@ -1210,7 +1206,6 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
     } else {
 	(void)nmea_send(session, "$PGRMC1,1,2,1,,,,2,W,N");
 	(void)nmea_send(session, "$PGRMI,,,,,,,R");
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
 	settle();		// wait 333mS, essential!
     }
 }

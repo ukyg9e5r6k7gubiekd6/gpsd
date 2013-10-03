@@ -376,18 +376,12 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
 
 static gps_mask_t italk_parse_input(struct gps_device_t *session)
 {
-    gps_mask_t st;
-
     if (session->packet.type == ITALK_PACKET) {
-	st = italk_parse(session, session->packet.outbuffer,
-			 session->packet.outbuflen);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;	/* binary */
-	return st;
+	return italk_parse(session, session->packet.outbuffer,
+			   session->packet.outbuflen);;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.dev.driver_mode = MODE_NMEA;	/* NMEA */
-	return st;
+	return nmea_parse((char *)session->packet.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;

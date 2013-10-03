@@ -375,31 +375,10 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 			9 - session->gpsdata.dev.stopbits,
 			session->gpsdata.dev.stopbits, parity);
 	(void)usleep(333);	/* guessed settling time */
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
     }
     session->back_to_nmea = false;
 }
 #endif /* RECONFIGURE_ENABLE */
-
-static ssize_t sirf_get(struct gps_device_t *session)
-{
-    ssize_t len = generic_get(session);
-
-    if (session->packet.type == SIRF_PACKET) {
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-    } else if (session->packet.type == NMEA_PACKET) {
-	session->gpsdata.dev.driver_mode = MODE_NMEA;
-	(void)gpsd_switch_driver(session, "Generic NMEA");
-    } else {
-	/* should never happen */
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Unexpected packet type %d\n",
-		    session->packet.type);
-	(void)gpsd_switch_driver(session, "Generic NMEA");
-    }
-
-    return len;
-}
 
 static gps_mask_t sirf_msg_debug(unsigned char *buf, size_t len,
 				 const int debug)
@@ -1251,18 +1230,12 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
 static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 {
-    gps_mask_t st;
-
     if (session->packet.type == SIRF_PACKET) {
-	st = sirf_parse(session, session->packet.outbuffer,
+	return sirf_parse(session, session->packet.outbuffer,
 			session->packet.outbuflen);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-	return st;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->packet.outbuffer, session);
-	session->gpsdata.dev.driver_mode = MODE_NMEA;
-	return st;
+	return nmea_parse((char *)session->packet.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;
@@ -1397,7 +1370,7 @@ const struct gps_type_t sirf_binary =
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */
-    .get_packet     = sirf_get,		/* be prepared for SiRF or NMEA */
+    .get_packet     = generic_get,	/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = gpsd_write,	/* send RTCM data straight */
     .event_hook     = sirfbin_event_hook,/* lifetime event handler */

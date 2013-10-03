@@ -485,10 +485,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 static gps_mask_t geostar_parse_input(struct gps_device_t *session)
 {
     if (session->packet.type == GEOSTAR_PACKET) {
-	gps_mask_t st;
-	st = geostar_analyze(session);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-	return st;
+	return geostar_analyze(session);;
     } else
 	return 0;
 }

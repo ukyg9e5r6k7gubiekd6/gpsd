@@ -1011,19 +1011,13 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 
 static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 {
-    gps_mask_t st;
-
     if (session->packet.type == TSIP_PACKET) {
-	st = tsip_analyze(session);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-	return st;
+	return tsip_analyze(session);
 #ifdef __UNUSED__
     } else if (session->packet.type == EVERMORE_PACKET) {
 	(void)gpsd_switch_driver(session, "EverMore binary");
-	st = evermore_parse(session, session->packet.outbuffer,
-			    session->packet.outbuflen);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-	return st;
+	return evermore_parse(session, session->packet.outbuffer,
+			      session->packet.outbuflen);
 #endif /* __UNUSED__ */
 #ifdef SIRF_ENABLE
 	/*
@@ -1034,10 +1028,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	 */
     } else if (session->packet.type == SIRF_PACKET) {
 	(void)gpsd_switch_driver(session, "SiRF binary");
-	st = sirf_parse(session, session->packet.outbuffer,
-			session->packet.outbuflen);
-	session->gpsdata.dev.driver_mode = MODE_BINARY;
-	return st;
+	return sirf_parse(session, session->packet.outbuffer,
+			  session->packet.outbuflen);
 #endif /* SIRF_ENABLE */
     } else
 	return 0;
