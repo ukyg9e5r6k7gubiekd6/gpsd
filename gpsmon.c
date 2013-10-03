@@ -333,7 +333,6 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 	context.readonly = false;
 	st = (*active)->driver->control_send(&session, (char *)buf, len);
 	context.readonly = true;
-	monitor_dump_send((const char *)buf, len);
 	return (st != -1);
     }
 }
@@ -343,13 +342,21 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
     if (!serial)
 	return false;
     else {
-	ssize_t st;
-	st = write(session.gpsdata.gps_fd, (char *)buf, len);
-	monitor_dump_send((const char *)buf, len);
+	ssize_t st = gpsd_write(&session, (char *)buf, len);
 	return (st > 0 && (size_t) st == len);
     }
 }
 #endif /* CONTROLSEND_ENABLE */
+
+ssize_t gpsd_write(struct gps_device_t *session,
+		   const char *buf,
+		   const size_t len)
+/* log low-level data to the packet window as it pas */
+{
+    monitor_dump_send((const char *)buf, len);
+    (void)tcdrain(session->gpsdata.gps_fd);
+    return gpsd_serial_write(session, buf, len);
+}
 
 /*****************************************************************************
  *
