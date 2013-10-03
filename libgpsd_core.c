@@ -154,9 +154,9 @@ static void gpsd_run_device_hook(const int debuglevel,
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
     const struct gps_type_t **dp;
-    bool identified = (session->device_type != NULL);
+    bool first_sync = (session->device_type != NULL);
 
-    if (identified && strcmp(session->device_type->type_name, type_name) == 0)
+    if (first_sync && strcmp(session->device_type->type_name, type_name) == 0)
 	return 0;
 
     gpsd_report(session->context->debug, LOG_PROG,
@@ -173,7 +173,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
 #endif /* RECONFIGURE_ENABLE */
 	    /* reconfiguration might be required */
-	    if (identified && session->device_type->event_hook != NULL)
+	    if (first_sync && session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session,
 						 event_driver_switch);
 	    /* clients should be notified */
@@ -961,7 +961,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
     ssize_t newlen;
-    bool first_sync = false;
+    bool identified = false;
 
     gps_clear_fix(&session->newdata);
 
@@ -1080,7 +1080,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			"comment, sync lock deferred\n");
 	    /* FALL THROUGH */
 	} else if (session->packet.type > COMMENT_PACKET) {
-	    first_sync = (session->device_type == NULL);
 	    /*
 	     * Only switch drivers if we don't already have one with the
 	     * matching packet type *and* we're not seeing an NMEA packet.
@@ -1089,10 +1088,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	     * non-native NMEA mode.  Without this guard, the code
 	     * would forget the binary driver identification.
 	     */
+	    identified = (session->device_type == NULL)
+		|| (session->packet.type != session->device_type->packet_type &&
+		    session->packet.type != NMEA_PACKET);
 	    /*@-nullderef@*/
-	    if (first_sync ||
-		(session->packet.type != session->device_type->packet_type &&
-		    session->packet.type != NMEA_PACKET)) {
+	    if (identified) {
 		const struct gps_type_t **dp;
 
 		for (dp = gpsd_drivers; *dp; dp++)
@@ -1140,7 +1140,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path);
 
 	/* track the packet count since achieving sync on the device */
-	if (first_sync) {
+	if (identified) {
 	    speed_t speed = gpsd_get_speed(session);
 
 	    /*@-nullderef@*/
@@ -1171,7 +1171,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * reason, that's a significant event that the caller needs to
 	 * know about.
 	 */
-	if (first_sync || session->notify_clients) {
+	if (identified || session->notify_clients) {
 	    session->notify_clients = false;
 	    received |= DRIVER_IS;
 	}
