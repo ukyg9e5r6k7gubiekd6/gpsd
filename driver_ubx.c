@@ -597,7 +597,8 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 
 	gpsd_report(session->context->debug, LOG_IO, "UBX configure\n");
 
-	(void)ubx_write(session, 0x06u, 0x00, NULL, 0);	/* get this port's settings */
+	/* ship CFG-PRT to get this port's settings */
+	(void)ubx_write(session, 0x06u, 0x00, NULL, 0);
 
 	/*@ -type @*/
 	msg[0] = 0x03;		/* SBAS mode enabled, accept testbed mode */
