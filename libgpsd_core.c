@@ -1099,7 +1099,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    if (session->packet.type == (*dp)->packet_type) {
 			gpsd_report(session->context->debug, LOG_PROG,
 				    "switching to match packet type %d: %s\n",
-				    session->packet.type, gpsd_packetdump(session->packet.outbuffer, session->packet.outbuflen));
+				    session->packet.type, gpsd_packetdump((char *)session->packet.outbuffer, session->packet.outbuflen));
 			(void)gpsd_switch_driver(session, (*dp)->type_name);
 			break;
 		    }

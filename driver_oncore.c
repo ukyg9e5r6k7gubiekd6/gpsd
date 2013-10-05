@@ -505,8 +505,6 @@ static void oncore_set_mode(struct gps_device_t *session, int mode)
 
 static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 {
-    gps_mask_t st;
-
     if (session->packet.type == ONCORE_PACKET) {
 	return oncore_dispatch(session, session->packet.outbuffer,
 			     session->packet.outbuflen);

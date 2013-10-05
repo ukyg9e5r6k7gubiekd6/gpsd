@@ -536,7 +536,8 @@ static gps_mask_t parse_input(struct gps_device_t *session)
     } else if (session->packet.type == NMEA_PACKET) {
 	return nmea_parse((char *)session->packet.outbuffer, session);
 #endif /* NMEA_ENABLE */
-    }
+    } else
+	return 0;
 }
 
 bool ubx_write(struct gps_device_t * session,
