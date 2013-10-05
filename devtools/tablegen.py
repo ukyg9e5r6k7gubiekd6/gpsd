@@ -283,7 +283,7 @@ def make_json_dumper(wfp):
             if not inarray:
                 endit = '}",\n'
         elif tuples[i+1][1] == None:
-            endit = r',\"%s\":['
+            endit = r',\"%s\":[",'
         elif scaled(i) != scaled(i+1):
             endit =  ',",'
         else:
@@ -335,8 +335,8 @@ def make_json_dumper(wfp):
         base = " " * 8
         print >>wfp, base + "}"
         print >>wfp, base + "if (buf[strlen(buf) - 1] == ',')"
-        print >>wfp, base + step + "buf[strlen(buf)-1] = '\0';"
-        print >>wfp, base + "(void)strlcat(buf, ']}\r\n', buflen - strlen(buf));"
+        print >>wfp, base + step + r"buf[strlen(buf)-1] = '\0';"
+        print >>wfp, base + "(void)strlcat(buf, \"]}\", buflen - strlen(buf));"
 
 def make_json_generator(wfp):
     # Write a stanza for jsongen.py.in describing how to generate a
