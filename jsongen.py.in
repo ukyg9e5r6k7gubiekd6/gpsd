@@ -514,6 +514,20 @@ ais_specs = (
     'stringbuffered' : ('start', 'end'),
     },
     {
+    "initname" : "json_ais8_fid24",
+    "headers": ("AIS_HEADER","AIS_TYPE8"),
+    "structname": "ais->type8.dac200fid24",
+    "fieldmap":(
+        # fieldname    type        default
+        ('country',    'string',   None),
+        ('gauges',     'array', (
+            ('gauge_t', 'ngauges', (
+                ('id',        'uinteger', 'DAC200FID24_GAUGE_ID_UNKNOWN'),
+                ('level',     'integer',  'DAC200FID24_GAUGE_LEVEL_UNKNOWN'),
+                    )))),
+        ),
+    },
+    {
         "initname" : "json_ais8_fid27",
         "headers": ("AIS_HEADER","AIS_TYPE8",),
         "structname": "ais->type8.dac1fid27",

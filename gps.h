@@ -1288,6 +1288,16 @@ struct ais_t
 		    unsigned int wind;	/* Wind Direction */
 #define DAC200FID23_WIND_UNKNOWN		0
 		} dac200fid23;
+		struct {
+		    char country[2+1];	/* UN Country Code */
+		    signed int ngauges;
+		    struct gauge_t {
+			unsigned int id;	/* Gauge ID */
+#define DAC200FID24_GAUGE_ID_UNKNOWN		0
+			signed int level;	/* Water Level */
+#define DAC200FID24_GAUGE_LEVEL_UNKNOWN		0
+		    } gauges[4];
+		} dac200fid24;
 		/* IMO236  - Meteorological-Hydrological data
 		 * Trial message, not to be used after January 2013
 		 * Replaced by IMO289 (DAC 1, FID 31)

@@ -678,6 +678,21 @@ bool ais_binary_decode(const int debug,
 		/* skip 6 bits */
 		imo = true;
 		break;
+	    case 24:
+		UCHARS(56, ais->type8.dac200fid24.country);
+#define ARRAY_BASE 68
+#define ELEMENT_SIZE 25
+		for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) < bitlen; i++) {
+		    int a = ARRAY_BASE + (ELEMENT_SIZE*i);
+		    ais->type8.dac200fid24.gauges[i].id = UBITS(a+0,  11);
+		    ais->type8.dac200fid24.gauges[i].level = SBITS(a+11, 14);
+		}
+		ais->type8.dac200fid24.ngauges = i;
+#undef ARRAY_BASE
+#undef ELEMENT_SIZE
+		/* skip 6 bits */
+		imo = true;
+		break;
 	    }
 	}
 	/* land here if we failed to match a known DAC/FID */

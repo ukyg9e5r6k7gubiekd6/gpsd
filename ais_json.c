@@ -358,6 +358,10 @@ int json_ais_read(const char *buf,
 			 &ais->type8.dac200fid23.end_minute);
 		imo = true;
 	    }
+	    else if (strstr(buf, "\"fid\":24,") != NULL) {
+		status = json_read_object(buf, json_ais8_fid24, endptr);
+		imo = true;
+	    }
 	    else if (strstr(buf, "\"fid\":27,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid27, endptr);
 		if (status == 0) {
