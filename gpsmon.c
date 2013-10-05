@@ -333,6 +333,7 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 	context.readonly = false;
 	st = (*active)->driver->control_send(&session, (char *)buf, len);
 	context.readonly = true;
+	monitor_dump_send((const char *)buf, len);
 	return (st != -1);
     }
 }
@@ -342,21 +343,13 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
     if (!serial)
 	return false;
     else {
-	ssize_t st = gpsd_write(&session, (char *)buf, len);
+	ssize_t st;
+	st = write(session.gpsdata.gps_fd, (char *)buf, len);
+	monitor_dump_send((const char *)buf, len);
 	return (st > 0 && (size_t) st == len);
     }
 }
 #endif /* CONTROLSEND_ENABLE */
-
-ssize_t gpsd_write(struct gps_device_t *session,
-		   const char *buf,
-		   const size_t len)
-/* log low-level data to the packet window as it pas */
-{
-    monitor_dump_send((const char *)buf, len);
-    (void)tcdrain(session->gpsdata.gps_fd);
-    return gpsd_serial_write(session, buf, len);
-}
 
 /*****************************************************************************
  *
@@ -389,7 +382,7 @@ void monitor_log(const char *fmt, ...)
     }
 }
 
-static bool switch_type(const struct gps_type_t *devtype)
+static bool switch_type(const struct gps_type_t *devtype, bool switch_flag)
 {
     const struct monitor_object_t **trial, **newobject;
     newobject = NULL;
@@ -406,6 +399,10 @@ static bool switch_type(const struct gps_type_t *devtype)
 			     (*newobject)->min_x, (*newobject)->min_y + 1);
 	} else {
 	    int leftover;
+
+	    if (switch_flag == true) {
+	        return true;
+	    }
 	    if (active != NULL) {
 		if ((*active)->wrap != NULL)
 		    (*active)->wrap();
@@ -468,7 +465,7 @@ int main(int argc, char **argv)
     char line[80], *explanation, *p;
     int bailout = 0, matches = 0;
     bool nmea = false;
-    size_t promptlen = 0;
+    int promptlen;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -695,10 +692,16 @@ int main(int argc, char **argv)
 	    if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 		/* switch types on packet receipt */
 		/*@ -nullpass */
+	        bool switch_flag = false;
+
 		if (session.packet.type != last_type) {
+		    if (((last_type == NMEA_PACKET ) && (session.packet.type == AIVDM_PACKET) && (nmea == true)) ||
+			((last_type == AIVDM_PACKET) && (session.packet.type == NMEA_PACKET ) && (nmea == true))) {
+		        switch_flag = true;
+		    }
 		    last_type = session.packet.type;
-		    if (!switch_type(session.device_type))
-			longjmp(terminate, TERM_DRIVER_SWITCH);
+		    if (!switch_type(session.device_type, switch_flag))
+		        longjmp(terminate, TERM_DRIVER_SWITCH);
 		}
 		/*@ +nullpass */
 
@@ -706,9 +709,9 @@ int main(int argc, char **argv)
 		(void)wprintw(cmdwin, type_name);
 		promptlen = strlen(type_name);
 		if (fallback != NULL) {
-		    (void)waddch(cmdwin, (chtype)'(');
-		    (void)waddstr(cmdwin, (*fallback)->driver->type_name);
-		    (void)waddch(cmdwin, (chtype)')');
+		    waddch(cmdwin, '(');
+		    waddstr(cmdwin, (*fallback)->driver->type_name);
+		    waddch(cmdwin, ')');
 		    promptlen += strlen((*fallback)->driver->type_name) + 2;
 		}
 		(void)wprintw(cmdwin, "> ");
@@ -738,7 +741,7 @@ int main(int argc, char **argv)
 
 	    if (FD_ISSET(0, &select_set)) {
 		char *arg;
-		(void)wmove(cmdwin, 0, (int)promptlen + 2);
+		(void)wmove(cmdwin, 0, promptlen + 2);
 		(void)wrefresh(cmdwin);
 		(void)echo();
 		/*@ -usedef -compdef @*/
@@ -849,11 +852,12 @@ int main(int argc, char **argv)
 			if (fallback != NULL && (*fallback)->driver->mode_switcher != NULL)
 			    switcher = fallback;
 			if ((*switcher)->driver->mode_switcher) {
-			    announce_log("Mode switcher called: to mode %d", v);
 			    context.readonly = false;
 			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
 			    context.readonly = true;
+			    announce_log("Mode switcher called: to mode %d", v);
+			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
 			} else
 			    monitor_complain
@@ -955,7 +959,7 @@ int main(int argc, char **argv)
 			} else if (matchcount == 1) {
 			    assert(forcetype != NULL);
 			    /* *INDENT-OFF* */
-			    if (switch_type(forcetype))
+			    if (switch_type(forcetype, false))
 				(void)gpsd_switch_driver(&session,
 							 forcetype->type_name);
 			    /* *INDENT-ON* */
