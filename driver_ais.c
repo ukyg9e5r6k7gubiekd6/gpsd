@@ -653,6 +653,30 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac200fid10.course_q	= (bool)UBITS(158, 1);
 		ais->type8.dac200fid10.heading_q	= (bool)UBITS(159, 1);
 		/* skip 8 bits */
+		imo = true;
+		break;
+	    case 23:
+		ais->type8.dac200fid23.start_year	= UBITS(56, 8);
+		ais->type8.dac200fid23.start_month	= UBITS(64, 4);
+		ais->type8.dac200fid23.start_day	= UBITS(68, 5);
+		ais->type8.dac200fid23.end_year	= UBITS(73, 8);
+		ais->type8.dac200fid23.end_month	= UBITS(81, 4);
+		ais->type8.dac200fid23.end_day	= UBITS(85, 5);
+		ais->type8.dac200fid23.start_hour	= UBITS(90, 5);
+		ais->type8.dac200fid23.start_minute	= UBITS(95, 6);
+		ais->type8.dac200fid23.end_hour	= UBITS(101, 5);
+		ais->type8.dac200fid23.end_minute	= UBITS(106, 6);
+		ais->type8.dac200fid23.start_lon	= SBITS(112, 28);
+		ais->type8.dac200fid23.start_lat	= SBITS(140, 27);
+		ais->type8.dac200fid23.end_lon	= SBITS(167, 28);
+		ais->type8.dac200fid23.end_lat	= SBITS(195, 27);
+		ais->type8.dac200fid23.type	= UBITS(222, 4);
+		ais->type8.dac200fid23.min	= SBITS(226, 9);
+		ais->type8.dac200fid23.max	= SBITS(235, 9);
+		ais->type8.dac200fid23.class	= UBITS(244, 2);
+		ais->type8.dac200fid23.wind	= UBITS(246, 4);
+		/* skip 6 bits */
+		imo = true;
 		break;
 	    }
 	}

@@ -330,6 +330,34 @@ int json_ais_read(const char *buf,
 		status = json_read_object(buf, json_ais8_fid19, endptr);
 		imo = true;
 	    }
+	    else if (strstr(buf, "\"fid\":23,") != NULL) {
+		status = json_read_object(buf, json_ais8_fid23, endptr);
+		ais->type8.dac200fid23.start_year = AIS_YEAR_NOT_AVAILABLE;
+		ais->type8.dac200fid23.start_month = AIS_MONTH_NOT_AVAILABLE;
+		ais->type8.dac200fid23.start_day = AIS_DAY_NOT_AVAILABLE;
+		ais->type8.dac200fid23.start_hour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type8.dac200fid23.start_minute = AIS_MINUTE_NOT_AVAILABLE;
+		ais->type8.dac200fid23.end_year = AIS_YEAR_NOT_AVAILABLE;
+		ais->type8.dac200fid23.end_month = AIS_MONTH_NOT_AVAILABLE;
+		ais->type8.dac200fid23.end_day = AIS_DAY_NOT_AVAILABLE;
+		ais->type8.dac200fid23.end_hour = AIS_HOUR_NOT_AVAILABLE;
+		ais->type8.dac200fid23.end_minute = AIS_MINUTE_NOT_AVAILABLE;
+		// cppcheck-suppress uninitvar
+		(void)sscanf(start, "%09u-%02u-%02uT%02u:%02u",
+			 &ais->type8.dac200fid23.start_year,
+			 &ais->type8.dac200fid23.start_month,
+			 &ais->type8.dac200fid23.start_day,
+			 &ais->type8.dac200fid23.start_hour,
+			 &ais->type8.dac200fid23.start_minute);
+		// cppcheck-suppress uninitvar
+		(void)sscanf(end, "%09u-%02u-%02uT%02u:%02u",
+			 &ais->type8.dac200fid23.end_year,
+			 &ais->type8.dac200fid23.end_month,
+			 &ais->type8.dac200fid23.end_day,
+			 &ais->type8.dac200fid23.end_hour,
+			 &ais->type8.dac200fid23.end_minute);
+		imo = true;
+	    }
 	    else if (strstr(buf, "\"fid\":27,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid27, endptr);
 		if (status == 0) {

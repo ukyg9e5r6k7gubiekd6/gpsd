@@ -2735,6 +2735,37 @@ void json_aivdm_dump(const struct ais_t *ais,
 		"Loaded",
 	    };
 #define LSTATUS_DISPLAY(n) (((n) < (unsigned int)NITEMS(lstatus_types)) ? lstatus_types[n] : "INVALID LOAD STATUS")
+	    const char *emma_types[] = {
+		"Not Available",
+		"Wind",
+		"Rain",
+		"Snow and ice",
+		"Thunderstorm",
+		"Fog",
+		"Low temperature",
+		"High temperature",
+		"Flood",
+		"Forest Fire",
+	    };
+#define EMMA_TYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(emma_types)) ? emma_types[n] : "INVALID EMMA TYPE")
+	    const char *emma_classes[] = {
+		"Slight",
+		"Medium",
+		"Strong",
+	    };
+#define EMMA_CLASS_DISPLAY(n) (((n) < (unsigned int)NITEMS(emma_classes)) ? emma_classes[n] : "INVALID EMMA TYPE")
+	    const char *emma_winds[] = {
+		"N/A",
+		"North",
+		"North East",
+		"East",
+		"South East",
+		"South",
+		"South West",
+		"West",
+		"North West",
+	    };
+#define EMMA_WIND_DISPLAY(n) (((n) < (unsigned int)NITEMS(emma_winds)) ? emma_winds[n] : "INVALID EMMA WIND DIRECTION")
 	    switch (ais->type8.fid) {
 	    case 10:        /* Inland ship static and voyage-related data */
 		for (cp = shiptypes; cp < shiptypes + NITEMS(shiptypes); cp++)
@@ -2764,6 +2795,46 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       JSON_BOOL(ais->type8.dac200fid10.course_q),
 			       JSON_BOOL(ais->type8.dac200fid10.heading_q));
 		structured = true;
+		break;
+	    case 23:	/* EMMA warning */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			       "\"start\":\"%4u-%02u-%02uT%02u:%02u\","
+			       "\"end\":\"%4u-%02u-%02uT%02u:%02u\",",
+			       ais->type8.dac200fid23.start_year + 2000,
+			       ais->type8.dac200fid23.start_month,
+			       ais->type8.dac200fid23.start_hour,
+			       ais->type8.dac200fid23.start_minute,
+			       ais->type8.dac200fid23.start_day,
+			       ais->type8.dac200fid23.end_year + 2000,
+			       ais->type8.dac200fid23.end_month,
+			       ais->type8.dac200fid23.end_day,
+			       ais->type8.dac200fid23.end_hour,
+			       ais->type8.dac200fid23.end_minute);
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"start_lon\":%.4f,\"start_lat\":%.4f,\"end_lon\":%.4f,\"end_lat\":%.4f,",
+			ais->type8.dac200fid23.start_lon / AIS_LATLON_DIV,
+			ais->type8.dac200fid23.start_lat / AIS_LATLON_DIV,
+			ais->type8.dac200fid23.end_lon / AIS_LATLON_DIV,
+			ais->type8.dac200fid23.end_lat / AIS_LATLON_DIV);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"start_lon\":%d,\"start_lat\":%d,\"end_lon\":%d,\"end_lat\":%d,",
+			ais->type8.dac200fid23.start_lon,
+			ais->type8.dac200fid23.start_lat,
+			ais->type8.dac200fid23.end_lon,
+			ais->type8.dac200fid23.end_lat);
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"type\":%u,\"type_text\":\"%s\",\"min\":%d,\"max\":%d,\"class\":%u,\"class_text\":\"%s\",\"wind\":%u,\"wind_text\":\"%s\"}",
+
+		    ais->type8.dac200fid23.type,
+		    EMMA_TYPE_DISPLAY(ais->type8.dac200fid23.type),
+		    ais->type8.dac200fid23.min,
+		    ais->type8.dac200fid23.max,
+		    ais->type8.dac200fid23.class,
+		    EMMA_CLASS_DISPLAY(ais->type8.dac200fid23.class),
+		    ais->type8.dac200fid23.wind,
+		    EMMA_WIND_DISPLAY(ais->type8.dac200fid23.wind));
 		break;
 	    }
 	}

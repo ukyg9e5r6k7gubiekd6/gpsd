@@ -430,7 +430,7 @@ ais_specs = (
             ('thour',      'uinteger', 'AIS_HOUR_NOT_AVAILABLE'),
             ('tminute',    'uinteger', 'AIS_MINUTE_NOT_AVAILABLE'),
         ),
-    'stringbuffered' : ('from', 'to'),
+    'stringbuffered' : ('closefrom', 'closeto'),
     },
     {
         "initname" : "json_ais8_fid15",
@@ -489,6 +489,29 @@ ais_specs = (
             ('nextsignal', 'uinteger', '0'),
             ('nextsignal_type', 'ignore', None),
         ),
+    },
+    {
+    "initname" : "json_ais8_fid23",
+    "headers": ("AIS_HEADER","AIS_TYPE8"),
+    "structname": "ais->type8.dac200fid23",
+    "fieldmap":(
+        # fieldname    type        default
+        ('start',      'string',   None),
+        ('end',        'string',   None),
+        ('start_lon',  'integer',  'AIS_LON4_NOT_AVAILABLE'),
+        ('start_lat',  'integer',  'AIS_LAT4_NOT_AVAILABLE'),
+        ('end_lon',    'integer',  'AIS_LON4_NOT_AVAILABLE'),
+        ('end_lat',    'integer',  'AIS_LAT4_NOT_AVAILABLE'),
+        ('type',       'uinteger', 'DAC200FID23_TYPE_UNKNOWN'),
+        ('type_text',  'ignore',   None),
+        ('min',        'integer',  'DAC200FID23_MIN_UNKNOWN'),
+        ('max',        'integer',  'DAC200FID23_MAX_UNKNOWN'),
+        ('class',      'uinteger', 'DAC200FID23_CLASS_UNKNOWN'),
+        ('class_text', 'ignore',   None),
+        ('wind',       'uinteger', 'DAC200FID23_WIND_UNKNOWN'),
+        ('wind_text',  'ignore',   None),
+        ),
+    'stringbuffered' : ('start', 'end'),
     },
     {
         "initname" : "json_ais8_fid27",
@@ -879,11 +902,16 @@ def generate(spec):
     initname = spec["initname"]
     # Utter storage declarations for any fields that are declared to be
     # stringbuffered. These will need to be postprocessed in json_ais_read().
-    for (attr, itype, default) in spec["fieldmap"]:
-        if attr in spec.get("stringbuffered", []):
-            if attr not in outboard:
-                report += "    char %s[JSON_VAL_MAX+1];\n" % attr
-                outboard.append(attr)
+    attributes = [t[0] for t in spec["fieldmap"]]
+    for attr in spec.get("stringbuffered", []):
+        if attr not in attributes:
+            print >>sys.stderr, "buffered %s is not in base attributes of %s"\
+                  % (attr, initname)
+            raise SystemExit, 1
+        elif attr not in outboard:
+            report += "    char %s[JSON_VAL_MAX+1];\n" % attr
+            outboard.append(attr)
+                
     structname = spec["structname"]
     # If there are structarrays describing array subobjects, we need
     # to make a separate parse control initializer for each one.  The

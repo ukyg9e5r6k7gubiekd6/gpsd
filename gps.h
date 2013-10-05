@@ -1261,6 +1261,33 @@ struct ais_t
 		    bool course_q;	/* Course inf. quality */
 		    bool heading_q;	/* Heading inf. quality */
 		} dac200fid10;
+		/* Inland AIS EMMA Warning */
+		struct {
+		    unsigned int start_year;	/* Start Year */
+		    unsigned int start_month;	/* Start Month */
+		    unsigned int start_day;	/* Start Day */
+		    unsigned int end_year;	/* End Year */
+		    unsigned int end_month;	/* End Month */
+		    unsigned int end_day;	/* End Day */
+		    unsigned int start_hour;	/* Start Hour */
+		    unsigned int start_minute;	/* Start Minute */
+		    unsigned int end_hour;	/* End Hour */
+		    unsigned int end_minute;	/* End Minute */
+		    signed int start_lon;	/* Start Longitude */
+		    signed int start_lat;	/* Start Latitude */
+		    signed int end_lon;	/* End Longitude */
+		    signed int end_lat;	/* End Latitude */
+		    unsigned int type;	/* Type */
+#define DAC200FID23_TYPE_UNKNOWN		0
+		    signed int min;	/* Min value */
+#define DAC200FID23_MIN_UNKNOWN			255
+		    signed int max;	/* Max value */
+#define DAC200FID23_MAX_UNKNOWN			255
+		    unsigned int class;	/* Classification */
+#define DAC200FID23_CLASS_UNKNOWN		0
+		    unsigned int wind;	/* Wind Direction */
+#define DAC200FID23_WIND_UNKNOWN		0
+		} dac200fid23;
 		/* IMO236  - Meteorological-Hydrological data
 		 * Trial message, not to be used after January 2013
 		 * Replaced by IMO289 (DAC 1, FID 31)

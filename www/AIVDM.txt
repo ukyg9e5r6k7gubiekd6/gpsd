@@ -3605,37 +3605,37 @@ replace the Notices to Skippers warnings.
 
 [frame="topbot",options="header"]
 |===============================================================================
-|Field   |Len |Description         |Member     |T|Units
-|0-5     |  6 |Message Type        |type       |u|Constant: 8
-|6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
-|8-37    | 30 |Source MMSI         |mmsi       |u|9 decimal digits
-|38-39   |  2 |Spare               |           |x|Not used
-|40-49   | 10 |Designated Area Code|dac        |u|Constant: 200
-|50-55   |  6 |Functional ID       |fid        |u|Constant: 23
-|56-63   |  8 |Start Year          |start_year |u|1-55, year since 2000
+|Field   |Len |Description         |Member      |T|Units
+|0-5     |  6 |Message Type        |type        |u|Constant: 8
+|6-7     |  2 |Repeat Indicator    |repeat      |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI         |mmsi        |u|9 decimal digits
+|38-39   |  2 |Spare               |            |x|Not used
+|40-49   | 10 |Designated Area Code|dac         |u|Constant: 200
+|50-55   |  6 |Functional ID       |fid         |u|Constant: 23
+|56-63   |  8 |Start Year          |start_year  |u|1-55, year since 2000
+                                                   0 = N/A (default)
+|64-67   |  4 |Start Month         |start_month |u|1-12; 0 = N/A (default)
+|68-72   |  5 |Start Day           |start_day   |u|1-31; 0 = N/A (default)
+|73-80   |  8 |End Year            |end_year    |u|1-55, year since 2000
                                                   0 = N/A (default)
-|64-67   |  4 |Start Month         |start_month|u|1-12; 0 = N/A (default)
-|68-72   |  5 |Start Day           |start_day  |u|1-31; 0 = N/A (default)
-|73-80   |  8 |End Year            |end_year   |u|1-55, year since 2000
-                                                  0 = N/A (default)
-|81-84   |  4 |End Month           |end_month  |u|1-12; 0 = N/A (default)
-|85-89   |  5 |End Day             |end_day    |u|1-31; 0 = N/A (default)
-|90-94   |  5 |Start Hour          |start_hour |u|0-23; 24 = N/A (default)
-|95-100  |  6 |Start Minute        |start_min  |u|0-59; 60 = N/A (default)
-|101-105 |  5 |End Hour            |end_hour   |u|0-23; 24 = N/A (default)
-|106-111 |  6 |End Minute          |end_min    |u|0-59; 60 = N/A (default)
-|112-139 | 28 |Start Longitude     |start_lon  |I4|Minutes/10000 (as in CNB)
-|140-166 | 27 |Start Latitude      |start_lat  |I4|Minutes/10000 (as in CNB)
-|167-194 | 28 |End Longitude       |end_lon    |I4|Minutes/10000 (as in CNB)
-|195-221 | 27 |End Latitude        |end_lat    |I4|Minutes/10000 (as in CNB)
-|222-225 |  4 |Type                |type       |e|See "EMMA Type Codes" below
-|226-234 |  9 |Min value           |min        |i|Signed Integer, see below
-|235-243 |  9 |Max value           |max        |i|Signed Integer, see below
-|244-245 |  2 |Classification      |class      |e|1 = Slight,
-                                                  2 = Medium,
-                                                  3 = Strong
-|246-249 |  4 |Wind Direction      |wind       |e|See "EMMA Winds" below
-|250-255 |  6 |Spare               |           |x|Not used
+|81-84   |  4 |End Month           |end_month   |u|1-12; 0 = N/A (default)
+|85-89   |  5 |End Day             |end_day     |u|1-31; 0 = N/A (default)
+|90-94   |  5 |Start Hour          |start_hour  |u|0-23; 24 = N/A (default)
+|95-100  |  6 |Start Minute        |start_minute|u|0-59; 60 = N/A (default)
+|101-105 |  5 |End Hour            |end_hour    |u|0-23; 24 = N/A (default)
+|106-111 |  6 |End Minute          |end_minute  |u|0-59; 60 = N/A (default)
+|112-139 | 28 |Start Longitude     |start_lon   |I4|Minutes/10000 (as in CNB)
+|140-166 | 27 |Start Latitude      |start_lat   |I4|Minutes/10000 (as in CNB)
+|167-194 | 28 |End Longitude       |end_lon     |I4|Minutes/10000 (as in CNB)
+|195-221 | 27 |End Latitude        |end_lat     |I4|Minutes/10000 (as in CNB)
+|222-225 |  4 |Type                |type        |e|See "EMMA Type Codes" below
+|226-234 |  9 |Min value           |min         |i|Signed Integer, see below
+|235-243 |  9 |Max value           |max         |i|Signed Integer, see below
+|244-245 |  2 |Classification      |class       |e|1 = Slight,
+                                                   2 = Medium,
+                                                   3 = Strong
+|246-249 |  4 |Wind Direction      |wind        |e|See "EMMA Winds" below
+|250-255 |  6 |Spare               |            |x|Not used
 |===============================================================================
 
 OPEN-QUESTION: <<INLAND>> is not explicit about the interpretation of
@@ -3657,6 +3657,7 @@ are UTC or local.
 .EMMA Type Codes
 [frame="topbot",options="header"]
 |==============================
+|  0 | NA | Not Available
 |  1 | WI | Wind
 |  2 | RA | Rain
 |  3 | SN | Snow and ice
@@ -4812,6 +4813,8 @@ ISO8601 format.
 |8(1/13)| tmonth,tday,thour,tminute        | to           | %02u-%02uT%02u:%02uZ
 |8(1/22)| month,day,hour,minute            | timestamp    | %02u-%02uT%02u:%02uZ
 |8(1/27)| month,day,hour,minute            | start        | %02u-%02uT%02u:%02uZ
+|8(200/23)| year,month,day,hour,minute     | start        |%4u-%02u-%02uT%02u:%02u
+|8(200/23)| year,month,day,hour,minute     | end          |%4u-%02u-%02uT%02u:%02u
 |===========================================================================
 
 4. There are two variants of the encoding, one scaled and one
