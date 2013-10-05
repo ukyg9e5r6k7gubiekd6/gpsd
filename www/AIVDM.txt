@@ -3702,14 +3702,9 @@ messages.
 |40-49   | 10 |Designated Area Code|dac        |u|Constant: 200
 |50-55   |  6 |Functional ID       |fid        |u|Constant: 24
 |56-67   | 12 |UN Country Code     |country    |t|2 six-bit characters
-|68-78   | 11 |Gauge ID #1         |gauge1     |u|0=unknown (default)
-|79-92   | 14 |Water Level #1      |level1     |i|cm, 0=unknown (defailt)
-|93-103  | 11 |Gauge ID #2         |gauge2     |u|0=unknown (default)
-|104-117 | 14 |Water Level #2      |level2     |i|cm, 0=unknown (defailt)
-|128-128 | 11 |Gauge ID #3         |gauge3     |u|0=unknown (default)
-|139-142 | 14 |Water Level #3      |level3     |i|cm, 0=unknown (defailt)
-|153-153 | 11 |Gauge ID #4         |gauge4     |u|0=unknown (default)
-|164-167 | 14 |Water Level #4      |level4     |i|cm, 0=unknown (defailt)
+|68      |    |                    |gauges     |a4|Gauge measurement array
+|0-10    | 11 |Gauge ID            |id         |u|0=unknown (default)
+|11-24   | 14 |Water Level         |level      |i|cm, 0=unknown (defailt)
 |===============================================================================
 
 Water levels are relative to the local standard, e.g. GIW in Germany 
