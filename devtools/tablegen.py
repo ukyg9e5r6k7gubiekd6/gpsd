@@ -95,16 +95,16 @@ def make_driver_code(wfp):
                 print >>wfp, '#define ELEMENT_SIZE %s' % trailing
                 if explicit:
                     lengthfield = last
-                    print >>wfp, indent + "for (ind = 0; ind < %s; ind++) {" % lengthfield 
+                    print >>wfp, indent + "for (i = 0; i < %s; i++) {" % lengthfield 
                 else:
                     lengthfield = "n" + arrayname
-                    print >>wfp, indent + "for (ind = 0; ARRAY_BASE + (ELEMENT_SIZE*ind) <= ais_context->bitlen; ind++) {" 
+                    print >>wfp, indent + "for (i = 0; ARRAY_BASE + (ELEMENT_SIZE*i) < bitlen; i++) {" 
                 indent += step
-                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*ind);" 
+                print >>wfp, indent + "int a = ARRAY_BASE + (ELEMENT_SIZE*i);" 
                 continue
             offset = offsets[i].split('-')[0]
             if arrayname:
-                target = "%s.%s[ind].%s" % (structname, arrayname, name)
+                target = "%s.%s[i].%s" % (structname, arrayname, name)
                 offset = "a + " + offset 
             else:
                 target = "%s.%s" % (structname, name)
