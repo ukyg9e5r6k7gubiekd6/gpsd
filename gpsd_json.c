@@ -2835,6 +2835,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    EMMA_CLASS_DISPLAY(ais->type8.dac200fid23.class),
 		    ais->type8.dac200fid23.wind,
 		    EMMA_WIND_DISPLAY(ais->type8.dac200fid23.wind));
+		structured = true;
 		break;
 	    }
 	}
