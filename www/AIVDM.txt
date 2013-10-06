@@ -3771,10 +3771,10 @@ message 8 at regular intervals.
 |50-55   |  6 |Functional ID       |fid        |u|Constant: 40
 |56-83   | 28 |Signal Longitude    |lon        |I4|Minutes/10000 (as in CNB)
 |84-110  | 27 |Signal Latitude     |lat        |I4|Minutes/10000 (as in CNB)
-|111-114 |  4 |Signal form         |form       |e|Consult <<INLAND>> Annex C
+|111-114 |  4 |Signal form         |form       |u|Consult <<INLAND>> Annex C
 |115-123 |  9 |Signal orientation  |facing     |u|0-39 deg, 511= N/A (default)
 |124-126 |  3 |Direction of impact |direction  |e|See "Signal Impact" below
-|127-156 | 30 |Light Status        |status     |u|See "Signal Status" below
+|127-156 | 30 |Light Status        |status     |e|See "Signal Status" below
 |157-167 | 11 |Spare               |           |x|Not used
 |===============================================================================
 
@@ -3786,7 +3786,8 @@ The Signal Form field describes the physical arrangement of the
 signal lights.  Values 0 and 15 indicate the shape is unknown or 
 unspecified.
 
-.Direction of Signal impact
+//: direction vocabulary
+.Direction of Signal Impact
 [frame="topbot",options="header"]
 |===============================================================================
 | 0 | Unknown (default)
@@ -3801,6 +3802,7 @@ the lights as numbered in their Signal Form diagram  - typically left
 to right and then top to bottom - with each digit interpreted in the
 following way:
 
+//: status vocabulary
 .Signal Status
 [frame="topbot",options="header"]
 |===============================================================================
@@ -3808,7 +3810,7 @@ following way:
 | 1 | No light
 | 2 | White
 | 3 | Yellow
-| 4 | Greeen
+| 4 | Green
 | 5 | Red
 | 6 | White flashing
 | 7 | Yellow flashing.
