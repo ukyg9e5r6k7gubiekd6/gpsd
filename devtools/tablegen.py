@@ -473,15 +473,14 @@ if __name__ == '__main__':
     #    table - the table lines
     #    widths - array of table widths
     #    ranges - array of table offsets
-    #    trailing - bit length of the table or trailing array element 
+    #    trailing - bit length of the table or trailing array element
+    #    subtables - list of following vocabulary tables.
     tablename = arguments[0]
     table = []
     ranges = []
-    keep = False
-    i = 0
+    subtables = []
     state = 0
     for line in sys.stdin:
-        i += 1
         if state == 0 and line.startswith("//: Type") and tablename in line:
             state = 1
             continue
@@ -504,7 +503,25 @@ if __name__ == '__main__':
             table.append(line)
             continue
         elif state == 3:		# Found table end
-            break
+            state = 4
+            continue
+        elif state == 4:		# Skipping until subsidiary table
+            if line.startswith("//:") and "vocabulary" in line:
+                subtable_name = line.split()[1]
+                subtable_content = []
+                state = 5
+        elif state == 5:		# Seen subtable header
+            if line.startswith("|="):
+                state = 6
+                continue
+        elif state == 6:		# Parsing subtable content
+            if line.startswith("|="):
+                subtables.append((subtable_name, subtable_content))
+                state = 4
+                continue
+            elif line[0] == '|':
+                subtable_content.append([f.strip() for f in line[1:].strip().split("|")])
+            continue
     if state == 0:
         print >>sys.stderr, "Can't find named table."
         sys.exit(1)        
