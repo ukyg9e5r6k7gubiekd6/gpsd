@@ -105,7 +105,7 @@ def make_driver_code(wfp):
                 continue
             offset = offsets[i].split('-')[0]
             if arrayname:
-                target = "%s.%s[i].%s" % (structname, arrayname, name)
+                target = "%s.%s[i].%s" % (structnme, arrayname, name)
                 offset = "a + " + offset 
             else:
                 target = "%s.%s" % (structname, name)
@@ -186,24 +186,24 @@ def make_structure(wfp):
         inwards -= step
         print >>wfp, tabify(baseindent + inwards) + "} %s[%s];" % (arrayname, arraydim)
     if "->" in structname:
-        structname = structname.split("->")[1]
-    if "." in structname:
+        typename = structname.split("->")[1]
+    if "." in typename:
         structname = structname.split(".")[1]    
-    print >>wfp, tabify(baseindent) + "} %s;" % structname
+    print >>wfp, tabify(baseindent) + "} %s;" % typename
 
 def make_json_dumper(wfp):
     # Write the skeleton of a JSON dump corresponding to the table.
     # Also, if there are subtables, some initializers
     if subtables:
         for (name, lines) in subtables:
-            wfp.write("    const char %s_vocabulary[] = {\n" % name)
+            wfp.write("    const char *%s_vocabulary[] = {\n" % name)
             for line in lines:
                 value = line[1]
                 if value.endswith(" (default)"):
                     value = value[:-10]
                 wfp.write('        "%s",\n' % value)
-            wfp.write("    }\n")
-            wfp.write('#define %s_DISPLAY(n) (((n) < (unsigned int)NITEMS(%s_vocabulary)) ? %s_vocabulary[n] : "INVALID %s")\n' % (name.upper(), name, name, name.upper()))
+            wfp.write("    };\n")
+            wfp.write('#define DISPLAY_%s(n) (((n) < (unsigned int)NITEMS(%s_vocabulary)) ? %s_vocabulary[n] : "INVALID %s")\n' % (name.upper(), name, name, name.upper()))
         wfp.write("\n")
     record = after is None
     # Elements of each tuple type except 'a':
