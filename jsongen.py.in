@@ -604,6 +604,20 @@ ais_specs = (
     "stringbuffered":("timestamp",),
     },
     {
+    "initname" : "json_ais8_fid40",
+    "headers": ("AIS_HEADER","AIS_TYPE8"),
+    "structname": "ais->type8.dac200fid40",
+    "fieldmap":(
+        # fieldname    type        default
+        ('form',       'uinteger', 'DAC200FID40_FORM_UNKNOWN'),
+        ('facing',     'uinteger', 'DAC200FID40_FACING_UNKNOWN'),
+        ('direction',  'uinteger', 'DAC200FID40_DIRECTION_UNKNOWN'),
+        ('direction_text','ignore',   None),
+        ('status',     'uinteger', 'DAC200FID40_STATUS_UNKNOWN'),
+        ('status_text','ignore',   None),
+        ),
+    },
+    {
     "initname" : "json_ais9",
     "headers": ("AIS_HEADER",),
     "structname": "ais->type9",

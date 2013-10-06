@@ -693,6 +693,16 @@ bool ais_binary_decode(const int debug,
 		/* skip 6 bits */
 		imo = true;
 		break;
+	    case 40:
+		ais->type8.dac200fid40.lon	= SBITS(56, 28);
+		ais->type8.dac200fid40.lat	= SBITS(84, 27);
+		ais->type8.dac200fid40.form	= UBITS(111, 4);
+		ais->type8.dac200fid40.facing	= UBITS(115, 9);
+		ais->type8.dac200fid40.direction	= UBITS(124, 3);
+		ais->type8.dac200fid40.status	= UBITS(127, 30);
+		/* skip 11 bits */
+		imo = true;
+		break;
 	    }
 	}
 	/* land here if we failed to match a known DAC/FID */

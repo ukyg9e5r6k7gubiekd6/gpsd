@@ -402,6 +402,10 @@ int json_ais_read(const char *buf,
 		status = json_read_object(buf, json_ais8_fid10, endptr);
 		imo = true;
 	    }
+	    if (strstr(buf, "\"fid\":40,") != NULL) {
+		status = json_read_object(buf, json_ais8_fid40, endptr);
+		imo = true;
+	    }
 	}
 	if (!imo) {
 	    status = json_read_object(buf, json_ais8, endptr);

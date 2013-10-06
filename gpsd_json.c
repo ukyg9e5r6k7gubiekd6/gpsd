@@ -2766,6 +2766,26 @@ void json_aivdm_dump(const struct ais_t *ais,
 		"North West",
 	    };
 #define EMMA_WIND_DISPLAY(n) (((n) < (unsigned int)NITEMS(emma_winds)) ? emma_winds[n] : "INVALID EMMA WIND DIRECTION")
+	    const char *direction_vocabulary[] = {
+		"Unknown",
+		"Upstream",
+		"Downstream",
+		"To left bank",
+		"To right bank",
+	    };
+#define DIRECTION_DISPLAY(n) (((n) < (unsigned int)NITEMS(direction_vocabulary)) ? direction_vocabulary[n] : "INVALID DIRECTION")
+	    const char *status_vocabulary[] = {
+		"Unknown",
+		"No light",
+		"White",
+		"Yellow",
+		"Green",
+		"Red",
+		"White flashing",
+		"Yellow flashing.",
+	    };
+#define STATUS_DISPLAY(n) (((n) < (unsigned int)NITEMS(status_vocabulary)) ? status_vocabulary[n] : "INVALID STATUS")
+
 	    switch (ais->type8.fid) {
 	    case 10:        /* Inland ship static and voyage-related data */
 		for (cp = shiptypes; cp < shiptypes + NITEMS(shiptypes); cp++)
@@ -2837,7 +2857,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    EMMA_WIND_DISPLAY(ais->type8.dac200fid23.wind));
 		structured = true;
 		break;
-	    case 23:	/* EMMA warning */
+	    case 24:	/* Inland AIS Water Levels */
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 		    "\"country\":\"%s\",\"gauges\":[",
 		    ais->type8.dac200fid24.country);
@@ -2851,6 +2871,29 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    buf[strlen(buf)-1] = '\0';
 		(void)strlcat(buf, "]}", buflen - strlen(buf));
 			break;
+		structured = true;
+		break;
+	    case 40:	/* Inland AIS Signal Strength */
+		if (scaled)
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"lon\":%.4f,\"lat\":%.4f,",
+			ais->type8.dac200fid40.lon / AIS_LATLON_DIV,
+			ais->type8.dac200fid40.lat / AIS_LATLON_DIV);
+		else
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"\"lon\":%d,\"lat\":%d,",
+			ais->type8.dac200fid40.lon,
+			ais->type8.dac200fid40.lat);
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"form\":%u,\"facing\":%u,\"direction\":%u,\"direction_text\":\"%s\",\"status\":%u,\"status_text\":\"%s\"}",
+		    ais->type8.dac200fid40.form,
+		    ais->type8.dac200fid40.facing,
+		    ais->type8.dac200fid40.direction,
+		    DIRECTION_DISPLAY(ais->type8.dac200fid40.direction),
+		    ais->type8.dac200fid40.status,
+		    STATUS_DISPLAY(ais->type8.dac200fid40.status));
+		structured = true;
+		break;
 	    }
 	}
 	if (!structured)

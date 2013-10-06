@@ -1298,6 +1298,18 @@ struct ais_t
 #define DAC200FID24_GAUGE_LEVEL_UNKNOWN		0
 		    } gauges[4];
 		} dac200fid24;
+		struct {
+		    signed int lon;	/* Signal Longitude */
+		    signed int lat;	/* Signal Latitude */
+		    unsigned int form;	/* Signal form */
+#define DAC200FID40_FORM_UNKNOWN		0
+		    unsigned int facing;	/* Signal orientation */
+#define DAC200FID40_FACING_UNKNOWN		0
+		    unsigned int direction;	/* Direction of impact */
+#define DAC200FID40_DIRECTION_UNKNOWN		0
+		    unsigned int status;	/* Light Status */
+#define DAC200FID40_STATUS_UNKNOWN		0
+		} dac200fid40;
 		/* IMO236  - Meteorological-Hydrological data
 		 * Trial message, not to be used after January 2013
 		 * Replaced by IMO289 (DAC 1, FID 31)
