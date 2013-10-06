@@ -65,7 +65,8 @@ def correct_table(wfp):
 def make_driver_code(wfp):
     # Writes calls to bit-extraction macros.
     # Requires UBITS, SBITS, UCHARS to act as they do in the AIVDM driver.
-    # Also relies on ais_context->bitlen to be the message bit length.
+    # Also relies on bitlen to be the message bit length, and i to be
+    # available as abn index variable.
     record = after is None
     arrayname = None
     base = '\t'
