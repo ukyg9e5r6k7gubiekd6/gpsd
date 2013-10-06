@@ -20,7 +20,7 @@ static short sw1, sw2;
 static unsigned short uw1, uw2;
 static int sl1, sl2;
 static unsigned int ul1, ul2;
-static long long sL1, sL2;
+static int64_t sL1, sL2;
 static uint64_t uL1, uL2;
 static float f1;
 static double d1;
