@@ -2837,6 +2837,20 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    EMMA_WIND_DISPLAY(ais->type8.dac200fid23.wind));
 		structured = true;
 		break;
+	    case 23:	/* EMMA warning */
+		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+		    "\"country\":\"%s\",\"gauges\":[",
+		    ais->type8.dac200fid24.country);
+		for (i = 0; i < ais->type8.dac200fid24.ngauges; i++) {
+		    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
+			"{\"id\":%u,\"level\":%d}",
+			ais->type8.dac200fid24.gauges[i].id,
+			ais->type8.dac200fid24.gauges[i].level);
+		}
+		if (buf[strlen(buf)-1] == ',')
+		    buf[strlen(buf)-1] = '\0';
+		(void)strlcat(buf, "]}", buflen - strlen(buf));
+			break;
 	    }
 	}
 	if (!structured)
