@@ -49,6 +49,14 @@
 # of fields in the table.  This may be useful for dealing with groups of
 # messages that have a common head section.
 #
+# This code interprets magic comments in the input
+#
+# //: Type
+#    The token following "Type" is the name of the table
+# //: xxxx vocabulary
+#    A subtable describing a controlled vocabulary for field xxxx in the
+#    preceding table.
+#
 # TO-DO: generate code for ais.py.
 
 import sys, getopt
