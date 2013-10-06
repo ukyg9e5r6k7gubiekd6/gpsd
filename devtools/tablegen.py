@@ -192,7 +192,19 @@ def make_structure(wfp):
     print >>wfp, tabify(baseindent) + "} %s;" % structname
 
 def make_json_dumper(wfp):
-    # Write the skeleton of a JSON dump corresponding to the table
+    # Write the skeleton of a JSON dump corresponding to the table.
+    # Also, if there are subtables, some initializers
+    if subtables:
+        for (name, lines) in subtables:
+            wfp.write("    const char %s_vocabulary[] = {\n" % name)
+            for line in lines:
+                value = line[1]
+                if value.endswith(" (default)"):
+                    value = value[:-10]
+                wfp.write('        "%s",\n' % value)
+            wfp.write("    }\n")
+            wfp.write('#define %s_DISPLAY(n) (((n) < (unsigned int)NITEMS(%s_vocabulary)) ? %s_vocabulary[n] : "INVALID %s")\n' % (name.upper(), name, name, name.upper()))
+        wfp.write("\n")
     record = after is None
     # Elements of each tuple type except 'a':
     #   1. variable name,
@@ -207,6 +219,7 @@ def make_json_dumper(wfp):
     #   4. None
     #   5. Name of length field
     tuples = []
+    vocabularies = [x[0] for x in subtables]
     for (i, t) in enumerate(table):
         if '|' in t:
             fields = map(lambda s: s.strip(), t.split('|'))
@@ -230,8 +243,13 @@ def make_json_dumper(wfp):
                 tuples.append((name,
                                fmt+"%u", "%s",
                                None, None))
+                if vocabularies:
+                    this = vocabularies.pop(0)
+                    ref = "DISPLAY_%s(%%s)" % (this.upper())
+                else:
+                    ref = 'FOO[%s]'
                 tuples.append((name,
-                               fmt_text+r"\"%s\"", 'FOO[%s]',
+                               fmt_text+r"\"%s\"", ref,
                                None, None))
             elif ftype == 'i':
                 tuples.append((name,
