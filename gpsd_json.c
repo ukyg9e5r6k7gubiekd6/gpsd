@@ -2870,7 +2870,6 @@ void json_aivdm_dump(const struct ais_t *ais,
 		if (buf[strlen(buf)-1] == ',')
 		    buf[strlen(buf)-1] = '\0';
 		(void)strlcat(buf, "]}", buflen - strlen(buf));
-			break;
 		structured = true;
 		break;
 	    case 40:	/* Inland AIS Signal Strength */

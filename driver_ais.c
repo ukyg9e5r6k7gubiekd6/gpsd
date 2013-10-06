@@ -65,7 +65,7 @@ bool ais_binary_decode(const int debug,
 		       struct ais_type24_queue_t *type24_queue)
 /* decode an AIS binary packet */
 {
-    bool imo;
+    bool structured;
     unsigned int u;
     int i;
 
@@ -174,7 +174,7 @@ bool ais_binary_decode(const int debug,
 	ais->type6.dac            = UBITS(72, 10);
 	ais->type6.fid            = UBITS(82, 6);
 	ais->type6.bitcount       = bitlen - 88;
-	imo = false;
+	structured = false;
 	/* Inland AIS */
 	if (ais->type6.dac == 200) {
 	    switch (ais->type6.fid) {
@@ -191,7 +191,7 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac200fid21.tugs	= UBITS(228, 3);
 		ais->type6.dac200fid21.airdraught	= UBITS(231, 12);
 		/* skip 5 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 22:	/* RTA at lock/bridge/terminal */
 		UCHARS(88, ais->type6.dac200fid22.country);
@@ -205,14 +205,14 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac200fid22.minute	= UBITS(222, 6);
 		ais->type6.dac200fid22.status	= UBITS(228, 2);
 		/* skip 2 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 55:	/* Number of Persons On Board */
 		ais->type6.dac200fid55.crew	= UBITS(88, 8);
 		ais->type6.dac200fid55.passengers	= UBITS(96, 13);
 		ais->type6.dac200fid55.personnel	= UBITS(109, 8);
 		/* skip 51 bits */
-		imo = true;
+		structured = true;
 		break;
 	    }
 	    break;
@@ -230,7 +230,7 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac235fid10.stat_ext	= UBITS(123, 8);
 		ais->type6.dac235fid10.off_pos  = UBITS(131, 1);
 		/* skip 4 bits */
-		imo = true;
+		structured = true;
 		break;
 	    }
 	    break;
@@ -255,7 +255,7 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac1fid12.amount		= UBITS(345, 10);
 		ais->type6.dac1fid12.unit		= UBITS(355, 2);
 		/* skip 3 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 14:	/* IMO236 - Tidal Window */
 		ais->type6.dac1fid32.month	= UBITS(88, 4);
@@ -277,18 +277,18 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac1fid32.ntidals = u;
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
-		imo = true;
+		structured = true;
 		break;
 	    case 15:	/* IMO236 - Extended Ship Static and Voyage Related Data */
 		ais->type6.dac1fid15.airdraught	= UBITS(56, 11);
-		imo = true;
+		structured = true;
 		break;
 	    case 16:	/* IMO236 - Number of persons on board */
 		if (ais->type6.bitcount == 136)
 		    ais->type6.dac1fid16.persons = UBITS(88, 13);/* 289 */
 		else
 		    ais->type6.dac1fid16.persons = UBITS(55, 13);/* 236 */
-		imo = true;
+		structured = true;
 		break;
 	    case 18:	/* IMO289 - Clearance time to enter port */
 		ais->type6.dac1fid18.linkage	= UBITS(88, 10);
@@ -301,7 +301,7 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac1fid18.lon	= SBITS(268, 25);
 		ais->type6.dac1fid18.lat	= SBITS(293, 24);
 		/* skip 43 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 20:	/* IMO289 - Berthing data - addressed */
 		ais->type6.dac1fid20.linkage	= UBITS(88, 10);
@@ -342,7 +342,7 @@ bool ais_binary_decode(const int debug,
 		UCHARS(191, ais->type6.dac1fid20.berth_name);
 		ais->type6.dac1fid20.berth_lon	= SBITS(311, 25);
 		ais->type6.dac1fid20.berth_lat	= SBITS(336, 24);
-		imo = true;
+		structured = true;
 		break;
 	    case 23:        /* IMO289 - Area notice - addressed */
 		break;
@@ -354,7 +354,7 @@ bool ais_binary_decode(const int debug,
 		    ais->type6.dac1fid25.cargos[u].subtype = UBITS(104+u*17,13);
 		}
 		ais->type6.dac1fid25.ncargos = u;
-		imo = true;
+		structured = true;
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
 		ais->type6.dac1fid28.linkage	= UBITS(88, 10);
@@ -375,12 +375,12 @@ bool ais_binary_decode(const int debug,
 		}
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
-		imo = true;
+		structured = true;
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
 		ais->type6.dac1fid30.linkage   = UBITS(88, 10);
 		ENDCHARS(98, ais->type6.dac1fid30.text);
-		imo = true;
+		structured = true;
 		break;
 	    case 32:	/* IMO289 - Tidal Window */
 		ais->type6.dac1fid32.month	= UBITS(88, 4);
@@ -402,10 +402,10 @@ bool ais_binary_decode(const int debug,
 		ais->type6.dac1fid32.ntidals = u;
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
-		imo = true;
+		structured = true;
 		break;
 	    }
-	if (!imo)
+	if (!structured)
 	    (void)memcpy(ais->type6.bitdata,
 			 (char *)bits + (88 / BITS_PER_BYTE),
 			 (ais->type6.bitcount + 7) / 8);
@@ -445,7 +445,7 @@ bool ais_binary_decode(const int debug,
 	ais->type8.dac            = UBITS(40, 10);
 	ais->type8.fid            = UBITS(50, 6);
 	ais->type8.bitcount       = bitlen - 56;
-	imo = false;
+	structured = false;
 	if (ais->type8.dac == 1)
 	    switch (ais->type8.fid) {
 	    case 11:        /* IMO236 - Meteorological/Hydrological data */
@@ -486,7 +486,7 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac1fid11.preciptype	= UBITS(332, 3);
 		ais->type8.dac1fid11.salinity	= UBITS(335, 9);
 		ais->type8.dac1fid11.ice		= UBITS(344, 2);
-		imo = true;
+		structured = true;
 		break;
 	    case 13:        /* IMO236 - Fairway closed */
 		UCHARS(56, ais->type8.dac1fid13.reason);
@@ -503,19 +503,19 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac1fid13.thour  	= UBITS(457, 5);
 		ais->type8.dac1fid13.tminute	= UBITS(462, 6);
 		/* skip 4 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 15:        /* IMO236 - Extended ship and voyage */
 		ais->type8.dac1fid15.airdraught	= UBITS(56, 11);
 		/* skip 5 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 16:	    /* Number of Persons On Board */
 		if (ais->type8.bitcount == 136)
 		    ais->type8.dac1fid16.persons = UBITS(88, 13);/* 289 */
 		else
 		    ais->type8.dac1fid16.persons = UBITS(55, 13);/* 236 */
-		imo = true;
+		structured = true;
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 #define ARRAY_BASE 56
@@ -548,7 +548,7 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac1fid17.ntargets = u;
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
-		imo = true;
+		structured = true;
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
 		ais->type8.dac1fid19.linkage	= UBITS(56, 10);
@@ -561,7 +561,7 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac1fid19.minute	= UBITS(247, 6);
 		ais->type8.dac1fid19.nextsignal	= UBITS(253, 5);
 		/* skip 102 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 21:        /* IMO289 - Weather obs. report from ship */
 		break;
@@ -590,12 +590,12 @@ bool ais_binary_decode(const int debug,
 		}
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
-		imo = true;
+		structured = true;
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
 		ais->type8.dac1fid29.linkage   = UBITS(56, 10);
 		ENDCHARS(66, ais->type8.dac1fid29.text);
-		imo = true;
+		structured = true;
 		break;
 	    case 31:        /* IMO289 - Meteorological/Hydrological data */
 		ais->type8.dac1fid31.lon		= SBITS(56, 25);
@@ -636,7 +636,7 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac1fid31.preciptype	= UBITS(336, 3);
 		ais->type8.dac1fid31.salinity	= UBITS(339, 9);
 		ais->type8.dac1fid31.ice		= UBITS(348, 2);
-		imo = true;
+		structured = true;
 		break;
 	    }
 	else if (ais->type8.dac == 200) {
@@ -653,7 +653,7 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac200fid10.course_q	= (bool)UBITS(158, 1);
 		ais->type8.dac200fid10.heading_q	= (bool)UBITS(159, 1);
 		/* skip 8 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 23:
 		ais->type8.dac200fid23.start_year	= UBITS(56, 8);
@@ -676,7 +676,7 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac200fid23.class	= UBITS(244, 2);
 		ais->type8.dac200fid23.wind	= UBITS(246, 4);
 		/* skip 6 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 24:
 		UCHARS(56, ais->type8.dac200fid24.country);
@@ -691,7 +691,7 @@ bool ais_binary_decode(const int debug,
 #undef ARRAY_BASE
 #undef ELEMENT_SIZE
 		/* skip 6 bits */
-		imo = true;
+		structured = true;
 		break;
 	    case 40:
 		ais->type8.dac200fid40.lon	= SBITS(56, 28);
@@ -701,12 +701,12 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac200fid40.direction	= UBITS(124, 3);
 		ais->type8.dac200fid40.status	= UBITS(127, 30);
 		/* skip 11 bits */
-		imo = true;
+		structured = true;
 		break;
 	    }
 	}
 	/* land here if we failed to match a known DAC/FID */
-	if (!imo)
+	if (!structured)
 	    (void)memcpy(ais->type8.bitdata,
 			 (char *)bits + (56 / BITS_PER_BYTE),
 			 (ais->type8.bitcount + 7) / 8);

@@ -122,7 +122,7 @@ int json_ais_read(const char *buf,
 			 &ais->type5.minute);
 	}
     } else if (strstr(buf, "\"type\":6,") != NULL) {
-	bool imo = false;
+	bool structured = false;
 	if (strstr(buf, "\"dac\":1,") != NULL) {
 	    if (strstr(buf, "\"fid\":12,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid12, endptr);
@@ -148,15 +148,15 @@ int json_ais_read(const char *buf,
 				 &ais->type6.dac1fid12.nhour,
 				 &ais->type6.dac1fid12.nminute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":15,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid15, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":16,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid16, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":18,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid18, endptr);
@@ -171,7 +171,7 @@ int json_ais_read(const char *buf,
 				 &ais->type6.dac1fid18.hour,
 				 &ais->type6.dac1fid18.minute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":20,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid20, endptr);
@@ -187,11 +187,11 @@ int json_ais_read(const char *buf,
 				 &ais->type6.dac1fid20.hour,
 				 &ais->type6.dac1fid20.minute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":25,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid25, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":28,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid28, endptr);
@@ -207,27 +207,27 @@ int json_ais_read(const char *buf,
 				 &ais->type6.dac1fid28.hour,
 				 &ais->type6.dac1fid28.minute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":30,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid30, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":32,") != NULL || strstr(buf, "\"fid\":14,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid32, endptr);
-		imo = true;
+		structured = true;
 	    }
 	}
 	else if (strstr(buf, "\"dac\":235,") != NULL || strstr(buf, "\"dac\":250,") != NULL) {
 	    if (strstr(buf, "\"fid\":10,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid10, endptr);
-		imo = true;
+		structured = true;
 	    }
 	}
 	else if (strstr(buf, "\"dac\":200,") != NULL) {
 	    if (strstr(buf, "\"fid\":21,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid21, endptr);
-		imo = true;
+		structured = true;
 		if (status == 0) {
 		    ais->type6.dac200fid21.month = AIS_MONTH_NOT_AVAILABLE;
 		    ais->type6.dac200fid21.day = AIS_DAY_NOT_AVAILABLE;
@@ -243,7 +243,7 @@ int json_ais_read(const char *buf,
 	    }
 	    else if (strstr(buf, "\"fid\":22,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid22, endptr);
-		imo = true;
+		structured = true;
 		if (status == 0) {
 		    ais->type6.dac200fid22.month = AIS_MONTH_NOT_AVAILABLE;
 		    ais->type6.dac200fid22.day = AIS_DAY_NOT_AVAILABLE;
@@ -259,10 +259,10 @@ int json_ais_read(const char *buf,
 	    }
 	    else if (strstr(buf, "\"fid\":55,") != NULL) {
 		status = json_read_object(buf, json_ais6_fid55, endptr);
-		imo = true;
+		structured = true;
 	    }
 	}
-	if (!imo) {
+	if (!structured) {
 	    status = json_read_object(buf, json_ais6, endptr);
 	    if (status == 0)
 		lenhex_unpack(data, &ais->type6.bitcount,
@@ -272,7 +272,7 @@ int json_ais_read(const char *buf,
 	       || strstr(buf, "\"type\":13,") != NULL) {
 	status = json_read_object(buf, json_ais7, endptr);
     } else if (strstr(buf, "\"type\":8,") != NULL) {
-	bool imo = false;
+	bool structured = false;
 	if (strstr(buf, "\"dac\":1,") != NULL) {
 	    if (strstr(buf, "\"fid\":11,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid11, endptr);
@@ -286,7 +286,7 @@ int json_ais_read(const char *buf,
 				 &ais->type8.dac1fid11.hour,
 				 &ais->type8.dac1fid11.minute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":13,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid13, endptr);
@@ -312,23 +312,23 @@ int json_ais_read(const char *buf,
 				 &ais->type8.dac1fid13.thour,
 				 &ais->type8.dac1fid13.tminute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":15,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid15, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":16,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid16, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":17,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid17, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":19,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid19, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":23,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid23, endptr);
@@ -356,11 +356,11 @@ int json_ais_read(const char *buf,
 			 &ais->type8.dac200fid23.end_day,
 			 &ais->type8.dac200fid23.end_hour,
 			 &ais->type8.dac200fid23.end_minute);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":24,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid24, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":27,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid27, endptr);
@@ -376,11 +376,11 @@ int json_ais_read(const char *buf,
 				 &ais->type8.dac1fid27.hour,
 				 &ais->type8.dac1fid27.minute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":29,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid29, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    else if (strstr(buf, "\"fid\":31,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid31, endptr);
@@ -394,20 +394,20 @@ int json_ais_read(const char *buf,
 				 &ais->type8.dac1fid31.hour,
 				 &ais->type8.dac1fid31.minute);
 		}
-		imo = true;
+		structured = true;
 	    }
 	}
 	else if (strstr(buf, "\"dac\":200,") != NULL) {
 	    if (strstr(buf, "\"fid\":10,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid10, endptr);
-		imo = true;
+		structured = true;
 	    }
 	    if (strstr(buf, "\"fid\":40,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid40, endptr);
-		imo = true;
+		structured = true;
 	    }
 	}
-	if (!imo) {
+	if (!structured) {
 	    status = json_read_object(buf, json_ais8, endptr);
 	    if (status == 0)
 		lenhex_unpack(data, &ais->type8.bitcount,
