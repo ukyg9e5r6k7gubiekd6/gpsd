@@ -280,10 +280,9 @@ def make_json_dumper(wfp):
         # At end of tuples, or if scaled flag changes, or if next op is array,
         # flush out dump code for a span of fields.
         if i+1 == len(tuples):
-            if not inarray:
-                endit = '}",\n'
+            endit = '}",'
         elif tuples[i+1][1] == None:
-            endit = r',\"%s\":[",'
+            endit = r',\"%s\":[",' % tuples[i+1][0]
         elif scaled(i) != scaled(i+1):
             endit =  ',",'
         else:
@@ -291,7 +290,11 @@ def make_json_dumper(wfp):
         if endit:
             if not scaled(i):
                 print >>wfp, base + header
-                print >>wfp, base + step + '"'+','.join(tslice(i,1)) + endit
+                if inarray:
+                    prefix = '{"'
+                else:
+                    prefix = '"'
+                print >>wfp, base + step + prefix +','.join(tslice(i,1)) + endit
                 for (j, t) in enumerate(tuples[startspan:i+1]):
                     if inarray:
                         ref = structname + "." + inarray + "[i]." + t[0]
@@ -334,7 +337,7 @@ def make_json_dumper(wfp):
     if inarray:
         base = " " * 8
         print >>wfp, base + "}"
-        print >>wfp, base + "if (buf[strlen(buf) - 1] == ',')"
+        print >>wfp, base + "if (buf[strlen(buf)-1] == ',')"
         print >>wfp, base + step + r"buf[strlen(buf)-1] = '\0';"
         print >>wfp, base + "(void)strlcat(buf, \"]}\", buflen - strlen(buf));"
 
