@@ -6,7 +6,7 @@
 # correct offsets in the tables themselves.
 #
 # Requires the AIVDM.txt file on standard input. Takes a single argument,
-# the line number of a table start.  Things you can generate:
+# which must match a string in a //: Type comment.  Things you can generate:
 #
 # * -t: A corrected version of the table.  It will redo all the offsets to be
 #   in conformance with the bit widths. (The other options rely only on the
@@ -474,23 +474,26 @@ if __name__ == '__main__':
     #    widths - array of table widths
     #    ranges - array of table offsets
     #    trailing - bit length of the table or trailing array element 
-    startline = int(arguments[0])
+    tablename = arguments[0]
     table = []
     ranges = []
     keep = False
     i = 0
+    state = 0
     for line in sys.stdin:
         i += 1
-        if i == startline:
+        if state == 0 and line.startswith("//: Type") and tablename in line:
+            state = 1
+            continue
+        elif state == 1:		# Found table tag
             if line.startswith("|="):
-                keep = True
-            else:
-                print >>sys.stderr, "Bad table start"
-                sys.exit(1)
-        elif line.startswith("|="):
-            keep = False
-        if keep:
-            if line[0] == '|':
+                state = 2
+                continue
+        elif state == 2:		# Found table header
+            if line.startswith("|="):
+                state = 3
+                continue
+            elif line[0] == '|':
                 fields = line.split("|")
                 trailing = fields[1]
                 ranges.append(fields[1].strip())
@@ -499,8 +502,17 @@ if __name__ == '__main__':
             else:
                 ranges.append('')
             table.append(line)
-    table = table[2:]
-    ranges = ranges[2:]
+            continue
+        elif state == 3:		# Found table end
+            break
+    if state == 0:
+        print >>sys.stderr, "Can't find named table."
+        sys.exit(1)        
+    elif state < 3:
+        print >>sys.stderr, "Ill-formed table (in state %d)." % state
+        sys.exit(1)
+    table = table[1:]
+    ranges = ranges[1:]
     widths = []
     for line in table:
         fields = line.split('|')
