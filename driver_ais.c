@@ -673,7 +673,7 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac200fid23.type	= UBITS(222, 4);
 		ais->type8.dac200fid23.min	= SBITS(226, 9);
 		ais->type8.dac200fid23.max	= SBITS(235, 9);
-		ais->type8.dac200fid23.class	= UBITS(244, 2);
+		ais->type8.dac200fid23.intensity	= UBITS(244, 2);
 		ais->type8.dac200fid23.wind	= UBITS(246, 4);
 		/* skip 6 bits */
 		structured = true;

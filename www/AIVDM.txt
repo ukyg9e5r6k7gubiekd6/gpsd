@@ -3669,7 +3669,7 @@ replace the Notices to Skippers warnings.
 |222-225 |  4 |Type                |type        |e|See "EMMA Type Codes" below
 |226-234 |  9 |Min value           |min         |i|Signed Integer, see below
 |235-243 |  9 |Max value           |max         |i|Signed Integer, see below
-|244-245 |  2 |Classification      |class       |e|1 = Slight,
+|244-245 |  2 |Classification      |intensity   |e|1 = Slight,
                                                    2 = Medium,
                                                    3 = Strong
 |246-249 |  4 |Wind Direction      |wind        |e|See "EMMA Winds" below

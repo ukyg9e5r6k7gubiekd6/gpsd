@@ -2851,8 +2851,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    EMMA_TYPE_DISPLAY(ais->type8.dac200fid23.type),
 		    ais->type8.dac200fid23.min,
 		    ais->type8.dac200fid23.max,
-		    ais->type8.dac200fid23.class,
-		    EMMA_CLASS_DISPLAY(ais->type8.dac200fid23.class),
+		    ais->type8.dac200fid23.intensity,
+		    EMMA_CLASS_DISPLAY(ais->type8.dac200fid23.intensity),
 		    ais->type8.dac200fid23.wind,
 		    EMMA_WIND_DISPLAY(ais->type8.dac200fid23.wind));
 		structured = true;

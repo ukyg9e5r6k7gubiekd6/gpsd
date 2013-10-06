@@ -1283,7 +1283,7 @@ struct ais_t
 #define DAC200FID23_MIN_UNKNOWN			255
 		    signed int max;	/* Max value */
 #define DAC200FID23_MAX_UNKNOWN			255
-		    unsigned int class;	/* Classification */
+		    unsigned int intensity;	/* Classification */
 #define DAC200FID23_CLASS_UNKNOWN		0
 		    unsigned int wind;	/* Wind Direction */
 #define DAC200FID23_WIND_UNKNOWN		0
