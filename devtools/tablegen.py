@@ -129,6 +129,7 @@ def make_driver_code(wfp):
 
 def make_structure(wfp):
     # Write a structure definition correponding to the table.
+    global structname
     record = after is None
     baseindent = 8
     step = 4
@@ -184,6 +185,10 @@ def make_structure(wfp):
     if arrayname:
         inwards -= step
         print >>wfp, tabify(baseindent + inwards) + "} %s[%s];" % (arrayname, arraydim)
+    if "->" in structname:
+        structname = structname.split("->")[1]
+    if "." in structname:
+        structname = structname.split(".")[1]    
     print >>wfp, tabify(baseindent) + "} %s;" % structname
 
 def make_json_dumper(wfp):
