@@ -5,6 +5,10 @@ v1.43, September 2013
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
 
+// If you are reading the asciidoc mater of this document, the
+// occasional comments led with '//!' are hits for GPSD developer tools
+// that use the table layouts to generate code.
+
 == Introduction ==
 
 This is a description of how to decode AIVDM/AIVDO sentences.  It
@@ -517,6 +521,7 @@ navigational information; we'll call it the Common Navigation Block
 (CNB). This is the information most likely to be of interest for
 decoding software. Total of 168 bits, occupying one AIVDM sentence.
 
+//: Type CNB
 .Common Navigation Block
 [frame="topbot",options="header"]
 |==============================================================================
@@ -673,6 +678,7 @@ occupying one AIVDM sentence.
 
 The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 
+//: Type 4
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len  |Description      |Member   |T|Units
@@ -722,6 +728,7 @@ In practice, the information in these fields (especially ETA and
 destination) is not reliable, as it has to be hand-updated by
 humans rather than gathered automatically from sensors.
 
+//: Type 5
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description            |Member/Type  |T|Encoding
@@ -867,6 +874,7 @@ extension messages. <<IMO236>> and <<IMO289>> describe payload use as
 international extension messages.  This type is variable in length up
 to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
+//: Type 6
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |T|Units
@@ -903,6 +911,7 @@ in use for type 6.
 |   1 | 16 | <<IMO236>>    | Deprecated/In Use| Num persons on board
 |   1 | 16 | <<IMO289>>    | Standard         | Num persons on board
 |   1 | 18 | <<IMO289>>    | Standard         | Clearance time to enter port
+|   1 | 20 | <<IMO289>>    | Standard         | Berthing data (addressed)
 |   1 | 23 | <<IMO289>>    | In use           | Area notice (addressed)
 |   1 | 25 | <<IMO289>>    | Standard         | Dangerous Cargo indication
 |   1 | 28 | <<IMO289>>    | Standard         | Route info addressed
@@ -931,6 +940,7 @@ A message 6 subtype. DAC = 001 FID = 12. Fixed length: 360 bits.
 This is the <<IMO236>> version, now deprecated; there is a later 
 <<IMO289>> version. 
 
+//: Type 6(1/12)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |T|Units
@@ -984,6 +994,7 @@ This is the <<IMO236>> version; there is an <<IMO289>> version with
 different widths for the latitude, longitude, and current-speed fields
 (also the order of lat/lon is swapped).
 
+//: Type 6(1/14)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description            |Member    |T|Units
@@ -1052,6 +1063,7 @@ them.
 
 <<IMO289>> describes a fixed-length, 136-bit message with this layout:
 
+//: Type 6(1/16)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |T|Units
@@ -1079,6 +1091,7 @@ use of the port.
 
 A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 
+//: Type 6(1/18)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member     |T|Units
@@ -1106,6 +1119,106 @@ A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 |317-359 | 43 |Spare                |           |x|Not used
 |==============================================================================
 
+==== IMO 289 Berthing Data (addressed) ====
+
+This message provides information on the ship's berth. If sent from a
+ship it is a berthing request; if it is transmitted by a competent
+authority it is a berthing assignment.
+
+A message 6 subtype. DAC = 001 FID = 20. Fixed Length: 360 bits.
+
+The 2-bit fields after "availabilty" describe services which may be
+available at the berth.  They are valid only if this master availability
+bit is on.
+
+//: Type 6(1/20)
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description        |Member/Type |T|Units
+|0-5     |  6 |Message Type       |type        |u|Constant: 6
+|6-7     |  2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
+|8-37    | 30 |Source MMSI        |mmsi        |u|9 decimal digits
+|38-39   |  2 |Sequence Number    |seqno       |u|Unsigned integer 0-3
+|40-69   | 30 |Destination MMSI   |dest_mmsi   |u|9 decimal digits
+|70-70   |  1 |Retransmit flag    |retransmit  |b|0 = no retransmit (default)
+                                                  1 = retransmitted
+|71-71   |  1 |Spare              |            |x|Not used
+|72-81   | 10 |DAC                |dac         |u|AC = 001
+|82-87   |  6 |FID                |fid         |u|ID = 20
+|88-97   | 10 |Message Linkage ID |linkage     |u|Unsigned integer
+|98-106  |  9 |Berth length       |berth_length|u|In 1m steps, 1-510m,
+                                                  511 = >= 511m
+                                                  0 = N/A (default).
+|107-114 |  8 |Berth Water Depth  |berth_depth |U1|0.1-25.4m in 0.1 steps
+                                                  255 = >= 25.5m
+                                                  0 = N/A (default)
+|115-117 |  3 |Mooring Position   |position    |e|See "Mooring Position"
+|118-121 |  4 |Month (UTC)        |month       |u|1-12; 0 = N/A (default)
+|122-126 |  5 |Day (UTC)          |day         |u|1-31; 0 = N/A (default)
+|127-131 |  5 |Hour (UTC)         |hour        |u|0-23; 24 = N/A (default)
+|132-137 |  6 |Minute (UTC)       |minute      |u|0-59; 60 = N/A (default)
+|138-138 |  1 |Services Availability|availability|b|0 = services unknown (default)
+                                                    1 = services known
+|139-140 |  2 |Agent              |agent       |e|See "Service Status"
+|141-142 |  2 |Bunker/fuel        |fuel        |e|See "Service Status"
+|143-144 |  2 |Chandler           |chandler    |e|See "Service Status"
+|145-146 |  2 |Stevedore          |stevedore   |e|See "Service Status"
+|147-148 |  2 |Electrical         |electrical  |e|See "Service Status"
+|149-150 |  2 |Potable water      |water       |e|See "Service Status"
+|151-152 |  2 |Customs house      |customs     |e|See "Service Status"
+|153-154 |  2 |Cartage            |cartage     |e|See "Service Status"
+|155-156 |  2 |Crane(s)           |crane       |e|See "Service Status"
+|157-158 |  2 |Lift(s)            |lift        |e|See "Service Status"
+|159-160 |  2 |Medical facilities |medical     |e|See "Service Status"
+|161-162 |  2 |Navigation repair  |navrepair   |e|See "Service Status"
+|163-164 |  2 |Provisions         |provisions  |e|See "Service Status"
+|165-166 |  2 |Ship repair        |shiprepair  |e|See "Service Status"
+|167-168 |  2 |Surveyor           |surveyor    |e|See "Service Status"
+|169-170 |  2 |Steam              |steam       |e|See "Service Status"
+|171-172 |  2 |Tugs               |tugs        |e|See "Service Status"
+|173-174 |  2 |Waste disposal (solid)    |solidwaste    |e|See "Service Status"
+|175-176 |  2 |Waste disposal (liquid)   |liquidwaste   |e|See "Service Status"
+|177-178 |  2 |Waste disposal (hazardous)|hazardouswaste|e|See "Service Status"
+|179-180 |  2 |Reserved ballast exchange |ballast       |e|See "Service Status"
+|181-182 |  2 |Additional services|additional  |e|See "Service Status"
+|183-184 |  2 |Regional reserved 1|regional1   |e|See "Service Status"
+|185-186 |  2 |Regional reserved 2|regional2   |e|See "Service Status"
+|187-188 |  2 |Reserved for future|future1     |e|See "Service Status"
+|189-190 |  2 |Reserved for future|future1     |e|See "Service Status"
+|191-310 |120 |Name of Berth      |berth_name  |t|20 6-bit characters
+|311-335 | 25 |Longitude          |berth_lon   |I3|Minutes * 0.001,
+                                                  181000 = N/A (default)
+|336-359 | 24 |Latitude           |berth_lat   |I3|Minutes * 0.001,
+                                                  91000 = N/A (default)
+|==============================================================================
+
+The UTC timestamp refers to the time requested or granted for berthing.
+
+The longitude and latitude refer to the center of the berth.
+
+.Mooring Position
+[width="50%",frame="topbot",options="header"]
+|===================================
+|Code |Position
+|0    |Not available (default)
+|1    |Port-side to
+|2    |Starboard-side to
+|3    |Mediterranean (end-on) mooring
+|4    |Mooring buoy
+|5    |Anchorage
+|6-7  |Reserved for future use
+|===================================
+
+.Service Status
+[width="50%",frame="topbot",options="header"]
+|=============================================================================
+|Code |Meaning
+|0    |Not available or requested (default)
+|1    |Service available
+|2    |No data or unknown
+|3    |Not to be used
+|=============================================================================
+
 ==== IMO289 Area Notice (addressed) ====
 
 This should be used to convey time- and location-dependent information about 
@@ -1119,6 +1232,7 @@ The message consists of a fixed-length header of 143 bits, followed by 1 to
 10 sub-area indications which are fixed-length records 87 bits long. Here
 is the message header format:
 
+//: Type 6(1/23)
 .Area Notice (addressed) message header
 [frame="topbot",options="header"]
 |==============================================================================
@@ -1426,105 +1540,6 @@ an implied boundary from the last polygon vertex to the zero vertex.
 |3-87    |84  |Text               |text        |t|14 chars of packed 6-bit.
 |==============================================================================
 
-==== IMO 289 Berthing Data (addressed) ====
-
-This message provides information on the ship's berth. If sent from a
-ship it is a berthing request; if it is transmitted by a competent
-authority it is a berthing assignment.
-
-A message 6 subtype. DAC = 001 FID = 20. Fixed Length: 360 bits.
-
-The 2-bit fields after "availabilty" describe services which may be
-available at the berth.  They are valid only if this master availability
-bit is on.
-
-[frame="topbot",options="header"]
-|==============================================================================
-|Field   |Len |Description        |Member/Type |T|Units
-|0-5     |  6 |Message Type       |type        |u|Constant: 6
-|6-7     |  2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
-|8-37    | 30 |Source MMSI        |mmsi        |u|9 decimal digits
-|38-39   |  2 |Sequence Number    |seqno       |u|Unsigned integer 0-3
-|40-69   | 30 |Destination MMSI   |dest_mmsi   |u|9 decimal digits
-|70-70   |  1 |Retransmit flag    |retransmit  |b|0 = no retransmit (default)
-                                                  1 = retransmitted
-|71-71   |  1 |Spare              |            |x|Not used
-|72-81   | 10 |DAC                |dac         |u|AC = 001
-|82-87   |  6 |FID                |fid         |u|ID = 20
-|88-97   | 10 |Message Linkage ID |linkage     |u|Unsigned integer
-|98-106  |  9 |Berth length       |berth_length|u|In 1m steps, 1-510m,
-                                                  511 = >= 511m
-                                                  0 = N/A (default).
-|107-114 |  8 |Berth Water Depth  |berth_depth |U1|0.1-25.4m in 0.1 steps
-                                                  255 = >= 25.5m
-                                                  0 = N/A (default)
-|115-117 |  3 |Mooring Position   |position    |e|See "Mooring Position"
-|118-121 |  4 |Month (UTC)        |month       |u|1-12; 0 = N/A (default)
-|122-126 |  5 |Day (UTC)          |day         |u|1-31; 0 = N/A (default)
-|127-131 |  5 |Hour (UTC)         |hour        |u|0-23; 24 = N/A (default)
-|132-137 |  6 |Minute (UTC)       |minute      |u|0-59; 60 = N/A (default)
-|138-138 |  1 |Services Availability|availability|b|0 = services unknown (default)
-                                                    1 = services known
-|139-140 |  2 |Agent              |agent       |e|See "Service Status"
-|141-142 |  2 |Bunker/fuel        |fuel        |e|See "Service Status"
-|143-144 |  2 |Chandler           |chandler    |e|See "Service Status"
-|145-146 |  2 |Stevedore          |stevedore   |e|See "Service Status"
-|147-148 |  2 |Electrical         |electrical  |e|See "Service Status"
-|149-150 |  2 |Potable water      |water       |e|See "Service Status"
-|151-152 |  2 |Customs house      |customs     |e|See "Service Status"
-|153-154 |  2 |Cartage            |cartage     |e|See "Service Status"
-|155-156 |  2 |Crane(s)           |crane       |e|See "Service Status"
-|157-158 |  2 |Lift(s)            |lift        |e|See "Service Status"
-|159-160 |  2 |Medical facilities |medical     |e|See "Service Status"
-|161-162 |  2 |Navigation repair  |navrepair   |e|See "Service Status"
-|163-164 |  2 |Provisions         |provisions  |e|See "Service Status"
-|165-166 |  2 |Ship repair        |shiprepair  |e|See "Service Status"
-|167-168 |  2 |Surveyor           |surveyor    |e|See "Service Status"
-|169-170 |  2 |Steam              |steam       |e|See "Service Status"
-|171-172 |  2 |Tugs               |tugs        |e|See "Service Status"
-|173-174 |  2 |Waste disposal (solid)    |solidwaste    |e|See "Service Status"
-|175-176 |  2 |Waste disposal (liquid)   |liquidwaste   |e|See "Service Status"
-|177-178 |  2 |Waste disposal (hazardous)|hazardouswaste|e|See "Service Status"
-|179-180 |  2 |Reserved ballast exchange |ballast       |e|See "Service Status"
-|181-182 |  2 |Additional services|additional  |e|See "Service Status"
-|183-184 |  2 |Regional reserved 1|regional1   |e|See "Service Status"
-|185-186 |  2 |Regional reserved 2|regional2   |e|See "Service Status"
-|187-188 |  2 |Reserved for future|future1     |e|See "Service Status"
-|189-190 |  2 |Reserved for future|future1     |e|See "Service Status"
-|191-310 |120 |Name of Berth      |berth_name  |t|20 6-bit characters
-|311-335 | 25 |Longitude          |berth_lon   |I3|Minutes * 0.001,
-                                                  181000 = N/A (default)
-|336-359 | 24 |Latitude           |berth_lat   |I3|Minutes * 0.001,
-                                                  91000 = N/A (default)
-|==============================================================================
-
-The UTC timestamp refers to the time requested or granted for berthing.
-
-The longitude and latitude refer to the center of the berth.
-
-.Mooring Position
-[width="50%",frame="topbot",options="header"]
-|===================================
-|Code |Position
-|0    |Not available (default)
-|1    |Port-side to
-|2    |Starboard-side to
-|3    |Mediterranean (end-on) mooring
-|4    |Mooring buoy
-|5    |Anchorage
-|6-7  |Reserved for future use
-|===================================
-
-.Service Status
-[width="50%",frame="topbot",options="header"]
-|=============================================================================
-|Code |Meaning
-|0    |Not available or requested (default)
-|1    |Service available
-|2    |No data or unknown
-|3    |Not to be used
-|=============================================================================
-
 ==== IMO289 Dangerous Cargo Indication ====
 
 See the IMO236 variant for the meaning of this message.
@@ -1533,6 +1548,7 @@ A message 6 subtype. DAC = 001 FID = 25. Variable length: 117-576 bits.
 This is the <<IMO289>> version; there is an earlier <<IMO236>> version 
 with a different layout, deprecated in <<IMO289>>.
 
+//: Type 6(1/25)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Membe     |T|Units
@@ -1616,6 +1632,7 @@ course. It has a broadcast equivalent that is a message 8 subtype.
 
 A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 
+//: Type 6(1/28)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description       |Member    |T|Units
@@ -1679,6 +1696,7 @@ A message 6 subtype. DAC = 001 FID = 30. Variable length: 104-1028 bits.
 Intended to be used to associate a text annotation with another message 
 via the Message Linkage ID field.
 
+//: Type 6(1/30)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len    |Description       |Member     |T|Units
@@ -1706,6 +1724,7 @@ A message 6 subtype. DAC = 001 FID = 32. Variable length: 185-350 bits.
 This is the <<IMO289>> version; there is an <<IMO289>> version with 
 different bit widths for the latitude and longitude fields.
 
+//: Type 6(1/32)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description            |Member    |T|Units
@@ -1754,6 +1773,7 @@ An acknowledgement by Inland AIS message 22 should be received within
 15 minutes. Otherwise, the Inland AIS message 21 should be repeated
 once.
 
+//: Type 6(200/21)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member    |T|Units
@@ -1846,6 +1866,7 @@ board.
 
 A message 6 subtype. DAC = 200 FID = 55.  Fixed length, 168 bits.
 
+//: Type 6(200/55)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |T|Units
@@ -1894,6 +1915,7 @@ message, but without indicating how the Destination MMSI field is to
 be set or interpreted.  Robust implementations should accept and
 process this variant.
 
+//: Type 6(235-250:10)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description       |Member     |T|Units
@@ -1938,6 +1960,7 @@ previous messages of type 6.  Total length varies between 72 and 168
 bits by 32-bit increments, depending on the number of destination
 MMSIs included.
 
+//: Type 7
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description      |Member   |T|Units
@@ -1964,6 +1987,7 @@ messages. <<IMO236>> and <<IMO289>> describe payload use as
 international extension messages. This type is variable in length up
 to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
+//: Type 8
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |T|Units
@@ -1989,7 +2013,6 @@ DAC-FID pairs in use for type 8:
 |   1     | 15 |     | <<IMO236>> | Deprecated | Extended ship and voyage
 |   1     | 17 |     | <<IMO89>>  | In use     | VTS-Generated/Synthetic targets
 |   1     | 19 |     | <<IMO289>> | Standard   | Marine traffic signals
-|   1     | 20 |     | <<IMO289>> | Standard   | Berthing data
 |   1     | 21 |     | <<IMO289>> | Standard   | Weather observation from ship
 |   1     | 22 |     | <<IMO289>> | In use     | Area notice (broadcast)
 |   1     | 24 |     | <<IMO289>> | Standard   | Extended ship and voyage
@@ -2025,7 +2048,7 @@ Jan 2013. The deprecated IMO236 1/11 has a different binary layout from
 the IMO289 1/31.  FID type 17 is in use; there is a proposed
 update for it in <<IMO289>>.
 
-Breakdowns of selected Message 8 subtypes from <<IMO289>> follow.
+Breakdowns Message 8 subtypes from <<IMO289>> follow.
 
 ==== Meteorological and Hydrological Data (IMO236) ====
 
@@ -2035,6 +2058,7 @@ This is in use and described in <<IMO236>>, but has been deprecated by
 different binary layout. <<IMO236>> specifies a maximum interval between
 broadcast of this message of 12 minutes.
 
+//: Type 8(1/11)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member      |u|Units
@@ -2195,6 +2219,7 @@ fairways or sections in ports.
 A message 8 subtype. DAC = 001 FID = 13. Fixed length, 472 bits.
 Described in <<IMO236>> but deprecated by <<IMO289>>.
 
+//: Type 8(1/13)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description             |Member   |T|Units
@@ -2229,6 +2254,7 @@ This message should be used by a ship to report the height over keel.
 A message 8 subtype. DAC = 001 FID = 15 in <<IMO236>>.  Fixed length, 72 bits.
 Deprecated in <<IMO289>>.
 
+//: Type 8(1/15)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description          |Member    |T|Units
@@ -2250,6 +2276,7 @@ A message 8 subtype. DAC = 001 FID = 17. Variable length: 176-536
 bits.  This message is laid out identically in <<IMO236>> and
 <<IMO289>>.  In <<IMO236>> it is titled "Pseudo-AIS Targets".
 
+//: Type 8(1/17)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member     |T|Units
@@ -2302,6 +2329,7 @@ order.
 A message 8 subtype described in <<IMO289>>. DAC = 001 FID = 19. Fixed
 length: 360 bits.
 
+//: Type 8(1/19)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len  |Description           |Member  |u|Units
@@ -2365,6 +2393,8 @@ the WMO bit.  Field layouts after that bit vary depending on it.
 
 A message 8 subtype described in <<IMO289>>. DAC = 001 FID = 21. Fixed
 length: 360 bits.
+
+//: Type 8(1/21)
 .Weather observation report from ship: Non-WMO variant
 [frame="topbot",options="header"]
 |==============================================================================
@@ -2611,6 +2641,7 @@ The message consists of a fixed-length header of 111 bits, followed by 1 to
 10 sub-area indications which are fixed-length records 87 bits long. Here
 is the message header format:
 
+//: Type 8(1/22)
 .Area Notice (addressed) message header
 [frame="topbot",options="header"]
 |==============================================================================
@@ -2638,10 +2669,158 @@ is the message header format:
 The sub-area indications are as described under the addressed form, 
 message type 6 with DAC = 1 and FID = 23.
 
+==== IMO289 Extended Ship Static and Voyage Related Data ====
+
+This message should be used by a ship to report the height over keel.
+
+A message 8 subtype. DAC = 001 FID = 24 in <<IMO289>>.  Fixed length, 360 bits.
+Replaces a deprecated trial message from <<IMO236>>.
+
+//: Type 8(1/24)
+[frame="topbot",options="header"]
+|==============================================================================
+|Field   |Len |Description            |Member        |T|Units
+|0-5     |  6 |Message Type           |type          |u|Constant: 8
+|6-7     |  2 |Repeat Indicator       |repeat        |u|As in CNB
+|8-37    | 30 |Source MMSI            |mmsi          |u|9 digits
+|38-39   |  2 |Spare                  |              |x|Not used
+|40-49   | 10 |DAC                    |dac           |u|DAC = 001
+|50-55   |  6 |FID                    |fid           |u|FID = 24
+|56-65   | 10 |Message Linkage ID     |linkage       |u|Unsigned integer
+|66-78   | 13 |Air Draught            |airdraught    |u|Unsigned int, in 0.1m
+                                                        1-81.9 m.
+                                                        0 = N/A (default)
+                                                        81.91 = >= 81.91 m
+|79-108  | 30 |Last Port Of Call      |lastport      |t|5 6-bit chars, UN locode
+|109-138 | 30 |Next Port Of Call      |nextport      |t|5 6-bit chars, UN locode
+|139-168 | 30 |Second Port Of Call    |secondport    |t|5 6-bit chars, UN locode
+|169-170 |  2 |AIS Class A            |ais_state     |e|See "SOLAS Status"
+|171-172 |  2 |Automatic Tracking Aid |ata_state     |e|See "SOLAS Status"
+|173-174 |  2 |BNWAS                  |bnwas_state   |e|See "SOLAS Status"
+|175-176 |  2 |ECDIS Back-up          |ecdisb_state  |e|See "SOLAS Status"
+|177-178 |  2 |Paper Nautical Chart   |chart_state   |e|See "SOLAS Status"
+|179-180 |  2 |Echo sounder           |sounder_state |e|See "SOLAS Status"
+|181-182 |  2 |Electronic plotting aid|epaid_state   |e|See "SOLAS Status"
+|183-184 |  2 |Emergency steering gear|steer_state   |e|See "SOLAS Status"
+|185-186 |  2 |GNSS                   |gnss_state    |e|See "SOLAS Status"
+|187-188 |  2 |Gyro compass           |gyro_state    |e|See "SOLAS Status"
+|189-190 |  2 |LRIT                   |lrit_state    |e|See "SOLAS Status"
+|191-192 |  2 |Magnetic compass       |magcomp_state |e|See "SOLAS Status"
+|193-194 |  2 |NAVTEX                 |navtex_state  |e|See "SOLAS Status"
+|195-196 |  2 |Radar (ARPA)           |arpa_state    |e|See "SOLAS Status"
+|197-198 |  2 |Radar (S-band)         |sband_state   |e|See "SOLAS Status"
+|199-200 |  2 |Radar (X-band)         |xband_state   |e|See "SOLAS Status"
+|201-202 |  2 |Radio HF               |hfradio_state |e|See "SOLAS Status"
+|203-204 |  2 |Radio INMARSAT         |inmarsat_state|e|See "SOLAS Status"
+|205-206 |  2 |Radio MF               |mfradio_state |e|See "SOLAS Status"
+|207-208 |  2 |Radio VHF              |vhfradio_state|e|See "SOLAS Status"
+|209-210 |  2 |Speed Log over ground  |grndlog_state |e|See "SOLAS Status"
+|211-212 |  2 |Speed Log through water|waterlog_state|e|See "SOLAS Status"
+|213-214 |  2 |THD                    |thd_state     |e|See "SOLAS Status"
+|215-216 |  2 |Track control system   |tcs_state     |e|See "SOLAS Status"
+|217-218 |  2 |VDR/S-VDR              |vdr_state     |e|See "SOLAS Status"
+|219-220 |  2 |Reserved               |              |x|Not used
+|221-224 |  4 |Ice Class              |iceclass      |e|See "Ice Class"
+|225-242 | 18 |Shaft Horsepower       |horsepower    |u|Total ship HP: 1hp units,
+                                                        262,142 = >= 262,142hp,
+                                                        262,143 = N/A (default).
+|243-254 | 12 |VHF Working Channel    |vhfchan       |u|Channel number,
+                                                        0 = N/A (default).
+|255-296 | 42 |Lloyd's Ship Type      |lshiptype     |t|7 six-bit characters
+|297-314 | 18 |Gross Tonnage          |tonnage       |u|0-262,141,
+                                                        262,142 = >= 262,142hp,
+                                                        262,143 = N/A (default).
+|315-316 |  2 |Laden or Ballast       |lading        |e|0 = N/A (default),
+                                                        1 = Laden,
+                                                        2 = Ballast,
+                                                        3 = Not in use.
+|317-318 |  2 |Heavy Fuel Oil Bunkered|heavyoil      |e|0 = N/A (default),
+                                                        1 = No,
+                                                        2 = Yes,
+                                                        3 = Not in use.
+|319-320 |  2 |Light Fuel Oil Bunkered|lightoil      |e|0 = N/A (default),
+                                                        1 = No,
+                                                        2 = Yes,
+                                                        3 = Not in use.
+|321-322 |  2 |Diesel Oil Bunkered    |dieseloil     |e|0 = N/A (default),
+                                                        1 = No,
+                                                        2 = Yes,
+                                                        3 = Not in use.
+|323-336 | 14 |Total Bunker Oil       |totaloil      |u|0-16381 in tonnes,
+                                                        16382 = >= 16382 tonnes,
+                                                        16382 = N/A (default).
+|337-349 | 13 |Number of persons      |persons       |u|0 = N/A (default),
+                                                        1-8190,
+                                                        8191 = >= 8191.
+|350-359 | 10 |Spare                  |              |x|Not used
+|==============================================================================
+
+The special value of 81.91 for air draught is probably a drafting
+error in <<IMO289>>, as the scaled field does not have the precision
+required to represent it. The actual special value is unknown.
+
+The 2-bit _state fields describe the operational state of various sorts of
+SOLAS-required navigational equipment.  GNSS systems may include GPS, Loran-C, or GLONASS. BNWAS is the Bridge Navigational Watch Alarm System.  THD is a 
+Transmitting Heading Device.  Paper Nautical Chart state is officially 
+"ECDIS/Paper Nautical Chart" state in <<IMO289>>.  Status codes should be 
+interpreted according to the following table:
+
+.SOLAS Status
+[width="50%",frame="topbot",options="header"]
+|=============================================================================
+|Code |Meaning
+|0    |Not available or requested (default)
+|1    |Equipment operational
+|2    |Equipment not operational
+|3    |No data (equipment may or may not be on board/or its status is unknown)
+|=============================================================================
+
+.Ice Class
+[width="50%",frame="topbot",options="header"]
+|=============================================================================
+|Code |Meaning
+|0    |Not classified
+|1    |IACS PC 1
+|2    |IACS PC 2
+|3    |IACS PC 3
+|4    |IACS PC 4
+|5    |IACS PC 5
+|6    |IACS PC 6 / FSICR IA Super / RS Arc5
+|7    |IACS PC 7 / FSICR IA / RS Arc4
+|8    |FSICR IB / RS Ice3
+|9    |FSICR IC / RS Ice2
+|10   |RS Ice1
+|11-14|Reserved for future use
+|15   |Not available = default
+|=============================================================================
+
+ACS = International Association of Classification Societies
+
+PC = Polar Class. For further details, see IACS Req. 2007 Requirements
+concerning POLAR CLASS and MSC/Circ.1056 and MEPC/Circ.399 on
+Guidelines for ships operating in Arctic ice-covered waters.
+
+FSICR = Finnish-Swedish Ice Class Rules. For further details, see
+Finnish Maritime Administration's Bulletin No.10/10.12.2008 Ice class
+regulations 2008 (Finnish-Swedish ice class rules). Note: Authorized
+classification society equivalents for the Finnish-Swedish Ice Class
+Rules should also be recognized, as issued in the Finnish Maritime
+Administration's Bulletin No.4/2.4.2007 (as amended). Both bulletins
+can be found at www.fma.fi.
+
+RS = Russian Maritime Register of Shipping. For further details see
+Rules for the classification and construction of seagoing ships,
+Edition 2008.
+
+VHF channel number is encoded according to Recommendation ITU-R M.1084.
+
+The lshiptype field uses Lloyd's Register STATCODE 5 encoding.
+
 ==== IMO289 Environmental ====
 
 A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
 
+//: Type 8(1/26)
 .Environmental message header
 [frame="topbot",options="header"]
 |==============================================================================
@@ -3152,6 +3331,7 @@ course.  It has an addressed equivalent that is a message 6 subtype.
 
 A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
 
+//: Type 8(1/27)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description       |Member   |T|Units
@@ -3195,6 +3375,7 @@ A message 8 subtype. DAC = 001 FID = 29. Variable length: 72-1032 bits.
 Intended to be used to associate a text annotation with another message 
 via the Message Linkage ID field.
 
+//: Type 8(1/29)
 [frame="topbot",options="header"]
 |=============================================================================
 |Field   |Len    |Description       |Member     |T|Units
@@ -3210,152 +3391,6 @@ via the Message Linkage ID field.
 
 There is an equivalent subtype of message 6 that is an addressed description.
 
-==== IMO289 Extended Ship Static and Voyage Related Data ====
-
-This message should be used by a ship to report the height over keel.
-
-A message 8 subtype. DAC = 001 FID = 24 in <<IMO289>>.  Fixed length, 360 bits.
-Replaces a deprecated trial message from <<IMO236>>.
-
-[frame="topbot",options="header"]
-|==============================================================================
-|Field   |Len |Description            |Member        |T|Units
-|0-5     |  6 |Message Type           |type          |u|Constant: 8
-|6-7     |  2 |Repeat Indicator       |repeat        |u|As in CNB
-|8-37    | 30 |Source MMSI            |mmsi          |u|9 digits
-|38-39   |  2 |Spare                  |              |x|Not used
-|40-49   | 10 |DAC                    |dac           |u|DAC = 001
-|50-55   |  6 |FID                    |fid           |u|FID = 24
-|56-65   | 10 |Message Linkage ID     |linkage       |u|Unsigned integer
-|66-78   | 13 |Air Draught            |airdraught    |u|Unsigned int, in 0.1m
-                                                        1-81.9 m.
-                                                        0 = N/A (default)
-                                                        81.91 = >= 81.91 m
-|79-108  | 30 |Last Port Of Call      |lastport      |t|5 6-bit chars, UN locode
-|109-138 | 30 |Next Port Of Call      |nextport      |t|5 6-bit chars, UN locode
-|139-168 | 30 |Second Port Of Call    |secondport    |t|5 6-bit chars, UN locode
-|169-170 |  2 |AIS Class A            |ais_state     |e|See "SOLAS Status"
-|171-172 |  2 |Automatic Tracking Aid |ata_state     |e|See "SOLAS Status"
-|173-174 |  2 |BNWAS                  |bnwas_state   |e|See "SOLAS Status"
-|175-176 |  2 |ECDIS Back-up          |ecdisb_state  |e|See "SOLAS Status"
-|177-178 |  2 |Paper Nautical Chart   |chart_state   |e|See "SOLAS Status"
-|179-180 |  2 |Echo sounder           |sounder_state |e|See "SOLAS Status"
-|181-182 |  2 |Electronic plotting aid|epaid_state   |e|See "SOLAS Status"
-|183-184 |  2 |Emergency steering gear|steer_state   |e|See "SOLAS Status"
-|185-186 |  2 |GNSS                   |gnss_state    |e|See "SOLAS Status"
-|187-188 |  2 |Gyro compass           |gyro_state    |e|See "SOLAS Status"
-|189-190 |  2 |LRIT                   |lrit_state    |e|See "SOLAS Status"
-|191-192 |  2 |Magnetic compass       |magcomp_state |e|See "SOLAS Status"
-|193-194 |  2 |NAVTEX                 |navtex_state  |e|See "SOLAS Status"
-|195-196 |  2 |Radar (ARPA)           |arpa_state    |e|See "SOLAS Status"
-|197-198 |  2 |Radar (S-band)         |sband_state   |e|See "SOLAS Status"
-|199-200 |  2 |Radar (X-band)         |xband_state   |e|See "SOLAS Status"
-|201-202 |  2 |Radio HF               |hfradio_state |e|See "SOLAS Status"
-|203-204 |  2 |Radio INMARSAT         |inmarsat_state|e|See "SOLAS Status"
-|205-206 |  2 |Radio MF               |mfradio_state |e|See "SOLAS Status"
-|207-208 |  2 |Radio VHF              |vhfradio_state|e|See "SOLAS Status"
-|209-210 |  2 |Speed Log over ground  |grndlog_state |e|See "SOLAS Status"
-|211-212 |  2 |Speed Log through water|waterlog_state|e|See "SOLAS Status"
-|213-214 |  2 |THD                    |thd_state     |e|See "SOLAS Status"
-|215-216 |  2 |Track control system   |tcs_state     |e|See "SOLAS Status"
-|217-218 |  2 |VDR/S-VDR              |vdr_state     |e|See "SOLAS Status"
-|219-220 |  2 |Reserved               |              |x|Not used
-|221-224 |  4 |Ice Class              |iceclass      |e|See "Ice Class"
-|225-242 | 18 |Shaft Horsepower       |horsepower    |u|Total ship HP: 1hp units,
-                                                        262,142 = >= 262,142hp,
-                                                        262,143 = N/A (default).
-|243-254 | 12 |VHF Working Channel    |vhfchan       |u|Channel number,
-                                                        0 = N/A (default).
-|255-296 | 42 |Lloyd's Ship Type      |lshiptype     |t|7 six-bit characters
-|297-314 | 18 |Gross Tonnage          |tonnage       |u|0-262,141,
-                                                        262,142 = >= 262,142hp,
-                                                        262,143 = N/A (default).
-|315-316 |  2 |Laden or Ballast       |lading        |e|0 = N/A (default),
-                                                        1 = Laden,
-                                                        2 = Ballast,
-                                                        3 = Not in use.
-|317-318 |  2 |Heavy Fuel Oil Bunkered|heavyoil      |e|0 = N/A (default),
-                                                        1 = No,
-                                                        2 = Yes,
-                                                        3 = Not in use.
-|319-320 |  2 |Light Fuel Oil Bunkered|lightoil      |e|0 = N/A (default),
-                                                        1 = No,
-                                                        2 = Yes,
-                                                        3 = Not in use.
-|321-322 |  2 |Diesel Oil Bunkered    |dieseloil     |e|0 = N/A (default),
-                                                        1 = No,
-                                                        2 = Yes,
-                                                        3 = Not in use.
-|323-336 | 14 |Total Bunker Oil       |totaloil      |u|0-16381 in tonnes,
-                                                        16382 = >= 16382 tonnes,
-                                                        16382 = N/A (default).
-|337-349 | 13 |Number of persons      |persons       |u|0 = N/A (default),
-                                                        1-8190,
-                                                        8191 = >= 8191.
-|350-359 | 10 |Spare                  |              |x|Not used
-|==============================================================================
-
-The special value of 81.91 for air draught is probably a drafting
-error in <<IMO289>>, as the scaled field does not have the precision
-required to represent it. The actual special value is unknown.
-
-The 2-bit _state fields describe the operational state of various sorts of
-SOLAS-required navigational equipment.  GNSS systems may include GPS, Loran-C, or GLONASS. BNWAS is the Bridge Navigational Watch Alarm System.  THD is a 
-Transmitting Heading Device.  Paper Nautical Chart state is officially 
-"ECDIS/Paper Nautical Chart" state in <<IMO289>>.  Status codes should be 
-interpreted according to the following table:
-
-.SOLAS Status
-[width="50%",frame="topbot",options="header"]
-|=============================================================================
-|Code |Meaning
-|0    |Not available or requested (default)
-|1    |Equipment operational
-|2    |Equipment not operational
-|3    |No data (equipment may or may not be on board/or its status is unknown)
-|=============================================================================
-
-.Ice Class
-[width="50%",frame="topbot",options="header"]
-|=============================================================================
-|Code |Meaning
-|0    |Not classified
-|1    |IACS PC 1
-|2    |IACS PC 2
-|3    |IACS PC 3
-|4    |IACS PC 4
-|5    |IACS PC 5
-|6    |IACS PC 6 / FSICR IA Super / RS Arc5
-|7    |IACS PC 7 / FSICR IA / RS Arc4
-|8    |FSICR IB / RS Ice3
-|9    |FSICR IC / RS Ice2
-|10   |RS Ice1
-|11-14|Reserved for future use
-|15   |Not available = default
-|=============================================================================
-
-ACS = International Association of Classification Societies
-
-PC = Polar Class. For further details, see IACS Req. 2007 Requirements
-concerning POLAR CLASS and MSC/Circ.1056 and MEPC/Circ.399 on
-Guidelines for ships operating in Arctic ice-covered waters.
-
-FSICR = Finnish-Swedish Ice Class Rules. For further details, see
-Finnish Maritime Administration's Bulletin No.10/10.12.2008 Ice class
-regulations 2008 (Finnish-Swedish ice class rules). Note: Authorized
-classification society equivalents for the Finnish-Swedish Ice Class
-Rules should also be recognized, as issued in the Finnish Maritime
-Administration's Bulletin No.4/2.4.2007 (as amended). Both bulletins
-can be found at www.fma.fi.
-
-RS = Russian Maritime Register of Shipping. For further details see
-Rules for the classification and construction of seagoing ships,
-Edition 2008.
-
-VHF channel number is encoded according to Recommendation ITU-R M.1084.
-
-The lshiptype field uses Lloyd's Register STATCODE 5 encoding.
-
 ==== Meteorological and Hydrological Data (IMO289) ===
 
 A message 8 subtype. DAC = 001 FID = 31. Fixed length, 360 bits.
@@ -3365,6 +3400,7 @@ addition of the Position Accuracy field, (b) water level has 12 bits
 of precision rather than 9 (units of centimeters rather than
 decimeters), and (c) end padding changes from 6 to 10 bits.
 
+//: Type 8(1/31)
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member      |T|Units
@@ -3480,6 +3516,7 @@ static and voyage related data in addition to message 5. The message
 should be sent as soon as possible (from the AIS point of view) after
 message 5.
 
+//: Type 8(200/10)
 [frame="topbot",options="header"]
 |===============================================================================
 |Field   |Len |Description            |Member   |T|Units
@@ -3596,13 +3633,14 @@ expand both.
 
 ==== EMMA Warning Report (Inland AIS) ====
 
-A message 6 subtype. DAC = 200 FID = 23. Fixed length, 256 bits.
+A message 8 subtype. DAC = 200 FID = 23. Fixed length, 256 bits.
 
 The EMMA warning is sent by base stations to drive shipboard ECDIS
 displays of heavy weather conditions. The following message is capable
 of transmitting the EMMA data using the AIS channel. It does not
 replace the Notices to Skippers warnings.
 
+//: Type 8(200/23)
 [frame="topbot",options="header"]
 |===============================================================================
 |Field   |Len |Description         |Member      |T|Units
@@ -3692,6 +3730,7 @@ water levels distributed via Notices to Skippers. It is possible to
 transmit the water levels of more than 4 gauges using multiple
 messages.
 
+//: Type 8(200/24)
 [frame="topbot",options="header"]
 |===============================================================================
 |Field   |Len |Description         |Member     |T|Units
@@ -3720,6 +3759,7 @@ area. The information should be displayed on an external Inland ECDIS
 display as dynamic symbols. The message should be sent with binary
 message 8 at regular intervals.
 
+//: Type 8(200/40)
 [frame="topbot",options="header"]
 |===============================================================================
 |Field   |Len |Description         |Member     |T|Units
@@ -3779,6 +3819,7 @@ following way:
 Tracking information for search-and-rescue aircraft.  Total number of
 bits is 168.
 
+//: Type 9
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member     |T|Encoding
@@ -3818,6 +3859,7 @@ values as in the common navigation block, but is at a different offset.
 Request for UTC/Date information from an AIS base station. Total
 number of bits is 72.
 
+//: Type 10
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member     |T|Encoding
@@ -3839,6 +3881,7 @@ This is a point-to-point text message.  The payload is interpreted as
 six-bit text.  This message is variable in length up to a maximum of
 1008 bits (up to 5 AIVDM sentence payloads).
 
+//: Type 12
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member      |T|Units
@@ -3877,6 +3920,7 @@ This is a broadcast text message.  The payload is interpreted as
 six-bit text.  This message is variable in length up to a maximum of
 1008 bits (up to 5 AIVDM sentence payloads).
 
+//: Type 14
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member    |T|Units
@@ -3906,6 +3950,7 @@ analysis of information flow in an AIS station network.  The "slot offset"
 members are a request for the response to interrogation to occupy
 a particular time division in the TDMA packet layer.
 
+//: Type 15
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description         |Member    |T|Units
@@ -3955,6 +4000,7 @@ be transmitted.  It is probably not of interest unless you are
 studying the internal operation of an AIS base station network.
 Length may be 96 or 144 bits.
 
+//: Type 16
 [frame="topbot",options="header"]
 |============================================================================
 |Field   |Len |Description         |Member     |T|Units
@@ -3993,6 +4039,8 @@ The data in the payload is intended to be passed directly to GPS
 receivers capable of accepting such corrections. 80 to 816 bits
 depending on payload size.
 
+//: Type 17
+[frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description         |Member     |T|Units
 |0-5     |  6 |Message Type        |type       |u|Constant: 17
@@ -4026,6 +4074,7 @@ communicated by Kurt Schwehr.  Kurt warns that "the spec does not do a
 good job of explaining these fields... I don't think that I totally
 understand these fields."
 
+//: Type 18
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description        |Member   |T|Units
@@ -4076,6 +4125,7 @@ In practice, the information in the ship name and dimension fields is
 not reliable, as it has to be hand-entered by humans rather than
 gathered automatically from sensors.
 
+//: Type 19
 [frame="topbot",options="header"]
 |==============================================================================
 |Field    |Len |Description            |Member       |T|Units
@@ -4115,6 +4165,7 @@ unlikely to be of interest unless you are implementing or studying
 an AIS base station network. Length varies from 72-160 depending on
 the number of slot reservations (1 to 4) in the message.
 
+//: Type 20
 [frame="topbot",options="header"]
 |===============================================================================
 |Field    |Len |Description       |Member      |T|Units
@@ -4151,6 +4202,7 @@ This message is unusual in that it varies in length depending on the
 presence and size of the Name Extension field. May vary between 272
 and 360 bits.
 
+//: Type 21
 [frame="topbot",options="header"]
 |==============================================================================
 |Field    |Len |Description            |Member      |T|Units
@@ -4255,6 +4307,7 @@ This message contains no navigational information, and is unlikely to be of
 interest unless you are implementing or studying an AIS base station
 network. 
 
+//: Type 22
 [frame="topbot",options="header"]
 |==============================================================================
 |Field    |Len |Description      |Member    |T|Units
@@ -4320,6 +4373,7 @@ This message contains no navigational information, and is unlikely to
 be of interest unless you are implementing or studying an AIS base
 station network.
 
+//: Type 23
 [frame="topbot",options="header"]
 |==============================================================================
 |Field    |Len |Description      |Member       |T|Units
@@ -4422,6 +4476,7 @@ depending on the range of the Type B MMSI field. 160 bits for part A,
 <<IALA>> does not describe this message type; format information
 is thanks to Kurt Schwehr.
 
+//: Type 24
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len |Description            | Member         |T|Units
@@ -4473,6 +4528,7 @@ Maximum of 168 bits (a single slot). Fields after the Destination
 MMSI are at variable offsets depending on that flag and the Destination
 Indicator; they always occur in the same order but some may be omitted.
 
+//: Type 25
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len   |Description            | Member      |T|Units
@@ -4507,6 +4563,7 @@ observed even in long-duration samples from AISHub.
 
 Takes up 60-1064 bits (up to 5 slots).
 
+//: Type 26
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len   |Description           | Member     |T|Units
@@ -4544,6 +4601,7 @@ satellite). This message has a similar content to Messages 1, 2 and 3,
 but the total number of bits has been compressed to allow for
 increased propagation delays associated with long-range detection
 
+//: Type 27
 [frame="topbot",options="header"]
 |==============================================================================
 |Field   |Len   |Description         |Member   |u|Units
@@ -4583,7 +4641,7 @@ System) which uses extended AIS binary formats. <<SEAWAY>> says it's
 intercompatible with the St. Lawrence Seaway system and describes three 
 PAWSS-specific messages in its Appendix A.
 
-Since 2007 the Port Authority of London has operated an Thames AIS
+Since 2007 the Port Authority of London has operated a Thames AIS
 system covering the Thames River; it uses extensions of message types
 6 and 8.  It is describes in <<THAMES>>.
 
