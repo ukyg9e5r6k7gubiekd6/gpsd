@@ -68,11 +68,13 @@ static void ubx_msg_inf(unsigned char *buf, size_t data_len, const int debug);
 
 static void ubx_setup_cfg(struct gps_device_t *session)
 {
+    extern const struct gps_type_t ubx_binary;
     unsigned char *out = session->driver.ubx.port_settings;
     int id = 0;
 
     /* don't do this if the CFG_PRT response has already come back */
-    if (session->driver.ubx.have_port_configuration)
+    if (session->device_type == &ubx_binary 
+		&& session->driver.ubx.have_port_configuration)
 	return;
 
     switch(session->sourcetype) {
@@ -146,9 +148,6 @@ static void ubx_setup_cfg(struct gps_device_t *session)
     out[18] = 0;					/* res3 */
     out[19] = 0;					/* res3 */
     /*@ +type @*/
-    gpsd_report(session->context->debug, LOG_IO,
-		"Synthetic USART config block: %s\n",
-		gpsd_hexdump(out, UBX_CFG_LEN));
 #else
     /*
      * Until uBlox reveals the black magic required to create these
@@ -182,6 +181,9 @@ static void ubx_setup_cfg(struct gps_device_t *session)
     }
     /*@-charint@*/
 #endif /* __FUTURE__ */
+    gpsd_report(session->context->debug, LOG_SHOUT,
+		"Synthetic USART config block: %s\n",
+		gpsd_hexdump(out, UBX_CFG_LEN));
 
     session->driver.ubx.have_port_configuration = true;
 }
