@@ -385,8 +385,8 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	/* see PF_INET6 case below */
 	s = socket(PF_INET, type, proto);
 	break;
-#ifndef S_SPLINT_S
 #ifdef IPV6_ENABLE
+#ifndef S_SPLINT_S
     case AF_INET6:
 	sin_len = sizeof(sat.sa_in6);
 
@@ -428,7 +428,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	    }
 	}
 	break;
-#endif
+#endif  /* IPV6_ENABLE */
     default:
 	gpsd_report(context.debug, LOG_ERROR,
 		    "unhandled address family %d\n", af);
