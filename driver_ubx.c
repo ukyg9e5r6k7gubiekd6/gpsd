@@ -152,7 +152,7 @@ static void ubx_setup_cfg(struct gps_device_t *session)
 #else
     /*
      * Until uBlox reveals the black magic required to create these
-     * configuraation blocks, we'll use default coonfigs read from a
+     * configuration blocks, we'll use default configs read from a
      * TCX0 after cold boot.
      *
      * The serial one encodes the assumption that the device is running
