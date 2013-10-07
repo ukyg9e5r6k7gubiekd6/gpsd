@@ -46,12 +46,15 @@
 #define UBX_CLASS_OFFSET	2
 #define UBX_TYPE_OFFSET		3
 
+/* because we hates magic numbers forever */
 #define USART1_ID		1
 #define USART2_ID		2
 #define USB_ID			3
-#define UBX_MASK		0x01
-#define NMEA_MASK		0x02
+#define UBX_PROTOCOL_MASK	0x01
+#define NMEA_PROTOCOL_MASK	0x02
+#define RTCM_PROTOCOL_MASK	0x04
 #define UBX_CFG_LEN		20
+#define outProtoMask		14
 
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf,
 			    size_t len);
@@ -140,9 +143,9 @@ static void ubx_setup_cfg(struct gps_device_t *session)
     out[7] = 0;					/* txReady */
     if (session->sourcetype == source_rs232)
 	putle32(out, 8, session->gpsdata.dev.baudrate);	/* baudRate */
-    out[12] = NMEA_MASK;				/* inProtoMask */
+    out[12] = NMEA_PROTOCOL_MASK;				/* inProtoMask */
     out[13] = 0;					/* inProtoMask */
-    out[14] = UBX_MASK | NMEA_MASK;			/* outProtoMask */
+    out[14] = UBX_PROTOCOL_MASK | NMEA_PROTOCOL_MASK;			/* outProtoMask */
     out[15] = 0;					/* outProtoMask */
     out[16] = 0;					/* flags */
     out[17] = 0;					/* flags */
@@ -803,8 +806,8 @@ static void ubx_mode(struct gps_device_t *session, int mode)
 	putle32(session->driver.ubx.port_settings, 8, session->gpsdata.dev.baudrate);
 
     if (mode == MODE_NMEA) {
-	session->driver.ubx.port_settings[14] &= ~0x01;	/* turn off UBX output on this port */
-	session->driver.ubx.port_settings[14] |= 0x02;	/* turn on NMEA output on this port */
+	session->driver.ubx.port_settings[outProtoMask] &= ~UBX_PROTOCOL_MASK;
+	session->driver.ubx.port_settings[outProtoMask] |= NMEA_PROTOCOL_MASK;
     } else { /* MODE_BINARY */
 	/*
 	 * Just enabling the UBX protocol for output is not enough to
@@ -833,8 +836,8 @@ static void ubx_mode(struct gps_device_t *session, int mode)
 	msg[2] = 0x0a;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
-	session->driver.ubx.port_settings[14] &= ~0x02;	/* turn off NMEA output on this port */
-	session->driver.ubx.port_settings[14] |= 0x01;	/* turn on UBX output on this port */
+	session->driver.ubx.port_settings[outProtoMask] &= ~NMEA_PROTOCOL_MASK;
+	session->driver.ubx.port_settings[outProtoMask] |= UBX_PROTOCOL_MASK;
     }
     /*@ -charint @*/
     (void)ubx_write(session, 0x06u, 0x00,
