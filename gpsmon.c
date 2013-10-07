@@ -143,9 +143,44 @@ void monitor_fixframe(WINDOW * win)
 
 /******************************************************************************
  *
- * Device-independent I/O routines
+ * Device-type-independent I/O routines
  *
  ******************************************************************************/
+
+static void packet_dump(const char *buf, size_t buflen)
+{
+    if (packetwin != NULL) {
+	size_t i;
+	bool printable = true;
+	for (i = 0; i < buflen; i++)
+	    if (!isprint(buf[i]) && !isspace(buf[i]))
+		printable = false;
+	if (printable) {
+	    for (i = 0; i < buflen; i++)
+		if (isprint(buf[i]))
+		    (void)waddch(packetwin, (chtype) buf[i]);
+		else
+		    (void)wprintw(packetwin, "\\x%02x",
+				  (unsigned char)buf[i]);
+	} else {
+	    for (i = 0; i < buflen; i++)
+		(void)wprintw(packetwin, "%02x", (unsigned char)buf[i]);
+	}
+	(void)wprintw(packetwin, "\n");
+    }
+}
+
+#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
+static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
+{
+    if (packetwin != NULL) {
+	(void)wattrset(packetwin, A_BOLD);
+	(void)wprintw(packetwin, ">>>");
+	packet_dump(buf, len);
+	(void)wattrset(packetwin, A_NORMAL);
+    }
+}
+#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
 static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
@@ -220,8 +255,9 @@ void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
 ssize_t gpsd_write(struct gps_device_t *session,
 		   const char *buf,
 		   const size_t len)
-/* pass low-level data to devices straight through */
+/* pass low-level data to devices, echoing it to the log window */
 {
+    monitor_dump_send((const char *)buf, len);
     return gpsd_serial_write(session, buf, len);
 }
 
@@ -272,41 +308,6 @@ static ssize_t readpkt(void)
     /*@ +globstate +type +shiftnegative +compdef +nullpass @*/
 }
 
-static void packet_dump(const char *buf, size_t buflen)
-{
-    if (packetwin != NULL) {
-	size_t i;
-	bool printable = true;
-	for (i = 0; i < buflen; i++)
-	    if (!isprint(buf[i]) && !isspace(buf[i]))
-		printable = false;
-	if (printable) {
-	    for (i = 0; i < buflen; i++)
-		if (isprint(buf[i]))
-		    (void)waddch(packetwin, (chtype) buf[i]);
-		else
-		    (void)wprintw(packetwin, "\\x%02x",
-				  (unsigned char)buf[i]);
-	} else {
-	    for (i = 0; i < buflen; i++)
-		(void)wprintw(packetwin, "%02x", (unsigned char)buf[i]);
-	}
-	(void)wprintw(packetwin, "\n");
-    }
-}
-
-#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
-static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
-{
-    if (packetwin != NULL) {
-	(void)wattrset(packetwin, A_BOLD);
-	(void)wprintw(packetwin, ">>>");
-	packet_dump(buf, len);
-	(void)wattrset(packetwin, A_NORMAL);
-    }
-}
-#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
-
 #ifdef RECONFIGURE_ENABLE
 static void announce_log(/*@in@*/ const char *fmt, ...)
 {
@@ -341,7 +342,6 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 	context.readonly = false;
 	st = (*active)->driver->control_send(&session, (char *)buf, len);
 	context.readonly = true;
-	monitor_dump_send((const char *)buf, len);
 	return (st != -1);
     }
 }
@@ -351,9 +351,7 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
     if (!serial)
 	return false;
     else {
-	ssize_t st;
-	st = write(session.gpsdata.gps_fd, (char *)buf, len);
-	monitor_dump_send((const char *)buf, len);
+	ssize_t st = gpsd_write(&session, (char *)buf, len);
 	return (st > 0 && (size_t) st == len);
     }
 }
