@@ -390,7 +390,7 @@ void monitor_log(const char *fmt, ...)
     }
 }
 
-static bool switch_type(const struct gps_type_t *devtype, bool switch_flag)
+static bool switch_type(const struct gps_type_t *devtype)
 {
     const struct monitor_object_t **trial, **newobject;
     newobject = NULL;
@@ -408,9 +408,6 @@ static bool switch_type(const struct gps_type_t *devtype, bool switch_flag)
 	} else {
 	    int leftover;
 
-	    if (switch_flag) {
-	        return true;
-	    }
 	    if (active != NULL) {
 		if ((*active)->wrap != NULL)
 		    (*active)->wrap();
@@ -703,12 +700,8 @@ int main(int argc, char **argv)
 	        bool switch_flag = false;
 
 		if (session.packet.type != last_type) {
-		    if (((last_type == NMEA_PACKET ) && (session.packet.type == AIVDM_PACKET) && nmea) ||
-			((last_type == AIVDM_PACKET) && (session.packet.type == NMEA_PACKET ) && nmea)) {
-		        switch_flag = true;
-		    }
 		    last_type = session.packet.type;
-		    if (!switch_type(session.device_type, switch_flag))
+		    if (!switch_type(session.device_type))
 		        longjmp(terminate, TERM_DRIVER_SWITCH);
 		}
 		/*@ +nullpass */
@@ -967,7 +960,7 @@ int main(int argc, char **argv)
 			} else if (matchcount == 1) {
 			    assert(forcetype != NULL);
 			    /* *INDENT-OFF* */
-			    if (switch_type(forcetype, false))
+			    if (switch_type(forcetype))
 				(void)gpsd_switch_driver(&session,
 							 forcetype->type_name);
 			    /* *INDENT-ON* */
