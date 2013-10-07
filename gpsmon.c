@@ -707,7 +707,7 @@ int main(int argc, char **argv)
 		/* refresh all windows */
 		(void)wprintw(cmdwin, type_name);
 		promptlen = strlen(type_name);
-		if (fallback != NULL) {
+		if (fallback != NULL && fallback != active) {
 		    (void)waddch(cmdwin, (chtype)'(');
 		    (void)waddstr(cmdwin, (*fallback)->driver->type_name);
 		    (void)waddch(cmdwin, (chtype)')');
@@ -789,7 +789,7 @@ int main(int argc, char **argv)
 			    /* *INDENT-OFF* */
 			    context.readonly = false;
 			    if ((*switcher)->driver->rate_switcher(&session, rate)) {
-				announce_log("Rate switcher called.");
+				announce_log("[Rate switcher called.]");
 			    } else
 				monitor_complain("Rate not supported.");
 			    context.readonly = true;
@@ -852,10 +852,10 @@ int main(int argc, char **argv)
 			    switcher = fallback;
 			if ((*switcher)->driver->mode_switcher) {
 			    context.readonly = false;
+			    announce_log("[Mode switcher to mode %d]", v);
 			    (*switcher)->driver->mode_switcher(&session,
 							     (int)v);
 			    context.readonly = true;
-			    announce_log("Mode switcher called: to mode %d", v);
 			    (void)tcdrain(session.gpsdata.gps_fd);
 			    (void)usleep(50000);
 			} else
@@ -915,7 +915,7 @@ int main(int argc, char **argv)
 				driver->speed_switcher(&session, speed,
 						       parity, (int)
 						       stopbits)) {
-				announce_log("Speed switcher called.");
+				announce_log("[Speed switcher called.]");
 				/*
 				 * See the comment attached to the 'DEVICE'
 				 * command in gpsd.  Allow the control
