@@ -65,6 +65,7 @@ static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session,
 				     unsigned char *buf, size_t data_len);
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
 static void ubx_msg_inf(unsigned char *buf, size_t data_len, const int debug);
+static void ubx_mode(struct gps_device_t *session, int mode);
 
 static void ubx_setup_cfg(struct gps_device_t *session)
 {
@@ -606,6 +607,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(session->context->debug, LOG_IO, "UBX_CFG_PRT\n");
 	for (i = 0; i < (int)sizeof(session->driver.ubx.port_settings); i++)
 	    session->driver.ubx.port_settings[i] = buf[UBX_PREFIX_LEN+i];
+	session->driver.ubx.have_port_configuration = true;
 #ifdef __FUTURE__
 	gpsd_report(session->context->debug, LOG_IO,
 		    "Actual USART config block: %s\n",
@@ -613,12 +615,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 				 UBX_CFG_LEN));
 #endif /* __FUTURE__ */
 	/* turn off NMEA output, turn on UBX on this port */
-	session->driver.ubx.port_settings[14] &= ~0x02;
-	session->driver.ubx.port_settings[14] |= 0x01;
-	(void)ubx_write(session, 0x06, 0x00,
-			session->driver.ubx.port_settings,
-			sizeof(session->driver.ubx.port_settings));
-	session->driver.ubx.have_port_configuration = true;
+	ubx_mode(session, MODE_BINARY);
 	break;
 
     case UBX_ACK_NAK:
@@ -771,34 +768,13 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	/*@ -type @*/
 	msg[0] = 0x03;		/* SBAS mode enabled, accept testbed mode */
 	msg[1] = 0x07;		/* SBAS usage: range, differential corrections and integrity */
-	msg[2] = 0x03;		/* use the maximun search range: 3 channels */
+	msg[2] = 0x03;		/* use the maximum search range: 3 channels */
 	msg[3] = 0x00;		/* PRN numbers to search for all set to 0 => auto scan */
 	msg[4] = 0x00;
 	msg[5] = 0x00;
 	msg[6] = 0x00;
 	msg[7] = 0x00;
 	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
-
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
-	msg[2] = 0x01;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x06;		/* msg id  = NAV-SOL */
-	msg[2] = 0x01;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x20;		/* msg id  = UBX_NAV_TIMEGPS */
-	msg[2] = 0x01;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x30;		/* msg id  = NAV-SVINFO */
-	msg[2] = 0x0a;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
-	msg[2] = 0x0a;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 	/*@ +type @*/
     } else if (event == event_deactivate) {
 	/*@ -type @*/
@@ -830,6 +806,33 @@ static void ubx_mode(struct gps_device_t *session, int mode)
 	session->driver.ubx.port_settings[14] &= ~0x01;	/* turn off UBX output on this port */
 	session->driver.ubx.port_settings[14] |= 0x02;	/* turn on NMEA output on this port */
     } else { /* MODE_BINARY */
+	/*
+	 * Just enabling the UBX protocol for output is not enough to
+	 * actually get UBX output; the sentence mix is initially empty.
+	 * Fix that...
+	 */
+	unsigned char msg[3];
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x06;		/* msg id  = NAV-SOL */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x20;		/* msg id  = UBX_NAV_TIMEGPS */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x30;		/* msg id  = NAV-SVINFO */
+	msg[2] = 0x0a;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
+	msg[2] = 0x0a;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 	session->driver.ubx.port_settings[14] &= ~0x02;	/* turn off NMEA output on this port */
 	session->driver.ubx.port_settings[14] |= 0x01;	/* turn on UBX output on this port */
     }
