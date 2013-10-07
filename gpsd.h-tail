@@ -449,11 +449,11 @@ struct gps_device_t {
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
     /*
      * The rest of this structure is driver-specific private storage.
-     * Because the Garmin driver uses a long buffer, you can have
-     * up to 4096+12 bytes of private storage in your own union member
-     * without making this structure larger or changing the API at all.
+     * It used to be a union, but that turned out to be unsafe.  Dual-mode
+     * devices like SiRFs and uBloxes need to not step on the old mode's
+     * storage when they transition.
      */
-    union {
+    struct {
 #ifdef NMEA_ENABLE
 	struct {
 	    int part, await;		/* for tracking GSV parts */
