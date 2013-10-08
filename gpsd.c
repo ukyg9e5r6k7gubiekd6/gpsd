@@ -1616,8 +1616,9 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #endif /* SOCKET_EXPORT_ENABLE */
 }
 
-static void consume_packets(struct gps_device_t *device)
-/* consume and report packets from a specified device */
+static void consume_packets(struct gps_device_t *device,
+			    void (*handler)(struct gps_device_t *, gps_mask_t))
+/* consume and handle packets from a specified device */
 {
     gps_mask_t changed;
     int fragments;
@@ -1722,8 +1723,8 @@ static void consume_packets(struct gps_device_t *device)
 			gps_maskdump(device->gpsdata.set));
 
 
-	/* report on data contained in this packet */
-	all_reports(device, changed);
+	/* handle data contained in this packet */
+	handler(device, changed);
     }
 }
 
@@ -2408,7 +2409,7 @@ int main(int argc, char *argv[])
 	    if (device->gpsdata.gps_fd >= 0) {
 		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))
 		    /* get data from the device */
-		    consume_packets(device);
+		    consume_packets(device, all_reports);
 	        else if (device->reawake>0 && timestamp()>device->reawake) {
 		    /* device may have had a zero-length read */
 		    gpsd_report(context.debug, LOG_DATA,
