@@ -1424,7 +1424,7 @@ static void pseudonmea_report(struct subscriber_t *sub,
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
-static void all_reports(struct gps_device_t *device, const gps_mask_t changed)
+static gps_mask_t all_reports(struct gps_device_t *device, gps_mask_t changed)
 /* report on the corrent packet from a specified device */
 {
 #ifdef SOCKET_EXPORT_ENABLE
@@ -1485,6 +1485,81 @@ static void all_reports(struct gps_device_t *device, const gps_mask_t changed)
 	    }
 	}
     }
+
+
+#ifdef NTPSHM_ENABLE
+    /*
+     * Time is eligible for shipping to NTPD if the driver has
+     * asserted PPSTIME_IS at any point in the current cycle.
+     */
+    if ((changed & CLEAR_IS)!=0)
+	device->ship_to_ntpd = false;
+    if ((changed & PPSTIME_IS)!=0)
+	device->ship_to_ntpd = true;
+    /*
+     * Only update the NTP time if we've seen the leap-seconds data.
+     * Else we may be providing GPS time.
+     */
+    if (device->context->enable_ntpshm == 0) {
+	//gpsd_report(context.debug, LOG_PROG, "NTP: off\n");
+    } else if ((changed & TIME_SET) == 0) {
+	//gpsd_report(context.debug, LOG_PROG, "NTP: No time this packet\n");
+    } else if (isnan(device->newdata.time)) {
+	//gpsd_report(context.debug, LOG_PROG, "NTP: bad new time\n");
+    } else if (device->newdata.time == device->last_fixtime) {
+	//gpsd_report(context.debug, LOG_PROG, "NTP: Not a new time\n");
+    } else if (!device->ship_to_ntpd) {
+	//gpsd_report(context.debug, LOG_PROG, "NTP: No precision time report\n");
+    } else {
+	double offset;
+	//gpsd_report(context.debug, LOG_PROG, "NTP: Got one\n");
+	/* assume zero when there's no offset method */
+	if (device->device_type == NULL
+	    || device->device_type->ntp_offset == NULL)
+	    offset = 0.0;
+	else
+	    offset = device->device_type->ntp_offset(device);
+	(void)ntpshm_put(device, device->newdata.time, offset);
+	device->last_fixtime = device->newdata.time;
+    }
+#endif /* NTPSHM_ENABLE */
+
+    /*
+     * If no reliable end of cycle, must report every time
+     * a sentence changes position or mode. Likely to
+     * cause display jitter.
+     */
+    if (!device->cycle_end_reliable && (changed & (LATLON_SET | MODE_SET))!=0)
+	changed |= REPORT_IS;
+
+    /* a few things are not per-subscriber reports */
+    if ((changed & REPORT_IS) != 0) {
+#ifdef NETFEED_ENABLE
+	if (device->gpsdata.fix.mode == MODE_3D) {
+	    struct gps_device_t *dgnss;
+	    /*
+	     * Pass the fix to every potential caster, here.
+	     * netgnss_report() individual caster types get to
+	     * make filtering decisiona.
+	     */
+	    for (dgnss = devices; dgnss < devices + MAXDEVICES; dgnss++)
+		if (dgnss != device)
+		    netgnss_report(&context, device, dgnss);
+	}
+#endif /* NETFEED_ENABLE */
+#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
+	if (device->gpsdata.fix.mode > MODE_NO_FIX)
+	    send_dbus_fix(device);
+#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
+    }
+
+#ifdef SHM_EXPORT_ENABLE
+    if ((changed & (REPORT_IS|GST_SET|SATELLITE_SET|SUBFRAME_SET|
+		    ATTITUDE_SET|RTCM2_SET|RTCM3_SET|AIS_SET)) != 0)
+	shm_update(&context, &device->gpsdata);
+#endif /* SHM_EXPORT_ENABLE */
+
+    return changed;
 }
 
 static void consume_packets(struct gps_device_t *device)
@@ -1597,79 +1672,7 @@ static void consume_packets(struct gps_device_t *device)
 
 
 	/* report on data contained in this packet */
-	all_reports(device, changed);
-
-#ifdef NTPSHM_ENABLE
-	/*
-	 * Time is eligible for shipping to NTPD if the driver has
-	 * asserted PPSTIME_IS at any point in the current cycle.
-	 */
-	if ((changed & CLEAR_IS)!=0)
-	    device->ship_to_ntpd = false;
-	if ((changed & PPSTIME_IS)!=0)
-	    device->ship_to_ntpd = true;
-	/*
-	 * Only update the NTP time if we've seen the leap-seconds data.
-	 * Else we may be providing GPS time.
-	 */
-	if (device->context->enable_ntpshm == 0) {
-	    //gpsd_report(context.debug, LOG_PROG, "NTP: off\n");
-	} else if ((changed & TIME_SET) == 0) {
-	    //gpsd_report(context.debug, LOG_PROG, "NTP: No time this packet\n");
-	} else if (isnan(device->newdata.time)) {
-	    //gpsd_report(context.debug, LOG_PROG, "NTP: bad new time\n");
-	} else if (device->newdata.time == device->last_fixtime) {
-	    //gpsd_report(context.debug, LOG_PROG, "NTP: Not a new time\n");
-	} else if (!device->ship_to_ntpd) {
-	    //gpsd_report(context.debug, LOG_PROG, "NTP: No precision time report\n");
-	} else {
-	    double offset;
-	    //gpsd_report(context.debug, LOG_PROG, "NTP: Got one\n");
-	    /* assume zero when there's no offset method */
-	    if (device->device_type == NULL
-		|| device->device_type->ntp_offset == NULL)
-		offset = 0.0;
-	    else
-		offset = device->device_type->ntp_offset(device);
-	    (void)ntpshm_put(device, device->newdata.time, offset);
-	    device->last_fixtime = device->newdata.time;
-	}
-#endif /* NTPSHM_ENABLE */
-
-	/*
-	 * If no reliable end of cycle, must report every time
-	 * a sentence changes position or mode. Likely to
-	 * cause display jitter.
-	 */
-	if (!device->cycle_end_reliable && (changed & (LATLON_SET | MODE_SET))!=0)
-	    changed |= REPORT_IS;
-
-	/* a few things are not per-subscriber reports */
-	if ((changed & REPORT_IS) != 0) {
-#ifdef NETFEED_ENABLE
-	    if (device->gpsdata.fix.mode == MODE_3D) {
-		struct gps_device_t *dgnss;
-		/*
-		 * Pass the fix to every potential caster, here.
-		 * netgnss_report() individual caster types get to
-		 * make filtering decisiona.
-		 */
-		for (dgnss = devices; dgnss < devices + MAXDEVICES; dgnss++)
-		    if (dgnss != device)
-			netgnss_report(&context, device, dgnss);
-	    }
-#endif /* NETFEED_ENABLE */
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
-	    if (device->gpsdata.fix.mode > MODE_NO_FIX)
-		send_dbus_fix(device);
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
-	}
-
-#ifdef SHM_EXPORT_ENABLE
-	if ((changed & (REPORT_IS|GST_SET|SATELLITE_SET|SUBFRAME_SET|
-			ATTITUDE_SET|RTCM2_SET|RTCM3_SET|AIS_SET)) != 0)
-	    shm_update(&context, &device->gpsdata);
-#endif /* SHM_EXPORT_ENABLE */
+	changed = all_reports(device, changed);
 
 #ifdef SOCKET_EXPORT_ENABLE
 	/* update all subscribers associated with this device */
