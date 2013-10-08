@@ -724,7 +724,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
 			"stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
 	    if (!flag_nowait) {
-		devp->gpsdata.gps_fd = -1;
+		devp->gpsdata.gps_fd = UNALLOCATED_FD;
 		ret = true;
 	    } else {
 		ret = open_device(devp);
@@ -1847,7 +1847,7 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 #endif /* __UNUSED_AUTOCONNECT__ */
 
 static bool await_data(fd_set *rfds, fd_set *all_fds, sigset_t *oldset)
-/* await data */
+/* await data from any socket in the all_fds set */
 {
     int i;
 #ifdef COMPAT_SELECT
