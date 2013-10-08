@@ -1616,6 +1616,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #endif /* SOCKET_EXPORT_ENABLE */
 }
 
+#define DESCRIPTOR_ERROR	-2
 #define DESCRIPTOR_UNREADY	-1
 #define DESCRIPTOR_READY	1
 #define DESCRIPTOR_UNCHANGED	0
@@ -1646,8 +1647,7 @@ static int consume_packets(const bool data_ready,
 		gpsd_report(context.debug, LOG_WARN,
 			    "connection to ntrip server failed\n");
 		device->ntrip.conn_state = ntrip_conn_init;
-		deactivate_device(device);
-		return DESCRIPTOR_UNREADY;
+		return DESCRIPTOR_ERROR;
 	    } else {
 		return DESCRIPTOR_READY;
 	    }
@@ -1662,7 +1662,7 @@ static int consume_packets(const bool data_ready,
 			    "device read of %s returned error or packet sniffer failed sync (flags %s)\n",
 			    device->gpsdata.dev.path,
 			    gps_maskdump(changed));
-		deactivate_device(device);
+		return DESCRIPTOR_ERROR;
 		break;
 	    } else if (changed == NODATA_IS) {
 		/*
@@ -1675,12 +1675,13 @@ static int consume_packets(const bool data_ready,
 				device->gpsdata.dev.path);
 		    if (device->zerokill) {
 			/* failed timeout-and-reawake, kill it */
-			deactivate_device(device);
+			gpsd_deactivate(device);
 			if (device->ntrip.works) {
 			    device->ntrip.works = false; // reset so we try this once only
 			    if (gpsd_activate(device) < 0) {
 				gpsd_report(context.debug, LOG_WARN,
 					    "reconnect to ntrip server failed\n");
+				return DESCRIPTOR_ERROR;
 			    } else {
 				gpsd_report(context.debug, LOG_INFO,
 					    "reconnecting to ntrip server\n");
@@ -2429,6 +2430,9 @@ int main(int argc, char *argv[])
 		case DESCRIPTOR_UNREADY:
 		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
 		    adjust_max_fd(device->gpsdata.gps_fd, false);
+		    break;
+		case DESCRIPTOR_ERROR:
+		    deactivate_device(device);
 		    break;
 		default:
 		    break;
