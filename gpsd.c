@@ -1616,12 +1616,16 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #endif /* SOCKET_EXPORT_ENABLE */
 }
 
-static void consume_packets(fd_set *rfds, fd_set *all_fds,
+#define DESCRIPTOR_UNREADY	-1
+#define DESCRIPTOR_READY	1
+#define DESCRIPTOR_UNCHANGED	0
+
+static int consume_packets(const bool data_ready,
 			    struct gps_device_t *device,
 			    void (*handler)(struct gps_device_t *, gps_mask_t))
 /* consume and handle packets from a specified device */
 {
-    if (FD_ISSET(device->gpsdata.gps_fd, rfds))
+    if (data_ready)
     {
 	gps_mask_t changed;
 	int fragments;
@@ -1637,20 +1641,16 @@ static void consume_packets(fd_set *rfds, fd_set *all_fds,
 	if (device->servicetype == service_ntrip
 	    && device->ntrip.conn_state != ntrip_conn_established) {
 
-	    /* the socket descriptor might change during connection */
-	    if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
-		FD_CLR(device->gpsdata.gps_fd, all_fds);
-	    }
 	    (void)ntrip_open(device, "");
 	    if (device->ntrip.conn_state == ntrip_conn_err) {
 		gpsd_report(context.debug, LOG_WARN,
 			    "connection to ntrip server failed\n");
 		device->ntrip.conn_state = ntrip_conn_init;
 		deactivate_device(device);
+		return DESCRIPTOR_UNREADY;
 	    } else {
-		FD_SET(device->gpsdata.gps_fd, all_fds);
+		return DESCRIPTOR_READY;
 	    }
-	    return;
 	}
 #endif /* NETFEED_ENABLE */
 
@@ -1684,7 +1684,7 @@ static void consume_packets(fd_set *rfds, fd_set *all_fds,
 			    } else {
 				gpsd_report(context.debug, LOG_INFO,
 					    "reconnecting to ntrip server\n");
-				FD_SET(device->gpsdata.gps_fd, all_fds);
+				return DESCRIPTOR_READY;
 			    }
 			}
 		    } else {
@@ -1696,8 +1696,7 @@ static void consume_packets(fd_set *rfds, fd_set *all_fds,
 				    "%s will be repolled in %f seconds\n",
 				    device->gpsdata.dev.path, DEVICE_REAWAKE);
 			device->reawake = timestamp() + DEVICE_REAWAKE;
-			FD_CLR(device->gpsdata.gps_fd, all_fds);
-			adjust_max_fd(device->gpsdata.gps_fd, false);
+			return DESCRIPTOR_UNREADY;
 		    }
 		}
 		/*
@@ -1737,9 +1736,11 @@ static void consume_packets(fd_set *rfds, fd_set *all_fds,
 		    device->gpsdata.dev.path);
 	device->reawake = (timestamp_t)0;
 	device->zerokill = true;
-	FD_SET(device->gpsdata.gps_fd, all_fds);
-	adjust_max_fd(device->gpsdata.gps_fd, true);
+	return DESCRIPTOR_READY;
     }
+
+    /* no change in device descriptor state */
+    return DESCRIPTOR_UNCHANGED;
 }
 
 #ifdef SOCKET_EXPORT_ENABLE
@@ -2418,7 +2419,20 @@ int main(int argc, char *argv[])
 	/* poll all active devices */
 	for (device = devices; device < devices + MAXDEVICES; device++)
 	    if (allocated_device(device) && device->gpsdata.gps_fd > 0)
-		consume_packets(&rfds, &all_fds, device, all_reports);
+		switch (consume_packets(FD_ISSET(device->gpsdata.gps_fd, &rfds),
+					device, all_reports))
+		{
+		case DESCRIPTOR_READY:
+		    FD_SET(device->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(device->gpsdata.gps_fd, true);
+		    break;
+		case DESCRIPTOR_UNREADY:
+		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+		    adjust_max_fd(device->gpsdata.gps_fd, false);
+		    break;
+		default:
+		    break;
+		}
 
 #ifdef __UNUSED_AUTOCONNECT__
 	if (context.fixcnt > 0 && !context.autconnect) {
