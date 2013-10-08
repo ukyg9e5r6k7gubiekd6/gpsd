@@ -1424,6 +1424,69 @@ static void pseudonmea_report(struct subscriber_t *sub,
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
+static void all_reports(struct gps_device_t *device, const gps_mask_t changed)
+/* report on the corrent packet from a specified device */
+{
+#ifdef SOCKET_EXPORT_ENABLE
+    struct subscriber_t *sub;
+
+    /* add any just-identified device to watcher lists */
+    if ((changed & DRIVER_IS) != 0) {
+	bool listeners = false;
+	for (sub = subscribers;
+	     sub < subscribers + MAXSUBSCRIBERS; sub++)
+	    if (sub->active != 0
+		&& sub->policy.watcher
+		&& subscribed(sub, device))
+		listeners = true;
+	if (listeners) {
+	    (void)awaken(device);
+	}
+    }
+
+    /* handle laggy response to a firmware version query */
+    if ((changed & (DEVICEID_SET | DRIVER_IS)) != 0) {
+	assert(device->device_type != NULL);
+	{
+	    char id2[GPS_JSON_RESPONSE_MAX];
+	    json_device_dump(device, id2, sizeof(id2));
+	    notify_watchers(device, id2);
+	}
+    }
+#endif /* SOCKET_EXPORT_ENABLE */
+
+    /*
+     * If the device provided an RTCM packet, repeat it to all devices.
+     */
+    if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
+	if (device->packet.outbuflen > RTCM_MAX) {
+	    gpsd_report(context.debug, LOG_ERROR,
+			"overlong RTCM packet (%zd bytes)\n",
+			device->packet.outbuflen);
+	} else {
+	    struct gps_device_t *dp;
+	    for (dp = devices; dp < devices+MAXDEVICES; dp++) {
+		if (allocated_device(dp)) {
+/* *INDENT-OFF* */
+		    if (dp->device_type->rtcm_writer != NULL) {
+			if (dp->device_type->rtcm_writer(dp,
+							     (const char *)device->packet.outbuffer,
+							     device->packet.outbuflen) == 0)
+			    gpsd_report(context.debug, LOG_ERROR,
+					"Write to RTCM sink failed\n");
+			else {
+			    gpsd_report(context.debug, LOG_IO,
+					"<= DGPS: %zd bytes of RTCM relayed.\n",
+					device->packet.outbuflen);
+			}
+		    }
+/* *INDENT-ON* */
+		}
+	    }
+	}
+    }
+}
+
 static void consume_packets(struct gps_device_t *device)
 /* consume and report packets from a specified device */
 {
@@ -1532,62 +1595,9 @@ static void consume_packets(struct gps_device_t *device)
 			device->gpsdata.dev.path,
 			gps_maskdump(device->gpsdata.set));
 
-#ifdef SOCKET_EXPORT_ENABLE
-	/* add any just-identified device to watcher lists */
-	if ((changed & DRIVER_IS) != 0) {
-	    bool listeners = false;
-	    for (sub = subscribers;
-		 sub < subscribers + MAXSUBSCRIBERS; sub++)
-		if (sub->active != 0
-		    && sub->policy.watcher
-		    && subscribed(sub, device))
-		    listeners = true;
-	    if (listeners) {
-		(void)awaken(device);
-	    }
-	}
 
-	/* handle laggy response to a firmware version query */
-	if ((changed & (DEVICEID_SET | DRIVER_IS)) != 0) {
-	    assert(device->device_type != NULL);
-	    {
-		char id2[GPS_JSON_RESPONSE_MAX];
-		json_device_dump(device, id2, sizeof(id2));
-		notify_watchers(device, id2);
-	    }
-	}
-#endif /* SOCKET_EXPORT_ENABLE */
-
-	/*
-	 * If the device provided an RTCM packet, repeat it to all devices.
-	 */
-	if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
-	    if (device->packet.outbuflen > RTCM_MAX) {
-		gpsd_report(context.debug, LOG_ERROR,
-			    "overlong RTCM packet (%zd bytes)\n",
-			    device->packet.outbuflen);
-	    } else {
-		struct gps_device_t *dp;
-		for (dp = devices; dp < devices+MAXDEVICES; dp++) {
-		    if (allocated_device(dp)) {
-/* *INDENT-OFF* */
-			if (dp->device_type->rtcm_writer != NULL) {
-			    if (dp->device_type->rtcm_writer(dp,
-								 (const char *)device->packet.outbuffer,
-								 device->packet.outbuflen) == 0)
-				gpsd_report(context.debug, LOG_ERROR,
-					    "Write to RTCM sink failed\n");
-			    else {
-				gpsd_report(context.debug, LOG_IO,
-					    "<= DGPS: %zd bytes of RTCM relayed.\n",
-					    device->packet.outbuflen);
-			    }
-			}
-/* *INDENT-ON* */
-		    }
-		}
-	    }
-	}
+	/* report on data contained in this packet */
+	all_reports(device, changed);
 
 #ifdef NTPSHM_ENABLE
 	/*
