@@ -1424,7 +1424,7 @@ static void pseudonmea_report(struct subscriber_t *sub,
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
-static gps_mask_t all_reports(struct gps_device_t *device, gps_mask_t changed)
+static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 /* report on the corrent packet from a specified device */
 {
 #ifdef SOCKET_EXPORT_ENABLE
@@ -1559,7 +1559,61 @@ static gps_mask_t all_reports(struct gps_device_t *device, gps_mask_t changed)
 	shm_update(&context, &device->gpsdata);
 #endif /* SHM_EXPORT_ENABLE */
 
-    return changed;
+#ifdef SOCKET_EXPORT_ENABLE
+    /* update all subscribers associated with this device */
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+	/*@-nullderef@*/
+	if (sub == NULL || sub->active == 0 || !subscribed(sub, device))
+	    continue;
+
+#ifdef PASSTHROUGH_ENABLE
+	/* this is for passing through JSON packets */
+	if ((changed & PASSTHROUGH_IS) != 0) {
+	    (void)strlcat((char *)device->packet.outbuffer,
+			  "\r\n",
+			  sizeof(device->packet.outbuffer));
+	    (void)throttled_write(sub,
+				  (char *)device->packet.outbuffer,
+				  device->packet.outbuflen+2);
+	    continue;
+	}
+#endif /* PASSTHROUGH_ENABLE */
+
+	/* report raw packets to users subscribed to those */
+	raw_report(sub, device);
+
+	/* some listeners may be in watcher mode */
+	if (sub->policy.watcher) {
+	    if (changed & DATA_IS) {
+		/* guard keeps mask dumper from eating CPU */
+		if (context.debug >= LOG_PROG)
+		    gpsd_report(context.debug, LOG_PROG,
+				"Changed mask: %s with %sreliable cycle detection\n",
+				gps_maskdump(changed),
+				device->cycle_end_reliable ? "" : "un");
+		if ((changed & REPORT_IS) != 0)
+		    gpsd_report(context.debug, LOG_PROG,
+				"time to report a fix\n");
+
+		if (sub->policy.nmea)
+		    pseudonmea_report(sub, changed, device);
+
+		if (sub->policy.json)
+		{
+		    char buf[GPS_JSON_RESPONSE_MAX * 4];
+
+		    json_data_report(changed,
+				     device, &sub->policy,
+				     buf, sizeof(buf));
+		    if (buf[0] != '\0')
+			(void)throttled_write(sub, buf, strlen(buf));
+
+		}
+	    }
+	}
+	/*@+nullderef@*/
+    } /* subscribers */
+#endif /* SOCKET_EXPORT_ENABLE */
 }
 
 static void consume_packets(struct gps_device_t *device)
@@ -1567,9 +1621,6 @@ static void consume_packets(struct gps_device_t *device)
 {
     gps_mask_t changed;
     int fragments;
-#ifdef SOCKET_EXPORT_ENABLE
-    struct subscriber_t *sub;
-#endif /* SOCKET_EXPORT_ENABLE */
 
     gpsd_report(context.debug, LOG_RAW + 1, 
 		"polling %d\n", device->gpsdata.gps_fd);
@@ -1672,63 +1723,7 @@ static void consume_packets(struct gps_device_t *device)
 
 
 	/* report on data contained in this packet */
-	changed = all_reports(device, changed);
-
-#ifdef SOCKET_EXPORT_ENABLE
-	/* update all subscribers associated with this device */
-	for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-	    /*@-nullderef@*/
-	    if (sub == NULL || sub->active == 0 || !subscribed(sub, device))
-		continue;
-
-#ifdef PASSTHROUGH_ENABLE
-	    /* this is for passing through JSON packets */
-	    if ((changed & PASSTHROUGH_IS) != 0) {
-		(void)strlcat((char *)device->packet.outbuffer,
-			      "\r\n",
-			      sizeof(device->packet.outbuffer));
-		(void)throttled_write(sub,
-				      (char *)device->packet.outbuffer,
-				      device->packet.outbuflen+2);
-		continue;
-	    }
-#endif /* PASSTHROUGH_ENABLE */
-
-	    /* report raw packets to users subscribed to those */
-	    raw_report(sub, device);
-
-	    /* some listeners may be in watcher mode */
-	    if (sub->policy.watcher) {
-		if (changed & DATA_IS) {
-		    /* guard keeps mask dumper from eating CPU */
-		    if (context.debug >= LOG_PROG)
-			gpsd_report(context.debug, LOG_PROG,
-				    "Changed mask: %s with %sreliable cycle detection\n",
-				    gps_maskdump(changed),
-				    device->cycle_end_reliable ? "" : "un");
-		    if ((changed & REPORT_IS) != 0)
-			gpsd_report(context.debug, LOG_PROG,
-				    "time to report a fix\n");
-
-		    if (sub->policy.nmea)
-			pseudonmea_report(sub, changed, device);
-
-		    if (sub->policy.json)
-		    {
-			char buf[GPS_JSON_RESPONSE_MAX * 4];
-
-			json_data_report(changed,
-					 device, &sub->policy,
-					 buf, sizeof(buf));
-			if (buf[0] != '\0')
-			    (void)throttled_write(sub, buf, strlen(buf));
-
-		    }
-		}
-	    }
-	    /*@+nullderef@*/
-	} /* subscribers */
-#endif /* SOCKET_EXPORT_ENABLE */
+	all_reports(device, changed);
     }
 }
 
