@@ -1846,6 +1846,67 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 }
 #endif /* __UNUSED_AUTOCONNECT__ */
 
+static bool await_data(fd_set *rfds, fd_set *all_fds, sigset_t *oldset)
+/* await data */
+{
+    int i;
+#ifdef COMPAT_SELECT
+    struct timeval tv;
+#endif /* COMPAT_SELECT */
+
+    (void)memcpy((char *)rfds, (char *)all_fds, sizeof(fd_set));
+    gpsd_report(context.debug, LOG_RAW + 2, "select waits\n");
+    /*
+     * Poll for user commands or GPS data.  The timeout doesn't
+     * actually matter here since select returns whenever one of
+     * the file descriptors in the set goes ready.  The point
+     * of tracking maxfd is to keep the set of descriptors that
+     * select(2) has to poll here as small as possible (for
+     * low-clock-rate SBCs and the like).
+     *
+     * pselect() is preferable, when we can have it, to eliminate
+     * the once-per-second wakeup when no sensors are attached.
+     * This cuts power consumption.
+     */
+    /*@ -usedef -nullpass @*/
+    errno = 0;
+
+#ifdef COMPAT_SELECT
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    if (select(maxfd + 1, rfds, NULL, NULL, &tv) == -1) {
+#else
+    if (pselect(maxfd + 1, rfds, NULL, NULL, NULL, oldset) == -1) {
+#endif
+	if (errno == EINTR)
+	    return false;
+	gpsd_report(context.debug, LOG_ERROR, "select: %s\n", strerror(errno));
+	exit(EXIT_FAILURE);
+    }
+    /*@ +usedef +nullpass @*/
+
+    if (context.debug >= LOG_SPIN) {
+	char dbuf[BUFSIZ];
+	dbuf[0] = '\0';
+	for (i = 0; i < FD_SETSIZE; i++)
+	    if (FD_ISSET(i, all_fds))
+		(void)snprintf(dbuf + strlen(dbuf),
+			       sizeof(dbuf) - strlen(dbuf), "%d ", i);
+	if (strlen(dbuf) > 0)
+	    dbuf[strlen(dbuf) - 1] = '\0';
+	(void)strlcat(dbuf, "} -> {", BUFSIZ);
+	for (i = 0; i < FD_SETSIZE; i++)
+	    if (FD_ISSET(i, rfds))
+		(void)snprintf(dbuf + strlen(dbuf),
+			       sizeof(dbuf) - strlen(dbuf), " %d ", i);
+	gpsd_report(context.debug, LOG_SPIN,
+		    "select() {%s} at %f (errno %d)\n",
+		    dbuf, timestamp(), errno);
+    }
+
+    return true;
+}
+
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
@@ -1856,7 +1917,7 @@ int main(int argc, char *argv[])
 #endif /* SOCKET_EXPORT_ENABLE */
 #ifdef CONTROL_SOCKET_ENABLE
     static socket_t csock;
-    fd_set control_fds;
+    fd_set control_fds, rfds;
     socket_t cfd;
     static char *control_socket = NULL;
 #endif /* CONTROL_SOCKET_ENABLE */
@@ -1865,13 +1926,10 @@ int main(int argc, char *argv[])
 #endif /* defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE) */
     static char *pid_file = NULL;
     struct gps_device_t *device;
-    fd_set rfds;
     int i, option, dfd;
     int msocks[2] = {-1, -1};
     bool go_background = true;
 #ifdef COMPAT_SELECT
-    struct timeval tv;
-#else
     sigset_t oldset, blockset;
 #endif /* COMPAT_SELECT */
     bool in_restart;
@@ -2239,56 +2297,8 @@ int main(int argc, char *argv[])
 	}
 
     while (0 == signalled) {
-	(void)memcpy((char *)&rfds, (char *)&all_fds, sizeof(rfds));
-
-	gpsd_report(context.debug, LOG_RAW + 2, "select waits\n");
-	/*
-	 * Poll for user commands or GPS data.  The timeout doesn't
-	 * actually matter here since select returns whenever one of
-	 * the file descriptors in the set goes ready.  The point
-	 * of tracking maxfd is to keep the set of descriptors that
-	 * select(2) has to poll here as small as possible (for
-	 * low-clock-rate SBCs and the like).
-	 *
-	 * pselect() is preferable, when we can have it, to eliminate
-	 * the once-per-second wakeup when no sensors are attached.
-	 * This cuts power consumption.
-	 */
-	/*@ -usedef -nullpass @*/
-	errno = 0;
-
-#ifdef COMPAT_SELECT
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
-	if (select(maxfd + 1, &rfds, NULL, NULL, &tv) == -1) {
-#else
-	if (pselect(maxfd + 1, &rfds, NULL, NULL, NULL, &oldset) == -1) {
-#endif
-	    if (errno == EINTR)
-		continue;
-	    gpsd_report(context.debug, LOG_ERROR, "select: %s\n", strerror(errno));
-	    exit(EXIT_FAILURE);
-	}
-	/*@ +usedef +nullpass @*/
-
-	if (context.debug >= LOG_SPIN) {
-	    char dbuf[BUFSIZ];
-	    dbuf[0] = '\0';
-	    for (i = 0; i < FD_SETSIZE; i++)
-		if (FD_ISSET(i, &all_fds))
-		    (void)snprintf(dbuf + strlen(dbuf),
-				   sizeof(dbuf) - strlen(dbuf), "%d ", i);
-	    if (strlen(dbuf) > 0)
-		dbuf[strlen(dbuf) - 1] = '\0';
-	    (void)strlcat(dbuf, "} -> {", BUFSIZ);
-	    for (i = 0; i < FD_SETSIZE; i++)
-		if (FD_ISSET(i, &rfds))
-		    (void)snprintf(dbuf + strlen(dbuf),
-				   sizeof(dbuf) - strlen(dbuf), " %d ", i);
-	    gpsd_report(context.debug, LOG_SPIN,
-			"select() {%s} at %f (errno %d)\n",
-			dbuf, timestamp(), errno);
-	}
+	if (!await_data(&rfds, &all_fds, &oldset))
+	    continue;
 
 #ifdef SOCKET_EXPORT_ENABLE
 	/* always be open to new client connections */
