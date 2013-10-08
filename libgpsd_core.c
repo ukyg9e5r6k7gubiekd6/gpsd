@@ -1277,6 +1277,130 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     }
 }
 
+int gpsd_multipoll(const bool data_ready,
+		   struct gps_device_t *device,
+		   void (*handler)(struct gps_device_t *, gps_mask_t),
+		   float reawake_time)
+/* consume and handle packets from a specified device */
+{
+    if (data_ready)
+    {
+	gps_mask_t changed;
+	int fragments;
+
+	gpsd_report(device->context->debug, LOG_RAW + 1, 
+		    "polling %d\n", device->gpsdata.gps_fd);
+
+#ifdef NETFEED_ENABLE
+	/*
+	 * Strange special case - the opening transaction on an NTRIP connection
+	 * may not yet be completed.  Try to ratchet things forward.
+	 */
+	if (device->servicetype == service_ntrip
+	    && device->ntrip.conn_state != ntrip_conn_established) {
+
+	    (void)ntrip_open(device, "");
+	    if (device->ntrip.conn_state == ntrip_conn_err) {
+		gpsd_report(device->context->debug, LOG_WARN,
+			    "connection to ntrip server failed\n");
+		device->ntrip.conn_state = ntrip_conn_init;
+		return DEVICE_ERROR;
+	    } else {
+		return DEVICE_READY;
+	    }
+	}
+#endif /* NETFEED_ENABLE */
+
+	for (fragments = 0; ; fragments++) {
+	    changed = gpsd_poll(device);
+
+	    if (changed == ERROR_SET) {
+		gpsd_report(device->context->debug, LOG_WARN,
+			    "device read of %s returned error or packet sniffer failed sync (flags %s)\n",
+			    device->gpsdata.dev.path,
+			    gps_maskdump(changed));
+		return DEVICE_ERROR;
+		break;
+	    } else if (changed == NODATA_IS) {
+		/*
+		 * No data on the first fragment read means the device
+		 * fd may have been in an end-of-file condition on select.
+		 */
+		if (fragments == 0) {
+		    gpsd_report(device->context->debug, LOG_DATA,
+				"%s returned zero bytes\n",
+				device->gpsdata.dev.path);
+		    if (device->zerokill) {
+			/* failed timeout-and-reawake, kill it */
+			gpsd_deactivate(device);
+			if (device->ntrip.works) {
+			    device->ntrip.works = false; // reset so we try this once only
+			    if (gpsd_activate(device) < 0) {
+				gpsd_report(device->context->debug, LOG_WARN,
+					    "reconnect to ntrip server failed\n");
+				return DEVICE_ERROR;
+			    } else {
+				gpsd_report(device->context->debug, LOG_INFO,
+					    "reconnecting to ntrip server\n");
+				return DEVICE_READY;
+			    }
+			}
+		    } else {
+			/*
+			 * Disable listening to this fd for long enough
+			 * that the buffer can fill up again.
+			 */
+			gpsd_report(device->context->debug, LOG_DATA,
+				    "%s will be repolled in %f seconds\n",
+				    device->gpsdata.dev.path, reawake_time);
+			device->reawake = timestamp() + reawake_time;
+			return DEVICE_UNREADY;
+		    }
+		}
+		/*
+		 * No data on later fragment reads just means the
+		 * input buffer is empty.  In this case break out
+		 * of the fragment-processing loop but consider
+		 * the device still good.
+		 */
+		break;
+	    }
+
+	    /* we got actual data, head off the reawake special case */
+	    device->zerokill = false;
+	    device->reawake = (timestamp_t)0;
+
+	    /* must have a full packet to continue */
+	    if ((changed & PACKET_SET) == 0)
+		break;
+
+	    /* conditional prevents mask dumper from eating CPU */
+	    if (device->context->debug >= LOG_DATA)
+		gpsd_report(device->context->debug, LOG_DATA,
+			    "packet type %d from %s with %s\n",
+			    device->packet.type,
+			    device->gpsdata.dev.path,
+			    gps_maskdump(device->gpsdata.set));
+
+
+	    /* handle data contained in this packet */
+	    handler(device, changed);
+	}
+    }
+    else if (device->reawake>0 && timestamp()>device->reawake) {
+	/* device may have had a zero-length read */
+	gpsd_report(device->context->debug, LOG_DATA,
+		    "%s reawakened after zero-length read\n",
+		    device->gpsdata.dev.path);
+	device->reawake = (timestamp_t)0;
+	device->zerokill = true;
+	return DEVICE_READY;
+    }
+
+    /* no change in device descriptor state */
+    return DEVICE_UNCHANGED;
+}
+
 void gpsd_wrap(struct gps_device_t *session)
 /* end-of-session wrapup */
 {

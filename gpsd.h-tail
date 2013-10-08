@@ -823,6 +823,14 @@ extern int gpsd_open(struct gps_device_t *);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
+#define DEVICE_ERROR	-2
+#define DEVICE_UNREADY	-1
+#define DEVICE_READY	1
+#define DEVICE_UNCHANGED	0
+extern int gpsd_multipoll(const bool,
+			  struct gps_device_t *,
+			  void (*)(struct gps_device_t *, gps_mask_t),
+			  float reawake_time);
 extern void gpsd_wrap(struct gps_device_t *);
 extern bool gpsd_add_device(const char *device_name, bool flag_nowait);
 extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
