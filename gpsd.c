@@ -2403,10 +2403,8 @@ int main(int argc, char *argv[])
 
 	/* poll all active devices */
 	for (device = devices; device < devices + MAXDEVICES; device++) {
-	    if (!allocated_device(device))
-		continue;
-
-	    if (device->gpsdata.gps_fd >= 0) {
+	    if (allocated_device(device) && device->gpsdata.gps_fd > 0)
+	    {
 		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))
 		    /* get data from the device */
 		    consume_packets(device, all_reports);
