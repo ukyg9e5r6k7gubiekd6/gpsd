@@ -1616,115 +1616,129 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #endif /* SOCKET_EXPORT_ENABLE */
 }
 
-static void consume_packets(struct gps_device_t *device,
+static void consume_packets(fd_set *rfds, fd_set *all_fds,
+			    struct gps_device_t *device,
 			    void (*handler)(struct gps_device_t *, gps_mask_t))
 /* consume and handle packets from a specified device */
 {
-    gps_mask_t changed;
-    int fragments;
+    if (FD_ISSET(device->gpsdata.gps_fd, rfds))
+    {
+	gps_mask_t changed;
+	int fragments;
 
-    gpsd_report(context.debug, LOG_RAW + 1, 
-		"polling %d\n", device->gpsdata.gps_fd);
+	gpsd_report(context.debug, LOG_RAW + 1, 
+		    "polling %d\n", device->gpsdata.gps_fd);
 
 #ifdef NETFEED_ENABLE
-    /*
-     * Strange special case - the opening transaction on an NTRIP connection
-     * may not yet be completed.  Try to ratchet things forward.
-     */
-    if (device->servicetype == service_ntrip
+	/*
+	 * Strange special case - the opening transaction on an NTRIP connection
+	 * may not yet be completed.  Try to ratchet things forward.
+	 */
+	if (device->servicetype == service_ntrip
 	    && device->ntrip.conn_state != ntrip_conn_established) {
 
-	/* the socket descriptor might change during connection */
-	if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
-	    FD_CLR(device->gpsdata.gps_fd, &all_fds);
+	    /* the socket descriptor might change during connection */
+	    if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
+		FD_CLR(device->gpsdata.gps_fd, all_fds);
+	    }
+	    (void)ntrip_open(device, "");
+	    if (device->ntrip.conn_state == ntrip_conn_err) {
+		gpsd_report(context.debug, LOG_WARN,
+			    "connection to ntrip server failed\n");
+		device->ntrip.conn_state = ntrip_conn_init;
+		deactivate_device(device);
+	    } else {
+		FD_SET(device->gpsdata.gps_fd, all_fds);
+	    }
+	    return;
 	}
-	(void)ntrip_open(device, "");
-	if (device->ntrip.conn_state == ntrip_conn_err) {
-	    gpsd_report(context.debug, LOG_WARN,
-		    "connection to ntrip server failed\n");
-	    device->ntrip.conn_state = ntrip_conn_init;
-	    deactivate_device(device);
-	} else {
-	    FD_SET(device->gpsdata.gps_fd, &all_fds);
-	}
-	return;
-    }
 #endif /* NETFEED_ENABLE */
 
-    for (fragments = 0; ; fragments++) {
-	changed = gpsd_poll(device);
+	for (fragments = 0; ; fragments++) {
+	    changed = gpsd_poll(device);
 
-	if (changed == ERROR_SET) {
-	    gpsd_report(context.debug, LOG_WARN,
-			"device read of %s returned error or packet sniffer failed sync (flags %s)\n",
-			device->gpsdata.dev.path,
-			gps_maskdump(changed));
-	    deactivate_device(device);
-	    break;
-	} else if (changed == NODATA_IS) {
-	    /*
-	     * No data on the first fragment read means the device
-	     * fd may have been in an end-of-file condition on select.
-	     */
-	    if (fragments == 0) {
-		gpsd_report(context.debug, LOG_DATA,
-			    "%s returned zero bytes\n",
-			    device->gpsdata.dev.path);
-		if (device->zerokill) {
-		    /* failed timeout-and-reawake, kill it */
-		    deactivate_device(device);
-		    if (device->ntrip.works) {
-			device->ntrip.works = false; // reset so we try this once only
-			if (gpsd_activate(device) < 0) {
-			    gpsd_report(context.debug, LOG_WARN,
-					"reconnect to ntrip server failed\n");
-			} else {
-			    gpsd_report(context.debug, LOG_INFO,
-					"reconnecting to ntrip server\n");
-			    FD_SET(device->gpsdata.gps_fd, &all_fds);
-			}
-		    }
-		} else {
-		    /*
-		     * Disable listening to this fd for long enough
-		     * that the buffer can fill up again.
-		     */
+	    if (changed == ERROR_SET) {
+		gpsd_report(context.debug, LOG_WARN,
+			    "device read of %s returned error or packet sniffer failed sync (flags %s)\n",
+			    device->gpsdata.dev.path,
+			    gps_maskdump(changed));
+		deactivate_device(device);
+		break;
+	    } else if (changed == NODATA_IS) {
+		/*
+		 * No data on the first fragment read means the device
+		 * fd may have been in an end-of-file condition on select.
+		 */
+		if (fragments == 0) {
 		    gpsd_report(context.debug, LOG_DATA,
-				"%s will be repolled in %f seconds\n",
-				device->gpsdata.dev.path, DEVICE_REAWAKE);
-		    device->reawake = timestamp() + DEVICE_REAWAKE;
-		    FD_CLR(device->gpsdata.gps_fd, &all_fds);
-		    adjust_max_fd(device->gpsdata.gps_fd, false);
+				"%s returned zero bytes\n",
+				device->gpsdata.dev.path);
+		    if (device->zerokill) {
+			/* failed timeout-and-reawake, kill it */
+			deactivate_device(device);
+			if (device->ntrip.works) {
+			    device->ntrip.works = false; // reset so we try this once only
+			    if (gpsd_activate(device) < 0) {
+				gpsd_report(context.debug, LOG_WARN,
+					    "reconnect to ntrip server failed\n");
+			    } else {
+				gpsd_report(context.debug, LOG_INFO,
+					    "reconnecting to ntrip server\n");
+				FD_SET(device->gpsdata.gps_fd, all_fds);
+			    }
+			}
+		    } else {
+			/*
+			 * Disable listening to this fd for long enough
+			 * that the buffer can fill up again.
+			 */
+			gpsd_report(context.debug, LOG_DATA,
+				    "%s will be repolled in %f seconds\n",
+				    device->gpsdata.dev.path, DEVICE_REAWAKE);
+			device->reawake = timestamp() + DEVICE_REAWAKE;
+			FD_CLR(device->gpsdata.gps_fd, all_fds);
+			adjust_max_fd(device->gpsdata.gps_fd, false);
+		    }
 		}
+		/*
+		 * No data on later fragment reads just means the
+		 * input buffer is empty.  In this case break out
+		 * of the fragment-processing loop but consider
+		 * the device still good.
+		 */
+		break;
 	    }
-	    /*
-	     * No data on later fragment reads just means the
-	     * input buffer is empty.  In this case break out
-	     * of the fragment-processing loop but consider
-	     * the device still good.
-	     */
-	    break;
+
+	    /* we got actual data, head off the reawake special case */
+	    device->zerokill = false;
+	    device->reawake = (timestamp_t)0;
+
+	    /* must have a full packet to continue */
+	    if ((changed & PACKET_SET) == 0)
+		break;
+
+	    /* conditional prevents mask dumper from eating CPU */
+	    if (context.debug >= LOG_DATA)
+		gpsd_report(context.debug, LOG_DATA,
+			    "packet type %d from %s with %s\n",
+			    device->packet.type,
+			    device->gpsdata.dev.path,
+			    gps_maskdump(device->gpsdata.set));
+
+
+	    /* handle data contained in this packet */
+	    handler(device, changed);
 	}
-
-	/* we got actual data, head off the reawake special case */
-	device->zerokill = false;
+    }
+    else if (device->reawake>0 && timestamp()>device->reawake) {
+	/* device may have had a zero-length read */
+	gpsd_report(context.debug, LOG_DATA,
+		    "%s reawakened after zero-length read\n",
+		    device->gpsdata.dev.path);
 	device->reawake = (timestamp_t)0;
-
-	/* must have a full packet to continue */
-	if ((changed & PACKET_SET) == 0)
-	    break;
-
-	/* conditional prevents mask dumper from eating CPU */
-	if (context.debug >= LOG_DATA)
-	    gpsd_report(context.debug, LOG_DATA,
-			"packet type %d from %s with %s\n",
-			device->packet.type,
-			device->gpsdata.dev.path,
-			gps_maskdump(device->gpsdata.set));
-
-
-	/* handle data contained in this packet */
-	handler(device, changed);
+	device->zerokill = true;
+	FD_SET(device->gpsdata.gps_fd, all_fds);
+	adjust_max_fd(device->gpsdata.gps_fd, true);
     }
 }
 
@@ -2402,24 +2416,9 @@ int main(int argc, char *argv[])
 #endif /* CONTROL_SOCKET_ENABLE */
 
 	/* poll all active devices */
-	for (device = devices; device < devices + MAXDEVICES; device++) {
+	for (device = devices; device < devices + MAXDEVICES; device++)
 	    if (allocated_device(device) && device->gpsdata.gps_fd > 0)
-	    {
-		if (FD_ISSET(device->gpsdata.gps_fd, &rfds))
-		    /* get data from the device */
-		    consume_packets(device, all_reports);
-	        else if (device->reawake>0 && timestamp()>device->reawake) {
-		    /* device may have had a zero-length read */
-		    gpsd_report(context.debug, LOG_DATA,
-				"%s reawakened after zero-length read\n",
-				device->gpsdata.dev.path);
-		    device->reawake = (timestamp_t)0;
-		    device->zerokill = true;
-		    FD_SET(device->gpsdata.gps_fd, &all_fds);
-		    adjust_max_fd(device->gpsdata.gps_fd, true);
-		}
-	    }
-	} /* devices */
+		consume_packets(&rfds, &all_fds, device, all_reports);
 
 #ifdef __UNUSED_AUTOCONNECT__
 	if (context.fixcnt > 0 && !context.autconnect) {
