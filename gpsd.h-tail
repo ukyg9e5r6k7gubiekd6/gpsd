@@ -822,6 +822,8 @@ extern void gpsd_clear(struct gps_device_t *);
 extern int gpsd_open(struct gps_device_t *);
 extern int gpsd_activate(struct gps_device_t *);
 extern void gpsd_deactivate(struct gps_device_t *);
+extern bool gpsd_await_data(fd_set *, const int, fd_set *,
+			    sigset_t *, const int);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
 #define DEVICE_ERROR	-2
 #define DEVICE_UNREADY	-1

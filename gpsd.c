@@ -1735,67 +1735,6 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 }
 #endif /* __UNUSED_AUTOCONNECT__ */
 
-static bool await_data(fd_set *rfds, fd_set *all_fds, sigset_t *oldset)
-/* await data from any socket in the all_fds set */
-{
-    int i;
-#ifdef COMPAT_SELECT
-    struct timeval tv;
-#endif /* COMPAT_SELECT */
-
-    (void)memcpy((char *)rfds, (char *)all_fds, sizeof(fd_set));
-    gpsd_report(context.debug, LOG_RAW + 2, "select waits\n");
-    /*
-     * Poll for user commands or GPS data.  The timeout doesn't
-     * actually matter here since select returns whenever one of
-     * the file descriptors in the set goes ready.  The point
-     * of tracking maxfd is to keep the set of descriptors that
-     * select(2) has to poll here as small as possible (for
-     * low-clock-rate SBCs and the like).
-     *
-     * pselect() is preferable, when we can have it, to eliminate
-     * the once-per-second wakeup when no sensors are attached.
-     * This cuts power consumption.
-     */
-    /*@ -usedef -nullpass @*/
-    errno = 0;
-
-#ifdef COMPAT_SELECT
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
-    if (select(maxfd + 1, rfds, NULL, NULL, &tv) == -1) {
-#else
-    if (pselect(maxfd + 1, rfds, NULL, NULL, NULL, oldset) == -1) {
-#endif
-	if (errno == EINTR)
-	    return false;
-	gpsd_report(context.debug, LOG_ERROR, "select: %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
-    }
-    /*@ +usedef +nullpass @*/
-
-    if (context.debug >= LOG_SPIN) {
-	char dbuf[BUFSIZ];
-	dbuf[0] = '\0';
-	for (i = 0; i < FD_SETSIZE; i++)
-	    if (FD_ISSET(i, all_fds))
-		(void)snprintf(dbuf + strlen(dbuf),
-			       sizeof(dbuf) - strlen(dbuf), "%d ", i);
-	if (strlen(dbuf) > 0)
-	    dbuf[strlen(dbuf) - 1] = '\0';
-	(void)strlcat(dbuf, "} -> {", BUFSIZ);
-	for (i = 0; i < FD_SETSIZE; i++)
-	    if (FD_ISSET(i, rfds))
-		(void)snprintf(dbuf + strlen(dbuf),
-			       sizeof(dbuf) - strlen(dbuf), " %d ", i);
-	gpsd_report(context.debug, LOG_SPIN,
-		    "select() {%s} at %f (errno %d)\n",
-		    dbuf, timestamp(), errno);
-    }
-
-    return true;
-}
-
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
@@ -2186,7 +2125,7 @@ int main(int argc, char *argv[])
 	}
 
     while (0 == signalled) {
-	if (!await_data(&rfds, &all_fds, &oldset))
+	if (!gpsd_await_data(&rfds, maxfd, &all_fds, &oldset, context.debug))
 	    continue;
 
 #ifdef SOCKET_EXPORT_ENABLE
