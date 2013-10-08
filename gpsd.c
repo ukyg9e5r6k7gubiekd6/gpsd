@@ -1699,8 +1699,8 @@ static void consume_packets(struct gps_device_t *device)
 	    /*
 	     * No data on later fragment reads just means the
 	     * input buffer is empty.  In this case break out
-	     * of the packet-processing loop but don't drop
-	     * the device.
+	     * of the fragment-processing loop but consider
+	     * the device still good.
 	     */
 	    break;
 	}
