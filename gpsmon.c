@@ -444,6 +444,7 @@ static bool switch_type(const struct gps_type_t *devtype)
     return false;
 }
 
+/*@-globstate@*/
 static bool do_command(void)
 {
 #ifdef RECONFIGURE_ENABLE
@@ -729,6 +730,7 @@ static bool do_command(void)
     /* continue accepting commands */
     return true;
 }
+/*@+globstate@*/
 
 static jmp_buf assertbuf;
 
