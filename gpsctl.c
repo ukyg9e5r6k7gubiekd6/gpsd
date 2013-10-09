@@ -636,7 +636,7 @@ int main(int argc, char **argv)
 		    continue;
 
 		switch(gpsd_multipoll(FD_ISSET(session.gpsdata.gps_fd, &rfds),
-					       &session, ctlhook, 0.01))
+					       &session, ctlhook, 0))
 		{
 		case DEVICE_READY:
 		    FD_SET(session.gpsdata.gps_fd, &all_fds);

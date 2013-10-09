@@ -1416,6 +1416,8 @@ int gpsd_multipoll(const bool data_ready,
 				return DEVICE_READY;
 			    }
 			}
+		    } else if (reawake_time == 0) {
+			return DEVICE_ERROR;
 		    } else {
 			/*
 			 * Disable listening to this fd for long enough
