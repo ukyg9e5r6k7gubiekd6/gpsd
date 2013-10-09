@@ -291,9 +291,10 @@ void gpsd_deactivate(struct gps_device_t *session)
     else
 #endif /* of defined(NMEA2000_ENABLE) */
         (void)gpsd_close(session);
-    gpsd_run_device_hook(session->context->debug, 
-			 session->gpsdata.dev.path,
-			 "DEACTIVATE");
+    if (session->mode == O_OPTIMIZE)
+	gpsd_run_device_hook(session->context->debug, 
+			     session->gpsdata.dev.path,
+			     "DEACTIVATE");
 }
 
 void gpsd_clear(struct gps_device_t *session)
@@ -430,8 +431,9 @@ int gpsd_open(struct gps_device_t *session)
 int gpsd_activate(struct gps_device_t *session, const int mode)
 /* acquire a connection to the GPS device */
 {
-    gpsd_run_device_hook(session->context->debug,
-			 session->gpsdata.dev.path, "ACTIVATE");
+    if (session->mode == O_OPTIMIZE)
+	gpsd_run_device_hook(session->context->debug,
+			     session->gpsdata.dev.path, "ACTIVATE");
     session->gpsdata.gps_fd = gpsd_open(session);
     if (mode != O_CONTINUE)
 	session->mode = mode;
