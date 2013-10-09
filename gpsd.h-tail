@@ -565,8 +565,6 @@ struct gps_device_t {
 #endif /* ZODIAC_ENABLE */
 #ifdef UBX_ENABLE
 	struct {
-	    bool have_port_configuration;
-	    unsigned char port_settings[20];
 	    unsigned char sbas_in_use;
     	} ubx;
 #endif /* UBX_ENABLE */

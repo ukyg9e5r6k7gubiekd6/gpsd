@@ -70,128 +70,6 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
 static void ubx_msg_inf(unsigned char *buf, size_t data_len, const int debug);
 static void ubx_mode(struct gps_device_t *session, int mode);
 
-static void ubx_setup_cfg(struct gps_device_t *session)
-{
-    extern const struct gps_type_t ubx_binary;
-    unsigned char *out = session->driver.ubx.port_settings;
-    int id = 0;
-
-    /* don't do this if the CFG_PRT response has already come back */
-    if (session->device_type == &ubx_binary 
-		&& session->driver.ubx.have_port_configuration)
-	return;
-
-    switch(session->sourcetype) {
-    case source_rs232:
-	id = USART1_ID;
-	break;
-    case source_usb:
-	id = USB_ID;
-	break;
-    default:
-	gpsd_report(session->context->debug, LOG_WARN,
-		    "UBX driver sees unexpected source type %d.",
-		    session->sourcetype);
-	break;
-    }
-
-#ifdef __FUTURE__
-    /*
-     * FIXME: Sadly, this code doesn't work - the uBlox docs are inadequate. 
-     *
-     * Generate the default settings documented in Appendix A-11
-     * of the UBlox 6 protocol manual to be used until the the CFG-PRT
-     * response from the device comes back.  They are:
-     *  - Extended TX timeout & TX ready: feature disabled
-     *  - DDC/I2C (Target0): NMEA enabled in and out, UBX disabled
-     *  - USART1 (Target1): NMEA enabled in and out, UBX disabled, 9600bps
-     *  - USART2 (Target2): No protocols enabled, 9600bps,
-     *  - USB (Target3): NMEA enabled in and out, UBX disabled.
-     *  - SPI (Target4): NMEA enabled in and out, UBX disabled.
-     * In the USB config block, the baud rate and USART mode bits
-     * field are fields are ignored; that is, only the inProtoMask
-     * and outProtoMask fields have meaning.
-     *
-     * The protocol manual isn't very clear about how this
-     * translates into an actual bit layout.  We checked against
-     * actual config block returned by a TCX0 eval unit running at
-     * 9600 8n1.  These were as follows:
-     *
-     * Default USB config:
-     * 03 00 00 00 00 00 00 00 00 00 00 00 07 00 07 00 00 00 00 00
-     * 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19
-     *
-     * Default USART1 config:
-     * 01 00 00 00 c0 08 00 00 80 25 00 00 07 00 07 00 00 00 00 00
-     * 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19
-     *
-     * Why there are 0x07s in the inProtoMask and OutProtoMask fields
-     * is not at all clear.  According to the documentation these should
-     * be 0x03 and 0x02 respectively.  The 80 25 00 00 is clear enough;
-     * that's 9600 as an unsigned 32-bit little-endian.
-     */
-    memset(out, '\0', UBX_CFG_LEN);
-    /*@ -type @*/
-    out[0] = id;				/* portID */
-    out[1] = 0;					/* res0 */
-    out[2] = 0;					/* txReady */
-    out[3] = 0;					/* txReady */
-    if (session->sourcetype == source_rs232)
-	ubx_set_mode(session->gpsdata.dev.parity,
-		     session->gpsdata.dev.stopbits, out);
-    out[6] = 0;					/* txReady */
-    out[7] = 0;					/* txReady */
-    if (session->sourcetype == source_rs232)
-	putle32(out, 8, session->gpsdata.dev.baudrate);	/* baudRate */
-    out[12] = NMEA_PROTOCOL_MASK;				/* inProtoMask */
-    out[13] = 0;					/* inProtoMask */
-    out[14] = UBX_PROTOCOL_MASK | NMEA_PROTOCOL_MASK;			/* outProtoMask */
-    out[15] = 0;					/* outProtoMask */
-    out[16] = 0;					/* flags */
-    out[17] = 0;					/* flags */
-    out[18] = 0;					/* res3 */
-    out[19] = 0;					/* res3 */
-    /*@ +type @*/
-#else
-    /*
-     * Until uBlox reveals the black magic required to create these
-     * configuration blocks, we'll use default configs read from a
-     * TCX0 after cold boot.
-     *
-     * The serial one encodes the assumption that the device is running
-     * at 9600 8N1,
-     *
-     * It is unclear why there are 0x07s in the inProtoMask and outProtoMask
-     * fields; this doesn't match the documentation.
-     */
-    /*@+charint@*/
-    if (id == USB_ID)
-    {
-	const unsigned char usb_cfg[] = {0x03, 0x00, 0x00, 0x00,
-					 0x00, 0x00, 0x00, 0x00,
-					 0x00, 0x00, 0x00, 0x00,
-					 0x07, 0x00, 0x07, 0x00,
-					 0x00, 0x00, 0x00, 0x00};
-	(void)memcpy(out, usb_cfg, UBX_CFG_LEN);
-    }
-    else
-    {
-	const unsigned char usart_cfg[] = {0x01, 0x00, 0x00, 0x00,
-					   0xc0, 0x08, 0x00, 0x00,
-					   0x80, 0x25, 0x00, 0x00,
-					   0x07, 0x00, 0x07, 0x00,
-					   0x00, 0x00, 0x00, 0x00};
-	(void)memcpy(out, usart_cfg, UBX_CFG_LEN);
-    }
-    /*@-charint@*/
-#endif /* __FUTURE__ */
-    gpsd_report(session->context->debug, LOG_SHOUT,
-		"Synthetic USART config block: %s\n",
-		gpsd_hexdump(out, UBX_CFG_LEN));
-
-    session->driver.ubx.have_port_configuration = true;
-}
-
 /**
  * Navigation solution message
  */
@@ -608,15 +486,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
     case UBX_CFG_PRT:
 	gpsd_report(session->context->debug, LOG_IO, "UBX_CFG_PRT\n");
-	for (i = 0; i < (int)sizeof(session->driver.ubx.port_settings); i++)
-	    session->driver.ubx.port_settings[i] = buf[UBX_PREFIX_LEN+i];
-	session->driver.ubx.have_port_configuration = true;
-#ifdef __FUTURE__
-	gpsd_report(session->context->debug, LOG_IO,
-		    "Actual USART config block: %s\n",
-		    gpsd_hexdump(session->driver.ubx.port_settings,
-				 UBX_CFG_LEN));
-#endif /* __FUTURE__ */
 	/* turn off NMEA output, turn on UBX on this port */
 	ubx_mode(session, MODE_BINARY);
 	break;
@@ -724,38 +593,6 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 }
 #endif /* CONTROLSEND_ENABLE */
 
-#ifdef __FUTURE__
-static ubx_set_mode(const int parity, const int stopbits,
-		    unsigned char *buf)
-/* set the mode field in a USART configuration block */
-{
-    unsigned long usart_mode;
-
-    usart_mode = (unsigned long)getleu32(buf, 4);
-    usart_mode &= ~0xE00;	/* zero bits 11:9 */
-    switch (parity) {
-    case (int)'E':
-    case 2:
-	usart_mode |= 0x00;
-	break;
-    case (int)'O':
-    case 1:
-	usart_mode |= 0x01;
-	break;
-    case (int)'N':
-    case 0:
-    default:
-	usart_mode |= 0x4;	/* 0x5 would work too */
-	break;
-    }
-    /*@-charint@*/
-    usart_mode &= ~0x03000;	/* zero bits 13:12 */
-    if (stopbits == 2)
-	usart_mode |= 0x2000;	/* zero value means 1 stop bit */
-    putle32(buf, 4, usart_mode);
-}
-#endif /* __FUTURE__ */
-
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
@@ -796,18 +633,102 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 }
 
 #ifdef RECONFIGURE_ENABLE
+static ubx_gen_cfg(struct gps_device_t *session, 
+		   speed_t speed, const int parity, const int stopbits, 
+		   unsigned char *buf)
+/* set  configuration block */
+{
+    unsigned long usart_mode = 0;
+
+    memset(buf, '\0', UBX_CFG_LEN);
+
+    switch(session->sourcetype) {
+    case source_rs232:
+	buf[0] = USART1_ID;
+
+	putle32(buf, 8, speed);
+
+	/*
+	 * uBlox tech support explains the default contents of the mode
+	 * field as follows:
+	 *
+	 * D0 08 00 00     mode (LSB first)
+	 *
+	 * re-ordering bytes: 000008D0
+	 * dividing into fields: 000000000000000000 00 100 0 11 0 1 0000
+	 * nStopbits = 00 = 1
+	 * parity = 100 = none
+	 * charLen = 11 = 8-bit
+	 * reserved1 = 1
+	 *
+	 * The protocol reference further gives the following subfield values:
+	 * 01 = 1.5 stop bits (?)
+	 * 10 = 2 stopbits
+	 * 000 = even parity
+	 * 001 = odd parity
+	 * 10x = no parity
+	 * 10 = 7 bits
+	 *
+	 * Some UBX reference code amplifies this with:
+	 *
+	 *   prtcfg.mode = (1<<4) |	// compatibility with ANTARIS 4
+	 *                 (1<<7) |	// charLen = 11 = 8 bit
+	 *                 (1<<6) |	// charLen = 11 = 8 bit
+	 *                 (1<<11);	// parity = 10x = none
+	 */
+	usart_mode |= (1<<4);	/* reserved1 Antaris 4 compatibility bit */
+	usart_mode |= (1<<7);	/* high bit of charLen */
+
+	switch (parity) {
+	case (int)'E':
+	case 2:
+	    usart_mode |= (1<<7);		/* 7E */
+	    break;
+	case (int)'O':
+	case 1:
+	    usart_mode |= (1<<9) | (1<<7);	/* 7O */
+	    break;
+	case (int)'N':
+	case 0:
+	default:
+	    usart_mode |= (1<<11) | (3<<6);	/* 8N */
+	    break;
+	}
+	/*@-charint@*/
+
+	if (stopbits == 2)
+	    usart_mode |= (1<<13);
+
+	putle32(buf, 4, usart_mode);
+	break;
+    case source_usb:
+	buf[0] = USB_ID;
+	break;
+    default:
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "UBX driver sees unexpected source type %d.",
+		    session->sourcetype);
+	break;
+    }
+
+    /* always enable all input protocols */
+    buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
+}
+
 static void ubx_mode(struct gps_device_t *session, int mode)
 {
-    ubx_setup_cfg(session);
+    unsigned char buf[UBX_CFG_LEN];
+
+    ubx_gen_cfg(session, 
+		gpsd_get_speed(session),
+		gpsd_get_parity(session),
+		gpsd_get_stopbits(session),
+		buf);
 
     /*@+charint@*/
-    /* set baudrate on serial port only */
-    if (session->driver.ubx.port_settings[0] == (unsigned char)USART1_ID)
-	putle32(session->driver.ubx.port_settings, 8, session->gpsdata.dev.baudrate);
-
     if (mode == MODE_NMEA) {
-	session->driver.ubx.port_settings[outProtoMask] &= ~UBX_PROTOCOL_MASK;
-	session->driver.ubx.port_settings[outProtoMask] |= NMEA_PROTOCOL_MASK;
+	buf[outProtoMask] &= ~UBX_PROTOCOL_MASK;
+	buf[outProtoMask] |= NMEA_PROTOCOL_MASK;
     } else { /* MODE_BINARY */
 	/*
 	 * Just enabling the UBX protocol for output is not enough to
@@ -836,53 +757,21 @@ static void ubx_mode(struct gps_device_t *session, int mode)
 	msg[2] = 0x0a;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
-	session->driver.ubx.port_settings[outProtoMask] &= ~NMEA_PROTOCOL_MASK;
-	session->driver.ubx.port_settings[outProtoMask] |= UBX_PROTOCOL_MASK;
+	buf[outProtoMask] &= ~NMEA_PROTOCOL_MASK;
+	buf[outProtoMask] |= UBX_PROTOCOL_MASK;
     }
     /*@ -charint @*/
-    (void)ubx_write(session, 0x06u, 0x00,
-		    session->driver.ubx.port_settings,
-		    sizeof(session->driver.ubx.port_settings));
+    (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));
 }
 
 static bool ubx_speed(struct gps_device_t *session,
 		      speed_t speed, char parity, int stopbits)
 {
-    unsigned long usart_mode;
+    unsigned char buf[UBX_CFG_LEN];
 
-    ubx_setup_cfg(session);
+    ubx_gen_cfg(session, speed, parity, stopbits, buf);
 
-    /* set baudrate on serial port only */
-    if (session->driver.ubx.port_settings[0] != (unsigned char)USART1_ID)
-	return false;
-
-    /*@+charint@*/
-    usart_mode = (unsigned long)getleu32(session->driver.ubx.port_settings, 4);
-    usart_mode &= ~0xE00;	/* zero bits 11:9 */
-    switch (parity) {
-    case (int)'E':
-    case 2:
-	usart_mode |= 0x00;
-	break;
-    case (int)'O':
-    case 1:
-	usart_mode |= 0x01;
-	break;
-    case (int)'N':
-    case 0:
-    default:
-	usart_mode |= 0x4;	/* 0x5 would work too */
-	break;
-    }
-    /*@-charint@*/
-    usart_mode &= ~0x03000;	/* zero bits 13:12 */
-    if (stopbits == 2)
-	usart_mode |= 0x2000;	/* zero value means 1 stop bit */
-    putle32(session->driver.ubx.port_settings, 4, usart_mode);
-    putle32(session->driver.ubx.port_settings, 8, speed);
-    (void)ubx_write(session, 0x06, 0x00,
-		    session->driver.ubx.port_settings,
-		    sizeof(session->driver.ubx.port_settings));
+    (void)ubx_write(session, 0x06, 0x00, buf, sizeof(buf));
     return true;
 }
 
