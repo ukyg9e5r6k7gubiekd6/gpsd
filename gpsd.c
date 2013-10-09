@@ -946,9 +946,7 @@ static bool privileged_user(struct gps_device_t *device)
     struct subscriber_t *sub;
     int subcount = 0;
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-	if (sub->active == 0)
-	    continue;
-	else if (subscribed(sub, device))
+	if (subscribed(sub, device))
 	    subcount++;
     }
     return subcount == 1;
