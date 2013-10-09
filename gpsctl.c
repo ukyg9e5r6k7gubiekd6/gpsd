@@ -606,8 +606,6 @@ int main(int argc, char **argv)
 	 * and find out what is actually there.
 	 */
 	if (!(forcetype != NULL && echo)) {
-	    int seq;
-
 	    if (device == NULL) {
 		gpsd_report(context.debug, LOG_ERROR,
 			    "device must be specified for low-level access.\n");
@@ -623,13 +621,14 @@ int main(int argc, char **argv)
 	    }
 	    gpsd_report(context.debug, LOG_INF, 
 			"device %s activated\n", session.gpsdata.dev.path);
-	    FD_SET(session.gpsdata.gps_fd, &all_fds);
+	    /*@i1@*/FD_SET(session.gpsdata.gps_fd, &all_fds);
 	    if (session.gpsdata.gps_fd > maxfd)
 		 maxfd = session.gpsdata.gps_fd;
 
 	    /* initialize the GPS context's time fields */
 	    gpsd_time_init(&context, time(NULL));
 
+	    /*@-compdef@*/
 	    /* grab packets until we time out or get sync */
 	    for (hunting = true; hunting; )
 	    {
@@ -653,6 +652,7 @@ int main(int argc, char **argv)
 		    break;
 		}
 	    }
+	    /*@+compdef@*/
 
 	    gpsd_report(context.debug, LOG_PROG,
 			"%s looks like a %s at %d.\n",
@@ -667,7 +667,7 @@ int main(int argc, char **argv)
 	    }
 	}
 
-	(void)printf("%s identified as a %s at %d baud.\n",
+	(void)printf("%s identified as a %s at %u baud.\n",
                        device, gpsd_id(&session),
                        session.gpsdata.dev.baudrate);
 
