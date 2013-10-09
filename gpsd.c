@@ -1757,9 +1757,6 @@ int main(int argc, char *argv[])
     int i, option, dfd;
     int msocks[2] = {-1, -1};
     bool go_background = true;
-#ifdef COMPAT_SELECT
-    sigset_t oldset, blockset;
-#endif /* COMPAT_SELECT */
     bool in_restart;
 
     context.debug = 0;
@@ -2052,16 +2049,6 @@ int main(int argc, char *argv[])
 	subscribers[i].fd = UNALLOCATED_FD;
 #endif /* SOCKET_EXPORT_ENABLE*/
 
-    /* Handle some signals */
-#ifndef COMPAT_SELECT
-    (void)sigemptyset(&blockset);
-    (void)sigaddset(&blockset, SIGHUP);
-    (void)sigaddset(&blockset, SIGINT);
-    (void)sigaddset(&blockset, SIGTERM);
-    (void)sigaddset(&blockset, SIGQUIT);
-    (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
-#endif /* COMPAT_SELECT */
-
     /*@-compdef -compdestroy@*/
     {
 	struct sigaction sa;
@@ -2125,7 +2112,7 @@ int main(int argc, char *argv[])
 	}
 
     while (0 == signalled) {
-	if (!gpsd_await_data(&rfds, maxfd, &all_fds, &oldset, context.debug))
+	if (!gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
 	    continue;
 
 #ifdef SOCKET_EXPORT_ENABLE

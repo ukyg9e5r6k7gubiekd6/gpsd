@@ -965,7 +965,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 bool gpsd_await_data(/*@out@*/fd_set *rfds, 
 		     const int maxfd,
 		     /*@out@*/fd_set *all_fds, 
-		     sigset_t *oldset, const int debug)
+		     const int debug)
 /* await data from any socket in the all_fds set */
 {
     int i;
@@ -995,7 +995,7 @@ bool gpsd_await_data(/*@out@*/fd_set *rfds,
     tv.tv_usec = 0;
     if (select(maxfd + 1, rfds, NULL, NULL, &tv) == -1) {
 #else
-    if (pselect(maxfd + 1, rfds, NULL, NULL, NULL, oldset) == -1) {
+    if (pselect(maxfd + 1, rfds, NULL, NULL, NULL, NULL) == -1) {
 #endif
 	if (errno == EINTR)
 	    return false;
