@@ -484,12 +484,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(session->context->debug, LOG_IO, "UBX_TIM_SVIN\n");
 	break;
 
-    case UBX_CFG_PRT:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_CFG_PRT\n");
-	/* turn off NMEA output, turn on UBX on this port */
-	ubx_mode(session, MODE_BINARY);
-	break;
-
     case UBX_ACK_NAK:
 	gpsd_report(session->context->debug, LOG_IO,
 		    "UBX_ACK_NAK, class: %02x, id: %02x\n",
@@ -602,9 +596,6 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 
 	gpsd_report(session->context->debug, LOG_IO, "UBX configure\n");
 
-	/* ship a CFG-PRT query to get this port's settings */
-	(void)ubx_write(session, 0x06u, 0x00, NULL, 0);
-
 	/*@ -type @*/
 	msg[0] = 0x03;		/* SBAS mode enabled, accept testbed mode */
 	msg[1] = 0x07;		/* SBAS usage: range, differential corrections and integrity */
@@ -616,6 +607,10 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	msg[7] = 0x00;
 	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
 	/*@ +type @*/
+
+	/* turn off NMEA output, turn on UBX on this port */
+	if (session->packet_type == NMEA_PACKET)
+	    ubx_mode(session, MODE_BINARY);
     } else if (event == event_deactivate) {
 	/*@ -type @*/
 	unsigned char msg[4] = {
