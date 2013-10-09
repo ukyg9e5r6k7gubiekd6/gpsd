@@ -53,6 +53,7 @@ static WINDOW *statwin, *cmdwin;
 /*@null@*/ static WINDOW *packetwin;
 /*@null@*/ static FILE *logfile;
 static char *type_name;
+static size_t promptlen = 0;
 
 #ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
@@ -367,7 +368,7 @@ void monitor_complain(const char *fmt, ...)
 {
     va_list ap;
     assert(cmdwin!=NULL);
-    (void)wmove(cmdwin, 0, (int)strlen(type_name) + 2);
+    (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wclrtoeol(cmdwin);
     (void)wattrset(cmdwin, A_BOLD | A_BLINK);
     va_start(ap, fmt);
@@ -443,7 +444,7 @@ static bool switch_type(const struct gps_type_t *devtype)
     return false;
 }
 
-static bool do_command(size_t promptlen)
+static bool do_command(void)
 {
 #ifdef RECONFIGURE_ENABLE
     unsigned int v;
@@ -721,7 +722,7 @@ static bool do_command(size_t promptlen)
 #endif /* CONTROLSEND_ENABLE */
 
     default:
-	monitor_complain("Unknown command");
+	monitor_complain("Unknown command '%c'", line[0]);
 	break;
     }
 
@@ -750,7 +751,6 @@ int main(int argc, char **argv)
     int bailout = 0, matches = 0;
     bool nmea = false;
     ssize_t len;
-    size_t promptlen = 0;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -1019,7 +1019,7 @@ int main(int argc, char **argv)
 		break;
 
 	    if (FD_ISSET(0, &select_set)) 
-		if (!do_command(promptlen))
+		if (!do_command())
 		    goto quit;
 	}
 	/*@ +nullpass @*/
