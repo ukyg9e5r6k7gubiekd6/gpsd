@@ -705,8 +705,8 @@ static void ubx_gen_cfg(struct gps_device_t *session,
 	break;
     }
 
-    /* always enable all input protocols */
-    buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
+    /* enable all input and output protocols by default */
+    buf[12] = buf[14] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
     /*@ -ignoresigns -charint @*/
 }
 
