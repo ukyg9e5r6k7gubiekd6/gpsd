@@ -416,7 +416,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 	    devicewin = newwin((*active)->min_y, (*active)->min_x, 1, 0);
 	    if ((devicewin == NULL) || ((*active)->initialize != NULL && !(*active)->initialize())) {
 		monitor_complain("Internal initialization failure - screen "
-				 "must be at least 80x24. aborting.");
+				 "must be at least 80x24. Aborting.");
 		return false;
 	    }
 
@@ -898,8 +898,8 @@ int main(int argc, char **argv)
 	(void)strlcpy(session.gpsdata.dev.path, argv[optind],
 		      sizeof(session.gpsdata.dev.path));
 	if (gpsd_activate(&session, O_PROBEONLY) == -1) {
-	    gpsd_report(context.debug, LOG_ERROR,
-			"activation of device %s failed, errno=%d\n",
+	    (void)fprintf(stderr,
+			"gpsmon: activation of device %s failed, errno=%d\n",
 			session.gpsdata.dev.path, errno);
 	    exit(EXIT_FAILURE);
 	}
@@ -1046,6 +1046,9 @@ int main(int argc, char **argv)
 	break;
     case TERM_READ_ERROR:
 	explanation = "Read error from device\n";
+	break;
+    default:
+	explanation = "Unknown error, should never happen.\n";
 	break;
     }
 
