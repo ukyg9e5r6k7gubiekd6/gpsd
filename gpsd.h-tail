@@ -407,6 +407,7 @@ struct gps_device_t {
     struct gps_context_t	*context;
     sourcetype_t sourcetype;
     servicetype_t servicetype;
+    int mode;
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
 #endif
@@ -820,7 +821,10 @@ extern void gpsd_init(struct gps_device_t *,
 		      /*@null@*/const char *);
 extern void gpsd_clear(struct gps_device_t *);
 extern int gpsd_open(struct gps_device_t *);
-extern int gpsd_activate(struct gps_device_t *);
+#define O_CONTINUE	0
+#define O_PROBEONLY	1
+#define O_OPTIMIZE	2
+extern int gpsd_activate(struct gps_device_t *, const int);
 extern void gpsd_deactivate(struct gps_device_t *);
 extern bool gpsd_await_data(fd_set *, const int, fd_set *,
 			    sigset_t *, const int);

@@ -678,7 +678,7 @@ static void deactivate_device(struct gps_device_t *device)
 
 static bool open_device( /*@null@*/struct gps_device_t *device)
 {
-    if (NULL == device || gpsd_activate(device) < 0) {
+    if (NULL == device || gpsd_activate(device, O_OPTIMIZE) < 0) {
 	return false;
     }
     gpsd_report(context.debug, LOG_INF, 
@@ -922,7 +922,7 @@ static bool awaken(struct gps_device_t *device)
 		    device->gpsdata.gps_fd, device->gpsdata.dev.path);
 	return true;
     } else {
-	if (gpsd_activate(device) < 0) {
+	if (gpsd_activate(device, O_OPTIMIZE) < 0) {
 	    gpsd_report(context.debug, LOG_ERROR,
 			"%s: device activation failed.\n",
 			device->gpsdata.dev.path);

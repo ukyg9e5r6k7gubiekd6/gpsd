@@ -645,7 +645,7 @@ int main(int argc, char **argv)
 	    gpsd_time_init(&context, time(NULL));
 	    gpsd_init(&session, &context, device);
 	    gpsd_report(context.debug, LOG_PROG, "initialization passed.\n");
-	    if (gpsd_activate(&session) == -1) {
+	    if (gpsd_activate(&session, O_PROBEONLY) == -1) {
 		gpsd_report(context.debug, LOG_ERROR,
 			      "activation of device %s failed, errno=%d\n",
 			      device, errno);

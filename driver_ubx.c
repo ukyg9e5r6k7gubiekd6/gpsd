@@ -609,7 +609,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	/*@ +type @*/
 
 	/* turn off NMEA output, turn on UBX on this port */
-	if (session->packet_type == NMEA_PACKET)
+	if (session->packet.type == NMEA_PACKET && session->mode == O_OPTIMIZE)
 	    ubx_mode(session, MODE_BINARY);
     } else if (event == event_deactivate) {
 	/*@ -type @*/

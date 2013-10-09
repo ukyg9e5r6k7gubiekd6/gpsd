@@ -615,7 +615,7 @@ int main(int argc, char **argv)
     } else {
 	(void)strlcpy(session.gpsdata.dev.path, argv[optind],
 		      sizeof(session.gpsdata.dev.path));
-	if (gpsd_activate(&session) == -1) {
+	if (gpsd_activate(&session, O_PROBEONLY) == -1) {
 	    gpsd_report(context.debug, LOG_ERROR,
 			"activation of device %s failed, errno=%d\n",
 			session.gpsdata.dev.path, errno);

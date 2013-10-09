@@ -427,12 +427,14 @@ int gpsd_open(struct gps_device_t *session)
 }
 
 /*@ -branchstate @*/
-int gpsd_activate(struct gps_device_t *session)
+int gpsd_activate(struct gps_device_t *session, const int mode)
 /* acquire a connection to the GPS device */
 {
     gpsd_run_device_hook(session->context->debug,
 			 session->gpsdata.dev.path, "ACTIVATE");
     session->gpsdata.gps_fd = gpsd_open(session);
+    if (mode != O_CONTINUE)
+	session->mode = mode;
 
     if (session->gpsdata.gps_fd < 0)
 	return -1;
@@ -472,8 +474,8 @@ int gpsd_activate(struct gps_device_t *session)
 #endif /* NON_NMEA_ENABLE */
 	gpsd_clear(session);
 	gpsd_report(session->context->debug, LOG_INF,
-		    "gpsd_activate(): activated GPS (fd %d)\n",
-		    session->gpsdata.gps_fd);
+		    "gpsd_activate(%d): activated GPS (fd %d)\n",
+		    session->mode, session->gpsdata.gps_fd);
 	/*
 	 * We might know the device's type, but we shouldn't assume it has
 	 * retained its settings.  A revert hook might well have undone
@@ -1398,7 +1400,7 @@ int gpsd_multipoll(const bool data_ready,
 			gpsd_deactivate(device);
 			if (device->ntrip.works) {
 			    device->ntrip.works = false; // reset so we try this once only
-			    if (gpsd_activate(device) < 0) {
+			    if (gpsd_activate(device, O_CONTINUE) < 0) {
 				gpsd_report(device->context->debug, LOG_WARN,
 					    "reconnect to ntrip server failed\n");
 				return DEVICE_ERROR;
