@@ -695,8 +695,6 @@ int main(int argc, char **argv)
 	    if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 		/* switch types on packet receipt */
 		/*@ -nullpass */
-	        bool switch_flag = false;
-
 		if (session.packet.type != last_type) {
 		    last_type = session.packet.type;
 		    if (!switch_type(session.device_type))

@@ -344,7 +344,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     size_t data_len;
     unsigned short msgid;
     gps_mask_t mask = 0;
-    int i;
 
     /* the packet at least contains a head long enough for an empty message */
     if (len < UBX_PREFIX_LEN)
@@ -628,15 +627,16 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 }
 
 #ifdef RECONFIGURE_ENABLE
-static ubx_gen_cfg(struct gps_device_t *session, 
-		   speed_t speed, const int parity, const int stopbits, 
-		   unsigned char *buf)
+static void ubx_gen_cfg(struct gps_device_t *session, 
+		   speed_t speed, const char parity, const int stopbits, 
+		   /*@out@*/unsigned char *buf)
 /* set  configuration block */
 {
     unsigned long usart_mode = 0;
 
     memset(buf, '\0', UBX_CFG_LEN);
 
+    /*@ +ignoresigns +charint @*/
     switch(session->sourcetype) {
     case source_rs232:
 	buf[0] = USART1_ID;
@@ -689,7 +689,6 @@ static ubx_gen_cfg(struct gps_device_t *session,
 	    usart_mode |= (1<<11) | (3<<6);	/* 8N */
 	    break;
 	}
-	/*@-charint@*/
 
 	if (stopbits == 2)
 	    usart_mode |= (1<<13);
@@ -708,6 +707,7 @@ static ubx_gen_cfg(struct gps_device_t *session,
 
     /* always enable all input protocols */
     buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
+    /*@ -ignoresigns -charint @*/
 }
 
 static void ubx_mode(struct gps_device_t *session, int mode)

@@ -962,9 +962,10 @@ static void gpsd_error_model(struct gps_device_t *session,
 }
 #endif /* CHEAPFLOATS_ENABLE */
 
+/*@ -mustdefine -compdef @*/
 bool gpsd_await_data(/*@out@*/fd_set *rfds, 
 		     const int maxfd,
-		     /*@out@*/fd_set *all_fds, 
+		     /*@in@*/fd_set *all_fds, 
 		     const int debug)
 /* await data from any socket in the all_fds set */
 {
@@ -1025,6 +1026,7 @@ bool gpsd_await_data(/*@out@*/fd_set *rfds,
 
     return true;
 }
+/*@ +mustdefine +compdef @*/
 
 gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
@@ -1387,7 +1389,6 @@ int gpsd_multipoll(const bool data_ready,
 			    device->gpsdata.dev.path,
 			    gps_maskdump(changed));
 		return DEVICE_ERROR;
-		break;
 	    } else if (changed == NODATA_IS) {
 		/*
 		 * No data on the first fragment read means the device
@@ -1451,7 +1452,7 @@ int gpsd_multipoll(const bool data_ready,
 
 
 	    /* handle data contained in this packet */
-	    handler(device, changed);
+	    /*@i1@*/handler(device, changed);
 	}
     }
     else if (device->reawake>0 && timestamp()>device->reawake) {

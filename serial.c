@@ -178,13 +178,13 @@ speed_t gpsd_get_speed_old(const struct gps_device_t *dev)
     return gpsd_get_speed_termios(&dev->ttyset_old);
 }
 
-int gpsd_get_parity(const struct gps_device_t *dev)
+char gpsd_get_parity(const struct gps_device_t *dev)
 {
-    int parity = 0;
+    char parity = 'N';
     if ((dev->ttyset.c_cflag & (PARENB | PARODD)) == (PARENB | PARODD))
-	parity = 1;
+	parity = 'O';
     else if ((dev->ttyset.c_cflag & PARENB) == PARENB)
-	parity = 2;
+	parity = 'E';
     return parity;
 }
 
