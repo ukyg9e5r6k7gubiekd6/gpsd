@@ -24,6 +24,7 @@
 static int debuglevel;
 static unsigned int timeout = 8;
 static struct gps_context_t context;
+static bool hunting = true;
 
 ssize_t gpsd_write(struct gps_device_t *session,
 		   const char *buf,
@@ -49,67 +50,6 @@ void gpsd_report(const int debuglevel, const int errlevel,
     va_end(ap);
 			
 }
-
-/*@ -noret @*/
-static gps_mask_t get_packet(struct gps_device_t *session)
-/* try to get a well-formed packet from the GPS */
-{
-    static fd_set rfds;
-    gps_mask_t fieldmask;
-#ifdef COMPAT_SELECT
-    struct timeval tv;
-#else
-    struct timespec tv;
-    sigset_t oldset, blockset;
-
-    (void)sigemptyset(&blockset);
-    (void)sigaddset(&blockset, SIGHUP);
-    (void)sigaddset(&blockset, SIGINT);
-    (void)sigaddset(&blockset, SIGTERM);
-    (void)sigaddset(&blockset, SIGQUIT);
-    (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
-#endif /* COMPAT_SELECT */
-
-    FD_ZERO(&rfds);
-    for (;;) {
-	FD_CLR(session->gpsdata.gps_fd, &rfds);
-
-	/*@ -usedef -type -nullpass -compdef @*/
-	/*
-	 * If the timeout on this select isn't longer than the device's
-	 * cycle time, the code will be prone to flaky timing-dependent
-	 * failures.
-	 */
-	errno = 0;
-	tv.tv_sec = 2;
-#ifdef COMPAT_SELECT
-	tv.tv_usec = 0;
-	if (select(session->gpsdata.gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
-#else
-	tv.tv_nsec = 0;
-	if (pselect(session->gpsdata.gps_fd + 1, &rfds, NULL, NULL, &tv, &oldset) == -1) {
-#endif
-	    if (errno == EINTR || !FD_ISSET(session->gpsdata.gps_fd, &rfds))
-		continue;
-	    gpsd_report(session->context->debug, LOG_ERROR,
-			"select %s\n", strerror(errno));
-	    exit(EXIT_FAILURE);
-	}
-	/*@ +usedef +type +nullpass +compdef @*/
-
-	fieldmask = gpsd_poll(session);
-
-	/* conditional prevents mask dumper from eating CPU */
-	if (debuglevel >= LOG_DATA)
-	    gpsd_report(session->context->debug, LOG_DATA,
-			"packet mask = %s\n",
-			gps_maskdump(session->gpsdata.set));
-
-	if ((fieldmask &~ ONLINE_SET)!=0)
-	    return fieldmask;
-    }
-}
-/*@ +noret @*/
 
 static void settle(struct gps_device_t *session)
 /* allow the device to settle after a control operation */
@@ -229,6 +169,33 @@ static char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
 	(void)strlcat(buf, session->subtype, sizeof(buf));
     }
     return (buf);
+}
+
+static void ctlhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
+/* recognize when we've achieved sync */
+{
+    static int packet_counter = 0;
+
+    /*
+     * Anything non-NMEA is an immediate lock.
+     */
+    if (device->device_type != NULL 
+	&& device->device_type->packet_type > NMEA_PACKET)
+    {
+	hunting = false;
+	(void) alarm(0);
+    }
+
+    /*
+     * If it's NMEA, go back around enough times for the type probes to
+     * reveal any secret identity (like SiRF or UBX) the chip might have.
+     */
+    if (device->packet.type == NMEA_PACKET 
+	&& packet_counter++ >= REDIRECT_SNIFF)
+    {
+	hunting = false;
+	(void) alarm(0);
+    }
 }
 
 int main(int argc, char **argv)
@@ -619,6 +586,10 @@ int main(int argc, char **argv)
     } else {
 	/* access to the daemon failed, use the low-level facilities */
 	static struct gps_device_t	session;	/* zero this too */
+	fd_set all_fds;
+	fd_set rfds;
+	int maxfd = 0;
+
 	/*@ -mustfreeonly -immediatetrans @*/
 	gps_context_init(&context);
 	context.debug = debuglevel;
@@ -642,29 +613,47 @@ int main(int argc, char **argv)
 			    "device must be specified for low-level access.\n");
 		exit(EXIT_FAILURE);
 	    }
-	    gpsd_time_init(&context, time(NULL));
+
 	    gpsd_init(&session, &context, device);
-	    gpsd_report(context.debug, LOG_PROG, "initialization passed.\n");
-	    if (gpsd_activate(&session, O_PROBEONLY) == -1) {
+	    if (gpsd_activate(&session, O_PROBEONLY) < 0) {
 		gpsd_report(context.debug, LOG_ERROR,
-			      "activation of device %s failed, errno=%d\n",
-			      device, errno);
+			    "initial GPS device %s open failed\n",
+			    device);
 		exit(EXIT_FAILURE);
 	    }
-	    /* hunt for packet type and serial parameters */
-	    for (seq = 0; session.device_type == NULL; seq++) {
-		if (get_packet(&session) == ERROR_SET) {
-		    gpsd_report(context.debug, LOG_ERROR,
-				"autodetection failed.\n");
+	    gpsd_report(context.debug, LOG_INF, 
+			"device %s activated\n", session.gpsdata.dev.path);
+	    FD_SET(session.gpsdata.gps_fd, &all_fds);
+	    if (session.gpsdata.gps_fd > maxfd)
+		 maxfd = session.gpsdata.gps_fd;
+
+	    /* initialize the GPS context's time fields */
+	    gpsd_time_init(&context, time(NULL));
+
+	    /* grab packets until we time out or get sync */
+	    for (hunting = true; hunting; )
+	    {
+		if (!gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+		    continue;
+
+		switch(gpsd_multipoll(FD_ISSET(session.gpsdata.gps_fd, &rfds),
+					       &session, ctlhook, 0.01))
+		{
+		case DEVICE_READY:
+		    FD_SET(session.gpsdata.gps_fd, &all_fds);
+		    break;
+		case DEVICE_UNREADY:
+		    FD_CLR(session.gpsdata.gps_fd, &all_fds);
+		    break;
+		case DEVICE_ERROR:
+		    gpsd_report(context.debug, LOG_WARN,
+				"device error, bailing out.\n");
 		    exit(EXIT_FAILURE);
-		} else if (session.packet.type > COMMENT_PACKET) {
-		    gpsd_report(context.debug, LOG_IO,
-				"autodetection after %d reads finds packet type %d.\n",
-				seq, session.packet.type);
-		    (void) alarm(0);
+		default:
 		    break;
 		}
 	    }
+
 	    gpsd_report(context.debug, LOG_PROG,
 			"%s looks like a %s at %d.\n",
 			device, gpsd_id(&session),
@@ -676,25 +665,6 @@ int main(int argc, char **argv)
 			    forcetype->type_name,
 			    session.device_type->type_name);
 	    }
-
-	    /*
-	     * If we've identified this as an NMEA device, we have to eat
-	     * packets for a while to see if one of our probes elicits an
-	     * ID response telling us that it's really a SiRF or
-	     * something.  If so, the libgpsd(3) layer will automatically
-	     * redispatch to the correct driver type.
-	     */
-	    if (strcmp(session.device_type->type_name, "Generic NMEA") == 0) {
-		int dummy;
-		for (dummy = 0; dummy < REDIRECT_SNIFF; dummy++) {
-		    if ((get_packet(&session) & DEVICEID_SET)!=0)
-			break;
-		}
-	    }
-	    gpsd_report(context.debug, LOG_SHOUT,
-			"%s identified as a %s at %d.\n",
-			device, gpsd_id(&session),
-			session.gpsdata.dev.baudrate);
 	}
 
 	/* if no control operation was specified, we're done */
