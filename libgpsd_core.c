@@ -2,8 +2,9 @@
  *
  * Access to the driver layer goes through the entry points in this file.
  * The idea is to present a session as an abstraction from which you get
- * fixes (and possibly other data updates) by calling gpsd_poll(). The
- * rest is setup and teardown.
+ * fixes (and possibly other data updates) by calling gpsd_multipoll(). The
+ * rest is setup and teardown. (For backward compatibility the older gpsd_poll()
+ * entry point has been retained.)
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
