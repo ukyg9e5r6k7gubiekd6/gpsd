@@ -971,7 +971,7 @@ bool gpsd_await_data(/*@out@*/fd_set *rfds,
 		     const int debug)
 /* await data from any socket in the all_fds set */
 {
-    int i;
+    int i, status;
 #ifdef COMPAT_SELECT
     struct timeval tv;
 #endif /* COMPAT_SELECT */
@@ -996,10 +996,11 @@ bool gpsd_await_data(/*@out@*/fd_set *rfds,
 #ifdef COMPAT_SELECT
     tv.tv_sec = 1;
     tv.tv_usec = 0;
-    if (select(maxfd + 1, rfds, NULL, NULL, &tv) == -1) {
+    status = select(maxfd + 1, rfds, NULL, NULL, &tv);
 #else
-    if (pselect(maxfd + 1, rfds, NULL, NULL, NULL, NULL) == -1) {
+    status = pselect(maxfd + 1, rfds, NULL, NULL, NULL, NULL);
 #endif
+    if (status == -1) {
 	if (errno == EINTR)
 	    return false;
 	gpsd_report(debug, LOG_ERROR, "select: %s\n", strerror(errno));
