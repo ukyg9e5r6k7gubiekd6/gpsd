@@ -386,8 +386,8 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	s = socket(PF_INET, type, proto);
 	break;
 #ifdef IPV6_ENABLE
-#ifndef S_SPLINT_S
     case AF_INET6:
+#ifndef S_SPLINT_S
 	sin_len = sizeof(sat.sa_in6);
 
 	memset((char *)&sat.sa_in6, 0, sin_len);
@@ -398,7 +398,6 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	else
 #endif /* FORCE_GLOBAL_ENABLE */
 	    sat.sa_in6.sin6_addr = in6addr_any;
-#endif /* S_SPLINT_S */
 	sat.sa_in6.sin6_port = htons(port);
 
 	/*
@@ -427,6 +426,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 		return -1;
 	    }
 	}
+#endif /* S_SPLINT_S */
 	break;
 #endif  /* IPV6_ENABLE */
     default:

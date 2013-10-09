@@ -962,7 +962,9 @@ static void gpsd_error_model(struct gps_device_t *session,
 }
 #endif /* CHEAPFLOATS_ENABLE */
 
-bool gpsd_await_data(fd_set *rfds, const int maxfd, fd_set *all_fds, 
+bool gpsd_await_data(/*@out@*/fd_set *rfds, 
+		     const int maxfd,
+		     /*@out@*/fd_set *all_fds, 
 		     sigset_t *oldset, const int debug)
 /* await data from any socket in the all_fds set */
 {
