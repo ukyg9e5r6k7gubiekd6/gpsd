@@ -178,6 +178,26 @@ speed_t gpsd_get_speed_old(const struct gps_device_t *dev)
     return gpsd_get_speed_termios(&dev->ttyset_old);
 }
 
+int gpsd_get_parity(const struct gps_device_t *dev)
+{
+    int parity = 0;
+    if ((dev->ttyset.c_cflag & (PARENB | PARODD)) == (PARENB | PARODD))
+	parity = 1;
+    else if ((dev->ttyset.c_cflag & PARENB) == PARENB)
+	parity = 2;
+    return parity;
+}
+
+int gpsd_get_stopbits(const struct gps_device_t *dev)
+{
+    int stopbits = 0;
+    if ((dev->ttyset.c_cflag & CS8) == CS8)
+	stopbits = 1;
+    else if ((dev->ttyset.c_cflag & (CS7 | CSTOPB)) == (CS7 | CSTOPB))
+	stopbits = 2;
+    return stopbits;
+}
+
 bool gpsd_set_raw(struct gps_device_t * session)
 {
     (void)cfmakeraw(&session->ttyset);
