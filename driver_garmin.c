@@ -889,7 +889,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product,
 	}
     }
 
-    gpsd_report(debug, LOG_SHOUT,
+    gpsd_report(debug, LOG_INF,
 		"vendor/product match with %04x:%04x %sfound\n",
 		vendor, product, found ? "" : "not ");
     libusb_free_device_list(list, 1);
