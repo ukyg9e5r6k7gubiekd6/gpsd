@@ -901,8 +901,8 @@ int main(int argc, char **argv)
 		      sizeof(session.gpsdata.dev.path));
 	if (gpsd_activate(&session, O_PROBEONLY) == -1) {
 	    (void)fprintf(stderr,
-			"gpsmon: activation of device %s failed, errno=%d\n",
-			session.gpsdata.dev.path, errno);
+			"gpsmon: activation of device %s failed, errno=%d (%s)\n",
+			  session.gpsdata.dev.path, errno, strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
 
