@@ -443,6 +443,292 @@ static bool switch_type(const struct gps_type_t *devtype)
     return false;
 }
 
+static bool do_command(size_t promptlen)
+{
+#ifdef RECONFIGURE_ENABLE
+    unsigned int v;
+#endif /* RECONFIGURE_ENABLE */
+    char line[80], *arg, *p;
+    unsigned char buf[BUFLEN];
+    int status;
+    ssize_t len;
+
+    (void)wmove(cmdwin, 0, (int)promptlen + 2);
+    (void)wrefresh(cmdwin);
+    (void)echo();
+    /*@ -usedef -compdef @*/
+    (void)wgetnstr(cmdwin, line, 80);
+    (void)noecho();
+    if (packetwin != NULL)
+	(void)wrefresh(packetwin);
+    (void)wrefresh(cmdwin);
+
+    if ((p = strchr(line, '\r')) != NULL)
+	*p = '\0';
+
+    if (line[0] == '\0')
+	return true;
+    /*@ +usedef +compdef @*/
+
+    if (isspace(line[1])) {
+	for (arg = line + 2; *arg != '\0' && isspace(*arg); arg++)
+	    arg++;
+	arg++;
+    } else
+	arg = line + 1;
+
+    if (serial && active != NULL && (*active)->command != NULL) {
+	status = (*active)->command(line);
+	if (status == COMMAND_TERMINATE)
+	    return false;
+	else if (status == COMMAND_MATCH)
+	    return true;
+	assert(status == COMMAND_UNKNOWN);
+    }
+    switch (line[0]) {
+#ifdef RECONFIGURE_ENABLE
+    case 'c':	/* change cycle time */
+	if (active == NULL)
+	    monitor_complain("No device defined yet");
+	else if (!serial)
+	    monitor_complain("Only available in low-level mode.");
+	else {
+	    double rate = strtod(arg, NULL);
+	    const struct monitor_object_t **switcher = active;
+
+	    if (fallback != NULL && (*fallback)->driver->rate_switcher != NULL)
+		switcher = fallback;
+	    if ((*switcher)->driver->rate_switcher) {
+		/* *INDENT-OFF* */
+		context.readonly = false;
+		if ((*switcher)->driver->rate_switcher(&session, rate)) {
+		    announce_log("[Rate switcher called.]");
+		} else
+		    monitor_complain("Rate not supported.");
+		context.readonly = true;
+		/* *INDENT-ON* */
+	    } else
+		monitor_complain
+		    ("Device type has no rate switcher");
+	}
+#endif /* RECONFIGURE_ENABLE */
+	break;
+    case 'i':	/* start probing for subtype */
+	if (active == NULL)
+	    monitor_complain("No GPS type detected.");
+	else if (!serial)
+	    monitor_complain("Only available in low-level mode.");
+	else {
+	    if (strcspn(line, "01") == strlen(line))
+		context.readonly = !context.readonly;
+	    else
+		context.readonly = (atoi(line + 1) == 0);
+	    /* *INDENT-OFF* */
+	    (void)gpsd_switch_driver(&session,
+		     (*active)->driver->type_name);
+	    /* *INDENT-ON* */
+	}
+	break;
+
+    case 'l':	/* open logfile */
+	if (logfile != NULL) {
+	    if (packetwin != NULL)
+		(void)wprintw(packetwin,
+			      ">>> Logging to %s off", logfile);
+	    (void)fclose(logfile);
+	}
+
+	if ((logfile = fopen(line + 1, "a")) != NULL)
+	    if (packetwin != NULL)
+		(void)wprintw(packetwin,
+			      ">>> Logging to %s on", logfile);
+	break;
+
+#ifdef RECONFIGURE_ENABLE
+    case 'n':	/* change mode */
+	/* if argument not specified, toggle */
+	if (strcspn(line, "01") == strlen(line)) {
+	    /* *INDENT-OFF* */
+	    v = (unsigned int)TEXTUAL_PACKET_TYPE(
+		session.packet.type);
+	    /* *INDENT-ON* */
+	} else
+	    v = (unsigned)atoi(line + 1);
+	if (active == NULL)
+	    monitor_complain("No device defined yet");
+	else if (!serial)
+	    monitor_complain("Only available in low-level mode.");
+	else {
+	    const struct monitor_object_t **switcher = active;
+
+	    if (fallback != NULL && (*fallback)->driver->mode_switcher != NULL)
+		switcher = fallback;
+	    if ((*switcher)->driver->mode_switcher) {
+		context.readonly = false;
+		announce_log("[Mode switcher to mode %d]", v);
+		(*switcher)->driver->mode_switcher(&session,
+						 (int)v);
+		context.readonly = true;
+		(void)tcdrain(session.gpsdata.gps_fd);
+		(void)usleep(50000);
+	    } else
+		monitor_complain
+		    ("Device type has no mode switcher");
+	}
+	break;
+#endif /* RECONFIGURE_ENABLE */
+
+    case 'q':	/* quit */
+	return false;
+
+#ifdef RECONFIGURE_ENABLE
+    case 's':	/* change speed */
+	if (active == NULL)
+	    monitor_complain("No device defined yet");
+	else if (!serial)
+	    monitor_complain("Only available in low-level mode.");
+	else {
+	    speed_t speed;
+	    char parity = session.gpsdata.dev.parity;
+	    unsigned int stopbits =
+		(unsigned int)session.gpsdata.dev.stopbits;
+	    char *modespec;
+	    const struct monitor_object_t **switcher = active;
+
+	    if (fallback != NULL && (*fallback)->driver->speed_switcher != NULL)
+		switcher = fallback;
+
+	    modespec = strchr(arg, ':');
+	    /*@ +charint @*/
+	    if (modespec != NULL) {
+		if (strchr("78", *++modespec) == NULL) {
+		    monitor_complain
+			("No support for that word length.");
+		    break;
+		}
+		parity = *++modespec;
+		if (strchr("NOE", parity) == NULL) {
+		    monitor_complain("What parity is '%c'?.",
+				     parity);
+		    break;
+		}
+		stopbits = (unsigned int)*++modespec;
+		if (strchr("12", (char)stopbits) == NULL) {
+		    monitor_complain("Stop bits must be 1 or 2.");
+		    break;
+		}
+		stopbits = (unsigned int)(stopbits - '0');
+	    }
+	    /*@ -charint @*/
+	    speed = (unsigned)atoi(arg);
+	    /* *INDENT-OFF* */
+	    if ((*switcher)->driver->speed_switcher) {
+		context.readonly = false;
+		if ((*switcher)->
+		    driver->speed_switcher(&session, speed,
+					   parity, (int)
+					   stopbits)) {
+		    announce_log("[Speed switcher called.]");
+		    /*
+		     * See the comment attached to the 'DEVICE'
+		     * command in gpsd.  Allow the control
+		     * string time to register at the GPS
+		     * before we do the baud rate switch,
+		     * which effectively trashes the UART's
+		     * buffer.
+		     */
+		    (void)tcdrain(session.gpsdata.gps_fd);
+		    (void)usleep(50000);
+		    (void)gpsd_set_speed(&session, speed,
+					 parity, stopbits);
+		} else
+		    monitor_complain
+			("Speed/mode combination not supported.");
+		context.readonly = true;
+	    } else
+		monitor_complain
+		    ("Device type has no speed switcher");
+	    /* *INDENT-ON* */
+	}
+	break;
+#endif /* RECONFIGURE_ENABLE */
+
+    case 't':	/* force device type */
+	if (!serial)
+	    monitor_complain("Only available in low-level mode.");
+	else if (strlen(arg) > 0) {
+	    int matchcount = 0;
+	    const struct gps_type_t **dp, *forcetype = NULL;
+	    for (dp = gpsd_drivers; *dp; dp++) {
+		if (strstr((*dp)->type_name, arg) != NULL) {
+		    forcetype = *dp;
+		    matchcount++;
+		}
+	    }
+	    if (matchcount == 0) {
+		monitor_complain
+		    ("No driver type matches '%s'.", arg);
+	    } else if (matchcount == 1) {
+		assert(forcetype != NULL);
+		/* *INDENT-OFF* */
+		if (switch_type(forcetype))
+		    (void)gpsd_switch_driver(&session,
+					     forcetype->type_name);
+		/* *INDENT-ON* */
+	    } else {
+		monitor_complain
+		    ("Multiple driver type names match '%s'.",
+		     arg);
+	    }
+	}
+	break;
+
+#ifdef CONTROLSEND_ENABLE
+    case 'x':	/* send control packet */
+	if (active == NULL)
+	    monitor_complain("No device defined yet");
+	else if (!serial)
+	    monitor_complain("Only available in low-level mode.");
+	else {
+	    /*@ -compdef @*/
+	    int st = gpsd_hexpack(arg, (char *)buf, strlen(arg));
+	    if (st < 0)
+		monitor_complain
+		    ("Invalid hex string (error %d)", st);
+	    else if ((*active)->driver->control_send == NULL)
+		monitor_complain
+		    ("Device type has no control-send method.");
+	    else if (!monitor_control_send(buf, (size_t) st))
+		monitor_complain("Control send failed.");
+	    /*@ +compdef @*/
+	}
+	break;
+
+    case 'X':	/* send raw packet */
+	if (!serial)
+	    monitor_complain("Only available in low-level mode.");
+	else {
+	    /*@ -compdef @*/
+	    len = (ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
+	    if (len < 0)
+		monitor_complain("Invalid hex string (error %d)",
+				 len);
+	    else if (!monitor_raw_send(buf, (size_t) len))
+		monitor_complain("Raw send failed.");
+	    /*@ +compdef @*/
+	}
+	break;
+#endif /* CONTROLSEND_ENABLE */
+
+    default:
+	monitor_complain("Unknown command");
+	break;
+    }
+
+    /* continue accepting commands */
+    return true;
+}
+
 static jmp_buf assertbuf;
 
 static void onsig(int sig UNUSED)
@@ -457,17 +743,13 @@ static void onsig(int sig UNUSED)
 
 int main(int argc, char **argv)
 {
-#ifdef RECONFIGURE_ENABLE
-    unsigned int v;
-#endif /* RECONFIGURE_ENABLE */
-    int option, status, last_type = BAD_PACKET;
-    ssize_t len;
+    int option, last_type = BAD_PACKET;
     struct fixsource_t source;
     fd_set select_set;
-    unsigned char buf[BUFLEN];
-    char line[80], *explanation, *p;
+    char *explanation;
     int bailout = 0, matches = 0;
     bool nmea = false;
+    ssize_t len;
     size_t promptlen = 0;
 
     /*@ -observertrans @*/
@@ -736,281 +1018,9 @@ int main(int argc, char **argv)
 	    if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) == -1)
 		break;
 
-	    if (FD_ISSET(0, &select_set)) {
-		char *arg;
-		(void)wmove(cmdwin, 0, (int)promptlen + 2);
-		(void)wrefresh(cmdwin);
-		(void)echo();
-		/*@ -usedef -compdef @*/
-		(void)wgetnstr(cmdwin, line, 80);
-		(void)noecho();
-		if (packetwin != NULL)
-		    (void)wrefresh(packetwin);
-		(void)wrefresh(cmdwin);
-
-		if ((p = strchr(line, '\r')) != NULL)
-		    *p = '\0';
-
-		if (line[0] == '\0')
-		    continue;
-		/*@ +usedef +compdef @*/
-
-		if (isspace(line[1])) {
-		    for (arg = line + 2; *arg != '\0' && isspace(*arg); arg++)
-			arg++;
-		    arg++;
-		} else
-		    arg = line + 1;
-
-		if (serial && active != NULL && (*active)->command != NULL) {
-		    status = (*active)->command(line);
-		    if (status == COMMAND_TERMINATE)
-			goto quit;
-		    else if (status == COMMAND_MATCH)
-			continue;
-		    assert(status == COMMAND_UNKNOWN);
-		}
-		switch (line[0]) {
-#ifdef RECONFIGURE_ENABLE
-		case 'c':	/* change cycle time */
-		    if (active == NULL)
-			monitor_complain("No device defined yet");
-		    else if (!serial)
-			monitor_complain("Only available in low-level mode.");
-		    else {
-			double rate = strtod(arg, NULL);
-			const struct monitor_object_t **switcher = active;
-
-			if (fallback != NULL && (*fallback)->driver->rate_switcher != NULL)
-			    switcher = fallback;
-			if ((*switcher)->driver->rate_switcher) {
-			    /* *INDENT-OFF* */
-			    context.readonly = false;
-			    if ((*switcher)->driver->rate_switcher(&session, rate)) {
-				announce_log("[Rate switcher called.]");
-			    } else
-				monitor_complain("Rate not supported.");
-			    context.readonly = true;
-			    /* *INDENT-ON* */
-			} else
-			    monitor_complain
-				("Device type has no rate switcher");
-		    }
-#endif /* RECONFIGURE_ENABLE */
-		    break;
-		case 'i':	/* start probing for subtype */
-		    if (active == NULL)
-			monitor_complain("No GPS type detected.");
-		    else if (!serial)
-			monitor_complain("Only available in low-level mode.");
-		    else {
-			if (strcspn(line, "01") == strlen(line))
-			    context.readonly = !context.readonly;
-			else
-			    context.readonly = (atoi(line + 1) == 0);
-			/* *INDENT-OFF* */
-			(void)gpsd_switch_driver(&session,
-				 (*active)->driver->type_name);
-			/* *INDENT-ON* */
-		    }
-		    break;
-
-		case 'l':	/* open logfile */
-		    if (logfile != NULL) {
-			if (packetwin != NULL)
-			    (void)wprintw(packetwin,
-					  ">>> Logging to %s off", logfile);
-			(void)fclose(logfile);
-		    }
-
-		    if ((logfile = fopen(line + 1, "a")) != NULL)
-			if (packetwin != NULL)
-			    (void)wprintw(packetwin,
-					  ">>> Logging to %s on", logfile);
-		    break;
-
-#ifdef RECONFIGURE_ENABLE
-		case 'n':	/* change mode */
-		    /* if argument not specified, toggle */
-		    if (strcspn(line, "01") == strlen(line)) {
-			/* *INDENT-OFF* */
-			v = (unsigned int)TEXTUAL_PACKET_TYPE(
-			    session.packet.type);
-			/* *INDENT-ON* */
-		    } else
-			v = (unsigned)atoi(line + 1);
-		    if (active == NULL)
-			monitor_complain("No device defined yet");
-		    else if (!serial)
-			monitor_complain("Only available in low-level mode.");
-		    else {
-			const struct monitor_object_t **switcher = active;
-
-			if (fallback != NULL && (*fallback)->driver->mode_switcher != NULL)
-			    switcher = fallback;
-			if ((*switcher)->driver->mode_switcher) {
-			    context.readonly = false;
-			    announce_log("[Mode switcher to mode %d]", v);
-			    (*switcher)->driver->mode_switcher(&session,
-							     (int)v);
-			    context.readonly = true;
-			    (void)tcdrain(session.gpsdata.gps_fd);
-			    (void)usleep(50000);
-			} else
-			    monitor_complain
-				("Device type has no mode switcher");
-		    }
-		    break;
-#endif /* RECONFIGURE_ENABLE */
-
-		case 'q':	/* quit */
+	    if (FD_ISSET(0, &select_set)) 
+		if (!do_command(promptlen))
 		    goto quit;
-
-#ifdef RECONFIGURE_ENABLE
-		case 's':	/* change speed */
-		    if (active == NULL)
-			monitor_complain("No device defined yet");
-		    else if (!serial)
-			monitor_complain("Only available in low-level mode.");
-		    else {
-			speed_t speed;
-			char parity = session.gpsdata.dev.parity;
-			unsigned int stopbits =
-			    (unsigned int)session.gpsdata.dev.stopbits;
-			char *modespec;
-			const struct monitor_object_t **switcher = active;
-
-			if (fallback != NULL && (*fallback)->driver->speed_switcher != NULL)
-			    switcher = fallback;
-
-			modespec = strchr(arg, ':');
-			/*@ +charint @*/
-			if (modespec != NULL) {
-			    if (strchr("78", *++modespec) == NULL) {
-				monitor_complain
-				    ("No support for that word length.");
-				break;
-			    }
-			    parity = *++modespec;
-			    if (strchr("NOE", parity) == NULL) {
-				monitor_complain("What parity is '%c'?.",
-						 parity);
-				break;
-			    }
-			    stopbits = (unsigned int)*++modespec;
-			    if (strchr("12", (char)stopbits) == NULL) {
-				monitor_complain("Stop bits must be 1 or 2.");
-				break;
-			    }
-			    stopbits = (unsigned int)(stopbits - '0');
-			}
-			/*@ -charint @*/
-			speed = (unsigned)atoi(arg);
-			/* *INDENT-OFF* */
-			if ((*switcher)->driver->speed_switcher) {
-			    context.readonly = false;
-			    if ((*switcher)->
-				driver->speed_switcher(&session, speed,
-						       parity, (int)
-						       stopbits)) {
-				announce_log("[Speed switcher called.]");
-				/*
-				 * See the comment attached to the 'DEVICE'
-				 * command in gpsd.  Allow the control
-				 * string time to register at the GPS
-				 * before we do the baud rate switch,
-				 * which effectively trashes the UART's
-				 * buffer.
-				 */
-				(void)tcdrain(session.gpsdata.gps_fd);
-				(void)usleep(50000);
-				(void)gpsd_set_speed(&session, speed,
-						     parity, stopbits);
-			    } else
-				monitor_complain
-				    ("Speed/mode combination not supported.");
-			    context.readonly = true;
-			} else
-			    monitor_complain
-				("Device type has no speed switcher");
-			/* *INDENT-ON* */
-		    }
-		    break;
-#endif /* RECONFIGURE_ENABLE */
-
-		case 't':	/* force device type */
-		    if (!serial)
-			monitor_complain("Only available in low-level mode.");
-		    else if (strlen(arg) > 0) {
-			int matchcount = 0;
-			const struct gps_type_t **dp, *forcetype = NULL;
-			for (dp = gpsd_drivers; *dp; dp++) {
-			    if (strstr((*dp)->type_name, arg) != NULL) {
-				forcetype = *dp;
-				matchcount++;
-			    }
-			}
-			if (matchcount == 0) {
-			    monitor_complain
-				("No driver type matches '%s'.", arg);
-			} else if (matchcount == 1) {
-			    assert(forcetype != NULL);
-			    /* *INDENT-OFF* */
-			    if (switch_type(forcetype))
-				(void)gpsd_switch_driver(&session,
-							 forcetype->type_name);
-			    /* *INDENT-ON* */
-			} else {
-			    monitor_complain
-				("Multiple driver type names match '%s'.",
-				 arg);
-			}
-		    }
-		    break;
-
-#ifdef CONTROLSEND_ENABLE
-		case 'x':	/* send control packet */
-		    if (active == NULL)
-			monitor_complain("No device defined yet");
-		    else if (!serial)
-			monitor_complain("Only available in low-level mode.");
-		    else {
-			/*@ -compdef @*/
-			int st = gpsd_hexpack(arg, (char *)buf, strlen(arg));
-			if (st < 0)
-			    monitor_complain
-				("Invalid hex string (error %d)", st);
-			else if ((*active)->driver->control_send == NULL)
-			    monitor_complain
-				("Device type has no control-send method.");
-			else if (!monitor_control_send(buf, (size_t) st))
-			    monitor_complain("Control send failed.");
-			/*@ +compdef @*/
-		    }
-		    break;
-
-		case 'X':	/* send raw packet */
-		    if (!serial)
-			monitor_complain("Only available in low-level mode.");
-		    else {
-			/*@ -compdef @*/
-			len =
-			    (ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
-			if (len < 0)
-			    monitor_complain("Invalid hex string (error %d)",
-					     len);
-			else if (!monitor_raw_send(buf, (size_t) len))
-			    monitor_complain("Raw send failed.");
-			/*@ +compdef @*/
-		    }
-		    break;
-#endif /* CONTROLSEND_ENABLE */
-
-		default:
-		    monitor_complain("Unknown command");
-		    break;
-		}
-	    }
 	}
 	/*@ +nullpass @*/
 	/*@ +observertrans @*/
