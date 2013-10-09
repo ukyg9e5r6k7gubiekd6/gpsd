@@ -60,8 +60,7 @@ running as root in order to have write access to the device.</para>
 <varlistentry>
 <term>-b</term>
 <listitem>
-<para>Put the GPS into binary mode.  After the GPS resets itself, autobaud to
-the new speed.</para>
+<para>Put the GPS into native (binary) mode.</para>
 </listitem>
 </varlistentry>
 
@@ -102,8 +101,7 @@ to which device types, and exit.</para>
 <varlistentry>
 <term>-n</term>
 <listitem>
-<para>Put GPS into NMEA mode.  After the GPS resets itself autobaud to
-its new speed.</para>
+<para>Put GPS into NMEA mode.</para>
 </listitem>
 </varlistentry>
 
@@ -155,9 +153,9 @@ ESC. This switch implies <option>-f</option>.</para>
 <varlistentry>
 <term>-T</term>
 <listitem>
-<para>Change the sampling timeout. Defaults to 4 seconds, which
-should always be sufficient to get a packet from a device emitting at
-the normal rate of 1 per second.</para>
+<para>Change the sampling timeout. Defaults to 8 seconds, which should
+always be sufficient to get an identifying packet from a device
+emitting at the normal rate of 1 per second.</para>
 </listitem>
 </varlistentry>
 
@@ -204,7 +202,7 @@ probe.)</para>
 identifying the GPS type of the selected device and exit.</para>
 
 <para>Reset (-r) operations must stand alone; others can be combined.
-Multiple options will be executed in tis order: mode changes (-b and
+Multiple options will be executed in this order: mode changes (-b and
 -n) first, speed changes (-s) second, and control-string sends (-c)
 last.</para>
 

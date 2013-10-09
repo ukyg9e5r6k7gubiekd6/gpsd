@@ -667,6 +667,10 @@ int main(int argc, char **argv)
 	    }
 	}
 
+	(void)printf("%s identified as a %s at %d baud.\n",
+                       device, gpsd_id(&session),
+                       session.gpsdata.dev.baudrate);
+
 	/* if no control operation was specified, we're done */
 	if (speed==NULL && !to_nmea && !to_binary && control==NULL)
 	    exit(EXIT_SUCCESS);
