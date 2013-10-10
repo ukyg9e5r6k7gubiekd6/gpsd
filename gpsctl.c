@@ -525,7 +525,7 @@ int main(int argc, char **argv)
 		    *modespec = '\0';
 		    if (strchr("78", *++modespec) == NULL) {
 			gpsd_report(context.debug, LOG_ERROR,
-				    "No support for that word lengths.\n");
+				    "No support for that word length.\n");
 			status = 1;
 		    }
 		    parity = *++modespec;
