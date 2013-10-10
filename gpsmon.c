@@ -468,7 +468,6 @@ static bool do_command(void)
     char line[80], *arg, *p;
     unsigned char buf[BUFLEN];
     int status;
-    ssize_t len;
 
     (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wrefresh(cmdwin);
@@ -730,7 +729,7 @@ static bool do_command(void)
 	    monitor_complain("Only available in low-level mode.");
 	else {
 	    /*@ -compdef @*/
-	    len = (ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
+	    ssize_t len = (ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
 	    if (len < 0)
 		monitor_complain("Invalid hex string (error %d)",
 				 len);
