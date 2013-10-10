@@ -263,7 +263,7 @@ ssize_t gpsd_write(struct gps_device_t *session,
     return gpsd_serial_write(session, buf, len);
 }
 
-static ssize_t readpkt(void)
+static void readpkt(void)
 {
     /*@ -globstate -type -shiftnegative -compdef -nullpass @*/
     struct timeval timeval;
@@ -306,7 +306,6 @@ static ssize_t readpkt(void)
 		session.packet.outbuflen, logfile) >= 1);
 	/*@ +shiftimplementation +sefparams -charint @*/
     }
-    return session.packet.outbuflen;
     /*@ +globstate +type +shiftnegative +compdef +nullpass @*/
 }
 
@@ -486,13 +485,13 @@ static void refresh_cmdwin(void)
     wnoutrefresh(cmdwin);
 }
 
-static refresh_per_packet(ssize_t len)
+static refresh_per_packet(void)
 /* what to do on every packet arrival */
 {
     (void)wmove(cmdwin, 0, 0);
 
     if (active != NULL
-	&& len > 0 && session.packet.outbuflen > 0
+	&& session.packet.outbuflen > 0
 	&& (*active)->update != NULL)
 	(*active)->update();
     if (devicewin != NULL)
@@ -817,7 +816,6 @@ int main(int argc, char **argv)
     char *explanation;
     int bailout = 0, matches = 0;
     bool nmea = false;
-    ssize_t len;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -1024,7 +1022,8 @@ int main(int argc, char **argv)
 	/*@ -observertrans @*/
 	for (;;) {
 	    /* get a packet -- calls gpsd_poll() */
-	    if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
+	    readpkt();
+	    if (session.packet.outbuflen > 0) {
 		/* switch types on packet receipt */
 		/*@ -nullpass */
 		if (session.packet.type != last_type) {
@@ -1038,7 +1037,7 @@ int main(int argc, char **argv)
 		}
 		/*@ +nullpass */
 
-		refresh_per_packet(len);
+		refresh_per_packet();
 	    }
 
 	    /* rest of this invoked only if user has pressed a key */
