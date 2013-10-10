@@ -949,7 +949,13 @@ static bool privileged_user(struct gps_device_t *device)
 	if (subscribed(sub, device))
 	    subcount++;
     }
-    return subcount == 1;
+    /*
+     * Yes, zero subscribers is possible. For example, gpsctl talking
+     * to the daemon connects but doesn't necessarily issue a ?WATCH
+     * before shipping a request, which means it isn't marked as a 
+     * subscribers,
+     */
+    return subcount <= 1;
 }
 
 static void set_serial(struct gps_device_t *device,
