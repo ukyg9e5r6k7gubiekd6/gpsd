@@ -472,6 +472,7 @@ static void refresh_statwin(void)
 static void refresh_cmdwin(void)
 /* refresh the command window */
 {
+    (void)wmove(cmdwin, 0, 0);
     (void)wprintw(cmdwin, type_name);
     promptlen = strlen(type_name) + 2;
     if (fallback != NULL && fallback != active) {
