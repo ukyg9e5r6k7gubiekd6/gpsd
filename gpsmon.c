@@ -455,7 +455,7 @@ static bool do_command(void)
     int status;
     ssize_t len;
 
-    (void)wmove(cmdwin, 0, (int)promptlen + 2);
+    (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wrefresh(cmdwin);
     (void)echo();
     /*@ -usedef -compdef @*/
@@ -479,6 +479,7 @@ static bool do_command(void)
     } else
 	arg = line + 1;
 
+    /* handle it in the currently selected monitor object if possible */
     if (serial && active != NULL && (*active)->command != NULL) {
 	status = (*active)->command(line);
 	if (status == COMMAND_TERMINATE)
@@ -487,6 +488,8 @@ static bool do_command(void)
 	    return true;
 	assert(status == COMMAND_UNKNOWN);
     }
+
+    /* otherse dispatch to generic commands */
     switch (line[0]) {
 #ifdef RECONFIGURE_ENABLE
     case 'c':	/* change cycle time */
