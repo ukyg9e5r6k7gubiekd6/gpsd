@@ -627,12 +627,13 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 }
 
 #ifdef RECONFIGURE_ENABLE
-static void ubx_gen_cfg(struct gps_device_t *session, 
-		   speed_t speed, const char parity, const int stopbits, 
-		   /*@out@*/unsigned char *buf)
-/* set  configuration block */
+static void ubx_cfg_prt(struct gps_device_t *session, 
+			speed_t speed, const char parity, const int stopbits, 
+			const mode)
+/* generare and send a configuration block */
 {
     unsigned long usart_mode = 0;
+    unsigned char buf[UBX_CFG_LEN];
 
     memset(buf, '\0', UBX_CFG_LEN);
 
@@ -705,22 +706,10 @@ static void ubx_gen_cfg(struct gps_device_t *session,
 	break;
     }
 
-    /* enable all input and output protocols by default */
-    buf[12] = buf[14] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
-    /*@ -ignoresigns -charint @*/
-}
+    /* enable all input protocols by default */
+    buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
 
-static void ubx_mode(struct gps_device_t *session, int mode)
-{
-    unsigned char buf[UBX_CFG_LEN];
-
-    ubx_gen_cfg(session, 
-		gpsd_get_speed(session),
-		gpsd_get_parity(session),
-		gpsd_get_stopbits(session),
-		buf);
-
-    /*@+charint@*/
+    /* selectively enable input protocols */
     if (mode == MODE_NMEA) {
 	buf[outProtoMask] &= ~UBX_PROTOCOL_MASK;
 	buf[outProtoMask] |= NMEA_PROTOCOL_MASK;
@@ -754,19 +743,29 @@ static void ubx_mode(struct gps_device_t *session, int mode)
 
 	buf[outProtoMask] &= ~NMEA_PROTOCOL_MASK;
 	buf[outProtoMask] |= UBX_PROTOCOL_MASK;
-    }
-    /*@ -charint @*/
+    }    
+    /*@ -ignoresigns -charint @*/
+
     (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));
+}
+
+static void ubx_mode(struct gps_device_t *session, int mode)
+{
+    ubx_cfg_prt(session, 
+		gpsd_get_speed(session),
+		gpsd_get_parity(session),
+		gpsd_get_stopbits(session),
+		mode);
 }
 
 static bool ubx_speed(struct gps_device_t *session,
 		      speed_t speed, char parity, int stopbits)
 {
-    unsigned char buf[UBX_CFG_LEN];
-
-    ubx_gen_cfg(session, speed, parity, stopbits, buf);
-
-    (void)ubx_write(session, 0x06, 0x00, buf, sizeof(buf));
+    ubx_cfg_prt(session, 
+		speed,
+		parity,
+		stopbits,
+		session->packet.type == UBX_PACKET);
     return true;
 }
 
