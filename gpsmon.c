@@ -437,27 +437,7 @@ static void refresh_cmdwin(void)
     (void)wclrtoeol(cmdwin);
     (void)wnoutrefresh(cmdwin);
 }
-
-static void refresh_per_packet(void)
-/* what to do on every packet arrival */
-{
-    (void)wmove(cmdwin, 0, 0);
-
-    if (active != NULL
-	&& session.packet.outbuflen > 0
-	&& (*active)->update != NULL)
-	(*active)->update();
-    if (devicewin != NULL)
-	(void)wnoutrefresh(devicewin);
-
-    (void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
-    packet_dump((char *)session.packet.outbuffer,
-		session.packet.outbuflen);
-    if (packetwin != NULL)
-	(void)wnoutrefresh(packetwin);
-    (void)doupdate();
-}
-/*@-observertrans +nullpass +globstate@*/
+/*@+observertrans +nullpass +globstate@*/
 
 /*@-globstate@*/
 static bool do_command(void)
@@ -768,7 +748,22 @@ static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     }
     /*@ +nullpass */
 
-    refresh_per_packet();
+    /*@-observertrans -nullpass -globstate@*/
+    (void)wmove(cmdwin, 0, 0);
+    if (active != NULL
+	&& session.packet.outbuflen > 0
+	&& (*active)->update != NULL)
+	(*active)->update();
+    if (devicewin != NULL)
+	(void)wnoutrefresh(devicewin);
+
+    (void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
+    packet_dump((char *)session.packet.outbuffer,
+		session.packet.outbuflen);
+    if (packetwin != NULL)
+	(void)wnoutrefresh(packetwin);
+    (void)doupdate();
+    /*@+observertrans +nullpass +globstate@*/
 
     if (logfile != NULL && session.packet.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
