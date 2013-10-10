@@ -54,6 +54,7 @@ static WINDOW *statwin, *cmdwin;
 /*@null@*/ static FILE *logfile;
 static char *type_name;
 static size_t promptlen = 0;
+static struct fixsource_t source;
 
 #ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
@@ -444,6 +445,28 @@ static bool switch_type(const struct gps_type_t *devtype)
     return false;
 }
 
+static void refresh_statwin()
+{
+    /* *INDENT-OFF* */
+    type_name =
+	session.device_type ? session.device_type->type_name : "Unknown device";
+    /* *INDENT-ON* */
+    (void)wattrset(statwin, A_BOLD);
+    if (serial)
+	display(statwin, 0, 0, "%s %u %d%c%d",
+		session.gpsdata.dev.path,
+		session.gpsdata.dev.baudrate,
+		9 - session.gpsdata.dev.stopbits,
+		session.gpsdata.dev.parity,
+		session.gpsdata.dev.stopbits);
+    else
+	/*@ -nullpass @*/
+	display(statwin, 0, 0, "%s:%s:%s",
+		source.server, source.port, session.gpsdata.dev.path);
+    /*@ +nullpass @*/
+    (void)wattrset(statwin, A_NORMAL);
+}
+
 /*@-globstate@*/
 static bool do_command(void)
 {
@@ -750,7 +773,6 @@ static void onsig(int sig UNUSED)
 int main(int argc, char **argv)
 {
     int option, last_type = BAD_PACKET;
-    struct fixsource_t source;
     fd_set select_set;
     char *explanation;
     int bailout = 0, matches = 0;
@@ -958,24 +980,7 @@ int main(int argc, char **argv)
     if ((bailout = setjmp(terminate)) == 0) {
 	/*@ -observertrans @*/
 	for (;;) {
-	    /* *INDENT-OFF* */
-	    type_name =
-		session.device_type ? session.device_type->type_name : "Unknown device";
-	    /* *INDENT-ON* */
-	    (void)wattrset(statwin, A_BOLD);
-	    if (serial)
-		display(statwin, 0, 0, "%s %u %d%c%d",
-			session.gpsdata.dev.path,
-			session.gpsdata.dev.baudrate,
-			9 - session.gpsdata.dev.stopbits,
-			session.gpsdata.dev.parity,
-			session.gpsdata.dev.stopbits);
-	    else
-		/*@ -nullpass @*/
-		display(statwin, 0, 0, "%s:%s:%s",
-			source.server, source.port, session.gpsdata.dev.path);
-	    /*@ +nullpass @*/
-	    (void)wattrset(statwin, A_NORMAL);
+	    refresh_statwin();
 	    (void)wmove(cmdwin, 0, 0);
 
 	    /* get a packet -- calls gpsd_poll() */
