@@ -980,7 +980,8 @@ static void set_serial(struct gps_device_t *device,
     }
 
     gpsd_report(context.debug, LOG_PROG,
-		"set_serial(,%d,%s) %c%d\n", 
+		"set_serial(%s,%d,%s) %c%d\n",
+		device->gpsdata.dev.path,
 		speed, modestring, parity, stopbits);
     /* no support for other word sizes yet */
     /* *INDENT-OFF* */
@@ -1214,8 +1215,12 @@ static void handle_request(struct subscriber_t *sub,
 				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n",
 				   device->gpsdata.dev.path);
 		else {
-		    char serialmode[3];
 		    const struct gps_type_t *dt = device->device_type;
+		    bool no_serial_change =
+			(devconf.baudrate == DEVDEFAULT_BPS)
+			&& (devconf.parity == DEVDEFAULT_PARITY)
+			&& (devconf.stopbits == DEVDEFAULT_STOPBITS);
+
 		    /* interpret defaults */
 		    if (devconf.baudrate == DEVDEFAULT_BPS)
 			devconf.baudrate =
@@ -1232,15 +1237,17 @@ static void handle_request(struct subscriber_t *sub,
 			&& devconf.driver_mode != DEVDEFAULT_NATIVE
 			&& dt->mode_switcher != NULL)
 			dt->mode_switcher(device, devconf.driver_mode);
-
-		    serialmode[0] = devconf.parity;
-		    serialmode[1] = '0' + devconf.stopbits;
-		    serialmode[2] = '\0';
-		    set_serial(device,
-			       (speed_t) devconf.baudrate, serialmode);
-		    if (dt->rate_switcher != NULL
-			&& isnan(devconf.cycle) == 0
-			&& devconf.cycle >= dt->min_cycle)
+		    if (!no_serial_change) {
+			char serialmode[3];
+			serialmode[0] = devconf.parity;
+			serialmode[1] = '0' + devconf.stopbits;
+			serialmode[2] = '\0';
+			set_serial(device,
+				   (speed_t) devconf.baudrate, serialmode);
+		    }
+		    if (devconf.cycle != device->gpsdata.dev.cycle
+			&& devconf.cycle >= dt->min_cycle
+			&& dt->rate_switcher != NULL)
 			if (dt->rate_switcher(device, devconf.cycle))
 			    device->gpsdata.dev.cycle = devconf.cycle;
 		}
