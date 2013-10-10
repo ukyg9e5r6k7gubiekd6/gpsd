@@ -730,13 +730,13 @@ static bool do_command(void)
 }
 /*@+globstate@*/
 
+/*@-observertrans -nullpass -globstate@*/
 static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
     static int last_type = BAD_PACKET;
 
     /* switch types on packet receipt */
-    /*@ -nullpass */
     if (session.packet.type != last_type) {
 	last_type = session.packet.type;
 	if (!switch_type(session.device_type))
@@ -746,10 +746,7 @@ static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    refresh_cmdwin();
 	}
     }
-    /*@ +nullpass */
 
-    /*@-observertrans -nullpass -globstate@*/
-    (void)wmove(cmdwin, 0, 0);
     if (active != NULL
 	&& session.packet.outbuflen > 0
 	&& (*active)->update != NULL)
@@ -762,9 +759,9 @@ static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 		session.packet.outbuflen);
     if (packetwin != NULL)
 	(void)wnoutrefresh(packetwin);
-    (void)doupdate();
-    /*@+observertrans +nullpass +globstate@*/
 
+    (void)doupdate();
+ 
     if (logfile != NULL && session.packet.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
         assert(fwrite
@@ -773,6 +770,7 @@ static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
         /*@ +shiftimplementation +sefparams -charint @*/
     }
 }
+   /*@+observertrans +nullpass +globstate@*/
 
 static jmp_buf assertbuf;
 
