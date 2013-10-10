@@ -662,11 +662,7 @@ int main(int argc, char **argv)
 		    continue;
 		case AWAIT_FAILED:
 		    exit(EXIT_FAILURE);
-		    break;
 		}
-
-		if (!gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
-		    continue;
 
 		switch(gpsd_multipoll(FD_ISSET(session.gpsdata.gps_fd, &rfds),
 					       &session, ctlhook, 0))

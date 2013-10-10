@@ -2131,7 +2131,6 @@ int main(int argc, char *argv[])
 	    continue;
 	case AWAIT_FAILED:
 	    exit(EXIT_FAILURE);
-	    break;
 	}
 
 #ifdef SOCKET_EXPORT_ENABLE

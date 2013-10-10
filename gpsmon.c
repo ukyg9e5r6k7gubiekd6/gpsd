@@ -398,6 +398,7 @@ static bool switch_type(const struct gps_type_t *devtype)
     return false;
 }
 
+ /*@-observertrans -nullpass -globstate@*/
 static void refresh_statwin(void)
 /* refresh the device-identification window */
 {
@@ -414,12 +415,10 @@ static void refresh_statwin(void)
 		session.gpsdata.dev.parity,
 		session.gpsdata.dev.stopbits);
     else
-	/*@ -nullpass @*/
 	display(statwin, 0, 0, "%s:%s:%s",
 		source.server, source.port, session.gpsdata.dev.path);
-    /*@ +nullpass @*/
     (void)wattrset(statwin, A_NORMAL);
-    wnoutrefresh(statwin);
+    (void)wnoutrefresh(statwin);
 }
 
 static void refresh_cmdwin(void)
@@ -436,10 +435,10 @@ static void refresh_cmdwin(void)
     }
     (void)wprintw(cmdwin, "> ");
     (void)wclrtoeol(cmdwin);
-    wnoutrefresh(cmdwin);
+    (void)wnoutrefresh(cmdwin);
 }
 
-static refresh_per_packet(void)
+static void refresh_per_packet(void)
 /* what to do on every packet arrival */
 {
     (void)wmove(cmdwin, 0, 0);
@@ -458,6 +457,7 @@ static refresh_per_packet(void)
 	(void)wnoutrefresh(packetwin);
     (void)doupdate();
 }
+/*@-observertrans +nullpass +globstate@*/
 
 /*@-globstate@*/
 static bool do_command(void)
@@ -754,7 +754,7 @@ static bool do_command(void)
 static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
-    static int last_type;
+    static int last_type = BAD_PACKET;
 
     /* switch types on packet receipt */
     /*@ -nullpass */
@@ -794,7 +794,7 @@ static void onsig(int sig UNUSED)
 
 int main(int argc, char **argv)
 {
-    int option, last_type = BAD_PACKET;
+    int option;
     char *explanation;
     int bailout = 0, matches = 0;
     bool nmea = false;
@@ -1004,7 +1004,7 @@ int main(int argc, char **argv)
     FD_ZERO(&all_fds);
     FD_SET(0, &all_fds);	/* accept keystroke inputs */
 
-    /*@i1@*/FD_SET(session.gpsdata.gps_fd, &all_fds);
+    FD_SET(session.gpsdata.gps_fd, &all_fds);
     if (session.gpsdata.gps_fd > maxfd)
 	 maxfd = session.gpsdata.gps_fd;
 
