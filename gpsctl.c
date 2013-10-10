@@ -62,6 +62,13 @@ static void settle(struct gps_device_t *session)
     (void)tcdrain(session->gpsdata.gps_fd);
 }
 
+/*
+ * Allows any response other than ERROR.  Use it for queries where a 
+ * failure return (due to, for example, a missing driver method) is 
+ * immediate, but successful responses have unpredictable lag.  
+ */
+#define NON_ERROR	0	/* must be distinct from any gps_mask_t value */
+
 static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 		       gps_mask_t expect,
 		       const int timeout,
@@ -131,7 +138,7 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 	}
 
 	/*@ +ignorequals @*/
-	if ((expect & gpsdata->set) != 0)
+	if ((expect == NON_ERROR) || (expect & gpsdata->set) != 0)
 	    return true;
 	else if (time(NULL) - starttime > timeout) {
 	    gpsd_report(context.debug, LOG_ERROR,
