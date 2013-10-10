@@ -445,7 +445,7 @@ static bool switch_type(const struct gps_type_t *devtype)
     return false;
 }
 
-static void refresh_statwin()
+static void refresh_statwin(void)
 /* refresh the device-identification window */
 {
     /* *INDENT-OFF* */
@@ -469,7 +469,7 @@ static void refresh_statwin()
     wnoutrefresh(statwin);
 }
 
-static void refresh_cmdwin()
+static void refresh_cmdwin(void)
 /* refresh the command window */
 {
     (void)wprintw(cmdwin, type_name);
@@ -483,6 +483,26 @@ static void refresh_cmdwin()
     (void)wprintw(cmdwin, "> ");
     (void)wclrtoeol(cmdwin);
     wnoutrefresh(cmdwin);
+}
+
+static refresh_per_packet(ssize_t len)
+/* what to do on every packet arrival */
+{
+    (void)wmove(cmdwin, 0, 0);
+
+    if (active != NULL
+	&& len > 0 && session.packet.outbuflen > 0
+	&& (*active)->update != NULL)
+	(*active)->update();
+    if (devicewin != NULL)
+	(void)wnoutrefresh(devicewin);
+
+    (void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
+    packet_dump((char *)session.packet.outbuffer,
+		session.packet.outbuflen);
+    if (packetwin != NULL)
+	(void)wnoutrefresh(packetwin);
+    (void)doupdate();
 }
 
 /*@-globstate@*/
@@ -1002,8 +1022,6 @@ int main(int argc, char **argv)
     if ((bailout = setjmp(terminate)) == 0) {
 	/*@ -observertrans @*/
 	for (;;) {
-	    (void)wmove(cmdwin, 0, 0);
-
 	    /* get a packet -- calls gpsd_poll() */
 	    if ((len = readpkt()) > 0 && session.packet.outbuflen > 0) {
 		/* switch types on packet receipt */
@@ -1019,18 +1037,7 @@ int main(int argc, char **argv)
 		}
 		/*@ +nullpass */
 
-		if (active != NULL
-			&& len > 0 && session.packet.outbuflen > 0
-			&& (*active)->update != NULL)
-		    (*active)->update();
-		(void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
-		packet_dump((char *)session.packet.outbuffer,
-			    session.packet.outbuflen);
-		if (devicewin != NULL)
-		    (void)wnoutrefresh(devicewin);
-		if (packetwin != NULL)
-		    (void)wnoutrefresh(packetwin);
-		(void)doupdate();
+		refresh_per_packet(len);
 	    }
 
 	    /* rest of this invoked only if user has pressed a key */
