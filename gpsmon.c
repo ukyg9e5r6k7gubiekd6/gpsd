@@ -466,6 +466,23 @@ static void refresh_statwin()
 		source.server, source.port, session.gpsdata.dev.path);
     /*@ +nullpass @*/
     (void)wattrset(statwin, A_NORMAL);
+    wnoutrefresh(statwin);
+}
+
+static void refresh_cmdwin()
+/* refresh the command window */
+{
+    (void)wprintw(cmdwin, type_name);
+    promptlen = strlen(type_name) + 2;
+    if (fallback != NULL && fallback != active) {
+	(void)waddch(cmdwin, (chtype)'(');
+	(void)waddstr(cmdwin, (*fallback)->driver->type_name);
+	(void)waddch(cmdwin, (chtype)')');
+	promptlen += strlen((*fallback)->driver->type_name);
+    }
+    (void)wprintw(cmdwin, "> ");
+    (void)wclrtoeol(cmdwin);
+    wnoutrefresh(cmdwin);
 }
 
 /*@-globstate@*/
@@ -980,6 +997,7 @@ int main(int argc, char **argv)
     FD_ZERO(&select_set);
 
     refresh_statwin();
+    refresh_cmdwin();
 
     if ((bailout = setjmp(terminate)) == 0) {
 	/*@ -observertrans @*/
@@ -994,20 +1012,13 @@ int main(int argc, char **argv)
 		    last_type = session.packet.type;
 		    if (!switch_type(session.device_type))
 		        longjmp(terminate, TERM_DRIVER_SWITCH);
+		    else {
+			refresh_statwin();
+			refresh_cmdwin();
+		    }
 		}
 		/*@ +nullpass */
 
-		/* refresh all windows */
-		(void)wprintw(cmdwin, type_name);
-		promptlen = strlen(type_name);
-		if (fallback != NULL && fallback != active) {
-		    (void)waddch(cmdwin, (chtype)'(');
-		    (void)waddstr(cmdwin, (*fallback)->driver->type_name);
-		    (void)waddch(cmdwin, (chtype)')');
-		    promptlen += strlen((*fallback)->driver->type_name) + 2;
-		}
-		(void)wprintw(cmdwin, "> ");
-		(void)wclrtoeol(cmdwin);
 		if (active != NULL
 			&& len > 0 && session.packet.outbuflen > 0
 			&& (*active)->update != NULL)
@@ -1015,8 +1026,6 @@ int main(int argc, char **argv)
 		(void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
 		packet_dump((char *)session.packet.outbuffer,
 			    session.packet.outbuflen);
-		(void)wnoutrefresh(statwin);
-		(void)wnoutrefresh(cmdwin);
 		if (devicewin != NULL)
 		    (void)wnoutrefresh(devicewin);
 		if (packetwin != NULL)
