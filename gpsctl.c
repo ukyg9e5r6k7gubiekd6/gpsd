@@ -475,23 +475,38 @@ int main(int argc, char **argv)
 	}
 
 	/*@-boolops@*/
+	/*
+	 * We used to wait on DEVICE_SET here.  That doesn't work anymore
+	 * because when the demon generates its response it sets the mode
+	 * bit in the response it does so from the current packet type,
+	 * which may not have changed (probably will not have changed) even
+	 * though the command to switch modes has been sent and will shortly
+	 * take effect.
+	 */
 	if (to_nmea) {
-	    if (!gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n", device) || (gpsdata.dev.driver_mode != MODE_NMEA)) {
+	    if (!gps_query(&gpsdata, NON_ERROR, (int)timeout, 
+			   "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n",
+			   device)) {
 		gpsd_report(context.debug, LOG_ERROR,
-			    "%s mode change to NMEA failed\n", gpsdata.dev.path);
+			    "%s mode change to NMEA failed\n",
+			    gpsdata.dev.path);
 		status = 1;
 	    } else
 		gpsd_report(context.debug, LOG_PROG,
 			    "%s mode change succeeded\n", gpsdata.dev.path);
 	}
 	else if (to_binary) {
-	    if (gps_query(&gpsdata, DEVICE_SET, (int)timeout, "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n", device) || (gpsdata.dev.driver_mode != MODE_BINARY)) {
+	    if (!gps_query(&gpsdata, NON_ERROR, (int)timeout,
+			   "?DEVICE={\"path\":\"%s\",\"native\":1}\r\n",
+			   device)) {
 		gpsd_report(context.debug, LOG_ERROR,
-			    "%s mode change to native mode failed\n", gpsdata.dev.path);
+			    "%s mode change to native mode failed\n",
+			    gpsdata.dev.path);
 		status = 1;
 	    } else
 		gpsd_report(context.debug, LOG_PROG,
-			    "%s mode change succeeded\n", gpsdata.dev.path);
+			    "%s mode change succeeded\n",
+			    gpsdata.dev.path);
 	}
 	/*@+boolops@*/
 	if (speed != NULL) {
