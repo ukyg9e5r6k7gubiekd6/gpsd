@@ -446,6 +446,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 }
 
 static void refresh_statwin()
+/* refresh the device-identification window */
 {
     /* *INDENT-OFF* */
     type_name =
@@ -677,6 +678,7 @@ static bool do_command(void)
 		monitor_complain
 		    ("Device type has no speed switcher");
 	    /* *INDENT-ON* */
+	    refresh_statwin();
 	}
 	break;
 #endif /* RECONFIGURE_ENABLE */
@@ -977,10 +979,11 @@ int main(int argc, char **argv)
 
     FD_ZERO(&select_set);
 
+    refresh_statwin();
+
     if ((bailout = setjmp(terminate)) == 0) {
 	/*@ -observertrans @*/
 	for (;;) {
-	    refresh_statwin();
 	    (void)wmove(cmdwin, 0, 0);
 
 	    /* get a packet -- calls gpsd_poll() */
