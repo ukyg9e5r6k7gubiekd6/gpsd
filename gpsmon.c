@@ -263,52 +263,6 @@ ssize_t gpsd_write(struct gps_device_t *session,
     return gpsd_serial_write(session, buf, len);
 }
 
-static void readpkt(void)
-{
-    /*@ -globstate -type -shiftnegative -compdef -nullpass @*/
-    struct timeval timeval;
-    fd_set select_set;
-    gps_mask_t changed;
-
-    FD_ZERO(&select_set);
-    FD_SET(session.gpsdata.gps_fd, &select_set);
-    /*
-     * If the timeout on this select isn't longer than the device's
-     * cycle time, the code will be prone to flaky timing-dependent
-     * failures.
-     */
-    timeval.tv_sec = 2;
-    timeval.tv_usec = 0;
-    if (select(session.gpsdata.gps_fd + 1, &select_set, NULL, NULL, &timeval)
-	== -1)
-	longjmp(terminate, TERM_SELECT_FAILED);
-
-    if (!FD_ISSET(session.gpsdata.gps_fd, &select_set))
-	longjmp(terminate, TERM_SELECT_FAILED);
-
-    changed = gpsd_poll(&session);
-    if (changed == 0)
-	longjmp(terminate, TERM_EMPTY_READ);
-
-    /* conditional prevents mask dumper from eating CPU */
-    if (context.debug >= LOG_DATA)
-	gpsd_report(context.debug, LOG_DATA,
-		    "packet mask = %s\n",
-		    gps_maskdump(session.gpsdata.set));
-
-    if ((changed & ERROR_SET) != 0)
-	longjmp(terminate, TERM_READ_ERROR);
-
-    if (logfile != NULL && session.packet.outbuflen > 0) {
-	/*@ -shiftimplementation -sefparams +charint @*/
-	assert(fwrite
-	       (session.packet.outbuffer, sizeof(char),
-		session.packet.outbuflen, logfile) >= 1);
-	/*@ +shiftimplementation +sefparams -charint @*/
-    }
-    /*@ +globstate +type +shiftnegative +compdef +nullpass @*/
-}
-
 #ifdef RECONFIGURE_ENABLE
 static void announce_log(/*@in@*/ const char *fmt, ...)
 {
@@ -797,6 +751,35 @@ static bool do_command(void)
 }
 /*@+globstate@*/
 
+static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
+/* per-packet hook */
+{
+    static int last_type;
+
+    /* switch types on packet receipt */
+    /*@ -nullpass */
+    if (session.packet.type != last_type) {
+	last_type = session.packet.type;
+	if (!switch_type(session.device_type))
+	    longjmp(terminate, TERM_DRIVER_SWITCH);
+	else {
+	    refresh_statwin();
+	    refresh_cmdwin();
+	}
+    }
+    /*@ +nullpass */
+
+    refresh_per_packet();
+
+    if (logfile != NULL && session.packet.outbuflen > 0) {
+        /*@ -shiftimplementation -sefparams +charint @*/
+        assert(fwrite
+               (session.packet.outbuffer, sizeof(char),
+                session.packet.outbuflen, logfile) >= 1);
+        /*@ +shiftimplementation +sefparams -charint @*/
+    }
+}
+
 static jmp_buf assertbuf;
 
 static void onsig(int sig UNUSED)
@@ -812,10 +795,12 @@ static void onsig(int sig UNUSED)
 int main(int argc, char **argv)
 {
     int option, last_type = BAD_PACKET;
-    fd_set select_set;
     char *explanation;
     int bailout = 0, matches = 0;
     bool nmea = false;
+    fd_set all_fds;
+    fd_set rfds;
+    int maxfd = 0;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -1013,46 +998,43 @@ int main(int argc, char **argv)
 
     (void)wmove(packetwin, 0, 0);
 
-    FD_ZERO(&select_set);
-
     refresh_statwin();
     refresh_cmdwin();
 
-    if ((bailout = setjmp(terminate)) == 0) {
-	/*@ -observertrans @*/
-	for (;;) {
-	    /* get a packet -- calls gpsd_poll() */
-	    readpkt();
-	    if (session.packet.outbuflen > 0) {
-		/* switch types on packet receipt */
-		/*@ -nullpass */
-		if (session.packet.type != last_type) {
-		    last_type = session.packet.type;
-		    if (!switch_type(session.device_type))
-		        longjmp(terminate, TERM_DRIVER_SWITCH);
-		    else {
-			refresh_statwin();
-			refresh_cmdwin();
-		    }
-		}
-		/*@ +nullpass */
+    FD_ZERO(&all_fds);
+    FD_SET(0, &all_fds);	/* accept keystroke inputs */
 
-		refresh_per_packet();
+    /*@i1@*/FD_SET(session.gpsdata.gps_fd, &all_fds);
+    if (session.gpsdata.gps_fd > maxfd)
+	 maxfd = session.gpsdata.gps_fd;
+
+    if ((bailout = setjmp(terminate)) == 0) {
+	for (;;) 
+	{
+	    /* FIXME: On non-EINTR select failure, throw TERM_SELECT_FAILED */
+	    if (!gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+		continue;
+
+	    switch(gpsd_multipoll(FD_ISSET(session.gpsdata.gps_fd, &rfds),
+				  &session, monhook, 0))
+	    {
+	    case DEVICE_READY:
+		FD_SET(session.gpsdata.gps_fd, &all_fds);
+		break;
+	    case DEVICE_UNREADY:
+		longjmp(terminate, TERM_EMPTY_READ);
+		break;
+	    case DEVICE_ERROR:
+		longjmp(terminate, TERM_READ_ERROR);
+		break;
+	    default:
+		break;
 	    }
 
-	    /* rest of this invoked only if user has pressed a key */
-	    FD_SET(0, &select_set);
-	    FD_SET(session.gpsdata.gps_fd, &select_set);
-
-	    if (select(FD_SETSIZE, &select_set, NULL, NULL, NULL) == -1)
-		break;
-
-	    if (FD_ISSET(0, &select_set)) 
+	    if (FD_ISSET(0, &rfds)) 
 		if (!do_command())
 		    goto quit;
 	}
-	/*@ +nullpass @*/
-	/*@ +observertrans @*/
     }
 
   quit:
