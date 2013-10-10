@@ -654,6 +654,17 @@ int main(int argc, char **argv)
 	    /* grab packets until we time out or get sync */
 	    for (hunting = true; hunting; )
 	    {
+		switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+		{
+		case AWAIT_GOT_INPUT:
+		    break;
+		case AWAIT_NOT_READY:
+		    continue;
+		case AWAIT_FAILED:
+		    exit(EXIT_FAILURE);
+		    break;
+		}
+
 		if (!gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
 		    continue;
 

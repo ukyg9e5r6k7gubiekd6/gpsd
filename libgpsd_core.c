@@ -966,7 +966,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 #endif /* CHEAPFLOATS_ENABLE */
 
 /*@ -mustdefine -compdef @*/
-bool gpsd_await_data(/*@out@*/fd_set *rfds, 
+int gpsd_await_data(/*@out@*/fd_set *rfds, 
 		     const int maxfd,
 		     /*@in@*/fd_set *all_fds, 
 		     const int debug)
@@ -1003,9 +1003,9 @@ bool gpsd_await_data(/*@out@*/fd_set *rfds,
 #endif
     if (status == -1) {
 	if (errno == EINTR)
-	    return false;
+	    return AWAIT_NOT_READY;
 	gpsd_report(debug, LOG_ERROR, "select: %s\n", strerror(errno));
-	exit(EXIT_FAILURE);
+	return AWAIT_FAILED;
     }
     /*@ +usedef +nullpass @*/
 
@@ -1028,7 +1028,7 @@ bool gpsd_await_data(/*@out@*/fd_set *rfds,
 		    dbuf, timestamp(), errno);
     }
 
-    return true;
+    return AWAIT_GOT_INPUT;
 }
 /*@ +mustdefine +compdef @*/
 

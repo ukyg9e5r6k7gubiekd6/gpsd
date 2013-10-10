@@ -1011,9 +1011,16 @@ int main(int argc, char **argv)
     if ((bailout = setjmp(terminate)) == 0) {
 	for (;;) 
 	{
-	    /* FIXME: On non-EINTR select failure, throw TERM_SELECT_FAILED */
-	    if (!gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+	    switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+	    {
+	    case AWAIT_GOT_INPUT:
+		break;
+	    case AWAIT_NOT_READY:
 		continue;
+	    case AWAIT_FAILED:
+		longjmp(terminate, TERM_SELECT_FAILED);
+		break;
+	    }
 
 	    switch(gpsd_multipoll(FD_ISSET(session.gpsdata.gps_fd, &rfds),
 				  &session, monhook, 0))

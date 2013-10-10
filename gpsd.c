@@ -2123,8 +2123,16 @@ int main(int argc, char *argv[])
 	}
 
     while (0 == signalled) {
-	if (!gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+	switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+	{
+	case AWAIT_GOT_INPUT:
+	    break;
+	case AWAIT_NOT_READY:
 	    continue;
+	case AWAIT_FAILED:
+	    exit(EXIT_FAILURE);
+	    break;
+	}
 
 #ifdef SOCKET_EXPORT_ENABLE
 	/* always be open to new client connections */
