@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 	case 'V':
 	    (void)fprintf(stderr, "version %s (revision %s)\n",
 			  VERSION, REVISION);
-	    break;
+	    exit(EXIT_SUCCESS);
 	case 'h':
 	default:
 	    fprintf(stderr, USAGE);
