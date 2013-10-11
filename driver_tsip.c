@@ -1281,7 +1281,7 @@ void configuration_packets_accutime_gold(struct gps_device_t *session)
 /* *INDENT-OFF* */
 const struct gps_type_t tsip_binary =
 {
-    .type_name      = "Trimble TSIP",	/* full name of type */
+    .type_name      = "Trimble TSIP binary",	/* full name of type */
     .packet_type    = TSIP_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_NOFLAGS,	/* no flags set */
     .trigger	    = NULL,		/* no trigger */

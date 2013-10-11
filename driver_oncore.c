@@ -520,7 +520,7 @@ static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 /* *INDENT-OFF* */
 const struct gps_type_t oncore_binary = {
 
-    .type_name        = "oncore binary",	/* Full name of type */
+    .type_name        = "Oncore binary",	/* Full name of type */
     .packet_type      = ONCORE_PACKET,		/* numeric packet type */
     .flags	      = DRIVER_NOFLAGS,		/* no flags set */
     .trigger          = NULL,			/* identifying response */
