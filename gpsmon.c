@@ -731,7 +731,7 @@ static bool do_command(void)
 /*@+globstate@*/
 
 /*@-observertrans -nullpass -globstate@*/
-static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
+static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
     static int last_type = BAD_PACKET;
@@ -739,7 +739,7 @@ static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     /*
      * Switch display types on packet receipt.  Note, this *doesn't*
      * change the selection of the current device driver; that's done
-     * in gpsd_multipoll().
+     * within gpsd_multipoll() before this hook is called.
      */
     if (session.packet.type != last_type) {
 	last_type = session.packet.type;
@@ -1019,7 +1019,7 @@ int main(int argc, char **argv)
 	    }
 
 	    switch(gpsd_multipoll(FD_ISSET(session.gpsdata.gps_fd, &rfds),
-				  &session, monhook, 0))
+				  &session, gpsmon_hook, 0))
 	    {
 	    case DEVICE_READY:
 		FD_SET(session.gpsdata.gps_fd, &all_fds);
