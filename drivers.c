@@ -65,6 +65,11 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	return st;
 #endif /* NMEA_ENABLE */
     } else {
+	/*
+	 * Fallback case, we shouldn't actually ever get here.  If
+	 * we do, it means the driver-switching logic in gpsd_poll()
+	 * is leaky.
+	 */
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    if (session->packet.type == (*dp)->packet_type) {
 		(void)gpsd_switch_driver(session, (*dp)->type_name);
@@ -1059,54 +1064,6 @@ static const struct gps_type_t garmintxt = {
  *
  **************************************************************************/
 
-static gps_mask_t processMTK3301(struct gps_device_t *session)
-{
-    gps_mask_t mask;
-
-    /* try a straight NMEA parse, this will set up fields */
-    mask = generic_parse_input(session);
-
-    if (session->packet.type == NMEA_PACKET
-	&& strncmp(session->driver.nmea.field[0], "PMTK", 4) == 0)
-    {
-	int msg, reason;
-
-	msg = atoi(&(session->driver.nmea.field[0])[4]);
-	switch (msg) {
-	case 705:			/*  */
-	    (void)strlcat(session->subtype, session->driver.nmea.field[1], sizeof(session->subtype));
-	    (void)strlcat(session->subtype, "-", sizeof(session->subtype));
-	    (void)strlcat(session->subtype, session->driver.nmea.field[2], sizeof(session->subtype));
-	    return ONLINE_SET;
-	case 001:			/* ACK / NACK */
-	    reason = atoi(session->driver.nmea.field[2]);
-	    if (atoi(session->driver.nmea.field[1]) == -1)
-		gpsd_report(session->context->debug, LOG_WARN,
-			    "MTK NACK: unknown sentence\n");
-	    else if (reason < 3) {
-		const char *mtk_reasons[] = {
-		    "Invalid",
-		    "Unsupported",
-		    "Valid but Failed",
-		    "Valid success"
-		};
-		gpsd_report(session->context->debug, LOG_WARN,
-			    "MTK NACK: %s, reason: %s\n", 
-			    session->driver.nmea.field[1],
-			    mtk_reasons[reason]);
-	    }
-	    else
-		gpsd_report(session->context->debug, LOG_WARN,
-			    "MTK ACK: %s\n", session->driver.nmea.field[1]);
-	    break;
-	default:
-	    return ONLINE_SET;		/* ignore */
-	}
-    }
-
-    return mask;
-}
-
 static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 {
 /*
@@ -1167,7 +1124,7 @@ const struct gps_type_t mtk3301 = {
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
     .get_packet     = generic_get,	/* how to get a packet */
-    .parse_packet   = processMTK3301,	/* how to interpret a packet */
+    .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
     .event_hook     = mtk3301_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE

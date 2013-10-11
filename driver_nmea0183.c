@@ -1089,6 +1089,46 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 }
 #endif /* ASHTECH_ENABLE */
 
+#ifdef MTK3301_ENABLE
+static gps_mask_t processMTK3301(int c UNUSED, char *field[],
+			       struct gps_device_t *session)
+{
+    int msg, reason;
+
+    msg = atoi(&(session->driver.nmea.field[0])[4]);
+    switch (msg) {
+    case 705:			/*  */
+	(void)strlcat(session->subtype, session->driver.nmea.field[1], sizeof(session->subtype));
+	(void)strlcat(session->subtype, "-", sizeof(session->subtype));
+	(void)strlcat(session->subtype, session->driver.nmea.field[2], sizeof(session->subtype));
+	return ONLINE_SET;
+    case 001:			/* ACK / NACK */
+	reason = atoi(session->driver.nmea.field[2]);
+	if (atoi(session->driver.nmea.field[1]) == -1)
+	    gpsd_report(session->context->debug, LOG_WARN,
+			"MTK NACK: unknown sentence\n");
+	else if (reason < 3) {
+	    const char *mtk_reasons[] = {
+		"Invalid",
+		"Unsupported",
+		"Valid but Failed",
+		"Valid success"
+	    };
+	    gpsd_report(session->context->debug, LOG_WARN,
+			"MTK NACK: %s, reason: %s\n",
+			session->driver.nmea.field[1],
+			mtk_reasons[reason]);
+	}
+	else
+	    gpsd_report(session->context->debug, LOG_WARN,
+			"MTK ACK: %s\n", session->driver.nmea.field[1]);
+	return ONLINE_SET;
+    default:
+	return ONLINE_SET;		/* ignore */
+    }
+}
+#endif /* MTK3301_ENABLE */
+
 /**************************************************************************
  *
  * Entry points begin here
@@ -1150,6 +1190,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"OHPR", 18, false, processOHPR},
 #endif /* OCEANSERVER_ENABLE */
 	    /*@ +nullassign @*/
+#ifdef MTK3301_ENABLE
+	{"PMTK", 3,  false, processMTK3301},
+#endif /* MTK3301_ENABLE */
     };
 
     int count;
