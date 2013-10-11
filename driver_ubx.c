@@ -607,7 +607,15 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
 	/*@ +type @*/
 
-	/* turn off NMEA output, turn on UBX on this port */
+	/* 
+	 * Turn off NMEA output, turn on UBX on this port.
+	 *
+	 * Note: this may fail if the device's firmware image has been
+	 * configured to disallow the mode switching. The Navsys
+	 * GR601W, aka "Macx-1", is one example.  We can recognize it
+	 * as a UBX because it responds to a MON_VER probe, but it
+	 * won't change modes.
+	 */
 	if (session->mode == O_OPTIMIZE)
 	    ubx_mode(session, MODE_BINARY);
     } else if (event == event_deactivate) {
