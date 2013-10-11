@@ -1214,13 +1214,11 @@ packet state machine in packet.c recognizes a special packet type, or
 watches for.  When that string is recognized at the start of a
 line, the interpreter switches to its driver.</p>
 
-<p>When a driver switch takes place, the old driver's wrapup method is
-called.  Then the new driver's initializer method is called.</p>
-
-<p>A good thing to send from the NMEA probe_subtype method is probe
+<p>A good thing to send from the NMEA confgure-event code is probe
 strings.  These are strings which should elicit an identifying
 response from the GPS that you can use as a trigger string for a
-native-mode driver.</p>
+native-mode driver, or a response which has an identifiable binary
+packet type.</p>
 
 <p>Don't worry about probe strings messing up GPSes they aren't meant for.
 In general, all GPSes have rather rigidly defined packet formats with
@@ -1237,7 +1235,7 @@ with the driver. It will look through the list of drivers compiled
 in to find the (first) one that handles that packet type.</p>
 
 <p>If you have to add a new packet type to packet.c, add tests for the
-type to the TESTMAIN code.</p>
+type to the test_packet.c code.</p>
 
 <p>Probe-detect methods are intended for drivers that don't use the packet
 getter because they read from a device with special kernel support.
