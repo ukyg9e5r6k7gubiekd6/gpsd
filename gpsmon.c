@@ -131,6 +131,7 @@ static jmp_buf terminate;
 #define TERM_DRIVER_SWITCH	2
 #define TERM_EMPTY_READ 	3
 #define TERM_READ_ERROR 	4
+#define TERM_QUIT		5
 
 void monitor_fixframe(WINDOW * win)
 {
@@ -1036,7 +1037,7 @@ int main(int argc, char **argv)
 
 	    if (FD_ISSET(0, &rfds)) 
 		if (!do_command())
-		    goto quit;
+		    longjmp(terminate, TERM_QUIT);
 	}
     }
 
@@ -1060,6 +1061,9 @@ int main(int argc, char **argv)
 	break;
     case TERM_READ_ERROR:
 	explanation = "Read error from device\n";
+	break;
+    case TERM_QUIT:
+	/* normal exit, no message */
 	break;
     default:
 	explanation = "Unknown error, should never happen.\n";
