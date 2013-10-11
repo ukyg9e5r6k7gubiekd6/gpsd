@@ -736,7 +736,11 @@ static void monhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 {
     static int last_type = BAD_PACKET;
 
-    /* switch types on packet receipt */
+    /*
+     * Switch display types on packet receipt.  Note, this *doesn't*
+     * change the selection of the current device driver; that's done
+     * in gpsd_multipoll().
+     */
     if (session.packet.type != last_type) {
 	last_type = session.packet.type;
 	if (!switch_type(session.device_type))
