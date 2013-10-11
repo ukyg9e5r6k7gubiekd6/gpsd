@@ -202,9 +202,15 @@ static void typelist(void)
 	    (void)fputs("c\t", stdout);
 	else
 	    (void)fputc('\t', stdout);
+	if ((*dp)->packet_type > NMEA_PACKET)
+	    (void)fputs("*\t", stdout);
+	else
+	    (void)fputc('\t', stdout);
 #endif /* RECONFIGURE_ENABLE */
 	(void)puts((*dp)->type_name);
     }
+    (void)printf("# n: mode switch, b: speed switch, "
+	"c: rate switch, *: non-NMEA packet type.\n");
 #if defined(SOCKET_EXPORT_ENABLE)
     (void)printf("# Socket export enabled.\n");
 #endif
