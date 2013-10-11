@@ -1469,11 +1469,11 @@ with very different risk profiles:</p>
 can be effectively simulated with a test-load file using gpsfake.  We
 can verify these with high confidence using a mechanical regression test.</p>
 
-<p>B) The problem children: Currently this includes Garmin USB and the
-PPS support.  In the future it must include any other devices
-that aren't static-testable.  When the correctness of drivers and core
-code in handling is suspect, they have to be live-tested by someone
-with access to the actual device.</p>
+ <p>B) The problem children: Currently this includes Garmin USB and the
+PPS support (both serial and USB via Macx-1).  In the future it must
+include any other devices that aren't static-testable.  When the
+correctness of drivers and core code in handling is suspect, they have
+to be live-tested by someone with access to the actual device.</p>
 
 <p>The goal of our release procedure is simple: prevent functional progressions.
 No device that worked in release N should break in release N+1.  Of course
@@ -1496,8 +1496,9 @@ encounter in the future.</p>
 <p>State 0 (red): There are known blocker bugs,  Blocker bugs include functional
 regressions in core or driver code.  </p>
 
-<p>State 1 (blue): There are no known blocker bugs.  'scons testregress' passes,
-but problem-children (USB Garmin and serial PPS) have not been live-tested.</p>
+<p>State 1 (blue): There are no known blocker bugs.  'scons
+testregress' passes, but problem-children (USB Garmin and PPS) have
+not been live-tested.</p>
 
 <p>State 2 (yellow): There are no known blocker bugs.  'scons testregress'
 passes.  Problem children have been live-tested.  From this state, we
