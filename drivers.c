@@ -241,30 +241,6 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#if defined(RECONFIGURE_ENABLE) && defined(BINARY_ENABLE)
-static void nmea_mode_switch(struct gps_device_t *session, int mode)
-{
-    /*
-     * If the daemon has seen this device in a binary mode, we may
-     * actually know how to switch back.
-     */
-    if (mode == MODE_BINARY)
-    {
-	const struct gps_type_t **dp;
-
-	/*@-shiftnegative@*/
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    if ((*dp)->packet_type > 0 && (*dp)->packet_type != session->packet.type &&
-	    	    (session->observed & PACKET_TYPEMASK((*dp)->packet_type))!=0) {
-		(*dp)->mode_switcher(session, mode);
-		break;
-	    }
-	}
-	/*@+shiftnegative@*/
-    }
-}
-#endif /* defined(RECONFIGURE_ENABLE) && defined(BINARY_ENABLE) */
-
 /* *INDENT-OFF* */
 const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
@@ -280,7 +256,7 @@ const struct gps_type_t nmea = {
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
 #ifdef BINARY_ENABLE
-    .mode_switcher  = nmea_mode_switch,	/* maybe switchable if it was a SiRF */
+    .mode_switcher  = NULL,		/* maybe switchable if it was a SiRF */
 #else
     .mode_switcher  = NULL,		/* no binary mode to revert to */
 #endif /* BINARY_ENABLE */
