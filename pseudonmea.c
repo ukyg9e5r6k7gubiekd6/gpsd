@@ -293,7 +293,7 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
     unsigned int offset;
   
     channel = 'A';
-    if (session->aivdm_ais_channel == 'B') {
+    if (session->driver.aivdm.ais_channel == 'B') {
         channel = 'B';
     }
  

@@ -616,17 +616,13 @@ struct gps_device_t {
 	    unsigned int    bufindex;
 	} isgps;
 #endif /* BINARY_ENABLE */
-    } driver;
-    /*
-     * Auxiliary structures for parsing data that can be interleaved with
-     * GPS sentences. Can't be in the driver union or it will get stepped on.
-     * So far the only case of this is AIS reports, which in marine navigation
-     * systems may come over the same wire with GPS NMEA sentences.
-     */
 #ifdef AIVDM_ENABLE
-    struct aivdm_context_t aivdm[AIVDM_CHANNELS];
-    char aivdm_ais_channel;
+	struct {
+	    struct aivdm_context_t context[AIVDM_CHANNELS];
+	    char ais_channel;
+	} aivdm;
 #endif /* AIVDM_ENABLE */
+    } driver;
 
     /*
      * State of an NTRIP connection.  We don't want to zero this on every

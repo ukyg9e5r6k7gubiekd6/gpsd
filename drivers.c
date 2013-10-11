@@ -1224,20 +1224,20 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	if (strncmp((const char *)field[0], "!AIVDO", 6) != 0)
 	    gpsd_report(session->context->debug, LOG_ERROR,
 			"invalid empty AIS channel. Assuming 'A'\n");
-	ais_context = &session->aivdm[0];
-	session->aivdm_ais_channel ='A';
+	ais_context = &session->driver.aivdm.context[0];
+	session->driver.aivdm.ais_channel ='A';
 	break;
     case '1':
 	/*@fallthrough@*/
     case 'A':
-	ais_context = &session->aivdm[0];
-	session->aivdm_ais_channel ='A';
+	ais_context = &session->driver.aivdm.context[0];
+	session->driver.aivdm.ais_channel ='A';
 	break;
     case '2':
 	/*@fallthrough@*/
     case 'B':
-	ais_context = &session->aivdm[1];
-	session->aivdm_ais_channel ='B';
+	ais_context = &session->driver.aivdm.context[1];
+	session->driver.aivdm.ais_channel ='B';
 	break;
     default:
 	gpsd_report(session->context->debug, LOG_ERROR,
@@ -1328,12 +1328,6 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 }
 /*@ +fixedformalarray +usedef +branchstate @*/
 
-static void aivdm_event_hook(struct gps_device_t *session, event_t event)
-{
-    if (event == event_configure)
-	/*@i1@*/session->aivdm->type24_queue.index = 0;
-}
-
 static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
     if (session->packet.type == AIVDM_PACKET) {
@@ -1365,7 +1359,7 @@ const struct gps_type_t aivdm = {
     .get_packet       = generic_get,	/* how to get a packet */
     .parse_packet     = aivdm_analyze,	/* how to analyze a packet */
     .rtcm_writer      = NULL,		/* don't send RTCM data,  */
-    .event_hook       = aivdm_event_hook,/* lifetime event handler */
+    .event_hook       = NULL,		/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher   = NULL,		/* no speed switcher */
     .mode_switcher    = NULL,		/* no mode switcher */
