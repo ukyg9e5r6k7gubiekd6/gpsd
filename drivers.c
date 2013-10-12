@@ -871,7 +871,7 @@ static bool fury_rate_switcher(struct gps_device_t *session, double rate)
     char buf[78];
     double inverted;
 
-    /* rate is a frequency, but the command takes interval in # of sedconds */
+    /* rate is a frequency, but the command takes interval in # of seconds */
     if (rate == 0.0)
 	inverted = 0.0;
     else
