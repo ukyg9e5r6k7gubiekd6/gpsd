@@ -324,6 +324,32 @@ static void runon_test(struct map *mp)
     /*@ +compdef +uniondef +usedef +formatcode @*/
 }
 
+static int property_check(void)
+{
+    const struct gps_type_t **dp;
+
+    for (dp = gpsd_drivers; *dp; dp++) {
+	if ((*dp)->packet_type == COMMENT_PACKET)
+	    continue;
+
+	if (CONFIGURABLE(*dp))
+	    (void)fputs("config\t", stdout);
+	else
+	    (void)fputs(".\t", stdout);
+	if ((*dp)->event_hook != NULL)
+	    (void)fputs("hook\t", stdout);
+	else
+	    (void)fputs(".\t", stdout);
+	if ((*dp)->packet_type > NMEA_PACKET)
+	    (void)fputs("binary\t", stdout);
+	else
+	    (void)fputs("NMEA\t", stdout);
+	(void)puts((*dp)->type_name);
+    }
+
+    return EXIT_SUCCESS;
+}
+
 int main(int argc, char *argv[])
 {
     struct map *mp;
@@ -331,8 +357,10 @@ int main(int argc, char *argv[])
     int option, singletest = 0;
 
     verbose = 0;
-    while ((option = getopt(argc, argv, "e:t:v:")) != -1) {
+    while ((option = getopt(argc, argv, "ce:t:v:")) != -1) {
 	switch (option) {
+	case 'c':
+	    exit(property_check());
 	case 'e':
 	    mp = singletests + atoi(optarg) - 1;
 	    (void)fwrite(mp->test, mp->testlen, sizeof(char), stdout);

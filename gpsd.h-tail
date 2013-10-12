@@ -297,6 +297,9 @@ typedef enum {
 typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;
 #define DRIVER_NOFLAGS	0x00000000u
 
+/* does this device have control methods or required initialization strings? */
+#define CONFIGURABLE(d)	(((d)->speed_switcher != NULL) || ((d)->mode_switcher != NULL)  || ((d)->rate_switcher != NULL))
+
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
     /*@observer@*/char *type_name;
