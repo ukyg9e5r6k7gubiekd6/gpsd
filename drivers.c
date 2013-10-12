@@ -964,7 +964,7 @@ static const struct gps_type_t rtcm104v2 = {
     .min_cycle     = 1,			/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
-    .control_send   = nmea_write,	/* how to send control strings */
+    .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
@@ -1010,7 +1010,7 @@ static const struct gps_type_t rtcm104v3 = {
     .min_cycle     = 1,			/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
-    .control_send   = nmea_write,	/* how to send control strings */
+    .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
@@ -1045,7 +1045,7 @@ static const struct gps_type_t garmintxt = {
     .min_cycle     = 1,			/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
-    .control_send   = nmea_write,	/* how to send control strings */
+    .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,

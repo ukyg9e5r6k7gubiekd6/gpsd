@@ -332,6 +332,7 @@ static int property_check(void)
 	if ((*dp)->packet_type == COMMENT_PACKET)
 	    continue;
 
+#ifdef RECONFIGURE_ENABLE
 	if (CONFIGURABLE(*dp))
 	    (void)fputs("config\t", stdout);
 	else
@@ -340,6 +341,17 @@ static int property_check(void)
 	    (void)fputs("hook\t", stdout);
 	else
 	    (void)fputs(".\t", stdout);
+#endif /* RECONFIGURE_ENABLE */
+	if ((*dp)->trigger != NULL)
+	    (void)fputs("trigger\t", stdout);
+	else
+	    (void)fputs(".\t", stdout);
+#ifdef CONTROLSEND_ENABLE
+	if ((*dp)->control_send != NULL)
+	    (void)fputs("send\t", stdout);
+	else
+	    (void)fputs(".\t", stdout);
+#endif /* CONTROLSEND_ENABLE */
 	if ((*dp)->packet_type > NMEA_PACKET)
 	    (void)fputs("binary\t", stdout);
 	else
