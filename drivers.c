@@ -626,7 +626,7 @@ static void earthmate_event_hook(struct gps_device_t *session, event_t event)
 /*@ -redef @*/
 /* *INDENT-OFF* */
 static const struct gps_type_t earthmate = {
-    .type_name     = "Delorme EarthMate (pre-2003, Zodiac chipset)",
+    .type_name     = "Pre-2003 Delorme EarthMate",
     .packet_type   = NMEA_PACKET,	/* associated lexer packet type */
     .flags	   = DRIVER_NOFLAGS,		/* no rollover or other flags */
     .trigger       = "EARTHA",			/* Earthmate trigger string */

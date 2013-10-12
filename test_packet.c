@@ -349,6 +349,10 @@ static int property_check(void)
 	    (void)fputs("trigger\t", stdout);
 	else
 	    (void)fputs(".\t", stdout);
+	if ((*dp)->probe_detect != NULL)
+	    (void)fputs("probe\t", stdout);
+	else
+	    (void)fputs(".\t", stdout);
 #ifdef CONTROLSEND_ENABLE
 	if ((*dp)->control_send != NULL)
 	    (void)fputs("send\t", stdout);
@@ -366,6 +370,7 @@ static int property_check(void)
     for (dp = gpsd_drivers; *dp; dp++) {
 	if ((*dp)->packet_type == COMMENT_PACKET)
 	    continue;
+#ifdef CONTROLSEND_ENABLE
 	if (CONFIGURABLE(*dp) && (*dp)->control_send == NULL) {
 	    (void)fprintf(stderr, "%s has control methods but no send\n",
 			  (*dp)->type_name);
@@ -376,6 +381,7 @@ static int property_check(void)
 			  (*dp)->type_name);
 	    status = EXIT_FAILURE;
 	}
+#endif /* CONTROLSEND_ENABLE */
     }
 
     return status;
