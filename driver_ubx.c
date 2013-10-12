@@ -774,7 +774,7 @@ static bool ubx_speed(struct gps_device_t *session,
 		speed,
 		parity,
 		stopbits,
-		session->packet.type == UBX_PACKET);
+		(session->packet.type == UBX_PACKET) ? MODE_BINARY : MODE_NMEA);
     return true;
 }
 
