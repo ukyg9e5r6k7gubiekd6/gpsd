@@ -1596,6 +1596,12 @@ json_regress = Utility('json-regress', [test_json], [
     '$SRCDIR/test_json'
     ])
 
+# consistency-check the driver methods
+method_regress = Utility('packet-regress', [test_packet], [
+    '@echo "Consistency-checking driver methods..."',
+    '$SRCDIR/test_packet -c >/dev/null',
+    ])
+
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit',
     ['$SRCDIR/valgrind-audit.py', python_built_extensions, gpsd],
@@ -1608,6 +1614,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 # Run all normal regression tests
 check = env.Alias('check', [
     python_compilation_regress,
+    method_regress,
     bits_regress,
     gps_regress,
     rtcm_regress,

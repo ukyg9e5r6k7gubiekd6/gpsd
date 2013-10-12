@@ -326,7 +326,10 @@ static void runon_test(struct map *mp)
 
 static int property_check(void)
 {
+/* does this device have control methods or required initialization strings? */
+#define CONFIGURABLE(d)	(((d)->speed_switcher != NULL) || ((d)->mode_switcher != NULL)  || ((d)->rate_switcher != NULL))
     const struct gps_type_t **dp;
+    int status;
 
     for (dp = gpsd_drivers; *dp; dp++) {
 	if ((*dp)->packet_type == COMMENT_PACKET)
@@ -359,7 +362,24 @@ static int property_check(void)
 	(void)puts((*dp)->type_name);
     }
 
-    return EXIT_SUCCESS;
+    status = EXIT_SUCCESS;
+    for (dp = gpsd_drivers; *dp; dp++) {
+	if ((*dp)->packet_type == COMMENT_PACKET)
+	    continue;
+	if (CONFIGURABLE(*dp) && (*dp)->control_send == NULL) {
+	    (void)fprintf(stderr, "%s has control methods but no send\n",
+			  (*dp)->type_name);
+	    status = EXIT_FAILURE;
+	}
+	if ((*dp)->event_hook != NULL && (*dp)->control_send == NULL) {
+	    (void)fprintf(stderr, "%s has event hook but no send\n",
+			  (*dp)->type_name);
+	    status = EXIT_FAILURE;
+	}
+    }
+
+    return status;
+#undef CONFIGURABLE
 }
 
 int main(int argc, char *argv[])
