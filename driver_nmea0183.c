@@ -1098,13 +1098,13 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
     msg = atoi(&(session->driver.nmea.field[0])[4]);
     switch (msg) {
     case 705:			/*  */
-	(void)strlcat(session->subtype, session->driver.nmea.field[1], sizeof(session->subtype));
+	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));
 	(void)strlcat(session->subtype, "-", sizeof(session->subtype));
-	(void)strlcat(session->subtype, session->driver.nmea.field[2], sizeof(session->subtype));
+	(void)strlcat(session->subtype, field[2], sizeof(session->subtype));
 	return ONLINE_SET;
     case 001:			/* ACK / NACK */
-	reason = atoi(session->driver.nmea.field[2]);
-	if (atoi(session->driver.nmea.field[1]) == -1)
+	reason = atoi(field[2]);
+	if (atoi(field[1]) == -1)
 	    gpsd_report(session->context->debug, LOG_WARN,
 			"MTK NACK: unknown sentence\n");
 	else if (reason < 3) {
@@ -1116,12 +1116,12 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 	    };
 	    gpsd_report(session->context->debug, LOG_WARN,
 			"MTK NACK: %s, reason: %s\n",
-			session->driver.nmea.field[1],
+			field[1],
 			mtk_reasons[reason]);
 	}
 	else
 	    gpsd_report(session->context->debug, LOG_WARN,
-			"MTK ACK: %s\n", session->driver.nmea.field[1]);
+			"MTK ACK: %s\n", field[1]);
 	return ONLINE_SET;
     default:
 	return ONLINE_SET;		/* ignore */

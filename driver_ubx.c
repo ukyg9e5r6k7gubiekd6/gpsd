@@ -638,7 +638,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 #ifdef RECONFIGURE_ENABLE
 static void ubx_cfg_prt(struct gps_device_t *session, 
 			speed_t speed, const char parity, const int stopbits, 
-			const mode)
+			const int mode)
 /* generare and send a configuration block */
 {
     unsigned long usart_mode = 0;
