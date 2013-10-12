@@ -443,29 +443,38 @@ static void refresh_cmdwin(void)
 /*@-globstate@*/
 static bool do_command(void)
 {
+    static char input[80];
+    char  line[80];
 #ifdef RECONFIGURE_ENABLE
     unsigned int v;
 #endif /* RECONFIGURE_ENABLE */
-    char line[80], *arg, *p;
+    char *arg, *p;
     unsigned char buf[BUFLEN];
-    int status;
+    int status, c;
 
-    (void)wmove(cmdwin, 0, (int)promptlen);
-    (void)wrefresh(cmdwin);
-    (void)echo();
-    /*@ -usedef -compdef @*/
-    (void)wgetnstr(cmdwin, line, 80);
-    (void)noecho();
-    if (packetwin != NULL)
-	(void)wrefresh(packetwin);
-    (void)wrefresh(cmdwin);
+    c = wgetch(cmdwin);
+    if (c != '\r' && c != '\n') {
+	size_t len = strlen(input);
 
-    if ((p = strchr(line, '\r')) != NULL)
-	*p = '\0';
+	if (c == '\b' || c == KEY_LEFT || c == erasechar()) {
+	    input[len] = '\0';
+	} else {
+	    input[len] = c;
+	    input[++len] = '\0';
+	}
 
-    if (line[0] == '\0')
 	return true;
-    /*@ +usedef +compdef @*/
+    }
+    (void)wmove(cmdwin, 0, (int)promptlen);
+    (void)wclrtoeol(cmdwin);
+
+    /* user finished entering a command */
+    if (input[0] == '\0')
+	return true;
+    else {
+	(void) strlcpy(line, input, sizeof(line));
+	input[0] = '\0';
+    }
 
     if (isspace(line[1])) {
 	for (arg = line + 2; *arg != '\0' && isspace(*arg); arg++)
@@ -976,7 +985,6 @@ int main(int argc, char **argv)
 
     (void)initscr();
     (void)cbreak();
-    (void)noecho();
     (void)intrflush(stdscr, FALSE);
     (void)keypad(stdscr, true);
     curses_active = true;
