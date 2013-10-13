@@ -570,6 +570,7 @@ struct gps_device_t {
 #ifdef UBX_ENABLE
 	struct {
 	    unsigned char sbas_in_use;
+	    bool user_switched;
     	} ubx;
 #endif /* UBX_ENABLE */
 #ifdef NAVCOM_ENABLE
