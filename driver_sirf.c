@@ -264,6 +264,16 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
 }
 #endif /* CONTROLSEND_ENABLE */
 
+#ifdef VISUALIZE_ENABLE
+static ssize_t sirfbin_visualize(struct gps_device_t *session,
+				 char *buf,
+				 size_t len)
+{
+    (void)snprintf(buf, len, "MID%d:", (int)buf[4]);
+    gpsd_packetdump(buf + strlen(buf), len - strlen(buf));
+}
+#endif /* VISUALIZE_ENABLE */
+
 #ifdef RECONFIGURE_ENABLE
 static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char parity, int stopbits)
 /* change speed in binary mode */
@@ -1360,6 +1370,8 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
+
+
 /* this is everything we export */
 /* *INDENT-OFF* */
 const struct gps_type_t sirf_binary =
@@ -1384,7 +1396,7 @@ const struct gps_type_t sirf_binary =
     .control_send   = sirf_control_send,/* how to send a control string */
 #endif /* CONTROLSEND_ENABLE */
 #ifdef VISUALIZE_ENABLE
-    .visualize      = NULL,			/* no visualization method */
+    .visualize      = sirfbin_visualize,	/* no visualization method */
 #endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = sirf_ntp_offset,
