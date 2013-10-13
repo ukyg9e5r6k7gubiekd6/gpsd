@@ -404,6 +404,9 @@ struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     /*@relnull@*/const struct gps_type_t *device_type;
+#ifdef RECONFIGURE_ENABLE
+    /*@relnull@*/const struct gps_type_t *last_controller;
+#endif /* RECONFIGURE_ENABLE */
     struct gps_context_t	*context;
     sourcetype_t sourcetype;
     servicetype_t servicetype;

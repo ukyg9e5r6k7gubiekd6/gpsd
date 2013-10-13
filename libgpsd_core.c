@@ -37,6 +37,14 @@
 static pthread_mutex_t report_mutex;
 #endif /* PPS_ENABLE */
 
+/*
+ * True if a device type is non-null and has control methods.
+ */
+#define CONTROLLABLE(dp)	(((dp) != NULL) && \
+				 ((dp)->speed_switcher != NULL		\
+				  || (dp)->mode_switcher != NULL	\
+				  || (dp)->rate_switcher != NULL))
+
 static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
     const char *sp;
@@ -178,6 +186,10 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 	    if (first_sync && session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session,
 						 event_driver_switch);
+#ifdef RECONFIGURE_ENABLE
+	    if (CONTROLLABLE(session->device_type))
+		session->last_controller = session->device_type;
+#endif /* RECONFIGURE_ENABLE */
 	    /* clients should be notified */
 	    session->notify_clients = true;
 	    return 1;
@@ -1268,6 +1280,23 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (session->device_type != NULL
 		&& session->device_type->parse_packet != NULL)
 		received |= session->device_type->parse_packet(session);
+
+#ifdef RECONFIGURE_ENABLE
+	/*
+	 * We may want to revert to the last driver that had control methods.
+	 * What this accomplishes is that if we've just processed something
+	 * like AIVDM, but a driver with control methods had been active
+	 * before that, we keep the information about the control methods.
+	 */
+	if (!CONTROLLABLE(session->device_type)
+	    && session->last_controller != NULL)
+	{
+	    session->device_type = session->last_controller;
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"reverted to %s driver...\n",
+			session->device_type->type_name);
+	}
+#endif /* RECONFIGURE_ENABLE */
 
 #ifdef TIMING_ENABLE
 	/* are we going to generate a report? if so, count characters */
