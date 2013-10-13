@@ -1383,6 +1383,9 @@ const struct gps_type_t sirf_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = sirf_control_send,/* how to send a control string */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = sirf_ntp_offset,
 #endif /* NTP_SHM_ENABLE */

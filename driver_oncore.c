@@ -540,6 +540,9 @@ const struct gps_type_t oncore_binary = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = oncore_control_send,	/* to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset = oncore_ntp_offset,		/* NTP offset array */
 #endif /* NTPSHM_ENABLE */

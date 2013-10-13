@@ -107,6 +107,9 @@ const struct gps_type_t unknown = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -271,6 +274,9 @@ const struct gps_type_t nmea = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -372,6 +378,9 @@ const struct gps_type_t garmin = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -434,6 +443,9 @@ const struct gps_type_t ashtech = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -485,6 +497,9 @@ const struct gps_type_t fv18 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -539,6 +554,9 @@ const struct gps_type_t gpsclock = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -594,6 +612,9 @@ static const struct gps_type_t tripmate = {
 #ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -645,6 +666,9 @@ static const struct gps_type_t earthmate = {
 #ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */
@@ -768,6 +792,9 @@ const struct gps_type_t trueNorth = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = tnt_control_send,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -846,6 +873,9 @@ static const struct gps_type_t oceanServer = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -913,6 +943,9 @@ static const struct gps_type_t fury = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -966,6 +999,9 @@ static const struct gps_type_t rtcm104v2 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -1012,6 +1048,9 @@ static const struct gps_type_t rtcm104v3 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -1047,6 +1086,9 @@ static const struct gps_type_t garmintxt = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -1136,6 +1178,9 @@ const struct gps_type_t mtk3301 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,
 #endif /* NTPSHM_ ENABLE */
@@ -1369,6 +1414,9 @@ const struct gps_type_t aivdm = {
 #ifdef CONTROLSEND_ENABLE
     .control_send     = NULL,		/* no control sender */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no NTP communication */
 #endif /* NTPSHM_ ENABLE */
@@ -1467,6 +1515,9 @@ const struct gps_type_t json_passthrough = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */

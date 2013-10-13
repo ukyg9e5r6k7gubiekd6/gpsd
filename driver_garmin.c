@@ -1391,6 +1391,9 @@ const struct gps_type_t garmin_usb_binary_old =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
@@ -1420,6 +1423,9 @@ const struct gps_type_t garmin_usb_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */
@@ -1448,6 +1454,9 @@ const struct gps_type_t garmin_ser_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = garmin_ntp_offset,
 #endif /* NTPSHM_ ENABLE */

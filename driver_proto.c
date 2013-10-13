@@ -530,6 +530,9 @@ const struct gps_type_t _proto__binary = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = _proto__control_send,
 #endif /* CONTROLSEND_ENABLE */
+#ifdef VISUALIZE_ENABLE
+    .visualize      = NULL,			/* no visualization method */
+#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = _proto_ntp_offset,
 #endif /* NTPSHM_ENABLE */
