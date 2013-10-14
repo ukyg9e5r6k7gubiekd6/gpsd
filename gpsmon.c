@@ -440,7 +440,7 @@ static void refresh_cmdwin(void)
 }
 /*@+observertrans +nullpass +globstate@*/
 
-/*@-globstate@*/
+/*@-globstate -usedef -compdef@*/
 static bool do_command(void)
 {
     static char input[80];
@@ -448,7 +448,7 @@ static bool do_command(void)
 #ifdef RECONFIGURE_ENABLE
     unsigned int v;
 #endif /* RECONFIGURE_ENABLE */
-    char *arg, *p;
+    char *arg;
     unsigned char buf[BUFLEN];
     int status, c;
 
@@ -456,10 +456,10 @@ static bool do_command(void)
     if (c != '\r' && c != '\n') {
 	size_t len = strlen(input);
 
-	if (c == '\b' || c == KEY_LEFT || c == erasechar()) {
+	if (c == '\b' || c == KEY_LEFT || c == (int)erasechar()) {
 	    input[len] = '\0';
 	} else {
-	    input[len] = c;
+	    input[len] = (char)c;
 	    input[++len] = '\0';
 	}
 
@@ -738,7 +738,7 @@ static bool do_command(void)
     /* continue accepting commands */
     return true;
 }
-/*@+globstate@*/
+/*@+globstate +usedef +compdef@*/
 
 /*@-observertrans -nullpass -globstate@*/
 static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
