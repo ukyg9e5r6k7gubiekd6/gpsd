@@ -14,7 +14,7 @@
   "_text" to the name of the base attribute.  Full support (untested) for
   Inland AIS extended sentences. In gpsmon, entering a command no longer
   pauses packet display. Better support for mode and speed switching in the 
-  UBX driver.
+  UBX driver. Be a bit more forgiving about AIS Type 5 message lengths.
 
 * Wed 1 May 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.9
   Note to packagers: this is an urgent release that fixes a possible

@@ -139,7 +139,12 @@ bool ais_binary_decode(const int debug,
 	    gpsd_report(debug, LOG_WARN,
 			"AIVDM message type 5 size not 424 bits (%zd).\n",
 			bitlen);
-	    return false;
+	    /*
+	     * For unknown reasons, a lot of transmitters in the wild ship
+	     * with a length of 420 or 422.  This is a recoverable error.
+	     */
+	    if (bitlen < 420)
+		return false;
 	}
 	ais->type5.ais_version  = UBITS(38, 2);
 	ais->type5.imo          = UBITS(40, 30);
@@ -157,7 +162,8 @@ bool ais_binary_decode(const int debug,
 	ais->type5.minute       = UBITS(288, 6);
 	ais->type5.draught      = UBITS(294, 8);
 	UCHARS(302, ais->type5.destination);
-	ais->type5.dte          = UBITS(422, 1);
+	if (bitlen >= 423)
+	    ais->type5.dte          = UBITS(422, 1);
 	//ais->type5.spare        = UBITS(423, 1);
 	break;
     case 6: /* Addressed Binary Message */
