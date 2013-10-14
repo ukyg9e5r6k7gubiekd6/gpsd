@@ -418,9 +418,6 @@ const struct gps_type_t italk_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* no control string sender */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef VISUALIZE_ENABLE
-    .visualize      = NULL,			/* no visualization method */
-#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */

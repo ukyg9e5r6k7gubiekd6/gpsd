@@ -575,9 +575,6 @@ const struct gps_type_t superstar2_binary = {
     /* Control string sender - should provide checksum and trailer */
     .control_send	= superstar2_control_send,
 #endif /* CONTROLSEND_ENABLE */
-#ifdef VISUALIZE_ENABLE
-    .visualize      = NULL,			/* no visualization method */
-#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* NTPSHM_ ENABLE */

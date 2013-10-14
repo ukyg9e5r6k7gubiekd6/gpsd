@@ -522,9 +522,6 @@ const struct gps_type_t zodiac_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = zodiac_control_send,	/* for gpsctl and friends */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef VISUALIZE_ENABLE
-    .visualize      = NULL,			/* no visualization method */
-#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = zodiac_ntp_offset,	/* compute NTO fudge factor */
 #endif /* NTPSHM_ENABLE */

@@ -1300,9 +1300,6 @@ const struct gps_type_t tsip_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = tsip_control_send,/* how to send commands */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef VISUALIZE_ENABLE
-    .visualize      = NULL,			/* no visualization method */
-#endif /* VISUALIZE_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = tsip_ntp_offset,
 #endif /* NTPSHM_ENABLE */

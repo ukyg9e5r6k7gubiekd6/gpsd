@@ -145,7 +145,6 @@ boolopts = (
     ("libgpsmm",      True,  "build C++ bindings"),
     ("libQgpsmm",     True,  "build QT bindings"),
     # Daemon options
-    ("visualize",     True,  "visualizer functions for logging and gpsmon"),
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
