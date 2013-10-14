@@ -944,17 +944,17 @@ AIVDM,2,2,1,B,00000000000,2*26
 !AIVDM,1,1,,A,402Fha0000Htt<tSF0l4Q@000d20,0*65
 # Type 4 with YYYY/MM/DD OK, but HHmmSS N/A
 !AIVDM,1,1,,B,4028n@iuiPpttwIWI<Hl>8700PS:,0*60
-# Type 4 with year set to 10196 (0x27D4), idempotency use to fail on this one
+# Type 4 with year set to 10196 (0x27D4), idempotency used to fail on this one
 # It has a bad epfd as well.
 !AIVDM,1,1,,B,4>O7m7Iu@<9qUfbtm`vSnwvH20S8,0*46
-# Type 22 with MMSI1=4059193694, use to fail due to UBITS() instead of SBITS()
+# Type 22 with MMSI1=4059193694, used to fail due to UBITS() instead of SBITS()
 !AIVDM,1,1,,B,Fe3>>MOD@GDF?ThcoCk02?ioQie4,0*03
 # A type 6, DAC 1, FID 18 with plenty of N/A fields, idempotency use to fail
 !AIVDM,1,1,,B,602E:s0tw@9B0580@00000000000,0*68
-# A type 6, DAC 1, FID 30. use to fail idempotency
+# A type 6, DAC 1, FID 30. used to fail idempotency
 !AIVDM,1,1,,B,6h2E3MPr<buN05p0J00000000000,0*0A
-# A type 6, DAC 1, FID 18, use to fail idempotency
+# A type 6, DAC 1, FID 18, used to fail idempotency
 !AIVDM,1,1,,B,602E:s0tw@9B0580@00000000000,0*68
-# Array of struct. use to crash "gpsdecode -j -e -u"
+# Array of struct, used to crash "gpsdecode -j -e -u"
 !AIVDM,1,1,,A,6h2E3MHrg19P0600@00000000000,0*02
 !AIVDM,1,1,,A,6h2E3N0rThqP0600J00000000000,0*51
