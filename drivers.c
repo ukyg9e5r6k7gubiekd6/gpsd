@@ -1088,8 +1088,7 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 */
     if (session->context->readonly)
 	return;
-    /* FIX-ME: Do we need to resend this on reactivation? */
-    if (event == event_identified) {
+    if (event == event_triggermatch) {
 	(void)nmea_send(session, "$PMTK320,0");	/* power save off */
 	(void)nmea_send(session, "$PMTK300,1000,0,0,0.0,0.0");	/* Fix interval */
 	(void)nmea_send(session,
