@@ -166,6 +166,11 @@ There is a http://gnuais.sourceforge.net/[GNU AIS] project at
 SourceForge.  It seems intended primarily to work directly
 with AIS radios.
 
+http://www.maritec.co.za/aisvdmvdodecoding.php[The Maritec decoder]
+looks to be pretty high-quality and can be exercised through a
+public web form. This is a useful resource for anyone qualifying
+an AIS decoder.
+
 == AIVDM/AIVDO Sentence Layer ==
 
 AIVDM/AIVDO is a two-layer protocol.  The outer layer is a variant of
