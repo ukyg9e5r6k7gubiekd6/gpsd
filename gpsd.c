@@ -1384,13 +1384,10 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
      */
     if (sub->policy.raw == 1) {
 	const char *hd =
-	    gpsd_hexdump((char *)device->packet.outbuffer,
+	    gpsd_hexdump(device->msgbuf, sizeof(device->msgbuf),
+			 (char *)device->packet.outbuffer,
 			 device->packet.outbuflen);
-	/*
-	 * Ugh...depends on knowing the length of gpsd_hexdump's
-	 * buffer.
-	 */
-	(void)strlcat((char *)hd, "\r\n", MAX_PACKET_LENGTH * 2 + 1);
+	(void)strlcat((char *)hd, "\r\n", sizeof(device->msgbuf));
 	(void)throttled_write(sub, (char *)hd, strlen(hd));
     }
 #endif /* BINARY_ENABLE */

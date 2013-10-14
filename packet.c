@@ -1356,6 +1356,8 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 /* packet grab succeeded, move to output buffer */
 {
     size_t packetlen = lexer->inbufptr - lexer->inbuffer;
+    char scratchbuf[MAX_PACKET_LENGTH*2+1];
+
     if (packetlen < sizeof(lexer->outbuffer)) {
 	memcpy(lexer->outbuffer, lexer->inbuffer, packetlen);
 	lexer->outbuflen = packetlen;
@@ -1365,7 +1367,8 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
 	    gpsd_report(lexer->debug, LOG_RAW+1,
 			"Packet type %d accepted %zu = %s\n",
 			packet_type, packetlen,
-			gpsd_packetdump((char *)lexer->outbuffer,
+			gpsd_packetdump(scratchbuf,  sizeof(scratchbuf),
+					(char *)lexer->outbuffer,
 					lexer->outbuflen));
     } else {
 	gpsd_report(lexer->debug, LOG_ERROR,
@@ -1381,23 +1384,28 @@ static void packet_discard(struct gps_packet_t *lexer)
     size_t remaining = lexer->inbuflen - discard;
     lexer->inbufptr = memmove(lexer->inbuffer, lexer->inbufptr, remaining);
     lexer->inbuflen = remaining;
-    if (lexer->debug >= LOG_RAW+1)
+    if (lexer->debug >= LOG_RAW+1) {
+	char scratchbuf[MAX_PACKET_LENGTH*2+1];
 	gpsd_report(lexer->debug, LOG_RAW + 1,
 		    "Packet discard of %zu, chars remaining is %zu = %s\n",
 		    discard, remaining,
-		    gpsd_packetdump((char *)lexer->inbuffer, lexer->inbuflen));
+		    gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
+				    (char *)lexer->inbuffer, lexer->inbuflen));
+    }
 }
 
 static void character_discard(struct gps_packet_t *lexer)
 /* shift the input buffer to discard one character and reread data */
 {
+    char scratchbuf[MAX_PACKET_LENGTH*2+1];
     memmove(lexer->inbuffer, lexer->inbuffer + 1, (size_t)-- lexer->inbuflen);
     lexer->inbufptr = lexer->inbuffer;
     if (lexer->debug >= LOG_RAW+1)
 	gpsd_report(lexer->debug, LOG_RAW + 1,
 		    "Character discarded, buffer %zu chars = %s\n",
 		    lexer->inbuflen,
-		    gpsd_packetdump((char *)lexer->inbuffer, lexer->inbuflen));
+		    gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
+				    (char *)lexer->inbuffer, lexer->inbuflen));
 }
 
 /* get 0-origin big-endian words relative to start of packet buffer */
@@ -2065,11 +2073,14 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	    return -1;
 	}
     } else {
-	if (lexer->debug >= LOG_RAW+1)
+	if (lexer->debug >= LOG_RAW+1) {
+	    char scratchbuf[MAX_PACKET_LENGTH*2+1];
 	    gpsd_report(lexer->debug, LOG_RAW + 1,
 			"Read %zd chars to buffer offset %zd (total %zd): %s\n",
 			recvd, lexer->inbuflen, lexer->inbuflen + recvd,
-			gpsd_packetdump((char *)lexer->inbufptr, (size_t) recvd));
+			gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
+			    (char *)lexer->inbufptr, (size_t) recvd));
+	}
 	lexer->inbuflen += recvd;
     }
     gpsd_report(lexer->debug, LOG_SPIN,

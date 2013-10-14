@@ -755,8 +755,11 @@ extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int,
 				uint32_t[]);
 extern gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *,
 				unsigned int, uint32_t[]);
-extern /*@ observer @*/ const char *gpsd_hexdump(/*@null@*/char *, size_t);
-extern /*@ observer @*/ const char *gpsd_packetdump(/*@null@*/char *, size_t);
+extern /*@ observer @*/ const char *gpsd_hexdump(/*@out@*/char *, size_t,
+						 /*@null@*/char *, size_t);
+extern /*@ observer @*/ const char *gpsd_packetdump(/*@out@*/char *, size_t,
+						    /*@null@*/char *, size_t);
+extern /*@ observer @*/ const char *gpsd_prettydump(struct gps_device_t *);
 # ifdef __cplusplus
 extern "C" {
 # endif

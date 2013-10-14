@@ -558,10 +558,13 @@ ssize_t gpsd_serial_write(struct gps_device_t * session,
     ok = (status == (ssize_t) len);
     (void)tcdrain(session->gpsdata.gps_fd);
     /* extra guard prevents expensive hexdump calls */
-    if (session->context->debug >= LOG_IO)
+    if (session->context->debug >= LOG_IO) {
+	char scratchbuf[MAX_PACKET_LENGTH*2+1];
 	gpsd_report(session->context->debug, LOG_IO,
 		    "=> GPS: %s%s\n",
-		    gpsd_packetdump((char *)buf, len), ok ? "" : " FAILED");
+		    gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
+				    (char *)buf, len), ok ? "" : " FAILED");
+    }
     return status;
 }
 

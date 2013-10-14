@@ -59,6 +59,14 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
+const char *gpsd_prettydump(struct gps_device_t *session)
+/* dump the current packet in a form optimised for eyeballs */
+{
+    return gpsd_packetdump(session->msgbuf, sizeof(session->msgbuf),
+			   (char *)session->packet.outbuffer, 
+			   session->packet.outbuflen);
+}
+
 void gpsd_labeled_report(const int debuglevel, const int errlevel,
 			 const char *label, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -163,6 +171,7 @@ static void gpsd_run_device_hook(const int debuglevel,
 
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
+    /*@-mustfreeonly@*/
     const struct gps_type_t **dp;
     bool first_sync = (session->device_type != NULL);
 
@@ -197,6 +206,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     gpsd_report(session->context->debug, LOG_ERROR, "invalid GPS type \"%s\".\n", type_name);
     return 0;
     /*@ +compmempass @*/
+    /*@+mustfreeonly@*/
 }
 
 /*@-compdestroy@*/
@@ -1186,7 +1196,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    if (session->packet.type == (*dp)->packet_type) {
 			gpsd_report(session->context->debug, LOG_PROG,
 				    "switching to match packet type %d: %s\n",
-				    session->packet.type, gpsd_packetdump((char *)session->packet.outbuffer, session->packet.outbuflen));
+				    session->packet.type, gpsd_prettydump(session));
 			(void)gpsd_switch_driver(session, (*dp)->type_name);
 			break;
 		    }
@@ -1273,7 +1283,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			"raw packet of type %d, %zd:%s\n",
 			session->packet.type,
 			session->packet.outbuflen,
-			gpsd_packetdump((char *)session->packet.outbuffer, session->packet.outbuflen));
+			gpsd_prettydump(session));
 
 	/* Get data from current packet into the fix structure */
 	if (session->packet.type != COMMENT_PACKET)
@@ -1288,6 +1298,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * like AIVDM, but a driver with control methods had been active
 	 * before that, we keep the information about the control methods.
 	 */
+	/*@-mustfreeonly@*/
 	if (!CONTROLLABLE(session->device_type)
 	    && session->last_controller != NULL)
 	{
@@ -1296,6 +1307,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			"reverted to %s driver...\n",
 			session->device_type->type_name);
 	}
+	/*@+mustfreeonly@*/
 #endif /* RECONFIGURE_ENABLE */
 
 #ifdef TIMING_ENABLE

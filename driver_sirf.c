@@ -270,7 +270,9 @@ static ssize_t sirfbin_visualize(struct gps_device_t *session,
 				 size_t len)
 {
     (void)snprintf(buf, len, "MID%d:", (int)buf[4]);
-    gpsd_packetdump(buf + strlen(buf), len - strlen(buf));
+    (void)gpsd_packetdump(session->msgbuf, sizeof(session->msgbuf),
+		    buf + strlen(buf), len - strlen(buf));
+    return (ssize_t)strlen(buf);
 }
 #endif /* VISUALIZE_ENABLE */
 

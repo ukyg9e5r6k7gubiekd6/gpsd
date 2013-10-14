@@ -1369,6 +1369,7 @@ void json_aivdm_dump(const struct ais_t *ais,
     char buf2[JSON_VAL_MAX * 2 + 1];
     char buf3[JSON_VAL_MAX * 2 + 1];
     char buf4[JSON_VAL_MAX * 2 + 1];
+    char scratchbuf[MAX_PACKET_LENGTH*2+1];
     bool structured;
     int i;
 
@@ -2205,8 +2206,9 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   "\"data\":\"%zd:%s\"}\r\n",
 			   ais->type6.bitcount,
 			   json_stringify(buf1, sizeof(buf1),
-					  gpsd_hexdump((char *)ais->type6.bitdata,
-						       (ais->type6.bitcount + 7) / 8)));
+					  gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+					      (char *)ais->type6.bitdata,
+					      (ais->type6.bitcount + 7) / 8)));
 	break;
     case 7:			/* Binary Acknowledge */
     case 13:			/* Safety Related Acknowledge */
@@ -2900,7 +2902,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   "\"data\":\"%zd:%s\"}\r\n",
 			   ais->type8.bitcount,
 			   json_stringify(buf1, sizeof(buf1),
-					  gpsd_hexdump((char *)ais->type8.bitdata,
+					  gpsd_hexdump(scratchbuf, sizeof(scratchbuf), 
+						       (char *)ais->type8.bitdata,
 						       (ais->type8.bitcount + 7) / 8)));
 	break;
     case 9:			/* Standard SAR Aircraft Position Report */
@@ -3012,7 +3015,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type17.lon / AIS_GNSS_LATLON_DIV,
 			   ais->type17.lat / AIS_GNSS_LATLON_DIV,
 			   ais->type17.bitcount,
-			   gpsd_hexdump((char *)ais->type17.bitdata,
+			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+					(char *)ais->type17.bitdata,
 					(ais->type17.bitcount + 7) / 8));
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -3020,7 +3024,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type17.lon,
 			   ais->type17.lat,
 			   ais->type17.bitcount,
-			   gpsd_hexdump((char *)ais->type17.bitdata,
+			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+					(char *)ais->type17.bitdata,
 					(ais->type17.bitcount + 7) / 8));
 	}
 	break;
@@ -3346,7 +3351,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type25.dest_mmsi,
 		       ais->type25.app_id,
 		       ais->type25.bitcount,
-		       gpsd_hexdump((char *)ais->type25.bitdata,
+		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+				    (char *)ais->type25.bitdata,
 				    (ais->type25.bitcount + 7) / 8));
 	break;
     case 26:			/* Binary Message, Multiple Slot */
@@ -3358,7 +3364,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type26.dest_mmsi,
 		       ais->type26.app_id,
 		       ais->type26.bitcount,
-		       gpsd_hexdump((char *)ais->type26.bitdata,
+		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+				    (char *)ais->type26.bitdata,
 				    (ais->type26.bitcount + 7) / 8),
 		       ais->type26.radio);
 	break;

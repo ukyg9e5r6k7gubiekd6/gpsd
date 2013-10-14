@@ -49,6 +49,7 @@ void gpsd_report(const int debuglevel, const int errlevel,
 #ifdef AIVDM_ENABLE
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
+    char scratchbuf[MAX_PACKET_LENGTH*2+1];
     bool imo = false;
     (void)snprintf(buf, buflen, "%u|%u|%09u|", ais->type, ais->repeat,
 		   ais->mmsi);
@@ -139,7 +140,8 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "|%zd:%s",
 			   ais->type6.bitcount,
-			   gpsd_hexdump(ais->type6.bitdata,
+			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+					ais->type6.bitdata,
 					(ais->type6.bitcount + 7) / 8));
 	break;
     case 7:			/* Binary Acknowledge */
@@ -246,7 +248,8 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "|%zd:%s",
 			   ais->type8.bitcount,
-			   gpsd_hexdump(ais->type8.bitdata,
+			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+					ais->type8.bitdata,
 					(ais->type8.bitcount + 7) / 8));
 	break;
     case 9:
@@ -304,7 +307,8 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type17.lon,
 		       ais->type17.lat,
 		       ais->type17.bitcount,
-		       gpsd_hexdump(ais->type17.bitdata,
+		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+				    ais->type17.bitdata,
 				    (ais->type17.bitcount + 7) / 8));
 	break;
     case 18:
@@ -459,7 +463,8 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type25.dest_mmsi,
 		       ais->type25.app_id,
 		       ais->type25.bitcount,
-		       gpsd_hexdump(ais->type25.bitdata,
+		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+				    ais->type25.bitdata,
 				    (ais->type25.bitcount + 7) / 8));
 	break;
     case 26:			/* Binary Message, Multiple Slot */
@@ -470,7 +475,8 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type26.dest_mmsi,
 		       ais->type26.app_id,
 		       ais->type26.bitcount,
-		       gpsd_hexdump(ais->type26.bitdata,
+		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
+				    ais->type26.bitdata,
 				    (ais->type26.bitcount + 7) / 8),
 		       ais->type26.radio);
 	break;
