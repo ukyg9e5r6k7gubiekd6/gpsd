@@ -728,6 +728,11 @@ In practice, the information in these fields (especially ETA and
 destination) is not reliable, as it has to be hand-updated by
 humans rather than gathered automatically from sensors.
 
+Also note that it is fairly common in the wild for this message to
+have a wrong bit length (420 or 422). Robust decoders should ignore
+trailing garbage and deal gracefully with a slightly truncated
+destination field.
+
 //: Type 5
 [frame="topbot",options="header"]
 |==============================================================================
