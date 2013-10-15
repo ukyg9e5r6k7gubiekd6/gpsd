@@ -119,7 +119,7 @@ static bool tsip_detect(struct gps_device_t *session)
     return ret;
 }
 
-static gps_mask_t tsip_analyze(struct gps_device_t *session)
+static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 {
     int i, j, len, count;
     gps_mask_t mask = 0;
@@ -1007,32 +1007,6 @@ static gps_mask_t tsip_analyze(struct gps_device_t *session)
 #endif /* USE_SUPERPACKET */
 
     return mask;
-}
-
-static gps_mask_t tsip_parse_input(struct gps_device_t *session)
-{
-    if (session->packet.type == TSIP_PACKET) {
-	return tsip_analyze(session);
-#ifdef __UNUSED__
-    } else if (session->packet.type == EVERMORE_PACKET) {
-	(void)gpsd_switch_driver(session, "EverMore binary");
-	return evermore_parse(session, session->packet.outbuffer,
-			      session->packet.outbuflen);
-#endif /* __UNUSED__ */
-#ifdef SIRF_ENABLE
-	/*
-	 * mrd reported that once every couple of weeks his SiRF was flipping
-	 * into Trimble binary mode and not recovering.  Damn Trimble for not
-	 * checksumming their packets, it makes false positives hard to reject.
-	 * This should enable the SiRF to recover.
-	 */
-    } else if (session->packet.type == SIRF_PACKET) {
-	(void)gpsd_switch_driver(session, "SiRF binary");
-	return sirf_parse(session, session->packet.outbuffer,
-			  session->packet.outbuflen);
-#endif /* SIRF_ENABLE */
-    } else
-	return 0;
 }
 
 #ifdef CONTROLSEND_ENABLE
