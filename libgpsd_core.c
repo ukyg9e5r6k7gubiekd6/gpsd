@@ -171,6 +171,7 @@ static void gpsd_run_device_hook(const int debuglevel,
 
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
+    extern const struct gps_type_t nmea;
     /*@-mustfreeonly@*/
     const struct gps_type_t **dp;
     bool first_sync = (session->device_type != NULL);
@@ -196,7 +197,8 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 		session->device_type->event_hook(session,
 						 event_driver_switch);
 #ifdef RECONFIGURE_ENABLE
-	    if (CONTROLLABLE(session->device_type))
+	    if (CONTROLLABLE(session->device_type) 
+		|| (session->packet.type == NMEA_PACKET) && session->device_type != &nmea)
 		session->last_controller = session->device_type;
 #endif /* RECONFIGURE_ENABLE */
 	    /* clients should be notified */
