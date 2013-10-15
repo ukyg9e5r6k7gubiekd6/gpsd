@@ -29,7 +29,9 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 {
     const struct gps_type_t **dp;
 
-    if (session->packet.type == COMMENT_PACKET) {
+    if (session->packet.type == BAD_PACKET)
+	return 0;
+    else if (session->packet.type == COMMENT_PACKET) {
 	gpsd_set_century(session);
 	return 0;
 #ifdef NMEA_ENABLE
@@ -65,17 +67,9 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	return st;
 #endif /* NMEA_ENABLE */
     } else {
-	/*
-	 * Fallback case, we shouldn't actually ever get here.  If
-	 * we do, it means the driver-switching logic in gpsd_poll()
-	 * is leaky.
-	 */
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    if (session->packet.type == (*dp)->packet_type) {
-		(void)gpsd_switch_driver(session, (*dp)->type_name);
-		return (*dp)->parse_packet(session);
-	    }
-	}
+	gpsd_report(session->context->debug, LOG_SHOUT,
+		    "packet type %d fell through (should never happen): %s.\n",
+		    session->packet.type, gpsd_prettydump(session));
 	return 0;
     }
 }
