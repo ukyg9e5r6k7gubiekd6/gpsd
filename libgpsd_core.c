@@ -37,14 +37,6 @@
 static pthread_mutex_t report_mutex;
 #endif /* PPS_ENABLE */
 
-/*
- * True if a device type is non-null and has control methods.
- */
-#define CONTROLLABLE(dp)	(((dp) != NULL) && \
-				 ((dp)->speed_switcher != NULL		\
-				  || (dp)->mode_switcher != NULL	\
-				  || (dp)->rate_switcher != NULL))
-
 static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
     const char *sp;
@@ -197,9 +189,8 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 		session->device_type->event_hook(session,
 						 event_driver_switch);
 #ifdef RECONFIGURE_ENABLE
-	    if (CONTROLLABLE(session->device_type) 
-		|| (session->packet.type == NMEA_PACKET) && session->device_type != &nmea)
-		session->last_controller = session->device_type;
+	    if (SALIENT(*dp))
+		session->last_controller = *dp;
 #endif /* RECONFIGURE_ENABLE */
 	    /* clients should be notified */
 	    session->notify_clients = true;

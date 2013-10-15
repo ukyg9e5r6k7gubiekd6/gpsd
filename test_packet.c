@@ -326,8 +326,7 @@ static void runon_test(struct map *mp)
 
 static int property_check(void)
 {
-/* does this device have control methods or required initialization strings? */
-#define CONFIGURABLE(d)	(((d)->speed_switcher != NULL) || ((d)->mode_switcher != NULL)  || ((d)->rate_switcher != NULL))
+    extern const struct gps_type_t nmea;
     const struct gps_type_t **dp;
     int status;
 
@@ -336,8 +335,8 @@ static int property_check(void)
 	    continue;
 
 #ifdef RECONFIGURE_ENABLE
-	if (CONFIGURABLE(*dp))
-	    (void)fputs("config\t", stdout);
+	if (CONTROLLABLE(*dp))
+	    (void)fputs("control\t", stdout);
 	else
 	    (void)fputs(".\t", stdout);
 	if ((*dp)->event_hook != NULL)
@@ -347,9 +346,7 @@ static int property_check(void)
 #endif /* RECONFIGURE_ENABLE */
 	if ((*dp)->trigger != NULL)
 	    (void)fputs("trigger\t", stdout);
-	else
-	    (void)fputs(".\t", stdout);
-	if ((*dp)->probe_detect != NULL)
+	else if ((*dp)->probe_detect != NULL)
 	    (void)fputs("probe\t", stdout);
 	else
 	    (void)fputs(".\t", stdout);
@@ -363,6 +360,12 @@ static int property_check(void)
 	    (void)fputs("binary\t", stdout);
 	else
 	    (void)fputs("NMEA\t", stdout);
+#ifdef CONTROLSEND_ENABLE
+	if (SALIENT(*dp))
+	    (void)fputs("salient\t", stdout);
+	else
+	    (void)fputs(".\t", stdout);
+#endif /* CONTROLSEND_ENABLE */
 	(void)puts((*dp)->type_name);
     }
 
@@ -371,7 +374,7 @@ static int property_check(void)
 	if ((*dp)->packet_type == COMMENT_PACKET)
 	    continue;
 #ifdef CONTROLSEND_ENABLE
-	if (CONFIGURABLE(*dp) && (*dp)->control_send == NULL) {
+	if (CONTROLLABLE(*dp) && (*dp)->control_send == NULL) {
 	    (void)fprintf(stderr, "%s has control methods but no send\n",
 			  (*dp)->type_name);
 	    status = EXIT_FAILURE;
@@ -381,11 +384,15 @@ static int property_check(void)
 			  (*dp)->type_name);
 	    status = EXIT_FAILURE;
 	}
+	if ((*dp)->probe_detect != NULL && (*dp)->trigger != NULL) {
+	    (void)fprintf(stderr, "%s both a probe and a trigger string\n",
+			  (*dp)->type_name);
+	    status = EXIT_FAILURE;
+	}
 #endif /* CONTROLSEND_ENABLE */
     }
 
     return status;
-#undef CONFIGURABLE
 }
 
 int main(int argc, char *argv[])
