@@ -55,10 +55,6 @@ static gps_mask_t oncore_msg_firmware(struct gps_device_t *, unsigned char *,
  */
 static ssize_t oncore_control_send(struct gps_device_t *, char *, size_t);
 static void oncore_event_hook(struct gps_device_t *, event_t);
-#ifdef RECONFIGURE_ENABLE
-static bool oncore_set_speed(struct gps_device_t *, speed_t, char, int);
-static void oncore_set_mode(struct gps_device_t *, int);
-#endif /* RECONFIGURE_ENABLE */
 
 /*
  * Decode the navigation solution message
@@ -470,39 +466,6 @@ static double oncore_ntp_offset(struct gps_device_t *session UNUSED)
 }
 #endif /* NTPSHM_ENABLE */
 
-#ifdef RECONFIGURE_ENABLE
-static bool oncore_set_speed(struct gps_device_t *session UNUSED,
-			     speed_t speed UNUSED,
-			     char parity UNUSED, int stopbits UNUSED)
-{
-    /*
-     * Set port operating mode, speed, parity, stopbits etc. here.
-     * Note: parity is passed as 'N'/'E'/'O', but you should program
-     * defensively and allow 0/1/2 as well.
-     */
-    return false;
-}
-
-/*
- * Switch between NMEA and binary mode, if supported
- */
-static void oncore_set_mode(struct gps_device_t *session, int mode)
-{
-    if (mode == MODE_NMEA) {
-	/* send the mode switch control string */
-	/* oncore_to_nmea(session->gpsdata.gps_fd,session->gpsdata.baudrate); */
-	/*
-	 * Anticipatory switching works only when the packet getter is the
-	 * generic one and it recognizes packets of the type this driver
-	 * is expecting.  This should be the normal case.
-	 */
-	(void)gpsd_switch_driver(session, "Generic NMEA");
-    } else {
-	session->back_to_nmea = false;
-    }
-}
-#endif /* RECONFIGURE_ENABLE */
-
 static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 {
     if (session->packet.type == ONCORE_PACKET) {
@@ -531,8 +494,8 @@ const struct gps_type_t oncore_binary = {
     .rtcm_writer      = gpsd_write,		/* device accepts RTCM */
     .event_hook     = oncore_event_hook,	/* lifetime event hook */
 #ifdef RECONFIGURE_ENABLE
-    .speed_switcher   = oncore_set_speed,	/* no speed setter */
-    .mode_switcher    = oncore_set_mode,	/* no mode setter */
+    .speed_switcher   = NULL,			/* no speed setter */
+    .mode_switcher    = NULL,			/* no mode setter */
     .rate_switcher    = NULL,			/* no speed setter */
     .min_cycle        = 1,			/* 1Hz */
 #endif /* RECONFIGURE_ENABLE */
