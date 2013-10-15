@@ -485,7 +485,7 @@ const struct gps_type_t oncore_binary = {
 
     .type_name        = "Oncore binary",	/* Full name of type */
     .packet_type      = ONCORE_PACKET,		/* numeric packet type */
-    .flags	      = DRIVER_NOFLAGS,		/* no flags set */
+    .flags	      = DRIVER_STICKY,		/* remember this */
     .trigger          = NULL,			/* identifying response */
     .channels         = 12,			/* device channel count */
     .probe_detect     = NULL,			/* no probe */

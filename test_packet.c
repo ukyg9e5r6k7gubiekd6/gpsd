@@ -361,8 +361,8 @@ static int property_check(void)
 	else
 	    (void)fputs("NMEA\t", stdout);
 #ifdef CONTROLSEND_ENABLE
-	if (SALIENT(*dp))
-	    (void)fputs("salient\t", stdout);
+	if (STICKY(*dp))
+	    (void)fputs("sticky\t", stdout);
 	else
 	    (void)fputs(".\t", stdout);
 #endif /* CONTROLSEND_ENABLE */

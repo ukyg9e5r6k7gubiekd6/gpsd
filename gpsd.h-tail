@@ -296,6 +296,7 @@ typedef enum {
 
 typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;
 #define DRIVER_NOFLAGS	0x00000000u
+#define DRIVER_STICKY	0x00000001u
 
 /*
  * True if a device type is non-null and has control methods.
@@ -304,10 +305,11 @@ typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;
 				 ((dp)->speed_switcher != NULL		\
 				  || (dp)->mode_switcher != NULL	\
 				  || (dp)->rate_switcher != NULL))
+
 /*
- * True if a driver is salient and selection of it should be sticky. 
+ * True if a driver selection of it should be sticky. 
  */
-#define SALIENT(dp)		(CONTROLLABLE(dp) || (((dp)->packet_type == NMEA_PACKET) && strcmp((dp)->type_name, "Generic NMEA") != 0))
+#define STICKY(dp)		(((dp)->flags & DRIVER_STICKY) != 0)
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */

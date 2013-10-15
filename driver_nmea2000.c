@@ -1296,7 +1296,7 @@ void nmea2000_close(struct gps_device_t *session)
 const struct gps_type_t nmea2000 = {
     .type_name      = "NMEA2000",       /* full name of type */
     .packet_type    = NMEA2000_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no rollover or other flags */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = NULL,		/* detect their main sentence */
     .channels       = 12,		/* not an actual GPS at all */
     .probe_detect   = NULL,

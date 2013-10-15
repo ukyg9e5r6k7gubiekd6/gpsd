@@ -612,7 +612,7 @@ const struct gps_type_t geostar_binary =
 {
     .type_name      = "GeoStar binary",	/* full name of type */
     .packet_type    = GEOSTAR_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = NULL,		/* no trigger */
     .channels       = GEOSTAR_CHANNELS,	/* consumer-grade GPS/GLONASS */
     .probe_detect   = geostar_detect,	/* probe for device */

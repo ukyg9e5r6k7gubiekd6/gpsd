@@ -189,7 +189,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 		session->device_type->event_hook(session,
 						 event_driver_switch);
 #ifdef RECONFIGURE_ENABLE
-	    if (SALIENT(*dp))
+	    if (STICKY(*dp))
 		session->last_controller = *dp;
 #endif /* RECONFIGURE_ENABLE */
 	    /* clients should be notified */

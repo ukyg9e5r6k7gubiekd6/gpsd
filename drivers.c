@@ -244,7 +244,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t nmea = {
     .type_name      = "Generic NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_NOFLAGS,	/* remember this */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 12,		/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */
@@ -349,7 +349,7 @@ static void garmin_nmea_event_hook(struct gps_device_t *session,
 const struct gps_type_t garmin = {
     .type_name      = "Garmin NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = "$PGRMC,",	/* Garmin private */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -411,7 +411,7 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = "$PASHR,RID,",	/* Ashtech receivers respond thus */
     .channels       = 24,		/* not used, GG24 has 24 channels */
     .probe_detect   = NULL,		/* no probe */
@@ -462,7 +462,7 @@ static void fv18_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = "$PFEC,GPint,",	/* FV18s should echo the probe */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -516,7 +516,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = "$PFEC,GPssd",	/* GPSclock should return this */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -571,7 +571,7 @@ static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 static const struct gps_type_t tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
     .packet_type   = NMEA_PACKET,		/* lexer packet type */
-    .flags	   = DRIVER_NOFLAGS,		/* no rollover or other flags */
+    .flags	   = DRIVER_STICKY,		/* no rollover or other flags */
     .trigger       ="ASTRAL",			/* tells us to switch */
     .channels      = 12,			/* consumer-grade GPS */
     .probe_detect  = NULL,			/* no probe */
@@ -622,7 +622,7 @@ static void earthmate_event_hook(struct gps_device_t *session, event_t event)
 static const struct gps_type_t earthmate = {
     .type_name     = "Pre-2003 Delorme EarthMate",
     .packet_type   = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	   = DRIVER_NOFLAGS,		/* no rollover or other flags */
+    .flags	   = DRIVER_STICKY,		/* no rollover or other flags */
     .trigger       = "EARTHA",			/* Earthmate trigger string */
     .channels      = 12,			/* not used by NMEA parser */
     .probe_detect  = NULL,			/* no probe */
@@ -745,7 +745,7 @@ static void tnt_event_hook(struct gps_device_t *session, event_t event)
 const struct gps_type_t trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = "$PTNTHTM",	/* their proprietary sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,		/* no probe in run mode */
@@ -823,7 +823,7 @@ static void oceanserver_event_hook(struct gps_device_t *session,
 static const struct gps_type_t oceanServer = {
     .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no rollover or other flags */
+    .flags	    = DRIVER_STICKY,	/* no rollover or other flags */
     .trigger	    = "$OHPR,",		/* detect their main sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,
@@ -890,7 +890,7 @@ static void fury_event_hook(struct gps_device_t *session, event_t event)
 static const struct gps_type_t fury = {
     .type_name      = "Jackson Labs Fury", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no rollover or other flags */
+    .flags	    = DRIVER_STICKY,	/* no rollover or other flags */
     .trigger	    = NULL,		/* detect their main sentence */
     .channels       = 0,		/* not an actual GPS at all */
     .probe_detect   = NULL,
@@ -1113,7 +1113,7 @@ static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 const struct gps_type_t mtk3301 = {
     .type_name      = "MTK-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = "$PMTK705,",	/* firmware release name and version */
     .channels       = 12,		/* not used by this driver */
     .probe_detect   = NULL,		/* no probe */
@@ -1445,7 +1445,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
 const struct gps_type_t json_passthrough = {
     .type_name      = "JSON slave driver",	/* full name of type */
     .packet_type    = JSON_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_NOFLAGS,	/* no flags set */
+    .flags	    = DRIVER_NOFLAGS,	/* don't remember this */
     .trigger	    = NULL,		/* it's the default */
     .channels       = 0,		/* not used */
     .probe_detect   = NULL,		/* no probe */
