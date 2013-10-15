@@ -307,7 +307,7 @@ typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;
 /*
  * True if a driver is salient and selection of it should be sticky. 
  */
-#define SALIENT(dp)		(CONTROLLABLE(dp))
+#define SALIENT(dp)		(CONTROLLABLE(dp) || (((dp)->packet_type == NMEA_PACKET) && strcmp((dp)->type_name, "Generic NMEA") != 0))
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
