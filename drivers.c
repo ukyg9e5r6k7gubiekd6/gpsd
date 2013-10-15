@@ -627,7 +627,7 @@ static const struct gps_type_t earthmate = {
     .channels      = 12,			/* not used by NMEA parser */
     .probe_detect  = NULL,			/* no probe */
     .get_packet    = generic_get,		/* how to get a packet */
-    .parse_packet  = generic_parse_input,		/* how to interpret a packet */
+    .parse_packet  = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
     .event_hook    = earthmate_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
@@ -637,7 +637,7 @@ static const struct gps_type_t earthmate = {
     .min_cycle     = 1,				/* no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
-    .control_send  = nmea_write,	/* how to send control strings */
+    .control_send  = nmea_write,	/* never actually used. */
 #endif /* CONTROLSEND_ENABLE */
 #ifdef NTPSHM_ENABLE
     .ntp_offset     = NULL,		/* no method for NTP fudge factor */
