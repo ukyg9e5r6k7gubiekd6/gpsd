@@ -362,52 +362,18 @@ static void handle1108(struct gps_device_t *session)
 
 static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 {
-    char buf[BUFSIZ];
-    int i;
     unsigned int id =
 	(unsigned int)((session->packet.outbuffer[3] << 8) |
 		       session->packet.outbuffer[2]);
-
-    if (session->packet.type != ZODIAC_PACKET) {
-	const struct gps_type_t **dp;
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "zodiac_analyze packet type %d\n",
-		    session->packet.type);
-	// Wrong packet type ?
-	// Maybe find a trigger just in case it's an Earthmate
-	gpsd_report(session->context->debug, LOG_RAW + 4,
-		    "Is this a trigger: %s ?\n",
-		    (char *)session->packet.outbuffer);
-
-	for (dp = gpsd_drivers; *dp; dp++) {
-	    char *trigger = (*dp)->trigger;
-
-	    if (trigger != NULL
-		&& strncmp((char *)session->packet.outbuffer, trigger,
-			   strlen(trigger)) == 0
-		&& isatty(session->gpsdata.gps_fd) != 0) {
-		gpsd_report(session->context->debug, LOG_PROG, "found %s.\n", trigger);
-
-		(void)gpsd_switch_driver(session, (*dp)->type_name);
-		return 0;
-	    }
-	}
-	return 0;
-    }
-
-    buf[0] = '\0';
-    for (i = 0; i < (int)session->packet.outbuflen; i++)
-	(void)snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
-		       "%02x", (unsigned int)session->packet.outbuffer[i]);
     gpsd_report(session->context->debug, LOG_RAW,
 		"Raw Zodiac packet type %d length %zd: %s\n",
-		id, session->packet.outbuflen, buf);
+		id, session->packet.outbuflen, gpsd_prettydump(session));
 
     if (session->packet.outbuflen < 10)
 	return 0;
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%u",
-		   id);
+    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), 
+		   "%u", id);
 
     /*
      * Normal cycle for these devices is 1001 1002.
