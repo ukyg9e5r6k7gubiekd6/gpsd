@@ -1286,13 +1286,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 #ifdef RECONFIGURE_ENABLE
 	/*
-	 * We may want to revert to the last driver that had control methods.
-	 * What this accomplishes is that if we've just processed something
-	 * like AIVDM, but a driver with control methods had been active
-	 * before that, we keep the information about the control methods.
+	 * We may want to revert to the last driver that was marked
+	 * sticky.  What this accomplishes is that if we've just
+	 * processed something like AIVDM, but a driver with control
+	 * methods or an event hook had been active before that, we
+	 * keep the information about those capabilities.
 	 */
 	/*@-mustfreeonly@*/
-	if (!CONTROLLABLE(session->device_type)
+	if (!STICKY(session->device_type)
 	    && session->last_controller != NULL)
 	{
 	    session->device_type = session->last_controller;

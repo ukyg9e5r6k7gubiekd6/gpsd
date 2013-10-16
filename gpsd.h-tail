@@ -309,7 +309,7 @@ typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;
 /*
  * True if a driver selection of it should be sticky. 
  */
-#define STICKY(dp)		(((dp)->flags & DRIVER_STICKY) != 0)
+#define STICKY(dp)		((dp) != NULL && ((dp)->flags & DRIVER_STICKY) != 0)
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
