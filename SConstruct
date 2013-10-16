@@ -1759,6 +1759,13 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     if "packaging/rpm/gpsd.spec" not in distfiles:
         distfiles.append("packaging/rpm/gpsd.spec")
 
+    # How to build a zip file.
+    zip = env.Command('zip', distfiles, [
+        '@zip gpsd-${VERSION}.zip $SOURCES',
+        '@ls -l gpsd-${VERSION}.zip',
+        ])
+    env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
+
     # How to build a tarball.
     tarball = env.Command('tarball', distfiles, [
         '@tar --transform "s:^:gpsd-${VERSION}/:" -czf gpsd-${VERSION}.tar.gz $SOURCES',
