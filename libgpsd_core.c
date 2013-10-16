@@ -1171,16 +1171,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    /* FALL THROUGH */
 	} else if (session->packet.type > COMMENT_PACKET) {
 	    /*
-	     * Only switch drivers if we don't already have one with the
-	     * matching packet type *and* we're not seeing an NMEA packet.
-	     * The reason for the second guard is that some GPSes with
-	     * binary protocols (notably SiRF and uBlox) also have a
-	     * non-native NMEA mode.  Without this guard, the code
-	     * would forget the binary driver identification.
+	     * Always change drivers on a new packet type.  If thge previous
+	     * driver type was sticky and this one isn't, we'll revert after
+	     * processing the packet.
 	     */
 	    identified = (session->device_type == NULL)
-		|| (session->packet.type != session->device_type->packet_type &&
-		    session->packet.type != NMEA_PACKET);
+		|| (session->packet.type != session->device_type->packet_type);
 	    /*@-nullderef@*/
 	    if (identified) {
 		const struct gps_type_t **dp;
