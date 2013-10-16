@@ -116,7 +116,7 @@ const struct gps_type_t unknown = {
  * ship NMEA subtype probe strings to a device until we've seen at
  * least one NMEA packet.  This avoids spamming devices that might
  * actually be USB modems or other things in USB device class FF that
- * just happen to have one of 'our' adaptor chips in pront of them.
+ * just happen to have one of 'our' adaptor chips in front of them.
  *
  **************************************************************************/
 
