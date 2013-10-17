@@ -510,6 +510,11 @@ static int init_kernel_pps(struct gps_device_t *session) {
     (void)snprintf(path, sizeof(path), "/dev/pps%c", pps_num);
 
     /* root privs are required for this device open */
+    if ( 0 != getuid() ) {
+	gpsd_report(session->context->debug, LOG_INF,
+		    "KPPS only works as root \n");
+    	return -1;
+    }
     int ret = open(path, O_RDWR);
     if ( 0 > ret ) {
 	gpsd_report(session->context->debug, LOG_INF,
@@ -743,7 +748,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* HAVE_SYS_TIMEPPS_H */
 
 #if defined(TIOCMIWAIT)
-	ok = false;
+	ok = false;  /* FIXME, this steps on ok = TRUE just above */
 	log = NULL;
 
 	/*@ +ignoresigns */
