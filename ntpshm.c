@@ -31,6 +31,11 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#if defined(HAVE_SYS_TIMEPPS_H)
+static pthread_mutex_t initialization_mutex;
+static int uninitialized_pps_thread_count;
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
+
 #define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
 #define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */
 
@@ -523,6 +528,14 @@ static int init_kernel_pps(struct gps_device_t *session) {
     }
     /* root privs are not required past this point */
 
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_lock(&initialization_mutex);
+    /* +unrecog */
+    --uninitialized_pps_thread_count;
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_unlock(&initialization_mutex);
+    /* +unrecog */
+
     if ( 0 > time_pps_create(ret, &session->kernelpps_handle )) {
 	gpsd_report(session->context->debug, LOG_INF,
 		    "KPPS time_pps_create(%d) failed: %s\n",
@@ -552,6 +565,29 @@ static int init_kernel_pps(struct gps_device_t *session) {
         }
     }
     return 0;
+}
+
+void gpsd_await_pps_initialization(void)
+/* wait for all threads seeking kernel PPS to open /dev/pps devuces */
+{
+    /* wait only this many sec if some thread croaked too early */
+    static int dropdead = 10;
+
+    gpsd_report(session->context->debug, LOG_WARN,
+		"waiting on KPPS initalization...\n");
+
+    while (dropdead > 0)
+    {
+	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_lock(&initialization_mutex);
+	/* +unrecog */
+	if (uninitialized_pps_thread_count == 0)
+	    return
+	/*@ -unrecog (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_unlock(&initialization_mutex);
+	/* +unrecog */
+	usleep(1000)
+    }
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
@@ -976,6 +1012,15 @@ static void pps_thread_activate(struct gps_device_t *session)
     pthread_t pt;
     if (session->shmTimeP >= 0) {
 	gpsd_report(session->context->debug, LOG_PROG, "PPS thread launched\n");
+#if defined(HAVE_SYS_TIMEPPS_H)
+	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_lock(&initialization_mutex);
+	/* +unrecog */
+	++uninitialized_pps_thread_count;
+	/*@ -unrecog (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_unlock(&initialization_mutex);
+	/* +unrecog */
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 	/*@-compdef -nullpass@*/
 	(void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
         /*@+compdef +nullpass@*/
