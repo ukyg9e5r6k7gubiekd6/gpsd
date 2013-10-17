@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <syslog.h>
@@ -163,7 +164,6 @@ static void gpsd_run_device_hook(const int debuglevel,
 
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
-    extern const struct gps_type_t nmea;
     /*@-mustfreeonly@*/
     const struct gps_type_t **dp;
     bool first_sync = (session->device_type != NULL);
@@ -1476,7 +1476,7 @@ int gpsd_multipoll(const bool data_ready,
 		break;
 
 	    /* conditional prevents mask dumper from eating CPU */
-	    if (device->context->debug >= LOG_DATA)
+	    if (device->context->debug >= LOG_DATA) {
 		if (device->packet.type == BAD_PACKET)
 		    gpsd_report(device->context->debug, LOG_DATA,
 				"packet with bad checksum from %s\n",
@@ -1487,6 +1487,7 @@ int gpsd_multipoll(const bool data_ready,
 				device->packet.type,
 				device->gpsdata.dev.path,
 				gps_maskdump(device->gpsdata.set));
+	    }
 
 
 	    /* handle data contained in this packet */

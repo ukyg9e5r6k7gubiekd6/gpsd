@@ -751,9 +751,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
      * change the selection of the current device driver; that's done
      * within gpsd_multipoll() before this hook is called.
      */
-    if (session.packet.type != last_type) {
-	last_type = session.packet.type;
-	if (!switch_type(session.device_type))
+    if (device->packet.type != last_type) {
+	last_type = device->packet.type;
+	if (!switch_type(device->device_type))
 	    longjmp(terminate, TERM_DRIVER_SWITCH);
 	else {
 	    refresh_statwin();
@@ -762,25 +762,25 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     }
 
     if (active != NULL
-	&& session.packet.outbuflen > 0
+	&& device->packet.outbuflen > 0
 	&& (*active)->update != NULL)
 	(*active)->update();
     if (devicewin != NULL)
 	(void)wnoutrefresh(devicewin);
 
-    (void)wprintw(packetwin, "(%d) ", session.packet.outbuflen);
-    packet_dump((char *)session.packet.outbuffer,
-		session.packet.outbuflen);
+    (void)wprintw(packetwin, "(%d) ", device->packet.outbuflen);
+    packet_dump((char *)device->packet.outbuffer,
+		device->packet.outbuflen);
     if (packetwin != NULL)
 	(void)wnoutrefresh(packetwin);
 
     (void)doupdate();
  
-    if (logfile != NULL && session.packet.outbuflen > 0) {
+    if (logfile != NULL && device->packet.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
         assert(fwrite
-               (session.packet.outbuffer, sizeof(char),
-                session.packet.outbuflen, logfile) >= 1);
+               (device->packet.outbuffer, sizeof(char),
+                device->packet.outbuflen, logfile) >= 1);
         /*@ +shiftimplementation +sefparams -charint @*/
     }
 }

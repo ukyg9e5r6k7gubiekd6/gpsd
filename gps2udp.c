@@ -457,7 +457,7 @@ int main(int argc, char **argv)
 		    // strtok break original string
 		    (void)strncpy((char *)packet, buffer, sizeof(packet));
 		    for (j=0; j<MAX_INFO; j++) {
-			info[j] = strsep((char **)&adrpkt, ",");
+			info[j] = (unsigned char *)strsep((char **)&adrpkt, ",");
 		    }
 
 		    for(i=0 ; i < (int)strlen((char *)info[5]); i++)  {

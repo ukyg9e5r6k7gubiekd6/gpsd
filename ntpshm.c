@@ -580,13 +580,13 @@ static int init_kernel_pps(struct gps_device_t *session) {
     return 0;
 }
 
-void gpsd_await_pps_initialization(void)
+void gpsd_await_pps_initialization(struct gps_context_t *context)
 /* wait for all threads seeking kernel PPS to open /dev/pps devices */
 {
     /* wait only this many intervals if some thread croaked too early */
     static int dropdead = 100;
 
-    gpsd_report(session->context->debug, LOG_WARN,
+    gpsd_report(context->debug, LOG_WARN,
 		"waiting on KPPS initalization...\n");
 
     while (dropdead > 0)
@@ -595,14 +595,14 @@ void gpsd_await_pps_initialization(void)
 	(void)pthread_mutex_lock(&initialization_mutex);
 	/* +unrecog */
 	if (uninitialized_pps_thread_count == 0)
-	    return
+	    return;
 	/*@ -unrecog (splint has no pthread declarations as yet) @*/
 	(void)pthread_mutex_unlock(&initialization_mutex);
 	/* +unrecog */
-	usleep(1000)
+	usleep(1000);
     }
 
-    gpsd_report(session->context->debug, LOG_WARN,
+    gpsd_report(context->debug, LOG_WARN,
 		"wait for KPPS initalization timed out\n");
 
 }
