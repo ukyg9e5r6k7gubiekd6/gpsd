@@ -689,6 +689,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 /*@+noeffect@*/
 
+	/* ok and log used by KPPS and TIOMCWAIT */
+	ok = false;  
+	log = NULL;  
 #if defined(HAVE_SYS_TIMEPPS_H)
         if ( 0 <= session->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
@@ -748,8 +751,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* HAVE_SYS_TIMEPPS_H */
 
 #if defined(TIOCMIWAIT)
-	ok = false;  /* FIXME, this steps on ok = TRUE just above */
-	log = NULL;
 
 	/*@ +ignoresigns */
 	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0) {
