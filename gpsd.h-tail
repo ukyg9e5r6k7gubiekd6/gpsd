@@ -418,6 +418,8 @@ struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     /*@relnull@*/const struct gps_type_t *device_type;
+    int driver_index;		/* numeric index of current driver */
+    int drivers_identified;	/* bitmask; what drivers have we seen? */
 #ifdef RECONFIGURE_ENABLE
     /*@relnull@*/const struct gps_type_t *last_controller;
 #endif /* RECONFIGURE_ENABLE */

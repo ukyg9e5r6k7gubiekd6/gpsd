@@ -167,6 +167,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     /*@-mustfreeonly@*/
     const struct gps_type_t **dp;
     bool first_sync = (session->device_type != NULL);
+    int i;
 
     if (first_sync && strcmp(session->device_type->type_name, type_name) == 0)
 	return 0;
@@ -174,13 +175,14 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     gpsd_report(session->context->debug, LOG_PROG,
 		"switch_driver(%s) called...\n", type_name);
     /*@ -compmempass @*/
-    for (dp = gpsd_drivers; *dp; dp++)
+    for (dp = gpsd_drivers, i = 0; *dp; dp++, i++)
 	if (strcmp((*dp)->type_name, type_name) == 0) {
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"selecting %s driver...\n",
 			(*dp)->type_name);
 	    gpsd_assert_sync(session);
 	    /*@i@*/ session->device_type = *dp;
+	    session->driver_index = i;
 #ifdef RECONFIGURE_ENABLE
 	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
 #endif /* RECONFIGURE_ENABLE */
@@ -1226,13 +1228,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path);
 
 	/* track the packet count since achieving sync on the device */
-	if (driver_change) {
+	if (driver_change 
+		&& (session->drivers_identified & (1 << session->driver_index)) == 0) {
 	    speed_t speed = gpsd_get_speed(session);
 
 	    /*@-nullderef@*/
 	    /* coverity[var_deref_op] */
 	    gpsd_report(session->context->debug, LOG_INF,
-			"%s identified as type %s (%f sec @ %dbps)\n",
+			"%s identified as type %s, %f sec @ %dbps\n",
 			session->gpsdata.dev.path,
 			session->device_type->type_name,
 			timestamp() - session->opentime,
@@ -1243,6 +1246,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		&& session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session, event_identified);
 	    session->packet.counter = 0;
+	    /* mark the fact that this driver has been seen */
+	    session->drivers_identified |= (1 << session->driver_index);
 	} else
 	    session->packet.counter++;
 
