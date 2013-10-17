@@ -3,15 +3,20 @@
  * struct shmTime and getShmTime from file in the xntp distribution:
  *	sht.c - Testprogram for shared memory refclock
  *
- * Yes, this file is something of a swamp.  It helps to know that there are
- * two PPS delivery methods in play. One, kernel PPS (KPPS), is a Linux-only
- * feature supplied through special /dev/pps devices. The other, serial PPS,
- * uses the TIOCMIWAIT ioctl to explicitly watch for PPS on serial lines. KPPS
- * requires root permissions; serial PPS does not.
+ * Yes, this file is something of a swamp.  If you are not good at
+ * threads do not touch this file.  It helps to know that there are
+ * two PPS measurement methods in play. One, kernel PPS (KPPS), is
+ * RFCRFC2783 and available on many OS and supplied through special
+ * /dev/pps devices. The other, plain PPS, uses the TIOCMIWAIT ioctl
+ * to explicitly watch for PPS on serial lines. KPPS requires root
+ * permissions for intialization; plain PPS does not.  Plain PPS loses
+ * some functionality when not initialized as root.  So when running PPS
+ * you should start gpsd as root and use the -n option so initialization
+ * is completed before gpsd drops root.  If gpsd gets disconnnected
+ * from your gpsd you should restart gpsd for acceptable PPS performance.
  *
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- */
+ * This file is Copyright (c) 2010 by the GPSD project BSD terms apply:
+ *see the file COPYING in the distribution root for details. /
 
 #include <string.h>
 #include <libgen.h>
@@ -398,7 +403,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 
 /*
  * Warning: This is a potential portability problem.
- * It's needed so that TIOCMIWAIT will be defined and the serial-PPS
+ * It's needed so that TIOCMIWAIT will be defined and the plain PPS
  * code will work, but it's not a SuS/POSIX standard header.  We're
  * going to include it unconditionally here because we expect both
  * Linux and BSD to have it and we want compilation to break with
