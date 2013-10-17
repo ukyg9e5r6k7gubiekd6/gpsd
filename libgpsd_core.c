@@ -1477,15 +1477,21 @@ int gpsd_multipoll(const bool data_ready,
 
 	    /* conditional prevents mask dumper from eating CPU */
 	    if (device->context->debug >= LOG_DATA)
-		gpsd_report(device->context->debug, LOG_DATA,
-			    "packet type %d from %s with %s\n",
-			    device->packet.type,
-			    device->gpsdata.dev.path,
-			    gps_maskdump(device->gpsdata.set));
+		if (device->packet.type == BAD_PACKET)
+		    gpsd_report(device->context->debug, LOG_DATA,
+				"packet with bad checksum from %s\n",
+				device->gpsdata.dev.path);
+		else
+		    gpsd_report(device->context->debug, LOG_DATA,
+				"packet type %d from %s with %s\n",
+				device->packet.type,
+				device->gpsdata.dev.path,
+				gps_maskdump(device->gpsdata.set));
 
 
 	    /* handle data contained in this packet */
-	    /*@i1@*/handler(device, changed);
+	    if (device->packet.type != BAD_PACKET)
+		/*@i1@*/handler(device, changed);
 	}
     }
     else if (device->reawake>0 && timestamp()>device->reawake) {
