@@ -655,6 +655,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      */
     while (!gpsd_ppsmonitor_stop) {
 	bool ok = false;
+	bool ok_kpps = false;
 	char *log = NULL;
 
 #if defined(TIOCMIWAIT)
@@ -744,8 +745,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)tv_kpps.tv_sec,
 		    (unsigned long)tv_kpps.tv_nsec);
 		pulse_kpps[edge_kpps] = tv_kpps;
-		ok = true;
-		log = "KPPS";
+		if (999000 < cycle_kpps && 1001000 > cycle_kpps) {
+		    /* KPPS passes a basic sanity check */
+		    ok_kpps = true;
+		    log = "KPPS";
+		}
 	    }
 	}
 #endif /* HAVE_SYS_TIMEPPS_H */
@@ -898,7 +902,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    sample.leap = session->context->leap_notify;
 	    sample.magic = SOCK_MAGIC;
 #if defined(HAVE_SYS_TIMEPPS_H)
-            if ( 0 <= session->kernelpps_handle) {
+            if ( 0 <= session->kernelpps_handle && ok_kpps) {
+		/* use KPPS time */
 		/* pick the right edge */
 		if ( edge_kpps ) {
 		    ts = pi.assert_timestamp; /* structure copy */
