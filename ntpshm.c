@@ -7,7 +7,7 @@
  * two PPS delivery methods in play. One, kernel PPS (KPPS), is a Linux-only
  * feature supplied through special /dev/pps devices. The other, serial PPS,
  * uses the TIOCMIWAIT ioctl to explicitly watch for PPS on serial lines. KPPS
- * requires roor permissions; serial PPS does not.
+ * requires root permissions; serial PPS does not.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -39,7 +39,7 @@
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 static pthread_mutex_t initialization_mutex;
-static int uninitialized_pps_thread_count;
+static volatile int uninitialized_pps_thread_count;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
 #define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
@@ -86,7 +86,7 @@ struct shmTime
  *                   for synchronisation.
  *
  * As gpsd can be started as both root and non-root, this behaviour is
- * mimiced by:
+ * mimicked by:
  *
  * Started as root: do as ntpd when attaching (creating) the segments.
  * (In contrast to ntpd, which only attaches (creates) configured
@@ -103,7 +103,9 @@ struct shmTime
  * will be delivered on segments 2 and 3.
  *
  * to debug, try looking at the live segments this way
+ *
  *  ipcs -m
+ * 
  * results  should look like this:
  * ------ Shared Memory Segments --------
  *  key        shmid      owner      perms      bytes      nattch     status
