@@ -3,6 +3,12 @@
  * struct shmTime and getShmTime from file in the xntp distribution:
  *	sht.c - Testprogram for shared memory refclock
  *
+ * Yes, this file is something of a swamp.  It helps to know that there are
+ * two PPS delivery methods in play. One, kernel PPS (KPPS), is a Linux-only
+ * feature supplied through special /dev/pps devices. The other, serial PPS,
+ * uses the TIOCMIWAIT ioctl to explicitly watch for PPS on serial lines. KPPS
+ * requires roor permissions; serial PPS does not.
+ *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
@@ -394,7 +400,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
  * code will work, but it's not a SuS/POSIX standard header.  We're
  * going to include it unconditionally here because we expect both
  * Linux and BSD to have it and we want compilation to break with
- * an audible snapping sound.
+ * an audible snapping sound if it's not present.
  */
 #include <sys/ioctl.h>
 
