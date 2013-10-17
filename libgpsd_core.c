@@ -194,8 +194,6 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 	    if (STICKY(*dp))
 		session->last_controller = *dp;
 #endif /* RECONFIGURE_ENABLE */
-	    /* clients should be notified */
-	    session->notify_clients = true;
 	    return 1;
 	}
     gpsd_report(session->context->debug, LOG_ERROR, "invalid GPS type \"%s\".\n", type_name);
@@ -1246,6 +1244,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		&& session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session, event_identified);
 	    session->packet.counter = 0;
+
+	    /* let clients know about this. */
+	    received |= DRIVER_IS;
+
 	    /* mark the fact that this driver has been seen */
 	    session->drivers_identified |= (1 << session->driver_index);
 	} else
@@ -1255,17 +1257,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->device_type != NULL
 	    && session->device_type->event_hook != NULL)
 	    session->device_type->event_hook(session, event_configure);
-
-	/*
-	 * If this is the first time we've achieved sync on this
-	 * device, or the driver type has changed for any other
-	 * reason, that's a significant event that the caller needs to
-	 * know about.
-	 */
-	if (driver_change || session->notify_clients) {
-	    session->notify_clients = false;
-	    received |= DRIVER_IS;
-	}
 
 	/*
 	 * The guard looks superfluous, but it keeps the rather expensive

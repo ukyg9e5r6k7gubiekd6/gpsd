@@ -463,7 +463,6 @@ struct gps_device_t {
     size_t msgbuflen;
     int observed;			/* which packet type`s have we seen? */
     bool cycle_end_reliable;		/* does driver signal REPORT_MASK */
-    bool notify_clients;		/* ship DEVICE notification on poll? */
     int fixcnt;				/* count of fixes from this device */
     struct gps_fix_t newdata;		/* where drivers put their data */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
