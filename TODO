@@ -49,13 +49,6 @@ message 6 and 8 subtypes - specifically, 6/23, 8/21, 8/22, 8/24, and
 
 We'd need machinery to shift a byte array 30 bits left...
 
-**** JSON passthrough for AIS
-
-Roy Barkas wants to be able to pass custom JSON up to GPSD in an
-armored AIS sentence, so all his clients will get it.  See
-http://lists.nongnu.org/archive/html/gpsd-dev/2013-01/msg00022.html
-for the full proposal.
-
 ** Ports
 
 *** Windows port
