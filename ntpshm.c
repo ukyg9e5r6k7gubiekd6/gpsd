@@ -567,7 +567,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
 #endif /* TIOCMIWAIT */
 #if defined(HAVE_SYS_TIMEPPS_H)
-    int kpps_edge = 0;       /* 0 = clear edge, 1 = assert edge */
+    int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
     int cycle_kpps, duration_kpps;
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec tv_kpps;
@@ -705,16 +705,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } else {
 		// find the last edge
 	    	if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
-		    kpps_edge = 1;
+		    edge_kpps = 1;
 		    tv_kpps = pi.assert_timestamp;
 	    	} else if ( pi.assert_timestamp.tv_sec < pi.clear_timestamp.tv_sec ) {
-		    kpps_edge = 0;
+		    edge_kpps = 0;
 		    tv_kpps = pi.clear_timestamp;
 		} else if ( pi.assert_timestamp.tv_nsec > pi.clear_timestamp.tv_nsec ) {
-		    kpps_edge = 1;
+		    edge_kpps = 1;
 		    tv_kpps = pi.assert_timestamp;
 		} else {
-		    kpps_edge = 0;
+		    edge_kpps = 0;
 		    tv_kpps = pi.clear_timestamp;
 		}
 		gpsd_report(session->context->debug, LOG_PROG,
@@ -728,11 +728,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    pi.clear_sequence);
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "KPPS data: using %s\n",
-			    kpps_edge ? "assert" : "clear");
+			    edge_kpps ? "assert" : "clear");
 
 #define timediff_kpps(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+((x.tv_nsec-y.tv_nsec)/1000))
-	        cycle_kpps = timediff_kpps(tv_kpps, pulse_kpps[kpps_edge]);
-	        duration_kpps = timediff_kpps(tv_kpps, pulse_kpps[(int)(kpps_edge == 0)]);
+	        cycle_kpps = timediff_kpps(tv_kpps, pulse_kpps[edge_kpps]);
+	        duration_kpps = timediff_kpps(tv_kpps, pulse_kpps[(int)(edge_kpps == 0)]);
 		if ( 3000000 < duration_kpps ) {
 		    // invisible pulse
 		    duration_kpps = 0;
@@ -743,7 +743,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    cycle_kpps, duration_kpps,
 		    (unsigned long)tv_kpps.tv_sec,
 		    (unsigned long)tv_kpps.tv_nsec);
-		pulse_kpps[kpps_edge] = tv_kpps;
+		pulse_kpps[edge_kpps] = tv_kpps;
 		ok = true;
 		log = "KPPS";
 	    }
@@ -900,7 +900,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H)
             if ( 0 <= session->kernelpps_handle) {
 		/* pick the right edge */
-		if ( kpps_edge ) {
+		if ( edge_kpps ) {
 		    ts = pi.assert_timestamp; /* structure copy */
 		} else {
 		    ts = pi.clear_timestamp;  /* structure copy */
