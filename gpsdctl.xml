@@ -45,7 +45,10 @@ client requests a watch.</para>
 
 <para>Two environment variables are
 interpreted. <envar>GPSD_SOCKET</envar> sets the location of the
-control socket.  It defaults to <filename>/var/run/gpsd.sock</filename>.</para>
+control socket.  It defaults to
+<filename>/var/run/gpsd.sock</filename> if the effective user ID of
+this program is root, <filename>/tmp/gpsd.sock</filename>
+otherwise.</para>
 
 <para><envar>GPSD_OPTIONS</envar>
 may be a list of options to be passed to <application>gpsd</application> 

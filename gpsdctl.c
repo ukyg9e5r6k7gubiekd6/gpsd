@@ -21,6 +21,8 @@
 
 #include "gpsd.h"
 
+#define DEFAULT_GPSD_TEST_SOCKET	"/tmp/gpsd.sock"
+
 static char *control_socket = DEFAULT_GPSD_SOCKET;
 static char *gpsd_options = "";
 
@@ -97,6 +99,8 @@ int main(int argc, char *argv[])
 
 	if (sockenv != NULL)
 	    control_socket = sockenv;
+	else if (geteuid() != 0)
+	    control_socket = DEFAULT_GPSD_TEST_SOCKET;
 	if (optenv != NULL)
 	    gpsd_options = optenv;
 
