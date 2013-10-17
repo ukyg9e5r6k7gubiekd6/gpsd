@@ -1051,7 +1051,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
     ssize_t newlen;
-    bool identified = false;
+    bool driver_change = false;
 
     gps_clear_fix(&session->newdata);
 
@@ -1175,10 +1175,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	     * driver type was sticky and this one isn't, we'll revert after
 	     * processing the packet.
 	     */
-	    identified = (session->device_type == NULL)
+	    driver_change = (session->device_type == NULL)
 		|| (session->packet.type != session->device_type->packet_type);
 	    /*@-nullderef@*/
-	    if (identified) {
+	    if (driver_change) {
 		const struct gps_type_t **dp;
 
 		for (dp = gpsd_drivers; *dp; dp++)
@@ -1226,7 +1226,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    session->gpsdata.dev.path);
 
 	/* track the packet count since achieving sync on the device */
-	if (identified) {
+	if (driver_change) {
 	    speed_t speed = gpsd_get_speed(session);
 
 	    /*@-nullderef@*/
@@ -1257,7 +1257,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * reason, that's a significant event that the caller needs to
 	 * know about.
 	 */
-	if (identified || session->notify_clients) {
+	if (driver_change || session->notify_clients) {
 	    session->notify_clients = false;
 	    received |= DRIVER_IS;
 	}
