@@ -5,8 +5,8 @@ v1.43, September 2013
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
 
-// If you are reading the asciidoc mater of this document, the
-// occasional comments led with '//!' are hits for GPSD developer tools
+// If you are reading the asciidoc master of this document, the
+// occasional comments led with '//!' are hints for GPSD developer tools
 // that use the table layouts to generate code.
 
 == Introduction ==
