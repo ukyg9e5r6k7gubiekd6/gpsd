@@ -1989,11 +1989,11 @@ int main(int argc, char *argv[])
      * Wait here until all the thread spawns produced by opening command-line
      * PPS devices no longer need root privileges.
      */
-    gpsd_await_pps_initialization()
+    gpsd_await_pps_initialization();
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
     /* drop privileges */
-    if (getuid() == 0) {
+    if (0 == getuid()) {
 	struct passwd *pw;
 	struct stat stb;
 
