@@ -81,7 +81,7 @@ to variable delays in the ionophere; processing overhead in the GPS
 itself adds a bit more latency. But it's still often accurate to on the
 order of 1 uSec.
 
-Under most Unix there are two ways to watch 1PPS; Kernel PPS (KPPS)
+Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
 and plain PPS.  KPPS is formally known as RFC 2783 PPS.  These have
 different error budgets.
 
@@ -127,6 +127,28 @@ higher USB accuracy will ensue.
 
 TODO: How specific can we be about jitter?
 
+== Choice of Hardware ==
+
+To get 1PPS to your NTP daemon, you first need to get it from a
+PPS-capable GPS. As of late 2013 this means either the previously
+mentioned GR601-W or a serial GPS with 1PPS.
+
+You can find 1PPs-capable devices supported by GPSD at <<HARDWARE>>.
+Note that the most popular consumer-grade GPS engine - SiRF - does not
+deliver 1PPS through USB.  Thus the general run of cheap GPS mice
+won't do.
+
+In the past, the RS232 variant of the Garmin GPS-18 has been very
+commonly used for time service.  While it is still a respectable
+choice, newer devices have better sensitivity and signal
+discrimination. This makes them superior for indoor use as time
+sources.
+
+Among newer receiver designs we've found the the uBlox 6 receiver
+particularly good.  Unfortunately as of late 2013 this is still hard
+to find in a packaged RS232/USB version, as opposed to an OEM
+module exporting TTL levels. Search the web...
+
 == Feeding NTPD from GPSD ==
 
 When gpsd receives a sentence with a timestamp, it packages the
@@ -143,11 +165,13 @@ GPS is not as accurate as you might expect.  Messages are often
 delayed in the receiver and on the link by as much as several hundred
 milliSeconds, and this delay is not constant.
 
+//Hal: This is where a reference to SiRFs-are-bogus would be good.
+
 On most OS, gpsd includes support for interpreting the PPS pulses
 emitted at the start of every clock second on the carrier-detect lines
 of some serial GPSes; this pulse can be used to update NTP at much
 higher accuracy than message time provides.  You can determine whether
-your GPS emits this pulse, and gpsd is detecintg it, by running at -D 5
+your GPS emits this pulse, and gpsd is detecting it, by running at -D 5
 and watching for carrier-detect state change messages in the logfile.
 In addition, if your kernel provides the RFC 2783 KPPS (kernel PPS) API
 then gpsd will use that for extra accuracy.
@@ -341,4 +365,6 @@ ckuethe could contribute info on how this all works with BSD.
 == References ==
 
 [bibliography]
-- [[[STRATA]]] [What Is Stratum 1?]
+- [[[STRATA]]] http://www.endruntechnologies.com/stratum1.htm[What Is Stratum 1?]
+
+- [[[HARDWARE]]] http://catb.org/gpsd/hardware.html[Compatible Hardware]
