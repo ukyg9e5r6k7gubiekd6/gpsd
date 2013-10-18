@@ -16,11 +16,11 @@ a comprehensive guide suitable for people who know little about time
 service. We encourage others to contribute additions and corrections.
 
 .Units table
-|==================================================
+|====================================================
 | nSec    | nanoSecond  | 1/1,000,000,000 of a second
 | uSec    | microSecond | 1/1,000,000 of a second
 | mSec    | milliSecond | 1/1,000 of a second
-|==================================================
+|====================================================
 
 == How NTP Works ==
 
@@ -136,7 +136,8 @@ mentioned GR601-W or a serial GPS with 1PPS.
 You can find 1PPs-capable devices supported by GPSD at <<HARDWARE>>.
 Note that the most popular consumer-grade GPS engine - SiRF - does not
 deliver 1PPS through USB.  Thus the general run of cheap GPS mice
-won't do.
+won't do.  In general, you can't use a USB device for time service
+unless you know it has the Macx-1 mod.
 
 In the past, the RS232 variant of the Garmin GPS-18 has been very
 commonly used for time service.  While it is still a respectable
@@ -146,8 +147,9 @@ sources.
 
 Among newer receiver designs we've found the the uBlox 6 receiver
 particularly good.  Unfortunately as of late 2013 this is still hard
-to find in a packaged RS232/USB version, as opposed to an OEM
-module exporting TTL levels. Search the web...
+to find in a packaged RS232 version, as opposed to an OEM module
+exporting TTL levels or an eval kit costing a lot. Search the web; you
+may find a here-today-gone-tomorrow offer on alibaba.com.  
 
 == Feeding NTPD from GPSD ==
 
@@ -167,7 +169,7 @@ milliSeconds, and this delay is not constant.
 
 //Hal: This is where a reference to SiRFs-are-bogus would be good.
 
-On most OS, gpsd includes support for interpreting the PPS pulses
+On most OSes, gpsd includes support for interpreting the PPS pulses
 emitted at the start of every clock second on the carrier-detect lines
 of some serial GPSes; this pulse can be used to update NTP at much
 higher accuracy than message time provides.  You can determine whether
@@ -287,7 +289,7 @@ name.  This allows multiple GPS to feed one chronyd.
 
 No gpsd configuration is required to talk to chronyd.  To get chronyd
 to connect to gpsd using the non-preferred SHM method add this to your
-/etc/chrony/chonry.conf file:
+/etc/chrony/chrony.conf file:
 
 -----------------------------------------------------------------------------
 # delay 0.0 is right, but use 0.2 to avoid NMEA
