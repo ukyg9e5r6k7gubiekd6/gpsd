@@ -595,7 +595,7 @@ century.</para>
 <para>gpsd can provide reference clock information to
 <application>ntpd</application>, to keep the system clock synchronized
 to the time provided by the GPS receiver. If you're going to
-use <application>gpsd</application> you are strongly encourage to run gpsd
+use <application>gpsd</application> you are strongly encouraged to run gpsd
 <option>-n</option> mode so the clock will be updated even when no
 clients are active.</para>
 

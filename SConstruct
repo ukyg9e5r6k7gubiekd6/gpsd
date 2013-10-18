@@ -1681,6 +1681,7 @@ if env.WhereIs('asciidoc'):
                 ["asciidoc -o www/installation.html INSTALL"])
     for stem in ['AIVDM', 'NMEA',
                  'protocol-evolution', 'protocol-transition',
+                 'gpsd-time-service-howto',
                  'client-howto']:
         env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
                     ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
