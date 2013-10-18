@@ -17,9 +17,9 @@ service. We encourage others to contribute additions and corrections.
 
 .Units table
 |==================================================
-| ns    | nanosecond  | 1/1,000,000,000 of a second
-| &mu;s | microsecond | 1/1,000,000 of a second
-| ms    | millisecond | 1/1,000 of a second
+| nSec    | nanoSecond  | 1/1,000,000,000 of a second
+| uSec    | microSecond | 1/1,000,000 of a second
+| mSec    | milliSecond | 1/1,000 of a second
 |==================================================
 
 == How NTP Works ==
@@ -35,22 +35,22 @@ believe it is time X and that my propagation delay to you is Y".
 Each daemon then uses rather complex algorithms that we won't attempt
 to describe here to digest incoming messages into a composite "NTP time".
 
-NTP conditions your system clock by noticing how your system clock
-time differs from deduced NTP time, then speeding up or slowing down
-your clock's tick rate until it is resynchronized.  (These tick-rate
-changes are extremely small, much too small for a human or even most
+NTP conditions your system clock by noticing how your system clock time
+differs from deduced NTP time, then speeding up or slowing down your
+clock's tick rate until it is resynchronized.  (These tick-rate changes
+are usually extremely small, much too small for a human or even most
 software timing loops to ever notice.)
 
 Most computers are just NTP clients.  They take NTP notifications from
-a set of servers (which on a Linux system is described by a list in
+a set of servers (which on a Unix system is described by a list in
 /etc/ntp.conf or possibly /etc/default/ntpdate) and use it to adjust
 the local clock.  It is generally expected that NTP clients will have
 an accuracy (that is, maximum divergence from the master atomic clock)
-of +0-10ms.
+of +/-100 mSec depending upon your network connnection.
 
 With GPSD and a suitable GPS, you can locally condition your clock to
-higher accuracy than received NTP time, and possibly serve that to
-other systems.
+higher accuracy than internet received NTP time, and possibly serve that
+to other systems.
 
 == 1PPS quality issues ==
 
@@ -58,16 +58,17 @@ GPSD is useful for precision time service because it can use the 1PPS
 pulse delivered by some GPSes to condition time delivered by NTP.
 
 GPS satellites deliver a top-of-GPS-second notification that is
-nominally accurate to 50ns. 1PPS-capable GPSes use an RS-232 control
-line to ship the 1PPS edge of second to the host system (usually
+nominally accurate to 50ns. 1PPS-capable GPSes often use an RS-232
+control line to ship the 1PPS edge of second to the host system (usually
 Carrier Detect or Ring Indicator; GPSD will quietly accept either).
 Satellite top-of-second loses some accuracy on the way down due mainly
 to variable delays in the ionophere; processing overhead in the GPS
-itself adds a bit more latency. But it's still accurate to on the 
-order of 500ns.
+itself adds a bit more latency. But it's still often accurate to on the
+order of 1 uSec.
 
-Under Linux there are two ways to watch 1PPS; Kernel PPS (KPPS) and
-plain PPS. These have very different error budgets.
+Under most Unix there are two ways to watch 1PPS; Kernel PPS (KPPS)
+and plain PPS.  KPPS is formally known as RFC 2783 PPS.  These have
+different error budgets.
 
 Kernel PPS uses a kernel function to accurately timestamp the status
 change on the PPS line.  Basic PPS has the kernel wake up the PPS
@@ -77,9 +78,9 @@ lower latency and less jitter. Both methods have accuracy degraded by
 interrupt-processing latency in the kernel serial layer, but plain
 PPS incurs additional context-switching overhead that KPPS does not.
 
-With KPPS it is very doable to get the system clock stable to +-1
-&mu;sec.  Otherwise you are lucky to get +-5 ms, and there will be
-about 20&mu;s of jitter. All these figures were observed on
+With KPPS it is very doable to get the system clock stable to +/-1
+uSec.  Otherwise you are lucky to get +-5 uSec, and there will be
+about 20uSec of jitter. All these figures were observed on
 plain-vanilla x86 PCS with clock speeds in the 2GHz range.
 
 All the previous figures assume you're using PPS delivered over RS232.
@@ -99,10 +100,10 @@ can expect 1ms accuracy; this is typical of USB 1.1 devices.
 
 .Summary of latency sources
 |===================================
-| GPS atomic clock  |  +-50ns
-| KPPS              |  +-1&mu;s
-| PPS               |  +-5ms
-| USB poll interval |  +-1ms
+| GPS atomic clock  |  +/-50nSec
+| KPPS              |  +/-1uSec
+| PPS               |  +/-5uSec
+| USB poll interval |  +/-1mSec
 |===================================
 
 As of late 2013 no USB GPS we know of implements the higher polling-rate
@@ -119,37 +120,41 @@ shared-memory segment with an ID known to ntpd, the network time
 synchronization daemon.  If ntpd has been properly configured to
 receive this message, it will be used to correct the system clock.
 
-If you're going to use gpsd for time service you are strongly
-encouraged to run in -n mode so the clock will be updated even when no
-clients are active.
+If you're going to use gpsd for time service you must run in -n mode so
+the clock will be updated even when no clients are active.  
 
 Note that deriving time from the date/time messages received from the
 GPS is not as accurate as you might expect.  Messages are often
 delayed in the receiver and on the link by as much as several hundred
-milliseconds, and this delay is not constant.
+milliSeconds, and this delay is not constant.
 
-On Linux, gpsd includes support for interpreting the PPS pulses
+On most OS, gpsd includes support for interpreting the PPS pulses
 emitted at the start of every clock second on the carrier-detect lines
 of some serial GPSes; this pulse can be used to update NTP at much
 higher accuracy than message time provides.  You can determine whether
-your GPS emits this pulse by running at -D 5 and watching for
-carrier-detect state change messages in the logfile.  In addition, if
-your kernel provides the RFC 2783 KPPS (kernel PPS) API then gpsd will
-use that for extra accuracy.
+your GPS emits this pulse, and gpsd is detecintg it, by running at -D 5
+and watching for carrier-detect state change messages in the logfile.
+In addition, if your kernel provides the RFC 2783 KPPS (kernel PPS) API
+then gpsd will use that for extra accuracy.
 
 Many Linux distributions have a package called "pps-tools" that will
 install KPPS support and the time_pps.h header file.  We recommend you
-do that.
+do that.  Your linux kernel must also include these two lines:
+	CONFIG_PPS=y
+	CONFIG_PPS_CLIENT_LDISC=y
 
-On Linux, KPPS requires root permissions.  In order to present the
-smallest possible attack surface to privilege-escalation attempts, gpsd
-run as root drops its root privileges very soon after startup - just
-after it has opened any serial device paths passed on the command line.
-Thus, KPPS can only be used with devices passed that way, not with
-GPSes that are later presented to gpsd by the hotplug system.
+Other OS have different ways to enable KPPS in their kernels.
+
+On any unis that supports KPPS root permission is required for
+initialization.  In order to present the smallest possible attack
+surface to privilege-escalation attempts, gpsd run as root drops its
+root privileges very soon after startup - just after it has opened any
+serial device paths passed on the command line.  Thus, KPPS can only
+be used with devices passed that way, not with GPSes that are later
+presented to gpsd by the hotplug system.
 
 Here is a sample ntp.conf configuration stanza telling ntpd how to
-read the GPS notifications:
+read the GPS notifications, when gpsd is started as root:
 
 -----------------------------------------------------------------------------
 server 127.127.28.0 
@@ -160,7 +165,7 @@ fudge 127.127.28.1 refid GPS1
 -----------------------------------------------------------------------------
 
 Users of ntpd versions older than revision ntp-4.2.5p138 should instead use
-this ntp.conf snippet:
+this ntp.conf snippet, when gpsd is started as root:
 
 -----------------------------------------------------------------------------
 server 127.127.28.0 minpoll 4 maxpoll 4
@@ -175,17 +180,18 @@ shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0 is used
 for message-decoded time and unit 1 for the (more accurate, when
 available) time derived from the PPS synchronization pulse.  Splitting
 these notifications allows ntpd to use its normal heuristics to weight
-them.
+them.  Different units must be used when gpsd is not started as root.
 
 With this configuration, ntpd will read the timestamp posted by gpsd
 every 16 seconds and send it to unit 0.  The number after the
 parameter time1 is an offset in seconds.  You can use it to adjust out
-some of the fixed delays in the system.  0.035 is a good starting
-value for the Garmin GPS-18/USB, 0.420 for the Garmin GPS-18/LVC.
+some of the fixed delays in the system.  gpsd builds in many offsets
+but they are very GPS and CPU dependent.  
 
-After restarting ntpd, a line similar to the one below should
-appear in the output of the command "ntpq -p" (after allowing a couple
-of minutes):
+After starting as root ntpd, then gpsd, a line similar to the one below
+should appear in the output of the command "ntpq -p" (after allowing the
+GPS to acquire a 3D fix).  This may take up to 30 minutes if you GPS
+has to cold start or has a poor sky view.
 
 -----------------------------------------------------------------------------
 remote	   refid      st t when poll reach  delay    offset  jitter
@@ -202,36 +208,40 @@ remote	   refid      st t when poll reach  delay    offset  jitter
 *SHM(1)	  .GPS1.     0 l   11   16  377    0.000   -0.059   0.006
 -----------------------------------------------------------------------------
 
-When the value under "reach" remains zero, check that gpsd is
-running; and some application is connected to it or the '-n' option was
-used.  Make sure the receiver is locked on to at least one satellite,
-and the receiver is in SiRF binary, Garmin binary or NMEA/PPS mode.  Plain
-NMEA will also drive ntpd, but the accuracy as bad as one second.  When
-the SHM(0) line does not appear at all, check the system logs for error
+When the value under "reach" remains zero, check that gpsd is running;
+cgps reports a 3D fix; and the '-n' option was used.  Some GPS can
+report time with only one satellite but is almost all cases a 3D fix is
+preferred or required.  Plain NMEA, no PPS, will also drive ntpd, but
+the accuracy as bad as one second, or worse.  When the SHM(0) line does
+not appear at all, check your ntp.conf and the system logs for error
 messages from ntpd.
 
-When no other reference clocks appear in the NTP configuration, the
-system clock will lock onto the GPS clock.  When you have previously
-used ntpd, and other reference clocks appear in your configuration,
-there may be a fixed offset between the GPS clock and other clocks.
-The gpsd developers would like to receive information about the
-offsets observed by users for each type of receiver.  Please send us
-the output of the "ntpq -p" command and the make and type of receiver.
+When no other reference clocks appear in the NTP configuration,
+the system clock will lock onto the GPS clock, but this is a bad
+configuration.  You should always have at least two other reference
+clocks in your ntpd.conf for proper ntpd operation.  You want to adjust
+the offsets (fudge) in your ntp.conf so the SHM(1) time is consistent
+with your other reference clocks.  The gpsd developers would like to
+receive information about the offsets (fudge) observed by users for each
+type of receiver.  Please send us the output of the "ntpq -p" command
+and the make and type of receiver.
 
 == USE WITH CHRONY ==
 
-gpsd can provide reference clock information to chronyd similarly to
-the way it talks to ntpd.  The advantage to using chrony is that the
-PPS time resolution is in nanoseconds.  This is 1,000 times more precision
-than the time resolution provided to ntpd.
+gpsd can provide reference clock information to chronyd similarly to the
+way it talks to ntpd.  The advantage to using chrony is that the PPS
+time resolution is in nanoseconds.  This is 1,000 times more precision
+than the time resolution provided to ntpd.  When gpsd supports the new
+ntpd protocol this difference will disappear, but chronyd is still
+preferred.
 
-gpsd talks to chronyd using a socket named /tmp/chrony.ttyXX.sock
-(where ttyXX is replaced by the GPS device name.  This allows multiple
-GPS to feed one chronyd.
+gpsd, when run as root, talks to chronyd using a socket named
+/var/run/chrony.ttyXX.sock (where ttyXX is replaced by the GPS device
+name.  This allows multiple GPS to feed one chronyd.
 
-No gpsd configuration is required to talk to chronyd.  To get 
-chronyd to connect to gpsd using the SHM method add this to your
-/etc/chrony/chonry.conf file.
+No gpsd configuration is required to talk to chronyd.  To get chronyd
+to connect to gpsd using the non-preferred SHM method add this to your
+/etc/chrony/chonry.conf file:
 
 -----------------------------------------------------------------------------
 # delay 0.0 is right, but use 0.2 to avoid NMEA
