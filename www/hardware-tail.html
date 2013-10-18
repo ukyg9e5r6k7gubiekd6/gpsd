@@ -4,7 +4,8 @@
 
 <p>Some GPS receivers offer a 1PPS (one pulse per second) output that
 GPSD is capable of passing along to <code>ntpd</code> for use as an
-extremely accurate clock source.  The "Claimed Accuracy" figures are taken
+extremely accurate clock source.  These are marked as having PPS 
+in the table above. The "Claimed Accuracy" figures are taken
 from manufacturers' data sheets, and have not been independently
 verified.</p>
 
@@ -19,88 +20,6 @@ on the order of 1&mu;s (microsecond) for RS232, 1ms (millisecond) for
 USB.  From GPSes that are native USB but not PPS-capable, GPSD can
 extract time information from the serial data accurate to about
 250ms.</p>
-
-<p>Most PPS accuracy information has been moved to the main hardware
-table. The following table collects some statistics on older PPS-
-capable devices for which we don't have full information.</p>
-
-<div>&nbsp;</div>
-
-<table border='1'>
-<tr>
-<th>Receiver</th>
-<th>Claimed<br>Accuracy</th>
-<th>NTP time offset</th>
-<th>Notes</th>
-</tr>
-<tr>
-<td>SigNav TM3-01</td>
-<td align="center">10ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Trimble Thunderbolt E</td>
-<td align="center">15ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Trimble Resolution-T</td>
-<td align="center">15ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Motorola<br>iLotus<br>Synergy-GPS M12M</td>
-<td align="center">20ns<br>6ns corrected</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>NavSync CW25-TIM</td>
-<td align="center">25ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>NavSync CW12-TIM</td>
-<td align="center">30ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Trimble Copernicus</td>
-<td align="center">50ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Novatel SuperStarII</td>
-<td align="center">200ns</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>Rockwell Jupiter</td>
-<td align="center">1&mu;sec</td>
-<td align="center">-</td>
-<td align="center">-</td>
-</tr>
-<tr>
-<td>SiRFstar2</td>
-<td align="center">1&mu;sec</td>
-<td align="center">-</td>
-<td align="center">Many stock SiRFs have PPS disabled, available only
-as an extra-cost firmware upgrade.</td>
-</tr>
-<tr>
-<td>GR301-W</td>
-<td align="center">1 millisecond</td>
-<td align="center">150ns</td>
-<td align="center"></td>
-</tr>
-</table>
 
 <a id="raw"></a>
 <h2>Raw Measurements and GPSD:</h2>
