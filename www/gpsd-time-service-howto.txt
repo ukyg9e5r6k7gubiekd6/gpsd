@@ -201,7 +201,7 @@ be used with devices passed that way, not with GPSes that are later
 presented to gpsd by the hotplug system.  
 
 Those hotplug devices will, however, be able to use plain, non-kernel
-PPS.  gpsd outomatucally falls back to this when absence of root 
+PPS.  gpsd automatically falls back to this when absence of root
 permissions makes KPPS unavailable.
 
 Here is a sample ntp.conf configuration stanza telling ntpd how to
