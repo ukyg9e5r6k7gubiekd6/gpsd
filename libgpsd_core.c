@@ -36,6 +36,20 @@
 
 #if defined(PPS_ENABLE)
 static pthread_mutex_t report_mutex;
+
+void gpsd_acquire_reporting_lock(void)
+{
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_lock(&report_mutex);
+    /* +unrecog */
+}
+
+void gpsd_release_reporting_lock(void)
+{
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_unlock(&report_mutex);
+    /* +unrecog */
+}
 #endif /* PPS_ENABLE */
 
 static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
@@ -60,6 +74,7 @@ const char *gpsd_prettydump(struct gps_device_t *session)
 			   session->packet.outbuflen);
 }
 
+
 void gpsd_labeled_report(const int debuglevel, const int errlevel,
 			 const char *label, const char *fmt, va_list ap)
 /* assemble command in printf(3) style, use stderr or syslog */
@@ -70,9 +85,7 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
 	char *err_str;
 
 #if defined(PPS_ENABLE)
-	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
-	(void)pthread_mutex_lock(&report_mutex);
-	/* +unrecog */
+	gpsd_acquire_reporting_lock();
 #endif /* PPS_ENABLE */
 	switch ( errlevel ) {
 	case LOG_ERROR:
@@ -117,9 +130,7 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
 	else
 	    (void)fputs(buf2, stderr);
 #if defined(PPS_ENABLE)
-	/*@ -unrecog (splint has no pthread declarations as yet) @*/
-	(void)pthread_mutex_unlock(&report_mutex);
-	/* +unrecog */
+	gpsd_release_reporting_lock();
 #endif /* PPS_ENABLE */
     }
 #endif /* !SQUELCH_ENABLE */

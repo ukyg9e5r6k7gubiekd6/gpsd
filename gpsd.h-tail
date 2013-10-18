@@ -800,6 +800,8 @@ extern void ntpd_link_deactivate(struct gps_device_t *);
 extern void ntpd_link_activate(struct gps_device_t *);
 extern void gpsd_await_pps_initialization(struct gps_context_t *);
 
+extern void gpsd_acquire_reporting_lock(void);
+extern void gpsd_release_reporting_lock(void);
 
 extern void ecef_to_wgs84fix(/*@out@*/struct gps_fix_t *,
 			     /*@out@*/double *,
