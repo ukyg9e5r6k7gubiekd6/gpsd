@@ -16,7 +16,8 @@
  * from your gpsd you should restart gpsd for acceptable PPS performance.
  *
  * This file is Copyright (c) 2010 by the GPSD project BSD terms apply:
- *see the file COPYING in the distribution root for details. /
+ *see the file COPYING in the distribution root for details.
+ */
 
 #include <string.h>
 #include <libgen.h>
