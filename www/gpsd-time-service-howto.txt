@@ -56,7 +56,7 @@ You will hear time service people speak of "Stratum 0" (the reference
 clocks) "Stratum 1" (NTP servers directly connected to reference
 clocks over a path with fixed latency) and "Stratum 2" (publicly
 accessible servers that get time from Stratum 1 over a network link.)
-Ordinary compters are normally configured to get time from one or more
+Ordinary computers are normally configured to get time from one or more
 Stratum 2 servers.
 
 With GPSD and a suitable GPS, you can locally condition your clock to
@@ -73,7 +73,7 @@ GPSD is useful for precision time service because it can use the 1PPS
 pulse delivered by some GPSes to condition time delivered by NTP.
 
 GPS satellites deliver a top-of-GPS-second notification that is
-nominally accurate to 50ns. 1PPS-capable GPSes often use an RS-232
+nominally accurate to 50nSec. 1PPS-capable GPSes often use an RS-232
 control line to ship the 1PPS edge of second to the host system (usually
 Carrier Detect or Ring Indicator; GPSD will quietly accept either).
 Satellite top-of-second loses some accuracy on the way down due mainly
@@ -154,13 +154,20 @@ then gpsd will use that for extra accuracy.
 
 Many Linux distributions have a package called "pps-tools" that will
 install KPPS support and the time_pps.h header file.  We recommend you
-do that.  Your linux kernel must also include these two lines:
+do that.  If your kernel is built in the normal modular way, this
+package installation will suffice.
+
+If you are scratch-building your linux kernel, the configuration 
+must include these two lines:
+
+-----------------------------------------------------------------------------
 	CONFIG_PPS=y
 	CONFIG_PPS_CLIENT_LDISC=y
+-----------------------------------------------------------------------------
 
-Other OS have different ways to enable KPPS in their kernels.
+Other OSes have different ways to enable KPPS in their kernels.
 
-On any unis that supports KPPS root permission is required for
+On any system that supports KPPS root, permission is required for
 initialization.  In order to present the smallest possible attack
 surface to privilege-escalation attempts, gpsd run as root drops its
 root privileges very soon after startup - just after it has opened any
@@ -241,7 +248,7 @@ receive information about the offsets (fudge) observed by users for each
 type of receiver.  Please send us the output of the "ntpq -p" command
 and the make and type of receiver.
 
-== USE WITH CHRONY ==
+== Feeding chrony from GPSD ==
 
 gpsd can provide reference clock information to chronyd similarly to the
 way it talks to ntpd.  The advantage to using chrony is that the PPS
@@ -335,6 +342,3 @@ ckuethe could contribute info on how this all works with BSD.
 
 [bibliography]
 - [[[STRATA]]] [What Is Stratum 1?]
-
-
-//Reviewers: Gerry Creager <gerry.creager@noaa.gov>, Hal Murray <hmurray@megapathdsl.net>
