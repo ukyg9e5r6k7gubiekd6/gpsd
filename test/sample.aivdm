@@ -5,7 +5,8 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 # Type 1:
-# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
+# From Kurt Schwehr.  Dump was attached.
+# Checked using the noaadata tools and the Maritec decoder.
 !AIVDM,1,1,,A,15RTgt0PAso;90TKcjM8h6g208CQ,0*4A
 #       MessageID:          1
 #       RepeatIndicator:    0
@@ -95,7 +96,8 @@
 #       state_slotoffset:   0
 #
 # Type 4:
-# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
+# From Kurt Schwehr.  Dump was attached.
+# Checked using the noaadata tools and the Maritec decoder.  
 !AIVDM,1,1,,A,403OviQuMGCqWrRO9>E6fE700@GO,0*4D
 #       MessageID:          4
 #       RepeatIndicator:    0
@@ -117,7 +119,8 @@
 #       state_slotoffset:   1503
 #
 # Type 5:
-# From Kurt Schwehr.  Dump was attached.  Checked using the noaadata tools.  
+# From Kurt Schwehr.  Dump was attached.
+# Checked using the noaadata tools and the Maritec decoder.  
 !AIVDM,2,1,1,A,55?MbV02;H;s<HtKR20EHE:0@T4@Dn2222222216L961O5Gf0NSQEp6ClRp8,0*1C
 !AIVDM,2,2,1,A,88888888880,2*25
 #       MessageID:        5
@@ -146,7 +149,8 @@
 # From Kurt Schwehr
 # Text decode for this one came from regrouping the binary data dump from Kurt's
 # ais_msg_6.py on one of his test sentences.  It's unknown what's in the binary
-# data block.
+# data block.  The Maritec sdecoder confirms the preamble decoder but doesn't
+# display the data block.
 !AIVDM,1,1,,B,6B?n;be:cbapalgc;i6?Ow4,2*4A
 #       MessageID:        6
 #	RepeatIndicator:  1
@@ -187,7 +191,8 @@
 !AIVDM,1,1,4,B,6>jR0600V:C0>da4P106P00,2*02
 #
 # From AISHub.  This type 6 has no data.  It's paired with the
-# following type 7; both are verified by the match in the MMSI fields 
+# following type 7; both are verified by the match in the MMSI fields.
+# This one is fully verified by the Maritec decoder. 
 !AIVDM,1,1,,A,63u?;TP0`QJ<06P000,4*43
 #	Message Type             : 6
 #	Repeat Indicator         : 0
@@ -699,6 +704,7 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 #
 # Type 19:
 # From Mike Greene.  Checked with the noaadata tools. Decode is known good.
+# Also checked with the Maritec decoder
 !AIVDM,1,1,,B,C5N3SRgPEnJGEBT>NhWAwwo862PaLELTBJ:V00000000S0D:R220,0*0B
 #        MessageID:         19
 #        RepeatIndicator:   0
@@ -756,6 +762,8 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 # Type 21:
 # Has a Name Extension field
 # From Mike Greene. Decode is verified by the text being readable.
+# Also checked against the Maritec decoder, which verifies
+# everything except the Regional Reserve field.
 !AIVDM,2,1,5,B,E1mg=5J1T4W0h97aRh6ba84<h2d;W:Te=eLvH50```q,0*46
 !AIVDM,2,2,5,B,:D44QDlp0C1DU00,2*36
 #        Message Type:             21
@@ -828,6 +836,7 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 # Type 24:
 # From Nirgal
 # One pair of type A and Type B messages.
+# Checked against the Maritec decoder.
 !AIVDM,1,1,,A,H42O55i18tMET00000000000000,2*6D
 #       MessageID:         24
 #       RepeatIndicator:   0
