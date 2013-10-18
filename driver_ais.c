@@ -879,11 +879,11 @@ bool ais_binary_decode(const int debug,
 	ais->type19.to_stern     = UBITS(280, 9);
 	ais->type19.to_port      = UBITS(289, 6);
 	ais->type19.to_starboard = UBITS(295, 6);
-	ais->type19.epfd         = UBITS(299, 4);
-	ais->type19.raim         = UBITS(302, 1)!=0;
-	ais->type19.dte          = UBITS(305, 1)!=0;
-	ais->type19.assigned     = UBITS(306, 1)!=0;
-	//ais->type19.spare      = UBITS(307, 5);
+	ais->type19.epfd         = UBITS(301, 4);
+	ais->type19.raim         = UBITS(305, 1)!=0;
+	ais->type19.dte          = UBITS(306, 1)!=0;
+	ais->type19.assigned     = UBITS(307, 1)!=0;
+	//ais->type19.spare      = UBITS(308, 4);
 	break;
     case 20:	/* Data Link Management Message */
 	if (bitlen < 72 || bitlen > 160) {
