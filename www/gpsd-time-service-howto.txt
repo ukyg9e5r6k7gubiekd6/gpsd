@@ -16,11 +16,11 @@ a comprehensive guide suitable for people who know little about time
 service. We encourage others to contribute additions and corrections.
 
 .Units table
-|=================================================
-| ns    | nanosecond  | One billionth of a second
-| &mu;s | microsecond | One millionth of a second
-| ms    | millisecond | One thousandth of a second
-|=================================================
+|==================================================
+| ns    | nanosecond  | 1/1,000,000,000 of a second
+| &mu;s | microsecond | 1/1,000,000 of a second
+| ms    | millisecond | 1/1,000 of a second
+|==================================================
 
 == How NTP Works ==
 
@@ -59,10 +59,15 @@ pulse delivered by some GPSes to condition time delivered by NTP.
 
 GPS satellites deliver a top-of-GPS-second notification that is
 nominally accurate to 50ns. 1PPS-capable GPSes use an RS-232 control
-line to mark the 1PPS edge of second (usually Carrier Detect or Ring
-Indicator; GPSD will quietly accept either).  Under Linux there are
-two ways to watch 1PPS; Kernel PPS (KPPS) and plain PPS. These have
-very different error budgets.
+line to ship the 1PPS edge of second to the host system (usually
+Carrier Detect or Ring Indicator; GPSD will quietly accept either).
+Satellite top-of-second loses some accuracy on the way down due mainly
+to variable delays in the ionophere; processing overhead in the GPS
+itself adds a bit more latency. But it's still accurate to on the 
+order of 500ns.
+
+Under Linux there are two ways to watch 1PPS; Kernel PPS (KPPS) and
+plain PPS. These have very different error budgets.
 
 Kernel PPS uses a kernel function to accurately timestamp the status
 change on the PPS line.  Basic PPS has the kernel wake up the PPS
@@ -79,18 +84,18 @@ plain-vanilla x86 PCS with clock speeds in the 2GHz range.
 
 All the previous figures assume you're using PPS delivered over RS232.
 USB GPSes that deliver 1PPS are rare, but do exist. Notably, there's
-the Navsys GR601-W (designed by one of us, as it happens). In case
-this device goes out of production it's worth noting that it's a
-trivial modification of the stock two-chip-on-a-miniboard
-commodity-GPS design of engine plus USB-to-serial adapter; the GR601-W
-wires a UBlox 6 to a Prolific Logic PL23203.  To get 1PPS out, just
-wire the 1PPS pin from the engine to the Carrier Detect pin on the USB
-adapter.
+the Navsys GR601-W. In case this device goes out of production it's
+worth noting that it's a trivial modification of the stock
+two-chip-on-a-miniboard commodity-GPS design of engine plus
+USB-to-serial adapter; the GR601-W wires a UBlox 6 to a Prolific Logic
+PL23203.  To get 1PPS out, just wire the 1PPS pin from the engine to
+the Carrier Detect pin on the USB adapter. (This is known as the
+"Macx-1 mod".)
 
 With this design, 1PPS from the engine will turn into a USB event that
-become visible to the host system (and GPSD) the next time the USB
+becomes visible to the host system (and GPSD) the next time the USB
 device is polled. USB polling intervals vary but on the GR601-W you
-can expect 1ms accuracy; this is typical.
+can expect 1ms accuracy; this is typical of USB 1.1 devices. 
 
 .Summary of latency sources
 |===================================
@@ -99,6 +104,10 @@ can expect 1ms accuracy; this is typical.
 | PPS               |  +-5ms
 | USB poll interval |  +-1ms
 |===================================
+
+As of late 2013 no USB GPS we know of implements the higher polling-rate
+options in USB 2 and 3.  When one does, and if it has the Macx-1 mod,
+higher USB accuracy will ensue.
 
 TODO: How specific can we be about jitter?
 
@@ -110,23 +119,27 @@ shared-memory segment with an ID known to ntpd, the network time
 synchronization daemon.  If ntpd has been properly configured to
 receive this message, it will be used to correct the system clock.
 
-If you're going to use <application>gpsd</application> you are
-strongly encouraged to run gpsd <option>-n</option> mode so the clock
-will be updated even when no clients are active.</para>
+If you're going to use gpsd for time service you are strongly
+encouraged to run in -n mode so the clock will be updated even when no
+clients are active.
 
-Note that deriving time from messages received from the GPS is
-not as accurate as you might expect.  Messages are often delayed in
-the receiver and on the link by several hundred milliseconds, and this
-delay is not constant.
+Note that deriving time from the date/time messages received from the
+GPS is not as accurate as you might expect.  Messages are often
+delayed in the receiver and on the link by as much as several hundred
+milliseconds, and this delay is not constant.
 
-On Linux, <application>gpsd</application> includes support for
-interpreting the PPS pulses emitted at the start of every clock second
-on the carrier-detect lines of some serial GPSes; this pulse can be
-used to update NTP at much higher accuracy than message time provides.
-You can determine whether your GPS emits this pulse by running at -D 5
-and watching for carrier-detect state change messages in the logfile.
-In addition, if your kernel provides the RFC 2783 KPPS (kernel PPS) API then
-gpsd will use that for extra accuracy.
+On Linux, gpsd includes support for interpreting the PPS pulses
+emitted at the start of every clock second on the carrier-detect lines
+of some serial GPSes; this pulse can be used to update NTP at much
+higher accuracy than message time provides.  You can determine whether
+your GPS emits this pulse by running at -D 5 and watching for
+carrier-detect state change messages in the logfile.  In addition, if
+your kernel provides the RFC 2783 KPPS (kernel PPS) API then gpsd will
+use that for extra accuracy.
+
+Many Linux distributions have a package called "pps-tools" that will
+install KPPS support and the time_pps.h header file.  We recommend you
+do that.
 
 On Linux, KPPS requires root permissions.  In order to present the
 smallest possible attack surface to privilege-escalation attempts, gpsd
@@ -270,9 +283,6 @@ t still needs to put the socket in different places depending on
 root/non-root operation.
 
 I would also add the comments in ntpshm.c starting on lines 78 and 865.
-
-The only thing missing would be some help on enabling KPPS in the kernel
-and getting time_pps.h installed.
 
 ckuethe could contribute info on how this all works with BSD.
 
