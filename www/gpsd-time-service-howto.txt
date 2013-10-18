@@ -46,7 +46,7 @@ a set of servers (which on a Unix system is described by a list in
 /etc/ntp.conf or possibly /etc/default/ntpdate) and use it to adjust
 the local clock.  It is generally expected that NTP clients will have
 an accuracy (that is, maximum divergence from the master atomic clock)
-of +/-100 mSec depending upon your network connnection.
+of +-100 mSec depending upon your network connnection.
 
 Some NTP hosts are time *servers*.  They use local high-precision time
 sourced synchronized to the Naval Observatory timebase to export
@@ -115,10 +115,10 @@ can expect 1ms accuracy; this is typical of USB 1.1 devices.
 
 .Summary of latency sources
 |===================================
-| GPS atomic clock  |  +/-50nSec
-| KPPS              |  +/-1uSec
-| PPS               |  +/-5uSec
-| USB poll interval |  +/-1mSec
+| GPS atomic clock  |  +-50nSec
+| KPPS              |  +-1uSec
+| PPS               |  +-5uSec
+| USB poll interval |  +-1mSec
 |===================================
 
 As of late 2013 no USB GPS we know of implements the higher polling-rate
