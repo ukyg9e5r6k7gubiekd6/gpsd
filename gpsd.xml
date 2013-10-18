@@ -594,144 +594,22 @@ century.</para>
 
 <para>gpsd can provide reference clock information to
 <application>ntpd</application>, to keep the system clock synchronized
-to the time provided by the GPS receiver. If you're going to
-use <application>gpsd</application> you are strongly encouraged to run gpsd
-<option>-n</option> mode so the clock will be updated even when no
-clients are active.</para>
+to the time provided by the GPS receiver.</para>
 
-<para>Note that deriving time from messages received from the GPS is
-not as accurate as you might expect.  Messages are often delayed in
-the receiver and on the link by several hundred milliseconds, and this
-delay is not constant.  On Linux, <application>gpsd</application>
-includes support for interpreting the PPS pulses emitted at the start
-of every clock second on the carrier-detect lines of some serial
-GPSes; this pulse can be used to update NTP at much higher accuracy
-than message time provides.  You can determine whether your GPS emits
-this pulse by running at -D 5 and watching for carrier-detect state
-change messages in the logfile.  In addition, if your kernel provides
-the RFC 2783 kernel PPS API then <application>gpsd</application> will 
-use that for extra accuracy.</para>
+<para>On Linux, <application>gpsd</application> includes support for
+interpreting the PPS pulses emitted at the start of every clock second
+on the carrier-detect lines of some serial GPSes; this pulse can be
+used to update NTP at much higher accuracy than message time provides.
+You can determine whether your GPS emits this pulse by running at -D 5
+and watching for carrier-detect state change messages in the logfile.
+In addition, if your kernel provides the RFC 2783 kernel PPS API then
+<application>gpsd</application> will use that for extra
+accuracy.</para>
 
-<para>When <application>gpsd</application> receives a sentence with a
-timestamp, it packages the received timestamp with current local time
-and sends it to a shared-memory segment with an ID known to
-<application>ntpd</application>, the network time synchronization
-daemon.  If <application>ntpd</application> has been properly
-configured to receive this message, it will be used to correct the
-system clock.</para>
+<para>Detailed instructions for using GPSD to set up a high-quality
+time service can be found among the documentation on the GPSD
+website.</para>
 
-<para>Here is a sample <filename>ntp.conf</filename> configuration
-stanza telling <application>ntpd</application> how to read the GPS
-notifications:</para>
-
-<programlisting>
-server 127.127.28.0 
-fudge 127.127.28.0 time1 0.420 refid GPS
-
-server 127.127.28.1 prefer
-fudge 127.127.28.1 refid GPS1
-</programlisting>
-
-<para>Users of  <application>ntpd</application> older than revision 
-ntp-4.2.5p138 should instead use this  <filename>ntp.conf</filename> 
-snippet:</para>
-
-<programlisting>
-server 127.127.28.0 minpoll 4 maxpoll 4
-fudge 127.127.28.0 time1 0.420 refid GPS
-
-server 127.127.28.1 minpoll 4 maxpoll 4 prefer
-fudge 127.127.28.1 refid GPS1
-</programlisting>
-
-<para>The magic pseudo-IP address 127.127.28.0 identifies unit 0 of
-the <application>ntpd</application> shared-memory driver; 127.127.28.1
-identifies unit 1.  Unit 0 is used for message-decoded time and unit 1
-for the (more accurate, when available) time derived from the PPS
-synchronization pulse.  Splitting these notifications allows
-<application>ntpd</application> to use its normal heuristics to weight
-them.</para>
-
-<para>With this configuration, <application>ntpd</application> will
-read the timestamp posted by <application>gpsd</application> every 16
-seconds and send it to unit 0.  The number after the parameter time1
-is an offset in seconds.  You can use it to adjust out some of the
-fixed delays in the system.  0.035 is a good starting value for the
-Garmin GPS-18/USB, 0.420 for the Garmin GPS-18/LVC.</para>
-
-<para>After restarting ntpd, a line similar to the one below should
-appear in the output of the command "ntpq -p" (after allowing a couple
-of minutes):</para>
-
-<screen>
-remote	   refid      st t when poll reach  delay    offset  jitter
-=========================================================================
-+SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
-</screen>
-
-<para>If you are running PPS then it will look like this:</para>
-
-<screen>
-remote	   refid      st t when poll reach  delay    offset  jitter
-=========================================================================
--SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
-*SHM(1)	  .GPS1.     0 l   11   16  377    0.000   -0.059   0.006
-</screen>
-
-<para>When the value under "reach" remains zero, check that gpsd is
-running; and some application is connected to it or the '-n' option was
-used.  Make sure the receiver is locked on to at least one satellite,
-and the receiver is in SiRF binary, Garmin binary or NMEA/PPS mode.  Plain
-NMEA will also drive ntpd, but the accuracy as bad as one second.  When
-the SHM(0) line does not appear at all, check the system logs for error
-messages from ntpd.</para>
-
-<para>When no other reference clocks appear in the NTP configuration,
-the system clock will lock onto the GPS clock.  When you have previously
-used <application>ntpd</application>, and other reference clocks appear
-in your configuration, there may be a fixed offset between the GPS clock
-and other clocks.  The <application>gpsd</application> developers would
-like to receive information about the offsets observed by users for each
-type of receiver.  Please send us the output of the "ntpq -p" command
-and the make and type of receiver.</para>
-
-</refsect1>
-<refsect1 id='chrony'><title>USE WITH CHRONY</title>
-<para>gpsd can provide reference clock information to
-<application>chronyd</application> similar to the way it talks to
-<application>ntpd</application>.  The advantage to using chrony is
-that the PPS time resolution is in nSec.  This is 1,000 times more
-precision than the time resolution provided to ntpd.
-</para>
-<para>gpsd talks to <application>chronyd</application> using a socket
-named /tmp/chrony.ttyXX.sock (where ttyXX is replaced by the GPS
-device name.  This allows multiple GPS to feed one <application>chronyd
-</application>.
-</para>
-<para>No gpsd configuration is required to talk to chronyd.  To get 
-chronyd to connect to gpsd using the SHM method add this to your
-/etc/chrony/chonry.conf file.
-</para>
-<screen>
-# delay 0.0 is right, but use 0.2 to avoid NMEA
-# time fighting with PPS time
-refclock SHM 0 offset 0.0 delay 0.2
-refclock SHM 1 offset 0.0 delay 0.0
-</screen>
-<para>To get chronyd to connect to gpsd using the more precise socket 
-method add this to your /etc/chrony/chrony.conf file (replacing ttyXX
-with your device name): </para> 
-<para>If running as root:</para>
-<screen> 
-#refclock PPS
-refclock SOCK /var/run/chrony.ttyXX.sock 
-</screen> 
-<para>If not running as root:</para>
-<screen> 
-#refclock PPS
-refclock SOCK /tmp/chrony.ttyXX.sock 
-</screen> 
-</refsect1>
 <refsect1 id='dbus'><title>USE WITH D-BUS</title>
 
 <para>On operating systems that support D-BUS,
@@ -753,7 +631,7 @@ private or something that you wish to publish.</para>
 to open the NTPD shared-memory segment, open its logfile, and create
 its local control socket.  Before doing any processing of GPS data, it
 tries to drop root privileges by setting its UID to "nobody" (or another
-userid as set by configure) and its group ID to the group of the initial
+configured userid) and its group ID to the group of the initial
 GPS passed on the command line &mdash; or, if that device doesn't exist,
 to the group of <filename>/dev/ttyS0</filename>.</para>
 
@@ -834,7 +712,7 @@ the PPS line discipline. Under Linux the POSIX capability to set the
 line discipline is retained, but other platforms cannot use this
 code.</para>
 
-<para>USB GPS devices do not identify themselves through the USB
+<para>USB GPS devices often do not identify themselves through the USB
 subsystem; they typically present as the class 00h (undefined) or
 class FFh (vendor-specific) of USB-to-serial adapters. Because of
 this, the Linux hotplug scripts must tell
