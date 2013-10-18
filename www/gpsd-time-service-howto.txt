@@ -313,23 +313,23 @@ I would also add the comments in ntpshm.c starting on lines 78 and 865.
 
 ckuethe could contribute info on how this all works with BSD.
 
-> > A brief tutorial on how to choose NTPd offset parameters would be good
-> > to have in the HOWTO, too.  Basically I want this to be a primer for
-> > the relatively ignorant - like, er, me.
->
-> One could argue that is out of our scope as it is in the ntp.conf
-> file.  Basically you get several good chimers and adjust fudges until
-> they all agree.  From what I can tel no one really does it right.
+# > A brief tutorial on how to choose NTPd offset parameters would be good
+# > to have in the HOWTO, too.  Basically I want this to be a primer for
+# > the relatively ignorant - like, er, me.
+#
+# One could argue that is out of our scope as it is in the ntp.conf
+# file.  Basically you get several good chimers and adjust fudges until
+# they all agree.  From what I can tel no one really does it right.
 
-> > There's a reference to it in a comment
-> > in ntpshm.c, but it didn't tell me eniough to understand *why*.
->
-> One very basic issue, is that the mechanism gpsd uses to communicate
-> to ntpd or chronyd differs depending on whether gpsd is root or not.
->
-> Note the code and coments in ntpshm.c starting on lines 190 and 664.
->
-> Or just search for all usage of getuid() in ntpshm.c
+# > There's a reference to it in a comment
+# > in ntpshm.c, but it didn't tell me eniough to understand *why*.
+#
+# One very basic issue, is that the mechanism gpsd uses to communicate
+# to ntpd or chronyd differs depending on whether gpsd is root or not.
+#
+# Note the code and coments in ntpshm.c starting on lines 190 and 664.
+#
+# Or just search for all usage of getuid() in ntpshm.c
 
 == References ==
 
