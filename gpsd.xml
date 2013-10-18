@@ -587,7 +587,6 @@ not) then the century part of the dates
 near the century turnover, a range of dates as wide in seconds as the
 accuracy of your system clock may be referred to the wrong
 century.</para>
-
 </refsect1>
 
 <refsect1 id='ntp'><title>USE WITH NTP</title>
@@ -609,6 +608,7 @@ accuracy.</para>
 <para>Detailed instructions for using GPSD to set up a high-quality
 time service can be found among the documentation on the GPSD
 website.</para>
+</refsect1>
 
 <refsect1 id='dbus'><title>USE WITH D-BUS</title>
 
