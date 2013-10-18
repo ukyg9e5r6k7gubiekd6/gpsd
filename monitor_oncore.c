@@ -326,7 +326,7 @@ static void oncore_update(void)
 	    doppl = (int)getbes16(buf, off + 1);
 	    el = (int)getub(buf, off + 3);
 	    az = (int)getbeu16(buf, off + 4);
-	    health = (int)getub(buf, off + 5);
+	    health = (int)getub(buf, off + 6);
 
 	    (void)wmove(Bbwin, (int)Bblines[i], 1);
 	    (void)wprintw(Bbwin, "%3d %3d %2d %5d %c%c", sv, az, el, doppl, (health & 0x02) ? 'U' : ' ',	/* unhealthy */
