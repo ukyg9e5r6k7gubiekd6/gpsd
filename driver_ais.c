@@ -1134,11 +1134,18 @@ bool ais_binary_decode(const int debug,
 		     (ais->type26.bitcount + 7) / 8);
 	break;
     case 27:	/* Long Range AIS Broadcast message */
-	if (bitlen != 96) {
+	if (bitlen != 96 && bitlen != 168) {
 	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 27 size not 96 bits (%zd).\n",
+			"unexpected AIVDM message type 27 (%zd).\n",
 			bitlen);
 	    return false;
+	} if (bitlen == 168) {
+	    /*
+	     * This is an implementation error observed in the wild,
+	     * sending a full 168-bit slot rather than just 96 bits.
+	     */
+	    gpsd_report(debug, LOG_WARN,
+			"oversized 169=8-bit AIVDM message type 27.\n");
 	}
 	ais->type27.accuracy        = (bool)UBITS(38, 1);
 	ais->type27.raim		= UBITS(39, 1)!=0;

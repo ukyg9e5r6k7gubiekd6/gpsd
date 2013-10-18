@@ -4601,7 +4601,7 @@ The 20 radio status bits are always present after end-of-data in the
 last slot and are in the format specified by <<IALA>>.  The radio
 status is 20 bits rather than 19 because an extra first bit selects
 whether it should be interpretred as a SOTDMA or ITDMA state.
-
+i
 Note: Type 26 is extremely rare. As of April 2011 it has not been
 observed even in long-duration samples from AISHub.
 
@@ -4612,6 +4612,10 @@ detection of AIS Class A equipped vessels (typically by
 satellite). This message has a similar content to Messages 1, 2 and 3,
 but the total number of bits has been compressed to allow for
 increased propagation delays associated with long-range detection
+
+Length according to ITU-1374 is 96 bits.  However, in the wild these
+are sometimes transmitted with 168 bits (a full slot). Robust decoders
+should warn when this occurs but decode the first 96 bits.
 
 //: Type 27
 [frame="topbot",options="header"]

@@ -892,6 +892,10 @@ DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062
 # The only message 27 in more than 25 millions messages that is 96 bits long!
 !AIVDM,1,1,,A,KCQ9r=hrFUnH7P00,0*41
 #
+# Type 27:
+# From Marius Kintel <marius@kintel.net>
+# It's apparently more common for these to be 168 bits long (a full slot)
+!AIVDM,1,1,,B,KC5E2b@U19PFdLbMuc5=ROv62<7m,0*16
 #
 ##############################################################################
 # Invalid packet tests:
