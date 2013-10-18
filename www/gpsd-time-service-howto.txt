@@ -48,9 +48,24 @@ the local clock.  It is generally expected that NTP clients will have
 an accuracy (that is, maximum divergence from the master atomic clock)
 of +/-100 mSec depending upon your network connnection.
 
+Some NTP hosts are time *servers*.  They use local high-precision time
+sourced synchronized to the Naval Observatory timebase to export
+reliable time for use by NTP clients. 
+
+You will hear time service people speak of "Stratum 0" (the reference
+clocks) "Stratum 1" (NTP servers directly connected to reference
+clocks over a path with fixed latency) and "Stratum 2" (publicly
+accessible servers that get time from Stratum 1 over a network link.)
+Ordinary compters are normally configured to get time from one or more
+Stratum 2 servers.
+
 With GPSD and a suitable GPS, you can locally condition your clock to
 higher accuracy than internet received NTP time, and possibly serve that
 to other systems.
+
+TODO: How good can GPSD time service be?  Is a properly tuned
+installation potentially Stratum-1 quality?  Is it really true that
+most public NTP servers are Stratum 2, or are there more layers?
 
 == 1PPS quality issues ==
 
@@ -78,7 +93,7 @@ lower latency and less jitter. Both methods have accuracy degraded by
 interrupt-processing latency in the kernel serial layer, but plain
 PPS incurs additional context-switching overhead that KPPS does not.
 
-With KPPS it is very doable to get the system clock stable to +/-1
+With KPPS it is very doable to get the system clock stable to +-1
 uSec.  Otherwise you are lucky to get +-5 uSec, and there will be
 about 20uSec of jitter. All these figures were observed on
 plain-vanilla x86 PCS with clock speeds in the 2GHz range.
@@ -272,6 +287,8 @@ refclock SOCK /tmp/chrony.ttyXX.sock
 
 TODO: tutorial on how to choose NTPD offset parameters
 
+TODO: What is a "chimer"?
+
 Gary says:
 
 gpsd needs root for several things during timekeeping initialization:
@@ -313,6 +330,11 @@ ckuethe could contribute info on how this all works with BSD.
 > Note the code and coments in ntpshm.c starting on lines 190 and 664.
 >
 > Or just search for all usage of getuid() in ntpshm.c
+
+== References ==
+
+[bibliography]
+- [[[STRATA]]] [What Is Stratum 1?]
 
 
 //Reviewers: Gerry Creager <gerry.creager@noaa.gov>, Hal Murray <hmurray@megapathdsl.net>
