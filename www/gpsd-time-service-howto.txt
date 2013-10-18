@@ -135,9 +135,9 @@ mentioned GR601-W or a serial GPS with 1PPS.
 
 You can find 1PPs-capable devices supported by GPSD at <<HARDWARE>>.
 Note that the most popular consumer-grade GPS engine - SiRF - does not
-deliver 1PPS through USB.  Thus the general run of cheap GPS mice
-won't do.  In general, you can't use a USB device for time service
-unless you know it has the Macx-1 mod.
+deliver 1PPS through USB or even RS232.  Thus the general run of cheap
+GPS mice won't do.  In general, you can't use a USB device for time
+service unless you know it has the Macx-1 mod.
 
 In the past, the RS232 variant of the Garmin GPS-18 has been very
 commonly used for time service.  While it is still a respectable
@@ -160,23 +160,22 @@ synchronization daemon.  If ntpd has been properly configured to
 receive this message, it will be used to correct the system clock.
 
 If you're going to use gpsd for time service you must run in -n mode so
-the clock will be updated even when no clients are active.  
+the clock will be updated even when no clients are active.
 
 Note that deriving time from the date/time messages received from the
 GPS is not as accurate as you might expect.  Messages are often
 delayed in the receiver and on the link by as much as several hundred
-milliSeconds, and this delay is not constant.
+mSec, and this delay is not constant.
 
 //Hal: This is where a reference to SiRFs-are-bogus would be good.
 
-On most OSes, gpsd includes support for interpreting the PPS pulses
-emitted at the start of every clock second on the carrier-detect lines
-of some serial GPSes; this pulse can be used to update NTP at much
-higher accuracy than message time provides.  You can determine whether
-your GPS emits this pulse, and gpsd is detecting it, by running at -D 5
-and watching for carrier-detect state change messages in the logfile.
-In addition, if your kernel provides the RFC 2783 KPPS (kernel PPS) API
-then gpsd will use that for extra accuracy.
+On most OSes, gpsd includes support for interpreting the 1PPS pulses;
+this can be used to update NTP at much higher accuracy than message
+time provides.  You can determine whether your GPS emits this pulse,
+and gpsd is detecting it, by running at -D 5 and watching for
+carrier-detect state change messages in the logfile.  In addition, if
+your kernel provides the RFC 2783 KPPS (kernel PPS) API then gpsd will
+use that for extra accuracy.
 
 Many Linux distributions have a package called "pps-tools" that will
 install KPPS support and the time_pps.h header file.  We recommend you
@@ -187,19 +186,23 @@ If you are scratch-building your linux kernel, the configuration
 must include these two lines:
 
 -----------------------------------------------------------------------------
-	CONFIG_PPS=y
-	CONFIG_PPS_CLIENT_LDISC=y
+CONFIG_PPS=y
+CONFIG_PPS_CLIENT_LDISC=y
 -----------------------------------------------------------------------------
 
 Other OSes have different ways to enable KPPS in their kernels.
 
-On any system that supports KPPS root, permission is required for
+On any system that supports KPPS, root permission is required for
 initialization.  In order to present the smallest possible attack
 surface to privilege-escalation attempts, gpsd run as root drops its
 root privileges very soon after startup - just after it has opened any
 serial device paths passed on the command line.  Thus, KPPS can only
 be used with devices passed that way, not with GPSes that are later
-presented to gpsd by the hotplug system.
+presented to gpsd by the hotplug system.  
+
+Those hotplug devices will, however, be able to use plain, non-kernel
+PPS.  gpsd outomatucally falls back to this when absence of root 
+permissions makes KPPS unavailable.
 
 Here is a sample ntp.conf configuration stanza telling ntpd how to
 read the GPS notifications, when gpsd is started as root:
