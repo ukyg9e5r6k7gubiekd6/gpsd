@@ -87,7 +87,7 @@ are there more layers?
 == 1PPS quality issues ==
 
 GPSD is useful for precision time service because it can use the 1PPS
-pulse delivered by some GPSes to condition time delivered by NTP.
+pulse delivered by some GPSes to correct a local NTP instance.
 
 GPS satellites deliver a top-of-GPS-second notification that is
 nominally accurate to 50nSec. 1PPS-capable GPSes often use an RS-232
@@ -226,7 +226,7 @@ GPS we know of does things in this order.  If you ever encounter
 an exception, it should manifest as reported times that look like
 they're from the future and require a negative fudge. If this
 ever happens, please report the device make and model to the GPSD
-maintainers.
+maintainers so we can flag it in our GPS hardware database.
 
 Many Linux distributions have a package called "pps-tools" that will
 install KPPS support and the time_pps.h header file.  We recommend you
@@ -385,6 +385,14 @@ If not running as root:
 #refclock PPS
 refclock SOCK /tmp/chrony.ttyXX.sock 
 -----------------------------------------------------------------------------
+
+== Providing public NTP service ==
+
+<<NTP-FAQ>> has good advice on things to be sure you have done - and
+are ready to do - before becoming a public chimer.
+
+One detail it doesn't mention is that you'll need to un-firewall UDP
+port 123.
 
 == TODOs ==
 
