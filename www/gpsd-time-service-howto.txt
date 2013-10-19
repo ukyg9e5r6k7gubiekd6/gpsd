@@ -54,14 +54,15 @@ use high-precision time sourced synchronized to the Naval Observatory
 timebase to export reliable time for use by NTP clients.
 
 You will hear time service people speak of "Stratum 0" (the reference
-clocks) "Stratum 1" (NTP servers directly connected to reference clocks
-over a path) and "Stratum 2" (publicly accessible servers that get time
-from Stratum 1 over a network link.)  Ordinary computers are normally
-configured to get time from one or more Stratum 2 servers.
+clocks) "Stratum 1" (NTP servers directly connected to reference
+clocks over a path with known and compensated-for latency) and
+"Stratum 2" (publicly accessible servers that get time from Stratum 1
+over a network link.)  Ordinary computers are normally configured to
+get time from one or more Stratum 2 servers.
 
 With GPSD and a suitable GPS, you can locally condition your clock to
 higher accuracy than internet received NTP time, and possibly serve that
-to other systems.  This would create your very own Statum 1 server.
+to other systems.  This would create your very own Stratum 1 server.
 
 TODO: How good can GPSD time service be?  Is it really true that most
 public NTP servers are Stratum 2, or are there more layers?
