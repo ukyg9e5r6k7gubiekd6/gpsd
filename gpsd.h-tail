@@ -237,7 +237,7 @@ struct gps_context_t {
     bool shmTimeInuse[NTPSHMSEGS];
 # ifdef PPS_ENABLE
     bool shmTimePPS;
-    void (*pps_hook)(struct gps_device_t *, struct timeval *);
+    void (*pps_hook)(struct gps_device_t *, unsigned long, struct timespec *);
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
