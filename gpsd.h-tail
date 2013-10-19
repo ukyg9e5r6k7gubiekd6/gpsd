@@ -9,6 +9,19 @@
 #include <stdint.h>
 #include "gps.h"
 
+/*
+ * Tell GCC that we want thread-safe behavior wuth _REENTRANT;
+ * in particular, errno must be thread-local.
+ * Tell POSIX-conforming implementations with _POSIX_THREAD_SAFE_FUNCTIONS.
+ * See http://www.unix.org/whitepapers/reentrant.html
+ */
+#ifndef _REENTRANT
+#define _REENTRANT
+#endif
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+#define _POSIX_THREAD_SAFE_FUNCTIONS
+#endif
+
 /* use RFC 2782 PPS API */
 /* this needs linux >= 2.6.34 and
  * CONFIG_PPS=y
