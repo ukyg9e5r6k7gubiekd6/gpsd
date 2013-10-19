@@ -53,7 +53,8 @@ a set of servers (which on a Unix system is described by a list in
 /etc/ntp.conf or possibly /etc/default/ntpdate) and use it to adjust
 the local clock.  It is generally expected that NTP clients will have
 an accuracy (that is, maximum divergence from the master atomic clock)
-of &plusmn;100 mSec depending upon your network connnection.
+of at most &plusmn;100 mSec, possibly less depending upon the quality 
+of your network connection.
 
 Some NTP hosts are time *servers*.  These are known as "chimers".  They
 use high-precision time sourced synchronized to the Naval Observatory
@@ -140,6 +141,8 @@ can expect 1ms accuracy; this is typical of USB 1.1 devices.
 | Stratum 2 NTP time  |  &plusmn;100mSec
 |=======================================
 
+(Sources for the NTP accuracy bounds are <<STRATA>> and <<NTP-FAQ>>.)
+
 As of late 2013 no USB GPS we know of implements the higher polling-rate
 options in USB 2 and 3.  When one does, and if it has the Macx-1 mod,
 higher USB accuracy will ensue.
@@ -167,8 +170,9 @@ sources.
 In general, use a GPS with an RS232 interface for time service if you
 can.  The GR601-W was designed (by one of the authors, as it happens)
 for deployment with commodity TCP/IP routers that only have USB ports.
-RS232 is more fiddly to set up, but it can deliver significantly 
-better accuracy and repeatability.
+RS232 is more fiddly to set up, but it can deliver three orders of 
+magnitude better accuracy and repeatability - enough to meet
+prevailing standards for a public Stratum 1 chimer.
 
 Among newer receiver designs we've found the the uBlox 6 receiver used
 in the GR601-W to be particularly good.  Very detailed information on
