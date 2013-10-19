@@ -24,9 +24,10 @@ service. We encourage others to contribute additions and corrections.
 
 == How NTP Works ==
 
-NTP (Network Time Protocol) is a set of services that attempts to
+NTP (Network Time Protocol) is a set of protocols that attempts to
 synchronize computer clocks across the Internet - ultimately, to the
-master atomic clock at the U.S. Naval Observatory.
+master atomic clock at the U.S. Naval Observatory.  NTP Version 3 is
+defined in RFC 1305.
 
 NTP service daemons running on each host do clock synchronization in
 the presence of variable network latency by monitoring those delays in
@@ -37,9 +38,9 @@ to describe here to digest incoming messages into a composite "NTP time".
 
 NTP conditions your system clock by noticing how your system clock time
 differs from deduced NTP time, then speeding up or slowing down your
-clock's tick rate until it is resynchronized.  (These tick-rate changes
+clock's tick rate until it is resynchronized.  These tick-rate changes
 are usually extremely small, much too small for a human or even most
-software timing loops to ever notice.)
+software timing loops to ever notice.  Large changes are possible.
 
 Most computers are just NTP clients.  They take NTP notifications from
 a set of servers (which on a Unix system is described by a list in
@@ -48,24 +49,22 @@ the local clock.  It is generally expected that NTP clients will have
 an accuracy (that is, maximum divergence from the master atomic clock)
 of &plusmn;100 mSec depending upon your network connnection.
 
-Some NTP hosts are time *servers*.  They use local high-precision time
-sourced synchronized to the Naval Observatory timebase to export
-reliable time for use by NTP clients. 
+Some NTP hosts are time *servers*.  These are known as chimers.  They
+use high-precision time sourced synchronized to the Naval Observatory
+timebase to export reliable time for use by NTP clients.
 
 You will hear time service people speak of "Stratum 0" (the reference
-clocks) "Stratum 1" (NTP servers directly connected to reference
-clocks over a path with fixed latency) and "Stratum 2" (publicly
-accessible servers that get time from Stratum 1 over a network link.)
-Ordinary computers are normally configured to get time from one or more
-Stratum 2 servers.
+clocks) "Stratum 1" (NTP servers directly connected to reference clocks
+over a path) and "Stratum 2" (publicly accessible servers that get time
+from Stratum 1 over a network link.)  Ordinary computers are normally
+configured to get time from one or more Stratum 2 servers.
 
 With GPSD and a suitable GPS, you can locally condition your clock to
 higher accuracy than internet received NTP time, and possibly serve that
-to other systems.
+to other systems.  This would create your very own Statum 1 server.
 
-TODO: How good can GPSD time service be?  Is a properly tuned
-installation potentially Stratum-1 quality?  Is it really true that
-most public NTP servers are Stratum 2, or are there more layers?
+TODO: How good can GPSD time service be?  Is it really true that most
+public NTP servers are Stratum 2, or are there more layers?
 
 == 1PPS quality issues ==
 
@@ -78,8 +77,9 @@ control line to ship the 1PPS edge of second to the host system (usually
 Carrier Detect or Ring Indicator; GPSD will quietly accept either).
 Satellite top-of-second loses some accuracy on the way down due mainly
 to variable delays in the ionophere; processing overhead in the GPS
-itself adds a bit more latency. But it's still often accurate to on the
-order of 1 uSec.
+itself adds a bit more latency, and your server detecting that pulse add
+still more latency.  But it's still often accurate to on the order of 1
+uSec.
 
 Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
 and plain PPS.  KPPS is formally known as RFC 2783 PPS.  These have
@@ -113,7 +113,7 @@ becomes visible to the host system (and GPSD) the next time the USB
 device is polled. USB polling intervals vary but on the GR601-W you
 can expect 1ms accuracy; this is typical of USB 1.1 devices. 
 
-.Summary of latency sources
+.Summary of typical accuracy
 |===================================
 | GPS atomic clock  |  &plusmn;50nSec
 | KPPS              |  &plusmn;1uSec
@@ -200,9 +200,13 @@ serial device paths passed on the command line.  Thus, KPPS can only
 be used with devices passed that way, not with GPSes that are later
 presented to gpsd by the hotplug system.  
 
-Those hotplug devices will, however, be able to use plain, non-kernel
-PPS.  gpsd automatically falls back to this when absence of root
-permissions makes KPPS unavailable.
+Those hotplug devices will, however, may be able to use plain,
+non-kernel PPS. gpsd trys to automatically fall back to this when
+absence of root permissions makes KPPS unavailable.  This fall back is
+complicated by the fact that gpsd needs to communicate to ntpd in
+a different way in root and non-root mode.  This complicates the
+configuation in ways beyond the scope of tis document and is stronly
+discouraged in practice.
 
 Here is a sample ntp.conf configuration stanza telling ntpd how to
 read the GPS notifications, when gpsd is started as root:
@@ -276,6 +280,16 @@ with your other reference clocks.  The gpsd developers would like to
 receive information about the offsets (fudge) observed by users for each
 type of receiver.  Please send us the output of the "ntpq -p" command
 and the make and type of receiver.
+
+When in doubt the preferred method to start your time keeping is:
+
+$ su -
+# killall -9 gpsd ntpd
+# ntpd -gN
+# sleep 2
+# gpsd -n /dev/ttyXX
+# sleep 2
+# cgps
 
 == Feeding chrony from GPSD ==
 
