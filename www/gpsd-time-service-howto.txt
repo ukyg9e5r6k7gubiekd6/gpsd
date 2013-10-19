@@ -251,17 +251,16 @@ is not started as root.
 
 With this configuration, ntpd will read the timestamp posted by gpsd
 every 16 seconds and send it to unit 0.  The number after the
-parameter time1 is an offset in seconds.  You can use it to adjust out
-some of the fixed delays in the system.  gpsd builds in many offsets
-but they are very GPS and CPU dependent.  
+parameter time1 is a "fudge" offset in seconds.  You can use it to
+adjust out some of the fixed delays in the system.
 
 After starting as root ntpd, then gpsd, a line similar to the one below
 should appear in the output of the command "ntpq -p" (after allowing the
 GPS to acquire a 3D fix).  This may take up to 30 minutes if you GPS
-has to cold start or has a poor sky view.
+has to cold start or has a poor skyview.
 
 -----------------------------------------------------------------------------
-remote	   refid      st t when poll reach  delay    offset  jitter
+remote	   refid     st t when poll reach  delay    offset  jitter
 =========================================================================
 +SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
 -----------------------------------------------------------------------------
@@ -269,29 +268,31 @@ remote	   refid      st t when poll reach  delay    offset  jitter
 If you are running PPS then it will look like this:
 
 -----------------------------------------------------------------------------
-remote	   refid      st t when poll reach  delay    offset  jitter
+remote	   refid     st t when poll reach  delay    offset  jitter
 =========================================================================
 -SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
 *SHM(1)	  .GPS1.     0 l   11   16  377    0.000   -0.059   0.006
 -----------------------------------------------------------------------------
 
 When the value under "reach" remains zero, check that gpsd is running;
-cgps reports a 3D fix; and the '-n' option was used.  Some GPS can
-report time with only one satellite but is almost all cases a 3D fix is
-preferred or required.  Plain NMEA, no PPS, will also drive ntpd, but
-the accuracy as bad as one second, or worse.  When the SHM(0) line does
-not appear at all, check your ntp.conf and the system logs for error
-messages from ntpd.
+cgps reports a 3D fix; and the '-n' option was used.  Some GPSes
+specialized for time service can report time with only one satellite,
+but with most devices a 3D fix is preferred or required.  Plain NMEA,
+no PPS, will also drive ntpd, but the accuracy as bad as one second,
+or worse.  When the SHM(0) line does not appear at all, check your
+ntp.conf and the system logs for error messages from ntpd.
 
 When no other reference clocks appear in the NTP configuration,
 the system clock will lock onto the GPS clock, but this is a bad
 configuration.  You should always have at least two other reference
 clocks in your ntpd.conf for proper ntpd operation.  You want to adjust
 the offsets (fudge) in your ntp.conf so the SHM(1) time is consistent
-with your other reference clocks.  The gpsd developers would like to
-receive information about the offsets (fudge) observed by users for each
-type of receiver.  Please send us the output of the "ntpq -p" command
-and the make and type of receiver.
+with your other reference clocks.
+
+The gpsd developers would like to receive information about the
+offsets (fudge) observed by users for each type of receiver.  Please
+send us the output of the "ntpq -p" command and the make and type of
+receiver.
 
 When in doubt the preferred method to start your time keeping is:
 
