@@ -1009,7 +1009,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		sec_pps--;
 	    }
 	    if (session->context->pps_hook != NULL)
-		session->context->pps_hook(session, sec_pps, &tv);
+		session->context->pps_hook(session, sec_pps, &ts);
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);

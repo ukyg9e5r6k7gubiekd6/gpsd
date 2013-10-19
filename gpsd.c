@@ -1661,13 +1661,13 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 #ifdef PPS_ENABLE
 static void ship_pps_drift_message(struct gps_device_t *session,
 				   unsigned long sec,
-				   struct timeval *tv)
+				   struct timespec *ts)
 /* on PPS interrupt, ship a drift message to all clients */
 {
 #ifdef SOCKET_EXPORT_ENABLE
-    notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_musec\":0,\"clock_sec\":%ld,\"clock_musec\":%ld}\r\n",
+    notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":0,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
-		    sec, tv->tv_sec, tv->tv_usec);
+		    sec, ts->tv_sec, ts->tv_nsec);
 #endif /* SOCKET_EXPORT_ENABLE */
 }
 #endif /* PPS_ENABLE */
