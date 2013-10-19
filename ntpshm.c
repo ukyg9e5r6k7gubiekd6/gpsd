@@ -357,6 +357,12 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 	return -1;
     }
 
+    /*
+     * This innocuous-looking "+ 1" embodies a significant  assumption:
+     * that GPSes report time to the second over the serial stream *after*
+     * emitting PPS for the top of second.  Thus, when we see PPS our
+     * available report is from the previous cycle and we must increment.
+     */
     /*@+relaxtypes@*/
     seconds = shmTime->clockTimeStampSec + 1;
     offset = fabs((tv->tv_sec - seconds)
