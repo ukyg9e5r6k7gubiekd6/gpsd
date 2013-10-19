@@ -1188,10 +1188,10 @@ Per Second) strobe from a device.</para>
         <entry>seconds from the realtime clock</entry>
 </row>
 <row>
-	<entry>real_musec</entry>
+	<entry>real_nsec</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>microseconds from the realtime clock</entry>
+        <entry>nanoseconds from the realtime clock</entry>
 </row>
 <row>
 	<entry>clock_sec</entry>
@@ -1200,10 +1200,10 @@ Per Second) strobe from a device.</para>
         <entry>seconds from the system clock</entry>
 </row>
 <row>
-	<entry>clock_musec</entry>
+	<entry>clock_nsec</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>microseconds from the system clock</entry>
+        <entry>nanoseconds from the system clock</entry>
 </row>
 </tbody>
 </tgroup>
@@ -1231,8 +1231,8 @@ are estimates based on measured latency in other applications)</para>
 
 <programlisting>
 {"class":"PPS","device":"/dev/ttyUSB0",
-     "real_sec":1330212592, "real_musec":343182,
-     "clock_sec":1330212592,"clock_musec":343184}
+     "real_sec":1330212592, "real_nsec":343182,
+     "clock_sec":1330212592,"clock_nsec":343184}
 </programlisting>
 
 </listitem>
