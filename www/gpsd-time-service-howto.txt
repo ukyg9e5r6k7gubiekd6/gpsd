@@ -15,6 +15,12 @@ The document you see is a draft in progress. We would like to produce
 a comprehensive guide suitable for people who know little about time
 service. We encourage others to contribute additions and corrections.
 
+This document does not attempt to explain all the intricacies of
+time service; it is focused on practical advice for one specific
+deployment case.  An overview of the protocols can be found at
+<<WIKI-NTP>>, and the official NTP FAQ <<NTP-FAQ>> is probably
+as gentle an introduction as presently exists.
+
 .Units table
 |====================================================
 | nSec    | nanoSecond  | 1/1,000,000,000 of a second
@@ -125,12 +131,14 @@ device is polled. USB polling intervals vary but on the GR601-W you
 can expect 1ms accuracy; this is typical of USB 1.1 devices. 
 
 .Summary of typical accuracy
-|===================================
-| GPS atomic clock  |  &plusmn;50nSec
-| KPPS              |  &plusmn;1uSec
-| PPS               |  &plusmn;5uSec
-| USB poll interval |  &plusmn;1mSec
-|===================================
+|=======================================
+| GPS atomic clock    |  &plusmn;50nSec
+| KPPS                |  &plusmn;1uSec
+| PPS                 |  &plusmn;5uSec
+| USB poll interval   |  &plusmn;1mSec
+| Stratum 1 NTP time  |  &plusmn;10uSec
+| Stratum 2 NTP time  |  &plusmn;100mSec
+|=======================================
 
 As of late 2013 no USB GPS we know of implements the higher polling-rate
 options in USB 2 and 3.  When one does, and if it has the Macx-1 mod,
@@ -423,6 +431,10 @@ ckuethe could contribute info on how this all works with BSD.
 == References ==
 
 [bibliography]
+- [[[WIKI-NTP]]] http://en.wikipedia.org/wiki/Network_Time_Protocol[Network Time Protocol]
+
+- [[[NTP-FAQ]]] http://www.ntp.org/ntpfaq/[NTP FAQ]
+
 - [[[RFC-1305] http://www.ietf.org/rfc/rfc1305.txt[Network Time Protocol (Version 3)]
 
 - [[[STRATA]]] http://www.endruntechnologies.com/stratum1.htm[What Is Stratum 1?]
