@@ -1952,6 +1952,11 @@ int main(int argc, char *argv[])
 	if (nice(NICEVAL) == -1 && errno != 0)
 	    gpsd_report(context.debug, LOG_INF, "NTPD Priority setting failed.\n");
     }
+    /*
+     * By initializing before we drop privileges, we guarantee that even
+     * hotplugged devices added *after* we drop privileges will be able 
+     * to use segments 0 and 1.
+     */
     (void)ntpshm_init(&context, NOWAIT);
 #endif /* NTPSHM_ENABLE */
 

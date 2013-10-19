@@ -157,10 +157,16 @@ discrimination. This makes them superior for indoor use as time
 sources.
 
 Among newer receiver designs we've found the the uBlox 6 receiver
-particularly good.  Unfortunately as of late 2013 this is still hard
-to find in a packaged RS232 version, as opposed to an OEM module
-exporting TTL levels or an eval kit costing a lot. Search the web; you
-may find a here-today-gone-tomorrow offer on alibaba.com.  
+particularly good.  Very detailed information on its timing
+performance can be found at <<UBLOX-TIMING>>. For the highest
+precision we recommend using its stationary time-service mode with the
+location pre-entered.  GPSD tools don't yet directly support this, but
+that capability may be added in a future release.
+
+Unfortunately as of late 2013 the uBlox 6 is still hard to find in a
+packaged RS232 version, as opposed to an OEM module exporting TTL
+levels or an eval kit costing upwards of US$300. Search the web; you
+may find a here-today-gone-tomorrow offer on alibaba.com.
 
 == Feeding NTPD from GPSD ==
 
@@ -400,3 +406,6 @@ ckuethe could contribute info on how this all works with BSD.
 - [[[STRATA]]] http://www.endruntechnologies.com/stratum1.htm[What Is Stratum 1?]
 
 - [[[HARDWARE]]] http://catb.org/gpsd/hardware.html[Compatible Hardware]
+
+- [[UBLOX-TIMING]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
+
