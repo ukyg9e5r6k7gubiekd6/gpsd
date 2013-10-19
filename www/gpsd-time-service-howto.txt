@@ -121,7 +121,7 @@ USB GPSes that deliver 1PPS are rare, but do exist. Notably, there's
 the Navsys GR601-W. In case this device goes out of production it's
 worth noting that it's a trivial modification of the stock
 two-chip-on-a-miniboard commodity-GPS design of engine plus
-USB-to-serial adapter; the GR601-W wires a UBlox 6 to a Prolific Logic
+USB-to-serial adapter; the GR601-W wires a uBlox 6 to a Prolific Logic
 PL23203.  To get 1PPS out, just wire the 1PPS pin from the engine to
 the Carrier Detect pin on the USB adapter. (This is known as the
 "Macx-1 mod".)
@@ -181,10 +181,10 @@ its timing performance can be found at <<UBLOX-TIMING>>. One of us
 that would make an excellent Stratum 0 device.
 
 Unfortunately as of late 2013 the uBlox 6 is still hard to find in a
-packaged RS232 version, as opposed to an OEM module exporting TTL
+packaged RS232 version, as opposed to a bare OEM module exporting TTL
 levels or an eval kit like the EVK 6H-0-001 costing upwards of
 US$300. Search the web; you may find a here-today-gone-tomorrow offer
-on alibaba.com.
+on alibaba.com or somewhere similar.
 
 The uBlox, and some other higher-end GPS receivers, has a stationary
 mode which, after you initialize it with the device's location, can
@@ -195,6 +195,10 @@ directly support this, but that capability may be added in a future
 release.
 
 == Feeding NTPD from GPSD ==
+
+Most Unix systems get their time service through ntpd, a very old and
+stable open-source software suite which is the reference
+implementation of NTP.  The project home page is <<NTP.ORG>>.
 
 When gpsd receives a sentence with a timestamp, it packages the
 received timestamp with current local time and sends it to a
@@ -217,7 +221,7 @@ this can be used to update NTP at much higher accuracy than message
 time provides.  You can determine whether your GPS emits this pulse,
 and gpsd is detecting it, by running at -D 5 and watching for
 carrier-detect state change messages in the logfile.  In addition, if
-your kernel provides the RFC 2783 KPPS (kernel PPS) API then gpsd will
+your kernel provides the RFC 2783 KPPS (kernel PPS) API gpsd will
 use that for extra accuracy.
 
 Note that gpsd assumes that after each fix the GPS will assert
@@ -284,14 +288,17 @@ fudge 127.127.28.1 refid GPS1
 The magic pseudo-IP address 127.127.28.0 identifies unit 0 of the ntpd
 shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0 is used
 for message-decoded time and unit 1 for the (more accurate, when
-available) time derived from the PPS synchronization pulse.  Splitting
-these notifications allows ntpd to use its normal heuristics to weight
-them.  Different units (2 and 3, respectively) must be used when gpsd 
-is not started as root.
+available) time derived from combining message-decoded time with the
+PPS synchronization pulse.  Splitting these notifications allows ntpd
+to use its normal heuristics to weight them. 
+
+(Different units - 2 and 3, respectively - must be used when gpsd is not
+started as root.)
 
 With this configuration, ntpd will read the timestamp posted by gpsd
 every 16 seconds and send it to unit 0.  The number after the
-parameter time1 is a "fudge" offset in seconds.  You can use it to
+parameter time1 is a "fudge", offset in seconds.  It's an estimate
+of the latency between the time source and your ntpd. You can use it to
 adjust out some of the fixed delays in the system.
 
 After starting as root ntpd, then gpsd, a line similar to the one below
@@ -318,7 +325,7 @@ When the value under "reach" remains zero, check that gpsd is running;
 cgps reports a 3D fix; and the '-n' option was used.  Some GPSes
 specialized for time service can report time with only one satellite,
 but with most devices a 3D fix is preferred or required.  Plain NMEA,
-no PPS, will also drive ntpd, but the accuracy as bad as one second,
+no PPS, will also drive ntpd, but the accuracy is as bad as one second,
 or worse.  When the SHM(0) line does not appear at all, check your
 ntp.conf and the system logs for error messages from ntpd.
 
@@ -330,9 +337,10 @@ the offsets (fudge) in your ntp.conf so the SHM(1) time is consistent
 with your other reference clocks.
 
 The gpsd developers would like to receive information about the
-offsets (fudge) observed by users for each type of receiver.  Please
-send us the output of the "ntpq -p" command and the make and type of
-receiver.
+offsets (fudges) observed by users for each type of receiver.  Please
+check the GPS hardware table at <<HARDWARE>>; if your GPS is not
+present or doesn't have a recommended fudge, send us the output of the
+"ntpq -p" command and the make and type of receiver.
 
 When in doubt the preferred method to start your time keeping is:
 
@@ -346,12 +354,18 @@ $ su -
 
 == Feeding chrony from GPSD ==
 
+chrony is an alternative open-source implementation of NTP service,
+originally designed for systems with low-bandwidth or intermittent
+TCP/IP service.  It interoperates with ntpd using the same protocols,
+but is somewhat easier to configure and administer.  The chrony project
+has a home page at <<CHRONY>>.
+
 gpsd can provide reference clock information to chronyd similarly to the
 way it talks to ntpd.  The advantage to using chrony is that the PPS
 time resolution is in nanoseconds.  This is 1,000 times more precision
 than the time resolution provided to ntpd.  When gpsd supports the new
 ntpd protocol this difference will disappear, but chronyd is still
-preferred.
+simpler to set up.
 
 gpsd, when run as root, talks to chronyd using a socket named
 /var/run/chrony.ttyXX.sock (where ttyXX is replaced by the GPS device
@@ -455,3 +469,6 @@ ckuethe could contribute info on how this all works with BSD.
 
 - [[UBLOX-TIMING]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
 
+- [[NTP.ORG]]] http://www.ntp.org/[Home of the Network Time Protocol project]
+
+- [[[CHRONY]]] http://chrony.tuxfamily.org/[Chrony Home]
