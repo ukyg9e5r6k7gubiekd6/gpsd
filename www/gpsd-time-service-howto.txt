@@ -48,7 +48,7 @@ clock's tick rate until it is resynchronized.  These tick-rate changes
 are usually extremely small, much too small for a human or even most
 software timing loops to ever notice. But large changes are possible.
 
-Most computers are just NTP clients.  They take NTP notifications from
+Most computers are just NTP clients.  They request NTP notifications from
 a set of servers (which on a Unix system is described by a list in
 /etc/ntp.conf or possibly /etc/default/ntpdate) and use it to adjust
 the local clock.  It is generally expected that NTP clients will have
@@ -68,7 +68,7 @@ over a network link.)  Ordinary computers are normally configured to
 get time from one or more Stratum 2 servers.
 
 With GPSD and a suitable GPS, you can locally condition your clock to
-higher accuracy than internet received NTP time, and possibly serve that
+higher accuracy than Internet received NTP time, and possibly serve that
 to other systems.  
 
 This would create your very own Stratum 1 server. Anyone can do this;
@@ -206,11 +206,11 @@ If you're going to use gpsd for time service you must run in -n mode so
 the clock will be updated even when no clients are active.
 
 Note that deriving time from the date/time messages received from the
-GPS is not as accurate as you might expect.  Messages are often
-delayed in the receiver and on the link by as much as several hundred
-mSec, and this delay is not constant.
+GPS (without PPS) is not as accurate as you might expect.  Messages
+are often delayed in the receiver and on the link by as much as
+several hundred mSec, and this delay is not constant.
 
-//Hal: This is where a reference to SiRFs-are-bogus would be good.
+TODO: Hal: This is where a reference to SiRFs-are-bogus would be good.
 
 On most OSes, gpsd includes support for interpreting the 1PPS pulses;
 this can be used to update NTP at much higher accuracy than message
