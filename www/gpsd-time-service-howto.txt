@@ -27,7 +27,7 @@ service. We encourage others to contribute additions and corrections.
 NTP (Network Time Protocol) is a set of protocols that attempts to
 synchronize computer clocks across the Internet - ultimately, to the
 master atomic clock at the U.S. Naval Observatory.  NTP Version 3 is
-defined in RFC 1305.
+defined in <<RFC-1305>>.
 
 NTP service daemons running on each host do clock synchronization in
 the presence of variable network latency by monitoring those delays in
@@ -193,7 +193,7 @@ install KPPS support and the time_pps.h header file.  We recommend you
 do that.  If your kernel is built in the normal modular way, this
 package installation will suffice.
 
-If you are scratch-building your linux kernel, the configuration 
+If you are scratch-building your Linux kernel, the configuration 
 must include these two lines:
 
 -----------------------------------------------------------------------------
@@ -212,11 +212,11 @@ be used with devices passed that way, not with GPSes that are later
 presented to gpsd by the hotplug system.  
 
 Those hotplug devices will, however, may be able to use plain,
-non-kernel PPS. gpsd trys to automatically fall back to this when
-absence of root permissions makes KPPS unavailable.  This fall back is
+non-kernel PPS. gpsd tries to automatically fall back to this when
+absence of root permissions makes KPPS unavailable. This fallback is
 complicated by the fact that gpsd needs to communicate to ntpd in
 a different way in root and non-root mode.  This complicates the
-configuation in ways beyond the scope of tis document and is stronly
+configuration in ways beyond the scope of this document and is strongly
 discouraged in practice.
 
 Here is a sample ntp.conf configuration stanza telling ntpd how to
@@ -246,7 +246,8 @@ shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0 is used
 for message-decoded time and unit 1 for the (more accurate, when
 available) time derived from the PPS synchronization pulse.  Splitting
 these notifications allows ntpd to use its normal heuristics to weight
-them.  Different units must be used when gpsd is not started as root.
+them.  Different units (2 and 3, respectively) must be used when gpsd 
+is not started as root.
 
 With this configuration, ntpd will read the timestamp posted by gpsd
 every 16 seconds and send it to unit 0.  The number after the
@@ -393,6 +394,8 @@ ckuethe could contribute info on how this all works with BSD.
 == References ==
 
 [bibliography]
+- [[[RFC-1305] http://www.ietf.org/rfc/rfc1305.txt[Network Time Protocol (Version 3)]
+
 - [[[STRATA]]] http://www.endruntechnologies.com/stratum1.htm[What Is Stratum 1?]
 
 - [[[HARDWARE]]] http://catb.org/gpsd/hardware.html[Compatible Hardware]
