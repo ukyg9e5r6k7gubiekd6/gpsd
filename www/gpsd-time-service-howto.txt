@@ -40,7 +40,7 @@ NTP conditions your system clock by noticing how your system clock time
 differs from deduced NTP time, then speeding up or slowing down your
 clock's tick rate until it is resynchronized.  These tick-rate changes
 are usually extremely small, much too small for a human or even most
-software timing loops to ever notice.  Large changes are possible.
+software timing loops to ever notice. But large changes are possible.
 
 Most computers are just NTP clients.  They take NTP notifications from
 a set of servers (which on a Unix system is described by a list in
@@ -49,7 +49,7 @@ the local clock.  It is generally expected that NTP clients will have
 an accuracy (that is, maximum divergence from the master atomic clock)
 of &plusmn;100 mSec depending upon your network connnection.
 
-Some NTP hosts are time *servers*.  These are known as chimers.  They
+Some NTP hosts are time *servers*.  These are known as "chimers".  They
 use high-precision time sourced synchronized to the Naval Observatory
 timebase to export reliable time for use by NTP clients.
 
@@ -62,10 +62,20 @@ get time from one or more Stratum 2 servers.
 
 With GPSD and a suitable GPS, you can locally condition your clock to
 higher accuracy than internet received NTP time, and possibly serve that
-to other systems.  This would create your very own Stratum 1 server.
+to other systems.  
 
-TODO: How good can GPSD time service be?  Is it really true that most
-public NTP servers are Stratum 2, or are there more layers?
+This would create your very own Stratum 1 server. Anyone can do this;
+there is no official authority, and NTP clients may choose to use your
+host as a chimer. The time-service network is self-regulating, with
+NTP daemons constantly pruning statistical outliers so the timebase
+cannot be accidentally or deliberately compromised.
+
+In fact many public and widely-trusted Stratum 1 chimers use GPSes as
+their Stratum 0, and a significant fraction of those use GPSD in the
+way we will describe here.
+
+TODO: Is it really true that most public NTP servers are Stratum 2, or
+are there more layers?
 
 == 1PPS quality issues ==
 
@@ -337,8 +347,6 @@ refclock SOCK /tmp/chrony.ttyXX.sock
 == TODOs ==
 
 TODO: tutorial on how to choose NTPD offset parameters
-
-TODO: What is a "chimer"?
 
 Gary says:
 
