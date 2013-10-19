@@ -119,9 +119,6 @@ icon"> in this column means we have a regression test load for the
 device that is checked before each release. Vendors are listed in
 alphabetical order.</p>
 
-<p>There is also a <a href="#timing">table of PPS-capable
-receivers</a> which may be appropriate for timing use.</p>
-
 <p><b>Warning:</b> the baudrate-hunting code in <code>gpsd</code>
 tickles serious firmware bugs on some Bluetooth and USB devices.
 These bugs may send affected GPSes catatonic.  See this <a
