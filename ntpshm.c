@@ -613,6 +613,7 @@ volatile bool gpsd_ppsmonitor_stop = false;
 /*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
+    unsigned long sec_pps;
     struct gps_device_t *session = (struct gps_device_t *)arg;
     struct timeval  tv;
     struct timespec ts;
@@ -1003,8 +1004,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)sample.tv.tv_sec,
 		    (unsigned long)sample.tv.tv_usec,
 		    sample.offset);
+	    sec_pps = (unsigned long)sample.tv.tv_sec;
+	    if ( 0 > sample.offset ) {
+		sec_pps--;
+	    }
 	    if (session->context->pps_hook != NULL)
-		session->context->pps_hook(session, &tv);
+		session->context->pps_hook(session, sec_pps, &tv);
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);
