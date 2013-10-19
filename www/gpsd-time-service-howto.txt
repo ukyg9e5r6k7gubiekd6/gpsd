@@ -156,17 +156,31 @@ choice, newer devices have better sensitivity and signal
 discrimination. This makes them superior for indoor use as time
 sources.
 
-Among newer receiver designs we've found the the uBlox 6 receiver
-particularly good.  Very detailed information on its timing
-performance can be found at <<UBLOX-TIMING>>. For the highest
-precision we recommend using its stationary time-service mode with the
-location pre-entered.  GPSD tools don't yet directly support this, but
-that capability may be added in a future release.
+In general, use a GPS with an RS232 interface for time service if you
+can.  The GR601-W was designed (by one of the authors, as it happens)
+for deployment with commodity TCP/IP routers that only have USB ports.
+RS232 is more fiddly to set up, but it can deliver significantly 
+better accuracy and repeatability.
+
+Among newer receiver designs we've found the the uBlox 6 receiver used
+in the GR601-W to be particularly good.  Very detailed information on
+its timing performance can be found at <<UBLOX-TIMING>>. One of us
+(Raymond) has recent experience with an eval kit, the EVK 6H-0-001,
+that would make an excellent Stratum 0 device.
 
 Unfortunately as of late 2013 the uBlox 6 is still hard to find in a
 packaged RS232 version, as opposed to an OEM module exporting TTL
-levels or an eval kit costing upwards of US$300. Search the web; you
-may find a here-today-gone-tomorrow offer on alibaba.com.
+levels or an eval kit like the EVK 6H-0-001 costing upwards of
+US$300. Search the web; you may find a here-today-gone-tomorrow offer
+on alibaba.com.
+
+The uBlox, and some other higher-end GPS receivers, has a stationary
+mode which, after you initialize it with the device's location, can
+deliver time service with only one good satellite lock (as opposed to
+the three required for a fix in its normal mode). For most reliable
+service we recommend using stationary mode. GPSD tools don't yet
+directly support this, but that capability may be added in a future
+release.
 
 == Feeding NTPD from GPSD ==
 
