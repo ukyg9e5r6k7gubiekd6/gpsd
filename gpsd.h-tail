@@ -37,11 +37,12 @@ typedef unsigned int speed_t;
  * 3.6  VERSION, WATCH, and DEVICES from slave gpsds get "remote" attribute.
  * 3.7  PPS message added to repertoire. SDDBT water depth reported as
  *      negative altitude with Mode 3 set.
- * 3.8  AIS course nember becomes float in scaled mode (bug fix).
+ * 3.8  AIS course member becomes float in scaled mode (bug fix).
  * 3.9  split24 flag added. Controlled-vocabulary fields are now always
  *      dumped in both numeric and string form, with the string being the
  *      value of a synthesized additional attribute with "_text" appended.
  *      (Thus, the 'scaled' flag no longer affects display of these fields.)
+ *      PPS drift message ships nsec rather than msec.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
 #define GPSD_PROTO_MINOR_VERSION	9	/* bump on compatible changes */
