@@ -596,7 +596,7 @@ void gpsd_await_pps_initialization(struct gps_context_t *context)
     gpsd_report(context->debug, LOG_WARN,
 		"waiting on KPPS initalization...\n");
 
-    while (dropdead > 0)
+    while (dropdead-- > 0)
     {
 	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
 	(void)pthread_mutex_lock(&initialization_mutex);
