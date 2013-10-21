@@ -31,6 +31,7 @@ static int gpsd_control(char *action, char *argument)
 {
     int connect = -1;
     char buf[512];
+    int status;
 
     (void)syslog(LOG_ERR, "gpsd_control(action=%s, arg=%s)", action, argument);
     if (access(control_socket, F_OK) == 0 && 
@@ -73,17 +74,20 @@ static int gpsd_control(char *action, char *argument)
 	if (stat(argument, &sb) != 1)
 	    (void)chmod(argument, sb.st_mode | S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	(void)snprintf(buf, sizeof(buf), "+%s\r\n", argument);
-	ignore_return(write(connect, buf, strlen(buf)));
+	status = write(connect, buf, strlen(buf));
 	ignore_return(read(connect, buf, 12));
     } else if (strcmp(action, "remove") == 0) {
 	(void)snprintf(buf, sizeof(buf), "-%s\r\n", argument);
-	ignore_return(write(connect, buf, strlen(buf)));
+	status = write(connect, buf, strlen(buf));
 	ignore_return(read(connect, buf, 12));
+    } else {
+	(void)syslog(LOG_ERR, "unknown action \"%s\"", action);
+	status = -1;
     }
     /*@ +sefparams @*/
     (void)close(connect);
     //syslog(LOG_DEBUG, "gpsd_control ends");
-    return 0;
+    return status;
 }
 
 int main(int argc, char *argv[])
