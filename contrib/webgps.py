@@ -277,7 +277,8 @@ function draw_satview() {
     def run(self, suffix, period):
         jsfile = 'gpsd' + suffix + '.js'
         htmlfile = 'gpsd' + suffix + '.html'
-        end = time.time() + period
+        if period is not None:
+            end = time.time() + period
         self.needsupdate = 1
         self.stream(WATCH_ENABLE | WATCH_NEWSTYLE)
         for report in self:
@@ -288,8 +289,10 @@ function draw_satview() {
                 self.generate_js(jsfile)
                 self.needsupdate = 0
             self.generate_html(htmlfile, jsfile)
-            if period <= 0 and self.fix.mode >= MODE_2D \
-            or period > 0 and time.time() > end:
+            if period is not None and (
+                period <= 0 and self.fix.mode >= MODE_2D or
+                period > 0 and time.time() > end
+            ):
                 break
 
 def main():
@@ -302,13 +305,13 @@ def main():
     if arg[-1:] in factors.keys():
         period = int(arg[:-1]) * factors[arg[-1]]
     elif arg == 'c':
-	period = None
+        period = None
     elif arg:
         period = int(arg)
     else:
         period = 0
     if arg:
-	arg = '-' + arg
+        arg = '-' + arg
 
     sat = SatTracks()
 
