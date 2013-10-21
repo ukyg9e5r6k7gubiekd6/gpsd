@@ -46,6 +46,10 @@ class Track:
             return 1
         return 0
 
+    def track(self):
+        '''Return the track as canvas drawing operations.'''
+        return 'M(%d,%d); ' % self.posn[0] + ''.join(['L(%d,%d); ' % p for p in self.posn[1:]])
+
 class SatTracks(gps):
     '''gpsd client writing HTML5 and <canvas> output.'''
 
@@ -196,17 +200,11 @@ function draw_satview() {
     ctx.strokeStyle = 'red';
 """);
 
-        def M(p):
-            return 'M(%d,%d); ' % p
-        def L(p):
-            return 'L(%d,%d); ' % p
-
         # Draw the tracks
         for t in self.sattrack.values():
             if t.posn:
-                fh.write("    ctx.globalAlpha = %s; ctx.beginPath(); %s%sctx.stroke();\n" % (
-                    t.stale == 0 and '0.66' or '1', M(t.posn[0]),
-                    ''.join([L(p) for p in t.posn[1:]])
+                fh.write("    ctx.globalAlpha = %s; ctx.beginPath(); %sctx.stroke();\n" % (
+                    t.stale == 0 and '0.66' or '1', t.track()
                 ))
 
         fh.write("""
