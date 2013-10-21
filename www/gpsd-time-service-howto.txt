@@ -528,6 +528,36 @@ If the offset is positive, reduce the time1 value and vice versa.
 A more detailed description of the output is available at
 <<NTPQ-OUTPUT>>.
 
+In order to determine the correct GPS offset, do the following:
+
+1. Add these lines to ntp.conf:
+
+-----------------------------------------------------------------------------
+statsdir /var/log/ntpstats/
+statistics peerstats
+filegen peerstats file peerstats type day enable
+-----------------------------------------------------------------------------
+
+This enables logging of the peer server statistics.
+
+2. Start ntpd and let it run for at least four hours.
+
+3. Calculate the average GPS offset:
+
+-----------------------------------------------------------------------------
+awk '
+     /127\.127\.28\.0/ { sum += $5 * 1000; cnt++; }
+     END { print sum / cnt; }
+' </var/log/ntpstats/peerstats
+-----------------------------------------------------------------------------
+
+This prints the average offset.
+
+5. Adjust the "time1" value in ntp.conf by subtracting the average
+   offset from step 4.
+
+6. Restart ntpd.
+
 == Providing public NTP service ==
 
 <<NTP-FAQ>> has good advice on things to be sure you have done - and
