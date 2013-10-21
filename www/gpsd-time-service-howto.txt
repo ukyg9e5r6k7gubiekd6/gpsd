@@ -62,27 +62,29 @@ timebase to export reliable time for use by NTP clients.
 
 You will hear time service people speak of "Stratum 0" (the reference
 clocks) "Stratum 1" (NTP servers directly connected to reference
-clocks over a path with known and compensated-for latency) and
+clocks over a path with known and compensated-for latency)
 "Stratum 2" (publicly accessible servers that get time from Stratum 1
-over a network link.)  Ordinary computers are normally configured to
-get time from one or more Stratum 2 servers.
+over a network link.) Stratum 3 chimers redistribute time from Stratum
+2, and so forth. There are defined higher strata up to 15, but
+you will probably never see a public chimer higher than Stratum 3.
 
-With GPSD and a suitable GPS, you can locally condition your clock to
-higher accuracy than Internet received NTP time, and possibly serve that
-to other systems.  
+Ordinary client computers are normally configured to get time from one
+or more Stratum 2 (or less commonly Stratum 3) servers. With GPSD and
+a suitable GPS, you can easily condition your clock to higher
+accuracy than typical Stratum 2; with a little effort you can do
+better than public Stratum 1 servers.
 
-This would create your very own Stratum 1 server. Anyone can do this;
-there is no official authority, and NTP clients may choose to use your
-host as a chimer. The time-service network is self-regulating, with
-NTP daemons constantly pruning statistical outliers so the timebase
-cannot be accidentally or deliberately compromised.
+You can then make your high-quality time available to other systems on
+your network.  You can even join the fraternity of "time nuts" who run
+public NTP servers for fun.  Anyone can do this; there is no official
+authority, and NTP clients may choose to use your host as a
+chimer. The time-service network is self-regulating, with NTP daemons
+constantly pruning statistical outliers so the timebase cannot be
+accidentally or deliberately compromised.
 
 In fact many public and widely-trusted Stratum 1 chimers use GPSes as
 their Stratum 0, and a significant fraction of those use GPSD in the
 way we will describe here.
-
-TODO: Is it really true that most public NTP servers are Stratum 2, or
-are there more layers?
 
 == 1PPS quality issues ==
 
@@ -139,6 +141,7 @@ can expect 1ms accuracy; this is typical of USB 1.1 devices.
 | USB poll interval   |  &plusmn;1mSec
 | Stratum 1 NTP time  |  &plusmn;10uSec
 | Stratum 2 NTP time  |  &plusmn;100mSec
+| Stratum 3 NTP time  |  &plusmn;200mSec
 |=======================================
 
 (Sources for the NTP accuracy bounds are <<STRATA>> and <<NTP-FAQ>>.)
@@ -362,16 +365,17 @@ $ su -
 
 chrony is an alternative open-source implementation of NTP service,
 originally designed for systems with low-bandwidth or intermittent
-TCP/IP service.  It interoperates with gpsd using the same protocols,
-but is somewhat easier to configure and administer.  The chrony project
-has a home page at <<CHRONY>>.
+TCP/IP service.  It interoperates with ntpd using the same protocols,
+but is somewhat easier to configure and administer.  Like ntpd, it can
+either operate purely as a client or provide time service. The chrony
+project has a home page at <<CHRONY>>.
 
-gpsd can provide reference clock information to chronyd similarly to the
-way it talks to ntpd.  The advantage to using chrony is that the PPS
-time resolution is in nanoseconds.  This is 1,000 times more precision
-than the time resolution provided to ntpd.  When gpsd supports the new
-ntpd protocol this difference will disappear, but chronyd is still
-simpler to set up.
+gpsd can provide reference clock information to chronyd similarly to
+the way it talks to ntpd.  The advantage to using chrony is that the
+PPS time resolution is in nanoseconds.  This is 1,000 times more
+precision than the microsecond time resolution provided to ntpd.  When
+gpsd supports the new ntpd protocol this difference will disappear,
+but chronyd is still simpler to set up.
 
 gpsd, when run as root, talks to chronyd using a socket named
 /var/run/chrony.ttyXX.sock (where ttyXX is replaced by the GPS device
@@ -406,11 +410,14 @@ If not running as root:
 refclock SOCK /tmp/chrony.ttyXX.sock 
 -----------------------------------------------------------------------------
 
-== NTPD performance tuning ==
+== NTP performance tuning ==
 
 For good time stability, you should always have at least two other
-reference clocks in your ntpd.conf besides your GPS - in case, for
-example, your GPS is temporarily unable to achieve satellite lock.
+reference clocks in your ntpd or chrony configuration besides your GPS
+- in case, for example, your GPS is temporarily unable to achieve
+satellite lock. 
+
+You can find 
 
 TODO: more on performance tuning and diagnostics here. 
 
@@ -420,10 +427,10 @@ fudges until they all agree."
 == Providing public NTP service ==
 
 <<NTP-FAQ>> has good advice on things to be sure you have done - and
-are ready to do - before becoming a public chimer.
+are ready to do - before becoming a public chimer. One detail it
+doesn't mention is that you'll need to un-firewall UDP port 123.
 
-One detail it doesn't mention is that you'll need to un-firewall UDP
-port 123.
+If and when you are ready to go public, see <<JOIN-POOL>>. 
 
 == TODOs ==
 
@@ -487,6 +494,10 @@ gives text printout which is easier to parse from simple scripts.
 
 - [[UBLOX-TIMING]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
 
-- [[NTP.ORG]]] http://www.ntp.org/[Home of the Network Time Protocol project]
+- [[[NTP.ORG]]] http://www.ntp.org/[Home of the Network Time Protocol project]
+
+- [[[USE-POOL]]] http://www.pool.ntp.org/en/use.html[How do I use pool.ntp.org?]
+
+- [[[JOIN-POOL]]] http://www.pool.ntp.org/en/join.html[How do I join pool.ntp.org?]
 
 - [[[CHRONY]]] http://chrony.tuxfamily.org/[Chrony Home]
