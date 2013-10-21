@@ -1,11 +1,40 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-# webgps.py
-#
-# This is a Python port of webgps.c from http://www.wireless.org.au/~jhecker/gpsd/
-# by Beat Bolli <me+gps@drbeat.li>
-#
+"""webgps.py
+
+This is a Python port of webgps.c from http://www.wireless.org.au/~jhecker/gpsd/
+by Beat Bolli <me+gps@drbeat.li>
+
+It creates a skyview of the currently visible GPS satellites and their tracks
+over a time period.
+
+Usage:
+    ./webgps.py [duration]
+
+    duration may be
+    - a number of seconds
+    - a number followed by a time unit ('s' for secinds, 'm' for minutes,
+      'h' for hours or 'd' for days, e.g. '4h' for a duration of four hours)
+    - the letter 'c' for continuous operation
+
+If duration is missing, the current skyview is generated and webgps.py exits
+immediately. This is the same as giving a duration of 0.
+
+If a duration is given, webgps.py runs for this duration and generates the
+tracks of the GPS satellites in view. If the duration is the letter 'c',
+the script never exits and continuously updates the skyview.
+
+webgps.py generates two files: a HTML5 file that can be browsed, and a
+JavaScript file that contains the drawing commands for the skyview. The HTML5
+file auto-refreshes every five minutes. The generated file names are
+"gpsd-<duration>.html" and "gpsd-<duration>.js".
+
+If webgps.py is interrupted with Ctrl-C before the duration is over, it saves
+the current tracks into the file "tracks.p". This is a Python "pickle" file.
+If this file is present on start of webgps.py, it is loaded. This allows to
+restart webgps.py without losing accumulated satellite tracks.
+"""
 
 import time, calendar, math, socket, sys, os, select, pickle
 try:
