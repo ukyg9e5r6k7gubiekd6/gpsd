@@ -254,14 +254,14 @@ function draw_satview() {
             t = self.sattrack[prn]
         except KeyError:
             self.sattrack[prn] = t = Track(prn)
-        self.needsupdate += t.add(x, y)
+        if t.add(x, y):
+            self.needsupdate = 1
 
     def update_tracks(self):
         self.make_stale()
         for s in self.satellites:
             x, y = polartocart(s.elevation, s.azimuth)
-            if self.insert_sat(s.PRN, x, y):
-                self.needsupdate = 1
+            self.insert_sat(s.PRN, x, y)
         self.delete_stale()
 
     def generate_html(self, htmlfile, jsfile):
