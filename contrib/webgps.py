@@ -8,7 +8,11 @@
 #
 
 import time, calendar, math, socket, sys, os, select, pickle
-from gps import *
+try:
+    from gps import *
+except ImportError:
+    sys.path.append('..')
+    from gps import *
 
 TRACKMAX = 1024
 STALECOUNT = 10
