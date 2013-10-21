@@ -55,6 +55,13 @@ may be a list of options to be passed to <application>gpsd</application>
 when this tool launches it.  It defaults to an empty string.</para>
 </refsect1>
 
+<refsect1 id='exit_status'><title>RETURN VALUES</title>
+
+<para>1 if the action was unknown or the write to the control socket
+failed, 0 otherwise</para>
+
+</refsect1>
+
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
