@@ -299,17 +299,14 @@ def main():
     factors = {
         's': 1, 'm': 60, 'h': 60 * 60, 'd': 24 * 60 * 60
     }
-    arg = argv and argv[0] or ''
+    arg = argv and argv[0] or '0'
     if arg[-1:] in factors.keys():
         period = int(arg[:-1]) * factors[arg[-1]]
     elif arg == 'c':
         period = None
-    elif arg:
-        period = int(arg)
     else:
-        period = 0
-    if arg:
-        arg = '-' + arg
+        period = int(arg)
+    prefix = '-' + arg
 
     sat = SatTracks()
 
@@ -321,7 +318,7 @@ def main():
         p.close()
 
     try:
-        sat.run(arg, period)
+        sat.run(prefix, period)
     except KeyboardInterrupt:
         # save the tracks
         p = open(pfile, 'w')
