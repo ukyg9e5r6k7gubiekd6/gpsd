@@ -74,7 +74,7 @@ encode JSON on standard input to JSON on standard output. This option
 is only useful for regression-testing of the JSON dumping and parsing
 code.</para>
 
-<para>The <option>-t</option> option option tells the program to report
+<para>The <option>-s</option> option option tells the program to report
 AIS Type 24 sentence halves separately rather than attempting to
 aggregate them.</para>
 
