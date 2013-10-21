@@ -414,6 +414,9 @@ example, your GPS is temporarily unable to achieve satellite lock.
 
 TODO: more on performance tuning and diagnostics here. 
 
+TODO: Expand on: "Basically you get several good chimers and adjust
+fudges until they all agree."
+
 == Providing public NTP service ==
 
 <<NTP-FAQ>> has good advice on things to be sure you have done - and
@@ -423,8 +426,6 @@ One detail it doesn't mention is that you'll need to un-firewall UDP
 port 123.
 
 == TODOs ==
-
-TODO: tutorial on how to choose NTPD offset parameters
 
 Gary says:
 
@@ -450,13 +451,16 @@ I would also add the comments in ntpshm.c starting on lines 78 and 865.
 
 ckuethe could contribute info on how this all works with BSD.
 
-# > A brief tutorial on how to choose NTPd offset parameters would be good
-# > to have in the HOWTO, too.  Basically I want this to be a primer for
-# > the relatively ignorant - like, er, me.
-#
-# One could argue that is out of our scope as it is in the ntp.conf
-# file.  Basically you get several good chimers and adjust fudges until
-# they all agree.  From what I can tel no one really does it right.
+Hal says:
+
+No, the servers are OK.  The problem is a buggy tool and/or a poor choice of
+tool.  Try sntp -d xxx or ntpdate -d xxx  (ntpdate is depricated)
+
+ntptrace calls ntpq which uses mode 6 packets.  That's the back door for
+debugging/monitoring.  It's disabled (from the outside world) on many/most
+ntpd servers that are exposed to the big/bad internet.  But when it works, it
+gives text printout which is easier to parse from simple scripts.
+
 
 # > There's a reference to it in a comment
 # > in ntpshm.c, but it didn't tell me eniough to understand *why*.
