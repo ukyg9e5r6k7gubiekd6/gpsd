@@ -7,9 +7,9 @@ you can find the original at the GPSD project website.
 
 == Introduction ==
 
-GPSD, NTP and a GPS supplying 1PPS output can be used to set up a
-high-quality NTP time server. This HOWTO explains the method and
-various options you have in setting it up.
+GPSD, NTP and a GPS supplying 1PPS (pulse-per-second) output can be
+used to set up a high-quality NTP time server. This HOWTO explains the
+method and various options you have in setting it up.
 
 The document you see is a draft in progress. We would like to produce
 a comprehensive guide suitable for people who know little about time
@@ -91,16 +91,16 @@ pulse delivered by some GPSes to correct a local NTP instance.
 
 GPS satellites deliver a top-of-GPS-second notification that is
 nominally accurate to 50nSec. 1PPS-capable GPSes often use an RS-232
-control line to ship the 1PPS edge of second to the host system (usually
-Carrier Detect or Ring Indicator; GPSD will quietly accept either).
-Satellite top-of-second loses some accuracy on the way down due mainly
-to variable delays in the ionophere; processing overhead in the GPS
-itself adds a bit more latency, and your server detecting that pulse add
-still more latency.  But it's still often accurate to on the order of 1
-uSec.
+control line to ship the 1PPS edge of second to the host system
+(usually Carrier Detect or Ring Indicator; GPSD will quietly accept
+either).  Satellite top-of-second loses some accuracy on the way down
+due mainly to variable delays in the ionosphere; processing overhead
+in the GPS itself adds a bit more latency, and your server detecting
+that pulse add still more latency and jitter.  But it's still often
+accurate to on the order of 1 uSec.
 
 Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
-and plain PPS.  KPPS is formally known as RFC 2783 PPS.  These have
+and plain PPS latching.  KPPS is formally known as RFC 2783 PPS.  These have
 different error budgets.
 
 Kernel PPS uses a kernel function to accurately timestamp the status
@@ -356,7 +356,7 @@ $ su -
 
 chrony is an alternative open-source implementation of NTP service,
 originally designed for systems with low-bandwidth or intermittent
-TCP/IP service.  It interoperates with ntpd using the same protocols,
+TCP/IP service.  It interoperates with gpsd using the same protocols,
 but is somewhat easier to configure and administer.  The chrony project
 has a home page at <<CHRONY>>.
 
