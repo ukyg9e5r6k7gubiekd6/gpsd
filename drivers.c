@@ -1233,6 +1233,10 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	ais_context = &session->driver.aivdm.context[1];
 	session->driver.aivdm.ais_channel ='B';
 	break;
+    case 'C':
+        gpsd_report(session->context->debug, LOG_INF,
+                    "ignoring AIS channel C (secure AIS).\n");
+        return false;
     default:
 	gpsd_report(session->context->debug, LOG_ERROR,
 		    "invalid AIS channel 0x%0X .\n", field[4][0]);
