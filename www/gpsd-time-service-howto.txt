@@ -212,7 +212,8 @@ the clock will be updated even when no clients are active.
 Note that deriving time from the date/time messages received from the
 GPS (without PPS) is not as accurate as you might expect.  Messages
 are often delayed in the receiver and on the link by as much as
-several hundred mSec, and this delay is not constant.
+several hundred mSec, and this delay is not constant.  Under these
+circumstances you can't expect accuracy to UTC better than 1 second. 
 
 TODO: Hal: This is where a reference to SiRFs-are-bogus would be good.
 
@@ -303,7 +304,7 @@ adjust out some of the fixed delays in the system.
 
 After starting as root ntpd, then gpsd, a line similar to the one below
 should appear in the output of the command "ntpq -p" (after allowing the
-GPS to acquire a 3D fix).  This may take up to 30 minutes if you GPS
+GPS to acquire a 3D fix).  This may take up to 30 minutes if your GPS
 has to cold start or has a poor skyview.
 
 -----------------------------------------------------------------------------
@@ -323,18 +324,23 @@ remote	   refid     st t when poll reach  delay    offset  jitter
 
 When the value under "reach" remains zero, check that gpsd is running;
 cgps reports a 3D fix; and the '-n' option was used.  Some GPSes
-specialized for time service can report time with only one satellite,
-but with most devices a 3D fix is preferred or required.  Plain NMEA,
-no PPS, will also drive ntpd, but the accuracy is as bad as one second,
-or worse.  When the SHM(0) line does not appear at all, check your
-ntp.conf and the system logs for error messages from ntpd.
+specialized for time service can report time with signal lock on only
+one satellite, but with most devices a 3D fix is required.
 
-When no other reference clocks appear in the NTP configuration,
-the system clock will lock onto the GPS clock, but this is a bad
-configuration.  You should always have at least two other reference
-clocks in your ntpd.conf for proper ntpd operation.  You want to adjust
-the offsets (fudge) in your ntp.conf so the SHM(1) time is consistent
-with your other reference clocks.
+When the SHM(0) line does not appear at all, check your ntp.conf and
+the system logs for error messages from ntpd.
+
+When no other reference clocks appear in the NTP configuration, the
+system clock will lock onto the GPS clock, but this is a fragile setup
+- you can lose your only time reference if the GPS is temporarily
+unable to get satellite lock.
+
+You should always have at least two fallback chimers in your ntpd.conf
+for proper ntpd operation, in case your GPS fails to report time. And
+you'll need to adjust the offsets (fudges) in your ntp.conf so the
+SHM(1) time is consistent with your other reference clocks. We'll
+describe how to diagnose and tune your chimer configuration in a later
+section.
 
 The gpsd developers would like to receive information about the
 offsets (fudges) observed by users for each type of receiver.  Please
@@ -399,6 +405,14 @@ If not running as root:
 #refclock PPS
 refclock SOCK /tmp/chrony.ttyXX.sock 
 -----------------------------------------------------------------------------
+
+== NTPD performance tuning ==
+
+For good time stability, you should always have at least two other
+reference clocks in your ntpd.conf besides your GPS - in case, for
+example, your GPS is temporarily unable to achieve satellite lock.
+
+TODO: more on performance tuning and diagnostics here. 
 
 == Providing public NTP service ==
 
