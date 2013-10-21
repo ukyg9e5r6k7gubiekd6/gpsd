@@ -209,9 +209,6 @@ shared-memory segment with an ID known to ntpd, the network time
 synchronization daemon.  If ntpd has been properly configured to
 receive this message, it will be used to correct the system clock.
 
-If you're going to use gpsd for time service you must run in -n mode so
-the clock will be updated even when no clients are active.
-
 Note that deriving time from the date/time messages received from the
 GPS (without PPS) is not as accurate as you might expect.  Messages
 are often delayed in the receiver and on the link by as much as
@@ -251,21 +248,54 @@ CONFIG_PPS_CLIENT_LDISC=y
 
 Other OSes have different ways to enable KPPS in their kernels.
 
-On any system that supports KPPS, root permission is required for
-initialization.  In order to present the smallest possible attack
-surface to privilege-escalation attempts, gpsd run as root drops its
-root privileges very soon after startup - just after it has opened any
-serial device paths passed on the command line.  Thus, KPPS can only
-be used with devices passed that way, not with GPSes that are later
-presented to gpsd by the hotplug system.  
+If you're going to use gpsd for time service, you must run in -n mode
+so the clock will be updated even when no clients are active.
 
-Those hotplug devices will, however, may be able to use plain,
-non-kernel PPS. gpsd tries to automatically fall back to this when
-absence of root permissions makes KPPS unavailable. This fallback is
-complicated by the fact that gpsd needs to communicate to ntpd in
-a different way in root and non-root mode.  This complicates the
-configuration in ways beyond the scope of this document and is strongly
-discouraged in practice.
+In order to present the smallest possible attack surface to
+privilege-escalation attempts, gpsd run as root drops its root
+privileges very soon after startup - just after it has opened any
+serial device paths passed on the command line.
+
+Thus, KPPS can only be used with devices passed that way, not with
+GPSes that are later presented to gpsd by the hotplug system.  Those
+hotplug devices will, however, may be able to use plain, non-kernel
+PPS. gpsd tries to automatically fall back to this when absence of
+root permissions makes KPPS unavailable.
+
+In general, if you start gpsd as other than root, the following
+things will happen that slightly degrade the accuracy of reported
+time:
+
+1. Devices passed on the command line will be unable to use KPPS and
+will fall back to the same plain PPS that all hotplug devices must
+use, increasing the associated error from ~1 uSec to about ~5 uSec.
+
+2. gpsd will be unable to renice itself to a higher priority.  This
+action helps protect it against jitter induced by variable system
+load. It's particularly important if your NTP server is a general-use 
+computer that's also handling mail or web service or development.
+
+3. The way you have to configure ntpd and chrony will change away
+from what we show you here; ntpd will need to be told different
+shared-memory segment numbers, and chrony will need a different
+socket location.
+
+You may also find gpsd can't open serial devices at all if your
+OS distribution has done "secure" things with the permissions.
+
+When in doubt, the preferred method to start your time keeping is:
+
+$ su -
+# killall -9 gpsd ntpd
+# ntpd -gN
+# sleep 2
+# gpsd -n /dev/ttyXX
+# sleep 2
+# cgps
+
+where /dev/ttyXX is whatever 1PPS-capable device you have.  In the
+rest of these setup instructions will assume that you are starting
+gpsd as root, with occasional glances at the non-root case.
 
 Here is a sample ntp.conf configuration stanza telling ntpd how to
 read the GPS notifications, when gpsd is started as root:
@@ -351,16 +381,6 @@ check the GPS hardware table at <<HARDWARE>>; if your GPS is not
 present or doesn't have a recommended fudge, send us the output of the
 "ntpq -p" command and the make and type of receiver.
 
-When in doubt the preferred method to start your time keeping is:
-
-$ su -
-# killall -9 gpsd ntpd
-# ntpd -gN
-# sleep 2
-# gpsd -n /dev/ttyXX
-# sleep 2
-# cgps
-
 == Feeding chrony from GPSD ==
 
 chrony is an alternative open-source implementation of NTP service,
@@ -415,14 +435,19 @@ refclock SOCK /tmp/chrony.ttyXX.sock
 For good time stability, you should always have at least two other
 reference clocks in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
-satellite lock. 
-
-You can find 
+satellite lock. You can find public NTP chimers to add to your
+configuration at <<USE-POOL>>.
 
 TODO: more on performance tuning and diagnostics here. 
 
 TODO: Expand on: "Basically you get several good chimers and adjust
 fudges until they all agree."
+
+A chimer can be a poor performer (what the inventor of NTP whimsically
+calls a "falseticker") for either of two reasons. It may be shipping
+bad time, or the best routes between you and it have large latency
+variations.  (Large but fixed latencies can be compensated out using a
+fudge.)
 
 == Providing public NTP service ==
 
