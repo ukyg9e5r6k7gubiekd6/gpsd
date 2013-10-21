@@ -461,13 +461,6 @@ If and when you are ready to go public, see <<JOIN-POOL>>.
 
 Gary says:
 
-gpsd needs root for several things during timekeeping initialization:
-        to give itself a high priority for minimal latency timekeeping.
-        to access KPPS
-        to access PPS on the GPS port if the port permissions are odd
-        to select and access/create the proper ntpd shmget() units
-        to select and access/create the proper chronyd socket file
-
 At the moment proper timekeeping initialization can only happen when
 gpsd is just started (ATM that is slightly broken).  If a device
 is hotplugged into a runing gpsd initialization of KPPS is not
