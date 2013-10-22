@@ -262,9 +262,8 @@ hotplug devices will, however, may be able to use plain, non-kernel
 PPS. gpsd tries to automatically fall back to this when absence of
 root permissions makes KPPS unavailable.
 
-In general, if you start gpsd as other than root, the following
-things will happen that slightly degrade the accuracy of reported
-time:
+In general, if you start gpsd as other than root, the following things
+will happen that degrade the accuracy of reported time:
 
 1. Devices passed on the command line will be unable to use KPPS and
 will fall back to the same plain PPS that all hotplug devices must
@@ -277,7 +276,7 @@ computer that's also handling mail or web service or development.
 
 3. The way you have to configure ntpd and chrony will change away
 from what we show you here; ntpd will need to be told different
-shared-memory segment numbers, and chrony will need a different
+shared-memory segment numbers, and chronyd will need a different
 socket location.
 
 You may also find gpsd can't open serial devices at all if your
@@ -297,24 +296,48 @@ where /dev/ttyXX is whatever 1PPS-capable device you have.  In the
 rest of these setup instructions will assume that you are starting
 gpsd as root, with occasional glances at the non-root case.
 
-Here is a sample ntp.conf configuration stanza telling ntpd how to
+Here is a minimal sample ntp.conf configuration telling ntpd how to
 read the GPS notifications, when gpsd is started as root:
 
 -----------------------------------------------------------------------------
+server time-a.timefreq.bldrdoc.gov 
+server bonehed.lcs.mit.edu 
+server clock.sjc.he.net 
+
+driftfile /var/lib/ntp/ntp.drift
+logfile /var/log/ntp.log
+
+# NMEA reference
 server 127.127.28.0 
 fudge 127.127.28.0 time1 0.420 refid GPS
 
+# PPS reference
 server 127.127.28.1 prefer
 fudge 127.127.28.1 refid GPS1
 -----------------------------------------------------------------------------
 
+The first three servers are additional time references needed by ntpd
+for redundancy and to give you a reference to see how well your local 
+GPS is performing.  It is best to pick at least three good chimers near
+you.  You can find a list of public server here:
+	http://support.ntp.org/bin/view/Servers/StratumOneTimeServers
+
 Users of ntpd versions older than revision ntp-4.2.5p138 should instead use
-this ntp.conf snippet, when gpsd is started as root:
+this ntp.conf, when gpsd is started as root:
 
 -----------------------------------------------------------------------------
+server time-a.timefreq.bldrdoc.gov 
+server bonehed.lcs.mit.edu 
+server clock.sjc.he.net 
+
+driftfile /var/lib/ntp/ntp.drift
+logfile /var/log/ntp.log
+
+# NMEA reference
 server 127.127.28.0 minpoll 4 maxpoll 4
 fudge 127.127.28.0 time1 0.420 refid GPS
 
+# PPS reference
 server 127.127.28.1 minpoll 4 maxpoll 4 prefer
 fudge 127.127.28.1 refid GPS1
 -----------------------------------------------------------------------------
@@ -330,10 +353,13 @@ to use its normal heuristics to weight them.
 started as root.)
 
 With this configuration, ntpd will read the timestamp posted by gpsd
-every 16 seconds and send it to unit 0.  The number after the
-parameter time1 is a "fudge", offset in seconds.  It's an estimate
+every 64 seconds (16 non-root) and send it to unit 0.  The number after
+the parameter time1 is a "fudge", offset in seconds.  It's an estimate
 of the latency between the time source and your ntpd. You can use it to
 adjust out some of the fixed delays in the system.
+
+To keep ntpd from preferring NMEA time over PPS time you can add an 
+over large fudge to the NMEA time.
 
 After starting as root ntpd, then gpsd, a line similar to the one below
 should appear in the output of the command "ntpq -p" (after allowing the
