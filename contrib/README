@@ -41,3 +41,7 @@ display the satellite view properly. webgps.py can be called with the argument
 "c" to run continously, with an integer duration and a unit suffix to run this
 long (units allowed are "s", "m", "h" and "d", e.g. "4h"), or without argument
 to create a snapshot of the current sat view.
+
+ntpoffset generate an estimate of your GPS's offset from a peerstats
+file.  For instructions on how to use this script, see the GPSD Time
+Service HOWTO in this distrubution.

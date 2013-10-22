@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Generate an estimate of your GPS's offset from a peerstats file
+# For instructions on how to use this script, see the GPSD Time 
+# Service HOWTO in this distrubution. 
+#
+awk '
+     /127\.127\.28\.0/ { sum += $5 * 1000; cnt++; }
+     END { print sum / cnt; }
+' </var/log/ntpstats/peerstats

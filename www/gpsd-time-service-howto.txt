@@ -473,7 +473,9 @@ For good time stability, you should always have at least two other
 reference clocks in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
 satellite lock. You can find public NTP chimers to add to your
-configuration at <<USE-POOL>>.
+configuration at <<USE-POOL>>.  To minimize latency variations, use
+the national and regional pool domains for your country and/or
+nearby ones.
 
 Note that a chimer can be a poor performer (what the inventor of NTP
 whimsically calls a "falseticker") for either of two reasons. It may
@@ -545,7 +547,8 @@ This enables logging of the peer server statistics.
 
 2. Start ntpd and let it run for at least four hours.
 
-3. Calculate the average GPS offset:
+3. Calculate the average GPS offset using this script (a copy is
+included as contrib/ntpoffset in the GPSD distribution):
 
 -----------------------------------------------------------------------------
 awk '
