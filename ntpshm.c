@@ -546,16 +546,8 @@ static int init_kernel_pps(struct gps_device_t *session) {
 		    "KPPS cannot open %s: %s\n", path, strerror(errno));
     	return -1;
     }
-    /* root privs are not required past this point */
-
-    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_lock(&initialization_mutex);
-    /* +unrecog */
-    --uninitialized_pps_thread_count;
-    /*@ -unrecog (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_unlock(&initialization_mutex);
-    /* +unrecog */
-
+    /* RFC 2783 implies the time_pps_setcap() needs priviledges *
+     * keep root a tad longer just in case */
     if ( 0 > time_pps_create(ret, &session->kernelpps_handle )) {
 	gpsd_report(session->context->debug, LOG_INF,
 		    "KPPS time_pps_create(%d) failed: %s\n",
@@ -584,6 +576,17 @@ static int init_kernel_pps(struct gps_device_t *session) {
 	    return -1;
         }
     }
+
+    /* root privs are not required past this point */
+
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_lock(&initialization_mutex);
+    /* +unrecog */
+    --uninitialized_pps_thread_count;
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_unlock(&initialization_mutex);
+    /* +unrecog */
+
     return 0;
 }
 
