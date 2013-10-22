@@ -215,7 +215,10 @@ are often delayed in the receiver and on the link by as much as
 several hundred mSec, and this delay is not constant.  Under these
 circumstances you can't expect accuracy to UTC better than 1 second. 
 
-TODO: Hal: This is where a reference to SiRFs-are-bogus would be good.
+For example: SiRF receivers, the make currently most popular in
+consumer-grade GPSes, exhibit a random wander of about 170mSec in the
+offset between PPS and the transmission of the first sentence in each
+reporting cycle. You can see this graphed at <<SIRF-WOBBLE>>.
 
 On most OSes, gpsd includes support for interpreting the 1PPS pulses;
 this can be used to update NTP at much higher accuracy than message
@@ -318,9 +321,7 @@ fudge 127.127.28.1 refid GPS1
 
 The first three servers are additional time references needed by ntpd
 for redundancy and to give you a reference to see how well your local 
-GPS is performing.  It is best to pick at least three good chimers near
-you.  You can find a list of public server here:
-	http://support.ntp.org/bin/view/Servers/StratumOneTimeServers
+GPS is performing. 
 
 Users of ntpd versions older than revision ntp-4.2.5p138 should instead use
 this ntp.conf, when gpsd is started as root:
@@ -469,13 +470,13 @@ refclock SOCK /tmp/chrony.ttyXX.sock
 
 == NTP performance tuning ==
 
-For good time stability, you should always have at least two other
+For good time stability, you should always have at least four other
 reference clocks in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
-satellite lock. You can find public NTP chimers to add to your
-configuration at <<USE-POOL>>.  To minimize latency variations, use
-the national and regional pool domains for your country and/or
-nearby ones.
+satellite lock, or has an attack of temporarity insanity. You can find
+public NTP chimers to add to your configuration at <<USE-POOL>>.  To
+minimize latency variations, use the national and regional pool
+domains for your country and/or nearby ones.
 
 Note that a chimer can be a poor performer (what the inventor of NTP
 whimsically calls a "falseticker") for either of two reasons. It may
@@ -530,7 +531,7 @@ If the offset is positive, reduce the time1 value and vice versa.
 A more detailed description of the output is available at
 <<NTPQ-OUTPUT>>.
 
-TODO: There's an oopen issue about how you know you're stabilized
+TODO: There's an open issue about how you know you're stabilized
 enough to compute a correct offset.
 
 In order to determine the correct GPS offset, do the following:
@@ -559,8 +560,8 @@ awk '
 
 This prints the average offset.
 
-5. Adjust the "time1" value in ntp.conf by subtracting the average
-   offset from step 4.
+5. Adjust the "time1" value for unit 0 of your ntp.conf (the non-PPS
+   channel) by subtracting the average offset from step 4.
 
 6. Restart ntpd.
 
@@ -627,4 +628,6 @@ performance tuning.
 
 - [[[CHRONY]]] http://chrony.tuxfamily.org/[Chrony Home]
 
-- [[[NTPQ-OUTPUT]]] nlug.ml1.co.uk/2012/01/ntpq-p-output/831
+- [[[NTPQ-OUTPUT]]] http://nlug.ml1.co.uk/2012/01/ntpq-p-output/831
+
+- [[[SIRF-WOBBLE]]] http://www.megapathdsl.net/~hmurray/ntp/GPSSiRF-off.gif[Peer Offset of SiRF units]
