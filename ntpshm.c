@@ -809,7 +809,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)tv_kpps.tv_sec,
 		    (unsigned long)tv_kpps.tv_nsec);
 		pulse_kpps[edge_kpps] = tv_kpps;
-		if (999000 < cycle_kpps && 1001000 > cycle_kpps) {
+		if (990000 < cycle_kpps && 1010000 > cycle_kpps) {
 		    /* KPPS passes a basic sanity check */
 		    ok_kpps = true;
 		    log = "KPPS";
@@ -982,6 +982,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    }
 	    /* FIXME!! this is wrong if signal is 5Hz or 10Hz instead of PPS */
 	    /* careful, Unix time to nSec is more precision than a double */
+	    /* FIXME, validate last_fixtime a bit better */
 	    sample.offset = 1 + session->last_fixtime - ts.tv_sec;
 	    sample.offset -= ts.tv_nsec / 1e9;
 /* was: defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
@@ -1013,10 +1014,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)sample.tv.tv_sec,
 		    (unsigned long)sample.tv.tv_usec,
 		    sample.offset);
-	    sec_pps = (unsigned long)sample.tv.tv_sec;
-	    if ( 0 > sample.offset ) {
-		sec_pps--;
-	    }
+	    sec_pps = 1 + session->last_fixtime;
 	    if (session->context->pps_hook != NULL)
 		session->context->pps_hook(session, sec_pps, &ts);
 	} else {
