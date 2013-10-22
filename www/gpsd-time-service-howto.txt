@@ -307,11 +307,11 @@ server clock.sjc.he.net
 driftfile /var/lib/ntp/ntp.drift
 logfile /var/log/ntp.log
 
-# NMEA reference
+# GPS Serial data reference
 server 127.127.28.0 
 fudge 127.127.28.0 time1 0.420 refid GPS
 
-# PPS reference
+# GPS PPS reference
 server 127.127.28.1 prefer
 fudge 127.127.28.1 refid GPS1
 -----------------------------------------------------------------------------
@@ -333,11 +333,11 @@ server clock.sjc.he.net
 driftfile /var/lib/ntp/ntp.drift
 logfile /var/log/ntp.log
 
-# NMEA reference
+# GPS Serial data reference
 server 127.127.28.0 minpoll 4 maxpoll 4
 fudge 127.127.28.0 time1 0.420 refid GPS
 
-# PPS reference
+# GPS PPS reference
 server 127.127.28.1 minpoll 4 maxpoll 4 prefer
 fudge 127.127.28.1 refid GPS1
 -----------------------------------------------------------------------------
@@ -367,18 +367,24 @@ GPS to acquire a 3D fix).  This may take up to 30 minutes if your GPS
 has to cold start or has a poor skyview.
 
 -----------------------------------------------------------------------------
-remote	   refid     st t when poll reach  delay    offset  jitter
-=========================================================================
-+SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
+-bonehed.lcs.mit 18.26.4.106      2 u   44   64  377   84.259    4.194   0.503
++clock.sjc.he.ne .CDMA.           1 u   41   64  377   23.634   -0.518   0.465
++SHM(0)          .GPS.            0 l   50   64  377    0.000    6.631   5.331
 -----------------------------------------------------------------------------
 
 If you are running PPS then it will look like this:
 
 -----------------------------------------------------------------------------
-remote	   refid     st t when poll reach  delay    offset  jitter
-=========================================================================
--SHM(0)	  .GPS.      0 l   13   16  377    0.000    0.885   0.882
-*SHM(1)	  .GPS1.     0 l   11   16  377    0.000   -0.059   0.006
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
+-bonehed.lcs.mit 18.26.4.106      2 u   44   64  377   84.259    4.194   0.503
++clock.sjc.he.ne .CDMA.           1 u   41   64  377   23.634   -0.518   0.465
++SHM(0)          .GPS.            0 l   50   64  377    0.000    6.631   5.331
+*SHM(1)          .GPS1.           0 l   49   64  377    0.000    0.222   0.310
 -----------------------------------------------------------------------------
 
 When the value under "reach" remains zero, check that gpsd is running;
@@ -388,6 +394,11 @@ one satellite, but with most devices a 3D fix is required.
 
 When the SHM(0) line does not appear at all, check your ntp.conf and
 the system logs for error messages from ntpd.
+
+Notice the 1st and 3rd servers, stratum 1 servers, disagree by more than
+8 mSec.  The 1st and 2nd servers disagree by over 12 mSec.  Our local
+PPS reference agrees to the clock.sjc.he.net server within the expected
+jitter of the GR-601W in use.
 
 When no other reference clocks appear in the NTP configuration, the
 system clock will lock onto the GPS clock, but this is a fragile setup
