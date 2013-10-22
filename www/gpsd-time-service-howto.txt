@@ -576,6 +576,10 @@ gives text printout which is easier to parse from simple scripts.
 #
 # Or just search for all usage of getuid() in ntpshm.c
 
+== Acknowledgments ==
+Beat Bolli <bbolli@ewanet.ch> wrote much of the section on NTP
+performance tuning.
+
 == References ==
 
 [bibliography]
