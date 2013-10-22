@@ -528,6 +528,9 @@ If the offset is positive, reduce the time1 value and vice versa.
 A more detailed description of the output is available at
 <<NTPQ-OUTPUT>>.
 
+TODO: There's an oopen issue about how you know you're stabilized
+enough to compute a correct offset.
+
 In order to determine the correct GPS offset, do the following:
 
 1. Add these lines to ntp.conf:
@@ -570,17 +573,6 @@ If and when you are ready to go public, see <<JOIN-POOL>>.
 
 Gary says:
 
-At the moment proper timekeeping initialization can only happen when
-gpsd is just started (ATM that is slightly broken).  If a device
-is hotplugged into a runing gpsd initialization of KPPS is not
-possible, the PPS device may not be accesible and the SHMs and sockets
-will be different or unavailable.
-
-If I had my druthers, gpsd<->ntpd would use the chronyd socket
-mechanism.  It is a much simpler and robust method.  Given the LFSSTD
-t still needs to put the socket in different places depending on
-root/non-root operation.
-
 I would also add the comments in ntpshm.c starting on lines 78 and 865.
 
 ckuethe could contribute info on how this all works with BSD.
@@ -594,7 +586,6 @@ ntptrace calls ntpq which uses mode 6 packets.  That's the back door for
 debugging/monitoring.  It's disabled (from the outside world) on many/most
 ntpd servers that are exposed to the big/bad internet.  But when it works, it
 gives text printout which is easier to parse from simple scripts.
-
 
 # > There's a reference to it in a comment
 # > in ntpshm.c, but it didn't tell me eniough to understand *why*.
