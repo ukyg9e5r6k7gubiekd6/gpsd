@@ -475,6 +475,12 @@ reference clocks in your ntpd or chrony configuration besides your GPS
 satellite lock. You can find public NTP chimers to add to your
 configuration at <<USE-POOL>>.
 
+Note that a chimer can be a poor performer (what the inventor of NTP
+whimsically calls a "falseticker") for either of two reasons. It may
+be shipping bad time, or the best routes between you and it have large
+latency variations.  (Large but fixed latencies can be compensated out
+using a fudge.)
+
 The standard tool for tuning is "ntpq" ("NTP query program"). To show a
 list of all servers declared in ntp.conf and their statistics, invoke it
 with the "-p" option. On a sample system configured with 7 servers from
@@ -521,12 +527,6 @@ If the offset is positive, reduce the time1 value and vice versa.
 
 A more detailed description of the output is available at
 <<NTPQ-OUTPUT>>.
-
-A chimer can be a poor performer (what the inventor of NTP whimsically
-calls a "falseticker") for either of two reasons. It may be shipping
-bad time, or the best routes between you and it have large latency
-variations.  (Large but fixed latencies can be compensated out using a
-fudge.)
 
 == Providing public NTP service ==
 
