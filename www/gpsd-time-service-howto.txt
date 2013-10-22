@@ -475,10 +475,52 @@ reference clocks in your ntpd or chrony configuration besides your GPS
 satellite lock. You can find public NTP chimers to add to your
 configuration at <<USE-POOL>>.
 
-TODO: more on performance tuning and diagnostics here. 
+The standard tool for tuning is "ntpq" ("NTP query program"). To show a
+list of all servers declared in ntp.conf and their statistics, invoke it
+with the "-p" option. On a sample system configured with 7 servers from
+the NTP pool project and one PPS GPS attached via RS232, this is the
+output:
+ 
+-----------------------------------------------------------------------------
+$ ntpq -p
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+-mimir.fcom.ch   162.23.41.55     2 u   11   64  377    3.774   -0.276  11.866
+-arthur.testserv 162.23.41.56     2 u   62   64  377    5.835   -1.129   8.921
+-ntppublic.uzh.c 130.60.159.7     3 u   62   64  377    6.121   -4.102   6.336
+-smtp.irtech.ch  162.23.41.56     2 u   35   64  377   15.521   -1.677   8.678
++time2.ethz.ch   .PPS.            1 u   27   64  377    5.938   -1.713  16.404
+-callisto.mysnip 192.53.103.104   2 u   53   64  377   49.357   -0.274   5.125
+-shore.naturalne 122.135.113.81   3 u   22   64  377   14.676   -0.528   2.601
+-ntp.univ-angers 195.220.94.163   2 u   41   64  377   40.678   -1.847  13.391
++SHM(0)          .GPS.            0 l    4   64  377    0.000   34.682   7.952
+*SHM(1)          .PPS.            0 l    3   64  377    0.000   -2.664   0.457
+-----------------------------------------------------------------------------
 
-TODO: Expand on: "Basically you get several good chimers and adjust
-fudges until they all agree."
+The interesting columns are "remote", "st", "reach" and "offset".
+
+"remote" is the name of the remote NTP server. The character in its
+first column shows its current state: "-" or "x" for out-of-tolerance
+servers, "+" for good servers ("truechimers"), and "*" for the one good
+server currently used as the primary reference. The calculations used to
+determine a server's state are outside the scope of this document;
+details are available in RFCs 1305 and 5905.
+
+"st" shows the remote server's stratum.
+
+"reach" is the octal representation of the remote server's reachability.
+A bit is set if the corresponding poll of the server was successful,
+i.e. the server returned a reply. New poll results are shifted in from
+the least significant bit; results older than 8 polls are discarded. In
+the absence of network problems, this should show "377".
+
+"offset" shows the mean offset in the times reported between this local
+host and the remote server in milliseconds. This is the value that can
+be fudged with the "time1" parameter of the GPS server line in ntp.conf.
+If the offset is positive, reduce the time1 value and vice versa.
+
+A more detailed description of the output is available at
+<<NTPQ-OUTPUT>>.
 
 A chimer can be a poor performer (what the inventor of NTP whimsically
 calls a "falseticker") for either of two reasons. It may be shipping
@@ -556,3 +598,5 @@ gives text printout which is easier to parse from simple scripts.
 - [[[JOIN-POOL]]] http://www.pool.ntp.org/en/join.html[How do I join pool.ntp.org?]
 
 - [[[CHRONY]]] http://chrony.tuxfamily.org/[Chrony Home]
+
+- [[[NTPQ-OUTPUT]]] nlug.ml1.co.uk/2012/01/ntpq-p-output/831
