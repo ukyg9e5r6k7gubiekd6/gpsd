@@ -558,7 +558,8 @@ pool us.pool.ntp.org iburst
 
 where "us" may be replaced by one of the zone/country codes the Pool
 project supports (list behind the "Global" link at <<ZONES>>). The
-"iburst" tag expands to four randomly chosen servers.
+"pool" tag expands to four randomly chosen servers by default.  "iburst"
+implements a fast start algorithm that alos weeds out bad servers.
 
 Note that a chimer can be a poor performer (what the inventor of NTP
 whimsically calls a "falseticker") for either of two reasons. It may
