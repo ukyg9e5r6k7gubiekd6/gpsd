@@ -546,9 +546,13 @@ filegen peerstats file peerstats type day enable
 
 This enables logging of the peer server statistics.
 
-2. Start ntpd and let it run for at least four hours.
+2. Make sure the directory exists properly.  As root do:
+   # mkdir -p /var/log/ntpstats
+   # chown ntp:ntp /var/log/ntpstats
 
-3. Calculate the average GPS offset using this script (a copy is
+3. Start ntpd and let it run for at least four hours.
+
+4. Calculate the average GPS offset using this script (a copy is
 included as contrib/ntpoffset in the GPSD distribution):
 
 -----------------------------------------------------------------------------
