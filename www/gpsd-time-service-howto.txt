@@ -39,9 +39,10 @@ in <<RFC-1305>>.
 NTP service daemons running on each host do clock synchronization in
 the presence of variable network latency by monitoring those delays in
 real time and passing around messages that say, essentially, "I
-believe it is time X and that my propagation delay to you is Y".
-Each daemon then uses rather complex algorithms that we won't attempt
-to describe here to digest incoming messages into a composite "NTP time".
+received your request at time X, I'm sending the reply at time Y and
+the propagation delay to my source of time is Z".  Each daemon then
+uses rather complex algorithms that we won't attempt to describe here
+to digest incoming messages into a composite "NTP time".
 
 NTP conditions your system clock by noticing how your system clock time
 differs from deduced NTP time, then speeding up or slowing down your
@@ -71,9 +72,9 @@ Stratum 3.
 
 Ordinary client computers are normally configured to get time from one
 or more Stratum 2 (or less commonly Stratum 3) servers. With GPSD and
-a suitable GPS, you can easily condition your clock to higher
-accuracy than typical Stratum 2; with a little effort you can do
-better than many public Stratum 1 servers.
+a suitable GPS, you can easily condition your clock to higher accuracy
+than what you get from typical Stratum 2; with a little effort you can
+do better than you can get many public Stratum 1 servers.
 
 You can then make your high-quality time available to other systems on
 your network.  You can even join the fraternity of "time nuts" who run
@@ -243,7 +244,8 @@ do that.  If your kernel is built in the normal modular way, this
 package installation will suffice.
 
 If you are scratch-building your Linux kernel, the configuration 
-must include these two lines:
+must include either these two lines, or the same with "y" replaced
+by "m" to enable the drivers as modules:
 
 -----------------------------------------------------------------------------
 CONFIG_PPS=y
@@ -402,17 +404,17 @@ Notice the 1st and 3rd servers, stratum 1 servers, disagree by more than
 PPS reference agrees to the clock.sjc.he.net server within the expected
 jitter of the GR-601W in use.
 
-When no other reference clocks appear in the NTP configuration, the
-system clock will lock onto the GPS clock, but this is a fragile setup
-- you can lose your only time reference if the GPS is temporarily
-unable to get satellite lock.
+When no other chimers or local reference clocks appear in the NTP
+configuration, the system clock will lock onto the GPS clock, but this
+is a fragile setup - you can lose your only time reference if the GPS
+is temporarily unable to get satellite lock.
 
 You should always have at least two fallback chimers in your ntpd.conf
 for proper ntpd operation, in case your GPS fails to report time. And
 you'll need to adjust the offsets (fudges) in your ntp.conf so the
-SHM(1) time is consistent with your other reference clocks. We'll
-describe how to diagnose and tune your chimer configuration in a later
-section.
+SHM(1) time is consistent with your other chimers (and other local
+reference clocks, if you have any). We'll describe how to diagnose and
+tune your chimer configuration in a later section.
 
 The gpsd developers would like to receive information about the
 offsets (fudges) observed by users for each type of receiver.  Please
@@ -424,10 +426,12 @@ present or doesn't have a recommended fudge, send us the output of the
 
 chrony is an alternative open-source implementation of NTP service,
 originally designed for systems with low-bandwidth or intermittent
-TCP/IP service.  It interoperates with ntpd using the same protocols,
-but is somewhat easier to configure and administer.  Like ntpd, it can
-either operate purely as a client or provide time service. The chrony
-project has a home page at <<CHRONY>>.
+TCP/IP service.  It interoperates with ntpd using the same NTP
+protocols, but is somewhat easier to configure and administer.  Like
+ntpd, it can either operate purely as a client or provide time
+service. The chrony project has a home page at <<CHRONY>>. Its
+documentation includes an instructive feature comparison with ntpd
+at <<CHRONY-COMPARE>>.
 
 gpsd can provide reference clock information to chronyd similarly to
 the way it talks to ntpd.  The advantage to using chrony is that the
@@ -451,9 +455,11 @@ refclock SHM 0 offset 0.0 delay 0.2
 refclock SHM 1 offset 0.0 delay 0.0
 -----------------------------------------------------------------------------
 
+The offset option is functionally like ntpd's time1 option
+
 To get chronyd to connect to gpsd using the more precise socket 
 method add this to your /etc/chrony/chrony.conf file (replacing ttyXX
-with your device name):  
+with your device name).  
 
 If running as root:
 
@@ -468,6 +474,9 @@ If not running as root:
 #refclock PPS
 refclock SOCK /tmp/chrony.ttyXX.sock 
 -----------------------------------------------------------------------------
+
+Finally note that chronyd needs to be started before gpsd so the
+socket is ready when gpsd starts up and drops the root privileges.
 
 == NTP performance tuning ==
 
@@ -485,9 +494,9 @@ line should probably look like this
 pool us.pool.ntp.org iburst
 -----------------------------------------------------------------------------
 
-where "us" may be replaced by one of the country codes the Pool
-project supports. The "iburst" tag expands to four randomly chosen
-servers. 
+where "us" may be replaced by one of the zone/country codes the Pool
+project supports (list behind the "Global" link at <<ZONES>>). The
+"iburst" tag expands to four randomly chosen servers.
 
 Note that a chimer can be a poor performer (what the inventor of NTP
 whimsically calls a "falseticker") for either of two reasons. It may
@@ -580,6 +589,31 @@ This prints the average offset.
 
 6. Restart ntpd.
 
+== Chrony peformance tuning
+
+The easiest way to determine the offset with chronyd is probably to
+configure the source whose offset should be measured with the noselect
+option and a long poll, let chronyd run for at least 30 minutes and
+observe the offset reported in the chronyc sourcestats output. For
+example:
+
+SHM 0 configured as:
+refclock SHM 0 poll 8 filter 1000 noselect
+
+# chronyc sourcestats
+210 Number of sources = 6
+Name/IP Address            NP  NR  Span  Frequency  Freq Skew  Offset  Std Dev
+==============================================================================
+SHM0                       21   9   85m      4.278      4.713   +495ms  8896us
+SHM1                       20   8   307      0.000      0.002     +0ns   202ns
+mort.cihar.com             21   8   72m      0.148      0.798   +668us   490us
+vps2.martinpoljak.net       6   4   17m    -53.200    141.596    -24ms    15ms
+ntp1.kajot.cz              25  16   91m     -0.774      1.494    -11ms  1859us
+ntp1.karneval.cz           17  10   89m      0.127      0.539  -4131us   574us
+
+In this case (Garmin 18x) the offset specified in the config for the
+SHM 0 source should be around 0.495.
+
 == Providing public NTP service ==
 
 <<NTP-FAQ>> has good advice on things to be sure you have done - and
@@ -643,6 +677,10 @@ performance tuning.
 
 - [[[CHRONY]]] http://chrony.tuxfamily.org/[Chrony Home]
 
+- [[[CHRONY-COMPARE]]] http://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
+
 - [[[NTPQ-OUTPUT]]] http://nlug.ml1.co.uk/2012/01/ntpq-p-output/831
 
 - [[[SIRF-WOBBLE]]] http://www.megapathdsl.net/~hmurray/ntp/GPSSiRF-off.gif[Peer Offset of SiRF units]
+
+- [[[ZONES]]] http://www.pool.ntp.org/zone
