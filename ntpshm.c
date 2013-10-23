@@ -769,6 +769,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    "KPPS kernel PPS failed\n");
 	    } else {
 		// find the last edge
+		// FIXME a bit simplistic, should hook into the
+                // cycle/duration check below.
 	    	if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
 		    edge_kpps = 1;
 		    tv_kpps = pi.assert_timestamp;
