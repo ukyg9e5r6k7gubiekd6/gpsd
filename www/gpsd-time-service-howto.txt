@@ -62,17 +62,17 @@ timebase to export reliable time for use by NTP clients.
 
 You will hear time service people speak of "Stratum 0" (the reference
 clocks) "Stratum 1" (NTP servers directly connected to reference
-clocks over a path with known and compensated-for latency)
-"Stratum 2" (publicly accessible servers that get time from Stratum 1
-over a network link.) Stratum 3 chimers redistribute time from Stratum
-2, and so forth. There are defined higher strata up to 15, but
-you will probably never see a public chimer higher than Stratum 3.
+clocks) and "Stratum 2" (publicly accessible servers that get time
+from Stratum 1 over a network link). Stratum 3 chimers redistribute
+time from Stratum 2, and so forth. There are defined higher strata up
+to 15, but you will probably never see a public chimer higher than
+Stratum 3.
 
 Ordinary client computers are normally configured to get time from one
 or more Stratum 2 (or less commonly Stratum 3) servers. With GPSD and
 a suitable GPS, you can easily condition your clock to higher
 accuracy than typical Stratum 2; with a little effort you can do
-better than public Stratum 1 servers.
+better than many public Stratum 1 servers.
 
 You can then make your high-quality time available to other systems on
 your network.  You can even join the fraternity of "time nuts" who run
@@ -474,9 +474,19 @@ For good time stability, you should always have at least four other
 reference clocks in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
 satellite lock, or has an attack of temporarity insanity. You can find
-public NTP chimers to add to your configuration at <<USE-POOL>>.  To
-minimize latency variations, use the national and regional pool
-domains for your country and/or nearby ones.
+public NTP chimers to add to your configuration at <<USE-POOL>>. 
+
+To minimize latency variations, use the national and regional pool
+domains for your country and/or nearby ones.  Your configuration
+line should probably look like this
+
+-----------------------------------------------------------------------------
+pool us.pool.ntp.org iburst
+-----------------------------------------------------------------------------
+
+where "us" may be replaced by one of the country codes the Pool
+project supports. The "iburst" tag expands to four randomly chosen
+servers. 
 
 Note that a chimer can be a poor performer (what the inventor of NTP
 whimsically calls a "falseticker") for either of two reasons. It may
