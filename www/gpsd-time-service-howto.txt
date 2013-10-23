@@ -152,8 +152,6 @@ As of late 2013 no USB GPS we know of implements the higher polling-rate
 options in USB 2 and 3.  When one does, and if it has the Macx-1 mod,
 higher USB accuracy will ensue.
 
-TODO: How specific can we be about jitter?
-
 == Choice of Hardware ==
 
 To get 1PPS to your NTP daemon, you first need to get it from a
@@ -287,9 +285,10 @@ socket location.
 
 You may also find gpsd can't open serial devices at all if your
 OS distribution has done "secure" things with the permissions.
-
+ 
 When in doubt, the preferred method to start your time keeping is:
 
+-----------------------------------------------------------------------------
 $ su -
 # killall -9 gpsd ntpd
 # ntpd -gN
@@ -297,10 +296,70 @@ $ su -
 # gpsd -n /dev/ttyXX
 # sleep 2
 # cgps
+-----------------------------------------------------------------------------
 
 where /dev/ttyXX is whatever 1PPS-capable device you have.  In the
 rest of these setup instructions will assume that you are starting
 gpsd as root, with occasional glances at the non-root case.
+
+Now check to see if gpsd has correctly attached the shared-memory
+segments in needs to communicate with ntpd.  ntpd's rules for the
+creation of these segments are:
+
+Segments 0 and 1:: 
+	 Permissions are 0600 - other programs can only read and
+	 write this segment when running as root.
+
+Segments 2 and 3:: 
+	 Permissions are 0666 - other programs can read
+ 	 and write as any user. If ntpd has been
+ 	 configured to use these segments, any
+ 	 unprivileged user is allowed to provide data
+ 	 for synchronisation.
+
+Because gpsd can be started either as root or non-root, it checks and
+attaches the most privileged segment pair it can - either 0 and 1 or 2
+and 3.
+
+For each GPS receiver gpsd controls, it will use the attached ntpshm
+segments in pairs (for coarse clock and pps source, respectively)
+starting from the first found segments.
+
+To debug, try looking at the live segments this way
+
+-----------------------------------------------------------------------------
+ipcs -m
+-----------------------------------------------------------------------------
+
+When gpsd has starrted as root, the results  should look like this:
+
+-----------------------------------------------------------------------------
+------ Shared Memory Segments --------
+ key        shmid      owner      perms      bytes      nattch     status
+ 0x4e545030 0          root       700        96         2
+ 0x4e545031 32769      root       700        96         2
+ 0x4e545032 163842     root       666        96         1
+ 0x4e545033 196611     root       666        96         1
+-----------------------------------------------------------------------------
+
+For a bit more data try this:
+
+-----------------------------------------------------------------------------
+ cat /proc/sysvipc/shm
+-----------------------------------------------------------------------------
+
+If gpsd cannot open the segments, check that you are not running SELinux
+or apparmor. Either may require you to configure a security exception.
+
+If you see the shared segments (keys 1314148400 -- 1314148403), and
+no gpsd or ntpd is running then try removing them like this:
+
+-----------------------------------------------------------------------------
+ipcrm  -M 0x4e545030
+ipcrm  -M 0x4e545031
+ipcrm  -M 0x4e545032
+ipcrm  -M 0x4e545033
+-----------------------------------------------------------------------------
 
 Here is a minimal sample ntp.conf configuration telling ntpd how to
 read the GPS notifications, when gpsd is started as root:
@@ -362,8 +421,11 @@ the parameter time1 is a "fudge", offset in seconds.  It's an estimate
 of the latency between the time source and your ntpd. You can use it to
 adjust out some of the fixed delays in the system.
 
-To keep ntpd from preferring NMEA time over PPS time you can add an 
-over large fudge to the NMEA time.
+To keep ntpd from preferring NMEA time over PPS time, you can add an 
+overlarge fudge to the NMEA time.
+
+When you start gpsd, it will wait for a few good fixes before
+attempting process PPS.
 
 After starting as root ntpd, then gpsd, a line similar to the one below
 should appear in the output of the command "ntpq -p" (after allowing the
@@ -551,9 +613,6 @@ If the offset is positive, reduce the time1 value and vice versa.
 A more detailed description of the output is available at
 <<NTPQ-OUTPUT>>.
 
-TODO: There's an open issue about how you know you're stabilized
-enough to compute a correct offset.
-
 In order to determine the correct GPS offset, do the following:
 
 1. Add these lines to ntp.conf:
@@ -621,34 +680,6 @@ are ready to do - before becoming a public chimer. One detail it
 doesn't mention is that you'll need to un-firewall UDP port 123.
 
 If and when you are ready to go public, see <<JOIN-POOL>>. 
-
-== TODOs ==
-
-Gary says:
-
-I would also add the comments in ntpshm.c starting on lines 78 and 865.
-
-ckuethe could contribute info on how this all works with BSD.
-
-Hal says:
-
-No, the servers are OK.  The problem is a buggy tool and/or a poor choice of
-tool.  Try sntp -d xxx or ntpdate -d xxx  (ntpdate is depricated)
-
-ntptrace calls ntpq which uses mode 6 packets.  That's the back door for
-debugging/monitoring.  It's disabled (from the outside world) on many/most
-ntpd servers that are exposed to the big/bad internet.  But when it works, it
-gives text printout which is easier to parse from simple scripts.
-
-# > There's a reference to it in a comment
-# > in ntpshm.c, but it didn't tell me eniough to understand *why*.
-#
-# One very basic issue, is that the mechanism gpsd uses to communicate
-# to ntpd or chronyd differs depending on whether gpsd is root or not.
-#
-# Note the code and coments in ntpshm.c starting on lines 190 and 664.
-#
-# Or just search for all usage of getuid() in ntpshm.c
 
 == Acknowledgments ==
 Beat Bolli <bbolli@ewanet.ch> wrote much of the section on NTP
