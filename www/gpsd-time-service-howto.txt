@@ -471,7 +471,7 @@ refclock SOCK /tmp/chrony.ttyXX.sock
 == NTP performance tuning ==
 
 For good time stability, you should always have at least four other
-reference clocks in your ntpd or chrony configuration besides your GPS
+chimers in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
 satellite lock, or has an attack of temporarity insanity. You can find
 public NTP chimers to add to your configuration at <<USE-POOL>>. 
