@@ -59,7 +59,7 @@ of at most &plusmn;100 mSec, possibly less depending upon the quality
 of your network connection.
 
 Some NTP hosts are time *servers*.  These are known as "chimers".  They
-use high-precision time sourced synchronized to the Naval Observatory
+use high-precision time sourced synchronized to national time standard
 timebase to export reliable time for use by NTP clients.
 
 You will hear time service people speak of "Stratum 0" (the reference
@@ -158,7 +158,7 @@ To get 1PPS to your NTP daemon, you first need to get it from a
 PPS-capable GPS. As of late 2013 this means either the previously
 mentioned GR601-W or a serial GPS with 1PPS.
 
-You can find 1PPs-capable devices supported by GPSD at <<HARDWARE>>.
+You can find 1PPS-capable devices supported by GPSD at <<HARDWARE>>.
 Note that the most popular consumer-grade GPS engine - SiRF - does not
 deliver 1PPS through USB or even RS232.  Thus the general run of cheap
 GPS mice won't do.  In general, you can't use a USB device for time
@@ -298,7 +298,7 @@ $ su -
 # cgps
 -----------------------------------------------------------------------------
 
-where /dev/ttyXX is whatever 1PPS-capable device you have.  In the
+where /dev/ttyXX is whatever 1PPS-capable device you have.  The
 rest of these setup instructions will assume that you are starting
 gpsd as root, with occasional glances at the non-root case.
 
@@ -345,7 +345,7 @@ When gpsd has starrted as root, the results  should look like this:
 For a bit more data try this:
 
 -----------------------------------------------------------------------------
- cat /proc/sysvipc/shm
+cat /proc/sysvipc/shm
 -----------------------------------------------------------------------------
 
 If gpsd cannot open the segments, check that you are not running SELinux
@@ -355,10 +355,10 @@ If you see the shared segments (keys 1314148400 -- 1314148403), and
 no gpsd or ntpd is running then try removing them like this:
 
 -----------------------------------------------------------------------------
-ipcrm  -M 0x4e545030
-ipcrm  -M 0x4e545031
-ipcrm  -M 0x4e545032
-ipcrm  -M 0x4e545033
+ipcrm -M 0x4e545030
+ipcrm -M 0x4e545031
+ipcrm -M 0x4e545032
+ipcrm -M 0x4e545033
 -----------------------------------------------------------------------------
 
 Here is a minimal sample ntp.conf configuration telling ntpd how to
@@ -559,7 +559,7 @@ pool us.pool.ntp.org iburst
 where "us" may be replaced by one of the zone/country codes the Pool
 project supports (list behind the "Global" link at <<ZONES>>). The
 "pool" tag expands to four randomly chosen servers by default.  "iburst"
-implements a fast start algorithm that alos weeds out bad servers.
+implements a fast start algorithm that also weeds out bad servers.
 
 Note that a chimer can be a poor performer (what the inventor of NTP
 whimsically calls a "falseticker") for either of two reasons. It may
@@ -710,7 +710,7 @@ performance tuning.
 
 - [[[CHRONY-COMPARE]]] http://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
 
-- [[[NTPQ-OUTPUT]]] http://nlug.ml1.co.uk/2012/01/ntpq-p-output/831
+- [[[NTPQ-OUTPUT]]] http://nlug.ml1.co.uk/2012/01/ntpq-p-output/831[ntpq output description]
 
 - [[[SIRF-WOBBLE]]] http://www.megapathdsl.net/~hmurray/ntp/GPSSiRF-off.gif[Peer Offset of SiRF units]
 
