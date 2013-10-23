@@ -31,9 +31,10 @@ as gentle an introduction as presently exists.
 == How NTP Works ==
 
 NTP (Network Time Protocol) is a set of protocols that attempts to
-synchronize computer clocks across the Internet - ultimately, to the
-master atomic clock at the U.S. Naval Observatory.  NTP Version 3 is
-defined in <<RFC-1305>>.
+synchronize computer clocks across the Internet - ultimately,
+Universal Coordinated Time as defined by several scale-related atomic
+clocks run by national standards institutes.  NTP Version 3 is defined
+in <<RFC-1305>>.
 
 NTP service daemons running on each host do clock synchronization in
 the presence of variable network latency by monitoring those delays in
