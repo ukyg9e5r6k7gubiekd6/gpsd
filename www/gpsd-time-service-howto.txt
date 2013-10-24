@@ -7,7 +7,7 @@ you can find the original at the GPSD project website.
 
 == Introduction ==
 
-GPSD, NTP and a GPS supplying 1PPS (pulse-per-second) output can be
+GPSD, NTP and a GPS supplying 1PPS ( one pulse-per-second) output can be
 used to set up a high-quality NTP time server. This HOWTO explains the
 method and various options you have in setting it up.
 
@@ -46,7 +46,7 @@ to digest incoming messages into a composite "NTP time".
 
 NTP conditions your system clock by noticing how your system clock time
 differs from deduced NTP time, then speeding up or slowing down your
-clock's tick rate until it is resynchronized.  These tick-rate changes
+clock's tick rate until it is synchronized.  These tick-rate changes
 are usually extremely small, much too small for a human or even most
 software timing loops to ever notice. But large changes are possible.
 
@@ -68,13 +68,13 @@ clocks) and "Stratum 2" (publicly accessible servers that get time
 from Stratum 1 over a network link). Stratum 3 chimers redistribute
 time from Stratum 2, and so forth. There are defined higher strata up
 to 15, but you will probably never see a public chimer higher than
-Stratum 3.
+Stratum 3 or 4.
 
 Ordinary client computers are normally configured to get time from one
 or more Stratum 2 (or less commonly Stratum 3) servers. With GPSD and
 a suitable GPS, you can easily condition your clock to higher accuracy
 than what you get from typical Stratum 2; with a little effort you can
-do better than you can get many public Stratum 1 servers.
+do better than you can get from most public Stratum 1 servers.
 
 You can then make your high-quality time available to other systems on
 your network.  You can even join the fraternity of "time nuts" who run
@@ -91,7 +91,8 @@ way we will describe here.
 == 1PPS quality issues ==
 
 GPSD is useful for precision time service because it can use the 1PPS
-pulse delivered by some GPSes to correct a local NTP instance.
+pulse delivered by some GPSes to discipline (correct) a local NTP
+instance.
 
 GPS satellites deliver a top-of-GPS-second notification that is
 nominally accurate to 50nSec. 1PPS-capable GPSes often use an RS-232
@@ -99,13 +100,18 @@ control line to ship the 1PPS edge of second to the host system
 (usually Carrier Detect or Ring Indicator; GPSD will quietly accept
 either).  Satellite top-of-second loses some accuracy on the way down
 due mainly to variable delays in the ionosphere; processing overhead
-in the GPS itself adds a bit more latency, and your server detecting
-that pulse add still more latency and jitter.  But it's still often
+in the GPS itself adds a bit more latency, and your local host detecting
+that pulse adds still more latency and jitter.  But it's still often
 accurate to on the order of 1 uSec.
+
+Latency is any added delay from an event until its measurement.  Jitter
+is the short term variation in that latency.  Accuracy is the traceable
+offset from 'true' time as defined by a national standard institute.
 
 Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
 and plain PPS latching.  KPPS is formally known as RFC 2783 PPS.  These have
-different error budgets.
+different error budgets.  Plain PPS just references the pulse to the
+system clock as measured in user space.
 
 Kernel PPS uses a kernel function to accurately timestamp the status
 change on the PPS line.  Basic PPS has the kernel wake up the PPS
@@ -120,20 +126,25 @@ uSec.  Otherwise you are lucky to get &plusmn;5 uSec, and there will be
 about 20uSec of jitter. All these figures were observed on
 plain-vanilla x86 PCS with clock speeds in the 2GHz range.
 
-All the previous figures assume you're using PPS delivered over RS232.
-USB GPSes that deliver 1PPS are rare, but do exist. Notably, there's
-the Navsys GR601-W. In case this device goes out of production it's
-worth noting that it's a trivial modification of the stock
-two-chip-on-a-miniboard commodity-GPS design of engine plus
+The observed latency and jitter will be greatly affected by your CPU
+clock speed, number of cores, system load factor and other unkowns.
+
+All the previous figures assume you're using PPS delivered over
+RS232.  USB GPSes that deliver 1PPS are rare, but do exist. Notably,
+there's the Navsys GR601-W. In case this device goes out of
+production it's worth noting that it's a trivial modification of the
+stock two-chip-on-a-miniboard commodity-GPS design of engine plus
 USB-to-serial adapter; the GR601-W wires a uBlox 6 to a Prolific Logic
-PL23203.  To get 1PPS out, just wire the 1PPS pin from the engine to
-the Carrier Detect pin on the USB adapter. (This is known as the
-"Macx-1 mod".)
+PL23203.  To get 1PPS out, just wire the 1PPS pin from the GPS engine to
+the Carrier Detect pin on the USB adapter. (This is known as the "Macx-1
+mod".)
 
 With this design, 1PPS from the engine will turn into a USB event that
 becomes visible to the host system (and GPSD) the next time the USB
-device is polled. USB polling intervals vary but on the GR601-W you
-can expect 1ms accuracy; this is typical of USB 1.1 devices. 
+device is polled. USB 1.1 polls 1024 slots ever second.  Each slot is
+polled in the same order ever second.  When a device is added it is
+assigned to one of those 1024 polling slots.  It should then be clear
+that the accuracy of a USB 1.1 connected GPS would be about 1 mSec.
 
 .Summary of typical accuracy
 |=======================================
@@ -197,6 +208,9 @@ service we recommend using stationary mode. GPSD tools don't yet
 directly support this, but that capability may be added in a future
 release.
 
+Very few GPS with PPS output come with RS-232 connectors.  To use this
+type of source you will usually need to build your own cables.
+
 == Feeding NTPD from GPSD ==
 
 Most Unix systems get their time service through ntpd, a very old and
@@ -209,11 +223,13 @@ shared-memory segment with an ID known to ntpd, the network time
 synchronization daemon.  If ntpd has been properly configured to
 receive this message, it will be used to correct the system clock.
 
-Note that deriving time from the date/time messages received from the
-GPS (without PPS) is not as accurate as you might expect.  Messages
-are often delayed in the receiver and on the link by as much as
-several hundred mSec, and this delay is not constant.  Under these
-circumstances you can't expect accuracy to UTC better than 1 second. 
+Note that latency from the moment the date/time messages are received
+from the GPS (without PPS) is not as accurate as you might expect.
+Messages are often delayed in the receiver and on the link by as much as
+several hundred mSec, and this delay is not constant.  It also varies
+(jitter) throughout the day.  It may be stable to 1o0 mSec for hours and
+then jump by 200mSec.  Under these circumstances you can't expect
+accuracy to UTC much better than 1 second.
 
 For example: SiRF receivers, the make currently most popular in
 consumer-grade GPSes, exhibit a random wander of about 170mSec in the
@@ -253,7 +269,7 @@ CONFIG_PPS_CLIENT_LDISC=y
 Other OSes have different ways to enable KPPS in their kernels.
 
 If you're going to use gpsd for time service, you must run in -n mode
-so the clock will be updated even when no clients are active.
+so the clock will be updated even when no JSON clients are active.
 
 In order to present the smallest possible attack surface to
 privilege-escalation attempts, gpsd run as root drops its root
@@ -365,9 +381,7 @@ Here is a minimal sample ntp.conf configuration telling ntpd how to
 read the GPS notifications, when gpsd is started as root:
 
 -----------------------------------------------------------------------------
-server time-a.timefreq.bldrdoc.gov 
-server bonehed.lcs.mit.edu 
-server clock.sjc.he.net 
+pool us.pool.ntp.org iburst
 
 driftfile /var/lib/ntp/ntp.drift
 logfile /var/log/ntp.log
@@ -381,17 +395,18 @@ server 127.127.28.1 prefer
 fudge 127.127.28.1 refid GPS1
 -----------------------------------------------------------------------------
 
-The first three servers are additional time references needed by ntpd
-for redundancy and to give you a reference to see how well your local 
-GPS is performing. 
+The pool statement adds 4 chimer as additional time references needed
+by ntpd for redundancy and to give you a reference to see how well your
+local GPS is performing.
+
+If you are outside of the USA replace the pool servers with one in your
+local area.
 
 Users of ntpd versions older than revision ntp-4.2.5p138 should instead use
 this ntp.conf, when gpsd is started as root:
 
 -----------------------------------------------------------------------------
-server time-a.timefreq.bldrdoc.gov 
-server bonehed.lcs.mit.edu 
-server clock.sjc.he.net 
+pool us.pool.ntp.org iburst
 
 driftfile /var/lib/ntp/ntp.drift
 logfile /var/log/ntp.log
@@ -418,14 +433,18 @@ started as root.)
 With this configuration, ntpd will read the timestamp posted by gpsd
 every 64 seconds (16 non-root) and send it to unit 0.  The number after
 the parameter time1 is a "fudge", offset in seconds.  It's an estimate
-of the latency between the time source and your ntpd. You can use it to
-adjust out some of the fixed delays in the system.
+of the latency between the time source and the 'real' time. You can use
+it to adjust out some of the fixed delays in the system.
 
 To keep ntpd from preferring NMEA time over PPS time, you can add an 
-overlarge fudge to the NMEA time.
+overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
+is never used, just monitored.
 
 When you start gpsd, it will wait for a few good fixes before
-attempting process PPS.
+attempting to process PPS.
+
+You may run 'cgps' to verify your GPS has a 3D lock before worrying about
+timekeeping.
 
 After starting as root ntpd, then gpsd, a line similar to the one below
 should appear in the output of the command "ntpq -p" (after allowing the
@@ -441,7 +460,7 @@ xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
 +SHM(0)          .GPS.            0 l   50   64  377    0.000    6.631   5.331
 -----------------------------------------------------------------------------
 
-If you are running PPS then it will look like this:
+If you are running PPS then it may look like this:
 
 -----------------------------------------------------------------------------
      remote           refid      st t when poll reach   delay   offset  jitter
@@ -471,12 +490,13 @@ configuration, the system clock will lock onto the GPS clock, but this
 is a fragile setup - you can lose your only time reference if the GPS
 is temporarily unable to get satellite lock.
 
-You should always have at least two fallback chimers in your ntpd.conf
-for proper ntpd operation, in case your GPS fails to report time. And
-you'll need to adjust the offsets (fudges) in your ntp.conf so the
-SHM(1) time is consistent with your other chimers (and other local
-reference clocks, if you have any). We'll describe how to diagnose and
-tune your chimer configuration in a later section.
+You should always have at least two (preferably four) fallback chimers
+in your ntpd.conf for proper ntpd operation, in case your GPS fails to
+report time.  The 'pool' command makes this happen.  And you'll need
+to adjust the offsets (fudges) in your ntp.conf so the SHM(0) time is
+consistent with your other chimers (and other local reference clocks,
+if you have any). We'll describe how to diagnose and tune your chimer
+configuration in a later section.
 
 The gpsd developers would like to receive information about the
 offsets (fudges) observed by users for each type of receiver.  Please
@@ -489,18 +509,19 @@ present or doesn't have a recommended fudge, send us the output of the
 chrony is an alternative open-source implementation of NTP service,
 originally designed for systems with low-bandwidth or intermittent
 TCP/IP service.  It interoperates with ntpd using the same NTP
-protocols, but is somewhat easier to configure and administer.  Like
-ntpd, it can either operate purely as a client or provide time
-service. The chrony project has a home page at <<CHRONY>>. Its
-documentation includes an instructive feature comparison with ntpd
-at <<CHRONY-COMPARE>>.
+protocols.  Unlike ntpd which is designed to always be connected to
+multiple internet time sources chrony is designed for long periods
+of offline use.  Like ntpd, it can either operate purely as a client
+or provide time service. The chrony project has a home page at
+<<CHRONY>>. Its documentation includes an instructive feature comparison
+with ntpd at <<CHRONY-COMPARE>>.
 
 gpsd can provide reference clock information to chronyd similarly to
 the way it talks to ntpd.  The advantage to using chrony is that the
 PPS time resolution is in nanoseconds.  This is 1,000 times more
-precision than the microsecond time resolution provided to ntpd.  When
-gpsd supports the new ntpd protocol this difference will disappear,
-but chronyd is still simpler to set up.
+precision than the microsecond time resolution provided to ntpd.  This
+only matters if you has an RS-232 connected 1PPS refclock.  When
+gpsd supports the new ntpd protocol this difference will disappear.
 
 gpsd, when run as root, talks to chronyd using a socket named
 /var/run/chrony.ttyXX.sock (where ttyXX is replaced by the GPS device
@@ -540,6 +561,36 @@ refclock SOCK /tmp/chrony.ttyXX.sock
 Finally note that chronyd needs to be started before gpsd so the
 socket is ready when gpsd starts up and drops the root privileges.
 
+If running as root, the preferred starting procedure is:
+
+-----------------------------------------------------------------------------
+$ su -
+# killall -9 gpsd chronyd
+# chrony -f /etc/chrony/chrony.conf -s -r
+# sleep 2
+# gpsd -n /dev/ttyXX
+# sleep 2
+# cgps
+-----------------------------------------------------------------------------
+
+After you have verified with cgps that your GPS has a good 3D lock you
+can check how chrony is doing by running 'chronyc sources'.  Your output
+will look like this:
+
+ # chronyc sources
+210 Number of sources = 21
+MS Name/IP address    Stratum Poll Reach LastRx Last sample
+===============================================================================
+^+ XXXXXX                   3   6   377     8    -34us[  -34us] +/- 53ms
+^+ XXXXXX                   3   9   377   285   +102us[ +102us] +/- 42ms
+^+ XXXXXX                   3   6   377     9  -2000ns[-2000ns] +/- 48ms
+^+ XXXXXX                   3   7   377   128   -472us[ -472us] +/- 54ms
+^? XXXXXX                   0  10     0   10y     +0ns[   +0ns] +/- 0ns
+
+The stratum is as in ntpq.  The pool is how many seconds between samples.
+The reach is as in ntpq. LastRx is the time sonce the last successful
+sample.  Last sample is the offset and jitter of the source.
+
 == NTP performance tuning ==
 
 For good time stability, you should always have at least four other
@@ -548,9 +599,9 @@ chimers in your ntpd or chrony configuration besides your GPS
 satellite lock, or has an attack of temporarity insanity. You can find
 public NTP chimers to add to your configuration at <<USE-POOL>>. 
 
-To minimize latency variations, use the national and regional pool
-domains for your country and/or nearby ones.  Your configuration
-line should probably look like this
+To minimize latency variations, use the national and regional
+pool domains for your country and/or nearby ones.  Your ntp.conf
+configuration line should probably look like this
 
 -----------------------------------------------------------------------------
 pool us.pool.ntp.org iburst
@@ -564,29 +615,30 @@ implements a fast start algorithm that also weeds out bad servers.
 Note that a chimer can be a poor performer (what the inventor of NTP
 whimsically calls a "falseticker") for either of two reasons. It may
 be shipping bad time, or the best routes between you and it have large
-latency variations.  (Large but fixed latencies can be compensated out
-using a fudge.)
+latency variations (jitter) or may have an asymetric route confusing
+NPT.  Large but fixed latencies can be compensated out using a fudge.
+Jitter may not be compensated for.
 
-The standard tool for tuning is "ntpq" ("NTP query program"). To show a
-list of all servers declared in ntp.conf and their statistics, invoke it
-with the "-p" option. On a sample system configured with 7 servers from
-the NTP pool project and one PPS GPS attached via RS232, this is the
-output:
- 
------------------------------------------------------------------------------
+The standard tool for tuning ntpd is "ntpq" ("NTP query program"). To
+show a list of all servers declared in ntp.conf and their statistics,
+invoke it with the "-p" option. On a sample system configured with 7
+servers from the NTP pool project and one PPS GPS attached via RS232,
+this is the output:
+
+------------------------------------------------------------------------
 $ ntpq -p
-     remote           refid      st t when poll reach   delay   offset  jitter
-==============================================================================
--arthur.testserv 162.23.41.56     2 u   62   64  377    5.835   -1.129   8.921
--ntppublic.uzh.c 130.60.159.7     3 u   62   64  377    6.121   -4.102   6.336
--smtp.irtech.ch  162.23.41.56     2 u   35   64  377   15.521   -1.677   8.678
-+time2.ethz.ch   .PPS.            1 u   27   64  377    5.938   -1.713  16.404
--callisto.mysnip 192.53.103.104   2 u   53   64  377   49.357   -0.274   5.125
--shore.naturalne 122.135.113.81   3 u   22   64  377   14.676   -0.528   2.601
--ntp.univ-angers 195.220.94.163   2 u   41   64  377   40.678   -1.847  13.391
-+SHM(0)          .GPS.            0 l    4   64  377    0.000   34.682   7.952
-*SHM(1)          .PPS.            0 l    3   64  377    0.000   -2.664   0.457
------------------------------------------------------------------------------
+ remote          refid         st t when poll reach delay offset jitter
+========================================================================
+-arthur.testserv 162.23.41.56   2 u 62     64 377 5.835 -1.129 8.921
+-ntppublic.uzh.c 130.60.159.7   3 u 62     64 377 6.121 -4.102 6.336
+-smtp.irtech.ch  162.23.41.56   2 u 35     64 377 15.521 -1.677 8.678
++time2.ethz.ch   .PPS.          1 u 27     64 377 5.938 -1.713 16.404 
+-callisto.mysnip 192.53.103.104 2 u 53     64 377 49.357 -0.274 5.125 
+-shore.naturalne 122.135.113.81 3 u 22     64 377 14.676 -0.528 2.601 
+-ntp.univ-angers 195.220.94.163 2 u 41     64 377 40.678 -1.847 13.391 
++SHM(0)          .GPS.          0 l  4     64 377 0.000 34.682 7.952 
+*SHM(1)          .PPS.          0 l  3     64 377 0.000 -2.664 0.457
+------------------------------------------------------------------------
 
 The interesting columns are "remote", "st", "reach" and "offset".
 
