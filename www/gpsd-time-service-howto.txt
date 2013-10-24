@@ -652,9 +652,9 @@ project supports (list behind the "Global" link at <<ZONES>>). The
 "pool" tag expands to four randomly chosen servers by default.  "iburst"
 implements a fast start algorithm that also weeds out bad servers.
 
-Note that a chimer can be a poor performer for either of two
+Note that a chimer can be a poor performer for either of three
 reasons. It may be shipping bad time, or the best routes between you
-and it have large latency variations (jitter) or may have an asymetric
+and it have large latency variations (jitter), or it may have an asymetric
 route, confusing NTP.
 
 The standard tool for tuning ntpd is "ntpq" ("NTP query program"). To
