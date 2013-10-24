@@ -211,6 +211,14 @@ release.
 Very few GPS with PPS output come with RS-232 connectors.  To use this
 type of source you will usually need to build your own cables.
 
+The design of your host system can also affect time quality.  The
+&plusmn;5uSec error bound quoted above is for a dual-core or better
+system with clock in the 2GHz range on which the OS can schedule the
+long-running PPS thread in GPSD on an otherwise mostly unused
+processor (the Linux scheduler, in particular, will do this). On a
+single-core system, contention with other processes can pile
+on several additional microseconds of error.
+
 == Feeding NTPD from GPSD ==
 
 Most Unix systems get their time service through ntpd, a very old and
@@ -612,12 +620,10 @@ project supports (list behind the "Global" link at <<ZONES>>). The
 "pool" tag expands to four randomly chosen servers by default.  "iburst"
 implements a fast start algorithm that also weeds out bad servers.
 
-Note that a chimer can be a poor performer (what the inventor of NTP
-whimsically calls a "falseticker") for either of two reasons. It may
-be shipping bad time, or the best routes between you and it have large
-latency variations (jitter) or may have an asymetric route confusing
-NPT.  Large but fixed latencies can be compensated out using a fudge.
-Jitter may not be compensated for.
+Note that a chimer can be a poor performer for either of two
+reasons. It may be shipping bad time, or the best routes between you
+and it have large latency variations (jitter) or may have an asymetric
+route, confusing NTP.
 
 The standard tool for tuning ntpd is "ntpq" ("NTP query program"). To
 show a list of all servers declared in ntp.conf and their statistics,
