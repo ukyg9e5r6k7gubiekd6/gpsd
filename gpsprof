@@ -88,7 +88,7 @@ class plotter:
                     sys.exit(1)
                 if self.session.data["class"] == "DEVICES":
                     if len(self.session.data["devices"]) !=1 and not device:
-                       sys.stderr.write(" ERROR: a few devices connected, you must explicitly specify the device.\n")
+                       sys.stderr.write(" ERROR: multiple devices connected, you must explicitly specify the device.\n")
                        sys.exit(1)
                     for i in range(len(self.session.data["devices"])):
                         self.device = copy.copy(self.session.data["devices"][i])
