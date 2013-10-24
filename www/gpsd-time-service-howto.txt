@@ -33,8 +33,8 @@ as gentle an introduction as presently exists.
 NTP (Network Time Protocol) is a set of protocols that attempts to
 synchronize computer clocks across the Internet - ultimately,
 Universal Coordinated Time as defined by several scale-related atomic
-clocks run by national standards institutes.  NTP Version 3 is defined
-in <<RFC-1305>>.
+clocks run by national standards institutes.  NTP Version 4 is defined
+in <<RFC-5905>>.
 
 NTP service daemons running on each host do clock synchronization in
 the presence of variable network latency by monitoring those delays in
@@ -653,7 +653,7 @@ first column shows its current state: "-" or "x" for out-of-tolerance
 servers, "+" for good servers ("truechimers"), and "*" for the one good
 server currently used as the primary reference. The calculations used to
 determine a server's state are outside the scope of this document;
-details are available in RFCs 1305 and 5905.
+details are available in NTPv4 RFC 5905.
 
 "st" shows the remote server's stratum.
 
@@ -750,7 +750,8 @@ performance tuning.
 
 - [[[NTP-FAQ]]] http://www.ntp.org/ntpfaq/[NTP FAQ]
 
-- [[[RFC-1305] http://www.ietf.org/rfc/rfc1305.txt[Network Time Protocol (Version 3)]
+- [[[RFC-5905] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification
+]
 
 - [[[STRATA]]] http://www.endruntechnologies.com/stratum1.htm[What Is Stratum 1?]
 
