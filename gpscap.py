@@ -149,7 +149,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     else:
                         ofp.write("<td>?<br>\n")
                 else:
-                    ofp.write("<td>&nbsp;</td>\n")
+                    ofp.write("<td>No</td>\n")
                 if self.has_option(dev, "notes"):
                     notes = self.get(dev, "notes")
                 else:
