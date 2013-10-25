@@ -378,6 +378,11 @@ requirements list.</dd>
 <dd>What a long strange trip it's been. GPSD 3.0 ships, five years of
 effort pays off, and I think out loud about protocol transitions and
 ubiquity and what it's like to be an infrastructure gnome.</dd>
+
+<dt><a href="www/gpsd-time-service-howto.html">GPSD Time Service HOWTO</a></dt>
+<dd>Step-by-step instructions on setting up a Stratum 1 time server
+using GPSD and either ntpd or chrony. Documents the black art of
+tuning offsets for remote time servers.</dd>
 </dl>
 
 <h1 id='recipes'>Recipes and related resources</h1>
