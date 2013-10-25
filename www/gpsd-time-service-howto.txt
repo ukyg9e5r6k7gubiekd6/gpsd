@@ -35,11 +35,16 @@ jitter-like variation that is long compared to typical measurement
 periods.  *Accuracy* is the traceable offset from 'true' time as
 defined by a national standard institute.
 
+A good analogy to jitter vs wobble is changes in sea level on a beach.
+Jitter is caused by wave action, wobble is the daily effect of tides.
+For a time server, the most common cause of wobble is the effect of
+daily temperature variations on the oscillators in your equipment.
+
 == How NTP Works ==
 
 NTP (Network Time Protocol) is a set of protocols that attempts to
 synchronize computer clocks across the Internet - ultimately,
-Universal Coordinated Time as defined by several scale-related atomic
+Universal Coordinated Time (UTC) as defined by several scale-related atomic
 clocks run by national standards institutes.  NTP Version 4 is defined
 in <<RFC-5905>>.
 
@@ -57,7 +62,7 @@ clock's tick rate until it is synchronized.  These tick-rate changes
 are usually extremely small, much too small for a human or even most
 software timing loops to ever notice. But large changes are possible.
 
-Most computers are just NTP clients.  They request NTP notifications from
+Most computers are just NTP clients.  They send NTP requests to
 a set of servers (which on a Unix system is described by a list in
 /etc/ntp.conf or possibly /etc/default/ntpdate) and use it to adjust
 the local clock.  It is generally expected that NTP clients will have
@@ -66,7 +71,7 @@ of at most &plusmn;100 mSec, possibly less depending upon the quality
 of your network connection.
 
 Some NTP hosts are time *servers*.  These are known as "chimers".
-They distribute to NTP clients time read from high-precision reference
+They respond to NTP clients with time, hopefully read from high-precision reference
 clocks (often abbreviated "refclocks") synchronized to national time
 standards.  GPSes, because they distribute a single atomic-clock time
 basis in a way that is generally accessible, are widely used as
@@ -74,15 +79,14 @@ refclocks.
 
 You will hear time service people speak of "Stratum 0" (the reference
 clocks) "Stratum 1" (NTP servers directly connected to reference
-clocks) and "Stratum 2" (publicly accessible servers that get time
-from Stratum 1 over a network link). Stratum 3 chimers redistribute
-time from Stratum 2, and so forth. There are defined higher strata up
-to 15, but you will probably never see a public chimer higher than
-Stratum 3 or 4.
+clocks) and "Stratum 2" (servers that get time from Stratum
+1). Stratum 3 chimers redistribute time from Stratum 2, and so
+forth. There are defined higher strata up to 15, but you will probably
+never see a public chimer higher than Stratum 3 or 4.
 
 Ordinary client computers are normally configured to get time from one
-or more Stratum 2 (or less commonly Stratum 3) servers. With GPSD and
-a suitable GPS, you can easily condition your clock to higher accuracy
+or more Stratum 2 (or less commonly Stratum 3) servers. However, with GPSD and
+a suitable GPS device, you can easily condition your clock to higher accuracy
 than what you get from typical Stratum 2; with a little effort you can
 do better than you can get from most public Stratum 1 servers.
 
@@ -252,11 +256,14 @@ on several additional microseconds of error.
 If you are super-serious about your time-nuttery, you may want to look
 into the newest generation of dedicated Stratum 1 microservers being
 built out of open-source SBCs like the Raspberry Pi and Beaglebone, or
-sometimes with fully custom designs.  These avoid load-induced jitter
-by being fully dedicated to NTP service.  They are small, low-powered
-devices and often surprisingly inexpensive, as in costing less than
-US$100.  These microserver designs tend to favor the LEA-6H, and many
-of them use preinstalled GPSD on board.
+sometimes with fully custom designs. A representative build is well
+described at <<RPI>>.
+
+These microserver designs avoid load-induced jitter by being fully
+dedicated to NTP service.  They are small, low-powered devices and
+often surprisingly inexpensive, as in costing less than US$100.  They
+tend to favor the LEA-6H, and many of them use preinstalled GPSD on
+board.
 
 == Feeding NTPD from GPSD ==
 
@@ -827,6 +834,8 @@ performance tuning.
 - [[[HARDWARE]]] http://catb.org/gpsd/hardware.html[Compatible Hardware]
 
 - [[UBLOX-TIMING]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
+
+- [[[RPI]]] http://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html[The Raspberry Pi as a Stratum-1 NTP Server]
 
 - [[[NTP.ORG]]] http://www.ntp.org/[Home of the Network Time Protocol project]
 
