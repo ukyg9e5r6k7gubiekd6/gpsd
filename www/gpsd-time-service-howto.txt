@@ -91,13 +91,12 @@ than what you get from typical Stratum 2; with a little effort you can
 do better than you can get from most public Stratum 1 servers.
 
 You can then make your high-quality time available to other systems on
-your network.  You can even join the fraternity of "time nuts" who run
-public NTP servers for fun.  Anyone can do this; there is no official
-authority, and any NTP client may choose to use your host as a chimer
-by requesting time from it. The time-service network is
-self-regulating, with NTP daemons constantly pruning statistical
-outliers so the timebase cannot be accidentally or deliberately
-compromised.
+your network, or even run a public NTP server.  Anyone can do this;
+there is no official authority, and any NTP client may choose to use
+your host as a chimer by requesting time from it. The time-service
+network is self-regulating, with NTP daemons constantly pruning
+statistical outliers so the timebase cannot be accidentally or
+deliberately compromised.
 
 In fact many public and widely-trusted Stratum 1 chimers use GPSes as
 their Stratum 0, and a significant fraction of those use GPSD in the
@@ -143,12 +142,12 @@ latency and jitter.  But it's still often accurate to on the order of
 1 uSec.
 
 Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
-and plain PPS latching.  KPPS is formally known as RFC 2783 PPS.  These have
-different error budgets.  Plain PPS just references the pulse to the
-system clock as measured in user space.
+and plain PPS latching.  KPPS is an implementation of RFC 2783 <<RFC-2783>>.  
+Plain PPS just references the pulse to the system clock as 
+measured in user space.  These have different error budgets.  
 
 Kernel PPS uses a kernel function to accurately timestamp the status
-change on the PPS line.  Basic PPS has the kernel wake up the PPS
+change on the PPS line.  Plain PPS has the kernel wake up the PPS
 thread and then the PPS thread reads the current system clock.  As
 noted in the GPSD code, having the kernel do the time stamp yields
 lower latency and less jitter. Both methods have accuracy degraded by
@@ -219,7 +218,7 @@ mentioned GR601-W or a serial GPS with 1PPS.
 
 You can find 1PPS-capable devices supported by GPSD at <<HARDWARE>>.
 Note that the most popular consumer-grade GPS engine - SiRF - does not
-deliver 1PPS through USB or even RS232.  Thus the general run of cheap
+deliver 1PPS through USB or even RS232.  Thus the usual run of cheap
 GPS mice won't do.  In general, you can't use a USB device for time
 service unless you know it has the Macx-1 mod.
 
@@ -324,19 +323,26 @@ CONFIG_PPS=y
 CONFIG_PPS_CLIENT_LDISC=y
 -----------------------------------------------------------------------------
 
+Your Linux distribution may ship a file "config-xxxx" in the /boot
+directory, which will have a list of the configurattion options
+that were used to build the kernel.  You can check if the above
+options are set.
+
 Other OSes have different ways to enable KPPS in their kernels.
+
+== Feeding ntpd from gpsd ==
 
 If you're going to use gpsd for time service, you must run in -n mode
 so the clock will be updated even when no JSON clients are active.
 
 In order to present the smallest possible attack surface to
-privilege-escalation attempts, gpsd run as root drops its root
+privilege-escalation attempts, gpsd, if run as root, drops its root
 privileges very soon after startup - just after it has opened any
 serial device paths passed on the command line.
 
 Thus, KPPS can only be used with devices passed that way, not with
 GPSes that are later presented to gpsd by the hotplug system.  Those
-hotplug devices will, however, may be able to use plain, non-kernel
+hotplug devices may, however, be able to use plain, non-kernel
 PPS. gpsd tries to automatically fall back to this when absence of
 root permissions makes KPPS unavailable.
 
@@ -363,7 +369,7 @@ OS distribution has done "secure" things with the permissions.
 When in doubt, the preferred method to start your time keeping is:
 
 -----------------------------------------------------------------------------
-$ su -
+$ su - (or sudo -s )
 # killall -9 gpsd ntpd
 # ntpd -gN
 # sleep 2
@@ -392,10 +398,10 @@ Segments 2 and 3::
  	 for synchronisation.
 
 Because gpsd can be started either as root or non-root, it checks and
-attaches the most privileged segment pair it can - either 0 and 1 or 2
+attaches the more privileged segment pair it can - either 0 and 1 or 2
 and 3.
 
-For each GPS receiver gpsd controls, it will use the attached ntpshm
+For each GPS receiver that gpsd controls, it will use the attached ntpshm
 segments in pairs (for coarse clock and pps source, respectively)
 starting from the first found segments.
 
@@ -405,7 +411,7 @@ To debug, try looking at the live segments this way
 ipcs -m
 -----------------------------------------------------------------------------
 
-When gpsd has starrted as root, the results  should look like this:
+If gpsd was started as root, the results  should look like this:
 
 -----------------------------------------------------------------------------
 ------ Shared Memory Segments --------
@@ -450,15 +456,15 @@ fudge 127.127.28.0 time1 0.420 refid GPS
 
 # GPS PPS reference
 server 127.127.28.1 prefer
-fudge 127.127.28.1 refid GPS1
+fudge 127.127.28.1 refid PPS
 -----------------------------------------------------------------------------
 
-The pool statement adds 4 chimer as additional time references needed
+The pool statement adds 4 chimers as additional time references needed
 by ntpd for redundancy and to give you a reference to see how well your
 local GPS is performing.
 
 If you are outside of the USA replace the pool servers with one in your
-local area.
+local area. See <<USE-POOL>> for further information.
 
 Users of ntpd versions older than revision ntp-4.2.5p138 should instead use
 this ntp.conf, when gpsd is started as root:
@@ -475,8 +481,12 @@ fudge 127.127.28.0 time1 0.420 refid GPS
 
 # GPS PPS reference
 server 127.127.28.1 minpoll 4 maxpoll 4 prefer
-fudge 127.127.28.1 refid GPS1
+fudge 127.127.28.1 refid PPS
 -----------------------------------------------------------------------------
+
+Users of ntpd versions prior to ntp-4.2.5 do not have the "pool" option.
+Alternative configurations exist, but it is recommended that you upgrade
+ntpd, if feasible.
 
 The magic pseudo-IP address 127.127.28.0 identifies unit 0 of the ntpd
 shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0 is used
@@ -489,8 +499,8 @@ to use its normal heuristics to weight them.
 started as root.)
 
 With this configuration, ntpd will read the timestamp posted by gpsd
-every 64 seconds (16 non-root) and send it to unit 0.  The number after
-the parameter time1 is a "fudge", offset in seconds.  It's an estimate
+every 64 seconds (16 if non-root) and send it to unit 0.  The number after
+the parameter time1 (0.420 in the example above) is a "fudge", offset in seconds.  It's an estimate
 of the latency between the time source and the 'real' time. You can use
 it to adjust out some of the fixed delays in the system.
 
@@ -504,8 +514,8 @@ attempting to process PPS.
 You may run 'cgps' to verify your GPS has a 3D lock before worrying about
 timekeeping.
 
-After starting as root ntpd, then gpsd, a line similar to the one below
-should appear in the output of the command "ntpq -p" (after allowing the
+After starting (as root) ntpd, then gpsd, a listing similar to the one below
+should appear as the output of the command "ntpq -p" (after allowing the
 GPS to acquire a 3D fix).  This may take up to 30 minutes if your GPS
 has to cold start or has a poor skyview.
 
@@ -527,10 +537,10 @@ xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
 -bonehed.lcs.mit 18.26.4.106      2 u   44   64  377   84.259    4.194   0.503
 +clock.sjc.he.ne .CDMA.           1 u   41   64  377   23.634   -0.518   0.465
 +SHM(0)          .GPS.            0 l   50   64  377    0.000    6.631   5.331
-*SHM(1)          .GPS1.           0 l   49   64  377    0.000    0.222   0.310
+*SHM(1)          .PPS.            0 l   49   64  377    0.000    0.222   0.310
 -----------------------------------------------------------------------------
 
-When the value under "reach" remains zero, check that gpsd is running;
+If the value under "reach" for the SHM lines remains zero, check that gpsd is running;
 cgps reports a 3D fix; and the '-n' option was used.  Some GPSes
 specialized for time service can report time with signal lock on only
 one satellite, but with most devices a 3D fix is required.
@@ -568,7 +578,7 @@ chrony is an alternative open-source implementation of NTP service,
 originally designed for systems with low-bandwidth or intermittent
 TCP/IP service.  It interoperates with ntpd using the same NTP
 protocols.  Unlike ntpd which is designed to always be connected to
-multiple internet time sources chrony is designed for long periods
+multiple internet time sources, chrony is designed for long periods
 of offline use.  Like ntpd, it can either operate purely as a client
 or provide time service. The chrony project has a home page at
 <<CHRONY>>. Its documentation includes an instructive feature comparison
@@ -606,7 +616,11 @@ refclock SHM 0 offset 0.0 delay 0.2
 refclock SHM 1 offset 0.0 delay 0.0 prefer
 -----------------------------------------------------------------------------
 
-The offset option is functionally like ntpd's time1 option
+If you are outside of the USA replace the pool servers with one in your
+local area. See <<USE-POOL>> for further information.
+
+The offset option is functionally like ntpd's time1 option, used to 
+correct known and constant latency.
 
 To get chronyd to connect to gpsd using the more precise socket 
 method add this to your chrony.conf file (replacing ttyXX
@@ -643,7 +657,7 @@ socket is ready when gpsd starts up.
 If running as root, the preferred starting procedure is:
 
 -----------------------------------------------------------------------------
-$ su -
+$ su - (or sudo -s )
 # killall -9 gpsd chronyd
 # chrony -f /etc/chrony/chrony.conf -s -r
 # sleep 2
@@ -671,8 +685,8 @@ MS Name/IP address         Stratum Poll Reach LastRx Last sample
 ^? 142.54.181.202                2   6   377    22   -126ms[ -128ms] +/- 73ms
 -----------------------------------------------------------------------------
 
-The stratum is as in ntpq.  The pool is how many seconds between samples.
-The reach is as in ntpq. LastRx is the time sonce the last successful
+The stratum is as in ntpq.  The Poll is how many seconds elapse between samples.
+The Reach is as in ntpq. LastRx is the time since the last successful
 sample.  Last sample is the offset and jitter of the source.
 
 To keep chronyd from preferring NMEA time over PPS time, you can add an 
