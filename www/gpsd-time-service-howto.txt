@@ -7,13 +7,13 @@ you can find the original at the GPSD project website.
 
 == Introduction ==
 
-GPSD, NTP and a GPS supplying 1PPS ( one pulse-per-second) output can be
+GPSD, NTP and a GPS supplying 1PPS (one pulse-per-second) output can be
 used to set up a high-quality NTP time server. This HOWTO explains the
 method and various options you have in setting it up.
 
-The document you see is a draft in progress. We would like to produce
-a comprehensive guide suitable for people who know little about time
-service. We encourage others to contribute additions and corrections.
+This document is intended to be a comprehensive guide suitable for
+people who know little about time service. We encourage others to
+contribute additions and corrections.
 
 This document does not attempt to explain all the intricacies of
 time service; it is focused on practical advice for one specific
@@ -129,7 +129,7 @@ constant latency with respect to the time of of the fix.  GPS
 satellites deliver a top-of-GPS-second notification that is nominally
 accurate to 50nSec; in capable GPses that becomes the 1PPS signal.
 
-1PPS-capable GPSes often use an RS-232 control line to ship the 1PPS
+1PPS-capable GPSes use an RS-232 control line to ship the 1PPS
 edge of second to the host system (usually Carrier Detect or Ring
 Indicator; GPSD will quietly accept either).  Satellite top-of-second
 loses some accuracy on the way down due mainly to variable delays in
