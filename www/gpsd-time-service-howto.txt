@@ -71,11 +71,11 @@ of at most &plusmn;100 mSec, possibly less depending upon the quality
 of your network connection.
 
 Some NTP hosts are time *servers*.  These are known as "chimers".
-They respond to NTP clients with time, hopefully read from high-precision reference
-clocks (often abbreviated "refclocks") synchronized to national time
-standards.  GPSes, because they distribute a single atomic-clock time
-basis in a way that is generally accessible, are widely used as
-refclocks.
+They respond to NTP clients with time read from high-precision
+reference clocks (often abbreviated "refclocks") synchronized to
+national time standards.  GPSes, because they distribute a single
+atomic-clock time basis in a way that is generally accessible, are
+widely used as refclocks.
 
 You will hear time service people speak of "Stratum 0" (the reference
 clocks) "Stratum 1" (NTP servers directly connected to reference
