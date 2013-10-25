@@ -105,15 +105,38 @@ GPSD is useful for precision time service because it can use the 1PPS
 pulse delivered by some GPSes to discipline (correct) a local NTP
 instance.
 
-GPS satellites deliver a top-of-GPS-second notification that is
-nominally accurate to 50nSec. 1PPS-capable GPSes often use an RS-232
-control line to ship the 1PPS edge of second to the host system
-(usually Carrier Detect or Ring Indicator; GPSD will quietly accept
-either).  Satellite top-of-second loses some accuracy on the way down
-due mainly to variable delays in the ionosphere; processing overhead
-in the GPS itself adds a bit more latency, and your local host detecting
-that pulse adds still more latency and jitter.  But it's still often
-accurate to on the order of 1 uSec.
+It's tempting to think one could use a GPS for time service just by 
+timestamping the arrival of the first character in the report on each fix
+and correcting for a relatively small fixed latency composed of
+fix-processing and RS232 transmission time.
+
+Unfortunately, fix reports are often delayed in the receiver and on
+the link by as much as several hundred mSec, and this delay is not
+constant. This latency varies (jitters) throughout the day.  It may be
+stable to 10 mSec for hours and then jump by 200mSec.  Under these
+circumstances you can't expect accuracy to UTC much better than 1
+second from this method.
+
+For example: SiRF receivers, the make currently most popular in
+consumer-grade GPSes, exhibit a wobble of about 170mSec in the offset
+between actual top-of-second and the transmission of the first
+sentence in each reporting cycle. You can see this graphed at
+<<SIRF-WOBBLE>>.
+
+To get accurate time, then, the in-band fix report from the GPS needs
+to be supplemented with an out-of-band signal that has a low and
+constant latency with respect to the time of of the fix.  GPS
+satellites deliver a top-of-GPS-second notification that is nominally
+accurate to 50nSec; in capable GPses that becomes the 1PPS signal.
+
+1PPS-capable GPSes often use an RS-232 control line to ship the 1PPS
+edge of second to the host system (usually Carrier Detect or Ring
+Indicator; GPSD will quietly accept either).  Satellite top-of-second
+loses some accuracy on the way down due mainly to variable delays in
+the ionosphere; processing overhead in the GPS itself adds a bit more
+latency, and your local host detecting that pulse adds still more
+latency and jitter.  But it's still often accurate to on the order of
+1 uSec.
 
 Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
 and plain PPS latching.  KPPS is formally known as RFC 2783 PPS.  These have
@@ -197,21 +220,26 @@ Among newer receiver designs we've found the the uBlox 6 receiver used
 in the GR601-W to be particularly good.  Very detailed information on
 its timing performance can be found at <<UBLOX-TIMING>>. One of us
 (Raymond) has recent experience with an eval kit, the EVK 6H-0-001,
-that would make an excellent Stratum 0 device.
+that would make an excellent Stratum 0 device. 
 
-Unfortunately as of late 2013 the uBlox 6 is still hard to find in a
+Both the EVK 6H and GR601-W are built around the LEA-6H module, which
+is a relatively inexpensive but high-quality navigation GPS. We make a
+note of this because u-blox also has a specialized timing variant, the
+LEA 6T, which would be expensive overkill for an NTP server.
+
+Unfortunately as of late 2013 the LEA-6H is still hard to find in a
 packaged RS232 version, as opposed to a bare OEM module exporting TTL
 levels or an eval kit like the EVK 6H-0-001 costing upwards of
 US$300. Search the web; you may find a here-today-gone-tomorrow offer
 on alibaba.com or somewhere similar.
 
-The uBlox, and some other higher-end GPS receivers, has a stationary
-mode which, after you initialize it with the device's location, can
-deliver time service with only one good satellite lock (as opposed to
-the three required for a fix in its normal mode). For most reliable
-service we recommend using stationary mode. GPSD tools don't yet
-directly support this, but that capability may be added in a future
-release.
+The LEA-6T, and some other higher-end GPS receivers (but not the
+LEA-6H) have a stationary mode which, after you initialize it with the
+device's location, can deliver time service with only one good
+satellite lock (as opposed to the three required for a fix in its
+normal mode). For most reliable service we recommend using stationary
+mode if your device has it. GPSD tools don't yet directly support
+this, but that capability may be added in a future release.
 
 The design of your host system can also affect time quality.  The
 &plusmn;5uSec error bound quoted above is for a dual-core or better
@@ -222,12 +250,13 @@ single-core system, contention with other processes can pile
 on several additional microseconds of error.
 
 If you are super-serious about your time-nuttery, you may want to look
-into the newest generation of dedicated stratum 1 microservers being
-built out of SBCs like the Raspberry Pi and Beaglebone, or sometimes
-with fully custom designs.  These avoid load-induced jitter by being
-fully dedicated to NTP service.  They are small, low-powered devices
-and often surprisingly inexpensive, as in costing less than US$100. 
-Many of these microservers use preinstalled GPSD on board.  
+into the newest generation of dedicated Stratum 1 microservers being
+built out of open-source SBCs like the Raspberry Pi and Beaglebone, or
+sometimes with fully custom designs.  These avoid load-induced jitter
+by being fully dedicated to NTP service.  They are small, low-powered
+devices and often surprisingly inexpensive, as in costing less than
+US$100.  These microserver designs tend to favor the LEA-6H, and many
+of them use preinstalled GPSD on board.
 
 == Feeding NTPD from GPSD ==
 
@@ -241,26 +270,13 @@ shared-memory segment with an ID known to ntpd, the network time
 synchronization daemon.  If ntpd has been properly configured to
 receive this message, it will be used to correct the system clock.
 
-Note that latency from the moment the date/time messages are received
-from the GPS (without PPS) is not as accurate as you might expect.
-Messages are often delayed in the receiver and on the link by as much as
-several hundred mSec, and this delay is not constant.  It also varies
-(jitter) throughout the day.  It may be stable to 1o0 mSec for hours and
-then jump by 200mSec.  Under these circumstances you can't expect
-accuracy to UTC much better than 1 second.
-
-For example: SiRF receivers, the make currently most popular in
-consumer-grade GPSes, exhibit a random wander of about 170mSec in the
-offset between PPS and the transmission of the first sentence in each
-reporting cycle. You can see this graphed at <<SIRF-WOBBLE>>.
-
-On most OSes, gpsd includes support for interpreting the 1PPS pulses;
-this can be used to update NTP at much higher accuracy than message
-time provides.  You can determine whether your GPS emits this pulse,
-and gpsd is detecting it, by running at -D 5 and watching for
-carrier-detect state change messages in the logfile.  In addition, if
-your kernel provides the RFC 2783 KPPS (kernel PPS) API gpsd will
-use that for extra accuracy.
+gpsd includes support for interpreting the 1PPS pulses; this can be
+used to update NTP at much higher accuracy than message time provides.
+You can determine whether your GPS emits this pulse, and gpsd is
+detecting it, by running at -D 5 and watching for carrier-detect state
+change messages in the logfile.  In addition, if your kernel provides
+the RFC 2783 KPPS (kernel PPS) API gpsd will use that for extra
+accuracy.
 
 Note that gpsd assumes that after each fix the GPS will assert
 1PPS first and ship sentences reporting time of fix second. Every
