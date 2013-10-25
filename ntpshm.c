@@ -691,8 +691,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
 	if (chronyfd < 0)
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"PPS can not connect chrony socket: %s\n",
-		chrony_path);
+		"PPS can not connect chrony socket: %s, error: %d, errno: %d\n",
+		chrony_path, chronyfd, errno);
 	else
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS using chrony socket: %s\n", chrony_path);
