@@ -48,6 +48,8 @@ static pthread_mutex_t initialization_mutex;
 static volatile int uninitialized_pps_thread_count;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
+#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
+
 #define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
 #define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */
 
@@ -869,12 +871,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    cycle, duration,
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
-	/*  only listen to PPS after 4 consecutive fixes, otherwise time
-	 *  will be inaccurate.
-	 *  Not sure yet how to handle uBlox UBX_MODE_TMONLY
-	 *  Do not use ship_to_ntp here since it is synced to packets
-	 *  and this thread is asynchonous to packets */
-	if ( 3 < session->fixcnt ) {
+	/*
+	 * Only listen to PPS after several consecutive fixes,
+	 * otherwise time may be inaccurate.  (We know this is
+	 * required on some Garmins in binary mode; safest to do it
+	 * for all case we're talking to a Garmin in text mode, and
+	 * out of general safety-first conservatism.)
+	 *
+	 * Not sure yet how to handle uBlox UBX_MODE_TMONLY
+	 */
+	if ( PPS_MIN_FIXES < session->fixcnt ) {
 	    /*
 	     * The PPS pulse is normally a short pulse with a frequency of
 	     * 1 Hz, and the UTC second is defined by the front edge. But we

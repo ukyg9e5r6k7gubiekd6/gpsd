@@ -1300,14 +1300,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		    session->driver.nmea.date.tm_min,
 		    session->driver.nmea.date.tm_sec + session->driver.nmea.subseconds);
 	/*
-	 * Conservative heuristic for whether we should try using the
-	 * device for precision time service. Wait for it to stabilize
-	 * after initialization. (We know this is required on some
-	 * Garmins in binary mode; safest to do it in case we're
-	 * talking to a Garmin in text mode.)
+	 * If we have time and PPS is available, assume we have good time.
+	 * Because this is a generic driver we don't really have enough
+	 * information for a sharper test, so we'll leave it up to the
+	 * PPS code to do its own sanity filtering.
 	 */
-	if (session->fixcnt > 3)
-	    retval |= PPSTIME_IS;
+	retval |= PPSTIME_IS;
     }
 
     /*
