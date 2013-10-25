@@ -535,39 +535,60 @@ gpsd, when run as root, talks to chronyd using a socket named
 /var/run/chrony.ttyXX.sock (where ttyXX is replaced by the GPS device
 name.  This allows multiple GPS to feed one chronyd.
 
-No gpsd configuration is required to talk to chronyd.  To get chronyd
-to connect to gpsd using the non-preferred SHM method add this to your
-/etc/chrony/chrony.conf file:
+No gpsd configuration is required to talk to chronyd. chronyd is
+configured using the file /etc/chrony.conf or /etc/chrony/chrony.conf.
+Check your distributions documentation for the correct location.  To get
+chronyd to connect to gpsd using the basic ntpd compatible SHM method
+add this to use this basic chrony.conf file:
 
 -----------------------------------------------------------------------------
+server 0.us.pool.ntp.org
+server 1.us.pool.ntp.org
+server 2.us.pool.ntp.org
+server 3.us.pool.ntp.org
+
+driftfile /etc/chrony/chrony.drift
+
 # delay 0.0 is right, but use 0.2 to avoid NMEA
 # time fighting with PPS time
+# or use noprefer and a good offset
 refclock SHM 0 offset 0.0 delay 0.2
-refclock SHM 1 offset 0.0 delay 0.0
+refclock SHM 1 offset 0.0 delay 0.0 prefer
 -----------------------------------------------------------------------------
 
 The offset option is functionally like ntpd's time1 option
 
 To get chronyd to connect to gpsd using the more precise socket 
-method add this to your /etc/chrony/chrony.conf file (replacing ttyXX
+method add this to your chrony.conf file (replacing ttyXX
 with your device name).  
 
 If running as root:
 
 -----------------------------------------------------------------------------
+server 0.us.pool.ntp.org
+server 1.us.pool.ntp.org
+server 2.us.pool.ntp.org
+server 3.us.pool.ntp.org
+
+driftfile /etc/chrony/chrony.drift
+
+# delay 0.0 is right, but use 0.2 to avoid NMEA
+# time fighting with PPS time
+# or use noprefer and a good offset
+refclock SHM 0 offset 0.0 delay 0.2
+refclock SHM 1 offset 0.0 delay 0.0 noprefer
 #refclock PPS
-refclock SOCK /var/run/chrony.ttyXX.sock 
+refclock SOCK /var/run/chrony.ttyXX.sock prefer
 -----------------------------------------------------------------------------
 
-If not running as root:  
+If not running as root change the "refclock SOCK" line to:
 
 -----------------------------------------------------------------------------
-#refclock PPS
-refclock SOCK /tmp/chrony.ttyXX.sock 
+refclock SOCK /tmp/chrony.ttyXX.sock prefer
 -----------------------------------------------------------------------------
 
 Finally note that chronyd needs to be started before gpsd so the
-socket is ready when gpsd starts up and drops the root privileges.
+socket is ready when gpsd starts up.
 
 If running as root, the preferred starting procedure is:
 
@@ -585,19 +606,30 @@ After you have verified with cgps that your GPS has a good 3D lock you
 can check how chrony is doing by running 'chronyc sources'.  Your output
 will look like this:
 
- # chronyc sources
-210 Number of sources = 21
-MS Name/IP address    Stratum Poll Reach LastRx Last sample
+-----------------------------------------------------------------------------
+# chronyc sources
+
+210 Number of sources = 7
+MS Name/IP address         Stratum Poll Reach LastRx Last sample
 ===============================================================================
-^+ XXXXXX                   3   6   377     8    -34us[  -34us] +/- 53ms
-^+ XXXXXX                   3   9   377   285   +102us[ +102us] +/- 42ms
-^+ XXXXXX                   3   6   377     9  -2000ns[-2000ns] +/- 48ms
-^+ XXXXXX                   3   7   377   128   -472us[ -472us] +/- 54ms
-^? XXXXXX                   0  10     0   10y     +0ns[   +0ns] +/- 0ns
+#* SHM0                          0   4   377    22  -1646us[-3345us] +/- 100ms
+#? SHM1                          0   4   377    19   -126ms[ -126ms] +/- 67us
+#? SOC2                          0   4     0   10y     +0ns[   +0ns] +/- 0ns
+^? vimo.dorui.net                3   6   377    23   -123ms[ -125ms] +/- 71ms
+^? time.gac.edu                  2   6   377    24   -127ms[ -128ms] +/- 55ms
+^? 2001:470:1:24f::2:3           2   6   377    24   -122ms[ -124ms] +/- 44ms
+^? 142.54.181.202                2   6   377    22   -126ms[ -128ms] +/- 73ms
+-----------------------------------------------------------------------------
 
 The stratum is as in ntpq.  The pool is how many seconds between samples.
 The reach is as in ntpq. LastRx is the time sonce the last successful
 sample.  Last sample is the offset and jitter of the source.
+
+To keep chronyd from preferring NMEA time over PPS time, you can add an 
+overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
+is never used, just monitored.
+
+
 
 == NTP performance tuning ==
 
@@ -681,13 +713,26 @@ statistics peerstats
 filegen peerstats file peerstats type day enable
 -----------------------------------------------------------------------------
 
+Or, if you are running chronyd add these to chrony.conf:
+
+-----------------------------------------------------------------------------
+logdir /var/log/chrony
+log statistics measurements tracking
+-----------------------------------------------------------------------------
+
 This enables logging of the peer server statistics.
 
-2. Make sure the directory exists properly.  As root do:
+2. Make sure the directory exists properly.  For ntpd as root do:
    # mkdir -p /var/log/ntpstats
    # chown ntp:ntp /var/log/ntpstats
 
-3. Start ntpd and let it run for at least four hours.
+For chronyd as root do:
+   # mkdir -p /var/log/chrony
+   # chown root:root /var/log/chrony
+
+3. Start ntpd (or chronyd) and let it run for at least four hours.
+Periodically check progress with "ntpq -p" or "chronyc sources" and wait
+until change has settled out.
 
 4. Calculate the average GPS offset using this script (a copy is
 included as contrib/ntpoffset in the GPSD distribution):
