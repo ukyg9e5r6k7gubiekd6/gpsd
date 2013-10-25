@@ -324,11 +324,14 @@ CONFIG_PPS_CLIENT_LDISC=y
 -----------------------------------------------------------------------------
 
 Your Linux distribution may ship a file "config-xxxx" in the /boot
-directory, which will have a list of the configurattion options
+directory, which will have a list of the configuration options
 that were used to build the kernel.  You can check if the above
-options are set.
+options are set. Usually they will be set to "m", which is
+sufficient.
 
 Other OSes have different ways to enable KPPS in their kernels.
+When we learn what those are, we'll document them or point
+at references.
 
 == Feeding ntpd from gpsd ==
 
@@ -366,7 +369,7 @@ socket location.
 You may also find gpsd can't open serial devices at all if your
 OS distribution has done "secure" things with the permissions.
  
-When in doubt, the preferred method to start your time keeping is:
+When in doubt, the preferred method to start your timekeeping is:
 
 -----------------------------------------------------------------------------
 $ su - (or sudo -s )
@@ -378,8 +381,11 @@ $ su - (or sudo -s )
 # cgps
 -----------------------------------------------------------------------------
 
-where /dev/ttyXX is whatever 1PPS-capable device you have.  The
-rest of these setup instructions will assume that you are starting
+where /dev/ttyXX is whatever 1PPS-capable device you have.  In a
+binary-package-based Linux distribution it is probable that ntpd
+will already have brrn launched at boot time.
+
+The rest of these setup instructions will assume that you are starting
 gpsd as root, with occasional glances at the non-root case.
 
 Now check to see if gpsd has correctly attached the shared-memory
