@@ -28,6 +28,13 @@ as gentle an introduction as presently exists.
 | mSec    | milliSecond | 1/1,000 of a second
 |====================================================
 
+There are a few important terms we need to define up front.  *Latency*
+is delay from a time measurement until a report on it arrives where it
+is needed. *Jitter* is short-term variation in latency. *Wobble* is a
+jitter-like variation that is long compared to typical measurement
+periods.  *Accuracy* is the traceable offset from 'true' time as
+defined by a national standard institute.
+
 == How NTP Works ==
 
 NTP (Network Time Protocol) is a set of protocols that attempts to
@@ -58,9 +65,12 @@ an accuracy (that is, maximum divergence from the master atomic clock)
 of at most &plusmn;100 mSec, possibly less depending upon the quality 
 of your network connection.
 
-Some NTP hosts are time *servers*.  These are known as "chimers".  They
-use high-precision time sourced synchronized to national time standard
-timebase to export reliable time for use by NTP clients.
+Some NTP hosts are time *servers*.  These are known as "chimers".
+They distribute to NTP clients time read from high-precision reference
+clocks (often abbreviated "refclocks") synchronized to national time
+standards.  GPSes, because they distribute a single atomic-clock time
+basis in a way that is generally accessible, are widely used as
+refclocks.
 
 You will hear time service people speak of "Stratum 0" (the reference
 clocks) "Stratum 1" (NTP servers directly connected to reference
@@ -79,10 +89,11 @@ do better than you can get from most public Stratum 1 servers.
 You can then make your high-quality time available to other systems on
 your network.  You can even join the fraternity of "time nuts" who run
 public NTP servers for fun.  Anyone can do this; there is no official
-authority, and NTP clients may choose to use your host as a
-chimer. The time-service network is self-regulating, with NTP daemons
-constantly pruning statistical outliers so the timebase cannot be
-accidentally or deliberately compromised.
+authority, and any NTP client may choose to use your host as a chimer
+by requesting time from it. The time-service network is
+self-regulating, with NTP daemons constantly pruning statistical
+outliers so the timebase cannot be accidentally or deliberately
+compromised.
 
 In fact many public and widely-trusted Stratum 1 chimers use GPSes as
 their Stratum 0, and a significant fraction of those use GPSD in the
@@ -104,10 +115,6 @@ in the GPS itself adds a bit more latency, and your local host detecting
 that pulse adds still more latency and jitter.  But it's still often
 accurate to on the order of 1 uSec.
 
-Latency is any added delay from an event until its measurement.  Jitter
-is the short term variation in that latency.  Accuracy is the traceable
-offset from 'true' time as defined by a national standard institute.
-
 Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
 and plain PPS latching.  KPPS is formally known as RFC 2783 PPS.  These have
 different error budgets.  Plain PPS just references the pulse to the
@@ -126,9 +133,6 @@ uSec.  Otherwise you are lucky to get &plusmn;5 uSec, and there will be
 about 20uSec of jitter. All these figures were observed on
 plain-vanilla x86 PCS with clock speeds in the 2GHz range.
 
-The observed latency and jitter will be greatly affected by your CPU
-clock speed, number of cores, system load factor and other unkowns.
-
 All the previous figures assume you're using PPS delivered over
 RS232.  USB GPSes that deliver 1PPS are rare, but do exist. Notably,
 there's the Navsys GR601-W. In case this device goes out of
@@ -142,9 +146,13 @@ mod".)
 With this design, 1PPS from the engine will turn into a USB event that
 becomes visible to the host system (and GPSD) the next time the USB
 device is polled. USB 1.1 polls 1024 slots ever second.  Each slot is
-polled in the same order ever second.  When a device is added it is
+polled in the same order every second.  When a device is added it is
 assigned to one of those 1024 polling slots.  It should then be clear
 that the accuracy of a USB 1.1 connected GPS would be about 1 mSec.
+
+As of late 2013 no USB GPS we know of implements the higher polling-rate
+options in USB 2 and 3.  When one does, and if it has the Macx-1 mod,
+higher USB accuracy will ensue.
 
 .Summary of typical accuracy
 |=======================================
@@ -158,10 +166,6 @@ that the accuracy of a USB 1.1 connected GPS would be about 1 mSec.
 |=======================================
 
 (Sources for the NTP accuracy bounds are <<STRATA>> and <<NTP-FAQ>>.)
-
-As of late 2013 no USB GPS we know of implements the higher polling-rate
-options in USB 2 and 3.  When one does, and if it has the Macx-1 mod,
-higher USB accuracy will ensue.
 
 == Choice of Hardware ==
 
@@ -184,8 +188,9 @@ sources.
 In general, use a GPS with an RS232 interface for time service if you
 can.  The GR601-W was designed (by one of the authors, as it happens)
 for deployment with commodity TCP/IP routers that only have USB ports.
-RS232 is more fiddly to set up, but it can deliver three orders of 
-magnitude better accuracy and repeatability - enough to meet
+RS232 is more fiddly to set up (with older devices like the GPS-18 you
+may even have to make your own cables) but it can deliver three orders
+of magnitude better accuracy and repeatability - enough to meet
 prevailing standards for a public Stratum 1 chimer.
 
 Among newer receiver designs we've found the the uBlox 6 receiver used
@@ -208,9 +213,6 @@ service we recommend using stationary mode. GPSD tools don't yet
 directly support this, but that capability may be added in a future
 release.
 
-Very few GPS with PPS output come with RS-232 connectors.  To use this
-type of source you will usually need to build your own cables.
-
 The design of your host system can also affect time quality.  The
 &plusmn;5uSec error bound quoted above is for a dual-core or better
 system with clock in the 2GHz range on which the OS can schedule the
@@ -218,6 +220,14 @@ long-running PPS thread in GPSD on an otherwise mostly unused
 processor (the Linux scheduler, in particular, will do this). On a
 single-core system, contention with other processes can pile
 on several additional microseconds of error.
+
+If you are super-serious about your time-nuttery, you may want to look
+into the newest generation of dedicated stratum 1 microservers being
+built out of SBCs like the Raspberry Pi and Beaglebone, or sometimes
+with fully custom designs.  These avoid load-induced jitter by being
+fully dedicated to NTP service.  They are small, low-powered devices
+and often surprisingly inexpensive, as in costing less than US$100. 
+Many of these microservers use preinstalled GPSD on board.  
 
 == Feeding NTPD from GPSD ==
 
@@ -628,8 +638,6 @@ sample.  Last sample is the offset and jitter of the source.
 To keep chronyd from preferring NMEA time over PPS time, you can add an 
 overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
 is never used, just monitored.
-
-
 
 == NTP performance tuning ==
 
