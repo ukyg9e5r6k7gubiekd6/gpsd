@@ -183,16 +183,33 @@ higher USB accuracy will ensue.
 
 .Summary of typical accuracy
 |=======================================
-| GPS atomic clock    |  &plusmn;50nSec
-| KPPS                |  &plusmn;1uSec
-| PPS                 |  &plusmn;5uSec
-| USB poll interval   |  &plusmn;1mSec
-| Stratum 1 NTP time  |  &plusmn;10uSec
-| Stratum 2 NTP time  |  &plusmn;100mSec
-| Stratum 3 NTP time  |  &plusmn;200mSec
+| GPS atomic clock    |  &plusmn;50nSec 
+| KPPS                |  &plusmn;1uSec  
+| PPS                 |  &plusmn;5uSec  
+| USB poll interval   |  &plusmn;1mSec  
+| Network NTP time    |  &plusmn;10mSec 
 |=======================================
 
-(Sources for the NTP accuracy bounds are <<STRATA>> and <<NTP-FAQ>>.)
+Observed variations from the typical figure increase towards the
+bottom of the table.  Notably, a heavily loaded host system can reduce PPS
+accuracy, though not KPPS accuracy except in the most extreme cases.
+The USB poll interval tends to be very stable.
+
+Network NTP time accuracy can be degraded below 10mSec by a number of
+factors. Almost all have more to do with the quality of your Internet
+connection to your chimers than with the acuracy of the chimers
+themselves.  Some negatives:
+
+* Having a cable modem.  That is, as opposed to DSL or optical fiber, which
+  tend to have less variable latencies.
+
+* Path delay asymmetries due to peering policy.  These can confuse
+  NTP's reconciliation algorithms.
+
+With these factors in play, worst-case error can reach up to
+&plusmn;100mSec.  Fortunately, errors of over &plusmn;100mSec are very
+unusual and should occur only if all your network routes to chimers
+have serious problems.
 
 == Choice of Hardware ==
 
@@ -826,10 +843,7 @@ performance tuning.
 
 - [[[NTP-FAQ]]] http://www.ntp.org/ntpfaq/[NTP FAQ]
 
-- [[[RFC-5905] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification
-]
-
-- [[[STRATA]]] http://www.endruntechnologies.com/stratum1.htm[What Is Stratum 1?]
+- [[[RFC-5905] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
 - [[[HARDWARE]]] http://catb.org/gpsd/hardware.html[Compatible Hardware]
 
