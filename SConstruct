@@ -424,10 +424,27 @@ def CheckCompilerOption(context, option):
     context.Result(ret)
     return ret
 
+def CheckEndian(context):
+    context.Message("checking endianess ... ")
+    import struct
+    array = struct.pack('cccc', '\x01', '\x02', '\x03', '\x04')
+    i = struct.unpack('i', array)
+    # Little Endian
+    if i == struct.unpack('<i', array):
+        context.Result("little")
+        return "little"
+    # Big Endian
+    elif i == struct.unpack('>i', array):
+        context.Result("big")
+        return "big"
+    context.Result("unknown")
+    return "unknown"
+
 config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc,
-                                         'CheckCompilerOption' : CheckCompilerOption})
+                                         'CheckCompilerOption' : CheckCompilerOption,
+                                         'CheckEndian' : CheckEndian})
 
 
 # If supported by the compiler, enable all warnings except uninitialized and
@@ -600,30 +617,15 @@ if config.CheckFunc("pselect"):
 else:
     confdefs.append("#define COMPAT_SELECT\n")
 
-confdefs.append('''
-/* will not handle pre-Intel Apples that can run big-endian 
-   __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
-  only, probably depending on the architecture. Try to use endian.h if
-  the gcc way fails - endian.h also doesn not seem to be available on all
-  platforms.
-*/
-#ifdef __BIG_ENDIAN__
-#define WORDS_BIGENDIAN 1
-#else /* __BIG_ENDIAN__ */
-#ifdef __LITTLE_ENDIAN__
-#undef WORDS_BIGENDIAN
-#else
-#include <endian.h>
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define WORDS_BIGENDIAN 1
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-#undef WORDS_BIGENDIAN
-#else
-#error "unable to determine endianess!"
-#endif /* __BYTE_ORDER */
-#endif /* __LITTLE_ENDIAN__ */
-#endif /* __BIG_ENDIAN__ */
+endian = config.CheckEndian()
+if endian == 'big':
+    confdefs.append("#define WORDS_BIGENDIAN	1\n")
+elif endian == 'little':
+    confdefs.append("#undef WORDS_BIGENDIAN\n")
+elif endian == 'unknown':
+    announce("processor endianness unknown")
 
+confdefs.append('''\
 /* Some libcs do not have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
 # ifdef __cplusplus
