@@ -210,6 +210,14 @@ static int ntpshm_alloc(struct gps_context_t *context)
 	if (context->shmTime[i] != NULL && !context->shmTimeInuse[i]) {
 	    context->shmTimeInuse[i] = true;
 
+	    /*
+	     * In case this segment gets sent to ntpd before an
+	     * ephemeris is available, the LEAP_NOTINSYNC value will
+	     * tell ntpd that this source is in a "clock alarm" state
+	     * and should be ignored.  The goal is to prevent ntpd
+	     * from declaring the GPS a falseticker before it gets
+	     * all its marbles together.
+	     */
 	    memset((void *)context->shmTime[i], 0, sizeof(struct shmTime));
 	    context->shmTime[i]->mode = 1;
 	    context->shmTime[i]->leap = LEAP_NOTINSYNC;
