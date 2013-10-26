@@ -279,20 +279,10 @@ often surprisingly inexpensive, as in costing less than US$100.  They
 tend to favor the LEA-6H, and many of them use preinstalled GPSD on
 board.
 
-== Feeding NTPD from GPSD ==
-
-Most Unix systems get their time service through ntpd, a very old and
-stable open-source software suite which is the reference
-implementation of NTP.  The project home page is <<NTP.ORG>>.
-
-When gpsd receives a sentence with a timestamp, it packages the
-received timestamp with current local time and sends it to a
-shared-memory segment with an ID known to ntpd, the network time
-synchronization daemon.  If ntpd has been properly configured to
-receive this message, it will be used to correct the system clock.
+== Enabling PPS ==
 
 gpsd includes support for interpreting the 1PPS pulses; this can be
-used to update NTP at much higher accuracy than message time provides.
+used to update your time at much higher accuracy than message time provides.
 You can determine whether your GPS emits this pulse, and gpsd is
 detecting it, by running at -D 5 and watching for carrier-detect state
 change messages in the logfile.  In addition, if your kernel provides
@@ -367,6 +357,18 @@ socket location.
 You may also find gpsd can't open serial devices at all if your
 OS distribution has done "secure" things with the permissions.
  
+== Feeding NTPD from GPSD ==
+
+Most Unix systems get their time service through ntpd, a very old and
+stable open-source software suite which is the reference
+implementation of NTP.  The project home page is <<NTP.ORG>>.
+
+When gpsd receives a sentence with a timestamp, it packages the
+received timestamp with current local time and sends it to a
+shared-memory segment with an ID known to ntpd, the network time
+synchronization daemon.  If ntpd has been properly configured to
+receive this message, it will be used to correct the system clock.
+
 When in doubt, the preferred method to start your timekeeping is:
 
 -----------------------------------------------------------------------------
