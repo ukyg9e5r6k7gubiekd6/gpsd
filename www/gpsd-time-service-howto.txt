@@ -62,13 +62,11 @@ clock's tick rate until it is synchronized.  These tick-rate changes
 are usually extremely small, much too small for a human or even most
 software timing loops to ever notice. But large changes are possible.
 
-Most computers are just NTP clients.  They send NTP requests to
-a set of servers (which on a Unix system is described by a list in
-/etc/ntp.conf or possibly /etc/default/ntpdate) and use it to adjust
-the local clock.  It is generally expected that NTP clients will have
-an accuracy (that is, maximum divergence from the master atomic clock)
-of at most &plusmn;100 mSec, possibly less depending upon the quality 
-of your network connection.
+Most computers are just NTP clients.  They send NTP requests to a set
+of servers and use it to adjust the local clock.  It is generally
+expected that NTP clients will have an accuracy (that is, maximum
+divergence from the master atomic clock) of at most &plusmn;100 mSec,
+possibly less depending upon the quality of your network connection.
 
 Some NTP hosts are time *servers*.  These are known as "chimers".
 They respond to NTP clients with time read from high-precision
