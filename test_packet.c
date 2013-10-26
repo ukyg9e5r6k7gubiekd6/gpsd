@@ -326,7 +326,6 @@ static void runon_test(struct map *mp)
 
 static int property_check(void)
 {
-    extern const struct gps_type_t nmea;
     const struct gps_type_t **dp;
     int status;
 

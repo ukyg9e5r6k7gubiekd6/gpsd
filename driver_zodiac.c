@@ -18,6 +18,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
+#include "bits.h"
 
 /* Zodiac protocol description uses 1-origin indexing by little-endian word */
 #define get16z(buf, n)	( (buf[2*(n)-2])	\
@@ -52,11 +53,10 @@ static int end_write(int fd, void *d, int len)
 /* write an array of shorts in little-endian format */
 {
     char buf[BUFSIZ];
-    char *p = buf;
     short *data = (short *)d;
     size_t n = (size_t)(len/2);
 
-    for (n - 0; n < (size_t)(len/2); n++)
+    for (n = 0; n < (size_t)(len/2); n++)
 	putle16(buf, n*2, data[n]); 
     return write(fd, buf, len);
 }
