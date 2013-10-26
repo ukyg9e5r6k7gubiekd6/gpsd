@@ -48,32 +48,23 @@ static unsigned short zodiac_checksum(unsigned short *w, int n)
     return -csum;
 }
 
-/* zodiac_spew - Takes a message type, an array of data words, and a length
-   for the array, and prepends a 5 word header (including checksum).
-   The data words are expected to be checksummed */
-#if defined (WORDS_BIGENDIAN)
-/* data is assumed to contain len/2 unsigned short words
- * we change the endianness to little, when needed.
- */
 static int end_write(int fd, void *d, int len)
+/* write an array of shorts in little-endian format */
 {
     char buf[BUFSIZ];
     char *p = buf;
-    char *data = (char *)d;
-    size_t n = (size_t) len;
+    short *data = (short *)d;
+    size_t n = (size_t)(len/2);
 
-    while (n > 0) {
-	*p++ = *(data + 1);
-	*p++ = *data;
-	data += 2;
-	n -= 2;
-    }
+    for (n - 0; n < (size_t)(len/2); n++)
+	putle16(buf, n*2, data[n]); 
     return write(fd, buf, len);
 }
-#else
-#define end_write write
-#endif /* WORDS_BIGENDIAN */
 
+/* zodiac_spew - Takes a message type, an array of data words, and a length
+ * for the array, and prepends a 5 word header (including checksum).
+ * The data words are expected to be checksummed.
+ */
 static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
 			   unsigned short *dat, int dlen)
 {
