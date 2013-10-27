@@ -45,3 +45,10 @@ to create a snapshot of the current sat view.
 ntpoffset generate an estimate of your GPS's offset from a peerstats
 file.  For instructions on how to use this script, see the GPSD Time
 Service HOWTO in this distrubution.
+
+ppscheck watches a specified serial device for changes in handshake lines
+CD, RI, and CTS by running ioctl(...., TIOCMIWAIT, ...) in a loop.  When it
+sees a state change it emits a timestamped line of output dumping the state
+of the handshake signals. It's useful for checking whether a device is
+emitting 1PPS.
+  
