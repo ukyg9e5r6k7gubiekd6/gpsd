@@ -269,6 +269,10 @@ def announce(msg):
 # We need to define -D_GNU_SOURCE
 env.Append(CFLAGS='-D_GNU_SOURCE')
 
+# And we need some libraries
+env.MergeFlags("-lm")
+env.MergeFlags("-pthread")
+
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
@@ -460,7 +464,7 @@ for option in ('-Wextra','-Wall', '-Wno-uninitialized','-Wno-missing-field-initi
 
 env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 if env["shared"]:
-    if env["chrpath"] and config.CheckExecutable('$CHRPATH -v', 'chrpath'):
+    if env["chrpath"] and config.CheckExecutable('chrpath -v', 'chrpath'):
         # Tell generated binaries to look in the current directory for
         # shared libraries so we can run regression tests without
         # hassle. Should be handled sanely by scons on all systems.  Not
@@ -889,7 +893,7 @@ compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
                            version=libgpsd_version,
-                           parse_flags=[ "-lm"] + usblibs + rtlibs + bluezlibs)
+                           parse_flags=usblibs + rtlibs + bluezlibs)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
@@ -962,19 +966,7 @@ gpsmon_sources = [
 
 ## Production programs
 
-# FIXME: What we really want is for libm to be linked when libgps is.
-# VersionedSharedLibrary accomplishes this for its case, but we don't
-# know how to force it when linking staticly.
-#
-# It turns out there are two cases where we need to force this.  Some
-# distributions don't do implicit linking by design.  See the test
-# code for implicit_link.
-#
-if not env['shared'] or not env["implicit_link"]:
-    env.MergeFlags("-lm")
-
 gpsd_env = env.Clone()
-gpsd_env.MergeFlags("-pthread")
 
 gpsd = gpsd_env.Program('gpsd', gpsd_sources,
                         parse_flags = gpsdlibs + dbus_libs)

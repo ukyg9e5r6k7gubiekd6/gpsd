@@ -729,7 +729,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      */
     while (!gpsd_ppsmonitor_stop) {
 	bool ok = false;
+#if defined(HAVE_SYS_TIMEPPS_H)
 	bool ok_kpps = false;
+#endif /* HAVE_SYS_TIMEPPS_H */
 	char *log = NULL;
 
 #if defined(TIOCMIWAIT)
