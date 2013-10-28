@@ -43,16 +43,6 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#if defined(HAVE_SYS_TIMEPPS_H)
-static pthread_mutex_t initialization_mutex;
-static volatile int uninitialized_pps_thread_count;
-#endif /* defined(HAVE_SYS_TIMEPPS_H) */
-
-#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
-
-#define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
-#define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */
-
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
 #define SHM_UNIT	0	/* SHM driver unit number (0..3) */
 
@@ -488,7 +478,17 @@ static void chrony_wrap(struct gps_device_t *session)
 	(void)close(session->chronyfd);
 }
 
-/* refactored chrony support ends here */
+/* thread-bashing begins here - someday, goes to seperate module */
+
+#if defined(HAVE_SYS_TIMEPPS_H)
+static pthread_mutex_t initialization_mutex;
+static volatile int uninitialized_pps_thread_count;
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
+
+#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
+
+#define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
+#define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */
 
 /*
  * Warning: This is a potential portability problem.
