@@ -628,59 +628,25 @@ void gpsd_await_pps_initialization(struct gps_context_t *context)
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-volatile bool gpsd_ppsmonitor_stop = false;
-/*@-mustfreefresh -type@ -unrecog*/
-static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
-{
-    unsigned long sec_pps;
-    struct gps_device_t *session = (struct gps_device_t *)arg;
-    struct timeval  tv;
-    struct timespec ts;
-#if defined(TIOCMIWAIT)
-    int cycle, duration, state = 0, laststate = -1, unchanged = 0;
-    struct timeval pulse[2] = { {0, 0}, {0, 0} };
-#endif /* TIOCMIWAIT */
-#if defined(HAVE_SYS_TIMEPPS_H)
-    int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
-    int cycle_kpps, duration_kpps;
-    struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
-    struct timespec tv_kpps;
-    pps_info_t pi;
-#endif
-/* for chrony SOCK interface, which allows nSec timekeeping */
+/* refactored chrony support begins here */
+
 #define SOCK_MAGIC 0x534f434b
-    struct sock_sample {
-	struct timeval tv;
-	double offset;
-	int pulse;
-	int leap;
-	/* cppcheck-suppress unusedStructMember */
-	int _pad;
-	int magic;      /* must be SOCK_MAGIC */
-    } sample;
-    /* chrony must be started first as chrony insists on creating the socket */
+struct sock_sample {
+    struct timeval tv;
+    double offset;
+    int pulse;
+    int leap;
+    /* cppcheck-suppress unusedStructMember */
+    int _pad;
+    int magic;      /* must be SOCK_MAGIC */
+} sample;
+
+static int chrony_init(struct gps_device_t *session)
+/* for chrony SOCK interface, which allows nSec timekeeping */
+{
     /* open the chrony socket */
     int chronyfd = -1;
     char chrony_path[PATH_MAX];
-
-    gpsd_report(session->context->debug, LOG_PROG,
-		"PPS Create Thread gpsd_ppsmonitor\n");
-
-    /* wait for the device to go active - makes this safe to call early */
-    /*@-infloops@*/
-    while (BAD_SOCKET(session->gpsdata.gps_fd)) {
-	/* gpsd_report(session->context->debug, LOG_PROG, "PPS thread awaiting device activation\n"); */
-	(void)sleep(1);
-    }
-    /*@+infloops@*/
-
-    /*  Activates PPS support for RS-232 or USB devices only. */
-    if (!(session->sourcetype == source_rs232 || session->sourcetype == source_usb)) {
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "PPS thread deactivation. Not RS-232 or USB device.\n");
-	(void)ntpshm_free(session->context, session->shmTimeP);
-	return NULL;
-    }
 
     if ( 0 == getuid() ) {
 	/* this case will fire on command-line devices;
@@ -708,7 +674,54 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			"PPS using chrony socket: %s\n", chrony_path);
     }
 
-    /* end chrony */
+    return chronyfd;
+}
+
+/* refactored chrony support ends here (someday) */
+
+volatile bool gpsd_ppsmonitor_stop = false;
+
+/*@-mustfreefresh -type@ -unrecog*/
+static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
+{
+    unsigned long sec_pps;
+    struct gps_device_t *session = (struct gps_device_t *)arg;
+    struct timeval  tv;
+    struct timespec ts;
+#if defined(TIOCMIWAIT)
+    int cycle, duration, state = 0, laststate = -1, unchanged = 0;
+    struct timeval pulse[2] = { {0, 0}, {0, 0} };
+#endif /* TIOCMIWAIT */
+#if defined(HAVE_SYS_TIMEPPS_H)
+    int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
+    int cycle_kpps, duration_kpps;
+    struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
+    struct timespec tv_kpps;
+    pps_info_t pi;
+#endif
+    int chronyfd = -1;
+
+    gpsd_report(session->context->debug, LOG_PROG,
+		"PPS Create Thread gpsd_ppsmonitor\n");
+
+    /* wait for the device to go active - makes this safe to call early */
+    /*@-infloops@*/
+    while (BAD_SOCKET(session->gpsdata.gps_fd)) {
+	/* gpsd_report(session->context->debug, LOG_PROG, "PPS thread awaiting device activation\n"); */
+	(void)sleep(1);
+    }
+    /*@+infloops@*/
+
+    /*  Activates PPS support for RS-232 or USB devices only. */
+    if (!(session->sourcetype == source_rs232 || session->sourcetype == source_usb)) {
+	gpsd_report(session->context->debug, LOG_PROG,
+		    "PPS thread deactivation. Not RS-232 or USB device.\n");
+	(void)ntpshm_free(session->context, session->shmTimeP);
+	return NULL;
+    }
+
+    /* chrony must be started first as chrony insists on creating the socket */
+    chronyfd = chrony_init(session);
 
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* some operations in init_kernel_pps() require root privs */
