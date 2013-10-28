@@ -677,6 +677,24 @@ static int chrony_init(struct gps_device_t *session)
     return chronyfd;
 }
 
+
+static void chrony_send(struct gps_device_t *session,
+			int chronyfd,
+			struct timeval *tv, double offset)
+{
+    struct sock_sample sample;
+
+    /* FIXME!! offset is double of the error from local time */
+    /* chrony expects tv-sec since Jan 1970 */
+    sample.pulse = 0;
+    sample.leap = session->context->leap_notify;
+    sample.magic = SOCK_MAGIC;
+    sample.tv = *tv;
+    sample.offset = offset; 
+
+    send(chronyfd, &sample, sizeof (sample), 0);
+}
+
 /* refactored chrony support ends here (someday) */
 
 volatile bool gpsd_ppsmonitor_stop = false;
@@ -989,13 +1007,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	if (ok) {
 	    char *log1 = NULL;
+	    struct timeval  edge_tv;
+	    double edge_offset;
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge accepted %.100s", log);
-	    /* chrony expects tv-sec since Jan 1970 */
-	    /* FIXME!! offset is double of the error from local time */
-	    sample.pulse = 0;
-	    sample.leap = session->context->leap_notify;
-	    sample.magic = SOCK_MAGIC;
 #if defined(HAVE_SYS_TIMEPPS_H)
             if ( 0 <= session->kernelpps_handle && ok_kpps) {
 		/* use KPPS time */
@@ -1005,25 +1020,25 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		} else {
 		    ts = pi.clear_timestamp;  /* structure copy */
 		}
-		TSTOTV( &sample.tv, &ts);
+		TSTOTV( &edge_tv, &ts);
 	    } else
 #endif
 	    {
-		sample.tv = tv; 	/* structure copy */
+		edge_tv = tv; 	/* structure copy */
 	    }
 	    /* FIXME!! this is wrong if signal is 5Hz or 10Hz instead of PPS */
 	    /* careful, Unix time to nSec is more precision than a double */
 	    /* FIXME, validate last_fixtime a bit better */
-	    sample.offset = 1 + session->last_fixtime - ts.tv_sec;
-	    sample.offset -= ts.tv_nsec / 1e9;
+	    edge_offset = 1 + session->last_fixtime - ts.tv_sec;
+	    edge_offset -= ts.tv_nsec / 1e9;
 /* was: defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
 #ifdef __UNUSED__
 	    /*@-noeffect@*/
 	    if (session->device_type == &oncore_binary) {
 		int pulse_delay_ns = session->driver.oncore.pps_offset_ns;
-	        sample.offset += (double)pulse_delay_ns / 1000000000;
-	        ts.tv_nsec    -= pulse_delay_ns;
-	        TS_NORM( &ts );
+	        edge_offset += (double)pulse_delay_ns / 1000000000;
+	        edge_tv.tv_nsec -= pulse_delay_ns;
+	        TS_NORM( &edge_tv );
 	    }
 	    /*@+noeffect@*/
 #endif
@@ -1033,7 +1048,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	        log1 = "accepted";
 		if ( 0 <= chronyfd ) {
 		    log1 = "accepted chrony sock";
-		    (void)send(chronyfd, &sample, sizeof (sample), 0);
+		    chrony_send(session, chronyfd, &edge_tv, edge_offset);
                 }
 		(void)ntpshm_pps(session, &tv);
 	    } else {
@@ -1042,9 +1057,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
 		    log1,
-		    (unsigned long)sample.tv.tv_sec,
-		    (unsigned long)sample.tv.tv_usec,
-		    sample.offset);
+		    (unsigned long)edge_tv.tv_sec,
+		    (unsigned long)edge_tv.tv_usec,
+		    edge_offset);
 	    sec_pps = 1 + session->last_fixtime;
 	    if (session->context->pps_hook != NULL)
 		session->context->pps_hook(session, sec_pps, &ts);
