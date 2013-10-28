@@ -321,8 +321,6 @@ Other OSes have different ways to enable KPPS in their kernels.
 When we learn what those are, we'll document them or point
 at references.
 
-== Feeding ntpd from gpsd ==
-
 If you're going to use gpsd for time service, you must run in -n mode
 so the clock will be updated even when no JSON clients are active.
 
