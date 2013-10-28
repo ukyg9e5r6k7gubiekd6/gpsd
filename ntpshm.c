@@ -418,6 +418,78 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     return 1;
 }
 
+/* refactored chrony support begins here */
+
+#define SOCK_MAGIC 0x534f434b
+struct sock_sample {
+    struct timeval tv;
+    double offset;
+    int pulse;
+    int leap;
+    /* cppcheck-suppress unusedStructMember */
+    int _pad;
+    int magic;      /* must be SOCK_MAGIC */
+} sample;
+
+static void chrony_init(struct gps_device_t *session)
+/* for chrony SOCK interface, which allows nSec timekeeping */
+{
+    /* open the chrony socket */
+    char chrony_path[PATH_MAX];
+
+    session->chronyfd = -1;
+    if ( 0 == getuid() ) {
+	/* this case will fire on command-line devices;
+	 * they're opened before priv-dropping.  Matters because
+         * only root can use /var/run.
+	 */
+	(void)snprintf(chrony_path, sizeof (chrony_path),
+		"/var/run/chrony.%s.sock", basename(session->gpsdata.dev.path));
+    } else {
+	(void)snprintf(chrony_path, sizeof (chrony_path),
+		"/tmp/chrony.%s.sock", 	basename(session->gpsdata.dev.path));
+    }
+
+    if (access(chrony_path, F_OK) != 0) {
+	gpsd_report(session->context->debug, LOG_PROG,
+		    "PPS chrony socket %s doesn't exist\n", chrony_path);
+    } else {
+	session->chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
+	if (session->chronyfd < 0)
+	    gpsd_report(session->context->debug, LOG_PROG,
+		"PPS connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
+		chrony_path, session->chronyfd, errno, strerror(errno));
+	else
+	    gpsd_report(session->context->debug, LOG_RAW,
+			"PPS using chrony socket: %s\n", chrony_path);
+    }
+}
+
+
+static void chrony_send(struct gps_device_t *session,
+			struct timeval *tv, double offset)
+{
+    struct sock_sample sample;
+
+    /* FIXME!! offset is double of the error from local time */
+    /* chrony expects tv-sec since Jan 1970 */
+    sample.pulse = 0;
+    sample.leap = session->context->leap_notify;
+    sample.magic = SOCK_MAGIC;
+    sample.tv = *tv;
+    sample.offset = offset; 
+
+    send(session->chronyfd, &sample, sizeof (sample), 0);
+}
+
+static void chrony_wrap(struct gps_device_t *session)
+{
+    if (session->chronyfd != -1)
+	(void)close(session->chronyfd);
+}
+
+/* refactored chrony support ends here */
+
 /*
  * Warning: This is a potential portability problem.
  * It's needed so that TIOCMIWAIT will be defined and the plain PPS
@@ -432,10 +504,8 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 #endif
 #if defined(HAVE_SYS_TIMEPPS_H)
-    #include <glob.h>
+#include <glob.h>
 #endif
-/* and for chrony */
-#include <sys/un.h>
 
 /* normalize a timespec */
 #define TS_NORM(ts)  \
@@ -627,78 +697,6 @@ void gpsd_await_pps_initialization(struct gps_context_t *context)
 
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
-
-/* refactored chrony support begins here */
-
-#define SOCK_MAGIC 0x534f434b
-struct sock_sample {
-    struct timeval tv;
-    double offset;
-    int pulse;
-    int leap;
-    /* cppcheck-suppress unusedStructMember */
-    int _pad;
-    int magic;      /* must be SOCK_MAGIC */
-} sample;
-
-static void chrony_init(struct gps_device_t *session)
-/* for chrony SOCK interface, which allows nSec timekeeping */
-{
-    /* open the chrony socket */
-    char chrony_path[PATH_MAX];
-
-    session->chronyfd = -1;
-    if ( 0 == getuid() ) {
-	/* this case will fire on command-line devices;
-	 * they're opened before priv-dropping.  Matters because
-         * only root can use /var/run.
-	 */
-	(void)snprintf(chrony_path, sizeof (chrony_path),
-		"/var/run/chrony.%s.sock", basename(session->gpsdata.dev.path));
-    } else {
-	(void)snprintf(chrony_path, sizeof (chrony_path),
-		"/tmp/chrony.%s.sock", 	basename(session->gpsdata.dev.path));
-    }
-
-    if (access(chrony_path, F_OK) != 0) {
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "PPS chrony socket %s doesn't exist\n", chrony_path);
-    } else {
-	session->chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
-	if (session->chronyfd < 0)
-	    gpsd_report(session->context->debug, LOG_PROG,
-		"PPS connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
-		chrony_path, session->chronyfd, errno, strerror(errno));
-	else
-	    gpsd_report(session->context->debug, LOG_RAW,
-			"PPS using chrony socket: %s\n", chrony_path);
-    }
-}
-
-
-static void chrony_send(struct gps_device_t *session,
-			struct timeval *tv, double offset)
-{
-    struct sock_sample sample;
-
-    /* FIXME!! offset is double of the error from local time */
-    /* chrony expects tv-sec since Jan 1970 */
-    sample.pulse = 0;
-    sample.leap = session->context->leap_notify;
-    sample.magic = SOCK_MAGIC;
-    sample.tv = *tv;
-    sample.offset = offset; 
-
-    send(session->chronyfd, &sample, sizeof (sample), 0);
-}
-
-static chrony_wrap(struct gps_device_t *session)
-{
-    if (session->chronyfd != -1)
-	(void)close(session->chronyfd);
-}
-
-/* refactored chrony support ends here (someday) */
 
 volatile bool gpsd_ppsmonitor_stop = false;
 
