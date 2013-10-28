@@ -1,3 +1,6 @@
+/*
+ * Watch a specified serial port for transitions that might be 1PPS.
+ */
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -15,9 +18,25 @@ struct assoc {
     char *string;
 };
 
+/*
+ * Possible pins for PPS: DCD, CTS, RTS, RI, DSR. Pinouts:
+ *
+ * DB9  DB25  Name      Full name
+ * ---  ----  ----      --------------------
+ *  3     2    TXD  --> Transmit Data
+ *  2     3    RXD  <-- Receive Data
+ *  7     4    RTS  --> Request To Send
+ *  8     5    CTS  <-- Clear To Send
+ *  6     6    DSR  <-- Data Set Ready
+ *  4    20    DTR  --> Data Terminal Ready
+ *  1     8    DCD  <-- Data Carrier Detect
+ *  9    22    RI   <-- Ring Indicator
+ *  5     7    SG       Signal ground
+ */
 const static struct assoc hlines[] = {
     {TIOCM_CD, "TIOCM_CD"},
     {TIOCM_RI, "TIOCM_RI"},
+    {TIOCM_DSR, "TIOCM_DSR"},
     {TIOCM_CTS, "TIOCM_CTS"},
 };
 
@@ -37,7 +56,7 @@ int main(int argc, char *argv[])
     (void)printf("Beginning wait...\n");
 
     for (;;) {
-	if (ioctl(fd, TIOCMIWAIT, TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS) != 0) {
+	if (ioctl(fd, TIOCMIWAIT, TIOCM_CD|TIOCM_DSR|TIOCM_CAR|TIOCM_RI|TIOCM_CTS) != 0) {
 	    (void)fprintf(stderr,
 			  "PPS ioctl(TIOCMIWAIT) failed: %d %.40s\n",
 			  errno, strerror(errno));
