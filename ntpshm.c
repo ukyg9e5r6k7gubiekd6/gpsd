@@ -641,13 +641,13 @@ struct sock_sample {
     int magic;      /* must be SOCK_MAGIC */
 } sample;
 
-static int chrony_init(struct gps_device_t *session)
+static void chrony_init(struct gps_device_t *session)
 /* for chrony SOCK interface, which allows nSec timekeeping */
 {
     /* open the chrony socket */
-    int chronyfd = -1;
     char chrony_path[PATH_MAX];
 
+    session->chronyfd = -1;
     if ( 0 == getuid() ) {
 	/* this case will fire on command-line devices;
 	 * they're opened before priv-dropping.  Matters because
@@ -664,22 +664,19 @@ static int chrony_init(struct gps_device_t *session)
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "PPS chrony socket %s doesn't exist\n", chrony_path);
     } else {
-	chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
-	if (chronyfd < 0)
+	session->chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
+	if (session->chronyfd < 0)
 	    gpsd_report(session->context->debug, LOG_PROG,
 		"PPS connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
-		chrony_path, chronyfd, errno, strerror(errno));
+		chrony_path, session->chronyfd, errno, strerror(errno));
 	else
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS using chrony socket: %s\n", chrony_path);
     }
-
-    return chronyfd;
 }
 
 
 static void chrony_send(struct gps_device_t *session,
-			int chronyfd,
 			struct timeval *tv, double offset)
 {
     struct sock_sample sample;
@@ -692,7 +689,13 @@ static void chrony_send(struct gps_device_t *session,
     sample.tv = *tv;
     sample.offset = offset; 
 
-    send(chronyfd, &sample, sizeof (sample), 0);
+    send(session->chronyfd, &sample, sizeof (sample), 0);
+}
+
+static chrony_wrap(struct gps_device_t *session)
+{
+    if (session->chronyfd != -1)
+	(void)close(session->chronyfd);
 }
 
 /* refactored chrony support ends here (someday) */
@@ -717,7 +720,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timespec tv_kpps;
     pps_info_t pi;
 #endif
-    int chronyfd = -1;
 
     gpsd_report(session->context->debug, LOG_PROG,
 		"PPS Create Thread gpsd_ppsmonitor\n");
@@ -739,7 +741,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     }
 
     /* chrony must be started first as chrony insists on creating the socket */
-    chronyfd = chrony_init(session);
+    chrony_init(session);
 
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* some operations in init_kernel_pps() require root privs */
@@ -1046,9 +1048,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    TSTOTV( &tv, &ts );
 	    if (session->ship_to_ntpd) {
 	        log1 = "accepted";
-		if ( 0 <= chronyfd ) {
+		if ( 0 <= session->chronyfd ) {
 		    log1 = "accepted chrony sock";
-		    chrony_send(session, chronyfd, &edge_tv, edge_offset);
+		    chrony_send(session, &edge_tv, edge_offset);
                 }
 		(void)ntpshm_pps(session, &tv);
 	    } else {
@@ -1075,8 +1077,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	time_pps_destroy(session->kernelpps_handle);
     }
 #endif
-    if (chronyfd != -1)
-	(void)close(chronyfd);
+    chrony_wrap(session);
     gpsd_report(session->context->debug, LOG_PROG, "PPS gpsd_ppsmonitor exited.\n");
     return NULL;
 }
