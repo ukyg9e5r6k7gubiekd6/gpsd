@@ -478,7 +478,7 @@ static void chrony_wrap(struct gps_device_t *session)
 	(void)close(session->chronyfd);
 }
 
-/* thread-bashing begins here - someday, goes to seperate module */
+/* pure thread-bashing begins here - someday, goes to seperate module */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 static pthread_mutex_t initialization_mutex;
@@ -1108,6 +1108,8 @@ static void pps_thread_deactivate(struct gps_device_t *session UNUSED)
     gpsd_ppsmonitor_stop = true;
 }
 #endif /* PPS_ENABLE */
+
+/* pure thread-bashing ends here */
 
 void ntpd_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
