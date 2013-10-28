@@ -333,9 +333,8 @@ void gpsd_clear(struct gps_device_t *session)
     packet_init(&session->packet);
     session->packet.debug = session->context->debug;
     // session->gpsdata.online = 0;
-    session->gpsdata.fix.mode = MODE_NOT_SEEN;
+    gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.status = STATUS_NO_FIX;
-    session->gpsdata.fix.track = NAN;
     session->gpsdata.separation = NAN;
     session->mag_var = NAN;
     session->releasetime = (timestamp_t)0;
