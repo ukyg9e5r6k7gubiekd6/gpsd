@@ -39,8 +39,6 @@ static pthread_mutex_t initialization_mutex;
 static volatile int uninitialized_pps_thread_count;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
-
 #define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
 #define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */
 
@@ -425,95 +423,80 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
 
 	/*
-	 * Only listen to PPS after several consecutive fixes,
-	 * otherwise time may be inaccurate.  (We know this is
-	 * required on some Garmins in binary mode; safest to do it
-	 * for all case we're talking to a Garmin in text mode, and
-	 * out of general safety-first conservatism.)
+	 * The PPS pulse is normally a short pulse with a frequency of
+	 * 1 Hz, and the UTC second is defined by the front edge. But we
+	 * don't know the polarity of the pulse (different receivers
+	 * emit different polarities). The duration variable is used to
+	 * determine which way the pulse is going. The code assumes
+	 * that the UTC second is changing when the signal has not
+	 * been changing for at least 800ms, i.e. it assumes the duty
+	 * cycle is at most 20%.
 	 *
-	 * Not sure yet how to handle uBlox UBX_MODE_TMONLY
+	 * Some GPSes instead output a square wave that is 0.5 Hz and each
+	 * edge denotes the start of a second.
+	 *
+	 * Some GPSes, like the Globalsat MR-350P, output a 1uS pulse.
+	 * The pulse is so short that TIOCMIWAIT sees a state change
+	 * but by the time TIOCMGET is called the pulse is gone.
+	 *
+	 * A few stupid GPSes, like the Furuno GPSClock, output a 1.0 Hz
+	 * square wave where the leading edge is the start of a second
+	 *
+	 * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to
+	 * 40ms which gives a 160ms pulse before going high.
+	 *
 	 */
-	if ( PPS_MIN_FIXES < session->fixcnt ) {
-	    /*
-	     * The PPS pulse is normally a short pulse with a frequency of
-	     * 1 Hz, and the UTC second is defined by the front edge. But we
-	     * don't know the polarity of the pulse (different receivers
-	     * emit different polarities). The duration variable is used to
-	     * determine which way the pulse is going. The code assumes
-	     * that the UTC second is changing when the signal has not
-	     * been changing for at least 800ms, i.e. it assumes the duty
-	     * cycle is at most 20%.
-	     *
-	     * Some GPSes instead output a square wave that is 0.5 Hz and each
-	     * edge denotes the start of a second.
-	     *
-	     * Some GPSes, like the Globalsat MR-350P, output a 1uS pulse.
-	     * The pulse is so short that TIOCMIWAIT sees a state change
-	     * but by the time TIOCMGET is called the pulse is gone.
-	     *
-	     * A few stupid GPSes, like the Furuno GPSClock, output a 1.0 Hz
-	     * square wave where the leading edge is the start of a second
-	     *
-	     * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to
-	     * 40ms which gives a 160ms pulse before going high.
-	     *
-	     */
 
-	    log = "Unknown error";
-	    if (199000 > cycle) {
-		// too short to even be a 5Hz pulse
-		log = "Too short for 5Hz\n";
-	    } else if (201000 > cycle) {
-		/* 5Hz cycle */
-		/* looks like 5hz PPS pulse */
-		if (100000 > duration) {
-		    /* BUG: how does the code know to tell ntpd
-		     * which 1/5 of a second to use?? */
+	log = "Unknown error";
+	if (199000 > cycle) {
+	    // too short to even be a 5Hz pulse
+	    log = "Too short for 5Hz\n";
+	} else if (201000 > cycle) {
+	    /* 5Hz cycle */
+	    /* looks like 5hz PPS pulse */
+	    if (100000 > duration) {
+		/* BUG: how does the code know to tell ntpd
+		 * which 1/5 of a second to use?? */
+		ok = true;
+		log = "5Hz PPS pulse\n";
+	    }
+	} else if (999000 > cycle) {
+	    log = "Too long for 5Hz, too short for 1Hz\n";
+	} else if (1001000 > cycle) {
+	    /* looks like PPS pulse or square wave */
+	    if (0 == duration) {
+		ok = true;
+		log = "invisible pulse\n";
+	    } else if (499000 > duration) {
+		/* end of the short "half" of the cycle */
+		/* aka the trailing edge */
+		log = "1Hz trailing edge\n";
+	    } else if (501000 > duration) {
+		/* looks like 1.0 Hz square wave, ignore trailing edge */
+		if (state == 1) {
 		    ok = true;
-		    log = "5Hz PPS pulse\n";
-		}
-	    } else if (999000 > cycle) {
-		log = "Too long for 5Hz, too short for 1Hz\n";
-	    } else if (1001000 > cycle) {
-		/* looks like PPS pulse or square wave */
-		if (0 == duration) {
-		    ok = true;
-		    log = "invisible pulse\n";
-		} else if (499000 > duration) {
-		    /* end of the short "half" of the cycle */
-		    /* aka the trailing edge */
-		    log = "1Hz trailing edge\n";
-		} else if (501000 > duration) {
-		    /* looks like 1.0 Hz square wave, ignore trailing edge */
-		    if (state == 1) {
-			ok = true;
-			log = "square\n";
-		    }
-		} else {
-		    /* end of the long "half" of the cycle */
-		    /* aka the leading edge */
-		    ok = true;
-		    log = "1Hz leading edge\n";
-		}
-	    } else if (1999000 > cycle) {
-		log = "Too long for 1Hz, too short for 2Hz\n";
-	    } else if (2001000 > cycle) {
-		/* looks like 0.5 Hz square wave */
-		if (999000 > duration) {
-		    log = "0.5 Hz square too short duration\n";
-		} else if (1001000 > duration) {
-		    ok = true;
-		    log = "0.5 Hz square wave\n";
-		} else {
-		    log = "0.5 Hz square too long duration\n";
+		    log = "square\n";
 		}
 	    } else {
-		log = "Too long for 0.5Hz\n";
+		/* end of the long "half" of the cycle */
+		/* aka the leading edge */
+		ok = true;
+		log = "1Hz leading edge\n";
+	    }
+	} else if (1999000 > cycle) {
+	    log = "Too long for 1Hz, too short for 2Hz\n";
+	} else if (2001000 > cycle) {
+	    /* looks like 0.5 Hz square wave */
+	    if (999000 > duration) {
+		log = "0.5 Hz square too short duration\n";
+	    } else if (1001000 > duration) {
+		ok = true;
+		log = "0.5 Hz square wave\n";
+	    } else {
+		log = "0.5 Hz square too long duration\n";
 	    }
 	} else {
-	    /* not a good fix, but a test for an otherwise good PPS
-	     * would go here */
-	    log = "no fix.\n";
+	    log = "Too long for 0.5Hz\n";
 	}
 #endif /* TIOCMIWAIT */
 

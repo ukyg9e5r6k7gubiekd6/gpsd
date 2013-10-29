@@ -29,6 +29,8 @@
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
 #define SHM_UNIT	0	/* SHM driver unit number (0..3) */
 
+#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
+
 struct shmTime
 {
     int mode;			/* 0 - if valid set
@@ -420,17 +422,28 @@ static char *report_hook(struct gps_device_t *session,
 {
     char *log1;
 
-    if (session->ship_to_ntpd) {
-	log1 = "accepted";
-	if ( 0 <= session->chronyfd ) {
-	    log1 = "accepted chrony sock";
-	    chrony_send(session, actual_tv, ts, edge_offset);
-	}
-	(void)ntpshm_pps(session, actual_tv, ts);
-#endif /* PPS_ENABLE */
-    } else {
-	log1 = "skipped ship_to_ntp=0";
+    if (!session->ship_to_ntpd)
+	return "skipped ship_to_ntp=0";
+
+    /*
+     * Only listen to PPS after several consecutive fixes,
+     * otherwise time may be inaccurate.  (We know this is
+     * required on some Garmins in binary mode; safest to do it
+     * for all case we're talking to a Garmin in text mode, and
+     * out of general safety-first conservatism.)
+     *
+     * Not sure yet how to handle uBlox UBX_MODE_TMONLY
+     */
+    if (session->fixcnt <= PPS_MIN_FIXES)
+	return "no fix";
+
+    log1 = "accepted";
+    if ( 0 <= session->chronyfd ) {
+	log1 = "accepted chrony sock";
+	chrony_send(session, actual_tv, ts, edge_offset);
     }
+    (void)ntpshm_pps(session, actual_tv, ts);
+
     return log1;
 }
 
@@ -438,6 +451,7 @@ static void error_hook(struct gps_device_t *session)
 {
     (void)ntpshm_free(session->context, session->shmTimeP);
 }
+#endif	/* PPS_ENABLE */
 
 void ntpd_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
