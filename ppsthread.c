@@ -249,7 +249,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * is that no GPS lights up more than one of these pins.  By waiting on
      * all of them we remove a configuration switch.
      */
-    while (session->thread_report_hook != NULL) {
+    while (session->thread_report_hook != NULL || session->context->pps_hook != NULL) {
 	bool ok = false;
 #if defined(HAVE_SYS_TIMEPPS_H)
 	bool ok_kpps = false;
@@ -591,6 +591,7 @@ void pps_thread_deactivate(struct gps_device_t *session)
 /* cleanly terminate PPS thread */
 {
     session->thread_report_hook = NULL;
+    session->context->pps_hook != NULL;
 }
 
 #if defined(HAVE_SYS_TIMEPPS_H)
