@@ -68,6 +68,46 @@ struct shmTime
     int pad[10];
 };
 
+/* normalize a timespec */
+#define TS_NORM(ts)  \
+    do { \
+	if ( 1000000000 <= (ts)->tv_nsec ) { \
+	    (ts)->tv_nsec -= 1000000000; \
+	    (ts)->tv_sec++; \
+	} else if ( 0 > (ts)->tv_nsec ) { \
+	    (ts)->tv_nsec += 1000000000; \
+	    (ts)->tv_sec--; \
+	} \
+    } while (0)
+
+/* normalize a timeval */
+#define TV_NORM(tv)  \
+    do { \
+	if ( 1000000 <= (tv)->tv_usec ) { \
+	    (tv)->tv_usec -= 1000000; \
+	    (tv)->tv_sec++; \
+	} else if ( 0 > (tv)->tv_usec ) { \
+	    (tv)->tv_usec += 1000000; \
+	    (tv)->tv_sec--; \
+	} \
+    } while (0)
+
+/* convert timespec to timeval, with rounding */
+#define TSTOTV(tv, ts) \
+    do { \
+	(tv)->tv_sec = (ts)->tv_sec; \
+	(tv)->tv_usec = ((ts)->tv_nsec + 500)/1000; \
+        TV_NORM( tv ); \
+    } while (0)
+
+/* convert timeval to timespec */
+#define TVTOTS(ts, tv) \
+    do { \
+	(ts)->tv_sec = (tv)->tv_sec; \
+	(ts)->tv_nsec = (tv)->tv_usec*1000; \
+        TS_NORM( ts ); \
+    } while (0)
+
 /* Note: you can start gpsd as non-root, and have it work with ntpd.
  * However, it will then only use the ntpshm segments 2 and 3.
  *
@@ -321,9 +361,10 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
  * good news is that kernel PPS gives us nSec resolution
  * bad news is that ntpshm only has uSec resolution
  */
-static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
+static int ntpshm_pps(struct gps_device_t *session, struct timespec *ts)
 {
     volatile struct shmTime *shmTime = NULL, *shmTimeP = NULL;
+    struct timeval tv;
     time_t seconds;
     /* FIX-ME, microseconds needs to be set for 5Hz PPS */
     int microseconds = 0;
@@ -341,15 +382,17 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
      * GPS serial input then use that */
 
     /* FIX-ME, does not handle 5Hz yet */
+    /* for now we use uSec, not nSec */
+    TSTOTV( &tv, ts );
 
 #ifdef S_SPLINT_S		/* avoids an internal error in splint 3.1.1 */
     l_offset = 0;
 #else
-    l_offset = tv->tv_sec - shmTime->receiveTimeStampSec;
+    l_offset = tv.tv_sec - shmTime->receiveTimeStampSec;
 #endif
     /*@ -ignorequals @*/
     l_offset *= 1000000;
-    l_offset += tv->tv_usec - shmTime->receiveTimeStampUSec;
+    l_offset += tv.tv_usec - shmTime->receiveTimeStampUSec;
     if (0 > l_offset || 1000000 < l_offset) {
 	gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS ntpshm_pps: no current GPS seconds: %ld\n",
@@ -365,8 +408,8 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
      */
     /*@+relaxtypes@*/
     seconds = shmTime->clockTimeStampSec + 1;
-    offset = fabs((tv->tv_sec - seconds)
-		  + ((double)(tv->tv_usec - 0) / 1000000.0));
+    offset = fabs((tv.tv_sec - seconds)
+		  + ((double)(tv.tv_usec - 0) / 1000000.0));
     /*@-relaxtypes@*/
 
 
@@ -388,8 +431,8 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = seconds;
     shmTimeP->clockTimeStampUSec = (int)microseconds;
-    shmTimeP->receiveTimeStampSec = (time_t) tv->tv_sec;
-    shmTimeP->receiveTimeStampUSec = (int)tv->tv_usec;
+    shmTimeP->receiveTimeStampSec = (time_t) tv.tv_sec;
+    shmTimeP->receiveTimeStampUSec = (int)tv.tv_usec;
     shmTimeP->leap = session->context->leap_notify;
     /* precision is a placebo, ntpd does not really use it
      * real world accuracy is around 16uS, thus -16 precision */
@@ -401,9 +444,9 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *tv)
      * but still useful for debug */
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     gpsd_report(session->context->debug, LOG_RAW,
-		"PPS ntpshm_pps %lu.%03lu @ %lu.%06lu, preci %d\n",
+		"PPS ntpshm_pps %lu.%03lu @ %lu.%09lu, preci %d\n",
 		(unsigned long)seconds, (unsigned long)microseconds / 1000,
-		(unsigned long)tv->tv_sec, (unsigned long)tv->tv_usec,
+		(unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec,
 		precision);
     return 1;
 }
@@ -506,46 +549,6 @@ static volatile int uninitialized_pps_thread_count;
 #if defined(HAVE_SYS_TIMEPPS_H)
 #include <glob.h>
 #endif
-
-/* normalize a timespec */
-#define TS_NORM(ts)  \
-    do { \
-	if ( 1000000000 <= (ts)->tv_nsec ) { \
-	    (ts)->tv_nsec -= 1000000000; \
-	    (ts)->tv_sec++; \
-	} else if ( 0 > (ts)->tv_nsec ) { \
-	    (ts)->tv_nsec += 1000000000; \
-	    (ts)->tv_sec--; \
-	} \
-    } while (0)
-
-/* normalize a timeval */
-#define TV_NORM(tv)  \
-    do { \
-	if ( 1000000 <= (tv)->tv_usec ) { \
-	    (tv)->tv_usec -= 1000000; \
-	    (tv)->tv_sec++; \
-	} else if ( 0 > (tv)->tv_usec ) { \
-	    (tv)->tv_usec += 1000000; \
-	    (tv)->tv_sec--; \
-	} \
-    } while (0)
-
-/* convert timespec to timeval, with rounding */
-#define TSTOTV(tv, ts) \
-    do { \
-	(tv)->tv_sec = (ts)->tv_sec; \
-	(tv)->tv_usec = ((ts)->tv_nsec + 500)/1000; \
-        TV_NORM( tv ); \
-    } while (0)
-
-/* convert timeval to timespec */
-#define TVTOTS(ts, tv) \
-    do { \
-	(ts)->tv_sec = (tv)->tv_sec; \
-	(ts)->tv_nsec = (tv)->tv_usec*1000; \
-        TS_NORM( ts ); \
-    } while (0)
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 /* return handle for kernel pps, or -1 */
@@ -1024,6 +1027,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } else
 #endif
 	    {
+	        // use plain PPS
 		edge_tv = tv; 	/* structure copy */
 	    }
 	    /* FIXME!! this is wrong if signal is 5Hz or 10Hz instead of PPS */
@@ -1043,14 +1047,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /*@+noeffect@*/
 #endif
 
-	    TSTOTV( &tv, &ts );
 	    if (session->ship_to_ntpd) {
 	        log1 = "accepted";
 		if ( 0 <= session->chronyfd ) {
 		    log1 = "accepted chrony sock";
 		    chrony_send(session, &edge_tv, edge_offset);
                 }
-		(void)ntpshm_pps(session, &tv);
+		(void)ntpshm_pps(session, &ts);
 	    } else {
 	    	log1 = "skipped ship_to_ntp=0";
 	    }
