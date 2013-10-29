@@ -694,8 +694,6 @@ void gpsd_await_pps_initialization(struct gps_context_t *context)
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-volatile bool gpsd_ppsmonitor_stop = false;
-
 /*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
@@ -754,7 +752,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * is that no GPS lights up more than one of these pins.  By waiting on
      * all of them we remove a configuration switch.
      */
-    while (!gpsd_ppsmonitor_stop) {
+    while (session->thread_report_hook != NULL) {
 	bool ok = false;
 #if defined(HAVE_SYS_TIMEPPS_H)
 	bool ok_kpps = false;
@@ -1103,10 +1101,10 @@ static void pps_thread_activate(struct gps_device_t *session)
     }
 }
 
-static void pps_thread_deactivate(struct gps_device_t *session UNUSED)
+static void pps_thread_deactivate(struct gps_device_t *session)
 /* cleanly terminate PPS thread */
 {
-    gpsd_ppsmonitor_stop = true;
+    session->thread_report_hook = NULL;
 }
 #endif /* PPS_ENABLE */
 
@@ -1125,7 +1123,7 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 }
 
 void ntpd_link_activate(struct gps_device_t *session)
-/* set up ntpshm storage for a session - may fail if not called as root */
+/* set up ntpshm storage for a session */
 {
     /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */
     if (session->context->enable_ntpshm)
