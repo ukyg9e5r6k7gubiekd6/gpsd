@@ -763,7 +763,7 @@ libgpsd_sources = [
     "net_dgpsip.c",
     "net_gnss_dispatch.c",
     "net_ntrip.c",
-    "ntpshm.c",
+    "ppsthread.c",
     "packet.c",
     "pseudonmea.c",
     "pseudoais.c",
@@ -947,7 +947,7 @@ env.StaticLibrary(target = 'libgps.a', source = libgps_sources)
 
 # Source groups
 
-gpsd_sources = ['gpsd.c','shmexport.c','dbusexport.c']
+gpsd_sources = ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c']
 
 if env['systemd']:
     gpsd_sources.append("sd_socket.c")

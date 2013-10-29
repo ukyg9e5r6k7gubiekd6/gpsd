@@ -820,7 +820,50 @@ extern void ntpshm_init(struct gps_context_t *);
 extern int ntpshm_put(struct gps_device_t *, double, double);
 extern void ntpd_link_deactivate(struct gps_device_t *);
 extern void ntpd_link_activate(struct gps_device_t *);
+
+/* normalize a timespec */
+#define TS_NORM(ts)  \
+    do { \
+	if ( 1000000000 <= (ts)->tv_nsec ) { \
+	    (ts)->tv_nsec -= 1000000000; \
+	    (ts)->tv_sec++; \
+	} else if ( 0 > (ts)->tv_nsec ) { \
+	    (ts)->tv_nsec += 1000000000; \
+	    (ts)->tv_sec--; \
+	} \
+    } while (0)
+
+/* normalize a timeval */
+#define TV_NORM(tv)  \
+    do { \
+	if ( 1000000 <= (tv)->tv_usec ) { \
+	    (tv)->tv_usec -= 1000000; \
+	    (tv)->tv_sec++; \
+	} else if ( 0 > (tv)->tv_usec ) { \
+	    (tv)->tv_usec += 1000000; \
+	    (tv)->tv_sec--; \
+	} \
+    } while (0)
+
+/* convert timespec to timeval, with rounding */
+#define TSTOTV(tv, ts) \
+    do { \
+	(tv)->tv_sec = (ts)->tv_sec; \
+	(tv)->tv_usec = ((ts)->tv_nsec + 500)/1000; \
+        TV_NORM( tv ); \
+    } while (0)
+
+/* convert timeval to timespec */
+#define TVTOTS(ts, tv) \
+    do { \
+	(ts)->tv_sec = (tv)->tv_sec; \
+	(ts)->tv_nsec = (tv)->tv_usec*1000; \
+        TS_NORM( ts ); \
+    } while (0)
+
 extern void gpsd_await_pps_initialization(struct gps_context_t *);
+extern void pps_thread_activate(struct gps_device_t *);
+extern void pps_thread_deactivate(struct gps_device_t *);
 
 extern void gpsd_acquire_reporting_lock(void);
 extern void gpsd_release_reporting_lock(void);
