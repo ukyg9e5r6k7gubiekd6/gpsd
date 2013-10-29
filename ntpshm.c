@@ -1107,7 +1107,7 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 {
     (void)ntpshm_free(session->context, session->shmindex);
 #if defined(PPS_ENABLE)
-    if (session->context->shmTimePPS && (session->shmTimeP != -1)) {
+    if (session->shmTimeP != -1) {
 	pps_thread_deactivate(session);
 	(void)ntpshm_free(session->context, session->shmTimeP);
     }
@@ -1124,7 +1124,7 @@ void ntpd_link_activate(struct gps_device_t *session)
     if (0 > session->shmindex) {
 	gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE)
-    } else if (session->context->shmTimePPS) {
+    } else {
 	/* We also have the 1pps capability, allocate a shared-memory segment
 	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
