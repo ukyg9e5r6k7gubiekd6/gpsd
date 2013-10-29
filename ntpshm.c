@@ -1035,17 +1035,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* FIXME, validate last_fixtime a bit better */
 	    edge_offset = 1 + session->last_fixtime - ts.tv_sec;
 	    edge_offset -= ts.tv_nsec / 1e9;
-/* was: defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */
-#ifdef __UNUSED__
-	    /*@-noeffect@*/
-	    if (session->device_type == &oncore_binary) {
-		int pulse_delay_ns = session->driver.oncore.pps_offset_ns;
-	        edge_offset += (double)pulse_delay_ns / 1000000000;
-	        edge_tv.tv_nsec -= pulse_delay_ns;
-	        TS_NORM( &edge_tv );
-	    }
-	    /*@+noeffect@*/
-#endif
 
 	    if (session->ship_to_ntpd) {
 	        log1 = "accepted";
