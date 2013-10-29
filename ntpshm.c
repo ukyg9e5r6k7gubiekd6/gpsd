@@ -365,7 +365,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
  * ts is the time we saw the pulse
  */
 static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
-	struct timespec *ts, double edge_offset)
+	struct timespec *ts)
 {
     volatile struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     struct timeval tv;
@@ -474,7 +474,7 @@ static void chrony_init(struct gps_device_t *session)
 /* offset is actual_tv - tv */
 static void chrony_send(struct gps_device_t *session,
 			struct timeval *actual_tv,
-			struct timespec *ts,  double offset)
+			struct timespec *ts UNUSED,  double offset)
 {
     struct sock_sample sample;
 
@@ -493,6 +493,27 @@ static void chrony_wrap(struct gps_device_t *session)
 {
     if (session->chronyfd != -1)
 	(void)close(session->chronyfd);
+}
+
+static char *time_report(struct gps_device_t *session, 
+			struct timeval *actual_tv, 
+			struct timespec *ts, 
+			long edge_offset)
+/* ship the time of a PPS event to ntpd and/or chrony */
+{
+    char *log1;
+
+    if (session->ship_to_ntpd) {
+	log1 = "accepted";
+	if ( 0 <= session->chronyfd ) {
+	    log1 = "accepted chrony sock";
+	    chrony_send(session, actual_tv, ts, edge_offset);
+	}
+	(void)ntpshm_pps(session, actual_tv, ts);
+    } else {
+	log1 = "skipped ship_to_ntp=0";
+    }
+    return log1;
 }
 
 /* pure thread-bashing begins here - someday, goes to seperate module */
@@ -1025,23 +1046,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     * GPS serial input then use that */
 	    l_offset = (long)edge_offset;
 	    if (0 > l_offset || 1000000 < l_offset) {
-		/* timestamp out of range */
 		gpsd_report(session->context->debug, LOG_RAW,
-			    "PPS ntpshm_pps: no current GPS seconds: %ld\n",
+			    "PPS: no current GPS seconds: %ld\n",
 			    (long)l_offset);
-		session->ship_to_ntpd = 0;
+		log1 = "timestamp out of range";
 	    }
-
-	    if (session->ship_to_ntpd) {
-	        log1 = "accepted";
-		if ( 0 <= session->chronyfd ) {
-		    log1 = "accepted chrony sock";
-		    chrony_send(session, &actual_tv, &ts, edge_offset);
-                }
-		(void)ntpshm_pps(session, &actual_tv,  &ts, edge_offset);
-	    } else {
-	    	log1 = "skipped ship_to_ntp=0";
-	    }
+	    else
+		log1 = time_report(session, &actual_tv, &ts, edge_offset);
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
 		    log1,
