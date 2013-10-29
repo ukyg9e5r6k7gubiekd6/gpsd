@@ -427,7 +427,7 @@ struct sock_sample {
     int magic;      /* must be SOCK_MAGIC */
 } sample;
 
-static void chrony_init(struct gps_device_t *session)
+static void init_hook(struct gps_device_t *session)
 /* for chrony SOCK interface, which allows nSec timekeeping */
 {
     /* open the chrony socket */
@@ -482,13 +482,13 @@ static void chrony_send(struct gps_device_t *session,
     send(session->chronyfd, &sample, sizeof (sample), 0);
 }
 
-static void chrony_wrap(struct gps_device_t *session)
+static void wrap_hook(struct gps_device_t *session)
 {
     if (session->chronyfd != -1)
 	(void)close(session->chronyfd);
 }
 
-static char *time_report(struct gps_device_t *session, 
+static char *report_hook(struct gps_device_t *session,
 			struct timeval *actual_tv, 
 			struct timespec *ts, 
 			long edge_offset)
@@ -507,6 +507,11 @@ static char *time_report(struct gps_device_t *session,
 	log1 = "skipped ship_to_ntp=0";
     }
     return log1;
+}
+
+static void error_hook(struct gps_device_t *session)
+{
+    (void)ntpshm_free(session->context, session->shmTimeP);
 }
 
 /* pure thread-bashing begins here - someday, goes to seperate module */
@@ -724,12 +729,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     if (!(session->sourcetype == source_rs232 || session->sourcetype == source_usb)) {
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "PPS thread deactivation. Not RS-232 or USB device.\n");
-	(void)ntpshm_free(session->context, session->shmTimeP);
+	if (session->thread_error_hook != NULL)
+	    session->thread_error_hook(session);
 	return NULL;
     }
 
-    /* chrony must be started first as chrony insists on creating the socket */
-    chrony_init(session);
+    if (session->thread_init_hook != NULL)
+	session->thread_init_hook(session);
 
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* some operations in init_kernel_pps() require root privs */
@@ -1044,8 +1050,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    (long)l_offset);
 		log1 = "timestamp out of range";
 	    }
+	    else if (session->thread_report_hook != NULL)
+		log1 = session->thread_report_hook(session,
+						   &actual_tv, &ts, edge_offset);
 	    else
-		log1 = time_report(session, &actual_tv, &ts, edge_offset);
+		log1 = "no report hook";
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
 		    log1,
@@ -1066,7 +1075,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	time_pps_destroy(session->kernelpps_handle);
     }
 #endif
-    chrony_wrap(session);
+    if (session->thread_init_hook != NULL)
+	session->thread_wrap_hook(session);
     gpsd_report(session->context->debug, LOG_PROG, "PPS gpsd_ppsmonitor exited.\n");
     return NULL;
 }
@@ -1131,8 +1141,13 @@ void ntpd_link_activate(struct gps_device_t *session)
 	 */
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) < 0) {
 	    gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
-	} else
+	} else {
+	    session->thread_init_hook = init_hook;
+	    session->thread_error_hook = error_hook;
+	    session->thread_report_hook = report_hook;
+	    session->thread_wrap_hook = wrap_hook;
 	    pps_thread_activate(session);
+	}
 #endif /* PPS_ENABLE */
     }
 }

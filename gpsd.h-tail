@@ -470,6 +470,13 @@ struct gps_device_t {
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     int chronyfd;			/* for talking to chrony */
+    void (*thread_init_hook)(struct gps_device_t *);
+    void (*thread_error_hook)(struct gps_device_t *);
+    char *(*thread_report_hook)(struct gps_device_t *,
+			       struct timeval *,
+			       struct timespec *,
+			       long);
+    void (*thread_wrap_hook)(struct gps_device_t *);
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
