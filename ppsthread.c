@@ -21,15 +21,9 @@
  */
 
 #include <string.h>
-#include <libgen.h>
-#include <stdbool.h>
-#include <math.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <pthread.h>
 #ifndef S_SPLINT_S
-#include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #endif /* S_SPLINT_S */
