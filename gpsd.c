@@ -1665,9 +1665,11 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 /* on PPS interrupt, ship a drift message to all clients */
 {
 #ifdef SOCKET_EXPORT_ENABLE
+    /*@-type@*//* splint is confused about struct timespec */
     notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":0,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
 		    sec, ts->tv_sec, ts->tv_nsec);
+    /*@+type@*/
 #endif /* SOCKET_EXPORT_ENABLE */
 }
 #endif /* PPS_ENABLE */

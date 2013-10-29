@@ -74,11 +74,11 @@ static int gpsd_control(char *action, char *argument)
 	if (stat(argument, &sb) != 1)
 	    (void)chmod(argument, sb.st_mode | S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP);
 	(void)snprintf(buf, sizeof(buf), "+%s\r\n", argument);
-	status = write(connect, buf, strlen(buf));
+	status = (int)write(connect, buf, strlen(buf));
 	ignore_return(read(connect, buf, 12));
     } else if (strcmp(action, "remove") == 0) {
 	(void)snprintf(buf, sizeof(buf), "-%s\r\n", argument);
-	status = write(connect, buf, strlen(buf));
+	status = (int)write(connect, buf, strlen(buf));
 	ignore_return(read(connect, buf, 12));
     } else {
 	(void)syslog(LOG_ERR, "unknown action \"%s\"", action);

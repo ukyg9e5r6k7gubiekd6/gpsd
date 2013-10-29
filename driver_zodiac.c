@@ -49,16 +49,16 @@ static unsigned short zodiac_checksum(unsigned short *w, int n)
     return -csum;
 }
 
-static int end_write(int fd, void *d, int len)
+static ssize_t end_write(int fd, void *d, size_t len)
 /* write an array of shorts in little-endian format */
 {
-    char buf[BUFSIZ];
+    unsigned char buf[BUFSIZ];
     short *data = (short *)d;
     size_t n = (size_t)(len/2);
 
     for (n = 0; n < (size_t)(len/2); n++)
 	putle16(buf, n*2, data[n]); 
-    return write(fd, buf, len);
+    return write(fd, (char*)buf, len);
 }
 
 /* zodiac_spew - Takes a message type, an array of data words, and a length

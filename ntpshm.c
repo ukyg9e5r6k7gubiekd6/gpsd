@@ -299,7 +299,9 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
 	return 0;
 
     /* for now we use uSec, not nSec */
+    /*@-type@*//* splint is confused about struct timespec */
     TSTOTV( &tv, ts );
+    /*@+type@*/
 
     /* we use the shmTime mode 1 protocol
      *
@@ -330,15 +332,17 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
 
     /* this is more an offset jitter/dispersion than precision,
      * but still useful for debug */
-    offset = fabs((tv.tv_sec - actual_tv->tv_sec)
+    offset = fabs((double)(tv.tv_sec - actual_tv->tv_sec)
 		  + ((double)(tv.tv_usec - actual_tv->tv_usec) / 1000000.0));
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
+    /*@-type@*//* splint is confused about struct timespec */
     gpsd_report(session->context->debug, LOG_RAW,
 		"PPS ntpshm_pps %lu.%03lu @ %lu.%09lu, preci %d\n",
 		(unsigned long)actual_tv->tv_sec, 
 		(unsigned long)actual_tv->tv_usec,
 		(unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec,
 		precision);
+    /*@+type@*/
     return 1;
 }
 
@@ -351,8 +355,9 @@ struct sock_sample {
     /* cppcheck-suppress unusedStructMember */
     int _pad;
     int magic;      /* must be SOCK_MAGIC */
-} sample;
+};
 
+/*@-mustfreefresh@*/
 static void init_hook(struct gps_device_t *session)
 /* for chrony SOCK interface, which allows nSec timekeeping */
 {
@@ -386,6 +391,7 @@ static void init_hook(struct gps_device_t *session)
 			"PPS using chrony socket: %s\n", chrony_path);
     }
 }
+/*@+mustfreefresh@*/
 
 
 /* actual_tv is when we think the PPS pulse wass */
@@ -405,7 +411,7 @@ static void chrony_send(struct gps_device_t *session,
     sample.tv = *actual_tv; /* structure copy */
     sample.offset = offset; 
 
-    send(session->chronyfd, &sample, sizeof (sample), 0);
+    (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
 
 static void wrap_hook(struct gps_device_t *session)
@@ -414,10 +420,10 @@ static void wrap_hook(struct gps_device_t *session)
 	(void)close(session->chronyfd);
 }
 
-static char *report_hook(struct gps_device_t *session,
+static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 			struct timeval *actual_tv, 
 			struct timespec *ts, 
-			long edge_offset)
+			double edge_offset)
 /* ship the time of a PPS event to ntpd and/or chrony */
 {
     char *log1;

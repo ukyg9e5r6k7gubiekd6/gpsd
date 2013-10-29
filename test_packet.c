@@ -330,7 +330,7 @@ static int property_check(void)
     int status;
 
     for (dp = gpsd_drivers; *dp; dp++) {
-	if ((*dp)->packet_type == COMMENT_PACKET)
+	if (*dp == NULL || (*dp)->packet_type == COMMENT_PACKET)
 	    continue;
 
 #ifdef RECONFIGURE_ENABLE
@@ -370,7 +370,7 @@ static int property_check(void)
 
     status = EXIT_SUCCESS;
     for (dp = gpsd_drivers; *dp; dp++) {
-	if ((*dp)->packet_type == COMMENT_PACKET)
+	if (*dp == NULL || (*dp)->packet_type == COMMENT_PACKET)
 	    continue;
 #ifdef CONTROLSEND_ENABLE
 	if (CONTROLLABLE(*dp) && (*dp)->control_send == NULL) {

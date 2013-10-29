@@ -185,12 +185,12 @@ static int init_kernel_pps(struct gps_device_t *session)
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-/*@-mustfreefresh -type@ -unrecog*/
+/*@-mustfreefresh -type@ -unrecog -branchstate*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    struct timeval  tv;
-    struct timespec ts;
+    struct timeval  tv = {0, 0};
+    struct timespec ts = {0, 0};
 #if defined(TIOCMIWAIT)
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
@@ -497,7 +497,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 	    {
 	        // use plain PPS
-		TVTOTS( &ts, &tv);
+		/*@i10@*/TVTOTS( &ts, &tv);
 	    }
 
             /* This innocuous-looking "+ 1" embodies a significant
@@ -541,7 +541,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);
 	}
-
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
     if (session->kernelpps_handle > 0) {
@@ -554,7 +553,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     gpsd_report(session->context->debug, LOG_PROG, "PPS gpsd_ppsmonitor exited.\n");
     return NULL;
 }
-/*@+mustfreefresh +type +unrecog@*/
+/*@+mustfreefresh +type +unrecog +branchstate@*/
 
 /*
  * Entry points begin here.
@@ -584,8 +583,10 @@ void pps_thread_activate(struct gps_device_t *session)
 void pps_thread_deactivate(struct gps_device_t *session)
 /* cleanly terminate PPS thread */
 {
+    /*@-nullstate -mustfreeonly@*/
     session->thread_report_hook = NULL;
     session->context->pps_hook = NULL;
+    /*@+nullstate +mustfreeonly@*/
 }
 
 #if defined(HAVE_SYS_TIMEPPS_H)

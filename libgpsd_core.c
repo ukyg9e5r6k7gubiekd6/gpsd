@@ -173,12 +173,13 @@ static void gpsd_run_device_hook(const int debuglevel,
     }
 }
 
+/*@-kepttrans@*/
 int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 {
     /*@-mustfreeonly@*/
     const struct gps_type_t **dp;
     bool first_sync = (session->device_type != NULL);
-    int i;
+    unsigned int i;
 
     if (first_sync && strcmp(session->device_type->type_name, type_name) == 0)
 	return 0;
@@ -212,6 +213,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     /*@ +compmempass @*/
     /*@+mustfreeonly@*/
 }
+/*@+kepttrans@*/
 
 /*@-compdestroy@*/
 void gps_context_init(struct gps_context_t *context)
