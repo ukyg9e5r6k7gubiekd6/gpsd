@@ -1,5 +1,5 @@
 /*
- * ppsthread.c - manage a PPS watcher thread
+ * ppsthread.c - manage PPS watcher threads
  *
  * If you are not good at threads do not touch this file!
  *
@@ -10,6 +10,11 @@
  * serial lines. KPPS requires root permissions for intialization;
  * plain PPS does not.  Plain PPS loses some functionality when not
  * initialized as root.
+ *
+ * To use the thread manager, you need to first fill in the four
+ * thread_* methods in the session structure.  Then you can call
+ * pps_thread_activate() and the thread will launch.  It is OK to do
+ * this before the device is open, the thread will wait on that.
  *
  * This file is Copyright (c) 2013 by the GPSD project BSD terms apply:
  * see the file COPYING in the distribution root for details.
@@ -60,8 +65,9 @@ static volatile int uninitialized_pps_thread_count;
 #endif
 
 #if defined(HAVE_SYS_TIMEPPS_H)
+static int init_kernel_pps(struct gps_device_t *session)
 /* return handle for kernel pps, or -1 */
-static int init_kernel_pps(struct gps_device_t *session) {
+{
     int ldisc = 18;   /* the PPS line discipline */
     pps_params_t pp;
     glob_t globbuf;
@@ -180,33 +186,6 @@ static int init_kernel_pps(struct gps_device_t *session) {
     /* +unrecog */
 
     return 0;
-}
-
-void gpsd_await_pps_initialization(struct gps_context_t *context)
-/* wait for all threads seeking kernel PPS to open /dev/pps devices */
-{
-    /* wait only this many intervals if some thread croaked too early */
-    static int dropdead = 100;
-
-    gpsd_report(context->debug, LOG_WARN,
-		"waiting on KPPS initalization...\n");
-
-    while (dropdead-- > 0)
-    {
-	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
-	(void)pthread_mutex_lock(&initialization_mutex);
-	/* +unrecog */
-	if (uninitialized_pps_thread_count == 0)
-	    return;
-	/*@ -unrecog (splint has no pthread declarations as yet) @*/
-	(void)pthread_mutex_unlock(&initialization_mutex);
-	/* +unrecog */
-	usleep(1000);
-    }
-
-    gpsd_report(context->debug, LOG_WARN,
-		"wait for KPPS initalization timed out\n");
-
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
@@ -581,6 +560,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 }
 /*@+mustfreefresh +type +unrecog@*/
 
+/*
+ * Entry points begin here.
+ */
+
 void pps_thread_activate(struct gps_device_t *session)
 /* activate a thread to watch the device's PPS transitions */
 {
@@ -607,6 +590,35 @@ void pps_thread_deactivate(struct gps_device_t *session)
 {
     session->thread_report_hook = NULL;
 }
+
+#if defined(HAVE_SYS_TIMEPPS_H)
+void gpsd_await_pps_initialization(struct gps_context_t *context)
+/* wait for all threads seeking kernel PPS to open /dev/pps devices */
+{
+    /* wait only this many intervals if some thread croaked too early */
+    static int dropdead = 100;
+
+    gpsd_report(context->debug, LOG_WARN,
+		"waiting on KPPS initalization...\n");
+
+    while (dropdead-- > 0)
+    {
+	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_lock(&initialization_mutex);
+	/* +unrecog */
+	if (uninitialized_pps_thread_count == 0)
+	    return;
+	/*@ -unrecog (splint has no pthread declarations as yet) @*/
+	(void)pthread_mutex_unlock(&initialization_mutex);
+	/* +unrecog */
+	usleep(1000);
+    }
+
+    gpsd_report(context->debug, LOG_WARN,
+		"wait for KPPS initalization timed out\n");
+
+}
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
 /* end */
 
