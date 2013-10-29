@@ -591,7 +591,7 @@ void pps_thread_deactivate(struct gps_device_t *session)
 /* cleanly terminate PPS thread */
 {
     session->thread_report_hook = NULL;
-    session->context->pps_hook != NULL;
+    session->context->pps_hook = NULL;
 }
 
 #if defined(HAVE_SYS_TIMEPPS_H)
