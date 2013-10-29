@@ -771,6 +771,7 @@ A more detailed description of the output is available at
 
 In order to determine the correct GPS offset, do the following:
 
+[start=1]
 1. Add these lines to ntp.conf:
 
 -----------------------------------------------------------------------------
@@ -788,18 +789,27 @@ log statistics measurements tracking
 
 This enables logging of the peer server statistics.
 
+[start=2]
 2. Make sure the directory exists properly.  For ntpd as root do:
+
+-----------------------------------------------------------------------------
    # mkdir -p /var/log/ntpstats
    # chown ntp:ntp /var/log/ntpstats
+-----------------------------------------------------------------------------
 
 For chronyd as root do:
+
+-----------------------------------------------------------------------------
    # mkdir -p /var/log/chrony
    # chown root:root /var/log/chrony
+-----------------------------------------------------------------------------
 
+[start=3]
 3. Start ntpd (or chronyd) and let it run for at least four hours.
 Periodically check progress with "ntpq -p" or "chronyc sources" and wait
 until change has settled out.
 
+[start=4]
 4. Calculate the average GPS offset using this script (a copy is
 included as contrib/ntpoffset in the GPSD distribution):
 
@@ -812,6 +822,7 @@ awk '
 
 This prints the average offset.
 
+[start=5]
 5. Adjust the "time1" value for unit 0 of your ntp.conf (the non-PPS
    channel) by subtracting the average offset from step 4.
 
@@ -828,6 +839,7 @@ example:
 SHM 0 configured as:
 refclock SHM 0 poll 8 filter 1000 noselect
 
+-----------------------------------------------------------------------------
 # chronyc sourcestats
 210 Number of sources = 6
 Name/IP Address            NP  NR  Span  Frequency  Freq Skew  Offset  Std Dev
@@ -841,6 +853,7 @@ ntp1.karneval.cz           17  10   89m      0.127      0.539  -4131us   574us
 
 In this case (Garmin 18x) the offset specified in the config for the
 SHM 0 source should be around 0.495.
+-----------------------------------------------------------------------------
 
 == Providing public NTP service ==
 

@@ -223,7 +223,7 @@ software must cope.
 
 == Talker IDs == 
 
-NMEA sentences do not identify the individuasl device that issued
+NMEA sentences do not identify the individual device that issued
 them; the format was originally designed for shipboard multidrop
 networks on which it's possible only to broadcast to all devices,. not
 address a specific one.  
@@ -261,7 +261,7 @@ EC -- ECDIS is a specialized geographical information system intended
 to support professional maritime navigation.  NMEA talker units
 meeting the ECDIS standard use this prefix.  Some of these emit GLL.
 
-CD -- Modern marine VHF radios have a set of logic collectively known as
+CD -- Modern marine VHF radios use conventions collectively known as
 Digital Selective Calling (DSC).  These radios typically take data
 from a local position indicating device.  This data is used in
 conjunction with a unique (FCC assigned) ID to cause your radio to
@@ -377,8 +377,8 @@ a. GPS satellites are identified by their PRN numbers, which range from 1 to 32.
 
 b. The numbers 33-64 are reserved for WAAS satellites. The WAAS system
 PRN numbers are 120-138. The offset from NMEA WAAS SV ID to WAAS PRN
-number is 87. A WAAS PRN number of 120 minus 87 yields the SV ID of
-33. The addition of 87 to the SV ID yields the WAAS PRN number.
+number is 87. A WAAS PRN number of 120 minus 87 yields the SV ID of 33.
+The addition of 87 to the SV ID yields the WAAS PRN number.
 
 c. The numbers 65-96 are reserved for GLONASS satellites. GLONASS
 satellites are identified by 64+satellite slot number. The slot
