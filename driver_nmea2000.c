@@ -831,6 +831,104 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+static gps_mask_t hnd_127506(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_127508(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_127513(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+static gps_mask_t hnd_127245(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_128259(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_128267(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_128275(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_130306(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_130310(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+static gps_mask_t hnd_130311(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
 /*@-usereleased@*/
 static const char msg_059392[] = {"ISO  Acknowledgment"};
 static const char msg_060928[] = {"ISO  Address Claim"};
@@ -838,11 +936,17 @@ static const char msg_126208[] = {"NMEA Command/Request/Acknowledge"};
 static const char msg_126464[] = {"ISO  Transmit/Receive PGN List"};
 static const char msg_126992[] = {"GNSS System Time"};
 static const char msg_126996[] = {"ISO  Product Information"};
+
+static const char msg_127506[] = {"PWR DC Detailed Status"};
+static const char msg_127508[] = {"PWR Battery Status"};
+static const char msg_127513[] = {"PWR Battery Configuration Status"};
+
 static const char msg_129025[] = {"GNSS Position Rapid Update"};
 static const char msg_129026[] = {"GNSS COG and SOG Rapid Update"};
 static const char msg_129029[] = {"GNSS Positition Data"};
 static const char msg_129539[] = {"GNSS DOPs"};
 static const char msg_129540[] = {"GNSS Satellites in View"};
+
 static const char msg_129038[] = {"AIS  Class A Position Report"};
 static const char msg_129039[] = {"AIS  Class B Position Report"};
 static const char msg_129040[] = {"AIS  Class B Extended Position Report"};
@@ -851,6 +955,16 @@ static const char msg_129798[] = {"AIS  SAR Aircraft Position Report"};
 static const char msg_129802[] = {"AIS  Safty Related Broadcast Message"};
 static const char msg_129809[] = {"AIS  Class B CS Static Data Report, Part A"};
 static const char msg_129810[] = {"AIS  Class B CS Static Data Report, Part B"};
+
+static const char msg_127245[] = {"NAV Rudder"};
+static const char msg_127250[] = {"NAV Vessel Heading"};
+static const char msg_128259[] = {"NAV Speed"};
+static const char msg_128267[] = {"NAV Water Depth"};
+static const char msg_128275[] = {"NAV Distance Log"};
+static const char msg_130306[] = {"NAV Wind Data"};
+static const char msg_130310[] = {"NAV Water Temp., Outside Air Temp., Atmospheric Pressure"};
+static const char msg_130311[] = {"NAV Environmental Parameters"};
+
 static const char msg_error [] = {"**error**"};
 
 static PGN gpspgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
@@ -881,6 +995,35 @@ static PGN aispgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 		       {129809, 1, 2, hnd_129809, &msg_129809[0]},
 		       {129810, 1, 2, hnd_129810, &msg_129810[0]},
 		       {0     , 0, 0, NULL,       &msg_error [0]}};
+
+static PGN pwrpgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
+		       { 60928, 0, 0, hnd_060928, &msg_060928[0]},
+		       {126208, 0, 0, hnd_126208, &msg_126208[0]},
+		       {126464, 1, 0, hnd_126464, &msg_126464[0]},
+		       {126992, 0, 0, hnd_126992, &msg_126992[0]},
+		       {126996, 1, 0, hnd_126996, &msg_126996[0]},
+		       {127506, 1, 2, hnd_127506, &msg_127506[0]},
+		       {127508, 1, 2, hnd_127508, &msg_127508[0]},
+		       {127513, 1, 2, hnd_127513, &msg_127513[0]},
+		       {0     , 0, 0, NULL,       &msg_error [0]}};
+
+static PGN navpgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
+		       { 60928, 0, 0, hnd_060928, &msg_060928[0]},
+		       {126208, 0, 0, hnd_126208, &msg_126208[0]},
+		       {126464, 1, 0, hnd_126464, &msg_126464[0]},
+		       {126992, 0, 0, hnd_126992, &msg_126992[0]},
+		       {126996, 1, 0, hnd_126996, &msg_126996[0]},
+		       {127245, 0, 2, hnd_127245, &msg_127245[0]},
+		       {127250, 0, 2, hnd_127250, &msg_127250[0]},
+		       {128259, 0, 2, hnd_128259, &msg_128259[0]},
+		       {128267, 0, 2, hnd_128267, &msg_128267[0]},
+		       {128275, 1, 2, hnd_128275, &msg_128275[0]},
+		       {130306, 0, 2, hnd_130306, &msg_130306[0]},
+		       {130310, 0, 2, hnd_130310, &msg_130310[0]},
+		       {130311, 0, 2, hnd_130311, &msg_130311[0]},
+		       {0     , 0, 0, NULL,       &msg_error [0]}};
+
+
 /*@+usereleased@*/
 
 /*@-immediatetrans@*/
@@ -991,6 +1134,14 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		work = search_pgnlist(source_pgn, pgnlist);
 		if (work == NULL) {
 		    pgnlist = &aispgn[0];
+		    work = search_pgnlist(source_pgn, pgnlist);
+		}
+		if (work == NULL) {
+		    pgnlist = &pwrpgn[0];
+		    work = search_pgnlist(source_pgn, pgnlist);
+		}
+		if (work == NULL) {
+		    pgnlist = &navpgn[0];
 		    work = search_pgnlist(source_pgn, pgnlist);
 		}
 		if ((work != 0) && (work->type > 0)) {
