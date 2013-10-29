@@ -35,6 +35,8 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
+
+#ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
 #include <fcntl.h>	/* needed for open() and friends */
 #endif
@@ -619,6 +621,8 @@ void gpsd_await_pps_initialization(struct gps_context_t *context)
 
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
+
+#endif /* PPS_ENABLE */
 
 /* end */
 
