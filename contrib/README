@@ -50,5 +50,5 @@ ppscheck watches a specified serial device for changes in handshake lines
 CD, RI, and CTS by running ioctl(...., TIOCMIWAIT, ...) in a loop.  When it
 sees a state change it emits a timestamped line of output dumping the state
 of the handshake signals. It's useful for checking whether a device is
-emitting 1PPS.
+emitting 1PPS.  There is troubleshooting advice in the header comment.
   
