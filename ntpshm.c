@@ -360,58 +360,25 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
  *
  * good news is that kernel PPS gives us nSec resolution
  * bad news is that ntpshm only has uSec resolution
+ *
+ * actual_tv is the actual time we think the PPS happened
+ * ts is the time we saw the pulse
  */
-static int ntpshm_pps(struct gps_device_t *session, struct timespec *ts)
+static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
+	struct timespec *ts, double edge_offset)
 {
     volatile struct shmTime *shmTime = NULL, *shmTimeP = NULL;
     struct timeval tv;
-    time_t seconds;
-    /* FIX-ME, microseconds needs to be set for 5Hz PPS */
-    int microseconds = 0;
     int precision;
     double offset;
-    long l_offset;
 
     if (0 > session->shmindex || 0 > session->shmTimeP ||
 	(shmTime = session->context->shmTime[session->shmindex]) == NULL ||
 	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
 	return 0;
 
-    /* PPS has no seconds attached to it.
-     * check to see if we have a fresh timestamp from the
-     * GPS serial input then use that */
-
-    /* FIX-ME, does not handle 5Hz yet */
     /* for now we use uSec, not nSec */
     TSTOTV( &tv, ts );
-
-#ifdef S_SPLINT_S		/* avoids an internal error in splint 3.1.1 */
-    l_offset = 0;
-#else
-    l_offset = tv.tv_sec - shmTime->receiveTimeStampSec;
-#endif
-    /*@ -ignorequals @*/
-    l_offset *= 1000000;
-    l_offset += tv.tv_usec - shmTime->receiveTimeStampUSec;
-    if (0 > l_offset || 1000000 < l_offset) {
-	gpsd_report(session->context->debug, LOG_RAW,
-		    "PPS ntpshm_pps: no current GPS seconds: %ld\n",
-		    (long)l_offset);
-	return -1;
-    }
-
-    /*
-     * This innocuous-looking "+ 1" embodies a significant  assumption:
-     * that GPSes report time to the second over the serial stream *after*
-     * emitting PPS for the top of second.  Thus, when we see PPS our
-     * available report is from the previous cycle and we must increment.
-     */
-    /*@+relaxtypes@*/
-    seconds = shmTime->clockTimeStampSec + 1;
-    offset = fabs((tv.tv_sec - seconds)
-		  + ((double)(tv.tv_usec - 0) / 1000000.0));
-    /*@-relaxtypes@*/
-
 
     /* we use the shmTime mode 1 protocol
      *
@@ -429,9 +396,9 @@ static int ntpshm_pps(struct gps_device_t *session, struct timespec *ts)
      */
     shmTimeP->valid = 0;
     shmTimeP->count++;
-    shmTimeP->clockTimeStampSec = seconds;
-    shmTimeP->clockTimeStampUSec = (int)microseconds;
-    shmTimeP->receiveTimeStampSec = (time_t) tv.tv_sec;
+    shmTimeP->clockTimeStampSec = (time_t)actual_tv->tv_sec;
+    shmTimeP->clockTimeStampUSec = (int)actual_tv->tv_usec;
+    shmTimeP->receiveTimeStampSec = (time_t)tv.tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)tv.tv_usec;
     shmTimeP->leap = session->context->leap_notify;
     /* precision is a placebo, ntpd does not really use it
@@ -442,10 +409,13 @@ static int ntpshm_pps(struct gps_device_t *session, struct timespec *ts)
 
     /* this is more an offset jitter/dispersion than precision,
      * but still useful for debug */
+    offset = fabs((tv.tv_sec - actual_tv->tv_sec)
+		  + ((double)(tv.tv_usec - actual_tv->tv_usec) / 1000000.0));
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     gpsd_report(session->context->debug, LOG_RAW,
 		"PPS ntpshm_pps %lu.%03lu @ %lu.%09lu, preci %d\n",
-		(unsigned long)seconds, (unsigned long)microseconds / 1000,
+		(unsigned long)actual_tv->tv_sec, 
+		(unsigned long)actual_tv->tv_usec,
 		(unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec,
 		precision);
     return 1;
@@ -499,8 +469,12 @@ static void chrony_init(struct gps_device_t *session)
 }
 
 
+/* actual_tv is when we think the PPS pulse wass */
+/* ts is the local clocke time we saw the pulse */
+/* offset is actual_tv - tv */
 static void chrony_send(struct gps_device_t *session,
-			struct timeval *tv, double offset)
+			struct timeval *actual_tv,
+			struct timespec *ts,  double offset)
 {
     struct sock_sample sample;
 
@@ -509,7 +483,7 @@ static void chrony_send(struct gps_device_t *session,
     sample.pulse = 0;
     sample.leap = session->context->leap_notify;
     sample.magic = SOCK_MAGIC;
-    sample.tv = *tv;
+    sample.tv = *actual_tv; /* structure copy */
     sample.offset = offset; 
 
     send(session->chronyfd, &sample, sizeof (sample), 0);
@@ -706,7 +680,6 @@ volatile bool gpsd_ppsmonitor_stop = false;
 /*@-mustfreefresh -type@ -unrecog*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
-    unsigned long sec_pps;
     struct gps_device_t *session = (struct gps_device_t *)arg;
     struct timeval  tv;
     struct timespec ts;
@@ -1009,8 +982,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 
 	if (ok) {
+	    long l_offset;
 	    char *log1 = NULL;
-	    struct timeval  edge_tv;
+	    /* actual_tv is the time we think the pulse represents  */
+	    struct timeval  actual_tv;
+	    /* edge_offset is the skew from expected to observed pulse time */
 	    double edge_offset;
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge accepted %.100s", log);
@@ -1023,38 +999,57 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		} else {
 		    ts = pi.clear_timestamp;  /* structure copy */
 		}
-		TSTOTV( &edge_tv, &ts);
 	    } else
 #endif
 	    {
 	        // use plain PPS
-		edge_tv = tv; 	/* structure copy */
+		TVTOTS( &ts, &tv);
 	    }
-	    /* FIXME!! this is wrong if signal is 5Hz or 10Hz instead of PPS */
-	    /* careful, Unix time to nSec is more precision than a double */
-	    /* FIXME, validate last_fixtime a bit better */
-	    edge_offset = 1 + session->last_fixtime - ts.tv_sec;
+
+            /* This innocuous-looking "+ 1" embodies a significant
+             * assumption: that GPSes report time to the second over the
+             * serial stream *after* * emitting PPS for the top of second.
+             * Thus, when we see PPS our available report is from the
+             * previous cycle and we must increment. 
+             */
+
+	    /*@+relaxtypes@*/
+	    actual_tv.tv_sec = session->last_fixtime + 1;
+	    actual_tv.tv_usec = 0;  /* need to be fixed for 5Hz */
+	    /*@-relaxtypes@*/
+
+	    edge_offset = actual_tv.tv_sec - ts.tv_sec;
 	    edge_offset -= ts.tv_nsec / 1e9;
+
+	    /* check to see if we have a fresh timestamp from the
+	     * GPS serial input then use that */
+	    l_offset = (long)edge_offset;
+	    if (0 > l_offset || 1000000 < l_offset) {
+		/* timestamp out of range */
+		gpsd_report(session->context->debug, LOG_RAW,
+			    "PPS ntpshm_pps: no current GPS seconds: %ld\n",
+			    (long)l_offset);
+		session->ship_to_ntpd = 0;
+	    }
 
 	    if (session->ship_to_ntpd) {
 	        log1 = "accepted";
 		if ( 0 <= session->chronyfd ) {
 		    log1 = "accepted chrony sock";
-		    chrony_send(session, &edge_tv, edge_offset);
+		    chrony_send(session, &actual_tv, &ts, edge_offset);
                 }
-		(void)ntpshm_pps(session, &ts);
+		(void)ntpshm_pps(session, &actual_tv,  &ts, edge_offset);
 	    } else {
 	    	log1 = "skipped ship_to_ntp=0";
 	    }
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
 		    log1,
-		    (unsigned long)edge_tv.tv_sec,
-		    (unsigned long)edge_tv.tv_usec,
+		    (unsigned long)ts.tv_sec,
+		    (unsigned long)ts.tv_nsec,
 		    edge_offset);
-	    sec_pps = 1 + session->last_fixtime;
 	    if (session->context->pps_hook != NULL)
-		session->context->pps_hook(session, sec_pps, &ts);
+		session->context->pps_hook(session, actual_tv.tv_sec, &ts);
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);
