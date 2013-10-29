@@ -178,6 +178,9 @@ static double ais_direction(unsigned int val, double scale)
 }
 
 
+/*
+ *   PGN 59392: ISO  Acknowledgment
+ */
 static gps_mask_t hnd_059392(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -187,6 +190,9 @@ static gps_mask_t hnd_059392(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 60928: ISO  Address Claim
+ */
 static gps_mask_t hnd_060928(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -196,6 +202,9 @@ static gps_mask_t hnd_060928(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 126208: NMEA Command/Request/Acknowledge
+ */
 static gps_mask_t hnd_126208(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -205,6 +214,9 @@ static gps_mask_t hnd_126208(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 126464: ISO Transmit/Receive PGN List
+ */
 static gps_mask_t hnd_126464(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -214,6 +226,9 @@ static gps_mask_t hnd_126464(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 126996: ISO  Product Information
+ */
 static gps_mask_t hnd_126996(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -223,6 +238,9 @@ static gps_mask_t hnd_126996(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129025: GNSS Position Rapid Update
+ */
 static gps_mask_t hnd_129025(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -240,6 +258,9 @@ static gps_mask_t hnd_129025(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129026: GNSS COG and SOG Rapid Update
+ */
 static gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -259,6 +280,9 @@ static gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 126992: GNSS System Time
+ */
 static gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     //uint8_t        sid;
@@ -284,6 +308,9 @@ static gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_de
 static const int mode_tab[] = {MODE_NO_FIX, MODE_2D,  MODE_3D, MODE_NO_FIX,
 			       MODE_NO_FIX, MODE_NO_FIX, MODE_NO_FIX, MODE_NO_FIX};
 
+/*
+ *   PGN 129539: GNSS DOPs
+ */
 static gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     gps_mask_t mask;
@@ -331,6 +358,9 @@ static gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129540: GNSS Satellites in View
+ */
 static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     int         l1, l2;
@@ -372,6 +402,9 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129029: GNSS Positition Data
+ */
 static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     gps_mask_t mask;
@@ -440,6 +473,9 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129038: AIS  Class A Position Report
+ */
 static gps_mask_t hnd_129038(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -470,6 +506,9 @@ static gps_mask_t hnd_129038(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129039: AIS  Class B Position Report
+ */
 static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -505,6 +544,9 @@ static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129040: AIS Class B Extended Position Report
+ */
 /* No test case for this message at the moment */
 static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
@@ -561,6 +603,9 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129794: AIS Class A Static and Voyage Related Data
+ */
 static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -654,6 +699,9 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129798: AIS SAR Aircraft Position Report
+ */
 /* No test case for this message at the moment */
 static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
@@ -686,6 +734,9 @@ static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129802: AIS Safty Related Broadcast Message
+ */
 /* No test case for this message at the moment */
 static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
@@ -712,6 +763,9 @@ static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129809: AIS Class B CS Static Data Report, Part A
+ */
 static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -748,6 +802,9 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 129810: AIS Class B CS Static Data Report, Part B
+ */
 static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
@@ -831,6 +888,9 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 127506: PWR DC Detailed Status
+ */
 static gps_mask_t hnd_127506(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -840,6 +900,9 @@ static gps_mask_t hnd_127506(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 127508: PWR Battery Status
+ */
 static gps_mask_t hnd_127508(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -849,6 +912,9 @@ static gps_mask_t hnd_127508(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 127513: PWR Battery Configuration Status
+ */
 static gps_mask_t hnd_127513(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -857,6 +923,10 @@ static gps_mask_t hnd_127513(unsigned char *bu, int len, PGN *pgn, struct gps_de
     return(0);
 }
 
+
+/*
+ *   PGN 127245: NAV Rudder
+ */
 static gps_mask_t hnd_127245(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -866,6 +936,9 @@ static gps_mask_t hnd_127245(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 127250: NAV Vessel Heading
+ */
 static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -875,6 +948,9 @@ static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 128259: NAV Speed
+ */
 static gps_mask_t hnd_128259(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -884,6 +960,9 @@ static gps_mask_t hnd_128259(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 128267: NAV Water Depth
+ */
 static gps_mask_t hnd_128267(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -893,6 +972,9 @@ static gps_mask_t hnd_128267(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 128275: NAV Distance Log
+ */
 static gps_mask_t hnd_128275(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -902,6 +984,9 @@ static gps_mask_t hnd_128275(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 130306: NAV Wind Data
+ */
 static gps_mask_t hnd_130306(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -911,6 +996,9 @@ static gps_mask_t hnd_130306(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 130310: NAV Water Temp., Outside Air Temp., Atmospheric Pressure
+ */
 static gps_mask_t hnd_130310(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
@@ -920,6 +1008,9 @@ static gps_mask_t hnd_130310(unsigned char *bu, int len, PGN *pgn, struct gps_de
 }
 
 
+/*
+ *   PGN 130311: NAV Environmental Parameters
+ */
 static gps_mask_t hnd_130311(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
