@@ -209,11 +209,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *cont
     /*@ +mustfreefresh */
 }
 
-#ifdef PPS_ENABLE
-void ntpshm_init(struct gps_context_t *context, bool enablepps)
-#else
-void ntpshm_init(struct gps_context_t *context, bool enablepps UNUSED)
-#endif /* PPS_ENABLE */
+void ntpshm_init(struct gps_context_t *context)
 /* Attach all NTP SHM segments. Called once at startup, while still root. */
 {
     int i;
@@ -225,9 +221,6 @@ void ntpshm_init(struct gps_context_t *context, bool enablepps UNUSED)
 	}
     }
     memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
-# ifdef PPS_ENABLE
-    context->shmTimePPS = enablepps;
-# endif	/* PPS_ENABLE */
     context->enable_ntpshm = true;
 }
 
