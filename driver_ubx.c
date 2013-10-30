@@ -840,9 +840,9 @@ const struct gps_type_t ubx_binary = {
 #ifdef CONTROLSEND_ENABLE
     .control_send     = ubx_control_send,	/* no control sender yet */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* NTPSHM_ ENABLE */
+#ifdef TIMESERVICE_ENABLE
+    .time_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* ENABLE ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */

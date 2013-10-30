@@ -1151,13 +1151,13 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 }
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef NTPSHM_ENABLE
-static double tsip_ntp_offset(struct gps_device_t *session UNUSED)
+#ifdef TIMESERVICE_ENABLE
+static double tsip_time_offset(struct gps_device_t *session UNUSED)
 {
     /* FIX-ME: is a constant offset right here? */
     return 0.075;
 }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 
 void configuration_packets_generic(struct gps_device_t *session)
 /* configure generic Trimble TSIP device to a known state */
@@ -1274,9 +1274,9 @@ const struct gps_type_t tsip_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = tsip_control_send,/* how to send commands */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = tsip_ntp_offset,
-#endif /* NTPSHM_ENABLE */
+#ifdef TIMESERVICE_ENABLE
+    .time_offset     = tsip_time_offset,
+#endif /* TIMESERVICE_ENABLE */
 };
 /* *INDENT-ON* */
 

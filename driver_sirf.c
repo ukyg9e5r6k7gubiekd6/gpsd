@@ -486,9 +486,9 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     gpsd_report(session->context->debug, LOG_PROG,
 		"SiRF: fv: %0.2f, Driver state flags are: %0x\n",
 		fv, session->driver.sirf.driverstate);
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
     session->driver.sirf.time_seen = 0;
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
     gpsd_report(session->context->debug, LOG_DATA,
 		"SiRF: FV MID 0x06: subtype='%s' mask={DEVICEID}\n",
 		session->subtype);
@@ -577,7 +577,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 		&& session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS)
 	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
     }
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
     if (st < 3) {
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: NTPD not enough satellites seen: %d\n", st);
@@ -589,15 +589,15 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 		    session->gpsdata.skyview_time,
 		    session->context->leap_seconds);
     }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
     gpsd_report(session->context->debug, LOG_DATA,
 		"SiRF: MTD 0x04: visible=%d mask={SATELLITE}\n",
 		session->gpsdata.satellites_visible);
     return SATELLITE_SET;
 }
 
-#ifdef NTPSHM_ENABLE
-static double sirf_ntp_offset(struct gps_device_t *session)
+#ifdef TIMESERVICE_ENABLE
+static double sirf_time_offset(struct gps_device_t *session)
 /* return NTP time-offset fudge factor for this device */
 {
     double retval = NAN;
@@ -650,7 +650,7 @@ static double sirf_ntp_offset(struct gps_device_t *session)
 
     return retval;
 }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 
 static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
@@ -695,7 +695,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     /* byte 21 is "mode 2", not clear how to interpret that */
     session->newdata.time = gpsd_gpstime_resolve(session,
 	(unsigned short)getbes16(buf, 22), (double)getbeu32(buf, 24) * 1e-2);
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
     if (session->newdata.mode <= MODE_NO_FIX) {
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: NTPD no fix, mode: %d\n",
@@ -706,7 +706,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 		    session->driver.sirf.time_seen,
 		    session->newdata.time, session->context->leap_seconds);
     }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
     /* fix quality data */
     session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
     mask |=
@@ -846,7 +846,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: GND 0x29 UTC: %lf\n",
 		    session->newdata.time);
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
 	if (session->newdata.mode <= MODE_NO_FIX) {
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: NTPD no fix, mode: $d\n",
@@ -864,7 +864,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	    mask |= PPSTIME_IS;
 	}
 
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 	/* skip 4 bytes of satellite map */
 	session->newdata.altitude = getbes32(buf, 35) * 1e-2;
 	/* skip 1 byte of map datum */
@@ -979,7 +979,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	/*@ -compdef */
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
 	/*@ +compdef */
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
 	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"SiRF: NTPD just SEEN_UTC_2\n");
@@ -988,7 +988,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 		    "SiRF: NTPD valid time MID 0x62, seen=0x%02x\n",
 		    session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 	session->context->valid |= LEAP_SECOND_VALID;
     }
 
@@ -1034,7 +1034,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	/*@ +compdef */
 	session->context->leap_seconds = (int)getbeu16(buf, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
 	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"SiRF: NTPD just SEEN_UTC_2\n");
@@ -1044,7 +1044,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 		    session->driver.sirf.time_seen,
 		    session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 	mask |= TIME_SET;
 	if ( 3 <= session->gpsdata.satellites_visible ) {
 	    mask |= PPSTIME_IS;
@@ -1385,8 +1385,8 @@ const struct gps_type_t sirf_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = sirf_control_send,/* how to send a control string */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = sirf_ntp_offset,
+#ifdef TIMESERVICE_ENABLE
+    .time_offset     = sirf_time_offset,
 #endif /* NTP_SHM_ENABLE */
 };
 /* *INDENT-ON* */

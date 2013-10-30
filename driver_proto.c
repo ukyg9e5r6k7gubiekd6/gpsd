@@ -453,8 +453,8 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
 }
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef NTPSHM_ENABLE
-static double _proto_ntp_offset(struct gps_device_t *session)
+#ifdef TIMESERVICE_ENABLE
+static double _proto_time_offset(struct gps_device_t *session)
 {
     /*
      * If NTP notification is enabled, the GPS will occasionally NTP
@@ -468,7 +468,7 @@ static double _proto_ntp_offset(struct gps_device_t *session)
      */
     return MAGIC_CONSTANT;
 }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 
 static void _proto__wrapup(struct gps_device_t *session)
 {
@@ -525,9 +525,9 @@ const struct gps_type_t _proto__binary = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = _proto__control_send,
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = _proto_ntp_offset,
-#endif /* NTPSHM_ENABLE */
+#ifdef TIMESERVICE_ENABLE
+    .time_offset     = _proto_time_offset,
+#endif /* TIMESERVICE_ENABLE */
 /* *INDENT-ON* */
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */

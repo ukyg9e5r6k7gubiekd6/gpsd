@@ -418,9 +418,9 @@ const struct gps_type_t italk_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* no control string sender */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* NTPSHM_ ENABLE */
+#ifdef TIMESERVICE_ENABLE
+    .time_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* ENABLE ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */

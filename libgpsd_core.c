@@ -231,15 +231,17 @@ void gps_context_init(struct gps_context_t *context)
 	.gps_tow        = 0,
 	.century	= 0,
 	.rollovers      = 0,
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
 	.leap_notify    = LEAP_NOWARNING,
+#endif /* TIMESERVICE_ENABLE */
+#ifdef NTPSHM_ENABLE
 	.enable_ntpshm  = false,
 	.shmTime	= {0},
 	.shmTimeInuse   = {0},
+#endif /* NTPSHM_ENABLE */
 # ifdef PPS_ENABLE
 	.pps_hook       = NULL,
 # endif /* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
 	.shmexport      = NULL,
 #endif /* SHM_EXPORT_ENABLE */

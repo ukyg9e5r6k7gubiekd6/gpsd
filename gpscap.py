@@ -139,13 +139,13 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     nmea = self.get(dev, "nmea")
                 ofp.write("<td>%s</td>\n" % nmea)
                 if self.has_option(dev, "pps") and self.get(dev, "pps") == "True":
-                    pps_accuracy = ntp_offset = ""
+                    pps_accuracy = time_offset = ""
                     if self.has_option(dev, "pps_accuracy"):
                         pps_accuracy = self.get(dev, "pps_accuracy")
-                    if self.has_option(dev, "ntp_offset"):
-                        ntp_offset = self.get(dev, "ntp_offset")
-                    if pps_accuracy and ntp_offset:
-                        ofp.write("<td>%s<br>%s</td>\n" % (pps_accuracy, ntp_offset))
+                    if self.has_option(dev, "time_offset"):
+                        time_offset = self.get(dev, "time_offset")
+                    if pps_accuracy and time_offset:
+                        ofp.write("<td>%s<br>%s</td>\n" % (pps_accuracy, time_offset))
                     else:
                         ofp.write("<td>?<br>\n")
                 else:

@@ -223,6 +223,9 @@ static void typelist(void)
 #if defined(NTPSHM_ENABLE)
     (void)printf("# NTPSHM for NTPd enabled.\n");
 #endif
+#if defined(CHRONY_ENABLE)
+    (void)printf("# Chrony support enabled.\n");
+#endif
 #if defined(PPS_ENABLE)
     (void)printf("# PPS enabled.\n");
 #endif
@@ -663,9 +666,9 @@ static void deactivate_device(struct gps_device_t *device)
 	adjust_max_fd(device->gpsdata.gps_fd, false);
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
 	ntpd_link_deactivate(device);
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 	gpsd_deactivate(device);
     }
 }
@@ -717,7 +720,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	if (!allocated_device(devp)) {
 	    gpsd_init(devp, &context, device_name);
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
 	    /*
 	     * Now is the right time to grab the shared memory segment(s)
 	     * to communicate the navigation message derived and (possibly)
@@ -732,7 +735,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
 			"NTPD ntpd_link_activate: %d\n",
 			(int)devp->shmindex >= 0);
 
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 	    gpsd_report(context.debug, LOG_INF,
 			"stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
@@ -1508,7 +1511,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
     }
 
 
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
     /*
      * Time is eligible for shipping to NTPD if the driver has
      * asserted PPSTIME_IS at any point in the current cycle.
@@ -1536,14 +1539,14 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_report(context.debug, LOG_PROG, "NTP: Got one\n");
 	/* assume zero when there's no offset method */
 	if (device->device_type == NULL
-	    || device->device_type->ntp_offset == NULL)
+	    || device->device_type->time_offset == NULL)
 	    offset = 0.0;
 	else
-	    offset = device->device_type->ntp_offset(device);
+	    offset = device->device_type->time_offset(device);
 	(void)ntpshm_put(device, device->newdata.time, offset);
 	device->last_fixtime = device->newdata.time;
     }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 
     /*
      * If no reliable end of cycle, must report every time
@@ -1946,7 +1949,7 @@ int main(int argc, char *argv[])
     gpsd_report(context.debug, LOG_INF, "listening on port %s\n", gpsd_service);
 #endif /* SOCKET_EXPORT_ENABLE */
 
-#ifdef NTPSHM_ENABLE
+#ifdef TIMESERVICE_ENABLE
     if (getuid() == 0) {
 	errno = 0;
 	// nice() can ONLY succeed when run as root!
@@ -1960,7 +1963,7 @@ int main(int argc, char *argv[])
      * to use segments 0 and 1.
      */
     (void)ntpshm_init(&context);
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMESERVICE_ENABLE */
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
     /* we need to connect to dbus as root */
