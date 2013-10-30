@@ -86,14 +86,15 @@ static int init_kernel_pps(struct gps_device_t *session)
     	return -1;
     }
 
-    /* uh, oh, magic file names!, this is not how RFC2783 was designed */
+    /* uh, oh, magic file names!, RFC2783 neglects to specify how
+     * to associate the serial device and pps device names */
     /* need to look in /sys/devices/virtual/pps/pps?/path
      * (/sys/class/pps/pps?/path is just a link to that)
      * to find the /dev/pps? that matches our serial port.
      * this code fails if there are more then 10 pps devices.
      *
      * yes, this could be done with libsysfs, but trying to keep the
-     * number of required libs small */
+     * number of required libs small, and libsysfs would still be linux only */
     memset( (void *)&globbuf, 0, sizeof(globbuf));
     glob("/sys/devices/virtual/pps/pps?/path", 0, NULL, &globbuf);
 
@@ -191,6 +192,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct gps_device_t *session = (struct gps_device_t *)arg;
     struct timeval  tv = {0, 0};
     struct timespec ts = {0, 0};
+    time_t last_second_used = 0;
 #if defined(TIOCMIWAIT)
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
     struct timeval pulse[2] = { {0, 0}, {0, 0} };
@@ -474,6 +476,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    log = "Too long for 0.5Hz\n";
 	}
 #endif /* TIOCMIWAIT */
+	if ( ok && last_second_used >= session->last_fixtime ) {
+		/* uh, oh, this second already handled */
+		ok = 0;
+		log = "this second already handled\n";
+	}
 
 	if (ok) {
 	    long l_offset;
@@ -523,20 +530,22 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    "PPS: no current GPS seconds: %ld\n",
 			    (long)l_offset);
 		log1 = "timestamp out of range";
-	    }
-	    else if (session->thread_report_hook != NULL)
-		log1 = session->thread_report_hook(session,
-						   &actual_tv, &ts, edge_offset);
-	    else
-		log1 = "no report hook";
+	    } else {
+		last_second_used = session->last_fixtime;
+		if (session->thread_report_hook != NULL) 
+		    log1 = session->thread_report_hook(session,
+					   &actual_tv, &ts, edge_offset);
+		else
+		    log1 = "no report hook";
+		if (session->context->pps_hook != NULL)
+		    session->context->pps_hook(session, actual_tv.tv_sec, &ts);
+            }
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
 		    log1,
 		    (unsigned long)ts.tv_sec,
 		    (unsigned long)ts.tv_nsec,
 		    edge_offset);
-	    if (session->context->pps_hook != NULL)
-		session->context->pps_hook(session, actual_tv.tv_sec, &ts);
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);
