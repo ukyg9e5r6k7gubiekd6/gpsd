@@ -428,6 +428,20 @@ def CheckCompilerOption(context, option):
     context.Result(ret)
     return ret
 
+def CheckDefine(context, define, file):
+    context.Message( 'Checking if %s supplies %s ...' %(file,define) )
+    ret = context.TryLink("""
+        #include <%s>
+        #ifndef %s
+        #error %s is not defined
+        #endif
+        int main(int argc, char **argv) {
+            return 0;
+        }
+    """ % (file, define, define),'.c')
+    context.Result(ret)
+    return ret
+
 def CheckEndian(context):
     context.Message("checking endianess ... ")
     import struct
@@ -448,6 +462,7 @@ config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc,
                                          'CheckCompilerOption' : CheckCompilerOption,
+                                         'CheckDefine' : CheckDefine,
                                          'CheckEndian' : CheckEndian})
 
 
@@ -620,6 +635,10 @@ if config.CheckFunc("pselect"):
     confdefs.append("/* #undef COMPAT_SELECT */\n")
 else:
     confdefs.append("#define COMPAT_SELECT\n")
+
+if not config.CheckDefine("TIOCMIWAIT", "sys/ioctl.h"):
+    announce("Forcing pps=no (TIOCMIWAIT not available)")
+    env["pps"] = False
 
 endian = config.CheckEndian()
 if endian == 'big':
