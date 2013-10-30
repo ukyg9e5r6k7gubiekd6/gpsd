@@ -33,9 +33,7 @@
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
 #include <fcntl.h>	/* needed for open() and friends */
-#endif
 
-#if defined(HAVE_SYS_TIMEPPS_H)
 static pthread_mutex_t initialization_mutex;
 static volatile int uninitialized_pps_thread_count;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
@@ -281,7 +279,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    break;
 	}
 	TVTOTS( &ts, &tv);
-#endif
+#endif /* HAVE_CLOCK_GETTIME */
 /*@+noeffect@*/
 
 	/* ok and log used by KPPS and TIOMCWAIT */
@@ -501,7 +499,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    ts = pi.clear_timestamp;  /* structure copy */
 		}
 	    } else
-#endif
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 	    {
 	        // use plain PPS
 		/*@i10@*/TVTOTS( &ts, &tv);

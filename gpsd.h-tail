@@ -250,11 +250,11 @@ struct gps_context_t {
      * 'optimize' as 'dead code' the writes to SHM */
     /*@reldef@*/volatile struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
+#endif /* NTPSHM_ENABLE */
 # ifdef PPS_ENABLE
     /*@null@*/ void (*pps_hook)(struct gps_device_t *,
 				unsigned long, struct timespec *);
 # endif /* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
     /* we don't want the compiler to treat writes to shmexport as dead code,
      * and we don't want them reordered either */
@@ -463,10 +463,11 @@ struct gps_device_t {
 #endif /* TIMING_ENABLE */
 #ifdef NTPSHM_ENABLE
     int shmindex;
-    timestamp_t last_fixtime;		/* so updates happen once */
     bool ship_to_ntpd;
-# ifdef PPS_ENABLE
+#endif /* NTPSHM_ENABLE */
+#ifdef PPS_ENABLE
     int shmTimeP;
+    timestamp_t last_fixtime;		/* so updates happen once */
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
@@ -478,8 +479,7 @@ struct gps_device_t {
 					   struct timespec *,
 					   double);
     /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
-# endif /* PPS_ENABLE */
-#endif /* NTPSHM_ENABLE */
+#endif /* PPS_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
     bool back_to_nmea;			/* back to NMEA on revert? */
     char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */
