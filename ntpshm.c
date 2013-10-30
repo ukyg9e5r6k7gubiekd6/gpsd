@@ -22,6 +22,8 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
+
+#ifdef NTPSHM_ENABLE
 #include <sys/time.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -499,4 +501,5 @@ void ntpd_link_activate(struct gps_device_t *session)
     }
 }
 
+#endif /* NTPSHM_ENABLE */
 /* end */
