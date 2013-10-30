@@ -239,6 +239,18 @@ static gps_mask_t hnd_126996(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 
 /*
+ *   PGN 127258: GNSS Magnetic Variation
+ */
+static gps_mask_t hnd_127258(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+/*
  *   PGN 129025: GNSS Position Rapid Update
  */
 static gps_mask_t hnd_129025(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
@@ -1032,6 +1044,7 @@ static const char msg_127506[] = {"PWR DC Detailed Status"};
 static const char msg_127508[] = {"PWR Battery Status"};
 static const char msg_127513[] = {"PWR Battery Configuration Status"};
 
+static const char msg_127258[] = {"GNSS Magnetic Variation"};
 static const char msg_129025[] = {"GNSS Position Rapid Update"};
 static const char msg_129026[] = {"GNSS COG and SOG Rapid Update"};
 static const char msg_129029[] = {"GNSS Positition Data"};
@@ -1064,6 +1077,7 @@ static PGN gpspgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 		       {126464, 1, 0, hnd_126464, &msg_126464[0]},
 		       {126992, 0, 0, hnd_126992, &msg_126992[0]},
 		       {126996, 1, 0, hnd_126996, &msg_126996[0]},
+		       {127258, 0, 0, hnd_127258, &msg_127258[0]},
 		       {129025, 0, 1, hnd_129025, &msg_129025[0]},
 		       {129026, 0, 1, hnd_129026, &msg_129026[0]},
 		       {129029, 1, 1, hnd_129029, &msg_129029[0]},
@@ -1106,6 +1120,7 @@ static PGN navpgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 		       {126996, 1, 0, hnd_126996, &msg_126996[0]},
 		       {127245, 0, 4, hnd_127245, &msg_127245[0]},
 		       {127250, 0, 4, hnd_127250, &msg_127250[0]},
+		       {127258, 0, 0, hnd_127258, &msg_127258[0]},
 		       {128259, 0, 4, hnd_128259, &msg_128259[0]},
 		       {128267, 0, 4, hnd_128267, &msg_128267[0]},
 		       {128275, 1, 4, hnd_128275, &msg_128275[0]},
