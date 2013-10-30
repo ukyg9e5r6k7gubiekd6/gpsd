@@ -1187,11 +1187,11 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	source_unit = frame->can_id & 0x0ff;
 	/*@end@*/
 
-	if ((source_pgn >> 8) < 240) {
+	if (((source_pgn & 0x0ff00) >> 8) < 240) {
 	    daddr  = source_pgn & 0x000ff;
 	    source_pgn  = source_pgn & 0x1ff00;
 	} else {
-	    daddr = 0;
+	    daddr = 0xff;
 	}
 
 	if (session->driver.nmea2000.unit_valid == 0) {
