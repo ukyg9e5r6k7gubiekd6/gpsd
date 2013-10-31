@@ -62,6 +62,7 @@ __locations = [
     r" TAI-UTC= +([0-9-]+)[^\n]*\n$",
     1,
     19, # Magic TAI-GPS offset -> (leapseconds 1980)
+    "ftp://maia.usno.navy.mil/ser7/tai-utc.dat",
     ),
     (
     # International Earth Rotation Service Bulletin C
@@ -69,6 +70,7 @@ __locations = [
     r" UTC-TAI = ([0-9-]+)",
     -1,
     19, # Magic TAI-GPS offset -> (leapseconds 1980)
+    "http://hpiers.obspm.fr/iers/bul/bulc/UTC-TAI.history",
     ),
 ]
 
@@ -101,9 +103,8 @@ def isotime(s):
 
 def retrieve():
     "Retrieve current leap-second from Web sources."
-    global verbose
     random.shuffle(__locations) # To spread the load
-    for (url, regexp, sign, offset) in __locations:
+    for (url, regexp, sign, offset, _) in __locations:
         try:
             if os.path.exists(url):
                 ifp = open(url)
@@ -119,7 +120,6 @@ def retrieve():
         except IOError:
             if verbose:
                 print >>sys.stderr, "IOError: %s" % url
-            pass
     else:
         return None
 
@@ -186,11 +186,15 @@ def get():
         return (current_offset, valid_from)
 
 def save_leapseconds(outfile):
-    "Fetch the USNO leap-second history data and make a leap-second list since Unix epoch GMT (1970-01-01T00:00:00)."
-    global verbose
-    skip = True
-    try:
-        fetchobj = urllib.urlopen("ftp://maia.usno.navy.mil/ser7/tai-utc.dat")
+    "Fetch the leap-second history data and make a leap-second list since Unix epoch GMT (1970-01-01T00:00:00)."
+    random.shuffle(__locations) # To spread the load
+    for (_, _, _, _, url) in __locations:
+        skip = True
+        try:
+            fetchobj = urllib.urlopen(url)
+        except IOError:
+            print >>sys.stderr, "Fetch from %s failed." % url
+            continue
         # This code assumes that after 1980, leap-second increments are
         # always integrally one second and every increment is listed here
         fp = open(outfile, "w")
@@ -202,13 +206,15 @@ def save_leapseconds(outfile):
             if skip:
                 continue
             fields = line.strip().split()
+            if len(fields) < 2:
+                continue
             md = leapbound(fields[0], fields[1])
             if verbose:
                 print >>sys.stderr, "# %s" % md
             fp.write(repr(iso_to_unix(md)) + "\t# (" + repr(md)  + ")\n")
         fp.close()
-    except IOError:
-        print >>sys.stderr, "Fetch from USNO failed, %s not updated." % outfile
+        return
+    print >>sys.stderr, "%s not updated." % outfile
 
 def fetch_leapsecs(filename):
     "Get a list of leap seconds from the local cache of the USNO history"
@@ -318,12 +324,12 @@ def printnext(val):
 def leapbound(year, month):
     "Return a leap-second date in RFC822 form."
     # USNO lists JAN and JUL (month following the leap second).
-    # IERS lists DEC and JUN (month preceding the leap second).
-    if month.upper() == "JAN":
+    # IERS lists DEC. and JUN. (month preceding the leap second).
+    if month.upper()[:3] == "JAN":
         tv = "%s-12-31T23:59:60" % (int(year)-1)
-    elif month.upper() in ("JUN", "JUL"):
+    elif month.upper()[:3] in ("JUN", "JUL"):
         tv = "%s-06-30T23:59:59" % year
-    elif month.upper() == "DEC":
+    elif month.upper()[:3] == "DEC":
         tv = "%s-12-31T23:59:59" % year
     return tv
 
