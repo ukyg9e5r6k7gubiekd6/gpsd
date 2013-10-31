@@ -1168,7 +1168,8 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
 from leapsecond import save_leapseconds
-leapseconds_cache_rebuild = lambda target, source, env: save_leapseconds(target[0].abspath)
+def leapseconds_cache_rebuild(target, source, env):
+    save_leapseconds(target[0].abspath)
 if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
     leapseconds_cache = env.Command(target="leapseconds.cache",
                                 source="leapsecond.py",
