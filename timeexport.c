@@ -25,13 +25,13 @@
 
 #ifdef TIMESERVICE_ENABLE
 #include <sys/time.h>
-
-#ifdef NTPSHM_ENABLE
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
 #define SHM_UNIT	0	/* SHM driver unit number (0..3) */
+
+#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
 
 struct shmTime
 {
@@ -276,9 +276,8 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
 
     return 1;
 }
-#endif /* NTPSHM_ENABLE */
 
-#if defined(NTPSHM_ENABLE) && defined(PPS_ENABLE)
+#ifdef PPS_ENABLE
 /*@unused@*//* splint is confused here */
 /* put NTP shared memory info based on received PPS pulse
  *
@@ -348,9 +347,7 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
     /*@+type@*/
     return 1;
 }
-#endif /* defined(NTPSHM_ENABLE) && defined(PPS_ENABLE) */
 
-#ifdef PPS
 #define SOCK_MAGIC 0x534f434b
 struct sock_sample {
     struct timeval tv;
@@ -401,7 +398,6 @@ static void init_hook(struct gps_device_t *session)
 /*@+mustfreefresh@*/
 
 
-#ifdef CHRONY_ENABLE
 /* actual_tv is when we think the PPS pulse wass */
 /* ts is the local clocke time we saw the pulse */
 /* offset is actual_tv - tv */
@@ -421,14 +417,11 @@ static void chrony_send(struct gps_device_t *session,
 
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
-#endif /* CHRONY_ENABLE */
 
 static void wrap_hook(struct gps_device_t *session)
 {
-#ifdef CHRONY_ENABLE
     if (session->chronyfd != -1)
 	(void)close(session->chronyfd);
-#endif /* CHRONY_ENABLE */
 }
 
 static /*@observer@*/ char *report_hook(struct gps_device_t *session,
@@ -455,15 +448,11 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 	return "no fix";
 
     log1 = "accepted";
-#ifdef CHRONY_ENABLE
     if ( 0 <= session->chronyfd ) {
 	log1 = "accepted chrony sock";
 	chrony_send(session, actual_tv, ts, edge_offset);
     }
-#endif /* CHRONY_ENABLE */
-#ifdef defined(NTPSHM_ENABLE) && defined(PPS_ENABLE)
     (void)ntpshm_pps(session, actual_tv, ts);
-#endif /* defined(NTPSHM_ENABLE) && defined(PPS_ENABLE) */
 
     return log1;
 }
@@ -477,54 +466,41 @@ static void error_hook(struct gps_device_t *session)
 void ntpd_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
+    (void)ntpshm_free(session->context, session->shmindex);
 #if defined(PPS_ENABLE)
     if (session->shmTimeP != -1) {
 	pps_thread_deactivate(session);
-#ifdef NTPSHM_ENABLE
-	/* deactivate unit 3 or 1 */
-	(void)ntpshm_free(session->context, session->shmindex);
-#endif	/* NTPSHM_ENABLE */
+	(void)ntpshm_free(session->context, session->shmTimeP);
     }
 #endif	/* PPS_ENABLE */
-#ifdef NTPSHM_ENABLE
-    /* deactivate unit 2 or 0 */
-    (void)ntpshm_free(session->context, session->shmindex);
-#endif	/* NTPSHM_ENABLE */
 }
 
 void ntpd_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
-#ifdef NTPSHM_ENABLE
-    /* 
-     * If we are talking to ntpd, allocate a shared-memory segment for
-     * in-stream time data.
-     */
+    /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */
     if (session->context->enable_ntpshm)
 	session->shmindex = ntpshm_alloc(session->context);
 
     if (0 > session->shmindex) {
 	gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc() failed\n");
-	return;
-    }
-#endif	/*NTPSHM_ENABLE */
-
-#if defined(NPSHM_ENABLE) && defined(PPS_ENABLE)
-    /*
-     * We also have the 1PPS capability, allocate a shared-memory segment
-     * for the 1PPS time data and launch a thread to capture the 1PPS
-     * transitions
-     */
-    if ((session->shmTimeP = ntpshm_alloc(session->context)) < 0) {
-	gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
+#if defined(PPS_ENABLE)
     } else {
-	session->thread_init_hook = init_hook;
-	session->thread_error_hook = error_hook;
-	session->thread_report_hook = report_hook;
-	session->thread_wrap_hook = wrap_hook;
-	pps_thread_activate(session);
+	/* We also have the 1pps capability, allocate a shared-memory segment
+	 * for the 1pps time data and launch a thread to capture the 1pps
+	 * transitions
+	 */
+	if ((session->shmTimeP = ntpshm_alloc(session->context)) < 0) {
+	    gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
+	} else {
+	    session->thread_init_hook = init_hook;
+	    session->thread_error_hook = error_hook;
+	    session->thread_report_hook = report_hook;
+	    session->thread_wrap_hook = wrap_hook;
+	    pps_thread_activate(session);
+	}
+#endif /* PPS_ENABLE */
     }
-#endif /* defined(NPSHM_ENABLE) && defined(PPS_ENABLE) */
 }
 
 #endif /* TIMESERVICE_ENABLE */

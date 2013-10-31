@@ -1513,14 +1513,13 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 
 #ifdef TIMESERVICE_ENABLE
     /*
-     * Time is eligible for shipping to NTPD or chrony if the driver has
+     * Time is eligible for shipping to NTPD if the driver has
      * asserted PPSTIME_IS at any point in the current cycle.
      */
     if ((changed & CLEAR_IS)!=0)
 	device->ship_to_ntpd = false;
     if ((changed & PPSTIME_IS)!=0)
 	device->ship_to_ntpd = true;
-#ifdef NTPSHM_ENABLE
     /*
      * Only update the NTP time if we've seen the leap-seconds data.
      * Else we may be providing GPS time.
@@ -1547,7 +1546,6 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	(void)ntpshm_put(device, device->newdata.time, offset);
 	device->last_fixtime = device->newdata.time;
     }
-#endif /* NTPSHM_ENABLE */
 #endif /* TIMESERVICE_ENABLE */
 
     /*
@@ -1959,14 +1957,12 @@ int main(int argc, char *argv[])
 	if (nice(NICEVAL) == -1 && errno != 0)
 	    gpsd_report(context.debug, LOG_INF, "NTPD Priority setting failed.\n");
     }
-#ifdef NTPSHM_ENABLE
     /*
      * By initializing before we drop privileges, we guarantee that even
      * hotplugged devices added *after* we drop privileges will be able 
      * to use segments 0 and 1.
      */
     (void)ntpshm_init(&context);
-#endif /* NTPSHM_ENABLE */
 #endif /* TIMESERVICE_ENABLE */
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
