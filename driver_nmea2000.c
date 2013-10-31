@@ -997,6 +997,42 @@ static gps_mask_t hnd_128275(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 
 /*
+ *   PGN 129283: NAV Cross Track Error
+ */
+static gps_mask_t hnd_129283(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+/*
+ *   PGN 129284: NAV Navigation Data
+ */
+static gps_mask_t hnd_129284(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+/*
+ *   PGN 129285: NAV Navigation - Route/WP Information
+ */
+static gps_mask_t hnd_129285(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    print_data(session->context, bu, len, pgn);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+    return(0);
+}
+
+
+/*
  *   PGN 130306: NAV Wind Data
  */
 static gps_mask_t hnd_130306(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
@@ -1065,6 +1101,11 @@ static const char msg_127250[] = {"NAV Vessel Heading"};
 static const char msg_128259[] = {"NAV Speed"};
 static const char msg_128267[] = {"NAV Water Depth"};
 static const char msg_128275[] = {"NAV Distance Log"};
+
+static const char msg_129283[] = {"NAV Cross Track Error"};
+static const char msg_129284[] = {"NAV Navigation Data"};
+static const char msg_129285[] = {"NAV Navigation - Route/WP Information"};
+
 static const char msg_130306[] = {"NAV Wind Data"};
 static const char msg_130310[] = {"NAV Water Temp., Outside Air Temp., Atmospheric Pressure"};
 static const char msg_130311[] = {"NAV Environmental Parameters"};
@@ -1081,6 +1122,9 @@ static PGN gpspgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 		       {129025, 0, 1, hnd_129025, &msg_129025[0]},
 		       {129026, 0, 1, hnd_129026, &msg_129026[0]},
 		       {129029, 1, 1, hnd_129029, &msg_129029[0]},
+		       {129283, 0, 0, hnd_129283, &msg_129283[0]},
+		       {129284, 1, 0, hnd_129284, &msg_129284[0]},
+		       {129285, 1, 0, hnd_129285, &msg_129285[0]},
 		       {129539, 0, 1, hnd_129539, &msg_129539[0]},
 		       {129540, 1, 1, hnd_129540, &msg_129540[0]},
 		       {0     , 0, 0, NULL,       &msg_error [0]}};
@@ -1124,6 +1168,9 @@ static PGN navpgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 		       {128259, 0, 4, hnd_128259, &msg_128259[0]},
 		       {128267, 0, 4, hnd_128267, &msg_128267[0]},
 		       {128275, 1, 4, hnd_128275, &msg_128275[0]},
+		       {129283, 0, 0, hnd_129283, &msg_129283[0]},
+		       {129284, 1, 0, hnd_129284, &msg_129284[0]},
+		       {129285, 1, 0, hnd_129285, &msg_129285[0]},
 		       {130306, 0, 4, hnd_130306, &msg_130306[0]},
 		       {130310, 0, 4, hnd_130310, &msg_130310[0]},
 		       {130311, 0, 4, hnd_130311, &msg_130311[0]},
