@@ -461,10 +461,10 @@ struct gps_device_t {
     timestamp_t sor;	/* timestamp start of this reporting cycle */
     unsigned long chars;	/* characters in the cycle */
 #endif /* TIMING_ENABLE */
-    timestamp_t last_fixtime;		/* so updates happen once */
 #ifdef NTPSHM_ENABLE
     int shmindex;
     bool ship_to_ntpd;
+    timestamp_t last_fixtime;		/* so updates happen once */
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
     int shmTimeP;
