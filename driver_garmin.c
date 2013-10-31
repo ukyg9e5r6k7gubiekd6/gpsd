@@ -1224,8 +1224,8 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 }
 #endif /* CONTROLSEND_ENABLE */
 
-#ifdef TIMESERVICE_ENABLE
-static double garmin_time_offset(struct gps_device_t *session)
+#ifdef NTPSHM_ENABLE
+static double garmin_ntp_offset(struct gps_device_t *session)
 {
     if (session->sourcetype == source_usb) {
 	return 0.035;		/* Garmin USB, expect +/- 40mS jitter */
@@ -1244,7 +1244,7 @@ static double garmin_time_offset(struct gps_device_t *session)
     }
     return 0.430;		/* WTF?  WAG */
 }
-#endif /* TIMESERVICE_ENABLE */
+#endif /* NTPSHM_ENABLE */
 
 /* this is everything we export */
 #ifdef __UNUSED__
@@ -1391,9 +1391,9 @@ const struct gps_type_t garmin_usb_binary_old =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMESERVICE_ENABLE
-    .time_offset     = garmin_time_offset,
-#endif /* ENABLE ENABLE */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = garmin_ntp_offset,
+#endif /* NTPSHM_ ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* __UNUSED__ */
@@ -1420,9 +1420,9 @@ const struct gps_type_t garmin_usb_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMESERVICE_ENABLE
-    .time_offset     = garmin_time_offset,
-#endif /* ENABLE ENABLE */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = garmin_ntp_offset,
+#endif /* NTPSHM_ ENABLE */
 };
 /* *INDENT-ON* */
 
@@ -1448,9 +1448,9 @@ const struct gps_type_t garmin_ser_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMESERVICE_ENABLE
-    .time_offset     = garmin_time_offset,
-#endif /* ENABLE ENABLE */
+#ifdef NTPSHM_ENABLE
+    .ntp_offset     = garmin_ntp_offset,
+#endif /* NTPSHM_ ENABLE */
 };
 /* *INDENT-ON* */
 

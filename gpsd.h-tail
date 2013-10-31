@@ -36,10 +36,6 @@
 #include <sys/timepps.h>
 #endif
 
-#if defined(ENABLE_NTPSHM) || defined(ENABLE_CHRONY)
-#define TIMESERVICE_ENABLE
-#endif
-
 #ifdef _WIN32
 typedef unsigned int speed_t;
 #endif
@@ -243,14 +239,12 @@ struct gps_context_t {
     double gps_tow;                     /* GPS time of week, actually 19 bits */
     int century;			/* for NMEA-only devices without ZDA */
     int rollovers;			/* rollovers since start of run */
-#ifdef TIMESERVICE_ENABLE
+#ifdef NTPSHM_ENABLE
     int leap_notify;			/* notification state from subframe */
 #define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
 #define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
 #define LEAP_DELSECOND  0x2     /* last minute of day has 59 seconds */
 #define LEAP_NOTINSYNC  0x3     /* overload, clock is free running */
-#endif /* TIMESERVICE_ENABLE */
-#ifdef NTPSHM_ENABLE
     bool enable_ntpshm;
     /* we need the volatile here to tell the C compiler not to
      * 'optimize' as 'dead code' the writes to SHM */
@@ -354,9 +348,9 @@ struct gps_type_t {
 #ifdef CONTROLSEND_ENABLE
     /*@null@*/ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMESERVICE_ENABLE
-    /*@null@*/double (*time_offset)(struct gps_device_t *session);
-#endif /* TIMESERVICE_ENABLE */
+#ifdef NTPSHM_ENABLE
+    /*@null@*/double (*ntp_offset)(struct gps_device_t *session);
+#endif /* NTPSHM_ENABLE */
 };
 
 /*
@@ -477,6 +471,7 @@ struct gps_device_t {
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
+    int chronyfd;			/* for talking to chrony */
     /*@null@*/ void (*thread_init_hook)(struct gps_device_t *);
     /*@null@*/ void (*thread_error_hook)(struct gps_device_t *);
     /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
@@ -485,9 +480,6 @@ struct gps_device_t {
 					   double);
     /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
 #endif /* PPS_ENABLE */
-#ifdef CHRONY_ENABLE
-    int chronyfd;			/* for talking to chrony */
-#endif /* CHRONY_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
     bool back_to_nmea;			/* back to NMEA on revert? */
     char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */

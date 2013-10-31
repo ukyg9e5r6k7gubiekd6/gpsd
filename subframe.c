@@ -728,7 +728,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 			    subp->sub4_18.leap, subp->sub4_18.WNlsf,
 			    subp->sub4_18.DN, subp->sub4_18.lsf);
 
-#ifdef TIMESERVICE_ENABLE
+#ifdef NTPSHM_ENABLE
 		/* IS-GPS-200 Revision E, paragraph 20.3.3.5.2.4 */
 		if (((session->context->gps_week % 256) == (unsigned short)subp->sub4_18.WNlsf) &&
 		    /* notify the leap seconds correction in the end of current day */
@@ -742,7 +742,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 			session->context->leap_notify = LEAP_NOWARNING;
 		} else
 		   session->context->leap_notify = LEAP_NOWARNING;
-#endif /* TIMESERVICE_ENABLE */
+#endif /* NTPSHM_ENABLE */
 
 		session->context->leap_seconds = (int)subp->sub4_18.leap;
 		session->context->valid |= LEAP_SECOND_VALID;

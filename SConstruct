@@ -123,7 +123,6 @@ boolopts = (
     ("rtcm104v3",     True,  "rtcm104v3 support"),
     # Time service
     ("ntpshm",        True,  "NTP time hinting support"),
-    ("chrony",        True,  "chrony time hinting support"),
     ("pps",           True,  "PPS time syncing support"),
     # Export methods
     ("socket_export", True,  "data export over sockets"),
@@ -576,7 +575,8 @@ else:
     bluezlibs = []
     env["bluez"] = False
 
-if env['pps'] and config.CheckHeader("sys/timepps.h"):
+# ntpshm is required for pps support
+if env['pps'] and env['ntpshm'] and config.CheckHeader("sys/timepps.h"):
     confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
     announce("You have kernel PPS available.")
 else:
@@ -966,7 +966,7 @@ env.StaticLibrary(target = 'libgps.a', source = libgps_sources)
 
 # Source groups
 
-gpsd_sources = ['gpsd.c','timeexport.c','shmexport.c','dbusexport.c']
+gpsd_sources = ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c']
 
 if env['systemd']:
     gpsd_sources.append("sd_socket.c")
