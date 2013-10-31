@@ -1052,10 +1052,16 @@ static const struct gps_type_t garmintxt = {
 #ifdef MTK3301_ENABLE
 /**************************************************************************
  *
- * MediaTek MTK-3301
+ * MediaTek MTK-3301 and 3329
  *
  * OEMs for several GPS vendors, notably including Garmin and FasTrax.
  * Website at <http://www.mediatek.com/>.
+ *
+ * The Trimble Condor appears to be an MTK3329.  It behaves as an MTK3301
+ * and positively acknowledges all 3301 sentences as valid. It ignores $PMTK
+ * sentence fields that are not implemented in the Trimble Condor. It does
+ * not have power0save mode abd ignores $PMTK320.  For $PMTK314 it silently
+ * ignores periodic enabling of messages that aren't supported.
  *
  **************************************************************************/
 
