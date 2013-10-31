@@ -48,6 +48,11 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 import os, urllib, re, random, time, calendar, math, sys
 
+# Set a socket timeout for slow servers
+import socket
+socket.setdefaulttimeout(30)
+del socket
+
 verbose = 0
 
 __locations = [
