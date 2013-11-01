@@ -264,8 +264,6 @@ def announce(msg):
 
 # We need to define -D_GNU_SOURCE
 env.Append(CFLAGS='-D_GNU_SOURCE')
-# This is a kluge inserted so <endian.h> will be resolved by BSD sys/endian.h
-env.Append(CFLAGS='-I/usr/include/sys')
 
 # And we need some libraries
 env.MergeFlags("-lm")
