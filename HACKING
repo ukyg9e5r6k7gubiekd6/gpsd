@@ -2,3 +2,11 @@ For the gpsd project, the information that was traditionally placed in
 this file is in the repository as:
 
   www/hacking.html
+
+If you only have www/hacking.html.in, run 
+
+  scons www
+
+This builds www/hacking.html with some magic cookies usefully substituted.
+
+
