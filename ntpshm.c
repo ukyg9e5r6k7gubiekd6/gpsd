@@ -454,11 +454,6 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 
     return log1;
 }
-
-static void error_hook(struct gps_device_t *session)
-{
-    (void)ntpshm_free(session->context, session->shmTimeP);
-}
 #endif	/* PPS_ENABLE */
 
 void ntpd_link_deactivate(struct gps_device_t *session)
@@ -491,8 +486,7 @@ void ntpd_link_activate(struct gps_device_t *session)
 	if ((session->shmTimeP = ntpshm_alloc(session->context)) < 0) {
 	    gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
 	} else {
-	    session->thread_init_hook = init_hook;
-	    session->thread_error_hook = error_hook;
+	    init_hook(session);
 	    session->thread_report_hook = report_hook;
 	    session->thread_wrap_hook = wrap_hook;
 	    pps_thread_activate(session);

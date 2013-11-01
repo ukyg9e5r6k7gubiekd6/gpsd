@@ -472,8 +472,6 @@ struct gps_device_t {
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     int chronyfd;			/* for talking to chrony */
-    /*@null@*/ void (*thread_init_hook)(struct gps_device_t *);
-    /*@null@*/ void (*thread_error_hook)(struct gps_device_t *);
     /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
 					   struct timeval *,
 					   struct timespec *,
@@ -862,7 +860,6 @@ extern void ntpd_link_activate(struct gps_device_t *);
         TS_NORM( ts ); \
     } while (0)
 
-extern void gpsd_await_pps_initialization(struct gps_context_t *);
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
 
