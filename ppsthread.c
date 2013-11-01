@@ -187,12 +187,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec tv_kpps;
     pps_info_t pi;
+
+    memset( (void *)&pi, 0, sizeof(pps_info_t));
 #endif
 
     gpsd_report(session->context->debug, LOG_PROG,
 		"PPS Create Thread gpsd_ppsmonitor\n");
-
-    memset( (void *)&pi, 0, sizeof(pps_info_t));
 
     /*
      * Wait for status change on any handshake line. The only assumption here
