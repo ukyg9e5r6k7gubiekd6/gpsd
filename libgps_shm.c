@@ -67,7 +67,7 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 }
 
 bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
-/* check to see if new dayta has been written */
+/* check to see if new data has been written */
 {
     volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
     bool newdata;
@@ -77,7 +77,7 @@ bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
     for (;;) {
 	newdata = false;
 	barrier();
-	if (shared->bookend1 == shared->bookend2 && shared->bookend1 > PRIVATE(gpsdata)->tick + timeout)
+	if (shared->bookend1 == shared->bookend2 && shared->bookend1 > PRIVATE(gpsdata)->tick)
 	    newdata = true;
 	barrier();
 	if (newdata || (timestamp() - basetime >= (double)timeout))
