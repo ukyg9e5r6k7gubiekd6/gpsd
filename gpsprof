@@ -46,6 +46,7 @@ class plotter:
     def __init__(self):
         self.fixes = []
         self.start_time = int(time.time())
+        self.watch = {"TPV"}
     def whatami(self):
         "How do we identify this plotting run?"
         return "%s, %s, %d %dN%d, cycle %ds" % \
@@ -101,8 +102,8 @@ class plotter:
                 # Log before filtering - might be good for post-analysis.
                 if logfp:
                     logfp.write(self.session.response)
-                # Ignore everything but TPVs for the moment
-                if self.session.data["class"] != "TPV":
+                # Ignore everything but what we're told to
+                if self.session.data["class"] not in self.watch:
                     continue
                 # We can get some funky artifacts at start of self.session
                 # apparently due to RS232 buffering effects. Ignore
@@ -242,6 +243,32 @@ class spaceplot(plotter):
             fmt += "e\n" + self.data()
         return fmt
 
+class timeplot(plotter):
+    "Time drift against PPS."
+    name = "time"
+    requires_time = True
+    def __init__(self):
+        plotter.__init__(self)
+        self.watch = {"PPS"}
+    def sample(self):
+        if self.session.data["class"] == "PPS":
+            self.fixes.append((self.session.data['real_sec'],
+                               self.session.data['real_nsec'],
+                               self.session.data['clock_sec'],
+                               self.session.data['clock_nsec']))
+        return True
+    def header(self):
+        return "# Time drift against PPS, %s\n" % self.whatami()
+    def postprocess(self):
+        pass
+    def data(self):
+        res = ""
+        for (real_sec, real_nsec, clock_sec, clock_nsec) in self.fixes:
+            res += "%d\t%d\t%d\t%d\n" % (real_sec, real_nsec, clock_sec, clock_nsec)
+        return res
+    def plot(self):
+        return ""
+
 class uninstrumented(plotter):
     "Total times without instrumentation."
     name = "uninstrumented"
@@ -321,7 +348,7 @@ plot \\\n'''
         fmt = fmt[:-4] + "\n"
         return fmt + self.header() + (self.data() + "e\n") * len(legends)
 
-formatters = (spaceplot, uninstrumented, instrumented)
+formatters = (spaceplot, timeplot, uninstrumented, instrumented)
 
 if __name__ == '__main__':
     try:
