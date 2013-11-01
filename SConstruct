@@ -264,6 +264,8 @@ def announce(msg):
 
 # We need to define -D_GNU_SOURCE
 env.Append(CFLAGS='-D_GNU_SOURCE')
+# This is a kluge inserted so <endian.h> will be resolved by BSD sys/endian.h
+env.Append(CFLAGS='-I/usr/include/sys')
 
 # And we need some libraries
 env.MergeFlags("-lm")
@@ -438,28 +440,11 @@ def CheckDefine(context, define, file):
     context.Result(ret)
     return ret
 
-def CheckEndian(context):
-    context.Message("checking endianess ... ")
-    import struct
-    array = struct.pack('cccc', '\x01', '\x02', '\x03', '\x04')
-    i = struct.unpack('i', array)
-    # Little Endian
-    if i == struct.unpack('<i', array):
-        context.Result("little")
-        return "little"
-    # Big Endian
-    elif i == struct.unpack('>i', array):
-        context.Result("big")
-        return "big"
-    context.Result("unknown")
-    return "unknown"
-
 config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc,
                                          'CheckCompilerOption' : CheckCompilerOption,
-                                         'CheckDefine' : CheckDefine,
-                                         'CheckEndian' : CheckEndian})
+                                         'CheckDefine' : CheckDefine})
 
 
 # If supported by the compiler, enable all warnings except uninitialized and
@@ -636,15 +621,30 @@ if not config.CheckDefine("TIOCMIWAIT", "sys/ioctl.h"):
     announce("Forcing pps=no (TIOCMIWAIT not available)")
     env["pps"] = False
 
-endian = config.CheckEndian()
-if endian == 'big':
-    confdefs.append("#define WORDS_BIGENDIAN	1\n")
-elif endian == 'little':
-    confdefs.append("#undef WORDS_BIGENDIAN\n")
-elif endian == 'unknown':
-    announce("processor endianness unknown")
+confdefs.append('''
+/*
+   __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
+  only, probably depending on the architecture. Try to use endian.h if
+  the gcc way fails - endian.h also doesn not seem to be available on all
+  platforms.
+*/
+#ifdef __BIG_ENDIAN__
+#define WORDS_BIGENDIAN 1
+#else /* __BIG_ENDIAN__ */
+#ifdef __LITTLE_ENDIAN__
+#undef WORDS_BIGENDIAN
+#else
+#include <endian.h>
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define WORDS_BIGENDIAN 1
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+#undef WORDS_BIGENDIAN
+#else
+#error "unable to determine endianess!"
+#endif /* __BYTE_ORDER */
+#endif /* __LITTLE_ENDIAN__ */
+#endif /* __BIG_ENDIAN__ */
 
-confdefs.append('''\
 /* Some libcs do not have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
 # ifdef __cplusplus
