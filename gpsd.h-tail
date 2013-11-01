@@ -998,11 +998,13 @@ void cfmakeraw(struct termios *);
 
 /* memory barriers */
 static /*@unused@*/ inline void barrier(void) {
-#if defined(__GNUC__) && defined(__x86_64__)
-#ifndef S_SPLINT_S
-	asm volatile("mfence");
-#endif /* S_SPLINT_S */
-#endif /* defined(__GNUC__) && defined(__x86_64__) */
+#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
+       __atomic_thread_fence(__ATOMIC_SEQ_CST);
+#elif (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+       __sync_synchronize();
+#else
+# error Memory barriers are not supported. Disable SHM export.
+#endif /* defined(__GNUC__) */
 }
 
 #endif /* _GPSD_H_ */

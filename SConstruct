@@ -88,10 +88,6 @@ systemd = os.path.exists("/usr/share/systemd/system")
 # Set distribution-specific defaults here
 imloads = True
 
-# Does our platform has a working memory-barrier instruction?
-# The shared-memory export won't be reliable without it.
-mfence = (platform.machine() in ('x86_64',))
-    
 boolopts = (
     # GPS protocols
     ("nmea",          True,  "NMEA support"),
@@ -127,7 +123,7 @@ boolopts = (
     # Export methods
     ("socket_export", True,  "data export over sockets"),
     ("dbus_export",   False, "enable DBUS export support"),
-    ("shm_export",    mfence,"export via shared memory"),
+    ("shm_export",    True,  "export via shared memory"),
     # Communication
     ('usb',           True,  "libusb support for USB devices"),
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
