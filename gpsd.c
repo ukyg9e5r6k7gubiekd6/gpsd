@@ -1666,6 +1666,10 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 {
 #ifdef SOCKET_EXPORT_ENABLE
     /*@-type@*//* splint is confused about struct timespec */
+    /*
+     * Yes, real_nsec is constant 0 because our "real time" is top of GPS
+     * second. This will change when we support 5Hz devices fully.
+     */
     notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":0,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
 		    sec, ts->tv_sec, ts->tv_nsec);
