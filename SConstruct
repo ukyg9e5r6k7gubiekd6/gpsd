@@ -632,7 +632,11 @@ confdefs.append('''
 #ifdef __LITTLE_ENDIAN__
 #undef WORDS_BIGENDIAN
 #else
+#ifdef BSD
+#include <sys/endian.h>
+#else
 #include <endian.h>
+#endif
 #if __BYTE_ORDER == __BIG_ENDIAN
 #define WORDS_BIGENDIAN 1
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
