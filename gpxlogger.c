@@ -205,7 +205,8 @@ int main(int argc, char **argv)
 
     progname = argv[0];
 
-    if (export_default() == NULL) {
+    method = export_default();
+    if (method == NULL) {
 	(void)fprintf(stderr, "%s: no export methods.\n", progname);
 	exit(EXIT_FAILURE);
     }
@@ -292,16 +293,20 @@ int main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    if (method != NULL)
-	if (method->magic != NULL) {
-	    source.server = (char *)method->magic;
-	    source.port = NULL;
-	}
+    if (method->magic != NULL) {
+	source.server = (char *)method->magic;
+	source.port = NULL;
+	source.device = NULL;
+    } else {
+	source.server = (char *)"localhost";
+	source.port = (char *)DEFAULT_GPSD_PORT;
+	source.device = NULL;
+    }
 
     if (optind < argc) {
+	/* in this case, switch to the method "socket" always */
 	gpsd_source_spec(argv[optind], &source);
-    } else
-	gpsd_source_spec(NULL, &source);
+    }
 #if 0
     (void)fprintf(logfile,"<!-- server: %s port: %s  device: %s -->\n",
 		 source.server, source.port, source.device);
