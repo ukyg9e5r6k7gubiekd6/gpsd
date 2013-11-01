@@ -231,8 +231,10 @@ void gps_context_init(struct gps_context_t *context)
 	.gps_tow        = 0,
 	.century	= 0,
 	.rollovers      = 0,
-#ifdef NTPSHM_ENABLE
+#ifdef TIMEHINT_ENABLE
 	.leap_notify    = LEAP_NOWARNING,
+#endif /* TIMEHINT_ENABLE */
+#ifdef NTPSHM_ENABLE
 	.enable_ntpshm  = false,
 	.shmTime	= {0},
 	.shmTimeInuse   = {0},

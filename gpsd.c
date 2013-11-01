@@ -220,8 +220,8 @@ static void typelist(void)
 #if defined(DBUS_EXPORT_ENABLE)
     (void)printf("# DBUS export enabled\n");
 #endif
-#if defined(NTPSHM_ENABLE)
-    (void)printf("# NTPSHM for NTPd enabled.\n");
+#if defined(TIMEHINT_ENABLE)
+    (void)printf("# Time service features enabled.\n");
 #endif
 #if defined(PPS_ENABLE)
     (void)printf("# PPS enabled.\n");
@@ -1536,10 +1536,10 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_report(context.debug, LOG_PROG, "NTP: Got one\n");
 	/* assume zero when there's no offset method */
 	if (device->device_type == NULL
-	    || device->device_type->ntp_offset == NULL)
+	    || device->device_type->time_offset == NULL)
 	    offset = 0.0;
 	else
-	    offset = device->device_type->ntp_offset(device);
+	    offset = device->device_type->time_offset(device);
 	(void)ntpshm_put(device, device->newdata.time, offset);
 	device->last_fixtime = device->newdata.time;
     }

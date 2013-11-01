@@ -599,12 +599,12 @@ static void geostar_mode(struct gps_device_t *session, int mode)
 }
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef NTPSHM_ENABLE
-static double geostar_ntp_offset(struct gps_device_t *session UNUSED)
+#ifdef TIMEHINT_ENABLE
+static double geostar_time_offset(struct gps_device_t *session UNUSED)
 {
     return 0.31;
 }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMEHINT_ENABLE */
 
 /* this is everything we export */
 /* *INDENT-OFF* */
@@ -629,9 +629,9 @@ const struct gps_type_t geostar_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = geostar_control_send,/* how to send commands */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = geostar_ntp_offset,
-#endif /* NTPSHM_ENABLE */
+#ifdef TIMEHINT_ENABLE
+    .time_offset     = geostar_time_offset,
+#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

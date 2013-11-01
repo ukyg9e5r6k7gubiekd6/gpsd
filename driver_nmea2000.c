@@ -1617,9 +1617,9 @@ const struct gps_type_t nmea2000 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = NULL,
-#endif /* NTPSHM_ ENABLE */
+#ifdef TIMEHINT_ENABLE
+    .time_offset     = NULL,
+#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

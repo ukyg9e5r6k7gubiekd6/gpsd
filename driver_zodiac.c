@@ -445,8 +445,8 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
 }
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef NTPSHM_ENABLE
-static double zodiac_ntp_offset(struct gps_device_t *session UNUSED)
+#ifdef TIMEHINT_ENABLE
+static double zodiac_time_offset(struct gps_device_t *session UNUSED)
 {
     /* Removing/changing the magic number below is likely to disturb
      * the handling of the 1pps signal from the gps device. The regression
@@ -454,7 +454,7 @@ static double zodiac_ntp_offset(struct gps_device_t *session UNUSED)
      * with the 1pps signal active is required. */
     return 1.1;
 }
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMEHINT_ENABLE */
 
 /* this is everything we export */
 /* *INDENT-OFF* */
@@ -479,9 +479,9 @@ const struct gps_type_t zodiac_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = zodiac_control_send,	/* for gpsctl and friends */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    .ntp_offset     = zodiac_ntp_offset,	/* compute NTO fudge factor */
-#endif /* NTPSHM_ENABLE */
+#ifdef TIMEHINT_ENABLE
+    .time_offset     = zodiac_time_offset,	/* compute NTO fudge factor */
+#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

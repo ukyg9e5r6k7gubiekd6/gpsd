@@ -15,6 +15,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.12</revnumber>
+      <date>31 Oct 2013</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; ntp_offset becomes time_offset
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.11</revnumber>
       <date>19 Jan 2011</date>
       <authorinitials>er</authorinitials>
@@ -745,11 +753,12 @@ possible, assemble your packet in
 gpsmon to display the control messages it sends for you.</para>
 
 <!-- added by ESR, 2009 -->
-<para><structfield>.ntp_offset</structfield> points to code to compute
-an offset to be added, additionally to that in
-<filename>ntp.conf</filename> (if any) when shipping time notifications
-to NTP. If multiple sentences set TIME_IS, this will differ by
-sentence type; it should differ by baud rare, as well. </para>
+<para><structfield>.timr_offset</structfield> points to code to
+compute an offset to be added, additionally to that in
+<filename>ntp.conf</filename> (if any) when shipping time
+notifications to NTP, or the equivalent configuration file for
+chrony. If multiple sentences set TIME_IS, this will differ by
+sentence type; it should differ by baud rate, as well. </para>
 
 </sect1>
 

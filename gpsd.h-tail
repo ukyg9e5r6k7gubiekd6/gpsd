@@ -83,6 +83,9 @@ typedef unsigned int speed_t;
 #if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
 #define COMPASS_ENABLE
 #endif
+#ifdef NTPSHM_ENABLE
+#define TIMEHINT_ENABLE
+#endif
 
 /* First, declarations for the packet layer... */
 
@@ -239,7 +242,7 @@ struct gps_context_t {
     double gps_tow;                     /* GPS time of week, actually 19 bits */
     int century;			/* for NMEA-only devices without ZDA */
     int rollovers;			/* rollovers since start of run */
-#ifdef NTPSHM_ENABLE
+#ifdef TIMEHINT_ENABLE
     int leap_notify;			/* notification state from subframe */
 #define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
 #define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
@@ -250,7 +253,7 @@ struct gps_context_t {
      * 'optimize' as 'dead code' the writes to SHM */
     /*@reldef@*/volatile struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
-#endif /* NTPSHM_ENABLE */
+#endif /* TIMEHINT_ENABLE */
 # ifdef PPS_ENABLE
     /*@null@*/ void (*pps_hook)(struct gps_device_t *,
 				unsigned long, struct timespec *);
@@ -348,9 +351,9 @@ struct gps_type_t {
 #ifdef CONTROLSEND_ENABLE
     /*@null@*/ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
 #endif /* CONTROLSEND_ENABLE */
-#ifdef NTPSHM_ENABLE
-    /*@null@*/double (*ntp_offset)(struct gps_device_t *session);
-#endif /* NTPSHM_ENABLE */
+#ifdef TIMEHINT_ENABLE
+    /*@null@*/double (*time_offset)(struct gps_device_t *session);
+#endif /* TIMEHINT_ENABLE */
 };
 
 /*
