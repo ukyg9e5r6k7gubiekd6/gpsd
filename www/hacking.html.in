@@ -1572,24 +1572,28 @@ have to be rebuilt.  The problem is in the SiRF tests; that driver
 relies on the default until it gets the current offset from subframe
 data.</p></dd>
 
-<dt>8. Push and pull from the public repo</dt>
+<dt>9. Live-test PPS</dt>
+<dd><p>Point gpsmon at a GR601-W or other PPS-capable GPS and verify
+that PPS events are visible.</p></dd>
+
+<dt>10. Push and pull from the public repo</dt>
 <dd><p>This is the revision the release will be built from.</p></dd>
 
-<dt>9. Build and ship the release</dt>
+<dt>11. Build and ship the release</dt>
 <dd><p><code>scons release</code> will tag the release, make the tarball,
 upload it to the hosting site, and refresh the website.</p></dd>
 
-<dt>10. Bump the release number and push that commit</dt>
+<dt>12. Bump the release number and push that commit</dt>
 <dd><p>Bump the release number in SConstruct, adding a '~dev' suffix
 so tarball instances pulled from the repo will be clearly
 distinguishable from the next public release.</p></dd>
 
-<dt>11. Close all resolved tracker bugs</dt>
+<dt>13. Close all resolved tracker bugs</dt>
 <dd><p>Go to <a
 href="https://savannah.nongnu.org/bugs/?group=gpsd">the tracker</a>
 and close all resolved bugs.</p></dd>
 
-<dt>12. Announce the release</dt>
+<dt>14. Announce the release</dt>
 <dd><p>Announce the release on the announce list, and the resumption of
 regular commits on the dev list.</p></dd>
 </dl>

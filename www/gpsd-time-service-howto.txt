@@ -220,6 +220,10 @@ deliver 1PPS through USB or even RS232.  Thus the usual run of cheap
 GPS mice won't do.  In general, you can't use a USB device for time
 service unless you know it has the Macx-1 mod.
 
+If you are in any doubt about whether your device has PPS
+capability, point gpsmon at it. When it has a 3D fix the PPS
+event reports should be obvious in the packet window.
+
 In the past, the RS232 variant of the Garmin GPS-18 has been very
 commonly used for time service.  While it is still a respectable
 choice, newer devices have better sensitivity and signal

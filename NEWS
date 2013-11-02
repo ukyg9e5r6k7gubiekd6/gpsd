@@ -15,7 +15,8 @@
   Inland AIS extended sentences. In gpsmon, entering a command no longer
   pauses packet display. Better support for mode and speed switching in the 
   UBX driver. Be a bit more forgiving about AIS Type 5 message lengths.
-  PPS drift message now ships nsec rather than msec.
+  PPS drift message now ships nsec rather than msec. PPS wvents are
+  visible in gpsmon.
 
 * Wed 1 May 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.9
   Note to packagers: this is an urgent release that fixes a possible
@@ -27,10 +28,11 @@
 
 * Mon 25 Feb 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.8
   Fix various minor errors in the AIVDM/AIVDO description. Repair the
-  xmlto support in the build system. Add two more regression tests. Significant
-  improvements to NMEA2000 support. Upgrade the PHP client to v3 of the
-  Google Maps API. Support for the Telit SL869 chipset. Added a nautical-style
-  display to xgpsspeed. Minor improvements to leapsecond.py.
+  xmlto support in the build system. Add two more regression
+  tests. Significant improvements to NMEA2000 support. Upgrade the PHP
+  client to v3 of the Google Maps API. Support for the Telit SL869
+  chipset. Added a nautical-style display to xgpsspeed. Minor
+  improvements to leapsecond.py.
 
 * Mon 02 Jul 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.7
   Snap release to get the midnight change in the default leap-second
