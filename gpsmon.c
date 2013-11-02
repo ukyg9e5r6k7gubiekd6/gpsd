@@ -916,10 +916,9 @@ int main(int argc, char **argv)
     if ((optind >= argc || source.device == NULL
 	|| strchr(argv[optind], ':') != NULL)
 #ifdef HAVE_BLUEZ
-        && bachk(argv[optind])) {
-#else
-	) {
+        && bachk(argv[optind])
 #endif
+       ) {
 	(void)gps_open(source.server, source.port, &session.gpsdata);
 	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr,
