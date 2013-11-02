@@ -45,6 +45,7 @@ extern struct monitor_object_t oncore_mmt, tnt_mmt, aivdm_mmt;
 struct gps_device_t session;
 WINDOW *devicewin;
 bool serial;
+float timedelta = 0;
 
 /* These are private */
 static struct gps_context_t context;
@@ -836,16 +837,22 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /*@+observertrans +nullpass +globstate@*/
 
 #ifdef PPS_ENABLE
-/* The PPS thread_report_hook callback. This or a pps_hook callback is
- * needed to keep the PPS thread running.
- */
 static char *pps_report(struct gps_device_t *session UNUSED,
-			struct timeval *actual_tv,
-			struct timespec *ts,
-			double edge_offset) {
-    packet_log("PPS time=%llu.%09lu; clock=%llu.%09lu; edge_offset=%.9f\n",
-	       (long long)actual_tv->tv_sec, actual_tv->tv_usec * 1000,
-	       (long long)ts->tv_sec, ts->tv_nsec, edge_offset);
+			struct timeval *pps_tv,
+			struct timespec *sysclock_ts,
+			double edge_offset UNUSED) {
+    /*
+     * Ugh.  Access through a shared global is nasty.
+     * This may be a layer violation that needs to be fixed.
+     *
+     * Read access to timedelta is not thread-locked.
+     * Instead we're relying on access to floats to be atomic.
+     */
+    timedelta = (pps_tv->tv_sec + pps_tv->tv_usec / 1e6) 
+		- (sysclock_ts->tv_sec + sysclock_ts->tv_nsec / 1e9);
+    packet_log("-------------------------------------" 
+	       " PPS "
+	       "-------------------------------------\n");
     return "gpsmon";
 }
 #endif /* PPS_ENABLE */

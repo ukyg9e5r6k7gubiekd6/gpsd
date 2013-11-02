@@ -35,6 +35,7 @@ extern void monitor_complain(const char *fmt, ...);
 extern WINDOW *devicewin;
 extern struct gps_device_t	session;
 extern bool serial;	/* True - direct mode, False - daemon mode */
+extern float timedelta;
 
 #endif /* _GPSD_GPSMON_H_ */
 /* gpsmon.h ends here */

@@ -12,7 +12,7 @@
 #ifdef UBX_ENABLE
 #include "driver_ubx.h"
 extern const struct gps_type_t ubx_binary;
-static WINDOW *satwin, *navsolwin, *dopwin;
+static WINDOW *satwin, *navsolwin, *dopwin, *ppswin;
 
 #define display	(void)mvwprintw
 static bool ubx_initialize(void)
@@ -34,7 +34,7 @@ static bool ubx_initialize(void)
 
     /* "heavily inspired" by monitor_nmea.c */
     if ((navsolwin = derwin(devicewin, 13, 51, 0, 28)) == NULL)
-	return false;
+	return false;    
     (void)wborder(navsolwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(navsolwin, A_BOLD);
     (void)wmove(navsolwin, 1, 1);
@@ -62,12 +62,21 @@ static bool ubx_initialize(void)
 
     if ((dopwin = derwin(devicewin, 3, 51, 13, 28)) == NULL)
 	return false;
-    (void)wborder(dopwin, 0, 0, 0, 0, 0, 0, 0, 0),
-	(void)wattrset(dopwin, A_BOLD);
+    (void)wborder(dopwin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)wattrset(dopwin, A_BOLD);
     (void)wmove(dopwin, 1, 1);
     (void)wprintw(dopwin, "DOP [H]      [V]      [P]      [T]      [G]");
     display(dopwin, 2, 20, " NAV_DOP ");
     (void)wattrset(dopwin, A_NORMAL);
+
+    if ((ppswin = derwin(devicewin, 3, 51, 16, 28)) == NULL)
+	return false;
+    (void)wborder(ppswin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)wattrset(ppswin, A_BOLD);
+    (void)wmove(ppswin, 1, 1);
+    (void)wprintw(ppswin, "DELTA: ");
+    display(ppswin, 2, 22, " PPS ");
+    (void)wattrset(ppswin, A_NORMAL);
 
     return true;
 }
@@ -230,6 +239,8 @@ static void ubx_update(void)
 	break;
     }
 
+    if (timedelta != 0)
+	(void)mvwprintw(ppswin, 1, 8, "%f", timedelta);
 }
 
 static int ubx_command(char line[]UNUSED)
