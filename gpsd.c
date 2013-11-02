@@ -694,22 +694,19 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
     if (NULL == device || gpsd_activate(device, O_OPTIMIZE) < 0) {
 	return false;
     }
+
 #ifdef NTPSHM_ENABLE
     /*
      * Now is the right time to grab the shared memory segment(s)
      * to communicate the navigation message derived and (possibly)
      * 1PPS derived time data to ntpd/chrony.
      */
-    /* do not start more than one PPS-watcher thread */
-    if (!(device->shmindex >= 0))
-	ntpshm_link_activate(device);
-
+    ntpshm_link_activate(device);
     gpsd_report(context.debug, LOG_INF, 
 		"NTPD ntpshm_link_activate: %d\n",
 		(int)device->shmindex >= 0);
-
-
 #endif /* NTPSHM_ENABLE */
+
     gpsd_report(context.debug, LOG_INF, 
 		"device %s activated\n", device->gpsdata.dev.path);
     FD_SET(device->gpsdata.gps_fd, &all_fds);
