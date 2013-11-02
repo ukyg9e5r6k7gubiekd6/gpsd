@@ -62,6 +62,33 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #include "gpsd.h"
 
 /*
+   __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
+  only, probably depending on the architecture. Try to use endian.h if
+  the gcc way fails - endian.h also doesn not seem to be available on all
+  platforms.
+*/
+#ifdef __BIG_ENDIAN__
+#define WORDS_BIGENDIAN 1
+#else /* __BIG_ENDIAN__ */
+#ifdef __LITTLE_ENDIAN__
+#undef WORDS_BIGENDIAN
+#else
+#ifdef BSD
+#include <sys/endian.h>
+#else
+#include <endian.h>
+#endif
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define WORDS_BIGENDIAN 1
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+#undef WORDS_BIGENDIAN
+#else
+#error "unable to determine endianess!"
+#endif /* __BYTE_ORDER */
+#endif /* __LITTLE_ENDIAN__ */
+#endif /* __BIG_ENDIAN__ */
+
+/*
  * Structures for interpreting words in an RTCM-104 2.x message (after
  * parity checking and removing inversion).  Note, these structures
  * are overlayed on the raw data in order to decode them into
@@ -76,8 +103,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
  * Very few of these are left in 2012. By test, we know of s390, s390x,
  * and sparc.)
  *
- * The RTCM 2.1 standard is less explicit than it should be about signed-integer
- * representations.  Two's complement is specified for some but not all.
+ * The RTCM 2.1 standard is less explicit than it should be about
+ * signed-integer representations.  Two's complement is specified for
+ * some but not all.
  */
 
 #define	ZCOUNT_SCALE	0.6	/* sec */
