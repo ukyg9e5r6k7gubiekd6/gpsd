@@ -1474,7 +1474,7 @@ if env['socket_export']:
     # dumped through the daemon running in R=2 mode.  (This test is not
     # included in the normal regressions.)
     Utility("raw-regress", [gpsd, python_built_extensions],
-        '$SRCDIR/regress-driver %s test/daemon/*.log' %(regress_driver_options,))
+        '$SRCDIR/regress-driver -r %s test/daemon/*.log' %(regress_driver_options,))
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
