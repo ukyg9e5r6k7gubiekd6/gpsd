@@ -248,16 +248,17 @@ struct gps_context_t {
 #define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
 #define LEAP_DELSECOND  0x2     /* last minute of day has 59 seconds */
 #define LEAP_NOTINSYNC  0x3     /* overload, clock is free running */
-    bool enable_ntpshm;
+#endif /* TIMEHINT_ENABLE */
+#ifdef NTPSHM_ENABLE
     /* we need the volatile here to tell the C compiler not to
      * 'optimize' as 'dead code' the writes to SHM */
     /*@reldef@*/volatile struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
-#endif /* TIMEHINT_ENABLE */
-# ifdef PPS_ENABLE
+#endif /* NTPSHM_ENABLE */
+#ifdef PPS_ENABLE
     /*@null@*/ void (*pps_hook)(struct gps_device_t *,
 				unsigned long, struct timespec *);
-# endif /* PPS_ENABLE */
+#endif /* PPS_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
     /* we don't want the compiler to treat writes to shmexport as dead code,
      * and we don't want them reordered either */

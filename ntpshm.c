@@ -167,7 +167,6 @@ void ntpshm_context_init(struct gps_context_t *context)
 	}
     }
     memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
-    context->enable_ntpshm = true;
 }
 
 static int ntpshm_alloc(struct gps_context_t *context)
@@ -482,9 +481,8 @@ void ntpshm_link_deactivate(struct gps_device_t *session)
 void ntpshm_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
-    /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */
-    if (session->context->enable_ntpshm)
-	session->shmindex = ntpshm_alloc(session->context);
+    /* allocate a shared-memory segment for "NMEA" time data */
+    session->shmindex = ntpshm_alloc(session->context);
 
     if (0 > session->shmindex) {
 	gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc() failed\n");

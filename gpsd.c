@@ -1524,9 +1524,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
      * Only update the NTP time if we've seen the leap-seconds data.
      * Else we may be providing GPS time.
      */
-    if (device->context->enable_ntpshm == 0) {
-	//gpsd_report(context.debug, LOG_PROG, "NTP: off\n");
-    } else if ((changed & TIME_SET) == 0) {
+    if ((changed & TIME_SET) == 0) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: No time this packet\n");
     } else if (isnan(device->newdata.time)) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: bad new time\n");
