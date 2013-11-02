@@ -7,7 +7,7 @@
  * play. One, kernel PPS (KPPS), is RFC2783 and available on many
  * OS and supplied through special /dev/pps devices. The other, plain
  * PPS, uses the TIOCMIWAIT ioctl to explicitly watch for PPS on
- * serial lines. KPPS requires root permissions for intialization;
+ * serial lines. KPPS requires root permissions for initialization;
  * plain PPS does not.  Plain PPS loses some functionality when not
  * initialized as root.
  *
@@ -16,8 +16,8 @@
  * pps_thread_activate() and the thread will launch.  It is OK to do
  * this before the device is open, the thread will wait on that.
  *
- * This file is Copyright (c) 2013 by the GPSD project BSD terms apply:
- * see the file COPYING in the distribution root for details.
+ * This file is Copyright (c) 2013 by the GPSD project. BSD terms
+ * apply: see the file COPYING in the distribution root for details.
  */
 
 #include <string.h>

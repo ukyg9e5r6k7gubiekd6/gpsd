@@ -126,7 +126,7 @@ static jmp_buf terminate;
 
 #define display	(void)mvwprintw
 
-/* ternination codes */
+/* termination codes */
 #define TERM_SELECT_FAILED	1
 #define TERM_DRIVER_SWITCH	2
 #define TERM_EMPTY_READ 	3
