@@ -11,10 +11,11 @@
  * plain PPS does not.  Plain PPS loses some functionality when not
  * initialized as root.
  *
- * To use the thread manager, you need to first fill in the four
- * thread_* methods in the session structure.  Then you can call
- * pps_thread_activate() and the thread will launch.  It is OK to do
- * this before the device is open, the thread will wait on that.
+ * To use the thread manager, you need to first fill in the two
+ * thread_* methods in the session structure and/or the pps_hook in
+ * the context structure.  Then you can call pps_thread_activate() and
+ * the thread will launch.  It is OK to do this before the device is
+ * open, the thread will wait on that.
  *
  * This file is Copyright (c) 2013 by the GPSD project. BSD terms
  * apply: see the file COPYING in the distribution root for details.
