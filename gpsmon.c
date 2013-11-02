@@ -543,14 +543,14 @@ static bool do_command(void)
 	if (logfile != NULL) {
 	    if (packetwin != NULL)
 		(void)wprintw(packetwin,
-			      ">>> Logging to %s off", logfile);
+			      ">>> Logging off\n");
 	    (void)fclose(logfile);
 	}
 
 	if ((logfile = fopen(line + 1, "a")) != NULL)
 	    if (packetwin != NULL)
 		(void)wprintw(packetwin,
-			      ">>> Logging to %s on", logfile);
+			      ">>> Logging to %s\n", line + 1);
 	break;
 
 #ifdef RECONFIGURE_ENABLE
