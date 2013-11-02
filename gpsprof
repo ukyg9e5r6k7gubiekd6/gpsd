@@ -129,7 +129,7 @@ class plotter:
             self.session.unpack(line)
             if self.session.data["class"] == "DEVICES":
                 self.device = copy.copy(self.session.data["devices"][0])
-            elif self.session.data["class"] != "TPV":
+            elif self.session.data["class"] not in self.watch:
                 continue
             self.sample()
         baton.end()
