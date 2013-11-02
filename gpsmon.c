@@ -217,6 +217,32 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
+static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
+{
+    char buf2[BUFSIZ];
+
+    (void)vsnprintf(buf, len, fmt, ap);
+    visibilize(buf2, sizeof(buf2), buf);
+
+    report_lock();
+    if (!curses_active)
+	(void)fputs(buf2, stdout);
+    else if (packetwin != NULL)
+	(void)waddstr(packetwin, buf2);
+    if (logfile != NULL)
+	(void)fputs(buf2, logfile);
+    report_unlock();
+}
+
+static void packet_log(const char *fmt, ...)
+{
+    char buf[BUFSIZ];
+    va_list ap;
+    va_start(ap, fmt);
+    packet_vlog(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+}
+
 void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
 /* our version of the logger */
 {
@@ -256,20 +282,12 @@ void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
     }
 
     (void)strlcpy(buf, "gpsd:", BUFSIZ);
-    (void)strncat(buf, err_str, BUFSIZ - strlen(buf) );
-    if (errlevel <= debuglevel && packetwin != NULL) {
-	char buf2[BUFSIZ];
+    (void)strncat(buf, err_str, BUFSIZ - strlen(buf));
+    if (errlevel <= debuglevel) {
 	va_list ap;
 	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
+	packet_vlog(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
 	va_end(ap);
-	visibilize(buf2, sizeof(buf2), buf);
-	if (!curses_active)
-	    (void)fputs(buf2, stdout);
-	else
-	    (void)waddstr(packetwin, buf2);
-	if (logfile != NULL)
-	    (void)fputs(buf2, logfile);
     }
 }
 
