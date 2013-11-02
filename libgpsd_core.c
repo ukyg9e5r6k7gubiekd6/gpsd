@@ -41,14 +41,14 @@ void gpsd_acquire_reporting_lock(void)
 {
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
     (void)pthread_mutex_lock(&report_mutex);
-    /* +unrecog */
+    /*@ +unrecog @*/
 }
 
 void gpsd_release_reporting_lock(void)
 {
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     (void)pthread_mutex_unlock(&report_mutex);
-    /* +unrecog */
+    /*@ +unrecog @*/
 }
 #endif /* PPS_ENABLE */
 
