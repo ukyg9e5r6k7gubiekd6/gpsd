@@ -238,10 +238,10 @@ void gps_context_init(struct gps_context_t *context)
 	.enable_ntpshm  = false,
 	.shmTime	= {0},
 	.shmTimeInuse   = {0},
-# ifdef PPS_ENABLE
-	.pps_hook       = NULL,
-# endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
+#ifdef PPS_ENABLE
+	.pps_hook       = NULL,
+#endif /* PPS_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
 	.shmexport      = NULL,
 #endif /* SHM_EXPORT_ENABLE */
