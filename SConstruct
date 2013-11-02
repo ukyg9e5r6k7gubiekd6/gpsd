@@ -619,34 +619,7 @@ if not config.CheckDefine("TIOCMIWAIT", "sys/ioctl.h"):
     announce("Forcing pps=no (TIOCMIWAIT not available)")
     env["pps"] = False
 
-confdefs.append('''
-/*
-   __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
-  only, probably depending on the architecture. Try to use endian.h if
-  the gcc way fails - endian.h also doesn not seem to be available on all
-  platforms.
-*/
-#ifdef __BIG_ENDIAN__
-#define WORDS_BIGENDIAN 1
-#else /* __BIG_ENDIAN__ */
-#ifdef __LITTLE_ENDIAN__
-#undef WORDS_BIGENDIAN
-#else
-#ifdef BSD
-#include <sys/endian.h>
-#else
-#include <endian.h>
-#endif
-#if __BYTE_ORDER == __BIG_ENDIAN
-#define WORDS_BIGENDIAN 1
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-#undef WORDS_BIGENDIAN
-#else
-#error "unable to determine endianess!"
-#endif /* __BYTE_ORDER */
-#endif /* __LITTLE_ENDIAN__ */
-#endif /* __BIG_ENDIAN__ */
-
+confdefs.append('''\
 /* Some libcs do not have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
 # ifdef __cplusplus
@@ -1268,8 +1241,7 @@ build = env.Alias('build', [libraries, binaries, python_built_extensions, "gpsd.
 env.Clean(build,
           map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
           generated_sources + \
-          map(lambda f: f[:-3], templated) + \
-          [".sconf_temp"])
+          map(lambda f: f[:-3], templated))
 env.Default(*build)
 
 if qt_env:
