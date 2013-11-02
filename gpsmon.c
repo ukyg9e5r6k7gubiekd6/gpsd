@@ -775,7 +775,10 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	(void)wnoutrefresh(packetwin);
 
     (void)doupdate();
- 
+
+    /* Update the last fix time seen for PPS. FIXME: do this here? */
+    device->last_fixtime = device->newdata.time;
+
     if (logfile != NULL && device->packet.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
         assert(fwrite
@@ -784,7 +787,19 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
         /*@ +shiftimplementation +sefparams -charint @*/
     }
 }
-   /*@+observertrans +nullpass +globstate@*/
+/*@+observertrans +nullpass +globstate@*/
+
+#ifdef PPS_ENABLE
+/* The PPS thread_report_hook callback. This or a pps_hook callback is
+ * needed to keep the PPS thread running.
+ */
+static char *pps_report(struct gps_device_t *session UNUSED,
+			struct timeval *actual_tv UNUSED,
+			struct timespec *ts UNUSED,
+			double edge_offset UNUSED) {
+    return "gpsmon";
+}
+#endif /* PPS_ENABLE*/
 
 static jmp_buf assertbuf;
 
@@ -961,6 +976,12 @@ int main(int argc, char **argv)
 	}
 
 	serial = true;
+
+#ifdef PPS_ENABLE
+	/* Setup PPS monitoring. */
+	session.thread_report_hook = pps_report;
+	pps_thread_activate(&session);
+#endif /* PPS_ENABLE*/
     }
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
@@ -1051,6 +1072,13 @@ int main(int argc, char **argv)
 
   quit:
     /* we'll fall through to here on longjmp() */
+
+#ifdef PPS_ENABLE
+    /* Shut down PPS monitoring. */
+    if (serial)
+       (void)pps_thread_deactivate(&session);
+#endif /* PPS_ENABLE*/
+
     gpsd_close(&session);
     if (logfile)
 	(void)fclose(logfile);
