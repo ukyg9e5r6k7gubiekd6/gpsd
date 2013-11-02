@@ -128,7 +128,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *cont
 
     /*
      * Note: this call requires root under BSD, and possibly on
-     * well-secured Linux systems.  This is why ntpshm_init() has to be
+     * well-secured Linux systems.  This is why ntpshm_context_init() has to be
      * called before privilege-dropping.
      */
     shmid = shmget((key_t) (NTPD_BASE + unit),
@@ -155,7 +155,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *cont
     /*@ +mustfreefresh */
 }
 
-void ntpshm_init(struct gps_context_t *context)
+void ntpshm_context_init(struct gps_context_t *context)
 /* Attach all NTP SHM segments. Called once at startup, while still root. */
 {
     int i;
@@ -207,6 +207,17 @@ static bool ntpshm_free(struct gps_context_t * context, int segment)
 
     context->shmTimeInuse[segment] = false;
     return true;
+}
+
+void ntpshm_session_init(struct gps_device_t *session)
+{
+#ifdef NTPSHM_ENABLE
+    /* mark NTPD shared memory segments as unused */
+    session->shmindex = -1;
+#endif /* NTPSHM_ENABLE */
+#ifdef PPS_ENABLE
+    session->shmTimeP = -1;
+#endif	/* PPS_ENABLE */
 }
 
 int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)

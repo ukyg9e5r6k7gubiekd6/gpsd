@@ -733,6 +733,9 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
     for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	if (!allocated_device(devp)) {
 	    gpsd_init(devp, &context, device_name);
+#ifdef NTPSHM_ENABLE
+	    ntpshm_session_init(devp);
+#endif /* NTPSHM_ENABLE */
 	    gpsd_report(context.debug, LOG_INF,
 			"stashing device %s at slot %d\n",
 			device_name, (int)(devp - devices));
@@ -1963,7 +1966,7 @@ int main(int argc, char *argv[])
      * hotplugged devices added *after* we drop privileges will be able 
      * to use segments 0 and 1.
      */
-    (void)ntpshm_init(&context);
+    (void)ntpshm_context_init(&context);
 #endif /* NTPSHM_ENABLE */
 
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)

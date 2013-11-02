@@ -288,14 +288,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->sor = 0.0;
     session->chars = 0;
 #endif /* TIMING_ENABLE */
-#ifdef NTPSHM_ENABLE
-    /* mark NTPD shared memory segments as unused */
-    session->shmindex = -1;
-#endif /* NTPSHM_ENABLE */
-#ifdef PPS_ENABLE
-    session->shmTimeP = -1;
-#endif	/* PPS_ENABLE */
-
     /* tty-level initialization */
     gpsd_tty_init(session);
     /* necessary in case we start reading in the middle of a GPGSV sequence */

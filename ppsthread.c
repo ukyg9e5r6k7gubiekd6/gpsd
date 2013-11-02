@@ -526,20 +526,18 @@ void pps_thread_activate(struct gps_device_t *session)
 /* activate a thread to watch the device's PPS transitions */
 {
     pthread_t pt;
-    if (session->shmTimeP >= 0) {
 #if defined(HAVE_SYS_TIMEPPS_H)
-	/* some operations in init_kernel_pps() require root privs */
-	(void)init_kernel_pps( session );
-	if ( 0 <= session->kernelpps_handle ) {
-	    gpsd_report(session->context->debug, LOG_WARN,
-			"KPPS kernel PPS will be used\n");
-	}
-#endif
-	/*@-compdef -nullpass@*/
-	(void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
-        /*@+compdef +nullpass@*/
-	gpsd_report(session->context->debug, LOG_PROG, "PPS thread launched\n");
+    /* some operations in init_kernel_pps() require root privs */
+    (void)init_kernel_pps( session );
+    if ( 0 <= session->kernelpps_handle ) {
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "KPPS kernel PPS will be used\n");
     }
+#endif
+    /*@-compdef -nullpass@*/
+    (void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
+    /*@+compdef +nullpass@*/
+    gpsd_report(session->context->debug, LOG_PROG, "PPS thread launched\n");
 }
 
 void pps_thread_deactivate(struct gps_device_t *session)
