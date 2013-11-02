@@ -267,7 +267,13 @@ class timeplot(plotter):
             res += "%d\t%d\t%d\t%d\n" % (real_sec, real_nsec, clock_sec, clock_nsec)
         return res
     def plot(self):
-        return ""
+        fmt = '''\
+set autoscale
+set key below
+set key title "System clock delta from GPS time"
+plot "-" using 0:(column(3)*1000000000+column(4)-(column(1)*1000000000+column(2))) title "Delta" with impulses
+'''
+        return fmt + self.header() + self.data()
 
 class uninstrumented(plotter):
     "Total times without instrumentation."

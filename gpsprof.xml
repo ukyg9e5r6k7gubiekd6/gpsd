@@ -38,12 +38,14 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>gpsprof</application> performs accuracy and latency
-profiling on a GPS. It emits to standard output a GNUPLOT program
-that draws an illustrative graph. It can also be told to emit the raw
-profile data.  The information it provides can be useful for
-establishing an upper bound on latency, and thus on position accuracy
-of a GPS in motion.</para>
+<para><application>gpsprof</application> performs accuracy, latency,
+and time drift profiling on a GPS. It emits to standard output a
+GNUPLOT program that draws one of several illustrative graphs. It can
+also be told to emit the raw profile data.</para>
+
+<para>Information from the default spatial plot it provides can be
+useful for establishing an upper bound on latency, and thus on
+position accuracy of a GPS in motion.</para>
 
 <para><application>gpsprof</application> uses instrumentation built
 into <application>gpsd</application>.</para>
@@ -68,9 +70,10 @@ gpsprof -T png | gnuplot >image.png
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
-<para>The -f option sets the plot type. The X axis is samples
-(sentences with timestamps).  The Y axis is normally latency in seconds.
-Currently the following plot types are defined:</para>
+<para>The -f option sets the plot type. The X axis is samples (either
+sentences with timestamps or PPS time drift messages).  The Y axis is
+normally latency in seconds, except for the spatial plot.  Currently the
+following plot types are defined:</para>
 
 <variablelist>
 <varlistentry>
@@ -80,6 +83,13 @@ Currently the following plot types are defined:</para>
 circle.  This data is only meaningful if the GPS is held stationary
 while <application>gpsprof</application> is running. 
 This is the default.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>time</term>
+<listitem>
+<para>Plot delta of system clock (NTP corrected time) against GPS time
+as reported in PPS messages.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
