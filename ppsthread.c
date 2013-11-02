@@ -4,7 +4,7 @@
  * If you are not good at threads do not touch this file!
  *
  * It helps to know that there are two PPS measurement methods in
- * play. One, kernel PPS (KPPS), is RFCRFC2783 and available on many
+ * play. One, kernel PPS (KPPS), is RFC2783 and available on many
  * OS and supplied through special /dev/pps devices. The other, plain
  * PPS, uses the TIOCMIWAIT ioctl to explicitly watch for PPS on
  * serial lines. KPPS requires root permissions for intialization;
