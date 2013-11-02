@@ -840,9 +840,12 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
  * needed to keep the PPS thread running.
  */
 static char *pps_report(struct gps_device_t *session UNUSED,
-			struct timeval *actual_tv UNUSED,
-			struct timespec *ts UNUSED,
-			double edge_offset UNUSED) {
+			struct timeval *actual_tv,
+			struct timespec *ts,
+			double edge_offset) {
+    packet_log("PPS time=%llu.%09lu; clock=%llu.%09lu; edge_offset=%.9f\n",
+	       (long long)actual_tv->tv_sec, actual_tv->tv_usec * 1000,
+	       (long long)ts->tv_sec, ts->tv_nsec, edge_offset);
     return "gpsmon";
 }
 #endif /* PPS_ENABLE */
