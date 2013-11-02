@@ -467,7 +467,7 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 }
 #endif	/* PPS_ENABLE */
 
-void ntpd_link_deactivate(struct gps_device_t *session)
+void ntpshm_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
     (void)ntpshm_free(session->context, session->shmindex);
@@ -479,7 +479,7 @@ void ntpd_link_deactivate(struct gps_device_t *session)
 #endif	/* PPS_ENABLE */
 }
 
-void ntpd_link_activate(struct gps_device_t *session)
+void ntpshm_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
     /* If we are talking to ntpd, allocate a shared-memory segment for "NMEA" time data */

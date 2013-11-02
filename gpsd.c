@@ -664,7 +664,7 @@ static void deactivate_device(struct gps_device_t *device)
 #if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
 #endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #ifdef NTPSHM_ENABLE
-	ntpd_link_deactivate(device);
+	ntpshm_link_deactivate(device);
 #endif /* NTPSHM_ENABLE */
 	gpsd_deactivate(device);
     }
@@ -702,10 +702,10 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
      */
     /* do not start more than one PPS-watcher thread */
     if (!(device->shmindex >= 0))
-	ntpd_link_activate(device);
+	ntpshm_link_activate(device);
 
     gpsd_report(context.debug, LOG_INF, 
-		"NTPD ntpd_link_activate: %d\n",
+		"NTPD ntpshm_link_activate: %d\n",
 		(int)device->shmindex >= 0);
 
 
