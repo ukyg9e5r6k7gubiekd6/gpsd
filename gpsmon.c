@@ -133,6 +133,22 @@ static jmp_buf terminate;
 #define TERM_READ_ERROR 	4
 #define TERM_QUIT		5
 
+/* PPS monitoring */
+#if defined(PPS_ENABLE)
+static inline void report_lock(void)
+{
+    gpsd_acquire_reporting_lock();
+}
+
+static inline void report_unlock(void)
+{
+    gpsd_release_reporting_lock();
+}
+#else
+static inline void report_lock(void) { }
+static inline void report_unlock(void) { }
+#endif /* PPS_ENABLE */
+
 void monitor_fixframe(WINDOW * win)
 {
     int ymax, xmax, ycur, xcur;
@@ -177,10 +193,12 @@ static void packet_dump(const char *buf, size_t buflen)
 static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 {
     if (packetwin != NULL) {
+	report_lock();
 	(void)wattrset(packetwin, A_BOLD);
 	(void)wprintw(packetwin, ">>>");
 	packet_dump(buf, len);
 	(void)wattrset(packetwin, A_NORMAL);
+	report_unlock();
     }
 }
 #endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
@@ -274,11 +292,13 @@ static void announce_log(/*@in@*/ const char *fmt, ...)
     va_end(ap);
  
    if (packetwin != NULL) {
+	report_lock();
 	(void)wattrset(packetwin, A_BOLD);
 	(void)wprintw(packetwin, ">>>");
 	(void)waddstr(packetwin, buf);
 	(void)wattrset(packetwin, A_NORMAL);
 	(void)wprintw(packetwin, "\n");
+	report_unlock();
    }
    if (logfile != NULL) {
        (void)fprintf(logfile, ">>>%s\n", buf);
@@ -338,9 +358,11 @@ void monitor_log(const char *fmt, ...)
 {
     if (packetwin != NULL) {
 	va_list ap;
+	report_lock();
 	va_start(ap, fmt);
 	(void)vwprintw(packetwin, (char *)fmt, ap);
 	va_end(ap);
+	report_unlock();
     }
 }
 
@@ -377,6 +399,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 
 	    /*@ -onlytrans @*/
 	    leftover = LINES - 1 - (*active)->min_y;
+	    report_lock();
 	    if (leftover <= 0) {
 		if (packetwin != NULL)
 		    (void)delwin(packetwin);
@@ -390,6 +413,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 		(void)mvwin(packetwin, (*active)->min_y + 1, 0);
 		(void)wsetscrreg(packetwin, 0, leftover - 1);
 	    }
+	    report_unlock();
 	    /*@ +onlytrans @*/
 	}
 	return true;
@@ -540,6 +564,7 @@ static bool do_command(void)
 	break;
 
     case 'l':	/* open logfile */
+	report_lock();
 	if (logfile != NULL) {
 	    if (packetwin != NULL)
 		(void)wprintw(packetwin,
@@ -551,6 +576,7 @@ static bool do_command(void)
 	    if (packetwin != NULL)
 		(void)wprintw(packetwin,
 			      ">>> Logging to %s\n", line + 1);
+	report_unlock();
 	break;
 
 #ifdef RECONFIGURE_ENABLE
@@ -768,6 +794,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     if (devicewin != NULL)
 	(void)wnoutrefresh(devicewin);
 
+    report_lock();
     (void)wprintw(packetwin, "(%d) ", device->packet.outbuflen);
     packet_dump((char *)device->packet.outbuffer,
 		device->packet.outbuflen);
@@ -775,6 +802,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	(void)wnoutrefresh(packetwin);
 
     (void)doupdate();
+    report_unlock();
 
     /* Update the last fix time seen for PPS. FIXME: do this here? */
     device->last_fixtime = device->newdata.time;
@@ -799,7 +827,7 @@ static char *pps_report(struct gps_device_t *session UNUSED,
 			double edge_offset UNUSED) {
     return "gpsmon";
 }
-#endif /* PPS_ENABLE*/
+#endif /* PPS_ENABLE */
 
 static jmp_buf assertbuf;
 
@@ -826,6 +854,7 @@ int main(int argc, char **argv)
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
+    gps_context_init(&context);	// initialize the report mutex
     /*@ -branchstate @*/
     while ((option = getopt(argc, argv, "D:LVhl:nt:?")) != -1) {
 	switch (option) {
@@ -981,7 +1010,7 @@ int main(int argc, char **argv)
 	/* Setup PPS monitoring. */
 	session.thread_report_hook = pps_report;
 	pps_thread_activate(&session);
-#endif /* PPS_ENABLE*/
+#endif /* PPS_ENABLE */
     }
     /*@ +boolops */
     /*@ +nullpass +branchstate @*/
