@@ -953,10 +953,46 @@ static gps_mask_t hnd_127245(unsigned char *bu, int len, PGN *pgn, struct gps_de
  */
 static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
+    int aux;
+  
     print_data(session->context, bu, len, pgn);
+
+    session->gpsdata.attitude.heading = getleu16(bu, 1) * RAD_2_DEG * 0.0001;
+//  printf("ATT 0:%8.3f\n",session->gpsdata.attitude.heading);
+    aux = getles16(bu, 3);
+    if (aux != 0x07fff) {
+        session->gpsdata.attitude.heading += aux * RAD_2_DEG * 0.0001;
+    }
+//  printf("ATT 1:%8.3f %6x\n",session->gpsdata.attitude.heading, aux);
+    aux = getles16(bu, 5);
+    if (aux != 0x07fff) {
+        session->gpsdata.attitude.heading += aux * RAD_2_DEG * 0.0001;
+    }
+//  printf("ATT 2:%8.3f %6x\n",session->gpsdata.attitude.heading, aux);
+    session->gpsdata.attitude.mag_st = '\0';
+    session->gpsdata.attitude.pitch = NAN;
+    session->gpsdata.attitude.pitch_st = '\0';
+    session->gpsdata.attitude.roll = NAN;
+    session->gpsdata.attitude.roll_st = '\0';
+    session->gpsdata.attitude.yaw = NAN;
+    session->gpsdata.attitude.yaw_st = '\0';
+    session->gpsdata.attitude.dip = NAN;
+    session->gpsdata.attitude.mag_len = NAN;
+    session->gpsdata.attitude.mag_x = NAN;
+    session->gpsdata.attitude.mag_y = NAN;
+    session->gpsdata.attitude.mag_z = NAN;
+    session->gpsdata.attitude.acc_len = NAN;
+    session->gpsdata.attitude.acc_x = NAN;
+    session->gpsdata.attitude.acc_y = NAN;
+    session->gpsdata.attitude.acc_z = NAN;
+    session->gpsdata.attitude.gyro_x = NAN;
+    session->gpsdata.attitude.gyro_y = NAN;
+    session->gpsdata.attitude.temp = NAN;
+    session->gpsdata.attitude.depth = NAN;
+
     gpsd_report(session->context->debug, LOG_DATA,
 		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
-    return(0);
+    return(ONLINE_SET | ATTITUDE_SET);
 }
 
 
@@ -978,9 +1014,31 @@ static gps_mask_t hnd_128259(unsigned char *bu, int len, PGN *pgn, struct gps_de
 static gps_mask_t hnd_128267(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
+
+    session->gpsdata.attitude.heading = NAN;
+    session->gpsdata.attitude.pitch = NAN;
+    session->gpsdata.attitude.pitch_st = '\0';
+    session->gpsdata.attitude.roll = NAN;
+    session->gpsdata.attitude.roll_st = '\0';
+    session->gpsdata.attitude.yaw = NAN;
+    session->gpsdata.attitude.yaw_st = '\0';
+    session->gpsdata.attitude.dip = NAN;
+    session->gpsdata.attitude.mag_len = NAN;
+    session->gpsdata.attitude.mag_x = NAN;
+    session->gpsdata.attitude.mag_y = NAN;
+    session->gpsdata.attitude.mag_z = NAN;
+    session->gpsdata.attitude.acc_len = NAN;
+    session->gpsdata.attitude.acc_x = NAN;
+    session->gpsdata.attitude.acc_y = NAN;
+    session->gpsdata.attitude.acc_z = NAN;
+    session->gpsdata.attitude.gyro_x = NAN;
+    session->gpsdata.attitude.gyro_y = NAN;
+    session->gpsdata.attitude.temp = NAN;
+    session->gpsdata.attitude.depth = getleu32(bu, 1) *.01;
+
     gpsd_report(session->context->debug, LOG_DATA,
 		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
-    return(0);
+    return(ONLINE_SET | ATTITUDE_SET);
 }
 
 
