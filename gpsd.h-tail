@@ -468,10 +468,10 @@ struct gps_device_t {
 #ifdef NTPSHM_ENABLE
     int shmindex;
     bool ship_to_ntpd;
-    timestamp_t last_fixtime;		/* so updates happen once */
-#endif /* NTPSHM_ENABLE */
-#ifdef PPS_ENABLE
     int shmTimeP;
+#endif /* NTPSHM_ENABLE */
+    timestamp_t last_fixtime;		/* so updates happen once */
+#ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
