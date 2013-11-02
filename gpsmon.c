@@ -896,7 +896,8 @@ int main(int argc, char **argv)
 	default:
 	    (void)
 		fputs
-		("usage:  gpsmon [-?hVln] [-D debuglevel] [-t type] [server[:port:[device]]]\n",
+		("usage: gpsmon [-?hVn] [-l logfile] [-D debuglevel] "
+		 "[-t type] [server[:port:[device]]]\n",
 		 stderr);
 	    exit(EXIT_FAILURE);
 	}
