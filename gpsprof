@@ -271,7 +271,7 @@ class timeplot(plotter):
 set autoscale
 set key below
 set key title "System clock delta from GPS time"
-plot "-" using 0:(column(3)*1000000000+column(4)-(column(1)*1000000000+column(2))) title "Delta" with impulses
+plot "-" using 0:((column(1)-column(3))*1e9 + (column(2)-column(4))) title "Delta" with impulses
 '''
         return fmt + self.header() + self.data()
 

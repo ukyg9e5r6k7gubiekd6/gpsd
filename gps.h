@@ -1891,6 +1891,8 @@ struct timedrift_t {
     struct timespec	real;
     struct timespec	clock;
 };
+#define TIMEDIFF(drift)	((((drift)->real.tv_sec - (drift)->clock.tv_sec)*1e9)\
+			 + ((drift)->real.tv_nsec - (drift)->clock.tv_nsec))
 
 /*
  * Someday we may support Windows, under which socket_t is a separate type.
