@@ -74,7 +74,7 @@ static bool ubx_initialize(void)
     (void)wborder(ppswin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)wattrset(ppswin, A_BOLD);
     (void)wmove(ppswin, 1, 1);
-    (void)wprintw(ppswin, "DELTA: ");
+    (void)wprintw(ppswin, "PPS offset: ");
     display(ppswin, 2, 22, " PPS ");
     (void)wattrset(ppswin, A_NORMAL);
 
@@ -240,7 +240,7 @@ static void ubx_update(void)
     }
 
     if (timedelta != 0)
-	(void)mvwprintw(ppswin, 1, 8, "%f", timedelta);
+	(void)mvwprintw(ppswin, 1, 13, "%f", timedelta);
 }
 
 static int ubx_command(char line[]UNUSED)

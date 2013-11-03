@@ -83,7 +83,7 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gprmcwin, 8, 12, " RMC ");
     (void)wattrset(gprmcwin, A_NORMAL);
 
-    gpgsawin = derwin(devicewin, 5, 30, 15, 20);
+    gpgsawin = derwin(devicewin, 6, 30, 15, 20);
     assert(gpgsawin !=NULL);
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(gpgsawin, true);
@@ -91,7 +91,8 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgsawin, 1, 1, "Mode: ");
     (void)mvwprintw(gpgsawin, 2, 1, "Sats: ");
     (void)mvwprintw(gpgsawin, 3, 1, "DOP: H=      V=      P=");
-    (void)mvwprintw(gpgsawin, 4, 12, " GSA ");
+    (void)mvwprintw(gpgsawin, 4, 1, "PPS offset: ");
+    (void)mvwprintw(gpgsawin, 5, 9, " GSA + PPS ");
     (void)wattrset(gpgsawin, A_NORMAL);
 
     gpggawin = derwin(devicewin, 9, 30, 6, 50);
@@ -310,6 +311,9 @@ static void nmea_update(void)
 	    (void)mvwprintw(gpgstwin, 4, 21,  "%-8s", fields[8]);
 	}
     }
+
+    if (timedelta != 0)
+	(void)mvwprintw(gpgsawin, 4, 13, "%f", timedelta);
 }
 
 /*@ +globstate +nullpass */
