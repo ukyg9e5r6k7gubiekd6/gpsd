@@ -190,7 +190,10 @@ if __name__ == '__main__':
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1
             except IOError, e:
-                sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
+                if e.filename is None:
+                    sys.stderr.write("gpsfake: unknown internal I/O error %s\n" % e)
+                else:
+                    sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
                 raise SystemExit, 1
             except OSError:
                 sys.stderr.write("gpsfake: can't open pty.\n")
