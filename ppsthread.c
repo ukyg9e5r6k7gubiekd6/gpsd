@@ -441,8 +441,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	if (ok) {
 	    long l_offset;
 	    char *log1 = NULL;
-	    /* actual_tv is the time we think the pulse represents  */
-	    struct timeval  actual_tv;
+	    /* drift.real is the time we think the pulse represents  */
+	    struct timedrift_t drift;
 	    /* edge_offset is the skew from expected to observed pulse time */
 	    double edge_offset;
 	    gpsd_report(session->context->debug, LOG_RAW,
@@ -465,18 +465,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
             /* This innocuous-looking "+ 1" embodies a significant
              * assumption: that GPSes report time to the second over the
-             * serial stream *after* * emitting PPS for the top of second.
+             * serial stream *after* emitting PPS for the top of second.
              * Thus, when we see PPS our available report is from the
              * previous cycle and we must increment. 
              */
 
 	    /*@+relaxtypes@*/
-	    actual_tv.tv_sec = session->last_fixtime + 1;
-	    actual_tv.tv_usec = 0;  /* need to be fixed for 5Hz */
+	    drift.real.tv_sec = session->last_fixtime + 1;
+	    drift.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
+	    drift.clock = clock_ts;
 	    /*@-relaxtypes@*/
 
-	    edge_offset = actual_tv.tv_sec - clock_ts.tv_sec;
-	    edge_offset -= clock_ts.tv_nsec / 1e9;
+	    /* edge_offset = delta between PPS and sysclock time in seconds */
+	    edge_offset = drift.real.tv_sec - drift.clock.tv_sec;
+	    edge_offset -= drift.clock.tv_nsec / 1e9;
 
 	    /* check to see if we have a fresh timestamp from the
 	     * GPS serial input then use that */
@@ -487,10 +489,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    (long)l_offset);
 		log1 = "timestamp out of range";
 	    } else {
-		struct timedrift_t drift;
-		drift.real.tv_sec = actual_tv.tv_sec;
-		drift.real.tv_nsec = 0;
-		drift.clock = clock_ts;
 		last_second_used = session->last_fixtime;
 		if (session->thread_report_hook != NULL) 
 		    log1 = session->thread_report_hook(session,
