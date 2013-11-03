@@ -574,6 +574,9 @@ consistent with your other chimers (and other local reference clocks,
 if you have any). We'll describe how to diagnose and tune your chimer
 configuration in a later section.
 
+Also note that after cold-starting ntpd it will calibrate for up to
+15 minutes before it starts adjusting the clock.
+
 The gpsd developers would like to receive information about the
 offsets (fudges) observed by users for each type of receiver.  Please
 check the GPS hardware table at <<HARDWARE>>; if your GPS is not
