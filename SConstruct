@@ -1242,7 +1242,7 @@ if manbuilder:
 ## Where it all comes together
 
 build = env.Alias('build', [libraries, binaries, python_built_extensions, "gpsd.php", manpage_targets])
-env.Clean(build,
+clean = env.Clean(build,
           map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
           generated_sources + \
           map(lambda f: f[:-3], templated))
@@ -1624,7 +1624,7 @@ check = env.Alias('check', [
 env.Alias('testregress', check)
 
 # Clean up to a close approximation of a fresh repository pull
-env.alias('distclean', [clean, testclean])
+env.Alias('distclean', [clean, testclean])
 
 # The website directory
 #
