@@ -291,8 +291,10 @@ be sure those aren't going to bite you in production.
 == Reverting to a clean state ==
 
 The scons equivalent of 'make clean' is 'scons -c'. This will revert
-your source tree to a clean state as though you had just cloned or
-downloaded it.
+your source tree to a clean state nearly as though you had just cloned or
+downloaded it. Some scons housekeeping stuff is left in place.  If you
+interrupted a regression test, 'distclean' will remove generated test
+programs.
 
 == Cross-building ==
 

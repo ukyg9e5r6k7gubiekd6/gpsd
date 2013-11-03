@@ -12,6 +12,9 @@
 # testbuild - test-build the code from a tarball
 # release   - ship a release
 #
+# clean     - clean all normal build targets
+# distclean - clean up to a state like a fresh repo pull
+#
 # Setting the DESTDIR environment variable will prefix the install destinations
 # without changing the --prefix prefix.
 
@@ -1598,7 +1601,10 @@ valgrind_audit = Utility('valgrind-audit',
 # Run test builds on remote machines
 flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 
+
 # Run all normal regression tests
+testclean = Utility('test_cleanup', [],
+                    'rm -f test_bits test_geoid test_json test_libgps test_mkgmtime test_packet')
 check = env.Alias('check', [
     python_compilation_regress,
     method_regress,
@@ -1612,9 +1618,13 @@ check = env.Alias('check', [
     time_regress,
     unpack_regress,
     json_regress,
+    testclean,
     ])
 
 env.Alias('testregress', check)
+
+# Clean up to a close approximation of a fresh repository pull
+env.alias('distclean', [clean, testclean])
 
 # The website directory
 #
