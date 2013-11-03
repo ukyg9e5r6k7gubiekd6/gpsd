@@ -1624,7 +1624,7 @@ check = env.Alias('check', [
 env.Alias('testregress', check)
 
 # Clean up to a close approximation of a fresh repository pull
-env.Alias('distclean', [clean, testclean])
+distclean = env.Alias('distclean', [clean, testclean])
 
 # The website directory
 #
