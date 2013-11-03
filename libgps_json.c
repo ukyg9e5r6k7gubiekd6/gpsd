@@ -353,6 +353,44 @@ static int json_error_read(const char *buf, struct gps_data_t *gpsdata,
     return status;
 }
 
+static int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
+			   /*@null@*/ const char **endptr)
+{
+    int real_sec, real_nsec, clock_sec, clock_nsec;
+    /*@ -fullinitblock @*/
+    const struct json_attr_t json_attrs_pps[] = {
+	/* *INDENT-OFF* */
+        {"class",     t_check,   .dflt.check = "PPS"},
+	{"real_sec",  t_integer, .addr.integer = &real_sec,
+			         .dflt.integer = 0},
+	{"real_nsec", t_integer, .addr.integer = &real_nsec,
+			         .dflt.integer = 0},
+	{"clock_sec", t_integer, .addr.integer = &clock_sec,
+			         .dflt.integer = 0},
+	{"clock_nsec",t_integer, .addr.integer = &clock_nsec,
+			         .dflt.integer = 0},
+	{NULL},
+	/* *INDENT-ON* */
+    };
+    /*@ +fullinitblock @*/
+    int status;
+
+    memset(&gpsdata->timedrift, '\0', sizeof(gpsdata->timedrift));
+    status = json_read_object(buf, json_attrs_pps, endptr);
+    /*
+     * This is theoretically dodgy, but in practice likely not
+     * to break until GPSes are obsolete.
+     */
+    gpsdata->timedrift.real.tv_sec = (long)real_sec;
+    gpsdata->timedrift.real.tv_nsec = (time_t)real_nsec;
+    gpsdata->timedrift.clock.tv_sec = (long)clock_sec;
+    gpsdata->timedrift.clock.tv_nsec = (time_t)clock_nsec;
+    if (status != 0)
+	return status;
+
+    return status;
+}
+
 int libgps_json_unpack(const char *buf,
 		       struct gps_data_t *gpsdata, const char **end)
 /* the only entry point - unpack a JSON object into gpsdata_t substructures */
@@ -479,6 +517,13 @@ int libgps_json_unpack(const char *buf,
 	if (status == 0) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= ERROR_SET;
+	}
+	return status;
+    } else if (STARTSWITH(classtag, "\"class\":\"PPS\"")) {
+	status = json_pps_read(buf, gpsdata, end);
+	if (status == 0) {
+	    gpsdata->set &= ~UNION_SET;
+	    gpsdata->set |= TIMEDRIFT_SET;
 	}
 	return status;
     } else
