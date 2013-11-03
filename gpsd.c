@@ -993,9 +993,9 @@ static void set_serial(struct gps_device_t *device,
     }
 
     gpsd_report(context.debug, LOG_PROG,
-		"set_serial(%s,%d,%s) %c%d\n",
+		"set_serial(%s,%u,%s) %c%d\n",
 		device->gpsdata.dev.path,
-		speed, modestring, parity, stopbits);
+		(unsigned int)speed, modestring, parity, stopbits);
     /* no support for other word sizes yet */
     /* *INDENT-OFF* */
     if (wordsize == (int)(9 - stopbits)

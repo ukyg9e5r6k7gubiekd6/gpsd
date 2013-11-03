@@ -550,7 +550,7 @@ static bool evermore_speed(struct gps_device_t *session,
 {
     /*@ -type @*/
     gpsd_report(session->context->debug, LOG_PROG,
-		"evermore_speed(%u%c%d)\n", speed, parity,
+		"evermore_speed(%u%c%d)\n", (unsigned int)speed, parity,
 		stopbits);
     /* parity and stopbit switching aren't available on this chip */
     if (parity != session->gpsdata.dev.parity

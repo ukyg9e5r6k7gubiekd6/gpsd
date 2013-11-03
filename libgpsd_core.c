@@ -1278,11 +1278,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    /*@-nullderef@*/
 	    /* coverity[var_deref_op] */
 	    gpsd_report(session->context->debug, LOG_INF,
-			"%s identified as type %s, %f sec @ %dbps\n",
+			"%s identified as type %s, %f sec @ %ubps\n",
 			session->gpsdata.dev.path,
 			session->device_type->type_name,
 			timestamp() - session->opentime,
-			speed);
+			(unsigned int)speed);
 	    /*@+nullderef@*/
 	    /* fire the identified hook */
 	    if (session->device_type != NULL

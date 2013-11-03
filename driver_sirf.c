@@ -283,8 +283,8 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char pari
     };
     /*@ -charint @*/
     gpsd_report(session->context->debug, LOG_PROG,
-		"SiRF: sirf_speed(%d,%c,%d)\n",
-		speed, parity, stopbits);
+		"SiRF: sirf_speed(%u,%c,%d)\n",
+		(unsigned int)speed, parity, stopbits);
     if (9600 >= speed) {
 	gpsd_report(session->context->debug, LOG_WARN,
 		    "SiRF may lag at 9600bps or less.\n");
@@ -339,7 +339,7 @@ static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
     if (speed >= 0xffff) {
 	gpsd_report(session->context->debug, LOG_ERROR,
 		    "SiRF: can't switch from SiRF to NMEA because current speed %u is big.",
-		     speed);
+		     (unsigned int)speed);
 	return false;
     }
 

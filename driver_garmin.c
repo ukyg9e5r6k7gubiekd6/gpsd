@@ -925,7 +925,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product,
  * return 1 is device found
  * return 0 if not
  */
-static bool garmin_usb_detect(struct gps_device_t *session)
+static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 {
 #if defined(__linux__) || defined(S_SPLINT_S)
     /*
