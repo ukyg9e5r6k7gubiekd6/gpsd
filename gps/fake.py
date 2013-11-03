@@ -272,24 +272,27 @@ class FakePTY(FakeGPS):
 class FakeTCP(FakeGPS):
     "A TCP broadcaster with a test log ready to be cycled to it."
     def __init__(self, testload,
-                 ipaddr, port,
+                 host, port,
                  progress=None):
         FakeGPS.__init__(self, testload, progress)
-        self.ipaddr = ipaddr
-        self.port = port
-        self.byname = "tcp://" + ipaddr + ":" + port
+        self.host = host
+        self.port = int(port)
+        self.byname = "tcp://" + host + ":" + port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind((self.host, self.port))
+        self.sock.listen(5)
+        (self.rsock, _address) = self.sock.accept()
 
     def read(self):
         "Discard control strings written by gpsd."
-        pass
+        self.rsock.recv(1024)
 
     def write(self, line):
-        self.sock.sendto(line, (self.ipaddr, int(self.port)))
+        self.sock.send(line)
 
     def drain(self):
         "Wait for the associated device to drain (e.g. before closing)."
-        pass
+        self.sock.shutdown()
 
 class FakeUDP(FakeGPS):
     "A UDP broadcaster with a test log ready to be cycled to it."
@@ -474,7 +477,7 @@ class TestSession:
                 newgps = FakeUDP(testload, ipaddr="127.0.0.1", port="5000",
                                    progress=self.progress)
             if testload.sourcetype == "TCP" or self.tcp:
-                newgps = FakeTCP(testload, ipaddr="127.0.0.1", port="5000",
+                newgps = FakeTCP(testload, host="127.0.0.1", port="5000",
                                    progress=self.progress)
             else:
                 newgps = FakePTY(testload, speed=speed, 
