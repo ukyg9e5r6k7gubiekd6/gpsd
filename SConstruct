@@ -905,7 +905,8 @@ if qt_env:
             compile_with = qt_env['CC']
             compile_flags = qt_env['CFLAGS']
         qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
-                                             CC=compile_with,                                             CFLAGS=compile_flags,
+                                             CC=compile_with,
+                                             CFLAGS=compile_flags,
                                              parse_flags=dbus_libs))
     compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libgps_version)
     libraries.append(compiled_qgpsmmlib)
