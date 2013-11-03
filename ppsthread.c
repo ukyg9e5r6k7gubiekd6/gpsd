@@ -486,14 +486,19 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    (long)l_offset);
 		log1 = "timestamp out of range";
 	    } else {
+		struct timedrift_t drift;
+		drift.real.tv_sec = actual_tv.tv_sec;
+		drift.real.tv_nsec = 0;
+		drift.clock = ts;
 		last_second_used = session->last_fixtime;
 		if (session->thread_report_hook != NULL) 
 		    log1 = session->thread_report_hook(session,
-					   &actual_tv, &ts, edge_offset);
+						       &drift, edge_offset);
 		else
 		    log1 = "no report hook";
 		if (session->context->pps_hook != NULL)
-		    session->context->pps_hook(session, actual_tv.tv_sec, &ts);
+		    session->context->pps_hook(session,
+					       &drift, edge_offset);
             }
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",

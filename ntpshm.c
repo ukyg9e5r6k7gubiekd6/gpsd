@@ -294,14 +294,15 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
  * good news is that kernel PPS gives us nSec resolution
  * bad news is that ntpshm only has uSec resolution
  *
- * actual_tv is the actual time we think the PPS happened
- * ts is the time we saw the pulse
+ * actual_ts is the actual time we think the PPS happened
+ * clock_ts is the time we saw the pulse
  */
-static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
-	struct timespec *ts)
+static int ntpshm_pps(struct gps_device_t *session,
+		      struct timespec *actual_ts,
+		      struct timespec *clock_ts)
 {
     volatile struct shmTime *shmTime = NULL, *shmTimeP = NULL;
-    struct timeval tv;
+    struct timeval actual_tv, clock_tv;
     int precision;
     double offset;
 
@@ -312,7 +313,8 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
 
     /* for now we use uSec, not nSec */
     /*@-type@*//* splint is confused about struct timespec */
-    TSTOTV( &tv, ts );
+    TSTOTV( &actual_tv, actual_ts );
+    TSTOTV( &clock_tv, clock_ts );
     /*@+type@*/
 
     /* we use the shmTime mode 1 protocol
@@ -331,10 +333,10 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
      */
     shmTimeP->valid = 0;
     shmTimeP->count++;
-    shmTimeP->clockTimeStampSec = (time_t)actual_tv->tv_sec;
-    shmTimeP->clockTimeStampUSec = (int)actual_tv->tv_usec;
-    shmTimeP->receiveTimeStampSec = (time_t)tv.tv_sec;
-    shmTimeP->receiveTimeStampUSec = (int)tv.tv_usec;
+    shmTimeP->clockTimeStampSec = (time_t)actual_tv.tv_sec;
+    shmTimeP->clockTimeStampUSec = (int)actual_tv.tv_usec;
+    shmTimeP->receiveTimeStampSec = (time_t)clock_tv.tv_sec;
+    shmTimeP->receiveTimeStampUSec = (int)clock_tv.tv_usec;
     shmTimeP->leap = session->context->leap_notify;
     /* precision is a placebo, ntpd does not really use it
      * real world accuracy is around 16uS, thus -16 precision */
@@ -344,15 +346,16 @@ static int ntpshm_pps(struct gps_device_t *session, struct timeval *actual_tv,
 
     /* this is more an offset jitter/dispersion than precision,
      * but still useful for debug */
-    offset = fabs((double)(tv.tv_sec - actual_tv->tv_sec)
-		  + ((double)(tv.tv_usec - actual_tv->tv_usec) / 1000000.0));
+    offset = fabs((double)(clock_tv.tv_sec - actual_tv.tv_sec)
+		  + ((double)(clock_tv.tv_usec - actual_tv.tv_usec) / 1000000.0));
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     /*@-type@*//* splint is confused about struct timespec */
     gpsd_report(session->context->debug, LOG_RAW,
 		"PPS ntpshm_pps %lu.%03lu @ %lu.%09lu, preci %d\n",
-		(unsigned long)actual_tv->tv_sec, 
-		(unsigned long)actual_tv->tv_usec,
-		(unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec,
+		(unsigned long)actual_tv.tv_sec,
+		(unsigned long)actual_tv.tv_usec,
+		(unsigned long)clock_ts->tv_sec,
+		(unsigned long)clock_ts->tv_nsec,
 		precision);
     /*@+type@*/
     return 1;
@@ -406,12 +409,12 @@ static void init_hook(struct gps_device_t *session)
 /*@+mustfreefresh@*/
 
 
-/* actual_tv is when we think the PPS pulse wass */
-/* ts is the local clocke time we saw the pulse */
-/* offset is actual_tv - tv */
+/* actual_ts is when we think the PPS pulse wass */
+/* clock_ts is the local clocke time we saw the pulse */
+/* offset is actual_ts - clock_ts */
 static void chrony_send(struct gps_device_t *session,
-			struct timeval *actual_tv,
-			struct timespec *ts UNUSED,  double offset)
+			struct timespec *actual_ts,
+			struct timespec *clock_ts UNUSED,  double offset)
 {
     struct sock_sample sample;
 
@@ -420,7 +423,7 @@ static void chrony_send(struct gps_device_t *session,
     sample.pulse = 0;
     sample.leap = session->context->leap_notify;
     sample.magic = SOCK_MAGIC;
-    sample.tv = *actual_tv; /* structure copy */
+    TSTOTV(&sample.tv, actual_ts);
     sample.offset = offset; 
 
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
@@ -433,9 +436,8 @@ static void wrap_hook(struct gps_device_t *session)
 }
 
 static /*@observer@*/ char *report_hook(struct gps_device_t *session,
-			struct timeval *actual_tv, 
-			struct timespec *ts, 
-			double edge_offset)
+					struct timedrift_t *td,
+					double edge_offset)
 /* ship the time of a PPS event to ntpd and/or chrony */
 {
     char *log1;
@@ -458,9 +460,9 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
     log1 = "accepted";
     if ( 0 <= session->chronyfd ) {
 	log1 = "accepted chrony sock";
-	chrony_send(session, actual_tv, ts, edge_offset);
+	chrony_send(session, &td->real, &td->clock, edge_offset);
     }
-    (void)ntpshm_pps(session, actual_tv, ts);
+    (void)ntpshm_pps(session, &td->real, &td->clock);
 
     return log1;
 }

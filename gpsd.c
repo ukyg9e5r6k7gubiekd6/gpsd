@@ -1658,8 +1658,8 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 
 #ifdef PPS_ENABLE
 static void ship_pps_drift_message(struct gps_device_t *session,
-				   unsigned long sec,
-				   struct timespec *ts)
+				   struct timedrift_t *td,
+    double edge_offset UNUSED)
 /* on PPS interrupt, ship a drift message to all clients */
 {
 #ifdef SOCKET_EXPORT_ENABLE
@@ -1668,9 +1668,10 @@ static void ship_pps_drift_message(struct gps_device_t *session,
      * Yes, real_nsec is constant 0 because our "real time" is top of GPS
      * second. This will change when we support 5Hz devices fully.
      */
-    notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":0,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
+    notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
-		    sec, ts->tv_sec, ts->tv_nsec);
+		    td->real.tv_sec, td->real.tv_nsec,
+		    td->clock.tv_sec, td->clock.tv_nsec);
     /*@+type@*/
 #endif /* SOCKET_EXPORT_ENABLE */
 }
