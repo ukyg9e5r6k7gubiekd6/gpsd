@@ -199,7 +199,7 @@ class FakePTY(FakeGPS):
                  speed=4800, databits=8, parity='N', stopbits=1,
                  progress=None):
         FakeGPS.__init__(self, testload, progress)
-        # Allow Serial: header to be overridden by explicit spped.
+        # Allow Serial: header to be overridden by explicit speed.
         if self.testload.serial:
             (speed, databits, parity, stopbits) = self.testload.serial
         self.speed = speed
