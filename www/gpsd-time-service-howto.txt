@@ -574,8 +574,15 @@ consistent with your other chimers (and other local reference clocks,
 if you have any). We'll describe how to diagnose and tune your chimer
 configuration in a later section.
 
-Also note that after cold-starting ntpd it will calibrate for up to
-15 minutes before it starts adjusting the clock.
+Also note that after cold-starting ntpd it will calibrate for up to 15
+minutes before it starts adjusting the clock. Because the frequency
+error estimate ("drift") that NTP uses isn't right when you first
+start NTP, there will be a phase error that persists while the
+frequency is estimated.  So if your clock is a litle slow, then it
+will keep getting behind, and the positive offset will cause NTP to
+adjust the phase forward and also increase the frequency offset error.
+After a day or so or maybe less the frequency estimate will be very
+close and there won't be a persistent offset.
 
 The gpsd developers would like to receive information about the
 offsets (fudges) observed by users for each type of receiver.  Please
