@@ -1205,13 +1205,33 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			"comment, sync lock deferred\n");
 	    /* FALL THROUGH */
 	} else if (session->packet.type > COMMENT_PACKET) {
-	    /*
-	     * Always change drivers on a new packet type.  If the previous
-	     * driver type was sticky and this one isn't, we'll revert after
-	     * processing the packet.
-	     */
-	    driver_change = (session->device_type == NULL)
-		|| (session->packet.type != session->device_type->packet_type);
+	    if (session->device_type == NULL)
+		driver_change = true;
+	    else {
+		int newtype = session->packet.type;
+		/*
+		 * Are we seeing a new packet type? Then we probably
+		 * want to change drivers.
+		 */
+		bool new_packet_type = 
+		    (newtype != session->device_type->packet_type);
+		/*
+		 * Possibly the old driver has a mode-switcher method, in
+		 * which case we know it can handle NMEA itself and may
+		 * want to do special things (like tracking whether a
+		 * previous mode switch to binary succeeded in suppressing
+		 * NMEA).
+		 */
+		bool dependent_nmea = (newtype == NMEA_PACKET
+				       && session->device_type->mode_switcher!=NULL);
+
+		/*
+		 * Compute whether to switch drivers.
+		 * If the previous driver type was sticky and this one
+		 * isn't, we'll revert after processing the packet.
+		 */
+		driver_change = new_packet_type && !dependent_nmea;
+	    }
 	    /*@-nullderef@*/
 	    if (driver_change) {
 		const struct gps_type_t **dp;
