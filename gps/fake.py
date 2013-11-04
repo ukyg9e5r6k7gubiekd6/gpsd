@@ -282,10 +282,11 @@ class FakeTCP(FakeGPS):
         self.dispatcher.bind((self.host, self.port))
         self.dispatcher.listen(5)
         self.readables = [self.dispatcher]
+        print "** OUT OF INITIALIZATION **"
 
     def read(self):
         "Handle connection requests and data."
-        readable, _writable, _errored = select.select(self.readables, [], [])
+        readable, _writable, _errored = select.select(self.readables, [], [], 0)
         for s in readable:
             if s == self.dispatcher:	# Connection request
                 client_socket, _address = s.accept()
@@ -306,7 +307,7 @@ class FakeTCP(FakeGPS):
         "Wait for the associated device(s) to drain (e.g. before closing)."
         for s in self.readables:
             if s != self.dispatcher:
-                s.shutdown()
+                s.shutdown(socket.SHUT_RDWR)
 
 class FakeUDP(FakeGPS):
     "A UDP broadcaster with a test log ready to be cycled to it."
