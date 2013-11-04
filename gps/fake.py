@@ -476,7 +476,7 @@ class TestSession:
             if testload.sourcetype == "UDP" or self.udp:
                 newgps = FakeUDP(testload, ipaddr="127.0.0.1", port="5000",
                                    progress=self.progress)
-            if testload.sourcetype == "TCP" or self.tcp:
+            elif testload.sourcetype == "TCP" or self.tcp:
                 newgps = FakeTCP(testload, host="127.0.0.1", port="5000",
                                    progress=self.progress)
             else:
