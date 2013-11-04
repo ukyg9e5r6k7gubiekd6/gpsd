@@ -163,6 +163,7 @@ process:
 |libxslt            | xsltproc is used to build man pages from xml
 |docbook-xsl        | style file for xml to man translation
 |xmlto              | DocBook formatter program
+|asciidoc           | DocBook front end with lighter markup
 |============================================================================
 
 The build degrades gracefully in the absence of any of these. You should
@@ -183,7 +184,7 @@ will need some subset of the following modules:
 |cdc_am     | USB Communication Device Class Abstract Control Model interface
 |============================================================================
 
-These are listed in rough order of devices covered as of 2011; the
+These are listed in rough order of devices covered as of 2013; the
 PL23203 by itself accounts for over 70% of deployed USB mice.  We
 recommend building with pl2303, ftdi_sio, cypress_m8, and cp210x.
 
