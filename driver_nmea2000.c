@@ -796,19 +796,31 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		    "NMEA2000: AIS message 24A from %09u stashed.\n",
 		    ais->mmsi);
 
-	saveptr->mmsi = ais->mmsi;
+	if (session->gpsdata.policy.split24 == true) {
+	    for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
+	        ais->type24.shipname[l] = (char) bu[ 5+l];
+	    }
+	    ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
+	} else {
+	    saveptr->mmsi = ais->mmsi;
 
-	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    saveptr->shipname[l] = (char) bu[ 5+l];
+	    for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
+	        saveptr->shipname[l] = (char) bu[ 5+l];
+	    }
+	    saveptr->shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
+
+	    index += 1;
+	    index %= MAX_TYPE24_INTERLEAVE;
+	    session->driver.aivdm.context[0].type24_queue.index = index;
 	}
-	saveptr->shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
-
-	index += 1;
-	index %= MAX_TYPE24_INTERLEAVE;
-	session->driver.aivdm.context[0].type24_queue.index = index;
 	decode_ais_channel_info(bu, len, 200, session);
 
-        return(0);
+	if (session->gpsdata.policy.split24 == true) {
+	    ais->type24.part = part_a;
+	    return(ONLINE_SET | AIS_SET);
+	} else {
+	    return(0);
+	}
     }
     return(0);
 }
