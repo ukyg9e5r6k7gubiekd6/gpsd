@@ -387,6 +387,11 @@ where /dev/ttyXX is whatever 1PPS-capable device you have.  In a
 binary-package-based Linux distribution it is probable that ntpd
 will already have brrn launched at boot time.
 
+If you're using dhcp3-client to configure your system, make sure
+you disable /etc/dhcp3/dhclient-exit-hooks.d/ntp, as dhclient would
+restart ntpd with an automatically created ntp.conf otherwise - and
+gpsd would not be able to talk with ntpd any more.
+
 The rest of these setup instructions will assume that you are starting
 gpsd as root, with occasional glances at the non-root case.
 

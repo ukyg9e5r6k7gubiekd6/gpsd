@@ -157,8 +157,5 @@ first time it's invoked, it will generate a file called
 'gpsd_config.inc' in that directory containing configuration
 information; edit to taste.
 
-4. Note for people using gpsd as time source for ntpd: In case you're
-using dhcp3-client to configure your system, make sure you disable
-/etc/dhcp3/dhclient-exit-hooks.d/ntp, as dhclient would restart
-ntpd with an automatically created ntp.conf otherwise - and gpsd
-would not be able to talk with ntpd anymore.
+For special instructions related to using GPSD for time service, see the
+GPSD Time Service HOWTO in the distribution or on the web.
