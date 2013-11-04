@@ -3,9 +3,9 @@
 """
 gpsfake.py -- classes for creating a controlled test environment around gpsd.
 
-The gpsfake(1) regression tester shipped with gpsd is a trivial wrapper
+The gpsfake(1) regression tester shipped with GPSD is a trivial wrapper
 around this code.  For a more interesting usage example, see the
-valgrind-audit script shipped with the gpsd code.
+valgrind-audit script shipped with the GPSD code.
 
 To use this code, start by instantiating a TestSession class.  Use the
 prefix argument if you want to run the daemon under some kind of run-time
@@ -45,13 +45,16 @@ run with -N, so the output will go to stderr (along with, for example,
 Valgrind notifications).
 
 Each FakeGPS instance tries to packetize the data from the logfile it
-is initialized with. It uses the same packet-getter as the daeomon.
+is initialized with. It uses the same packet-getter as the daemon.
+Exception: if there is a Delay-Cookie line in a header comment, that
+delimiter is used to split up the test load.
 
-The TestSession code maintains a run queue of FakeGPS and gps.gs (client-
-session) objects. It repeatedly cycles through the run queue.  For each
-client session object in the queue, it tries to read data from gpsd.  For
-each fake GPS, it sends one line of stored data.  When a fake-GPS's
-go predicate becomes false, the fake GPS is removed from the run queue.
+The TestSession code maintains a run queue of FakeGPS and gps.gs
+(client- session) objects. It repeatedly cycles through the run queue.
+For each client session object in the queue, it tries to read data
+from gpsd.  For each fake GPS, it sends one line or packet of stored
+data.  When a fake-GPS's go predicate becomes false, the fake GPS is
+removed from the run queue.
 
 There are two ways to use this code.  The more deterministic is
 non-threaded mode: set up your client sessions and fake GPS devices,
@@ -110,6 +113,8 @@ class TestLoad:
         self.type = None
         self.sourcetype = "pty"
         self.serial = None
+        self.delay = WRITE_PAD
+        self.delimiter = None
         # Grab the packets
         getter = sniffer.new()
         #gps.packet.register_report(reporter)
@@ -146,6 +151,16 @@ class TestLoad:
                     self.sourcetype = "UDP"
                 elif "Transport: TCP" in packet:
                     self.sourcetype = "TCP"
+                elif "Delay-Cookie:" in packet:
+                    if packet.startswith("#"):
+                        packet = packet[1:]
+                    try:
+                        (_dummy, self.delimiter, delay) = packet.strip().split()
+                        self.delay = float(delay)
+                    except ValueError:
+                        raise TestLoadError("bad Delay-Cookie line in %s"%\
+                                            logfp.name)
+                    self.resplit = True
             else:
                 if type_latch is None:
                     type_latch = ptype
@@ -161,6 +176,9 @@ class TestLoad:
             self.legend = "gpsfake: line %d: "
         else:
             self.legend = "gpsfake: packet %d"
+        # Maybe this needs to be split on different delimiters?
+        if self.delimiter is not None:
+            self.sentences = ''.join(self.sentences).split(self.delimiter)
 
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
@@ -190,7 +208,7 @@ class FakeGPS:
         self.write(line)
         if self.progress:
             self.progress("gpsfake: %s feeds %d=%s\n" % (self.testload.name, len(line), repr(line)))
-        time.sleep(WRITE_PAD)
+        time.sleep(self.testload.delay)
         self.index += 1
 
 class FakePTY(FakeGPS):
@@ -298,7 +316,7 @@ class FakeTCP(FakeGPS):
                 data = s.recv(1024)
                 if not data:
                     s.close()
-                    self.readables.remove[s]
+                    self.readables.remove(s)
 
     def write(self, line):
         "Send the next log packet to everybody connected."

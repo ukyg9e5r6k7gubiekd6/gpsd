@@ -195,6 +195,15 @@ slave port that the daemon sees.</para></listitem>
 <listitem><para>Values 'TCP' and 'UDP' force the use of TCP and
 UDP feeds respectively (the default is a pty).</para></listitem>
 </varlistentry>
+<varlistentry>
+<term>Delay-Cookie:</term>
+<listitem><para>Must be followed by two whitespace-separated fields, a
+delimiter character and a numeric delay in seconds. Instead of being
+broken up by packet boundaries, the test load is split on the
+delimiters.  The delay is performed after each feed.  Can be useful
+for imposing write boundaries in the middle of packets.
+</para></listitem>
+</varlistentry>
 </variablelist>
 
 </refsect1>
