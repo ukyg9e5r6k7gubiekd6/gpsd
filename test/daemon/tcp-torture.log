@@ -1,0 +1,18 @@
+# Name: Generic NMEA
+# Submitter: Eric S. Raymond <esr@thyrsus.com>
+# Date: 2013-11-03
+# Transport: TCP
+# Notes: A variant of the TCP testload intended to capture the error case
+#        reported in Savannah tracker bug  #36409: "GPSD fails to start
+#        get GPS data from tcp://location:port".  The delay cookies are
+#        inserted to produce write boundaries that will be visible to the
+#        packetizer.
+# Delay-Cookie: | 0.01
+,1.7,-30.40,M,-13.9,M,,*7D
+$GPGGA,|19322|1.00,|2037.|72792,N,08704.08478,W,1,04,1.7,-30.40,M,-13.9,M,,*7D
+$GPGSA,A,3,10,28,09,13,,,,,,,,,03.4,01.7,03.0*00
+$GPGSV,3,1,12,28,14,150,41,09,15,254,41,10,43,192,47,13,06,081,36*7A
+$GPGSV,3,2,12,02,56,323,,04,41,024,,12,31,317,,17,31,085,*72
+$GPGSV,3,3,12,05,15,318,,24,02,246,,33,08,096,,35,45,118,*7D
+$GPRMC,193221.00,A,2037.7279,N,08704.0848,W,00.1,201.8,231207,01,W,A*2D
+$GPZDA,193223.00,23,12,2007,00,00*69

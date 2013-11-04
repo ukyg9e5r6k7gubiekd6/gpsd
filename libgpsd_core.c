@@ -1058,6 +1058,30 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 }
 /*@ +mustdefine +compdef @*/
 
+static bool hunt_failure(struct gps_device_t *session)
+/* after a bad packet, what should cue us to go to next autobaud setting? */
+{
+    /*
+     * Fail hunt only if we get a second consecutive bad packet
+     * and the lexer is in ground state.  We don't want to fail on
+     * a first bad packet because the source might have a burst of
+     * leading garbage after open.  We don't want to fail if the
+     * lexer is not in ground state, because that means the read
+     * might have picked up a valid partial packet - better to go
+     * back around the loop and pick up more data.
+     *
+     * It has been reported that the "&& session->packet.state==0"
+     * guard causes a hang while autobauding on SiRF IIIs (but not on
+     * SiRF-IIs, oddly enough).  Removing this conjunct will resurrect
+     * chronic failure to sync on TCP/IP sources, which have I/O
+     * boundaries in mid-packet more often than RS232 ones.  There's a
+     * test for this at test/daemon/tcp-torture.log.
+     *
+     * This test may need further revision.
+     */
+    return session->badcount++>1 && session->packet.state==0;
+}
+
 gps_mask_t gpsd_poll(struct gps_device_t *session)
 /* update the stuff in the scoreboard structure */
 {
@@ -1205,27 +1229,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->badcount = 0;
 	    session->gpsdata.dev.driver_mode = (session->packet.type > NMEA_PACKET) ? MODE_BINARY : MODE_NMEA;
 	    /* FALL THROUGH */
-        /*
-	 * We used to have a third conjunct && session->packet.state==0
-	 * in this guard. The comment was:
-	 *
-	 * Fail hunt only if we get a second consecutive bad packet
-	 * and the lexer is in ground state.  We don't want to fail on
-	 * a first bad packet because the source might have a burst of
-	 * leading garbage after open.  We don't want to fail if the
-	 * lexer is not in ground state, because that means the read
-	 * might have picked up a valid partial packet - better to go
-	 * back around the loop and pick up more data.
-	 *
-	 * Unfortunately this caused a reproducible hang while
-	 * autobauding on SiRF IIIs (but not on SiRF-IIs, oddly enough).
-	 * Reverting this change may resurrect chronic failure to sync
-	 * on TCP/IP sources, which have I/O boundaries in mid-packet 
-	 * more often than RS232 ones.
-	 *
-	 * We need a better test here....
-	 */
-	} else if (session->badcount++>1 && !gpsd_next_hunt_setting(session)) {
+	} else if (hunt_failure(session) && !gpsd_next_hunt_setting(session)) {
 	    gpsd_report(session->context->debug, LOG_INF,
 			"hunt on %s failed (%lf sec since data)\n",
 			session->gpsdata.dev.path,
