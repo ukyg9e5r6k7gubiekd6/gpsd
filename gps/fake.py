@@ -469,7 +469,7 @@ class TestSession:
         self.writers = 0
         self.runqueue = []
         self.index = 0
-        self.baseport = 5000	# Regression tests break if you change this 
+        self.baseport = 49194	# In the IANA orivate port range
         if port:
             self.port = port
         else:

@@ -1,11 +1,11 @@
 # Name: Generic NMEA
 # Submitter: Eric S. Raymond <esr@thyrsus.com>
 # Date: 2013-11-03
-# Transport: UDP
+# Transport: TCP
 # Notes: The most significant thing about this test load is not the content,
-#        but the magic cookie that tells it to feed the daemon over UDP
+#        but the magic cookie that tells it to feed the daemon over TCP
 #        rather than a pseudo-tty. We include spme leading garbage as a
-#        robustness check for the packetizer.  There is a TCP test load 
+#        robustness check for the packetizer.  There is a UDP test load 
 #        that feeds the same content.
 ,1.7,-30.40,M,-13.9,M,,*7D
 $GPGGA,193221.00,2037.72792,N,08704.08478,W,1,04,1.7,-30.40,M,-13.9,M,,*7D
