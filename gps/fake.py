@@ -109,7 +109,6 @@ class TestLoad:
         self.name = logfp.name
         self.logfp = logfp
         self.predump = predump
-        self.logfile = logfp.name
         self.type = None
         self.sourcetype = "pty"
         self.serial = None
@@ -145,7 +144,7 @@ class TestLoad:
                             raise ValueError
                     except (ValueError, IndexError):
                         raise TestLoadError("bad serial-parameter spec in %s"%\
-                                            logfp.name)                    
+                                            self.name)                    
                     self.serial = (baud, databits, parity, stopbits)
                 elif "Transport: UDP" in packet:
                     self.sourcetype = "UDP"
@@ -159,7 +158,7 @@ class TestLoad:
                         self.delay = float(delay)
                     except ValueError:
                         raise TestLoadError("bad Delay-Cookie line in %s"%\
-                                            logfp.name)
+                                            self.name)
                     self.resplit = True
             else:
                 if type_latch is None:
@@ -168,7 +167,7 @@ class TestLoad:
                     print repr(packet)
                 if not packet:
                     raise TestLoadError("zero-length packet from %s"%\
-                                        logfp.name)                    
+                                        self.name)                    
                 self.sentences.append(packet)
         # Look at the first packet to grok the GPS type
         self.textual = (type_latch == sniffer.NMEA_PACKET)
