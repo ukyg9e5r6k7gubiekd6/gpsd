@@ -279,10 +279,12 @@ class FakeTCP(FakeGPS):
         self.port = int(port)
         self.byname = "tcp://" + host + ":" + str(port)
         self.dispatcher = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # This magic prevents "Address already in use" errors after
+        # we release the socket.
+        self.dispatcher.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.dispatcher.bind((self.host, self.port))
         self.dispatcher.listen(5)
         self.readables = [self.dispatcher]
-        print "** OUT OF INITIALIZATION **"
 
     def read(self):
         "Handle connection requests and data."
@@ -290,7 +292,8 @@ class FakeTCP(FakeGPS):
         for s in readable:
             if s == self.dispatcher:	# Connection request
                 client_socket, _address = s.accept()
-                self.readables.append(client_socket)
+                self.readables = [client_socket]
+                self.dispatcher.close()
             else:			# Incoming data
                 data = s.recv(1024)
                 if not data:
