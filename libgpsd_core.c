@@ -1206,7 +1206,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    /* FALL THROUGH */
 	} else if (session->packet.type > COMMENT_PACKET) {
 	    /*
-	     * Always change drivers on a new packet type.  If thge previous
+	     * Always change drivers on a new packet type.  If the previous
 	     * driver type was sticky and this one isn't, we'll revert after
 	     * processing the packet.
 	     */
