@@ -65,7 +65,7 @@ run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
 import os, time, signal, pty, termios # fcntl, array, struct
-import exceptions, threading, socket
+import exceptions, threading, socket, select
 import gps
 import packet as sniffer
 
@@ -270,29 +270,43 @@ class FakePTY(FakeGPS):
         termios.tcdrain(self.fd)
 
 class FakeTCP(FakeGPS):
-    "A TCP broadcaster with a test log ready to be cycled to it."
+    "A TCP serverlet with a test log ready to be cycled to it."
     def __init__(self, testload,
                  host, port,
                  progress=None):
         FakeGPS.__init__(self, testload, progress)
         self.host = host
         self.port = int(port)
-        self.byname = "tcp://" + host + ":" + port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind((self.host, self.port))
-        self.sock.listen(5)
-        (self.rsock, _address) = self.sock.accept()
+        self.byname = "tcp://" + host + ":" + str(port)
+        self.dispatcher = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.dispatcher.bind((self.host, self.port))
+        self.dispatcher.listen(5)
+        self.readables = [self.dispatcher]
 
     def read(self):
-        "Discard control strings written by gpsd."
-        self.rsock.recv(1024)
+        "Handle connection requests and data."
+        readable, _writable, _errored = select.select(self.readables, [], [])
+        for s in readable:
+            if s == self.dispatcher:	# Connection request
+                client_socket, _address = s.accept()
+                self.readables.append(client_socket)
+            else:			# Incoming data
+                data = s.recv(1024)
+                if not data:
+                    s.close()
+                    self.readables.remove[s]
 
     def write(self, line):
-        self.sock.send(line)
+        "Send the next log packet to everybody connected."
+        for s in self.readables:
+            if s != self.dispatcher:
+                s.send(line)
 
     def drain(self):
-        "Wait for the associated device to drain (e.g. before closing)."
-        self.sock.shutdown()
+        "Wait for the associated device(s) to drain (e.g. before closing)."
+        for s in self.readables:
+            if s != self.dispatcher:
+                s.shutdown()
 
 class FakeUDP(FakeGPS):
     "A UDP broadcaster with a test log ready to be cycled to it."
@@ -302,7 +316,7 @@ class FakeUDP(FakeGPS):
         FakeGPS.__init__(self, testload, progress)
         self.ipaddr = ipaddr
         self.port = port
-        self.byname = "udp://" + ipaddr + ":" + port
+        self.byname = "udp://" + ipaddr + ":" + str(port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def read(self):
@@ -451,6 +465,7 @@ class TestSession:
         self.writers = 0
         self.runqueue = []
         self.index = 0
+        self.baseport = 5000	# Regression tests break if you change this 
         if port:
             self.port = port
         else:
@@ -474,11 +489,15 @@ class TestSession:
         if logfile not in self.fakegpslist:
             testload = TestLoad(logfile, predump=self.predump)
             if testload.sourcetype == "UDP" or self.udp:
-                newgps = FakeUDP(testload, ipaddr="127.0.0.1", port="5000",
-                                   progress=self.progress)
+                newgps = FakeUDP(testload, ipaddr="127.0.0.1",
+                                 port=self.baseport,
+                                 progress=self.progress)
+                self.baseport += 1
             elif testload.sourcetype == "TCP" or self.tcp:
-                newgps = FakeTCP(testload, host="127.0.0.1", port="5000",
-                                   progress=self.progress)
+                newgps = FakeTCP(testload, host="127.0.0.1",
+                                 port=self.baseport,
+                                 progress=self.progress)
+                self.baseport += 1
             else:
                 newgps = FakePTY(testload, speed=speed, 
                                    progress=self.progress)
