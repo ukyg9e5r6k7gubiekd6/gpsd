@@ -177,6 +177,27 @@ port 5000 to the address 192.168.0.1.255.  You can monitor them with
 this: <command>tcpdump -s0 -n -A -i lo udp and port 5000</command>.</para>
 
 </refsect1>
+<refsect1 id='magic'><title>MAGIC COMMENTS</title>
+
+<para>Certain magic comments in test load headers can change the 
+conditions of the test.  These are:</para>
+
+<variablelist>
+<varlistentry>
+<term>Serial:</term>
+<listitem><para>May contain a serial-port setting such as 4800 7N2 -
+baud rate followed by 7 or 8 for byte length, N or O or E for parity
+and 1 or 2 for stop bits. The test is run with those settings on the
+slave port that the daemon sees.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>Transport:</term>
+<listitem><para>Values 'TCP' and 'UDP' force the use of TCP and
+UDP feeds respectively (the default is a pty).</para></listitem>
+</varlistentry>
+</variablelist>
+
+</refsect1>
 <refsect1 id='custom'><title>CUSTOM TESTS</title>
 
 <para><application>gpsfake</application> is a trivial wrapper around a
