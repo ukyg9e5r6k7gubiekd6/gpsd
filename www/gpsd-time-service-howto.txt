@@ -630,13 +630,12 @@ server 1.us.pool.ntp.org
 server 2.us.pool.ntp.org
 server 3.us.pool.ntp.org
 
-driftfile /etc/chrony/chrony.drift
+driftfile /var/lib/chrony/drift
 
-# delay 0.0 is right, but use 0.2 to avoid NMEA
-# time fighting with PPS time
-# or use noprefer and a good offset
-refclock SHM 0 offset 0.0 delay 0.2
-refclock SHM 1 offset 0.0 delay 0.0 prefer
+# set larger delay to allow the NMEA source to overlap with
+# the other sources and avoid the falseticker status
+refclock SHM 0 offset 0.420 delay 0.2 refid GPS
+refclock SHM 1 refid PPS
 -----------------------------------------------------------------------------
 
 If you are outside of the USA replace the pool servers with one in your
@@ -657,21 +656,18 @@ server 1.us.pool.ntp.org
 server 2.us.pool.ntp.org
 server 3.us.pool.ntp.org
 
-driftfile /etc/chrony/chrony.drift
+driftfile /var/lib/chrony/drift
 
-# delay 0.0 is right, but use 0.2 to avoid NMEA
-# time fighting with PPS time
-# or use noprefer and a good offset
-refclock SHM 0 offset 0.0 delay 0.2
-refclock SHM 1 offset 0.0 delay 0.0 noprefer
-#refclock PPS
-refclock SOCK /var/run/chrony.ttyXX.sock prefer
+# set larger delay to allow the NMEA source to overlap with
+# the other sources and avoid the falseticker status
+refclock SHM 0 offset 0.420 delay 0.2 refid GPS
+refclock SOCK /var/run/chrony.ttyXX.sock refid PPS
 -----------------------------------------------------------------------------
 
 If not running as root change the "refclock SOCK" line to:
 
 -----------------------------------------------------------------------------
-refclock SOCK /tmp/chrony.ttyXX.sock prefer
+refclock SOCK /tmp/chrony.ttyXX.sock refid PPS
 -----------------------------------------------------------------------------
 
 Finally note that chronyd needs to be started before gpsd so the
@@ -699,9 +695,8 @@ will look like this:
 210 Number of sources = 7
 MS Name/IP address         Stratum Poll Reach LastRx Last sample
 ===============================================================================
-#* SHM0                          0   4   377    22  -1646us[-3345us] +/- 100ms
-#? SHM1                          0   4   377    19   -126ms[ -126ms] +/- 67us
-#? SOC2                          0   4     0   10y     +0ns[   +0ns] +/- 0ns
+#- GPS                           0   4   377    12  +3580us[+3580us] +/- 101ms
+#* PPS                           0   4   377    10    -86ns[ -157ns] +/- 181ns
 ^? vimo.dorui.net                3   6   377    23   -123ms[ -125ms] +/- 71ms
 ^? time.gac.edu                  2   6   377    24   -127ms[ -128ms] +/- 55ms
 ^? 2001:470:1:24f::2:3           2   6   377    24   -122ms[ -124ms] +/- 44ms
@@ -870,13 +865,6 @@ statistics peerstats
 filegen peerstats file peerstats type day enable
 -----------------------------------------------------------------------------
 
-Or, if you are running chronyd add these to chrony.conf:
-
------------------------------------------------------------------------------
-logdir /var/log/chrony
-log statistics measurements tracking
------------------------------------------------------------------------------
-
 This enables logging of the peer server statistics.
 
 [start=2]
@@ -887,16 +875,9 @@ This enables logging of the peer server statistics.
    # chown ntp:ntp /var/log/ntpstats
 -----------------------------------------------------------------------------
 
-For chronyd as root do:
-
------------------------------------------------------------------------------
-   # mkdir -p /var/log/chrony
-   # chown root:root /var/log/chrony
------------------------------------------------------------------------------
-
 [start=3]
-3. Start ntpd (or chronyd) and let it run for at least four hours.
-Periodically check progress with "ntpq -p" or "chronyc sources" and wait
+3. Start ntpd and let it run for at least four hours.
+Periodically check progress with "ntpq -p" and wait
 until change has settled out.
 
 [start=4]
