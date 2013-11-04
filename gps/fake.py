@@ -68,7 +68,7 @@ run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
 import os, time, signal, pty, termios # fcntl, array, struct
-import exceptions, threading, socket, select
+import exceptions, threading, socket, select, cStringIO
 import gps
 import packet as sniffer
 
@@ -114,15 +114,20 @@ class TestLoad:
         self.serial = None
         self.delay = WRITE_PAD
         self.delimiter = None
-        # Grab the packets
+        # Stash away a copy in case we need to resplit
+        text = logfp.read()
+        logfp = open(logfp.name)
+        # Grab the packets in the normal way
         getter = sniffer.new()
         #gps.packet.register_report(reporter)
         type_latch = None
+        commentlen = 0
         while True:
             (plen, ptype, packet, counter) = getter.get(logfp.fileno())
             if plen <= 0:
                 break
             elif ptype == sniffer.COMMENT_PACKET:
+                commentlen += len(packet)
                 # Some comments are magic
                 if "Serial:" in packet:
                     # Change serial parameters
@@ -177,7 +182,7 @@ class TestLoad:
             self.legend = "gpsfake: packet %d"
         # Maybe this needs to be split on different delimiters?
         if self.delimiter is not None:
-            self.sentences = ''.join(self.sentences).split(self.delimiter)
+            self.sentences = text[commentlen:].split(self.delimiter)
 
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
