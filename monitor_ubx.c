@@ -259,7 +259,7 @@ const struct monitor_object_t ubx_mmt = {
     .update = ubx_update,
     .command = ubx_command,
     .wrap = ubx_wrap,
-    .min_y = 23,.min_x = 80,	/* size of the device window */
+    .min_y = 19,.min_x = 80,	/* size of the device window */
     .driver = &ubx_binary,
 };
 #endif

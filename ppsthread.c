@@ -175,8 +175,8 @@ static int init_kernel_pps(struct gps_device_t *session)
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    struct timeval  tv = {0, 0};
-    struct timespec ts = {0, 0};
+    struct timeval  clock_tv = {0, 0};
+    struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
 #if defined(TIOCMIWAIT)
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
@@ -221,21 +221,21 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #ifdef HAVE_CLOCK_GETTIME
 	/* using  clock_gettime() here, that is nSec,
 	 * not uSec like gettimeofday */
-	if ( 0 > clock_gettime(CLOCK_REALTIME, &ts) ) {
+	if ( 0 > clock_gettime(CLOCK_REALTIME, &clock_ts) ) {
 	    /* uh, oh, can not get time! */
 	    gpsd_report(session->context->debug, LOG_ERROR,
 			"PPS clock_gettime() failed\n");
 	    break;
 	}
-	TSTOTV( &tv, &ts);
+	TSTOTV( &clock_tv, &clock_ts);
 #else
-	if ( 0 > gettimeofday(&tv, NULL) ) {
+	if ( 0 > gettimeofday(&clock_tv, NULL) ) {
 	    /* uh, oh, can not get time! */
 	    gpsd_report(session->context->debug, LOG_ERROR,
 			"PPS gettimeofday() failed\n");
 	    break;
 	}
-	TVTOTS( &ts, &tv);
+	TVTOTS( &clock_ts, &clock_tv);
 #endif /* HAVE_CLOCK_GETTIME */
 /*@+noeffect@*/
 
@@ -318,8 +318,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	state = (int)((state & PPS_LINE_TIOC) != 0);
 	/*@ +boolint @*/
 #define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
-	cycle = timediff(tv, pulse[state]);
-	duration = timediff(tv, pulse[(int)(state == 0)]);
+	cycle = timediff(clock_tv, pulse[state]);
+	duration = timediff(clock_tv, pulse[(int)(state == 0)]);
 #undef timediff
 	/*@ -boolint @*/
 
@@ -344,7 +344,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    laststate = state;
 	    unchanged = 0;
 	}
-	pulse[state] = tv;
+	pulse[state] = clock_tv;
 	if (unchanged) {
 	    // strange, try again
 	    continue;
@@ -352,7 +352,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	gpsd_report(session->context->debug, LOG_INF,
 		    "PPS cycle: %7d, duration: %7d @ %lu.%06lu\n",
 		    cycle, duration,
-		    (unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec);
+		    (unsigned long)clock_tv.tv_sec,
+		    (unsigned long)clock_tv.tv_usec);
 
 	/*
 	 * The PPS pulse is normally a short pulse with a frequency of
@@ -440,8 +441,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	if (ok) {
 	    long l_offset;
 	    char *log1 = NULL;
-	    /* actual_tv is the time we think the pulse represents  */
-	    struct timeval  actual_tv;
+	    /* drift.real is the time we think the pulse represents  */
+	    struct timedrift_t drift;
 	    /* edge_offset is the skew from expected to observed pulse time */
 	    double edge_offset;
 	    gpsd_report(session->context->debug, LOG_RAW,
@@ -451,31 +452,33 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/* use KPPS time */
 		/* pick the right edge */
 		if ( edge_kpps ) {
-		    ts = pi.assert_timestamp; /* structure copy */
+		    clock_ts = pi.assert_timestamp; /* structure copy */
 		} else {
-		    ts = pi.clear_timestamp;  /* structure copy */
+		    clock_ts = pi.clear_timestamp;  /* structure copy */
 		}
 	    } else
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 	    {
 	        // use plain PPS
-		/*@i10@*/TVTOTS( &ts, &tv);
+		/*@i10@*/TVTOTS( &clock_ts, &clock_tv);
 	    }
 
             /* This innocuous-looking "+ 1" embodies a significant
              * assumption: that GPSes report time to the second over the
-             * serial stream *after* * emitting PPS for the top of second.
+             * serial stream *after* emitting PPS for the top of second.
              * Thus, when we see PPS our available report is from the
              * previous cycle and we must increment. 
              */
 
 	    /*@+relaxtypes@*/
-	    actual_tv.tv_sec = session->last_fixtime + 1;
-	    actual_tv.tv_usec = 0;  /* need to be fixed for 5Hz */
+	    drift.real.tv_sec = session->last_fixtime + 1;
+	    drift.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
+	    drift.clock = clock_ts;
 	    /*@-relaxtypes@*/
 
-	    edge_offset = actual_tv.tv_sec - ts.tv_sec;
-	    edge_offset -= ts.tv_nsec / 1e9;
+	    /* edge_offset = delta between PPS and sysclock time in seconds */
+	    edge_offset = drift.real.tv_sec - drift.clock.tv_sec;
+	    edge_offset -= drift.clock.tv_nsec / 1e9;
 
 	    /* check to see if we have a fresh timestamp from the
 	     * GPS serial input then use that */
@@ -489,17 +492,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		last_second_used = session->last_fixtime;
 		if (session->thread_report_hook != NULL) 
 		    log1 = session->thread_report_hook(session,
-					   &actual_tv, &ts, edge_offset);
+						       &drift, edge_offset);
 		else
 		    log1 = "no report hook";
 		if (session->context->pps_hook != NULL)
-		    session->context->pps_hook(session, actual_tv.tv_sec, &ts);
+		    session->context->pps_hook(session,
+					       &drift, edge_offset);
             }
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
 		    log1,
-		    (unsigned long)ts.tv_sec,
-		    (unsigned long)ts.tv_nsec,
+		    (unsigned long)clock_ts.tv_sec,
+		    (unsigned long)clock_ts.tv_nsec,
 		    edge_offset);
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,

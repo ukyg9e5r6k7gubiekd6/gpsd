@@ -257,7 +257,7 @@ struct gps_context_t {
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
     /*@null@*/ void (*pps_hook)(struct gps_device_t *,
-				unsigned long, struct timespec *);
+				struct timedrift_t *, double);
 #endif /* PPS_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
     /* we don't want the compiler to treat writes to shmexport as dead code,
@@ -477,8 +477,7 @@ struct gps_device_t {
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     int chronyfd;			/* for talking to chrony */
     /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
-					   struct timeval *,
-					   struct timespec *,
+					   struct timedrift_t *,
 					   double);
     /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
 #endif /* PPS_ENABLE */

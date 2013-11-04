@@ -38,7 +38,7 @@ extern "C" {
  *       gps_poll() removed in favor of gps_read().  The raw hook is gone.
  * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added. New
  *       model and serial members in part B of AIS type 24, conforming
- *       with ITU-R 1371-4.
+ *       with ITU-R 1371-4. New timedrift structure.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
@@ -1887,6 +1887,13 @@ struct policy_t {
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
 };
 
+struct timedrift_t {
+    struct timespec	real;
+    struct timespec	clock;
+};
+#define TIMEDIFF(drift)	((((drift)->real.tv_sec - (drift)->clock.tv_sec)*1e9)\
+			 + ((drift)->real.tv_nsec - (drift)->clock.tv_nsec))
+
 /*
  * Someday we may support Windows, under which socket_t is a separate type.
  * In the meantime, having a typedef for this semantic kind is no bad thing,
@@ -1948,7 +1955,8 @@ struct gps_data_t {
 #define POLICY_SET	(1llu<<29)
 #define LOGMESSAGE_SET	(1llu<<30)
 #define ERROR_SET	(1llu<<31)
-#define SET_HIGH_BIT	31
+#define TIMEDRIFT_SET	(1llu<<32)
+#define SET_HIGH_BIT	33
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -1999,7 +2007,7 @@ struct gps_data_t {
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
     /* pack things never reported together to reduce structure size */
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET|TIMEDRIFT_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */
 	struct rtcm2_t	rtcm2;
@@ -2017,6 +2025,7 @@ struct gps_data_t {
 	    struct devconfig_t list[MAXUSERDEVS];
 	} devices;
 	char error[256];
+	struct timedrift_t timedrift;
     };
 
     /* Private data - client code must not set this */
@@ -2107,7 +2116,7 @@ extern double wgs84_separation(double, double);
 #define strtok_r(s,d,p) strtok_s(s,d,p)
 #endif
 
-/* Some libc's don't have strlcat/strlcpy. Local copies are provided */
+/* Some libcs don't have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
 size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #endif

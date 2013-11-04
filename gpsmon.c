@@ -838,9 +838,8 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
 #ifdef PPS_ENABLE
 static char *pps_report(struct gps_device_t *session UNUSED,
-			struct timeval *pps_tv,
-			struct timespec *sysclock_ts,
-			double edge_offset UNUSED) {
+			struct timedrift_t *td UNUSED,
+			double edge_offset) {
     /*
      * Ugh.  Access through a shared global is nasty.
      * This may be a layer violation that needs to be fixed.
@@ -848,8 +847,7 @@ static char *pps_report(struct gps_device_t *session UNUSED,
      * Read access to timedelta is not thread-locked.
      * Instead we're relying on access to floats to be atomic.
      */
-    timedelta = (pps_tv->tv_sec + pps_tv->tv_usec / 1e6) 
-		- (sysclock_ts->tv_sec + sysclock_ts->tv_nsec / 1e9);
+    timedelta = edge_offset;
     packet_log("-------------------------------------" 
 	       " PPS "
 	       "-------------------------------------\n");
