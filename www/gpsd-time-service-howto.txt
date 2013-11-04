@@ -1,6 +1,6 @@
 = GPSD Time Service HOWTO =
-Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v1.0, October 2013
+Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>, Hal Murray <hmurray@megapathdsl.net>
+v1.1, November 2013
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -711,7 +711,77 @@ To keep chronyd from preferring NMEA time over PPS time, you can add an
 overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
 is never used, just monitored.
 
-== NTP performance tuning ==
+== NTP working and performance details ==
+
+This Section deals specifically with ntpd.  It discusses algorithms
+used by the ntpd suite to measure and correct the system time.  It is not
+directly applicable to chronyd, althogh some design considerations
+may be similar.
+
+=== ntpd internal instrumentation ===
+
+==== Theory and background ====
+The crystals used in consumer electronics have two properties we are
+interested in: accuracy and stability.  *Accuracy* is how well the measured
+frequency matches the number printed on the can.  *Stability* is how well the
+frequency stays the same even if it isn't accurate.  (Long term aging is a
+3rd property that is interesting, but as discussed below, since ntpd
+uses a short drift history, it is not a cause of error.)
+
+Typical specs for oscillator packages are 20, 50, 100 ppm.  That includes
+everything; initial accuracy, temperature, supply voltage, aging, etc.
+
+With a bit of software, you can correct for the in-accuracy.  ntpd calls it
+*drift*.  It just takes some extra low order bits on the arithmetic doing the
+time calculations.  In the simple minded case, if you thought you had a 100
+MHz crystal, you need to change that to something like 100.000324. The use
+of a PPS signal from gpsd contributes directly to this measurement.
+
+Note that a low drift contributes to stability, not necessarily accuracy.
+
+The major source of in-stability is temperature.  Ballpark is the drift
+changes by 1 PPM per degree C.  This means that the drift does not stay
+constant, it may vary with a daily and yearly pattern.  This is why the
+value of drift the ntpd uses is calculated over a (relatively) short time.
+
+So how do we calculate the drift?  The general idea is simple.  Measure the
+time offset every N seconds, plot the graph, and fit a straight line.  The
+slope of that line is the drift.  The units cancel out.  Parts-per-million is
+a handy scale.
+
+How do you turn that handwaving description into code?  One easy way is to
+use 2 points and pick the right N, then run the answer through a low pass
+filter.  In that context, there are two competing sources of error.  If N is
+too small, the errors on each individual measurement  of the offset time will
+dominate.  If N is too big, the actual drift will change while you are
+measuring it.  In the middle is a sweet spot.  (For an example,
+see <<ADEV-PLOT>>.
+
+ntpd adjusts the value of the polling interval to get the best results.  That
+turns into the N above.
+
+If you turn on logging for loopstats, that will record both offset, drift,
+and the polling interval  It's easy to feed to gnuplot, see the sample
+scripts provided with this file *FIX-ME*
+
+
+==== Applying the theory ====
+
+While ntpd is adjusting the polling interval, it is assuming that the drift
+is not changing.  It gets confused if your drift changes abruptly, say
+because you started some big chunk of work on a machine that's usually idle
+and that raises the temperature.
+
+ntpd writes out the drift every hour or so.  (Less often if it hasn't changed
+much to reduce the workload on flash file systems.)  On startup, ntpd reloads
+the old value.
+
+If you restart ntpd, it should start with a close old drift value and quickly
+converge to the newer slightly different value.  If you reboot, expect it to
+converge to a new/different drift value and that may take a while depending
+on how different the basic calibration factors are.
+
+=== NTP performance tuning ===
 
 For good time stability, you should always have at least four other
 chimers in your ntpd or chrony configuration besides your GPS
@@ -911,3 +981,5 @@ performance tuning.
 - [[[SIRF-WOBBLE]]] http://www.megapathdsl.net/~hmurray/ntp/GPSSiRF-off.gif[Peer Offset of SiRF units]
 
 - [[[ZONES]]] http://www.pool.ntp.org/zone
+
+- [[[ADEV-PLOT]]] http://www.leapsecond.com/pages/adev-avg/[Allan deviation and Averaging]
