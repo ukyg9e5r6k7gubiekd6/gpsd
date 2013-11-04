@@ -1,5 +1,5 @@
 = GPSD Time Service HOWTO =
-Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>, Hal Murray <hmurray@megapathdsl.net>
+Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
 v1.1, November 2013
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
@@ -713,7 +713,7 @@ is never used, just monitored.
 
 == NTP working and performance details ==
 
-This Section deals specifically with ntpd.  It discusses algorithms
+This section deals specifically with ntpd.  It discusses algorithms
 used by the ntpd suite to measure and correct the system time.  It is not
 directly applicable to chronyd, althogh some design considerations
 may be similar.
@@ -721,19 +721,21 @@ may be similar.
 === ntpd internal instrumentation ===
 
 ==== Theory and background ====
-The crystals used in consumer electronics have two properties we are
-interested in: accuracy and stability.  *Accuracy* is how well the measured
-frequency matches the number printed on the can.  *Stability* is how well the
-frequency stays the same even if it isn't accurate.  (Long term aging is a
-3rd property that is interesting, but as discussed below, since ntpd
-uses a short drift history, it is not a cause of error.)
+
+The clock crystals used in consumer electronics have two properties we
+are interested in: accuracy and stability.  *Accuracy* is how well the
+measured frequency matches the number printed on the can.  *Stability*
+is how well the frequency stays the same even if it isn't accurate.
+(Long term aging is a third property that is interesting, but as
+discussed below, since ntpd uses a short drift history, it is not a
+cause of error.)
 
 Typical specs for oscillator packages are 20, 50, 100 ppm.  That includes
 everything; initial accuracy, temperature, supply voltage, aging, etc.
 
-With a bit of software, you can correct for the in-accuracy.  ntpd calls it
+With a bit of software, you can correct for the inaccuracy.  ntpd calls it
 *drift*.  It just takes some extra low order bits on the arithmetic doing the
-time calculations.  In the simple minded case, if you thought you had a 100
+time calculations.  In the simplest case, if you thought you had a 100
 MHz crystal, you need to change that to something like 100.000324. The use
 of a PPS signal from gpsd contributes directly to this measurement.
 
@@ -761,9 +763,8 @@ ntpd adjusts the value of the polling interval to get the best results.  That
 turns into the N above.
 
 If you turn on logging for loopstats, that will record both offset, drift,
-and the polling interval  It's easy to feed to gnuplot, see the sample
-scripts provided with this file *FIX-ME*
-
+and the polling interval  It's easy to feed to gnuplot, see the example
+script in the GPSD contrib directory.
 
 ==== Applying the theory ====
 
@@ -949,7 +950,10 @@ If and when you are ready to go public, see <<JOIN-POOL>>.
 
 == Acknowledgments ==
 Beat Bolli <bbolli@ewanet.ch> wrote much of the section on NTP
-performance tuning.
+performance tuning. Hal Murray <hmurray@megapathdsl.net> wrote
+much of the section on NTP working and performance details.
+Sanjeev Gupta <Hal Murray <hmurray@megapathdsl.net> assisted 
+with editing.
 
 == References ==
 
