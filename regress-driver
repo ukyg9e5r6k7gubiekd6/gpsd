@@ -158,7 +158,7 @@ case $mode in
         echo "Testing super-raw mode..." >&2
         for f in $*; do
             ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts -r '?WATCH={"enable":true,"raw":2}' $opts ${f} \
-            | ./devtools/striplog -2 >${TMP}/test1-$$.chk;
+            | ./devtools/striplog -n 4 >${TMP}/test1-$$.chk;
             ./devtools/striplog <${f} >${TMP}/test2-$$.chk;
             cmp ${TMP}/test[12]-$$.chk;
         done; rm ${TMP}/test[12]-$$.chk

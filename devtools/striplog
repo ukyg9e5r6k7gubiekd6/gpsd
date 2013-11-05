@@ -11,12 +11,15 @@
 import getopt, sys
 
 secondline = firstline = False
-(options, arguments) = getopt.getopt(sys.argv[1:], "12")
+stripval = 0
+(options, arguments) = getopt.getopt(sys.argv[1:], "12n:")
 for (switch, val) in options:
     if (switch == '-1'):
         firstline = True
     if (switch == '-2'):
         secondline = True
+    if (switch == '-n'):
+        stripval = int(val)
 
 try:
     if firstline:
@@ -24,6 +27,9 @@ try:
     elif secondline:
         sys.stdin.readline()
         sys.stdin.readline()
+    elif stripval:
+        for _dummy in range(stripval):
+            sys.stdin.readline()
     else:
         while True:
             line = sys.stdin.readline()
@@ -32,5 +38,5 @@ try:
         sys.stdout.write(line)
 
     sys.stdout.write(sys.stdin.read())
-except KeyBoardInterrupt:
+except KeyboardInterrupt:
     pass
