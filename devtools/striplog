@@ -10,19 +10,27 @@
 #
 import getopt, sys
 
-firstline = False
-(options, argumwnts) = getopt.getopt(sys.argv[1:], "1")
+secondline = firstline = False
+(options, arguments) = getopt.getopt(sys.argv[1:], "12")
 for (switch, val) in options:
     if (switch == '-1'):
         firstline = True
+    if (switch == '-2'):
+        secondline = True
 
-if firstline:
-    sys.stdin.readline()
-else:
-    while True:
-        line = sys.stdin.readline()
-        if line[0] != '#':
-            break
-    sys.stdout.write(line)
+try:
+    if firstline:
+        sys.stdin.readline()
+    elif secondline:
+        sys.stdin.readline()
+        sys.stdin.readline()
+    else:
+        while True:
+            line = sys.stdin.readline()
+            if line[0] != '#':
+                break
+        sys.stdout.write(line)
 
-sys.stdout.write(sys.stdin.read())
+    sys.stdout.write(sys.stdin.read())
+except KeyBoardInterrupt:
+    pass
