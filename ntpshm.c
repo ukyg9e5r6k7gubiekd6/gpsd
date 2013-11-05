@@ -43,7 +43,7 @@ struct shmTime
 				 *         use values
 				 *       clear valid
 				 */
-    int count;
+    volatile int count;
     time_t clockTimeStampSec;
     int clockTimeStampUSec;
     time_t receiveTimeStampSec;
@@ -51,7 +51,7 @@ struct shmTime
     int leap;
     int precision;
     int nsamples;
-    int valid;
+    volatile int valid;
     unsigned        clockTimeStampNSec;     /* Unsigned ns timestamps */
     unsigned        receiveTimeStampNSec;   /* Unsigned ns timestamps */
     int             dummy[8];
