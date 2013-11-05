@@ -36,13 +36,14 @@ testing=daemon
 opts=""
 logfile=""
 help="0"
+baton=false
 while getopts cl:strbuvo:h opt
 do
     case $opt in
 	c) testing=clientlib ;;	# Can be 'daemon'
 	l) logfile=$OPTARG ;;	# Logfile to save diffs to
 	s) mode=regress ;;	# Run regression tests
-	t) opts="-b $opts" mode=regress ;;	# Run regression tests w/baton
+	t) baton=true mode=regress ;;	# Run regression tests w/baton
 	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
 	b) mode=build ;;	# Rebuild regression check files
 	u) opts="$opts -u" ;;	# Force UDP
@@ -91,7 +92,11 @@ GPSFILTER="sed -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE
 TMP=`mktemp -d -t gpsd-test-XXXXXXXXXXXXXX`
 
 # Only twirl the baton on a tty, avoids junk in transcripts.
-if [ -t 1 ]
+if [ -t 0 ]
+then
+    baton=false
+fi
+if ] $baton = true ]
 then
     opts="$opts -b"
 fi
@@ -152,7 +157,7 @@ case $mode in
     superraw)
         echo "Testing super-raw mode..." >&2
         for f in $*; do
-            ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts -r '{"class":"WATCH","enable":False,"raw":2}' $opts ${f} \
+            ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts -r '?WATCH={"enable":true,"raw":2}' $opts ${f} \
             | ./devtools/striplog -1 >${TMP}/test1-$$.chk;
             ./devtools/striplog <${f} >${TMP}/test2-$$.chk;
             cmp ${TMP}/test[12]-$$.chk;
