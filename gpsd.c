@@ -634,7 +634,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 }
 
 static void notify_watchers(struct gps_device_t *device, const char *sentence, ...)
-/* notify all clients watching a given device of an event */
+/* notify all JSON-watching clients of a given device about an event */
 {
     va_list ap;
     char buf[BUFSIZ];
@@ -645,7 +645,7 @@ static void notify_watchers(struct gps_device_t *device, const char *sentence, .
     va_end(ap);
 
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-	if (sub->active != 0 && subscribed(sub, device))
+	if (sub->active != 0 && subscribed(sub, device) && sub->policy.json)
 	    (void)throttled_write(sub, buf, strlen(buf));
 }
 #endif /* SOCKET_EXPORT_ENABLE */
