@@ -29,11 +29,13 @@
  * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
  * CONFIG_PPS_CLIENT_LDISC=y
  */
+#ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
 // include unistd.h here as it is missing on older pps-tools releases.
 // 'close' is not defined otherwise.
 #include <unistd.h>
 #include <sys/timepps.h>
+#endif /* S_SPLINT_S */
 #endif
 
 #ifdef _WIN32
@@ -997,6 +999,7 @@ void cfmakeraw(struct termios *);
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall)	assert(funcall != -23)
 
+#ifndef S_SPLINT_S
 #if defined(NTPSHM_ENABLE) || defined(SHM_EXPORT_ENABLE)
 /* memory barriers */
 static /*@unused@*/ inline void barrier(void) {
@@ -1008,7 +1011,10 @@ static /*@unused@*/ inline void barrier(void) {
 # error Memory barriers are not supported. Disable NTPSHM and SHM export.
 #endif /* defined(NTPSHM_ENABLE) || defined(SHM_EXPORT_ENABLE) */
 }
-#endif /*  */
+#endif /* defined(NTPSHM_ENABLE) || defined(SHM_EXPORT_ENABLE) */
+#else
+#define barrier()
+#endif /* S_SPLINT_S */
 
 #endif /* _GPSD_H_ */
 // Local variables:

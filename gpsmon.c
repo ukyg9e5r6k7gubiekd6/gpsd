@@ -45,7 +45,7 @@ extern struct monitor_object_t oncore_mmt, tnt_mmt, aivdm_mmt;
 struct gps_device_t session;
 WINDOW *devicewin;
 bool serial;
-float timedelta = 0;
+double timedelta = 0;
 
 /* These are private */
 static struct gps_context_t context;
@@ -837,7 +837,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /*@+observertrans +nullpass +globstate@*/
 
 #ifdef PPS_ENABLE
-static char *pps_report(struct gps_device_t *session UNUSED,
+static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
 			struct timedrift_t *td UNUSED,
 			double edge_offset) {
     /*

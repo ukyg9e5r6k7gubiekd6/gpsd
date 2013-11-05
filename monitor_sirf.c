@@ -386,7 +386,7 @@ static void sirf_update(void)
 	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */
 	display(mid7win, 2, 16, "%lu", getbeu32(buf, 16));	/* Estimated Time */
 	/* Not a CSD field, but there's no better place to put it */
-	if (timedelta)
+	if (timedelta != 0)
 	    display(mid7win, 2, 39, "%f", timedelta);	/* PPS offset */
 	monitor_log("CSD 0x07=");
 	break;

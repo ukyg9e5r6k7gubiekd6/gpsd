@@ -298,9 +298,11 @@ int main(int argc, char **argv)
 	source.port = NULL;
 	source.device = NULL;
     } else {
+	/*@-statictrans -observertrans@*/
 	source.server = (char *)"localhost";
 	source.port = (char *)DEFAULT_GPSD_PORT;
 	source.device = NULL;
+	/*@+statictrans +observertrans@*/
     }
 
     if (optind < argc) {

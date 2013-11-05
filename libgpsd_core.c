@@ -249,11 +249,11 @@ void gps_context_init(struct gps_context_t *context)
     /* *INDENT-ON* */
     (void)memcpy(context, &nullcontext, sizeof(struct gps_context_t));
 
-#ifdef PPS_ENABLE
+#if !defined(S_SPLINT_S) && defined(PPS_ENABLE)
     /*@-nullpass@*/
     (void)pthread_mutex_init(&report_mutex, NULL);
     /*@+nullpass@*/
-#endif /* PPS_ENABLE */
+#endif /* defined(S_SPLINT_S) defined(PPS_ENABLE) */
 }
 /*@+compdestroy@*/
 

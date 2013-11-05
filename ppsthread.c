@@ -61,17 +61,21 @@ static int init_kernel_pps(struct gps_device_t *session)
 /* return handle for kernel pps, or -1; requires root privileges */
 {
     int ldisc = 18;   /* the PPS line discipline */
+#ifndef S_SPLINT_S
     pps_params_t pp;
+#endif /* S_SPLINT_S */
     glob_t globbuf;
     size_t i;             /* to match type of globbuf.gl_pathc */
-    char pps_num = 0;     /* /dev/pps[pps_num] is our device */
+    char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
     char path[GPS_PATH_MAX] = "";
+    int ret;
 
     session->kernelpps_handle = -1;
-    if ( !isatty(session->gpsdata.gps_fd) ) {
+    if ( isatty(session->gpsdata.gps_fd) == 0 ) {
 	gpsd_report(session->context->debug, LOG_INF, "KPPS gps_fd not a tty\n");
     	return -1;
     }
+    /*@+ignoresigns@*/
     /* Attach the line PPS discipline, so no need to ldattach */
     /* This activates the magic /dev/pps0 device */
     /* Note: this ioctl() requires root */
@@ -81,6 +85,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 		    strerror(errno));
     	return -1;
     }
+    /*@-ignoresigns@*/
 
     /* uh, oh, magic file names!, RFC2783 neglects to specify how
      * to associate the serial device and pps device names */
@@ -92,7 +97,7 @@ static int init_kernel_pps(struct gps_device_t *session)
      * yes, this could be done with libsysfs, but trying to keep the
      * number of required libs small, and libsysfs would still be linux only */
     memset( (void *)&globbuf, 0, sizeof(globbuf));
-    glob("/sys/devices/virtual/pps/pps?/path", 0, NULL, &globbuf);
+    (void)glob("/sys/devices/virtual/pps/pps?/path", 0, NULL, &globbuf);
 
     memset( (void *)&path, 0, sizeof(path));
     for ( i = 0; i < globbuf.gl_pathc; i++ ) {
@@ -102,7 +107,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 	    if ( 0 < r ) {
 		path[r - 1] = '\0'; /* remove trailing \x0a */
 	    }
-	    close(fd);
+	    (void)close(fd);
 	}
 	gpsd_report(session->context->debug, LOG_INF,
 		    "KPPS checking %s, %s\n",
@@ -131,7 +136,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 		    "KPPS only works as root \n");
     	return -1;
     }
-    int ret = open(path, O_RDWR);
+    ret = open(path, O_RDWR);
     if ( 0 > ret ) {
 	gpsd_report(session->context->debug, LOG_INF,
 		    "KPPS cannot open %s: %s\n", path, strerror(errno));
@@ -147,6 +152,7 @@ static int init_kernel_pps(struct gps_device_t *session)
     } else {
     	/* have kernel PPS handle */
         int caps;
+#ifndef S_SPLINT_S
 	/* get features  supported */
         if ( 0 > time_pps_getcap(session->kernelpps_handle, &caps)) {
 	    gpsd_report(session->context->debug, LOG_ERROR,
@@ -159,6 +165,7 @@ static int init_kernel_pps(struct gps_device_t *session)
         /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
         memset( (void *)&pp, 0, sizeof(pps_params_t));
         pp.mode = PPS_CAPTUREBOTH;
+#endif /* S_SPLINT_S */
 
         if ( 0 > time_pps_setparams(session->kernelpps_handle, &pp)) {
 	    gpsd_report(session->context->debug, LOG_ERROR,
@@ -171,7 +178,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-/*@-mustfreefresh -type@ -unrecog -branchstate*/
+/*@-mustfreefresh -type -unrecog -branchstate@*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
@@ -513,7 +520,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H)
     if (session->kernelpps_handle > 0) {
 	gpsd_report(session->context->debug, LOG_PROG, "PPS descriptor cleaned up\n");
-	time_pps_destroy(session->kernelpps_handle);
+	(void)time_pps_destroy(session->kernelpps_handle);
     }
 #endif
     if (session->thread_wrap_hook != NULL)

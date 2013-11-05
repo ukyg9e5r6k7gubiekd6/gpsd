@@ -18,3 +18,8 @@
 -DCRTSCTS=0x00020000
 -DONLCR=0x00000002
 -D__gnuc_va_list=va_list
+-D__signed__=signed
+-D__pid_t=int
+-D__size_t=size_t
+-Dpps_handle_t=int
+

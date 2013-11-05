@@ -275,7 +275,7 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
     shmTime->clockTimeStampNSec = (unsigned)(microseconds*1000);
     shmTime->receiveTimeStampSec = (time_t) tv.tv_sec;
     shmTime->receiveTimeStampUSec = (int)tv.tv_usec;
-    shmTime->receiveTimeStampNSec = (int)(tv.tv_usec*1000);
+    shmTime->receiveTimeStampNSec = (unsigned int)(tv.tv_usec*1000);
     shmTime->leap = session->context->leap_notify;
     /* setting the precision here does not seem to help anything, too
      * hard to calculate properly anyway.  Let ntpd figure it out.
@@ -339,12 +339,14 @@ static int ntpshm_pps(struct gps_device_t *session,
      */
     shmTimeP->valid = 0;
     shmTimeP->count++;
+    /*@-type@*//* splint is confused about struct timespec */
     shmTimeP->clockTimeStampSec = (time_t)actual_ts->tv_sec;
     shmTimeP->clockTimeStampUSec = (int)(actual_ts->tv_nsec/1000);
     shmTimeP->clockTimeStampNSec = (unsigned)actual_ts->tv_nsec;
     shmTimeP->receiveTimeStampSec = (time_t)clock_ts->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)(clock_ts->tv_nsec/1000);
     shmTimeP->receiveTimeStampNSec = (unsigned)clock_ts->tv_nsec;
+    /*@+type@*/
     shmTimeP->leap = session->context->leap_notify;
     /* precision is a placebo, ntpd does not really use it
      * real world accuracy is around 16uS, thus -16 precision */
@@ -352,10 +354,12 @@ static int ntpshm_pps(struct gps_device_t *session,
     shmTimeP->count++;
     shmTimeP->valid = 1;
 
+    /*@-usedef@*/
     /* this is more an offset jitter/dispersion than precision,
      * but still useful for debug */
     offset = fabs((double)(clock_tv.tv_sec - actual_tv.tv_sec)
 		  + ((double)(clock_tv.tv_usec - actual_tv.tv_usec) / 1000000.0));
+    /*@+usedef@*/
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     /*@-type@*//* splint is confused about struct timespec */
     gpsd_report(session->context->debug, LOG_RAW,
@@ -431,7 +435,9 @@ static void chrony_send(struct gps_device_t *session,
     sample.pulse = 0;
     sample.leap = session->context->leap_notify;
     sample.magic = SOCK_MAGIC;
+    /*@-type@*//* splint is confused about struct timespec */
     TSTOTV(&sample.tv, actual_ts);
+    /*@+type@*/
     sample.offset = offset; 
 
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
