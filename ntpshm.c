@@ -341,7 +341,7 @@ static int ntpshm_pps(struct gps_device_t *session,
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = (time_t)actual_ts->tv_sec;
     shmTimeP->clockTimeStampUSec = (int)(actual_ts->tv_nsec/1000);
-    shmTimeP->clockTimeStampUSec = (unsigned)actual_ts->tv_nsec;
+    shmTimeP->clockTimeStampNSec = (unsigned)actual_ts->tv_nsec;
     shmTimeP->receiveTimeStampSec = (time_t)clock_ts->tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)(clock_ts->tv_nsec/1000);
     shmTimeP->receiveTimeStampNSec = (unsigned)clock_ts->tv_nsec;
