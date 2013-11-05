@@ -216,7 +216,7 @@ if __name__ == '__main__':
             sys.stderr.write("gpsfake: JSON error on line %s is %s.\n" % (`e.data`, e.explanation))
             raise SystemExit, 1
         except KeyboardInterrupt:
-            sys.stderr.write("gpsfake: aborted\n"))
+            sys.stderr.write("gpsfake: aborted\n")
             raise SystemExit, 1
     finally:
         test.cleanup();
