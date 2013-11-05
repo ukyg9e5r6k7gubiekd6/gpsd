@@ -52,7 +52,9 @@ struct shmTime
     int precision;
     int nsamples;
     int valid;
-    int pad[10];
+    unsigned        clockTimeStampNSec;     /* Unsigned ns timestamps */
+    unsigned        receiveTimeStampNSec;   /* Unsigned ns timestamps */
+    int             dummy[8];
 };
 
 /* Note: you can start gpsd as non-root, and have it work with ntpd.
@@ -266,8 +268,10 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
      * the compiler or CPU cache */
     shmTime->clockTimeStampSec = (time_t) seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
+    shmTime->clockTimeStampNSec = (unsigned)(microseconds*1000);
     shmTime->receiveTimeStampSec = (time_t) tv.tv_sec;
     shmTime->receiveTimeStampUSec = (int)tv.tv_usec;
+    shmTime->receiveTimeStampNSec = (int)(tv.tv_usec*1000);
     shmTime->leap = session->context->leap_notify;
     /* setting the precision here does not seem to help anything, too
      * hard to calculate properly anyway.  Let ntpd figure it out.
@@ -335,8 +339,10 @@ static int ntpshm_pps(struct gps_device_t *session,
     shmTimeP->count++;
     shmTimeP->clockTimeStampSec = (time_t)actual_tv.tv_sec;
     shmTimeP->clockTimeStampUSec = (int)actual_tv.tv_usec;
+    shmTimeP->clockTimeStampUSec = (unsigned)actual_ts->tv_nsec;
     shmTimeP->receiveTimeStampSec = (time_t)clock_tv.tv_sec;
     shmTimeP->receiveTimeStampUSec = (int)clock_tv.tv_usec;
+    shmTimeP->receiveTimeStampNSec = (unsigned)clock_ts->tv_nsec;
     shmTimeP->leap = session->context->leap_notify;
     /* precision is a placebo, ntpd does not really use it
      * real world accuracy is around 16uS, thus -16 precision */
