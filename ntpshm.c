@@ -264,8 +264,12 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
      */
     shmTime->valid = 0;
     shmTime->count++;
-    /* FIXME need a memory barrier here to prevent write reordering by
-     * the compiler or CPU cache */
+
+    /*
+     * We need a memory barrier here to prevent write reordering by
+     * the compiler or CPU cache
+     */
+    barrier();
     shmTime->clockTimeStampSec = (time_t) seconds;
     shmTime->clockTimeStampUSec = (int)microseconds;
     shmTime->clockTimeStampNSec = (unsigned)(microseconds*1000);
@@ -278,8 +282,8 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
      * Any NMEA will be about -1 or -2.
      * Garmin GPS-18/USB is around -6 or -7.
      */
-    /* FIXME need a memory barrier here to prevent write reordering by
-     * the compiler or CPU cache */
+    barrier();
+
     shmTime->count++;
     shmTime->valid = 1;
 
