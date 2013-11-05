@@ -315,11 +315,9 @@ static int ntpshm_pps(struct gps_device_t *session,
 	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
 	return 0;
 
-    /* for now we use uSec, not nSec */
-    /*@-type@*//* splint is confused about struct timespec */
-    TSTOTV( &actual_tv, actual_ts );
-    TSTOTV( &clock_tv, clock_ts );
-    /*@+type@*/
+    /* new ntpd interrace can use uSec andnSec */
+    /* do NOT use TSTOTV() since that may round up and we need seconds to 
+     * be the same for uSec and nSec.  */
 
     /* we use the shmTime mode 1 protocol
      *
@@ -337,11 +335,11 @@ static int ntpshm_pps(struct gps_device_t *session,
      */
     shmTimeP->valid = 0;
     shmTimeP->count++;
-    shmTimeP->clockTimeStampSec = (time_t)actual_tv.tv_sec;
-    shmTimeP->clockTimeStampUSec = (int)actual_tv.tv_usec;
+    shmTimeP->clockTimeStampSec = (time_t)actual_ts->tv_sec;
+    shmTimeP->clockTimeStampUSec = (int)(actual_ts->tv_nsec/1000);
     shmTimeP->clockTimeStampUSec = (unsigned)actual_ts->tv_nsec;
-    shmTimeP->receiveTimeStampSec = (time_t)clock_tv.tv_sec;
-    shmTimeP->receiveTimeStampUSec = (int)clock_tv.tv_usec;
+    shmTimeP->receiveTimeStampSec = (time_t)clock_ts->tv_sec;
+    shmTimeP->receiveTimeStampUSec = (int)(clock_ts->tv_nsec/1000);
     shmTimeP->receiveTimeStampNSec = (unsigned)clock_ts->tv_nsec;
     shmTimeP->leap = session->context->leap_notify;
     /* precision is a placebo, ntpd does not really use it
