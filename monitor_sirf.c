@@ -169,7 +169,8 @@ static bool sirf_initialize(void)
     display(mid7win, 1, 1, "SVs: ");
     display(mid7win, 1, 9, "Drift: ");
     display(mid7win, 1, 23, "Bias: ");
-    display(mid7win, 2, 1, "Estimated GPS Time: ");
+    display(mid7win, 2, 1, "Est. GPS Time: ");
+    display(mid7win, 2, 27, "PPS Offset: ");
     display(mid7win, 3, 8, " Packet type 7 (0x07) ");
     (void)wattrset(mid7win, A_NORMAL);
 
@@ -383,7 +384,10 @@ static void sirf_update(void)
 	display(mid7win, 1, 5, "%2d", getub(buf, 7));	/* SVs */
 	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock drift */
 	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */
-	display(mid7win, 2, 21, "%lu", getbeu32(buf, 16));	/* Estimated Time */
+	display(mid7win, 2, 16, "%lu", getbeu32(buf, 16));	/* Estimated Time */
+	/* Not a CSD field, but there's no better place to put it */
+	if (timedelta)
+	    display(mid7win, 2, 39, "%f", timedelta);	/* PPS offset */
 	monitor_log("CSD 0x07=");
 	break;
 
