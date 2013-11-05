@@ -1062,6 +1062,15 @@ static bool hunt_failure(struct gps_device_t *session)
 /* after a bad packet, what should cue us to go to next autobaud setting? */
 {
     /*
+     * We have tried three different tests here.
+     *
+     * The first was session->badcount++>1.  This worked very well on
+     * ttys for years and years, but caused failure to sync on TCP/IP
+     * sources, which have I/O boundaries in mid-packet more often
+     * than RS232 ones.  There's a test for this at
+     * test/daemon/tcp-torture.log.
+     *
+     * The second was session->badcount++>1 && session->packet.state==0.
      * Fail hunt only if we get a second consecutive bad packet
      * and the lexer is in ground state.  We don't want to fail on
      * a first bad packet because the source might have a burst of
@@ -1070,16 +1079,20 @@ static bool hunt_failure(struct gps_device_t *session)
      * might have picked up a valid partial packet - better to go
      * back around the loop and pick up more data.
      *
-     * It has been reported that the "&& session->packet.state==0"
-     * guard causes a hang while autobauding on SiRF IIIs (but not on
-     * SiRF-IIs, oddly enough).  Removing this conjunct will resurrect
-     * chronic failure to sync on TCP/IP sources, which have I/O
-     * boundaries in mid-packet more often than RS232 ones.  There's a
-     * test for this at test/daemon/tcp-torture.log.
+     * The "&& session->packet.state==0" guard causes an intermittent
+     * hang while autobauding on SiRF IIIs (but not on SiRF-IIs, oddly
+     * enough).  Removing this conjunct resurrected the failure
+     * of test/daemon/tcp-torture.log.
+     *
+     * Our third attempt, isatty(session->gpsdata.gps_fd) != 0 
+     * && session->badcount++>1, reverts to the old test that worked
+     * well on ttys for ttys and prevents non-tty devices from *ever*
+     * having hunt failures. This has the cost that non-tty devices
+     * will never get kicked off for presenting bad packets.
      *
      * This test may need further revision.
      */
-    return session->badcount++>1 && session->packet.state==0;
+    return isatty(session->gpsdata.gps_fd) != 0 && session->badcount++>1;
 }
 
 gps_mask_t gpsd_poll(struct gps_device_t *session)
