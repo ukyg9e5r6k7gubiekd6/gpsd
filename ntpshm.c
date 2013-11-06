@@ -224,9 +224,12 @@ void ntpshm_session_init(struct gps_device_t *session)
 int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *td)
 /* put a received fix time into shared memory for NTP */
 {
-    /* shmTime is volatile to try to prevent C compiler from reordering
+    /*
+     * shmTime is volatile to try to prevent C compiler from reordering
      * writes, or optimizing some 'dead code'.  but CPU cache may still
-     * write out of order since we do not use memory barriers, yet */
+     * write out of order if barrier() is a no-op (our implementation 
+     * isn't portable).
+     */
     volatile struct shmTime *shmTime = NULL;
     /* Any NMEA will be about -1 or -2. Garmin GPS-18/USB is around -6 or -7. */
     int precision = -1; /* default precision */
