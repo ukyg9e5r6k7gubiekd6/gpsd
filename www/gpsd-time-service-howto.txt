@@ -113,7 +113,7 @@ fix-processing and RS232 transmission time.
 
 Unfortunately, fix reports are often delayed in the receiver and on
 the link by as much as several hundred mSec, and this delay is not
-constant. This latency varies (jitters) throughout the day.  It may be
+constant. This latency varies (wobbles) throughout the day.  It may be
 stable to 10 mSec for hours and then jump by 200mSec.  Under these
 circumstances you can't expect accuracy to UTC much better than 1
 second from this method.
