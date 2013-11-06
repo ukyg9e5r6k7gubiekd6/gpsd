@@ -227,7 +227,7 @@ int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *t
     /*
      * shmTime is volatile to try to prevent C compiler from reordering
      * writes, or optimizing some 'dead code'.  but CPU cache may still
-     * write out of order if barrier() is a no-op (our implementation 
+     * write out of order if memory_barrier() is a no-op (our implementation 
      * isn't portable).
      */
     volatile struct shmTime *shmTime = NULL;
@@ -264,7 +264,7 @@ int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *t
     shmTime->count++;
     /* We need a memory barrier here to prevent write reordering by
      * the compiler or CPU cache */
-    barrier();
+    memory_barrier();
     /*@-type@*/ /* splint is confused about struct timespec */
     shmTime->clockTimeStampSec = (time_t)td->real.tv_sec;
     shmTime->clockTimeStampUSec = (int)(td->real.tv_nsec/1000);
@@ -275,7 +275,7 @@ int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *t
     /*@+type@*/
     shmTime->leap = session->context->leap_notify;
     shmTime->precision = precision;
-    barrier();
+    memory_barrier();
     shmTime->count++;
     shmTime->valid = 1;
 

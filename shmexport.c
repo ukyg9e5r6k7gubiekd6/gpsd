@@ -80,17 +80,17 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 * get clobbered first and the data can be detected as bad.
 	 */
 	shared->bookend2 = tick;
-	barrier();
+	memory_barrier();
 	memcpy((void *)(context->shmexport + offsetof(struct shmexport_t, gpsdata)),
 	       (void *)gpsdata,
 	       sizeof(struct gps_data_t));
-	barrier();
+	memory_barrier();
 #ifndef USE_QT
 	shared->gpsdata.gps_fd = SHM_PSEUDO_FD;
 #else
 	shared->gpsdata.gps_fd = (void *)(intptr_t)SHM_PSEUDO_FD;
 #endif /* USE_QT */
-	barrier();
+	memory_barrier();
 	shared->bookend1 = tick;
     }
 }
