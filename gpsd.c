@@ -1534,7 +1534,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	struct timedrift_t td;
 
 #ifdef HAVE_CLOCK_GETTIME
-	(void)clock_gettime(CLOCK_REALTIME, &td.clock);
+	/*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &td.clock);
 #else
 	struct timeval clock_tv;
 	(void)gettimeofday(&clock_tv, NULL);
@@ -1549,9 +1549,13 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	    fix_time += device->device_type->time_offset(device);
 	/* it's ugly but timestamp_t is double */
 	fractional = modf(fix_time, &integral);
+	/*@-type@*/ /* splint is confused about struct timespec */
 	td.real.tv_sec = (time_t)integral;
 	td.real.tv_nsec = (long)(fractional * 1e+9);
+	/*@+type@*/
+	/*@-compdef@*/
 	(void)ntpshm_put(device, device->shmIndex, &td);
+	/*@+compdef@*/
 	device->last_fixtime = device->newdata.time;
     }
 #endif /* NTPSHM_ENABLE */

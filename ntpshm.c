@@ -352,9 +352,11 @@ static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
     sample.magic = SOCK_MAGIC;
     /*@-type@*//* splint is confused about struct timespec */
     TSTOTV(&sample.tv, &td->real);
-    /*@+type@*/
+    /*@-compdef@*/
     sample.offset = td->real.tv_sec - td->clock.tv_sec;
     sample.offset += (td->real.tv_nsec - td->clock.tv_nsec) / 1e9;
+    /*@+compdef@*/
+    /*@+type@*/
 
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
