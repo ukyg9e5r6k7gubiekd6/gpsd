@@ -294,10 +294,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    "KPPS data: using %s\n",
 			    edge_kpps ? "assert" : "clear");
 
-#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1e9+x.tv_nsec-y.tv_nsec)
-	        cycle_kpps = timediff(ts_kpps, pulse_kpps[edge_kpps])/1000;
-	        duration_kpps = timediff(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
-#undef timediff
+	        cycle_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[edge_kpps])/1000;
+	        duration_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
 	        gpsd_report(session->context->debug, LOG_INF,
 		    "KPPS cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
 		    cycle_kpps, duration_kpps,
@@ -325,12 +323,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	state = (int)((state & PPS_LINE_TIOC) != 0);
 	/*@ +boolint @*/
-#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1e9+x.tv_nsec-y.tv_nsec)
-	cycle = timediff(clock_ts, pulse[state]) / 1000;
-	duration = timediff(clock_ts, pulse[(int)(state == 0)])/1000;
-#undef timediff
+	cycle = timespec_diff_ns(clock_ts, pulse[state]) / 1000;
+	duration = timespec_diff_ns(clock_ts, pulse[(int)(state == 0)])/1000;
 	/*@ -boolint @*/
-
 	if (state == laststate) {
 	    /* some pulses may be so short that state never changes */
 	    if (999000 < cycle && 1001000 > cycle) {

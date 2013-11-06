@@ -847,8 +847,7 @@ static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
      * Instead we're relying on access to floats to be atomic.
      */
     /*@-type@*/ /* splint is confused about struct timespec */
-    timedelta = td->real.tv_sec - td->clock.tv_sec;
-    timedelta += (td->real.tv_nsec - td->clock.tv_nsec) / 1e9;
+    timedelta = timespec_diff_ns(td->real, td->clock) * 1e-9;
     /*@+type@*/
     packet_log("-------------------------------------" 
 	       " PPS "
