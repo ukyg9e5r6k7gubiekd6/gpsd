@@ -1716,8 +1716,6 @@ void packet_parse(struct gps_packet_t *lexer)
 		 */
 		else if ((0x1c == pkt_id) && (11 <= packetlen))
 		    /* pass */ ;
-		else if (TSIP_ID_AND_LENGTH(0x38, 0))        /* Not in [TSIP] */
-		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x41, 10))
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x42, 16))

@@ -1213,11 +1213,7 @@ static void handle_request(struct subscriber_t *sub,
 		    }
 		    /* we should have exactly one device now */
 		}
-		if (device == NULL)
-		    (void)snprintf(reply + strlen(reply),
-				   replylen - strlen(reply),
-				   "{\"class\":\"ERROR\",\"message\":\"Channel has no device (possible internal error).\"}\r\n");
-		else if (!privileged_user(device))
+		if (!privileged_user(device))
 		    (void)snprintf(reply + strlen(reply),
 				   replylen - strlen(reply),
 				   "{\"class\":\"ERROR\",\"message\":\"Multiple subscribers, cannot change control bits on %s.\"}\r\n",
