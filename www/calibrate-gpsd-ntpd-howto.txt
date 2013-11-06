@@ -7,6 +7,8 @@ you can find the original at the GPSD project website.
 
 == Introduction ==
 
+
+
 Using GPSD with ntpd, you will often find references to measuring
 the delay between the time that the GPS with 1PPS emits a fix, and
 the time that the ntpd service, via the shared memory segment,
@@ -23,13 +25,18 @@ fudge 127.127.28.1 refid GPS1
 Note that the 'GPS' and 'GPS1' on the second and fourth lines above
 have no special meaning, they are used only for display.
 
-The first two lines (127.127.28.0) refer to the shared memory segment
-to report message-decode time, the next stanza (127.127.28.1) is used for
-the 1PPS time.
+The magic pseudo-IP address 127.127.28.0 identifies unit 0 of the ntpd
+shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0 is used
+for in-band message timestamps (IMT) and unit 1 for the (more accurate,
+when available) time derived from combining IMT
+with the out-of-band PPS synchronization pulse.  Splitting these
+notifications allows ntpd to use its normal heuristics to weight them.
 
 We assume that the 1PPS signal, being just one bit long, and directly
-triggering an interrupt, is always on time.  The message-decode time,
-however, may be delayed, due to it being emitted, copied to shared memory, etc.
+triggering an interrupt, is always on time (sic).  Correcting for latency
+in the 1PPS signal is beyond the scope of this document.  The IMT,
+however, may be delayed, due to it being emitted, copied to shared
+memory, etc.
 
 Based on advice and script fragments on the GPSD list, the following
 may help to calculate the 'time1' factor.  You may need to modify
@@ -86,14 +93,14 @@ Example:    48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000 0.00142487
 There are three parts to measuring and correcting for the delay in
 processing the 1PPS signal.
 
-1. Running ntpd without using the GPSD time (but using the 1PPS time)
+1. Running ntpd without using the IMT (but using the 1PPS time)
 2. Measuring the delay between the two messages
 3. Applying the correction factor
 
 We assume that you have successfully integrated GPSD with ntpd already.
 You should also have a decent set of NTP servers you are syncing to.
 
-==== 1. Running ntpd without GPSD time ====
+==== 1. Running ntpd without IMT ====
 
 Locate the line in your ntp.conf which refers to the shm0 segment, and
 append 'noselect' to it.  As an example, the first two lines in the sample
@@ -104,7 +111,7 @@ server 127.127.28.0 minpoll 4 maxpoll 4 noselect
 fudge 127.127.28.0 time1 0.420 refid GPS
 --------------------
 
-ntpd will now continue to monitor the in-band message timestamps from
+ntpd will now continue to monitor the IMT from
 GPSD, but not use for its algorithm.  It will write out statistics to
 the peerstats file.  Once ntpd is stable (a few hours or so), we can
 process the peerstats file.
@@ -119,14 +126,14 @@ From the 'peerstats' file, extract the lines corresponding to
 grep 127.127.28.0 peerstats > peerstats.shm
 -----------
 
-You can now examine the offset and jitter of the in-band time.  <<ANDY-POST>>
+You can now examine the offset and jitter of the IMT.  <<ANDY-POST>>
 suggests the following gnuplot fragment (you will need to set output
 options before plotting).
 
 Show the GPSD shared memory clock deviations from the system
-        clock.  (You will get the GPSD shared memory clock fudge value
-        estimate from this data when NTP has converged to your
-        satisfaction.)
+clock.  (You will get the GPSD shared memory clock fudge value
+estimate from this data when NTP has converged to your
+satisfaction.)
 
 ------------------
         gnuplot> plot    "peerstats.shm" using ($2):($5) with lines 1
