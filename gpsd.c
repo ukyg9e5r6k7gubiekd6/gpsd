@@ -704,7 +704,7 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
     ntpshm_link_activate(device);
     gpsd_report(context.debug, LOG_INF, 
 		"NTPD ntpshm_link_activate: %d\n",
-		(int)device->shmindex >= 0);
+		(int)device->shmIndex >= 0);
 #endif /* NTPSHM_ENABLE */
 
     gpsd_report(context.debug, LOG_INF, 

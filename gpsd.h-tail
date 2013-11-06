@@ -468,9 +468,11 @@ struct gps_device_t {
     unsigned long chars;	/* characters in the cycle */
 #endif /* TIMING_ENABLE */
 #ifdef NTPSHM_ENABLE
-    int shmindex;
     bool ship_to_ntpd;
-    int shmTimeP;
+    int shmIndex;
+# ifdef PPS_ENABLE
+    int shmIndexPPS;
+# endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     timestamp_t last_fixtime;		/* so updates happen once */
 #ifdef PPS_ENABLE

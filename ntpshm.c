@@ -214,10 +214,10 @@ void ntpshm_session_init(struct gps_device_t *session)
 {
 #ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
-    session->shmindex = -1;
+    session->shmIndex = -1;
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
-    session->shmTimeP = -1;
+    session->shmIndexPPS = -1;
 #endif	/* PPS_ENABLE */
 }
 
@@ -232,8 +232,8 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
     double seconds, microseconds;
 
     // gpsd_report(session->context->debug, LOG_PROG, "NTP: doing ntpshm_put(,%g, %g)\n", fixtime, fudge);
-    if (session->shmindex < 0 ||
-	(shmTime = session->context->shmTime[session->shmindex]) == NULL) {
+    if (session->shmIndex < 0 ||
+	(shmTime = session->context->shmTime[session->shmIndex]) == NULL) {
 	gpsd_report(session->context->debug, LOG_RAW,
 		    "NTPD missing shm\n");
 	return 0;
@@ -312,9 +312,9 @@ static int ntpshm_pps(struct gps_device_t *session,
     /* precision is an expensive float oeration, shold be optional */
     int precision;
 
-    if (0 > session->shmindex || 0 > session->shmTimeP ||
-	(shmTime = session->context->shmTime[session->shmindex]) == NULL ||
-	(shmTimeP = session->context->shmTime[session->shmTimeP]) == NULL)
+    if (0 > session->shmIndex || 0 > session->shmIndexPPS ||
+	(shmTime = session->context->shmTime[session->shmIndex]) == NULL ||
+	(shmTimeP = session->context->shmTime[session->shmIndexPPS]) == NULL)
 	return 0;
 
     /* new ntpd interrace can use uSec andnSec */
@@ -475,11 +475,11 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 void ntpshm_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
-    (void)ntpshm_free(session->context, session->shmindex);
+    (void)ntpshm_free(session->context, session->shmIndex);
 #if defined(PPS_ENABLE)
-    if (session->shmTimeP != -1) {
+    if (session->shmIndexPPS != -1) {
 	pps_thread_deactivate(session);
-	(void)ntpshm_free(session->context, session->shmTimeP);
+	(void)ntpshm_free(session->context, session->shmIndexPPS);
     }
 #endif	/* PPS_ENABLE */
 }
@@ -488,9 +488,9 @@ void ntpshm_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
     /* allocate a shared-memory segment for "NMEA" time data */
-    session->shmindex = ntpshm_alloc(session->context);
+    session->shmIndex = ntpshm_alloc(session->context);
 
-    if (0 > session->shmindex) {
+    if (0 > session->shmIndex) {
 	gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE)
     } else if (session->sourcetype == source_usb || session->sourcetype == source_rs232) {
@@ -498,7 +498,7 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
 	 */
-	if ((session->shmTimeP = ntpshm_alloc(session->context)) < 0) {
+	if ((session->shmIndexPPS = ntpshm_alloc(session->context)) < 0) {
 	    gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
 	} else {
 	    init_hook(session);
