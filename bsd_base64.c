@@ -130,7 +130,6 @@ b64_ntop(unsigned char const *src, size_t srclength, char *target,
     size_t datalength = 0;
     unsigned char input[3];
     unsigned char output[4];
-    size_t i;
 
     while (2 < srclength) {
 	input[0] = *src++;
@@ -157,6 +156,7 @@ b64_ntop(unsigned char const *src, size_t srclength, char *target,
 
     /* Now we worry about padding. */
     if (0 != srclength) {
+	size_t i;
 	/* Get what's left. */
 	input[0] = input[1] = input[2] = '\0';
 	for (i = 0; i < srclength; i++)

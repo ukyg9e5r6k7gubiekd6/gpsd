@@ -410,7 +410,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 static void update_gps_panel(struct gps_data_t *gpsdata)
 /* This gets called once for each new GPS sentence. */
 {
-    int i, j, n;
+    int i, j;
     int newstate;
     char scr[128], *s;
     bool usedflags[MAXCHANNELS];
@@ -444,7 +444,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 				SATELLITES_WIDTH - 3, scr);
 	    }
 	} else {
-	    n = 0;
+	    int n = 0;
 	    for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 		if (n < display_sats) {
 		    if ((i < gpsdata->satellites_visible)
@@ -682,7 +682,6 @@ static void usage(char *prog)
 int main(int argc, char *argv[])
 {
     int option;
-    int c;
     unsigned int flags = WATCH_ENABLE;
 
     /*@ -observertrans @*/
@@ -808,6 +807,8 @@ int main(int argc, char *argv[])
 
     /* heart of the client */
     for (;;) {
+	int c;
+
 	if (!gps_waiting(&gpsdata, 5000000)) {
 	    die(GPS_TIMEOUT);
 	} else {

@@ -1067,10 +1067,11 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 			session->gpsdata.dop.tdop);
 	}
     } else if (0 == strcmp("SAT", field[1])) {	/* Satellite Status */
-	int i, n, p, u;
+	int i, n, u;
 	n = session->gpsdata.satellites_visible = atoi(field[2]);
 	u = 0;
 	for (i = 0; i < n; i++) {
+	    int p;
 	    session->gpsdata.PRN[i] = p = atoi(field[3 + i * 5 + 0]);
 	    session->gpsdata.azimuth[i] = atoi(field[3 + i * 5 + 1]);
 	    session->gpsdata.elevation[i] = atoi(field[3 + i * 5 + 2]);

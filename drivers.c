@@ -27,8 +27,6 @@ ssize_t generic_get(struct gps_device_t *session)
 
 gps_mask_t generic_parse_input(struct gps_device_t *session)
 {
-    const struct gps_type_t **dp;
-
     if (session->packet.type == BAD_PACKET)
 	return 0;
     else if (session->packet.type == COMMENT_PACKET) {
@@ -36,6 +34,7 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	return 0;
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
+	const struct gps_type_t **dp;
 	gps_mask_t st = 0;
 	char *sentence = (char *)session->packet.outbuffer;
 
@@ -1177,7 +1176,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     unsigned char *field[NMEA_MAX*2];
     unsigned char fieldcopy[NMEA_MAX*2+1];
     unsigned char *data, *cp;
-    unsigned char ch, pad;
+    unsigned char pad;
     struct aivdm_context_t *ais_context;
     int i;
 
@@ -1278,6 +1277,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     /* wacky 6-bit encoding, shades of FIELDATA */
     /*@ +charint @*/
     for (cp = data; cp < data + strlen((char *)data); cp++) {
+	unsigned char ch;
 	ch = *cp;
 	ch -= 48;
 	if (ch >= 40)

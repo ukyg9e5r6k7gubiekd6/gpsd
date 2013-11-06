@@ -70,12 +70,11 @@ bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* check to see if new data has been written */
 {
     volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
-    bool newdata;
     timestamp_t basetime = timestamp();
 
     /* busy-waiting sucks, but there's not really an alternative */
     for (;;) {
-	newdata = false;
+	bool newdata = false;
 	barrier();
 	if (shared->bookend1 == shared->bookend2 && shared->bookend1 > PRIVATE(gpsdata)->tick)
 	    newdata = true;

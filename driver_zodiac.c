@@ -124,10 +124,8 @@ static void send_rtcm(struct gps_device_t *session,
 static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
 				const char *rtcmbuf, size_t rtcmbytes)
 {
-    size_t len;
-
     while (rtcmbytes > 0) {
-	len = (size_t) (rtcmbytes > 64 ? 64 : rtcmbytes);
+	size_t len = (size_t) (rtcmbytes > 64 ? 64 : rtcmbytes);
 	send_rtcm(session, rtcmbuf, len);
 	rtcmbytes -= len;
 	rtcmbuf += len;
@@ -218,7 +216,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 static gps_mask_t handle1002(struct gps_device_t *session)
 /* satellite signal quality report */
 {
-    int i, j, status, prn;
+    int i, j;
 
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
@@ -233,6 +231,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     session->gpsdata.satellites_used = 0;
     memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
+	int status, prn;
 	/*@ -type @*/
 	session->driver.zodiac.Zv[i] = status = (int)getzword(15 + (3 * i));
 	session->driver.zodiac.Zs[i] = prn = (int)getzword(16 + (3 * i));

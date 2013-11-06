@@ -76,13 +76,13 @@ int sd;
 
 /*  Read a line from a socket  */
 ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
-  ssize_t n,rc;
+  ssize_t n;
   char    c,*buffer;
 
   buffer=vptr;
 
   for (n = 1; n < (ssize_t)maxlen; n++) {
-
+    ssize_t rc;
     if ((rc=read(sockd,&c,1))==1) {
       *buffer++=c;
       if (c=='\n')
@@ -108,13 +108,13 @@ ssize_t sockreadline(int sockd,void *vptr,size_t maxlen) {
 /*  Write a line to a socket  */
 ssize_t sockwriteline(int sockd,const void *vptr,size_t n) {
   size_t      nleft;
-  ssize_t     nwritten;
   const char *buffer;
 
   buffer=vptr;
   nleft=n;
 
   while (nleft>0) {
+    ssize_t     nwritten;
     if ((nwritten= write(sockd,buffer,nleft))<=0) {
       if (errno==EINTR)
         nwritten=0;

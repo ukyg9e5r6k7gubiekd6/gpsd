@@ -135,8 +135,6 @@ int main(int argc, char *argv[])
 	 7, 2, 2, false, "2 bits crossing 1st to 2nd byte (0x1923)"},
     };
 
-    unsigned char *sp;
-
     memcpy(buf, "\x01\x02\x03\x04\x05\x06\x07\x08", 8);
     memcpy(buf + 8, "\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8", 8);
     memcpy(buf + 16, "\x40\x09\x21\xfb\x54\x44\x2d\x18", 8);
@@ -151,6 +149,8 @@ int main(int argc, char *argv[])
     /*@+type@*/
 
     if (!quiet) {
+	unsigned char *sp;
+
 	(void)fputs("Test data:", stdout);
 	for (sp = buf; sp < buf + 28; sp++)
 	    (void)printf(" %02x", *sp);

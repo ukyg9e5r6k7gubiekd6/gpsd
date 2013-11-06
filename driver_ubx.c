@@ -77,8 +77,7 @@ static gps_mask_t
 ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 		size_t data_len)
 {
-    unsigned short gw;
-    unsigned int tow, flags;
+    unsigned int flags;
     double epx, epy, epz, evx, evy, evz;
     unsigned char navmode;
     gps_mask_t mask;
@@ -89,6 +88,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     flags = (unsigned int)getub(buf, 11);
     mask = 0;
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
+	unsigned short gw;
+	unsigned int tow;
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
 	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);

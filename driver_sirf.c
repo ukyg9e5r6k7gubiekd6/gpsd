@@ -531,7 +531,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
 {
-    int st, i, j, cn;
+    int st, i, j;
 
     if (len != 188)
 	return 0;
@@ -542,6 +542,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 
     gpsd_zero_satellites(&session->gpsdata);
     for (i = st = 0; i < SIRF_CHANNELS; i++) {
+	int cn;
 	int off = 8 + 15 * i;
 	bool good;
 	session->gpsdata.PRN[st] = (int)getub(buf, off);

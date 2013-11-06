@@ -356,7 +356,7 @@ static int json_error_read(const char *buf, struct gps_data_t *gpsdata,
 static int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
 			   /*@null@*/ const char **endptr)
 {
-    int real_sec, real_nsec, clock_sec, clock_nsec;
+    int real_sec = 0, real_nsec = 0, clock_sec = 0, clock_nsec = 0;
     /*@ -fullinitblock @*/
     const struct json_attr_t json_attrs_pps[] = {
 	/* *INDENT-OFF* */

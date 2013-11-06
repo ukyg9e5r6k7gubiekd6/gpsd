@@ -287,7 +287,6 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 {
     gps_mask_t mask = 0;
     int i, n;
-    unsigned long ul;
     double t;
 
     gpsd_report(session->context->debug, LOG_PROG,
@@ -301,6 +300,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
     }
     t = getled64((char *)buf, 7);		/* measurement time */
     for (i = 0; i < n; i++) {
+	unsigned long ul;
 	session->gpsdata.raw.mtime[i] = t;
 	session->gpsdata.PRN[i] = (int)getub(buf, 11 * i + 15) & 0x1f;
 	session->gpsdata.ss[i] = (double)getub(buf, 11 * i * 15 + 1) / 4.0;

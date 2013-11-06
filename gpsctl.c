@@ -610,7 +610,6 @@ int main(int argc, char **argv)
 	static struct gps_device_t	session;	/* zero this too */
 	fd_set all_fds;
 	fd_set rfds;
-	int maxfd = 0;
 
 	/*@ -mustfreeonly -immediatetrans @*/
 	gps_context_init(&context);
@@ -628,6 +627,7 @@ int main(int argc, char **argv)
 	 * and find out what is actually there.
 	 */
 	if (!(forcetype != NULL && echo)) {
+	    int maxfd = 0;
 	    if (device == NULL) {
 		gpsd_report(context.debug, LOG_ERROR,
 			    "device must be specified for low-level access.\n");

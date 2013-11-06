@@ -193,13 +193,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 #if defined(HAVE_SYS_TIMEPPS_H)
     int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
+#ifndef S_SPLINT_S
     int cycle_kpps, duration_kpps;
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec tv_kpps;
     pps_info_t pi;
 
     memset( (void *)&pi, 0, sizeof(pps_info_t));
-#endif
+#endif /* S_SPLINT_S */
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
     gpsd_report(session->context->debug, LOG_PROG,
 		"PPS Create Thread gpsd_ppsmonitor\n");
@@ -251,7 +253,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/* ok and log used by KPPS and TIOMCWAIT */
 	ok = false;  
 	log = NULL;  
-#if defined(HAVE_SYS_TIMEPPS_H)
+#if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
         if ( 0 <= session->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of
@@ -312,7 +314,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 	    }
 	}
-#endif /* HAVE_SYS_TIMEPPS_H */
+#endif /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
 
 #if defined(TIOCMIWAIT)
 
@@ -498,6 +500,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    (long)l_offset);
 		log1 = "timestamp out of range";
 	    } else {
+		/*@-compdef@*/
 		last_second_used = session->last_fixtime;
 		if (session->thread_report_hook != NULL) 
 		    log1 = session->thread_report_hook(session,
@@ -507,6 +510,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		if (session->context->pps_hook != NULL)
 		    session->context->pps_hook(session,
 					       &drift, edge_offset);
+		/*@+compdef@*/
             }
 	    gpsd_report(session->context->debug, LOG_RAW,
 		    "PPS edge %.20s %lu.%06lu offset %.9f\n",

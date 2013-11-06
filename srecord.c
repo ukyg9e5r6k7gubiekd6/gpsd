@@ -121,7 +121,7 @@ unsigned char
 sr_sum(unsigned int count, unsigned int addr, unsigned char *bbuf)
 {
     int i, j;
-    unsigned char k, sum = 0;
+    unsigned char sum = 0;
 
     sum = (count & 0xff);
     sum += ((addr & 0x000000ff));
@@ -130,7 +130,7 @@ sr_sum(unsigned int count, unsigned int addr, unsigned char *bbuf)
     sum += ((addr & 0xff000000) >> 24);
     j = count - 5;
     for (i = 0; i < j; i++) {
-	k = bbuf[i];
+	unsigned char k = bbuf[i];
 	sum += k;
     }
     return ~sum;

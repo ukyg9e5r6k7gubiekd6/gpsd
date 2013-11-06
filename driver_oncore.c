@@ -67,10 +67,9 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     unsigned char flags;
     double lat, lon, alt;
     float speed, track, dop;
-    unsigned int i, j, st, nsv, off;
+    unsigned int i, j, st, nsv;
     int Bbused;
     struct tm unpacked_date;
-    unsigned int nsec;
 
     if (data_len != 76)
 	return 0;
@@ -99,6 +98,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
      * and not UTC time.  Do not use it.
      */
     if (session->context->leap_seconds) {
+	unsigned int nsec;
 	unpacked_date.tm_mon = (int)getub(buf, 4) - 1;
 	unpacked_date.tm_mday = (int)getub(buf, 5);
 	unpacked_date.tm_year = (int)getbeu16(buf, 6) - 1900;
@@ -150,6 +150,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     nsv = 0;
     for (i = st = 0; i < 8; i++) {
 	int sv, mode, sn, status;
+	unsigned int off;
 
 	off = 40 + 4 * i;
 	sv = (int)getub(buf, off);
