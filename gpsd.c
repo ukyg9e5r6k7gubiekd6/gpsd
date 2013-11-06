@@ -1551,8 +1551,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	fractional = modf(fix_time, &integral);
 	td.real.tv_sec = (time_t)integral;
 	td.real.tv_nsec = (long)(fractional * 1e+9);
-	/* Any NMEA will be about -1 or -2. Garmin GPS-18/USB is around -6 or -7. */
-	(void)ntpshm_put(device, device->shmIndex, &td, -1);
+	(void)ntpshm_put(device, device->shmIndex, &td);
 	device->last_fixtime = device->newdata.time;
     }
 #endif /* NTPSHM_ENABLE */

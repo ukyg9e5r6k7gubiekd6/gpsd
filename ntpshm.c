@@ -221,18 +221,26 @@ void ntpshm_session_init(struct gps_device_t *session)
 #endif	/* PPS_ENABLE */
 }
 
-int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *td, int precision)
+int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *td)
 /* put a received fix time into shared memory for NTP */
 {
     /* shmTime is volatile to try to prevent C compiler from reordering
      * writes, or optimizing some 'dead code'.  but CPU cache may still
      * write out of order since we do not use memory barriers, yet */
     volatile struct shmTime *shmTime = NULL;
+    /* Any NMEA will be about -1 or -2. Garmin GPS-18/USB is around -6 or -7. */
+    int precision = -1; /* default precision */
 
     if (shmIndex < 0 || (shmTime = session->context->shmTime[shmIndex]) == NULL) {
 	gpsd_report(session->context->debug, LOG_RAW, "NTPD missing shm\n");
 	return 0;
     }
+
+#ifdef PPS_ENABLE
+    /* ntpd sets -20 for PPS refclocks, thus -20 precision */
+    if (shmIndex == session->shmIndexPPS)
+	precision = -20;
+#endif	/* PPS_ENABLE */
 
     /* we use the shmTime mode 1 protocol
      *
@@ -380,8 +388,7 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 	log1 = "accepted chrony sock";
 	chrony_send(session, td);
     }
-    /* ntpd sets -20 for PPS refclocks, thus -20 precision */
-    (void)ntpshm_put(session, session->shmIndexPPS, td, -20);
+    (void)ntpshm_put(session, session->shmIndexPPS, td);
 
     return log1;
 }
