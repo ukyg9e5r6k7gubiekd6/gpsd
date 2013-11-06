@@ -363,7 +363,7 @@ static int ntpshm_pps(struct gps_device_t *session,
     precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
     /*@-type@*//* splint is confused about struct timespec */
     gpsd_report(session->context->debug, LOG_RAW,
-		"PPS ntpshm_pps %lu.%03lu @ %lu.%09lu, preci %d\n",
+		"PPS ntpshm_pps %lu.%06lu @ %lu.%09lu, preci %d\n",
 		(unsigned long)actual_tv.tv_sec,
 		(unsigned long)actual_tv.tv_usec,
 		(unsigned long)clock_ts->tv_sec,
