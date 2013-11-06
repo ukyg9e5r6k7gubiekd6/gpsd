@@ -999,22 +999,17 @@ void cfmakeraw(struct termios *);
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall)	assert(funcall != -23)
 
-#ifndef S_SPLINT_S
-#if defined(NTPSHM_ENABLE) || defined(SHM_EXPORT_ENABLE)
 /* memory barriers */
-static /*@unused@*/ inline void barrier(void) {
+static /*@unused@*/ inline void barrier(void)
+{
+#ifndef S_SPLINT_S
 #if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
        __atomic_thread_fence(__ATOMIC_SEQ_CST);
 #elif (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
        __sync_synchronize();
-#else
-# error Memory barriers are not supported. Disable NTPSHM and SHM export.
-#endif /* defined(NTPSHM_ENABLE) || defined(SHM_EXPORT_ENABLE) */
-}
-#endif /* defined(NTPSHM_ENABLE) || defined(SHM_EXPORT_ENABLE) */
-#else
-#define barrier()
+#endif
 #endif /* S_SPLINT_S */
+}
 
 #endif /* _GPSD_H_ */
 // Local variables:
