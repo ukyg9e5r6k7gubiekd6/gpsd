@@ -104,9 +104,10 @@ server 127.127.28.0 minpoll 4 maxpoll 4 noselect
 fudge 127.127.28.0 time1 0.420 refid GPS
 --------------------
 
-ntpd will now continue to monitor the in-band timestamps from GPSD, but not use
-for its algorithm.  It will write out statistics to the peerstats file.
-Once ntpd is stable (a few hours or so), we can process the peerstats file.
+ntpd will now continue to monitor the in-band message timestamps from
+GPSD, but not use for its algorithm.  It will write out statistics to
+the peerstats file.  Once ntpd is stable (a few hours or so), we can
+process the peerstats file.
 
 
 ==== 2. Measuring the delay between the two messages ====

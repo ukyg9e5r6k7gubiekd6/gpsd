@@ -503,10 +503,10 @@ ntpd, if feasible.
 
 The magic pseudo-IP address 127.127.28.0 identifies unit 0 of the ntpd
 shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0 is used
-for message-decoded time and unit 1 for the (more accurate, when
-available) time derived from combining message-decoded time with the
-PPS synchronization pulse.  Splitting these notifications allows ntpd
-to use its normal heuristics to weight them. 
+for ine-band message timestamps and unit 1 for the (more accurate,
+when available) time derived from combining in-band message timestamps
+with the out-of-band PPS synchronization pulse.  Splitting these
+notifications allows ntpd to use its normal heuristics to weight them.
 
 (Different units - 2 and 3, respectively - must be used when gpsd is not
 started as root.)
