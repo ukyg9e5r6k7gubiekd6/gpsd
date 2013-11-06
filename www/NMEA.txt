@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.12, Oct 2012
+v2.13, Nov 2013
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -1975,7 +1975,7 @@ Field Number:
 6. Checksum     
 
 
-=== XDR - Cross Track Error - Dead Reckoning ===
+=== XDR - Transducer Measurement ===
 
 ------------------------------------------------------------------------------
         1 2   3 4            n
