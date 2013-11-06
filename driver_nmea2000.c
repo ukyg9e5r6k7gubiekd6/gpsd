@@ -970,6 +970,7 @@ static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_de
   
     print_data(session->context, bu, len, pgn);
 
+    /*@-type@*/
     session->gpsdata.attitude.heading = getleu16(bu, 1) * RAD_2_DEG * 0.0001;
 //  printf("ATT 0:%8.3f\n",session->gpsdata.attitude.heading);
     aux = getles16(bu, 3);
@@ -981,6 +982,7 @@ static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_de
     if (aux != 0x07fff) {
         session->gpsdata.attitude.heading += aux * RAD_2_DEG * 0.0001;
     }
+    /*@+type@*/
 //  printf("ATT 2:%8.3f %6x\n",session->gpsdata.attitude.heading, aux);
     session->gpsdata.attitude.mag_st = '\0';
     session->gpsdata.attitude.pitch = NAN;
@@ -1047,7 +1049,7 @@ static gps_mask_t hnd_128267(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->gpsdata.attitude.gyro_x = NAN;
     session->gpsdata.attitude.gyro_y = NAN;
     session->gpsdata.attitude.temp = NAN;
-    session->gpsdata.attitude.depth = getleu32(bu, 1) *.01;
+    /*@i@*/session->gpsdata.attitude.depth = getleu32(bu, 1) *.01;
 
     gpsd_report(session->context->debug, LOG_DATA,
 		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
@@ -1273,7 +1275,6 @@ static /*@null@*/ PGN *search_pgnlist(unsigned int pgn, PGN *pgnlist)
 /*@-nullstate -branchstate -globstate -mustfreeonly@*/
 static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 {
-    PGN *work;
     unsigned int can_net;
 
     session->driver.nmea2000.workpgn = NULL;
@@ -1349,6 +1350,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	}
 
 	if (source_unit == session->driver.nmea2000.unit) {
+	    PGN *work;
 	    if (session->driver.nmea2000.pgnlist != NULL) {
 	        work = search_pgnlist(source_pgn, session->driver.nmea2000.pgnlist);
 	    } else {
@@ -1436,9 +1438,9 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    gpsd_report(session->context->debug, LOG_ERROR,
 				"Fast error %2x %2x %2x %2x %6d\n",
 				session->driver.nmea2000.idx,
-				                                               /*@i1@*/frame->data[0],
-				                                               session->driver.nmea2000.unit,
-				                                               (unsigned int) session->driver.nmea2000.fast_packet_len,
+				/*@i2@*/frame->data[0],
+				session->driver.nmea2000.unit,
+				(unsigned int) session->driver.nmea2000.fast_packet_len,
 				                                               source_pgn);
 		}
 	    } else {
@@ -1489,7 +1491,7 @@ static ssize_t nmea2000_get(struct gps_device_t *session)
     return 0;
 }
 
-/*@-mustfreeonly@*/
+/*@-mustfreeonly -nullstate@*/
 static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
 {
     gps_mask_t mask;
@@ -1507,7 +1509,7 @@ static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
 
     return mask;
 }
-/*@+mustfreeonly@*/
+/*@+mustfreeonly -nullstate@*/
 
 /*@+nullassign@*/
 

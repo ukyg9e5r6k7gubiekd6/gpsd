@@ -272,7 +272,7 @@ static void decode_ecef(double x, double y, double z,
 /*@ -globstate */
 static void sirf_update(void)
 {
-    int i, j, ch, sv, off;
+    int i, j, ch, sv;
     unsigned char *buf;
     size_t len;
     uint8_t dgps;
@@ -333,7 +333,7 @@ static void sirf_update(void)
     case 0x04:			/* Measured Tracking Data */
 	ch = (int)getub(buf, 7);
 	for (i = 0; i < ch; i++) {
-	    int az, el, state;
+	    int az, el, state, off;
 	    double cn;
 
 	    off = 8 + 15 * i;

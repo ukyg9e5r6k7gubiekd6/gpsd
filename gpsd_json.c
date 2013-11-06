@@ -275,7 +275,7 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
 void json_sky_dump(const struct gps_data_t *datap,
 		   /*@out@*/ char *reply, size_t replylen)
 {
-    int i, j, used, reported = 0;
+    int i, reported = 0;
     char tbuf[JSON_DATE_MAX+1];
 
     assert(replylen > 2);
@@ -328,10 +328,11 @@ void json_sky_dump(const struct gps_data_t *datap,
     if (reported) {
 	(void)strlcat(reply, "\"satellites\":[", replylen);
 	for (i = 0; i < reported; i++) {
-	    used = 0;
+	    int j; 
+	    bool used = false;
 	    for (j = 0; j < datap->satellites_used; j++)
 		if (datap->used[j] == datap->PRN[i]) {
-		    used = 1;
+		    used = true;
 		    break;
 		}
 	    if (datap->PRN[i]) {

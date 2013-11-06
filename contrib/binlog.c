@@ -16,7 +16,7 @@
 void spinner(int );
 
 int main(int argc, char **argv) {
-	int speed, n, l, ifd, ofd;
+	int speed, n, ifd, ofd;
 	struct termios term;
 	char buf[BUFSIZ];
 
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 	tcflush(ifd, TCIOFLUSH);
 	n = 0;
 	while (1){
-		l = read(ifd, buf, BUFSIZ);
+		int l = read(ifd, buf, BUFSIZ);
 		if (l > 0)
 		    assert(write(ofd, buf, l) > 0);
 		usleep(1000);

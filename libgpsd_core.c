@@ -998,7 +998,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 		     const int debug)
 /* await data from any socket in the all_fds set */
 {
-    int i, status;
+    int status;
 #ifdef COMPAT_SELECT
     struct timeval tv;
 #endif /* COMPAT_SELECT */
@@ -1036,6 +1036,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
     /*@ +usedef +nullpass @*/
 
     if (debug >= LOG_SPIN) {
+	int i;
 	char dbuf[BUFSIZ];
 	dbuf[0] = '\0';
 	for (i = 0; i < FD_SETSIZE; i++)
@@ -1444,7 +1445,6 @@ int gpsd_multipoll(const bool data_ready,
 {
     if (data_ready)
     {
-	gps_mask_t changed;
 	int fragments;
 
 	gpsd_report(device->context->debug, LOG_RAW + 1, 
@@ -1471,7 +1471,7 @@ int gpsd_multipoll(const bool data_ready,
 #endif /* NETFEED_ENABLE */
 
 	for (fragments = 0; ; fragments++) {
-	    changed = gpsd_poll(device);
+	    gps_mask_t changed = gpsd_poll(device);
 
 	    if (changed == ERROR_SET) {
 		gpsd_report(device->context->debug, LOG_WARN,

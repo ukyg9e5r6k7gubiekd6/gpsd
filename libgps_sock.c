@@ -267,9 +267,9 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 
 	for (ns = buf; ns; ns = strstr(ns + 1, "GPSD")) {
 	    if ( /*@i1@*/ strncmp(ns, "GPSD", 4) == 0) {
-		bool eol = false;
 		/* the following should execute each time we have a good next sp */
 		for (sp = ns + 5; *sp != '\0'; sp = tp + 1) {
+		    bool eol = false;
 		    tp = sp + strcspn(sp, ",\r\n");
 		    eol = *tp == '\r' || *tp == '\n';
 		    if (*tp == '\0')

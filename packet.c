@@ -1398,15 +1398,16 @@ static void packet_discard(struct gps_packet_t *lexer)
 static void character_discard(struct gps_packet_t *lexer)
 /* shift the input buffer to discard one character and reread data */
 {
-    char scratchbuf[MAX_PACKET_LENGTH*2+1];
     memmove(lexer->inbuffer, lexer->inbuffer + 1, (size_t)-- lexer->inbuflen);
     lexer->inbufptr = lexer->inbuffer;
-    if (lexer->debug >= LOG_RAW+1)
+    if (lexer->debug >= LOG_RAW+1) {
+	char scratchbuf[MAX_PACKET_LENGTH*2+1];
 	gpsd_report(lexer->debug, LOG_RAW + 1,
 		    "Character discarded, buffer %zu chars = %s\n",
 		    lexer->inbuflen,
 		    gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
 				    (char *)lexer->inbuffer, lexer->inbuflen));
+    }
 }
 
 /* get 0-origin big-endian words relative to start of packet buffer */

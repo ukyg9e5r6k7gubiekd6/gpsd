@@ -175,7 +175,7 @@ static bool oncore_initialize(void)
 
 static void oncore_update(void)
 {
-    unsigned int i, j, off;
+    unsigned int i, off;
     unsigned char *buf;
     unsigned int type;
 
@@ -297,6 +297,7 @@ static void oncore_update(void)
 	memset(Bblines, 0, sizeof(Bblines));
 	Bblines_mask = 0;
 	for (i = 0; i < ch; i++) {
+	    unsigned int j;
 	    off = 5 + 7 * i;
 	    sv = (unsigned char)getub(buf, off);
 	    /*@ -boolops @*/

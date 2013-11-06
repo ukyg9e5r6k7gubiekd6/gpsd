@@ -38,10 +38,10 @@ static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
 	"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_ !\"#$%&'()*+,-./0123456789:;<=>?";
 #endif /* S_SPLINT_S */
     int i;
-    char newchar;
 
     /* six-bit to ASCII */
     for (i = 0; i < count; i++) {
+	char newchar;
 	newchar = sixchr[ubits(bitvec, start + 6 * i, 6U, false)];
 	if (newchar == '@')
 	    break;
