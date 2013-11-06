@@ -41,7 +41,6 @@ chronyd, you *will* need to modify these, at the least.
 
 == Measuring Offsets ==
 
-
 === Format of the loopstats and peerstats files ===
 
 The following is incorporated from the ntpd website, see <<NTP-MONOPT>>
@@ -105,7 +104,7 @@ server 127.127.28.0 minpoll 4 maxpoll 4 noselect
 fudge 127.127.28.0 time1 0.420 refid GPS
 --------------------
 
-ntpd will now continue to monitor the GPS time from GPSD, but not use
+ntpd will now continue to monitor the in-band timestamps from GPSD, but not use
 for its algorithm.  It will write out statistics to the peerstats file.
 Once ntpd is stable (a few hours or so), we can process the peerstats file.
 
@@ -119,7 +118,7 @@ From the 'peerstats' file, extract the lines corresponding to
 grep 127.127.28.0 peerstats > peerstats.shm
 -----------
 
-You can now examine the offset and jitter of the GPS time.  <<ANDY-POST>>
+You can now examine the offset and jitter of the in-band time.  <<ANDY-POST>>
 suggests the following gnuplot fragment (you will need to set output
 options before plotting).
 
