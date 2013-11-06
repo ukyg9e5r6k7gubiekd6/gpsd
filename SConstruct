@@ -1604,9 +1604,12 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 
 
 # Run all normal regression tests
+describe = Utility('describe', [],
+                   '@if [ -d .git ]; then git describe --tags; fi')
 testclean = Utility('test_cleanup', [],
                     'rm -f test_bits test_geoid test_json test_libgps test_mkgmtime test_packet')
 check = env.Alias('check', [
+    describe,
     python_compilation_regress,
     method_regress,
     bits_regress,
