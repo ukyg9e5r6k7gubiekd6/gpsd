@@ -57,6 +57,7 @@
 #endif
 
 #if defined(HAVE_SYS_TIMEPPS_H)
+/*@-compdestroy -nullpass -unrecog@*/
 static int init_kernel_pps(struct gps_device_t *session)
 /* return handle for kernel pps, or -1; requires root privileges */
 {
@@ -123,7 +124,7 @@ static int init_kernel_pps(struct gps_device_t *session)
     /* done with blob, clear it */
     globfree(&globbuf);
 
-    if ( 0 == pps_num ) {
+    if ( 0 == (int)pps_num ) {
 	gpsd_report(session->context->debug, LOG_INF, "KPPS device not found.\n");
     	return -1;
     }
@@ -150,9 +151,9 @@ static int init_kernel_pps(struct gps_device_t *session)
 		    ret, strerror(errno));
     	return -1;
     } else {
+#ifndef S_SPLINT_S
     	/* have kernel PPS handle */
         int caps;
-#ifndef S_SPLINT_S
 	/* get features  supported */
         if ( 0 > time_pps_getcap(session->kernelpps_handle, &caps)) {
 	    gpsd_report(session->context->debug, LOG_ERROR,
@@ -176,6 +177,7 @@ static int init_kernel_pps(struct gps_device_t *session)
     }
     return 0;
 }
+/*@+compdestroy +nullpass +unrecog@*/
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
 /*@-mustfreefresh -type -unrecog -branchstate@*/
