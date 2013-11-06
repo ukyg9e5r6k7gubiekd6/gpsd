@@ -513,7 +513,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@+compdef@*/
             }
 	    gpsd_report(session->context->debug, LOG_RAW,
-		    "PPS edge %.20s %lu.%06lu offset %.9f\n",
+		    "PPS edge %.20s %lu.%09lu offset %.9f\n",
 		    log1,
 		    (unsigned long)clock_ts.tv_sec,
 		    (unsigned long)clock_ts.tv_nsec,
