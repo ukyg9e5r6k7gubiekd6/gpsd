@@ -447,12 +447,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 
 	if (ok) {
+	    /* l_offset is the skew from expected to observed pulse time */
 	    long l_offset;
 	    char *log1 = NULL;
 	    /* drift.real is the time we think the pulse represents  */
 	    struct timedrift_t drift;
-	    /* edge_offset is the skew from expected to observed pulse time */
-	    double edge_offset;
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge accepted %.100s", log);
 #if defined(HAVE_SYS_TIMEPPS_H)
@@ -481,13 +480,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    drift.clock = clock_ts;
 	    /*@-relaxtypes@*/
 
-	    /* edge_offset = delta between PPS and sysclock time in seconds */
-	    edge_offset = drift.real.tv_sec - drift.clock.tv_sec;
-	    edge_offset -= drift.clock.tv_nsec / 1e9;
-
 	    /* check to see if we have a fresh timestamp from the
 	     * GPS serial input then use that */
-	    l_offset = (long)edge_offset;
+	    l_offset = (long)(drift.real.tv_sec - drift.clock.tv_sec);
+	    l_offset += (long)((drift.real.tv_nsec - drift.clock.tv_nsec) / 1e9);
 	    if (0 > l_offset || 1000000 < l_offset) {
 		gpsd_report(session->context->debug, LOG_RAW,
 			    "PPS: no current GPS seconds: %ld\n",
@@ -497,21 +493,19 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@-compdef@*/
 		last_second_used = session->last_fixtime;
 		if (session->thread_report_hook != NULL) 
-		    log1 = session->thread_report_hook(session,
-						       &drift, edge_offset);
+		    log1 = session->thread_report_hook(session, &drift);
 		else
 		    log1 = "no report hook";
 		if (session->context->pps_hook != NULL)
-		    session->context->pps_hook(session,
-					       &drift, edge_offset);
+		    session->context->pps_hook(session, &drift);
 		/*@+compdef@*/
             }
 	    gpsd_report(session->context->debug, LOG_RAW,
-		    "PPS edge %.20s %lu.%09lu offset %.9f\n",
+		    "PPS edge %.20s %lu.%09lu offset %.9ld\n",
 		    log1,
 		    (unsigned long)clock_ts.tv_sec,
 		    (unsigned long)clock_ts.tv_nsec,
-		    edge_offset);
+		    l_offset);
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);

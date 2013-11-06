@@ -331,8 +331,7 @@ static void init_hook(struct gps_device_t *session)
 
 /* td is the real time and clock time of the edge */
 /* offset is actual_ts - clock_ts */
-static void chrony_send(struct gps_device_t *session,
-			struct timedrift_t *td,  double offset)
+static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
 {
     struct sock_sample sample;
 
@@ -343,7 +342,8 @@ static void chrony_send(struct gps_device_t *session,
     /*@-type@*//* splint is confused about struct timespec */
     TSTOTV(&sample.tv, &td->real);
     /*@+type@*/
-    sample.offset = offset; 
+    sample.offset = td->real.tv_sec - td->clock.tv_sec;
+    sample.offset += (td->real.tv_nsec - td->clock.tv_nsec) / 1e9;
 
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
@@ -355,8 +355,7 @@ static void wrap_hook(struct gps_device_t *session)
 }
 
 static /*@observer@*/ char *report_hook(struct gps_device_t *session,
-					struct timedrift_t *td,
-					double edge_offset)
+					struct timedrift_t *td)
 /* ship the time of a PPS event to ntpd and/or chrony */
 {
     char *log1;
@@ -379,7 +378,7 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
     log1 = "accepted";
     if ( 0 <= session->chronyfd ) {
 	log1 = "accepted chrony sock";
-	chrony_send(session, td, edge_offset);
+	chrony_send(session, td);
     }
     /* ntpd sets -20 for PPS refclocks, thus -20 precision */
     (void)ntpshm_put(session, session->shmIndexPPS, td, -20);

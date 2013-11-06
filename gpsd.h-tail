@@ -258,8 +258,7 @@ struct gps_context_t {
     bool shmTimeInuse[NTPSHMSEGS];
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
-    /*@null@*/ void (*pps_hook)(struct gps_device_t *,
-				struct timedrift_t *, double);
+    /*@null@*/ void (*pps_hook)(struct gps_device_t *, struct timedrift_t *);
 #endif /* PPS_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
     /* we don't want the compiler to treat writes to shmexport as dead code,
@@ -481,8 +480,7 @@ struct gps_device_t {
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     int chronyfd;			/* for talking to chrony */
     /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
-					   struct timedrift_t *,
-					   double);
+					   struct timedrift_t *);
     /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
 #endif /* PPS_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
