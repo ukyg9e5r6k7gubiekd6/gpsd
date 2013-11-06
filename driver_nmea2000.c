@@ -1288,8 +1288,10 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
     /*@ignore@*//* because the CAN include files choke splint */
     if (frame->can_id & 0x80000000) {
 	// cppcheck-suppress unreadVariable
-	unsigned int source_prio UNUSED;
-	unsigned int daddr UNUSED;
+#ifdef __UNUSED__
+	unsigned int source_prio;
+	unsigned int daddr;
+#endif
 	// cppcheck-suppress unreadVariable
 	unsigned int source_pgn;
 	unsigned int source_unit;
@@ -1523,7 +1525,7 @@ static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
 
 int nmea2000_open(struct gps_device_t *session)
 {
-    char interface_name[strlen(session->gpsdata.dev.path)];
+    char interface_name[strlen(session->gpsdata.dev.path)+1];
     socket_t sock;
     int status;
     int unit_number;

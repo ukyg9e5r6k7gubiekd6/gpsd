@@ -87,20 +87,22 @@ static int hex2bin(const char *s)
 int gpsd_hexpack( /*@in@*/ const char *src, /*@out@ */ char *dst, size_t len)
 /* hex2bin source string to destination - destination can be same as source */
 {
-    int i, k, l;
+    int i, j;
 
     /*@ -mustdefine @*/
-    l = (int)(strlen(src) / 2);
-    if ((l < 1) || ((size_t) l > len))
+    j = (int)(strlen(src) / 2);
+    if ((j < 1) || ((size_t) j > len))
 	return -2;
 
-    for (i = 0; i < l; i++)
+    for (i = 0; i < j; i++) {
+	int k;
 	if ((k = hex2bin(src + i * 2)) != -1)
 	    dst[i] = (char)(k & 0xff);
 	else
 	    return -1;
+    }
     (void)memset(dst + i, '\0', (size_t) (len - i));
-    return l;
+    return j;
     /*@ +mustdefine @*/
 }
 
