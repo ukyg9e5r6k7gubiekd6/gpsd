@@ -184,19 +184,21 @@ static int init_kernel_pps(struct gps_device_t *session)
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
+#ifndef HAVE_CLOCK_GETTIME
     struct timeval  clock_tv = {0, 0};
+#endif /* HAVE_CLOCK_GETTIME */
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
 #if defined(TIOCMIWAIT)
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
-    struct timeval pulse[2] = { {0, 0}, {0, 0} };
+    struct timespec pulse[2] = { {0, 0}, {0, 0} };
 #endif /* TIOCMIWAIT */
 #if defined(HAVE_SYS_TIMEPPS_H)
     int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
 #ifndef S_SPLINT_S
     int cycle_kpps, duration_kpps;
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
-    struct timespec tv_kpps;
+    struct timespec ts_kpps;
     pps_info_t pi;
 
     memset( (void *)&pi, 0, sizeof(pps_info_t));
@@ -238,7 +240,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			"PPS clock_gettime() failed\n");
 	    break;
 	}
-	TSTOTV( &clock_tv, &clock_ts);
 #else
 	if ( 0 > gettimeofday(&clock_tv, NULL) ) {
 	    /* uh, oh, can not get time! */
@@ -269,16 +270,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
                 // cycle/duration check below.
 	    	if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
 		    edge_kpps = 1;
-		    tv_kpps = pi.assert_timestamp;
+		    ts_kpps = pi.assert_timestamp;
 	    	} else if ( pi.assert_timestamp.tv_sec < pi.clear_timestamp.tv_sec ) {
 		    edge_kpps = 0;
-		    tv_kpps = pi.clear_timestamp;
+		    ts_kpps = pi.clear_timestamp;
 		} else if ( pi.assert_timestamp.tv_nsec > pi.clear_timestamp.tv_nsec ) {
 		    edge_kpps = 1;
-		    tv_kpps = pi.assert_timestamp;
+		    ts_kpps = pi.assert_timestamp;
 		} else {
 		    edge_kpps = 0;
-		    tv_kpps = pi.clear_timestamp;
+		    ts_kpps = pi.clear_timestamp;
 		}
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "KPPS assert %ld.%09ld, sequence: %ld - "
@@ -293,20 +294,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    "KPPS data: using %s\n",
 			    edge_kpps ? "assert" : "clear");
 
-#define timediff_kpps(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+((x.tv_nsec-y.tv_nsec)/1000))
-	        cycle_kpps = timediff_kpps(tv_kpps, pulse_kpps[edge_kpps]);
-	        duration_kpps = timediff_kpps(tv_kpps, pulse_kpps[(int)(edge_kpps == 0)]);
-		if ( 3000000 < duration_kpps ) {
-		    // invisible pulse
-		    duration_kpps = 0;
-		}
-#undef timediff_kpps
+#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1e9+x.tv_nsec-y.tv_nsec)
+	        cycle_kpps = timediff(ts_kpps, pulse_kpps[edge_kpps])/1000;
+	        duration_kpps = timediff(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
+#undef timediff
 	        gpsd_report(session->context->debug, LOG_INF,
-		    "KPPS cycle: %7d, duration: %7d @ %lu.%09lu\n",
+		    "KPPS cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
 		    cycle_kpps, duration_kpps,
-		    (unsigned long)tv_kpps.tv_sec,
-		    (unsigned long)tv_kpps.tv_nsec);
-		pulse_kpps[edge_kpps] = tv_kpps;
+		    (unsigned long)ts_kpps.tv_sec,
+		    (unsigned long)ts_kpps.tv_nsec);
+		pulse_kpps[edge_kpps] = ts_kpps;
 		if (990000 < cycle_kpps && 1010000 > cycle_kpps) {
 		    /* KPPS passes a basic sanity check */
 		    ok_kpps = true;
@@ -328,9 +325,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	state = (int)((state & PPS_LINE_TIOC) != 0);
 	/*@ +boolint @*/
-#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1000000+x.tv_usec-y.tv_usec)
-	cycle = timediff(clock_tv, pulse[state]);
-	duration = timediff(clock_tv, pulse[(int)(state == 0)]);
+#define timediff(x, y)	(int)((x.tv_sec-y.tv_sec)*1e9+x.tv_nsec-y.tv_nsec)
+	cycle = timediff(clock_ts, pulse[state]) / 1000;
+	duration = timediff(clock_ts, pulse[(int)(state == 0)])/1000;
 #undef timediff
 	/*@ -boolint @*/
 
@@ -355,16 +352,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    laststate = state;
 	    unchanged = 0;
 	}
-	pulse[state] = clock_tv;
+	pulse[state] = clock_ts;
 	if (unchanged) {
 	    // strange, try again
 	    continue;
 	}
 	gpsd_report(session->context->debug, LOG_INF,
-		    "PPS cycle: %7d, duration: %7d @ %lu.%06lu\n",
+		    "PPS cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
 		    cycle, duration,
-		    (unsigned long)clock_tv.tv_sec,
-		    (unsigned long)clock_tv.tv_usec);
+		    (unsigned long)clock_ts.tv_sec,
+		    (unsigned long)clock_ts.tv_nsec);
 
 	/*
 	 * The PPS pulse is normally a short pulse with a frequency of
@@ -467,12 +464,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		} else {
 		    clock_ts = pi.clear_timestamp;  /* structure copy */
 		}
-	    } else
+	    } 
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
-	    {
-	        // use plain PPS
-		/*@i10@*/TVTOTS( &clock_ts, &clock_tv);
-	    }
+	    /* else, use plain PPS */
 
             /* This innocuous-looking "+ 1" embodies a significant
              * assumption: that GPSes report time to the second over the
