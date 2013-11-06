@@ -221,30 +221,16 @@ void ntpshm_session_init(struct gps_device_t *session)
 #endif	/* PPS_ENABLE */
 }
 
-int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
+int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *td, int precision)
 /* put a received fix time into shared memory for NTP */
 {
     /* shmTime is volatile to try to prevent C compiler from reordering
      * writes, or optimizing some 'dead code'.  but CPU cache may still
-     *write out of order since we do not use memory barriers, yet */
+     * write out of order since we do not use memory barriers, yet */
     volatile struct shmTime *shmTime = NULL;
-    struct timeval tv;
-    double seconds, microseconds;
 
-    // gpsd_report(session->context->debug, LOG_PROG, "NTP: doing ntpshm_put(,%g, %g)\n", fixtime, fudge);
-    if (session->shmIndex < 0 ||
-	(shmTime = session->context->shmTime[session->shmIndex]) == NULL) {
-	gpsd_report(session->context->debug, LOG_RAW,
-		    "NTPD missing shm\n");
-	return 0;
-    }
-
-    (void)gettimeofday(&tv, NULL);
-    fixtime += fudge;
-    microseconds = 1000000.0 * modf(fixtime, &seconds);
-    if (shmTime->clockTimeStampSec == (time_t) seconds) {
-	gpsd_report(session->context->debug, LOG_RAW,
-		    "NTPD ntpshm_put: skipping duplicate second\n");
+    if (shmIndex < 0 || (shmTime = session->context->shmTime[shmIndex]) == NULL) {
+	gpsd_report(session->context->debug, LOG_RAW, "NTPD missing shm\n");
 	return 0;
     }
 
@@ -262,110 +248,39 @@ int ntpshm_put(struct gps_device_t *session, double fixtime, double fudge)
      *    clear valid
      *
      */
+
     shmTime->valid = 0;
     shmTime->count++;
-
-    /*
-     * We need a memory barrier here to prevent write reordering by
-     * the compiler or CPU cache
-     */
+    /* We need a memory barrier here to prevent write reordering by
+     * the compiler or CPU cache */
     barrier();
-    shmTime->clockTimeStampSec = (time_t) seconds;
-    shmTime->clockTimeStampUSec = (int)microseconds;
-    shmTime->clockTimeStampNSec = (unsigned)(microseconds*1000);
-    shmTime->receiveTimeStampSec = (time_t) tv.tv_sec;
-    shmTime->receiveTimeStampUSec = (int)tv.tv_usec;
-    shmTime->receiveTimeStampNSec = (unsigned int)(tv.tv_usec*1000);
+    /*@-type@*/ /* splint is confused about struct timespec */
+    shmTime->clockTimeStampSec = (time_t)td->real.tv_sec;
+    shmTime->clockTimeStampUSec = (int)(td->real.tv_nsec/1000);
+    shmTime->clockTimeStampNSec = (unsigned)td->real.tv_nsec;
+    shmTime->receiveTimeStampSec = (time_t)td->clock.tv_sec;
+    shmTime->receiveTimeStampUSec = (int)(td->clock.tv_nsec/1000);
+    shmTime->receiveTimeStampNSec = (unsigned)td->clock.tv_nsec;
+    /*@+type@*/
     shmTime->leap = session->context->leap_notify;
-    /* setting the precision here does not seem to help anything, too
-     * hard to calculate properly anyway.  Let ntpd figure it out.
-     * Any NMEA will be about -1 or -2.
-     * Garmin GPS-18/USB is around -6 or -7.
-     */
+    shmTime->precision = precision;
     barrier();
-
     shmTime->count++;
     shmTime->valid = 1;
 
+    /*@-type@*/ /* splint is confused about struct timespec */
     gpsd_report(session->context->debug, LOG_RAW,
-		"NTPD ntpshm_put: Clock: %lu.%06lu @ %lu.%06lu, fudge: %0.3f\n",
-		(unsigned long)seconds, (unsigned long)microseconds,
-		(unsigned long)tv.tv_sec, (unsigned long)tv.tv_usec, fudge);
+		"PPS ntpshm_put %lu.%09lu @ %lu.%09lu\n",
+		(unsigned long)td->real.tv_sec,
+		(unsigned long)td->real.tv_nsec,
+		(unsigned long)td->clock.tv_sec,
+		(unsigned long)td->clock.tv_nsec);
+    /*@+type@*/
 
     return 1;
 }
 
 #ifdef PPS_ENABLE
-/*@unused@*//* splint is confused here */
-/* put NTP shared memory info based on received PPS pulse
- *
- * good news is that kernel PPS gives us nSec resolution
- * bad news is that ntpshm only has uSec resolution
- *
- * actual_ts is the actual time we think the PPS happened
- * clock_ts is the time we saw the pulse
- */
-static int ntpshm_pps(struct gps_device_t *session,
-		      struct timedrift_t *td,  double offset)
-{
-    volatile struct shmTime *shmTime = NULL, *shmTimeP = NULL;
-    /* precision is an expensive float oeration, shold be optional */
-    int precision;
-
-    if (0 > session->shmIndex || 0 > session->shmIndexPPS ||
-	(shmTime = session->context->shmTime[session->shmIndex]) == NULL ||
-	(shmTimeP = session->context->shmTime[session->shmIndexPPS]) == NULL)
-	return 0;
-
-    /* new ntpd interrace can use uSec andnSec */
-    /* do NOT use TSTOTV() since that may round up and we need seconds to 
-     * be the same for uSec and nSec.  */
-
-    /* we use the shmTime mode 1 protocol
-     *
-     * ntpd does this:
-     *
-     * reads valid.
-     * IFF valid is 1
-     *    reads count
-     *    reads values
-     *    reads count
-     *    IFF count unchanged
-     *        use values
-     *    clear valid
-     *
-     */
-    shmTimeP->valid = 0;
-    shmTimeP->count++;
-    /*@-type@*//* splint is confused about struct timespec */
-    shmTimeP->clockTimeStampSec = (time_t)td->real.tv_sec;
-    shmTimeP->clockTimeStampUSec = (int)(td->real.tv_nsec/1000);
-    shmTimeP->clockTimeStampNSec = (unsigned)td->real.tv_nsec;
-    shmTimeP->receiveTimeStampSec = (time_t)td->clock.tv_sec;
-    shmTimeP->receiveTimeStampUSec = (int)(td->clock.tv_nsec/1000);
-    shmTimeP->receiveTimeStampNSec = (unsigned)td->clock.tv_nsec;
-    /*@+type@*/
-    shmTimeP->leap = session->context->leap_notify;
-    /* precision is a placebo, ntpd does not really use it
-     * real world accuracy is around 16uS, thus -16 precision */
-    shmTimeP->precision = -16;
-    shmTimeP->count++;
-    shmTimeP->valid = 1;
-
-    /* precision is expensive to compute, make compile optional */
-    precision = offset != 0 ? (int)(ceil(log(offset) / M_LN2)) : -20;
-    /*@-type@*//* splint is confused about struct timespec */
-    gpsd_report(session->context->debug, LOG_RAW,
-		"PPS ntpshm_pps %lu.%09lu @ %lu.%09lu, preci %d\n",
-		(unsigned long)td->real.tv_sec,
-		(unsigned long)td->real.tv_nsec,
-		(unsigned long)td->clock.tv_sec,
-		(unsigned long)td->clock.tv_nsec,
-		precision);
-    /*@+type@*/
-    return 1;
-}
-
 #define SOCK_MAGIC 0x534f434b
 struct sock_sample {
     struct timeval tv;
@@ -466,7 +381,8 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 	log1 = "accepted chrony sock";
 	chrony_send(session, td, edge_offset);
     }
-    (void)ntpshm_pps(session, td, edge_offset);
+    /* ntpd sets -20 for PPS refclocks, thus -20 precision */
+    (void)ntpshm_put(session, session->shmIndexPPS, td, -20);
 
     return log1;
 }

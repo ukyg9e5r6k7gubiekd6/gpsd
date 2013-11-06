@@ -824,7 +824,7 @@ extern unsigned int ais_binary_encode(struct ais_t *ais, /*@out@*/unsigned char 
 
 extern void ntpshm_context_init(struct gps_context_t *);
 extern void ntpshm_session_init(struct gps_device_t *);
-extern int ntpshm_put(struct gps_device_t *, double, double);
+extern int ntpshm_put(struct gps_device_t *, int, struct timedrift_t *, int);
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
 

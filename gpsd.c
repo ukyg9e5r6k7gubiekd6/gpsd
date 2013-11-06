@@ -1530,15 +1530,29 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
     } else if (!device->ship_to_ntpd) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: No precision time report\n");
     } else {
-	double offset;
-	//gpsd_report(context.debug, LOG_PROG, "NTP: Got one\n");
+	double fix_time, integral, fractional;
+	struct timedrift_t td;
+
+#ifdef HAVE_CLOCK_GETTIME
+	(void)clock_gettime(CLOCK_REALTIME, &td.clock);
+#else
+	struct timeval clock_tv;
+	(void)gettimeofday(&clock_tv, NULL);
+	TVTOTS(&td.clock, &clock_tv);
+#endif /* HAVE_CLOCK_GETTIME */
+	fix_time = device->newdata.time;
 	/* assume zero when there's no offset method */
 	if (device->device_type == NULL
 	    || device->device_type->time_offset == NULL)
-	    offset = 0.0;
+	    fix_time += 0.0;
 	else
-	    offset = device->device_type->time_offset(device);
-	(void)ntpshm_put(device, device->newdata.time, offset);
+	    fix_time += device->device_type->time_offset(device);
+	/* it's ugly but timestamp_t is double */
+	fractional = modf(fix_time, &integral);
+	td.real.tv_sec = (time_t)integral;
+	td.real.tv_nsec = (long)(fractional * 1e+9);
+	/* Any NMEA will be about -1 or -2. Garmin GPS-18/USB is around -6 or -7. */
+	(void)ntpshm_put(device, device->shmIndex, &td, -1);
 	device->last_fixtime = device->newdata.time;
     }
 #endif /* NTPSHM_ENABLE */
