@@ -1386,7 +1386,7 @@ for (target,sources,description,params) in splint_table:
     env.Alias('splint',Splint(target,sources,description,params))
 
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
-        "cppcheck --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
+        "cppcheck -D__COVERITY__ -U__UNUSED__ --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
 
 # Experimental check with clang analyzer
 Utility("scan-build", ["gpsd.h", "packet_names.h"],

@@ -80,7 +80,7 @@ static bool aisonly = false;
 
 static int send_udp (char *nmeastring, size_t ind)
 {
-    char message [255];
+    char message[255];
     char *buffer;
     int  channel;
 
@@ -88,7 +88,7 @@ static int send_udp (char *nmeastring, size_t ind)
     if (ind == 0) {
 	/* compute message size and add 0x0a 0x0d */
 	for (ind=0; nmeastring [ind] != '\0'; ind ++) {
-	    if (ind >= sizeof(message)) {
+	    if (ind >= sizeof(message) - 3) {
 		fprintf(stderr, "gps2udp: too big [%s] \n", nmeastring);
 		return -1;
 	    }
@@ -129,7 +129,7 @@ static int open_udp(char **hostport)
 /* Open and bind udp socket to host */
 {
    int channel;
-   for (channel=0; channel <udpchannel; channel ++)
+   for (channel=0; channel < udpchannel; channel ++)
    {
        struct hostent *hp;
        char *hostname = NULL;
@@ -190,7 +190,6 @@ static void usage(void)
 static void connect2gpsd(bool restart)
 /* loop until we connect with gpsd */
 {
-    int status;
     unsigned int delay;
 
     if (restart) {
@@ -203,7 +202,7 @@ static void connect2gpsd(bool restart)
 
     /* loop until we reach GPSd */
     for (delay = 10; ; delay = delay*2) {
-        status = gps_open(gpsd_source.server, gpsd_source.port, &gpsdata);
+        int status = gps_open(gpsd_source.server, gpsd_source.port, &gpsdata);
         if (status != 0) {
 	    (void)fprintf(stderr,
 			  "gps2udp [%s] connection failed at %s:%s\n",
@@ -227,7 +226,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 {   
     struct timeval tv;
     fd_set fds,master;
-    int result, ind;
+    int ind;
     char c;
     int retry=0;
 
@@ -237,6 +236,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 
     /* loop until we get some data or an error */
     for (ind = 0; ind < (int)len;) {
+	int result;
         /* prepare for a blocking read with a 10s timeout */
         tv.tv_sec =  10;
         tv.tv_usec = 0;
@@ -331,10 +331,12 @@ static unsigned int AISGetInt(unsigned char *bitbytes, unsigned int sp, unsigned
 {
     unsigned int acc = 0;
     unsigned int s0p = sp-1;                          // to zero base
-    unsigned int cp, cx, c0, i;
+    unsigned int i;
 
     for(i=0 ; i<len ; i++)
     {
+	unsigned int cp, cx, c0;
+
         acc  = acc << 1;
         cp = (s0p + i) / 6;
         cx = (unsigned int)bitbytes[cp];      // what if cp >= byte_length?
@@ -350,7 +352,7 @@ int main(int argc, char **argv)
 {
     bool daemonize = false;
     long count = -1;
-    int option, status;
+    int option;
     char *udphostport[MAX_UDP_DEST];
 
     flags = WATCH_ENABLE;
@@ -380,7 +382,7 @@ int main(int argc, char **argv)
 	    daemonize = true;
 	    break;
         case 'u':
-            if (udpchannel > MAX_UDP_DEST) {
+            if (udpchannel >= MAX_UDP_DEST) {
 		(void)fprintf(stderr, 
 			      "gps2udp: too many UDP destinations (max=%d)\n",
 			      MAX_UDP_DEST);
@@ -413,7 +415,7 @@ int main(int argc, char **argv)
 
     /* Open UDP port */
     if (udpchannel > 0) {
-        status = open_udp(udphostport);
+        int status = open_udp(udphostport);
 	if (status !=0) exit (1);
     }
 

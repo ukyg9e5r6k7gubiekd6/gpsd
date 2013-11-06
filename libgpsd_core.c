@@ -362,7 +362,7 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     /* otherwise, could be an TCP data feed */
     } else if (strncmp(session->gpsdata.dev.path, "tcp://", 6) == 0) {
-	char server[strlen(session->gpsdata.dev.path)], *port;
+	char server[strlen(session->gpsdata.dev.path)+1], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
@@ -389,7 +389,7 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     /* or could be UDP */
     } else if (strncmp(session->gpsdata.dev.path, "udp://", 6) == 0) {
-	char server[strlen(session->gpsdata.dev.path)], *port;
+	char server[strlen(session->gpsdata.dev.path)+1], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
@@ -419,7 +419,7 @@ int gpsd_open(struct gps_device_t *session)
 #ifdef PASSTHROUGH_ENABLE
     if (strncmp(session->gpsdata.dev.path, "gpsd://", 7) == 0) {
 	/*@-branchstate -nullpass@*/
-	char server[strlen(session->gpsdata.dev.path)], *port;
+	char server[strlen(session->gpsdata.dev.path)+1], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 7, sizeof(server));
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);

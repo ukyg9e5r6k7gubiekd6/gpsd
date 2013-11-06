@@ -1317,15 +1317,21 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	session->driver.nmea2000.can_msgcnt += 1;
 	/*@ignore@*//* because the CAN include files choke splint */
 	source_pgn = (frame->can_id >> 8) & 0x1ffff;
+#ifdef __UNUSED__
 	source_prio = (frame->can_id >> 26) & 0x7;
+#endif
 	source_unit = frame->can_id & 0x0ff;
 	/*@end@*/
 
 	if (((source_pgn & 0x0ff00) >> 8) < 240) {
+#ifdef __UNUSED__
 	    daddr  = source_pgn & 0x000ff;
+#endif
 	    source_pgn  = source_pgn & 0x1ff00;
 	} else {
+#ifdef __UNUSED__
 	    daddr = 0xff;
+#endif
 	}
 
 	if (session->driver.nmea2000.unit_valid == 0) {

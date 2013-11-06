@@ -298,7 +298,6 @@ struct sock_sample {
     double offset;
     int pulse;
     int leap;
-    /* cppcheck-suppress unusedStructMember */
     int _pad;
     int magic;      /* must be SOCK_MAGIC */
 };
@@ -355,6 +354,9 @@ static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
     /*@-compdef@*/
     sample.offset = timespec_diff_ns(td->real, td->clock) / 1e9;
     /*@+compdef@*/
+#ifdef __COVERITY__
+    sample._pad = 0;
+#endif /* __COVERITY__ */
     /*@+type@*/
 
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
