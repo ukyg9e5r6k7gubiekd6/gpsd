@@ -711,21 +711,6 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
 
     memset(satpos, 0, sizeof(satpos));
 
-#ifdef __UNUSED__
-    gpsd_report(session->context->debug, LOG_INF, "Satellite picture:\n");
-    for (k = 0; k < MAXCHANNELS; k++) {
-	bool used_in_solution = false;
-	for (j = 0; j < ; j++)
-	    if (collect->used == i)
-		used_in_solution = true;
-	if (gpsdata->used[k])
-	    gpsd_report(session->context->debug, LOG_INF,
-			"az: %d el: %d  SV: %d\n",
-			gpsdata->azimuth[k], gpsdata->elevation[k],
-			used_in_solution);
-    }
-#endif /* __UNUSED__ */
-
     for (n = k = 0; k < gpsdata->satellites_used; k++) {
 	if (gpsdata->used[k] == 0)
 	    continue;

@@ -276,7 +276,6 @@ void json_sky_dump(const struct gps_data_t *datap,
 		   /*@out@*/ char *reply, size_t replylen)
 {
     int i, reported = 0;
-    char tbuf[JSON_DATE_MAX+1];
 
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"SKY\",", replylen);
@@ -288,11 +287,13 @@ void json_sky_dump(const struct gps_data_t *datap,
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
 		       "\"device\":\"%s\",", datap->dev.path);
-    if (isnan(datap->skyview_time) == 0)
+    if (isnan(datap->skyview_time) == 0) {
+	char tbuf[JSON_DATE_MAX+1];
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
 		       "\"time\":\"%s\",",
 		       unix_to_iso8601(datap->skyview_time, tbuf, sizeof(tbuf)));
+    }
     if (isnan(datap->dop.xdop) == 0)
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -750,13 +751,6 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 {
     /*@-mustfreefresh@*/
     char buf1[JSON_VAL_MAX * 2 + 1];
-    /*
-     * Beware! Needs to stay synchronized with a JSON enumeration map in
-     * the parser. This interpretation of NAVSYSTEM_GALILEO is assumed
-     * from RTCM3, it's not actually documented in RTCM 2.1.
-     */
-    static char *navsysnames[] = { "GPS", "GLONASS", "GALILEO" };
-
     unsigned int n;
 
     (void)snprintf(buf, buflen, "{\"class\":\"RTCM2\",");
@@ -794,6 +788,13 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 
     case 4:
 	if (rtcm->reference.valid) {
+	    /*
+	     * Beware! Needs to stay synchronized with a JSON
+	     * enumeration map in the parser. This interpretation of
+	     * NAVSYSTEM_GALILEO is assumed from RTCM3, it's not
+	     * actually documented in RTCM 2.1.
+	     */
+	    static char *navsysnames[] = { "GPS", "GLONASS", "GALILEO" };
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"system\":\"%s\",\"sense\":%1d,\"datum\":\"%s\",\"dx\":%.1f,\"dy\":%.1f,\"dz\":%.1f,",
 			   rtcm->reference.system >= NITEMS(navsysnames)
@@ -1369,7 +1370,6 @@ void json_aivdm_dump(const struct ais_t *ais,
     char buf1[JSON_VAL_MAX * 2 + 1];
     char buf2[JSON_VAL_MAX * 2 + 1];
     char buf3[JSON_VAL_MAX * 2 + 1];
-    char buf4[JSON_VAL_MAX * 2 + 1];
     char scratchbuf[MAX_PACKET_LENGTH*2+1];
     bool structured;
     int i;
@@ -1965,7 +1965,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    }
 	}
-	else if (ais->type6.dac == 1)
+	else if (ais->type6.dac == 1) {
+	    char buf4[JSON_VAL_MAX * 2 + 1];
 	    switch (ais->type6.fid) {
 	    case 12:	/* IMO236 -Dangerous cargo indication */
 		/* some fields have beem merged to an ISO8601 partial date */
@@ -2202,6 +2203,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	      structured = true;
 	      break;
 	    }
+	}
 	if (!structured)
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"data\":\"%zd:%s\"}\r\n",

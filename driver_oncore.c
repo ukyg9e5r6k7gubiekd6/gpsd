@@ -273,8 +273,6 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
 		  size_t data_len)
 {
     unsigned int i, nchan;
-    unsigned int off;
-    int sv, el, az;
     int j;
 
     if (data_len != 92)
@@ -289,11 +287,11 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
     session->driver.oncore.visible = (int)nchan;
     for (i = 0; i < nchan; i++) {
 	/* get info for one channel/satellite */
-	off = 5 + 7 * i;
+	unsigned int off = 5 + 7 * i;
 
-	sv = (int)getub(buf, off);
-	el = (int)getub(buf, off + 3);
-	az = (int)getbeu16(buf, off + 4);
+	int sv = (int)getub(buf, off);
+	int el = (int)getub(buf, off + 3);
+	int az = (int)getbeu16(buf, off + 4);
 
 	gpsd_report(session->context->debug, LOG_IO, "%2d %2d %2d %3d\n", i, sv, el, az);
 

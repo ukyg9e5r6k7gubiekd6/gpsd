@@ -83,7 +83,6 @@ static int send_udp (char *nmeastring, size_t ind)
     char message [255];
     char *buffer;
     int  channel;
-    ssize_t status;
 
     /* if string length is unknown make a copy and compute it */
     if (ind == 0) {
@@ -109,6 +108,7 @@ static int send_udp (char *nmeastring, size_t ind)
     /* send message on udp channel */
     /*@-type@*/
     for (channel=0; channel < udpchannel; channel ++) {
+	ssize_t status;
 	status = sendto(sock[channel],
 			buffer,
 			ind,
@@ -128,14 +128,14 @@ static int send_udp (char *nmeastring, size_t ind)
 static int open_udp(char **hostport)
 /* Open and bind udp socket to host */
 {
-   struct hostent *hp;
-   char *hostname = NULL;
-   char *portname = NULL;
-   int  portnum, channel;
-
+   int channel;
    for (channel=0; channel <udpchannel; channel ++)
    {
-       /* parse argument */
+       struct hostent *hp;
+       char *hostname = NULL;
+       char *portname = NULL;
+       int  portnum;
+      /* parse argument */
        /*@-unrecog@*/
        hostname = strsep(&hostport[channel], ":");
        portname = strsep(&hostport[channel], ":");

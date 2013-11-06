@@ -163,7 +163,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
      */
     /* FIXME!! I really doubt this is Big Endian compatible */
     uint8_t preamble;
-    int i = 0;   /* handy loop counter */
     struct subframe_t *subp = &session->gpsdata.subframe;
     gpsd_report(session->context->debug, LOG_IO,
 		"50B: gpsd_interpret_subframe: (%d) "
@@ -334,6 +333,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	break;
     case 4:
 	{
+	    int i = 0;   /* handy loop counter */
 	    int sv = -2;
 	    switch (subp->pageid) {
 	    case 0:

@@ -493,7 +493,7 @@ static bool do_command(void)
 #endif /* RECONFIGURE_ENABLE */
     char *arg;
     unsigned char buf[BUFLEN];
-    int status, c;
+    int c;
 
     c = wgetch(cmdwin);
     if (c != '\r' && c != '\n') {
@@ -528,7 +528,7 @@ static bool do_command(void)
 
     /* handle it in the currently selected monitor object if possible */
     if (serial && active != NULL && (*active)->command != NULL) {
-	status = (*active)->command(line);
+	int status = (*active)->command(line);
 	if (status == COMMAND_TERMINATE)
 	    return false;
 	else if (status == COMMAND_MATCH)
