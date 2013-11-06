@@ -414,15 +414,13 @@ static void init_hook(struct gps_device_t *session)
 /*@+mustfreefresh@*/
 
 
-/* actual_ts is when we think the PPS pulse wass */
-/* clock_ts is the local clocke time we saw the pulse */
+/* td is the real time and clock time of the edge */
 /* offset is actual_ts - clock_ts */
 static void chrony_send(struct gps_device_t *session,
 			struct timedrift_t *td,  double offset)
 {
     struct sock_sample sample;
 
-    /* FIXME!! offset is double of the error from local time */
     /* chrony expects tv-sec since Jan 1970 */
     sample.pulse = 0;
     sample.leap = session->context->leap_notify;
