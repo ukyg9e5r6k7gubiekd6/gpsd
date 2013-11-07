@@ -1394,7 +1394,7 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
     /*
      * Hack the packet to reflect its origin.  This code is supposed
      * to insert the path naming the remote gpsd instance into the
-     * baginning of the path attribute, followed by a # to separate it
+     * beginning of the path attribute, followed by a # to separate it
      * from the device.
      */
     char *prefloc;
@@ -1402,7 +1402,7 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
 	 prefloc < (char *)session->packet.outbuffer+session->packet.outbuflen;
 	 prefloc++)
 	if (strncmp(prefloc, prefix, strlen(prefix)) == 0) {
-	    char copy[sizeof(session->packet.outbuffer)];
+	    char copy[sizeof(session->packet.outbuffer)+1];
 	    (void)strlcpy(copy,
 			  (char *)session->packet.outbuffer,
 			  sizeof(copy));
@@ -1419,13 +1419,13 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
     session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
 }
 
-static gps_mask_t json_pass_packet(struct gps_device_t *session UNUSED)
+static gps_mask_t json_pass_packet(struct gps_device_t *session)
 {
     gpsd_report(session->context->debug, LOG_IO,
 		"<= GPS: %s\n", (char *)session->packet.outbuffer);
 
     /*@-nullpass@*/ /* required only because splint is buggy */
-    /* devices and paths need to be edited to */
+    /* devices and paths need to be edited */
     if (strstr((char *)session->packet.outbuffer, "DEVICE") != NULL)
 	path_rewrite(session, "\"path\":\"");
     path_rewrite(session, "\"device\":\"");

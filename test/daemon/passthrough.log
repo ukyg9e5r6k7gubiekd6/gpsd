@@ -1,0 +1,8 @@
+# Name: JSON
+# Submitter: Eric S. Raymond <esr@thyrsus.com>
+# Date: 2013-11-07
+# Notes: Tests the JSON passthrough feature. 
+#
+{"class":"XXX","text":"U can't touch dis."}
+{"class":"YYY","path":"theyellowbrickroad"}
+{"class":"ZZZ","device":"amireacleofstrange"}
