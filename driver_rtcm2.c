@@ -61,7 +61,32 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 #include "gpsd.h"
 
-#define IS_BIG_ENDIAN (*(uint16_t *)"\0\xff" < 0x100)
+/*
+   __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
+  only, probably depending on the architecture. Try to use endian.h if
+  the gcc way fails - endian.h also doesn not seem to be available on all
+  platforms.
+*/
+#ifdef __BIG_ENDIAN__
+#define WORDS_BIGENDIAN 1
+#else /* __BIG_ENDIAN__ */
+#ifdef __LITTLE_ENDIAN__
+#undef WORDS_BIGENDIAN
+#else
+#ifdef BSD
+#include <sys/endian.h>
+#else
+#include <endian.h>
+#endif
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define WORDS_BIGENDIAN 1
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+#undef WORDS_BIGENDIAN
+#else
+#error "unable to determine endianess!"
+#endif /* __BYTE_ORDER */
+#endif /* __LITTLE_ENDIAN__ */
+#endif /* __BIG_ENDIAN__ */
 
 /*
  * Structures for interpreting words in an RTCM-104 2.x message (after
@@ -110,7 +135,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
  * Reminder: Emacs reverse-region is useful...
  */
 
-#ifndef IS_BIGENDIAN	/* little-endian, like x86 */
+#ifndef WORDS_BIGENDIAN	/* little-endian, like x86 */
 
 struct rtcm2_msg_t {
     struct rtcm2_msghw1 {			/* header word 1 */
