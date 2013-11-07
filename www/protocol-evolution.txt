@@ -1,6 +1,10 @@
 = GPSD-NG: A Case Study in Application Protocol Evolution =
 Eric S. Raymond <esr@thyrsus.com>
-v1.5, August 2011
+v1.5.1, November 2013
+
+This document is mastered in asciidoc format.  If you are reading it in HTML,
+you can find the original at the GPSD project website.
+
 
 == Introduction ==
 
@@ -139,7 +143,7 @@ single Ethernet packet (1509 bytes).
 Along about 2006, despite my efforts to conserve the remaining
 namespace, we ran out of letters completely. As the PADE example
 shows, the protocol parser interprets command words letter
-by latter, so trying to wedge longer commands in by simple 
+by letter, so trying to wedge longer commands in by simple
 fiat wouldn't work. Recruiting non-letter characters as
 command characters would have been ugly and only postponed
 the problem a bit, not solved it.
@@ -165,7 +169,7 @@ like.  I had carefully structured GPSD as a relatively small (about
 and services library, all of which was designed from the get-go to use
 re-entrant structures.  Thus, only the top layer needed to change, and
 at that only about 1 KLOC of it actually did. Building the test
-framework to verify the multidevice code in action was a bigger job.)
+framework to verify the multi-device code in action was a bigger job.)
 
 Note that the "one at a time" limitation was imposed by the
 protocol design, notably the fact that the 'O' record didn't contain
@@ -335,7 +339,7 @@ client libraries, what do I actually do with this capability?
 The possibility that immediately suggested itself was "get rid of channels".  
 In the old interface, subscribers could only listen to one device at 
 a time - again, this was a consequence of the fact that 'O' and 'Y' 
-reports were designed before multidevice support and didn't include a 
+reports were designed before multi-device support and didn't include a
 device field.  JSON reports can easily include a device field and 
 thus need not have this problem.
 
@@ -522,7 +526,7 @@ modern scripting languages (Perl, Python, Ruby, and progeny) into a
 common data language that is far more expressive than the structs of
 yesteryear.
 
-=== Protocols on top of metaprotocols ===
+== Protocols on top of metaprotocols ==
 
 GPSD-NG is an application of JSON.  Not a completely pure one; the
 request identifiers, are, for convenience reasons, outside the JSON
