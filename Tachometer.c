@@ -579,11 +579,13 @@ static void Destroy(Widget w)
 
 /* Exported Procedures */
 
+// cppcheck-suppress unusedFunction 
 int TachometerGetValue(Widget w)
 {
     return (((TachometerWidget) w)->tachometer.value);
 }
 
+// cppcheck-suppress unusedFunction 
 int TachometerSetValue(Widget w, int i)
 {
     int old;

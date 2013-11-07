@@ -216,6 +216,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     while (session->thread_report_hook != NULL || session->context->pps_hook != NULL) {
 	bool ok = false;
 #if defined(HAVE_SYS_TIMEPPS_H)
+	// cppcheck-suppress variableScope
 	bool ok_kpps = false;
 #endif /* HAVE_SYS_TIMEPPS_H */
 	char *log = NULL;

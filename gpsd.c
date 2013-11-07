@@ -356,6 +356,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     INVALIDATE_SOCKET(s);
     if ((pse = getservbyname(service, tcp_or_udp)))
 	port = ntohs((in_port_t) pse->s_port);
+    // cppcheck-suppress unreadVariable
     else if ((port = (in_port_t) atoi(service)) == 0) {
 	gpsd_report(context.debug, LOG_ERROR,
 		    "can't get \"%s\" service entry.\n", service);

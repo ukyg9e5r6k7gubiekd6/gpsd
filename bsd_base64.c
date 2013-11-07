@@ -185,6 +185,7 @@ b64_ntop(unsigned char const *src, size_t srclength, char *target,
     return (datalength);
 }
 
+#ifdef __UNUSED__
 /*@ -matchanyintegral +type @*/
 
 /* skips all whitespace anywhere.
@@ -311,5 +312,6 @@ int b64_pton(char const *src, unsigned char *target, size_t targsize)
 }
 
 /*@ +matchanyintegral    -charint @*/
+#endif /* __UNUSED__ */
 
 #endif /* !defined(HAVE_B64_NTOP) && !defined(HAVE___B64_NTOP) */

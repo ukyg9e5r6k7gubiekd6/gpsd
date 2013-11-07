@@ -1029,7 +1029,7 @@ static const struct gps_type_t garmintxt = {
     .channels      = 0,			/* not used */
     .probe_detect  = NULL,		/* no probe */
     .get_packet    = generic_get,	/* how to get a packet */
-    .parse_packet  = generic_parse_input,	/* how to parse one */
+    .parse_packet  = garmintxt_parse,	/* how to parse one */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
     .event_hook    = NULL,		/* no event hook */
 #ifdef RECONFIGURE_ENABLE

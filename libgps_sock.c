@@ -182,6 +182,7 @@ int gps_sock_read(/*@out@*/struct gps_data_t *gpsdata)
 	     * If we received 0 bytes, other side of socket is closing.
 	     * Return -1 as end-of-data indication.
 	     */
+	    // cppcheck-suppress duplicateBranch
 	    if (status == 0)
 		return -1;
 #ifndef USE_QT

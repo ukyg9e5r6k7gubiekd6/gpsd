@@ -54,11 +54,13 @@ bin2srec(unsigned int type, unsigned int offset, unsigned int num,
     return 0;
 }
 
+// cppcheck-suppress unusedFunction 
 int srec_hdr(unsigned int num, unsigned char *bbuf, unsigned char *sbuf)
 {
     return bin2srec(0, 0, num, bbuf, sbuf);
 }
 
+// cppcheck-suppress unusedFunction 
 int srec_fin(unsigned int num, unsigned char *sbuf)
 {
     unsigned char bbuf[4], sum;

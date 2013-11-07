@@ -387,14 +387,14 @@ static gps_mask_t italk_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
-#ifdef __future__
+#ifdef __UNUSED__
 static void italk_ping(struct gps_device_t *session)
 /* send a "ping". it may help us detect an itrax more quickly */
 {
     char *ping = "<?>";
     (void)gpsd_write(session, ping, 3);
 }
-#endif /* __future__ */
+#endif /* __UNUSED__ */
 
 /* *INDENT-OFF* */
 const struct gps_type_t italk_binary =

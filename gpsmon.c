@@ -991,6 +991,7 @@ int main(int argc, char **argv)
 #endif
        ) {
 	(void)gps_open(source.server, source.port, &session.gpsdata);
+	// cppcheck-suppress pointerLessThanZero
 	if (session.gpsdata.gps_fd < 0) {
 	    (void)fprintf(stderr,
 			  "%s: connection failure on %s:%s, error %d = %s.\n",

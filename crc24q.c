@@ -159,6 +159,7 @@ unsigned crc24q_hash(unsigned char *data, int len)
 #define MID(x)	(unsigned char)(((x) >> 8) & 0xff)
 #define HI(x)	(unsigned char)(((x) >> 16) & 0xff)
 
+#ifdef __UNUSED__
 void crc24q_sign(unsigned char *data, int len)
 {
     unsigned crc = crc24q_hash(data, len);
@@ -167,6 +168,7 @@ void crc24q_sign(unsigned char *data, int len)
     data[len + 1] = MID(crc);
     data[len + 2] = LO(crc);
 }
+#endif /* __UNUSED__ */
 
 bool crc24q_check(unsigned char *data, int len)
 {

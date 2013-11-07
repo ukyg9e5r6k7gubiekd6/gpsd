@@ -137,7 +137,6 @@ void putbed64(char *buf, int off, double val)
     /*@+shiftimplementation -ignoresigns@*/
 }
 
-// cppcheck-suppress unusedFunction
 u_int16_t swap_u16(u_int16_t i)
 /* byte-swap a 16-bit unsigned int */
 {
@@ -149,7 +148,6 @@ u_int16_t swap_u16(u_int16_t i)
     return (c1 << 8) + c2;
 }
 
-// cppcheck-suppress unusedFunction
 u_int32_t swap_u32(u_int32_t i)
 /* byte-swap a 32-bit unsigned int */
 {
@@ -163,7 +161,6 @@ u_int32_t swap_u32(u_int32_t i)
     return ((u_int32_t)c1 << 24) + ((u_int32_t)c2 << 16) + ((u_int32_t)c3 << 8) + c4;
 }
 
-// cppcheck-suppress unusedFunction
 u_int64_t swap_u64(u_int64_t i)
 /* byte-swap a 64-bit unsigned int */
 {

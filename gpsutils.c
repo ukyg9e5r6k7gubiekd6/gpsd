@@ -406,8 +406,9 @@ double earth_distance_and_bearings(double lat1, double lon1, double lat2, double
     double a, b, f;		// WGS-84 ellipsoid params
     double L, L_P, U1, U2, s_U1, c_U1, s_U2, c_U2;
     double uSq, A, B, d_S, lambda;
-    double s_L, c_L, s_S, C;
-    double c_S, S, s_A, c_SqA, c_2SM;
+    // cppcheck-suppress variableScope
+    double s_L, c_L, s_A, C;
+    double c_S, S, s_S, c_SqA, c_2SM;
     int i = 100;
 
     a = WGS84A;

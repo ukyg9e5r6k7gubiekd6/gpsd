@@ -1570,6 +1570,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 #define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
+    // cppcheck-suppress variableScope
     static const char *signal_legends[] = {
 	"N/A",
 	"Serious emergency – stop or divert according to instructions.",
@@ -1625,6 +1626,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Cancel route identified by message linkage",
     };
 
+    // cppcheck-suppress variableScope
     static const char *idtypes[] = {
 	"mmsi",
 	"imo",
@@ -1632,6 +1634,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"other",
     };
 
+    // cppcheck-suppress variableScope
     static const char *racon_status[] = {
 	"No RACON installed",
 	"RACON not monitored",
@@ -1639,6 +1642,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"RACON ERROR"
     };
 
+    // cppcheck-suppress variableScope
     static const char *light_status[] = {
 	"No light or no monitoring",
 	"Light ON",
@@ -1646,6 +1650,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Light ERROR"
     };
 
+    // cppcheck-suppress variableScope
     static const char *rta_status[] = {
 	"Operational",
 	"Limited operation",
@@ -1653,6 +1658,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"N/A",
     };
 
+    // cppcheck-suppress variableScope
     const char *position_types[8] = {
 	"Not available",
 	"Port-side to",
