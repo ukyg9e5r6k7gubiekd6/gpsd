@@ -938,8 +938,7 @@ If and when you are ready to go public, see <<JOIN-POOL>>.
 Beat Bolli <bbolli@ewanet.ch> wrote much of the section on NTP
 performance tuning. Hal Murray <hmurray@megapathdsl.net> wrote
 much of the section on NTP working and performance details.
-Sanjeev Gupta <Hal Murray <hmurray@megapathdsl.net> assisted 
-with editing.
+Sanjeev Gupta <ghane0@gmail.com> assisted with editing.
 
 == References ==
 
