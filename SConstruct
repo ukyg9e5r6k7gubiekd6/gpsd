@@ -427,7 +427,7 @@ def CheckCompilerOption(context, option):
     context.Result(ret)
     return ret
 
-def CheckDefinedIn(context, define, file):
+def CheckHeaderDefines(context, file, define):
     context.Message( 'Checking if %s supplies %s ...' %(file,define) )
     ret = context.TryLink("""
         #include <%s>
@@ -445,7 +445,7 @@ config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc,
                                          'CheckCompilerOption' : CheckCompilerOption,
-                                         'CheckDefinedIn' : CheckDefinedIn})
+                                         'CheckHeaderDefines' : CheckHeaderDefines})
 
 
 # If supported by the compiler, enable all warnings except uninitialized and
@@ -618,7 +618,7 @@ if config.CheckFunc("pselect"):
 else:
     confdefs.append("#define COMPAT_SELECT\n")
 
-if not config.CheckDefinedIn("TIOCMIWAIT", "sys/ioctl.h"):
+if not config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT"):
     announce("Forcing pps=no (TIOCMIWAIT not available)")
     env["pps"] = False
 
