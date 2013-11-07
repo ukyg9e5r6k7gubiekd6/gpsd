@@ -2,6 +2,9 @@
 Eric S. Raymond <esr@thyrsus.com>
 v1.10, Febuary 2011
 
+This document is mastered in asciidoc format.  If you are reading it in HTML,
+you can find the original at the GPSD project website.
+
 == Why a new protocol? ==
 
 GPSD has moved to a new request/response protocol.  This move has been
