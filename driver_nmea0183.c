@@ -1134,7 +1134,9 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 	 *
 	 * Support for this theory comes from the fact that crystal
 	 * TXCOs with a 16.368MHZ period are commonly available from
-	 * multiple vendors.
+	 * multiple vendors. Furthermore, 61*69 = 4209, which is
+	 * close to the observed cycle time and suggests that the
+	 * documentation is trying to indicate 61ns units.
 	 *
 	 * He continues:
 	 *
