@@ -732,6 +732,33 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 
     /* selectively enable input protocols */
     if (mode == MODE_NMEA) {
+	/*
+	 * We have to club the GR601-W over the head to make it stop emitting
+	 * UBX after we've told it to start. Turning off the UBX protocol
+	 * mask, by itself, seems to be ineffective.
+	 */
+	unsigned char msg[3];
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x06;		/* msg id  = NAV-SOL */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x20;		/* msg id  = UBX_NAV_TIMEGPS */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x30;		/* msg id  = NAV-SVINFO */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 	buf[outProtoMask] &= ~UBX_PROTOCOL_MASK;
 	buf[outProtoMask] |= NMEA_PROTOCOL_MASK;
     } else { /* MODE_BINARY */
