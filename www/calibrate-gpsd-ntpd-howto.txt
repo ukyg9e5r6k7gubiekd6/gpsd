@@ -9,7 +9,7 @@ you can find the original at the GPSD project website.
 
 
 
-Using GPSD with ntpd, you will often find references to measuring
+When using GPSD with ntpd, you will often find references to measuring
 the delay between the time that the GPS with 1PPS emits a fix, and
 the time that the ntpd service, via the shared memory segment,
 process it.  This is the 'time1' factor in the typical configuration
@@ -102,7 +102,7 @@ You should also have a decent set of NTP servers you are syncing to.
 
 ==== 1. Running ntpd without IMT ====
 
-Locate the line in your ntp.conf which refers to the shm0 segment, and
+Locate the line in your ntp.conf that refers to the shm0 segment and
 append 'noselect' to it.  As an example, the first two lines in the sample
 above will become:
 
@@ -111,8 +111,8 @@ server 127.127.28.0 minpoll 4 maxpoll 4 noselect
 fudge 127.127.28.0 time1 0.420 refid GPS
 --------------------
 
-ntpd will now continue to monitor the IMT from
-GPSD, but not use for its algorithm.  It will write out statistics to
+ntpd will now continue to monitor the IMT from GPSD, but not use it
+for its clock selection algorithm.  It will still write out statistics to
 the peerstats file.  Once ntpd is stable (a few hours or so), we can
 process the peerstats file.
 
@@ -130,14 +130,26 @@ You can now examine the offset and jitter of the IMT.  <<ANDY-POST>>
 suggests the following gnuplot fragment (you will need to set output
 options before plotting).
 
-Show the GPSD shared memory clock deviations from the system
+----------------
+	set term gif
+	set output "fudge.gif"
+----------------
+
+If your gnuplot has X11 support, and you do not wish to save the plot,
+the above may not be required.  Use:
+
+---------------
+	set term x11
+---------------
+
+Now plot the GPSD shared memory clock deviations from the system
 clock.  (You will get the GPSD shared memory clock fudge value
 estimate from this data when NTP has converged to your
 satisfaction.)
 
 ------------------
-        gnuplot> plot    "peerstats.shm" using ($2):($5) with lines 1
-        gnuplot> replot  "peerstats.shm" using ($2):($5):($8) with yerrorbars 2
+        gnuplot> plot "peerstats.shm" using ($2):($5):($8) with yerrorbars
+        gnuplot> replot "peerstats.shm" using ($2):($5) with lines
 ------------------
 
 ==== 3. Applying the correction factor ====
@@ -145,14 +157,16 @@ satisfaction.)
 By examining the plot generated above, you should be able to estimate
 the offset between the 1PPS time and the GPS Time.
 
-If, for example, your estimate of the offset is 0.32s, your time1 fudge
-value will be '-0.32'.  Note the change of sign.
+If, for example, your estimate of the offset is -0.32s, your time1 fudge
+value will be '0.32'.  Note the change of sign.
 
 == Acknowledgments ==
 This HOWTO was drafted by Sanjeev Gupta <ghane0@gmail.com>, based on
 discussions on the GPSD list <<GPSD-LIST>> in Oct and Nov 2013.  Code
 examples are based on work by Andy Walls <andy@silverblocksystems.net>.
 A copy of the original email can be found at <<ANDY-POST>>.
+
+A thorough review was contributed by Jaap Winius <jwinius@rjsystems.nl>.
 
 == References ==
 
