@@ -574,6 +574,29 @@ else:
     announce("You do not have kernel CANbus available.")
     env["nmea2000"] = False
 
+# endian.h is required for rtcm104v2 unless the compiler defines
+# __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
+if config.CheckHeaderDefines("/dev/null", "__ORDER_BIG_ENDIAN__") \
+and config.CheckHeaderDefines("/dev/null", "__ORDER_LITTLE_ENDIAN__") \
+and config.CheckHeaderDefines("/dev/null", "__BYTE_ORDER__"):
+    confdefs.append("#define HAVE_BUILTIN_ENDIANNESS 1\n")
+    confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
+    confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
+    announce("Your compiler has built-in endianness support.")
+else:
+    confdefs.append("/* #undef HAVE_BUILTIN_ENDIANNESS\n */")
+    if config.CheckHeader("endian.h"):
+        confdefs.append("#define HAVE_ENDIAN_H 1\n")
+        confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
+    elif config.CheckHeader("sys/endian.h"):
+        confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
+        confdefs.append("#define HAVE_SYS_ENDIAN_H 1\n")
+    else:
+        confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
+        confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
+        announce("You do not have the endian.h header file. RTCM V2 support disabled.")
+        env["rtcm104v2"] = False
+
 # check function after libraries, because some function require library
 # for example clock_gettime() require librt on Linux
 for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):

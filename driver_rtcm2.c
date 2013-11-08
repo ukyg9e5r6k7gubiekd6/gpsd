@@ -62,32 +62,38 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #include "gpsd.h"
 
 /*
-   __BIG_ENDIAN__ and __LITTLE_ENDIAN__ are define in some gcc versions
-  only, probably depending on the architecture. Try to use endian.h if
-  the gcc way fails - endian.h also doesn not seem to be available on all
-  platforms.
+  __BYTE_ORDER__, __ORDER_BIG_ENDIAN__ and __ORDER_LITTLE_ENDIAN__ are
+  defined in some gcc versions only, probably depending on the
+  architecture. Try to use endian.h if the gcc way fails - endian.h also
+  does not seem to be available on all platforms.
 */
-#ifdef __BIG_ENDIAN__
+
+#if HAVE_BUILTIN_ENDIANNESS
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define WORDS_BIGENDIAN 1
-#else /* __BIG_ENDIAN__ */
-#ifdef __LITTLE_ENDIAN__
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #undef WORDS_BIGENDIAN
 #else
-#ifdef __linux__
+#error Unknown endianness!
+#endif
+
+#else /* HAVE_BUILTIN_ENDIANNESS */
+
+#if defined(HAVE_ENDIAN_H)
 #include <endian.h>
-#else
-/* usual BSD location */
+#elif defined(HAVE_SYS_ENDIAN_H)
 #include <sys/endian.h>
 #endif
+
 #if __BYTE_ORDER == __BIG_ENDIAN
 #define WORDS_BIGENDIAN 1
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
 #undef WORDS_BIGENDIAN
 #else
-#error "unable to determine endianess!"
+#error Unknown endianness!
 #endif /* __BYTE_ORDER */
-#endif /* __LITTLE_ENDIAN__ */
-#endif /* __BIG_ENDIAN__ */
+
+#endif /* HAVE_BUILTIN_ENDIANNESS */
 
 /*
  * Structures for interpreting words in an RTCM-104 2.x message (after
