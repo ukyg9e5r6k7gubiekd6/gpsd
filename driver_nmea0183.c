@@ -1101,10 +1101,51 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
     case 424:			/* PPS pulse width response */
 	/*
 	 * Response will look something like: $PMTK424,0,0,1,0,69*12
-	 * The pulse width is in field 5 (69 in this example).
-	 * The response, if required, should look something like this:
-	 * nmea_send(session, "$PMTK324,0,0,1,0,127875")
+	 * The pulse width is in field 5 (69 in this example).  This
+	 * sentence is poorly documented at:
+	 * http://www.trimble.com/embeddedsystems/condor-gps-module.aspx?dtID=documentation
+	 *
+	 * Packet Type: 324 PMTK_API_SET_OUTPUT_CTL
+	 * Packet meaning
+	 * Write the TSIP / antenna / PPS configuration data to the Flash memory.
+	 * DataField [Data0]:TSIP Packet[on/off]
+         * 0 - Disable TSIP output (Default).
+         * 1 - Enable TSIP output.
+         * [Data1]:Antenna Detect[on/off]
+         * 0 - Disable antenna detect function (Default).
+         * 1 - Enable antenna detect function.
+         * [Data2]:PPS on/off
+         * 0 - Disable PPS function.
+         * 1 - Enable PPS function (Default).
+         * [Data3]:PPS output timing
+         * 0 - Always output PPS (Default).
+         * 1 - Only output PPS when GPS position is fixed.
+         * [Data4]:PPS pulse width
+         * 1~16367999: 61 ns~(61x 16367999) ns (Default = 69)
+	 *
+	 * The documentation does not give the units of the data field.
+	 * Andy Walls <andy@silverblocksystems.net> says:
+	 *
+	 * "The best I can figure using an oscilloscope, is that it is
+	 * in units of 16.368000 MHz clock cycles.  It may be
+	 * different for any other unit other than the Trimble
+	 * Condor. 69 cycles / 16368000 cycles/sec = 4.216 microseconds
+	 * [which is the pulse width I have observed]"
+	 *
+	 * Support for this theory comes from the fact that crystal
+	 * TXCOs with a 16.368MHZ period are commonly available from
+	 * multiple vendors.
+	 *
+	 * He continues:
+	 *
+	 * "I chose [127875] because to divides 16368000 nicely and the
+	 * pulse width is close to 1/100th of a second.  Any number
+	 * the user wants to use would be fine.  127875 cycles /
+	 * 16368000 cycles/second = 1/128 seconds = 7.8125
+	 * milliseconds"
 	 */
+	if (atoi(field[5]) < 127875)
+	    nmea_send(session, "$PMTK324,0,0,1,0,127875");
 	return ONLINE_SET;
     case 705:			/* return device subtype */
 	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));
