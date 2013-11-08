@@ -759,6 +759,40 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
+	/* try to improve the sentence mix. in particular by enabling ZDA */
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x09;		/* msg id  = GBS */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x00;		/* msg id  = GGA */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x02;		/* msg id  = GSA */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x07;		/* msg id  = GST */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x03;		/* msg id  = GSV */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x04;		/* msg id  = RMC */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x05;		/* msg id  = VTG */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x08;		/* msg id  = ZDA */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 	buf[outProtoMask] &= ~UBX_PROTOCOL_MASK;
 	buf[outProtoMask] |= NMEA_PROTOCOL_MASK;
     } else { /* MODE_BINARY */
@@ -788,6 +822,48 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
 	msg[2] = 0x0a;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
+#ifdef __UNUSED__
+	/*
+	 * In theory this should turn off NMEA reporting even if
+	 * clearing the NMEA protocol mask does not.  In practice it
+	 * doesn't work on the GR601-W.  If it did, we could get rid
+	 * of the crocky code that detects unsuppressed NMEA and
+	 * suppresses UBX.
+	 */
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x09;		/* msg id  = GBS */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x00;		/* msg id  = GGA */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x02;		/* msg id  = GSA */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x07;		/* msg id  = GST */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x03;		/* msg id  = GSV */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x04;		/* msg id  = RMC */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x05;		/* msg id  = VTG */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0xf0;		/* class */
+	msg[1] = 0x08;		/* msg id  = ZDA */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+#endif /* __UNUSED __ */
 
 	buf[outProtoMask] &= ~NMEA_PROTOCOL_MASK;
 	buf[outProtoMask] |= UBX_PROTOCOL_MASK;
