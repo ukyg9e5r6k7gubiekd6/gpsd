@@ -73,10 +73,11 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #ifdef __LITTLE_ENDIAN__
 #undef WORDS_BIGENDIAN
 #else
-#ifdef BSD
-#include <sys/endian.h>
-#else
+#ifdef __linux__
 #include <endian.h>
+#else
+/* usual BSD location */
+#include <sys/endian.h>
 #endif
 #if __BYTE_ORDER == __BIG_ENDIAN
 #define WORDS_BIGENDIAN 1
