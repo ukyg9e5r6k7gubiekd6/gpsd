@@ -730,7 +730,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
     /* enable all input protocols by default */
     buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
 
-    /* selectively enable input protocols */
+    /* selectively enable output protocols */
     if (mode == MODE_NMEA) {
 	/*
 	 * We have to club the GR601-W over the head to make it stop emitting
