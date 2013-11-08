@@ -37,14 +37,13 @@ opts=""
 logfile=""
 help="0"
 baton=false
-while getopts cl:strbuvo:h opt
+while getopts cl:stbuvo:h opt
 do
     case $opt in
 	c) testing=clientlib ;;	# Can be 'daemon'
 	l) logfile=$OPTARG ;;	# Logfile to save diffs to
 	s) mode=regress ;;	# Run regression tests
 	t) baton=true mode=regress ;;	# Run regression tests w/baton
-	r) mode=superraw ;;	# Run superraw regressions (r=2 mode)
 	b) mode=build ;;	# Rebuild regression check files
 	u) opts="$opts -u" ;;	# Force UDP
 	v) mode=view ;;		# View result of generating a check file
@@ -64,7 +63,6 @@ then
 	echo "-l <filename>  - where to log diffs to"
 	echo "-s  - run regreession tests"
 	echo "-t <ots>  - Run regression tests w/baton"
-	echo "-r  - run superraw regressions (r=2 mode)"
 	echo "-b  - Rebuild regression check files"
 	echo "-u - Force UDP"
 	echo "-v  - view result of generating a check file"
@@ -153,15 +151,6 @@ case $mode in
             echo "Regression test successful: no errors in $total tests ($notfound not found).";
             status=0;
         fi
-        ;;
-    superraw)
-        echo "Testing super-raw mode..." >&2
-        for f in $*; do
-            ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts -r '?WATCH={"enable":true,"raw":2}' $opts ${f} \
-            | ./devtools/striplog -n 4 >${TMP}/test1-$$.chk;
-            ./devtools/striplog <${f} >${TMP}/test2-$$.chk;
-            cmp ${TMP}/test[12]-$$.chk;
-        done; rm ${TMP}/test[12]-$$.chk
         ;;
     build)
 	echo "Rebuilding $testing regressions..." >&2
