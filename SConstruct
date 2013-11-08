@@ -1241,11 +1241,9 @@ if manbuilder:
 
 ## Where it all comes together
 
-build = env.Alias('build', [libraries, binaries, python_built_extensions, "gpsd.php", manpage_targets])
-clean = env.Clean(build,
-          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
-          generated_sources + \
-          map(lambda f: f[:-3], templated))
+build = env.Alias('build',
+                  [libraries, binaries, python_built_extensions,
+                   "gpsd.php", manpage_targets])
 env.Default(*build)
 
 if qt_env:
@@ -1621,9 +1619,6 @@ check = env.Alias('check', [
 
 env.Alias('testregress', check)
 
-# Clean up to a close approximation of a fresh repository pull
-distclean = env.Alias('distclean', [clean, testclean])
-
 # The website directory
 #
 # None of these productions are fired by default.
@@ -1738,6 +1733,17 @@ Utility('udev-uninstall', '', [
 Utility('udev-test', '', [
     '$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5',
         ])
+
+# Cleanup
+
+# Ordinary cleanup
+clean = env.Clean(build,
+          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
+          webpages + generated_sources + \
+          map(lambda f: f[:-3], templated))
+
+# Clean up to a close approximation of a fresh repository pull
+distclean = env.Alias('distclean', [clean, testclean])
 
 # Release machinery begins here
 #
