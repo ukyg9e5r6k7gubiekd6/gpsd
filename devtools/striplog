@@ -2,7 +2,7 @@
 #
 # striplog -- strip leading lines from logs
 #
-# striplog -1 strips the first line only.
+# striplog -j strips JSON leader sentences.
 # striplog with no option strips all leading lines beginning with #
 #
 # This file is Copyright (c) 2010 by the GPSD project
@@ -10,9 +10,9 @@
 #
 import getopt, sys
 
-secondline = firstline = False
+secondline = firstline = stripjson = False
 stripval = 0
-(options, arguments) = getopt.getopt(sys.argv[1:], "12n:")
+(options, arguments) = getopt.getopt(sys.argv[1:], "12n:j")
 for (switch, val) in options:
     if (switch == '-1'):
         firstline = True
@@ -20,6 +20,8 @@ for (switch, val) in options:
         secondline = True
     if (switch == '-n'):
         stripval = int(val)
+    if (switch == '-j'):
+        stripjson = True
 
 try:
     if firstline:
@@ -30,6 +32,17 @@ try:
     elif stripval:
         for _dummy in range(stripval):
             sys.stdin.readline()
+    elif stripjson:
+        while True:
+            line = sys.stdin.readline()
+            if line.startswith('{"class":"VERSION"') \
+                   or line.startswith('{"class":"DEVICE"') \
+                   or line.startswith('{"class":"DEVICES"') \
+                   or line.startswith('{"class":"WATCH"'):
+                continue
+            else:
+                break
+        sys.stdout.write(line)
     else:
         while True:
             line = sys.stdin.readline()
