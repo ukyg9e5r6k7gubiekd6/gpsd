@@ -1094,6 +1094,7 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 			"$PMTK314,0,1,0,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0");
 	(void)nmea_send(session, "$PMTK301,2");	/* DGPS is WAAS */
 	(void)nmea_send(session, "$PMTK313,1");	/* SBAS enable */
+	(void)nmea_send(session, "$PMTK424");	/* Query PPS pulse width */
     }
 }
 

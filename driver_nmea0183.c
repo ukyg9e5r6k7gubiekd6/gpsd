@@ -1098,7 +1098,15 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 
     msg = atoi(&(session->driver.nmea.field[0])[4]);
     switch (msg) {
-    case 705:			/*  */
+    case 424:			/* PPS pulse width response */
+	/*
+	 * Response will look something like: $PMTK424,0,0,1,0,69*12
+	 * The pulse width is in field 5 (69 in this example).
+	 * The response, if required, should look something like this:
+	 * nmea_send(session, "$PMTK324,0,0,1,0,127875")
+	 */
+	return ONLINE_SET;
+    case 705:			/* return device subtype */
 	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));
 	(void)strlcat(session->subtype, "-", sizeof(session->subtype));
 	(void)strlcat(session->subtype, field[2], sizeof(session->subtype));
