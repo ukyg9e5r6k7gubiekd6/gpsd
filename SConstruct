@@ -1,4 +1,4 @@
-### SCons build recipe for the GPSD project
+## SCons build recipe for the GPSD project
 
 # Important targets:
 #
@@ -1739,11 +1739,14 @@ Utility('udev-test', '', [
 # Ordinary cleanup
 clean = env.Clean(build,
           map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
-          webpages + generated_sources + \
+          generated_sources + \
           map(lambda f: f[:-3], templated))
 
+# Clean up web directory
+webclean = env.Clean(www, [])
+
 # Clean up to a close approximation of a fresh repository pull
-distclean = env.Alias('distclean', [clean, testclean])
+distclean = env.Alias('distclean', [clean, testclean, webclean])
 
 # Release machinery begins here
 #
