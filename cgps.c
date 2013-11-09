@@ -96,6 +96,7 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
+#include <ctype.h>
 
 #include "gpsd_config.h"
 #include "gps.h"
@@ -640,7 +641,10 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 
     /* Be quiet if the user requests silence. */
     if (!silent_flag && raw_flag && (s = (char *)gps_data(gpsdata)) != NULL) {
-	(void)waddstr(messages, s);
+	char *p;
+	for (p = s + strlen(s); --p > s && isspace(*p); *p = '\0')
+	    ;
+	(void)wprintw(messages, "%s\n", s);
     }
 
     /* Reset the status_timer if the state has changed. */
