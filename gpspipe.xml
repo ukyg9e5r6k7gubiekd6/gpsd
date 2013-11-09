@@ -36,6 +36,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-w</arg>
       <arg choice='opt'>-S</arg>
+      <arg choice='opt'>-2</arg>
       <arg choice='opt'>-v</arg>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <group>
@@ -103,6 +104,9 @@ if <application>gpspipe</application> is run as a daemon.</para>
 output.</para>
 
 <para>-S sets the scaled flag.</para>
+
+<para>-2 sets the split24 flag on AIS reports. Note: this option 
+is experimental and may be changed or removed in a future release.</para>
 
 <para>-t adds a timestamp to each sentence output.</para>
 
