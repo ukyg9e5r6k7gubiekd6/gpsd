@@ -1739,7 +1739,7 @@ Utility('udev-test', '', [
 # Ordinary cleanup
 clean = env.Clean(build,
           map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
-          generated_sources + \
+          generated_sources + base_manpages.keys() + \
           map(lambda f: f[:-3], templated))
 
 # Clean up web directory
