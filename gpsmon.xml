@@ -104,7 +104,7 @@ immediately on device open.  This may be useful is, for example,
 you want to capture the startup message from a device that displays
 firmware version information there.</para>
 
-<para>The -n option forces gpsmon to request nmea183 packets instead of the
+<para>The -n option forces gpsmon to request NMEA0183 packets instead of the
 raw datastream from gpsd.</para>
 
 <para>The -t option sets up a fallback type. Give it a string that
@@ -118,7 +118,8 @@ such as SiRF binary.</para>
 of several especially interesting packet types.  The bottom half of
 the screen is a scrolling hex dump of all packets the GPS is issuing.
 Dump lines beginning &gt;&gt;&gt; represent control packets sent to the
-GPS.</para>
+GPS. Lines consisting of "PPS" surrounded by dashes, if present,
+indicate 1PPS and ths start of the reporting cycle.</para>
 
 </refsect1>
 <refsect1 id='commands'><title>COMMANDS</title>
@@ -324,6 +325,9 @@ the 'M' command.</para>
 </refsect2>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title>
+
+<para>PPS events show in the packet window only when gpsmon is
+directly connected, not in client mode.</para>
 
 <para>If you run <application>gpsmon</application> in client mode,
 and kill the daemon while <application>gpsmon</application> is
