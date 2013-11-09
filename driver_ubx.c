@@ -8,7 +8,7 @@
  * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
  *
- * For the Antaris 4, the default leap-secoond offset (before getting one from
+ * For the Antaris 4, the default leap-second offset (before getting one from
  * the sats, one presumes) is 0sec; for the u-blox 6 it's 15sec.
  *
  * This file is Copyright (c) 2010 by the GPSD project
@@ -161,7 +161,7 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf,
     /*
      * We make a deliberate choice not to clear DOPs from the
      * last skyview here, but rather to treat this as a supplement
-     * to our calculations from the visiniolity matrix, trusting
+     * to our calculations from the visibility matrix, trusting
      * the firmware algorithms over ours.
      */
     session->gpsdata.dop.gdop = (double)(getleu16(buf, 4) / 100.0);
