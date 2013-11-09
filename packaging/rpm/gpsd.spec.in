@@ -211,6 +211,7 @@ fi
 %{_bindir}/gpsmon
 %{_bindir}/gpsctl
 %{_bindir}/gegps
+%{_bindir}/gps2udp
 %{_libdir}/libgps*.so.*
 #/lib/udev/gpsd*
 %{python_sitearch}/gps*
@@ -220,6 +221,7 @@ fi
 %{_mandir}/man1/gpsprof.1*
 %{_mandir}/man1/gpsmon.1*
 %{_mandir}/man1/gegps.1*
+%{_mandir}/man1/gps2udp.1*
 %{_mandir}/man1/gpsctl.1*
 %{_mandir}/man5/gpsd_json.5*
 
