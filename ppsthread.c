@@ -496,7 +496,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    session->context->pps_hook(session, &drift);
 		/*@+compdef@*/
             }
-	    gpsd_report(session->context->debug, LOG_RAW,
+	    gpsd_report(session->context->debug, LOG_INF,
 		    "PPS edge %.20s %lu.%09lu offset %.9ld\n",
 		    log1,
 		    (unsigned long)clock_ts.tv_sec,
