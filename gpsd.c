@@ -1365,8 +1365,7 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
     if (TEXTUAL_PACKET_TYPE(device->packet.type)
 	&& (sub->policy.raw > 0 || sub->policy.nmea)) {
 	(void)throttled_write(sub,
-			      (char *)device->packet.
-			      outbuffer,
+			      (char *)device->packet.outbuffer,
 			      device->packet.outbuflen);
 	return;
     }
@@ -1377,8 +1376,7 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
      */
     if (sub->policy.raw > 1) {
 	(void)throttled_write(sub,
-			      (char *)device->packet.
-			      outbuffer,
+			      (char *)device->packet.outbuffer,
 			      device->packet.outbuflen);
 	return;
     }
