@@ -925,7 +925,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
 /* This is everything we export */
 /* *INDENT-OFF* */
 const struct gps_type_t ubx_binary = {
-    .type_name        = "u-blox inary",    /* Full name of type */
+    .type_name        = "u-blox binary",    /* Full name of type */
     .packet_type      = UBX_PACKET,	/* associated lexer packet type */
     .flags	      = DRIVER_STICKY,	/* remember this */
     .trigger          = NULL,
