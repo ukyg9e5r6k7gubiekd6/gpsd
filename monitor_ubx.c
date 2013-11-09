@@ -151,6 +151,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     (void)wprintw(navsolwin, "%+9.2fm/s %+9.2fm/s %+9.2fm/s", evx, evy, evz);
 
     (void)wmove(navsolwin, 4, 11);
+    (void)wattrset(navsolwin, A_UNDERLINE);
     (void)wprintw(navsolwin, "%12.9f  %13.9f  %8.2fm",
 		  g.fix.latitude, g.fix.longitude, g.fix.altitude);
     (void)mvwaddch(navsolwin, 4, 23, ACS_DEGREE);
@@ -159,6 +160,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     (void)wprintw(navsolwin, "%6.2fm/s %5.1fo %6.2fm/s",
 		  g.fix.speed, g.fix.track, g.fix.climb);
     (void)mvwaddch(navsolwin, 5, 26, ACS_DEGREE);
+    (void)wattrset(navsolwin, A_NORMAL);
 
     (void)wmove(navsolwin, 7, 7);
     /*@ -compdef @*/
@@ -171,7 +173,9 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 
 	m = (m - s) / 6000;
 
+	(void)wattrset(navsolwin, A_UNDERLINE);
 	(void)wprintw(navsolwin, "%u %02u:%02u:%05.2f", day, h, m, (double)s / 100);
+	(void)wattrset(navsolwin, A_NORMAL);
     }
     /*@ +compdef @*/
     (void)wmove(navsolwin, 8, 11);
@@ -181,7 +185,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	(void)wprintw(navsolwin, "%d", (tow / 86400000));
     }
 
-    /* relies on the fact that expx and epy are aet to same value */
+    /* relies on the fact that epx and epy are set to same value */
     (void)wmove(navsolwin, 10, 12);
     (void)wprintw(navsolwin, "%7.2f", g.fix.epx);
     (void)wmove(navsolwin, 10, 33);

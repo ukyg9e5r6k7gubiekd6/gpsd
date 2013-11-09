@@ -115,11 +115,15 @@ packet type is NMEA but the device is known to have a binary mode,
 such as SiRF binary.</para>
 
 <para>After startup, the top part of the screen reports the contents
-of several especially interesting packet types.  The bottom half of
-the screen is a scrolling hex dump of all packets the GPS is issuing.
-Dump lines beginning &gt;&gt;&gt; represent control packets sent to the
-GPS. Lines consisting of "PPS" surrounded by dashes, if present,
-indicate 1PPS and ths start of the reporting cycle.</para>
+of several especially interesting packet types.  The "PPS offset"
+field, if nonempty, is the delta between the last 1PPS top of second
+and the system clock at that time.</para>
+
+<para>The bottom half of the screen is a scrolling hex dump of all
+packets the GPS is issuing.  Dump lines beginning &gt;&gt;&gt;
+represent control packets sent to the GPS. Lines consisting of "PPS"
+surrounded by dashes, if present, indicate 1PPS and ths start of the
+reporting cycle.</para>
 
 </refsect1>
 <refsect1 id='commands'><title>COMMANDS</title>
@@ -266,8 +270,9 @@ These will be shipped to the device.</para>
 but all extended NMEA devices for which
 <application>gpsmon</application> presently has support.)</para>
 
-<para>All fields are raw data from the GPS except the "Cooked PVT"
-window near top of screen, provided as a sheck.</para>
+<para>All fields are raw data from the GPS except (a) the "Cooked PVT"
+window near top of screen, provided as a check and (b) the "PPS
+offset" field.</para>
 
 <para>There are no device-specific commands. Which generic
 commands are available may vary by type: examine the output
@@ -277,7 +282,8 @@ of <command>gpsmon -l</command> to learn more.</para>
 <refsect2><title>SiRF support</title>
 <para>Most information is raw from the GPS.  Underlined fields are
 derived by translation from ECEF coordinates or application of
-leap-second and local time-zone offsets.</para>
+leap-second and local time-zone offsets. 1PPS is the clock lag as
+usual.</para>
 
 <para>The following commands are supported for SiRF GPSes only:</para>
 
@@ -321,6 +327,12 @@ the 'M' command.</para>
 
 <para>To interpret what you see, you will need a copy of the
 <citetitle>SiRF Binary Protocol Reference Manual</citetitle>.</para>
+
+</refsect2>
+<refsect2><title>u-blox support</title>
+<para>Most information is raw from the GPS. Underlined fields are
+derived by translation from ECEF coordinates. 1PPS is the clock lag as
+usual. There are no per-type special commands.</para>
 
 </refsect2>
 </refsect1>
