@@ -385,7 +385,7 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
      * for all case we're talking to a Garmin in text mode, and
      * out of general safety-first conservatism.)
      *
-     * Not sure yet how to handle uBlox UBX_MODE_TMONLY
+     * Not sure yet how to handle u-blox UBX_MODE_TMONLY
      */
     if (session->fixcnt <= PPS_MIN_FIXES)
 	return "no fix";

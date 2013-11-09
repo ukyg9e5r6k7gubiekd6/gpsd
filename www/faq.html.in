@@ -152,7 +152,7 @@ a new USB device of that kind and giving you the device path -
 
 <p>3b. If your receiver lists in lsusb(1) doesn't show up as a ttyUSBx
 device, don't lose hope.  It might be a ttyACM device, probably
-/dev/ttyACM0; some receivers, including for example the uBlox TCX0 
+/dev/ttyACM0; some receivers, including for example the u-blox TCX0 
 evaluation kit, announce themselves as USB modems.</p>
 
 <p>3c. For a Bluetooth device, see our <a href="bt.html">Bluetooth
@@ -625,7 +625,7 @@ time-report will come 1 whole millisecond earlier. This will have NTP
 observing something like a 1ms-high sawtooth in the time-reports.</p>
 
 <p>That being said, we've observed excellent 1 millisecond accuracy
-timing performance over USB with a uBlox6+PL2303 combination featuring
+timing performance over USB with a u-blox 6+PL2303 combination featuring
 1PPS wired to DCD_IN.  NaviSys sells this as the GR601W, aka the
 Macx-1.</p>
 

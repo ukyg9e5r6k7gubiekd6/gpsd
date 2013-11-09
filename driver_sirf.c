@@ -1,6 +1,6 @@
 /*
  * This is the gpsd driver for SiRF GPSes operating in binary mode.
- * It also handles uBlox, a SiRF derivative.
+ * It also handles early u-bloxes that were SiRF derivatives.
  *
  * The advantages: Reports climb/sink rate (raw-mode clients won't see this).
  * Also, we can flag DGPS satellites used in the skyview when SBAS is in use.
@@ -613,7 +613,7 @@ static double sirf_time_offset(struct gps_device_t *session)
 	retval = 0.3;
     }
 
-    /* uBlox EMND message */
+    /* u-blox EMND message */
     else if (strcmp(session->gpsdata.tag, "MID98") == 0) {
 	retval = 0.570;
     }
@@ -934,7 +934,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     if (len != 39)
 	return 0;
 
-    /* this packet is only sent by uBlox firmware from version 1.32 */
+    /* this packet is only sent by u-blox firmware from version 1.32 */
     mask = LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET |
 	STATUS_SET | MODE_SET | DOP_SET;
     session->newdata.latitude = (double)getbes32(buf, 1) * RAD_2_DEG * 1e-8;
@@ -1078,7 +1078,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 				   len) | (CLEAR_IS | REPORT_IS);
 	else {
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: MND 0x02 skipped, uBlox flag is on.\n");
+			"SiRF: MND 0x02 skipped, u-blox flag is on.\n");
 	    return 0;
 	}
     case 0x04:			/* Measured tracker data out MID 4 */
@@ -1208,8 +1208,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	 */
 	return sirf_msg_ppstime(session, buf, len);
 
-    case 0x62:			/* uBlox Extended Measured Navigation Data MID 98 */
-	gpsd_report(session->context->debug, LOG_PROG, "SiRF: uBlox EMND 0x62\n");
+    case 0x62:			/* u-blox Extended Measured Navigation Data MID 98 */
+	gpsd_report(session->context->debug, LOG_PROG, "SiRF: u-blox EMND 0x62\n");
 	return sirf_msg_ublox(session, buf, len) | (CLEAR_IS | REPORT_IS);
 
     case 0x80:			/* Initialize Data Source MID 128 */

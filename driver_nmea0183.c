@@ -733,7 +733,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
      * 6) Local zone minutes description, apply same sign as local hours
      * 7) Checksum
      *
-     * Note: some devices, like the uBlox ANTARIS 4h, are known to ship ZDAs
+     * Note: some devices, like the u-blox ANTARIS 4h, are known to ship ZDAs
      * with some fields blank under poorly-understood circumstances (probably
      * when they don't have satellite lock yet).
      */

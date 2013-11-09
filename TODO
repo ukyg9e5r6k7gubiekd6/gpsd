@@ -28,7 +28,7 @@ packet aggregation issue as it doesn't happen with test logs.
 
 *** Add a method for presetting time and enabling/disabing time service mode
 
-We could implement this right away on the uBlox 6.  Zodiac and Delorme
+We could implement this right away on the u-blox 6.  Zodiac and Delorme
 devices could use it too. 
 
 **** RTCM3 analysis is incomplete

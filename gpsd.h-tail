@@ -495,7 +495,7 @@ struct gps_device_t {
     /*
      * The rest of this structure is driver-specific private storage.
      * It used to be a union, but that turned out to be unsafe.  Dual-mode
-     * devices like SiRFs and uBloxes need to not step on the old mode's
+     * devices like SiRFs and u-bloxes need to not step on the old mode's
      * storage when they transition.
      */
     struct {
@@ -546,7 +546,7 @@ struct gps_device_t {
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
 #define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
 #define SIRF_GE_232     0x04            /* SiRF at firmware rev >= 232 */
-#define UBLOX   	0x08		/* uBlox firmware with packet 0x62 */
+#define UBLOX   	0x08		/* u-blox firmware with packet 0x62 */
 	    unsigned long satcounter;
 	    unsigned int time_seen;
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */

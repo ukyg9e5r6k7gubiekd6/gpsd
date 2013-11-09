@@ -1,5 +1,5 @@
 /*
- * UBX driver.  All capabilities are common to Antaris4 and uBlox6.
+ * UBX driver.  All capabilities are common to Antaris4 and u-blox 6.
  * Reference manuals are at
  * http://www.u-blox.com/en/download/documents-a-resources/u-blox-6-gps-modules-resources.html
  *
@@ -9,7 +9,7 @@
  * unhappy things will occur on the next rollover.
  *
  * For the Antaris 4, the default leap-secoond offset (before getting one from
- * the sats, one presumes) is 0sec; for the uBlox6 it's 15sec.
+ * the sats, one presumes) is 0sec; for the u-blox 6 it's 15sec.
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -666,7 +666,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	putle32(buf, 8, speed);
 
 	/*
-	 * uBlox tech support explains the default contents of the mode
+	 * u-blox tech support explains the default contents of the mode
 	 * field as follows:
 	 *
 	 * D0 08 00 00     mode (LSB first)
@@ -925,7 +925,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
 /* This is everything we export */
 /* *INDENT-OFF* */
 const struct gps_type_t ubx_binary = {
-    .type_name        = "uBlox UBX binary",    /* Full name of type */
+    .type_name        = "u-blox inary",    /* Full name of type */
     .packet_type      = UBX_PACKET,	/* associated lexer packet type */
     .flags	      = DRIVER_STICKY,	/* remember this */
     .trigger          = NULL,

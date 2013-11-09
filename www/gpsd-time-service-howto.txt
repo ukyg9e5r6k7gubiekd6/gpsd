@@ -162,7 +162,7 @@ RS232.  USB GPSes that deliver 1PPS are rare, but do exist. Notably,
 there's the Navsys GR601-W. In case this device goes out of
 production it's worth noting that it's a trivial modification of the
 stock two-chip-on-a-miniboard commodity-GPS design of engine plus
-USB-to-serial adapter; the GR601-W wires a uBlox 6 to a Prolific Logic
+USB-to-serial adapter; the GR601-W wires a u-blox 6 to a Prolific Logic
 PL23203.  To get 1PPS out, just wire the 1PPS pin from the GPS engine to
 the Carrier Detect pin on the USB adapter. (This is known as the "Macx-1
 mod".)
@@ -238,7 +238,7 @@ may even have to make your own cables) but it can deliver three orders
 of magnitude better accuracy and repeatability - enough to meet
 prevailing standards for a public Stratum 1 chimer.
 
-Among newer receiver designs we've found the the uBlox 6 receiver used
+Among newer receiver designs we've found the the u-blox 6 receiver used
 in the GR601-W to be particularly good.  Very detailed information on
 its timing performance can be found at <<UBLOX-TIMING>>. One of us
 (Raymond) has recent experience with an eval kit, the EVK 6H-0-001,

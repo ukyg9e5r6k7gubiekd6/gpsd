@@ -101,7 +101,7 @@ that speaks either the standard textual NMEA 0183 protocol, or the
 (differing) extended NMEA dialects used by MKT-3301, iTrax, Motorola
 OnCore, Sony CXD2951, and Ashtech/Thales devices.  It can also
 interpret the binary protocols used by EverMore, Garmin, Navcom,
-Rockwell/Zodiac, SiRF, Trimble, and uBlox ANTARIS devices. Under Linux 
+Rockwell/Zodiac, SiRF, Trimble, and u-blox ANTARIS devices. Under Linux 
 it can read NMEA2000 packets through the kernel CAN socket. It can read
 heading and attitude information from the Oceanserver 5000 or TNT
 Revolution digital compasses.</para>
