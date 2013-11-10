@@ -856,7 +856,7 @@ static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
     /*@+type@*/
     packet_log("#------------------------------------" 
 	       " PPS "
-	       "------------------------------------#\n");
+	       "------------------------------------#");
     return "gpsmon";
 }
 #endif /* PPS_ENABLE */

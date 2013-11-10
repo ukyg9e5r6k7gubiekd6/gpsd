@@ -1917,6 +1917,7 @@ typedef int socket_t;
 #define WATCH_TIMING	0x000200u	/* timing information */
 #define WATCH_DEVICE	0x000800u	/* watch specific device */
 #define WATCH_SPLIT24	0x001000u	/* split AIS Type 24s */
+#define WATCH_PPSBAR	0x002000u	/* enable PPS comment packets */
 #define WATCH_NEWSTYLE	0x010000u	/* force JSON streaming */
 #define WATCH_OLDSTYLE	0x020000u	/* force old-style streaming */
 
