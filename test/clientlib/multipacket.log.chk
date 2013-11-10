@@ -1,2 +1,2 @@
 flags: (0x20000000) {POLICY}
-POLICY: watcher=true nmea=false raw=0 scaled=false timing=false, split24=false devpath=
+POLICY: watcher=true nmea=false raw=0 scaled=false timing=false, split24=false ppsbar=false, devpath=
