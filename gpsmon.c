@@ -471,8 +471,9 @@ static void refresh_cmdwin(void)
 {
     (void)wmove(cmdwin, 0, 0);
     (void)wprintw(cmdwin, type_name);
-    promptlen = strlen(type_name) + 2;
+    promptlen = strlen(type_name) + 3;
     if (fallback != NULL && fallback != active) {
+	(void)waddch(cmdwin, (chtype)' ');
 	(void)waddch(cmdwin, (chtype)'(');
 	(void)waddstr(cmdwin, (*fallback)->driver->type_name);
 	(void)waddch(cmdwin, (chtype)')');
