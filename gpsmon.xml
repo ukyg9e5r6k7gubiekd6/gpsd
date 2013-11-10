@@ -129,7 +129,7 @@ and the system clock at that time.</para>
 <para>The bottom half of the screen is a scrolling hex dump of all
 packets the GPS is issuing.  Dump lines beginning &gt;&gt;&gt;
 represent control packets sent to the GPS. Lines consisting of "PPS"
-surrounded by dashes, if present, indicate 1PPS and ths start of the
+surrounded by dashes, if present, indicate 1PPS and the start of the
 reporting cycle.</para>
 
 </refsect1>
