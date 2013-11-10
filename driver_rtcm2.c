@@ -85,6 +85,23 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #include <sys/endian.h>
 #endif
 
+/*
+ * BSD uses _BYTE_ORDER, and Linux uses __BYTE_ORDER.
+ */
+#if !defined( __BYTE_ORDER) && defined(_BYTE_ORDER)
+#define __BYTE_ORDER _BYTE_ORDER
+#endif
+#if !defined( __BIG_ENDIAN) && defined(_BIG_ENDIAN)
+#define __BIG_ENDIAN _BIG_ENDIAN
+#endif
+#if !defined( __LITTLE_ENDIAN) && defined(_LITTLE_ENDIAN)
+#define __LITTLE_ENDIAN _LITTLE_ENDIAN
+#endif
+
+#if !defined(__BYTE_ORDER) || !defined(__BIG_ENDIAN) || !defined(__LITTLE_ENDIAN)
+#error endianness macros are not defined
+#endif
+
 #if __BYTE_ORDER == __BIG_ENDIAN
 #define WORDS_BIGENDIAN 1
 #elif __BYTE_ORDER == __LITTLE_ENDIAN
