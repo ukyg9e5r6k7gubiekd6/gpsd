@@ -84,6 +84,13 @@ connection. In direct-connect mode <application>gpsmon</application>
 will hunt for a correct baud rate and lock on to it
 automatically.</para>
 
+<para>Unlike <application>gpsd</application>,
+<application>gpsmon</application> run in direct mode does not do its
+own device probing.  Thus, in particular, if you point it at a
+GPS with a native binary mode that happens to be emitting NMEA, it
+won't identify the actual type unless the device emits a recognizable
+NMEA trigger sentence.  The -t and -i options may help you.</para>
+
 <para>The -F option is only valid in client mode; it specifies a
 control socket to which the program should send device control
 strings.  You must specify a valid pathname of a Unix-domain socket on
