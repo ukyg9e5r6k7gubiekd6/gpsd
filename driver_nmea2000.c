@@ -178,6 +178,16 @@ static double ais_direction(unsigned int val, double scale)
 }
 
 
+static bool get_split24(struct gps_device_t *session)
+{
+    bool split24;
+
+    split24 = session->gpsdata.policy.split24;
+
+    return split24;
+}
+
+
 /*
  *   PGN 59392: ISO  Acknowledgment
  */
@@ -781,7 +791,9 @@ static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_de
 static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
+    bool split24;
 
+    split24 = get_split24(session);
     ais =  &session->gpsdata.ais;
     print_data(session->context, bu, len, pgn);
     gpsd_report(session->context->debug, LOG_DATA,
@@ -796,7 +808,7 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		    "NMEA2000: AIS message 24A from %09u stashed.\n",
 		    ais->mmsi);
 
-	if (session->gpsdata.policy.split24 == true) {
+	if (split24 == true) {
 	    for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
 	        ais->type24.shipname[l] = (char) bu[ 5+l];
 	    }
@@ -815,7 +827,7 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	}
 	decode_ais_channel_info(bu, len, 200, session);
 
-	if (session->gpsdata.policy.split24 == true) {
+	if (split24 == true) {
 	    ais->type24.part = part_a;
 	    return(ONLINE_SET | AIS_SET);
 	} else {
@@ -832,7 +844,9 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
+    bool split24;
 
+    split24 = get_split24(session);
     ais =  &session->gpsdata.ais;
     print_data(session->context, bu, len, pgn);
     gpsd_report(session->context->debug, LOG_DATA,
@@ -876,7 +890,7 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    }
 	}
 
-	if (session->gpsdata.policy.split24 == true) {
+	if (split24 == true) {
 #if NMEA2000_DEBUG_AIS
 	    printf("AIS: MMSI  :  %09u\n", ais->mmsi);
 	    printf("AIS: vendor:  %-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
