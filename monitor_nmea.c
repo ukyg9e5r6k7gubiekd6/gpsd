@@ -24,6 +24,7 @@ extern const struct gps_type_t nmea;
 
 static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
 static timestamp_t last_tick, tick_interval;
+static char sentences[NMEA_MAX * 2];
 
 /*****************************************************************************
  *
@@ -130,6 +131,8 @@ static bool nmea_initialize(void)
 
     last_tick = timestamp();
 
+    sentences[0] = '\0';
+
     return (nmeawin != NULL);
     /*@ +globstate @*/
 }
@@ -170,7 +173,6 @@ static void cooked_pvt(void)
 /*@ -globstate -nullpass (splint is confused) */
 static void nmea_update(void)
 {
-    static char sentences[NMEA_MAX * 2];
     char **fields;
 
     assert(cookedwin != NULL);
