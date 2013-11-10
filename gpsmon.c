@@ -1065,6 +1065,7 @@ int main(int argc, char **argv)
     (void)cbreak();
     (void)intrflush(stdscr, FALSE);
     (void)keypad(stdscr, true);
+    (void)clear();
     curses_active = true;
 
 #define CMDWINHEIGHT	1
