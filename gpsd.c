@@ -1633,6 +1633,12 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 		{
 		    char buf[GPS_JSON_RESPONSE_MAX * 4];
 
+		    if ((changed & AIS_SET) != 0)
+			if (device->gpsdata.ais.type == 24
+			    && device->gpsdata.ais.type24.part != both
+			    && !sub->policy.split24)
+			    continue;
+
 		    json_data_report(changed,
 				     device, &sub->policy,
 				     buf, sizeof(buf));

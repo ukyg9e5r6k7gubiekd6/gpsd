@@ -989,29 +989,24 @@ bool ais_binary_decode(const int debug,
 			    bitlen);
 		return false;
 	    }
-	    if (type24_queue != NULL)
-	    {
-		/* save incoming 24A shipname/MMSI pairs in a circular queue */
-		{
-		    struct ais_type24a_t *saveptr = &type24_queue->ships[type24_queue->index];
 
-		    gpsd_report(debug, LOG_PROG,
-				"AIVDM: 24A from %09u stashed.\n",
-				ais->mmsi);
-		    saveptr->mmsi = ais->mmsi;
-		    UCHARS(40, saveptr->shipname);
-		    ++type24_queue->index;
-		    type24_queue->index %= MAX_TYPE24_INTERLEAVE;
-		}
-		//ais->type24.a.spare	= UBITS(160, 8);
-		return false;	/* data only partially decoded */
-	    }
-	    else
+	    /* save incoming 24A shipname/MMSI pairs in a circular queue */
 	    {
-		UCHARS(40, ais->type24.shipname);
-		ais->type24.part = part_a;
-		return true;
+		struct ais_type24a_t *saveptr = &type24_queue->ships[type24_queue->index];
+
+		gpsd_report(debug, LOG_PROG,
+			    "AIVDM: 24A from %09u stashed.\n",
+			    ais->mmsi);
+		saveptr->mmsi = ais->mmsi;
+		UCHARS(40, saveptr->shipname);
+		++type24_queue->index;
+		type24_queue->index %= MAX_TYPE24_INTERLEAVE;
 	    }
+	    //ais->type24.a.spare	= UBITS(160, 8);
+
+	    UCHARS(40, ais->type24.shipname);
+	    ais->type24.part = part_a;
+	    return true;
 	case 1:
 	    if (bitlen != 168) {
 		gpsd_report(debug, LOG_WARN,
@@ -1044,33 +1039,26 @@ bool ais_binary_decode(const int debug,
 		ais->type24.dim.to_starboard  = UBITS(156, 6);
 	    }
 	    //ais->type24.b.spare	    = UBITS(162, 8);
-	    if (type24_queue != NULL)
-	    {
-		/* search the 24A queue for a matching MMSI */
-		for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
-		    if (type24_queue->ships[i].mmsi == ais->mmsi) {
-			(void)strlcpy(ais->type24.shipname,
-				      type24_queue->ships[i].shipname,
-				      sizeof(type24_queue->ships[i].shipname));
-			gpsd_report(debug, LOG_PROG,
-				    "AIVDM 24B from %09u matches a 24A.\n",
-				    ais->mmsi);
-			/* prevent false match if a 24B is repeated */
-			type24_queue->ships[i].mmsi = 0;
-			return true;
-		    }
+
+	    /* search the 24A queue for a matching MMSI */
+	    for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
+		if (type24_queue->ships[i].mmsi == ais->mmsi) {
+		    (void)strlcpy(ais->type24.shipname,
+				  type24_queue->ships[i].shipname,
+				  sizeof(type24_queue->ships[i].shipname));
+		    gpsd_report(debug, LOG_PROG,
+				"AIVDM 24B from %09u matches a 24A.\n",
+				ais->mmsi);
+		    /* prevent false match if a 24B is repeated */
+		    type24_queue->ships[i].mmsi = 0;
+		    ais->type24.part = both;
+		    return true;
 		}
-		gpsd_report(debug, LOG_WARN,
-			    "AIVDM 24B from %09u can't be matched to a 24A.\n",
-			    ais->mmsi);
-		ais->type24.part = both;
-		return false;
 	    }
-	    else
-	    {
-		ais->type24.part = part_b;
-		return true;
-	    }
+
+	    /* no match, return Part B */
+	    ais->type24.part = part_b;
+	    return true;
 	default:
 	    gpsd_report(debug, LOG_WARN,
 			"AIVDM message type 24 of subtype unknown.\n");

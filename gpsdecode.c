@@ -51,6 +51,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
     char scratchbuf[MAX_PACKET_LENGTH*2+1];
     bool imo = false;
+
     (void)snprintf(buf, buflen, "%u|%u|%09u|", ais->type, ais->repeat,
 		   ais->mmsi);
     /*@ -formatcode @*/
@@ -548,7 +549,6 @@ static void decode(FILE *fpin, FILE*fpout)
     gpsd_clear(&session);
     session.gpsdata.gps_fd = fileno(fpin);
     session.gpsdata.dev.baudrate = 38400;     /* hack to enable subframes */
-    session.gpsdata.policy.split24 = split24;
     (void)strlcpy(session.gpsdata.dev.path,
 		  "stdin",
 		  sizeof(session.gpsdata.dev.path));
@@ -574,6 +574,10 @@ static void decode(FILE *fpin, FILE*fpout)
 	    }
 #ifdef SOCKET_EXPORT_ENABLE
 	    else {
+		if ((changed & AIS_SET)!=0) {
+		    if (session.gpsdata.ais.type == 24 && session.gpsdata.ais.type24.part != both && !split24)
+			continue;
+		}
 		json_data_report(changed,
 				 &session, &policy,
 				 buf, sizeof(buf));
@@ -583,6 +587,8 @@ static void decode(FILE *fpin, FILE*fpout)
 #ifdef AIVDM_ENABLE
 	} else if (session.packet.type == AIVDM_PACKET) {
 	    if ((changed & AIS_SET)!=0) {
+		if (session.gpsdata.ais.type == 24 && session.gpsdata.ais.type24.part != both && !split24)
+		    continue;
 		aivdm_csv_dump(&session.gpsdata.ais, buf, sizeof(buf));
 		(void)fputs(buf, fpout);
 	    }
