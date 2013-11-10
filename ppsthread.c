@@ -443,7 +443,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 
 	if (ok) {
-	    /* l_offset is the skew from expected to observed pulse time */
+	    /* offset is the skew from expected to observed pulse time */
+	    double offset;
 	    long l_offset;
 	    char *log1 = NULL;
 	    /* drift.real is the time we think the pulse represents  */
@@ -478,8 +479,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	    /* check to see if we have a fresh timestamp from the
 	     * GPS serial input then use that */
-	    l_offset = (long)(drift.real.tv_sec - drift.clock.tv_sec);
-	    l_offset += (long)((drift.real.tv_nsec - drift.clock.tv_nsec) / 1e9);
+	    offset = (drift.real.tv_sec - drift.clock.tv_sec);
+	    offset += ((drift.real.tv_nsec - drift.clock.tv_nsec) / 1e9);
+	    l_offset = (long) offset;
 	    if (0 > l_offset || 1000000 < l_offset) {
 		gpsd_report(session->context->debug, LOG_RAW,
 			    "PPS: no current GPS seconds: %ld\n",
@@ -497,11 +499,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@+compdef@*/
             }
 	    gpsd_report(session->context->debug, LOG_INF,
-		    "PPS edge %.20s %lu.%09lu offset %.9ld\n",
+		    "PPS edge %.20s %lu.%09lu offset %.9f\n",
 		    log1,
 		    (unsigned long)clock_ts.tv_sec,
 		    (unsigned long)clock_ts.tv_nsec,
-		    l_offset);
+		    offset);
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);
