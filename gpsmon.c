@@ -484,6 +484,61 @@ static void refresh_cmdwin(void)
 }
 /*@+observertrans +nullpass +globstate@*/
 
+/*@-observertrans -nullpass -globstate@*/
+static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
+/* per-packet hook */
+{
+    static int last_type = BAD_PACKET;
+
+    /*
+     * Switch display types on packet receipt.  Note, this *doesn't*
+     * change the selection of the current device driver; that's done
+     * within gpsd_multipoll() before this hook is called.
+     */
+    if (device->packet.type != last_type) {
+	const struct gps_type_t *active_type = device->device_type;
+	if (device->packet.type == NMEA_PACKET
+	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
+	    active_type = &nmea;
+	if (!switch_type(active_type))
+	    longjmp(terminate, TERM_DRIVER_SWITCH);
+	else {
+	    refresh_statwin();
+	    refresh_cmdwin();
+	}
+	last_type = device->packet.type;
+    }
+
+    if (active != NULL
+	&& device->packet.outbuflen > 0
+	&& (*active)->update != NULL)
+	(*active)->update();
+    if (devicewin != NULL)
+	(void)wnoutrefresh(devicewin);
+
+    report_lock();
+    (void)wprintw(packetwin, "(%d) ", device->packet.outbuflen);
+    packet_dump((char *)device->packet.outbuffer,
+		device->packet.outbuflen);
+    if (packetwin != NULL)
+	(void)wnoutrefresh(packetwin);
+
+    (void)doupdate();
+    report_unlock();
+
+    /* Update the last fix time seen for PPS. FIXME: do this here? */
+    device->last_fixtime = device->newdata.time;
+
+    if (logfile != NULL && device->packet.outbuflen > 0) {
+        /*@ -shiftimplementation -sefparams +charint @*/
+        assert(fwrite
+               (device->packet.outbuffer, sizeof(char),
+                device->packet.outbuflen, logfile) >= 1);
+        /*@ +shiftimplementation +sefparams -charint @*/
+    }
+}
+/*@+observertrans +nullpass +globstate@*/
+
 /*@-globstate -usedef -compdef@*/
 static bool do_command(void)
 {
@@ -497,14 +552,20 @@ static bool do_command(void)
     int c;
 
     c = wgetch(cmdwin);
-    if (c != '\r' && c != '\n') {
+    if (c == CTRL('L')) {
+	(void)clearok(stdscr, TRUE);
+	if (active != NULL && (*active)->initialize != NULL)
+	    (*active)->initialize();
+	gpsmon_hook(&session, 0);
+    } else if (c != '\r' && c != '\n') {
 	size_t len = strlen(input);
 
 	if (c == '\b' || c == KEY_LEFT || c == (int)erasechar()) {
 	    input[len] = '\0';
-	} else {
+	} else if (isprint(c)) {
 	    input[len] = (char)c;
 	    input[++len] = '\0';
+	    (void)waddch(cmdwin, c);
 	}
 
 	return true;
@@ -786,61 +847,6 @@ static bool do_command(void)
 }
 /*@+globstate +usedef +compdef@*/
 
-/*@-observertrans -nullpass -globstate@*/
-static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
-/* per-packet hook */
-{
-    static int last_type = BAD_PACKET;
-
-    /*
-     * Switch display types on packet receipt.  Note, this *doesn't*
-     * change the selection of the current device driver; that's done
-     * within gpsd_multipoll() before this hook is called.
-     */
-    if (device->packet.type != last_type) {
-	const struct gps_type_t *active_type = device->device_type;
-	if (device->packet.type == NMEA_PACKET
-	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
-	    active_type = &nmea;
-	if (!switch_type(active_type))
-	    longjmp(terminate, TERM_DRIVER_SWITCH);
-	else {
-	    refresh_statwin();
-	    refresh_cmdwin();
-	}
-	last_type = device->packet.type;
-    }
-
-    if (active != NULL
-	&& device->packet.outbuflen > 0
-	&& (*active)->update != NULL)
-	(*active)->update();
-    if (devicewin != NULL)
-	(void)wnoutrefresh(devicewin);
-
-    report_lock();
-    (void)wprintw(packetwin, "(%d) ", device->packet.outbuflen);
-    packet_dump((char *)device->packet.outbuffer,
-		device->packet.outbuflen);
-    if (packetwin != NULL)
-	(void)wnoutrefresh(packetwin);
-
-    (void)doupdate();
-    report_unlock();
-
-    /* Update the last fix time seen for PPS. FIXME: do this here? */
-    device->last_fixtime = device->newdata.time;
-
-    if (logfile != NULL && device->packet.outbuflen > 0) {
-        /*@ -shiftimplementation -sefparams +charint @*/
-        assert(fwrite
-               (device->packet.outbuffer, sizeof(char),
-                device->packet.outbuflen, logfile) >= 1);
-        /*@ +shiftimplementation +sefparams -charint @*/
-    }
-}
-/*@+observertrans +nullpass +globstate@*/
-
 #ifdef PPS_ENABLE
 static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
 			struct timedrift_t *td) {
@@ -1070,7 +1076,9 @@ int main(int argc, char **argv)
     (void)cbreak();
     (void)intrflush(stdscr, FALSE);
     (void)keypad(stdscr, true);
+    (void)clearok(stdscr, TRUE);
     (void)clear();
+    (void)noecho();
     curses_active = true;
 
 #define CMDWINHEIGHT	1
