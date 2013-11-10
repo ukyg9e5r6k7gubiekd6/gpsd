@@ -157,16 +157,21 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef SIRF_ENABLE
 	case 1:
 	    /*
-	     * We used to try to probe for SiRF by issuing "$PSRF105,1"
-	     * and expecting "$Ack Input105.".  But it turns out this
-	     * only works for SiRF-IIs; SiRF-I and SiRF-III don't respond.
-	     * Thus the only reliable probe is to try to flip the SiRF into
-	     * binary mode, cluing in the library to revert it on close.
+	     * We used to try to probe for SiRF by issuing
+	     * "$PSRF105,1" and expecting "$Ack Input105.".  But it
+	     * turns out this only works for SiRF-IIs; SiRF-I and
+	     * SiRF-III don't respond.  Sadly, the MID132 binary
+	     * request for firmware version is ignored in NMEA mode.
+	     * Thus the only reliable probe is to try to flip the SiRF
+	     * into binary mode, cluing in the library to revert it on
+	     * close.
 	     *
-	     * SiRFs dominate the GPS-mouse market, so we used to put this test
-	     * first. Unfortunately this causes problems for gpsctl, as it cannot
-	     * select the NMEA driver without switching the device back to
-	     * binary mode!  Fix this if we ever find a nondisruptive probe string.
+	     * SiRFs dominate the consumer-grade GPS-mouse market, so
+	     * we used to put this test first. Unfortunately this
+	     * causes problems for gpsctl, as it cannot select the
+	     * NMEA driver without switching the device back to binary
+	     * mode!  Fix this if we ever find a nondisruptive probe
+	     * string.
 	     */
 	    gpsd_report(session->context->debug, LOG_PROG, "=> Probing for SiRF\n");
 	    (void)nmea_send(session,
