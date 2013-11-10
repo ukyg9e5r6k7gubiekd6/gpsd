@@ -217,14 +217,14 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	    (void)nmea_send(session, "$PASHQ,RID");
 	    break;
 #endif /* ASHTECH_ENABLE */
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
 	case 7:
 	    /* probe for UBX -- query software version */
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"=> Probing for UBX\n");
 	    (void)ubx_write(session, 0x0au, 0x04, NULL, 0);
 	    break;
-#endif /* UBX_ENABLE */
+#endif /* UBLOX_ENABLE */
 #ifdef MTK3301_ENABLE
 	case 8:
 	    /* probe for MTK-3301 -- expect $PMTK705 */
@@ -1557,9 +1557,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef TSIP_ENABLE
     &tsip_binary,
 #endif /* TSIP_ENABLE */
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
     &ubx_binary,
-#endif /* UBX_ENABLE */
+#endif /* UBLOX_ENABLE */
 #ifdef ZODIAC_ENABLE
     &zodiac_binary,
 #endif /* ZODIAC_ENABLE */

@@ -115,7 +115,7 @@
    NAVCOM_RECOGNIZED,	/* found end of the Navcom packet */
 #endif /* NAVCOM_ENABLE */
 
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
    UBX_LEADER_1,        /* first constant leader byte found */
    UBX_LEADER_2,        /* second constant leader byte found */
    UBX_CLASS_ID,        /* classid read */

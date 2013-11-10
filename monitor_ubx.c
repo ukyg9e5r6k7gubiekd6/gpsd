@@ -9,7 +9,7 @@
 #include "bits.h"
 #include "gpsmon.h"
 
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
 #include "driver_ubx.h"
 extern const struct gps_type_t ubx_binary;
 static WINDOW *satwin, *navsolwin, *dopwin, *ppswin;

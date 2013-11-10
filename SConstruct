@@ -110,7 +110,7 @@ boolopts = (
     ("tnt",           True,  "True North Technologies support"),
     ("tripmate",      True,  "DeLorme TripMate support"),
     ("tsip",          True,  "Trimble TSIP support"),
-    ("ubx",           True,  "UBX Protocol support"),
+    ("ublox",         True,  "u-blox Protocol support"),
     ("fury",          True,  "Jackson Labs Fury and Firefly support"),
     ("nmea2000",      True,  "NMEA2000/CAN support"),
     # Non-GPS protocols

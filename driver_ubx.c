@@ -26,7 +26,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
-#if defined(UBX_ENABLE) && defined(BINARY_ENABLE)
+#if defined(UBLOX_ENABLE) && defined(BINARY_ENABLE)
 #include "driver_ubx.h"
 
 #include "bits.h"
@@ -949,4 +949,4 @@ const struct gps_type_t ubx_binary = {
 #endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
-#endif /* defined(UBX_ENABLE) && defined(BINARY_ENABLE) */
+#endif /* defined(UBLOX_ENABLE) && defined(BINARY_ENABLE) */

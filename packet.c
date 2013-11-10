@@ -266,12 +266,12 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    break;
 	}
 #endif /* ZODIAC_ENABLE */
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
 	if (c == 0xb5) {
 	    lexer->state = UBX_LEADER_1;
 	    break;
 	}
-#endif /* UBX_ENABLE */
+#endif /* UBLOX_ENABLE */
 #ifdef ITRAX_ENABLE
 	if (c == '<') {
 	    lexer->state = ITALK_LEADER_1;
@@ -510,7 +510,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = NMEA_DOLLAR;
 	else if (c == '!')
 	    lexer->state = NMEA_BANG;
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
 	else if (c == 0xb5)	/* LEA-5H can and will output NMEA and UBX back to back */
 	    lexer->state = UBX_LEADER_1;
 #endif
@@ -1014,7 +1014,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = ZODIAC_RECOGNIZED;
 	break;
 #endif /* ZODIAC_ENABLE */
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
     case UBX_LEADER_1:
 	if (c == 0x62)
 	    lexer->state = UBX_LEADER_2;
@@ -1059,7 +1059,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	else
 	    lexer->state = GROUND_STATE;
 	break;
-#endif /* UBX_ENABLE */
+#endif /* UBLOX_ENABLE */
 #ifdef EVERMORE_ENABLE
     case EVERMORE_LEADER_1:
 	if (c == STX)
@@ -1853,7 +1853,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    break;
 	}
 #endif /* ZODIAC_ENABLE */
-#ifdef UBX_ENABLE
+#ifdef UBLOX_ENABLE
 	else if (lexer->state == UBX_RECOGNIZED) {
 	    /* UBX use a TCP like checksum */
 	    int n, len;
@@ -1884,7 +1884,7 @@ void packet_parse(struct gps_packet_t *lexer)
 	    packet_discard(lexer);
 	    break;
 	}
-#endif /* UBX_ENABLE */
+#endif /* UBLOX_ENABLE */
 #ifdef EVERMORE_ENABLE
 	else if (lexer->state == EVERMORE_RECOGNIZED) {
 	    unsigned int n, crc, checksum, len;
