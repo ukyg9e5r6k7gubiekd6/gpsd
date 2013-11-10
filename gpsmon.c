@@ -40,6 +40,7 @@ extern struct monitor_object_t garmin_mmt, garmin_bin_ser_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mtk3301_mmt;
 extern struct monitor_object_t oncore_mmt, tnt_mmt, aivdm_mmt;
+extern const struct gps_type_t nmea;
 
 /* These are public */
 struct gps_device_t session;
@@ -797,13 +798,17 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
      * within gpsd_multipoll() before this hook is called.
      */
     if (device->packet.type != last_type) {
-	last_type = device->packet.type;
-	if (!switch_type(device->device_type))
+	const struct gps_type_t *active_type = device->device_type;
+	if (device->packet.type == NMEA_PACKET
+	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
+	    active_type = &nmea;
+	if (!switch_type(active_type))
 	    longjmp(terminate, TERM_DRIVER_SWITCH);
 	else {
 	    refresh_statwin();
 	    refresh_cmdwin();
 	}
+	last_type = device->packet.type;
     }
 
     if (active != NULL
