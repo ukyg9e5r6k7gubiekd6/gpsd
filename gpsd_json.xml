@@ -1011,6 +1011,14 @@ object.</para>
         false. Applies only to AIS reports.</entry>
 </row>
 <row>
+	<entry>ppsbar</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>If true, emit a PPS bar when the device issues 1PPS.
+	Intended to be used with the nmea and raw modes.
+	Default is false.</entry>
+</row>
+<row>
 	<entry>device</entry>
 	<entry>No</entry>
 	<entry>string</entry>

@@ -854,9 +854,9 @@ static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
     /*@-type@*/ /* splint is confused about struct timespec */
     timedelta = timespec_diff_ns(td->real, td->clock) * 1e-9;
     /*@+type@*/
-    packet_log("-------------------------------------" 
+    packet_log("#------------------------------------" 
 	       " PPS "
-	       "-------------------------------------\n");
+	       "------------------------------------#\n");
     return "gpsmon";
 }
 #endif /* PPS_ENABLE */
@@ -868,10 +868,10 @@ static void onsig(int sig UNUSED)
     longjmp(assertbuf, 1);
 }
 
-#define WATCHRAW	"?WATCH={\"raw\":2}\r\n"
-#define WATCHRAWDEVICE	"?WATCH={\"raw\":2,\"device\":\"%s\"}\r\n"
-#define WATCHNMEA	"?WATCH={\"nmea\":true}\r\n"
-#define WATCHNMEADEVICE	"?WATCH={\"nmea\":true,\"device\":\"%s\"}\r\n"
+#define WATCHRAW	"?WATCH={\"raw\":2,\"ppsbar\":true}\r\n"
+#define WATCHRAWDEVICE	"?WATCH={\"raw\":2,\"ppsbar\":true,\"device\":\"%s\"}\r\n"
+#define WATCHNMEA	"?WATCH={\"nmea\":true,\"ppsbar\":true}\r\n"
+#define WATCHNMEADEVICE	"?WATCH={\"nmea\":true,\"ppsbar\":true,\"device\":\"%s\"}\r\n"
 
 int main(int argc, char **argv)
 {

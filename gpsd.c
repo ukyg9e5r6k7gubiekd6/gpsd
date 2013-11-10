@@ -1674,6 +1674,17 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 /* on PPS interrupt, ship a drift message to all clients */
 {
 #ifdef SOCKET_EXPORT_ENABLE
+#ifdef PPS_ENABLE
+#define PPSBAR "#----------------------------------- PPS -----------------------------------#\n"
+    struct subscriber_t *sub;
+
+    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
+	if (sub->active != 0 && subscribed(sub, session) && sub->policy.ppsbar){
+	    (void)throttled_write(sub, PPSBAR, strlen(PPSBAR));
+	}
+    }
+#endif /* PPS_ENABLE */
+#undef PPSBAR
     /*@-type@*//* splint is confused about struct timespec */
     /*
      * Yes, real_nsec is constant 0 because our "real time" is top of GPS
@@ -1684,6 +1695,7 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 		    td->real.tv_sec, td->real.tv_nsec,
 		    td->clock.tv_sec, td->clock.tv_nsec);
     /*@+type@*/
+	return;
 #endif /* SOCKET_EXPORT_ENABLE */
 }
 #endif /* PPS_ENABLE */

@@ -338,9 +338,6 @@ usual. There are no per-type special commands.</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title>
 
-<para>PPS events show in the packet window only when gpsmon is
-directly connected, not in client mode.</para>
-
 <para>If you run <application>gpsmon</application> in client mode,
 and kill the daemon while <application>gpsmon</application> is
 still running, <application>gpsmon</application> will hang.
