@@ -108,11 +108,12 @@ else:
 # Field reports:
 #
 # Eric Raymond got success with 0.1, failure with 0.05 on Linux 3.11.0 under an
-# Intel Core Duo at 2.66GHz.
+# Intel Core Duo at 2.66GHz.  Elapsed time 112s real.
 #
 # From Hal Murray on NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
-#  CLOSE_DELAY = 0.4    Works, takes 688.69 real
-#  CLOSE_DELAY = 0.3    Fails tcp-torture.log, takes 677.53 real
+#  CLOSE_DELAY = 0.4    Works, takes 688.69s real
+#  CLOSE_DELAY = 0.3    Fails tcp-torture.log, takes 677.53s real
+# Both observations with WRITE_PAD = 0.01
 #
 # Greg Troxel reported failure with 0.4, success with 0.8, on
 # NetBSD 6, i386, 2.90GHz.

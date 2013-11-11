@@ -283,11 +283,19 @@ status of Qt supported platforms as of version 4.6.
 
 == Port and toolchain testing ==
 
-'scons testregress' will run a comprehensive regression-test suite.
-You should do this, at minimum, every time you build from source
-on a new machine type.  GPSD does enough bit-twiddling and floating
-point that it is very sensitive to toolchain problems; you'll want to
-be sure those aren't going to bite you in production.
+'scons check' will run a comprehensive regression-test suite.  You
+should do this, at minimum, every time you build from source on a new
+machine type.  GPSD does enough bit-twiddling and floating point that
+it is very sensitive to toolchain problems; you'll want to be sure
+those aren't going to bite you in production.
+
+So the tests will run fast and be easy to do often, we make the test
+framework shove data through the pty and socket layers *way* faster
+than would ever occur in production.  If you get regression-test
+failures that aren't repeatable and look like the test framework is
+sporadically failing to feed the last line or two of test loads, try
+increasing the delay constants in fake.py.  If you have to do this, 
+please report your experience to the GPSD maintainers.
 
 == Reverting to a clean state ==
 
