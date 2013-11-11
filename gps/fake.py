@@ -98,7 +98,7 @@ import packet as sniffer
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05   Fails
 #
 # Michael Tatarinov on a Raspberry Pi:
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Works, 346s real
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.5    Works, 344s real
 #
 # From Hal Murray on NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.4    Works, takes 688.69s real
