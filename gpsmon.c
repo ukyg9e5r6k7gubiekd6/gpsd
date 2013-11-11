@@ -371,7 +371,14 @@ void monitor_complain(const char *fmt, ...)
     va_end(ap);
     (void)wattrset(cmdwin, A_NORMAL);
     (void)wrefresh(cmdwin);
+    doupdate();
+
     (void)wgetch(cmdwin);
+    (void)wmove(cmdwin, 0, (int)promptlen);
+    (void)wclrtoeol(cmdwin);
+    (void)wrefresh(cmdwin);
+    (void)wmove(cmdwin, 0, (int)promptlen);
+    doupdate();
 }
 
 void monitor_log(const char *fmt, ...)
@@ -471,15 +478,16 @@ static void refresh_cmdwin(void)
 {
     (void)wmove(cmdwin, 0, 0);
     (void)wprintw(cmdwin, type_name);
-    promptlen = strlen(type_name) + 3;
+    promptlen = strlen(type_name);
     if (fallback != NULL && strcmp((*fallback)->driver->type_name, type_name) != 0) {
 	(void)waddch(cmdwin, (chtype)' ');
 	(void)waddch(cmdwin, (chtype)'(');
 	(void)waddstr(cmdwin, (*fallback)->driver->type_name);
 	(void)waddch(cmdwin, (chtype)')');
-	promptlen += strlen((*fallback)->driver->type_name);
+	promptlen += strlen((*fallback)->driver->type_name) + 3;
     }
     (void)wprintw(cmdwin, "> ");
+    promptlen += 2;
     (void)wclrtoeol(cmdwin);
     (void)wnoutrefresh(cmdwin);
 }
@@ -573,8 +581,11 @@ static bool do_command(void)
 
 	return true;
     }
+
     (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wclrtoeol(cmdwin);
+    (void)wrefresh(cmdwin);
+    doupdate();
 
     /* user finished entering a command */
     if (input[0] == '\0')
