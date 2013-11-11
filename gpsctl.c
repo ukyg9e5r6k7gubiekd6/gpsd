@@ -653,7 +653,7 @@ int main(int argc, char **argv)
 	    gpsd_time_init(&context, time(NULL));
 
 	    /*@-compdef@*/
-	    /* grab packets until we time out or get sync */
+	    /* grab packets until we time out, get sync, or fail sync */
 	    for (hunting = true; hunting; )
 	    {
 		switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
@@ -676,6 +676,7 @@ int main(int argc, char **argv)
 		    FD_CLR(session.gpsdata.gps_fd, &all_fds);
 		    break;
 		case DEVICE_ERROR:
+		    /* this is where a failure to sync lands */
 		    gpsd_report(context.debug, LOG_WARN,
 				"device error, bailing out.\n");
 		    exit(EXIT_FAILURE);
