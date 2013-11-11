@@ -76,15 +76,17 @@ import packet as sniffer
 # they're too high you'll slow the tests down a lot.  If they're too low
 # you'll get random spurious regression failures that usually look
 # like lines missing from the end of the test output relative to the
-# check file.  These numbers might have to be adjusted upward on faster
-# machines.  The need for them may be symptomatic of race conditions
+# check file.  The need for them may be symptomatic of race conditions
 # in the pty layer or elsewhere.
 
 # Define a per-line delay on writes so we won't spam the buffers in
 # the pty layer or gpsd itself.  Removing this entirely was tried but
 # caused failures under NetBSD.  Values smaller than the system timer
 # tick don't make any difference here.
-WRITE_PAD = 0.001
+#
+# Greg Troxel reported failure with 0.001, success with 0.004
+#
+WRITE_PAD = 0.004
 
 # We delay briefly after a GPS source is exhausted before removing it.
 # This should give its subscribers time to get gpsd's response before
@@ -92,9 +94,17 @@ WRITE_PAD = 0.001
 # CLOSE_DELAY may have no effect; Python time.time() returns a float
 # value, but it is not guaranteed by Python that the C implementation
 # underneath will return with precision finer than 1 second. (Linux
-# and *BSD return full precision.) Dropping this to 0.1 has been
-# tried but caused failures.
-CLOSE_DELAY = 0.2
+# and *BSD return full precision.)
+#
+# Field reports:
+#
+# From Hal Murray on NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
+#  CLOSE_DELAY = 0.4    Works, takes 688.69 real
+#  CLOSE_DELAY = 0.3    Fails tcp-torture.log, takes 677.53 real
+#
+# Greg Troxel reported failure with 0.4, success with 0.8
+#
+CLOSE_DELAY = 0.8
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
