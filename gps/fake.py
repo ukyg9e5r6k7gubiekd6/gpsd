@@ -67,7 +67,7 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
-import os, time, signal, pty, termios # fcntl, array, struct
+import os, sys, time, signal, pty, termios # fcntl, array, struct
 import exceptions, threading, socket, select, cStringIO
 import gps
 import packet as sniffer
@@ -79,32 +79,50 @@ import packet as sniffer
 # check file.  The need for them may be symptomatic of race conditions
 # in the pty layer or elsewhere.
 
-# Define a per-line delay on writes so we won't spam the buffers in
-# the pty layer or gpsd itself.  Removing this entirely was tried but
-# caused failures under NetBSD.  Values smaller than the system timer
-# tick don't make any difference here.
+# WRITE_PAD: Define a per-line delay on writes so we won't spam the
+# buffers in the pty layer or gpsd itself.  Removing this entirely was
+# tried but caused failures under NetBSD.  Values smaller than the
+# system timer tick don't make any difference here.
 #
-# Greg Troxel reported failure with 0.001, success with 0.004
+# Eric Raymond got success with 0.0 on Linux 3.11.0 under an
+# Intel Core Duo at 2.66GHz.
 #
-WRITE_PAD = 0.004
+# Greg Troxel reported failure with 0.001, success with 0.004, on
+# NetBSD 6, i386, 2.90GHz.
+#
+if sys.platform.startswith("linux"):
+    WRITE_PAD = 0.0
+elif sys.platform.startswith("freebsd"):
+    WRITE_PAD = 0.001
+else:
+    WRITE_PAD = 0.004
 
-# We delay briefly after a GPS source is exhausted before removing it.
-# This should give its subscribers time to get gpsd's response before
-# we call the cleanup code. Note that using fractional seconds in
-# CLOSE_DELAY may have no effect; Python time.time() returns a float
-# value, but it is not guaranteed by Python that the C implementation
-# underneath will return with precision finer than 1 second. (Linux
-# and *BSD return full precision.)
+# CLOSE_DELAY: We delay briefly after a GPS source is exhausted before
+# removing it.  This should give its subscribers time to get gpsd's
+# response before we call the cleanup code. Note that using fractional
+# seconds in CLOSE_DELAY may have no effect; Python time.time()
+# returns a float value, but it is not guaranteed by Python that the C
+# implementation underneath will return with precision finer than 1
+# second. (Linux and *BSD return full precision.)
 #
 # Field reports:
+#
+# Eric Raymond got success with 0.1, failure with 0.05 on Linux 3.11.0 under an
+# Intel Core Duo at 2.66GHz.
 #
 # From Hal Murray on NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
 #  CLOSE_DELAY = 0.4    Works, takes 688.69 real
 #  CLOSE_DELAY = 0.3    Fails tcp-torture.log, takes 677.53 real
 #
-# Greg Troxel reported failure with 0.4, success with 0.8
+# Greg Troxel reported failure with 0.4, success with 0.8, on
+# NetBSD 6, i386, 2.90GHz.
 #
-CLOSE_DELAY = 0.8
+if sys.platform.startswith("linux"):
+    CLOSE_DELAY = 0.1
+elif sys.platform.startswith("freebsd"):
+    CLOSE_DELAY = 0.4
+else:
+    CLOSE_DELAY = 0.8
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
