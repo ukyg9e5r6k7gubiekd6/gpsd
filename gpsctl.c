@@ -140,7 +140,7 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 	/*@ +ignorequals @*/
 	if ((expect == NON_ERROR) || (expect & gpsdata->set) != 0)
 	    return true;
-	else if (time(NULL) - starttime > timeout) {
+	else if (timeout > 0 && (time(NULL) - starttime > timeout)) {
 	    gpsd_report(context.debug, LOG_ERROR,
 			"timed out after %d seconds\n",
 			timeout);
@@ -619,8 +619,10 @@ int main(int argc, char **argv)
 	if (echo)
 	    context.readonly = true;
 
-	(void) alarm(timeout);
-	(void) signal(SIGALRM, onsig);
+	if (timeout > 0) {
+	    (void) alarm(timeout);
+	    (void) signal(SIGALRM, onsig);
+	}
 	/*
 	 * Unless the user has forced a type and only wants to see the
 	 * string (not send it) we now need to try to open the device
