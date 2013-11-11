@@ -178,16 +178,6 @@ static double ais_direction(unsigned int val, double scale)
 }
 
 
-static bool get_split24(struct gps_device_t *session)
-{
-    bool split24;
-
-    split24 = session->gpsdata.policy.split24;
-
-    return split24;
-}
-
-
 /*
  *   PGN 59392: ISO  Acknowledgment
  */
@@ -791,9 +781,7 @@ static gps_mask_t hnd_129802(unsigned char *bu, int len, PGN *pgn, struct gps_de
 static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
-    bool split24;
 
-    split24 = get_split24(session);
     ais =  &session->gpsdata.ais;
     print_data(session->context, bu, len, pgn);
     gpsd_report(session->context->debug, LOG_DATA,
@@ -808,31 +796,23 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		    "NMEA2000: AIS message 24A from %09u stashed.\n",
 		    ais->mmsi);
 
-	if (split24 == true) {
-	    for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	        ais->type24.shipname[l] = (char) bu[ 5+l];
-	    }
-	    ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
-	} else {
-	    saveptr->mmsi = ais->mmsi;
-
-	    for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	        saveptr->shipname[l] = (char) bu[ 5+l];
-	    }
-	    saveptr->shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
-
-	    index += 1;
-	    index %= MAX_TYPE24_INTERLEAVE;
-	    session->driver.aivdm.context[0].type24_queue.index = index;
+	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
+	    ais->type24.shipname[l] = (char) bu[ 5+l];
+	    saveptr->shipname[l] = (char) bu[ 5+l];
 	}
+	ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
+	saveptr->shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
+	
+	saveptr->mmsi = ais->mmsi;
+
+	index += 1;
+	index %= MAX_TYPE24_INTERLEAVE;
+	session->driver.aivdm.context[0].type24_queue.index = index;
+
 	decode_ais_channel_info(bu, len, 200, session);
 
-	if (split24 == true) {
-	    ais->type24.part = part_a;
-	    return(ONLINE_SET | AIS_SET);
-	} else {
-	    return(0);
-	}
+	ais->type24.part = part_a;
+	return(ONLINE_SET | AIS_SET);
     }
     return(0);
 }
@@ -844,16 +824,14 @@ static gps_mask_t hnd_129809(unsigned char *bu, int len, PGN *pgn, struct gps_de
 static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     struct ais_t *ais;
-    bool split24;
 
-    split24 = get_split24(session);
     ais =  &session->gpsdata.ais;
     print_data(session->context, bu, len, pgn);
     gpsd_report(session->context->debug, LOG_DATA,
 		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(session->context, bu, len, ais, 0xffffffffU) != 0) {
-	int l;
+      int l, i;
 
 	ais->type24.shiptype = (unsigned int) ((bu[ 5] >> 0) & 0xff);
 
@@ -890,56 +868,48 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    }
 	}
 
-	if (split24 == true) {
+	for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
+	    if (session->driver.aivdm.context[0].type24_queue.ships[i].mmsi == ais->mmsi) {
+	        for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
+		    ais->type24.shipname[l] = (char)(session->driver.aivdm.context[0].type24_queue.ships[i].shipname[l]);
+		}
+		ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
+
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "NMEA2000: AIS 24B from %09u matches a 24A.\n",
+			    ais->mmsi);
+		/* prevent false match if a 24B is repeated */
+		session->driver.aivdm.context[0].type24_queue.ships[i].mmsi = 0;
 #if NMEA2000_DEBUG_AIS
-	    printf("AIS: MMSI  :  %09u\n", ais->mmsi);
-	    printf("AIS: vendor:  %-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
-		   ais->type24.vendorid,
-		   ais->type24.callsign,
-		   ais->type24.dim.to_bow,
-		   ais->type24.dim.to_stern,
-		   ais->type24.dim.to_port,
-		   ais->type24.dim.to_starboard);
-#endif /* of #if NMEA2000_DEBUG_AIS */
-	    decode_ais_channel_info(bu, len, 264, session);
-	    ais->type24.part = part_b;
-	    return(ONLINE_SET | AIS_SET);
-
-	    } else {
-	    int i;
-
-	    for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
-	        if (session->driver.aivdm.context[0].type24_queue.ships[i].mmsi == ais->mmsi) {
-		  for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-		      ais->type24.shipname[l] = (char)(session->driver.aivdm.context[0].type24_queue.ships[i].shipname[l]);
-		  }
-		  ais->type24.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
-
-		  gpsd_report(session->context->debug, LOG_PROG,
-			      "NMEA2000: AIS 24B from %09u matches a 24A.\n",
-			      ais->mmsi);
-		  /* prevent false match if a 24B is repeated */
-		  session->driver.aivdm.context[0].type24_queue.ships[i].mmsi = 0;
-#if NMEA2000_DEBUG_AIS
-		  printf("AIS: MMSI:  %09u\n", ais->mmsi);
-		  printf("AIS: name:  %-20.20s v:%-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
-			 ais->type24.shipname,
-			 ais->type24.vendorid,
-			 ais->type24.callsign,
-			 ais->type24.dim.to_bow,
-			 ais->type24.dim.to_stern,
-			 ais->type24.dim.to_port,
-			 ais->type24.dim.to_starboard);
+		printf("AIS: MMSI:  %09u\n", ais->mmsi);
+		printf("AIS: name:  %-20.20s v:%-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
+		       ais->type24.shipname,
+		       ais->type24.vendorid,
+		       ais->type24.callsign,
+		       ais->type24.dim.to_bow,
+		       ais->type24.dim.to_stern,
+		       ais->type24.dim.to_port,
+		       ais->type24.dim.to_starboard);
 #endif /* of #if NMEA2000_DEBUG_AIS */
 
 		decode_ais_channel_info(bu, len, 264, session);
 		ais->type24.part = both;
 		return(ONLINE_SET | AIS_SET);
-		}
 	    }
 	}
-	gpsd_report(session->context->debug, LOG_WARN, "NMEA2000: AIS 24B from %09u can't be matched to a 24A.\n", ais->mmsi);
-        return(0);
+#if NMEA2000_DEBUG_AIS
+	printf("AIS: MMSI  :  %09u\n", ais->mmsi);
+	printf("AIS: vendor:  %-8.8s c:%-8.8s b:%6u s:%6u p:%6u s:%6u\n",
+	       ais->type24.vendorid,
+	       ais->type24.callsign,
+	       ais->type24.dim.to_bow,
+	       ais->type24.dim.to_stern,
+	       ais->type24.dim.to_port,
+	       ais->type24.dim.to_starboard);
+#endif /* of #if NMEA2000_DEBUG_AIS */
+	decode_ais_channel_info(bu, len, 264, session);
+	ais->type24.part = part_b;
+	return(ONLINE_SET | AIS_SET);
     }
     return(0);
 }
