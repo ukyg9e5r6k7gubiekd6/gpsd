@@ -662,60 +662,6 @@ static void ubx_cfg_prt(struct gps_device_t *session,
     switch(session->sourcetype) {
     case source_rs232:
 	buf[0] = USART1_ID;
-
-	putle32(buf, 8, speed);
-
-	/*
-	 * u-blox tech support explains the default contents of the mode
-	 * field as follows:
-	 *
-	 * D0 08 00 00     mode (LSB first)
-	 *
-	 * re-ordering bytes: 000008D0
-	 * dividing into fields: 000000000000000000 00 100 0 11 0 1 0000
-	 * nStopbits = 00 = 1
-	 * parity = 100 = none
-	 * charLen = 11 = 8-bit
-	 * reserved1 = 1
-	 *
-	 * The protocol reference further gives the following subfield values:
-	 * 01 = 1.5 stop bits (?)
-	 * 10 = 2 stopbits
-	 * 000 = even parity
-	 * 001 = odd parity
-	 * 10x = no parity
-	 * 10 = 7 bits
-	 *
-	 * Some UBX reference code amplifies this with:
-	 *
-	 *   prtcfg.mode = (1<<4) |	// compatibility with ANTARIS 4
-	 *                 (1<<7) |	// charLen = 11 = 8 bit
-	 *                 (1<<6) |	// charLen = 11 = 8 bit
-	 *                 (1<<11);	// parity = 10x = none
-	 */
-	usart_mode |= (1<<4);	/* reserved1 Antaris 4 compatibility bit */
-	usart_mode |= (1<<7);	/* high bit of charLen */
-
-	switch (parity) {
-	case (int)'E':
-	case 2:
-	    usart_mode |= (1<<7);		/* 7E */
-	    break;
-	case (int)'O':
-	case 1:
-	    usart_mode |= (1<<9) | (1<<7);	/* 7O */
-	    break;
-	case (int)'N':
-	case 0:
-	default:
-	    usart_mode |= (1<<11) | (3<<6);	/* 8N */
-	    break;
-	}
-
-	if (stopbits == 2)
-	    usart_mode |= (1<<13);
-
-	putle32(buf, 4, usart_mode);
 	break;
     case source_usb:
 	buf[0] = USB_ID;
@@ -724,8 +670,62 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	gpsd_report(session->context->debug, LOG_WARN,
 		    "UBX driver sees unexpected source type %d.",
 		    session->sourcetype);
+	return;
+    }
+
+    putle32(buf, 8, speed);
+
+    /*
+     * u-blox tech support explains the default contents of the mode
+     * field as follows:
+     *
+     * D0 08 00 00     mode (LSB first)
+     *
+     * re-ordering bytes: 000008D0
+     * dividing into fields: 000000000000000000 00 100 0 11 0 1 0000
+     * nStopbits = 00 = 1
+     * parity = 100 = none
+     * charLen = 11 = 8-bit
+     * reserved1 = 1
+     *
+     * The protocol reference further gives the following subfield values:
+     * 01 = 1.5 stop bits (?)
+     * 10 = 2 stopbits
+     * 000 = even parity
+     * 001 = odd parity
+     * 10x = no parity
+     * 10 = 7 bits
+     *
+     * Some UBX reference code amplifies this with:
+     *
+     *   prtcfg.mode = (1<<4) |	// compatibility with ANTARIS 4
+     *                 (1<<7) |	// charLen = 11 = 8 bit
+     *                 (1<<6) |	// charLen = 11 = 8 bit
+     *                 (1<<11);	// parity = 10x = none
+     */
+    usart_mode |= (1<<4);	/* reserved1 Antaris 4 compatibility bit */
+    usart_mode |= (1<<7);	/* high bit of charLen */
+
+    switch (parity) {
+    case (int)'E':
+    case 2:
+	usart_mode |= (1<<7);		/* 7E */
+	break;
+    case (int)'O':
+    case 1:
+	usart_mode |= (1<<9) | (1<<7);	/* 7O */
+	break;
+    case (int)'N':
+    case 0:
+    default:
+	usart_mode |= (1<<11) | (3<<6);	/* 8N */
 	break;
     }
+
+    if (stopbits == 2)
+	usart_mode |= (1<<13);
+
+    putle32(buf, 4, usart_mode);
 
     /* enable all input protocols by default */
     buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
