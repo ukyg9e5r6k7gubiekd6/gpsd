@@ -414,7 +414,7 @@ def CheckXsltproc(context):
     return ret
 
 def CheckCompilerOption(context, option):
-    context.Message( 'Checking if compiler accepts %s ...' %(option,) )
+    context.Message( 'Checking if compiler accepts %s ...' % (option,) )
     old_CFLAGS=context.env['CFLAGS']
     context.env.Append(CFLAGS=option)
     ret = context.TryLink("""
@@ -428,7 +428,7 @@ def CheckCompilerOption(context, option):
     return ret
 
 def CheckHeaderDefines(context, file, define):
-    context.Message( 'Checking if %s supplies %s ...' %(file,define) )
+    context.Message( 'Checking if %s supplies %s ...' % (file,define) )
     ret = context.TryLink("""
         #include <%s>
         #ifndef %s
@@ -441,10 +441,24 @@ def CheckHeaderDefines(context, file, define):
     context.Result(ret)
     return ret
 
+def CheckCompilerDefines(context, define):
+    context.Message( 'Checking if compiler supplies %s ...' % (define,) )
+    ret = context.TryLink("""
+        #ifndef %s
+        #error %s is not defined
+        #endif
+        int main(int argc, char **argv) {
+            return 0;
+        }
+    """ % (define, define),'.c')
+    context.Result(ret)
+    return ret
+
 config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                          'CheckExecutable' : CheckExecutable,
                                          'CheckXsltproc' : CheckXsltproc,
                                          'CheckCompilerOption' : CheckCompilerOption,
+                                         'CheckCompilerDefines' : CheckCompilerDefines,
                                          'CheckHeaderDefines' : CheckHeaderDefines})
 
 
@@ -576,9 +590,9 @@ else:
 
 # endian.h is required for rtcm104v2 unless the compiler defines
 # __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
-if config.CheckHeaderDefines("/dev/null", "__ORDER_BIG_ENDIAN__") \
-and config.CheckHeaderDefines("/dev/null", "__ORDER_LITTLE_ENDIAN__") \
-and config.CheckHeaderDefines("/dev/null", "__BYTE_ORDER__"):
+if config.CheckCompilerDefines("__ORDER_BIG_ENDIAN__") \
+and config.CheckCompilerDefines("__ORDER_LITTLE_ENDIAN__") \
+and config.CheckCompilerDefines("__BYTE_ORDER__"):
     confdefs.append("#define HAVE_BUILTIN_ENDIANNESS 1\n")
     confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
     confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
