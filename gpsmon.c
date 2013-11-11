@@ -651,10 +651,10 @@ static bool do_command(void)
 		context.readonly = !context.readonly;
 	    else
 		context.readonly = (atoi(line + 1) == 0);
-	    /* *INDENT-OFF* */
-	    (void)gpsd_switch_driver(&session,
-		     (*active)->driver->type_name);
-	    /* *INDENT-ON* */
+	    announce_log("[probing %sabled]", context.readonly ? "dis" : "en");
+	    if (!context.readonly)
+		/* magic - forces a reconfigure */
+		session.packet.counter = 0;
 	}
 	break;
 
