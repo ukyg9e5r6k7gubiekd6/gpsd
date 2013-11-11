@@ -4,8 +4,8 @@
   library.  Tweaks of Evermore support remove code and suppress
   spurious error messages.  Minor fix to AIVDM unpacking of Type 123
   radio field.  Longer maximum path names (required an object library
-  version bump).  New split24 option supports passing through AIS type
-  24 message halves.  ITU-R 1371-4 model and serial fields are
+  version bump).  New split24 option supports passing through unmatched 
+  AIS type 24 message halves.  ITU-R 1371-4 model and serial fields are
   extracted from AIS Type 24s.  The packet getter's handling of write
   boundaries not coinciding with packet boundaries is improved. The
   "scaled" flag no longer controls dumping of AIS controlled-vocabulary
@@ -15,7 +15,7 @@
   Inland AIS extended sentences. In gpsmon, entering a command no longer
   pauses packet display. Better support for mode and speed switching in the 
   UBX driver. Be a bit more forgiving about AIS Type 5 message lengths.
-  PPS drift message now ships nsec rather than msec. PPS wvents are
+  PPS drift message now ships nsec rather than msec. PPS events are
   visible in gpsmon.
 
 * Wed 1 May 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.9
