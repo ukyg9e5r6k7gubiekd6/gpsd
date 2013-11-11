@@ -299,7 +299,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 	    break;
         }
     }
-    message[ind] = '\0';
+    message[ind-1] = '\0';
     (void)fprintf (stderr,"\n gps2udp: message too big [%s]\n", message);
     return(-1);
 }
@@ -393,12 +393,12 @@ int main(int argc, char **argv)
 	case 'v':
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
 			  argv[0], VERSION, REVISION);
-	    exit(0);
+	    exit(EXIT_SUCCESS);
 	case '?':
 	case 'h':
 	default:
 	    usage();
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
     }
 
@@ -416,7 +416,8 @@ int main(int argc, char **argv)
     /* Open UDP port */
     if (udpchannel > 0) {
         int status = open_udp(udphostport);
-	if (status !=0) exit (1);
+	if (status !=0)
+	 exit(EXIT_FAILURE);
     }
 
     /* Daemonize if the user requested it. */
@@ -484,7 +485,7 @@ int main(int argc, char **argv)
 		    /* completed count */
 		    (void)fprintf(stderr, 
 				  "gpsd2udp: normal exit after %ld packets\n",count);
-		    exit (0); 
+		    exit(EXIT_SUCCESS);
 		}
 	    }  // end count  
         } // end len > 3
@@ -493,7 +494,7 @@ int main(int argc, char **argv)
     // This is an infinite loop, should never be here
     /*@-unreachable@*/
     fprintf (stderr, "gpsd2udp ERROR abnormal exit\n");
-    exit (-1);
+    exit(EXIT_FAILURE);
 }
 /*@=compdef =usedef@*/
 
