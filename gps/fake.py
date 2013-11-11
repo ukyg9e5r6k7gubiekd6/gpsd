@@ -271,6 +271,7 @@ class FakePTY(FakeGPS):
             cflag |= termios.CS8
         if stopbits == 2:
             cflag |= termios.CSTOPB
+        # Warning: attempting to set parity makes Fedora lose its cookies
         if parity == 'E':
             iflag |= termios.INPCK
             cflag |= termios.PARENB
