@@ -80,22 +80,8 @@ import packet as sniffer
 # in the pty layer or elsewhere.
 
 # WRITE_PAD: Define a per-line delay on writes so we won't spam the
-# buffers in the pty layer or gpsd itself.  Removing this entirely was
-# tried but caused failures under NetBSD.  Values smaller than the
+# buffers in the pty layer or gpsd itself. Values smaller than the
 # system timer tick don't make any difference here.
-#
-# Eric Raymond got success with 0.0 on Linux 3.11.0 under an
-# Intel Core Duo at 2.66GHz.
-#
-# Greg Troxel reported failure with 0.001, success with 0.004, on
-# NetBSD 6, i386, 2.90GHz.
-#
-if sys.platform.startswith("linux"):
-    WRITE_PAD = 0.0
-elif sys.platform.startswith("freebsd"):
-    WRITE_PAD = 0.001
-else:
-    WRITE_PAD = 0.004
 
 # CLOSE_DELAY: We delay briefly after a GPS source is exhausted before
 # removing it.  This should give its subscribers time to get gpsd's
@@ -104,25 +90,35 @@ else:
 # returns a float value, but it is not guaranteed by Python that the C
 # implementation underneath will return with precision finer than 1
 # second. (Linux and *BSD return full precision.)
-#
+
 # Field reports:
 #
-# Eric Raymond got success with 0.1, failure with 0.05 on Linux 3.11.0 under an
-# Intel Core Duo at 2.66GHz.  Elapsed time 112s real.
+# Eric Raymond  on Linux 3.11.0 under an Intel Core Duo at 2.66GHz.
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Works, 112s real
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05   Fails
+#
+# Michael Tatarinov on a Raspberry Pi:
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Works, 346s real
 #
 # From Hal Murray on NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
-#  CLOSE_DELAY = 0.4    Works, takes 688.69s real
-#  CLOSE_DELAY = 0.3    Fails tcp-torture.log, takes 677.53s real
-# Both observations with WRITE_PAD = 0.01
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.4    Works, takes 688.69s real
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.3    Fails tcp-torture.log, 677.53s real
 #
-# Greg Troxel reported failure with 0.4, success with 0.8, on
-# NetBSD 6, i386, 2.90GHz.
+# Greg Troxel running NetBSD 6 on a core i5 (i386, 4 cpus) 2.90GHz.
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.2 had failures (645s)
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.4 had failures (662s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
 #
+
 if sys.platform.startswith("linux"):
+    WRITE_PAD = 0.0
     CLOSE_DELAY = 0.1
 elif sys.platform.startswith("freebsd"):
+    WRITE_PAD = 0.001
     CLOSE_DELAY = 0.4
 else:
+    WRITE_PAD = 0.004
     CLOSE_DELAY = 0.8
 
 class TestLoadError(exceptions.Exception):
