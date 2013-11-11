@@ -256,7 +256,6 @@ class FakePTY(FakeGPS):
             115200: termios.B115200,
             230400: termios.B230400,
         }
-        speed = baudrates[speed]	# Throw an error if the speed isn't legal
         (self.fd, self.slave_fd) = pty.openpty()
         self.byname = os.ttyname(self.slave_fd)
         (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(self.slave_fd)
@@ -278,7 +277,7 @@ class FakePTY(FakeGPS):
         elif parity == 'O':
             iflag |= termios.INPCK
             cflag |= termios.PARENB | termios.PARODD
-        ispeed = ospeed = speed
+        ispeed = ospeed = baudrates[speed]
         try:
             termios.tcsetattr(self.slave_fd, termios.TCSANOW,
                           [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
