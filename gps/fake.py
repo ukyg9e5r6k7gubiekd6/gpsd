@@ -283,8 +283,8 @@ class FakePTY(FakeGPS):
             termios.tcsetattr(self.slave_fd, termios.TCSANOW,
                           [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
         except termios.error:
-            raise Fatal("error attempting to set serial mode to %s %s%s%s" \
-                        % (speed, databits, parity, stopbits))
+            raise TestLoadError("error attempting to set serial mode to %s %s%s%s" \
+                                % (speed, databits, parity, stopbits))
     def read(self):
         "Discard control strings written by gpsd."
         # A tcflush implementation works on Linux but fails on OpenBSD 4.
