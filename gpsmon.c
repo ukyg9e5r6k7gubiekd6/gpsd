@@ -562,11 +562,13 @@ static bool do_command(void)
 	size_t len = strlen(input);
 
 	if (c == '\b' || c == KEY_LEFT || c == (int)erasechar()) {
-	    input[len] = '\0';
+	    input[len--] = '\0';
 	} else if (isprint(c)) {
 	    input[len] = (char)c;
 	    input[++len] = '\0';
 	    (void)waddch(cmdwin, c);
+	    (void)wrefresh(cmdwin);
+	    doupdate();
 	}
 
 	return true;
