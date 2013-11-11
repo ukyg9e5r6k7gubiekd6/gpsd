@@ -21,8 +21,11 @@
 #include "gpsd.h"
 #include "revision.h"
 
+#define HIGH_LEVEL_TIMEOUT	8
+#define DEFAULT_TIMEOUT 	-1
+
 static int debuglevel;
-static unsigned int timeout = 8;
+static unsigned int timeout = DEFAULT_TIMEOUT;
 static struct gps_context_t context;
 static bool hunting = true;
 
@@ -378,6 +381,9 @@ int main(int argc, char **argv)
     if (!lowlevel) {
 	int i, devcount;
 
+	if (timeout == DEFAULT_TIMEOUT)
+	    timeout = HIGH_LEVEL_TIMEOUT;
+
 	/* what devices have we available? */
 	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\n")) {
 	    gpsd_report(context.debug, LOG_ERROR, "no DEVICES response received.\n");
@@ -610,6 +616,14 @@ int main(int argc, char **argv)
 	static struct gps_device_t	session;	/* zero this too */
 	fd_set all_fds;
 	fd_set rfds;
+
+	/*
+	 * Unless the user explicitly requested it, always run to end of 
+	 * hunt rather than timing out. Otherwise we can easily get messages
+	 * that spuriously look like failure at high baud rates. 
+	 */
+	if (timeout == DEFAULT_TIMEOUT)
+	    timeout = 0;
 
 	/*@ -mustfreeonly -immediatetrans @*/
 	gps_context_init(&context);
