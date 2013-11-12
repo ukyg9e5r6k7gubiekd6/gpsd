@@ -471,6 +471,12 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	ubx_msg_inf(buf, data_len, session->context->debug);
 	break;
 
+    case UBX_CFG_PRT:
+	session->driver.ubx.port_id = (int)buf[UBX_MESSAGE_DATA_OFFSET + 0];
+	gpsd_report(session->context->debug, LOG_INF, "UBX_CFG_PRT: port %d\n",
+		    session->driver.ubx.port_id);
+	break;
+
     case UBX_TIM_TP:
 	gpsd_report(session->context->debug, LOG_IO, "UBX_TIM_TP\n");
 	break;
@@ -659,19 +665,35 @@ static void ubx_cfg_prt(struct gps_device_t *session,
     memset(buf, '\0', UBX_CFG_LEN);
 
     /*@ +ignoresigns +charint @*/
-    switch(session->sourcetype) {
-    case source_rs232:
-	buf[0] = USART1_ID;
-	break;
-    case source_usb:
+    /*
+     * When this is called from gpsd, the initial probe for UBX should
+     * have picked up the device's port number from the CFG_PRT response.
+     */
+    if (session->driver.ubx.port_id != 0)
+	buf[0] = session->driver.ubx.port_id;
+    /*
+     * This default can be hit if we haven't sent a CFG_PRT query yet,
+     * which can happen in gpsmon because it doesn't autoprobe.
+     *
+     * What we'd like to do here is dispatch to USART1_ID or
+     * USB_ID intelligently based on whether this is a USB or RS232
+     * source.  Unfortunately the GR601-W screws that up by being
+     * a USB device with port_id 1.  So we bite the bullet and 
+     * default to port 1.
+     *
+     * Without further logic, this means gpsmon wouldn't be able to
+     * change the speed on the EVK 6H's USB port.  But! To pick off
+     * the EVK 6H on Linux as a special case, we notice that its
+     * USB device name is /dev/ACMx - it presents as a USB modem.
+     *
+     * This logic will fail on any USB u-blox device that presents
+     * as an ordinary USB serial device (/dev/USB*) and actually
+     * has port ID 3 the way it ought to.
+     */
+    else if (strstr(session->gpsdata.dev.path, "/ACM") != NULL)
 	buf[0] = USB_ID;
-	break;
-    default:
-	gpsd_report(session->context->debug, LOG_WARN,
-		    "UBX driver sees unexpected source type %d.",
-		    session->sourcetype);
-	return;
-    }
+    else
+	buf[0] = USART1_ID;
 
     putle32(buf, 8, speed);
 

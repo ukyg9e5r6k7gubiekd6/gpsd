@@ -610,6 +610,7 @@ struct gps_device_t {
 #endif /* ZODIAC_ENABLE */
 #ifdef UBLOX_ENABLE
 	struct {
+	    unsigned char port_id;
 	    unsigned char sbas_in_use;
 	    bool user_switched;
     	} ubx;
