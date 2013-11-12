@@ -602,12 +602,19 @@ else:
     if config.CheckHeader("endian.h"):
         confdefs.append("#define HAVE_ENDIAN_H 1\n")
         confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
+        confdefs.append("/* #undef HAVE_MACHINE_ENDIAN_H */\n")
     elif config.CheckHeader("sys/endian.h"):
         confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
         confdefs.append("#define HAVE_SYS_ENDIAN_H 1\n")
+        confdefs.append("/* #undef HAVE_MACHINE_ENDIAN_H */\n")
+    elif config.CheckHeader("machine/endian.h"):
+        confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
+        confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
+        confdefs.append("#define HAVE_MACHINE_ENDIAN_H 1\n")
     else:
         confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
         confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
+        confdefs.append("/* #undef HAVE_MACHINE_ENDIAN_H */\n")
         announce("You do not have the endian.h header file. RTCM V2 support disabled.")
         env["rtcm104v2"] = False
 
