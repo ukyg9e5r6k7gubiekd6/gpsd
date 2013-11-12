@@ -181,8 +181,8 @@ emitting at the normal rate of 1 per second.</para>
 </varlistentry>
 </variablelist>
 
-<para>The argument of the forcing option. <option>-t</option>, should be a
-string which should be contained in exactly one of the known driver
+<para>The argument of the forcing option, <option>-t</option>, should be a
+string which is contained in exactly one of the known driver
 names; for a list, do <command>gpsctl -l</command>.</para>
 
 <para>Forcing the device type behaves somewhat differently depending
