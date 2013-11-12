@@ -24,7 +24,7 @@
 #define HIGH_LEVEL_TIMEOUT	8
 
 static int debuglevel;
-static bppl explicit_timeout = false;
+static bool explicit_timeout = false;
 static unsigned int timeout = 0;	/* no timeout */
 static struct gps_context_t context;
 static bool hunting = true;
