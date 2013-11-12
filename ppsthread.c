@@ -205,9 +205,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* S_SPLINT_S */
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-    gpsd_report(session->context->debug, LOG_PROG,
-		"PPS Create Thread gpsd_ppsmonitor\n");
-
     /*
      * Wait for status change on any handshake line. The only assumption here
      * is that no GPS lights up more than one of these pins.  By waiting on
@@ -529,6 +526,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 void pps_thread_activate(struct gps_device_t *session)
 /* activate a thread to watch the device's PPS transitions */
 {
+    int retval;
     pthread_t pt;
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* some operations in init_kernel_pps() require root privs */
@@ -539,9 +537,10 @@ void pps_thread_activate(struct gps_device_t *session)
     }
 #endif
     /*@-compdef -nullpass@*/
-    (void)pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
+    retval = pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)session);
     /*@+compdef +nullpass@*/
-    gpsd_report(session->context->debug, LOG_PROG, "PPS thread launched\n");
+    gpsd_report(session->context->debug, LOG_PROG, "PPS thread %s\n",
+		(retval==0) ? "launched" : "FAILED");
 }
 
 void pps_thread_deactivate(struct gps_device_t *session)
