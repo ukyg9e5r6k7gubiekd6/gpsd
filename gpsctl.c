@@ -623,8 +623,6 @@ int main(int argc, char **argv)
 	 * hunt rather than timing out. Otherwise we can easily get messages
 	 * that spuriously look like failure at high baud rates. 
 	 */
-	if (timeout == DEFAULT_TIMEOUT)
-	    timeout = 0;
 
 	/*@ -mustfreeonly -immediatetrans @*/
 	gps_context_init(&context);

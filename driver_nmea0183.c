@@ -1147,7 +1147,7 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 	 * milliseconds"
 	 */
 	if (atoi(field[5]) < 127875)
-	    nmea_send(session, "$PMTK324,0,0,1,0,127875");
+	    (void)nmea_send(session, "$PMTK324,0,0,1,0,127875");
 	return ONLINE_SET;
     case 705:			/* return device subtype */
 	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));

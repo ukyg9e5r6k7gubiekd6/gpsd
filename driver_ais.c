@@ -69,6 +69,9 @@ bool ais_binary_decode(const int debug,
     unsigned int u;
     int i;
 
+#ifdef S_SPLINT_S
+    assert(type24_queue != NULL);
+#endif /* S_SPLINT_S */
 #define BITS_PER_BYTE	8
 #define UBITS(s, l)	ubits((unsigned char *)bits, s, l, false)
 #define SBITS(s, l)	sbits((signed char *)bits, s, l, false)

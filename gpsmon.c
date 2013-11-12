@@ -40,7 +40,7 @@ extern struct monitor_object_t garmin_mmt, garmin_bin_ser_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mtk3301_mmt;
 extern struct monitor_object_t oncore_mmt, tnt_mmt, aivdm_mmt;
-extern const struct gps_type_t nmea;
+extern const struct gps_type_t nmea0183;
 
 /* These are public */
 struct gps_device_t session;
@@ -371,14 +371,14 @@ void monitor_complain(const char *fmt, ...)
     va_end(ap);
     (void)wattrset(cmdwin, A_NORMAL);
     (void)wrefresh(cmdwin);
-    doupdate();
+    (void)doupdate();
 
     (void)wgetch(cmdwin);
     (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wclrtoeol(cmdwin);
     (void)wrefresh(cmdwin);
     (void)wmove(cmdwin, 0, (int)promptlen);
-    doupdate();
+    (void)doupdate();
 }
 
 void monitor_log(const char *fmt, ...)
@@ -508,7 +508,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	const struct gps_type_t *active_type = device->device_type;
 	if (device->packet.type == NMEA_PACKET
 	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
-	    active_type = &nmea;
+	    active_type = &nmea0183;
 	if (!switch_type(active_type))
 	    longjmp(terminate, TERM_DRIVER_SWITCH);
 	else {
@@ -562,9 +562,9 @@ static bool do_command(void)
 
     c = wgetch(cmdwin);
     if (c == CTRL('L')) {
-	(void)clearok(stdscr, TRUE);
+	(void)clearok(stdscr, true);
 	if (active != NULL && (*active)->initialize != NULL)
-	    (*active)->initialize();
+	    (void)(*active)->initialize();
 	gpsmon_hook(&session, 0);
     } else if (c != '\r' && c != '\n') {
 	size_t len = strlen(input);
@@ -574,9 +574,9 @@ static bool do_command(void)
 	} else if (isprint(c)) {
 	    input[len] = (char)c;
 	    input[++len] = '\0';
-	    (void)waddch(cmdwin, c);
+	    (void)waddch(cmdwin, (chtype)c);
 	    (void)wrefresh(cmdwin);
-	    doupdate();
+	    (void)doupdate();
 	}
 
 	return true;
@@ -585,7 +585,7 @@ static bool do_command(void)
     (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wclrtoeol(cmdwin);
     (void)wrefresh(cmdwin);
-    doupdate();
+    (void)doupdate();
 
     /* user finished entering a command */
     if (input[0] == '\0')
@@ -1090,7 +1090,7 @@ int main(int argc, char **argv)
     (void)cbreak();
     (void)intrflush(stdscr, FALSE);
     (void)keypad(stdscr, true);
-    (void)clearok(stdscr, TRUE);
+    (void)clearok(stdscr, true);
     (void)clear();
     (void)noecho();
     curses_active = true;

@@ -733,6 +733,7 @@ static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
 #define DIMENSION(a) (unsigned)(sizeof(a)/sizeof(a[0]))
 
+/*@-type */
 void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 /* break out the raw bits into the content fields */
 {
@@ -979,6 +980,7 @@ static bool length_check(struct gps_packet_t *lexer)
 	&& lexer->isgps.bufindex >=
 	((struct rtcm2_msg_t *)lexer->isgps.buf)->w2.frmlen + 2u;
 }
+/*@+type */
 
 enum isgpsstat_t rtcm2_decode(struct gps_packet_t *lexer, unsigned int c)
 {

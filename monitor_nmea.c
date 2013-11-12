@@ -20,7 +20,7 @@
 #include "gpsdclient.h"
 
 #ifdef NMEA_ENABLE
-extern const struct gps_type_t nmea;
+extern const struct gps_type_t nmea0183;
 
 static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
 static timestamp_t last_tick, tick_interval;
@@ -336,7 +336,7 @@ const struct monitor_object_t nmea_mmt = {
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &nmea,
+    .driver = &nmea0183,
 };
 
 /*****************************************************************************
