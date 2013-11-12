@@ -358,11 +358,30 @@ void json_device_dump(const struct gps_device_t *device,
 		      /*@out@*/ char *reply, size_t replylen)
 {
     struct classmap_t *cmp;
+    char buf1[JSON_VAL_MAX * 2 + 1];
+
     (void)strlcpy(reply, "{\"class\":\"DEVICE\",\"path\":\"", replylen);
     (void)strlcat(reply, device->gpsdata.dev.path, replylen);
     (void)strlcat(reply, "\",", replylen);
+    if (device->device_type != NULL) {
+	(void)strlcat(reply, "\"driver\":\"", replylen);
+	(void)strlcat(reply, device->device_type->type_name, replylen);
+	(void)strlcat(reply, "\",", replylen);
+    }
+    /*@-mustfreefresh@*/
+    if (device->subtype[0] != '\0') {
+	(void)strlcat(reply, "\"subtype\":\"", replylen);
+	(void)strlcat(reply,
+		      json_stringify(buf1, sizeof(buf1), device->subtype),
+		      replylen);
+	(void)strlcat(reply, "\",", replylen);
+    }
+    /*@+mustfreefresh@*/
+    /*
+     * There's an assumption here: Anything that we type service_sensor is
+     * a serial device with the usual control parameters.
+     */
     if (device->gpsdata.online > 0) {	
-	char buf1[JSON_VAL_MAX * 2 + 1];
 	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 		       "\"activated\":\"%s\",", 
 		       unix_to_iso8601(device->gpsdata.online, buf1, sizeof(buf1)));
@@ -376,38 +395,23 @@ void json_device_dump(const struct gps_device_t *device,
 			       replylen - strlen(reply), "\"flags\":%d,",
 			       mask);
 	}
-	if (device->device_type != NULL) {
-	    (void)strlcat(reply, "\"driver\":\"", replylen);
-	    (void)strlcat(reply, device->device_type->type_name, replylen);
-	    (void)strlcat(reply, "\",", replylen);
-	}
-	/*@-mustfreefresh@*/
-	if (device->subtype[0] != '\0') {
-	    (void)strlcat(reply, "\"subtype\":\"", replylen);
-	    (void)strlcat(reply,
-			  json_stringify(buf1, sizeof(buf1), device->subtype),
-			  replylen);
-	    (void)strlcat(reply, "\",", replylen);
-	}
-	/*@+mustfreefresh@*/
-	/*
-	 * There's an assumption here: Anything that we type service_sensor is
-	 * a serial device with the usual control parameters.
-	 */
 	if (device->servicetype == service_sensor) {
-	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
-			   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
-			   device->gpsdata.dev.driver_mode,
-			   (int)gpsd_get_speed(device),
-			   device->gpsdata.dev.parity,
-			   device->gpsdata.dev.stopbits,
-			   device->gpsdata.dev.cycle);
+	    /* speed can be 0 if the device is not currently active */
+	    speed_t speed = gpsd_get_speed(device);
+	    if (speed != 0)
+		(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
+			       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f,",
+			       device->gpsdata.dev.driver_mode,
+			       (int)speed,
+			       device->gpsdata.dev.parity,
+			       device->gpsdata.dev.stopbits,
+			       device->gpsdata.dev.cycle);
 #ifdef RECONFIGURE_ENABLE
 	    if (device->device_type != NULL
 		&& device->device_type->rate_switcher != NULL)
 		(void)snprintf(reply + strlen(reply),
 			       replylen - strlen(reply),
-			       ",\"mincycle\":%2.2f",
+			       "\"mincycle\":%2.2f,",
 			       device->device_type->min_cycle);
 #endif /* RECONFIGURE_ENABLE */
 	}
