@@ -1208,12 +1208,42 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	 */
 	return sirf_msg_ppstime(session, buf, len);
 
+    case 0x38:                /* EE Output MID 56 */
+	gpsd_report(session->context->debug, LOG_WARN, 
+                    "SiRF IV: unused EE Output 0x38, SubID: %d\n",
+		    buf[1]);
+	return 0;
+
+    case 0x40:                /* Nav Library MID 64 */
+	gpsd_report(session->context->debug, LOG_WARN, 
+                    "SiRF IV: unused NL 0x40, SubID: %d\n",
+		    buf[1]);
+	return 0;
+
+    case 0x47:                /* Hardware Config MID 71 */
+	gpsd_report(session->context->debug, LOG_WARN, 
+                    "SiRF IV: unused Hardware Config 0x47\n");
+	return 0;
+
+    case 0x5c:                /* CW Controller Output MID 92 */
+	gpsd_report(session->context->debug, LOG_WARN, 
+                    "SiRF IV: unused CW Controller Output 0x5c\n");
+	return 0;
+
+    case 0x5d:                /* TCXO Output MID 93 */
+	gpsd_report(session->context->debug, LOG_WARN, 
+                    "SiRF IV: unused TCXO Output 0x5d, SubID: %d\n",
+		    buf[1]);
+	return 0;
+
     case 0x62:			/* u-blox Extended Measured Navigation Data MID 98 */
-	gpsd_report(session->context->debug, LOG_PROG, "SiRF: u-blox EMND 0x62\n");
+	gpsd_report(session->context->debug, LOG_PROG, 
+                    "SiRF: u-blox EMND 0x62\n");
 	return sirf_msg_ublox(session, buf, len) | (CLEAR_IS | REPORT_IS);
 
     case 0x80:			/* Initialize Data Source MID 128 */
-	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unused INIT 0x80\n");
+	gpsd_report(session->context->debug, LOG_PROG, 
+                    "SiRF: unused INIT 0x80\n");
 	return 0;
 
     case 0xe1:			/* Development statistics messages MID 225 */
@@ -1223,7 +1253,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     default:
-	gpsd_report(session->context->debug, LOG_WARN, "SiRF: Unknown packet id %d length %zd\n",
+	gpsd_report(session->context->debug, LOG_WARN, 
+                    "SiRF: Unknown packet id %d length %zd\n",
 		    buf[0], len);
 	return 0;
     }
