@@ -495,22 +495,26 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    log1 = "no report hook";
 		if (session->context->pps_hook != NULL)
 		    session->context->pps_hook(session, &drift);
-		/*@+compdef@*/
 		/*@ -unrecog  (splint has no pthread declarations as yet) @*/
 		(void)pthread_mutex_lock(&ppslast_mutex);
 		/*@ +unrecog @*/
+		/*@-type@*/ /* splint is confused about struct timespec */
 		session->ppslast = drift;
+		/*@+type@*/
 		session->ppscount++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
 		(void)pthread_mutex_unlock(&ppslast_mutex);
 		/*@ +unrecog @*/
+		/*@+compdef@*/
             }
+	    /*@-type@*/ /* splint is confused about struct timespec */
 	    gpsd_report(session->context->debug, LOG_INF,
 		    "PPS edge %.20s %lu.%09lu offset %.9f\n",
 		    log1,
 		    (unsigned long)clock_ts.tv_sec,
 		    (unsigned long)clock_ts.tv_nsec,
 		    offset);
+	    /*@+type@*/
 	} else {
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS edge rejected %.100s", log);

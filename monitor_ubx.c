@@ -251,13 +251,15 @@ static void ubx_update(void)
     }
 
 #ifdef PPS_ENABLE
+    /*@-compdef@*/
+    /*@-type@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
-	/*@-type@*/ /* splint is confused about struct timespec */
 	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
-	/*@+type@*/
 	(void)mvwprintw(ppswin, 1, 13, "%.9f", timedelta);
-	wnoutrefresh(ppswin);
+	(void)wnoutrefresh(ppswin);
     }
+    /*@+type@*/
+    /*@+compdef@*/
 #endif /* PPS_ENABLE */
 }
 
