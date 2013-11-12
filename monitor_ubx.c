@@ -229,7 +229,9 @@ static void ubx_update(void)
     unsigned char *buf;
     size_t data_len;
     unsigned short msgid;
+#ifdef PPS_ENABLE
     struct timedrift_t drift;
+#endif /* PPS_ENABLE */
 
     buf = session.packet.outbuffer;
     msgid = (unsigned short)((buf[2] << 8) | buf[3]);
@@ -248,6 +250,7 @@ static void ubx_update(void)
 	break;
     }
 
+#ifdef PPS_ENABLE
     if (pps_thread_lastpps(&session, &drift) > 0) {
 	/*@-type@*/ /* splint is confused about struct timespec */
 	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
@@ -255,6 +258,7 @@ static void ubx_update(void)
 	(void)mvwprintw(ppswin, 1, 13, "%.9f", timedelta);
 	wnoutrefresh(ppswin);
     }
+#endif /* PPS_ENABLE */
 }
 
 static int ubx_command(char line[]UNUSED)

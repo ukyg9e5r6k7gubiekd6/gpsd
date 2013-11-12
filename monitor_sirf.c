@@ -277,7 +277,9 @@ static void sirf_update(void)
     size_t len;
     uint8_t dgps;
     char tbuf[JSON_DATE_MAX+1];
+#ifdef PPS_ENABLE
     struct timedrift_t drift;
+#endif /* PPS_ENABLE */
 
     /* splint pacification */
     assert(mid2win!=NULL && mid27win != NULL);
@@ -581,6 +583,7 @@ static void sirf_update(void)
     }
     /*@ +nullpass -nullderef @*/
 
+#ifdef PPS_ENABLE
     /* Not a CSD field, but there's no better place to put it */
     if (pps_thread_lastpps(&session, &drift) > 0) {
 	/*@-type@*/ /* splint is confused about struct timespec */
@@ -589,6 +592,7 @@ static void sirf_update(void)
 	display(mid7win, 2, 39, "%.9f", timedelta);	/* PPS offset */
 	wnoutrefresh(mid7win);
     }
+#endif /* PPS_ENABLE */
 }
 
 /*@ +globstate */

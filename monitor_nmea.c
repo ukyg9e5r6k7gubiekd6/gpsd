@@ -174,8 +174,9 @@ static void cooked_pvt(void)
 static void nmea_update(void)
 {
     char **fields;
+#ifdef PPS_ENABLE
     struct timedrift_t drift;
-    double timedelta;
+#endif /* PPS_ENABLE */
 
     assert(cookedwin != NULL);
     assert(nmeawin != NULL);
@@ -316,12 +317,15 @@ static void nmea_update(void)
 	}
     }
 
-    pps_thread_lastpps(&session, &drift);
-    /*@-type@*/ /* splint is confused about struct timespec */
-    timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
-    /*@+type@*/
-    (void)mvwprintw(gpgsawin, 4, 13, "%.9f", timedelta);
-    wnoutrefresh(gpgsawin);
+#ifdef PPS_ENABLE
+    if (pps_thread_lastpps(&session, &drift) > 0) {
+	/*@-type@*/ /* splint is confused about struct timespec */
+	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
+	/*@+type@*/
+	(void)mvwprintw(gpgsawin, 4, 13, "%.9f", timedelta);
+	wnoutrefresh(gpgsawin);
+    }
+#endif /* PPS_ENABLE */
 }
 
 /*@ +globstate +nullpass */
