@@ -358,7 +358,7 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 
    /* we may need to dump the message */
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
-   gpsd_report(session->context->debug, LOG_DATA,
+   gpsd_report(session->context->debug, LOG_PROG,
 	       "writing _proto_ control type %02x\n");
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }

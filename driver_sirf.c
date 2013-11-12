@@ -240,8 +240,8 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     msg[len + 4] = (unsigned char)((crc & 0xff00) >> 8);
     msg[len + 5] = (unsigned char)(crc & 0x00ff);
 
-    gpsd_report(session->context->debug,
-		LOG_DATA, "SiRF: Writing control type %02x:\n", msg[4]);
+    gpsd_report(session->context->debug, LOG_PROG,
+		"SiRF: Writing control type %02x:\n", msg[4]);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
     return (ok);
 }

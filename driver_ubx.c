@@ -572,7 +572,7 @@ bool ubx_write(struct gps_device_t * session,
     /*@ +type @*/
 
 
-    gpsd_report(session->context->debug, LOG_DATA,
+    gpsd_report(session->context->debug, LOG_PROG,
 		"=> GPS: UBX class: %02x, id: %02x, len: %zd, crc: %02x%02x\n",
 		msg_class, msg_id, data_len,
 		CK_A, CK_B);

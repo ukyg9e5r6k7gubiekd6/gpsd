@@ -429,7 +429,7 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
     session->msgbuf[msglen + 4] = '\n';
     session->msgbuflen = msglen + 5;
 
-    gpsd_report(session->context->debug, LOG_DATA,
+    gpsd_report(session->context->debug, LOG_PROG,
 		"writing oncore control type %c%c\n", msg[0], msg[1]);
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }

@@ -607,7 +607,8 @@ static gps_mask_t processGPGSV(int count, char *field[],
 
     /* not valid data until we've seen a complete set of parts */
     if (session->driver.nmea.part < session->driver.nmea.await) {
-	gpsd_report(session->context->debug, LOG_PROG, "Partial satellite data (%d of %d).\n",
+	gpsd_report(session->context->debug, LOG_PROG,
+		    "Partial satellite data (%d of %d).\n",
 		    session->driver.nmea.part, session->driver.nmea.await);
 	return ONLINE_SET;
     }

@@ -68,7 +68,7 @@ static int geostar_write(struct gps_device_t *session,
 
     session->msgbuflen = len * 4;
 
-    gpsd_report(session->context->debug, LOG_DATA,
+    gpsd_report(session->context->debug, LOG_PROG,
 		"Sent GeoStar packet id 0x%x\n", id);
     if (gpsd_write(session, session->msgbuf, session->msgbuflen) !=
 	(ssize_t) session->msgbuflen)

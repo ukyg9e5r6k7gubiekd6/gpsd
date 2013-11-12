@@ -508,7 +508,8 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
-    gpsd_report(session->context->debug, LOG_PROG, "evermore_mode(%d), %d\n", mode,
+    gpsd_report(session->context->debug, LOG_PROG,
+		"evermore_mode(%d), %d\n", mode,
 		session->back_to_nmea ? 1 : 0);
     if (mode == MODE_NMEA) {
 	/* NMEA */

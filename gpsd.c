@@ -921,7 +921,7 @@ static bool awaken(struct gps_device_t *device)
     /* open that device */
     if (!initialized_device(device)) {
 	if (!open_device(device)) {
-	    gpsd_report(context.debug, LOG_PROG, 
+	    gpsd_report(context.debug, LOG_WARN,
 			"%s: open failed\n",
 			device->gpsdata.dev.path);
 	    free_device(device);
@@ -2008,9 +2008,11 @@ int main(int argc, char *argv[])
 #ifdef SHM_EXPORT_ENABLE
     /* create the shared segment as root so readers can't mess with it */
     if (!shm_acquire(&context)) {
-	gpsd_report(context.debug, LOG_ERROR, "shared-segment creation failed,\n");
+	gpsd_report(context.debug, LOG_ERROR,
+		    "shared-segment creation failed,\n");
     } else
-	gpsd_report(context.debug, LOG_PROG, "shared-segment creation succeeded,\n");
+	gpsd_report(context.debug, LOG_PROG,
+		    "shared-segment creation succeeded,\n");
 #endif /* SHM_EXPORT_ENABLE */
 
     /*
@@ -2392,10 +2394,12 @@ int main(int argc, char *argv[])
 				device->gpsdata.gps_fd);
 		} else if (timestamp() - device->releasetime >
 			RELEASE_TIMEOUT) {
-		    gpsd_report(context.debug, LOG_PROG, "device %d closed\n",
-			(int)(device - devices));
-		    gpsd_report(context.debug, LOG_RAW, "unflagging descriptor %d\n",
-			device->gpsdata.gps_fd);
+		    gpsd_report(context.debug, LOG_PROG,
+				"device %d closed\n",
+				(int)(device - devices));
+		    gpsd_report(context.debug, LOG_RAW,
+				"unflagging descriptor %d\n",
+				device->gpsdata.gps_fd);
 		    deactivate_device(device);
 		}
 	    }

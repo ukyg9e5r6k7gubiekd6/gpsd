@@ -754,7 +754,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 
     theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
-    gpsd_report(session->context->debug, LOG_DATA,
+    gpsd_report(session->context->debug, LOG_PROG,
 		"Garmin: SendPacket(), wrote %zd bytes\n",
 		theBytesReturned);
 
@@ -827,7 +827,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 
     theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
-    gpsd_report(session->context->debug, LOG_DATA,
+    gpsd_report(session->context->debug, LOG_PROG,
 		"Garmin: SendPacket(), wrote %zd bytes\n",
 		theBytesReturned);
 
@@ -1008,7 +1008,8 @@ static void garmin_event_hook(struct gps_device_t *session, event_t event)
     }
     if (event == event_deactivate)
 	/* FIX-ME: is any action needed, or is closing the port sufficient? */
-	gpsd_report(session->context->debug, LOG_PROG, "Garmin: garmin_close()\n");
+	gpsd_report(session->context->debug, LOG_PROG,
+		    "Garmin: garmin_close()\n");
 }
 
 #define Send_ACK()    Build_Send_SER_Packet(session, 0, ACK, 0, 0)
@@ -1189,7 +1190,7 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	ssize_t status = gpsd_write(session, switcher, sizeof(switcher));
 	/*@ -charint @*/
 	if (status == (ssize_t)sizeof(switcher)) {
-	    gpsd_report(session->context->debug, LOG_DATA,
+	    gpsd_report(session->context->debug, LOG_PROG,
 			"Garmin: => GPS: turn off binary %02x %02x %02x... \n",
 			switcher[0], switcher[1], switcher[2]);
 	} else {

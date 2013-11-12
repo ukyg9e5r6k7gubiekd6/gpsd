@@ -55,7 +55,7 @@ static int tsip_write(struct gps_device_t *session,
     *ep++ = '\x03';
     session->msgbuflen = (size_t) (ep - session->msgbuf);
     /*@ -charint @*/
-    gpsd_report(session->context->debug, LOG_DATA,
+    gpsd_report(session->context->debug, LOG_PROG,
 		"Sent TSIP packet id 0x%02x\n", id);
     if (gpsd_write(session, session->msgbuf, session->msgbuflen) !=
 	(ssize_t) session->msgbuflen)

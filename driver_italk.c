@@ -212,7 +212,8 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
     flags = (unsigned short) getleu16(buf, 7 + 4);
     prn = (unsigned short) getleu16(buf, 7 + 6);
     sf = (unsigned short) getleu16(buf, 7 + 8);
-    gpsd_report(session->context->debug, LOG_PROG, "iTalk 50B SUBFRAME prn %u sf %u - decode %s %s\n",
+    gpsd_report(session->context->debug, LOG_PROG,
+		"iTalk 50B SUBFRAME prn %u sf %u - decode %s %s\n",
 		prn, sf,
 		flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
 		flags & SUBFRAME_GPS_PREAMBLE_INVERTED ? "(inverted)" : "");
