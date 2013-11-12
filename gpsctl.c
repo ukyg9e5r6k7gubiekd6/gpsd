@@ -22,10 +22,10 @@
 #include "revision.h"
 
 #define HIGH_LEVEL_TIMEOUT	8
-#define DEFAULT_TIMEOUT 	-1
 
 static int debuglevel;
-static unsigned int timeout = DEFAULT_TIMEOUT;
+static bppl explicit_timeout = false;
+static unsigned int timeout = 0;	/* no timeout */
 static struct gps_context_t context;
 static bool hunting = true;
 
@@ -313,6 +313,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'T':		/* set the timeout on packet recognition */
 	    timeout = (unsigned)atoi(optarg);
+	    explicit_timeout = true;
 	    break;
 	case 'D':		/* set debugging level */
 	    debuglevel = atoi(optarg);
@@ -381,7 +382,7 @@ int main(int argc, char **argv)
     if (!lowlevel) {
 	int i, devcount;
 
-	if (timeout == DEFAULT_TIMEOUT)
+	if (!explicit_timeout)
 	    timeout = HIGH_LEVEL_TIMEOUT;
 
 	/* what devices have we available? */
