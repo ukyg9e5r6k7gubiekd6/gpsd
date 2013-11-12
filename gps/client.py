@@ -173,10 +173,10 @@ class gpsjson(gpscommon):
                 arg += ',"json":true'
             if flags & WATCH_NMEA:
                 arg += ',"nmea":true'
-            if flags & WATCH_RAW:
-                arg += ',"raw":1'
             if flags & WATCH_RARE:
-                arg += ',"raw":0'
+                arg += ',"raw":1'
+            if flags & WATCH_RAW:
+                arg += ',"raw":2'
             if flags & WATCH_SCALED:
                 arg += ',"scaled":true'
             if flags & WATCH_TIMING:
