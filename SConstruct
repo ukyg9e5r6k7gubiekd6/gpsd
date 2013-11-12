@@ -1164,7 +1164,7 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
 
 # generate revision.h
 if 'dev' in gpsd_version:
-    (st, rev) = _getstatusoutput('git describe')
+    (st, rev) = _getstatusoutput('git describe --tags')
     if st != 0:
         from datetime import datetime
         rev = datetime.now().isoformat()[:-4]
@@ -1634,7 +1634,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 
 # Run all normal regression tests
 describe = Utility('describe', [],
-                   '@if [ -d .git ]; then git describe --tags; fi')
+                   ['@echo "Run normal regression tests for %s..."' %(rev.strip(),)])
 testclean = Utility('test_cleanup', [],
                     'rm -f test_bits test_geoid test_json test_libgps test_mkgmtime test_packet')
 check = env.Alias('check', [

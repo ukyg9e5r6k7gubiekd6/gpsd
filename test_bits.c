@@ -141,6 +141,9 @@ int main(int argc, char *argv[])
     memcpy(buf + 24, "\x40\x49\x0f\xdb", 4);
     /*@ +observertrans +usereleased @*/
 
+    if (!quiet)
+	(void)printf("Testing bitfield extraction\n");
+
     /*@-type@*/
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
@@ -202,7 +205,6 @@ int main(int argc, char *argv[])
     if (ub1 != 1)  printf("getub(buf, 0) FAILED\n");
     if (ub2 != 0xff) printf("getub(buf, 8) FAILED\n");
 
-    (void)printf("Testing bitfield extraction\n");
     for (up = unsigned_tests;
 	 up <
 	 unsigned_tests + sizeof(unsigned_tests) / sizeof(unsigned_tests[0]);
