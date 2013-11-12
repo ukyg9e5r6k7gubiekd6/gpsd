@@ -16,6 +16,17 @@ See the GPSD bug tracker on the project website, but don't be
 surprised if it's empty or very sparse.  Our rate of new defects per
 month is quite low.
 
+*** Client bugs
+
+**** In gpsmon's PPS Offset field
+
+The PPS Offset field in the gpsmon display will never be updated when
+running in client mode. This bug is called out on the manual page.
+
+Presently PPS Offset is displayed in direct mode for NMEA, SiRF, and
+UBX devices.  Others should probably do likewise, notably the
+Motorola Oncore and Garmin drivers.
+
 *** Dispatcher/network issues
 
 **** Reading AISHub data via UDP confuses xgps with short writes

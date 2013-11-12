@@ -1014,9 +1014,11 @@ object.</para>
 	<entry>ppsbar</entry>
 	<entry>No</entry>
 	<entry>boolean</entry>
-        <entry>If true, emit a PPS bar when the device issues 1PPS.
-	Intended to be used with the nmea and raw modes.
-	Default is false.</entry>
+        <entry>If true, emit a PPS bar when the device issues
+        1PPS.  Intended to be used with the nmea and raw modes.
+        Default is false. <emphasis role="bold">Note: this is an
+        unstable experimental feature which may change or be removed
+        without notice.</emphasis></entry>
 </row>
 <row>
 	<entry>device</entry>

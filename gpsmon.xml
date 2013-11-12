@@ -345,10 +345,9 @@ usual. There are no per-type special commands.</para>
 </refsect1>
 <refsect1 id='bugs'><title>BUGS AND LIMITATIONS</title>
 
-<para>If you run <application>gpsmon</application> in client mode,
-and kill the daemon while <application>gpsmon</application> is
-still running, <application>gpsmon</application> will hang.
-Don't do that...</para>
+<para>The PPS Offset field will never be updated when running in
+client mode, even if you can see PPS events in the packet window.
+This limitation may be fixed in a future release.</para>
 
 <!--
 Debug window dumps of control message sends to the GPS (preceded
