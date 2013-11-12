@@ -483,6 +483,8 @@ struct gps_device_t {
     /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
 					   struct timedrift_t *);
     /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
+    volatile struct timedrift_t ppslast;
+    volatile int ppscount;
 #endif /* PPS_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
     bool back_to_nmea;			/* back to NMEA on revert? */
@@ -870,6 +872,7 @@ extern void ntpshm_link_activate(struct gps_device_t *);
 
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
+extern int pps_thread_lastpps(struct gps_device_t *, struct timedrift_t *);
 
 extern void gpsd_acquire_reporting_lock(void);
 extern void gpsd_release_reporting_lock(void);

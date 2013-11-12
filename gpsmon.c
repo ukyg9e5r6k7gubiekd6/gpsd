@@ -46,7 +46,6 @@ extern const struct gps_type_t nmea0183;
 struct gps_device_t session;
 WINDOW *devicewin;
 bool serial;
-double timedelta = 0;
 
 /* These are private */
 static struct gps_context_t context;
@@ -863,17 +862,7 @@ static bool do_command(void)
 
 #ifdef PPS_ENABLE
 static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
-			struct timedrift_t *td) {
-    /*
-     * Ugh.  Access through a shared global is nasty.
-     * This may be a layer violation that needs to be fixed.
-     *
-     * Read access to timedelta is not thread-locked.
-     * Instead we're relying on access to floats to be atomic.
-     */
-    /*@-type@*/ /* splint is confused about struct timespec */
-    timedelta = timespec_diff_ns(td->real, td->clock) * 1e-9;
-    /*@+type@*/
+			struct timedrift_t *td UNUSED) {
     packet_log("#------------------------------------" 
 	       " PPS "
 	       "------------------------------------#\n");

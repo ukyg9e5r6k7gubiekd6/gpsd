@@ -56,6 +56,8 @@
 #include <glob.h>
 #endif
 
+static pthread_mutex_t ppslast_mutex;
+
 #if defined(HAVE_SYS_TIMEPPS_H)
 /*@-compdestroy -nullpass -unrecog@*/
 static int init_kernel_pps(struct gps_device_t *session)
@@ -494,6 +496,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		if (session->context->pps_hook != NULL)
 		    session->context->pps_hook(session, &drift);
 		/*@+compdef@*/
+		/*@ -unrecog  (splint has no pthread declarations as yet) @*/
+		(void)pthread_mutex_lock(&ppslast_mutex);
+		/*@ +unrecog @*/
+		session->ppslast = drift;
+		session->ppscount++;
+		/*@ -unrecog (splint has no pthread declarations as yet) @*/
+		(void)pthread_mutex_unlock(&ppslast_mutex);
+		/*@ +unrecog @*/
             }
 	    gpsd_report(session->context->debug, LOG_INF,
 		    "PPS edge %.20s %lu.%09lu offset %.9f\n",
@@ -550,6 +560,24 @@ void pps_thread_deactivate(struct gps_device_t *session)
     session->thread_report_hook = NULL;
     session->context->pps_hook = NULL;
     /*@+nullstate +mustfreeonly@*/
+}
+
+int pps_thread_lastpps(struct gps_device_t *session, struct timedrift_t *td)
+/* return a copy of the drift at the time of the last PPS */
+{
+    volatile int ret;
+
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_lock(&ppslast_mutex);
+    /*@ +unrecog @*/
+    *td = session->ppslast;
+    ret = session->ppscount;
+    gpsd_release_reporting_lock();
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    (void)pthread_mutex_unlock(&ppslast_mutex);
+    /*@ +unrecog @*/
+
+    return ret;
 }
 
 #endif /* PPS_ENABLE */

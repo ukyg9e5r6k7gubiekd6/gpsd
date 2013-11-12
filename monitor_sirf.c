@@ -277,6 +277,7 @@ static void sirf_update(void)
     size_t len;
     uint8_t dgps;
     char tbuf[JSON_DATE_MAX+1];
+    struct timedrift_t drift;
 
     /* splint pacification */
     assert(mid2win!=NULL && mid27win != NULL);
@@ -385,9 +386,6 @@ static void sirf_update(void)
 	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock drift */
 	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */
 	display(mid7win, 2, 16, "%lu", getbeu32(buf, 16));	/* Estimated Time */
-	/* Not a CSD field, but there's no better place to put it */
-	if (timedelta != 0)
-	    display(mid7win, 2, 39, "%f", timedelta);	/* PPS offset */
 	monitor_log("CSD 0x07=");
 	break;
 
@@ -582,6 +580,15 @@ static void sirf_update(void)
 	(void)wnoutrefresh(mid19win);
     }
     /*@ +nullpass -nullderef @*/
+
+    /* Not a CSD field, but there's no better place to put it */
+    if (pps_thread_lastpps(&session, &drift) > 0) {
+	/*@-type@*/ /* splint is confused about struct timespec */
+	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
+	/*@+type@*/
+	display(mid7win, 2, 39, "%.9f", timedelta);	/* PPS offset */
+	wnoutrefresh(mid7win);
+    }
 }
 
 /*@ +globstate */

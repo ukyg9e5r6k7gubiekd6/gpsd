@@ -174,6 +174,8 @@ static void cooked_pvt(void)
 static void nmea_update(void)
 {
     char **fields;
+    struct timedrift_t drift;
+    double timedelta;
 
     assert(cookedwin != NULL);
     assert(nmeawin != NULL);
@@ -314,8 +316,12 @@ static void nmea_update(void)
 	}
     }
 
-    if (timedelta != 0)
-	(void)mvwprintw(gpgsawin, 4, 13, "%f", timedelta);
+    pps_thread_lastpps(&session, &drift);
+    /*@-type@*/ /* splint is confused about struct timespec */
+    timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
+    /*@+type@*/
+    (void)mvwprintw(gpgsawin, 4, 13, "%.9f", timedelta);
+    wnoutrefresh(gpgsawin);
 }
 
 /*@ +globstate +nullpass */
