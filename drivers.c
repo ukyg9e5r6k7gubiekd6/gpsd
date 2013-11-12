@@ -1436,19 +1436,21 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
     path_rewrite(session, "\"device\":\"");
 
     /* mark certain responses without a path or device attribute */
-    if (strstr((char *)session->packet.outbuffer, "VERSION") != NULL
-	|| strstr((char *)session->packet.outbuffer, "WATCH") != NULL
-	|| strstr((char *)session->packet.outbuffer, "DEVICES") != NULL) {
-	session->packet.outbuffer[session->packet.outbuflen-1] = '\0';
-	(void)strlcat((char *)session->packet.outbuffer, ",\"remote\":\"",
-		      sizeof(session->packet.outbuffer));
-	(void)strlcat((char *)session->packet.outbuffer,
-		      session->gpsdata.dev.path,
-		      sizeof(session->packet.outbuffer));
-	(void)strlcat((char *)session->packet.outbuffer, "\"}",
-		      sizeof(session->packet.outbuffer));
+    if (session->gpsdata.dev.path[0] != '\0') {
+	if (strstr((char *)session->packet.outbuffer, "VERSION") != NULL
+	    || strstr((char *)session->packet.outbuffer, "WATCH") != NULL
+	    || strstr((char *)session->packet.outbuffer, "DEVICES") != NULL) {
+	    session->packet.outbuffer[session->packet.outbuflen-1] = '\0';
+	    (void)strlcat((char *)session->packet.outbuffer, ",\"remote\":\"",
+			  sizeof(session->packet.outbuffer));
+	    (void)strlcat((char *)session->packet.outbuffer,
+			  session->gpsdata.dev.path,
+			  sizeof(session->packet.outbuffer));
+	    (void)strlcat((char *)session->packet.outbuffer, "\"}",
+			  sizeof(session->packet.outbuffer));
+	}
+	session->packet.outbuflen = (unsigned int)strlen((char *)session->packet.outbuffer);
     }
-
     gpsd_report(session->context->debug, LOG_PROG,
 		 "JSON, passing through %s\n",
 		 (char *)session->packet.outbuffer);
