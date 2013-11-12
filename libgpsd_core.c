@@ -323,6 +323,8 @@ void gpsd_deactivate(struct gps_device_t *session)
 	gpsd_run_device_hook(session->context->debug, 
 			     session->gpsdata.dev.path,
 			     "DEACTIVATE");
+    /* mark it inactivated */
+    session->gpsdata.online = (timestamp_t)0;
 }
 
 void gpsd_clear(struct gps_device_t *session)
