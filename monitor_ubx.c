@@ -125,6 +125,10 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     if (data_len != 52)
 	return;
 
+#ifdef S_SPLINT_S
+    assert(navsolwin != NULL);
+#endif /* S_SPLINT_S */
+
     navmode = (unsigned char)getub(buf, 10);
     flags = (unsigned int)getub(buf, 11);
 
