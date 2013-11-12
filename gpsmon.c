@@ -532,10 +532,6 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	(void)wnoutrefresh(packetwin);
 
     (void)doupdate();
-    report_unlock();
-
-    /* Update the last fix time seen for PPS. FIXME: do this here? */
-    device->last_fixtime = device->newdata.time;
 
     if (logfile != NULL && device->packet.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
@@ -544,6 +540,10 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
                 device->packet.outbuflen, logfile) >= 1);
         /*@ +shiftimplementation +sefparams -charint @*/
     }
+    report_unlock();
+
+    /* Update the last fix time seen for PPS. FIXME: do this here? */
+    device->last_fixtime = device->newdata.time;
 }
 /*@+observertrans +nullpass +globstate@*/
 
