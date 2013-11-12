@@ -229,7 +229,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	    if (!(eol = strstr(line, NTRIP_BR)))
 		break;
 
-	    gpsd_report(device->context->debug, LOG_IO,
+	    gpsd_report(device->context->debug, LOG_DATA,
 			"next Ntrip source table line %s\n", line);
 
 	    *eol = '\0';

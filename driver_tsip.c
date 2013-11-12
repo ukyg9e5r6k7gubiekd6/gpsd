@@ -55,7 +55,8 @@ static int tsip_write(struct gps_device_t *session,
     *ep++ = '\x03';
     session->msgbuflen = (size_t) (ep - session->msgbuf);
     /*@ -charint @*/
-    gpsd_report(session->context->debug, LOG_IO, "Sent TSIP packet id 0x%02x\n", id);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"Sent TSIP packet id 0x%02x\n", id);
     if (gpsd_write(session, session->msgbuf, session->msgbuflen) !=
 	(ssize_t) session->msgbuflen)
 	return -1;
@@ -162,7 +163,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
 		   "ID%02x", id = (unsigned)session->packet.outbuffer[1]);
 
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"TSIP packet id 0x%02x length %d: %s\n",
 		id, len, buf2);
     (void)time(&now);

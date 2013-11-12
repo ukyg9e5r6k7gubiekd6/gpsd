@@ -361,12 +361,12 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return TIME_SET | PPSTIME_IS | RAW_IS;
 
     case 0x20:			/* LogConfig Info, could be used as a probe for EverMore GPS */
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "LogConfig EverMore packet, length %zd\n", datalen);
 	return ONLINE_SET;
 
     case 0x22:			/* LogData */
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "LogData EverMore packet, length %zd\n", datalen);
 	return ONLINE_SET;
 

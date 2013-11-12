@@ -44,7 +44,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
      * word is inverted.
      *
      */
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"50B: gpsd_interpret_subframe_raw: "
 		"%08x %08x %08x %08x %08x %08x %08x %08x %08x %08x\n",
 		words[0], words[1], words[2], words[3], words[4],
@@ -55,7 +55,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	words[0] ^= 0x3fffffc0;	/* invert */
     } else if (preamble != 0x74) {
 	/* strangely this is very common, so don't log it */
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "50B: gpsd_interpret_subframe_raw: bad preamble 0x%x\n",
 		    preamble);
 	return 0;
@@ -72,7 +72,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 	}
 	parity = (uint32_t)isgps_parity((isgps30bits_t)words[i]);
 	if (parity != (words[i] & 0x3f)) {
-	    gpsd_report(session->context->debug, LOG_IO,
+	    gpsd_report(session->context->debug, LOG_DATA,
 			"50B: gpsd_interpret_subframe_raw parity fail words[%d] 0x%x != 0x%x\n",
 			i, parity, (words[i] & 0x1));
 	    return 0;
@@ -164,7 +164,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     /* FIXME!! I really doubt this is Big Endian compatible */
     uint8_t preamble;
     struct subframe_t *subp = &session->gpsdata.subframe;
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"50B: gpsd_interpret_subframe: (%d) "
 		"%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
 		tSVID, words[0], words[1], words[2], words[3], words[4],

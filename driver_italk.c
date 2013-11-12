@@ -291,39 +291,48 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
 
     switch (type) {
     case ITALK_NAV_FIX:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk NAV_FIX len %zu\n", len);
+	gpsd_report(session->context->debug, LOG_DATA,
+		    "iTalk NAV_FIX len %zu\n", len);
 	mask = decode_itk_navfix(session, buf, len) | (CLEAR_IS | REPORT_IS);
 	break;
     case ITALK_PRN_STATUS:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk PRN_STATUS len %zu\n", len);
+	gpsd_report(session->context->debug, LOG_DATA,
+		    "iTalk PRN_STATUS len %zu\n", len);
 	mask = decode_itk_prnstatus(session, buf, len);
 	break;
     case ITALK_UTC_IONO_MODEL:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk UTC_IONO_MODEL len %zu\n", len);
+	gpsd_report(session->context->debug, LOG_DATA,
+		    "iTalk UTC_IONO_MODEL len %zu\n", len);
 	mask = decode_itk_utcionomodel(session, buf, len);
 	break;
 
     case ITALK_ACQ_DATA:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk ACQ_DATA len %zu\n", len);
+	gpsd_report(session->context->debug, LOG_DATA,
+		    "iTalk ACQ_DATA len %zu\n", len);
 	break;
     case ITALK_TRACK:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk TRACK len %zu\n", len);
+	gpsd_report(session->context->debug, LOG_DATA,
+		    "iTalk TRACK len %zu\n", len);
 	break;
     case ITALK_PSEUDO:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk PSEUDO len %zu\n", len);
+	gpsd_report(session->context->debug,
+		    LOG_DATA, "iTalk PSEUDO len %zu\n", len);
 	mask = decode_itk_pseudo(session, buf, len);
 	break;
     case ITALK_RAW_ALMANAC:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk RAW_ALMANAC len %zu\n", len);
+	gpsd_report(session->context->debug,
+		    LOG_DATA, "iTalk RAW_ALMANAC len %zu\n", len);
 	break;
     case ITALK_RAW_EPHEMERIS:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk RAW_EPHEMERIS len %zu\n", len);
+	gpsd_report(session->context->debug,
+		    LOG_DATA, "iTalk RAW_EPHEMERIS len %zu\n", len);
 	break;
     case ITALK_SUBFRAME:
 	mask = decode_itk_subframe(session, buf, len);
 	break;
     case ITALK_BIT_STREAM:
-	gpsd_report(session->context->debug, LOG_IO, "iTalk BIT_STREAM len %zu\n", len);
+	gpsd_report(session->context->debug, LOG_DATA,
+		    "iTalk BIT_STREAM len %zu\n", len);
 	break;
 
     case ITALK_AGC:
@@ -357,12 +366,12 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
     case ITALK_PULL_FIX:
     case ITALK_MEMCTRL:
     case ITALK_STOP_TASK:
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "iTalk not processing packet: id 0x%02x length %zu\n",
 		    type, len);
 	break;
     default:
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "iTalk unknown packet: id 0x%02x length %zu\n",
 		    type, len);
     }

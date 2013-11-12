@@ -304,7 +304,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
     cpo_pvt_data *pvt = NULL;
     cpo_rcv_data *rmd = NULL;
 
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"Garmin: PrintSERPacket(, %#02x, %#02x, )\n", pkt_id, pkt_len);
 
     session->cycle_end_reliable = true;
@@ -521,7 +521,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
     case GARMIN_PKTID_RMD_DATA:
     case GARMIN_PKTID_RMD41_DATA:
 	rmd = (cpo_rcv_data *) buf;
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "Garmin: PVT RMD Data Sz: %d\n", pkt_len);
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "Garmin: PVT RMD rcvr_tow: %f, rcvr_wn: %d\n",
@@ -614,7 +614,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		    pkt_id, pkt_len);
 	break;
     }
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"Garmin: PrintSERPacket(, %#02x, %#02x, )\n",
 		pkt_id, pkt_len);
     return mask;
@@ -754,7 +754,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 
     theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"Garmin: SendPacket(), wrote %zd bytes\n",
 		theBytesReturned);
 
@@ -827,7 +827,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 
     theBytesReturned = gpsd_write(session, (const char *)thePacket,
 				  (size_t) theBytesToWrite);
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"Garmin: SendPacket(), wrote %zd bytes\n",
 		theBytesReturned);
 
@@ -1151,7 +1151,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     }
 
 
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"Garmin: garmin_ser_parse() Type: %#02x, Len: %#02x, chksum: %#02x\n",
 		pkt_id, pkt_len, chksum);
     mask = PrintSERPacket(session, pkt_id, pkt_len, data_buf);
@@ -1161,7 +1161,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     (void)usleep(300);
     Send_ACK();
     /*@ +usedef +compdef @*/
-    gpsd_report(session->context->debug, LOG_IO, "Garmin: garmin_ser_parse( )\n");
+    gpsd_report(session->context->debug, LOG_DATA, "Garmin: garmin_ser_parse( )\n");
     return mask;
 }
 
@@ -1189,7 +1189,7 @@ static void garmin_switcher(struct gps_device_t *session, int mode)
 	ssize_t status = gpsd_write(session, switcher, sizeof(switcher));
 	/*@ -charint @*/
 	if (status == (ssize_t)sizeof(switcher)) {
-	    gpsd_report(session->context->debug, LOG_IO,
+	    gpsd_report(session->context->debug, LOG_DATA,
 			"Garmin: => GPS: turn off binary %02x %02x %02x... \n",
 			switcher[0], switcher[1], switcher[2]);
 	} else {
@@ -1277,7 +1277,7 @@ static int GetPacket(struct gps_device_t *session)
     session->driver.garmin.BufferLen = 0;
     session->packet.outbuflen = 0;
 
-    gpsd_report(session->context->debug, LOG_IO, "Garmin: GetPacket()\n");
+    gpsd_report(session->context->debug, LOG_DATA, "Garmin: GetPacket()\n");
 
     for (cnt = 0; cnt < 10; cnt++) {
 	size_t pkt_size;

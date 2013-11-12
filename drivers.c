@@ -39,9 +39,11 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	char *sentence = (char *)session->packet.outbuffer;
 
 	if (sentence[strlen(sentence)-1] != '\n')
-	    gpsd_report(session->context->debug, LOG_IO, "<= GPS: %s\n", sentence);
+	    gpsd_report(session->context->debug, LOG_IO,
+			"<= GPS: %s\n", sentence);
 	else
-	    gpsd_report(session->context->debug, LOG_IO, "<= GPS: %s", sentence);
+	    gpsd_report(session->context->debug, LOG_IO,
+			"<= GPS: %s", sentence);
 
 	if ((st=nmea_parse(sentence, session)) == 0) {
 	    gpsd_report(session->context->debug, LOG_WARN,
@@ -706,10 +708,12 @@ static bool tnt_send(struct gps_device_t *session, const char *fmt, ...)
     va_end(ap);
     sent = tnt_control_send(session, buf, strlen(buf));
     if (sent == (ssize_t) strlen(buf)) {
-	gpsd_report(session->context->debug, LOG_IO, "=> GPS: %s\n", buf);
+	gpsd_report(session->context->debug, LOG_IO,
+		    "=> GPS: %s\n", buf);
 	return true;
     } else {
-	gpsd_report(session->context->debug, LOG_WARN, "=> GPS: %s FAILED\n", buf);
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "=> GPS: %s FAILED\n", buf);
 	return false;
     }
 }

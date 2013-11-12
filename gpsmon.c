@@ -263,14 +263,14 @@ void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
     case LOG_INF:
 	err_str = "INFO: ";
 	break;
-    case LOG_DATA:
-	err_str = "DATA: ";
-	break;
     case LOG_PROG:
 	err_str = "PROG: ";
 	break;
     case LOG_IO:
 	err_str = "IO: ";
+	break;
+    case LOG_DATA:
+	err_str = "DATA: ";
 	break;
     case LOG_SPIN:
 	err_str = "SPIN: ";

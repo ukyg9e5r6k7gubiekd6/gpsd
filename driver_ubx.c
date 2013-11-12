@@ -357,13 +357,13 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     data_len = (size_t) getles16(buf, 4);
     switch (msgid) {
     case UBX_NAV_POSECEF:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_POSECEF\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_POSECEF\n");
 	break;
     case UBX_NAV_POSLLH:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_POSLLH\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_POSLLH\n");
 	break;
     case UBX_NAV_STATUS:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_STATUS\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_STATUS\n");
 	break;
     case UBX_NAV_DOP:
 	gpsd_report(session->context->debug, LOG_PROG, "UBX_NAV_DOP\n");
@@ -376,41 +376,41 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 			    data_len) | (CLEAR_IS | REPORT_IS);
 	break;
     case UBX_NAV_POSUTM:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_POSUTM\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_POSUTM\n");
 	break;
     case UBX_NAV_VELECEF:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_VELECEF\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_VELECEF\n");
 	break;
     case UBX_NAV_VELNED:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_VELNED\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_VELNED\n");
 	break;
     case UBX_NAV_TIMEGPS:
 	gpsd_report(session->context->debug, LOG_PROG, "UBX_NAV_TIMEGPS\n");
 	mask = ubx_msg_nav_timegps(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_TIMEUTC:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_TIMEUTC\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_TIMEUTC\n");
 	break;
     case UBX_NAV_CLOCK:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_CLOCK\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_CLOCK\n");
 	break;
     case UBX_NAV_SVINFO:
 	gpsd_report(session->context->debug, LOG_PROG, "UBX_NAV_SVINFO\n");
 	mask = ubx_msg_nav_svinfo(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_DGPS:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_DGPS\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_DGPS\n");
 	break;
     case UBX_NAV_SBAS:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_SBAS\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_SBAS\n");
 	ubx_msg_sbas(session, &buf[6]);
 	break;
     case UBX_NAV_EKFSTATUS:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_NAV_EKFSTATUS\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_NAV_EKFSTATUS\n");
 	break;
 
     case UBX_RXM_RAW:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_RXM_RAW\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_RXM_RAW\n");
 	break;
     case UBX_RXM_SFRB:
 	mask = ubx_msg_sfrb(session, &buf[UBX_PREFIX_LEN]);
@@ -419,44 +419,44 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_report(session->context->debug, LOG_PROG, "UBX_RXM_SVSI\n");
 	break;
     case UBX_RXM_ALM:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_RXM_ALM\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_RXM_ALM\n");
 	break;
     case UBX_RXM_EPH:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_RXM_EPH\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_RXM_EPH\n");
 	break;
     case UBX_RXM_POSREQ:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_RXM_POSREQ\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_RXM_POSREQ\n");
 	break;
 
     case UBX_MON_SCHED:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_SCHED\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_SCHED\n");
 	break;
     case UBX_MON_IO:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_IO\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_IO\n");
 	break;
     case UBX_MON_IPC:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_IPC\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_IPC\n");
 	break;
     case UBX_MON_VER:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_VER\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_VER\n");
 	break;
     case UBX_MON_EXCEPT:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_EXCEPT\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_EXCEPT\n");
 	break;
     case UBX_MON_MSGPP:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_MSGPP\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_MSGPP\n");
 	break;
     case UBX_MON_RXBUF:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_RXBUF\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_RXBUF\n");
 	break;
     case UBX_MON_TXBUF:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_TXBUF\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_TXBUF\n");
 	break;
     case UBX_MON_HW:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_HW\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_HW\n");
 	break;
     case UBX_MON_USB:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_MON_USB\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_USB\n");
 	break;
 
     case UBX_INF_DEBUG:
@@ -478,26 +478,26 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
 
     case UBX_TIM_TP:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_TIM_TP\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_TIM_TP\n");
 	break;
     case UBX_TIM_TM:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_TIM_TM\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_TIM_TM\n");
 	break;
     case UBX_TIM_TM2:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_TIM_TM2\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_TIM_TM2\n");
 	break;
     case UBX_TIM_SVIN:
-	gpsd_report(session->context->debug, LOG_IO, "UBX_TIM_SVIN\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX_TIM_SVIN\n");
 	break;
 
     case UBX_ACK_NAK:
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "UBX_ACK_NAK, class: %02x, id: %02x\n",
 		    buf[UBX_CLASS_OFFSET],
 		    buf[UBX_TYPE_OFFSET]);
 	break;
     case UBX_ACK_ACK:
-	gpsd_report(session->context->debug, LOG_IO,
+	gpsd_report(session->context->debug, LOG_DATA,
 		    "UBX_ACK_ACK, class: %02x, id: %02x\n",
 		    buf[UBX_CLASS_OFFSET],
 		    buf[UBX_TYPE_OFFSET]);
@@ -572,7 +572,7 @@ bool ubx_write(struct gps_device_t * session,
     /*@ +type @*/
 
 
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"=> GPS: UBX class: %02x, id: %02x, len: %zd, crc: %02x%02x\n",
 		msg_class, msg_id, data_len,
 		CK_A, CK_B);
@@ -600,7 +600,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
     else if (event == event_identified) {
 	unsigned char msg[32];
 
-	gpsd_report(session->context->debug, LOG_IO, "UBX configure\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX configure\n");
 
 	/*@ -type @*/
 	msg[0] = 0x03;		/* SBAS mode enabled, accept testbed mode */
@@ -629,7 +629,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	};			/* reserved */
 	/*@ +type @*/
 
-	gpsd_report(session->context->debug, LOG_IO, "UBX revert\n");
+	gpsd_report(session->context->debug, LOG_DATA, "UBX revert\n");
 
 	/* Reverting all in one fast and reliable reset */
 	(void)ubx_write(session, 0x06, 0x04, msg, 4);	/* CFG-RST */
@@ -916,7 +916,7 @@ static bool ubx_rate(struct gps_device_t *session, double cycletime)
     if (cycletime < 200.0)
 	cycletime = 200.0;
 
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"UBX rate change, report every %f secs\n", cycletime);
     s = (unsigned short)cycletime;
     msg[0] = (unsigned char)(s >> 8);

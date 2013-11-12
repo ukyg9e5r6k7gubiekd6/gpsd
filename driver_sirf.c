@@ -241,7 +241,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     msg[len + 5] = (unsigned char)(crc & 0x00ff);
 
     gpsd_report(session->context->debug,
-		LOG_IO, "SiRF: Writing control type %02x:\n", msg[4]);
+		LOG_DATA, "SiRF: Writing control type %02x:\n", msg[4]);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
     return (ok);
 }
@@ -515,7 +515,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 	words[i] = (uint32_t)getbeu32(buf, 4 * i + 3);
     }
 
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"SiRF: NavData chan %u svid %u\n",chan,svid);
 
 #ifdef RECONFIGURE_ENABLE

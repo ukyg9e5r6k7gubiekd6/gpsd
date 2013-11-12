@@ -68,7 +68,8 @@ static int geostar_write(struct gps_device_t *session,
 
     session->msgbuflen = len * 4;
 
-    gpsd_report(session->context->debug, LOG_IO, "Sent GeoStar packet id 0x%x\n", id);
+    gpsd_report(session->context->debug, LOG_DATA,
+		"Sent GeoStar packet id 0x%x\n", id);
     if (gpsd_write(session, session->msgbuf, session->msgbuflen) !=
 	(ssize_t) session->msgbuflen)
 	return -1;
@@ -159,7 +160,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
     (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "ID%02x", id);
 
-    gpsd_report(session->context->debug, LOG_IO,
+    gpsd_report(session->context->debug, LOG_DATA,
 		"GeoStar packet id 0x%02x length %d: %s\n", id, len, buf2);
 
     session->cycle_end_reliable = true;
