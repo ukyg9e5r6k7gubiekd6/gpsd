@@ -395,19 +395,22 @@ void json_device_dump(const struct gps_device_t *device,
 	 * a serial device with the usual control parameters.
 	 */
 	if (device->servicetype == service_sensor) {
-	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
-			   "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f",
-			   device->gpsdata.dev.driver_mode,
-			   (int)gpsd_get_speed(device),
-			   device->gpsdata.dev.parity,
-			   device->gpsdata.dev.stopbits,
-			   device->gpsdata.dev.cycle);
+	    /* speed can be 0 if the device is not currently active */
+	    speed_t speed = gpsd_get_speed(device);
+	    if (speed != 0)
+		(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
+			       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f,",
+			       device->gpsdata.dev.driver_mode,
+			       (int)speed,
+			       device->gpsdata.dev.parity,
+			       device->gpsdata.dev.stopbits,
+			       device->gpsdata.dev.cycle);
 #ifdef RECONFIGURE_ENABLE
 	    if (device->device_type != NULL
 		&& device->device_type->rate_switcher != NULL)
 		(void)snprintf(reply + strlen(reply),
 			       replylen - strlen(reply),
-			       ",\"mincycle\":%2.2f",
+			       "\"mincycle\":%2.2f,",
 			       device->device_type->min_cycle);
 #endif /* RECONFIGURE_ENABLE */
 	}
