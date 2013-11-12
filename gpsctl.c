@@ -704,7 +704,7 @@ int main(int argc, char **argv)
 			device, gpsd_id(&session),
 			session.gpsdata.dev.baudrate);
 
-	    if (forcetype!=NULL && strcmp("Generic NMEA", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
+	    if (forcetype!=NULL && strcmp("NMEA0183", session.device_type->type_name) !=0 && strcmp(forcetype->type_name, session.device_type->type_name)!=0) {
 		gpsd_report(context.debug, LOG_ERROR,
 			    "'%s' doesn't match non-generic type '%s' of selected device.\n",
 			    forcetype->type_name,

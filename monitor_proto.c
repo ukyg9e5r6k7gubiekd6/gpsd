@@ -33,7 +33,7 @@
  * helper functions.
  */
 
-extern const struct gps_type_t PROTO_binary;
+extern const struct gps_type_t driver__proto_;
 
 static bool PROTO_initialize(void)
 {

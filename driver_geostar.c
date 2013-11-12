@@ -608,9 +608,9 @@ static double geostar_time_offset(struct gps_device_t *session UNUSED)
 
 /* this is everything we export */
 /* *INDENT-OFF* */
-const struct gps_type_t geostar_binary =
+const struct gps_type_t driver_geostar =
 {
-    .type_name      = "GeoStar binary",	/* full name of type */
+    .type_name      = "GeoStar",	/* full name of type */
     .packet_type    = GEOSTAR_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = NULL,		/* no trigger */

@@ -14,7 +14,7 @@
 #include "gpsmon.h"
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
-extern const struct gps_type_t oncore_binary;
+extern const struct gps_type_t driver_oncore;
 
 static WINDOW *Ea1win, *Eawin, *Bbwin, *Enwin, *Bowin, *Aywin, *Aswin, *Atwin;
 static unsigned char EaSVlines[8];
@@ -461,7 +461,7 @@ const struct monitor_object_t oncore_mmt = {
     .command = oncore_command,
     .wrap = oncore_wrap,
     .min_y = 20,.min_x = 80,	/* size of the device window */
-    .driver = &oncore_binary,
+    .driver = &driver_oncore,
 };
 
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */

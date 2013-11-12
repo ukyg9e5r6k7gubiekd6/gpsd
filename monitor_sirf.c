@@ -18,7 +18,7 @@
 #include "gpsmon.h"
 
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
-extern const struct gps_type_t sirf_binary;
+extern const struct gps_type_t driver_sirf;
 
 static WINDOW *mid2win, *mid4win, *mid6win, *mid7win, *mid9win, *mid13win;
 static WINDOW *mid19win, *mid27win;
@@ -584,14 +584,15 @@ static void sirf_update(void)
     /*@ +nullpass -nullderef @*/
 
 #ifdef PPS_ENABLE
-    /* Not a CSD field, but there's no better place to put it */
+    /*@-compdef@*/
+    /*@-type@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
-	/*@-type@*/ /* splint is confused about struct timespec */
 	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
-	/*@+type@*/
 	display(mid7win, 2, 39, "%.9f", timedelta);	/* PPS offset */
-	wnoutrefresh(mid7win);
+	(void)wnoutrefresh(mid7win);
     }
+    /*@+type@*/
+    /*@+compdef@*/
 #endif /* PPS_ENABLE */
 }
 
@@ -687,7 +688,7 @@ const struct monitor_object_t sirf_mmt = {
 #endif /* CONTROLSEND_ENABLE */
     .wrap = sirf_wrap,
     .min_y = 22,.min_x = 80,
-    .driver = &sirf_binary,
+    .driver = &driver_sirf,
 };
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */
 

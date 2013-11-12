@@ -11,7 +11,7 @@
 
 #ifdef UBLOX_ENABLE
 #include "driver_ubx.h"
-extern const struct gps_type_t ubx_binary;
+extern const struct gps_type_t driver_ubx;
 static WINDOW *satwin, *navsolwin, *dopwin, *ppswin;
 
 #define display	(void)mvwprintw
@@ -280,6 +280,6 @@ const struct monitor_object_t ubx_mmt = {
     .command = ubx_command,
     .wrap = ubx_wrap,
     .min_y = 19,.min_x = 80,	/* size of the device window */
-    .driver = &ubx_binary,
+    .driver = &driver_ubx,
 };
 #endif

@@ -397,9 +397,9 @@ static void italk_ping(struct gps_device_t *session)
 #endif /* __UNUSED__ */
 
 /* *INDENT-OFF* */
-const struct gps_type_t italk_binary =
+const struct gps_type_t driver_italk =
 {
-    .type_name      = "iTalk binary",	/* full name of type */
+    .type_name      = "iTalk",		/* full name of type */
     .packet_type    = ITALK_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* no rollover or other flags */
     .trigger	    = NULL,		/* recognize the type */

@@ -614,9 +614,9 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 
 /* this is everything we export */
 /* *INDENT-OFF* */
-const struct gps_type_t evermore_binary =
+const struct gps_type_t driver_evermore =
 {
-    .type_name      = "EverMore binary",	/* full name of type */
+    .type_name      = "EverMore",		/* full name of type */
     .packet_type    = EVERMORE_PACKET,		/* lexer packet type */
     .flags	    = DRIVER_STICKY,		/* remember this */
     .trigger        = NULL, 			/* recognize the type */

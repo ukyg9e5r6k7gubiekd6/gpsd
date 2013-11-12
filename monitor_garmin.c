@@ -13,7 +13,7 @@
 #include "gpsmon.h"
 
 #if defined(GARMIN_ENABLE) && defined(BINARY_ENABLE)
-extern const struct gps_type_t garmin_ser_binary;
+extern const struct gps_type_t driver_garmin_ser_binary;
 
 static WINDOW *miscwin, *mid51win, *mid114win;
 
@@ -294,7 +294,7 @@ const struct monitor_object_t garmin_bin_ser_mmt = {
     .command = NULL,
     .wrap = garmin_bin_wrap,
     .min_y = 16,.min_x = 80,
-    .driver = &garmin_ser_binary,
+    .driver = &driver_garmin_ser_binary,
 };
 
 #endif /* defined(GARMIN_ENABLE) && defined(BINARY_ENABLE) */

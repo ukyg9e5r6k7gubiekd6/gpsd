@@ -20,7 +20,7 @@
 #include "gpsdclient.h"
 
 #ifdef NMEA_ENABLE
-extern const struct gps_type_t nmea0183;
+extern const struct gps_type_t driver_nmea0183;
 
 static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
 static timestamp_t last_tick, tick_interval;
@@ -28,7 +28,7 @@ static char sentences[NMEA_MAX * 2];
 
 /*****************************************************************************
  *
- * Generic NMEA support
+ * NMEA0183 support
  *
  *****************************************************************************/
 
@@ -318,13 +318,15 @@ static void nmea_update(void)
     }
 
 #ifdef PPS_ENABLE
+    /*@-compdef@*/
+    /*@-type@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
-	/*@-type@*/ /* splint is confused about struct timespec */
 	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
-	/*@+type@*/
 	(void)mvwprintw(gpgsawin, 4, 13, "%.9f", timedelta);
-	wnoutrefresh(gpgsawin);
+	(void)wnoutrefresh(gpgsawin);
     }
+    /*@+type@*/
+    /*@+compdef@*/
 #endif /* PPS_ENABLE */
 }
 
@@ -346,7 +348,7 @@ const struct monitor_object_t nmea_mmt = {
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &nmea0183,
+    .driver = &driver_nmea0183,
 };
 
 /*****************************************************************************
@@ -378,7 +380,7 @@ static void monitor_nmea_send(const char *fmt, ...)
  */
 
 #if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
-extern const struct gps_type_t garmin;
+extern const struct gps_type_t driver_garmin;
 
 const struct monitor_object_t garmin_mmt = {
     .initialize = nmea_initialize,
@@ -386,12 +388,12 @@ const struct monitor_object_t garmin_mmt = {
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &garmin,
+    .driver = &driver_garmin,
 };
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
 
 #ifdef ASHTECH_ENABLE
-extern const struct gps_type_t ashtech;
+extern const struct gps_type_t driver_ashtech;
 
 #define ASHTECH_SPEED_9600 5
 #define ASHTECH_SPEED_57600 8
@@ -456,12 +458,12 @@ const struct monitor_object_t ashtech_mmt = {
 #endif /* CONTROLSEND_ENABLE */
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &ashtech,
+    .driver = &driver_ashtech,
 };
 #endif /* ASHTECH_ENABLE */
 
 #ifdef FV18_ENABLE
-extern const struct gps_type_t fv18;
+extern const struct gps_type_t driver_fv18;
 
 const struct monitor_object_t fv18_mmt = {
     .initialize = nmea_initialize,
@@ -469,12 +471,12 @@ const struct monitor_object_t fv18_mmt = {
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &fv18,
+    .driver = &driver_fv18,
 };
 #endif /* FV18_ENABLE */
 
 #ifdef GPSCLOCK_ENABLE
-extern const struct gps_type_t gpsclock;
+extern const struct gps_type_t driver_gpsclock;
 
 const struct monitor_object_t gpsclock_mmt = {
     .initialize = nmea_initialize,
@@ -482,12 +484,12 @@ const struct monitor_object_t gpsclock_mmt = {
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &gpsclock,
+    .driver = &driver_gpsclock,
 };
 #endif /* GPSCLOCK_ENABLE */
 
 #ifdef MTK3301_ENABLE
-extern const struct gps_type_t mtk3301;
+extern const struct gps_type_t driver_mtk3301;
 
 const struct monitor_object_t mtk3301_mmt = {
     .initialize = nmea_initialize,
@@ -495,12 +497,12 @@ const struct monitor_object_t mtk3301_mmt = {
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &mtk3301,
+    .driver = &driver_mtk3301,
 };
 #endif /* MTK3301_ENABLE */
 
 #ifdef AIVDM_ENABLE
-extern const struct gps_type_t aivdm;
+extern const struct gps_type_t driver_aivdm;
 
 const struct monitor_object_t aivdm_mmt = {
     .initialize = nmea_initialize,
@@ -508,7 +510,7 @@ const struct monitor_object_t aivdm_mmt = {
     .command = NULL,
     .wrap = nmea_wrap,
     .min_y = 21,.min_x = 80,
-    .driver = &aivdm,
+    .driver = &driver_aivdm,
 };
 #endif /* AIVDM_ENABLE */
 #endif /* NMEA_ENABLE */

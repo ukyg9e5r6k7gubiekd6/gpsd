@@ -8,7 +8,7 @@
 
 #ifdef SUPERSTAR2_ENABLE
 #include "driver_superstar2.h"
-extern const struct gps_type_t superstar2_binary;
+extern const struct gps_type_t driver_superstar2;
 static WINDOW *satwin;
 
 static bool superstar2_initialize(void)
@@ -99,6 +99,6 @@ const struct monitor_object_t superstar2_mmt = {
     .command = superstar2_command,
     .wrap = superstar2_wrap,
     .min_y = 23,.min_x = 80,	/* size of the device window */
-    .driver = &superstar2_binary,
+    .driver = &driver_superstar2,
 };
 #endif

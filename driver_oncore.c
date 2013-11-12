@@ -480,9 +480,9 @@ static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 
 /* This is everything we export */
 /* *INDENT-OFF* */
-const struct gps_type_t oncore_binary = {
+const struct gps_type_t driver_oncore = {
 
-    .type_name        = "Oncore binary",	/* Full name of type */
+    .type_name        = "Motorola Oncore",	/* Full name of type */
     .packet_type      = ONCORE_PACKET,		/* numeric packet type */
     .flags	      = DRIVER_STICKY,		/* remember this */
     .trigger          = NULL,			/* identifying response */

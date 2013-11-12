@@ -15,10 +15,10 @@
 #include "gpsd.h"
 #include "bits.h"		/* for getbeu16(), to extract big-endian words */
 
-extern const struct gps_type_t zodiac_binary;
-extern const struct gps_type_t ubx_binary;
-extern const struct gps_type_t sirf_binary;
-extern const struct gps_type_t nmea2000;
+extern const struct gps_type_t driver_zodiac_binary;
+extern const struct gps_type_t driver_ubx_binary;
+extern const struct gps_type_t driver_sirf_binary;
+extern const struct gps_type_t driver_nmea2000;
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -80,7 +80,7 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
  **************************************************************************/
 
 /* *INDENT-OFF* */
-const struct gps_type_t unknown = {
+const struct gps_type_t driver_unknown = {
     .type_name      = "Unknown",	/* full name of type */
     .packet_type    = COMMENT_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_NOFLAGS,	/* no flags set */
@@ -245,8 +245,8 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t nmea0183 = {
-    .type_name      = "Generic NMEA",	/* full name of type */
+const struct gps_type_t driver_nmea0183 = {
+    .type_name      = "NMEA0183",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_NOFLAGS,	/* remember this */
     .trigger	    = NULL,		/* it's the default */
@@ -350,7 +350,7 @@ static void garmin_nmea_event_hook(struct gps_device_t *session,
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t garmin = {
+const struct gps_type_t driver_garmin = {
     .type_name      = "Garmin NMEA",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */
@@ -412,7 +412,7 @@ static void ashtech_event_hook(struct gps_device_t *session, event_t event)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t ashtech = {
+const struct gps_type_t driver_ashtech = {
     .type_name      = "Ashtech",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */
@@ -463,7 +463,7 @@ static void fv18_event_hook(struct gps_device_t *session, event_t event)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t fv18 = {
+const struct gps_type_t driver_fv18 = {
     .type_name      = "San Jose Navigation FV18",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */
@@ -517,7 +517,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t gpsclock = {
+const struct gps_type_t driver_gpsclock = {
     .type_name      = "Furuno Electric GH-79L4",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */
@@ -572,7 +572,7 @@ static void tripmate_event_hook(struct gps_device_t *session, event_t event)
 }
 
 /* *INDENT-OFF* */
-static const struct gps_type_t tripmate = {
+static const struct gps_type_t driver_tripmate = {
     .type_name     = "Delorme TripMate",	/* full name of type */
     .packet_type   = NMEA_PACKET,		/* lexer packet type */
     .flags	   = DRIVER_STICKY,		/* no rollover or other flags */
@@ -617,13 +617,13 @@ static void earthmate_event_hook(struct gps_device_t *session, event_t event)
     if (event == event_triggermatch) {
 	(void)gpsd_write(session, "EARTHA\r\n", 8);
 	(void)usleep(10000);
-	(void)gpsd_switch_driver(session, "Zodiac Binary");
+	(void)gpsd_switch_driver(session, "Zodiac");
     }
 }
 
 /*@ -redef @*/
 /* *INDENT-OFF* */
-static const struct gps_type_t earthmate = {
+static const struct gps_type_t driver_earthmate = {
     .type_name     = "Pre-2003 Delorme EarthMate",
     .packet_type   = NMEA_PACKET,	/* associated lexer packet type */
     .flags	   = DRIVER_STICKY,		/* no rollover or other flags */
@@ -746,7 +746,7 @@ static void tnt_event_hook(struct gps_device_t *session, event_t event)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t trueNorth = {
+const struct gps_type_t driver_trueNorth = {
     .type_name      = "True North",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */
@@ -824,8 +824,8 @@ static void oceanserver_event_hook(struct gps_device_t *session,
 }
 
 /* *INDENT-OFF* */
-static const struct gps_type_t oceanServer = {
-    .type_name      = "OceanServer Digital Compass OS5000", /* full name of type */
+static const struct gps_type_t driver_oceanServer = {
+    .type_name      = "OceanServer OS5000", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* no rollover or other flags */
     .trigger	    = "$OHPR,",		/* detect their main sentence */
@@ -891,7 +891,7 @@ static void fury_event_hook(struct gps_device_t *session, event_t event)
 
 
 /* *INDENT-OFF* */
-static const struct gps_type_t fury = {
+static const struct gps_type_t driver_fury = {
     .type_name      = "Jackson Labs Fury", /* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* no rollover or other flags */
@@ -945,7 +945,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 }
 
 /* *INDENT-OFF* */
-static const struct gps_type_t rtcm104v2 = {
+static const struct gps_type_t driver_rtcm104v2 = {
     .type_name     = "RTCM104V2",	/* full name of type */
     .packet_type   = RTCM2_PACKET,	/* associated lexer packet type */
     .flags	   = DRIVER_NOFLAGS,	/* no rollover or other flags */
@@ -991,7 +991,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 }
 
 /* *INDENT-OFF* */
-static const struct gps_type_t rtcm104v3 = {
+static const struct gps_type_t driver_rtcm104v3 = {
     .type_name     = "RTCM104V3",	/* full name of type */
     .packet_type   = RTCM3_PACKET,	/* associated lexer packet type */
     .flags	   = DRIVER_NOFLAGS,	/* no rollover or other flags */
@@ -1026,7 +1026,7 @@ static const struct gps_type_t rtcm104v3 = {
  **************************************************************************/
 
 /* *INDENT-OFF* */
-static const struct gps_type_t garmintxt = {
+static const struct gps_type_t driver_garmintxt = {
     .type_name     = "Garmin Simple Text",		/* full name of type */
     .packet_type   = GARMINTXT_PACKET,	/* associated lexer packet type */
     .flags	   = DRIVER_NOFLAGS,	/* no rollover or other flags */
@@ -1121,7 +1121,7 @@ static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
 #endif /* RECONFIGURE_ENABLE */
 
 /* *INDENT-OFF* */
-const struct gps_type_t mtk3301 = {
+const struct gps_type_t driver_mtk3301 = {
     .type_name      = "MTK-3301",	/* full name of type */
     .packet_type    = NMEA_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */
@@ -1358,7 +1358,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t aivdm = {
+const struct gps_type_t driver_aivdm = {
     /* Full name of type */
     .type_name        = "AIVDM",    	/* associated lexer packet type */
     .packet_type      = AIVDM_PACKET,	/* numeric packet type */
@@ -1449,7 +1449,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
 	    (void)strlcat((char *)session->packet.outbuffer, "\"}",
 			  sizeof(session->packet.outbuffer));
 	}
-	session->packet.outbuflen = (unsigned int)strlen((char *)session->packet.outbuffer);
+	session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
     }
     gpsd_report(session->context->debug, LOG_PROG,
 		 "JSON, passing through %s\n",
@@ -1459,7 +1459,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t json_passthrough = {
+const struct gps_type_t driver_json_passthrough = {
     .type_name      = "JSON slave driver",	/* full name of type */
     .packet_type    = JSON_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_NOFLAGS,	/* don't remember this */
@@ -1487,105 +1487,112 @@ const struct gps_type_t json_passthrough = {
 
 #endif /* PASSTHROUGH_ENABLE */
 
-extern const struct gps_type_t garmin_usb_binary, garmin_ser_binary;
-extern const struct gps_type_t geostar_binary;
-extern const struct gps_type_t tsip_binary, oncore_binary;
-extern const struct gps_type_t evermore_binary, italk_binary;
-extern const struct gps_type_t navcom_binary, superstar2_binary;
+extern const struct gps_type_t driver_evermore;
+extern const struct gps_type_t driver_garmin_ser_binary;
+extern const struct gps_type_t driver_garmin_usb_binary;
+extern const struct gps_type_t driver_geostar;
+extern const struct gps_type_t driver_italk;
+extern const struct gps_type_t driver_navcom;
+extern const struct gps_type_t driver_oncore;
+extern const struct gps_type_t driver_sirf;
+extern const struct gps_type_t driver_superstar2;
+extern const struct gps_type_t driver_tsip;
+extern const struct gps_type_t driver_ubx;
+extern const struct gps_type_t driver_zodiac;
 
 /*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
 static const struct gps_type_t *gpsd_driver_array[] = {
-    &unknown,
+    &driver_unknown,
 #ifdef NMEA_ENABLE
-    &nmea0183,
+    &driver_nmea0183,
 #ifdef ASHTECH_ENABLE
-    &ashtech,
+    &driver_ashtech,
 #endif /* ASHTECHV18_ENABLE */
 #ifdef TRIPMATE_ENABLE
-    &tripmate,
+    &driver_tripmate,
 #endif /* TRIPMATE_ENABLE */
 #ifdef EARTHMATE_ENABLE
-    &earthmate,
+    &driver_earthmate,
 #endif /* EARTHMATE_ENABLE */
 #ifdef GPSCLOCK_ENABLE
-    &gpsclock,
+    &driver_gpsclock,
 #endif /* GPSCLOCK_ENABLE */
 #ifdef GARMIN_ENABLE
-    &garmin,
+    &driver_garmin,
 #endif /* GARMIN_ENABLE */
 #ifdef MTK3301_ENABLE
-    &mtk3301,
+    &driver_mtk3301,
 #endif /*  MTK3301_ENABLE */
 #ifdef OCEANSERVER_ENABLE
-    &oceanServer,
+    &driver_oceanServer,
 #endif /* OCEANSERVER_ENABLE */
 #ifdef FV18_ENABLE
-    &fv18,
+    &driver_fv18,
 #endif /* FV18_ENABLE */
 #ifdef TNT_ENABLE
-    &trueNorth,
+    &driver_trueNorth,
 #endif /* TNT_ENABLE */
 #ifdef FURY_ENABLE
-    &fury,
+    &driver_fury,
 #endif /* FURY_ENABLE */
 #ifdef AIVDM_ENABLE
-    &aivdm,
+    &driver_aivdm,
 #endif /* AIVDM_ENABLE */
 #endif /* NMEA_ENABLE */
 
 #ifdef EVERMORE_ENABLE
-    &evermore_binary,
+    &driver_evermore,
 #endif /* EVERMORE_ENABLE */
 #ifdef GARMIN_ENABLE
     /* be sure to try Garmin Serial Binary before Garmin USB Binary */
-    &garmin_ser_binary,
-    &garmin_usb_binary,
+    &driver_garmin_ser_binary,
+    &driver_garmin_usb_binary,
 #endif /* GARMIN_ENABLE */
 #ifdef GEOSTAR_ENABLE
-    &geostar_binary,
+    &driver_geostar,
 #endif /* GEOSTAR_ENABLE */
 #ifdef ITRAX_ENABLE
-    &italk_binary,
+    &driver_italk,
 #endif /* ITRAX_ENABLE */
 #ifdef ONCORE_ENABLE
-    &oncore_binary,
+    &driver_oncore,
 #endif /* ONCORE_ENABLE */
 #ifdef NAVCOM_ENABLE
-    &navcom_binary,
+    &driver_navcom,
 #endif /* NAVCOM_ENABLE */
 #ifdef SIRF_ENABLE
-    &sirf_binary,
+    &driver_sirf,
 #endif /* SIRF_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
-    &superstar2_binary,
+    &driver_superstar2,
 #endif /* SUPERSTAR2_ENABLE */
 #ifdef TSIP_ENABLE
-    &tsip_binary,
+    &driver_tsip,
 #endif /* TSIP_ENABLE */
 #ifdef UBLOX_ENABLE
-    &ubx_binary,
+    &driver_ubx,
 #endif /* UBLOX_ENABLE */
 #ifdef ZODIAC_ENABLE
-    &zodiac_binary,
+    &driver_zodiac,
 #endif /* ZODIAC_ENABLE */
 
 #ifdef NMEA2000_ENABLE
-    &nmea2000,
+    &driver_nmea2000,
 #endif /* NMEA2000_ENABLE */
 
 #ifdef RTCM104V2_ENABLE
-    &rtcm104v2,
+    &driver_rtcm104v2,
 #endif /* RTCM104V2_ENABLE */
 #ifdef RTCM104V3_ENABLE
-    &rtcm104v3,
+    &driver_rtcm104v3,
 #endif /* RTCM104V3_ENABLE */
 #ifdef GARMINTXT_ENABLE
-    &garmintxt,
+    &driver_garmintxt,
 #endif /* GARMINTXT_ENABLE */
 
 #ifdef PASSTHROUGH_ENABLE
-    &json_passthrough,
+    &driver_json_passthrough,
 #endif /* PASSTHROUGH_ENABLE */
 
     NULL,

@@ -1370,7 +1370,7 @@ static ssize_t garmin_get_packet(struct gps_device_t *session)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t garmin_usb_binary_old =
+const struct gps_type_t driver_garmin_usb_binary_old =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET;	/* associated lexer packet type */
@@ -1399,7 +1399,7 @@ const struct gps_type_t garmin_usb_binary_old =
 #endif /* __UNUSED__ */
 
 /* *INDENT-OFF* */
-const struct gps_type_t garmin_usb_binary =
+const struct gps_type_t driver_garmin_usb_binary =
 {
     .type_name      = "Garmin USB binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */
@@ -1427,7 +1427,7 @@ const struct gps_type_t garmin_usb_binary =
 /* *INDENT-ON* */
 
 /* *INDENT-OFF* */
-const struct gps_type_t garmin_ser_binary =
+const struct gps_type_t driver_garmin_ser_binary =
 {
     .type_name      = "Garmin Serial binary",	/* full name of type */
     .packet_type    = GARMIN_PACKET,	/* associated lexer packet type */

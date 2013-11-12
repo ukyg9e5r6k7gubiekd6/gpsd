@@ -16,7 +16,7 @@
 #include <string.h>
 #endif
 
-extern const struct gps_type_t italk_binary;
+extern const struct gps_type_t driver_italk;
 static WINDOW *satwin, *navfixwin;
 
 #define display	(void)mvwprintw
@@ -248,6 +248,6 @@ const struct monitor_object_t italk_mmt = {
     .command = italk_command,
     .wrap = italk_wrap,
     .min_y = 23,.min_x = 80,	/* size of the device window */
-    .driver = &italk_binary,
+    .driver = &driver_italk,
 };
 #endif

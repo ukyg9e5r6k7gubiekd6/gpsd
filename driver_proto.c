@@ -490,9 +490,9 @@ static void _proto__wrapup(struct gps_device_t *session)
 
 /* This is everything we export */
 /* *INDENT-OFF* */
-const struct gps_type_t _proto__binary = {
+const struct gps_type_t driver__proto__binary = {
     /* Full name of type */
-    .type_name        = "_proto_ binary",
+    .type_name        = "_proto",
     /* Associated lexer packet type */
     .packet_type      = _PROTO__PACKET,
     /* Driver tyoe flags */

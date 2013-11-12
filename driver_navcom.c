@@ -1275,9 +1275,9 @@ static bool navcom_speed(struct gps_device_t *session,
 
 /* this is everything we export */
 /* *INDENT-OFF* */
-const struct gps_type_t navcom_binary =
+const struct gps_type_t driver_navcom =
 {
-    .type_name      = "Navcom binary",  	/* full name of type */
+    .type_name      = "Navcom",  	/* full name of type */
     .packet_type    = NAVCOM_PACKET,		/* lexer packet type */
     .flags	    = DRIVER_STICKY,		/* remember this */
     .trigger	    = NULL,			/* none */

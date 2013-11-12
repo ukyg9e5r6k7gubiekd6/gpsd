@@ -457,9 +457,9 @@ static double zodiac_time_offset(struct gps_device_t *session UNUSED)
 
 /* this is everything we export */
 /* *INDENT-OFF* */
-const struct gps_type_t zodiac_binary =
+const struct gps_type_t driver_zodiac =
 {
-    .type_name      = "Zodiac binary",	/* full name of type */
+    .type_name      = "Zodiac",		/* full name of type */
     .packet_type    = ZODIAC_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* no flags set */
     .trigger	    = NULL,		/* no trigger */

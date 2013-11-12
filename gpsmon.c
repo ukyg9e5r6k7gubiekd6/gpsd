@@ -40,7 +40,7 @@ extern struct monitor_object_t garmin_mmt, garmin_bin_ser_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mtk3301_mmt;
 extern struct monitor_object_t oncore_mmt, tnt_mmt, aivdm_mmt;
-extern const struct gps_type_t nmea0183;
+extern const struct gps_type_t driver_nmea0183;
 
 /* These are public */
 struct gps_device_t session;
@@ -59,14 +59,14 @@ static struct fixsource_t source;
 
 #ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
-extern const struct gps_type_t json_passthrough;
+extern const struct gps_type_t driver_json_passthrough;
 const struct monitor_object_t json_mmt = {
     .initialize = NULL,
     .update = NULL,
     .command = NULL,
     .wrap = NULL,
     .min_y = 0, .min_x = 80,	/* no need for a device window */
-    .driver = &json_passthrough,
+    .driver = &driver_json_passthrough,
 };
 #endif /* PASSTHROUGH_ENABLE */
 
@@ -507,7 +507,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	const struct gps_type_t *active_type = device->device_type;
 	if (device->packet.type == NMEA_PACKET
 	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
-	    active_type = &nmea0183;
+	    active_type = &driver_nmea0183;
 	if (!switch_type(active_type))
 	    longjmp(terminate, TERM_DRIVER_SWITCH);
 	else {

@@ -1476,9 +1476,9 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 
 /* this is everything we export */
 /* *INDENT-OFF* */
-const struct gps_type_t sirf_binary =
+const struct gps_type_t driver_sirf =
 {
-    .type_name      = "SiRF binary",	/* full name of type */
+    .type_name      = "SiRF",		/* full name of type */
     .packet_type    = SIRF_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* no flags set */
     .trigger	    = NULL,		/* no trigger */

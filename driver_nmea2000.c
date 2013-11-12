@@ -1680,7 +1680,7 @@ void nmea2000_close(struct gps_device_t *session)
 }
 
 /* *INDENT-OFF* */
-const struct gps_type_t nmea2000 = {
+const struct gps_type_t driver_nmea2000 = {
     .type_name      = "NMEA2000",       /* full name of type */
     .packet_type    = NMEA2000_PACKET,	/* associated lexer packet type */
     .flags	    = DRIVER_STICKY,	/* remember this */

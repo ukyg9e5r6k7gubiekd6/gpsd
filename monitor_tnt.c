@@ -10,7 +10,7 @@
 #include "gpsmon.h"
 
 #ifdef TNT_ENABLE
-extern const struct gps_type_t trueNorth;
+extern const struct gps_type_t driver_trueNorth;
 
 static WINDOW *thtmwin;
 
@@ -101,7 +101,7 @@ const struct monitor_object_t tnt_mmt = {
     .command = tnt_command,
     .wrap = tnt_wrap,
     .min_y = 6,.min_x = 80,	/* size of the device window */
-    .driver = &trueNorth,
+    .driver = &driver_trueNorth,
 };
 #endif /* TNT_ENABLE */
 

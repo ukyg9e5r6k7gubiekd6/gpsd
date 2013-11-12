@@ -540,9 +540,9 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 #endif /* RECONFIGURE_ENABLE */
 
 /* *INDENT-OFF* */
-const struct gps_type_t superstar2_binary = {
+const struct gps_type_t driver_superstar2 = {
     /* Full name of type */
-    .type_name		= "SuperStarII binary",
+    .type_name		= "SuperStarII",
     /* Associated lexer packet type */
     .packet_type        = SUPERSTAR2_PACKET,
     /* Driver type flags */
