@@ -525,11 +525,6 @@ static gps_mask_t parse_input(struct gps_device_t *session)
 			 session->packet.outbuflen);
 #ifdef NMEA_ENABLE
     } else if (session->packet.type == NMEA_PACKET) {
-	if (session->mode == O_OPTIMIZE && !session->driver.ubx.user_switched) {
-	    gpsd_report(session->context->debug, LOG_WARN,
-		    "binary mode change failed, unsuppressed NMEA detected.\n");
-	    ubx_mode(session, MODE_NMEA);
-	}
 	return nmea_parse((char *)session->packet.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
@@ -621,21 +616,9 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 
 	/* 
 	 * Turn off NMEA output, turn on UBX on this port.
-	 *
-	 * Note: this may fail to actually turn off NMEA if the
-	 * device's firmware image has been configured to disallow
-	 * it. The Navsys GR601W, aka "Macx-1", is one example.  We
-	 * can recognize it as a UBX because it responds to a MON_VER
-	 * probe, and it will start emitting UBX packets on command,
-	 * but it won't stop emitting NMEA packets.
-	 *
-	 * This is what the user_switched variable deals with.  When
-	 * the unsuppressed ASCII packets come through, binary mode
-	 * will be switched off to reduce traffic.
 	 */
 	if (session->mode == O_OPTIMIZE) {
 	    ubx_mode(session, MODE_BINARY);
-	    session->driver.ubx.user_switched = false;
 	}
     } else if (event == event_deactivate) {
 	/*@ -type @*/
@@ -902,7 +885,6 @@ static void ubx_mode(struct gps_device_t *session, int mode)
 		gpsd_get_parity(session),
 		gpsd_get_stopbits(session),
 		mode);
-    session->driver.ubx.user_switched = (mode == MODE_NMEA);
 }
 
 static bool ubx_speed(struct gps_device_t *session,

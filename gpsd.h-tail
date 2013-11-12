@@ -615,7 +615,6 @@ struct gps_device_t {
 	struct {
 	    unsigned char port_id;
 	    unsigned char sbas_in_use;
-	    bool user_switched;
     	} ubx;
 #endif /* UBLOX_ENABLE */
 #ifdef NAVCOM_ENABLE
