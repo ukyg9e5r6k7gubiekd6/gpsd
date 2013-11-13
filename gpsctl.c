@@ -455,11 +455,16 @@ int main(int argc, char **argv)
 
 	/* if no control operation was specified, just ID the device */
 	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-		gpsd_report(context.debug, LOG_SHOUT,
-			    "%s identified as %s at %d\n",
-			    gpsdata.dev.path,
-			    gpsdata.dev.driver,
-			    gpsdata.dev.baudrate);
+	    (void)printf("%s identified as a %s", 
+			 gpsdata.dev.path, gpsdata.dev.driver);
+	    if (gpsdata.dev.subtype[0] != '\0') {
+		(void)fputc(' ', stdout);
+		(void)fputs(gpsdata.dev.subtype, stdout);
+	    }
+	    if (gpsdata.dev.baudrate > 0)
+		(void)printf(" at %u baud", gpsdata.dev.baudrate);
+	    (void)fputc('.', stdout);
+	    (void)fputc('\n', stdout);
 	}
 
 	status = 0;
