@@ -63,7 +63,7 @@ tipwidget  = "<script data-gittip-username='esr' \
 
 EnsureSConsVersion(2,0,1)
 
-import copy, os, sys, glob, re, platform, time
+import copy, os, sys, glob, re, platform, time, signal
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
@@ -159,6 +159,7 @@ boolopts = (
     ("strip",         True,  "build with stripping of binaries enabled"),
     ("chrpath",       True,  "use chrpath to edit library load paths"),
     ("manbuild",      True,  "build help in man and HTML formats"),
+    ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
     )
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
@@ -1187,15 +1188,34 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
 from leapsecond import save_leapseconds
+
+def timed_save_leapseconds(outfile, env, timeout=15):
+    "Fetch leapsecond data with timeout, in case outside web access is blocked."
+    if not env["leapfetch"]:
+        sys.stdout.write("Leapsecond fetch suppressed by leapfetch=no.\n")
+    else:    
+        def handler(signum, frame):
+            raise IOError
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(timeout)
+        sys.stdout.write("attempting leap-second fetch...")
+        try:
+            save_leapseconds(outfile)
+            sys.stdout.write("succeeded.\n")
+        except IOError:
+            sys.stdout.write("failed; try building with leapfetch=no.\n")
+        signal.alarm(0)
+
 def leapseconds_cache_rebuild(target, source, env):
-    save_leapseconds(target[0].abspath)
+    timed_save_leapseconds(target[0].abspath)
 if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
     leapseconds_cache = env.Command(target="leapseconds.cache",
                                 source="leapsecond.py",
-                                action=leapseconds_cache_rebuild)
+                                action=lambda target, source, env: timed_save_leapseconds(target[0].abspath, env))
     env.Clean(leapseconds_cache, "leapsecond.pyc")
     env.NoClean(leapseconds_cache)
     env.Precious(leapseconds_cache)
+    env.AlwaysBuild(leapseconds_cache)
 
 # Instantiate some file templates.  We'd like to use the Substfile builtin
 # but it doesn't seem to work in scons 1.20

@@ -262,7 +262,7 @@ def iso_to_unix(tv):
     return calendar.timegm(time.strptime(tv, "%Y-%m-%dT%H:%M:%S"))
 
 def unix_to_iso(tv):
-    "iso date to gmt Unix time."
+    "ISO date to UTC Unix time."
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(tv))
 
 def graph_history(filename):
