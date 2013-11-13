@@ -1193,7 +1193,7 @@ def timed_save_leapseconds(outfile, env, timeout=15):
     "Fetch leapsecond data with timeout, in case outside web access is blocked."
     if not env["leapfetch"]:
         sys.stdout.write("Leapsecond fetch suppressed by leapfetch=no.\n")
-    else:    
+    else:
         def handler(signum, frame):
             raise IOError
         signal.signal(signal.SIGALRM, handler)
@@ -1207,11 +1207,11 @@ def timed_save_leapseconds(outfile, env, timeout=15):
         signal.alarm(0)
 
 def leapseconds_cache_rebuild(target, source, env):
-    timed_save_leapseconds(target[0].abspath)
+    timed_save_leapseconds(target[0].abspath, env)
 if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
     leapseconds_cache = env.Command(target="leapseconds.cache",
                                 source="leapsecond.py",
-                                action=lambda target, source, env: timed_save_leapseconds(target[0].abspath, env))
+                                action=leapseconds_cache_rebuild)
     env.Clean(leapseconds_cache, "leapsecond.pyc")
     env.NoClean(leapseconds_cache)
     env.Precious(leapseconds_cache)
