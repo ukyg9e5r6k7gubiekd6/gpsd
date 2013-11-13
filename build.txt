@@ -10,7 +10,7 @@ guidance on how to cross-build the package.
 Under Linux, assuming you have all your build prerequisites in place,
 this line will do:
 
-   scons && scons testregress && sudo scons udev-install 
+   scons && scons check && sudo scons udev-install 
 
 If you get any errors, you need to read the detailed instructions that follow.
 
@@ -234,10 +234,10 @@ won't try building the documentation.  The actual fix is to install
 DocBook on your machine so there will be a local copy of the
 stylesheet where xmlto can find it.
 
-After building, please run 'scons testregress' to test the correctness
+After building, please run 'scons check' to test the correctness
 of the build.  It is not necessary to install first, but you do need
 to have "." in your $PATH to run regressions uninstalled.  Python is
-required for regression tests. If any of the tests fail, you probavly
+required for regression tests. If any of the tests fail, you probably
 have a toolchain issue.  The most common such problem is issues with
 strict C99 conformance in floating-point libraries.
 
