@@ -83,6 +83,18 @@ bool ais_binary_decode(const int debug,
     gpsd_report(debug, LOG_INF,
 		"AIVDM message type %d, MMSI %09d:\n",
 		ais->type, ais->mmsi);
+
+#define PERMISSIVE_LENGTH_CHECK(correct) \
+	if (bitlen < correct) { \
+	    gpsd_report(debug, LOG_ERROR, \
+			"AIVDM message type %d size < %d bits (%zd).\n", \
+			ais->type, correct, bitlen); \
+	    return false; \
+	} else if (bitlen > correct) { \
+	    gpsd_report(debug, LOG_WARN, \
+			"AIVDM message type %d size > %d bits (%zd).\n", \
+			ais->type, correct, bitlen); \
+	}
     /*
      * Something about the shape of this switch statement confuses
      * GNU indent so badly that there is no point in trying to be
@@ -93,13 +105,7 @@ bool ais_binary_decode(const int debug,
     case 1:	/* Position Report */
     case 2:
     case 3:
-	if (bitlen != 168) {
-	    gpsd_report(debug, LOG_WARN, 
-			"AIVDM message type %d size not 168 bits (%zd).\n",
-			ais->type,
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(168)
 	ais->type1.status	= UBITS(38, 4);
 	ais->type1.turn		= SBITS(42, 8);
 	ais->type1.speed	= UBITS(50, 10);
@@ -116,13 +122,7 @@ bool ais_binary_decode(const int debug,
 	break;
     case 4: 	/* Base Station Report */
     case 11:	/* UTC/Date Response */
-	if (bitlen != 168) {
-	    gpsd_report(debug, LOG_WARN, 
-			"AIVDM message type %d size not 168 bits (%zd).\n",
-			ais->type,
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(168)
 	ais->type4.year		= UBITS(38, 14);
 	ais->type4.month	= UBITS(52, 4);
 	ais->type4.day		= UBITS(56, 5);
@@ -742,12 +742,7 @@ bool ais_binary_decode(const int debug,
 	ais->type9.radio		= UBITS(148, 19);
 	break;
     case 10: /* UTC/Date inquiry */
-	if (bitlen != 72) {
-	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 10 size not 72 bits (%zd).\n",
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(72);
 	//ais->type10.spare        = UBITS(38, 2);
 	ais->type10.dest_mmsi      = UBITS(40, 30);
 	//ais->type10.spare2       = UBITS(70, 2);
@@ -836,12 +831,7 @@ bool ais_binary_decode(const int debug,
 		     (ais->type17.bitcount + 7) / 8);
 	break;
     case 18:	/* Standard Class B CS Position Report */
-	if (bitlen != 168) {
-	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 18 size not 168 bits (%zd).\n",
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(168)
 	ais->type18.reserved	= UBITS(38, 8);
 	ais->type18.speed		= UBITS(46, 10);
 	ais->type18.accuracy	= UBITS(56, 1)!=0;
@@ -986,13 +976,7 @@ bool ais_binary_decode(const int debug,
     case 24:	/* Class B CS Static Data Report */
 	switch (UBITS(38, 2)) {
 	case 0:
-	    if (bitlen != 160) {
-		gpsd_report(debug, LOG_WARN,
-			    "AIVDM message type 24A size not 160 bits (%zd).\n",
-			    bitlen);
-		return false;
-	    }
-
+	    PERMISSIVE_LENGTH_CHECK(160)
 	    /* save incoming 24A shipname/MMSI pairs in a circular queue */
 	    {
 		struct ais_type24a_t *saveptr = &type24_queue->ships[type24_queue->index];
@@ -1011,12 +995,7 @@ bool ais_binary_decode(const int debug,
 	    ais->type24.part = part_a;
 	    return true;
 	case 1:
-	    if (bitlen != 168) {
-		gpsd_report(debug, LOG_WARN,
-			    "AIVDM message type 24B size not 168 bits (%zd).\n",
-			    bitlen);
-		return false;
-	    }
+	    PERMISSIVE_LENGTH_CHECK(168)
 	    ais->type24.shiptype = UBITS(40, 8);
 	    /*
 	     * In ITU-R 1371-4, there are new model and serial fields
