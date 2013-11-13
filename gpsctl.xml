@@ -51,8 +51,10 @@ running, it is not necessary to specify the device;
 <application>gpsd</application>, which will locate it for you.</para>
 
 <para>When <application>gpsd</application> is not running, the device
-specification is required, and you will almost certainly need to be
-running as root in order to have write access to the device.</para>
+specification is required, and you will need to be running as root or
+be a member of the device's owning group in order to have write access
+to the device. On many Unix variants the owning group will be named
+'dialout'.</para>
 
 <para>The program accepts the following options:</para>
 <variablelist remap='TP'>
