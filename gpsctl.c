@@ -181,27 +181,17 @@ static char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
     return (buf);
 }
 
-static void ctlhook(struct gps_device_t *device, gps_mask_t changed UNUSED)
+static void ctlhook(struct gps_device_t *device UNUSED, gps_mask_t changed UNUSED)
 /* recognize when we've achieved sync */
 {
     static int packet_counter = 0;
 
     /*
-     * Anything non-NMEA is an immediate lock.
-     */
-    if (device->device_type != NULL 
-	&& device->device_type->packet_type > NMEA_PACKET)
-    {
-	hunting = false;
-	(void) alarm(0);
-    }
-
-    /*
      * If it's NMEA, go back around enough times for the type probes to
      * reveal any secret identity (like SiRF or UBX) the chip might have.
+     * If it's not, getting more packets might fetch subtype information.
      */
-    if (device->packet.type == NMEA_PACKET 
-	&& packet_counter++ >= REDIRECT_SNIFF)
+    if (packet_counter++ >= REDIRECT_SNIFF)
     {
 	hunting = false;
 	(void) alarm(0);
