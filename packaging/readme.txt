@@ -6,8 +6,8 @@ in desktop packaging.
 Usable deb and RPM specifications have their own subdirectories here.
 Our package files want to set up a hotplug script to notify gpsd
 when a potential GPS device goes active and should be polled.  The
-goal is zero configuration; users should never have to tell gpsd how
-to configure itself.
+goal is zero configuration; users should *never* have to tell gpsd how
+to set itself up.
 
 Bluetooth has a requirement to be able to write to the gpsd control
 socket from a userland device manager.  Accordingly, you probably 
@@ -27,7 +27,8 @@ figures out which group it should move to by looking at the ownership
 of a prototypical tty (look in gpsd.c for this code) but the owning
 user and group can be compiled in with build-system options.
 
-Make sure whatever group gpsd lands in has dialout access - otherwise
-your users will see myerious failures.
+Make *sure* whatever group gpsd lands in after privilege-dropping has
+dialout access - otherwise your users will see mysterious failures
+which they will wrongly attribute to GPSD itself.
 
 // end
