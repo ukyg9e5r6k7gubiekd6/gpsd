@@ -1,7 +1,9 @@
 = Building GPSD from source ==
 
 This is a guide to building GPSD from a bare source tree.  It includes
-guidance on how to cross-build the package.
+guidance on how to cross-build the package. 
+
+Some hints for people building binary packages are in packaging/readme.txt.
 
 (This file is marked up in asciidoc.)
 
@@ -330,6 +332,8 @@ sporadically failing to feed the last line or two of test loads, try
 increasing the delay constants in fake.py.  If you have to do this, 
 please report your experience to the GPSD maintainers.
 
+For instructions on how to live-test the software, see the file INSTALL.
+
 == Reverting to a clean state ==
 
 The scons equivalent of 'make clean' is 'scons -c'. This will revert
@@ -425,3 +429,5 @@ If you for some reason need to start gpsd unconditionally at
 boot time (in particular, if you need to support RS232 devices)
 there's a model init.d script under packaging/deb and a systemd
 setup under systemd/.
+
+// end
