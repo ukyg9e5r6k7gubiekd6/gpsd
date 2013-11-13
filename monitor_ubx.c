@@ -159,7 +159,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     (void)wprintw(navsolwin, "%12.9f  %13.9f  %8.2fm",
 		  g.fix.latitude, g.fix.longitude, g.fix.altitude);
     (void)mvwaddch(navsolwin, 4, 23, ACS_DEGREE);
-    (void)mvwaddch(navsolwin, 4, 39, ACS_DEGREE);
+    (void)mvwaddch(navsolwin, 4, 38, ACS_DEGREE);
     (void)wmove(navsolwin, 5, 11);
     (void)wprintw(navsolwin, "%6.2fm/s %5.1fo %6.2fm/s",
 		  g.fix.speed, g.fix.track, g.fix.climb);
