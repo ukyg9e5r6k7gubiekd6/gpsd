@@ -830,7 +830,8 @@ static bool do_command(void)
 		    ("Invalid hex string (error %d)", st);
 	    else if ((*active)->driver->control_send == NULL)
 		monitor_complain
-		    ("Device type has no control-send method.");
+		    ("Device type %s has no control-send method.", 
+		     (*active)->driver->type_name);
 	    else if (!monitor_control_send(buf, (size_t) st))
 		monitor_complain("Control send failed.");
 	    /*@ +compdef @*/
@@ -844,8 +845,7 @@ static bool do_command(void)
 	    /*@ -compdef @*/
 	    ssize_t len = (ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
 	    if (len < 0)
-		monitor_complain("Invalid hex string (error %d)",
-				 len);
+		monitor_complain("Invalid hex string (error %d)", len);
 	    else if (!monitor_raw_send(buf, (size_t) len))
 		monitor_complain("Raw send failed.");
 	    /*@ +compdef @*/
