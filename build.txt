@@ -256,6 +256,39 @@ included with the distribution. To install it, copy the file
 'gpsd.php' to your HTML document directory. Then see the
 post-installation instructions in INSTALL for how to configure it.
 
+== The leapseconds cache ==
+
+Early in your build, the recipe will try to go over the Internet to
+one of several sources of current data on the leap-second offset in
+order to ensure that the file leapseconds.cache is up to date.  This,
+in turn, is used to build a timebase.h include file.
+
+This procedure may fail if you are building inside an intranet that
+requires an authenticating web proxy.  If that occurs, it will time
+out with a warning and a suggestion to use the leapfetch=no build
+option.
+
+Building with leapfetch=no may, in unusual circumstances, result in
+reported GPS time being off by a second or more.  The circumstances
+are:
+
+1. It has been less than 20 minutes since power-up; the GPS has
+   not yet received the current leapsecond offset as part of the
+   periodic ephemeris download.
+
+2. One or more leap-second offset increments have been issued between
+   when your GPSD source tree was cloned from the repository (or
+   leapsecond.cache was later updated) and now.  Leap-second
+   increments, compensating for minute and unpredictable changes in
+   the Earth's rotation, are occasionally issued by international time
+   authorities.
+
+Note that the same failure can occur with any GPSD installation.  But
+by refreshing leapseconds.cache you reduce the error window for
+leap-second offset bumps to affect your installation so that it begins
+as late as possible, at your build time rather than from when the 
+source tree was copied.
+
 == Optional features ==
 
 By giving command-line options to scons you can configure certain rarely-used
