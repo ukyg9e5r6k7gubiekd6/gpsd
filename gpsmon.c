@@ -636,7 +636,8 @@ static bool do_command(void)
 		/* *INDENT-ON* */
 	    } else
 		monitor_complain
-		    ("Device type has no rate switcher");
+		    ("Device type %s has no rate switcher", 
+		     (*switcher)->driver->type_name);
 	}
 #endif /* RECONFIGURE_ENABLE */
 	break;
@@ -702,7 +703,8 @@ static bool do_command(void)
 		(void)usleep(50000);
 	    } else
 		monitor_complain
-		    ("Device type has no mode switcher");
+		    ("Device type %s has no mode switcher", 
+		     (*switcher)->driver->type_name);
 	}
 	break;
 #endif /* RECONFIGURE_ENABLE */
@@ -776,7 +778,8 @@ static bool do_command(void)
 		context.readonly = true;
 	    } else
 		monitor_complain
-		    ("Device type has no speed switcher");
+		    ("Device type %s has no speed switcher",
+		     (*switcher)->driver->type_name);
 	    /* *INDENT-ON* */
 	    refresh_statwin();
 	}
