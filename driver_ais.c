@@ -721,12 +721,7 @@ bool ais_binary_decode(const int debug,
 			 (ais->type8.bitcount + 7) / 8);
 	break;
     case 9: /* Standard SAR Aircraft Position Report */
-	if (bitlen != 168) {
-	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 9 size not 168 bits (%zd).\n",
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(168);
 	ais->type9.alt		= UBITS(38, 12);
 	ais->type9.speed		= UBITS(50, 10);
 	ais->type9.accuracy		= (bool)UBITS(60, 1);
@@ -851,12 +846,7 @@ bool ais_binary_decode(const int debug,
 	ais->type18.radio		= UBITS(148, 20);
 	break;
     case 19:	/* Extended Class B CS Position Report */
-	if (bitlen != 312) {
-	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 19 size not 312 bits (%zd).\n",
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(312)
 	ais->type19.reserved     = UBITS(38, 8);
 	ais->type19.speed        = UBITS(46, 10);
 	ais->type19.accuracy     = UBITS(56, 1)!=0;
@@ -932,12 +922,7 @@ bool ais_binary_decode(const int debug,
 	    ENDCHARS(272, ais->type21.name+20);
 	break;
     case 22:	/* Channel Management */
-	if (bitlen != 168) {
-	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 22 size not 168 bits (%zd).\n",
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(168)
 	ais->type22.channel_a    = UBITS(40, 12);
 	ais->type22.channel_b    = UBITS(52, 12);
 	ais->type22.txrx         = UBITS(64, 4);
@@ -957,12 +942,7 @@ bool ais_binary_decode(const int debug,
 	ais->type22.zonesize     = UBITS(142, 3);
 	break;
     case 23:	/* Group Assignment Command */
-	if (bitlen != 160) {
-	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 23 size not 160 bits (%zd).\n",
-			bitlen);
-	    return false;
-	}
+	PERMISSIVE_LENGTH_CHECK(160)
 	ais->type23.ne_lon       = SBITS(40, 18);
 	ais->type23.ne_lat       = SBITS(58, 17);
 	ais->type23.sw_lon       = SBITS(75, 18);
