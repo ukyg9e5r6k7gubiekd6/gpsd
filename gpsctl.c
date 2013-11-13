@@ -478,12 +478,12 @@ int main(int argc, char **argv)
 
 	/*@-boolops@*/
 	/*
-	 * We used to wait on DEVICE_SET here.  That doesn't work anymore
-	 * because when the demon generates its response it sets the mode
-	 * bit in the response it does so from the current packet type,
-	 * which may not have changed (probably will not have changed) even
-	 * though the command to switch modes has been sent and will shortly
-	 * take effect.
+	 * We used to wait on DEVICE_SET here.  That doesn't work
+	 * anymore because when the demon generates its response it
+	 * sets the mode bit in the response from the current packet
+	 * type, which may not have changed (probably will not have
+	 * changed) even though the command to switch modes has been
+	 * sent and will shortly take effect.
 	 */
 	if (to_nmea) {
 	    if (!gps_query(&gpsdata, NON_ERROR, (int)timeout, 
