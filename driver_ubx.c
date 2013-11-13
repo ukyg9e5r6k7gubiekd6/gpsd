@@ -439,6 +439,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_MON_VER:
 	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_VER\n");
+	(void)strlcpy(session->subtype, 
+		      (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 0], 30);
 	break;
     case UBX_MON_EXCEPT:
 	gpsd_report(session->context->debug, LOG_DATA, "UBX_MON_EXCEPT\n");
@@ -612,6 +614,9 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	msg[6] = 0x00;
 	msg[7] = 0x00;
 	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
+
+	/* MON_VER: query for version information */
+	(void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
 	/*@ +type @*/
 
 	/* 
