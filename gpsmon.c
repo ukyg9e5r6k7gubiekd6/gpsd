@@ -150,17 +150,6 @@ static inline void report_lock(void) { }
 static inline void report_unlock(void) { }
 #endif /* PPS_ENABLE */
 
-void monitor_fixframe(WINDOW * win)
-{
-    int ymax, xmax, ycur, xcur;
-
-    assert(win != NULL);
-    getyx(win, ycur, xcur);
-    getmaxyx(win, ymax, xmax);
-    assert(xcur > -1 && ymax > 0);  /* squash a compiler warning */
-    (void)mvwaddch(win, ycur, xmax - 1, ACS_VLINE);
-}
-
 /******************************************************************************
  *
  * Visualization helpers
@@ -215,6 +204,17 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
  * Mode-dependent I/O
  *
  ******************************************************************************/
+
+void monitor_fixframe(WINDOW * win)
+{
+    int ymax, xmax, ycur, xcur;
+
+    assert(win != NULL);
+    getyx(win, ycur, xcur);
+    getmaxyx(win, ymax, xmax);
+    assert(xcur > -1 && ymax > 0);  /* squash a compiler warning */
+    (void)mvwaddch(win, ycur, xmax - 1, ACS_VLINE);
+}
 
 static void packet_dump(const char *buf, size_t buflen)
 {
@@ -358,6 +358,124 @@ static void refresh_cmdwin(void)
 }
 /*@+observertrans +nullpass +globstate@*/
 
+static bool curses_init(void)
+{
+    (void)initscr();
+    (void)cbreak();
+    (void)intrflush(stdscr, FALSE);
+    (void)keypad(stdscr, true);
+    (void)clearok(stdscr, true);
+    (void)clear();
+    (void)noecho();
+    curses_active = true;
+
+#define CMDWINHEIGHT	1
+
+    /*@ -onlytrans @*/
+    statwin = newwin(CMDWINHEIGHT, 30, 0, 0);
+    cmdwin = newwin(CMDWINHEIGHT, 0, 0, 30);
+    packetwin = newwin(0, 0, CMDWINHEIGHT, 0);
+    if (statwin == NULL || cmdwin == NULL || packetwin == NULL)
+	return false;
+    (void)scrollok(packetwin, true);
+    (void)wsetscrreg(packetwin, 0, LINES - CMDWINHEIGHT);
+    /*@ +onlytrans @*/
+
+    (void)wmove(packetwin, 0, 0);
+
+    refresh_statwin();
+    refresh_cmdwin();
+    return true;
+}
+
+static bool switch_type(const struct gps_type_t *devtype)
+{
+    const struct monitor_object_t **trial, **newobject;
+    newobject = NULL;
+    for (trial = monitor_objects; *trial; trial++) {
+	if (strcmp((*trial)->driver->type_name, devtype->type_name)==0) {
+	    newobject = trial;
+	    break;
+	}
+    }
+    if (newobject) {
+	if (LINES < (*newobject)->min_y + 1 || COLS < (*newobject)->min_x) {
+	    monitor_complain("%s requires %dx%d screen",
+			     (*newobject)->driver->type_name,
+			     (*newobject)->min_x, (*newobject)->min_y + 1);
+	} else {
+	    int leftover;
+
+	    if (active != NULL) {
+		if ((*active)->wrap != NULL)
+		    (*active)->wrap();
+		(void)delwin(devicewin);
+	    }
+	    active = newobject;
+	    devicewin = newwin((*active)->min_y, (*active)->min_x, 1, 0);
+	    if ((devicewin == NULL) || ((*active)->initialize != NULL && !(*active)->initialize())) {
+		monitor_complain("Internal initialization failure - screen "
+				 "must be at least 80x24. Aborting.");
+		return false;
+	    }
+
+	    /*@ -onlytrans @*/
+	    leftover = LINES - 1 - (*active)->min_y;
+	    report_lock();
+	    if (leftover <= 0) {
+		if (packetwin != NULL)
+		    (void)delwin(packetwin);
+		packetwin = NULL;
+	    } else if (packetwin == NULL) {
+		packetwin = newwin(leftover, COLS, (*active)->min_y + 1, 0);
+		(void)scrollok(packetwin, true);
+		(void)wsetscrreg(packetwin, 0, leftover - 1);
+	    } else {
+		(void)wresize(packetwin, leftover, COLS);
+		(void)mvwin(packetwin, (*active)->min_y + 1, 0);
+		(void)wsetscrreg(packetwin, 0, leftover - 1);
+	    }
+	    report_unlock();
+	    /*@ +onlytrans @*/
+	}
+	return true;
+    }
+
+    monitor_complain("No monitor matches %s.", devtype->type_name);
+    return false;
+}
+
+static void select_packet_monitor(struct gps_device_t *device)
+{
+    static int last_type = BAD_PACKET;
+
+    /*
+     * Switch display types on packet receipt.  Note, this *doesn't*
+     * change the selection of the current device driver; that's done
+     * within gpsd_multipoll() before this hook is called.
+     */
+    if (device->packet.type != last_type) {
+	const struct gps_type_t *active_type = device->device_type;
+	if (device->packet.type == NMEA_PACKET
+	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
+	    active_type = &driver_nmea0183;
+	if (!switch_type(active_type))
+	    longjmp(terminate, TERM_DRIVER_SWITCH);
+	else {
+	    refresh_statwin();
+	    refresh_cmdwin();
+	}
+	last_type = device->packet.type;
+    }
+
+    if (active != NULL
+	&& device->packet.outbuflen > 0
+	&& (*active)->update != NULL)
+	(*active)->update();
+    if (devicewin != NULL)
+	(void)wnoutrefresh(devicewin);
+}
+
 /******************************************************************************
  *
  * Mode-independent I/O
@@ -458,98 +576,16 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 
 /*****************************************************************************
  *
- * Main sequence and display machinery
+ * Main sequence 
  *
  *****************************************************************************/
-
-static bool switch_type(const struct gps_type_t *devtype)
-{
-    const struct monitor_object_t **trial, **newobject;
-    newobject = NULL;
-    for (trial = monitor_objects; *trial; trial++) {
-	if (strcmp((*trial)->driver->type_name, devtype->type_name)==0) {
-	    newobject = trial;
-	    break;
-	}
-    }
-    if (newobject) {
-	if (LINES < (*newobject)->min_y + 1 || COLS < (*newobject)->min_x) {
-	    monitor_complain("%s requires %dx%d screen",
-			     (*newobject)->driver->type_name,
-			     (*newobject)->min_x, (*newobject)->min_y + 1);
-	} else {
-	    int leftover;
-
-	    if (active != NULL) {
-		if ((*active)->wrap != NULL)
-		    (*active)->wrap();
-		(void)delwin(devicewin);
-	    }
-	    active = newobject;
-	    devicewin = newwin((*active)->min_y, (*active)->min_x, 1, 0);
-	    if ((devicewin == NULL) || ((*active)->initialize != NULL && !(*active)->initialize())) {
-		monitor_complain("Internal initialization failure - screen "
-				 "must be at least 80x24. Aborting.");
-		return false;
-	    }
-
-	    /*@ -onlytrans @*/
-	    leftover = LINES - 1 - (*active)->min_y;
-	    report_lock();
-	    if (leftover <= 0) {
-		if (packetwin != NULL)
-		    (void)delwin(packetwin);
-		packetwin = NULL;
-	    } else if (packetwin == NULL) {
-		packetwin = newwin(leftover, COLS, (*active)->min_y + 1, 0);
-		(void)scrollok(packetwin, true);
-		(void)wsetscrreg(packetwin, 0, leftover - 1);
-	    } else {
-		(void)wresize(packetwin, leftover, COLS);
-		(void)mvwin(packetwin, (*active)->min_y + 1, 0);
-		(void)wsetscrreg(packetwin, 0, leftover - 1);
-	    }
-	    report_unlock();
-	    /*@ +onlytrans @*/
-	}
-	return true;
-    }
-
-    monitor_complain("No monitor matches %s.", devtype->type_name);
-    return false;
-}
 
 /*@-observertrans -nullpass -globstate@*/
 static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
-    static int last_type = BAD_PACKET;
-
-    /*
-     * Switch display types on packet receipt.  Note, this *doesn't*
-     * change the selection of the current device driver; that's done
-     * within gpsd_multipoll() before this hook is called.
-     */
-    if (device->packet.type != last_type) {
-	const struct gps_type_t *active_type = device->device_type;
-	if (device->packet.type == NMEA_PACKET
-	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
-	    active_type = &driver_nmea0183;
-	if (!switch_type(active_type))
-	    longjmp(terminate, TERM_DRIVER_SWITCH);
-	else {
-	    refresh_statwin();
-	    refresh_cmdwin();
-	}
-	last_type = device->packet.type;
-    }
-
-    if (active != NULL
-	&& device->packet.outbuflen > 0
-	&& (*active)->update != NULL)
-	(*active)->update();
-    if (devicewin != NULL)
-	(void)wnoutrefresh(devicewin);
+    if (curses_active)
+	select_packet_monitor(device);
 
     report_lock();
     (void)wprintw(packetwin, "(%d) ", device->packet.outbuflen);
@@ -1105,31 +1141,8 @@ int main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    (void)initscr();
-    (void)cbreak();
-    (void)intrflush(stdscr, FALSE);
-    (void)keypad(stdscr, true);
-    (void)clearok(stdscr, true);
-    (void)clear();
-    (void)noecho();
-    curses_active = true;
-
-#define CMDWINHEIGHT	1
-
-    /*@ -onlytrans @*/
-    statwin = newwin(CMDWINHEIGHT, 30, 0, 0);
-    cmdwin = newwin(CMDWINHEIGHT, 0, 0, 30);
-    packetwin = newwin(0, 0, CMDWINHEIGHT, 0);
-    if (statwin == NULL || cmdwin == NULL || packetwin == NULL)
+    if (!curses_init())
 	goto quit;
-    (void)scrollok(packetwin, true);
-    (void)wsetscrreg(packetwin, 0, LINES - CMDWINHEIGHT);
-    /*@ +onlytrans @*/
-
-    (void)wmove(packetwin, 0, 0);
-
-    refresh_statwin();
-    refresh_cmdwin();
 
     FD_ZERO(&all_fds);
     FD_SET(0, &all_fds);	/* accept keystroke inputs */
@@ -1186,7 +1199,8 @@ int main(int argc, char **argv)
     gpsd_close(&session);
     if (logfile)
 	(void)fclose(logfile);
-    (void)endwin();
+    if (curses_active)
+	(void)endwin();
 
     explanation = NULL;
     switch (bailout) {
