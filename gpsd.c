@@ -634,7 +634,9 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
     return status;
 }
 
-static void notify_watchers(struct gps_device_t *device, const char *sentence, ...)
+static void notify_watchers(struct gps_device_t *device,
+			    bool onjson, bool onpps,
+			    const char *sentence, ...)
 /* notify all JSON-watching clients of a given device about an event */
 {
     va_list ap;
@@ -646,8 +648,10 @@ static void notify_watchers(struct gps_device_t *device, const char *sentence, .
     va_end(ap);
 
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++)
-	if (sub->active != 0 && subscribed(sub, device) && sub->policy.json)
-	    (void)throttled_write(sub, buf, strlen(buf));
+	if (sub->active != 0 && subscribed(sub, device)) {
+	    if ((onjson && sub->policy.json) || (onpps && sub->policy.pps))
+		(void)throttled_write(sub, buf, strlen(buf));
+	}
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
@@ -655,7 +659,7 @@ static void deactivate_device(struct gps_device_t *device)
 /* deactivate device, but leave it in the pool (do not free it) */
 {
 #ifdef SOCKET_EXPORT_ENABLE
-    notify_watchers(device,
+    notify_watchers(device, true, false,
 		    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":0}\r\n",
 		    device->gpsdata.dev.path);
 #endif /* SOCKET_EXPORT_ENABLE */
@@ -744,7 +748,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
 		ret = open_device(devp);
 	    }
 #ifdef SOCKET_EXPORT_ENABLE
-	    notify_watchers(devp,
+	    notify_watchers(devp, true, false,
 			    "{\"class\":\"DEVICE\",\"path\":\"%s\",\"activated\":%lf}\r\n",
 			    devp->gpsdata.dev.path, timestamp());
 #endif /* SOCKET_EXPORT_ENABLE */
@@ -1466,7 +1470,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	{
 	    char id2[GPS_JSON_RESPONSE_MAX];
 	    json_device_dump(device, id2, sizeof(id2));
-	    notify_watchers(device, id2);
+	    notify_watchers(device, true, false, id2);
 	}
     }
 #endif /* SOCKET_EXPORT_ENABLE */
@@ -1680,17 +1684,9 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 /* on PPS interrupt, ship a drift message to all clients */
 {
 #ifdef SOCKET_EXPORT_ENABLE
-#define PPSBAR "#----------------------------------- PPS -----------------------------------#\n"
-    struct subscriber_t *sub;
-
-    for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-	if (sub->active != 0 && subscribed(sub, session) && sub->policy.pps){
-	    (void)throttled_write(sub, PPSBAR, strlen(PPSBAR));
-	}
-    }
-#undef PPSBAR
     /*@-type@*//* splint is confused about struct timespec */
-    notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
+    notify_watchers(session, true, true,
+		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
 		    td->real.tv_sec, td->real.tv_nsec,
 		    td->clock.tv_sec, td->clock.tv_nsec);
