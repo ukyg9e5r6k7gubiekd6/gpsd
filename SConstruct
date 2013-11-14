@@ -1129,7 +1129,6 @@ else:
                 )
             )
         python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
-    python_built_extensions = python_compiled_libs.values()
     python_egg_info_source = """Metadata-Version: 1.0
 Name: gps
 Version: %s
@@ -1142,6 +1141,7 @@ Description: The gpsd service daemon can monitor one or more GPS devices connect
 Platform: UNKNOWN
 """ %(gpsd_version, website, devmail)
     python_egg_info = python_env.Textfile(target="gps-%s.egg-info" %(gpsd_version, ), source=python_egg_info_source)
+    python_built_extensions = python_compiled_libs.values() + [python_egg_info]
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
@@ -1307,7 +1307,8 @@ if manbuilder:
 
 build = env.Alias('build',
                   [libraries, binaries, python_built_extensions,
-                   "gpsd.php", manpage_targets])
+                   "gpsd.php", manpage_targets,
+                   "libgps.pc", "libgpsd.pc"])
 env.Default(*build)
 
 if qt_env:
