@@ -9,6 +9,11 @@ you can find the original at the GPSD project website
 // occasional comments led with '//!' are hints for GPSD developer tools
 // that use the table layouts to generate code.
 
+If you find this document useful - and especially if it helps you make
+money - please contribute to maintaining it by supporting the author's
+full-time open-source work through <<GITTIP>>. Even a few dollars a
+week can make a difference.
+
 == Introduction ==
 
 This is a description of how to decode AIVDM/AIVDO sentences.  It
@@ -5138,6 +5143,8 @@ Identification System]
 - [[[AIS-SART]]] http://www.navcen.uscg.gov/?pageName=AISMessagesA
 
 - [[[SART]]] http://en.wikipedia.org/wiki/AIS-SART
+
+- [[[GITTIP]]] https://www.gittip.com/esr/
 
 == Change history ==
 
