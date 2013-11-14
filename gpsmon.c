@@ -201,7 +201,7 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
 
 /******************************************************************************
  *
- * Mode-dependent I/O
+ * Curses I/O
  *
  ******************************************************************************/
 
@@ -534,6 +534,9 @@ static char *curses_get_command(void)
  *
  * Mode-independent I/O
  *
+ * Below this line, all calls to curses-dependent functions are guarded
+ * by curses_active and have ttylike alternatives.
+ *
  ******************************************************************************/
 
 static void packet_log(const char *fmt, ...)
@@ -860,7 +863,8 @@ static bool do_command(const char *line)
 		    ("Device type %s has no speed switcher",
 		     (*switcher)->driver->type_name);
 	    /* *INDENT-ON* */
-	    refresh_statwin();
+	    if (curses_active)
+		refresh_statwin();
 	}
 	break;
 #endif /* RECONFIGURE_ENABLE */
@@ -887,6 +891,8 @@ static bool do_command(const char *line)
 		    (void)gpsd_switch_driver(&session,
 					     forcetype->type_name);
 		/* *INDENT-ON* */
+		if (curses_active)
+		    refresh_cmdwin();
 	    } else {
 		monitor_complain
 		    ("Multiple driver type names match '%s'.",
@@ -1152,7 +1158,8 @@ int main(int argc, char **argv)
     if (setjmp(assertbuf) > 0) {
 	if (logfile)
 	    (void)fclose(logfile);
-	(void)endwin();
+	if (curses_active)
+	    (void)endwin();
 	(void)fputs("gpsmon: assertion failure, probable I/O error\n",
 		    stderr);
 	exit(EXIT_FAILURE);
