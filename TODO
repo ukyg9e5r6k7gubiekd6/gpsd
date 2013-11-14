@@ -81,11 +81,15 @@ message 6 and 8 subtypes - specifically, 6/23, 8/21, 8/22, 8/24, and
 
 We'd need machinery to shift a byte array 30 bits left...
 
-** Ports
+** Build issues
 
-*** Windows port
+libgps.pc, libgpsd.pc and the egg-info file are only created at
+installation time and never cleaned.  Because the user will be
+running as root, these are created owned by root and annoying
+to remove later.
 
-Partial. David Ludlow <dave@adsllc.com> is working on it.
+SConstruct should be refactored so these are created as part
+of the normal build and normally cleaned.
 
 ** To do:
 
