@@ -120,7 +120,8 @@ static const struct monitor_object_t *monitor_objects[] = {
     NULL,
 };
 
-static const struct monitor_object_t **active, **fallback;
+static const struct monitor_object_t **active;
+static const struct gps_type_t *fallback;
 /*@ +nullassign @*/
 
 static jmp_buf terminate;
@@ -349,12 +350,12 @@ static void refresh_cmdwin(void)
     (void)wmove(cmdwin, 0, 0);
     (void)wprintw(cmdwin, type_name);
     promptlen = strlen(type_name);
-    if (fallback != NULL && strcmp((*fallback)->driver->type_name, type_name) != 0) {
+    if (fallback != NULL && strcmp(fallback->type_name, type_name) != 0) {
 	(void)waddch(cmdwin, (chtype)' ');
 	(void)waddch(cmdwin, (chtype)'(');
-	(void)waddstr(cmdwin, (*fallback)->driver->type_name);
+	(void)waddstr(cmdwin, fallback->type_name);
 	(void)waddch(cmdwin, (chtype)')');
-	promptlen += strlen((*fallback)->driver->type_name) + 3;
+	promptlen += strlen(fallback->type_name) + 3;
     }
     (void)wprintw(cmdwin, "> ");
     promptlen += 2;
@@ -721,14 +722,14 @@ static bool do_command(const char *line)
 	    complain("Only available in low-level mode.");
 	else {
 	    double rate = strtod(arg, NULL);
-	    const struct monitor_object_t **switcher = active;
+	    const struct gps_type_t *switcher = (*active)->driver;
 
-	    if (fallback != NULL && (*fallback)->driver->rate_switcher != NULL)
+	    if (fallback != NULL && fallback->rate_switcher != NULL)
 		switcher = fallback;
-	    if ((*switcher)->driver->rate_switcher) {
+	    if (switcher->rate_switcher != NULL) {
 		/* *INDENT-OFF* */
 		context.readonly = false;
-		if ((*switcher)->driver->rate_switcher(&session, rate)) {
+		if (switcher->rate_switcher(&session, rate)) {
 		    announce_log("[Rate switcher called.]");
 		} else
 		    complain("Rate not supported.");
@@ -737,7 +738,7 @@ static bool do_command(const char *line)
 	    } else
 		complain
 		    ("Device type %s has no rate switcher", 
-		     (*switcher)->driver->type_name);
+		     switcher->type_name);
 	}
 #endif /* RECONFIGURE_ENABLE */
 	break;
@@ -789,22 +790,21 @@ static bool do_command(const char *line)
 	else if (!serial)
 	    complain("Only available in low-level mode.");
 	else {
-	    const struct monitor_object_t **switcher = active;
+	    const struct gps_type_t *switcher = (*active)->driver;
 
-	    if (fallback != NULL && (*fallback)->driver->mode_switcher != NULL)
+	    if (fallback != NULL && fallback->mode_switcher != NULL)
 		switcher = fallback;
-	    if ((*switcher)->driver->mode_switcher) {
+	    if (switcher->mode_switcher != NULL) {
 		context.readonly = false;
 		announce_log("[Mode switcher to mode %d]", v);
-		(*switcher)->driver->mode_switcher(&session,
-						 (int)v);
+		switcher->mode_switcher(&session, (int)v);
 		context.readonly = true;
 		(void)tcdrain(session.gpsdata.gps_fd);
 		(void)usleep(50000);
 	    } else
 		complain
 		    ("Device type %s has no mode switcher", 
-		     (*switcher)->driver->type_name);
+		     switcher->type_name);
 	}
 	break;
 #endif /* RECONFIGURE_ENABLE */
@@ -824,9 +824,9 @@ static bool do_command(const char *line)
 	    unsigned int stopbits =
 		(unsigned int)session.gpsdata.dev.stopbits;
 	    char *modespec;
-	    const struct monitor_object_t **switcher = active;
+	    const struct gps_type_t *switcher = (*active)->driver;
 
-	    if (fallback != NULL && (*fallback)->driver->speed_switcher != NULL)
+	    if (fallback != NULL && fallback->speed_switcher != NULL)
 		switcher = fallback;
 
 	    modespec = strchr(arg, ':');
@@ -853,12 +853,11 @@ static bool do_command(const char *line)
 	    /*@ -charint @*/
 	    speed = (unsigned)atoi(arg);
 	    /* *INDENT-OFF* */
-	    if ((*switcher)->driver->speed_switcher) {
+	    if (switcher->speed_switcher) {
 		context.readonly = false;
-		if ((*switcher)->
-		    driver->speed_switcher(&session, speed,
-					   parity, (int)
-					   stopbits)) {
+		if (switcher->speed_switcher(&session, speed,
+					     parity, (int)
+					     stopbits)) {
 		    announce_log("[Speed switcher called.]");
 		    /*
 		     * See the comment attached to the 'DEVICE'
@@ -879,7 +878,7 @@ static bool do_command(const char *line)
 	    } else
 		complain
 		    ("Device type %s has no speed switcher",
-		     (*switcher)->driver->type_name);
+		     switcher->type_name);
 	    /* *INDENT-ON* */
 	    if (curses_active)
 		refresh_statwin();
@@ -912,9 +911,7 @@ static bool do_command(const char *line)
 		if (curses_active)
 		    refresh_cmdwin();
 	    } else {
-		complain
-		    ("Multiple driver type names match '%s'.",
-		     arg);
+		complain("Multiple driver type names match '%s'.", arg);
 	    }
 	}
 	break;
@@ -1068,7 +1065,7 @@ int main(int argc, char **argv)
 	    for (active = monitor_objects; *active; active++) {
 		if (strncmp((*active)->driver->type_name, optarg, strlen(optarg)) == 0)
 		{
-		    fallback = active;
+		    fallback = (*active)->driver;
 		    matches++;
 		}
 	    }
