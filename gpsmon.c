@@ -163,6 +163,55 @@ void monitor_fixframe(WINDOW * win)
 
 /******************************************************************************
  *
+ * Visualization helpers
+ *
+ ******************************************************************************/
+
+static void visibilize(/*@out@*/char *buf2, size_t len2, const char *buf)
+/* string is mostly printable, dress up the nonprintables a bit */
+{
+    const char *sp;
+
+    buf2[0] = '\0';
+    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len2; sp++)
+	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0')
+	  || (sp[0] == '\r' && sp[2] == '\0'))
+	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
+	else
+	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
+			   0x00ff & (unsigned)*sp);
+}
+
+static void cond_hexdump(/*@out@*/char *buf2, size_t len2, 
+			 const char *buf, size_t len)
+/* pass through visibilized if all printable, hexdump otherwise */
+{
+    size_t i;
+    bool printable = true;
+    for (i = 0; i < len; i++)
+	if (!isprint(buf[i]) && !isspace(buf[i]))
+	    printable = false;
+    if (printable) {
+	size_t j;
+	for (i = j = 0; i < len && j < len2 - 1; i++)
+	    if (isprint(buf[i])) {
+		buf2[j++] = buf[i];
+		buf2[j] = '\0';
+	    }
+	    else {
+		(void)snprintf(&buf2[j], len2-strlen(buf2), "\\x%02x", buf[i]);
+		j = strlen(buf2);
+	    }
+    } else {
+	buf2[0] = '\0';
+	for (i = 0; i < len; i++)
+	    (void)snprintf(buf2 + strlen(buf2), len2 - strlen(buf2),
+			   "%02x", buf[i]);
+    }
+}
+
+/******************************************************************************
+ *
  * Device-type-independent I/O routines
  *
  ******************************************************************************/
@@ -170,23 +219,10 @@ void monitor_fixframe(WINDOW * win)
 static void packet_dump(const char *buf, size_t buflen)
 {
     if (packetwin != NULL) {
-	size_t i;
-	bool printable = true;
-	for (i = 0; i < buflen; i++)
-	    if (!isprint(buf[i]) && !isspace(buf[i]))
-		printable = false;
-	if (printable) {
-	    for (i = 0; i < buflen; i++)
-		if (isprint(buf[i]))
-		    (void)waddch(packetwin, (chtype) buf[i]);
-		else
-		    (void)wprintw(packetwin, "\\x%02x",
-				  (unsigned char)buf[i]);
-	} else {
-	    for (i = 0; i < buflen; i++)
-		(void)wprintw(packetwin, "%02x", (unsigned char)buf[i]);
-	}
-	(void)wprintw(packetwin, "\n");
+	char buf2[buflen * 2];
+	cond_hexdump(buf2, buflen * 2, buf, buflen);
+	waddstr(packetwin, buf2);
+	waddch(packetwin, '\n');
     }
 }
 
@@ -203,20 +239,6 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
     }
 }
 #endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
-
-static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
-{
-    const char *sp;
-
-    buf2[0] = '\0';
-    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
-	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0')
-	  || (sp[0] == '\r' && sp[2] == '\0'))
-	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
-	else
-	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
-			   0x00ff & (unsigned)*sp);
-}
 
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
