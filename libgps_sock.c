@@ -520,8 +520,8 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"timing\":false,", sizeof(buf));
 	    if (flags & WATCH_SPLIT24)
 		(void)strlcat(buf, "\"split24\":false,", sizeof(buf));
-	    if (flags & WATCH_PPSBAR)
-		(void)strlcat(buf, "\"ppsbar\":false,", sizeof(buf));
+	    if (flags & WATCH_PPS)
+		(void)strlcat(buf, "\"pps\":false,", sizeof(buf));
 	    if (buf[strlen(buf) - 1] == ',')
 		buf[strlen(buf) - 1] = '\0';
 	    (void)strlcat(buf, "};", sizeof(buf));
@@ -550,8 +550,8 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"timing\":true,", sizeof(buf));
 	    if (flags & WATCH_SPLIT24)
 		(void)strlcat(buf, "\"split24\":true,", sizeof(buf));
-	    if (flags & WATCH_PPSBAR)
-		(void)strlcat(buf, "\"ppsbar\":true,", sizeof(buf));
+	    if (flags & WATCH_PPS)
+		(void)strlcat(buf, "\"pps\":true,", sizeof(buf));
 	    /*@-nullpass@*//* shouldn't be needed, splint has a bug */
 	    if (flags & WATCH_DEVICE)
 		(void)snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),

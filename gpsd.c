@@ -1684,7 +1684,7 @@ static void ship_pps_drift_message(struct gps_device_t *session,
     struct subscriber_t *sub;
 
     for (sub = subscribers; sub < subscribers + MAXSUBSCRIBERS; sub++) {
-	if (sub->active != 0 && subscribed(sub, session) && sub->policy.ppsbar){
+	if (sub->active != 0 && subscribed(sub, session) && sub->policy.pps){
 	    (void)throttled_write(sub, PPSBAR, strlen(PPSBAR));
 	}
     }

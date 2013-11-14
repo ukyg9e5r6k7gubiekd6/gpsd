@@ -880,10 +880,10 @@ static void onsig(int sig UNUSED)
     longjmp(assertbuf, 1);
 }
 
-#define WATCHRAW	"?WATCH={\"raw\":2,\"ppsbar\":true}\r\n"
-#define WATCHRAWDEVICE	"?WATCH={\"raw\":2,\"ppsbar\":true,\"device\":\"%s\"}\r\n"
-#define WATCHNMEA	"?WATCH={\"nmea\":true,\"ppsbar\":true}\r\n"
-#define WATCHNMEADEVICE	"?WATCH={\"nmea\":true,\"ppsbar\":true,\"device\":\"%s\"}\r\n"
+#define WATCHRAW	"?WATCH={\"raw\":2,\"pps\":true}\r\n"
+#define WATCHRAWDEVICE	"?WATCH={\"raw\":2,\"pps\":true,\"device\":\"%s\"}\r\n"
+#define WATCHNMEA	"?WATCH={\"nmea\":true,\"pps\":true}\r\n"
+#define WATCHNMEADEVICE	"?WATCH={\"nmea\":true,\"pps\":true,\"device\":\"%s\"}\r\n"
 
 int main(int argc, char **argv)
 {

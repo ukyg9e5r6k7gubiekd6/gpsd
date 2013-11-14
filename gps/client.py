@@ -129,7 +129,7 @@ WATCH_RAW	= 0x000080	# output of raw packets
 WATCH_SCALED	= 0x000100	# scale output to floats 
 WATCH_TIMING	= 0x000200	# timing information
 WATCH_SPLIT24	= 0x001000	# split AIS Type 24s
-WATCH_PPSBAR	= 0x002000	# enable PPS comment packets
+WATCH_PPS	= 0x002000	# enable PPS in raw/NMEA
 WATCH_DEVICE	= 0x000800	# watch specific device
 
 class gpsjson(gpscommon):
@@ -165,8 +165,8 @@ class gpsjson(gpscommon):
                 arg += ',"timing":false'
             if flags & WATCH_SPLIT24:
                 arg += ',"split24":false'
-            if flags & WATCH_PPSBAR:
-                arg += ',"ppsbar":false'
+            if flags & WATCH_PPS:
+                arg += ',"pps":false'
         else: # flags & WATCH_ENABLE:
             arg = '?WATCH={"enable":true'
             if flags & WATCH_JSON:
@@ -183,8 +183,8 @@ class gpsjson(gpscommon):
                 arg += ',"timing":true'
             if flags & WATCH_SPLIT24:
                 arg += ',"split24":true'
-            if flags & WATCH_PPSBAR:
-                arg += ',"ppsbar":true'
+            if flags & WATCH_PPS:
+                arg += ',"pps":true'
             if flags & WATCH_DEVICE:
                 arg += ',"device":"%s"' % devpath
         return self.send(arg + "}")

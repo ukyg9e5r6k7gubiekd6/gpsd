@@ -1882,7 +1882,7 @@ struct policy_t {
     bool scaled;			/* requesting report scaling? */
     bool timing;			/* requesting timing info */
     bool split24;			/* requesting split AIS Type 24s */
-    bool ppsbar;			/* requesting PPS bar display */
+    bool pps;				/* requesting PPS in NMEA/raw modes */
     int loglevel;			/* requested log level of messages */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
@@ -1917,7 +1917,7 @@ typedef int socket_t;
 #define WATCH_TIMING	0x000200u	/* timing information */
 #define WATCH_DEVICE	0x000800u	/* watch specific device */
 #define WATCH_SPLIT24	0x001000u	/* split AIS Type 24s */
-#define WATCH_PPSBAR	0x002000u	/* enable PPS comment packets */
+#define WATCH_PPS	0x002000u	/* enable PPS JSON */
 #define WATCH_NEWSTYLE	0x010000u	/* force JSON streaming */
 #define WATCH_OLDSTYLE	0x020000u	/* force old-style streaming */
 

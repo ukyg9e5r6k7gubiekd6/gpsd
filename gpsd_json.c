@@ -426,7 +426,7 @@ void json_watch_dump(const struct policy_t *ccp,
 {
     /*@-compdef@*/
     (void)snprintf(reply, replylen,
-		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,\"timing\":%s,\"split24\":%s,\"ppsbar\":%s,",
+		   "{\"class\":\"WATCH\",\"enable\":%s,\"json\":%s,\"nmea\":%s,\"raw\":%d,\"scaled\":%s,\"timing\":%s,\"split24\":%s,\"pps\":%s,",
 		   ccp->watcher ? "true" : "false",
 		   ccp->json ? "true" : "false",
 		   ccp->nmea ? "true" : "false",
@@ -434,7 +434,7 @@ void json_watch_dump(const struct policy_t *ccp,
 		   ccp->scaled ? "true" : "false",
 		   ccp->timing ? "true" : "false",
 		   ccp->split24 ? "true" : "false",
-		   ccp->ppsbar ? "true" : "false");
+		   ccp->pps ? "true" : "false");
     if (ccp->devpath[0] != '\0')
 	(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
 		       "\"device\":\"%s\",", ccp->devpath);
