@@ -109,6 +109,7 @@ static void usage(void)
 		  "-n [count] exit after count packets.\n"
 		  "-v Print a little spinner.\n"
 		  "-p Include profiling info in the JSON.\n"
+		  "-P Include PPS JSON in NMEA or raw mode.\n"
 		  "-V Print version and exit.\n\n"
 		  "You must specify one, or more, of -r, -R, or -w\n"
 		  "You must use -o if you use -d.\n");
@@ -142,7 +143,7 @@ int main(int argc, char **argv)
 
     /*@-branchstate@*/
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVn:s:o:pu2")) != -1) {
+    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVn:s:o:pPu2")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -194,6 +195,9 @@ int main(int argc, char **argv)
 	    break;
 	case 'p':
 	    profile = true;
+	    break;
+	case 'P':
+	    flags |= WATCH_PPS;
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
