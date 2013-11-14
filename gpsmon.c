@@ -121,6 +121,7 @@ static const struct monitor_object_t *monitor_objects[] = {
 };
 
 static const struct monitor_object_t **active;
+static const struct gps_type_t *active_type;
 static const struct gps_type_t *fallback;
 /*@ +nullassign @*/
 
@@ -461,7 +462,7 @@ static void select_packet_monitor(struct gps_device_t *device)
      * within gpsd_multipoll() before this hook is called.
      */
     if (device->packet.type != last_type) {
-	const struct gps_type_t *active_type = device->device_type;
+	active_type = device->device_type;
 	if (device->packet.type == NMEA_PACKET
 	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
 	    active_type = &driver_nmea0183;
@@ -620,7 +621,7 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 	ssize_t st;
 
 	context.readonly = false;
-	st = (*active)->driver->control_send(&session, (char *)buf, len);
+	st = active_type->control_send(&session, (char *)buf, len);
 	context.readonly = true;
 	return (st != -1);
     }
@@ -716,13 +717,13 @@ static bool do_command(const char *line)
     switch (line[0]) {
 #ifdef RECONFIGURE_ENABLE
     case 'c':	/* change cycle time */
-	if (active == NULL)
+	if (active_type == NULL)
 	    complain("No device defined yet");
 	else if (!serial)
 	    complain("Only available in low-level mode.");
 	else {
 	    double rate = strtod(arg, NULL);
-	    const struct gps_type_t *switcher = (*active)->driver;
+	    const struct gps_type_t *switcher = active_type;
 
 	    if (fallback != NULL && fallback->rate_switcher != NULL)
 		switcher = fallback;
@@ -743,7 +744,7 @@ static bool do_command(const char *line)
 #endif /* RECONFIGURE_ENABLE */
 	break;
     case 'i':	/* start probing for subtype */
-	if (active == NULL)
+	if (active_type == NULL)
 	    complain("No GPS type detected.");
 	else if (!serial)
 	    complain("Only available in low-level mode.");
@@ -785,12 +786,12 @@ static bool do_command(const char *line)
 	    /* *INDENT-ON* */
 	} else
 	    v = (unsigned)atoi(line + 1);
-	if (active == NULL)
+	if (active_type == NULL)
 	    complain("No device defined yet");
 	else if (!serial)
 	    complain("Only available in low-level mode.");
 	else {
-	    const struct gps_type_t *switcher = (*active)->driver;
+	    const struct gps_type_t *switcher = active_type;
 
 	    if (fallback != NULL && fallback->mode_switcher != NULL)
 		switcher = fallback;
@@ -814,7 +815,7 @@ static bool do_command(const char *line)
 
 #ifdef RECONFIGURE_ENABLE
     case 's':	/* change speed */
-	if (active == NULL)
+	if (active_type == NULL)
 	    complain("No device defined yet");
 	else if (!serial)
 	    complain("Only available in low-level mode.");
@@ -824,11 +825,10 @@ static bool do_command(const char *line)
 	    unsigned int stopbits =
 		(unsigned int)session.gpsdata.dev.stopbits;
 	    char *modespec;
-	    const struct gps_type_t *switcher = (*active)->driver;
+	    const struct gps_type_t *switcher = active_type;
 
 	    if (fallback != NULL && fallback->speed_switcher != NULL)
 		switcher = fallback;
-
 	    modespec = strchr(arg, ':');
 	    /*@ +charint @*/
 	    if (modespec != NULL) {
@@ -918,7 +918,7 @@ static bool do_command(const char *line)
 
 #ifdef CONTROLSEND_ENABLE
     case 'x':	/* send control packet */
-	if (active == NULL)
+	if (active_type == NULL)
 	    complain("No device defined yet");
 	else if (!serial)
 	    complain("Only available in low-level mode.");
@@ -927,9 +927,9 @@ static bool do_command(const char *line)
 	    int st = gpsd_hexpack(arg, (char *)buf, strlen(arg));
 	    if (st < 0)
 		complain("Invalid hex string (error %d)", st);
-	    else if ((*active)->driver->control_send == NULL)
+	    else if (active_type->control_send == NULL)
 		complain("Device type %s has no control-send method.", 
-			 (*active)->driver->type_name);
+			 active_type->type_name);
 	    else if (!monitor_control_send(buf, (size_t) st))
 		complain("Control send failed.");
 	    /*@ +compdef @*/
