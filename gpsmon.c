@@ -281,16 +281,13 @@ static void announce_log(/*@in@*/ const char *fmt, ...)
 }
 #endif /* RECONFIGURE_ENABLE */
 
-void monitor_complain(const char *fmt, ...)
+static void monitor_vcomplain(const char *fmt, va_list ap)
 {
-    va_list ap;
     assert(cmdwin!=NULL);
     (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wclrtoeol(cmdwin);
-    (void)wattrset(cmdwin, A_BOLD | A_BLINK);
-    va_start(ap, fmt);
+    (void)wattrset(cmdwin, A_BOLD);
     (void)vwprintw(cmdwin, (char *)fmt, ap);
-    va_end(ap);
     (void)wattrset(cmdwin, A_NORMAL);
     (void)wrefresh(cmdwin);
     (void)doupdate();
@@ -301,6 +298,14 @@ void monitor_complain(const char *fmt, ...)
     (void)wrefresh(cmdwin);
     (void)wmove(cmdwin, 0, (int)promptlen);
     (void)doupdate();
+}
+
+void monitor_complain(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    monitor_vcomplain(fmt, ap);
+    va_end(ap);
 }
 
 void monitor_log(const char *fmt, ...)
@@ -631,6 +636,19 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 }
 #endif /* CONTROLSEND_ENABLE */
 
+static void complain(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    if (curses_active)
+	monitor_vcomplain(fmt, ap);
+    else
+	vfprintf(stderr, fmt, ap);
+
+    va_end(ap);
+}
+
 /*****************************************************************************
  *
  * Main sequence 
@@ -698,9 +716,9 @@ static bool do_command(const char *line)
 #ifdef RECONFIGURE_ENABLE
     case 'c':	/* change cycle time */
 	if (active == NULL)
-	    monitor_complain("No device defined yet");
+	    complain("No device defined yet");
 	else if (!serial)
-	    monitor_complain("Only available in low-level mode.");
+	    complain("Only available in low-level mode.");
 	else {
 	    double rate = strtod(arg, NULL);
 	    const struct monitor_object_t **switcher = active;
@@ -713,11 +731,11 @@ static bool do_command(const char *line)
 		if ((*switcher)->driver->rate_switcher(&session, rate)) {
 		    announce_log("[Rate switcher called.]");
 		} else
-		    monitor_complain("Rate not supported.");
+		    complain("Rate not supported.");
 		context.readonly = true;
 		/* *INDENT-ON* */
 	    } else
-		monitor_complain
+		complain
 		    ("Device type %s has no rate switcher", 
 		     (*switcher)->driver->type_name);
 	}
@@ -725,9 +743,9 @@ static bool do_command(const char *line)
 	break;
     case 'i':	/* start probing for subtype */
 	if (active == NULL)
-	    monitor_complain("No GPS type detected.");
+	    complain("No GPS type detected.");
 	else if (!serial)
-	    monitor_complain("Only available in low-level mode.");
+	    complain("Only available in low-level mode.");
 	else {
 	    if (strcspn(line, "01") == strlen(line))
 		context.readonly = !context.readonly;
@@ -767,9 +785,9 @@ static bool do_command(const char *line)
 	} else
 	    v = (unsigned)atoi(line + 1);
 	if (active == NULL)
-	    monitor_complain("No device defined yet");
+	    complain("No device defined yet");
 	else if (!serial)
-	    monitor_complain("Only available in low-level mode.");
+	    complain("Only available in low-level mode.");
 	else {
 	    const struct monitor_object_t **switcher = active;
 
@@ -784,7 +802,7 @@ static bool do_command(const char *line)
 		(void)tcdrain(session.gpsdata.gps_fd);
 		(void)usleep(50000);
 	    } else
-		monitor_complain
+		complain
 		    ("Device type %s has no mode switcher", 
 		     (*switcher)->driver->type_name);
 	}
@@ -797,9 +815,9 @@ static bool do_command(const char *line)
 #ifdef RECONFIGURE_ENABLE
     case 's':	/* change speed */
 	if (active == NULL)
-	    monitor_complain("No device defined yet");
+	    complain("No device defined yet");
 	else if (!serial)
-	    monitor_complain("Only available in low-level mode.");
+	    complain("Only available in low-level mode.");
 	else {
 	    speed_t speed;
 	    char parity = session.gpsdata.dev.parity;
@@ -815,19 +833,19 @@ static bool do_command(const char *line)
 	    /*@ +charint @*/
 	    if (modespec != NULL) {
 		if (strchr("78", *++modespec) == NULL) {
-		    monitor_complain
+		    complain
 			("No support for that word length.");
 		    break;
 		}
 		parity = *++modespec;
 		if (strchr("NOE", parity) == NULL) {
-		    monitor_complain("What parity is '%c'?.",
+		    complain("What parity is '%c'?.",
 				     parity);
 		    break;
 		}
 		stopbits = (unsigned int)*++modespec;
 		if (strchr("12", (char)stopbits) == NULL) {
-		    monitor_complain("Stop bits must be 1 or 2.");
+		    complain("Stop bits must be 1 or 2.");
 		    break;
 		}
 		stopbits = (unsigned int)(stopbits - '0');
@@ -855,11 +873,11 @@ static bool do_command(const char *line)
 		    (void)gpsd_set_speed(&session, speed,
 					 parity, stopbits);
 		} else
-		    monitor_complain
+		    complain
 			("Speed/mode combination not supported.");
 		context.readonly = true;
 	    } else
-		monitor_complain
+		complain
 		    ("Device type %s has no speed switcher",
 		     (*switcher)->driver->type_name);
 	    /* *INDENT-ON* */
@@ -871,7 +889,7 @@ static bool do_command(const char *line)
 
     case 't':	/* force device type */
 	if (!serial)
-	    monitor_complain("Only available in low-level mode.");
+	    complain("Only available in low-level mode.");
 	else if (strlen(arg) > 0) {
 	    int matchcount = 0;
 	    const struct gps_type_t **dp, *forcetype = NULL;
@@ -882,7 +900,7 @@ static bool do_command(const char *line)
 		}
 	    }
 	    if (matchcount == 0) {
-		monitor_complain
+		complain
 		    ("No driver type matches '%s'.", arg);
 	    } else if (matchcount == 1) {
 		assert(forcetype != NULL);
@@ -894,7 +912,7 @@ static bool do_command(const char *line)
 		if (curses_active)
 		    refresh_cmdwin();
 	    } else {
-		monitor_complain
+		complain
 		    ("Multiple driver type names match '%s'.",
 		     arg);
 	    }
@@ -904,42 +922,40 @@ static bool do_command(const char *line)
 #ifdef CONTROLSEND_ENABLE
     case 'x':	/* send control packet */
 	if (active == NULL)
-	    monitor_complain("No device defined yet");
+	    complain("No device defined yet");
 	else if (!serial)
-	    monitor_complain("Only available in low-level mode.");
+	    complain("Only available in low-level mode.");
 	else {
 	    /*@ -compdef @*/
 	    int st = gpsd_hexpack(arg, (char *)buf, strlen(arg));
 	    if (st < 0)
-		monitor_complain
-		    ("Invalid hex string (error %d)", st);
+		complain("Invalid hex string (error %d)", st);
 	    else if ((*active)->driver->control_send == NULL)
-		monitor_complain
-		    ("Device type %s has no control-send method.", 
-		     (*active)->driver->type_name);
+		complain("Device type %s has no control-send method.", 
+			 (*active)->driver->type_name);
 	    else if (!monitor_control_send(buf, (size_t) st))
-		monitor_complain("Control send failed.");
+		complain("Control send failed.");
 	    /*@ +compdef @*/
 	}
 	break;
 
     case 'X':	/* send raw packet */
 	if (!serial)
-	    monitor_complain("Only available in low-level mode.");
+	    complain("Only available in low-level mode.");
 	else {
 	    /*@ -compdef @*/
 	    ssize_t len = (ssize_t) gpsd_hexpack(arg, (char *)buf, strlen(arg));
 	    if (len < 0)
-		monitor_complain("Invalid hex string (error %d)", len);
+		complain("Invalid hex string (error %d)", len);
 	    else if (!monitor_raw_send(buf, (size_t) len))
-		monitor_complain("Raw send failed.");
+		complain("Raw send failed.");
 	    /*@ +compdef @*/
 	}
 	break;
 #endif /* CONTROLSEND_ENABLE */
 
     default:
-	monitor_complain("Unknown command '%c'", line[0]);
+	complain("Unknown command '%c'", line[0]);
 	break;
     }
 
@@ -980,14 +996,18 @@ int main(int argc, char **argv)
     fd_set rfds;
     int maxfd = 0;
     char inbuf[80];
+    bool nocurses = false;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
     gps_context_init(&context);	// initialize the report mutex
     /*@ -branchstate @*/
-    while ((option = getopt(argc, argv, "D:LVhl:nt:?")) != -1) {
+    while ((option = getopt(argc, argv, "aD:LVhl:nt:?")) != -1) {
 	switch (option) {
+	case 'a':
+	    nocurses = true;
+	    break;
 	case 'D':
 	    context.debug = atoi(optarg);
 	    break;
@@ -1165,7 +1185,8 @@ int main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    if (!curses_init())
+    (void)cbreak();
+    if (!nocurses && !curses_init())
 	goto quit;
 
     FD_ZERO(&all_fds);
@@ -1210,6 +1231,8 @@ int main(int argc, char **argv)
 		    cmdline = curses_get_command();
 		else
 		{
+		    (void)fflush(stdout);
+		    nocbreak();
 		    (void)fputs("gpsmon> ", stdout);
 		    cmdline = fgets(inbuf, strlen(inbuf), stdin); 
 		}
