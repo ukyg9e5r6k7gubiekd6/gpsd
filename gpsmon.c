@@ -476,6 +476,60 @@ static void select_packet_monitor(struct gps_device_t *device)
 	(void)wnoutrefresh(devicewin);
 }
 
+static char *curses_get_command(void)
+/* char-by-char nonblocking input, return accumulated command line on \n */
+{
+    static char input[80];
+    static char line[80];
+    int c;
+
+    c = wgetch(cmdwin);
+    if (c == CTRL('L')) {
+	(void)clearok(stdscr, true);
+	if (active != NULL && (*active)->initialize != NULL)
+	    (void)(*active)->initialize();
+    } else if (c != '\r' && c != '\n') {
+	size_t len = strlen(input);
+
+	if (c == '\b' || c == KEY_LEFT || c == (int)erasechar()) {
+	    input[len--] = '\0';
+	} else if (isprint(c)) {
+	    input[len] = (char)c;
+	    input[++len] = '\0';
+	    (void)waddch(cmdwin, (chtype)c);
+	    (void)wrefresh(cmdwin);
+	    (void)doupdate();
+	}
+
+	return NULL;
+    }
+
+    (void)wmove(cmdwin, 0, (int)promptlen);
+    (void)wclrtoeol(cmdwin);
+    (void)wrefresh(cmdwin);
+    (void)doupdate();
+
+    /* user finished entering a command */
+    if (input[0] == '\0')
+	return NULL;
+    else {
+	(void) strlcpy(line, input, sizeof(line));
+	input[0] = '\0';
+    }
+
+    /* handle it in the currently selected monitor object if possible */
+    if (serial && active != NULL && (*active)->command != NULL) {
+	int status = (*active)->command(line);
+	if (status == COMMAND_TERMINATE)
+	    longjmp(terminate, TERM_QUIT);
+	else if (status == COMMAND_MATCH)
+	    return NULL;
+	assert(status == COMMAND_UNKNOWN);
+    }
+
+    return line;
+}
+
 /******************************************************************************
  *
  * Mode-independent I/O
@@ -622,51 +676,13 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /*@+observertrans +nullpass +globstate@*/
 
 /*@-globstate -usedef -compdef@*/
-static bool do_command(void)
+static bool do_command(const char *line)
 {
-    static char input[80];
-    char  line[80];
 #ifdef RECONFIGURE_ENABLE
     unsigned int v;
 #endif /* RECONFIGURE_ENABLE */
-    char *arg;
     unsigned char buf[BUFLEN];
-    int c;
-
-    c = wgetch(cmdwin);
-    if (c == CTRL('L')) {
-	(void)clearok(stdscr, true);
-	if (active != NULL && (*active)->initialize != NULL)
-	    (void)(*active)->initialize();
-	gpsmon_hook(&session, 0);
-    } else if (c != '\r' && c != '\n') {
-	size_t len = strlen(input);
-
-	if (c == '\b' || c == KEY_LEFT || c == (int)erasechar()) {
-	    input[len--] = '\0';
-	} else if (isprint(c)) {
-	    input[len] = (char)c;
-	    input[++len] = '\0';
-	    (void)waddch(cmdwin, (chtype)c);
-	    (void)wrefresh(cmdwin);
-	    (void)doupdate();
-	}
-
-	return true;
-    }
-
-    (void)wmove(cmdwin, 0, (int)promptlen);
-    (void)wclrtoeol(cmdwin);
-    (void)wrefresh(cmdwin);
-    (void)doupdate();
-
-    /* user finished entering a command */
-    if (input[0] == '\0')
-	return true;
-    else {
-	(void) strlcpy(line, input, sizeof(line));
-	input[0] = '\0';
-    }
+    const char *arg;
 
     if (isspace(line[1])) {
 	for (arg = line + 2; *arg != '\0' && isspace(*arg); arg++)
@@ -675,17 +691,6 @@ static bool do_command(void)
     } else
 	arg = line + 1;
 
-    /* handle it in the currently selected monitor object if possible */
-    if (serial && active != NULL && (*active)->command != NULL) {
-	int status = (*active)->command(line);
-	if (status == COMMAND_TERMINATE)
-	    return false;
-	else if (status == COMMAND_MATCH)
-	    return true;
-	assert(status == COMMAND_UNKNOWN);
-    }
-
-    /* otherse dispatch to generic commands */
     switch (line[0]) {
 #ifdef RECONFIGURE_ENABLE
     case 'c':	/* change cycle time */
@@ -962,12 +967,13 @@ static void onsig(int sig UNUSED)
 int main(int argc, char **argv)
 {
     int option;
-    char *explanation;
+    char *explanation, *cmdline;
     int bailout = 0, matches = 0;
     bool nmea = false;
     fd_set all_fds;
     fd_set rfds;
     int maxfd = 0;
+    char inbuf[80];
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
@@ -1192,9 +1198,17 @@ int main(int argc, char **argv)
 		break;
 	    }
 
-	    if (FD_ISSET(0, &rfds)) 
-		if (!do_command())
+	    if (FD_ISSET(0, &rfds)) {
+		if (curses_active)
+		    cmdline = curses_get_command();
+		else
+		{
+		    (void)fputs("gpsmon> ", stdout);
+		    cmdline = fgets(inbuf, strlen(inbuf), stdin); 
+		}
+		if (cmdline != NULL && !do_command(cmdline))
 		    longjmp(terminate, TERM_QUIT);
+	    }
 	}
     }
 
