@@ -992,7 +992,7 @@ int main(int argc, char **argv)
     fd_set rfds;
     int maxfd = 0;
     char inbuf[80];
-    bool nocurses = false;
+    volatile bool nocurses = false;
 
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
