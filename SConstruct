@@ -1070,6 +1070,7 @@ if cxx and env["libgpsmm"]:
 # Python programs
 if not env['python']:
     python_built_extensions = []
+    python_targets = []
 else:
     python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed", "gegps"]
     python_modules = Glob('gps/*.py') 
@@ -1141,7 +1142,8 @@ Description: The gpsd service daemon can monitor one or more GPS devices connect
 Platform: UNKNOWN
 """ %(gpsd_version, website, devmail)
     python_egg_info = python_env.Textfile(target="gps-%s.egg-info" %(gpsd_version, ), source=python_egg_info_source)
-    python_built_extensions = python_compiled_libs.values() + [python_egg_info]
+    python_built_extensions = python_compiled_libs.values()
+    python_targets = python_built_extensions + [python_egg_info]
 
 env.Command(target = "packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
@@ -1306,7 +1308,7 @@ if manbuilder:
 ## Where it all comes together
 
 build = env.Alias('build',
-                  [libraries, binaries, python_built_extensions,
+                  [libraries, binaries, python_targets,
                    "gpsd.php", manpage_targets,
                    "libgps.pc", "libgpsd.pc"])
 env.Default(*build)
@@ -1316,7 +1318,7 @@ if qt_env:
     qt_env.Default(*build_qt)
 
 if env['python']:
-    build_python = python_env.Alias('build', [python_built_extensions])
+    build_python = python_env.Alias('build', python_targets)
     python_env.Default(*build_python)
 
 ## Installation and deinstallation
