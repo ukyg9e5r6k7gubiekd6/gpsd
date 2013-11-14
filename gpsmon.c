@@ -584,17 +584,27 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
+    char buf[BUFSIZ];
+
+    (void)snprintf(buf, sizeof(buf), "(%zd) ", device->packet.outbuflen);
+    cond_hexdump(buf + strlen(buf), sizeof(buf) - strlen(buf), 
+		 (char *)device->packet.outbuffer, device->packet.outbuflen);
+    (void)strlcat(buf, "\n", sizeof(buf) - strlen(buf));
+
     if (curses_active)
 	select_packet_monitor(device);
 
     report_lock();
-    (void)wprintw(packetwin, "(%d) ", device->packet.outbuflen);
-    packet_dump((char *)device->packet.outbuffer,
-		device->packet.outbuflen);
-    if (packetwin != NULL)
-	(void)wnoutrefresh(packetwin);
 
-    (void)doupdate();
+    if (!curses_active)
+	(void)fputs(buf, stdout);
+    else {
+	if (packetwin != NULL) {
+	    (void)waddstr(packetwin, buf);
+	    (void)wnoutrefresh(packetwin);
+	}
+	(void)doupdate();
+    }
 
     if (logfile != NULL && device->packet.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
@@ -603,6 +613,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
                 device->packet.outbuflen, logfile) >= 1);
         /*@ +shiftimplementation +sefparams -charint @*/
     }
+
     report_unlock();
 
     /* Update the last fix time seen for PPS. FIXME: do this here? */
