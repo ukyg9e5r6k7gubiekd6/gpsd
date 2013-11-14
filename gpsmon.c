@@ -212,7 +212,7 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
 
 /******************************************************************************
  *
- * Device-type-independent I/O routines
+ * Mode-dependent I/O
  *
  ******************************************************************************/
 
@@ -256,6 +256,113 @@ static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list
 	(void)fputs(buf2, logfile);
     report_unlock();
 }
+
+#ifdef RECONFIGURE_ENABLE
+static void announce_log(/*@in@*/ const char *fmt, ...)
+{
+    char buf[BUFSIZ];
+    va_list ap;
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf) - 5, fmt, ap);
+    va_end(ap);
+ 
+   if (packetwin != NULL) {
+	report_lock();
+	(void)wattrset(packetwin, A_BOLD);
+	(void)wprintw(packetwin, ">>>");
+	(void)waddstr(packetwin, buf);
+	(void)wattrset(packetwin, A_NORMAL);
+	(void)wprintw(packetwin, "\n");
+	report_unlock();
+   }
+   if (logfile != NULL) {
+       (void)fprintf(logfile, ">>>%s\n", buf);
+   }
+}
+#endif /* RECONFIGURE_ENABLE */
+
+void monitor_complain(const char *fmt, ...)
+{
+    va_list ap;
+    assert(cmdwin!=NULL);
+    (void)wmove(cmdwin, 0, (int)promptlen);
+    (void)wclrtoeol(cmdwin);
+    (void)wattrset(cmdwin, A_BOLD | A_BLINK);
+    va_start(ap, fmt);
+    (void)vwprintw(cmdwin, (char *)fmt, ap);
+    va_end(ap);
+    (void)wattrset(cmdwin, A_NORMAL);
+    (void)wrefresh(cmdwin);
+    (void)doupdate();
+
+    (void)wgetch(cmdwin);
+    (void)wmove(cmdwin, 0, (int)promptlen);
+    (void)wclrtoeol(cmdwin);
+    (void)wrefresh(cmdwin);
+    (void)wmove(cmdwin, 0, (int)promptlen);
+    (void)doupdate();
+}
+
+void monitor_log(const char *fmt, ...)
+{
+    if (packetwin != NULL) {
+	va_list ap;
+	report_lock();
+	va_start(ap, fmt);
+	(void)vwprintw(packetwin, (char *)fmt, ap);
+	va_end(ap);
+	report_unlock();
+    }
+}
+
+ /*@-observertrans -nullpass -globstate@*/
+static void refresh_statwin(void)
+/* refresh the device-identification window */
+{
+    /* *INDENT-OFF* */
+    type_name =
+	session.device_type ? session.device_type->type_name : "Unknown device";
+    /* *INDENT-ON* */
+    (void)wattrset(statwin, A_BOLD);
+    if (serial)
+	display(statwin, 0, 0, "%s %u %d%c%d",
+		session.gpsdata.dev.path,
+		session.gpsdata.dev.baudrate,
+		9 - session.gpsdata.dev.stopbits,
+		session.gpsdata.dev.parity,
+		session.gpsdata.dev.stopbits);
+    else
+	display(statwin, 0, 0, "%s:%s:%s",
+		source.server, source.port, session.gpsdata.dev.path);
+    (void)wattrset(statwin, A_NORMAL);
+    (void)wnoutrefresh(statwin);
+}
+
+static void refresh_cmdwin(void)
+/* refresh the command window */
+{
+    (void)wmove(cmdwin, 0, 0);
+    (void)wprintw(cmdwin, type_name);
+    promptlen = strlen(type_name);
+    if (fallback != NULL && strcmp((*fallback)->driver->type_name, type_name) != 0) {
+	(void)waddch(cmdwin, (chtype)' ');
+	(void)waddch(cmdwin, (chtype)'(');
+	(void)waddstr(cmdwin, (*fallback)->driver->type_name);
+	(void)waddch(cmdwin, (chtype)')');
+	promptlen += strlen((*fallback)->driver->type_name) + 3;
+    }
+    (void)wprintw(cmdwin, "> ");
+    promptlen += 2;
+    (void)wclrtoeol(cmdwin);
+    (void)wnoutrefresh(cmdwin);
+}
+/*@+observertrans +nullpass +globstate@*/
+
+/******************************************************************************
+ *
+ * Mode-independent I/O
+ *
+ ******************************************************************************/
 
 static void packet_log(const char *fmt, ...)
 {
@@ -323,31 +430,6 @@ ssize_t gpsd_write(struct gps_device_t *session,
     return gpsd_serial_write(session, buf, len);
 }
 
-#ifdef RECONFIGURE_ENABLE
-static void announce_log(/*@in@*/ const char *fmt, ...)
-{
-    char buf[BUFSIZ];
-    va_list ap;
-    va_start(ap, fmt);
-    (void)vsnprintf(buf, sizeof(buf) - 5, fmt, ap);
-    va_end(ap);
- 
-   if (packetwin != NULL) {
-	report_lock();
-	(void)wattrset(packetwin, A_BOLD);
-	(void)wprintw(packetwin, ">>>");
-	(void)waddstr(packetwin, buf);
-	(void)wattrset(packetwin, A_NORMAL);
-	(void)wprintw(packetwin, "\n");
-	report_unlock();
-   }
-   if (logfile != NULL) {
-       (void)fprintf(logfile, ">>>%s\n", buf);
-   }
-}
-#endif /* RECONFIGURE_ENABLE */
-
-
 #ifdef CONTROLSEND_ENABLE
 bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 {
@@ -379,40 +461,6 @@ static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
  * Main sequence and display machinery
  *
  *****************************************************************************/
-
-void monitor_complain(const char *fmt, ...)
-{
-    va_list ap;
-    assert(cmdwin!=NULL);
-    (void)wmove(cmdwin, 0, (int)promptlen);
-    (void)wclrtoeol(cmdwin);
-    (void)wattrset(cmdwin, A_BOLD | A_BLINK);
-    va_start(ap, fmt);
-    (void)vwprintw(cmdwin, (char *)fmt, ap);
-    va_end(ap);
-    (void)wattrset(cmdwin, A_NORMAL);
-    (void)wrefresh(cmdwin);
-    (void)doupdate();
-
-    (void)wgetch(cmdwin);
-    (void)wmove(cmdwin, 0, (int)promptlen);
-    (void)wclrtoeol(cmdwin);
-    (void)wrefresh(cmdwin);
-    (void)wmove(cmdwin, 0, (int)promptlen);
-    (void)doupdate();
-}
-
-void monitor_log(const char *fmt, ...)
-{
-    if (packetwin != NULL) {
-	va_list ap;
-	report_lock();
-	va_start(ap, fmt);
-	(void)vwprintw(packetwin, (char *)fmt, ap);
-	va_end(ap);
-	report_unlock();
-    }
-}
 
 static bool switch_type(const struct gps_type_t *devtype)
 {
@@ -470,49 +518,6 @@ static bool switch_type(const struct gps_type_t *devtype)
     monitor_complain("No monitor matches %s.", devtype->type_name);
     return false;
 }
-
- /*@-observertrans -nullpass -globstate@*/
-static void refresh_statwin(void)
-/* refresh the device-identification window */
-{
-    /* *INDENT-OFF* */
-    type_name =
-	session.device_type ? session.device_type->type_name : "Unknown device";
-    /* *INDENT-ON* */
-    (void)wattrset(statwin, A_BOLD);
-    if (serial)
-	display(statwin, 0, 0, "%s %u %d%c%d",
-		session.gpsdata.dev.path,
-		session.gpsdata.dev.baudrate,
-		9 - session.gpsdata.dev.stopbits,
-		session.gpsdata.dev.parity,
-		session.gpsdata.dev.stopbits);
-    else
-	display(statwin, 0, 0, "%s:%s:%s",
-		source.server, source.port, session.gpsdata.dev.path);
-    (void)wattrset(statwin, A_NORMAL);
-    (void)wnoutrefresh(statwin);
-}
-
-static void refresh_cmdwin(void)
-/* refresh the command window */
-{
-    (void)wmove(cmdwin, 0, 0);
-    (void)wprintw(cmdwin, type_name);
-    promptlen = strlen(type_name);
-    if (fallback != NULL && strcmp((*fallback)->driver->type_name, type_name) != 0) {
-	(void)waddch(cmdwin, (chtype)' ');
-	(void)waddch(cmdwin, (chtype)'(');
-	(void)waddstr(cmdwin, (*fallback)->driver->type_name);
-	(void)waddch(cmdwin, (chtype)')');
-	promptlen += strlen((*fallback)->driver->type_name) + 3;
-    }
-    (void)wprintw(cmdwin, "> ");
-    promptlen += 2;
-    (void)wclrtoeol(cmdwin);
-    (void)wnoutrefresh(cmdwin);
-}
-/*@+observertrans +nullpass +globstate@*/
 
 /*@-observertrans -nullpass -globstate@*/
 static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
