@@ -1680,7 +1680,6 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 /* on PPS interrupt, ship a drift message to all clients */
 {
 #ifdef SOCKET_EXPORT_ENABLE
-#ifdef PPS_ENABLE
 #define PPSBAR "#----------------------------------- PPS -----------------------------------#\n"
     struct subscriber_t *sub;
 
@@ -1689,13 +1688,8 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 	    (void)throttled_write(sub, PPSBAR, strlen(PPSBAR));
 	}
     }
-#endif /* PPS_ENABLE */
 #undef PPSBAR
     /*@-type@*//* splint is confused about struct timespec */
-    /*
-     * Yes, real_nsec is constant 0 because our "real time" is top of GPS
-     * second. This will change when we support 5Hz devices fully.
-     */
     notify_watchers(session, "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
 		    td->real.tv_sec, td->real.tv_nsec,

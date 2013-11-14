@@ -1056,6 +1056,7 @@ bool ais_binary_decode(const int debug,
 	 * the destination MMSI
 	 */
 	ais->type25.bitcount       = bitlen - 40 - 16*ais->type25.structured;
+	/* bit 40 is exactly 5 bytes in; 2 bytes is 16 bits */
 	(void)memcpy(ais->type25.bitdata,
 		     (char *)bits+5 + 2 * ais->type25.structured,
 		     (ais->type25.bitcount + 7) / 8);
