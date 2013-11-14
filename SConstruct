@@ -1695,6 +1695,8 @@ webpages = Split('''www/installation.html
     www/libgpsd.html www/libgpsmm.html www/libgps.html
     www/srec.html
     www/AIVDM.html www/NMEA.html
+    www/calibrate-gpsd-ntpd-howto.html
+    www/gpsd-time-service-howto.html
     www/protocol-evolution.html www/protocol-transition.html
     www/client-howto.html www/writing-a-driver.html
     www/hardware.html
@@ -1735,6 +1737,7 @@ if env.WhereIs('asciidoc'):
     for stem in ['AIVDM', 'NMEA',
                  'protocol-evolution', 'protocol-transition',
                  'gpsd-time-service-howto',
+		 'calibrate-gpsd-ntpd-howto',
                  'client-howto']:
         env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
                     ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
