@@ -43,6 +43,9 @@
 #include "bits.h"
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
+/* arbitrary back off time to not overload the SiRF, 330 too short for
+ * SiRF IV.  We should instead be waiting for the ACK, at least on SiRF IV */
+#define SIRF_SETTLE	30330
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
@@ -378,7 +381,7 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 			session->gpsdata.dev.baudrate,
 			9 - session->gpsdata.dev.stopbits,
 			session->gpsdata.dev.stopbits, parity);
-	(void)usleep(333);	/* guessed settling time */
+	(void)usleep(SIRF_SETTLE);	/* guessed settling time */
     }
     session->back_to_nmea = false;
 }
@@ -1365,78 +1368,78 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)nmea_send(session,
 			    "$PSRF100,0,%d,8,1,0",
 			    session->gpsdata.dev.baudrate);
-	    (void)usleep(3330); /* guessed settling time */
+	    (void)usleep(SIRF_SETTLE); /* guessed settling time */
 	}
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Probing for firmware version...\n");
 	(void)sirf_write(session, versionprobe);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Requesting navigation parameters...\n");
 	(void)sirf_write(session, navparams);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 #ifdef RECONFIGURE_ENABLE
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Requesting periodic ecef reports...\n");
 	(void)sirf_write(session, requestecef);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Requesting periodic tracker reports...\n");
 	(void)sirf_write(session, requesttracker);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Setting DGPS control to use SBAS...\n");
 	(void)sirf_write(session, dgpscontrol);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Setting SBAS to auto/integrity mode...\n");
 	(void)sirf_write(session, sbasparams);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Enabling PPS message...\n");
 	(void)sirf_write(session, enablemid52);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	if (session->gpsdata.dev.baudrate >= 38400) {
 	    /* some USB devices are also too slow, no way to tell which ones */
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Enabling subframe transmission...\n");
 	    (void)sirf_write(session, enablesubframe);
-	    (void)usleep(3330); /* guessed settling time */
+	    (void)usleep(SIRF_SETTLE); /* guessed settling time */
 	}
 
 	/* disable some MIDs. we do not decode it, so don't send it */
 	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 7...\n");
 	putbyte(unsetmidXX, 6, 0x11);
 	(void)sirf_write(session, unsetmidXX);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 28...\n");
 	putbyte(unsetmidXX, 6, 0x1c);
 	(void)sirf_write(session, unsetmidXX);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 29...\n");
 	putbyte(unsetmidXX, 6, 0x1d);
 	(void)sirf_write(session, unsetmidXX);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 30...\n");
 	putbyte(unsetmidXX, 6, 0x1e);
 	(void)sirf_write(session, unsetmidXX);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 31...\n");
 	putbyte(unsetmidXX, 6, 0x1f);
 	(void)sirf_write(session, unsetmidXX);
-	(void)usleep(3330); /* guessed settling time */
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 #endif /* RECONFIGURE_ENABLE */
     }
 
