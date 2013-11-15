@@ -15,7 +15,7 @@ class Baton:
         self.stream = sys.stderr
         self.stream.write(prompt + "...")
         if os.isatty(self.stream.fileno()):
-            self.stream.write(" \010")
+            self.stream.write(" \b")
         self.stream.flush()
         self.count = 0
         self.endmsg = endmsg
@@ -29,7 +29,7 @@ class Baton:
             self.stream.write(ch)
         elif os.isatty(self.stream.fileno()):
             self.stream.write("-/|\\"[self.count % 4])
-            self.stream.write("\010")
+            self.stream.write("\b")
         self.count = self.count + 1
         self.stream.flush()
         return
@@ -89,8 +89,8 @@ class plotter:
                     sys.exit(1)
                 if self.session.data["class"] == "DEVICES":
                     if len(self.session.data["devices"]) !=1 and not device:
-                       sys.stderr.write(" ERROR: multiple devices connected, you must explicitly specify the device.\n")
-                       sys.exit(1)
+                        sys.stderr.write(" ERROR: multiple devices connected, you must explicitly specify the device.\n")
+                        sys.exit(1)
                     for i in range(len(self.session.data["devices"])):
                         self.device = copy.copy(self.session.data["devices"][i])
                         if self.device['path'] == device:
@@ -177,14 +177,14 @@ class spaceplot(plotter):
         alt_fixes = []
         lon_max = -9999
         for i in range(len(self.recentered)):
-            (lat, lon) = self.recentered[i][:2]
-            (raw1, raw2, alt) = self.fixes[i]
+            (_lat, lon) = self.recentered[i][:2]
+            (_raw1, _raw2, alt) = self.fixes[i]
             if not gps.isnan(alt):
-                    alt_sum += alt
-                    alt_fixes.append( alt)
-                    alt_num += 1
+                alt_sum += alt
+                alt_fixes.append( alt)
+                alt_num += 1
             if lon > lon_max :
-                    lon_max = lon
+                lon_max = lon
         if alt_num == 0:
             alt_avg = gps.NaN
             alt_ep = gps.NaN

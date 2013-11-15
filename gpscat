@@ -16,9 +16,9 @@ BASELEVEL = sniffer.LOG_IO
 
 highhalf_latch = True
 
-def hexdump(str):
+def hexdump(st):
     dmp = ""
-    for (i, ch) in enumerate(str):
+    for (_i, ch) in enumerate(st):
         if curses.ascii.isprint(ord(ch)) or curses.ascii.isspace(ord(ch)):
             dmp += ch
         else:
@@ -67,8 +67,8 @@ if __name__ == '__main__':
                 raise SystemExit, 0
 
         if (len(arguments) != 1):
-                printusage()
-                raise SystemExit, 1
+            printusage()
+            raise SystemExit, 1
 
         if "rfcomm" in arguments[0]:     # Bluetooth special case
             s = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
                     if length == 0:
                         break
                     if typeflag:
-                        sys.stdout.write(`ptype` + " (" + `length` + "@" + `counter-length` + "): " + hexdump(packet))
+                        sys.stdout.write(`ptype` + " (" + repr(length) + "@" + repr(counter-length) + "): " + hexdump(packet))
                         sys.stdout.write("\n")
                     else:
                         sys.stdout.write(hexdump(packet) + "\n")

@@ -23,7 +23,7 @@ class Baton:
         self.stream = sys.stderr
         self.stream.write(prompt + "...")
         if os.isatty(self.stream.fileno()):
-            self.stream.write(" \010")
+            self.stream.write(" \b")
         self.stream.flush()
         self.count = 0
         self.endmsg = endmsg
@@ -39,7 +39,7 @@ class Baton:
                 self.stream.flush()
             elif self.count % Baton.SPINNER_INTERVAL == 0:
                 self.stream.write("-/|\\"[self.count % 4])
-                self.stream.write("\010")
+                self.stream.write("\b")
                 self.stream.flush()
         self.count = self.count + 1
         return
@@ -75,7 +75,7 @@ def fakehook(linenumber, fakegps):
         if singleshot and linenumber > 0:
             return False
         if progress:
-            baton.twirl('*\010')
+            baton.twirl('*\b')
         elif not singleshot:
             sys.stderr.write("gpsfake: log cycle of %s begins.\n" % fakegps.testload.name)
     time.sleep(cycle)
@@ -213,13 +213,13 @@ if __name__ == '__main__':
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)
             raise SystemExit, 1
         except gps.client.json_error, e:
-            sys.stderr.write("gpsfake: JSON error on line %s is %s.\n" % (`e.data`, e.explanation))
+            sys.stderr.write("gpsfake: JSON error on line %s is %s.\n" % (repr(e.data), e.explanation))
             raise SystemExit, 1
         except KeyboardInterrupt:
             sys.stderr.write("gpsfake: aborted\n")
             raise SystemExit, 1
     finally:
-        test.cleanup();
+        test.cleanup()
 
     if progress:
         baton.end()

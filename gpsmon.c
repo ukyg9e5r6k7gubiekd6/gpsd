@@ -173,6 +173,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len2, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
+/*@-compdef -mustdefine@*/
 static void cond_hexdump(/*@out@*/char *buf2, size_t len2, 
 			 const char *buf, size_t len)
 /* pass through visibilized if all printable, hexdump otherwise */
@@ -190,16 +191,17 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
 		buf2[j] = '\0';
 	    }
 	    else {
-		(void)snprintf(&buf2[j], len2-strlen(buf2), "\\x%02x", buf[i]);
+		(void)snprintf(&buf2[j], len2-strlen(buf2), "\\x%02x", (unsigned int)buf[i]);
 		j = strlen(buf2);
 	    }
     } else {
 	buf2[0] = '\0';
 	for (i = 0; i < len; i++)
 	    (void)snprintf(buf2 + strlen(buf2), len2 - strlen(buf2),
-			   "%02x", buf[i]);
+			   "%02x", (unsigned int)buf[i]);
     }
 }
+/*@+compdef +mustdefine@*/
 
 /******************************************************************************
  *
@@ -223,8 +225,8 @@ static void packet_dump(const char *buf, size_t buflen)
     if (packetwin != NULL) {
 	char buf2[buflen * 2];
 	cond_hexdump(buf2, buflen * 2, buf, buflen);
-	waddstr(packetwin, buf2);
-	waddch(packetwin, '\n');
+	(void)waddstr(packetwin, buf2);
+	(void)waddch(packetwin, (chtype)'\n');
     }
 }
 
@@ -663,7 +665,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 {
     char buf[BUFSIZ];
 
-    (void)snprintf(buf, sizeof(buf), "(%zd) ", device->packet.outbuflen);
+    (void)snprintf(buf, sizeof(buf), "(%d) ", (int)device->packet.outbuflen);
     cond_hexdump(buf + strlen(buf), sizeof(buf) - strlen(buf), 
 		 (char *)device->packet.outbuffer, device->packet.outbuflen);
     (void)strlcat(buf, "\n", sizeof(buf) - strlen(buf));
@@ -1194,9 +1196,9 @@ int main(int argc, char **argv)
 
 
     if ((bailout = setjmp(terminate)) == 0) {
-	signal(SIGQUIT, onsig);
-	signal(SIGINT, onsig);
-	signal(SIGTERM, onsig);
+	(void)signal(SIGQUIT, onsig);
+	(void)signal(SIGINT, onsig);
+	(void)signal(SIGTERM, onsig);
 	(void)cbreak();
 	if (!nocurses && !curses_init())
 	    goto quit;
@@ -1238,7 +1240,7 @@ int main(int argc, char **argv)
 		    (void)fflush(stdout);
 		    nocbreak();
 		    (void)fputs("gpsmon> ", stdout);
-		    cmdline = fgets(inbuf, strlen(inbuf), stdin); 
+		    cmdline = fgets(inbuf, (int)strlen(inbuf), stdin); 
 		}
 		if (cmdline != NULL && !do_command(cmdline))
 		    longjmp(terminate, TERM_QUIT);
