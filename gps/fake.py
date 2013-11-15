@@ -124,6 +124,7 @@ else:
 
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
+        exceptions.Exception.__init__(self)
         self.msg = msg
 
 class TestLoad:
@@ -212,6 +213,7 @@ class TestLoad:
 
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
+        exceptions.Exception.__init__(self)
         self.msg = msg
 
 class FakeGPS:
@@ -388,6 +390,7 @@ class FakeUDP(FakeGPS):
 
 class DaemonError(exceptions.Exception):
     def __init__(self, msg):
+        exceptions.Exception.__init__(self)
         self.msg = msg
     def __str__(self):
         return repr(self.msg)
@@ -501,6 +504,7 @@ class DaemonInstance:
 
 class TestSessionError(exceptions.Exception):
     def __init__(self, msg):
+        exceptions.Exception.__init__(self)
         self.msg = msg
 
 class TestSession:

@@ -1,7 +1,7 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
-import time, socket, sys, select
+import time, socket, sys, select, exceptions
 
 if sys.hexversion >= 0x2060000:
     import json			# For Python 2.6
@@ -10,8 +10,9 @@ else:
 
 GPSD_PORT="2947"
 
-class json_error:
+class json_error(exceptions.Exception):
     def __init__(self, data, explanation):
+        exceptions.Exception.__init__(self)
         self.data = data
         self.explanation = explanation
 
