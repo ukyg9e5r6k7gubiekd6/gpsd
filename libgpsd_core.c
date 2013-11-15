@@ -34,7 +34,6 @@
 #include "driver_nmea2000.h"
 #endif /* defined(NMEA2000_ENABLE) */
 
-#if defined(PPS_ENABLE)
 static pthread_mutex_t report_mutex;
 
 void gpsd_acquire_reporting_lock(void)
@@ -50,7 +49,6 @@ void gpsd_release_reporting_lock(void)
     (void)pthread_mutex_unlock(&report_mutex);
     /*@ +unrecog @*/
 }
-#endif /* PPS_ENABLE */
 
 static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
@@ -84,9 +82,7 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
 	char buf[BUFSIZ], buf2[BUFSIZ];
 	char *err_str;
 
-#if defined(PPS_ENABLE)
 	gpsd_acquire_reporting_lock();
-#endif /* PPS_ENABLE */
 	switch ( errlevel ) {
 	case LOG_ERROR:
 		err_str = "ERROR: ";
@@ -129,9 +125,7 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
 	else
 	    (void)fputs(buf2, stderr);
-#if defined(PPS_ENABLE)
 	gpsd_release_reporting_lock();
-#endif /* PPS_ENABLE */
     }
 #endif /* !SQUELCH_ENABLE */
 }

@@ -602,9 +602,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 	}
     }
 
-#if defined(PPS_ENABLE)
     gpsd_acquire_reporting_lock();
-#endif /* PPS_ENABLE */
     status = send(sub->fd, buf, len, 0);
 #if defined(PPS_ENABLE)
     gpsd_release_reporting_lock();
