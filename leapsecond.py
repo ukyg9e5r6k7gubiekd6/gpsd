@@ -132,11 +132,11 @@ def last_insertion_time():
 
     tm_mday = 1
     tm_hour = tm_min = tm_sec = 0
-    tm_mon = 1;
+    tm_mon = 1
     jan = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
            tm_sec, tm_wday, tm_yday, tm_isdst)
     jan = int(calendar.timegm(jan))
-    tm_mon = 7;
+    tm_mon = 7
     jul = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
            tm_sec, tm_wday, tm_yday, tm_isdst)
     jul = int(calendar.timegm(jul))
@@ -182,7 +182,6 @@ def get():
             except (IOError, OSError):
                 if verbose:
                     print >>sys.stderr, "can't write %s" % __cachepath
-                pass
         return (current_offset, valid_from)
 
 def save_leapseconds(outfile):
@@ -333,9 +332,8 @@ def leapbound(year, month):
         tv = "%s-12-31T23:59:59" % year
     return tv
 
-"""
-Main part
-"""
+# Main part
+
 def usage():
     print __doc__
     raise SystemExit, 0

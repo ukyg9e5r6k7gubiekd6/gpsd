@@ -149,7 +149,7 @@ class TestLoad:
         type_latch = None
         commentlen = 0
         while True:
-            (plen, ptype, packet, counter) = getter.get(logfp.fileno())
+            (plen, ptype, packet, _counter) = getter.get(logfp.fileno())
             if plen <= 0:
                 break
             elif ptype == sniffer.COMMENT_PACKET:
@@ -159,7 +159,7 @@ class TestLoad:
                     # Change serial parameters
                     packet = packet[1:].strip()
                     try:
-                        (xx, baud, params) = packet.split()
+                        (_xx, baud, params) = packet.split()
                         baud = int(baud)
                         if params[0] in ('7', '8'):
                             databits = int(params[0])

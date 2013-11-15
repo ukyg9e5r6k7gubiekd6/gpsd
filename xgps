@@ -92,7 +92,7 @@ class SkyView(gtk.DrawingArea):
         self.satellites = []
         self.center_x = self.center_y = self.radius = None
 
-    def on_size_allocate(self, unused, allocation):
+    def on_size_allocate(self, _unused, allocation):
         width = allocation.width
         height = allocation.height
         x = width / 2
@@ -176,7 +176,7 @@ class SkyView(gtk.DrawingArea):
         yout = self.center_y - math.cos(az) * el * self.radius
         return (xout, yout)
 
-    def on_expose_event(self, widget, unused):
+    def on_expose_event(self, widget, _unused):
         self.cr = widget.window.cairo_create()
 
         self.cr.set_line_width(1)
@@ -451,7 +451,7 @@ class Base:
         vbox = gtk.VBox(False, 0)
         self.window.add(vbox)
 
-        self.window.connect("destroy", lambda unused: gtk.main_quit())
+        self.window.connect("destroy", lambda _unused: gtk.main_quit())
 
         self.uimanager = gtk.UIManager()
         self.accelgroup = self.uimanager.get_accel_group()
@@ -459,7 +459,7 @@ class Base:
         self.actiongroup = gtk.ActionGroup('xgps')
         self.actiongroup.add_actions(
             [('Quit', gtk.STOCK_QUIT, '_Quit', None,
-              'Quit the Program', lambda unused: gtk.main_quit()),
+              'Quit the Program', lambda _unused: gtk.main_quit()),
              ('File', None, '_File'),
              ('View', None, '_View'),
              ('Units', None, '_Units'),
@@ -485,12 +485,12 @@ class Base:
               'Nautical units', 1),
              ('Metric', None, '_Metric', '<Control>m',
               'Metric Units', 2),
-             ], 0, lambda a, unused: self.set_units(['i', 'n', 'm'][a.get_current_value()]))
+             ], 0, lambda a, _unused: self.set_units(['i', 'n', 'm'][a.get_current_value()]))
         self.actiongroup.add_radio_actions(
             [('30°', None, '30°', None, '30°', 30),
              ('45°', None, '45°', None, '45°', 45),
              ('Off', None, 'Off', None, 'Off', 0),
-             ], 45, lambda a, unused: self.set_step_of_grid(a.get_current_value()))
+             ], 45, lambda a, _unused: self.set_step_of_grid(a.get_current_value()))
         self.uimanager.insert_action_group(self.actiongroup, 0)
         self.uimanager.add_ui_from_string('''
 <ui>
@@ -643,7 +643,7 @@ class Base:
         except IndexError:
             sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n" % (row, gps.MAXCHANNELS))
 
-    def delete_event(self, widget, event, data=None):
+    def delete_event(self, _widget, _event, _data=None):
         gtk.main_quit()
         return False
 
@@ -822,12 +822,12 @@ class Base:
                     
         return True
 
-    def handle_hangup(self, source, condition):
+    def handle_hangup(self, _source, _condition):
         "Handle hangup condition from the daemon."
         w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
                               flags=gtk.DIALOG_DESTROY_WITH_PARENT,
                               buttons=gtk.BUTTONS_CANCEL)
-        w.connect("destroy", lambda unused: gtk.main_quit())
+        w.connect("destroy", lambda _unused: gtk.main_quit())
         w.set_markup("gpsd has stopped sending data.")
         w.run()
         gtk.main_quit()

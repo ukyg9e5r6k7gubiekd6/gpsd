@@ -43,7 +43,7 @@ class gpscommon:
         msg = "getaddrinfo returns an empty list"
         self.sock = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
-            af, socktype, proto, canonname, sa = res
+            af, socktype, proto, _canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
                 #if self.debuglevel > 0: print 'connect:', (host, port)
@@ -68,7 +68,7 @@ class gpscommon:
         "Return True if data is ready for the client."
         if self.linebuffer:
             return True
-        (winput, woutput, wexceptions) = select.select((self.sock,), (), (), timeout)
+        (winput, _woutput, _wexceptions) = select.select((self.sock,), (), (), timeout)
         return winput != []
 
     def read(self):
