@@ -133,7 +133,8 @@ static jmp_buf terminate;
 #define TERM_DRIVER_SWITCH	2
 #define TERM_EMPTY_READ 	3
 #define TERM_READ_ERROR 	4
-#define TERM_QUIT		5
+#define TERM_SIGNAL		5
+#define TERM_QUIT		6
 
 /* PPS monitoring */
 #if defined(PPS_ENABLE)
@@ -974,7 +975,10 @@ static jmp_buf assertbuf;
 
 static void onsig(int sig UNUSED)
 {
-    longjmp(assertbuf, 1);
+    if (sig == SIGABRT)
+	longjmp(assertbuf, 1);
+    else
+	longjmp(terminate, TERM_SIGNAL);
 }
 
 #define WATCHRAW	"?WATCH={\"raw\":2,\"pps\":true}\r\n"
@@ -1181,10 +1185,6 @@ int main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    (void)cbreak();
-    if (!nocurses && !curses_init())
-	goto quit;
-
     FD_ZERO(&all_fds);
     FD_SET(0, &all_fds);	/* accept keystroke inputs */
 
@@ -1192,7 +1192,15 @@ int main(int argc, char **argv)
     if (session.gpsdata.gps_fd > maxfd)
 	 maxfd = session.gpsdata.gps_fd;
 
+
     if ((bailout = setjmp(terminate)) == 0) {
+	signal(SIGQUIT, onsig);
+	signal(SIGINT, onsig);
+	signal(SIGTERM, onsig);
+	(void)cbreak();
+	if (!nocurses && !curses_init())
+	    goto quit;
+
 	for (;;) 
 	{
 	    switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
@@ -1267,6 +1275,7 @@ int main(int argc, char **argv)
     case TERM_READ_ERROR:
 	explanation = "Read error from device\n";
 	break;
+    case TERM_SIGNAL:
     case TERM_QUIT:
 	/* normal exit, no message */
 	break;
