@@ -249,6 +249,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     gpsd_report(session->context->debug, LOG_PROG,
 		"SiRF: Writing control type %02x:\n", msg[4]);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
+    (void)usleep(SIRF_SETTLE); /* guessed settling time */
     return (ok);
 }
 
@@ -1377,57 +1378,47 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Probing for firmware version...\n");
 	(void)sirf_write(session, versionprobe);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Requesting navigation parameters...\n");
 	(void)sirf_write(session, navparams);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 #ifdef RECONFIGURE_ENABLE
         /* unset MID 64 first since there is a flood of them */
 	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64...\n");
 	putbyte(unsetmidXX, 6, 0x40);
 	(void)sirf_write(session, unsetmidXX);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Requesting periodic ecef reports...\n");
 	(void)sirf_write(session, requestecef);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Requesting periodic tracker reports...\n");
 	(void)sirf_write(session, requesttracker);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Setting DGPS control to use SBAS...\n");
 	(void)sirf_write(session, dgpscontrol);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Setting SBAS to auto/integrity mode...\n");
 	(void)sirf_write(session, sbasparams);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Enabling PPS message...\n");
 	(void)sirf_write(session, enablemid52);
-	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 	if (session->gpsdata.dev.baudrate >= 38400) {
 	    /* fast enough, turn on nav data */
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Enabling subframe transmission...\n");
 	    (void)sirf_write(session, enablesubframe);
-	    (void)usleep(SIRF_SETTLE); /* guessed settling time */
 	} else {
 	    /* too slow, turn off nav data */
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Disabling subframe transmission...\n");
 	    (void)sirf_write(session, disablesubframe);
-	    (void)usleep(SIRF_SETTLE); /* guessed settling time */
 	}
 
 #endif /* RECONFIGURE_ENABLE */
