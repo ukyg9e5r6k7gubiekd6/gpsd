@@ -1382,6 +1382,12 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	(void)usleep(SIRF_SETTLE); /* guessed settling time */
 
 #ifdef RECONFIGURE_ENABLE
+        /* unset MID 64 first since there is a flood of them */
+	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64...\n");
+	putbyte(unsetmidXX, 6, 0x40);
+	(void)sirf_write(session, unsetmidXX);
+	(void)usleep(SIRF_SETTLE); /* guessed settling time */
+
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: Requesting periodic ecef reports...\n");
 	(void)sirf_write(session, requestecef);
