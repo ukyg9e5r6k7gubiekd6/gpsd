@@ -526,7 +526,8 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 		"SiRF: NavData chan %u svid %u\n",chan,svid);
 
 #ifdef RECONFIGURE_ENABLE
-    if (!session->context->readonly && session->gpsdata.dev.baudrate < 38400) {
+    /* SiRF recommends at least 57600 for SiRF IV nav data */
+    if (!session->context->readonly && session->gpsdata.dev.baudrate < 57600) {
         /* some USB are also too slow, no way to tell which ones */
 	gpsd_report(session->context->debug, LOG_WARN,
 		"WARNING: SiRF: link too slow, disabling subframes.\n");
@@ -1409,7 +1410,8 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 		    "SiRF: Enabling PPS message...\n");
 	(void)sirf_write(session, enablemid52);
 
-	if (session->gpsdata.dev.baudrate >= 38400) {
+    /* SiRF recommends at least 57600 for SiRF IV nav data */
+	if (session->gpsdata.dev.baudrate >= 57600) {
 	    /* fast enough, turn on nav data */
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Enabling subframe transmission...\n");
