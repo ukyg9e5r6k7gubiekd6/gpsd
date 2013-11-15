@@ -576,7 +576,6 @@ int pps_thread_lastpps(struct gps_device_t *session, struct timedrift_t *td)
     /*@ +unrecog @*/
     *td = session->ppslast;
     ret = session->ppscount;
-    gpsd_release_reporting_lock();
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     (void)pthread_mutex_unlock(&ppslast_mutex);
     /*@ +unrecog @*/
