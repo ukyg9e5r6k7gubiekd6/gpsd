@@ -135,6 +135,9 @@ WATCH_DEVICE	= 0x000800	# watch specific device
 
 class gpsjson(gpscommon):
     "Basic JSON decoding."
+    def __init__(self):
+        gpscommon.__init__(self)
+
     def __iter__(self):
         return self
 

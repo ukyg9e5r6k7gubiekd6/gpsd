@@ -68,7 +68,7 @@ run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
 import os, sys, time, signal, pty, termios # fcntl, array, struct
-import exceptions, threading, socket, select, cStringIO
+import exceptions, threading, socket, select
 import gps
 import packet as sniffer
 

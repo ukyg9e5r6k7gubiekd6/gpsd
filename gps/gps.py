@@ -149,7 +149,7 @@ class gpsdata:
             st += "    %r\n" % sat
         return st
 
-class gps(gpsdata, gpsjson):
+class gps(gpscommon, gpsdata, gpsjson):
     "Client interface to a running gpsd instance."
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
         gpscommon.__init__(self, host, port, verbose)
