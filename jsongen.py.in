@@ -923,8 +923,6 @@ ais_specs = (
 # You should not need to modify anything below this line.
 
 def generate(spec):
-    global outboard
-
     report = ""
     leader = " " * 39
     initname = spec["initname"]

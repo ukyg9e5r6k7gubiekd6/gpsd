@@ -149,7 +149,6 @@ def last_insertion_time():
 
 def get():
     "Fetch GPS offset, from local cache file if possible."
-    global verbose
     stale = False
     offset = None
     valid_from = None
