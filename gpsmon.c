@@ -1208,7 +1208,7 @@ int main(int argc, char **argv)
 	if (nocurses) {
 	    tcgetattr(0, &cooked);
 	    tcgetattr(0, &rare);
-	    rare.c_lflag &=~ ICANON;
+	    rare.c_lflag &=~ (ICANON | ECHO);
 	    rare.c_cc[VMIN] = 1;
 	    tcflush(0, TCIFLUSH);
 	    tcsetattr(0, TCSANOW, &rare);
@@ -1256,14 +1256,18 @@ int main(int argc, char **argv)
 			tcflush(0, TCIFLUSH);
 			tcsetattr(0, TCSANOW, &cooked);
 			(void)fputs("gpsmon> ", stdout);
+			(void)putchar(inbuf[0]);
 			cmdline = fgets(inbuf+1, (int)strlen(inbuf)-1, stdin);
 			cmdline--;
-			tcsetattr(0, TCSANOW, &rare);
-			gpsd_release_reporting_lock();
 		    }
 		}
 		if (cmdline != NULL && !do_command(cmdline))
 		    longjmp(terminate, TERM_QUIT);
+		if (!curses_active) {
+		    sleep(2);
+		    tcsetattr(0, TCSANOW, &rare);
+		    gpsd_release_reporting_lock();
+		}
 	    }
 	}
     }
