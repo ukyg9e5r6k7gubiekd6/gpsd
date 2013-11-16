@@ -97,6 +97,9 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
 	case LOG_WARN:
 		err_str = "WARN: ";
 		break;
+	case LOG_CLIENT:
+		err_str = "CLIENT: ";
+		break;
 	case LOG_INF:
 		err_str = "INFO: ";
 		break;

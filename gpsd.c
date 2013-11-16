@@ -586,9 +586,9 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 {
     ssize_t status;
 
-    if (context.debug >= 3) {
+    if (context.debug >= LOG_CLIENT) {
 	if (isprint(buf[0]))
-	    gpsd_report(context.debug, LOG_IO,
+	    gpsd_report(context.debug, LOG_CLIENT,
 			"=> client(%d): %s\n", sub_index(sub), buf);
 	else {
 	    char *cp, buf2[MAX_PACKET_LENGTH * 3];
@@ -597,7 +597,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 		(void)snprintf(buf2 + strlen(buf2),
 			       sizeof(buf2) - strlen(buf2),
 			       "%02x", (unsigned int)(*cp & 0xff));
-	    gpsd_report(context.debug, LOG_IO,
+	    gpsd_report(context.debug, LOG_CLIENT,
 			"=> client(%d): =%s\n", sub_index(sub),	buf2);
 	}
     }
@@ -2257,7 +2257,7 @@ int main(int argc, char *argv[])
 
 		while ((rd = read(cfd, buf, sizeof(buf) - 1)) > 0) {
 		    buf[rd] = '\0';
-		    gpsd_report(context.debug, LOG_IO,
+		    gpsd_report(context.debug, LOG_CLIENT,
 				"<= control(%d): %s\n", cfd, buf);
 		    /* coverity[tainted_data] Safe, never handed to exec */
 		    handle_control(cfd, buf);
@@ -2326,7 +2326,7 @@ int main(int argc, char *argv[])
 		    if (buf[buflen - 1] != '\n')
 			buf[buflen++] = '\n';
 		    buf[buflen] = '\0';
-		    gpsd_report(context.debug, LOG_IO,
+		    gpsd_report(context.debug, LOG_CLIENT,
 				"<= client(%d): %s\n", sub_index(sub), buf);
 
 		    /*
