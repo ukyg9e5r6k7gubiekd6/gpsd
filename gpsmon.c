@@ -648,8 +648,10 @@ static void complain(const char *fmt, ...)
 
     if (curses_active)
 	monitor_vcomplain(fmt, ap);
-    else
+    else {
 	vfprintf(stderr, fmt, ap);
+	fputc('\n', stderr);
+    }
 
     va_end(ap);
 }
@@ -989,10 +991,13 @@ static void onsig(int sig UNUSED)
 #define WATCHNMEA	"?WATCH={\"nmea\":true,\"pps\":true}\r\n"
 #define WATCHNMEADEVICE	"?WATCH={\"nmea\":true,\"pps\":true,\"device\":\"%s\"}\r\n"
 
+/* this placement avoids a compiler warning */
+static const char *cmdline;
+
 int main(int argc, char **argv)
 {
     int option;
-    char *explanation, *cmdline;
+    char *explanation;
     int bailout = 0, matches = 0;
     bool nmea = false;
     fd_set all_fds;
@@ -1244,10 +1249,18 @@ int main(int argc, char **argv)
 		    cmdline = curses_get_command();
 		else
 		{
-		    tcsetattr(0, TCSANOW, &cooked);
-		    (void)fputs("gpsmon> ", stdout);
-		    cmdline = fgets(inbuf, (int)strlen(inbuf), stdin); 
-		    tcsetattr(0, TCSANOW, &rare);
+		    int st = read(0, &inbuf, 1);
+
+		    if (st == 1) {
+			gpsd_acquire_reporting_lock();
+			tcflush(0, TCIFLUSH);
+			tcsetattr(0, TCSANOW, &cooked);
+			(void)fputs("gpsmon> ", stdout);
+			cmdline = fgets(inbuf+1, (int)strlen(inbuf)-1, stdin);
+			cmdline--;
+			tcsetattr(0, TCSANOW, &rare);
+			gpsd_release_reporting_lock();
+		    }
 		}
 		if (cmdline != NULL && !do_command(cmdline))
 		    longjmp(terminate, TERM_QUIT);
