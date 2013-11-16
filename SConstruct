@@ -1899,7 +1899,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # This will ship a freecode metadata update 
     ship_release = Utility("ship_release",
                            [tarball],
-                           ['shipper -u -m --exclude "login.ibiblio.org:/public/html/catb/esr/"'])
+                           ['shipper -u --exclude "login.ibiblio.org:/public/html/catb/esr/" version=' + gpsd_version])
     env.Alias("ship", [releaseprep,
                           ship_release,
                           upload_tags])
