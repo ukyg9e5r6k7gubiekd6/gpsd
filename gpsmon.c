@@ -249,7 +249,7 @@ static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list
 {
     char buf2[BUFSIZ];
 
-    (void)vsnprintf(buf, len, fmt, ap);
+    (void)vsnprintf(buf + strlen(buf), len, fmt, ap);
     visibilize(buf2, sizeof(buf2), buf);
 
     report_lock();
@@ -552,6 +552,7 @@ static char *curses_get_command(void)
 static void packet_log(const char *fmt, ...)
 {
     char buf[BUFSIZ];
+    buf[0] = '\0';
     va_list ap;
     va_start(ap, fmt);
     packet_vlog(buf, sizeof(buf), fmt, ap);
@@ -596,12 +597,12 @@ void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
 	err_str = "UNK: ";
     }
 
-    (void)strlcpy(buf, "gpsd:", BUFSIZ);
+    (void)strlcpy(buf, "gpsmon:", BUFSIZ);
     (void)strncat(buf, err_str, BUFSIZ - strlen(buf));
     if (errlevel <= debuglevel) {
 	va_list ap;
 	va_start(ap, fmt);
-	packet_vlog(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
+	packet_vlog(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
     }
 }
