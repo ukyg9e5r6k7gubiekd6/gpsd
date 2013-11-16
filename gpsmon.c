@@ -56,6 +56,7 @@ static WINDOW *statwin, *cmdwin;
 static char *type_name;
 static size_t promptlen = 0;
 static struct fixsource_t source;
+struct termios cooked, rare;
 
 #ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
@@ -1199,8 +1200,14 @@ int main(int argc, char **argv)
 	(void)signal(SIGQUIT, onsig);
 	(void)signal(SIGINT, onsig);
 	(void)signal(SIGTERM, onsig);
-	(void)cbreak();
-	if (!nocurses && !curses_init())
+	if (nocurses) {
+	    tcgetattr(0, &cooked);
+	    tcgetattr(0, &rare);
+	    rare.c_lflag &=~ ICANON;
+	    rare.c_cc[VMIN] = 1;
+	    tcflush(0, TCIFLUSH);
+	    tcsetattr(0, TCSANOW, &rare);
+	} else if (!curses_init())
 	    goto quit;
 
 	for (;;) 
@@ -1237,10 +1244,10 @@ int main(int argc, char **argv)
 		    cmdline = curses_get_command();
 		else
 		{
-		    (void)fflush(stdout);
-		    nocbreak();
+		    tcsetattr(0, TCSANOW, &cooked);
 		    (void)fputs("gpsmon> ", stdout);
 		    cmdline = fgets(inbuf, (int)strlen(inbuf), stdin); 
+		    tcsetattr(0, TCSANOW, &rare);
 		}
 		if (cmdline != NULL && !do_command(cmdline))
 		    longjmp(terminate, TERM_QUIT);
@@ -1262,6 +1269,8 @@ int main(int argc, char **argv)
 	(void)fclose(logfile);
     if (curses_active)
 	(void)endwin();
+    else
+	tcsetattr(0, TCSANOW, &cooked);
 
     explanation = NULL;
     switch (bailout) {
