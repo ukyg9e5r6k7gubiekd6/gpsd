@@ -127,7 +127,8 @@ static int init_kernel_pps(struct gps_device_t *session)
     globfree(&globbuf);
 
     if ( 0 == (int)pps_num ) {
-	gpsd_report(session->context->debug, LOG_INF, "KPPS device not found.\n");
+	gpsd_report(session->context->debug, LOG_INF,
+		    "KPPS device not found.\n");
     	return -1;
     }
     /* contruct the magic device path */
@@ -296,7 +297,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	        cycle_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[edge_kpps])/1000;
 	        duration_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
-	        gpsd_report(session->context->debug, LOG_INF,
+	        gpsd_report(session->context->debug, LOG_PROG,
 		    "KPPS cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
 		    cycle_kpps, duration_kpps,
 		    (unsigned long)ts_kpps.tv_sec,
@@ -352,7 +353,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    // strange, try again
 	    continue;
 	}
-	gpsd_report(session->context->debug, LOG_INF,
+	gpsd_report(session->context->debug, LOG_PROG,
 		    "PPS cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
 		    cycle, duration,
 		    (unsigned long)clock_ts.tv_sec,
@@ -506,9 +507,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		(void)pthread_mutex_unlock(&ppslast_mutex);
 		/*@ +unrecog @*/
 		/*@+compdef@*/
+		gpsd_report(session->context->debug, LOG_INF,
+			    "PPS hooks called with %.20s %lu.%09lu offset %.9f\n",
+			    log1,
+			    (unsigned long)clock_ts.tv_sec,
+			    (unsigned long)clock_ts.tv_nsec,
+			    offset);
             }
 	    /*@-type@*/ /* splint is confused about struct timespec */
-	    gpsd_report(session->context->debug, LOG_INF,
+	    gpsd_report(session->context->debug, LOG_PROG,
 		    "PPS edge %.20s %lu.%09lu offset %.9f\n",
 		    log1,
 		    (unsigned long)clock_ts.tv_sec,
