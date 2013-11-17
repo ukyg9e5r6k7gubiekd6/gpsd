@@ -23,12 +23,7 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
-#include "gpsd_config.h"
-#ifdef HAVE_BLUEZ
-#include <bluetooth/bluetooth.h>
-#endif
 #include "gpsd.h"
-#include "gpsdclient.h"
 #include "gpsmon.h"
 #include "revision.h"
 
@@ -55,7 +50,6 @@ static WINDOW *statwin, *cmdwin;
 /*@null@*/ static FILE *logfile;
 static char *type_name;
 static size_t promptlen = 0;
-static struct fixsource_t source;
 struct termios cooked, rare;
 
 #ifdef PASSTHROUGH_ENABLE
@@ -342,8 +336,7 @@ static void refresh_statwin(void)
 		session.gpsdata.dev.parity,
 		session.gpsdata.dev.stopbits);
     else
-	display(statwin, 0, 0, "%s:%s:%s",
-		source.server, source.port, session.gpsdata.dev.path);
+	display(statwin, 0, 0, "%s", session.gpsdata.dev.path);
     (void)wattrset(statwin, A_NORMAL);
     (void)wnoutrefresh(statwin);
 }
@@ -1001,7 +994,7 @@ static const char *cmdline;
 int main(int argc, char **argv)
 {
     int option;
-    char *explanation;
+    char *explanation, *devicename;
     int bailout = 0, matches = 0;
     bool nmea = false;
     fd_set all_fds;
@@ -1110,73 +1103,36 @@ int main(int argc, char **argv)
     }
     /*@ +branchstate @*/
 
-    if (optind < argc) {
-	gpsd_source_spec(argv[optind], &source);
-    } else
-	gpsd_source_spec(NULL, &source);
-
     gpsd_time_init(&context, time(NULL));
     gpsd_init(&session, &context, NULL);
 
-    /*@ -boolops */
-    if ((optind >= argc || source.device == NULL
-	|| strchr(argv[optind], ':') != NULL)
-#ifdef HAVE_BLUEZ
-        && bachk(argv[optind])
-#endif
-       ) {
-	(void)gps_open(source.server, source.port, &session.gpsdata);
-	// cppcheck-suppress pointerLessThanZero
-	if (session.gpsdata.gps_fd < 0) {
-	    (void)fprintf(stderr,
-			  "%s: connection failure on %s:%s, error %d = %s.\n",
-			  argv[0], source.server, source.port,
-			  session.gpsdata.gps_fd,
-			  netlib_errstr(session.gpsdata.gps_fd));
-	    exit(EXIT_FAILURE);
-	}
-	if (source.device != NULL) {
-	    if (nmea) {
-	        (void)gps_send(&session.gpsdata, WATCHNMEADEVICE, source.device);
-	    } else {
-	        (void)gps_send(&session.gpsdata, WATCHRAWDEVICE, source.device);
-	    }
-	    /*
-	     *  The gpsdata.dev member is filled only in JSON mode,
-	     *  but we are in super-raw mode.
-	     */
-	    (void)strlcpy(session.gpsdata.dev.path, source.device,
-			  sizeof(session.gpsdata.dev.path));
-	} else {
-	    if (nmea) {
-	        (void)gps_send(&session.gpsdata, WATCHNMEA);
-		session.gpsdata.dev.path[0] = '\0';
-	    } else {
-	        (void)gps_send(&session.gpsdata, WATCHRAW);
-		session.gpsdata.dev.path[0] = '\0';
-	    }
-	}
-	serial = false;
-    } else {
-	(void)strlcpy(session.gpsdata.dev.path, argv[optind],
-		      sizeof(session.gpsdata.dev.path));
-	if (gpsd_activate(&session, O_PROBEONLY) == -1) {
-	    (void)fprintf(stderr,
-			"gpsmon: activation of device %s failed, errno=%d (%s)\n",
-			  session.gpsdata.dev.path, errno, strerror(errno));
-	    exit(EXIT_FAILURE);
-	}
+    if (optind >= argc)
+	devicename = "gpsd://localhost:" DEFAULT_GPSD_PORT;
+    else 
+	devicename = argv[optind];
 
-	serial = true;
+    (void)strlcpy(session.gpsdata.dev.path, devicename,
+		  sizeof(session.gpsdata.dev.path));
 
+    if (gpsd_activate(&session, O_PROBEONLY) == -1) {
+	(void)fprintf(stderr,
+		      "gpsmon: activation of device %s failed, errno=%d (%s)\n",
+		      session.gpsdata.dev.path, errno, strerror(errno));
+	exit(EXIT_FAILURE);
+    }
+
+    serial = (strncmp(devicename, "/dev", 4) == 0);
+
+    if (serial) {
 #ifdef PPS_ENABLE
-	/* Setup PPS monitoring. */
 	session.thread_report_hook = pps_report;
 	pps_thread_activate(&session);
 #endif /* PPS_ENABLE */
     }
-    /*@ +boolops */
-    /*@ +nullpass +branchstate @*/
+    else {
+	/* FIXME: Also use WATCH*DEVICE here someday */
+	(void)gps_send(&session.gpsdata, nmea ? WATCHNMEA : WATCHRAW);
+    }
 
     /*
      * This is a monitoring utility. Disable autoprobing, because
