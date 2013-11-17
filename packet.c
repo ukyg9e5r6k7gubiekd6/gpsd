@@ -514,7 +514,10 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	else if (c == 0xb5)	/* LEA-5H can and will output NMEA and UBX back to back */
 	    lexer->state = UBX_LEADER_1;
 #endif
-	else
+	else if (c == '{') {
+	    lexer->state = JSON_LEADER;
+	    character_pushback(lexer);
+	} else
 	    lexer->state = GROUND_STATE;
 	break;
     case SEATALK_LEAD_1:
