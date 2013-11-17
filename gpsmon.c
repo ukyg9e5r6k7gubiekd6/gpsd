@@ -669,6 +669,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 {
     char buf[BUFSIZ];
 
+#ifdef PPS_ENABLE
     if (!serial && strncmp((char*)device->packet.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
     {
 	const char *end;
@@ -687,6 +688,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	}
     }
     else
+#endif /* PPS_ENABLE */
     {
 	(void)snprintf(buf, sizeof(buf), "(%d) ",
 		       (int)device->packet.outbuflen);
@@ -1235,7 +1237,9 @@ int main(int argc, char **argv)
 		    int st = read(0, &inbuf, 1);
 
 		    if (st == 1) {
+#ifdef PPS_ENABLE
 			gpsd_acquire_reporting_lock();
+#endif /* PPS_ENABLE*/
 			tcflush(0, TCIFLUSH);
 			tcsetattr(0, TCSANOW, &cooked);
 			(void)fputs("gpsmon> ", stdout);
@@ -1249,7 +1253,9 @@ int main(int argc, char **argv)
 		if (!curses_active) {
 		    sleep(2);
 		    tcsetattr(0, TCSANOW, &rare);
+#ifdef PPS_ENABLE
 		    gpsd_release_reporting_lock();
+#endif /* PPS_ENABLE*/
 		}
 	    }
 	}

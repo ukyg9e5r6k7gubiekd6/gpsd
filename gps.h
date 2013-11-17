@@ -2048,6 +2048,9 @@ extern int gps_mainloop(struct gps_data_t *, int,
 extern const char /*@null observer@*/ *gps_data(const struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
+int json_pps_read(const char *buf, struct gps_data_t *,
+		  /*@null@*/ const char **);
+
 /* dependencies on struct gpsdata_t end hrere */
 
 extern void libgps_trace(int errlevel, const char *, ...);

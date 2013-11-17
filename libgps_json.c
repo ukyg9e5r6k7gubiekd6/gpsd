@@ -353,7 +353,7 @@ static int json_error_read(const char *buf, struct gps_data_t *gpsdata,
     return status;
 }
 
-static int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
+int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
 			   /*@null@*/ const char **endptr)
 {
     int real_sec = 0, real_nsec = 0, clock_sec = 0, clock_nsec = 0;
@@ -361,6 +361,8 @@ static int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
     const struct json_attr_t json_attrs_pps[] = {
 	/* *INDENT-OFF* */
         {"class",     t_check,   .dflt.check = "PPS"},
+	{"device",    t_string,  .addr.string = gpsdata->dev.path,
+			         .len = sizeof(gpsdata->dev.path)},
 	{"real_sec",  t_integer, .addr.integer = &real_sec,
 			         .dflt.integer = 0},
 	{"real_nsec", t_integer, .addr.integer = &real_nsec,
