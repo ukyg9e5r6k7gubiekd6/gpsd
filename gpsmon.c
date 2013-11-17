@@ -147,6 +147,10 @@ static inline void report_lock(void) { }
 static inline void report_unlock(void) { }
 #endif /* PPS_ENABLE */
 
+#define PPSBAR	"-------------------------------------" \
+	       " PPS " \
+	       "-------------------------------------\n"
+
 /******************************************************************************
  *
  * Visualization helpers
@@ -665,10 +669,31 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 {
     char buf[BUFSIZ];
 
-    (void)snprintf(buf, sizeof(buf), "(%d) ", (int)device->packet.outbuflen);
-    cond_hexdump(buf + strlen(buf), sizeof(buf) - strlen(buf), 
-		 (char *)device->packet.outbuffer, device->packet.outbuflen);
-    (void)strlcat(buf, "\n", sizeof(buf) - strlen(buf));
+    if (!serial && strncmp((char*)device->packet.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
+    {
+	const char *end;
+	struct gps_data_t noclobber;
+	int status = json_pps_read((const char *)device->packet.outbuffer,
+				   &noclobber,
+				   &end);
+	if (status != 0) {
+	    /* FIXME: figure out why using json_error_string() core dumps */
+	    complain("Ill-formed PPS packet: %d", status);
+	    buf[0] = '\0';
+	} else {
+	    (void)strlcpy(buf, PPSBAR, BUFSIZ);
+	    session.gpsdata.timedrift = noclobber.timedrift;
+	    session.ppscount++;
+	}
+    }
+    else
+    {
+	(void)snprintf(buf, sizeof(buf), "(%d) ",
+		       (int)device->packet.outbuflen);
+	cond_hexdump(buf + strlen(buf), sizeof(buf) - strlen(buf),
+		     (char *)device->packet.outbuffer,device->packet.outbuflen);
+	(void)strlcat(buf, "\n", sizeof(buf) - strlen(buf));
+    }
 
     if (curses_active)
 	select_packet_monitor(device);
@@ -966,9 +991,7 @@ static bool do_command(const char *line)
 #ifdef PPS_ENABLE
 static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
 			struct timedrift_t *td UNUSED) {
-    packet_log("#------------------------------------" 
-	       " PPS "
-	       "------------------------------------#\n");
+    packet_log(PPSBAR);
     return "gpsmon";
 }
 #endif /* PPS_ENABLE */
