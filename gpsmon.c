@@ -169,7 +169,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len2, const char *buf)
 	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
 	else
 	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
-			   0x00ff & (unsigned)*sp);
+			   (unsigned)(*sp & 0xff));
 }
 
 /*@-compdef -mustdefine@*/
@@ -190,14 +190,14 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
 		buf2[j] = '\0';
 	    }
 	    else {
-		(void)snprintf(&buf2[j], len2-strlen(buf2), "\\x%02x", (unsigned int)buf[i]);
+		(void)snprintf(&buf2[j], len2-strlen(buf2), "\\x%02x", (unsigned int)(buf[i] & 0xff));
 		j = strlen(buf2);
 	    }
     } else {
 	buf2[0] = '\0';
 	for (i = 0; i < len; i++)
 	    (void)snprintf(buf2 + strlen(buf2), len2 - strlen(buf2),
-			   "%02x", (unsigned int)buf[i]);
+			   "%02x", (unsigned int)(buf[i] & 0xff));
     }
 }
 /*@+compdef +mustdefine@*/
