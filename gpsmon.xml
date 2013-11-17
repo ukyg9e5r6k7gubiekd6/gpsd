@@ -26,6 +26,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-n </arg>
+      <arg choice='opt'>-a </arg>
       <arg choice='opt'>-l <replaceable>logfile</replaceable></arg>
       <arg choice='opt'>-t <replaceable>driver-prefix</replaceable></arg>
       <arg choice='opt'>
@@ -121,10 +122,15 @@ by the packet type lacks those capabilities.  Most useful when the
 packet type is NMEA but the device is known to have a binary mode,
 such as SiRF binary.</para>
 
-<para>After startup, the top part of the screen reports the contents
-of several especially interesting packet types.  The "PPS offset"
-field, if nonempty, is the delta between the last 1PPS top of second
-and the system clock at that time.</para>
+<para>The -a option enables a special debugging mode that does not
+use screen painting.  Packets are dumped normally; any character 
+typed suspends packet dumping and brings up a command prompt. This
+feature will mainly be of interest to GPSD developers.</para>
+
+<para>After startup (without -a), the top part of the screen reports
+the contents of several especially interesting packet types.  The "PPS
+offset" field, if nonempty, is the delta between the last 1PPS top of
+second and the system clock at that time.</para>
 
 <para>The bottom half of the screen is a scrolling hex dump of all
 packets the GPS is issuing.  Dump lines beginning &gt;&gt;&gt;
