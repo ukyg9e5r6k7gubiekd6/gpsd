@@ -690,15 +690,15 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     else
 #endif /* PPS_ENABLE */
     {
+	if (curses_active)
+	    select_packet_monitor(device);
+
 	(void)snprintf(buf, sizeof(buf), "(%d) ",
 		       (int)device->packet.outbuflen);
 	cond_hexdump(buf + strlen(buf), sizeof(buf) - strlen(buf),
 		     (char *)device->packet.outbuffer,device->packet.outbuflen);
 	(void)strlcat(buf, "\n", sizeof(buf) - strlen(buf));
     }
-
-    if (curses_active)
-	select_packet_monitor(device);
 
     report_lock();
 
