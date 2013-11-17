@@ -48,6 +48,10 @@ The second 'n' is losing information that it shouldn't.
 
 Display update should not stop while this is going on.
 
+*** Speed, mode and rate-changes in client-mode JSON.
+
+Are not implemented.  In theory they could be.
+
 *** Dispatcher/network issues
 
 **** Reading AISHub data via UDP confuses xgps with short writes

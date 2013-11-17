@@ -2421,6 +2421,10 @@ int main(int argc, char *argv[])
 	    (void)gpsd_wrap(&devices[dfd]);
     }
 
+#ifdef PPS_ENABLE
+    context.pps_hook = NULL;	/* tell any PPS-watcher thread to die */
+#endif /* PPS_ENABLE */
+
     gpsd_report(context.debug, LOG_WARN, "exiting.\n");
 
 #ifdef SOCKET_EXPORT_ENABLE
