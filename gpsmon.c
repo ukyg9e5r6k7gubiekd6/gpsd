@@ -682,8 +682,19 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    complain("Ill-formed PPS packet: %d", status);
 	    buf[0] = '\0';
 	} else {
+	    double timedelta = timespec_diff_ns(noclobber.timedrift.real, 
+						noclobber.timedrift.clock) * 1e-9;
+	    if (!curses_active)
+		(void)fprintf(stderr,
+			      "Drift clock=%lu.%09lu clock=%lu.%09lu offset=%.9f\n",
+			      (unsigned long)noclobber.timedrift.clock.tv_sec,
+			      (unsigned long)noclobber.timedrift.clock.tv_nsec,
+			      (unsigned long)noclobber.timedrift.real.tv_sec,
+			      (unsigned long)noclobber.timedrift.real.tv_nsec,
+			      timedelta);
+
 	    (void)strlcpy(buf, PPSBAR, BUFSIZ);
-	    session.gpsdata.timedrift = noclobber.timedrift;
+	    session.ppslast = noclobber.timedrift;
 	    session.ppscount++;
 	}
     }
