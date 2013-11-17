@@ -1777,6 +1777,21 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 }
 #endif /* __UNUSED_AUTOCONNECT__ */
 
+static void gpsd_terminate(struct gps_context_t *context)
+/* finish cleanly, reverting device configuration */
+{
+    int dfd;
+
+    for (dfd = 0; dfd < MAXDEVICES; dfd++) {
+	if (allocated_device(&devices[dfd])) {
+	    (void)gpsd_wrap(&devices[dfd]);
+	}
+    }
+#ifdef PPS_ENABLE
+    context->pps_hook = NULL;	/* tell any PPS-watcher thread to die */
+#endif /* PPS_ENABLE */
+}
+
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
@@ -1796,7 +1811,7 @@ int main(int argc, char *argv[])
 #endif /* defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE) */
     static char *pid_file = NULL;
     struct gps_device_t *device;
-    int i, option, dfd;
+    int i, option;
     int msocks[2] = {-1, -1};
     bool go_background = true;
     bool in_restart;
@@ -2123,11 +2138,7 @@ int main(int argc, char *argv[])
 
     /* daemon got termination or interrupt signal */
     if (setjmp(restartbuf) > 0) {
-	/* try to undo all device configurations */
-	for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	    if (allocated_device(&devices[dfd]))
-		(void)gpsd_wrap(&devices[dfd]);
-	}
+	gpsd_terminate(&context);
 	in_restart = true;
 	gpsd_report(context.debug, LOG_WARN, "gpsd restarted by SIGHUP\n");
     }
@@ -2415,15 +2426,7 @@ int main(int argc, char *argv[])
     gpsd_report(context.debug, LOG_WARN,
 		"received terminating signal %d.\n", signalled);
 
-    /* try to undo all device configurations */
-    for (dfd = 0; dfd < MAXDEVICES; dfd++) {
-	if (allocated_device(&devices[dfd]))
-	    (void)gpsd_wrap(&devices[dfd]);
-    }
-
-#ifdef PPS_ENABLE
-    context.pps_hook = NULL;	/* tell any PPS-watcher thread to die */
-#endif /* PPS_ENABLE */
+    gpsd_terminate(&context);
 
     gpsd_report(context.debug, LOG_WARN, "exiting.\n");
 
