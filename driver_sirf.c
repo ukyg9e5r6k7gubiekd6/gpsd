@@ -43,9 +43,16 @@
 #include "bits.h"
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
-/* arbitrary back off time to not overload the SiRF, 330 too short for
- * SiRF IV.  We should instead be waiting for the ACK, at least on SiRF IV */
-#define SIRF_SETTLE	30330
+/*
+ * Gary: "I read the SiRF IV doc.  It specifically says that once you initialize
+ * a SiRCC IV that you must wait for each ACK before proceeding.  I found
+ * that by lengthening the delays between initialization messages that
+ * things work a bit better.  But the doc says that waits up to 4 seconds
+ * may be required and that sending another message before the ACK will
+ * result in problems.  Looks pretty much like what I am seeing."
+ */
+#define SIRF_SETTLE	4
+
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
@@ -233,6 +240,12 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     unsigned int crc;
     size_t i, len;
     bool ok;
+    time_t cooldown;
+
+    /* control strings spaced too closely together confuse the SiRF IV */
+    cooldown = time(NULL) - session->driver.sirf.last_send;
+    if (cooldown < SIRF_SETTLE)
+	(void)sleep(SIRF_SETTLE - cooldown);
 
     len = (size_t) ((msg[2] << 8) | msg[3]);
 
@@ -249,7 +262,8 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     gpsd_report(session->context->debug, LOG_PROG,
 		"SiRF: Writing control type %02x:\n", msg[4]);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
-    (void)usleep(SIRF_SETTLE); /* guessed settling time */
+ 
+    session->driver.sirf.last_send = time(NULL);
     return (ok);
 }
 
@@ -385,7 +399,6 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 			session->gpsdata.dev.baudrate,
 			9 - session->gpsdata.dev.stopbits,
 			session->gpsdata.dev.stopbits, parity);
-	(void)usleep(SIRF_SETTLE);	/* guessed settling time */
     }
     session->back_to_nmea = false;
 }
@@ -1367,63 +1380,93 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	return;
 
     if (event == event_identified || event == event_reactivate) {
+	session->driver.sirf.cfg_stage = 0;
 	if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Switching chip mode to binary.\n");
 	    (void)nmea_send(session,
 			    "$PSRF100,0,%d,8,1,0",
 			    session->gpsdata.dev.baudrate);
-	    (void)usleep(SIRF_SETTLE); /* guessed settling time */
 	}
+    }
 
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Probing for firmware version...\n");
-	(void)sirf_write(session, versionprobe);
+    if (event == event_configure) {
+	/* might not be time for the next init string yet */ 
+	if (session->driver.sirf.last_send + SIRF_SETTLE > time(NULL))
+	    return;
 
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Requesting navigation parameters...\n");
-	(void)sirf_write(session, navparams);
+	switch (session->driver.sirf.cfg_stage++) {
+	case 0:
+	    /* this slot used by event_identified */
+	    return;
 
+	case 1:
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: Probing for firmware version...\n");
+	    (void)sirf_write(session, versionprobe);
+	    break;
+
+	case 2:
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "SiRF: Requesting navigation parameters...\n");
+	    (void)sirf_write(session, navparams);
+	    break;
+
+	case 3:
 #ifdef RECONFIGURE_ENABLE
-        /* unset MID 64 first since there is a flood of them */
-	gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64...\n");
-	putbyte(unsetmidXX, 6, 0x40);
-	(void)sirf_write(session, unsetmidXX);
+	    /* unset MID 64 first since there is a flood of them */
+	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64...\n");
+	    putbyte(unsetmidXX, 6, 0x40);
+	    (void)sirf_write(session, unsetmidXX);
+	    break;
 
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Requesting periodic ecef reports...\n");
-	(void)sirf_write(session, requestecef);
-
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Requesting periodic tracker reports...\n");
-	(void)sirf_write(session, requesttracker);
-
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Setting DGPS control to use SBAS...\n");
-	(void)sirf_write(session, dgpscontrol);
-
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Setting SBAS to auto/integrity mode...\n");
-	(void)sirf_write(session, sbasparams);
-
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Enabling PPS message...\n");
-	(void)sirf_write(session, enablemid52);
-
-    /* SiRF recommends at least 57600 for SiRF IV nav data */
-	if (session->gpsdata.dev.baudrate >= 57600) {
-	    /* fast enough, turn on nav data */
+	case 4:
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Enabling subframe transmission...\n");
-	    (void)sirf_write(session, enablesubframe);
-	} else {
-	    /* too slow, turn off nav data */
-	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Disabling subframe transmission...\n");
-	    (void)sirf_write(session, disablesubframe);
-	}
+			"SiRF: Requesting periodic ecef reports...\n");
+	    (void)sirf_write(session, requestecef);
+	    break;
 
+	case 5:
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: Requesting periodic tracker reports...\n");
+	    (void)sirf_write(session, requesttracker);
+	    break;
+
+	case 7:
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: Setting DGPS control to use SBAS...\n");
+	    (void)sirf_write(session, dgpscontrol);
+	    break;
+
+	case 8:
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: Setting SBAS to auto/integrity mode...\n");
+	    (void)sirf_write(session, sbasparams);
+	    break;
+
+	case 9:
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: Enabling PPS message...\n");
+	    (void)sirf_write(session, enablemid52);
+
+	    /* SiRF recommends at least 57600 for SiRF IV nav data */
+	    if (session->gpsdata.dev.baudrate >= 57600) {
+		/* fast enough, turn on nav data */
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "SiRF: Enabling subframe transmission...\n");
+		(void)sirf_write(session, enablesubframe);
+	    } else {
+		/* too slow, turn off nav data */
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "SiRF: Disabling subframe transmission...\n");
+		(void)sirf_write(session, disablesubframe);
+	    }
+	    break;
 #endif /* RECONFIGURE_ENABLE */
+	default:
+	    /* initialization is done */
+	    return;
+	}
     }
 
     if (event == event_deactivate) {

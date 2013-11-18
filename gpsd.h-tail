@@ -545,6 +545,8 @@ struct gps_device_t {
 #endif /* GEOSTAR_ENABLE */
 #ifdef SIRF_ENABLE
 	struct {
+	    time_t last_send;		/* time of last control send */
+	    unsigned int cfg_stage;	/* configuration stage counter */
 	    unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
 #define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
