@@ -795,9 +795,6 @@ works.</p>
 <li>If it finds a Zodiac binary packet (led with 0xff 0x81), it
    switches to the Zodiac driver.  We're done.</li>
 
-<li>If it finds an Evermore binary packet (led with DLE=0x10 followed
-   by STX=0x02) it switches to Evermore binary protocol.  We're done.</li>
-
 <li>If it finds a Navcom binary packet (led with 0x10 0x02 0x99 0x66)
    it switches to Navcom driver.  We're done.</li>
 
@@ -830,7 +827,7 @@ works.</p>
 driver-type or baud rate options.</p>
 
 <p>(The above sequence of steps may be out of date.  If so, it will
-be because we have added more recognized packet types and drivers.)</p>
+probably be because we have added more recognized packet types and drivers.)</p>
 
 <h2 id="error">Error modeling</h2>
 
@@ -1080,8 +1077,7 @@ present; at time of writing in late 2010 this capability is very rare
 and unavailable on consumer-grade receivers.</p>
 
 <p>For these reasons, GPSD needs the host computer's system clock to
-be accurate to within one second. (Work is in progress to relax this
-requirement to accuracy within half of a rollover period.)</p>
+be accurate to within one second.</p>
 
 <p>When debugging time and date issues, you may find an
 <a href="http://adn.agi.com/GNSSWeb/">interactive GPS calendar</a>
