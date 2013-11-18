@@ -1688,22 +1688,37 @@ env.Alias('testregress', check)
 # None of these productions are fired by default.
 # The content they handle is the GPSD website, not included in release tarballs.
 
-webpages = Split('''www/installation.html
+# asciidoc documents
+if env.WhereIs('asciidoc'):
+    txtfiles = ['AIVDM', 'NMEA',
+                'protocol-evolution',
+                'protocol-transition',
+                'gpsd-time-service-howto',
+                'calibrate-gpsd-ntpd-howto',
+                'client-howto']
+    asciidocs = ["www/" + stem + ".html" for stem in txtfiles] \
+                + ["www/installation.html"]
+    for stem in txtfiles:
+        env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
+                    ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem,stem)])
+    env.Command("www/installation.html",
+                "INSTALL",
+                ["asciidoc -o www/installation.html INSTALL"])
+else:
+    announce("Part of the website build requires asciidoc, not installed.")
+    asciidocs = []
+
+htmlpages = Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
     www/gpsd.html www/gpsd_json.html www/gpsfake.html www/gpsmon.html 
     www/gpspipe.html www/gps2udp.html www/gpsprof.html www/gps.html 
     www/libgpsd.html www/libgpsmm.html www/libgps.html
-    www/srec.html
-    www/AIVDM.html www/NMEA.html
-    www/calibrate-gpsd-ntpd-howto.html
-    www/gpsd-time-service-howto.html
-    www/protocol-evolution.html www/protocol-transition.html
-    www/client-howto.html www/writing-a-driver.html
-    www/hardware.html
-    www/performance/performance.html
-    www/internals.html
+    www/srec.html www/writing-a-driver.html www/hardware.html
+    www/performance/performance.html www/internals.html
     www/cycle.png
-    ''') + map(lambda f: f[:-3], glob.glob("www/*.in"))
+    ''')
+
+webpages = htmlpages + asciidocs + map(lambda f: f[:-3], glob.glob("www/*.in"))
 
 www = env.Alias('www', webpages)
 
@@ -1728,19 +1743,6 @@ upload_web = Utility("upload_web", [www],
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
     env.Depends(fn[:-3], "SConstruct")
-
-# asciidoc documents
-if env.WhereIs('asciidoc'):
-    env.Command("www/installation.html",
-                "INSTALL",
-                ["asciidoc -o www/installation.html INSTALL"])
-    for stem in ['AIVDM', 'NMEA',
-                 'protocol-evolution', 'protocol-transition',
-                 'gpsd-time-service-howto',
-		 'calibrate-gpsd-ntpd-howto',
-                 'client-howto']:
-        env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
-                    ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
 
 if htmlbuilder:
     # Manual pages
