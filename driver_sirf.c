@@ -230,11 +230,14 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     unsigned int crc;
     size_t i, len;
     bool ok;
-    time_t cooldown;
 
     /* control strings spaced too closely together confuse the SiRF IV */
-    if (session->driver.sirf.ack_await > 0)
+    if (session->driver.sirf.ack_await > 0) {
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "SiRF: write of control type %02x failed, awaiting ACK.\n",
+		    msg[4]);
 	return false;
+    }
 
     len = (size_t) ((msg[2] << 8) | msg[3]);
 
