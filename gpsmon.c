@@ -243,6 +243,7 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 }
 #endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
+/*@-compdef@*/
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
     char buf2[BUFSIZ];
@@ -259,6 +260,7 @@ static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list
 	(void)fputs(buf2, logfile);
     report_unlock();
 }
+/*@+compdef@*/
 
 #ifdef RECONFIGURE_ENABLE
 static void announce_log(/*@in@*/ const char *fmt, ...)
@@ -452,6 +454,7 @@ static bool switch_type(const struct gps_type_t *devtype)
     return false;
 }
 
+/*@-globstate@*/
 static void select_packet_monitor(struct gps_device_t *device)
 {
     static int last_type = BAD_PACKET;
@@ -482,8 +485,10 @@ static void select_packet_monitor(struct gps_device_t *device)
     if (devicewin != NULL)
 	(void)wnoutrefresh(devicewin);
 }
+/*@+globstate@*/
 
-static char *curses_get_command(void)
+/*@-statictrans -globstate@*/
+static /*@null@*/ char *curses_get_command(void)
 /* char-by-char nonblocking input, return accumulated command line on \n */
 {
     static char input[80];
@@ -536,6 +541,7 @@ static char *curses_get_command(void)
 
     return line;
 }
+/*@+statictrans +globstate@*/
 
 /******************************************************************************
  *
@@ -550,8 +556,9 @@ static char *curses_get_command(void)
 static void packet_log(const char *fmt, ...)
 {
     char buf[BUFSIZ];
-    buf[0] = '\0';
     va_list ap;
+
+    buf[0] = '\0';
     va_start(ap, fmt);
     packet_vlog(buf, sizeof(buf), fmt, ap);
     va_end(ap);
@@ -652,8 +659,8 @@ static void complain(const char *fmt, ...)
     if (curses_active)
 	monitor_vcomplain(fmt, ap);
     else {
-	vfprintf(stderr, fmt, ap);
-	fputc('\n', stderr);
+	(void)vfprintf(stderr, fmt, ap);
+	(void)fputc('\n', stderr);
     }
 
     va_end(ap);
@@ -665,7 +672,7 @@ static void complain(const char *fmt, ...)
  *
  *****************************************************************************/
 
-/*@-observertrans -nullpass -globstate@*/
+/*@-observertrans -nullpass -globstate -compdef -uniondef@*/
 static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
@@ -674,7 +681,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 #ifdef PPS_ENABLE
     if (!serial && strncmp((char*)device->packet.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
     {
-	const char *end;
+	const char *end = NULL;
 	struct gps_data_t noclobber;
 	int status = json_pps_read((const char *)device->packet.outbuffer,
 				   &noclobber,
@@ -684,6 +691,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    complain("Ill-formed PPS packet: %d", status);
 	    buf[0] = '\0';
 	} else {
+	    /*@-type@*/ /* splint is confused about struct timespec */
 	    double timedelta = timespec_diff_ns(noclobber.timedrift.real, 
 						noclobber.timedrift.clock) * 1e-9;
 	    if (!curses_active)
@@ -694,6 +702,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			      (unsigned long)noclobber.timedrift.real.tv_sec,
 			      (unsigned long)noclobber.timedrift.real.tv_nsec,
 			      timedelta);
+	    /*@+type@*/
 
 	    (void)strlcpy(buf, PPSBAR, BUFSIZ);
 	    session.ppslast = noclobber.timedrift;
@@ -738,7 +747,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     /* Update the last fix time seen for PPS. FIXME: do this here? */
     device->last_fixtime = device->newdata.time;
 }
-/*@+observertrans +nullpass +globstate@*/
+/*@+observertrans +nullpass +globstate +compdef +uniondef@*/
 
 /*@-globstate -usedef -compdef@*/
 static bool do_command(const char *line)
@@ -1029,6 +1038,7 @@ static void onsig(int sig UNUSED)
 /* this placement avoids a compiler warning */
 static const char *cmdline;
 
+/*@-onlytrans -branchstate@*/
 int main(int argc, char **argv)
 {
     int option;
@@ -1045,7 +1055,6 @@ int main(int argc, char **argv)
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
     gps_context_init(&context);	// initialize the report mutex
-    /*@ -branchstate @*/
     while ((option = getopt(argc, argv, "aD:LVhl:nt:?")) != -1) {
 	switch (option) {
 	case 'a':
@@ -1139,7 +1148,6 @@ int main(int argc, char **argv)
 	    exit(EXIT_FAILURE);
 	}
     }
-    /*@ +branchstate @*/
 
     gpsd_time_init(&context, time(NULL));
     gpsd_init(&session, &context, NULL);
@@ -1204,12 +1212,12 @@ int main(int argc, char **argv)
 	(void)signal(SIGINT, onsig);
 	(void)signal(SIGTERM, onsig);
 	if (nocurses) {
-	    tcgetattr(0, &cooked);
-	    tcgetattr(0, &rare);
+	    (void)tcgetattr(0, &cooked);
+	    (void)tcgetattr(0, &rare);
 	    rare.c_lflag &=~ (ICANON | ECHO);
-	    rare.c_cc[VMIN] = 1;
-	    tcflush(0, TCIFLUSH);
-	    tcsetattr(0, TCSANOW, &rare);
+	    rare.c_cc[VMIN] = (cc_t)1;
+	    (void)tcflush(0, TCIFLUSH);
+	    (void)tcsetattr(0, TCSANOW, &rare);
 	} else if (!curses_init())
 	    goto quit;
 
@@ -1247,14 +1255,14 @@ int main(int argc, char **argv)
 		    cmdline = curses_get_command();
 		else
 		{
-		    int st = read(0, &inbuf, 1);
+		    ssize_t st = read(0, &inbuf, 1);
 
 		    if (st == 1) {
 #ifdef PPS_ENABLE
 			gpsd_acquire_reporting_lock();
 #endif /* PPS_ENABLE*/
-			tcflush(0, TCIFLUSH);
-			tcsetattr(0, TCSANOW, &cooked);
+			(void)tcflush(0, TCIFLUSH);
+			(void)tcsetattr(0, TCSANOW, &cooked);
 			(void)fputs("gpsmon> ", stdout);
 			(void)putchar(inbuf[0]);
 			cmdline = fgets(inbuf+1, (int)strlen(inbuf)-1, stdin);
@@ -1264,8 +1272,8 @@ int main(int argc, char **argv)
 		if (cmdline != NULL && !do_command(cmdline))
 		    longjmp(terminate, TERM_QUIT);
 		if (!curses_active) {
-		    sleep(2);
-		    tcsetattr(0, TCSANOW, &rare);
+		    (void)sleep(2);
+		    (void)tcsetattr(0, TCSANOW, &rare);
 #ifdef PPS_ENABLE
 		    gpsd_release_reporting_lock();
 #endif /* PPS_ENABLE*/
@@ -1289,7 +1297,7 @@ int main(int argc, char **argv)
     if (curses_active)
 	(void)endwin();
     else
-	tcsetattr(0, TCSANOW, &cooked);
+	(void)tcsetattr(0, TCSANOW, &cooked);
 
     explanation = NULL;
     switch (bailout) {
@@ -1318,5 +1326,6 @@ int main(int argc, char **argv)
 	(void)fputs(explanation, stderr);
     exit(EXIT_SUCCESS);
 }
+/*@+onlytrans +branchstate@*/
 
 /* gpsmon.c ends here */

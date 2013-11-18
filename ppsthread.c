@@ -507,12 +507,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		(void)pthread_mutex_unlock(&ppslast_mutex);
 		/*@ +unrecog @*/
 		/*@+compdef@*/
+		/*@-type@*/ /* splint is confused about struct timespec */
 		gpsd_report(session->context->debug, LOG_INF,
 			    "PPS hooks called with %.20s %lu.%09lu offset %.9f\n",
 			    log1,
 			    (unsigned long)clock_ts.tv_sec,
 			    (unsigned long)clock_ts.tv_nsec,
 			    offset);
+		/*@+type@*/
             }
 	    /*@-type@*/ /* splint is confused about struct timespec */
 	    gpsd_report(session->context->debug, LOG_PROG,

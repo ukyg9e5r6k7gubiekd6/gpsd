@@ -327,8 +327,10 @@ void gpsd_deactivate(struct gps_device_t *session)
 			     session->gpsdata.dev.path,
 			     "DEACTIVATE");
 #ifdef PPS_ENABLE
+    /*@-mustfreeonly@*/
     session->thread_report_hook = NULL;	/* tell any PPS-watcher thread to die */
 #endif /* PPS_ENABLE */
+    /*@-mustfreeonly@*/
     /* mark it inactivated */
     session->gpsdata.online = (timestamp_t)0;
 }

@@ -245,7 +245,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     /* control strings spaced too closely together confuse the SiRF IV */
     cooldown = time(NULL) - session->driver.sirf.last_send;
     if (cooldown < SIRF_SETTLE)
-	(void)sleep(SIRF_SETTLE - cooldown);
+	(void)sleep((unsigned int)(SIRF_SETTLE - cooldown));
 
     len = (size_t) ((msg[2] << 8) | msg[3]);
 
