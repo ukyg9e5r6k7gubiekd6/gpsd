@@ -15,6 +15,7 @@ extern const struct gps_type_t driver_ubx;
 static WINDOW *satwin, *navsolwin, *dopwin, *ppswin;
 
 #define display	(void)mvwprintw
+
 static bool ubx_initialize(void)
 {
     int i;
@@ -73,8 +74,10 @@ static bool ubx_initialize(void)
 	return false;
     (void)wborder(ppswin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)wattrset(ppswin, A_BOLD);
-    (void)wmove(ppswin, 1, 1);
-    (void)wprintw(ppswin, "PPS offset: ");
+    (void)mvwaddstr(ppswin, 1, 1, "PPS offset: ");
+#ifndef PPS_ENABLE
+    (void)mvwaddstr(ppswin, 1, 13, "Not available");
+#endif /* PPS_ENABLE */
     display(ppswin, 2, 22, " PPS ");
     (void)wattrset(ppswin, A_NORMAL);
 

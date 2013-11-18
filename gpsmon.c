@@ -147,7 +147,7 @@ static inline void report_lock(void) { }
 static inline void report_unlock(void) { }
 #endif /* PPS_ENABLE */
 
-#define PPSBAR	"-------------------------------------" \
+#define PPSBAR "-------------------------------------" \
 	       " PPS " \
 	       "-------------------------------------\n"
 
@@ -546,6 +546,7 @@ static char *curses_get_command(void)
  *
  ******************************************************************************/
 
+#ifdef PPS_ENABLE
 static void packet_log(const char *fmt, ...)
 {
     char buf[BUFSIZ];
@@ -555,6 +556,7 @@ static void packet_log(const char *fmt, ...)
     packet_vlog(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 }
+#endif /* PPS_ENABLE */
 
 void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
 /* our version of the logger */
