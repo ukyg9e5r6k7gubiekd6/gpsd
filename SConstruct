@@ -1765,7 +1765,7 @@ env.Command('www/hardware.html', ['gpscap.py',
             ['(cat www/hardware-head.html; $PYTHON gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
 
 # The diagram editor dia is required in order to edit the diagram masters
-Utility("www/cycle.svg", ["www/cycle.dia"], ["dia -e www/cycle.svg www/cycle.dia"])
+# Utility("www/cycle.svg", ["www/cycle.dia"], ["dia -e www/cycle.svg www/cycle.dia"])
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
 
