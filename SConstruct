@@ -1715,7 +1715,7 @@ htmlpages = Split('''www/installation.html
     www/libgpsd.html www/libgpsmm.html www/libgps.html
     www/srec.html www/writing-a-driver.html www/hardware.html
     www/performance/performance.html www/internals.html
-    www/cycle.png
+    www/cycle.svg
     ''')
 
 webpages = htmlpages + asciidocs + map(lambda f: f[:-3], glob.glob("www/*.in"))
@@ -1765,7 +1765,7 @@ env.Command('www/hardware.html', ['gpscap.py',
             ['(cat www/hardware-head.html; $PYTHON gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
 
 # The diagram editor dia is required in order to edit the diagram masters
-Utility("www/cycle.png", ["www/cycle.dia"], ["dia -e www/cycle.png www/cycle.dia"])
+Utility("www/cycle.svg", ["www/cycle.dia"], ["dia -e www/cycle.svg www/cycle.dia"])
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
 
