@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="34cm" height="10cm" viewBox="-2 66 680 198" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="158.268" y="123" width="321.439" height="37"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="158.268" y="123" width="321.439" height="37"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="345" y="221.808" width="160" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="345" y="221.808" width="160" height="40"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="361" y1="221.808" x2="361" y2="261.808"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="489" y1="221.808" x2="489" y2="261.808"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="425" y="245.808">
+      <tspan x="425" y="245.808"></tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="12.766" y="122.293" width="139" height="37"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="12.766" y="122.293" width="139" height="37"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="82.266" y="145.218">
+    <tspan x="82.266" y="145.218">computation</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="333.086" y="175.623">
+    <tspan x="333.086" y="175.623">transmission time</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="484" y="123" width="101" height="37"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="484" y="123" width="101" height="37"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="534.5" y="145.925">
+    <tspan x="534.5" y="145.925">quiet time</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="13.311" y1="83.9182" x2="12.9397" y2="110.058"/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="7.94025,109.987 12.7977,120.057 17.9392,110.129 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="12.4939" y="80.607">
+    <tspan x="12.4939" y="80.607">SOC</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="158.615" y="81.4354">
+    <tspan x="158.615" y="81.4354">SOR</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="478.588" y1="81.7968" x2="479.376" y2="110.768"/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="474.377,110.904 479.647,120.765 484.374,110.633 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="479.294" y="78.0398">
+    <tspan x="479.294" y="78.0398">EOR</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="423" y="241">
+    <tspan x="423" y="241"></tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="422.142" y1="161.435" x2="422.829" y2="210.573"/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="417.829,210.643 422.969,220.572 427.828,210.503 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="425" y="246.233">
+    <tspan x="425" y="246.233">GPSD reports </tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="505" y1="241.808" x2="568.764" y2="241.808"/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="568.764,246.808 578.764,241.808 568.764,236.808 "/>
+  </g>
+  <g>
+    <path style="fill: #ffffff" d="M 599.5 222.808 L 661.5,222.808 C 670.06,222.808 677,231.762 677,242.808 C 677,253.854 670.06,262.808 661.5,262.808 L 599.5,262.808 C 590.94,262.808 584,253.854 584,242.808 C 584,231.762 590.94,222.808 599.5,222.808z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 599.5 222.808 L 661.5,222.808 C 670.06,222.808 677,231.762 677,242.808 C 677,253.854 670.06,262.808 661.5,262.808 L 599.5,262.808 C 590.94,262.808 584,253.854 584,242.808 C 584,231.762 590.94,222.808 599.5,222.808"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="630.5" y="246.808">
+      <tspan x="630.5" y="246.808"></tspan>
+    </text>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="630.5" y="247.233">
+    <tspan x="630.5" y="247.233">to client</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="420.728" y1="80.648" x2="420.87" y2="110.509"/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="415.87,110.533 420.917,120.509 425.87,110.486 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="420.02" y="78.3052">
+    <tspan x="420.02" y="78.3052">RTIME</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="163.218" y="128.466" width="57.2756" height="27.5772"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="163.218" y="128.466" width="57.2756" height="27.5772"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="187.966" y="145.619">
+    <tspan x="187.966" y="145.619">packet</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="260.728" y="128.537" width="73.6098" height="27.5772"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="260.728" y="128.537" width="73.6098" height="27.5772"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="297.532" y="146.75">
+    <tspan x="297.532" y="146.75">packet</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="339.146" y="128.607" width="80.0445" height="27.5772"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="339.146" y="128.607" width="80.0445" height="27.5772"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="423.22" y="128.678" width="50.4167" height="27.5772"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="423.22" y="128.678" width="50.4167" height="27.5772"/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="379.168" y="146.821">
+    <tspan x="379.168" y="146.821">packet</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="448.43" y="146.892">
+    <tspan x="448.43" y="146.892">packet</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="158.268" y1="83.9182" x2="158.268" y2="110.764"/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="153.268,110.764 158.268,120.764 163.268,110.764 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="223.958" y="128.537" width="32.5976" height="27.5772"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2.35099e-37; stroke: #ffffff" x="223.958" y="128.537" width="32.5976" height="27.5772"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="230.131" y="134.85" width="20.25" height="14.95"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="240.256" y="146.75">
+      <tspan x="240.256" y="146.75">. . .</tspan>
+    </text>
+  </g>
+</svg>
