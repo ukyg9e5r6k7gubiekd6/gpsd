@@ -194,7 +194,7 @@ The USB poll interval tends to be very stable.
 
 Network NTP time accuracy can be degraded below 10mSec by a number of
 factors. Almost all have more to do with the quality of your Internet
-connection to your chimers than with the acuracy of the chimers
+connection to your chimers than with the accuracy of the chimers
 themselves.  Some negatives:
 
 * Having a cable modem.  That is, as opposed to DSL or optical fiber, which
@@ -287,11 +287,16 @@ board.
 
 gpsd includes support for interpreting the 1PPS pulses; this can be
 used to update your time at much higher accuracy than message time provides.
+
 You can determine whether your GPS emits this pulse, and gpsd is
-detecting it, by running at -D 5 and watching for carrier-detect state
-change messages in the logfile.  In addition, if your kernel provides
-the RFC 2783 KPPS (kernel PPS) API gpsd will use that for extra
-accuracy.
+detecting it, by running the gpsmon utility (giving it the GPS's
+serial-device path as arument).  Watch for lines of
+dashes in the packet-logging window; for most GPS types there will
+also be a "PPS offset:" field in the data panels above  showing the
+delta between PPS and your local clock.
+
+If you don't have gpsmon available, you can run gpsd at -D 5 and watch
+for carrier-detect state change messages in the logfile.
 
 Note that gpsd assumes that after each fix the GPS will assert
 1PPS first and ship sentences reporting time of fix second. Every
@@ -301,10 +306,11 @@ they're from the future and require a negative fudge. If this
 ever happens, please report the device make and model to the GPSD
 maintainers so we can flag it in our GPS hardware database.
 
-Many Linux distributions have a package called "pps-tools" that will
-install KPPS support and the time_pps.h header file.  We recommend you
-do that.  If your kernel is built in the normal modular way, this
-package installation will suffice.
+If your kernel provides the RFC 2783 KPPS (kernel PPS) API, gpsd will
+use that for extra accuracy. Many Linux distributions have a package
+called "pps-tools" that will install KPPS support and the time_pps.h
+header file.  We recommend you do that.  If your kernel is built in
+the normal modular way, this package installation will suffice.
 
 If you are scratch-building your Linux kernel, the configuration 
 must include either these two lines, or the same with "y" replaced
@@ -427,12 +433,12 @@ ipcs -m
 If gpsd was started as root, the results  should look like this:
 
 -----------------------------------------------------------------------------
------- Shared Memory Segments --------
- key        shmid      owner      perms      bytes      nattch     status
- 0x4e545030 0          root       700        96         2
- 0x4e545031 32769      root       700        96         2
- 0x4e545032 163842     root       666        96         1
- 0x4e545033 196611     root       666        96         1
+ ------ Shared Memory Segments --------
+  key        shmid      owner      perms      bytes      nattch     status
+  0x4e545030 0          root       700        96         2
+  0x4e545031 32769      root       700        96         2
+  0x4e545032 163842     root       666        96         1
+  0x4e545033 196611     root       666        96         1
 -----------------------------------------------------------------------------
 
 For a bit more data try this:
@@ -553,10 +559,11 @@ xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
 *SHM(1)          .PPS.            0 l   49   64  377    0.000    0.222   0.310
 -----------------------------------------------------------------------------
 
-If the value under "reach" for the SHM lines remains zero, check that gpsd is running;
-cgps reports a 3D fix; and the '-n' option was used.  Some GPSes
-specialized for time service can report time with signal lock on only
-one satellite, but with most devices a 3D fix is required.
+If the value under "reach" for the SHM lines remains zero, check that
+gpsd is running; cgps reports a 3D fix; and the '-n' option was used.
+Some GPSes specialized for time service can report time with signal
+lock on only one satellite, but with most devices a 3D fix is
+required.
 
 When the SHM(0) line does not appear at all, check your ntp.conf and
 the system logs for error messages from ntpd.
@@ -711,7 +718,7 @@ To keep chronyd from preferring NMEA time over PPS time, you can add an
 overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
 is never used, just monitored.
 
-== NTP working and performance details ==
+== NTP tuning and performance details ==
 
 This section deals specifically with ntpd.  It discusses algorithms
 used by the ntpd suite to measure and correct the system time.  It is not
