@@ -706,6 +706,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
 	    (void)strlcpy(buf, PPSBAR, BUFSIZ);
 	    session.ppslast = noclobber.timedrift;
+	    /* coverity[missing_lock] */
 	    session.ppscount++;
 	}
     }
@@ -1206,7 +1207,6 @@ int main(int argc, char **argv)
     if (session.gpsdata.gps_fd > maxfd)
 	 maxfd = session.gpsdata.gps_fd;
 
-
     if ((bailout = setjmp(terminate)) == 0) {
 	(void)signal(SIGQUIT, onsig);
 	(void)signal(SIGINT, onsig);
@@ -1255,6 +1255,7 @@ int main(int argc, char **argv)
 		    cmdline = curses_get_command();
 		else
 		{
+		    /* coverity[string_null] */
 		    ssize_t st = read(0, &inbuf, 1);
 
 		    if (st == 1) {
