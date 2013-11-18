@@ -43,16 +43,6 @@
 #include "bits.h"
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
-/*
- * Gary: "I read the SiRF IV doc.  It specifically says that once you initialize
- * a SiRCC IV that you must wait for each ACK before proceeding.  I found
- * that by lengthening the delays between initialization messages that
- * things work a bit better.  But the doc says that waits up to 4 seconds
- * may be required and that sending another message before the ACK will
- * result in problems.  Looks pretty much like what I am seeing."
- */
-#define SIRF_SETTLE	4
-
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
@@ -243,9 +233,8 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     time_t cooldown;
 
     /* control strings spaced too closely together confuse the SiRF IV */
-    cooldown = time(NULL) - session->driver.sirf.last_send;
-    if (cooldown < SIRF_SETTLE)
-	(void)sleep((unsigned int)(SIRF_SETTLE - cooldown));
+    if (session->driver.sirf.ack_await > 0)
+	return false;
 
     len = (size_t) ((msg[2] << 8) | msg[3]);
 
@@ -263,7 +252,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
 		"SiRF: Writing control type %02x:\n", msg[4]);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
  
-    session->driver.sirf.last_send = time(NULL);
+    session->driver.sirf.ack_await++;
     return (ok);
 }
 
@@ -1233,11 +1222,14 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x0b:			/* Command Acknowledgement MID 11 */
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: ACK 0x0b: %02x\n", getub(buf, 1));
+	session->driver.sirf.ack_await--;
 	return 0;
 
     case 0x0c:			/* Command NAcknowledgement MID 12 */
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: NAK 0x0c: %02x\n", getub(buf, 1));
+	/* ugh -- there's no alternative but silent failure here */
+	session->driver.sirf.ack_await--;
 	return 0;
 
     case 0x0d:			/* Visible List MID 13 */
@@ -1380,7 +1372,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	return;
 
     if (event == event_identified || event == event_reactivate) {
-	session->driver.sirf.cfg_stage = 0;
 	if (session->packet.type == NMEA_PACKET) {
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Switching chip mode to binary.\n");
@@ -1392,7 +1383,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 
     if (event == event_configure) {
 	/* might not be time for the next init string yet */ 
-	if (session->driver.sirf.last_send + SIRF_SETTLE > time(NULL))
+	if (session->driver.sirf.ack_await > 0)
 	    return;
 
 	switch (session->driver.sirf.cfg_stage++) {
