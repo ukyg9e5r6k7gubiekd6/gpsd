@@ -325,13 +325,13 @@ void monitor_log(const char *fmt, ...)
     }
 }
 
-static const char *promptgen(void)
+static /*@observer@*/ const char *promptgen(void)
 {
     static char buf[sizeof(session.gpsdata.dev.path)];
 
     if (serial)
 	(void)snprintf(buf, sizeof(buf),
-		       "%s %u %d%c%d",
+		       "%s %u %u%c%u",
 		       session.gpsdata.dev.path,
 		       session.gpsdata.dev.baudrate,
 		       9 - session.gpsdata.dev.stopbits,
