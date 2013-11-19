@@ -48,9 +48,14 @@ The second 'n' is losing information that it shouldn't.
 
 Display update should not stop while this is going on.
 
-*** Speed, mode and rate-changes in client-mode JSON.
+*** Speed, mode and rate-changes in client-mode gpsmon.
 
 Are not implemented.  In theory they could be.
+
+*** Speed, mode and rate-changes in client-mode gpsctl.
+
+Baud rate and mode changes work in direct mode but are not
+reliable in client mode.
 
 *** Dispatcher/network issues
 

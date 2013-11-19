@@ -241,6 +241,9 @@ GPS type itself.</para>
 to flip them into SiRF binary mode. Thus, the process of probing one of
 these running in NMEA will change its behavior.</para>
 
+<para>Baud rate and mode changes work in direct mode but are not
+reliable in client mode.  This will be fixed in a future release.</para>
+
 </refsect1>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
