@@ -1158,7 +1158,13 @@ int main(int argc, char **argv)
     else 
 	devicename = argv[optind];
 
-    (void)strlcpy(session.gpsdata.dev.path, devicename,
+    /* backward compatibilty: accept a bare server name */
+    if (strchr(devicename, ':') == NULL && devicename[0] != '/')
+	(void) strlcpy(session.gpsdata.dev.path, 
+		       "tcp://", sizeof(session.gpsdata.dev.path));
+    else
+	session.gpsdata.dev.path[0] = '\0';
+    (void)strlcat(session.gpsdata.dev.path, devicename,
 		  sizeof(session.gpsdata.dev.path));
 
     if (gpsd_activate(&session, O_PROBEONLY) == -1) {

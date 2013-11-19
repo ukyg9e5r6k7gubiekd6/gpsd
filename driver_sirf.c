@@ -46,6 +46,12 @@
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
 
+/*
+ * According to the protocol reference, if you don't get ACK/NACK in response
+ * to a control send withing 6 seconds, you should just retry.
+ */
+#define SIRF_RETRY_TIME	6
+
 /*@ +charint @*/
 /* Poll Software Version MID 132 */
 static unsigned char versionprobe[] = {
@@ -237,7 +243,10 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
      * lower-powered processor that apparently has trouble keeping up.  
      * Now you have to wait for the ACK, otherwise chaos ensues.
      */
-    if (session->driver.sirf.ack_await > 0) {
+    if (time(NULL) - session->driver.sirf.last_send > SIRF_RETRY_TIME)
+	session->driver.sirf.need_ack = false;
+    /* can also be false because ACK was received after last send */
+    if (session->driver.sirf.need_ack) {
 	gpsd_report(session->context->debug, LOG_WARN,
 		    "SiRF: write of control type %02x failed, awaiting ACK.\n",
 		    msg[4]);
@@ -260,7 +269,8 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
 		"SiRF: Writing control type %02x:\n", msg[4]);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
  
-    session->driver.sirf.ack_await++;
+    session->driver.sirf.need_ack = true;
+    session->driver.sirf.last_send = time(NULL);
     return (ok);
 }
 
@@ -1230,14 +1240,14 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x0b:			/* Command Acknowledgement MID 11 */
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: ACK 0x0b: %02x\n", getub(buf, 1));
-	session->driver.sirf.ack_await--;
+	session->driver.sirf.need_ack = false;
 	return 0;
 
     case 0x0c:			/* Command NAcknowledgement MID 12 */
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: NAK 0x0c: %02x\n", getub(buf, 1));
 	/* ugh -- there's no alternative but silent failure here */
-	session->driver.sirf.ack_await--;
+	session->driver.sirf.need_ack = false;
 	return 0;
 
     case 0x0d:			/* Visible List MID 13 */
@@ -1391,7 +1401,10 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 
     if (event == event_configure) {
 	/* might not be time for the next init string yet */ 
-	if (session->driver.sirf.ack_await > 0)
+	if (time(NULL) - session->driver.sirf.last_send > SIRF_RETRY_TIME)
+	    session->driver.sirf.need_ack = false;
+	/* can also be false because ACK was received after last send */
+	if (session->driver.sirf.need_ack)
 	    return;
 
 	switch (session->driver.sirf.cfg_stage++) {
