@@ -453,7 +453,6 @@ def CheckCompilerDefines(context, define):
     return ret
 
 if env.GetOption("clean") or env.GetOption("help"):
-    cxx = qt_network = None
     dbus_libs = []
     rtlibs = []
     usblibs = []
@@ -502,6 +501,9 @@ else:
     confdefs.append('#define GPSD_URL "%s"\n' % website)
 
     cxx = config.CheckCXX()
+    if not cxx and env["libgpsmm"]:
+        announce("C++ doesn't work, suppressing libgpsmm build.")
+        env["libgpsmm"] = false
 
     # define a helper function for pkg-config - we need to pass
     # --static for static linking, too.
@@ -737,23 +739,23 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
     if not changelatch:
         announce("All configuration flags are defaulted.")
 
-# Gentoo systems can have a problem with the Python path
-if os.path.exists("/etc/gentoo-release"):
-    announce("This is a Gentoo system.")
-    announce("Adjust your PYTHONPATH to see library directories under /usr/local/lib")
+    # Gentoo systems can have a problem with the Python path
+    if os.path.exists("/etc/gentoo-release"):
+        announce("This is a Gentoo system.")
+        announce("Adjust your PYTHONPATH to see library directories under /usr/local/lib")
 
-# Should we build the Qt binding?
-if cxx and qt_network:
-    qt_env = env.Clone()
-    qt_env.MergeFlags('-DUSE_QT')
+    # Should we build the Qt binding?
     if qt_network:
-        try:
-            qt_env.MergeFlags(pkg_config('QtNetwork'))
-        except OSError:
-            announce("pkg_config is confused about the state of QtNetwork.")
-            qt_env = None
-else:
-    qt_env = None
+        qt_env = env.Clone()
+        qt_env.MergeFlags('-DUSE_QT')
+        if qt_network:
+            try:
+                qt_env.MergeFlags(pkg_config('QtNetwork'))
+            except OSError:
+                announce("pkg_config is confused about the state of QtNetwork.")
+                qt_env = None
+    else:
+        qt_env = None
 
 ## Two shared libraries provide most of the code for the C programs
 
@@ -783,7 +785,7 @@ libgps_sources = [
     "strl.c",
 ]
 
-if cxx and env['libgpsmm']:
+if env['libgpsmm']:
     libgps_sources.append("libgpsmm.cpp")
 
 libgpsd_sources = [
@@ -1059,7 +1061,7 @@ testprogs = [test_float, test_trig, test_bits, test_packet,
              test_mkgmtime, test_geoid, test_libgps]
 if env['socket_export']:
     testprogs.append(test_json)
-if cxx and env["libgpsmm"]:
+if env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
 # Python programs
