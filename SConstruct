@@ -462,6 +462,7 @@ if env.GetOption("clean") or env.GetOption("help"):
     confdefs = []
     manbuilder = False
     htmlbuilder = False
+    qt_env = None
 else:
     config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
                                              'CheckExecutable' : CheckExecutable,
