@@ -20,9 +20,6 @@ month is quite low.
 
 **** In gpsmon's PPS Offset field
 
-The PPS Offset field in the gpsmon display will never be updated when
-running in client mode. This bug is called out on the manual page.
-
 Presently PPS Offset is displayed in direct mode for NMEA, SiRF, and
 UBX devices.  Others should probably do likewise, notably the
 Motorola Oncore and Garmin drivers.
