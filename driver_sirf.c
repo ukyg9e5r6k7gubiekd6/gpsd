@@ -231,7 +231,12 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     size_t i, len;
     bool ok;
 
-    /* control strings spaced too closely together confuse the SiRF IV */
+    /*
+     * Control strings spaced too closely together confuse the SiRF
+     * IV.  This wasn't an issue on older SiRFs, but they've gone to a
+     * lower-powered processor that apparently has trouble keeping up.  
+     * Now you have to wait for the ACK, otherwise chaos ensues.
+     */
     if (session->driver.sirf.ack_await > 0) {
 	gpsd_report(session->context->debug, LOG_WARN,
 		    "SiRF: write of control type %02x failed, awaiting ACK.\n",
