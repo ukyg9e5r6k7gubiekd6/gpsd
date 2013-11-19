@@ -367,9 +367,6 @@ values can be listed with 'scons -h'.
 
 """ + opts.GenerateHelpText(env, sort=cmp))
 
-if "help" in ARGLIST:
-    Return()
-
 ## Configuration
 
 def CheckPKG(context, name):
