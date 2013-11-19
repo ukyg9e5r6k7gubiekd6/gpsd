@@ -335,7 +335,7 @@ static void refresh_statwin(void)
     /* *INDENT-ON* */
     (void)wattrset(statwin, A_BOLD);
     if (serial)
-	display(statwin, 0, 0, "%s %u %d%c%d",
+	display(statwin, 0, 0, "%s %u %d%c%d   ",
 		session.gpsdata.dev.path,
 		session.gpsdata.dev.baudrate,
 		9 - session.gpsdata.dev.stopbits,
