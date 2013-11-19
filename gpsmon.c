@@ -325,6 +325,23 @@ void monitor_log(const char *fmt, ...)
     }
 }
 
+static const char *promptgen(void)
+{
+    static char buf[sizeof(session.gpsdata.dev.path)];
+
+    if (serial)
+	(void)snprintf(buf, sizeof(buf),
+		       "%s %u %d%c%d",
+		       session.gpsdata.dev.path,
+		       session.gpsdata.dev.baudrate,
+		       9 - session.gpsdata.dev.stopbits,
+		       session.gpsdata.dev.parity,
+		       session.gpsdata.dev.stopbits);
+    else
+	(void)strlcpy(buf, session.gpsdata.dev.path, sizeof(buf));
+    return buf;
+}
+
  /*@-observertrans -nullpass -globstate@*/
 static void refresh_statwin(void)
 /* refresh the device-identification window */
@@ -333,16 +350,9 @@ static void refresh_statwin(void)
     type_name =
 	session.device_type ? session.device_type->type_name : "Unknown device";
     /* *INDENT-ON* */
+    (void)wclear(statwin);
     (void)wattrset(statwin, A_BOLD);
-    if (serial)
-	display(statwin, 0, 0, "%s %u %d%c%d   ",
-		session.gpsdata.dev.path,
-		session.gpsdata.dev.baudrate,
-		9 - session.gpsdata.dev.stopbits,
-		session.gpsdata.dev.parity,
-		session.gpsdata.dev.stopbits);
-    else
-	display(statwin, 0, 0, "%s", session.gpsdata.dev.path);
+    (void)mvwaddstr(statwin, 0, 0, promptgen());
     (void)wattrset(statwin, A_NORMAL);
     (void)wnoutrefresh(statwin);
 }
@@ -1218,6 +1228,9 @@ int main(int argc, char **argv)
 	(void)signal(SIGINT, onsig);
 	(void)signal(SIGTERM, onsig);
 	if (nocurses) {
+	    (void)fputs("gpsmon: ", stdout);
+	    (void)fputs(promptgen(), stdout);
+	    (void)fputs("\n", stdout);
 	    (void)tcgetattr(0, &cooked);
 	    (void)tcgetattr(0, &rare);
 	    rare.c_lflag &=~ (ICANON | ECHO);
@@ -1270,7 +1283,9 @@ int main(int argc, char **argv)
 #endif /* PPS_ENABLE*/
 			(void)tcflush(0, TCIFLUSH);
 			(void)tcsetattr(0, TCSANOW, &cooked);
-			(void)fputs("gpsmon> ", stdout);
+			(void)fputs("gpsmon: ", stdout);
+			(void)fputs(promptgen(), stdout);
+			(void)fputs("> ", stdout);
 			(void)putchar(inbuf[0]);
 			cmdline = fgets(inbuf+1, (int)strlen(inbuf)-1, stdin);
 			cmdline--;
