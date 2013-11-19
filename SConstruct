@@ -462,7 +462,6 @@ if env.GetOption("clean") or env.GetOption("help"):
     ncurseslibs = []
     confdefs = []
     manbuilder = False
-    regress_driver_options = ''
     htmlbuilder = False
 else:
     config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
@@ -724,20 +723,6 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
                                           src_suffix=".xml", suffix=".html")
 
     qt_network = env['libQgpsmm'] and config.CheckPKG('QtNetwork')
-
-
-    # check if ptys are available for regression tests
-    regress_driver_options = ''
-    try:
-        import pty
-        pty.openpty()
-    except Exception:
-        pty_available = False
-    else:
-        pty_available = True
-
-    if not pty_available:
-        regress_driver_options = '-u'
 
     env = config.Finish()
 
@@ -1517,7 +1502,7 @@ else:
 if env['socket_export']:
     # Regression-test the daemon
     gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
-            '$SRCDIR/regress-driver %s test/daemon/*.log' %(regress_driver_options,))
+            '$SRCDIR/regress-driver test/daemon/*.log')
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
@@ -1525,7 +1510,7 @@ if env['socket_export']:
     # that driver relies on the default until it gets the current
     # offset from subframe data.
     Utility('gps-makeregress', [gpsd, python_built_extensions],
-        '$SRCDIR/regress-driver %s -b test/daemon/*.log' %(regress_driver_options,))
+        '$SRCDIR/regress-driver -b test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
@@ -1639,13 +1624,13 @@ time_regress = Utility('time-regress', [test_mkgmtime], [
 # Regression test the unpacking code in libgps
 unpack_regress = Utility('unpack-regress', [test_libgps], [
     '@echo "Testing the client-library sentence decoder..."',
-    '$SRCDIR/regress-driver %s -c $SRCDIR/test/clientlib/*.log' %(regress_driver_options,),
+    '$SRCDIR/regress-driver -c $SRCDIR/test/clientlib/*.log',
     ])
 
 # Build the regression test for the sentence unpacker
 Utility('unpack-makeregress', [test_libgps], [
     '@echo "Rebuilding the client sentence-unpacker tests..."',
-    '$SRCDIR/regress-driver %s -c -b $SRCDIR/test/clientlib/*.log' %(regress_driver_options,)
+    '$SRCDIR/regress-driver -c -b $SRCDIR/test/clientlib/*.log'
     ])
 
 # Unit-test the JSON parsing

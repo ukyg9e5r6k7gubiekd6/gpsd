@@ -9,7 +9,7 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
-import sys, os, time, getopt, socket, random
+import sys, os, time, getopt, socket, random, pty
 import gps, gps.fake as gpsfake   # The "as" pacifies pychecker
 
 class Baton:
@@ -156,6 +156,12 @@ if __name__ == '__main__':
         elif (switch == '-h'):
             sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
             raise SystemExit,0
+
+    try:
+        pty.openpty()
+    except Exception:
+        print >>sys.stderr, "gpsfake: ptys not available, falling back to UDP."
+        udp = True
 
     if not arguments:
         print >>sys.stderr, "gpsfake: requires at least one logfile argument."
