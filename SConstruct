@@ -749,12 +749,11 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
     if qt_network:
         qt_env = env.Clone()
         qt_env.MergeFlags('-DUSE_QT')
-        if qt_network:
-            try:
-                qt_env.MergeFlags(pkg_config('QtNetwork'))
-            except OSError:
-                announce("pkg_config is confused about the state of QtNetwork.")
-                qt_env = None
+        try:
+            qt_env.MergeFlags(pkg_config('QtNetwork'))
+        except OSError:
+            announce("pkg_config is confused about the state of QtNetwork.")
+            qt_env = None
     else:
         qt_env = None
 
