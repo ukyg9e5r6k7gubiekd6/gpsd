@@ -452,7 +452,7 @@ def CheckCompilerDefines(context, define):
     context.Result(ret)
     return ret
 
-if env.GetOption("clean"):
+if env.GetOption("clean") or env.GetOption("help"):
     cxx = qt_network = None
     dbus_libs = []
     rtlibs = []
@@ -741,16 +741,16 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 
     env = config.Finish()
 
-# Be explicit about what we're doing.
-changelatch = False 
-for (name, default, help) in boolopts + nonboolopts + pathopts:
-    if env[name] != env.subst(default):
-        if not changelatch:
-            announce("Altered configuration variables:")
-            changelatch = True
-        announce("%s = %s (default %s): %s" % (name, env[name], env.subst(default), help))
-if not changelatch:
-    announce("All configuration flags are defaulted.")
+    # Be explicit about what we're doing.
+    changelatch = False 
+    for (name, default, help) in boolopts + nonboolopts + pathopts:
+        if env[name] != env.subst(default):
+            if not changelatch:
+                announce("Altered configuration variables:")
+                changelatch = True
+            announce("%s = %s (default %s): %s" % (name, env[name], env.subst(default), help))
+    if not changelatch:
+        announce("All configuration flags are defaulted.")
 
 # Gentoo systems can have a problem with the Python path
 if os.path.exists("/etc/gentoo-release"):
