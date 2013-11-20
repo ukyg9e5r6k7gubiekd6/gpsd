@@ -967,7 +967,7 @@ have it. The spectacularly bad design and documentation of most
 vendor-specific GPS reporting protocols is at its abysmal worst in
 this exact area.</p>
 
-</p>On a SiRF-based device you might be able to get some use out of
+<p>On a SiRF-based device you might be able to get some use out of
 the SUBFRAME JSON.  If you succeed in extracting
 almanac/ephemeris/pseudorange data from those raw fields, we salute
 you - and please share that code with us!</p>
