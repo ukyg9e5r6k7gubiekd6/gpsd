@@ -108,6 +108,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     session->newdata.epx = session->newdata.epy =
 	(double)(getles32(buf, 24) / 100.0) / sqrt(2);
     session->newdata.eps = (double)(getles32(buf, 40) / 100.0);
+    mask |= HERR_SET | SPEEDERR_SET;
     /* Better to have a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (double)(getleu16(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
