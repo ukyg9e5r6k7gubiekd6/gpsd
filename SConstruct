@@ -504,7 +504,7 @@ else:
     cxx = config.CheckCXX()
     if not cxx and env["libgpsmm"]:
         announce("C++ doesn't work, suppressing libgpsmm build.")
-        env["libgpsmm"] = false
+        env["libgpsmm"] = False
 
     # define a helper function for pkg-config - we need to pass
     # --static for static linking, too.
