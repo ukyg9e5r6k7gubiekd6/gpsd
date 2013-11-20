@@ -288,18 +288,17 @@ one with the best-established peer community if you need help in
 unusual situations.  On the other hand, chrony has a reputation for
 being easier to set up and configure, and is better in situations
 where your machine has to be disconnected from the Internet for long
-periods of time.
+enough periods of time for the clock to drift significantly.
+
+ntpd and chrony have differing philosophies, with ntpd more interested
+in deriving conensus time from multiple sources while chrony tries to
+identify a single best source and track it closely.
 
 A feature comparison, part of the chrony documentation, is at
-<<CHRONY-COMPARE>>. If you don't already know enough about time
+<<CHRONY-COMPARE>>. An informative email thread about the differences
+is <<CHRONYDEFAULT>>. If you don't already know enough about time
 service to have a preference, the functional differences between them
-are unlikely to be significant to you; flip a coin.
-
-//FIXME: I've seen hints that ntpd and chrony have differing
-//philosophies, with ntpd more interested in deriving conensus 
-//time from multiple sources while chrony tries to identify
-//a single best source and hug it.  If this true?  If so, here
-//is where it should be described.
+are unlikely to be significant to you; flip a coin
 
 == Choice of Hardware ==
 
@@ -840,11 +839,9 @@ The clock crystals used in consumer electronics have two properties we
 are interested in: accuracy and stability.  *Accuracy* is how well the
 measured frequency matches the number printed on the can.  *Stability*
 is how well the frequency stays the same even if it isn't accurate.
-(Long term aging is a third property that is interesting, but as
-discussed below, since ntpd and chrony use a short drift history, it
-is not a cause of error.)
-
-//FIXME: Is it correct that chrony uses a short drift history?
+(Long term aging is a third property that is interesting, but ntpd and
+chrony both a use a drift history that is relatively short; thius,
+this is not a significant cause of error.)
 
 Typical specs for oscillator packages are 20, 50, 100 ppm.  That includes
 everything; initial accuracy, temperature, supply voltage, aging, etc.
@@ -881,11 +878,17 @@ see <<ADEV-PLOT>>.
 ntpd and chrony automatically adjust the value of the polling interval
 to get the best results.  That turns into the N above.
 
-If you turn on ntpd logging for loopstats, that will record both offset, drift,
-and the polling interval  It's easy to feed to gnuplot, see the example
-script in the GPSD contrib directory.
+If you turn on the right logging level ("statistics loopstats
+peerstats" for ntpd, "log measurements tracking") , that will record
+both offset, drift, and the polling interval. The ntpd stats are easy
+to feed to gnuplot, see the example script in the GPSD contrib
+directory.  The most important value is the offset reported in the 3rd
+field in loopstats and the last field in tracking.log. With gnuplot
+you can compare them (after concatenating the rotated logs):
 
-//FIXME: What is the analogous facility in chrony? Is there one?
+-----------------------------------------------------------------------------
+plot "tracking.log" using 7 with lines, "loopstats" using 3 with lines
+-----------------------------------------------------------------------------
 
 While your NTP daemon (ntpd or chrony) is adjusting the polling
 interval, it is assuming that the drift is not changing.  It gets
@@ -1110,3 +1113,5 @@ Sanjeev Gupta <ghane0@gmail.com> assisted with editing.
 - [[[ZONES]]] http://www.pool.ntp.org/zone
 
 - [[[ADEV-PLOT]]] http://www.leapsecond.com/pages/adev-avg/[Allan deviation and Averaging]
+
+- [[[CHRONYDEFAULT]]] https://lists.fedoraproject.org/pipermail/devel/2010-May/135679.html
