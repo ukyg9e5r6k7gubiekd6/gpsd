@@ -295,6 +295,12 @@ A feature comparison, part of the chrony documentation, is at
 service to have a preference, the functional differences between them
 are unlikely to be significant to you; flip a coin.
 
+//FIXME: I've seen hints that ntpd and chrony have differing
+//philosophies, with ntpd more interested in deriving conensus 
+//time from multiple sources while chrony tries to identify
+//a single best source and hug it.  If this true?  If so, here
+//is where it should be described.
+
 == Choice of Hardware ==
 
 To get 1PPS to your NTP daemon, you first need to get it from a
@@ -554,14 +560,23 @@ logfile /var/log/ntp.log
 
 # GPS Serial data reference
 server 127.127.28.0 
-fudge 127.127.28.0 time1 0.420 refid GPS
+fudge 127.127.28.0 time1 0.9999 refid GPS
 
 # GPS PPS reference
 server 127.127.28.1 prefer
 fudge 127.127.28.1 refid PPS
 -----------------------------------------------------------------------------
 
-The number "0.420" is a placeholder, to be explained shortly.
+The number "0.9999" is a placeholder, to be explained shortly.  It
+is *not a number to be used in production* - it's too large. If you
+can't replace it with a real value, it would be best to leave out the 
+clause entirely so the entry looks like
+
+-----------------------------------------------------------------------------
+fudge 127.127.28.0 refid GPS
+-----------------------------------------------------------------------------
+
+This is equivalent to declaring a time1 of 0.
 
 The pool statement adds 4 chimers as additional time references needed
 by ntpd for redundancy and to give you a reference to see how well
@@ -585,7 +600,7 @@ logfile /var/log/ntp.log
 
 # GPS Serial data reference
 server 127.127.28.0 minpoll 4 maxpoll 4
-fudge 127.127.28.0 time1 0.420 refid GPS
+fudge 127.127.28.0 time1 0.9999 refid GPS
 
 # GPS PPS reference
 server 127.127.28.1 minpoll 4 maxpoll 4 prefer
@@ -609,21 +624,18 @@ started as root.)
 With this configuration, ntpd will read the timestamp posted by gpsd
 every 64 seconds (16 if non-root) and send it to unit 0.  
 
-The number after the parameter time1 (0.420 in the example above) is a
+The number after the parameter time1 (0.9999 in the example above) is a
 "fudge", offset in seconds.  It's an estimate of the latency between
 the time source and the 'real' time. You can use it to compensate out
-some of the fixed delays in the system.
+some of the fixed delays in the system. An 0.9999 fudge would be
+ridiculously large.
 
 You may be able to find a value for the fudge by looking at the entry
 for your GPS type on <<HARDWARE>>.  Later in this document we'll
-explain methods for estimating a fudge factor on uknown hardware.
+explain methods for estimating a fudge factor on unknown hardware.
 
 There is nothing magic about the refid fields; they are just labels
 used for generating reports.  You can name them anything you like.
-
-To keep ntpd from preferring NMEA time over PPS time, you can add an 
-overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
-is never used, just monitored.
 
 When you start gpsd, it will wait for a few good fixes before
 attempting to process PPS.  You should run gpsmon or cgps to verify
@@ -741,7 +753,7 @@ driftfile /var/lib/chrony/drift
 
 # set larger delay to allow the NMEA source to overlap with
 # the other sources and avoid the falseticker status
-refclock SHM 0 offset 0.420 delay 0.2 refid GPS
+refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
 refclock SHM 1 refid PPS
 -----------------------------------------------------------------------------
 
@@ -767,7 +779,7 @@ driftfile /var/lib/chrony/drift
 
 # set larger delay to allow the NMEA source to overlap with
 # the other sources and avoid the falseticker status
-refclock SHM 0 offset 0.420 delay 0.2 refid GPS
+refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
 refclock SOCK /var/run/chrony.ttyXX.sock refid PPS
 -----------------------------------------------------------------------------
 
@@ -818,37 +830,35 @@ To keep chronyd from preferring NMEA time over PPS time, you can add an
 overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
 is never used, just monitored.
 
-== NTP tuning and performance details ==
+== Performance Tuning ==
 
-This section deals specifically with ntpd.  It discusses algorithms
-used by the ntpd suite to measure and correct the system time.  It is not
-directly applicable to chronyd, althogh some design considerations
-may be similar.
-
-=== ntpd internal instrumentation ===
-
-==== Theory and background ====
+This section is general and can be used with either ntpd or chronyd.
+We'll have more to say about tuning techniques for the specific 
+implementations in later sections.
 
 The clock crystals used in consumer electronics have two properties we
 are interested in: accuracy and stability.  *Accuracy* is how well the
 measured frequency matches the number printed on the can.  *Stability*
 is how well the frequency stays the same even if it isn't accurate.
 (Long term aging is a third property that is interesting, but as
-discussed below, since ntpd uses a short drift history, it is not a
-cause of error.)
+discussed below, since ntpd and chrony use a short drift history, it
+is not a cause of error.)
+
+//FIXME: Is it correct that chrony uses a short drift history?
 
 Typical specs for oscillator packages are 20, 50, 100 ppm.  That includes
 everything; initial accuracy, temperature, supply voltage, aging, etc.
 
-With a bit of software, you can correct for the inaccuracy.  ntpd calls it
-*drift*.  It just takes some extra low order bits on the arithmetic doing the
-time calculations.  In the simplest case, if you thought you had a 100
-MHz crystal, you need to change that to something like 100.000324. The use
-of a PPS signal from gpsd contributes directly to this measurement.
+With a bit of software, you can correct for the inaccuracy.  ntpd and
+chrony both call it *drift*.  It just takes some extra low order bits
+on the arithmetic doing the time calculations.  In the simplest case,
+if you thought you had a 100 MHz crystal, you need to change that to
+something like 100.000324. The use of a PPS signal from gpsd
+contributes directly to this measurement.
 
 Note that a low drift contributes to stability, not necessarily accuracy.
 
-The major source of in-stability is temperature.  Ballpark is the drift
+The major source of instability is temperature.  Ballpark is the drift
 changes by 1 PPM per degree C.  This means that the drift does not stay
 constant, it may vary with a daily and yearly pattern.  This is why the
 value of drift the ntpd uses is calculated over a (relatively) short time.
@@ -858,6 +868,8 @@ time offset every N seconds, plot the graph, and fit a straight line.  The
 slope of that line is the drift.  The units cancel out.  Parts-per-million is
 a handy scale.
 
+//FIXME: Is it correct that chrony uses a linear fit with low-pass filter?
+
 How do you turn that handwaving description into code?  One easy way is to
 use 2 points and pick the right N, then run the answer through a low pass
 filter.  In that context, there are two competing sources of error.  If N is
@@ -866,28 +878,39 @@ dominate.  If N is too big, the actual drift will change while you are
 measuring it.  In the middle is a sweet spot.  (For an example,
 see <<ADEV-PLOT>>.
 
-ntpd adjusts the value of the polling interval to get the best results.  That
-turns into the N above.
+ntpd and chrony automatically adjust the value of the polling interval
+to get the best results.  That turns into the N above.
 
-If you turn on logging for loopstats, that will record both offset, drift,
+If you turn on ntpd logging for loopstats, that will record both offset, drift,
 and the polling interval  It's easy to feed to gnuplot, see the example
 script in the GPSD contrib directory.
 
-==== Applying the theory ====
+//FIXME: What is the analogous facility in chrony? Is there one?
 
-While ntpd is adjusting the polling interval, it is assuming that the drift
-is not changing.  It gets confused if your drift changes abruptly, say
-because you started some big chunk of work on a machine that's usually idle
-and that raises the temperature.
+While your NTP daemon (ntpd or chrony) is adjusting the polling
+interval, it is assuming that the drift is not changing.  It gets
+confused if your drift changes abruptly, say because you started some
+big chunk of work on a machine that's usually idle and that raises the
+temperature.
 
-ntpd writes out the drift every hour or so.  (Less often if it hasn't changed
-much to reduce the workload on flash file systems.)  On startup, ntpd reloads
-the old value.
+Your NTP daemon writes out the drift every hour or so.  (Less often if
+it hasn't changed much to reduce the workload on flash file systems.)
+On startup, it reloads the old value.
 
-If you restart ntpd, it should start with a close old drift value and quickly
-converge to the newer slightly different value.  If you reboot, expect it to
-converge to a new/different drift value and that may take a while depending
-on how different the basic calibration factors are.
+If you restart the daemon, it should start with a close old drift
+value and quickly converge to the newer slightly different value.  If
+you reboot, expect it to converge to a new/different drift value and
+that may take a while depending on how different the basic calibration
+factors are.
+
+//FIXME: Is this description correct of chrony?
+
+== NTP tuning and performance details ==
+
+This section deals specifically with ntpd.  It discusses algorithms
+used by the ntpd suite to measure and correct the system time.  It is not
+directly applicable to chronyd, althogh some design considerations
+may be similar.
 
 === NTP performance tuning ===
 
@@ -957,6 +980,12 @@ the absence of network problems, this should show "377".
 host and the remote server in milliseconds. This is the value that can
 be fudged with the "time1" parameter of the GPS server line in ntp.conf.
 If the offset is positive, reduce the time1 value and vice versa.
+
+The asterisk in this example indicates that ntpd has correctly
+preferred .PPS.  over .GPS., as it should.  If for some reason it
+locks on to GPS time as a preferred source, you can add an overlarge
+fudge to the NMEA time to discourage it.  Or add the suffix 'noselect'
+so GPS time is never used, just monitored.
 
 A more detailed description of the output is available at
 <<NTPQ-OUTPUT>>.
@@ -1032,6 +1061,8 @@ ntp1.karneval.cz           17  10   89m      0.127      0.539  -4131us   574us
 In this case (Garmin 18x) the offset specified in the config for the
 SHM 0 source should be around 0.495.
 -----------------------------------------------------------------------------
+
+//FIXME: What more can we say about chronyd tuning?
 
 == Providing public NTP service ==
 
