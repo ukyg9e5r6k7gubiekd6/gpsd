@@ -1956,37 +1956,6 @@ struct gps_data_t {
 #define GST_SET 	(1llu<<27)
 #define VERSION_SET	(1llu<<28)
 #define POLICY_SET	(1llu<<29)
-#define LOGMESSAGE_SET	(1llu<<30)
-#define ERROR_SET	(1llu<<31)
-#define TIMEDRIFT_SET	(1llu<<32)
-#define SET_HIGH_BIT	33
-    timestamp_t online;		/* NZ if GPS is on line, 0 if not.
-				 *
-				 * Note: gpsd clears this time when sentences
-				 * fail to show up within the GPS's normal
-				 * send cycle time. If the host-to-GPS
-				 * link is lossy enough to drop entire
-				 * sentences, this field will be
-				 * prone to false zero values.
-				 */
-
-#ifndef USE_QT
-    socket_t gps_fd;		/* socket or file descriptor to GPS */
-#else
-    void* gps_fd;
-#endif
-    struct gps_fix_t	fix;	/* accumulated PVT data */
-
-    /* this should move to the per-driver structure */
-    double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
-
-    /* GPS status -- always valid */
-    int    status;		/* Do we have a fix? */
-#define STATUS_NO_FIX	0	/* no */
-#define STATUS_FIX	1	/* yes, without DGPS */
-#define STATUS_DGPS_FIX	2	/* yes, with DGPS */
-
-    /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
     int used[MAXCHANNELS];	/* PRNs of satellites used in solution */
     struct dop_t dop;
