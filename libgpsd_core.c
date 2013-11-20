@@ -1548,6 +1548,20 @@ int gpsd_multipoll(const bool data_ready,
 	    /* handle data contained in this packet */
 	    if (device->packet.type != BAD_PACKET)
 		/*@i1@*/handler(device, changed);
+
+#ifdef __future__
+	    /*
+	     * Bernd Ocklin suggests:
+	     * Exit when a full packet was received and parsed.
+	     * This allows other devices to be serviced even if
+	     * this device delivers a full packet at every single
+	     * read.
+	     * Otherwise we can sit here for a long time without
+	     * any for-loop exit condition being met.
+	     */
+	    if ((changed & PACKET_SET) != 0)
+               break;
+#endif /* __future__ */
 	}
     }
     else if (device->reawake>0 && timestamp()>device->reawake) {
