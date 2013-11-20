@@ -11,6 +11,44 @@ GPSD, NTP and a GPS supplying 1PPS (one pulse-per-second) output can be
 used to set up a high-quality NTP time server. This HOWTO explains the
 method and various options you have in setting it up.
 
+Here is the quick-start sequence. The rest of this document goes
+into more detail about the steps.
+
+1. Ensure that either gpsd and either ntpd or chronyd are installed on
+   your system. (Both gpsd and ntpd are preinstalled in many stock
+   Linux distributions; chronyd is normally not.) You don't have to
+   choose which to use yet if you have easy access to both, but
+   knowing which alternatives are readily available to you is a good
+   place to start.
+
+2. Connect a PPS-capable GPS to one of your serial or USB ports.
+   A random cheap consumer-grade GPS won't do; you may have to
+   do some hunting to find a usable one.
+
+3. Check that it actually emits PPS by pointing GPSD's gpsmon utility
+   at the port.  If it has a good (3D-mode) fix, lines marked "PPS"
+   should scroll by in the packet-logging window.
+
+4. If you persistently fail to get live PPS, (1) you may have a
+   skyview problem, (2) you may have a cabling problem, (3) you may
+   have a gpsd or kernel configuration problem, (4) you may have a
+   device problem.  These are listed in roughly decreasing probability
+   order.  Troubleshoot appropriately.
+
+5. Edit your ntpd or chronyd configuration to tell your NTP daemon to
+   listen for time hints. (This step is somewhat tricky.)
+
+6. Start up gpsd.  If you are using ntpd, you can use ipcrm(1) to check that
+   verify that the shared-memory segment that gpsd and ntpd want to
+   use to communicate has been attached; or you can impatiently skip
+   to the next step and look for the segment only if that fails.
+
+7. Use ntpq or the chronyc sources command to verify that your device 
+   is feeding time corrections to your NTP daemon.
+
+8. (Optional and challenging.) Hand-tune your installation for the
+   best possible performance.
+
 This document is intended to be a comprehensive guide suitable for
 people who know little about time service. We encourage others to
 contribute additions and corrections.
@@ -208,6 +246,55 @@ With these factors in play, worst-case error can reach up to
 unusual and should occur only if all your network routes to chimers
 have serious problems.
 
+== Software Prerequisites ==
+
+gpsd includes support for interpreting 1PPS pulses that is mostly
+autoconfiguring and requires no special setup.  If you built GPSD from
+sources, make sure the build is with pps=yes and ntpshm=yes (the
+default).  The command "gpsd -L" should indicate that
+time-service features and PPS are enabled.
+
+If your kernel provides the RFC 2783 KPPS (kernel PPS) API, gpsd will
+use that for extra accuracy. Many Linux distributions have a package
+called "pps-tools" that will install KPPS support and the time_pps.h
+header file.  We recommend you do that.  If your kernel is built in
+the normal modular way, this package installation will suffice.
+
+If you are scratch-building your Linux kernel, the configuration 
+must include either these two lines, or the same with "y" replaced
+by "m" to enable the drivers as modules:
+
+-----------------------------------------------------------------------------
+CONFIG_PPS=y
+CONFIG_PPS_CLIENT_LDISC=y
+-----------------------------------------------------------------------------
+
+Your Linux distribution may ship a file "config-xxxx" in the /boot
+directory, which will have a list of the configuration options
+that were used to build the kernel.  You can check if the above
+options are set. Usually they will be set to "m", which is
+sufficient.
+
+Other OSes have different ways to enable KPPS in their kernels.
+When we learn what those are, we'll document them or point
+at references.
+
+You will need to have either ntpd or chrony installed. If you are
+running a Unix variant with a package system, the packages will
+probably be named 'ntpd' and either 'chrony' or 'chronyd'.
+
+Of these two, ntpd is the older and more popular choice - thus, the
+one with the best-established peer community if you need help in
+unusual situations.  On the other hand, chrony has a reputation for
+being easier to set up and configure, and is better in situations
+where your machine has to be disconnected from the Internet for long
+periods of time.
+
+A feature comparison, part of the chrony documentation, is at
+<<CHRONY-COMPARE>>. If you don't already know enough about time
+service to have a preference, the functional differences between them
+are unlikely to be significant to you; flip a coin.
+
 == Choice of Hardware ==
 
 To get 1PPS to your NTP daemon, you first need to get it from a
@@ -219,10 +306,6 @@ Note that the most popular consumer-grade GPS engine - SiRF - does not
 deliver 1PPS through USB or even RS232.  Thus the usual run of cheap
 GPS mice won't do.  In general, you can't use a USB device for time
 service unless you know it has the Macx-1 mod.
-
-If you are in any doubt about whether your device has PPS
-capability, point gpsmon at it. When it has a 3D fix the PPS
-event reports should be obvious in the packet window.
 
 In the past, the RS232 variant of the Garmin GPS-18 has been very
 commonly used for time service.  While it is still a respectable
@@ -285,18 +368,46 @@ board.
 
 == Enabling PPS ==
 
-gpsd includes support for interpreting the 1PPS pulses; this can be
-used to update your time at much higher accuracy than message time provides.
-
-You can determine whether your GPS emits this pulse, and gpsd is
+You can determine whether your GPS emits 1PPS, and gpsd is
 detecting it, by running the gpsmon utility (giving it the GPS's
-serial-device path as arument).  Watch for lines of
-dashes in the packet-logging window; for most GPS types there will
-also be a "PPS offset:" field in the data panels above  showing the
-delta between PPS and your local clock.
+serial-device path as argument).  Watch for lines of dashes marked
+'PPS' in the packet-logging window; for most GPS types there will also
+be a "PPS ffset:" field in the data panels above showing the delta
+between PPS and your local clock.
 
 If you don't have gpsmon available, you can run gpsd at -D 5 and watch
 for carrier-detect state change messages in the logfile.
+
+If you don't see evidence of incoming PPS, here are some trouble
+sources to check:
+
+1. The skyview of your GPS may be poor.  Suspect this if, when you
+   watch it with gpsmon, it wanders in and out of having a good 3D
+   fix. Unfortunately, the only fix for this is to re-site your GPS
+   where it can see more sky; fortunately, this is not as common
+   a problem as it used to be, because modern receivers are often
+   capable of getting a solid fix indoors.
+
+2. If you are using an RS232 cable, examine it suspiciously, ideally
+   with an RS232 breakout box. Cheap DB9 to DB9 cables such as those
+   issued with UPSes often carry TXD/RXD/SG only, omitting handshake
+   lines such as DCD, RI, and DSR that are used to carry 1PPS.
+   Suspect this especially if the cable jacket looks too skinny to
+   hold more than three leads!
+
+3. Verify that your gpsd and kernel were both built with PPS support,
+   as previously deccribed in the section on software prerequisites.
+
+4. If you have a solid 3D fix, a known-good cable, and your software
+   is properly configured, but you still get no PPS, then you might
+   have a GPS that fails to deliver PPS off the chip to the RS232
+   or USB interface.  You get to become intimate with datasheets 
+   and pinouts, and might need to acquire a different GPS.
+
+== Running GPSD ==
+
+If you're going to use gpsd for time service, you must run in -n mode
+so the clock will be updated even when no JSON clients are active.
 
 Note that gpsd assumes that after each fix the GPS will assert
 1PPS first and ship sentences reporting time of fix second. Every
@@ -305,34 +416,6 @@ an exception, it should manifest as reported times that look like
 they're from the future and require a negative fudge. If this
 ever happens, please report the device make and model to the GPSD
 maintainers so we can flag it in our GPS hardware database.
-
-If your kernel provides the RFC 2783 KPPS (kernel PPS) API, gpsd will
-use that for extra accuracy. Many Linux distributions have a package
-called "pps-tools" that will install KPPS support and the time_pps.h
-header file.  We recommend you do that.  If your kernel is built in
-the normal modular way, this package installation will suffice.
-
-If you are scratch-building your Linux kernel, the configuration 
-must include either these two lines, or the same with "y" replaced
-by "m" to enable the drivers as modules:
-
------------------------------------------------------------------------------
-CONFIG_PPS=y
-CONFIG_PPS_CLIENT_LDISC=y
------------------------------------------------------------------------------
-
-Your Linux distribution may ship a file "config-xxxx" in the /boot
-directory, which will have a list of the configuration options
-that were used to build the kernel.  You can check if the above
-options are set. Usually they will be set to "m", which is
-sufficient.
-
-Other OSes have different ways to enable KPPS in their kernels.
-When we learn what those are, we'll document them or point
-at references.
-
-If you're going to use gpsd for time service, you must run in -n mode
-so the clock will be updated even when no JSON clients are active.
 
 In order to present the smallest possible attack surface to
 privilege-escalation attempts, gpsd, if run as root, drops its root
@@ -460,8 +543,8 @@ ipcrm -M 0x4e545032
 ipcrm -M 0x4e545033
 -----------------------------------------------------------------------------
 
-Here is a minimal sample ntp.conf configuration telling ntpd how to
-read the GPS notifications, when gpsd is started as root:
+Here is a minimal sample ntp.conf configuration to work with GPSD run
+as root, telling ntpd how to read the GPS notifications
 
 -----------------------------------------------------------------------------
 pool us.pool.ntp.org iburst
@@ -478,12 +561,18 @@ server 127.127.28.1 prefer
 fudge 127.127.28.1 refid PPS
 -----------------------------------------------------------------------------
 
-The pool statement adds 4 chimers as additional time references needed
-by ntpd for redundancy and to give you a reference to see how well your
-local GPS is performing.
+The number "0.420" is a placeholder, to be explained shortly.
 
-If you are outside of the USA replace the pool servers with one in your
-local area. See <<USE-POOL>> for further information.
+The pool statement adds 4 chimers as additional time references needed
+by ntpd for redundancy and to give you a reference to see how well
+your local GPS is performing.  If you are outside of the USA replace
+the pool servers with one in your local area. See <<USE-POOL>> for
+further information.
+
+The pool statememt, and the drftfile and logfile declarations after it,
+will not be stirctly necessary if the default ntp.conf that your
+distribution supplies gives you a working setup. The two pairs of
+server and fudge declarations are the key.
 
 Users of ntpd versions older than revision ntp-4.2.5p138 should instead use
 this ntp.conf, when gpsd is started as root:
@@ -518,20 +607,27 @@ notifications allows ntpd to use its normal heuristics to weight them.
 started as root.)
 
 With this configuration, ntpd will read the timestamp posted by gpsd
-every 64 seconds (16 if non-root) and send it to unit 0.  The number after
-the parameter time1 (0.420 in the example above) is a "fudge", offset in seconds.  It's an estimate
-of the latency between the time source and the 'real' time. You can use
-it to adjust out some of the fixed delays in the system.
+every 64 seconds (16 if non-root) and send it to unit 0.  
+
+The number after the parameter time1 (0.420 in the example above) is a
+"fudge", offset in seconds.  It's an estimate of the latency between
+the time source and the 'real' time. You can use it to compensate out
+some of the fixed delays in the system.
+
+You may be able to find a value for the fudge by looking at the entry
+for your GPS type on <<HARDWARE>>.  Later in this document we'll
+explain methods for estimating a fudge factor on uknown hardware.
+
+There is nothing magic about the refid fields; they are just labels
+used for generating reports.  You can name them anything you like.
 
 To keep ntpd from preferring NMEA time over PPS time, you can add an 
 overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
 is never used, just monitored.
 
 When you start gpsd, it will wait for a few good fixes before
-attempting to process PPS.
-
-You may run 'cgps' to verify your GPS has a 3D lock before worrying about
-timekeeping.
+attempting to process PPS.  You should run gpsmon or cgps to verify
+your GPS has a 3D lock before worrying about timekeeping.
 
 After starting (as root) ntpd, then gpsd, a listing similar to the one below
 should appear as the output of the command "ntpq -p" (after allowing the
@@ -547,7 +643,8 @@ xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
 +SHM(0)          .GPS.            0 l   50   64  377    0.000    6.631   5.331
 -----------------------------------------------------------------------------
 
-If you are running PPS then it may look like this:
+The line with refid ".GPS." represents the in-band time reportts from
+your GPS.  When you are getting PPS then it may look like this:
 
 -----------------------------------------------------------------------------
      remote           refid      st t when poll reach   delay   offset  jitter
@@ -558,6 +655,8 @@ xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
 +SHM(0)          .GPS.            0 l   50   64  377    0.000    6.631   5.331
 *SHM(1)          .PPS.            0 l   49   64  377    0.000    0.222   0.310
 -----------------------------------------------------------------------------
+
+Note the additional ".PPS." line.
 
 If the value under "reach" for the SHM lines remains zero, check that
 gpsd is running; cgps reports a 3D fix; and the '-n' option was used.
@@ -597,10 +696,11 @@ After a day or so or maybe less the frequency estimate will be very
 close and there won't be a persistent offset.
 
 The gpsd developers would like to receive information about the
-offsets (fudges) observed by users for each type of receiver.  Please
-check the GPS hardware table at <<HARDWARE>>; if your GPS is not
-present or doesn't have a recommended fudge, send us the output of the
-"ntpq -p" command and the make and type of receiver.
+offsets (fudges) observed by users for each type of receiver. Uf your
+GPS is not present in <<HARDWARE>>, or doesn't have a recommended
+fudge, or you see a fudge value very different dfrom what's there,
+send us the output of the "ntpq -p" command and the make and type of
+receiver.
 
 == Feeding chrony from GPSD ==
 
