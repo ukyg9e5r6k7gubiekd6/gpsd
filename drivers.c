@@ -15,8 +15,6 @@
 #include "gpsd.h"
 #include "bits.h"		/* for getbeu16(), to extract big-endian words */
 
-extern const struct gps_type_t driver_nmea2000;
-
 ssize_t generic_get(struct gps_device_t *session)
 {
     return packet_get(session->gpsdata.gps_fd, &session->packet);
@@ -1497,6 +1495,7 @@ extern const struct gps_type_t driver_garmin_usb_binary;
 extern const struct gps_type_t driver_geostar;
 extern const struct gps_type_t driver_italk;
 extern const struct gps_type_t driver_navcom;
+extern const struct gps_type_t driver_nmea2000;
 extern const struct gps_type_t driver_oncore;
 extern const struct gps_type_t driver_sirf;
 extern const struct gps_type_t driver_superstar2;
