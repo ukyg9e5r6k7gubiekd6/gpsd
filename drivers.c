@@ -1515,7 +1515,7 @@ static const struct gps_type_t *gpsd_driver_array[] = {
     &driver_nmea0183,
 #ifdef ASHTECH_ENABLE
     &driver_ashtech,
-#endif /* ASHTECHV18_ENABLE */
+#endif /* ASHTECH_ENABLE */
 #ifdef TRIPMATE_ENABLE
     &driver_tripmate,
 #endif /* TRIPMATE_ENABLE */
