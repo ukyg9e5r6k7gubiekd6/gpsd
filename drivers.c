@@ -15,9 +15,6 @@
 #include "gpsd.h"
 #include "bits.h"		/* for getbeu16(), to extract big-endian words */
 
-extern const struct gps_type_t driver_zodiac_binary;
-extern const struct gps_type_t driver_ubx_binary;
-extern const struct gps_type_t driver_sirf_binary;
 extern const struct gps_type_t driver_nmea2000;
 
 ssize_t generic_get(struct gps_device_t *session)
