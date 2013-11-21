@@ -149,7 +149,16 @@ timestamping the arrival of the first character in the report on each fix
 and correcting for a relatively small fixed latency composed of
 fix-processing and RS232 transmission time.
 
-Unfortunately, fix reports are often delayed in the receiver and on
+At one character per ten bits (counting framing at stopbits) a
+9600-bps serial link introduces about a mSec of latency *per
+character*; furthermore, the Linux kernel will normally delay delivery
+of characters to your application until the next timer tick, about
+every 4 mSec in modern kernels. Both USB and RS232 will incur that
+approximately 5mSec-per-char latency overhead.  You'll have to deal
+with this latency even on chips like the Venus 6 that claim the
+beginning of their reporting burst is synced to PPS.
+
+Unfortunately, fix reports are also delayed in the receiver and on
 the link by as much as several hundred mSec, and this delay is not
 constant. This latency varies (wobbles) throughout the day.  It may be
 stable to 10 mSec for hours and then jump by 200mSec.  Under these

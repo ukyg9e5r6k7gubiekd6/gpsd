@@ -150,9 +150,9 @@ Technology PL2303.  Then run "dmesg", looking for a message indicating
 a new USB device of that kind and giving you the device path -
 <code>/dev/ttyUSBn</code> for some number n.</p>
 
-<p>3b. If your receiver lists in lsusb(1) doesn't show up as a ttyUSBx
+<p>3b. If your receiver lists in lsusb(1) but doesn't show up as a ttyUSBx
 device, don't lose hope.  It might be a ttyACM device, probably
-/dev/ttyACM0; some receivers, including for example the u-blox TCX0 
+/dev/ttyACM0; some receivers, including for example the u-blox EVK 6H 
 evaluation kit, announce themselves as USB modems.</p>
 
 <p>3c. For a Bluetooth device, see our <a href="bt.html">Bluetooth
@@ -241,6 +241,7 @@ Location" service with a similar bug. You can disable this through
 Settings.  See <a
 href="http://blog.gadgethelpline.com/gpsd-stop-samsung-galaxy-siiis-battery-life/">this
 blog post</a> for a fix.</p>
+
 <h1 id='garmin'>My Garmin USB GPS doesn't work.</h1>
 
 <p>Garmin binary protocol is weird enough that it can't be handled
@@ -272,10 +273,11 @@ some date in the current year <em>before</em> launching gpsd you
 will see correct time reports.</p>
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
-<blockquote>
+
 <p>When you have a problem with gpsd, here are some steps you can take to
 help get your bug resolved as quickly as possible.</p>
 
+<blockquote>
 <h3>1. Read this whole FAQ first</h3>
 
 <p>First, read this whole FAQ before reporting apparent misbehavior as a
@@ -300,7 +302,7 @@ have a real <code>gpsd</code> bug.</p>
 possible your bug has already been fixed.  Download the latest public
 version from the <a href='@MAINPAGE@'>project page</a> and test it.
 To be really helpful, check out the <a href='@BROWSEREPO@'>git head</a>
-and test that.  We don't mind getting bug reports that say "I saw
+and test that.  We don't mind getting reports that say "I saw
 version foo had the following bug, but you've fixed it."</p>
 
 <h3>5. Capture a log that triggers the problem</h3>
@@ -471,15 +473,19 @@ to include the firmware version as well.  This should be in your xgps
 display if your device makes it available; in a form field before
 2.35, or as the window title in 2.35 and later.  If the ID string is
 too long to fit, let the daemon run for a few minutes and issue an "I"
-command to it.  Alternatively, running the daemon at -D 4 may reveal
+command to it. Alternatively, running the daemon at -D 4 may reveal
 the version.</p>
+
+<p>In 3.10 and newer versions, runing gpsctrl with your GPS's device
+path as an argument will produce a report that includes both the GPS
+type and subtype, if that information is available at all.</p>
 
 <h3>13. Report it on the GPSD bugtracker</h3>
 
 <p>There is a <a
 href="@BUGTRACKER@">GPSD bug tracker</a>.
 Use that.  If your bug narrative does not fit the tracker template well,
-it's acceptable to send an email report to the gpsd-dev list.</p>
+it's acceptable to send an email report to the @DEVMAIL@ list.</p>
 </blockquote>
 
 <h1 id="startup">Why does getting a fix take so long after powerup?</h1>
@@ -614,40 +620,8 @@ accuracy</a> will help. Time referencing at accuracies below
 0.01sec has its own set of issues related to latency in your
 sensor and computer.</p>
 
-<p>In particular, USB transport is not suited for anything
-time-related that requires sub-millisecond accuracy. If a
-USB-connected GPS unit wants to tell the computer it's 12:23:45, it
-will have to wait for the computer to poll it. This polling happens
-1000 times per second, introducing variable latency averaging a
-half-millisecond.  Furthermore, the USB chip might run at anything
-close to 1000 Hz. If it runs at 1000.1 Hz, every 10th second the next
-time-report will come 1 whole millisecond earlier. This will have NTP
-observing something like a 1ms-high sawtooth in the time-reports.</p>
-
-<p>That being said, we've observed excellent 1 millisecond accuracy
-timing performance over USB with a u-blox 6+PL2303 combination featuring
-1PPS wired to DCD_IN.  NaviSys sells this as the GR601W, aka the
-Macx-1.</p>
-
-<p>For accurate time reference, use a PPS line over RS232 triggering an
-interrupt. Serial bus interrupt latencies on modern hardware on the
-order of 10 microseconds, roughly a hundred-fold improvement over
-USB.</p>
-
-<p>Don't confuse PPS with conventional, non-PPS data transport over
-RS232; the latency on that is much higher. At one character per ten
-bits (counting framing at stopbits) a 9600-bps serial link introduces
-about a millisecond of latency <em>per character</em>; furthermore,
-the Linux kernel will normally delay delivery of characters to your
-application until the next timer tick, about every 4 milliseconds in
-modern kernels. Both USB and RS232 will incur that approximately
-5ms-per-char latency overhead.  You'll have to deal with this
-latency even on chips like the Venus 6 that claim the beginning of
-their reporting burst is synced to PPS.</p>
-
-<p>GPS chips that do not sync their start of reporting to PPS can have
-long-period jitters in the latency between 1PPS and the start of
-reporting. SiRFs, in particular, wobble by 100-170 milliseconds.</p>
+<p>There is now a <a href="www/gpsd-time-service-howto.html">GPSD Time
+Service HOWTO</a> that gives detailed setup instructions.</p>
 
 <h1 id='waas'>How can I tell if WAAS/EGNOS is working?</h1>
 
@@ -750,10 +724,11 @@ nor will they interfere with GPSD.</p>
 
 <p>Unfortunately, there is no device class for USB GPSes. Nor is there
 a device class for USB-to-serial adapter chips.  Both are assigned the
-catch-all class 0xFF, "Vendor Specific". Every USB GPS we've ever seen
+catch-all class 0xFF, "Vendor Specific". Almost every USB GPS we've ever seen
 consists of a GPS module with TTL-level RS232 outputs connected to an
 RS232-to-USB adapter chip, and presents the class ID 0xFF to your USB
-subsystem.</p>
+subsystem. The only exceptions we know of are some u-blox modules that
+pretend to be USB modems.</p>
 
 <p>When you install GPSD, it puts in place rules that watch for
 hotplug activation events from devices that might be GPSes. When such
