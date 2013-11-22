@@ -16,6 +16,10 @@ See the GPSD bug tracker on the project website, but don't be
 surprised if it's empty or very sparse.  Our rate of new defects per
 month is quite low.
 
+*** Documentation
+
+Consider merging the calibration draft into the Time Service HOWTO.
+
 *** Client bugs
 
 **** In gpsmon's PPS Offset field

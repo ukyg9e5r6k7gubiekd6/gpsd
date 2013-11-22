@@ -2,7 +2,7 @@
 #
 # gpsfake -- test harness for gpsd
 #
-# Simulates a GPS, playing back a logfile
+# Simulates one or more GPSes, playing back logfiles.
 # Most of the logic for this now lives in gps.fake,
 # factored out so we can write other test programs with it.
 #

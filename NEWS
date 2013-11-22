@@ -1,6 +1,6 @@
 			GPSD project news
 
-Reposutory head:
+Repository head:
   A bug that prevented track interpolation has been fixed. 
 
 * Fri 22 Oct 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.10
