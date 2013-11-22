@@ -863,23 +863,23 @@ changes by 1 PPM per degree C.  This means that the drift does not stay
 constant, it may vary with a daily and yearly pattern.  This is why the
 value of drift the ntpd uses is calculated over a (relatively) short time.
 
-So how do we calculate the drift?  The general idea is simple.  Measure the
-time offset every N seconds, plot the graph, and fit a straight line.  The
-slope of that line is the drift.  The units cancel out.  Parts-per-million is
-a handy scale.
+So how do we calculate the drift?  The general idea is simple.
+Measure the time offset every N seconds over a longer window of time
+T, plot the graph, and fit a straight line.  The slope of that line is
+the drift.  The units cancel out.  Parts-per-million is a handy scale.
 
-How do you turn that handwaving description into code?  One easy way is to
-use 2 points and pick the right N, then run the answer through a low pass
-filter.  In that context, there are two competing sources of error.  If N is
-too small, the errors on each individual measurement  of the offset time will
-dominate.  If N is too big, the actual drift will change while you are
-measuring it.  In the middle is a sweet spot.  (For an example,
-see <<ADEV-PLOT>>.
+How do you turn that handwaving description into code?  One easy way
+is to set N=2 and pick the right T, then run the answer through a
+low pass filter.  In that context, there are two competing sources of
+error.  If T is too small, the errors on each individual measurement
+of the offset time will dominate.  If T is too big, the actual drift
+will change while you are measuring it.  In the middle is a sweet
+spot.  (For an example, see <<ADEV-PLOT>>.
 
-Both ntpd and chrony use this technique (ntpd also uses a more
-esoteric form of estimation called a "PLL/FLL hybrid loop").  Both NTP
-implementations automatically adjust the value of the polling interval
-to get the best results.  That turns into the N above.
+Both ntpd and chrony use this technique; ntpd also uses a more
+esoteric form of estimation called a "PLL/FLL hybrid loop". How T and N are
+chosen is beyond the scope of this HOWTO and varies by implementation
+and tuning parameters.
 
 If you turn on the right logging level ("statistics loopstats
 peerstats" for ntpd, "log measurements tracking") , that will record
