@@ -58,6 +58,12 @@ Are not implemented.  In theory they could be.
 Baud rate and mode changes work in direct mode but are not
 reliable in client mode.
 
+*** Integrate 1PPS into profiling ***
+
+We caw now *really* measure latency from GPS top of second when it has
+1PPS.  Add this capability to gpsprof and revise the "Where's the
+Latency?" white paper.
+
 *** Dispatcher/network issues
 
 **** Reading AISHub data via UDP confuses xgps with short writes
