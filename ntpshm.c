@@ -351,7 +351,7 @@ static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
     sample.leap = session->context->leap_notify;
     sample.magic = SOCK_MAGIC;
     /*@-type@*//* splint is confused about struct timespec */
-    TSTOTV(&sample.tv, &td->real);
+    TSTOTV(&sample.tv, &td->clock);
     /*@-compdef@*/
     sample.offset = timespec_diff_ns(td->real, td->clock) / 1e9;
     /*@+compdef@*/
