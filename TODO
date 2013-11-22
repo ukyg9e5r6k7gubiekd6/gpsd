@@ -20,7 +20,7 @@ month is quite low.
 
 **** In gpsmon's PPS Offset field
 
-resently PPS Offset is displayed in direct mode for NMEA, SiRF, and
+Presently PPS Offset is displayed in direct mode for NMEA, SiRF, and
 UBX devices.  Others should probably do likewise, notably the
 Motorola Oncore and Garmin drivers.
 
