@@ -455,7 +455,6 @@ if env.GetOption("clean") or env.GetOption("help"):
     rtlibs = []
     usblibs = []
     bluezlibs = []
-    caplibs = []
     ncurseslibs = []
     confdefs = []
     manbuilder = False
@@ -557,14 +556,6 @@ else:
     else:
         confdefs.append("/* #undef HAVE_LIBRT */\n")
         rtlibs = []
-
-    if config.CheckLib('libcap'):
-        confdefs.append("#define HAVE_LIBCAP 1\n")
-        # System library - no special flags
-        caplibs = ["-lcap"]
-    else:
-        confdefs.append("/* #undef HAVE_LIBCAP */\n")
-        caplibs = []
 
     if env['dbus_export'] and config.CheckPKG('dbus-1'):
         confdefs.append("#define HAVE_DBUS 1\n")
@@ -957,7 +948,7 @@ if qt_env:
 # The libraries have dependencies on system libraries
 
 gpslibs = ["-lgps", "-lm"]
-gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs + caplibs
+gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
 
 # We need to be able to make a static client library for ad-hoc testing.
