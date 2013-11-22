@@ -1089,11 +1089,11 @@ Sanjeev Gupta <ghane0@gmail.com> assisted with editing.
 
 - [[[NTP-FAQ]]] http://www.ntp.org/ntpfaq/[NTP FAQ]
 
-- [[[RFC-5905] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
+- [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
 - [[[HARDWARE]]] http://catb.org/gpsd/hardware.html[Compatible Hardware]
 
-- [[UBLOX-TIMING]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
+- [[[UBLOX-TIMING]]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
 
 - [[[RPI]]] http://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html[The Raspberry Pi as a Stratum-1 NTP Server]
 
