@@ -1195,7 +1195,12 @@ def timed_save_leapseconds(outfile, env, timeout=15):
     else:
         def handler(signum, frame):
             raise IOError
-        signal.signal(signal.SIGALRM, handler)
+        try:
+            signal.signal(signal.SIGALRM, handler)
+        except ValueError:
+            # Parallel builds trigger this - signal only works in main thread
+            sys.stdout.write("Signal set failed; try building with leapfetch=no.\n")
+            return
         signal.alarm(timeout)
         sys.stdout.write("attempting leap-second fetch...")
         try:
