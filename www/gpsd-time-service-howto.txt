@@ -734,16 +734,10 @@ or provide time service. The chrony project has a home page at
 <<CHRONY>>. Its documentation includes an instructive feature comparison
 with ntpd at <<CHRONY-COMPARE>>.
 
-gpsd can provide reference clock information to chronyd similarly to
-the way it talks to ntpd.  The advantage to using chrony is that the
-PPS time resolution is in nanoseconds.  This is 1,000 times more
-precision than the microsecond time resolution provided to ntpd.  This
-only matters if you has an RS-232 connected 1PPS refclock.  When
-gpsd supports the new ntpd protocol this difference will disappear.
-
-gpsd, when run as root, talks to chronyd using a socket named
-/var/run/chrony.ttyXX.sock (where ttyXX is replaced by the GPS device
-name.  This allows multiple GPS to feed one chronyd.
+gpsd, when run as root, feeds reference clock information to chronyd
+using a socket named /var/run/chrony.ttyXX.sock (where ttyXX is
+replaced by the GPS device name.  This allows multiple GPS to feed one
+chronyd.
 
 No gpsd configuration is required to talk to chronyd. chronyd is
 configured using the file /etc/chrony.conf or /etc/chrony/chrony.conf.
@@ -874,8 +868,6 @@ time offset every N seconds, plot the graph, and fit a straight line.  The
 slope of that line is the drift.  The units cancel out.  Parts-per-million is
 a handy scale.
 
-//FIXME: Is it correct that chrony uses a linear fit with low-pass filter?
-
 How do you turn that handwaving description into code?  One easy way is to
 use 2 points and pick the right N, then run the answer through a low pass
 filter.  In that context, there are two competing sources of error.  If N is
@@ -884,7 +876,9 @@ dominate.  If N is too big, the actual drift will change while you are
 measuring it.  In the middle is a sweet spot.  (For an example,
 see <<ADEV-PLOT>>.
 
-ntpd and chrony automatically adjust the value of the polling interval
+Both ntpd and chrony use this technique (ntpd also uses a more
+esoteric form of estimation called a "PLL/FLL hybrid loop").  Both NTP
+implementations automatically adjust the value of the polling interval
 to get the best results.  That turns into the N above.
 
 If you turn on the right logging level ("statistics loopstats
@@ -914,8 +908,6 @@ value and quickly converge to the newer slightly different value.  If
 you reboot, expect it to converge to a new/different drift value and
 that may take a while depending on how different the basic calibration
 factors are.
-
-//FIXME: Is this description correct of chrony?
 
 == NTP tuning and performance details ==
 
