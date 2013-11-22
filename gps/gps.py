@@ -166,6 +166,7 @@ class gpsdata:
 class gps(gpscommon, gpsdata, gpsjson):
     "Client interface to a running gpsd instance."
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
+        gpsjson.__init__(self)
         gpscommon.__init__(self, host, port, verbose)
         gpsdata.__init__(self)
         self.newstyle = False
