@@ -840,7 +840,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    s1 = (int16_t)getbeu16(buf, 5);	/* week */
 	    s2 = getbes16(buf, 7);	/* leap seconds */
 
-	    if ((int)u1 > 10) {
+	    if ((int)ul1 > 10) {
 		session->context->leap_seconds = (int)s2;
 		session->context->valid |= LEAP_SECOND_VALID;
 		session->newdata.time =
