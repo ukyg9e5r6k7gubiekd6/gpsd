@@ -950,30 +950,6 @@ if qt_env:
 gpslibs = ["-lgps", "-lm"]
 gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
-
-# We need to be able to make a static client library for ad-hoc testing.
-# Without this, we can't run regression tests in the build directory 
-# without either (a) having installed the GPSD shared libraries in system
-# space (which requires root) or (b) having either '.' or an absolute
-# path in the shared library load path (which is a security hole).
-#
-# None of the normal targets relies on this library.  You can use it
-# with a build command like
-#
-# g++ --static streamtest.cpp libgps.a -lrt -o streamtest
-#
-# When you link with this library you will get warnings that look like this:
-# warning: Using 'getprotobyname' in statically linked applications requires
-#          at runtime the shared libraries from the glibc version used for
-#          linking
-# The final executable will build but not be portable.
-
-env.StaticLibrary(target='libgps.a',
-                  source=libgps_sources,
-                  parse_flags=dbus_libs + rtlibs)
-
-
-
 # Source groups
 
 gpsd_sources = ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c']
