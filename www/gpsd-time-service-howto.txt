@@ -14,12 +14,11 @@ method and various options you have in setting it up.
 Here is the quick-start sequence. The rest of this document goes
 into more detail about the steps.
 
-1. Ensure that either gpsd and either ntpd or chronyd are installed on
-   your system. (Both gpsd and ntpd are preinstalled in many stock
-   Linux distributions; chronyd is normally not.) You don't have to
-   choose which to use yet if you have easy access to both, but
-   knowing which alternatives are readily available to you is a good
-   place to start.
+1. Ensure that gpsd and either ntpd or chronyd are installed on your
+   system. (Both gpsd and ntpd are preinstalled in many stock Linux
+   distributions; chronyd is normally not.) You don't have to choose
+   which to use yet if you have easy access to both, but knowing which
+   alternatives are readily available to you is a good place to start.
 
 2. Connect a PPS-capable GPS to one of your serial or USB ports.
    A random cheap consumer-grade GPS won't do; you may have to
@@ -410,7 +409,7 @@ sources to check:
    hold more than three leads!
 
 3. Verify that your gpsd and kernel were both built with PPS support,
-   as previously deccribed in the section on software prerequisites.
+   as previously described in the section on software prerequisites.
 
 4. If you have a solid 3D fix, a known-good cable, and your software
    is properly configured, but you still get no PPS, then you might
