@@ -1877,12 +1877,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # Experimental release mechanics using shipper
     # This will ship a freecode metadata update 
-    ship_release = Utility("ship_release",
-                           [tarball],
-                           ['shipper -u --exclude "login.ibiblio.org:/public/html/catb/esr/" version=' + gpsd_version])
-    env.Alias("ship", [releaseprep,
-                          ship_release,
-                          upload_tags])
+    Utility("ship", [tarball], ['shipper version=%s | sh -e -x' % gpsd_version])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
