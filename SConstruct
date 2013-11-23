@@ -1790,10 +1790,10 @@ if env['python']:
 # is plugged in.
 
 Utility('udev-install', 'install', [
-    'mkdir -p ' + env['udevdir'],
-    'cp $SRCDIR/gpsd.rules ' + env['udevdir'] + '/rules.d/25-gpsd.rules',
-    'cp $SRCDIR/gpsd.hotplug ' + env['udevdir'],
-    'chmod a+x ' + env['udevdir'] + '/gpsd.hotplug',
+    'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
+    'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] + '/rules.d/25-gpsd.rules',
+    'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + env['udevdir'],
+    'chmod a+x ' + DESTDIR + env['udevdir'] + '/gpsd.hotplug',
         ])
 
 Utility('udev-uninstall', '', [
