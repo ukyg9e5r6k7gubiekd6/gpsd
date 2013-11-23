@@ -1255,6 +1255,11 @@ def substituter(target, source, env):
 
 templated = glob.glob("*.in") + glob.glob("*/*.in") + glob.glob("*/*/*.in")
 
+# ignore files in subfolder called 'debian' - the Debian packaging
+# tools will handle them.
+templated = [ x for x in templated if not x.startswith('debian/') ]
+
+
 for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
     env.AddPostAction(builder, 'chmod -w $TARGET')
