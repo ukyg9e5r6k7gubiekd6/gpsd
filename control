@@ -19,6 +19,8 @@ XBS-Destinations: ~, savannah, freecode
 
 XBS-Web-Directory: www
 
+Homepage: http://www.catb.org/~esr/gpsd
+
 XBS-IRC-Channel: irc://chat.freenode.net/#gpsd
 
 XBS-Project-Tag-List: Communications, Scientific/Engineering, Geographical
