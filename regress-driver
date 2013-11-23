@@ -19,8 +19,12 @@ fi
 if [ -z ${PYTHON} ]; then
     PYTHON="python"
 fi
-# For an explanation of what we define here, see the comment on
-# PYTHON_DISTUTILS_LIBDIR/PYTHON_DISTUTILS_SCRIPTDIR in configure.ac
+# Define the directories we ask setup.py to install the
+# modules/extensions and scripts to. The way chosen here reproduces
+# the internal behaviour of distutils. Unfortunately distutils does
+# not export the pre-defined/configured directories, so we have to
+# define them on our own. For default installations of distutils the
+# chosen values here will match what distutils uses.
 py_libdir=`pwd`/build/`${PYTHON} -c 'import distutils.util; import sys; print("lib.%s-%s" %(distutils.util.get_platform(), sys.version[0:3]))'`
 py_scriptdir=`pwd`/build/`${PYTHON} -c 'import sys; print("scripts-%s" %(sys.version[0:3], ))'`
 if [ -d ${py_libdir} ] && [ -d ${py_scriptdir} ]; then
