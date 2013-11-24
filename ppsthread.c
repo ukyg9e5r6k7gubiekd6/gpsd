@@ -4,12 +4,25 @@
  * If you are not good at threads do not touch this file!
  *
  * It helps to know that there are two PPS measurement methods in
- * play. One, kernel PPS (KPPS), is RFC2783 and available on many
- * OS and supplied through special /dev/pps devices. The other, plain
- * PPS, uses the TIOCMIWAIT ioctl to explicitly watch for PPS on
- * serial lines. KPPS requires root permissions for initialization;
- * plain PPS does not.  Plain PPS loses some functionality when not
- * initialized as root.
+ * play.  One is defined by RFC2783 and typically implemented in the
+ * kernel.  It is available on FreeBSD, Linux, and NetBSD.  On Linux
+ * it is referred to as KPPS, and is accessed via /dev/ppsN devices.
+ * On BSD it is accessed via the same device as the serial port.  This
+ * mechanism is preferred as it should provide the smallest latency
+ * and jitter from control line transition to timestamp.
+ *
+ * The other mechanism is user-space PPS, which uses the (not
+ * standardized) TIOCMIWAIT ioctl to wait for PPS transitions on
+ * serial port control lines.  It is implemented on Linux and OpenBSD.
+ *
+ * On Linux, RFC2783 PPS requires root permissions for initialization;
+ * user-space PPS does not.  User-space PPS loses some functionality
+ * when not initialized as root.  In Linux, user-space PPS is referred
+ * to as "plain PPS".
+ *
+ * On {Free,Net}BSD, RFC2783 PPS should only require access to the
+ * serial port, but details have not yet been tested and documented
+ * here.
  *
  * To use the thread manager, you need to first fill in the two
  * thread_* methods in the session structure and/or the pps_hook in
@@ -63,21 +76,42 @@ static pthread_mutex_t ppslast_mutex;
 static int init_kernel_pps(struct gps_device_t *session)
 /* return handle for kernel pps, or -1; requires root privileges */
 {
-    int ldisc = 18;   /* the PPS line discipline */
 #ifndef S_SPLINT_S
     pps_params_t pp;
 #endif /* S_SPLINT_S */
+    int ret;
+#ifdef linux
+    /* These variables are only needed by Linux to find /dev/ppsN. */
+    int ldisc = 18;   /* the PPS line discipline */
     glob_t globbuf;
     size_t i;             /* to match type of globbuf.gl_pathc */
     char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
     char path[GPS_PATH_MAX] = "";
-    int ret;
+#endif
 
     session->kernelpps_handle = -1;
     if ( isatty(session->gpsdata.gps_fd) == 0 ) {
 	gpsd_report(session->context->debug, LOG_INF, "KPPS gps_fd not a tty\n");
     	return -1;
     }
+
+    /*
+     * This next code block abuses "ret" by storing the filedescriptor
+     * to use for RFC2783 calls.
+     */
+    ret = -1;
+#ifndef linux
+    /*
+     * On BSDs that support RFC2783, one uses the API calls on serial
+     * port file descriptor.
+     */
+    ret  = session->gpsdata.gps_fd;
+#else /* linux */
+    /*
+     * On Linux, one must make calls to associate a serial port with a
+     * /dev/ppsN device and then grovel in system data to determine
+     * the association.
+     */
     /*@+ignoresigns@*/
     /* Attach the line PPS discipline, so no need to ldattach */
     /* This activates the magic /dev/pps0 device */
@@ -146,6 +180,12 @@ static int init_kernel_pps(struct gps_device_t *session)
 		    "KPPS cannot open %s: %s\n", path, strerror(errno));
     	return -1;
     }
+#endif
+    /* assert(ret >= 0); */
+    gpsd_report(session->context->debug, LOG_INF,
+		"RFC2783 fd is %d\n",
+		ret);
+
     /* RFC 2783 implies the time_pps_setcap() needs priviledges *
      * keep root a tad longer just in case */
     if ( 0 > time_pps_create(ret, &session->kernelpps_handle )) {
@@ -166,9 +206,16 @@ static int init_kernel_pps(struct gps_device_t *session)
 			LOG_INF, "KPPS caps %0x\n", caps);
         }
 
+#ifndef linux
+	/*
+	 * Attempt to follow RFC2783 as straightforwardly as possible.
+	 */
+	pp.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREBOTH;
+#else /* linux */
         /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
         memset( (void *)&pp, 0, sizeof(pps_params_t));
         pp.mode = PPS_CAPTUREBOTH;
+#endif
 #endif /* S_SPLINT_S */
 
         if ( 0 > time_pps_setparams(session->kernelpps_handle, &pp)) {
@@ -258,14 +305,36 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
         if ( 0 <= session->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
+#ifndef linux
+	    /*
+	     * RFC2783 specifies that a NULL timeval means to wait.
+	     */
+	    kernelpps_tv.tv_sec = 1;
+	    kernelpps_tv.tv_nsec = 0;
+#else
+	    /*
+	     * \todo Explain the use of a non-NULL zero timespec,
+	     * which means to return immediately with -1 (section
+	     * 3.4.3).  Further, explain the non-sensical comment,
+	     * because the intent of RFC2783 is that the timestamp has
+	     * already been captured in the kernel, and we are merely
+	     * fetching it here.
+	     */
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of
 	     * latency, and about +/-5uS of jitter over the other method */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
+#endif
 	    if ( 0 > time_pps_fetch(session->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
 		gpsd_report(session->context->debug, LOG_ERROR,
 			    "KPPS kernel PPS failed\n");
 	    } else {
+	        /* Wait until we have both edges. */
+		if (pi.assert_sequence == 0 || pi.clear_sequence == 0) {
+		    usleep(100000);
+		    continue;
+		}
+
 		// find the last edge
 		// FIXME a bit simplistic, should hook into the
                 // cycle/duration check below.
@@ -282,15 +351,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    edge_kpps = 0;
 		    ts_kpps = pi.clear_timestamp;
 		}
+		/*
+		 * pps_seq_t is uint32_t on NetBSD, so cast to
+		 * unsigned long as a wider-or-equal type to
+		 * accomodate Linux's type.
+		 */
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "KPPS assert %ld.%09ld, sequence: %ld - "
 			    "clear  %ld.%09ld, sequence: %ld\n",
 			    pi.assert_timestamp.tv_sec,
 			    pi.assert_timestamp.tv_nsec,
-			    pi.assert_sequence,
+			    (unsigned long) pi.assert_sequence,
 			    pi.clear_timestamp.tv_sec,
 			    pi.clear_timestamp.tv_nsec,
-			    pi.clear_sequence);
+			    (unsigned long) pi.clear_sequence);
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "KPPS data: using %s\n",
 			    edge_kpps ? "assert" : "clear");
