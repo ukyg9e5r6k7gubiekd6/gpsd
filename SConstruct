@@ -573,15 +573,6 @@ else:
         bluezlibs = []
         env["bluez"] = False
 
-    # ntpshm is required for pps support
-    if env['pps'] and env['ntpshm'] and config.CheckHeader("sys/timepps.h"):
-        confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
-        announce("You have kernel PPS available.")
-    else:
-        confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
-        announce("You do not have kernel PPS available.")
-        # Don't turn off PPS here, we might be using the non-kernel version
-
     if config.CheckHeader(["bits/sockaddr.h", "linux/can.h"]):
         confdefs.append("#define HAVE_LINUX_CAN_H 1\n")
         announce("You have kernel CANbus available.")
@@ -664,8 +655,15 @@ else:
     else:
         confdefs.append("#define COMPAT_SELECT\n")
 
-    if not config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT"):
-        announce("Forcing pps=no (TIOCMIWAIT not available)")
+    if config.CheckHeader(["sys/time.h", "sys/timepps.h"]):
+        confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
+        kpps = True
+    else:
+        confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
+        kpps = False
+    tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
+    if env["pps"] and not tiocmiwait and not kpps:
+        announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 API is available)")
         env["pps"] = False
 
     confdefs.append('''\
