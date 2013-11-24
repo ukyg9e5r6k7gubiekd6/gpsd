@@ -17,7 +17,7 @@ class json_error(exceptions.Exception):
         self.explanation = explanation
 
 class gpscommon:
-    "Isolate socket handling and buffering from the protcol interpretation."
+    "Isolate socket handling and buffering from the protocol interpretation."
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
         self.sock = None        # in case we blow up in connect
         self.linebuffer = ""
@@ -133,11 +133,8 @@ WATCH_SPLIT24	= 0x001000	# split AIS Type 24s
 WATCH_PPS	= 0x002000	# enable PPS in raw/NMEA
 WATCH_DEVICE	= 0x000800	# watch specific device
 
-class gpsjson(gpscommon):
+class gpsjson:
     "Basic JSON decoding."
-    def __init__(self):
-        gpscommon.__init__(self)
-
     def __iter__(self):
         return self
 
