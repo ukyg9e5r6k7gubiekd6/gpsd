@@ -213,10 +213,15 @@ void json_tpv_dump(const struct gps_device_t *session,
 			   replylen - strlen(reply),
 			   "\"epc\":%.2f,", gpsdata->fix.epc);
 #ifdef TIMING_ENABLE
-	if (policy->timing)
-	    (void)snprintf(reply + strlen(reply),
-	        replylen - strlen(reply),
-			   "\"sor\":%f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%f,\"week\":%u,\"tow\":%.3f,\"rollovers\":%d",
+	if (policy->timing) {
+#ifdef PPS_ENABLE
+	    if (session->ppscount)
+		(void)snprintf(reply + strlen(reply), replylen - strlen(reply),
+			       "\"pps\":%.9f,", 
+			       session->ppslast.clock.tv_sec + session->ppslast.clock.tv_nsec / 1e9);
+#endif /* PPS_ENABLE */
+	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
+			   "\"sor\":%.9f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%.9f,\"week\":%u,\"tow\":%.3f,\"rollovers\":%d",
 			   session->sor,
 			   session->chars,
 			   gpsdata->satellites_used,
@@ -224,6 +229,7 @@ void json_tpv_dump(const struct gps_device_t *session,
 			   session->context->gps_week,
 			   session->context->gps_tow,
 			   session->context->rollovers);
+	}
 #endif /* TIMING_ENABLE */
     }
     if (reply[strlen(reply) - 1] == ',')
