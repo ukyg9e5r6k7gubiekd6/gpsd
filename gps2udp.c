@@ -83,7 +83,6 @@ static int send_udp (char *nmeastring, size_t ind)
     char message [255];
     char *buffer;
     int  channel;
-    ssize_t status;
 
     /* if string length is unknow make a copy and compute it */
     if (ind == 0) {
@@ -109,12 +108,12 @@ static int send_udp (char *nmeastring, size_t ind)
     /* send message on udp channel */
     /*@-type@*/
     for (channel=0; channel < udpchannel; channel ++) {
-	status = sendto(sock[channel],
-			buffer,
-			ind,
-			0,
-			&remote[channel],
-			(int)sizeof(remote));
+	ssize_t status = sendto(sock[channel],
+				buffer,
+				ind,
+				0,
+				&remote[channel],
+				(int)sizeof(remote));
 	if (status < (ssize_t)ind) {
 	    (void)fprintf(stderr, "gps2udp: failed to send [%s] \n", nmeastring);
 	    return -1;
@@ -128,13 +127,15 @@ static int send_udp (char *nmeastring, size_t ind)
 static int open_udp(char **hostport)
 /* Open and bind udp socket to host */
 {
-   struct hostent *hp;
-   char *hostname = NULL;
-   char *portname = NULL;
-   int  portnum, channel;
+   int channel;
 
    for (channel=0; channel <udpchannel; channel ++)
    {
+       char *hostname = NULL;
+       char *portname = NULL;
+       int  portnum;
+       struct hostent *hp;
+
        /* parse argument */
        /*@-unrecog@*/
        hostname = strsep(&hostport[channel], ":");
@@ -191,7 +192,6 @@ static void usage(void)
 static void connect2gpsd(bool restart)
 /* loop until we connect with gpsd */
 {
-    int status;
     unsigned int delay;
 
     if (restart) {
@@ -204,7 +204,7 @@ static void connect2gpsd(bool restart)
 
     /* loop until we reach GPSd */
     for (delay = 10; ; delay = delay*2) {
-        status = gps_open(gpsd_source.server, gpsd_source.port, &gpsdata);
+        int status = gps_open(gpsd_source.server, gpsd_source.port, &gpsdata);
         if (status != 0) {
 	    (void)fprintf(stderr,
 			  "gps2udp [%s] connection failed at %s:%s\n",
@@ -228,7 +228,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 {   
     struct timeval tv;
     fd_set fds,master;
-    int result, ind;
+    int ind;
     char c;
     int retry=0;
 
@@ -238,6 +238,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 
     /* loop until we get some data or an error */
     for (ind = 0; ind < (int)len;) {
+	int result;
         /* prepare for a blocking read with a 10s timeout */
         tv.tv_sec =  10;
         tv.tv_usec = 0;
@@ -291,8 +292,10 @@ static ssize_t read_gpsd(char *message, size_t len)
 		connect2gpsd(true);
 		retry = 0;
 	    }
+	    /*@-sefparams@*/
 	    if (debug > 0)
 		ignore_return(write (1, ".", 1));
+	    /*@+sefparams@*/
 	    break;
 
         default:	/* we lost connection with gpsd */
@@ -332,10 +335,11 @@ static unsigned int AISGetInt(unsigned char *bitbytes, unsigned int sp, unsigned
 {
     unsigned int acc = 0;
     unsigned int s0p = sp-1;                          // to zero base
-    unsigned int cp, cx, c0, i;
+    unsigned int i;
 
     for(i=0 ; i<len ; i++)
     {
+	unsigned int cp, cx, c0;
         acc  = acc << 1;
         cp = (s0p + i) / 6;
         cx = (unsigned int)bitbytes[cp];      // what if cp >= byte_length?
@@ -351,7 +355,7 @@ int main(int argc, char **argv)
 {
     bool daemonize = false;
     long count = -1;
-    int option, status;
+    int option;
     char *udphostport[MAX_UDP_DEST];
 
     flags = WATCH_ENABLE;
@@ -418,7 +422,7 @@ int main(int argc, char **argv)
 
     /* Open UDP port */
     if (udpchannel > 0) {
-        status = open_udp(udphostport);
+        int status = open_udp(udphostport);
 	if (status !=0) exit (1);
     }
 

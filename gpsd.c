@@ -2047,10 +2047,12 @@ int main(int argc, char *argv[])
 	 * of any compromises in the code.  It requires that all GPS
 	 * devices have their group read/write permissions set.
 	 */
+	/*@-nullpass@*/
 	if (setgroups(0, NULL) != 0)
 	    gpsd_report(context.debug, LOG_ERROR,
 			"setgroups() failed, errno %s\n",
 			strerror(errno));
+	/*@+nullpass@*/
 	/*@-type@*/
 #ifdef GPSD_GROUP
 	{

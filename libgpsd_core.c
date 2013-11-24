@@ -1143,9 +1143,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	timestamp_t now = timestamp();
 	if (session->device_type != NULL && session->packet.start_time > 0) {
 #ifdef RECONFIGURE_ENABLE
-	    const time_t min_cycle = session->device_type->min_cycle;
+	    const double min_cycle = session->device_type->min_cycle;
 #else
-	    const time_t min_cycle = 1;
+	    const double min_cycle = 1;
 #endif /* RECONFIGURE_ENABLE */
 	    double quiet_time = (MINIMUM_QUIET_TIME * min_cycle);
 	    double gap = now - session->packet.start_time;
@@ -1387,7 +1387,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
 #ifdef CHEAPFLOATS_ENABLE
-	gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
+	/*@i1@*/gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
 #endif /* CHEAPFLOATS_ENABLE */
 
 	/*@+nullderef -nullpass@*/
