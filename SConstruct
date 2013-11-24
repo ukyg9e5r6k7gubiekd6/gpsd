@@ -1197,7 +1197,7 @@ def substituter(target, source, env):
         ('@libdir@',     env['libdir']),
         ('@PYTHON@',     sys.executable),
         ('@DATE@',       time.asctime()),
-        ('@MASTER',      'DO NOT HAND_HACK! THIS FILE IS GENERATED@'),
+        ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),
         ('@SITENAME@',   sitename),
         ('@SITESEARCH@', sitesearch),
         ('@WEBSITE@',    website),
