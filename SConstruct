@@ -56,7 +56,8 @@ gitrepo    = "git://git.savannah.nongnu.org/gpsd.git"
 webform    = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
 formserver = "www@thyrsus.com"
 devmail    = "gpsd-dev@lists.nongnu.org"
-announcemail   = "gpsd-announce@nongnu.org"
+usermail   = "gpsd-users@lists.nongnu.org"
+annmail    = "gpsd-announce@nongnu.org"
 ircchan    = "irc://chat.freenode.net/#gpsd"
 tiplink    = "<a href='http://gittip.com/esr'>leave a tip at Gittip</a>"
 tipwidget  = "<script data-gittip-username='esr' \
@@ -1216,8 +1217,9 @@ def substituter(target, source, env):
         ('@GITREPO@',    gitrepo),
         ('@WEBFORM@',    webform),
         ('@FORMSERVER@', formserver),
+        ('@USERMAIL@',   usermail),
         ('@DEVMAIL@',    devmail),
-        ('@ANNOUNCE@',   announcemail),
+        ('@ANNOUNCE@',   annmail),
         ('@IRCCHAN@',    ircchan),
         ('@LIBGPSVERSION@', libgps_version),
         ('@TIPLINK@',    tiplink),

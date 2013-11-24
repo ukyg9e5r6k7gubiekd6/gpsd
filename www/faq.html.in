@@ -77,6 +77,7 @@ GPSD Frequently Asked Questions
 <li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a>
 <li><a href='#raspberry'>Time is wrong on my Raspberry Pi</a></li>
 <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a></li>
+<li><a href='#support'>What support channels does GPSD have?</a></li>
 </ul>
 </li>
 
@@ -482,11 +483,31 @@ type and subtype, if that information is available at all.</p>
 
 <h3>13. Report it on the GPSD bugtracker</h3>
 
-<p>There is a <a
-href="@BUGTRACKER@">GPSD bug tracker</a>.
-Use that.  If your bug narrative does not fit the tracker template well,
-it's acceptable to send an email report to the @DEVMAIL@ list.</p>
+<p>There is a <a href="@BUGTRACKER@">GPSD bug tracker</a>.  Use that.
+If your bug narrative does not fit the tracker template well and
+you've done these data-gathering steps, it's acceptable to send an
+email report to the <a href="mail:@DEVMAIL@">GPSD developers'
+list</a>.</p>
 </blockquote>
+
+<h1 id='support'>What support channels does GPSD have?</h1>
+
+<p>If you are submitting a code patch or a technically detailed bug
+report, write the <a href="mail:@DEVMAIL@">GPSD developers'
+list</a> (and see the previous entry on how to report bugs).</p>
+
+<p>Please do <em>not</em> write to the dev list unless you are willing
+to actively work with our developers on a solution. If you are
+non-technical and confused, the <a href="mail:@USERMAIL@">GPSD users'
+list</a> will be more appropriate.</p>
+
+<p>GPSD developers are often, though not predictably, available in
+real time <a href="@IRCCHAN@">on IRC</a>.</p>
+
+<p>Commercial users: senior GPSD developers are available for contract
+engagements at reasonable rates. If you have a hard problem or a tight
+deadline or both, request an engagement via the dev list or IRC. We're
+professionals and experts and we deliver results.</p>
 
 <h1 id="startup">Why does getting a fix take so long after powerup?</h1>
 
