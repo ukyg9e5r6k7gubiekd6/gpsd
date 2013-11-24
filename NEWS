@@ -3,7 +3,7 @@
 Repository head:
   A bug that prevented track interpolation has been fixed. 
 
-* Fri 22 Oct 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.10
+* Fri 22 Nov 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.10
   AIS: Adds gps2udp, an AIS data relay, split24 option supports
   passing through Type 24 halves; support for Inland AIS; "scaled" no
   longer controls dumping of controlled-vocabulary fields; instead,
