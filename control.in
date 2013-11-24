@@ -15,13 +15,13 @@ Description: A monitoring daemon for GPSes, AIS radios, and other nav sensors.
  distribution includes sample clients, application interface libraries, 
  and test/profiling tools.
 
-XBS-Destinations: savannah, freecode, mailto:gpsd-announce@nongnu.org
+XBS-Destinations: savannah, freecode, mailto:@ANNOUNCE@
 
 XBS-Web-Directory: www
 
-Homepage: http://www.catb.org/~esr/gpsd
+Homepage: @WEBSITE@
 
-XBS-IRC-Channel: irc://chat.freenode.net/#gpsd
+XBS-IRC-Channel: @IRCCHAN@
 
 XBS-Project-Tag-List: Communications, Scientific/Engineering, Geographical
 

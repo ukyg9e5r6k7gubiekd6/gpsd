@@ -56,6 +56,8 @@ gitrepo    = "git://git.savannah.nongnu.org/gpsd.git"
 webform    = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
 formserver = "www@thyrsus.com"
 devmail    = "gpsd-dev@lists.nongnu.org"
+announcemail   = "gpsd-announce@nongnu.org"
+ircchan    = "irc://chat.freenode.net/#gpsd"
 tiplink    = "<a href='http://gittip.com/esr'>leave a tip at Gittip</a>"
 tipwidget  = "<script data-gittip-username='esr' \
 	data-gittip-widget='button' src='//gttp.co/v1.js'></script>"
@@ -1215,6 +1217,8 @@ def substituter(target, source, env):
         ('@WEBFORM@',    webform),
         ('@FORMSERVER@', formserver),
         ('@DEVMAIL@',    devmail),
+        ('@ANNOUNCE@',   announcemail),
+        ('@IRCCHAN@',    ircchan),
         ('@LIBGPSVERSION@', libgps_version),
         ('@TIPLINK@',    tiplink),
         ('@TIPWIDGET@',  tipwidget),
@@ -1874,8 +1878,9 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
                           upload_web])
 
     # Experimental release mechanics using shipper
-    # This will ship a freecode metadata update 
-    Utility("ship", [tarball], ['shipper version=%s | sh -e -x' % gpsd_version])
+    # This will ship a freecode metadata update
+    # FIXME: No cleanup of generated control yet.
+    Utility("ship", [tarball, "control"], ['shipper version=%s | sh -e -x' % gpsd_version])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:

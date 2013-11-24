@@ -18,6 +18,7 @@ gpsfake
 gpsprof
 jsongen.py
 maskaudit.py
+control
 upload
 gpsd.php
 valgrind-audit.py
