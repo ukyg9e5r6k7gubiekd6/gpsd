@@ -531,14 +531,14 @@ second.</p>
 
 <p>If you are starting a GPS for the first time, or after it has been
 powered off for more than two weeks, this is a 'cold start'; it needs
-to get a new satellite ephemeris to do its job. The satellites
+to get a new satellite <i>almanac</i> to do its job. The satellites
 broadcast this information very slowly (at 50bps) on a fixed schedule,
 and it can take up to 20 minutes.</p>
 
 <p>Warm start on a modern GPS with a good skyview (4 or more sats
 visible) normally takes about 30 seconds. (Vendor spec sheets fib by
 quoting this time only, leaving out the cold-start lag to fetch
-ephemeris.) If it's taking longer, the first thing to suspect is that
+almanac.) If it's taking longer, the first thing to suspect is that
 your skyview is poor. Especially if you're indoors.</p>
 
 <p>The best advice is: go outside and be patient for a few minutes.</p>
@@ -547,14 +547,14 @@ your skyview is poor. Especially if you're indoors.</p>
 
 <p>Your GPS may have dropped its leap-second offset.  You can tell you
 have this problem if your sentence timestamps look wrong at startup.
-Wait 20 minutes or so; the lag should go away.</p>
+Wait 20 minutes or so; the lag should go away, as the almanac is updated.</p>
 
 <p>GPS satellites broadcast time using a clock without a leap-second
 correction. They broadcast a leap-second correction once each complete
-reporting cycle along with the satellite ephemerides; it's up to the
+reporting cycle along with the satellite almanac; it's up to the
 GPS firmware to add that correction to the time it puts in reports.
 If your GPS has forgotten the current correction, you'll have to wait
-until the next ephemerides message for it.</p>
+until the next almanac message for it.</p>
 
 <p>GPSes are supposed to retain the leap-second correction along with
 the last fix in NVRAM when they power down, but we've observed that
