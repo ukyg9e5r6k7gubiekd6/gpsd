@@ -530,7 +530,7 @@ use a fixed port speed, handshake times drop to a fraction of a
 second.</p>
 
 <p>If you are starting a GPS for the first time, or after it has been
-powered off for more than two weeks, this is a 'cold start'; it needs
+powered off for more than few weeks, this is a 'cold start'; it needs
 to get a new satellite <i>almanac</i> to do its job. The satellites
 broadcast this information very slowly (at 50bps) on a fixed schedule,
 and it can take up to 20 minutes.</p>
@@ -554,7 +554,7 @@ correction. They broadcast a leap-second correction once each complete
 reporting cycle along with the satellite almanac; it's up to the
 GPS firmware to add that correction to the time it puts in reports.
 If your GPS has forgotten the current correction, you'll have to wait
-until the next almanac message for it.</p>
+until an updated almanac is downloaded (should be less than 20 minutes).</p>
 
 <p>GPSes are supposed to retain the leap-second correction along with
 the last fix in NVRAM when they power down, but we've observed that
@@ -581,7 +581,7 @@ to a compiled-in default that is off by one</p>
 supposed to ship a MID52 sentence (which GPSD knows how to interpret)
 containing the current leap-second offset.  But there is at least one
 firmware revision that ships a damaged version of MID52 with a garbled
-start sequence or a zero length field.  This GPSD cannot handle.</p>
+start sequence or a zero length field.  GPSD cannot handle this.</p>
 
 <p>The bad revision is 2.3.2-GSW2-2.05.024-C1Prod1.1; there may be
 others.  Suspect this if you have persistent off-by-one errors. If you
@@ -591,13 +591,13 @@ know about it.</p>
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
 
 <p>If your problem is wildly fluctuating speed reports on a SiRF,
-switching on static navigation mode using <code>gpsmon</code>. Static
-navigation mode will freeze your position if your speed is below 1.2
-m/s for three seconds, and will begin updating your position again
-when speed exceeds 1.4 m/s. This prevents multipath, weak signals, or
-poor constellation geometry from dragging your solutions around too
-much. Other receivers may suffer the same problem and may have a
-similar solution.</p>
+switch on static navigation mode using the <code>M</code> command in
+<code>gpsmon</code>. Static navigation mode will freeze your position
+if your speed is below 1.2 m/s for three seconds, and will begin
+updating your position again when speed exceeds 1.4 m/s.  This
+prevents multipath, weak signals, or poor constellation geometry
+from dragging your solutions around too much. Other receivers may
+suffer the same problem and may have a similar solution.</p>
 
 <h1 id='accuracy'>How can I improve fix accuracy from my GPS?</h1>
 
