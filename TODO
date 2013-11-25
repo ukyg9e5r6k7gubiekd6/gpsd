@@ -49,16 +49,16 @@ The second 'n' is losing information that it shouldn't.
 
 Display update should not stop while this is going on.
 
-*** Speed, mode and rate-changes in client-mode gpsmon.
+**** Speed, mode and rate-changes in client-mode gpsmon.
 
 Are not implemented.  In theory they could be.
 
-*** Speed, mode and rate-changes in client-mode gpsctl.
+**** Speed, mode and rate-changes in client-mode gpsctl.
 
 Baud rate and mode changes work in direct mode but are not
 reliable in client mode.
 
-*** Integrate 1PPS into profiling ***
+**** Integrate 1PPS into profiling ***
 
 We caw now *really* measure latency from GPS top of second when it has
 1PPS.  Add this capability to gpsprof and revise the "Where's the
@@ -98,6 +98,11 @@ message 6 and 8 subtypes - specifically, 6/23, 8/21, 8/22, 8/24, and
 We'd need machinery to shift a byte array 30 bits left...
 
 ** To do:
+
+*** On next API bump ***
+
+In struct gpsdata_t, move the device list out of the union and move
+the tag field to private data.
 
 ***  Make subframe reports available in the C API.
 
