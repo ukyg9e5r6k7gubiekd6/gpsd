@@ -118,36 +118,43 @@ location-aware applications GPS/AIS logs for diagnostic purposes.</p>
 layer of open-source infrastructure for programs running under Linux
 and other open-source Unixes that want to be location-sensitive. We
 aim for simple, robust interfaces, unfussy operation, and an easy
-learning curve for application developers.  Applications that
+learning curve for application developers.</p>
+
+<p>Applications that
 presently use <code>gpsd</code> include 
 <a href="http://www.pygps.org">pyGPS</a>,
-<a href="http://www.gpsdrive.de/">gpsdrive</a>
-<a href="http://www.kismetwireless.net/">Kismet</a>
-<a href="http://www.gpsdrive.de/">GPSdrive</a>
-<a href="http://qpegps.sourceforge.net/">gpeGPS</a>
-<a href="http://www.gnustep.it/enrico/position/">position</a>
-<a href="http://roadmap.sourceforge.net/">roadmap</a>
-<a href="http://roadnav.sourceforge.net/">roadnav</a>
-<a href="http://www.navit-project.org/">navit</a>
-<a href="http://viking.sf.net">viking</a>
-<a href="http://www.tangogps.org/">tangogps</a>
-<a href="http://www.foxtrotGPS.org/">foxtrot</a>
-<a href="http://sourceforge.net/projects/opencpn/">opencpn</a>
+<a href="http://www.gpsdrive.de/">gpsdrive</a>,
+<a href="http://www.kismetwireless.net/">Kismet</a>,
+<a href="http://www.gpsdrive.de/">GPSdrive</a>,
+<a href="http://qpegps.sourceforge.net/">gpeGPS</a>,
+<a href="http://www.gnustep.it/enrico/position/">position</a>,
+<a href="http://roadmap.sourceforge.net/">roadmap</a>,
+<a href="http://roadnav.sourceforge.net/">roadnav</a>,
+<a href="http://www.navit-project.org/">navit</a>,
+<a href="http://viking.sf.net">viking</a>,
+<a href="http://www.tangogps.org/">tangogps</a>,
+<a href="http://www.foxtrotGPS.org/">foxtrot</a>,
+<a href="http://sourceforge.net/projects/opencpn/">opencpn</a>,
 <a href="http://icculus.org/obdgpslogger/">obdgpslogger</a>,
 <a href="http://www.virtualroadside.com/geoHist/">geohist</a>,
-<a href="http://wiki.openstreetmap.org/wiki/JOSM/Plugins/LiveGPS">LiveGPS</a>
-<a href="http://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>
-<a href="http://www.qlandkarte.org/">qlandkartegt</a>
-<a href="http://gpredict.oz9aec.net/">gpredict</a>
-<a href="http://opencpn.org/">OpenCPN</a>
+<a href="http://wiki.openstreetmap.org/wiki/JOSM/Plugins/LiveGPS">LiveGPS</a>,
+<a href="http://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>,
+<a href="http://www.qlandkarte.org/">qlandkartegt</a>,
+<a href="http://gpredict.oz9aec.net/">gpredict</a>,
+<a href="http://opencpn.org/">OpenCPN</a>,
 <a href="https://github.com/infinet/gpsd-navigator.git">gpsd-navigator</a>,
-<a href="https://github.com/IvanSanchez/gpsd-ais-viewer">gpsd-ais-viewer>,
-and <a href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>.</p>
-
-<p>In addition, the Android smartphone operating system (from version
+<a href="https://github.com/IvanSanchez/gpsd-ais-viewer">gpsd-ais-viewer</a>,
+and <a
+href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>. 
+In addition, the Android smartphone operating system (from version
 4.0 onwards and possibly earlier; we don't know for sure when the
 change happened) uses GPSD to monitor the phone's on-board GPS, so
 every location-aware Android app is indirectly a GPSD client.</p>
+
+<p>GPSD is also extremely widely deployed in mobile embedded systems:
+it's a basic building block for navigation used by UAVs, robot
+submarines, and driverless cars as well as more conventional
+applications like marine navigation and military IFF systems.</p>
 
 <p>Under Linux, <code>gpsd</code> normally runs with zero
 configuration.  Binary packages for this program install hotplug
