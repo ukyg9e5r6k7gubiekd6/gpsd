@@ -68,61 +68,66 @@ GPSD Frequently Asked Questions
 <div id="Content">
 
 <ul>
-<li>Troubleshooting GPSD: the basics
-<ul>
-<li><a href='#verify'>How can I verify operation of a new GPS?</a></li>
-<li><a href='#willitwork'>Will a GPS not on the GPSD hardware list work?</a></li>
-<li><a href='#android'>Android reports that gpsd is draining my battery. Help!</a></li>
-<li><a href='#garmin'>My Garmin USB GPS doesn't work.</a></li>
-<li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a>
-<li><a href='#raspberry'>Time is wrong on my Raspberry Pi</a></li>
-<li><a href='#bug-reporting'>How do I report bugs in GPSD?</a></li>
-<li><a href='#support'>What support channels does GPSD have?</a></li>
-</ul>
-</li>
+  <li>Troubleshooting GPSD: the basics
+  <ul>
+    <li><a href='#verify'>How can I verify operation of a new GPS?</a></li>
+    <li><a href='#willitwork'>Will a GPS not on the GPSD hardware list work?</a></li>
+    <li><a href='#android'>Android reports that gpsd is draining my battery. Help!</a></li>
+    <li><a href='#garmin'>My Garmin USB GPS doesn't work.</a></li>
+    <li><a href='#agps'>Can GPSD use Assisted GPS data from cellphone networks?</a>
+    <li><a href='#raspberry'>Time is wrong on my Raspberry Pi</a></li>
+  </ul>
+  </li>
+  <li>Licensing and support
+  <ul>
+    <li><a href='#bug-reporting'>How do I report bugs in GPSD?</a></li>
+    <li><a href='#support'>What support channels does GPSD have?</a></li>
+    <li><a href='#license'>What is the license of GPSD?</a></li>
+    <li><a href='#commercial'>Can I use GPSD in commercial products?</a></li>
+  </ul>
+  </li>
+  <li>GPS performance
+  <ul>
+    <li><a href='#startup'>Why does getting a fix take so long after powerup?</a></li>
+    <li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
+    <li><a href='#timelag2'>Why is my GPS time off by exactly one second?</a></li>
+    <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a></li>
+    <li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a></li>
+    <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
+    <li><a href='#waas'>How can I tell if WAAS/EGNOS is working?</a></li>
+  </ul>
+  </li>
 
-<li>GPS performance
-<ul>
-<li><a href='#startup'>Why does getting a fix take so long after powerup?</a></li>
-<li><a href='#timelag'>Why does GPS time lag wall time by 11-15 seconds?</a></li>
-<li><a href='#timelag2'>Why is my GPS time off by exactly one second?</a></li>
-<li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a></li>
-<li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a></li>
-<li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
-<li><a href='#waas'>How can I tell if WAAS/EGNOS is working?</a></li>
-</ul>
-</li>
+  <li>Problems with specific applications
+  <ul>
+    <li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a></li>
+    <li><a href='#kismet'>Why do I get no results when I try to use <code>gpsd</code> with Kismet?</a></li>
+  </ul>
+  </li>
 
-<li>Problems with specific applications
-<ul>
-<li><a href='#gpsdrive'>Why do I get implausibly low speeds when using gpsdrive?</a></li>
-<li><a href='#kismet'>Why do I get no results when I try to use <code>gpsd</code> with Kismet?</a></li>
-</ul>
-</li>
+  <li>Troubleshooting GPSD: advanced topics
+  <ul>
+    <li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
+    <li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
+    <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
+    <li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a><li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a></li>
+  </ul>
+  </li>
 
-<li>Troubleshooting GPSD: advanced topics
-<ul>
-<li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
-<li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
-<li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
-<li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a><li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a></li>
-</ul>
-</li>
+  <li>Application development with GPSD
+  <ul>
+    <li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a></li>
+    <li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a></li>
+    <li><a href='#almanac'>How can my application get almanac/ephemeris/pseudorange data?</a></li>
+  </ul>
+  </li>
 
-<li>Application development with GPSD
-<ul>
-<li><a href='#why_not_parse_nmea'>Why use the <code>gpsd</code> protocol rather than parsing raw NMEA?</a></li>
-<li><a href='#interfacing'>How should  I interface my application with <code>gpsd</code>?</a></li>
-<li><a href='#almanac'>How can my application get almanac/ephemeris/pseudorange data?</a></li>
-</ul>
-</li>
-
-<li>Linux issues
-<ul>
-<li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a></li>
-<li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
-</ul>
-</li>
+  <li>Linux issues
+  <ul>
+    <li><a href='#bluetooth'>Why do I have to restart <code>gpsd</code> whenever I power-cycle my Bluetooth device?</a></li>
+    <li><a href='#sleep'>Why does my GPS get lost when I sleep/wake my laptop?</a></li>
+  </ul>
+  </li>
 </ul>
 
 <p>If none of these FAQs seems to address your problem, look at the <a
@@ -510,6 +515,20 @@ real time <a href="@IRCCHAN@">on IRC</a>.</p>
 engagements at reasonable rates. If you have a hard problem or a tight
 deadline or both, request an engagement via the dev list or IRC. We're
 professionals and experts and we deliver results.</p>
+
+<h1 id="license">What is the license of GPSD?</h1>
+
+<p>Most of GPSD is under the permissive BSD license.  Some portions
+are under other permissive licenses, including the MIT/X license and
+the ISC license.</p>
+
+<h1 id="commercial">Can I use GPSD in commercial products?</h1>
+
+<p>Yes, GPSD code can be used in commercial and for-profit deployments
+without restrictions.</p>
+
+<p>If you use GPSD to make money, please show some concern for the project's
+sustainability; @TIPLINK@.</p>
 
 <h1 id="startup">Why does getting a fix take so long after powerup?</h1>
 

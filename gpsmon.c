@@ -24,6 +24,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
+#include "gps_json.h"
 #include "gpsmon.h"
 #include "revision.h"
 
@@ -652,12 +653,8 @@ bool monitor_control_send( /*@in@*/ unsigned char *buf, size_t len)
 
 static bool monitor_raw_send( /*@in@*/ unsigned char *buf, size_t len)
 {
-    if (!serial)
-	return false;
-    else {
-	ssize_t st = gpsd_write(&session, (char *)buf, len);
-	return (st > 0 && (size_t) st == len);
-    }
+    ssize_t st = gpsd_write(&session, (char *)buf, len);
+    return (st > 0 && (size_t) st == len);
 }
 #endif /* CONTROLSEND_ENABLE */
 
@@ -723,6 +720,17 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     else
 #endif /* PPS_ENABLE */
     {
+#ifdef __future__
+	if (!serial)
+	{
+	    if (device->packet.type == JSON_PACKET)
+	    {
+		const char *end = NULL;
+		libgps_json_unpack((char *)device->packet.outbuffer, &session.gpsdata, &end);
+	    }
+	}
+#endif /* __future__ */
+
 	if (curses_active)
 	    select_packet_monitor(device);
 
