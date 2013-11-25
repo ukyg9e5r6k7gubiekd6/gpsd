@@ -530,7 +530,7 @@ use a fixed port speed, handshake times drop to a fraction of a
 second.</p>
 
 <p>If you are starting a GPS for the first time, or after it has been
-powered off for more than few weeks, this is a 'cold start'; it needs
+powered off for more than a few weeks, this is a 'cold start'; it needs
 to get a new satellite <i>almanac</i> to do its job. The satellites
 broadcast this information very slowly (at 50bps) on a fixed schedule,
 and it can take up to 20 minutes.</p>
@@ -585,7 +585,7 @@ start sequence or a zero length field.  GPSD cannot handle this.</p>
 
 <p>The bad revision is 2.3.2-GSW2-2.05.024-C1Prod1.1; there may be
 others.  Suspect this if you have persistent off-by-one errors. If you
-are able to identify other bad firmeare versions, please let us
+are able to identify other bad firmware versions, please let us
 know about it.</p>
 
 <h1 id='speed'>Why does my receiver report wildly fluctuating speed?</h1>
