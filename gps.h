@@ -38,7 +38,7 @@ extern "C" {
  *       gps_poll() removed in favor of gps_read().  The raw hook is gone.
  * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added. New
  *       model and serial members in part B of AIS type 24, conforming
- *       with ITU-R 1371-4. New timedrift structure.
+ *       with ITU-R 1371-4. New timedrift structure (Nov 2013, release 3.10).
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
