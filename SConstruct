@@ -10,6 +10,7 @@
 # check     - run regression and unit tests.
 # audit     - run code-auditing tools
 # testbuild - test-build the code from a tarball
+# website   - refresh the website
 # release   - ship a release
 #
 # clean     - clean all normal build targets
@@ -1709,7 +1710,7 @@ def validation_list(target, source, env):
 Utility("validation-list", [www], validation_list)
 
 # How to update the website
-upload_web = Utility("upload_web", [www],
+website = Utility("website", [www],
                      ['rsync --exclude="*.in" -avz www/ ' + webupload,
                       'scp README TODO NEWS ' + webupload,
                       'chmod ug+w,a+x www/gps_report.cgi',
@@ -1870,7 +1871,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     env.Alias("release", [releaseprep,
                           upload_release,
                           upload_tags,
-                          upload_web])
+                          website])
 
     # Experimental release mechanics using shipper
     # This will ship a freecode metadata update
