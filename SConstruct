@@ -1874,7 +1874,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # Experimental release mechanics using shipper
     # This will ship a freecode metadata update
-    # FIXME: No cleanup of generated control yet.
     Utility("ship", [tarball, "control"], ['shipper version=%s | sh -e -x' % gpsd_version])
 
 # The following sets edit modes for GNU EMACS
