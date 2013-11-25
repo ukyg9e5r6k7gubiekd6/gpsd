@@ -376,12 +376,6 @@ def CheckPKG(context, name):
     context.Result( ret )
     return ret
 
-def CheckExecutable(context, testprogram, check_for):
-    context.Message( 'Checking for %s... ' %(check_for,))
-    ret = context.TryAction(testprogram)[0]
-    context.Result( ret )
-    return ret
-
 # Stylesheet URLs for making HTML and man pages from DocBook XML.
 docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
 docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
@@ -465,7 +459,6 @@ if env.GetOption("clean") or env.GetOption("help"):
     qt_env = None
 else:
     config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
-                                             'CheckExecutable' : CheckExecutable,
                                              'CheckXsltproc' : CheckXsltproc,
                                              'CheckCompilerOption' : CheckCompilerOption,
                                              'CheckCompilerDefines' : CheckCompilerDefines,
@@ -485,7 +478,7 @@ else:
 
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
     if env["shared"] and env["chrpath"]:
-        if config.CheckExecutable('chrpath -v', 'chrpath'):
+        if WhereIs('chrpath'):
             # Tell generated binaries to look in the current directory for
             # shared libraries so we can run regression tests without
             # hassle. Should be handled sanely by scons on all systems.  Not
@@ -521,9 +514,9 @@ else:
     if env['ncurses']:
         if config.CheckPKG('ncurses'):
             ncurseslibs = pkg_config('ncurses')
-        elif config.CheckExecutable('ncurses5-config --version', 'ncurses5-config'):
+        elif WhereIs('ncurses5-config'):
             ncurseslibs = ['!ncurses5-config --libs --cflags']
-        elif config.CheckExecutable('ncursesw5-config --version', 'ncursesw5-config'):
+        elif WhereIs('ncursesw5-config'):
             ncurseslibs = ['!ncursesw5-config --libs --cflags']
         elif sys.platform.startswith('freebsd'):
             ncurseslibs= [ '-lncurses' ]
