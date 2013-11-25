@@ -29,9 +29,11 @@ Options:
   -v be verbose
 
   -g generate a plot of the leap-second trend over time. The command you
-     probably want is something like
+     probably want is something like (depending on if your gnuplot install
+     does or does not support X11.
 
-     leapsecond.py -g leapsecond.cache | gnuplot -e 'set terminal svg' - | display
+     leapsecond.py -g leapseconds.cache | gnuplot --persist
+     leapsecond.py -g leapseconds.cache | gnuplot -e 'set terminal svg' - | display
 
   -n compute Unix gmt time for an IERS leap-second event given as a three-letter
      English Gregorian month abbreviation followed by a 4-digit year.
