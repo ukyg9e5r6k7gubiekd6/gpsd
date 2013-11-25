@@ -24,11 +24,19 @@
   </affiliation>
 </author>
 <copyright>
-  <year>2005</year>
+  <year>2005,2013</year>
   <holder role="mailto:esr@thyrsus.com">Eric S. Raymond</holder> 
 </copyright>
 
 <revhistory>
+   <revision>
+      <revnumber>2.3</revnumber>
+      <date>25 November 2011</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+	 Typo fixes.
+      </revremark>
+   </revision>
    <revision>
       <revnumber>2.2</revnumber>
       <date>30 September 2011</date>
@@ -134,13 +142,13 @@ approximately 40N 75W.</para>
 
 <sect2><title>Modeling the reporting chain</title>
 
-<para>Consider the whole transmission path of a PVT
+<para>Consider the whole transmission path of a TPV
 (position/velocity/time) report from a GPS to the user or user
 application.  It has the following stages:</para>
 
 <orderedlist>
 <listitem>
-<para>A PVT report is generated in the GPS</para>
+<para>A TPV report is generated in the GPS</para>
 </listitem>
 <listitem>
 <para>It is encoded (into NMEA or a vendor binary protocol) 
@@ -164,11 +172,11 @@ into a session structure available to the user application.</para>
 </orderedlist>
 
 <para>It is also relevant that consumer-grade GPSes do not expect to
-be polled, but are designed to issue PVT reports on a fixed cycle
+be polled, but are designed to issue TPV reports on a fixed cycle
 time, which we'll call C and which is usually 1
 second. <application>gpsd</application> expects this.  A few GPSes
 (notably SiRF-II-based ones) can be polled, and we might thus be able
-to pull PVT reports out of them at a higher rate.
+to pull TPV reports out of them at a higher rate.
 <application>gpsd</application> doesn't do this; one question this
 investigation can address is whether there would be any point to
 that.</para>
@@ -183,11 +191,11 @@ stages 2, 3, and 4.</para>
 how much latency is introduced at stage 4.  The design of the
 <application>gpsd</application> protocol (in particular, the average
 and worst-case size and complexity of a position/velocity/time report)
-affects how much latency is introduced at stages 5, 6, and 7.</para>
+affects how much latency is introduced at stages 5 and 6.</para>
 
 <para>At stages 5 and later, the client design and implementation 
 matter a lot.  In particular, it matters how frequently the client
-samples the PVT reports that <application>gpsd</application> makes
+samples the TPV reports that <application>gpsd</application> makes
 available.</para>
 
 <para>The list of stages above implies the following formula for 
@@ -206,7 +214,7 @@ L = C/2 + E1 + T1 + D1 + W + E2 + T2 + D2
 C, but consumer-grade GPSes don't go below 1 second.</para>
 </listitem>
 <listitem>
-<para>E1 is PVT encoding time within the GPS. We can't affect this.</para>
+<para>E1 is TPV encoding time within the GPS. We can't affect this.</para>
 </listitem>
 <listitem>
 <para>T1 is transmission time over the serial link.  We can decrease
@@ -224,7 +232,7 @@ by tuning the implementation or using faster hardware.</para>
 the application to poll frequently.</para>
 </listitem>
 <listitem>
-<para>E2 is PVT encoding time within the daemon. We can speed this up
+<para>E2 is TPV encoding time within the daemon. We can speed this up
 with faster hardware or a simpler GPSD format.</para>
 </listitem>
 <listitem>
@@ -351,7 +359,7 @@ see the effect of profiling overhead.</para>
 </figure>
 
 <para>Uninstrumented total latency is simply the delta from the GPS
-timestamp associated with the packet to the arrival time ofthe end of
+timestamp associated with the packet to the arrival time of the end of
 the packet at the profiling client.  The repeated stairstep effect is
 because all packets in a reporting cycle have the same timestamp;
 thus, the impulses cumulate time in the reporting cycle so far.</para>
@@ -505,7 +513,7 @@ significantly reduced the overhead of profiling in the report stream.</para>
 
 <orderedlist>
 <listitem>
-<para>A PVT report is generated in the GPS (at time 'T')</para>
+<para>A TPV report is generated in the GPS (at time 'T')</para>
 </listitem>
 <listitem>
 <para>It is encoded into a burst of sentences in NMEA or a vendor
@@ -651,8 +659,8 @@ vendor binary mode. Consider, for example, these:</para>
 
 <para>The comb-shaped pattern in these graphs reflect the additional
 transmission time for $GPGSV every 5 cycles. We can see clearly that
-the vendor binary protocol significantly cuts neither latency nor
-total bandwidth required.</para>
+the vendor binary protocol does not significantly cut either the latency
+or the total bandwidth required.</para>
 
 </sect2>
 </sect1>
