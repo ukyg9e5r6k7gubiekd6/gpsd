@@ -205,7 +205,7 @@ plain-vanilla x86 PCS with clock speeds in the 2GHz range.
 
 All the previous figures assume you're using PPS delivered over
 RS232.  USB GPSes that deliver 1PPS are rare, but do exist. Notably,
-there's the Navsys GR601-W. In case this device goes out of
+there's the Navisys GR601-W. In case this device goes out of
 production it's worth noting that it's a trivial modification of the
 stock two-chip-on-a-miniboard commodity-GPS design of engine plus
 USB-to-serial adapter; the GR601-W wires a u-blox 6 to a Prolific Logic
