@@ -282,8 +282,7 @@ def graph_history(filename):
     fmt += 'set format y "%Y-%m-%d"\n'
     fmt += 'set yrange ["%s":"%s"]\n' % (dates[0], dates[-1])
     fmt += 'set key left top box\n'
-    fmt += 'set data style linespoints\n'
-    fmt += 'plot "-" using 1:3 title "Leap-second trend";\n'
+    fmt += 'plot "-" using 1:3 title "Leap-second trend" with linespoints ;\n'
     for (i, (r, d)) in enumerate(zip(raw, dates)):
         fmt += "%d\t%s\t%s\n" % (i, r, d)
     fmt += 'e\n'
