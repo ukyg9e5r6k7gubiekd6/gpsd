@@ -105,6 +105,7 @@ static int init_kernel_pps(struct gps_device_t *session)
      * On BSDs that support RFC2783, one uses the API calls on serial
      * port file descriptor.
      */
+    // cppcheck-suppress redundantAssignment
     ret  = session->gpsdata.gps_fd;
 #else /* linux */
     /*

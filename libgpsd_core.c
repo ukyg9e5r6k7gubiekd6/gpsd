@@ -1387,7 +1387,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
 #ifdef CHEAPFLOATS_ENABLE
-	/*@i1@*/gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
+	gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
 #endif /* CHEAPFLOATS_ENABLE */
 
 	/*@+nullderef -nullpass@*/
