@@ -7,22 +7,23 @@ clock be accurate to within one second.  It would be nice to relax this
 to "accurate within one GPS rollover period" for receivers reporting
 GPS week+TOW, but isn't possible in general.
 
-Date and time in GPS is represented as number of weeks from the start
-of zero second of 6 January 1980 mod 1024, plus number of seconds into
-the week.  GPS time is not leap-second corrected, though satellites
-also broadcast a current leap-second correction which is updated on
-(theoretically) three-month boundaries according to rotational
-bulletins issued by the International Earth Rotation and Reference
-Systems Service (IERS). Historically all corrections have been issued
-on six-month boundaries.
+Date and time in GPS is represented as number of weeks mod 1024 from
+the start of zero second of 6 January 1980, and number of seconds into
+the week.  GPS time is not leap-second corrected, and has a constant
+offset from TAI.  Satellites also broadcast a current leap-second
+correction which is updated on (theoretically) three-month boundaries
+according to rotational bulletins issued by the International
+Earth Rotation and Reference Systems Service (IERS).
+Historically all corrections have been issued on six-month boundaries.
 
 The leap-second correction is only included in the satellite subframe
 broadcast, roughly once ever 20 minutes.  While the satellites do
 notify GPSes of upcoming leap-seconds, this notification is not
 necessarily processed correctly on consumer-grade devices, and will
 not be available at all when a GPS receiver has just
-cold-booted. Thus, UTC time reported from NMEA devices may be slightly
-inaccurate between a cold boot or leap second and the following
+cold-booted. Thus, the time reported from NMEA devices, although
+supposed to be UTC, may be offset by an integer number of seconds
+between a cold boot or leap second and the following
 subframe broadcast. 
 
 It might be best not to trust time for 20 minutes after GPSD startup
@@ -64,7 +65,7 @@ we can't know which rollover period we're in without an external time
 source.
 
 4) Only one external time source, the host system clock, is reliably
-available.
+available, although it may not be accurate.
 
 5) Another source *may* be available - the GPS leap second count, if we can
 get the device to report it. The latter is not a given; SiRFs before
