@@ -311,12 +311,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    struct timespec kernelpps_tv;
 #ifdef linux
 	    /*
-	     * \todo Explain the use of a non-NULL zero timespec,
+	     * We use of a non-NULL zero timespec here,
 	     * which means to return immediately with -1 (section
-	     * 3.4.3).  Further, explain the non-sensical comment,
-	     * because the intent of RFC2783 is that the timestamp has
-	     * already been captured in the kernel, and we are merely
-	     * fetching it here.
+	     * 3.4.3).  This is because we know we just got a pulse because 
+             * TIOMCIWAIT just work up.
+	     * The timestamp has already been captured in the kernel, and we 
+             * are merely fetching it here.
 	     */
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of
 	     * latency, and about +/-5uS of jitter over the other method */
