@@ -24,6 +24,9 @@
  * serial port, but details have not yet been tested and documented
  * here.
  *
+ * Note that for easy debugging all logging from the file is prefixed
+ * with PPS or KPPS.
+ *
  * To use the thread manager, you need to first fill in the two
  * thread_* methods in the session structure and/or the pps_hook in
  * the context structure.  Then you can call pps_thread_activate() and
@@ -184,7 +187,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 #endif
     /* assert(ret >= 0); */
     gpsd_report(session->context->debug, LOG_INF,
-		"RFC2783 fd is %d\n",
+		"KPPS RFC2783 fd is %d\n",
 		ret);
 
     /* RFC 2783 implies the time_pps_setcap() needs priviledges *
@@ -606,13 +609,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
     if (session->kernelpps_handle > 0) {
-	gpsd_report(session->context->debug, LOG_PROG, "PPS descriptor cleaned up\n");
+	gpsd_report(session->context->debug, LOG_PROG, 
+            "PPS descriptor cleaned up\n");
 	(void)time_pps_destroy(session->kernelpps_handle);
     }
 #endif
     if (session->thread_wrap_hook != NULL)
 	session->thread_wrap_hook(session);
-    gpsd_report(session->context->debug, LOG_PROG, "PPS gpsd_ppsmonitor exited.\n");
+    gpsd_report(session->context->debug, LOG_PROG, 
+         "PPS gpsd_ppsmonitor exited.\n");
     return NULL;
 }
 /*@+mustfreefresh +type +unrecog +branchstate@*/
