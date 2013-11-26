@@ -5,11 +5,11 @@
  *
  * It helps to know that there are two PPS measurement methods in
  * play.  One is defined by RFC2783 and typically implemented in the
- * kernel.  It is available on FreeBSD, Linux, and NetBSD.  On Linux
- * it is referred to as KPPS, and is accessed via /dev/ppsN devices.
- * On BSD it is accessed via the same device as the serial port.  This
- * mechanism is preferred as it should provide the smallest latency
- * and jitter from control line transition to timestamp.
+ * kernel.  It is available on FreeBSD, Linux, and NetBSD.  In gpsd it
+ * is referred to as KPPS.  KPPS is accessed on Linux via /dev/ppsN
+ * devices.  On BSD it is accessed via the same device as the serial
+ * port.  This mechanism is preferred as it should provide the smallest
+ * latency and jitter from control line transition to timestamp.
  *
  * The other mechanism is user-space PPS, which uses the (not
  * standardized) TIOCMIWAIT ioctl to wait for PPS transitions on
@@ -17,7 +17,7 @@
  *
  * On Linux, RFC2783 PPS requires root permissions for initialization;
  * user-space PPS does not.  User-space PPS loses some functionality
- * when not initialized as root.  In Linux, user-space PPS is referred
+ * when not initialized as root.  In gpsd, user-space PPS is referred
  * to as "plain PPS".
  *
  * On {Free,Net}BSD, RFC2783 PPS should only require access to the
