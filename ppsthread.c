@@ -333,12 +333,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		gpsd_report(session->context->debug, LOG_ERROR,
 			    "KPPS kernel PPS failed\n");
 	    } else {
-	        /* Wait until we have both edges. */
-		if (pi.assert_sequence == 0 || pi.clear_sequence == 0) {
-		    usleep(100000);
-		    continue;
-		}
-
 		// find the last edge
 		// FIXME a bit simplistic, should hook into the
                 // cycle/duration check below.
