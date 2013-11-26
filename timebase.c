@@ -8,11 +8,13 @@ to "accurate within one GPS rollover period" for receivers reporting
 GPS week+TOW, but isn't possible in general.
 
 Date and time in GPS is represented as number of weeks from the start
-of zero second of 6 January 1980, plus number of seconds into the
-week.  GPS time is not leap-second corrected, though satellites also
-broadcast a current leap-second correction which is updated on
-six-month boundaries according to rotational bulletins issued by the
-International Earth Rotation and Reference Systems Service (IERS).
+of zero second of 6 January 1980 mod 1024, plus number of seconds into
+the week.  GPS time is not leap-second corrected, though satellites
+also broadcast a current leap-second correction which is updated on
+(theoretically) three-month boundaries according to rotational
+bulletins issued by the International Earth Rotation and Reference
+Systems Service (IERS). Historically all corrections have been issued
+on six-month boundaries.
 
 The leap-second correction is only included in the satellite subframe
 broadcast, roughly once ever 20 minutes.  While the satellites do
