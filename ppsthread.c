@@ -260,11 +260,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
     /*
-     * Wait for status change on any handshake line. The only assumption here
-     * is that no GPS lights up more than one of these pins.  By waiting on
-     * all of them we remove a configuration switch.
+     * Wait for status change on any handshake line.  Just one edge,
+     * we do not want to be spinning waiting for the trailing edge of
+     * a pulse. The only assumption here is that no GPS lights up more
+     * than one of these pins.  By waiting on all of them we remove a
+     * configuration switch. 
      */
-    while (session->thread_report_hook != NULL || session->context->pps_hook != NULL) {
+
+    while (session->thread_report_hook != NULL 
+           || session->context->pps_hook != NULL) {
 	bool ok = false;
 #if defined(HAVE_SYS_TIMEPPS_H)
 	// cppcheck-suppress variableScope
@@ -309,19 +313,19 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
         if ( 0 <= session->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
-#ifdef linux
+#ifdef TIOMCIWAIT
 	    /*
 	     * We use of a non-NULL zero timespec here,
 	     * which means to return immediately with -1 (section
 	     * 3.4.3).  This is because we know we just got a pulse because 
-             * TIOMCIWAIT just work up.
+             * TIOMCIWAIT just woke up.
 	     * The timestamp has already been captured in the kernel, and we 
              * are merely fetching it here.
 	     */
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of
 	     * latency, and about +/-5uS of jitter over the other method */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
-#else /* not linux */
+#else /* not TIOMCIWAIT */
 	    /*
 	     * RFC2783 specifies that a NULL timeval means to wait.
 	     */
