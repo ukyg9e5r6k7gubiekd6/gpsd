@@ -100,14 +100,7 @@ static int init_kernel_pps(struct gps_device_t *session)
      * to use for RFC2783 calls.
      */
     ret = -1;
-#ifndef linux
-    /*
-     * On BSDs that support RFC2783, one uses the API calls on serial
-     * port file descriptor.
-     */
-    // cppcheck-suppress redundantAssignment
-    ret  = session->gpsdata.gps_fd;
-#else /* linux */
+#ifdef linux
     /*
      * On Linux, one must make calls to associate a serial port with a
      * /dev/ppsN device and then grovel in system data to determine
@@ -181,6 +174,13 @@ static int init_kernel_pps(struct gps_device_t *session)
 		    "KPPS cannot open %s: %s\n", path, strerror(errno));
     	return -1;
     }
+#else /* not linux */
+    /*
+     * On BSDs that support RFC2783, one uses the API calls on serial
+     * port file descriptor.
+     */
+    // cppcheck-suppress redundantAssignment
+    ret  = session->gpsdata.gps_fd;
 #endif
     /* assert(ret >= 0); */
     gpsd_report(session->context->debug, LOG_INF,
@@ -207,15 +207,15 @@ static int init_kernel_pps(struct gps_device_t *session)
 			LOG_INF, "KPPS caps %0x\n", caps);
         }
 
-#ifndef linux
+#ifdef linux
+        /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
+        memset( (void *)&pp, 0, sizeof(pps_params_t));
+        pp.mode = PPS_CAPTUREBOTH;
+#else /* not linux */
 	/*
 	 * Attempt to follow RFC2783 as straightforwardly as possible.
 	 */
 	pp.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREBOTH;
-#else /* linux */
-        /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
-        memset( (void *)&pp, 0, sizeof(pps_params_t));
-        pp.mode = PPS_CAPTUREBOTH;
 #endif
 #endif /* S_SPLINT_S */
 
@@ -306,13 +306,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
         if ( 0 <= session->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
-#ifndef linux
-	    /*
-	     * RFC2783 specifies that a NULL timeval means to wait.
-	     */
-	    kernelpps_tv.tv_sec = 1;
-	    kernelpps_tv.tv_nsec = 0;
-#else
+#ifdef linux
 	    /*
 	     * \todo Explain the use of a non-NULL zero timespec,
 	     * which means to return immediately with -1 (section
@@ -324,6 +318,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* on a quad core 2.4GHz Xeon this removes about 20uS of
 	     * latency, and about +/-5uS of jitter over the other method */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
+#else /* not linux */
+	    /*
+	     * RFC2783 specifies that a NULL timeval means to wait.
+	     */
+	    kernelpps_tv.tv_sec = 1;
+	    kernelpps_tv.tv_nsec = 0;
 #endif
 	    if ( 0 > time_pps_fetch(session->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
