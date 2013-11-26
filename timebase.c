@@ -51,7 +51,7 @@ last rollover) that we don't have access to.  Thus, there's no way to
 check whether a rollover the device wasn't prepared for has occurred
 before gpsd startup time (making the reported UTC date invalid)
 without some other time source.  (Some NMEA devices may keep a
-rollover count in RAM and avoid the problem; we can't tell when that's
+rollover count in NVRAM and avoid the problem; we can't tell when that's
 happening, either.)
 
 2) Many NMEA devices - in fact, all that don't report ZDA - never tell
