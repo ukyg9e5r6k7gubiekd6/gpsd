@@ -20,6 +20,26 @@ month is quite low.
 
 Consider merging the calibration draft into the Time Service HOWTO.
 
+*** Time tracking
+
+Our goal is to be independent of the system clock.
+
+**** Compile the GPS week of the build into the build
+
+The obvious place tp put this is in timebase.h. Not too expensive;
+will typically cause extra work once per seven days.  The benefit is that
+we can compare received week to the compiled in week and if the latter
+is less know that a rollover has occurred.
+
+**** Track gpsd's confidence in the GPS time it's seeing
+
+This would increase when we see a leap-second offset or get GPZDA from
+the device, decrease when we detect a rollover.  Some devices that are
+known to deliver high-quality time (notably u-blox GPSes) would peg the
+confidence measure at a high level.  We'd use the confidence level to
+control (a) whether gpsd ships to NTP, and (b) how it sets time
+uncertainty in output JSON.
+
 *** Client bugs
 
 **** In gpsmon's PPS Offset field
