@@ -24,7 +24,7 @@
  * serial port, but details have not yet been tested and documented
  * here.
  *
- * Note that for easy debugging all logging from the file is prefixed
+ * Note that for easy debugging all logging from this file is prefixed
  * with PPS or KPPS.
  *
  * To use the thread manager, you need to first fill in the two

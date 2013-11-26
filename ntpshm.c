@@ -4,6 +4,9 @@
  * struct shmTime and getShmTime from file in the xntp distribution:
  *	sht.c - Testprogram for shared memory refclock
  *
+ * Note that for easy debugging all logging from this file is prefixed
+ * with PPS or NTP.
+ *
  * This file is Copyright (c) 2010 by the GPSD project BSD terms apply:
  * see the file COPYING in the distribution root for details.
  */
@@ -281,7 +284,8 @@ int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *t
 
     /*@-type@*/ /* splint is confused about struct timespec */
     gpsd_report(session->context->debug, LOG_RAW,
-		"PPS ntpshm_put %lu.%09lu @ %lu.%09lu\n",
+		"NTP ntpshm_put(%d) %lu.%09lu @ %lu.%09lu\n",
+                shmIndex,
 		(unsigned long)td->real.tv_sec,
 		(unsigned long)td->real.tv_nsec,
 		(unsigned long)td->clock.tv_sec,
@@ -360,6 +364,15 @@ static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
 #endif /* __COVERITY__ */
     /*@+type@*/
 
+    /*@-type@*/ /* splint is confused about struct timespec */
+    gpsd_report(session->context->debug, LOG_RAW,
+		"PPS chrony_send %lu.%09lu @ %lu.%09lu Offset: %0.9f\n",
+		(unsigned long)td->real.tv_sec,
+		(unsigned long)td->real.tv_nsec,
+		(unsigned long)td->clock.tv_sec,
+		(unsigned long)td->clock.tv_nsec,
+                sample.offset);
+    /*@+type@*/
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
 
@@ -420,7 +433,8 @@ void ntpshm_link_activate(struct gps_device_t *session)
     session->shmIndex = ntpshm_alloc(session->context);
 
     if (0 > session->shmIndex) {
-	gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc() failed\n");
+	gpsd_report(session->context->debug, LOG_INF, 
+                    "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE)
     } else if (session->sourcetype == source_usb || session->sourcetype == source_rs232) {
 	/* We also have the 1pps capability, allocate a shared-memory segment
@@ -428,7 +442,8 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	 * transitions
 	 */
 	if ((session->shmIndexPPS = ntpshm_alloc(session->context)) < 0) {
-	    gpsd_report(session->context->debug, LOG_INF, "NTPD ntpshm_alloc(1) failed\n");
+	    gpsd_report(session->context->debug, LOG_INF, 
+                        "NTPD ntpshm_alloc(1) failed\n");
 	} else {
 	    init_hook(session);
 	    session->thread_report_hook = report_hook;
