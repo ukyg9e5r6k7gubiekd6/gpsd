@@ -14,7 +14,7 @@ broadcast a current leap-second correction which is updated on
 six-month boundaries according to rotational bulletins issued by the
 International Earth Rotation and Reference Systems Service (IERS).
 
-The leap-second correction is only included in the satellite subframre
+The leap-second correction is only included in the satellite subframe
 broadcast, roughly once ever 20 minutes.  While the satellites do
 notify GPSes of upcoming leap-seconds, this notification is not
 necessarily processed correctly on consumer-grade devices, and will
