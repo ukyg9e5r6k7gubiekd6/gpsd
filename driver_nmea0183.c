@@ -767,6 +767,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 	    gpsd_report(session->context->debug, LOG_WARN,
 			"malformed ZDA day: %s\n",  field[2]);
 	} else {
+	    session->context->valid |= CENTURY_VALID;
 	    if (century > session->context->century) {
 		/*
 		 * This mismatch is almost certainly not due to a GPS week
@@ -786,6 +787,7 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 			    "ZDA year %d less than clock year, "
 			    "probable GPS week rollover lossage\n",
 			    year);
+		session->context->valid &=~ CENTURY_VALID;
 	    }
 	    session->driver.nmea.date.tm_year = year - 1900;
 	    session->driver.nmea.date.tm_mon = mon - 1;
