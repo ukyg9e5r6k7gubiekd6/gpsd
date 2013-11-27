@@ -322,12 +322,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     * The timestamp has already been captured in the kernel, and we 
              * are merely fetching it here.
 	     */
-	    /* on a quad core 2.4GHz Xeon this removes about 20uS of
-	     * latency, and about +/-5uS of jitter over the other method */
+	    /* on a quad core 2.4GHz Xeon using KPPS timestamp instead of plain 
+             * PPS timestamp removes about 20uS of latency, and about +/-5uS 
+             * of jitter 
+             */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
 #else /* not TIOMCIWAIT */
 	    /*
 	     * RFC2783 specifies that a NULL timeval means to wait.
+             *
+             * FIXME, this will fail on 2Hz 'PPS', should wait 3 Sec.
 	     */
 	    kernelpps_tv.tv_sec = 1;
 	    kernelpps_tv.tv_nsec = 0;
