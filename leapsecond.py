@@ -50,7 +50,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 """
 
-import os, urllib, re, random, time, calendar, math, sys
+import os, urllib, re, random, time, calendar, math, sys, signal
 
 # Set a socket timeout for slow servers
 import socket
@@ -252,6 +252,27 @@ def make_leapsecond_include(infile):
 #define LEAPSECOND_NOW\t%(leapsecs)d
 #define GPS_WEEK_NOW\t%(gps_week_now)d
 """ % locals()
+
+def conditional_leapsecond_fetch(outfile, timeout):
+    "Fetch leapsecond data, with timeout in case of evil firewalls."
+    def handler(signum, frame):
+        raise IOError
+    try:
+        signal.signal(signal.SIGALRM, handler)
+    except ValueError:
+        # Parallel builds trigger this - signal only works in main thread
+        sys.stdout.write("Signal set failed; ")
+        return False
+    signal.alarm(timeout)
+    sys.stdout.write("Attempting leap-second fetch...")
+    try:
+        save_leapseconds(outfile)
+        sys.stdout.write("succeeded.\n")
+    except IOError:
+        sys.stdout.write("failed; ")
+        return False
+    signal.alarm(0)
+    return True
 
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."

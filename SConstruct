@@ -67,7 +67,7 @@ tipwidget  = "<script data-gittip-username='esr' \
 
 EnsureSConsVersion(2,0,1)
 
-import copy, os, sys, glob, re, platform, time, signal
+import copy, os, sys, glob, re, platform, time
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
@@ -1151,32 +1151,13 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
-from leapsecond import save_leapseconds
-
-def timed_save_leapseconds(outfile, env, timeout=15):
-    "Fetch leapsecond data with timeout, in case outside web access is blocked."
-    if not env["leapfetch"]:
-        sys.stdout.write("Leapsecond fetch suppressed by leapfetch=no.\n")
-    else:
-        def handler(signum, frame):
-            raise IOError
-        try:
-            signal.signal(signal.SIGALRM, handler)
-        except ValueError:
-            # Parallel builds trigger this - signal only works in main thread
-            sys.stdout.write("Signal set failed; try building with leapfetch=no.\n")
-            return
-        signal.alarm(timeout)
-        sys.stdout.write("attempting leap-second fetch...")
-        try:
-            save_leapseconds(outfile)
-            sys.stdout.write("succeeded.\n")
-        except IOError:
-            sys.stdout.write("failed; try building with leapfetch=no.\n")
-        signal.alarm(0)
+from leapsecond import conditional_leapsecond_fetch
 
 def leapseconds_cache_rebuild(target, source, env):
-    timed_save_leapseconds(target[0].abspath, env)
+    if not env["leapfetch"]:
+        sys.stdout.write("Leapsecond fetch suppressed by leapfetch=no.\n")
+    elif not conditional_leapsecond_fetch(target[0].abspath, timeout=15):
+        sys.stdout.write("try building with leapfetch=no.\n")
 if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
     leapseconds_cache = env.Command(target="leapseconds.cache",
                                 source="leapsecond.py",
