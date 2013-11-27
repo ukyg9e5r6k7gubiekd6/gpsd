@@ -803,8 +803,9 @@ extern void gpsd_set_century(struct gps_device_t *);
 extern timestamp_t gpsd_gpstime_resolve(/*@in@ */ struct gps_device_t *,
 			      const unsigned short, const double);
 extern timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *);
+extern void gpsd_century_update(/*@in@*/struct gps_device_t *, int);
 
-extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp)/*@modifies sp@*/;
+extern void gpsd_zero_satellites(/*@out@*/struct gps_data_t *sp);
 extern gps_mask_t gpsd_interpret_subframe(struct gps_device_t *, unsigned int,
 				uint32_t[]);
 extern gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *,

@@ -204,6 +204,31 @@ timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
 
     return t;
 }
+
+void gpsd_century_update(/*@in@*/struct gps_device_t *session, int century)
+{
+    session->context->valid |= CENTURY_VALID;
+    if (century > session->context->century) {
+	/*
+	 * This mismatch is almost certainly not due to a GPS week
+	 * rollover, because that would throw the ZDA report backward
+	 * into the last rollover period instead of forward.  Almost
+	 * certainly it means that a century mark has passed while
+	 * gpsd was running, and we should trust the new ZDA year.
+	 */
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "century rollover detected.\n");
+	session->context->century = century;
+    } else if (session->context->start_time >= GPS_EPOCH && century < session->context->century) {
+	/*
+	 * This looks like a GPS week-counter rollover.
+	 */
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "ZDA year less than clock year, "
+		    "probable GPS week rollover lossage\n");
+	session->context->valid &=~ CENTURY_VALID;
+    }
+}
 #endif /* NMEA_ENABLE */
 
 timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
