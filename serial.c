@@ -644,7 +644,6 @@ void gpsd_close(struct gps_device_t *session)
 	}
 	/* this is the clean way to do it */
 	session->ttyset_old.c_cflag |= HUPCL;
-	/* keep the most recent baud rate */
 	/*
 	 * Don't revert the serial parameters if we didn't have to mess with
 	 * them the first time.  Economical, and avoids tripping over an
@@ -652,6 +651,10 @@ void gpsd_close(struct gps_device_t *session)
 	 * ioctl(TIOCMWAIT) on a device after tcsetattr() is called.
 	 */
 	if (cfgetispeed(&session->ttyset_old) != cfgetispeed(&session->ttyset) || (session->ttyset_old.c_cflag & CSTOPB) != (session->ttyset.c_cflag & CSTOPB)) {
+	    /*
+	     * If we revert, keep the most recent baud rate.
+	     * Cuts down on autobaud overhead the next time.
+	     */
 	    /*@ ignore @*/
 	    (void)cfsetispeed(&session->ttyset_old,
 			      (speed_t) session->gpsdata.dev.baudrate);
