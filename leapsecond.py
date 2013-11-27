@@ -4,10 +4,6 @@
 Usage: leapsecond.py [-v] { [-h] | [-f filename] | [-g filename] | [-H filename]
     | [-I isodate] | [-O unixdate] | [-i rfcdate] | [-o unixdate] | [-n MMMYYYY] }
 
-With no option, get the current leap-second value.  This is the offset between
-UTC and GPS time, which changes occasionally due to variations in the Earth's
-rotation.
-
 Options:
 
   -I take a date in ISO8601 format and convert to Unix gmt time
@@ -20,7 +16,7 @@ Options:
 
   -c generate a C initializer listing leap seconds in Unix time.
 
-  -f fetch USNO data and save to local cache file
+  -f fetch leap-second offset data and save to local cache file
 
   -H make leapsecond include
 
@@ -41,8 +37,8 @@ Options:
 Public urls and local cache file used:
 
 http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat
+http://hpiers.obspm.fr/iers/bul/bulc/UTC-TAI.history
 ftp://maia.usno.navy.mil/ser7/tai-utc.dat
-file:///var/run/leapsecond
 leapseconds.cache
 
 This file is Copyright (c) 2013 by the GPSD project
@@ -77,11 +73,6 @@ __locations = [
     "http://hpiers.obspm.fr/iers/bul/bulc/UTC-TAI.history",
     ),
 ]
-
-# File containing cached offset data.
-# Two fields: the offset, and the start of the current six-month span
-# between times it might change, in seconds since Unix epoch GMT (1970-01-01T00:00:00).
-__cachepath = "/var/run/leapsecond"
 
 GPS_EPOCH	= 315964800		# 6 Jan 1981 00:00:00
 SECS_PER_WEEK	= 60 * 60 * 24 * 7	# Seconds per GPS week
@@ -157,42 +148,6 @@ def last_insertion_time():
     else:
         return jan
 
-def get():
-    "Fetch GPS offset, from local cache file if possible."
-    stale = False
-    offset = None
-    valid_from = None
-    last_insertion = last_insertion_time()
-    if not os.path.exists(__cachepath):
-        stale = True
-    else:
-        try:
-            cfp = open(__cachepath)
-            txt = cfp.read()
-            cfp.close()
-            (offset, valid_from) = map(int, txt.split())
-            if valid_from < last_insertion:
-                stale = True
-        except (IOError, OSError, ValueError):
-            if verbose:
-                print >>sys.stderr, "can't read %s" % __cachepath
-            stale = True
-    # We now know whether the cached data is stale
-    if not stale:
-        return (offset, valid_from)
-    else:
-        current_offset = retrieve()
-        # Try to cache this for later
-        if current_offset != None:
-            try:
-                cfp = open(__cachepath, "w")
-                cfp.write("%d %d\n" % (current_offset, last_insertion))
-                cfp.close()
-            except (IOError, OSError):
-                if verbose:
-                    print >>sys.stderr, "can't write %s" % __cachepath
-        return (current_offset, valid_from)
-
 def save_leapseconds(outfile):
     "Fetch the leap-second history data and make a leap-second list since Unix epoch GMT (1970-01-01T00:00:00)."
     random.shuffle(__locations) # To spread the load
@@ -232,7 +187,7 @@ def fetch_leapsecs(filename):
     return leapsecs
 
 def make_leapsecond_include(infile):
-    "Get the current leap second count and century from the local cache usable as c preprocessor #define"
+    "Get the current leap second count and century from the local cache usable as C preprocessor #define"
     leapjumps = fetch_leapsecs(infile)
     now = int(time.time())
     year = time.strftime("%Y", time.gmtime(now))
@@ -411,8 +366,5 @@ if __name__ == '__main__':
         elif (switch == '-O'):  # Compute ISO8601 date from Unix time
             print isotime(float(val))
             raise SystemExit, 0
-
-    (offset, valid_from) = get()
-    print "Current leap second: %d, valid from %s" % (offset, unix_to_iso(valid_from))
 
 # End
