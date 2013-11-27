@@ -77,10 +77,8 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     int year;
 
     /* check for century wrap */
-    if (session->driver.nmea.date.tm_year % 100 == 99 && yy == 0) {
-	session->context->century += 100;
-	gpsd_report(session->context->debug, LOG_WARN, "century rollover detected.\n");
-    }
+    if (session->driver.nmea.date.tm_year % 100 == 99 && yy == 0)
+	gpsd_century_update(session, session->context->century + 100);
     year = (session->context->century + yy);
 
     if ( (1 > mon ) || (12 < mon ) ) {
