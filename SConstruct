@@ -1111,14 +1111,15 @@ env.Command(target = "packet_names.h", source="packet_states.h", action="""
     sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
     chmod a-w $TARGET""")
 
-# build timebase.h
+# timebase.h - always built in order to include current GPS week
 def timebase_h(target, source, env):
     from leapsecond import make_leapsecond_include
     f = open(target[0].abspath, 'w')
     f.write(make_leapsecond_include(source[0].abspath))
     f.close()
-env.Command(target="timebase.h", source="leapseconds.cache",
-            action=timebase_h)
+timebase = env.Command(target="timebase.h",
+                       source=["leapseconds.cache"], action=timebase_h)
+env.AlwaysBuild(timebase)
 
 env.Textfile(target="gpsd_config.h", source=confdefs)
 env.Textfile(target="gpsd.h", source=[File("gpsd.h-head"), File("gpsd_config.h"), File("gpsd.h-tail")])

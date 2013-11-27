@@ -83,6 +83,12 @@ __locations = [
 # between times it might change, in seconds since Unix epoch GMT (1970-01-01T00:00:00).
 __cachepath = "/var/run/leapsecond"
 
+GPS_EPOCH	= 315964800		# 6 Jan 1981 00:00:00
+SECS_PER_WEEK	= 60 * 60 * 24 * 7	# Seconds per GPS week
+
+def gps_week(t):
+    return (t - GPS_EPOCH)/SECS_PER_WEEK
+
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
     if type(s) == type(1):
@@ -228,12 +234,24 @@ def fetch_leapsecs(filename):
 def make_leapsecond_include(infile):
     "Get the current leap second count and century from the local cache usable as c preprocessor #define"
     leapjumps = fetch_leapsecs(infile)
-    year = time.strftime("%Y", time.gmtime(time.time()))
-    leapsecs = 0
+    now = int(time.time())
+    year = time.strftime("%Y", time.gmtime(now))
+    gps_week_now = gps_week(now)
+    isodate = isotime(now - now % SECS_PER_WEEK)
+    leapsecs = -1
     for leapjump in leapjumps:
         if leapjump < time.time():
             leapsecs += 1
-    return ("#define CENTURY_BASE\t%s00\n" % year[:2]) + ("#define LEAPSECOND_NOW\t%d\n" % (leapsecs-1))
+    return """\
+/*
+ * Constants used for GPS time detection and rollover correction.
+ *
+ * Correct for week beginning %(isodate)s
+ */
+#define CENTURY_BASE\t%(year)s00
+#define LEAPSECOND_NOW\t%(leapsecs)d
+#define GPS_WEEK_NOW\t%(gps_week_now)d
+""" % locals()
 
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."
