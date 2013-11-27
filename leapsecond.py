@@ -209,25 +209,35 @@ def make_leapsecond_include(infile):
 """ % locals()
 
 def conditional_leapsecond_fetch(outfile, timeout):
-    "Fetch leapsecond data, with timeout in case of evil firewalls."
-    def handler(signum, frame):
-        raise IOError
-    try:
-        signal.signal(signal.SIGALRM, handler)
-    except ValueError:
-        # Parallel builds trigger this - signal only works in main thread
-        sys.stdout.write("Signal set failed; ")
-        return False
-    signal.alarm(timeout)
-    sys.stdout.write("Attempting leap-second fetch...")
-    try:
-        save_leapseconds(outfile)
-        sys.stdout.write("succeeded.\n")
-    except IOError:
-        sys.stdout.write("failed; ")
-        return False
-    signal.alarm(0)
-    return True
+    "Conditionally fetch leapsecond data, w. timeout in case of evil firewalls."
+    if not os.path.exists(outfile):
+        stale = True
+    else:
+        # If there can't have been a leapsecond insertion since the
+        # last time the cache was updated, we don't need to refresh.
+        # This test cuts way down on the frequency with which we fetch.
+        stale = last_insertion_time() > os.path.getmtime(outfile)
+    if not stale:
+        return True
+    else:
+        def handler(signum, frame):
+            raise IOError
+        try:
+            signal.signal(signal.SIGALRM, handler)
+        except ValueError:
+            # Parallel builds trigger this - signal only works in main thread
+            sys.stdout.write("Signal set failed; ")
+            return False
+        signal.alarm(timeout)
+        sys.stdout.write("Attempting leap-second fetch...")
+        try:
+            save_leapseconds(outfile)
+            sys.stdout.write("succeeded.\n")
+        except IOError:
+            sys.stdout.write("failed; ")
+            return False
+        signal.alarm(0)
+        return True
 
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."
