@@ -265,6 +265,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * a pulse. The only assumption here is that no GPS lights up more
      * than one of these pins.  By waiting on all of them we remove a
      * configuration switch. 
+     *
+     * Once we have the latest edge we compare it to the last edge which we
+     * stored.  If the edge passes sanity checks we use it to send to
+     * ntpshm and chrony_send
      */
 
     while (session->thread_report_hook != NULL 
@@ -313,6 +317,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
         if ( 0 <= session->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
+	    /* on a quad core 2.4GHz Xeon using KPPS timestamp instead of plain 
+             * PPS timestamp removes about 20uS of latency, and about +/-5uS 
+             * of jitter 
+             */
 #ifdef TIOMCIWAIT
 	    /*
 	     * We use of a non-NULL zero timespec here,
@@ -322,16 +330,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     * The timestamp has already been captured in the kernel, and we 
              * are merely fetching it here.
 	     */
-	    /* on a quad core 2.4GHz Xeon using KPPS timestamp instead of plain 
-             * PPS timestamp removes about 20uS of latency, and about +/-5uS 
-             * of jitter 
-             */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
 #else /* not TIOMCIWAIT */
 	    /*
 	     * RFC2783 specifies that a NULL timeval means to wait.
              *
-             * FIXME, this will fail on 2Hz 'PPS', should wait 3 Sec.
+             * FIXME, this will fail on 2Hz 'PPS', maybe should wait 3 Sec.
 	     */
 	    kernelpps_tv.tv_sec = 1;
 	    kernelpps_tv.tv_nsec = 0;
