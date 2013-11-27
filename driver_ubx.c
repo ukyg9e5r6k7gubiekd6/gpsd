@@ -166,7 +166,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
  */
 static gps_mask_t
 ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
-		   size_t data_len)
+		   size_t data_len UNUSED)
 {
     session->driver.ubx.last_herr = (double)(getleu32(buf, 20) / 1000.0);
     session->driver.ubx.last_verr = (double)(getleu32(buf, 24) / 1000.0);
