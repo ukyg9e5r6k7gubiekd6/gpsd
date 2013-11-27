@@ -219,7 +219,7 @@ def save_leapseconds(outfile):
             md = leapbound(fields[0], fields[1])
             if verbose:
                 print >>sys.stderr, "# %s" % md
-            fp.write(repr(iso_to_unix(md)) + "\t# (" + repr(md)  + ")\n")
+            fp.write(repr(iso_to_unix(md)) + "\t# " + str(md)  + "\n")
         fp.close()
         return
     print >>sys.stderr, "%s not updated." % outfile
