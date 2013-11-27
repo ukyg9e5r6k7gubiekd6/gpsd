@@ -2276,6 +2276,7 @@ int main(int argc, char *argv[])
 		    adjust_max_fd(device->gpsdata.gps_fd, false);
 		    break;
 		case DEVICE_ERROR:
+		case DEVICE_EOF:
 		    deactivate_device(device);
 		    break;
 		default:

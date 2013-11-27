@@ -1273,6 +1273,9 @@ int main(int argc, char **argv)
 	    case DEVICE_ERROR:
 		longjmp(terminate, TERM_READ_ERROR);
 		break;
+	    case DEVICE_EOF:
+		longjmp(terminate, TERM_QUIT);
+		break;
 	    default:
 		break;
 	    }

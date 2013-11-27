@@ -1214,8 +1214,14 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    "packet sniff on %s finds type %d\n",
 		    session->gpsdata.dev.path, session->packet.type);
 	if (session->packet.type == COMMENT_PACKET) {
-	    gpsd_report(session->context->debug, LOG_PROG,
-			"comment, sync lock deferred\n");
+	    if (strcmp((const char *)session->packet.outbuffer, "# EOF\n") == 0) {
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "synthetic EOF\n");
+		return EOF_SET;
+	    }
+	    else
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "comment, sync lock deferred\n");
 	    /* FALL THROUGH */
 	} else if (session->packet.type > COMMENT_PACKET) {
 	    if (session->device_type == NULL)
@@ -1472,7 +1478,12 @@ int gpsd_multipoll(const bool data_ready,
 	for (fragments = 0; ; fragments++) {
 	    gps_mask_t changed = gpsd_poll(device);
 
-	    if (changed == ERROR_SET) {
+	    if (changed == EOF_SET) {
+		gpsd_report(device->context->debug, LOG_WARN,
+			    "device signed off %s\n",
+			    device->gpsdata.dev.path);
+		return DEVICE_EOF;
+	    } else if (changed == ERROR_SET) {
 		gpsd_report(device->context->debug, LOG_WARN,
 			    "device read of %s returned error or packet sniffer failed sync (flags %s)\n",
 			    device->gpsdata.dev.path,

@@ -626,13 +626,14 @@ class TestSession:
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
-                    if chosen.exhausted and (time.time() - chosen.exhausted > CLOSE_DELAY):
+                    if chosen.exhausted and (time.time() - chosen.exhausted > CLOSE_DELAY) and chosen.byname in self.fakegpslist:
                         self.gps_remove(chosen.byname)
-                        self.progress("gpsfake: GPS %s removed\n" % chosen.byname)
+                        self.progress("gpsfake: GPS %s removed (timeout)\n" % chosen.byname)
                     elif not chosen.go_predicate(chosen.index, chosen):
                         if chosen.exhausted == 0:
                             chosen.exhausted = time.time()
                             self.progress("gpsfake: GPS %s ran out of input\n" % chosen.byname)
+                            chosen.write("\n#EOF\n")
                     else:
                         chosen.feed()
                 elif isinstance(chosen, gps.gps):
@@ -643,6 +644,14 @@ class TestSession:
                         chosen.read()
                         if chosen.valid & gps.PACKET_SET:
                             self.reporter(chosen.response)
+                            # If we're lucky, this close notification reaches
+                            # us before the device timeout.  It would be nice
+                            # if this were the only logic for device closing
+                            # and we could get rid of CLOSE_DELAY, but this
+                            # sometimes fails on binary logfiles.
+                            if chosen.data["class"] == "DEVICE" and chosen.data["activated"] == 0 and chosen.data["path"] in self.fakegpslist:
+                                self.gps_remove(chosen.data["path"])
+                                self.progress("gpsfake: GPS %s removed (notification)\n" % chosen.byname)
                         had_output = True
                 else:
                     raise TestSessionError("test object of unknown type")

@@ -944,6 +944,7 @@ extern int gpsd_await_data(/*@out@*/fd_set *,
 			    /*@in@*/fd_set *,
 			    const int);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
+#define DEVICE_EOF	-3
 #define DEVICE_ERROR	-2
 #define DEVICE_UNREADY	-1
 #define DEVICE_READY	1
