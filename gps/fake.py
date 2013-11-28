@@ -633,7 +633,7 @@ class TestSession:
                         if chosen.exhausted == 0:
                             chosen.exhausted = time.time()
                             self.progress("gpsfake: GPS %s ran out of input\n" % chosen.byname)
-                            chosen.write("\n#EOF\n")
+                            chosen.write("# EOF\n")
                     else:
                         chosen.feed()
                 elif isinstance(chosen, gps.gps):
@@ -651,7 +651,7 @@ class TestSession:
                             # sometimes fails on binary logfiles.
                             if chosen.data["class"] == "DEVICE" and chosen.data["activated"] == 0 and chosen.data["path"] in self.fakegpslist:
                                 self.gps_remove(chosen.data["path"])
-                                self.progress("gpsfake: GPS %s removed (notification)\n" % chosen.byname)
+                                self.progress("gpsfake: GPS %s removed (notification)\n" % chosen.data["path"])
                         had_output = True
                 else:
                     raise TestSessionError("test object of unknown type")
