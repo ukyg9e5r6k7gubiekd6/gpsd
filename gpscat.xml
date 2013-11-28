@@ -26,7 +26,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
-      <arg choice='plain'><replaceable>serial-port</replaceable></arg>
+      <arg choice='plain'><replaceable>file-or-serial-port</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
