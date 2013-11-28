@@ -59,13 +59,17 @@ the attendant confusion and fear that the formula would be revised.
 
 Since 1972, the start of UTC, the decision to have leap seconds means that
 UTC ticks SI seconds.  Every 86400 SI seconds, we declare a new day, and
-we let the error (UT1 - UTC) build up (this is of the order of a few ms
-each midnight).
+we let the error (UT1 - UTC) build up. This is of the order of a few ms
+each midnight, not always the same way (think eartquakes that move the
+earth's crust).
 
 Once the error has built up substantially, in a few years, we (and by
 "we", I mean M Daniel Gambis at the IERS) declare that a future
 day will have 86401 secs.  This is the Leap Second.  Note that this
 often overcorrects, but if we wait a few months, the error will disappear.
+
+An animation of this process is available at:
+http://space-geodesy.nasa.gov/multimedia/EarthOrientationAnimations/UT1.html
 
 Clear?
 
