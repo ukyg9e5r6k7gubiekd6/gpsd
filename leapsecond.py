@@ -330,6 +330,8 @@ def leapbound(year, month):
     "Return a leap-second date in RFC822 form."
     # USNO lists JAN and JUL (month following the leap second).
     # IERS lists DEC. and JUN. (month preceding the leap second).
+    # Note: It is also possible for leap seconds to occur in end-Mar and end-Sep
+    #  although none have occurred yet
     if month.upper()[:3] == "JAN":
         tv = "%s-12-31T23:59:60" % (int(year)-1)
     elif month.upper()[:3] in ("JUN", "JUL"):

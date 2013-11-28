@@ -7,6 +7,80 @@ clock be accurate to within one second.  It would be nice to relax this
 to "accurate within one GPS rollover period" for receivers reporting
 GPS week+TOW, but isn't possible in general.
 
+= Begin Sidebar =
+
+READ this carefully, and if there are errors, please correct.  An
+understanding of the following terms is critical to make sense of the
+situation, which would be farcical if it were not serious.
+
+We discuss four timescales:
+
+ 1. TAI, International Atomic Time, which ticks smoothly
+    at the rate of the SI second.  TAI has no concept of a day, year, etc.
+    TAI does not define "days" or large units, and is hence difficult
+    for humans to parse.  Also, TAI is not broadcast or generally available.
+ 2. GPS Time, which ticks at at the rate of TAI, but has a constant offset
+    from it.  For other GNSS systems, the offset is different.  The
+    offset is of purely historical interest, being chosen by each
+    GNSS operator for convinience when the systems were inaugurated.
+ 3. UT1, a smoothed earth rotation angle, which MUST return to zero
+    once a day, (why?  Because you want the sun to be overhead *each*
+    day at the same time on your watch, no?), and ticks SI seconds
+    (a non-integeral number of seconds will occur in a UT1 day,
+    obviously).  For those of you who still say GMT, UT1 is the
+    closest modern timescale.
+ 4. UTC, Coordinated Universal Time, which ticks SI seconds.  An attempt is
+    made to keep UTC aligned with the rate of flow of seconds (TAI), and
+    the rate of flow of days (UT1).
+
+The reason UTC has to struggle has little to do with the fact that the
+earth's rotation is slowing down.  Although the length of the day, as
+measured by UT1, is lengthening in terms of the SI second, this is a very
+long term slowdown, and since 1980, the earth has actually speeded up.
+
+The issue simply is that the term "second" is defined in two incompatible ways:
+
+  Def 1. As a fixed number (9,192,631,770) of cycles of an atomic standard.
+    We believe this is a constant, and evidence to the contrary may
+    involve GPSD code review, and Nobel Prizes.
+  Def 2. As 1/86400 of a "day".  The number 86400 arises from
+    1 day == 24 * 60 * 60 secs
+
+Both of these have been defined separately, and the issue of leap seconds,
+rubber seconds, Smoothed Leap Seconds, etc, arises because we are
+unwilling to change the definition of either to be a derived unit of the
+other.
+
+At the time the SI second was defined, it was believed that Def 2 was correct,
+and the number in Def 1 was derived.  Because of ease of measurement,
+Def 1 was codified, and the problem was ignored for some time.  Prior
+to 1972, complicated formulae were used to scale the SI second, with
+the attendant confusion and fear that the formula would be revised.
+
+Since 1972, the start of UTC, the decision to have leap seconds means that
+UTC ticks SI seconds.  Every 86400 SI seconds, we declare a new day, and
+we let the error (UT1 - UTC) build up (this is of the order of a few ms
+each midnight).
+
+Once the error has built up substantially, in a few years, we (and by
+"we", I mean M Daniel Gambis at the IERS) declare that a future
+day will have 86401 secs.  This is the Leap Second.  Note that this
+often overcorrects, but if we wait a few months, the error will disappear.
+
+Clear?
+
+Two last things:
+ 1. Again, the earth slowing down is NOT the cause of leap seconds,
+    except very indirectly.  It is the conflict between the two
+    definitions above that causes leap seconds
+ 2. POSIX declares that there is no conflict, there are always 86400 SI
+    secs in a day, and hence no leap seconds.  The fact that ostriches
+    survive in the wild indicates that this is not as mind-crushing
+    wrong as it may seem.
+
+= End Sidebar =
+
+
 Date and time in GPS is represented as number of weeks mod 1024 from
 the start of zero second of 6 January 1980, and number of seconds into
 the week.  GPS time is not leap-second corrected, and has a constant
