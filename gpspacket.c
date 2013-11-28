@@ -273,4 +273,15 @@ initpacket(void)
     PyModule_AddIntConstant(m, "RTCM2_PACKET", RTCM2_PACKET);
     PyModule_AddIntConstant(m, "RTCM3_PACKET", RTCM3_PACKET);
     PyModule_AddIntConstant(m, "JSON_PACKET", JSON_PACKET);
+
+    PyModule_AddIntConstant(m, "LOG_ERROR", LOG_ERROR);
+    PyModule_AddIntConstant(m, "LOG_SHOUT", LOG_SHOUT);
+    PyModule_AddIntConstant(m, "LOG_WARN", LOG_WARN);
+    PyModule_AddIntConstant(m, "LOG_CLIENT", LOG_CLIENT);
+    PyModule_AddIntConstant(m, "LOG_INF", LOG_INF);
+    PyModule_AddIntConstant(m, "LOG_PROG", LOG_PROG);
+    PyModule_AddIntConstant(m, "LOG_IO", LOG_IO);
+    PyModule_AddIntConstant(m, "LOG_DATA", LOG_DATA);
+    PyModule_AddIntConstant(m, "LOG_SPIN", LOG_SPIN);
+    PyModule_AddIntConstant(m, "LOG_RAW", LOG_RAW);
 }
