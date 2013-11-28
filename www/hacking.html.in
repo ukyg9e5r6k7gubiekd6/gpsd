@@ -130,7 +130,6 @@ file in the source distribution.</p>
     <li><a href="#oncepercycle">Reporting fix data only once per cycle</a></li>
     <li><a href="#shipstrings">Allowing clients to ship arbitrary control strings to a GPS</a></li>
     <li><a href="#fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</a></li>
-    <li><a href="#utc-tai">Stop using a compiled-in UTC-TAI offset</a></li>
     <li><a href="#subsecond">Subsecond polling</a></li>
   </ol></li>
   <li><a href="#release">Release Checklist</a></li>
@@ -1332,7 +1331,6 @@ exploit that in the future.</p>
 discussion:</p>
 
 <pre>
-?A .. ?Z -&gt; map to the original A..Z gpsd commands
 ?almanac -&gt; poll the almanac from the receiver
 ?ephemeris -&gt; poll the ephemeris from the receiver
 ?assist -&gt; load assistance data (time, position, etc) into the receiver
@@ -1379,22 +1377,6 @@ jitter.</p>
 expert, reckons that at 4800bps the UART buffering can cause at most
 about 15msec of jitter.  This is, observably, swamped by other less
 controllable sources of variation.</p>
-
-<h2 id="utc-tai">Stop using a compiled-in UTC-TAI offset</h2>
-
-<p>Instead, from the hotplug script, we could maintain a local offset file:</p>
-
-<ol>
-<li>If there is no local offset file, download the current leap-second
-offset from <a href='http://hpiers.obspm.fr/iers/bul/bulc/'>IERS</a>
-or <a href="ftp://maia.usno.navy.mil/ser7/tai-utc.dat">the U.S. Naval
-Observatory</a> and copy it to a local offset file</li>
-
-<li>If there is a local offset file, consider it stale after five
-months and reload it.</li>
-
-<li>gpsd should read the local offset file when it starts up, if
-it exists.</li>
 </ol>
 
 <p>However, it turns out this is only an issue for EverMore chips.  SiRF GPSes
