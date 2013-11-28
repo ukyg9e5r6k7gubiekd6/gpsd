@@ -283,7 +283,7 @@ int main(int argc, char **argv)
     if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
-		      source.server, source.port, strerror(errno), errno);
+		      source.server, source.port, gps_errstr(errno), errno);
 	exit(EXIT_FAILURE);
     }
     /*@ +nullpass +onlytrans @*/

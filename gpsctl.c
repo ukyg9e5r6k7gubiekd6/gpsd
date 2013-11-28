@@ -363,7 +363,7 @@ int main(int argc, char **argv)
 	if (gps_open(NULL, NULL, &gpsdata) != 0) {
 	    gpsd_report(context.debug, LOG_ERROR,
 			"no gpsd running or network error: %s.\n",
-			netlib_errstr(errno));
+			gps_errstr(errno));
 	    lowlevel = true;
 	}
     }
