@@ -281,6 +281,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
 
 #if defined(TIOCMIWAIT)
+        /* we are lucky to have TIOMCIWAIT, so wait for next edge */
 #define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS)
         if (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
 	    gpsd_report(session->context->debug, LOG_ERROR,
@@ -288,9 +289,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			errno, strerror(errno));
 	    break;
 	}
-#endif /* TIOCMIWAIT */
 
 /*@-noeffect@*/
+        /* get the time after we just woke up */
 #ifdef HAVE_CLOCK_GETTIME
 	/* using  clock_gettime() here, that is nSec,
 	 * not uSec like gettimeofday */
@@ -310,6 +311,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	TVTOTS( &clock_ts, &clock_tv);
 #endif /* HAVE_CLOCK_GETTIME */
 /*@+noeffect@*/
+
+        /* got the edge, got the time just after the edge, now quickly
+         * get the edge state */
+	/*@ +ignoresigns */
+	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0) {
+	    gpsd_report(session->context->debug, LOG_ERROR,
+			"PPS ioctl(TIOCMGET) failed\n");
+	    break;
+	}
+	/*@ -ignoresigns */
+
+	/* mask for monitored lines */
+	state = (int)(state & PPS_LINE_TIOC);
+#endif /* TIOCMIWAIT */
 
 	/* ok and log used by KPPS and TIOMCWAIT */
 	ok = false;  
@@ -397,16 +412,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
 
 #if defined(TIOCMIWAIT)
-
-	/*@ +ignoresigns */
-	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0) {
-	    gpsd_report(session->context->debug, LOG_ERROR,
-			"PPS ioctl(TIOCMGET) failed\n");
-	    break;
-	}
-	/*@ -ignoresigns */
-
-	state = (int)((state & PPS_LINE_TIOC) != 0);
 	/*@ +boolint @*/
 	cycle = timespec_diff_ns(clock_ts, pulse[state]) / 1000;
 	duration = timespec_diff_ns(clock_ts, pulse[(int)(state == 0)])/1000;
