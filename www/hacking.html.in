@@ -1364,7 +1364,7 @@ suppose the control string were a baud-rate change?</p>
 <h2 id="fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</h2>
 
 <p>When using gpsd as a time reference, one of the things we'd like to do
-is make the amount of lag in the message path from GPS to GPS small
+is make the amount of lag in the message path from GPS to GPS as small
 and with as little jitter as possible, so we can correct for it with
 a constant offset.</p>
 
@@ -1373,8 +1373,8 @@ device UART to 1 using TIOCGSERIAL/TIOCSSERIAL.  This would, in
 effect, disable transmission buffering, increasing lag but decreasing
 jitter.</p>
 
-<p>But it's almost certainly not worth the work.  Rob Janssen, our timekeeping
-expert, reckons that at 4800bps the UART buffering can cause at most
+<p>But it's almost certainly not worth the work.  Rob Janssen
+reckons that at 4800bps the UART buffering can cause at most
 about 15msec of jitter.  This is, observably, swamped by other less
 controllable sources of variation.</p>
 </ol>

@@ -554,6 +554,24 @@ to get a new satellite <i>almanac</i> to do its job. The satellites
 broadcast this information very slowly (at 50bps) on a fixed schedule,
 and it can take up to 20 minutes.</p>
 
+<p>Without an almanac, your GPS has trouble finding the satellites.
+The satellites broadcast on a known frequency, but they are moving,
+and that gets shifted all over the place by the Doppler effect.  ("All
+over" means a big shift relative to the bandwidth of the signal.)</p>
+
+<p>If you have a recent almanac and you know the date/time and location, then
+you can compute the Doppler and look in the right frequency and find the
+satellites quickly.  In this context, "find" means hearing a signal at an
+expected frequency.  If you don't hear anything where you expect it, then you
+get to check nearby frequencies.  If you don't find anything nearby, you get
+to give up and start searching the whole Doppler range.  This is the difference
+between warm start and cold start.</p>
+
+<p>Once you do see one or more satellites, you can figure out the
+date/time and location and after a while get a new almanac. This will
+be stored in non-volatile memory in your devices and make subsequent
+satellite acquisitions faster, until it gets stale.</p>
+
 <p>Warm start on a modern GPS with a good skyview (4 or more sats
 visible) normally takes about 30 seconds. (Vendor spec sheets fib by
 quoting this time only, leaving out the cold-start lag to fetch

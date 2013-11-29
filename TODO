@@ -31,6 +31,10 @@ will typically cause extra work once per seven days.  The benefit is that
 we can compare received week to the compiled in week and if the latter
 is less know that a rollover has occurred.
 
+**** Maybe apply wraparound compensation ****
+
+See <http://www.febo.com/pipermail/time-nuts/2013-August/079271.html>
+
 **** Track gpsd's confidence in the GPS time it's seeing
 
 This would increase when we see a leap-second offset or get GPZDA from
