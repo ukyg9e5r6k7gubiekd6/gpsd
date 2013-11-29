@@ -312,7 +312,7 @@ static void init_hook(struct gps_device_t *session)
 /* for chrony SOCK interface, which allows nSec timekeeping */
 {
     /* open the chrony socket */
-    char chrony_path[PATH_MAX];
+    char chrony_path[GPS_PATH_MAX];
 
     session->chronyfd = -1;
     if ( 0 == getuid() ) {
