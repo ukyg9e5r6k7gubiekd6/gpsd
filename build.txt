@@ -24,7 +24,6 @@ Necessary components for any build:
 |C compiler         | gpsd and client library are written in C
 |Python             | some code is generated from python scripts
 |scons              | for executing the build recipe 
-|chrpath            | needed with scons for RPATH setting
 |============================================================================
 
 === C compiler ===
@@ -76,43 +75,6 @@ The xgps test client requires the following Python extensions:
 
 You will need scons version 2.0.1 or later to build the code. The
 autotools build from 2.96 and earlier versions has been dropped.
-
-=== chrpath ===
-
-chrpath is a tool for editing RPATH in object files.
-
-libtool is a messy pile of crocks, and throwing it out of our build
-chain was a good thing, but it had consequences. Whatever its other
-flaws, libtool successfully hid some tricky problems related to
-dynamic-linkage paths; to address these in the scons build, you need
-chrpath present to edit those paths.  
-
-Ubuntu users can do 'apt-get install chrpath' 
-CentOS users can do 'yum install chrpath' from extras.
-
-Some distribution makers have considered the use of chrpath to be a
-wart on the build recipe.
-
-Here's the problem. Ideally, we want to build build binaries that (a)
-link dynamically, (b) can be tested in the build directory without
-installing to system space (in particular, so we can run the regression
-tests without disturbing a production installation) and (c) won't
-carry a potential exploit into system space when the binaries are
-installed.
-
-The potential exploit is the remnant presence of the build directory in
-the binary's internal list of places it will look for shared libraries.
-We need that to be there for testing purposes, but we want it gone
-in the version of the binary that's copied to /usr/lib.  Otherwise
-there are threat scenarios with a maliciously crafted library.
-
-Without chrpath we can get any two of those three, but we can't get
-all three. Choosing static linking we get (b) and (c), choosing
-dynamic linking without chrpath we get (a) and (b).
-
-If you configure with chrpath=no, you will suppress use of chrpath,
-but this also means you will lose the ability to run regression tests
-in the build directory
 
 === Optional build components ===
 
@@ -201,11 +163,6 @@ running "scons prefix=<installation_root>". The default value is
 "/usr/local".  The envoronment variable DESTDIR also works in the 
 usual way.
 
-If your link fails with a message like "/usr/bin/ld: cannot find -lgps",
-you need to install chrpath.  Note that after you have done so, you
-may need to run 'scons --config=force' to override the scons 
-configuration cache's belief that chrpath isn't there.
-
 If your scons fails with the complaint "No tool named 'textfile'",
 you need to upgrade it.  This feature was introduced during the long
 interval after the 1.2.0 release; 1.2.1 and later versions will have it.
@@ -237,10 +194,9 @@ DocBook on your machine so there will be a local copy of the
 stylesheet where xmlto can find it.
 
 After building, please run 'scons check' to test the correctness
-of the build.  It is not necessary to install first, but you do need
-to have "." in your $PATH to run regressions uninstalled.  Python is
+of the build.  It is not necessary to install first.  Python is
 required for regression tests. If any of the tests fail, you probably
-have a toolchain issue.  The most common such problem is issues with
+have a toolchain issue.  The most common such problem is failures of
 strict C99 conformance in floating-point libraries.
 
 Once you have verified that the code is working, "scons install" 
@@ -257,6 +213,58 @@ You will need php and php-gd installed to support the PHP web page.
 included with the distribution. To install it, copy the file
 'gpsd.php' to your HTML document directory. Then see the
 post-installation instructions in INSTALL for how to configure it.
+
+=== Why you might need chrpath ===
+
+You can probably skip this section unless you are a developer working
+on the GPSD source directly, with a need to run some of the GPSD
+programs by hand in the test directory.  You are likely to get a
+message something like:
+
+--------------------------------------------------------------------
+./gpsd: error while loading shared libraries: libgpsd.so.XX: cannot open shared object file: No such file or directory
+--------------------------------------------------------------------
+
+If this happens, there are two different things you can do about it.
+One is this:
+
+--------------------------------------------------------------------
+export LD_LIBRARY_PATH=${PWD}
+--------------------------------------------------------------------
+
+The other is to install the chrpath utility and do your builds with
+chrpath=yes.
+
+The reason one of these required is because of some details
+about dynamic linking.  The search path for dynamic linking that is
+compiled into your binaries as you build them is set by the
+environment variable RPATH, if it exists.  At runtime, when a 
+dynamically-linked executable is called, that patch is extended
+with $LD_LIBRARY_PATH
+
+Ideally, during development, we want to build build binaries that (a)
+link dynamically, (b) can be tested in the build directory without
+installing to system space (in particular, so we can run ad-hoc
+tests without disturbing a production installation) and (c) won't
+carry a potential exploit into system space if the binaries are
+installed.
+
+The potential exploit is the remnant presence of the build directory in
+the binary's internal list of places it will look for shared libraries.
+We need that to be there for testing purposes, but we want it gone
+in the version of the binary that's copied to /lib or /usr/lib.  Otherwise
+there are threat scenarios with a maliciously crafted library.
+
+To get (b) without runtime tweaking of LD_LIBRARY_PATH, the
+development directory needs to be in RPATH, opening the security hole.
+Without editing RPATH at installation time we can get any two of those
+three, but we can't get all three. Choosing static linking we get (b)
+and (c), choosing dynamic linking without chrpath we get (a) and (b).
+
+chrpath is a tool for editing RPATH in object files.
+
+Ubuntu users can do 'apt-get install chrpath' 
+CentOS users can do 'yum install chrpath' from extras.
 
 == The leapseconds cache ==
 
