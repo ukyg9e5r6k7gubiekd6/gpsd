@@ -238,6 +238,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
+    double last_fixtime = 0;
 #ifndef HAVE_CLOCK_GETTIME
     struct timeval  clock_tv = {0, 0};
 #endif /* HAVE_CLOCK_GETTIME */
@@ -289,6 +290,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			errno, strerror(errno));
 	    break;
 	}
+        /* quick, grab a copy of last_fixtime before it changes */
+	last_fixtime = session->last_fixtime;
 
 /*@-noeffect@*/
         /* get the time after we just woke up */
@@ -357,8 +360,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 	    if ( 0 > time_pps_fetch(session->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
-		gpsd_report(session->context->debug, LOG_ERROR,
-			    "KPPS kernel PPS failed\n");
+		// gpsd_report(session->context->debug, LOG_ERROR,
+			    // "KPPS kernel PPS failed\n");
 	    } else {
 		// find the last edge
 		// FIXME a bit simplistic, should hook into the
@@ -525,7 +528,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    log = "Too long for 0.5Hz\n";
 	}
 #endif /* TIOCMIWAIT */
-	if ( ok && last_second_used >= session->last_fixtime ) {
+	if ( ok && last_second_used >= last_fixtime ) {
 		/* uh, oh, this second already handled */
 		ok = 0;
 		log = "this second already handled\n";
@@ -561,7 +564,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              */
 
 	    /*@+relaxtypes@*/
-	    drift.real.tv_sec = session->last_fixtime + 1;
+	    drift.real.tv_sec = last_fixtime + 1;
 	    drift.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
 	    drift.clock = clock_ts;
 	    /*@-relaxtypes@*/
@@ -578,7 +581,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		log1 = "timestamp out of range";
 	    } else {
 		/*@-compdef@*/
-		last_second_used = session->last_fixtime;
+		last_second_used = last_fixtime;
 		if (session->thread_report_hook != NULL) 
 		    log1 = session->thread_report_hook(session, &drift);
 		else
