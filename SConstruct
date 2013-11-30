@@ -225,6 +225,7 @@ for var in import_env:
     if var in os.environ:
         envs[var] = os.environ[var]
 envs["GPSD_HOME"] = os.getcwd()
+envs["LD_LIBRARY_PATH"] = os.getcwd()
 
 env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV=envs)
 opts.Save('.scons-option-cache', env)
