@@ -424,10 +424,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/*@ -boolint @*/
 	if (state == laststate) {
 	    /* some pulses may be so short that state never changes */
-	    if (0 > cycle ) {
-		gpsd_report(session->context->debug, LOG_WARN,
-			    "PPS rejecting negative cycle\n");
-	    } else if (999000 < cycle && 1001000 > cycle) {
+	    if (999000 < cycle && 1001000 > cycle) {
 		duration = 0;
 		unchanged = 0;
 		gpsd_report(session->context->debug, LOG_RAW,
@@ -484,7 +481,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	 */
 
 	log = "Unknown error";
-	if (199000 > cycle) {
+        if ( 0 > cycle ) {
+	    log = "Rejecting negative cycle\n";
+	} else if (199000 > cycle) {
 	    // too short to even be a 5Hz pulse
 	    log = "Too short for 5Hz\n";
 	} else if (201000 > cycle) {
