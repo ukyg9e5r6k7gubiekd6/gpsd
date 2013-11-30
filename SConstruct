@@ -291,7 +291,7 @@ def installdir(dir, add_destdir=True):
 # Honor the specified installation prefix in link paths.
 if env["sysroot"]:
     env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir', add_destdir=False)])
-if env["shared"]:
+if env["shared"] and env["libdir"] not in {"/lib", "/usr/lib"}:
     env.Prepend(RPATH=[installdir('libdir')])
 
 # Give deheader a way to set compiler flags
