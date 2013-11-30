@@ -360,8 +360,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif
 	    if ( 0 > time_pps_fetch(session->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
-		// gpsd_report(session->context->debug, LOG_ERROR,
-			    // "KPPS kernel PPS failed\n");
+		gpsd_report(session->context->debug, LOG_ERROR,
+			    "KPPS kernel PPS failed\n");
 	    } else {
 		// find the last edge
 		// FIXME a bit simplistic, should hook into the
