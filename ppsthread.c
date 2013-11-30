@@ -247,6 +247,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(TIOCMIWAIT)
     int cycle, duration, state = 0, laststate = -1, unchanged = 0;
     struct timespec pulse[2] = { {0, 0}, {0, 0} };
+    int raw_state = 0, raw_state_last = 0;
 #endif /* TIOCMIWAIT */
 #if defined(HAVE_SYS_TIMEPPS_H)
     int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
@@ -326,7 +327,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/*@ -ignoresigns */
 
 	/* mask for monitored lines */
-	state = (int)(state & PPS_LINE_TIOC);
+	raw_state = state & PPS_LINE_TIOC;
+	state = (int)(raw_state > raw_state_last);
+	raw_state_last = raw_state;
 #endif /* TIOCMIWAIT */
 
 	/* ok and log used by KPPS and TIOMCWAIT */
@@ -421,13 +424,17 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/*@ -boolint @*/
 	if (state == laststate) {
 	    /* some pulses may be so short that state never changes */
-	    if (999000 < cycle && 1001000 > cycle) {
+	    if (0 > cycle ) {
+		gpsd_report(session->context->debug, LOG_WARN,
+			    "PPS rejecting negative cycle\n");
+	    } else if (999000 < cycle && 1001000 > cycle) {
 		duration = 0;
 		unchanged = 0;
 		gpsd_report(session->context->debug, LOG_RAW,
 			    "PPS pps-detect on %s invisible pulse\n",
 			    session->gpsdata.dev.path);
 	    } else if (++unchanged == 10) {
+                /* not really unchanged, just out of bounds */
 		unchanged = 1;
 		gpsd_report(session->context->debug, LOG_WARN,
 			    "PPS TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n");
