@@ -481,11 +481,14 @@ else:
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
     if env["shared"] and env["chrpath"]:
         if WhereIs('chrpath'):
-            # Tell generated binaries to look in the current directory for
-            # shared libraries so we can run regression tests without
-            # hassle. Should be handled sanely by scons on all systems.  Not
-            # good to use '.' or a relative path here; it's a security risk.
-            # At install time we use chrpath to edit this out of RPATH.
+            # Tell generated binaries to look in the current directory
+            # for shared libraries so we can run ad-hoc tests without
+            # hassle (the regression tests *don't* need this as
+            # they're run in a controlled environment where we can set
+            # LD_LIBRARY_PATH). Should be handled sanely by scons on
+            # all systems.  Not good to use '.' or a relative path
+            # here; it's a security risk.  At install time we use
+            # chrpath to edit this out of RPATH.
             env.Prepend(RPATH=[os.path.realpath(os.curdir)])
         else:
             print "chrpath is not available; please build with chrpath=no."
