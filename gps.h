@@ -1895,7 +1895,7 @@ struct timedrift_t {
 
 /* difference between timespecs in nanoseconds */
 /* int is too small, avoid floats  */
-#define timespec_diff_ns(x, y)	(long)(((x).tv_sec-(y).tv_sec)*1000000+(x).tv_nsec-(y).tv_nsec)
+#define timespec_diff_ns(x, y)	(long)(((x).tv_sec-(y).tv_sec)*1000000000+(x).tv_nsec-(y).tv_nsec)
 
 /*
  * Someday we may support Windows, under which socket_t is a separate type.

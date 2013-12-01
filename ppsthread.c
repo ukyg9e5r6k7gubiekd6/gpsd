@@ -245,14 +245,21 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
 #if defined(TIOCMIWAIT)
-    int cycle, duration, state = 0, laststate = -1, unchanged = 0;
+    int cycle, duration; 
+    /* state is the last state of the tty control ssignals */
+    int state = 0, unchanged = 0;
+    /* state_last is previous state */
+    int state_last = 0;
+    /* pulse stores the time of the last two edges */
     struct timespec pulse[2] = { {0, 0}, {0, 0} };
-    int raw_state = 0, raw_state_last = 0;
+    /* edge, used as index into pulse to find previous edges */
+    int edge = 0;       /* 0 = clear edge, 1 = assert edge */
 #endif /* TIOCMIWAIT */
 #if defined(HAVE_SYS_TIMEPPS_H)
     int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
 #ifndef S_SPLINT_S
     int cycle_kpps, duration_kpps;
+    /* kpps_pulse stores the time of the last two edges */
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec ts_kpps;
     pps_info_t pi;
@@ -327,9 +334,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/*@ -ignoresigns */
 
 	/* mask for monitored lines */
-	raw_state = state & PPS_LINE_TIOC;
-	state = (int)(raw_state > raw_state_last);
-	raw_state_last = raw_state;
+	state &= PPS_LINE_TIOC;
+	edge = (state > state_last) ? 1 : 0;
+	state_last = state;
 #endif /* TIOCMIWAIT */
 
 	/* ok and log used by KPPS and TIOMCWAIT */
@@ -418,11 +425,13 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
 
 #if defined(TIOCMIWAIT)
+	gpsd_report(session->context->debug, LOG_PROG, "PPS Hello! %d\n",
+		edge);
 	/*@ +boolint @*/
-	cycle = timespec_diff_ns(clock_ts, pulse[state]) / 1000;
-	duration = timespec_diff_ns(clock_ts, pulse[(int)(state == 0)])/1000;
+	cycle = timespec_diff_ns(clock_ts, pulse[edge]) / 1000;
+	duration = timespec_diff_ns(clock_ts, pulse[(int)(edge == 0)])/1000;
 	/*@ -boolint @*/
-	if (state == laststate) {
+	if (state == state_last) {
 	    /* some pulses may be so short that state never changes */
 	    if (999000 < cycle && 1001000 > cycle) {
 		duration = 0;
@@ -441,19 +450,19 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"PPS pps-detect on %s changed to %d\n",
 			session->gpsdata.dev.path, state);
-	    laststate = state;
 	    unchanged = 0;
 	}
-	pulse[state] = clock_ts;
+        /* save this edge so we know next cycle time */
+	pulse[edge] = clock_ts;
+	gpsd_report(session->context->debug, LOG_PROG,
+		    "PPS edge: %d, cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
+		    edge, cycle, duration,
+		    (unsigned long)clock_ts.tv_sec,
+		    (unsigned long)clock_ts.tv_nsec);
 	if (unchanged) {
 	    // strange, try again
 	    continue;
 	}
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "PPS cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
-		    cycle, duration,
-		    (unsigned long)clock_ts.tv_sec,
-		    (unsigned long)clock_ts.tv_nsec);
 
 	/*
 	 * The PPS pulse is normally a short pulse with a frequency of
@@ -508,7 +517,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		log = "1Hz trailing edge\n";
 	    } else if (501000 > duration) {
 		/* looks like 1.0 Hz square wave, ignore trailing edge */
-		if (state == 1) {
+		if (edge == 1) {
 		    ok = true;
 		    log = "square\n";
 		}
