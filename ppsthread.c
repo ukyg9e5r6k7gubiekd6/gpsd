@@ -425,8 +425,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
 
 #if defined(TIOCMIWAIT)
-	gpsd_report(session->context->debug, LOG_PROG, "PPS Hello! %d\n",
-		edge);
 	/*@ +boolint @*/
 	cycle = timespec_diff_ns(clock_ts, pulse[edge]) / 1000;
 	duration = timespec_diff_ns(clock_ts, pulse[(int)(edge == 0)])/1000;
