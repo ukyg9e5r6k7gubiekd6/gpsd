@@ -574,6 +574,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              * serial stream *after* emitting PPS for the top of second.
              * Thus, when we see PPS our available report is from the
              * previous cycle and we must increment. 
+             *
+             * FIXME! The GR-601W at 38,400 or faster can send the
+             * serial fix before PPS by about 10 mSec!
              */
 
 	    /*@+relaxtypes@*/
