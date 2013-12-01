@@ -1,4 +1,4 @@
-= Building GPSD from source ==
+= Building GPSD from source =
 
 This is a guide to building GPSD from a bare source tree.  It includes
 guidance on how to cross-build the package. 
@@ -358,7 +358,7 @@ illustrating how to do that, with some routine messages suppressed and
 replaced with [...], follows.  The script assumes you're cloning from the 
 GPSD project site or a mirror. Notes and explanation follow the transcript.
 
-===========================================================================
+----
 $ git clone [...]
 Cloning into gpsd...
 [...]
@@ -400,7 +400,7 @@ arm-indigo-linux-gnueabi-gcc -o gps_maskdump.os -c --sysroot=/work/buildroot/out
 scons: done building targets.
 $ file gpsd
 gpsd: ELF 32-bit LSB executable, ARM, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.36, not stripped
-===========================================================================
+----
 
 The author of this transcript notes:
 
