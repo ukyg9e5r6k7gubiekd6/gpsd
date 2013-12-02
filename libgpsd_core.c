@@ -1241,8 +1241,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		 * previous mode switch to binary succeeded in suppressing
 		 * NMEA).
 		 */
+#ifdef RECONFIGURE_ENABLE
 		bool dependent_nmea = (newtype == NMEA_PACKET
 				       && session->device_type->mode_switcher!=NULL);
+#else
+		bool dependent_nmea = false;
+#endif /* RECONFIGURE_ENABLE */
 
 		/*
 		 * Compute whether to switch drivers.
