@@ -292,7 +292,14 @@ def installdir(dir, add_destdir=True):
 # Honor the specified installation prefix in link paths.
 if env["sysroot"]:
     env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir', add_destdir=False)])
-if env["shared"] and env["libdir"] not in {"/lib", "/usr/lib"}:
+
+# Not setting RPATH when libdir=/usr/local/lib could be a problem if
+# /usr/local/lib isn't in the default system load path - which it
+# isn't guaranteed to be, but usually is. The issue is that a default
+# prefix=/usr/local build want to put our libraries there. Ideally
+# we'd query the default load path here and test against wharever it
+# is, but we haven't found a way to do that.
+if env["shared"] and env["libdir"] not in {"/lib","/usr/lib","/usr/local/lib"}:
     env.Prepend(RPATH=[installdir('libdir')])
 
 # Give deheader a way to set compiler flags
