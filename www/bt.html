@@ -96,6 +96,36 @@ should see your BT interface listed under the "hci0" name.</p></li>
 
 <li><p>Write down the address of your BT GPS receiver (xx:xx:xx:xx:xx:xx)</p></li>
 
+<li><p>If you're using a smartphone via Bluetooth, you will probably need to
+specify a channel other than 1.  Start the GPS app on your phone, altering any
+settings needed to make it give NMEA strings over Bluetooth, and then do
+something like:
+
+<pre>
+  sdptool browse xx:xx:xx:xx:xx:xx
+</pre>
+
+You should see something like this in the output:</p>
+
+<pre>
+  Service Name: GPS2BT
+  Service RecHandle: 0x1000b
+  Service Class ID List:
+    UUID 128: 00001101-0000-1000-8000-00805f9b34fb
+  Protocol Descriptor List:
+    "L2CAP" (0x0100)
+    "RFCOMM" (0x0003)
+      Channel: 2
+</pre>
+
+<p>The Service name will vary based on the app.  Write down the
+channel number and use it in the next step instead of channel 1. The channel
+number will likely vary each time the app is started, so you will probably
+need some scripting or other additional configuration to fix that. If gpsd or
+gpsctl is reporting "connection refused" it is likely that you have the
+wrong channel number.</p>
+</li>
+
 <li><p>Set up rfcomm.  Edit /etc/bluetooth/rfcomm.conf to reflect your BT
 GPS address and to enable binding.</p>
 <pre>
@@ -129,13 +159,13 @@ it will be automatically bound).</p>
 </li>
 
 <li>
-<p>Under most Linixes, GPSD is by default configured to start gpsd on
+<p>Under most Linux distros, GPSD is by default configured to start gpsd on
 a hotplug event announcing a USB GPS. You need to reconfigure the GPSD
 installation so the daemon will be started at boot time listening to
 /dev/rfcomm0 (it will still work with hotplugged USB GPses after you
 do this).</p>
 
-<p>Under Debian and Ubuntu Linux, <code>"dpkg reconfigure gpsd"</code>
+<p>Under Debian and Ubuntu Linux, <code>"dpkg-reconfigure gpsd"</code>
 will start a dialog that will reconfigure the device for you. You
 will need to reboot for this change to take effect.</p>
 </li>
@@ -170,6 +200,7 @@ additional udev rules.</a></p>
 <li><p>Joshua Layne</p></li>
 <li><p>Lukasz Stelmach</p></li>
 <li><p>Bertolt Loprets</p></li>
+<li><p>Rob Shinn</p></li>
 </ul>
 
 <hr>
