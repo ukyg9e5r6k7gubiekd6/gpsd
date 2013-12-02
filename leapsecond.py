@@ -188,24 +188,26 @@ def fetch_leapsecs(filename):
 
 def make_leapsecond_include(infile):
     "Get the current leap second count and century from the local cache usable as C preprocessor #define"
+    # Underscore prefixes avoids warning W0612 from pylint,
+    # which doesn't count substitution through locals() as use.
     leapjumps = fetch_leapsecs(infile)
     now = int(time.time())
-    year = time.strftime("%Y", time.gmtime(now))
-    gps_week_now = gps_week(now)
-    isodate = isotime(now - now % SECS_PER_WEEK)
-    leapsecs = -1
+    _year = time.strftime("%Y", time.gmtime(now))
+    _gps_week_now = gps_week(now)
+    _isodate = isotime(now - now % SECS_PER_WEEK)
+    _leapsecs = -1
     for leapjump in leapjumps:
         if leapjump < time.time():
-            leapsecs += 1
+            _leapsecs += 1
     return """\
 /*
  * Constants used for GPS time detection and rollover correction.
  *
- * Correct for week beginning %(isodate)s
+ * Correct for week beginning %(_isodate)s
  */
-#define CENTURY_BASE\t%(year)s00
-#define LEAPSECOND_NOW\t%(leapsecs)d
-#define GPS_WEEK_NOW\t%(gps_week_now)d
+#define CENTURY_BASE\t%(_year)s00
+#define LEAPSECOND_NOW\t%(_leapsecs)d
+#define GPS_WEEK_NOW\t%(_gps_week_now)d
 """ % locals()
 
 def conditional_leapsecond_fetch(outfile, timeout):
@@ -220,7 +222,7 @@ def conditional_leapsecond_fetch(outfile, timeout):
     if not stale:
         return True
     else:
-        def handler(signum, frame):
+        def handler(_signum, _frame):
             raise IOError
         try:
             signal.signal(signal.SIGALRM, handler)
