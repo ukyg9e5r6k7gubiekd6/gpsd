@@ -487,7 +487,7 @@ $ su - (or sudo -s )
 
 where /dev/ttyXX is whatever 1PPS-capable device you have.  In a
 binary-package-based Linux distribution it is probable that ntpd
-will already have brrn launched at boot time.
+will already have been launched at boot time.
 
 If you're using dhcp3-client to configure your system, make sure
 you disable /etc/dhcp3/dhclient-exit-hooks.d/ntp, as dhclient would
@@ -715,9 +715,9 @@ After a day or so or maybe less the frequency estimate will be very
 close and there won't be a persistent offset.
 
 The gpsd developers would like to receive information about the
-offsets (fudges) observed by users for each type of receiver. Uf your
+offsets (fudges) observed by users for each type of receiver. If your
 GPS is not present in <<HARDWARE>>, or doesn't have a recommended
-fudge, or you see a fudge value very different dfrom what's there,
+fudge, or you see a fudge value very different from what's there,
 send us the output of the "ntpq -p" command and the make and type of
 receiver.
 
@@ -842,7 +842,7 @@ are interested in: accuracy and stability.  *Accuracy* is how well the
 measured frequency matches the number printed on the can.  *Stability*
 is how well the frequency stays the same even if it isn't accurate.
 (Long term aging is a third property that is interesting, but ntpd and
-chrony both a use a drift history that is relatively short; thius,
+chrony both a use a drift history that is relatively short; thus,
 this is not a significant cause of error.)
 
 Typical specs for oscillator packages are 20, 50, 100 ppm.  That includes
@@ -873,7 +873,7 @@ low pass filter.  In that context, there are two competing sources of
 error.  If T is too small, the errors on each individual measurement
 of the offset time will dominate.  If T is too big, the actual drift
 will change while you are measuring it.  In the middle is a sweet
-spot.  (For an example, see <<ADEV-PLOT>>.
+spot.  (For an example, see <<ADEV-PLOT>>.)
 
 Both ntpd and chrony use this technique; ntpd also uses a more
 esoteric form of estimation called a "PLL/FLL hybrid loop". How T and N are
@@ -936,7 +936,7 @@ project supports (list behind the "Global" link at <<ZONES>>). The
 "pool" tag expands to four randomly chosen servers by default.  "iburst"
 implements a fast start algorithm that also weeds out bad servers.
 
-Note that a chimer can be a poor performer for either of three
+Note that a chimer can be a poor performer for any of three
 reasons. It may be shipping bad time, or the best routes between you
 and it have large latency variations (jitter), or it may have an asymetric
 route, confusing NTP.
