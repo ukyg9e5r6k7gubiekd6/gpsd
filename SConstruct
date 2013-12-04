@@ -178,6 +178,8 @@ nonboolopts = (
     ("gpsd_user",           "nobody",      "privilege revocation user",),
     ("gpsd_group",          def_group,     "privilege revocation group"),
     ("prefix",              "/usr/local",  "installation directory prefix"),
+    ("python_libdir",       sysconfig.get_python_lib(plat_specific=1),
+                                           "Python module directory prefix"),
     ("limited_max_clients", 0,             "maximum allowed clients"),
     ("limited_max_devices", 0,             "maximum allowed devices"),
     ("fixed_port_speed",    0,             "fixed serial port speed"),
@@ -1316,7 +1318,7 @@ if not env['debug'] and not env['profiling'] and env['strip']:
 if not env['python']:
     python_install = []
 else:
-    python_lib_dir = sysconfig.get_python_lib(plat_specific=1)
+    python_lib_dir = env['python_libdir']
     python_module_dir = python_lib_dir + os.sep + 'gps'
     python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
                                                     python_built_extensions)
