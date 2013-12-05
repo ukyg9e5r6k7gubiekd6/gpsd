@@ -1,3 +1,9 @@
+#
+# ## This file is obselete, and kept for historical records
+# ## only.  It documents alternate ways to use the (then) new
+# ## udev facility.
+#
+# ##  See the file   gpsd.rules   in the source for updated rules
 # 
 # Author: Fulup Ar Foll
 # Date:   26-jun-09
