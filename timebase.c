@@ -88,7 +88,23 @@ Two last things:
 Date and time in GPS is represented as number of weeks mod 1024 from
 the start of zero second of 6 January 1980, and number of SI seconds into
 the week.  GPS time is not leap-second corrected, and has a constant
-offset from TAI.  Satellites also broadcast a current leap-second
+offset from TAI, but not from UTC.
+
+There are hence two issues with converting GPS Time to UTC:
+
+1. We need to recover the epoch difference between TAI and GPS Time,
+   which rolls over to 0 every 1024 weeks (approx 20 years).  Think
+   of this as analogous to the Y2K problem; we do not know if we are
+   off by 1024 weeks.  This is the "rollover" issue below.
+2. Once we have the epoch right, we need to adjust for Leap Seconds
+   that have been issued.
+
+(Complicating the issue is that most consumer devices may not apply
+the corrections when rollover occurs, as this may not be adequately
+tested.  We hence have to accept the UTC time reported by the device,
+while checking it on the sly).
+
+Satellites also broadcast a current leap-second
 correction which is updated on (theoretically) three-month boundaries
 according to rotational bulletins issued by the International
 Earth Rotation and Reference Systems Service (IERS).
@@ -169,7 +185,7 @@ NTP clock skew goes over 1 second, but this is unlikely to ever happen
 - and if it does the reasons will have nothing to do with GPS
 idiosyncracies.
 
-This file is Copyright (c) 2010 by the GPSD project
+This file is Copyright (c) 2010 -- 2013 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
