@@ -63,6 +63,11 @@ int64_t sbits(signed char buf[], unsigned int start, unsigned int width, bool le
 {
     uint64_t fld = ubits((unsigned char *)buf, start, width, le);
 
+    /* ensure width > 0 as the result of
+       1LL << (width - 1)
+       is undefined for width <= 0 */
+    assert(width > 0);
+
     /*@ +relaxtypes */
     if (fld & (1LL << (width - 1))) {
 	/*@ -shiftimplementation @*/
