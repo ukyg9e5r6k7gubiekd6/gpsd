@@ -295,14 +295,15 @@ def installdir(dir, add_destdir=True):
 if env["sysroot"]:
     env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir', add_destdir=False)])
 
-# Not setting RPATH when libdir=/usr/local/lib could be a problem if
-# /usr/local/lib isn't in the default system load path - which it
-# isn't guaranteed to be, but usually is. The issue is that a default
-# prefix=/usr/local build want to put our libraries there. Ideally
-# we'd query the default load path here and test against wharever it
-# is, but we haven't found a way to do that.
-if env["shared"] and env["libdir"] not in {"/lib","/usr/lib","/usr/local/lib"}:
-    env.Prepend(RPATH=[installdir('libdir')])
+# Don't hack RPATH unless libdir points somewhere that is not on the
+# system default load path. /lib and /usr/lib should always be on
+# this; listing them explicitly is a fail-safe against this ldfconfig
+# invocation not doing what we expect.
+if env["shared"]:
+    sysrpath = Split(_getoutput("ldconfig -v -N -X 2>/dev/null | sed -n -e '/^\//s/://p'"))
+    if env["libdir"] not in ["/usr/lib", "/lib"] + sysrpath:
+        announce("Prepending %s to RATH." % installdir('libdir'))
+        env.Prepend(RPATH=[installdir('libdir')])
 
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
@@ -458,6 +459,9 @@ def CheckCompilerDefines(context, define):
     context.Result(ret)
     return ret
 
+def GetLoadPath(context):
+    context.Message("Getting system load path ...")
+
 if env.GetOption("clean") or env.GetOption("help"):
     dbus_libs = []
     rtlibs = []
@@ -485,7 +489,6 @@ else:
                    '-Wcast-align','-Wmissing-declarations', '-Wmissing-prototypes',
                    '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
         config.CheckCompilerOption(option)
-
 
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
     if env["shared"] and env["chrpath"]:
