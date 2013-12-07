@@ -88,7 +88,7 @@ static int send_udp (char *nmeastring, size_t ind)
     if (ind == 0) {
 	/* compute message size and add 0x0a 0x0d */
 	for (ind=0; nmeastring [ind] != '\0'; ind ++) {
-	    if (ind > sizeof(message)) {
+	    if (ind >= sizeof(message)) {
 		fprintf(stderr, "gps2udp: too big [%s] \n", nmeastring);
 		return -1;
 	    }
@@ -389,7 +389,7 @@ int main(int argc, char **argv)
 	    daemonize = true;
 	    break;
         case 'u':
-            if (udpchannel > MAX_UDP_DEST) {
+            if (udpchannel >= MAX_UDP_DEST) {
 		(void)fprintf(stderr, 
 			      "gps2udp: too many UDP destinations (max=%d)\n",
 			      MAX_UDP_DEST);
