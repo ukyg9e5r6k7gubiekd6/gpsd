@@ -632,7 +632,9 @@ ssize_t gpsd_write(struct gps_device_t *session,
 		   const size_t len)
 /* pass low-level data to devices, echoing it to the log window */
 {
+#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
     monitor_dump_send((const char *)buf, len);
+#endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
     return gpsd_serial_write(session, buf, len);
 }
 
@@ -823,7 +825,9 @@ static bool do_command(const char *line)
 		context.readonly = !context.readonly;
 	    else
 		context.readonly = (atoi(line + 1) == 0);
+#ifdef RECONFIGURE_ENABLE
 	    announce_log("[probing %sabled]", context.readonly ? "dis" : "en");
+#endif /* RECONFIGURE_ENABLE */
 	    if (!context.readonly)
 		/* magic - forces a reconfigure */
 		session.packet.counter = 0;
