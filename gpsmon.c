@@ -36,7 +36,9 @@ extern struct monitor_object_t garmin_mmt, garmin_bin_ser_mmt;
 extern struct monitor_object_t italk_mmt, ubx_mmt, superstar2_mmt;
 extern struct monitor_object_t fv18_mmt, gpsclock_mmt, mtk3301_mmt;
 extern struct monitor_object_t oncore_mmt, tnt_mmt, aivdm_mmt;
+#ifdef NMEA_ENABLE
 extern const struct gps_type_t driver_nmea0183;
+#endif /* NMEA_ENABLE */
 
 /* These are public */
 struct gps_device_t session;
@@ -477,9 +479,11 @@ static void select_packet_monitor(struct gps_device_t *device)
      */
     if (device->packet.type != last_type) {
 	const struct gps_type_t *active_type = device->device_type;
+#ifdef NMEA_ENABLE
 	if (device->packet.type == NMEA_PACKET
 	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
 	    active_type = &driver_nmea0183;
+#endif /* NMEA_ENABLE */
 	if (!switch_type(active_type))
 	    longjmp(terminate, TERM_DRIVER_SWITCH);
 	else {
