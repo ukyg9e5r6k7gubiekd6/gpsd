@@ -68,7 +68,9 @@ static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session,
 				     unsigned char *buf, size_t data_len);
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
 static void ubx_msg_inf(unsigned char *buf, size_t data_len, const int debug);
+#ifdef RECONFIGURE_ENABLE
 static void ubx_mode(struct gps_device_t *session, int mode);
+#endif /* RECONFIGURE_ENABLE */
 
 /**
  * Navigation solution message
@@ -645,12 +647,14 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	(void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
 	/*@ +type @*/
 
+#ifdef RECONFIGURE_ENABLE
 	/* 
 	 * Turn off NMEA output, turn on UBX on this port.
 	 */
 	if (session->mode == O_OPTIMIZE) {
 	    ubx_mode(session, MODE_BINARY);
 	}
+#endif /* RECONFIGURE_ENABLE */
     } else if (event == event_deactivate) {
 	/*@ -type @*/
 	unsigned char msg[4] = {
