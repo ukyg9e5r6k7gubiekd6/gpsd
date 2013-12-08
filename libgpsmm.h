@@ -45,6 +45,7 @@ class LIBQGPSMMSHARED_EXPORT gpsmm {
 		bool waiting(int);	// blocking check for data waiting
 		void clear_fix(void);
 		void enable_debug(int, FILE*);
+		bool is_open(void);	// check for constructor success
 	private:
 		struct gps_data_t *to_user;	//we return the user a copy of the internal structure. This way she can modify it without
 						//integrity loss for the entire class
