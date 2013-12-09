@@ -897,7 +897,7 @@ static void handle_control(int sfd, char *buf)
 		ignore_return(write(sfd, "ERROR\n", 6));
 	    }
 	}
-    } else if (strcmp(buf, "?devices")==0) {
+    } else if (strstr(buf, "?devices")==buf) {
 	/* write back devices list followed by OK */
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    char *path = devp->gpsdata.dev.path;
