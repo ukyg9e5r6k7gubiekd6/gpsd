@@ -273,9 +273,9 @@ one of several sources of current data on the leap-second offset in
 order to ensure that the file leapseconds.cache is up to date.  This,
 in turn, is used to build a timebase.h include file.
 
-This procedure may fail if you are building inside an intranet that
-requires an authenticating web proxy.  If that occurs, it will time
-out with a warning and a suggestion to use the leapfetch=no build
+This procedure may fail if you are building in a network that
+requires an authenticating web proxy.  If that occurs, the build will
+time out with a warning and a suggestion to use the leapfetch=no build
 option.
 
 Building with leapfetch=no may, in unusual circumstances, result in
