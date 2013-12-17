@@ -336,7 +336,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/* mask for monitored lines */
 	state &= PPS_LINE_TIOC;
 	edge = (state > state_last) ? 1 : 0;
-	state_last = state;
 #endif /* TIOCMIWAIT */
 
 	/* ok and log used by KPPS and TIOMCWAIT */
@@ -450,6 +449,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			session->gpsdata.dev.path, state);
 	    unchanged = 0;
 	}
+	state_last = state;
         /* save this edge so we know next cycle time */
 	pulse[edge] = clock_ts;
 	gpsd_report(session->context->debug, LOG_PROG,
