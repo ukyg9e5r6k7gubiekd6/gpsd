@@ -290,7 +290,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
 
 #if defined(TIOCMIWAIT)
-        /* we are lucky to have TIOMCIWAIT, so wait for next edge */
+        /* we are lucky to have TIOCMIWAIT, so wait for next edge */
 #define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS)
         if (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
 	    gpsd_report(session->context->debug, LOG_ERROR,
@@ -338,7 +338,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	edge = (state > state_last) ? 1 : 0;
 #endif /* TIOCMIWAIT */
 
-	/* ok and log used by KPPS and TIOMCWAIT */
+	/* ok and log used by KPPS and TIOCMIWAIT, */
 	ok = false;  
 	log = NULL;  
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
@@ -348,17 +348,17 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              * PPS timestamp removes about 20uS of latency, and about +/-5uS 
              * of jitter 
              */
-#ifdef TIOMCIWAIT
+#ifdef TIOCMIWAIT,
 	    /*
 	     * We use of a non-NULL zero timespec here,
 	     * which means to return immediately with -1 (section
 	     * 3.4.3).  This is because we know we just got a pulse because 
-             * TIOMCIWAIT just woke up.
+             * TIOCMIWAIT, just woke up.
 	     * The timestamp has already been captured in the kernel, and we 
              * are merely fetching it here.
 	     */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
-#else /* not TIOMCIWAIT */
+#else /* not TIOCMIWAIT, */
 	    /*
 	     * RFC2783 specifies that a NULL timeval means to wait.
              *
