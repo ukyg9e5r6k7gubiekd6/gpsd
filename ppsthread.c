@@ -348,7 +348,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              * PPS timestamp removes about 20uS of latency, and about +/-5uS 
              * of jitter 
              */
-#ifdef TIOCMIWAIT,
+#ifdef TIOCMIWAIT
 	    /*
 	     * We use of a non-NULL zero timespec here,
 	     * which means to return immediately with -1 (section
