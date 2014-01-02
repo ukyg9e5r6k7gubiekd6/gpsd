@@ -338,7 +338,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	edge = (state > state_last) ? 1 : 0;
 #endif /* TIOCMIWAIT */
 
-	/* ok and log used by KPPS and TIOCMIWAIT, */
+	/* ok and log used by KPPS and TIOCMIWAIT */
 	ok = false;  
 	log = NULL;  
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
@@ -353,12 +353,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     * We use of a non-NULL zero timespec here,
 	     * which means to return immediately with -1 (section
 	     * 3.4.3).  This is because we know we just got a pulse because 
-             * TIOCMIWAIT, just woke up.
+             * TIOCMIWAIT just woke up.
 	     * The timestamp has already been captured in the kernel, and we 
              * are merely fetching it here.
 	     */
             memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
-#else /* not TIOCMIWAIT, */
+#else /* not TIOCMIWAIT */
 	    /*
 	     * RFC2783 specifies that a NULL timeval means to wait.
              *
