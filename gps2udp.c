@@ -105,6 +105,11 @@ static int send_udp (char *nmeastring, size_t ind)
     buffer[ind] = '\r'; ind++;
     buffer[ind] = '\0';
 
+    if (!(flags & WATCH_JSON) && buffer[0] == '{') {
+	/* do not send JSON when not configured to do so */
+	return 0;
+    }
+
     /* send message on udp channel */
     /*@-type@*/
     for (channel=0; channel < udpchannel; channel ++) {
