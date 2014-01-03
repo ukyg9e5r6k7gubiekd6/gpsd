@@ -154,7 +154,7 @@ static int open_udp(char **hostport)
 
        errno = 0;
        portnum = strtol(portname, &endptr, 10);
-       if (0 == portnum || '\0' != *endptr || 0 != errno) {
+       if (1 > portnum || 65535 < portnum || '\0' != *endptr || 0 != errno) {
 	   (void)fprintf(stderr, "gps2udp: syntax is [-u hostname:port] [%s] is not a valid port number\n",portname);
 	   return (-1);
        }
