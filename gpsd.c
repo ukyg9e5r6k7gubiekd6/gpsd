@@ -330,6 +330,10 @@ static void adjust_max_fd(int fd, bool on)
 }
 
 #ifdef SOCKET_EXPORT_ENABLE
+#ifndef IPTOS_LOWDELAY
+#define IPTOS_LOWDELAY 0x10
+#endif
+
 static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen)
 /* bind a passive command socket for the daemon */
 {
@@ -347,7 +351,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     int type, proto, one = 1;
     in_port_t port;
     char *af_str = "";
-
+    const int dscp = IPTOS_LOWDELAY | 2; /* Enable ECN for testing */
     INVALIDATE_SOCKET(s);
     if ((pse = getservbyname(service, tcp_or_udp)))
 	port = ntohs((in_port_t) pse->s_port);
@@ -386,6 +390,13 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	af_str = "IPv4";
 	/* see PF_INET6 case below */
 	s = socket(PF_INET, type, proto);
+	if (s > -1 ) {
+	/* Set packet priority */
+	  if (setsockopt(s, IPPROTO_IP, IP_TOS, &dscp, sizeof(dscp)) == -1)
+	    gpsd_report(context.debug, LOG_WARN,
+			"Warning: SETSOCKOPT TOS failed\n");
+	}
+
 	break;
 #ifdef IPV6_ENABLE
     case AF_INET6:
@@ -427,6 +438,10 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 		(void)close(s);
 		return -1;
 	    }
+	    /* Set packet priority */
+	    if (setsockopt(s, IPPROTO_IPV6, IPV6_TCLASS, &dscp, sizeof(dscp)) == -1)
+		gpsd_report(context.debug, LOG_WARN,
+			    "Warning: SETSOCKOPT TOS failed\n");
 	}
 #endif /* S_SPLINT_S */
 	break;
