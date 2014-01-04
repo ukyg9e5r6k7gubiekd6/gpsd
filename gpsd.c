@@ -351,7 +351,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     int type, proto, one = 1;
     in_port_t port;
     char *af_str = "";
-    const int dscp = IPTOS_LOWDELAY | 2; /* Enable ECN for testing */
+    const int dscp = IPTOS_LOWDELAY; /* Prioritize packet */
     INVALIDATE_SOCKET(s);
     if ((pse = getservbyname(service, tcp_or_udp)))
 	port = ntohs((in_port_t) pse->s_port);
