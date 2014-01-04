@@ -17,6 +17,7 @@
 #endif /* INADDR_ANY */
 #include <arpa/inet.h>     /* for htons() and friends */
 #include <unistd.h>
+#include <netinet/ip.h>
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
@@ -108,7 +109,10 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     {
 	int opt = IPTOS_LOWDELAY;
 	/*@ -unrecog @*/
-	(void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof opt);
+	(void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof(opt));
+#ifdef IPV6_TCLASS
+	(void)setsockopt(s, IPPROTO_IPV6, IPV6_TCLASS, &opt, sizeof(opt));
+#endif
 	/*@ +unrecog @*/
     }
 #endif
