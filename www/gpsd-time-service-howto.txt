@@ -74,16 +74,17 @@ defined by a national standard institute.
 
 A good analogy to jitter vs wobble is changes in sea level on a beach.
 Jitter is caused by wave action, wobble is the daily effect of tides.
-For a time server, the most common cause of wobble is the effect of
-daily temperature variations on the oscillators in your equipment.
+For a time server, the most common causes of wobble are varying GPS
+satellite geometries and the effect of daily temperature variations on
+the oscillators in your equipment.
 
 == How NTP Works ==
 
 NTP (Network Time Protocol) is a set of protocols that attempts to
-synchronize computer clocks across the Internet - ultimately,
-Universal Coordinated Time (UTC) as defined by several scale-related atomic
-clocks run by national standards institutes.  NTP Version 4 is defined
-in <<RFC-5905>>.
+synchronize computer clocks across the Internet - ultimately, Universal
+Coordinated Time (UTC) as defined by several scale-related atomic clocks
+run by national standards institutes.  NTP Version 4 is defined in
+<<RFC-5905>>.
 
 NTP service daemons running on each host do clock synchronization in
 the presence of variable network latency by monitoring those delays in
@@ -191,7 +192,7 @@ Plain PPS just references the pulse to the system clock as
 measured in user space.  These have different error budgets.  
 
 Kernel PPS uses a kernel function to accurately timestamp the status
-change on the PPS line.  Plain PPS has the kernel wake up the PPS
+change on the PPS line.  Plain PPS has the kernel wake up the GPSD PPS
 thread and then the PPS thread reads the current system clock.  As
 noted in the GPSD code, having the kernel do the time stamp yields
 lower latency and less jitter. Both methods have accuracy degraded by
@@ -201,7 +202,7 @@ PPS incurs additional context-switching overhead that KPPS does not.
 With KPPS it is very doable to get the system clock stable to &plusmn;1
 uSec.  Otherwise you are lucky to get &plusmn;5 uSec, and there will be
 about 20uSec of jitter. All these figures were observed on
-plain-vanilla x86 PCS with clock speeds in the 2GHz range.
+plain-vanilla x86 PCs with clock speeds in the 2GHz range.
 
 All the previous figures assume you're using PPS delivered over
 RS232.  USB GPSes that deliver 1PPS are rare, but do exist. Notably,
@@ -233,10 +234,11 @@ higher USB accuracy will ensue.
 | Network NTP time    |  &plusmn;10mSec 
 |=======================================
 
-Observed variations from the typical figure increase towards the
-bottom of the table.  Notably, a heavily loaded host system can reduce PPS
-accuracy, though not KPPS accuracy except in the most extreme cases.
-The USB poll interval tends to be very stable.
+Observed variations from the typical figure increase towards the bottom
+of the table.  Notably, a heavily loaded host system can reduce PPS
+accuracy further, though not KPPS accuracy except in the most extreme
+cases.  The USB poll interval tends to be very stable (relative to its
+1mSec poll).
 
 Network NTP time accuracy can be degraded below 10mSec by a number of
 factors. Almost all have more to do with the quality of your Internet
@@ -250,7 +252,7 @@ themselves.  Some negatives:
   NTP's reconciliation algorithms.
 
 With these factors in play, worst-case error can reach up to
-&plusmn;100mSec.  Fortunately, errors of over &plusmn;100mSec are very
+&plusmn;100mSec.  Fortunately, errors of over &plusmn;100mSec are
 unusual and should occur only if all your network routes to chimers
 have serious problems.
 
@@ -277,11 +279,11 @@ CONFIG_PPS=y
 CONFIG_PPS_CLIENT_LDISC=y
 -----------------------------------------------------------------------------
 
-Your Linux distribution may ship a file "config-xxxx" in the /boot
-directory, which will have a list of the configuration options
-that were used to build the kernel.  You can check if the above
-options are set. Usually they will be set to "m", which is
-sufficient.
+Your Linux distribution may ship a file /boot/config-XXX (where XXX is
+the name of a kernel) or one called /proc/config.gz (for the running
+kernel).  This will have a list of the configuration options that were
+used to build the kernel.  You can check if the above options are
+set. Usually they will be set to "m", which is sufficient.
 
 Other OSes have different ways to enable KPPS in their kernels.
 When we learn what those are, we'll document them or point
@@ -315,10 +317,10 @@ PPS-capable GPS. As of late 2013 this means either the previously
 mentioned GR601-W or a serial GPS with 1PPS.
 
 You can find 1PPS-capable devices supported by GPSD at <<HARDWARE>>.
-Note that the most popular consumer-grade GPS engine - SiRF - does not
-deliver 1PPS through USB or even RS232.  Thus the usual run of cheap
-GPS mice won't do.  In general, you can't use a USB device for time
-service unless you know it has the Macx-1 mod.
+Note that the most popular consumer-grade GPS do not usually deliver
+1PPS through USB or even RS232.  The usual run of cheap GPS mice won't
+do.  In general, you can't use a USB device for time service unless you
+know it has the Macx-1 mod.
 
 In the past, the RS232 variant of the Garmin GPS-18 has been very
 commonly used for time service.  While it is still a respectable
@@ -385,7 +387,7 @@ You can determine whether your GPS emits 1PPS, and gpsd is
 detecting it, by running the gpsmon utility (giving it the GPS's
 serial-device path as argument).  Watch for lines of dashes marked
 'PPS' in the packet-logging window; for most GPS types there will also
-be a "PPS ffset:" field in the data panels above showing the delta
+be a "PPS offset:" field in the data panels above showing the delta
 between PPS and your local clock.
 
 If you don't have gpsmon available, you can run gpsd at -D 5 and watch
@@ -420,7 +422,7 @@ sources to check:
 == Running GPSD ==
 
 If you're going to use gpsd for time service, you must run in -n mode
-so the clock will be updated even when no JSON clients are active.
+so the clock will be updated even when no clients are active.
 
 Note that gpsd assumes that after each fix the GPS will assert
 1PPS first and ship sentences reporting time of fix second. Every
@@ -565,6 +567,11 @@ pool us.pool.ntp.org iburst
 driftfile /var/lib/ntp/ntp.drift
 logfile /var/log/ntp.log
 
+restrict default kod nomodify notrap nopeer noquery
+restrict -6 default kod nomodify notrap nopeer noquery
+restrict 127.0.0.1 mask 255.255.255.0
+restrict -6 ::1
+
 # GPS Serial data reference
 server 127.127.28.0 
 fudge 127.127.28.0 time1 0.9999 refid GPS
@@ -596,6 +603,11 @@ will not be stirctly necessary if the default ntp.conf that your
 distribution supplies gives you a working setup. The two pairs of
 server and fudge declarations are the key.
 
+ntpd can be used in Denial of Service (DoS) attacks.  To prevent that,
+but still allow clients to requst the local time, be sure the restrict
+statements are in your ntpd config file.  For more information see
+<<CVE-2009-3563>>.
+
 Users of ntpd versions older than revision ntp-4.2.5p138 should instead use
 this ntp.conf, when gpsd is started as root:
 
@@ -604,6 +616,11 @@ pool us.pool.ntp.org iburst
 
 driftfile /var/lib/ntp/ntp.drift
 logfile /var/log/ntp.log
+
+restrict default kod nomodify notrap nopeer noquery
+restrict -6 default kod nomodify notrap nopeer noquery
+restrict 127.0.0.1 mask 255.255.255.0
+restrict -6 ::1
 
 # GPS Serial data reference
 server 127.127.28.0 minpoll 4 maxpoll 4
@@ -752,6 +769,8 @@ server 3.us.pool.ntp.org
 
 driftfile /var/lib/chrony/drift
 
+allow
+
 # set larger delay to allow the NMEA source to overlap with
 # the other sources and avoid the falseticker status
 refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
@@ -763,6 +782,9 @@ local area. See <<USE-POOL>> for further information.
 
 The offset option is functionally like ntpd's time1 option, used to 
 correct known and constant latency.
+
+The allow option allows anyone on the internet to query your server's
+time.
 
 To get chronyd to connect to gpsd using the more precise socket 
 method add this to your chrony.conf file (replacing ttyXX
@@ -778,6 +800,8 @@ server 3.us.pool.ntp.org
 
 driftfile /var/lib/chrony/drift
 
+allow
+
 # set larger delay to allow the NMEA source to overlap with
 # the other sources and avoid the falseticker status
 refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
@@ -789,6 +813,9 @@ If not running as root change the "refclock SOCK" line to:
 -----------------------------------------------------------------------------
 refclock SOCK /tmp/chrony.ttyXX.sock refid PPS
 -----------------------------------------------------------------------------
+
+See the chrony man page for more detail on the configuration options
+<<CHRONY-MAN>>.
 
 Finally note that chronyd needs to be started before gpsd so the
 socket is ready when gpsd starts up.
@@ -880,13 +907,13 @@ esoteric form of estimation called a "PLL/FLL hybrid loop". How T and N are
 chosen is beyond the scope of this HOWTO and varies by implementation
 and tuning parameters.
 
-If you turn on the right logging level ("statistics loopstats
-peerstats" for ntpd, "log measurements tracking") , that will record
-both offset, drift, and the polling interval. The ntpd stats are easy
-to feed to gnuplot, see the example script in the GPSD contrib
-directory.  The most important value is the offset reported in the 3rd
-field in loopstats and the last field in tracking.log. With gnuplot
-you can compare them (after concatenating the rotated logs):
+If you turn on the right logging level ("statistics loopstats peerstats"
+for ntpd, "log measurements tracking" for chronyd) , that will record
+both offset, drift, and the polling interval. The ntpd stats are easy to
+feed to gnuplot, see the example script in the GPSD contrib directory.
+The most important value is the offset reported in the 3rd field in
+loopstats and the last field in tracking.log. With gnuplot you can
+compare them (after concatenating the rotated logs):
 
 -----------------------------------------------------------------------------
 plot "tracking.log" using 7 with lines, "loopstats" using 3 with lines
@@ -951,15 +978,15 @@ this is the output:
 $ ntpq -p
  remote          refid         st t when poll reach delay offset jitter
 ========================================================================
--arthur.testserv 162.23.41.56   2 u 62     64 377 5.835 -1.129 8.921
--ntppublic.uzh.c 130.60.159.7   3 u 62     64 377 6.121 -4.102 6.336
--smtp.irtech.ch  162.23.41.56   2 u 35     64 377 15.521 -1.677 8.678
-+time2.ethz.ch   .PPS.          1 u 27     64 377 5.938 -1.713 16.404 
--callisto.mysnip 192.53.103.104 2 u 53     64 377 49.357 -0.274 5.125 
--shore.naturalne 122.135.113.81 3 u 22     64 377 14.676 -0.528 2.601 
--ntp.univ-angers 195.220.94.163 2 u 41     64 377 40.678 -1.847 13.391 
-+SHM(0)          .GPS.          0 l  4     64 377 0.000 34.682 7.952 
-*SHM(1)          .PPS.          0 l  3     64 377 0.000 -2.664 0.457
+-arthur.testserv 162.23.41.56   2 u 62     64 377  5.835 -1.129   8.921
+-ntppublic.uzh.c 130.60.159.7   3 u 62     64 377  6.121 -4.102   6.336
+-smtp.irtech.ch  162.23.41.56   2 u 35     64 377 15.521 -1.677   8.678
++time2.ethz.ch   .PPS.          1 u 27     64 377  5.938 -1.713  16.404 
+-callisto.mysnip 192.53.103.104 2 u 53     64 377 49.357 -0.274   5.125 
+-shore.naturalne 122.135.113.81 3 u 22     64 377 14.676 -0.528   2.601 
+-ntp.univ-angers 195.220.94.163 2 u 41     64 377 40.678 -1.847  13.391 
++SHM(0)          .GPS.          0 l  4     64 377  0.000 34.682   7.952 
+*SHM(1)          .PPS.          0 l  3     64 377  0.000 -2.664   0.457
 ------------------------------------------------------------------------
 
 The interesting columns are "remote", "st", "reach" and "offset".
@@ -1042,9 +1069,9 @@ This prints the average offset.
 
 The easiest way to determine the offset with chronyd is probably to
 configure the source whose offset should be measured with the noselect
-option and a long poll, let chronyd run for at least 30 minutes and
-observe the offset reported in the chronyc sourcestats output. For
-example:
+option and a long poll, let chronyd run for at least 4 hours and
+observe the offset reported in the chronyc sourcestats output.  If the
+offset is unstable, wait longer.  For example:
 
 SHM 0 configured as:
 refclock SHM 0 poll 8 filter 1000 noselect
@@ -1071,7 +1098,8 @@ SHM 0 source should be around 0.495.
 
 <<NTP-FAQ>> has good advice on things to be sure you have done - and
 are ready to do - before becoming a public chimer. One detail it
-doesn't mention is that you'll need to un-firewall UDP port 123.
+doesn't mention is that you'll need to un-firewall UDP port 123.  The
+NTP protocol does not use TCP, so no need to unblock TCCp port 123.
 
 If and when you are ready to go public, see <<JOIN-POOL>>. 
 
@@ -1115,3 +1143,7 @@ Sanjeev Gupta <ghane0@gmail.com> assisted with editing.
 - [[[ADEV-PLOT]]] http://www.leapsecond.com/pages/adev-avg/[Allan deviation and Averaging]
 
 - [[[CHRONYDEFAULT]]] https://lists.fedoraproject.org/pipermail/devel/2010-May/135679.html
+
+- [[[CVE-2009-3563]]] http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2009-3563
+
+- [[[CHRONY-MAN]]] http://chrony.tuxfamily.org/manual.html
