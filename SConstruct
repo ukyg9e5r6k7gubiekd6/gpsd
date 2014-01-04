@@ -1781,7 +1781,7 @@ Utility('udev-test', '', [
 
 # Ordinary cleanup
 clean = env.Clean(build,
-          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc")) + \
+          map(glob.glob,("*.[oa]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc", "TAGS")) + \
           generated_sources + base_manpages.keys() + \
           map(lambda f: f[:-3], templated))
 
@@ -1790,6 +1790,13 @@ webclean = env.Clean(www, [])
 
 # Clean up to a close approximation of a fresh repository pull
 distclean = env.Alias('distclean', [clean, testclean, webclean])
+
+# Tags for Emacs and vi
+misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
+                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c']
+sources = libgpsd_sources + libgps_sources \
+          + gpsd_sources + gpsmon_sources + misc_sources
+env.Command('TAGS', sources, ['etags ' + " ".join(sources)])
 
 # Release machinery begins here
 #
