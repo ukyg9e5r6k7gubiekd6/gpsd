@@ -36,16 +36,17 @@
 
 #define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
 
+/* the definition of shmTime is from ntpd source ntpd/refclock_shm.c */
 struct shmTime
 {
-    int mode;			/* 0 - if valid set
-				 *       use values,
-				 *       clear valid
-				 * 1 - if valid set
-				 *       if count before and after read of values is equal,
-				 *         use values
-				 *       clear valid
-				 */
+    int mode;	/* 0 - if valid set
+		 *       use values,
+		 *       clear valid
+		 * 1 - if valid set
+		 *       if count before and after read of values is equal,
+		 *         use values
+		 *       clear valid
+		 */
     volatile int count;
     time_t clockTimeStampSec;
     int clockTimeStampUSec;
