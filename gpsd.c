@@ -149,6 +149,14 @@ static struct gps_context_t context;
 static int sd_socket_count = 0;
 #endif
 
+/* work around the unfinished ipv6 implementation on hurd */
+#ifdef __GNU__
+#ifndef IPV6_TCLASS
+#define IPV6_TCLASS 67
+#endif
+#endif
+
+
 static volatile sig_atomic_t signalled;
 
 static void onsig(int sig)
