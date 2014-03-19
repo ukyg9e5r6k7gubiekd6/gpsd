@@ -1190,6 +1190,7 @@ def substituter(target, source, env):
         ('@VERSION@',    gpsd_version),
         ('@prefix@',     env['prefix']),
         ('@libdir@',     env['libdir']),
+        ('@udevdir@',    env['udevdir']),
         ('@PYTHON@',     sys.executable),
         ('@DATE@',       time.asctime()),
         ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),
@@ -1282,7 +1283,7 @@ if manbuilder:
 build = env.Alias('build',
                   [libraries, binaries, python_targets,
                    "gpsd.php", manpage_targets,
-                   "libgps.pc", "libgpsd.pc"])
+                   "libgps.pc", "libgpsd.pc", "gpsd.rules"])
 env.Default(*build)
 
 if qt_env:
