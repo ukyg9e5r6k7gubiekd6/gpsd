@@ -144,14 +144,14 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>lat</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Latitude in degrees: +/- signifies West/East.  Present
+        <entry>Latitude in degrees: +/- signifies North/South.  Present
         when mode is 2 or 3.</entry>
 </row>
 <row>
 	<entry>lon</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Longitude in degrees: +/- signifies North/South. Present
+        <entry>Longitude in degrees: +/- signifies East/West. Present
         when mode is 2 or 3.</entry>
 </row>
 <row>
