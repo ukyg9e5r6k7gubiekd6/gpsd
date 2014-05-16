@@ -73,6 +73,19 @@ The second 'n' is losing information that it shouldn't.
 
 Display update should not stop while this is going on.
 
+*** Time offset debugging in gpsmon ***
+
+Hall Murray:
+> The gpsmon logging stuff should include time stamps.
+>
+> There should be some way for gpsmon to display the time offset that it would
+> send to NTP via SHM.  I don't see any obvious empty space on the screen.  If
+> nothing else, it could use the PPS space or alternate with the PPS info,
+> perhaps via a keyboard command.
+>
+> Or perhaps a higher level keyboard command to switch into timekeeping
+> debugging mode rather than position debugging mode.
+
 **** Speed, mode and rate-changes in client-mode gpsmon.
 
 Are not implemented.  In theory they could be.

@@ -90,18 +90,23 @@ PERMISSIONS
  * application, they'd just add complexity.
  *
  * The NMEA portion of the state machine allows the following talker IDs:
- *      GP -- Global Positioning System.
- *      GL -- GLONASS, according to IEIC 61162-1
- *      GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
- *      II -- Integrated Instrumentation (Raytheon's SeaTalk system).
- *      IN -- Integrated Navigation (Garmin uses this).
- *      WI -- Weather instrument (Airmar PB200, Radio Ocean ROWIND, Vaisala WXT520).
- *      HC -- Heading/compass (Airmar PB200).
- *      TI -- Turn indicator (Airmar PB200).
- *      EC -- Electronic Chart Display & Information System (ECDIS)
- *      SD -- Depth Sounder
- *      P  -- Vendor-specific sentence
+ *      $GP -- Global Positioning System.
+ *      $GL -- GLONASS, according to IEIC 61162-1
+ *      $GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
+ *      $II -- Integrated Instrumentation (Raytheon's SeaTalk system).
+ *      $IN -- Integrated Navigation (Garmin uses this).
+ *      $WI -- Weather instrument (Airmar PB200, Radio Ocean ROWIND, Vaisala WXT520).
+ *      $HC -- Heading/compass (Airmar PB200).
+ *      $TI -- Turn indicator (Airmar PB200).
+ *      $EC -- Electronic Chart Display & Information System (ECDIS)
+ *      $SD -- Depth Sounder
+ *      $P  -- Vendor-specific sentence
  *
+ *      !AI -- Mobile AIS station
+ *      !BS -- Base AIS station (deprecated in NMEA 4.0)
+ *      !AB -- NMEA 4.0 Base AIS station
+ *      !AN -- NMEA 4.0 Buoy AIS station
+ *      !AX -- NMEA 4.0 Repeater AIS station
  */
 
 enum
@@ -419,7 +424,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
     case AIS_LEAD_1:
-	if (c == 'I')
+	if (c == 'I' || c == 'B' || c == 'N' || c == 'X')
 	    lexer->state = AIS_LEAD_2;
 	else
 	    lexer->state = GROUND_STATE;
