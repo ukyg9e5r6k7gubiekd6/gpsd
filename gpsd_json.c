@@ -3200,7 +3200,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   "\"name\":\"%s\",\"lon\":%.4f,"
 			   "\"lat\":%.4f,\"accuracy\":%s,\"to_bow\":%u,"
 			   "\"to_stern\":%u,\"to_port\":%u,\"to_starboard\":%u,"
-			   "\"epfd\"%u,\"epfd_text\":\"%s\","
+			   "\"epfd\":%u,\"epfd_text\":\"%s\","
 			   "\"second\":%u,\"regional\":%u,"
 			   "\"off_position\":%s,\"raim\":%s,"
 			   "\"virtual_aid\":%s}\r\n",
