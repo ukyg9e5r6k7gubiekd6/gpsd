@@ -536,6 +536,7 @@ struct subscriber_t
     int fd;			/* client file descriptor. -1 if unused */
     timestamp_t active;		/* when subscriber last polled for data */
     struct policy_t policy;	/* configurable bits */
+    pthread_mutex_t mutex;	/* serialize access to fd */
 };
 
 #ifdef LIMITED_MAX_CLIENTS
@@ -550,6 +551,16 @@ struct subscriber_t
 static struct subscriber_t subscribers[MAXSUBSCRIBERS];	/* indexed by client file descriptor */
 
 #define UNALLOCATED_FD	-1
+
+static void lock_subscriber(struct subscriber_t *sub)
+{
+    (void)pthread_mutex_lock(&sub->mutex);
+}
+
+static void unlock_subscriber(struct subscriber_t *sub)
+{
+    (void)pthread_mutex_unlock(&sub->mutex);
+}
 
 static /*@null@*//*@observer@ */ struct subscriber_t *allocate_client(void)
 /* return the address of a subscriber structure allocated for a new session */
@@ -572,8 +583,11 @@ static void detach_client(struct subscriber_t *sub)
 /* detach a client and terminate the session */
 {
     char *c_ip;
-    if (sub->fd == UNALLOCATED_FD)
+    lock_subscriber(sub);
+    if (sub->fd == UNALLOCATED_FD) {
+	unlock_subscriber(sub);
 	return;
+    }
     c_ip = netlib_sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
     gpsd_report(context.debug, LOG_SPIN,
@@ -595,6 +609,7 @@ static void detach_client(struct subscriber_t *sub)
     sub->policy.split24 = false;
     sub->policy.devpath[0] = '\0';
     sub->fd = UNALLOCATED_FD;
+    unlock_subscriber(sub);
     /*@+mustfreeonly@*/
 }
 
@@ -2111,8 +2126,10 @@ int main(int argc, char *argv[])
 		"running with effective user ID %d\n", geteuid());
 
 #ifdef SOCKET_EXPORT_ENABLE
-    for (i = 0; i < NITEMS(subscribers); i++)
+    for (i = 0; i < NITEMS(subscribers); i++) {
 	subscribers[i].fd = UNALLOCATED_FD;
+	(void)pthread_mutex_init(&subscribers[i].mutex, NULL);
+    }
 #endif /* SOCKET_EXPORT_ENABLE*/
 
     /*@-compdef -compdestroy@*/
@@ -2326,9 +2343,12 @@ int main(int argc, char *argv[])
 	    if (sub->active == 0)
 		continue;
 
+	    lock_subscriber(sub);
 	    if (FD_ISSET(sub->fd, &rfds)) {
 		char buf[BUFSIZ];
 		int buflen;
+
+		unlock_subscriber(sub);
 
 		gpsd_report(context.debug, LOG_PROG,
 			    "checking client(%d)\n",
@@ -2354,6 +2374,8 @@ int main(int argc, char *argv[])
 			detach_client(sub);
 		}
 	    } else {
+		unlock_subscriber(sub);
+
 		if (!sub->policy.watcher
 		    && timestamp() - sub->active > COMMAND_TIMEOUT) {
 		    gpsd_report(context.debug, LOG_WARN,
