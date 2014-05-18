@@ -546,8 +546,6 @@ struct gps_device_t {
 #endif /* GEOSTAR_ENABLE */
 #ifdef SIRF_ENABLE
 	struct {
-	    bool need_ack;		/* if NZ we're awaiting ACK */
-	    time_t last_send;		/* for tracking send timeouts */
 	    unsigned int cfg_stage;	/* configuration stage counter */
 	    unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
