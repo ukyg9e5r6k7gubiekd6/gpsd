@@ -236,6 +236,21 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     unsigned int crc;
     size_t i, len;
     bool ok;
+    unsigned int type = (unsigned int)msg[4];
+
+    /*
+     * Control strings spaced too closely together confuse the SiRF
+     * IV.  This wasn't an issue on older SiRFs, but they've gone to a
+     * lower-powered processor that apparently has trouble keeping up.  
+     * Now you have to wait for the ACK, otherwise chaos ensues.
+     * Add instrumentation to reveal when this may happen.
+     */
+    /* can also be false because ACK was received after last send */
+    if (session->driver.sirf.need_ack > 0) {
+	gpsd_report(session->context->debug, LOG_WARN,
+		    "SiRF: warning, write of control type %02x while awaiting ACK for %02x.\n",
+		    type, session->driver.sirf.need_ack);
+    }
 
     len = (size_t) ((msg[2] << 8) | msg[3]);
 
@@ -250,9 +265,10 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     msg[len + 5] = (unsigned char)(crc & 0x00ff);
 
     gpsd_report(session->context->debug, LOG_PROG,
-		"SiRF: Writing control type %02x:\n", msg[4]);
+		"SiRF: Writing control type %02x:\n", type);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
  
+    session->driver.sirf.need_ack = type;
     return (ok);
 }
 
@@ -1222,12 +1238,14 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x0b:			/* Command Acknowledgement MID 11 */
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: ACK 0x0b: %02x\n", getub(buf, 1));
+	session->driver.sirf.need_ack = 0;
 	return 0;
 
     case 0x0c:			/* Command NAcknowledgement MID 12 */
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "SiRF: NAK 0x0c: %02x\n", getub(buf, 1));
 	/* ugh -- there's no alternative but silent failure here */
+	session->driver.sirf.need_ack = 0;
 	return 0;
 
     case 0x0d:			/* Visible List MID 13 */
@@ -1380,6 +1398,10 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
     }
 
     if (event == event_configure) {
+	/* might not be time for the next init string yet */ 
+	if (session->driver.sirf.need_ack > 0)
+	    return;
+
 	switch (session->driver.sirf.cfg_stage++) {
 	case 0:
 	    /* this slot used by event_identified */
