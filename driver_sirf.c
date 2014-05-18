@@ -1419,8 +1419,8 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    break;
 
 	case 2:
-		gpsd_report(session->context->debug, LOG_PROG,
-			    "SiRF: Requesting navigation parameters...\n");
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: Requesting navigation parameters...\n");
 	    (void)sirf_write(session, navparams);
 	    break;
 
@@ -1460,7 +1460,9 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Enabling PPS message...\n");
 	    (void)sirf_write(session, enablemid52);
+	    break;
 
+	case 10:
 	    /* SiRF recommends at least 57600 for SiRF IV nav data */
 	    if (session->gpsdata.dev.baudrate >= 57600) {
 		/* fast enough, turn on nav data */
@@ -1474,6 +1476,13 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 		(void)sirf_write(session, disablesubframe);
 	    }
 	    break;
+
+	case 11:
+	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: disable MID 7, 28, 29, 30, 31...\n");
+	    putbyte(unsetmidXX, 5, 0x05);
+	    (void)sirf_write(session, unsetmidXX);
+	    break;
+
 #endif /* RECONFIGURE_ENABLE */
 	default:
 	    /* initialization is done */
