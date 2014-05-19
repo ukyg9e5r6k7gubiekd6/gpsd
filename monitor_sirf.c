@@ -172,7 +172,7 @@ static bool sirf_initialize(void)
     display(mid7win, 2, 1, "Est. GPS Time: ");
     display(mid7win, 2, 27, "PPS offset: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(mid7win, 2, 40, "Not available");
+    (void)mvwaddstr(mid7win, 2, 40, "N/A");
 #endif /* PPS_ENABLE */
     display(mid7win, 3, 8, " Packet type 7 (0x07) ");
     (void)wattrset(mid7win, A_NORMAL);

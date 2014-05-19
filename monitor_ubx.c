@@ -76,7 +76,7 @@ static bool ubx_initialize(void)
     (void)wattrset(ppswin, A_BOLD);
     (void)mvwaddstr(ppswin, 1, 1, "PPS offset: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(ppswin, 1, 13, "Not available");
+    (void)mvwaddstr(ppswin, 1, 13, "N/A");
 #endif /* PPS_ENABLE */
     display(ppswin, 2, 22, " PPS ");
     (void)wattrset(ppswin, A_NORMAL);

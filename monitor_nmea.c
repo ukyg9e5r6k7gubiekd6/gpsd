@@ -94,7 +94,7 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgsawin, 3, 1, "DOP: H=      V=      P=");
     (void)mvwprintw(gpgsawin, 4, 1, "PPS offset: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(gpgsawin, 4, 13, "Not available");
+    (void)mvwaddstr(gpgsawin, 4, 13, "N/A");
 #endif /* PPS_ENABLE */
     (void)mvwprintw(gpgsawin, 5, 9, " GSA + PPS ");
     (void)wattrset(gpgsawin, A_NORMAL);
