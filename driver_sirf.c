@@ -937,13 +937,6 @@ static gps_mask_t sirf_msg_sysparam(struct gps_device_t *session,
     session->driver.sirf.degraded_timeout = (unsigned char)getub(buf, 10);
     session->driver.sirf.dr_timeout = (unsigned char)getub(buf, 11);
     session->driver.sirf.track_smooth_mode = (unsigned char)getub(buf, 12);
-#ifdef RECONFIGURE_ENABLE
-    if (!session->context->readonly) {
-	gpsd_report(session->context->debug, LOG_PROG,
-		    "SiRF: Setting Navigation Parameters\n");
-	(void)sirf_write(session, modecontrol);
-    }
-#endif /* RECONFIGURE_ENABLE */
     return 0;
 }
 
@@ -1398,9 +1391,11 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
     }
 
     if (event == event_configure) {
+#ifdef __UNUSED__
 	/* might not be time for the next init string yet */ 
 	if (session->driver.sirf.need_ack > 0)
 	    return;
+#endif /* UNUSED */
 
 	switch (session->driver.sirf.cfg_stage++) {
 	case 0:
@@ -1414,12 +1409,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    break;
 
 	case 2:
-	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Requesting navigation parameters...\n");
-	    (void)sirf_write(session, navparams);
-	    break;
-
-	case 3:
 #ifdef RECONFIGURE_ENABLE
 	    /* unset MID 64 first since there is a flood of them */
 	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64...\n");
@@ -1427,13 +1416,33 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
 
+	case 3:
+	    /*
+	     * The response to this request will save the navigation
+	     * parameters so they can be reverted before close.
+	     */
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: Requesting navigation parameters...\n");
+	    (void)sirf_write(session, navparams);
+	    break;
+
 	case 4:
+#ifdef RECONFIGURE_ENABLE
+	    if (!session->context->readonly) {
+		gpsd_report(session->context->debug, LOG_PROG,
+			    "SiRF: Setting Navigation Parameters\n");
+		(void)sirf_write(session, modecontrol);
+	    }
+#endif /* RECONFIGURE_ENABLE */
+	    break;
+
+	case 5:
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Requesting periodic ecef reports...\n");
 	    (void)sirf_write(session, requestecef);
 	    break;
 
-	case 5:
+	case 6:
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Requesting periodic tracker reports...\n");
 	    (void)sirf_write(session, requesttracker);
