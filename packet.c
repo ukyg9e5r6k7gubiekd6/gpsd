@@ -102,11 +102,16 @@ PERMISSIONS
  *      $SD -- Depth Sounder
  *      $P  -- Vendor-specific sentence
  *
- *      !AI -- Mobile AIS station
- *      !BS -- Base AIS station (deprecated in NMEA 4.0)
  *      !AB -- NMEA 4.0 Base AIS station
- *      !AN -- NMEA 4.0 Buoy AIS station
+ *      !AD -- MMEA 4.0 Dependent AIS Base Station 
+ *      !AI -- Mobile AIS station
+ *      !AN -- NMEA 4.0 Aid to Navigation AIS station
+ *      !AR -- NMEA 4.0 AIS Receiving Station
  *      !AX -- NMEA 4.0 Repeater AIS station
+ *      !AS -- NMEA 4.0 Limited Base Station
+ *      !AT -- NMEA 4.0 AIS Transmitting Station
+ *      !BS -- Base AIS station (deprecated in NMEA 4.0)
+ *      !SA -- NMEA 4.0 Physical Shore AIS Station
  */
 
 enum
@@ -420,11 +425,13 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = AIS_LEAD_1;
 	else if (c == 'B')
 	    lexer->state = AIS_LEAD_ALT1;
+	else if (c == 'S')
+	    lexer->state = AIS_LEAD_ALT3;
 	else
 	    lexer->state = GROUND_STATE;
 	break;
     case AIS_LEAD_1:
-	if (c == 'I' || c == 'B' || c == 'N' || c == 'X')
+	if (strchr("BDINRSTX", c) != NULL)
 	    lexer->state = AIS_LEAD_2;
 	else
 	    lexer->state = GROUND_STATE;
@@ -442,6 +449,18 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
     case AIS_LEAD_ALT2:
+	if (isalpha(c))
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case AIS_LEAD_ALT3:
+	if (c == 'A')
+	    lexer->state = AIS_LEAD_ALT4;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case AIS_LEAD_ALT4:
 	if (isalpha(c))
 	    lexer->state = NMEA_LEADER_END;
 	else

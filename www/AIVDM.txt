@@ -237,16 +237,21 @@ nonempty message ID field:
 == Talker IDS ==
 
 The AI prefix commonly found on these sentences is an NMEA talker ID
-for a mobile AIS station.  Other
+for a mobile AIS station.  Other possible values are as listed:
 
 .AIS talker IDs
 [width="25%",frame="topbot",options="header"]
 |================================================
-| !AI | Mobile AIS station
-| !BS | Base AIS station (deprecated in NMEA 4.0)
 | !AB | NMEA 4.0 Base AIS station
-| !AN | NMEA 4.0 Buoy AIS station
+| !AD | MMEA 4.0 Dependent AIS Base Station 
+| !AI | Mobile AIS station
+| !AN | NMEA 4.0 Aid to Navigation AIS station
+| !AR | NMEA 4.0 AIS Receiving Station
+| !AS | NMEA 4.0 Limited Base Station
+| !AT | NMEA 4.0 AIS Transmitting Station
 | !AX | NMEA 4.0 Repeater AIS station
+| !BS | Base AIS station (deprecated in NMEA 4.0)
+| !SA | NMEA 4.0 Physical Shore AIS Station
 |================================================
 
 == AIVDM/AIVDO Payload Armoring ==
@@ -5303,4 +5308,4 @@ waterways. Also Inland AIS standard messages are now covered.
 Version 1.44 adds substantial new information on MMSIs and updates
 the <<MMSI link>>, which was stale.
 
-Version 1.45 adds a description of AIS talker IDs.
+Version 1.45 adds a description of variant AIS talker IDs.

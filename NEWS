@@ -4,6 +4,7 @@ Repository head:
   A bug that prevented track interpolation has been fixed. 
   We now get vertical error position and speed estimates from the 
   u-blox driver rather than having to interpolate them.
+  Some unusual AIS talker IDs (NMEA 4.0 station classes) are supported.
   chrpath is no longer a dependency for building and testing, and
   now defaults to 'no'.
 

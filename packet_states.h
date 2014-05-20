@@ -21,10 +21,12 @@
 
    SIRF_ACK_LEAD_1,	/* seen A of possible SiRF Ack */
    SIRF_ACK_LEAD_2,	/* seen c of possible SiRF Ack */
-   AIS_LEAD_1,		/* seen A of possible marine AIS message */
-   AIS_LEAD_2,		/* seen I of possible marine AIS message */
-   AIS_LEAD_ALT1,	/* seen B of possible marine AIS message */
-   AIS_LEAD_ALT2,	/* seen S of possible marine AIS message */
+   AIS_LEAD_1,		/* seen initial A of possible AIS message */
+   AIS_LEAD_2,		/* seen second I/B/N/X of possible AIS message */
+   AIS_LEAD_ALT1,	/* seen initial B of possible AIS message */
+   AIS_LEAD_ALT2,	/* seen second S of possible AIS message */
+   AIS_LEAD_ALT3,	/* seen initial S of possible AIS message */
+   AIS_LEAD_ALT4,	/* seen second A of possible AIS message */
 
    SEATALK_LEAD_1,	/* SeaTalk/Garmin packet leader 'I' */
    WEATHER_LEAD_1,	/* Weather instrument packet leader 'W' */
