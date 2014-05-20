@@ -2352,12 +2352,12 @@ decimeters. Various other scaling conversions are described in
 <refsect1 id='subframe'><title>SUBFRAME DUMP FORMATS</title>
 
 <para>Subframe support is always compiled into
-<application>gpsd</application> but many GPS do not output Subframe data
-or the <application>gpsd</application> driver may not support Subframes.
+<application>gpsd</application> but many GPSes do not output subframe data
+or the <application>gpsd</application> driver may not support subframes.
 </para>
 
 <para>Subframe packets are dumped as JSON objects with class "SUBFRAME".
-Each Subframe report object contains a "frame" field giving the subframe
+Each subframe report object contains a "frame" field giving the subframe
 number, a "tSV" field for the transmitting satellite number, a "TOW17"
 field containing the 17 MSBs of the start of the next 12-second message
 and a "scaled" field telling whether the remainder of the fields are
