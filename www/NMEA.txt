@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.13, Nov 2013
+v2.14, May 2014
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -100,6 +100,7 @@ FAA Mode Indicator
      M = Manual Input Mode
      S = Simulated Mode
      N = Data Not Valid
+     P = Precise (4.00 and later)
 
 This field may be empty.  In pre-2.3 versions it is omitted. <<NTUM>> says
 that according to the NMEA specification, it dominates the Status field --
@@ -2367,3 +2368,7 @@ Described in <<MALTESE>>, actually a Maltese government document.
 - [[[MALTESE]]]
   "Procurement of a Fixed-Wing Maritime Patrol Aircraft"
   https://secure2.gov.mt/eprocurement/Tenders/file.ashx?f=9832DB05E65C774258580284031EC72CC315D954A7108B5E.
+
+- [[NMEA-ADVANCE]]
+  "NMEA 0183 Advancements" (describes 'P' value of FAA mode) 
+  http://www.nmea.org/Assets/0183_advancements_nmea_oct_1_2010%20(2).pdf

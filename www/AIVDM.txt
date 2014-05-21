@@ -4768,6 +4768,45 @@ language time function. Both date and time to the nearest second can be
 derived from this field. This field is always provided, regardless of  
 the type of AIS equipment.
 
+== NMEA 4.0 Tag Blocks ==
+
+Beginning with NMEA 4.00, the standard describes a way to intersperse 
+"tag blocks" with AIS sentences in order to supply additional
+metadata, notably a Unix timestamp to be associated with a sentence
+(or contiguous group of sentences such as an armored AIS Type 5).
+
+The general format of a tag block is: an opening backslash, followed
+by multiple comma-separated fields none of which may contain
+backslashes, followed by an asterisk and NMEA checksum, followed by a
+closing backslash.
+
+The following is an example of an AIS Type 1 sentence preceded by a tag:
+
+-------------------------------------------------------------------------------------------------
+\g:1-2-73874,n:157036,s:r003669945,c:1241544035*4A\!AIVDM,1,1,,B,15N4cJ`005Jrek0H@9n`DW5608EP,0*13
+-------------------------------------------------------------------------------------------------
+
+Each comma-separated field is expected to be a type key, followed by a
+colon, followed by content.  The semantics of the type keys are as
+follows (table from <<NMEA-ADVANCE>>):
+
+.NMEA 4.00 Field Types
+[frame="topbot",options="header"]
+|===========================================================================
+| Code	| Type   | Description
+| c	| int>0  | UNIX time in seconds or milliseconds
+| d	| string | Destination (at most 15 chars)
+| g	| int	 | Sentence grouping
+| n	| int>0  | line count
+| r     | int>0  | relative time
+| s	| string | Source / station
+| t	| string | Text string (at most 15 chars)
+|===========================================================================
+
+We do not yet have information on the meaing of these fields or how
+they are related to nearby AIVDM/AIVDO sentences.  We hope to add this 
+in a future revision.
+
 == AIS Payload Byte Alignment, Padding, and Bit Stuffing ==
 
 Warning: Here there be dragons. Read with care. Once you get through
@@ -5166,6 +5205,8 @@ Identification System]
 
 - [[[GITTIP]]] https://www.gittip.com/esr/
 
+- [[NMEA-ADVANCE]] http://www.nmea.org/Assets/0183_advancements_nmea_oct_1_2010%20(2).pdf
+
 == Change history ==
 
 Version 1.0 was the initial release covering messages 1-3, 4, and 5.
@@ -5308,4 +5349,5 @@ waterways. Also Inland AIS standard messages are now covered.
 Version 1.44 adds substantial new information on MMSIs and updates
 the <<MMSI link>>, which was stale.
 
-Version 1.45 adds a description of variant AIS talker IDs.
+Version 1.45 adds a description of variant AIS talker IDs and NMEA
+4.00 tag blocks.
