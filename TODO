@@ -114,7 +114,13 @@ Anthony Stirk <upuaut@gmail.com> writes on Wed May 21 06:09:00 2014:
     need to put the module back in max performance mode as soon as the
     satellites drops below 4.
 
-A possibility: drop the chip to low-power modewhen it can see > 4
+    I'm not sure for most applications the low power mode needs to be used at
+    all on the newer ublox modules. The values for the MAX-7Q are 22mA (6Q
+    50mA) under acquire, tracking (i.e locked and in max performance) current
+    at is 17mA  (39mA 6Q) and power saving reduces this to 5mA or less (15mA on
+    the 6Q). We've observed the issue on the 6 and 7 series.
+
+A possibility: drop the chip to low-power mode when it can see > 4
 sats, revert to normal otherwise.
 
 *** Dispatcher/network issues
