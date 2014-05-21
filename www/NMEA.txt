@@ -65,6 +65,22 @@ While newer marine electronics uses this protocol, general-purpose
 GPSes have not adopted it.  Thus we do not attempt to document NMEA
 2000 here; see <<CANBUS>>, <<NMEA2000>>, and <<KEVERSOFT>> instead.  
 
+== NMEA version timeline ==
+
+|========================================================================
+|NMEA 2.00 | January 1992
+|NMEA 2.01 | August 1994
+|NMEA 2.10 | October 1995
+|NMEA 2.20 | January 1997
+|NMEA 2.30 | March 1998
+|NMEA 3.00 | July 2000
+|NMEA 3.01 | January 2002
+|NMEA 4.00 | November 2008
+|NMEA 4.10 | July 2012
+|========================================================================
+
+No version earlier than 2.00 is listed or archived on the NMEA website.
+
 == NMEA 0183 physical protocol layer ==
 
 The NMEA specification requires a physical-level protocol compatible
