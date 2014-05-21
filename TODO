@@ -101,6 +101,22 @@ We caw now *really* measure latency from GPS top of second when it has
 1PPS.  Add this capability to gpsprof and revise the "Where's the
 Latency?" white paper.
 
+*** Low-pwer autoconfiguration in the uBlox driver ***
+
+Anthony Stirk <upuaut@gmail.com> writes on Wed May 21 06:09:00 2014:
+
+    The low power modes are really good on the ublox modules (especially the
+    MAX7's) however a word of warning.
+
+    We use the 1 sec cyclic mode on our balloon trackers but if the module
+    looses satellites or is jammed out (cheap Chinese cameras do it) the ublox
+    modules seem to hang and become unresponsive. To mitigate against this you
+    need to put the module back in max performance mode as soon as the
+    satellites drops below 4.
+
+A possibility: drop the chip to low-power modewhen it can see > 4
+sats, revert to normal otherwise.
+
 *** Dispatcher/network issues
 
 **** Reading AISHub data via UDP confuses xgps with short writes
