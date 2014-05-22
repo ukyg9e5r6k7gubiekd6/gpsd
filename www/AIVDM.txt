@@ -4793,17 +4793,29 @@ follows (table from <<NMEA-ADVANCE>>):
 .NMEA 4.00 Field Types
 [frame="topbot",options="header"]
 |===========================================================================
-| Code	| Type   | Description
-| c	| int>0  | UNIX time in seconds or milliseconds
-| d	| string | Destination (at most 15 chars)
-| g	| int	 | Sentence grouping
-| n	| int>0  | line count
-| r     | int>0  | relative time
-| s	| string | Source / station
-| t	| string | Text string (at most 15 chars)
+| Code	| Type           | Description
+| c	| int>0          | UNIX time in seconds or milliseconds
+| d	| string         | Destination (at most 15 chars)
+| g	| int-int-int	 | Sentence grouping
+| n	| int>0          | line count
+| r     | int>0          | relative time
+| s	| string         | Source / station
+| t	| string         | Text string (at most 15 chars)
 |===========================================================================
 
-We do not yet have information on the meaing of these fields or how
+The c field is an emission time for the associated sentence or
+sentence group.
+
+The g value describes a sentence or sentence group to associate the
+tag block to. It is a triple of ints separated by dashes.  The first
+number is the sentence number, the second is total number of sentences
+to make up one group.  The third number is an identifier for that
+particular group.
+
+As of May 2014 no relative time fields have beenm observed in the
+wild. It is unknown whether the unit is seconds or milliseconds.
+
+We do not yet have more information on the meaning of these fields or how
 they are related to nearby AIVDM/AIVDO sentences.  We hope to add this 
 in a future revision.
 
