@@ -2100,7 +2100,7 @@ Field Number:
 
 === Other sentences ===
 
-There isis evidence for the existence ofv the following NMEA semtences
+There is evidence for the existence ofv the following NMEA sentences
 on the Web:
 
 |======================================================
@@ -2115,6 +2115,8 @@ on the Web:
 |WDC - Distance to Waypoint - Great Circle
 |ZDL - Time and Distance to Variable Point
 |======================================================
+
+$CDDSC is described in <<CDDSC>>.
 
 == Vendor extensions == 
 
@@ -2388,3 +2390,7 @@ Described in <<MALTESE>>, actually a Maltese government document.
 - [[NMEA-ADVANCE]]
   "NMEA 0183 Advancements" (describes 'P' value of FAA mode) 
   http://www.nmea.org/Assets/0183_advancements_nmea_oct_1_2010%20(2).pdf
+
+- [[CDDSC]]
+  "Data Interface in Digital Selective Calling Class-D Radios"
+  http://continuouswave.com/whaler/reference/DSC_Datagrams.html
