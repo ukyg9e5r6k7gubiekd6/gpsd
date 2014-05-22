@@ -1761,6 +1761,9 @@ if env['python']:
 # another window, then run 'scons udev-test', then plug and unplug the
 # GPS ad libitum.  All is well when you get fix reports each time a GPS
 # is plugged in.
+#
+# Note that a udev event can be triggered with an invocation like:
+# udevadm trigger --sysname-match=ttyUSB0 --action add
 
 Utility('udev-install', 'install', [
     'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
