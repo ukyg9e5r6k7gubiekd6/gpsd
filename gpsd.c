@@ -446,12 +446,10 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 		(void)close(s);
 		return -1;
 	    }
-#ifdef IPV6_TCLASS	/* Hurd doesn't have this as of May 2014 */
 	    /* Set packet priority */
 	    if (setsockopt(s, IPPROTO_IPV6, IPV6_TCLASS, &dscp, sizeof(dscp)) == -1)
 		gpsd_report(context.debug, LOG_WARN,
 			    "Warning: SETSOCKOPT TOS failed\n");
-#endif /* IPV6_TCLASS */
 	}
 #endif /* S_SPLINT_S */
 	break;
