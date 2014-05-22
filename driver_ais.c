@@ -183,6 +183,8 @@ bool ais_binary_decode(const int debug,
 	ais->type6.dac            = UBITS(72, 10);
 	ais->type6.fid            = UBITS(82, 6);
 	ais->type6.bitcount       = bitlen - 88;
+	/* not strictly required - helps stability in testing */ 
+	(void)memset(ais->type6.bitdata, '\0', sizeof(ais->type6.bitdata));
 	structured = false;
 	/* Inland AIS */
 	if (ais->type6.dac == 200) {
@@ -454,6 +456,8 @@ bool ais_binary_decode(const int debug,
 	ais->type8.dac            = UBITS(40, 10);
 	ais->type8.fid            = UBITS(50, 6);
 	ais->type8.bitcount       = bitlen - 56;
+	/* not strictly required - helps stability in testing */ 
+	(void)memset(ais->type8.bitdata, '\0', sizeof(ais->type8.bitdata));
 	structured = false;
 	if (ais->type8.dac == 1)
 	    switch (ais->type8.fid) {
