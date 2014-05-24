@@ -152,7 +152,7 @@ static int sd_socket_count = 0;
 /* work around the unfinished ipv6 implementation on hurd */
 #ifdef __GNU__
 #ifndef IPV6_TCLASS
-#define IPV6_TCLASS 67
+#define IPV6_TCLASS 61
 #endif
 #endif
 
