@@ -38,15 +38,15 @@ ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="@udev
 # Cygnal Integrated Products, Inc. CP210x Composite Device (Used by Holux m241 and Wintec grays2 wbt-201) [linux module: cp210x]
 ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
 # Cygnal Integrated Products, Inc. [linux module: cp210x]
-ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea71", SYMLINK="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea71", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
 # u-blox AG, u-blox 5 (tested with Navilock NL-402U) [linux module: cdc_acm]
-ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a5", SYMLINK="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a5", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
 # u-blox AG, u-blox 6 (tested with GNSS Evaluation Kit TCXO) [linux module: cdc_acm]
-ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a6", SYMLINK="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a6", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
 # MediaTek (tested with HOLUX M-1200E) [linux module: cdc_acm]
-ATTRS{idVendor}=="0e8d", ATTRS{idProduct}=="3329", SYMLINK="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="0e8d", ATTRS{idProduct}=="3329", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
 # Telit wireless solutions (tested with HE910G) [linux module: cdc_acm]
-ATTRS{interface}=="Telit Wireless Module Port", ATTRS{bInterfaceNumber}=="06", SYMLINK="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{interface}=="Telit Wireless Module Port", ATTRS{bInterfaceNumber}=="06", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
 
 ACTION=="remove", RUN+="@udevdir@/gpsd.hotplug"
 
