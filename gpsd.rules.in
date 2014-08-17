@@ -22,32 +22,32 @@
 SUBSYSTEM!="tty", GOTO="gpsd_rules_end"
 
 # Prolific Technology, Inc. PL2303 Serial Port [linux module: pl2303]
-ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303", SYMLINK+="gps%n", @udevcommand@
 # ATEN International Co., Ltd UC-232A Serial Port [linux module: pl2303]
-ATTRS{idVendor}=="0557", ATTRS{idProduct}=="2008", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="0557", ATTRS{idProduct}=="2008", SYMLINK+="gps%n", @udevcommand@
 # PS-360 OEM (GPS sold with MS Street and Trips 2005) [linux module: pl2303]
-ATTRS{idVendor}=="067b", ATTRS{idProduct}=="aaa0", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="067b", ATTRS{idProduct}=="aaa0", SYMLINK+="gps%n", @udevcommand@
 # FTDI 8U232AM / FT232 [linux module: ftdi_sio]
-ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="gps%n", @udevcommand@
 # Cypress M8/CY7C64013 (Delorme uses these) [linux module: cypress_m8]
-ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0100", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0100", SYMLINK+="gps%n", @udevcommand@
 # Cypress M8/CY7C64013 (DeLorme LT-40)
-ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0200", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="1163", ATTRS{idProduct}=="0200", SYMLINK+="gps%n", @udevcommand@
 # Garmin International GPSmap, various models (tested with Garmin GPS 18 USB)  [linux module: garmin_gps]
-ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="gps%n", @udevcommand@
 # Cygnal Integrated Products, Inc. CP210x Composite Device (Used by Holux m241 and Wintec grays2 wbt-201) [linux module: cp210x]
-ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="gps%n", @udevcommand@
 # Cygnal Integrated Products, Inc. [linux module: cp210x]
-ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea71", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea71", SYMLINK+="gps%n", @udevcommand@
 # u-blox AG, u-blox 5 (tested with Navilock NL-402U) [linux module: cdc_acm]
-ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a5", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a5", SYMLINK+="gps%n", @udevcommand@
 # u-blox AG, u-blox 6 (tested with GNSS Evaluation Kit TCXO) [linux module: cdc_acm]
-ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a6", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a6", SYMLINK+="gps%n", @udevcommand@
 # MediaTek (tested with HOLUX M-1200E) [linux module: cdc_acm]
-ATTRS{idVendor}=="0e8d", ATTRS{idProduct}=="3329", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{idVendor}=="0e8d", ATTRS{idProduct}=="3329", SYMLINK+="gps%n", @udevcommand@
 # Telit wireless solutions (tested with HE910G) [linux module: cdc_acm]
-ATTRS{interface}=="Telit Wireless Module Port", ATTRS{bInterfaceNumber}=="06", SYMLINK+="gps%n", RUN+="@udevdir@/gpsd.hotplug"
+ATTRS{interface}=="Telit Wireless Module Port", ATTRS{bInterfaceNumber}=="06", SYMLINK+="gps%n", @udevcommand@
 
-ACTION=="remove", RUN+="@udevdir@/gpsd.hotplug"
+ACTION=="remove", @udevcommand@
 
 LABEL="gpsd_rules_end"

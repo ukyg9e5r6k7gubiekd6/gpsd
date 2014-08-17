@@ -1,0 +1,13 @@
+[Unit]
+Description=Manage %I for GPS daemon
+Requires=gpsd.socket
+BindsTo=dev-%i.device
+After=dev-%i.device
+
+[Service]
+Type=oneshot
+Environment="GPSD_SOCKET=/var/run/gpsd.sock"
+EnvironmentFile=-/etc/default/gpsd
+RemainAfterExit=yes
+ExecStart=/bin/sh -c "[ \"$USBAUTO\" = true ] && /usr/sbin/gpsdctl add /dev/%I || :"
+ExecStop=/bin/sh -c "[ \"$USBAUTO\" = true ] && /usr/sbin/gpsdctl remove /dev/%I || :"

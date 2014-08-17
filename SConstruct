@@ -90,7 +90,8 @@ def _getoutput(cmd, input=None, cwd=None, env=None):
 # Start by reading configuration variables from the cache
 opts = Variables('.scons-option-cache')
 
-systemd = os.path.exists("/usr/share/systemd/system")
+systemd_dir = '/lib/systemd/system'
+systemd = os.path.exists(systemd_dir)
 
 # Set distribution-specific defaults here
 imloads = True
@@ -289,6 +290,7 @@ def installdir(dir, add_destdir=True):
     if add_destdir:
         wrapped = os.path.normpath(DESTDIR + os.path.sep + wrapped)
     wrapped.replace("/usr/etc", "/etc")
+    wrapped.replace("/usr/lib/systemd", "/lib/systemd")
     return wrapped
 
 # Honor the specified installation prefix in link paths.
@@ -1183,6 +1185,12 @@ if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
     env.Precious(leapseconds_cache)
     env.AlwaysBuild(leapseconds_cache)
 
+if env['systemd']:
+    udevcommand = 'TAG+="systemd", ENV{SYSTEMD_WANTS}="gpsdctl@%k.service"'
+else:
+    udevcommand = 'RUN+="%s/gpsd.hotplug"' %(env['udevdir'], )
+
+
 # Instantiate some file templates.  We'd like to use the Substfile builtin
 # but it doesn't seem to work in scons 1.20
 def substituter(target, source, env):
@@ -1190,7 +1198,7 @@ def substituter(target, source, env):
         ('@VERSION@',    gpsd_version),
         ('@prefix@',     env['prefix']),
         ('@libdir@',     env['libdir']),
-        ('@udevdir@',    env['udevdir']),
+        ('@udevcommand@',    udevcommand),
         ('@PYTHON@',     sys.executable),
         ('@DATE@',       time.asctime()),
         ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),
@@ -1345,6 +1353,7 @@ pc_install = [ env.Install(installdir('pkgconfig'), x) for x in ("libgps.pc", "l
 if qt_env:
     pc_install.append(qt_env.Install(installdir('pkgconfig'), 'Qgpsmm.pc'))
     pc_install.append(qt_env.Install(installdir('libdir'), 'libQgpsmm.prl'))
+
 
 
 maninstall = []
@@ -1762,15 +1771,43 @@ if env['python']:
 # GPS ad libitum.  All is well when you get fix reports each time a GPS
 # is plugged in.
 #
+# In case you are a systemd user you might also need to watch the
+# journalctl output. Instead of the hotplug script the gpsdctl@.service
+# unit will handle hotplugging together with the udev rules.
+#
 # Note that a udev event can be triggered with an invocation like:
 # udevadm trigger --sysname-match=ttyUSB0 --action add
 
-Utility('udev-install', 'install', [
+if env['systemd']:
+    systemdinstall_target = [ env.Install(DESTDIR + systemd_dir, "systemd/%s" %(x,)) for x in ("gpsdctl@.service", "gpsd.service", "gpsd.socket") ]
+    systemd_install = env.Alias('systemd_install', systemdinstall_target)
+    systemd_uninstall = env.Command('systemd_uninstall', '', Flatten(Uninstall(Alias("systemd_install"))) or "")
+
+    env.AlwaysBuild(systemd_uninstall)
+    env.Precious(systemd_uninstall)
+
+
+if env['systemd']:
+    hotplug_wrapper_install = []
+else:
+    hotplug_wrapper_install = [
+        'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + env['udevdir'],
+        'chmod a+x ' + DESTDIR + env['udevdir'] + '/gpsd.hotplug'
+    ]
+
+udev_install = Utility('udev-install', 'install', [
     'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
     'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] + '/rules.d/25-gpsd.rules',
-    'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + env['udevdir'],
-    'chmod a+x ' + DESTDIR + env['udevdir'] + '/gpsd.hotplug',
-        ])
+    ] + hotplug_wrapper_install)
+
+if env['systemd']:
+    systemctl_daemon_reload = Utility('systemctl-daemon-reload', '', [ 'systemctl daemon-reload || true'])
+    env.AlwaysBuild(systemctl_daemon_reload)
+    env.Precious(systemctl_daemon_reload)
+    env.Requires(udev_install, systemd_install)
+    env.Requires(systemctl_daemon_reload, systemd_install)
+    env.Requires(udev_install, systemctl_daemon_reload)
+
 
 Utility('udev-uninstall', '', [
     'rm -f %s/gpsd.hotplug' % env['udevdir'],

@@ -3,6 +3,7 @@ Description=GPS (Global Positioning System) Daemon Sockets
 
 [Socket]
 ListenStream=/var/run/gpsd.sock
+ListenStream=[::1]:2947
 ListenStream=127.0.0.1:2947
 SocketMode=0600
 
