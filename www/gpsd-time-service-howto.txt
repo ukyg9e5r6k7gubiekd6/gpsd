@@ -1,6 +1,6 @@
 = GPSD Time Service HOWTO =
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v1.1, November 2013
+v1.2, November 2013
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -151,7 +151,7 @@ fix-processing and RS232 transmission time.
 
 At one character per ten bits (counting framing at stopbits) a
 9600-bps serial link introduces about a mSec of latency *per
-character*; furthermore, the Linux kernel will normally delay delivery
+character*; furthermore, your kernel will normally delay delivery
 of characters to your application until the next timer tick, about
 every 4 mSec in modern kernels. Both USB and RS232 will incur that
 approximately 5mSec-per-char latency overhead.  You'll have to deal
@@ -270,7 +270,7 @@ called "pps-tools" that will install KPPS support and the time_pps.h
 header file.  We recommend you do that.  If your kernel is built in
 the normal modular way, this package installation will suffice.
 
-If you are scratch-building your Linux kernel, the configuration 
+If you are scratch-building a Linux kernel, the configuration 
 must include either these two lines, or the same with "y" replaced
 by "m" to enable the drivers as modules:
 
@@ -287,7 +287,8 @@ set. Usually they will be set to "m", which is sufficient.
 
 Other OSes have different ways to enable KPPS in their kernels.
 When we learn what those are, we'll document them or point
-at references.
+at references.  We can say that versions of NetBSD shipped after
+Juky 25 2014 have PPS support that is known to work with GPSD.
 
 You will need to have either ntpd or chrony installed. If you are
 running a Unix variant with a package system, the packages will
@@ -1147,3 +1148,9 @@ Sanjeev Gupta <ghane0@gmail.com> assisted with editing.
 - [[[CVE-2009-3563]]] http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2009-3563
 
 - [[[CHRONY-MAN]]] http://chrony.tuxfamily.org/manual.html
+
+== Changelog ==
+
+1.1, Nov 2013: Initial release.
+
+1.2, Aug 2014: Note that NetBSD bow has PPS support.
