@@ -654,7 +654,7 @@ bool ais_binary_decode(const int debug,
 	    }
 	else if (ais->type8.dac == 200) {
 	    switch (ais->type8.fid) {
-	    case 21:	/* Inland ship static and voyage related data */
+	    case 10:	/* Inland ship static and voyage related data */
 		UCHARS(56, ais->type8.dac200fid10.vin);
 		ais->type8.dac200fid10.length	= UBITS(104, 13);
 		ais->type8.dac200fid10.beam	= UBITS(117, 10);
@@ -668,7 +668,7 @@ bool ais_binary_decode(const int debug,
 		/* skip 8 bits */
 		structured = true;
 		break;
-	    case 23:
+	    case 23:	/* EMMA warning */
 		ais->type8.dac200fid23.start_year	= UBITS(56, 8);
 		ais->type8.dac200fid23.start_month	= UBITS(64, 4);
 		ais->type8.dac200fid23.start_day	= UBITS(68, 5);
@@ -691,7 +691,7 @@ bool ais_binary_decode(const int debug,
 		/* skip 6 bits */
 		structured = true;
 		break;
-	    case 24:
+	    case 24:	/* Water level */
 		UCHARS(56, ais->type8.dac200fid24.country);
 #define ARRAY_BASE 68
 #define ELEMENT_SIZE 25
@@ -706,7 +706,7 @@ bool ais_binary_decode(const int debug,
 		/* skip 6 bits */
 		structured = true;
 		break;
-	    case 40:
+	    case 40:	/* Signal status */
 		ais->type8.dac200fid40.lon	= SBITS(56, 28);
 		ais->type8.dac200fid40.lat	= SBITS(84, 27);
 		ais->type8.dac200fid40.form	= UBITS(111, 4);
