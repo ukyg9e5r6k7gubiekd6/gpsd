@@ -190,6 +190,8 @@ bool ais_binary_decode(const int debug,
 	if (ais->type6.dac == 200) {
 	    switch (ais->type6.fid) {
 	    case 21:	/* ETA at lock/bridge/terminal */
+		if (bitlen != 248)
+		    break;
 		UCHARS(88, ais->type6.dac200fid21.country);
 		UCHARS(100, ais->type6.dac200fid21.locode);
 		UCHARS(118, ais->type6.dac200fid21.section);
@@ -205,6 +207,8 @@ bool ais_binary_decode(const int debug,
 		structured = true;
 		break;
 	    case 22:	/* RTA at lock/bridge/terminal */
+		if (bitlen != 232)
+		    break;
 		UCHARS(88, ais->type6.dac200fid22.country);
 		UCHARS(100, ais->type6.dac200fid22.locode);
 		UCHARS(118, ais->type6.dac200fid22.section);
@@ -219,6 +223,8 @@ bool ais_binary_decode(const int debug,
 		structured = true;
 		break;
 	    case 55:	/* Number of Persons On Board */
+		if (bitlen != 168)
+		    break;
 		ais->type6.dac200fid55.crew	= UBITS(88, 8);
 		ais->type6.dac200fid55.passengers	= UBITS(96, 13);
 		ais->type6.dac200fid55.personnel	= UBITS(109, 8);
@@ -232,6 +238,8 @@ bool ais_binary_decode(const int debug,
 	else if (ais->type6.dac == 235 || ais->type6.dac == 250) {
 	    switch (ais->type6.fid) {
 	    case 10:	/* GLA - AtoN monitoring data */
+		if (bitlen != 136)
+		    break;
 		ais->type6.dac235fid10.ana_int	= UBITS(88, 10);
 		ais->type6.dac235fid10.ana_ext1	= UBITS(98, 10);
 		ais->type6.dac235fid10.ana_ext2	= UBITS(108, 10);
@@ -655,6 +663,8 @@ bool ais_binary_decode(const int debug,
 	else if (ais->type8.dac == 200) {
 	    switch (ais->type8.fid) {
 	    case 10:	/* Inland ship static and voyage related data */
+		if (bitlen != 168)
+		    break;
 		UCHARS(56, ais->type8.dac200fid10.vin);
 		ais->type8.dac200fid10.length	= UBITS(104, 13);
 		ais->type8.dac200fid10.beam	= UBITS(117, 10);
@@ -669,6 +679,8 @@ bool ais_binary_decode(const int debug,
 		structured = true;
 		break;
 	    case 23:	/* EMMA warning */
+		if (bitlen != 256)
+		    break;
 		ais->type8.dac200fid23.start_year	= UBITS(56, 8);
 		ais->type8.dac200fid23.start_month	= UBITS(64, 4);
 		ais->type8.dac200fid23.start_day	= UBITS(68, 5);
@@ -692,6 +704,8 @@ bool ais_binary_decode(const int debug,
 		structured = true;
 		break;
 	    case 24:	/* Water level */
+		if (bitlen != 168)
+		    break;
 		UCHARS(56, ais->type8.dac200fid24.country);
 #define ARRAY_BASE 68
 #define ELEMENT_SIZE 25
@@ -707,6 +721,8 @@ bool ais_binary_decode(const int debug,
 		structured = true;
 		break;
 	    case 40:	/* Signal status */
+		if (bitlen != 168)
+		    break;
 		ais->type8.dac200fid40.lon	= SBITS(56, 28);
 		ais->type8.dac200fid40.lat	= SBITS(84, 27);
 		ais->type8.dac200fid40.form	= UBITS(111, 4);
