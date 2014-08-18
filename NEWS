@@ -6,7 +6,8 @@ Repository head:
   u-blox driver rather than having to interpolate them.
   Some unusual AIS talker IDs (NMEA 4.0 station classes) are supported.
   chrpath is no longer a dependency for building and testing, and
-  now defaults to 'no'.
+  now defaults to 'no'.  Full systemd support.  Fixes for handling
+  large PPS offsets. Improved recovery from device flakeouts.
 
 * Fri 22 Nov 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.10
   AIS: Adds gps2udp, an AIS data relay, split24 option supports

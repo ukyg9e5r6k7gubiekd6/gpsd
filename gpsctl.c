@@ -664,11 +664,19 @@ int main(int argc, char **argv)
 	    /* grab packets until we time out, get sync, or fail sync */
 	    for (hunting = true; hunting; )
 	    {
+#ifdef EFDS
+		fd_set efds;
+#endif /* EFDS */
 		switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
 		{
 		case AWAIT_GOT_INPUT:
 		    break;
 		case AWAIT_NOT_READY:
+#ifdef EFDS
+		    /* no recovery from bad fd is possible */
+		    if (FD_ISSET(session.gpsdata.gps_fd, &efds))
+			exit(EXIT_FAILURE);
+#endif /* EFDS */
 		    continue;
 		case AWAIT_FAILED:
 		    exit(EXIT_FAILURE);

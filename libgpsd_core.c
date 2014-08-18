@@ -1002,6 +1002,9 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
     struct timeval tv;
 #endif /* COMPAT_SELECT */
 
+#ifdef EFDS
+    FD_ZERO(efds);
+#endif /* EFDS */
     (void)memcpy((char *)rfds, (char *)all_fds, sizeof(fd_set));
     gpsd_report(debug, LOG_RAW + 2, "select waits\n");
     /*
@@ -1029,8 +1032,25 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
     if (status == -1) {
 	if (errno == EINTR)
 	    return AWAIT_NOT_READY;
-	gpsd_report(debug, LOG_ERROR, "select: %s\n", strerror(errno));
-	return AWAIT_FAILED;
+	else if (errno == EBADF) {
+	    int fd;
+	    for (fd = 0; fd < FD_SETSIZE; fd++)
+		/*
+		 * All we care about here is a cheap, fast, uninterruptible
+		 * way to check if a file descriptor is valid.
+		 * FIXME: pass out error fds when we can do a library bump.
+		 */
+		if (FD_ISSET(fd, all_fds) && fcntl(fd, F_GETFL, 0) == -1) {
+		    FD_CLR(fd, all_fds);
+#ifdef EFDS
+		    FD_SET(fd, efds);
+#endif /* EFDS */
+		}
+	    return AWAIT_NOT_READY;
+	} else {
+	    gpsd_report(debug, LOG_ERROR, "select: %s\n", strerror(errno));
+	    return AWAIT_FAILED;
+	}
     }
     /*@ +usedef +nullpass @*/
 
