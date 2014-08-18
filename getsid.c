@@ -1,4 +1,7 @@
 /*
+ * This file plugs a hole in Bionic, a derivation of the BSD standard C library
+ * code that was originally developed by Google for Android.
+ *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
