@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.45, May 2014
+v1.46, Aug 2014
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -3585,7 +3585,7 @@ message 5.
 |56-103  | 48 |European Vessel ID     |vin      |t|8 six-bit characters
 |104-116 | 13 |Length of ship         |length   |u|1-8000 * 0.1m, default 0
 |117-126 | 10 |Beam of ship           |beam     |u|1-1000 * 0.1m, default 0
-|127-140 | 14 |Ship/combination type  |type     |e|ERI Classification
+|127-140 | 14 |Ship/combination type  |shiptype |e|ERI Classification
 |141-143 |  3 |Hazardous cargo        |hazard   |e|See "Hazard Codes" below
 |144-154 | 11 |Draught                |draught  |u|1-200 * 0.01m, default 0
 |155-156 |  2 |Loaded/Unloaded        |loaded   |e|See "Load Status" below
@@ -5363,3 +5363,6 @@ the <<MMSI link>>, which was stale.
 
 Version 1.45 adds a description of variant AIS talker IDs and NMEA
 4.00 tag blocks.
+
+Version 1.46 corrects an error in the specification on Inland AIS Type
+10s.

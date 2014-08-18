@@ -1250,10 +1250,10 @@ struct ais_t
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
 		/* Inland static ship and voyage-related data */
 		struct {
-		    char vin[8+1];	/* European Vessel ID */
+		    char vin[8+1];      	/* European Vessel ID */
 		    unsigned int length;	/* Length of ship */
-		    unsigned int beam;	/* Beam of ship */
-		    unsigned int type;	/* Ship/combination type */
+		    unsigned int beam;  	/* Beam of ship */
+		    unsigned int shiptype;	/* Ship/combination type */
 		    unsigned int hazard;	/* Hazardous cargo */
 		    unsigned int draught;	/* Draught */
 		    unsigned int loaded;	/* Loaded/Unloaded */

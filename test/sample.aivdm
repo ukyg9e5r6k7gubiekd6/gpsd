@@ -428,6 +428,28 @@
 # Salinity=0x1FE(51.0 permil)
 # Ice=0x3(3)
 #
+# Type 8, DAC 200, FID 10  (Inland AIS Ship Static and Voyage Data)
+# Paul Courbis <paul@courbis.com>
+!AIVDM,1,1,,B,83aDChPj2d<dL<uM=hhhI?a@6HP0,0*40
+#	Message type           : 8
+# 	Repleat Indicator      : 0
+#	MMSI                   : 244650946
+#	DAC                    : 200
+#	FID                    : 10
+#	VIN                    : 02103547
+#	Length                 : 390
+#	Beam                   : 50
+#	Vessel type            : 8010
+#	Type text              : "Motor freighter"
+#	Hazard                 : 0
+#	Hazard text            : "0 blue cones/lights"
+#	Draught                : 204
+#	Loaded                 : 1
+#	Loaded text            : "Unloaded"
+#	speed_q                : false
+#	course_q               : false
+#	heading_q              : false
+#
 # Type 9:
 # From AISHub. Checked with the noaadata tools.
 !AIVDM,1,1,,A,91b77=h3h00nHt0Q3r@@07000<0b,0*69

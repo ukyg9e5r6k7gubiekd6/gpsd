@@ -2813,22 +2813,22 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    switch (ais->type8.fid) {
 	    case 10:        /* Inland ship static and voyage-related data */
 		for (cp = shiptypes; cp < shiptypes + NITEMS(shiptypes); cp++)
-		    if (cp->code == ais->type8.dac200fid10.type
-			|| cp->ais == ais->type8.dac200fid10.type)
+		    if (cp->code == ais->type8.dac200fid10.shiptype
+			|| cp->ais == ais->type8.dac200fid10.shiptype)
 			break;
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"vin\":\"%s\",\"length\":%u,\"beam\":%u,"
-			       "\"type\":%u,\"type_text\":\"%s\","
+			       "\"shiptype\":%u,\"shiptype_text\":\"%s\","
 			       "\"hazard\":%u,\"hazard_text\":\"%s\","
 			       "\"draught\":%u,"
 			       "\"loaded\":%u,\"loaded_text\":\"%s\","
-			       "\"speed_q\":\"%s\","
-			       "\"course_q\":\"%s\","
-			       "\"heading_q\":\"%s\"}\r\n",
+			       "\"speed_q\":%s,"
+			       "\"course_q\":%s,"
+			       "\"heading_q\":%s}\r\n",
 			       ais->type8.dac200fid10.vin,
 			       ais->type8.dac200fid10.length,
 			       ais->type8.dac200fid10.beam,
-			       ais->type8.dac200fid10.type,
+			       ais->type8.dac200fid10.shiptype,
 			       cp->legend,
 			       ais->type8.dac200fid10.hazard,
 			       HTYPE_DISPLAY(ais->type8.dac200fid10.hazard),
