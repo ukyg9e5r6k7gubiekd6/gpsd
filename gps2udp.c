@@ -11,8 +11,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  */
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -22,8 +20,11 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <time.h>
-#include <sys/time.h>
 #include <assert.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/select.h>
 
 #ifndef S_SPLINT_S
 #include <unistd.h>

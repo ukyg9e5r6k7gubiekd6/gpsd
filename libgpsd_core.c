@@ -19,10 +19,11 @@
 #include <stdarg.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <syslog.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <sys/stat.h>
 #ifndef S_SPLINT_S
 #include <sys/wait.h>
 #include <sys/socket.h>

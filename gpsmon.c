@@ -18,6 +18,7 @@
 #include <sys/time.h>		/* expected to declare select(2) a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/select.h>
 #include <fcntl.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>

@@ -16,6 +16,7 @@
 #include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/select.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
 #include <unistd.h>

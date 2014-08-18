@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/select.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */

@@ -19,6 +19,8 @@
 #include "gpsd.h"
 #include "bits.h"
 
+#include <sys/select.h>
+
 #ifdef GEOSTAR_ENABLE
 #define GEOSTAR_CHANNELS	24
 

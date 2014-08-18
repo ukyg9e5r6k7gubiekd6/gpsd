@@ -24,6 +24,8 @@
 #include "gpsd.h"
 #include "bits.h"
 
+#include <sys/select.h>
+
 #define USE_SUPERPACKET	1	/* use Super Packet mode? */
 
 #define SEMI_2_DEG	(180.0 / 2147483647)	/* 2^-31 semicircle to deg */
