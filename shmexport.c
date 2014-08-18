@@ -14,6 +14,10 @@ PERMISSIONS
    BSD terms apply: see the file COPYING in the distribution root for details.
 
 ***************************************************************************/
+#include "gpsd_config.h"
+
+#ifdef SHM_EXPORT_ENABLE
+
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
@@ -23,8 +27,6 @@ PERMISSIONS
 
 #include "gpsd.h"
 #include "libgps.h" /* for SHM_PSEUDO_FD */
-
-#ifdef SHM_EXPORT_ENABLE
 
 /*@ -mustfreeonly -nullstate -mayaliasunique @*/
 

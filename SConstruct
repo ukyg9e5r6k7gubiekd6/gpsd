@@ -588,6 +588,18 @@ else:
         bluezlibs = []
         env["bluez"] = False
 
+    #in_port_t is not defined on Android
+    if not config.CheckType("in_port_t","#include <netinet/in.h>"):
+        announce("Did not find in_port_t typedef, assuming unsigned short int")
+        confdefs.append("typedef unsigned short int in_port_t;\n")
+
+    #SUN_LEN is not defined on Android
+    if not config.CheckDeclaration("SUN_LEN", "#include <sys/un.h>") and not config.CheckDeclaration("SUN_LEN", "#include <linux/un.h>"):
+        announce("SUN_LEN is not system-defined, using local definition")
+        confdefs.append("#ifndef SUN_LEN\n")
+        confdefs.append("#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) + strlen((ptr)->sun_path))\n")
+        confdefs.append("#endif /* SUN_LEN */\n")
+
     if config.CheckHeader(["bits/sockaddr.h", "linux/can.h"]):
         confdefs.append("#define HAVE_LINUX_CAN_H 1\n")
         announce("You have kernel CANbus available.")
@@ -628,7 +640,7 @@ else:
 
     # check function after libraries, because some function require library
     # for example clock_gettime() require librt on Linux
-    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):
+    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime","getsid"):
         if config.CheckFunc(f):
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
         else:
@@ -687,6 +699,7 @@ else:
 # ifdef __cplusplus
 extern "C" {
 # endif
+#include <string.h>
 size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # ifdef __cplusplus
 }
@@ -696,11 +709,23 @@ size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # ifdef __cplusplus
 extern "C" {
 # endif
+#include <string.h>
 size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # ifdef __cplusplus
 }
 # endif
 #endif
+#ifndef HAVE_GETSID
+# ifdef __cplusplus
+extern "C" {
+# endif
+#include <unistd.h>
+pid_t getsid(pid_t pid);
+# ifdef __cplusplus
+}
+# endif
+#endif
+
 
 #define GPSD_CONFIG_H
 ''')
@@ -785,6 +810,7 @@ libgps_sources = [
     "rtcm3_json.c",
     "shared_json.c",
     "strl.c",
+    "getsid.c",
 ]
 
 if env['libgpsmm']:
