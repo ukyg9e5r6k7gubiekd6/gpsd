@@ -2824,7 +2824,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"loaded\":%u,\"loaded_text\":\"%s\","
 			       "\"speed_q\":\"%s\","
 			       "\"course_q\":\"%s\","
-			       "\"heading_q\":\"%s\"}",
+			       "\"heading_q\":\"%s\"}\r\n",
 			       ais->type8.dac200fid10.vin,
 			       ais->type8.dac200fid10.length,
 			       ais->type8.dac200fid10.beam,
@@ -2869,7 +2869,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			ais->type8.dac200fid23.end_lon,
 			ais->type8.dac200fid23.end_lat);
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"type\":%u,\"type_text\":\"%s\",\"min\":%d,\"max\":%d,\"class\":%u,\"class_text\":\"%s\",\"wind\":%u,\"wind_text\":\"%s\"}",
+		    "\"type\":%u,\"type_text\":\"%s\",\"min\":%d,\"max\":%d,\"class\":%u,\"class_text\":\"%s\",\"wind\":%u,\"wind_text\":\"%s\"}\r\n",
 
 		    ais->type8.dac200fid23.type,
 		    EMMA_TYPE_DISPLAY(ais->type8.dac200fid23.type),
@@ -2893,7 +2893,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		}
 		if (buf[strlen(buf)-1] == ',')
 		    buf[strlen(buf)-1] = '\0';
-		(void)strlcat(buf, "]}", buflen - strlen(buf));
+		(void)strlcat(buf, "]}\r\n", buflen - strlen(buf));
 		structured = true;
 		break;
 	    case 40:	/* Inland AIS Signal Strength */
@@ -2908,7 +2908,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			ais->type8.dac200fid40.lon,
 			ais->type8.dac200fid40.lat);
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
-		    "\"form\":%u,\"facing\":%u,\"direction\":%u,\"direction_text\":\"%s\",\"status\":%u,\"status_text\":\"%s\"}",
+		    "\"form\":%u,\"facing\":%u,\"direction\":%u,\"direction_text\":\"%s\",\"status\":%u,\"status_text\":\"%s\"}\r\n",
 		    ais->type8.dac200fid40.form,
 		    ais->type8.dac200fid40.facing,
 		    ais->type8.dac200fid40.direction,
