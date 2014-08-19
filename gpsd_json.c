@@ -2810,12 +2810,21 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    };
 #define STATUS_DISPLAY(n) (((n) < (unsigned int)NITEMS(status_vocabulary)) ? status_vocabulary[n] : "INVALID STATUS")
 
+	    structured = false;
 	    switch (ais->type8.fid) {
 	    case 10:        /* Inland ship static and voyage-related data */
 		for (cp = shiptypes; cp < shiptypes + NITEMS(shiptypes); cp++)
 		    if (cp->code == ais->type8.dac200fid10.shiptype
 			|| cp->ais == ais->type8.dac200fid10.shiptype)
 			break;
+		/*
+		 * FIXME: AIS struct should have "structured" bit set by driver
+		 * This is a kluge.
+		 */
+		if (cp->code == 0
+		    || ais->type8.dac200fid10.hazard >= NITEMS(hazard_types)
+		    || !isascii(ais->type8.dac200fid10.vin[0]))
+		    break;
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"vin\":\"%s\",\"length\":%u,\"beam\":%u,"
 			       "\"shiptype\":%u,\"shiptype_text\":\"%s\","
@@ -2841,6 +2850,12 @@ void json_aivdm_dump(const struct ais_t *ais,
 		structured = true;
 		break;
 	    case 23:	/* EMMA warning */
+		/*
+		 * FIXME: AIS struct should have "structured" bit set by driver
+		 * This is a kluge.
+		 */
+		if (ais->type8.dac200fid23.type >= NITEMS(emma_types))
+		    break;
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"start\":\"%4u-%02u-%02uT%02u:%02u\","
 			       "\"end\":\"%4u-%02u-%02uT%02u:%02u\",",
