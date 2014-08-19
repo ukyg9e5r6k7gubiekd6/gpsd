@@ -397,7 +397,7 @@ int json_ais_read(const char *buf,
 		structured = true;
 	    }
 	}
-	else if (strstr(buf, "\"dac\":200,") != NULL) {
+	else if (strstr(buf, "\"dac\":200,") != NULL && strstr(buf,"data")==NULL) {
 	    if (strstr(buf, "\"fid\":10,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid10, endptr);
 		structured = true;

@@ -450,6 +450,20 @@
 #	course_q               : false
 #	heading_q              : false
 #
+# This is a Type 8 blob that spoofs being Inland AIS Ship Static data.
+# but has garbage in the shiptype, vin, and other fields.
+# Curiously, it seems to have been emitted by the same ship (or, anyway,
+# the same MMSI) as the previous and valid one.
+# Paul Courbis <paul@courbis.com>
+!AIVDM,2,1,4,A,83aDChPj2d<dL<uM=hhhI?a@6HP0e9QvUEEEOPPrE4t880>p2JqA6wimt:Ow,0*22
+!AIVDM,2,2,4,A,UPP8k;JvOeD,2*7F
+#	Message type           : 8
+# 	Repleat Indicator      : 0
+#	MMSI                   : 244650946
+#	DAC                    : 200
+#	FID                    : 10
+#	data		       : 368:c32c70cf5d370c3064fa50198800b4987e9555557e083a544f082003b809ae511bfc75f0a7ff960808ccb6be7ed5
+#
 # Type 9:
 # From AISHub. Checked with the noaadata tools.
 !AIVDM,1,1,,A,91b77=h3h00nHt0Q3r@@07000<0b,0*69
