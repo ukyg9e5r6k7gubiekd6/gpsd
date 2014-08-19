@@ -298,13 +298,9 @@ if env["sysroot"]:
     env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir', add_destdir=False)])
 
 # Don't hack RPATH unless libdir points somewhere that is not on the
-# system default load path. /lib and /usr/lib should always be on
-# this; listing them explicitly is a fail-safe against this ldconfig
-# invocation not doing what we expect.
+# minimum default load path.
 if env["shared"]:
-    sysrpath = Split(_getoutput("ldconfig -v -N -X 2>/dev/null | sed -n -e '/^\//s/://p'"))
-    if env["libdir"] not in ["/usr/lib", "/lib"] + sysrpath:
-        announce("Prepending %s to RPATH." % installdir('libdir', False))
+    if env["libdir"] not in ["/usr/lib", "/lib"]:
         env.Prepend(RPATH=[installdir('libdir')])
 
 # Give deheader a way to set compiler flags
