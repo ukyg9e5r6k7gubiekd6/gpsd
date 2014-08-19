@@ -2815,7 +2815,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    case 10:        /* Inland ship static and voyage-related data */
 		for (cp = shiptypes; cp < shiptypes + NITEMS(shiptypes); cp++)
 		    if (cp->code == ais->type8.dac200fid10.shiptype
-			|| cp->ais == ais->type8.dac200fid10.shiptype)
+			|| cp->ais == ais->type8.dac200fid10.shiptype
+			|| cp->code == 0)
 			break;
 		/*
 		 * FIXME: AIS struct should have "structured" bit set by driver
