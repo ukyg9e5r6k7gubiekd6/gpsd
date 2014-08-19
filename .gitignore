@@ -34,6 +34,7 @@ test_json
 test_trig
 test_libgps
 # Other generated files
+gpsd.rules
 gps.html
 gpscat.html
 gpsctl.html
