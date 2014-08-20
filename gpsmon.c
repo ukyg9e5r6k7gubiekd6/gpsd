@@ -27,6 +27,7 @@
 #include "gpsd.h"
 #include "gps_json.h"
 #include "gpsmon.h"
+#include "gpsdclient.h"
 #include "revision.h"
 
 #define BUFLEN		2048
@@ -55,6 +56,7 @@ static WINDOW *statwin, *cmdwin;
 static char *type_name;
 static size_t promptlen = 0;
 struct termios cooked, rare;
+struct fixsource_t source;
 
 #ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
@@ -341,8 +343,13 @@ static /*@observer@*/ const char *promptgen(void)
 		       9 - session.gpsdata.dev.stopbits,
 		       session.gpsdata.dev.parity,
 		       session.gpsdata.dev.stopbits);
-    else
+    else {
 	(void)strlcpy(buf, session.gpsdata.dev.path, sizeof(buf));
+	if (source.device != NULL) {
+	    (void) strlcat(buf, ":", sizeof(buf));
+	    (void) strlcat(buf, source.device, sizeof(buf));
+	}
+    }
     return buf;
 }
 
@@ -1070,7 +1077,7 @@ static const char *cmdline;
 int main(int argc, char **argv)
 {
     int option;
-    char *explanation, *devicename;
+    char *explanation;
     int bailout = 0, matches = 0;
     bool nmea = false;
     fd_set all_fds;
@@ -1180,19 +1187,30 @@ int main(int argc, char **argv)
     gpsd_time_init(&context, time(NULL));
     gpsd_init(&session, &context, NULL);
 
-    if (optind >= argc)
-	devicename = "gpsd://localhost:" DEFAULT_GPSD_PORT;
-    else 
-	devicename = argv[optind];
+    /* Grok the server, port, and device. */
+    if (optind < argc) {
+	serial = (strncmp(argv[optind], "/dev", 4) == 0);
+	gpsd_source_spec(argv[optind], &source);
+    } else {
+	serial = false;
+	gpsd_source_spec(NULL, &source);
+    }
 
-    /* backward compatibilty: accept a bare server name */
-    if (strchr(devicename, ':') == NULL && devicename[0] != '/')
+    if (serial) {
 	(void) strlcpy(session.gpsdata.dev.path, 
-		       "tcp://", sizeof(session.gpsdata.dev.path));
-    else
-	session.gpsdata.dev.path[0] = '\0';
-    (void)strlcat(session.gpsdata.dev.path, devicename,
-		  sizeof(session.gpsdata.dev.path));
+		       source.device, 
+		       sizeof(session.gpsdata.dev.path));
+    } else {
+	if (strstr(source.server, "//") == 0)
+	    (void) strlcpy(session.gpsdata.dev.path, 
+			   "tcp://",
+			   sizeof(session.gpsdata.dev.path));
+	else
+	    session.gpsdata.dev.path[0] = '\0';
+	(void)snprintf(session.gpsdata.dev.path + strlen(session.gpsdata.dev.path),
+		       sizeof(session.gpsdata.dev.path) - strlen(session.gpsdata.dev.path),
+		       "%s:%s", source.server, source.port);
+    }
 
     if (gpsd_activate(&session, O_PROBEONLY) == -1) {
 	(void)fprintf(stderr,
@@ -1201,7 +1219,6 @@ int main(int argc, char **argv)
 	exit(EXIT_FAILURE);
     }
 
-    serial = (strncmp(devicename, "/dev", 4) == 0);
 
     if (serial) {
 #ifdef PPS_ENABLE
@@ -1210,8 +1227,10 @@ int main(int argc, char **argv)
 #endif /* PPS_ENABLE */
     }
     else {
-	/* FIXME: Also use WATCH*DEVICE here someday */
-	(void)gps_send(&session.gpsdata, nmea ? WATCHNMEA : WATCHRAW);
+	if (source.device != NULL)
+	    (void)gps_send(&session.gpsdata, nmea ? WATCHNMEADEVICE : WATCHRAWDEVICE, source.device);
+	else
+	    (void)gps_send(&session.gpsdata, nmea ? WATCHNMEA : WATCHRAW);
     }
 
     /*
