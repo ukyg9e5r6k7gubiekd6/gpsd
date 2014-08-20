@@ -4522,14 +4522,19 @@ during the quiet period.
 Equivalent of a Type 5 message for ships using Class B equipment.  Also
 used to associate an MMSI with a name on either class A or class B equipment.
 
-A "Type 24" may be in part A or part B format; either is 168 bits.
-According to the standard, parts A and B are expected to be broadcast
-in adjacent pairs; in the real world they may (due to quirks in
-various aggregation methods) be separated by other sentances or even
+A "Type 24" may be in part A or part B format; According to the
+standard, parts A and B are expected to be broadcast in adjacent
+pairs; in the real world they may (due to quirks in various
+aggregation methods) be separated by other sentances or even
 interleaved with different Type 24 pairs; decoders must cope with
 this.  The interpretation of some fields in Type B format changes
 depending on the range of the Type B MMSI field. 160 bits for part A,
 168 bits for part B.
+
+According to the standard, both the A and B parts are supposed to
+be 168 bits. However, in the wild, A parts are often transmitted
+with only 160 bits, omitting the 'spare' 7 bits at the end.
+Implementers should be permissive about this.
 
 <<IALA>> does not describe this message type; format information
 is thanks to Kurt Schwehr.
