@@ -95,6 +95,14 @@ bool ais_binary_decode(const int debug,
 			"AIVDM message type %d size > %d bits (%zd).\n", \
 			ais->type, correct, bitlen); \
 	}
+#define RANGE_CHECK(min, max) \
+	if (bitlen < min || bitlen > max) { \
+	    gpsd_report(debug, LOG_ERROR, \
+			"AIVDM message type %d size is out of range (%zd).\n", \
+			ais->type, bitlen); \
+	    return false; \
+	}
+
     /*
      * Something about the shape of this switch statement confuses
      * GNU indent so badly that there is no point in trying to be
@@ -763,12 +771,7 @@ bool ais_binary_decode(const int debug,
 	//ais->type10.spare2       = UBITS(70, 2);
 	break;
     case 12: /* Safety Related Message */
-	if (bitlen < 72 || bitlen > 1008) {
-	    gpsd_report(debug, LOG_WARN,
-			"AIVDM message type 12 size is out of range (%zd).\n",
-			bitlen);
-	    return false;
-	}
+	RANGE_CHECK(72, 1008)
 	ais->type12.seqno          = UBITS(38, 2);
 	ais->type12.dest_mmsi      = UBITS(40, 30);
 	ais->type12.retransmit     = (bool)UBITS(70, 1);
@@ -976,7 +979,7 @@ bool ais_binary_decode(const int debug,
     case 24:	/* Class B CS Static Data Report */
 	switch (UBITS(38, 2)) {
 	case 0:
-	    PERMISSIVE_LENGTH_CHECK(160)
+	    RANGE_CHECK(160, 168)
 	    /* save incoming 24A shipname/MMSI pairs in a circular queue */
 	    {
 		struct ais_type24a_t *saveptr = &type24_queue->ships[type24_queue->index];
