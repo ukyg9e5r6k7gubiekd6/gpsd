@@ -854,10 +854,6 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    beam                          =                 getleu16(bu, 22);
 	    to_starboard                  =                 getleu16(bu, 24);
 	    to_bow                        =                 getleu16(bu, 26);
-	    ais->type24.dim.to_bow        = (unsigned int) (to_bow/10);
-	    ais->type24.dim.to_stern      = (unsigned int) ((length-to_bow)/10);
-	    ais->type24.dim.to_port       = (unsigned int) ((beam-to_starboard)/10);
-	    ais->type24.dim.to_starboard  = (unsigned int) (to_starboard/10);
 	    if ((length == 0xffff) || (to_bow       == 0xffff)) {
 	        length       = 0;
 		to_bow       = 0;
@@ -866,6 +862,10 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	        beam         = 0;
 		to_starboard = 0;
 	    }
+	    ais->type24.dim.to_bow        = (unsigned int) (to_bow/10);
+	    ais->type24.dim.to_stern      = (unsigned int) ((length-to_bow)/10);
+	    ais->type24.dim.to_port       = (unsigned int) ((beam-to_starboard)/10);
+	    ais->type24.dim.to_starboard  = (unsigned int) (to_starboard/10);
 	}
 
 	for (i = 0; i < MAX_TYPE24_INTERLEAVE; i++) {
