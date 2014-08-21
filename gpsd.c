@@ -399,11 +399,13 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	/* see PF_INET6 case below */
 	s = socket(PF_INET, type, proto);
 	if (s > -1 ) {
+	/*@-unrecog@*/
 	/* Set packet priority */
-	  if (setsockopt(s, IPPROTO_IP, IP_TOS, &dscp, sizeof(dscp)) == -1)
+	if (setsockopt(s, IPPROTO_IP, IP_TOS, &dscp, sizeof(dscp)) == -1)
 	    gpsd_report(context.debug, LOG_WARN,
 			"Warning: SETSOCKOPT TOS failed\n");
 	}
+	/*@+unrecog@*/
 
 	break;
 #ifdef IPV6_ENABLE
@@ -1589,7 +1591,9 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	(void)ntpshm_put(device, device->shmIndex, &td);
 	/*@+compdef@*/
 	device->last_fixtime.real = device->newdata.time;
+#ifndef S_SPLINT_S
 	device->last_fixtime.clock = td.clock.tv_sec + td.clock.tv_nsec / 1e9;
+#endif /* S_SPLINT_S */
     }
 #endif /* NTPSHM_ENABLE */
 
@@ -1913,7 +1917,7 @@ int main(int argc, char *argv[])
 
 #ifdef SYSTEMD_ENABLE
     sd_socket_count = sd_get_socket_count();
-    if (sd_socket_count > 0 && control_socket) {
+    if (sd_socket_count > 0 && control_socket != NULL) {
         gpsd_report(context.debug, LOG_WARN,
                     "control socket passed on command line ignored\n");
         control_socket = NULL;
@@ -2129,7 +2133,9 @@ int main(int argc, char *argv[])
 #ifdef SOCKET_EXPORT_ENABLE
     for (i = 0; i < NITEMS(subscribers); i++) {
 	subscribers[i].fd = UNALLOCATED_FD;
+#ifndef S_SPLINT_S
 	(void)pthread_mutex_init(&subscribers[i].mutex, NULL);
+#endif /* S_SPLINT_S */
     }
 #endif /* SOCKET_EXPORT_ENABLE*/
 

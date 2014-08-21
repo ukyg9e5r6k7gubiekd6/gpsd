@@ -2823,8 +2823,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 		 * This is a kluge.
 		 */
 		if (cp->code == 0
-		    || ais->type8.dac200fid10.hazard >= NITEMS(hazard_types)
-		    || !isascii(ais->type8.dac200fid10.vin[0]))
+		    || (int)ais->type8.dac200fid10.hazard >= NITEMS(hazard_types)
+		    || !isascii((int)ais->type8.dac200fid10.vin[0]))
 		    break;
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"vin\":\"%s\",\"length\":%u,\"beam\":%u,"
@@ -2855,7 +2855,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		 * FIXME: AIS struct should have "structured" bit set by driver
 		 * This is a kluge.
 		 */
-		if (ais->type8.dac200fid23.type >= NITEMS(emma_types))
+		if ((int)ais->type8.dac200fid23.type >= NITEMS(emma_types))
 		    break;
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"start\":\"%4u-%02u-%02uT%02u:%02u\","

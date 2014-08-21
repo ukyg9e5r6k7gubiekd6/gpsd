@@ -1197,10 +1197,12 @@ int main(int argc, char **argv)
     }
 
     if (serial) {
+	assert(source.device != NULL);	/* clue to splint */
 	(void) strlcpy(session.gpsdata.dev.path, 
 		       source.device, 
 		       sizeof(session.gpsdata.dev.path));
     } else {
+	assert(source.server != NULL);	/* clue to splint */
 	if (strstr(source.server, "//") == 0)
 	    (void) strlcpy(session.gpsdata.dev.path, 
 			   "tcp://",

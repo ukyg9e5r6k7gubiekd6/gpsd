@@ -106,7 +106,7 @@ static int send_udp (char *nmeastring, size_t ind)
     buffer[ind] = '\r'; ind++;
     buffer[ind] = '\0';
 
-    if (!(flags & WATCH_JSON) && buffer[0] == '{') {
+    if ((flags & WATCH_JSON)==0 && buffer[0] == '{') {
 	/* do not send JSON when not configured to do so */
 	return 0;
     }
@@ -139,7 +139,7 @@ static int open_udp(char **hostport)
    {
        char *hostname = NULL;
        char *portname = NULL;
-       char *endptr = '\0';
+       char *endptr = NULL;
        int  portnum;
        struct hostent *hp;
 
@@ -154,11 +154,13 @@ static int open_udp(char **hostport)
        }
 
        errno = 0;
-       portnum = strtol(portname, &endptr, 10);
+       portnum = (int)strtol(portname, &endptr, 10);
+       /*@+charint@*/
        if (1 > portnum || 65535 < portnum || '\0' != *endptr || 0 != errno) {
 	   (void)fprintf(stderr, "gps2udp: syntax is [-u hostname:port] [%s] is not a valid port number\n",portname);
 	   return (-1);
        }
+       /*@-charint@*/
 
        sock[channel]= socket(AF_INET, SOCK_DGRAM, 0);
        if (sock[channel] < 0) {

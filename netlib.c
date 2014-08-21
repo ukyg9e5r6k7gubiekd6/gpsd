@@ -102,7 +102,7 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 #ifndef S_SPLINT_S
     freeaddrinfo(result);
 #endif /* S_SPLINT_S */
-    if (ret)
+    if (ret != 0 || s < 0)
 	return ret;
 
 #ifdef IPTOS_LOWDELAY
