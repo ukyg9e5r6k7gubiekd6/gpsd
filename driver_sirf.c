@@ -1404,14 +1404,14 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 
 	case 1:
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Probing for firmware version...\n");
+			"SiRF: Probing for firmware version.\n");
 	    (void)sirf_write(session, versionprobe);
 	    break;
 
 	case 2:
 #ifdef RECONFIGURE_ENABLE
-	    /* unset MID 64 first since there is a flood of them */
-	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64...\n");
+	    /* unset MID 0x40 = 64 first since there is a flood of them */
+	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64.\n");
 	    putbyte(unsetmidXX, 6, 0x40);
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
@@ -1422,13 +1422,13 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	     * parameters so they can be reverted before close.
 	     */
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Requesting navigation parameters...\n");
+			"SiRF: Requesting navigation parameters.\n");
 	    (void)sirf_write(session, navparams);
 	    break;
 
 	case 4:
-	    /* unset GND (0x029), it's not reliable on SiRF II */
-	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64...\n");
+	    /* unset GND (0x29 = 41), it's not reliable on SiRF II */
+	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: unset MID 64.\n");
 	    putbyte(unsetmidXX, 6, 0x29);
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
@@ -1436,38 +1436,38 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	case 5:
 	    if (!session->context->readonly) {
 		gpsd_report(session->context->debug, LOG_PROG,
-			    "SiRF: Setting Navigation Parameters\n");
+			    "SiRF: Setting Navigation Parameters.\n");
 		(void)sirf_write(session, modecontrol);
 	    }
 	    break;
 
 	case 6:
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Requesting periodic ecef reports...\n");
+			"SiRF: Requesting periodic ecef reports.\n");
 	    (void)sirf_write(session, requestecef);
 	    break;
 
 	case 7:
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Requesting periodic tracker reports...\n");
+			"SiRF: Requesting periodic tracker reports.\n");
 	    (void)sirf_write(session, requesttracker);
 	    break;
 
 	case 8:
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Setting DGPS control to use SBAS...\n");
+			"SiRF: Setting DGPS control to use SBAS.\n");
 	    (void)sirf_write(session, dgpscontrol);
 	    break;
 
 	case 9:
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Setting SBAS to auto/integrity mode...\n");
+			"SiRF: Setting SBAS to auto/integrity mode.\n");
 	    (void)sirf_write(session, sbasparams);
 	    break;
 
 	case 10:
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Enabling PPS message...\n");
+			"SiRF: Enabling PPS message.\n");
 	    (void)sirf_write(session, enablemid52);
 	    break;
 
@@ -1476,18 +1476,20 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    if (session->gpsdata.dev.baudrate >= 57600) {
 		/* fast enough, turn on nav data */
 		gpsd_report(session->context->debug, LOG_PROG,
-			    "SiRF: Enabling subframe transmission...\n");
+			    "SiRF: Enabling subframe transmission.\n");
 		(void)sirf_write(session, enablesubframe);
 	    } else {
 		/* too slow, turn off nav data */
 		gpsd_report(session->context->debug, LOG_PROG,
-			    "SiRF: Disabling subframe transmission...\n");
+			    "SiRF: Disabling subframe transmission.\n");
 		(void)sirf_write(session, disablesubframe);
 	    }
 	    break;
 
 	case 12:
-	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: disable MID 7, 28, 29, 30, 31...\n");
+	    /* disable navigation debug messages (the value 5 is magic) */
+	    gpsd_report(session->context->debug, LOG_PROG,
+			"SiRF: disable MID 7, 28, 29, 30, 31.\n");
 	    putbyte(unsetmidXX, 5, 0x05);
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
