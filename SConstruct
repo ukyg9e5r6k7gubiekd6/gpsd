@@ -1041,7 +1041,7 @@ cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 env.Depends(cgps, compiled_gpslib)
 
 binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps]
-if ncurseslibs:
+if env["ncurses"]:
     binaries += [cgps, gpsmon]
 
 # Test programs
@@ -1335,7 +1335,7 @@ headerinstall = [ env.Install(installdir('includedir'), x) for x in ("libgpsmm.h
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
 binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gps2udp, gpxlogger, lcdgps]))
-if ncurseslibs:
+if env["ncurses"]:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib))
