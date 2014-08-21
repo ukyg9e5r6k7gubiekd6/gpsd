@@ -778,7 +778,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     report_unlock();
 
     /* Update the last fix time seen for PPS. FIXME: do this here? */
-    device->last_fixtime.real = device->newdata.time;
+    device->last_fixtime = device->newdata.time;
 }
 /*@+observertrans +nullpass +globstate +compdef +uniondef@*/
 

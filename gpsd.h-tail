@@ -475,10 +475,7 @@ struct gps_device_t {
     int shmIndexPPS;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-    volatile struct {
-	timestamp_t real;
-	timestamp_t clock;
-    } last_fixtime;	/* so updates happen once */
+    volatile timestamp_t last_fixtime;		/* so updates happen once */
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;

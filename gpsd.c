@@ -1559,7 +1559,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_report(context.debug, LOG_PROG, "NTP: No time this packet\n");
     } else if (isnan(device->newdata.time)) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: bad new time\n");
-    } else if (device->newdata.time == device->last_fixtime.real) {
+    } else if (device->newdata.time == device->last_fixtime) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: Not a new time\n");
     } else if (!device->ship_to_ntpd) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: No precision time report\n");
@@ -1590,10 +1590,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	/*@-compdef@*/
 	(void)ntpshm_put(device, device->shmIndex, &td);
 	/*@+compdef@*/
-	device->last_fixtime.real = device->newdata.time;
-#ifndef S_SPLINT_S
-	device->last_fixtime.clock = td.clock.tv_sec + td.clock.tv_nsec / 1e9;
-#endif /* S_SPLINT_S */
+	device->last_fixtime = device->newdata.time;
     }
 #endif /* NTPSHM_ENABLE */
 
