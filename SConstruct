@@ -147,7 +147,8 @@ boolopts = (
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
     ("libgpsmm",      True,  "build C++ bindings"),
-    ("libQgpsmm",     True,  "build QT bindings"),
+    ("libQgpsmm",     True,  "build QT bindings (deprecated alias)"),
+    ("qt",            True,  "build QT bindings"),
     # Daemon options
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
@@ -748,7 +749,7 @@ pid_t getsid(pid_t pid);
         env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                           src_suffix=".xml", suffix=".html")
 
-    qt_network = env['libQgpsmm'] and config.CheckPKG('QtNetwork')
+    qt_network = env['qt'] and env['libQgpsmm'] and config.CheckPKG('QtNetwork')
 
     env = config.Finish()
 
