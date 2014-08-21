@@ -171,7 +171,7 @@ static int open_udp(char **hostport)
        remote[channel].sin_family = (sa_family_t)AF_INET;
        hp = gethostbyname(hostname);
        if (hp==NULL) {
-	   fprintf(stderr, "gps2udp: syntaxe is [-u hostname:port] [%s] is not a valid hostnamer\n",hostname);
+	   fprintf(stderr, "gps2udp: syntax is [-u hostname:port] [%s] is not a valid hostname\n",hostname);
 	   return (-1);
        }
 
@@ -194,7 +194,6 @@ static void usage(void)
 		  "-b Run in background as a daemon.\n" 
 		  "-d [0-2] 1 display sent packets, 2 ignored packets.\n" 
 		  "-v Print version and exit.\n\n"
-		  "You must specify one, or more, of -r, -R, or -w\n"
                   "example: gps2udp -a -n -c 2 -d 1 -u data.aishub.net:2222 fridu.net\n"
 		  );
 }
