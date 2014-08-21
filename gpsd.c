@@ -1852,7 +1852,7 @@ int main(int argc, char *argv[])
     int i, option;
     int msocks[2] = {-1, -1};
     bool go_background = true;
-    bool in_restart;
+    volatile bool in_restart;
 
     context.debug = 0;
     gps_context_init(&context);
