@@ -1486,6 +1486,12 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    }
 	    break;
 
+	case 12:
+	    gpsd_report(session->context->debug, LOG_PROG, "SiRF: disable MID 7, 28, 29, 30, 31...\n");
+	    putbyte(unsetmidXX, 5, 0x05);
+	    (void)sirf_write(session, unsetmidXX);
+	    break;
+
 #endif /* RECONFIGURE_ENABLE */
 	default:
 	    /* initialization is done */
