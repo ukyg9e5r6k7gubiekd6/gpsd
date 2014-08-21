@@ -1485,19 +1485,14 @@ static ssize_t nmea2000_get(struct gps_device_t *session)
     struct can_frame frame;
     ssize_t          status;
 
-//  printf("NMEA2000 get: enter\n");
     session->packet.outbuflen = 0;
     status = read(session->gpsdata.gps_fd, &frame, sizeof(frame));
     if (status == (ssize_t)sizeof(frame)) {
         session->packet.type = NMEA2000_PACKET;
 	find_pgn(&frame, session);
-//	printf("NMEA2000 get: exit(%d)\n", status);
-	if (session->driver.nmea2000.workpgn == NULL) {
-	    status = 0;
-	}
+
         return frame.can_dlc & 0x0f;
     }
-//  printf("NMEA2000 get: exit(EXIT_SUCCESS)\n");
     return 0;
 }
 
