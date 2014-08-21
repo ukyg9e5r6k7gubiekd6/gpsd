@@ -1031,6 +1031,10 @@ static /*@unused@*/ inline void memory_barrier(void)
 #endif /* S_SPLINT_S */
 }
 
+# ifdef __cplusplus
+}
+# endif
+
 #endif /* _GPSD_H_ */
 // Local variables:
 // mode: c
