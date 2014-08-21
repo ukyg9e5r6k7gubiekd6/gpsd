@@ -396,11 +396,20 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 static ssize_t zodiac_control_send(struct gps_device_t *session,
 				   char *msg, size_t len)
 {
-    unsigned short *shortwords = (unsigned short *)msg;
+    /*@-usedef -compdef@*/
+    unsigned short shortwords[256];
+
+#define min(x,y)	((x) < (y) ? x : y)
+    /*
+     * We used to just cast msg to an unsigned short pointer.
+     * This can fail on word-oriented achitectures like a SPARC.
+     */
+    memcpy((char *)shortwords, msg, min(sizeof(shortwords), len));
 
     /* and if len isn't even, it's your own fault */
     return zodiac_spew(session, shortwords[0], shortwords + 1,
 		       (int)(len / 2 - 1));
+    /*@+usedef +compdef@*/
 }
 #endif /* CONTROLSEND_ENABLE */
 
