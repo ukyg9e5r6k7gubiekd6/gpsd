@@ -461,6 +461,13 @@ not all integer types have the same length across architectures. A long may
 be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
 4 bytes in a packet, then say so (or use sizeof(int32_t)).</p>
 
+<h2 id="nohash">Avoid git hashes</h2>
+
+<p>Style point: use git hashes in change comments. They'll become at
+best a pain in the ass and at worst meaningless meaningless if the
+project ever has to change version control systems again.  Better to
+refer by committer and date.</p>
+
 <h1 id="understanding">Understanding the code</h1>
 
 <h2 id="debugging">Debugging</h2>
