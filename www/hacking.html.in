@@ -463,10 +463,10 @@ be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
 
 <h2 id="nohash">Avoid git hashes</h2>
 
-<p>Style point: use git hashes in change comments. They'll become at
-best a pain in the ass and at worst meaningless meaningless if the
-project ever has to change version control systems again.  Better to
-refer by committer and date.</p>
+<p>Style point: avoid using git hashes in change comments. They'll
+become at best a pain in the ass and at worst meaningless meaningless
+if the project ever has to change version control systems again.
+Better to refer by committer and date.</p>
 
 <h1 id="understanding">Understanding the code</h1>
 
