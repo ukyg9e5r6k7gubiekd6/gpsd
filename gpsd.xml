@@ -116,7 +116,7 @@ instance, see the output of <command>gpsd -l</command></para>
 <para><application>gpsd</application> effectively hides the
 differences among the GPS types it supports. It also knows about and
 uses commands that tune these GPSes for lower latency. By using
-<application>gpsd</application> as an intermediary applications
+<application>gpsd</application> as an intermediary, applications
 avoid contention for serial devices.</para>
 
 <para><application>gpsd</application> can use differential-GPS

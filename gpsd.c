@@ -248,10 +248,13 @@ static void usage(void)
   -S integer (default %s) = set port for daemon \n\
   -h		     	    = help message \n\
   -V			    = emit version and exit.\n\
-A device may be a local serial device for GPS input, or a URL of the form:\n\
+A device may be a local serial device for GPS input, or a URL in one \n\
+of the following forms:\n\
+     tcp://host[:port]\n\
+     udp://host[:port]\n\
      {dgpsip|ntrip}://[user:passwd@]host[:port][/stream]\n\
      gpsd://host[:port][/device][?protocol]\n\
-in which case it specifies an input source for GPSD, DGPS or ntrip data.\n\
+in which case it specifies an input source for device, DGPS or ntrip data.\n\
 \n\
 The following driver types are compiled into this gpsd instance:\n",
 		 DEFAULT_GPSD_PORT);
