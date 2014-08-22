@@ -1562,38 +1562,16 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_report(context.debug, LOG_PROG, "NTP: No time this packet\n");
     } else if (isnan(device->newdata.time)) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: bad new time\n");
-    } else if (device->newdata.time == device->last_fixtime) {
+    } else if (device->newdata.time == device->last_fixtime.real) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: Not a new time\n");
     } else if (!device->ship_to_ntpd) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: No precision time report\n");
     } else {
-	double fix_time, integral, fractional;
 	struct timedrift_t td;
-
-#ifdef HAVE_CLOCK_GETTIME
-	/*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &td.clock);
-#else
-	struct timeval clock_tv;
-	(void)gettimeofday(&clock_tv, NULL);
-	TVTOTS(&td.clock, &clock_tv);
-#endif /* HAVE_CLOCK_GETTIME */
-	fix_time = device->newdata.time;
-	/* assume zero when there's no offset method */
-	if (device->device_type == NULL
-	    || device->device_type->time_offset == NULL)
-	    fix_time += 0.0;
-	else
-	    fix_time += device->device_type->time_offset(device);
-	/* it's ugly but timestamp_t is double */
-	fractional = modf(fix_time, &integral);
-	/*@-type@*/ /* splint is confused about struct timespec */
-	td.real.tv_sec = (time_t)integral;
-	td.real.tv_nsec = (long)(fractional * 1e+9);
-	/*@+type@*/
+	ntpshm_latch(device, &td);
 	/*@-compdef@*/
 	(void)ntpshm_put(device, device->shmIndex, &td);
 	/*@+compdef@*/
-	device->last_fixtime = device->newdata.time;
     }
 #endif /* NTPSHM_ENABLE */
 

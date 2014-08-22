@@ -475,7 +475,10 @@ struct gps_device_t {
     int shmIndexPPS;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
-    volatile timestamp_t last_fixtime;		/* so updates happen once */
+    volatile struct {
+	timestamp_t real;
+	timestamp_t clock;
+    } last_fixtime;	/* so updates happen once */
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
@@ -839,6 +842,7 @@ extern unsigned int ais_binary_encode(struct ais_t *ais, /*@out@*/unsigned char 
 extern void ntpshm_context_init(struct gps_context_t *);
 extern void ntpshm_session_init(struct gps_device_t *);
 extern int ntpshm_put(struct gps_device_t *, int, struct timedrift_t *);
+extern void ntpshm_latch(struct gps_device_t *device, struct timedrift_t *td);
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
 

@@ -698,6 +698,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
     char buf[BUFSIZ];
+    struct timedrift_t td;
 
 #ifdef PPS_ENABLE
     if (!serial && strncmp((char*)device->packet.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
@@ -778,7 +779,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     report_unlock();
 
     /* Update the last fix time seen for PPS. FIXME: do this here? */
-    device->last_fixtime = device->newdata.time;
+    ntpshm_latch(device, &td);
 }
 /*@+observertrans +nullpass +globstate +compdef +uniondef@*/
 

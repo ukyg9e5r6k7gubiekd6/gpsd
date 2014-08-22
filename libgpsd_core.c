@@ -1641,3 +1641,34 @@ void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
     gps_clear_dop(&out->dop);
 #endif
 }
+
+void ntpshm_latch(struct gps_device_t *device, struct timedrift_t *td)
+/* latch the fact that we've saved a fix */
+{
+    double fix_time, integral, fractional;
+
+#ifdef HAVE_CLOCK_GETTIME
+    /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &td->clock);
+#else
+    struct timeval clock_tv;
+    (void)gettimeofday(&clock_tv, NULL);
+    TVTOTS(&td->clock, &clock_tv);
+#endif /* HAVE_CLOCK_GETTIME */
+    fix_time = device->newdata.time;
+    /* assume zero when there's no offset method */
+    if (device->device_type == NULL
+	|| device->device_type->time_offset == NULL)
+	fix_time += 0.0;
+    else
+	fix_time += device->device_type->time_offset(device);
+    /* it's ugly but timestamp_t is double */
+    fractional = modf(fix_time, &integral);
+    /*@-type@*/ /* splint is confused about struct timespec */
+    td->real.tv_sec = (time_t)integral;
+    td->real.tv_nsec = (long)(fractional * 1e+9);
+    /*@+type@*/
+    device->last_fixtime.real = device->newdata.time;
+    device->last_fixtime.clock = td->clock.tv_sec + td->clock.tv_nsec / 1e9;
+}
+
+/* end */
