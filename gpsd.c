@@ -1567,9 +1567,9 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
     } else if (!device->ship_to_ntpd) {
 	//gpsd_report(context.debug, LOG_PROG, "NTP: No precision time report\n");
     } else {
+	/*@-compdef@*/
 	struct timedrift_t td;
 	ntpshm_latch(device, &td);
-	/*@-compdef@*/
 	(void)ntpshm_put(device, device->shmIndex, &td);
 	/*@+compdef@*/
     }
