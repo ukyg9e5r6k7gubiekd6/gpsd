@@ -660,7 +660,7 @@ ais_specs = (
         ('text',          'string',        None),
         ),
     },
-    # Message type 13 duplicates 7 
+    # Message type 13 duplicates 7
     {
     "initname" : "json_ais14",
     "headers": ("AIS_HEADER",),
@@ -939,7 +939,7 @@ def generate(spec):
         elif attr not in outboard:
             report += "    char %s[JSON_VAL_MAX+1];\n" % attr
             outboard.append(attr)
-                
+
     structname = spec["structname"]
     # If there are structarrays describing array subobjects, we need
     # to make a separate parse control initializer for each one.  The

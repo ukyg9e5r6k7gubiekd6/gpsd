@@ -249,7 +249,7 @@ class SkyView(gtk.DrawingArea):
         self.queue_draw()
 
 class NoiseView:
-    "Encapsulate view object for watching noise statistics." 
+    "Encapsulate view object for watching noise statistics."
     COLUMNS = 2
     ROWS = 4
     noisefields = (
@@ -270,7 +270,7 @@ class NoiseView:
         for i in range(len(NoiseView.noisefields)):
             colbase = (i / NoiseView.ROWS) * 2
             label = gtk.Label(NoiseView.noisefields[i][0] + ": ")
-            # Wacky way to force right alignment 
+            # Wacky way to force right alignment
             label.set_alignment(xalign=1, yalign=0.5)
             self.widget.attach(label, colbase, colbase+1,
                              i % NoiseView.ROWS, i % NoiseView.ROWS + 1)
@@ -291,7 +291,7 @@ class NoiseView:
                 widget.set_text("n/a")
 
 class MaidenheadView:
-    "Encapsulate view object for watching Maidenhead grid location." 
+    "Encapsulate view object for watching Maidenhead grid location."
     def __init__(self):
         self.widget = gtk.Entry()
         self.widget.set_editable(False)
@@ -302,7 +302,7 @@ class MaidenheadView:
             return self.widget.set_text("n/a")
 
 class AISView:
-    "Encapsulate store and view objects for watching AIS data." 
+    "Encapsulate store and view objects for watching AIS data."
     AIS_ENTRIES = 10
     DWELLTIME = 360
     def __init__(self, deg_type):
@@ -412,7 +412,7 @@ class AISView:
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
                     (ais.type, ais.name, "(%s navaid)" % ais.epfd_text, "", where, ais.aid_type_text))
-                    
+
 class Base:
     COLUMNS = 3
     ROWS = 7
@@ -440,7 +440,7 @@ class Base:
         self.saved_mode = -1
         self.ais_latch = False
         self.noise_latch = False
-  
+
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
@@ -567,7 +567,7 @@ class Base:
         for i in range(len(Base.gpsfields)):
             colbase = (i / Base.ROWS) * 2
             label = gtk.Label(Base.gpsfields[i][0] + ": ")
-            # Wacky way to force right alignment 
+            # Wacky way to force right alignment
             label.set_alignment(xalign=1, yalign=0.5)
             datatable.attach(label, colbase, colbase+1,
                              i % Base.ROWS, i % Base.ROWS + 1)
@@ -746,7 +746,7 @@ class Base:
         "Update the GPS data fields."
         # the first 14 fields are updated using TPV data
         for (hook, widget) in Base.gpsfields[:14]:
-            if hook:	# Remove this guard when we have all hooks 
+            if hook:	# Remove this guard when we have all hooks
                 widget.set_text(hook(self, tpv))
         self.gsview.update(tpv)
 
@@ -756,12 +756,13 @@ class Base:
             satellites = data.satellites
             for fld in reversed(SKY_VIEW_SORT_FIELDS):
                 rev =  (fld[0] == '-')
-                if (rev): fld = fld[1:]
+                if rev:
+                    fld = fld[1:]
                 satellites = sorted(satellites[:],
-                                    cmp=lambda x,y: cmp(x[fld], 
+                                    cmp=lambda x,y: cmp(x[fld],
                                                         y[fld]),
                                     reverse = rev)
-            for (i, satellite) in enumerate(satellites): 
+            for (i, satellite) in enumerate(satellites):
                 self.set_satlist_field(i, 0, satellite.PRN)
                 self.set_satlist_field(i, 1, satellite.el)
                 self.set_satlist_field(i, 2, satellite.az)
@@ -819,7 +820,7 @@ class Base:
                     self.ais_latch = True
                     self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
                     self.aisbox.show()
-                    
+
         return True
 
     def handle_hangup(self, _source, _condition):

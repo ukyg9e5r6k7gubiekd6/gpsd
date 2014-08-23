@@ -26,7 +26,7 @@ class SourceExtractor:
                 self.masks.append((fields[1], fields[2]))
                 if fields[2].startswith("(1llu<<") or fields[2].startswith("INTERNAL_SET"):
                     self.primitive_masks.append((fields[1], fields[2]))
-    
+
     def in_library(self, flag):
         (status, _output) = commands.getstatusoutput("grep %s libgps_core.c libgps_json.c gpsctl.c" % flag)
         return status == 0
@@ -40,20 +40,20 @@ class SourceExtractor:
             return self.in_library(flag)
         else:
             return self.in_daemon(flag)
-    
+
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "cdpt")
         pythonize = tabulate = False
         clientgen = daemongen = False
         for (switch, val) in options:
-            if (switch == '-p'):
+            if switch == '-p':
                 pythonize = True
-            if (switch == '-c'):
+            if switch == '-c':
                 clientgen = True
-            if (switch == '-d'):
+            if switch == '-d':
                 daemongen = True
-            if (switch == '-t'):
+            if switch == '-t':
                 tabulate = True
 
         if not arguments:
@@ -108,7 +108,7 @@ const char *gps_maskdump(gps_mask_t set)
 	gps_mask_t      mask;
 	const char      *name;
     } *sp, names[] = {"""  % (maxout + 3,)
-            for (flag, value) in (clientside.primitive_masks + daemonside.primitive_masks):
+            for (flag, value) in clientside.primitive_masks + daemonside.primitive_masks:
                 stem = flag
                 if stem.endswith("_SET"):
                     stem = stem[:-4]

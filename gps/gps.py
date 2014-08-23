@@ -112,7 +112,7 @@ class gpsdata:
             )
 
     def __init__(self):
-        # Initialize all data members 
+        # Initialize all data members
         self.online = 0                 # NZ if GPS on, zero if not
 
         self.valid = 0
@@ -261,8 +261,8 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.valid = ONLINE_SET | DEVICE_SET
             self.path        = self.data["path"]
             self.activated   = default("activated", None)
-            driver = default("driver", None, DEVICEID_SET) 
-            subtype = default("subtype", None, DEVICEID_SET) 
+            driver = default("driver", None, DEVICEID_SET)
+            subtype = default("subtype", None, DEVICEID_SET)
             self.gps_id      = driver
             if subtype:
                 self.gps_id += " " + subtype
@@ -298,7 +298,7 @@ class gps(gpscommon, gpsdata, gpsjson):
             for attrp in ("x", "y", "v", "h", "p", "g"):
                 setattr(self, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
             if "satellites" in self.data.keys():
-                self.satellites = [] 
+                self.satellites = []
                 for sat in self.data['satellites']:
                     self.satellites.append(gps.satellite(PRN=sat['PRN'], elevation=sat['el'], azimuth=sat['az'], ss=sat['ss'], used=sat['used']))
             self.satellites_used = 0
@@ -345,7 +345,7 @@ class gps(gpscommon, gpsdata, gpsjson):
         else: # flags & WATCH_ENABLE:
             if flags & WATCH_OLDSTYLE:
                 arg = 'w+'
-                if (flags & WATCH_NMEA):
+                if flags & WATCH_NMEA:
                     arg += 'r+'
                     return self.send(arg)
             else:

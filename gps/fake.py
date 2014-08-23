@@ -132,7 +132,7 @@ class TestLoad:
     def __init__(self, logfp, predump=False):
         self.sentences = []	# This is the interesting part
         if type(logfp) == type(""):
-            logfp = open(logfp, "r")            
+            logfp = open(logfp, "r")
         self.name = logfp.name
         self.logfp = logfp
         self.predump = predump
@@ -176,7 +176,7 @@ class TestLoad:
                             raise ValueError
                     except (ValueError, IndexError):
                         raise TestLoadError("bad serial-parameter spec in %s"%\
-                                            self.name)                    
+                                            self.name)
                     self.serial = (baud, databits, parity, stopbits)
                 elif "Transport: UDP" in packet:
                     self.sourcetype = "UDP"
@@ -199,7 +199,7 @@ class TestLoad:
                     print repr(packet)
                 if not packet:
                     raise TestLoadError("zero-length packet from %s"%\
-                                        self.name)                    
+                                        self.name)
                 self.sentences.append(packet)
         # Look at the first packet to grok the GPS type
         self.textual = (type_latch == sniffer.NMEA_PACKET)
@@ -559,7 +559,7 @@ class TestSession:
                                  progress=self.progress)
                 self.baseport += 1
             else:
-                newgps = FakePTY(testload, speed=speed, 
+                newgps = FakePTY(testload, speed=speed,
                                    progress=self.progress)
             if pred:
                 newgps.go_predicate = pred
@@ -582,11 +582,11 @@ class TestSession:
         self.progress("gpsfake: client_add()\n")
         newclient = gps.gps(port=self.port, verbose=self.verbose)
         self.append(newclient)
-        newclient.id = self.client_id + 1 
+        newclient.id = self.client_id + 1
         self.client_id += 1
         self.progress("gpsfake: client %d has %s\n" % (self.client_id,newclient.device))
         if commands:
-            self.initialize(newclient, commands) 
+            self.initialize(newclient, commands)
         return self.client_id
     def client_remove(self, cid):
         "Terminate a client session."
@@ -595,8 +595,7 @@ class TestSession:
             if isinstance(obj, gps.gps) and obj.id == cid:
                 self.remove(obj)
                 return True
-        else:
-            return False
+        return False
     def wait(self, seconds):
         "Wait, doing nothing."
         self.progress("gpsfake: wait(%d)\n" % seconds)

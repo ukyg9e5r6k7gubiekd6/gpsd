@@ -121,8 +121,7 @@ def retrieve():
         except IOError:
             if verbose:
                 print >>sys.stderr, "IOError: %s" % url
-    else:
-        return None
+    return None
 
 def last_insertion_time():
     "Give last potential insertion time for a leap second."
@@ -352,32 +351,32 @@ if __name__ == '__main__':
     import getopt
     (options, arguments) = getopt.getopt(sys.argv[1:], "hvf:g:H:i:n:o:I:O:")
     for (switch, val) in options:
-        if (switch == '-h'):    # help, get usage only
+        if switch == '-h':    # help, get usage only
             usage()
-        if (switch == '-v'):    # be verbose
+        elif switch == '-v':    # be verbose
             verbose=1
-        if (switch == '-f'):    # Fetch USNO data to cache locally
+        elif switch == '-f':    # Fetch USNO data to cache locally
             save_leapseconds(val)
             raise SystemExit, 0
-        elif (switch == '-g'):  # Graph the leap_second history
+        elif switch == '-g':  # Graph the leap_second history
             graph_history(val)
             raise SystemExit, 0
-        elif (switch == '-H'):  # make leapsecond include
+        elif switch == '-H':  # make leapsecond include
             sys.stdout.write(make_leapsecond_include(val))
             raise SystemExit, 0
-        elif (switch == '-i'):  # Compute Unix time from RFC822 date
+        elif switch == '-i':  # Compute Unix time from RFC822 date
             print rfc822_to_unix(val)
             raise SystemExit, 0
-        elif (switch == '-n'):  # Compute possible next leapsecond
+        elif switch == '-n':  # Compute possible next leapsecond
             printnext(val)
             raise SystemExit, 0
-        elif (switch == '-o'):  # Compute RFC822 date from Unix time
+        elif switch == '-o':  # Compute RFC822 date from Unix time
             print unix_to_rfc822(float(val))
             raise SystemExit, 0
-        elif (switch == '-I'):  # Compute Unix time from ISO8601 date
+        elif switch == '-I':  # Compute Unix time from ISO8601 date
             print isotime(val)
             raise SystemExit, 0
-        elif (switch == '-O'):  # Compute ISO8601 date from Unix time
+        elif switch == '-O':  # Compute ISO8601 date from Unix time
             print isotime(float(val))
             raise SystemExit, 0
 
