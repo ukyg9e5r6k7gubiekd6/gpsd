@@ -121,7 +121,7 @@ should look something like this:
 greeting line that's a JSON object describing GPSD's version.
 Now plug in your GPS (or AIS receiver, or RTCM2 receiver).
 
-3. Type '?WATCH={"enable":true,"json"};' to start raw and
+3. Type '?WATCH={"enable":true,"json":true};' to start raw and
 watcher modes.  You should see lines beginning with '{' that are
 JSON objects representing reports from your GPS; these are reports
 in GPSD protocol.
