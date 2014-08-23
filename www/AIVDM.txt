@@ -982,6 +982,12 @@ in use for type 6.
 
 DAC/FID pairs are assigned separately per message type.
 
+Note that the apparent presence of one of these DAC/FID pairs dooes
+not guarantee that the message is structured.  Decoders should 
+perform range validation on the structured fields and interpret the
+message as unstructured if any check fails. (As of Aug 2014 no such
+collisions have been in the wild; but see the parallel note for Type 8.)
+
 A list of binary layouts for selected subtypes of message 6 follows.
 
 ==== IMO236 Dangerous Cargo Indication ====
@@ -2096,6 +2102,12 @@ DAC/FID pairs are assigned separately per message type.  For St. Lawrence
 Seaway messages, the DAC may be 316 (Canada) or 366 (U.S.) depending
 on the transmitter location.
 
+Note that the apparent presence of one of these DAC/FID pairs dooes
+not guarantee that the message is structured.  Decoders should 
+perform range validation on the structured fields and interpret the
+message as unstructured if any check fails. Actual false matches with
+DAC/FID = 200/10 have been observed in the wild.
+
 DAC/FID pairs 1/23, 1/28, and 1/30 have addressed versions descrubed
 under type 6.
 
@@ -2104,7 +2116,7 @@ Jan 2013. The deprecated IMO236 1/11 has a different binary layout from
 the IMO289 1/31.  FID type 17 is in use; there is a proposed
 update for it in <<IMO289>>.
 
-Breakdowns Message 8 subtypes from <<IMO289>> follow.
+Breakdowns of Message 8 subtypes from <<IMO289>> follow.
 
 ==== Meteorological and Hydrological Data (IMO236) ====
 
