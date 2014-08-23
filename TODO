@@ -166,6 +166,11 @@ To fix this, the driver needs to store the 'structured' bit in
 the AIS structure.  Will require a library bump, but afterwards
 some code can be removed from the JSON dumper. 
 
+When this happens, also dump AIS text fields unconditionally (not on
+"scaled"). xgps may need changes.
+
+Also, in gps.h, move the tag field to privdata.
+
 ** To do:
 
 *** On next API bump ***
