@@ -156,20 +156,10 @@ message 6 and 8 subtypes - specifically, 6/23, 8/21, 8/22, 8/24, and
 
 We'd need machinery to shift a byte array 30 bits left...
 
-**** AIS struct needs a 'structured' bit detected by the driver ****
+**** Always dump AIS text fields ****
 
-Turns out that dispatching JSON dump on Types 6 and 8 by DAC/FID 
-isn't reliable, because sometimes unstructured Type 8s can
-false-match with a structured type.  Observed in the wild with 
-an unstructured Type 8 misconstrued as an Inland AIS Type 10.
-To fix this, the driver needs to store the 'structured' bit in
-the AIS structure.  Will require a library bump, but afterwards
-some code can be removed from the JSON dumper. 
-
-When this happens, also dump AIS text fields unconditionally (not on
-"scaled"). xgps may need changes.
-
-Also, in gps.h, move the tag field to privdata.
+Dump AIS text fields unconditionally (not on "scaled"). xgps may
+need changes.
 
 ** To do:
 
