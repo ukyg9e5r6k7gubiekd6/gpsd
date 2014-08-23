@@ -1,5 +1,9 @@
 			GPSD project news
 
+Repository head:
+  Better protection agains false matches ogf Inland AIS messages; this
+  requireda libgps version bump to 22.
+
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed. 
   We now get vertical error position and speed estimates from the 
