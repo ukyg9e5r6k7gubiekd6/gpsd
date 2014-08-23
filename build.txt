@@ -34,20 +34,17 @@ compiler that also speaks C++): anonymous unions.  We could eliminate
 these, but the cost would be source-level interface breakage if we
 have to move structure members in and out of unions.
 
-GPSD is normally built and tested with GCC. If the option
--Wmissing-field-initializers or its non-gcc equivalent is set you will
-get a lot of warnings; this is due to generated code and cannot be
-fixed.
+GPSD is normally built and tested with GCC. Do not compile with a version
+older than 4.1.1; there are several known issues with older versions,
+including (a) non-standards-conformant floating-point generation that
+messes up regression testing, (b) a compiler bug affecting RTCM2 code
+generation, (c)  the option -Wno-missing-field-initializers is
+unavailable, leading to a flood of warnings (this is due to generated 
+code and cannot be fixed).
 
 The shared-memory interface relies on one GCCism, but the code is
 otherwise pretty compiler-agnostic.  It is reported that clang
 produces a gpsd that passes all regression tests.
-
-Older versions of gcc don't recognize Wno-missing-field-initializers;
-this has been reported from GCC 3.4.6.  We don't recommend building
-with GCC versions prior to 4.1.1, as these had some floating-point
-non-conformances that confused our regression testing and might have
-real-world consequences.
 
 === Python ===
 
@@ -172,12 +169,6 @@ comment relating to implicit_links in the scons recipe; you probably
 need to build with implicit_link=no.  If this happens, please report
 your platform, ideally along with a way of identifying it from Python,
 to the GPSD maintainers.
-
-If you are going to use the RTCM-104 support, you must compile with
-gcc 4.x; if you don't have it installed as your default compiler, do this
-by specifying CC=gcc4 before the build command.  The rtcm2.c file
-confuses the gcc-3.4.[23] optimizer at -O2 level, making it generate
-incorrect code.
 
 If, while building, you see a complaint that looks like this:
 
