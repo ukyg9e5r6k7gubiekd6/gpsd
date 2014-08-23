@@ -4773,12 +4773,16 @@ language time function. Both date and time to the nearest second can be
 derived from this field. This field is always provided, regardless of  
 the type of AIS equipment.
 
-== NMEA 4.0 Tag Blocks ==
+== NMEA 4.10 Tag Blocks ==
 
-Beginning with NMEA 4.00, the standard describes a way to intersperse 
+Beginning with NMEA 4.10, the standard describes a way to intersperse 
 "tag blocks" with AIS sentences in order to supply additional
 metadata, notably a Unix timestamp to be associated with a sentence
 (or contiguous group of sentences such as an armored AIS Type 5).
+
+The tag black facility is complex, in some respects poorly specified,
+and there has been yet much public discussion of it.  This section
+should be considered provisional and in need of improvement.
 
 The general format of a tag block is: an opening backslash, followed
 by multiple comma-separated fields none of which may contain
@@ -4808,21 +4812,30 @@ follows (table from <<NMEA-ADVANCE>>):
 | t	| string         | Text string (at most 15 chars)
 |===========================================================================
 
-The c field is an emission time for the associated sentence or
-sentence group.
+The c field is an emission time for the sentence it precedes. We're
+not yet sure what the time unit is.
 
 The g value describes a sentence or sentence group to associate the
 tag block to. It is a triple of ints separated by dashes.  The first
 number is the sentence number, the second is total number of sentences
 to make up one group.  The third number is an identifier for that
-particular group.
+particular group.  If there is no g value, the tag block simply applies
+to the following sentence.
 
-As of May 2014 no relative time fields have beenm observed in the
+gAs of May 2014 no relative time fields have been observed in the
 wild. It is unknown whether the unit is seconds or milliseconds.
 
-We do not yet have more information on the meaning of these fields or how
-they are related to nearby AIVDM/AIVDO sentences.  We hope to add this 
-in a future revision.
+The d, t, and s fields are intended to be used for fitering by 
+station IDs included in them.
+
+Part of the standard describes a configuration message facility by
+which AIS message receivers can send queries to AIS senders, and under
+some circumstances change the semantics if tag blocks (in particular,
+by specifying time units and epoch).
+
+We do not yet have more definite information on the meaning of these
+fields or how they are related to nearby AIVDM/AIVDO sentences.  We
+hope to add this in a future revision.
 
 == AIS Payload Byte Alignment, Padding, and Bit Stuffing ==
 
@@ -5367,7 +5380,8 @@ Version 1.44 adds substantial new information on MMSIs and updates
 the <<MMSI link>>, which was stale.
 
 Version 1.45 adds a description of variant AIS talker IDs and NMEA
-4.00 tag blocks.
+4.10 tag blocks.
 
 Version 1.46 corrects an error in the specification on Inland AIS Type
-10s.
+10s. It also adds a bit more information on AIS tag blocks.
+
