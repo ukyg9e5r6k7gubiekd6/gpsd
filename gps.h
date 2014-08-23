@@ -39,7 +39,8 @@ extern "C" {
  * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added. New
  *       model and serial members in part B of AIS type 24, conforming
  *       with ITU-R 1371-4. New timedrift structure (Nov 2013, release 3.10).
- * 5.2 - AIS type 6 and 8 get 'structured' flag; devices moved out of union.
+ * 5.2 - AIS type 6 and 8 get 'structured' flag; GPS_PATH_MAX
+ *       shortened because devices has moved out of union.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	2	/* bump on compatible changes */
@@ -48,13 +49,7 @@ extern "C" {
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define MAXUSERDEVS	4	/* max devices per user */
-
-/* PATH_MAX needs to be enough for long names like /dev/serial/by-id/... */
-#ifdef PATH_MAX
-#define GPS_PATH_MAX   PATH_MAX
-#else
-#define GPS_PATH_MAX   1024
-#endif
+#define GPS_PATH_MAX   32	/* for names like /dev/serial/by-id/... */
 
 /*
  * The structure describing an uncertainty volume in kinematic space.
