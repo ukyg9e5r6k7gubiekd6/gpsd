@@ -1,6 +1,6 @@
 			GPSD project news
 
-Repository head:
+* Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed. 
   We now get vertical error position and speed estimates from the 
   u-blox driver rather than having to interpolate them.
