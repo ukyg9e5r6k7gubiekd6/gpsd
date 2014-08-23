@@ -3601,7 +3601,7 @@ message 5.
 OPEN-QUESTION: <<INLAND>> is not explicit whether the
 "Ship/combination type" field is to contain full ERI codes with range
 8000-8370 or ERI SOLAS codes in the range 1-99.  The tables below
-expand both.
+expand both.  Full ERI codes have been observed in the wild.
 
 .ERI Classification
 [frame="topbot",options="header"]
@@ -5126,7 +5126,8 @@ specified for the Status field.
 
 In Inland Ship Static and Voyage Related Data, which of two possible
 ERI numeric codesets are used for the Type field - the 4-digit codes
-in the 8000-8073 range, or the AIS codes in the 1-99 range?
+in the 8000-8073 range, or the AIS codes in the 1-99 range?  Full ERI
+codes have been observed in the wild.
 
 In the <<INLAND>> description of Message 5 extensions, footnote 6 is
 incomprehensible and not actually referenced in the table.
