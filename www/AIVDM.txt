@@ -4789,10 +4789,10 @@ the type of AIS equipment.
 
 Beginning with NMEA 4.10, the standard describes a way to intersperse 
 "tag blocks" with AIS sentences in order to supply additional
-metadata, notably a Unix timestamp to be associated with a sentence
+metadata, udually a Unix timestamp to be associated with a sentence
 (or contiguous group of sentences such as an armored AIS Type 5).
 
-The tag black facility is complex, in some respects poorly specified,
+The tag block facility is complex, in some respects poorly specified,
 and there has been yet much public discussion of it.  This section
 should be considered provisional and in need of improvement.
 
