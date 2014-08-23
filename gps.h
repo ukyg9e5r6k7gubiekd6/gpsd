@@ -39,7 +39,7 @@ extern "C" {
  * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added. New
  *       model and serial members in part B of AIS type 24, conforming
  *       with ITU-R 1371-4. New timedrift structure (Nov 2013, release 3.10).
- * 5.2 - AIS type 6 and 8 get 'structured' flag.
+ * 5.2 - AIS type 6 and 8 get 'structured' flag; devices moved out of union.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	2	/* bump on compatible changes */
@@ -2012,11 +2012,17 @@ struct gps_data_t {
 
     struct policy_t policy;	/* our listening policy */
 
+    struct {
+	timestamp_t time;
+	int ndevices;
+	struct devconfig_t list[MAXUSERDEVS];
+    } devices;
+
     /* should be moved to privdata someday */
     char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
     /* pack things never reported together to reduce structure size */
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|DEVICELIST_SET|LOGMESSAGE_SET|ERROR_SET|TIMEDRIFT_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|LOGMESSAGE_SET|ERROR_SET|TIMEDRIFT_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */
 	struct rtcm2_t	rtcm2;
@@ -2028,11 +2034,6 @@ struct gps_data_t {
 	struct gst_t gst;
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
-	struct {
-	    timestamp_t time;
-	    int ndevices;
-	    struct devconfig_t list[MAXUSERDEVS];
-	} devices;
 	char error[256];
 	struct timedrift_t timedrift;
     };

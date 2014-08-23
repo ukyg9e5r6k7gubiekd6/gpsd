@@ -165,8 +165,7 @@ need changes.
 
 *** On next API bump ***
 
-In struct gpsdata_t, move the device list out of the union and move
-the tag field to private data.
+Move the tag field to private data.
 
 ***  Make subframe reports available in the C API.
 
