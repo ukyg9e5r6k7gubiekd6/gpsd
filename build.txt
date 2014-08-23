@@ -173,8 +173,8 @@ need to build with implicit_link=no.  If this happens, please report
 your platform, ideally along with a way of identifying it from Python,
 to the GPSD maintainers.
 
-If you are going to use the RTCM-104 support, you should compile with
-gcc4; if you don't have it installed as your default compiler, do this
+If you are going to use the RTCM-104 support, you must compile with
+gcc 4.x; if you don't have it installed as your default compiler, do this
 by specifying CC=gcc4 before the build command.  The rtcm2.c file
 confuses the gcc-3.4.[23] optimizer at -O2 level, making it generate
 incorrect code.
@@ -318,7 +318,7 @@ dbus=no: for systems using DBUS: gpsd includes support for shipping
 fixes as DBUS notifications, but it is not compiled in by default.
 Build with the option "dbus=yes" to get it working.
 
-libQgpsmm=yes: libQgpsmm is a Qt version of the libgps/libgpsmm
+qt=yes: libQgpsmm is a Qt version of the libgps/libgpsmm
 pair. Thanks to the multi-platform approach of Qt, it allows the gpsd
 client library to be available on all the Qt supported platforms.
 Please see http://qt.nokia.com/doc/4.6/supported-platforms.html for a
