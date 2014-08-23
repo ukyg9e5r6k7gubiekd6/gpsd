@@ -1011,16 +1011,6 @@ object.</para>
         false. Applies only to AIS reports.</entry>
 </row>
 <row>
-	<entry>pps</entry>
-	<entry>No</entry>
-	<entry>boolean</entry>
-        <entry>If true, emit a PPS JSON message when the device issues
-        1PPS.  Intended to be used with the "nmea" and "raw" modes.
-        Default is false. <emphasis role="bold">Note: this is an
-        unstable experimental feature which may change or be removed
-        without notice.</emphasis></entry>
-</row>
-<row>
 	<entry>device</entry>
 	<entry>No</entry>
 	<entry>string</entry>

@@ -2,7 +2,9 @@
 
 Repository head:
   Better protection agains false matches of Inland AIS messages; this
-  required a libgps version bump to 22.
+  required a libgps version bump to 22. PPS feature is no longer marked
+  experimental/unstable and the separate "pps" policy flag is gone; PPS
+  is now always emitten when watching JSON.
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed. 

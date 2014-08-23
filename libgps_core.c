@@ -321,14 +321,13 @@ void libgps_dump_state(struct gps_data_t *collect)
 		      collect->version.proto_minor);
     if (collect->set & POLICY_SET)
 	(void)fprintf(debugfp,
-		      "POLICY: watcher=%s nmea=%s raw=%d scaled=%s timing=%s, split24=%s pps=%s, devpath=%s\n",
+		      "POLICY: watcher=%s nmea=%s raw=%d scaled=%s timing=%s, split24=%s devpath=%s\n",
 		      collect->policy.watcher ? "true" : "false",
 		      collect->policy.nmea ? "true" : "false",
 		      collect->policy.raw,
 		      collect->policy.scaled ? "true" : "false",
 		      collect->policy.timing ? "true" : "false",
 		      collect->policy.split24 ? "true" : "false",
-		      collect->policy.pps ? "true" : "false",
 		      collect->policy.devpath);
     if (collect->set & SATELLITE_SET) {
 	int i;
