@@ -4773,7 +4773,7 @@ language time function. Both date and time to the nearest second can be
 derived from this field. This field is always provided, regardless of  
 the type of AIS equipment.
 
-== NMEA 4.10 Tag Blocks ==
+== NMEA Tag Blocks ==
 
 Beginning with NMEA 4.10, the standard describes a way to intersperse 
 "tag blocks" with AIS sentences in order to supply additional
@@ -4789,7 +4789,8 @@ by multiple comma-separated fields none of which may contain
 backslashes, followed by an asterisk and NMEA checksum, followed by a
 closing backslash.
 
-The following is an example of an AIS Type 1 sentence preceded by a tag:
+The following is an example of an AIS Type 1 sentence preceded by a
+tag block:
 
 -------------------------------------------------------------------------------------------------
 \g:1-2-73874,n:157036,s:r003669945,c:1241544035*4A\!AIVDM,1,1,,B,15N4cJ`005Jrek0H@9n`DW5608EP,0*13
@@ -4799,36 +4800,40 @@ Each comma-separated field is expected to be a type key, followed by a
 colon, followed by content.  The semantics of the type keys are as
 follows (table from <<NMEA-ADVANCE>>):
 
+Confusingly, there is a different standard introduced with NMEA 4.00,
+IEC 62320-1, that uses the same tag block format but a slightly
+different (overlapping) set of field keys
+
 .NMEA 4.00 Field Types
 [frame="topbot",options="header"]
 |===========================================================================
-| Code	| Type           | Description
-| c	| int>0          | UNIX time in seconds or milliseconds
-| d	| string         | Destination (at most 15 chars)
-| g	| int-int-int	 | Sentence grouping
-| n	| int>0          | line count
-| r     | int>0          | relative time
-| s	| string         | Source / station
-| t	| string         | Text string (at most 15 chars)
+| IEC   | NMEA	| Type           | Description
+|  c    | c	| int>0          | UNIX time in seconds or milliseconds
+|  d    | d	| string         | Destination (at most 15 chars)
+| xGy   | g	| int-int-int	 | Sentence grouping
+|  x    | n	| int>0          | line count
+|       | r	| int>0          | relative time
+|  s    | s	| string         | Source / station
+|  i    | t	| string         | Text string (at most 15 chars)
 |===========================================================================
 
-The c field is an emission time for the sentence it precedes. We're
-not yet sure what the time unit is.
+The IEC 62320-1 and NMEA 4.10 c field is an emission time for the
+sentence it precedes. We're not yet sure what the time unit is.
 
-The g value describes a sentence or sentence group to associate the
-tag block to. It is a triple of ints separated by dashes.  The first
-number is the sentence number, the second is total number of sentences
-to make up one group.  The third number is an identifier for that
-particular group.  If there is no g value, the tag block simply applies
-to the following sentence.
+The NMEA 4.10 g value describes a sentence or sentence group to
+associate the tag block to. It is a triple of ints separated by
+dashes.  The first number is the sentence number, the second is total
+number of sentences to make up one group.  The third number is an
+identifier for that particular group.  If there is no g value, the tag
+block simply applies to the following sentence.
 
-gAs of May 2014 no relative time fields have been observed in the
+As of May 2014 no NMEA 4.10 relative time fields have been observed in the
 wild. It is unknown whether the unit is seconds or milliseconds.
 
-The d, t, and s fields are intended to be used for fitering by 
+The d, i/t, and s fields are intended to be used for fitering by 
 station IDs included in them.
 
-Part of the standard describes a configuration message facility by
+Part of the NMEA 4.10 standard describes a configuration message facility by
 which AIS message receivers can send queries to AIS senders, and under
 some circumstances change the semantics if tag blocks (in particular,
 by specifying time units and epoch).
