@@ -1258,6 +1258,7 @@ struct ais_t
 		    unsigned int beam;  	/* Beam of ship */
 		    unsigned int shiptype;	/* Ship/combination type */
 		    unsigned int hazard;	/* Hazardous cargo */
+#define DAC200FID10_HAZARD_MAX	5
 		    unsigned int draught;	/* Draught */
 		    unsigned int loaded;	/* Loaded/Unloaded */
 		    bool speed_q;	/* Speed inf. quality */

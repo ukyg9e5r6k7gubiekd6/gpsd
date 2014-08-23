@@ -666,7 +666,15 @@ bool ais_binary_decode(const int debug,
 		ais->type8.dac200fid10.course_q	= (bool)UBITS(158, 1);
 		ais->type8.dac200fid10.heading_q	= (bool)UBITS(159, 1);
 		/* skip 8 bits */
-		ais->type8.structured = true;
+		/*
+		 * Attempt to prevent false matches with this message type 
+		 * by range-checking certain fields.
+		 */
+		if (ais->type8.dac200fid10.hazard > DAC200FID10_HAZARD_MAX
+		    || !isascii((int)ais->type8.dac200fid10.vin[0]))
+		    ais->type8.structured = false;
+		else
+		    ais->type8.structured = true;
 		break;
 	    case 23:	/* EMMA warning */
 		if (bitlen != 256)

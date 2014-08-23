@@ -268,6 +268,7 @@ int json_ais_read(const char *buf,
 		lenhex_unpack(data, &ais->type6.bitcount,
 			      ais->type6.bitdata, sizeof(ais->type6.bitdata));
 	}
+	ais->type6.structured = structured;
     } else if (strstr(buf, "\"type\":7,") != NULL
 	       || strstr(buf, "\"type\":13,") != NULL) {
 	status = json_read_object(buf, json_ais7, endptr);
@@ -413,6 +414,7 @@ int json_ais_read(const char *buf,
 		lenhex_unpack(data, &ais->type8.bitcount,
 			      ais->type8.bitdata, sizeof(ais->type8.bitdata));
 	}
+	ais->type8.structured = structured;
     } else if (strstr(buf, "\"type\":9,") != NULL) {
 	status = json_read_object(buf, json_ais9, endptr);
     } else if (strstr(buf, "\"type\":10,") != NULL) {
