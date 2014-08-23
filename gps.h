@@ -39,9 +39,10 @@ extern "C" {
  * 5.1 - GPS_PATH_MAX uses system PATH_MAX; split24 flag added. New
  *       model and serial members in part B of AIS type 24, conforming
  *       with ITU-R 1371-4. New timedrift structure (Nov 2013, release 3.10).
+ * 5.2 - AIS type 6 and 8 get 'structured' flag.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
-#define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
+#define GPSD_API_MINOR_VERSION	2	/* bump on compatible changes */
 
 #define MAXTAGLEN	8	/* maximum length of sentence tag name */
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
@@ -975,6 +976,7 @@ struct ais_t
 	    //unsigned int spare;	spare bit(s) */
 	    unsigned int dac;           /* Application ID */
 	    unsigned int fid;           /* Functional ID */
+	    bool structured;		/* True match for DAC/FID? */
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
 	    size_t bitcount;		/* bit count of the data */
 	    union {
@@ -1246,6 +1248,7 @@ struct ais_t
 	    unsigned int fid;       	/* Functional ID */
 #define AIS_TYPE8_BINARY_MAX	952	/* 952 bits */
 	    size_t bitcount;		/* bit count of the data */
+	    bool structured;		/* True match for DAC/FID? */
 	    union {
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
 		/* Inland static ship and voyage-related data */

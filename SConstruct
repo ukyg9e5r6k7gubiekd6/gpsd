@@ -27,7 +27,7 @@
 gpsd_version = "3.12~dev"
 
 # library version
-libgps_version_current   = 21
+libgps_version_current   = 22
 libgps_version_revision  = 0
 libgps_version_age       = 0
 libgpsd_version_current  = 22
