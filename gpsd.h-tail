@@ -101,7 +101,6 @@ typedef unsigned int speed_t;
  */
 #define NMEA_MAX	91		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
-#define MAXTAGLEN	8		/* max length of sentence tag name */
 
 /* a few bits of ISGPS magic */
 enum isgpsstat_t {
@@ -451,7 +450,6 @@ struct gps_device_t {
     sourcetype_t sourcetype;
     servicetype_t servicetype;
     int mode;
-    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
 #endif
@@ -561,6 +559,7 @@ struct gps_device_t {
 #define UBLOX   	0x08		/* u-blox firmware with packet 0x62 */
 	    unsigned long satcounter;
 	    unsigned int time_seen;
+	    char lastid;		/* ID with last timestamp seen */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
 	    /* fields from Navigation Parameters message */
 	    bool nav_parameters_seen;	/* have we seen one? */

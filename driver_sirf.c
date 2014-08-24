@@ -639,23 +639,23 @@ static double sirf_time_offset(struct gps_device_t *session)
     }
 
     /* the PPS time message */
-    else if (strcmp(session->tag, "MID52") == 0) {
+    else if (session->driver.sirf.lastid == (char)52) {
 	retval = 0.3;
     }
 
     /* u-blox EMND message */
-    else if (strcmp(session->tag, "MID98") == 0) {
+    else if (session->driver.sirf.lastid == (char)98) {
 	retval = 0.570;
     }
 #ifdef __UNUSED__
     /* geodetic-data message */
-    else if (strcmp(session->tag, "MID41") == 0) {
+    else if (session->driver.sirf.lastid == (char)41) {
 	retval = 0.570;
     }
 #endif /* __UNUSED__ */
 
     /* the Navigation Solution message */
-    else if (strcmp(session->tag, "MID2") == 0) {
+    else if (session->driver.sirf.lastid == (char)2) {
 	if (session->sourcetype == source_usb) {
 	    retval = 0.640;	/* USB, expect +/- 50mS jitter */
 	} else {
@@ -1171,8 +1171,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     len -= 8;
     gpsd_report(session->context->debug, LOG_RAW,
 		"SiRF: Raw packet type 0x%02x\n", buf[0]);
-    (void)snprintf(session->tag, sizeof(session->tag),
-		   "MID%d", (int)buf[0]);
+    session->driver.sirf.lastid = buf[0];
 
     /* could change if the set of messages we enable does */
     session->cycle_end_reliable = true;
