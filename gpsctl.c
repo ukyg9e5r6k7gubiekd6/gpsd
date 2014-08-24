@@ -666,7 +666,7 @@ int main(int argc, char **argv)
 	    for (hunting = true; hunting; )
 	    {
 		fd_set efds;
-		switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+		switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, context.debug))
 		{
 		case AWAIT_GOT_INPUT:
 		    break;
