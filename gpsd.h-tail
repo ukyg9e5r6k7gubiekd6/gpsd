@@ -559,7 +559,7 @@ struct gps_device_t {
 #define UBLOX   	0x08		/* u-blox firmware with packet 0x62 */
 	    unsigned long satcounter;
 	    unsigned int time_seen;
-	    char lastid;		/* ID with last timestamp seen */
+	    unsigned char lastid;	/* ID with last timestamp seen */
 #define TIME_SEEN_UTC_2	0x08	/* Seen UTC time variant 2? */
 	    /* fields from Navigation Parameters message */
 	    bool nav_parameters_seen;	/* have we seen one? */

@@ -639,23 +639,23 @@ static double sirf_time_offset(struct gps_device_t *session)
     }
 
     /* the PPS time message */
-    else if (session->driver.sirf.lastid == (char)52) {
+    else if (session->driver.sirf.lastid == (unsigned char)52) {
 	retval = 0.3;
     }
 
     /* u-blox EMND message */
-    else if (session->driver.sirf.lastid == (char)98) {
+    else if (session->driver.sirf.lastid == (unsigned char)98) {
 	retval = 0.570;
     }
 #ifdef __UNUSED__
     /* geodetic-data message */
-    else if (session->driver.sirf.lastid == (char)41) {
+    else if (session->driver.sirf.lastid == (unsigned char)41) {
 	retval = 0.570;
     }
 #endif /* __UNUSED__ */
 
     /* the Navigation Solution message */
-    else if (session->driver.sirf.lastid == (char)2) {
+    else if (session->driver.sirf.lastid == (unsigned char)2) {
 	if (session->sourcetype == source_usb) {
 	    retval = 0.640;	/* USB, expect +/- 50mS jitter */
 	} else {
