@@ -528,7 +528,6 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	break;
     case NMEA_RECOGNIZED:
-	/* FIXME: shouldn't all end-of-NMEA cases collapse into a pushback? */
 	if (c == '#')
 	    lexer->state = COMMENT_BODY;
 	else if (c == '$')
@@ -1078,7 +1077,6 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 	lexer->state = UBX_RECOGNIZED;
 	break;
     case UBX_RECOGNIZED:
-	/* FIXME: shouldn't all end-of-UBX cases collapse into a pushback? */
 	if (c == 0xb5)
 	    lexer->state = UBX_LEADER_1;
 #ifdef NMEA_ENABLE
