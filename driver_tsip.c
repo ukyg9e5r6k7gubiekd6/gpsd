@@ -190,7 +190,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	break;
     case 0x1c: /* Hardware/Software Version Information (Accutime Gold) */
 	/*
-	 * FIXME: We could get both ginds of version info.
+	 * FIXME: We could get both kinds of version info.
 	 */
 	u1 = (uint8_t) getub(buf, 0); 
 	if (u1 == 0x81) { /* Software Version Information */

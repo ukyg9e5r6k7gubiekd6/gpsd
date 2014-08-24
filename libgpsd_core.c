@@ -904,7 +904,7 @@ static void gpsd_error_model(struct gps_device_t *session,
      * expected time error should be half the resolution of
      * the GPS clock, so we put the bound of the error
      * in as a constant pending getting it from each driver.
-     * FIXME: increase this if no keap-second has been seen
+     * FIXME: increase this if no leap-second has been seen
      * and it's less than 750s (one almanac load cycle)
      * from device powerup.
      */

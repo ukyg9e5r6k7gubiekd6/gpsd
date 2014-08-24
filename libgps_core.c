@@ -81,7 +81,6 @@ int gps_open(/*@null@*/const char *host,
     if (host != NULL && strcmp(host, GPSD_DBUS_EXPORT) == 0) {
 	/*@i@*/status = gps_dbus_open(gpsdata);
 	if (status != 0)
-	    /* FIXME: it would be better not to throw away information here */
 	    status = DBUS_FAILURE;
     }
 #endif /* DBUS_EXPORT_ENABLE */
