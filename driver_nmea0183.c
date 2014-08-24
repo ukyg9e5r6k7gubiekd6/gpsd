@@ -77,7 +77,7 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     int year;
 
     /* check for century wrap */
-    if (session->driver.nmea.date.tm_year % 100 == 99 && yy == 0)
+    if (session->nmea.date.tm_year % 100 == 99 && yy == 0)
 	gpsd_century_update(session, session->context->century + 100);
     year = (session->context->century + yy);
 
@@ -91,37 +91,37 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 	gpsd_report(session->context->debug, LOG_DATA,
 		    "merge_ddmmyy(%s) sets year %d\n",
 		    ddmmyy, year);
-	session->driver.nmea.date.tm_year = year - 1900;
-	session->driver.nmea.date.tm_mon = mon - 1;
-	session->driver.nmea.date.tm_mday = mday;
+	session->nmea.date.tm_year = year - 1900;
+	session->nmea.date.tm_mon = mon - 1;
+	session->nmea.date.tm_mday = mday;
     }
 }
 
 static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 /* update from a UTC time */
 {
-    int old_hour = session->driver.nmea.date.tm_hour;
+    int old_hour = session->nmea.date.tm_hour;
 
-    session->driver.nmea.date.tm_hour = DD(hhmmss);
-    if (session->driver.nmea.date.tm_hour < old_hour)	/* midnight wrap */
-	session->driver.nmea.date.tm_mday++;
-    session->driver.nmea.date.tm_min = DD(hhmmss + 2);
-    session->driver.nmea.date.tm_sec = DD(hhmmss + 4);
-    session->driver.nmea.subseconds =
-	safe_atof(hhmmss + 4) - session->driver.nmea.date.tm_sec;
+    session->nmea.date.tm_hour = DD(hhmmss);
+    if (session->nmea.date.tm_hour < old_hour)	/* midnight wrap */
+	session->nmea.date.tm_mday++;
+    session->nmea.date.tm_min = DD(hhmmss + 2);
+    session->nmea.date.tm_sec = DD(hhmmss + 4);
+    session->nmea.subseconds =
+	safe_atof(hhmmss + 4) - session->nmea.date.tm_sec;
 }
 
 static void register_fractional_time(const char *tag, const char *fld,
 				     struct gps_device_t *session)
 {
     if (fld[0] != '\0') {
-	session->driver.nmea.last_frac_time =
-	    session->driver.nmea.this_frac_time;
-	session->driver.nmea.this_frac_time = safe_atof(fld);
-	session->driver.nmea.latch_frac_time = true;
+	session->nmea.last_frac_time =
+	    session->nmea.this_frac_time;
+	session->nmea.this_frac_time = safe_atof(fld);
+	session->nmea.latch_frac_time = true;
 	gpsd_report(session->context->debug, LOG_DATA,
 		    "%s: registers fractional time %.2f\n",
-		    tag, session->driver.nmea.this_frac_time);
+		    tag, session->nmea.this_frac_time);
     }
 }
 
@@ -265,7 +265,7 @@ static gps_mask_t processGPGLL(int count, char *field[],
     if (field[5][0] != '\0') {
 	merge_hhmmss(field[5], session);
 	register_fractional_time(field[0], field[5], session);
-	if (session->driver.nmea.date.tm_year == 0)
+	if (session->nmea.date.tm_year == 0)
 	    gpsd_report(session->context->debug, LOG_WARN,
 			"can't use GLL time until after ZDA or RMC has supplied a year.\n");
 	else {
@@ -339,23 +339,23 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
      * is only issued once per cycle we can detect this here (it would be
      * nicer to do it on GSA but GSA has no timestamp).
      */
-    session->driver.nmea.latch_mode = strncmp(field[1],
-					      session->driver.nmea.last_gga_timestamp,
-					      sizeof(session->driver.nmea.last_gga_timestamp))==0;
-    if (session->driver.nmea.latch_mode) {
+    session->nmea.latch_mode = strncmp(field[1],
+					      session->nmea.last_gga_timestamp,
+					      sizeof(session->nmea.last_gga_timestamp))==0;
+    if (session->nmea.latch_mode) {
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
     } else
-	(void)strlcpy(session->driver.nmea.last_gga_timestamp,
+	(void)strlcpy(session->nmea.last_gga_timestamp,
 		       field[1],
-		       sizeof(session->driver.nmea.last_gga_timestamp));
+		       sizeof(session->nmea.last_gga_timestamp));
     /* if we have a fix and the mode latch is off, go... */
     if (session->gpsdata.status > STATUS_NO_FIX) {
 	char *altitude;
 
 	merge_hhmmss(field[1], session);
 	register_fractional_time(field[0], field[1], session);
-	if (session->driver.nmea.date.tm_year == 0)
+	if (session->nmea.date.tm_year == 0)
 	    gpsd_report(session->context->debug, LOG_WARN,
 			"can't use GGA time until after ZDA or RMC has supplied a year.\n");
 	else {
@@ -485,7 +485,7 @@ static gps_mask_t processGPGSA(int count, char *field[],
 	gpsd_report(session->context->debug, LOG_DATA,
 		    "GPGSA: malformed, setting ONLINE_SET only.\n");
 	mask = ONLINE_SET;
-    } else if (session->driver.nmea.latch_mode) {
+    } else if (session->nmea.latch_mode) {
 	/* last GGA had a non-advancing timestamp; don't trust this GSA */
 	mask = ONLINE_SET;
     } else {
@@ -560,12 +560,12 @@ static gps_mask_t processGPGSV(int count, char *field[],
 	return ONLINE_SET;
     }
 
-    session->driver.nmea.await = atoi(field[1]);
-    if ((session->driver.nmea.part = atoi(field[2])) < 1) {
+    session->nmea.await = atoi(field[1]);
+    if ((session->nmea.part = atoi(field[2])) < 1) {
 	gpsd_report(session->context->debug, LOG_WARN, "malformed GPGSV - bad part\n");
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
-    } else if (session->driver.nmea.part == 1)
+    } else if (session->nmea.part == 1)
 	gpsd_zero_satellites(&session->gpsdata);
 
     for (fldnum = 4; fldnum < count;) {
@@ -597,17 +597,17 @@ static gps_mask_t processGPGSV(int count, char *field[],
 	if (session->gpsdata.PRN[session->gpsdata.satellites_visible] != 0)
 	    session->gpsdata.satellites_visible++;
     }
-    if (session->driver.nmea.part == session->driver.nmea.await
+    if (session->nmea.part == session->nmea.await
 	&& atoi(field[3]) != session->gpsdata.satellites_visible)
 	gpsd_report(session->context->debug, LOG_WARN,
 		    "GPGSV field 3 value of %d != actual count %d\n",
 		    atoi(field[3]), session->gpsdata.satellites_visible);
 
     /* not valid data until we've seen a complete set of parts */
-    if (session->driver.nmea.part < session->driver.nmea.await) {
+    if (session->nmea.part < session->nmea.await) {
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "Partial satellite data (%d of %d).\n",
-		    session->driver.nmea.part, session->driver.nmea.await);
+		    session->nmea.part, session->nmea.await);
 	return ONLINE_SET;
     }
     /*
@@ -623,14 +623,14 @@ static gps_mask_t processGPGSV(int count, char *field[],
 	    goto sane;
     gpsd_report(session->context->debug, LOG_WARN,
 		"Satellite data no good (%d of %d).\n",
-		session->driver.nmea.part, session->driver.nmea.await);
+		session->nmea.part, session->nmea.await);
     gpsd_zero_satellites(&session->gpsdata);
     return ONLINE_SET;
   sane:
     session->gpsdata.skyview_time = NAN;
     gpsd_report(session->context->debug, LOG_DATA,
 		"GSV: Satellite data OK (%d of %d).\n",
-		session->driver.nmea.part, session->driver.nmea.await);
+		session->nmea.part, session->nmea.await);
     return SATELLITE_SET;
 }
 
@@ -699,9 +699,9 @@ static gps_mask_t processGPGBS(int c UNUSED, char *field[],
     register_fractional_time(field[0], field[1], session);
 
     /* check that we're associated with the current fix */
-    if (session->driver.nmea.date.tm_hour == DD(field[1])
-	&& session->driver.nmea.date.tm_min == DD(field[1] + 2)
-	&& session->driver.nmea.date.tm_sec == DD(field[1] + 4)) {
+    if (session->nmea.date.tm_hour == DD(field[1])
+	&& session->nmea.date.tm_min == DD(field[1] + 2)
+	&& session->nmea.date.tm_sec == DD(field[1] + 4)) {
 	session->newdata.epy = safe_atof(field[2]);
 	session->newdata.epx = safe_atof(field[3]);
 	session->newdata.epv = safe_atof(field[4]);
@@ -766,9 +766,9 @@ static gps_mask_t processGPZDA(int c UNUSED, char *field[],
 			"malformed ZDA day: %s\n",  field[2]);
 	} else {
 	    gpsd_century_update(session, century);
-	    session->driver.nmea.date.tm_year = year - 1900;
-	    session->driver.nmea.date.tm_mon = mon - 1;
-	    session->driver.nmea.date.tm_mday = mday;
+	    session->nmea.date.tm_year = year - 1900;
+	    session->nmea.date.tm_mon = mon - 1;
+	    session->nmea.date.tm_mday = mday;
 	    mask = TIME_SET;
 	}
     };
@@ -1076,7 +1076,7 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 {
     int msg, reason;
 
-    msg = atoi(&(session->driver.nmea.field[0])[4]);
+    msg = atoi(&(session->nmea.field[0])[4]);
     switch (msg) {
     case 424:			/* PPS pulse width response */
 	/*
@@ -1250,9 +1250,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
-    (void)strlcpy((char *)session->driver.nmea.fieldcopy, sentence, NMEA_MAX);
+    (void)strlcpy((char *)session->nmea.fieldcopy, sentence, NMEA_MAX);
     /* discard the checksum part */
-    for (p = (char *)session->driver.nmea.fieldcopy;
+    for (p = (char *)session->nmea.fieldcopy;
 	 (*p != '*') && (*p >= ' ');)
 	++p;
     if (*p == '*')
@@ -1263,10 +1263,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* split sentence copy on commas, filling the field array */
     count = 0;
     t = p;			/* end of sentence */
-    p = (char *)session->driver.nmea.fieldcopy + 1;	/* beginning of tag, 'G' not '$' */
+    p = (char *)session->nmea.fieldcopy + 1;	/* beginning of tag, 'G' not '$' */
     /* while there is a search string and we haven't run off the buffer... */
     while ((p != NULL) && (p <= t)) {
-	session->driver.nmea.field[count] = p;	/* we have a field. record it */
+	session->nmea.field[count] = p;	/* we have a field. record it */
 	/*@ -compdef @*/
 	if ((p = strchr(p, ',')) != NULL) {	/* search for the next delimiter */
 	    *p = '\0';		/* replace it with a NUL */
@@ -1279,17 +1279,17 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* point remaining fields at empty string, just in case */
     for (i = (unsigned int)count;
 	 i <
-	 (unsigned)(sizeof(session->driver.nmea.field) /
-		    sizeof(session->driver.nmea.field[0])); i++)
-	session->driver.nmea.field[i] = e;
+	 (unsigned)(sizeof(session->nmea.field) /
+		    sizeof(session->nmea.field[0])); i++)
+	session->nmea.field[i] = e;
 
     /* sentences handlers will tell us whren they have fractional time */
-    session->driver.nmea.latch_frac_time = false;
+    session->nmea.latch_frac_time = false;
 
     /* dispatch on field zero, the sentence tag */
     for (thistag = i = 0;
 	 i < (unsigned)(sizeof(nmea_phrase) / sizeof(nmea_phrase[0])); ++i) {
-	s = session->driver.nmea.field[0];
+	s = session->nmea.field[0];
 	if (strlen(nmea_phrase[i].name) == 3)
 	    s += 2;		/* skip talker ID */
 	if (strcmp(nmea_phrase[i].name, s) == 0) {
@@ -1297,10 +1297,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		&& (count >= nmea_phrase[i].nf)) {
 		retval =
 		    (nmea_phrase[i].decoder) (count,
-					      session->driver.nmea.field,
+					      session->nmea.field,
 					      session);
 		if (nmea_phrase[i].cycle_continue)
-		    session->driver.nmea.cycle_continue = true;
+		    session->nmea.cycle_continue = true;
 		/*
 		 * Must force this to be nz, as we're going to rely on a zero
 		 * value to mean "no previous tag" later.
@@ -1321,13 +1321,13 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 */
 	gpsd_report(session->context->debug, LOG_DATA,
 		    "%s time is %2f = %d-%02d-%02dT%02d:%02d:%02.2fZ\n",
-		    session->driver.nmea.field[0], session->newdata.time,
-		    1900 + session->driver.nmea.date.tm_year,
-		    session->driver.nmea.date.tm_mon + 1,
-		    session->driver.nmea.date.tm_mday,
-		    session->driver.nmea.date.tm_hour,
-		    session->driver.nmea.date.tm_min,
-		    session->driver.nmea.date.tm_sec + session->driver.nmea.subseconds);
+		    session->nmea.field[0], session->newdata.time,
+		    1900 + session->nmea.date.tm_year,
+		    session->nmea.date.tm_mon + 1,
+		    session->nmea.date.tm_mday,
+		    session->nmea.date.tm_hour,
+		    session->nmea.date.tm_min,
+		    session->nmea.date.tm_sec + session->nmea.subseconds);
 	/*
 	 * If we have time and PPS is available, assume we have good time.
 	 * Because this is a generic driver we don't really have enough
@@ -1348,19 +1348,19 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * occurs just befiore timestamp increments also occurs in
      * mid-cycle, as in the Garmin eXplorist 210; those might jitter.
      */
-    if (session->driver.nmea.latch_frac_time) {
+    if (session->nmea.latch_frac_time) {
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "%s sentence timestamped %.2f.\n",
-		    session->driver.nmea.field[0],
-		    session->driver.nmea.this_frac_time);
+		    session->nmea.field[0],
+		    session->nmea.this_frac_time);
 	if (!GPS_TIME_EQUAL
-	    (session->driver.nmea.this_frac_time,
-	     session->driver.nmea.last_frac_time)) {
-	    uint lasttag = session->driver.nmea.lasttag;
+	    (session->nmea.this_frac_time,
+	     session->nmea.last_frac_time)) {
+	    uint lasttag = session->nmea.lasttag;
 	    retval |= CLEAR_IS;
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"%s starts a reporting cycle.\n",
-			session->driver.nmea.field[0]);
+			session->nmea.field[0]);
 	    /*
 	     * Have we seen a previously timestamped NMEA tag?
 	     * If so, designate as end-of-cycle marker.
@@ -1368,9 +1368,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     * those get sorted after the last timestamped sentence
 	     */
 	    if (lasttag > 0
-		&& (session->driver.nmea.cycle_enders & (1 << lasttag)) == 0
-		&& !session->driver.nmea.cycle_continue) {
-		session->driver.nmea.cycle_enders |= (1 << lasttag);
+		&& (session->nmea.cycle_enders & (1 << lasttag)) == 0
+		&& !session->nmea.cycle_continue) {
+		session->nmea.cycle_enders |= (1 << lasttag);
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "tagged %s as a cycle ender.\n",
 			    nmea_phrase[lasttag - 1].name);
@@ -1378,31 +1378,31 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	}
     } else {
 	/* extend the cycle to an un-timestamped sentence? */
-	if ((session->driver.nmea.lasttag & session->driver.nmea.cycle_enders) != 0)
+	if ((session->nmea.lasttag & session->nmea.cycle_enders) != 0)
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"%s is just after a cycle ender.\n",
-			session->driver.nmea.field[0]);
-	if (session->driver.nmea.cycle_continue) {
+			session->nmea.field[0]);
+	if (session->nmea.cycle_continue) {
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"%s extends the reporting cycle.\n",
-			session->driver.nmea.field[0]);
-	    session->driver.nmea.cycle_enders &=~ (1 << session->driver.nmea.lasttag);
-	    session->driver.nmea.cycle_enders |= (1 << thistag);
+			session->nmea.field[0]);
+	    session->nmea.cycle_enders &=~ (1 << session->nmea.lasttag);
+	    session->nmea.cycle_enders |= (1 << thistag);
 	}
     }
     /* here's where we check for end-of-cycle */
-    if ((session->driver.nmea.latch_frac_time || session->driver.nmea.cycle_continue)
-	&& (session->driver.nmea.cycle_enders & (1 << thistag))!=0) {
+    if ((session->nmea.latch_frac_time || session->nmea.cycle_continue)
+	&& (session->nmea.cycle_enders & (1 << thistag))!=0) {
 	gpsd_report(session->context->debug, LOG_PROG,
 		    "%s ends a reporting cycle.\n",
-		    session->driver.nmea.field[0]);
+		    session->nmea.field[0]);
 	retval |= REPORT_IS;
     }
-    if (session->driver.nmea.latch_frac_time)
-	session->driver.nmea.lasttag = thistag;
+    if (session->nmea.latch_frac_time)
+	session->nmea.lasttag = thistag;
 
     /* we might have a reliable end-of-cycle */
-    if (session->driver.nmea.cycle_enders != 0)
+    if (session->nmea.cycle_enders != 0)
 	session->cycle_end_reliable = true;
 
     return retval;

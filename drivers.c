@@ -509,7 +509,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
     if (event == event_identified || event == event_reactivate) {
 	gpsd_report(session->context->debug, LOG_INF,
 		    "PPS trailing edge will be ignored\n");
-	session->driver.nmea.ignore_trailing_edge = true;
+	session->nmea.ignore_trailing_edge = true;
     }
 }
 

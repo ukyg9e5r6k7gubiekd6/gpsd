@@ -500,42 +500,43 @@ struct gps_device_t {
     int fixcnt;				/* count of fixes from this device */
     struct gps_fix_t newdata;		/* where drivers put their data */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
+#ifdef NMEA_ENABLE
+    struct {
+	int part, await;		/* for tracking GSV parts */
+	struct tm date;		/* date part of last sentence time */
+	double subseconds;		/* subsec part of last sentence time */
+	char *field[NMEA_MAX];
+	unsigned char fieldcopy[NMEA_MAX+1];
+	/* detect receivers that ship GGA with non-advancing timestamp */
+	bool latch_mode;
+	char last_gga_timestamp[16];
+	/*
+	 * State for the cycle-tracking machinery.
+	 * The reason these timestamps are separate from the
+	 * general sentence timestamps is that we can
+	 * use the minutes and seconds part of a sentence
+	 * with an incomplete timestamp (like GGA) for
+	 * end-cycle recognition, even if we don't have a previous
+	 * RMC or ZDA that lets us get full time from it.
+	 */
+	timestamp_t this_frac_time, last_frac_time;
+	bool latch_frac_time;
+	unsigned int lasttag;
+	unsigned int cycle_enders;
+	bool cycle_continue;
+#ifdef GPSCLOCK_ENABLE
+	bool ignore_trailing_edge;
+#endif /* GPSCLOCK_ENABLE */
+    } nmea;
+#endif /* NMEA_ENABLE */
     /*
      * The rest of this structure is driver-specific private storage.
-     * It used to be a union, but that turned out to be unsafe.  Dual-mode
-     * devices like SiRFs and u-bloxes need to not step on the old mode's
-     * storage when they transition.
+     * Only put a driver's scratch storage in here if it is never
+     * implemented on the same device that supports any mode already
+     * in this union; otherwise bad things might happen after a device
+     * mode switch.
      */
-    struct {
-#ifdef NMEA_ENABLE
-	struct {
-	    int part, await;		/* for tracking GSV parts */
-	    struct tm date;		/* date part of last sentence time */
-	    double subseconds;		/* subsec part of last sentence time */
-	    char *field[NMEA_MAX];
-	    unsigned char fieldcopy[NMEA_MAX+1];
-	    /* detect receivers that ship GGA with non-advancing timestamp */
-	    bool latch_mode;
-	    char last_gga_timestamp[16];
-	    /*
-	     * State for the cycle-tracking machinery.
-	     * The reason these timestamps are separate from the
-	     * general sentence timestamps is that we can
-	     * use the minutes and seconds part of a sentence
-	     * with an incomplete timestamp (like GGA) for
-	     * end-cycle recognition, even if we don't have a previous
-	     * RMC or ZDA that lets us get full time from it.
-	     */
-	    timestamp_t this_frac_time, last_frac_time;
-	    bool latch_frac_time;
-	    unsigned int lasttag;
-	    unsigned int cycle_enders;
-	    bool cycle_continue;
-#ifdef GPSCLOCK_ENABLE
-	    bool ignore_trailing_edge;
-#endif /* GPSCLOCK_ENABLE */
-	} nmea;
-#endif /* NMEA_ENABLE */
+    union {
 #ifdef GARMINTXT_ENABLE
 	struct {
 	    struct tm date;		/* date part of last sentence time */

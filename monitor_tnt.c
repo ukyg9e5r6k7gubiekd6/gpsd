@@ -47,15 +47,15 @@ static void tnt_update(void)
      */
     (void)nmea_parse((char *)session.packet.outbuffer, &session);
 
-    (void)mvwaddstr(thtmwin, 1, 19, session.driver.nmea.field[1]);
-    (void)mvwaddstr(thtmwin, 2, 19, session.driver.nmea.field[3]);
-    (void)mvwaddstr(thtmwin, 3, 19, session.driver.nmea.field[5]);
-    (void)mvwaddstr(thtmwin, 4, 19, session.driver.nmea.field[7]);
+    (void)mvwaddstr(thtmwin, 1, 19, session.nmea.field[1]);
+    (void)mvwaddstr(thtmwin, 2, 19, session.nmea.field[3]);
+    (void)mvwaddstr(thtmwin, 3, 19, session.nmea.field[5]);
+    (void)mvwaddstr(thtmwin, 4, 19, session.nmea.field[7]);
 
-    (void)mvwaddstr(thtmwin, 1, 61, session.driver.nmea.field[2]);
-    (void)mvwaddstr(thtmwin, 2, 61, session.driver.nmea.field[4]);
-    (void)mvwaddstr(thtmwin, 3, 61, session.driver.nmea.field[6]);
-    (void)mvwaddstr(thtmwin, 4, 61, session.driver.nmea.field[8]);
+    (void)mvwaddstr(thtmwin, 1, 61, session.nmea.field[2]);
+    (void)mvwaddstr(thtmwin, 2, 61, session.nmea.field[4]);
+    (void)mvwaddstr(thtmwin, 3, 61, session.nmea.field[6]);
+    (void)mvwaddstr(thtmwin, 4, 61, session.nmea.field[8]);
 }
 
 static int tnt_command(char line[] UNUSED)
