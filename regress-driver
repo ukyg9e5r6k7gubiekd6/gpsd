@@ -45,12 +45,13 @@ opts=""
 logfile=""
 help="0"
 baton=false
-while getopts cl:stbuvo:h opt
+while getopts cl:sStbuvo:h opt
 do
     case $opt in
 	c) testing=clientlib ;;	# Can be 'daemon'
 	l) logfile=$OPTARG ;;	# Logfile to save diffs to
 	s) mode=regress ;;	# Run regression tests
+	S) mode=slowregress ;;	# Run regression tests with big delays
 	t) baton=true mode=regress ;;	# Run regression tests w/baton
 	b) mode=build ;;	# Rebuild regression check files
 	u) opts="$opts -u" ;;	# Force UDP
@@ -69,7 +70,8 @@ then
 	echo "-h  - this help"
 	echo "-c  - can be 'daemon'"
 	echo "-l <filename>  - where to log diffs to"
-	echo "-s  - run regreession tests"
+	echo "-s  - run regression tests"
+	echo "-S  - run regression tests with realistic timing delays"
 	echo "-t <ots>  - Run regression tests w/baton"
 	echo "-b  - Rebuild regression check files"
 	echo "-u - Force UDP"
@@ -107,8 +109,13 @@ then
     opts="$opts -b"
 fi
 
+if [ $mode = slowregress ]
+then
+    opts="$opts -S"
+fi
+
 case $mode in
-    regress)
+    regress|slowregress)
         echo "Testing the $testing..." >&2
         errors=0; total=0; notfound=0;error_list="";
         for f in $*; do

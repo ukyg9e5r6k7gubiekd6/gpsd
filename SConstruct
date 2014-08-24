@@ -166,6 +166,8 @@ boolopts = (
     ("chrpath",       False, "use chrpath to edit library load paths"),
     ("manbuild",      True,  "build help in man and HTML formats"),
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
+    # Test control
+    ("slow",          False, "run tests with realistic (slow) delays"),
     )
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
@@ -270,6 +272,13 @@ for key, value in os.environ.iteritems():
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
+
+# We may need to force slow regression tests to get around race
+# conditions in the pty layer, especially on a loaded machine.
+if env["slow"]:
+    env['REGRESSOPTS'] = "-S"
+else:
+    env['REGRESSOPTS'] = ""
 
 def announce(msg):
     if not env.GetOption("silent"):
@@ -1514,7 +1523,7 @@ else:
 if env['socket_export']:
     # Regression-test the daemon
     gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
-            '$SRCDIR/regress-driver test/daemon/*.log')
+            '$SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second

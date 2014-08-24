@@ -94,7 +94,7 @@ def fakehook(linenumber, fakegps):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pP:r:s:tuvx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pP:r:s:Stuvx")
     except getopt.GetoptError, msg:
         print "gpsfake: " + str(msg)
         raise SystemExit, 1
@@ -114,6 +114,7 @@ if __name__ == '__main__':
     tcp = False
     udp = False
     verbose = 0
+    slow = False
     for (switch, val) in options:
         if (switch == '-1'):
             singleshot = True
@@ -147,6 +148,8 @@ if __name__ == '__main__':
             client_init = val
         elif (switch == '-s'):
             speed = int(val)
+        elif (switch == '-S'):
+            slow = True
         elif (switch == '-t'):
             tcp = True
         elif (switch == '-u'):
@@ -154,7 +157,7 @@ if __name__ == '__main__':
         elif (switch == '-v'):
             verbose += 1
         elif (switch == '-h'):
-            sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-c cycle] [-b] logfile\n")
+            sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-S] [-c cycle] [-b] logfile\n")
             raise SystemExit,0
 
     try:
@@ -174,7 +177,7 @@ if __name__ == '__main__':
 
     test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions,
                                tcp=tcp, udp=udp, verbose=verbose,
-                               predump=predump)
+                               predump=predump, slow=slow)
 
     if pipe:
         test.reporter = sys.stdout.write

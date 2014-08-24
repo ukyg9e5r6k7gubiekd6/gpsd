@@ -38,6 +38,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-P <replaceable>port</replaceable></arg>
       <arg choice='opt'>-r <replaceable>initcmd</replaceable></arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
+      <arg choice='opt'>-S</arg>
       <arg choice='opt'>-u</arg>
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-v</arg>
@@ -144,6 +145,12 @@ The default is <command>?WATCH={"enable":true,"json":true}</command>.</para>
 
 <para>The <option>-s</option> sets the baud rate for the slave tty.  The
 default is 4800.</para>
+
+<para>The option -S tells gpsfake to insert realistic delays in the
+test input rather than trying to stuff it through the daemon as fast
+as possible.  This will make the test(s) run much slower, but avoids
+flaky failures due to machine lode and possible race conditions in
+the pty layer.</para>
 
 <para>The <option>-t</option> forces the test framework to use TCP
 rather than pty devices. Besides being a test of TCP source handling,

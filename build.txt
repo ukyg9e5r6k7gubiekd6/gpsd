@@ -328,6 +328,7 @@ framework shove data through the pty and socket layers *way* faster
 than would ever occur in production.  If you get regression-test
 failures that aren't repeatable and look like the test framework is
 sporadically failing to feed the last line or two of test loads, try
+using the slow=yes option with scons check.  If that fails, try
 increasing the delay constants in fake.py.  If you have to do this, 
 please report your experience to the GPSD maintainers.
 

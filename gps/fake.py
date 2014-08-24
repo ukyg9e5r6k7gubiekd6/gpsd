@@ -91,7 +91,7 @@ import packet as sniffer
 # implementation underneath will return with precision finer than 1
 # second. (Linux and *BSD return full precision.)
 
-# Field reports:
+# Field reports on minima:
 #
 # Eric Raymond  on Linux 3.11.0 under an Intel Core Duo at 2.66GHz.
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Works, 112s real
@@ -122,6 +122,10 @@ else:
     WRITE_PAD = 0.004
     CLOSE_DELAY = 0.8
 
+# Additional delays in slow mode
+WRITE_PAD_SLOWDOWN = 0.01
+CLOSE_DELAY_SLOWDOWN = 2.0
+
 class TestLoadError(exceptions.Exception):
     def __init__(self, msg):
         exceptions.Exception.__init__(self)
@@ -129,7 +133,7 @@ class TestLoadError(exceptions.Exception):
 
 class TestLoad:
     "Digest a logfile into a list of sentences we can cycle through."
-    def __init__(self, logfp, predump=False):
+    def __init__(self, logfp, predump=False, slow=False):
         self.sentences = []	# This is the interesting part
         if type(logfp) == type(""):
             logfp = open(logfp, "r")
@@ -140,6 +144,8 @@ class TestLoad:
         self.sourcetype = "pty"
         self.serial = None
         self.delay = WRITE_PAD
+        if slow:
+            self.delay += WRITE_PAD_SLOWDOWN
         self.delimiter = None
         # Stash away a copy in case we need to resplit
         text = logfp.read()
@@ -509,7 +515,7 @@ class TestSessionError(exceptions.Exception):
 
 class TestSession:
     "Manage a session including a daemon with fake GPSes and clients."
-    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False, tcp=False):
+    def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False, tcp=False, slow=False):
         "Initialize the test session by launching the daemon."
         self.prefix = prefix
         self.port = port
@@ -518,6 +524,7 @@ class TestSession:
         self.predump = predump
         self.udp = udp
         self.tcp = tcp
+        self.slow = slow
         self.daemon = DaemonInstance()
         self.fakegpslist = {}
         self.client_id = 0
@@ -530,6 +537,9 @@ class TestSession:
             self.port = port
         else:
             self.port = gps.GPSD_PORT
+        self.close_delay = CLOSE_DELAY
+        if slow:
+            self.close_delay += CLOSE_DELAY_SLOWDOWN
         self.progress = lambda x: None
         self.reporter = lambda x: None
         self.default_predicate = None
@@ -547,7 +557,7 @@ class TestSession:
         "Add a simulated GPS being fed by the specified logfile."
         self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
         if logfile not in self.fakegpslist:
-            testload = TestLoad(logfile, predump=self.predump)
+            testload = TestLoad(logfile, predump=self.predump, slow=self.slow)
             if testload.sourcetype == "UDP" or self.udp:
                 newgps = FakeUDP(testload, ipaddr="127.0.0.1",
                                  port=self.baseport,
@@ -625,7 +635,7 @@ class TestSession:
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
-                    if chosen.exhausted and (time.time() - chosen.exhausted > CLOSE_DELAY) and chosen.byname in self.fakegpslist:
+                    if chosen.exhausted and (time.time() - chosen.exhausted > self.close_delay) and chosen.byname in self.fakegpslist:
                         self.gps_remove(chosen.byname)
                         self.progress("gpsfake: GPS %s removed (timeout)\n" % chosen.byname)
                     elif not chosen.go_predicate(chosen.index, chosen):
