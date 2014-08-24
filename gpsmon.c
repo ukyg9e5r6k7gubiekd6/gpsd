@@ -1281,19 +1281,15 @@ int main(int argc, char **argv)
 
 	for (;;) 
 	{
-#ifdef EFDS
 	    fd_set efds;
-#endif /* EFDS */
 	    switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
 	    {
 	    case AWAIT_GOT_INPUT:
 		break;
 	    case AWAIT_NOT_READY:
-#ifdef EFDS
 		/* no recovery from bad fd is possible */
 		if (FD_ISSET(session.gpsdata.gps_fd, &efds))
 		    longjmp(terminate, TERM_SELECT_FAILED);
-#endif /* EFDS */
 		continue;
 	    case AWAIT_FAILED:
 		longjmp(terminate, TERM_SELECT_FAILED);

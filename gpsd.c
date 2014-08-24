@@ -2175,21 +2175,17 @@ int main(int argc, char *argv[])
 	}
 
     while (0 == signalled) {
-#ifdef EFDS
 	fd_set efds;
-#endif /* EFDS */
-	switch(gpsd_await_data(&rfds, maxfd, &all_fds, context.debug))
+	switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, context.debug))
 	{
 	case AWAIT_GOT_INPUT:
 	    break;
 	case AWAIT_NOT_READY:
-#ifdef EFDS
 	    for (device = devices; device < devices + MAXDEVICES; device++)
 		if (FD_ISSET(device->gpsdata.gps_fd, &efds)) {
 		    deactivate_device(device);
 		    free_device(device);
 		}
-#endif /* EFDS*/
 	    continue;
 	case AWAIT_FAILED:
 	    exit(EXIT_FAILURE);

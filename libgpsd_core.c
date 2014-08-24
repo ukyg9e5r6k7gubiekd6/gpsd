@@ -992,7 +992,8 @@ static void gpsd_error_model(struct gps_device_t *session,
 #endif /* CHEAPFLOATS_ENABLE */
 
 /*@ -mustdefine -compdef @*/
-int gpsd_await_data(/*@out@*/fd_set *rfds, 
+int gpsd_await_data(/*@out@*/fd_set *rfds,
+		    /*@out@*/fd_set *efds,
 		     const int maxfd,
 		     /*@in@*/fd_set *all_fds, 
 		     const int debug)
@@ -1003,9 +1004,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
     struct timeval tv;
 #endif /* COMPAT_SELECT */
 
-#ifdef EFDS
     FD_ZERO(efds);
-#endif /* EFDS */
     (void)memcpy((char *)rfds, (char *)all_fds, sizeof(fd_set));
     gpsd_report(debug, LOG_RAW + 2, "select waits\n");
     /*
@@ -1039,13 +1038,10 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 		/*
 		 * All we care about here is a cheap, fast, uninterruptible
 		 * way to check if a file descriptor is valid.
-		 * FIXME: pass out error fds when we can do a library bump.
 		 */
 		if (FD_ISSET(fd, all_fds) && fcntl(fd, F_GETFL, 0) == -1) {
 		    FD_CLR(fd, all_fds);
-#ifdef EFDS
 		    FD_SET(fd, efds);
-#endif /* EFDS */
 		}
 	    return AWAIT_NOT_READY;
 	} else {

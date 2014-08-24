@@ -945,6 +945,7 @@ extern void gpsd_deactivate(struct gps_device_t *);
 #define AWAIT_NOT_READY	0
 #define AWAIT_FAILED	-1
 extern int gpsd_await_data(/*@out@*/fd_set *,
+			   /*@out@*/fd_set *,
 			    const int, 
 			    /*@in@*/fd_set *,
 			    const int);
