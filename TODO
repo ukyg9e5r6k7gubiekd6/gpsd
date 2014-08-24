@@ -52,27 +52,6 @@ Presently PPS Offset is displayed in direct mode for NMEA, SiRF, and
 UBX devices.  Others should probably do likewise, notably the
 Motorola Oncore and Garmin drivers.
 
-**** gpsmon driver switching and blocking on error
-
-Hal Murray reports:
-
-   If I run .gpsmon /dev/ttyUSB0
-
-   It starts up in NMEA0183 mode as I expect.
-   "i" switches to SiRF, again, as I expect.
-
-   "n" switches the display to NMEA layout, but the header still says SiRF.
-   Another "n" now says: Device type has no mode switcher.
-   At this point, "i" doesn't do anything.  (no pause either)
-
-The second 'n' is losing information that it shouldn't.
-
-   If I start over and feed it an "f", it starts blinking "Unknown command "f"
-   The logging and display update stops.  After I type another character,  it
-   clears the blinking error message and stars logging/updating again.
-
-Display update should not stop while this is going on.
-
 *** Time offset debugging in gpsmon ***
 
 Hall Murray:
