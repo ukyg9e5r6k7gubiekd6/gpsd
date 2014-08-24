@@ -2818,11 +2818,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       JSON_BOOL(ais->type8.dac200fid10.heading_q));
 		break;
 	    case 23:	/* EMMA warning */
-		/*
-		 * FIXME: AIS struct should have "structured" bit set by driver
-		 * This is a kluge.
-		 */
-		if ((int)ais->type8.dac200fid23.type >= NITEMS(emma_types))
+		if (!ais->type8.structured)
 		    break;
 		(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			       "\"start\":\"%4u-%02u-%02uT%02u:%02u\","
