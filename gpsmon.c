@@ -889,6 +889,13 @@ static bool do_command(const char *line)
 		context.readonly = true;
 		(void)tcdrain(session.gpsdata.gps_fd);
 		(void)usleep(50000);
+		/*
+		 * Session device change will be set to NMEA when
+		 * gpsmon resyncs.  So stash the current type to
+		 * be restored if we do 'n' from NMEA mode.
+		 */
+		if (v == 0)
+		    fallback = switcher;
 	    } else
 		complain
 		    ("Device type %s has no mode switcher", 
