@@ -162,9 +162,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     }
     /*@ -charint @*/
 
-    (void)snprintf(session->tag, sizeof(session->tag),
-		   "ID%02x", id = (unsigned)session->packet.outbuffer[1]);
-
+    id = (unsigned)session->packet.outbuffer[1];
     gpsd_report(session->context->debug, LOG_DATA,
 		"TSIP packet id 0x%02x length %d: %s\n",
 		id, len, buf2);
@@ -196,9 +194,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	 */
 	u1 = (uint8_t) getub(buf, 0); 
 	if (u1 == 0x81) { /* Software Version Information */
-		(void)snprintf(session->tag + strlen(session->tag), 
-			sizeof(session->tag) -
-			strlen(session->tag), "%02x", (uint) u1);
 		u2 = getub(buf, 2); /* Major version */
 		u3 = getub(buf, 3); /* Minor version */
 		u4 = getub(buf, 4); /* Build number */
@@ -223,9 +218,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		mask |= DEVICEID_SET;
 	}
 	if (u1 == 0x83) { /* Hardware Version Information */
-		(void)snprintf(session->tag + strlen(session->tag), 
-			sizeof(session->tag) -
-			strlen(session->tag), "%02x", (uint) u1);
 		ul1 = getbeu32(buf, 1); /* Serial number */
 		u2 = getub(buf, 5); /* Build day */
 		u3 = getub(buf, 6); /* Build month */
@@ -667,9 +659,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     case 0x8f:			/* Super Packet.  Well...  */
 	/*@ +charint @*/
 	u1 = (uint8_t) getub(buf, 0);
-	(void)snprintf(session->tag + strlen(session->tag),
-		       sizeof(session->tag) -
-		       strlen(session->tag), "%02x", (uint) u1);
 	/*@ -charint @*/
 	switch (u1) {		/* sub-packet ID */
 	case 0x15:		/* Current Datum Values */
