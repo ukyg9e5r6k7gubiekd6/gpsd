@@ -1218,7 +1218,6 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     }
 
     switch (field[4][0]) {
-    /* FIXME: if fields[4] == "12", it doesn't detect the error */
     case '\0':
 	/*
 	 * Apparently an empty channel is normal for AIVDO sentences,
@@ -1232,6 +1231,11 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	session->driver.aivdm.ais_channel ='A';
 	break;
     case '1':
+	if (strcmp((char *)field[4], (char *)"12") == 0) {
+	    gpsd_report(session->context->debug, LOG_INF,
+                    "ignoring bogus AIS channel '12'.\n");
+	    return false;
+	}
 	/*@fallthrough@*/
     case 'A':
 	ais_context = &session->driver.aivdm.context[0];
