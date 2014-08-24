@@ -280,8 +280,6 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     }
 
     session->packet.type = GARMINTXT_PACKET;
-    /* TAG message as GTXT, Garmin Simple Text Message */
-    (void)strlcpy(session->gpsdata.tag, "GTXT", MAXTAGLEN);
 
     /* only one message, set cycle start */
     session->cycle_end_reliable = true;

@@ -1299,9 +1299,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		    (nmea_phrase[i].decoder) (count,
 					      session->driver.nmea.field,
 					      session);
-		(void)strlcpy(session->gpsdata.tag,
-			      nmea_phrase[i].name,
-			      MAXTAGLEN);
 		if (nmea_phrase[i].cycle_continue)
 		    session->driver.nmea.cycle_continue = true;
 		/*

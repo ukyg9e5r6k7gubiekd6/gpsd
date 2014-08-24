@@ -163,10 +163,6 @@ need changes.
 
 ** To do:
 
-*** On next API bump ***
-
-Move the tag field to private data.
-
 ***  Make subframe reports available in the C API.
 
 gpsd now reports subframes when they're available, but the C client

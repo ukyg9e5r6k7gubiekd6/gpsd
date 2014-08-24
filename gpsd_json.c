@@ -131,10 +131,6 @@ void json_tpv_dump(const struct gps_device_t *session,
 
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"tag\":\"%s\",",
-		   gpsdata->tag[0] != '\0' ? gpsdata->tag : "-");
     if (gpsdata->dev.path[0] != '\0')
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -246,10 +242,6 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
 
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"GST\",", replylen);
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"tag\":\"%s\",",
-		   gpsdata->tag[0] != '\0' ? gpsdata->tag : "-");
     if (gpsdata->dev.path[0] != '\0')
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -287,10 +279,6 @@ void json_sky_dump(const struct gps_data_t *datap,
 
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"SKY\",", replylen);
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"tag\":\"%s\",",
-		   datap->tag[0] != '\0' ? datap->tag : "-");
     if (datap->dev.path[0] != '\0')
 	(void)snprintf(reply + strlen(reply),
 		       replylen - strlen(reply),
@@ -3420,10 +3408,6 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 {
     assert(replylen > 2);
     (void)strlcpy(reply, "{\"class\":\"ATT\",", replylen);
-    (void)snprintf(reply + strlen(reply),
-		   replylen - strlen(reply),
-		   "\"tag\":\"%s\",",
-		   gpsdata->tag[0] != '\0' ? gpsdata->tag : "-");
     (void)snprintf(reply + strlen(reply),
 		   replylen - strlen(reply),
 		   "\"device\":\"%s\",", gpsdata->dev.path);

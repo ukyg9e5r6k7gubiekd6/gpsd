@@ -329,14 +329,14 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    gps_clear_fix(&gpsdata->fix);
 			} else {
 			    struct gps_fix_t nf;
-			    char tag[MAXTAGLEN + 1], alt[20];
+			    char alt[20];
 			    char eph[20], epv[20], track[20], speed[20],
 				climb[20];
 			    char epd[20], eps[20], epc[20], mode[2];
 			    char timestr[20], ept[20], lat[20], lon[20];
 			    int st = sscanf(sp + 2,
-					    "%8s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
-					    tag, timestr, ept, lat, lon,
+					    "%*s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
+					    timestr, ept, lat, lon,
 					    alt, eph, epv, track, speed,
 					    climb,
 					    epd, eps, epc, mode);
@@ -379,8 +379,6 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				if (isnan(nf.epc) == 0)
 				    gpsdata->set |= CLIMBERR_SET;
 				gpsdata->fix = nf;
-				(void)strlcpy(gpsdata->tag, tag,
-					      MAXTAGLEN + 1);
 				gpsdata->set |=
 				    TIME_SET | TIMERR_SET | LATLON_SET |
 				    MODE_SET;
@@ -404,13 +402,12 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			} else {
 			    int j, i1, i2, i3, i5;
 			    double f4;
-			    char tag[MAXTAGLEN + 1], timestamp[21];
+			    char timestamp[21];
 
 			    // cppcheck-suppress invalidscanf
-			    (void)sscanf(sp, "Y=%8s %20s %d ",
-					 tag, timestamp,
+			    (void)sscanf(sp, "Y=%*s %20s %d ",
+					 timestamp,
 					 &gpsdata->satellites_visible);
-			    (void)strlcpy(gpsdata->tag, tag, MAXTAGLEN);
 			    if (timestamp[0] != '?') {
 				gpsdata->set |= TIME_SET;
 			    }

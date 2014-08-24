@@ -395,9 +395,6 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     type = (int)buf[SUPERSTAR2_TYPE_OFFSET];
-    (void)snprintf(session->gpsdata.tag,
-		   sizeof(session->gpsdata.tag), "SS2-%d", type);
-
     session->cycle_end_reliable = true;
 
     switch (type) {

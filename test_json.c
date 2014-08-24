@@ -88,14 +88,14 @@ static struct gps_data_t gpsdata;
 
 /* *INDENT-OFF* */
 static const char json_str1[] = "{\"class\":\"TPV\",\
-    \"device\":\"GPS#1\",\"tag\":\"MID2\",				\
+    \"device\":\"GPS#1\",				\
     \"time\":\"2005-06-19T08:12:41.89Z\",\"lon\":46.498203637,\"lat\":7.568074350,\
     \"alt\":1327.780,\"epx\":21.000,\"epy\":23.000,\"epv\":124.484,\"mode\":3}";
 
 /* Case 2: SKY report */
 
 static const char *json_str2 = "{\"class\":\"SKY\",\
-         \"tag\":\"MID4\",\"time\":\"2005-06-19T12:12:42.03Z\",   \
+         \"time\":\"2005-06-19T12:12:42.03Z\",   \
          \"satellites\":[\
          {\"PRN\":10,\"el\":45,\"az\":196,\"ss\":34,\"used\":true},\
          {\"PRN\":29,\"el\":67,\"az\":310,\"ss\":40,\"used\":true},\
@@ -224,7 +224,6 @@ static void jsontest(int i)
 	status = libgps_json_unpack(json_str1, &gpsdata, NULL);
 	assert_case(1, status);
 	assert_string("device", gpsdata.dev.path, "GPS#1");
-	assert_string("tag", gpsdata.tag, "MID2");
 	assert_integer("mode", gpsdata.fix.mode, 3);
 	assert_real("time", gpsdata.fix.time, 1119168761.8900001);
 	assert_real("lon", gpsdata.fix.longitude, 46.498203637);
@@ -234,7 +233,6 @@ static void jsontest(int i)
     case 2:
 	status = libgps_json_unpack(json_str2, &gpsdata, NULL);
 	assert_case(2, status);
-	assert_string("tag", gpsdata.tag, "MID4");
 	assert_integer("used", gpsdata.satellites_used, 6);
 	assert_integer("PRN[0]", gpsdata.PRN[0], 10);
 	assert_integer("el[0]", gpsdata.elevation[0], 45);

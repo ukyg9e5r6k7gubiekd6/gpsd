@@ -295,13 +295,6 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
     gpsd_report(session->context->debug, LOG_RAW,
 		"raw _proto_ packet type 0x%02x\n", type);
 
-   /*
-    * The tag field is only 8 bytes; be careful you do not overflow.
-    * Using an abbreviation (eg. "italk" -> "itk") may be useful.
-    */
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-	"_PROTO_%02x", type);
-
     switch (type)
     {
 	/* Deliver message to specific decoder based on message type */

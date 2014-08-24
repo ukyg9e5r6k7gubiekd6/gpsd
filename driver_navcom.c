@@ -1134,9 +1134,6 @@ gps_mask_t navcom_parse(struct gps_device_t * session, unsigned char *buf,
     gpsd_report(session->context->debug, LOG_RAW, "Navcom: packet type 0x%02x\n", cmd_id);
     /*@ +usedef +compdef @*/
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		   "0x%02x", cmd_id);
-
     session->cycle_end_reliable = true;
 
     switch (cmd_id) {

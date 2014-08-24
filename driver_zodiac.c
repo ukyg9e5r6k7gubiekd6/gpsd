@@ -362,9 +362,6 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     if (session->packet.outbuflen < 10)
 	return 0;
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), 
-		   "%u", id);
-
     /*
      * Normal cycle for these devices is 1001 1002.
      * We count 1001 as end of cycle because 1002 doesn't

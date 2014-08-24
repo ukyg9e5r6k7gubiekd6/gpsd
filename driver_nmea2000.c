@@ -264,8 +264,6 @@ static gps_mask_t hnd_129025(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->newdata.longitude = getles32(bu, 4) * 1e-7;
     /*@+type@*/
 
-    (void)strlcpy(session->gpsdata.tag, "129025", sizeof(session->gpsdata.tag));
-
     return LATLON_SET | get_mode(session);
 }
 
@@ -285,8 +283,6 @@ static gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->newdata.track           =  getleu16(bu, 2) * 1e-4 * RAD_2_DEG;
     session->newdata.speed           =  getleu16(bu, 4) * 1e-2;
     /*@+type@*/
-
-    (void)strlcpy(session->gpsdata.tag, "129026", sizeof(session->gpsdata.tag));
 
     return SPEED_SET | TRACK_SET | get_mode(session);
 }
@@ -310,8 +306,6 @@ static gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_de
     /*@-type@*//* splint has a bug here */
     session->newdata.time = getleu16(bu, 2)*24*60*60 + getleu32(bu, 4)/1e4;
     /*@+type@*/
-
-    (void)strlcpy(session->gpsdata.tag, "126992", sizeof(session->gpsdata.tag));
 
     return TIME_SET | get_mode(session);
 }
@@ -363,8 +357,6 @@ static gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		session->gpsdata.dop.hdop,
 		session->gpsdata.dop.vdop,
 		session->gpsdata.dop.tdop);
-
-    (void)strlcpy(session->gpsdata.tag, "129539", sizeof(session->gpsdata.tag));
 
     return mask | get_mode(session);
 }
@@ -478,8 +470,6 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->gpsdata.dop.pdop        = getleu16(bu, 36) * 0.01;
     /*@+type@*/
     mask                            |= DOP_SET;
-
-    (void)strlcpy(session->gpsdata.tag, "129029", sizeof(session->gpsdata.tag));
 
     return mask | get_mode(session);
 }

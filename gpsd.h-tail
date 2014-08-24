@@ -60,9 +60,10 @@ typedef unsigned int speed_t;
  *      value of a synthesized additional attribute with "_text" appended.
  *      (Thus, the 'scaled' flag no longer affects display of these fields.)
  *      PPS drift message ships nsec rather than msec.
+ * 3.10 The obsolete tag field has been dropped from JSON.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	9	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	10	/* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
@@ -100,6 +101,7 @@ typedef unsigned int speed_t;
  */
 #define NMEA_MAX	91		/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
+#define MAXTAGLEN	8		/* max length of sentence tag name */
 
 /* a few bits of ISGPS magic */
 enum isgpsstat_t {
@@ -449,6 +451,7 @@ struct gps_device_t {
     sourcetype_t sourcetype;
     servicetype_t servicetype;
     int mode;
+    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 #ifndef _WIN32
     struct termios ttyset, ttyset_old;
 #endif

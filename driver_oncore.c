@@ -369,9 +369,6 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
     gpsd_report(session->context->debug, LOG_RAW,
 		"raw Oncore packet type 0x%04x\n", type);
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		   "MOT-%c%c", type >> 8, type & 0xff);
-
     session->cycle_end_reliable = true;
 
     switch (type) {

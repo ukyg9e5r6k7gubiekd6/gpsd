@@ -40,16 +40,16 @@ extern "C" {
  *       model and serial members in part B of AIS type 24, conforming
  *       with ITU-R 1371-4. New timedrift structure (Nov 2013, release 3.10).
  * 5.2 - AIS type 6 and 8 get 'structured' flag; GPS_PATH_MAX
- *       shortened because devices has moved out of union.
+ *       shortened because devices has moved out of union. Sentence
+ *       tag fields dropped from emitted JSON.
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	2	/* bump on compatible changes */
 
-#define MAXTAGLEN	8	/* maximum length of sentence tag name */
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define MAXUSERDEVS	4	/* max devices per user */
-#define GPS_PATH_MAX   32	/* for names like /dev/serial/by-id/... */
+#define GPS_PATH_MAX	32	/* for names like /dev/serial/by-id/... */
 
 /*
  * The structure describing an uncertainty volume in kinematic space.
@@ -2011,9 +2011,6 @@ struct gps_data_t {
 	int ndevices;
 	struct devconfig_t list[MAXUSERDEVS];
     } devices;
-
-    /* should be moved to privdata someday */
-    char tag[MAXTAGLEN+1];	/* tag of last sentence processed */
 
     /* pack things never reported together to reduce structure size */
 #define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|LOGMESSAGE_SET|ERROR_SET|TIMEDRIFT_SET)

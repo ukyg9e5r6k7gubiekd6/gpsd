@@ -656,8 +656,6 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 	return 0;
     }
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "%u",
-		   (unsigned int)pkt->mPacketType);
     switch (pkt->mPacketType) {
     case GARMIN_LAYERID_TRANSPORT:
 	/* Garmin USB layer specific */

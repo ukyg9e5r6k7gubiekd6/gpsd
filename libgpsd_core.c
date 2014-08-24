@@ -1417,7 +1417,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->gpsdata.fix.mode > session->newdata.mode)
 	    session->gpsdata.set &= ~MODE_SET;
 	//gpsd_report(session->context->debug, LOG_PROG,
-	//              "transfer mask on %s: %02x\n", session->gpsdata.tag, session->gpsdata.set);
+	//              "transfer mask: %02x\n", session->gpsdata.set);
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
 #ifdef CHEAPFLOATS_ENABLE
@@ -1459,7 +1459,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			    "date more than a year in the future!\n");
 	    else if (session->newdata.time < 0)
 		gpsd_report(session->context->debug, LOG_ERROR,
-			    "date in %s is negative!\n", session->gpsdata.tag);
+			    "date is negative!\n");
 	}
 	/*@-relaxtypes -longunsignedintegral@*/
 

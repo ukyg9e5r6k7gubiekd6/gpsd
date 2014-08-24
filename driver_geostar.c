@@ -160,8 +160,6 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
     id = (unsigned int)getleu16(session->packet.outbuffer, OFFSET(0));
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag), "ID%02x", id);
-
     gpsd_report(session->context->debug, LOG_DATA,
 		"GeoStar packet id 0x%02x length %d: %s\n", id, len, buf2);
 

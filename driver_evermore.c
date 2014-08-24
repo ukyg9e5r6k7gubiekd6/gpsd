@@ -177,9 +177,6 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 		"EverMore packet type 0x%02x (%zd bytes)\n", type, tp-buf2);
     /*@ +usedef +compdef @*/
 
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		   "EID%u", type);
-
     session->cycle_end_reliable = true;
 
     switch (type) {

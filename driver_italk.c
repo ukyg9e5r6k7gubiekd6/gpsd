@@ -376,8 +376,6 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
 		    "iTalk unknown packet: id 0x%02x length %zu\n",
 		    type, len);
     }
-    (void)snprintf(session->gpsdata.tag, sizeof(session->gpsdata.tag),
-		       "ITK-%02x", type);
 
     return mask | ONLINE_SET;
 }
