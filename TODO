@@ -39,6 +39,11 @@ uncertainty in output JSON.
 
 *** Client bugs
 
+*** gpsmon on a SiRF doesn't get firmware version ***
+
+For this to work, the firmware probe needs to be split out of the
+configure method so gpsmon can call it separately.
+
 **** In gpsmon's PPS Offset field
 
 Presently PPS Offset is displayed in direct mode for NMEA, SiRF, and
@@ -57,6 +62,8 @@ Hall Murray:
 >
 > Or perhaps a higher level keyboard command to switch into timekeeping
 > debugging mode rather than position debugging mode.
+
+Add PPS offset to each PPS bar.
 
 **** Speed, mode and rate-changes in client-mode gpsmon.
 
@@ -104,6 +111,15 @@ works inside thyrsus.com) and run xgps. Probably some kind of
 packet aggregation issue as it doesn't happen with test logs.
 
 *** Driver issues
+
+*** SiRF IV flakiness ***
+
+Symptom: device hangs when switching from SiRF to NMEA in gpsmon
+(power cycle fixes this).
+
+Underlying problem: SiRF IV has some constraints previous versions
+didn't.  You have to wait on ACK of the previous config commands
+before sending another. The SiRF driver doesn't do this oroperly.
 
 **** RTCM3 analysis is incomplete
 
