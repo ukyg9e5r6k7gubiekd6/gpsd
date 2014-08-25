@@ -511,6 +511,7 @@ struct gps_device_t {
 	/* detect receivers that ship GGA with non-advancing timestamp */
 	bool latch_mode;
 	char last_gga_timestamp[16];
+	char last_gsv_talker;
 	/*
 	 * State for the cycle-tracking machinery.
 	 * The reason these timestamps are separate from the

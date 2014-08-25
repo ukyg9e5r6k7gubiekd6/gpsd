@@ -541,6 +541,10 @@ static gps_mask_t processGSV(int count, char *field[],
      * 46          Signal-to-noise ratio in decibels
      * <repeat for up to 4 satellites per sentence>
      * There my be up to three GSV sentences in a data packet
+     *
+     * Can occur with talker ID GP (GNSS) or GL (GLONASS). In the GLONASS
+     * version sat IDs start at 65. At least one GPS, the BU-353 GLONASS,
+     * emits a GPGSV set followed by a GLGSV set.  We need to combine these.
      */
     int n, fldnum;
     if (count <= 3) {
@@ -565,8 +569,13 @@ static gps_mask_t processGSV(int count, char *field[],
 	gpsd_report(session->context->debug, LOG_WARN, "malformed GPGSV - bad part\n");
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
-    } else if (session->nmea.part == 1)
-	gpsd_zero_satellites(&session->gpsdata);
+    } else if (session->nmea.part == 1) {
+	/* might have gone from GPGSV to GLGSV, in which case accumulate */
+	if (session->nmea.last_gsv_talker == '\0' || field[0][3] == session->nmea.last_gsv_talker) {
+	    gpsd_zero_satellites(&session->gpsdata);
+	}
+	session->nmea.last_gsv_talker = field[0][2];
+    }
 
     for (fldnum = 4; fldnum < count;) {
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
@@ -1311,6 +1320,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	    break;
 	}
     }
+
+    /* prevent overaccumulation of sat reports */
+    if (strncmp(session->nmea.field[0] + 2, "GSV", 3) !=0)
+	session->nmea.last_gsv_talker = '\0';
 
     /* timestamp recording for fixes happens here */
     if ((retval & TIME_SET) != 0) {
