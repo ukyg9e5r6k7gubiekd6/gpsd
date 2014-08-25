@@ -623,10 +623,10 @@ static void ubx_init_query(struct gps_device_t *session)
 {
     unsigned char msg[32];
 
-    /*@ -type @*/
+    /*@ -type -compdef @*/
     /* MON_VER: query for version information */
     (void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
-    /*@ +type @*/
+    /*@ +type +compdef @*/
 }
 
 static void ubx_event_hook(struct gps_device_t *session, event_t event)

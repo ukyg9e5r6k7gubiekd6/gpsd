@@ -894,8 +894,10 @@ static bool do_command(const char *line)
 		 * gpsmon resyncs.  So stash the current type to
 		 * be restored if we do 'n' from NMEA mode.
 		 */
+		/*@-onlytrans@*/
 		if (v == 0)
 		    fallback = switcher;
+		/*@+onlytrans@*/
 	    } else
 		complain
 		    ("Device type %s has no mode switcher", 

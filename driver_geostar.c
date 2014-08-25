@@ -505,9 +505,11 @@ static ssize_t geostar_control_send(struct gps_device_t *session,
 
 static void geostar_init_query(struct gps_device_t *session)
 {
+    /*@-compdef@*/
     unsigned char buf[2 * 4];
     /* Poll Software Version */
     (void)geostar_write(session, 0xc1, buf, 1);
+    /*@+compdef@*/
 }
 
 static void geostar_event_hook(struct gps_device_t *session, event_t event)
