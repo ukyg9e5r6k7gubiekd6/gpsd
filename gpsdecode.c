@@ -563,7 +563,8 @@ static void decode(FILE *fpin, FILE*fpout)
 	    gpsd_set_century(&session);
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.packet.type))
 	    (void)fputs((char *)session.packet.outbuffer, fpout);
-	if ((changed & (REPORT_IS|SUBFRAME_SET|AIS_SET|RTCM2_SET|RTCM3_SET|PASSTHROUGH_IS)) == 0)
+	/* mask should match what's in report_data() */
+	if ((changed & (REPORT_IS|GST_SET|SATELLITE_SET|SUBFRAME_SET|ATTITUDE_SET|RTCM2_SET|RTCM3_SET|AIS_SET|PASSTHROUGH_IS)) == 0)
 	    continue;
 	if (!filter(changed, &session))
 	    continue;
