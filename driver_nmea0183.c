@@ -141,7 +141,7 @@ static void register_fractional_time(const char *tag, const char *fld,
  *
  **************************************************************************/
 
-static gps_mask_t processGPRMC(int count, char *field[],
+static gps_mask_t processRMC(int count, char *field[],
 			       struct gps_device_t *session)
 /* Recommend Minimum Course Specific GPS/TRANSIT Data */
 {
@@ -223,7 +223,7 @@ static gps_mask_t processGPRMC(int count, char *field[],
     return mask;
 }
 
-static gps_mask_t processGPGLL(int count, char *field[],
+static gps_mask_t processGLL(int count, char *field[],
 			       struct gps_device_t *session)
 /* Geographic position - Latitude, Longitude */
 {
@@ -306,7 +306,7 @@ static gps_mask_t processGPGLL(int count, char *field[],
     return mask;
 }
 
-static gps_mask_t processGPGGA(int c UNUSED, char *field[],
+static gps_mask_t processGGA(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
 /* Global Positioning System Fix Data */
 {
@@ -410,7 +410,7 @@ static gps_mask_t processGPGGA(int c UNUSED, char *field[],
 }
 
 
-static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *session)
+static gps_mask_t processGST(int count, char *field[], struct gps_device_t *session)
 /* GST - GPS Pseudorange Noise Statistics */
 {
     /*
@@ -456,7 +456,7 @@ static gps_mask_t processGPGST(int count, char *field[], struct gps_device_t *se
 }
 
 
-static gps_mask_t processGPGSA(int count, char *field[],
+static gps_mask_t processGSA(int count, char *field[],
 			       struct gps_device_t *session)
 /* GPS DOP and Active Satellites */
 {
@@ -526,7 +526,7 @@ static gps_mask_t processGPGSA(int count, char *field[],
     return mask;
 }
 
-static gps_mask_t processGPGSV(int count, char *field[],
+static gps_mask_t processGSV(int count, char *field[],
 			       struct gps_device_t *session)
 /* GPS Satellites in View */
 {
@@ -678,7 +678,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
     return mask;
 }
 
-static gps_mask_t processGPGBS(int c UNUSED, char *field[],
+static gps_mask_t processGBS(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
 /* NMEA 3.0 Estimated Position Error */
 {
@@ -718,7 +718,7 @@ static gps_mask_t processGPGBS(int c UNUSED, char *field[],
     }
 }
 
-static gps_mask_t processGPZDA(int c UNUSED, char *field[],
+static gps_mask_t processZDA(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
 /* Time & Date */
 {
@@ -1201,15 +1201,15 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     * 4. The mode is changed back to NMEA, resulting in an
 	     *    infinite loop.
 	     */
-	{"RMC", 8,  false, processGPRMC},
-	{"GGA", 13, false, processGPGGA},
-	{"GST", 8,  false, processGPGST},
-	{"GLL", 7,  false, processGPGLL},
-	{"GSA", 17, false, processGPGSA},
-	{"GSV", 0,  false, processGPGSV},
+	{"RMC", 8,  false, processRMC},
+	{"GGA", 13, false, processGGA},
+	{"GST", 8,  false, processGST},
+	{"GLL", 7,  false, processGLL},
+	{"GSA", 17, false, processGSA},
+	{"GSV", 0,  false, processGSV},
 	{"VTG", 0,  false, NULL},	/* ignore Velocity Track made Good */
-	{"ZDA", 4,  false, processGPZDA},
-	{"GBS", 7,  false, processGPGBS},
+	{"ZDA", 4,  false, processZDA},
+	{"GBS", 7,  false, processGBS},
         {"HDT", 1,  false, processHDT},
 	{"DBT", 7,  true,  processDBT},
 #ifdef TNT_ENABLE
