@@ -24,13 +24,6 @@ Consider merging the calibration draft into the Time Service HOWTO.
 
 Our goal is to be independent of the system clock.
 
-**** Compile the GPS week of the build into the build
-
-The obvious place tp put this is in timebase.h. Not too expensive;
-will typically cause extra work once per seven days.  The benefit is that
-we can compare received week to the compiled in week and if the latter
-is less know that a rollover has occurred.
-
 **** Maybe apply wraparound compensation ****
 
 See <http://www.febo.com/pipermail/time-nuts/2013-August/079271.html>

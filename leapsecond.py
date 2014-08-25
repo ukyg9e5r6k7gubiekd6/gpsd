@@ -76,9 +76,13 @@ __locations = [
 
 GPS_EPOCH	= 315964800		# 6 Jan 1981 00:00:00
 SECS_PER_WEEK	= 60 * 60 * 24 * 7	# Seconds per GPS week
+ROLLOVER	= 1024			# 10-bit week rollover 
 
 def gps_week(t):
-    return (t - GPS_EPOCH)/SECS_PER_WEEK
+    return ((t - GPS_EPOCH)/SECS_PER_WEEK % ROLLOVER)
+
+def gps_rollovers(t):
+    return ((t - GPS_EPOCH)/SECS_PER_WEEK / ROLLOVER)
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
@@ -191,8 +195,9 @@ def make_leapsecond_include(infile):
     # which doesn't count substitution through locals() as use.
     leapjumps = fetch_leapsecs(infile)
     now = int(time.time())
-    _year = time.strftime("%Y", time.gmtime(now))
+    _century = time.strftime("%Y", time.gmtime(now))[:2] + "00"
     _gps_week_now = gps_week(now)
+    _gps_rollover_now = gps_rollovers(now)
     _isodate = isotime(now - now % SECS_PER_WEEK)
     _leapsecs = -1
     for leapjump in leapjumps:
@@ -204,9 +209,10 @@ def make_leapsecond_include(infile):
  *
  * Correct for week beginning %(_isodate)s
  */
-#define CENTURY_BASE\t%(_year)s00
+#define CENTURY_BASE\t%(_century)s
 #define LEAPSECOND_NOW\t%(_leapsecs)d
 #define GPS_WEEK_NOW\t%(_gps_week_now)d
+#define GPS_ROLLOVERS_NOW\t%(_gps_rollover_now)d
 """ % locals()
 
 def conditional_leapsecond_fetch(outfile, timeout):
