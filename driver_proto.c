@@ -512,6 +512,8 @@ const struct gps_type_t driver__proto__binary = {
     .parse_packet     = _proto__parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer      = pass_rtcm,
+    /* non-perturbing initial query (e.g. for version) */
+    .init_query        = NULL,
     /* fire on various lifetime events */
     .event_hook       = _proto__event_hook,
 #ifdef RECONFIGURE_ENABLE

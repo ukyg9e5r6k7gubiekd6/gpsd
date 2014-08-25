@@ -1373,6 +1373,13 @@ static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+static void sirfbin_init_query(struct gps_device_t *session)
+{
+    gpsd_report(session->context->debug, LOG_PROG,
+		"SiRF: Probing for firmware version.\n");
+    (void)sirf_write(session, versionprobe);
+}
+
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
@@ -1401,9 +1408,11 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    return;
 
 	case 1:
+	    /* disable navigation debug messages (the value 5 is magic) */
 	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: Probing for firmware version.\n");
-	    (void)sirf_write(session, versionprobe);
+			"SiRF: disable MID 7, 28, 29, 30, 31.\n");
+	    putbyte(unsetmidXX, 5, 0x05);
+	    (void)sirf_write(session, unsetmidXX);
 	    break;
 
 	case 2:
@@ -1484,14 +1493,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    }
 	    break;
 
-	case 12:
-	    /* disable navigation debug messages (the value 5 is magic) */
-	    gpsd_report(session->context->debug, LOG_PROG,
-			"SiRF: disable MID 7, 28, 29, 30, 31.\n");
-	    putbyte(unsetmidXX, 5, 0x05);
-	    (void)sirf_write(session, unsetmidXX);
-	    break;
-
 #endif /* RECONFIGURE_ENABLE */
 	default:
 	    /* initialization is done */
@@ -1546,6 +1547,7 @@ const struct gps_type_t driver_sirf =
     .get_packet     = generic_get,	/* be prepared for SiRF or NMEA */
     .parse_packet   = sirfbin_parse_input,/* parse message packets */
     .rtcm_writer    = gpsd_write,	/* send RTCM data straight */
+    .init_query     = sirfbin_init_query,/* non-perturbing initial qury */
     .event_hook     = sirfbin_event_hook,/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = sirfbin_speed,	/* we can change baud rate */

@@ -345,6 +345,7 @@ struct gps_type_t {
     /*@null@*/ssize_t (*get_packet)(struct gps_device_t *session);
     /*@null@*/gps_mask_t (*parse_packet)(struct gps_device_t *session);
     /*@null@*/ssize_t (*rtcm_writer)(struct gps_device_t *session, const char *rtcmbuf, size_t rtcmbytes);
+    /*@null@*/void (*init_query)(struct gps_device_t *session);
     /*@null@*/void (*event_hook)(struct gps_device_t *session, event_t event);
 #ifdef RECONFIGURE_ENABLE
     /*@null@*/bool (*speed_switcher)(struct gps_device_t *session,

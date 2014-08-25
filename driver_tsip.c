@@ -1012,6 +1012,19 @@ static ssize_t tsip_control_send(struct gps_device_t *session,
 }
 #endif /* CONTROLSEND_ENABLE */
 
+static void tsip_init_query(struct gps_device_t *session)
+{
+    unsigned char buf[100];
+
+    /* Request Hardware Version Information */
+    putbyte(buf, 0, 0x03); /* Subcode */
+    (void)tsip_write(session, 0x1c, buf, 1);
+    /* 
+     * After HW information packet is received, a 
+     * decision is made how to configure the device.
+     */
+}
+
 static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
@@ -1020,7 +1033,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	unsigned char buf[100];
 	
 	/*
-	 * Set basic configuration, in case no hardware config resonse
+	 * Set basic configuration, in case no hardware config response
 	 * comes back.
 	 */
 	putbyte(buf, 0, 0x1e);	/* Position: DP, MSL, LLA */
@@ -1028,14 +1041,6 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	putbyte(buf, 2, 0x00);	/* Time: GPS */
 	putbyte(buf, 3, 0x08);	/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
-
-	/* Request Hardware Version Information */
-	putbyte(buf, 0, 0x03); /* Subcode */
-	(void)tsip_write(session, 0x1c, buf, 1);
-	/* 
-	 * After HW information packet is received, a 
-	 * decision is made how to configure the device.
-	 */
     }
     if (event == event_configure && session->packet.counter == 0) {
 	/*
@@ -1256,6 +1261,7 @@ const struct gps_type_t driver_tsip =
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = tsip_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
+    .init_query     = tsip_init_query,	/* non-perturbing initial query */
     .event_hook     = tsip_event_hook,	/* fire on various lifetime events */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = tsip_speed_switch,/* change baud rate */

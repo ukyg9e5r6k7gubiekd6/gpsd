@@ -1384,6 +1384,7 @@ const struct gps_type_t driver_garmin_usb_binary_old =
     .get_packet     = garmin_get_packet,/* how to grab a packet */
     .parse_packet   = garmin_usb_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = garmin_event_hook,/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -1413,6 +1414,7 @@ const struct gps_type_t driver_garmin_usb_binary =
     .get_packet     = generic_get,      /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = garmin_event_hook,/* lifetime ebent handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -1441,6 +1443,7 @@ const struct gps_type_t driver_garmin_ser_binary =
     .get_packet     = generic_get,       /* how to grab a packet */
     .parse_packet   = garmin_ser_parse,	/* parse message packets */
     .rtcm_writer    = NULL,		/* don't send DGPS corrections */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = NULL,	        /* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */

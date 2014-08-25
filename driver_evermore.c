@@ -623,6 +623,7 @@ const struct gps_type_t driver_evermore =
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = generic_parse_input,	/* parse message packets */
     .rtcm_writer    = gpsd_write,		/* send RTCM data straight */
+    .init_query     = NULL,			/* non-perturbing query */
     .event_hook     = evermore_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = evermore_speed,		/* we can change baud rates */

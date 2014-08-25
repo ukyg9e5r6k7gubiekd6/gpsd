@@ -619,6 +619,16 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 }
 #endif /* CONTROLSEND_ENABLE */
 
+static void ubx_init_query(struct gps_device_t *session)
+{
+    unsigned char msg[32];
+
+    /*@ -type @*/
+    /* MON_VER: query for version information */
+    (void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
+    /*@ +type @*/
+}
+
 static void ubx_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
@@ -638,9 +648,6 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	msg[6] = 0x00;
 	msg[7] = 0x00;
 	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
-
-	/* MON_VER: query for version information */
-	(void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
 	/*@ +type @*/
 
 #ifdef RECONFIGURE_ENABLE
@@ -969,6 +976,7 @@ const struct gps_type_t driver_ubx = {
     .get_packet       = generic_get,    /* Packet getter (using default routine) */
     .parse_packet     = parse_input,    /* Parse message packets */
     .rtcm_writer      = gpsd_write,      /* RTCM handler (using default routine) */
+    .init_query       = ubx_init_query,	/* non-perturbing initial query */
     .event_hook       = ubx_event_hook,	/* Fire on various lifetime events */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */

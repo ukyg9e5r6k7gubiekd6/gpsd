@@ -87,6 +87,7 @@ const struct gps_type_t driver_unknown = {
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = NULL,		/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -252,6 +253,7 @@ const struct gps_type_t driver_nmea0183 = {
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = nmea_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -357,6 +359,7 @@ const struct gps_type_t driver_garmin = {
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* some do, some don't, skip for now */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = garmin_nmea_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,			/* no speed switcher */
@@ -419,6 +422,7 @@ const struct gps_type_t driver_ashtech = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = ashtech_event_hook, /* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -470,6 +474,7 @@ const struct gps_type_t driver_fv18 = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = fv18_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -524,6 +529,7 @@ const struct gps_type_t driver_gpsclock = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = gpsclock_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -577,8 +583,9 @@ static const struct gps_type_t driver_tripmate = {
     .channels      = 12,			/* consumer-grade GPS */
     .probe_detect  = NULL,			/* no probe */
     .get_packet    = generic_get,		/* how to get a packet */
-    .parse_packet  = generic_parse_input,		/* how to interpret a packet */
-    .rtcm_writer   = gpsd_write,			/* send RTCM data straight */
+    .parse_packet  = generic_parse_input,	/* how to interpret a packet */
+    .rtcm_writer   = gpsd_write,		/* send RTCM data straight */
+    .init_query    = NULL,			/* non-perturbing query */
     .event_hook    = tripmate_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,			/* no speed switcher */
@@ -630,6 +637,7 @@ static const struct gps_type_t driver_earthmate = {
     .get_packet    = generic_get,		/* how to get a packet */
     .parse_packet  = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer   = NULL,			/* don't send RTCM data */
+    .init_query     = NULL,			/* non-perturbing query */
     .event_hook    = earthmate_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,			/* no speed switcher */
@@ -755,6 +763,7 @@ const struct gps_type_t driver_trueNorth = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = tnt_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = tnt_speed,	/* no speed switcher */
@@ -833,6 +842,7 @@ static const struct gps_type_t driver_oceanServer = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = oceanserver_event_hook,
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -900,6 +910,7 @@ static const struct gps_type_t driver_fury = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = fury_event_hook,
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -954,6 +965,7 @@ static const struct gps_type_t driver_rtcm104v2 = {
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = rtcm104v2_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook    = NULL,		/* no event_hook */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,		/* no speed switcher */
@@ -1000,6 +1012,7 @@ static const struct gps_type_t driver_rtcm104v3 = {
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = rtcm104v3_analyze,	/*  */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+    .init_query    = NULL,		/* non-perturbing initial query */
     .event_hook    = NULL,		/* no event hook */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,		/* no speed switcher */
@@ -1035,6 +1048,7 @@ static const struct gps_type_t driver_garmintxt = {
     .get_packet    = generic_get,	/* how to get a packet */
     .parse_packet  = garmintxt_parse,	/* how to parse one */
     .rtcm_writer   = NULL,		/* don't send RTCM data,  */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook    = NULL,		/* no event hook */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher= NULL,		/* no speed switcher */
@@ -1130,6 +1144,7 @@ const struct gps_type_t driver_mtk3301 = {
     .get_packet     = generic_get,	/* how to get a packet */
     .parse_packet   = generic_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = gpsd_write,	/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = mtk3301_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
@@ -1372,6 +1387,7 @@ const struct gps_type_t driver_aivdm = {
     .get_packet       = generic_get,	/* how to get a packet */
     .parse_packet     = aivdm_analyze,	/* how to analyze a packet */
     .rtcm_writer      = NULL,		/* don't send RTCM data,  */
+    .init_query       = NULL,		/* non-perturbing initial query */
     .event_hook       = NULL,		/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher   = NULL,		/* no speed switcher */
@@ -1475,6 +1491,7 @@ const struct gps_type_t driver_json_passthrough = {
     .get_packet     = generic_get,	/* use generic packet getter */
     .parse_packet   = json_pass_packet,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = NULL,		/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */

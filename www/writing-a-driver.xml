@@ -15,6 +15,14 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.13</revnumber>
+      <date>25 Aug 2014</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; added init_query method.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.12</revnumber>
       <date>31 Oct 2013</date>
       <authorinitials>er</authorinitials>
@@ -638,6 +646,11 @@ makes changes to the port permanently, it should store the
 original settings for later restoration, probably by
 <structfield>.wrapup</structfield> mentioned below. Later in this
 document I discuss my work to implement this function.</para>
+
+<!-- added by ESR, 2014 -->
+<para><structfield>.init_query</structfield> points to a block of code
+that will be called to query the firmware version of the device.  This
+code <emphasis>must not</emphasis> alter device state or settings.</para>
 
 <para><structfield>.event_hook</structfield> points to a block of code
 that will be executed on and after various events, distinguished by a

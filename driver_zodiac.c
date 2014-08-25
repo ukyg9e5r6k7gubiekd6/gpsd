@@ -474,6 +474,7 @@ const struct gps_type_t driver_zodiac =
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = zodiac_analyze,	/* parse message packets */
     .rtcm_writer    = zodiac_send_rtcm,	/* send DGPS correction */
+    .init_query     = NULL,		/* non-perturbing initial query */
     .event_hook     = NULL,		/* no configuration */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */

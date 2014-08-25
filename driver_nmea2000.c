@@ -1675,6 +1675,7 @@ const struct gps_type_t driver_nmea2000 = {
     .get_packet     = nmea2000_get,	/* how to get a packet */
     .parse_packet   = nmea2000_parse_input,	/* how to interpret a packet */
     .rtcm_writer    = NULL,		/* Don't send RTCM to this */
+    .init_query     = NULL,		/* non-perturbing query */
     .event_hook     = NULL,
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */

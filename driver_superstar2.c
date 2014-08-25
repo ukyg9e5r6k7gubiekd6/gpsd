@@ -430,6 +430,8 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
  *
  **********************************************************/
 
+/* FIXME: factor out Superstar init_query for version */
+
 static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
@@ -556,6 +558,8 @@ const struct gps_type_t driver_superstar2 = {
     .parse_packet	= superstar2_parse_input,
     /* RTCM handler (using default routine) */
     .rtcm_writer	= gpsd_write,
+    /* non-perturbing initial query */
+    .init_query         = NULL,
     /* Fire on various lifetime events */
     .event_hook		= superstar2_event_hook,
 #ifdef RECONFIGURE_ENABLE

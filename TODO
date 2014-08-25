@@ -39,11 +39,6 @@ uncertainty in output JSON.
 
 *** Client bugs
 
-*** gpsmon on a SiRF doesn't get firmware version ***
-
-For this to work, the firmware probe needs to be split out of the
-configure method so gpsmon can call it separately.
-
 **** In gpsmon's PPS Offset field
 
 Presently PPS Offset is displayed in direct mode for NMEA, SiRF, and

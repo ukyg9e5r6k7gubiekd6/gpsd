@@ -502,6 +502,14 @@ static ssize_t geostar_control_send(struct gps_device_t *session,
 }
 #endif /* CONTROLSEND_ENABLE */
 
+
+static void geostar_init_query(struct gps_device_t *session)
+{
+    unsigned char buf[2 * 4];
+    /* Poll Software Version */
+    (void)geostar_write(session, 0xc1, buf, 1);
+}
+
 static void geostar_event_hook(struct gps_device_t *session, event_t event)
 {
     unsigned char buf[2 * 4];
@@ -537,8 +545,6 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
 	(void)geostar_write(session, 0x8e, buf, 1);
 	/* Poll binary packets selected */
 	(void)geostar_write(session, 0x8f, buf, 1);
-	/* Poll Software Version */
-	(void)geostar_write(session, 0xc1, buf, 1);
     }
 
     if (event == event_deactivate) {
@@ -620,6 +626,7 @@ const struct gps_type_t driver_geostar =
     .get_packet     = generic_get,	/* use the generic packet getter */
     .parse_packet   = geostar_parse_input,	/* parse message packets */
     .rtcm_writer    = NULL,		/* doesn't accept DGPS corrections */
+    .init_query     = geostar_init_query,	/* non-perturbing initial query */
     .event_hook     = geostar_event_hook,	/* fire on various lifetime events */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = geostar_speed_switch,/* change baud rate */

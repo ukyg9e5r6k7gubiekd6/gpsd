@@ -1325,6 +1325,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 			timestamp() - session->opentime,
 			(unsigned int)speed);
 	    /*@+nullderef@*/
+
+	    /* fire the init_query method */
+	    if (session->device_type != NULL
+		&& session->device_type->init_query != NULL) {
+		/*
+		 * We can force readonly off knowing this method does
+		 * not alter device state.
+		 */
+		bool saved = session->context->readonly;
+		session->context->readonly = false;
+		session->device_type->init_query(session);
+		session->context->readonly = saved;
+	    }
+
 	    /* fire the identified hook */
 	    if (session->device_type != NULL
 		&& session->device_type->event_hook != NULL)

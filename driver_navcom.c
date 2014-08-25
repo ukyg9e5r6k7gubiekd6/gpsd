@@ -1285,6 +1285,7 @@ const struct gps_type_t driver_navcom =
     .get_packet     = generic_get,		/* use generic one */
     .parse_packet   = navcom_parse_input,	/* parse message packets */
     .rtcm_writer    = gpsd_write,		/* send RTCM data straight */
+    .init_query     = NULL,			/* non-perturbing query */
     .event_hook     = navcom_event_hook,	/* lifetime event handler */
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = navcom_speed,		/* we do change baud rates */
