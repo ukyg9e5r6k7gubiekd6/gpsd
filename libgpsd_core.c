@@ -1638,6 +1638,7 @@ void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
 #endif
 }
 
+#ifdef NTPSHM_ENABLE
 void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
 /* latch the fact that we've saved a fix */
 {
@@ -1668,5 +1669,6 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     device->last_fixtime.clock = td->clock.tv_sec + td->clock.tv_nsec / 1e9;
 #endif /* S_SPLINT_S */
 }
+#endif /* NTPSHM_ENABLE */
 
 /* end */
