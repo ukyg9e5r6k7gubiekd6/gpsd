@@ -35,6 +35,14 @@
 #include "driver_nmea2000.h"
 #endif /* defined(NMEA2000_ENABLE) */
 
+ssize_t gpsd_write(struct gps_device_t *session,
+		   const char *buf,
+		   const size_t len)
+/* pass low-level data to devices straight through */
+{
+    return session->context->serial_write(session, buf, len);
+}
+
 #if defined(PPS_ENABLE)
 static pthread_mutex_t report_mutex;
 
@@ -248,6 +256,7 @@ void gps_context_init(struct gps_context_t *context)
 #ifdef SHM_EXPORT_ENABLE
 	.shmexport      = NULL,
 #endif /* SHM_EXPORT_ENABLE */
+	.serial_write    = gpsd_serial_write,
     };
     /*@ +initallelements +nullassign +nullderef @*/
     /* *INDENT-ON* */

@@ -639,7 +639,7 @@ void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
     }
 }
 
-ssize_t gpsd_write(struct gps_device_t *session,
+static ssize_t gpsmon_serial_write(struct gps_device_t *session,
 		   const char *buf,
 		   const size_t len)
 /* pass low-level data to devices, echoing it to the log window */
@@ -1099,6 +1099,7 @@ int main(int argc, char **argv)
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
     gps_context_init(&context);	// initialize the report mutex
+    context.serial_write = gpsmon_serial_write;
     while ((option = getopt(argc, argv, "aD:LVhl:nt:?")) != -1) {
 	switch (option) {
 	case 'a':

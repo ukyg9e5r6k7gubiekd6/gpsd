@@ -30,14 +30,6 @@ static unsigned int timeout = 0;	/* no timeout */
 static struct gps_context_t context;
 static bool hunting = true;
 
-ssize_t gpsd_write(struct gps_device_t *session,
-		   const char *buf,
-		   const size_t len)
-/* pass low-level data to devices straight through */
-{
-    return gpsd_serial_write(session, buf, len);
-}
-
 /*
  * Set this as high or higher than the maximum number of subtype
  * probes in drivers.c.
