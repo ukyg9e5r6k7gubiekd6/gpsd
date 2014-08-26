@@ -530,6 +530,7 @@ static gps_mask_t processGSV(int count, char *field[],
 			       struct gps_device_t *session)
 /* GPS Satellites in View */
 {
+#define GSV_TALKER	field[0][1]
     /*
      * GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
      * 2           Number of sentences for full data
@@ -571,10 +572,13 @@ static gps_mask_t processGSV(int count, char *field[],
 	return ONLINE_SET;
     } else if (session->nmea.part == 1) {
 	/* might have gone from GPGSV to GLGSV, in which case accumulate */
-	if (session->nmea.last_gsv_talker == '\0' || field[0][3] == session->nmea.last_gsv_talker) {
+	if (session->nmea.last_gsv_talker == '\0' || GSV_TALKER == session->nmea.last_gsv_talker) {
 	    gpsd_zero_satellites(&session->gpsdata);
 	}
-	session->nmea.last_gsv_talker = field[0][2];
+	session->nmea.last_gsv_talker = GSV_TALKER;
+	if (session->nmea.last_gsv_talker == 'L') {
+	    session->nmea.seen_glgsv = true;
+	}
     }
 
     for (fldnum = 4; fldnum < count;) {
@@ -640,7 +644,12 @@ static gps_mask_t processGSV(int count, char *field[],
     gpsd_report(session->context->debug, LOG_DATA,
 		"GSV: Satellite data OK (%d of %d).\n",
 		session->nmea.part, session->nmea.await);
+
+    /* assumes the GLGSV group, if present, is emitted after the GPGSV */
+    if (session->nmea.seen_glgsv && GSV_TALKER == 'P')
+	return ONLINE_SET;
     return SATELLITE_SET;
+#undef GSV_TALKER
 }
 
 static gps_mask_t processPGRME(int c UNUSED, char *field[],
