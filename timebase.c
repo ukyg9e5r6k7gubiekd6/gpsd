@@ -9,7 +9,7 @@ GPS week+TOW, but this isn't possible in general.
 
 = Begin Sidebar: Why Leap Seconds =
 
-READ this carefully, and if there are errors, please correct.  An
+Read this carefully, and if there are errors, please correct.  An
 understanding of the following terms is critical to make sense of the
 situation, which would be farcical if it were not serious.
 
@@ -64,7 +64,7 @@ error (UT1 - UTC) build up. This is of the order of a few ms each midnight, not
 always the same way (think earthquakes that move the earth's crust).
 
 Once the error has built up substantially, every few years, we (and by
-"we", I mean M Daniel Gambis at the IERS) declare that a future
+"we", I mean M. Daniel Gambis at the IERS) declare that a future
 day will have 86401 secs.  This is the Leap Second.  Note that this
 often overcorrects, but if we wait a few months, the error will disappear.
 
@@ -79,11 +79,10 @@ Two last things:
     definitions above that causes leap seconds
  2. POSIX declares that there is no conflict, there are always 86400 SI
     secs in a day, and hence no leap seconds.  The fact that ostriches
-    survive in the wild indicates that this is not as mind-crushing
+    survive in the wild indicates that this is not as mind-crushingly
     wrong as it may seem.
 
 = End Sidebar =
-
 
 Date and time in GPS is represented as number of weeks mod 1024 from
 the start of zero second of 6 January 1980, and number of SI seconds into
@@ -104,11 +103,11 @@ the corrections when rollover occurs, as this may not be adequately
 tested.  We hence have to accept the UTC time reported by the device,
 while checking it on the sly).
 
-Satellites also broadcast a current leap-second
-correction which is updated on (theoretically) three-month boundaries
-according to rotational bulletins issued by the International
-Earth Rotation and Reference Systems Service (IERS).
-Historically all corrections have been made on six-month boundaries.
+Satellites also broadcast a current leap-second correction which is
+updated on (theoretically) three-month boundaries according to
+rotational bulletins issued by the International Earth Rotation and
+Reference Systems Service (IERS).  Historically all corrections have
+been made on six-month boundaries.
 
 The leap-second correction is only included in the satellite subframe
 broadcast, roughly once ever 20 minutes.  While the satellites do
@@ -133,7 +132,7 @@ afoot to upgrade the satellite counters to 13 bits; this will delay
 the next rollover until 2173.
 
 For accurate time reporting, therefore, a GPS requires a supplemental
-time references sufficient to identify the current rollover period,
+time reference sufficient to identify the current rollover period,
 e.g. accurate to within 512 weeks.  Many NMEA GPSes have a wired-in
 assumption about the UTC time of the last rollover and will thus report
 incorrect times outside the rollover period they were designed in.
@@ -216,8 +215,8 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
      * just before a century mark, but that case is probably doomed
      * anyhow because of 2-digit years.
      */
-    context->leap_seconds = LEAPSECOND_NOW;
-    context->century = CENTURY_BASE;
+    context->leap_seconds = BUILD_LEAPSECONDS;
+    context->century = BUILD_CENTURY;
     context->start_time = starttime;
 
     context->rollovers = (int)((context->start_time-GPS_EPOCH) / GPS_ROLLOVER);

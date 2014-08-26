@@ -196,8 +196,8 @@ def make_leapsecond_include(infile):
     leapjumps = fetch_leapsecs(infile)
     now = int(time.time())
     _century = time.strftime("%Y", time.gmtime(now))[:2] + "00"
-    _gps_week_now = gps_week(now)
-    _gps_rollover_now = gps_rollovers(now)
+    _week = gps_week(now)
+    _rollovers = gps_rollovers(now)
     _isodate = isotime(now - now % SECS_PER_WEEK)
     _leapsecs = -1
     for leapjump in leapjumps:
@@ -209,10 +209,10 @@ def make_leapsecond_include(infile):
  *
  * Correct for week beginning %(_isodate)s
  */
-#define CENTURY_BASE\t%(_century)s
-#define LEAPSECOND_NOW\t%(_leapsecs)d
-#define GPS_WEEK_NOW\t%(_gps_week_now)d
-#define GPS_ROLLOVERS_NOW\t%(_gps_rollover_now)d
+#define BUILD_CENTURY\t%(_century)s
+#define BUILD_WEEK\t%(_week)d		# Assumes 10-bit week counter
+#define BUILD_LEAPSECONDS\t%(_leapsecs)d
+#define BUILD_ROLLOVERS\t%(_rollovers)d		# Assumes 10-bit week counter
 """ % locals()
 
 def conditional_leapsecond_fetch(outfile, timeout):
