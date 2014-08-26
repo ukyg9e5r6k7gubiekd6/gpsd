@@ -40,6 +40,7 @@
 #include <string.h>
 #include <errno.h>
 #include <pthread.h>
+#include <math.h>
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
 #include <unistd.h>
@@ -583,7 +584,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              */
 
 	    /*@+relaxtypes@*/
-	    drift.real.tv_sec = last_fixtime_real + 1;
+	    drift.real.tv_sec = (time_t)trunc(last_fixtime_real) + 1;
 	    drift.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
 	    drift.clock = clock_ts;
 	    /*@-relaxtypes@*/
