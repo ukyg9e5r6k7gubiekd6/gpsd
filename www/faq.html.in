@@ -772,8 +772,11 @@ can set that up like this:</p>
 
 <p>On *BSD systems, baud rate 0 doesn't have this special meaning -
 the ports open at a fixed speed, usually 9600.  So to suppress the
-hunt loop you have to actually compile at a fixed baud rate and then
-use the stty trick.</p>
+hunt loop you may have to actually compile at a fixed baud rate and
+then use the stty trick - unless your BSD has an "init" device paired
+with each real one in which case <a
+href="m/blog/posts/using-serial-devices-in-freebsd-how-to-set-a-terminal-baud-rate">this
+note on how to set a baud rate</a> may be relevant.</p>
 
 <h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
 
