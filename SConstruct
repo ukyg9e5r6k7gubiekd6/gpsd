@@ -758,7 +758,9 @@ pid_t getsid(pid_t pid);
         env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                           src_suffix=".xml", suffix=".html")
 
-    qt_network = env['qt'] and env['libQgpsmm'] and config.CheckPKG('QtNetwork')
+    qt_network = env['libQgpsmm'] and config.CheckPKG('QtNetwork')
+    if not qt_network:
+        env["qt"] = False
 
     env = config.Finish()
 
