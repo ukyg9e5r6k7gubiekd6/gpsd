@@ -148,7 +148,7 @@ boolopts = (
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
     ("libgpsmm",      True,  "build C++ bindings"),
     ("libQgpsmm",     True,  "build QT bindings (deprecated alias)"),
-    ("qt",            True,  "build QT bindings"),
+    ("qt",            False,  "build QT bindings"),
     # Daemon options
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
