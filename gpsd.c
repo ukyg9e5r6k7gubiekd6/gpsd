@@ -2173,11 +2173,13 @@ int main(int argc, char *argv[])
 	case AWAIT_GOT_INPUT:
 	    break;
 	case AWAIT_NOT_READY:
+#ifdef __UNUSED_
 	    for (device = devices; device < devices + MAXDEVICES; device++)
 		if (FD_ISSET(device->gpsdata.gps_fd, &efds)) {
 		    deactivate_device(device);
 		    free_device(device);
 		}
+#endif /* UNUSED__ */
 	    continue;
 	case AWAIT_FAILED:
 	    exit(EXIT_FAILURE);
