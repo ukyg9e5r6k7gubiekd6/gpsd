@@ -67,7 +67,7 @@ static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session,
 static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session,
 				     unsigned char *buf, size_t data_len);
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
-static void ubx_msg_inf(unsigned char *buf, size_t data_len, const int debug);
+static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t data_len);
 #ifdef RECONFIGURE_ENABLE
 static void ubx_mode(struct gps_device_t *session, int mode);
 #endif /* RECONFIGURE_ENABLE */
@@ -332,7 +332,7 @@ static gps_mask_t ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
     return gpsd_interpret_subframe(session, svid, words);
 }
 
-static void ubx_msg_inf(unsigned char *buf, size_t data_len, const int debug)
+static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t data_len)
 {
     unsigned short msgid;
     static char txtbuf[MAX_PACKET_LENGTH];
@@ -345,19 +345,19 @@ static void ubx_msg_inf(unsigned char *buf, size_t data_len, const int debug)
     txtbuf[data_len] = '\0';
     switch (msgid) {
     case UBX_INF_DEBUG:
-	gpsd_report(debug, LOG_PROG, "UBX_INF_DEBUG: %s\n", txtbuf);
+	gpsd_report(session->context->debug, LOG_PROG, "UBX_INF_DEBUG: %s\n", txtbuf);
 	break;
     case UBX_INF_TEST:
-	gpsd_report(debug, LOG_PROG, "UBX_INF_TEST: %s\n", txtbuf);
+	gpsd_report(session->context->debug, LOG_PROG, "UBX_INF_TEST: %s\n", txtbuf);
 	break;
     case UBX_INF_NOTICE:
-	gpsd_report(debug, LOG_INF, "UBX_INF_NOTICE: %s\n", txtbuf);
+	gpsd_report(session->context->debug, LOG_INF, "UBX_INF_NOTICE: %s\n", txtbuf);
 	break;
     case UBX_INF_WARNING:
-	gpsd_report(debug, LOG_WARN, "UBX_INF_WARNING: %s\n", txtbuf);
+	gpsd_report(session->context->debug, LOG_WARN, "UBX_INF_WARNING: %s\n", txtbuf);
 	break;
     case UBX_INF_ERROR:
-	gpsd_report(debug, LOG_WARN, "UBX_INF_ERROR: %s\n", txtbuf);
+	gpsd_report(session->context->debug, LOG_WARN, "UBX_INF_ERROR: %s\n", txtbuf);
 	break;
     default:
 	break;
@@ -498,7 +498,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_INF_WARNING:
 	/* FALLTHROUGH */
     case UBX_INF_ERROR:
-	ubx_msg_inf(buf, data_len, session->context->debug);
+	ubx_msg_inf(session, buf, data_len);
 	break;
 
     case UBX_CFG_PRT:
