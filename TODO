@@ -37,6 +37,21 @@ confidence measure at a high level.  We'd use the confidence level to
 control (a) whether gpsd ships to NTP, and (b) how it sets time
 uncertainty in output JSON.
 
+*** Optionally use tag blocks in NMEA output
+
+Ed W. writes:
+>Feature request: I would like to see an option to get the NMEA data
+>out of gpsd, but augmented with a timestamp on each sentence and
+>details of which input fed in the data. TAG blocks appear to solve
+>that problem perfectly.  So the feature request is simply an option
+>that inserts a TAG block for each emitted sentence from GPSd with a
+>timestamp and some handle which references the input method for the
+>sentence.
+>
+>I think all this is effectively emitted with the JSON output (?), so
+>really this is just adding it to the NMEA sentence output options via
+>the TAG structure
+
 *** RFC2783 bugs
 
 **** detangle TIOCMIWAIT and RFC2783
