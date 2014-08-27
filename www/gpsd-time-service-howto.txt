@@ -286,10 +286,16 @@ kernel).  This will have a list of the configuration options that were
 used to build the kernel.  You can check if the above options are
 set. Usually they will be set to "m", which is sufficient.
 
+NetBSD has included the RFC2783 Pulse Per Second API for real serial
+ports by default since 1998, and it works with ntpd.  NetBSD 7
+(forthcoming) includes RFC2783 support for USB-serial devices, and
+this works (with ntpd) with the GR601-W.  However, gpsd's code
+interacts badly with the NetBSD implementation, and gpsd's support for
+RFC2783 PPS does not yet work on NetBSD (for serial or USB).
+
 Other OSes have different ways to enable KPPS in their kernels.
 When we learn what those are, we'll document them or point
-at references.  We can say that versions of NetBSD shipped after
-Juky 25 2014 have PPS support that is known to work with GPSD.
+at references.
 
 You will need to have either ntpd or chrony installed. If you are
 running a Unix variant with a package system, the packages will
