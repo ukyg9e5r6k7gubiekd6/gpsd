@@ -119,7 +119,7 @@ enum
 #include "packet_states.h"
 };
 
-static void lexer_report(const struct gps_lexer_t *lexer,
+void lexer_report(const struct gps_lexer_t *lexer,
 			 const int errlevel,
 			 const char *fmt, ...)
 {

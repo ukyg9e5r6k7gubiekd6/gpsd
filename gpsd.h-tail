@@ -209,6 +209,8 @@ struct gps_lexer_t {
 };
 
 extern void lexer_init(/*@out@*/struct gps_lexer_t *);
+extern void lexer_report(const struct gps_lexer_t *,
+			 const int, const char *, ...);
 extern void packet_reset(/*@out@*/struct gps_lexer_t *);
 extern void packet_pushback(struct gps_lexer_t *);
 extern void packet_parse(struct gps_lexer_t *);
