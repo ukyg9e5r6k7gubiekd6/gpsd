@@ -275,7 +275,7 @@ static int packet_test(struct map *mp)
     struct gps_lexer_t packet;
     int failure = 0;
 
-    packet_init(&packet);
+    lexer_init(&packet);
     packet.debug = verbose;
     /*@i@*/ memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
     packet.inbuflen = mp->testlen;
@@ -303,7 +303,7 @@ static void runon_test(struct map *mp)
     int nullfd = open("/dev/null", O_RDONLY);
     ssize_t st;
 
-    packet_init(&packet);
+    lexer_init(&packet);
     packet.debug = verbose;
     /*@i@*/ memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
     packet.inbuflen = mp->testlen;

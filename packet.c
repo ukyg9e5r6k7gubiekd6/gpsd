@@ -1445,7 +1445,7 @@ static void character_discard(struct gps_lexer_t *lexer)
 
 /* entry points begin here */
 
-void packet_init( /*@out@*/ struct gps_lexer_t *lexer)
+void lexer_init( /*@out@*/ struct gps_lexer_t *lexer)
 {
     lexer->char_counter = 0;
     lexer->retry_counter = 0;
