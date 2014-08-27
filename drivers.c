@@ -34,21 +34,21 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	char *sentence = (char *)session->lexer.outbuffer;
 
 	if (sentence[strlen(sentence)-1] != '\n')
-	    gpsd_report(session->context->errout.debug, LOG_IO,
+	    gpsd_notify(&session->context->errout, LOG_IO,
 			"<= GPS: %s\n", sentence);
 	else
-	    gpsd_report(session->context->errout.debug, LOG_IO,
+	    gpsd_notify(&session->context->errout, LOG_IO,
 			"<= GPS: %s", sentence);
 
 	if ((st=nmea_parse(sentence, session)) == 0) {
-	    gpsd_report(session->context->errout.debug, LOG_WARN,
+	    gpsd_notify(&session->context->errout, LOG_WARN,
 			"unknown sentence: \"%s\"\n",	sentence);
 	}
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    char *trigger = (*dp)->trigger;
 
 	    if (trigger!=NULL && strncmp(sentence,trigger,strlen(trigger))==0) {
-		gpsd_report(session->context->errout.debug, LOG_PROG,
+		gpsd_notify(&session->context->errout, LOG_PROG,
 			    "found trigger string %s.\n", trigger);
 		if (*dp != session->device_type) {
 		    (void)gpsd_switch_driver(session, (*dp)->type_name);
@@ -63,7 +63,7 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	return st;
 #endif /* NMEA_ENABLE */
     } else {
-	gpsd_report(session->context->errout.debug, LOG_SHOUT,
+	gpsd_notify(&session->context->errout, LOG_SHOUT,
 		    "packet type %d fell through (should never happen): %s.\n",
 		    session->lexer.type, gpsd_prettydump(session));
 	return 0;
@@ -147,7 +147,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef NMEA_ENABLE
 	case 0:
 	    /* probe for Garmin serial GPS -- expect $PGRMC followed by data */
-	    gpsd_report(session->context->errout.debug, LOG_PROG,
+	    gpsd_notify(&session->context->errout, LOG_PROG,
 			"=> Probing for Garmin NMEA\n");
 	    (void)nmea_send(session, "$PGRMCE");
 	    break;
@@ -171,7 +171,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	     * mode!  Fix this if we ever find a nondisruptive probe
 	     * string.
 	     */
-	    gpsd_report(session->context->errout.debug, LOG_PROG, "=> Probing for SiRF\n");
+	    gpsd_notify(&session->context->errout, LOG_PROG, "=> Probing for SiRF\n");
 	    (void)nmea_send(session,
 			    "$PSRF100,0,%d,%d,%d,0",
 			    session->gpsdata.dev.baudrate,
@@ -183,19 +183,19 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef NMEA_ENABLE
 	case 2:
 	    /* probe for the FV-18 -- expect $PFEC,GPint followed by data */
-	    gpsd_report(session->context->errout.debug, LOG_PROG, "=> Probing for FV-18\n");
+	    gpsd_notify(&session->context->errout, LOG_PROG, "=> Probing for FV-18\n");
 	    (void)nmea_send(session, "$PFEC,GPint");
 	    break;
 	case 3:
 	    /* probe for the Trimble Copernicus */
-	    gpsd_report(session->context->errout.debug, LOG_PROG,
+	    gpsd_notify(&session->context->errout, LOG_PROG,
 			"=> Probing for Trimble Copernicus\n");
 	    (void)nmea_send(session, "$PTNLSNM,0139,01");
 	    break;
 #endif /* NMEA_ENABLE */
 #ifdef EVERMORE_ENABLE
 	case 4:
-	    gpsd_report(session->context->errout.debug, LOG_PROG,
+	    gpsd_notify(&session->context->errout, LOG_PROG,
 			"=> Probing for Evermore\n");
 	    /* Enable checksum and GGA(1s), GLL(0s), GSA(1s), GSV(1s), RMC(1s), VTG(0s), PEMT101(0s) */
 	    /* EverMore will reply with: \x10\x02\x04\x38\x8E\xC6\x10\x03 */
@@ -207,7 +207,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef GPSCLOCK_ENABLE
 	case 5:
 	    /* probe for Furuno Electric GH-79L4-N (GPSClock); expect $PFEC,GPssd */
-	    gpsd_report(session->context->errout.debug, LOG_PROG,
+	    gpsd_notify(&session->context->errout, LOG_PROG,
 			"=> Probing for GPSClock\n");
 	    (void)nmea_send(session, "$PFEC,GPsrq");
 	    break;
@@ -215,7 +215,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef ASHTECH_ENABLE
 	case 6:
 	    /* probe for Ashtech -- expect $PASHR,RID */
-	    gpsd_report(session->context->errout.debug, LOG_PROG,
+	    gpsd_notify(&session->context->errout, LOG_PROG,
 			"=> Probing for Ashtech\n");
 	    (void)nmea_send(session, "$PASHQ,RID");
 	    break;
@@ -223,7 +223,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef UBLOX_ENABLE
 	case 7:
 	    /* probe for UBX -- query port configuration */
-	    gpsd_report(session->context->errout.debug, LOG_PROG,
+	    gpsd_notify(&session->context->errout, LOG_PROG,
 			"=> Probing for UBX\n");
 	    (void)ubx_write(session, 0x06, 0x00, NULL, 0);
 	    break;
@@ -231,7 +231,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 #ifdef MTK3301_ENABLE
 	case 8:
 	    /* probe for MTK-3301 -- expect $PMTK705 */
-	    gpsd_report(session->context->errout.debug, LOG_PROG,
+	    gpsd_notify(&session->context->errout, LOG_PROG,
 			"=> Probing for MediaTek\n");
 	    (void)nmea_send(session, "$PMTK605");
 	    break;
@@ -512,7 +512,7 @@ static void gpsclock_event_hook(struct gps_device_t *session, event_t event)
      * ignore the trailing PPS edge when extracting time from this chip.
      */
     if (event == event_identified || event == event_reactivate) {
-	gpsd_report(session->context->errout.debug, LOG_INF,
+	gpsd_notify(&session->context->errout, LOG_INF,
 		    "PPS trailing edge will be ignored\n");
 	session->nmea.ignore_trailing_edge = true;
     }
@@ -685,7 +685,7 @@ static ssize_t tnt_control_send(struct gps_device_t *session,
     } 
 #ifdef __UNUSED__
     else {
-	gpsd_report(session->context->errout.debug, LOG_ERROR,
+	gpsd_notify(&session->context->errout, LOG_ERROR,
 		    "Bad TNT sentence: '%s'\n", msg);
     }
 #endif /* __UNUSED__ */
@@ -711,11 +711,11 @@ static bool tnt_send(struct gps_device_t *session, const char *fmt, ...)
     va_end(ap);
     sent = tnt_control_send(session, buf, strlen(buf));
     if (sent == (ssize_t) strlen(buf)) {
-	gpsd_report(session->context->errout.debug, LOG_IO,
+	gpsd_notify(&session->context->errout, LOG_IO,
 		    "=> GPS: %s\n", buf);
 	return true;
     } else {
-	gpsd_report(session->context->errout.debug, LOG_WARN,
+	gpsd_notify(&session->context->errout, LOG_WARN,
 		    "=> GPS: %s FAILED\n", buf);
 	return false;
     }
@@ -941,7 +941,7 @@ static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
     rtcm2_unpack(&session->gpsdata.rtcm2, (char *)session->lexer.isgps.buf);
     /* extra guard prevents expensive hexdump calls */
     if (session->context->errout.debug >= LOG_RAW)
-	gpsd_report(session->context->errout.debug, LOG_RAW,
+	gpsd_notify(&session->context->errout, LOG_RAW,
 		    "RTCM 2.x packet type 0x%02x length %d words from %zd bytes: %s\n",
 		    session->gpsdata.rtcm2.type,
 		    session->gpsdata.rtcm2.length + 2,
@@ -993,7 +993,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 {
     uint16_t type = getbeu16(session->lexer.inbuffer, 3) >> 4;
 
-    gpsd_report(session->context->errout.debug, LOG_RAW, "RTCM 3.x packet %d\n", type);
+    gpsd_notify(&session->context->errout, LOG_RAW, "RTCM 3.x packet %d\n", type);
     rtcm3_unpack(session->context,
 		 &session->gpsdata.rtcm3, 
 		 (char *)session->lexer.outbuffer);
@@ -1204,7 +1204,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	return false;
 
     /* we may need to dump the raw packet */
-    gpsd_report(session->context->errout.debug, LOG_PROG,
+    gpsd_notify(&session->context->errout, LOG_PROG,
 		"AIVDM packet length %zd: %s\n", buflen, buf);
 
     /* first clear the result, making sure we don't return garbage */
@@ -1212,7 +1212,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 
     /* discard overlong sentences */
     if (strlen(buf) > sizeof(fieldcopy)-1) {
-	gpsd_report(session->context->errout.debug, LOG_ERROR, "overlong AIVDM packet.\n");
+	gpsd_notify(&session->context->errout, LOG_ERROR, "overlong AIVDM packet.\n");
 	return false;
     }
 
@@ -1228,7 +1228,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 
     /* discard sentences with exiguous commas; catches run-ons */
     if (nfields < 7) {
-	gpsd_report(session->context->errout.debug, LOG_ERROR, "malformed AIVDM packet.\n");
+	gpsd_notify(&session->context->errout, LOG_ERROR, "malformed AIVDM packet.\n");
 	return false;
     }
 
@@ -1240,14 +1240,14 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	 * is going to break if there's ever an AIVDO type 24, though.
 	 */
 	if (strncmp((const char *)field[0], "!AIVDO", 6) != 0)
-	    gpsd_report(session->context->errout.debug, LOG_INF,
+	    gpsd_notify(&session->context->errout, LOG_INF,
 			"invalid empty AIS channel. Assuming 'A'\n");
 	ais_context = &session->driver.aivdm.context[0];
 	session->driver.aivdm.ais_channel ='A';
 	break;
     case '1':
 	if (strcmp((char *)field[4], (char *)"12") == 0) {
-	    gpsd_report(session->context->errout.debug, LOG_INF,
+	    gpsd_notify(&session->context->errout, LOG_INF,
                     "ignoring bogus AIS channel '12'.\n");
 	    return false;
 	}
@@ -1263,11 +1263,11 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	session->driver.aivdm.ais_channel ='B';
 	break;
     case 'C':
-        gpsd_report(session->context->errout.debug, LOG_INF,
+        gpsd_notify(&session->context->errout, LOG_INF,
                     "ignoring AIS channel C (secure AIS).\n");
         return false;
     default:
-	gpsd_report(session->context->errout.debug, LOG_ERROR,
+	gpsd_notify(&session->context->errout, LOG_ERROR,
 		    "invalid AIS channel 0x%0X .\n", field[4][0]);
 	return false;
     }
@@ -1276,7 +1276,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     ifrag = atoi((char *)field[2]); /* fragment id */
     data = field[5];
     pad = field[6][0]; /* number of padding bits */
-    gpsd_report(session->context->errout.debug, LOG_PROG,
+    gpsd_notify(&session->context->errout, LOG_PROG,
 		"nfrags=%d, ifrag=%d, decoded_frags=%d, data=%s\n",
 		nfrags, ifrag, ais_context->decoded_frags, data);
 
@@ -1284,7 +1284,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 
     /* check fragment ordering */
     if (ifrag != ais_context->decoded_frags + 1) {
-	gpsd_report(session->context->errout.debug, LOG_ERROR,
+	gpsd_notify(&session->context->errout, LOG_ERROR,
 		    "invalid fragment #%d received, expected #%d.\n",
 		    ifrag, ais_context->decoded_frags + 1);
 	if (ifrag != 1)
@@ -1307,7 +1307,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	if (ch >= 40)
 	    ch -= 8;
 #ifdef __UNUSED_DEBUG__
-	gpsd_report(session->context->errout.debug, LOG_RAW,
+	gpsd_notify(&session->context->errout, LOG_RAW,
 		    "%c: %s\n", *cp, sixbits[ch]);
 #endif /* __UNUSED_DEBUG__ */
 	/*@ -shiftnegative @*/
@@ -1318,7 +1318,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	    }
 	    ais_context->bitlen++;
 	    if (ais_context->bitlen > sizeof(ais_context->bits)) {
-		gpsd_report(session->context->errout.debug, LOG_INF,
+		gpsd_notify(&session->context->errout, LOG_INF,
 			    "overlong AIVDM payload truncated.\n");
 		return false;
 	    }
@@ -1333,7 +1333,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     if (ifrag == nfrags) {
 	if (debug >= LOG_INF) {
 	    size_t clen = (ais_context->bitlen + 7) / 8;
-	    gpsd_report(session->context->errout.debug, LOG_INF,
+	    gpsd_notify(&session->context->errout, LOG_INF,
 			"AIVDM payload is %zd bits, %zd chars: %s\n",
 			ais_context->bitlen, clen,
 			gpsd_hexdump(session->msgbuf, sizeof(session->msgbuf),
@@ -1445,7 +1445,7 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
 
 static gps_mask_t json_pass_packet(struct gps_device_t *session)
 {
-    gpsd_report(session->context->errout.debug, LOG_IO,
+    gpsd_notify(&session->context->errout, LOG_IO,
 		"<= GPS: %s\n", (char *)session->lexer.outbuffer);
 
     if (strncmp(session->gpsdata.dev.path, "gpsd://localhost:", 17) != 0) 
@@ -1473,7 +1473,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
 	    session->lexer.outbuflen = strlen((char *)session->lexer.outbuffer);
 	}
     }
-    gpsd_report(session->context->errout.debug, LOG_PROG,
+    gpsd_notify(&session->context->errout, LOG_PROG,
 		 "JSON, passing through %s\n",
 		 (char *)session->lexer.outbuffer);
     /*@-nullpass@*/

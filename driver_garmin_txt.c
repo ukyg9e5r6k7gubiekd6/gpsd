@@ -153,13 +153,13 @@ static int gar_decode(const struct gps_context_t *context,
     /* splint is buggy here, thinks buf can be a null pointer */
     /*@ -mustdefine -nullderef -nullpass @*/
     if (length >= sizeof(buf)) {
-	gpsd_report(context->errout.debug, LOG_ERROR, "internal buffer too small\n");
+	gpsd_notify(&context->errout, LOG_ERROR, "internal buffer too small\n");
 	return -1;
     }
 
     bzero(buf, (int)sizeof(buf));
     (void)strlcpy(buf, data, length);
-    gpsd_report(context->errout.debug, LOG_RAW + 2, "Decoded string: %s\n", buf);
+    gpsd_notify(&context->errout, LOG_RAW + 2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
 	/* value is not valid, ignore it */
@@ -186,14 +186,14 @@ static int gar_decode(const struct gps_context_t *context,
 		break;
 	    }
 	}
-	gpsd_report(context->errout.debug, LOG_WARN,
+	gpsd_notify(&context->errout, LOG_WARN,
 		    "Unexpected char \"%c\" in data \"%s\"\n",
 		    buf[0], buf);
 	return -1;
     } while (0);
 
     if (strspn(buf + offset, "0123456789") != length - offset) {
-	gpsd_report(context->errout.debug, LOG_WARN, "Invalid value %s\n", buf);
+	gpsd_notify(&context->errout, LOG_WARN, "Invalid value %s\n", buf);
 	return -1;
     }
     /*@ +mustdefine +nullderef +nullpass @*/
@@ -223,13 +223,13 @@ static int gar_int_decode(const struct gps_context_t *context,
 
     /*@ -mustdefine @*/
     if (length >= sizeof(buf)) {
-	gpsd_report(context->errout.debug, LOG_ERROR, "internal buffer too small\n");
+	gpsd_notify(&context->errout, LOG_ERROR, "internal buffer too small\n");
 	return -1;
     }
 
     bzero(buf, (int)sizeof(buf));
     (void)strlcpy(buf, data, length);
-    gpsd_report(context->errout.debug, LOG_RAW + 2, "Decoded string: %s\n", buf);
+    gpsd_notify(&context->errout, LOG_RAW + 2, "Decoded string: %s\n", buf);
 
     if (strchr(buf, '_') != NULL) {
 	/* value is not valid, ignore it */
@@ -238,7 +238,7 @@ static int gar_int_decode(const struct gps_context_t *context,
 
     /*@ -nullpass @*//* splint bug */
     if (strspn(buf, "0123456789") != length) {
-	gpsd_report(context->errout.debug, LOG_WARN, "Invalid value %s\n", buf);
+	gpsd_notify(&context->errout, LOG_WARN, "Invalid value %s\n", buf);
 	return -1;
     }
 
@@ -247,7 +247,7 @@ static int gar_int_decode(const struct gps_context_t *context,
 	*result = res;
 	return 0;		/* SUCCESS */
     } else {
-	gpsd_report(context->errout.debug, LOG_WARN,
+	gpsd_notify(&context->errout, LOG_WARN,
 		    "Value %u out of range <%u, %u>\n", res, min,
 		    max);
 	return -1;
@@ -268,13 +268,13 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
     gps_mask_t mask = 0;
 
-    gpsd_report(session->context->errout.debug, LOG_PROG,
+    gpsd_notify(&session->context->errout, LOG_PROG,
 		"Garmin Simple Text packet, len %zd: %s\n",
 		session->lexer.outbuflen, (char*)session->lexer.outbuffer);
 
     if (session->lexer.outbuflen < 54) {
 	/* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */
-	gpsd_report(session->context->errout.debug, LOG_WARN,
+	gpsd_notify(&session->context->errout, LOG_WARN,
 		    "Message is too short, rejected.\n");
 	return ONLINE_SET;
     }
@@ -286,7 +286,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     do {
 	unsigned int result;
 	char *buf = (char *)session->lexer.outbuffer + 1;
-	gpsd_report(session->context->errout.debug, LOG_PROG, "Timestamp: %.12s\n", buf);
+	gpsd_notify(&session->context->errout, LOG_PROG, "Timestamp: %.12s\n", buf);
 
 	/* year */
 	if (0 != gar_int_decode(session->context,
@@ -460,7 +460,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	mask |= CLIMB_SET;
     } while (0);
 
-    gpsd_report(session->context->errout.debug, LOG_DATA,
+    gpsd_notify(&session->context->errout, LOG_DATA,
 		"GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f exp=%.2f epy=%.2f mode=%d status=%d\n",
 		session->newdata.time, session->newdata.latitude,
 		session->newdata.longitude, session->newdata.altitude,
