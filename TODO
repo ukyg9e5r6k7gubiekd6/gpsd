@@ -37,6 +37,19 @@ confidence measure at a high level.  We'd use the confidence level to
 control (a) whether gpsd ships to NTP, and (b) how it sets time
 uncertainty in output JSON.
 
+*** RFC2783 bugs
+
+**** detangle TIOCMIWAIT and RFC2783
+
+Currently, the code for RFC2783 seems to depend (logically) on
+TIOCMIWAIT support.  However, RFC2783 (and really, no standard)
+defines TIOCMIWAIT, and NetBSD (and probably FreeBSD) do not implement
+it.  So, there really should be two separate implementations, one that
+works with TIOCMIWAIT (and thus only on Linux and OpenBSD) and one
+that assumes only RFC2783 (and thus works on Linux, FreeBSD and
+NetBSD, as well as any future system that complies with RFC2783 and
+uses the serial port for time_pps_init).
+
 *** Client bugs
 
 **** In gpsmon's PPS Offset field
