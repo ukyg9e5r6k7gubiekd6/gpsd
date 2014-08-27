@@ -133,8 +133,8 @@ static ssize_t zodiac_send_rtcm(struct gps_device_t *session,
     return 1;
 }
 
-#define getzword(n)	get16z(session->packet.outbuffer, n)
-#define getzlong(n)	get32z(session->packet.outbuffer, n)
+#define getzword(n)	get16z(session->lexer.outbuffer, n)
+#define getzlong(n)	get32z(session->lexer.outbuffer, n)
 
 static gps_mask_t handle1000(struct gps_device_t *session)
 /* time-position-velocity report */
@@ -329,7 +329,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
      * client querying of the ID with firmware version in 2006.
      * The Zodiac is supposed to send one of these messages on startup.
      */
-    getstringz(session->subtype, session->packet.outbuffer, 19, 28);	/* software version field */
+    getstringz(session->subtype, session->lexer.outbuffer, 19, 28);	/* software version field */
     gpsd_report(session->context->debug, LOG_DATA,
 		"1011: subtype=%s mask={DEVICEID}\n",
 		session->subtype);
@@ -353,13 +353,13 @@ static void handle1108(struct gps_device_t *session)
 static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 {
     unsigned int id =
-	(unsigned int)((session->packet.outbuffer[3] << 8) |
-		       session->packet.outbuffer[2]);
+	(unsigned int)((session->lexer.outbuffer[3] << 8) |
+		       session->lexer.outbuffer[2]);
     gpsd_report(session->context->debug, LOG_RAW,
 		"Raw Zodiac packet type %d length %zd: %s\n",
-		id, session->packet.outbuflen, gpsd_prettydump(session));
+		id, session->lexer.outbuflen, gpsd_prettydump(session));
 
-    if (session->packet.outbuflen < 10)
+    if (session->lexer.outbuflen < 10)
 	return 0;
 
     /*

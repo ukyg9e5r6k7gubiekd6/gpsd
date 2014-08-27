@@ -216,8 +216,8 @@ static void italk_update(void)
     size_t len;
     unsigned char type;
 
-    buf = session.packet.outbuffer;
-    len = session.packet.outbuflen;
+    buf = session.lexer.outbuffer;
+    len = session.lexer.outbuflen;
     type = (unsigned char)getub(buf, 4);
     switch (type) {
     case ITALK_NAV_FIX:

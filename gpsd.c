@@ -1395,11 +1395,11 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
      * copied to all clients that are in raw or nmea
      * mode.
      */
-    if (TEXTUAL_PACKET_TYPE(device->packet.type)
+    if (TEXTUAL_PACKET_TYPE(device->lexer.type)
 	&& (sub->policy.raw > 0 || sub->policy.nmea)) {
 	(void)throttled_write(sub,
-			      (char *)device->packet.outbuffer,
-			      device->packet.outbuflen);
+			      (char *)device->lexer.outbuffer,
+			      device->lexer.outbuflen);
 	return;
     }
 
@@ -1409,8 +1409,8 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
      */
     if (sub->policy.raw > 1) {
 	(void)throttled_write(sub,
-			      (char *)device->packet.outbuffer,
-			      device->packet.outbuflen);
+			      (char *)device->lexer.outbuffer,
+			      device->lexer.outbuflen);
 	return;
     }
 #ifdef BINARY_ENABLE
@@ -1420,8 +1420,8 @@ static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
     if (sub->policy.raw == 1) {
 	const char *hd =
 	    gpsd_hexdump(device->msgbuf, sizeof(device->msgbuf),
-			 (char *)device->packet.outbuffer,
-			 device->packet.outbuflen);
+			 (char *)device->lexer.outbuffer,
+			 device->lexer.outbuflen);
 	(void)strlcat((char *)hd, "\r\n", sizeof(device->msgbuf));
 	(void)throttled_write(sub, (char *)hd, strlen(hd));
     }
@@ -1433,8 +1433,8 @@ static void pseudonmea_report(struct subscriber_t *sub,
 			  struct gps_device_t *device)
 /* report pseudo-NMEA in appropriate circumstances */
 {
-    if (GPS_PACKET_TYPE(device->packet.type)
-	&& !TEXTUAL_PACKET_TYPE(device->packet.type)) {
+    if (GPS_PACKET_TYPE(device->lexer.type)
+	&& !TEXTUAL_PACKET_TYPE(device->lexer.type)) {
 	char buf[MAX_PACKET_LENGTH * 3 + 2];
 
 	if ((changed & REPORT_IS) != 0) {
@@ -1508,10 +1508,10 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
      * If the device provided an RTCM packet, repeat it to all devices.
      */
     if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
-	if (device->packet.outbuflen > RTCM_MAX) {
+	if (device->lexer.outbuflen > RTCM_MAX) {
 	    gpsd_report(context.debug, LOG_ERROR,
 			"overlong RTCM packet (%zd bytes)\n",
-			device->packet.outbuflen);
+			device->lexer.outbuflen);
 	} else {
 	    struct gps_device_t *dp;
 	    for (dp = devices; dp < devices+MAXDEVICES; dp++) {
@@ -1519,14 +1519,14 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 /* *INDENT-OFF* */
 		    if (dp->device_type->rtcm_writer != NULL) {
 			if (dp->device_type->rtcm_writer(dp,
-							     (const char *)device->packet.outbuffer,
-							     device->packet.outbuflen) == 0)
+							     (const char *)device->lexer.outbuffer,
+							     device->lexer.outbuflen) == 0)
 			    gpsd_report(context.debug, LOG_ERROR,
 					"Write to RTCM sink failed\n");
 			else {
 			    gpsd_report(context.debug, LOG_IO,
 					"<= DGPS: %zd bytes of RTCM relayed.\n",
-					device->packet.outbuflen);
+					device->lexer.outbuflen);
 			}
 		    }
 /* *INDENT-ON* */
@@ -1611,12 +1611,12 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #ifdef PASSTHROUGH_ENABLE
 	/* this is for passing through JSON packets */
 	if ((changed & PASSTHROUGH_IS) != 0) {
-	    (void)strlcat((char *)device->packet.outbuffer,
+	    (void)strlcat((char *)device->lexer.outbuffer,
 			  "\r\n",
-			  sizeof(device->packet.outbuffer));
+			  sizeof(device->lexer.outbuffer));
 	    (void)throttled_write(sub,
-				  (char *)device->packet.outbuffer,
-				  device->packet.outbuflen+2);
+				  (char *)device->lexer.outbuffer,
+				  device->lexer.outbuflen+2);
 	    continue;
 	}
 #endif /* PASSTHROUGH_ENABLE */
@@ -2393,7 +2393,7 @@ int main(int argc, char *argv[])
 		}
 
 	    if (!device_needed && device->gpsdata.gps_fd > -1 &&
-		    device->packet.type != BAD_PACKET) {
+		    device->lexer.type != BAD_PACKET) {
 		if (device->releasetime == 0) {
 		    device->releasetime = timestamp();
 		    gpsd_report(context.debug, LOG_PROG,

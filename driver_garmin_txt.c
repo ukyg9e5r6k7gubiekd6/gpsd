@@ -270,22 +270,22 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
     gpsd_report(session->context->debug, LOG_PROG,
 		"Garmin Simple Text packet, len %zd: %s\n",
-		session->packet.outbuflen, (char*)session->packet.outbuffer);
+		session->lexer.outbuflen, (char*)session->lexer.outbuffer);
 
-    if (session->packet.outbuflen < 54) {
+    if (session->lexer.outbuflen < 54) {
 	/* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */
 	gpsd_report(session->context->debug, LOG_WARN,
 		    "Message is too short, rejected.\n");
 	return ONLINE_SET;
     }
 
-    session->packet.type = GARMINTXT_PACKET;
+    session->lexer.type = GARMINTXT_PACKET;
 
     /* only one message, set cycle start */
     session->cycle_end_reliable = true;
     do {
 	unsigned int result;
-	char *buf = (char *)session->packet.outbuffer + 1;
+	char *buf = (char *)session->lexer.outbuffer + 1;
 	gpsd_report(session->context->debug, LOG_PROG, "Timestamp: %.12s\n", buf);
 
 	/* year */
@@ -343,13 +343,13 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	/* decode degrees of Latitude */
 	if (0 !=
 	    gar_decode(session->context,
-		(char *)session->packet.outbuffer + 13, 3, "NS", 1.0,
+		(char *)session->lexer.outbuffer + 13, 3, "NS", 1.0,
 		&lat))
 	    break;
 	/* decode minutes of Latitude */
 	if (0 !=
 	    gar_int_decode(session->context,
-			   (char *)session->packet.outbuffer + 16, 5, 0,
+			   (char *)session->lexer.outbuffer + 16, 5, 0,
 			   99999, &degfrag))
 	    break;
 	lat += degfrag * 100.0 / 60.0 / 100000.0;
@@ -359,20 +359,20 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	/* decode degrees of Longitude */
 	if (0 !=
 	    gar_decode(session->context,
-		       (char *)session->packet.outbuffer + 21, 4, "EW", 1.0,
+		       (char *)session->lexer.outbuffer + 21, 4, "EW", 1.0,
 		       &lon))
 	    break;
 	/* decode minutes of Longitude */
 	if (0 !=
 	    gar_int_decode(session->context,
-			   (char *)session->packet.outbuffer + 25, 5, 0,
+			   (char *)session->lexer.outbuffer + 25, 5, 0,
 			   99999, &degfrag))
 	    break;
 	lon += degfrag * 100.0 / 60.0 / 100000.0;
 	session->newdata.longitude = lon;
 
 	/* fix mode, GPS status, [gGdDS_] */
-	status = (char)session->packet.outbuffer[30];
+	status = (char)session->lexer.outbuffer[30];
 
 	switch (status) {
 	case 'G':
@@ -404,7 +404,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	double eph;
 	if (0 !=
 	    gar_decode(session->context,
-		       (char *)session->packet.outbuffer + 31, 3, "", 1.0,
+		       (char *)session->lexer.outbuffer + 31, 3, "", 1.0,
 		       &eph))
 	    break;
 	/* eph is a circular error, sqrt(epx**2 + epy**2) */
@@ -418,7 +418,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	double alt;
 	if (0 !=
 	    gar_decode(session->context,
-		       (char *)session->packet.outbuffer + 34, 6, "+-", 1.0,
+		       (char *)session->lexer.outbuffer + 34, 6, "+-", 1.0,
 		       &alt))
 	    break;
 	session->newdata.altitude = alt;
@@ -430,12 +430,12 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	double ewvel, nsvel, speed, track;
 	if (0 !=
 	    gar_decode(session->context,
-		       (char *)session->packet.outbuffer + 40, 5, "EW", 10.0,
+		       (char *)session->lexer.outbuffer + 40, 5, "EW", 10.0,
 		       &ewvel))
 	    break;
 	if (0 !=
 	    gar_decode(session->context,
-		       (char *)session->packet.outbuffer + 45, 5, "NS", 10.0,
+		       (char *)session->lexer.outbuffer + 45, 5, "NS", 10.0,
 		       &nsvel))
 	    break;
 	speed = sqrt(ewvel * ewvel + nsvel * nsvel);	/* is this correct formula? Result is in mps */
@@ -453,7 +453,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	double climb;
 	if (0 !=
 	    gar_decode(session->context,
-		       (char *)session->packet.outbuffer + 50, 5, "UD", 100.0,
+		       (char *)session->lexer.outbuffer + 50, 5, "UD", 100.0,
 		       &climb))
 	    break;
 	session->newdata.climb = climb;	/* climb in mps */

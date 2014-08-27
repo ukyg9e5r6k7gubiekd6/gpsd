@@ -44,7 +44,7 @@ static PyTypeObject Lexer_Type;
 
 typedef struct {
 	PyObject_HEAD
-	struct gps_packet_t lexer;
+	struct gps_lexer_t lexer;
 } LexerObject;
 
 static LexerObject *
@@ -54,7 +54,7 @@ newLexerObject(PyObject *arg UNUSED)
     self = PyObject_New(LexerObject, &Lexer_Type);
     if (self == NULL)
 	return NULL;
-    memset(&self->lexer, 0, sizeof(struct gps_packet_t));
+    memset(&self->lexer, 0, sizeof(struct gps_lexer_t));
     packet_reset(&self->lexer);
     return self;
 }

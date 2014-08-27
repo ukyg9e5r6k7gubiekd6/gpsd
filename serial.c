@@ -359,7 +359,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 		session->device_type->event_hook(session, event_wakeup);
 	}
     }
-    packet_reset(&session->packet);
+    packet_reset(&session->lexer);
 }
 
 int gpsd_serial_open(struct gps_device_t *session)
@@ -478,7 +478,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
 
-    session->packet.type = BAD_PACKET;
+    session->lexer.type = BAD_PACKET;
     if (isatty(session->gpsdata.gps_fd) != 0) {
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd, &session->ttyset_old) != 0)
@@ -576,7 +576,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
     if (isatty(session->gpsdata.gps_fd) == 0)
 	return false;
 
-    if (session->packet.retry_counter++ >= SNIFF_RETRIES) {
+    if (session->lexer.retry_counter++ >= SNIFF_RETRIES) {
 #ifdef FIXED_PORT_SPEED
 	return false;
 #else
@@ -609,7 +609,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 		       session->gpsdata.dev.stopbits
 #endif /* FIXED_STOP_BITS */
 	    );
-	session->packet.retry_counter = 0;
+	session->lexer.retry_counter = 0;
     }
 
     return true;		/* keep hunting */

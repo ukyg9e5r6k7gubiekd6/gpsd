@@ -546,12 +546,12 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
 static gps_mask_t parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == UBX_PACKET) {
-	return ubx_parse(session, session->packet.outbuffer,
-			 session->packet.outbuflen);
+    if (session->lexer.type == UBX_PACKET) {
+	return ubx_parse(session, session->lexer.outbuffer,
+			 session->lexer.outbuflen);
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->packet.outbuffer, session);
+    } else if (session->lexer.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->lexer.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;
@@ -932,7 +932,7 @@ static bool ubx_speed(struct gps_device_t *session,
 		speed,
 		parity,
 		stopbits,
-		(session->packet.type == UBX_PACKET) ? MODE_BINARY : MODE_NMEA);
+		(session->lexer.type == UBX_PACKET) ? MODE_BINARY : MODE_NMEA);
     return true;
 }
 

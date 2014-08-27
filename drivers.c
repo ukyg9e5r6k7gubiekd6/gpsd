@@ -17,21 +17,21 @@
 
 ssize_t generic_get(struct gps_device_t *session)
 {
-    return packet_get(session->gpsdata.gps_fd, &session->packet);
+    return packet_get(session->gpsdata.gps_fd, &session->lexer);
 }
 
 gps_mask_t generic_parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == BAD_PACKET)
+    if (session->lexer.type == BAD_PACKET)
 	return 0;
-    else if (session->packet.type == COMMENT_PACKET) {
+    else if (session->lexer.type == COMMENT_PACKET) {
 	gpsd_set_century(session);
 	return 0;
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
+    } else if (session->lexer.type == NMEA_PACKET) {
 	const struct gps_type_t **dp;
 	gps_mask_t st = 0;
-	char *sentence = (char *)session->packet.outbuffer;
+	char *sentence = (char *)session->lexer.outbuffer;
 
 	if (sentence[strlen(sentence)-1] != '\n')
 	    gpsd_report(session->context->debug, LOG_IO,
@@ -65,7 +65,7 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
     } else {
 	gpsd_report(session->context->debug, LOG_SHOUT,
 		    "packet type %d fell through (should never happen): %s.\n",
-		    session->packet.type, gpsd_prettydump(session));
+		    session->lexer.type, gpsd_prettydump(session));
 	return 0;
     }
 }
@@ -143,7 +143,7 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	 * a comma to the trigger, because that won't be in the response
 	 * unless there is actual following data.
 	 */
-	switch (session->packet.counter) {
+	switch (session->lexer.counter) {
 #ifdef NMEA_ENABLE
 	case 0:
 	    /* probe for Garmin serial GPS -- expect $PGRMC followed by data */
@@ -301,7 +301,7 @@ static void garmin_nmea_event_hook(struct gps_device_t *session,
 
     if (event == event_driver_switch) {
 	/* forces a reconfigure as the following packets come in */
-	session->packet.counter = 0;
+	session->lexer.counter = 0;
     }
     if (event == event_configure) {
 	/*
@@ -309,7 +309,7 @@ static void garmin_nmea_event_hook(struct gps_device_t *session,
 	 * receivers like the Garmin GPS-10 don't handle having having a lot of
 	 * probes shoved at them very well.
 	 */
-	switch (session->packet.counter) {
+	switch (session->lexer.counter) {
 	case 0:
 	    /* reset some config, AutoFix, WGS84, PPS
 	     * Set the PPS pulse length to 40ms which leaves the Garmin 18-5hz
@@ -821,7 +821,7 @@ static void oceanserver_event_hook(struct gps_device_t *session,
 {
     if (session->context->readonly)
 	return;
-    if (event == event_configure && session->packet.counter == 0) {
+    if (event == event_configure && session->lexer.counter == 0) {
 	/* report in NMEA format */
 	(void)oceanserver_send(session->context->debug,
 			       session->gpsdata.gps_fd, "2\n");
@@ -938,16 +938,16 @@ static const struct gps_type_t driver_fury = {
 
 static gps_mask_t rtcm104v2_analyze(struct gps_device_t *session)
 {
-    rtcm2_unpack(&session->gpsdata.rtcm2, (char *)session->packet.isgps.buf);
+    rtcm2_unpack(&session->gpsdata.rtcm2, (char *)session->lexer.isgps.buf);
     /* extra guard prevents expensive hexdump calls */
     if (session->context->debug >= LOG_RAW)
 	gpsd_report(session->context->debug, LOG_RAW,
 		    "RTCM 2.x packet type 0x%02x length %d words from %zd bytes: %s\n",
 		    session->gpsdata.rtcm2.type,
 		    session->gpsdata.rtcm2.length + 2,
-		    session->packet.isgps.buflen,
+		    session->lexer.isgps.buflen,
 		    gpsd_hexdump(session->msgbuf, sizeof(session->msgbuf),
-				 (char *)session->packet.isgps.buf,
+				 (char *)session->lexer.isgps.buf,
 				 (session->gpsdata.rtcm2.length +
 				  2) * sizeof(isgps30bits_t)));
     session->cycle_end_reliable = true;
@@ -991,12 +991,12 @@ static const struct gps_type_t driver_rtcm104v2 = {
 
 static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 {
-    uint16_t type = getbeu16(session->packet.inbuffer, 3) >> 4;
+    uint16_t type = getbeu16(session->lexer.inbuffer, 3) >> 4;
 
     gpsd_report(session->context->debug, LOG_RAW, "RTCM 3.x packet %d\n", type);
     rtcm3_unpack(session->context,
 		 &session->gpsdata.rtcm3, 
-		 (char *)session->packet.outbuffer);
+		 (char *)session->lexer.outbuffer);
     session->cycle_end_reliable = true;
     return RTCM3_SET;
 }
@@ -1359,17 +1359,17 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 
 static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
-    if (session->packet.type == AIVDM_PACKET) {
+    if (session->lexer.type == AIVDM_PACKET) {
 	if (aivdm_decode
-	    ((char *)session->packet.outbuffer, session->packet.outbuflen,
+	    ((char *)session->lexer.outbuffer, session->lexer.outbuflen,
 	     session, &session->gpsdata.ais, 
 	     session->context->debug)) {
 	    return ONLINE_SET | AIS_SET;
 	} else
 	    return ONLINE_SET;
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->packet.outbuffer, session);
+    } else if (session->lexer.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->lexer.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;
@@ -1422,60 +1422,60 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
      * from the device.
      */
     char *prefloc;
-    for (prefloc = (char *)session->packet.outbuffer;
-	 prefloc < (char *)session->packet.outbuffer+session->packet.outbuflen;
+    for (prefloc = (char *)session->lexer.outbuffer;
+	 prefloc < (char *)session->lexer.outbuffer+session->lexer.outbuflen;
 	 prefloc++)
 	if (strncmp(prefloc, prefix, strlen(prefix)) == 0) {
-	    char copy[sizeof(session->packet.outbuffer)+1];
+	    char copy[sizeof(session->lexer.outbuffer)+1];
 	    (void)strlcpy(copy,
-			  (char *)session->packet.outbuffer,
+			  (char *)session->lexer.outbuffer,
 			  sizeof(copy));
 	    prefloc += strlen(prefix);
 	    (void)strlcpy(prefloc,
 			  session->gpsdata.dev.path,
 			  sizeof(session->gpsdata.dev.path));
-	    (void)strlcat((char *)session->packet.outbuffer, "#",
-			  sizeof(session->packet.outbuffer));
-	    (void)strlcat((char *)session->packet.outbuffer,
-			  copy + (prefloc-(char *)session->packet.outbuffer),
-			  sizeof(session->packet.outbuffer));
+	    (void)strlcat((char *)session->lexer.outbuffer, "#",
+			  sizeof(session->lexer.outbuffer));
+	    (void)strlcat((char *)session->lexer.outbuffer,
+			  copy + (prefloc-(char *)session->lexer.outbuffer),
+			  sizeof(session->lexer.outbuffer));
 	}
-    session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
+    session->lexer.outbuflen = strlen((char *)session->lexer.outbuffer);
 }
 
 static gps_mask_t json_pass_packet(struct gps_device_t *session)
 {
     gpsd_report(session->context->debug, LOG_IO,
-		"<= GPS: %s\n", (char *)session->packet.outbuffer);
+		"<= GPS: %s\n", (char *)session->lexer.outbuffer);
 
     if (strncmp(session->gpsdata.dev.path, "gpsd://localhost:", 17) != 0) 
     {
 	/*@-nullpass@*/ /* required only because splint is buggy */
 	/* devices and paths need to be edited */
-	if (strstr((char *)session->packet.outbuffer, "DEVICE") != NULL)
+	if (strstr((char *)session->lexer.outbuffer, "DEVICE") != NULL)
 	    path_rewrite(session, "\"path\":\"");
 	path_rewrite(session, "\"device\":\"");
 
 	/* mark certain responses without a path or device attribute */
 	if (session->gpsdata.dev.path[0] != '\0') {
-	    if (strstr((char *)session->packet.outbuffer, "VERSION") != NULL
-		|| strstr((char *)session->packet.outbuffer, "WATCH") != NULL
-		|| strstr((char *)session->packet.outbuffer, "DEVICES") != NULL) {
-		session->packet.outbuffer[session->packet.outbuflen-1] = '\0';
-		(void)strlcat((char *)session->packet.outbuffer, ",\"remote\":\"",
-			      sizeof(session->packet.outbuffer));
-		(void)strlcat((char *)session->packet.outbuffer,
+	    if (strstr((char *)session->lexer.outbuffer, "VERSION") != NULL
+		|| strstr((char *)session->lexer.outbuffer, "WATCH") != NULL
+		|| strstr((char *)session->lexer.outbuffer, "DEVICES") != NULL) {
+		session->lexer.outbuffer[session->lexer.outbuflen-1] = '\0';
+		(void)strlcat((char *)session->lexer.outbuffer, ",\"remote\":\"",
+			      sizeof(session->lexer.outbuffer));
+		(void)strlcat((char *)session->lexer.outbuffer,
 			      session->gpsdata.dev.path,
-			      sizeof(session->packet.outbuffer));
-		(void)strlcat((char *)session->packet.outbuffer, "\"}",
-			      sizeof(session->packet.outbuffer));
+			      sizeof(session->lexer.outbuffer));
+		(void)strlcat((char *)session->lexer.outbuffer, "\"}",
+			      sizeof(session->lexer.outbuffer));
 	    }
-	    session->packet.outbuflen = strlen((char *)session->packet.outbuffer);
+	    session->lexer.outbuflen = strlen((char *)session->lexer.outbuffer);
 	}
     }
     gpsd_report(session->context->debug, LOG_PROG,
 		 "JSON, passing through %s\n",
-		 (char *)session->packet.outbuffer);
+		 (char *)session->lexer.outbuffer);
     /*@-nullpass@*/
     return PASSTHROUGH_IS;
 }

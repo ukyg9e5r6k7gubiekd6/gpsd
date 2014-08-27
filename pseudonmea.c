@@ -144,7 +144,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     }
 
 #ifdef ZODIAC_ENABLE
-    if (session->packet.type == ZODIAC_PACKET
+    if (session->lexer.type == ZODIAC_PACKET
 	&& session->driver.zodiac.Zs[0] != 0) {
 	bufp += strlen(bufp);
 	bufp2 = bufp;

@@ -45,7 +45,7 @@ static void tnt_update(void)
      * We have to do our own field parsing because the way this
      * gets called, nmea_parse() is never called on the sentence.
      */
-    (void)nmea_parse((char *)session.packet.outbuffer, &session);
+    (void)nmea_parse((char *)session.lexer.outbuffer, &session);
 
     (void)mvwaddstr(thtmwin, 1, 19, session.nmea.field[1]);
     (void)mvwaddstr(thtmwin, 2, 19, session.nmea.field[3]);

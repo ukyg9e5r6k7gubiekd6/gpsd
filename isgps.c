@@ -167,7 +167,7 @@ unsigned int isgps_parity(isgps30bits_t th)
  */
 #define isgps_parityok(w)	(isgps_parity(w) == ((w) & 0x3f))
 
-void isgps_init( /*@out@*/ struct gps_packet_t *session)
+void isgps_init( /*@out@*/ struct gps_lexer_t *session)
 {
     session->isgps.curr_word = 0;
     session->isgps.curr_offset = 24;	/* first word */
@@ -179,9 +179,9 @@ void isgps_init( /*@out@*/ struct gps_packet_t *session)
 /*@ -usereleased -compdef @*/
 // This works around cppcheck not looking into enough config branches
 // cppcheck-suppress unusedFunction
-enum isgpsstat_t isgps_decode(struct gps_packet_t *session,
+enum isgpsstat_t isgps_decode(struct gps_lexer_t *session,
 			      bool(*preamble_match) (isgps30bits_t *),
-			      bool(*length_check) (struct gps_packet_t *),
+			      bool(*length_check) (struct gps_lexer_t *),
 			      size_t maxlen, unsigned int c)
 {
     /* ASCII characters 64-127, @ through DEL */

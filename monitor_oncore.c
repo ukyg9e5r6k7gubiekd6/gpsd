@@ -183,7 +183,7 @@ static void oncore_update(void)
     unsigned int type;
 
     assert(Eawin != NULL);
-    buf = session.packet.outbuffer;
+    buf = session.lexer.outbuffer;
     type = ONCTYPE(buf[2], buf[3]);
     switch (type) {
     case ONCTYPE('E', 'a'):

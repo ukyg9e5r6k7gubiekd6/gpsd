@@ -105,7 +105,7 @@ static bool tsip_detect(struct gps_device_t *session)
 	    if (select(myfd + 1, &fdset, NULL, NULL, &to) != 1)
 		break;
 	    if (generic_get(session) >= 0) {
-		if (session->packet.type == TSIP_PACKET) {
+		if (session->lexer.type == TSIP_PACKET) {
 		    gpsd_report(session->context->debug, LOG_RAW,
 				"tsip_detect found\n");
 		    ret = true;
@@ -137,32 +137,32 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     unsigned char buf[BUFSIZ];
     char buf2[BUFSIZ];
 
-    if (session->packet.type != TSIP_PACKET) {
+    if (session->lexer.type != TSIP_PACKET) {
 	gpsd_report(session->context->debug, LOG_INF, "tsip_analyze packet type %d\n",
-		    session->packet.type);
+		    session->lexer.type);
 	return 0;
     }
 
     /*@ +charint @*/
-    if (session->packet.outbuflen < 4 || session->packet.outbuffer[0] != 0x10)
+    if (session->lexer.outbuflen < 4 || session->lexer.outbuffer[0] != 0x10)
 	return 0;
 
     /* remove DLE stuffing and put data part of message in buf */
 
     memset(buf, 0, sizeof(buf));
     buf2[len = 0] = '\0';
-    for (i = 2; i < (int)session->packet.outbuflen; i++) {
-	if (session->packet.outbuffer[i] == 0x10)
-	    if (session->packet.outbuffer[++i] == 0x03)
+    for (i = 2; i < (int)session->lexer.outbuflen; i++) {
+	if (session->lexer.outbuffer[i] == 0x10)
+	    if (session->lexer.outbuffer[++i] == 0x03)
 		break;
 
 	(void)snprintf(buf2 + strlen(buf2),
 		       sizeof(buf2) - strlen(buf2),
-		       "%02x", buf[len++] = session->packet.outbuffer[i]);
+		       "%02x", buf[len++] = session->lexer.outbuffer[i]);
     }
     /*@ -charint @*/
 
-    id = (unsigned)session->packet.outbuffer[1];
+    id = (unsigned)session->lexer.outbuffer[1];
     gpsd_report(session->context->debug, LOG_DATA,
 		"TSIP packet id 0x%02x length %d: %s\n",
 		id, len, buf2);
@@ -1042,7 +1042,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	putbyte(buf, 3, 0x08);	/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
     }
-    if (event == event_configure && session->packet.counter == 0) {
+    if (event == event_configure && session->lexer.counter == 0) {
 	/*
 	 * TSIP is ODD parity 1 stopbit, save original values and
 	 * change it Thunderbolts and Copernicus use

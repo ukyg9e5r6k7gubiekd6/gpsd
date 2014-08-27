@@ -245,7 +245,7 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
 #define SF_BETA2 (65536)
 /* 2^16 */
 #define SF_BETA3 (65536)
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     uint16_t week = getleu16(buf, 3);
     uint32_t tow = getleu32(buf, 5);
     int8_t alpha0 = getsb(buf, 9);
@@ -318,7 +318,7 @@ static gps_mask_t handle_0x83(struct gps_device_t *session)
 /* Acknowledgement (without error) */
 static gps_mask_t handle_0x06(struct gps_device_t *session)
 {
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     uint8_t cmd_id = getub(buf, 3);
     uint8_t port = getub(buf, 4);
     session->driver.navcom.physical_port = port;	/* This tells us which serial port was used last */
@@ -336,7 +336,7 @@ static gps_mask_t handle_0x06(struct gps_device_t *session)
 static gps_mask_t handle_0x15(struct gps_device_t *session)
 {
     size_t n;
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     size_t msg_len = (size_t) getleu16(buf, 1);
     /*@ -type @*/
     uint8_t port, cmd_id = getub(buf, 3);
@@ -362,7 +362,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 {
     gps_mask_t mask;
     unsigned int n;
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     uint16_t week;
     uint32_t tow;
     uint32_t sats_used;
@@ -594,7 +594,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     /* 2^-43 */
 #define SF_IDOT      (.000000000000113686837721616029)
 
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     uint8_t prn = getub(buf, 3);
     uint16_t week = getleu16(buf, 4);
     uint32_t tow = getleu32(buf, 6);
@@ -714,7 +714,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     size_t n, i;
     uint8_t prn, ele, ca_snr, p2_snr, log_channel, hw_channel, s;
     uint16_t azm, dgps_age;
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     size_t msg_len = (size_t) getleu16(buf, 1);
     uint16_t week = getleu16(buf, 3);
     uint32_t tow = getleu32(buf, 5);
@@ -818,7 +818,7 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     /* L1 wavelength (299792458m/s / 1575420000Hz) */
 #define LAMBDA_L1 (.190293672798364880476317426464)
     size_t n;
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     size_t msg_len = (size_t) getleu16(buf, 1);
     uint16_t week = getleu16(buf, 3);
     uint32_t tow = getleu32(buf, 5);
@@ -893,7 +893,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 {
     if (sizeof(double) == 8) {
 	gps_mask_t mask = TIME_SET;
-	char *buf = (char *)session->packet.outbuffer + 3;
+	char *buf = (char *)session->lexer.outbuffer + 3;
 	uint16_t week = getleu16(buf, 3);
 	uint32_t tow = getleu32(buf, 5);
 	double rms = getled64(buf, 9);
@@ -954,7 +954,7 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 {
     /*@-modobserver@*/
     char *engconfstr, *asicstr;
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     size_t msg_len = (size_t) getleu16(buf, 1);
     uint8_t engconf = getub(buf, 3);
     uint8_t asic = getub(buf, 4);
@@ -1082,7 +1082,7 @@ static gps_mask_t handle_0xae(struct gps_device_t *session)
 /* Clock Drift and Offset */
 static gps_mask_t handle_0xef(struct gps_device_t *session)
 {
-    unsigned char *buf = session->packet.outbuffer + 3;
+    unsigned char *buf = session->lexer.outbuffer + 3;
     //uint16_t week = getleu16(buf, 3);
     //uint32_t tow = getleu32(buf, 5);
     int8_t osc_temp = getsb(buf, 9);
@@ -1171,12 +1171,12 @@ gps_mask_t navcom_parse(struct gps_device_t * session, unsigned char *buf,
 
 static gps_mask_t navcom_parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == NAVCOM_PACKET) {
-	return navcom_parse(session, session->packet.outbuffer,
-			  session->packet.outbuflen);
+    if (session->lexer.type == NAVCOM_PACKET) {
+	return navcom_parse(session, session->lexer.outbuffer,
+			  session->lexer.outbuflen);
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->packet.outbuffer, session);;
+    } else if (session->lexer.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->lexer.outbuffer, session);;
 #endif /* NMEA_ENABLE */
     } else
 	return 0;

@@ -375,7 +375,7 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
     if (event == event_identified) {
 	/*
 	 * Fires when the first full packet is recognized from a
-	 * previously unidentified device.  The session packet counter
+	 * previously unidentified device.  The session.lexer counter
 	 * is zeroed.  If your device has a default cycle time other
 	 * than 1 second, set session->device->gpsdata.cycle here. If
 	 * possible, get the software version and store it in
@@ -388,9 +388,9 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
 	 * Called immediately after event_identified fires, then just
 	 * after every packet received thereafter, but you probably
 	 * only want to take actions on the first few packets after
-	 * the session packet counter has been zeroed,
+	 * the session.lexer counter has been zeroed,
 	 *
-	 * Remember that session->packet.counter is available when you
+	 * Remember that session->lexer.counter is available when you
 	 * write this hook; you can use this fact to interleave configuration
 	 * sends with the first few packet reads, which is useful for
 	 * devices with small receive buffers.
@@ -422,11 +422,11 @@ static void _proto__event_hook(struct gps_device_t *session, event_t event)
  */
 static gps_mask_t _proto__parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == _PROTO__PACKET) {
-	return _proto__dispatch(session, session->packet.outbuffer, session->packet.outbuflen);
+    if (session->lexer.type == _PROTO__PACKET) {
+	return _proto__dispatch(session, session->lexer.outbuffer, session->lexer.outbuflen);
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->packet.outbuffer, session);
+    } else if (session->lexer.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->lexer.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;

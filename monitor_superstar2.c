@@ -72,8 +72,8 @@ static void superstar2_update(void)
     size_t len;
     unsigned char type;
 
-    buf = session.packet.outbuffer;
-    len = session.packet.outbuflen;
+    buf = session.lexer.outbuffer;
+    len = session.lexer.outbuflen;
     type = buf[SUPERSTAR2_TYPE_OFFSET];
     switch (type) {
     case SUPERSTAR2_SVINFO:

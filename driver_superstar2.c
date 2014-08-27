@@ -473,12 +473,12 @@ static void superstar2_event_hook(struct gps_device_t *session, event_t event)
  */
 static gps_mask_t superstar2_parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == SUPERSTAR2_PACKET) {
-	return superstar2_dispatch(session, session->packet.outbuffer,
-				   session->packet.length);;
+    if (session->lexer.type == SUPERSTAR2_PACKET) {
+	return superstar2_dispatch(session, session->lexer.outbuffer,
+				   session->lexer.length);;
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->packet.outbuffer, session);
+    } else if (session->lexer.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->lexer.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;

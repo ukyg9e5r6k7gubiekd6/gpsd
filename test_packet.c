@@ -272,7 +272,7 @@ static struct map runontests[] = {
 
 static int packet_test(struct map *mp)
 {
-    struct gps_packet_t packet;
+    struct gps_lexer_t packet;
     int failure = 0;
 
     packet_init(&packet);
@@ -299,7 +299,7 @@ static int packet_test(struct map *mp)
 
 static void runon_test(struct map *mp)
 {
-    struct gps_packet_t packet;
+    struct gps_lexer_t packet;
     int nullfd = open("/dev/null", O_RDONLY);
     ssize_t st;
 

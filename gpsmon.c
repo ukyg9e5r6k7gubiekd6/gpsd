@@ -485,10 +485,10 @@ static void select_packet_monitor(struct gps_device_t *device)
      * change the selection of the current device driver; that's done
      * within gpsd_multipoll() before this hook is called.
      */
-    if (device->packet.type != last_type) {
+    if (device->lexer.type != last_type) {
 	const struct gps_type_t *active_type = device->device_type;
 #ifdef NMEA_ENABLE
-	if (device->packet.type == NMEA_PACKET
+	if (device->lexer.type == NMEA_PACKET
 	    && ((device->device_type->flags & DRIVER_STICKY) != 0))
 	    active_type = &driver_nmea0183;
 #endif /* NMEA_ENABLE */
@@ -498,11 +498,11 @@ static void select_packet_monitor(struct gps_device_t *device)
 	    refresh_statwin();
 	    refresh_cmdwin();
 	}
-	last_type = device->packet.type;
+	last_type = device->lexer.type;
     }
 
     if (active != NULL
-	&& device->packet.outbuflen > 0
+	&& device->lexer.outbuflen > 0
 	&& (*active)->update != NULL)
 	(*active)->update();
     if (devicewin != NULL)
@@ -701,11 +701,11 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     struct timedrift_t td;
 
 #ifdef PPS_ENABLE
-    if (!serial && strncmp((char*)device->packet.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
+    if (!serial && strncmp((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
     {
 	const char *end = NULL;
 	struct gps_data_t noclobber;
-	int status = json_pps_read((const char *)device->packet.outbuffer,
+	int status = json_pps_read((const char *)device->lexer.outbuffer,
 				   &noclobber,
 				   &end);
 	if (status != 0) {
@@ -738,10 +738,10 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 #ifdef __future__
 	if (!serial)
 	{
-	    if (device->packet.type == JSON_PACKET)
+	    if (device->lexer.type == JSON_PACKET)
 	    {
 		const char *end = NULL;
-		libgps_json_unpack((char *)device->packet.outbuffer, &session.gpsdata, &end);
+		libgps_json_unpack((char *)device->lexer.outbuffer, &session.gpsdata, &end);
 	    }
 	}
 #endif /* __future__ */
@@ -750,9 +750,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    select_packet_monitor(device);
 
 	(void)snprintf(buf, sizeof(buf), "(%d) ",
-		       (int)device->packet.outbuflen);
+		       (int)device->lexer.outbuflen);
 	cond_hexdump(buf + strlen(buf), sizeof(buf) - strlen(buf),
-		     (char *)device->packet.outbuffer,device->packet.outbuflen);
+		     (char *)device->lexer.outbuffer,device->lexer.outbuflen);
 	(void)strlcat(buf, "\n", sizeof(buf) - strlen(buf));
     }
 
@@ -768,11 +768,11 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	(void)doupdate();
     }
 
-    if (logfile != NULL && device->packet.outbuflen > 0) {
+    if (logfile != NULL && device->lexer.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
         assert(fwrite
-               (device->packet.outbuffer, sizeof(char),
-                device->packet.outbuflen, logfile) >= 1);
+               (device->lexer.outbuffer, sizeof(char),
+                device->lexer.outbuflen, logfile) >= 1);
         /*@ +shiftimplementation +sefparams -charint @*/
     }
 
@@ -843,7 +843,7 @@ static bool do_command(const char *line)
 #endif /* RECONFIGURE_ENABLE */
 	    if (!context.readonly)
 		/* magic - forces a reconfigure */
-		session.packet.counter = 0;
+		session.lexer.counter = 0;
 	}
 	break;
 
@@ -869,7 +869,7 @@ static bool do_command(const char *line)
 	if (strcspn(line, "01") == strlen(line)) {
 	    /* *INDENT-OFF* */
 	    v = (unsigned int)TEXTUAL_PACKET_TYPE(
-		session.packet.type);
+		session.lexer.type);
 	    /* *INDENT-ON* */
 	} else
 	    v = (unsigned)atoi(line + 1);

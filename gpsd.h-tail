@@ -136,7 +136,7 @@ enum isgpsstat_t {
 #define SECS_PER_WEEK	(7*SECS_PER_DAY)	/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
-struct gps_packet_t {
+struct gps_lexer_t {
     /* packet-getter internals */
     int	type;
 #define BAD_PACKET      	-1
@@ -207,12 +207,12 @@ struct gps_packet_t {
 #endif /* PASSTHROUGH_ENABLE */
 };
 
-extern void packet_init(/*@out@*/struct gps_packet_t *);
-extern void packet_reset(/*@out@*/struct gps_packet_t *);
-extern void packet_pushback(struct gps_packet_t *);
-extern void packet_parse(struct gps_packet_t *);
-extern ssize_t packet_get(int, struct gps_packet_t *);
-extern int packet_sniff(struct gps_packet_t *);
+extern void packet_init(/*@out@*/struct gps_lexer_t *);
+extern void packet_reset(/*@out@*/struct gps_lexer_t *);
+extern void packet_pushback(struct gps_lexer_t *);
+extern void packet_parse(struct gps_lexer_t *);
+extern ssize_t packet_get(int, struct gps_lexer_t *);
+extern int packet_sniff(struct gps_lexer_t *);
 #define packet_buffered_input(lexer) ((lexer)->inbuffer + (lexer)->inbuflen - (lexer)->inbufptr)
 
 /* Next, declarations for the core library... */
@@ -460,7 +460,7 @@ struct gps_device_t {
     unsigned int baudindex;
 #endif /* FIXED_PORT_SPEED */
     int saved_baud;
-    struct gps_packet_t packet;
+    struct gps_lexer_t lexer;
     int badcount;
     int subframe_count;
     char subtype[64];			/* firmware version or subtype ID */
@@ -737,16 +737,16 @@ struct gps_device_t {
 #define IS_HIGHEST_BIT(v,m)	(v & ~((m<<1)-1))==0
 
 /* driver helper functions */
-extern void isgps_init(/*@out@*/struct gps_packet_t *);
-enum isgpsstat_t isgps_decode(struct gps_packet_t *,
+extern void isgps_init(/*@out@*/struct gps_lexer_t *);
+enum isgpsstat_t isgps_decode(struct gps_lexer_t *,
 			      bool (*preamble_match)(isgps30bits_t *),
-			      bool (*length_check)(struct gps_packet_t *),
+			      bool (*length_check)(struct gps_lexer_t *),
 			      size_t,
 			      unsigned int);
 extern unsigned int isgps_parity(isgps30bits_t);
 extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
 
-extern enum isgpsstat_t rtcm2_decode(struct gps_packet_t *, unsigned int);
+extern enum isgpsstat_t rtcm2_decode(struct gps_lexer_t *, unsigned int);
 extern void json_rtcm2_dump(const struct rtcm2_t *,
 			    /*@null@*/const char *, /*@out@*/char[], size_t);
 extern void rtcm2_unpack(/*@out@*/struct rtcm2_t *, char *);

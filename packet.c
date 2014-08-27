@@ -182,7 +182,7 @@ static size_t oncore_payload_cksum_length(unsigned char id1, unsigned char id2)
 }
 #endif /* ONCORE_ENABLE */
 
-static void character_pushback(struct gps_packet_t *lexer)
+static void character_pushback(struct gps_lexer_t *lexer)
 /* push back the last character grabbed */
 {
     /*@-modobserver@*//* looks like a splint bug */
@@ -194,7 +194,7 @@ static void character_pushback(struct gps_packet_t *lexer)
 		lexer->char_counter);
 }
 
-static void nextstate(struct gps_packet_t *lexer, unsigned char c)
+static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 {
     static int n = 0;
 #ifdef RTCM104V2_ENABLE
@@ -1382,7 +1382,7 @@ static void nextstate(struct gps_packet_t *lexer, unsigned char c)
 /*@ -charint +casebreak @*/
 }
 
-static void packet_accept(struct gps_packet_t *lexer, int packet_type)
+static void packet_accept(struct gps_lexer_t *lexer, int packet_type)
 /* packet grab succeeded, move to output buffer */
 {
     size_t packetlen = lexer->inbufptr - lexer->inbuffer;
@@ -1408,7 +1408,7 @@ static void packet_accept(struct gps_packet_t *lexer, int packet_type)
     }
 }
 
-static void packet_discard(struct gps_packet_t *lexer)
+static void packet_discard(struct gps_lexer_t *lexer)
 /* shift the input buffer to discard all data up to current input pointer */
 {
     size_t discard = lexer->inbufptr - lexer->inbuffer;
@@ -1425,7 +1425,7 @@ static void packet_discard(struct gps_packet_t *lexer)
     }
 }
 
-static void character_discard(struct gps_packet_t *lexer)
+static void character_discard(struct gps_lexer_t *lexer)
 /* shift the input buffer to discard one character and reread data */
 {
     memmove(lexer->inbuffer, lexer->inbuffer + 1, (size_t)-- lexer->inbuflen);
@@ -1445,7 +1445,7 @@ static void character_discard(struct gps_packet_t *lexer)
 
 /* entry points begin here */
 
-void packet_init( /*@out@*/ struct gps_packet_t *lexer)
+void packet_init( /*@out@*/ struct gps_lexer_t *lexer)
 {
     lexer->char_counter = 0;
     lexer->retry_counter = 0;
@@ -1458,7 +1458,7 @@ void packet_init( /*@out@*/ struct gps_packet_t *lexer)
     packet_reset(lexer);
 }
 
-void packet_parse(struct gps_packet_t *lexer)
+void packet_parse(struct gps_lexer_t *lexer)
 /* grab a packet from the input buffer */
 {
     lexer->outbuflen = 0;
@@ -2082,7 +2082,7 @@ void packet_parse(struct gps_packet_t *lexer)
 
 #undef getword
 
-ssize_t packet_get(int fd, struct gps_packet_t *lexer)
+ssize_t packet_get(int fd, struct gps_lexer_t *lexer)
 /* grab a packet; return -1=>I/O error, 0=>EOF, BAD_PACKET or a length */
 {
     ssize_t recvd;
@@ -2165,7 +2165,7 @@ ssize_t packet_get(int fd, struct gps_packet_t *lexer)
 	return recvd;
 }
 
-void packet_reset( /*@out@*/ struct gps_packet_t *lexer)
+void packet_reset( /*@out@*/ struct gps_lexer_t *lexer)
 /* return the packet machine to the ground state */
 {
     lexer->type = BAD_PACKET;
@@ -2179,7 +2179,7 @@ void packet_reset( /*@out@*/ struct gps_packet_t *lexer)
 
 
 #ifdef __UNUSED__
-void packet_pushback(struct gps_packet_t *lexer)
+void packet_pushback(struct gps_lexer_t *lexer)
 /* push back the last packet grabbed */
 {
     if (lexer->outbuflen + lexer->inbuflen < MAX_PACKET_LENGTH) {

@@ -1020,8 +1020,8 @@ static void garmin_event_hook(struct gps_device_t *session, event_t event)
 /*@ +charint @*/
 gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 {
-    unsigned char *buf = session->packet.outbuffer;
-    size_t len = session->packet.outbuflen;
+    unsigned char *buf = session->lexer.outbuffer;
+    size_t len = session->lexer.outbuflen;
     unsigned char data_buf[MAX_BUFFER_SIZE];
     unsigned char c;
     int i = 0;
@@ -1278,7 +1278,7 @@ static int GetPacket(struct gps_device_t *session)
     memset(session->driver.garmin.Buffer, 0, sizeof(Packet_t));
     memset(&delay, 0, sizeof(delay));
     session->driver.garmin.BufferLen = 0;
-    session->packet.outbuflen = 0;
+    session->lexer.outbuflen = 0;
 
     gpsd_report(session->context->debug, LOG_DATA, "Garmin: GetPacket()\n");
 
@@ -1356,7 +1356,7 @@ static int GetPacket(struct gps_device_t *session)
     gpsd_report(session->context->debug, LOG_RAW,
 		"Garmin: GotPacket() sz=%d \n",
 		session->driver.garmin.BufferLen);
-    session->packet.outbuflen = session->driver.garmin.BufferLen;
+    session->lexer.outbuflen = session->driver.garmin.BufferLen;
     return 0;
 }
 

@@ -1366,12 +1366,12 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
 static gps_mask_t sirfbin_parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == SIRF_PACKET) {
-	return sirf_parse(session, session->packet.outbuffer,
-			session->packet.outbuflen);
+    if (session->lexer.type == SIRF_PACKET) {
+	return sirf_parse(session, session->lexer.outbuffer,
+			session->lexer.outbuflen);
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->packet.outbuffer, session);
+    } else if (session->lexer.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->lexer.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;
@@ -1390,7 +1390,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	return;
 
     if (event == event_identified || event == event_reactivate) {
-	if (session->packet.type == NMEA_PACKET) {
+	if (session->lexer.type == NMEA_PACKET) {
 	    gpsd_report(session->context->debug, LOG_PROG,
 			"SiRF: Switching chip mode to binary.\n");
 	    (void)nmea_send(session,

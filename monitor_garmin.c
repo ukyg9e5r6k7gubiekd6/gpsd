@@ -223,8 +223,8 @@ static void garmin_bin_ser_update(void)
    unsigned char chksum;
    bool pkt_good = false, got_dle = false;
 
-   buf = session.packet.outbuffer;
-   len = session.packet.outbuflen;
+   buf = session.lexer.outbuffer;
+   len = session.lexer.outbuflen;
 
    if (!(buf[0] == (unsigned char)0x10 &&		/* DLE */
 		buf[len-2] == (unsigned char)0x10 &&	/* DLE */

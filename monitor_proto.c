@@ -62,7 +62,7 @@ static void PROTO_update(void)
 {
     /*
      * Called on each packet received.  The packet will be accessible in
-     * session.packet.outbuffer and the length in session.packet.outbuflen.
+     * session.lexer.outbuffer and the length in session.lexer.outbuflen.
      * If the device is NMEA, session.driver.nmea.fields[] will contain the
      * array of unconverted field strings, including the tag in slot zero
      * but not including the checksum or trailing \r\n.

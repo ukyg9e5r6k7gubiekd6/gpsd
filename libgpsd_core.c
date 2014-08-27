@@ -79,8 +79,8 @@ const char *gpsd_prettydump(struct gps_device_t *session)
 /* dump the current packet in a form optimised for eyeballs */
 {
     return gpsd_packetdump(session->msgbuf, sizeof(session->msgbuf),
-			   (char *)session->packet.outbuffer, 
-			   session->packet.outbuflen);
+			   (char *)session->lexer.outbuffer, 
+			   session->lexer.outbuflen);
 }
 
 
@@ -306,7 +306,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     gpsd_zero_satellites(&session->gpsdata);
 
     /* initialize things for the packet parser */
-    packet_reset(&session->packet);
+    packet_reset(&session->lexer);
 }
 
 void gpsd_deactivate(struct gps_device_t *session)
@@ -351,8 +351,8 @@ void gpsd_clear(struct gps_device_t *session)
 #ifdef SIRF_ENABLE
     session->driver.sirf.satcounter = 0;
 #endif /* SIRF_ENABLE */
-    packet_init(&session->packet);
-    session->packet.debug = session->context->debug;
+    packet_init(&session->lexer);
+    session->lexer.debug = session->context->debug;
     // session->gpsdata.online = 0;
     gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.status = STATUS_NO_FIX;
@@ -1096,7 +1096,7 @@ static bool hunt_failure(struct gps_device_t *session)
      * than RS232 ones.  There's a test for this at
      * test/daemon/tcp-torture.log.
      *
-     * The second was session->badcount++>1 && session->packet.state==0.
+     * The second was session->badcount++>1 && session->lexer.state==0.
      * Fail hunt only if we get a second consecutive bad packet
      * and the lexer is in ground state.  We don't want to fail on
      * a first bad packet because the source might have a burst of
@@ -1105,7 +1105,7 @@ static bool hunt_failure(struct gps_device_t *session)
      * might have picked up a valid partial packet - better to go
      * back around the loop and pick up more data.
      *
-     * The "&& session->packet.state==0" guard causes an intermittent
+     * The "&& session->lexer.state==0" guard causes an intermittent
      * hang while autobauding on SiRF IIIs (but not on SiRF-IIs, oddly
      * enough).  Removing this conjunct resurrected the failure
      * of test/daemon/tcp-torture.log.
@@ -1166,18 +1166,18 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
      * with the data they transmit.
      */
 #define MINIMUM_QUIET_TIME	0.25
-    if (session->packet.outbuflen == 0)
+    if (session->lexer.outbuflen == 0)
     {
 	/* beginning of a new packet */
 	timestamp_t now = timestamp();
-	if (session->device_type != NULL && session->packet.start_time > 0) {
+	if (session->device_type != NULL && session->lexer.start_time > 0) {
 #ifdef RECONFIGURE_ENABLE
 	    const double min_cycle = session->device_type->min_cycle;
 #else
 	    const double min_cycle = 1;
 #endif /* RECONFIGURE_ENABLE */
 	    double quiet_time = (MINIMUM_QUIET_TIME * min_cycle);
-	    double gap = now - session->packet.start_time;
+	    double gap = now - session->lexer.start_time;
 
 	    if (gap > min_cycle)
 		gpsd_report(session->context->debug, LOG_WARN,
@@ -1186,16 +1186,16 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "transmission pause of %f\n", gap);
 		session->sor = now;
-		session->packet.start_char = session->packet.char_counter;
+		session->lexer.start_char = session->lexer.char_counter;
 	    }
 	}
-	session->packet.start_time = now;
+	session->lexer.start_time = now;
     }
 #endif /* TIMING_ENABLE */
 
-    if (session->packet.type >= COMMENT_PACKET) {
+    if (session->lexer.type >= COMMENT_PACKET) {
 	/*@-shiftnegative@*/
-	session->observed |= PACKET_TYPEMASK(session->packet.type);
+	session->observed |= PACKET_TYPEMASK(session->lexer.type);
 	/*@+shiftnegative@*/
     }
 
@@ -1238,9 +1238,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else /* (newlen > 0) */ {
 	gpsd_report(session->context->debug, LOG_RAW,
 		    "packet sniff on %s finds type %d\n",
-		    session->gpsdata.dev.path, session->packet.type);
-	if (session->packet.type == COMMENT_PACKET) {
-	    if (strcmp((const char *)session->packet.outbuffer, "# EOF\n") == 0) {
+		    session->gpsdata.dev.path, session->lexer.type);
+	if (session->lexer.type == COMMENT_PACKET) {
+	    if (strcmp((const char *)session->lexer.outbuffer, "# EOF\n") == 0) {
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "synthetic EOF\n");
 		return EOF_SET;
@@ -1249,11 +1249,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		gpsd_report(session->context->debug, LOG_PROG,
 			    "comment, sync lock deferred\n");
 	    /* FALL THROUGH */
-	} else if (session->packet.type > COMMENT_PACKET) {
+	} else if (session->lexer.type > COMMENT_PACKET) {
 	    if (session->device_type == NULL)
 		driver_change = true;
 	    else {
-		int newtype = session->packet.type;
+		int newtype = session->lexer.type;
 		/*
 		 * Are we seeing a new packet type? Then we probably
 		 * want to change drivers.
@@ -1286,17 +1286,17 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		const struct gps_type_t **dp;
 
 		for (dp = gpsd_drivers; *dp; dp++)
-		    if (session->packet.type == (*dp)->packet_type) {
+		    if (session->lexer.type == (*dp)->packet_type) {
 			gpsd_report(session->context->debug, LOG_PROG,
 				    "switching to match packet type %d: %s\n",
-				    session->packet.type, gpsd_prettydump(session));
+				    session->lexer.type, gpsd_prettydump(session));
 			(void)gpsd_switch_driver(session, (*dp)->type_name);
 			break;
 		    }
 	    }
 	    /*@+nullderef@*/
 	    session->badcount = 0;
-	    session->gpsdata.dev.driver_mode = (session->packet.type > NMEA_PACKET) ? MODE_BINARY : MODE_NMEA;
+	    session->gpsdata.dev.driver_mode = (session->lexer.type > NMEA_PACKET) ? MODE_BINARY : MODE_NMEA;
 	    /* FALL THROUGH */
 	} else if (hunt_failure(session) && !gpsd_next_hunt_setting(session)) {
 	    gpsd_report(session->context->debug, LOG_INF,
@@ -1307,7 +1307,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	}
     }
 
-    if (session->packet.outbuflen == 0) {	/* got new data, but no packet */
+    if (session->lexer.outbuflen == 0) {	/* got new data, but no packet */
 	gpsd_report(session->context->debug, LOG_RAW + 3,
 		    "New data on %s, not yet a packet\n",
 		    session->gpsdata.dev.path);
@@ -1352,7 +1352,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (session->device_type != NULL
 		&& session->device_type->event_hook != NULL)
 		session->device_type->event_hook(session, event_identified);
-	    session->packet.counter = 0;
+	    session->lexer.counter = 0;
 
 	    /* let clients know about this. */
 	    received |= DRIVER_IS;
@@ -1360,7 +1360,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    /* mark the fact that this driver has been seen */
 	    session->drivers_identified |= (1 << session->driver_index);
 	} else
-	    session->packet.counter++;
+	    session->lexer.counter++;
 
 	/* fire the configure hook */
 	if (session->device_type != NULL
@@ -1375,12 +1375,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if (session->context->debug >= LOG_RAW)
 	    gpsd_report(session->context->debug, LOG_RAW,
 			"raw packet of type %d, %zd:%s\n",
-			session->packet.type,
-			session->packet.outbuflen,
+			session->lexer.type,
+			session->lexer.outbuflen,
 			gpsd_prettydump(session));
 
 	/* Get data from current packet into the fix structure */
-	if (session->packet.type != COMMENT_PACKET)
+	if (session->lexer.type != COMMENT_PACKET)
 	    if (session->device_type != NULL
 		&& session->device_type->parse_packet != NULL)
 		received |= session->device_type->parse_packet(session);
@@ -1408,7 +1408,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #ifdef TIMING_ENABLE
 	/* are we going to generate a report? if so, count characters */
 	if ((received & REPORT_IS) != 0) {
-	    session->chars = session->packet.char_counter - session->packet.start_char;
+	    session->chars = session->lexer.char_counter - session->lexer.start_char;
 	}
 #endif /* TIMING_ENABLE */
 
@@ -1590,21 +1590,21 @@ int gpsd_multipoll(const bool data_ready,
 
 	    /* conditional prevents mask dumper from eating CPU */
 	    if (device->context->debug >= LOG_DATA) {
-		if (device->packet.type == BAD_PACKET)
+		if (device->lexer.type == BAD_PACKET)
 		    gpsd_report(device->context->debug, LOG_DATA,
 				"packet with bad checksum from %s\n",
 				device->gpsdata.dev.path);
 		else
 		    gpsd_report(device->context->debug, LOG_DATA,
 				"packet type %d from %s with %s\n",
-				device->packet.type,
+				device->lexer.type,
 				device->gpsdata.dev.path,
 				gps_maskdump(device->gpsdata.set));
 	    }
 
 
 	    /* handle data contained in this packet */
-	    if (device->packet.type != BAD_PACKET)
+	    if (device->lexer.type != BAD_PACKET)
 		/*@i1@*/handler(device, changed);
 
 #ifdef __future__

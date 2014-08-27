@@ -386,14 +386,14 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 {
     gps_mask_t st;
 
-    if (session->packet.type == EVERMORE_PACKET) {
-	st = evermore_parse(session, session->packet.outbuffer,
-			    session->packet.outbuflen);
+    if (session->lexer.type == EVERMORE_PACKET) {
+	st = evermore_parse(session, session->lexer.outbuffer,
+			    session->lexer.outbuflen);
 	return st;
     }
 #ifdef NMEA_ENABLE
-    else if (session->packet.type == NMEA_PACKET) {
-	st = nmea_parse((char *)session->packet.outbuffer, session);
+    else if (session->lexer.type == NMEA_PACKET) {
+	st = nmea_parse((char *)session->lexer.outbuffer, session);
 	return st;
     }
 #endif /* NMEA_ENABLE */

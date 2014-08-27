@@ -236,7 +236,7 @@ static void ubx_update(void)
     struct timedrift_t drift;
 #endif /* PPS_ENABLE */
 
-    buf = session.packet.outbuffer;
+    buf = session.lexer.outbuffer;
     msgid = (unsigned short)((buf[2] << 8) | buf[3]);
     data_len = (size_t) getles16(buf, 4);
     switch (msgid) {

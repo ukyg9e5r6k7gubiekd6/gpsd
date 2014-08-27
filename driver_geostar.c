@@ -108,7 +108,7 @@ static bool geostar_detect(struct gps_device_t *session)
 	    if (select(myfd + 1, &fdset, NULL, NULL, &to) != 1)
 		break;
 	    if (generic_get(session) >= 0) {
-		if (session->packet.type == GEOSTAR_PACKET) {
+		if (session->lexer.type == GEOSTAR_PACKET) {
 		    gpsd_report(session->context->debug, LOG_RAW,
 				"geostar_detect found\n");
 		    ret = true;
@@ -133,32 +133,32 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     char buf[BUFSIZ];
     char buf2[BUFSIZ];
 
-    if (session->packet.type != GEOSTAR_PACKET) {
+    if (session->lexer.type != GEOSTAR_PACKET) {
 	gpsd_report(session->context->debug, LOG_INF,
 		    "geostar_analyze packet type %d\n",
-		    session->packet.type);
+		    session->lexer.type);
 	return 0;
     }
 
     /*@ +charint @*/
-    if (session->packet.outbuflen < 12 || session->packet.outbuffer[0] != 'P')
+    if (session->lexer.outbuflen < 12 || session->lexer.outbuffer[0] != 'P')
 	return 0;
 
     /* put data part of message in buf */
 
     memset(buf, 0, sizeof(buf));
     /* cppcheck-suppress redundantCopy */
-    memcpy(buf, session->packet.outbuffer, session->packet.outbuflen);
+    memcpy(buf, session->lexer.outbuffer, session->lexer.outbuflen);
 
     buf2[len = 0] = '\0';
-    for (i = 0; i < (int)session->packet.outbuflen; i++) {
+    for (i = 0; i < (int)session->lexer.outbuflen; i++) {
 	(void)snprintf(buf2 + strlen(buf2),
 		       sizeof(buf2) - strlen(buf2),
-		       "%02x", buf[len++] = session->packet.outbuffer[i]);
+		       "%02x", buf[len++] = session->lexer.outbuffer[i]);
     }
     /*@ -charint @*/
 
-    id = (unsigned int)getleu16(session->packet.outbuffer, OFFSET(0));
+    id = (unsigned int)getleu16(session->lexer.outbuffer, OFFSET(0));
 
     gpsd_report(session->context->debug, LOG_DATA,
 		"GeoStar packet id 0x%02x length %d: %s\n", id, len, buf2);
@@ -485,7 +485,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
 static gps_mask_t geostar_parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == GEOSTAR_PACKET) {
+    if (session->lexer.type == GEOSTAR_PACKET) {
 	return geostar_analyze(session);;
     } else
 	return 0;

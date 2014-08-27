@@ -474,12 +474,12 @@ static double oncore_time_offset(struct gps_device_t *session UNUSED)
 
 static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 {
-    if (session->packet.type == ONCORE_PACKET) {
-	return oncore_dispatch(session, session->packet.outbuffer,
-			     session->packet.outbuflen);
+    if (session->lexer.type == ONCORE_PACKET) {
+	return oncore_dispatch(session, session->lexer.outbuffer,
+			     session->lexer.outbuflen);
 #ifdef NMEA_ENABLE
-    } else if (session->packet.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->packet.outbuffer, session);
+    } else if (session->lexer.type == NMEA_PACKET) {
+	return nmea_parse((char *)session->lexer.outbuffer, session);
 #endif /* NMEA_ENABLE */
     } else
 	return 0;

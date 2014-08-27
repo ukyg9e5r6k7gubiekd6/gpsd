@@ -989,7 +989,7 @@ static bool preamble_match(isgps30bits_t * w)
     return (((struct rtcm2_msghw1 *)w)->preamble == PREAMBLE_PATTERN);
 }
 
-static bool length_check(struct gps_packet_t *lexer)
+static bool length_check(struct gps_lexer_t *lexer)
 {
     return lexer->isgps.bufindex >= 2
 	&& lexer->isgps.bufindex >=
@@ -997,7 +997,7 @@ static bool length_check(struct gps_packet_t *lexer)
 }
 /*@+type */
 
-enum isgpsstat_t rtcm2_decode(struct gps_packet_t *lexer, unsigned int c)
+enum isgpsstat_t rtcm2_decode(struct gps_lexer_t *lexer, unsigned int c)
 {
     return isgps_decode(lexer,
 			preamble_match, length_check, RTCM2_WORDS_MAX, c);

@@ -287,8 +287,8 @@ static void sirf_update(void)
     /* splint pacification */
     assert(mid2win!=NULL && mid27win != NULL);
 
-    buf = session.packet.outbuffer + 4;
-    len = session.packet.outbuflen - 8;
+    buf = session.lexer.outbuffer + 4;
+    len = session.lexer.outbuflen - 8;
     switch (buf[0]) {
     case 0x02:			/* Measured Navigation Data */
 	(void)wmove(mid2win, 1, 6);	/* ECEF position */
