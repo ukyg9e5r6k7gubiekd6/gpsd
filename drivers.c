@@ -795,7 +795,8 @@ const struct gps_type_t driver_trueNorth = {
  *
  **************************************************************************/
 
-static int oceanserver_send(const int debug, const int fd, const char *fmt, ...)
+static int oceanserver_send(struct errout_t *errout, 
+			    const int fd, const char *fmt, ...)
 {
     int status;
     char buf[BUFSIZ];
@@ -808,10 +809,10 @@ static int oceanserver_send(const int debug, const int fd, const char *fmt, ...)
     status = (int)write(fd, buf, strlen(buf));
     (void)tcdrain(fd);
     if (status == (int)strlen(buf)) {
-	gpsd_report(debug, LOG_IO, "=> GPS: %s\n", buf);
+	gpsd_notify(errout, LOG_IO, "=> GPS: %s\n", buf);
 	return status;
     } else {
-	gpsd_report(debug, LOG_WARN, "=> GPS: %s FAILED\n", buf);
+	gpsd_notify(errout, LOG_WARN, "=> GPS: %s FAILED\n", buf);
 	return -1;
     }
 }
@@ -823,10 +824,10 @@ static void oceanserver_event_hook(struct gps_device_t *session,
 	return;
     if (event == event_configure && session->lexer.counter == 0) {
 	/* report in NMEA format */
-	(void)oceanserver_send(session->context->errout.debug,
+	(void)oceanserver_send(&session->context->errout,
 			       session->gpsdata.gps_fd, "2\n");
 	/* ship all fields */
-	(void)oceanserver_send(session->context->errout.debug,
+	(void)oceanserver_send(&session->context->errout,
 			       session->gpsdata.gps_fd, "X2047");
     }
 }
@@ -1344,7 +1345,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
         ais_context->decoded_frags = 0;
 
 	/* decode the assembled binary packet */
-	return ais_binary_decode(session->context->errout.debug,
+	return ais_binary_decode(&session->context->errout,
 				 ais,
 				 ais_context->bits,
 				 ais_context->bitlen,

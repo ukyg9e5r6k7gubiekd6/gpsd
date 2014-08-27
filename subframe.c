@@ -86,7 +86,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 /* you can find up to date almanac data for comparision here:
  * https://gps.afspc.af.mil/gps/Current/current.alm
  */
-static void subframe_almanac(const struct gps_context_t *context,
+static void subframe_almanac(const struct errout_t *errout,
 			     uint8_t tSVID, uint32_t words[],
 			     uint8_t subframe, uint8_t sv,
 			     uint8_t data_id,
@@ -126,7 +126,7 @@ static void subframe_almanac(const struct gps_context_t *context,
     almp->af0     |= ((words[9] >>  2) & 0x000007);
     almp->af0      = (short)uint2int(almp->af0, 11);
     almp->d_af0    = pow(2.0,-20) * almp->af0;
-    gpsd_notify(&context->errout, LOG_PROG,
+    gpsd_notify(errout, LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
 		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.10g Omega0:%.10e "
 		"omega:%.10e M0:%.11e af0:%.5e af1:%.5e\n",
@@ -752,7 +752,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    }
 	    if ( -1 < sv ) {
 		subp->is_almanac = 1;
-		subframe_almanac(session->context,
+		subframe_almanac(&session->context->errout,
 				 subp->tSVID, words, subp->subframe_num,
 				 (uint8_t)sv, subp->data_id, 
 				 &subp->sub4.almanac);
@@ -774,7 +774,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	 */
 	if ( 25 > subp->pageid ) {
 	    subp->is_almanac = 1;
-	    subframe_almanac(session->context,
+	    subframe_almanac(&session->context->errout,
 			     subp->tSVID, words, subp->subframe_num,
 			     subp->pageid, subp->data_id, &subp->sub5.almanac);
 	} else if ( 51 == subp->pageid ) {

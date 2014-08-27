@@ -141,7 +141,7 @@ unsigned int isgps_parity(isgps30bits_t th)
     /*@ -charint @*/
 
 #ifdef __UNUSED__
-    gpsd_report(ISGPS_ERRLEVEL_BASE + 2, "ISGPS parity %u\n", p);
+    gpsd_notify(errout, ISGPS_ERRLEVEL_BASE + 2, "ISGPS parity %u\n", p);
 #endif /* __UNUSED__ */
     return (p);
 }

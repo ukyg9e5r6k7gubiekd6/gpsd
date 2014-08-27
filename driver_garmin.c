@@ -847,7 +847,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 // This works around cppcheck not looking into enough config branches
 // cppcheck-suppress unusedFunction
 static bool is_usb_device(const char *path UNUSED, int vendor, int product,
-			  const int debug)
+			  struct errout_t *errout)
 {
     // discover devices
     libusb_device **list;
@@ -855,12 +855,12 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product,
     ssize_t i = 0;
     bool found = false;
 
-    gpsd_report(debug, LOG_INF, 
+    gpsd_notify(errout, LOG_INF, 
 		"attempting USB device enumeration.\n");
     (void)libusb_init(NULL);
 
     if ((cnt = libusb_get_device_list(NULL, &list)) < 0) {
-	gpsd_report(debug, LOG_ERROR,
+	gpsd_notify(errout, LOG_ERROR,
 		    "USB device list call failed.\n");
 	libusb_exit(NULL);
 	return false;
@@ -872,13 +872,13 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product,
 
 	int r = libusb_get_device_descriptor(dev, &desc);
 	if (r < 0) {
-	    gpsd_report(debug, LOG_ERROR,
+	    gpsd_notify(errout, LOG_ERROR,
 			"USB descriptor fetch failed on device %zd.\n", i);
 	    continue;
 	}
 
 	/* we can extract device descriptor data */
-	gpsd_report(debug, LOG_INF,
+	gpsd_notify(errout, LOG_INF,
 		    "%04x:%04x (bus %d, device %d)\n",
 		    desc.idVendor, desc.idProduct,
 		    libusb_get_bus_number(dev),
@@ -891,7 +891,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product,
 	}
     }
 
-    gpsd_report(debug, LOG_INF,
+    gpsd_notify(errout, LOG_INF,
 		"vendor/product match with %04x:%04x %sfound\n",
 		vendor, product, found ? "" : "not ");
     libusb_free_device_list(list, 1);
@@ -941,7 +941,7 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
     else {
 #ifdef HAVE_LIBUSB
 	if (!is_usb_device(session->gpsdata.dev.path, 0x091e, 0x0003,
-		session->context->errout.debug))
+		&session->context->errout))
 	    return false;
 
 	if (!gpsd_set_raw(session)) {

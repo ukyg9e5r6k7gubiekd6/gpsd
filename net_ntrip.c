@@ -36,7 +36,7 @@
 static /*@null@*/ char *ntrip_field_iterate( /*@null@ */ char *start,
 					     /*@null@*/ char *prev,
 					     const char *eol,
-					     const int debug)
+					     const struct errout_t *errout)
 {
     char *s, *t, *u;
 
@@ -58,7 +58,7 @@ static /*@null@*/ char *ntrip_field_iterate( /*@null@ */ char *start,
     if ((t = strstr(t, ";")))
 	*t = '\0';
 
-    gpsd_report(debug, LOG_RAW, "Next Ntrip source table field %s\n", s);
+    gpsd_notify(errout, LOG_RAW, "Next Ntrip source table field %s\n", s);
 
     return s;
 }
@@ -68,19 +68,19 @@ static /*@null@*/ char *ntrip_field_iterate( /*@null@ */ char *start,
 /*@ -mustfreefresh @*/
 static void ntrip_str_parse(char *str, size_t len,
 			    /*@out@*/ struct ntrip_stream_t *hold,
-			    const int debug)
+			    const struct errout_t *errout)
 {
     char *s, *eol = str + len;
 
     memset(hold, 0, sizeof(*hold));
 
     /* <mountpoint> */
-    if ((s = ntrip_field_iterate(str, NULL, eol, debug)))
+    if ((s = ntrip_field_iterate(str, NULL, eol, errout)))
 	(void)strlcpy(hold->mountpoint, s, sizeof(hold->mountpoint));
     /* <identifier> */
-    s = ntrip_field_iterate(NULL, s, eol, debug);
+    s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <format> */
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug))) {
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
 	if (strcasecmp("RTCM 2", s) == 0)
 	    hold->format = fmt_rtcm2;
 	else if (strcasecmp("RTCM 2.0", s) == 0)
@@ -100,41 +100,41 @@ static void ntrip_str_parse(char *str, size_t len,
 	    hold->format = fmt_unknown;
     }
     /* <format-details> */
-    s = ntrip_field_iterate(NULL, s, eol, debug);
+    s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <carrier> */
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug)))
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout)))
 	hold->carrier = atoi(s);
     /* <nav-system> */
-    s = ntrip_field_iterate(NULL, s, eol, debug);
+    s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <network> */
-    s = ntrip_field_iterate(NULL, s, eol, debug);
+    s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <country> */
-    s = ntrip_field_iterate(NULL, s, eol, debug);
+    s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <latitude> */
     hold->latitude = NAN;
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug)))
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout)))
 	hold->latitude = atof(s);
     /* <longitude> */
     hold->longitude = NAN;
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug)))
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout)))
 	hold->longitude = atof(s);
     /* <nmea> */
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug))) {
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
 	hold->nmea = atoi(s);
     }
     /* <solution> */
-    s = ntrip_field_iterate(NULL, s, eol, debug);
+    s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <generator> */
-    s = ntrip_field_iterate(NULL, s, eol, debug);
+    s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <compr-encryp> */
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug))) {
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
 	if (strcasecmp("none", s) == 0)
 	    hold->compr_encryp = cmp_enc_none;
 	else
 	    hold->compr_encryp = cmp_enc_unknown;
     }
     /* <authentication> */
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug))) {
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
 	if (strcasecmp("N", s) == 0)
 	    hold->authentication = auth_none;
 	else if (strcasecmp("B", s) == 0)
@@ -145,15 +145,15 @@ static void ntrip_str_parse(char *str, size_t len,
 	    hold->authentication = auth_unknown;
     }
     /* <fee> */
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug))) {
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
 	hold->fee = atoi(s);
     }
     /* <bitrate> */
-    if ((s = ntrip_field_iterate(NULL, s, eol, debug))) {
+    if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
 	hold->bitrate = atoi(s);
     }
     /* ...<misc> */
-    while ((s = ntrip_field_iterate(NULL, s, eol, debug)));
+    while ((s = ntrip_field_iterate(NULL, s, eol, errout)));
 }
 
 static int ntrip_sourcetable_parse(struct gps_device_t *device)
@@ -241,7 +241,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	    if (strncmp(line, NTRIP_STR, strlen(NTRIP_STR)) == 0) {
 		ntrip_str_parse(line + strlen(NTRIP_STR),
 				(size_t) (llen - strlen(NTRIP_STR)), 
-				&hold, device->context->errout.debug);
+				&hold, &device->context->errout);
 		if (strcmp(device->ntrip.stream.mountpoint, hold.mountpoint) == 0) {
 		    /* todo: support for RTCM 3.0, SBAS (WAAS, EGNOS), ... */
 		    if (hold.format == fmt_unknown) {
@@ -307,7 +307,7 @@ done:
 }
 
 static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream,
-				  const int debug)
+				  struct errout_t *errout)
 {
     int dsock;
     ssize_t r;
@@ -315,10 +315,10 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream,
 
     dsock = netlib_connectsock(AF_UNSPEC, stream->url, stream->port, "tcp");
     if (dsock < 0) {
-	gpsd_report(debug, LOG_ERROR, "ntrip stream connect error %d in req probe\n", dsock);
+	gpsd_notify(errout, LOG_ERROR, "ntrip stream connect error %d in req probe\n", dsock);
 	return -1;
     }
-    gpsd_report(debug, LOG_SPIN, "ntrip stream for req probe connected on fd %d\n", dsock);
+    gpsd_notify(errout, LOG_SPIN, "ntrip stream for req probe connected on fd %d\n", dsock);
     (void)snprintf(buf, sizeof(buf),
 	    "GET / HTTP/1.1\r\n"
 	    "User-Agent: NTRIP gpsd/%s\r\n"
@@ -327,7 +327,7 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream,
 	    "\r\n", VERSION, stream->url);
     r = write(dsock, buf, strlen(buf));
     if (r != (ssize_t)strlen(buf)) {
-	gpsd_report(debug, LOG_ERROR, 
+	gpsd_notify(errout, LOG_ERROR, 
 		    "ntrip stream write error %d on fd %d during probe request %zd\n",
 		    errno, dsock, r);
 	(void)close(dsock);
@@ -364,19 +364,19 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
 /* *INDENT-ON* */
 
 static int ntrip_stream_get_req(const struct ntrip_stream_t *stream,
-				const int debug)
+				const struct errout_t *errout)
 {
     int dsock;
     char buf[BUFSIZ];
 
     dsock = netlib_connectsock(AF_UNSPEC, stream->url, stream->port, "tcp");
     if (BAD_SOCKET(dsock)) {
-	gpsd_report(debug, LOG_ERROR,
+	gpsd_notify(errout, LOG_ERROR,
 		    "ntrip stream connect error %d\n", dsock);
 	return -1;
     }
 
-    gpsd_report(debug, LOG_SPIN,
+    gpsd_notify(errout, LOG_SPIN,
 		"netlib_connectsock() returns socket on fd %d\n",
 		dsock);
 
@@ -389,7 +389,7 @@ static int ntrip_stream_get_req(const struct ntrip_stream_t *stream,
 	    "Connection: close\r\n"
 	    "\r\n", stream->mountpoint, VERSION, stream->url, stream->authStr);
     if (write(dsock, buf, strlen(buf)) != (ssize_t) strlen(buf)) {
-	gpsd_report(debug, LOG_ERROR,
+	gpsd_notify(errout, LOG_ERROR,
 		    "ntrip stream write error %d on fd %d during get request\n", errno,
 		    dsock);
 	(void)close(dsock);
@@ -399,7 +399,8 @@ static int ntrip_stream_get_req(const struct ntrip_stream_t *stream,
 }
 
 static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream,
-				  const int dsock, const int debug)
+				  const int dsock, 
+				  const struct errout_t *errout)
 {
 /*@-nullpass@*/
     char buf[BUFSIZ];
@@ -408,7 +409,7 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream,
     while (read(dsock, buf, sizeof(buf) - 1) == -1) {
 	if (errno == EINTR)
 	    continue;
-	gpsd_report(debug, LOG_ERROR, 
+	gpsd_notify(errout, LOG_ERROR, 
 		    "ntrip stream read error %d on fd %d during get rsp\n", errno,
 		    dsock);
 	goto close;
@@ -417,21 +418,21 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream,
     /* parse 401 Unauthorized */
     /* coverity[string_null] - guaranteed terminated by the memset above */
     if (strstr(buf, NTRIP_UNAUTH)!=NULL) {
-	gpsd_report(debug, LOG_ERROR,
+	gpsd_notify(errout, LOG_ERROR,
 		"not authorized for Ntrip stream %s/%s\n", stream->url,
 		stream->mountpoint);
 	goto close;
     }
     /* parse SOURCETABLE */
     if (strstr(buf, NTRIP_SOURCETABLE)!=NULL) {
-	gpsd_report(debug, LOG_ERROR,
+	gpsd_notify(errout, LOG_ERROR,
 		"Broadcaster doesn't recognize Ntrip stream %s:%s/%s\n",
 		stream->url, stream->port, stream->mountpoint);
 	goto close;
     }
     /* parse ICY 200 OK */
     if (strstr(buf, NTRIP_ICY)==NULL) {
-	gpsd_report(debug, LOG_ERROR,
+	gpsd_notify(errout, LOG_ERROR,
 		"Unknown reply %s from Ntrip service %s:%s/%s\n", buf,
 		stream->url, stream->port, stream->mountpoint);
 	goto close;
@@ -528,7 +529,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 			      sizeof(device->ntrip.stream.port));
 
 	    ret = ntrip_stream_req_probe(&device->ntrip.stream,
-					 device->context->errout.debug);
+					 &device->context->errout);
 	    if (ret == -1) {
 		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
@@ -551,7 +552,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		return -1;
 	    }
 	    ret = ntrip_stream_get_req(&device->ntrip.stream,
-				       device->context->errout.debug);
+				       &device->context->errout);
 	    if (ret == -1) {
 		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
@@ -562,7 +563,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 	case ntrip_conn_sent_get:
 	    ret = ntrip_stream_get_parse(&device->ntrip.stream,
 					 device->gpsdata.gps_fd,
-					 device->context->errout.debug);
+					 &device->context->errout);
 	    if (ret == -1) {
 		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
