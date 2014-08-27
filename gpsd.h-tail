@@ -136,6 +136,11 @@ enum isgpsstat_t {
 #define SECS_PER_WEEK	(7*SECS_PER_DAY)	/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
+struct errout_t {
+    int debug;				/* lexer debug level */
+    void (*report)(const char *);	/* reporting hook for lexer errors */
+};
+
 struct gps_lexer_t {
     /* packet-getter internals */
     int	type;
@@ -177,8 +182,7 @@ struct gps_lexer_t {
     unsigned long char_counter;		/* count characters processed */
     unsigned long retry_counter;	/* count sniff retries */
     unsigned counter;			/* packets since last driver switch */
-    int debug;				/* lexer debug level */
-    void (*report)(const char *);	/* reporting hook for lexer errors */
+    struct errout_t errout;		/* how to report errors */
 #ifdef TIMING_ENABLE
     timestamp_t start_time;		/* timestamp of first input */
     unsigned long start_char;		/* char counter at first input */
@@ -209,8 +213,6 @@ struct gps_lexer_t {
 };
 
 extern void lexer_init(/*@out@*/struct gps_lexer_t *);
-extern void lexer_report(const struct gps_lexer_t *,
-			 const int, const char *, ...);
 extern void packet_reset(/*@out@*/struct gps_lexer_t *);
 extern void packet_pushback(struct gps_lexer_t *);
 extern void packet_parse(struct gps_lexer_t *);
@@ -239,7 +241,7 @@ struct gps_context_t {
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
 #define GPS_TIME_VALID  	0x02	/* GPS week/tow is valid */
 #define CENTURY_VALID		0x04	/* have received ZDA or 4-digit year */
-    int debug;				/* dehug verbosity level */
+    struct errout_t errout;		/* debug verbosity level and hook */
     bool readonly;			/* if true, never write to device */
     /* DGPS status */
     int fixcnt;				/* count of good fixes seen */
@@ -901,6 +903,10 @@ extern void ntpshm_link_activate(struct gps_device_t *);
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
 extern int pps_thread_lastpps(struct gps_device_t *, struct timedrift_t *);
+
+extern void errout_reset(struct errout_t *errout);
+extern void gpsd_notify(const struct errout_t *,
+			const int, const char *, ...);
 
 extern void gpsd_acquire_reporting_lock(void);
 extern void gpsd_release_reporting_lock(void);

@@ -40,6 +40,45 @@ void gpsd_report(int unused UNUSED, int errlevel, const char *fmt, ... )
     Py_DECREF(args);
 }
 
+static void basic_report(const char *buf)
+{
+    (void)fputs(buf, stderr);
+}
+
+void errout_reset(struct errout_t *errout)
+{
+    errout->debug = 0;
+    errout->report = basic_report;
+}
+
+void gpsd_notify(const struct errout_t *errout UNUSED, 
+		 int errlevel, const char *fmt, ... )
+{
+    char buf[BUFSIZ];
+    PyObject *args;
+    va_list ap;
+
+    if (!report_callback)   /* no callback defined, exit early */
+	return;
+
+    if (!PyCallable_Check(report_callback)) {
+	PyErr_SetString(ErrorObject, "Cannot call Python callback function");
+	return;
+    }
+
+    va_start(ap, fmt);
+    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+
+    args = Py_BuildValue("(is)", errlevel, buf);
+    if (!args)
+	return;
+
+    PyObject_Call(report_callback, args, NULL);
+    Py_DECREF(args);
+}
+
+
 static PyTypeObject Lexer_Type;
 
 typedef struct {

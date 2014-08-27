@@ -1106,7 +1106,7 @@ int main(int argc, char **argv)
 	    nocurses = true;
 	    break;
 	case 'D':
-	    context.debug = atoi(optarg);
+	    context.errout.debug = atoi(optarg);
 	    break;
 	case 'L':		/* list known device types */
 	    (void)
@@ -1291,7 +1291,7 @@ int main(int argc, char **argv)
 	for (;;) 
 	{
 	    fd_set efds;
-	    switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, context.debug))
+	    switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, context.errout.debug))
 	    {
 	    case AWAIT_GOT_INPUT:
 		break;

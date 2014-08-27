@@ -272,21 +272,21 @@ static struct map runontests[] = {
 
 static int packet_test(struct map *mp)
 {
-    struct gps_lexer_t packet;
+    struct gps_lexer_t lexer;
     int failure = 0;
 
-    lexer_init(&packet);
-    packet.debug = verbose;
-    /*@i@*/ memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
-    packet.inbuflen = mp->testlen;
+    lexer_init(&lexer);
+    lexer.errout.debug = verbose;
+    /*@i@*/ memcpy(lexer.inbufptr = lexer.inbuffer, mp->test, mp->testlen);
+    lexer.inbuflen = mp->testlen;
     /*@ -compdef -uniondef -usedef -formatcode @*/
-    packet_parse(&packet);
-    if (packet.type != mp->type)
+    packet_parse(&lexer);
+    if (lexer.type != mp->type)
 	printf("%2zi: %s test FAILED (packet type %d wrong).\n",
-	       mp - singletests + 1, mp->legend, packet.type);
+	       mp - singletests + 1, mp->legend, lexer.type);
     else if (memcmp
-	     (mp->test + mp->garbage_offset, packet.outbuffer,
-	      packet.outbuflen)) {
+	     (mp->test + mp->garbage_offset, lexer.outbuffer,
+	      lexer.outbuflen)) {
 	printf("%2zi: %s test FAILED (data garbled).\n", mp - singletests + 1,
 	       mp->legend);
 	++failure;
@@ -299,18 +299,18 @@ static int packet_test(struct map *mp)
 
 static void runon_test(struct map *mp)
 {
-    struct gps_lexer_t packet;
+    struct gps_lexer_t lexer;
     int nullfd = open("/dev/null", O_RDONLY);
     ssize_t st;
 
-    lexer_init(&packet);
-    packet.debug = verbose;
-    /*@i@*/ memcpy(packet.inbufptr = packet.inbuffer, mp->test, mp->testlen);
-    packet.inbuflen = mp->testlen;
+    lexer_init(&lexer);
+    lexer.errout.debug = verbose;
+    /*@i@*/ memcpy(lexer.inbufptr = lexer.inbuffer, mp->test, mp->testlen);
+    lexer.inbuflen = mp->testlen;
     /*@ -compdef -uniondef -usedef -formatcode @*/
     (void)fputs(mp->test, stdout);
     do {
-	st = packet_get(nullfd, &packet);
+	st = packet_get(nullfd, &lexer);
 	//printf("packet_parse() returned %zd\n", st);
     } while (st > 0);
     /*@ +compdef +uniondef +usedef +formatcode @*/
