@@ -52,6 +52,27 @@ Ed W. writes:
 >really this is just adding it to the NMEA sentence output options via
 >the TAG structure
 
+However, Iván Sánchez Ortega notes:
+
+>There is one *big* problem with using TAG blocks to timestamp the sentences.
+>The standards (as far as I/we know) say that the timestamp is **either** the
+>number of seconds **or** milliseconds since the UNIX epoch, but we do **not**
+>know if the initial state should be secs, msecs, or nothing. We do not know
+>how clients reading that TAGblocked NMEA stream should ask GPSD to switch the
+>timestamp units (or enable/disable them).
+>
+>There are a few sentences introduced in NMEA 4.00 that supposedly allow that -
+>the client sends a sentence to the server, and then the server starts
+>TAGblocking sentences. But, alas, there are no examples anywhere.
+>
+>>From my personal experience, the way to know if a TAGblocked timestamp is in
+>seconds or milliseconds is ask the people in charge of setting up the
+>device/service. Perhaps some devices output only secs/msecs, and some other
+>accept the NMEA 4.00 TAGblock configuration sentences.
+>
+>I, for one, would like to see the secs/msecs problem solved before GPSD
+>embarks on the enterprise of writing TAGblocks.
+
 *** RFC2783 bugs
 
 **** detangle TIOCMIWAIT and RFC2783
