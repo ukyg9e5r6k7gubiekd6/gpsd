@@ -175,12 +175,12 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
 #endif /* !SQUELCH_ENABLE */
 }
 
-static void gpsd_run_device_hook(const int debuglevel, 
+static void gpsd_run_device_hook(struct errout_t *errout,
 				 char *device_name, char *hook)
 {
     struct stat statbuf;
     if (stat(DEVICEHOOKPATH, &statbuf) == -1)
-	gpsd_report(debuglevel, LOG_PROG,
+	gpsd_notify(errout, LOG_PROG,
 		    "no %s present, skipped running %s hook\n",
 		    DEVICEHOOKPATH, hook);
     else {
@@ -192,19 +192,19 @@ static void gpsd_run_device_hook(const int debuglevel,
 	size_t bufsize = strlen(DEVICEHOOKPATH) + 1 + strlen(device_name) + 1 + strlen(hook) + 1;
 	char *buf = malloc(bufsize);
 	if (buf == NULL)
-	    gpsd_report(debuglevel, LOG_ERROR,
+	    gpsd_notify(errout, LOG_ERROR,
 			"error allocating run-hook buffer\n");
 	else
 	{
 	    int status;
 	    (void)snprintf(buf, bufsize, "%s %s %s",
 			   DEVICEHOOKPATH, device_name, hook);
-	    gpsd_report(debuglevel, LOG_INF, "running %s\n", buf);
+	    gpsd_notify(errout, LOG_INF, "running %s\n", buf);
 	    status = system(buf);
 	    if (status == -1)
-		gpsd_report(debuglevel, LOG_ERROR, "error running %s\n", buf);
+		gpsd_notify(errout, LOG_ERROR, "error running %s\n", buf);
 	    else
-		gpsd_report(debuglevel, LOG_INF,
+		gpsd_notify(errout, LOG_INF,
 			    "%s returned %d\n", DEVICEHOOKPATH,
 			    WEXITSTATUS(status));
 	    free(buf);
@@ -361,7 +361,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 #endif /* of defined(NMEA2000_ENABLE) */
         (void)gpsd_close(session);
     if (session->mode == O_OPTIMIZE)
-	gpsd_run_device_hook(session->context->errout.debug, 
+	gpsd_run_device_hook(&session->context->errout, 
 			     session->gpsdata.dev.path,
 			     "DEACTIVATE");
 #ifdef PPS_ENABLE
@@ -507,7 +507,7 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
 /* acquire a connection to the GPS device */
 {
     if (session->mode == O_OPTIMIZE)
-	gpsd_run_device_hook(session->context->errout.debug,
+	gpsd_run_device_hook(&session->context->errout,
 			     session->gpsdata.dev.path, "ACTIVATE");
     session->gpsdata.gps_fd = gpsd_open(session);
     if (mode != O_CONTINUE)
@@ -750,7 +750,9 @@ static bool invert(double mat[4][4], /*@out@*/ double inverse[4][4])
 
 /*@ +fixedformalarray +mustdefine @*/
 
-static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop, const int debug)
+static gps_mask_t fill_dop(const struct errout_t *errout,
+			   const struct gps_data_t * gpsdata, 
+			   struct dop_t * dop)
 {
     double prod[4][4];
     double inv[4][4];
@@ -775,7 +777,7 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
     /* If we don't have 4 satellites then we don't have enough information to calculate DOPS */
     if (n < 4) {
 #ifdef __UNUSED__
-	gpsd_notify(&session->context->errout, LOG_DATA + 2,
+	gpsd_notify(errout, LOG_DATA + 2,
 		    "Not enough satellites available %d < 4:\n",
 		    n);
 #endif /* __UNUSED__ */
@@ -786,9 +788,9 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
     memset(inv, 0, sizeof(inv));
 
 #ifdef __UNUSED__
-    gpsd_notify(&session->context->errout, LOG_INF, "Line-of-sight matrix:\n");
+    gpsd_notify(errout, LOG_INF, "Line-of-sight matrix:\n");
     for (k = 0; k < n; k++) {
-	gpsd_report(debug, LOG_INF, "%f %f %f %f\n",
+	gpsd_notify(errout, LOG_INF, "%f %f %f %f\n",
 		    satpos[k][0], satpos[k][1], satpos[k][2], satpos[k][3]);
     }
 #endif /* __UNUSED__ */
@@ -803,9 +805,9 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
     }
 
 #ifdef __UNUSED__
-    gpsd_report(debug, LOG_INF, "product:\n");
+    gpsd_notify(errout, LOG_INF, "product:\n");
     for (k = 0; k < 4; k++) {
-	gpsd_notify(&session->context->errout, LOG_INF, "%f %f %f %f\n",
+	gpsd_notify(errout, LOG_INF, "%f %f %f %f\n",
 		    prod[k][0], prod[k][1], prod[k][2], prod[k][3]);
     }
 #endif /* __UNUSED__ */
@@ -816,16 +818,16 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
 	 * Note: this will print garbage unless all the subdeterminants
 	 * are computed in the invert() function.
 	 */
-	gpsd_report(debug, LOG_RAW, "inverse:\n");
+	gpsd_notify(errout, LOG_RAW, "inverse:\n");
 	for (k = 0; k < 4; k++) {
-	    gpsd_notify(&session->context->errout, LOG_RAW,
+	    gpsd_notify(errout, LOG_RAW,
 			"%f %f %f %f\n",
 			inv[k][0], inv[k][1], inv[k][2], inv[k][3]);
 	}
 #endif /* __UNUSED__ */
     } else {
 #ifndef USE_QT
-	gpsd_report(debug, LOG_DATA,
+	gpsd_notify(errout, LOG_DATA,
 		    "LOS matrix is singular, can't calculate DOPs - source '%s'\n",
 		    gpsdata->dev.path);
 #endif
@@ -841,7 +843,7 @@ static gps_mask_t fill_dop(const struct gps_data_t * gpsdata, struct dop_t * dop
     gdop = sqrt(inv[0][0] + inv[1][1] + inv[2][2] + inv[3][3]);
 
 #ifndef USE_QT
-    gpsd_report(debug, LOG_DATA,
+    gpsd_notify(errout, LOG_DATA,
 		"DOPS computed/reported: X=%f/%f, Y=%f/%f, H=%f/%f, V=%f/%f, P=%f/%f, T=%f/%f, G=%f/%f\n",
 		xdop, dop->xdop, ydop, dop->ydop, hdop, dop->hdop, vdop,
 		dop->vdop, pdop, dop->pdop, tdop, dop->tdop, gdop, dop->gdop);
@@ -1033,7 +1035,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 		    /*@out@*/fd_set *efds,
 		     const int maxfd,
 		     /*@in@*/fd_set *all_fds, 
-		     const int debug)
+		     struct errout_t *errout)
 /* await data from any socket in the all_fds set */
 {
     int status;
@@ -1043,7 +1045,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 
     FD_ZERO(efds);
     (void)memcpy((char *)rfds, (char *)all_fds, sizeof(fd_set));
-    gpsd_report(debug, LOG_RAW + 2, "select waits\n");
+    gpsd_notify(errout, LOG_RAW + 2, "select waits\n");
     /*
      * Poll for user commands or GPS data.  The timeout doesn't
      * actually matter here since select returns whenever one of
@@ -1082,13 +1084,13 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 		}
 	    return AWAIT_NOT_READY;
 	} else {
-	    gpsd_report(debug, LOG_ERROR, "select: %s\n", strerror(errno));
+	    gpsd_notify(errout, LOG_ERROR, "select: %s\n", strerror(errno));
 	    return AWAIT_FAILED;
 	}
     }
     /*@ +usedef +nullpass @*/
 
-    if (debug >= LOG_SPIN) {
+    if (errout->debug >= LOG_SPIN) {
 	int i;
 	char dbuf[BUFSIZ];
 	dbuf[0] = '\0';
@@ -1103,7 +1105,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 	    if (FD_ISSET(i, rfds))
 		(void)snprintf(dbuf + strlen(dbuf),
 			       sizeof(dbuf) - strlen(dbuf), " %d ", i);
-	gpsd_report(debug, LOG_SPIN,
+	gpsd_notify(errout, LOG_SPIN,
 		    "select() {%s} at %f (errno %d)\n",
 		    dbuf, timestamp(), errno);
     }
@@ -1451,7 +1453,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	if ((received & SATELLITE_SET) != 0
 	    && session->gpsdata.satellites_visible > 0) {
-	    session->gpsdata.set |= fill_dop(&session->gpsdata, &session->gpsdata.dop, session->context->errout.debug);
+	    session->gpsdata.set |= fill_dop(&session->context->errout,
+					     &session->gpsdata, 
+					     &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
 #endif /* CHEAPFLOATS_ENABLE */

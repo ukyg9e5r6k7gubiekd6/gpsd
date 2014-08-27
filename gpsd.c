@@ -2168,7 +2168,7 @@ int main(int argc, char *argv[])
 
     while (0 == signalled) {
 	fd_set efds;
-	switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, context.errout.debug))
+	switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, &context.errout))
 	{
 	case AWAIT_GOT_INPUT:
 	    break;
