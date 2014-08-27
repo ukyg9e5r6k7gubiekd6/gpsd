@@ -167,26 +167,26 @@ unsigned int isgps_parity(isgps30bits_t th)
  */
 #define isgps_parityok(w)	(isgps_parity(w) == ((w) & 0x3f))
 
-void isgps_init( /*@out@*/ struct gps_lexer_t *session)
+void isgps_init( /*@out@*/ struct gps_lexer_t *lexer)
 {
-    session->isgps.curr_word = 0;
-    session->isgps.curr_offset = 24;	/* first word */
-    session->isgps.locked = false;
-    session->isgps.bufindex = 0;
-    session->isgps.buflen = 0;
+    lexer->isgps.curr_word = 0;
+    lexer->isgps.curr_offset = 24;	/* first word */
+    lexer->isgps.locked = false;
+    lexer->isgps.bufindex = 0;
+    lexer->isgps.buflen = 0;
 }
 
 /*@ -usereleased -compdef @*/
 // This works around cppcheck not looking into enough config branches
 // cppcheck-suppress unusedFunction
-enum isgpsstat_t isgps_decode(struct gps_lexer_t *session,
+enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 			      bool(*preamble_match) (isgps30bits_t *),
 			      bool(*length_check) (struct gps_lexer_t *),
 			      size_t maxlen, unsigned int c)
 {
     /* ASCII characters 64-127, @ through DEL */
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 1,
+	gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 1,
 		    "ISGPS word tag not correct, skipping byte\n");
 	return ISGPS_SKIP;
     }
@@ -194,125 +194,125 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *session,
     c = reverse_bits[c & 0x3f];
 
     /*@ -shiftnegative @*/
-    if (!session->isgps.locked) {
-	session->isgps.curr_offset = -5;
-	session->isgps.bufindex = 0;
+    if (!lexer->isgps.locked) {
+	lexer->isgps.curr_offset = -5;
+	lexer->isgps.bufindex = 0;
 
-	while (session->isgps.curr_offset <= 0) {
-	    session->isgps.curr_word <<= 1;
-	    if (session->isgps.curr_offset > 0) {
-		session->isgps.curr_word |= c << session->isgps.curr_offset;
+	while (lexer->isgps.curr_offset <= 0) {
+	    lexer->isgps.curr_word <<= 1;
+	    if (lexer->isgps.curr_offset > 0) {
+		lexer->isgps.curr_word |= c << lexer->isgps.curr_offset;
 	    } else {
-		session->isgps.curr_word |=
-		    c >> -(session->isgps.curr_offset);
+		lexer->isgps.curr_word |=
+		    c >> -(lexer->isgps.curr_offset);
 	    }
-	    gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 2,
+	    gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 2,
 			"ISGPS syncing at byte %lu: 0x%08x\n",
-			session->char_counter, session->isgps.curr_word);
+			lexer->char_counter, lexer->isgps.curr_word);
 
-	    if (preamble_match(&session->isgps.curr_word)) {
-		if (isgps_parityok(session->isgps.curr_word)) {
-		    gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 1,
+	    if (preamble_match(&lexer->isgps.curr_word)) {
+		if (isgps_parityok(lexer->isgps.curr_word)) {
+		    gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 1,
 				"ISGPS preamble ok, parity ok -- locked\n");
-		    session->isgps.locked = true;
+		    lexer->isgps.locked = true;
 		    break;
 		}
-		gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 1,
+		gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 1,
 			    "ISGPS preamble ok, parity fail\n");
 	    }
-	    session->isgps.curr_offset++;
+	    lexer->isgps.curr_offset++;
 	}			/* end while */
     }
-    if (session->isgps.locked) {
+    if (lexer->isgps.locked) {
 	enum isgpsstat_t res;
 
 	res = ISGPS_SYNC;
 
-	if (session->isgps.curr_offset > 0) {
-	    session->isgps.curr_word |= c << session->isgps.curr_offset;
+	if (lexer->isgps.curr_offset > 0) {
+	    lexer->isgps.curr_word |= c << lexer->isgps.curr_offset;
 	} else {
-	    session->isgps.curr_word |= c >> -(session->isgps.curr_offset);
+	    lexer->isgps.curr_word |= c >> -(lexer->isgps.curr_offset);
 	}
 
-	if (session->isgps.curr_offset <= 0) {
+	if (lexer->isgps.curr_offset <= 0) {
 	    /* weird-assed inversion */
-	    if (session->isgps.curr_word & P_30_MASK)
-		session->isgps.curr_word ^= W_DATA_MASK;
+	    if (lexer->isgps.curr_word & P_30_MASK)
+		lexer->isgps.curr_word ^= W_DATA_MASK;
 
-	    if (isgps_parityok(session->isgps.curr_word)) {
+	    if (isgps_parityok(lexer->isgps.curr_word)) {
 #if 0
 		/*
 		 * Don't clobber the buffer just because we spot
 		 * another preamble pattern in the data stream. -wsr
 		 */
-		if (preamble_match(&session->isgps.curr_word)) {
-		    gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 2,
+		if (preamble_match(&lexer->isgps.curr_word)) {
+		    gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 2,
 				"ISGPS preamble spotted (index: %u)\n",
-				session->isgps.bufindex);
-		    session->isgps.bufindex = 0;
+				lexer->isgps.bufindex);
+		    lexer->isgps.bufindex = 0;
 		}
 #endif
-		gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 2,
+		gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 2,
 			    "ISGPS processing word %u (offset %d)\n",
-			    session->isgps.bufindex,
-			    session->isgps.curr_offset);
+			    lexer->isgps.bufindex,
+			    lexer->isgps.curr_offset);
 		{
 		    /*
 		     * Guard against a buffer overflow attack.  Just wait for
 		     * the next preamble match and go on from there.
 		     */
-		    if (session->isgps.bufindex >= (unsigned)maxlen) {
-			session->isgps.bufindex = 0;
-			gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 1,
+		    if (lexer->isgps.bufindex >= (unsigned)maxlen) {
+			lexer->isgps.bufindex = 0;
+			gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 1,
 				    "ISGPS buffer overflowing -- resetting\n");
 			return ISGPS_NO_SYNC;
 		    }
 
-		    session->isgps.buf[session->isgps.bufindex] =
-			session->isgps.curr_word;
+		    lexer->isgps.buf[lexer->isgps.bufindex] =
+			lexer->isgps.curr_word;
 
 		    /* *INDENT-OFF* */
-		    if ((session->isgps.bufindex == 0) &&
-			!preamble_match((isgps30bits_t *) session->isgps.buf)) {
-			gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 1,
+		    if ((lexer->isgps.bufindex == 0) &&
+			!preamble_match((isgps30bits_t *) lexer->isgps.buf)) {
+			gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 1,
 				    "ISGPS word 0 not a preamble- punting\n");
 			return ISGPS_NO_SYNC;
 		    }
 		    /* *INDENT-ON* */
-		    session->isgps.bufindex++;
+		    lexer->isgps.bufindex++;
 
-		    if (length_check(session)) {
+		    if (length_check(lexer)) {
 			/* jackpot, we have a complete packet */
-			session->isgps.buflen = session->isgps.bufindex * sizeof(isgps30bits_t);
-			session->isgps.bufindex = 0;
+			lexer->isgps.buflen = lexer->isgps.bufindex * sizeof(isgps30bits_t);
+			lexer->isgps.bufindex = 0;
 			res = ISGPS_MESSAGE;
 		    }
 		}
-		session->isgps.curr_word <<= 30;	/* preserve the 2 low bits */
-		session->isgps.curr_offset += 30;
-		if (session->isgps.curr_offset > 0) {
-		    session->isgps.curr_word |=
-			c << session->isgps.curr_offset;
+		lexer->isgps.curr_word <<= 30;	/* preserve the 2 low bits */
+		lexer->isgps.curr_offset += 30;
+		if (lexer->isgps.curr_offset > 0) {
+		    lexer->isgps.curr_word |=
+			c << lexer->isgps.curr_offset;
 		} else {
-		    session->isgps.curr_word |=
-			c >> -(session->isgps.curr_offset);
+		    lexer->isgps.curr_word |=
+			c >> -(lexer->isgps.curr_offset);
 		}
 	    } else {
-		gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 0,
+		gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 0,
 			    "ISGPS parity failure, lost lock\n");
-		session->isgps.locked = false;
+		lexer->isgps.locked = false;
 	    }
 	}
-	session->isgps.curr_offset -= 6;
-	gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 2,
+	lexer->isgps.curr_offset -= 6;
+	gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 2,
 		    "ISGPS residual %d\n",
-		    session->isgps.curr_offset);
+		    lexer->isgps.curr_offset);
 	return res;
     }
     /*@ +shiftnegative @*/
 
     /* never achieved lock */
-    gpsd_report(session->debug, ISGPS_ERRLEVEL_BASE + 1,
+    gpsd_report(lexer->debug, ISGPS_ERRLEVEL_BASE + 1,
 		"ISGPS lock never achieved\n");
     return ISGPS_NO_SYNC;
 }
