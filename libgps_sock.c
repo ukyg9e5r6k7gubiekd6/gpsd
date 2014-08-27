@@ -572,8 +572,12 @@ int gps_sock_mainloop(struct gps_data_t *gpsdata, int timeout,
 	if (!gps_waiting(gpsdata, timeout)) {
 	    return -1;
 	} else {
-	    (void)gps_read(gpsdata);
-	    (*hook)(gpsdata);
+	    int status = gps_read(gpsdata);
+
+	    if (status == -1)
+		return -1;
+	    if (status > 0)
+		(*hook)(gpsdata);
 	}
     }
     //return 0;
