@@ -781,7 +781,7 @@ pid_t getsid(pid_t pid);
         announce("Adjust your PYTHONPATH to see library directories under /usr/local/lib")
 
     # Should we build the Qt binding?
-    if qt_network:
+    if env["qt"]:
         qt_env = env.Clone()
         qt_env.MergeFlags('-DUSE_QT')
         try:
