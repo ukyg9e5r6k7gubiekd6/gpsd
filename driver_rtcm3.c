@@ -65,7 +65,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 /* *INDENT-OFF* */
 /*@ -type @*//* re-enable when we're ready to take this live */
 
-void rtcm3_unpack(const int debug,
+void rtcm3_unpack(const struct gps_context_t *context,
 		  /*@out@*/ struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
@@ -97,7 +97,7 @@ void rtcm3_unpack(const int debug,
     rtcm->length = (uint)ugrab(10);
     rtcm->type = (uint)ugrab(12);
 
-    gpsd_report(debug, LOG_RAW, "RTCM3: type %d payload length %d\n",
+    gpsd_report(context->debug, LOG_RAW, "RTCM3: type %d payload length %d\n",
 		rtcm->type, rtcm->length);
 
     switch (rtcm->type) {
