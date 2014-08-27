@@ -86,11 +86,11 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 /* you can find up to date almanac data for comparision here:
  * https://gps.afspc.af.mil/gps/Current/current.alm
  */
-static void subframe_almanac(uint8_t tSVID, uint32_t words[],
+static void subframe_almanac(const struct gps_context_t *context,
+			     uint8_t tSVID, uint32_t words[],
 			     uint8_t subframe, uint8_t sv,
 			     uint8_t data_id,
-			     /*@out@*/struct almanac_t *almp,
-			     const int debug)
+			     /*@out@*/struct almanac_t *almp)
 {
     /*@+matchanyintegral -shiftimplementation@*/
     almp->sv     = sv; /* ignore the 0 sv problem for now */
@@ -126,7 +126,7 @@ static void subframe_almanac(uint8_t tSVID, uint32_t words[],
     almp->af0     |= ((words[9] >>  2) & 0x000007);
     almp->af0      = (short)uint2int(almp->af0, 11);
     almp->d_af0    = pow(2.0,-20) * almp->af0;
-    gpsd_report(debug, LOG_PROG,
+    gpsd_report(context->debug, LOG_PROG,
 		"50B: SF:%d SV:%2u TSV:%2u data_id %d e:%g toa:%lu "
 		"deltai:%.10e Omegad:%.5e svh:%u sqrtA:%.10g Omega0:%.10e "
 		"omega:%.10e M0:%.11e af0:%.5e af1:%.5e\n",
@@ -752,10 +752,10 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	    }
 	    if ( -1 < sv ) {
 		subp->is_almanac = 1;
-		subframe_almanac(subp->tSVID, words, subp->subframe_num,
+		subframe_almanac(session->context,
+				 subp->tSVID, words, subp->subframe_num,
 				 (uint8_t)sv, subp->data_id, 
-				 &subp->sub4.almanac,
-				 session->context->debug);
+				 &subp->sub4.almanac);
 	    } else if ( -2 == sv ) {
 		/* unknown or secret page */
 		gpsd_report(session->context->debug, LOG_PROG,
@@ -774,9 +774,9 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 	 */
 	if ( 25 > subp->pageid ) {
 	    subp->is_almanac = 1;
-	    subframe_almanac(subp->tSVID, words, subp->subframe_num,
-			     subp->pageid, subp->data_id, &subp->sub5.almanac,
-			     session->context->debug);
+	    subframe_almanac(session->context,
+			     subp->tSVID, words, subp->subframe_num,
+			     subp->pageid, subp->data_id, &subp->sub5.almanac);
 	} else if ( 51 == subp->pageid ) {
 	    /* for some inscrutable reason page 25 is sent as page 51
 	     * IS-GPS-200E Table 20-V */
