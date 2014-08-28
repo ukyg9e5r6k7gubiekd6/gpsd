@@ -27,17 +27,6 @@ static unsigned int typelist[32];
  *
  **************************************************************************/
 
-void gpsd_report(const int debuglevel, const int errlevel,
-		 const char *fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    gpsd_labeled_report(debuglevel, errlevel, "gpsdecode:", fmt, ap);
-    va_end(ap);
-			
-}
-
 #ifdef AIVDM_ENABLE
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
@@ -537,6 +526,7 @@ static void decode(FILE *fpin, FILE*fpout)
     gps_context_init(&context);
     gpsd_time_init(&context, time(NULL));
     context.readonly = true;
+    context.errout.label = "gpsdecode";
     gpsd_init(&session, &context, NULL);
     gpsd_clear(&session);
     session.gpsdata.gps_fd = fileno(fpin);
@@ -598,9 +588,14 @@ static void encode(FILE *fpin, FILE *fpout)
     struct policy_t policy;
     struct gps_device_t session;
     int lineno = 0;
+    struct gps_context_t context;
 
     memset(&policy, '\0', sizeof(policy));
     memset(&session, '\0', sizeof(session));
+    memset(&context, '\0', sizeof(context));
+    session.context = &context;
+    context.errout.debug = 0;
+    context.errout.label = "gpsdecode";
     (void)strlcpy(session.gpsdata.dev.path,
 		  "stdin",
 		  sizeof(session.gpsdata.dev.path));

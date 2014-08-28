@@ -14,32 +14,6 @@ static PyObject *ErrorObject = NULL;
 
 static PyObject *report_callback = NULL;
 
-void gpsd_report(int unused UNUSED, int errlevel, const char *fmt, ... )
-{
-    char buf[BUFSIZ];
-    PyObject *args;
-    va_list ap;
-
-    if (!report_callback)   /* no callback defined, exit early */
-	return;
-
-    if (!PyCallable_Check(report_callback)) {
-	PyErr_SetString(ErrorObject, "Cannot call Python callback function");
-	return;
-    }
-
-    va_start(ap, fmt);
-    (void)vsnprintf(buf, sizeof(buf), fmt, ap);
-    va_end(ap);
-
-    args = Py_BuildValue("(is)", errlevel, buf);
-    if (!args)
-	return;
-
-    PyObject_Call(report_callback, args, NULL);
-    Py_DECREF(args);
-}
-
 static void basic_report(const char *buf)
 {
     (void)fputs(buf, stderr);

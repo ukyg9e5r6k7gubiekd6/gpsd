@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/stat.h>
+#include <assert.h>
 #ifndef S_SPLINT_S
 #include <sys/wait.h>
 #include <sys/socket.h>
@@ -52,22 +53,6 @@ void errout_reset(struct errout_t *errout)
 {
     errout->debug = 0;
     errout->report = basic_report;
-}
-
-void gpsd_notify(const struct errout_t *errout,
-			 const int errlevel,
-			 const char *fmt, ...)
-{
-    if (errout->debug >= errlevel)
-    {
-	char buf[128];
-	va_list ap;
-
-	va_start(ap, fmt);
-	vsnprintf(buf, sizeof(buf), fmt, ap);
-	errout->report(buf);
-	va_end(ap);
-    }
 }
 
 #if defined(PPS_ENABLE)
@@ -102,23 +87,16 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 			   0x00ff & (unsigned)*sp);
 }
 
-const char *gpsd_prettydump(struct gps_device_t *session)
-/* dump the current packet in a form optimised for eyeballs */
-{
-    return gpsd_packetdump(session->msgbuf, sizeof(session->msgbuf),
-			   (char *)session->lexer.outbuffer, 
-			   session->lexer.outbuflen);
-}
-
-
-void gpsd_labeled_report(const int debuglevel, const int errlevel,
-			 const char *label, const char *fmt, va_list ap)
-/* assemble command in printf(3) style, use stderr or syslog */
+void gpsd_notify(const struct errout_t *errout, 
+		 const int errlevel,
+		 const char *fmt, ...)
+/* assemble msg in printf(3) style, use errout hook or syslog for delivery */
 {
 #ifndef SQUELCH_ENABLE
-    if (errlevel <= debuglevel) {
+    if (errout->debug >= errlevel) {
 	char buf[BUFSIZ], buf2[BUFSIZ];
 	char *err_str;
+	va_list ap;
 
 #if defined(PPS_ENABLE)
 	gpsd_acquire_reporting_lock();
@@ -158,9 +136,13 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
 		err_str = "UNK: ";
 	}
 
-	(void)strlcpy(buf, label, sizeof(buf));
+	assert(errout->label != NULL);
+	(void)strlcpy(buf, errout->label, sizeof(buf));
+	(void)strlcat(buf, ":", sizeof(buf));
 	(void)strncat(buf, err_str, sizeof(buf) - 1 - strlen(buf));
+	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
+	va_end(ap);
 
 	visibilize(buf2, sizeof(buf2), buf);
 
@@ -174,6 +156,15 @@ void gpsd_labeled_report(const int debuglevel, const int errlevel,
     }
 #endif /* !SQUELCH_ENABLE */
 }
+
+const char *gpsd_prettydump(struct gps_device_t *session)
+/* dump the current packet in a form optimised for eyeballs */
+{
+    return gpsd_packetdump(session->msgbuf, sizeof(session->msgbuf),
+			   (char *)session->lexer.outbuffer, 
+			   session->lexer.outbuflen);
+}
+
 
 static void gpsd_run_device_hook(struct errout_t *errout,
 				 char *device_name, char *hook)

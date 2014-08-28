@@ -165,17 +165,6 @@ static void onsig(int sig)
     signalled = (sig_atomic_t) sig;
 }
 
-void gpsd_report(const int debuglevel, const int errlevel,
-		 const char *fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    gpsd_labeled_report(debuglevel, errlevel, "gpsd:", fmt, ap);
-    va_end(ap);
-			
-}
-
 static void typelist(void)
 /* list installed drivers and enabled features */
 {
@@ -1823,8 +1812,8 @@ int main(int argc, char *argv[])
     bool go_background = true;
     volatile bool in_restart;
 
-    context.errout.debug = 0;
     gps_context_init(&context);
+    context.errout.label = "gpsd";
 
 #ifdef CONTROL_SOCKET_ENABLE
     INVALIDATE_SOCKET(csock);

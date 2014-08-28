@@ -17,23 +17,6 @@
 
 static int verbose = 0;
 
-void gpsd_report(int debuglevel, int errlevel, const char *fmt, ...)
-/* assemble command in printf(3) style, use stderr or syslog */
-{
-    if (errlevel <= debuglevel) {
-	char buf[BUFSIZ];
-	va_list ap;
-
-	buf[0] = '\0';
-	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
-			ap);
-	va_end(ap);
-
-	(void)fputs(buf, stderr);
-    }
-}
-
 struct map
 {
     char *legend;

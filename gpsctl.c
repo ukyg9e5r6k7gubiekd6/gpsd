@@ -36,17 +36,6 @@ static bool hunting = true;
  */
 #define REDIRECT_SNIFF	15
 
-void gpsd_report(const int debuglevel, const int errlevel,
-		 const char *fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    gpsd_labeled_report(debuglevel, errlevel, "gpsctl:", fmt, ap);
-    va_end(ap);
-			
-}
-
 static void settle(struct gps_device_t *session)
 /* allow the device to settle after a control operation */
 {
@@ -314,6 +303,8 @@ int main(int argc, char **argv)
 	    break;
 	}
     }
+
+    context.errout.label = "gpsctl";
 
     if (optind < argc)
 	device = argv[optind];

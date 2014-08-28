@@ -250,6 +250,24 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 #endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
 /*@-compdef@*/
+static void report_hook(const char *buf)
+{
+    char buf2[BUFSIZ];
+
+    visibilize(buf2, sizeof(buf2), buf);
+
+    report_lock();
+    if (!curses_active)
+	(void)fputs(buf2, stdout);
+    else if (packetwin != NULL)
+	(void)waddstr(packetwin, buf2);
+    if (logfile != NULL)
+	(void)fputs(buf2, logfile);
+    report_unlock();
+}
+/*@+compdef@*/
+
+/*@-compdef@*/
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
     char buf2[BUFSIZ];
@@ -587,57 +605,6 @@ static void packet_log(const char *fmt, ...)
     va_end(ap);
 }
 #endif /* PPS_ENABLE */
-
-void gpsd_report(const int debuglevel, const int errlevel, const char *fmt, ...)
-/* our version of the logger */
-{
-    char buf[BUFSIZ]; 
-    char *err_str;
-
-    switch ( errlevel ) {
-    case LOG_ERROR:
-	err_str = "ERROR: ";
-	break;
-    case LOG_SHOUT:
-	err_str = "SHOUT: ";
-	break;
-    case LOG_WARN:
-	err_str = "WARN: ";
-	break;
-    case LOG_CLIENT:
-	err_str = "CLIENT: ";
-	break;
-    case LOG_INF:
-	err_str = "INFO: ";
-	break;
-    case LOG_PROG:
-	err_str = "PROG: ";
-	break;
-    case LOG_IO:
-	err_str = "IO: ";
-	break;
-    case LOG_DATA:
-	err_str = "DATA: ";
-	break;
-    case LOG_SPIN:
-	err_str = "SPIN: ";
-	break;
-    case LOG_RAW:
-	err_str = "RAW: ";
-	break;
-    default:
-	err_str = "UNK: ";
-    }
-
-    (void)strlcpy(buf, "gpsmon:", BUFSIZ);
-    (void)strncat(buf, err_str, BUFSIZ - strlen(buf));
-    if (errlevel <= debuglevel) {
-	va_list ap;
-	va_start(ap, fmt);
-	packet_vlog(buf, sizeof(buf), fmt, ap);
-	va_end(ap);
-    }
-}
 
 static ssize_t gpsmon_serial_write(struct gps_device_t *session,
 		   const char *buf,
@@ -1100,6 +1067,8 @@ int main(int argc, char **argv)
     /*@ +observertrans @*/
     gps_context_init(&context);	// initialize the report mutex
     context.serial_write = gpsmon_serial_write;
+    context.errout.label = "gpsmon";
+    context.errout.report = report_hook;
     while ((option = getopt(argc, argv, "aD:LVhl:nt:?")) != -1) {
 	switch (option) {
 	case 'a':
