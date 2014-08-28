@@ -145,8 +145,10 @@ int gps_read(struct gps_data_t *gpsdata)
 #endif /* SOCKET_EXPORT_ENABLE */
     /*@ +usedef +compdef +uniondef @*/
 
+    /*@-usedef@*/
     libgps_debug_trace((DEBUG_CALLS, "gps_read() -> %d (%s)\n",
 			status, gps_maskdump(gpsdata->set)));
+    /*@+usedef@*/
 
     return status;
 }

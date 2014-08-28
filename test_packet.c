@@ -255,6 +255,7 @@ static struct map runontests[] = {
 
 static int packet_test(struct map *mp)
 {
+    /*@-compdestroy@*/
     struct gps_lexer_t lexer;
     int failure = 0;
 
@@ -278,8 +279,10 @@ static int packet_test(struct map *mp)
 	       mp->legend);    /*@ +compdef +uniondef +usedef +formatcode @*/
 
     return failure;
+    /*@+compdestroy@*/
 }
 
+/*@ -compdef -uniondef -usedef -formatcode -compdestroy @*/
 static void runon_test(struct map *mp)
 {
     struct gps_lexer_t lexer;
@@ -290,14 +293,13 @@ static void runon_test(struct map *mp)
     lexer.errout.debug = verbose;
     /*@i@*/ memcpy(lexer.inbufptr = lexer.inbuffer, mp->test, mp->testlen);
     lexer.inbuflen = mp->testlen;
-    /*@ -compdef -uniondef -usedef -formatcode @*/
-    (void)fputs(mp->test, stdout);
+     (void)fputs(mp->test, stdout);
     do {
 	st = packet_get(nullfd, &lexer);
 	//printf("packet_parse() returned %zd\n", st);
     } while (st > 0);
-    /*@ +compdef +uniondef +usedef +formatcode @*/
 }
+/*@ +compdef +uniondef +usedef +formatcode +compdestroy@*/
 
 static int property_check(void)
 {

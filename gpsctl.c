@@ -304,8 +304,6 @@ int main(int argc, char **argv)
 	}
     }
 
-    context.errout.label = "gpsctl";
-
     if (optind < argc)
 	device = argv[optind];
 
@@ -568,7 +566,7 @@ int main(int argc, char **argv)
 	    }
 
 	/*@ -mustfreeonly -immediatetrans @*/
-	gps_context_init(&context);
+	gps_context_init(&context, "gpsctl");
 	context.errout.debug = debuglevel;
 	session.context = &context;
 	gpsd_tty_init(&session);
@@ -604,7 +602,7 @@ int main(int argc, char **argv)
 	 */
 
 	/*@ -mustfreeonly -immediatetrans @*/
-	gps_context_init(&context);
+	gps_context_init(&context, "gpsctl");
 	context.errout.debug = debuglevel;
 	session.context = &context;	/* in case gps_init isn't called */
 

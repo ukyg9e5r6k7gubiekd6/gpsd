@@ -250,7 +250,7 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 #endif /* defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE) */
 
 /*@-compdef@*/
-static void report_hook(const char *buf)
+static void gpsmon_report(const char *buf)
 {
     char buf2[BUFSIZ];
 
@@ -271,7 +271,7 @@ static void report_hook(const char *buf)
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
     (void)vsnprintf(buf + strlen(buf), len, fmt, ap);
-    report_hook(buf);
+    gpsmon_report(buf);
 }
 /*@+compdef@*/
 
@@ -1054,10 +1054,9 @@ int main(int argc, char **argv)
     /*@ -observertrans @*/
     (void)putenv("TZ=UTC");	// for ctime()
     /*@ +observertrans @*/
-    gps_context_init(&context);	// initialize the report mutex
+    gps_context_init(&context, "gsmon");	// initialize the report mutex
     context.serial_write = gpsmon_serial_write;
-    context.errout.label = "gpsmon";
-    context.errout.report = report_hook;
+    context.errout.report = gpsmon_report;
     while ((option = getopt(argc, argv, "aD:LVhl:nt:?")) != -1) {
 	switch (option) {
 	case 'a':

@@ -245,11 +245,12 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 }
 /*@+kepttrans@*/
 
-/*@-compdestroy@*/
-void gps_context_init(struct gps_context_t *context)
+/*@-compdestroy -mustfreeonly -observertrans -dependenttrans@*/
+void gps_context_init(struct gps_context_t *context, 
+		      /*@observer@*/const char *label)
 {
     /* *INDENT-OFF* */
-    /*@ -initallelements -nullassign -nullderef @*/
+    /*@ -initallelements -nullassign -nullderef -fullinitblock @*/
     struct gps_context_t nullcontext = {
 	.valid	        = 0,
 	.readonly	= false,
@@ -275,11 +276,12 @@ void gps_context_init(struct gps_context_t *context)
 #endif /* SHM_EXPORT_ENABLE */
 	.serial_write    = gpsd_serial_write,
     };
-    /*@ +initallelements +nullassign +nullderef @*/
+    /*@ +initallelements +nullassign +nullderef +fullinitblock @*/
     /* *INDENT-ON* */
     (void)memcpy(context, &nullcontext, sizeof(struct gps_context_t));
 
     errout_reset(&context->errout);
+    context->errout.label = label;
 
 #if !defined(S_SPLINT_S) && defined(PPS_ENABLE)
     /*@-nullpass@*/
@@ -287,7 +289,7 @@ void gps_context_init(struct gps_context_t *context)
     /*@+nullpass@*/
 #endif /* defined(S_SPLINT_S) defined(PPS_ENABLE) */
 }
-/*@+compdestroy@*/
+/*@+compdestroy +mustfreeonly +observertrans +dependenttrans@*/
 
 void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 	       const char *device)
@@ -364,6 +366,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->gpsdata.online = (timestamp_t)0;
 }
 
+/*@-usereleased -compdef@*/
 void gpsd_clear(struct gps_device_t *session)
 {
     session->gpsdata.online = timestamp();
@@ -385,6 +388,7 @@ void gpsd_clear(struct gps_device_t *session)
 
     session->opentime = timestamp();
 }
+/*@+usereleased +compdef@*/
 
 int gpsd_open(struct gps_device_t *session)
 /* open a device for access to its data */

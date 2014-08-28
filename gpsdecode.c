@@ -508,7 +508,7 @@ static bool filter(gps_mask_t changed, struct gps_device_t *session)
     return false;
 }
 
-/*@ -compdestroy -compdef -usedef -uniondef @*/
+/*@ -mustfreeonly -compdestroy -compdef -usedef -uniondef -immediatetrans -observertrans -statictrans @*/
 static void decode(FILE *fpin, FILE*fpout)
 /* sensor data on fpin to dump format on fpout */
 {
@@ -523,10 +523,9 @@ static void decode(FILE *fpin, FILE*fpout)
     policy.json = json;
     policy.scaled = scaled;
 
-    gps_context_init(&context);
+    gps_context_init(&context, "gpsdecode");
     gpsd_time_init(&context, time(NULL));
     context.readonly = true;
-    context.errout.label = "gpsdecode";
     gpsd_init(&session, &context, NULL);
     gpsd_clear(&session);
     session.gpsdata.gps_fd = fileno(fpin);
@@ -623,7 +622,7 @@ static void encode(FILE *fpin, FILE *fpout)
 	(void)fputs(inbuf, fpout);
     }
 }
-/*@ +compdestroy +compdef +usedef @*/
+/*@ +mustfreeonly +compdestroy +compdef +usedef +immediatetrans +observertrans @ +statictrans*/
 #endif /* SOCKET_EXPORT_ENABLE */
 
 int main(int argc, char **argv)

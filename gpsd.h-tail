@@ -944,7 +944,8 @@ extern int srec_fin(unsigned int, unsigned char *);
 extern unsigned char hc(unsigned char);
 
 /* application interface */
-extern void gps_context_init(struct gps_context_t *context);
+extern void gps_context_init(struct gps_context_t *context, 
+			     /*@observer@*/const char *label);
 extern void gpsd_init(struct gps_device_t *,
 		      struct gps_context_t *,
 		      /*@null@*/const char *);
@@ -1005,7 +1006,7 @@ void gpsd_labeled_report(const int, const int,
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 __attribute__((__format__(__printf__, 3, 4))) void gpsd_report(const struct gpsd_errout_t *, const int, const char *, ...);
 # else /* not a new enough GCC, use the unprotected prototype */
-void gpsd_report(const struct *gpsd_errout_t, const int, const char *, ...);
+void gpsd_report(const struct gpsd_errout_t *, const int, const char *, ...);
 #endif
 
 #ifdef S_SPLINT_S

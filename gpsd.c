@@ -1812,8 +1812,7 @@ int main(int argc, char *argv[])
     bool go_background = true;
     volatile bool in_restart;
 
-    gps_context_init(&context);
-    context.errout.label = "gpsd";
+    gps_context_init(&context, "gpsd");
 
 #ifdef CONTROL_SOCKET_ENABLE
     INVALIDATE_SOCKET(csock);
