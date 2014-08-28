@@ -72,7 +72,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     if (data_len != _PROTO__NAVSOL_MSG_LEN)
 	return 0;
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"_proto_ NAVSOL - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
@@ -121,7 +121,7 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      * the fields it potentially set and the transfer mask. Doing this
      * makes it relatively easy to track down data-management problems.
      */
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"NAVSOL: time=%.2f, lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
 		session->newdata.time,
 		session->newdata.latitude,
@@ -144,7 +144,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     if (data_len != UTCTIME_MSG_LEN)
 	return 0;
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"_proto_ UTCTIME - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
@@ -171,7 +171,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     if (data_len != SVINFO_MSG_LEN )
 	return 0;
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"_proto_ SVINFO - navigation data\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
@@ -187,7 +187,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
      */
     nchan = GET_NUMBER_OF_CHANNELS();
     if ((nchan < 1) || (nchan > MAXCHANNELS)) {
-	gpsd_notify(&session->context->errout, LOG_INF,
+	gpsd_report(&session->context->errout, LOG_INF,
 		    "too many channels reported\n");
 	return 0;
     }
@@ -212,7 +212,7 @@ _proto__msg_svinfo(struct gps_device_t *session, unsigned char *buf, size_t data
     session->gpsdata.skyview_time = NaN;
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
 		session->gpsdata.satellites_visible,
 		session->gpsdata.satellites_used);
@@ -231,7 +231,7 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
     if (data_len != RAW_MSG_LEN )
 	return 0;
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"_proto_ RAW - raw measurements\n");
     /* if this protocol has a way to test message validity, use it */
     flags = GET_FLAGS();
@@ -247,7 +247,7 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
      */
     nchan = GET_NUMBER_OF_CHANNELS();
     if ((nchan < 1) || (nchan > MAXCHANNELS)) {
-	gpsd_notify(&session->context->errout, LOG_INF,
+	gpsd_report(&session->context->errout, LOG_INF,
 		    "too many channels reported\n");
 	return 0;
     }
@@ -292,7 +292,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
     type = GET_MESSAGE_TYPE();
 
     /* we may need to dump the raw packet */
-    gpsd_notify(&session->context->errout, LOG_RAW,
+    gpsd_report(&session->context->errout, LOG_RAW,
 		"raw _proto_ packet type 0x%02x\n", type);
 
     switch (type)
@@ -300,7 +300,7 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
 	/* Deliver message to specific decoder based on message type */
 
     default:
-	gpsd_notify(&session->context->errout, LOG_WARN,
+	gpsd_report(&session->context->errout, LOG_WARN,
 		    "unknown packet id %d length %d\n", type, len);
 	return 0;
     }
@@ -351,7 +351,7 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 
    /* we may need to dump the message */
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
-   gpsd_notify(&session->context->errout, LOG_PROG,
+   gpsd_report(&session->context->errout, LOG_PROG,
 	       "writing _proto_ control type %02x\n");
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }

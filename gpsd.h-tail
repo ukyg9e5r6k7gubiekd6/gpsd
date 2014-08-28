@@ -136,7 +136,7 @@ enum isgpsstat_t {
 #define SECS_PER_WEEK	(7*SECS_PER_DAY)	/* seconds per week */
 #define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
 
-struct errout_t {
+struct gpsd_errout_t {
     int debug;				/* lexer debug level */
     void (*report)(const char *);	/* reporting hook for lexer errors */
     char *label;
@@ -183,7 +183,7 @@ struct gps_lexer_t {
     unsigned long char_counter;		/* count characters processed */
     unsigned long retry_counter;	/* count sniff retries */
     unsigned counter;			/* packets since last driver switch */
-    struct errout_t errout;		/* how to report errors */
+    struct gpsd_errout_t errout;		/* how to report errors */
 #ifdef TIMING_ENABLE
     timestamp_t start_time;		/* timestamp of first input */
     unsigned long start_char;		/* char counter at first input */
@@ -242,7 +242,7 @@ struct gps_context_t {
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
 #define GPS_TIME_VALID  	0x02	/* GPS week/tow is valid */
 #define CENTURY_VALID		0x04	/* have received ZDA or 4-digit year */
-    struct errout_t errout;		/* debug verbosity level and hook */
+    struct gpsd_errout_t errout;		/* debug verbosity level and hook */
     bool readonly;			/* if true, never write to device */
     /* DGPS status */
     int fixcnt;				/* count of good fixes seen */
@@ -905,7 +905,7 @@ extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
 extern int pps_thread_lastpps(struct gps_device_t *, struct timedrift_t *);
 
-extern void errout_reset(struct errout_t *errout);
+extern void errout_reset(struct gpsd_errout_t *errout);
 
 extern void gpsd_acquire_reporting_lock(void);
 extern void gpsd_release_reporting_lock(void);
@@ -963,7 +963,7 @@ extern int gpsd_await_data(/*@out@*/fd_set *,
 			   /*@out@*/fd_set *,
 			    const int, 
 			    /*@in@*/fd_set *,
-			    struct errout_t *errout);
+			    struct gpsd_errout_t *errout);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
 #define DEVICE_EOF	-3
 #define DEVICE_ERROR	-2
@@ -981,7 +981,7 @@ extern /*@observer@*/const char *gpsd_maskdump(gps_mask_t);
 /* exceptional driver methods */
 extern bool ubx_write(struct gps_device_t *, unsigned int, unsigned int,
 		      /*@null@*/unsigned char *, size_t);
-extern bool ais_binary_decode(const struct errout_t *errout,
+extern bool ais_binary_decode(const struct gpsd_errout_t *errout,
 			      struct ais_t *ais,
 			      const unsigned char *, size_t,
 			      /*@null@*/struct ais_type24_queue_t *);
@@ -1003,9 +1003,9 @@ extern void libgps_dump_state(struct gps_data_t *);
 void gpsd_labeled_report(const int, const int,
 			 const char *, const char *, va_list);
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
-__attribute__((__format__(__printf__, 3, 4))) void gpsd_notify(const struct errout_t *, const int, const char *, ...);
+__attribute__((__format__(__printf__, 3, 4))) void gpsd_report(const struct gpsd_errout_t *, const int, const char *, ...);
 # else /* not a new enough GCC, use the unprotected prototype */
-void gpsd_notify(const struct *errout_t, const int, const char *, ...);
+void gpsd_report(const struct *gpsd_errout_t, const int, const char *, ...);
 #endif
 
 #ifdef S_SPLINT_S

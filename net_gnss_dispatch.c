@@ -44,7 +44,7 @@ int netgnss_uri_open(struct gps_device_t *dev, char *netgnss_service)
 #ifndef REQUIRE_DGNSS_PROTO
     return dgpsip_open(dev, netgnss_service);
 #else
-    gpsd_notify(&dev->context.errout, LOG_ERROR,
+    gpsd_report(&dev->context.errout, LOG_ERROR,
 		"Unknown or unspecified DGNSS protocol for service %s\n",
 		netgnss_service);
     return -1;

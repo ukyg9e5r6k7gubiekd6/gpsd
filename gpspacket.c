@@ -19,13 +19,13 @@ static void basic_report(const char *buf)
     (void)fputs(buf, stderr);
 }
 
-void errout_reset(struct errout_t *errout)
+void errout_reset(struct gpsd_errout_t *errout)
 {
     errout->debug = 0;
     errout->report = basic_report;
 }
 
-void gpsd_notify(const struct errout_t *errout UNUSED, 
+void gpsd_report(const struct gpsd_errout_t *errout UNUSED, 
 		 int errlevel, const char *fmt, ... )
 {
     char buf[BUFSIZ];

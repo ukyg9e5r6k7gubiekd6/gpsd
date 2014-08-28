@@ -82,13 +82,13 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     year = (session->context->century + yy);
 
     if ( (1 > mon ) || (12 < mon ) ) {
-	gpsd_notify(&session->context->errout, LOG_WARN,
+	gpsd_report(&session->context->errout, LOG_WARN,
 		    "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
     } else if ( (1 > mday ) || (31 < mday ) ) {
-	gpsd_notify(&session->context->errout, LOG_WARN,
+	gpsd_report(&session->context->errout, LOG_WARN,
 		    "merge_ddmmyy(%s), malformed day\n",  ddmmyy);
     } else {
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "merge_ddmmyy(%s) sets year %d\n",
 		    ddmmyy, year);
 	session->nmea.date.tm_year = year - 1900;
@@ -119,7 +119,7 @@ static void register_fractional_time(const char *tag, const char *fld,
 	    session->nmea.this_frac_time;
 	session->nmea.this_frac_time = safe_atof(fld);
 	session->nmea.latch_frac_time = true;
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "%s: registers fractional time %.2f\n",
 		    tag, session->nmea.this_frac_time);
     }
@@ -210,7 +210,7 @@ static gps_mask_t processRMC(int count, char *field[],
 	}
     }
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"RMC: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
 		"speed=%.2f track=%.2f mode=%d status=%d\n",
 		field[9], field[1],
@@ -266,7 +266,7 @@ static gps_mask_t processGLL(int count, char *field[],
 	merge_hhmmss(field[5], session);
 	register_fractional_time(field[0], field[5], session);
 	if (session->nmea.date.tm_year == 0)
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"can't use GLL time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
@@ -296,7 +296,7 @@ static gps_mask_t processGLL(int count, char *field[],
 	mask |= STATUS_SET;
     }
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
 		field[5],
 		session->newdata.latitude,
@@ -356,7 +356,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	merge_hhmmss(field[1], session);
 	register_fractional_time(field[0], field[1], session);
 	if (session->nmea.date.tm_year == 0)
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"can't use GGA time until after ZDA or RMC has supplied a year.\n");
 	else {
 	    mask |= TIME_SET;
@@ -398,7 +398,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 				 session->newdata.longitude);
 	}
     }
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
 		field[1],
 		session->newdata.latitude,
@@ -441,7 +441,7 @@ static gps_mask_t processGST(int count, char *field[], struct gps_device_t *sess
 #undef PARSE_FIELD
     register_fractional_time(field[0], field[1], session);
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"GST: utc = %.2f, rms = %.2f, maj = %.2f, min = %.2f, ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
                 session->gpsdata.gst.utctime,
                 session->gpsdata.gst.rms_deviation,
@@ -482,7 +482,7 @@ static gps_mask_t processGSA(int count, char *field[],
      * Alarmingly, it's possible this error may be generic to SiRFstarIII.
      */
     if (count < 17) {
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "GPGSA: malformed, setting ONLINE_SET only.\n");
 	mask = ONLINE_SET;
     } else if (session->nmea.latch_mode) {
@@ -500,7 +500,7 @@ static gps_mask_t processGSA(int count, char *field[],
 	    mask = 0;
 	else
 	    mask = MODE_SET;
-	gpsd_notify(&session->context->errout, LOG_PROG,
+	gpsd_report(&session->context->errout, LOG_PROG,
 		    "GPGSA sets mode %d\n", session->newdata.mode);
 	session->gpsdata.dop.pdop = safe_atof(field[15]);
 	session->gpsdata.dop.hdop = safe_atof(field[16]);
@@ -515,7 +515,7 @@ static gps_mask_t processGSA(int count, char *field[],
 		    prn;
 	}
 	mask |= DOP_SET | USED_IS;
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "GPGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f\n",
 		    session->newdata.mode,
 		    session->gpsdata.satellites_used,
@@ -549,7 +549,7 @@ static gps_mask_t processGSV(int count, char *field[],
      */
     int n, fldnum;
     if (count <= 3) {
-	gpsd_notify(&session->context->errout, LOG_WARN,
+	gpsd_report(&session->context->errout, LOG_WARN,
 		    "malformed GPGSV - fieldcount %d <= 3\n",
 		    count);
 	gpsd_zero_satellites(&session->gpsdata);
@@ -557,7 +557,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	return ONLINE_SET;
     }
     if (count % 4 != 0) {
-	gpsd_notify(&session->context->errout, LOG_WARN,
+	gpsd_report(&session->context->errout, LOG_WARN,
 		    "malformed GPGSV - fieldcount %d %% 4 != 0\n",
 		    count);
 	gpsd_zero_satellites(&session->gpsdata);
@@ -567,7 +567,7 @@ static gps_mask_t processGSV(int count, char *field[],
 
     session->nmea.await = atoi(field[1]);
     if ((session->nmea.part = atoi(field[2])) < 1) {
-	gpsd_notify(&session->context->errout, LOG_WARN, "malformed GPGSV - bad part\n");
+	gpsd_report(&session->context->errout, LOG_WARN, "malformed GPGSV - bad part\n");
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
     } else if (session->nmea.part == 1) {
@@ -583,7 +583,7 @@ static gps_mask_t processGSV(int count, char *field[],
 
     for (fldnum = 4; fldnum < count;) {
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
-	    gpsd_notify(&session->context->errout, LOG_ERROR,
+	    gpsd_report(&session->context->errout, LOG_ERROR,
 			"internal error - too many satellites [%d]!\n",
                     session->gpsdata.satellites_visible);
 	    gpsd_zero_satellites(&session->gpsdata);
@@ -612,13 +612,13 @@ static gps_mask_t processGSV(int count, char *field[],
     }
     if (session->nmea.part == session->nmea.await
 	&& atoi(field[3]) != session->gpsdata.satellites_visible)
-	gpsd_notify(&session->context->errout, LOG_WARN,
+	gpsd_report(&session->context->errout, LOG_WARN,
 		    "GPGSV field 3 value of %d != actual count %d\n",
 		    atoi(field[3]), session->gpsdata.satellites_visible);
 
     /* not valid data until we've seen a complete set of parts */
     if (session->nmea.part < session->nmea.await) {
-	gpsd_notify(&session->context->errout, LOG_PROG,
+	gpsd_report(&session->context->errout, LOG_PROG,
 		    "Partial satellite data (%d of %d).\n",
 		    session->nmea.part, session->nmea.await);
 	return ONLINE_SET;
@@ -634,14 +634,14 @@ static gps_mask_t processGSV(int count, char *field[],
     for (n = 0; n < session->gpsdata.satellites_visible; n++)
 	if (session->gpsdata.azimuth[n] != 0)
 	    goto sane;
-    gpsd_notify(&session->context->errout, LOG_WARN,
+    gpsd_report(&session->context->errout, LOG_WARN,
 		"Satellite data no good (%d of %d).\n",
 		session->nmea.part, session->nmea.await);
     gpsd_zero_satellites(&session->gpsdata);
     return ONLINE_SET;
   sane:
     session->gpsdata.skyview_time = NAN;
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"GSV: Satellite data OK (%d of %d).\n",
 		session->nmea.part, session->nmea.await);
 
@@ -688,7 +688,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
 	mask = HERR_SET | VERR_SET | PERR_IS;
     }
 
-    gpsd_notify(&session->context->errout, LOG_DATA,
+    gpsd_report(&session->context->errout, LOG_DATA,
 		"PGRME: epx=%.2f epy=%.2f epv=%.2f\n",
 		session->newdata.epx,
 		session->newdata.epy,
@@ -723,14 +723,14 @@ static gps_mask_t processGBS(int c UNUSED, char *field[],
 	session->newdata.epy = safe_atof(field[2]);
 	session->newdata.epx = safe_atof(field[3]);
 	session->newdata.epv = safe_atof(field[4]);
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "GBS: epx=%.2f epy=%.2f epv=%.2f\n",
 		    session->newdata.epx,
 		    session->newdata.epy,
 		    session->newdata.epv);
 	return HERR_SET | VERR_SET;
     } else {
-	gpsd_notify(&session->context->errout, LOG_PROG,
+	gpsd_report(&session->context->errout, LOG_PROG,
 		    "second in $GPGBS error estimates doesn't match.\n");
 	return 0;
     }
@@ -758,7 +758,7 @@ static gps_mask_t processZDA(int c UNUSED, char *field[],
 
     if (field[1][0] == '\0' || field[2][0] == '\0' || field[3][0] == '\0'
 	|| field[4][0] == '\0') {
-	gpsd_notify(&session->context->errout, LOG_WARN, "ZDA fields are empty\n");
+	gpsd_report(&session->context->errout, LOG_WARN, "ZDA fields are empty\n");
     } else {
     	int year, mon, mday, century;
 
@@ -774,13 +774,13 @@ static gps_mask_t processZDA(int c UNUSED, char *field[],
 	mday = atoi(field[2]);
 	century = year - year % 100;
 	if ( (1900 > year ) || (2200 < year ) ) {
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"malformed ZDA year: %s\n",  field[4]);
 	} else if ( (1 > mon ) || (12 < mon ) ) {
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"malformed ZDA month: %s\n",  field[3]);
 	} else if ( (1 > mday ) || (31 < mday ) ) {
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"malformed ZDA day: %s\n",  field[2]);
 	} else {
 	    gpsd_century_update(session, century);
@@ -831,7 +831,7 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
     session->gpsdata.attitude.depth = NAN;
     mask |= (ATTITUDE_SET);
 
-    gpsd_notify(&session->context->errout, LOG_RAW,
+    gpsd_report(&session->context->errout, LOG_RAW,
 		"time %.3f, heading %lf.\n",
 		session->newdata.time,
 		session->gpsdata.attitude.heading);
@@ -879,7 +879,7 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
      * no better place to put it.  Should work in practice as nobody is
      * likely to be operating a depth sounder at varying altitudes.
      */
-    gpsd_notify(&session->context->errout, LOG_RAW,
+    gpsd_report(&session->context->errout, LOG_RAW,
 		"mode %d, depth %lf.\n",
 		session->newdata.mode,
 		session->newdata.altitude);
@@ -946,7 +946,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
     session->gpsdata.attitude.depth = NAN;
     mask |= (ATTITUDE_SET);
 
-    gpsd_notify(&session->context->errout, LOG_RAW,
+    gpsd_report(&session->context->errout, LOG_RAW,
 		"time %.3f, heading %lf (%c).\n",
 		session->newdata.time,
 		session->gpsdata.attitude.heading,
@@ -1005,7 +1005,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
     session->gpsdata.attitude.gyro_y = safe_atof(field[16]);
     mask |= (ATTITUDE_SET);
 
-    gpsd_notify(&session->context->errout, LOG_RAW,
+    gpsd_report(&session->context->errout, LOG_RAW,
 		"Heading %lf.\n", session->gpsdata.attitude.heading);
     return mask;
 }
@@ -1021,7 +1021,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
     if (0 == strcmp("RID", field[1])) {	/* Receiver ID */
 	(void)snprintf(session->subtype, sizeof(session->subtype) - 1,
 		       "%s ver %s", field[2], field[3]);
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "PASHR,RID: subtype=%s mask={}\n",
 		    session->subtype);
 	return mask;
@@ -1054,7 +1054,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
-	    gpsd_notify(&session->context->errout, LOG_DATA,
+	    gpsd_report(&session->context->errout, LOG_DATA,
 			"PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
 			field[4], session->newdata.latitude,
 			session->newdata.longitude, session->newdata.altitude,
@@ -1078,7 +1078,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 		session->gpsdata.used[u++] = p;
 	}
 	session->gpsdata.satellites_used = u;
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "PASHR,SAT: used=%d\n",
 		    session->gpsdata.satellites_used);
 	session->gpsdata.skyview_time = NAN;
@@ -1155,7 +1155,7 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
     case 001:			/* ACK / NACK */
 	reason = atoi(field[2]);
 	if (atoi(field[1]) == -1)
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"MTK NACK: unknown sentence\n");
 	else if (reason < 3) {
 	    const char *mtk_reasons[] = {
@@ -1164,13 +1164,13 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 		"Valid but Failed",
 		"Valid success"
 	    };
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"MTK NACK: %s, reason: %s\n",
 			field[1],
 			mtk_reasons[reason]);
 	}
 	else
-	    gpsd_notify(&session->context->errout, LOG_WARN,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"MTK ACK: %s\n", field[1]);
 	return ONLINE_SET;
     default:
@@ -1260,7 +1260,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * packets.  This may be a generic bug of all Garmin chipsets.
      */
     if (strlen(sentence) > NMEA_MAX) {
-	gpsd_notify(&session->context->errout, LOG_WARN,
+	gpsd_report(&session->context->errout, LOG_WARN,
 		    "Overlong packet of %zd chars rejected.\n",
 		    strlen(sentence));
 	return ONLINE_SET;
@@ -1341,7 +1341,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 * WARNING: This assumes time is always field 0, and that field 0
 	 * is a timestamp whenever TIME_SET is set.
 	 */
-	gpsd_notify(&session->context->errout, LOG_DATA,
+	gpsd_report(&session->context->errout, LOG_DATA,
 		    "%s time is %2f = %d-%02d-%02dT%02d:%02d:%02.2fZ\n",
 		    session->nmea.field[0], session->newdata.time,
 		    1900 + session->nmea.date.tm_year,
@@ -1371,7 +1371,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * mid-cycle, as in the Garmin eXplorist 210; those might jitter.
      */
     if (session->nmea.latch_frac_time) {
-	gpsd_notify(&session->context->errout, LOG_PROG,
+	gpsd_report(&session->context->errout, LOG_PROG,
 		    "%s sentence timestamped %.2f.\n",
 		    session->nmea.field[0],
 		    session->nmea.this_frac_time);
@@ -1380,7 +1380,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     session->nmea.last_frac_time)) {
 	    uint lasttag = session->nmea.lasttag;
 	    retval |= CLEAR_IS;
-	    gpsd_notify(&session->context->errout, LOG_PROG,
+	    gpsd_report(&session->context->errout, LOG_PROG,
 			"%s starts a reporting cycle.\n",
 			session->nmea.field[0]);
 	    /*
@@ -1393,7 +1393,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		&& (session->nmea.cycle_enders & (1 << lasttag)) == 0
 		&& !session->nmea.cycle_continue) {
 		session->nmea.cycle_enders |= (1 << lasttag);
-		gpsd_notify(&session->context->errout, LOG_PROG,
+		gpsd_report(&session->context->errout, LOG_PROG,
 			    "tagged %s as a cycle ender.\n",
 			    nmea_phrase[lasttag - 1].name);
 	    }
@@ -1401,11 +1401,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     } else {
 	/* extend the cycle to an un-timestamped sentence? */
 	if ((session->nmea.lasttag & session->nmea.cycle_enders) != 0)
-	    gpsd_notify(&session->context->errout, LOG_PROG,
+	    gpsd_report(&session->context->errout, LOG_PROG,
 			"%s is just after a cycle ender.\n",
 			session->nmea.field[0]);
 	if (session->nmea.cycle_continue) {
-	    gpsd_notify(&session->context->errout, LOG_PROG,
+	    gpsd_report(&session->context->errout, LOG_PROG,
 			"%s extends the reporting cycle.\n",
 			session->nmea.field[0]);
 	    session->nmea.cycle_enders &=~ (1 << session->nmea.lasttag);
@@ -1415,7 +1415,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* here's where we check for end-of-cycle */
     if ((session->nmea.latch_frac_time || session->nmea.cycle_continue)
 	&& (session->nmea.cycle_enders & (1 << thistag))!=0) {
-	gpsd_notify(&session->context->errout, LOG_PROG,
+	gpsd_report(&session->context->errout, LOG_PROG,
 		    "%s ends a reporting cycle.\n",
 		    session->nmea.field[0]);
 	retval |= REPORT_IS;
