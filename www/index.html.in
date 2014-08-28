@@ -174,7 +174,7 @@ associated with this project are <a
 href="https://www.ohloh.net/p/3944">available at Ohloh</a></p>
 
 <p>Our development platforms are open-source Unixes &mdash; Linux, and
-the *BSD family.  Presently Linux and OpenBSD are directly supported.
+the *BSD family.  Presently Linux, OpenBSD and NetBSD are directly supported.
 We'll support proprietary Unixes if it's not too much work (and it
 usually isn't). Apple's OS X is back in our good books, but it is
 critical that you have all your USB drivers updated. Older drivers are
