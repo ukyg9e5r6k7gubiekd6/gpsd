@@ -270,19 +270,8 @@ static void report_hook(const char *buf)
 /*@-compdef@*/
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
-    char buf2[BUFSIZ];
-
     (void)vsnprintf(buf + strlen(buf), len, fmt, ap);
-    visibilize(buf2, sizeof(buf2), buf);
-
-    report_lock();
-    if (!curses_active)
-	(void)fputs(buf2, stdout);
-    else if (packetwin != NULL)
-	(void)waddstr(packetwin, buf2);
-    if (logfile != NULL)
-	(void)fputs(buf2, logfile);
-    report_unlock();
+    report_hook(buf);
 }
 /*@+compdef@*/
 
