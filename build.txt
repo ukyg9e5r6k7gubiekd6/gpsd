@@ -90,10 +90,10 @@ this and use it to discover Garmin USB GPSes, rather than groveling
 through /proc/bus/usb/devices (which has been deprecated by the
 Linux kernel team).
 
-You can build libQgpsmm if you have Qt (specifically the (specifically
-QtCore and QtNetwork modules) version 4.5.3 or higher.  You will also
-need a C++ compiler supported by Qt (tested on GCC 4.4.0/mingw on
-Windows and GCC 4.1.2 on linux). Please refer to Qt's documentation at
+You can build libQgpsmm if you have Qt (specifically QtCore and
+QtNetwork modules) version 4.5.3 or higher.  You will also need a C++
+compiler supported by Qt (tested on GCC 4.4.0/mingw on Windows and GCC
+4.1.2 on linux). Please refer to Qt's documentation at
 http://qt.nokia.com/doc/4.6/platform-specific.html for platform
 specific building documentation
 
