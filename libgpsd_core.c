@@ -281,7 +281,7 @@ void gps_context_init(struct gps_context_t *context,
     (void)memcpy(context, &nullcontext, sizeof(struct gps_context_t));
 
     errout_reset(&context->errout);
-    context->errout.label = label;
+    context->errout.label = (char *)label;
 
 #if !defined(S_SPLINT_S) && defined(PPS_ENABLE)
     /*@-nullpass@*/
