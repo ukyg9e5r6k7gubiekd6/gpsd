@@ -11,7 +11,7 @@ you can find the original at the GPSD project website
 
 If you find this document useful - and especially if it helps you make
 money - please contribute to maintaining it by supporting the author's
-full-time open-source work through <<GITTIP>>. Even a few dollars a
+full-time open-source work through <<GRATIPAY>>. Even a few dollars a
 week can make a difference.
 
 == Introduction ==
@@ -5251,7 +5251,7 @@ Identification System]
 
 - [[[SART]]] http://en.wikipedia.org/wiki/AIS-SART
 
-- [[[GITTIP]]] https://www.gittip.com/esr/
+- [[[GRATIPAY]]] https://www.gratipay.com/esr/
 
 - [[NMEA-ADVANCE]] http://www.nmea.org/Assets/0183_advancements_nmea_oct_1_2010%20(2).pdf
 
