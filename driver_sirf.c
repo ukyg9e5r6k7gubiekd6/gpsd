@@ -24,6 +24,13 @@
  *  If it's no longer implemented on your receiver, messages
  * 7, 28, 29 and 30 will give you the same information."
  *
+ * There is a known problem with the SiRF IV: it is prone to freeze
+ * when being switched back to NMEA mode from SiRF binary. The
+ * failure is randomly flaky, you may get away with several mode
+ * flips before triggering it.  Powering off the device resets and
+ * unfreezes it. We have tries waiting on command acknowledges as
+ * the manual advises; this does not fix the problem.
+ *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */

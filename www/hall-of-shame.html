@@ -105,6 +105,11 @@ is the only way to get the receiver to communicate again.</li>
 
 <li>Some Garmin chips issue a bogus length field, too.  This from the
 outfit that likes to tout itself as the industry leader!</li>
+
+<li>The SiRF-IV chipset has a tendency to freeze when switched from
+binary to NMEA mode (powering it off unjams it).  This is some kind of
+race condition in the firmware that cannot be fixed by waiting on
+command ACKs; we've truid that.</p>
 </ul>
 
 <h2>Documentation blunders</h2>

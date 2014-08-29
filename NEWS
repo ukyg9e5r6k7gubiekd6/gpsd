@@ -4,7 +4,7 @@ Repository head:
   Better protection against false matches of Inland AIS messages; this
   required a libgps version bump to 22. PPS feature is no longer
   marked experimental/unstable and the separate "pps" policy flag is
-  gone; PPS is now always emitten when watching JSON.  Sentence tag
+  gone; PPS is now always emitted when watching JSON.  Sentence tag
   fields have been dropped from the JSON reports. GNSS and GLONASS SKY
   reports are now merged. Qt support default changed to False pending a
   build patch. Addressed versions of AIS Type 25 and 26 are now handled.
