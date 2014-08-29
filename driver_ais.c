@@ -1059,7 +1059,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		     (ais->type26.bitcount + 7) / 8);
 	/* discard MMSI if addressed */
 	if (ais->type26.addressed) {
-	    shiftleft((char *)ais->type26.bitdata, ais->type26.bitcount, 30);
+	    shiftleft((unsigned char *)ais->type26.bitdata, ais->type26.bitcount, 30);
 	    ais->type26.bitcount -= 30;
 	}
 	break;
