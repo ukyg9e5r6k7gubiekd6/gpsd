@@ -1029,20 +1029,16 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	    ais->type25.dest_mmsi   = UBITS(40, 30);
 	if (ais->type25.structured)
 	    ais->type25.app_id      = UBITS(40+ais->type25.addressed*30,16);
-	/*
-	 * Not possible to do this right without machinery we
-	 * don't yet have.  The problem is that if the addressed
-	 * bit is on, the bitfield start won't be on a byte
-	 * boundary. Thus the formulas below (and in message type 26)
-	 * will work perfectly for broadcast messages, but for addressed
-	 * messages the retrieved data will be led by the 30 bits of
-	 * the destination MMSI
-	 */
 	ais->type25.bitcount       = bitlen - 40 - 16*ais->type25.structured;
 	/* bit 40 is exactly 5 bytes in; 2 bytes is 16 bits */
 	(void)memcpy(ais->type25.bitdata,
 		     (char *)bits+5 + 2 * ais->type25.structured,
 		     (ais->type25.bitcount + 7) / 8);
+	/* discard MMSI if addressed */
+	if (ais->type25.addressed) {
+	    shiftleft((unsigned char *)ais->type25.bitdata, ais->type25.bitcount, 30);
+	    ais->type25.bitcount -= 30;
+	}
 	break;
     case 26:	/* Binary Message, Multiple Slot */
 	RANGE_CHECK(60, 1004);
@@ -1059,8 +1055,13 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	    ais->type26.app_id      = UBITS(40+ais->type26.addressed*30,16);
 	ais->type26.bitcount        = bitlen - 60 - 16*ais->type26.structured;
 	(void)memcpy(ais->type26.bitdata,
-		     (char *)bits+5 + 2 * ais->type26.structured,
+		     (unsigned char *)bits+5 + 2 * ais->type26.structured,
 		     (ais->type26.bitcount + 7) / 8);
+	/* discard MMSI if addressed */
+	if (ais->type26.addressed) {
+	    shiftleft((char *)ais->type26.bitdata, ais->type26.bitcount, 30);
+	    ais->type26.bitcount -= 30;
+	}
 	break;
     case 27:	/* Long Range AIS Broadcast message */
 	if (bitlen != 96 && bitlen != 168) {
