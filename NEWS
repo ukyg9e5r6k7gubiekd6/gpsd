@@ -6,8 +6,8 @@ Repository head:
   marked experimental/unstable and the separate "pps" policy flag is
   gone; PPS is now always emitten when watching JSON.  Sentence tag
   fields have been dropped from the JSON reports. GNSS and GLONASS SKY
-  reports are now merged. Qt support default chaned to False pending a
-  build patch.
+  reports are now merged. Qt support default changed to False pending a
+  build patch. Addressed versions of AIS Type 25 and 26 are now handled.
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed. 
