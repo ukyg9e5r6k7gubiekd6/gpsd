@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <string.h>
 
 #include "bits.h"
 
@@ -128,6 +129,31 @@ void putbef32(char *buf, int off, float val)
     /*@-shiftimplementation +ignoresigns@*/
     putbe32(buf, off, i_f.i);
     /*@+shiftimplementation -ignoresigns@*/
+}
+
+
+void shiftleft(unsigned char *data, int size, unsigned short left)
+{
+    /*@+matchanyintegral +ignoresigns -type -shiftnegative@*/
+    unsigned char *byte;
+
+    if (left >= CHAR_BIT) {
+	size -= left/CHAR_BIT;
+	memmove(data, data + left/CHAR_BIT, size);
+	left %= CHAR_BIT;
+    }
+
+    for (byte = data; size--; ++byte )
+    {
+      unsigned char bits;
+      if (size)
+	  bits = byte[1] >> (CHAR_BIT - left);
+      else
+	  bits = 0;
+      *byte <<= left;
+      *byte |= bits;
+    }
+    /*@-matchanyintegral -ignoresigns +type +shiftnegative@*/
 }
 
 #ifdef __UNUSED__

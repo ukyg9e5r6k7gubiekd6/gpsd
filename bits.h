@@ -50,6 +50,8 @@ extern double getbed64(const char *, int);
 extern void putbef32(char *, int, float);
 extern void putbed64(char *, int, double);
 
+extern void shiftleft(unsigned char *, int, unsigned short);
+
 /* bitfield extraction */
 extern uint64_t ubits(unsigned char buf[], unsigned int, unsigned int, bool);
 extern int64_t sbits(signed char buf[], unsigned int, unsigned int, bool);

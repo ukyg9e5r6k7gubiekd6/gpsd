@@ -221,5 +221,24 @@ int main(int argc, char *argv[])
 			 success ? "succeeded" : "FAILED");
     }
 
+    
+    shiftleft(buf, 28, 30);
+    printf("Left-shifted 30 bits: %s\n", hexdump(buf, 28));
+    /* 
+     * After the 24-bit shift, the but array loses its first three bytes:
+     * 0x0405060708 = 00000100 00000101 00000110 00000111 00001000
+     * By inspection, the results of the 6-bit shift are
+     * 00000001 01000001 10000001 11000010 00
+     */
+#define LASSERT(n, v) if (buf[n] != v) printf("Expected buf[%d] to be %02x, was %02x\n", n, v, buf[n])
+    LASSERT(0, 0x01);
+    LASSERT(1, 0x41);
+    LASSERT(2, 0x81);
+    LASSERT(3, 0xc2);
+#undef LASSERT
+
+
     exit(failures ? EXIT_FAILURE : EXIT_SUCCESS);
+
 }
+
