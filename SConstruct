@@ -289,7 +289,6 @@ env.Append(CFLAGS='-D_GNU_SOURCE')
 
 # And we need some libraries
 env.MergeFlags("-lm")
-env.MergeFlags("-pthread")
 
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
@@ -497,6 +496,9 @@ else:
                    '-Wcast-align','-Wmissing-declarations', '-Wmissing-prototypes',
                    '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
         config.CheckCompilerOption(option)
+
+    if config.CheckCompilerOption("-pthread"):
+        env.MergeFlags("-pthread")
 
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
     if env["shared"] and env["chrpath"]:
