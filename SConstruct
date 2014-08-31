@@ -971,7 +971,7 @@ compiled_gpsdlib = Library(env=env,
                            target="gpsd",
                            sources=libgpsd_sources,
                            version=libgpsd_version,
-                           parse_flags=usblibs + rtlibs + bluezlibs)
+                           parse_flags=usblibs + rtlibs + bluezlibs + ["-lgps"])
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
