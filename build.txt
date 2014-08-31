@@ -16,6 +16,27 @@ this line will do:
 
 If you get any errors, you need to read the detailed instructions that follow.
 
+== Supported platforms ==
+
+Native-build success should be expected on the following platforms,
+provided you have the prerequisites listed in the next section
+installed:
+
+* Any desktop or server Linux distribution.
+* OpenWRT and derivatives such as CeroWRT.
+* FreeBSD, NetBSD, OpenBSD, Macintosh OS X
+* Android
+
+We consider failure to build and function on any of these platforms
+a serious bug; if you encounter it, please complain on the
+development list.
+
+A Cygwin port is in progress but not complete.
+
+Cross-compilation to embedded Linuxes (in addition to the OpenWRT family)
+is usually fairly straightforward. An illustrative build transcript
+is included at the end of this file.
+
 == Check your build prerequisites ==
 
 Necessary components for any build:
@@ -410,10 +431,6 @@ sysroot option.
 "arm-indigo-linux-gnueabi" as target means that
 arm-indigo-linux-gnueabi-gcc and related tools are available in PATH;
 your cross-compiler is likely to have a different target prefix.
-
-When you are cross-compiling, you'll need chrpath at version 0.14 or
-later for cross-architecture support.  If it's not yet packaged for
-your environment, see http://alioth.debian.org/projects/chrpath/
 
 You may also find it useful to set manbuild=no.
 
