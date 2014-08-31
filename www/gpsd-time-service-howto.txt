@@ -1168,3 +1168,5 @@ Sanjeev Gupta <ghane0@gmail.com> assisted with editing.
 1.1, Nov 2013: Initial release.
 
 1.2, Aug 2014: Note that NetBSD now has PPS support.
+
+1.3, Aug 2014: Add a note about the GR-601W.
