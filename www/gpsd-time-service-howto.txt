@@ -1,6 +1,6 @@
 = GPSD Time Service HOWTO =
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v1.2, Aug 2014
+v1.3, Aug 2014
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -174,9 +174,10 @@ sentence in each reporting cycle. You can see this graphed at
 
 To get accurate time, then, the in-band fix report from the GPS needs
 to be supplemented with an out-of-band signal that has a low and
-constant latency with respect to the time of of the fix.  GPS
-satellites deliver a top-of-GPS-second notification that is nominally
-accurate to 50nSec; in capable GPses that becomes the 1PPS signal.
+constant or near-constant latency with respect to the time of of the
+fix.  GPS satellites deliver a top-of-GPS-second notification that is
+nominally accurate to 50nSec; in capable GPses that becomes the 1PPS
+signal.
 
 1PPS-capable GPSes use an RS-232 control line to ship the 1PPS
 edge of second to the host system (usually Carrier Detect or Ring
@@ -316,7 +317,7 @@ A feature comparison, part of the chrony documentation, is at
 <<CHRONY-COMPARE>>. An informative email thread about the differences
 is <<CHRONYDEFAULT>>. If you don't already know enough about time
 service to have a preference, the functional differences between them
-are unlikely to be significant to you; flip a coin
+are unlikely to be significant to you; flip a coin.
 
 == Choice of Hardware ==
 
@@ -439,6 +440,12 @@ an exception, it should manifest as reported times that look like
 they're from the future and require a negative fudge. If this
 ever happens, please report the device make and model to the GPSD
 maintainers so we can flag it in our GPS hardware database.
+
+There is another possible cause of small negative offsets which
+shows up on the GR-601-W: implementation bugs in your USB driver,
+combining with quantization by the USB poll interval.  This 
+doesn't mean the u-blox 6 inside it is actually emitting PPS 
+after the GPS timestamp is shipped.
 
 In order to present the smallest possible attack surface to
 privilege-escalation attempts, gpsd, if run as root, drops its root
@@ -607,7 +614,7 @@ the pool servers with one in your local area. See <<USE-POOL>> for
 further information.
 
 The pool statememt, and the drftfile and logfile declarations after it,
-will not be stirctly necessary if the default ntp.conf that your
+will not be strictly necessary if the default ntp.conf that your
 distribution supplies gives you a working setup. The two pairs of
 server and fudge declarations are the key.
 
