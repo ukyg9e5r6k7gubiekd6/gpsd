@@ -58,22 +58,8 @@ extern "C" {
  *
  * All double values use NAN to indicate data not available.
  *
- * Usually all the information in this structure was considered valid
- * by the GPS at the time of update.  This will be so if you are using
- * a GPS chipset that speaks SiRF binary, Garmin binary, or Zodiac binary.
- * This covers over 80% of GPS products in early 2005.
- *
- * If you are using a chipset that speaks NMEA, this structure is updated
- * in bits by GPRMC (lat/lon, track, speed), GPGGA (alt, climb), GPGLL
- * (lat/lon), and GPGSA (eph, epv).  Most NMEA GPSes take a single fix
- * at the beginning of a 1-second cycle and report the same timestamp in
- * GPRMC, GPGGA, and GPGLL; for these, all info is guaranteed correctly
- * synced to the time member, but you'll get different stages of the same
- * update depending on where in the cycle you poll.  A very few GPSes,
- * like the Garmin 48, take a new fix before more than one of of
- * GPRMC/GPGGA/GPGLL during a single cycle; thus, they may have different
- * timestamps and some data in this structure can be up to 1 cycle (usually
- * 1 second) older than the fix time.
+ * All the information in this structure was considered valid
+ * by the GPS at the time of update.
  *
  * Error estimates are at 95% confidence.
  */
