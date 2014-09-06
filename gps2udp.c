@@ -118,7 +118,7 @@ static int send_udp (char *nmeastring, size_t ind)
 				buffer,
 				ind,
 				0,
-				&remote[channel],
+				(const struct sockaddr *)&remote[channel],
 				(int)sizeof(remote));
 	if (status < (ssize_t)ind) {
 	    (void)fprintf(stderr, "gps2udp: failed to send [%s] \n", nmeastring);
