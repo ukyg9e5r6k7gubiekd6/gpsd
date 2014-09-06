@@ -12,6 +12,7 @@ gpxlogger
 cgpxlogger
 gpspipe
 gps2udp
+*.exe
 # These are built from .in files
 gpscat
 gpsfake
@@ -56,6 +57,7 @@ srec.html
 *.sum
 *.i
 *.o
+*.obj
 *.os
 *.a
 *.lo
@@ -63,6 +65,7 @@ srec.html
 *.so
 *.so.[0-9.]*
 *.dylib
+*.dll
 *~
 *.swp
 *.egg-info
