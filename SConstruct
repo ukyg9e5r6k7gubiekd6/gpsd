@@ -1545,6 +1545,9 @@ if env['socket_export']:
     # offset from subframe data.
     Utility('gps-makeregress', [gpsd, python_built_extensions],
         '$SRCDIR/regress-driver -b test/daemon/*.log')
+else:
+    gps_regress = Utility("gps-regress", [],
+                      "echo 'gps-regress: socket export disabled'")
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:

@@ -156,6 +156,7 @@ static int sd_socket_count = 0;
 #endif
 #endif
 
+#define UNALLOCATED_FD	-1
 
 static volatile sig_atomic_t signalled;
 
@@ -535,8 +536,6 @@ struct subscriber_t
 #define subscribed(sub, devp)    (sub->policy.watcher && (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, devp->gpsdata.dev.path)==0))
 
 static struct subscriber_t subscribers[MAXSUBSCRIBERS];	/* indexed by client file descriptor */
-
-#define UNALLOCATED_FD	-1
 
 static void lock_subscriber(struct subscriber_t *sub)
 {
@@ -1773,7 +1772,12 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 }
 #endif /* __UNUSED_AUTOCONNECT__ */
 
-static void gpsd_terminate(struct gps_context_t *context)
+#ifdef PPS_ENABLE
+#define CONDITIONALLY_UNUSED
+#else
+#define CONDITIONALLY_UNUSED UNUSED
+#endif /* PPS_ENABLE */
+static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
 /* finish cleanly, reverting device configuration */
 {
     int dfd;
@@ -1796,9 +1800,12 @@ int main(int argc, char *argv[])
     static char *gpsd_service = NULL;	/* this static pacifies splint */
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
+    fd_set rfds;
+#ifdef CONTROL_SOCKET_ENABLE
+    fd_set control_fds;
+#endif /* CONTROL_SOCKET_ENABLE */
 #ifdef CONTROL_SOCKET_ENABLE
     static socket_t csock;
-    fd_set control_fds, rfds;
     socket_t cfd;
     static char *control_socket = NULL;
 #endif /* CONTROL_SOCKET_ENABLE */

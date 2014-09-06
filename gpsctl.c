@@ -36,6 +36,7 @@ static bool hunting = true;
  */
 #define REDIRECT_SNIFF	15
 
+#if defined(RECONFIGURE_ENABLE) || defined(CONTROLSEND_ENABLE)
 static void settle(struct gps_device_t *session)
 /* allow the device to settle after a control operation */
 {
@@ -46,6 +47,7 @@ static void settle(struct gps_device_t *session)
     (void)usleep(50000);
     (void)tcdrain(session->gpsdata.gps_fd);
 }
+#endif /* defined(RECONFIGURE_ENABLE) || defined(CONTROLSEND_ENABLE) */
 
 /*
  * Allows any response other than ERROR.  Use it for queries where a 

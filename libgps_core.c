@@ -75,6 +75,7 @@ int gps_open(/*@null@*/const char *host,
 	else if (status == -2)
 	    status = SHM_NOATTACH;
     }
+#define USES_HOST
 #endif /* SHM_EXPORT_ENABLE */
 
 #ifdef DBUS_EXPORT_ENABLE
@@ -83,13 +84,20 @@ int gps_open(/*@null@*/const char *host,
 	if (status != 0)
 	    status = DBUS_FAILURE;
     }
+#define USES_HOST
 #endif /* DBUS_EXPORT_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
     if (status == -1) {
         status = gps_sock_open(host, port, gpsdata);
     }
+#define USES_HOST
 #endif /* SOCKET_EXPORT_ENABLE */
+
+#ifndef USES_HOST
+    fprintf(stderr, "No methods available for connnecting to %s!\n", host);
+#endif /* USES_HOST */
+#undef USES_HOST
 
     gpsdata->set = 0;
     gpsdata->status = STATUS_NO_FIX;
@@ -101,7 +109,13 @@ int gps_open(/*@null@*/const char *host,
     /*@ +branchstate +compdef @*/
 }
 
-int gps_close(struct gps_data_t *gpsdata)
+#if defined(SHM_EXPORT_ENABLE) || defined(SOCKET_EXPORT_ENABLE)
+#define CONDITIONALLY_UNUSED
+#else
+#define CONDITIONALLY_UNUSED	UNUSED
+#endif
+
+int gps_close(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 /* close a gpsd connection */
 {
     int status = -1;
@@ -124,7 +138,7 @@ int gps_close(struct gps_data_t *gpsdata)
 	return status;
 }
 
-int gps_read(struct gps_data_t *gpsdata)
+int gps_read(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 /* read from a gpsd connection */
 {
     int status = -1;
@@ -221,8 +235,9 @@ bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int time
     return waiting;
 }
 
-int gps_mainloop(struct gps_data_t *gpsdata, int timeout,
-		 void (*hook)(struct gps_data_t *gpsdata))
+int gps_mainloop(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, 
+		 int timeout CONDITIONALLY_UNUSED, 
+		 void (*hook)(struct gps_data_t *gpsdata) CONDITIONALLY_UNUSED)
 {
     int status = -1;
 

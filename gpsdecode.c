@@ -515,7 +515,9 @@ static void decode(FILE *fpin, FILE*fpout)
     struct gps_device_t session;
     struct gps_context_t context;
     struct policy_t policy;
+#if defined(SOCKET_EXPORT_ENABLE) || defined(AIVDM_ENABLE)
     char buf[GPS_JSON_RESPONSE_MAX * 4];
+#endif
 
     //This looks like a good idea, but it breaks regression tests
     //(void)strlcpy(session.gpsdata.dev.path, "stdin", sizeof(session.gpsdata.dev.path));
