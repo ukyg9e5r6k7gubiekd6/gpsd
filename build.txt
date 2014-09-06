@@ -382,7 +382,7 @@ Here are thescons switches I use:
 scons wordsize=32 snapshot=off arch=arm sample=shell
 
 scons -j3 prefix=/usr libdir=$prefix/lib udevdir=/lib/udev
-chrpath=False gpsd_user=gpsd gpsd_group=uucp strip=False python=False
+chrpath=False gpsd_user=gpsd gpsd_group=uucp nostrip=True python=False
 bluez=0 libgpsmm=0 clientdebug=0 dbus_export=0 ipv6=0 timing=0
 ncurses=0 ntpshm=0 pps=0 shm_export=0 socket_export=1 systemd=0
 libQgpsmm=0 usb=0 aivdm=0 ashtech=0 earthmate=0 evermore=0 fury=0

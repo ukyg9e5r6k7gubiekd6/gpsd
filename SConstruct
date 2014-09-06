@@ -162,10 +162,11 @@ boolopts = (
     ("debug",         False, "include debug information in build"),
     ("profiling",     False, "build with profiling enabled"),
     ("coveraging",    False, "build with code coveraging enabled"),
-    ("strip",         True,  "build with stripping of binaries enabled"),
+    ("nostrip",       False, "don't symbol-strip binaries at link time"),
     ("chrpath",       False, "use chrpath to edit library load paths"),
     ("manbuild",      True,  "build help in man and HTML formats"),
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
+    ("minimal",       False, "default all optional features to off"), 
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
     )
@@ -191,7 +192,6 @@ nonboolopts = (
     ("target",              "",            "cross-development target"),
     ("sysroot",             "",            "cross-development system root"),
     )
-
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
@@ -208,7 +208,6 @@ pathopts = (
     )
 for (name, default, help) in pathopts:
     opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
-
 
 #
 # Environment creation
@@ -1364,7 +1363,7 @@ if env["shared"] and env["chrpath"]:
     env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' \
                       % (installdir('libdir', False), ))
 
-if not env['debug'] and not env['profiling'] and env['strip']:
+if not env['debug'] and not env['profiling'] and not env['nostrip']:
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
 if not env['python']:
@@ -1374,7 +1373,7 @@ else:
     python_module_dir = python_lib_dir + os.sep + 'gps'
     python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
                                                     python_built_extensions)
-    if not env['debug'] and not env['profiling'] and env['strip']:
+    if not env['debug'] and not env['profiling'] and not env['nostrip']:
         python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
 
     python_modules_install = python_env.Install( DESTDIR + python_module_dir,
