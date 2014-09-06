@@ -443,12 +443,14 @@ int gpsd_serial_open(struct gps_device_t *session)
      * We also exclude bluetooth device because the bluetooth daemon opens them.
      */
     if (!(session->sourcetype == source_pty || session->sourcetype == source_bluetooth)) {
+#ifdef TIOCEXCL
 	/*
 	 * Try to block other processes from using this device while we
 	 * have it open (later opens should return EBUSY).  Won't work
 	 * against anything with root privileges, alas.
 	 */
 	(void)ioctl(session->gpsdata.gps_fd, (unsigned long)TIOCEXCL);
+#endif /* TIOCEXCL */
 
 #ifdef __linux__
 	/*
@@ -631,7 +633,9 @@ void gpsd_assert_sync(struct gps_device_t *session)
 void gpsd_close(struct gps_device_t *session)
 {
     if (!BAD_SOCKET(session->gpsdata.gps_fd)) {
+#ifdef TIOCNXCL
 	(void)ioctl(session->gpsdata.gps_fd, (unsigned long)TIOCNXCL);
+#endif /* TIOCNXCL */
 	(void)tcdrain(session->gpsdata.gps_fd);
 	if (isatty(session->gpsdata.gps_fd) != 0) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
