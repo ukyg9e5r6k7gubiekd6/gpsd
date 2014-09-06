@@ -98,7 +98,7 @@ imloads = True
 
 boolopts = (
     # GPS protocols
-    ("nmea",          True,  "NMEA support"),
+    ("nmea0183",      True,  "NMEA0183 support"),
     ("ashtech",       True,  "Ashtech support"),
     ("earthmate",     True,  "DeLorme EarthMate Zodiac support"),
     ("evermore",      True,  "EverMore binary support"),

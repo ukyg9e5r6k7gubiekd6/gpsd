@@ -2,12 +2,14 @@
 
 Repository head:
   Better protection against false matches of Inland AIS messages; this
-  required a libgps version bump to 22. PPS feature is no longer
-  marked experimental/unstable and the separate "pps" policy flag is
-  gone; PPS is now always emitted when watching JSON.  Sentence tag
-  fields have been dropped from the JSON reports. GNSS and GLONASS SKY
-  reports are now merged. Qt support default changed to False pending a
-  build patch. Addressed versions of AIS Type 25 and 26 are now handled.
+  required a libgps version bump to 22 (as a side effect, per-device
+  footprint has decreased). PPS feature is no longer marked
+  experimental/unstable and the separate "pps" policy flag is gone;
+  PPS is now always emitted when watching JSON.  Sentence tag fields
+  have been dropped from the JSON reports. GNSS and GLONASS SKY
+  reports are now merged. Qt support default changed to False pending
+  a build patch. Addressed versions of AIS Type 25 and 26 are now
+  handled. The 'nmea' build option is bow 'nmea0183'. 
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed. 
