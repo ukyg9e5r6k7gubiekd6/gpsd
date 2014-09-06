@@ -13,8 +13,8 @@ Repository head:
   sets all boolean options not explicitly set on the command line to false.
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
-  A bug that prevented track interpolation has been fixed. 
-  We now get vertical error position and speed estimates from the 
+  A bug that prevented track interpolation has been fixed.
+  We now get vertical error position and speed estimates from the
   u-blox driver rather than having to interpolate them.
   Some unusual AIS talker IDs (NMEA 4.0 station classes) are supported.
   chrpath is no longer a dependency for building and testing, and
@@ -84,7 +84,7 @@ Repository head:
   chrpath a mandatory build dependency and explain why in the build
   documentation.
 
-* Wed Oct 25 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2 
+* Wed Oct 25 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2
   In the build recipe, (1) set pkgconfig properly for 64-bit Fedora
   systems, (2) clean up various derived files including *.pyc on scons
   -c, (3) add an option to disable stripping of binaries (strip=no),
@@ -126,7 +126,7 @@ Repository head:
   attribute becomes an ISO8601 string; the client libraries will
   still backward-compatibly read a float value. gps_unpack() is
   now a documented part of the library API. There is now a
-  shared-memory export from the daemon that can be accessed through 
+  shared-memory export from the daemon that can be accessed through
   the C and C++ client libraries.  xgps and cgps may now display
   the Maidenhead grid locator for current lat/lon.  xgps displays
   GST noise statistics if they are available. Codebase now has
@@ -146,13 +146,13 @@ Repository head:
   log file. A gpsd client can now set any locale it likes, and JSON
   will still be parsed using the C locale matching the daemon's.  Clients
   are no longer required to define a gpsd_report() hook. gpsd no longer
-  emits probe strings to unidentified USB devices at startup. 
+  emits probe strings to unidentified USB devices at startup.
   JSON timestamps in TPV and SKY are now ISO8601 rather than seconds since
-  the Unix epoch; the library handles the older style backward-compatibly. 
+  the Unix epoch; the library handles the older style backward-compatibly.
   GPGST sentences are now parsed for noise statistics when a device emits them.
   AIS and RTCM2 JSON dumps have device fields. JSON reports now include 50bps
   subframe data if the device allows access to it. gpsdecode can now dump NMEA
-  GPS binary, and subframe data to JSON. The RTCM2 code now understands and 
+  GPS binary, and subframe data to JSON. The RTCM2 code now understands and
   analyzes RTCM2.3 messages 13, 14, and 31, and has been checked against another
   analyzer.  The ancient Sager dump format for RTCM2 is abolished in favor of
   a JSON profile.
