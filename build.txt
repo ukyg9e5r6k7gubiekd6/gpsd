@@ -336,6 +336,18 @@ client library to be available on all the Qt supported platforms.
 Please see http://qt.nokia.com/doc/4.6/supported-platforms.html for a
 status of Qt supported platforms as of version 4.6.
 
+minimal=yes: people building for extremely constrained environments
+may want to srt this.  It changes the default for all boolean (feature)
+options to false; thus, you get *only* the ioptions you specify on the
+command line.  Thus, for example, if you want to turn off all features 
+except socket export and nmea0183, 
+
+------------------------------------------------
+scons minimal=yes socket_export=yes nmea0183=yes
+------------------------------------------------
+
+will do that.
+
 == Port and toolchain testing ==
 
 'scons check' will run a comprehensive regression-test suite.  You
@@ -377,19 +389,13 @@ NDK or code sourcery's.
 If you are going to include "official" guidelines, I would go for
 recommanding the official toolchain from the NDK.
 
-Here are thescons switches I use:
+Here are the scons switches I use:
 
 scons wordsize=32 snapshot=off arch=arm sample=shell
 
 scons -j3 prefix=/usr libdir=$prefix/lib udevdir=/lib/udev
-chrpath=False gpsd_user=gpsd gpsd_group=uucp nostrip=True python=False
-bluez=0 libgpsmm=0 clientdebug=0 dbus_export=0 ipv6=0 timing=0
-ncurses=0 ntpshm=0 pps=0 shm_export=0 socket_export=1 systemd=0
-libQgpsmm=0 usb=0 aivdm=0 ashtech=0 earthmate=0 evermore=0 fury=0
-fv18=0 garmin=0 garmintxt=0 geostar=0 gpsclock=0 itrax=0 mtk3301=0
-navcom=0 nmea=1 nmea2000=0 ntrip=0 oceanserver=0 oncore=0 rtcm104v2=0
-rtcm104v3=0 sirf=1 superstar2=0 tnt=0 tripmate=0 tsip=0 ubx=0
-manbuild=0
+chrpath=False gpsd_user=gpsd gpsd_group=uucp socket_export=1
+nmea0183=1 sirf=1
 
 With the following environment variables:
 
@@ -405,7 +411,6 @@ export CCFLAGS="-march=armv7-a -mtune=cortex-a8 -mfpu=vfp"
 export ARM_TARGET_LIB=${TOOL_HOME}/sysroot
 
 scons wordsize=32 snapshot=off arch=arm sample=shell
-
 
 == Cross-building ==
 
