@@ -2084,7 +2084,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 #undef getword
 
 ssize_t packet_get(int fd, struct gps_lexer_t *lexer)
-/* grab a packet; return -1=>I/O error, 0=>EOF, BAD_PACKET or a length */
+/* grab a packet; return -1=>I/O error, 0=>EOF, or a length */
 {
     ssize_t recvd;
 
