@@ -152,7 +152,7 @@ boolopts = (
     # Daemon options
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
-    ("cheapfloats",   True,  "float ops are cheap, compute error estimates"),
+    ("nofloats",      False, "float ops are expensive, suppress error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
     ("ncurses",       True,  "build with ncurses"),
     # Build control

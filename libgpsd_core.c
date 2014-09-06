@@ -564,7 +564,7 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
 
 /*@ +branchstate @*/
 
-#ifdef CHEAPFLOATS_ENABLE
+#ifndef NOFLOATS_ENABLE
 /*****************************************************************************
 
 Carl Carter of SiRF supplied this algorithm for computing DOPs from
@@ -1023,7 +1023,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 	(void)memcpy(oldfix, fix, sizeof(struct gps_fix_t));
     /*@ +mayaliasunique @*/
 }
-#endif /* CHEAPFLOATS_ENABLE */
+#endif /* NOFLOATS_ENABLE */
 
 /*@ -mustdefine -compdef @*/
 int gpsd_await_data(/*@out@*/fd_set *rfds,
@@ -1440,7 +1440,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	session->gpsdata.set = ONLINE_SET | received;
 
-#ifdef CHEAPFLOATS_ENABLE
+#ifndef NOFLOATS_ENABLE
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * These will not overwrite any DOPs reported from the packet
@@ -1453,7 +1453,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 					     &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
-#endif /* CHEAPFLOATS_ENABLE */
+#endif /* NOFLOATS_ENABLE */
 
 	/* copy/merge device data into staging buffers */
 	/*@-nullderef -nullpass@*/
@@ -1466,9 +1466,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	//              "transfer mask: %02x\n", session->gpsdata.set);
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
-#ifdef CHEAPFLOATS_ENABLE
+#ifndef NOFLOATS_ENABLE
 	gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
-#endif /* CHEAPFLOATS_ENABLE */
+#endif /* NOFLOATS_ENABLE */
 
 	/*@+nullderef -nullpass@*/
 
