@@ -166,7 +166,7 @@ boolopts = (
     ("chrpath",       False, "use chrpath to edit library load paths"),
     ("manbuild",      True,  "build help in man and HTML formats"),
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
-    ("minimal",       False, "default all optional features to off"), 
+    ("minimal",       False, "turn off every option not set on the command line"), 
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
     )
@@ -235,6 +235,12 @@ envs["LD_LIBRARY_PATH"] = os.getcwd()
 env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV=envs)
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
+
+#  Minimal build turns off every option not set on the command line,
+if env['minimal']:
+    for (name, default, help) in boolopts:
+        if default == True and not ARGUMENTS.get(name):
+            env[name] = False
 
 for (name, default, help) in pathopts:
     env[name] = env.subst(env[name])
