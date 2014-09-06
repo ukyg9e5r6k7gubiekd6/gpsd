@@ -337,8 +337,8 @@ Please see http://qt.nokia.com/doc/4.6/supported-platforms.html for a
 status of Qt supported platforms as of version 4.6.
 
 minimal=yes: people building for extremely constrained environments
-may want to srt this.  It changes the default for all boolean (feature)
-options to false; thus, you get *only* the ioptions you specify on the
+may want to set this.  It changes the default for all boolean (feature)
+options to false; thus, you get *only* the options you specify on the
 command line.  Thus, for example, if you want to turn off all features 
 except socket export and nmea0183, 
 

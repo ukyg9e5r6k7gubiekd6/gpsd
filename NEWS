@@ -9,7 +9,7 @@ Repository head:
   have been dropped from the JSON reports. GNSS and GLONASS SKY
   reports are now merged. Qt support default changed to False pending
   a build patch. Addressed versions of AIS Type 25 and 26 are now
-  handled. The 'nmea' build option is bow 'nmea0183'. New 'minimal' options
+  handled. The 'nmea' build option is now 'nmea0183'. New 'minimal' option
   sets all boolean options not explicitly set on the command line to false.
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
