@@ -1070,7 +1070,7 @@ if env["ncurses"]:
 
 # Test programs
 test_float = env.Program('test_float', ['test_float.c'])
-test_geoid = env.Program('test_geoid', ['test_geoid.c', 'geoid.c'])
+test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpsdlibs)
 test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
 env.Depends(test_json, compiled_gpslib)
 test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], parse_flags=gpslibs)
@@ -1533,7 +1533,10 @@ else:
     python_compilation_regress = None
 
 # using regress-drivers requires socket_export being enabled.
-if env['socket_export']:
+if not env['socket_export']:
+    announce("GPS regression tests suppressed because socket_export is off.")
+    gps_regress = None
+else:
     # Regression-test the daemon
     gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
             '$SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
@@ -1545,29 +1548,30 @@ if env['socket_export']:
     # offset from subframe data.
     Utility('gps-makeregress', [gpsd, python_built_extensions],
         '$SRCDIR/regress-driver -b test/daemon/*.log')
-else:
-    gps_regress = Utility("gps-regress", [],
-                      "echo 'gps-regress: socket export disabled'")
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
 #    regress-driver -b test/daemon/foo.log
 
 # Regression-test the RTCM decoder.
-rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
-    '@echo "Testing RTCM decoding..."',
-    '@for f in $SRCDIR/test/*.rtcm2; do '
-        'echo "Testing $${f}..."; '
-        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-        '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
-        'diff -ub $${f}.chk $${TMPFILE}; '
-        'rm -f $${TMPFILE}; '
-    'done;',
-    '@echo "Testing idempotency of JSON dump/decode for RTCM2"',
-    '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-    '$SRCDIR/gpsdecode -u -e -j <test/synthetic-rtcm2.json >$${TMPFILE}; '
-        'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - $${TMPFILE}; '
-        'rm -f $${TMPFILE}; ',
+if not env["rtcm104v2"]:
+    announce("RTCM2 regression tests suppressed because rtcm104v2 is off.")
+    rtcm_regress = None
+else:
+    rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
+        '@echo "Testing RTCM decoding..."',
+        '@for f in $SRCDIR/test/*.rtcm2; do '
+            'echo "Testing $${f}..."; '
+            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
+            'diff -ub $${f}.chk $${TMPFILE}; '
+            'rm -f $${TMPFILE}; '
+        'done;',
+        '@echo "Testing idempotency of JSON dump/decode for RTCM2"',
+        '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '$SRCDIR/gpsdecode -u -e -j <test/synthetic-rtcm2.json >$${TMPFILE}; '
+            'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - $${TMPFILE}; '
+            'rm -f $${TMPFILE}; ',
         ])
 
 # Rebuild the RTCM regression tests.
@@ -1578,43 +1582,47 @@ Utility('rtcm-makeregress', [gpsdecode], [
         ])
 
 # Regression-test the AIVDM decoder.
-aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
-    '@echo "Testing AIVDM decoding w/ CSV format..."',
-    '@for f in $SRCDIR/test/*.aivdm; do '
-        'echo "Testing $${f}..."; '
-        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-        '$SRCDIR/gpsdecode -u -c <$${f} >$${TMPFILE}; '
-        'diff -ub $${f}.chk $${TMPFILE} || echo "Test FAILED!"; '
-        'rm -f $${TMPFILE}; '
-    'done;',
-    '@echo "Testing AIVDM decoding w/ JSON unscaled format..."',
-    '@for f in $SRCDIR/test/*.aivdm; do '
-        'echo "  Testing $${f}..."; '
-        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-        '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
-        'diff -ub $${f}.ju.chk $${TMPFILE} || echo "Test FAILED!"; '
-        'rm -f $${TMPFILE}; '
-    'done;',
-    '@echo "Testing AIVDM decoding w/ JSON scaled format..."',
-    '@for f in $SRCDIR/test/*.aivdm; do '
-        'echo "  Testing $${f}..."; '
-        'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-        '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
-        'diff -ub $${f}.js.chk $${TMPFILE} || echo "Test FAILED!"; '
-        'rm -f $${TMPFILE}; '
-    'done;',
-    '@echo "Testing idempotency of unscaled JSON dump/decode for AIS"',
-    '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-    '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
-        'grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk | diff -ub - $${TMPFILE}; '
-        'rm -f $${TMPFILE}; ',
-    # Parse the unscaled json reference, dump it as scaled json, 
-    # and finally compare it with the scaled json reference
-    '@echo "Testing idempotency of scaled JSON dump/decode for AIS"',
-    '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
-    '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
-        'grep -v "^#" $SRCDIR/test/sample.aivdm.js.chk | diff -ub - $${TMPFILE}; '
-        'rm -f $${TMPFILE}; ',
+if not env["aivdm"]:
+    announce("AIVDM regression tests suppressed because aivdm is off.")
+    aivdm_regress = None
+else:
+    aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
+        '@echo "Testing AIVDM decoding w/ CSV format..."',
+        '@for f in $SRCDIR/test/*.aivdm; do '
+            'echo "Testing $${f}..."; '
+            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            '$SRCDIR/gpsdecode -u -c <$${f} >$${TMPFILE}; '
+            'diff -ub $${f}.chk $${TMPFILE} || echo "Test FAILED!"; '
+            'rm -f $${TMPFILE}; '
+        'done;',
+        '@echo "Testing AIVDM decoding w/ JSON unscaled format..."',
+        '@for f in $SRCDIR/test/*.aivdm; do '
+            'echo "  Testing $${f}..."; '
+            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
+            'diff -ub $${f}.ju.chk $${TMPFILE} || echo "Test FAILED!"; '
+            'rm -f $${TMPFILE}; '
+        'done;',
+        '@echo "Testing AIVDM decoding w/ JSON scaled format..."',
+        '@for f in $SRCDIR/test/*.aivdm; do '
+            'echo "  Testing $${f}..."; '
+            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
+            'diff -ub $${f}.js.chk $${TMPFILE} || echo "Test FAILED!"; '
+            'rm -f $${TMPFILE}; '
+        'done;',
+        '@echo "Testing idempotency of unscaled JSON dump/decode for AIS"',
+        '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
+            'grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk | diff -ub - $${TMPFILE}; '
+            'rm -f $${TMPFILE}; ',
+        # Parse the unscaled json reference, dump it as scaled json, 
+        # and finally compare it with the scaled json reference
+        '@echo "Testing idempotency of scaled JSON dump/decode for AIS"',
+        '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
+            'grep -v "^#" $SRCDIR/test/sample.aivdm.js.chk | diff -ub - $${TMPFILE}; '
+            'rm -f $${TMPFILE}; ',
         ])
 
 # Rebuild the AIVDM regression tests.

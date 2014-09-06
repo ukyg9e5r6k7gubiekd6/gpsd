@@ -10,6 +10,8 @@
 #include <stdarg.h>
 #include <ctype.h>
 
+#define LIBGPS_DEBUG
+
 #include "gpsd.h"
 
 #ifndef S_SPLINT_S
