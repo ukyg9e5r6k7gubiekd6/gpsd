@@ -25,7 +25,7 @@ installed:
 * Any desktop or server Linux distribution.
 * OpenWRT and derivatives such as CeroWRT.
 * FreeBSD, NetBSD, OpenBSD, Macintosh OS X
-* Android
+* Android, using the official Google toolchain from the NDK
 
 We consider failure to build and function on any of these platforms
 a serious bug; if you encounter it, please complain on the
@@ -44,7 +44,7 @@ Necessary components for any build:
 |============================================================================
 |C compiler         | gpsd and client library are written in C
 |Python             | some code is generated from python scripts
-|scons              | for executing the build recipe 
+|scons              | for executing the build recipe
 |============================================================================
 
 === C compiler ===
@@ -362,6 +362,50 @@ your source tree to a clean state nearly as though you had just cloned or
 downloaded it; some scons housekeeping stuff is left in place.  If you
 interrupted a regression test, 'distclean' will remove generated test
 programs.
+
+== Notes on Android:
+
+Samuel Cuella reports:
+
+I use the official google toolchain from the Android NDK (Native
+Development Kit). You can also use the toolchain from code sourcery I
+guess. I cross-compile from a "regular" (with GNU userland) linux box.
+
+People who port software from linux to android tend to use either the
+NDK or code sourcery's.
+
+If you are going to include "official" guidelines, I would go for
+recommanding the official toolchain from the NDK.
+
+Here are thescons switches I use:
+
+scons wordsize=32 snapshot=off arch=arm sample=shell
+
+scons -j3 prefix=/usr libdir=$prefix/lib udevdir=/lib/udev
+chrpath=False gpsd_user=gpsd gpsd_group=uucp strip=False python=False
+bluez=0 libgpsmm=0 clientdebug=0 dbus_export=0 ipv6=0 timing=0
+ncurses=0 ntpshm=0 pps=0 shm_export=0 socket_export=1 systemd=0
+libQgpsmm=0 usb=0 aivdm=0 ashtech=0 earthmate=0 evermore=0 fury=0
+fv18=0 garmin=0 garmintxt=0 geostar=0 gpsclock=0 itrax=0 mtk3301=0
+navcom=0 nmea=1 nmea2000=0 ntrip=0 oceanserver=0 oncore=0 rtcm104v2=0
+rtcm104v3=0 sirf=1 superstar2=0 tnt=0 tripmate=0 tsip=0 ubx=0
+manbuild=0
+
+With the following environment variables:
+
+TOOL_HOME=/home/samuel/android-official-last/
+export TOOL_PREFIX=${TOOL_HOME}/bin/arm-linux-androideabi
+export CXX=$TOOL_PREFIX-g++
+export AR=$TOOL_PREFIX-ar
+export RANLIB=$TOOL_PREFIX-ranlib
+export CC=$TOOL_PREFIX-gcc
+export LD=$TOOL_PREFIX-ld
+
+export CCFLAGS="-march=armv7-a -mtune=cortex-a8 -mfpu=vfp"
+export ARM_TARGET_LIB=${TOOL_HOME}/sysroot
+
+scons wordsize=32 snapshot=off arch=arm sample=shell
+
 
 == Cross-building ==
 
