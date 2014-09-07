@@ -321,9 +321,12 @@ if env["shared"]:
 if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
+# Don't change CFLAGS if already set by environment.
+if not 'CFLAGS' in os.environ:
+    env.Append(CFLAGS=['-Wmissing-prototypes'])
+
 # Don't change CCFLAGS if already set by environment.
 if not 'CCFLAGS' in os.environ:
-    env.Append(CCFLAGS=['-Wmissing-prototypes'])
     env.Append(CCFLAGS=['-Wmissing-declarations'])
     # Should we build with profiling?
     if env['profiling']:
