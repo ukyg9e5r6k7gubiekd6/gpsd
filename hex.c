@@ -17,7 +17,7 @@ const char /*@ observer @*/ *gpsd_packetdump(char *scbuf, size_t scbuflen,
 
     assert(binbuf != NULL);
     for (cp = binbuf; cp < binbuf + binbuflen; cp++)
-	if (!isprint(*cp) && !isspace(*cp))
+	if (!isprint((unsigned char) *cp) && !isspace((unsigned char) *cp))
 	    printable = false;
     if (printable)
 	return binbuf;

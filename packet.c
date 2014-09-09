@@ -1500,7 +1500,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 * Back up past any whitespace.  Need to do this because
 		 * at least one GPS (the Firefly 1a) emits \r\r\n
 		 */
-		for (end = (char *)lexer->inbufptr - 1; isspace(*end); end--)
+		for (end = (char *)lexer->inbufptr - 1; isspace((unsigned char) *end); end--)
 		    continue;
 		while (strchr("0123456789ABCDEF", *end))
 		    --end;
@@ -1509,8 +1509,8 @@ void packet_parse(struct gps_lexer_t *lexer)
 		    for (n = 1; (char *)lexer->inbuffer + n < end; n++)
 			crc ^= lexer->inbuffer[n];
 		    (void)snprintf(csum, sizeof(csum), "%02X", crc);
-		    checksum_ok = (csum[0] == toupper(end[1])
-				   && csum[1] == toupper(end[2]));
+		    checksum_ok = (csum[0] == toupper((unsigned char) end[1])
+				   && csum[1] == toupper((unsigned char) end[2]));
 		}
 		if (!checksum_ok) {
 		    gpsd_report(&lexer->errout, LOG_WARN,

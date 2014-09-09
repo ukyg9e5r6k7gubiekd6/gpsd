@@ -605,7 +605,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
     ssize_t status;
 
     if (context.errout.debug >= LOG_CLIENT) {
-	if (isprint(buf[0]))
+	if (isprint((unsigned char) buf[0]))
 	    gpsd_report(&context.errout, LOG_CLIENT,
 			"=> client(%d): %s\n", sub_index(sub), buf);
 	else {
@@ -782,7 +782,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
     static char stash[BUFSIZ];
 
     /*@ -temptrans -mayaliasunique @*/
-    for (q = p; isprint(*p) && !isspace(*p) && /*@i@*/ (p - q < BUFSIZ - 1);
+    for (q = p; isprint((unsigned char) *p) && !isspace((unsigned char) *p) && /*@i@*/ (p - q < BUFSIZ - 1);
 	 p++)
 	continue;
     (void)memcpy(stash, q, (size_t) (p - q));
@@ -1002,12 +1002,12 @@ static void set_serial(struct gps_device_t *device,
     int wordsize = 8;
 
     if (strchr("78", *modestring) != NULL) {
-	while (isspace(*modestring))
+	while (isspace((unsigned char) *modestring))
 	    modestring++;
 	wordsize = (int)(*modestring++ - '0');
 	if (strchr("NOE", *modestring) != NULL) {
 	    parity = *modestring++;
-	    while (isspace(*modestring))
+	    while (isspace((unsigned char) *modestring))
 		modestring++;
 	    if (strchr("12", *modestring) != NULL)
 		stopbits = (unsigned int)(*modestring - '0');
@@ -1077,7 +1077,7 @@ static void rstrip(char *str)
 {
     char *strend;
     strend = str + strlen(str) - 1;
-    while (isspace(*strend)) {
+    while (isspace((unsigned char) *strend)) {
 	*strend = '\0';
 	--strend;
     }
@@ -1360,7 +1360,7 @@ static void handle_request(struct subscriber_t *sub,
     } else {
 	const char *errend;
 	errend = buf + strlen(buf) - 1;
-	while (isspace(*errend) && errend > buf)
+	while (isspace((unsigned char) *errend) && errend > buf)
 	    --errend;
 	(void)snprintf(reply, replylen,
 		       "{\"class\":\"ERROR\",\"message\":\"Unrecognized request '%.*s'\"}\r\n",
@@ -1662,7 +1662,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
     if (buf[0] == '?') {
 	const char *end;
 	for (end = buf; *buf != '\0'; buf = end)
-	    if (isspace(*buf))
+	    if (isspace((unsigned char) *buf))
 		end = buf + 1;
 	    else
 		handle_request(sub, buf, &end,

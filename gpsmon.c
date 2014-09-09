@@ -170,7 +170,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len2, const char *buf)
 
     buf2[0] = '\0';
     for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len2; sp++)
-	if (isprint(*sp) || (sp[0] == '\n' && sp[1] == '\0')
+	if (isprint((unsigned char) *sp) || (sp[0] == '\n' && sp[1] == '\0')
 	  || (sp[0] == '\r' && sp[2] == '\0'))
 	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
 	else
@@ -186,12 +186,12 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
     size_t i;
     bool printable = true;
     for (i = 0; i < len; i++)
-	if (!isprint(buf[i]) && !isspace(buf[i]))
+	if (!isprint((unsigned char) buf[i]) && !isspace((unsigned char) buf[i]))
 	    printable = false;
     if (printable) {
 	size_t j;
 	for (i = j = 0; i < len && j < len2 - 1; i++)
-	    if (isprint(buf[i])) {
+	    if (isprint((unsigned char) buf[i])) {
 		buf2[j++] = buf[i];
 		buf2[j] = '\0';
 	    }
@@ -750,8 +750,8 @@ static bool do_command(const char *line)
     unsigned char buf[BUFLEN];
     const char *arg;
 
-    if (isspace(line[1])) {
-	for (arg = line + 2; *arg != '\0' && isspace(*arg); arg++)
+    if (isspace((unsigned char) line[1])) {
+	for (arg = line + 2; *arg != '\0' && isspace((unsigned char) *arg); arg++)
 	    arg++;
 	arg++;
     } else

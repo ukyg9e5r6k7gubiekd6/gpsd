@@ -87,7 +87,7 @@ double safe_atof(const char *string)
      */
 
     p = string;
-    while (isspace(*p)) {
+    while (isspace((unsigned char) *p)) {
 	p += 1;
     }
     if (*p == '-') {
@@ -185,7 +185,7 @@ double safe_atof(const char *string)
 	    }
 	    expSign = false;
 	}
-	while (isdigit(*p)) {
+	while (isdigit((unsigned char) *p)) {
 	    exp = exp * 10 + (*p - '0');
 	    p += 1;
 	}

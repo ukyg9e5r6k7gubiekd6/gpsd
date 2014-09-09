@@ -235,7 +235,7 @@ static int json_internal_read_object(const char *cp,
 			  statenames[state], *cp, cp));
 	switch (state) {
 	case init:
-	    if (isspace(*cp))
+	    if (isspace((unsigned char) *cp))
 		continue;
 	    else if (*cp == '{')
 		state = await_attr;
@@ -246,7 +246,7 @@ static int json_internal_read_object(const char *cp,
 	    }
 	    break;
 	case await_attr:
-	    if (isspace(*cp))
+	    if (isspace((unsigned char) *cp))
 		continue;
 	    else if (*cp == '"') {
 		state = in_attr;
@@ -294,7 +294,7 @@ static int json_internal_read_object(const char *cp,
 		*pattr++ = *cp;
 	    break;
 	case await_value:
-	    if (isspace(*cp) || *cp == ':')
+	    if (isspace((unsigned char) *cp) || *cp == ':')
 		continue;
 	    else if (*cp == '[') {
 		if (cursor->type != t_array) {
@@ -372,7 +372,7 @@ static int json_internal_read_object(const char *cp,
 	case in_val_token:
 	    if (pval == NULL)
 		return JSON_ERR_NULLPTR;
-	    if (isspace(*cp) || *cp == ',' || *cp == '}') {
+	    if (isspace((unsigned char) *cp) || *cp == ',' || *cp == '}') {
 		*pval = '\0';
 		json_debug_trace((1, "Collected token value %s.\n", valbuf));
 		state = post_val;
@@ -400,7 +400,7 @@ static int json_internal_read_object(const char *cp,
 		if ((strcmp(valbuf, "true")==0 || strcmp(valbuf, "false")==0)
 			&& seeking == t_boolean)
 		    break;
-		if (isdigit(valbuf[0])) {
+		if (isdigit((unsigned char) valbuf[0])) {
 		    bool decimal = strchr(valbuf, '.') != NULL;
 		    if (decimal && seeking == t_real)
 			break;
@@ -501,7 +501,7 @@ static int json_internal_read_object(const char *cp,
 		}
 	    /*@fallthrough@*/
 	case post_array:
-	    if (isspace(*cp))
+	    if (isspace((unsigned char) *cp))
 		continue;
 	    else if (*cp == ',')
 		state = await_attr;
@@ -518,7 +518,7 @@ static int json_internal_read_object(const char *cp,
 
   good_parse:
     /* in case there's another object following, consune trailing WS */
-    while (isspace(*cp))
+    while (isspace((unsigned char) *cp))
 	++cp;
     if (end != NULL)
 	*end = cp;
@@ -539,7 +539,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 
     json_debug_trace((1, "Entered json_read_array()\n"));
 
-    while (isspace(*cp))
+    while (isspace((unsigned char) *cp))
 	cp++;
     if (*cp != '[') {
 	json_debug_trace((1, "Didn't find expected array start\n"));
@@ -551,7 +551,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
     arrcount = 0;
 
     /* Check for empty array */
-    while (isspace(*cp))
+    while (isspace((unsigned char) *cp))
 	cp++;
     if (*cp == ']')
 	goto breakout;
@@ -560,7 +560,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	json_debug_trace((1, "Looking at %s\n", cp));
 	switch (arr->element_type) {
 	case t_string:
-	    if (isspace(*cp))
+	    if (isspace((unsigned char) *cp))
 		cp++;
 	    if (*cp != '"')
 		return JSON_ERR_BADSTRING;
@@ -605,7 +605,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    return JSON_ERR_SUBTYPE;
 	}
 	arrcount++;
-	if (isspace(*cp))
+	if (isspace((unsigned char) *cp))
 	    cp++;
 	if (*cp == ']') {
 	    json_debug_trace((1, "End of array found.\n"));
