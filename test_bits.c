@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     LASSERT(0, 0x01);
     LASSERT(1, 0x41);
     LASSERT(2, 0x81);
-    LASSERT(3, 0xc2);
+    LASSERT(3, 0xc1);
 #undef LASSERT
 
 

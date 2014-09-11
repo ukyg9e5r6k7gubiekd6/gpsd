@@ -139,7 +139,7 @@ void shiftleft(unsigned char *data, int size, unsigned short left)
 
     if (left >= CHAR_BIT) {
 	size -= left/CHAR_BIT;
-	memmove(data, data + left/CHAR_BIT, size);
+	memmove(data, data + left/CHAR_BIT, (size + CHAR_BIT - 1)/CHAR_BIT);
 	left %= CHAR_BIT;
     }
 
