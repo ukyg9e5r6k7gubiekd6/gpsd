@@ -428,7 +428,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	if (!ais->type6.structured)
 	    (void)memcpy(ais->type6.bitdata,
 			 (char *)bits + (88 / BITS_PER_BYTE),
-			 (ais->type6.bitcount + 7) / 8);
+			 (ais->type6.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	break;
     case 7: /* Binary acknowledge */
     case 13: /* Safety Related Acknowledge */
@@ -736,7 +736,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	if (!ais->type8.structured)
 	    (void)memcpy(ais->type8.bitdata,
 			 (char *)bits + (56 / BITS_PER_BYTE),
-			 (ais->type8.bitcount + 7) / 8);
+			 (ais->type8.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	break;
     case 9: /* Standard SAR Aircraft Position Report */
 	PERMISSIVE_LENGTH_CHECK(168);
@@ -816,7 +816,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type17.bitcount        = bitlen - 80;
 	(void)memcpy(ais->type17.bitdata,
 		     (char *)bits + (80 / BITS_PER_BYTE),
-		     (ais->type17.bitcount + 7) / 8);
+		     (ais->type17.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	break;
     case 18:	/* Standard Class B CS Position Report */
 	PERMISSIVE_LENGTH_CHECK(168)
@@ -1033,7 +1033,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	/* bit 40 is exactly 5 bytes in; 2 bytes is 16 bits */
 	(void)memcpy(ais->type25.bitdata,
 		     (char *)bits+5 + 2 * ais->type25.structured,
-		     (ais->type25.bitcount + 7) / 8);
+		     (ais->type25.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	/* discard MMSI if addressed */
 	if (ais->type25.addressed) {
 	    shiftleft((unsigned char *)ais->type25.bitdata, ais->type25.bitcount, 30);
@@ -1056,7 +1056,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type26.bitcount        = bitlen - 60 - 16*ais->type26.structured;
 	(void)memcpy(ais->type26.bitdata,
 		     (unsigned char *)bits+5 + 2 * ais->type26.structured,
-		     (ais->type26.bitcount + 7) / 8);
+		     (ais->type26.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	/* discard MMSI if addressed */
 	if (ais->type26.addressed) {
 	    shiftleft((unsigned char *)ais->type26.bitdata, ais->type26.bitcount, 30);
