@@ -70,7 +70,6 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 #ifdef S_SPLINT_S
     assert(type24_queue != NULL);
 #endif /* S_SPLINT_S */
-#define BITS_PER_BYTE	8
 #define UBITS(s, l)	ubits((unsigned char *)bits, s, l, false)
 #define SBITS(s, l)	sbits((signed char *)bits, s, l, false)
 #define UCHARS(s, to)	from_sixbit((unsigned char *)bits, s, sizeof(to)-1, to)
@@ -427,7 +426,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	    }
 	if (!ais->type6.structured)
 	    (void)memcpy(ais->type6.bitdata,
-			 (char *)bits + (88 / BITS_PER_BYTE),
+			 (char *)bits + (88 / CHAR_BIT),
 			 (ais->type6.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	break;
     case 7: /* Binary acknowledge */
@@ -735,7 +734,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	/* land here if we failed to match a known DAC/FID */
 	if (!ais->type8.structured)
 	    (void)memcpy(ais->type8.bitdata,
-			 (char *)bits + (56 / BITS_PER_BYTE),
+			 (char *)bits + (56 / CHAR_BIT),
 			 (ais->type8.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	break;
     case 9: /* Standard SAR Aircraft Position Report */
@@ -815,7 +814,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	//ais->type17.spare	        = UBITS(75, 4);
 	ais->type17.bitcount        = bitlen - 80;
 	(void)memcpy(ais->type17.bitdata,
-		     (char *)bits + (80 / BITS_PER_BYTE),
+		     (char *)bits + (80 / CHAR_BIT),
 		     (ais->type17.bitcount + CHAR_BIT - 1) / CHAR_BIT);
 	break;
     case 18:	/* Standard Class B CS Position Report */
@@ -1095,7 +1094,6 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 #undef UCHARS
 #undef SBITS
 #undef UBITS
-#undef BITS_PER_BYTE
 
     /* data is fully decoded */
     return true;
