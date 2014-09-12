@@ -12,6 +12,7 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
+#include "bits.h"
 #include "gps_json.h"
 
 static int verbose = 0;
@@ -124,7 +125,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 			   ais->type6.bitcount,
 			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 					ais->type6.bitdata,
-					(ais->type6.bitcount + 7) / 8));
+					BITS_TO_BYTES(ais->type6.bitcount)));
 	break;
     case 7:			/* Binary Acknowledge */
     case 13:			/* Safety Related Acknowledge */
@@ -232,7 +233,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 			   ais->type8.bitcount,
 			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 					ais->type8.bitdata,
-					(ais->type8.bitcount + 7) / 8));
+					BITS_TO_BYTES(ais->type8.bitcount)));
 	break;
     case 9:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -291,7 +292,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type17.bitcount,
 		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 				    ais->type17.bitdata,
-				    (ais->type17.bitcount + 7) / 8));
+				    BITS_TO_BYTES(ais->type17.bitcount)));
 	break;
     case 18:
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -447,7 +448,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type25.bitcount,
 		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 				    ais->type25.bitdata,
-				    (ais->type25.bitcount + 7) / 8));
+				    BITS_TO_BYTES(ais->type25.bitcount)));
 	break;
     case 26:			/* Binary Message, Multiple Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -459,7 +460,7 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 		       ais->type26.bitcount,
 		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 				    ais->type26.bitdata,
-				    (ais->type26.bitcount + 7) / 8),
+				    BITS_TO_BYTES(ais->type26.bitcount)),
 		       ais->type26.radio);
 	break;
     case 27:			/* Long Range AIS Broadcast message */

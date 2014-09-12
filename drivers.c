@@ -1333,7 +1333,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     /* time to pass buffered-up data to where it's actually processed? */
     if (ifrag == nfrags) {
 	if (debug >= LOG_INF) {
-	    size_t clen = (ais_context->bitlen + 7) / 8;
+	    size_t clen = BITS_TO_BYTES(ais_context->bitlen);
 	    gpsd_report(&session->context->errout, LOG_INF,
 			"AIVDM payload is %zd bits, %zd chars: %s\n",
 			ais_context->bitlen, clen,

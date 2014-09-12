@@ -21,6 +21,7 @@ PERMISSIONS
 #include <ctype.h>
 
 #include "gpsd.h"
+#include "bits.h"
 
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
@@ -1880,8 +1881,8 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type6.bitcount,
 			   json_stringify(buf1, sizeof(buf1),
 					  gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
-					      (char *)ais->type6.bitdata,
-					      (ais->type6.bitcount + 7) / 8)));
+						       (char *)ais->type6.bitdata,
+						       BITS_TO_BYTES(ais->type6.bitcount))));
 	    break;
 	}
 	if (ais->type6.dac == 200) {
@@ -2226,7 +2227,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   json_stringify(buf1, sizeof(buf1),
 					  gpsd_hexdump(scratchbuf, sizeof(scratchbuf), 
 						       (char *)ais->type8.bitdata,
-						       (ais->type8.bitcount + 7) / 8)));
+						       BITS_TO_BYTES(ais->type8.bitcount))));
 	    break;
 	}
 	if (ais->type8.dac == 1) {
@@ -3007,7 +3008,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type17.bitcount,
 			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 					(char *)ais->type17.bitdata,
-					(ais->type17.bitcount + 7) / 8));
+					BITS_TO_BYTES(ais->type17.bitcount)));
 	} else {
 	    (void)snprintf(buf + strlen(buf), buflen - strlen(buf),
 			   "\"lon\":%d,\"lat\":%d,\"data\":\"%zd:%s\"}\r\n",
@@ -3016,7 +3017,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   ais->type17.bitcount,
 			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 					(char *)ais->type17.bitdata,
-					(ais->type17.bitcount + 7) / 8));
+					BITS_TO_BYTES(ais->type17.bitcount)));
 	}
 	break;
     case 18:
@@ -3343,7 +3344,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type25.bitcount,
 		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 				    (char *)ais->type25.bitdata,
-				    (ais->type25.bitcount + 7) / 8));
+				    BITS_TO_BYTES(ais->type25.bitcount)));
 	break;
     case 26:			/* Binary Message, Multiple Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),
@@ -3356,7 +3357,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		       ais->type26.bitcount,
 		       gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 				    (char *)ais->type26.bitdata,
-				    (ais->type26.bitcount + 7) / 8),
+				    BITS_TO_BYTES(ais->type26.bitcount)),
 		       ais->type26.radio);
 	break;
     case 27:			/* Long Range AIS Broadcast message */
