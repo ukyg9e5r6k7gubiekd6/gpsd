@@ -427,7 +427,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	if (!ais->type6.structured)
 	    (void)memcpy(ais->type6.bitdata,
 			 (char *)bits + (88 / CHAR_BIT),
-			 (ais->type6.bitcount + CHAR_BIT - 1) / CHAR_BIT);
+			 BITS_TO_BYTES(ais->type6.bitcount));
 	break;
     case 7: /* Binary acknowledge */
     case 13: /* Safety Related Acknowledge */
@@ -735,7 +735,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	if (!ais->type8.structured)
 	    (void)memcpy(ais->type8.bitdata,
 			 (char *)bits + (56 / CHAR_BIT),
-			 (ais->type8.bitcount + CHAR_BIT - 1) / CHAR_BIT);
+			 BITS_TO_BYTES(ais->type8.bitcount));
 	break;
     case 9: /* Standard SAR Aircraft Position Report */
 	PERMISSIVE_LENGTH_CHECK(168);
@@ -815,7 +815,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type17.bitcount        = bitlen - 80;
 	(void)memcpy(ais->type17.bitdata,
 		     (char *)bits + (80 / CHAR_BIT),
-		     (ais->type17.bitcount + CHAR_BIT - 1) / CHAR_BIT);
+		     BITS_TO_BYTES(ais->type17.bitcount));
 	break;
     case 18:	/* Standard Class B CS Position Report */
 	PERMISSIVE_LENGTH_CHECK(168)
@@ -1032,7 +1032,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	/* bit 40 is exactly 5 bytes in; 2 bytes is 16 bits */
 	(void)memcpy(ais->type25.bitdata,
 		     (char *)bits+5 + 2 * ais->type25.structured,
-		     (ais->type25.bitcount + CHAR_BIT - 1) / CHAR_BIT);
+		     BITS_TO_BYTES(ais->type25.bitcount));
 	/* discard MMSI if addressed */
 	if (ais->type25.addressed) {
 	    shiftleft((unsigned char *)ais->type25.bitdata, ais->type25.bitcount, 30);
@@ -1055,7 +1055,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type26.bitcount        = bitlen - 60 - 16*ais->type26.structured;
 	(void)memcpy(ais->type26.bitdata,
 		     (unsigned char *)bits+5 + 2 * ais->type26.structured,
-		     (ais->type26.bitcount + CHAR_BIT - 1) / CHAR_BIT);
+		     BITS_TO_BYTES(ais->type26.bitcount));
 	/* discard MMSI if addressed */
 	if (ais->type26.addressed) {
 	    shiftleft((unsigned char *)ais->type26.bitdata, ais->type26.bitcount, 30);
