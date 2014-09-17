@@ -23,8 +23,8 @@ default values to be used when an expected attribute is omitted.
    The preceding paragraph told one fib.  A single attribute may
 actually have a span of multiple specifications with different
 syntactically distinguishable types (e.g. string vs. real vs. integer
-vs boolean, but not signed integer vs. unsigned integer or strong vs. map).
-The parser will match the right spec against the actual data.
+vs. boolean, but not signed integer vs. unsigned integer).  The parser
+will match the right spec against the actual data.
 
    The dialect this parses has some limitations.  First, it cannot
 recognize the JSON "null" value.  Secondly, arrays may only have
