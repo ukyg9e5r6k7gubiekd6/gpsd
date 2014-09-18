@@ -32,7 +32,7 @@ objects or strings - not reals or integers or floats - as elements
 (this limitation could be easily removed if required). Third, all
 elements of an array must be of the same type.
 
-   There are separata entry points for beginning a parse of either
+   There are separate entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
 stored as doubles.
 
@@ -493,7 +493,7 @@ static int json_internal_read_object(const char *cp,
 		case t_check:
 		    if (strcmp(cursor->dflt.check, valbuf) != 0) {
 			json_debug_trace((1,
-					  "Required attribute vakue %s not present.\n",
+					  "Required attribute value %s not present.\n",
 					  cursor->dflt.check));
 			return JSON_ERR_CHECKFAIL;
 		    }
@@ -517,7 +517,7 @@ static int json_internal_read_object(const char *cp,
     }
 
   good_parse:
-    /* in case there's another object following, consune trailing WS */
+    /* in case there's another object following, consume trailing WS */
     while (isspace((unsigned char) *cp))
 	++cp;
     if (end != NULL)
@@ -654,7 +654,7 @@ const /*@observer@*/ char *json_error_string(int err)
 	"array element specified, but no [",
 	"string value too long",
 	"token value too long",
-	"garbage while expecting , or }",
+	"garbage while expecting comma, }, or ]",
 	"didn't find expected array start",
 	"error while parsing object array",
 	"too many array elements",
