@@ -21,6 +21,7 @@ static bool json = true;
 static bool split24 = false;
 static unsigned int ntypes = 0;
 static unsigned int typelist[32];
+struct gps_context_t context;
 
 /**************************************************************************
  *
@@ -514,7 +515,6 @@ static void decode(FILE *fpin, FILE*fpout)
 /* sensor data on fpin to dump format on fpout */
 {
     struct gps_device_t session;
-    struct gps_context_t context;
     struct policy_t policy;
 #if defined(SOCKET_EXPORT_ENABLE) || defined(AIVDM_ENABLE)
     char buf[GPS_JSON_RESPONSE_MAX * 4];
@@ -526,7 +526,6 @@ static void decode(FILE *fpin, FILE*fpout)
     policy.json = json;
     policy.scaled = scaled;
 
-    gps_context_init(&context, "gpsdecode");
     gpsd_time_init(&context, time(NULL));
     context.readonly = true;
     gpsd_init(&session, &context, NULL);
@@ -590,11 +589,9 @@ static void encode(FILE *fpin, FILE *fpout)
     struct policy_t policy;
     struct gps_device_t session;
     int lineno = 0;
-    struct gps_context_t context;
 
     memset(&policy, '\0', sizeof(policy));
     memset(&session, '\0', sizeof(session));
-    memset(&context, '\0', sizeof(context));
     session.context = &context;
     context.errout.debug = 0;
     context.errout.label = "gpsdecode";
@@ -633,6 +630,8 @@ int main(int argc, char **argv)
     int c;
     enum
     { doencode, dodecode } mode = dodecode;
+
+    gps_context_init(&context, "gpsdecode");
 
     while ((c = getopt(argc, argv, "cdejpst:uvVD:")) != EOF) {
 	switch (c) {
@@ -677,7 +676,7 @@ int main(int argc, char **argv)
 	    break;
 
 	case 'D':
-	    verbose = atoi(optarg);
+	    context.errout.debug = verbose = atoi(optarg);
 #if defined(CLIENTDEBUG_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
 	    json_enable_debug(verbose - 2, stderr);
 #endif
