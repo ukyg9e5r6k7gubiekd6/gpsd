@@ -759,18 +759,21 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
 
     gpsd_report(errout, LOG_INF, "Sats used (%d):\n", gpsdata->satellites_used);
     for (n = k = 0; k < gpsdata->satellites_used; k++) {
-	if (gpsdata->used[k] == 0)
-	    continue;
-	i = gpsdata->used[k];
-	gpsd_report(errout, LOG_INF, "PRN=%d az=%d el=%d\n",
-		    i, gpsdata->azimuth[i], gpsdata->elevation[i]);
-	satpos[n][0] = sin(gpsdata->azimuth[i] * DEG_2_RAD)
-	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
-	satpos[n][1] = cos(gpsdata->azimuth[i] * DEG_2_RAD)
-	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
-	satpos[n][2] = sin(gpsdata->elevation[i] * DEG_2_RAD);
-	satpos[n][3] = 1;
-	n++;
+	for (i = 0; i < gpsdata->satellites_visible; i++) {
+	    if (gpsdata->PRN[i] == gpsdata->used[k]) {
+		gpsd_report(errout, LOG_INF, "PRN=%d az=%d el=%d\n",
+			    gpsdata->PRN[i], 
+			    gpsdata->azimuth[i], 
+			    gpsdata->elevation[i]);
+		satpos[n][0] = sin(gpsdata->azimuth[i] * DEG_2_RAD)
+		    * cos(gpsdata->elevation[k] * DEG_2_RAD);
+		satpos[n][1] = cos(gpsdata->azimuth[i] * DEG_2_RAD)
+		    * cos(gpsdata->elevation[k] * DEG_2_RAD);
+		satpos[n][2] = sin(gpsdata->elevation[i] * DEG_2_RAD);
+		satpos[n][3] = 1;
+		n++;
+	    }
+	}
     }
 
     /* If we don't have 4 satellites then we don't have enough information to calculate DOPS */
