@@ -502,9 +502,12 @@ static gps_mask_t processGSA(int count, char *field[],
 	    mask = MODE_SET;
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "GPGSA sets mode %d\n", session->newdata.mode);
-	session->gpsdata.dop.pdop = safe_atof(field[15]);
-	session->gpsdata.dop.hdop = safe_atof(field[16]);
-	session->gpsdata.dop.vdop = safe_atof(field[17]);
+	if (field[15][0])
+	    session->gpsdata.dop.pdop = safe_atof(field[15]);
+	if (field[16][0])
+	    session->gpsdata.dop.hdop = safe_atof(field[16]);
+	if (field[17][0])
+	    session->gpsdata.dop.vdop = safe_atof(field[17]);
 	session->gpsdata.satellites_used = 0;
 	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */

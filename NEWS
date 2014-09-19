@@ -11,6 +11,7 @@ Repository head:
   a build patch. Addressed versions of AIS Type 25 and 26 are now
   handled. The 'nmea' build option is now 'nmea0183'. New 'minimal' option
   sets all boolean options not explicitly set on the command line to false.
+  A bug fix for error modeling when NMEA 0183 reports empty DOP fields.
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed.
