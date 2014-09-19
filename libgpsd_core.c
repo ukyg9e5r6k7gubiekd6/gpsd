@@ -757,14 +757,24 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
 
     memset(satpos, 0, sizeof(satpos));
 
+    gpsd_report(errout, LOG_INF, "Sats used (%d):\n", gpsdata->satellites_used);
     for (n = k = 0; k < gpsdata->satellites_used; k++) {
 	if (gpsdata->used[k] == 0)
 	    continue;
-	satpos[n][0] = sin(gpsdata->azimuth[k] * DEG_2_RAD)
+	i = gpsdata->used[k];
+	gpsd_report(errout, LOG_INF, "PRN=%d az=%d el=%d\n",
+		    i, gpsdata->azimuth[i], gpsdata->elevation[i]);
+    }
+
+    for (n = k = 0; k < gpsdata->satellites_used; k++) {
+	if (gpsdata->used[k] == 0)
+	    continue;
+	i = gpsdata->used[k];
+	satpos[n][0] = sin(gpsdata->azimuth[i] * DEG_2_RAD)
 	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
-	satpos[n][1] = cos(gpsdata->azimuth[k] * DEG_2_RAD)
+	satpos[n][1] = cos(gpsdata->azimuth[i] * DEG_2_RAD)
 	    * cos(gpsdata->elevation[k] * DEG_2_RAD);
-	satpos[n][2] = sin(gpsdata->elevation[k] * DEG_2_RAD);
+	satpos[n][2] = sin(gpsdata->elevation[i] * DEG_2_RAD);
 	satpos[n][3] = 1;
 	n++;
     }
