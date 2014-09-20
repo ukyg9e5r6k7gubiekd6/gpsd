@@ -33,6 +33,13 @@ static struct {
 	.mat = {{10,0,0,0}, {0,10,0,0}, {0,0,10,0}, {0,0,0,10}},
 	.inv = {{0.1,0,0,0}, {0,0.1,0,0}, {0,0,0.1,0}, {0,0,0,0.1}},
     },
+#ifdef __UNUSED__
+    /* random values */
+    {
+	.mat = {{1,-1,-1,0}, {1,-2,3,0}, {1,1,4,0}, {0,0,10}},
+	.inv = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}},
+    },
+#endif /* __UNUSED__ */
 };
 
 static void dump(const char *label, double m[4][4])
@@ -70,7 +77,9 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     for (i = 0; i < sizeof(inverses) / sizeof(inverses[0]); i++) {
 	double inverse[4][4];
-	matrix_invert(inverses[i].mat, inverse);
+	if (!matrix_invert(inverses[i].mat, inverse)) {
+	    printf("Vanishing determinant in test %zd\n", i);
+	}
 	if (!check_diag(i, inverse, inverses[i].inv))
 	    break;
     }
