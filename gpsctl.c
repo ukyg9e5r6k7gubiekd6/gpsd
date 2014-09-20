@@ -197,6 +197,8 @@ int main(int argc, char **argv)
     ssize_t cooklen = 0;
 #endif /* RECONFIGURE_ENABLE */
 
+    context.errout.label = "gpsctl";
+
 #define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-c rate] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
     while ((option = getopt(argc, argv, "bec:fhlnrs:t:x:D:T:V")) != -1) {
 	switch (option) {
