@@ -1526,6 +1526,11 @@ bits_regress = Utility('bits-regress', [test_bits], [
     '$SRCDIR/test_bits --quiet'
     ])
 
+# Unit-test the bitfield extractor
+matrix_regress = Utility('matrix-regress', [test_matrix], [
+    '$SRCDIR/test_matrix --quiet'
+    ])
+
 # Check that all Python modules compile properly 
 if env['python']:
     def check_compile(target, source, env):
@@ -1709,12 +1714,13 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 describe = Utility('describe', [],
                    ['@echo "Run normal regression tests for %s..."' %(rev.strip(),)])
 testclean = Utility('test_cleanup', [],
-                    'rm -f test_bits test_geoid test_json test_libgps test_mkgmtime test_packet')
+                    'rm -f test_bits test_matrix test_geoid test_json test_libgps test_mkgmtime test_packet')
 check = env.Alias('check', [
     describe,
     python_compilation_regress,
     method_regress,
     bits_regress,
+    matrix_regress,
     gps_regress,
     rtcm_regress,
     aivdm_regress,
