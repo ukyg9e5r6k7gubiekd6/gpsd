@@ -26,6 +26,7 @@ valgrind-audit.py
 # Unit tests
 test_float
 test_bits
+test_matrix
 test_gpsmm
 test_qgpsmm
 test_packet

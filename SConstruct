@@ -1084,11 +1084,13 @@ test_packet = env.Program('test_packet', ['test_packet.c'], parse_flags=gpsdlibs
 env.Depends(test_packet, [compiled_gpsdlib, compiled_gpslib])
 test_bits = env.Program('test_bits', ['test_bits.c'], parse_flags=gpslibs)
 env.Depends(test_bits, [compiled_gpsdlib, compiled_gpslib])
+test_matrix = env.Program('test_matrix', ['test_matrix.c'], parse_flags=gpsdlibs)
+env.Depends(test_matrix, [compiled_gpsdlib, compiled_gpslib])
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], parse_flags=gpslibs)
 env.Depends(test_gpsmm, compiled_gpslib)
 test_libgps = env.Program('test_libgps', ['test_libgps.c'], parse_flags=gpslibs)
 env.Depends(test_libgps, compiled_gpslib)
-testprogs = [test_float, test_trig, test_bits, test_packet,
+testprogs = [test_float, test_trig, test_bits, test_matrix, test_packet,
              test_mkgmtime, test_geoid, test_libgps]
 if env['socket_export']:
     testprogs.append(test_json)
