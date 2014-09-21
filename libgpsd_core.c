@@ -668,8 +668,8 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
     memset(satpos, 0, sizeof(satpos));
 
     gpsd_report(errout, LOG_INF, "Sats used (%d):\n", gpsdata->satellites_used);
-    for (n = k = 0; k < gpsdata->satellites_used; k++) {
-	for (i = 0; i < gpsdata->satellites_visible; i++) {
+    for (n = i = 0; i < gpsdata->satellites_visible; i++) {
+	for (k = 0; k < gpsdata->satellites_used; k++) {
 	    if (gpsdata->PRN[i] == gpsdata->used[k]) {
 		gpsd_report(errout, LOG_INF, "PRN=%d az=%d el=%d\n",
 			    gpsdata->PRN[i], 
