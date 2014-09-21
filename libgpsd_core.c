@@ -671,16 +671,17 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
     for (n = i = 0; i < gpsdata->satellites_visible; i++) {
 	for (k = 0; k < gpsdata->satellites_used; k++) {
 	    if (gpsdata->PRN[i] == gpsdata->used[k]) {
-		gpsd_report(errout, LOG_INF, "PRN=%d az=%d el=%d\n",
-			    gpsdata->PRN[i], 
-			    gpsdata->azimuth[i], 
-			    gpsdata->elevation[i]);
 		satpos[n][0] = sin(gpsdata->azimuth[i] * DEG_2_RAD)
 		    * cos(gpsdata->elevation[k] * DEG_2_RAD);
 		satpos[n][1] = cos(gpsdata->azimuth[i] * DEG_2_RAD)
 		    * cos(gpsdata->elevation[k] * DEG_2_RAD);
 		satpos[n][2] = sin(gpsdata->elevation[i] * DEG_2_RAD);
 		satpos[n][3] = 1;
+		gpsd_report(errout, LOG_INF, "PRN=%3d az=%3d el=%2d (%f, %f, %f)\n",
+			    gpsdata->PRN[i], 
+			    gpsdata->azimuth[i], 
+			    gpsdata->elevation[i],
+			    satpos[n][0], satpos[n][1], satpos[n][2]);
 		n++;
 	    }
 	}
