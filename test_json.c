@@ -211,6 +211,52 @@ static const struct json_attr_t json_attrs_8[] = {
 
 static const char *json_str9 = "{\"parts\":[]}";
 
+#ifndef MINIMAL_JSON
+/* Case 10: Read array of integers */
+
+static const char *json_str10 = "[23,-17,5]";
+static int intstore[4], intcount;
+
+/*@-type@*/
+static const struct json_array_t json_array_10 = {
+    .element_type = t_integer,
+    .arr.integers.store = intstore,
+    .count = &intcount,
+    .maxlen = sizeof(intstore)/sizeof(intstore[0]),
+};
+/*@+type@*/
+
+/* Case 11: Read array of booleans */
+
+static const char *json_str11 = "[true,false,true]";
+static bool boolstore[4];
+static int boolcount;
+
+/*@-type@*/
+static const struct json_array_t json_array_11 = {
+    .element_type = t_boolean,
+    .arr.booleans.store = boolstore,
+    .count = &boolcount,
+    .maxlen = sizeof(boolstore)/sizeof(boolstore[0]),
+};
+/*@+type@*/
+
+/* Case 12: Read array of reals */
+
+static const char *json_str12 = "[23.1,-17.2,5.3]";
+static double realstore[4]; 
+static int realcount;
+
+/*@-type@*/
+static const struct json_array_t json_array_12 = {
+    .element_type = t_real,
+    .arr.reals.store = realstore,
+    .count = &realcount,
+    .maxlen = sizeof(realstore)/sizeof(realstore[0]),
+};
+/*@+type@*/
+#endif /* MINIMAL_JSON */
+
 /*@ +fullinitblock @*/
 /* *INDENT-ON* */
 
@@ -315,7 +361,38 @@ static void jsontest(int i)
 	assert_integer("dumbcount", dumbcount, 0);
 	break;
 
-#define MAXTEST 9
+#ifdef MINIMAL_JSON
+#define MAXTEST 10
+#else
+    case 10:
+	status = json_read_array(json_str10, &json_array_10, NULL);
+	assert_integer("count", intcount, 3);
+	assert_integer("intstore[0]", intstore[0], 23);
+	assert_integer("intstore[1]", intstore[1], -17);
+	assert_integer("intstore[2]", intstore[2], 5);
+	assert_integer("intstore[3]", intstore[3], 0);
+	break;
+
+    case 11:
+	status = json_read_array(json_str11, &json_array_11, NULL);
+	assert_integer("count", boolcount, 3);
+	assert_boolean("boolstore[0]", boolstore[0], true);
+	assert_boolean("boolstore[1]", boolstore[1], false);
+	assert_boolean("boolstore[2]", boolstore[2], true);
+	assert_boolean("boolstore[3]", boolstore[3], false);
+	break;
+
+    case 12:
+	status = json_read_array(json_str12, &json_array_12, NULL);
+	assert_integer("count", realcount, 3);
+	assert_real("realstore[0]", realstore[0], 23.1);
+	assert_real("realstore[1]", realstore[1], -17.2);
+	assert_real("realstore[2]", realstore[2], 5.3);
+	assert_real("realstore[3]", realstore[3], 0);
+	break;
+
+#define MAXTEST 12
+#endif /* MINIMAL_JSON */
 
     default:
 	(int)fputs("Unknown test number\n", stderr);
@@ -358,3 +435,5 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 
     exit(EXIT_SUCCESS);
 }
+
+/* end */

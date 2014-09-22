@@ -27,10 +27,10 @@ vs. boolean, but not signed integer vs. unsigned integer).  The parser
 will match the right spec against the actual data.
 
    The dialect this parses has some limitations.  First, it cannot
-recognize the JSON "null" value.  Secondly, arrays may only have
-objects or strings - not reals or integers or floats - as elements
-(this limitation could be easily removed if required). Third, all
-elements of an array must be of the same type.
+recognize the JSON "null" value.  Secondly, arrays may not have time
+literals of character values as elements (this limitation could be
+easily removed if required). Third, all elements of an array must be
+of the same type.
 
    There are separate entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
@@ -557,6 +557,9 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	goto breakout;
 
     for (offset = 0; offset < arr->maxlen; offset++) {
+#ifndef JSON_MINIMAL
+	char *ep = NULL;
+#endif /* JSON_MINIMAL */
 	json_debug_trace((1, "Looking at %s\n", cp));
 	switch (arr->element_type) {
 	case t_string:
@@ -593,10 +596,45 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 		return substatus;
 	    break;
 	case t_integer:
+#ifndef JSON_MINIMAL
+	    arr->arr.integers.store[offset] = (int)strtol(cp, &ep, 0);
+	    if (ep == cp)
+		return JSON_ERR_BADNUM;
+	    else
+		cp = ep;
+	    break;
+#endif /* JSON_MINIMAL */
 	case t_uinteger:
-	case t_time:
+#ifndef JSON_MINIMAL
+	    arr->arr.uintegers.store[offset] = (unsigned int)strtoul(cp, &ep, 0);
+	    if (ep == cp)
+		return JSON_ERR_BADNUM;
+	    else
+		cp = ep;
+	    break;
+#endif /* JSON_MINIMAL */
 	case t_real:
+#ifndef JSON_MINIMAL
+	    arr->arr.reals.store[offset] = strtod(cp, &ep);
+	    if (ep == cp)
+		return JSON_ERR_BADNUM;
+	    else
+		cp = ep;
+	    break;
+#endif /* JSON_MINIMAL */
 	case t_boolean:
+#ifndef JSON_MINIMAL
+	    if (strncmp(cp, "true", 4) == 0) {
+		arr->arr.booleans.store[offset] = true;
+		cp += 4;
+	    }
+	    else if (strncmp(cp, "false", 5) == 0) {
+		arr->arr.booleans.store[offset] = false;
+		cp += 5;
+	    }
+	    break;
+#endif /* JSON_MINIMAL */
+	case t_time:
 	case t_character:
 	case t_array:
 	case t_check:
@@ -654,7 +692,7 @@ const /*@observer@*/ char *json_error_string(int err)
 	"array element specified, but no [",
 	"string value too long",
 	"token value too long",
-	"garbage while expecting comma, }, or ]",
+	"garbage while expecting comma or } or ]",
 	"didn't find expected array start",
 	"error while parsing object array",
 	"too many array elements",

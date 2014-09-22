@@ -32,6 +32,18 @@ struct json_array_t {
 	    char *store;
 	    int storelen;
 	} strings;
+	struct {
+	    int *store;
+	} integers;
+	struct {
+	    unsigned int *store;
+	} uintegers;
+	struct {
+	    double *store;
+	} reals;
+	struct {
+	    bool *store;
+	} booleans;
     } arr;
     int *count, maxlen;
 };
@@ -87,7 +99,7 @@ void json_enable_debug(int, FILE *);
 #define JSON_ERR_NOBRAK 	6	/* array element specified, but no [ */
 #define JSON_ERR_STRLONG	7	/* string value too long */
 #define JSON_ERR_TOKLONG	8	/* token value too long */
-#define JSON_ERR_BADTRAIL	9	/* garbage while expecting comma, }, or ] */
+#define JSON_ERR_BADTRAIL	9	/* garbage while expecting comma or } or ] */
 #define JSON_ERR_ARRAYSTART	10	/* didn't find expected array start */
 #define JSON_ERR_OBJARR 	11	/* error while parsing object array */
 #define JSON_ERR_SUBTOOLONG	12	/* too many array elements */
