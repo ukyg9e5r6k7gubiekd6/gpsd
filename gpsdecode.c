@@ -18,6 +18,7 @@
 static int verbose = 0;
 static bool scaled = true;
 static bool json = true;
+static bool pseudonmea = false;
 static bool split24 = false;
 static unsigned int ntypes = 0;
 static unsigned int typelist[32];
@@ -510,6 +511,36 @@ static bool filter(gps_mask_t changed, struct gps_device_t *session)
     return false;
 }
 
+static void pseudonmea_report(gps_mask_t changed, struct gps_device_t *device)
+/* report pseudo-NMEA in appropriate circumstances */
+{
+    if (GPS_PACKET_TYPE(device->lexer.type)
+	&& !TEXTUAL_PACKET_TYPE(device->lexer.type)) {
+	char buf[MAX_PACKET_LENGTH * 3 + 2];
+
+	if ((changed & REPORT_IS) != 0) {
+	    nmea_tpv_dump(device, buf, sizeof(buf));
+	    (void)fputs(buf, stdout);
+	}
+
+	if ((changed & SATELLITE_SET) != 0) {
+	    nmea_sky_dump(device, buf, sizeof(buf));
+	    (void)fputs(buf, stdout);
+	}
+
+	if ((changed & SUBFRAME_SET) != 0) {
+	    nmea_subframe_dump(device, buf, sizeof(buf));
+	    (void)fputs(buf, stdout);
+	}
+#ifdef AIVDM_ENABLE
+	if ((changed & AIS_SET) != 0) {
+	    nmea_ais_dump(device, buf, sizeof(buf));
+	    (void)fputs(buf, stdout);
+	}
+#endif /* AIVDM_ENABLE */
+    }
+}
+
 /*@ -mustfreeonly -compdestroy -compdef -usedef -uniondef -immediatetrans -observertrans -statictrans @*/
 static void decode(FILE *fpin, FILE*fpout)
 /* sensor data on fpin to dump format on fpout */
@@ -525,6 +556,7 @@ static void decode(FILE *fpin, FILE*fpout)
     memset(&policy, '\0', sizeof(policy));
     policy.json = json;
     policy.scaled = scaled;
+    policy.nmea = pseudonmea;
 
     gpsd_time_init(&context, time(NULL));
     context.readonly = true;
@@ -578,6 +610,8 @@ static void decode(FILE *fpin, FILE*fpout)
 	    }
 #endif /* AIVDM_ENABLE */
 	}
+	if (policy.nmea)
+	    pseudonmea_report(changed, &session);
     }
 }
 
@@ -599,6 +633,7 @@ static void encode(FILE *fpin, FILE *fpout)
 		  "stdin",
 		  sizeof(session.gpsdata.dev.path));
     policy.json = true;
+    policy.nmea = pseudonmea;
     /* Parsing is always made in unscaled mode,
      * this policy applies to the dumping */
     policy.scaled = scaled;
@@ -628,12 +663,11 @@ static void encode(FILE *fpin, FILE *fpout)
 int main(int argc, char **argv)
 {
     int c;
-    enum
-    { doencode, dodecode } mode = dodecode;
+    enum { doencode, dodecode } mode = dodecode;
 
     gps_context_init(&context, "gpsdecode");
 
-    while ((c = getopt(argc, argv, "cdejpst:uvVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "cdejnpst:uvVD:")) != EOF) {
 	switch (c) {
 	case 'c':
 	    json = false;
@@ -649,6 +683,10 @@ int main(int argc, char **argv)
 
 	case 'j':
 	    json = true;
+	    break;
+
+	case 'n':
+	    pseudonmea = true;
 	    break;
 
 	case 's':
