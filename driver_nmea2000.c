@@ -376,9 +376,7 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->driver.nmea2000.sid[2]           = bu[0];
     session->gpsdata.satellites_visible       = (int)bu[2];
 
-    for (l2=0;l2<MAXCHANNELS;l2++) {
-        session->gpsdata.used[l2] = 0;
-    }
+    memset(session->gpsdata.skyview, '\0', sizeof(session->gpsdata.skyview));
     l2 = 0;
     for (l1=0;l1<session->gpsdata.satellites_visible;l1++) {
         int    svt;
@@ -392,12 +390,13 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
         svt   = (int)(bu[3+12*l1+11] & 0x0f);
 
-        session->gpsdata.elevation[l1]  = (int) (round(elev));
-	session->gpsdata.azimuth[l1]    = (int) (round(azi));
-        session->gpsdata.ss[l1]         = snr;
-        session->gpsdata.PRN[l1]        = (int)bu[3+12*l1+0];
+        session->gpsdata.skyview[l1].elevation  = (int) (round(elev));
+	session->gpsdata.skyview[l1].azimuth    = (int) (round(azi));
+        session->gpsdata.skyview[l1].ss         = snr;
+        session->gpsdata.skyview[l1].PRN        = (int)bu[3+12*l1+0];
+	session->gpsdata.skyview[l1].used = false;
 	if ((svt == 2) || (svt == 5)) {
-	    session->gpsdata.used[l2] = session->gpsdata.PRN[l1];
+	    session->gpsdata.skyview[l1].used = true;
 	    l2 += 1;
 	}
     }

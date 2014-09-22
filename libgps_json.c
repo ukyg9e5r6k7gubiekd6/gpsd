@@ -118,15 +118,14 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 			 /*@null@*/ const char **endptr)
 {
-    bool usedflags[MAXCHANNELS];
     /*@ -fullinitblock @*/
-    const struct json_attr_t json_attrs_2_1[] = {
+    const struct json_attr_t json_attrs_satellites[] = {
 	/* *INDENT-OFF* */
-	{"PRN",	   t_integer, .addr.integer = gpsdata->PRN},
-	{"el",	   t_integer, .addr.integer = gpsdata->elevation},
-	{"az",	   t_integer, .addr.integer = gpsdata->azimuth},
-	{"ss",	   t_real,    .addr.real = gpsdata->ss},
-	{"used",   t_boolean, .addr.boolean = usedflags},
+	{"PRN",	   t_integer, STRUCTOBJECT(struct satellite_t, PRN)},
+	{"el",	   t_integer, STRUCTOBJECT(struct satellite_t, elevation)},
+	{"az",	   t_integer, STRUCTOBJECT(struct satellite_t, azimuth)},
+	{"ss",	   t_real,    STRUCTOBJECT(struct satellite_t, ss)},
+	{"used",   t_boolean, STRUCTOBJECT(struct satellite_t, used)},
 	/* *INDENT-ON* */
 	{NULL},
     };
@@ -153,10 +152,10 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	                             .dflt.real = NAN},
 	{"gdop",       t_real,    .addr.real    = &gpsdata->dop.gdop,
 	                             .dflt.real = NAN},
-	{"satellites", t_array,   .addr.array.element_type = t_object,
-				     .addr.array.arr.objects.subtype=json_attrs_2_1,
-	                             .addr.array.maxlen = MAXCHANNELS,
-	                             .addr.array.count = &gpsdata->satellites_visible},
+	{"satellites", t_array,
+	                           STRUCTARRAY(gpsdata->skyview,
+					 json_attrs_satellites,
+					 &gpsdata->satellites_visible)},
 	{NULL},
 	/* *INDENT-ON* */
     };
@@ -164,8 +163,8 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
     int status, i, j;
 
     for (i = 0; i < MAXCHANNELS; i++) {
-	gpsdata->PRN[i] = 0;
-	usedflags[i] = false;
+	gpsdata->skyview[i].PRN = 0;
+	gpsdata->skyview[i].used = false;
     }
 
     status = json_read_object(buf, json_attrs_2, endptr);
@@ -174,12 +173,10 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 
     gpsdata->satellites_used = 0;
     gpsdata->satellites_visible = 0;
-    (void)memset(gpsdata->used, '\0', sizeof(gpsdata->used));
     for (i = j = 0; i < MAXCHANNELS; i++) {
-	if(gpsdata->PRN[i] > 0)
+	if(gpsdata->skyview[i].PRN > 0)
 	    gpsdata->satellites_visible++;
-	if (usedflags[i]) {
-	    gpsdata->used[j++] = gpsdata->PRN[i];
+	if (gpsdata->skyview[i].used) {
 	    gpsdata->satellites_used++;
 	}
     }

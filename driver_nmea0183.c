@@ -509,12 +509,12 @@ static gps_mask_t processGSA(int count, char *field[],
 	if (field[17][0])
 	    session->gpsdata.dop.vdop = safe_atof(field[17]);
 	session->gpsdata.satellites_used = 0;
-	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
+	memset(session->sats_used, 0, sizeof(session->sats_used));
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
 	for (i = 0; i < count - 6; i++) {
 	    int prn = atoi(field[i + 3]);
 	    if (prn > 0)
-		session->gpsdata.used[session->gpsdata.satellites_used++] =
+		session->sats_used[session->gpsdata.satellites_used++] =
 		    prn;
 	}
 	mask |= DOP_SET | USED_IS;
@@ -585,6 +585,7 @@ static gps_mask_t processGSV(int count, char *field[],
     }
 
     for (fldnum = 4; fldnum < count;) {
+	struct satellite_t *sp;
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
 	    gpsd_report(&session->context->errout, LOG_ERROR,
 			"internal error - too many satellites [%d]!\n",
@@ -592,25 +593,28 @@ static gps_mask_t processGSV(int count, char *field[],
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
 	}
-	session->gpsdata.PRN[session->gpsdata.satellites_visible] =
-	    atoi(field[fldnum++]);
+	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
+	sp->PRN = atoi(field[fldnum++]);
 	// NMEA-ID (33..64) to SBAS PRN.
-	if (session->gpsdata.PRN[session->gpsdata.satellites_visible] >= 33
-		&& session->gpsdata.PRN[session->gpsdata.satellites_visible] <= 64)
-	    session->gpsdata.PRN[session->gpsdata.satellites_visible] += 87;
-	session->gpsdata.elevation[session->gpsdata.satellites_visible] =
-	    atoi(field[fldnum++]);
-	session->gpsdata.azimuth[session->gpsdata.satellites_visible] =
-	    atoi(field[fldnum++]);
-	session->gpsdata.ss[session->gpsdata.satellites_visible] =
-	    (float)atoi(field[fldnum++]);
+	if (sp->PRN >= 33 && sp->PRN <= 64)
+	    sp->PRN += 87;
+	sp->elevation = atoi(field[fldnum++]);
+	sp->azimuth = atoi(field[fldnum++]);
+	sp->ss = (float)atoi(field[fldnum++]);
+	sp->used = false;
+	if (sp->PRN > 0)
+	    for (n = 0; n < MAXCHANNELS; n++)
+		if (session->sats_used[n] == sp->PRN) {
+		    sp->used = true;
+		    break;
+		}
 	/*
 	 * Incrementing this unconditionally falls afoul of chipsets like
 	 * the Motorola Oncore GT+ that emit empty fields at the end of the
 	 * last sentence in a GPGSV set if the number of satellites is not
 	 * a multiple of 4.
 	 */
-	if (session->gpsdata.PRN[session->gpsdata.satellites_visible] != 0)
+	if (sp->PRN != 0)
 	    session->gpsdata.satellites_visible++;
     }
     if (session->nmea.part == session->nmea.await
@@ -635,7 +639,7 @@ static gps_mask_t processGSV(int count, char *field[],
      * revision 231.000.000_A2.
      */
     for (n = 0; n < session->gpsdata.satellites_visible; n++)
-	if (session->gpsdata.azimuth[n] != 0)
+	if (session->gpsdata.skyview[n].azimuth != 0)
 	    goto sane;
     gpsd_report(&session->context->errout, LOG_WARN,
 		"Satellite data no good (%d of %d).\n",
@@ -1068,19 +1072,20 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 			session->gpsdata.dop.tdop);
 	}
     } else if (0 == strcmp("SAT", field[1])) {	/* Satellite Status */
-	int i, n, u;
-	n = session->gpsdata.satellites_visible = atoi(field[2]);
-	u = 0;
-	for (i = 0; i < n; i++) {
-	    int p;
-	    session->gpsdata.PRN[i] = p = atoi(field[3 + i * 5 + 0]);
-	    session->gpsdata.azimuth[i] = atoi(field[3 + i * 5 + 1]);
-	    session->gpsdata.elevation[i] = atoi(field[3 + i * 5 + 2]);
-	    session->gpsdata.ss[i] = safe_atof(field[3 + i * 5 + 3]);
-	    if (field[3 + i * 5 + 4][0] == 'U')
-		session->gpsdata.used[u++] = p;
+	struct satellite_t *sp;
+	int i, n = session->gpsdata.satellites_visible = atoi(field[2]);
+	session->gpsdata.satellites_used = 0;
+	for (i = 0, sp = session->gpsdata.skyview; sp < session->gpsdata.skyview + n; sp++, i++) {
+	    sp->PRN = atoi(field[3 + i * 5 + 0]);
+	    sp->azimuth = atoi(field[3 + i * 5 + 1]);
+	    sp->elevation = atoi(field[3 + i * 5 + 2]);
+	    sp->ss = safe_atof(field[3 + i * 5 + 3]);
+	    sp->used = false;
+	    if (field[3 + i * 5 + 4][0] == 'U') {
+		sp->used = true;
+		session->gpsdata.satellites_used++;
+	    }
 	}
-	session->gpsdata.satellites_used = u;
 	gpsd_report(&session->context->errout, LOG_DATA,
 		    "PASHR,SAT: used=%d\n",
 		    session->gpsdata.satellites_used);

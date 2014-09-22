@@ -164,21 +164,23 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		    "%2d %2d %2d %3d %02x\n", i, sv, mode, sn, status);
 
 	if (sn) {
-	    session->gpsdata.PRN[st] = sv;
-	    session->gpsdata.ss[st] = (double)sn;
+	    session->gpsdata.skyview[st].PRN = sv;
+	    session->gpsdata.skyview[st].ss = (double)sn;
 	    for (j = 0; (int)j < session->driver.oncore.visible; j++)
 		if (session->driver.oncore.PRN[j] == sv) {
-		    session->gpsdata.elevation[st] =
+		    session->gpsdata.skyview[st].elevation =
 			session->driver.oncore.elevation[j];
-		    session->gpsdata.azimuth[st] =
+		    session->gpsdata.skyview[st].azimuth =
 			session->driver.oncore.azimuth[j];
 		    Bbused |= 1 << j;
 		    break;
 		}
-	    st++;
 	    /* bit 7 of the status word: sat used for position */
-	    if (status & 0x80)
-		session->gpsdata.used[nsv++] = sv;
+	    session->gpsdata.skyview[st].used = false;
+	    if (status & 0x80) {
+		session->gpsdata.skyview[st].used = true;
+		nsv++;
+	    }
 	    /* bit 2 of the status word: using for time solution */
 	    if (status & 0x02)
 		mask |= PPSTIME_IS;
@@ -188,15 +190,16 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	     * can signal that it's returning time even though no position fixes
 	     * have been available.
 	     */
+	    st++;
 	}
     }
     for (j = 0; (int)j < session->driver.oncore.visible; j++)
 	/*@ -boolops @*/
 	if (!(Bbused & (1 << j))) {
-	    session->gpsdata.PRN[st] = session->driver.oncore.PRN[j];
-	    session->gpsdata.elevation[st] =
+	    session->gpsdata.skyview[st].PRN = session->driver.oncore.PRN[j];
+	    session->gpsdata.skyview[st].elevation =
 		session->driver.oncore.elevation[j];
-	    session->gpsdata.azimuth[st] = session->driver.oncore.azimuth[j];
+	    session->gpsdata.skyview[st].azimuth = session->driver.oncore.azimuth[j];
 	    st++;
 	}
     /*@ +boolops @*/
@@ -307,9 +310,9 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
 	session->driver.oncore.azimuth[i] = az;
 	/* If it has an entry in the satellite list, update it! */
 	for (j = 0; j < session->gpsdata.satellites_visible; j++)
-	    if (session->gpsdata.PRN[j] == sv) {
-		session->gpsdata.elevation[j] = el;
-		session->gpsdata.azimuth[j] = az;
+	    if (session->gpsdata.skyview[j].PRN == sv) {
+		session->gpsdata.skyview[j].elevation = el;
+		session->gpsdata.skyview[j].azimuth = az;
 	    }
     }
 

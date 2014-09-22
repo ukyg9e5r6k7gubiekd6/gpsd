@@ -346,20 +346,17 @@ void libgps_dump_state(struct gps_data_t *collect)
 		      collect->policy.split24 ? "true" : "false",
 		      collect->policy.devpath);
     if (collect->set & SATELLITE_SET) {
-	int i;
+	struct satellite_t *sp;
 
 	(void)fprintf(debugfp, "SKY: satellites in view: %d\n",
 		      collect->satellites_visible);
-	for (i = 0; i < collect->satellites_visible; i++) {
-	    bool used_in_solution = false;
-	    int j;
-	    for (j = 0; j < MAXCHANNELS; j++)
-		if (collect->used[j] == i)
-		    used_in_solution = true;
+	for (sp = collect->skyview;
+	     sp < collect->skyview + collect->satellites_visible;
+	     sp++) {
 	    (void)fprintf(debugfp, "    %2.2d: %2.2d %3.3d %3.0f %c\n",
-			  collect->PRN[i], collect->elevation[i],
-			  collect->azimuth[i], collect->ss[i],
-			  used_in_solution ? 'Y' : 'N');
+			  sp->PRN, sp->elevation,
+			  sp->azimuth, sp->ss,
+			  sp->used ? 'Y' : 'N');
 	}
     }
     if (collect->set & DEVICE_SET)

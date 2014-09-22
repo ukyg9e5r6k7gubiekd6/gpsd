@@ -229,7 +229,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* Note: this week counter is not limited to 10 bits. */
     session->context->gps_week = (unsigned short)gps_week;
     session->gpsdata.satellites_used = 0;
-    memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
+    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	int status, prn;
 	/*@ -type @*/
@@ -238,11 +238,11 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	/*@ +type @*/
 
 	if (status & 1)
-	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
+	    session->sats_used[session->gpsdata.satellites_used++] = prn;
 	for (j = 0; j < ZODIAC_CHANNELS; j++) {
-	    if (session->gpsdata.PRN[j] != prn)
+	    if (session->gpsdata.skyview[j].PRN != prn)
 		continue;
-	    session->gpsdata.ss[j] = (float)getzword(17 + (3 * i));
+	    session->gpsdata.skyview[j].ss = (float)getzword(17 + (3 * i));
 	    break;
 	}
     }
@@ -281,17 +281,17 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	if (i < session->gpsdata.satellites_visible) {
-	    session->gpsdata.PRN[i] = (int)getzword(15 + (3 * i));
-	    session->gpsdata.azimuth[i] =
+	    session->gpsdata.skyview[i].PRN = (int)getzword(15 + (3 * i));
+	    session->gpsdata.skyview[i].azimuth =
 		(int)(((short)getzword(16 + (3 * i))) * RAD_2_DEG * 1e-4);
-	    if (session->gpsdata.azimuth[i] < 0)
-		session->gpsdata.azimuth[i] += 360;
-	    session->gpsdata.elevation[i] =
+	    if (session->gpsdata.skyview[i].azimuth < 0)
+		session->gpsdata.skyview[i].azimuth += 360;
+	    session->gpsdata.skyview[i].elevation =
 		(int)(((short)getzword(17 + (3 * i))) * RAD_2_DEG * 1e-4);
 	} else {
-	    session->gpsdata.PRN[i] = 0;
-	    session->gpsdata.azimuth[i] = 0;
-	    session->gpsdata.elevation[i] = 0;
+	    session->gpsdata.skyview[i].PRN = 0;
+	    session->gpsdata.skyview[i].azimuth = 0;
+	    session->gpsdata.skyview[i].elevation = 0;
 	}
     }
     session->gpsdata.skyview_time = NAN;

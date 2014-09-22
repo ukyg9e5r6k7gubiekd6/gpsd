@@ -411,10 +411,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 			    if (timestamp[0] != '?') {
 				gpsdata->set |= TIME_SET;
 			    }
-			    for (j = 0; j < MAXCHANNELS; j++) {
-				gpsdata->PRN[j] = gpsdata->elevation[j] = gpsdata->azimuth[j] = gpsdata->used[j] = 0;
-				gpsdata->ss[j] = 0.0;
-			    }
+			    memset(&gpsdata->skyview, '\0', sizeof(gpsdata->skyview));
 			    for (j = 0, gpsdata->satellites_used = 0;
 				 j < gpsdata->satellites_visible; j++) {
 				if ((sp != NULL)
@@ -423,11 +420,11 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				    // cppcheck-suppress invalidscanf
 				    (void)sscanf(sp, "%d %d %d %lf %d", &i1,
 						 &i2, &i3, &f4, &i5);
-				    gpsdata->PRN[j] = i1;
-				    gpsdata->elevation[j] = i2;
-				    gpsdata->azimuth[j] = i3;
-				    gpsdata->ss[j] = f4;
-				    gpsdata->used[j] = i5;
+				    gpsdata->skyview[j].PRN = i1;
+				    gpsdata->skyview[j].elevation = i2;
+				    gpsdata->skyview[j].azimuth = i3;
+				    gpsdata->skyview[j].ss = f4;
+				    gpsdata->skyview[j].used = i5;
 				    if (i5 == 1)
 					gpsdata->satellites_used++;
 				}

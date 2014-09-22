@@ -281,16 +281,16 @@ static void jsontest(int i)
 	status = libgps_json_unpack(json_str2, &gpsdata, NULL);
 	assert_case(2, status);
 	assert_integer("used", gpsdata.satellites_used, 6);
-	assert_integer("PRN[0]", gpsdata.PRN[0], 10);
-	assert_integer("el[0]", gpsdata.elevation[0], 45);
-	assert_integer("az[0]", gpsdata.azimuth[0], 196);
-	assert_real("ss[0]", gpsdata.ss[0], 34);
-	assert_integer("used[0]", gpsdata.used[0], 10);
-	assert_integer("used[5]", gpsdata.used[5], 27);
-	assert_integer("PRN[6]", gpsdata.PRN[6], 21);
-	assert_integer("el[6]", gpsdata.elevation[6], 10);
-	assert_integer("az[6]", gpsdata.azimuth[6], 301);
-	assert_real("ss[6]", gpsdata.ss[6], 0);
+	assert_integer("PRN[0]", gpsdata.skyview[0].PRN, 10);
+	assert_integer("el[0]", gpsdata.skyview[0].elevation, 45);
+	assert_integer("az[0]", gpsdata.skyview[0].azimuth, 196);
+	assert_real("ss[0]", gpsdata.skyview[0].ss, 34);
+	assert_boolean("used[0]", gpsdata.skyview[0].used, true);
+	assert_integer("PRN[6]", gpsdata.skyview[6].PRN, 21);
+	assert_integer("el[6]", gpsdata.skyview[6].elevation, 10);
+	assert_integer("az[6]", gpsdata.skyview[6].azimuth, 301);
+	assert_real("ss[6]", gpsdata.skyview[6].ss, 0);
+	assert_boolean("used[6]", gpsdata.skyview[6].used, false);
 	break;
 
     case 3:
@@ -363,7 +363,7 @@ static void jsontest(int i)
 	break;
 
 #ifdef JSON_MINIMAL
-#define MAXTEST 10
+#define MAXTEST 9
 #else
     case 10:
 	status = json_read_array(json_str10, &json_array_10, NULL);
@@ -428,7 +428,7 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 	jsontest(individual);
     else {
 	int i;
-	for (i = 1; i <= MAXTEST; i++)
+	for (i = 1; i < MAXTEST; i++)
 	    jsontest(i);
     }
 

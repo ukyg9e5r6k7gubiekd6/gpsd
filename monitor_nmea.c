@@ -240,10 +240,10 @@ static void nmea_update(void)
 	    for (i = 0; i < nsats; i++) {
 		(void)wmove(satwin, i + 2, 3);
 		(void)wprintw(satwin, " %3d %3d%3d %3.0f",
-			      session.gpsdata.PRN[i],
-			      session.gpsdata.azimuth[i],
-			      session.gpsdata.elevation[i],
-			      session.gpsdata.ss[i]);
+			      session.gpsdata.skyview[i].PRN,
+			      session.gpsdata.skyview[i].azimuth,
+			      session.gpsdata.skyview[i].elevation,
+			      session.gpsdata.skyview[i].ss);
 	    }
 	    /* add overflow mark to the display */
 	    if (nsats <= MAXSATS)
@@ -279,9 +279,10 @@ static void nmea_update(void)
 	    (void)wmove(gpgsawin, 2, 7);
 	    (void)wclrtoeol(gpgsawin);
 	    scr[0] = '\0';
-	    for (i = 0; i < session.gpsdata.satellites_used; i++) {
-		(void)snprintf(scr + strlen(scr), sizeof(scr) - strlen(scr),
-			       "%d ", session.gpsdata.used[i]);
+	    for (i = 0; i < MAXCHANNELS; i++) {
+		if (session.gpsdata.skyview[i].used)
+		    (void)snprintf(scr + strlen(scr), sizeof(scr) - strlen(scr),
+				   "%d ", session.gpsdata.skyview[i].PRN);
 	    }
 	    getmaxyx(gpgsawin, ymax, xmax);
 	    (void)mvwaddnstr(gpgsawin, 2, 7, scr, xmax - 2 - 7);

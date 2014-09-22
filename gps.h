@@ -1788,6 +1788,14 @@ struct ais_t
     };
 };
 
+struct satellite_t {
+    double ss;		/* signal-to-noise ratio (dB) */
+    bool used;		/* PRNs of satellites used in solution */
+    short PRN;		/* PRNs of satellite */
+    short elevation;	/* elevation of satellite */
+    short azimuth;	/* azimuth */
+};
+
 struct attitude_t {
     double heading;
     double pitch;
@@ -1974,7 +1982,6 @@ struct gps_data_t {
 
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
-    int used[MAXCHANNELS];	/* PRNs of satellites used in solution */
     struct dop_t dop;
 
     /* redundant with the estimate elements in the fix structure */
@@ -1983,10 +1990,7 @@ struct gps_data_t {
     /* satellite status -- valid when satellites_visible > 0 */
     timestamp_t skyview_time;	/* skyview timestamp */
     int satellites_visible;	/* # of satellites in view */
-    int PRN[MAXCHANNELS];	/* PRNs of satellite */
-    int elevation[MAXCHANNELS];	/* elevation of satellite */
-    int azimuth[MAXCHANNELS];	/* azimuth */
-    double ss[MAXCHANNELS];	/* signal-to-noise ratio (dB) */
+    struct satellite_t skyview[MAXCHANNELS];
 
     struct devconfig_t dev;	/* device that shipped last update */
 

@@ -133,10 +133,10 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	if (i < session->gpsdata.satellites_visible)
 	    len -= snprintf(bufp, len,
 			    ",%02d,%02d,%03d,%02.0f",
-			    session->gpsdata.PRN[i],
-			    session->gpsdata.elevation[i],
-			    session->gpsdata.azimuth[i],
-			    session->gpsdata.ss[i]);
+			    session->gpsdata.skyview[i].PRN,
+			    session->gpsdata.skyview[i].elevation,
+			    session->gpsdata.skyview[i].azimuth,
+			    session->gpsdata.skyview[i].ss);
 	if (i % 4 == 3 || i == session->gpsdata.satellites_visible - 1) {
 	    nmea_add_checksum(bufp2);
 	    len -= 5;
@@ -172,11 +172,11 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
 	for (i = 0; i < session->device_type->channels; i++) {
-	    if (session->gpsdata.used[i] > 0) {
+	    if (session->sats_used[i] > 0) {
 		bufp += strlen(bufp);
 		(void)snprintf(bufp, len - strlen(bufp),
 			       "%d,",
-			       session->gpsdata.used[i]);
+			       session->sats_used[i]);
 		j++;
 	    }
 	}

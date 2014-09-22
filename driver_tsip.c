@@ -342,8 +342,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if ((f1 = getbef32((char *)buf, 5 * i + 2)) < 0)
 		f1 = 0.0;
 	    for (j = 0; j < TSIP_CHANNELS; j++)
-		if (session->gpsdata.PRN[j] == (int)u1) {
-		    session->gpsdata.ss[j] = f1;
+		if (session->gpsdata.skyview[j].PRN == (int)u1) {
+		    session->gpsdata.skyview[j].ss = f1;
 		    break;
 		}
 	    (void)snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2),
@@ -507,14 +507,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    i, u1, u2 & 7, u3, u4, f1, f2, d1, d2);
 	if (i < TSIP_CHANNELS) {
 	    if (d1 >= 0.0) {
-		session->gpsdata.PRN[i] = (int)u1;
-		session->gpsdata.ss[i] = f1;
-		session->gpsdata.elevation[i] = (int)round(d1);
-		session->gpsdata.azimuth[i] = (int)round(d2);
+		session->gpsdata.skyview[i].PRN = (int)u1;
+		session->gpsdata.skyview[i].ss = f1;
+		session->gpsdata.skyview[i].elevation = (int)round(d1);
+		session->gpsdata.skyview[i].azimuth = (int)round(d2);
+		session->gpsdata.skyview[i].used = false;
+		for (j = 0; j < session->gpsdata.satellites_used; j++)
+		    if (session->gpsdata.skyview[i].PRN && session->sats_used[j])
+			session->gpsdata.skyview[i].used = true;
 	    } else {
-		session->gpsdata.PRN[i] = session->gpsdata.elevation[i]
-		    = session->gpsdata.azimuth[i] = 0;
-		session->gpsdata.ss[i] = 0.0;
+		session->gpsdata.skyview[i].PRN =
+		    session->gpsdata.skyview[i].elevation =
+		    session->gpsdata.skyview[i].azimuth = 0;
+		session->gpsdata.skyview[i].ss = 0.0;
+		session->gpsdata.skyview[i].used = false;
 	    }
 	    if (++i == session->gpsdata.satellites_visible) {
 		session->gpsdata.skyview_time = NAN;
@@ -568,12 +574,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 pow(session->gpsdata.dop.tdop, 2));
 	/*@ +evalorder @*/
 
-	memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
+	memset(session->sats_used, 0, sizeof(session->sats_used));
 	buf2[0] = '\0';
 	/*@ +charint @*/
 	for (i = 0; i < count; i++)
 	    (void)snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2),
-			   " %d", session->gpsdata.used[i] =
+			   " %d", session->sats_used[i] =
 			   (int)getub(buf, 17 + i));
 	/*@ -charint @*/
 	gpsd_report(&session->context->errout, LOG_DATA,

@@ -586,19 +586,24 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	int cn;
 	int off = 8 + 15 * i;
 	bool good;
-	session->gpsdata.PRN[st] = (int)getub(buf, off);
-	session->gpsdata.azimuth[st] =
+	session->gpsdata.skyview[st].PRN = (int)getub(buf, off);
+	session->gpsdata.skyview[st].azimuth =
 	    (int)(((unsigned)getub(buf, off + 1) * 3) / 2.0);
-	session->gpsdata.elevation[st] =
+	session->gpsdata.skyview[st].elevation =
 	    (int)((unsigned)getub(buf, off + 2) / 2.0);
 	cn = 0;
 	for (j = 0; j < 10; j++)
 	    cn += (int)getub(buf, off + 5 + j);
 
-	session->gpsdata.ss[st] = (float)(cn / 10.0);
-	good = session->gpsdata.PRN[st] != 0 &&
-	    session->gpsdata.azimuth[st] != 0 &&
-	    session->gpsdata.elevation[st] != 0;
+	session->gpsdata.skyview[st].ss = (float)(cn / 10.0);
+	session->gpsdata.skyview[st].used = false;
+	for (j = 0; j < SIRF_CHANNELS; j++)
+	    if (session->sats_used[j] == session->gpsdata.skyview[st].PRN)
+		session->gpsdata.skyview[st].used = true;
+
+	good = session->gpsdata.skyview[st].PRN != 0 &&
+	    session->gpsdata.skyview[st].azimuth != 0 &&
+	    session->gpsdata.skyview[st].elevation != 0;
 #ifdef __UNUSED__
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "SiRF: PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
@@ -613,11 +618,11 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     session->gpsdata.satellites_visible = st;
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < st; i++) {
-	int prn = session->gpsdata.PRN[i];
+	int prn = session->gpsdata.skyview[i].PRN;
 	if (SBAS_PRN(prn) \
 		&& session->gpsdata.status == STATUS_DGPS_FIX \
 		&& session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS)
-	    session->gpsdata.used[session->gpsdata.satellites_used++] = prn;
+	    session->sats_used[session->gpsdata.satellites_used++] = prn;
     }
 #ifdef TIMEHINT_ENABLE
     if (st < 3) {
@@ -705,9 +710,9 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	return 0;
 
     session->gpsdata.satellites_used = (int)getub(buf, 28);
-    memset(session->gpsdata.used, 0, sizeof(session->gpsdata.used));
+    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (i = 0; i < SIRF_CHANNELS; i++)
-	session->gpsdata.used[i] = (int)getub(buf, 29 + i);
+	session->sats_used[i] = (int)getub(buf, 29 + i);
     /* position/velocity is bytes 1-18 */
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 		     (double)getbes32(buf, 1) * 1.0,

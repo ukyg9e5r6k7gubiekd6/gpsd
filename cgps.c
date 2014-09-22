@@ -411,18 +411,9 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 static void update_gps_panel(struct gps_data_t *gpsdata)
 /* This gets called once for each new GPS sentence. */
 {
-    int i, j;
+    int i;
     int newstate;
     char scr[128], *s;
-    bool usedflags[MAXCHANNELS];
-
-    /* must build bit vector of which statellites are used from list */
-    for (i = 0; i < MAXCHANNELS; i++) {
-	usedflags[i] = false;
-	for (j = 0; j < gpsdata->satellites_used; j++)
-	    if (gpsdata->used[j] == gpsdata->PRN[i])
-		usedflags[i] = true;
-    }
 
     /* This is for the satellite status display.  Originally lifted from
      * xgps.c.  Note that the satellite list may be truncated based on
@@ -434,10 +425,11 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 		if (i < gpsdata->satellites_visible) {
 		    (void)snprintf(scr, sizeof(scr),
 				   " %3d    %02d    %03d    %02d      %c",
-				   gpsdata->PRN[i],
-				   gpsdata->elevation[i], gpsdata->azimuth[i],
-				   (int)gpsdata->ss[i],
-				   usedflags[i] ? 'Y' : 'N');
+				   gpsdata->skyview[i].PRN,
+				   gpsdata->skyview[i].elevation,
+				   gpsdata->skyview[i].azimuth,
+				   (int)gpsdata->skyview[i].ss,
+				   gpsdata->skyview[i].used ? 'Y' : 'N');
 		} else {
 		    (void)strlcpy(scr, "", sizeof(scr));
 		}
@@ -449,14 +441,15 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	    for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 		if (n < display_sats) {
 		    if ((i < gpsdata->satellites_visible)
-			&& ((gpsdata->used[i] != 0)
+			&& (gpsdata->skyview[i].used
 			    || (gpsdata->satellites_visible <= display_sats))) {
 			(void)snprintf(scr, sizeof(scr),
 				       " %3d    %02d    %03d    %02d      %c",
-				       gpsdata->PRN[i], gpsdata->elevation[i],
-				       gpsdata->azimuth[i],
-				       (int)gpsdata->ss[i],
-				       gpsdata->used[i] ? 'Y' : 'N');
+				       gpsdata->skyview[i].PRN,
+				       gpsdata->skyview[i].elevation,
+				       gpsdata->skyview[i].azimuth,
+				       (int)gpsdata->skyview[i].ss,
+				       gpsdata->skyview[i].used ? 'Y' : 'N');
 			(void)mvwprintw(satellites, n + 2, 1, "%-*s",
 					SATELLITES_WIDTH - 3, scr);
 			n++;

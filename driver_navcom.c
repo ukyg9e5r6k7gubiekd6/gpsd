@@ -413,7 +413,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     session->gpsdata.satellites_used = 0;
     for (n = 0; n < 31; n++) {
 	if ((sats_used & (0x01 << n)) != 0)
-	    session->gpsdata.used[session->gpsdata.satellites_used++] =
+	    session->sats_used[session->gpsdata.satellites_used++] =
 		(int)(n + 1);
     }
 
@@ -782,11 +782,11 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	 * says should be.  So I check for the fact that if all three
 	 * values below are zero, one is not interested on this satellite */
 	if (!(ele == 0 && azm == 0 && dgps_age == 0)) {
-	    session->gpsdata.PRN[i] = (int)prn;
-	    session->gpsdata.elevation[i] = (int)ele;
-	    session->gpsdata.azimuth[i] = (int)azm;
+	    session->gpsdata.skyview[i].PRN = (int)prn;
+	    session->gpsdata.skyview[i].elevation = (int)ele;
+	    session->gpsdata.skyview[i].azimuth = (int)azm;
 	    /*@ ignore @*//* splint is confused */
-	    s = session->gpsdata.ss[i++] = (p2_snr ? p2_snr : ca_snr) / 4.0;
+	    s = session->gpsdata.skyview[i++].ss = (p2_snr ? p2_snr : ca_snr) / 4.0;
 	    /*@ end @*/
 	}
 	gpsd_report(&session->context->errout, LOG_DATA,

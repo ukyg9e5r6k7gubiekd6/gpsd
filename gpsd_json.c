@@ -321,25 +321,20 @@ void json_sky_dump(const struct gps_data_t *datap,
 		       "\"pdop\":%.2f,", datap->dop.pdop);
     /* insurance against flaky drivers */
     for (i = 0; i < datap->satellites_visible; i++)
-	if (datap->PRN[i])
+	if (datap->skyview[i].PRN)
 	    reported++;
     if (reported) {
 	(void)strlcat(reply, "\"satellites\":[", replylen);
 	for (i = 0; i < reported; i++) {
-	    int j; 
-	    bool used = false;
-	    for (j = 0; j < datap->satellites_used; j++)
-		if (datap->used[j] == datap->PRN[i]) {
-		    used = true;
-		    break;
-		}
-	    if (datap->PRN[i]) {
+	    if (datap->skyview[i].PRN) {
 		(void)snprintf(reply + strlen(reply),
 			       replylen - strlen(reply),
 			       "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s},",
-			       datap->PRN[i],
-			       datap->elevation[i], datap->azimuth[i],
-			       datap->ss[i], used ? "true" : "false");
+			       datap->skyview[i].PRN,
+			       datap->skyview[i].elevation,
+			       datap->skyview[i].azimuth,
+			       datap->skyview[i].ss,
+			       datap->skyview[i].used ? "true" : "false");
 	    }
 	}
 	if (reply[strlen(reply) - 1] == ',')

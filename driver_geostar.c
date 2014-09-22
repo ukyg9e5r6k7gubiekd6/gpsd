@@ -123,7 +123,7 @@ static bool geostar_detect(struct gps_device_t *session)
 
 static gps_mask_t geostar_analyze(struct gps_device_t *session)
 {
-    int i, j, len;
+    int i, len;
     gps_mask_t mask = 0;
     unsigned int id;
     int16_t s1, s2, s3;
@@ -259,20 +259,18 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	gpsd_report(&session->context->errout, LOG_INF, "SVs in view %d\n", ul1);
 	session->gpsdata.satellites_visible = (int)ul1;
 	if(ul1 > GEOSTAR_CHANNELS) ul1 = GEOSTAR_CHANNELS;
-	for(i = 0, j = 0; (uint32_t)i < ul1; i++) {
+	for(i = 0; (uint32_t)i < ul1; i++) {
 	    ul2 = getleu32(buf, OFFSET(2) + i * 3 * 4);
 	    s1 = getles16(buf, OFFSET(3) + i * 3 * 4);
 	    s2 = getles16(buf, OFFSET(3) + 2 + i * 3 * 4);
 	    s3 = getles16(buf, OFFSET(4) + 2 + i * 3 * 4);
 	    gpsd_report(&session->context->errout, LOG_INF, "ID %d Az %g El %g SNR %g\n",
 			decode_channel_id(ul2), s1*0.001*RAD_2_DEG, s2*0.001*RAD_2_DEG, s3*0.1);
-	    session->gpsdata.PRN[i] = decode_channel_id(ul2);
-	    session->gpsdata.azimuth[i] = (int)round((double)s1*0.001 * RAD_2_DEG);
-	    session->gpsdata.elevation[i] = (int)round((double)s2*0.001 * RAD_2_DEG);
-	    session->gpsdata.ss[i] = (double)s3*0.1;
-	    if(ul2 & (1<<27)) {
-		session->gpsdata.used[j++] = decode_channel_id(ul2);
-	    }
+	    session->gpsdata.skyview[i].PRN = decode_channel_id(ul2);
+	    session->gpsdata.skyview[i].azimuth = (int)round((double)s1*0.001 * RAD_2_DEG);
+	    session->gpsdata.skyview[i].elevation = (int)round((double)s2*0.001 * RAD_2_DEG);
+	    session->gpsdata.skyview[i].ss = (double)s3*0.1;
+	    session->gpsdata.skyview[i].used = (bool)(ul2 & (1<<27));
 	}
 	session->gpsdata.skyview_time = NAN;
 	mask |= SATELLITE_SET | USED_IS;

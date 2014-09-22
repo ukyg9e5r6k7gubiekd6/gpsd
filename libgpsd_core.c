@@ -668,22 +668,22 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
     memset(satpos, 0, sizeof(satpos));
 
     gpsd_report(errout, LOG_INF, "Sats used (%d):\n", gpsdata->satellites_used);
-    for (n = i = 0; i < gpsdata->satellites_visible; i++) {
-	for (k = 0; k < gpsdata->satellites_used; k++) {
-	    if (gpsdata->PRN[i] == gpsdata->used[k]) {
-		satpos[n][0] = sin(gpsdata->azimuth[i] * DEG_2_RAD)
-		    * cos(gpsdata->elevation[i] * DEG_2_RAD);
-		satpos[n][1] = cos(gpsdata->azimuth[i] * DEG_2_RAD)
-		    * cos(gpsdata->elevation[i] * DEG_2_RAD);
-		satpos[n][2] = sin(gpsdata->elevation[i] * DEG_2_RAD);
-		satpos[n][3] = 1;
-		gpsd_report(errout, LOG_INF, "PRN=%3d az=%3d el=%2d (%f, %f, %f)\n",
-			    gpsdata->PRN[i], 
-			    gpsdata->azimuth[i], 
-			    gpsdata->elevation[i],
-			    satpos[n][0], satpos[n][1], satpos[n][2]);
-		n++;
-	    }
+    for (n = k = 0; k < gpsdata->satellites_visible; k++) {
+	if (gpsdata->skyview[k].used)
+	{
+	    const struct satellite_t *sp = &gpsdata->skyview[k];
+	    satpos[n][0] = sin(sp->azimuth * DEG_2_RAD)
+		* cos(sp->elevation * DEG_2_RAD);
+	    satpos[n][1] = cos(sp->azimuth * DEG_2_RAD)
+		* cos(sp->elevation * DEG_2_RAD);
+	    satpos[n][2] = sin(sp->elevation * DEG_2_RAD);
+	    satpos[n][3] = 1;
+	    gpsd_report(errout, LOG_INF, "PRN=%3d az=%3d el=%2d (%f, %f, %f)\n",
+			gpsdata->skyview[k].PRN,
+			gpsdata->skyview[k].azimuth,
+			gpsdata->skyview[k].elevation,
+			satpos[n][0], satpos[n][1], satpos[n][2]);
+	    n++;
 	}
     }
 
@@ -1590,10 +1590,7 @@ void gpsd_wrap(struct gps_device_t *session)
 
 void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
 {
-    (void)memset(out->PRN, 0, sizeof(out->PRN));
-    (void)memset(out->elevation, 0, sizeof(out->elevation));
-    (void)memset(out->azimuth, 0, sizeof(out->azimuth));
-    (void)memset(out->ss, 0, sizeof(out->ss));
+    (void)memset(out->skyview, '\0', sizeof(out->skyview));
     out->satellites_visible = 0;
 #if 0
     /*
