@@ -164,7 +164,6 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
 {
     char *bufp2 = bufp;
-    bool used_valid = (session->gpsdata.set & USED_IS) != 0;
 
     if (session->device_type != NULL && (session->gpsdata.set & MODE_SET) != 0) {
 	int i, j;
@@ -173,11 +172,11 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
 	for (i = 0; i < session->device_type->channels; i++) {
-	    if (session->gpsdata.used[i]) {
+	    if (session->gpsdata.used[i] > 0) {
 		bufp += strlen(bufp);
 		(void)snprintf(bufp, len - strlen(bufp),
-			       "%02d,",
-			       used_valid ? session->gpsdata.used[i] : 0);
+			       "%d,",
+			       session->gpsdata.used[i]);
 		j++;
 	    }
 	}
