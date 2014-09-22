@@ -71,6 +71,8 @@ PERMISSIONS
 
 #include "gps.h"		/* for safe_atof() & timestamp_t prototype */
 
+#define JSON_MINIMAL	/* GPSD only uses a subset of the features */
+
 #ifdef CLIENTDEBUG_ENABLE
 static int debuglevel = 0;
 static FILE *debugfp;

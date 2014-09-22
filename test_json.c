@@ -14,6 +14,7 @@
 #include "gpsd.h"
 #include "gps_json.h"
 
+#define JSON_MINIMAL	/* GPSD only uses a subset of the features */
 
 static void assert_case(int num, int status)
 {
@@ -211,7 +212,7 @@ static const struct json_attr_t json_attrs_8[] = {
 
 static const char *json_str9 = "{\"parts\":[]}";
 
-#ifndef MINIMAL_JSON
+#ifndef JSON_MINIMAL
 /* Case 10: Read array of integers */
 
 static const char *json_str10 = "[23,-17,5]";
@@ -255,7 +256,7 @@ static const struct json_array_t json_array_12 = {
     .maxlen = sizeof(realstore)/sizeof(realstore[0]),
 };
 /*@+type@*/
-#endif /* MINIMAL_JSON */
+#endif /* JSON_MINIMAL */
 
 /*@ +fullinitblock @*/
 /* *INDENT-ON* */
@@ -361,7 +362,7 @@ static void jsontest(int i)
 	assert_integer("dumbcount", dumbcount, 0);
 	break;
 
-#ifdef MINIMAL_JSON
+#ifdef JSON_MINIMAL
 #define MAXTEST 10
 #else
     case 10:
@@ -392,7 +393,7 @@ static void jsontest(int i)
 	break;
 
 #define MAXTEST 12
-#endif /* MINIMAL_JSON */
+#endif /* JSON_MINIMAL */
 
     default:
 	(int)fputs("Unknown test number\n", stderr);
