@@ -1054,6 +1054,11 @@ static /*@unused@*/ inline void memory_barrier(void)
 #endif /* S_SPLINT_S */
 }
 
+#ifndef  __GLIBC__
+/* in case target doesn't use glibc */
+extern time_t gmtime(register struct tm *);
+#endif
+
 # ifdef __cplusplus
 }
 # endif

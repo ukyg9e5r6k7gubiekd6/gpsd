@@ -834,6 +834,7 @@ libgps_sources = [
     "shared_json.c",
     "strl.c",
     "getsid.c",
+    "timegm.c",
 ]
 
 if env['libgpsmm']:

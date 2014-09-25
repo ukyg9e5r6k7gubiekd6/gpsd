@@ -36,4 +36,9 @@ extern int json_ais_read(const char *, char *, size_t, struct ais_t *,
 
 #define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
 
+#ifndef __GLIBC__
+/* in case target doesn't use glibc */
+extern time_t gmtime(register struct tm *);
+#endif
+
 #endif /* _GPSD_LIBGPS_H_ */
