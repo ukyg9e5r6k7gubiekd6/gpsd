@@ -308,34 +308,6 @@ timestamp_t timestamp(void)
 #endif
 }
 
-time_t mkgmtime(register struct tm * t)
-/* struct tm to seconds since Unix epoch */
-{
-    register int year;
-    register time_t result;
-    static const int cumdays[MONTHSPERYEAR] =
-	{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
-
-    /*@ +matchanyintegral @*/
-    year = 1900 + t->tm_year + t->tm_mon / MONTHSPERYEAR;
-    result = (year - 1970) * 365 + cumdays[t->tm_mon % MONTHSPERYEAR];
-    result += (year - 1968) / 4;
-    result -= (year - 1900) / 100;
-    result += (year - 1600) / 400;
-    if ((year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0) &&
-	(t->tm_mon % MONTHSPERYEAR) < 2)
-	result--;
-    result += t->tm_mday - 1;
-    result *= 24;
-    result += t->tm_hour;
-    result *= 60;
-    result += t->tm_min;
-    result *= 60;
-    result += t->tm_sec;
-    /*@ -matchanyintegral @*/
-    return (result);
-}
-
 timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 /* ISO8601 UTC to Unix UTC */
 {
@@ -349,7 +321,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
-    return (timestamp_t)mkgmtime(&tm) + usec;
+    return (timestamp_t)timegm(&tm) + usec;
 #else
     double usec = 0;
 

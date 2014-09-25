@@ -97,7 +97,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 #if 0				/* use this to calculate with glibc */
 	ts = mktime(&tests[i].t);
 #else
-	ts = mkgmtime(&tests[i].t);
+	ts = timegm(&tests[i].t);
 #endif
 	if (ts != tests[i].result) {
 	    failed = true;
