@@ -257,6 +257,9 @@ static int json_internal_read_object(const char *cp,
 	    else if (*cp == '"') {
 		state = in_attr;
 		pattr = attrbuf;
+#ifndef JSON_MINIMAL
+		*end = cp;
+#endif
 	    } else if (*cp == '}')
 		break;
 	    else {
@@ -271,8 +274,7 @@ static int json_internal_read_object(const char *cp,
 	case in_attr:
 	    if (pattr == NULL) {
 #ifndef JSON_MINIMAL
-		if (end != NULL)
-		    *end = cp;
+		/* don't update end here, leave at attribute start */
 #endif
 		return JSON_ERR_NULLPTR;
 	    }
@@ -291,8 +293,7 @@ static int json_internal_read_object(const char *cp,
 				      "Unknown attribute name '%s' (attributes begin with '%s').\n",
 				      attrbuf, attrs->attribute));
 #ifndef JSON_MINIMAL
-		    if (end != NULL)
-			*end = cp;
+		    /* don't update end here, leave at attribute start */
 #endif
 		    return JSON_ERR_BADATTR;
 		}
@@ -309,8 +310,7 @@ static int json_internal_read_object(const char *cp,
 	    } else if (pattr >= attrbuf + JSON_ATTR_MAX - 1) {
 		json_debug_trace((1, "Attribute name too long.\n"));
 #ifndef JSON_MINIMAL
-		if (end != NULL)
-		    *end = cp;
+		/* don't update end here, leave at attribute start */
 #endif
 		return JSON_ERR_ATTRLEN;
 	    } else
@@ -355,8 +355,7 @@ static int json_internal_read_object(const char *cp,
 	case in_val_string:
 	    if (pval == NULL) {
 #ifndef JSON_MINIMAL
-		if (end != NULL)
-		    *end = cp;
+		/* don't update end here, leave at value start */
 #endif
 		return JSON_ERR_NULLPTR;
 	    }
@@ -370,8 +369,7 @@ static int json_internal_read_object(const char *cp,
 		       || pval > valbuf + maxlen) {
 		json_debug_trace((1, "String value too long.\n"));
 #ifndef JSON_MINIMAL
-		if (end != NULL)
-		    *end = cp;
+		/* don't update end here, leave at value start */
 #endif
 		return JSON_ERR_STRLONG;	/*  */
 	    } else
@@ -431,8 +429,7 @@ static int json_internal_read_object(const char *cp,
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1) {
 		json_debug_trace((1, "Token value too long.\n"));
 #ifndef JSON_MINIMAL
-		if (end != NULL)
-		    *end = cp;
+		/* don't update end here, leave at start of value token */
 #endif
 		return JSON_ERR_TOKLONG;
 	    } else
@@ -540,8 +537,7 @@ static int json_internal_read_object(const char *cp,
 		case t_character:
 		    if (strlen(valbuf) > 1) {
 #ifndef JSON_MINIMAL
-			if (end != NULL)
-			    *end = cp;
+			/* don't update end here, leave at start of value token */
 #endif
 			return JSON_ERR_STRLONG;
 		    }
@@ -559,8 +555,7 @@ static int json_internal_read_object(const char *cp,
 					  "Required attribute value %s not present.\n",
 					  cursor->dflt.check));
 #ifndef JSON_MINIMAL
-			if (end != NULL)
-			    *end = cp;
+			/* don't update end here, leave at start of attribute */
 #endif
 			return JSON_ERR_CHECKFAIL;
 		    }
@@ -672,8 +667,11 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    substatus =
 		json_internal_read_object(cp, arr->arr.objects.subtype, arr,
 					  offset, &cp);
-	    if (substatus != 0)
+	    if (substatus != 0) {
+		if (end != NULL)
+		    end = &cp;
 		return substatus;
+	    }
 	    break;
 	case t_integer:
 #ifndef JSON_MINIMAL
@@ -688,10 +686,6 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 #ifndef JSON_MINIMAL
 	    arr->arr.uintegers.store[offset] = (unsigned int)strtoul(cp, &ep, 0);
 	    if (ep == cp) {
-#ifndef JSON_MINIMAL
-		if (end != NULL)
-		    *end = cp;
-#endif
 		return JSON_ERR_BADNUM;
 	    }
 	    else
@@ -702,8 +696,6 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 #ifndef JSON_MINIMAL
 	    arr->arr.reals.store[offset] = strtod(cp, &ep);
 	    if (ep == cp) {
-		if (end != NULL)
-		    *end = cp;
 		return JSON_ERR_BADNUM;
 	    }
 	    else
@@ -744,6 +736,10 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    cp++;
 	else {
 	    json_debug_trace((1, "Bad trailing syntax on array.\n"));
+#ifndef JSON_MINIMAL
+	    if (end != NULL)
+		*end = cp;
+#endif
 	    return JSON_ERR_BADSUBTRAIL;
 	}
     }
