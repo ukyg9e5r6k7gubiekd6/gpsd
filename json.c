@@ -53,6 +53,10 @@ If you initialize the offset fields with the correct offsetof calls,
 everything will work. Strings are supported but all string storage
 has to be inline in the struct.
 
+NOTE
+   This code has been spun out, packaged, and documented as a 
+reusable module; search for "microjson".
+
 PERMISSIONS
    This file is Copyright (c) 2010 by the GPSD project
    BSD terms apply: see the file COPYING in the distribution root for details.
@@ -409,7 +413,7 @@ static int json_internal_read_object(const char *cp,
 		    --cp;
 	    } else if (pval > valbuf + JSON_VAL_MAX - 1) {
 		json_debug_trace((1, "Token value too long.\n"));
-		/* don't update end here, leave at start of value token */
+		/* don't update end here, leave at value start */
 		return JSON_ERR_TOKLONG;
 	    } else
 		*pval++ = *cp;
