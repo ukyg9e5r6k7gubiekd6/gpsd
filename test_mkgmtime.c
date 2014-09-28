@@ -94,11 +94,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     (void)setenv("TZ", "GMT", 1);
 
     for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++) {
-#if 0				/* use this to calculate with glibc */
 	ts = mktime(&tests[i].t);
-#else
-	ts = timegm(&tests[i].t);
-#endif
 	if (ts != tests[i].result) {
 	    failed = true;
 	    (void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
