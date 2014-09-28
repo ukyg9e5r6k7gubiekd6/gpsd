@@ -1077,8 +1077,8 @@ test_float = env.Program('test_float', ['test_float.c'])
 test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpsdlibs)
 test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
 env.Depends(test_json, compiled_gpslib)
-test_mkgmtime = env.Program('test_mkgmtime', ['test_mkgmtime.c'], parse_flags=gpslibs)
-env.Depends(test_mkgmtime, compiled_gpslib)
+test_mktime = env.Program('test_mktime', ['test_mktime.c'], parse_flags=gpslibs)
+env.Depends(test_mktime, compiled_gpslib)
 test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
 test_packet = env.Program('test_packet', ['test_packet.c'], parse_flags=gpsdlibs)
 env.Depends(test_packet, [compiled_gpsdlib, compiled_gpslib])
@@ -1091,7 +1091,7 @@ env.Depends(test_gpsmm, compiled_gpslib)
 test_libgps = env.Program('test_libgps', ['test_libgps.c'], parse_flags=gpslibs)
 env.Depends(test_libgps, compiled_gpslib)
 testprogs = [test_float, test_trig, test_bits, test_matrix, test_packet,
-             test_mkgmtime, test_geoid, test_libgps]
+             test_mktime, test_geoid, test_libgps]
 if env['socket_export']:
     testprogs.append(test_json)
 if env["libgpsmm"]:
@@ -1475,7 +1475,7 @@ splint_table = [
     ('splint-gpsdecode',['gpsdecode.c'],'gpsdecode', ['']),
     ('splint-gpxlogger',['gpxlogger.c'],'gpxlogger', ['']),
     ('splint-test_packet',['test_packet.c'],'test_packet test harness', ['']),
-    ('splint-test_mkgmtime',['test_mkgmtime.c'],'test_mkgmtime test harness', ['']),
+    ('splint-test_mktime',['test_mktime.c'],'test_mktime test harness', ['']),
     ('splint-test_geoid',['test_geoid.c'],'test_geoid test harness', ['']),
     ('splint-test_json',['test_json.c'],'test_json test harness', ['']),
     ]
@@ -1673,8 +1673,8 @@ maidenhead_locator_regress = Utility('maidenhead-locator-regress', [python_built
     ])
 
 # Regression-test the calendar functions
-time_regress = Utility('time-regress', [test_mkgmtime], [
-    '$SRCDIR/test_mkgmtime'
+time_regress = Utility('time-regress', [test_mktime], [
+    '$SRCDIR/test_mktime'
     ])
 
 # Regression test the unpacking code in libgps
@@ -1714,7 +1714,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 describe = Utility('describe', [],
                    ['@echo "Run normal regression tests for %s..."' %(rev.strip(),)])
 testclean = Utility('test_cleanup', [],
-                    'rm -f test_bits test_matrix test_geoid test_json test_libgps test_mkgmtime test_packet')
+                    'rm -f test_bits test_matrix test_geoid test_json test_libgps test_mktime test_packet')
 check = env.Alias('check', [
     describe,
     python_compilation_regress,
