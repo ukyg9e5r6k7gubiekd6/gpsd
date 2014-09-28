@@ -6,8 +6,6 @@
 #ifndef _GPSD_LIBGPS_H_
 #define _GPSD_LIBGPS_H_
 
-#include "gpsd_config.h"
-
 /* values to poke in the gps_fd member if we get it via something special */
 #define SHM_PSEUDO_FD	-1
 #define DBUS_PSEUDO_FD	-2
@@ -37,10 +35,5 @@ extern int json_ais_read(const char *, char *, size_t, struct ais_t *,
 		  /*@null@*/const char **);
 
 #define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
-
-#ifndef HAVE_GMTIME
-/* in case target doesn't have gmtime */
-extern time_t gmtime(register struct tm *);
-#endif /* ndef HAVE_GMTIME */
 
 #endif /* _GPSD_LIBGPS_H_ */

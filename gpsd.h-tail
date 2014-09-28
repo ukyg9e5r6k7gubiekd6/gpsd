@@ -1054,11 +1054,6 @@ static /*@unused@*/ inline void memory_barrier(void)
 #endif /* S_SPLINT_S */
 }
 
-#ifndef HAVE_GMTIME
-/* in case target doesn't have gmtime */
-extern time_t gmtime(register struct tm *);
-#endif /* ndef HAVE_GMTIME */
-
 # ifdef __cplusplus
 }
 # endif
