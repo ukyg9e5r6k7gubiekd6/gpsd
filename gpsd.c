@@ -1293,7 +1293,7 @@ static void handle_request(struct subscriber_t *sub,
 	for (devp = devices; devp < devices + MAXDEVICES; devp++)
 	    if (!allocated_device(devp))
 		continue;
-	    else if (devconf.path[0] != '\0' && devp != NULL
+	    else if (devconf.path[0] != '\0'
 		     && strcmp(devp->gpsdata.dev.path, devconf.path) != 0)
 		continue;
 	    else {
