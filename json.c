@@ -27,10 +27,10 @@ vs. boolean, but not signed integer vs. unsigned integer).  The parser
 will match the right spec against the actual data.
 
    The dialect this parses has some limitations.  First, it cannot
-recognize the JSON "null" value.  Secondly, arrays may not have time
-literals of character values as elements (this limitation could be
-easily removed if required). Third, all elements of an array must be
-of the same type.
+recognize the JSON "null" value.  Secondly, arrays may not have
+character values as elements (this limitation could be easily removed
+if required). Third, all elements of an array must be of the same
+type.
 
    There are separate entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
@@ -694,6 +694,23 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 		cp = ep;
 	    break;
 #endif /* JSON_MINIMAL */
+	case t_time:
+#ifndef JSON_MINIMAL
+	    if (*cp != '"')
+		return JSON_ERR_BADSTRING;
+	    else
+		++cp;
+	    arr->arr.reals.store[offset] = iso8601_to_unix((char *)cp);
+	    if (arr->arr.reals.store[offset] >= HUGE_VAL)
+		return JSON_ERR_BADNUM;
+	    while (*cp && *cp != '"')
+		cp++;
+	    if (*cp != '"')
+		return JSON_ERR_BADSTRING;
+	    else
+		++cp; 
+#endif /* JSON_MINIMAL */
+	    break;
 	case t_real:
 #ifndef JSON_MINIMAL
 	    arr->arr.reals.store[offset] = strtod(cp, &ep);
