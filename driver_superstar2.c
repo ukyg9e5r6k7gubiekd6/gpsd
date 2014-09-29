@@ -99,7 +99,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     tm.tm_mday = (int)getub(buf, 14);
     tm.tm_mon = (int)getub(buf, 15) - 1;
     tm.tm_year = (int)getleu16(buf, 16) - 1900;
-    session->newdata.time = (timestamp_t)timegm(&tm) + (d - tm.tm_sec);
+    session->newdata.time = (timestamp_t)mkgmtime(&tm) + (d - tm.tm_sec);
     mask |= TIME_SET | PPSTIME_IS;
 
     /* extract the local tangential plane (ENU) solution */
@@ -269,7 +269,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 	tm.tm_min = (int)getsb(buf, 42);
 	d = getled64((char *)buf, 43);
 	tm.tm_sec = (int)d;
-	session->newdata.time = (timestamp_t)timegm(&tm);
+	session->newdata.time = (timestamp_t)mkgmtime(&tm);
 	session->context->leap_seconds = (int)getsb(buf, 20);
 	mask = TIME_SET | PPSTIME_IS;
     }

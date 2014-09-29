@@ -111,7 +111,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	nsec = (uint) getbeu32(buf, 11);
 
 	/*@ -unrecog */
-	session->newdata.time = (timestamp_t)timegm(&unpacked_date) + nsec * 1e-9;
+	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + nsec * 1e-9;
 	/*@ +unrecog */
 	mask |= TIME_SET;
 	gpsd_report(&session->context->errout, LOG_DATA,

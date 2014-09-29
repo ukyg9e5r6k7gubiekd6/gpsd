@@ -272,7 +272,7 @@ timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
      */
     timestamp_t t;
 
-    t = (timestamp_t)timegm(&session->nmea.date) +
+    t = (timestamp_t)mkgmtime(&session->nmea.date) +
 	session->nmea.subseconds;
     session->context->valid &=~ GPS_TIME_VALID;
 

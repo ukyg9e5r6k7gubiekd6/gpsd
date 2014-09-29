@@ -887,7 +887,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	unpacked_date.tm_sec = 0;
 	subseconds = getbeu16(buf, 17) * 1e-3;
 	/*@ -compdef -unrecog */
-	session->newdata.time = (timestamp_t)timegm(&unpacked_date) + subseconds;
+	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
 	/*@ +compdef +unrecog */
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "SiRF: GND 0x29 UTC: %lf\n",
@@ -1016,7 +1016,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	unpacked_date.tm_sec = 0;
 	subseconds = ((unsigned short)getbeu16(buf, 32)) * 1e-3;
 	/*@ -compdef */
-	session->newdata.time = (timestamp_t)timegm(&unpacked_date) + subseconds;
+	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
 	/*@ +compdef */
 #ifdef TIMEHINT_ENABLE
 	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
@@ -1069,7 +1069,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
 	unpacked_date.tm_year = (int)getbeu16(buf, 6) - 1900;
 	/*@ -compdef */
-	session->newdata.time = (timestamp_t)timegm(&unpacked_date);
+	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
 	/*@ +compdef */
 	session->context->leap_seconds = (int)getbeu16(buf, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
