@@ -85,9 +85,9 @@ Two last things:
 = End Sidebar =
 
 Date and time in GPS is represented as number of weeks mod 1024 from
-the start of zero second of 6 January 1980, and number of SI seconds into
-the week.  GPS time is not leap-second corrected, and has a constant
-offset from TAI, but not from UTC.
+1980-01-06T00:00.00Z, and number of SI seconds into the week.  GPS
+time is not leap-second corrected, and has a constant offset from TAI,
+but not from UTC.
 
 There are hence two issues with converting GPS Time to UTC:
 
@@ -114,7 +114,7 @@ broadcast, roughly once ever 20 minutes.  While the satellites do
 notify GPSes of upcoming leap-seconds, this notification is not
 necessarily processed correctly on consumer-grade devices, and will
 not be available at all when a GPS receiver has just
-cold-booted.  Thus, the time reported from NMEA devices, although
+cold-booted.  Thus, the time reported from GPS devices, although
 supposed to be UTC, may be offset by an integer number of seconds
 between a cold boot or leap second and the following
 subframe broadcast. 
@@ -127,24 +127,24 @@ divergence will normally be only one second or less.
 GPS date and time are subject to a rollover problem in the 10-bit week
 number counter, which will re-zero every 1024 weeks (roughly every 20
 years). The last rollover (and the first since GPS went live in 1980)
-was 0000 22 August 1999; the next would fall in 2019, but plans are
+was 1999-08-22T00:00:00Z; the next would fall in 2019, but plans are
 afoot to upgrade the satellite counters to 13 bits; this will delay
 the next rollover until 2173.
 
 For accurate time reporting, therefore, a GPS requires a supplemental
 time reference sufficient to identify the current rollover period,
-e.g. accurate to within 512 weeks.  Many NMEA GPSes have a wired-in
+e.g. accurate to within 512 weeks.  Many GPSes have a wired-in
 assumption about the UTC time of the last rollover and will thus report
 incorrect times outside the rollover period they were designed in.
 
 These conditions leave gpsd in a serious hole.  Actually there are several
 interrelated problems:
 
-1) Every NMEA device has some assumption about base epoch (date of
+1) Every device has some assumption about base epoch (date of
 last rollover) that we don't have access to.  Thus, there's no way to
 check whether a rollover the device wasn't prepared for has occurred
 before gpsd startup time (making the reported UTC date invalid)
-without some other time source.  (Some NMEA devices may keep a
+without some other time source.  (Some devices may keep a
 rollover count in NVRAM and avoid the problem; we can't tell when that's
 happening, either.)
 
@@ -167,10 +167,11 @@ is enabled, which requires 38400bps. Evermore GPSes can't be made to
 report it at all. Furthermore, before the almanac load the GPS may report
 a fixed (and possibly out of date) offset.
 
-Conclusion: if the system clock isn't accurate enough that we can deduce
-what rollover period we're in, we're utterly hosed. Furthermore, if it's
-not accurate to within a second and only NMEA devices are reporting,
-we don't even know what century it is!
+Conclusion: if the system clock isn't accurate enough that we can
+deduce what rollover period we're in, we're utterly
+hosed. Furthermore, if it's not accurate to within a second and only
+NMEA devices that don't emit ZDA are reporting, we don't even know
+what century it is!
 
 Therefore, we must assume the system clock is reliable to within a second.
 
