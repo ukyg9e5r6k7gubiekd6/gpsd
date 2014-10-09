@@ -102,8 +102,8 @@ static int send_udp (char *nmeastring, size_t ind)
 	ind = ind-1;
     }
     /* Add termination to NMEA feed for AISHUB */
-    buffer[ind] = '\n'; ind++;
     buffer[ind] = '\r'; ind++;
+    buffer[ind] = '\n'; ind++;
     buffer[ind] = '\0';
 
     if ((flags & WATCH_JSON)==0 && buffer[0] == '{') {
