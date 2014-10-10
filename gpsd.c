@@ -829,8 +829,11 @@ static void handle_control(int sfd, char *buf)
 			"<= control(%d): adding %s\n", sfd, stash);
 	    if (gpsd_add_device(stash, NOWAIT))
 		ignore_return(write(sfd, "OK\n", 3));
-	    else
+	    else {
 		ignore_return(write(sfd, "ERROR\n", 6));
+		gpsd_report(&context.errout, LOG_INF,
+			    "control(%d): adding %s failed, too many devices active\n", sfd, stash);
+	    }
 	}
     } else if (buf[0] == '!') {
 	/* split line after ! into device=string, send string to device */
@@ -1877,6 +1880,13 @@ int main(int argc, char *argv[])
 	    usage();
 	    exit(EXIT_SUCCESS);
 	}
+    }
+
+    /* sanity check */
+    if (argc - optind > MAXDEVICES) {
+	gpsd_report(&context.errout, LOG_ERROR,
+		    "too many devices on command line\n");
+	exit(1);
     }
 
 #ifdef SYSTEMD_ENABLE
