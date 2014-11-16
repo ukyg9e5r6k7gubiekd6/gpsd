@@ -35,10 +35,10 @@
 #                          update YOUR CONFIG here after
 # ========================================================================================
 
-# Default rules is applied for any unspecified vendor:product devices
-# -----------------------------------------------------------------------------------------
-SUBSYSTEM=="tty", SYSFS{idVendor}=="?*", SYSFS{idProduct}=="?*", SYMLINK="gps-$env{ID_PATH}"
+# Your own script:     SUBSYSTEM=="tty", ATTRS{idVendor}=="xxxx", ATTRS{idProduct}=="yyyy", RUN+="/usr/local/bin/myscript"
+# Static device name:  SUBSYSTEM=="tty", ATTRS{idVendor}=="xxxx", ATTRS{idProduct}=="yyyy", SYMLINK="gps-usb"
+# Path dependent name: SUBSYSTEM=="tty", ATTRS{idVendor}=="xxxx", ATTRS{idProduct}=="yyyy", SYMLINK="gps-$env{ID_PATH}"
+# In first case you do what ever you want, script receive the information about context in environement variables
+# In second case you name is fixe (ex: /dev/gps-usb) this is working if your usb/serial ID(vendor:product) is unique
+# In third case your device name depend on the port it is plugged in.
 
-# Well known device may get a static device name 
-# -----------------------------------------------------------------------
-SUBSYSTEM=="tty", SYSFS{idVendor}=="10c4", SYSFS{idProduct}=="ea60", SYMLINK="gps-usb"
