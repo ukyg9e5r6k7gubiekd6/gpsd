@@ -10,6 +10,9 @@
 #define SHM_PSEUDO_FD	-1
 #define DBUS_PSEUDO_FD	-2
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern int gps_sock_open(/*@null@*/const char *, /*@null@*/const char *,
 		      /*@out@*/struct gps_data_t *);
 extern int gps_sock_close(struct gps_data_t *);
@@ -33,6 +36,9 @@ extern int gps_dbus_mainloop(struct gps_data_t *, int,
 
 extern int json_ais_read(const char *, char *, size_t, struct ais_t *,
 		  /*@null@*/const char **);
+#ifdef __cplusplus
+}
+#endif
 
 #define PRIVATE(gpsdata) ((struct privdata_t *)(gpsdata)->privdata)
 
