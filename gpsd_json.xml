@@ -18,7 +18,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 </refmeta>
 <refnamediv id='name'>
 <refname>gpsd_json</refname>
-<refpurpose>gpsd request/response protol</refpurpose>
+<refpurpose>gpsd request/response protocol</refpurpose>
 </refnamediv>
 
 <refsect1 id='overview'><title>OVERVIEW</title>
