@@ -57,32 +57,35 @@ verbose = 0
 
 __locations = [
     (
-    # U.S. Navy's offset-history file
-    "ftp://maia.usno.navy.mil/ser7/tai-utc.dat",
-    r" TAI-UTC= +([0-9-]+)[^\n]*\n$",
-    1,
-    19, # Magic TAI-GPS offset -> (leapseconds 1980)
-    "ftp://maia.usno.navy.mil/ser7/tai-utc.dat",
+        # U.S. Navy's offset-history file
+        "ftp://maia.usno.navy.mil/ser7/tai-utc.dat",
+        r" TAI-UTC= +([0-9-]+)[^\n]*\n$",
+        1,
+        19,  # Magic TAI-GPS offset -> (leapseconds 1980)
+        "ftp://maia.usno.navy.mil/ser7/tai-utc.dat",
     ),
     (
-    # International Earth Rotation Service Bulletin C
-    "http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat",
-    r" UTC-TAI = ([0-9-]+)",
-    -1,
-    19, # Magic TAI-GPS offset -> (leapseconds 1980)
-    "http://hpiers.obspm.fr/iers/bul/bulc/UTC-TAI.history",
+        # International Earth Rotation Service Bulletin C
+        "http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat",
+        r" UTC-TAI = ([0-9-]+)",
+        -1,
+        19,  # Magic TAI-GPS offset -> (leapseconds 1980)
+        "http://hpiers.obspm.fr/iers/bul/bulc/UTC-TAI.history",
     ),
 ]
 
-GPS_EPOCH	= 315964800		# 6 Jan 1981 00:00:00
-SECS_PER_WEEK	= 60 * 60 * 24 * 7	# Seconds per GPS week
-ROLLOVER	= 1024			# 10-bit week rollover
+GPS_EPOCH = 315964800               # 6 Jan 1981 00:00:00
+SECS_PER_WEEK = 60 * 60 * 24 * 7    # Seconds per GPS week
+ROLLOVER = 1024                     # 10-bit week rollover
+
 
 def gps_week(t):
-    return (t - GPS_EPOCH)/SECS_PER_WEEK % ROLLOVER
+    return (t - GPS_EPOCH) / SECS_PER_WEEK % ROLLOVER
+
 
 def gps_rollovers(t):
-    return (t - GPS_EPOCH)/SECS_PER_WEEK / ROLLOVER
+    return (t - GPS_EPOCH) / SECS_PER_WEEK / ROLLOVER
+
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
@@ -106,9 +109,10 @@ def isotime(s):
     else:
         raise TypeError
 
+
 def retrieve():
     "Retrieve current leap-second from Web sources."
-    random.shuffle(__locations) # To spread the load
+    random.shuffle(__locations)  # To spread the load
     for (url, regexp, sign, offset, _) in __locations:
         try:
             if os.path.exists(url):
@@ -126,6 +130,7 @@ def retrieve():
             if verbose:
                 print >>sys.stderr, "IOError: %s" % url
     return None
+
 
 def last_insertion_time():
     "Give last potential insertion time for a leap second."
@@ -151,9 +156,10 @@ def last_insertion_time():
     else:
         return jan
 
+
 def save_leapseconds(outfile):
     "Fetch the leap-second history data and make a leap-second list since Unix epoch GMT (1970-01-01T00:00:00)."
-    random.shuffle(__locations) # To spread the load
+    random.shuffle(__locations)  # To spread the load
     for (_, _, _, _, url) in __locations:
         skip = True
         try:
@@ -177,10 +183,11 @@ def save_leapseconds(outfile):
             md = leapbound(fields[0], fields[1])
             if verbose:
                 print >>sys.stderr, "# %s" % md
-            fp.write(repr(iso_to_unix(md)) + "\t# " + str(md)  + "\n")
+            fp.write(repr(iso_to_unix(md)) + "\t# " + str(md) + "\n")
         fp.close()
         return
     print >>sys.stderr, "%s not updated." % outfile
+
 
 def fetch_leapsecs(filename):
     "Get a list of leap seconds from the local cache of the USNO history"
@@ -188,6 +195,7 @@ def fetch_leapsecs(filename):
     for line in open(str(filename)):
         leapsecs.append(float(line.strip().split()[0]))
     return leapsecs
+
 
 def make_leapsecond_include(infile):
     "Get the current leap second count and century from the local cache usable as C preprocessor #define"
@@ -210,10 +218,11 @@ def make_leapsecond_include(infile):
  * Correct for week beginning %(_isodate)s
  */
 #define BUILD_CENTURY\t%(_century)s
-#define BUILD_WEEK\t%(_week)d		# Assumes 10-bit week counter
+#define BUILD_WEEK\t%(_week)d                   # Assumes 10-bit week counter
 #define BUILD_LEAPSECONDS\t%(_leapsecs)d
-#define BUILD_ROLLOVERS\t%(_rollovers)d		# Assumes 10-bit week counter
+#define BUILD_ROLLOVERS\t%(_rollovers)d         # Assumes 10-bit week counter
 """ % locals()
+
 
 def conditional_leapsecond_fetch(outfile, timeout):
     "Conditionally fetch leapsecond data, w. timeout in case of evil firewalls."
@@ -246,22 +255,23 @@ def conditional_leapsecond_fetch(outfile, timeout):
         signal.alarm(0)
         return True
 
+
 def leastsquares(tuples):
     "Generate coefficients for a least-squares fit to the specified data."
-    sum_x=0
-    sum_y=0
-    sum_xx=0
-    sum_xy=0
+    sum_x = 0
+    sum_y = 0
+    sum_xx = 0
+    sum_xy = 0
     for (x, y) in tuples:
-        sum_x = sum_x+x
-        sum_y = sum_y+y
-        xx = math.pow(x,2)
-        sum_xx = sum_xx+xx
-        xy = x*y
-        sum_xy = sum_xy+xy
+        sum_x = sum_x + x
+        sum_y = sum_y + y
+        xx = math.pow(x, 2)
+        sum_xx = sum_xx + xx
+        xy = x * y
+        sum_xy = sum_xy + xy
     n = len(tuples)
-    c = (-sum_x*sum_xy+sum_xx*sum_y)/(n*sum_xx-sum_x*sum_x)
-    b = (-sum_x*sum_y+n*sum_xy)/(n*sum_xx-sum_x*sum_x)
+    c = (-sum_x * sum_xy + sum_xx * sum_y) / (n * sum_xx - sum_x * sum_x)
+    b = (-sum_x * sum_y + n * sum_xy) / (n * sum_xx - sum_x * sum_x)
     # y = b * x + c
     maxerr = 0
     for (x, y) in tuples:
@@ -270,27 +280,30 @@ def leastsquares(tuples):
             maxerr = err
     return (b, c, maxerr)
 
+
 def iso_to_unix(tv):
     "Local Unix time to iso date."
     return calendar.timegm(time.strptime(tv, "%Y-%m-%dT%H:%M:%S"))
 
+
 def unix_to_iso(tv):
     "ISO date to UTC Unix time."
     return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(tv))
+
 
 def graph_history(filename):
     "Generate a GNUPLOT plot of the leap-second history."
     raw = fetch_leapsecs(filename)
     (b, c, e) = leastsquares(zip(range(len(raw)), raw))
     e /= (60 * 60 * 24 * 7)
-    dates = map(lambda t: time.strftime("%Y-%m-%d",time.localtime(t)), raw)
+    dates = map(lambda t: time.strftime("%Y-%m-%d", time.localtime(t)), raw)
     fmt = ''
     fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
     fmt += '# Maximum residual error is %.2f weeks\n' % e
     fmt += 'set autoscale\n'
     fmt += 'set xlabel "Leap second offset"\n'
-    fmt += 'set xrange [0:%d]\n' % (len(dates)-1)
+    fmt += 'set xrange [0:%d]\n' % (len(dates) - 1)
     fmt += 'set ylabel "Leap second date"\n'
     fmt += 'set timefmt "%Y-%m-%d"\n'
     fmt += 'set ydata time\n'
@@ -303,35 +316,39 @@ def graph_history(filename):
     fmt += 'e\n'
     print fmt
 
+
 def rfc822_to_unix(tv):
     "Local Unix time to RFC822 date."
     return calendar.timegm(time.strptime(tv, "%d %b %Y %H:%M:%S"))
+
 
 def unix_to_rfc822(tv):
     "RFC822 date to gmt Unix time."
     return time.strftime("%d %b %Y %H:%M:%S", time.gmtime(tv))
 
+
 def printnext(val):
     "Compute Unix time correponsing to a scheduled leap second."
     if val[:3].lower() not in ("jun", "dec"):
         print >>sys.stderr, "leapsecond.py: -n argument must begin with "\
-              "'Jun' or 'Dec'"
+            "'Jun' or 'Dec'"
         raise SystemExit, 1
     else:
         month = val[:3].lower()
         if len(val) != 7:
             print >>sys.stderr, "leapsecond.py: -n argument must be of "\
-                  "the form {jun|dec}nnnn."
+                "the form {jun|dec}nnnn."
             raise SystemExit, 1
         try:
             year = int(val[3:])
         except ValueError:
             print >>sys.stderr, "leapsecond.py: -n argument must end "\
-                  "with a 4-digit year."
+                "with a 4-digit year."
             raise SystemExit, 1
         # Date looks valid
         tv = leapbound(year, month)
         print "%d       /* %s */" % (iso_to_unix(tv), tv)
+
 
 def leapbound(year, month):
     "Return a leap-second date in RFC822 form."
@@ -340,7 +357,7 @@ def leapbound(year, month):
     # Note: It is also possible for leap seconds to occur in end-Mar and end-Sep
     #  although none have occurred yet
     if month.upper()[:3] == "JAN":
-        tv = "%s-12-31T23:59:60" % (int(year)-1)
+        tv = "%s-12-31T23:59:60" % (int(year) - 1)
     elif month.upper()[:3] in ("JUN", "JUL"):
         tv = "%s-06-30T23:59:59" % year
     elif month.upper()[:3] == "DEC":
@@ -348,6 +365,7 @@ def leapbound(year, month):
     return tv
 
 # Main part
+
 
 def usage():
     print __doc__
@@ -360,7 +378,7 @@ if __name__ == '__main__':
         if switch == '-h':    # help, get usage only
             usage()
         elif switch == '-v':    # be verbose
-            verbose=1
+            verbose = 1
         elif switch == '-f':    # Fetch USNO data to cache locally
             save_leapseconds(val)
             raise SystemExit, 0
