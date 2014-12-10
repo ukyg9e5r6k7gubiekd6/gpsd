@@ -71,6 +71,7 @@ srec.html
 *~
 *.swp
 *.egg-info
+*.gcno
 # Built sources
 gps_maskdump.c
 gpsd_maskdump.c
