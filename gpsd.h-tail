@@ -554,7 +554,7 @@ struct gps_device_t {
 	    struct tm date;		/* date part of last sentence time */
 	    double subseconds;		/* subsec part of last sentence time */
 	} garmintxt;
-#endif /* NMEA_ENABLE */
+#endif /* GARMINTXT_ENABLE */
 #ifdef BINARY_ENABLE
 #ifdef GEOSTAR_ENABLE
 	struct {
