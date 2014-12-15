@@ -377,6 +377,7 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->gpsdata.satellites_visible       = (int)bu[2];
 
     memset(session->gpsdata.skyview, '\0', sizeof(session->gpsdata.skyview));
+    memset(session->sats_used, 0, sizeof(session->sats_used));
     l2 = 0;
     for (l1=0;l1<session->gpsdata.satellites_visible;l1++) {
         int    svt;
@@ -390,13 +391,14 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
         svt   = (int)(bu[3+12*l1+11] & 0x0f);
 
-        session->gpsdata.skyview[l1].elevation  = (int) (round(elev));
-	session->gpsdata.skyview[l1].azimuth    = (int) (round(azi));
+        session->gpsdata.skyview[l1].elevation  = (short) (round(elev));
+	session->gpsdata.skyview[l1].azimuth    = (short) (round(azi));
         session->gpsdata.skyview[l1].ss         = snr;
-        session->gpsdata.skyview[l1].PRN        = (int)bu[3+12*l1+0];
+        session->gpsdata.skyview[l1].PRN        = (short)bu[3+12*l1+0];
 	session->gpsdata.skyview[l1].used = false;
 	if ((svt == 2) || (svt == 5)) {
 	    session->gpsdata.skyview[l1].used = true;
+            session->sats_used[l2] = (unsigned short) session->gpsdata.skyview[l1].PRN;
 	    l2 += 1;
 	}
     }
