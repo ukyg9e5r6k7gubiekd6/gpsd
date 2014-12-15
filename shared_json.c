@@ -81,6 +81,7 @@ int json_watch_read(const char *buf,
 		    /*@out@*/ struct policy_t *ccp,
 		    /*@null@*/ const char **endptr)
 {
+    bool dummy_pps_flag;
     /*@ -fullinitblock @*/
     /* *INDENT-OFF* */
     struct json_attr_t chanconfig_attrs[] = {
@@ -101,6 +102,8 @@ int json_watch_read(const char *buf,
 	                                  .len = sizeof(ccp->devpath)},
 	{"remote",         t_string,   .addr.string = ccp->remote,
 	                                  .len = sizeof(ccp->remote)},
+	{"pps",            t_boolean,  .addr.boolean = &dummy_pps_flag,
+                                          .nodefault = false},
 	{NULL},
     };
     /* *INDENT-ON* */
