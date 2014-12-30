@@ -282,6 +282,13 @@ will see correct time reports.</p>
 
 <h1 id='bug-reporting'>How do I report bugs in GPSD?</h1>
 
+<p>Note: Because we have been informed that some people are insane
+about this, we shall state the obvious: we welcome security-related
+bug reports and will <em>not</em> sue people who send them to us.  If
+your report includes sensitive information or discloses an exploit,
+please email the maintainer rather than letting it all hang out on
+the public bugtracker. We will fix such bugs promptly.</p>
+
 <p>When you have a problem with gpsd, here are some steps you can take to
 help get your bug resolved as quickly as possible.</p>
 
