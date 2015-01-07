@@ -345,6 +345,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
     char *dp = NULL;
     double usec;
     struct tm tm;
+    memset(&tm,0,sizeof(tm));
 
     /*@i1@*/ dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
     if (dp != NULL && *dp == '.')
