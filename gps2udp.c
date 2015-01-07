@@ -73,7 +73,7 @@ static bool aisonly = false;
    loctime = localtime (&curtime);
      
    /* Print it out in a nice format. */
-   (void)strftime (buffer, MAX_TIME_LEN, "%H:%M:%S", loctime);
+   (void)strftime (buffer, sizeof(buffer), "%H:%M:%S", loctime);
      
    return (buffer);
 }

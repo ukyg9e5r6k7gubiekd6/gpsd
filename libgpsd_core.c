@@ -1015,7 +1015,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 			       sizeof(dbuf) - strlen(dbuf), "%d ", i);
 	if (strlen(dbuf) > 0)
 	    dbuf[strlen(dbuf) - 1] = '\0';
-	(void)strlcat(dbuf, "} -> {", BUFSIZ);
+	(void)strlcat(dbuf, "} -> {", sizeof(dbuf));
 	for (i = 0; i < FD_SETSIZE; i++)
 	    if (FD_ISSET(i, rfds))
 		(void)snprintf(dbuf + strlen(dbuf),

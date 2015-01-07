@@ -189,11 +189,11 @@ static void update_lcd(struct gps_data_t *gpsdata)
     char *s;
 
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
-    snprintf(tmpbuf, 254, "widget_set gpsd one 1 1 {Lat: %s %c}\n", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd one 1 1 {Lat: %s %c}\n", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     send_lcd(tmpbuf);
 
     s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
-    snprintf(tmpbuf, 254, "widget_set gpsd two 1 2 {Lon: %s %c}\n", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd two 1 2 {Lon: %s %c}\n", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     send_lcd(tmpbuf);
 
     /* As a pilot, a heading of "0" gives me the heebie-jeebies (ie, 0
@@ -201,7 +201,7 @@ static void update_lcd(struct gps_data_t *gpsdata)
     track=(int)(gpsdata->fix.track);
     if (track == 0) track = 360;
 
-    snprintf(tmpbuf, 254, "widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
              gpsdata->fix.speed*speedfactor, speedunits,
              track);
     send_lcd(tmpbuf);
@@ -221,10 +221,10 @@ static void update_lcd(struct gps_data_t *gpsdata)
     avgclimb=0.0;
     for(n=0;n<CLIMB;n++) avgclimb+=climb[n];
     avgclimb/=CLIMB;
-    snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
             (int)(gpsdata->fix.altitude*altfactor), altunits, gridsquare, (int)(avgclimb * METERS_TO_FEET * 60));
   } else {
-    snprintf(tmpbuf, 254, "widget_set gpsd four 1 4 {n/a}\n");
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd four 1 4 {n/a}\n");
   }
   send_lcd(tmpbuf);
 }

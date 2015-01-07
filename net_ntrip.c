@@ -164,7 +164,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
     bool sourcetable = false;
     bool match = false;
     char buf[BUFSIZ];
-    size_t blen = BUFSIZ;
+    size_t blen = sizeof(buf);
     int fd = device->gpsdata.gps_fd;
 
     for (;;) {
@@ -547,7 +547,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		return ret;
 	    }
 	    (void)close(device->gpsdata.gps_fd);
-	    if (ntrip_auth_encode(&device->ntrip.stream, device->ntrip.stream.credentials, device->ntrip.stream.authStr, 128) != 0) {
+	    if (ntrip_auth_encode(&device->ntrip.stream, device->ntrip.stream.credentials, device->ntrip.stream.authStr, sizeof(device->ntrip.stream.authStr)) != 0) {
 		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }

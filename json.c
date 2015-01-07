@@ -95,7 +95,7 @@ static void json_trace(int errlevel, const char *fmt, ...)
 	char buf[BUFSIZ];
 	va_list ap;
 
-	(void)strlcpy(buf, "json: ", BUFSIZ);
+	(void)strlcpy(buf, "json: ", sizeof(buf));
 	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			ap);

@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
 	(void)fputs("Daemon is not running.\n", stdout);
 	exit(EXIT_FAILURE);
     } else if (optind < argc) {
-	(void)strlcpy(buf, argv[optind], BUFSIZ);
-	(void)strlcat(buf, "\n", BUFSIZ);
+	(void)strlcpy(buf, argv[optind], sizeof(buf));
+	(void)strlcat(buf, "\n", sizeof(buf));
 	(void)gps_send(&collect, buf);
 	(void)gps_read(&collect);
 	libgps_dump_state(&collect);

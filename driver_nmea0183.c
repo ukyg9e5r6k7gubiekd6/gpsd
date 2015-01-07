@@ -1276,7 +1276,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 
     /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
-    (void)strlcpy((char *)session->nmea.fieldcopy, sentence, NMEA_MAX);
+    (void)strlcpy((char *)session->nmea.fieldcopy, sentence, sizeof(session->nmea.fieldcopy) - 1);
     /* discard the checksum part */
     for (p = (char *)session->nmea.fieldcopy;
 	 (*p != '*') && (*p >= ' ');)

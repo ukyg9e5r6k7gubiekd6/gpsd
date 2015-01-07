@@ -343,7 +343,7 @@ static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t
     if (data_len > MAX_PACKET_LENGTH - 1)
 	data_len = MAX_PACKET_LENGTH - 1;
 
-    (void)strlcpy(txtbuf, (char *)buf + UBX_PREFIX_LEN, MAX_PACKET_LENGTH);
+    (void)strlcpy(txtbuf, (char *)buf + UBX_PREFIX_LEN, sizeof(txtbuf));
     txtbuf[data_len] = '\0';
     switch (msgid) {
     case UBX_INF_DEBUG:

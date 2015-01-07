@@ -169,7 +169,7 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
 	for (i = 0; i < 32; i++) {
 	    if (svlist & (1 << i)) {
 		(void)snprintf(prn, 4, "%u ", i + 1);
-		(void)strlcat(satlist, prn, 38);
+		(void)strlcat(satlist, prn, sizeof(satlist));
 	    }
 	}
 	(void)wprintw(navfixwin, "%02d = %-38s", nsv, satlist);

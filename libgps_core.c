@@ -40,7 +40,7 @@ void libgps_trace(int errlevel, const char *fmt, ...)
 	char buf[BUFSIZ];
 	va_list ap;
 
-	(void)strlcpy(buf, "libgps: ", BUFSIZ);
+	(void)strlcpy(buf, "libgps: ", sizeof(buf));
 	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
 			ap);
@@ -178,7 +178,7 @@ int gps_send(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, const char *fmt CO
     (void)vsnprintf(buf, sizeof(buf) - 2, fmt, ap);
     va_end(ap);
     if (buf[strlen(buf) - 1] != '\n')
-	(void)strlcat(buf, "\n", BUFSIZ);
+	(void)strlcat(buf, "\n", sizeof(buf));
 
 #ifdef SOCKET_EXPORT_ENABLE
     status = gps_sock_send(gpsdata, buf);

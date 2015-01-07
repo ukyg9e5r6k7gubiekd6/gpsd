@@ -686,7 +686,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			      timedelta);
 	    /*@+type@*/
 
-	    (void)strlcpy(buf, PPSBAR, BUFSIZ);
+	    (void)strlcpy(buf, PPSBAR, sizeof(buf));
 	    session.ppslast = noclobber.timedrift;
 	    /* coverity[missing_lock] */
 	    session.ppscount++;

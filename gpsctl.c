@@ -84,7 +84,7 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
     (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
     va_end(ap);
     if (buf[strlen(buf)-1] != '\n')
-	(void)strlcat(buf, "\n", BUFSIZ);
+	(void)strlcat(buf, "\n", sizeof(buf));
     /*@-usedef@*/
     if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0) {
 	gpsd_report(&context.errout, LOG_ERROR, "gps_query(), write failed\n");

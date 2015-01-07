@@ -782,7 +782,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
     static char stash[BUFSIZ];
 
     /*@ -temptrans -mayaliasunique @*/
-    for (q = p; isprint((unsigned char) *p) && !isspace((unsigned char) *p) && /*@i@*/ (p - q < BUFSIZ - 1);
+    for (q = p; isprint((unsigned char) *p) && !isspace((unsigned char) *p) && /*@i@*/ (p - q < (ssize_t) sizeof(stash) - 1);
 	 p++)
 	continue;
     (void)memcpy(stash, q, (size_t) (p - q));

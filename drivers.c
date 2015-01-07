@@ -805,7 +805,7 @@ static int oceanserver_send(struct gpsd_errout_t *errout,
     va_start(ap, fmt);
     (void)vsnprintf(buf, sizeof(buf) - 5, fmt, ap);
     va_end(ap);
-    (void)strlcat(buf, "", BUFSIZ);
+    (void)strlcat(buf, "", sizeof(buf));
     status = (int)write(fd, buf, strlen(buf));
     (void)tcdrain(fd);
     if (status == (int)strlen(buf)) {
