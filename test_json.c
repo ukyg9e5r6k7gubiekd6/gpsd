@@ -428,7 +428,7 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 	jsontest(individual);
     else {
 	int i;
-	for (i = 1; i < MAXTEST; i++)
+	for (i = 1; i <= MAXTEST; i++)
 	    jsontest(i);
     }
 
