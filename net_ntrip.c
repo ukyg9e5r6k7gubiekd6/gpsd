@@ -469,7 +469,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 	    device->ntrip.works = false;
 	    device->ntrip.sourcetable_parse = false;
 	    device->ntrip.stream.set = false;
-	    (void)strlcpy(tmp, caster, strlen(caster) + 1);
+	    (void)strlcpy(tmp, caster, sizeof(t));
 
 	    /*@ -boolops @*/
 	    if ((amp = strchr(tmp, '@')) != NULL) {
