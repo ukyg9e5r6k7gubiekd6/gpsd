@@ -395,7 +395,7 @@ int libgps_json_unpack(const char *buf,
 
     if (classtag == NULL)
 	return -1;
-#define STARTSWITH(str, prefix)	strncmp(str, prefix, sizeof(prefix)-1)==0
+#define STARTSWITH(str, prefix)	strncmp(str, prefix, strlen(prefix)-1)==0
     if (STARTSWITH(classtag, "\"class\":\"TPV\"")) {
 	status = json_tpv_read(buf, gpsdata, end);
 	gpsdata->status = STATUS_FIX;
