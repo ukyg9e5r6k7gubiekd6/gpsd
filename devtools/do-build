@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# This script does a full build and check.  Outputs are saved to files
+# BUILD. and CHECK. with the git version appended.  The point is that
+# having regression test output from old versions is handy when
+# trouble arises.
+
+# This script should be run from the top-level directory.
+
+if [ ! -f gpsd.c ]; then
+    echo "do-build: not at top-level of gpsd"
+    exit 1
+fi
+
+version=`git describe`
+
+scons -c < /dev/null > /dev/null 2>&1
+scons $* < /dev/null > BUILD.$version 2>&1
+scons check < /dev/null > CHECK.$version 2>&1

@@ -29,6 +29,11 @@ on the Debian porter boxes. dchroot only accepts one command
 as argument, nothing else. This wrapper creates a temporary script
 which will be executed then.
 
+== do-build ==
+
+Very simple wrapper around scons clean, build, and check, saving
+output in a file named with "git describe".
+
 == editcomment ==
 
 Give this a commit-ID specification.  It will edit the associated comment.
