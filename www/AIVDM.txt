@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.46, Aug 2014
+v1.47, Jam 2015
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -939,7 +939,7 @@ to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 |8-37    | 30 |Source MMSI          |mmsi      |u|9 decimal digits
 |38-39   |  2 |Sequence Number      |seqno     |u|Unsigned integer 0-3
 |40-69   | 30 |Destination MMSI     |dest_mmsi |u|9 decimal digits
-|70      |  1 |Retransmit flag      |retransmit|u|0 = no retransmit (default)
+|70      |  1 |Retransmit flag      |retransmit|b|0 = no retransmit (default)
                                                   1 = retransmitted
 |71      |  1 |Spare                |          |x|Not used
 |72-81   | 10 |Designated Area Code |dac       |u|Unsigned integer
@@ -3909,7 +3909,7 @@ bits is 168.
 |143-145 | 3  |Spare              |           |x|Not used
 |146-146 | 1  |Assigned           |assigned   |b|Assigned-mode flag
 |147-147 | 1  |RAIM flag          |raim       |b|As for common navigation block
-|148-167 |19  |Radio status       |radio      |u|See <<IALA>> for details.
+|148-167 |20  |Radio status       |radio      |u|See <<IALA>> for details.
 |==============================================================================
 
 Altitude is in meters.  The special value 4095 indicates altitude is
@@ -4152,7 +4152,7 @@ understand these fields."
 |6-7     | 2  |Repeat Indicator   |repeat   |u|As in Common Navigation Block
 |8-37    |30  |MMSI               |mmsi     |u|9 decimal digits
 |38-45   | 8  |Regional Reserved  |reserved |x|Not used
-|46-55   |10  |Speed Over Ground  |speed    |u|As in common navigation block
+|46-55   |10  |Speed Over Ground  |speed    |U1|As in common navigation block
 |56-56   | 1  |Position Accuracy  |accuracy |b|See below
 |57-84   |28  |Longitude          |lon      |I4|Minutes/10000 (as in CNB)
 |85-111  |27  |Latitude           |lat      |I4|Minutes/10000 (as in CNB)
@@ -4203,7 +4203,7 @@ gathered automatically from sensors.
 |6-7      |  2 |Repeat Indicator       |repeat       |u|As in CNN
 |8-37     | 30 |MMSI                   |mmsi         |u|9 digits
 |38-45    |  8 |Regional Reserved      |reserved     |u|
-|46-55    | 10 |Speed Over Ground      |speed        |u|As in CNB.
+|46-55    | 10 |Speed Over Ground      |speed        |U1|As in CNB.
 |56-56    |  1 |Position Accuracy      |accuracy     |b|As in CNB.
 |57-84    | 28 |Longitude              |lon          |I4|Minutes/10000 (as in CNB)
 |85-111   | 27 |Latitude               |lat          |I4|Minutes/10000 (as in CNB)
@@ -5402,4 +5402,7 @@ Version 1.45 adds a description of variant AIS talker IDs and NMEA
 
 Version 1.46 corrects an error in the specification on Inland AIS Type
 10s. It also adds a bit more information on AIS tag blocks.
+
+Version 1.47 corrects some minor field type errors in Type 18 and Type
+19 speed fields.  Also corrected Type 9 radio field length.
 

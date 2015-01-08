@@ -751,7 +751,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	//ais->type9.spare		= UBITS(143, 3);
 	ais->type9.assigned		= UBITS(146, 1)!=0;
 	ais->type9.raim		= UBITS(147, 1)!=0;
-	ais->type9.radio		= UBITS(148, 19);
+	ais->type9.radio		= UBITS(148, 20);
 	break;
     case 10: /* UTC/Date inquiry */
 	PERMISSIVE_LENGTH_CHECK(72);
