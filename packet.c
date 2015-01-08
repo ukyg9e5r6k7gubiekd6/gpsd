@@ -224,6 +224,12 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 #endif /* NMEA_ENABLE */
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) || defined(ONCORE_ENABLE)
 	if (c == '@') {
+#ifdef RTCM104V2_ENABLE
+	    if (rtcm2_decode(lexer, c) == ISGPS_MESSAGE) {
+		lexer->state = RTCM2_RECOGNIZED;
+		break;
+	    }
+#endif /* RTCM104V2_ENABLE */
 	    lexer->state = AT1_LEADER;
 	    break;
 	}
