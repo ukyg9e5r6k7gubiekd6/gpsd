@@ -172,7 +172,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
 	for (i = 0; i < session->device_type->channels; i++) {
-#if 1
+#ifdef NMEA_ENABLE
 	    if (session->sats_used[i] > 0) {
 		bufp += strlen(bufp);
 		(void)snprintf(bufp, len - strlen(bufp),
