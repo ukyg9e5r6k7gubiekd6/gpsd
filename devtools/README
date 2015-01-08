@@ -34,6 +34,11 @@ which will be executed then.
 Very simple wrapper around scons clean, build, and check, saving
 output in a file named with "git describe".
 
+== easyinverse.pl ==
+
+Generate random pairirs of mutually inverse covariance matrices 
+suitable for testing a matrix-inversion algorithm.
+
 == editcomment ==
 
 Give this a commit-ID specification.  It will edit the associated comment.
