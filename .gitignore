@@ -30,6 +30,7 @@ test_matrix
 test_gpsmm
 test_qgpsmm
 test_packet
+test_mktime
 test_mkgmtime
 test_geoid
 test_json
