@@ -24,6 +24,8 @@ export PATH
 
 if [ -r /etc/default/gpsd ]; then
   . /etc/default/gpsd
+elif [ -r /etc/conf.d/gpsd ]; then
+  . /etc/conf.d/gpsd
 elif [ -r /etc/sysconfig/gpsd ]; then
   . /etc/sysconfig/gpsd
   GPSD_OPTIONS=$OPTIONS
