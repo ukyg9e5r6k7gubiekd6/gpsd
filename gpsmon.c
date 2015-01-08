@@ -654,7 +654,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
     char buf[BUFSIZ];
+#ifdef NTPSHM_ENABLE
     struct timedrift_t td;
+#endif /* NTPSHM_ENABLE */
 
 #ifdef PPS_ENABLE
     if (!serial && strncmp((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
