@@ -1196,8 +1196,11 @@ int main(int argc, char **argv)
 
     if (serial) {
 #ifdef PPS_ENABLE
-	session.thread_report_hook = pps_report;
-	pps_thread_activate(&session);
+	/* this guard suppresses a warning on Bluetooth devices */
+	if (session.sourcetype == source_rs232 || session.sourcetype == source_rs232) {
+	    session.thread_report_hook = pps_report;
+	    pps_thread_activate(&session);
+	}
 #endif /* PPS_ENABLE */
     }
     else {
