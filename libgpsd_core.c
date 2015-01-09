@@ -74,6 +74,7 @@ void gpsd_release_reporting_lock(void)
 }
 #endif /* PPS_ENABLE */
 
+#ifndef SQUELCH_ENABLE
 static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 {
     const char *sp;
@@ -87,6 +88,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
 	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
 			   0x00ff & (unsigned)*sp);
 }
+#endif /* !SQUELCH_ENABLE */
 
 void gpsd_report(const struct gpsd_errout_t *errout, 
 		 const int errlevel,
