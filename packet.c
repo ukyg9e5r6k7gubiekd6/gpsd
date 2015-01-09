@@ -544,10 +544,13 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	else if (c == 0xb5)	/* LEA-5H can and will output NMEA and UBX back to back */
 	    lexer->state = UBX_LEADER_1;
 #endif
+#ifdef PASSTHROUGH_ENABLE
 	else if (c == '{') {
 	    lexer->state = JSON_LEADER;
 	    character_pushback(lexer);
-	} else
+	}
+#endif /* PASSTHROUGH_ENABLE */
+	else
 	    lexer->state = GROUND_STATE;
 	break;
     case SEATALK_LEAD_1:
@@ -1089,10 +1092,13 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	else if (c == '$')	/* LEA-5H can and will output NMEA and UBX back to back */
 	    lexer->state = NMEA_DOLLAR;
 #endif /* NMEA_ENABLE */
+#ifdef PASSTHROUGH_ENABLE
 	else if (c == '{') {
 	    lexer->state = JSON_LEADER;
 	    character_pushback(lexer);
-	} else
+	}
+#endif /* PASSTHROUGH_ENABLE */
+	else
 	    lexer->state = GROUND_STATE;
 	break;
 #endif /* UBLOX_ENABLE */
