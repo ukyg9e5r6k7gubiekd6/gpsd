@@ -177,6 +177,7 @@ superstar2_msg_svinfo(struct gps_device_t *session,
     nchan = 12;
     gpsd_zero_satellites(&session->gpsdata);
     nsv = 0;			/* number of actually used satellites */
+    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (i = st = 0; i < nchan; i++) {
 	/* get info for one channel/satellite */
 	int off = i * 5 + 5;
