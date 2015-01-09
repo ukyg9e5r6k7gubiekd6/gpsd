@@ -37,7 +37,9 @@ static gps_mask_t superstar2_msg_ephemeris(struct gps_device_t *,
 /*
  * These methods may be called elsewhere in gpsd
  */
+#ifdef CONTROLSEND_ENABLE
 static ssize_t superstar2_control_send(struct gps_device_t *, char *, size_t);
+#endif /* CONTROLSEND_ENABLE */
 static void superstar2_event_hook(struct gps_device_t *, event_t);
 static ssize_t superstar2_write(struct gps_device_t *, char *, size_t);
 #ifdef RECONFIGURE_ENABLE
