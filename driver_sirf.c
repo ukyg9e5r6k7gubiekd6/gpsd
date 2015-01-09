@@ -572,7 +572,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
 {
-    int st, i, j;
+    int st, i, j, nsv;
 
     if (len != 188)
 	return 0;
@@ -582,11 +582,13 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	(unsigned int)getbeu32(buf, 3) * 1e-2);
 
     gpsd_zero_satellites(&session->gpsdata);
-    for (i = st = 0; i < SIRF_CHANNELS; i++) {
-	int cn;
+    memset(session->sats_used, 0, sizeof(session->sats_used));
+    for (i = st = nsv = 0; i < SIRF_CHANNELS; i++) {
+	int cn, prn;
 	int off = 8 + 15 * i;
 	bool good;
-	session->gpsdata.skyview[st].PRN = (int)getub(buf, off);
+	unsigned short stat = getbeu16(buf, off + 3);
+	session->gpsdata.skyview[st].PRN = prn = (int)getub(buf, off);
 	session->gpsdata.skyview[st].azimuth =
 	    (int)(((unsigned)getub(buf, off + 1) * 3) / 2.0);
 	session->gpsdata.skyview[st].elevation =
@@ -596,33 +598,36 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	    cn += (int)getub(buf, off + 5 + j);
 
 	session->gpsdata.skyview[st].ss = (float)(cn / 10.0);
-	session->gpsdata.skyview[st].used = false;
-	for (j = 0; j < SIRF_CHANNELS; j++)
-	    if (session->sats_used[j] == session->gpsdata.skyview[st].PRN)
-		session->gpsdata.skyview[st].used = true;
-
+	session->gpsdata.skyview[st].used = (stat & 0x01);
 	good = session->gpsdata.skyview[st].PRN != 0 &&
 	    session->gpsdata.skyview[st].azimuth != 0 &&
 	    session->gpsdata.skyview[st].elevation != 0;
 #ifdef __UNUSED__
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "SiRF: PRN=%2d El=%3.2f Az=%3.2f ss=%3d stat=%04x %c\n",
-		    getub(buf, off),
+		    prn,
 		    getub(buf, off + 2) / 2.0,
 		    (getub(buf, off + 1) * 3) / 2.0,
-		    cn / 10, getbeu16(buf, off + 3), good ? '*' : ' ');
+		    cn / 10, stat, good ? '*' : ' ');
 #endif /* UNUSED */
-	if (good != 0)
+	if (good != 0) {
 	    st += 1;
+	    if (stat & 0x01)
+		session->sats_used[nsv++] = prn;
+	}
     }
     session->gpsdata.satellites_visible = st;
+    session->gpsdata.satellites_used = nsv;
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < st; i++) {
 	int prn = session->gpsdata.skyview[i].PRN;
 	if (SBAS_PRN(prn) \
 		&& session->gpsdata.status == STATUS_DGPS_FIX \
 		&& session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS)
-	    session->sats_used[session->gpsdata.satellites_used++] = prn;
+	{
+	    session->gpsdata.skyview[i].used = true;
+	    session->sats_used[nsv++] = prn;
+	}
     }
 #ifdef TIMEHINT_ENABLE
     if (st < 3) {
@@ -702,17 +707,19 @@ static double sirf_time_offset(struct gps_device_t *session)
 static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
 {
-    int i;
     unsigned short navtype;
     gps_mask_t mask = 0;
 
     if (len != 41)
 	return 0;
 
-    session->gpsdata.satellites_used = (int)getub(buf, 28);
-    memset(session->sats_used, 0, sizeof(session->sats_used));
-    for (i = 0; i < SIRF_CHANNELS; i++)
-	session->sats_used[i] = (int)getub(buf, 29 + i);
+    /*
+     * A count of satellites used is an unsigned byte at offset 28
+     * and an array of unsigned bytes listing satellite PRNs used
+     * in this fix begins at offset 29, but we don't use either because
+     * in JSON the used bits are reported in the SKY sentence;
+     * we get that data from the svinfo packet.
+     */
     /* position/velocity is bytes 1-18 */
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 		     (double)getbes32(buf, 1) * 1.0,
