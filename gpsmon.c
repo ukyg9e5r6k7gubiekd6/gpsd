@@ -225,6 +225,7 @@ void monitor_fixframe(WINDOW * win)
     (void)mvwaddch(win, ycur, xmax - 1, ACS_VLINE);
 }
 
+#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
 static void packet_dump(const char *buf, size_t buflen)
 {
     if (packetwin != NULL) {
@@ -235,7 +236,6 @@ static void packet_dump(const char *buf, size_t buflen)
     }
 }
 
-#if defined(CONTROLSEND_ENABLE) || defined(RECONFIGURE_ENABLE)
 static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 {
     if (packetwin != NULL) {
@@ -267,6 +267,7 @@ static void gpsmon_report(const char *buf)
 }
 /*@+compdef@*/
 
+#ifdef PPS_ENABLE
 /*@-compdef@*/
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
@@ -274,6 +275,7 @@ static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list
     gpsmon_report(buf);
 }
 /*@+compdef@*/
+#endif
 
 #ifdef RECONFIGURE_ENABLE
 static void announce_log(/*@in@*/ const char *fmt, ...)
