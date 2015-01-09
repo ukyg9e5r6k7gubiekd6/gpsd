@@ -68,6 +68,7 @@ static unsigned char versionprobe[] = {
     0x00, 0x00, 0xb0, 0xb3
 };
 
+#ifdef RECONFIGURE_ENABLE
 /* Poll Navigation Parameters MID 152
  * query for MID 19 */
 static unsigned char navparams[] = {
@@ -77,7 +78,6 @@ static unsigned char navparams[] = {
     0x00, 0x00, 0xb0, 0xb3
 };
 
-#ifdef RECONFIGURE_ENABLE
 /* DGPS Source MID 133 */
 static unsigned char dgpscontrol[] = {
     0xa0, 0xa2, 0x00, 0x07,
