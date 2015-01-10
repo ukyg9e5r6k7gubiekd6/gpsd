@@ -105,7 +105,7 @@
 #endif /* ITRAX_ENABLE */
 
 #ifdef NAVCOM_ENABLE
-   NAVCOM_EXPECTED,	/* expecting Navcom packet */
+   NAVCOM_EXPECTED,	/* expecting Navcom NCT packet */
    NAVCOM_LEADER_1,	/* saw leading 0x02 */
    NAVCOM_LEADER_2,	/* saw leading 0x99 */
    NAVCOM_LEADER_3,	/* saw leading 0x66 */

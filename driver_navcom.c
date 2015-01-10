@@ -1,5 +1,5 @@
 /*
- * Driver for Navcom receivers using propietary NCT messages, a binary protocol.
+ * Driver for Navcom receivers using proprietary NCT messages, a binary protocol.
  *
  * Vendor website: http://www.navcomtech.com/
  * Technical references: Technical Reference Manual P/N 96-3120001-3001
@@ -772,7 +772,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	 *
 	 * By observation, the satellite is in use if this status is 0xff.
 	 * But errors here are not very serious, all they can affect is
-	 * the coverance-matrix calculation for error modeling,
+	 * the coverance-matrix calculation for error modeling.
 	 */
 	stat = getub(buf, n + 1);
 	log_channel = getub(buf, n + 2);
@@ -1287,7 +1287,7 @@ static bool navcom_speed(struct gps_device_t *session,
 /* *INDENT-OFF* */
 const struct gps_type_t driver_navcom =
 {
-    .type_name      = "Navcom",  	/* full name of type */
+    .type_name      = "Navcom NCT",		/* full name of type */
     .packet_type    = NAVCOM_PACKET,		/* lexer packet type */
     .flags	    = DRIVER_STICKY,		/* remember this */
     .trigger	    = NULL,			/* none */

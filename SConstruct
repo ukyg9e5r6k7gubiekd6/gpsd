@@ -108,7 +108,7 @@ boolopts = (
     ("geostar",       True,  "Geostar Protocol support"),
     ("itrax",         True,  "iTrax hardware support"),
     ("mtk3301",       True,  "MTK-3301 support"),
-    ("navcom",        True,  "Navcom support"),
+    ("navcom",        True,  "Navcom NCT support"),
     ("oncore",        True,  "Motorola OnCore chipset support"),
     ("sirf",          True,  "SiRF chipset support"),
     ("superstar2",    True,  "Novatel SuperStarII chipset support"),
