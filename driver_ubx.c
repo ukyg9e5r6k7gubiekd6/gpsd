@@ -240,7 +240,7 @@ static gps_mask_t
 ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 		   size_t data_len)
 {
-    unsigned int i, j, nchan, nsv, st;
+    unsigned int i, nchan, nsv, st;
 
     if (data_len < 152) {
 	gpsd_report(&session->context->errout, LOG_PROG,
@@ -258,25 +258,24 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
     /*@ -charint @*/
     gpsd_zero_satellites(&session->gpsdata);
     nsv = 0;
-    for (i = j = st = 0; i < nchan; i++) {
+    for (i = st = 0; i < nchan; i++) {
 	unsigned int off = 8 + 12 * i;
 	bool used = getub(buf, off + 2) & 0x01;
 	if ((int)getub(buf, off + 4) == 0)
 	    continue;		/* LEA-5H seems to have a bug reporting sats it does not see or hear */
-	session->gpsdata.skyview[j].PRN = (int)getub(buf, off + 1);
-	session->gpsdata.skyview[j].ss = (float)getub(buf, off + 4);
-	session->gpsdata.skyview[j].elevation = (int)getsb(buf, off + 5);
-	session->gpsdata.skyview[j].azimuth = (int)getles16(buf, off + 6);
-	session->gpsdata.skyview[j].used = used;
-	if (session->gpsdata.skyview[j].PRN)
-	    st++;
+	session->gpsdata.skyview[st].PRN = (int)getub(buf, off + 1);
+	session->gpsdata.skyview[st].ss = (float)getub(buf, off + 4);
+	session->gpsdata.skyview[st].elevation = (int)getsb(buf, off + 5);
+	session->gpsdata.skyview[st].azimuth = (int)getles16(buf, off + 6);
+	session->gpsdata.skyview[st].used = used;
 	/*@ -predboolothers */
-	if (used || session->gpsdata.skyview[j].PRN == (int)session->driver.ubx.sbas_in_use) {
-	    session->sats_used[nsv++] = session->gpsdata.skyview[j].PRN;
-	    session->gpsdata.skyview[j].used = true;
+	if (used || session->gpsdata.skyview[st].PRN == (int)session->driver.ubx.sbas_in_use) {
+	    session->sats_used[nsv++] = session->gpsdata.skyview[st].PRN;
+	    session->gpsdata.skyview[st].used = true;
 	}
 	/*@ +predboolothers */
-	j++;
+	if (session->gpsdata.skyview[st].PRN)
+	    st++;
     }
 
     session->gpsdata.skyview_time = NAN;
