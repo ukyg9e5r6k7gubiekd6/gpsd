@@ -671,7 +671,7 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
 
     gpsd_report(errout, LOG_INF, "Sats used (%d):\n", gpsdata->satellites_used);
     for (n = k = 0; k < gpsdata->satellites_visible; k++) {
-	if (gpsdata->skyview[k].used)
+	if (gpsdata->skyview[k].used && !SBAS_PRN(gpsdata->skyview[k].PRN))
 	{
 	    const struct satellite_t *sp = &gpsdata->skyview[k];
 	    satpos[n][0] = sin(sp->azimuth * DEG_2_RAD)
