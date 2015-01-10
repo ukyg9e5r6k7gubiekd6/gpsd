@@ -582,7 +582,6 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	(unsigned int)getbeu32(buf, 3) * 1e-2);
 
     gpsd_zero_satellites(&session->gpsdata);
-    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (i = st = nsv = 0; i < SIRF_CHANNELS; i++) {
 	int cn, prn;
 	int off = 8 + 15 * i;
@@ -613,7 +612,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	if (good != 0) {
 	    st += 1;
 	    if (stat & 0x01)
-		session->sats_used[nsv++] = prn;
+		nsv++;
 	}
     }
     session->gpsdata.satellites_visible = st;
@@ -624,10 +623,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	if (SBAS_PRN(prn) \
 		&& session->gpsdata.status == STATUS_DGPS_FIX \
 		&& session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS)
-	{
 	    session->gpsdata.skyview[i].used = true;
-	    session->sats_used[nsv++] = prn;
-	}
     }
 #ifdef TIMEHINT_ENABLE
     if (st < 3) {

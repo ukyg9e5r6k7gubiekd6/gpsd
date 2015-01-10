@@ -7,6 +7,7 @@
 #include <time.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "gpsd.h"
 
@@ -161,7 +162,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     return mask;
 }
 
-/**
+/*
  * GPS Satellite Info
  */
 static gps_mask_t
@@ -179,7 +180,6 @@ superstar2_msg_svinfo(struct gps_device_t *session,
     nchan = 12;
     gpsd_zero_satellites(&session->gpsdata);
     nsv = 0;			/* number of actually used satellites */
-    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (i = st = 0; i < nchan; i++) {
 	/* get info for one channel/satellite */
 	int off = i * 5 + 5;
@@ -196,7 +196,7 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	session->gpsdata.skyview[i].used = used;
 	/*@ +charint @*/
 	if (used)
-	    session->sats_used[nsv++] = session->gpsdata.skyview[i].PRN;
+	    nsv++;
 	/*@ -charint @*/
 
 	if (session->gpsdata.skyview[i].PRN)

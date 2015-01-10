@@ -133,26 +133,25 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
 	    (unsigned short)getleu16(buf, 7 + 4),
 	    (unsigned int)getleu32(buf, 7 + 6) / 1000.0),
 	gpsd_zero_satellites(&session->gpsdata);
-	nsv = 0;
 	nchan = (unsigned int)getleu16(buf, 7 + 50);
 	if (nchan > MAX_NR_VISIBLE_PRNS)
 	    nchan = MAX_NR_VISIBLE_PRNS;
-	for (i = st = 0; i < nchan; i++) {
+	for (i = st = nsv = 0; i < nchan; i++) {
 	    unsigned int off = 7 + 52 + 10 * i;
 	    unsigned short flags;
 	    bool used;
 
 	    flags = (unsigned short) getleu16(buf, off);
 	    used = flags & PRN_FLAG_USE_IN_NAV;
-	    session->gpsdata.skyview[i].ss = (float)(getleu16(buf, off + 2) & 0xff);
-	    session->gpsdata.skyview[i].PRN = (int)getleu16(buf, off + 4) & 0xff;
-	    session->gpsdata.skyview[i].elevation = (int)getles16(buf, off + 6) & 0xff;
-	    session->gpsdata.skyview[i].azimuth = (int)getles16(buf, off + 8) & 0xff;
-	    session->gpsdata.skyview[i].used = used;
-	    if (session->gpsdata.skyview[i].PRN > 0) {
+	    session->gpsdata.skyview[st].ss = (float)(getleu16(buf, off + 2) & 0xff);
+	    session->gpsdata.skyview[st].PRN = (int)getleu16(buf, off + 4) & 0xff;
+	    session->gpsdata.skyview[st].elevation = (int)getles16(buf, off + 6) & 0xff;
+	    session->gpsdata.skyview[st].azimuth = (int)getles16(buf, off + 8) & 0xff;
+	    session->gpsdata.skyview[st].used = used;
+	    if (session->gpsdata.skyview[st].PRN > 0) {
 		st++;
 		if (used)
-		    session->sats_used[nsv++] = session->gpsdata.skyview[i].PRN;
+		    nsv++;
 	    }
 	}
 	session->gpsdata.satellites_visible = (int)st;

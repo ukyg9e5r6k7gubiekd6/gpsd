@@ -272,7 +272,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 	    continue;
 	/*@ -predboolothers */
 	if (used || session->gpsdata.skyview[st].PRN == (int)session->driver.ubx.sbas_in_use) {
-	    session->sats_used[nsv++] = session->gpsdata.skyview[st].PRN;
+	    nsv++;
 	    session->gpsdata.skyview[st].used = true;
 	}
 	/*@ +predboolothers */

@@ -746,7 +746,6 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 
     /* Satellite details */
     i = nsu = 0;
-    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (n = 17; n < msg_len; n += 14) {
 	if (i >= MAXCHANNELS) {
 	    gpsd_report(&session->context->errout, LOG_ERROR,
@@ -796,8 +795,9 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    /*@ ignore @*//* splint is confused */
 	    s = session->gpsdata.skyview[i++].ss = (p2_snr ? p2_snr : ca_snr) / 4.0;
 	    /*@ end @*/
+	    session->gpsdata.skyview[i].used = (stat == 0xff);
 	    if (stat == 0xff)
-		session->sats_used[nsu++] = prn;
+		nsu++;
 	}
 	session->gpsdata.satellites_used = nsu;
 	gpsd_report(&session->context->errout, LOG_DATA,

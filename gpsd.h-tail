@@ -510,8 +510,8 @@ struct gps_device_t {
     struct gps_fix_t newdata;		/* where drivers put their data */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
 #ifdef NMEA_ENABLE
-    unsigned short sats_used[MAXCHANNELS];
     struct {
+	unsigned short sats_used[MAXCHANNELS];
 	int part, await;		/* for tracking GSV parts */
 	struct tm date;		/* date part of last sentence time */
 	double subseconds;		/* subsec part of last sentence time */
@@ -599,6 +599,7 @@ struct gps_device_t {
 #endif /* SUPERSTAR2_ENABLE */
 #ifdef TSIP_ENABLE
 	struct {
+	    unsigned short sats_used[MAXCHANNELS];
 	    bool superpkt;		/* Super Packet mode requested */
 	    time_t last_41;		/* Timestamps for packet requests */
 	    time_t last_48;

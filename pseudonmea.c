@@ -172,15 +172,6 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
 	for (i = 0; i < session->device_type->channels; i++) {
-#ifdef NMEA_ENABLE
-	    if (session->sats_used[i] > 0) {
-		bufp += strlen(bufp);
-		(void)snprintf(bufp, len - strlen(bufp),
-			       "%d,",
-			       session->sats_used[i]);
-		j++;
-	    }
-#else
 	    if (session->gpsdata.skyview[i].used == true){
 		bufp += strlen(bufp);
 		(void)snprintf(bufp, len - strlen(bufp),
@@ -188,7 +179,6 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 			       session->gpsdata.skyview[i].PRN);
 	        j++;
 	    }
-#endif
 	}
 	for (i = j; i < session->device_type->channels; i++) {
 	    bufp += strlen(bufp);

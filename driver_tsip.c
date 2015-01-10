@@ -513,7 +513,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.skyview[i].azimuth = (int)round(d2);
 		session->gpsdata.skyview[i].used = false;
 		for (j = 0; j < session->gpsdata.satellites_used; j++)
-		    if (session->gpsdata.skyview[i].PRN && session->sats_used[j])
+		    if (session->gpsdata.skyview[i].PRN && session->driver.tsip.sats_used[j])
 			session->gpsdata.skyview[i].used = true;
 	    } else {
 		session->gpsdata.skyview[i].PRN =
@@ -574,12 +574,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 pow(session->gpsdata.dop.tdop, 2));
 	/*@ +evalorder @*/
 
-	memset(session->sats_used, 0, sizeof(session->sats_used));
+	memset(session->driver.tsip.sats_used, 0, sizeof(session->driver.tsip.sats_used));
 	buf2[0] = '\0';
 	/*@ +charint @*/
 	for (i = 0; i < count; i++)
 	    (void)snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2),
-			   " %d", session->sats_used[i] =
+			   " %d", session->driver.tsip.sats_used[i] =
 			   (int)getub(buf, 17 + i));
 	/*@ -charint @*/
 	gpsd_report(&session->context->errout, LOG_DATA,

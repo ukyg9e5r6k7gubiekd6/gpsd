@@ -367,7 +367,7 @@ static gps_mask_t hnd_129539(unsigned char *bu, int len, PGN *pgn, struct gps_de
  */
 static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
-    int         l1, l2;
+    int         l1;
 
     print_data(session->context, bu, len, pgn);
     gpsd_report(&session->context->errout, LOG_DATA,
@@ -377,8 +377,6 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->gpsdata.satellites_visible       = (int)bu[2];
 
     memset(session->gpsdata.skyview, '\0', sizeof(session->gpsdata.skyview));
-    memset(session->sats_used, 0, sizeof(session->sats_used));
-    l2 = 0;
     for (l1=0;l1<session->gpsdata.satellites_visible;l1++) {
         int    svt;
         double azi, elev, snr;
@@ -398,8 +396,6 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	session->gpsdata.skyview[l1].used = false;
 	if ((svt == 2) || (svt == 5)) {
 	    session->gpsdata.skyview[l1].used = true;
-            session->sats_used[l2] = (unsigned short) session->gpsdata.skyview[l1].PRN;
-	    l2 += 1;
 	}
     }
     session->driver.nmea2000.mode_valid |= 2;

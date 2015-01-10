@@ -216,7 +216,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 static gps_mask_t handle1002(struct gps_device_t *session)
 /* satellite signal quality report */
 {
-    int i, j;
+    int i;
 
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
@@ -229,7 +229,6 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* Note: this week counter is not limited to 10 bits. */
     session->context->gps_week = (unsigned short)gps_week;
     session->gpsdata.satellites_used = 0;
-    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	int status, prn;
 	/*@ -type @*/
@@ -238,13 +237,11 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	/*@ +type @*/
 
 	if (status & 1)
-	    session->sats_used[session->gpsdata.satellites_used++] = prn;
-	for (j = 0; j < ZODIAC_CHANNELS; j++) {
-	    if (session->gpsdata.skyview[j].PRN != prn)
-		continue;
-	    session->gpsdata.skyview[j].ss = (float)getzword(17 + (3 * i));
-	    break;
-	}
+	    session->gpsdata.satellites_used++;
+
+	session->gpsdata.skyview[i].PRN = prn;
+	session->gpsdata.skyview[i].ss = (float)getzword(17 + (3 * i));
+	session->gpsdata.skyview[i].used = (bool)(status & 1);
     }
     session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
 						      (unsigned short)gps_week,

@@ -509,12 +509,12 @@ static gps_mask_t processGSA(int count, char *field[],
 	if (field[17][0])
 	    session->gpsdata.dop.vdop = safe_atof(field[17]);
 	session->gpsdata.satellites_used = 0;
-	memset(session->sats_used, 0, sizeof(session->sats_used));
+	memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
 	for (i = 0; i < count - 6; i++) {
 	    int prn = atoi(field[i + 3]);
 	    if (prn > 0)
-		session->sats_used[session->gpsdata.satellites_used++] =
+		session->nmea.sats_used[session->gpsdata.satellites_used++] =
 		    prn;
 	}
 	mask |= DOP_SET | USED_IS;
@@ -604,7 +604,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	sp->used = false;
 	if (sp->PRN > 0)
 	    for (n = 0; n < MAXCHANNELS; n++)
-		if (session->sats_used[n] == sp->PRN) {
+		if (session->nmea.sats_used[n] == sp->PRN) {
 		    sp->used = true;
 		    break;
 		}
