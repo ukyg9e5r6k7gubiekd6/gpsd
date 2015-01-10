@@ -268,14 +268,15 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.skyview[st].elevation = (int)getsb(buf, off + 5);
 	session->gpsdata.skyview[st].azimuth = (int)getles16(buf, off + 6);
 	session->gpsdata.skyview[st].used = used;
+	if (session->gpsdata.skyview[st].PRN == 0)
+	    continue;
 	/*@ -predboolothers */
 	if (used || session->gpsdata.skyview[st].PRN == (int)session->driver.ubx.sbas_in_use) {
 	    session->sats_used[nsv++] = session->gpsdata.skyview[st].PRN;
 	    session->gpsdata.skyview[st].used = true;
 	}
 	/*@ +predboolothers */
-	if (session->gpsdata.skyview[st].PRN)
-	    st++;
+	st++;
     }
 
     session->gpsdata.skyview_time = NAN;
