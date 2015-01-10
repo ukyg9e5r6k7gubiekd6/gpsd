@@ -2,7 +2,7 @@
  * Driver for Navcom receivers using propietary NCT messages, a binary protocol.
  *
  * Vendor website: http://www.navcomtech.com/
- * Technical references: http://www.navcomtech.com/support/docs.cfm
+ * Technical references: Technical Reference Manual P/N 96-3120001-3001
  *
  * Tested with two SF-2040G models
  *
@@ -766,7 +766,23 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    return 0;
 	}
 	prn = getub(buf, n);
-	/* tracking_status = getub(buf, n + 1); */
+	/*
+	 * tracking_status = getub(buf, n + 1);
+	 *
+	 * This field is described in the Technical Reference as follows:
+	 *
+	 * Channel Tracking Status:
+	 * B0-B1: C/A tracking status
+	 * B2-B3: P1 tracking status
+	 * B4-B5: P2 tracking status
+	 *    00 Acquisition or reacquisition
+	 *    01 Code loop locked 
+	 *    02 Costas loop locked
+	 *    11 Full tracking with aiding and active
+	 *       multipath reduction - all data is valid
+	 * B6=1: C/A Bit sync
+	 * B7=1: C/A Frame sync
+	 */
 	log_channel = getub(buf, n + 2);
 	ele = getub(buf, n + 5);
 	azm = getleu16(buf, n + 6);
@@ -780,7 +796,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	 * see if one is dealing with a GPS or other satellite, but the
 	 * channel numbers reported bear no resemblance to what the spec
 	 * says should be.  So I check for the fact that if all three
-	 * values below are zero, one is not interested on this satellite */
+	 * values below are zero, one is not interested in this satellite */
 	if (!(ele == 0 && azm == 0 && dgps_age == 0)) {
 	    session->gpsdata.skyview[i].PRN = (int)prn;
 	    session->gpsdata.skyview[i].elevation = (int)ele;
