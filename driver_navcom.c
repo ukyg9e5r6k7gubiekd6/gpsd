@@ -365,7 +365,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     unsigned char *buf = session->lexer.outbuffer + 3;
     uint16_t week;
     uint32_t tow;
-    uint32_t sats_used;
+    uint32_t used_sats;
     int32_t lat, lon;
     /* Resolution of lat/lon values (2^-11) */
 #define LL_RES (0.00048828125)
@@ -409,10 +409,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     session->newdata.time = gpsd_gpstime_resolve(session, week, tow / 1000.0);
 
     /* Satellites used */
-    sats_used = (uint32_t) getleu32(buf, 9);
+    used_sats = (uint32_t) getleu32(buf, 9);
     session->gpsdata.satellites_used = 0;
     for (n = 0; n < 31; n++) {
-	if ((sats_used & (0x01 << n)) != 0)
+	if ((used_sats & (0x01 << n)) != 0)
 	    session->sats_used[session->gpsdata.satellites_used++] =
 		(int)(n + 1);
     }
@@ -722,7 +722,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     uint16_t sol_status = getleu16(buf, 10);
     uint8_t sats_visible = getub(buf, 12);
     //uint8_t sats_tracked = getub(buf, 13);
-    uint8_t sats_used = getub(buf, 14);
+    uint8_t used_sats = getub(buf, 14);
     //uint8_t pdop = getub(buf, 15);
 
     /* Timestamp */
@@ -735,7 +735,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 
     /* Satellite count */
     session->gpsdata.satellites_visible = (int)sats_visible;
-    session->gpsdata.satellites_used = (int)sats_used;
+    session->gpsdata.satellites_used = (int)used_sats;
 
     /* Fix mode */
     switch (sol_status & 0x05) {
