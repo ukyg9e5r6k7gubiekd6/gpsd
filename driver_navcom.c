@@ -361,11 +361,9 @@ static gps_mask_t handle_0x15(struct gps_device_t *session)
 static gps_mask_t handle_0xb1(struct gps_device_t *session)
 {
     gps_mask_t mask;
-    unsigned int n;
     unsigned char *buf = session->lexer.outbuffer + 3;
     uint16_t week;
     uint32_t tow;
-    uint32_t used_sats;
     int32_t lat, lon;
     /* Resolution of lat/lon values (2^-11) */
 #define LL_RES (0.00048828125)
@@ -407,15 +405,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     week = (uint16_t) getleu16(buf, 3);
     tow = (uint32_t) getleu32(buf, 5);
     session->newdata.time = gpsd_gpstime_resolve(session, week, tow / 1000.0);
-
-    /* Satellites used */
-    used_sats = (uint32_t) getleu32(buf, 9);
-    session->gpsdata.satellites_used = 0;
-    for (n = 0; n < 31; n++) {
-	if ((used_sats & (0x01 << n)) != 0)
-	    session->sats_used[session->gpsdata.satellites_used++] =
-		(int)(n + 1);
-    }
 
     /* Get latitude, longitude */
     lat = getles32(buf, 13);
@@ -711,8 +700,8 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 /* Channel Status */
 static gps_mask_t handle_0x86(struct gps_device_t *session)
 {
-    size_t n, i;
-    uint8_t prn, ele, ca_snr, p2_snr, log_channel, hw_channel, s;
+    size_t n, i, nsu;
+    uint8_t prn, ele, ca_snr, p2_snr, log_channel, hw_channel, s, stat;
     uint16_t azm, dgps_age;
     unsigned char *buf = session->lexer.outbuffer + 3;
     size_t msg_len = (size_t) getleu16(buf, 1);
@@ -722,7 +711,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     uint16_t sol_status = getleu16(buf, 10);
     uint8_t sats_visible = getub(buf, 12);
     //uint8_t sats_tracked = getub(buf, 13);
-    uint8_t used_sats = getub(buf, 14);
+    //uint8_t used_sats = getub(buf, 14);
     //uint8_t pdop = getub(buf, 15);
 
     /* Timestamp */
@@ -735,7 +724,6 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 
     /* Satellite count */
     session->gpsdata.satellites_visible = (int)sats_visible;
-    session->gpsdata.satellites_used = (int)used_sats;
 
     /* Fix mode */
     switch (sol_status & 0x05) {
@@ -757,7 +745,8 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /*@ +predboolothers @*/
 
     /* Satellite details */
-    i = 0;
+    i = nsu = 0;
+    memset(session->sats_used, 0, sizeof(session->sats_used));
     for (n = 17; n < msg_len; n += 14) {
 	if (i >= MAXCHANNELS) {
 	    gpsd_report(&session->context->errout, LOG_ERROR,
@@ -767,8 +756,6 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	}
 	prn = getub(buf, n);
 	/*
-	 * tracking_status = getub(buf, n + 1);
-	 *
 	 * This field is described in the Technical Reference as follows:
 	 *
 	 * Channel Tracking Status:
@@ -782,7 +769,12 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	 *       multipath reduction - all data is valid
 	 * B6=1: C/A Bit sync
 	 * B7=1: C/A Frame sync
+	 *
+	 * By observation, the satellite is in use if this status is 0xff.
+	 * But errors here are not very serious, all they can affect is
+	 * the coverance-matrix calculation for error modeling,
 	 */
+	stat = getub(buf, n + 1);
 	log_channel = getub(buf, n + 2);
 	ele = getub(buf, n + 5);
 	azm = getleu16(buf, n + 6);
@@ -804,7 +796,10 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    /*@ ignore @*//* splint is confused */
 	    s = session->gpsdata.skyview[i++].ss = (p2_snr ? p2_snr : ca_snr) / 4.0;
 	    /*@ end @*/
+	    if (stat == 0xff)
+		session->sats_used[nsu++] = prn;
 	}
+	session->gpsdata.satellites_used = nsu;
 	gpsd_report(&session->context->errout, LOG_DATA,
 		    "Navcom: prn = %3u, ele = %02u, azm = %03u, snr = %d (%s), "
 		    "dgps age = %.1fs, log ch = %d, hw ch = 0x%02x\n",
