@@ -72,6 +72,9 @@ typedef unsigned int speed_t;
 #endif 
 
 /* Some internal capabilities depend on which drivers we're compiling. */
+#if !defined(AIVDM_ENABLE) && defined(NMEA2000_ENABLE)
+#define AIVDM_ENABLE
+#endif
 #if !defined(NMEA_ENABLE) && (defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE) || defined(FURY_ENABLE))
 #define NMEA_ENABLE
 #endif
