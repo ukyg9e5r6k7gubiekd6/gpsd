@@ -635,7 +635,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
     /*@-modobserver@*/
     if (!silent_flag && raw_flag && (s = (char *)gps_data(gpsdata)) != NULL) {
 	char *p;
-	for (p = s + strlen(s); --p > s && isspace(*p); *p = '\0')
+	for (p = s + strlen(s); --p > s && isspace((unsigned char) *p); *p = '\0')
 	    ;
 	(void)wprintw(messages, "%s\n", s);
     }
