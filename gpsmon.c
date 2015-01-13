@@ -660,7 +660,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     struct timedrift_t td;
 #endif /* NTPSHM_ENABLE */
 
-#ifdef PPS_ENABLE
+#if defined(PPS_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
     if (!serial && strncmp((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
     {
 	const char *end = NULL;
@@ -1054,7 +1054,7 @@ int main(int argc, char **argv)
     bool nmea = false;
     fd_set all_fds;
     fd_set rfds;
-    int maxfd = 0;
+    volatile int maxfd = 0;
     char inbuf[80];
     volatile bool nocurses = false;
 

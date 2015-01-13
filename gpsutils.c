@@ -352,6 +352,11 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
+
+    /*
+     * This could be "return (timestamp_t)timegm(&tm) + usec;" but
+     * that is glibc only.
+     */
     return (timestamp_t)mktime(&tm) - timezone + usec;
 #else
     double usec = 0;

@@ -1676,12 +1676,11 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
-#ifdef PPS_ENABLE
+#if defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
 static void ship_pps_drift_message(struct gps_device_t *session,
 				   struct timedrift_t *td)
 /* on PPS interrupt, ship a drift message to all clients */
 {
-#ifdef SOCKET_EXPORT_ENABLE
     /*@-type@*//* splint is confused about struct timespec */
     notify_watchers(session,
 		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
@@ -1690,9 +1689,8 @@ static void ship_pps_drift_message(struct gps_device_t *session,
 		    td->clock.tv_sec, td->clock.tv_nsec);
     /*@+type@*/
 	return;
-#endif /* SOCKET_EXPORT_ENABLE */
 }
-#endif /* PPS_ENABLE */
+#endif
 
 
 #ifdef __UNUSED_AUTOCONNECT__
@@ -1826,10 +1824,10 @@ int main(int argc, char *argv[])
 
 #ifdef CONTROL_SOCKET_ENABLE
     INVALIDATE_SOCKET(csock);
-#endif /* CONTROL_SOCKET_ENABLE */
 #ifdef PPS_ENABLE
     context.pps_hook = ship_pps_drift_message;
 #endif /* PPS_ENABLE */
+#endif /* CONTROL_SOCKET_ENABLE */
 
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
 	switch (option) {
@@ -1889,7 +1887,7 @@ int main(int argc, char *argv[])
 	exit(1);
     }
 
-#ifdef SYSTEMD_ENABLE
+#if defined(SYSTEMD_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
     sd_socket_count = sd_get_socket_count();
     if (sd_socket_count > 0 && control_socket != NULL) {
         gpsd_report(&context.errout, LOG_WARN,
@@ -1920,7 +1918,7 @@ int main(int argc, char *argv[])
      * avoid a race condition in which hotplug scripts can try opening
      * the socket before it's created.
      */
-#ifdef SYSTEMD_ENABLE
+#if defined(SYSTEMD_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
     if (sd_socket_count > 0) {
         csock = SD_SOCKET_FDS_START;
         FD_SET(csock, &all_fds);
