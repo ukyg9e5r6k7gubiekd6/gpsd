@@ -473,7 +473,7 @@ int main(int argc, char **argv)
 		    unsigned char bitstrings [255];
 
 		    // strtok break original string
-		    (void)strncpy((char *)packet, buffer, sizeof(packet));
+		    (void)strlcpy((char *)packet, buffer, sizeof(packet));
 		    for (j=0; j<MAX_INFO; j++) {
 			info[j] = (unsigned char *)strsep((char **)&adrpkt, ",");
 		    }

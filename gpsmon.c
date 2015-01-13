@@ -661,7 +661,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 #endif /* NTPSHM_ENABLE */
 
 #if defined(PPS_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
-    if (!serial && strncmp((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",", 13) == 0)
+    if (!serial && strncmp((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",", 15) == 0)
     {
 	const char *end = NULL;
 	struct gps_data_t noclobber;
@@ -713,7 +713,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 		       (int)device->lexer.outbuflen);
 	cond_hexdump(buf + strlen(buf), sizeof(buf) - strlen(buf),
 		     (char *)device->lexer.outbuffer,device->lexer.outbuflen);
-	(void)strlcat(buf, "\n", sizeof(buf) - strlen(buf));
+	(void)strlcat(buf, "\n", sizeof(buf));
     }
 
     report_lock();

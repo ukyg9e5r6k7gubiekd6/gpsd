@@ -142,7 +142,7 @@ void gpsd_report(const struct gpsd_errout_t *errout,
 	assert(errout->label != NULL);
 	(void)strlcpy(buf, errout->label, sizeof(buf));
 	(void)strlcat(buf, ":", sizeof(buf));
-	(void)strncat(buf, err_str, sizeof(buf) - 1 - strlen(buf));
+	(void)strlcat(buf, err_str, sizeof(buf));
 	va_start(ap, fmt);
 	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
 	va_end(ap);

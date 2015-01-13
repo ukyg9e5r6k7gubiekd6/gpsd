@@ -3326,7 +3326,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	}
 	if (buf[strlen(buf)-1] == ',')
 	    buf[strlen(buf)-1] = '\0';
-	strncat(buf, "}\r\n", buflen);
+	strlcat(buf, "}\r\n", buflen);
 	break;
     case 25:			/* Binary Message, Single Slot */
 	(void)snprintf(buf + strlen(buf), buflen - strlen(buf),

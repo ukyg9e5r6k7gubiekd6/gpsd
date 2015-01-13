@@ -989,7 +989,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		if (type24_queue->ships[i].mmsi == ais->mmsi) {
 		    (void)strlcpy(ais->type24.shipname,
 				  type24_queue->ships[i].shipname,
-				  sizeof(type24_queue->ships[i].shipname));
+				  sizeof(ais->type24.shipname));
 		    gpsd_report(errout, LOG_PROG,
 				"AIVDM 24B from %09u matches a 24A.\n",
 				ais->mmsi);
