@@ -1977,8 +1977,7 @@ struct gps_data_t {
     /* GPS status -- always valid */
     int    status;		/* Do we have a fix? */
 #define STATUS_NO_FIX	0	/* no */
-#define STATUS_FIX	1	/* yes, without DGPS */
-#define STATUS_DGPS_FIX	2	/* yes, with DGPS */
+#define STATUS_FIX	1	/* yes */
 
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
