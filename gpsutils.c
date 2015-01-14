@@ -354,10 +354,13 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 	usec = 0;
 
     /*
-     * This could be "return (timestamp_t)timegm(&tm) + usec;" but
-     * that is glibc only.
+     * This is a glibc dependency; timegm() is not standard.  It would
+     * be nice if we could say mktime(&tm) - timezone + usec instead,
+     * but that seems to fail on newer Fedora versions in a way that
+     * suggests timezone is being set improperly (off by an hour).
+     * Also timezon is not available at all on some BSDs.
      */
-    return (timestamp_t)mktime(&tm) - timezone + usec;
+    return (timestamp_t)timegm(&tm) + usec;
 #else
     double usec = 0;
 
