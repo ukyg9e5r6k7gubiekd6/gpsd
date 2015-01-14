@@ -175,7 +175,7 @@ void ntpshm_context_init(struct gps_context_t *context)
     memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
 }
 
-static int ntpshm_alloc(struct gps_context_t *context)
+static volatile struct shmTime *ntpshm_alloc(struct gps_context_t *context)
 /* allocate NTP SHM segment.  return its segment number, or -1 */
 {
     int i;
@@ -198,34 +198,38 @@ static int ntpshm_alloc(struct gps_context_t *context)
 	    context->shmTime[i]->precision = -1;	/* initially 0.5 sec */
 	    context->shmTime[i]->nsamples = 3;	/* stages of median filter */
 
-	    return i;
+	    return context->shmTime[i];
 	}
 
-    return -1;
+    return NULL;
 }
 
-static bool ntpshm_free(struct gps_context_t * context, int segment)
+static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime *s)
 /* free NTP SHM segment */
 {
-    if (segment < 0 || segment >= NTPSHMSEGS)
-	return false;
+    int i;
 
-    context->shmTimeInuse[segment] = false;
-    return true;
+    for (i = 0; i < NTPSHMSEGS; i++)
+	if (s == context->shmTime[i]) {
+	    context->shmTimeInuse[i] = false;
+	    return true;
+	}
+
+    return false;
 }
 
 void ntpshm_session_init(struct gps_device_t *session)
 {
 #ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
-    session->shmIndex = -1;
+    session->shm_clock = NULL;
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
-    session->shmIndexPPS = -1;
+    session->shm_pps = NULL;
 #endif	/* PPS_ENABLE */
 }
 
-int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *td)
+int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedrift_t *td)
 /* put a received fix time into shared memory for NTP */
 {
     /*
@@ -234,18 +238,18 @@ int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *t
      * write out of order if memory_barrier() is a no-op (our implementation 
      * isn't portable).
      */
-    volatile struct shmTime *shmTime = NULL;
+    volatile struct shmTime *shmTime = shmseg;
     /* Any NMEA will be about -1 or -2. Garmin GPS-18/USB is around -6 or -7. */
     int precision = -1; /* default precision */
 
-    if (shmIndex < 0 || (shmTime = session->context->shmTime[shmIndex]) == NULL) {
+    if (shmTime == NULL) {
 	gpsd_report(&session->context->errout, LOG_RAW, "NTPD missing shm\n");
 	return 0;
     }
 
 #ifdef PPS_ENABLE
     /* ntpd sets -20 for PPS refclocks, thus -20 precision */
-    if (shmIndex == session->shmIndexPPS)
+    if (shmTime == session->shm_pps)
 	precision = -20;
 #endif	/* PPS_ENABLE */
 
@@ -285,8 +289,9 @@ int ntpshm_put(struct gps_device_t *session, int shmIndex, struct timedrift_t *t
 
     /*@-type@*/ /* splint is confused about struct timespec */
     gpsd_report(&session->context->errout, LOG_RAW,
-		"NTP ntpshm_put(%d) %lu.%09lu @ %lu.%09lu\n",
-                shmIndex,
+		"NTP ntpshm_put(%s %s) %lu.%09lu @ %lu.%09lu\n",
+		session->gpsdata.dev.path,
+		(precision == -20) ? "pps" : "clock",
 		(unsigned long)td->real.tv_sec,
 		(unsigned long)td->real.tv_nsec,
 		(unsigned long)td->clock.tv_sec,
@@ -409,7 +414,7 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 	log1 = "accepted chrony sock";
 	chrony_send(session, td);
     }
-    (void)ntpshm_put(session, session->shmIndexPPS, td);
+    (void)ntpshm_put(session, session->shm_pps, td);
 
     return log1;
 }
@@ -418,11 +423,13 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 void ntpshm_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
-    (void)ntpshm_free(session->context, session->shmIndex);
+    (void)ntpshm_free(session->context, session->shm_clock);
+    session->shm_clock = NULL;
 #if defined(PPS_ENABLE)
-    if (session->shmIndexPPS != -1) {
+    if (session->shm_pps != NULL) {
 	pps_thread_deactivate(session);
-	(void)ntpshm_free(session->context, session->shmIndexPPS);
+	(void)ntpshm_free(session->context, session->shm_pps);
+	session->shm_pps = NULL;
     }
 #endif	/* PPS_ENABLE */
 }
@@ -431,9 +438,9 @@ void ntpshm_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
     /* allocate a shared-memory segment for "NMEA" time data */
-    session->shmIndex = ntpshm_alloc(session->context);
+    session->shm_clock = ntpshm_alloc(session->context);
 
-    if (0 > session->shmIndex) {
+    if (session->shm_clock == NULL) {
 	gpsd_report(&session->context->errout, LOG_INF, 
                     "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE)
@@ -442,7 +449,7 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
 	 */
-	if ((session->shmIndexPPS = ntpshm_alloc(session->context)) < 0) {
+	if ((session->shm_pps = ntpshm_alloc(session->context)) == NULL) {
 	    gpsd_report(&session->context->errout, LOG_INF, 
                         "NTPD ntpshm_alloc(1) failed\n");
 	} else {

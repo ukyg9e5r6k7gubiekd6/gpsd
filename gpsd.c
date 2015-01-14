@@ -726,7 +726,7 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
     ntpshm_link_activate(device);
     gpsd_report(&context.errout, LOG_INF, 
 		"NTPD ntpshm_link_activate: %d\n",
-		(int)device->shmIndex >= 0);
+		device->shm_clock != NULL);
 #endif /* NTPSHM_ENABLE */
 
     gpsd_report(&context.errout, LOG_INF, 
@@ -1552,7 +1552,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	/*@-compdef@*/
 	struct timedrift_t td;
 	ntpshm_latch(device, &td);
-	(void)ntpshm_put(device, device->shmIndex, &td);
+	(void)ntpshm_put(device, device->shm_clock, &td);
 	/*@+compdef@*/
     }
 #endif /* NTPSHM_ENABLE */

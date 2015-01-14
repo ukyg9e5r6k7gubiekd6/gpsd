@@ -489,9 +489,9 @@ struct gps_device_t {
 #endif /* TIMING_ENABLE */
 #ifdef NTPSHM_ENABLE
     bool ship_to_ntpd;
-    int shmIndex;
+    volatile struct shmTime *shm_clock;
 # ifdef PPS_ENABLE
-    int shmIndexPPS;
+    volatile struct shmTime *shm_pps;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     volatile struct {
@@ -867,7 +867,7 @@ extern unsigned int ais_binary_encode(struct ais_t *ais, /*@out@*/unsigned char 
 
 extern void ntpshm_context_init(struct gps_context_t *);
 extern void ntpshm_session_init(struct gps_device_t *);
-extern int ntpshm_put(struct gps_device_t *, int, struct timedrift_t *);
+extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *, struct timedrift_t *);
 #ifdef NTPSHM_ENABLE
 extern void ntpshm_latch(struct gps_device_t *device,  /*@out@*/struct timedrift_t *td);
 #endif /* NTPSHM_ENABLE */
