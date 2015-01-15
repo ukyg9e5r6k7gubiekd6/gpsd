@@ -698,7 +698,7 @@ else:
     else:
         confdefs.append("#define COMPAT_SELECT\n")
 
-    if config.CheckHeader(["sys/time.h", "sys/timepps.h"]):
+    if config.CheckHeader(["sys/types.h", "sys/time.h", "sys/timepps.h"]):
         confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
         kpps = True
     else:
