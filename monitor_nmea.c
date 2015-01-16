@@ -18,6 +18,7 @@
 #include "gpsd.h"
 #include "gpsmon.h"
 #include "gpsdclient.h"
+#include "strfuncs.h"
 
 #ifdef NMEA_ENABLE
 extern const struct gps_type_t driver_nmea0183;
@@ -281,7 +282,7 @@ static void nmea_update(void)
 	    scr[0] = '\0';
 	    for (i = 0; i < MAXCHANNELS; i++) {
 		if (session.gpsdata.skyview[i].used)
-		    (void)snprintf(scr + strlen(scr), sizeof(scr) - strlen(scr),
+		    str_appendf(scr, sizeof(scr),
 				   "%d ", session.gpsdata.skyview[i].PRN);
 	    }
 	    getmaxyx(gpgsawin, ymax, xmax);

@@ -613,8 +613,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 	    char *cp, buf2[MAX_PACKET_LENGTH * 3];
 	    buf2[0] = '\0';
 	    for (cp = buf; cp < buf + len; cp++)
-		(void)snprintf(buf2 + strlen(buf2),
-			       sizeof(buf2) - strlen(buf2),
+		str_appendf(buf2, sizeof(buf2),
 			       "%02x", (unsigned int)(*cp & 0xff));
 	    gpsd_report(&context.errout, LOG_CLIENT,
 			"=> client(%d): =%s\n", sub_index(sub),	buf2);
@@ -1230,8 +1229,7 @@ static void handle_request(struct subscriber_t *sub,
 				    "response: %s\n", reply);
 			goto bailout;
 		    } else if (devcount > 1) {
-			(void)snprintf(reply + strlen(reply),
-				       replylen - strlen(reply),
+			str_appendf(reply, replylen,
 				       "{\"class\":\"ERROR\",\"message\":\"No path specified in DEVICE, but multiple devices are attached.\"}\r\n");
 			gpsd_report(&context.errout, LOG_ERROR,
 				    "response: %s\n", reply);
@@ -1240,13 +1238,11 @@ static void handle_request(struct subscriber_t *sub,
 		    /* we should have exactly one device now */
 		}
 		if (!privileged_user(device))
-		    (void)snprintf(reply + strlen(reply),
-				   replylen - strlen(reply),
+		    str_appendf(reply, replylen,
 				   "{\"class\":\"ERROR\",\"message\":\"Multiple subscribers, cannot change control bits on %s.\"}\r\n",
 				   device->gpsdata.dev.path);
 		else if (device->device_type == NULL)
-		    (void)snprintf(reply + strlen(reply),
-				   replylen - strlen(reply),
+		    str_appendf(reply, replylen,
 				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n",
 				   device->gpsdata.dev.path);
 		else {
@@ -1289,7 +1285,7 @@ static void handle_request(struct subscriber_t *sub,
 	    }
 	    /*@+branchstate@*/
 #else /* RECONFIGURE_ENABLE */
-	    (void)snprintf(reply + strlen(reply), replylen - strlen(reply),
+	    str_appendf(reply, replylen,
 			   "{\"class\":\"ERROR\",\"message\":\"Device configuration support not compiled.\"}\r\n");
 #endif /* RECONFIGURE_ENABLE */
 	}

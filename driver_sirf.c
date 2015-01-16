@@ -48,6 +48,7 @@
 
 #include "gpsd.h"
 #include "bits.h"
+#include "strfuncs.h"
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
 #define HI(n)		((n) >> 8)
@@ -428,19 +429,15 @@ static gps_mask_t sirf_msg_debug(struct gps_device_t *device,
     /*@ +charint @*/
     if (0xe1 == buf[0]) {	/* Development statistics messages */
 	for (i = 2; i < (int)len; i++)
-	    (void)snprintf(msgbuf + strlen(msgbuf),
-			   sizeof(msgbuf) - strlen(msgbuf),
-			   "%c", buf[i] ^ 0xff);
+	    str_appendf(msgbuf, sizeof(msgbuf), "%c", buf[i] ^ 0xff);
 	gpsd_report(&device->context->errout, LOG_PROG,
 		    "SiRF: DEV 0xe1: %s\n", msgbuf);
     } else if (0xff == (unsigned char)buf[0]) {	/* Debug messages */
 	for (i = 1; i < (int)len; i++)
 	    if (isprint(buf[i]))
-		(void)snprintf(msgbuf + strlen(msgbuf),
-			       sizeof(msgbuf) - strlen(msgbuf), "%c", buf[i]);
+		str_appendf(msgbuf, sizeof(msgbuf), "%c", buf[i]);
 	    else
-		(void)snprintf(msgbuf + strlen(msgbuf),
-			       sizeof(msgbuf) - strlen(msgbuf),
+		str_appendf(msgbuf, sizeof(msgbuf),
 			       "\\x%02x", (unsigned int)buf[i]);
 	gpsd_report(&device->context->errout, LOG_PROG,
 		    "SiRF: DBG 0xff: %s\n", msgbuf);

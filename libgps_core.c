@@ -17,6 +17,7 @@
 #include "gpsd.h"
 #include "libgps.h"
 #include "gps_json.h"
+#include "strfuncs.h"
 
 #ifdef LIBGPS_DEBUG
 int libgps_debuglevel = 0;
@@ -42,8 +43,7 @@ void libgps_trace(int errlevel, const char *fmt, ...)
 
 	(void)strlcpy(buf, "libgps: ", sizeof(buf));
 	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
-			ap);
+	str_vappendf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
 	(void)fputs(buf, debugfp);

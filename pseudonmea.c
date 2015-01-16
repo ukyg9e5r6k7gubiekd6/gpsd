@@ -9,6 +9,7 @@
 #include <time.h>
 
 #include "gpsd.h"
+#include "strfuncs.h"
 
 /*
  * Support for generic binary drivers.  These functions dump NMEA for passing
@@ -52,24 +53,19 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 	if (isnan(session->gpsdata.dop.hdop))
 	    (void)strlcat(bufp, ",", len);
 	else
-	    (void)snprintf(bufp + strlen(bufp), len - strlen(bufp),
-			   "%.2f,", session->gpsdata.dop.hdop);
+	    str_appendf(bufp, len, "%.2f,", session->gpsdata.dop.hdop);
 	if (isnan(session->gpsdata.fix.altitude))
 	    (void)strlcat(bufp, ",", len);
 	else
-	    (void)snprintf(bufp + strlen(bufp), len - strlen(bufp),
-			   "%.2f,M,", session->gpsdata.fix.altitude);
+	    str_appendf(bufp, len, "%.2f,M,", session->gpsdata.fix.altitude);
 	if (isnan(session->gpsdata.separation))
 	    (void)strlcat(bufp, ",", len);
 	else
-	    (void)snprintf(bufp + strlen(bufp), len - strlen(bufp),
-			   "%.3f,M,", session->gpsdata.separation);
+	    str_appendf(bufp, len, "%.3f,M,", session->gpsdata.separation);
 	if (isnan(session->mag_var))
 	    (void)strlcat(bufp, ",", len);
 	else {
-	    (void)snprintf(bufp + strlen(bufp),
-			   len - strlen(bufp),
-			   "%3.2f,", fabs(session->mag_var));
+	    str_appendf(bufp, len, "%3.2f,", fabs(session->mag_var));
 	    (void)strlcat(bufp, (session->mag_var > 0) ? "E" : "W", len);
 	}
 	nmea_add_checksum(bufp);

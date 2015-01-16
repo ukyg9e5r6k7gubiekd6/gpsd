@@ -18,6 +18,7 @@
 
 #include "gpsd.h"
 #include "bits.h"
+#include "strfuncs.h"
 
 #include <sys/select.h>
 
@@ -152,8 +153,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
     buf2[len = 0] = '\0';
     for (i = 0; i < (int)session->lexer.outbuflen; i++) {
-	(void)snprintf(buf2 + strlen(buf2),
-		       sizeof(buf2) - strlen(buf2),
+	str_appendf(buf2, sizeof(buf2),
 		       "%02x", buf[len++] = session->lexer.outbuffer[i]);
     }
     /*@ -charint @*/

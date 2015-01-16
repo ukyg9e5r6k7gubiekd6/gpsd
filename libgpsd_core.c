@@ -145,7 +145,7 @@ void gpsd_report(const struct gpsd_errout_t *errout,
 	(void)strlcat(buf, ":", sizeof(buf));
 	(void)strlcat(buf, err_str, sizeof(buf));
 	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt, ap);
+	str_vappendf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
 	visibilize(buf2, sizeof(buf2), buf);
@@ -1012,15 +1012,13 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 	dbuf[0] = '\0';
 	for (i = 0; i < FD_SETSIZE; i++)
 	    if (FD_ISSET(i, all_fds))
-		(void)snprintf(dbuf + strlen(dbuf),
-			       sizeof(dbuf) - strlen(dbuf), "%d ", i);
+		str_appendf(dbuf, sizeof(dbuf), "%d ", i);
 	if (strlen(dbuf) > 0)
 	    dbuf[strlen(dbuf) - 1] = '\0';
 	(void)strlcat(dbuf, "} -> {", sizeof(dbuf));
 	for (i = 0; i < FD_SETSIZE; i++)
 	    if (FD_ISSET(i, rfds))
-		(void)snprintf(dbuf + strlen(dbuf),
-			       sizeof(dbuf) - strlen(dbuf), " %d ", i);
+		str_appendf(dbuf, sizeof(dbuf), " %d ", i);
 	gpsd_report(errout, LOG_SPIN,
 		    "select() {%s} at %f (errno %d)\n",
 		    dbuf, timestamp(), errno);

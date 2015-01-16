@@ -554,8 +554,7 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"pps\":true,", sizeof(buf));
 	    /*@-nullpass@*//* shouldn't be needed, splint has a bug */
 	    if (flags & WATCH_DEVICE)
-		(void)snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
-			       "\"device\":\"%s\",", (char *)d);
+		str_appendf(buf, sizeof(buf), "\"device\":\"%s\",", (char *)d);
 	    /*@+nullpass@*/
 	    if (buf[strlen(buf) - 1] == ',')
 		buf[strlen(buf) - 1] = '\0';

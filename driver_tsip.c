@@ -23,6 +23,7 @@
 
 #include "gpsd.h"
 #include "bits.h"
+#include "strfuncs.h"
 
 #include <sys/select.h>
 
@@ -156,8 +157,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if (session->lexer.outbuffer[++i] == 0x03)
 		break;
 
-	(void)snprintf(buf2 + strlen(buf2),
-		       sizeof(buf2) - strlen(buf2),
+	str_appendf(buf2, sizeof(buf2),
 		       "%02x", buf[len++] = session->lexer.outbuffer[i]);
     }
     /*@ -charint @*/
@@ -346,8 +346,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    session->gpsdata.skyview[j].ss = f1;
 		    break;
 		}
-	    (void)snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2),
-			   " %d=%.1f", (int)u1, f1);
+	    str_appendf(buf2, sizeof(buf2), " %d=%.1f", (int)u1, f1);
 	}
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "Signal Levels (%d):%s\n", count, buf2);
@@ -578,7 +577,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	buf2[0] = '\0';
 	/*@ +charint @*/
 	for (i = 0; i < count; i++)
-	    (void)snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2),
+	    str_appendf(buf2, sizeof(buf2),
 			   " %d", session->driver.tsip.sats_used[i] =
 			   (int)getub(buf, 17 + i));
 	/*@ -charint @*/

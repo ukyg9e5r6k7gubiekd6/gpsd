@@ -203,8 +203,7 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
     } else {
 	buf2[0] = '\0';
 	for (i = 0; i < len; i++)
-	    (void)snprintf(buf2 + strlen(buf2), len2 - strlen(buf2),
-			   "%02x", (unsigned int)(buf[i] & 0xff));
+	    str_appendf(buf2, len2, "%02x", (unsigned int)(buf[i] & 0xff));
     }
 }
 /*@+compdef +mustdefine@*/
@@ -1184,8 +1183,7 @@ int main(int argc, char **argv)
 			   sizeof(session.gpsdata.dev.path));
 	else
 	    session.gpsdata.dev.path[0] = '\0';
-	(void)snprintf(session.gpsdata.dev.path + strlen(session.gpsdata.dev.path),
-		       sizeof(session.gpsdata.dev.path) - strlen(session.gpsdata.dev.path),
+	str_appendf(session.gpsdata.dev.path, sizeof(session.gpsdata.dev.path),
 		       "%s:%s", source.server, source.port);
     }
 

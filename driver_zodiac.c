@@ -19,6 +19,7 @@
 
 #include "gpsd.h"
 #include "bits.h"
+#include "strfuncs.h"
 
 /* Zodiac protocol description uses 1-origin indexing by little-endian word */
 #define get16z(buf, n)	( (buf[2*(n)-2])	\
@@ -95,8 +96,7 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
 		   "%04x %04x %04x %04x %04x",
 		   h.sync, h.id, h.ndata, h.flags, h.csum);
     for (i = 0; i < dlen; i++)
-	(void)snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf),
-		       " %04x", dat[i]);
+	str_appendf(buf, sizeof(buf), " %04x", dat[i]);
 
     gpsd_report(&session->context->errout, LOG_RAW,
 		"Sent Zodiac packet: %s\n", buf);

@@ -74,6 +74,7 @@ PERMISSIONS
 #include "json.h"
 
 #include "gps.h"		/* for safe_atof() & timestamp_t prototype */
+#include "strfuncs.h"
 
 #define JSON_MINIMAL	/* GPSD only uses a subset of the features */
 
@@ -97,8 +98,7 @@ static void json_trace(int errlevel, const char *fmt, ...)
 
 	(void)strlcpy(buf, "json: ", sizeof(buf));
 	va_start(ap, fmt);
-	(void)vsnprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), fmt,
-			ap);
+	str_vappendf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
 	(void)fputs(buf, debugfp);
