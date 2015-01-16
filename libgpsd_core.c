@@ -33,6 +33,7 @@
 
 #include "gpsd.h"
 #include "matrix.h"
+#include "strfuncs.h"
 #if defined(NMEA2000_ENABLE)
 #include "driver_nmea2000.h"
 #endif /* defined(NMEA2000_ENABLE) */
@@ -407,7 +408,7 @@ int gpsd_open(struct gps_device_t *session)
 		    session->gpsdata.dev.path, session->gpsdata.gps_fd);
 	return session->gpsdata.gps_fd;
     /* otherwise, could be an TCP data feed */
-    } else if (strncmp(session->gpsdata.dev.path, "tcp://", 6) == 0) {
+    } else if (str_starts_with(session->gpsdata.dev.path, "tcp://")) {
 	char server[strlen(session->gpsdata.dev.path)+1], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
@@ -434,7 +435,7 @@ int gpsd_open(struct gps_device_t *session)
 	session->sourcetype = source_tcp;
 	return session->gpsdata.gps_fd;
     /* or could be UDP */
-    } else if (strncmp(session->gpsdata.dev.path, "udp://", 6) == 0) {
+    } else if (str_starts_with(session->gpsdata.dev.path, "udp://")) {
 	char server[strlen(session->gpsdata.dev.path)+1], *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
@@ -463,7 +464,7 @@ int gpsd_open(struct gps_device_t *session)
     }
 #endif /* NETFEED_ENABLE */
 #ifdef PASSTHROUGH_ENABLE
-    if (strncmp(session->gpsdata.dev.path, "gpsd://", 7) == 0) {
+    if (str_starts_with(session->gpsdata.dev.path, "gpsd://")) {
 	/*@-branchstate -nullpass@*/
 	char server[strlen(session->gpsdata.dev.path)+1], *port;
 	socket_t dsock;
@@ -492,7 +493,7 @@ int gpsd_open(struct gps_device_t *session)
     }
 #endif /* PASSTHROUGH_ENABLE */
 #if defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S)
-    if (strncmp(session->gpsdata.dev.path, "nmea2000://", 11) == 0) {
+    if (str_starts_with(session->gpsdata.dev.path, "nmea2000://")) {
         return nmea2000_open(session);
     }
 #endif /* defined(NMEA2000_ENABLE) && !defined(S_SPLINT_S) */

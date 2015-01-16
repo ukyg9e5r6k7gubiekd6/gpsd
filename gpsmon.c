@@ -29,6 +29,7 @@
 #include "gpsmon.h"
 #include "gpsdclient.h"
 #include "revision.h"
+#include "strfuncs.h"
 
 #define BUFLEN		2048
 
@@ -661,7 +662,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 #endif /* NTPSHM_ENABLE */
 
 #if defined(PPS_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
-    if (!serial && strncmp((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",", 15) == 0)
+    if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\","))
     {
 	const char *end = NULL;
 	struct gps_data_t noclobber;
@@ -1127,7 +1128,7 @@ int main(int argc, char **argv)
         case 't':
 	    fallback = NULL;
 	    for (active = monitor_objects; *active; active++) {
-		if (strncmp((*active)->driver->type_name, optarg, strlen(optarg)) == 0)
+		if (str_starts_with((*active)->driver->type_name, optarg))
 		{
 		    fallback = (*active)->driver;
 		    matches++;
@@ -1163,7 +1164,7 @@ int main(int argc, char **argv)
 
     /* Grok the server, port, and device. */
     if (optind < argc) {
-	serial = (strncmp(argv[optind], "/dev", 4) == 0);
+	serial = str_starts_with(argv[optind], "/dev");
 	gpsd_source_spec(argv[optind], &source);
     } else {
 	serial = false;

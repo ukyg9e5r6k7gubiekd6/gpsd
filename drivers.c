@@ -14,6 +14,7 @@
 
 #include "gpsd.h"
 #include "bits.h"		/* for getbeu16(), to extract big-endian words */
+#include "strfuncs.h"
 
 ssize_t generic_get(struct gps_device_t *session)
 {
@@ -47,7 +48,7 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    char *trigger = (*dp)->trigger;
 
-	    if (trigger!=NULL && strncmp(sentence,trigger,strlen(trigger))==0) {
+	    if (trigger!=NULL && str_starts_with(sentence, trigger)) {
 		gpsd_report(&session->context->errout, LOG_PROG,
 			    "found trigger string %s.\n", trigger);
 		if (*dp != session->device_type) {
@@ -1240,7 +1241,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	 * which makes sense as they don't come in over radio.  This
 	 * is going to break if there's ever an AIVDO type 24, though.
 	 */
-	if (strncmp((const char *)field[0], "!AIVDO", 6) != 0)
+	if (!str_starts_with((const char *)field[0], "!AIVDO"))
 	    gpsd_report(&session->context->errout, LOG_INF,
 			"invalid empty AIS channel. Assuming 'A'\n");
 	ais_context = &session->driver.aivdm.context[0];
@@ -1426,7 +1427,7 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
     for (prefloc = (char *)session->lexer.outbuffer;
 	 prefloc < (char *)session->lexer.outbuffer+session->lexer.outbuflen;
 	 prefloc++)
-	if (strncmp(prefloc, prefix, strlen(prefix)) == 0) {
+	if (str_starts_with(prefloc, prefix)) {
 	    char copy[sizeof(session->lexer.outbuffer)+1];
 	    (void)strlcpy(copy,
 			  (char *)session->lexer.outbuffer,
@@ -1449,7 +1450,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
     gpsd_report(&session->context->errout, LOG_IO,
 		"<= GPS: %s\n", (char *)session->lexer.outbuffer);
 
-    if (strncmp(session->gpsdata.dev.path, "gpsd://localhost:", 17) != 0) 
+    if (!str_starts_with(session->gpsdata.dev.path, "gpsd://localhost:"))
     {
 	/*@-nullpass@*/ /* required only because splint is buggy */
 	/* devices and paths need to be edited */

@@ -33,6 +33,7 @@
 #include "gpsd.h"
 #include "gpsdclient.h"
 #include "revision.h"
+#include "strfuncs.h"
 
 #ifndef S_SPLINT_S
 #include <sys/socket.h>
@@ -462,7 +463,7 @@ int main(int argc, char **argv)
 		(void)fprintf (stdout,"---> [%s] -- %s",time2string(),buffer);
 
 		// Try to extract MMSI from AIS payload
-		if (strncmp (buffer,"!AIVDM",6) == 0)
+		if (str_starts_with(buffer, "!AIVDM"))
 		{
 #define MAX_INFO 6
 		    int  i,j;

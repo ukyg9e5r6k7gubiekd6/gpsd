@@ -48,6 +48,7 @@
 #include "sockaddr.h"
 #include "gps_json.h"
 #include "revision.h"
+#include "strfuncs.h"
 
 #if defined(SYSTEMD_ENABLE)
 #include "sd_socket.h"
@@ -1107,10 +1108,10 @@ static void handle_request(struct subscriber_t *sub,
 
     if (buf[0] == '?')
 	++buf;
-    if (strncmp(buf, "DEVICES;", 8) == 0) {
+    if (str_starts_with(buf, "DEVICES;")) {
 	buf += 8;
 	json_devicelist_dump(reply, replylen);
-    } else if (strncmp(buf, "WATCH", 5) == 0
+    } else if (str_starts_with(buf, "WATCH")
 	       && (buf[5] == ';' || buf[5] == '=')) {
 	const char *start = buf;
 	buf += 5;
@@ -1173,7 +1174,7 @@ static void handle_request(struct subscriber_t *sub,
 	json_devicelist_dump(reply + strlen(reply), replylen - strlen(reply));
 	json_watch_dump(&sub->policy,
 			reply + strlen(reply), replylen - strlen(reply));
-    } else if (strncmp(buf, "DEVICE", 6) == 0
+    } else if (str_starts_with(buf, "DEVICE")
 	       && (buf[6] == ';' || buf[6] == '=')) {
 	struct devconfig_t devconf;
 	buf += 6;
@@ -1304,7 +1305,7 @@ static void handle_request(struct subscriber_t *sub,
 				 reply + strlen(reply),
 				 replylen - strlen(reply));
 	    }
-    } else if (strncmp(buf, "POLL;", 5) == 0) {
+    } else if (str_starts_with(buf, "POLL;")) {
 	char tbuf[JSON_DATE_MAX+1];
 	int active = 0;
 	buf += 5;
@@ -1357,7 +1358,7 @@ static void handle_request(struct subscriber_t *sub,
 	if (reply[strlen(reply) - 1] == ',')
 	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
 	(void)strlcat(reply, "]}\r\n", replylen);
-    } else if (strncmp(buf, "VERSION;", 8) == 0) {
+    } else if (str_starts_with(buf, "VERSION;")) {
 	buf += 8;
 	json_version_dump(reply, replylen);
     } else {

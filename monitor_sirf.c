@@ -16,6 +16,7 @@
 #include "gpsd.h"
 #include "bits.h"
 #include "gpsmon.h"
+#include "strfuncs.h"
 
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 extern const struct gps_type_t driver_sirf;
@@ -551,8 +552,7 @@ static void sirf_update(void)
 	buf[len] = '\0';
 	j = 1;
 	for (i = 0; verbpat[i] != NULL; i++)
-	    if (strncmp((char *)(buf + 1), verbpat[i], strlen(verbpat[i])) ==
-		0) {
+	    if (str_starts_with((char *)(buf + 1), verbpat[i])) {
 		j = 0;
 		break;
 	    }

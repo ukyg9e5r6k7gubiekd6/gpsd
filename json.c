@@ -686,11 +686,11 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 #endif /* JSON_MINIMAL */
 	case t_boolean:
 #ifndef JSON_MINIMAL
-	    if (strncmp(cp, "true", 4) == 0) {
+	    if (str_starts_with(cp, "true")) {
 		arr->arr.booleans.store[offset] = true;
 		cp += 4;
 	    }
-	    else if (strncmp(cp, "false", 5) == 0) {
+	    else if (str_starts_with(cp, "false")) {
 		arr->arr.booleans.store[offset] = false;
 		cp += 5;
 	    }

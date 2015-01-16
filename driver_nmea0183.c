@@ -11,6 +11,7 @@
 #include <time.h>
 
 #include "gpsd.h"
+#include "strfuncs.h"
 
 #ifdef NMEA_ENABLE
 /**************************************************************************
@@ -1339,7 +1340,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     }
 
     /* prevent overaccumulation of sat reports */
-    if (strncmp(session->nmea.field[0] + 2, "GSV", 3) !=0)
+    if (!str_starts_with(session->nmea.field[0] + 2, "GSV"))
 	session->nmea.last_gsv_talker = '\0';
 
     /* timestamp recording for fixes happens here */

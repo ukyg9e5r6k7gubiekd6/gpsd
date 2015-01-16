@@ -33,6 +33,7 @@
 #include "gps.h"
 #include "gpsd.h"
 #include "libgps.h"
+#include "strfuncs.h"
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
@@ -272,7 +273,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #endif /* __UNUSED__ */
 
 	for (ns = buf; ns; ns = strstr(ns + 1, "GPSD")) {
-	    if ( /*@i1@*/ strncmp(ns, "GPSD", 4) == 0) {
+	    if (str_starts_with(ns, "GPSD")) {
 		/* the following should execute each time we have a good next sp */
 		for (sp = ns + 5; *sp != '\0'; sp = tp + 1) {
 		    bool eol;

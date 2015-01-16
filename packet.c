@@ -42,6 +42,7 @@ PERMISSIONS
 #include "bits.h"
 #include "gpsd.h"
 #include "crc24q.h"
+#include "strfuncs.h"
 
 /*
  * The packet-recognition state machine.  This takes an incoming byte stream
@@ -1503,7 +1504,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 	     * $PASHR packets have no checksum. Avoid the possibility
 	     * that random garbage might make it look like they do.
 	     */
-	    if (strncmp((const char *)lexer->inbuffer, "$PASHR,", 7) != 0)
+	    if (!str_starts_with((const char *)lexer->inbuffer, "$PASHR,"))
 	    {
 		bool checksum_ok = true;
 		char csum[3] = { '0', '0', '0' };
@@ -1536,13 +1537,13 @@ void packet_parse(struct gps_lexer_t *lexer)
 	    }
 	    /* checksum passed or not present */
 #ifdef AIVDM_ENABLE
-	    if (strncmp((char *)lexer->inbuffer, "!AIVDM", 6) == 0)
+	    if (str_starts_with((char *)lexer->inbuffer, "!AIVDM"))
 		packet_accept(lexer, AIVDM_PACKET);
-	    else if (strncmp((char *)lexer->inbuffer, "!AIVDO", 6) == 0)
+	    else if (str_starts_with((char *)lexer->inbuffer, "!AIVDO"))
 		packet_accept(lexer, AIVDM_PACKET);
-	    else if (strncmp((char *)lexer->inbuffer, "!BSVDM", 6) == 0)
+	    else if (str_starts_with((char *)lexer->inbuffer, "!BSVDM"))
 		packet_accept(lexer, AIVDM_PACKET);
-	    else if (strncmp((char *)lexer->inbuffer, "!BSVDO", 6) == 0)
+	    else if (str_starts_with((char *)lexer->inbuffer, "!BSVDO"))
 		packet_accept(lexer, AIVDM_PACKET);
 	    else
 #endif /* AIVDM_ENABLE */

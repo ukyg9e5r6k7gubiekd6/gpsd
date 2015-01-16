@@ -9,4 +9,7 @@
 
 #include <string.h>
 
+#define str_starts_with(str, prefix) \
+    (strncmp((str), (prefix), strlen(prefix)) == 0)
+
 #endif /* _GPSD_STRFUNCS_H_ */

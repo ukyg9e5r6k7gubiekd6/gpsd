@@ -21,6 +21,7 @@
 
 #include "gpsd.h"
 #include "bsd_base64.h"
+#include "strfuncs.h"
 
 #define NTRIP_SOURCETABLE	"SOURCETABLE 200 OK\r\n"
 #define NTRIP_ENDSOURCETABLE	"ENDSOURCETABLE"
@@ -203,8 +204,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	sourcetable = device->ntrip.sourcetable_parse;
 	if (!sourcetable) {
 	    /* parse SOURCETABLE */
-	    if (strncmp(line, NTRIP_SOURCETABLE, strlen(NTRIP_SOURCETABLE)) ==
-		    0) {
+	    if (str_starts_with(line, NTRIP_SOURCETABLE)) {
 		sourcetable = true;
 		device->ntrip.sourcetable_parse = true;
 		llen = (ssize_t) strlen(NTRIP_SOURCETABLE);
@@ -220,9 +220,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 
 	while (len > 0) {
 	    /* parse ENDSOURCETABLE */
-	    if (strncmp
-		    (line, NTRIP_ENDSOURCETABLE,
-		     strlen(NTRIP_ENDSOURCETABLE)) == 0)
+	    if (str_starts_with(line, NTRIP_ENDSOURCETABLE))
 		goto done;
 
 	    /* coverity[string_null] - nul-terminated by previous memset */
@@ -238,7 +236,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	    /* todo: parse headers */
 
 	    /* parse STR */
-	    if (strncmp(line, NTRIP_STR, strlen(NTRIP_STR)) == 0) {
+	    if (str_starts_with(line, NTRIP_STR)) {
 		ntrip_str_parse(line + strlen(NTRIP_STR),
 				(size_t) (llen - strlen(NTRIP_STR)), 
 				&hold, &device->context->errout);
@@ -282,10 +280,10 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 		 * find nearest stream if user hasn't provided one */
 	    }
 	    /* todo: parse CAS */
-	    /* else if (strncmp(line, NTRIP_CAS, strlen(NTRIP_CAS))==0); */
+	    /* else if (str_starts_with(line, NTRIP_CAS)); */
 
 	    /* todo: parse NET */
-	    /* else if (strncmp(line, NTRIP_NET, strlen(NTRIP_NET))==0); */
+	    /* else if (str_starts_with(line, NTRIP_NET)); */
 
 	    llen += strlen(NTRIP_BR);
 	    line += llen;
