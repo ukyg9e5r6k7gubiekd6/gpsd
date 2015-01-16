@@ -378,7 +378,6 @@ void json_watch_dump(const struct policy_t *ccp,
 void json_subframe_dump(const struct gps_data_t *datap,
 			/*@out@*/ char buf[], size_t buflen)
 {
-    size_t len = 0;
     const struct subframe_t *subframe = &datap->subframe;
     const bool scaled = datap->policy.scaled;
  
@@ -389,12 +388,11 @@ void json_subframe_dump(const struct gps_data_t *datap,
 		   (unsigned int)subframe->TOW17,
 		   (unsigned int)subframe->subframe_num,
 		   JSON_BOOL(scaled));
-    len = strlen(buf);
 
     /*@-type@*/
     if ( 1 == subframe->subframe_num ) {
 	if (scaled) {
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 			",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,"
 			"\"ura\":%u,\"hlth\":%u,\"L2P\":%u,\"Tgd\":%g,"
 			"\"toc\":%lu,\"af2\":%.4g,\"af1\":%.6e,\"af0\":%.7e}",
@@ -410,7 +408,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 			subframe->sub1.d_af1,
 			subframe->sub1.d_af0);
 	} else {
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 			",\"EPHEM1\":{\"WN\":%u,\"IODC\":%u,\"L2\":%u,"
 			"\"ura\":%u,\"hlth\":%u,\"L2P\":%u,\"Tgd\":%d,"
 			"\"toc\":%u,\"af2\":%ld,\"af1\":%d,\"af0\":%d}",
@@ -428,7 +426,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 	}
     } else if ( 2 == subframe->subframe_num ) {
 	if (scaled) {
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 			",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%.6e,\"deltan\":%.6e,"
 			"\"M0\":%.11e,\"Cuc\":%.6e,\"e\":%f,\"Cus\":%.6e,"
 			"\"sqrtA\":%.11g,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}",
@@ -444,7 +442,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 			(unsigned int)subframe->sub2.fit,
 			(unsigned int)subframe->sub2.u_AODO);
 	} else {
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 			",\"EPHEM2\":{\"IODE\":%u,\"Crs\":%d,\"deltan\":%d,"
 			"\"M0\":%ld,\"Cuc\":%d,\"e\":%ld,\"Cus\":%d,"
 			"\"sqrtA\":%lu,\"toe\":%lu,\"FIT\":%u,\"AODO\":%u}",
@@ -462,7 +460,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 	}
     } else if ( 3 == subframe->subframe_num ) {
 	if (scaled) {
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 		",\"EPHEM3\":{\"IODE\":%3u,\"IDOT\":%.6g,\"Cic\":%.6e,"
 		"\"Omega0\":%.11e,\"Cis\":%.7g,\"i0\":%.11e,\"Crc\":%.7g,"
 		"\"omega\":%.11e,\"Omegad\":%.6e}",
@@ -476,7 +474,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 			subframe->sub3.d_omega,
 			subframe->sub3.d_Omegad );
 	} else {
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 		",\"EPHEM3\":{\"IODE\":%u,\"IDOT\":%u,\"Cic\":%u,"
 		"\"Omega0\":%ld,\"Cis\":%d,\"i0\":%ld,\"Crc\":%d,"
 		"\"omega\":%ld,\"Omegad\":%ld}",
@@ -493,7 +491,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
     } else if ( subframe->is_almanac ) {
 	if (scaled) {
 	    /*@-compdef@*/
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 			",\"ALMANAC\":{\"ID\":%d,\"Health\":%u,"
 			"\"e\":%g,\"toa\":%lu,"
 			"\"deltai\":%.10e,\"Omegad\":%.5e,\"sqrtA\":%.10g,"
@@ -512,7 +510,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 			subframe->sub5.almanac.d_af0,
 			subframe->sub5.almanac.d_af1);
 	} else {
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 			",\"ALMANAC\":{\"ID\":%d,\"Health\":%u,"
 			"\"e\":%u,\"toa\":%u,"
 			"\"deltai\":%d,\"Omegad\":%d,\"sqrtA\":%lu,"
@@ -532,10 +530,9 @@ void json_subframe_dump(const struct gps_data_t *datap,
 			(int)subframe->sub5.almanac.af1);
 	}
     } else if ( 4 == subframe->subframe_num ) {
-	(void)snprintf(buf + len, buflen - len,
+	str_appendf(buf, buflen,
 	    ",\"pageid\":%u",
 		       (unsigned int)subframe->pageid);
-	len = strlen(buf);
 	switch (subframe->pageid ) {
 	case 13:
 	case 52:
@@ -543,18 +540,16 @@ void json_subframe_dump(const struct gps_data_t *datap,
 		int i;
 	    /*@+charint@*/
 		/* decoding of ERD to SV is non trivial and not done yet */
-		(void)snprintf(buf + len, buflen - len,
+		str_appendf(buf, buflen,
 		    ",\"ERD\":{\"ai\":%u,", subframe->sub4_13.ai);
 
 		/* 1-index loop to construct json, rather than giant snprintf */
 		for(i = 1 ; i <= 30; i++){
-		    len = strlen(buf);
-		    (void)snprintf(buf + len, buflen - len,
+		    str_appendf(buf, buflen,
 			"\"ERD%d\":%d,", i, subframe->sub4_13.ERD[i]);
 		}
-		len = strlen(buf)-1;
-		buf[len] = '\0';
-		(void)snprintf(buf + len, buflen - len, "}");
+		buf[strlen(buf) - 1] = '\0';
+		str_appendf(buf, buflen, "}");
 		break;
 	    /*@-charint@*/
 	}
@@ -568,13 +563,13 @@ void json_subframe_dump(const struct gps_data_t *datap,
 	    {
 		char buf1[25 * 6];
 		(void)json_stringify(buf1, sizeof(buf1), subframe->sub4_17.str);
-		(void)snprintf(buf + len, buflen - len,
+		str_appendf(buf, buflen,
 			       ",\"system_message\":\"%.144s\"", buf1);
 	    }
 	    break;
 	case 56:
 	    if (scaled) {
-		(void)snprintf(buf + len, buflen - len,
+		str_appendf(buf, buflen,
 			",\"IONO\":{\"a0\":%.5g,\"a1\":%.5g,\"a2\":%.5g,"
 			"\"a3\":%.5g,\"b0\":%.5g,\"b1\":%.5g,\"b2\":%.5g,"
 			"\"b3\":%.5g,\"A1\":%.11e,\"A0\":%.11e,\"tot\":%.5g,"
@@ -597,7 +592,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 			    (unsigned int)subframe->sub4_18.DN,
 			    (int)subframe->sub4_18.lsf);
 	    } else {
-		(void)snprintf(buf + len, buflen - len,
+		str_appendf(buf, buflen,
 			",\"IONO\":{\"a0\":%d,\"a1\":%d,\"a2\":%d,\"a3\":%d,"
 			"\"b0\":%d,\"b1\":%d,\"b2\":%d,\"b3\":%d,"
 			"\"A1\":%ld,\"A0\":%ld,\"tot\":%u,\"WNt\":%u,"
@@ -624,52 +619,46 @@ void json_subframe_dump(const struct gps_data_t *datap,
 	case 63:
 	{
 	    int i;
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 			   ",\"HEALTH\":{\"data_id\":%d,",
 			   (int)subframe->data_id);
 
 		/* 1-index loop to construct json, rather than giant snprintf */
 		for(i = 1 ; i <= 32; i++){
-		    len = strlen(buf);
-		    (void)snprintf(buf + len, buflen - len,
+		    str_appendf(buf, buflen,
 				   "\"SV%d\":%d,",
 				   i, (int)subframe->sub4_25.svf[i]);
 		}
 		for(i = 0 ; i < 8; i++){ /* 0-index */
-		    len = strlen(buf);
-		    (void)snprintf(buf + len, buflen - len,
+		    str_appendf(buf, buflen,
 				   "\"SVH%d\":%d,",
 				   i+25, (int)subframe->sub4_25.svhx[i]);
 		}
-		len = strlen(buf)-1;
-		buf[len] = '\0';
-		(void)snprintf(buf + len, buflen - len, "}");
+		buf[strlen(buf) - 1] = '\0';
+		str_appendf(buf, buflen, "}");
 
 	    break;
 	    }
 	}
     } else if ( 5 == subframe->subframe_num ) {
-	(void)snprintf(buf + len, buflen - len,
+	str_appendf(buf, buflen,
 	    ",\"pageid\":%u",
 		       (unsigned int)subframe->pageid);
-	len = strlen(buf);
 	if ( 51 == subframe->pageid ) {
 	    int i;
 	    /*@+matchanyintegral@*/
 	    /* subframe5, page 25 */
-	    (void)snprintf(buf + len, buflen - len,
+	    str_appendf(buf, buflen,
 		",\"HEALTH2\":{\"toa\":%lu,\"WNa\":%u,",
 			   (unsigned long)subframe->sub5_25.l_toa,
 			   (unsigned int)subframe->sub5_25.WNa);
 		/* 1-index loop to construct json */
 		for(i = 1 ; i <= 24; i++){
-		    len = strlen(buf);
-		    (void)snprintf(buf + len, buflen - len,
+		    str_appendf(buf, buflen,
 				   "\"SV%d\":%d,", i, (int)subframe->sub5_25.sv[i]);
 		}
-		len = strlen(buf)-1;
-		buf[len] = '\0';
-		(void)snprintf(buf + len, buflen - len, "}");
+		buf[strlen(buf) - 1] = '\0';
+		str_appendf(buf, buflen, "}");
 
 	    /*@-matchanyintegral@*/
 	}
