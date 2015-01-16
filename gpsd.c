@@ -1069,8 +1069,7 @@ static void json_devicelist_dump(char *reply, size_t replylen)
 	    (void)strlcat(reply, ",", replylen);
 	}
 
-    if (reply[strlen(reply) - 1] == ',')
-	reply[strlen(reply) - 1] = '\0';
+    str_rstrip_char(reply, ',');
     (void)strlcat(reply, "]}\r\n", replylen);
 }
 #endif /* SOCKET_EXPORT_ENABLE */
@@ -1323,8 +1322,7 @@ static void handle_request(struct subscriber_t *sub,
 		}
 	    }
 	}
-	if (reply[strlen(reply) - 1] == ',')
-	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+	str_rstrip_char(reply, ',');
 	(void)strlcat(reply, "],\"gst\":[", replylen);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
@@ -1337,8 +1335,7 @@ static void handle_request(struct subscriber_t *sub,
 		}
 	    }
 	}
-	if (reply[strlen(reply) - 1] == ',')
-	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+	str_rstrip_char(reply, ',');
 	(void)strlcat(reply, "],\"sky\":[", replylen);
 	for (devp = devices; devp < devices + MAXDEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
@@ -1351,8 +1348,7 @@ static void handle_request(struct subscriber_t *sub,
 		}
 	    }
 	}
-	if (reply[strlen(reply) - 1] == ',')
-	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+	str_rstrip_char(reply, ',');
 	(void)strlcat(reply, "]}\r\n", replylen);
     } else if (str_starts_with(buf, "VERSION;")) {
 	buf += 8;

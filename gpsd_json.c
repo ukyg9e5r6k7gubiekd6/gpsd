@@ -204,8 +204,7 @@ void json_tpv_dump(const struct gps_device_t *session,
 	}
 #endif /* TIMING_ENABLE */
     }
-    if (reply[strlen(reply) - 1] == ',')
-	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+    str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);
 }
 
@@ -236,8 +235,7 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
 
 #undef ADD_GST_FIELD
 
-    if (reply[strlen(reply) - 1] == ',')
-	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+    str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);
 }
 
@@ -287,12 +285,10 @@ void json_sky_dump(const struct gps_data_t *datap,
 			       datap->skyview[i].used ? "true" : "false");
 	    }
 	}
-	if (reply[strlen(reply) - 1] == ',')
-	    reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+	str_rstrip_char(reply, ',');
 	(void)strlcat(reply, "]", replylen);
     }
-    if (reply[strlen(reply) - 1] == ',')
-	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+    str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);
 }
 
@@ -355,8 +351,7 @@ void json_device_dump(const struct gps_device_t *device,
 #endif /* RECONFIGURE_ENABLE */
 	}
     }
-    if (reply[strlen(reply) - 1] == ',')
-	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+    str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);
 }
 
@@ -375,8 +370,7 @@ void json_watch_dump(const struct policy_t *ccp,
 		   ccp->split24 ? "true" : "false");
     if (ccp->devpath[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", ccp->devpath);
-    if (reply[strlen(reply) - 1] == ',')
-	reply[strlen(reply) - 1] = '\0';
+    str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);
     /*@+compdef@*/
 }
@@ -715,8 +709,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 			   rsp->udre, rsp->iod,
 			   rsp->prc, rsp->rrc);
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -762,8 +755,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 			   JSON_BOOL(csp->new_data),
 			   JSON_BOOL(csp->los_warning), csp->tou);
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -782,8 +774,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 			   ssp->frequency,
 			   ssp->health, ssp->station_id, ssp->bitrate);
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -825,8 +816,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 			   rsp->tod,
 			   rsp->prc, rsp->rrc);
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -834,14 +824,12 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	(void)strlcat(buf, "\"data\":[", buflen);
 	for (n = 0; n < rtcm->length; n++)
 	    str_appendf(buf, buflen, "\"0x%08x\",", rtcm->words[n]);
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
     }
 
-    if (buf[strlen(buf) - 1] == ',')
-	buf[strlen(buf) - 1] = '\0';
+    str_rstrip_char(buf, ',');
     (void)strlcat(buf, "}\r\n", buflen);
     /*@+mustfreefresh@*/
 }
@@ -889,8 +877,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   INT(R1001.L1.locktime));
 #undef R1001
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -919,8 +906,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   R1002.L1.CNR);
 #undef R1002
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -954,8 +940,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   INT(R1003.L2.locktime));
 #undef R1003
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -994,8 +979,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   R1004.L2.CNR);
 #undef R1004
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -1009,8 +993,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	    (void)strlcat(buf, "\"GLONASS\",", buflen - strlen(buf));
 	if ((rtcm->rtcmtypes.rtcm3_1005.system & 0x01)!=0)
 	    (void)strlcat(buf, "\"GALILEO\",", buflen);
-	if (buf[strlen(buf)-1] == ',')
-	    buf[strlen(buf)-1] = '\0';
+	str_rstrip_char(buf, ',');
 	str_appendf(buf, buflen,
 		       "],\"refstation\":%s,\"sro\":%s,"
 		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",
@@ -1031,8 +1014,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	    (void)strlcat(buf, "\"GLONASS\",", buflen);
 	if ((rtcm->rtcmtypes.rtcm3_1006.system & 0x01)!=0)
 	    (void)strlcat(buf, "\"GALILEO\",", buflen);
-	if (buf[strlen(buf)-1] == ',')
-	    buf[strlen(buf)-1] = '\0';
+	str_rstrip_char(buf, ',');
 	str_appendf(buf, buflen,
 		       "],\"refstation\":%s,\"sro\":%s,"
 		       "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",
@@ -1089,8 +1071,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   INT(R1009.L1.locktime));
 #undef R1009
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -1120,8 +1101,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   R1010.L1.CNR);
 #undef R1010
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -1155,8 +1135,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   INT(R1011.L2.locktime));
 #undef R1011
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -1196,8 +1175,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   R1012.L2.CNR);
 #undef R1012
 	}
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
 
@@ -1284,14 +1262,12 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (n = 0; n < rtcm->length; n++)
 	    str_appendf(buf, buflen,
 			   "\"0x%02x\",",(unsigned int)rtcm->rtcmtypes.data[n]);
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "]", buflen);
 	break;
     }
 
-    if (buf[strlen(buf) - 1] == ',')
-	buf[strlen(buf) - 1] = '\0';
+    str_rstrip_char(buf, ',');
     (void)strlcat(buf, "}\r\n", buflen);
     /*@+mustfreefresh@*/
 #undef CODE
@@ -1908,8 +1884,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       racon_status[ais->type6.dac235fid10.racon],
 			       ais->type6.dac235fid10.light,
 			       light_status[ais->type6.dac235fid10.light]);
-		if (buf[strlen(buf) - 1] == ',')
-		    buf[strlen(buf)-1] = '\0';
+		str_rstrip_char(buf, ',');
 		(void)strlcat(buf, "}\r\n", buflen);
 		break;
 	    }
@@ -2061,8 +2036,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 
 				   ais->type6.dac1fid25.cargos[i].code,
 				   ais->type6.dac1fid25.cargos[i].subtype);
-		if (buf[strlen(buf) - 1] == ',')
-		    buf[strlen(buf) - 1] = '\0';
+		str_rstrip_char(buf, ',');
 		(void)strlcat(buf, "]}\r\n", buflen);
 		break;
 	    case 28:	/* IMO289 - Route info - addressed */
@@ -2093,8 +2067,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			    ais->type6.dac1fid28.waypoints[i].lon,
 			    ais->type6.dac1fid28.waypoints[i].lat);
 		}
-		if (buf[strlen(buf) - 1] == ',')
-		    buf[strlen(buf)-1] = '\0';
+		str_rstrip_char(buf, ',');
 		(void)strlcat(buf, "]}\r\n", buflen);
 		break;
 	    case 30:	/* IMO289 - Text description - addressed */
@@ -2138,8 +2111,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			  "\"cspeed\":%u},",
 			  tp->cspeed);
 	      }
-	      if (buf[strlen(buf) - 1] == ',')
-		  buf[strlen(buf)-1] = '\0';
+	      str_rstrip_char(buf, ',');
 	      (void)strlcat(buf, "]}\r\n", buflen);
 	      break;
 	    }
@@ -2400,8 +2372,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			ais->type8.dac1fid17.targets[i].second,
 			ais->type8.dac1fid17.targets[i].speed);
 		}
-		if (buf[strlen(buf) - 1] == ',')
-		    buf[strlen(buf) - 1] = '\0';
+		str_rstrip_char(buf, ',');
 		(void)strlcat(buf, "]}\r\n", buflen);
 		break;
 	    case 19:        /* IMO289 - Marine Traffic Signal */
@@ -2462,8 +2433,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			    ais->type8.dac1fid27.waypoints[i].lon,
 			    ais->type8.dac1fid27.waypoints[i].lat);
 		}
-		if (buf[strlen(buf) - 1] == ',')
-		    buf[strlen(buf) - 1] = '\0';
+		str_rstrip_char(buf, ',');
 		(void)strlcat(buf, "]}\r\n", buflen);
 		break;
 	    case 29:        /* IMO289 - Text Description - broadcast */
@@ -2805,8 +2775,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			ais->type8.dac200fid24.gauges[i].id,
 			ais->type8.dac200fid24.gauges[i].level);
 		}
-		if (buf[strlen(buf)-1] == ',')
-		    buf[strlen(buf)-1] = '\0';
+		str_rstrip_char(buf, ',');
 		(void)strlcat(buf, "]}\r\n", buflen - strlen(buf));
 		break;
 	    case 40:	/* Inland AIS Signal Strength */
@@ -3264,8 +3233,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type24.dim.to_starboard);
 	    }
 	}
-	if (buf[strlen(buf)-1] == ',')
-	    buf[strlen(buf)-1] = '\0';
+	str_rstrip_char(buf, ',');
 	strlcat(buf, "}\r\n", buflen);
 	break;
     case 25:			/* Binary Message, Single Slot */
@@ -3324,8 +3292,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   JSON_BOOL(ais->type27.gnss));
 	break;
     default:
-	if (buf[strlen(buf) - 1] == ',')
-	    buf[strlen(buf) - 1] = '\0';
+	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "}\r\n", buflen);
 	break;
     }
@@ -3426,8 +3393,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 	str_appendf(reply, replylen,
 		       "\"depth\":%.3f,", gpsdata->attitude.depth);
 
-    if (reply[strlen(reply) - 1] == ',')
-	reply[strlen(reply) - 1] = '\0';	/* trim trailing comma */
+    str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);
 }
 #endif /* COMPASS_ENABLE */

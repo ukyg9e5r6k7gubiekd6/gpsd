@@ -522,8 +522,7 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 		(void)strlcat(buf, "\"split24\":false,", sizeof(buf));
 	    if (flags & WATCH_PPS)
 		(void)strlcat(buf, "\"pps\":false,", sizeof(buf));
-	    if (buf[strlen(buf) - 1] == ',')
-		buf[strlen(buf) - 1] = '\0';
+	    str_rstrip_char(buf, ',');
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
 	libgps_debug_trace((DEBUG_CALLS, "gps_stream() disable command: %s\n", buf));
@@ -556,8 +555,7 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 	    if (flags & WATCH_DEVICE)
 		str_appendf(buf, sizeof(buf), "\"device\":\"%s\",", (char *)d);
 	    /*@+nullpass@*/
-	    if (buf[strlen(buf) - 1] == ',')
-		buf[strlen(buf) - 1] = '\0';
+	    str_rstrip_char(buf, ',');
 	    (void)strlcat(buf, "};", sizeof(buf));
 	}
 	libgps_debug_trace((DEBUG_CALLS, "gps_stream() enable command: %s\n", buf));
