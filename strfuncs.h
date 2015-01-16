@@ -8,21 +8,39 @@
 #define _GPSD_STRFUNCS_H_
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include "compiler.h"
 
-#define str_starts_with(str, prefix) \
-    (strncmp((str), (prefix), strlen(prefix)) == 0)
 
-#define str_appendf(str, alloc_size, format, ...) \
-    ((void) snprintf((str) + strlen(str), (alloc_size) - strlen(str), (format), ##__VA_ARGS__))
-#define str_vappendf(str, alloc_size, format, ap) \
-    ((void) vsnprintf((str) + strlen(str), (alloc_size) - strlen(str), (format), (ap)))
+static inline bool str_starts_with(const char *str, const char *prefix)
+{
+    return strncmp(str, prefix, strlen(prefix)) == 0;
+}
 
-#define str_rstrip_char(str, ch) \
-    do { \
-        if ((str)[strlen(str) - 1] == ch) \
-            (str)[strlen(str) - 1] = '\0'; \
-    } while (0)
+
+PRINTF_FUNC(3, 4)
+static inline void str_appendf(char *str, size_t alloc_size, const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    (void) vsnprintf(str + strlen(str), alloc_size - strlen(str), format, ap);
+    va_end(ap);
+}
+
+
+static inline void str_vappendf(char *str, size_t alloc_size, const char *format, va_list ap)
+{
+    (void) vsnprintf(str + strlen(str), alloc_size - strlen(str), format, ap);
+}
+
+
+static inline void str_rstrip_char(char *str, char ch)
+{
+    if (str[strlen(str) - 1] == ch) {
+        str[strlen(str) - 1] = '\0';
+    }
+}
 
 #endif /* _GPSD_STRFUNCS_H_ */
