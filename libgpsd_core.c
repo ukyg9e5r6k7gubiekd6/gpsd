@@ -1013,8 +1013,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 	for (i = 0; i < FD_SETSIZE; i++)
 	    if (FD_ISSET(i, all_fds))
 		str_appendf(dbuf, sizeof(dbuf), "%d ", i);
-	if (strlen(dbuf) > 0)
-	    dbuf[strlen(dbuf) - 1] = '\0';
+	str_rstrip_char(dbuf, ' ');
 	(void)strlcat(dbuf, "} -> {", sizeof(dbuf));
 	for (i = 0; i < FD_SETSIZE; i++)
 	    if (FD_ISSET(i, rfds))

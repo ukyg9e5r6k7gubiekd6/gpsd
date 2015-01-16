@@ -548,7 +548,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 		    str_appendf(buf, buflen,
 			"\"ERD%d\":%d,", i, subframe->sub4_13.ERD[i]);
 		}
-		buf[strlen(buf) - 1] = '\0';
+		str_rstrip_char(buf, ',');
 		str_appendf(buf, buflen, "}");
 		break;
 	    /*@-charint@*/
@@ -634,7 +634,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 				   "\"SVH%d\":%d,",
 				   i+25, (int)subframe->sub4_25.svhx[i]);
 		}
-		buf[strlen(buf) - 1] = '\0';
+		str_rstrip_char(buf, ',');
 		str_appendf(buf, buflen, "}");
 
 	    break;
@@ -657,7 +657,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 		    str_appendf(buf, buflen,
 				   "\"SV%d\":%d,", i, (int)subframe->sub5_25.sv[i]);
 		}
-		buf[strlen(buf) - 1] = '\0';
+		str_rstrip_char(buf, ',');
 		str_appendf(buf, buflen, "}");
 
 	    /*@-matchanyintegral@*/
