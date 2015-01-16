@@ -10,14 +10,6 @@
 extern "C" {
 #endif
 
-/* Macro for declaring function arguments unused. */
-#if defined(__GNUC__)
-#  define UNUSED __attribute__((unused)) /* Flag variable as unused */
-#else /* not __GNUC__ */
-#  define UNUSED
-#endif
-
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdbool.h>
@@ -29,6 +21,7 @@ extern "C" {
 #ifndef S_SPLINT_S
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
+#include "compiler.h"
 
 /*
  * 4.1 - Base version for initial JSON protocol (Dec 2009, release 2.90)

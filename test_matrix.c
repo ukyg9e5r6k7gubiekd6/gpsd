@@ -10,14 +10,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "compiler.h"
 #include "matrix.h"
-
-/* Macro for declaring function arguments unused. */
-#if defined(__GNUC__)
-#  define UNUSED __attribute__((unused)) /* Flag variable as unused */
-#else /* not __GNUC__ */
-#  define UNUSED
-#endif
 
 static struct {
     double mat[4][4];

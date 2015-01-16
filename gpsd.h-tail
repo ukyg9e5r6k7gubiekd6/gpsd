@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "gps.h"
+#include "compiler.h"
 
 /*
  * Tell GCC that we want thread-safe behavior with _REENTRANT;
@@ -1016,11 +1017,7 @@ extern void libgps_dump_state(struct gps_data_t *);
 
 void gpsd_labeled_report(const int, const int,
 			 const char *, const char *, va_list);
-# if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
-__attribute__((__format__(__printf__, 3, 4))) void gpsd_report(const struct gpsd_errout_t *, const int, const char *, ...);
-# else /* not a new enough GCC, use the unprotected prototype */
-void gpsd_report(const struct gpsd_errout_t *, const int, const char *, ...);
-#endif
+PRINTF_FUNC(3, 4) void gpsd_report(const struct gpsd_errout_t *, const int, const char *, ...);
 
 #ifdef S_SPLINT_S
 extern struct protoent *getprotobyname(const char *);
