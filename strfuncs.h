@@ -38,7 +38,7 @@ static inline void str_vappendf(char *str, size_t alloc_size, const char *format
 
 static inline void str_rstrip_char(char *str, char ch)
 {
-    if (str[strlen(str) - 1] == ch) {
+    if (strlen(str) != 0 && str[strlen(str) - 1] == ch) {
         str[strlen(str) - 1] = '\0';
     }
 }
