@@ -116,13 +116,13 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 				       char bufp[], size_t len)
 {
     int i;
-    char *bufp2 = bufp;
+    char *line_start = bufp;
     bufp[0] = '\0';
 
     for (i = 0; i < session->gpsdata.satellites_visible; i++) {
 	if (i % 4 == 0) {
 	    bufp += strlen(bufp);
-	    bufp2 = bufp;
+	    line_start = bufp;
 	    len -= snprintf(bufp, len,
 			    "$GPGSV,%d,%d,%02d",
 			    ((session->gpsdata.satellites_visible - 1) / 4) +
@@ -138,7 +138,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 			    session->gpsdata.skyview[i].azimuth,
 			    session->gpsdata.skyview[i].ss);
 	if (i % 4 == 3 || i == session->gpsdata.satellites_visible - 1) {
-	    nmea_add_checksum(bufp2);
+	    nmea_add_checksum(line_start);
 	    len -= 5;
 	}
     }
@@ -147,7 +147,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     if (session->lexer.type == ZODIAC_PACKET
 	&& session->driver.zodiac.Zs[0] != 0) {
 	bufp += strlen(bufp);
-	bufp2 = bufp;
+	line_start = bufp;
 	(void)strlcpy(bufp, "$PRWIZCH", len);
 	for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	    len -= snprintf(bufp + strlen(bufp), len,
@@ -155,7 +155,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 			    session->driver.zodiac.Zs[i],
 			    session->driver.zodiac.Zv[i] & 0x0f);
 	}
-	nmea_add_checksum(bufp2);
+	nmea_add_checksum(line_start);
     }
 #endif /* ZODIAC_ENABLE */
 }
@@ -163,7 +163,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 static void gpsd_binary_quality_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
 {
-    char *bufp2 = bufp;
+    char *line_start = bufp;
 
     if (session->device_type != NULL && (session->gpsdata.set & MODE_SET) != 0) {
 	int i, j;
@@ -194,7 +194,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 			   ZEROIZE(session->gpsdata.dop.pdop),
 			   ZEROIZE(session->gpsdata.dop.hdop),
 			   ZEROIZE(session->gpsdata.dop.vdop));
-	nmea_add_checksum(bufp2);
+	nmea_add_checksum(line_start);
 	bufp += strlen(bufp);
     }
     if (isfinite(session->gpsdata.fix.epx)!=0
