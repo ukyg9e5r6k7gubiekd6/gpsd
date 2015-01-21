@@ -112,46 +112,42 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 				       char bufp[], size_t len)
 {
     int i;
-    char *line_start = bufp;
+    char *bufp2 = bufp;
     bufp[0] = '\0';
 
     for (i = 0; i < session->gpsdata.satellites_visible; i++) {
 	if (i % 4 == 0) {
-	    bufp += strlen(bufp);
-	    line_start = bufp;
-	    len -= snprintf(bufp, len,
+	    bufp2 = bufp + strlen(bufp);
+	    str_appendf(bufp, len,
 			    "$GPGSV,%d,%d,%02d",
 			    ((session->gpsdata.satellites_visible - 1) / 4) +
 			    1, (i / 4) + 1,
 			    session->gpsdata.satellites_visible);
 	}
-	bufp += strlen(bufp);
 	if (i < session->gpsdata.satellites_visible)
-	    len -= snprintf(bufp, len,
+	    str_appendf(bufp, len,
 			    ",%02d,%02d,%03d,%02.0f",
 			    session->gpsdata.skyview[i].PRN,
 			    session->gpsdata.skyview[i].elevation,
 			    session->gpsdata.skyview[i].azimuth,
 			    session->gpsdata.skyview[i].ss);
 	if (i % 4 == 3 || i == session->gpsdata.satellites_visible - 1) {
-	    nmea_add_checksum(line_start);
-	    len -= 5;
+	    nmea_add_checksum(bufp2);
 	}
     }
 
 #ifdef ZODIAC_ENABLE
     if (session->lexer.type == ZODIAC_PACKET
 	&& session->driver.zodiac.Zs[0] != 0) {
-	bufp += strlen(bufp);
-	line_start = bufp;
-	(void)strlcpy(bufp, "$PRWIZCH", len);
+	bufp2 = bufp + strlen(bufp);
+	str_appendf(bufp, len, "$PRWIZCH");
 	for (i = 0; i < ZODIAC_CHANNELS; i++) {
-	    len -= snprintf(bufp + strlen(bufp), len,
+	    str_appendf(bufp, len,
 			    ",%02u,%X",
 			    session->driver.zodiac.Zs[i],
 			    session->driver.zodiac.Zv[i] & 0x0f);
 	}
-	nmea_add_checksum(line_start);
+	nmea_add_checksum(bufp2);
     }
 #endif /* ZODIAC_ENABLE */
 }
@@ -159,39 +155,37 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 static void gpsd_binary_quality_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
 {
-    char *line_start = bufp;
+    char *bufp2;
+    bufp[0] = '\0';
 
     if (session->device_type != NULL && (session->gpsdata.set & MODE_SET) != 0) {
 	int i, j;
 
-	(void)snprintf(bufp, len - strlen(bufp),
+	bufp2 = bufp + strlen(bufp);
+	(void)snprintf(bufp, len,
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
 	for (i = 0; i < session->device_type->channels; i++) {
 	    if (session->gpsdata.skyview[i].used == true){
-		bufp += strlen(bufp);
-		(void)snprintf(bufp, len - strlen(bufp),
+		str_appendf(bufp, len,
 			       "%d,",
 			       session->gpsdata.skyview[i].PRN);
 	        j++;
 	    }
 	}
 	for (i = j; i < session->device_type->channels; i++) {
-	    bufp += strlen(bufp);
-	    (void)strlcpy(bufp, ",", len);
+	    (void)strlcat(bufp, ",", len);
 	}
-	bufp += strlen(bufp);
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
 	if (session->gpsdata.fix.mode == MODE_NO_FIX)
 	    (void)strlcat(bufp, ",,,", len);
 	else
-	    (void)snprintf(bufp, len - strlen(bufp),
+	    str_appendf(bufp, len,
 			   "%.1f,%.1f,%.1f*",
 			   ZEROIZE(session->gpsdata.dop.pdop),
 			   ZEROIZE(session->gpsdata.dop.hdop),
 			   ZEROIZE(session->gpsdata.dop.vdop));
-	nmea_add_checksum(line_start);
-	bufp += strlen(bufp);
+	nmea_add_checksum(bufp2);
     }
     if (isfinite(session->gpsdata.fix.epx)!=0
 	&& isfinite(session->gpsdata.fix.epy)!=0
@@ -205,13 +199,14 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	    intfixtime = (time_t) session->gpsdata.fix.time;
 	    (void)gmtime_r(&intfixtime, &tm);
 	}
-	(void)snprintf(bufp, len - strlen(bufp),
+	bufp2 = bufp + strlen(bufp);
+	str_appendf(bufp, len,
 		       "$GPGBS,%02d%02d%02d,%.2f,M,%.2f,M,%.2f,M",
 		       tm.tm_hour, tm.tm_min, tm.tm_sec,
 		       ZEROIZE(session->gpsdata.fix.epx),
 		       ZEROIZE(session->gpsdata.fix.epy),
 		       ZEROIZE(session->gpsdata.fix.epv));
-	nmea_add_checksum(bufp);
+	nmea_add_checksum(bufp2);
     }
 #undef ZEROIZE
 }
