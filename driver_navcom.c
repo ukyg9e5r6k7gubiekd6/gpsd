@@ -793,9 +793,9 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    session->gpsdata.skyview[i].elevation = (short)ele;
 	    session->gpsdata.skyview[i].azimuth = (short)azm;
 	    /*@ ignore @*//* splint is confused */
-	    s = session->gpsdata.skyview[i++].ss = (p2_snr ? p2_snr : ca_snr) / 4.0;
+	    s = session->gpsdata.skyview[i].ss = (p2_snr ? p2_snr : ca_snr) / 4.0;
 	    /*@ end @*/
-	    session->gpsdata.skyview[i].used = (stat == 0xff);
+	    session->gpsdata.skyview[i++].used = (stat == 0xff);
 	    if (stat == 0xff)
 		nsu++;
 	}

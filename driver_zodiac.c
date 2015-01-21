@@ -165,6 +165,9 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     unpacked_date.tm_hour = (int)getzword(22);
     unpacked_date.tm_min = (int)getzword(23);
     unpacked_date.tm_sec = (int)getzword(24);
+#ifdef S_SPLINT_S
+    unpacked_date.tm_isdst = 0;
+#endif /* S_SPLINT_S */
     subseconds = (int)getzlong(25) / 1e9;
     /*@ -compdef */
     session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;

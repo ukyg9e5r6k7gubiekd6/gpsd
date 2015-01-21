@@ -109,7 +109,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	unpacked_date.tm_sec = (int)getub(buf, 10);
 	unpacked_date.tm_isdst = 0;
 #ifdef S_SPLINT_S
-	unpacked_date. tm_wday = unpacked_date. tm_yday = 0;
+	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
 #endif /* S_SPLINT_S */
 	nsec = (uint) getbeu32(buf, 11);
 

@@ -886,6 +886,9 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	unpacked_date.tm_hour = (int)getub(buf, 15);
 	unpacked_date.tm_min = (int)getub(buf, 16);
 	unpacked_date.tm_sec = 0;
+#ifdef S_SPLINT_S
+	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
+#endif /* S_SPLINT_S */
 	subseconds = getbeu16(buf, 17) * 1e-3;
 	/*@ -compdef -unrecog */
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
@@ -1069,6 +1072,9 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	unpacked_date.tm_mday = (int)getub(buf, 4);
 	unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
 	unpacked_date.tm_year = (int)getbeu16(buf, 6) - 1900;
+#ifdef S_SPLINT_S
+	unpacked_date.tm_isdst = 0;
+#endif /* S_SPLINT_S */
 	/*@ -compdef */
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
 	/*@ +compdef */

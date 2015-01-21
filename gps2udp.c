@@ -90,7 +90,7 @@ static int send_udp (char *nmeastring, size_t ind)
     if (ind == 0) {
 	/* compute message size and add 0x0a 0x0d */
 	for (ind=0; nmeastring [ind] != '\0'; ind ++) {
-	    if (ind >= sizeof(message)) {
+	    if (ind >= sizeof(message) - 3) {
 		fprintf(stderr, "gps2udp: too big [%s] \n", nmeastring);
 		return -1;
 	    }
