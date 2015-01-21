@@ -220,6 +220,7 @@ static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime 
 
 void ntpshm_session_init(struct gps_device_t *session)
 {
+    /*@-mustfreeonly@*/
 #ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
     session->shm_clock = NULL;
@@ -227,6 +228,7 @@ void ntpshm_session_init(struct gps_device_t *session)
 #ifdef PPS_ENABLE
     session->shm_pps = NULL;
 #endif	/* PPS_ENABLE */
+    /*@+mustfreeonly@*/
 }
 
 int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedrift_t *td)
@@ -414,7 +416,8 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 	log1 = "accepted chrony sock";
 	chrony_send(session, td);
     }
-    (void)ntpshm_put(session, session->shm_pps, td);
+    if (session->shm_pps != NULL)
+	(void)ntpshm_put(session, session->shm_pps, td);
 
     return log1;
 }
@@ -423,8 +426,10 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 void ntpshm_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
-    (void)ntpshm_free(session->context, session->shm_clock);
-    session->shm_clock = NULL;
+    if (session->shm_clock != NULL) {
+	(void)ntpshm_free(session->context, session->shm_clock);
+	session->shm_clock = NULL;
+    }
 #if defined(PPS_ENABLE)
     if (session->shm_pps != NULL) {
 	pps_thread_deactivate(session);

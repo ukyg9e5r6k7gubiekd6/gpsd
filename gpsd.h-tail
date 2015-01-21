@@ -490,9 +490,9 @@ struct gps_device_t {
 #endif /* TIMING_ENABLE */
 #ifdef NTPSHM_ENABLE
     bool ship_to_ntpd;
-    volatile struct shmTime *shm_clock;
+    volatile /*@null@*/ struct shmTime *shm_clock;
 # ifdef PPS_ENABLE
-    volatile struct shmTime *shm_pps;
+    volatile /*@null@*/ struct shmTime *shm_pps;
 # endif /* PPS_ENABLE */
 #endif /* NTPSHM_ENABLE */
     volatile struct {
