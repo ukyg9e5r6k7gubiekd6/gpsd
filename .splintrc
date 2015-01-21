@@ -9,6 +9,7 @@
 -predboolint
 -nestedextern
 -abstract
+-fixedformalarray
 
 -Ddbus_uint32_t=uint
 -Disgps30bits_t=uint

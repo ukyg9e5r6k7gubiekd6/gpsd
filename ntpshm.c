@@ -175,7 +175,7 @@ void ntpshm_context_init(struct gps_context_t *context)
     memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
 }
 
-static volatile struct shmTime *ntpshm_alloc(struct gps_context_t *context)
+static /*@null@*/ volatile struct shmTime *ntpshm_alloc(struct gps_context_t *context)
 /* allocate NTP SHM segment.  return its segment number, or -1 */
 {
     int i;

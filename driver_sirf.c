@@ -580,21 +580,22 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 
     gpsd_zero_satellites(&session->gpsdata);
     for (i = st = nsv = 0; i < SIRF_CHANNELS; i++) {
-	int cn, prn;
+	int cn;
+	short prn;
 	int off = 8 + 15 * i;
 	bool good;
-	unsigned short stat = getbeu16(buf, off + 3);
-	session->gpsdata.skyview[st].PRN = prn = (int)getub(buf, off);
+	unsigned short stat = (unsigned short)getbeu16(buf, off + 3);
+	session->gpsdata.skyview[st].PRN = prn = (short)getub(buf, off);
 	session->gpsdata.skyview[st].azimuth =
-	    (int)(((unsigned)getub(buf, off + 1) * 3) / 2.0);
+	    (short)(((unsigned)getub(buf, off + 1) * 3) / 2.0);
 	session->gpsdata.skyview[st].elevation =
-	    (int)((unsigned)getub(buf, off + 2) / 2.0);
+	    (short)((unsigned)getub(buf, off + 2) / 2.0);
 	cn = 0;
 	for (j = 0; j < 10; j++)
 	    cn += (int)getub(buf, off + 5 + j);
 
 	session->gpsdata.skyview[st].ss = (float)(cn / 10.0);
-	session->gpsdata.skyview[st].used = (stat & 0x01);
+	session->gpsdata.skyview[st].used = (bool)(stat & 0x01);
 	good = session->gpsdata.skyview[st].PRN != 0 &&
 	    session->gpsdata.skyview[st].azimuth != 0 &&
 	    session->gpsdata.skyview[st].elevation != 0;

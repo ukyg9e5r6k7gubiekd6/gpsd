@@ -184,15 +184,15 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	/* get info for one channel/satellite */
 	int off = i * 5 + 5;
 	unsigned int porn;
+	bool used = (getub(buf, off) & 0x60) == 0x60;
 	if ((porn = (unsigned int)getub(buf, off) & 0x1f) == 0)
 	    porn = (unsigned int)(getub(buf, off + 3) >> 1) + 87;
-	bool used = (getub(buf, off) & 0x60) == 0x60;
 
-	session->gpsdata.skyview[i].PRN = (int)porn;
+	session->gpsdata.skyview[i].PRN = (short)porn;
 	session->gpsdata.skyview[i].ss = (float)getub(buf, off + 4);
-	session->gpsdata.skyview[i].elevation = (int)getsb(buf, off + 1);
-	session->gpsdata.skyview[i].azimuth = (unsigned short)getub(buf, off + 2) +
-	    ((unsigned short)(getub(buf, off + 3) & 0x1) << 1);
+	session->gpsdata.skyview[i].elevation = (short)getsb(buf, off + 1);
+	session->gpsdata.skyview[i].azimuth = (short)getub(buf, off + 2) +
+	    (short)((unsigned short)(getub(buf, off + 3) & 0x1) << 1);
 	session->gpsdata.skyview[i].used = used;
 	/*@ +charint @*/
 	if (used)
@@ -306,7 +306,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
     for (i = 0; i < n; i++) {
 	unsigned long ul;
 	session->gpsdata.raw.mtime[i] = t;
-	session->gpsdata.skyview[i].PRN = (int)getub(buf, 11 * i + 15) & 0x1f;
+	session->gpsdata.skyview[i].PRN = (short)(getub(buf, 11 * i + 15) & 0x1f);
 	session->gpsdata.skyview[i].ss = (double)getub(buf, 11 * i * 15 + 1) / 4.0;
 	session->gpsdata.raw.codephase[i] =
 	    (double)getleu32(buf, 11 * i * 15 + 2);

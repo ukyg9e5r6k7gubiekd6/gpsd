@@ -182,6 +182,7 @@ static void ctlhook(struct gps_device_t *device UNUSED, gps_mask_t changed UNUSE
     }
 }
 
+/*@-mustfreeonly -observertrans -statictrans@*/
 int main(int argc, char **argv)
 {
     int option, status;
@@ -844,3 +845,6 @@ int main(int argc, char **argv)
 	/*@ +mustfreeonly +immediatetrans @*/
     }
 }
+/*@+mustfreeonly +observertrans +statictrans@*/
+
+/* end */

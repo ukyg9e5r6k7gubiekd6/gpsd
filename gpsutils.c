@@ -360,7 +360,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
      * suggests timezone is being set improperly (off by an hour).
      * Also timezon is not available at all on some BSDs.
      */
-    return (timestamp_t)timegm(&tm) + usec;
+    /*@i1@*/return (timestamp_t)timegm(&tm) + usec;
 #else
     double usec = 0;
 

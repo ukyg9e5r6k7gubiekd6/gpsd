@@ -564,11 +564,11 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    }
 
 	    if ((int)sats->svid <= 32)
-		session->gpsdata.skyview[j].PRN = (int)sats->svid;	/* GPS */
+		session->gpsdata.skyview[j].PRN = (short)sats->svid;	/* GPS */
 	    else
-		session->gpsdata.skyview[j].PRN = (int)sats->svid + 87;	/* SBAS */
-	    session->gpsdata.skyview[j].azimuth = (int)GPSD_LE16TOH(sats->azmth);
-	    session->gpsdata.skyview[j].elevation = (int)sats->elev;
+		session->gpsdata.skyview[j].PRN = (short)sats->svid + 87;	/* SBAS */
+	    session->gpsdata.skyview[j].azimuth = (short)GPSD_LE16TOH(sats->azmth);
+	    session->gpsdata.skyview[j].elevation = (short)sats->elev;
 	    // Garmin does not document this.  snr is in dB*100
 	    // Known, but not seen satellites have a dB value of -1*100
 	    session->gpsdata.skyview[j].ss = (float)(GPSD_LE16TOH(sats->snr) / 100.0);

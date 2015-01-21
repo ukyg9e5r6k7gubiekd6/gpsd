@@ -503,11 +503,11 @@ static gps_mask_t processGSA(int count, char *field[],
 	    mask = MODE_SET;
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "GPGSA sets mode %d\n", session->newdata.mode);
-	if (field[15][0])
+	if (field[15][0] != '\0')
 	    session->gpsdata.dop.pdop = safe_atof(field[15]);
-	if (field[16][0])
+	if (field[16][0] != '\0')
 	    session->gpsdata.dop.hdop = safe_atof(field[16]);
-	if (field[17][0])
+	if (field[17][0] != '\0')
 	    session->gpsdata.dop.vdop = safe_atof(field[17]);
 	session->gpsdata.satellites_used = 0;
 	memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
@@ -516,7 +516,7 @@ static gps_mask_t processGSA(int count, char *field[],
 	    int prn = atoi(field[i + 3]);
 	    if (prn > 0)
 		session->nmea.sats_used[session->gpsdata.satellites_used++] =
-		    prn;
+		    (unsigned short)prn;
 	}
 	mask |= DOP_SET | USED_IS;
 	gpsd_report(&session->context->errout, LOG_DATA,
@@ -595,17 +595,17 @@ static gps_mask_t processGSV(int count, char *field[],
 	    break;
 	}
 	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
-	sp->PRN = atoi(field[fldnum++]);
+	sp->PRN = (short)atoi(field[fldnum++]);
 	// NMEA-ID (33..64) to SBAS PRN.
 	if (sp->PRN >= 33 && sp->PRN <= 64)
 	    sp->PRN += 87;
-	sp->elevation = atoi(field[fldnum++]);
-	sp->azimuth = atoi(field[fldnum++]);
+	sp->elevation = (short)atoi(field[fldnum++]);
+	sp->azimuth = (short)atoi(field[fldnum++]);
 	sp->ss = (float)atoi(field[fldnum++]);
 	sp->used = false;
 	if (sp->PRN > 0)
 	    for (n = 0; n < MAXCHANNELS; n++)
-		if (session->nmea.sats_used[n] == sp->PRN) {
+		if (session->nmea.sats_used[n] == (unsigned short)sp->PRN) {
 		    sp->used = true;
 		    break;
 		}
@@ -1077,9 +1077,9 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	int i, n = session->gpsdata.satellites_visible = atoi(field[2]);
 	session->gpsdata.satellites_used = 0;
 	for (i = 0, sp = session->gpsdata.skyview; sp < session->gpsdata.skyview + n; sp++, i++) {
-	    sp->PRN = atoi(field[3 + i * 5 + 0]);
-	    sp->azimuth = atoi(field[3 + i * 5 + 1]);
-	    sp->elevation = atoi(field[3 + i * 5 + 2]);
+	    sp->PRN = (short)atoi(field[3 + i * 5 + 0]);
+	    sp->azimuth = (short)atoi(field[3 + i * 5 + 1]);
+	    sp->elevation = (short)atoi(field[3 + i * 5 + 2]);
 	    sp->ss = safe_atof(field[3 + i * 5 + 3]);
 	    sp->used = false;
 	    if (field[3 + i * 5 + 4][0] == 'U') {

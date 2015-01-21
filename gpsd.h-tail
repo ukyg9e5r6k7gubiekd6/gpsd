@@ -1050,8 +1050,8 @@ void cfmakeraw(struct termios *);
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall) \
     do { \
-        ssize_t result = (funcall); \
-        assert(result != -23); \
+        ssize_t locresult = (funcall); \
+        assert(locresult != -23); \
     } while (0)
 
 static /*@unused@*/ inline void memory_barrier(void)

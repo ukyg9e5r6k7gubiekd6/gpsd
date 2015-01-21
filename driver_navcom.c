@@ -789,9 +789,9 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	 * says should be.  So I check for the fact that if all three
 	 * values below are zero, one is not interested in this satellite */
 	if (!(ele == 0 && azm == 0 && dgps_age == 0)) {
-	    session->gpsdata.skyview[i].PRN = (int)prn;
-	    session->gpsdata.skyview[i].elevation = (int)ele;
-	    session->gpsdata.skyview[i].azimuth = (int)azm;
+	    session->gpsdata.skyview[i].PRN = (short)prn;
+	    session->gpsdata.skyview[i].elevation = (short)ele;
+	    session->gpsdata.skyview[i].azimuth = (short)azm;
 	    /*@ ignore @*//* splint is confused */
 	    s = session->gpsdata.skyview[i++].ss = (p2_snr ? p2_snr : ca_snr) / 4.0;
 	    /*@ end @*/
@@ -799,7 +799,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	    if (stat == 0xff)
 		nsu++;
 	}
-	session->gpsdata.satellites_used = nsu;
+	session->gpsdata.satellites_used = (int)nsu;
 	gpsd_report(&session->context->errout, LOG_DATA,
 		    "Navcom: prn = %3u, ele = %02u, azm = %03u, snr = %d (%s), "
 		    "dgps age = %.1fs, log ch = %d, hw ch = 0x%02x\n",

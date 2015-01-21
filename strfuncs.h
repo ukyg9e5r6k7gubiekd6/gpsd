@@ -14,14 +14,14 @@
 #include "compiler.h"
 
 
-static inline bool str_starts_with(const char *str, const char *prefix)
+static /*@unused@*/ inline bool str_starts_with(const char *str, const char *prefix)
 {
     return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
 
 PRINTF_FUNC(3, 4)
-static inline void str_appendf(char *str, size_t alloc_size, const char *format, ...)
+static /*@unused@*/ inline void str_appendf(char *str, size_t alloc_size, const char *format, ...)
 {
     va_list ap;
     va_start(ap, format);
@@ -30,13 +30,13 @@ static inline void str_appendf(char *str, size_t alloc_size, const char *format,
 }
 
 
-static inline void str_vappendf(char *str, size_t alloc_size, const char *format, va_list ap)
+static /*@unused@*/ inline void str_vappendf(char *str, size_t alloc_size, const char *format, va_list ap)
 {
     (void) vsnprintf(str + strlen(str), alloc_size - strlen(str), format, ap);
 }
 
 
-static inline void str_rstrip_char(char *str, char ch)
+static /*@unused@*/ inline void str_rstrip_char(char *str, char ch)
 {
     if (strlen(str) != 0 && str[strlen(str) - 1] == ch) {
         str[strlen(str) - 1] = '\0';

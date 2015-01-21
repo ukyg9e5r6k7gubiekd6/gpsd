@@ -273,7 +273,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #endif /* __UNUSED__ */
 
 	for (ns = buf; ns; ns = strstr(ns + 1, "GPSD")) {
-	    if (str_starts_with(ns, "GPSD")) {
+	    /*@i1@*/if (str_starts_with(ns, "GPSD")) {
 		/* the following should execute each time we have a good next sp */
 		for (sp = ns + 5; *sp != '\0'; sp = tp + 1) {
 		    bool eol;
@@ -425,11 +425,11 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 				    // cppcheck-suppress invalidscanf
 				    (void)sscanf(sp, "%d %d %d %lf %d", &i1,
 						 &i2, &i3, &f4, &i5);
-				    gpsdata->skyview[j].PRN = i1;
-				    gpsdata->skyview[j].elevation = i2;
-				    gpsdata->skyview[j].azimuth = i3;
-				    gpsdata->skyview[j].ss = f4;
-				    gpsdata->skyview[j].used = i5;
+				    gpsdata->skyview[j].PRN = (short)i1;
+				    gpsdata->skyview[j].elevation = (short)i2;
+				    gpsdata->skyview[j].azimuth = (short)i3;
+				    gpsdata->skyview[j].ss = (double)f4;
+				    gpsdata->skyview[j].used = (bool)i5;
 				    if (i5 == 1)
 					gpsdata->satellites_used++;
 				}

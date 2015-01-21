@@ -342,7 +342,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if ((f1 = getbef32((char *)buf, 5 * i + 2)) < 0)
 		f1 = 0.0;
 	    for (j = 0; j < TSIP_CHANNELS; j++)
-		if (session->gpsdata.skyview[j].PRN == (int)u1) {
+		if (session->gpsdata.skyview[j].PRN == (short)u1) {
 		    session->gpsdata.skyview[j].ss = f1;
 		    break;
 		}
@@ -506,13 +506,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    i, u1, u2 & 7, u3, u4, f1, f2, d1, d2);
 	if (i < TSIP_CHANNELS) {
 	    if (d1 >= 0.0) {
-		session->gpsdata.skyview[i].PRN = (int)u1;
-		session->gpsdata.skyview[i].ss = f1;
-		session->gpsdata.skyview[i].elevation = (int)round(d1);
-		session->gpsdata.skyview[i].azimuth = (int)round(d2);
+		session->gpsdata.skyview[i].PRN = (short)u1;
+		session->gpsdata.skyview[i].ss = (double)f1;
+		session->gpsdata.skyview[i].elevation = (short)round(d1);
+		session->gpsdata.skyview[i].azimuth = (short)round(d2);
 		session->gpsdata.skyview[i].used = false;
 		for (j = 0; j < session->gpsdata.satellites_used; j++)
-		    if (session->gpsdata.skyview[i].PRN && session->driver.tsip.sats_used[j])
+		    if (session->gpsdata.skyview[i].PRN != 0 && session->driver.tsip.sats_used[j] != 0)
 			session->gpsdata.skyview[i].used = true;
 	    } else {
 		session->gpsdata.skyview[i].PRN =
@@ -579,7 +579,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	for (i = 0; i < count; i++)
 	    str_appendf(buf2, sizeof(buf2),
 			   " %d", session->driver.tsip.sats_used[i] =
-			   (int)getub(buf, 17 + i));
+			   (short)getub(buf, 17 + i));
 	/*@ -charint @*/
 	gpsd_report(&session->context->errout, LOG_DATA,
 		    "AIVSS: 0x6d status=%d used=%d "

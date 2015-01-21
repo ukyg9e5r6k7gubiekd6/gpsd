@@ -3223,7 +3223,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    }
 	}
 	str_rstrip_char(buf, ',');
-	strlcat(buf, "}\r\n", buflen);
+	(void)strlcat(buf, "}\r\n", buflen);
 	break;
     case 25:			/* Binary Message, Single Slot */
 	str_appendf(buf, buflen,

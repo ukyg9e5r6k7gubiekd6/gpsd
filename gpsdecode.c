@@ -23,7 +23,7 @@ static bool pseudonmea = false;
 static bool split24 = false;
 static unsigned int ntypes = 0;
 static unsigned int typelist[32];
-struct gps_context_t context;
+static struct gps_context_t context;
 
 /**************************************************************************
  *

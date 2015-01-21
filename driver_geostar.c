@@ -266,9 +266,9 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	    s3 = getles16(buf, OFFSET(4) + 2 + i * 3 * 4);
 	    gpsd_report(&session->context->errout, LOG_INF, "ID %d Az %g El %g SNR %g\n",
 			decode_channel_id(ul2), s1*0.001*RAD_2_DEG, s2*0.001*RAD_2_DEG, s3*0.1);
-	    session->gpsdata.skyview[i].PRN = decode_channel_id(ul2);
-	    session->gpsdata.skyview[i].azimuth = (int)round((double)s1*0.001 * RAD_2_DEG);
-	    session->gpsdata.skyview[i].elevation = (int)round((double)s2*0.001 * RAD_2_DEG);
+	    session->gpsdata.skyview[i].PRN = (short)decode_channel_id(ul2);
+	    session->gpsdata.skyview[i].azimuth = (short)round((double)s1*0.001 * RAD_2_DEG);
+	    session->gpsdata.skyview[i].elevation = (short)round((double)s2*0.001 * RAD_2_DEG);
 	    session->gpsdata.skyview[i].ss = (double)s3*0.1;
 	    session->gpsdata.skyview[i].used = (bool)(ul2 & (1<<27));
 	}
