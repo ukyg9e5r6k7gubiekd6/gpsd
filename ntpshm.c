@@ -175,6 +175,7 @@ void ntpshm_context_init(struct gps_context_t *context)
     memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
 }
 
+/*@-unqualifiedtrans@*/
 static /*@null@*/ volatile struct shmTime *ntpshm_alloc(struct gps_context_t *context)
 /* allocate NTP SHM segment.  return its segment number, or -1 */
 {
@@ -203,6 +204,7 @@ static /*@null@*/ volatile struct shmTime *ntpshm_alloc(struct gps_context_t *co
 
     return NULL;
 }
+/*@+unqualifiedtrans@*/
 
 static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime *s)
 /* free NTP SHM segment */
@@ -423,6 +425,7 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
 }
 #endif	/* PPS_ENABLE */
 
+/*@-mustfreeonly@*/
 void ntpshm_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
@@ -438,7 +441,9 @@ void ntpshm_link_deactivate(struct gps_device_t *session)
     }
 #endif	/* PPS_ENABLE */
 }
+/*@+mustfreeonly@*/
 
+/*@-mustfreeonly@*/
 void ntpshm_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
@@ -466,6 +471,7 @@ void ntpshm_link_activate(struct gps_device_t *session)
 #endif /* PPS_ENABLE */
     }
 }
+/*@+mustfreeonly@*/
 
 #endif /* NTPSHM_ENABLE */
 /* end */
