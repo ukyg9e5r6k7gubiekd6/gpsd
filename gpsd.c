@@ -1786,6 +1786,57 @@ static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
 #endif /* PPS_ENABLE */
 }
 
+static void adaptive_delay(void)
+/* sleep a calculated time only if we have a buggy select() */
+{
+    struct gps_device_t *devp;
+    unsigned int numdevices;
+    useconds_t delay;
+    bool nonpty = false;
+
+    if (context.inbytesavg <= SLEEP_THRESHOLD)
+	context.selectbug = true;
+
+    /*
+     * Don't do anything if we don't have enough data +
+     * or if the select bug is not present
+     */
+    if (!context.selectbug)
+	return;
+    if (context.inbyteswpos != (unsigned char)WINDOW_AVG_SIZE)
+	return;
+
+    /* count the number of devices which would be polled */
+    numdevices = 0;
+    for (devp = devices; devp < devices + MAXDEVICES; devp++)
+	if (allocated_device(devp) && devp->gpsdata.gps_fd > 0) {
+	    if (devp->sourcetype != source_pty && devp->sourcetype != source_udp)
+		nonpty = true;
+	    numdevices++;
+	}
+
+    /*
+     * Avoid containing and delaying if we're tunning inside a test harness.
+     * Without this check the regression tests fail.
+     */
+    if (nonpty) {
+	numdevices= (numdevices==0) ? 1U:numdevices;
+
+	/*
+	 * SLEEP_FACTOR is a magic number derived by observation.
+	 * Sleep no more than 0.5secs including all the devices.
+	 */
+	delay = (useconds_t)(SLEEP_FACTOR/context.inbytesavg);
+	if (delay > (useconds_t) (500000UL/numdevices) )
+	    delay = (useconds_t) (500000UL/numdevices);
+
+	gpsd_report(&context.errout, LOG_WARN,
+		    "select() bug found, sleeping for %u usec\n",delay);
+	(void) usleep(delay);
+    }
+    return;
+}
+
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
@@ -2164,6 +2215,14 @@ int main(int argc, char *argv[])
 
     while (0 == signalled) {
 	fd_set efds;
+
+	/*
+	 * Adaptive delay to prevent buzzing if the tty layer returns data
+	 * one character at a time and too fast.  This has been observed as
+	 * a problem on the Raspberry Pi. It pushes CPU ysage up and eats power.
+	 */
+	(void) adaptive_delay();
+
 	switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, &context.errout))
 	{
 	case AWAIT_GOT_INPUT:
