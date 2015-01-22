@@ -1816,7 +1816,7 @@ static void adaptive_delay(void)
 	}
 
     /*
-     * Avoid containing and delaying if we're tunning inside a test harness.
+     * Avoid containing and delaying if we're running inside a test harness.
      * Without this check the regression tests fail.
      */
     if (nonpty) {
@@ -2219,7 +2219,7 @@ int main(int argc, char *argv[])
 	/*
 	 * Adaptive delay to prevent buzzing if the tty layer returns data
 	 * one character at a time and too fast.  This has been observed as
-	 * a problem on the Raspberry Pi. It pushes CPU ysage up and eats power.
+	 * a problem on the Raspberry Pi. It pushes CPU usage up and eats power.
 	 */
 	(void) adaptive_delay();
 
