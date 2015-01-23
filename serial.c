@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #endif /* S_SPLINT_S */
+#include <sys/param.h>	/* defines BSD */
 
 #include "gpsd_config.h"
 #ifdef HAVE_BLUEZ
@@ -47,11 +48,19 @@ static sourcetype_t gpsd_classify(const char *path)
     /* this assumes we won't get UDP from a filesystem socket */
     else if (S_ISSOCK(sb.st_mode))
 	return source_tcp;
+    /* OS-independent check for ptys using Unix98 naming convention */
+    else if (strncmp(path, "/dev/pts/", 9) == 0)
+	return source_pty;
     else if (S_ISCHR(sb.st_mode)) {
 	sourcetype_t devtype = source_rs232;
 #ifdef __linux__
 	/* Linux major device numbers live here
+	 *
 	 * https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Documentation/devices.txt
+	 *
+	 * Note: This code works because Linux major device numbers are
+	 * stable and architecture-independent.  It is *not* a good model
+	 * for other Unixes where either or both assumptions may break.
 	 */
 	int devmajor = major(sb.st_rdev);
         /* 207 are Freescale i.MX UARTs (ttymxc*) */
@@ -64,6 +73,43 @@ static sourcetype_t gpsd_classify(const char *path)
 	else if (devmajor == 3 || (devmajor >= 136 && devmajor <= 143))
 	    devtype = source_pty;
 #endif /* __linux__ */
+	/*
+	 * See http://nadeausoftware.com/articles/2012/01/c_c_tip_how_use_compiler_predefined_macros_detect_operating_system
+	 * for discussion how this works.  Key graphs:
+	 *
+	 * Compilers for the old BSD base for these distributions
+	 * defined the __bsdi__ macro, but none of these distributions
+	 * define it now. This leaves no generic "BSD" macro defined
+	 * by the compiler itself, but all UNIX-style OSes provide a
+	 * <sys/param.h> file. On BSD distributions, and only on BSD
+	 * distributions, this file defines a BSD macro that's set to
+	 * the OS version. Checking for this generic macro is more
+	 * robust than looking for known BSD distributions with
+	 * __DragonFly__, __FreeBSD__, __NetBSD__, and __OpenBSD__
+	 * macros.
+	 *
+	 * Apple's OSX for the Mac and iOS for iPhones and iPads are
+	 * based in part on a fork of FreeBSD distributed as
+	 * Darwin. As such, OSX and iOS also define the BSD macro
+	 * within <sys/param.h>. However, compilers for OSX, iOS, and
+	 * Darwin do not define __unix__. To detect all BSD OSes,
+	 * including OSX, iOS, and Darwin, use an #if/#endif that
+	 * checks for __unix__ along with __APPLE__ and __MACH__ (see
+	 * the later section on OSX and iOS).
+	 */
+#ifdef BSD
+	/*
+	 * Hacky check for pty, which is what really matters for avoiding
+	 * adaptive delay.
+	 */
+	if (strncmp(path, "/dev/ttyp", 9) == 0 ||
+	    strncmp(path, "/dev/ttyq", 9) == 0)
+	    devtype = source_pty;
+	else if (strncmp(path, "/dev/ttyU", 9) == 0 ||
+	    strncmp(path, "/dev/dtyU", 9) == 0)
+	    devtype = source_usb;
+	/* XXX bluetooth */
+#endif /* BSD */
 	return devtype;
     } else
 	return source_unknown;
