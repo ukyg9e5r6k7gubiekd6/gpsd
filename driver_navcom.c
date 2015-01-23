@@ -701,8 +701,6 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
 static gps_mask_t handle_0x86(struct gps_device_t *session)
 {
     size_t n, i, nsu;
-    uint8_t prn, ele, ca_snr, p2_snr, log_channel, hw_channel, s, stat;
-    uint16_t azm, dgps_age;
     unsigned char *buf = session->lexer.outbuffer + 3;
     size_t msg_len = (size_t) getleu16(buf, 1);
     uint16_t week = getleu16(buf, 3);
@@ -747,6 +745,8 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /* Satellite details */
     i = nsu = 0;
     for (n = 17; n < msg_len; n += 14) {
+	uint8_t prn, ele, ca_snr, p2_snr, log_channel, hw_channel, s, stat;
+	uint16_t azm, dgps_age;
 	if (i >= MAXCHANNELS) {
 	    gpsd_report(&session->context->errout, LOG_ERROR,
 			"Navcom: packet type 0x86: too many satellites!\n");

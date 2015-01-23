@@ -237,7 +237,7 @@ typedef struct
     uint32_t mDataSize;
     union
     {
-	int8_t chars[MAX_BUFFER_SIZE];
+	//int8_t chars[MAX_BUFFER_SIZE];
 	uint8_t uchars[MAX_BUFFER_SIZE];
 	cpo_pvt_data pvt;
 	cpo_sat_data sats;

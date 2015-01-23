@@ -128,7 +128,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     int i, j, len, count;
     gps_mask_t mask = 0;
     unsigned int id;
-    uint8_t u1, u2, u3, u4, u5, u6, u7;
+    uint8_t u1, u2, u3, u4, u5;
     int16_t s1, s2, s3, s4;
     int32_t sl1, sl2, sl3;
     uint32_t ul1, ul2;
@@ -194,6 +194,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	 */
 	u1 = (uint8_t) getub(buf, 0); 
 	if (u1 == 0x81) { /* Software Version Information */
+		uint8_t u6, u7;
 		u2 = getub(buf, 2); /* Major version */
 		u3 = getub(buf, 3); /* Minor version */
 		u4 = getub(buf, 4); /* Build number */

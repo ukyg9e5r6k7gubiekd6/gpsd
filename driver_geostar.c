@@ -127,7 +127,6 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     int i, len;
     gps_mask_t mask = 0;
     unsigned int id;
-    int16_t s1, s2, s3;
     uint16_t uw1, uw2;
     uint32_t ul1, ul2, ul3, ul4, ul5;
     double d1, d2, d3, d4, d5;
@@ -260,6 +259,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	session->gpsdata.satellites_visible = (int)ul1;
 	if(ul1 > GEOSTAR_CHANNELS) ul1 = GEOSTAR_CHANNELS;
 	for(i = 0; (uint32_t)i < ul1; i++) {
+	    int16_t s1, s2, s3;
 	    ul2 = getleu32(buf, OFFSET(2) + i * 3 * 4);
 	    s1 = getles16(buf, OFFSET(3) + i * 3 * 4);
 	    s2 = getles16(buf, OFFSET(3) + 2 + i * 3 * 4);

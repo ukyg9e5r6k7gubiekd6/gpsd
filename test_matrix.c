@@ -69,12 +69,12 @@ static bool check_diag(int n, double a[4][4], double b[4][4])
 
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
-    size_t i;
+    unsigned int i;
 
     for (i = 0; i < sizeof(inverses) / sizeof(inverses[0]); i++) {
 	double inverse[4][4];
 	if (!matrix_invert(inverses[i].mat, inverse)) {
-	    printf("Vanishing determinant in test %zd\n", i);
+	    printf("Vanishing determinant in test %u\n", i);
 	}
 	if (!check_diag(i, inverse, inverses[i].inv))
 	    break;

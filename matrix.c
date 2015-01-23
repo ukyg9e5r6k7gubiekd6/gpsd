@@ -101,15 +101,16 @@ bool matrix_invert(double mat[4][4], /*@out@*/ double inverse[4][4])
 /*@ +fixedformalarray +mustdefine @*/
 
 #ifdef __UNUSED_
+// cppcheck-suppress unusedFunction
 void matrix_symmetrize(double mat[4][4], /*@out@*/ double prod[4][4])
 /* symmetrize a matrix, multiply it by its transpose */
 {
-    int i, j, k, n;
+    int i, j, k;
 
     for (i = 0; i < 4; ++i) {	//< rows
 	for (j = 0; j < 4; ++j) {	//< cols
 	    prod[i][j] = 0.0;
-	    for (k = 0; k < n; ++k) {
+	    for (k = 0; k < 4; ++k) {
 		prod[i][j] += mat[k][i] * mat[k][j];
 	    }
 	}

@@ -2218,8 +2218,10 @@ int main(int argc, char *argv[])
 
 	/*
 	 * Adaptive delay to prevent buzzing if the tty layer returns data
-	 * one character at a time and too fast.  This has been observed as
-	 * a problem on the Raspberry Pi. It pushes CPU usage up and eats power.
+	 * one character at a time and too fast. This pushes CPU usage up and
+	 * eats power.  This has been directly observed as a problem on the
+	 * Raspberry Pi, and is probably behind occasional reports of
+	 * GPSD-related excessive power drain on Android phones.
 	 */
 	(void) adaptive_delay();
 

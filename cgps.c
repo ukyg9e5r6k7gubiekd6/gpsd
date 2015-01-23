@@ -411,7 +411,6 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 static void update_gps_panel(struct gps_data_t *gpsdata)
 /* This gets called once for each new GPS sentence. */
 {
-    int i;
     int newstate;
     char scr[128], *s;
 
@@ -420,6 +419,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
      * available screen size, or may only show satellites used for the
      * fix.  */
     if (gpsdata->satellites_visible != 0) {
+	int i;
 	if (display_sats >= MAX_POSSIBLE_SATS) {
 	    for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 		if (i < gpsdata->satellites_visible) {

@@ -16,7 +16,6 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 {
     unsigned int i;
     uint8_t preamble;
-    uint32_t parity;
 
     if (session->subframe_count++ == 0) {
 	speed_t speed = gpsd_get_speed(session);
@@ -64,6 +63,7 @@ gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 
     for (i = 1; i < 10; i++) {
 	int invert;
+	uint32_t parity;
 	/* D30* says invert */
 	invert = (words[i] & 0x40000000) ? 1 : 0;
 	/* inverted data, invert it back */

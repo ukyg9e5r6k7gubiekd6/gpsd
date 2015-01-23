@@ -57,20 +57,27 @@ typedef struct
 /* Receiver Measurement Record */
 typedef struct
 {
+    // cppcheck-suppress unusedStructMember
     uint32_t cycles;
     // cppcheck-suppress unusedStructMember
     double pr;
+    // cppcheck-suppress unusedStructMember
     uint16_t phase;
+    // cppcheck-suppress unusedStructMember
     int8_t slp_dtct;
+    // cppcheck-suppress unusedStructMember
     uint8_t snr_dbhz;
     uint8_t svid;
+    // cppcheck-suppress unusedStructMember
     int8_t valid;
 } cpo_rcv_sv_data;
 typedef struct
 {
     // cppcheck-suppress unusedStructMember
     double rcvr_tow;
+    // cppcheck-suppress unusedStructMember
     int16_t rcvr_wn;
+    // cppcheck-suppress unusedStructMember
     cpo_rcv_sv_data sv[GARMIN_CHANNELS];
 } cpo_rcv_data;
 
