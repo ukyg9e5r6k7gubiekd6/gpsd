@@ -878,14 +878,14 @@ extern void nmea_subframe_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern void nmea_ais_dump(struct gps_device_t *, /*@out@*/char[], size_t);
 extern unsigned int ais_binary_encode(struct ais_t *ais, /*@out@*/unsigned char *bits, int flag);
 
+#ifdef NTPSHM_ENABLE
 extern void ntpshm_context_init(struct gps_context_t *);
 extern void ntpshm_session_init(struct gps_device_t *);
 extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *, struct timedrift_t *);
-#ifdef NTPSHM_ENABLE
 extern void ntpshm_latch(struct gps_device_t *device,  /*@out@*/struct timedrift_t *td);
-#endif /* NTPSHM_ENABLE */
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
+#endif /* NTPSHM_ENABLE */
 
 /* normalize a timespec */
 #define TS_NORM(ts)  \
