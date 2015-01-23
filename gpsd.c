@@ -1868,9 +1868,9 @@ int main(int argc, char *argv[])
 
 #ifdef CONTROL_SOCKET_ENABLE
     INVALIDATE_SOCKET(csock);
-#ifdef PPS_ENABLE
+#if defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
     context.pps_hook = ship_pps_drift_message;
-#endif /* PPS_ENABLE */
+#endif /* PPS_ENABLE && SOCKET_EXPORT_ENABLE */
 #endif /* CONTROL_SOCKET_ENABLE */
 
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
