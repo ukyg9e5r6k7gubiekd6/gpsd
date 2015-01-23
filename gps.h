@@ -1890,7 +1890,7 @@ struct timedrift_t {
  */
 typedef int socket_t;
 #define BAD_SOCKET(s)	((s) == -1)
-#define INVALIDATE_SOCKET(s)	s = -1
+#define INVALIDATE_SOCKET(s)	do { s = -1; } while (0)
 
 /* mode flags for setting streaming policy */
 #define WATCH_ENABLE	0x000001u	/* enable streaming */
