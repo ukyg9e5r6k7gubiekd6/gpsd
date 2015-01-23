@@ -5,7 +5,9 @@
  */
 #endif /* GPSD_CONFIG_H */
 
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #include <stdint.h>
 #include <stdarg.h>
 #include "gps.h"

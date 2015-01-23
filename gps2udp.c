@@ -11,6 +11,9 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  */
+
+#include "gpsd_config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -18,7 +21,9 @@
 #include <string.h>
 #include <strings.h>
 #include <fcntl.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #include <time.h>
 #include <assert.h>
 #include <sys/time.h>

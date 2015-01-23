@@ -624,6 +624,11 @@ else:
         announce("You do not have kernel CANbus available.")
         env["nmea2000"] = False
 
+    if config.CheckHeader("termios.h"):
+        confdefs.append("#define HAVE_TERMIOS_H 1\n")
+    else:
+        confdefs.append("/* #undef HAVE_TERMIOS_H */\n")
+
     # endian.h is required for rtcm104v2 unless the compiler defines
     # __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
     if config.CheckCompilerDefines("__ORDER_BIG_ENDIAN__") \
