@@ -255,7 +255,7 @@ void gpsd_set_century(struct gps_device_t *session)
 	int year;
 	unsigned char *cp = session->lexer.outbuffer + 5;
 	while (isspace(*cp))
-	    --cp;
+	    ++cp;
 	year = (int)strtol((char *)cp, &end, 10);
 	session->context->century = year - (year % 100);
     }
