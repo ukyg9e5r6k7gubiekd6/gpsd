@@ -68,6 +68,13 @@ explanation.
 Retrieves the latest build logs from Debian's buildds and extracts a
 list of failed regression tests, sorted by architecture.
 
+== identify_failing_build_options.py ==
+
+Run from the top level to try to identify any combinations of build
+options that don't compile.  To run cd to the root of the repo and
+run "devtools/identify_failing_build_options.py" it will generate
+failed_build_configs.txt for any that failed to compile.
+
 == logextract ==
 
 Extract pure NMEA from an emailed gpsd error log. The output can be fed 
