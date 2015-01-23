@@ -339,7 +339,7 @@ time_t mkgmtime(register struct tm * t)
 }
 
 timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
-/* ISO8601 UTC to Unix UTC */
+/* ISO8601 UTC to Unix UTC, no leapsecond correction. */
 {
 #ifndef USE_QT
     char *dp = NULL;
@@ -352,15 +352,14 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
 	usec = strtod(dp, NULL);
     else
 	usec = 0;
-
     /*
-     * This is a glibc dependency; timegm() is not standard.  It would
-     * be nice if we could say mktime(&tm) - timezone + usec instead,
-     * but that seems to fail on newer Fedora versions in a way that
-     * suggests timezone is being set improperly (off by an hour).
-     * Also timezon is not available at all on some BSDs.
+     * It would be nice if we could say mktime(&tm) - timezone + usec instead,
+     * but timezone is not available at all on some BSDs. Besides, when working
+     * with historical dates the value of timezone after an ordinary tzset(3)
+     * can be wrong; you have to do a redirect through the IANA historical
+     * timezone database to get it right.
      */
-    /*@i1@*/return (timestamp_t)timegm(&tm) + usec;
+    return (timestamp_t)mkgmtime(&tm) + usec;
 #else
     double usec = 0;
 
