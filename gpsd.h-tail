@@ -237,7 +237,7 @@ extern int packet_sniff(struct gps_lexer_t *);
 /* this is where we choose the confidence level to use in reports */
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
-#define NTPSHMSEGS	4		/* number of NTP SHM segments */
+#define NTPSHMSEGS	(MAX_DEVICES * 2)	/* number of NTP SHM segments */
 
 #define AIVDM_CHANNELS	2		/* A, B */
 
