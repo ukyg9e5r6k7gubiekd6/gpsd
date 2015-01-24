@@ -208,6 +208,8 @@ static int json_att_read(const char *buf, struct gps_data_t *gpsdata,
 			             .dflt.real = NAN},
 	{"yaw_st",   t_character, .addr.character = &gpsdata->attitude.yaw_st},
 
+	{"dip",      t_real,      .addr.real = &gpsdata->attitude.dip,
+			             .dflt.real = NAN},
 	{"mag_len",  t_real,      .addr.real = &gpsdata->attitude.mag_len,
 			             .dflt.real = NAN},
 	{"mag_x",    t_real,      .addr.real = &gpsdata->attitude.mag_x,
