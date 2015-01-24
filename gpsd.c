@@ -41,6 +41,9 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
+#ifdef __linux__
+#include <linux/sockios.h>
+#endif /* __linux__ */
 
 #include "gpsd_config.h"
 
@@ -549,6 +552,19 @@ static void detach_client(struct subscriber_t *sub)
     }
     c_ip = netlib_sock2ip(sub->fd);
     (void)shutdown(sub->fd, SHUT_RDWR);
+#ifdef __linux__
+    /*
+     * Delay the socket close that breaks the connection until
+     * all pending data has shipped.
+     */
+    for(;;) {
+	int outstanding;
+	ioctl(sub->fd, SIOCOUTQ, &outstanding);
+	if (!outstanding)
+	    break;
+	usleep(1000);
+    }
+#endif
     gpsd_report(&context.errout, LOG_SPIN,
 		"close(%d) in detach_client()\n",
 		sub->fd);
