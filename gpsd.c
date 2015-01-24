@@ -1792,9 +1792,7 @@ static void adaptive_delay(void)
      * Avoid containing and delaying if we're running inside a test harness.
      * Without this check the regression tests fail.
      */
-    if (nonpty) {
-	numdevices= (numdevices==0) ? 1U:numdevices;
-
+    if (nonpty && numdevices > 0) {
 	/*
 	 * SLEEP_FACTOR is a magic number derived by observation.
 	 * Sleep no more than 0.5secs including all the devices.
