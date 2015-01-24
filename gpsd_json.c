@@ -3330,14 +3330,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 			   "\"roll_st\":\"%c\",", gpsdata->attitude.roll_st);
 
     }
-    if (isnan(gpsdata->attitude.yaw) == 0) {
-	str_appendf(reply, replylen,
-		       "\"yaw\":%.2f,", gpsdata->attitude.yaw);
-	if (gpsdata->attitude.yaw_st != '\0')
-	    str_appendf(reply, replylen,
-			   "\"yaw_st\":\"%c\",", gpsdata->attitude.yaw_st);
 
-    }
     if (isnan(gpsdata->attitude.dip) == 0)
 	str_appendf(reply, replylen,
 		       "\"dip\":%.3f,", gpsdata->attitude.dip);
