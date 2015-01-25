@@ -42,7 +42,8 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 #ifdef __linux__
-#include <linux/sockios.h>
+#include <sys/ioctl.h>		/* needed for ioctl(SIOCOUTQ) */
+#include <linux/sockios.h>	/* needed for ioctl(SIOCOUTQ) */
 #endif /* __linux__ */
 
 #include "gpsd_config.h"
