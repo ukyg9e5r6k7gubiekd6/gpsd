@@ -147,8 +147,8 @@ boolopts = (
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
     ("libgpsmm",      True,  "build C++ bindings"),
-    ("libQgpsmm",     False, "build QT bindings (deprecated alias)"),
-    ("qt",            False, "build QT bindings"),
+    ("libQgpsmm",     True,  "build QT bindings (deprecated alias)"),
+    ("qt",            True,  "build QT bindings"),
     # Daemon options
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
@@ -773,7 +773,7 @@ pid_t getsid(pid_t pid);
         env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                           src_suffix=".xml", suffix=".html")
 
-    # If libQgpsmm is enabled, force on qt (depecrated config support).
+    # If libQgpsmm is enabled, force on qt (deprecated config support).
     if env["libQgpsmm"]:
         env["qt"] = True
 

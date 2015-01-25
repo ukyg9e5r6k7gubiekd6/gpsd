@@ -7,8 +7,7 @@ Repository head:
   experimental/unstable and the separate "pps" policy flag is gone;
   PPS is now always emitted when watching JSON.  Sentence tag fields
   have been dropped from the JSON reports. GNSS and GLONASS SKY
-  reports are now merged. Qt support default changed to False pending
-  a build patch. Addressed versions of AIS Type 25 and 26 are now
+  reports are now merged. Addressed versions of AIS Type 25 and 26 are now
   handled. The 'nmea' build option is now 'nmea0183'. New 'minimal'
   option sets all boolean options not explicitly set on the command
   line to false.  The 'limited_max_devices' option is now
