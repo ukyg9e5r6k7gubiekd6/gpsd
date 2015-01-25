@@ -33,8 +33,10 @@ extern "C" {
  *       model and serial members in part B of AIS type 24, conforming
  *       with ITU-R 1371-4. New timedrift structure (Nov 2013, release 3.10).
  * 5.2 - AIS type 6 and 8 get 'structured' flag; GPS_PATH_MAX
- *       shortened because devices has moved out of union. Sentence
- *       tag fields dropped from emitted JSON.
+ *       shortened because devices has moved out of the tail union. Sentence
+ *       tag fields dropped from emitted JSON. The shape of the skyview
+ *       structure has changed to make working with the satellites-used
+ *       bits less confusing. (January 2015, release 3.12).
  */
 #define GPSD_API_MAJOR_VERSION	5	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	2	/* bump on compatible changes */
