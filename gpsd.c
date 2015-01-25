@@ -994,9 +994,9 @@ static void set_serial(struct gps_device_t *device,
     char parity = device->gpsdata.dev.parity;
     int wordsize = 8;
 
+    while (isspace((unsigned char) *modestring))
+	modestring++;
     if (strchr("78", *modestring) != NULL) {
-	while (isspace((unsigned char) *modestring))
-	    modestring++;
 	wordsize = (int)(*modestring++ - '0');
 	if (strchr("NOE", *modestring) != NULL) {
 	    parity = *modestring++;
