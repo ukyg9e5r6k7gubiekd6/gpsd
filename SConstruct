@@ -1555,7 +1555,7 @@ if not env['socket_export']:
 else:
     # Regression-test the daemon
     gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
-            '$SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
+            'gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
