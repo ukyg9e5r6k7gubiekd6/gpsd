@@ -1643,9 +1643,16 @@ int nmea2000_open(struct gps_device_t *session)
 	    nmea2000_units[can_net][l] = NULL;	  
 	}
     }
+
+    /*
+     * For device-classification purposes, pretend this is a fast pseudo-tty.
+     * What we mainly want out of this is to disable the adaptive-delay logic,
+     * which causes loss of CAN packets.
+     */
     session->gpsdata.dev.parity = 'n';
     session->gpsdata.dev.baudrate = 250000;
     session->gpsdata.dev.stopbits = 0;
+    session->sourcetype = source_pty;
     return session->gpsdata.gps_fd;
 }
 #endif /* of ifndef S_SPLINT_S */
