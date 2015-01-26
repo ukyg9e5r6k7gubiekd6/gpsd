@@ -840,7 +840,7 @@ If running as root, the preferred starting procedure is:
 -----------------------------------------------------------------------------
 $ su - (or sudo -s )
 # killall -9 gpsd chronyd
-# chrony -f /etc/chrony/chrony.conf
+# chronyd -f /etc/chrony/chrony.conf
 # sleep 2
 # gpsd -n /dev/ttyXX
 # sleep 2
