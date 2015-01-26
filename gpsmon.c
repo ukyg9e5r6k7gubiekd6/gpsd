@@ -753,7 +753,9 @@ static bool do_command(const char *line)
 #ifdef RECONFIGURE_ENABLE
     unsigned int v;
 #endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
     unsigned char buf[BUFLEN];
+#endif /* CONTROLSEND_ENABLE */
     const char *arg;
 
     if (isspace((unsigned char) line[1])) {
