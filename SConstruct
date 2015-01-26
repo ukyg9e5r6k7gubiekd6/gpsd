@@ -323,7 +323,8 @@ if 'MORECFLAGS' in os.environ:
 
 # Don't change CFLAGS if already set by environment.
 if not 'CFLAGS' in os.environ:
-    env.Append(CFLAGS=['-Wmissing-prototypes'])
+    if '-Wmissing-prototypes' not in env['CFLAGS']:
+        env.Append(CFLAGS=['-Wmissing-prototypes'])
 
 # Don't change CCFLAGS if already set by environment.
 if not 'CCFLAGS' in os.environ:
@@ -503,7 +504,8 @@ else:
     for option in ('-Wextra','-Wall', '-Wno-uninitialized','-Wno-missing-field-initializers',
                    '-Wcast-align','-Wmissing-declarations', '-Wmissing-prototypes',
                    '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
-        config.CheckCompilerOption(option)
+        if option not in config.env['CFLAGS']:
+            config.CheckCompilerOption(option)
 
     if config.CheckCompilerOption("-pthread"):
         env.MergeFlags("-pthread")
