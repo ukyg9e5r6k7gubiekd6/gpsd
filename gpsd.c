@@ -1778,6 +1778,7 @@ static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
 #endif /* PPS_ENABLE */
 }
 
+#ifdef BUZZKILL_ENABLE
 static void adaptive_delay(void)
 /* sleep a calculated time only if we have a buggy select() */
 {
@@ -1826,6 +1827,7 @@ static void adaptive_delay(void)
     }
     return;
 }
+#endif /* BUZZKILL_ENABLE */
 
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
@@ -2206,14 +2208,20 @@ int main(int argc, char *argv[])
     while (0 == signalled) {
 	fd_set efds;
 
+#ifdef BUZZKILL_ENABLE
 	/*
-	 * Adaptive delay to prevent buzzing if the tty layer returns data
-	 * one character at a time and too fast. This pushes CPU usage up and
-	 * eats power.  This has been directly observed as a problem on the
-	 * Raspberry Pi, and is probably behind occasional reports of
-	 * GPSD-related excessive power drain on Android phones.
+	 * Adaptive delay to prevent buzzing if the tty layer returns
+	 * data one character at a time and too fast. Buzzing pushes
+	 * CPU usage up and eats power.
+	 *
+	 * This has been directly observed as a problem on the
+	 * Raspberry Pi. A buzzing problem with outright defective
+	 * select(2) implementations is probably behind occasional
+	 * reports of GPSD-related excessive power drain on Android
+	 * phones.
 	 */
 	(void) adaptive_delay();
+#endif /* BUZZKILL_ENABLE */
 
 	switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, &context.errout))
 	{
