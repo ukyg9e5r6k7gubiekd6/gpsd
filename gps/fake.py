@@ -93,24 +93,26 @@ import packet as sniffer
 
 # Field reports on minima:
 #
-# Eric Raymond  on Linux 3.11.0 under an Intel Core Duo at 2.66GHz.
+# Eric Raymond runningLinux 3.11.0 on an Intel Core Duo at 2.66GHz.
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Works, 112s real
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05   Fails
 #
-# Michael Tatarinov on a Raspberry Pi:
+# Michael Tatarinov running ?? on a Raspberry Pi:
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05    Works, 344s real
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Fails, 339s real
 #
-# From Hal Murray on NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
+# Hal Murray running NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.4    Works, takes 688.69s real
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.3    Fails tcp-torture.log, 677.53s real
 #
-# Greg Troxel running NetBSD 6 on a core i5 (i386, 4 cpus) 2.90GHz.
+# Greg Troxel running NetBSD 6 on a Core i5 (i386, 4 cpus) 2.90GHz.
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.2 had failures (645s)
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.4 had failures (662s)
 #  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
 #
+# Greg Troxel running OS X 10.9 on a Core i7 (2 cpus) 1.7 GHz.
+#  WRITE_PAD = 0.01 / CLOSE_DELAY = 4 had massive failures
 
 # examples are "# sys.platform platform.platform()"
 
