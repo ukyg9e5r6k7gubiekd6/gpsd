@@ -112,12 +112,21 @@ import packet as sniffer
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
 #
 
+# examples are "# sys.platform platform.platform()"
+
 if sys.platform.startswith("linux"):
     WRITE_PAD = 0.0
     CLOSE_DELAY = 0.1
 elif sys.platform.startswith("freebsd"):
     WRITE_PAD = 0.001
     CLOSE_DELAY = 0.4
+elif sys.platform.startswith("netbsd"):
+    WRITE_PAD = 0.004
+    CLOSE_DELAY = 0.8
+elif sys.platform.startswith("darwin"):
+    # darwin Darwin-13.4.0-x86_64-i386-64bit
+    WRITE_PAD = 0.01
+    CLOSE_DELAY = 4
 else:
     WRITE_PAD = 0.004
     CLOSE_DELAY = 0.8
