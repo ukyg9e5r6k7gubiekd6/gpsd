@@ -112,7 +112,9 @@ import packet as sniffer
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
 #
 # Greg Troxel running OS X 10.9 on a Core i7 (2 cpus) 1.7 GHz.
-#  WRITE_PAD = 0.01 / CLOSE_DELAY = 4 had massive failures
+#  WRITE_PAD = 0.01 / CLOSE_DELAY = 4 had 81/89 failures (767s)
+#  WRITE_PAD = 0.01 / CLOSE_DELAY = 10 had 81/89 failures (1288s)
+#  WRITE_PAD = 1 / CLOSE_DELAY = 10 all tests passed (30362s)
 
 # examples are "# sys.platform platform.platform()"
 
