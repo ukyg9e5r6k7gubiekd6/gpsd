@@ -1804,7 +1804,7 @@ static void adaptive_delay(void)
     buzzlock = false;
     for (devp = devices; devp < devices + MAX_DEVICES; devp++)
 	if (allocated_device(devp) && devp->gpsdata.gps_fd > 0) {
-	    if (devp->sourcetype==source_rs232 && devp->sourcetype==source_usb)
+	    if (devp->sourcetype==source_rs232 || devp->sourcetype==source_usb)
 		mightbuzz++;
 	    /*
 	     * Some fast devices will lose packets if delays 
