@@ -127,8 +127,8 @@ elif sys.platform.startswith("netbsd"):
     CLOSE_DELAY = 0.8
 elif sys.platform.startswith("darwin"):
     # darwin Darwin-13.4.0-x86_64-i386-64bit
-    WRITE_PAD = 0.01
-    CLOSE_DELAY = 4
+    WRITE_PAD = 1
+    CLOSE_DELAY = 10
 else:
     WRITE_PAD = 0.004
     CLOSE_DELAY = 0.8
