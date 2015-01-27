@@ -1807,7 +1807,8 @@ static void adaptive_delay(void)
 	    if (devp->sourcetype==source_rs232 || devp->sourcetype==source_usb)
 		mightbuzz++;
 	    /*
-	     * Some fast devices will lose packets if delays 
+	     * Some fast devices will lose packets if delays are enabled.
+	     * Allow them to lock out delays.
 	     */
 	    if (devp->sourcetype == source_can)
 		buzzlock = true;

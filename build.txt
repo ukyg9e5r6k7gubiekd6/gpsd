@@ -352,39 +352,19 @@ scons minimal=yes socket_export=yes nmea0183=yes
 
 will do that.
 
-== Configuration problem cases
-
-This section describes cases in which the default build is known to be
-unavoidably broken and a custom configuration is required to do the
-right thing.
-
-Presently there is only one such case; buzzkill=yes (the default) can
-conflict with nmea2000=yes (the default), causing problems if you try
-to watch both a CAN/NMEA2000 device and a serial device.  The only
-remedy is a custom build with buzzkill=no.
-
-The buzzkill option is intended to thwart problems due to gpsd's main
-select(2) loop buzzing (spinning too fast). On battery-powered SBCs
-and mobile devices this can cause serious and unnecessary power drain;
-this has been observed on the Raspberry Pi and sporadically on
+buzzkill=yes: this option is intended to thwart problems due to gpsd's
+main select(2) loop buzzing (spinning too fast). On battery-powered
+SBCs and mobile devices this can cause serious and unnecessary power
+drain; this has been observed on the Raspberry Pi and sporadically on
 particular Android phone hardware. There are at least two reasons it
 can happen; one is defective select(2) device-driver hooks that return
 a data-ready when they shouldn't, the other is tty layers that return
 data in single characters or small packets even when it's arriving in
-packet-sized chunks.
-
-GPSD with buzzkill=yes watches the incoming data rate from all devices
-and adaptively inserts delays in the main loop if it thinks it sees
-buzzing.  This logic is routed around if all devices have types that never
-require delays, notably pseudo-ttys and UDP packet streams.
-
-With nmea2000=yes the code tries to read NME2000 packets from a CANbus
-interface at high speed. The resulting data flow can look like
-buzzing, but the CAN driver pretends to be a pseudo-tty to avoid delay
-insertion.  The problem arises if you try to watch both a conventional
-tty and a CAN interface at the same time; this foils the buzzkill
-guard, and you will lose CAN packets due to inserted delays.  To
-prevent this, build with buzzkill=no.
+packet-sized chunks. GPSD with buzzkill=yes watches the incoming data
+rate from all devices and adaptively inserts delays in the main loop
+if it thinks it sees buzzing.  This logic is routed around if all
+devices have types that never require delays, notably pseudo-ttys and
+UDP packet streams.
 
 == Port and toolchain testing ==
 
