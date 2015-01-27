@@ -44,7 +44,7 @@ bool shm_acquire(struct gps_context_t *context)
 		    strerror(errno));
 	return false;
     }
-    context->shmexport = (char *)shmat(shmid, 0, 0);
+    context->shmexport = (void *)shmat(shmid, 0, 0);
     if ((int)(long)context->shmexport == -1) {
 	gpsd_report(&context->errout, LOG_ERROR, "shmat failed: %s\n", strerror(errno));
 	context->shmexport = NULL;
@@ -83,7 +83,7 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 */
 	shared->bookend2 = tick;
 	memory_barrier();
-	memcpy((void *)(context->shmexport + offsetof(struct shmexport_t, gpsdata)),
+	memcpy((void *)((char *)context->shmexport + offsetof(struct shmexport_t, gpsdata)),
 	       (void *)gpsdata,
 	       sizeof(struct gps_data_t));
 	memory_barrier();

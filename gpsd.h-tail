@@ -278,7 +278,7 @@ struct gps_context_t {
 #ifdef SHM_EXPORT_ENABLE
     /* we don't want the compiler to treat writes to shmexport as dead code,
      * and we don't want them reordered either */
-    /*@reldef@*/volatile char *shmexport;
+    /*@reldef@*/volatile void *shmexport;
 #endif
     ssize_t (*serial_write)(struct gps_device_t *,
 			    const char *buf, const size_t len);
