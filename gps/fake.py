@@ -111,6 +111,17 @@ import packet as sniffer
 #  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
 #
+# Greg Troxel running NetBSD 5 on a Core 2 Duo E8500 (amd64, 2 cpus) 3.167GHz.
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 had 7/89 failures (730s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 2.0 had 3/89 failures (757s)
+#  WRITE_PAD = 0.010 / CLOSE_DELAY = 2.0 had 32/89 failures (755s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 4.0 had 13/89 failures (795s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 8.0 had 27/89 failures (872s)
+#  WRITE_PAD = 0.100 / CLOSE_DELAY = 8.0 had 9/89 failures (3519s)
+#  WRITE_PAD = 0.100 / CLOSE_DELAY = 8.0 had 7/89 failures (3539s)
+#  WRITE_PAD = 0.200 / CLOSE_DELAY = 8.0 all tests passed (6456s)
+#  WRITE_PAD = 0.200 / CLOSE_DELAY = 0.8 all tests passed (6310s)
+#
 # Greg Troxel running OS X 10.9 on a Core i7 (2 cpus) 1.7 GHz.
 #  WRITE_PAD = 0.01 / CLOSE_DELAY = 4 had 81/89 failures (767s)
 #  WRITE_PAD = 0.01 / CLOSE_DELAY = 10 had 81/89 failures (1288s)
@@ -129,6 +140,9 @@ if sys.platform.startswith("linux"):
 elif sys.platform.startswith("freebsd"):
     WRITE_PAD = 0.001
     CLOSE_DELAY = 0.4
+elif sys.platform.startswith("netbsd5"):
+    WRITE_PAD = 0.200
+    CLOSE_DELAY = 0.8
 elif sys.platform.startswith("netbsd"):
     WRITE_PAD = 0.004
     CLOSE_DELAY = 0.8
