@@ -1783,9 +1783,9 @@ static void adaptive_delay(void)
 /* sleep a calculated time only if we have a buggy select() */
 {
     struct gps_device_t *devp;
-    unsigned int numdevices;
+    unsigned int mightbuzz;
+    bool buzzlock;
     useconds_t delay;
-    bool nonpty = false;
 
     if (context.inbytesavg <= SLEEP_THRESHOLD)
 	context.selectbug = true;
@@ -1799,27 +1799,33 @@ static void adaptive_delay(void)
     if (context.inbyteswpos != (unsigned char)WINDOW_AVG_SIZE)
 	return;
 
-    /* count the number of devices which would be polled */
-    numdevices = 0;
+    /* count the number of devices which might buzz */
+    mightbuzz = 0;
+    buzzlock = false;
     for (devp = devices; devp < devices + MAX_DEVICES; devp++)
 	if (allocated_device(devp) && devp->gpsdata.gps_fd > 0) {
-	    if (devp->sourcetype != source_pty && devp->sourcetype != source_udp)
-		nonpty = true;
-	    numdevices++;
+	    if (devp->sourcetype==source_rs232 && devp->sourcetype==source_usb)
+		mightbuzz++;
+	    /*
+	     * Some fast devices will lose packets if delays 
+	     */
+	    if (devp->sourcetype == source_can)
+		buzzlock = true;
 	}
 
     /*
-     * Avoid containing and delaying if we're running inside a test harness.
-     * Without this check the regression tests fail.
+     * Because ptys are not counted, we avoid delay insertion if we're
+     * running inside a test harness.  Without this check the
+     * regression tests fail.
      */
-    if (nonpty && numdevices > 0) {
+    if (mightbuzz > 0 && !buzzlock) {
 	/*
 	 * SLEEP_FACTOR is a magic number derived by observation.
 	 * Sleep no more than 0.5secs including all the devices.
 	 */
 	delay = (useconds_t)(SLEEP_FACTOR/context.inbytesavg);
-	if (delay > (useconds_t) (500000UL/numdevices) )
-	    delay = (useconds_t) (500000UL/numdevices);
+	if (delay > (useconds_t) (500000UL/mightbuzz) )
+	    delay = (useconds_t) (500000UL/mightbuzz);
 
 	gpsd_report(&context.errout, LOG_WARN,
 		    "select() bug found, sleeping for %u usec\n",delay);
