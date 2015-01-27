@@ -396,7 +396,8 @@ static void jsontest(int i)
 #endif /* JSON_MINIMAL */
 
     default:
-	(int)fputs("Unknown test number\n", stderr);
+	if (fputs("Unknown test number\n", stderr) == EOF)
+	    exit(1);
 	break;
     }
 }
