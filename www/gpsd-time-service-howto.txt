@@ -400,8 +400,9 @@ serial-device path as argument).  Watch for lines of dashes marked
 be a "PPS offset:" field in the data panels above showing the delta
 between PPS and your local clock.
 
-If you don't have gpsmon available, you can run gpsd at -D 5 and watch
-for carrier-detect state change messages in the logfile.
+If you don't have gpsmon available, or you don't see PPS lines in it,
+you can run gpsd at -D 5 and watch for carrier-detect state change
+messages in the logfile.
 
 If you don't see evidence of incoming PPS, here are some trouble
 sources to check:
@@ -423,11 +424,21 @@ sources to check:
 3. Verify that your gpsd and kernel were both built with PPS support,
    as previously described in the section on software prerequisites.
 
-4. If you have a solid 3D fix, a known-good cable, and your software
-   is properly configured, but you still get no PPS, then you might
-   have a GPS that fails to deliver PPS off the chip to the RS232
-   or USB interface.  You get to become intimate with datasheets 
-   and pinouts, and might need to acquire a different GPS.
+4. Verify that the USB or RS232 device driver is accepting the ioctl
+   that tells it to wait on a PPS state change from the device.  The
+   messages you hope *not* to see look like "KPPS cannot set PPS line
+   discipline" and "PPS ioctl(TIOCMIWAIT) failed".  The former
+   can probably be corrected by running as root; the latter (which
+   should never happen with an RS232 device) probably means your USB
+   device driver lacks this wait capability entirely and cannot be
+   used for time service.
+
+5. If you have a solid 3D fix, a known-good cable, your software is
+   properly configured, the wait ioctl succeeded, but you still get no
+   PPS, then you might have a GPS that fails to deliver PPS off the
+   chip to the RS232 or USB interface.  You get to become intimate
+   with datasheets and pinouts, and might need to acquire a different
+   GPS.
 
 == Running GPSD ==
 
@@ -614,7 +625,7 @@ your local GPS is performing.  If you are outside of the USA replace
 the pool servers with one in your local area. See <<USE-POOL>> for
 further information.
 
-The pool statememt, and the drftfile and logfile declarations after it,
+The pool statement, and the driftfile and logfile declarations after it,
 will not be strictly necessary if the default ntp.conf that your
 distribution supplies gives you a working setup. The two pairs of
 server and fudge declarations are the key.
@@ -1177,4 +1188,4 @@ Shawn Kohlsmith <skohlsmith@gmail.com> tweaked the Bibliography.
 
 1.4, Dec 2014: Cleaned up Bibliography
 
-Repository: Minor corrections to dates.
+Repository: More about troubleshooting PPS delivery.

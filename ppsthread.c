@@ -294,11 +294,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
         /* we are lucky to have TIOCMIWAIT, so wait for next edge */
 #define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS)
         if (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
-	    gpsd_report(&session->context->errout, LOG_ERROR,
+	    gpsd_report(&session->context->errout, LOG_WARN,
 			"PPS ioctl(TIOCMIWAIT) on %s failed: %d %.40s\n",
 			session->gpsdata.dev.path, errno, strerror(errno));
 	    break;
 	}
+	gpsd_report(&session->context->errout, LOG_PROG,
+		    "PPS ioctl(TIOCMIWAIT) on %s succeeded",
+		    session->gpsdata.dev.path);
         /* quick, grab a copy of last_fixtime before it changes */
 	last_fixtime_real = session->last_fixtime.real;
 	last_fixtime_clock = session->last_fixtime.clock;
