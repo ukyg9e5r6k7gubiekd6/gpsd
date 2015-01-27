@@ -223,9 +223,10 @@ polled in the same order every second.  When a device is added it is
 assigned to one of those 1024 polling slots.  It should then be clear
 that the accuracy of a USB 1.1 connected GPS would be about 1 mSec.
 
-As of late 2013 no USB GPS we know of implements the higher polling-rate
-options in USB 2 and 3.  When one does, and if it has the Macx-1 mod,
-higher USB accuracy will ensue.
+As of early 2015 no USB GPS we know of implements the higher
+polling-rate options in USB 2 and 3 or the interrupt capability in
+USB 3.  When one does, and if it has the Macx-1 mod, higher USB
+accuracy will ensue.
 
 .Summary of typical accuracy
 |=======================================
@@ -322,7 +323,7 @@ are unlikely to be significant to you; flip a coin.
 == Choice of Hardware ==
 
 To get 1PPS to your NTP daemon, you first need to get it from a
-PPS-capable GPS. As of late 2013 this means either the previously
+PPS-capable GPS. As of early 2015 this means either the previously
 mentioned GR601-W or a serial GPS with 1PPS.
 
 You can find 1PPS-capable devices supported by GPSD at <<HARDWARE>>.
@@ -356,7 +357,7 @@ is a relatively inexpensive but high-quality navigation GPS. We make a
 note of this because u-blox also has a specialized timing variant, the
 LEA 6T, which would be expensive overkill for an NTP server.
 
-Unfortunately as of late 2013 the LEA-6H is still hard to find in a
+Unfortunately as of early 2015 the LEA-6H is still hard to find in a
 packaged RS232 version, as opposed to a bare OEM module exporting TTL
 levels or an eval kit like the EVK 6H-0-001 costing upwards of
 US$300. Search the web; you may find a here-today-gone-tomorrow offer
@@ -694,7 +695,7 @@ xtime-a.timefreq .ACTS.           1 u   40   64  377   59.228   -8.503   0.516
 +SHM(0)          .GPS.            0 l   50   64  377    0.000    6.631   5.331
 -----------------------------------------------------------------------------
 
-The line with refid ".GPS." represents the in-band time reportts from
+The line with refid ".GPS." represents the in-band time reports from
 your GPS.  When you are getting PPS then it may look like this:
 
 -----------------------------------------------------------------------------
@@ -1175,3 +1176,5 @@ Shawn Kohlsmith <skohlsmith@gmail.com> tweaked the Bibliography.
 1.3, Aug 2014: Add a note about the GR-601W.
 
 1.4, Dec 2014: Cleaned up Bibliography
+
+Repository: Minor corrections to dates.
