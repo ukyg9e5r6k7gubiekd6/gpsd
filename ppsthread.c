@@ -116,8 +116,8 @@ static int init_kernel_pps(struct gps_device_t *session)
     /* Note: this ioctl() requires root */
     if ( 0 > ioctl(session->gpsdata.gps_fd, TIOCSETD, &ldisc)) {
 	gpsd_report(&session->context->errout, LOG_INF,
-		    "KPPS cannot set PPS line discipline: %s\n",
-		    strerror(errno));
+		    "KPPS cannot set PPS line discipline on %s : %s\n",
+		    session->gpsdata.dev.path, strerror(errno));
     	return -1;
     }
     /*@-ignoresigns@*/
@@ -295,8 +295,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS)
         if (ioctl(session->gpsdata.gps_fd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
 	    gpsd_report(&session->context->errout, LOG_ERROR,
-			"PPS ioctl(TIOCMIWAIT) failed: %d %.40s\n",
-			errno, strerror(errno));
+			"PPS ioctl(TIOCMIWAIT) on %s failed: %d %.40s\n",
+			session->gpsdata.dev.path, errno, strerror(errno));
 	    break;
 	}
         /* quick, grab a copy of last_fixtime before it changes */
@@ -330,7 +330,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/*@ +ignoresigns */
 	if (ioctl(session->gpsdata.gps_fd, TIOCMGET, &state) != 0) {
 	    gpsd_report(&session->context->errout, LOG_ERROR,
-			"PPS ioctl(TIOCMGET) failed\n");
+			"PPS ioctl(TIOCMGET) on %s failed\n",
+			session->gpsdata.dev.path);
 	    break;
 	}
 	/*@ -ignoresigns */
