@@ -114,8 +114,12 @@ import packet as sniffer
 # Greg Troxel running OS X 10.9 on a Core i7 (2 cpus) 1.7 GHz.
 #  WRITE_PAD = 0.01 / CLOSE_DELAY = 4 had 81/89 failures (767s)
 #  WRITE_PAD = 0.01 / CLOSE_DELAY = 10 had 81/89 failures (1288s)
-#  WRITE_PAD = 1 / CLOSE_DELAY = 10 all tests passed (30362s)
+#  WRITE_PAD = 0.03 / CLOSE_DELAY = 1 all tests passed (1111s)
+#  WRITE_PAD = 0.03 / CLOSE_DELAY = 2 all tests passed (1194s)
+#  WRITE_PAD = 0.05 / CLOSE_DELAY = 2 all tests passed (1780s)
+#  WRITE_PAD = 0.1 / CLOSE_DELAY = 2 all tests passed (3248s)
 #  WRITE_PAD = 1 / CLOSE_DELAY = 2 all tests passed (29665s)
+#  WRITE_PAD = 1 / CLOSE_DELAY = 10 all tests passed (30362s)
 
 # examples are "# sys.platform platform.platform()"
 
@@ -130,8 +134,8 @@ elif sys.platform.startswith("netbsd"):
     CLOSE_DELAY = 0.8
 elif sys.platform.startswith("darwin"):
     # darwin Darwin-13.4.0-x86_64-i386-64bit
-    WRITE_PAD = 1
-    CLOSE_DELAY = 2
+    WRITE_PAD = 0.03
+    CLOSE_DELAY = 1
 else:
     WRITE_PAD = 0.004
     CLOSE_DELAY = 0.8
