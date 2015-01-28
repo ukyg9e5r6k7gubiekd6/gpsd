@@ -1779,6 +1779,8 @@ static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
 }
 
 #ifdef BUZZKILL_ENABLE
+#define SLEEP_THRESHOLD  4.0      /* delay if avg is less than this        */
+
 static void adaptive_delay(void)
 /* sleep a calculated time only if we have a buggy select() */
 {
@@ -1787,8 +1789,11 @@ static void adaptive_delay(void)
     bool buzzlock;
     useconds_t delay;
 
-    if (context.inbytesavg <= SLEEP_THRESHOLD)
+    if (context.inbytesavg <= SLEEP_THRESHOLD && !context.selectbug) {
+	gpsd_report(&context.errout, LOG_WARN,
+		    "select() bug found, adaptive delays will be inserted\n");
 	context.selectbug = true;
+    }
 
     /*
      * Don't do anything if we don't have enough data +
@@ -1820,14 +1825,18 @@ static void adaptive_delay(void)
      * regression tests fail.
      */
     if (mightbuzz > 0 && !buzzlock) {
+	delay = (useconds_t)(5000UL/mightbuzz);
+#ifdef __UNUSED__
 	/*
-	 * SLEEP_FACTOR is a magic number derived by observation.
-	 * Sleep no more than 0.5secs including all the devices.
+	 * We started with this more complex formula.  It worked well
+	 * on the Raspberry Pi but produced client hangs elsewhere due
+	 * to excessively long delays.
 	 */
+#define SLEEP_FACTOR     4700000U /* controls the formula to compute delay */
 	delay = (useconds_t)(SLEEP_FACTOR/context.inbytesavg);
 	if (delay > (useconds_t) (500000UL/mightbuzz) )
 	    delay = (useconds_t) (500000UL/mightbuzz);
-
+#endif /* __UNUSED__ */
 	gpsd_report(&context.errout, LOG_WARN,
 		    "select() bug found, sleeping for %u usec\n",delay);
 	(void) usleep(delay);
