@@ -708,17 +708,15 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
     }
 
 #ifdef NTPSHM_ENABLE
-    if (device->sourcetype == source_rs232 || device->sourcetype == source_usb) {
-	/*
-	 * Now is the right time to grab the shared memory segment(s)
-	 * to communicate the navigation message derived and (possibly)
-	 * 1PPS derived time data to ntpd/chrony.
-	 */
-	ntpshm_link_activate(device);
-	gpsd_report(&context.errout, LOG_INF, 
-		    "NTPD ntpshm_link_activate: %d\n",
-		    device->shm_clock != NULL);
-    }
+    /*
+     * Now is the right time to grab the shared memory segment(s)
+     * to communicate the navigation message derived and (possibly)
+     * 1PPS derived time data to ntpd/chrony.
+     */
+    ntpshm_link_activate(device);
+    gpsd_report(&context.errout, LOG_INF, 
+		"NTPD ntpshm_link_activate: %d\n",
+		device->shm_clock != NULL);
 #endif /* NTPSHM_ENABLE */
 
     gpsd_report(&context.errout, LOG_INF, 
