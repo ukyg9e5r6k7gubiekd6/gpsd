@@ -1837,8 +1837,8 @@ static void adaptive_delay(void)
 	if (delay > (useconds_t) (500000UL/mightbuzz) )
 	    delay = (useconds_t) (500000UL/mightbuzz);
 #endif /* __UNUSED__ */
-	gpsd_report(&context.errout, LOG_WARN,
-		    "select() bug found, sleeping for %u usec\n",delay);
+	gpsd_report(&context.errout, LOG_SPIN,
+		    "adaptive delay, sleeping for %u usec\n",delay);
 	(void) usleep(delay);
     }
     return;
