@@ -21,15 +21,36 @@ else
     GPSD_HOME=`dirname $0`
 fi
 
+version()
+{
+    echo `basename $0`" : Version v0.10";
+}
+
+usage()
+{
+    version; echo;
+    echo "usage :" `basename $0` " [-S <portnumber>] [-u <can_device>] testfile";
+    echo "      :" `basename $0` " -v";
+    echo "      :" `basename $0` " -h";
+}
+
+while getopts :S:u:vh opt
+do
+    case ${opt} in
+        S)  GPSD_PORT=${OPTARG};;
+        u)  CAN_DEVICE=${OPTARG};;
+        v)  version; exit 0;;
+        h)  usage; exit 0;;
+        \?) usage; exit 1;;
+    esac
+done
+
+shift $((${OPTIND} - 1))
+
+if [ -z $1 ]; then usage; exit 1; fi
 
 TEST_FILE=$1
 
-echo ${TMP_PID_FILE}
-echo ${TMP_OUT_FILE}
-echo ${CAN_PLAYER}
-echo ${STARTTIME}
-echo ${GPSD_HOME}
-echo ${TEST_FILE}
 
 ${GPSD_HOME}/gpsd -n -G -D0 -S ${GPSD_PORT} -P ${TMP_PID_FILE} nmea2000://${CAN_UNIT}
 
