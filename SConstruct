@@ -155,7 +155,6 @@ boolopts = (
     ("nofloats",      False, "float ops are expensive, suppress error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
     ("ncurses",       True,  "build with ncurses"),
-    ("buzzkill",      True,  "adaptive-delay logic to cope with select buzzing"),
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
     ("implicit_link", imloads,"implicit linkage is supported in shared libs"),

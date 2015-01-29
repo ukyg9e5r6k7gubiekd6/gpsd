@@ -352,20 +352,6 @@ scons minimal=yes socket_export=yes nmea0183=yes
 
 will do that.
 
-buzzkill=yes: this option is intended to thwart problems due to gpsd's
-main select(2) loop buzzing (spinning too fast). On battery-powered
-SBCs and mobile devices this can cause serious and unnecessary power
-drain; this has been observed on the Raspberry Pi and sporadically on
-particular Android phone hardware. There are at least two reasons it
-can happen; one is defective select(2) device-driver hooks that return
-a data-ready when they shouldn't, the other is tty layers that return
-data in single characters or small packets even when it's arriving in
-packet-sized chunks. GPSD with buzzkill=yes watches the incoming data
-rate from all devices and adaptively inserts delays in the main loop
-if it thinks it sees buzzing.  This logic is routed around if all
-devices have types that never require delays, notably pseudo-ttys and
-UDP packet streams.
-
 == Port and toolchain testing ==
 
 'scons check' will run a comprehensive regression-test suite.  You

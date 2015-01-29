@@ -1759,73 +1759,6 @@ static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
 #endif /* PPS_ENABLE */
 }
 
-#ifdef BUZZKILL_ENABLE
-#define SLEEP_THRESHOLD  4.0      /* delay if avg is less than this        */
-
-static void adaptive_delay(void)
-/* sleep a calculated time only if we have a buggy select() */
-{
-    struct gps_device_t *devp;
-    unsigned int mightbuzz;
-    bool buzzlock;
-    useconds_t delay;
-
-    if (context.inbytesavg <= SLEEP_THRESHOLD && !context.selectbug) {
-	gpsd_report(&context.errout, LOG_WARN,
-		    "select() bug found, adaptive delays will be inserted\n");
-	context.selectbug = true;
-    }
-
-    /*
-     * Don't do anything if we don't have enough data +
-     * or if the select bug is not present
-     */
-    if (!context.selectbug)
-	return;
-    if (context.inbyteswpos != (unsigned char)WINDOW_AVG_SIZE)
-	return;
-
-    /* count the number of devices which might buzz */
-    mightbuzz = 0;
-    buzzlock = false;
-    for (devp = devices; devp < devices + MAX_DEVICES; devp++)
-	if (allocated_device(devp) && devp->gpsdata.gps_fd > 0) {
-	    if (devp->sourcetype==source_rs232 || devp->sourcetype==source_usb)
-		mightbuzz++;
-	    /*
-	     * Some fast devices will lose packets if delays are enabled.
-	     * Allow them to lock out delays.
-	     */
-	    if (devp->sourcetype == source_can)
-		buzzlock = true;
-	}
-
-    /*
-     * Because ptys are not counted, we avoid delay insertion if we're
-     * running inside a test harness.  Without this check the
-     * regression tests fail.
-     */
-    if (mightbuzz > 0 && !buzzlock) {
-	delay = (useconds_t)(5000UL/mightbuzz);
-#ifdef __UNUSED__
-	/*
-	 * We started with this more complex formula.  It worked well
-	 * on the Raspberry Pi but produced client hangs elsewhere due
-	 * to excessively long delays.
-	 */
-#define SLEEP_FACTOR     4700000U /* controls the formula to compute delay */
-	delay = (useconds_t)(SLEEP_FACTOR/context.inbytesavg);
-	if (delay > (useconds_t) (500000UL/mightbuzz) )
-	    delay = (useconds_t) (500000UL/mightbuzz);
-#endif /* __UNUSED__ */
-	gpsd_report(&context.errout, LOG_SPIN,
-		    "adaptive delay, sleeping for %u usec\n",delay);
-	(void) usleep(delay);
-    }
-    return;
-}
-#endif /* BUZZKILL_ENABLE */
-
 /*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
@@ -2204,21 +2137,6 @@ int main(int argc, char *argv[])
 
     while (0 == signalled) {
 	fd_set efds;
-
-#ifdef BUZZKILL_ENABLE
-	/*
-	 * Adaptive delay to prevent buzzing if the tty layer returns
-	 * data one character at a time and too fast. Buzzing pushes
-	 * CPU usage up and eats power.
-	 *
-	 * This has been directly observed as a problem on the
-	 * Raspberry Pi. A buzzing problem with outright defective
-	 * select(2) implementations is probably behind occasional
-	 * reports of GPSD-related excessive power drain on Android
-	 * phones.
-	 */
-	(void) adaptive_delay();
-#endif /* BUZZKILL_ENABLE */
 
 	switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, &context.errout))
 	{
