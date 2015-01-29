@@ -610,12 +610,39 @@ ssize_t gpsd_serial_write(struct gps_device_t * session,
 }
 
 void gpsd_optimize_io(struct gps_device_t *session, 
-		     const int minlength, const bool textual)
+		     const int minlength, const bool textual UNUSED)
 /* optimize I/O mode depending on the minimum packet size */
 {
-	gpsd_report(&session->context->errout, LOG_SHOUT,
-		    "tty params optimized for min length %d of %s packets\n",
-		    minlength, textual ? "textual" : "binary");
+    /* bail out if this is not actually a tty */
+    if (isatty(session->gpsdata.gps_fd) == 0)
+	return;
+
+    /*
+     * This is an optimization hack.  The idea is to get away from
+     * character-at-a-time I/O in order to slow down the rate at
+     * which the main select loop spins (those calls eat power
+     * noticeably in environments like Android phones and the
+     * Raspberry Pi).  We tell the tty layer to wait until it has
+     * either accumulated characters corresponding to the minimum
+     * possible length of a packet or timed out.
+     *
+     * FIXME: Use cooked I/O for textual packets.
+     */
+    if (minlength > 1) {
+	session->ttyset.c_cc[VMIN] = minlength;
+	session->ttyset.c_cc[VTIME] = 1;	/* 0.1 sec */
+    } else {
+	/* raw character-at-at-time I/O, no timeout */
+	session->ttyset.c_cc[VMIN] = 1;
+	session->ttyset.c_cc[VTIME] = 0;
+    }
+
+    if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
+	return;
+
+    gpsd_report(&session->context->errout, LOG_IO,
+		"tty params optimized for min length %d of %s packets\n",
+		minlength, textual ? "textual" : "binary");
 }
 
 
