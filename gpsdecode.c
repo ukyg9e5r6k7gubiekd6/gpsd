@@ -535,7 +535,7 @@ static void decode(FILE *fpin, FILE*fpout)
 {
     struct gps_device_t session;
     struct policy_t policy;
-    unsigned int minima[PACKET_TYPES+1];
+    size_t minima[PACKET_TYPES+1];
 #if defined(SOCKET_EXPORT_ENABLE) || defined(AIVDM_ENABLE)
     char buf[GPS_JSON_RESPONSE_MAX * 4];
 #endif
@@ -621,7 +621,7 @@ static void decode(FILE *fpin, FILE*fpout)
 			break;
 		    }
 		}
-		printf("%s (%d): %d\n", np, i-1, minima[i]);
+		printf("%s (%d): %u\n", np, i-1, (unsigned int)minima[i]);
 	    }
 	}
     }
