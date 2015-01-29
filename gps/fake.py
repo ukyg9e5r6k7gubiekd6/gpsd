@@ -108,8 +108,9 @@ import packet as sniffer
 # Greg Troxel running NetBSD 6 on a Core i5 (i386, 4 cpus) 2.90GHz.
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.2 had failures (645s)
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.4 had failures (662s)
-#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed
+#  WRITE_PAD = 0.000 / CLOSE_DELAY = 0.8 had 69/89 failures (148s)
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed (737s)
 #
 # Greg Troxel running NetBSD 5 on a Core 2 Duo E8500 (amd64, 2 cpus) 3.167GHz.
 #  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 had 7/89 failures (730s)
