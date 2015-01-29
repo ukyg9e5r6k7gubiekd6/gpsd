@@ -404,9 +404,9 @@ static /*@observer@*/ char *report_hook(struct gps_device_t *session,
     /*
      * Only listen to PPS after several consecutive fixes,
      * otherwise time may be inaccurate.  (We know this is
-     * required on some Garmins in binary mode; safest to do it
-     * for all case we're talking to a Garmin in text mode, and
-     * out of general safety-first conservatism.)
+     * required on all Garmin and u-blox; safest to do it 
+     * for all cases as we have no other general way to know 
+     * if PPS is good.
      *
      * Not sure yet how to handle u-blox UBX_MODE_TMONLY
      */
