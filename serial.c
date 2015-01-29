@@ -609,6 +609,16 @@ ssize_t gpsd_serial_write(struct gps_device_t * session,
     return status;
 }
 
+void gpsd_optimize_io(struct gps_device_t *session, 
+		     const int minlength, const bool textual)
+/* optimize I/O mode depending on the minimum packet size */
+{
+	gpsd_report(&session->context->errout, LOG_SHOUT,
+		    "tty params optimized for min length %d of %s packets\n",
+		    minlength, textual ? "textual" : "binary");
+}
+
+
 /*
  * This constant controls how long the packet sniffer will spend looking
  * for a packet leader before it gives up.  It *must* be larger than
