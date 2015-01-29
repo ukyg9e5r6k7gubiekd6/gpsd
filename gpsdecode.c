@@ -21,6 +21,7 @@ static bool scaled = true;
 static bool json = true;
 static bool pseudonmea = false;
 static bool split24 = false;
+static bool minlength = false;
 static unsigned int ntypes = 0;
 static unsigned int typelist[32];
 static struct gps_context_t context;
@@ -534,9 +535,11 @@ static void decode(FILE *fpin, FILE*fpout)
 {
     struct gps_device_t session;
     struct policy_t policy;
+    unsigned int minima[PACKET_TYPES+1];
 #if defined(SOCKET_EXPORT_ENABLE) || defined(AIVDM_ENABLE)
     char buf[GPS_JSON_RESPONSE_MAX * 4];
 #endif
+    int i;
 
     //This looks like a good idea, but it breaks regression tests
     //(void)strlcpy(session.gpsdata.dev.path, "stdin", sizeof(session.gpsdata.dev.path));
@@ -554,6 +557,8 @@ static void decode(FILE *fpin, FILE*fpout)
     (void)strlcpy(session.gpsdata.dev.path,
 		  "stdin",
 		  sizeof(session.gpsdata.dev.path));
+    for (i = 0; i < (int)(sizeof(minima)/sizeof(minima[0])); i++)
+	minima[i] = MAX_PACKET_LENGTH+1;
 
     for (;;)
     {
@@ -565,6 +570,8 @@ static void decode(FILE *fpin, FILE*fpout)
 	    gpsd_set_century(&session);
 	if (verbose >= 1 && TEXTUAL_PACKET_TYPE(session.lexer.type))
 	    (void)fputs((char *)session.lexer.outbuffer, fpout);
+	if (session.lexer.outbuflen < minima[session.lexer.type+1])
+	    minima[session.lexer.type+1] = session.lexer.outbuflen;
 	/* mask should match what's in report_data() */
 	if ((changed & (REPORT_IS|GST_SET|SATELLITE_SET|SUBFRAME_SET|ATTITUDE_SET|RTCM2_SET|RTCM3_SET|AIS_SET|PASSTHROUGH_IS)) == 0)
 	    continue;
@@ -599,6 +606,24 @@ static void decode(FILE *fpin, FILE*fpout)
 	}
 	if (policy.nmea)
 	    pseudonmea_report(changed, &session);
+    }
+
+    if (minlength)
+    {
+	for (i = 0; i < (int)(sizeof(minima)/sizeof(minima[0])); i++) {
+	    const struct gps_type_t **dp;
+	    /* dump all minima, ignoring comments */
+	    if (i != 1 && minima[i] < MAX_PACKET_LENGTH+1) {
+		char *np = "Unknown";
+		for (dp = gpsd_drivers; *dp; dp++) {
+		    if ((*dp)->packet_type == i-1) {
+			np = (*dp)->type_name;
+			break;
+		    }
+		}
+		printf("%s (%d): %d\n", np, i-1, minima[i]);
+	    }
+	}
     }
 }
 
@@ -654,7 +679,7 @@ int main(int argc, char **argv)
 
     gps_context_init(&context, "gpsdecode");
 
-    while ((c = getopt(argc, argv, "cdejnpst:uvVD:")) != EOF) {
+    while ((c = getopt(argc, argv, "cdejmnpst:uvVD:")) != EOF) {
 	switch (c) {
 	case 'c':
 	    json = false;
@@ -670,6 +695,11 @@ int main(int argc, char **argv)
 
 	case 'j':
 	    json = true;
+	    break;
+
+	case 'm':
+	    minlength = true;
+	    json = false;
 	    break;
 
 	case 'n':
