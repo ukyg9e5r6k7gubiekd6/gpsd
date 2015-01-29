@@ -6,8 +6,6 @@
 
 GPSD_PORT=2948
 CAN_PLAYER=canplayer
-TMP_PID_FILE=`mktemp`
-TMP_OUT_FILE=`mktemp`
 CAN_UNIT="vcan0"
 
 # Requires GNU date extensions
@@ -23,22 +21,46 @@ fi
 
 version()
 {
+    echo
     echo `basename $0`" : Version v0.10";
+    echo
 }
 
 usage()
 {
-    version; echo;
-    echo "usage :" `basename $0` " [-S <portnumber>] [-u <can_device>] testfile";
+    version;
+    echo "usage :" `basename $0` " [-S <portnumber>] [-u <can_device>] [-p <canplayer>] testfile";
     echo "      :" `basename $0` " -v";
     echo "      :" `basename $0` " -h";
+    echo
 }
 
-while getopts :S:u:vh opt
+device()
+{
+    echo
+    echo "CAN device \"${CAN_UNIT}\" do not exit."
+    echo "Try: sudo ./gpsinit vcan "
+    echo
+}
+
+can_utils()
+(
+    echo
+    echo "Command to play CAN logfile \"${CAN_PLAYER}\" do not exist."
+    echo "Try to install \"can-utils\" from your distribution."
+    echo "I your distibution do not provide \"can-utils\", then"
+    echo "git clone https://gitorious.org/linux-can/can-utils.git"
+    echo "in a directory outside of gpsd, build and install it."
+    echo "On most linux systems, \"make\", and then \"sudo make install\" works."
+    echo
+)
+
+while getopts :S:u:p:vh opt
 do
     case ${opt} in
         S)  GPSD_PORT=${OPTARG};;
-        u)  CAN_DEVICE=${OPTARG};;
+        u)  CAN_UNIT=${OPTARG};;
+        p)  CAN_PLAYER=${OPTARG};;
         v)  version; exit 0;;
         h)  usage; exit 0;;
         \?) usage; exit 1;;
@@ -51,6 +73,12 @@ if [ -z $1 ]; then usage; exit 1; fi
 
 TEST_FILE=$1
 
+if [ `ifconfig -a | grep ${CAN_UNIT} | wc -c` -eq 0 ]; then device; exit 1; fi
+
+if [ `command -v ${CAN_PLAYER} | wc -c` -eq 0 ]; then can_utils; exit 1; fi
+
+TMP_PID_FILE=`mktemp`
+TMP_OUT_FILE=`mktemp`
 
 ${GPSD_HOME}/gpsd -n -G -D0 -S ${GPSD_PORT} -P ${TMP_PID_FILE} nmea2000://${CAN_UNIT}
 
