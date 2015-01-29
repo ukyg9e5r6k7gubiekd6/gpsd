@@ -432,6 +432,7 @@ const struct gps_type_t driver_italk =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 30,		/* min packet length for chunked output */
 };
 /* *INDENT-ON* */
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */

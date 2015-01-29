@@ -640,6 +640,7 @@ const struct gps_type_t driver_geostar =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = geostar_time_offset,
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 24,		/* min packet length for the GeoStar */
 };
 /* *INDENT-ON* */
 

@@ -389,6 +389,7 @@ struct gps_type_t {
 #ifdef TIMEHINT_ENABLE
     /*@null@*/double (*time_offset)(struct gps_device_t *session);
 #endif /* TIMEHINT_ENABLE */
+    int minlength;
 };
 
 /*

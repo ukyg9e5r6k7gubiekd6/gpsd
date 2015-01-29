@@ -1281,6 +1281,7 @@ const struct gps_type_t driver_tsip =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = tsip_time_offset,
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 5,		/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 

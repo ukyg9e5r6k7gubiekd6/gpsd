@@ -1590,6 +1590,7 @@ const struct gps_type_t driver_sirf =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = sirf_time_offset,
 #endif /* NTP_SHM_ENABLE */
+    .minlength       = 13,		/* minimum SiRF packet length */
 };
 /* *INDENT-ON* */
 #endif /* defined(SIRF_ENABLE) && defined(BINARY_ENABLE) */

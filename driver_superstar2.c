@@ -585,6 +585,7 @@ const struct gps_type_t driver_superstar2 = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 65,		/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */

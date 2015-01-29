@@ -486,6 +486,7 @@ const struct gps_type_t driver_zodiac =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = zodiac_time_offset,	/* compute NTO fudge factor */
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 40,		/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 

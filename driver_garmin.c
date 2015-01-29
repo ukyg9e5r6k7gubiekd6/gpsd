@@ -1401,6 +1401,7 @@ const struct gps_type_t driver_garmin_usb_binary_old =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = garmin_time_offset,
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 0;		/* min packet length unknown */
 };
 /* *INDENT-ON* */
 #endif /* __UNUSED__ */
@@ -1431,6 +1432,7 @@ const struct gps_type_t driver_garmin_usb_binary =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = garmin_time_offset,
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 0,		/* min packet length unknown */
 };
 /* *INDENT-ON* */
 
@@ -1460,6 +1462,7 @@ const struct gps_type_t driver_garmin_ser_binary =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = garmin_time_offset,
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 0,		/* min packet length unknown */
 };
 /* *INDENT-ON* */
 

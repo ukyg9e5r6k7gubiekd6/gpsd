@@ -533,6 +533,8 @@ const struct gps_type_t driver__proto__binary = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = _proto_time_offset,
 #endif /* TIMEHINT_ENABLE */
+    /* minimum length of packet, used for I/O optimization */
+    .minlength       = 0;
 /* *INDENT-ON* */
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */

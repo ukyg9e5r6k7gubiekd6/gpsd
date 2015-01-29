@@ -992,6 +992,7 @@ const struct gps_type_t driver_ubx = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
+    .minlength       = 17,		/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 #endif /* defined(UBLOX_ENABLE) && defined(BINARY_ENABLE) */
