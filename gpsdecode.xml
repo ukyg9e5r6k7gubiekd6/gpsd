@@ -72,8 +72,8 @@ default behavior.</para>
 to JSON (the default behavior).</para>
 
 <para>With the <option>-m</option> option, dump minimum lengths for
-each packet type in the input.  This is probably of interest only
-to GSD developers.</para>
+each packet type in the input (ignoring comment packets).  This is
+probably of interest only to GSD developers.</para>
 
 <para>The <option>-n</option> enables dumping in generated
 pseudo-NME0183.</para>
