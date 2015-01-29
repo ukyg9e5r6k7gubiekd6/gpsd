@@ -626,7 +626,11 @@ void gpsd_optimize_io(struct gps_device_t *session,
      * either accumulated characters corresponding to the minimum
      * possible length of a packet or timed out.
      *
-     * FIXME: Use cooked I/O for textual packets.
+     * For the moment, we do nothing with the textual flag. We'd like
+     * to use it to set ICANON mode and let the kernel do all the line
+     * buffering itself.  The problem with this is that VTIME stops
+     * working in ICANON mode, so a binary packet coming up the wire
+     * would result in no further input being seen.
      */
     if (minlength > 1) {
 	session->ttyset.c_cc[VMIN] = minlength;
