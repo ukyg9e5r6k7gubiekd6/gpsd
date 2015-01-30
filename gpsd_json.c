@@ -1616,7 +1616,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "%.1f", ais->type1.speed / 10.0);
 
 	    str_appendf(buf, buflen,
-			   "\"status\":\"%u\",\"status_text\":\"%s\","
+			   "\"status\":%u,\"status_text\":\"%s\","
 			   "\"turn\":%s,\"speed\":%s,"
 			   "\"accuracy\":%s,\"lon\":%.4f,\"lat\":%.4f,"
 			   "\"course\":%.1f,\"heading\":%u,\"second\":%u,"
