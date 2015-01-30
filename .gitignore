@@ -97,6 +97,9 @@ xgpsspeedc
 devtools/ppstest
 # Developer sandbox directory for patches that haven't been applied yet
 patches
+# build/test logs from devtools/do-build
+BUILD.*
+CHECK.*
 # SCons cruft
 config.log
 .sconsign.dblite
