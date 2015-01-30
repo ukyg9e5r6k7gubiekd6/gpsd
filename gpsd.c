@@ -1452,7 +1452,11 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 
     /* handle laggy response to a firmware version query */
     if ((changed & (DEVICEID_SET | DRIVER_IS)) != 0) {
-	assert(device->device_type != NULL);
+	if (device->device_type == NULL)
+	    gpsd_report(&context.errout, LOG_ERROR,
+			"internal error - device type of %s not set when expected\n",
+			device->gpsdata.dev.path);
+	else
 	{
 	    char id2[GPS_JSON_RESPONSE_MAX];
 	    json_device_dump(device, id2, sizeof(id2));

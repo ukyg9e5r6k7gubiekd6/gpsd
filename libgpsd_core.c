@@ -62,20 +62,16 @@ static pthread_mutex_t report_mutex;
 
 void gpsd_acquire_reporting_lock(void)
 {
-    int err;
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    err = pthread_mutex_lock(&report_mutex);
+    pthread_mutex_lock(&report_mutex);
     /*@ +unrecog @*/
-    assert( 0 == err);
 }
 
 void gpsd_release_reporting_lock(void)
 {
-    int err;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
-    err = pthread_mutex_unlock(&report_mutex);
+    pthread_mutex_unlock(&report_mutex);
     /*@ +unrecog @*/
-    assert( 0 == err);
 }
 #endif /* PPS_ENABLE */
 

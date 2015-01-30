@@ -131,7 +131,7 @@ void json_tpv_dump(const struct gps_device_t *session,
     timestamp_t rtime = timestamp();
 #endif /* TIMING_ENABLE */
 
-    assert(replylen > 2);
+    assert(replylen > sizeof(char *));
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
@@ -213,7 +213,7 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
 {
     char tbuf[JSON_DATE_MAX+1];
 
-    assert(replylen > 2);
+    assert(replylen > sizeof(char *));
     (void)strlcpy(reply, "{\"class\":\"GST\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
@@ -244,7 +244,7 @@ void json_sky_dump(const struct gps_data_t *datap,
 {
     int i, reported = 0;
 
-    assert(replylen > 2);
+    assert(replylen > sizeof(char *));
     (void)strlcpy(reply, "{\"class\":\"SKY\",", replylen);
     if (datap->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", datap->dev.path);
@@ -3294,7 +3294,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 		   /*@out@*/ char *reply, size_t replylen)
 /* dump the contents of an attitude_t structure as JSON */
 {
-    assert(replylen > 2);
+    assert(replylen > sizeof(char *));
     (void)strlcpy(reply, "{\"class\":\"ATT\",", replylen);
     str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
     if (isnan(gpsdata->attitude.heading) == 0) {
