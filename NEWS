@@ -13,8 +13,9 @@ Repository head:
   line to false.  The 'limited_max_devices' option is now
   'max_devices'; the 'limited_max_clients' option is now
   'max_clients' A bug fix for error modeling when NMEA 0183 reports
-  empty DOP fields.  Logic to prevent buzzing when select(2) is buggy
-  and returns too fast.
+  empty DOP fields. Low-level I/O changes to prevent buzzing when select(2)
+  is buggy and returns too fast; a side effect of this change reduces 
+  time-reporting latency, possibly requiring you to re-tune NTP fudges. 
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed.
