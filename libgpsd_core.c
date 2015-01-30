@@ -62,16 +62,28 @@ static pthread_mutex_t report_mutex;
 
 void gpsd_acquire_reporting_lock(void)
 {
+    int err;
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    pthread_mutex_lock(&report_mutex);
+    err = pthread_mutex_lock(&report_mutex);
     /*@ +unrecog @*/
+    if ( 0 != err ) {
+	(void) fprintf(stderr,"pthread_mutex_lock() failed: %s\n", 
+            strerror(errno));
+	exit(EXIT_FAILURE);
+    }
 }
 
 void gpsd_release_reporting_lock(void)
 {
+    int err;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
-    pthread_mutex_unlock(&report_mutex);
+    err = pthread_mutex_unlock(&report_mutex);
     /*@ +unrecog @*/
+    if ( 0 != err ) {
+	(void) fprintf(stderr,"pthread_mutex_unlock() failed: %s\n", 
+            strerror(errno));
+	exit(EXIT_FAILURE);
+    }
 }
 #endif /* PPS_ENABLE */
 
