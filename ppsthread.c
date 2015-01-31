@@ -75,6 +75,19 @@
 
 static pthread_mutex_t ppslast_mutex;
 
+void pps_early_init( struct gps_context_t * context ) {
+    int err;
+
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    err = pthread_mutex_init(&ppslast_mutex, NULL);
+    /*@ +unrecog @*/
+    if ( 0 != err ) {
+	gpsd_report(&context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_init() : %s\n",
+		strerror(errno));
+    }
+}
+
 #if defined(HAVE_SYS_TIMEPPS_H)
 /*@-compdestroy -nullpass -unrecog@*/
 static int init_kernel_pps(struct gps_device_t *session)
