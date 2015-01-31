@@ -522,9 +522,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		ok = true;
 		log = "5Hz PPS pulse\n";
 	    }
-	} else if (999000 > cycle) {
+	} else if (900000 > cycle) {
+            /* Yes, 10% window.  The Rasberry Pi clock is very coarse
+             * when it starts and chronyd may be doing a fast slew. 
+             * Don't worry, ntpd and chronyd will do further sanitizing.*/
 	    log = "Too long for 5Hz, too short for 1Hz\n";
-	} else if (1001000 > cycle) {
+	} else if (1100000 > cycle) {
+            /* Yes, 10% window.  The Rasberry Pi clock is very coarse
+             * when it starts and ntpd/chronyd may be doing a fast slew. 
+             * Don't worry, ntpd and chronyd will do further sanitizing.*/
 	    /* looks like PPS pulse or square wave */
 	    if (0 == duration) {
 		ok = true;
