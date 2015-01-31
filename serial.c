@@ -610,12 +610,26 @@ ssize_t gpsd_serial_write(struct gps_device_t * session,
 }
 
 void gpsd_optimize_io(struct gps_device_t *session, 
-		     const int minlength, const bool textual UNUSED)
+		      int minlength, const bool textual UNUSED)
 /* optimize I/O mode depending on the minimum packet size */
 {
     /* bail out if this is not actually a tty */
     if (isatty(session->gpsdata.gps_fd) == 0)
 	return;
+
+#ifdef __NetBSD__
+    /*
+     * Apparently NetBSD termios (at least on pty on netbsd-[56]) has
+     * trouble with VMIN=n VTIME=1.  Or reads are aftempted when no
+     * bytes are present and none arrive, in which case read is
+     * correct for waiting indefinitely.  Until this is
+     * debugged/fixed, avoid it, because even if it doesn't affect
+     * actual operation (unknown) it's important to preserve
+     * regression tests to allow bisecting for other bugs.
+     * http://pubs.opengroup.org/onlinepubs/007908799/xbd/termios.html
+     */
+    minlength = 1;
+#endif
 
     /*
      * This is an optimization hack.  The idea is to get away from
