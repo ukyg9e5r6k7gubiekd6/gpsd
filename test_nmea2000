@@ -7,6 +7,7 @@
 GPSD_PORT=2948
 CAN_PLAYER=canplayer
 CAN_UNIT="vcan0"
+BUILD=0
 
 # Requires GNU date extensions
 # Should return an empty blank string if those are not present.
@@ -29,7 +30,7 @@ version()
 usage()
 {
     version;
-    echo "usage :" `basename $0` " [-S <portnumber>] [-u <can_device>] [-p <canplayer>] testfile";
+    echo "usage :" `basename $0` " [-S <portnumber>] [-u <can_device>] [-p <canplayer>] [-b] testfile";
     echo "      :" `basename $0` " -v";
     echo "      :" `basename $0` " -h";
     echo
@@ -55,12 +56,13 @@ can_utils()
     echo
 )
 
-while getopts :S:u:p:vh opt
+while getopts :S:u:p:vhb opt
 do
     case ${opt} in
         S)  GPSD_PORT=${OPTARG};;
         u)  CAN_UNIT=${OPTARG};;
         p)  CAN_PLAYER=${OPTARG};;
+        b)  BUILD=1;;
         v)  version; exit 0;;
         h)  usage; exit 0;;
         \?) usage; exit 1;;
@@ -96,7 +98,12 @@ kill `cat ${TMP_PID_FILE}`
 
 sleep 1
 
-diff ${TEST_FILE}.chk ${TMP_OUT_FILE}
+if [ ${BUILD} -ne 0 ]
+then
+    cp ${TMP_OUT_FILE} ${TEST_FILE}.chk
+else
+    diff ${TEST_FILE}.chk ${TMP_OUT_FILE}
+fi
 
 rm -f ${TMP_PID_FILE}
 rm -f ${TMP_OUT_FILE}
