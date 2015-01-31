@@ -1,5 +1,5 @@
-{"class":"VERSION","release":"3.12~dev","rev":"release-3.11-285-g84eeb35","proto_major":3,"proto_minor":10}
-{"class":"DEVICES","devices":[{"class":"DEVICE","path":"nmea2000://vcan0","driver":"NMEA2000","activated":"2015-01-28T15:55:14.973Z"}]}
+{"class":"VERSION","release":"3.12~dev","rev":"release-3.11-314-gcdcee16","proto_major":3,"proto_minor":10}
+{"class":"DEVICES","devices":[{"class":"DEVICE","path":"nmea2000://vcan0","driver":"NMEA2000","activated":"2015-01-31T08:35:54.884Z"}]}
 {"class":"WATCH","enable":true,"json":true,"nmea":true,"raw":0,"scaled":true,"timing":false,"split24":false}
 $GPRMC,000000,V,3755.3232,N,02301.0145,E,0.0000,0.000,000000,,*3E
 $GPGSA,A,0,,,,,,,,,,,,,0.0,0.0,0.0*31
@@ -54,7 +54,7 @@ $GPRMC,165304,A,3755.3232,N,02301.0145,E,0.1166,0.000,140914,,*25
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGBS,165304,7.29,M,8.30,M,24.15,M*0E
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:04.000Z","ept":0.005,"lat":37.922053400,"lon":23.016909000,"alt":7.977,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.060,"climb":0.000}
-{"class":"DEVICE","path":"nmea2000://vcan0:176","activated":1422460530.339308}
+{"class":"DEVICE","path":"nmea2000://vcan0:176","activated":1422693357.713277}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:04.000Z","ept":0.005,"lat":37.922053400,"lon":23.016909000,"alt":7.977,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.060,"climb":0.000}
 $GPGGA,165304,3755.3232,N,02301.0145,E,1,12,0.73,7.98,M,35.000,M,,*44
@@ -73,7 +73,7 @@ $GPGGA,165304,3755.3232,N,02301.0145,E,1,12,0.73,7.98,M,35.000,M,,*44
 $GPRMC,165304,A,3755.3232,N,02301.0145,E,0.1166,0.000,140914,,*25
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:04.000Z","ept":0.005,"lat":37.922053400,"lon":23.016909000,"alt":7.977,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.060,"climb":0.000}
-{"class":"DEVICE","path":"nmea2000://vcan0:1","activated":1422460530.641723}
+{"class":"DEVICE","path":"nmea2000://vcan0:1","activated":1422693358.015235}
 $GPGGA,165304,3755.3232,N,02301.0145,E,1,12,0.73,7.98,M,35.000,M,,*44
 $GPRMC,165304,A,3755.3232,N,02301.0145,E,0.1166,0.000,140914,,*25
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
@@ -139,7 +139,7 @@ $GPGGA,165305,3755.3232,N,02301.0145,E,1,12,0.73,7.98,M,35.000,M,,*45
 $GPRMC,165305,A,3755.3232,N,02301.0145,E,0.0583,0.000,140914,,*2A
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:05.000Z","ept":0.005,"lat":37.922053400,"lon":23.016909000,"alt":7.977,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
-{"class":"DEVICE","path":"nmea2000://vcan0:17","activated":1422460531.585339}
+{"class":"DEVICE","path":"nmea2000://vcan0:17","activated":1422693358.958313}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGBS,165305,7.29,M,8.30,M,24.15,M*0F
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:05.000Z","ept":0.005,"lat":37.922053400,"lon":23.016909000,"alt":7.977,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
@@ -373,7 +373,7 @@ $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGBS,165308,7.29,M,8.30,M,24.15,M*02
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:08.000Z","ept":0.005,"lat":37.922053400,"lon":23.016909000,"alt":7.977,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.060,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,33RjbB0uRB1c;TNEVP4e7wv:0iiQ,0*67
+!AIVDM,1,1,,A,33RjbB0uRB1c;TLEVP4e7wv:0iiQ,0*65
 {"class":"AIS","device":"nmea2000://vcan0:1","type":3,"repeat":0,"mmsi":237808200,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":14.6,"accuracy":false,"lon":23.4140,"lat":37.7515,"course":335.9,"heading":511,"second":5,"maneuver":0,"raim":false,"radio":203873}
 $GPGGA,165308,3755.3232,N,02301.0145,E,1,12,0.73,7.98,M,35.000,M,,*48
 $GPRMC,165308,A,3755.3232,N,02301.0145,E,0.1166,0.000,140914,,*29
@@ -406,7 +406,7 @@ $GPRMC,165309,A,3755.3232,N,02301.0145,E,0.0000,0.000,140914,,*28
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGBS,165309,7.29,M,8.30,M,24.15,M*03
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:09.000Z","ept":0.005,"lat":37.922053400,"lon":23.016909000,"alt":7.977,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.000,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13V9KV0uP01acfFEdTeqKgvD041:,0*10
+!AIVDM,1,1,,A,13V9KV0uP01acfFEdTeaKgvD041:,0*00
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":241327000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":0.0,"accuracy":false,"lon":23.0868,"lat":37.9173,"course":241.4,"heading":511,"second":10,"maneuver":0,"raim":false,"radio":16458}
 $GPGGA,165309,3755.3232,N,02301.0145,E,1,12,0.73,7.98,M,35.000,M,,*49
 $GPRMC,165309,A,3755.3232,N,02301.0145,E,0.0000,0.000,140914,,*28
@@ -1818,7 +1818,7 @@ $GPGBS,165330,7.29,M,8.30,M,24.15,M*09
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:30.000Z","ept":0.005,"lat":37.922043800,"lon":23.016922300,"alt":7.982,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.000,"climb":0.000,"eps":16.61,"epc":48.30}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:30.000Z","ept":0.005,"lat":37.922043800,"lon":23.016922300,"alt":7.982,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.000,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13V9KV0uP01acf>EdTeqKgvt041:,0*58
+!AIVDM,1,1,,A,13V9KV0uP01acf<EdTeaKgvt041:,0*4A
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":241327000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":0.0,"accuracy":false,"lon":23.0868,"lat":37.9173,"course":241.4,"heading":511,"second":30,"maneuver":0,"raim":false,"radio":16458}
 $GPGSV,3,1,12,11,77,292,45,32,71,311,46,14,33,048,45,22,14,067,46*78
 $GPGSV,3,2,12,01,53,319,52,27,15,171,42,23,10,208,42,04,30,309,47*72
@@ -2686,7 +2686,7 @@ $GPGBS,165343,7.29,M,8.30,M,24.15,M*0D
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:43.000Z","ept":0.005,"lat":37.922043800,"lon":23.016922300,"alt":7.982,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:53:43.000Z","ept":0.005,"lat":37.922043800,"lon":23.016922300,"alt":7.982,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13<@ab@0001aIF@Ed`vLiaAH163D,0*3E
+!AIVDM,1,1,,A,13<@ab@0001aIF>Ed`vLiaAH163D,0*40
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":214182313,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0241,"lat":37.9191,"course":327.0,"heading":296,"second":44,"maneuver":0,"raim":false,"radio":286932}
 $GPGGA,165343,3755.3226,N,02301.0153,E,1,12,0.73,7.98,M,35.000,M,,*45
 $GPRMC,165343,A,3755.3226,N,02301.0153,E,0.0583,0.000,140914,,*2A
@@ -4453,7 +4453,7 @@ $GPRMC,165409,A,3755.3222,N,02301.0158,E,0.0583,0.000,140914,,*2C
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGBS,165409,7.29,M,8.30,M,24.15,M*04
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:09.000Z","ept":0.005,"lat":37.922037100,"lon":23.016929200,"alt":8.211,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13V9KV0uP01acfvEdTaqKgvD005M,0*53
+!AIVDM,1,1,,A,13V9KV0uP01acftEdTaqKgvD005M,0*51
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":241327000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":0.0,"accuracy":false,"lon":23.0869,"lat":37.9173,"course":241.4,"heading":511,"second":10,"maneuver":0,"raim":false,"radio":349}
 $GPGGA,165409,3755.3222,N,02301.0158,E,1,12,0.73,8.21,M,35.000,M,,*4E
 $GPRMC,165409,A,3755.3222,N,02301.0158,E,0.0583,0.000,140914,,*2C
@@ -4929,7 +4929,7 @@ $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGBS,165415,7.29,M,8.30,M,24.15,M*09
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:15.000Z","ept":0.005,"lat":37.922037100,"lon":23.016929200,"alt":8.211,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,B,13U9mB001M1`WvNEgfWs`q2J009G,0*51
+!AIVDM,1,1,,B,13U9mB001M1`WvLEgfWs`q2J009G,0*53
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":240285000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":9.3,"accuracy":false,"lon":22.8556,"lat":38.0035,"course":297.9,"heading":289,"second":13,"maneuver":0,"raim":false,"radio":599}
 $GPGGA,165415,3755.3222,N,02301.0158,E,1,12,0.73,8.21,M,35.000,M,,*43
 $GPRMC,165415,A,3755.3222,N,02301.0158,E,0.0583,0.000,140914,,*21
@@ -5489,7 +5489,7 @@ $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 $GPGBS,165423,7.29,M,8.30,M,24.15,M*0C
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:23.000Z","ept":0.005,"lat":37.922037100,"lon":23.016929200,"alt":8.211,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.040,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13<@ab@0001aIEHEda1hRq@h163H,0*51
+!AIVDM,1,1,,A,13<@ab@0001aIEHEda1PRq@h163H,0*69
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":214182313,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0241,"lat":37.9192,"course":13.9,"heading":296,"second":24,"maneuver":0,"raim":false,"radio":286936}
 $GPGGA,165423,3755.3222,N,02301.0158,E,1,12,0.73,8.21,M,35.000,M,,*46
 $GPRMC,165423,A,3755.3222,N,02301.0158,E,0.0778,0.000,140914,,*22
@@ -5566,7 +5566,7 @@ $GPGGA,165424,3755.3222,N,02301.0158,E,1,12,0.73,8.21,M,35.000,M,,*41
 $GPRMC,165424,A,3755.3222,N,02301.0158,E,0.1166,0.000,140914,,*2D
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:24.000Z","ept":0.005,"lat":37.922037100,"lon":23.016929200,"alt":8.211,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.060,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,B,13TcnR00001aHt8Eda8>bSVh00?7,0*39
+!AIVDM,1,1,,B,13TcnR00001aHt8Eda7vbSVh00?7,0*7E
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":239793800,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0227,"lat":37.9192,"course":375.4,"heading":115,"second":24,"maneuver":0,"raim":false,"radio":967}
 $GPGGA,165424,3755.3222,N,02301.0158,E,1,12,0.73,8.21,M,35.000,M,,*41
 $GPRMC,165424,A,3755.3222,N,02301.0158,E,0.1166,0.000,140914,,*2D
@@ -6164,7 +6164,7 @@ $GPGBS,165433,7.29,M,8.30,M,24.15,M*0D
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:33.000Z","ept":0.005,"lat":37.922037100,"lon":23.016929200,"alt":8.211,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.020,"climb":0.000,"eps":16.61,"epc":48.30}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:33.000Z","ept":0.005,"lat":37.922037100,"lon":23.016929200,"alt":8.211,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.020,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,B,13<@ab@0001aIEFEda1u6qA200CJ,0*0B
+!AIVDM,1,1,,B,13<@ab@0001aIEFEda1e6qA200CJ,0*1B
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":214182313,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0241,"lat":37.9192,"course":335.5,"heading":296,"second":33,"maneuver":0,"raim":false,"radio":1242}
 $GPGSV,3,1,12,11,77,291,47,32,71,313,48,14,33,048,45,22,13,067,43*77
 $GPGSV,3,2,12,01,54,319,49,27,15,171,42,23,11,208,44,04,30,309,43*7C
@@ -6922,7 +6922,7 @@ $GPGBS,165443,7.29,M,8.30,M,24.15,M*0A
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:43.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.040,"climb":0.000,"eps":16.61,"epc":48.30}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.1*30
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:43.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.040,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13<@ab@0001aIEHEda1htqAH0@SU,0*5C
+!AIVDM,1,1,,A,13<@ab@0001aIEHEda1PtqAH0@SU,0*64
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":214182313,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0241,"lat":37.9192,"course":24.3,"heading":296,"second":44,"maneuver":0,"raim":false,"radio":67813}
 $GPGGA,165443,3755.3220,N,02301.0162,E,1,12,0.73,8.35,M,35.000,M,,*4E
 $GPRMC,165443,A,3755.3220,N,02301.0162,E,0.0778,0.000,140914,,*2F
@@ -7452,7 +7452,7 @@ $GPRMC,165450,A,3755.3220,N,02301.0162,E,0.0583,0.000,140914,,*2B
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165450,7.29,M,8.30,M,24.15,M*08
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:50.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13RUPO0uQOQch?nEf7qrdOwT20Mk,0*57
+!AIVDM,1,1,,A,13RUPO0uQOQch?nEf7qbdOwT20Mk,0*47
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":237592700,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":9.5,"accuracy":true,"lon":23.5392,"lat":37.9596,"course":273.7,"heading":511,"second":50,"maneuver":0,"raim":true,"radio":1907}
 {"class":"ATT","device":"nmea2000://vcan0:17","depth":9.080}
 $GPGGA,165450,3755.3220,N,02301.0162,E,1,12,0.73,8.35,M,35.000,M,,*4C
@@ -7660,7 +7660,7 @@ $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165453,7.29,M,8.30,M,24.15,M*0B
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:54:53.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.010,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,B,13<@ab@0001aIELEda1h1aAd0@SD,0*33
+!AIVDM,1,1,,B,13<@ab@0001aIELEda1P1aAd0@SD,0*0B
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":214182313,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0241,"lat":37.9192,"course":0.6,"heading":296,"second":54,"maneuver":0,"raim":false,"radio":67796}
 $GPGGA,165453,3755.3220,N,02301.0162,E,1,12,0.73,8.35,M,35.000,M,,*4F
 $GPRMC,165453,A,3755.3220,N,02301.0162,E,0.0194,0.000,140914,,*2A
@@ -8980,7 +8980,7 @@ $GPZDA,165514.00,14,09,2014,00,00*6F
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165514,7.29,M,8.30,M,24.15,M*09
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:55:14.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.040,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,B,13<@ab@0001aIEhEda1uaq@L0<0l,0*54
+!AIVDM,1,1,,B,13<@ab@0001aIEhEda1eaq@L0<0l,0*44
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":214182313,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0241,"lat":37.9192,"course":349.5,"heading":296,"second":14,"maneuver":0,"raim":false,"radio":49204}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:55:14.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.040,"climb":0.000,"eps":16.61,"epc":48.30}
@@ -9541,7 +9541,7 @@ $GPRMC,165521,A,3755.3220,N,02301.0164,E,0.1166,0.000,140914,,*24
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165521,7.29,M,8.30,M,24.15,M*0F
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:55:21.000Z","ept":0.005,"lat":37.922033800,"lon":23.016940000,"alt":8.883,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.060,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,B,13RUPO0uQPQcggfEf8Hs6?vb28<o,0*4B
+!AIVDM,1,1,,B,13RUPO0uQPQcggdEf8Hs6?vb28<o,0*49
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":237592700,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":9.6,"accuracy":true,"lon":23.5375,"lat":37.9598,"course":284.0,"heading":511,"second":21,"maneuver":0,"raim":true,"radio":33591}
 $GPGGA,165521,3755.3220,N,02301.0164,E,1,12,0.73,8.88,M,35.000,M,,*4B
 $GPRMC,165521,A,3755.3220,N,02301.0164,E,0.1166,0.000,140914,,*24
@@ -9676,7 +9676,7 @@ $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165523,7.29,M,8.30,M,24.15,M*0D
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:55:23.000Z","ept":0.005,"lat":37.922033800,"lon":23.016940000,"alt":8.883,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.030,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13<@ab@0001aIF4Eda1iCI@h0@Rw,0*2F
+!AIVDM,1,1,,A,13<@ab@0001aIF4Eda1QCI@h0@Rw,0*17
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":214182313,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":0.0,"accuracy":false,"lon":23.0241,"lat":37.9192,"course":33.3,"heading":296,"second":24,"maneuver":0,"raim":false,"radio":67775}
 $GPGGA,165523,3755.3220,N,02301.0164,E,1,12,0.73,8.88,M,35.000,M,,*49
 $GPRMC,165523,A,3755.3220,N,02301.0164,E,0.0583,0.000,140914,,*28
@@ -11331,7 +11331,7 @@ $GPGGA,165546,3755.3220,N,02301.0164,E,1,12,0.73,8.88,M,35.000,M,,*4A
 $GPRMC,165546,A,3755.3220,N,02301.0164,E,0.0778,0.000,140914,,*2D
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:55:46.000Z","ept":0.005,"lat":37.922033800,"lon":23.016940000,"alt":8.883,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.040,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13U9mB001M1`VcbEgk9scI3H040L,0*37
+!AIVDM,1,1,,A,13U9mB001M1`VcbEgk9ccI3H040L,0*27
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":240285000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":0,"speed":9.3,"accuracy":false,"lon":22.8512,"lat":38.0054,"course":298.9,"heading":289,"second":44,"maneuver":0,"raim":false,"radio":16412}
 $GPGGA,165546,3755.3220,N,02301.0164,E,1,12,0.73,8.88,M,35.000,M,,*4A
 $GPRMC,165546,A,3755.3220,N,02301.0164,E,0.0778,0.000,140914,,*2D
@@ -12819,7 +12819,7 @@ $GPRMC,165609,A,3755.3222,N,02301.0159,E,0.1361,0.000,140914,,*24
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165609,7.29,M,8.30,M,24.15,M*06
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:56:09.000Z","ept":0.005,"lat":37.922036200,"lon":23.016931900,"alt":9.813,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.070,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13V9KV0uP01acfvEdTdIKgvD085M,0*66
+!AIVDM,1,1,,A,13V9KV0uP01acftEdTdIKgvD085M,0*64
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":241327000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":0.0,"accuracy":false,"lon":23.0869,"lat":37.9173,"course":241.4,"heading":511,"second":10,"maneuver":0,"raim":false,"radio":33117}
 $GPGGA,165609,3755.3222,N,02301.0159,E,1,12,0.73,9.81,M,35.000,M,,*46
 $GPRMC,165609,A,3755.3222,N,02301.0159,E,0.1361,0.000,140914,,*24
@@ -13615,7 +13615,7 @@ $GPRMC,165620,A,3755.3222,N,02301.0159,E,0.1166,0.000,140914,,*2A
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165620,7.29,M,8.30,M,24.15,M*0D
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:56:20.000Z","ept":0.005,"lat":37.922036200,"lon":23.016931900,"alt":9.813,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.060,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,B,13V9KV0uP01acfvEdTfaKgvb0@S;,0*01
+!AIVDM,1,1,,B,13V9KV0uP01acftEdTfaKgvb0@S;,0*03
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":241327000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":0.0,"accuracy":false,"lon":23.0869,"lat":37.9173,"course":241.4,"heading":511,"second":21,"maneuver":0,"raim":false,"radio":67787}
 $GPGGA,165620,3755.3222,N,02301.0159,E,1,12,0.73,9.81,M,35.000,M,,*4D
 $GPRMC,165620,A,3755.3222,N,02301.0159,E,0.1166,0.000,140914,,*2A
@@ -14200,7 +14200,7 @@ $GPGBS,165630,7.29,M,8.30,M,24.15,M*0C
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:56:30.000Z","ept":0.005,"lat":37.922036200,"lon":23.016931900,"alt":9.813,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.100,"climb":0.000,"eps":16.61,"epc":48.30}
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:56:30.000Z","ept":0.005,"lat":37.922036200,"lon":23.016931900,"alt":9.813,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.100,"climb":0.000,"eps":16.61,"epc":48.30}
-!AIVDM,1,1,,A,13V9KV0uP01acfvEdThaKgvt08Ab,0*29
+!AIVDM,1,1,,A,13V9KV0uP01acftEdThaKgvt08Ab,0*2B
 {"class":"AIS","device":"nmea2000://vcan0:1","type":1,"repeat":0,"mmsi":241327000,"scaled":true,"status":0,"status_text":"Under way using engine","turn":11250,"speed":0.0,"accuracy":false,"lon":23.0869,"lat":37.9173,"course":241.4,"heading":511,"second":30,"maneuver":0,"raim":false,"radio":33898}
 $GPGSV,3,1,12,11,78,287,45,32,71,316,47,14,32,047,46,22,13,067,42*7B
 $GPGSV,3,2,12,01,55,319,46,27,14,171,42,23,12,208,46,04,31,309,45*75
