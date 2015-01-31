@@ -2,6 +2,9 @@
  * ppsthread.c - manage PPS watcher threads
  *
  * If you are not good at threads do not touch this file!
+ * For example: errno is thread safe; strerror() is not.
+ *
+ * FIXME: find a portable and thread safe replacement for strerror().
  *
  * It helps to know that there are two PPS measurement methods in
  * play.  One is defined by RFC2783 and typically implemented in the
