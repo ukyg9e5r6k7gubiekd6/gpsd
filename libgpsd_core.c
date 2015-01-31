@@ -248,9 +248,6 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 			"selecting %s driver...\n",
 			(*dp)->type_name);
 	    gpsd_assert_sync(session);
-	    gpsd_optimize_io(session, 
-			     (*dp)->minlength, 
-			     TEXTUAL_PACKET_TYPE((*dp)->packet_type));
 	    /*@i@*/ session->device_type = *dp;
 	    session->driver_index = i;
 #ifdef RECONFIGURE_ENABLE

@@ -535,7 +535,19 @@ int gpsd_serial_open(struct gps_device_t *session)
 		     &session->ttyset_old, sizeof(session->ttyset));
 	/*
 	 * Only block until we get at least one character, whatever the
-	 * third arg of read(2) says.
+	 * third arg of read(2) says.  According to 
+	 * http://stackoverflow.com/questions/20154157/termios-vmin-vtime-and-blocking-non-blocking-read-operations
+	 * the VMIN setting may be a no-op because the tty was opened with
+	 * O_NONBLOCK.  Money quote:
+	 *
+	 * "When using select() with a file in non-blocking mode, you
+	 * get an event for every byte that arrives. At high serial
+	 * data rates, this hammers the CPU. It's better to use
+	 * blocking mode with VMIN, so that select() waits for a
+	 * block of data before firing an event, and VTIME to limit
+	 * the delay, for blocks smaller than VMIN."
+	 *
+	 * Would that we could do the latter...
 	 */
 	/*@ ignore @*/
 	memset(session->ttyset.c_cc, 0, sizeof(session->ttyset.c_cc));
@@ -608,61 +620,6 @@ ssize_t gpsd_serial_write(struct gps_device_t * session,
     }
     return status;
 }
-
-void gpsd_optimize_io(struct gps_device_t *session, 
-		      int minlength, const bool textual UNUSED)
-/* optimize I/O mode depending on the minimum packet size */
-{
-    /* bail out if this is not actually a tty */
-    if (isatty(session->gpsdata.gps_fd) == 0)
-	return;
-
-#ifdef __NetBSD__
-    /*
-     * Apparently NetBSD termios (at least on pty on netbsd-[56]) has
-     * trouble with VMIN=n VTIME=1.  Or reads are aftempted when no
-     * bytes are present and none arrive, in which case read is
-     * correct for waiting indefinitely.  Until this is
-     * debugged/fixed, avoid it, because even if it doesn't affect
-     * actual operation (unknown) it's important to preserve
-     * regression tests to allow bisecting for other bugs.
-     * http://pubs.opengroup.org/onlinepubs/007908799/xbd/termios.html
-     */
-    minlength = 1;
-#endif
-
-    /*
-     * This is an optimization hack.  The idea is to get away from
-     * character-at-a-time I/O in order to slow down the rate at
-     * which the main select loop spins (those calls eat power
-     * noticeably in environments like Android phones and the
-     * Raspberry Pi).  We tell the tty layer to wait until it has
-     * either accumulated characters corresponding to the minimum
-     * possible length of a packet or timed out.
-     *
-     * For the moment, we do nothing with the textual flag. We'd like
-     * to use it to set ICANON mode and let the kernel do all the line
-     * buffering itself.  The problem with this is that VTIME stops
-     * working in ICANON mode, so a binary packet coming up the wire
-     * would result in no further input being seen.
-     */
-    if (minlength > 1) {
-	session->ttyset.c_cc[VMIN] = minlength;
-	session->ttyset.c_cc[VTIME] = 1;	/* 0.1 sec */
-    } else {
-	/* raw character-at-at-time I/O, no timeout */
-	session->ttyset.c_cc[VMIN] = 1;
-	session->ttyset.c_cc[VTIME] = 0;
-    }
-
-    if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0)
-	return;
-
-    gpsd_report(&session->context->errout, LOG_IO,
-		"tty params optimized for min length %d of %s packets\n",
-		minlength, textual ? "textual" : "binary");
-}
-
 
 /*
  * This constant controls how long the packet sniffer will spend looking

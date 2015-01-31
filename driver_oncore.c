@@ -520,7 +520,6 @@ const struct gps_type_t driver_oncore = {
 #ifdef TIMEHINT_ENABLE
     .time_offset = oncore_time_offset,		/* NTP offset array */
 #endif /* TIMEHINT_ENABLE */
-    .minlength       = 38,		/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */

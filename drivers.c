@@ -16,8 +16,6 @@
 #include "bits.h"		/* for getbeu16(), to extract big-endian words */
 #include "strfuncs.h"
 
-#define NMEA_MINLENGTH	16	/* minimum length of NMEA0183 packet */
-
 ssize_t generic_get(struct gps_device_t *session)
 {
     return packet_get(session->gpsdata.gps_fd, &session->lexer);
@@ -104,7 +102,6 @@ const struct gps_type_t driver_unknown = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength	     = 0,		/* minimum packet length is unknown */
 };
 /* *INDENT-ON* */
 
@@ -275,7 +272,6 @@ const struct gps_type_t driver_nmea0183 = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 
@@ -378,7 +374,6 @@ const struct gps_type_t driver_garmin = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 #endif /* GARMIN_ENABLE && NMEA_ENABLE */
@@ -442,7 +437,6 @@ const struct gps_type_t driver_ashtech = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength	     = 0,		/* minimum packet length is unknown */
 };
 /* *INDENT-ON* */
 #endif /* ASHTECH_ENABLE */
@@ -495,7 +489,6 @@ const struct gps_type_t driver_fv18 = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* use NMEA minimum length */
 };
 /* *INDENT-ON* */
 #endif /* FV18_ENABLE */
@@ -551,7 +544,6 @@ const struct gps_type_t driver_gpsclock = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* use NMEA minimum length */
 };
 /* *INDENT-ON* */
 #endif /* GPSCLOCK_ENABLE */
@@ -608,7 +600,6 @@ static const struct gps_type_t driver_tripmate = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* use NME0183 minimum langth */
 };
 /* *INDENT-ON* */
 #endif /* TRIPMATE_ENABLE */
@@ -660,7 +651,6 @@ static const struct gps_type_t driver_earthmate = {
 #endif /* CONTROLSEND_ENABLE */
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-    .minlength	     = 40,		/* use Zodiac minimum langth */
 #endif /* TIMEHINT_ENABLE */
 };
 /*@ -redef @*/
@@ -788,7 +778,6 @@ const struct gps_type_t driver_trueNorth = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* use NME0183 minimum langth */
 };
 /* *INDENT-ON* */
 #endif
@@ -869,7 +858,6 @@ static const struct gps_type_t driver_oceanServer = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* use NME0183 minimum langth */
 };
 /* *INDENT-ON* */
 #endif
@@ -938,7 +926,6 @@ static const struct gps_type_t driver_fury = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* use NME0183 minimum langth */
 };
 /* *INDENT-ON* */
 
@@ -994,7 +981,6 @@ static const struct gps_type_t driver_rtcm104v2 = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = 0,		/* raw I/O - could probably be tuned */
 };
 /* *INDENT-ON* */
 #endif /* RTCM104V2_ENABLE */
@@ -1042,7 +1028,6 @@ static const struct gps_type_t driver_rtcm104v3 = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = 0,		/* raw I/O - could probably be tuned */
 };
 /* *INDENT-ON* */
 #endif /* RTCM104V3_ENABLE */
@@ -1079,7 +1064,6 @@ static const struct gps_type_t driver_garmintxt = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength     = 0,			/* min packet length unknown */
 };
 /* *INDENT-ON* */
 #endif /* GARMINTXT_ENABLE */
@@ -1176,7 +1160,6 @@ const struct gps_type_t driver_mtk3301 = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength	    = NMEA_MINLENGTH,	/* use NME0183 minimum langth */
 };
 /* *INDENT-ON* */
 #endif /* MTK3301_ENABLE */
@@ -1420,7 +1403,6 @@ const struct gps_type_t driver_aivdm = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no NTP communication */
 #endif /* TIMEHINT_ENABLE */
-    .minlength       = 23,		/* minimum AIVDM packet length */
 };
 /* *INDENT-ON* */
 #endif /* AIVDM_ENABLE */
@@ -1525,7 +1507,6 @@ const struct gps_type_t driver_json_passthrough = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength       = 43,		/* minimum JSON packet length */
 };
 /* *INDENT-ON* */
 

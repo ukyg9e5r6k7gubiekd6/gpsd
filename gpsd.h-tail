@@ -389,7 +389,6 @@ struct gps_type_t {
 #ifdef TIMEHINT_ENABLE
     /*@null@*/double (*time_offset)(struct gps_device_t *session);
 #endif /* TIMEHINT_ENABLE */
-    int minlength;
 };
 
 /*
@@ -824,7 +823,6 @@ extern void ntrip_report(struct gps_context_t *,
 
 extern void gpsd_tty_init(struct gps_device_t *);
 extern int gpsd_serial_open(struct gps_device_t *);
-extern void gpsd_optimize_io(struct gps_device_t *, const int, const bool);
 extern bool gpsd_set_raw(struct gps_device_t *);
 extern ssize_t gpsd_serial_write(struct gps_device_t *,
 				 const char *, const size_t);

@@ -1700,7 +1700,6 @@ const struct gps_type_t driver_nmea2000 = {
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
 #endif /* TIMEHINT_ENABLE */
-    .minlength       = 0,		/* min packet length unknown */
 };
 /* *INDENT-ON* */
 

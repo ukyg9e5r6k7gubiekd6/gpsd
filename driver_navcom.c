@@ -1310,7 +1310,6 @@ const struct gps_type_t driver_navcom =
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
-    .minlength       = 10,		/* min packet length for chunked I/O */
 };
 /* *INDENT-ON* */
 
