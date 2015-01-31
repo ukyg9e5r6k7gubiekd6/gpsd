@@ -67,6 +67,10 @@ void gpsd_acquire_reporting_lock(void)
     err = pthread_mutex_lock(&report_mutex);
     /*@ +unrecog @*/
     if ( 0 != err ) {
+        /* POSIX says pthread_mutex_lock() should only fail if the
+        thread holding the lock has died.  Best for gppsd to just die
+        because things are FUBAR. */
+
 	(void) fprintf(stderr,"pthread_mutex_lock() failed: %s\n", 
             strerror(errno));
 	exit(EXIT_FAILURE);
@@ -80,6 +84,11 @@ void gpsd_release_reporting_lock(void)
     err = pthread_mutex_unlock(&report_mutex);
     /*@ +unrecog @*/
     if ( 0 != err ) {
+        /* POSIX says pthread_mutex_unlock() should only fail when
+        trying to unlock a lock that does not exist, or is not owned by
+        this thread.  This should never happen, so best for gpsd to die
+        because things are FUBAR. */
+
 	(void) fprintf(stderr,"pthread_mutex_unlock() failed: %s\n", 
             strerror(errno));
 	exit(EXIT_FAILURE);

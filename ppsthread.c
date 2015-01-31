@@ -75,6 +75,19 @@
 
 static pthread_mutex_t ppslast_mutex;
 
+void pps_early_init( struct gps_context_t * context ) {
+    int err;
+
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    err = pthread_mutex_init(&ppslast_mutex, NULL);
+    /*@ +unrecog @*/
+    if ( 0 != err ) {
+	gpsd_report(&context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_init() : %s\n",
+		strerror(errno));
+    }
+}
+
 #if defined(HAVE_SYS_TIMEPPS_H)
 /*@-compdestroy -nullpass -unrecog@*/
 static int init_kernel_pps(struct gps_device_t *session)
@@ -300,7 +313,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    break;
 	}
 	gpsd_report(&session->context->errout, LOG_PROG,
-		    "PPS ioctl(TIOCMIWAIT) on %s succeeded",
+		    "PPS ioctl(TIOCMIWAIT) on %s succeeded\n",
 		    session->gpsdata.dev.path);
         /* quick, grab a copy of last_fixtime before it changes */
 	last_fixtime_real = session->last_fixtime.real;
@@ -509,9 +522,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		ok = true;
 		log = "5Hz PPS pulse\n";
 	    }
-	} else if (999000 > cycle) {
+	} else if (900000 > cycle) {
+            /* Yes, 10% window.  The Rasberry Pi clock is very coarse
+             * when it starts and chronyd may be doing a fast slew. 
+             * chronyd by default will slew up to 8.334% !
+             * Don't worry, ntpd and chronyd will do further sanitizing.*/
 	    log = "Too long for 5Hz, too short for 1Hz\n";
-	} else if (1001000 > cycle) {
+	} else if (1100000 > cycle) {
+            /* Yes, 10% window.  */
 	    /* looks like PPS pulse or square wave */
 	    if (0 == duration) {
 		ok = true;
@@ -555,6 +573,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 
 	if (ok) {
+            /* pthread error return */
+            int pthread_err; 
 	    /* offset is the skew from expected to observed pulse time */
 	    double offset;
 	    /* delay after last fix */
@@ -613,14 +633,24 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		if (session->context->pps_hook != NULL)
 		    session->context->pps_hook(session, &drift);
 		/*@ -unrecog  (splint has no pthread declarations as yet) @*/
-		(void)pthread_mutex_lock(&ppslast_mutex);
+		pthread_err = pthread_mutex_lock(&ppslast_mutex);
+                if ( 0 != pthread_err ) {
+		    gpsd_report(&session->context->errout, LOG_ERROR,
+			    "PPS: pthread_mutex_lock() : %s\n",
+			    strerror(errno));
+		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
 		session->ppslast = drift;
 		/*@+type@*/
 		session->ppscount++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
-		(void)pthread_mutex_unlock(&ppslast_mutex);
+		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+                if ( 0 != pthread_err ) {
+		    gpsd_report(&session->context->errout, LOG_ERROR,
+			    "PPS: pthread_mutex_unlock() : %s\n",
+			    strerror(errno));
+		}
 		/*@ +unrecog @*/
 		/*@+compdef@*/
 		/*@-type@*/ /* splint is confused about struct timespec */
@@ -697,14 +727,26 @@ int pps_thread_lastpps(struct gps_device_t *session, struct timedrift_t *td)
 /* return a copy of the drift at the time of the last PPS */
 {
     volatile int ret;
+    /* pthread error return */
+    int pthread_err; 
 
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_lock(&ppslast_mutex);
+    pthread_err = pthread_mutex_lock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_lock() : %s\n",
+		strerror(errno));
+    }
     /*@ +unrecog @*/
     *td = session->ppslast;
     ret = session->ppscount;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_unlock(&ppslast_mutex);
+    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_unlock() : %s\n",
+		strerror(errno));
+    }
     /*@ +unrecog @*/
 
     return ret;

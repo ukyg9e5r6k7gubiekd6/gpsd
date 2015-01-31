@@ -887,6 +887,9 @@ extern void ntpshm_latch(struct gps_device_t *device,  /*@out@*/struct timedrift
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
 #endif /* NTPSHM_ENABLE */
+#ifdef PPS_ENABLE
+extern void pps_early_init(struct gps_context_t *);
+#endif /* PPS_ENABLE */
 
 /* normalize a timespec */
 #define TS_NORM(ts)  \
