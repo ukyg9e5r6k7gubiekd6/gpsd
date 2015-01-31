@@ -23,16 +23,24 @@ fi
 version()
 {
     echo
-    echo `basename $0`" : Version v0.10";
+    echo `basename $0`" : Version v0.20";
     echo
 }
 
 usage()
 {
     version;
-    echo "usage :" `basename $0` " [-S <portnumber>] [-u <can_device>] [-p <canplayer>] [-b] testfile";
+    echo "usage :" `basename $0` " [-S <portnumber>] [-u <can_device>] [-p <canplayer>] [-b] <testfile>";
     echo "      :" `basename $0` " -v";
     echo "      :" `basename $0` " -h";
+    echo "  Options include:";
+    echo "  -S <portnumber> = Port for gpsd communication. Default is 2948.";
+    echo "  -u <can_device> = Used CAN device. Default is \"vcan0\"";
+    echo "  -p <canplayer>  = Programm to replay logfile. Default is \"canplayer\"";
+    echo "  -b              = Create testfile.chk instead of checking it.";
+    echo "  -v              = Print version and exit.";
+    echo "  -h              = Print this helptext and exit.";
+    echo "  <testfile>      = A file created by \"candump -l <can_device> ><testfile>\".";
     echo
 }
 
