@@ -2154,7 +2154,7 @@ ssize_t packet_get(int fd, struct gps_lexer_t *lexer)
      * If we gathered a packet, return its length; it will have been
      * consumed out of the input buffer and moved to the output
      * buffer.  We don't care whether the read() returned 0 or -1 and
-     * gathered packet data was all buffered or whether ot was partly
+     * gathered packet data was all buffered or whether it was partly
      * just physically read.
      *
      * Note: this choice greatly simplifies life for callers of
