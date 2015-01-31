@@ -555,6 +555,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 
 	if (ok) {
+            /* pthread error return */
+            int pthread_err; 
 	    /* offset is the skew from expected to observed pulse time */
 	    double offset;
 	    /* delay after last fix */
@@ -613,14 +615,24 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		if (session->context->pps_hook != NULL)
 		    session->context->pps_hook(session, &drift);
 		/*@ -unrecog  (splint has no pthread declarations as yet) @*/
-		(void)pthread_mutex_lock(&ppslast_mutex);
+		pthread_err = pthread_mutex_lock(&ppslast_mutex);
+                if ( 0 != pthread_err ) {
+		    gpsd_report(&session->context->errout, LOG_ERROR,
+			    "PPS: pthread_mutex_lock() : %s\n",
+			    strerror(errno));
+		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
 		session->ppslast = drift;
 		/*@+type@*/
 		session->ppscount++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
-		(void)pthread_mutex_unlock(&ppslast_mutex);
+		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+                if ( 0 != pthread_err ) {
+		    gpsd_report(&session->context->errout, LOG_ERROR,
+			    "PPS: pthread_mutex_unlock() : %s\n",
+			    strerror(errno));
+		}
 		/*@ +unrecog @*/
 		/*@+compdef@*/
 		/*@-type@*/ /* splint is confused about struct timespec */
@@ -697,14 +709,26 @@ int pps_thread_lastpps(struct gps_device_t *session, struct timedrift_t *td)
 /* return a copy of the drift at the time of the last PPS */
 {
     volatile int ret;
+    /* pthread error return */
+    int pthread_err; 
 
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_lock(&ppslast_mutex);
+    pthread_err = pthread_mutex_lock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_lock() : %s\n",
+		strerror(errno));
+    }
     /*@ +unrecog @*/
     *td = session->ppslast;
     ret = session->ppscount;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
-    (void)pthread_mutex_unlock(&ppslast_mutex);
+    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_unlock() : %s\n",
+		strerror(errno));
+    }
     /*@ +unrecog @*/
 
     return ret;
