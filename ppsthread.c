@@ -300,7 +300,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    break;
 	}
 	gpsd_report(&session->context->errout, LOG_PROG,
-		    "PPS ioctl(TIOCMIWAIT) on %s succeeded",
+		    "PPS ioctl(TIOCMIWAIT) on %s succeeded\n",
 		    session->gpsdata.dev.path);
         /* quick, grab a copy of last_fixtime before it changes */
 	last_fixtime_real = session->last_fixtime.real;
