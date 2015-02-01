@@ -1667,6 +1667,10 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     else
 	fix_time += device->device_type->time_offset(device);
     /* it's ugly but timestamp_t is double */
+    /* note loss of precision here
+     * td->clock is in nanoSec
+     * fix_time is in microSec
+     * OK since GPS timestamps are millSec or worse */
     fractional = modf(fix_time, &integral);
     /*@-type@*/ /* splint is confused about struct timespec */
     td->real.tv_sec = (time_t)integral;
