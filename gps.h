@@ -59,6 +59,13 @@ extern "C" {
  *
  * Error estimates are at 95% confidence.
  */
+/* WARNING!  potential loss of precision in timestamp_t
+ * a double is 53 significant bits.
+ * UNIX time to nanoSec precision is 60 significant bits
+ * UNIX time to nanoSec precision after 2038 is 61 bits
+ * timestamp_t is only microSec precision
+ * timestamp_t and PPS do not play well together
+ */
 typedef double timestamp_t;	/* Unix time in seconds with fractional part */
 
 struct gps_fix_t {
