@@ -531,8 +531,8 @@ static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(session->context, bu, len, ais, 0xffffffffU) != 0) {
-        ais->type18.lon      = (int)          (getles32(bu, 5) * 0.06);
-	ais->type18.lat      = (int)          (getles32(bu, 9) * 0.06);
+        ais->type18.lon      = (int)          scale_int(getles32(bu, 5), (int64_t)(SHIFT32 *.06L));
+	ais->type18.lat      = (int)          scale_int(getles32(bu, 9), (int64_t)(SHIFT32 *.06L));
 	ais->type18.accuracy = (bool)         ((bu[13] >> 0) & 0x01);
 	ais->type18.raim     = (bool)         ((bu[13] >> 1) & 0x01);
 	ais->type18.second   = (unsigned int) ((bu[13] >> 2) & 0x3f);
@@ -573,8 +573,8 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
         uint16_t length, beam, to_bow, to_starboard;
 	int l;
 
-        ais->type19.lon          = (int)          (getles32(bu, 5) * 0.06);
-	ais->type19.lat          = (int)          (getles32(bu, 9) * 0.06);
+        ais->type19.lon          = (int)          scale_int(getles32(bu, 5), (int64_t)(SHIFT32 *.06L));
+	ais->type19.lat          = (int)          scale_int(getles32(bu, 9), (int64_t)(SHIFT32 *.06L));
 	ais->type19.accuracy     = (bool)         ((bu[13] >> 0) & 0x01);
 	ais->type19.raim         = (bool)         ((bu[13] >> 1) & 0x01);
 	ais->type19.second       = (unsigned int) ((bu[13] >> 2) & 0x3f);
@@ -725,8 +725,8 @@ static gps_mask_t hnd_129798(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(session->context, bu, len, ais, 0xffffffffU) != 0) {
-        ais->type9.lon       = (int)          (getles32(bu, 5) * 0.06);
-	ais->type9.lat       = (int)          (getles32(bu, 9) * 0.06);
+        ais->type9.lon       = (int)          scale_int(getles32(bu, 5), (int64_t)(SHIFT32 *.06L));
+	ais->type9.lat       = (int)          scale_int(getles32(bu, 9), (int64_t)(SHIFT32 *.06L));
 	ais->type9.accuracy  = (bool)         ((bu[13] >> 0) & 0x01);
 	ais->type9.raim      = (bool)         ((bu[13] >> 1) & 0x01);
 	ais->type9.second    = (unsigned int) ((bu[13] >> 2) & 0x3f);
