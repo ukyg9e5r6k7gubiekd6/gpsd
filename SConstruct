@@ -289,9 +289,6 @@ def announce(msg):
     if not env.GetOption("silent"):
         print msg
 
-# We need to define -D_GNU_SOURCE
-env.Append(CFLAGS='-D_GNU_SOURCE')
-
 # And we need some libraries
 env.MergeFlags("-lm")
 
