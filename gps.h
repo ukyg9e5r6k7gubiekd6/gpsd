@@ -61,8 +61,8 @@ extern "C" {
  */
 /* WARNING!  potential loss of precision in timestamp_t
  * a double is 53 significant bits.
- * UNIX time to nanoSec precision is 60 significant bits
- * UNIX time to nanoSec precision after 2038 is 61 bits
+ * UNIX time to nanoSec precision is 62 significant bits
+ * UNIX time to nanoSec precision after 2038 is 63 bits
  * timestamp_t is only microSec precision
  * timestamp_t and PPS do not play well together
  */

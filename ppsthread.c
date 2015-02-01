@@ -35,6 +35,13 @@
  * the context structure.  Then you can call pps_thread_activate() and
  * the thread will launch.  It is OK to do this before the device is
  * open, the thread will wait on that.
+ * 
+ * WARNING!  Loss of precision
+ * UNIX time to nanoSec precision is 62 significant bits
+ * UNIX time to nanoSec precision after 2038 is 63 bits
+ * a double is only 53 significant bits.
+ * 
+ * You can not do PPS math with doubles
  *
  * This file is Copyright (c) 2013 by the GPSD project. BSD terms
  * apply: see the file COPYING in the distribution root for details.
