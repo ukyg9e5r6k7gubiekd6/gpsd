@@ -76,8 +76,8 @@ import packet as sniffer
 # they're too high you'll slow the tests down a lot.  If they're too low
 # you'll get random spurious regression failures that usually look
 # like lines missing from the end of the test output relative to the
-# check file.  The need for them may be symptomatic of race conditions
-# in the pty layer or elsewhere.
+# check file, but may be hangs.  The need for them may be symptomatic
+# of race conditions in the pty layer or elsewhere.
 
 # WRITE_PAD: Define a per-line delay on writes so we won't spam the
 # buffers in the pty layer or gpsd itself. Values smaller than the
@@ -93,9 +93,13 @@ import packet as sniffer
 
 # Field reports on minima:
 #
-# Eric Raymond runningLinux 3.11.0 on an Intel Core Duo at 2.66GHz.
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Works, 112s real
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05   Fails
+# Eric Raymond runningLinux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Hangs
+#  WRITE_PAD = 0.01 / CLOSE_DELAY = 1.0   Works, 779sec
+#  WRITE_PAD = 0.01 / CLOSE_DELAY = 2.1   Works, 800sec
+#
+# Those below have not been updated since we switched to using blocking I/O,
+# for gpsd's ttys, which increases the required delays. 
 #
 # Michael Tatarinov running ?? on a Raspberry Pi:
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05    Works, 344s real
@@ -136,8 +140,8 @@ import packet as sniffer
 # examples are "# sys.platform platform.platform()"
 
 if sys.platform.startswith("linux"):
-    WRITE_PAD = 0.0
-    CLOSE_DELAY = 0.1
+    WRITE_PAD = 0.01
+    CLOSE_DELAY = 1.0
 elif sys.platform.startswith("freebsd"):
     WRITE_PAD = 0.001
     CLOSE_DELAY = 0.4
