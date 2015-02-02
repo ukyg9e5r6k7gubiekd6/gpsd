@@ -295,6 +295,8 @@ void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 	to->eps = from->eps;
 }
 
+/* NOTE: timestamp_t is a double, so this is only precise to
+ * near microSec.  Do not use near PPS which is nanoSec precise */
 timestamp_t timestamp(void)
 {
 #ifdef HAVE_CLOCK_GETTIME
