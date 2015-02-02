@@ -457,18 +457,23 @@ int gpsd_serial_open(struct gps_device_t *session)
     } else
 #endif /* BLUEZ */
     {
+	/*
+	 * We open with O_NONBLOCK because we want to now get hung if
+	 * the clocal flag is off, but we don't want to stay in that mode.
+	 */
         if ((session->gpsdata.gps_fd =
-	     open(session->gpsdata.dev.path, (int)(mode | O_NOCTTY))) == -1) {
+	     open(session->gpsdata.dev.path, (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
             gpsd_report(&session->context->errout, LOG_ERROR,
 			    "device open failed: %s - retrying read-only\n",
 			    strerror(errno));
 	    if ((session->gpsdata.gps_fd =
-		 open(session->gpsdata.dev.path, O_RDONLY | O_NOCTTY)) == -1) {
+		 open(session->gpsdata.dev.path, O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
 		gpsd_report(&session->context->errout, LOG_ERROR,
 			    "read-only device open failed: %s\n",
 			    strerror(errno));
 		return -1;
 	    }
+
 	    gpsd_report(&session->context->errout, LOG_PROG,
 			"file device open success: %s\n",
 			strerror(errno));
@@ -568,6 +573,14 @@ int gpsd_serial_open(struct gps_device_t *session)
 #endif /* FIXED_STOP_BITS */
 	    );
     }
+
+    /* Switch back to blocking I/O now that CLOCAL is set. */
+    {
+	int oldfl = fcntl(session->gpsdata.gps_fd, F_GETFL);
+	if (oldfl != -1)
+	    fcntl(session->gpsdata.gps_fd, F_SETFL, oldfl & ~O_NONBLOCK);
+    }
+
 
     /* required so parity field won't be '\0' if saved speed matches */
     if (session->sourcetype <= source_blockdev) {
