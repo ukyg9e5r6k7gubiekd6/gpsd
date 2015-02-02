@@ -262,7 +262,10 @@ static int init_kernel_pps(struct gps_device_t *session)
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     struct gps_device_t *session = (struct gps_device_t *)arg;
-    double last_fixtime_real = 0, last_fixtime_clock = 0;
+    double last_fixtime_real = 0; 
+    /* the system clock ime, to the nSec, when the last fix received */
+    /* using a double would cause loss of precision */
+    struct timespec last_fixtime_clock = {0, 0};
 #ifndef HAVE_CLOCK_GETTIME
     struct timeval  clock_tv = {0, 0};
 #endif /* HAVE_CLOCK_GETTIME */
@@ -627,7 +630,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     * GPS serial input then use that */
 	    offset = (drift.real.tv_sec - drift.clock.tv_sec);
 	    offset += ((drift.real.tv_nsec - drift.clock.tv_nsec) / 1e9);
-	    delay = (drift.clock.tv_sec + drift.clock.tv_nsec / 1e9) - last_fixtime_clock;
+	    delay = (drift.clock.tv_sec - last_fixtime_clock.tv_sec);
+	    delay += ((drift.clock.tv_nsec - last_fixtime_clock.tv_nsec) / 1e9);
 	    if (0.0 > delay || 1.0 < delay) {
 		gpsd_report(&session->context->errout, LOG_RAW,
 			    "PPS: no current GPS seconds: %f\n",

@@ -508,7 +508,9 @@ struct gps_device_t {
 #endif /* NTPSHM_ENABLE */
     volatile struct {
 	timestamp_t real;
-	timestamp_t clock;
+        /* clock must be a timespec as it is in nSec and
+         * a timestamp_t will loose precision */
+	struct timespec clock; /* system clock time when last fix received */
     } last_fixtime;	/* so updates happen once */
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)

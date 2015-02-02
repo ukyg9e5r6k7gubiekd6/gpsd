@@ -1677,9 +1677,8 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     td->real.tv_nsec = (long)(fractional * 1e+9);
     /*@+type@*/
     device->last_fixtime.real = device->newdata.time;
-#ifndef S_SPLINT_S
-    device->last_fixtime.clock = td->clock.tv_sec + td->clock.tv_nsec / 1e9;
-#endif /* S_SPLINT_S */
+    /* structure copy */
+    device->last_fixtime.clock = td->clock;
 }
 #endif /* NTPSHM_ENABLE */
 
