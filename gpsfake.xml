@@ -25,7 +25,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-1</arg>
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-b</arg>
-      <arg choice='opt'>-f</arg>
       <arg choice='opt'>-c <replaceable>interval</replaceable></arg>
       <arg choice='opt'>-i</arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
@@ -123,11 +122,6 @@ and similar programs.</para>
 <para>The <option>-g</option> uses the monitor facility to run the
 <application>gpsd</application> instance within gpsfake under control
 of gdb.</para>
-
-<para>The <option>-f</option> configures <application>gpsd</application> to bind
-to a random dynamic/private port (range 49152 - 65535). Its main use 
-is within regression-test scripts so they won't collide with a production
-instance.</para>
 
 <para>The <option>-o</option> specifies options to pass to the daemon.  The -n
 option passes -n to start the daemon reading the GPS without waiting
