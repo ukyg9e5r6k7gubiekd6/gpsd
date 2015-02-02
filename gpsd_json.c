@@ -187,9 +187,12 @@ void json_tpv_dump(const struct gps_device_t *session,
 #ifdef PPS_ENABLE
 	    /*@-type -formattype@*/ /* splint is confused about struct timespec */
 	    if (session->ppscount)
+                /* you can not use a double here as you will lose 11 bits
+                 * of precision */
 		str_appendf(reply, replylen,
-			       "\"pps\":%.9f,", 
-			       session->ppslast.clock.tv_sec + session->ppslast.clock.tv_nsec / 1e9);
+			       "\"pps\":%ld.$09ld,", 
+			       session->ppslast.clock.tv_sec,
+			       session->ppslast.clock.tv_nsec);
 	    /*@+type +formattype@*/
 #endif /* PPS_ENABLE */
 	    str_appendf(reply, replylen,
