@@ -51,16 +51,6 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
-def fakeport():
-    "Find a port that isn't in use to bind to."
-    # Grab a random port from IANA's unassigned/private range. Not perfect,
-    # but at least less than in 16000 chance of a pair collision. It would
-    # be very hard to get this deterministically correct, since there would
-    # always be a window between port allocation and when the daemon picked
-    # it up.  We'd need to do some kind of semaphore, etc., and even that
-    # wouldn't prevent collisions with other apps using the range.
-    return random.randint(49152, 65535)
-
 def hexdump(s):
     rep = ""
     for c in s:
@@ -94,7 +84,7 @@ def fakehook(linenumber, fakegps):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:fghilm:no:pP:r:s:StTuvx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:ghilm:no:pP:r:s:StTuvx")
     except getopt.GetoptError, msg:
         print "gpsfake: " + str(msg)
         raise SystemExit, 1
@@ -118,8 +108,6 @@ if __name__ == '__main__':
     for (switch, val) in options:
         if (switch == '-1'):
             singleshot = True
-        elif (switch == '-f'):
-            port = fakeport()
         elif (switch == '-b'):
             progress = True
         elif (switch == '-c'):
