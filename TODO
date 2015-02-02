@@ -124,7 +124,7 @@ We caw now *really* measure latency from GPS top of second when it has
 1PPS.  Add this capability to gpsprof and revise the "Where's the
 Latency?" white paper.
 
-*** Low-power autoconfiguration in the uBlox driver ***
+*** Low-pwer autoconfiguration in the uBlox driver ***
 
 Anthony Stirk <upuaut@gmail.com> writes on Wed May 21 06:09:00 2014:
 

@@ -1878,6 +1878,7 @@ struct policy_t {
     bool scaled;			/* requesting report scaling? */
     bool timing;			/* requesting timing info */
     bool split24;			/* requesting split AIS Type 24s */
+    bool pps;				/* requesting PPS in NMEA/raw modes */
     int loglevel;			/* requested log level of messages */
     char devpath[GPS_PATH_MAX];		/* specific device to watch */
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */

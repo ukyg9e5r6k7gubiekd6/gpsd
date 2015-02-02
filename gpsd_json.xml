@@ -983,6 +983,13 @@ object.</para>
         false. Applies only to AIS reports.</entry>
 </row>
 <row>
+	<entry>pps</entry>
+	<entry>No</entry>
+	<entry>boolean</entry>
+        <entry>If true, emit a PPS JSON message when the device issues
+        1PPS. Default is false.</entry>
+</row>
+<row>
 	<entry>device</entry>
 	<entry>No</entry>
 	<entry>string</entry>
