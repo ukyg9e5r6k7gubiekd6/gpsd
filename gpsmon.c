@@ -674,6 +674,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    buf[0] = '\0';
 	} else {
 	    /*@-type@*/ /* splint is confused about struct timespec */
+	    /* WARNING!  this will fail if timedelta more than a few seconds */
 	    double timedelta = timespec_diff_ns(noclobber.timedrift.real, 
 						noclobber.timedrift.clock) * 1e-9;
 	    if (!curses_active)

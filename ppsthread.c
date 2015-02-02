@@ -439,6 +439,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    "KPPS data: using %s\n",
 			    edge_kpps ? "assert" : "clear");
 
+		/* WARNING! this will fail if delta more than a few seconds,
+                  that should not be the case here */
 	        cycle_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[edge_kpps])/1000;
 	        duration_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
 	        gpsd_report(&session->context->errout, LOG_PROG,

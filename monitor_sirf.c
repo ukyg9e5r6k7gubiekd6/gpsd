@@ -590,6 +590,7 @@ static void sirf_update(void)
     /*@-compdef@*/
     /*@-type@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
+	/* WARNING!  this will fail if timedelta more than a few seconds */
 	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
 	display(mid7win, 2, 39, "%.9f", timedelta);	/* PPS offset */
 	(void)wnoutrefresh(mid7win);

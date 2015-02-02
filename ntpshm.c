@@ -367,6 +367,7 @@ static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
     /*@-type@*//* splint is confused about struct timespec */
     TSTOTV(&sample.tv, &td->clock);
     /*@-compdef@*/
+    /* WARNING!  this will fail if timedelta more than a few seconds */
     sample.offset = timespec_diff_ns(td->real, td->clock) / 1e9;
     /*@+compdef@*/
 #ifdef __COVERITY__

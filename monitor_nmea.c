@@ -326,6 +326,7 @@ static void nmea_update(void)
     /*@-compdef@*/
     /*@-type@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
+	/* WARNING!  this will fail if timedelta more than a few seconds */
 	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
 	(void)mvwprintw(gpgsawin, 4, 13, "%.9f", timedelta);
 	(void)wnoutrefresh(gpgsawin);
