@@ -1163,6 +1163,9 @@ int main(int argc, char **argv)
 
     gpsd_time_init(&context, time(NULL));
     gpsd_init(&session, &context, NULL);
+#if defined(PPS_ENABLE) 
+    pps_early_init( &context);
+#endif /* PPS_ENABLE */
 
     /* Grok the server, port, and device. */
     if (optind < argc) {
