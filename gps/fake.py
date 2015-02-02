@@ -94,8 +94,7 @@ import packet as sniffer
 # Field reports on minima:
 #
 # Eric Raymond runningLinux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1      Hangs
-#  WRITE_PAD = 0.00001 / CLOSE_DELAY = 0.02 Works, 462sec
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Works, 462sec
 #
 # Those below have not been updated since we switched to using blocking I/O,
 # for gpsd's ttys, which increases the required delays. 
@@ -139,8 +138,8 @@ import packet as sniffer
 # examples are "# sys.platform platform.platform()"
 
 if sys.platform.startswith("linux"):
-    WRITE_PAD = 0.00001
-    CLOSE_DELAY = 0.02
+    WRITE_PAD = 0.0
+    CLOSE_DELAY = 0.0
 elif sys.platform.startswith("freebsd"):
     WRITE_PAD = 0.001
     CLOSE_DELAY = 0.4
