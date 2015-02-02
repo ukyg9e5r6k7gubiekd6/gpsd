@@ -533,7 +533,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 		     &session->ttyset_old, sizeof(session->ttyset));
 	/*@ ignore @*/
 	memset(session->ttyset.c_cc, 0, sizeof(session->ttyset.c_cc));
-	session->ttyset.c_cc[VTIME] = 1;
+	//session->ttyset.c_cc[VTIME] = 1;
 	/*@ end @*/
 	/*
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
