@@ -330,10 +330,10 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 #ifdef PPS_ENABLE
     memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
     session->ppscount = 0;
-#endif /* PPS_ENABLE */
 #if defined(HAVE_SYS_TIMEPPS_H)
     session->kernelpps_handle = -1;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
+#endif /* PPS_ENABLE */
 
     /*@ -mayaliasunique @*/
     if (device != NULL)
