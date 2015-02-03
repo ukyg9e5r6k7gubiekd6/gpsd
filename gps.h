@@ -45,7 +45,7 @@ extern "C" {
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define GPS_PRNMAX	32	/* above this number are SBAS satellites */
 #define MAXUSERDEVS	4	/* max devices per user */
-#define GPS_PATH_MAX	32	/* for names like /dev/serial/by-id/... */
+#define GPS_PATH_MAX	128	/* for names like /dev/serial/by-id/... */
 
 /*
  * The structure describing an uncertainty volume in kinematic space.

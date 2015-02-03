@@ -1078,6 +1078,9 @@ int main(int argc, char **argv)
 	    break;
 	case 'D':
 	    context.errout.debug = atoi(optarg);
+#if defined(CLIENTDEBUG_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
+	    json_enable_debug(context.errout.debug - 2, stderr);
+#endif
 	    break;
 	case 'L':		/* list known device types */
 	    (void)
