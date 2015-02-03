@@ -324,11 +324,14 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 /* initialize GPS polling */
 {
     /* clear some times */
-    memset(&session->last_fixtime, 0, sizeof(session->last_fixtime));
+    memset( (void *)&session->last_fixtime, 0, sizeof(session->last_fixtime));
 #ifdef PPS_ENABLE
-    memset(&session->ppslast, 0, sizeof(session->ppslast));
+    memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
     session->ppscount = 0;
 #endif /* PPS_ENABLE */
+#if defined(HAVE_SYS_TIMEPPS_H)
+    session->kernelpps_handle = -1;
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
     /*@ -mayaliasunique @*/
     if (device != NULL)
@@ -419,11 +422,11 @@ void gpsd_clear(struct gps_device_t *session)
     session->badcount = 0;
 
     /* clear the private data union */
-    memset(&session->driver, '\0', sizeof(session->driver));
+    memset( (void *)&session->driver, '\0', sizeof(session->driver));
     /* clear some times */
-    memset(&session->last_fixtime, 0, sizeof(session->last_fixtime));
+    memset( (void *)&session->last_fixtime, 0, sizeof(session->last_fixtime));
 #ifdef PPS_ENABLE
-    memset(&session->ppslast, 0, sizeof(session->ppslast));
+    memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
     session->ppscount = 0;
 #endif /* PPS_ENABLE */
 
