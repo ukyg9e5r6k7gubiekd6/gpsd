@@ -108,11 +108,13 @@ import packet as sniffer
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.3    Fails tcp-torture.log, 677.53s real
 #
 # Greg Troxel running NetBSD 6 on a Core i5 (i386, 4 cpus) 2.90GHz.
-#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.2 had failures (645s)
-#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.4 had failures (662s)
-#  WRITE_PAD = 0.000 / CLOSE_DELAY = 0.8 had 69/89 failures (148s)
-#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
-#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed (737s)
+# >= release-3.11-344-gef39b1c
+#  WRITE_PAD = 0.000 / CLOSE_DELAY = 0.0 88/89 failures (108s)
+#  WRITE_PAD = 0.000 / CLOSE_DELAY = 0.8 71/89 failures (149s)
+#  WRITE_PAD = 0.000 / CLOSE_DELAY = 8.0 69/89 failures (409s)
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 8.0 all tests passed (920s)
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 8.0 10/89 failures (951s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed (734s)
 #
 # Greg Troxel running NetBSD 5 on a Core 2 Duo E8500 (amd64, 2 cpus) 3.167GHz.
 #  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 had 7/89 failures (730s)
