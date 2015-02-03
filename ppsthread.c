@@ -325,6 +325,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			session->gpsdata.dev.path, errno, strerror(errno));
 	    break;
 	}
+        /* start of time critical section */
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "PPS ioctl(TIOCMIWAIT) on %s succeeded\n",
 		    session->gpsdata.dev.path);
@@ -353,7 +354,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	TVTOTS( &clock_ts, &clock_tv);
 #endif /* HAVE_CLOCK_GETTIME */
 /*@+noeffect@*/
-
+     
         /* got the edge, got the time just after the edge, now quickly
          * get the edge state */
 	/*@ +ignoresigns */
@@ -364,6 +365,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    break;
 	}
 	/*@ -ignoresigns */
+        /* end of time critical section */
+
+        if ( isnan( last_fixtime_real ) ) {
+	    gpsd_report(&session->context->errout, LOG_ERROR,
+			"PPS last_fixtime_real is NAN\n");
+	    /* this should never happen, but it does. */
+            last_fixtime_real = 0.0;
+        }
+
 
 	/* mask for monitored lines */
 	state &= PPS_LINE_TIOC;
@@ -602,6 +612,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H)
             if ( 0 <= session->kernelpps_handle && ok_kpps) {
 		/* use KPPS time */
+		gpsd_report(&session->context->errout, LOG_RAW,
+			    "KPPS using edge %d", edge_kpps );
 		/* pick the right edge */
 		if ( edge_kpps ) {
 		    clock_ts = pi.assert_timestamp; /* structure copy */
