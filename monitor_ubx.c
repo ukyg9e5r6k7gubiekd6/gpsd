@@ -257,9 +257,18 @@ static void ubx_update(void)
     /*@-compdef@*/
     /*@-type@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
-	/* WARNING!  this will fail if timedelta more than a few seconds */
-	double timedelta = timespec_diff_ns(drift.real, drift.clock) * 1e-9;
-	(void)mvwprintw(ppswin, 1, 13, "%.9f", timedelta);
+	/* NOTE: can not use double here due to precision requirements */
+	struct timespec timedelta;
+	TS_SUB( &timedelta, &drift.real, &drift.clock);
+        if ( 86400 < (long)timedelta.tv_sec ) {
+	    /* more than one day off, overflow */
+            /* need a bigger field to show it */
+	    (void)mvwprintw(ppswin, 1, 13, "> 1 day");
+        } else {
+	    (void)mvwprintw(ppswin, 1, 13, "%ld.09ld",
+			      (long)timedelta.tv_sec,
+                              (long)timedelta.tv_nsec);
+        }
 	(void)wnoutrefresh(ppswin);
     }
     /*@+type@*/
