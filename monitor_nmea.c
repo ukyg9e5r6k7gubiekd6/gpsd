@@ -339,7 +339,7 @@ static void nmea_update(void)
 	    if ( (0 > timedelta.tv_nsec ) || ( 0 > timedelta.tv_sec ) ) {
 		sign = '-';
 	    }
-	    (void)mvwprintw(gpgsawin, 4, 13, "%c,%ld.%09ld",
+	    (void)mvwprintw(gpgsawin, 4, 13, "%c%ld.%09ld",
 				  sign,
 				  (long)labs(timedelta.tv_sec),
 				  (long)labs(timedelta.tv_nsec));
