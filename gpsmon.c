@@ -674,17 +674,19 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    buf[0] = '\0';
 	} else {
 	    /*@-type@*/ /* splint is confused about struct timespec */
-	    /* WARNING!  this will fail if timedelta more than a few seconds */
-	    double timedelta = timespec_diff_ns(noclobber.timedrift.real, 
-						noclobber.timedrift.clock) * 1e-9;
+	    struct timespec timedelta;
+	    TS_SUB( &timedelta, &noclobber.timedrift.real, 
+		&noclobber.timedrift.clock);
+
 	    if (!curses_active)
 		(void)fprintf(stderr,
-			      "Drift clock=%lu.%09lu clock=%lu.%09lu offset=%.9f\n",
+			      "Drift clock=%lu.%09lu clock=%lu.%09lu offset=%ld.%09lu\n",
 			      (unsigned long)noclobber.timedrift.clock.tv_sec,
 			      (unsigned long)noclobber.timedrift.clock.tv_nsec,
 			      (unsigned long)noclobber.timedrift.real.tv_sec,
 			      (unsigned long)noclobber.timedrift.real.tv_nsec,
-			      timedelta);
+			      (long)timedelta.tv_sec,
+                              (unsigned long)timedelta.tv_nsec);
 	    /*@+type@*/
 
 	    (void)strlcpy(buf, PPSBAR, sizeof(buf));

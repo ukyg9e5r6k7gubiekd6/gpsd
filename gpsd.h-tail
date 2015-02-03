@@ -931,6 +931,14 @@ extern void pps_early_init(struct gps_context_t *);
         TS_NORM( ts ); \
     } while (0)
 
+/* subtract two timespec */
+#define TS_SUB(r, ts1, ts2) \
+    do { \
+	(r)->tv_sec = (ts1)->tv_sec - (ts2)->tv_sec; \
+	(r)->tv_nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
+        TS_NORM( r ); \
+    } while (0)
+
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
 extern int pps_thread_lastpps(struct gps_device_t *, struct timedrift_t *);

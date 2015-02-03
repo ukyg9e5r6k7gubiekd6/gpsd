@@ -1,0 +1,380 @@
+gsmon:INFO: startup at 2015-02-02T23:24:43.000Z (1422919483)
+gsmon:INFO: opening GPS data source type 3 at '/dev/gps0'
+gsmon:INFO: speed 9600, 8N1
+gsmon:PROG: Probing "Garmin USB binary" driver...
+gsmon:INFO: attempting USB device enumeration.
+gsmon:INFO: 1d6b:0003 (bus 2, device 1)
+gsmon:INFO: 046d:c06c (bus 1, device 35)
+gsmon:INFO: 1d6b:0002 (bus 1, device 1)
+gsmon:INFO: 13d3:5702 (bus 4, device 2)
+gsmon:INFO: 1d6b:0002 (bus 4, device 1)
+gsmon:INFO: 1d6b:0001 (bus 6, device 1)
+gsmon:INFO: 1d6b:0002 (bus 3, device 1)
+gsmon:INFO: 04ca:3006 (bus 5, device 3)
+gsmon:INFO: 067b:2303 (bus 5, device 2)
+gsmon:INFO: 1d6b:0001 (bus 5, device 1)
+gsmon:INFO: vendor/product match with 091e:0003 not found
+gsmon:PROG: Probe not found "Garmin USB binary" driver...
+gsmon:PROG: Probing "GeoStar" driver...
+gsmon:PROG: Sent GeoStar packet id 0xc1
+gsmon:IO: => GPS: 5053474700c100010000000050924746
+gsmon:PROG: Probe not found "GeoStar" driver...
+gsmon:PROG: Probing "Trimble TSIP" driver...
+gsmon:INFO: speed 9600, 8O1
+gsmon:INFO: speed 9600, 8N1
+gsmon:PROG: Probe not found "Trimble TSIP" driver...
+gsmon:PROG: no probe matched...
+gsmon:INFO: gpsd_activate(1): activated GPS (fd 3)
+gsmon:PROG: PPS thread launched
+gsmon:PROG: switching to match packet type 1: $GPGLL,4404.13381,N,12118.85590,W,232444.00,A,A*7A\x0d\x0a
+gsmon:PROG: switch_driver(NMEA0183) called...
+gsmon:PROG: selecting NMEA0183 driver...
+gsmon:INFO: /dev/gps0 identified as type NMEA0183, 0.103849 sec @ 9600bps
+gsmon:IO: <= GPS: $GPGLL,4404.13381,N,12118.85590,W,232444.00,A,A*7A
+gsmon:DATA: GPGLL: registers fractional time 232444.00
+gsmon:WARN: can't use GLL time until after ZDA or RMC has supplied a year.
+gsmon:DATA: GLL: hhmmss=232444.00 lat=44.07 lon=-121.31 mode=2 status=1
+gsmon:PROG: GPGLL sentence timestamped 232444.00.
+gsmon:PROG: GPGLL starts a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|LATLON|STATUS|MODE|PACKET|DRIVER|CLEAR}
+gsmon:IO: <= GPS: $GPGST,232444.00,30,,,,7.8,5.0,4.2*5F
+gsmon:DATA: GPGST: registers fractional time 232444.00
+gsmon:DATA: GST: utc = 232444.00, rms = 30.00, maj = nan, min = nan, ori = nan, lat = 7.80, lon = 5.00, alt = 4.20
+gsmon:PROG: GPGST sentence timestamped 232444.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET|GST}
+gsmon:IO: <= GPS: $GPZDA,232444.00,02,02,2015,00,00*67
+gsmon:DATA: GPZDA time is 1422919484.000000 = 2015-02-02T23:24:44.00Z
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGBS,232444.00,7.8,5.0,4.2,,,,*4A
+gsmon:DATA: GPGBS: registers fractional time 232444.00
+gsmon:DATA: GBS: epx=5.00 epy=7.80 epv=4.20
+gsmon:PROG: GPGBS sentence timestamped 232444.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|HERR|VERR|PACKET}
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 0, cycle: 1114803265 uSec, duration: 1114803265 uSec @ 1422919485.000769846
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 1, cycle: 1114903219 uSec, duration:   99953 uSec @ 1422919485.100723329
+gsmon:IO: <= GPS: $GPRMC,232445.00,A,4404.13390,N,12118.85582,W,0.238,,020215,,,A*6C
+gsmon:DATA: merge_ddmmyy(020215) sets year 2015
+gsmon:DATA: GPRMC: registers fractional time 232445.00
+gsmon:DATA: RMC: ddmmyy=020215 hhmmss=232445.00 lat=44.07 lon=-121.31 speed=0.12 track=0.00 mode=2 status=1
+gsmon:DATA: GPRMC time is 1422919485.000000 = 2015-02-02T23:24:45.00Z
+gsmon:PROG: GPRMC sentence timestamped 232445.00.
+gsmon:PROG: GPRMC starts a reporting cycle.
+gsmon:PROG: tagged GBS as a cycle ender.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|SPEED|TRACK|MODE|PACKET|CLEAR|PPSTIME}
+gsmon:IO: <= GPS: $GPVTG,,T,,M,0.238,N,0.442,K,A*28
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGGA,232445.00,4404.13390,N,12118.85582,W,1,10,0.88,1132.6,M,-21.4,M,,*51
+gsmon:DATA: GPGGA: registers fractional time 232445.00
+gsmon:DATA: GGA: hhmmss=232445.00 lat=44.07 lon=-121.31 alt=1132.60 mode=3 status=1
+gsmon:DATA: GPGGA time is 1422919485.000000 = 2015-02-02T23:24:45.00Z
+gsmon:PROG: GPGGA sentence timestamped 232445.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|ALTITUDE|STATUS|MODE|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGSA,A,3,03,23,32,20,16,31,09,06,10,07,,,1.53,0.88,1.26*0D
+gsmon:PROG: GPGSA sets mode 3
+gsmon:DATA: GPGSA: mode=3 used=10 pdop=1.53 hdop=0.88 vdop=1.26
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|MODE|DOP|PACKET|USED}
+gsmon:IO: <= GPS: $GPGSV,3,1,12,02,03,332,,03,56,181,27,06,18,293,32,07,22,236,23*71
+gsmon:PROG: Partial satellite data (1 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,2,12,08,43,049,,09,42,296,34,10,15,315,30,16,47,117,30*7D
+gsmon:PROG: Partial satellite data (2 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,3,12,20,49,291,37,23,73,325,32,31,11,053,21,32,21,152,26*7C
+gsmon:DATA: GSV: Satellite data OK (3 of 3).
+gsmon:INFO: Sats used (10):
+gsmon:INFO: PRN=  3 az=181 el=56 (-0.009759, -0.559108, 0.829038)
+gsmon:INFO: PRN=  6 az=293 el=18 (-0.875452, 0.371607, 0.309017)
+gsmon:INFO: PRN=  7 az=236 el=22 (-0.768670, -0.518475, 0.374607)
+gsmon:INFO: PRN=  9 az=296 el=42 (-0.667934, 0.325773, 0.669131)
+gsmon:INFO: PRN= 10 az=315 el=15 (-0.683013, 0.683013, 0.258819)
+gsmon:INFO: PRN= 16 az=117 el=47 (0.607665, -0.309621, 0.731354)
+gsmon:INFO: PRN= 20 az=291 el=49 (-0.612484, 0.235111, 0.754710)
+gsmon:INFO: PRN= 23 az=325 el=73 (-0.167698, 0.239497, 0.956305)
+gsmon:INFO: PRN= 31 az= 53 el=11 (0.783962, 0.590758, 0.190809)
+gsmon:INFO: PRN= 32 az=152 el=21 (0.438289, -0.824303, 0.358368)
+gsmon:DATA: DOPS computed/reported: X=0.560690/nan, Y=0.672723/nan, H=0.875745/0.880000, V=1.252357/1.260000, P=1.528178/1.530000, T=0.754544/nan, G=1.704308/nan
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|DOP|SATELLITE|PACKET}
+gsmon:IO: <= GPS: $GPGLL,4404.13390,N,12118.85582,W,232445.00,A,A*78
+gsmon:DATA: GPGLL: registers fractional time 232445.00
+gsmon:DATA: GLL: hhmmss=232445.00 lat=44.07 lon=-121.31 mode=2 status=1
+gsmon:DATA: GPGLL time is 1422919485.000000 = 2015-02-02T23:24:45.00Z
+gsmon:PROG: GPGLL sentence timestamped 232445.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|STATUS|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGST,232445.00,31,,,,7.8,5.0,4.2*5F
+gsmon:DATA: GPGST: registers fractional time 232445.00
+gsmon:DATA: GST: utc = 232445.00, rms = 31.00, maj = nan, min = nan, ori = nan, lat = 7.80, lon = 5.00, alt = 4.20
+gsmon:PROG: GPGST sentence timestamped 232445.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET|GST}
+gsmon:IO: <= GPS: $GPZDA,232445.00,02,02,2015,00,00*66
+gsmon:DATA: GPZDA time is 1422919485.000000 = 2015-02-02T23:24:45.00Z
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGBS,232445.00,7.8,5.0,4.2,,,,*4B
+gsmon:DATA: GPGBS: registers fractional time 232445.00
+gsmon:DATA: GBS: epx=5.00 epy=7.80 epv=4.20
+gsmon:PROG: GPGBS sentence timestamped 232445.00.
+gsmon:PROG: GPGBS ends a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|HERR|VERR|PACKET|REPORT}
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 0, cycle: 1000040 uSec, duration:  900087 uSec @ 1422919486.000810711
+gsmon:INFO: PPS hooks called with gpsmon 1422919486.000810711 offset 9223372035431856128.000000000
+gsmon:PROG: PPS edge gpsmon 1422919486.000810711 offset 9223372035431856128.000000000
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 1, cycle:  999977 uSec, duration:   99890 uSec @ 1422919486.100700848
+gsmon:IO: <= GPS: $GPRMC,232446.00,A,4404.13397,N,12118.85573,W,0.112,,020215,,,A*6D
+gsmon:DATA: merge_ddmmyy(020215) sets year 2015
+gsmon:DATA: GPRMC: registers fractional time 232446.00
+gsmon:DATA: RMC: ddmmyy=020215 hhmmss=232446.00 lat=44.07 lon=-121.31 speed=0.06 track=0.00 mode=2 status=1
+gsmon:DATA: GPRMC time is 1422919486.000000 = 2015-02-02T23:24:46.00Z
+gsmon:PROG: GPRMC sentence timestamped 232446.00.
+gsmon:PROG: GPRMC starts a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|SPEED|TRACK|MODE|PACKET|CLEAR|PPSTIME}
+gsmon:IO: <= GPS: $GPVTG,,T,,M,0.112,N,0.208,K,A*2B
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGGA,232446.00,4404.13397,N,12118.85573,W,1,10,0.88,1132.6,M,-21.4,M,,*5B
+gsmon:DATA: GPGGA: registers fractional time 232446.00
+gsmon:DATA: GGA: hhmmss=232446.00 lat=44.07 lon=-121.31 alt=1132.60 mode=3 status=1
+gsmon:DATA: GPGGA time is 1422919486.000000 = 2015-02-02T23:24:46.00Z
+gsmon:PROG: GPGGA sentence timestamped 232446.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|ALTITUDE|STATUS|MODE|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGSA,A,3,03,23,32,20,16,31,09,06,10,07,,,1.53,0.88,1.26*0D
+gsmon:PROG: GPGSA sets mode 3
+gsmon:DATA: GPGSA: mode=3 used=10 pdop=1.53 hdop=0.88 vdop=1.26
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|MODE|DOP|PACKET|USED}
+gsmon:IO: <= GPS: $GPGSV,3,1,12,02,03,332,,03,56,181,27,06,18,293,32,07,22,236,23*71
+gsmon:PROG: Partial satellite data (1 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,2,12,08,43,049,,09,42,296,35,10,15,315,31,16,47,117,30*7D
+gsmon:PROG: Partial satellite data (2 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,3,12,20,49,291,37,23,73,325,32,31,11,053,20,32,21,152,26*7D
+gsmon:DATA: GSV: Satellite data OK (3 of 3).
+gsmon:INFO: Sats used (10):
+gsmon:INFO: PRN=  3 az=181 el=56 (-0.009759, -0.559108, 0.829038)
+gsmon:INFO: PRN=  6 az=293 el=18 (-0.875452, 0.371607, 0.309017)
+gsmon:INFO: PRN=  7 az=236 el=22 (-0.768670, -0.518475, 0.374607)
+gsmon:INFO: PRN=  9 az=296 el=42 (-0.667934, 0.325773, 0.669131)
+gsmon:INFO: PRN= 10 az=315 el=15 (-0.683013, 0.683013, 0.258819)
+gsmon:INFO: PRN= 16 az=117 el=47 (0.607665, -0.309621, 0.731354)
+gsmon:INFO: PRN= 20 az=291 el=49 (-0.612484, 0.235111, 0.754710)
+gsmon:INFO: PRN= 23 az=325 el=73 (-0.167698, 0.239497, 0.956305)
+gsmon:INFO: PRN= 31 az= 53 el=11 (0.783962, 0.590758, 0.190809)
+gsmon:INFO: PRN= 32 az=152 el=21 (0.438289, -0.824303, 0.358368)
+gsmon:DATA: DOPS computed/reported: X=0.560690/0.560690, Y=0.672723/0.672723, H=0.875745/0.880000, V=1.252357/1.260000, P=1.528178/1.530000, T=0.754544/0.754544, G=1.704308/1.704308
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|DOP|SATELLITE|PACKET}
+gsmon:IO: <= GPS: $GPGLL,4404.13397,N,12118.85573,W,232446.00,A,A*72
+gsmon:DATA: GPGLL: registers fractional time 232446.00
+gsmon:DATA: GLL: hhmmss=232446.00 lat=44.07 lon=-121.31 mode=2 status=1
+gsmon:DATA: GPGLL time is 1422919486.000000 = 2015-02-02T23:24:46.00Z
+gsmon:PROG: GPGLL sentence timestamped 232446.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|STATUS|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGST,232446.00,31,,,,7.8,5.1,4.2*5D
+gsmon:DATA: GPGST: registers fractional time 232446.00
+gsmon:DATA: GST: utc = 232446.00, rms = 31.00, maj = nan, min = nan, ori = nan, lat = 7.80, lon = 5.10, alt = 4.20
+gsmon:PROG: GPGST sentence timestamped 232446.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET|GST}
+gsmon:IO: <= GPS: $GPZDA,232446.00,02,02,2015,00,00*65
+gsmon:DATA: GPZDA time is 1422919486.000000 = 2015-02-02T23:24:46.00Z
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGBS,232446.00,7.8,5.1,4.2,,,,*49
+gsmon:DATA: GPGBS: registers fractional time 232446.00
+gsmon:DATA: GBS: epx=5.10 epy=7.80 epv=4.20
+gsmon:PROG: GPGBS sentence timestamped 232446.00.
+gsmon:PROG: GPGBS ends a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|HERR|VERR|PACKET|REPORT}
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 0, cycle:  999968 uSec, duration:  900078 uSec @ 1422919487.000779311
+gsmon:INFO: PPS hooks called with gpsmon 1422919487.000779311 offset 9223372035431856128.000000000
+gsmon:PROG: PPS edge gpsmon 1422919487.000779311 offset 9223372035431856128.000000000
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 1, cycle: 1000069 uSec, duration:   99991 uSec @ 1422919487.100770339
+gsmon:IO: <= GPS: $GPRMC,232447.00,A,4404.13405,N,12118.85558,W,0.168,,020215,,,A*64
+gsmon:DATA: merge_ddmmyy(020215) sets year 2015
+gsmon:DATA: GPRMC: registers fractional time 232447.00
+gsmon:DATA: RMC: ddmmyy=020215 hhmmss=232447.00 lat=44.07 lon=-121.31 speed=0.09 track=0.00 mode=2 status=1
+gsmon:DATA: GPRMC time is 1422919487.000000 = 2015-02-02T23:24:47.00Z
+gsmon:PROG: GPRMC sentence timestamped 232447.00.
+gsmon:PROG: GPRMC starts a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|SPEED|TRACK|MODE|PACKET|CLEAR|PPSTIME}
+gsmon:IO: <= GPS: $GPVTG,,T,,M,0.168,N,0.311,K,A*2F
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGGA,232447.00,4404.13405,N,12118.85558,W,1,10,0.88,1132.7,M,-21.4,M,,*5E
+gsmon:DATA: GPGGA: registers fractional time 232447.00
+gsmon:DATA: GGA: hhmmss=232447.00 lat=44.07 lon=-121.31 alt=1132.70 mode=3 status=1
+gsmon:DATA: GPGGA time is 1422919487.000000 = 2015-02-02T23:24:47.00Z
+gsmon:PROG: GPGGA sentence timestamped 232447.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|ALTITUDE|STATUS|MODE|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGSA,A,3,03,23,32,20,16,31,09,06,10,07,,,1.53,0.88,1.26*0D
+gsmon:PROG: GPGSA sets mode 3
+gsmon:DATA: GPGSA: mode=3 used=10 pdop=1.53 hdop=0.88 vdop=1.26
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|MODE|DOP|PACKET|USED}
+gsmon:IO: <= GPS: $GPGSV,3,1,12,02,03,332,,03,56,181,26,06,18,293,32,07,22,236,22*71
+gsmon:PROG: Partial satellite data (1 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,2,12,08,43,049,,09,42,296,34,10,15,315,30,16,47,117,31*7C
+gsmon:PROG: Partial satellite data (2 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,3,12,20,49,291,38,23,73,325,33,31,11,053,20,32,21,152,27*72
+gsmon:DATA: GSV: Satellite data OK (3 of 3).
+gsmon:INFO: Sats used (10):
+gsmon:INFO: PRN=  3 az=181 el=56 (-0.009759, -0.559108, 0.829038)
+gsmon:INFO: PRN=  6 az=293 el=18 (-0.875452, 0.371607, 0.309017)
+gsmon:INFO: PRN=  7 az=236 el=22 (-0.768670, -0.518475, 0.374607)
+gsmon:INFO: PRN=  9 az=296 el=42 (-0.667934, 0.325773, 0.669131)
+gsmon:INFO: PRN= 10 az=315 el=15 (-0.683013, 0.683013, 0.258819)
+gsmon:INFO: PRN= 16 az=117 el=47 (0.607665, -0.309621, 0.731354)
+gsmon:INFO: PRN= 20 az=291 el=49 (-0.612484, 0.235111, 0.754710)
+gsmon:INFO: PRN= 23 az=325 el=73 (-0.167698, 0.239497, 0.956305)
+gsmon:INFO: PRN= 31 az= 53 el=11 (0.783962, 0.590758, 0.190809)
+gsmon:INFO: PRN= 32 az=152 el=21 (0.438289, -0.824303, 0.358368)
+gsmon:DATA: DOPS computed/reported: X=0.560690/0.560690, Y=0.672723/0.672723, H=0.875745/0.880000, V=1.252357/1.260000, P=1.528178/1.530000, T=0.754544/0.754544, G=1.704308/1.704308
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|DOP|SATELLITE|PACKET}
+gsmon:IO: <= GPS: $GPGLL,4404.13405,N,12118.85558,W,232447.00,A,A*76
+gsmon:DATA: GPGLL: registers fractional time 232447.00
+gsmon:DATA: GLL: hhmmss=232447.00 lat=44.07 lon=-121.31 mode=2 status=1
+gsmon:DATA: GPGLL time is 1422919487.000000 = 2015-02-02T23:24:47.00Z
+gsmon:PROG: GPGLL sentence timestamped 232447.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|STATUS|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGST,232447.00,32,,,,7.7,5.1,4.2*50
+gsmon:DATA: GPGST: registers fractional time 232447.00
+gsmon:DATA: GST: utc = 232447.00, rms = 32.00, maj = nan, min = nan, ori = nan, lat = 7.70, lon = 5.10, alt = 4.20
+gsmon:PROG: GPGST sentence timestamped 232447.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET|GST}
+gsmon:IO: <= GPS: $GPZDA,232447.00,02,02,2015,00,00*64
+gsmon:DATA: GPZDA time is 1422919487.000000 = 2015-02-02T23:24:47.00Z
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGBS,232447.00,7.7,5.1,4.2,,,,*47
+gsmon:DATA: GPGBS: registers fractional time 232447.00
+gsmon:DATA: GBS: epx=5.10 epy=7.70 epv=4.20
+gsmon:PROG: GPGBS sentence timestamped 232447.00.
+gsmon:PROG: GPGBS ends a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|HERR|VERR|PACKET|REPORT}
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 0, cycle: 1000010 uSec, duration:  900019 uSec @ 1422919488.000790034
+gsmon:INFO: PPS hooks called with gpsmon 1422919488.000790034 offset 9223372035431856128.000000000
+gsmon:PROG: PPS edge gpsmon 1422919488.000790034 offset 9223372035431856128.000000000
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 1, cycle: 1000010 uSec, duration:   99990 uSec @ 1422919488.100780828
+gsmon:IO: <= GPS: $GPRMC,232448.00,A,4404.13416,N,12118.85555,W,0.089,,020215,,,A*6A
+gsmon:DATA: merge_ddmmyy(020215) sets year 2015
+gsmon:DATA: GPRMC: registers fractional time 232448.00
+gsmon:DATA: RMC: ddmmyy=020215 hhmmss=232448.00 lat=44.07 lon=-121.31 speed=0.05 track=0.00 mode=2 status=1
+gsmon:DATA: GPRMC time is 1422919488.000000 = 2015-02-02T23:24:48.00Z
+gsmon:PROG: GPRMC sentence timestamped 232448.00.
+gsmon:PROG: GPRMC starts a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|SPEED|TRACK|MODE|PACKET|CLEAR|PPSTIME}
+gsmon:IO: <= GPS: $GPVTG,,T,,M,0.089,N,0.165,K,A*20
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGGA,232448.00,4404.13416,N,12118.85555,W,1,10,0.88,1132.7,M,-21.4,M,,*5E
+gsmon:DATA: GPGGA: registers fractional time 232448.00
+gsmon:DATA: GGA: hhmmss=232448.00 lat=44.07 lon=-121.31 alt=1132.70 mode=3 status=1
+gsmon:DATA: GPGGA time is 1422919488.000000 = 2015-02-02T23:24:48.00Z
+gsmon:PROG: GPGGA sentence timestamped 232448.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|ALTITUDE|STATUS|MODE|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGSA,A,3,03,23,32,20,16,31,09,06,10,07,,,1.53,0.88,1.26*0D
+gsmon:PROG: GPGSA sets mode 3
+gsmon:DATA: GPGSA: mode=3 used=10 pdop=1.53 hdop=0.88 vdop=1.26
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|MODE|DOP|PACKET|USED}
+gsmon:IO: <= GPS: $GPGSV,3,1,12,02,03,332,,03,56,181,26,06,18,293,32,07,22,236,22*71
+gsmon:PROG: Partial satellite data (1 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,2,12,08,43,049,,09,42,296,34,10,15,315,31,16,47,117,32*7E
+gsmon:PROG: Partial satellite data (2 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,3,12,20,49,291,37,23,73,325,32,31,11,053,19,32,21,152,26*77
+gsmon:DATA: GSV: Satellite data OK (3 of 3).
+gsmon:INFO: Sats used (10):
+gsmon:INFO: PRN=  3 az=181 el=56 (-0.009759, -0.559108, 0.829038)
+gsmon:INFO: PRN=  6 az=293 el=18 (-0.875452, 0.371607, 0.309017)
+gsmon:INFO: PRN=  7 az=236 el=22 (-0.768670, -0.518475, 0.374607)
+gsmon:INFO: PRN=  9 az=296 el=42 (-0.667934, 0.325773, 0.669131)
+gsmon:INFO: PRN= 10 az=315 el=15 (-0.683013, 0.683013, 0.258819)
+gsmon:INFO: PRN= 16 az=117 el=47 (0.607665, -0.309621, 0.731354)
+gsmon:INFO: PRN= 20 az=291 el=49 (-0.612484, 0.235111, 0.754710)
+gsmon:INFO: PRN= 23 az=325 el=73 (-0.167698, 0.239497, 0.956305)
+gsmon:INFO: PRN= 31 az= 53 el=11 (0.783962, 0.590758, 0.190809)
+gsmon:INFO: PRN= 32 az=152 el=21 (0.438289, -0.824303, 0.358368)
+gsmon:DATA: DOPS computed/reported: X=0.560690/0.560690, Y=0.672723/0.672723, H=0.875745/0.880000, V=1.252357/1.260000, P=1.528178/1.530000, T=0.754544/0.754544, G=1.704308/1.704308
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|DOP|SATELLITE|PACKET}
+gsmon:IO: <= GPS: $GPGLL,4404.13416,N,12118.85555,W,232448.00,A,A*76
+gsmon:DATA: GPGLL: registers fractional time 232448.00
+gsmon:DATA: GLL: hhmmss=232448.00 lat=44.07 lon=-121.31 mode=2 status=1
+gsmon:DATA: GPGLL time is 1422919488.000000 = 2015-02-02T23:24:48.00Z
+gsmon:PROG: GPGLL sentence timestamped 232448.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|STATUS|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGST,232448.00,32,,,,7.6,5.1,4.2*5E
+gsmon:DATA: GPGST: registers fractional time 232448.00
+gsmon:DATA: GST: utc = 232448.00, rms = 32.00, maj = nan, min = nan, ori = nan, lat = 7.60, lon = 5.10, alt = 4.20
+gsmon:PROG: GPGST sentence timestamped 232448.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET|GST}
+gsmon:IO: <= GPS: $GPZDA,232448.00,02,02,2015,00,00*6B
+gsmon:DATA: GPZDA time is 1422919488.000000 = 2015-02-02T23:24:48.00Z
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGBS,232448.00,7.6,5.1,4.2,,,,*49
+gsmon:DATA: GPGBS: registers fractional time 232448.00
+gsmon:DATA: GBS: epx=5.10 epy=7.60 epv=4.20
+gsmon:PROG: GPGBS sentence timestamped 232448.00.
+gsmon:PROG: GPGBS ends a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|HERR|VERR|PACKET|REPORT}
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 0, cycle: 1000018 uSec, duration:  900028 uSec @ 1422919489.000808926
+gsmon:INFO: PPS hooks called with gpsmon 1422919489.000808926 offset 9223372035431856128.000000000
+gsmon:PROG: PPS edge gpsmon 1422919489.000808926 offset 9223372035431856128.000000000
+gsmon:PROG: PPS ioctl(TIOCMIWAIT) on /dev/gps0 succeeded
+gsmon:PROG: PPS edge: 1, cycle: 1000232 uSec, duration:  100204 uSec @ 1422919489.101013618
+gsmon:IO: <= GPS: $GPRMC,232449.00,A,4404.13425,N,12118.85546,W,0.388,,020215,,,A*6B
+gsmon:DATA: merge_ddmmyy(020215) sets year 2015
+gsmon:DATA: GPRMC: registers fractional time 232449.00
+gsmon:DATA: RMC: ddmmyy=020215 hhmmss=232449.00 lat=44.07 lon=-121.31 speed=0.20 track=0.00 mode=2 status=1
+gsmon:DATA: GPRMC time is 1422919489.000000 = 2015-02-02T23:24:49.00Z
+gsmon:PROG: GPRMC sentence timestamped 232449.00.
+gsmon:PROG: GPRMC starts a reporting cycle.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|SPEED|TRACK|MODE|PACKET|CLEAR|PPSTIME}
+gsmon:IO: <= GPS: $GPVTG,,T,,M,0.388,N,0.719,K,A*2F
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGGA,232449.00,4404.13425,N,12118.85546,W,1,10,0.88,1132.7,M,-21.4,M,,*5D
+gsmon:DATA: GPGGA: registers fractional time 232449.00
+gsmon:DATA: GGA: hhmmss=232449.00 lat=44.07 lon=-121.31 alt=1132.70 mode=3 status=1
+gsmon:DATA: GPGGA time is 1422919489.000000 = 2015-02-02T23:24:49.00Z
+gsmon:PROG: GPGGA sentence timestamped 232449.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|ALTITUDE|STATUS|MODE|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGSA,A,3,03,23,32,20,16,31,09,06,10,07,,,1.53,0.88,1.26*0D
+gsmon:PROG: GPGSA sets mode 3
+gsmon:DATA: GPGSA: mode=3 used=10 pdop=1.53 hdop=0.88 vdop=1.26
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|MODE|DOP|PACKET|USED}
+gsmon:IO: <= GPS: $GPGSV,3,1,12,02,03,332,,03,56,181,26,06,18,293,32,07,22,236,22*71
+gsmon:PROG: Partial satellite data (1 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,2,12,08,43,049,,09,42,296,35,10,15,315,31,16,47,117,32*7F
+gsmon:PROG: Partial satellite data (2 of 3).
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET}
+gsmon:IO: <= GPS: $GPGSV,3,3,12,20,49,291,38,23,73,325,32,31,11,053,20,32,21,152,26*72
+gsmon:DATA: GSV: Satellite data OK (3 of 3).
+gsmon:INFO: Sats used (10):
+gsmon:INFO: PRN=  3 az=181 el=56 (-0.009759, -0.559108, 0.829038)
+gsmon:INFO: PRN=  6 az=293 el=18 (-0.875452, 0.371607, 0.309017)
+gsmon:INFO: PRN=  7 az=236 el=22 (-0.768670, -0.518475, 0.374607)
+gsmon:INFO: PRN=  9 az=296 el=42 (-0.667934, 0.325773, 0.669131)
+gsmon:INFO: PRN= 10 az=315 el=15 (-0.683013, 0.683013, 0.258819)
+gsmon:INFO: PRN= 16 az=117 el=47 (0.607665, -0.309621, 0.731354)
+gsmon:INFO: PRN= 20 az=291 el=49 (-0.612484, 0.235111, 0.754710)
+gsmon:INFO: PRN= 23 az=325 el=73 (-0.167698, 0.239497, 0.956305)
+gsmon:INFO: PRN= 31 az= 53 el=11 (0.783962, 0.590758, 0.190809)
+gsmon:INFO: PRN= 32 az=152 el=21 (0.438289, -0.824303, 0.358368)
+gsmon:DATA: DOPS computed/reported: X=0.560690/0.560690, Y=0.672723/0.672723, H=0.875745/0.880000, V=1.252357/1.260000, P=1.528178/1.530000, T=0.754544/0.754544, G=1.704308/1.704308
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|DOP|SATELLITE|PACKET}
+gsmon:IO: <= GPS: $GPGLL,4404.13425,N,12118.85546,W,232449.00,A,A*75
+gsmon:DATA: GPGLL: registers fractional time 232449.00
+gsmon:DATA: GLL: hhmmss=232449.00 lat=44.07 lon=-121.31 mode=2 status=1
+gsmon:DATA: GPGLL time is 1422919489.000000 = 2015-02-02T23:24:49.00Z
+gsmon:PROG: GPGLL sentence timestamped 232449.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|LATLON|STATUS|PACKET|PPSTIME}
+gsmon:IO: <= GPS: $GPGST,232449.00,32,,,,7.6,5.1,4.3*5E
+gsmon:DATA: GPGST: registers fractional time 232449.00
+gsmon:DATA: GST: utc = 232449.00, rms = 32.00, maj = nan, min = nan, ori = nan, lat = 7.60, lon = 5.10, alt = 4.30
+gsmon:PROG: GPGST sentence timestamped 232449.00.
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|PACKET|GST}
+gsmon:IO: <= GPS: $GPZDA,232449.00,02,02,2015,00,00*6A
+gsmon:DATA: GPZDA time is 1422919489.000000 = 2015-02-02T23:24:49.00Z
+gsmon:DATA: packet type 1 from /dev/gps0 with {ONLINE|TIME|PACKET|PPSTIME}
