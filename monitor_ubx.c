@@ -265,7 +265,7 @@ static void ubx_update(void)
             /* need a bigger field to show it */
 	    (void)mvwprintw(ppswin, 1, 13, "> 1 day");
         } else {
-	    (void)mvwprintw(ppswin, 1, 13, "%ld.09ld",
+	    (void)mvwprintw(ppswin, 1, 13, "%ld.%09ld",
 			      (long)timedelta.tv_sec,
                               (long)timedelta.tv_nsec);
         }

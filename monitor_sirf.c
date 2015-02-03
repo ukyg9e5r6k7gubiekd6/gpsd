@@ -598,7 +598,7 @@ static void sirf_update(void)
             /* need a bigger field to show it */
 	    (void)mvwprintw(mid7win, 2, 39, "> 1 day");
         } else {
-	    (void)mvwprintw(mid7win, 4, 39, "%ld.09ld",
+	    (void)mvwprintw(mid7win, 4, 39, "%ld.%09ld",
 				  (long)timedelta.tv_sec,
 				  (long)timedelta.tv_nsec);
         }

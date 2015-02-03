@@ -334,7 +334,7 @@ static void nmea_update(void)
             /* need a bigger field to show it */
 	    (void)mvwprintw(gpgsawin, 4, 13, "> 1 day");
         } else {
-	    (void)mvwprintw(gpgsawin, 4, 13, "%ld.09ld",
+	    (void)mvwprintw(gpgsawin, 4, 13, "%ld.%09ld",
 				  (long)timedelta.tv_sec,
 				  (long)timedelta.tv_nsec);
         }
