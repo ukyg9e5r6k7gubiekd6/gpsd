@@ -671,11 +671,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@+compdef@*/
 		/*@-type@*/ /* splint is confused about struct timespec */
 		gpsd_report(&session->context->errout, LOG_INF,
-			    "PPS hooks called with %.20s %lu.%09lu offset %.9f\n",
+			    "PPS hooks called with %.20s clock: %lu.%09ld real: %lu.%09ld\n",
 			    log1,
-			    (unsigned long)clock_ts.tv_sec,
-			    (unsigned long)clock_ts.tv_nsec,
-			    offset);
+			    (unsigned long)drift.clock.tv_sec,
+			    (long)drift.clock.tv_nsec,
+			    (unsigned long)drift.real.tv_sec,
+			    (long)drift.real.tv_nsec);
 		/*@+type@*/
             }
 	    /*@-type@*/ /* splint is confused about struct timespec */
