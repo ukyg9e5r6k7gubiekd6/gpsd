@@ -93,8 +93,11 @@ import packet as sniffer
 
 # Field reports on minima:
 #
-# Eric Raymond runningLinux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
+# Eric Raymond running Linux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Works, 462sec
+#
+# Michael Tatarinov running Linux-3.18.5+-armv6l-with-debian-7.8 on a Raspberry Pi Model B:
+# WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0      Works, 343sec
 #
 # Frank Nicholas, Mac OS X, 10.10 (Yosemite), MacBook Pro, Intel Core i7-4850H
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Fails
@@ -102,10 +105,6 @@ import packet as sniffer
 #
 # Those below have not been updated since we switched to using blocking I/O,
 # for gpsd's ttys, which increases the required delays. 
-#
-# Michael Tatarinov running ?? on a Raspberry Pi:
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05    Works, 344s real
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Fails, 339s real
 #
 # Hal Murray running NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.4    Works, takes 688.69s real
