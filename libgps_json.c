@@ -378,10 +378,10 @@ int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
      */
     /*@-usedef@*/
     /*@-type@*//* splint is confused about struct timespec */
-    gpsdata->timedrift.real.tv_sec = (long)real_sec;
-    gpsdata->timedrift.real.tv_nsec = (time_t)real_nsec;
-    gpsdata->timedrift.clock.tv_sec = (long)clock_sec;
-    gpsdata->timedrift.clock.tv_nsec = (time_t)clock_nsec;
+    gpsdata->timedrift.real.tv_sec = (time_t)real_sec;
+    gpsdata->timedrift.real.tv_nsec = (long)real_nsec;
+    gpsdata->timedrift.clock.tv_sec = (time_t)clock_sec;
+    gpsdata->timedrift.clock.tv_nsec = (long)clock_nsec;
     /*@+type@*/
     /*@+usedef@*/
     if (status != 0)
