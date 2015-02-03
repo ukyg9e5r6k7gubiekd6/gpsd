@@ -132,6 +132,9 @@ import packet as sniffer
 #  WRITE_PAD = 0.100 / CLOSE_DELAY = 8.0 had 7/89 failures (3539s)
 #  WRITE_PAD = 0.200 / CLOSE_DELAY = 8.0 all tests passed (6456s)
 #  WRITE_PAD = 0.200 / CLOSE_DELAY = 0.8 all tests passed (6310s)
+# >= release-3.11-344-gef39b1c
+#  WRITE_PAD = 0.100 / CLOSE_DELAY = 0.8 had 1/89 failures (3385s)
+#  WRITE_PAD = 0.200 / CLOSE_DELAY = 0.8 all tests passed (6315s)
 #
 # Greg Troxel running OS X 10.9 on a Core i7 (2 cpus) 1.7 GHz.
 # >= release-3.11-344-gef39b1c
