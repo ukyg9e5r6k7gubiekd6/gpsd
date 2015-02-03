@@ -93,22 +93,18 @@ import packet as sniffer
 
 # Field reports on minima:
 #
-# Eric Raymond running Linux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
+# Eric Raymond, Linux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Works, 462sec
 #
-# Michael Tatarinov running Linux-3.18.5+-armv6l-with-debian-7.8 on a Raspberry Pi Model B:
-# WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0      Works, 343sec
+# Michael Tatarinov, Linux-3.18.5+-armv6l-with-debian-7.8 on a RasPi Model B:
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Works, 343sec
 #
 # Frank Nicholas, Mac OS X, 10.10 (Yosemite), MacBook Pro, Intel Core i7-4850H
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Fails
 #  WRITE_PAD = 0.03 / CLOSE_DELAY = 2      Works, 1200sec
 #
-# Those below have not been updated since we switched to using blocking I/O,
-# for gpsd's ttys, which increases the required delays. 
-#
-# Hal Murray running NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.4    Works, takes 688.69s real
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.3    Fails tcp-torture.log, 677.53s real
+# Jon Schleuter, Linux-3.17.7-gentoo-i686-Intel i7-4770 @ 3.4 GHz
+#  WRITE_PAD = 0.00000 / CLOSE_DELAY = 0.1 Works, 106sec
 #
 # Greg Troxel running NetBSD 6 on a Core i5 (i386, 4 cpus) 2.90GHz.
 # >= release-3.11-344-gef39b1c
@@ -118,6 +114,13 @@ import packet as sniffer
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 8.0 all tests passed (920s)
 #  WRITE_PAD = 0.001 / CLOSE_DELAY = 8.0 10/89 failures (951s)
 #  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed (734s)
+#
+# Those below have not been updated since we switched to using blocking I/O,
+# for gpsd's ttys, which increases the required delays. 
+#
+# Hal Murray running NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.4    Works, takes 688.69s real
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.3    Fails tcp-torture.log, 677.53s real
 #
 # Greg Troxel running NetBSD 5 on a Core 2 Duo E8500 (amd64, 2 cpus) 3.167GHz.
 #  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 had 7/89 failures (730s)
