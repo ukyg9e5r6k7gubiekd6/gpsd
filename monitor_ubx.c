@@ -3,6 +3,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include <math.h>
+#include <stdlib.h> /* for labs() */
 #include <time.h>
 
 #include "gpsd.h"
@@ -259,15 +260,20 @@ static void ubx_update(void)
     if (pps_thread_lastpps(&session, &drift) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
-	TS_SUB( &timedelta, &drift.real, &drift.clock);
-        if ( 86400 < (long)timedelta.tv_sec ) {
+        int sign = ' ';
+	TS_SUB( &timedelta, &drift.clock, &drift.real);
+        if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
 	    (void)mvwprintw(ppswin, 1, 13, "> 1 day");
         } else {
-	    (void)mvwprintw(ppswin, 1, 13, "%ld.%09ld",
+	    if ( 0 > timedelta.tv_nsec ) {
+		sign = '-';
+	    }
+	    (void)mvwprintw(ppswin, 1, 13, "%c%ld.%09ld",
+		              sign,
 			      (long)timedelta.tv_sec,
-                              (long)timedelta.tv_nsec);
+                              (long)labs(timedelta.tv_nsec));
         }
 	(void)wnoutrefresh(ppswin);
     }
