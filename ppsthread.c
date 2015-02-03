@@ -372,6 +372,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			"PPS last_fixtime_real is NAN\n");
 	    /* this should never happen, but it does. */
             last_fixtime_real = 0.0;
+	    session->last_fixtime.real = 0.0;
         }
 
 
