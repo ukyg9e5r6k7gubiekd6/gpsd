@@ -680,13 +680,13 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
 	    if (!curses_active)
 		(void)fprintf(stderr,
-			      "Drift clock=%lu.%09lu clock=%lu.%09lu offset=%ld.%09lu\n",
-			      (unsigned long)noclobber.timedrift.clock.tv_sec,
-			      (unsigned long)noclobber.timedrift.clock.tv_nsec,
-			      (unsigned long)noclobber.timedrift.real.tv_sec,
-			      (unsigned long)noclobber.timedrift.real.tv_nsec,
+			      "Drift clock=%ld.%09ld clock=%ld.%09ld offset=%ld.%09ld\n",
+			      (long)noclobber.timedrift.clock.tv_sec,
+			      (long)noclobber.timedrift.clock.tv_nsec,
+			      (long)noclobber.timedrift.real.tv_sec,
+			      (long)noclobber.timedrift.real.tv_nsec,
 			      (long)timedelta.tv_sec,
-                              (unsigned long)timedelta.tv_nsec);
+                              (long)timedelta.tv_nsec);
 	    /*@+type@*/
 
 	    (void)strlcpy(buf, PPSBAR, sizeof(buf));
