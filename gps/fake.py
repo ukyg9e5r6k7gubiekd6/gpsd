@@ -96,6 +96,10 @@ import packet as sniffer
 # Eric Raymond runningLinux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Works, 462sec
 #
+# Frank Nicholas, Mac OS X, 10.10 (Yosemite), MacBook Pro, Intel Core i7-4850H
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Fails
+#  WRITE_PAD = 0.03 / CLOSE_DELAY = 2      Works, 1200sec
+#
 # Those below have not been updated since we switched to using blocking I/O,
 # for gpsd's ttys, which increases the required delays. 
 #
