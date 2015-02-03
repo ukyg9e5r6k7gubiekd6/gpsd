@@ -745,6 +745,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
 #ifdef NTPSHM_ENABLE
     /* Update the last fix time seen for PPS. */
+    /* FIXME! ntpshm_latch() need device->newdata.time to be set */
     ntpshm_latch(device, &td);
 #endif /* NTPSHM_ENABLE */
 }

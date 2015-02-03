@@ -1679,11 +1679,11 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     (void)gettimeofday(&clock_tv, NULL);
     TVTOTS(&td->clock, &clock_tv);
 #endif /* HAVE_CLOCK_GETTIME */
+    fix_time = device->newdata.time;
     if ( isnan( device->newdata.time ) ) {
 	/* this should not happen, but it does */
-        device->newdata.time = 0.0;
+        fix_time = 0.0;
     }
-    fix_time = device->newdata.time;
     /* assume zero when there's no offset method */
     if (device->device_type == NULL
 	|| device->device_type->time_offset == NULL)
