@@ -1166,9 +1166,6 @@ int main(int argc, char **argv)
 
     gpsd_time_init(&context, time(NULL));
     gpsd_init(&session, &context, NULL);
-#if defined(PPS_ENABLE) 
-    pps_early_init( &context);
-#endif /* PPS_ENABLE */
 
     /* Grok the server, port, and device. */
     if (optind < argc) {
@@ -1206,6 +1203,9 @@ int main(int argc, char **argv)
 
     if (serial) {
 #ifdef PPS_ENABLE
+	/* init the pps mutex */
+	pps_early_init( &context);
+
 	/* this guard suppresses a warning on Bluetooth devices */
 	if (session.sourcetype == source_rs232 || session.sourcetype == source_usb) {
 	    session.thread_report_hook = pps_report;
