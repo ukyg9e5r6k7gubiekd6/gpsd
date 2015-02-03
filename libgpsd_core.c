@@ -323,6 +323,13 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 	       const char *device)
 /* initialize GPS polling */
 {
+    /* clear some times */
+    memset(&session->last_fixtime, 0, sizeof(session->last_fixtime));
+#ifdef PPS_ENABLE
+    memset(&session->ppslast, 0, sizeof(session->ppslast));
+    session->ppscount = 0;
+#endif /* PPS_ENABLE */
+
     /*@ -mayaliasunique @*/
     if (device != NULL)
 	(void)strlcpy(session->gpsdata.dev.path, device,
@@ -413,6 +420,12 @@ void gpsd_clear(struct gps_device_t *session)
 
     /* clear the private data union */
     memset(&session->driver, '\0', sizeof(session->driver));
+    /* clear some times */
+    memset(&session->last_fixtime, 0, sizeof(session->last_fixtime));
+#ifdef PPS_ENABLE
+    memset(&session->ppslast, 0, sizeof(session->ppslast));
+    session->ppscount = 0;
+#endif /* PPS_ENABLE */
 
     session->opentime = timestamp();
 }
