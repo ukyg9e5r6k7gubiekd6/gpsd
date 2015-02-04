@@ -116,6 +116,7 @@ import packet as sniffer
 #
 # Greg Troxel running NetBSD 5 on a Core 2 Duo E8500 (amd64, 2 cpus) 3.167GHz.
 #  WRITE_PAD = 0.100 / CLOSE_DELAY = 0.8 had 1/89 failures (3385s)
+#  WRITE_PAD = 0.150 / CLOSE_DELAY = 0.8 all tests passed (4844s)
 #  WRITE_PAD = 0.200 / CLOSE_DELAY = 0.8 all tests passed (6315s)
 #
 ## OS X
@@ -147,7 +148,7 @@ elif sys.platform.startswith("freebsd"):
     WRITE_PAD = 0.001
     CLOSE_DELAY = 0.4
 elif sys.platform.startswith("netbsd5"):
-    WRITE_PAD = 0.200
+    WRITE_PAD = 0.150
     CLOSE_DELAY = 0.8
 elif sys.platform.startswith("netbsd"):
     # netbsd6, netbsd7, and -current
