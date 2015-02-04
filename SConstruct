@@ -1552,9 +1552,12 @@ if not env['socket_export']:
     announce("GPS regression tests suppressed because socket_export is off.")
     gps_regress = None
 else:
-    # Regression-test the daemon
+    # Regression-test the daemon. But first:
+    # (1) Clear GPSD's SHM segment in case a previous abort didn't.  This
+    # prevents spurious error messages.
+    # (2) Dump the platform and its delay parameters.
     gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
-            '$SRCDIR/gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
+            'ipcrm shm 0x47505344 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
