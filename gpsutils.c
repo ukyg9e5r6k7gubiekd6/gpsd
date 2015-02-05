@@ -485,3 +485,22 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
 	return earth_distance_and_bearings(lat1, lon1, lat2, lon2, NULL, NULL);
 }
 
+/* Convert a normailized timespec to a nice string 
+ * put in it *buf, buf should be at least 22 bytes
+ * return negative for error
+ * otherwise the number of chars in buf, excluding trailing \0
+*/
+int timespec_str( struct timespec *ts, char *buf, int buf_size )
+{
+    int ret;
+    char sign = ' ';
+
+    if ( (0 > ts->tv_nsec ) || ( 0 > ts->tv_sec ) ) {
+	sign = '-';
+    }
+    ret = snprintf( buf, buf_size, "%c%ld.%09ld",
+			  sign,
+			  (long)labs(ts->tv_sec),
+			  (long)labs(ts->tv_nsec));
+    return ret;
+}

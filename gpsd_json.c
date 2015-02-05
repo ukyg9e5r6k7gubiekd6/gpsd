@@ -128,6 +128,7 @@ void json_tpv_dump(const struct gps_device_t *session,
 {
     const struct gps_data_t *gpsdata = &session->gpsdata;
 #ifdef TIMING_ENABLE
+    char ts_str[22];  /* buffer to hold printable timespec */
     timestamp_t rtime = timestamp();
 #endif /* TIMING_ENABLE */
 
@@ -189,10 +190,8 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    if (session->ppscount)
                 /* you can not use a double here as you will lose 11 bits
                  * of precision */
-		str_appendf(reply, replylen,
-			       "\"pps\":%ld.$09lu,", 
-			       session->ppslast.clock.tv_sec,
-			       session->ppslast.clock.tv_nsec);
+		(void)timespec_str( &session->ppslast.clock, ts_str, sizeof(ts_str) );
+		str_appendf(reply, replylen, "\"pps\":%s,", ts_str);
 	    /*@+type +formattype@*/
 #endif /* PPS_ENABLE */
 	    str_appendf(reply, replylen,

@@ -260,20 +260,15 @@ static void ubx_update(void)
     if (pps_thread_lastpps(&session, &drift) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
-        char sign = ' ';
+        char buf[22];
 	TS_SUB( &timedelta, &drift.clock, &drift.real);
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
 	    (void)mvwprintw(ppswin, 1, 13, "> 1 day");
         } else {
-	    if ( (0 > timedelta.tv_nsec ) || ( 0 > timedelta.tv_sec ) ) {
-		sign = '-';
-	    }
-	    (void)mvwprintw(ppswin, 1, 13, "%c%ld.%09ld",
-		              sign,
-			      (long)labs(timedelta.tv_sec),
-                              (long)labs(timedelta.tv_nsec));
+	    (void)timespec_str( &timedelta, buf, sizeof(buf) );
+	    (void)mvwprintw(ppswin, 1, 13, "%s", buf);
         }
 	(void)wnoutrefresh(ppswin);
     }
