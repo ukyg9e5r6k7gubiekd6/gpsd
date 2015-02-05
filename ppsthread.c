@@ -438,7 +438,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		 * unsigned long as a wider-or-equal type to
 		 * accomodate Linux's type.
 		 */
-		(void)timespec_str( &pi.asert_timestamp, ts_str1, sizeof(ts_str1) );
+		(void)timespec_str( &pi.assert_timestamp, ts_str1, sizeof(ts_str1) );
 		(void)timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
 		gpsd_report(&session->context->errout, LOG_PROG,
 			    "KPPS assert %s, sequence: %ld - "
