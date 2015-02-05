@@ -34,6 +34,7 @@
    TURN_LEAD_1,		/* Turn indicator packet leader 'T' */
    ECDIS_LEAD_1,	/* ECDIS packet leader 'E' */
    SOUNDER_LEAD_1,	/* Depth sounder packet leader 'S' */
+   TRANSDUCER_LEAD_1,	/* Generic transducer packet leader 'Y' */
 #endif /* NMEA_ENABLE */
 
    DLE_LEADER,		/* we've seen the TSIP/EverMore leader (DLE) */

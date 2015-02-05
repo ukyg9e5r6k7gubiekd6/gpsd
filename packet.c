@@ -101,6 +101,7 @@ PERMISSIONS
  *      $TI -- Turn indicator (Airmar PB200).
  *      $EC -- Electronic Chart Display & Information System (ECDIS)
  *      $SD -- Depth Sounder
+ *      $YX -- Transducer (used by some Airmar equipment including PB100)
  *      $P  -- Vendor-specific sentence
  *
  *      !AB -- NMEA 4.0 Base AIS station
@@ -357,6 +358,8 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = ECDIS_LEAD_1;
 	else if (c == 'S')
 	    lexer->state = SOUNDER_LEAD_1;
+	else if (c == 'Y')
+	    lexer->state = TRANSDUCER_LEAD_1;
 #ifdef OCEANSERVER_ENABLE
 	else if (c == 'C')
 	    lexer->state = NMEA_LEADER_END;
@@ -586,6 +589,12 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	break;
     case SOUNDER_LEAD_1:
 	if (c == 'D')		/* Depth-sounder leader accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    lexer->state = GROUND_STATE;
+	break;
+    case TRANSDUCER_LEAD_1:
+	if (c == 'X')		/* Transducer leader accepted */
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    lexer->state = GROUND_STATE;
