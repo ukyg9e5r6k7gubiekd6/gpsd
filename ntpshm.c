@@ -236,6 +236,8 @@ void ntpshm_session_init(struct gps_device_t *session)
 int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedrift_t *td)
 /* put a received fix time into shared memory for NTP */
 {
+    char real_str[22];
+    char clock_str[22];
     /*
      * shmTime is volatile to try to prevent C compiler from reordering
      * writes, or optimizing some 'dead code'.  but CPU cache may still
@@ -292,14 +294,13 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     shmTime->valid = 1;
 
     /*@-type@*/ /* splint is confused about struct timespec */
+    (void)timespec_str( &td->real, real_str, sizeof(real_str) );
+    (void)timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_report(&session->context->errout, LOG_RAW,
-		"NTP ntpshm_put(%s %s) %lu.%09lu @ %lu.%09lu\n",
+		"NTP ntpshm_put(%s %s) %s @ %s\n",
 		session->gpsdata.dev.path,
-		(precision == -20) ? "pps" : "clock",
-		(unsigned long)td->real.tv_sec,
-		(unsigned long)td->real.tv_nsec,
-		(unsigned long)td->clock.tv_sec,
-		(unsigned long)td->clock.tv_nsec);
+		(precision == -20) ? "pps" : "clock", 
+		real_str, clock_str);
     /*@+type@*/
 
     return 1;
@@ -358,6 +359,8 @@ static void init_hook(struct gps_device_t *session)
 /* offset is actual_ts - clock_ts */
 static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
 {
+    char real_str[22];
+    char clock_str[22];
     struct sock_sample sample;
 
     /* chrony expects tv-sec since Jan 1970 */
@@ -376,13 +379,11 @@ static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
     /*@+type@*/
 
     /*@-type@*/ /* splint is confused about struct timespec */
+    (void)timespec_str( &td->real, real_str, sizeof(real_str) );
+    (void)timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_report(&session->context->errout, LOG_RAW,
-		"PPS chrony_send %lu.%09lu @ %lu.%09lu Offset: %0.9f\n",
-		(unsigned long)td->real.tv_sec,
-		(unsigned long)td->real.tv_nsec,
-		(unsigned long)td->clock.tv_sec,
-		(unsigned long)td->clock.tv_nsec,
-                sample.offset);
+		"PPS chrony_send %s @ %s Offset: %0.9f\n",
+		real_str, clock_str, sample.offset);
     /*@+type@*/
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
