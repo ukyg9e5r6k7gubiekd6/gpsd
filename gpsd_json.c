@@ -2701,7 +2701,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"speed_q\":%s,"
 			       "\"course_q\":%s,"
 			       "\"heading_q\":%s}\r\n",
-			       ais->type8.dac200fid10.vin,
+			       json_stringify(buf1, sizeof(buf1), ais->type8.dac200fid10.vin),
 			       ais->type8.dac200fid10.length,
 			       ais->type8.dac200fid10.beam,
 			       ais->type8.dac200fid10.shiptype,
@@ -2763,7 +2763,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		    ais->type8.dac200fid24.country);
 		for (i = 0; i < ais->type8.dac200fid24.ngauges; i++) {
 		    str_appendf(buf, buflen,
-			"{\"id\":%u,\"level\":%d}",
+			"{\"id\":%u,\"level\":%d},",
 			ais->type8.dac200fid24.gauges[i].id,
 			ais->type8.dac200fid24.gauges[i].level);
 		}
@@ -3213,7 +3213,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 					  ais->type24.callsign));
 	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 		str_appendf(buf, buflen,
-			       "\"mothership_mmsi\":%u}\r\n",
+			       "\"mothership_mmsi\":%u",
 			       ais->type24.mothership_mmsi);
 	    } else {
 		str_appendf(buf, buflen,
