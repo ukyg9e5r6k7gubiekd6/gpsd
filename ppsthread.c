@@ -261,6 +261,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 /*@-mustfreefresh -type -unrecog -branchstate@*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
+    char ts_str1[22], ts_str2[22];
     struct gps_device_t *session = (struct gps_device_t *)arg;
     double last_fixtime_real = 0; 
     /* the system clock ime, to the nSec, when the last fix received */
@@ -437,14 +438,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		 * unsigned long as a wider-or-equal type to
 		 * accomodate Linux's type.
 		 */
+		(void)timespec_str( &pi.asert_timestamp, ts_str1, sizeof(ts_str1) );
+		(void)timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
 		gpsd_report(&session->context->errout, LOG_PROG,
-			    "KPPS assert %ld.%09ld, sequence: %ld - "
-			    "clear  %ld.%09ld, sequence: %ld\n",
-			    pi.assert_timestamp.tv_sec,
-			    pi.assert_timestamp.tv_nsec,
+			    "KPPS assert %s, sequence: %ld - "
+			    "clear  %s, sequence: %ld\n",
+			    ts_str1,
 			    (unsigned long) pi.assert_sequence,
-			    pi.clear_timestamp.tv_sec,
-			    pi.clear_timestamp.tv_nsec,
+			    ts_str2,
 			    (unsigned long) pi.clear_sequence);
 		gpsd_report(&session->context->errout, LOG_PROG,
 			    "KPPS data: using %s\n",
@@ -454,11 +455,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
                   that should not be the case here */
 	        cycle_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[edge_kpps])/1000;
 	        duration_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
+		(void)timespec_str( &ts_kpps, ts_str1, sizeof(ts_str1) );
 	        gpsd_report(&session->context->errout, LOG_PROG,
-		    "KPPS cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
-		    cycle_kpps, duration_kpps,
-		    (unsigned long)ts_kpps.tv_sec,
-		    (unsigned long)ts_kpps.tv_nsec);
+		    "KPPS cycle: %7d uSec, duration: %7d uSec @ %s\n",
+		    cycle_kpps, duration_kpps, ts_str1);
 		pulse_kpps[edge_kpps] = ts_kpps;
 		if (990000 < cycle_kpps && 1010000 > cycle_kpps) {
 		    /* KPPS passes a basic sanity check */
@@ -498,11 +498,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	state_last = state;
         /* save this edge so we know next cycle time */
 	pulse[edge] = clock_ts;
+	(void)timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	gpsd_report(&session->context->errout, LOG_PROG,
-		    "PPS edge: %d, cycle: %7d uSec, duration: %7d uSec @ %lu.%09lu\n",
-		    edge, cycle, duration,
-		    (unsigned long)clock_ts.tv_sec,
-		    (unsigned long)clock_ts.tv_nsec);
+		    "PPS edge: %d, cycle: %7d uSec, duration: %7d uSec @ %s\n",
+		    edge, cycle, duration, ts_str1);
 	if (unchanged) {
 	    // strange, try again
 	    continue;
@@ -683,22 +682,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@ +unrecog @*/
 		/*@+compdef@*/
 		/*@-type@*/ /* splint is confused about struct timespec */
+		(void)timespec_str( &drift.clock, ts_str1, sizeof(ts_str1) );
+		(void)timespec_str( &drift.real, ts_str2, sizeof(ts_str2) );
 		gpsd_report(&session->context->errout, LOG_INF,
-			    "PPS hooks called with %.20s clock: %lu.%09ld real: %lu.%09ld\n",
-			    log1,
-			    (unsigned long)drift.clock.tv_sec,
-			    (long)drift.clock.tv_nsec,
-			    (unsigned long)drift.real.tv_sec,
-			    (long)drift.real.tv_nsec);
+			    "PPS hooks called with %.20s clock: %s real: %s\n",
+			    log1, ts_str1, ts_str2);
 		/*@+type@*/
             }
 	    /*@-type@*/ /* splint is confused about struct timespec */
+	    (void)timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    gpsd_report(&session->context->errout, LOG_PROG,
-		    "PPS edge %.20s %lu.%09lu offset %.9f\n",
-		    log1,
-		    (unsigned long)clock_ts.tv_sec,
-		    (unsigned long)clock_ts.tv_nsec,
-		    offset);
+		    "PPS edge %.20s @ %s offset %.9f\n",
+		    log1, ts_str1, offset);
 	    /*@+type@*/
 	} else {
 	    gpsd_report(&session->context->errout, LOG_RAW,
