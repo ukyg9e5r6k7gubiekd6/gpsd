@@ -450,30 +450,27 @@ int gpsd_serial_open(struct gps_device_t *session)
 			"bluetooth socket connect in progress or again : %s\n",
 			strerror(errno));
         }
-	(void)fcntl(session->gpsdata.gps_fd, F_SETFL, (int)mode);
+	(void)fcntl(session->gpsdata.gps_fd, F_SETFL, (int)mode | O_NONBLOCK);
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "bluez device open success: %s %s\n",
 		    session->gpsdata.dev.path, strerror(errno));
     } else
 #endif /* BLUEZ */
     {
-	/*
-	 * We open with O_NONBLOCK because we want to now get hung if
-	 * the clocal flag is off, but we don't want to stay in that mode.
-	 */
         if ((session->gpsdata.gps_fd =
-	     open(session->gpsdata.dev.path, (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
+	     open(session->gpsdata.dev.path,
+		      (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
             gpsd_report(&session->context->errout, LOG_ERROR,
 			    "device open failed: %s - retrying read-only\n",
 			    strerror(errno));
 	    if ((session->gpsdata.gps_fd =
-		 open(session->gpsdata.dev.path, O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
+		 open(session->gpsdata.dev.path,
+			  O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
 		gpsd_report(&session->context->errout, LOG_ERROR,
 			    "read-only device open failed: %s\n",
 			    strerror(errno));
 		return -1;
 	    }
-
 	    gpsd_report(&session->context->errout, LOG_PROG,
 			"file device open success: %s\n",
 			strerror(errno));
@@ -536,9 +533,25 @@ int gpsd_serial_open(struct gps_device_t *session)
 	    return -1;
 	(void)memcpy(&session->ttyset,
 		     &session->ttyset_old, sizeof(session->ttyset));
+	/*
+	 * Only block until we get at least one character, whatever the
+	 * third arg of read(2) says.  According to 
+	 * http://stackoverflow.com/questions/20154157/termios-vmin-vtime-and-blocking-non-blocking-read-operations
+	 * the VMIN setting may be a no-op because the tty was opened with
+	 * O_NONBLOCK.  Money quote:
+	 *
+	 * "When using select() with a file in non-blocking mode, you
+	 * get an event for every byte that arrives. At high serial
+	 * data rates, this hammers the CPU. It's better to use
+	 * blocking mode with VMIN, so that select() waits for a
+	 * block of data before firing an event, and VTIME to limit
+	 * the delay, for blocks smaller than VMIN."
+	 *
+	 * Would that we could do the latter...
+	 */
 	/*@ ignore @*/
 	memset(session->ttyset.c_cc, 0, sizeof(session->ttyset.c_cc));
-	//session->ttyset.c_cc[VTIME] = 1;
+	session->ttyset.c_cc[VMIN] = 1;
 	/*@ end @*/
 	/*
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
@@ -573,14 +586,6 @@ int gpsd_serial_open(struct gps_device_t *session)
 #endif /* FIXED_STOP_BITS */
 	    );
     }
-
-    /* Switch back to blocking I/O now that CLOCAL is set. */
-    {
-	int oldfl = fcntl(session->gpsdata.gps_fd, F_GETFL);
-	if (oldfl != -1)
-	    fcntl(session->gpsdata.gps_fd, F_SETFL, oldfl & ~O_NONBLOCK);
-    }
-
 
     /* required so parity field won't be '\0' if saved speed matches */
     if (session->sourcetype <= source_blockdev) {

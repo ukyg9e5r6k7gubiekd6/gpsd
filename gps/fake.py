@@ -76,8 +76,8 @@ import packet as sniffer
 # they're too high you'll slow the tests down a lot.  If they're too low
 # you'll get random spurious regression failures that usually look
 # like lines missing from the end of the test output relative to the
-# check file, but may be hangs.  The need for them may be symptomatic
-# of race conditions in the pty layer or elsewhere.
+# check file.  The need for them may be symptomatic of race conditions
+# in the pty layer or elsewhere.
 
 # WRITE_PAD: Define a per-line delay on writes so we won't spam the
 # buffers in the pty layer or gpsd itself. Values smaller than the
@@ -93,70 +93,63 @@ import packet as sniffer
 
 # Field reports on minima:
 #
-## Linux
+# Eric Raymond runningLinux 3.11.0 on an Intel Core Duo at 2.66GHz.
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.1    Works, 112s real
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05   Fails
 #
-# Eric Raymond, Linux 3.16.0 on a Xeon CPU E5-1650 v3 @ 3.50GHz
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Works, 462sec
-#
-# Michael Tatarinov, Linux-3.18.5+-armv6l-with-debian-7.8 on a RasPi Model B:
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Works, 343sec
-#
-# Jon Schleuter, Linux-3.17.7-gentoo-i686-Intel i7-4770 @ 3.4 GHz
-#  WRITE_PAD = 0.00000 / CLOSE_DELAY = 0.1 Works, 106sec
-#
-## NetBSD
-#
-# Greg Troxel running NetBSD 6 on a Core i5 (i386, 4 cpus) 2.90GHz.
-#  WRITE_PAD = 0.000 / CLOSE_DELAY = 0.0 88/89 failures (108s)
-#  WRITE_PAD = 0.000 / CLOSE_DELAY = 0.8 71/89 failures (149s)
-#  WRITE_PAD = 0.000 / CLOSE_DELAY = 8.0 69/89 failures (409s)
-#  WRITE_PAD = 0.001 / CLOSE_DELAY = 8.0 all tests passed (920s)
-#  WRITE_PAD = 0.001 / CLOSE_DELAY = 8.0 10/89 failures (951s)
-#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed (734s)
-#
-# Greg Troxel running NetBSD 5 on a Core 2 Duo E8500 (amd64, 2 cpus) 3.167GHz.
-#  WRITE_PAD = 0.100 / CLOSE_DELAY = 0.8 had 1/89 failures (3385s)
-#  WRITE_PAD = 0.150 / CLOSE_DELAY = 0.8 all tests passed (4844s)
-#  WRITE_PAD = 0.200 / CLOSE_DELAY = 0.8 all tests passed (6315s)
-#
-## OS X
-#
-# Frank Nicholas running OS X 10.10 (Yosemite), MacBook Pro, Intel Core i7-4850H
-#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Fails
-#  WRITE_PAD = 0.03 / CLOSE_DELAY = 2      Works, 1200sec
-#
-# Greg Troxel running OS X 10.9 on a Core i7 (2 cpus) 1.7 GHz.
-#  WRITE_PAD = 0.01 / CLOSE_DELAY = 1 all tests passed (536s)
-#  WRITE_PAD = 0.03 / CLOSE_DELAY = 1 all tests passed (1113s)
-#
-## OLD DATA
-#
-# Those below have not been updated since we switched to using blocking I/O,
-# for gpsd's ttys, which increases the required delays. 
-# This is approximately release-3.11-344-gef39b1c
+# Michael Tatarinov running ?? on a Raspberry Pi:
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.05    Works, 344s real
+#  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.0     Fails, 339s real
 #
 # Hal Murray running NetBSD 6.1.2 on an Intel(R) Celeron(R) CPU 2.80GHz
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.4    Works, takes 688.69s real
 #  WRITE_PAD = 0.0 / CLOSE_DELAY = 0.3    Fails tcp-torture.log, 677.53s real
+#
+# Greg Troxel running NetBSD 6 on a Core i5 (i386, 4 cpus) 2.90GHz.
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.2 had failures (645s)
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.4 had failures (662s)
+#  WRITE_PAD = 0.000 / CLOSE_DELAY = 0.8 had 69/89 failures (148s)
+#  WRITE_PAD = 0.001 / CLOSE_DELAY = 0.8 all tests passed (697s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 all tests passed (737s)
+#
+# Greg Troxel running NetBSD 5 on a Core 2 Duo E8500 (amd64, 2 cpus) 3.167GHz.
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 0.8 had 7/89 failures (730s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 2.0 had 3/89 failures (757s)
+#  WRITE_PAD = 0.010 / CLOSE_DELAY = 2.0 had 32/89 failures (755s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 4.0 had 13/89 failures (795s)
+#  WRITE_PAD = 0.004 / CLOSE_DELAY = 8.0 had 27/89 failures (872s)
+#  WRITE_PAD = 0.100 / CLOSE_DELAY = 8.0 had 9/89 failures (3519s)
+#  WRITE_PAD = 0.100 / CLOSE_DELAY = 8.0 had 7/89 failures (3539s)
+#  WRITE_PAD = 0.200 / CLOSE_DELAY = 8.0 all tests passed (6456s)
+#  WRITE_PAD = 0.200 / CLOSE_DELAY = 0.8 all tests passed (6310s)
+#
+# Greg Troxel running OS X 10.9 on a Core i7 (2 cpus) 1.7 GHz.
+#  WRITE_PAD = 0.01 / CLOSE_DELAY = 4 had 81/89 failures (767s)
+#  WRITE_PAD = 0.01 / CLOSE_DELAY = 10 had 81/89 failures (1288s)
+#  WRITE_PAD = 0.03 / CLOSE_DELAY = 1 all tests passed (1111s)
+#  WRITE_PAD = 0.03 / CLOSE_DELAY = 2 all tests passed (1194s)
+#  WRITE_PAD = 0.05 / CLOSE_DELAY = 2 all tests passed (1780s)
+#  WRITE_PAD = 0.1 / CLOSE_DELAY = 2 all tests passed (3248s)
+#  WRITE_PAD = 1 / CLOSE_DELAY = 2 all tests passed (29665s)
+#  WRITE_PAD = 1 / CLOSE_DELAY = 10 all tests passed (30362s)
 
 # examples are "# sys.platform platform.platform()"
 
 if sys.platform.startswith("linux"):
     WRITE_PAD = 0.0
-    CLOSE_DELAY = 0.0
+    CLOSE_DELAY = 0.1
 elif sys.platform.startswith("freebsd"):
     WRITE_PAD = 0.001
     CLOSE_DELAY = 0.4
 elif sys.platform.startswith("netbsd5"):
-    WRITE_PAD = 0.150
+    WRITE_PAD = 0.200
     CLOSE_DELAY = 0.8
 elif sys.platform.startswith("netbsd"):
-    # netbsd6, netbsd7, and -current
     WRITE_PAD = 0.004
     CLOSE_DELAY = 0.8
 elif sys.platform.startswith("darwin"):
     # darwin Darwin-13.4.0-x86_64-i386-64bit
-    WRITE_PAD = 0.01
+    WRITE_PAD = 0.03
     CLOSE_DELAY = 1
 else:
     WRITE_PAD = 0.004
@@ -369,15 +362,6 @@ class FakePTY(FakeGPS):
         "Wait for the associated device to drain (e.g. before closing)."
         termios.tcdrain(self.fd)
 
-def cleansocket(host, port):
-    "Get a socket that we can re-use cleanly after it's closed."
-    cs = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # This magic prevents "Address already in use" errors after
-    # we release the socket.
-    cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    cs.bind((host, port))
-    return cs
-
 class FakeTCP(FakeGPS):
     "A TCP serverlet with a test log ready to be cycled to it."
     def __init__(self, testload,
@@ -387,7 +371,11 @@ class FakeTCP(FakeGPS):
         self.host = host
         self.port = int(port)
         self.byname = "tcp://" + host + ":" + str(port)
-        self.dispatcher = cleansocket(self.host, self.port)
+        self.dispatcher = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # This magic prevents "Address already in use" errors after
+        # we release the socket.
+        self.dispatcher.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.dispatcher.bind((self.host, self.port))
         self.dispatcher.listen(5)
         self.readables = [self.dispatcher]
 
@@ -581,10 +569,7 @@ class TestSession:
         if port:
             self.port = port
         else:
-            # Magic way to get a socket with an unused port number
-            s = cleansocket("localhost", 0)
-            self.port = s.getsockname()[1]
-            s.close()
+            self.port = gps.GPSD_PORT
         self.close_delay = CLOSE_DELAY
         if slow:
             self.close_delay += CLOSE_DELAY_SLOWDOWN
