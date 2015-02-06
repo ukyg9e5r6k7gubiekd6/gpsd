@@ -286,6 +286,7 @@ initpacket(void)
     PyModule_AddIntConstant(m, "RTCM2_PACKET", RTCM2_PACKET);
     PyModule_AddIntConstant(m, "RTCM3_PACKET", RTCM3_PACKET);
     PyModule_AddIntConstant(m, "JSON_PACKET", JSON_PACKET);
+    PyModule_AddIntConstant(m, "PACKET_TYPES", PACKET_TYPES);
 
     PyModule_AddIntConstant(m, "LOG_ERROR", LOG_ERROR);
     PyModule_AddIntConstant(m, "LOG_SHOUT", LOG_SHOUT);
