@@ -8,8 +8,8 @@ Repository head:
   the JSON reports. GNSS and GLONASS SKY reports are now
   merged. Addressed versions of AIS Type 25 and 26 are now
   handled. The 'nmea' build option is now 'nmea0183'. New 'minimal'
-  option sets all boolean options not explicitly set on the command
-  line to false.  The 'limited_max_devices' option is now
+  option sets all boolean options not explicitly set on the build
+  command line to false.  The 'limited_max_devices' option is now
   'max_devices'; the 'limited_max_clients' option is now 'max_clients'
   A bug fix for error modeling when NMEA 0183 reports empty DOP
   fields.
