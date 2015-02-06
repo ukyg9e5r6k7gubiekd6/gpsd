@@ -480,6 +480,13 @@ listening for client connections.  This may be useful if your GPS
 enters a wedged or confused state but can be soft-reset by pulling
 down DTR.</para>
 
+<para>When <application>gpsd</application> is called with no initial
+devices (thus, expecting devices to be passed to it by notifications to
+the control socket), and reaches a state where there are no devices
+connected and no subscribers <emphasis>after</emphasis> after some
+devices have been seen, it shuts down gracefully. It is expected that
+future device hotplug events will reactivate it.</para>
+
 <para>To point <application>gpsd</application> at a device that may be
 a GPS, write to the control socket a plus sign ('+') followed by the
 device name followed by LF or CR-LF.  Thus, to point the daemon at
@@ -487,7 +494,7 @@ device name followed by LF or CR-LF.  Thus, to point the daemon at
 that a device has been disconnected and is no longer available, send a
 minus sign ('-') followed by the device name followed by LF or
 CR-LF. Thus, to remove <filename>/dev/foo</filename> from the search
-list. send "-/dev/foo\n".</para>
+list, send "-/dev/foo\n".</para>
 
 <para>To send a control string to a specified device, write to the
 control socket a '!', followed by the device name, followed by '=',

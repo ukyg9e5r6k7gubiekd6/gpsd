@@ -135,6 +135,7 @@ static const int af = AF_INET;
 
 static fd_set all_fds;
 static int maxfd;
+static int highwater;
 #ifndef FORCE_GLOBAL_ENABLE
 static bool listen_global = false;
 #endif /* FORCE_GLOBAL_ENABLE */
@@ -707,6 +708,7 @@ static bool open_device( /*@null@*/struct gps_device_t *device)
 		"device %s activated\n", device->gpsdata.dev.path);
     FD_SET(device->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(device->gpsdata.gps_fd, true);
+    ++highwater;
     return true;
 }
 
@@ -2402,6 +2404,32 @@ int main(int argc, char *argv[])
 	    }
 	}
 #endif /* SOCKET_EXPORT_ENABLE */
+
+	/*
+	 * Might be time for graceful shutdown if no command-line
+	 * devices were specified, there are no subscribers, there are
+	 * no active devices, and there *have been* active
+	 * devices. The goal is to go away and free up text space when
+	 * the daemon was hotplug-activated but there are no
+	 * subscribers and the last GPS has unplugged, and the point
+	 * of the last check is to prevent shutdown when the daemon
+	 * has been launched but not yet received its first device
+	 * over the socket.
+	 */
+	if (argc == optind && highwater > 0) {
+	    int subcount = 0, devcount = 0;
+	    for (sub = subscribers; sub < subscribers + MAX_CLIENTS; sub++)
+		if (sub->active != 0)
+		    ++subcount;
+	    for (device = devices; device < devices + MAX_DEVICES; device++)
+		if (allocated_device(device))
+		    ++devcount;
+	    if (subcount == 0 && devcount == 0) {
+		gpsd_report(&context.errout, LOG_SHOUT,
+			    "no subscribers or devices, shutting down.\n");
+		goto shutdown;
+	    }
+	}
     }
 
     /* if we make it here, we got a signal... deal with it */
@@ -2411,7 +2439,7 @@ int main(int argc, char *argv[])
 
     gpsd_report(&context.errout, LOG_WARN,
 		"received terminating signal %d.\n", signalled);
-
+shutdown:
     gpsd_terminate(&context);
 
     gpsd_report(&context.errout, LOG_WARN, "exiting.\n");
