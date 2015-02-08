@@ -184,16 +184,17 @@ static size_t oncore_payload_cksum_length(unsigned char id1, unsigned char id2)
 }
 #endif /* ONCORE_ENABLE */
 
-static void character_pushback(struct gps_lexer_t *lexer)
-/* push back the last character grabbed */
+static void character_pushback(struct gps_lexer_t *lexer, unsigned int newstate)
+/* push back the last character grabbed, setting a specified state */
 {
     /*@-modobserver@*//* looks like a splint bug */
     --lexer->inbufptr;
     /*@+modobserver@*/
     --lexer->char_counter;
+    lexer->state = newstate;
     gpsd_report(&lexer->errout, LOG_RAW + 2,
-		"%08ld: character pushed back\n",
-		lexer->char_counter);
+		"%08ld: character pushed back, state set to %d\n",
+		lexer->char_counter, lexer->state);
 }
 
 static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
@@ -324,19 +325,15 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	}
 #endif /* RTCM104V3_ENABLE */
 #ifdef PASSTHROUGH_ENABLE
-	if (c == '{') {
-	    lexer->state = JSON_LEADER;
-	    character_pushback(lexer);
-	}
+	if (c == '{')
+	    character_pushback(lexer, JSON_LEADER);
 #endif /* PASSTHROUGH_ENABLE */
 	break;
     case COMMENT_BODY:
 	if (c == '\n')
 	    lexer->state = COMMENT_RECOGNIZED;
-	else if (!isprint(c)) {
-	    lexer->state = GROUND_STATE;
-	    character_pushback(lexer);
-	}
+	else if (!isprint(c))
+	    character_pushback(lexer, GROUND_STATE);
 	break;
 #ifdef NMEA_ENABLE
     case NMEA_DOLLAR:
@@ -424,10 +421,9 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = NMEA_BINARY_BODY;
 	break;
     case NMEA_BINARY_NL:
-	if (c == '$') {
-	    character_pushback(lexer);
-	    lexer->state = NMEA_RECOGNIZED;
-	} else
+	if (c == '$')
+	    character_pushback(lexer, NMEA_RECOGNIZED);
+	else
 	    lexer->state = NMEA_BINARY_BODY;
 	break;
     case NMEA_BANG:
@@ -519,10 +515,9 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	else if (c == '\n')
 	    /* not strictly correct, but helps for interpreting logfiles */
 	    lexer->state = NMEA_RECOGNIZED;
-	else if (c == '$'){
-	    lexer->state = GROUND_STATE;
-	    character_pushback(lexer);
-	} else if (!isprint(c))
+	else if (c == '$')
+	    character_pushback(lexer, GROUND_STATE);
+	else if (!isprint(c))
 	    lexer->state = GROUND_STATE;
 	break;
     case NMEA_CR:
@@ -549,10 +544,8 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = UBX_LEADER_1;
 #endif
 #ifdef PASSTHROUGH_ENABLE
-	else if (c == '{') {
-	    lexer->state = JSON_LEADER;
-	    character_pushback(lexer);
-	}
+	else if (c == '{')
+	    character_pushback(lexer, JSON_LEADER);
 #endif /* PASSTHROUGH_ENABLE */
 	else
 	    lexer->state = GROUND_STATE;
@@ -1103,10 +1096,8 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = NMEA_DOLLAR;
 #endif /* NMEA_ENABLE */
 #ifdef PASSTHROUGH_ENABLE
-	else if (c == '{') {
-	    lexer->state = JSON_LEADER;
-	    character_pushback(lexer);
-	}
+	else if (c == '{')
+	    character_pushback(lexer, JSON_LEADER);
 #endif /* PASSTHROUGH_ENABLE */
 	else
 	    lexer->state = GROUND_STATE;
@@ -1352,8 +1343,7 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = JSON_STRINGLITERAL;
 	    lexer->json_after = JSON_END_VALUE;
 	} else if (c == '{' || c == '[') {
-	    lexer->state = JSON_LEADER;
-	    character_pushback(lexer);
+	    character_pushback(lexer, JSON_LEADER);
 	} else if (strchr("-0123456789", c) != NULL) {
 	    lexer->state = JSON_NUMBER;
 	} else if (c == 't' || c == 'f' || c == 'n')
@@ -1377,25 +1367,21 @@ static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	 * quietly chuck out the object.
 	 */
 	if (strchr("1234567890.eE+-", c) == NULL) {
-	    lexer->state = JSON_END_VALUE;
-	    character_pushback(lexer);
+	    character_pushback(lexer, JSON_END_VALUE);
 	}
 	break;
     case JSON_SPECIAL:
-	if (strchr("truefalsnil", c) == NULL) {
-	    lexer->state = JSON_END_VALUE;
-	    character_pushback(lexer);
-	}
+	if (strchr("truefalsnil", c) == NULL)
+	    character_pushback(lexer, JSON_END_VALUE);
 	break;
     case JSON_END_VALUE:
 	if (isspace(c))
 	    break;
 	else if (c == ',')
 	    lexer->state = JSON_LEADER;
-	else if (c == '}' || c == ']') {
-	    lexer->state = JSON_LEADER;
-	    character_pushback(lexer);
-	} else
+	else if (c == '}' || c == ']')
+	    character_pushback(lexer, JSON_LEADER);
+	else
 	    /* trailing garbage after JSON value */
 	    lexer->state = GROUND_STATE;
 	break;
