@@ -121,6 +121,10 @@ enum
 #include "packet_states.h"
 };
 
+static char *state_table[] = {
+#include "packet_names.h"
+};
+
 #define SOH	(unsigned char)0x01
 #define DLE	(unsigned char)0x10
 #define STX	(unsigned char)0x02
@@ -192,9 +196,15 @@ static void character_pushback(struct gps_lexer_t *lexer, unsigned int newstate)
     /*@+modobserver@*/
     --lexer->char_counter;
     lexer->state = newstate;
-    gpsd_report(&lexer->errout, LOG_RAW + 2,
-		"%08ld: character pushed back, state set to %d\n",
-		lexer->char_counter, lexer->state);
+    if (lexer->errout.debug >= LOG_RAW + 2)
+    {
+	unsigned int c = *lexer->inbufptr;
+	gpsd_report(&lexer->errout, LOG_RAW + 2,
+		"%08ld: character '%c' [%02x]  pushed back, state set to %s\n",
+		lexer->char_counter,
+		(isprint(c) ? c : '.'), c,
+		state_table[lexer->state]);
+    }
 }
 
 static void nextstate(struct gps_lexer_t *lexer, unsigned char c)
@@ -1475,9 +1485,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 	/*@ -modobserver @*/
 	unsigned char c = *lexer->inbufptr++;
 	/*@ +modobserver @*/
-	char *state_table[] = {
-#include "packet_names.h"
-	};
 	nextstate(lexer, c);
 	gpsd_report(&lexer->errout, LOG_RAW + 2,
 		    "%08ld: character '%c' [%02x], new state: %s\n",
