@@ -141,7 +141,7 @@ if __name__ == '__main__':
         elif (switch == '-t'):
             tcp = True
         elif (switch == '-T'):
-            sys.stdout.write("sys %s platform %s: WRITE_PAD = %.5f CLOSE_DELAY = %.5f\n" % (sys.platform, platform.platform(), gpsfake.WRITE_PAD, gpsfake.CLOSE_DELAY))
+            sys.stdout.write("sys %s platform %s: WRITE_PAD = %.5f\n" % (sys.platform, platform.platform(), gpsfake.WRITE_PAD))
             raise SystemExit,0
         elif (switch == '-u'):
             udp = True
