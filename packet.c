@@ -198,11 +198,11 @@ static bool character_pushback(struct gps_lexer_t *lexer, unsigned int newstate)
     lexer->state = newstate;
     if (lexer->errout.debug >= LOG_RAW + 2)
     {
-	unsigned int c = *lexer->inbufptr;
+	unsigned char c = *lexer->inbufptr;
 	gpsd_report(&lexer->errout, LOG_RAW + 2,
 		"%08ld: character '%c' [%02x]  pushed back, state set to %s\n",
 		lexer->char_counter,
-		(isprint(c) ? c : '.'), c,
+		(isprint((int)c) ? c : '.'), c,
 		state_table[lexer->state]);
     }
 
@@ -979,7 +979,6 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	if ((c & 0xFC) == 0) {
 	    lexer->length = (size_t) (c << 8);
 	    lexer->state = RTCM3_LEADER_2;
-	    break;
 	} else
 	    return character_pushback(lexer, GROUND_STATE);
 	break;

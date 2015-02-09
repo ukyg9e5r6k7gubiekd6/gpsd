@@ -325,7 +325,7 @@ static void nmea_update(void)
 
 #ifdef PPS_ENABLE
     /*@-compdef@*/
-    /*@-type@*/ /* splint is confused about struct timespec */
+    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
@@ -341,7 +341,7 @@ static void nmea_update(void)
         }
 	(void)wnoutrefresh(gpgsawin);
     }
-    /*@+type@*/
+    /*@+type +noeffect@*/
     /*@+compdef@*/
 #endif /* PPS_ENABLE */
 }

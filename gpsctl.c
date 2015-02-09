@@ -295,6 +295,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'R':		/* remove the SHM export segment */
 #ifdef SHM_EXPORT_ENABLE
+	    /*@-nullpass@*/
 	    status = shmget(GPSD_KEY, 0, 0);
 	    if (status == -1) {
 		gpsd_report(&context.errout, LOG_WARN,
@@ -309,9 +310,9 @@ int main(int argc, char **argv)
 		    exit(1);
 		}
 	    }
+	    /*@+nullpass@*/
 	    exit(0);
 #endif /* SHM_EXPORT_ENABLE */
-	    break;
 	case 'T':		/* set the timeout on packet recognition */
 	    timeout = (unsigned)atoi(optarg);
 	    explicit_timeout = true;

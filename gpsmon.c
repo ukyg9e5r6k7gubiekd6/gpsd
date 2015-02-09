@@ -673,7 +673,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    complain("Ill-formed PPS packet: %d", status);
 	    buf[0] = '\0';
 	} else {
-	    /*@-type@*/ /* splint is confused about struct timespec */
+	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    struct timespec timedelta;
 	    TS_SUB( &timedelta, &noclobber.timedrift.real, 
 		&noclobber.timedrift.clock);
@@ -687,7 +687,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			      (long)noclobber.timedrift.real.tv_nsec,
 			      (long)timedelta.tv_sec,
                               (long)timedelta.tv_nsec);
-	    /*@+type@*/
+	    /*@+type +noeffect@*/
 
 	    (void)strlcpy(buf, PPSBAR, sizeof(buf));
 	    /* coverity[missing_lock] */

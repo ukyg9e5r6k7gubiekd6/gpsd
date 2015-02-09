@@ -490,11 +490,12 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
  * return negative for error
  * otherwise the number of chars in buf, excluding trailing \0
 */
-int timespec_str( struct timespec *ts, char *buf, int buf_size )
+int timespec_str(struct timespec *ts, /*@out@*/char *buf, int buf_size)
 {
     int ret;
     char sign = ' ';
 
+    /*@-type@*//* splint is confused about timespec*/
     if ( (0 > ts->tv_nsec ) || ( 0 > ts->tv_sec ) ) {
 	sign = '-';
     }
@@ -502,5 +503,6 @@ int timespec_str( struct timespec *ts, char *buf, int buf_size )
 			  sign,
 			  (long)labs(ts->tv_sec),
 			  (long)labs(ts->tv_nsec));
+    /*@+type@*/
     return ret;
 }

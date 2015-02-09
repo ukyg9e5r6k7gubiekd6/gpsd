@@ -621,7 +621,7 @@ static void decode(FILE *fpin, FILE*fpout)
 			break;
 		    }
 		}
-		printf("%s (%d): %d\n", np, i-1, (unsigned int)minima[i]);
+		printf("%s (%d): %u\n", np, i-1, (unsigned int)minima[i]);
 	    }
 	}
     }

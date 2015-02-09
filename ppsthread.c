@@ -89,7 +89,9 @@ void pps_early_init( struct gps_context_t * context ) {
     int err;
 
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    /*@ -nullpass @*/
     err = pthread_mutex_init(&ppslast_mutex, NULL);
+    /*@ +nullpass@ */
     /*@ +unrecog @*/
     if ( 0 != err ) {
 	gpsd_report(&context->errout, LOG_ERROR,
@@ -680,7 +682,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    strerror(errno));
 		}
 		/*@ +unrecog @*/
-		/*@+compdef@*/
 		/*@-type@*/ /* splint is confused about struct timespec */
 		(void)timespec_str( &drift.clock, ts_str1, sizeof(ts_str1) );
 		(void)timespec_str( &drift.real, ts_str2, sizeof(ts_str2) );
@@ -688,6 +689,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    "PPS hooks called with %.20s clock: %s real: %s\n",
 			    log1, ts_str1, ts_str2);
 		/*@+type@*/
+		/*@+compdef@*/
             }
 	    /*@-type@*/ /* splint is confused about struct timespec */
 	    (void)timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );

@@ -322,8 +322,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 {
     /* clear some times */
     session->last_fixtime.real = 0.0;
-    session->last_fixtime.clock.tv_sec = 0;
-    session->last_fixtime.clock.tv_nsec = 0;
+    /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
+    /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
 #ifdef PPS_ENABLE
     memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
     session->ppscount = 0;
@@ -424,8 +424,8 @@ void gpsd_clear(struct gps_device_t *session)
     memset( (void *)&session->driver, '\0', sizeof(session->driver));
     /* clear some times */
     session->last_fixtime.real = 0.0;
-    session->last_fixtime.clock.tv_sec = 0;
-    session->last_fixtime.clock.tv_nsec = 0;
+    /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
+    /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
 #ifdef PPS_ENABLE
     memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
     session->ppscount = 0;
@@ -1110,7 +1110,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 {
     ssize_t newlen;
     bool driver_change = false;
-    float alpha;
 
     gps_clear_fix(&session->newdata);
 

@@ -2065,7 +2065,7 @@ extern double earth_distance_and_bearings(double, double, double, double,
 					  /*@null@*//*@out@*/double *,
 					  /*@null@*//*@out@*/double *);
 extern double wgs84_separation(double, double);
-extern int timespec_str( struct timespec *, char *, int );
+extern int timespec_str(struct timespec *, /*@out@*/char *, int);
 
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */

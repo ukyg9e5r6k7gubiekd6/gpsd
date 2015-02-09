@@ -578,7 +578,7 @@ int gpsd_serial_open(struct gps_device_t *session)
     {
 	int oldfl = fcntl(session->gpsdata.gps_fd, F_GETFL);
 	if (oldfl != -1)
-	    fcntl(session->gpsdata.gps_fd, F_SETFL, oldfl & ~O_NONBLOCK);
+	    (void)fcntl(session->gpsdata.gps_fd, F_SETFL, oldfl & ~O_NONBLOCK);
     }
 
 

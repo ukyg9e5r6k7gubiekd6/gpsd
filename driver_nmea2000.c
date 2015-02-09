@@ -67,7 +67,7 @@ static int scale_int(int32_t var, const int64_t factor)
 
         ret   = var;
         ret  *= factor;
-        ret >>= 32;
+        /*@i1@*/ret >>= 32;
 
         return((int)ret);
 }
