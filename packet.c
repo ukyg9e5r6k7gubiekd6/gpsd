@@ -46,7 +46,7 @@ PERMISSIONS
 
 /*
  * The packet-recognition state machine.  This takes an incoming byte stream
- * and tries to segment it into packets.  There are three types of packets:
+ * and tries to segment it into packets.  There are four types of packets:
  *
  * 1) Comments. These begin with # and end with \r\n.
  *
@@ -1290,7 +1290,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	     */
 	    lexer->state = DLE_LEADER;
 	else
-	    lexer->state = GROUND_STATE;
+	    return character_pushback(lexer, GROUND_STATE);
 	break;
 #endif /* TSIP_ENABLE */
 #ifdef RTCM104V2_ENABLE
@@ -1304,7 +1304,15 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	break;
 
     case RTCM2_RECOGNIZED:
-	if (rtcm2_decode(lexer, c) == ISGPS_SYNC) {
+	if (c == '#')
+	    /*
+	     * There's a remote possibility this could fire when # =
+	     * 0x23 is legitimate in-stream RTCM2 data.  No help for
+	     * it, the test framework needs this case so it can inject
+	     * # EOF and we'll miss a packet.
+	     */
+	    return character_pushback(lexer, GROUND_STATE);
+	else if (rtcm2_decode(lexer, c) == ISGPS_SYNC) {
 	    lexer->state = RTCM2_SYNC_STATE;
 	    break;
 	} else
@@ -1489,12 +1497,13 @@ void packet_parse(struct gps_lexer_t *lexer)
 	/*@ -modobserver @*/
 	unsigned char c = *lexer->inbufptr++;
 	/*@ +modobserver @*/
+	unsigned int oldstate = lexer->state;
 	if (!nextstate(lexer, c))
 	    continue;
 	gpsd_report(&lexer->errout, LOG_RAW + 2,
-		    "%08ld: character '%c' [%02x], new state: %s\n",
+		    "%08ld: character '%c' [%02x], %s -> %s\n",
 		    lexer->char_counter, (isprint(c) ? c : '.'), c,
-		    state_table[lexer->state]);
+		    state_table[oldstate], state_table[lexer->state]);
 	lexer->char_counter++;
 
 	if (lexer->state == GROUND_STATE) {
@@ -2066,7 +2075,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 	     * per word and the preamble better be good enough.
 	     */
 	    packet_accept(lexer, RTCM2_PACKET);
-	    lexer->state = RTCM2_SYNC_STATE;
 	    packet_discard(lexer);
 	    break;
 	}
