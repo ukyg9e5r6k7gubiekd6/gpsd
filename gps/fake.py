@@ -308,6 +308,15 @@ class FakePTY(FakeGPS):
         "Wait for the associated device to drain (e.g. before closing)."
         termios.tcdrain(self.fd)
 
+def cleansocket(host, port):
+    "Get a socket that we can re-use cleanly after it's closed."
+    cs = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # This magic prevents "Address already in use" errors after
+    # we release the socket.
+    cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    cs.bind((host, port))
+    return cs
+
 class FakeTCP(FakeGPS):
     "A TCP serverlet with a test log ready to be cycled to it."
     def __init__(self, testload,
@@ -317,11 +326,7 @@ class FakeTCP(FakeGPS):
         self.host = host
         self.port = int(port)
         self.byname = "tcp://" + host + ":" + str(port)
-        self.dispatcher = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # This magic prevents "Address already in use" errors after
-        # we release the socket.
-        self.dispatcher.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.dispatcher.bind((self.host, self.port))
+        self.dispatcher = cleansocket(self.host, self.port)
         self.dispatcher.listen(5)
         self.readables = [self.dispatcher]
 
@@ -515,7 +520,10 @@ class TestSession:
         if port:
             self.port = port
         else:
-            self.port = gps.GPSD_PORT
+            # Magic way to get a socket with an unused port number
+            s = cleansocket("localhost", 0)
+            self.port = s.getsockname()[1]
+            s.close()
         self.progress = lambda x: None
         self.reporter = lambda x: None
         self.default_predicate = None
