@@ -1556,8 +1556,8 @@ else:
     # (1) Clear GPSD's SHM segment in case a previous abort didn't.  This
     # prevents spurious error messages.
     # (2) Dump the platform and its delay parameters.
-    gps_regress = Utility("gps-regress", [gpsd, python_built_extensions],
-            'ipcrm shm 0x47505344 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
+    gps_regress = Utility("gps-regress", [gpsd, gpsctl, python_built_extensions],
+            'gpsctl -R 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second

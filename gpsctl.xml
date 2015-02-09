@@ -33,6 +33,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-l </arg>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-t <replaceable>devicetype</replaceable></arg>
+      <arg choice='opt'>-R </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'><replaceable>serial-port</replaceable></arg>
@@ -158,6 +159,14 @@ ESC. This switch implies <option>-f</option>.</para>
 <para>Change the sampling timeout. Defaults to 8 seconds, which should
 always be sufficient to get an identifying packet from a device
 emitting at the normal rate of 1 per second.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-R</term>
+<listitem>
+<para>Remove the GPSD shared-memory segment used for SHM export. This
+option will normally only be of interest to GPSD developers.</para>
 </listitem>
 </varlistentry>
 

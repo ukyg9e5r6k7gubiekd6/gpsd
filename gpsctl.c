@@ -22,6 +22,11 @@
 #include "gpsd.h"
 #include "revision.h"
 
+#ifdef SHM_EXPORT_ENABLE
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#endif /* SHM_EXPORT_ENABLE */
+
 #define HIGH_LEVEL_TIMEOUT	8
 
 static int debuglevel;
@@ -200,8 +205,8 @@ int main(int argc, char **argv)
 
     context.errout.label = "gpsctl";
 
-#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-c rate] [-T timeout] [-V] [-t devtype] [-x control] [-e] <device>\n"
-    while ((option = getopt(argc, argv, "bec:fhlnrs:t:x:D:T:V")) != -1) {
+#define USAGE	"usage: gpsctl [-l] [-b | -n | -r] [-D n] [-s speed] [-c rate] [-T timeout] [-V] [-t devtype] [-x control] [-R] [-e] [device]\n"
+    while ((option = getopt(argc, argv, "bec:fhlnrs:t:x:D:RT:V")) != -1) {
 	switch (option) {
 	case 'b':		/* switch to vendor binary mode */
 	    to_binary = true;
@@ -287,6 +292,25 @@ int main(int argc, char **argv)
 	    break;
 	case 't':		/* force the device type */
 	    devtype = optarg;
+	    break;
+	case 'R':		/* remove the SHM export segment */
+#ifdef SHM_EXPORT_ENABLE
+	    status = shmget(GPSD_KEY, 0, 0);
+	    if (status == -1) {
+		gpsd_report(&context.errout, LOG_WARN,
+			    "GPSD SHM segment does not exist.\n");
+		exit(1);
+	    } else {
+		status = shmctl(status, IPC_RMID, NULL);
+		if (status == -1) {
+		    gpsd_report(&context.errout, LOG_ERROR,
+				"shmctl failed, errno = %d (%s)\n",
+				errno, strerror(errno));
+		    exit(1);
+		}
+	    }
+	    exit(0);
+#endif /* SHM_EXPORT_ENABLE */
 	    break;
 	case 'T':		/* set the timeout on packet recognition */
 	    timeout = (unsigned)atoi(optarg);
