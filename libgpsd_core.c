@@ -300,9 +300,6 @@ void gps_context_init(struct gps_context_t *context,
 	.shmexport      = NULL,
 #endif /* SHM_EXPORT_ENABLE */
 	.serial_write    = gpsd_serial_write,
-	.inbytesavg = 0.0,
-	.inbyteswpos = (char) 0,
-	.selectbug = false
     };
     /*@ +initallelements +nullassign +nullderef +fullinitblock @*/
     /* *INDENT-ON* */
@@ -1198,24 +1195,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     } else {
 	newlen = generic_get(session);
     }
-
-	 /* Calculate window average of read count */
-    session->context->inbyteswpos = session->context->inbyteswpos % WINDOW_AVG_SIZE;
-    alpha = (session->context->inbyteswpos== (unsigned char) 0) ? 0.0f:1.0f;
-    if (newlen > 0)
-       session->context->inbytesavg = alpha*session->context->inbytesavg + (float) newlen;
-    else
-       /* error reading -- counts as 0 */
-       session->context->inbytesavg = alpha*session->context->inbytesavg;
-
-    if (session->context->inbyteswpos== (unsigned char) (WINDOW_AVG_SIZE-1)) {
-       session->context->inbytesavg/=WINDOW_AVG_SIZE;
-    }
-    session->context->inbyteswpos += (unsigned char) 1;
-
-	 gpsd_report(&session->context->errout, LOG_RAW,
-		    "window average of received byte count is %f\n",
-		    session->context->inbytesavg);
 
     /* update the scoreboard structure from the GPS */
     gpsd_report(&session->context->errout, LOG_RAW + 2,

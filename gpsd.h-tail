@@ -283,14 +283,6 @@ struct gps_context_t {
 #endif
     ssize_t (*serial_write)(struct gps_device_t *,
 			    const char *buf, const size_t len);
-    /*
-     * Used for calculation of sleep time before select();
-     * needed to sidestep buggy fast-looping selects.
-     */
-#define WINDOW_AVG_SIZE  8        /* reset avg after this number of reads  */
-    float inbytesavg;             /* average number of bytes per read      */
-    unsigned char inbyteswpos;
-    bool selectbug;               /* true if the slect bug is triggered    */
 };
 
 /* state for resolving interleaved Type 24 packets */
