@@ -260,13 +260,13 @@ static void ubx_update(void)
     if (pps_thread_lastpps(&session, &drift) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
-        char buf2[22];
 	TS_SUB( &timedelta, &drift.clock, &drift.real);
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
 	    (void)mvwprintw(ppswin, 1, 13, "> 1 day");
         } else {
+	    char buf2[22];
 	    (void)timespec_str( &timedelta, buf2, sizeof(buf2) );
 	    (void)mvwprintw(ppswin, 1, 13, "%s", buf2);
         }

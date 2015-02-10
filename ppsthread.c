@@ -600,8 +600,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 
 	if (ok) {
-            /* pthread error return */
-            int pthread_err; 
 	    /* offset is the skew from expected to observed pulse time */
 	    double offset;
 	    /* delay after last fix */
@@ -654,6 +652,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    delay);
 		log1 = "timestamp out of range";
 	    } else {
+		/* pthread error return */
+		int pthread_err; 
 		/*@-compdef@*/
 		last_second_used = last_fixtime_real;
 		if (session->thread_report_hook != NULL) 

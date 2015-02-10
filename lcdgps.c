@@ -384,6 +384,7 @@ int main(int argc, char *argv[])
     localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     localAddr.sin_port = htons(0);
 
+    /* coverity[uninit_use_in_call] */
     rc = bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr));
     if (rc == -1) {
 	printf("%s: cannot bind port TCP %u\n",argv[0],LCDDPORT);
@@ -392,6 +393,7 @@ int main(int argc, char *argv[])
     }
 
     /* connect to server */
+    /* coverity[uninit_use_in_call] */
     rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
     if (rc == -1) {
 	perror("cannot connect ");

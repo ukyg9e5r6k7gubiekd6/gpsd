@@ -611,9 +611,9 @@ static void decode(FILE *fpin, FILE*fpout)
     if (minlength)
     {
 	for (i = 0; i < (int)(sizeof(minima)/sizeof(minima[0])); i++) {
-	    const struct gps_type_t **dp;
 	    /* dump all minima, ignoring comments */
 	    if (i != 1 && minima[i] < MAX_PACKET_LENGTH+1) {
+		const struct gps_type_t **dp;
 		char *np = "Unknown";
 		for (dp = gpsd_drivers; *dp; dp++) {
 		    if ((*dp)->packet_type == i-1) {
