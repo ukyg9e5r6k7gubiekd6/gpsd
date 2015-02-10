@@ -711,7 +711,7 @@ supported.</para>
 sufficiently convoluted to confuse some compiler optimizers, notably
 in GCC 3.x at -O2, into generating bad code.</para>
 
-<para>Devices meant to to use PPS for high-precision timekeeping may
+<para>Devices meant to use PPS for high-precision timekeeping may
 fail if they are specified after startup by a control-socket command,
 as opposed to on the daemon's original command line. Root privileges
 are dropped early, and some Unix variants require them in order to set
@@ -791,17 +791,18 @@ them.  The GPSD project website links to several documents that collect
 publicly disclosed information about the protocol.</para>
 
 <para><application>gpsd</application> parses the following NMEA
-sentences: 
-RMC, GGA, GLL, GSA, GSV, VTG, ZDA, GBS, HDT, DBT.  
-It recognizes these with either the normal GP talker-ID prefix, or
-with the GN prefix used by GLONASS, or with the II prefix emitted by
+sentences: RMC, GGA, GLL, GSA, GSV, VTG, ZDA, GBS, HDT, DBT, GST.  It
+recognizes these with either the normal GP talker-ID prefix, or with
+the GN prefix used by GLONASS, or with the II prefix emitted by
 Seahawk Autohelm marine navigation systems, or with the IN prefix
 emitted by some Garmin units, or with the EC prefix emitted by ECDIS
-units, or with the SD prefix emitted by depth sounders.  It recognizes
-some vendor extensions: the PGRME emitted by some Garmin GPS models,
-the OHPR emitted by Oceanserver digital compasses, the PTNTHTM emitted
-by True North digital compasses, and the PASHR sentences emitted by
-some Ashtech GPSes.</para>
+units, or with the SD prefix emitted by depth sounders, or with the HC
+and TI prefix emitted by some Airmar equipment.  It recognizes some
+vendor extensions: the PGRME emitted by some Garmin GPS models, the
+OHPR emitted by Oceanserver digital compasses, the PTNTHTM emitted by
+True North digital compasses, the PMTK omitted by some San Jose
+Navigation GPSes, and the PASHR sentences emitted by some Ashtech
+GPSes.</para>
 
 <para>Note that <application>gpsd</application> JSON returns pure decimal
 degrees, not the hybrid degree/minute format described in the NMEA
