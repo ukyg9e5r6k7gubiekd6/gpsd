@@ -232,6 +232,11 @@ for var in import_env:
 envs["GPSD_HOME"] = os.getcwd()
 envs["LD_LIBRARY_PATH"] = os.getcwd()
 
+# In the test productions, use a non-default value of the SHM key
+# to avoid colliding with production instances. Value must be legal for
+# atoi(3)/strtoul(3); this is the default key plus one.
+envs["GPSD_SHM_KEY"] = "0x47505345"
+
 env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV=envs)
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
