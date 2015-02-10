@@ -73,7 +73,7 @@ import gps
 import packet as sniffer
 
 # The magic number below has to be derived from observation.  If
-# it's too high you'll slow the tests down a lot.  If they're too low
+# it's too high you'll slow the tests down a lot.  If it's too low
 # you'll get random spurious regression failures that usually look
 # like lines missing from the end of the test output relative to the
 # check file.  The need for it may be symptomatic of race conditions
@@ -91,7 +91,7 @@ import packet as sniffer
 if sys.platform.startswith("linux"):
     WRITE_PAD = 0.0
 elif sys.platform.startswith("freebsd"):
-    WRITE_PAD = 0.001
+    WRITE_PAD = 0.01
 elif sys.platform.startswith("netbsd5"):
     WRITE_PAD = 0.200
 elif sys.platform.startswith("netbsd"):
