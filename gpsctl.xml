@@ -219,6 +219,16 @@ last.</para>
 
 </refsect1>
 
+<refsect1 id='environment'><title>ENVIRONMENT VARIABLES</title>
+
+<para>By setting the environment variable <envar>GPSD_SHM_KEY</envar>,
+you can control the key value used to designate the shared-memory
+segment removed with the -R option.  This will be useful mainly when
+isolating test instances of <application>gpsd</application> from
+production ones.</para>
+
+</refsect1>
+
 <refsect1 id='examples'><title>EXAMPLES</title>
 
 <variablelist>

@@ -772,6 +772,15 @@ Text following # on a line is ignored.  Blank lines are ignored.</para>
 </variablelist>
 
 </refsect1>
+<refsect1 id='environment'><title>ENVIRONMENT VARIABLES</title>
+
+<para>By setting the environment variable <envar>GPSD_SHM_KEY</envar>,
+you can control the key value used to create the shared-memory segment
+used for communication with the client library.  This will be useful
+mainly when isolating test instances of
+<application>gpsd</application> from production ones.</para>
+
+</refsect1>
 <refsect1 id='standards'><title>APPLICABLE STANDARDS</title>
 
 <para>The official NMEA protocol standards for NMEA0183 and NMEA2000

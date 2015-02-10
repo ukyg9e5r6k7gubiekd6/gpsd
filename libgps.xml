@@ -261,6 +261,16 @@ as in the example given below.  Resources within the session object
 will be properly released when it is garbage-collected.</para>
 </refsect1>
 
+<refsect1 id='environment'><title>ENVIRONMENT VARIABLES</title>
+
+<para>By setting the environment variable <envar>GPSD_SHM_KEY</envar>,
+you can control the key value used to create shared-memory segment
+used for communication with <application>gpsd</application>.  This
+will be useful mainly when isolating test instances of
+<application>gpsd</application> from production ones.</para>
+
+</refsect1>
+
 <refsect1 id='example'><title>CODE EXAMPLE</title>
 
 <para>The following is an excerpted and simplified version of the

@@ -21,6 +21,7 @@ PERMISSIONS
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -33,13 +34,13 @@ PERMISSIONS
 bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
-    int shmid;
+    int shmid = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
 
-    shmid = shmget((key_t)GPSD_KEY, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
+    shmid = shmget((key_t)shmid, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {
 	gpsd_report(&context->errout, LOG_ERROR,
 		    "shmget(%ld, %zd, 0666) failed: %s\n",
-		    (long int)GPSD_KEY,
+		    (long int)shmid,
 		    sizeof(struct gps_data_t),
 		    strerror(errno));
 	return false;
