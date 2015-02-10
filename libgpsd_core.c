@@ -1650,6 +1650,9 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
 {
     double fix_time, integral, fractional;
 
+    /* this should be an invariant of the way this function is called */
+    assert(!isnan(device->newdata.time));
+
 #ifdef HAVE_CLOCK_GETTIME
     /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &td->clock);
 #else
@@ -1658,10 +1661,6 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     TVTOTS(&td->clock, &clock_tv);
 #endif /* HAVE_CLOCK_GETTIME */
     fix_time = device->newdata.time;
-    if ( isnan( device->newdata.time ) ) {
-	/* this should not happen, but it does */
-        fix_time = 0.0;
-    }
     /* assume zero when there's no offset method */
     if (device->device_type == NULL
 	|| device->device_type->time_offset == NULL)

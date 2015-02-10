@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <time.h>
+#include <math.h>
 #include <sys/time.h>		/* expected to declare select(2) a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -744,9 +745,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     report_unlock();
 
 #ifdef NTPSHM_ENABLE
-    /* Update the last fix time seen for PPS. */
-    /* FIXME! ntpshm_latch() need device->newdata.time to be set */
-    ntpshm_latch(device, &td);
+    /* Update the last fix time seen for PPS if we've actually seen one. */
+    if (!isnan(device->newdata.time))
+	ntpshm_latch(device, &td);
 #endif /* NTPSHM_ENABLE */
 }
 /*@+observertrans +nullpass +globstate +compdef +uniondef@*/

@@ -370,14 +370,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/*@ -ignoresigns */
         /* end of time critical section */
 
-        if ( isnan( last_fixtime_real ) ) {
-	    gpsd_report(&session->context->errout, LOG_ERROR,
-			"PPS last_fixtime_real is NAN\n");
-	    /* this should never happen, but it does. */
-            last_fixtime_real = 0.0;
-	    session->last_fixtime.real = 0.0;
-        }
-
+	/*
+	 * If there was no valid time from the GPS when the PPS event was
+	 * asserted, we can do nothing further.  It will be strange if
+	 * this ever actually happens, since we expect PPS to be asserted
+	 * only after a valid fix - which should yield time.
+	 */
+        if (isnan(last_fixtime_real))
+	    continue;
 
 	/* mask for monitored lines */
 	state &= PPS_LINE_TIOC;
