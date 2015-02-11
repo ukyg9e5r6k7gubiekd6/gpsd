@@ -34,7 +34,9 @@ PERMISSIONS
 bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
+    /*@-nullpass@*/
     int shmid = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
+    /*@+nullpass@*/
 
     shmid = shmget((key_t)shmid, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {

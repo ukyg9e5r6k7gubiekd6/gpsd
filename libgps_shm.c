@@ -41,7 +41,9 @@ struct privdata_t
 int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 /* open a shared-memory connection to the daemon */
 {
+    /*@-nullpass@*/
     int shmid = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
+    /*@+nullpass@*/
 
     libgps_debug_trace((DEBUG_CALLS, "gps_shm_open()\n"));
 

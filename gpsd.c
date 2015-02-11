@@ -2243,7 +2243,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* read any commands that came in over the control socket */
-	for (cfd = 0; cfd < FD_SETSIZE; cfd++)
+	for (cfd = 0; cfd < (int)FD_SETSIZE; cfd++)
 	    if (FD_ISSET(cfd, &control_fds)) {
 		char buf[BUFSIZ];
 		ssize_t rd;

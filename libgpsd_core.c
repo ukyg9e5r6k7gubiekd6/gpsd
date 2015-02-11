@@ -1030,7 +1030,7 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 	    return AWAIT_NOT_READY;
 	else if (errno == EBADF) {
 	    int fd;
-	    for (fd = 0; fd < FD_SETSIZE; fd++)
+	    for (fd = 0; fd < (int)FD_SETSIZE; fd++)
 		/*
 		 * All we care about here is a cheap, fast, uninterruptible
 		 * way to check if a file descriptor is valid.
@@ -1051,12 +1051,12 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 	int i;
 	char dbuf[BUFSIZ];
 	dbuf[0] = '\0';
-	for (i = 0; i < FD_SETSIZE; i++)
+	for (i = 0; i < (int)FD_SETSIZE; i++)
 	    if (FD_ISSET(i, all_fds))
 		str_appendf(dbuf, sizeof(dbuf), "%d ", i);
 	str_rstrip_char(dbuf, ' ');
 	(void)strlcat(dbuf, "} -> {", sizeof(dbuf));
-	for (i = 0; i < FD_SETSIZE; i++)
+	for (i = 0; i < (int)FD_SETSIZE; i++)
 	    if (FD_ISSET(i, rfds))
 		str_appendf(dbuf, sizeof(dbuf), " %d ", i);
 	gpsd_report(errout, LOG_SPIN,
@@ -1651,7 +1651,7 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     double fix_time, integral, fractional;
 
     /* this should be an invariant of the way this function is called */
-    assert(!isnan(device->newdata.time));
+    assert(isnan(device->newdata.time)==0);
 
 #ifdef HAVE_CLOCK_GETTIME
     /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &td->clock);
