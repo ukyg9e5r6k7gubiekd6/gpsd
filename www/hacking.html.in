@@ -70,14 +70,15 @@ file in the source distribution.</p>
 <ol class="ToC">
   <li><a href="#goals">Goals and philosophy of the project</a></li>
   <li><a href="#audience">Audience and supported hardware</a>
-  <ol>
-    <li><a href="#service">The time and location service</a></li>
-    <li><a href="#tuning">The testing and tuning tools</a></li>
-    <li><a href="#upgrading">The upgrading tools</a></li>
-    <li><a href="#monitoring">The GPS/GNSS monitoring tools</a></li>
-  </ol></li>
+    <ol>
+      <li><a href="#service">The time and location service</a></li>
+      <li><a href="#tuning">The testing and tuning tools</a></li>
+      <li><a href="#upgrading">The upgrading tools</a></li>
+      <li><a href="#monitoring">The GPS/GNSS monitoring tools</a></li>
+    </ol>
+  </li>
   <li><a href="#contribution">Contribution guidelines</a>
-  <ol>
+  
     <li><a href="#verify">Verify your patch or commit</a></li>
     <li><a href="#patches">Send patches in diff -u or -c format</a></li>
     <li><a href="#license">The license on contributions</a></li>
@@ -85,53 +86,61 @@ file in the source distribution.</p>
     <li><a href="#statics">Don't create static variables in the libraries!</a></li>
     <li><a href="#malloc">Don't use malloc!</a></li>
     <li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
-  </ol></li>
+    <li><a href="#standards">C, standards and style</a></li>
+    <li><a href="#asserts">Use assert(3) sparingly and carefully!</a></li>
+  </li>
   <li><a href="#understanding">Understanding the code</a>
-  <ol>
-    <li><a href="#debugging">Debugging</a></li>
-    <li><a href="#profiling">Profiling</a></li>
-    <li><a href="#porting">Porting to weird machines: endianness, width, and signedness issues.</a></li>
-    <li><a href="#architecture">Architecture and how to hack it</a></li>
-    <li><a href="#autoconfiguration">Autoconfiguration</a></li>
-    <li><a href="#error">Error modeling</a></li>
-    <li><a href="#ancient">Ancient history</a></li>
-  </ol></li>
+      <ol>
+	<li><a href="#debugging">Debugging</a></li>
+	<li><a href="#profiling">Profiling</a></li>
+	<li><a href="#porting">Porting to weird machines: endianness, width, and signedness issues.</a></li>
+	<li><a href="#architecture">Architecture and how to hack it</a></li>
+	<li><a href="#autoconfiguration">Autoconfiguration</a></li>
+	<li><a href="#error">Error modeling</a></li>
+	<li><a href="#ancient">Ancient history</a></li>
+      </ol>
+  </li>
   <li><a href="#newsentence">How to add a new sensor type</a>
-  <ol>
-    <li><a href="#newdriver">Driver-level support</a></li>
-    <li><a href="#newjson">JSON output</a></li>
-    <li><a href="#newtest">Updating the test suite</a></li>
-    <li><a href="#newclient">Client-side support</a></li>
-    <li><a href="#newdoc">Documentation</a></li>
-    <li><a href="#newstyle">Points for style</a></li>
-  </ol></li>
+    <ol>
+      <li><a href="#newdriver">Driver-level support</a></li>
+      <li><a href="#newjson">JSON output</a></li>
+      <li><a href="#newtest">Updating the test suite</a></li>
+      <li><a href="#newclient">Client-side support</a></li>
+      <li><a href="#newdoc">Documentation</a></li>
+      <li><a href="#newstyle">Points for style</a></li>
+    </ol>
+  </li>
   <li><a href="#trouble">Known trouble spots</a>
-  <ol>
-    <li><a href="#y2k1">The Y2.1K problem and other calendar issues</a></li>
-    <li><a href="#hotplug">Hotplug interface problems</a></li>
-    <li><a href="#security">Security Issues</a></li>
-  </ol></li>
+    <ol>
+      <li><a href="#y2k1">The Y2.1K problem and other calendar issues</a></li>
+      <li><a href="#hotplug">Hotplug interface problems</a></li>
+      <li><a href="#security">Security Issues</a></li>
+    </ol>
+  </li>
   <li><a href="#newtypes">Adding new GPS types</a>
-  <ol>
-    <li><a href="#drivers">Driver architecture</a></li>
-    <li><a href="#notdriver">When not to add a driver</a></li>
-    <li><a href="#init">Initializing time and date</a></li>
-    <li><a href="#invocation">How drivers are invoked</a></li>
-    <li><a href="#reports">Where to put the data you get from the GPS</a></li>
-    <li><a href="#confidence">Report errors with a 95% confidence interval</a></li>
-    <li><a href="#logfiles">Log files for regression testing</a></li>
-  </ol></li>
+    <ol>
+      <li><a href="#drivers">Driver architecture</a></li>
+      <li><a href="#notdriver">When not to add a driver</a></li>
+      <li><a href="#init">Initializing time and date</a></li>
+      <li><a href="#invocation">How drivers are invoked</a></li>
+      <li><a href="#reports">Where to put the data you get from the GPS</a></li>
+      <li><a href="#confidence">Report errors with a 95% confidence interval</a></li>
+      <li><a href="#logfiles">Log files for regression testing</a></li>
+    </ol>
+  </li>
   <li><a href="#designahead">Future Protocol Directions</a>
-  <ol>
-    <li><a href="#proposed">Proposed sentences</a></li>
-  </ol></li>
+    <ol>
+      <li><a href="#proposed">Proposed sentences</a></li>
+    </ol>
+  </li>
   <li><a href="#blindalleys">Blind alleys</a>
-  <ol>
-    <li><a href="#oncepercycle">Reporting fix data only once per cycle</a></li>
-    <li><a href="#shipstrings">Allowing clients to ship arbitrary control strings to a GPS</a></li>
-    <li><a href="#fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</a></li>
-    <li><a href="#subsecond">Subsecond polling</a></li>
-  </ol></li>
+    <ol>
+      <li><a href="#oncepercycle">Reporting fix data only once per cycle</a></li>
+      <li><a href="#shipstrings">Allowing clients to ship arbitrary control strings to a GPS</a></li>
+      <li><a href="#fifo">Setting FIFO threshold to 1 to reduce jitter in serial-message times</a></li>
+      <li><a href="#subsecond">Subsecond polling</a></li>
+    </ol>
+  </li>
   <li><a href="#release">Release Checklist</a></li>
 </ol>
 
@@ -252,7 +261,8 @@ to support an RTCM104 encoder.</p>
 <p>The project implementation languages are C and Python.  The core
 libgpsd libraries (and the daemon, which is a thin wrapper around
 them) are written in C; the test and profiling tools are written in
-Python, with a limited amount of glue in POSIX-conformant sh.</p>
+Python, with a limited amount of glue in POSIX-conformant sh and some 
+bash.</p>
 
 <p>Code in other languages will, in general, be accepted only if
 it supplies a language binding for the libgps or libgpsd libraries
@@ -323,7 +333,7 @@ go through the following checklist:</p>
     documentation.</li>
 
 <li>If your patch changes executable code in any way that is more than
-    trivial, use the regression-test suite &mdash; "scons testregress"
+    trivial, use the regression-test suite &mdash; "scons check"
     &mdash; to check that your patch doesn't break the handling of any
     already-supported GPS.</li>
 
@@ -461,7 +471,37 @@ not all integer types have the same length across architectures. A long may
 be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
 4 bytes in a packet, then say so (or use sizeof(int32_t)).</p>
 
-<h2 id="malloc">Use assert(3) sparingly and carefully!</h2>
+<h2 id="standards">C, standards and style</h2>
+
+<p>The C code is written with a large subset of C99.  You are
+encouraged to use <code>bool</code>, designated initializers, 
+<code>inline</code> and <code>restrict</code>.  Do not assume
+that type specifiers will default to int.</p>
+
+<p>You are allowed, but not required, to use C99 // comments.</p>
+
+<p>Though C99 allows it, do not intermix declarations with executable
+statements within a block, because that gives one of our code checkers
+the screaming fantods (splint dies with an internal error).  Do,
+however, declare variables at the front of the <em>smallest</em> enclosing
+block.</p>
+
+<p>The code does <em>not</em> use C99 variadic macros, flexible
+arrays, type-generic math, or type complex. Think carefully before
+introducing these and don't do it without discussion on the
+development list first.</p>
+
+<p>Avoid dependencies on GCC and glibc, as we must support embedded 
+environments using (for example) uClibc.</p>
+
+<p>We are pretty laissez-faire about indent style and low-level C
+formatting.  Be aware that if your patch seems disharmonious with what
+is around it, your code may be reformatted, so try to blend in.</p>
+
+<p>You may rely on a full POSIX and Single Unix Standard binding to
+the operating system.</p>
+
+<h2 id="assers">Use assert(3) sparingly and carefully!</h2>
 
 <p>gpsd - I'm speaking of the daemon itself, not the clients and test
 tools - runs in a lot of contexts where it provides a life-critical
@@ -820,8 +860,9 @@ settings.</p>
 <p>One of the design goals for <code>gpsd</code> is to be as near
 zero-configuration as possible.  Under most circumstances, it doesn't
 require either the GPS type or the serial-line parameters to connect
-to it to be specified.  Presently, here's how the autoconfig
-works.</p>
+to it to be specified.  Presently, here's roughly how the autoconfig
+works. (I say "roughly" because this sequemce may leave out
+recently-added binary packet types.)</p>
 
 <ol>
 <li>At each baud rate <code>gpsd</code> grabs packets until the
