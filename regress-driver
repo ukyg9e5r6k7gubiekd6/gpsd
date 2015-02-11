@@ -4,9 +4,8 @@
 # makefile before we regrouped the regression tests by stable and unstable
 # drivers.
 
-# Requires GNU date extensions
-# Should return an empty blank string if those are not present.
-starttime=`date +"%s  * 1000000000 + %N" 2>/dev/null`
+# Without GNU date extensions, %N won't expand and we only get 1sec precision
+starttime=`date +"%s  * 1000000000 + %N" | sed '/+ N/s///' 2>/dev/null`
 
 # We need to have the build directory in $GPSD_HOME to find the new gpsd
 if [ "`dirname $0`" = "." ]; then
@@ -190,7 +189,7 @@ case $mode in
 esac
 
 # See starttime above
-endtime=`date +"%s * 1000000000 + %N" 2>/dev/null`
+endtime=`date +"%s * 1000000000 + %N" | sed '/+ N/s///' 2>/dev/null`
 
 if [ "$starttime" -a "$endtime" ]
 then
