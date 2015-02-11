@@ -491,8 +491,11 @@ arrays, type-generic math, or type complex. Think carefully before
 introducing these and don't do it without discussion on the
 development list first.</p>
 
-<p>Avoid dependencies on GCC and glibc, as we must support embedded 
-environments using (for example) uClibc.</p>
+<p>Do not use GCC extensions, as the code should compile with any sane
+C99 compiler (specifically including clang).  Do not use
+glibc-specific features, as <code>gpsd</code> is portable to multiple
+operating systems that do not use glibc, including BSD's libc and
+uClibc.  Instead, rely on what POSIX guarantees.</p>
 
 <p>We are pretty laissez-faire about indent style and low-level C
 formatting.  Be aware that if your patch seems disharmonious with what
