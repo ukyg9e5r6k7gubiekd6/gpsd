@@ -179,7 +179,7 @@ if __name__ == '__main__':
     try:
         for logfile in arguments:
             try:
-                test.gps_add(logfile, speed=speed, pred=fakehook)
+                test.gps_add(logfile, speed=speed, pred=fakehook, oneshot=singleshot)
             except gpsfake.TestLoadError, e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit, 1

@@ -112,7 +112,7 @@ class TestLoadError(exceptions.Exception):
 
 class TestLoad:
     "Digest a logfile into a list of sentences we can cycle through."
-    def __init__(self, logfp, predump=False, slow=False):
+    def __init__(self, logfp, predump=False, slow=False, oneshot=False):
         self.sentences = []	# This is the interesting part
         if type(logfp) == type(""):
             logfp = open(logfp, "r")
@@ -195,6 +195,9 @@ class TestLoad:
         # Maybe this needs to be split on different delimiters?
         if self.delimiter is not None:
             self.sentences = text[commentlen:].split(self.delimiter)
+        # Do we want single-shot operation?
+        if oneshot:
+            self.sentences.append("# EOF\n")
 
 class PacketError(exceptions.Exception):
     def __init__(self, msg):
@@ -538,11 +541,11 @@ class TestSession:
     def set_predicate(self, pred):
         "Set a default go predicate for the session."
         self.default_predicate = pred
-    def gps_add(self, logfile, speed=19200, pred=None):
+    def gps_add(self, logfile, speed=19200, pred=None, oneshot=False):
         "Add a simulated GPS being fed by the specified logfile."
         self.progress("gpsfake: gps_add(%s, %d)\n" % (logfile, speed))
         if logfile not in self.fakegpslist:
-            testload = TestLoad(logfile, predump=self.predump, slow=self.slow)
+            testload = TestLoad(logfile, predump=self.predump, slow=self.slow, oneshot=oneshot)
             if testload.sourcetype == "UDP" or self.udp:
                 newgps = FakeUDP(testload, ipaddr="127.0.0.1",
                                  port=self.baseport,
@@ -624,7 +627,6 @@ class TestSession:
                         if chosen.exhausted == 0:
                             chosen.exhausted = time.time()
                             self.progress("gpsfake: GPS %s ran out of input\n" % chosen.byname)
-                            chosen.write("# EOF\n")
                     else:
                         chosen.feed()
                 elif isinstance(chosen, gps.gps):
