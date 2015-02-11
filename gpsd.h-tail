@@ -886,12 +886,22 @@ extern void pps_early_init(struct gps_context_t *);
 /* normalize a timespec */
 #define TS_NORM(ts)  \
     do { \
-	if ( 1000000000 <= (ts)->tv_nsec ) { \
-	    (ts)->tv_nsec -= 1000000000; \
-	    (ts)->tv_sec++; \
-	} else if ( 0 > (ts)->tv_nsec ) { \
-	    (ts)->tv_nsec += 1000000000; \
-	    (ts)->tv_sec--; \
+        if ( ( 0 > (ts)->tv_sec ) || (0 > (ts)->tv_nsec) ) { \
+	    if ( -1000000000 >= (ts)->tv_nsec ) { \
+		(ts)->tv_nsec += 1000000000; \
+		(ts)->tv_sec--; \
+	    } else if ( 0 < (ts)->tv_nsec ) { \
+		(ts)->tv_nsec -= 1000000000; \
+		(ts)->tv_sec++; \
+            } \
+        } else { \
+	    if ( 1000000000 <= (ts)->tv_nsec ) { \
+		(ts)->tv_nsec -= 1000000000; \
+		(ts)->tv_sec++; \
+	    } else if ( 0 > (ts)->tv_nsec ) { \
+		(ts)->tv_nsec += 1000000000; \
+		(ts)->tv_sec--; \
+            } \
 	} \
     } while (0)
 
