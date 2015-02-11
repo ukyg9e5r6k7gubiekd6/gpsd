@@ -223,8 +223,6 @@ class FakeGPS:
             time.sleep(int(delay))
         # self.write has to be set by the derived class
         self.write(line)
-        if self.progress:
-            self.progress("gpsfake: %s feeds %d=%s\n" % (self.testload.name, len(line), repr(line)))
         time.sleep(self.testload.delay)
         self.index += 1
 
@@ -302,6 +300,7 @@ class FakePTY(FakeGPS):
         #    pass
 
     def write(self, line):
+        self.progress("gpsfake: %s writes %d=%s\n" % (self.testload.name, len(line), repr(line)))
         os.write(self.fd, line)
 
     def drain(self):
@@ -346,6 +345,7 @@ class FakeTCP(FakeGPS):
 
     def write(self, line):
         "Send the next log packet to everybody connected."
+        self.progress("gpsfake: %s writes %d=%s\n" % (self.testload.name, len(line), repr(line)))
         for s in self.readables:
             if s != self.dispatcher:
                 s.send(line)
@@ -372,6 +372,7 @@ class FakeUDP(FakeGPS):
         pass
 
     def write(self, line):
+        self.progress("gpsfake: %s writes %d=%s\n" % (self.testload.name, len(line), repr(line)))
         self.sock.sendto(line, (self.ipaddr, int(self.port)))
 
     def drain(self):
