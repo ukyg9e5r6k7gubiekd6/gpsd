@@ -1434,7 +1434,7 @@ static void pseudonmea_report(struct subscriber_t *sub,
 #endif /* SOCKET_EXPORT_ENABLE */
 
 static void all_reports(struct gps_device_t *device, gps_mask_t changed)
-/* report on the corrent packet from a specified device */
+/* report on the current packet from a specified device */
 {
 #ifdef SOCKET_EXPORT_ENABLE
     struct subscriber_t *sub;
