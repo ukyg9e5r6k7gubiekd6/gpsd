@@ -41,14 +41,16 @@ struct privdata_t
 int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
 /* open a shared-memory connection to the daemon */
 {
+    int shmid;
+
     /*@-nullpass@*/
-    int shmid = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
+    int shmkey = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
     /*@+nullpass@*/
 
     libgps_debug_trace((DEBUG_CALLS, "gps_shm_open()\n"));
 
     gpsdata->privdata = NULL;
-    shmid = shmget((key_t)shmid, sizeof(struct gps_data_t), 0);
+    shmid = shmget((key_t)shmkey, sizeof(struct gps_data_t), 0);
     if (shmid == -1) {
 	/* daemon isn't running or failed to create shared segment */
 	return -1;
