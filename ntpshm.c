@@ -236,8 +236,8 @@ void ntpshm_session_init(struct gps_device_t *session)
 int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedrift_t *td)
 /* put a received fix time into shared memory for NTP */
 {
-    char real_str[22];
-    char clock_str[22];
+    char real_str[TIMESPEC_LEN];
+    char clock_str[TIMESPEC_LEN];
     /*
      * shmTime is volatile to try to prevent C compiler from reordering
      * writes, or optimizing some 'dead code'.  but CPU cache may still
@@ -359,8 +359,8 @@ static void init_hook(struct gps_device_t *session)
 /* offset is actual_ts - clock_ts */
 static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
 {
-    char real_str[22];
-    char clock_str[22];
+    char real_str[TIMESPEC_LEN];
+    char clock_str[TIMESPEC_LEN];
     struct sock_sample sample;
 
     /* chrony expects tv-sec since Jan 1970 */

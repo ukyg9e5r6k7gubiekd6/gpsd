@@ -263,7 +263,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 /*@-mustfreefresh -type -unrecog -branchstate@*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
-    char ts_str1[22], ts_str2[22];
+    char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     struct gps_device_t *session = (struct gps_device_t *)arg;
     double last_fixtime_real = 0; 
     /* the system clock ime, to the nSec, when the last fix received */

@@ -599,7 +599,7 @@ static void sirf_update(void)
             /* need a bigger field to show it */
 	    (void)mvwprintw(mid7win, 2, 37, "> 1 day");
         } else {
-	    char buf2[22];
+	    char buf2[TIMESPEC_LEN];
 	    (void)timespec_str( &timedelta, buf2, sizeof(buf2) );
 	    (void)mvwprintw(mid7win, 2, 37, "%s", buf2);
         }
