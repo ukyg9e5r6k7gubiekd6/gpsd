@@ -286,8 +286,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     int edge = 0;       /* 0 = clear edge, 1 = assert edge */
 #endif /* TIOCMIWAIT */
 #if defined(HAVE_SYS_TIMEPPS_H)
-    int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
 #ifndef S_SPLINT_S
+    int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
     int cycle_kpps, duration_kpps;
     /* kpps_pulse stores the time of the last two edges */
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
@@ -315,10 +315,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     while (session->thread_report_hook != NULL 
            || session->context->pps_hook != NULL) {
 	bool ok = false;
+#ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
 	// cppcheck-suppress variableScope
 	bool ok_kpps = false;
 #endif /* HAVE_SYS_TIMEPPS_H */
+#endif /* S_SPLINT_S */
 	char *log = NULL;
 
 #if defined(TIOCMIWAIT)
@@ -631,6 +633,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    struct timedrift_t drift;
 	    gpsd_report(&session->context->errout, LOG_RAW,
 			"PPS edge accepted %.100s", log);
+#ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
             if ( 0 <= session->kernelpps_handle && ok_kpps) {
 		/* use KPPS time */
@@ -644,6 +647,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 	    } 
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
+#endif /* S_SPLINT_S */
 	    /* else, use plain PPS */
 
             /* This innocuous-looking "+ 1" embodies a significant
