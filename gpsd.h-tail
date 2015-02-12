@@ -884,26 +884,31 @@ extern void pps_early_init(struct gps_context_t *);
 #endif /* PPS_ENABLE */
 
 /* normalize a timespec */
-#define TS_NORM(ts)  \
-    do { \
-        if ( 1 > (ts)->tv_sec ) { \
-	    if ( -1000000000 >= (ts)->tv_nsec ) { \
-		(ts)->tv_nsec += 1000000000; \
-		(ts)->tv_sec--; \
-	    } else if ( 0 < (ts)->tv_nsec ) { \
-		(ts)->tv_nsec -= 1000000000; \
-		(ts)->tv_sec++; \
-            } \
-        } else { \
-	    if ( 1000000000 <= (ts)->tv_nsec ) { \
-		(ts)->tv_nsec -= 1000000000; \
-		(ts)->tv_sec++; \
-	    } else if ( 0 > (ts)->tv_nsec ) { \
-		(ts)->tv_nsec += 1000000000; \
-		(ts)->tv_sec--; \
-            } \
-	} \
-    } while (0)
+static inline void TS_NORM( struct timespec *ts)
+{
+    if ( (  1 <= ts->tv_sec ) ||
+         ( (0 == ts->tv_sec ) && (0 <= ts->tv_nsec ) ) ) {
+        /* result is positive */
+	if ( 1000000000 <= ts->tv_nsec ) {
+            /* borrow from tv_sec */
+	    ts->tv_nsec -= 1000000000;
+	    ts->tv_sec++;
+	} else if ( 0 > (ts)->tv_nsec ) {
+            /* carry from tv_sec */
+	    ts->tv_nsec += 1000000000;
+	    ts->tv_sec--;
+	}
+    }  else {
+        /* result is negative */
+	if ( -1000000000 >= ts->tv_nsec ) {
+	    ts->tv_nsec += 1000000000;
+	    ts->tv_sec--;
+	} else if ( 0 < ts->tv_nsec ) {
+	    ts->tv_nsec -= 1000000000;
+	    ts->tv_sec++;
+	}
+    }
+}
 
 /* normalize a timeval */
 #define TV_NORM(tv)  \
