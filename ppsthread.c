@@ -41,7 +41,7 @@
  * UNIX time to nanoSec precision after 2038 is 63 bits
  * a double is only 53 significant bits.
  * 
- * You can not do PPS math with doubles
+ * You cannot do PPS math with doubles
  *
  * This file is Copyright (c) 2013 by the GPSD project. BSD terms
  * apply: see the file COPYING in the distribution root for details.
@@ -657,7 +657,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              * previous cycle and we must increment. 
              *
              * FIXME! The GR-601W at 38,400 or faster can send the
-             * serial fix before PPS by about 10 mSec!
+             * serial fix before the interrupt event carrying the PPS 
+	     * line assertion by about 10 mSec!
              */
 
 	    /*@+relaxtypes@*/
