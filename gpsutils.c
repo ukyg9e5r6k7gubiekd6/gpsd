@@ -489,6 +489,18 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
  * put in it *buf, buf should be at least 22 bytes
  * return negative for error
  * otherwise the number of chars in buf, excluding trailing \0
+ *
+ * the returned buffer will look like, shortest case:
+ *    sign character ' ' or '-'
+ *    one digit of seconds
+ *    decmal point '.'
+ *    9 digits of nanoSec
+ *
+ * So 12 chars, like this: "-0.123456789"
+ *
+ * Absolute worst case is 10 digits of seconds.  
+ * So 21 digits like this: "-2147483647.123456789"
+ *
 */
 int timespec_str(struct timespec *ts, /*@out@*/char *buf, int buf_size)
 {
