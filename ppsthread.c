@@ -296,9 +296,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
     memset( (void *)&pi, 0, sizeof(pps_info_t));
 #endif /* S_SPLINT_S */
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
     /* pthread error return */
     int pthread_err; 
-#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
     /*
      * Wait for status change on any handshake line.  Just one edge,
