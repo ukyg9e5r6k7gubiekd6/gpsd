@@ -501,7 +501,7 @@ struct gps_device_t {
     volatile struct {
 	timestamp_t real;
         /* clock must be a timespec as it is in nSec and
-         * a timestamp_t will loose precision */
+         * a timestamp_t will lose precision */
 	struct timespec clock; /* system clock time when last fix received */
     } last_fixtime;	/* so updates happen once */
 #ifdef PPS_ENABLE
@@ -959,6 +959,8 @@ extern void pps_early_init(struct gps_context_t *);
         TS_NORM( r ); \
     } while (0)
 
+extern void pps_stash_fixtime(struct gps_device_t *, 
+			      timestamp_t, struct timespec);
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
 extern int pps_thread_lastpps(struct gps_device_t *, struct timedrift_t *);

@@ -260,6 +260,31 @@ static int init_kernel_pps(struct gps_device_t *session)
 /*@+compdestroy +nullpass +unrecog@*/
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
+void pps_stash_fixtime(struct gps_device_t *session, 
+		   timestamp_t realtime, struct timespec clocktime)
+/* thread-safe update of last fix time */
+{
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    int pthread_err = pthread_mutex_lock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_lock() : %s\n",
+		strerror(errno));
+    }
+    /*@ +unrecog @*/
+    session->last_fixtime.real = realtime;
+    session->last_fixtime.clock = clocktime;
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_unlock() : %s\n",
+		strerror(errno));
+    }
+    /*@ +unrecog @*/
+}
+
+
 /*@-mustfreefresh -type -unrecog -branchstate@*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
@@ -293,6 +318,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec ts_kpps;
     pps_info_t pi;
+    /* pthread error return */
+    int pthread_err; 
 
     memset( (void *)&pi, 0, sizeof(pps_info_t));
 #endif /* S_SPLINT_S */
@@ -328,11 +355,30 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			session->gpsdata.dev.path, errno, strerror(errno));
 	    break;
 	}
-        /* start of time critical section 
-         * only error reporting, not success reporting in critical section 
-         * quick, grab a copy of last_fixtime before it changes */
+        /*
+	 * Start of time critical section 
+         * Only error reporting, not success reporting in critical section
+	 */
+
+	/* quick, grab a copy of last_fixtime before it changes */
+	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
+	pthread_err = pthread_mutex_lock(&ppslast_mutex);
+	if ( 0 != pthread_err ) {
+	    gpsd_report(&session->context->errout, LOG_ERROR,
+		    "PPS: pthread_mutex_lock() : %s\n",
+		    strerror(errno));
+	}
+	/*@ +unrecog @*/
 	last_fixtime_real = session->last_fixtime.real;
 	last_fixtime_clock = session->last_fixtime.clock;
+	/*@ -unrecog (splint has no pthread declarations as yet) @*/
+	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+	if ( 0 != pthread_err ) {
+	    gpsd_report(&session->context->errout, LOG_ERROR,
+		    "PPS: pthread_mutex_unlock() : %s\n",
+		    strerror(errno));
+	}
+	/*@ +unrecog @*/
 
 /*@-noeffect@*/
         /* get the time after we just woke up */
@@ -653,8 +699,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			    delay);
 		log1 = "timestamp out of range";
 	    } else {
-		/* pthread error return */
-		int pthread_err; 
 		/*@-compdef@*/
 		last_second_used = last_fixtime_real;
 		if (session->thread_report_hook != NULL) 
