@@ -293,11 +293,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
     struct timespec ts_kpps;
     pps_info_t pi;
-    /* pthread error return */
-    int pthread_err; 
 
     memset( (void *)&pi, 0, sizeof(pps_info_t));
 #endif /* S_SPLINT_S */
+    /* pthread error return */
+    int pthread_err; 
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
     /*
