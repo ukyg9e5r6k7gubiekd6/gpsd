@@ -893,7 +893,8 @@ extern void pps_early_init(struct gps_context_t *);
  * this only handles the case where two normalized timespecs
  * are added or subracted.  (e.g. only a one needs to be borrowed/carried
  */
-static inline void TS_NORM( struct timespec *ts)
+/*@-type -noeffect@*/ /* splint is confused about struct timespec */
+/*@unused@*/static inline void TS_NORM( struct timespec *ts)
 {
     if ( (  1 <= ts->tv_sec ) ||
          ( (0 == ts->tv_sec ) && (0 <= ts->tv_nsec ) ) ) {
@@ -920,6 +921,7 @@ static inline void TS_NORM( struct timespec *ts)
 	}
     }
 }
+/*@+type +noeffect@*/
 
 /* normalize a timeval */
 #define TV_NORM(tv)  \
