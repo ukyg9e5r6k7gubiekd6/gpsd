@@ -1569,8 +1569,8 @@ else:
     # changes in timebase.h.  The problem is in the SiRF tests;
     # that driver relies on the default until it gets the current
     # offset from subframe data.
-    Utility('gps-makeregress', [gpsd, python_built_extensions],
-        '$SRCDIR/regress-driver -b test/daemon/*.log')
+    Utility('gps-makeregress', [gpsd, gpsctl, python_built_extensions],
+        '$SRCDIR/gpsctl -R 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver -b test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
