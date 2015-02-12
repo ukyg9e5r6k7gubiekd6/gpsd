@@ -1679,7 +1679,7 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     /*@+type@*/
 
     /* thread-safe update */
-    pps_stash_fixtime(device, device->newdata.time, td->clock);
+    pps_thread_stash_fixtime(device, device->newdata.time, td->clock);
 }
 #endif /* NTPSHM_ENABLE */
 

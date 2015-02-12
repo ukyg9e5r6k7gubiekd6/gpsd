@@ -959,7 +959,7 @@ extern void pps_early_init(struct gps_context_t *);
         TS_NORM( r ); \
     } while (0)
 
-extern void pps_stash_fixtime(struct gps_device_t *, 
+extern void pps_thread_stash_fixtime(struct gps_device_t *, 
 			      timestamp_t, struct timespec);
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);

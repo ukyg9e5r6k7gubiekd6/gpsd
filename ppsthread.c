@@ -260,31 +260,6 @@ static int init_kernel_pps(struct gps_device_t *session)
 /*@+compdestroy +nullpass +unrecog@*/
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-void pps_stash_fixtime(struct gps_device_t *session, 
-		   timestamp_t realtime, struct timespec clocktime)
-/* thread-safe update of last fix time */
-{
-    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    int pthread_err = pthread_mutex_lock(&ppslast_mutex);
-    if ( 0 != pthread_err ) {
-	gpsd_report(&session->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_lock() : %s\n",
-		strerror(errno));
-    }
-    /*@ +unrecog @*/
-    session->last_fixtime.real = realtime;
-    session->last_fixtime.clock = clocktime;
-    /*@ -unrecog (splint has no pthread declarations as yet) @*/
-    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
-    if ( 0 != pthread_err ) {
-	gpsd_report(&session->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_unlock() : %s\n",
-		strerror(errno));
-    }
-    /*@ +unrecog @*/
-}
-
-
 /*@-mustfreefresh -type -unrecog -branchstate@*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
@@ -795,8 +770,32 @@ void pps_thread_deactivate(struct gps_device_t *session)
     /*@+nullstate +mustfreeonly@*/
 }
 
+void pps_thread_stash_fixtime(struct gps_device_t *session, 
+		   timestamp_t realtime, struct timespec clocktime)
+/* thread-safe update of last fix time - only way we pass data in */
+{
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    int pthread_err = pthread_mutex_lock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_lock() : %s\n",
+		strerror(errno));
+    }
+    /*@ +unrecog @*/
+    session->last_fixtime.real = realtime;
+    session->last_fixtime.clock = clocktime;
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	gpsd_report(&session->context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_unlock() : %s\n",
+		strerror(errno));
+    }
+    /*@ +unrecog @*/
+}
+
 int pps_thread_lastpps(struct gps_device_t *session, struct timedrift_t *td)
-/* return a copy of the drift at the time of the last PPS */
+/* return the drift at the time of the last PPS - only way we pass data out */
 {
     volatile int ret;
     /* pthread error return */
