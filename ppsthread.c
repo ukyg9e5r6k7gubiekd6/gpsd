@@ -328,11 +328,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			session->gpsdata.dev.path, errno, strerror(errno));
 	    break;
 	}
-        /* start of time critical section */
-	gpsd_report(&session->context->errout, LOG_PROG,
-		    "PPS ioctl(TIOCMIWAIT) on %s succeeded\n",
-		    session->gpsdata.dev.path);
-        /* quick, grab a copy of last_fixtime before it changes */
+        /* start of time critical section 
+         * only error reporting, not success reporting in critical section 
+         * quick, grab a copy of last_fixtime before it changes */
 	last_fixtime_real = session->last_fixtime.real;
 	last_fixtime_clock = session->last_fixtime.clock;
 
@@ -369,6 +367,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 	/*@ -ignoresigns */
         /* end of time critical section */
+	gpsd_report(&session->context->errout, LOG_PROG,
+		    "PPS ioctl(TIOCMIWAIT) on %s succeeded\n",
+		    session->gpsdata.dev.path);
 
 	/*
 	 * If there was no valid time from the GPS when the PPS event was
