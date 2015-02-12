@@ -50,7 +50,7 @@ static bool nmea_initialize(void)
     (void)mvwaddstr(cookedwin, 1, 1, "Time: ");
     (void)mvwaddstr(cookedwin, 1, 32, "Lat: ");
     (void)mvwaddstr(cookedwin, 1, 55, "Lon: ");
-    (void)mvwaddstr(cookedwin, 2, 34, " Cooked PVT ");
+    (void)mvwaddstr(cookedwin, 2, 34, " Cooked TPV ");
     (void)wattrset(cookedwin, A_NORMAL);
 
     nmeawin = derwin(devicewin, 3, 80, 3, 0);
@@ -269,7 +269,7 @@ static void nmea_update(void)
 	    (void)mvwprintw(gprmcwin, 7, 12, "%-5s%s", fields[10],
 			    fields[11]);
 
-	    cooked_pvt();	/* cooked version of PVT */
+	    cooked_pvt();	/* cooked version of TPV */
 	}
 
 	if (strcmp(fields[0], "GPGSA") == 0
@@ -447,10 +447,10 @@ static int ashtech_command(char line[])
 	(void)sleep(6);		/* it takes 4-6 sec for the receiver to reboot */
 	monitor_nmea_send("$PASHS,WAS,ON");	/* enable WAAS */
 
-	monitor_nmea_send("$PASHS,NME,POS,A,ON");	/* Ashtech PVT solution */
+	monitor_nmea_send("$PASHS,NME,POS,A,ON");	/* Ashtech TPV solution */
 	monitor_nmea_send("$PASHS,NME,SAT,A,ON");	/* Ashtech Satellite status */
 	monitor_nmea_send("$PASHS,NME,MCA,A,ON");	/* MCA measurements */
-	monitor_nmea_send("$PASHS,NME,PBN,A,ON");	/* ECEF PVT solution */
+	monitor_nmea_send("$PASHS,NME,PBN,A,ON");	/* ECEF TPV solution */
 	monitor_nmea_send("$PASHS,NME,SNV,A,ON,10");	/* Almanac data */
 
 	monitor_nmea_send("$PASHS,NME,XMG,A,ON");	/* exception messages */

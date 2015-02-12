@@ -453,6 +453,9 @@ static bool switch_type(const struct gps_type_t *devtype)
 	    }
 	    active = newobject;
 	    devicewin = newwin((*active)->min_y, (*active)->min_x, 1, 0);
+	    /* screen might have JSOM on it from the init sequence */
+	    (void)clearok(stdscr, true);
+	    (void)clear();
 	    if ((devicewin == NULL) || ((*active)->initialize != NULL && !(*active)->initialize())) {
 		monitor_complain("Internal initialization failure - screen "
 				 "must be at least 80x24. Aborting.");
