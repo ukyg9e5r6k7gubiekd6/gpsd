@@ -745,8 +745,13 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     report_unlock();
 
 #ifdef NTPSHM_ENABLE
-    /* Update the last fix time seen for PPS if we've actually seen one. */
-    if (isnan(device->newdata.time)==0)
+    /* Update the last fix time seen for PPS if we've actually seen one,
+     * and it is a new second. */
+    if ( 0 != isnan(device->newdata.time)) {
+	// "NTP: bad new time
+    } else if (device->newdata.time == device->last_fixtime.real) {
+	// "NTP: Not a new time
+    } else 
 	ntpshm_latch(device, &td);
 #endif /* NTPSHM_ENABLE */
 }
