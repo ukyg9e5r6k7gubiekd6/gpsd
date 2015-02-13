@@ -205,10 +205,13 @@ if __name__ == '__main__':
 
         try:
             if pipe:
-                session = test.client_by_id(test.client_add(client_init + "\n"))
-                for report in session:
-                    if report[u'class'] == u'WATCH':
-                        break
+                test.client_add(client_init + "\n")
+                # Give daemon time to get ready for the feeds.
+                # Without a delay here there's a window for test
+                # sentences to arrive before the watch takes effect.
+                # This needs to increase if leading sentences in
+                # test loads aren't being processed.
+                time.sleep(1)
             test.run()
         except socket.error, msg:
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)
