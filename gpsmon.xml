@@ -151,8 +151,8 @@ typed suspends packet dumping and brings up a command prompt. This
 feature will mainly be of interest to GPSD developers.</para>
 
 <para>After startup (without -a), the top part of the screen reports
-the contents of several especially interesting packet types.  The "PPS
-offset" field, if nonempty, is the delta between the last 1PPS top of
+the contents of several especially interesting packet types.  The
+"PPS" field, if nonempty, is the delta between the last 1PPS top of
 second and the system clock at that time.</para>
 
 <para>The bottom half of the screen is a scrolling hex dump of all

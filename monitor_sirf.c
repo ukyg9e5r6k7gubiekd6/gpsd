@@ -172,7 +172,7 @@ static bool sirf_initialize(void)
     display(mid7win, 1, 9, "Drift: ");
     display(mid7win, 1, 23, "Bias: ");
     display(mid7win, 2, 1, "Est. GPS Time: ");
-    display(mid7win, 2, 27, "PPS offs: ");
+    display(mid7win, 2, 27, "PPS: ");
 #ifndef PPS_ENABLE
     (void)mvwaddstr(mid7win, 2, 40, "N/A");
 #endif /* PPS_ENABLE */
@@ -597,11 +597,11 @@ static void sirf_update(void)
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
-	    (void)mvwprintw(mid7win, 2, 37, "> 1 day");
+	    (void)mvwprintw(mid7win, 2, 32, "> 1 day");
         } else {
 	    char buf2[TIMESPEC_LEN];
 	    (void)timespec_str( &timedelta, buf2, sizeof(buf2) );
-	    (void)mvwprintw(mid7win, 2, 37, "%s", buf2);
+	    (void)mvwprintw(mid7win, 2, 32, "%s", buf2);
         }
 	(void)wnoutrefresh(mid7win);
     }

@@ -75,9 +75,9 @@ static bool ubx_initialize(void)
 	return false;
     (void)wborder(ppswin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)wattrset(ppswin, A_BOLD);
-    (void)mvwaddstr(ppswin, 1, 1, "PPS offset: ");
+    (void)mvwaddstr(ppswin, 1, 1, "PPS: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(ppswin, 1, 13, "N/A");
+    (void)mvwaddstr(ppswin, 1, 6, "N/A");
 #endif /* PPS_ENABLE */
     display(ppswin, 2, 22, " PPS ");
     (void)wattrset(ppswin, A_NORMAL);
@@ -264,11 +264,11 @@ static void ubx_update(void)
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
-	    (void)mvwprintw(ppswin, 1, 13, "> 1 day");
+	    (void)mvwprintw(ppswin, 1, 6, "> 1 day");
         } else {
 	    char buf2[TIMESPEC_LEN];
 	    (void)timespec_str( &timedelta, buf2, sizeof(buf2) );
-	    (void)mvwprintw(ppswin, 1, 13, "%s", buf2);
+	    (void)mvwprintw(ppswin, 1, 6, "%s", buf2);
         }
 	(void)wnoutrefresh(ppswin);
     }

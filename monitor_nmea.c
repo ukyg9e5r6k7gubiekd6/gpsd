@@ -94,9 +94,9 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgsawin, 1, 1, "Mode: ");
     (void)mvwprintw(gpgsawin, 2, 1, "Sats: ");
     (void)mvwprintw(gpgsawin, 3, 1, "DOP: H=      V=      P=");
-    (void)mvwprintw(gpgsawin, 4, 1, "PPS offset: ");
+    (void)mvwprintw(gpgsawin, 4, 1, "PPS: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(gpgsawin, 4, 13, "N/A");
+    (void)mvwaddstr(gpgsawin, 4, 6, "N/A");
 #endif /* PPS_ENABLE */
     (void)mvwprintw(gpgsawin, 5, 9, " GSA + PPS ");
     (void)wattrset(gpgsawin, A_NORMAL);
@@ -333,11 +333,11 @@ static void nmea_update(void)
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
-	    (void)mvwprintw(gpgsawin, 4, 13, "> 1 day");
+	    (void)mvwprintw(gpgsawin, 4, 6, "> 1 day");
         } else {
 	    char buf[TIMESPEC_LEN];
 	    (void)timespec_str( &timedelta, buf, sizeof(buf) );
-	    (void)mvwprintw(gpgsawin, 4, 13, "%s", buf);
+	    (void)mvwprintw(gpgsawin, 4, 6, "%s", buf);
         }
 	(void)wnoutrefresh(gpgsawin);
     }
