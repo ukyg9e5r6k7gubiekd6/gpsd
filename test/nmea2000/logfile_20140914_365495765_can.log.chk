@@ -1,6 +1,6 @@
 {"class":"VERSION","release":"3.12~dev","rev":"release-3.11-314-gcdcee16","proto_major":3,"proto_minor":10}
 {"class":"DEVICES","devices":[{"class":"DEVICE","path":"nmea2000://vcan0","driver":"NMEA2000","activated":"2015-01-31T08:35:54.884Z"}]}
-{"class":"WATCH","enable":true,"json":true,"nmea":true,"raw":0,"scaled":true,"timing":false,"split24":false}
+{"class":"WATCH","enable":true,"json":true,"nmea":true,"raw":0,"scaled":true,"timing":false,"split24":false,"pps":false}
 $GPRMC,000000,V,3755.3232,N,02301.0145,E,0.0000,0.000,000000,,*3E
 $GPGSA,A,0,,,,,,,,,,,,,0.0,0.0,0.0*31
 {"class":"TPV","device":"nmea2000://vcan0","mode":0}
