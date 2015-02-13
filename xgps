@@ -15,14 +15,19 @@ By Eric S. Raymond for the GPSD project, December 2009
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
-import sys, math, time, getopt, socket
+import math
+import socket
+import sys
+import time
 
-import gobject, pygtk
+import gobject
+import pygtk
 pygtk.require('2.0')
 import gtk
 import cairo
 
-import gps, gps.clienthelpers
+import gps
+import gps.clienthelpers
 
 # how to sort the Satellite List
 # some of ("PRN","el","az","ss","used") with optional '-' to reverse sort
