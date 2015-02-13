@@ -166,6 +166,10 @@ if __name__ == '__main__':
     else:
         print >>sys.stderr, "Processing %s" % ",".join(arguments)
 
+    # Don't allocate a private port when cycling logs for client testing.
+     if port is None and not singleshot:
+         port = gps.GPSD_PORT
+
     test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions,
                                tcp=tcp, udp=udp, verbose=verbose,
                                predump=predump, slow=slow)
