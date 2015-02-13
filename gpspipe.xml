@@ -119,7 +119,7 @@ Default setting is "%F %T"</para>
 
 <para>-p enables dumping of profiling information in JSON.</para>
 
-<para>-P enables dumping of PPS drift JSON is NMEA and raw modes.</para>
+<para>-P enables dumping of PPS drift JSON in NMEA and raw modes.</para>
 
 <para>-n [count] causes [count] sentences to be output.
 <application>gpspipe</application> will then exit gracefully.</para>
