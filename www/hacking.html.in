@@ -501,6 +501,11 @@ uClibc.  Instead, rely on what POSIX guarantees.</p>
 formatting.  Be aware that if your patch seems disharmonious with what
 is around it, your code may be reformatted, so try to blend in.</p>
 
+<p>You may rely on a full POSIX and Single Unix Standard binding to
+the operating system. Someday it is possible we may have a Windows
+port, but we refuse to cripple or overcomplicate the codebase in
+advance.</p>
+
 <p>Do not litter the code with undocumented magic numbers!  This is
 especially important for buffer lengths, because unsynchronized
 changes to buffer lengths and the code that uses them can result in
@@ -509,9 +514,6 @@ a comment near the point of occurrence should explain why it has the
 value it does.  If it occurs multiple times, make it the value of
 a macro that is defined in one place so that all instances can be
 changed sanely.</p>
-
-<p>You may rely on a full POSIX and Single Unix Standard binding to
-the operating system.</p>
 
 <h2 id="assers">Use assert(3) sparingly and carefully!</h2>
 
