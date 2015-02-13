@@ -844,6 +844,7 @@ class Base:
 
 if __name__ == "__main__":
     try:
+        import getopt
         (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:u:V?",
                                              ['verbose'])
         debug = 0
