@@ -9,8 +9,16 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
-import sys, os, time, getopt, socket, random, pty, platform
-import gps, gps.fake as gpsfake   # The "as" pacifies pychecker
+import getopt
+import gps
+import gps.fake as gpsfake   # The "as" pacifies pychecker
+import os
+import platform
+import pty
+import socket
+import sys
+import time
+
 
 class Baton:
     "Ship progress indications to stderr."
