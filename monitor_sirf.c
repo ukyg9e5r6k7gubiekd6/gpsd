@@ -171,8 +171,8 @@ static bool sirf_initialize(void)
     display(mid7win, 1, 1, "SVs: ");
     display(mid7win, 1, 9, "Drift: ");
     display(mid7win, 1, 23, "Bias: ");
-    display(mid7win, 2, 1, "Est. GPS Time: ");
-    display(mid7win, 2, 27, "PPS: ");
+    display(mid7win, 2, 1, "GPS Time: ");
+    display(mid7win, 2, 23, "PPS: ");
 #ifndef PPS_ENABLE
     (void)mvwaddstr(mid7win, 2, 40, "N/A");
 #endif /* PPS_ENABLE */
@@ -392,7 +392,7 @@ static void sirf_update(void)
 	display(mid7win, 1, 5, "%2d", getub(buf, 7));	/* SVs */
 	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock drift */
 	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */
-	display(mid7win, 2, 16, "%lu", getbeu32(buf, 16));	/* Estimated Time */
+	display(mid7win, 2, 11, "%lu", getbeu32(buf, 16));	/* Estimated Time */
 	monitor_log("CSD 0x07=");
 	break;
 
@@ -591,13 +591,13 @@ static void sirf_update(void)
     /*@-compdef@*/
     /*@-type -noeffect@*/ /* splint is confused about struct timespec */
     if (pps_thread_lastpps(&session, &drift) > 0) {
-	/* NOTE: can not use double here due to precision requirements */
+	/* NOTE: cannot use double here due to precision requirements */
 	struct timespec timedelta;
 	TS_SUB( &timedelta, &drift.clock, &drift.real);
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
-	    (void)mvwprintw(mid7win, 2, 32, "> 1 day");
+	    (void)mvwprintw(mid7win, 2, 28, "> 1 day");
         } else {
 	    char buf2[TIMESPEC_LEN];
 	    (void)timespec_str( &timedelta, buf2, sizeof(buf2) );
