@@ -6,8 +6,16 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-import sys, os, time, getopt, socket, math, copy, signal
+import copy
+import getopt
 import gps
+import math
+import os
+import signal
+import socket
+import sys
+import time
+
 
 class Baton:
     "Ship progress indication to stderr."
@@ -35,11 +43,12 @@ class Baton:
         return
 
     def end(self, msg=None):
-        if msg == None:
+        if msg is None:
             msg = self.endmsg
         if self.stream:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
+
 
 class plotter:
     "Generic class for gatherling and plotting sensor statistics."
@@ -47,13 +56,15 @@ class plotter:
         self.fixes = []
         self.start_time = int(time.time())
         self.watch = {"TPV"}
+
     def whatami(self):
         "How do we identify this plotting run?"
         return "%s, %s, %d %dN%d, cycle %ds" % \
                (gps.misc.isotime(self.start_time),
                 self.device.get('driver', "unknown"), self.device['bps'],
                 9 - self.device['stopbits'],
-                self.device['stopbits'], self.device['cycle']) 
+                self.device['stopbits'], self.device['cycle'])
+
     def collect(self, verbose, logfp=None):
         "Collect data from the GPS."
         try:
@@ -63,7 +74,7 @@ class plotter:
             sys.exit(1)
         # Initialize
         self.session.read()
-        if self.session.version == None:
+        if self.session.version is None:
             sys.stderr.write("gpsprof: requires gpsd to speak new protocol.\n")
             sys.exit(1)
         # Set parameters
@@ -73,7 +84,7 @@ class plotter:
         if device:
             flags |= gps.WATCH_DEVICE
         try:
-            signal.signal(signal.SIGUSR1, lambda empty, unused: sys.stderr.write("%d of %d (%d%%)..." % (await-countdown, await, ((await-countdown)*100.0/await))))
+            signal.signal(signal.SIGUSR1, lambda empty, unused: sys.stderr.write("%d of %d (%d%%)..." % (await - countdown, await, ((await - countdown) * 100.0 / await))))
             signal.siginterrupt(signal.SIGUSR1, False)
             self.session.stream(flags, device)
             baton = Baton("gpsprof: %d looking for fix" % os.getpid(), "done")
@@ -88,7 +99,7 @@ class plotter:
                     sys.stderr.write(" ERROR: %s.\n" % self.session.data["message"])
                     sys.exit(1)
                 if self.session.data["class"] == "DEVICES":
-                    if len(self.session.data["devices"]) !=1 and not device:
+                    if len(self.session.data["devices"]) != 1 and not device:
                         sys.stderr.write(" ERROR: multiple devices connected, you must explicitly specify the device.\n")
                         sys.exit(1)
                     for i in range(len(self.session.data["devices"])):
@@ -108,18 +119,19 @@ class plotter:
                 # We can get some funky artifacts at start of self.session
                 # apparently due to RS232 buffering effects. Ignore
                 # them.
-                if threshold and time.time()-basetime < self.session.cycle * threshold:
+                if threshold and time.time() - basetime < self.session.cycle * threshold:
                     continue
                 if self.session.fix.mode <= gps.MODE_NO_FIX:
                     continue
                 if countdown == await:
-                    sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time()-basetime,await))
+                    sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time() - basetime, await))
                 if self.sample():
                     countdown -= 1
             baton.end()
         finally:
             self.session.stream(gps.WATCH_DISABLE | gps.WATCH_TIMING)
             signal.signal(signal.SIGUSR1, signal.SIG_DFL)
+
     def replot(self, infp):
         "Replot from a JSON log file."
         baton = Baton("gpsprof: replotting", "done")
@@ -133,33 +145,41 @@ class plotter:
                 continue
             self.sample()
         baton.end()
+
     def dump(self):
         "Dump the raw data for post-analysis."
         return self.header() + self.data()
+
 
 class spaceplot(plotter):
     "Spatial scattergram of fixes."
     name = "space"
     requires_time = False
+
     def __init__(self):
         plotter.__init__(self)
         self.recentered = []
+
     def d(self, a, b):
-        return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+        return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
     def sample(self):
         # Watch out for the NaN value from gps.py.
         self.fixes.append((self.session.fix.latitude, self.session.fix.longitude, self.session.fix.altitude))
         return True
+
     def header(self):
         return "# Position uncertainty, %s\n" % self.whatami()
+
     def postprocess(self):
         if not self.recentered:
             # centroid is just arithmetic avg of lat,lon
-            self.centroid = (sum(map(lambda x:x[0], self.fixes))/len(self.fixes), sum(map(lambda x:x[1], self.fixes))/len(self.fixes))
+            self.centroid = (sum(map(lambda x: x[0], self.fixes)) / len(self.fixes), sum(map(lambda x: x[1], self.fixes)) / len(self.fixes))
             # Sort fixes by distance from centroid
             self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
             # Convert fixes to offsets from centroid in meters
             self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
+
     def data(self):
         res = ""
         for i in range(len(self.recentered)):
@@ -167,11 +187,12 @@ class spaceplot(plotter):
             (raw1, raw2, alt) = self.fixes[i]
             res += "%f\t%f\t%f\t%f\t%f\n" % (lat, lon, raw1, raw2, alt)
         return res
+
     def plot(self):
         # Compute CEP(50%)
-        cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.50)][:2])
-        cep95_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.95)][:2])
-        cep99_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes)*0.99)][:2])
+        cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.50)][:2])
+        cep95_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
+        cep99_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
         alt_sum = 0
         alt_num = 0
         alt_fixes = []
@@ -181,9 +202,9 @@ class spaceplot(plotter):
             (_raw1, _raw2, alt) = self.fixes[i]
             if not gps.isnan(alt):
                 alt_sum += alt
-                alt_fixes.append( alt)
+                alt_fixes.append(alt)
                 alt_num += 1
-            if lon > lon_max :
+            if lon > lon_max:
                 lon_max = lon
         if alt_num == 0:
             alt_avg = gps.NaN
@@ -192,7 +213,7 @@ class spaceplot(plotter):
             alt_avg = alt_sum / alt_num
             # Sort fixes by distance from average altitude
             alt_fixes.sort(lambda x, y: cmp(abs(alt_avg - x), abs(alt_avg - y)))
-            alt_ep = abs( alt_fixes[ len(alt_fixes)/2 ] - alt_avg)
+            alt_ep = abs(alt_fixes[len(alt_fixes) / 2] - alt_avg)
         if self.centroid[0] < 0:
             latstring = "%fS" % -self.centroid[0]
         elif self.centroid[0] == 0:
@@ -218,9 +239,9 @@ class spaceplot(plotter):
             fmt += 'set y2label "Meters Altitude from %f"\n' % alt_avg
             fmt += 'set ytics nomirror\n'
             fmt += 'set y2tics\n'
-        fmt += 'cep=%f\n' % self.d((0,0), self.recentered[len(self.fixes)/2])
-        fmt += 'cep95=%f\n' % self.d((0,0), self.recentered[int(len(self.fixes)*0.95)])
-        fmt += 'cep99=%f\n' % self.d((0,0), self.recentered[int(len(self.fixes)*0.99)])
+        fmt += 'cep=%f\n' % self.d((0, 0), self.recentered[len(self.fixes) / 2])
+        fmt += 'cep95=%f\n' % self.d((0, 0), self.recentered[int(len(self.fixes) * 0.95)])
+        fmt += 'cep99=%f\n' % self.d((0, 0), self.recentered[int(len(self.fixes) * 0.99)])
         fmt += 'set parametric\n'
         fmt += 'set trange [0:2*pi]\n'
         fmt += 'cx(t, r) = sin(t)*r\n'
@@ -228,11 +249,13 @@ class spaceplot(plotter):
         fmt += 'chlen = cep/20\n'
         fmt += "set arrow from -chlen,0 to chlen,0 nohead\n"
         fmt += "set arrow from 0,-chlen to 0,chlen nohead\n"
-        if len(self.fixes) > 1000: plot_style = 'dots'
-        else: plot_style = 'points'
+        if len(self.fixes) > 1000:
+            plot_style = 'dots'
+        else:
+            plot_style = 'points'
         fmt += 'plot "-" using 1:2 with ' + plot_style + ' ls 3 title "%d GPS fixes" ' % (len(self.fixes))
         if not gps.isnan(alt_avg):
-            fmt += ', "-" using ( %f ):($5 < 100000 ? $5 - %f : 1/0) axes x1y2 with %s ls 2 title " %d Altitude fixes, Average = %f, EP (50%%) = %f"' % (lon_max +1, alt_avg, plot_style, alt_num, alt_avg, alt_ep)
+            fmt += ', "-" using ( %f ):($5 < 100000 ? $5 - %f : 1/0) axes x1y2 with %s ls 2 title " %d Altitude fixes, Average = %f, EP (50%%) = %f"' % (lon_max + 1, alt_avg, plot_style, alt_num, alt_avg, alt_ep)
         fmt += ', cx(t, cep),cy(t, cep) ls 1 title "CEP (50%%) = %f meters"' % (cep_meters)
         fmt += ', cx(t, cep95),cy(t, cep95) title "CEP (95%%) = %f meters"' % (cep95_meters)
         fmt += ', cx(t, cep99),cy(t, cep99) title "CEP (99%%) = %f meters"' % (cep99_meters)
@@ -243,13 +266,16 @@ class spaceplot(plotter):
             fmt += "e\n" + self.data()
         return fmt
 
+
 class timeplot(plotter):
     "Time drift against PPS."
     name = "time"
     requires_time = True
+
     def __init__(self):
         plotter.__init__(self)
         self.watch = {"PPS"}
+
     def sample(self):
         if self.session.data["class"] == "PPS":
             self.fixes.append((self.session.data['real_sec'],
@@ -257,15 +283,19 @@ class timeplot(plotter):
                                self.session.data['clock_sec'],
                                self.session.data['clock_nsec']))
         return True
+
     def header(self):
         return "# Time drift against PPS, %s\n" % self.whatami()
+
     def postprocess(self):
         pass
+
     def data(self):
         res = ""
         for (real_sec, real_nsec, clock_sec, clock_nsec) in self.fixes:
             res += "%d\t%d\t%d\t%d\n" % (real_sec, real_nsec, clock_sec, clock_nsec)
         return res
+
     def plot(self):
         fmt = '''\
 set autoscale
@@ -275,12 +305,15 @@ plot "-" using 0:((column(1)-column(3))*1e9 + (column(2)-column(4))) title "Delt
 '''
         return fmt + self.header() + self.data()
 
+
 class uninstrumented(plotter):
     "Total times without instrumentation."
     name = "uninstrumented"
     requires_time = False
+
     def __init__(self):
         plotter.__init__(self)
+
     def sample(self):
         if self.session.fix.time:
             seconds = time.time() - gps.misc.isotime(self.session.data.time)
@@ -288,15 +321,19 @@ class uninstrumented(plotter):
             return True
         else:
             return False
+
     def header(self):
         return "# Uninstrumented total latency, " + self.whatami() + "\n"
+
     def postprocess(self):
         pass
+
     def data(self):
         res = ""
         for seconds in self.fixes:
             res += "%2.6lf\n" % seconds
         return res
+
     def plot(self):
         fmt = '''\
 set autoscale
@@ -306,12 +343,15 @@ plot "-" using 0:1 title "Total time" with impulses
 '''
         return fmt + self.header() + self.data()
 
+
 class instrumented(plotter):
     "Latency as analyzed by instrumentation."
     name = "instrumented"
     requires_time = True
+
     def __init__(self):
         plotter.__init__(self)
+
     def sample(self):
         if 'rtime' in self.session.data:
             self.fixes.append((self.session.data['tag'],
@@ -324,25 +364,29 @@ class instrumented(plotter):
             return True
         else:
             return False
+
     def header(self):
         res = "# Analyzed latency, " + self.whatami() + "\n"
         res += "# Tag   -- Fix time --  - Chars -  --   Latency  - RS232-  Analysis  - Recv -\n"
         return res
+
     def postprocess(self):
         pass
+
     def data(self):
         res = ""
-        for (tag, time, chars, sats, start, xmit, recv) in self.fixes:
+        for (tag, fix_time, chars, sats, start, xmit, recv) in self.fixes:
             rs232_time = (chars * 10.0) / self.device['bps']
-            res += "%-6s  %.3f  %9u  %2u  %.6f  %.6f  %.6f  %.6f\n" % (tag, time, chars, sats, start-time, (start-time)+rs232_time, xmit-time, recv-time)
+            res += "%-6s  %.3f  %9u  %2u  %.6f  %.6f  %.6f  %.6f\n" % (tag, fix_time, chars, sats, start - fix_time, (start - fix_time) + rs232_time, xmit - fix_time, recv - fix_time)
         return res
+
     def plot(self):
         legends = (
             "Reception delta",
             "Analysis time",
             "RS232 time",
             "Fix latency",
-            )
+        )
         fmt = '''\
 set autoscale
 set key title "Analyzed latency"
@@ -350,7 +394,7 @@ set key below
 plot \\\n'''
         for (i, legend) in enumerate(legends):
             j = len(legends) - i + 4
-            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n'  % (j, legend)
+            fmt += '    "-" using 0:%d title "%s" with impulses, \\\n' % (j, legend)
         fmt = fmt[:-4] + "\n"
         return fmt + self.header() + (self.data() + "e\n") * len(legends)
 
@@ -393,9 +437,9 @@ if __name__ == '__main__':
             elif (switch == '-D'):
                 verbose = int(val)
             elif (switch == '-h'):
-                sys.stderr.write(\
+                sys.stderr.write(
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
-                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal] [server[:port[:device]]]\n")
+                    + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal] [server[:port[:device]]]\n")
                 sys.exit(0)
 
         (host, port, device) = ("localhost", "2947", None)
