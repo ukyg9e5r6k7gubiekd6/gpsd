@@ -14,11 +14,14 @@ steps will be very frustrating.  In this command
       stty -F /dev/ttyXXX ispeed 4800 && cat </dev/ttyXXX
 
 replace ttyXXX with the filename of the port.  This will probably be
-either /dev/ttyUSB0 or /dev/ttyS0.  When you run this command, you
-should see text lines beginning with $ come to stdout (possibly after
-a short initial burst of binary garbage).  If you don't see this, you
-may have OS-level problems with your serial support, but more likely
-have the wrong device.  Look again.
+either /dev/ttyUSB0 or /dev/ttyS0. If you are on a *BSD Unix or MacOS X,
+replace -F with -f.
+
+When you run this command, you should see text lines beginning with $
+come to stdout (possibly after a short initial burst of binary
+garbage).  If you don't see this, you may have OS-level problems with
+your serial support, but more likely have the wrong device.  Look
+again.
 
 If you have trouble with the preceding step, check your cabling
 first.  Verify that the device is connected and that its power LED
