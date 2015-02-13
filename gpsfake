@@ -27,6 +27,7 @@ class Baton:
     # nunber of baton states, otherwise it will cause beat artifacts
     # in the twirling.
     SPINNER_INTERVAL = 11
+
     def __init__(self, prompt, endmsg=None):
         self.stream = sys.stderr
         self.stream.write(prompt + "...")
@@ -59,11 +60,13 @@ class Baton:
             self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
         return
 
+
 def hexdump(s):
     rep = ""
     for c in s:
         rep += "%02x" % ord(c)
     return rep
+
 
 def fakehook(linenumber, fakegps):
     if len(fakegps.testload.sentences) == 0:
@@ -150,14 +153,14 @@ if __name__ == '__main__':
             tcp = True
         elif (switch == '-T'):
             sys.stdout.write("sys %s platform %s: WRITE_PAD = %.5f\n" % (sys.platform, platform.platform(), gpsfake.WRITE_PAD))
-            raise SystemExit,0
+            raise SystemExit, 0
         elif (switch == '-u'):
             udp = True
         elif (switch == '-v'):
             verbose += 1
         elif (switch == '-h'):
             sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-S] [-c cycle] [-b] logfile\n")
-            raise SystemExit,0
+            raise SystemExit, 0
 
     try:
         pty.openpty()
@@ -205,7 +208,7 @@ if __name__ == '__main__':
                 if e.filename is None:
                     sys.stderr.write("gpsfake: unknown internal I/O error %s\n" % e)
                 else:
-                    sys.stderr.write("gpsfake: no such file as %s or file unreadable\n"%e.filename)
+                    sys.stderr.write("gpsfake: no such file as %s or file unreadable\n" % e.filename)
                 raise SystemExit, 1
             except OSError:
                 sys.stderr.write("gpsfake: can't open pty.\n")
