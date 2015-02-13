@@ -117,48 +117,48 @@ if __name__ == '__main__':
     verbose = 0
     slow = False
     for (switch, val) in options:
-        if (switch == '-1'):
+        if switch == '-1':
             singleshot = True
-        elif (switch == '-b'):
+        elif switch == '-b':
             progress = True
-        elif (switch == '-c'):
+        elif switch == '-c':
             cycle = float(val)
-        elif (switch == '-D'):
+        elif switch == '-D':
             doptions += " -D " + val
-        elif (switch == '-g'):
+        elif switch == '-g':
             monitor = "xterm -e gdb -tui --args "
-        elif (switch == '-i'):
+        elif switch == '-i':
             linedump = promptme = True
-        elif (switch == '-l'):
+        elif switch == '-l':
             linedump = True
-        elif (switch == '-m'):
+        elif switch == '-m':
             monitor = val + " "
-        elif (switch == '-n'):
+        elif switch == '-n':
             doptions += " -n"
-        elif (switch == '-x'):
+        elif switch == '-x':
             predump = True
-        elif (switch == '-o'):
+        elif switch == '-o':
             doptions = val
-        elif (switch == '-p'):
+        elif switch == '-p':
             pipe = True
-        elif (switch == '-P'):
+        elif switch == '-P':
             port = int(val)
-        elif (switch == '-r'):
+        elif switch == '-r':
             client_init = val
-        elif (switch == '-s'):
+        elif switch == '-s':
             speed = int(val)
-        elif (switch == '-S'):
+        elif switch == '-S':
             slow = True
-        elif (switch == '-t'):
+        elif switch == '-t':
             tcp = True
-        elif (switch == '-T'):
+        elif switch == '-T':
             sys.stdout.write("sys %s platform %s: WRITE_PAD = %.5f\n" % (sys.platform, platform.platform(), gpsfake.WRITE_PAD))
             raise SystemExit, 0
-        elif (switch == '-u'):
+        elif switch == '-u':
             udp = True
-        elif (switch == '-v'):
+        elif switch == '-v':
             verbose += 1
-        elif (switch == '-h'):
+        elif switch == '-h':
             sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-S] [-c cycle] [-b] logfile\n")
             raise SystemExit, 0
 
