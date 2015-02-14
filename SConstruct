@@ -1570,8 +1570,11 @@ else:
     # (1) Clear GPSD's SHM segment in case a previous abort didn't.  This
     # prevents spurious error messages.
     # (2) Dump the platform and its delay parameters.
+    # The ":;" in this production and the next one forestalls an attempt by
+    # SCons to install up to date versions of gpsfake and gpsctl if it can
+    # find older versions of them in a directory on your $PATH.
     gps_regress = Utility("gps-regress", [gpsd, gpsctl, python_built_extensions],
-            '$SRCDIR/gpsctl -R 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
+            ':; $SRCDIR/gpsfake -T; $SRCDIR/gpsctl -R 2>/dev/null; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
@@ -1579,7 +1582,7 @@ else:
     # that driver relies on the default until it gets the current
     # offset from subframe data.
     Utility('gps-makeregress', [gpsd, gpsctl, python_built_extensions],
-        '$SRCDIR/gpsctl -R 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver -b test/daemon/*.log')
+        ':; $SRCDIR/gpsctl -R 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver -b $REGRESSOPTS test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
