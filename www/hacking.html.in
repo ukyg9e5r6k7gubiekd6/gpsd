@@ -78,16 +78,18 @@ file in the source distribution.</p>
     </ol>
   </li>
   <li><a href="#contribution">Contribution guidelines</a>
-  
-    <li><a href="#verify">Verify your patch or commit</a></li>
-    <li><a href="#patches">Send patches in diff -u or -c format</a></li>
-    <li><a href="#license">The license on contributions</a></li>
-    <li><a href="#options">Don't add invocation options!</a></li>
-    <li><a href="#statics">Don't create static variables in the libraries!</a></li>
-    <li><a href="#malloc">Don't use malloc!</a></li>
-    <li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
-    <li><a href="#standards">C, standards and style</a></li>
-    <li><a href="#asserts">Use assert(3) sparingly and carefully!</a></li>
+    <ol>
+      <li><a href="#verify">Verify your patch or commit</a></li>
+      <li><a href="#patches">Send patches in diff -u or -c format</a></li>
+      <li><a href="#license">The license on contributions</a></li>
+      <li><a href="#options">Don't add invocation options!</a></li>
+      <li><a href="#statics">Don't create static variables in the libraries!</a></li>
+      <li><a href="#malloc">Don't use malloc!</a></li>
+      <li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
+      <li><a href="#standards">C, standards and style</a></li>
+      <li><a href="#asserts">Use assert(3) sparingly and
+      carefully!</a></li>
+    </ol>
   </li>
   <li><a href="#understanding">Understanding the code</a>
       <ol>
@@ -1476,7 +1478,6 @@ jitter.</p>
 reckons that at 4800bps the UART buffering can cause at most
 about 15msec of jitter.  This is, observably, swamped by other less
 controllable sources of variation.</p>
-</ol>
 
 <p>However, it turns out this is only an issue for EverMore chips.  SiRF GPSes
 can get the offset from the PPS or subframe data; NMEA GPSes don't

@@ -89,27 +89,27 @@ versions it applies to.</p>
 vendors ever actually test their hardware.</p>
 
 <ul>
-<li>The iTalk protocol  from Fastrax Inc. sometimes emits well-formed,
+<li><p>The iTalk protocol  from Fastrax Inc. sometimes emits well-formed,
 checksummed binary packets in which the length is incorrect.  If you
 trust it and read the number of bytes it tells you to, you'll land in
-the middle of the next packet.</li>
+the middle of the next packet.</p></li>
 
-<li>Wintec has modified the firmware on the WBT200 (and probably the
+<li><p>Wintec has modified the firmware on the WBT200 (and probably the
 WBT100 as well) to disable iTalk support, thus making more room in the
 flash memory for logging. This wouldn't be a problem if they had also
 disabled the protocol switch command. Users attempting to switch their
 Wintec receivers to iTalk will find their receiver is left in limbo;
 not emitting iTalk, and unable to switch back to NMEA either. A hard
 reset by removing all power sources (including onboard battery backup)
-is the only way to get the receiver to communicate again.</li>
+is the only way to get the receiver to communicate again.</p></li>
 
-<li>Some Garmin chips issue a bogus length field, too.  This from the
-outfit that likes to tout itself as the industry leader!</li>
+<li><p>Some Garmin chips issue a bogus length field, too.  This from the
+outfit that likes to tout itself as the industry leader!</p></li>
 
-<li>The SiRF-IV chipset has a tendency to freeze when switched from
+<li><p>The SiRF-IV chipset has a tendency to freeze when switched from
 binary to NMEA mode (powering it off unjams it).  This is some kind of
 race condition in the firmware that cannot be fixed by waiting on
-command ACKs; we have tried that.</p>
+command ACKs; we have tried that.</p></li>
 </ul>
 
 <h2>Documentation blunders</h2>
