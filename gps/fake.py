@@ -83,8 +83,7 @@ import packet as sniffer
 # buffers in the pty layer or gpsd itself. Values smaller than the
 # system timer tick don't make any difference here.
 
-# Field reports on minima:
-#
+# Can be set from an environment variable.
 
 # examples are "# sys.platform platform.platform()"
 
@@ -101,6 +100,10 @@ elif sys.platform.startswith("darwin"):
     WRITE_PAD = 0.03
 else:
     WRITE_PAD = 0.004
+
+# Make it easier to test pad values
+if os.getenv("WRITE_PAD"):
+    WRITE_PAD = os.getenv("WRITE_PAD")
 
 # Additional delays in slow mode
 WRITE_PAD_SLOWDOWN = 0.01
@@ -627,7 +630,7 @@ class TestSession:
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
                     if chosen.exhausted and (time.time() - chosen.exhausted > TEST_TIMEOUT) and chosen.byname in self.fakegpslist:
-                        sys.stderr.write("Test timed out: increase WRITE_PAD = %s" % WRITE_PAD)
+                        sys.stderr.write("Test timed out: increase WRITE_PAD = %s\n" % WRITE_PAD)
                         raise SystemExit, 1
                     elif not chosen.go_predicate(chosen.index, chosen):
                         if chosen.exhausted == 0:
