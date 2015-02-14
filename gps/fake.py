@@ -103,7 +103,7 @@ else:
 
 # Make it easier to test pad values
 if os.getenv("WRITE_PAD"):
-    WRITE_PAD = os.getenv("WRITE_PAD")
+    WRITE_PAD = eval(os.getenv("WRITE_PAD"))
 
 # Additional delays in slow mode
 WRITE_PAD_SLOWDOWN = 0.01
