@@ -224,6 +224,7 @@ import_env = (
     'PKG_CONFIG_LIBDIR',      # Pass more environment variables to pkg-config (required for crossbuilds)
     'STAGING_DIR',     # Required by the OpenWRT and CeroWrt builds.
     'STAGING_PREFIX',  # Required by the OpenWRT and CeroWrt builds.
+    'WRITE_PAD',       # So we can test WRITE_PAD values on the fly.
     )
 envs = {}
 for var in import_env:
