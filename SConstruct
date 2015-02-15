@@ -599,6 +599,8 @@ else:
     else:
         confdefs.append("/* #undef HAVE_DBUS */\n")
         dbus_libs = []
+        if env["dbus_export"]:
+            announce("Turning off dbus-export support, library not found.")
         env["dbus_export"] = False
 
     if env['bluez'] and config.CheckPKG('bluez'):
@@ -607,6 +609,8 @@ else:
     else:
         confdefs.append("/* #undef HAVE_BLUEZ */\n")
         bluezlibs = []
+        if env["bluez"]:
+            announce("Turning off Bluetooth support, library not found.")
         env["bluez"] = False
 
     #in_port_t is not defined on Android
