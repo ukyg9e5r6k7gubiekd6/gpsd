@@ -12,7 +12,7 @@ packet formats.
 
 This document is a list of NMEA 0183 sentences with field descriptions.
 It is primarily intended to help people understand GPS reports. but
-also exists because he author finds life-critical protocols with
+also exists because the author finds life-critical protocols with
 only closed/proprietary documentation deeply offensive.
 
 The master of this document is in asciidoc format at the GPSD project
@@ -260,6 +260,8 @@ the following are well known:
 |CD    |  Digital Selective Calling (DSC)
 |GL    |  GLONASS, according to IEIC 61162-1
 |GN    |  Mixed GPS and GLONASS data, according to IEIC 61162-1
+|BD    |  Beidou regional GPS augmentation system (China)
+|QZ    |  QZSS regional GPS augmentation system (Japan)
 |================================================================
 
 LC - LORAN-C is a marine navigation system run by the U.S. government,
