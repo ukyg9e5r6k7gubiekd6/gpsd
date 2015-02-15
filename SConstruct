@@ -962,7 +962,7 @@ def VersionedSharedLibraryInstall(env, destination, libs):
             for linksuffix in [shlib_suffix, major_name, minor_name]:
                 linkname = re.sub(suffix_re, linksuffix, lib)
                 env.AddPostAction(ilibs, 'cd %s; rm -f %s; ln -s %s %s' % (destination, linkname, lib, linkname))
-            env.Clean(lib, linkname)
+                env.Clean(lib, linkname)
     return ilibs
 
 if not env["shared"]:
