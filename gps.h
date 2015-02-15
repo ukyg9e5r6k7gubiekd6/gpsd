@@ -2043,7 +2043,7 @@ extern const char /*@observer@*/ *gps_errstr(const int);
 int json_pps_read(const char *buf, struct gps_data_t *,
 		  /*@null@*/ const char **);
 
-/* dependencies on struct gpsdata_t end hrere */
+/* dependencies on struct gpsdata_t end here */
 
 extern void libgps_trace(int errlevel, const char *, ...);
 
