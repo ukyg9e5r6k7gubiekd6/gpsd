@@ -130,7 +130,7 @@ boolopts = (
     ("pps",           True,  "PPS time syncing support"),
     # Export methods
     ("socket_export", True,  "data export over sockets"),
-    ("dbus_export",   False, "enable DBUS export support"),
+    ("dbus_export",   True,  "enable DBUS export support"),
     ("shm_export",    True,  "export via shared memory"),
     # Communication
     ('usb',           True,  "libusb support for USB devices"),
@@ -592,7 +592,8 @@ else:
 
     if env['dbus_export'] and config.CheckPKG('dbus-1'):
         confdefs.append("#define HAVE_DBUS 1\n")
-        dbus_libs = pkg_config('dbus-1')
+        dbus_libs = ["-ldbus-1"]
+        env.MergeFlags(pkg_config("dbus-1"))
     else:
         confdefs.append("/* #undef HAVE_DBUS */\n")
         dbus_libs = []
@@ -984,7 +985,7 @@ compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
                           version=libgps_version,
-                          parse_flags=dbus_libs + rtlibs)
+                          parse_flags=rtlibs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = Library(env=env,
@@ -1014,14 +1015,14 @@ if qt_env:
             compile_flags = qt_env['CFLAGS']
         qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
                                              CC=compile_with,
-                                             CFLAGS=compile_flags,
-                                             parse_flags=dbus_libs))
+                                             CFLAGS=compile_flags))
     compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libgps_version)
     libraries.append(compiled_qgpsmmlib)
 
 # The libraries have dependencies on system libraries
+# libdbus appears multiple times because the linker only does one pass.
 
-gpslibs = ["-lgps", "-lm"]
+gpslibs = ["-lgps", "-lm"] + dbus_libs
 gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
 # Source groups
@@ -1047,8 +1048,7 @@ gpsmon_sources = [
 
 gpsd_env = env.Clone()
 
-gpsd = gpsd_env.Program('gpsd', gpsd_sources,
-                        parse_flags = gpsdlibs + dbus_libs)
+gpsd = gpsd_env.Program('gpsd', gpsd_sources, parse_flags = gpsdlibs)
 env.Depends(gpsd, [compiled_gpsdlib, compiled_gpslib])
 
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs)
