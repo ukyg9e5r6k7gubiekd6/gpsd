@@ -547,9 +547,10 @@ static gps_mask_t processGSV(int count, char *field[],
      * <repeat for up to 4 satellites per sentence>
      * There my be up to three GSV sentences in a data packet
      *
-     * Can occur with talker ID GP (GNSS) or GL (GLONASS). In the GLONASS
-     * version sat IDs start at 65. At least one GPS, the BU-353 GLONASS,
-     * emits a GPGSV set followed by a GLGSV set.  We need to combine these.
+     * Can occur with talker ID GP (GNSS) or GL (GLONASS). In the
+     * GLONASS version sat IDs run from 65-96 (NMEA0183 standardizes
+     * this). At least one GPS, the BU-353 GLONASS, emits a GPGSV set
+     * followed by a GLGSV set.  We need to combine these.
      */
     int n, fldnum;
     if (count <= 3) {
