@@ -295,9 +295,6 @@ def announce(msg):
     if not env.GetOption("silent"):
         print msg
 
-# And we need some libraries
-env.MergeFlags("-lm")
-
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
