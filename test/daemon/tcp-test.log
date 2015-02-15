@@ -4,7 +4,7 @@
 # Transport: TCP
 # Notes: The most significant thing about this test load is not the content,
 #        but the magic cookie that tells it to feed the daemon over TCP
-#        rather than a pseudo-tty. We include spme leading garbage as a
+#        rather than a pseudo-tty. We include some leading garbage as a
 #        robustness check for the packetizer.  There is a UDP test load 
 #        that feeds the same content.
 ,1.7,-30.40,M,-13.9,M,,*7D
