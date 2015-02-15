@@ -74,18 +74,12 @@ import packet as sniffer
 
 # The magic number below has to be derived from observation.  If
 # it's too high you'll slow the tests down a lot.  If it's too low
-# you'll get random spurious regression failures that usually look
-# like lines missing from the end of the test output relative to the
-# check file.  The need for it may be symptomatic of race conditions
-# in the pty layer or elsewhere.
+# you'll get regression tests timing out.
 
 # WRITE_PAD: Define a per-line delay on writes so we won't spam the
 # buffers in the pty layer or gpsd itself. Values smaller than the
-# system timer tick don't make any difference here.
-
-# Can be set from an environment variable.
-
-# examples are "# sys.platform platform.platform()"
+# system timer tick don't make any difference here. Can be set from
+# WRITE_PAD in the environment.
 
 if sys.platform.startswith("linux"):
     WRITE_PAD = 0.0
