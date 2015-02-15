@@ -154,19 +154,20 @@ job is to know the grotty details so nobody else has to.</p>
 
 <h1 id="audience">Audience and supported hardware</h1>
 
-<p>Our paradigm user, the one we have in mind when making design choices,
-is running navigational or wardriving software on a Linux laptop or
-PDA. Some of our developers are actively interested in supporting
+<p>Our paradigm user, the one we have in mind when making design
+choices, is running navigational or wardriving software on a Linux-based
+mobile device (including both laptops and Android mobile
+devices). Some of our developers are actively interested in supporting
 GPS-with-SBC (Single-Board-Computer) hardware such as is used in
 balloon telemetry, marine navigation, and aviation.</p>
 
 <p>These two use cases have similar issues in areas like client
-interfaces and power/duty-cycle management.  The one place where
-they differ substantially is that in the SBC case we generally
+interfaces and power/duty-cycle management.  The one place where they
+differ substantially is that in the SBC and Android cases we generally
 know in advance what devices will be connected and when.  Thus, by
-designing for the less predictable laptop/PDA environment, we
-cover both.  But it is not by accident that the source code can be built
-with support for only any single GPS type compiled in.</p>
+designing for the less predictable laptop environment, we cover both.
+But it is not by accident that the source code can be built with
+support for only one single GPS type compiled in.</p>
 
 <p>While we will support survey-grade GPSes when and if we have that
 hardware for testing, our focus will probably remain on inexpensive
