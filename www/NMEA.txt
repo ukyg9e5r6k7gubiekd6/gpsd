@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.14, May 2014
+v2.15, Feb 2015
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -381,10 +381,8 @@ Here is a table of NMEA-ID allocations above 32 as of March 2010:
 In general, NMEA-ID = PRN - 87. Theoretically, all NMEA-emitting
 devices should emit NMEA-IDs. In practice, some pass through PRNs.
 
-Documentation on IDs for GLONASS satellites is scanty and
-contradictory. The manual for one GLONASS-capable receiver has this to
-say (but it is not clear whether the "established convention"
-is obeyed by other devices, which may use different GLONASS offsets):
+Documentation on IDs for GLONASS satellites is scanty.
+The manual for one GLONASS-capable receiver has this to say:
 
 To avoid possible confusion caused by repetition of satellite ID
 numbers when using multiple satellite systems, the following
@@ -402,6 +400,26 @@ satellites are identified by 64+satellite slot number. The slot
 numbers are 1 through 24 for the full constellation of 24 satellites,
 this gives a range of 65 through 88. The numbers 89 through 96 are
 available if slot numbers above 24 are allocated to on-orbit spares.
+
+Other sources such as <<SATSTAT>> confirm that the NMEA standard
+assigns NMEA IDs 65-96 to GLONASS.  It goes on with the following
+table:
+
+[frame="topbot",options="header"]
+|====================================================
+| 1 - 32    | GPS
+| 33 - 54   | Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)
+| 55 - 64   | not used (might be assigned to further SBAS systems)
+| 65 - 88   | GLONASS
+| 89 - 96   | GLONASS (future extensions?)
+| 97 - 192  | not used
+| 193 - 195 | QZSS
+| 196 - 200 | QZSS (future extensions?)
+| 201 - 235 | Beidou
+|====================================================
+
+QZSS and Beidou are regional GPS augmentation systems using
+geostationary satellites fielded by Japan and China respectively.
 
 == Obsolete sentences ==
 
@@ -2366,6 +2384,8 @@ Described in <<MALTESE>>, actually a Maltese government document.
 - [[[SEATALK]]]
     "SeaTalk Technical Reference"
     http://www.thomasknauf.de/seatalk.htm
+
+- [[[SATSTAT]]] "NMEA IDs" https://github.com/mvglasow/satstat/wiki/NMEA-IDs
 
 - [[[GLOBALSAT]]]
     "NMEA (National Marine Electronics Association) 0183 Protocol"
