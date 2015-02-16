@@ -279,11 +279,6 @@ for key, value in os.environ.iteritems():
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
 env['SRCDIR'] = '.'
 
-# In the test productions, use a non-default value of the SHM key
-# to avoid colliding with production instances. Value must be legal for
-# atoi(3)/strtoul(3); this is the default key plus one.
-env["GPSD_SHM_KEY"] = "0x47505345"
-
 # We may need to force slow regression tests to get around race
 # conditions in the pty layer, especially on a loaded machine.
 if env["slow"]:
@@ -1576,7 +1571,7 @@ else:
     # SCons to install up to date versions of gpsfake and gpsctl if it can
     # find older versions of them in a directory on your $PATH.
     gps_regress = Utility("gps-regress", [gpsd, gpsctl, python_built_extensions],
-            ':; $SRCDIR/gpsfake -T; $SRCDIR/gpsctl -R 2>/dev/null; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
+            ':; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
@@ -1584,7 +1579,7 @@ else:
     # that driver relies on the default until it gets the current
     # offset from subframe data.
     Utility('gps-makeregress', [gpsd, gpsctl, python_built_extensions],
-        ':; $SRCDIR/gpsctl -R 2>/dev/null; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver -b $REGRESSOPTS test/daemon/*.log')
+        ':; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver -b $REGRESSOPTS test/daemon/*.log')
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:

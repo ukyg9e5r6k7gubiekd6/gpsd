@@ -35,20 +35,20 @@ bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
     /*@-nullpass@*/
-    int shmkey = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
+    long shmkey = getenv("GPSD_SHM_KEY") ? strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : GPSD_SHM_KEY;
     /*@+nullpass@*/
 
     int shmid = shmget((key_t)shmkey, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {
 	gpsd_report(&context->errout, LOG_ERROR,
-		    "shmget(%x, %zd, 0666) for SHM export failed: %s\n",
+		    "shmget(0x%lx, %zd, 0666) for SHM export failed: %s\n",
 		    shmkey,
 		    sizeof(struct gps_data_t),
 		    strerror(errno));
 	return false;
     } else
 	gpsd_report(&context->errout, LOG_PROG,
-		    "shmget(%x, %zd, 0666) for SHM export succeeded\n",
+		    "shmget(0x%lx, %zd, 0666) for SHM export succeeded\n",
 		    shmkey,
 		    sizeof(struct gps_data_t));
 

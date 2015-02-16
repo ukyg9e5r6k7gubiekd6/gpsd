@@ -44,7 +44,7 @@ int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
     int shmid;
 
     /*@-nullpass@*/
-    int shmkey = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
+    long shmkey = getenv("GPSD_SHM_KEY") ? strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : GPSD_SHM_KEY;
     /*@+nullpass@*/
 
     libgps_debug_trace((DEBUG_CALLS, "gps_shm_open()\n"));
