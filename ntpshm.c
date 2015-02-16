@@ -32,7 +32,6 @@
 #include <sys/shm.h>
 
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
-#define SHM_UNIT	0	/* SHM driver unit number (0..3) */
 
 #define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
 
@@ -91,6 +90,9 @@ struct shmTime
  * starting from the first found segments.  I.e. started as root, one
  * GPS will deliver data on segments 0 and 1, and as non-root data
  * will be delivered on segments 2 and 3.
+ *
+ * We use dummy[0] as an in-use flag, so segments can be released and
+ * reallocated from holes in the sequence.
  *
  * to debug, try looking at the live segments this way
  *
@@ -172,7 +174,6 @@ void ntpshm_context_init(struct gps_context_t *context)
 	    context->shmTime[i] = getShmTime(context, i);
 	}
     }
-    memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
 }
 
 /*@-unqualifiedtrans@*/
@@ -182,8 +183,8 @@ static /*@null@*/ volatile struct shmTime *ntpshm_alloc(struct gps_context_t *co
     int i;
 
     for (i = 0; i < NTPSHMSEGS; i++)
-	if (context->shmTime[i] != NULL && !context->shmTimeInuse[i]) {
-	    context->shmTimeInuse[i] = true;
+	if (context->shmTime[i] != NULL && !context->shmTime[i]->dummy[0] != 0) {
+	    context->shmTime[i]->dummy[0] = (char)true;
 
 	    /*
 	     * In case this segment gets sent to ntpd before an
@@ -213,7 +214,7 @@ static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime 
 
     for (i = 0; i < NTPSHMSEGS; i++)
 	if (s == context->shmTime[i]) {
-	    context->shmTimeInuse[i] = false;
+	    context->shmTime[i]->dummy[0] = (char)false;
 	    return true;
 	}
 

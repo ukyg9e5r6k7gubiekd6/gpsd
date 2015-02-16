@@ -291,7 +291,6 @@ void gps_context_init(struct gps_context_t *context,
 #endif /* TIMEHINT_ENABLE */
 #ifdef NTPSHM_ENABLE
 	.shmTime	= {0},
-	.shmTimeInuse   = {0},
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
 	.pps_hook       = NULL,
