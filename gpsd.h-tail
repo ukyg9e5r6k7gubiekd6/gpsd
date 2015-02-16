@@ -271,6 +271,7 @@ struct gps_context_t {
     /* we need the volatile here to tell the C compiler not to
      * 'optimize' as 'dead code' the writes to SHM */
     /*@reldef@*/volatile struct shmTime *shmTime[NTPSHMSEGS];
+    bool shmTimeInuse[NTPSHMSEGS];
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
     /*@null@*/ void (*pps_hook)(struct gps_device_t *, struct timedrift_t *);
