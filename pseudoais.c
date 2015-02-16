@@ -279,27 +279,31 @@ unsigned int ais_binary_encode(struct ais_t *ais,
 	}
         break;
     case 24:	/* Class B CS Static Data Report Part 1 */
-        ais_addbits(bits,  38,  2, (uint64_t)0);
-        ais_addchar(bits,  40, 20,           ais->type24.shipname);
-/*      ais_addbits(bits, 160,  8, (uint64_t)ais->type24.a.spare); */
-	len = 160;
+        if (ais->type24.part == part_a) {
+            ais_addbits(bits,  38,  2, (uint64_t)0);
+            ais_addchar(bits,  40, 20,           ais->type24.shipname);
+/*          ais_addbits(bits, 160,  8, (uint64_t)ais->type24.a.spare); */
+	    len = 160;
+	}
         break;
     case 24 | AIS_MSG_PART2_FLAG: /* Class B CS Static Data Report Part 2 */
-        ais_addbits(bits,  38,  2, (uint64_t)1);
-	ais_addbits(bits,  40,  8, (uint64_t)ais->type24.shiptype);
-	ais_addchar(bits,  48,  3,          &ais->type24.vendorid[0]);
-	ais_adddata(bits,  66,  3,          &ais->type24.vendorid[3]);
-	ais_addchar(bits,  90,  7,          ais->type24.callsign);
-	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
-	    ais_addbits(bits, 132, 30, (uint64_t)ais->type24.mothership_mmsi);
-	} else {
-	    ais_addbits(bits, 132,  9, (uint64_t)ais->type24.dim.to_bow);
-	    ais_addbits(bits, 141,  9, (uint64_t)ais->type24.dim.to_stern);
-	    ais_addbits(bits, 150,  6, (uint64_t)ais->type24.dim.to_port);
-	    ais_addbits(bits, 156,  6, (uint64_t)ais->type24.dim.to_starboard);
+        if ((ais->type24.part == part_b) || (ais->type24.part == both)) {
+            ais_addbits(bits,  38,  2, (uint64_t)1);
+	    ais_addbits(bits,  40,  8, (uint64_t)ais->type24.shiptype);
+	    ais_addchar(bits,  48,  3,          &ais->type24.vendorid[0]);
+	    ais_adddata(bits,  66,  3,          &ais->type24.vendorid[3]);
+	    ais_addchar(bits,  90,  7,          ais->type24.callsign);
+	    if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
+	        ais_addbits(bits, 132, 30, (uint64_t)ais->type24.mothership_mmsi);
+	    } else {
+	        ais_addbits(bits, 132,  9, (uint64_t)ais->type24.dim.to_bow);
+	        ais_addbits(bits, 141,  9, (uint64_t)ais->type24.dim.to_stern);
+	        ais_addbits(bits, 150,  6, (uint64_t)ais->type24.dim.to_port);
+	        ais_addbits(bits, 156,  6, (uint64_t)ais->type24.dim.to_starboard);
+	    }
+/*          ais_addbits(bits, 162,  6,          ais->type24.b.spare); */
+	    len = 162 + 6;
 	}
-/*      ais_addbits(bits, 162,  6,          ais->type24.b.spare); */
-	len = 162 + 6;
         break;
     case 27:	/* Long Range AIS Broadcast message */
         ais_addbits(bits,  38,  1, (uint64_t)ais->type27.accuracy);

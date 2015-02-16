@@ -334,7 +334,7 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
 	    }
 	    offset = (unsigned int) strlen(bufp);
 	}
-    } else {
+    } else if (datalen > 0) {
         msg1 = 1;
 	msg2 = 1;
 	numc[0] = '\0';
@@ -359,18 +359,20 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
 
         memset(data, 0, sizeof(data));
 	datalen = ais_binary_encode(&session->gpsdata.ais, &data[0], 1);
-	left = GETLEFT(datalen);
-	offset = (unsigned int)strlen(bufp);
-	(void)snprintf(&bufp[offset], len-offset,
-		       "%s,%u,%u,%s,%c,%s,%u",
-		       type,
-		       msg1,
-		       msg2,
-		       numc,
-		       channel,
-		       (char *)data,
-		       left);
+	if (datalen > 0) {
+	    left = GETLEFT(datalen);
+	    offset = (unsigned int)strlen(bufp);
+	    (void)snprintf(&bufp[offset], len-offset,
+		           "%s,%u,%u,%s,%c,%s,%u",
+		           type,
+		           msg1,
+		           msg2,
+		           numc,
+		           channel,
+		           (char *)data,
+		           left);
 	nmea_add_checksum(bufp+offset);
+	}
     }
 }
 #endif /* AIVDM_ENABLE */
