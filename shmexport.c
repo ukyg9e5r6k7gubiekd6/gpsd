@@ -35,18 +35,23 @@ bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
     /*@-nullpass@*/
-    int shmkey = getenv("GPSD_SHM_KEY") ? atoi(getenv("GPSD_SHM_KEY")) : GPSD_KEY;
+    long shmkey = getenv("GPSD_SHM_KEY") ? strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : GPSD_SHM_KEY;
     /*@+nullpass@*/
 
     int shmid = shmget((key_t)shmkey, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {
 	gpsd_report(&context->errout, LOG_ERROR,
-		    "shmget(%ld, %zd, 0666) failed: %s\n",
-		    (long int)shmkey,
+		    "shmget(0x%lx, %zd, 0666) for SHM export failed: %s\n",
+		    shmkey,
 		    sizeof(struct gps_data_t),
 		    strerror(errno));
 	return false;
-    }
+    } else
+	gpsd_report(&context->errout, LOG_PROG,
+		    "shmget(0x%lx, %zd, 0666) for SHM export succeeded\n",
+		    shmkey,
+		    sizeof(struct gps_data_t));
+
     context->shmexport = (void *)shmat(shmid, 0, 0);
     if ((int)(long)context->shmexport == -1) {
 	gpsd_report(&context->errout, LOG_ERROR, "shmat failed: %s\n", strerror(errno));
@@ -54,7 +59,7 @@ bool shm_acquire(struct gps_context_t *context)
 	return false;
     }
     gpsd_report(&context->errout, LOG_PROG,
-		"shmat() succeeded, segment %d\n", shmid);
+		"shmat() for SHM export succeeded, segment %d\n", shmid);
     return true;
 }
 

@@ -296,7 +296,7 @@ int main(int argc, char **argv)
 	case 'R':		/* remove the SHM export segment */
 #ifdef SHM_EXPORT_ENABLE
 	    /*@-nullpass@*/
-	    status = shmget(getenv("GPSD_SHM_KEY") ? (key_t)atoi(getenv("GPSD_SHM_KEY")) : (key_t)GPSD_KEY, 0, 0);
+	    status = shmget(getenv("GPSD_SHM_KEY") ? (key_t)strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : (key_t)GPSD_SHM_KEY, 0, 0);
 	    if (status == -1) {
 		gpsd_report(&context.errout, LOG_WARN,
 			    "GPSD SHM segment does not exist.\n");

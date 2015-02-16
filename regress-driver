@@ -38,6 +38,11 @@ if [ -d ${py_libdir} ] && [ -d ${py_scriptdir} ]; then
 fi
 export GPSD_HOME PATH
 
+# Use a non-default value of the SHM key to avoid colliding with
+# production instances. Value must be legal for strtol(3);
+# this is the default key plus one.
+export GPSD_SHM_KEY=0x47505345
+
 mode=regress
 testing=daemon
 opts=""
