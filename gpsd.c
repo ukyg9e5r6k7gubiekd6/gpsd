@@ -1999,12 +1999,7 @@ int main(int argc, char *argv[])
 
 #ifdef SHM_EXPORT_ENABLE
     /* create the shared segment as root so readers can't mess with it */
-    if (!shm_acquire(&context)) {
-	gpsd_report(&context.errout, LOG_ERROR,
-		    "shared-segment creation failed,\n");
-    } else
-	gpsd_report(&context.errout, LOG_PROG,
-		    "shared-segment creation succeeded,\n");
+    (void)shm_acquire(&context);
 #endif /* SHM_EXPORT_ENABLE */
 
     /*
