@@ -85,7 +85,7 @@ various additional features have additional prerequisites:
 |libtinfo5              | shared low-level terminfo library (see below)
 |libusb-1.0.x or later  | better USB device discovery
 |Qt + qmake             | libQgpsmm depends on this
-|python2.6+             | required for various clients and utilities
+|python2.x, x >=6       | required for various clients and utilities
 |pgtk-2/cairo bindings  | the main test client, xgps, needs this
 |==========================================================================
 
