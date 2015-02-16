@@ -256,11 +256,11 @@ export LD_LIBRARY_PATH=${PWD}
 The other is to install the chrpath utility and do your builds with
 chrpath=yes.
 
-The reason one of these required is because of some details
+The reason one of these is required is because of some details
 about dynamic linking.  The search path for dynamic linking that is
 compiled into your binaries as you build them is set by the
 environment variable RPATH, if it exists.  At runtime, when a
-dynamically-linked executable is called, that patch is extended
+dynamically-linked executable is called, that path is prepended
 with $LD_LIBRARY_PATH
 
 Ideally, during development, we want to build build binaries that (a)
