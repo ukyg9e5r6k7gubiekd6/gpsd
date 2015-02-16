@@ -295,8 +295,8 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     shmTime->valid = 1;
 
     /*@-type@*/ /* splint is confused about struct timespec */
-    (void)timespec_str( &td->real, real_str, sizeof(real_str) );
-    (void)timespec_str( &td->clock, clock_str, sizeof(clock_str) );
+    timespec_str( &td->real, real_str, sizeof(real_str) );
+    timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_report(&session->context->errout, LOG_RAW,
 		"NTP ntpshm_put(%s %s) %s @ %s\n",
 		session->gpsdata.dev.path,
@@ -380,8 +380,8 @@ static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
     /*@+type@*/
 
     /*@-type@*/ /* splint is confused about struct timespec */
-    (void)timespec_str( &td->real, real_str, sizeof(real_str) );
-    (void)timespec_str( &td->clock, clock_str, sizeof(clock_str) );
+    timespec_str( &td->real, real_str, sizeof(real_str) );
+    timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_report(&session->context->errout, LOG_RAW,
 		"PPS chrony_send %s @ %s Offset: %0.9f\n",
 		real_str, clock_str, sample.offset);

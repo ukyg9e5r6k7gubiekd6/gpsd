@@ -267,7 +267,7 @@ static void ubx_update(void)
 	    (void)mvwprintw(ppswin, 1, 6, "> 1 day");
         } else {
 	    char buf2[TIMESPEC_LEN];
-	    (void)timespec_str( &timedelta, buf2, sizeof(buf2) );
+	    timespec_str( &timedelta, buf2, sizeof(buf2) );
 	    (void)mvwprintw(ppswin, 1, 6, "%s", buf2);
         }
 	(void)wnoutrefresh(ppswin);

@@ -464,8 +464,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		 * unsigned long as a wider-or-equal type to
 		 * accomodate Linux's type.
 		 */
-		(void)timespec_str( &pi.assert_timestamp, ts_str1, sizeof(ts_str1) );
-		(void)timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
+		timespec_str( &pi.assert_timestamp, ts_str1, sizeof(ts_str1) );
+		timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
 		gpsd_report(&session->context->errout, LOG_PROG,
 			    "KPPS assert %s, sequence: %ld - "
 			    "clear  %s, sequence: %ld\n",
@@ -481,7 +481,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
                   that should not be the case here */
 	        cycle_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[edge_kpps])/1000;
 	        duration_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
-		(void)timespec_str( &ts_kpps, ts_str1, sizeof(ts_str1) );
+		timespec_str( &ts_kpps, ts_str1, sizeof(ts_str1) );
 	        gpsd_report(&session->context->errout, LOG_PROG,
 		    "KPPS cycle: %7d uSec, duration: %7d uSec @ %s\n",
 		    cycle_kpps, duration_kpps, ts_str1);
@@ -524,7 +524,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	state_last = state;
         /* save this edge so we know next cycle time */
 	pulse[edge] = clock_ts;
-	(void)timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
+	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	gpsd_report(&session->context->errout, LOG_PROG,
 		    "PPS edge: %d, cycle: %7d uSec, duration: %7d uSec @ %s\n",
 		    edge, cycle, duration, ts_str1);
@@ -708,8 +708,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
-		(void)timespec_str( &drift.clock, ts_str1, sizeof(ts_str1) );
-		(void)timespec_str( &drift.real, ts_str2, sizeof(ts_str2) );
+		timespec_str( &drift.clock, ts_str1, sizeof(ts_str1) );
+		timespec_str( &drift.real, ts_str2, sizeof(ts_str2) );
 		gpsd_report(&session->context->errout, LOG_INF,
 			    "PPS hooks called with %.20s clock: %s real: %s\n",
 			    log1, ts_str1, ts_str2);
@@ -717,7 +717,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@+compdef@*/
             }
 	    /*@-type@*/ /* splint is confused about struct timespec */
-	    (void)timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
+	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    gpsd_report(&session->context->errout, LOG_PROG,
 		    "PPS edge %.20s @ %s offset %.9f\n",
 		    log1, ts_str1, offset);

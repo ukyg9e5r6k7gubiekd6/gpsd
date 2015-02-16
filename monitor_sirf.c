@@ -600,7 +600,7 @@ static void sirf_update(void)
 	    (void)mvwprintw(mid7win, 2, 28, "> 1 day");
         } else {
 	    char buf2[TIMESPEC_LEN];
-	    (void)timespec_str( &timedelta, buf2, sizeof(buf2) );
+	    timespec_str( &timedelta, buf2, sizeof(buf2) );
 	    (void)mvwprintw(mid7win, 2, 32, "%s", buf2);
         }
 	(void)wnoutrefresh(mid7win);

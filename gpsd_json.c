@@ -191,7 +191,7 @@ void json_tpv_dump(const struct gps_device_t *session,
                 /* you can not use a double here as you will lose 11 bits
                  * of precision */
 		struct timespec clock_tmp = session->ppslast.clock;
-		(void)timespec_str( &clock_tmp, ts_str, sizeof(ts_str) );
+		timespec_str( &clock_tmp, ts_str, sizeof(ts_str) );
 		str_appendf(reply, replylen, "\"pps\":%s,", ts_str);
 	    }
 	    /*@+type +formattype@*/

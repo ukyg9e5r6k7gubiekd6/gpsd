@@ -487,8 +487,6 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
 
 /* Convert a normailized timespec to a nice string 
  * put in it *buf, buf should be at least 22 bytes
- * return negative for error
- * otherwise the number of chars in buf, excluding trailing \0
  *
  * the returned buffer will look like, shortest case:
  *    sign character ' ' or '-'
@@ -502,19 +500,17 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
  * So 21 digits like this: "-2147483647.123456789"
  *
 */
-int timespec_str(const struct timespec *ts, /*@out@*/char *buf, int buf_size)
+void timespec_str(const struct timespec *ts, /*@out@*/char *buf, int buf_size)
 {
-    int ret;
     char sign = ' ';
 
     /*@-type@*//* splint is confused about timespec*/
     if ( (0 > ts->tv_nsec ) || ( 0 > ts->tv_sec ) ) {
 	sign = '-';
     }
-    ret = snprintf( buf, buf_size, "%c%ld.%09ld",
+    (void) snprintf( buf, buf_size, "%c%ld.%09ld",
 			  sign,
 			  (long)labs(ts->tv_sec),
 			  (long)labs(ts->tv_nsec));
     /*@+type@*/
-    return ret;
 }

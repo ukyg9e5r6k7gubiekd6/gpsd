@@ -958,7 +958,7 @@ extern void pps_early_init(struct gps_context_t *);
         TS_NORM( r ); \
     } while (0)
 
-extern int timespec_str(const struct timespec *, /*@out@*/char *, int);
+extern void timespec_str(const struct timespec *, /*@out@*/char *, int);
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
 extern void pps_thread_stash_fixtime(struct gps_device_t *, 
