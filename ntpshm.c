@@ -183,8 +183,8 @@ static /*@null@*/ volatile struct shmTime *ntpshm_alloc(struct gps_context_t *co
     int i;
 
     for (i = 0; i < NTPSHMSEGS; i++)
-	if (context->shmTime[i] != NULL && !context->shmTime[i]->dummy[0] != 0) {
-	    context->shmTime[i]->dummy[0] = (char)true;
+	if (context->shmTime[i] != NULL && context->shmTime[i]->dummy[0] == (int)false) {
+	    context->shmTime[i]->dummy[0] = (int)true;
 
 	    /*
 	     * In case this segment gets sent to ntpd before an
@@ -214,7 +214,7 @@ static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime 
 
     for (i = 0; i < NTPSHMSEGS; i++)
 	if (s == context->shmTime[i]) {
-	    context->shmTime[i]->dummy[0] = (char)false;
+	    context->shmTime[i]->dummy[0] = (int)false;
 	    return true;
 	}
 
