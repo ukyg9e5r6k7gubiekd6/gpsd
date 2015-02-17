@@ -335,9 +335,10 @@ it is possible to build gpsd without thread support if you build
 with pps=no.  You'll lose support for updating the clock from PPS
 pulses.
 
-dbus=no: for systems using DBUS: gpsd includes support for shipping
-fixes as DBUS notifications, but it is not compiled in by default.
-Build with the option "dbus=yes" to get it working.
+dbus_export=no: for systems using DBUS: gpsd includes support for
+shipping fixes as DBUS notifications, compiled in by default.  This 
+may lead to complaint messages during testing  on systems that don't
+support DBUS. Build with the option "dbus_export=no" to disable it
 
 qt=yes: libQgpsmm is a Qt version of the libgps/libgpsmm
 pair. Thanks to the multi-platform approach of Qt, it allows the gpsd
