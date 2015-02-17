@@ -448,6 +448,10 @@ void ntpshm_link_deactivate(struct gps_device_t *session)
 void ntpshm_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
+    /* don't talk to NTP when we're running inside the test harness */
+    if (session->sourcetype == source_pty)
+	return;
+
     /* allocate a shared-memory segment for "NMEA" time data */
     session->shm_clock = ntpshm_alloc(session->context);
 
