@@ -1107,6 +1107,7 @@ if env["libgpsmm"]:
 if not env['python']:
     python_built_extensions = []
     python_targets = []
+    python_progs = []
 else:
     python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed", "gegps"]
     python_modules = Glob('gps/*.py') 
