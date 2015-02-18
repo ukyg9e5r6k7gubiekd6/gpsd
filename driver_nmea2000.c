@@ -97,6 +97,11 @@ static void print_data(struct gps_context_t *context,
         gpsd_report(&context->errout, LOG_IO,"%s\n", bu);
     }
     /*@+bufferoverflowhigh@*/
+#else
+    (void)context;
+    (void)buffer;
+    (void)len;
+    (void)pgn;
 #endif
 }
 
