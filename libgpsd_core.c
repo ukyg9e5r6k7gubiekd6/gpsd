@@ -117,7 +117,11 @@ void gpsd_report(const struct gpsd_errout_t *errout,
 		 const char *fmt, ...)
 /* assemble msg in printf(3) style, use errout hook or syslog for delivery */
 {
-#ifndef SQUELCH_ENABLE
+#ifdef SQUELCH_ENABLE
+    (void)errout;
+    (void)errlevel;
+    (void)fmt;
+#else
     if (errout->debug >= errlevel) {
 	char buf[BUFSIZ], buf2[BUFSIZ];
 	char *err_str;
