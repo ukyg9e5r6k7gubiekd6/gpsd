@@ -1649,7 +1649,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
-#if defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
+#if defined(CONTROL_SOCKET_ENABLE) && defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
 static void ship_pps_drift_message(struct gps_device_t *session,
 				   struct timedrift_t *td)
 /* on PPS interrupt, ship a drift message to all clients */
