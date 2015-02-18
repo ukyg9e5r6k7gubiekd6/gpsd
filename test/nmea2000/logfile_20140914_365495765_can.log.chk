@@ -8458,7 +8458,6 @@ $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165505,7.29,M,8.30,M,24.15,M*09
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:55:05.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.010,"climb":0.000,"eps":16.61,"epc":48.30}
 !AIVDM,1,1,,A,H3R8SG000000000000000000000,2*11
-!AIVDM,1,1,,A,H3R8SG5kw000000w0000000H19<0,0*01
 $GPGGA,165505,3755.3220,N,02301.0162,E,1,12,0.73,8.35,M,35.000,M,,*4D
 $GPRMC,165505,A,3755.3220,N,02301.0162,E,0.0194,0.000,140914,,*28
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
@@ -8467,9 +8466,8 @@ $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31
 $GPGBS,165505,7.29,M,8.30,M,24.15,M*09
 {"class":"TPV","device":"nmea2000://vcan0","mode":3,"time":"2014-09-14T16:55:05.000Z","ept":0.005,"lat":37.922033200,"lon":23.016936200,"alt":8.352,"epx":7.286,"epy":8.304,"epv":24.150,"track":0.0000,"speed":0.010,"climb":0.000,"eps":16.61,"epc":48.30}
 {"class":"ATT","device":"nmea2000://vcan0:17","depth":9.080}
-!AIVDM,1,1,,A,H3R8SG000000000000000000000,2*11
 !AIVDM,1,1,,A,H3R8SG4071B=9>00000000000000,0*59
-{"class":"AIS","device":"nmea2000://vcan0:1","type":24,"repeat":0,"mmsi":237118300,"scaled":true,"shipname":"","shiptype":0,"shiptype_text":"Not available","vendorid":"GARMIN","model":0,"serial":286940,"callsign":"","to_bow":0,"to_stern":0,"to_port":0,"to_starboard":0}
+{"class":"AIS","device":"nmea2000://vcan0:1","type":24,"repeat":0,"mmsi":237118300,"scaled":true,"shipname":"","shiptype":0,"shiptype_text":"Not available","vendorid":"GARMIN","model":0,"serial":0,"callsign":"","to_bow":0,"to_stern":0,"to_port":0,"to_starboard":0}
 $GPGGA,165505,3755.3220,N,02301.0162,E,1,12,0.73,8.35,M,35.000,M,,*4D
 $GPRMC,165505,A,3755.3220,N,02301.0162,E,0.0194,0.000,140914,,*28
 $GPGSA,A,3,11,32,14,22,1,27,23,4,31,28,19,20,1.3,0.7,1.0*31

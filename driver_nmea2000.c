@@ -831,7 +831,7 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 		"pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(session->context, bu, len, ais, 0xffffffffU) != 0) {
-      int l, i;
+        int l, i;
 
 	ais->type24.shiptype = (unsigned int) ((bu[ 5] >> 0) & 0xff);
 
@@ -844,6 +844,9 @@ static gps_mask_t hnd_129810(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	    ais->type24.callsign[l] = (char) bu[13+l];
 	}
 	ais->type24.callsign[7] = (char )0;
+
+	ais->type24.model = 0;
+	ais->type24.serial = 0;
 
 	if (AIS_AUXILIARY_MMSI(ais->mmsi)) {
 	    ais->type24.mothership_mmsi   = (unsigned int) (getleu32(bu, 28));
