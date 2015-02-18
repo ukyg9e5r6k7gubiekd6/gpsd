@@ -174,13 +174,14 @@ associated with this project are <a
 href="https://www.ohloh.net/p/3944">available at Ohloh</a></p>
 
 <p>Our development platforms are open-source Unixes &mdash; Linux, and
-the *BSD family.  Presently Linux, OpenBSD and NetBSD are directly supported.
-We'll support proprietary Unixes if it's not too much work (and it
-usually isn't). Apple's OS X is back in our good books, but it is
-critical that you have all your USB drivers updated. Older drivers are
-buggy and prevent <code>gpsd</code> from being able to read from
-USB-serial devices. No, we don't support Windows &mdash; get a better
-operating system.</p>
+the *BSD family.  Presently Linux, OpenBSD and NetBSD are directly
+supported.  The code is also exttremely widely deployed on Android
+phones.  We'll support proprietary Unixes if it's not too much work
+(and it usually isn't). Apple's OS X is currently <a
+href="upstream-bugs.html#appleserial">unsupported due to serial-layer
+issues</a>.  Older drivers are buggy and prevent <code>gpsd</code>
+from being able to read from USB-serial devices. No, we don't support
+Windows &mdash; get a better operating system.</p>
 
 <p>If you represent a GPS manufacturer interested in qualifying your 
 device for use with Linux and other open-source operating systems, 

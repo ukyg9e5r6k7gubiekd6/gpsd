@@ -14,7 +14,8 @@ Repository head:
   command line to false.  The 'limited_max_devices' option is now
   'max_devices'; the 'limited_max_clients' option is now 'max_clients'
   A bug fix for error modeling when NMEA 0183 reports empty DOP
-  fields.
+  fields.  Mac OS X has been dropped from the list of supported platforms
+  due to persistent flakiness in its serial layer.
 
 * Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
   A bug that prevented track interpolation has been fixed.

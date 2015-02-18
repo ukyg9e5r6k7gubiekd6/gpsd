@@ -24,12 +24,16 @@ installed:
 
 * Any desktop or server Linux distribution.
 * OpenWRT and derivatives such as CeroWRT.
-* FreeBSD, NetBSD, OpenBSD, Macintosh OS X
+* FreeBSD, NetBSD, OpenBSD
 * Android, using the official Google toolchain from the NDK
 
 We consider failure to build and function on any of these platforms
 a serious bug; if you encounter it, please complain on the
 development list.
+
+Macintosh OS X has been dropped from the list of supported platforms
+due to serial-layer flakiness that has persisted through 10.9 and
+10.10.
 
 A Cygwin port is in progress but not complete.
 

@@ -64,6 +64,7 @@ maintainer, we've tried to kick these upstream.</p>
 <h1>Links to Open User-Visible Problems</h1>
 
 <ul>
+<li><a href="#appleserial">Unknown serial-layer issues under Mac OS X</a></li> 
 <li><a href="#tiocmwait">PPS fails: ioctl(TIOCMIWAIT) hangs after tcsetattr()</a></li>
 <li><a href="#select">Buggy pl2303 drivers on Mac OS X can make select(2) look broken</a></li>
 <li><a href="#bluetooth">Firmware problems in some Bluetooth and USB devices can hang them</a></li>
@@ -96,19 +97,23 @@ maintainer, we've tried to kick these upstream.</p>
 
 <h1>Open User-Visible Problems</h1>
 
-<h2 id="tiocmwait">PPS fails: ioctl(TIOCMIWAIT) hangs after tcsetattr()</h2>
+<h2 href="appleserial">Unknown serial-layer issues under Mac OS X</h2> 
 
-<p>Due to a kernel bug in some versions of Linux 2.6 (recent as of
-2011 - the bug was <a
-href="http://kerneltrap.org/mailarchive/linux-kernel/2010/11/13/4645043">referenced
-in 2010</a>) the tcsetattr() used in our autobauding hunt loop
-prevents any thread(s) currently suspended in ioctl(TIOCMIWAIT) for
-the same device from ever resuming. This interferes with PPS support</p>
+<p>There is some unknown issue in the Mac OS X serial layer (observed
+under 10.9 and 10.10) that prevents reliable use with GPSD.</p>
 
-<p>This bug has apparently persisted in some 3.x kernels.</p>
+<p>Devices often work on the first open of a tty after reboot, only to
+fail in subtle ways on subsequent opens.  The symptom is that
+<code>gpsd</code> sees garbage from the device and cannot achieve
+packet synchronization.</p>
 
-<p>The workaround is to use stty to pre-set the serial port to the right
-baud rate so tcsetattr is never called.</p>
+<p>This bug has been observed on both USB and Bluetooth, so it is not
+the same as the problem with buggy pl2303 drivers. It also survived
+gpsd's move from non-blocking to blocking serial I/O.</p>
+
+<p>This problem has forced us to drop OS X from the list of supported
+platforms pending either a fix to the buggy serial layer or the 
+discovery of some magic workaround.</p>
 
 <h2 id="select">Buggy pl2303 drivers on Mac OS X can make select(2) look broken</h2>
 
@@ -122,6 +127,20 @@ up to date. As of January 2009, this is still a problem - the most recent
 report being a failure of the drivers from osx-pl2303.sourceforge.net on
 OS X 10.5.6. Please try the latest drivers from www.prolific.com.tw before
 reporting hangs on OS X.</p>
+
+<h2 id="tiocmwait">PPS fails: ioctl(TIOCMIWAIT) hangs after tcsetattr()</h2>
+
+<p>Due to a kernel bug in some versions of Linux 2.6 (recent as of
+2011 - the bug was <a
+href="http://kerneltrap.org/mailarchive/linux-kernel/2010/11/13/4645043">referenced
+in 2010</a>) the tcsetattr() used in our autobauding hunt loop
+prevents any thread(s) currently suspended in ioctl(TIOCMIWAIT) for
+the same device from ever resuming. This interferes with PPS support</p>
+
+<p>This bug has apparently persisted in some 3.x kernels.</p>
+
+<p>The workaround is to use stty to pre-set the serial port to the right
+baud rate so tcsetattr is never called.</p>
 
 <h2 id="bluetooth">Firmware problems in some Bluetooth and USB devices can hang them</h2>
 
