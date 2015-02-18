@@ -50,6 +50,9 @@ const char /*@ observer @*/ *gpsd_hexdump(char *scbuf, size_t scbuflen,
     scbuf[j] = '\0';
 #else /* SQUELCH defined */
     scbuf[0] = '\0';
+    (void)scbuflen;
+    (void)binbuf;
+    (void)binbuflen;
 #endif /* SQUELCH_ENABLE */
     return scbuf;
 }
