@@ -664,7 +664,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     struct timedrift_t td;
 #endif /* NTPSHM_ENABLE */
 
-#if defined(PPS_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
+#if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
     if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\","))
     {
 	const char *end = NULL;
