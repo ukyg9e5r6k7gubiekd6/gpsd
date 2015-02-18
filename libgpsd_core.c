@@ -1677,10 +1677,12 @@ void ntpshm_latch(struct gps_device_t *device, struct timedrift_t /*@out@*/*td)
     td->real.tv_nsec = (long)(fractional * 1e+9);
     /*@+type@*/
 
+#ifdef PPS_ENABLE
     /* thread-safe update */
     /*@-compdef@*/
     pps_thread_stash_fixtime(device, device->newdata.time, td->clock);
     /*@+compdef@*/
+#endif /* PPS_ENABLE */
 }
 #endif /* NTPSHM_ENABLE */
 

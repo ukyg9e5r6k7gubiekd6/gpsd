@@ -962,8 +962,10 @@ extern void pps_early_init(struct gps_context_t *);
 extern void timespec_str(const struct timespec *, /*@out@*/char *, int);
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
+#ifdef PPS_ENABLE
 extern void pps_thread_stash_fixtime(struct gps_device_t *, 
 			      timestamp_t, struct timespec);
+#endif /* PPS_ENABLE */
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
 extern int pps_thread_lastpps(struct gps_device_t *, struct timedrift_t *);
