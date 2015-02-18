@@ -63,9 +63,11 @@ struct shmTime
 /* Note: you can start gpsd as non-root, and have it work with ntpd.
  * However, it will then only use the ntpshm segments 2 3, and higher.
  *
- *
  * Ntpd always runs as root (to be able to control the system clock).
- * Its rules for the creation of ntpshm segments are:
+ * After that it often (depending on its host configuration) drops to run as
+ * user ntpd and group ntpd.
+ * 
+ * As of February 2015 its rules for the creation of ntpshm segments are:
  *
  * Segments 0 and 1: permissions 0600, i.e. other programs can only
  *                   read and write as root.
@@ -77,32 +79,34 @@ struct shmTime
  *                   unprivileged user is allowed to provide data
  *                   for synchronisation.
  *
- * By default ntpd creates only 4 segments.  It can be configured to
- * create up to 217.  gpsd creates two segments for each device it can
- * drive; by default this is 8 segments for 4 devices,but can be higher
- * if it was compiled with a larger value of MAX_DEVICES. 
+ * By default ntpd creates 0 segments (though the documentation is
+ * written in such a way as to suggest it creates 4).  It can be
+ * configured to create up to 217.  gpsd creates two segments for each
+ * device it can drive; by default this is 8 segments for 4
+ * devices,but can be higher if it was compiled with a larger value of
+ * MAX_DEVICES.
  *
  * Started as root, gpsd does as ntpd when attaching (creating) the
  * segments.  In contrast to ntpd, which only attaches (creates)
  * configured segments, gpsd creates all segments.  Thus a gpsd will
- * bve default create two segments 4 and 5 that an ntpd with default
+ * by default create eight segments 0-7 that an ntpd with default
  * configuration does not watch.
  *
- * Started as non-root, gpsd will only attach (create) segments 2-n with
- * permissions 0666.  As the permissions are for any user, the creator
- * does not matter.
+ * Started as non-root, gpsd will only attach (create) segments 2 and
+ * above, with permissions 0666.  As the permissions are for any user,
+ * the creator does not matter.
  *
  * For each GPS module gpsd controls, it will use the attached ntpshm
  * segments in pairs (for coarse clock and pps source, respectively)
  * starting from the first found segments.  I.e. started as root, one
- * GPS will deliver data on segments 0 and 1, and as non-root data
- * will be delivered on segments 2 and higher.
+ * GPS will deliver data on all segments including 0 and 1; started as
+ * non-root, gpsd will be deliver data only on segments 2 and higher.
  *
  * Segments are allocated to activated devices on a first-come-first-served
- * basis. A device's segment is deallocated when the device is closed and
+ * basis. A device's segment is marked unused when the device is closed and
  * may be re-used by devices connected later.
  *
- * To debug, try looking at the live segments this way
+ * To debug, try looking at the live segments this way:
  *
  *  ipcs -m
  * 
@@ -123,7 +127,7 @@ struct shmTime
  * or apparmor.
  *
  * if you see the shared segments (keys 1314148400 -- 1314148405), and
- * no gpsd or ntpd is running then try removing them like this:
+ * no gpsd or ntpd is running, you can remove them like this:
  *
  * ipcrm  -M 0x4e545030
  * ipcrm  -M 0x4e545031
@@ -131,6 +135,9 @@ struct shmTime
  * ipcrm  -M 0x4e545033
  * ipcrm  -M 0x4e545034
  * ipcrm  -M 0x4e545035
+ *
+ * Removing these segments is usually not necessary, as the operating system 
+ * garbage-collects them when they have no attached processes.
  */
 static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *context, int unit)
 {
