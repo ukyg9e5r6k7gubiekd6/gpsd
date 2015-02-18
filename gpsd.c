@@ -2413,9 +2413,11 @@ int main(int argc, char *argv[])
 	 */
 	if (argc == optind && highwater > 0) {
 	    int subcount = 0, devcount = 0;
+#ifdef SOCKET_EXPORT_ENABLE
 	    for (sub = subscribers; sub < subscribers + MAX_CLIENTS; sub++)
 		if (sub->active != 0)
 		    ++subcount;
+#endif /* SOCKET_EXPORT_ENABLE */
 	    for (device = devices; device < devices + MAX_DEVICES; device++)
 		if (allocated_device(device))
 		    ++devcount;
