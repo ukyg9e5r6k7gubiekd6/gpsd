@@ -17,7 +17,7 @@ Repository head:
   fields.  Mac OS X has been dropped from the list of supported platforms
   due to persistent flakiness in its serial layer.
 
-* Sat 23 Aug 2014 Eric S. Raymond <esr@snark.thyrsus.com> - 3.11
+3.11: 2014-07-23 (Eric S. Raymond <esr@snark.thyrsus.com>)
   A bug that prevented track interpolation has been fixed.
   We now get vertical error position and speed estimates from the
   u-blox driver rather than having to interpolate them.
@@ -27,7 +27,7 @@ Repository head:
   large PPS offsets. Improved recovery from device flakeouts,
   gpsmon argument parsing.
 
-* Fri 22 Nov 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.10
+3.10: 2013-11-22 (Eric S. Raymond <esr@snark.thyrsus.com>)
   AIS: Adds gps2udp, an AIS data relay, split24 option supports
   passing through Type 24 halves; support for Inland AIS; "scaled" no
   longer controls dumping of controlled-vocabulary fields; instead,
@@ -38,7 +38,7 @@ Repository head:
   mode and speed switching in the UBX driver.  PPS message now ships
   nsec. PPS events are visible in gpsmon. Time-reporting fix to TSIP.
 
-* Wed 1 May 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.9
+3.9: 2013-05-01 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Note to packagers: this is an urgent release that fixes a possible
   DoS or security hole!  Armor the AIS driver against an implausible
   overrun attack.  A (different) fix for our first malformed-packet
@@ -46,7 +46,7 @@ Repository head:
   driver. New FAQ entry on how to know WAAS/EGNOS is working.
   New -u and -uu options enable usec timestamps on gpspipe output.
 
-* Mon 25 Feb 2013 Eric S. Raymond <esr@snark.thyrsus.com> - 3.8
+3.8: 2013-02-25 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix various minor errors in the AIVDM/AIVDO description. Repair the
   xmlto support in the build system. Add two more regression
   tests. Significant improvements to NMEA2000 support. Upgrade the PHP
@@ -54,13 +54,13 @@ Repository head:
   chipset. Added a nautical-style display to xgpsspeed. Minor
   improvements to leapsecond.py.
 
-* Mon 02 Jul 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.7
+3.7: 2012-07-02 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Snap release to get the midnight change in the default leap-second
   constant out the door.  Port tests now pass on all Debian supported
   architectures, including the Sparc and s390 that were giving us
   trouble before. Pre-2003 Delorme Earthmate works again.
 
-* Wed 23 May 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.6
+3.6: 2012-05-23 (Eric S. Raymond <esr@snark.thyrsus.com>)
   It's the Fernando Poo Day release.  Code has zero detectible defects
   under Coverity scanning and cppcheck 1.52; this is mainly a cleanup
   release to get those minor fixes into the field.  If a leap-second
@@ -70,7 +70,7 @@ Repository head:
   chrpath is no longer a build dependency; see build.txt for
   explanation.
 
-* Sat 14 Apr 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.5
+3.5: 2012-04-14 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Use pselect when it's available to cut down on wakeups and improve
   signal handling.  New {PPS} message exporting clock drift. The AIVDM
   driver now handles up to 16 interleaved 24A and 24B pair-halves.
@@ -79,17 +79,17 @@ Repository head:
   PPS code now just accepts any handshake pin. A bug that sometimes
   caused RTCM packets to be dropped rather than relayed is fixed.
 
-* Thu 12 Jan 2012 Eric S. Raymond <esr@snark.thyrsus.com> - 3.4
+3.4: 2012-01-12 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Don't barf when chrpath is not available, fall back to static linking;
   helps people not running Linux.
 
-* Sat Oct 29 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.3
+3.3: 2011-10-29 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Improvements to build and release-procedure documentation. Make
   sirf=no build work again. Main reason for this release is to make
   chrpath a mandatory build dependency and explain why in the build
   documentation.
 
-* Wed Oct 25 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.2
+3.2: 2011-10-25 (Eric S. Raymond <esr@snark.thyrsus.com>)
   In the build recipe, (1) set pkgconfig properly for 64-bit Fedora
   systems, (2) clean up various derived files including *.pyc on scons
   -c, (3) add an option to disable stripping of binaries (strip=no),
@@ -107,7 +107,7 @@ Repository head:
   device; the Jackson Labs Fury. The chrpath utility has become a
   build prerequisite.
 
-* Sun Aug 28 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.1
+3.1: 2011-07-28 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The Irene release, rocking you like a hurricane and brought to you
   from the storm shelter in my basement. This is a snap release mainly
   to get some scons recipe cleanups out the door.  Parallelized builds
@@ -124,7 +124,7 @@ Repository head:
   suppresses backgrounding; privileges are now dropped as in normal
   background operation.
 
-* Fri Aug 19 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 3.0
+3.0: 2011-07-19 (Eric S. Raymond <esr@snark.thyrsus.com>)
   POLL subobject name changes: fixes -> tpv, skyview -> sky.
   Fix a timestamp-clobbering bug in the C library revealed by an
   obscure car-nav device, the MyGuide 3100. The DEVICE 'activated'
@@ -142,7 +142,7 @@ Repository head:
   for live-feeding GPSD data to Google Earth. The hotplug sequence no
   longer requires Python.
 
-* Mon Mar 21 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 2.96
+2.96: 2011-03-21 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Bumped maximum channel count to 32 to accommodate GPS+GLONASS devices.
   API version bumped to 5, redesign finished (changes are documented
   in the Client HOWTO). cgps now handles resize signals. Code can now
@@ -162,7 +162,7 @@ Repository head:
   analyzer.  The ancient Sager dump format for RTCM2 is abolished in favor of
   a JSON profile.
 
-* Tue Jul 13 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.95
+2.95: 2010-07-13 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The autonomous robot submarine total world domination release!
   Rationalize clearing and generation of DOPs, this makes epx/epy much
   more generally available. Fixed the test productions for the udev
@@ -182,7 +182,7 @@ Repository head:
   in -c mode, as string fields can contain commas.  Corrected error
   in reporting of AIS rate-of-turn fields.
 
-* Tue Apr 20 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.94
+2.94: 2010-04-20 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Error-checking in the 50bps subframe code has been greatly improved.
   The Garmin GPS driver can now use libusb, if it is present, to do
   device discovery. The libgps library has been split apart; the
@@ -193,7 +193,7 @@ Repository head:
   extracting the leap-second offset; they should prevent many cases
   where gpsd might previously have used an invalid leap-second offset.
 
-* Fri Apr 16 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.93
+2.93: 2010-04-16 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Support for JSON dumping and parsing of AIS message types 25 and 26,
   not yet observed in the wild on AISHub. Fix Debian bug #569703.  by
   removing non-streaming mode from the Python exerciser. Fix Debian
@@ -214,12 +214,12 @@ Repository head:
   There is now a gpsdfake diagnostic tool that fakes being gpsd shipping
   arbitrary specified data to clients.
 
-* Wed Mar 3 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.92
+2.92: 2010-03-03 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix a packaging error.  The new Python library module was
   inadvertently omitted from the 2.91 tarball.  Also, improve the json
   import test slightly.
 
-* Mon Mar 1 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 2.91
+2.91: 2010-03-01 (Eric S. Raymond <esr@snark.thyrsus.com>)
   We have support for NMEA GLONASS sentences, and a regression test.
   Clients now get a DEVICE notification on every driver switch.  It is
   possible to specify a TCP/IP AIS feed such as AISHub as a data
@@ -234,7 +234,7 @@ Repository head:
   modeling has been fixed. Old protocol has been removed from the
   daemon; the library still speaks it.
 
-* Fri Dec 4 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.90
+2.90: 2009-12-04 (Eric S. Raymond <esr@snark.thyrsus.com>)
   GPSD-NG, the new JSON-based command protocol, is now deployed; as a
   consequence, AIS is now fully supported in both daemon and client.
   Detection of end of a fix-reporting cycle is now reliable;
@@ -248,7 +248,7 @@ Repository head:
   interleaving test sentences from each.  gpsd now accepts error
   estimates from the NMEA $GPGBS sentence.
 
-* Wed Mar 18 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.39
+2.39: 2009-03-18 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fixed potential core dump in C client handling of "K" responses.
   Made device hotplugging work again; had been broken by changes in udev.
   Introduced major and minor API version symbols into the public interfaces.
@@ -264,7 +264,7 @@ Repository head:
   library now works correctly in locales where the decimal separator is
   not a period.
 
-* Tue Feb 10 2009 Eric S. Raymond <esr@snark.thyrsus.com> - 2.38
+2.38: 2009-02-10 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Regression test load for RoyalTek RGM3800 and Blumax GPS-009 added.
   Scaling on E error-estimate fields fixed to match O. Listen on
   localhost only by default to avoid security problems; this can be
@@ -280,12 +280,12 @@ Repository head:
   and returns, 'rtcm104v2' rather than 'rtcm104'; this is design forward
   for when RTCM104v3 is fully working.
 
-* Sun Feb 17 2008 Chris Kuethe <ckuethe@mainframe.cx> - 2.37
+2.37: 2008-02-17 (Chris Kuethe <ckuethe@mainframe.cx>)
   The C++ bindings, Garmin USB support, and multiple instances of ntp
   pps thread starting were fixed. Handling of odd PPS signals was
   improved. The eye candy in the PHP visualizers was fixed.
 
-* Tue Jan 1 2008 Eric S. Raymond <esr@snark.thyrsus.com> - 2.36
+2.36: 2008-01-01 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Urgent fix to leap-day calculation affecting dates from today to
   28 Feb on generic NMEA GPSes, Zodiacs, and SirFs emitting message 0x62.
   Integrated Garmin Simple Text Protocol driver from Peter Slansky.
@@ -294,7 +294,7 @@ Repository head:
   NMEA driver, this could only have worked by accident and should be
   set in ntpd.conf. Integrated Ashtech driver from Chris Kuethe.
 
-* Mon Dec 10 2007 Eric S. Raymond <esr@snark.thyrsus.com> - 2.35-1
+2.35: 2007-12-10 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Navcom driver merged. Removed -d -f and -p options of gpsd; these
   have been undocumented for a while.  Make gpsd play well with pkgconfig.
   Incorrect computation of VDOP when GPSes didn't supply it has been fixed.
@@ -304,7 +304,7 @@ Repository head:
   360; separated out the tests for the unstable Trimble drivers.
   32-vs-64-bit problems in the regression tests have been solved.
 
-* Thu Dec 14 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.34-1
+2.34: 2006-12-14 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix for byte-swapping of Zodiac control messages on big-endian hardware.
   Disable iTalk by default and note that it needs to be tested.  Command line
   arguments can now be DGPSIP or NTRIP URLs; -d is deprecated. Added udev
@@ -318,20 +318,20 @@ Repository head:
   protocols (notably TSIP and Garmin binary) and of SiRFStar I and III
   devices.  Fixed buggy parsing and generation of PGRME.
 
-* Fri Jun  9 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.33-1
+2.33: 2006-06-09 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix bad unit conversion in V output.  Clean up some man-page messes.
   Fixed buggy libgps parsing of multiple responses.  It's now possible
   to lock gpsd to a fixed speed at compile time for embedded use.  Added
   NTRIP support, thanks to Ville Nuorvala.  O command now ships an
   explicit mode field.
 
-* Sun Mar 12 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.32-1
+2.32: 2006-03-12 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Cleanup of the xgps layout, and minor memory-leak fixes for xgps.  Fix
   to cope with Antares u-blox by Andreas Stricker.  Minor fix to libgps
   cgpxlogger.  Merge cgpxlogger and gpxlogger documentation onto
   the xgps(1) manual page and rename it gps(1).
 
-* Fri Feb 17 2006 Eric S. Raymond <esr@snark.thyrsus.com> - 2.31-1
+2.31: 2006-02-17 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Now builds and runs under Cygwin.  Correct the speed units in
   synthetic NMEA.  Slightly better time handling under NMEA.  Daemon
   now builds with all but NMEA disabled.  Update the leap-second
@@ -339,13 +339,13 @@ Repository head:
   conformance.  Jason von Nieda's patch may fix the chronic TSIP
   driver problems.
 
-* Wed Sep 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.30-1
+2.30: 2005-09-14 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Prevent core dump on -d option.  The .log extension is no longer required for
   test loads.  cgps and xgps now have configurable latitude/longitude formats
   via the -l option.  Introduced new 'g' command that allows clients to
   specify whether they want GPS or RTCM104 information.
 
-* Fri Aug 19 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.29-1
+2.29: 2005-07-19 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Added Sony CXD2951 support, untested.  All error estimates are
   now nailed to 95% confidence interval.  Added rtcmdecode and its
   documentation; also, gpsd can now monitor serial devices emitting
@@ -356,13 +356,13 @@ Repository head:
   gpxlogger client for systems with DBUS support and the gpspipe
   and cgps clients for general use.
 
-* Wed Jul  6 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.28-1
+2.28: 2005-07-06 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The 2.27 source tarball somehow got truncated on upload.
   Due to procedural mechanics at Berlios, shipping a new release
   seems to be the least painful way to recover.  This release is
   identical to 2.27 except the roadmap stuff has been added to TODO.
 
-* Wed Jul 06 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.27
+2.27: 2005-07-06 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Arrange for the daemon to remove its pid file on exit.  Fix some
   buffering problems with the Python side of the hotplug interface.
   gpsfake can now run sessions under a monitor like Valgrind.  Most
@@ -379,7 +379,7 @@ Repository head:
   Fixed a core-dump that could happen if C, B or I commands were issued
   at odd times.
 
-* Wed Jun 22 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.26
+2.26: 2005-06-22 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Time DOP and total DOP are now passed on from GPSes that report
   them.  Ensure longitude has a leading zero when <100, for
   compatibility with gpsdrive.  Synchronous and thread hooks are now
@@ -396,7 +396,7 @@ Repository head:
   Correct off-by-one error in GPZDA processing.  The code has been
   audited and cleaned with splint (www.splint.org).
 
-* Sat May 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.25-1
+2.25: 2005-05-21 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Various signedness and scaling fixes and an OpenBSD port patch for the
   Zodiac driver. Command-line arguments to gpsd are now treated as a default
   device list; -f is still supported but deprecated.  sirfmon now tries not
@@ -407,7 +407,7 @@ Repository head:
   support.  gpsd no longer uses the system clock for anything, so it
   can be used to set that clock.
 
-* Tue May 17 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.24-1
+2.24: 2005-05-17 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Crazy-speed bug is finally fixed. Autobauding now starts with the
   current speed of the device, not the stored gpsd speed; this means
   hunting only takes place when device and GPS speed aren't matched.
@@ -415,7 +415,7 @@ Repository head:
   display now really shows 12 channels, not just 11. Major improvements
   in ntp notifications.
 
-* Wed May  4 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.23-1
+2.23: 2005-05- 4 (Eric S. Raymond <esr@snark.thyrsus.com>)
   For better security, the daemon now drops root privileges after startup.
   gpsd-clients is now a separate RPM; this is helpful on lean systems
   that don't run X.  The O command now reports speeds in meters per second
@@ -425,18 +425,18 @@ Repository head:
   specify one.  The intermittent processor-hogging problem introduced by the
   control-channel change in 2.21 has been solved.
 
-* Mon Apr 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.22-1
+2.22: 2005-04-25 (Eric S. Raymond <esr@snark.thyrsus.com>)
   SiRF-binary driver can now get leap-second corrections from subframe data.
   Device add/delete commands now send back OK or ERROR.  Error-modeling
   corrections from the SiRF folks.  Higher precision in position reports.
 
-* Tue Apr 12 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.21-1
+2.21: 2005-04-12 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Add tag and timestamp to Y response.  Use computed geoid separation as
   SiRF packet 42 is flaky.  Security fix: hotplug scripts now do device
   add/removes through a separate local control channel.  True multi-device
   support is in place.  When in watcher mode, device switches are announced.
 
-* Thu Mar 31 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.20-1
+2.20: 2005-03-31 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Rob Janssen's patches to fix timezone issues and improve cooperation
   with NTP.  License changed to BSD so linking to libgps won't make people
   nervous.  gpsprobe and gpsd.py are obsolete and have been removed, the
@@ -445,20 +445,20 @@ Repository head:
   so they can be saved and redisplayed.  Zodiac sort of works again, but
   occasionally spins madly during autobauding.
 
-* Sat Mar 26 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.19-1
+2.19: 2005-03-26 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix brown-paper-bag bug with NMEA parsing. Set SiRF GPSes to use
   SBAS.  sirfmon now displays SBAS parameters, and is included in the
   installed programs.  Add to FAQ a fix for spurious high speeds reported
   in XTrac mode.  We now interpret GPZDA.  We no longer fudge a missing
   ddmmyy in NMEA timestamps from the system clock, so replay will work better.
 
-* Wed Mar 23 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.18-1
+2.18-1: 2005-03-23 (Eric S. Raymond <esr@snark.thyrsus.com>)
   First cut at cooperating with NTP.  Major library restructuring;
   a fix is now a data structure of its own, and per-field timestamps
   are gone. Use new 'o' command for watcher mode.  Compute some estimated
   error bounds.
 
-* Wed Mar 16 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.17
+2.17: 2005-03-16 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix packet-engine problem that made disconnect/reconnect unreliable
   (important!).  Fix bonehead error in interpretation of PGRME.  We
   don't use O_SYNC (it turned out not to be reliable) so remove it to make
@@ -466,13 +466,13 @@ Repository head:
   Add a FAQ to the HTML documentation.  gps_poll() now handles multi-line
   responses.  Add N command for switching driver modes.
 
-* Fri Mar 11 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.16-1
+2.16: 2005-03-11 (Eric S. Raymond <esr@snark.thyrsus.com>)
   New F command allows changing the GPS device after startup time.
   Hotplug scripts to go with it are now installed by the RPM.  The
   Garmin probe is working.  The -T and -s options are gone.  We have
   achieved zero configuration!
 
-* Wed Mar 02 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.15-1
+2.15: 2005-03-02 (Eric S. Raymond <esr@snark.thyrsus.com>)
   A new packet engine autobauds much more quickly, and now iterates
   over both 1 and 2 stopbits. Explicit support for FV18 (the -T f
   option) is gone; instead, gpsd syncs with any 7N2 device and always
@@ -483,14 +483,14 @@ Repository head:
   invoked automatically when SiRF packets present themselves on the
   wire after device open.
 
-* Fri Feb 25 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.14-1
+2.14: 2005-02-25 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Pass zero magnetic variation in generated NMEA from binary GPSes
   correctly.  Use O_SYNC rather than timeouts to guarantee that
   baud-rate change strings get to the GPS before changing the line
   parameters.  Introduced I command.  Spatial scattergram plotting
   moved from gpsprobe to gpsprof.
 
-* Mon Feb 21 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.13-1
+2.13: 2005-02-21 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Correct a bug in binary-protocol dumping (applies to Zodiac and
   Garmin only).  Gary Miller's patch to deal gracefully with GPSes
   like the Magellan EC10X that send only GPRMC and never GPGGA or
@@ -502,7 +502,7 @@ Repository head:
   part is garbage when the PVT fields are garbage.  Can now recognize
   SiRF GPSes.  Experimental baud-switching support for Zodiac.
 
-* Tue Feb 15 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.12-1
+2.12: 2005-02-15 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fixed core-dump bug in processing of the GLL variant that does not
   include an FAA Mode Indicator. When using the NMEA driver, gpsd now
   hunts for a baud rate rather than requiring a fixed one to be set.
@@ -513,7 +513,7 @@ Repository head:
   timestamp for every sentence that has one, even if the PVT fields
   aren't valid.
 
-* Thu Feb 10 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.11-1
+2.11: 2005-02-10 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Added gpsprof and the capability to generate GPS latency profiles.
   gpsprobe now hunts through plausible baud rates when looking for NMEA
   data from a GPS. The -b (baudrate) option fixes a speed, disabling
@@ -522,21 +522,21 @@ Repository head:
   gps.EarthDistance due to numeric blowup on points very close together,
   and another in gps.MeterOffset() that was screwing up gpsprobe plots.
 
-* Tue Feb  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.10
+2.10: 2005-02-01 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Add -N option to explicitly foreground the daemon.  Fixed a bug
   that was causing gpsd to keep reopening the GPS device after
   leaving raw or watcher mode.  Fixed Gary Miller's core-dump bug.
 
-* Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.9-1
+2.9: 2005-01-27 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Python files restored to RPM.
 
-* Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.8-1
+2.8: 2005-01-27 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Embarrassing typo fix in gps.py. Avoid buffer overrun in xgps.c.
   Plug Debian security bug 292347, CVE number CAN-2004-1388.
   This version issued on an emergency basis without Python libraries,
   which have packaging problems due to the 2.3/2.4 transition.
 
-* Fri Jan  14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.7-1
+2.7: 2005-01-14 (Eric S. Raymond <esr@snark.thyrsus.com>)
   More compiler-warning cleanups.  gps client name changed to xgps.
   Added --speedunits option to xgpsspeed, --speedunits and --altunits
   options to xgps.  Improved GPGSV parsing so it copes gracefully if
@@ -546,18 +546,18 @@ Repository head:
   pidfile.  Audited for potential buffer overruns, found and fixed
   two.
 
-* Sat Jan 01 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 2.6-1
+2.6: 2005-01-01 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Petter Reinholdtsen's fix for gps.py buffering.  Fix syntax errors
   in udev scriptlets.  Clean up after GCC warning messages.  Drop use of
   vsprintf, so we get a link-time error on systems that might produce
   buffer overruns (all modern Unixes support vsnsprintf which is safe).
 
-* Thu Dec 23 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.5.1
+2.5: 2004-12-23 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Use gmtime instead of localtime when guessing the day or year of a date;
   this avoids jitter in the day after 19:00 GMT.  Added -v option to dump
   version and exit.  Commented out a crash-causing debug line in gps.py.
 
-* Thu Dec  9 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.4-1
+2.4: 2004-12-09 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Minor bugs in gpsd.py fixed.  M now returns 0 status if GPGSA not yet
   seen; this change also fixes a bug where gpsd claimed it was confused
   if GPGSA had not been seen and status was set.  RPM will now install
@@ -565,12 +565,12 @@ Repository head:
   on activate.  HP port changes and -Wall cleanup.  James Cameron's
   fixes to clean up gps.c and use X timeouts rather than alarms.
 
-* Mon Oct 25 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.3-1
+2.3: 2004-10-25 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Documentation and comment fixes.  Last two globals removed from
   low-level interface; library should now be fully re-entrant. Mac OS X
   port fixes. Q command fix from Robin L Darroch <robin@spade-men.com>.
 
-* Mon Oct 18 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.2-1
+2.2: 2004-10-18 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Documentation improvements.  BSD port fixes.  Bug fix: speed timestamp
   wasn't initialized properly in libgps. Device is now an optional
   command-line argument of gpsprobe, in line with the clients.  gpsd.py
@@ -578,7 +578,7 @@ Repository head:
   panel are now labeled with units.  Attempted fix for 2.1 bug of DTR
   not being pulled low on exit.
 
-* Thu Sep 30 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.1-1
+2.1: 2004-09-30 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Various internal cleanups, including fossil removal in the
   configuration machinery.  FV-18, Tripmate, Earthmate and are now
   enabled but can be disable with --disable-$NAME at configure time.
@@ -587,20 +587,20 @@ Repository head:
   shared). Fixed buggy handling of -p option in gps.c and xgpsspeed.c;
   it's now an optional command-line argument.
 
-* Thu Sep 16 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 2.0-1
+2.0: 2004-09-16 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Packaging fixes for 2.0 release.
 
-* Wed Sep  8 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.98-1
+1.98: 2004-09-08 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Only do one getdtablesize() call, otherwise we do several
   getrlimits() each poll cycle.  TripMate is working.  gpsprobe now
   deduces NMEA version.  Zodiac Earthmate seems to work.
 
-* Wed Sep 08 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.97-1
+1.97: 2004-08-08 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Removed PRWIZCH support (it still passes through in raw mode).
   Build Motif-dependent programs conditionally.  Added gpsprobe.
   Fixed a brown-paper-bag-bug in 1.96 RPM packaging.
 
-* Tue Aug 31 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.96-1
+1.96: 2004-08-31 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Implemented non-blocking writes to clients, so a stalled client
   cannot stall gpsd.  Fixed a nasty array-overrun bug.  Timestamps
   are now in ISO8601 format, with sub-second precision if the GPS
@@ -609,22 +609,22 @@ Repository head:
   Automake-based build machinery from Jens Oberender; RPM now
   installs shared libraries.  FV18 driver added. Offline timer in GPS.
 
-* Wed Aug 25 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.95-1
+1.95: 2004-08-25 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fixed broken 'make dist', missing display.c and Tachometer.c
   are in there now.
 
-* Tue Aug 24 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.94-1
+1.94: 2004-08-24 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix embarrassing bug -- watcher mode did not work for more than one
   client at a time.  Y command now carries information about which
   satellites were used in the last fix.  New timeout mechanism, no
   longer dependent on FIONREAD.
 
-* Mon Aug 23 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.93-1
+1.93: 2004-08-23 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fourth prerelease. Daemon-side timeouts are gone, they complicated
   the interface without adding anything.  Command responses now
   contain ? to tag invalid data. -D2 feature of 1.92 backed out.
 
-* Sun Aug 22 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.92-1
+1.92: 2004-08-22 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Third prerelease.  Clients in watcher mode now get notified when
   the GPS goes online or offline.  Major name changes -- old libgps
   is new libgpsd and vice-versa (so the high-level interface is more
@@ -632,7 +632,7 @@ Repository head:
   be started at boot time.  -D2 now causes command error messages
   to be echoed to the client.
 
-* Sat Aug 21 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.91-1
+1.91: 2004-08-21 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Second pre-2.0 release.  Features a linkable C library that hides the
   details of communicating with the daemon.  The daemon now recovers
   gracefully from having the GPS unplugged and plugged in at any time;
@@ -640,43 +640,43 @@ Repository head:
   The gps and xgpsspeed clients now query the daemon; their code
   for direct access to the serial port has been deliberately removed.
 
-* Sun Aug 15 2004 Eric S. Raymond <esr@snark.thyrsus.com> - 1.90
+1.90: 2004-08-15 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Creation of specfile.
 
-* Sun Mar 21 2004 Remco Treffkorn <remco@rvt.com> - ?
+?: 2004-03-21 (Remco Treffkorn <remco@rvt.com>)
   Without PRWIZCH sentence: sat. colors in gps according to ss, grey==lt20,
   yellow==lt40 else green.
   Added L Q and I to the protocol. Removed G and T.
   Changed the timeout mechanism. Try to not return Lat/Lon/Alt if
   validity is in doubt.
 
-* Thu Jan 29 2004 Remco Treffkorn <remco@rvt.com> - ?
+?: 2004-01-29 (Remco Treffkorn <remco@rvt.com>)
   Make applications null-terminate their resource lists.
 
-* Sat Dec 20 2003 Remco Treffkorn <remco@rvt.com> - ?
+?: 2003-12-20 (Remco Treffkorn <remco@rvt.com>)
   Removed <varargs.h> from netlib. Not needed, and new gcc does not support
   it any more.
 
-* Wed Aug 20 2003 Remco Treffkorn <remco@rvt.com> - 1.10
+1.10: 2003-08-20 (Remco Treffkorn <remco@rvt.com>)
   Add install target. Fix clean target. Make GPS timeout configurable.
   Make xgpsspeed build with Apple's X11.
   Make sure that we don't segfault if the NMEA is badly formed.
 
-* Mon Aug 18 2003 Remco Treffkorn <remco@rvt.com> - ?
+?: 2003-08-18 (Remco Treffkorn <remco@rvt.com>)
   Use cfset[io]speed() to set speed in serial.h. Glibc is quite insane
   and I am tired to chase it, so I give up. Hope this works for BSD.
   Set status and mode 0 after GPS timeout (5 sec) - Cougar <cougar@random.ee>
 
-* Sun Feb 16 2003 Remco Treffkorn <remco@rvt.com> - 1.09
+1.09: 2003-02-16 (Remco Treffkorn <remco@rvt.com>)
   Include sys/time.h in gpsd.c for struct timeval.
 
-* Sun Nov 03 2002 Remco Treffkorn <remco@rvt.com> - ?
+?: 2002-11-03 (Remco Treffkorn <remco@rvt.com>)
   G or g command returns six-digit Maidenhead grid square (like FN12fx)
 
-* Thu Oct 03 2002 Remco Treffkorn <remco@rvt.com> - 1.08
+1.08: 2002-10-03 (Remco Treffkorn <remco@rvt.com>)
   Added sockopt SO_REUSEADDR to netlib.c passive_sock.
 
-* Tue Feb 05 2002 Remco Treffkorn <remco@rvt.com> - 1.07
+1.07: 2002-02-05 (Remco Treffkorn <remco@rvt.com>)
   em.c uses <time.h> (as it should). Removed some <sys/time.h>
   where they were not needed.
   Russ Nelson: Improved Earthmate support: added state machine for
@@ -689,13 +689,13 @@ Repository head:
   sentence to not erroneously print fix type (2/3) instead of fix quality,
   and calculates fix type correctly.
 
-* Fri Aug 11 2000 Remco Treffkorn <remco@rvt.com> - 1.06
+1.06: 2000-08-11 (Remco Treffkorn <remco@rvt.com>)
   Change from C++ (/) to C comments (/* */)for compatibility.
   Added -n (need init) flag.
   Don't init unless lat/lon specified.
   Remove gps.mayko.com as the default hostname.
 
-* Fri May 12 2000 Remco Treffkorn <remco@rvt.com> - 1.05
+1.05: 2000-05-12 (Remco Treffkorn <remco@rvt.com>)
   (even though version.h says 1.04)
   Added some includes to xgpsspeed.c for portability.
   Fix problem with flags being overwritten, and using the wrong port
@@ -703,30 +703,29 @@ Repository head:
   Add a note about Y2K compatibility fix.
   Pass latitude and longitude into em_init().
 
-* Fri Mar 17 2000 Remco Treffkorn <remco@rvt.com> - 1.02
+1.02: 2000-03-17 (Remco Treffkorn <remco@rvt.com>)
   (even though version.h says 1.01)
 
-* Sun Mar 05 2000 Remco Treffkorn <remco@rvt.com> - 1.01
-  Updated to IANA port.
-  Fixes to DGPS support.
+1.01: 2000-03-05 (Remco Treffkorn <remco@rvt.com>)
+  Updated to IANA port. Fixes to DGPS support.
 
-* Sun Jan 02 2000 Remco Treffkorn <remco@rvt.com> - 1.0
+1.0: 2000-01-02 (Remco Treffkorn <remco@rvt.com>)
   Added DGPS fixes from Curt Mills. (See README for contact info.)
 
-* Mon Dec 13 1999 Remco Treffkorn <remco@rvt.com> - 0.99dgps
+0.99dgps: 1999-12-13 (Remco Treffkorn <remco@rvt.com>)
   Added minimal DGPS support by Derrick J Brashear
 
-* Sat Jul 17 1999 Remco Treffkorn <remco@rvt.com> - 0.99
+0.99: 1999-07-17 (Remco Treffkorn <remco@rvt.com>)
   Rockwell binary is now translated to NMEA format, so that
   clients like gps will work with an EarthMate.
   Added speedometer application. Thanks to Derrick J Brashear
   for his work (see README for contact info).
 
-* Thu Mar 04 1999 Remco Treffkorn <remco@rvt.com> - 0.96
+0.96: 1999-03-04 (Remco Treffkorn <remco@rvt.com>)
   Changed EarthMate support. Rockwell binary is now almost properly
   supported. Only the minimum required information is extracted.
 
-* Sat Feb 06 1999 Remco Treffkorn <remco@rvt.com> - 0.95
+0.95: 1999-02-06 (Remco Treffkorn <remco@rvt.com>)
   Added support for EarthMate receivers. Since I do not have one, this is
   untested.
   If it works, it does the following: You start gpsd with a baudrate of 9600
@@ -735,18 +734,18 @@ Repository head:
   is not received, but a binary data header is received, then we will try to
   switch NMEA too.
 
-* Sun Jan 24 1999 Remco Treffkorn <remco@rvt.com> - 0.94
+0.94: 1999-01-24 (Remco Treffkorn <remco@rvt.com>)
   Y2K compliant ;-)  (... is NOT. Look for "FIXME:" in nmea_parse.c)
 
-* Tue Jan 27 1998 Remco Treffkorn <remco@rvt.com> - 0.93
+0.93: 1998-01-27 (Remco Treffkorn <remco@rvt.com>)
   using GNU autoconf now.
   combined gpsd + gpsclient. No more init files, command line only.
 
-* Tue May 13 1997 Remco Treffkorn <remco@rvt.com> - 0.9
+0.9: 1997-05-13 (Remco Treffkorn <remco@rvt.com>)
   some cleanups in the ini code. version 0.9 ...
 
-* Fri Apr 25 1997 Remco Treffkorn <remco@rvt.com> - 0.8
+0.8: 1997-04-25 (Remco Treffkorn <remco@rvt.com>)
   version 0.8, some bug fixes. New MODE member, STATUS member changed.
 
-* Mon Apr 21 1997 Remco Treffkorn <remco@rvt.com> - 0.7
+0.7: 1997-04-21 (Remco Treffkorn <remco@rvt.com>)
   released version 0.7
