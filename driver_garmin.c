@@ -165,7 +165,7 @@
 
 #pragma pack(1)
 // This is the data format of the satellite data from the garmin USB
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint8_t svid;
     uint16_t snr;		// 0 - 0xffff
@@ -179,7 +179,7 @@ typedef struct
 /* Garmin D800_Pvt_Datetype_Type */
 /* packet type:  GARMIN_PKTID_PVT_DATA   52 */
 /* This is the data format of the position data from the garmin USB */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     float alt;			/* altitude above WGS 84 (meters) */
     float epe;			/* estimated position error, 2 sigma (meters)  */
@@ -206,7 +206,7 @@ typedef struct
 				 * beginning of the current week */
 } cpo_pvt_data;
 
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint32_t cycles;
     double pr;
@@ -219,7 +219,7 @@ typedef struct
 
 /* packet type:  GARMIN_PKTID_RMD_DATA   53 */
 /* seems identical to the packet id 0x29 from the Garmin GPS 25 */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     double rcvr_tow;
     int16_t rcvr_wn;
@@ -227,7 +227,7 @@ typedef struct
 } cpo_rcv_data;
 
 // This is the packet format to/from the Garmin USB
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint8_t mPacketType;
     uint8_t mReserved1;

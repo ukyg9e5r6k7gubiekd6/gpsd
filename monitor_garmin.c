@@ -26,7 +26,7 @@ static WINDOW *miscwin, *mid51win, *mid114win;
 
 #pragma pack(1)
 /* Satellite Data Record */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     uint8_t svid;
     uint16_t snr;
@@ -36,7 +36,7 @@ typedef struct
 } cpo_sat_data;
 
 /* Position Record */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     float alt;
     float epe;
@@ -55,7 +55,7 @@ typedef struct
 } cpo_pvt_data;
 
 /* Receiver Measurement Record */
-typedef struct
+typedef struct __attribute__((__packed__))
 {
     // cppcheck-suppress unusedStructMember
     uint32_t cycles;
@@ -71,7 +71,8 @@ typedef struct
     // cppcheck-suppress unusedStructMember
     int8_t valid;
 } cpo_rcv_sv_data;
-typedef struct
+
+typedef struct __attribute__((__packed__))
 {
     // cppcheck-suppress unusedStructMember
     double rcvr_tow;

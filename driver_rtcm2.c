@@ -455,7 +455,7 @@ struct rtcm2_msg_t {
 	/* unknown message */
 	isgps30bits_t	rtcm2_msgunk[RTCM2_WORDS_MAX-2];
     } msg_type;
-};
+} __attribute__((__packed__));
 
 #endif /* LITTLE_ENDIAN */
 
@@ -735,7 +735,7 @@ struct rtcm2_msg_t {
 	/* unknown message */
 	isgps30bits_t	rtcm2_msgunk[RTCM2_WORDS_MAX-2];
     } msg_type;
-};
+} __attribute__((__packed__));
 
 #endif /* S_SPLINT_S */
 #endif /* BIG ENDIAN */
