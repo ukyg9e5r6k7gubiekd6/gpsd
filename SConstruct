@@ -1030,7 +1030,7 @@ if env['systemd']:
 gpsmon_sources = [
     'gpsmon.c',
     'monitor_italk.c',
-    'monitor_nmea.c',
+    'monitor_nmea0183.c',
     'monitor_oncore.c',
     'monitor_sirf.c',
     'monitor_superstar2.c',

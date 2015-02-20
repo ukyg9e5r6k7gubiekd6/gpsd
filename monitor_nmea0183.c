@@ -1,5 +1,5 @@
 /*
- * monitor_nmea.c - gpsmon support for NMEA devices.
+ * monitor_nmea0183.c - gpsmon support for NMEA devices.
  *
  * To do: Support for GPGLL, GPGBS, GPZDA, PASHR NMEA sentences.
  *
