@@ -327,15 +327,16 @@ typedef enum {
 #define STATUS_DGPS_FIX	2	/* yes, with DGPS */
 
 #define INTERNAL_SET(n)	((gps_mask_t)(1llu<<(SET_HIGH_BIT+(n))))
-#define RAW_IS  	INTERNAL_SET(1)	/* raw pseudorange data available */
-#define USED_IS 	INTERNAL_SET(2)	/* sat-used count available */
-#define DRIVER_IS	INTERNAL_SET(3)	/* driver type identified */
-#define CLEAR_IS	INTERNAL_SET(4)	/* starts a reporting cycle */
-#define REPORT_IS	INTERNAL_SET(5)	/* ends a reporting cycle */
-#define NODATA_IS	INTERNAL_SET(6)	/* no data read from fd */
-#define PPSTIME_IS	INTERNAL_SET(7)	/* precision time is available */
-#define PERR_IS 	INTERNAL_SET(8)	/* PDOP set */
-#define PASSTHROUGH_IS 	INTERNAL_SET(9)	/* passthrough mode */
+#define RAW_IS  	INTERNAL_SET(1) 	/* raw pseudoranges available */
+#define USED_IS 	INTERNAL_SET(2) 	/* sat-used count available */
+#define DRIVER_IS	INTERNAL_SET(3) 	/* driver type identified */
+#define CLEAR_IS	INTERNAL_SET(4) 	/* starts a reporting cycle */
+#define REPORT_IS	INTERNAL_SET(5) 	/* ends a reporting cycle */
+#define NODATA_IS	INTERNAL_SET(6) 	/* no data read from fd */
+#define PPSTIME_IS	INTERNAL_SET(7) 	/* precision time is available */
+#define PERR_IS 	INTERNAL_SET(8) 	/* PDOP set */
+#define PASSTHROUGH_IS 	INTERNAL_SET(9) 	/* passthrough mode */
+#define EOF_IS		INTERNAL_SET(10)	/* synthetic EOF */
 #define DATA_IS	~(ONLINE_SET|PACKET_SET|CLEAR_IS|REPORT_IS)
 
 typedef /*@unsignedintegraltype@*/ unsigned int driver_mask_t;

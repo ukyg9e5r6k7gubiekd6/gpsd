@@ -521,7 +521,7 @@ int libgps_json_unpack(const char *buf,
 	status = json_pps_read(buf, gpsdata, end);
 	if (status == 0) {
 	    gpsdata->set &= ~UNION_SET;
-	    gpsdata->set |= TIMEDRIFT_SET;
+	    gpsdata->set |= PPSDRIFT_SET;
 	}
 	return status;
     } else

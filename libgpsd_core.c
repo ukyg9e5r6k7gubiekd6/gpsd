@@ -1226,7 +1226,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (strcmp((const char *)session->lexer.outbuffer, "# EOF\n") == 0) {
 		gpsd_report(&session->context->errout, LOG_PROG,
 			    "synthetic EOF\n");
-		return EOF_SET;
+		return EOF_IS;
 	    }
 	    else
 		gpsd_report(&session->context->errout, LOG_PROG,
@@ -1507,7 +1507,7 @@ int gpsd_multipoll(const bool data_ready,
 	for (fragments = 0; ; fragments++) {
 	    gps_mask_t changed = gpsd_poll(device);
 
-	    if (changed == EOF_SET) {
+	    if (changed == EOF_IS) {
 		gpsd_report(&device->context->errout, LOG_WARN,
 			    "device signed off %s\n",
 			    device->gpsdata.dev.path);
