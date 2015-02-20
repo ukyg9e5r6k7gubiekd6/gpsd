@@ -155,8 +155,11 @@ A side effect of the WATCH command is that the daemon will ship you
 back some information on available devices.
 
 -----------------------------------------------------------------------------
-{"class":"DEVICES","devices":[{"class":"DEVICE","path":"/dev/ttyUSB0","activated":1269959537.20,"native":0,"bps":4800,"parity":"N","stopbits":1,"cycle":1.00}]}
-{"class":"WATCH","enable":true,"json":true,"nmea":false,"raw":0,"scaled":false,"timing":false}
+{"class":"DEVICES","devices":[{"class":"DEVICE","path":"/dev/ttyUSB0",
+                   "activated":1269959537.20,"native":0,"bps":4800,"parity":"N",
+                   "stopbits":1,"cycle":1.00}]} 
+{"class":"WATCH","enable":true,"json":true,"nmea":false,"raw":0,
+                 "scaled":false,"timing":false,"pps":false}
 -----------------------------------------------------------------------------
 
 The DEVICES response tells you what devices are available to the
@@ -167,7 +170,7 @@ are.
 
 Up to this point, nothing has been dependent on the state of the
 sensors. At this time, it may well be that none of those devices is
-fully powered up yet. In fact, that won't be, unless another
+fully powered up yet. In fact, they won't be, unless another
 GPSD-enabled application is already watching when you open your
 connection.  If that's the case, you will start seeing data
 immediately.
@@ -242,7 +245,7 @@ looks like when the sensor has a fix to report:
                 "speed":0.091,"climb":-0.085,"eps":34.11,"mode":3}
 -----------------------------------------------------------------------------
 
-Note the "mode":3 at the end.  This is how you tell that the GPS ia
+Note the "mode":3 at the end.  This is how you tell that the GPS is
 reporting a full 3D fix with altitude.
 
 If you have an AIS receiver attached, it too will have been opened
@@ -623,4 +626,4 @@ In major versions before 5:
 * There was a set_raw_hook() method in the C and Python bindings, now gone.
   C clients should call gps_data(); the buffer is available directly in Python.
 
-See http:future.html#api_cleanup[Client API Cleanup] for details.
+//end
