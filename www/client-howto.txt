@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.16, July 2013
+v1.17, Mar 2015
 
 == Introduction ==
 
@@ -446,7 +446,7 @@ C and C++ client libraries shipped with GPSD can read this segment.
 The API for reading the segment uses the same gps_open(), gps_read()
 and gps_close() entry points as the sockets interface. To enable using
 shared memory instead, it is only necessary to use the macro constant
-GPSD_SHARED_MEMORY as the port argument of gps_open().
+GPSD_SHARED_MEMORY as the host argument of gps_open().
 
 The gps_stream(), gps_send(), gps_waiting(), and gps_data() entry
 points are not available with this interface. You cannot set a device
