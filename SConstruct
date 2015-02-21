@@ -125,6 +125,7 @@ boolopts = (
     ("oceanserver",   True,  "OceanServer support"),
     ("rtcm104v2",     True,  "rtcm104v2 support"),
     ("rtcm104v3",     True,  "rtcm104v3 support"),
+    ("passthrough",   True,  "build support for passing through JSON"),
     # Time service
     ("ntpshm",        True,  "NTP time hinting support"),
     ("pps",           True,  "PPS time syncing support"),
@@ -137,7 +138,6 @@ boolopts = (
     ("bluez",         True,  "BlueZ support for Bluetooth devices"),
     ("ipv6",          True,  "build IPv6 support"),
     ("netfeed",       True,  "build support for handling TCP/IP data sources"),
-    ("passthrough",   True,  "build support for passing through JSON"),
     # Other daemon options
     ("force_global",  False, "force daemon to listen on all addressses"),
     ("timing",        False, "latency timing support"),
@@ -146,6 +146,7 @@ boolopts = (
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
+    ("ncurses",       True,  "build with ncurses"),
     ("libgpsmm",      True,  "build C++ bindings"),
     ("qt",            True,  "build QT bindings"),
     # Daemon options
@@ -153,7 +154,6 @@ boolopts = (
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("nofloats",      False, "float ops are expensive, suppress error estimates"),
     ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
-    ("ncurses",       True,  "build with ncurses"),
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
     ("implicit_link", imloads,"implicit linkage is supported in shared libs"),
