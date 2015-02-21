@@ -1262,12 +1262,121 @@ SHM 0 source should be around 0.495.
 
 //FIXME: What more can we say about chronyd tuning?
 
+== Providing local NTP service ==
+
+By now if you have a good serial PPS signal your local clock should have
+jitter on the order of 1 uSec.  You do not want the hassle of placing
+a GPS on each of you local computers.  So you install chrony or ntp
+on your other hosts and configure them to use your NTP PPS server as
+their local chimer.
+
+With your best setup on a lightly loaded GigE network you find that your
+NTP clients have jitter on the order of 150 uSec, or 150 times worse
+than your master.  You want to do much better, so you look to the
+Precision Time Protocol (PTP) for help.  With PTP you can easily
+synchronize NTP hosts to 5 uSec with generic hardware.  Even better
+with newer ethernet cards.
+
+To start you will need the <<LINUX-PTP>> code, just follow the simple
+instructions on their web page to download, compile and install on your
+NTP chimer and its slaves.  Be sure to also follow their instructions on
+how to configure your linux kernel.
+
+In our setup we will just use the ptp4l program.  This program does
+special low level timing on ethernet frames and shares that information
+with chronyd or ntpd using an SHM.  Since gpsd also uses SHM be very careful
+not to have the two SHM servers stepping on the same shmid.
+
+If you are using ntpd, then add the last four lines below to your
+master ntp.conf file to configure the SHM.
+
+-----------------------------------------------------------------------------
+# GPS Serial data reference
+server 127.127.28.0
+fudge 127.127.28.0 time1 0.9999 refid GPS
+
+# GPS PPS reference
+server 127.127.28.1 prefer
+fudge 127.127.28.1 refid PPS
+
+# local PTP reference
+server 127.127.28.2
+fudge 127.127.28.2 refid PTP
+-----------------------------------------------------------------------------
+
+If you are using chronyd, then add the last one line below to your
+master chronyd.conf file to configure the SHM.
+
+-----------------------------------------------------------------------------
+refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
+refclock SHM 1 refid PPS
+refclock SHM 2 refid PTP
+-----------------------------------------------------------------------------
+
+To configure the master ptp4l, create a new file
+/usr/local/etc/ptp4l.conf with these contents:
+
+-----------------------------------------------------------------------------
+[global]
+time_stamping software
+clock_servo ntpshm
+ntpshm_segment 2
+
+priority1 10
+priority2 10
+
+[eth0]
+-----------------------------------------------------------------------------
+
+Now as root on the master, start the ptp4l daemon:
+
+# ptp4l -f /usr/local/etc/ptp4l.conf &
+
+Configuration of the master chimer is now complete.  Now to configure
+the slaves.  If the slaves also have PPS then configure them as masters.
+
+If you are using ntpd, then add the last three lines below to your
+master ntp.conf file to configure your one and only SHM.
+
+-----------------------------------------------------------------------------
+# local PTP reference
+server 127.127.28.0
+fudge 127.127.28.2 refid PTP
+-----------------------------------------------------------------------------
+
+If you are using chronyd, then add the one line below to your
+master chronyd.conf file to configure your one and only SHM.
+
+-----------------------------------------------------------------------------
+refclock SHM 0 refid PTP
+-----------------------------------------------------------------------------
+
+To configure the slave ptp4l, create a new file
+/usr/local/etc/ptp4l.conf with these contents:
+
+-----------------------------------------------------------------------------
+[global]
+time_stamping software
+clock_servo ntpshm
+ntpshm_segment 0
+
+[eth0]
+-----------------------------------------------------------------------------
+
+Now as root on the slave, start the ptp4l daemon:
+
+# ptp4l -f /usr/local/etc/ptp4l.conf &
+
+Configuration of the slave chimer is now complete.  Follow the earlier
+procedures for checking the jitter on the SHM on the slaves.  Give it
+a few hours to settle and your hosts will now be synced to around 5 uSec.
+
 == Providing public NTP service ==
 
 <<NTP-FAQ>> has good advice on things to be sure you have done - and
 are ready to do - before becoming a public chimer. One detail it
 doesn't mention is that you'll need to un-firewall UDP port 123.  The
-NTP protocol does not use TCP, so no need to unblock TCCp port 123.
+NTP protocol does not use TCP, so no need to unblock TCP port 123.
 
 If and when you are ready to go public, see <<JOIN-POOL>>. 
 
@@ -1334,6 +1443,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[WIKI-NTP]]] http://en.wikipedia.org/wiki/Network_Time_Protocol[Network Time Protocol]
 
+- [[[LINUX-PTP]]] http://http://linuxptp.sourceforge.net/[Linux PTP]
+
 == Changelog ==
 
 1.1, Nov 2013: Initial release.
@@ -1345,5 +1456,6 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 1.4, Dec 2014: Cleaned up Bibliography
 
 2.0, Feb 2015: More about troubleshooting PPS delivery.  Folded in Sanjeev
-Guota's Calibration Howto describing the loopstats-based procedure.
+Guota's Calibration Howto describing the loopstats-based procedure.  Added
+preliminary information on PTP.
 
