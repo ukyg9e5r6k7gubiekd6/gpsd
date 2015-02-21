@@ -1266,16 +1266,16 @@ SHM 0 source should be around 0.495.
 
 By now if you have a good serial PPS signal your local clock should have
 jitter on the order of 1 uSec.  You do not want the hassle of placing
-a GPS on each of you local computers.  So you install chrony or ntp
+a GPS on each of your local computers.  So you install chrony or ntp
 on your other hosts and configure them to use your NTP PPS server as
 their local chimer.
 
 With your best setup on a lightly loaded GigE network you find that your
 NTP clients have jitter on the order of 150 uSec, or 150 times worse
-than your master.  You want to do much better, so you look to the
-Precision Time Protocol (PTP) for help.  With PTP you can easily
-synchronize NTP hosts to 5 uSec with generic hardware.  Even better
-with newer ethernet cards.
+than your master.  Bummer, you want to do much better, so you look to
+the Precision Time Protocol (PTP) for help.  With PTP you can easily
+synchronize NTP hosts to 5 uSec with generic hardware.  Even better with
+newer ethernet cards that contain hardware timers.
 
 To start you will need the <<LINUX-PTP>> code, just follow the simple
 instructions on their web page to download, compile and install on your
@@ -1334,6 +1334,7 @@ Now as root on the master, start the ptp4l daemon:
 
 Configuration of the master chimer is now complete.  Now to configure
 the slaves.  If the slaves also have PPS then configure them as masters.
+Otherwise you will stop on your SHMs.
 
 If you are using ntpd, then add the last three lines below to your
 master ntp.conf file to configure your one and only SHM.
@@ -1341,11 +1342,11 @@ master ntp.conf file to configure your one and only SHM.
 -----------------------------------------------------------------------------
 # local PTP reference
 server 127.127.28.0
-fudge 127.127.28.2 refid PTP
+fudge 127.127.28.0 refid PTP
 -----------------------------------------------------------------------------
 
-If you are using chronyd, then add the one line below to your
-master chronyd.conf file to configure your one and only SHM.
+If you are using chronyd, then add the one line below to your master
+chronyd.conf file to configure your one and only SHM.
 
 -----------------------------------------------------------------------------
 refclock SHM 0 refid PTP
