@@ -15,8 +15,8 @@ Repository head:
   'max_devices'; the 'limited_max_clients' option is now 'max_clients'
   The previously deprecated 'libQgpsmm' option has been removed; use 'qt'.
   A bug fix for error modeling when NMEA 0183 reports empty DOP
-  fields.  Mac OS X has been dropped from the list of supported platforms
-  due to persistent flakiness in its serial layer.
+  fields.  On OS X, the "osx-pl203" driver has been explicitly listed
+  as unsupported.
 
 3.11: 2014-07-23 (Eric S. Raymond <esr@snark.thyrsus.com>)
   A bug that prevented track interpolation has been fixed.
