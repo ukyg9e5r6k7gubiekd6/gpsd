@@ -249,213 +249,7 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #endif /* LIBGPS_DEBUG */
 
 	}
-#ifdef OLDSTYLE_ENABLE
-	if (PRIVATE(gpsdata) != NULL)
-	    PRIVATE(gpsdata)->newstyle = true;
-#endif /* OLDSTYLE_ENABLE */
     }
-#ifdef OLDSTYLE_ENABLE
-    else {
-	/*
-	 * Get the decimal separator for the current application locale.
-	 * This looks thread-unsafe, but it's not.  The key is that
-	 * character assignment is atomic.
-	 */
-	char *ns, *sp, *tp;
-
-#ifdef __UNUSED__
-	static char decimal_point = '\0';
-	if (decimal_point == '\0') {
-	    struct lconv *locale_data = localeconv();
-	    if (locale_data != NULL && locale_data->decimal_point[0] != '.')
-		decimal_point = locale_data->decimal_point[0];
-	}
-#endif /* __UNUSED__ */
-
-	for (ns = buf; ns; ns = strstr(ns + 1, "GPSD")) {
-	    /*@i1@*/if (str_starts_with(ns, "GPSD")) {
-		/* the following should execute each time we have a good next sp */
-		for (sp = ns + 5; *sp != '\0'; sp = tp + 1) {
-		    bool eol;
-		    tp = sp + strcspn(sp, ",\r\n");
-		    eol = *tp == '\r' || *tp == '\n';
-		    if (*tp == '\0')
-			tp--;
-		    else
-			*tp = '\0';
-
-#ifdef __UNUSED__
-		    /*
-		     * The daemon always emits the Anglo-American and SI
-		     * decimal point.  Hack these into whatever the
-		     * application locale requires if it's not the same.
-		     * This has to happen *after* we grab the next
-		     * comma-delimited response, or we'll lose horribly
-		     * in locales where the decimal separator is comma.
-		     */
-		    if (decimal_point != '\0') {
-			char *cp;
-			for (cp = sp; cp < tp; cp++)
-			    if (*cp == '.')
-				*cp = decimal_point;
-		    }
-#endif /* __UNUSED__ */
-
-		    /* note, there's a bit of skip logic after the switch */
-
-		    switch (*sp) {
-		    case 'F':	/*@ -mustfreeonly */
-			if (sp[2] == '?')
-			    gpsdata->dev.path[0] = '\0';
-			else {
-			    /*@ -mayaliasunique @*/
-			    (void)strlcpy(gpsdata->dev.path, sp + 2,
-				    sizeof(gpsdata->dev.path));
-			    /*@ +mayaliasunique @*/
-			    gpsdata->set |= DEVICE_SET;
-			}
-			/*@ +mustfreeonly */
-			break;
-		    case 'I':
-			/*@ -mustfreeonly */
-			if (sp[2] == '?')
-			    gpsdata->dev.subtype[0] = '\0';
-			else {
-			    (void)strlcpy(gpsdata->dev.subtype, sp + 2,
-					  sizeof(gpsdata->dev.subtype));
-			    gpsdata->set |= DEVICEID_SET;
-			}
-			/*@ +mustfreeonly */
-			break;
-		    case 'O':
-			if (sp[2] == '?') {
-			    gpsdata->set = MODE_SET | STATUS_SET;
-			    gpsdata->status = STATUS_NO_FIX;
-			    gps_clear_fix(&gpsdata->fix);
-			} else {
-			    struct gps_fix_t nf;
-			    char alt[20];
-			    char eph[20], epv[20], track[20], speed[20],
-				climb[20];
-			    char epd[20], eps[20], epc[20], mode[2];
-			    char timestr[20], ept[20], lat[20], lon[20];
-			    int st = sscanf(sp + 2,
-					    "%*s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %19s %1s",
-					    timestr, ept, lat, lon,
-					    alt, eph, epv, track, speed,
-					    climb,
-					    epd, eps, epc, mode);
-			    if (st >= 14) {
-#define DEFAULT(val) (val[0] == '?') ? NAN : safe_atof(val)
-				/*@ +floatdouble @*/
-				nf.time = DEFAULT(timestr);
-				nf.latitude = DEFAULT(lat);
-				nf.longitude = DEFAULT(lon);
-				nf.ept = DEFAULT(ept);
-				nf.altitude = DEFAULT(alt);
-				/* designed before we split eph into epx+epy */
-				nf.epx = nf.epy = DEFAULT(eph) / sqrt(2);
-				nf.epv = DEFAULT(epv);
-				nf.track = DEFAULT(track);
-				nf.speed = DEFAULT(speed);
-				nf.climb = DEFAULT(climb);
-				nf.epd = DEFAULT(epd);
-				nf.eps = DEFAULT(eps);
-				nf.epc = DEFAULT(epc);
-				/*@ -floatdouble @*/
-#undef DEFAULT
-				if (st >= 15)
-				    nf.mode =
-					(mode[0] ==
-					 '?') ? MODE_NOT_SEEN : atoi(mode);
-				else
-				    nf.mode =
-					(alt[0] == '?') ? MODE_2D : MODE_3D;
-				if (alt[0] != '?')
-				    gpsdata->set |= ALTITUDE_SET | CLIMB_SET;
-				if (isnan(nf.epx) == 0 && isnan(nf.epy) == 0)
-				    gpsdata->set |= HERR_SET;
-				if (isnan(nf.epv) == 0)
-				    gpsdata->set |= VERR_SET;
-				if (isnan(nf.track) == 0)
-				    gpsdata->set |= TRACK_SET | SPEED_SET;
-				if (isnan(nf.eps) == 0)
-				    gpsdata->set |= SPEEDERR_SET;
-				if (isnan(nf.epc) == 0)
-				    gpsdata->set |= CLIMBERR_SET;
-				gpsdata->fix = nf;
-				gpsdata->set |=
-				    TIME_SET | TIMERR_SET | LATLON_SET |
-				    MODE_SET;
-				gpsdata->status = STATUS_FIX;
-				gpsdata->set |= STATUS_SET;
-			    }
-			}
-			break;
-		    case 'X':
-			if (sp[2] == '?')
-			    gpsdata->online = (timestamp_t)-1;
-			else {
-			    // cppcheck-suppress invalidscanf
-			    (void)sscanf(sp, "X=%lf", &gpsdata->online);
-			    gpsdata->set |= ONLINE_SET;
-			}
-			break;
-		    case 'Y':
-			if (sp[2] == '?') {
-			    gpsdata->satellites_visible = 0;
-			} else {
-			    int j, i1, i2, i3, i5;
-			    double f4;
-			    char timestamp[21];
-
-			    // cppcheck-suppress invalidscanf
-			    (void)sscanf(sp, "Y=%*s %20s %d ",
-					 timestamp,
-					 &gpsdata->satellites_visible);
-			    if (timestamp[0] != '?') {
-				gpsdata->set |= TIME_SET;
-			    }
-			    memset(&gpsdata->skyview, '\0', sizeof(gpsdata->skyview));
-			    for (j = 0, gpsdata->satellites_used = 0;
-				 j < gpsdata->satellites_visible; j++) {
-				if ((sp != NULL)
-				    && ((sp = strchr(sp, ':')) != NULL)) {
-				    sp++;
-				    // cppcheck-suppress invalidscanf
-				    (void)sscanf(sp, "%d %d %d %lf %d", &i1,
-						 &i2, &i3, &f4, &i5);
-				    gpsdata->skyview[j].PRN = (short)i1;
-				    gpsdata->skyview[j].elevation = (short)i2;
-				    gpsdata->skyview[j].azimuth = (short)i3;
-				    gpsdata->skyview[j].ss = (double)f4;
-				    gpsdata->skyview[j].used = (bool)i5;
-				    if (i5 == 1)
-					gpsdata->satellites_used++;
-				}
-			    }
-			}
-			gpsdata->set |= SATELLITE_SET;
-			break;
-		    }
-
-#ifdef LIBGPS_DEBUG
-		    if (libgps_debuglevel >= 1)
-			libgps_dump_state(gpsdata);
-#endif /* LIBGPS_DEBUG */
-
-		    /*
-		     * Skip to next GPSD when we see \r or \n;
-		     * we don't want to try interpreting stuff
-		     * in between that might be raw mode data.
-		     */
-		    if (eol)
-			break;
-		}
-	    }
-	}
-    }
-#endif /* OLDSTYLE_ENABLE */
 
 #ifndef USE_QT
     libgps_debug_trace((DEBUG_CALLS, "final flags: (0x%04x) %s\n", gpsdata->set,gps_maskdump(gpsdata->set)));
@@ -496,68 +290,55 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 {
     char buf[GPS_JSON_COMMAND_MAX];
 
-    if ((flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA | WATCH_RAW)) == 0) {
+    if ((flags & (WATCH_JSON | WATCH_NMEA | WATCH_RAW)) == 0) {
 	flags |= WATCH_JSON;
     }
     if ((flags & WATCH_DISABLE) != 0) {
-	if ((flags & WATCH_OLDSTYLE) != 0) {
-	    (void)strlcpy(buf, "w-", sizeof(buf));
-	    if ((flags & WATCH_NMEA) != 0)
-		(void)strlcat(buf, "r-", sizeof(buf));
-	} else {
-	    (void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
-	    if (flags & WATCH_JSON)
-		(void)strlcat(buf, "\"json\":false,", sizeof(buf));
-	    if (flags & WATCH_NMEA)
-		(void)strlcat(buf, "\"nmea\":false,", sizeof(buf));
-	    if (flags & WATCH_RAW)
-		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
-	    if (flags & WATCH_RARE)
-		(void)strlcat(buf, "\"raw\":0,", sizeof(buf));
-	    if (flags & WATCH_SCALED)
-		(void)strlcat(buf, "\"scaled\":false,", sizeof(buf));
-	    if (flags & WATCH_TIMING)
-		(void)strlcat(buf, "\"timing\":false,", sizeof(buf));
-	    if (flags & WATCH_SPLIT24)
-		(void)strlcat(buf, "\"split24\":false,", sizeof(buf));
-	    if (flags & WATCH_PPS)
-		(void)strlcat(buf, "\"pps\":false,", sizeof(buf));
-	    str_rstrip_char(buf, ',');
-	    (void)strlcat(buf, "};", sizeof(buf));
-	}
+	(void)strlcpy(buf, "?WATCH={\"enable\":false,", sizeof(buf));
+	if (flags & WATCH_JSON)
+	    (void)strlcat(buf, "\"json\":false,", sizeof(buf));
+	if (flags & WATCH_NMEA)
+	    (void)strlcat(buf, "\"nmea\":false,", sizeof(buf));
+	if (flags & WATCH_RAW)
+	    (void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+	if (flags & WATCH_RARE)
+	    (void)strlcat(buf, "\"raw\":0,", sizeof(buf));
+	if (flags & WATCH_SCALED)
+	    (void)strlcat(buf, "\"scaled\":false,", sizeof(buf));
+	if (flags & WATCH_TIMING)
+	    (void)strlcat(buf, "\"timing\":false,", sizeof(buf));
+	if (flags & WATCH_SPLIT24)
+	    (void)strlcat(buf, "\"split24\":false,", sizeof(buf));
+	if (flags & WATCH_PPS)
+	    (void)strlcat(buf, "\"pps\":false,", sizeof(buf));
+	str_rstrip_char(buf, ',');
+	(void)strlcat(buf, "};", sizeof(buf));
 	libgps_debug_trace((DEBUG_CALLS, "gps_stream() disable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     } else {			/* if ((flags & WATCH_ENABLE) != 0) */
-
-	if ((flags & WATCH_OLDSTYLE) != 0) {
-	    (void)strlcpy(buf, "w+x", sizeof(buf));
-	    if ((flags & WATCH_NMEA) != 0)
-		(void)strlcat(buf, "r+", sizeof(buf));
-	} else {
-	    (void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
-	    if (flags & WATCH_JSON)
-		(void)strlcat(buf, "\"json\":true,", sizeof(buf));
-	    if (flags & WATCH_NMEA)
-		(void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
-	    if (flags & WATCH_RARE)
-		(void)strlcat(buf, "\"raw\":1,", sizeof(buf));
-	    if (flags & WATCH_RAW)
-		(void)strlcat(buf, "\"raw\":2,", sizeof(buf));
-	    if (flags & WATCH_SCALED)
-		(void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
-	    if (flags & WATCH_TIMING)
-		(void)strlcat(buf, "\"timing\":true,", sizeof(buf));
-	    if (flags & WATCH_SPLIT24)
-		(void)strlcat(buf, "\"split24\":true,", sizeof(buf));
-	    if (flags & WATCH_PPS)
-		(void)strlcat(buf, "\"pps\":true,", sizeof(buf));
-	    /*@-nullpass@*//* shouldn't be needed, splint has a bug */
-	    if (flags & WATCH_DEVICE)
-		str_appendf(buf, sizeof(buf), "\"device\":\"%s\",", (char *)d);
-	    /*@+nullpass@*/
-	    str_rstrip_char(buf, ',');
-	    (void)strlcat(buf, "};", sizeof(buf));
-	}
+	(void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
+	if (flags & WATCH_JSON)
+	    (void)strlcat(buf, "\"json\":true,", sizeof(buf));
+	if (flags & WATCH_NMEA)
+	    (void)strlcat(buf, "\"nmea\":true,", sizeof(buf));
+	if (flags & WATCH_RARE)
+	    (void)strlcat(buf, "\"raw\":1,", sizeof(buf));
+	if (flags & WATCH_RAW)
+	    (void)strlcat(buf, "\"raw\":2,", sizeof(buf));
+	if (flags & WATCH_SCALED)
+	    (void)strlcat(buf, "\"scaled\":true,", sizeof(buf));
+	if (flags & WATCH_TIMING)
+	    (void)strlcat(buf, "\"timing\":true,", sizeof(buf));
+	if (flags & WATCH_SPLIT24)
+	    (void)strlcat(buf, "\"split24\":true,", sizeof(buf));
+	if (flags & WATCH_PPS)
+	    (void)strlcat(buf, "\"pps\":true,", sizeof(buf));
+	/*@-nullpass@*//* shouldn't be needed, splint has a bug */
+	if (flags & WATCH_DEVICE)
+	    str_appendf(buf, sizeof(buf), "\"device\":\"%s\",", (char *)d);
+	/*@+nullpass@*/
+	str_rstrip_char(buf, ',');
+	(void)strlcat(buf, "};", sizeof(buf));
 	libgps_debug_trace((DEBUG_CALLS, "gps_stream() enable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     }

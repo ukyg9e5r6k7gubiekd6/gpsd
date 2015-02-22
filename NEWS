@@ -16,7 +16,8 @@ Repository head:
   The previously deprecated 'libQgpsmm' option has been removed; use 'qt'.
   A bug fix for error modeling when NMEA 0183 reports empty DOP
   fields.  On OS X, the "osx-pl203" driver has been explicitly listed
-  as unsupported.
+  as unsupported. The last remnants of the old pre-JSON query protocol
+  have been removed from the client library.
 
 3.11: 2014-07-23 (Eric S. Raymond <esr@snark.thyrsus.com>)
   A bug that prevented track interpolation has been fixed.

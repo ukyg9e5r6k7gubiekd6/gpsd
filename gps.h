@@ -1917,7 +1917,6 @@ typedef int socket_t;
 #define WATCH_SPLIT24	0x001000u	/* split AIS Type 24s */
 #define WATCH_PPS	0x002000u	/* enable PPS JSON */
 #define WATCH_NEWSTYLE	0x010000u	/* force JSON streaming */
-#define WATCH_OLDSTYLE	0x020000u	/* force old-style streaming */
 
 /*
  * Main structure that includes all previous substructures

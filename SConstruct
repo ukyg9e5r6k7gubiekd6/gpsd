@@ -145,7 +145,6 @@ boolopts = (
     ("systemd",       systemd, "systemd socket activation"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
-    ("oldstyle",      True,  "oldstyle (pre-JSON) protocol support"),
     ("ncurses",       True,  "build with ncurses"),
     ("libgpsmm",      True,  "build C++ bindings"),
     ("qt",            True,  "build QT bindings"),

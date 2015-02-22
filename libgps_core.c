@@ -363,10 +363,6 @@ void libgps_dump_state(struct gps_data_t *collect)
     if (collect->set & DEVICE_SET)
 	(void)fprintf(debugfp, "DEVICE: Device is '%s', driver is '%s'\n",
 		      collect->dev.path, collect->dev.driver);
-#ifdef OLDSTYLE_ENABLE
-    if (collect->set & DEVICEID_SET)
-	(void)fprintf(debugfp, "GPSD ID is %s\n", collect->dev.subtype);
-#endif /* OLDSTYLE_ENABLE */
     if (collect->set & DEVICELIST_SET) {
 	int i;
 	(void)fprintf(debugfp, "DEVICELIST:%d devices:\n",
