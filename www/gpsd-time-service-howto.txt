@@ -534,7 +534,7 @@ Segments 0 and 1::
 	 Permissions are 0600 - other programs can only read and
 	 write this segment when running as root.
 
-Segments 2 and 3:: 
+Segments 2, 3 and above:: 
 	 Permissions are 0666 - other programs can read
  	 and write as any user. If ntpd has been
  	 configured to use these segments, any
@@ -1273,23 +1273,38 @@ their local chimer.
 With your best setup on a lightly loaded GigE network you find that your
 NTP clients have jitter on the order of 150 uSec, or 150 times worse
 than your master.  Bummer, you want to do much better, so you look to
-the Precision Time Protocol (PTP) for help.  With PTP you can easily
-synchronize NTP hosts to 5 uSec with generic hardware.  Even better with
-newer ethernet cards that contain hardware timers.
+the Precision Time Protocol <<PTP>> for help.  PTP is also known as IEEE
+1588.  With PTP you can easily synchronize NTP hosts to 5 uSec with
+generic hardware.  Even better with newer ethernet cards that contain
+hardware timers.
 
-To start you will need the <<LINUX-PTP>> code, just follow the simple
-instructions on their web page to download, compile and install on your
-NTP chimer and its slaves.  Be sure to also follow their instructions on
-how to configure your linux kernel.
-
-If you are scratch-building a Linux kernel, the configuration 
-must include either these two lines, or the same with "y" replaced
-by "m" to enable the drivers as modules:
+To start you need to verify that your Linux kernel configuration
+includes either these two lines, or the same with "y" replaced by "m" to
+enable the drivers as modules:
 
 -----------------------------------------------------------------------------
 CONFIG_NETWORK_PHY_TIMESTAMPING=y
 PTP_1588_CLOCK=y
 -----------------------------------------------------------------------------
+
+Then you need to verify that your ethernet hardware supports PTP
+by running this command as root:
+
+-----------------------------------------------------------------------------
+# ethtool -T eth0 | fgrep SOFTWARE
+	software-transmit     (SOF_TIMESTAMPING_TX_SOFTWARE)
+	software-receive      (SOF_TIMESTAMPING_RX_SOFTWARE)
+	software-system-clock (SOF_TIMESTAMPING_SOFTWARE)
+-----------------------------------------------------------------------------
+
+If the result includes those three lines then you have support for
+software PTP timestamping.  We will leave hardware timestamping
+for later.
+
+Next you will need the <<LINUX-PTP>> package, just follow the simple
+instructions on their web page to download, compile and install on your
+NTP chimer and its slaves.  Be sure to also follow their instructions on
+how to configure your linux kernel.
 
 In our setup we will just use the ptp4l program.  This program does
 special low level timing on ethernet frames and shares that information
@@ -1327,10 +1342,16 @@ To configure the master ptp4l, create a new file
 
 -----------------------------------------------------------------------------
 [global]
+# only syslog every 1024 seconds
+summary_interval 10
+# use software timestamping
 time_stamping software
+
+# send to to chronyd/ntpd using SHM 2
 clock_servo ntpshm
 ntpshm_segment 2
 
+# set our prioity hgh since we have PPS
 priority1 10
 priority2 10
 
@@ -1366,7 +1387,12 @@ To configure the slave ptp4l, create a new file
 
 -----------------------------------------------------------------------------
 [global]
+# only syslog every 1024 seconds
+summary_interval 10
+# use software timestamping
 time_stamping software
+
+# send to to chronyd/ntpd using SHM 2
 clock_servo ntpshm
 ntpshm_segment 0
 
@@ -1453,7 +1479,9 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[WIKI-NTP]]] http://en.wikipedia.org/wiki/Network_Time_Protocol[Network Time Protocol]
 
-- [[[LINUX-PTP]]] http://http://linuxptp.sourceforge.net/[Linux PTP]
+- [[[PTP]]] http://www.nist.gov/el/isd/ieee/ieee1588.cfm/[PTP]
+
+- [[[LINUX-PTP]]] http://linuxptp.sourceforge.net/[Linux PTP]
 
 == Changelog ==
 
