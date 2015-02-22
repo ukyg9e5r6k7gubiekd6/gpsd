@@ -1282,6 +1282,15 @@ instructions on their web page to download, compile and install on your
 NTP chimer and its slaves.  Be sure to also follow their instructions on
 how to configure your linux kernel.
 
+If you are scratch-building a Linux kernel, the configuration 
+must include either these two lines, or the same with "y" replaced
+by "m" to enable the drivers as modules:
+
+-----------------------------------------------------------------------------
+CONFIG_NETWORK_PHY_TIMESTAMPING=y
+PTP_1588_CLOCK=y
+-----------------------------------------------------------------------------
+
 In our setup we will just use the ptp4l program.  This program does
 special low level timing on ethernet frames and shares that information
 with chronyd or ntpd using an SHM.  Since gpsd also uses SHM be very careful
