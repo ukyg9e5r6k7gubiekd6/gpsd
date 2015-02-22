@@ -1,6 +1,6 @@
 			GPSD project news
 
-Repository head:
+3.12: 2015-02-22 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The daemon's power utilization has been reduced by changing from
   non-blocking to blocking I/O; this may be significant on mobile devices.
   Better protection against false matches of Inland AIS messages; this
