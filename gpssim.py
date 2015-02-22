@@ -5,7 +5,7 @@ A GPS simulator.
 
 This is proof-of-concept code, not production ready; some functions are stubs.
 """
-import sys, math, random, exceptions
+import sys, math, random, exceptions, time
 import gps, gpslib
 
 # First, the mathematics.  We simulate a moving viewpoint on the Earth
@@ -19,7 +19,7 @@ class ksv:
         self.lat = lat		# Decimal degrees
         self.lon = lon		# Decimal degrees
         self.alt = alt		# Meters
-        self.course = course	# Degrees from true North 
+        self.course = course	# Degrees from true North
         self.speed = speed	# Meters per second
         self.climb = climb	# Meters per second
         self.h_acc = h_acc	# Meters per second per second
@@ -43,14 +43,14 @@ class ksv:
         lat = gps.Deg2Rad(self.lat)
         lon = gps.Deg2Rad(self.lon)
         lat += distance * math.cos(tc)
-        dphi = math.log(tan(lat/2+math.pi/4)/math.tan(self.lat/2+math.pi/4))
-        if abs(lat-self.lat) < sqrt(1e-15):
-            q = cos(self.lat)
+        dphi = math.log(math.tan(lat/2+math.pi/4)/math.tan(self.lat/2+math.pi/4))
+        if abs(lat-self.lat) < math.sqrt(1e-15):
+            q = math.cos(self.lat)
         else:
             q = (lat-self.lat)/dphi
-        dlon = -distance * sin(tc) / q
-        self.lon = gp.Rad2Deg(math.mod(self.lon + dlon + pi, 2 * math.pi) - math.pi)
-        self.lat = gp.Rad2Deg(lat)
+        dlon = -distance * math.sin(tc) / q
+        self.lon = gps.Rad2Deg(math.mod(lon + dlon + math.pi, 2 * math.pi) - math.pi)
+        self.lat = gps.Rad2Deg(lat)
 
 # Satellite orbital elements are available at:
 # <http://www.ngs.noaa.gov/orbits/>
@@ -72,6 +72,7 @@ class satellite:
 
 class gpssimException(exceptions.Exception):
     def __init__(self, message, filename, lineno):
+        exceptions.Exception.__init__(self)
         self.message = message
         self.filename = filename
         self.lineno = lineno
@@ -80,13 +81,13 @@ class gpssimException(exceptions.Exception):
 
 class gpssim:
     "Simulate a moving sensor, with skyview."
-    active_PRNs = range(1, 24+1) + [134,] 
-    def __init__(self, gpstype):
+    active_PRNs = range(1, 24+1) + [134,]
+    def __init__(self, outfmt):
         self.ksv = ksv()
         self.ephemeris = {}
         # This sets up satellites at random.  Not really what we want.
-        for PRN in simulator.active_PRNs:
-            for (prn, satellite) in self.ephemeris.items():
+        for prn in gpssim.active_PRNs:
+            for (prn, _satellite) in self.ephemeris.items():
                 self.skyview[prn] = (random.randint(-60, +61),
                                      random.randint(0, 359))
         self.have_ephemeris = False
@@ -110,7 +111,7 @@ class gpssim:
         if command == "time":
             self.ksv.time = gps.isotime(fields[1])
         elif command == "location":
-            (self.lat, self.lon, self.alt) = map(float, fiels[1:])
+            (self.lat, self.lon, self.alt) = map(float, fields[1:])
         elif command == "course":
             self.ksv.time = float(fields[1])
         elif command == "speed":
@@ -146,12 +147,12 @@ class gpssim:
                                   self.filename, self.lineno)
         # FIX-ME: add syntax for ephemeris elements
         self.lineno += 1
-    def filter(self, input, output):
+    def filter(self, inp, outp):
         "Make this a filter for file-like objects."
         self.filename = input.name
         self.lineno = 1
-        self.output = output
-        for line in input:
+        self.output = outp
+        for line in inp:
             self.execute(line)
     def go(self, seconds):
         "Run the simulation for a specified number of seconds."
@@ -160,7 +161,7 @@ class gpssim:
             if self.have_ephemeris:
                 self.skyview = {}
                 for (prn, satellite) in self.ephemeris.items():
-                    self.skyview[prn] = satellite.position(time)
+                    self.skyview[prn] = satellite.position(i)
             self.output.write(self.gpstype.report(self))
 
 # Reporting classes need to have a report() method returning a string
@@ -176,19 +177,19 @@ class NMEA:
     def __init__(self):
         self.sentences = ("RMC", "GGA",)
         self.counter = 0
-    def add_checksum(self, str):
+    def add_checksum(self, mstr):
         "Concatenate NMEA checksum and trailer to a string"
-        sum = 0
-        for (i, c) in enumerate(str):
+        csum = 0
+        for (i, c) in enumerate(mstr):
             if i == 0 and c == "$":
                 continue
-            sum ^= ord(c)
-        str += "*%02X\r\n" % sum
-        return str
+            csum ^= ord(c)
+        mstr += "*%02X\r\n" % csum
+        return mstr
     def degtodm(self, angle):
         "Decimal degrees to GPS-style, degrees first followed by minutes."
-        (fraction, integer) = math.modf(angle)
-        return math.floor(angle) * 100 + fraction * 60;
+        (fraction, _integer) = math.modf(angle)
+        return math.floor(angle) * 100 + fraction * 60
     def GGA(self, sim):
         "Emit GGA sentence describing the simulation state."
         tm = time.gmtime(sim.ksv.time)
@@ -200,7 +201,7 @@ class NMEA:
             self.degtodm(abs(sim.ksv.lat)), "SN"[sim.ksv.lat > 0],
             self.degtodm(abs(sim.ksv.lon)), "WE"[sim.ksv.lon > 0],
             sim.status,
-            sim.satellites_used);
+            sim.satellites_used)
         # HDOP calculation goes here
         gga += ","
         if sim.mode == gps.MODE_3D:
@@ -213,7 +214,7 @@ class NMEA:
         # Time in seconds since last DGPS update goes here
         gga += ","
         # DGPS station ID goes here
-        return self.add_checksum(gga);
+        return self.add_checksum(gga)
     def GLL(self, sim):
         "Emit GLL sentence describing the simulation state."
         tm = time.gmtime(sim.ksv.time)
@@ -227,7 +228,7 @@ class NMEA:
             sim.validity,
             )
             # FAA mode indicator could go after these fields.
-        return self.add_checksum(gll);
+        return self.add_checksum(gll)
     def RMC(self, sim):
         "Emit RMC sentence describing the simulation state."
         tm = time.gmtime(sim.ksv.time)
@@ -247,7 +248,7 @@ class NMEA:
         # rmc += "%3.2f,M," % mag_var
         rmc += ",,"
         # FAA mode goes here
-        return self.add_checksum(rmc);        
+        return self.add_checksum(rmc)
     def ZDA(self, sim):
         "Emit ZDA sentence describing the simulation state."
         tm = time.gmtime(sim.ksv.time)
@@ -263,7 +264,7 @@ class NMEA:
         zda += ","
         # Local zone minutes description goes here
         zda += ","
-        return self.add_checksum(zda);        
+        return self.add_checksum(zda)
     def report(self, sim):
         "Report the simulation state."
         out = ""
