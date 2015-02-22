@@ -415,28 +415,28 @@ if __name__ == '__main__':
         logfp = None
         redo = False
         for (switch, val) in options:
-            if (switch == '-f'):
+            if switch == '-f':
                 plotmode = val
-            elif (switch == '-m'):
+            elif switch == '-m':
                 threshold = int(val)
-            elif (switch == '-n'):
+            elif switch == '-n':
                 if val[-1] == 'h':
                     await = int(val[:-1]) * 360
                 else:
                     await = int(val)
-            elif (switch == '-t'):
+            elif switch == '-t':
                 title = val
-            elif (switch == '-T'):
+            elif switch == '-T':
                 terminal = val
-            elif (switch == '-d'):
+            elif switch == '-d':
                 dumpfile = val
-            elif (switch == '-l'):
+            elif switch == '-l':
                 logfp = open(val, "w")
-            elif (switch == '-r'):
+            elif switch == '-r':
                 redo = True
-            elif (switch == '-D'):
+            elif switch == '-D':
                 verbose = int(val)
-            elif (switch == '-h'):
+            elif switch == '-h':
                 sys.stderr.write(
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
                     + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal] [server[:port[:device]]]\n")
