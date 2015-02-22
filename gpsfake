@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     try:
         pty.openpty()
-    except Exception:
+    except (AttributeError, OSError):
         print >>sys.stderr, "gpsfake: ptys not available, falling back to UDP."
         udp = True
 
