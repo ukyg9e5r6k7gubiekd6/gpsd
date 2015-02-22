@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Christian Gagneraud - 2012
-# Simple python script that will parse json dictionaries on it's input,
+# Simple python script that will parse json dictionaries on its input,
 # If it fails, it will print the offending line and an error message.
 # The goal is to check that GPSD outputs valid JSON.
 #
@@ -15,9 +15,9 @@ for line in sys.stdin.readlines():
     try:
         # Load the json dictionary, it should raise an error if it is malformed
         item = json.loads(line)
-    except Exception as e:
+    except ValueError as e:
         success = False
-        print "%d: %s" % (lc, line.strip()) 
-        print "%d: %s" % (lc, e) 
+        print "%d: %s" % (lc, line.strip())
+        print "%d: %s" % (lc, e)
 
 exit(0 if success else 1)
