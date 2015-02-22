@@ -64,7 +64,7 @@ class LandSpeedometer(Speedometer):
                 2: 100
         }
 
-    def expose_event(self, unused, event, empty=None):
+    def expose_event(self, _unused, event, _empty=None):
         self.cr = self.window.cairo_create()
         self.cr.rectangle(
                 event.area.x,
@@ -114,12 +114,12 @@ class LandSpeedometer(Speedometer):
             self.cr.save()
             _num = str(self.nums.get(i) * self.res_div_mul)
             (
-                    x_bearing,
-                    y_bearing,
+                    _x_bearing,
+                    _y_bearing,
                     t_width,
                     t_height,
-                    x_advance,
-                    y_advance
+                    _x_advance,
+                    _y_advance
             )  =  self.cr.text_extents(_num)
 
             if i in (-8, -7, -6, -5, -4):
@@ -188,7 +188,6 @@ class LandSpeedometer(Speedometer):
         speed = speed / (self.res_div * self.res_div_mul)
         actual = self.long_ticks[-1] + speed
         if actual > self.long_ticks[0]:
-            #TODO test this in real conditions! ;)
             self.res_div_mul += 1
             speed = speed / (self.res_div * self.res_div_mul)
             actual = self.long_ticks[-1] + speed
@@ -212,7 +211,7 @@ class LandSpeedometer(Speedometer):
                 #cairo.FONT_WEIGHT_BOLD
         )
         self.cr.set_font_size(radius / 10)
-        x_bearing, y_bearing, t_width, t_height = self.cr.text_extents(speed)[:4]
+        _x_bearing, _y_bearing, t_width, _t_height = self.cr.text_extents(speed)[:4]
         self.cr.move_to((x - t_width / 2), (y + radius) - self.long_inset(radius))
         self.cr.show_text(speed)
         self.cr.restore()
@@ -252,7 +251,7 @@ class NauticalSpeedometer(Speedometer):
         return a tuple contains (x, y)'''
         return (polex + cos(angle) * radius, poley - sin(angle) * radius)
 
-    def expose_event(self, unused, event, empty=None):
+    def expose_event(self, _unused, event, _empty=None):
         self.cr = self.window.cairo_create()
         self.cr.rectangle(
                 event.area.x,
@@ -282,7 +281,7 @@ class NauticalSpeedometer(Speedometer):
                                  cairo.FONT_SLANT_NORMAL,
                                  cairo.FONT_WEIGHT_BOLD)
         self.cr.set_font_size(fontsize)
-        (x_bearing, y_bearing,
+        (_x_bearing, _y_bearing,
          t_width, t_height) = self.cr.text_extents(txt)[:4]
         # set the center of textbox
         self.cr.move_to(x - t_width / 2, y + t_height / 2)
@@ -604,7 +603,7 @@ class Main(object):
 
         return True
 
-    def handle_hangup(self, dummy, unused):
+    def handle_hangup(self, _dummy, _unused):
         w = gtk.MessageDialog(
                 type=gtk.MESSAGE_ERROR,
                 flags=gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -632,11 +631,11 @@ class Main(object):
             self.widget.satellites = data.satellites
             self.widget.queue_draw()
 
-    def delete_event(self, widget, event, data=None):
-        #TODO handle all cleanup operations here
+    def delete_event(self, _widget, _event, _data=None):
+        # Someday, handle all cleanup operations here
         return False
 
-    def destroy(self, unused, empty=None):
+    def destroy(self, _unused, _empty=None):
         gtk.main_quit()
 
     def run(self):
