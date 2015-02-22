@@ -101,9 +101,12 @@ maintainer, we've tried to kick these upstream.</p>
 <p>The osx-pl2303 driver appears not to work, at least under 10.9.
   Specifically, the combination of gpsd, OS X, osx-pl2303, and a
   GR601-W usually fails.  With the official Prolific drivers, this
-  receiver works reliably.   The source code of this driver no longer
-  appears to be available.   Therefore we recommend against using the
-  osx-pl2303 driver and consider it unsupported</p>
+  receiver works reliably.  The source code of this driver no longer
+  appears to be available.  While the facts so far do not prove that
+  the bug is in the osx-pl2303 driver, the evidence points that way,
+  and no one has dug in enough to figure out what's wrong. Therefore
+  we recommend against using the osx-pl2303 driver and consider it
+  unsupported</p>
 
 <p>Previously, there were problems with the osx-pl2303 driver that
   caused select not to return even when input was available.  It is
