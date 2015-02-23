@@ -91,12 +91,16 @@ static bool nmea_initialize(void)
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
-    (void)mvwprintw(gpgsawin, 1, 1, "Mode: ");
-    (void)mvwprintw(gpgsawin, 2, 1, "Sats: ");
-    (void)mvwprintw(gpgsawin, 3, 1, "DOP: H=      V=      P=");
-    (void)mvwprintw(gpgsawin, 4, 1, "PPS: ");
+#define MODE_LINE	1
+    (void)mvwprintw(gpgsawin, MODE_LINE, 1, "Mode: ");
+#define SATS_LINE	2
+    (void)mvwprintw(gpgsawin, SATS_LINE, 1, "Sats: ");
+#define DOP_LINE	3
+    (void)mvwprintw(gpgsawin, DOP_LINE, 1, "DOP: H=      V=      P=");
+#define PPS_LINE	4
+    (void)mvwprintw(gpgsawin, PPS_LINE, 1, "PPS: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(gpgsawin, 4, 6, "N/A");
+    (void)mvwaddstr(gpgsawin, PPS_LINE, 6, "N/A");
 #endif /* PPS_ENABLE */
     (void)mvwprintw(gpgsawin, 5, 9, " GSA + PPS ");
     (void)wattrset(gpgsawin, A_NORMAL);
@@ -277,8 +281,8 @@ static void nmea_update(void)
 	    || strcmp(fields[0], "GLGSA") == 0) {
 	    char scr[128];
 	    int i;
-	    (void)mvwprintw(gpgsawin, 1, 7, "%1s %s", fields[1], fields[2]);
-	    (void)wmove(gpgsawin, 2, 7);
+	    (void)mvwprintw(gpgsawin, MODE_LINE, 7, "%1s %s", fields[1], fields[2]);
+	    (void)wmove(gpgsawin, SATS_LINE, 7);
 	    (void)wclrtoeol(gpgsawin);
 	    scr[0] = '\0';
 	    for (i = 0; i < MAXCHANNELS; i++) {
@@ -287,16 +291,16 @@ static void nmea_update(void)
 				   "%d ", session.gpsdata.skyview[i].PRN);
 	    }
 	    getmaxyx(gpgsawin, ymax, xmax);
-	    (void)mvwaddnstr(gpgsawin, 2, 7, scr, xmax - 2 - 7);
+	    (void)mvwaddnstr(gpgsawin, SATS_LINE, 7, scr, xmax - 2 - 7);
 	    if (strlen(scr) >= (size_t) (xmax - 2)) {
-		(void)mvwaddch(gpgsawin, 2, xmax - 2 - 7, (chtype) '.');
-		(void)mvwaddch(gpgsawin, 2, xmax - 3 - 7, (chtype) '.');
-		(void)mvwaddch(gpgsawin, 2, xmax - 4 - 7, (chtype) '.');
+		(void)mvwaddch(gpgsawin, SATS_LINE, xmax - 2 - 7, (chtype) '.');
+		(void)mvwaddch(gpgsawin, SATS_LINE, xmax - 3 - 7, (chtype) '.');
+		(void)mvwaddch(gpgsawin, SATS_LINE, xmax - 4 - 7, (chtype) '.');
 	    }
 	    monitor_fixframe(gpgsawin);
-	    (void)mvwprintw(gpgsawin, 3, 8, "%-5s", fields[16]);
-	    (void)mvwprintw(gpgsawin, 3, 16, "%-5s", fields[17]);
-	    (void)mvwprintw(gpgsawin, 3, 24, "%-5s", fields[15]);
+	    (void)mvwprintw(gpgsawin, DOP_LINE, 8, "%-5s", fields[16]);
+	    (void)mvwprintw(gpgsawin, DOP_LINE, 16, "%-5s", fields[17]);
+	    (void)mvwprintw(gpgsawin, DOP_LINE, 24, "%-5s", fields[15]);
 	    monitor_fixframe(gpgsawin);
 	}
 	if (strcmp(fields[0], "GPGGA") == 0
@@ -333,11 +337,11 @@ static void nmea_update(void)
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
-	    (void)mvwprintw(gpgsawin, 4, 6, "> 1 day");
+	    (void)mvwprintw(gpgsawin, PPS_LINE, 6, "> 1 day");
         } else {
 	    char buf[TIMESPEC_LEN];
 	    timespec_str( &timedelta, buf, sizeof(buf) );
-	    (void)mvwprintw(gpgsawin, 4, 6, "%s", buf);
+	    (void)mvwprintw(gpgsawin, PPS_LINE, 6, "%s", buf);
         }
 	(void)wnoutrefresh(gpgsawin);
     }
