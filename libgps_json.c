@@ -346,6 +346,46 @@ static int json_error_read(const char *buf, struct gps_data_t *gpsdata,
     return status;
 }
 
+int json_toff_read(const char *buf, struct gps_data_t *gpsdata,
+			   /*@null@*/ const char **endptr)
+{
+    int real_sec = 0, real_nsec = 0, clock_sec = 0, clock_nsec = 0;
+    /*@ -fullinitblock @*/
+    const struct json_attr_t json_attrs_toff[] = {
+	/* *INDENT-OFF* */
+        {"class",     t_check,   .dflt.check = "TOFF"},
+	{"device",    t_string,  .addr.string = gpsdata->dev.path,
+			         .len = sizeof(gpsdata->dev.path)},
+	{"real_sec",  t_integer, .addr.integer = &real_sec,
+			         .dflt.integer = 0},
+	{"real_nsec", t_integer, .addr.integer = &real_nsec,
+			         .dflt.integer = 0},
+	{"clock_sec", t_integer, .addr.integer = &clock_sec,
+			         .dflt.integer = 0},
+	{"clock_nsec",t_integer, .addr.integer = &clock_nsec,
+			         .dflt.integer = 0},
+	{NULL},
+	/* *INDENT-ON* */
+    };
+    /*@ +fullinitblock @*/
+    int status;
+
+    memset(&gpsdata->toff, '\0', sizeof(gpsdata->toff));
+    status = json_read_object(buf, json_attrs_toff, endptr);
+    /*@-usedef@*/
+    /*@-type@*//* splint is confused about struct timespec */
+    gpsdata->toff.real.tv_sec = (time_t)real_sec;
+    gpsdata->toff.real.tv_nsec = (long)real_nsec;
+    gpsdata->toff.clock.tv_sec = (time_t)clock_sec;
+    gpsdata->toff.clock.tv_nsec = (long)clock_nsec;
+    /*@+type@*/
+    /*@+usedef@*/
+    if (status != 0)
+	return status;
+
+    return status;
+}
+
 int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
 			   /*@null@*/ const char **endptr)
 {
@@ -515,6 +555,13 @@ int libgps_json_unpack(const char *buf,
 	if (status == 0) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= ERROR_SET;
+	}
+	return status;
+    } else if (str_starts_with(classtag, "\"class\":\"TOFF\"")) {
+	status = json_pps_read(buf, gpsdata, end);
+	if (status == 0) {
+	    gpsdata->set &= ~UNION_SET;
+	    gpsdata->set |= TOFF_SET;
 	}
 	return status;
     } else if (str_starts_with(classtag, "\"class\":\"PPS\"")) {

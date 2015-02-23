@@ -2019,6 +2019,7 @@ struct gps_data_t {
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
 	char error[256];
+	struct timedelta_t toff;
 	struct timedelta_t pps;
     };
 
@@ -2047,6 +2048,8 @@ extern int gps_mainloop(struct gps_data_t *, int,
 extern const char /*@null observer@*/ *gps_data(const struct gps_data_t *);
 extern const char /*@observer@*/ *gps_errstr(const int);
 
+int json_toff_read(const char *buf, struct gps_data_t *,
+		  /*@null@*/ const char **);
 int json_pps_read(const char *buf, struct gps_data_t *,
 		  /*@null@*/ const char **);
 

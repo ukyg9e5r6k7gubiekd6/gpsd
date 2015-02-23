@@ -1500,7 +1500,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
     }
 
 
-#ifdef NTPSHM_ENABLE
+#ifdef NTP_ENABLE
     /*
      * Time is eligible for shipping to NTPD if the driver has
      * asserted PPSTIME_IS at any point in the current cycle.
@@ -1521,14 +1521,25 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_report(&context.errout, LOG_PROG, "NTP: Not a new time\n");
     } else if (!device->ship_to_ntpd) {
 	//gpsd_report(&context.errout, LOG_PROG, "NTP: No precision time report\n");
-    } else if (device->shm_clock != NULL) {
-	/*@-compdef@*/
+    } else {
 	struct timedelta_t td;
-	ntpshm_latch(device, &td);
-	(void)ntpshm_put(device, device->shm_clock, &td);
-	/*@+compdef@*/
-    }
+	ntp_latch(device, &td);
+#ifdef NTPSHM_ENABLE
+	if (device->shm_clock != NULL) {
+	    /*@-compdef@*/
+	    (void)ntpshm_put(device, device->shm_clock, &td);
+	    /*@+compdef@*/
+	}
 #endif /* NTPSHM_ENABLE */
+
+	/*@-type@*//* splint is confused about struct timespec */
+	notify_watchers(device, false, true,
+			"{\"class\":\"TOFF\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
+			device->gpsdata.dev.path,
+			td.real.tv_sec, td.real.tv_nsec,
+			td.clock.tv_sec, td.clock.tv_nsec);
+    }
+#endif /* NTP_ENABLE */
 
     /*
      * If no reliable end of cycle, must report every time

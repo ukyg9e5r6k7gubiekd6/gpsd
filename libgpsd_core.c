@@ -1647,8 +1647,8 @@ void gpsd_zero_satellites( /*@out@*/ struct gps_data_t *out)
 #endif
 }
 
-#ifdef NTPSHM_ENABLE
-void ntpshm_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
+#ifdef NTP_ENABLE
+void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
 /* latch the fact that we've saved a fix */
 {
     double fix_time, integral, fractional;
@@ -1688,6 +1688,6 @@ void ntpshm_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
     /*@+compdef@*/
 #endif /* PPS_ENABLE */
 }
-#endif /* NTPSHM_ENABLE */
+#endif /* NTP_ENABLE */
 
 /* end */

@@ -127,7 +127,8 @@ boolopts = (
     ("rtcm104v3",     True,  "rtcm104v3 support"),
     ("passthrough",   True,  "build support for passing through JSON"),
     # Time service
-    ("ntpshm",        True,  "NTP time hinting support"),
+    ("ntp",           True,  "NTP time hinting support"),
+    ("ntpshm",        True,  "NTP time hinting via shared memory"),
     ("pps",           True,  "PPS time syncing support"),
     # Export methods
     ("socket_export", True,  "data export over sockets"),
@@ -240,6 +241,10 @@ if env['minimal']:
     for (name, default, help) in boolopts:
         if default == True and not ARGUMENTS.get(name):
             env[name] = False
+
+# NTPSHM requires NTP
+if env['ntpshm']:
+    env['ntp'] = True
 
 for (name, default, help) in pathopts:
     env[name] = env.subst(env[name])

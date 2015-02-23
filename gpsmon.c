@@ -660,13 +660,32 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
     char buf[BUFSIZ];
-#ifdef NTPSHM_ENABLE
+#ifdef NTP_ENABLE
     struct timedelta_t td;
-#endif /* NTPSHM_ENABLE */
+#endif /* NTP_ENABLE */
 
-#if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
-    if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\","))
-    {
+#if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_ENABLE)
+    if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"TOFF\",")) {
+	const char *end = NULL;
+	struct gps_data_t noclobber;
+	int status = json_pps_read((const char *)device->lexer.outbuffer,
+				   &noclobber,
+				   &end);
+	if (status != 0) {
+	    /* FIXME: figure out why using json_error_string() core dumps */
+	    complain("Ill-formed TOFF packet: %d", status);
+	    buf[0] = '\0';
+	} else {
+	    /* someday we'll display this data */
+	    if (!curses_active)
+		(void)fprintf(stderr,
+			      "TOFF clock=%ld.%09ld real=%ld.%09ld\n",
+			      (long)noclobber.toff.clock.tv_sec,
+			      (long)noclobber.toff.clock.tv_nsec,
+			      (long)noclobber.toff.real.tv_sec,
+			      (long)noclobber.toff.real.tv_nsec);
+	}
+    } else if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",")) {
 	const char *end = NULL;
 	struct gps_data_t noclobber;
 	int status = json_pps_read((const char *)device->lexer.outbuffer,
@@ -747,7 +766,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
     report_unlock();
 
-#ifdef NTPSHM_ENABLE
+#ifdef NTP_ENABLE
     /* Update the last fix time seen for PPS if we've actually seen one,
      * and it is a new second. */
     if ( 0 != isnan(device->newdata.time)) {
@@ -755,8 +774,8 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     } else if (device->newdata.time == device->last_fixtime.real) {
 	// "NTP: Not a new time
     } else 
-	ntpshm_latch(device, &td);
-#endif /* NTPSHM_ENABLE */
+	ntp_latch(device, &td);
+#endif /* NTP_ENABLE */
 }
 /*@+observertrans +nullpass +globstate +compdef +uniondef@*/
 
