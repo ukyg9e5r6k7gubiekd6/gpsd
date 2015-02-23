@@ -178,6 +178,32 @@ static void cooked_pvt(void)
     (void)mvwprintw(cookedwin, 1, 60, "%-17s", scr);
 }
 
+static void monitor_satlist(WINDOW *win, int y, int x)
+/* display as much as we can of a satlist in a specified window */
+{
+    int ymax, xmax;
+    char scr[128];
+    int i;
+
+    assert(win != NULL);
+    (void)wmove(win, y, x);
+    (void)wclrtoeol(win);
+    scr[0] = '\0';
+    for (i = 0; i < MAXCHANNELS; i++) {
+	if (session.gpsdata.skyview[i].used)
+	    str_appendf(scr, sizeof(scr),
+			"%d ", session.gpsdata.skyview[i].PRN);
+    }
+    getmaxyx(win, ymax, xmax);
+    assert(ymax != 0);	/* suppress compiler warning */
+    (void)mvwaddnstr(win, y, x, scr, xmax - 2 - x);
+    if (strlen(scr) >= (size_t) (xmax - 2)) {
+	(void)mvwaddch(win, y, xmax - 2 - x, (chtype) '.');
+	(void)mvwaddch(win, y, xmax - 3 - x, (chtype) '.');
+	(void)mvwaddch(win, y, xmax - 4 - x, (chtype) '.');
+    }
+    monitor_fixframe(win);
+}
 
 /*@ -globstate -nullpass (splint is confused) */
 static void nmea_update(void)
@@ -279,25 +305,8 @@ static void nmea_update(void)
 	if (strcmp(fields[0], "GPGSA") == 0
 	    || strcmp(fields[0], "GNGSA") == 0
 	    || strcmp(fields[0], "GLGSA") == 0) {
-	    char scr[128];
-	    int i;
 	    (void)mvwprintw(gpgsawin, MODE_LINE, 7, "%1s %s", fields[1], fields[2]);
-	    (void)wmove(gpgsawin, SATS_LINE, 7);
-	    (void)wclrtoeol(gpgsawin);
-	    scr[0] = '\0';
-	    for (i = 0; i < MAXCHANNELS; i++) {
-		if (session.gpsdata.skyview[i].used)
-		    str_appendf(scr, sizeof(scr),
-				   "%d ", session.gpsdata.skyview[i].PRN);
-	    }
-	    getmaxyx(gpgsawin, ymax, xmax);
-	    (void)mvwaddnstr(gpgsawin, SATS_LINE, 7, scr, xmax - 2 - 7);
-	    if (strlen(scr) >= (size_t) (xmax - 2)) {
-		(void)mvwaddch(gpgsawin, SATS_LINE, xmax - 2 - 7, (chtype) '.');
-		(void)mvwaddch(gpgsawin, SATS_LINE, xmax - 3 - 7, (chtype) '.');
-		(void)mvwaddch(gpgsawin, SATS_LINE, xmax - 4 - 7, (chtype) '.');
-	    }
-	    monitor_fixframe(gpgsawin);
+	    monitor_satlist(gpgsawin, SATS_LINE, 7);
 	    (void)mvwprintw(gpgsawin, DOP_LINE, 8, "%-5s", fields[16]);
 	    (void)mvwprintw(gpgsawin, DOP_LINE, 16, "%-5s", fields[17]);
 	    (void)mvwprintw(gpgsawin, DOP_LINE, 24, "%-5s", fields[15]);
