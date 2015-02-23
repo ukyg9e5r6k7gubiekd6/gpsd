@@ -370,7 +370,7 @@ int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
     /*@ +fullinitblock @*/
     int status;
 
-    memset(&gpsdata->timedrift, '\0', sizeof(gpsdata->timedrift));
+    memset(&gpsdata->pps, '\0', sizeof(gpsdata->pps));
     status = json_read_object(buf, json_attrs_pps, endptr);
     /*
      * This is theoretically dodgy, but in practice likely not
@@ -378,10 +378,10 @@ int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
      */
     /*@-usedef@*/
     /*@-type@*//* splint is confused about struct timespec */
-    gpsdata->timedrift.real.tv_sec = (time_t)real_sec;
-    gpsdata->timedrift.real.tv_nsec = (long)real_nsec;
-    gpsdata->timedrift.clock.tv_sec = (time_t)clock_sec;
-    gpsdata->timedrift.clock.tv_nsec = (long)clock_nsec;
+    gpsdata->pps.real.tv_sec = (time_t)real_sec;
+    gpsdata->pps.real.tv_nsec = (long)real_nsec;
+    gpsdata->pps.clock.tv_sec = (time_t)clock_sec;
+    gpsdata->pps.clock.tv_nsec = (long)clock_nsec;
     /*@+type@*/
     /*@+usedef@*/
     if (status != 0)
@@ -521,7 +521,7 @@ int libgps_json_unpack(const char *buf,
 	status = json_pps_read(buf, gpsdata, end);
 	if (status == 0) {
 	    gpsdata->set &= ~UNION_SET;
-	    gpsdata->set |= PPSDRIFT_SET;
+	    gpsdata->set |= PPS_SET;
 	}
 	return status;
     } else

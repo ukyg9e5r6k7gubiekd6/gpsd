@@ -254,7 +254,7 @@ void ntpshm_session_init(struct gps_device_t *session)
     /*@+mustfreeonly@*/
 }
 
-int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedrift_t *td)
+int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedelta_t *td)
 /* put a received fix time into shared memory for NTP */
 {
     char real_str[TIMESPEC_LEN];
@@ -378,7 +378,7 @@ static void init_hook(struct gps_device_t *session)
 
 /* td is the real time and clock time of the edge */
 /* offset is actual_ts - clock_ts */
-static void chrony_send(struct gps_device_t *session, struct timedrift_t *td)
+static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
 {
     char real_str[TIMESPEC_LEN];
     char clock_str[TIMESPEC_LEN];
@@ -416,7 +416,7 @@ static void wrap_hook(struct gps_device_t *session)
 }
 
 static /*@observer@*/ char *report_hook(struct gps_device_t *session,
-					struct timedrift_t *td)
+					struct timedelta_t *td)
 /* ship the time of a PPS event to ntpd and/or chrony */
 {
     char *log1;

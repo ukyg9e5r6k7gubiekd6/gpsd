@@ -1884,7 +1884,7 @@ struct policy_t {
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
 };
 
-struct timedrift_t {
+struct timedelta_t {
     struct timespec	real;
     struct timespec	clock;
 };
@@ -1955,8 +1955,8 @@ struct gps_data_t {
 #define POLICY_SET	(1llu<<29)
 #define LOGMESSAGE_SET	(1llu<<30)
 #define ERROR_SET	(1llu<<31)
-#define TIMEDRIFT_SET	(1llu<<32)
-#define PPSDRIFT_SET	(1llu<<33)
+#define TOFF_SET	(1llu<<32)	/* not yet used */
+#define PPS_SET 	(1llu<<33)
 #define SET_HIGH_BIT	34
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
@@ -2006,7 +2006,7 @@ struct gps_data_t {
     } devices;
 
     /* pack things never reported together to reduce structure size */
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|LOGMESSAGE_SET|ERROR_SET|TIMEDRIFT_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|LOGMESSAGE_SET|ERROR_SET|TOFF_SET|PPS_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */
 	struct rtcm2_t	rtcm2;
@@ -2019,12 +2019,20 @@ struct gps_data_t {
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
 	char error[256];
-	struct timedrift_t timedrift;
+	struct timedelta_t pps;
     };
 
     /* Private data - client code must not set this */
     void *privdata;
 };
+
+/*
+ * Preserve source compatibility with 6.0 (version 3.12).
+ * Can go away on next object file bump.
+ */
+#define timedrift_t	timedelta_t
+#define timedelta	pps
+#define PPSDRIFT_SET	PPS_SET
 
 extern int gps_open(/*@null@*/const char *, /*@null@*/const char *,
 		      /*@out@*/struct gps_data_t *);

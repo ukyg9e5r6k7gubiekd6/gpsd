@@ -661,7 +661,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 {
     char buf[BUFSIZ];
 #ifdef NTPSHM_ENABLE
-    struct timedrift_t td;
+    struct timedelta_t td;
 #endif /* NTPSHM_ENABLE */
 
 #if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
@@ -679,23 +679,23 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	} else {
 	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    struct timespec timedelta;
-	    TS_SUB( &timedelta, &noclobber.timedrift.real, 
-		&noclobber.timedrift.clock);
+	    TS_SUB( &timedelta, &noclobber.pps.real, 
+		&noclobber.pps.clock);
 
 	    if (!curses_active)
 		(void)fprintf(stderr,
-			      "Drift clock=%ld.%09ld clock=%ld.%09ld offset=%ld.%09ld\n",
-			      (long)noclobber.timedrift.clock.tv_sec,
-			      (long)noclobber.timedrift.clock.tv_nsec,
-			      (long)noclobber.timedrift.real.tv_sec,
-			      (long)noclobber.timedrift.real.tv_nsec,
+			      "PPS=%ld.%09ld clock=%ld.%09ld offset=%ld.%09ld\n",
+			      (long)noclobber.pps.clock.tv_sec,
+			      (long)noclobber.pps.clock.tv_nsec,
+			      (long)noclobber.pps.real.tv_sec,
+			      (long)noclobber.pps.real.tv_nsec,
 			      (long)timedelta.tv_sec,
                               (long)timedelta.tv_nsec);
 	    /*@+type +noeffect@*/
 
 	    (void)strlcpy(buf, PPSBAR, sizeof(buf));
 	    /* coverity[missing_lock] */
-	    session.ppslast = noclobber.timedrift;
+	    session.ppslast = noclobber.pps;
 	    /* coverity[missing_lock] */
 	    session.ppscount++;
 	}
@@ -1037,7 +1037,7 @@ static bool do_command(const char *line)
 
 #ifdef PPS_ENABLE
 static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
-			struct timedrift_t *td UNUSED) {
+			struct timedelta_t *td UNUSED) {
     packet_log(PPSBAR);
     return "gpsmon";
 }

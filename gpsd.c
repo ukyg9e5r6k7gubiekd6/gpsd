@@ -1523,7 +1523,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_report(&context.errout, LOG_PROG, "NTP: No precision time report\n");
     } else if (device->shm_clock != NULL) {
 	/*@-compdef@*/
-	struct timedrift_t td;
+	struct timedelta_t td;
 	ntpshm_latch(device, &td);
 	(void)ntpshm_put(device, device->shm_clock, &td);
 	/*@+compdef@*/
@@ -1650,9 +1650,9 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 #endif /* SOCKET_EXPORT_ENABLE */
 
 #if defined(CONTROL_SOCKET_ENABLE) && defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
-static void ship_pps_drift_message(struct gps_device_t *session,
-				   struct timedrift_t *td)
-/* on PPS interrupt, ship a drift message to all clients */
+static void ship_pps_message(struct gps_device_t *session,
+				   struct timedelta_t *td)
+/* on PPS interrupt, ship a message to all clients */
 {
     /*@-type@*//* splint is confused about struct timespec */
     notify_watchers(session, true, true,
@@ -1798,7 +1798,7 @@ int main(int argc, char *argv[])
 #ifdef CONTROL_SOCKET_ENABLE
     INVALIDATE_SOCKET(csock);
 #if defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
-    context.pps_hook = ship_pps_drift_message;
+    context.pps_hook = ship_pps_message;
 #endif /* PPS_ENABLE && SOCKET_EXPORT_ENABLE */
 #endif /* CONTROL_SOCKET_ENABLE */
 

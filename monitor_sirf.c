@@ -283,7 +283,7 @@ static void sirf_update(void)
     uint8_t dgps;
     char tbuf[JSON_DATE_MAX+1];
 #ifdef PPS_ENABLE
-    struct timedrift_t drift;
+    struct timedelta_t ppstimes;
 #endif /* PPS_ENABLE */
 
     /* splint pacification */
@@ -390,7 +390,7 @@ static void sirf_update(void)
 
     case 0x07:			/* Response - Clock Status Data */
 	display(mid7win, 1, 5, "%2d", getub(buf, 7));	/* SVs */
-	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock drift */
+	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock ppstimes */
 	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */
 	display(mid7win, 2, 11, "%lu", getbeu32(buf, 16));	/* Estimated Time */
 	monitor_log("CSD 0x07=");
@@ -590,10 +590,10 @@ static void sirf_update(void)
 #ifdef PPS_ENABLE
     /*@-compdef@*/
     /*@-type -noeffect@*/ /* splint is confused about struct timespec */
-    if (pps_thread_lastpps(&session, &drift) > 0) {
+    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
 	/* NOTE: cannot use double here due to precision requirements */
 	struct timespec timedelta;
-	TS_SUB( &timedelta, &drift.clock, &drift.real);
+	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */

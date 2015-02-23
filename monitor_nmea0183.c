@@ -180,7 +180,7 @@ static void nmea_update(void)
 {
     char **fields;
 #ifdef PPS_ENABLE
-    struct timedrift_t drift;
+    struct timedelta_t ppstimes;
 #endif /* PPS_ENABLE */
 
     assert(cookedwin != NULL);
@@ -326,10 +326,10 @@ static void nmea_update(void)
 #ifdef PPS_ENABLE
     /*@-compdef@*/
     /*@-type -noeffect@*/ /* splint is confused about struct timespec */
-    if (pps_thread_lastpps(&session, &drift) > 0) {
+    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
-	TS_SUB( &timedelta, &drift.clock, &drift.real);
+	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */

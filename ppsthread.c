@@ -629,8 +629,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* delay after last fix */
 	    double delay;
 	    char *log1 = NULL;
-	    /* drift.real is the time we think the pulse represents  */
-	    struct timedrift_t drift;
+	    /* ppstimes.real is the time we think the pulse represents  */
+	    struct timedelta_t ppstimes;
 	    gpsd_report(&session->context->errout, LOG_RAW,
 			"PPS edge accepted %.100s", log);
 #ifndef S_SPLINT_S
@@ -662,17 +662,17 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              */
 
 	    /*@+relaxtypes@*/
-	    drift.real.tv_sec = (time_t)trunc(last_fixtime_real) + 1;
-	    drift.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
-	    drift.clock = clock_ts;
+	    ppstimes.real.tv_sec = (time_t)trunc(last_fixtime_real) + 1;
+	    ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
+	    ppstimes.clock = clock_ts;
 	    /*@-relaxtypes@*/
 
 	    /* check to see if we have a fresh timestamp from the
 	     * GPS serial input then use that */
-	    offset = (drift.real.tv_sec - drift.clock.tv_sec);
-	    offset += ((drift.real.tv_nsec - drift.clock.tv_nsec) / 1e9);
-	    delay = (drift.clock.tv_sec - last_fixtime_clock.tv_sec);
-	    delay += ((drift.clock.tv_nsec - last_fixtime_clock.tv_nsec) / 1e9);
+	    offset = (ppstimes.real.tv_sec - ppstimes.clock.tv_sec);
+	    offset += ((ppstimes.real.tv_nsec - ppstimes.clock.tv_nsec) / 1e9);
+	    delay = (ppstimes.clock.tv_sec - last_fixtime_clock.tv_sec);
+	    delay += ((ppstimes.clock.tv_nsec - last_fixtime_clock.tv_nsec) / 1e9);
 	    if (0.0 > delay || 1.0 < delay) {
 		gpsd_report(&session->context->errout, LOG_RAW,
 			    "PPS: no current GPS seconds: %f\n",
@@ -682,11 +682,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@-compdef@*/
 		last_second_used = last_fixtime_real;
 		if (session->thread_report_hook != NULL) 
-		    log1 = session->thread_report_hook(session, &drift);
+		    log1 = session->thread_report_hook(session, &ppstimes);
 		else
 		    log1 = "no report hook";
 		if (session->context->pps_hook != NULL)
-		    session->context->pps_hook(session, &drift);
+		    session->context->pps_hook(session, &ppstimes);
 		/*@ -unrecog  (splint has no pthread declarations as yet) @*/
 		pthread_err = pthread_mutex_lock(&ppslast_mutex);
                 if ( 0 != pthread_err ) {
@@ -696,7 +696,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
-		session->ppslast = drift;
+		session->ppslast = ppstimes;
 		/*@+type@*/
 		session->ppscount++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
@@ -708,8 +708,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
-		timespec_str( &drift.clock, ts_str1, sizeof(ts_str1) );
-		timespec_str( &drift.real, ts_str2, sizeof(ts_str2) );
+		timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
+		timespec_str( &ppstimes.real, ts_str2, sizeof(ts_str2) );
 		gpsd_report(&session->context->errout, LOG_INF,
 			    "PPS hooks called with %.20s clock: %s real: %s\n",
 			    log1, ts_str1, ts_str2);
@@ -799,8 +799,8 @@ void pps_thread_stash_fixtime(struct gps_device_t *session,
     /*@ +unrecog @*/
 }
 
-int pps_thread_lastpps(struct gps_device_t *session, struct timedrift_t *td)
-/* return the drift at the time of the last PPS - only way we pass data out */
+int pps_thread_lastpps(struct gps_device_t *session, struct timedelta_t *td)
+/* return the delta at the time of the last PPS - only way we pass data out */
 {
     volatile int ret;
     /* pthread error return */
