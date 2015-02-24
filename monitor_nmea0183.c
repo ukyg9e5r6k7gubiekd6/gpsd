@@ -101,7 +101,7 @@ static bool nmea_initialize(void)
 #define TOFF_LINE	3
     (void)mvwprintw(gpgsawin, TOFF_LINE, 1, "TOFF: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(gpgsawin, TOS_LINE, 7, "N/A");
+    (void)mvwaddstr(gpgsawin, TOFF_LINE, 7, "N/A");
 #endif /* PPS_ENABLE */
 #define PPS_LINE	4
     (void)mvwprintw(gpgsawin, PPS_LINE, 1, "PPS: ");
