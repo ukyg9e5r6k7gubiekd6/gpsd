@@ -131,21 +131,6 @@ However, Iván Sánchez Ortega notes:
 >I, for one, would like to see the secs/msecs problem solved before GPSD
 >embarks on the enterprise of writing TAGblocks.
 
-*** Time offset debugging in gpsmon ***
-
-Hall Murray:
-> The gpsmon logging stuff should include time stamps.
->
-> There should be some way for gpsmon to display the time offset that it would
-> send to NTP via SHM.  I don't see any obvious empty space on the screen.  If
-> nothing else, it could use the PPS space or alternate with the PPS info,
-> perhaps via a keyboard command.
->
-> Or perhaps a higher level keyboard command to switch into timekeeping
-> debugging mode rather than position debugging mode.
-
-Add PPS offset to each PPS bar.
-
 **** Speed, mode and rate-changes in client-mode gpsmon.
 
 Are not implemented.  In theory they could be.

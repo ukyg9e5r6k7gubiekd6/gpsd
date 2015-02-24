@@ -70,6 +70,11 @@ static void PROTO_update(void)
      * Use this function to update devicewin.  The packet will be echoed to
      * packetwin immediately after this function is called; you can use this
      * function to write a prefix on the line.
+     *
+     * Helpers available include (1) toff_update, for throwing the
+     * TOFF data from the last time fix on the screen, and (2)
+     * pps_update, for throwing the PPS data from the last 1PPS event on
+     * the screen, and
      */
 }
 
