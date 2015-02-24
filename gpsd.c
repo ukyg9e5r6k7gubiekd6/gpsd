@@ -1532,6 +1532,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	}
 #endif /* NTPSHM_ENABLE */
 
+#ifdef SOCKET_EXPORT_ENABLE
 	/*@-type@*//* splint is confused about struct timespec */
 	notify_watchers(device, false, true,
 			"{\"class\":\"TOFF\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
@@ -1539,6 +1540,8 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 			td.real.tv_sec, td.real.tv_nsec,
 			td.clock.tv_sec, td.clock.tv_nsec);
 	/*@+type@*/
+#endif /* SOCKET_EXPORT_ENABLE */
+
     }
 #endif /* NTP_ENABLE */
 
