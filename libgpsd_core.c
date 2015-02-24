@@ -1666,12 +1666,15 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
     TVTOTS(&td->clock, &clock_tv);
 #endif /* HAVE_CLOCK_GETTIME */
     fix_time = device->newdata.time;
+
+#ifdef TIMEHINT_ENABLE
     /* assume zero when there's no offset method */
     if (device->device_type == NULL
 	|| device->device_type->time_offset == NULL)
 	fix_time += 0.0;
     else
 	fix_time += device->device_type->time_offset(device);
+#endif /* TIMEHINT_ENABLE */
     /* it's ugly but timestamp_t is double */
     /* note loss of precision here
      * td->clock is in nanoSec
