@@ -212,6 +212,31 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
 }
 /*@+compdef +mustdefine@*/
 
+#ifdef NTP_ENABLE
+/*@-compdef@*/
+/*@-type -noeffect@*/ /* splint is confused about struct timespec */
+void toff_update(WINDOW *win, int y, int x)
+{
+    if (time_offset.real.tv_sec != 0)
+    {
+	/* NOTE: can not use double here due to precision requirements */
+	struct timespec timedelta;
+	TS_SUB(&timedelta, &time_offset.clock, &time_offset.real);
+	if ( 86400 < (long)labs(timedelta.tv_sec) ) {
+	    /* more than one day off, overflow */
+	    /* need a bigger field to show it */
+	    (void)mvwprintw(win, y, x, "> 1 day");
+	} else {
+	    char buf[TIMESPEC_LEN];
+	    timespec_str( &timedelta, buf, sizeof(buf) );
+	    (void)mvwprintw(win, y, x, "%s", buf);
+	}
+    }
+}
+/*@+type +noeffect@*/
+/*@+compdef@*/
+#endif /* NTP_ENABLE */
+
 /******************************************************************************
  *
  * Curses I/O
