@@ -93,12 +93,15 @@ static bool nmea_initialize(void)
     (void)wattrset(gpgsawin, A_BOLD);
 #define MODE_LINE	1
     (void)mvwprintw(gpgsawin, MODE_LINE, 1, "Mode: ");
-#define SATS_LINE	2
-    (void)mvwprintw(gpgsawin, SATS_LINE, 1, "Sats: ");
-#define DOP_LINE	3
+#define SATS_LINE	1
+#define SATS_COL	10
+    (void)mvwprintw(gpgsawin, SATS_LINE, SATS_COL, "Sats: ");
+#define DOP_LINE	2
     (void)mvwprintw(gpgsawin, DOP_LINE, 1, "DOP: H=      V=      P=");
 #define PPS_LINE	4
     (void)mvwprintw(gpgsawin, PPS_LINE, 1, "PPS: ");
+#define TOFF_LINE	3
+    (void)mvwprintw(gpgsawin, TOFF_LINE, 1, "TOFF: ");
 #ifndef PPS_ENABLE
     (void)mvwaddstr(gpgsawin, PPS_LINE, 6, "N/A");
 #endif /* PPS_ENABLE */
@@ -305,13 +308,36 @@ static void nmea_update(void)
 	if (strcmp(fields[0], "GPGSA") == 0
 	    || strcmp(fields[0], "GNGSA") == 0
 	    || strcmp(fields[0], "GLGSA") == 0) {
-	    (void)mvwprintw(gpgsawin, MODE_LINE, 7, "%1s %s", fields[1], fields[2]);
-	    monitor_satlist(gpgsawin, SATS_LINE, 7);
+	    (void)mvwprintw(gpgsawin, MODE_LINE, 7, "%1s%s", fields[1], fields[2]);
+	    monitor_satlist(gpgsawin, SATS_LINE, SATS_COL+6);
 	    (void)mvwprintw(gpgsawin, DOP_LINE, 8, "%-5s", fields[16]);
 	    (void)mvwprintw(gpgsawin, DOP_LINE, 16, "%-5s", fields[17]);
 	    (void)mvwprintw(gpgsawin, DOP_LINE, 24, "%-5s", fields[15]);
 	    monitor_fixframe(gpgsawin);
 	}
+
+	/*@-compdef@*/
+	/*@-type -noeffect@*/ /* splint is confused about struct timespec */
+	if ((session.gpsdata.set & TOFF_SET) != 0) {
+	    /* NOTE: can not use double here due to precision requirements */
+	    struct timespec timedelta;
+	    TS_SUB(&timedelta,
+		    &session.gpsdata.toff.clock, &session.gpsdata.toff.real);
+	    if ( 86400 < (long)labs(timedelta.tv_sec) ) {
+		/* more than one day off, overflow */
+		/* need a bigger field to show it */
+		(void)mvwprintw(gpgsawin, TOFF_LINE, 7, "> 1 day");
+	    } else {
+		char buf[TIMESPEC_LEN];
+		timespec_str( &timedelta, buf, sizeof(buf) );
+		(void)mvwprintw(gpgsawin, TOFF_LINE, 7, "%s", buf);
+	    }
+	    (void)wnoutrefresh(gpgsawin);
+	}
+	/*@+type +noeffect@*/
+	/*@+compdef@*/
+
+
 	if (strcmp(fields[0], "GPGGA") == 0
 	    || strcmp(fields[0], "GNGGA") == 0
 	    || strcmp(fields[0], "GLGGA") == 0) {

@@ -47,6 +47,7 @@ extern const struct gps_type_t driver_nmea0183;
 /* These are public */
 struct gps_device_t session;
 WINDOW *devicewin;
+struct timedelta_t	time_offset;
 bool serial;
 
 /* These are private */
@@ -667,23 +668,23 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 #if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_ENABLE)
     if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"TOFF\",")) {
 	const char *end = NULL;
-	struct gps_data_t noclobber;
-	int status = json_pps_read((const char *)device->lexer.outbuffer,
-				   &noclobber,
+	int status = json_toff_read((const char *)device->lexer.outbuffer,
+				   &session.gpsdata,
 				   &end);
 	if (status != 0) {
 	    /* FIXME: figure out why using json_error_string() core dumps */
 	    complain("Ill-formed TOFF packet: %d", status);
 	    buf[0] = '\0';
 	} else {
-	    /* someday we'll display this data */
+	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    if (!curses_active)
 		(void)fprintf(stderr,
 			      "TOFF clock=%ld.%09ld real=%ld.%09ld\n",
-			      (long)noclobber.toff.clock.tv_sec,
-			      (long)noclobber.toff.clock.tv_nsec,
-			      (long)noclobber.toff.real.tv_sec,
-			      (long)noclobber.toff.real.tv_nsec);
+			      (long)session.gpsdata.toff.clock.tv_sec,
+			      (long)session.gpsdata.toff.clock.tv_nsec,
+			      (long)session.gpsdata.toff.real.tv_sec,
+			      (long)session.gpsdata.toff.real.tv_nsec);
+	    /*@+type +noeffect@*/
 	}
     } else if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",")) {
 	const char *end = NULL;
