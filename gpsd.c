@@ -1538,6 +1538,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 			device->gpsdata.dev.path,
 			td.real.tv_sec, td.real.tv_nsec,
 			td.clock.tv_sec, td.clock.tv_nsec);
+	/*@+type@*/
     }
 #endif /* NTP_ENABLE */
 
