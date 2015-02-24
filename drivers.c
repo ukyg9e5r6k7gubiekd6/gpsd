@@ -1450,7 +1450,7 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
     gpsd_report(&session->context->errout, LOG_IO,
 		"<= GPS: %s\n", (char *)session->lexer.outbuffer);
 
-    if (!str_starts_with(session->gpsdata.dev.path, "gpsd://localhost:"))
+    if (strstr(session->gpsdata.dev.path, ":/") != NULL && strstr(session->gpsdata.dev.path, "localhost") == NULL)
     {
 	/*@-nullpass@*/ /* required only because splint is buggy */
 	/* devices and paths need to be edited */
