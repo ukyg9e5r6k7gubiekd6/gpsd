@@ -754,18 +754,19 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	} else {
 	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    struct timespec timedelta;
-	    char pps_clock_str[TIMESPEC_LEN];
-	    char pps_real_str[TIMESPEC_LEN];
 	    char timedelta_str[TIMESPEC_LEN];
 
 	    TS_SUB( &timedelta, &noclobber.pps.real, &noclobber.pps.clock);
+	    timespec_str( &timedelta, timedelta_str, sizeof(timedelta_str) );
 
 	    if (!curses_active) {
+		char pps_clock_str[TIMESPEC_LEN];
+		char pps_real_str[TIMESPEC_LEN];
+
 		timespec_str( &noclobber.pps.clock, pps_clock_str,
 			sizeof(pps_clock_str) );
 		timespec_str( &noclobber.pps.real, pps_real_str,
 			sizeof(pps_real_str) );
-		timespec_str( &timedelta, timedelta_str, sizeof(timedelta_str) );
 
 		(void)fprintf(stderr,
 			      "PPS=%.20s clock=%.20s offset=%.20s\n",
@@ -775,7 +776,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    }
 	    /*@+type +noeffect@*/
 
-	    (void)strlcpy(buf, PPSBAR, sizeof(buf));
+	    (void)snprintf(buf, sizeof(buf), 
+			"------------------- PPS offset: %.20s ------\n ",
+			timedelta_str);
 	    /* coverity[missing_lock] */
 	    session.ppslast = noclobber.pps;
 	    /* coverity[missing_lock] */
