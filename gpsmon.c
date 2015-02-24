@@ -727,6 +727,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	if (status != 0) {
 	    /* FIXME: figure out why using json_error_string() core dumps */
 	    complain("Ill-formed TOFF packet: %d", status);
+	    return;
 	} else {
 	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    if (!curses_active)
@@ -738,6 +739,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			      (long)session.gpsdata.toff.real.tv_nsec);
 	    /*@+type +noeffect@*/
 	    time_offset = session.gpsdata.toff;
+	    return;
 	}
     } else if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",")) {
 	const char *end = NULL;
@@ -748,7 +750,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	if (status != 0) {
 	    /* FIXME: figure out why using json_error_string() core dumps */
 	    complain("Ill-formed PPS packet: %d", status);
-	    buf[0] = '\0';
+	    return;
 	} else {
 	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    struct timespec timedelta;
