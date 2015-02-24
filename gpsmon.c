@@ -754,18 +754,25 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	} else {
 	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    struct timespec timedelta;
-	    TS_SUB( &timedelta, &noclobber.pps.real, 
-		&noclobber.pps.clock);
+	    char pps_clock_str[TIMESPEC_LEN];
+	    char pps_real_str[TIMESPEC_LEN];
+	    char timedelta_str[TIMESPEC_LEN];
 
-	    if (!curses_active)
+	    TS_SUB( &timedelta, &noclobber.pps.real, &noclobber.pps.clock);
+
+	    if (!curses_active) {
+		timespec_str( &noclobber.pps.clock, pps_clock_str,
+			sizeof(pps_clock_str) );
+		timespec_str( &noclobber.pps.real, pps_real_str,
+			sizeof(pps_real_str) );
+		timespec_str( &timedelta, timedelta_str, sizeof(timedelta_str) );
+
 		(void)fprintf(stderr,
-			      "PPS=%ld.%09ld clock=%ld.%09ld offset=%ld.%09ld\n",
-			      (long)noclobber.pps.clock.tv_sec,
-			      (long)noclobber.pps.clock.tv_nsec,
-			      (long)noclobber.pps.real.tv_sec,
-			      (long)noclobber.pps.real.tv_nsec,
-			      (long)timedelta.tv_sec,
-                              (long)timedelta.tv_nsec);
+			      "PPS=%.20s clock=%.20s offset=%.20s\n",
+			      pps_clock_str,
+			      pps_real_str,
+                              timedelta_str);
+	    }
 	    /*@+type +noeffect@*/
 
 	    (void)strlcpy(buf, PPSBAR, sizeof(buf));
