@@ -47,7 +47,9 @@ extern const struct gps_type_t driver_nmea0183;
 /* These are public */
 struct gps_device_t session;
 WINDOW *devicewin;
+#ifdef NTP_ENABLE
 struct timedelta_t	time_offset;
+#endif /* NTP_ENABLE */
 bool serial;
 
 /* These are private */
@@ -645,9 +647,6 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
     char buf[BUFSIZ];
-#ifdef NTP_ENABLE
-    struct timedelta_t td;
-#endif /* NTP_ENABLE */
 
 #if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_ENABLE)
     if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"TOFF\",")) {
@@ -658,17 +657,17 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	if (status != 0) {
 	    /* FIXME: figure out why using json_error_string() core dumps */
 	    complain("Ill-formed TOFF packet: %d", status);
-	    buf[0] = '\0';
 	} else {
 	    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 	    if (!curses_active)
 		(void)fprintf(stderr,
-			      "TOFF clock=%ld.%09ld real=%ld.%09ld\n",
+			      "TOFF=%ld.%09ld real=%ld.%09ld\n",
 			      (long)session.gpsdata.toff.clock.tv_sec,
 			      (long)session.gpsdata.toff.clock.tv_nsec,
 			      (long)session.gpsdata.toff.real.tv_sec,
 			      (long)session.gpsdata.toff.real.tv_nsec);
 	    /*@+type +noeffect@*/
+	    time_offset = session.gpsdata.toff;
 	}
     } else if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",")) {
 	const char *end = NULL;
@@ -759,7 +758,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     } else if (device->newdata.time == device->last_fixtime.real) {
 	// "NTP: Not a new time
     } else 
-	ntp_latch(device, &td);
+	ntp_latch(device, &time_offset);
 #endif /* NTP_ENABLE */
 }
 /*@+observertrans +nullpass +globstate +compdef +uniondef@*/

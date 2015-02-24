@@ -98,10 +98,13 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgsawin, SATS_LINE, SATS_COL, "Sats: ");
 #define DOP_LINE	2
     (void)mvwprintw(gpgsawin, DOP_LINE, 1, "DOP: H=      V=      P=");
-#define PPS_LINE	4
-    (void)mvwprintw(gpgsawin, PPS_LINE, 1, "PPS: ");
 #define TOFF_LINE	3
     (void)mvwprintw(gpgsawin, TOFF_LINE, 1, "TOFF: ");
+#ifndef PPS_ENABLE
+    (void)mvwaddstr(gpgsawin, TOS_LINE, 7, "N/A");
+#endif /* PPS_ENABLE */
+#define PPS_LINE	4
+    (void)mvwprintw(gpgsawin, PPS_LINE, 1, "PPS: ");
 #ifndef PPS_ENABLE
     (void)mvwaddstr(gpgsawin, PPS_LINE, 6, "N/A");
 #endif /* PPS_ENABLE */
@@ -316,13 +319,14 @@ static void nmea_update(void)
 	    monitor_fixframe(gpgsawin);
 	}
 
+#ifdef NTP_ENABLE
 	/*@-compdef@*/
 	/*@-type -noeffect@*/ /* splint is confused about struct timespec */
-	if ((session.gpsdata.set & TOFF_SET) != 0) {
+	if (time_offset.real.tv_sec != 0)
+	{
 	    /* NOTE: can not use double here due to precision requirements */
 	    struct timespec timedelta;
-	    TS_SUB(&timedelta,
-		    &session.gpsdata.toff.clock, &session.gpsdata.toff.real);
+	    TS_SUB(&timedelta, &time_offset.clock, &time_offset.real);
 	    if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 		/* more than one day off, overflow */
 		/* need a bigger field to show it */
@@ -332,11 +336,10 @@ static void nmea_update(void)
 		timespec_str( &timedelta, buf, sizeof(buf) );
 		(void)mvwprintw(gpgsawin, TOFF_LINE, 7, "%s", buf);
 	    }
-	    (void)wnoutrefresh(gpgsawin);
 	}
 	/*@+type +noeffect@*/
 	/*@+compdef@*/
-
+#endif /* NTP_ENABLE */
 
 	if (strcmp(fields[0], "GPGGA") == 0
 	    || strcmp(fields[0], "GNGGA") == 0
