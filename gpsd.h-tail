@@ -274,7 +274,7 @@ struct gps_context_t {
     bool shmTimeInuse[NTPSHMSEGS];
 #endif /* NTPSHM_ENABLE */
 #ifdef PPS_ENABLE
-    /*@null@*/ void (*pps_hook)(struct gps_device_t *, struct timedrift_t *);
+    /*@null@*/ void (*pps_hook)(struct gps_device_t *, struct timedelta_t *);
 #endif /* PPS_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
     /* we don't want the compiler to treat writes to shmexport as dead code,
@@ -513,9 +513,9 @@ struct gps_device_t {
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     int chronyfd;			/* for talking to chrony */
     /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
-					   struct timedrift_t *);
+					   struct timedelta_t *);
     /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
-    volatile struct timedrift_t ppslast;
+    volatile struct timedelta_t ppslast;
     volatile int ppscount;
 #endif /* PPS_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
@@ -879,7 +879,7 @@ extern void ntp_latch(struct gps_device_t *device,  /*@out@*/struct timedelta_t 
 #ifdef NTPSHM_ENABLE
 extern void ntpshm_context_init(struct gps_context_t *);
 extern void ntpshm_session_init(struct gps_device_t *);
-extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *, struct timedrift_t *);
+extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *, struct timedelta_t *);
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
 #endif /* NTPSHM_ENABLE */
@@ -977,7 +977,7 @@ extern void pps_thread_stash_fixtime(struct gps_device_t *,
 #endif /* PPS_ENABLE */
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
-extern int pps_thread_lastpps(struct gps_device_t *, struct timedrift_t *);
+extern int pps_thread_lastpps(struct gps_device_t *, struct timedelta_t *);
 
 extern void errout_reset(struct gpsd_errout_t *errout);
 
