@@ -1138,7 +1138,7 @@ between the host's clock time and the GPS time at top of second
 
 <para>A TOFF object has the following elements:</para>
 
-<table frame="all" pgwide="0"><title>PPS object</title>
+<table frame="all" pgwide="0"><title>TOFF object</title>
 <tgroup cols="4" align="left" colsep="1" rowsep="1">
 <thead>
 <row>
