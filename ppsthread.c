@@ -624,13 +624,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
 
 	if (ok) {
-            struct timespec ts_temp;
 	    /* offset is the skew from expected to observed pulse time */
             struct timespec offset;
 	    /* offset as a printable string */
 	    char offset_str[TIMESPEC_LEN];
 	    /* delay after last fix */
-	    double delay;
+	    struct timespec  delay;
+	    /* delay as a printable string */
+	    char delay_str[TIMESPEC_LEN];
 	    char *log1 = NULL;
 	    /* ppstimes.real is the time we think the pulse represents  */
 	    struct timedelta_t ppstimes;
@@ -673,13 +674,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* check to see if we have a fresh timestamp from the
 	     * GPS serial input then use that */
 	    TS_SUB( &offset, &ppstimes.real, &ppstimes.clock);
-	    TS_SUB( &ts_temp, &ppstimes.clock, &last_fixtime_clock);
-	    delay = TSTONS( &ts_temp );
+	    TS_SUB( &delay, &ppstimes.clock, &last_fixtime_clock);
+	    timespec_str( &delay, delay_str, sizeof(delay_str) );
 
-	    if (0.0 > delay || 1.0 < delay) {
+	    if ( 0> delay.tv_sec || 0 > delay.tv_nsec ) {
 		gpsd_report(&session->context->errout, LOG_RAW,
-			    "PPS: no current GPS seconds: %f\n",
-			    delay);
+			    "PPS: system clock went backwards: %.20s\n",
+			    delay_str);
+		log1 = "system clock went backwards";
+	    } else if ( ( 2 < delay.tv_sec) 
+	      || ( 1 == delay.tv_sec && 100000000 > delay.tv_nsec ) ) {
+                /* system clock could be slewing so allow 1.1 sec delay */
+		gpsd_report(&session->context->errout, LOG_RAW,
+			    "PPS: no current GPS seconds: %.20s\n",
+			    delay_str);
 		log1 = "timestamp out of range";
 	    } else {
 		/*@-compdef@*/
