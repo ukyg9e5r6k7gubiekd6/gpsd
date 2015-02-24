@@ -166,21 +166,6 @@ static inline void report_unlock(void) { }
  *
  ******************************************************************************/
 
-static void visibilize(/*@out@*/char *buf2, size_t len2, const char *buf)
-/* string is mostly printable, dress up the nonprintables a bit */
-{
-    const char *sp;
-
-    buf2[0] = '\0';
-    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len2; sp++)
-	if (isprint((unsigned char) *sp) || (sp[0] == '\n' && sp[1] == '\0')
-	  || (sp[0] == '\r' && sp[2] == '\0'))
-	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
-	else
-	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
-			   (unsigned)(*sp & 0xff));
-}
-
 /*@-compdef -mustdefine@*/
 static void cond_hexdump(/*@out@*/char *buf2, size_t len2, 
 			 const char *buf, size_t len)
@@ -253,19 +238,16 @@ static void monitor_dump_send(/*@in@*/ const char *buf, size_t len)
 
 /*@-compdef@*/
 static void gpsmon_report(const char *buf)
+/* log to the packet window if curses is up, otherwise stdout */
 {
-    char buf2[BUFSIZ];
-
-    visibilize(buf2, sizeof(buf2), buf);
-
-    report_lock();
+    /* report locking is left to caller */
+    assert(buf[0] != '\0' && buf[0] != '\n');
     if (!curses_active)
-	(void)fputs(buf2, stdout);
+	(void)fputs(buf, stdout);
     else if (packetwin != NULL)
-	(void)waddstr(packetwin, buf2);
+	(void)waddstr(packetwin, buf);
     if (logfile != NULL)
-	(void)fputs(buf2, logfile);
-    report_unlock();
+	(void)fputs(buf, logfile);
 }
 /*@+compdef@*/
 
@@ -273,8 +255,10 @@ static void gpsmon_report(const char *buf)
 /*@-compdef@*/
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
+    report_lock();
     (void)vsnprintf(buf + strlen(buf), len, fmt, ap);
     gpsmon_report(buf);
+    report_unlock();
 }
 /*@+compdef@*/
 #endif

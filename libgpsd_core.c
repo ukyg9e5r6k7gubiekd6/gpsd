@@ -177,6 +177,8 @@ void gpsd_report(const struct gpsd_errout_t *errout,
 
 	if (getpid() == getsid(getpid()))
 	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
+	else if (errout->report != NULL)
+	    errout->report(buf2);
 	else
 	    (void)fputs(buf2, stderr);
 #if defined(PPS_ENABLE)
