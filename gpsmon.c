@@ -257,9 +257,11 @@ static void gpsmon_report(const char *buf)
 /*@-compdef@*/
 static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
 {
+    char buf2[len * 2];
     report_lock();
-    (void)vsnprintf(buf + strlen(buf), len, fmt, ap);
-    gpsmon_report(buf);
+    cond_hexdump(buf2, len * 2, buf, len);
+    (void)vsnprintf(buf2 + strlen(buf2), len, fmt, ap);
+    gpsmon_report(buf2);
     report_unlock();
 }
 /*@+compdef@*/
