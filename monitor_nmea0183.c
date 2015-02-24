@@ -215,9 +215,6 @@ static void monitor_satlist(WINDOW *win, int y, int x)
 static void nmea_update(void)
 {
     char **fields;
-#ifdef PPS_ENABLE
-    struct timedelta_t ppstimes;
-#endif /* PPS_ENABLE */
 
     assert(cookedwin != NULL);
     assert(nmeawin != NULL);
@@ -348,25 +345,7 @@ static void nmea_update(void)
     }
 
 #ifdef PPS_ENABLE
-    /*@-compdef@*/
-    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
-    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
-	/* NOTE: can not use double here due to precision requirements */
-	struct timespec timedelta;
-	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
-        if ( 86400 < (long)labs(timedelta.tv_sec) ) {
-	    /* more than one day off, overflow */
-            /* need a bigger field to show it */
-	    (void)mvwprintw(gpgsawin, PPS_LINE, 6, "> 1 day");
-        } else {
-	    char buf[TIMESPEC_LEN];
-	    timespec_str( &timedelta, buf, sizeof(buf) );
-	    (void)mvwprintw(gpgsawin, PPS_LINE, 6, "%s", buf);
-        }
-	(void)wnoutrefresh(gpgsawin);
-    }
-    /*@+type +noeffect@*/
-    /*@+compdef@*/
+    pps_update(gpgsawin, PPS_LINE, 6);
 #endif /* PPS_ENABLE */
 }
 

@@ -282,9 +282,6 @@ static void sirf_update(void)
     size_t len;
     uint8_t dgps;
     char tbuf[JSON_DATE_MAX+1];
-#ifdef PPS_ENABLE
-    struct timedelta_t ppstimes;
-#endif /* PPS_ENABLE */
 
     /* splint pacification */
     assert(mid2win!=NULL && mid27win != NULL);
@@ -588,25 +585,7 @@ static void sirf_update(void)
     /*@ +nullpass -nullderef @*/
 
 #ifdef PPS_ENABLE
-    /*@-compdef@*/
-    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
-    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
-	/* NOTE: cannot use double here due to precision requirements */
-	struct timespec timedelta;
-	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
-        if ( 86400 < (long)labs(timedelta.tv_sec) ) {
-	    /* more than one day off, overflow */
-            /* need a bigger field to show it */
-	    (void)mvwprintw(mid7win, 2, 28, "> 1 day");
-        } else {
-	    char buf2[TIMESPEC_LEN];
-	    timespec_str( &timedelta, buf2, sizeof(buf2) );
-	    (void)mvwprintw(mid7win, 2, 32, "%s", buf2);
-        }
-	(void)wnoutrefresh(mid7win);
-    }
-    /*@+type +noeffect@*/
-    /*@+compdef@*/
+    pps_update(mid7win, 2, 32);
 #endif /* PPS_ENABLE */
 }
 

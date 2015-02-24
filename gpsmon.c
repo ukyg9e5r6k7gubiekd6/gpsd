@@ -47,9 +47,6 @@ extern const struct gps_type_t driver_nmea0183;
 /* These are public */
 struct gps_device_t session;
 WINDOW *devicewin;
-#ifdef NTP_ENABLE
-struct timedelta_t	time_offset;
-#endif /* NTP_ENABLE */
 bool serial;
 
 /* These are private */
@@ -62,6 +59,9 @@ static char *type_name;
 static size_t promptlen = 0;
 struct termios cooked, rare;
 struct fixsource_t source;
+#ifdef NTP_ENABLE
+struct timedelta_t time_offset;
+#endif /* NTP_ENABLE */
 
 #ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
@@ -236,6 +236,33 @@ void toff_update(WINDOW *win, int y, int x)
 /*@+type +noeffect@*/
 /*@+compdef@*/
 #endif /* NTP_ENABLE */
+
+#ifdef PPS_ENABLE
+void pps_update(WINDOW *win, int y, int x)
+{
+    /*@-compdef@*/
+    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
+    struct timedelta_t ppstimes;
+
+    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
+	/* NOTE: can not use double here due to precision requirements */
+	struct timespec timedelta;
+	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
+        if ( 86400 < (long)labs(timedelta.tv_sec) ) {
+	    /* more than one day off, overflow */
+            /* need a bigger field to show it */
+	    (void)mvwprintw(win, y, x, "> 1 day");
+        } else {
+	    char buf[TIMESPEC_LEN];
+	    timespec_str( &timedelta, buf, sizeof(buf) );
+	    (void)mvwprintw(win, y, x, "%s", buf);
+        }
+	(void)wnoutrefresh(win);
+    }
+    /*@+type +noeffect@*/
+    /*@+compdef@*/
+}
+#endif /* PPS_ENABLE */
 
 /******************************************************************************
  *

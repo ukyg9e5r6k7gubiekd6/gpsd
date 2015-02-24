@@ -36,9 +36,11 @@ extern WINDOW *devicewin;
 extern struct gps_device_t	session;
 extern bool serial;	/* True - direct mode, False - daemon mode */
 #ifdef NTP_ENABLE
-extern struct timedelta_t time_offset;
 void toff_update(WINDOW *, int, int);
 #endif /* NTP_ENABLE */
+#ifdef PPS_ENABLE
+void pps_update(WINDOW *, int, int);
+#endif /* PPS_ENABLE */
 
 #endif /* _GPSD_GPSMON_H_ */
 /* gpsmon.h ends here */

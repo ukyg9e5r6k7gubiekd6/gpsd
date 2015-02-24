@@ -233,9 +233,6 @@ static void ubx_update(void)
     unsigned char *buf;
     size_t data_len;
     unsigned short msgid;
-#ifdef PPS_ENABLE
-    struct timedelta_t ppstimes;
-#endif /* PPS_ENABLE */
 
     buf = session.lexer.outbuffer;
     msgid = (unsigned short)((buf[2] << 8) | buf[3]);
@@ -255,25 +252,7 @@ static void ubx_update(void)
     }
 
 #ifdef PPS_ENABLE
-    /*@-compdef@*/
-    /*@-type -noeffect@*/ /* splint is confused about struct timespec */
-    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
-	/* NOTE: can not use double here due to precision requirements */
-	struct timespec timedelta;
-	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
-        if ( 86400 < (long)labs(timedelta.tv_sec) ) {
-	    /* more than one day off, overflow */
-            /* need a bigger field to show it */
-	    (void)mvwprintw(ppswin, 1, 6, "> 1 day");
-        } else {
-	    char buf2[TIMESPEC_LEN];
-	    timespec_str( &timedelta, buf2, sizeof(buf2) );
-	    (void)mvwprintw(ppswin, 1, 6, "%s", buf2);
-        }
-	(void)wnoutrefresh(ppswin);
-    }
-    /*@+type +noeffect@*/
-    /*@+compdef@*/
+    pps_update(ppswin, 1, 6);
 #endif /* PPS_ENABLE */
 }
 
