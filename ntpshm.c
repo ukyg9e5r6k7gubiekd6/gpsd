@@ -382,6 +382,7 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
 {
     char real_str[TIMESPEC_LEN];
     char clock_str[TIMESPEC_LEN];
+    struct timespec offset;
     struct sock_sample sample;
 
     /* chrony expects tv-sec since Jan 1970 */
@@ -389,10 +390,14 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     sample.leap = session->context->leap_notify;
     sample.magic = SOCK_MAGIC;
     /*@-type@*//* splint is confused about struct timespec */
+    /* chronyd wants a timeval, not a timspec, not to worry, it is
+     * just the top of the second */
     TSTOTV(&sample.tv, &td->clock);
-    /*@-compdef@*/
-    /* WARNING!  this will fail if timedelta more than a few seconds */
-    sample.offset = timespec_diff_ns(td->real, td->clock) / 1e9;
+    /* calculate the offset as a timespec to not lose precision */
+    TS_SUB( &offset, &td->real, &td->clock);
+    /* if tv_sec greater than 2 then tv_nsec loses precision, but
+     * not a big deal as slewing will bbe required */
+    sample.offset = TSTONS( &offset );
     /*@+compdef@*/
 #ifdef __COVERITY__
     sample._pad = 0;

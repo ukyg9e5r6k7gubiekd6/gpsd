@@ -964,6 +964,10 @@ extern void pps_early_init(struct gps_context_t *);
         TS_NORM( r ); \
     } while (0)
 
+/* convert a timespec to a double.
+ * is tv_sec > 2, then inevitable loss of precision in tv_nsec */
+#define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / 1e9)))
+
 extern void timespec_str(const struct timespec *, /*@out@*/char *, int);
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
