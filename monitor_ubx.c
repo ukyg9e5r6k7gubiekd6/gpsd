@@ -75,9 +75,17 @@ static bool ubx_initialize(void)
 	return false;
     (void)wborder(ppswin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)wattrset(ppswin, A_BOLD);
-    (void)mvwaddstr(ppswin, 1, 1, "PPS: ");
+#define TOFF_LINE	1
+#define TOFF_COLUMN	1
+    (void)mvwaddstr(ppswin, TOFF_LINE, TOFF_COLUMN, "TOFF: ");
 #ifndef PPS_ENABLE
-    (void)mvwaddstr(ppswin, 1, 6, "N/A");
+    (void)mvwaddstr(ppswin, TOFF_LINE, TOFF_COLUMN + 10, "N/A");
+#endif /* PPS_ENABLE */
+#define PPS_LINE	1
+#define PPS_COLUMN	26
+    (void)mvwaddstr(ppswin, PPS_LINE, PPS_COLUMN, "PPS: ");
+#ifndef PPS_ENABLE
+    (void)mvwaddstr(ppswin, PPS_LINE, PPS_COLUMN + 10, "N/A");
 #endif /* PPS_ENABLE */
     display(ppswin, 2, 22, " PPS ");
     (void)wattrset(ppswin, A_NORMAL);
@@ -251,8 +259,12 @@ static void ubx_update(void)
 	break;
     }
 
+#ifdef NTP_ENABLE
+    toff_update(ppswin, TOFF_LINE, TOFF_COLUMN + 6);
+#endif /* NTP_ENABLE */
+
 #ifdef PPS_ENABLE
-    pps_update(ppswin, 1, 6);
+    pps_update(ppswin, PPS_LINE, PPS_COLUMN + 5);
 #endif /* PPS_ENABLE */
 }
 
