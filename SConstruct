@@ -835,6 +835,7 @@ libgps_sources = [
     "libgps_shm.c",
     "libgps_sock.c",
     "netlib.c",
+    "ntpshmread.c",
     "rtcm2_json.c",
     "rtcm3_json.c",
     "shared_json.c",

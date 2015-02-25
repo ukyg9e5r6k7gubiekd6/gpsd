@@ -27,38 +27,7 @@
 #include "gpsd.h"
 
 #ifdef NTPSHM_ENABLE
-#include <sys/time.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-
-#define NTPD_BASE	0x4e545030	/* "NTP0" */
-
-#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
-
-/* the definition of shmTime is from ntpd source ntpd/refclock_shm.c */
-struct shmTime
-{
-    int mode;	/* 0 - if valid set
-		 *       use values,
-		 *       clear valid
-		 * 1 - if valid set
-		 *       if count before and after read of values is equal,
-		 *         use values
-		 *       clear valid
-		 */
-    volatile int count;
-    time_t clockTimeStampSec;
-    int clockTimeStampUSec;
-    time_t receiveTimeStampSec;
-    int receiveTimeStampUSec;
-    int leap;
-    int precision;
-    int nsamples;
-    volatile int valid;
-    unsigned        clockTimeStampNSec;     /* Unsigned ns timestamps */
-    unsigned        receiveTimeStampNSec;   /* Unsigned ns timestamps */
-    int             dummy[8];
-};
+#include "ntpshm.h"
 
 /* Note: you can start gpsd as non-root, and have it work with ntpd.
  * However, it will then only use the ntpshm segments 2 3, and higher.
@@ -139,6 +108,9 @@ struct shmTime
  * Removing these segments is usually not necessary, as the operating system 
  * garbage-collects them when they have no attached processes.
  */
+
+#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
+
 static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *context, int unit)
 {
     int shmid;
