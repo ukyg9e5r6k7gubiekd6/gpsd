@@ -168,6 +168,7 @@ static inline void report_unlock(void) { }
  *
  ******************************************************************************/
 
+#ifdef PPS_ENABLE
 static void visibilize(/*@out@*/char *buf2, size_t len2, const char *buf)
 /* string is mostly printable, dress up the nonprintables a bit */
 {
@@ -182,6 +183,7 @@ static void visibilize(/*@out@*/char *buf2, size_t len2, const char *buf)
 	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
 			   (unsigned)(*sp & 0xff));
 }
+#endif /* PPS_ENABLE */
 
 /*@-compdef -mustdefine@*/
 static void cond_hexdump(/*@out@*/char *buf2, size_t len2, 
