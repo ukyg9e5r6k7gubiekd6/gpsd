@@ -744,7 +744,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			      (long)session.gpsdata.toff.real.tv_sec,
 			      (long)session.gpsdata.toff.real.tv_nsec);
 	    /*@+type +noeffect@*/
+#ifdef NTP_ENABLE
 	    time_offset = session.gpsdata.toff;
+#endif /* NTP_ENABLE */
 	    return;
 	}
     } else if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",")) {
