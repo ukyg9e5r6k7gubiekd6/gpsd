@@ -12,6 +12,7 @@ gpxlogger
 cgpxlogger
 gpspipe
 gps2udp
+ntpmon
 *.exe
 # These are built from .in files
 gpscat

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+This file is Copyright (c) 2010 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+-->
+<!DOCTYPE refentry PUBLIC
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='ntpmon.1'>
+<refentryinfo><date>25 Jan 2015</date></refentryinfo>
+<refmeta>
+<refentrytitle>ntpmon</refentrytitle>
+<manvolnum>1</manvolnum>
+<refmiscinfo class="source">The GPSD Project</refmiscinfo>
+<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>ntpmon</refname>
+<refpurpose>capture samples from GPS or other ntpd refclock sources</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>ntpmon</command>
+      <arg choice='opt'>-h </arg>
+      <group>
+	<arg choice='plain'>-b</arg>
+	<arg choice='plain'>-n</arg>
+      </group>
+      <arg choice='opt'>-n <replaceable>units</replaceable></arg>
+      <arg choice='opt'>-s </arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para>This program monitors the shared-memory segments updated by 
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
+(and possibly other refclock sources) as a way of communicating with
+ntpd, the Network Time Protocol daemon. It reads these in exactly the way an
+ntpd instance does. It can be run concurrently with ntpd without
+interfering with ntpd's normal operation.</para>
+
+<para>This program runs forever or until interrupted, generating 
+sample reports to standard output once per second.  Each line 
+consists of whitespace-separated textual fields.</para>
+
+<para>Here is an example of thge beginning of a report file:
+
+<literallayout>
+ntpmon version 1
+units 4
+%
+sample NTP2 1424862537 1424862537 126617938 1424862537 0 0
+sample NTP3 1424862537 1424862537 1691342 1424862537 0 0
+%
+sample NTP2 1424862538 1424862538 123625917 1424862538 0 0
+sample NTP3 1424862538 1424862538 1687817 1424862538 0 0
+</literallayout></para>
+
+<para>The output always begins with a header line expressing the
+version of the output format; the version line begins with "ntpmon
+version" and is followed by a numeric version field.</para>
+
+<para>The header line is followed by a "units" line in which the
+second field is the number of NTP units (starting from NTP0 
+consecutively upwards) sampled on each cycle.</para>
+
+<para>The remainder of the file is a list of stanzas each led by a line
+containing the single field "%%".  Each stanza consists of sample lines.</para>
+
+<para>The fields of a sample line are as follows:
+
+<orderedlist>
+<listitem><para>The keyword "sample"</para></listitem>
+
+<listitem><para>The NTP unit from which it was collected.</para></listitem>
+
+<listitem><para>Time of collection, seconds Unix UTC.</para></listitem>
+
+<listitem><para>Receiver time of day, seconds.</para></listitem>
+
+<listitem><para>Receiver time of day, nanoseconds.</para></listitem>
+
+<listitem><para>Clock time of day, seconds.</para></listitem>
+
+<listitem><para>Clock time of day, nanoseconds</para></listitem>
+
+<listitem><para>Leap-second offset.</para></listitem>
+</orderedlist>
+</para>
+
+<para>In these fields, "clock time" is the high-precision time
+measured by the source and "receiver time" is Unix UTC time at
+the receiver. It is normal for the seconds part of receiver
+time to coincide with collection time and for the nanoseconds  
+part of receiver time to be zero.</para>
+
+<variablelist>
+<varlistentry>
+<term>-n</term>
+<listitem>
+<para>Argument specified the number of NTP units (segments) to query.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-s</term>
+<listitem>
+<para>Remove all segments specified by the units argument. This
+option will normally only be of interest to GPSD developers.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-h</term>
+<listitem>
+<para>Display program usage and exit.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsdctl</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+</refsect1>
+
+<refsect1 id='maintainer'><title>AUTHOR</title>
+
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
+</refsect1>
+</refentry>

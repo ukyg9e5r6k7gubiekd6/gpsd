@@ -1332,6 +1332,7 @@ base_manpages = {
     "gps2udp.1" : "gps2udp.xml",
     "gpsdecode.1" : "gpsdecode.xml",
     "srec.5" : "srec.xml",
+    "ntpmon.1" : "ntpmon.xml",
     }
 python_manpages = {
     "gpsprof.1" : "gpsprof.xml",
