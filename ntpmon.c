@@ -18,20 +18,6 @@
 static struct shmTime *segments[NTPSEGMENTS + 1];
 static struct timespec tick[NTPSEGMENTS + 1];
 
-static int shm_startup(int count)
-/* open a specified number of segments */
-{
-    int	i;
-
-    for (i = 0; i < count; i++) {
-	segments[i] = shm_get(i, true);
-	if (segments[i] == NULL)
-	    return i;
-    }
-
-    return count;
-}
-
 static void shm_shutdown(void)
 /* shut down all active segments */
 {
@@ -41,31 +27,27 @@ static void shm_shutdown(void)
 	(void)shmdt((void *)(*pp));
 }
 
-
 int main(int argc, char **argv)
 {
     int units = 0;
-    int opened = 0;
     int option;
+    int	i;
+    bool verbose = false;
 
-#define USAGE	"usage: ntpmon [-n units] [-s]\n"
-    while ((option = getopt(argc, argv, "hn:s")) != -1) {
+#define USAGE	"usage: ntpmon [-s]\n"
+    while ((option = getopt(argc, argv, "hsv")) != -1) {
 	switch (option) {
-	case 'n':
-	    units = atoi(optarg);
-	    opened = shm_startup(units);
-	    if (opened < units){
-		fprintf(stderr, "ntpmon: open of unit %d failed.\n", opened);
-		exit(EXIT_FAILURE);
-	    }
-	    break;
 	case 's':
-	    if (units > 0) 
+	    if (units > 0) {
 		shm_shutdown();
-	    else {
+		exit(EXIT_SUCCESS);
+	    } else {
 		fprintf(stderr, "ntpmon: zero units declared.\n");
 		exit(EXIT_FAILURE);
 	    }
+	    break;
+	case 'v':
+	    verbose = true;
 	    break;
 	case 'h':
 	default:
@@ -74,19 +56,28 @@ int main(int argc, char **argv)
 	}
     }
 
-    (void)printf("ntpmon version 1\nunits %d\n", units);
+    /* grab all segments, keep the non-null ones */
+    for (i = 0; i < NTPSEGMENTS; i++) {
+	segments[i] = shm_get(i, false, true);
+	if (verbose && segments[i] != NULL)
+	    fprintf(stderr, "unit %d opened\n", i);
+    }
+    if (verbose)
+
+    (void)printf("ntpmon version 1\n%%\n");
 
     for (;;) {
 	struct shm_stat_t	shm_stat;
 	int i;
 
-	printf("%%\n");
-	for (i = 0; i < units; i++) {
+	for (i = 0; i < NTPSEGMENTS; i++) {
 	    enum segstat_t status = shm_query(segments[i], &shm_stat);
+	    if (verbose)
+		fprintf(stderr, "unit %d status %d\n", i, status);
 	    switch(status)
 	    {
 	    case OK:
-		if (shm_stat.tvc.tv_sec >= tick[i].tv_sec || shm_stat.tvc.tv_sec >= tick[i].tv_nsec) {
+		if (shm_stat.tvc.tv_sec != tick[i].tv_nsec || shm_stat.tvc.tv_sec != tick[i].tv_nsec) {
 		    printf("sample %s %ld %ld %ld %ld %ld %ld %d %d\n",
 			   shm_name(i),
 			   shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
@@ -95,6 +86,8 @@ int main(int argc, char **argv)
 			   shm_stat.leap, shm_stat.precision);
 		    tick[i] = shm_stat.tvc;
 		}
+		break;
+	    case NO_SEGMENT:
 		break;
 	    case NOT_READY:
 		/* do nothing, data not ready, wait another cycle */
@@ -112,11 +105,17 @@ int main(int argc, char **argv)
 		break;
 	    }
 	}
-
-	sleep(1);
+ 
+	/*
+	 * Even on a 1 Hz PPS, a sleep(1) may end up
+         * being sleep(1.1) and missing a beat.  Since
+	 * we're ignoring duplicates via timestamp, polling
+	 * at interval < 1 sec shouldn't be a problem.
+	 */
+	usleep(1000);
     }
 
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 /* end */

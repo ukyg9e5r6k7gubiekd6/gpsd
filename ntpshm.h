@@ -58,7 +58,7 @@ struct shm_stat_t {
     int leap;
 };
 
-struct shmTime *shm_get(int, bool);
+struct shmTime *shm_get(int, bool, bool);
 extern char *shm_name(const int);
 enum segstat_t shm_query(struct shmTime *, struct shm_stat_t *);
 

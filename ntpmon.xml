@@ -23,11 +23,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <cmdsynopsis>
   <command>ntpmon</command>
       <arg choice='opt'>-h </arg>
-      <group>
-	<arg choice='plain'>-b</arg>
-	<arg choice='plain'>-n</arg>
-      </group>
-      <arg choice='opt'>-n <replaceable>units</replaceable></arg>
       <arg choice='opt'>-s </arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -41,15 +36,14 @@ ntpd, the Network Time Protocol daemon. It reads these in exactly the way an
 ntpd instance does. It can be run concurrently with ntpd without
 interfering with ntpd's normal operation.</para>
 
-<para>This program runs forever or until interrupted, generating 
-sample reports to standard output once per second.  Each line 
-consists of whitespace-separated textual fields.</para>
+<para>This program runs forever or until interrupted, generating
+sample reports to standard output.  Each line consists of
+whitespace-separated textual fields.</para>
 
 <para>Here is an example of the beginning of a report file:
 
 <literallayout>
 ntpmon version 1
-units 4
 %
 sample NTP2 1424865634 779678109 1424865634 109814469 1424865634 0 0 -1
 sample NTP3 1424865634 779693823 1424865633 999315444 1424865634 0 0 -20
@@ -63,14 +57,8 @@ sample NTP3 1424865635 779916521 1424865634 999344705 1424865635 0 0 -20
 version of the output format; the version line begins with "ntpmon
 version" and is followed by a numeric version field.</para>
 
-<para>The header line is followed by a "units" line in which the
-second field is the number of NTP units (starting from NTP0 
-consecutively upwards) sampled on each cycle.</para>
-
-<para>The remainder of the file is a list of stanzas each led by a line
-containing the single field "%%".  Each stanza consists of sample lines.</para>
-
-<para>The fields of a sample line are as follows:
+<para>The remainder of the file is sample lines. The fields of a
+sample line are as follows:
 
 <orderedlist>
 <listitem><para>The keyword "sample"</para></listitem>

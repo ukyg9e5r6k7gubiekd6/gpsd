@@ -18,7 +18,7 @@
 
 #include "ntpshm.h"
 
-struct shmTime *shm_get(int unit, bool forall)
+struct shmTime *shm_get(const int unit, const bool create, const bool forall)
 /* initialize an initial segment */
 {
     struct shmTime *p = NULL;
@@ -29,7 +29,7 @@ struct shmTime *shm_get(int unit, bool forall)
      * as long as everybody does it the same way.
      */
     shmid = shmget(NTPD_BASE + unit, sizeof(struct shmTime),
-		 IPC_CREAT | (forall ? 0666 : 0600));
+		   (create ? IPC_CREAT : 0) | (forall ? 0666 : 0600));
     if (shmid == -1) { /* error */
 	return NULL;
     }
@@ -144,6 +144,11 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
     }
     shm->valid = 0;
 
+    /*
+     * leap field is not a leap offset but a leap notification code.
+     * The values are magic numbers used by NTP and set by GPSD, if at all, in
+     * the subframe code.
+     */
     shm_stat->leap = shm->leap;
     shm_stat->precision = shm->precision;
     shm_stat->mode = OK;

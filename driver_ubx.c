@@ -228,8 +228,8 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 					      (double)tow / 1000.0);
 
     gpsd_report(&session->context->errout, LOG_DATA,
-		"TIMEGPS: time=%.2f mask={TIME}\n",
-		session->newdata.time);
+		"TIMEGPS: time=%.2f leap=%d, mask={TIME}\n",
+		session->newdata.time, session->context->leap_seconds);
     return TIME_SET | PPSTIME_IS;
 }
 
