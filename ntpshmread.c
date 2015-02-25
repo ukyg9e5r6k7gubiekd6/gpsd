@@ -65,6 +65,9 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
     unsigned int cns_new, rns_new;
     int cnt;
 
+    shm_stat->now = 0;
+    time(&shm_stat->now);
+
     if (shm == NULL)
 	return NO_SEGMENT;
     if (!shm->valid) {

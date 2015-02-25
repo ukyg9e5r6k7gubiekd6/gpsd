@@ -16,6 +16,7 @@
 #define NTPSEGMENTS	256	/* NTPx for x any byte */
 
 static struct shmTime *segments[NTPSEGMENTS + 1];
+static int tick[NTPSEGMENTS + 1];
 
 static int shm_startup(int count)
 /* open a specified number of segments */
@@ -85,11 +86,24 @@ int main(int argc, char **argv)
 	    switch(status)
 	    {
 	    case OK:
-		printf("%s %ld %ld %ld %ld %d\n",
-		       shm_name(i),
-		       shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
-		       shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
-		    shm_stat.leap);
+		if (shm_stat.now >= tick[i]) {
+		    printf("%s %ld %ld %ld %ld %ld %d\n",
+			   shm_name(i), shm_stat.now,
+			   shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
+			   shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
+			shm_stat.leap);
+		    tick[i] = shm_stat.now;
+		}
+		break;
+	    case NOT_READY:
+		/* do nothing, data not ready, wait another cycle */
+		break;
+	    case BAD_MODE:
+		fprintf(stderr, "ntpmon: unknown mode on segment %s\n",
+			shm_name(i));
+		break;
+	    case CLASH:
+		/* do nothing, data is corrupt, wait another cycle */
 		break;
 	    default:
 		fprintf(stderr, "ntpmon: unknown status %d on segment %s\n",
@@ -97,6 +111,7 @@ int main(int argc, char **argv)
 		break;
 	    }
 	}
+
 	sleep(1);
     }
 
