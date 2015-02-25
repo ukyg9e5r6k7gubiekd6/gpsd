@@ -1074,7 +1074,10 @@ env.Depends(lcdgps, compiled_gpslib)
 cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 env.Depends(cgps, compiled_gpslib)
 
-binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps]
+ntpmon = env.Program('ntpmon', ['ntpmon.c'], parse_flags=gpslibs)
+env.Depends(cgps, compiled_gpslib)
+
+binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps, ntpmon]
 if env["ncurses"]:
     binaries += [cgps, gpsmon]
 

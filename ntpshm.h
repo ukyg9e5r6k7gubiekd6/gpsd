@@ -6,6 +6,7 @@
 #ifndef GPSD_NTPSHM_H
 #define GPSD_NTPSHM_H
 
+#include <stdbool.h>
 #include <sys/time.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
