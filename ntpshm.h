@@ -17,6 +17,16 @@
 /* 
  * How to read and write fields in an NTP shared segment.
  * This definition of shmTime is from ntpd source ntpd/refclock_shm.c
+ *
+ * The fields aren't documented there.  It appears the only use of nsamples
+ * is internal to the EES M201 receiver refclock. The precision field
+ * is nominally log(2) of the jitter in seconds:
+ * 	-1 is about 100mSec jitter
+ *	-10 is about 1 mSec jitter (GR-601W or other USB with 1ms poll interval)
+ *	-13 is about 100 uSec
+ *	-20 is about 1 nSec (typical for serial PPS)
+ * The precision field is not used in ntpd 4.2.8 and probably not in other
+ * recent versions either.
  */
 
 struct shmTime
@@ -34,9 +44,9 @@ struct shmTime
     int clockTimeStampUSec;
     time_t receiveTimeStampSec;
     int receiveTimeStampUSec;
-    int leap;
-    int precision;
-    int nsamples;
+    int leap;			/* not leapsecond offset, a notification code */
+    int precision;		/* not used */
+    int nsamples;		/* not used */
     volatile int valid;
     unsigned        clockTimeStampNSec;     /* Unsigned ns timestamps */
     unsigned        receiveTimeStampNSec;   /* Unsigned ns timestamps */

@@ -94,7 +94,7 @@ nanoseconds part of receiver time to be zero.</para>
 <varlistentry>
 <term>-v</term>
 <listitem>
-<para>Enable verbose sratus messages.</para>
+<para>Enable verbose status messages.</para>
 </listitem>
 </varlistentry>
 
