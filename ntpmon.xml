@@ -45,17 +45,18 @@ interfering with ntpd's normal operation.</para>
 sample reports to standard output once per second.  Each line 
 consists of whitespace-separated textual fields.</para>
 
-<para>Here is an example of thge beginning of a report file:
+<para>Here is an example of the beginning of a report file:
 
 <literallayout>
 ntpmon version 1
 units 4
 %
-sample NTP2 1424862537 1424862537 126617938 1424862537 0 0
-sample NTP3 1424862537 1424862537 1691342 1424862537 0 0
+sample NTP2 1424865634 779678109 1424865634 109814469 1424865634 0 0 -1
+sample NTP3 1424865634 779693823 1424865633 999315444 1424865634 0 0 -20
 %
-sample NTP2 1424862538 1424862538 123625917 1424862538 0 0
-sample NTP3 1424862538 1424862538 1687817 1424862538 0 0
+sample NTP2 1424865635 779902553 1424865635 113981778 1424865635 0 0 -1
+sample NTP3 1424865635 779916521 1424865634 999344705 1424865635 0 0 -20
+%
 </literallayout></para>
 
 <para>The output always begins with a header line expressing the
@@ -76,7 +77,9 @@ containing the single field "%%".  Each stanza consists of sample lines.</para>
 
 <listitem><para>The NTP unit from which it was collected.</para></listitem>
 
-<listitem><para>Time of collection, seconds Unix UTC.</para></listitem>
+<listitem><para>Collection time of day, seconds.</para></listitem>
+
+<listitem><para>Collection time of day, nanoseconds.</para></listitem>
 
 <listitem><para>Receiver time of day, seconds.</para></listitem>
 
@@ -87,14 +90,16 @@ containing the single field "%%".  Each stanza consists of sample lines.</para>
 <listitem><para>Clock time of day, nanoseconds</para></listitem>
 
 <listitem><para>Leap-second offset.</para></listitem>
+
+<listitem><para>Source precision.</para></listitem>
 </orderedlist>
 </para>
 
 <para>In these fields, "clock time" is the high-precision time
-measured by the source and "receiver time" is Unix UTC time at
-the receiver. It is normal for the seconds part of receiver
-time to coincide with collection time and for the nanoseconds  
-part of receiver time to be zero.</para>
+measured by the source and "receiver time" is Unix UTC time at the
+receiver. It is normal for the seconds part of receiver time to
+coincide with the seconds part ofcollection time and for the
+nanoseconds part of receiver time to be zero.</para>
 
 <variablelist>
 <varlistentry>

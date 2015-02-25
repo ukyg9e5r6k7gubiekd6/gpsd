@@ -66,8 +66,8 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
     unsigned int cns_new, rns_new;
     int cnt;
 
-    shm_stat->now = 0;
-    time(&shm_stat->now);
+    shm_stat->tvc.tv_sec = shm_stat->tvc.tv_nsec = 0;
+    clock_gettime(CLOCK_REALTIME, &shm_stat->tvc);
 
     if (shm == NULL) {
 	shm_stat->mode = NO_SEGMENT;
@@ -145,6 +145,7 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
     shm->valid = 0;
 
     shm_stat->leap = shm->leap;
+    shm_stat->precision = shm->precision;
     shm_stat->mode = OK;
     return OK;
 }

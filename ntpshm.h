@@ -53,8 +53,8 @@ enum segstat_t {
 
 struct shm_stat_t {
     int mode;
-    struct timespec tvr, tvt;
-    time_t now;
+    struct timespec tvc, tvr, tvt;
+    int precision;
     int leap;
 };
 

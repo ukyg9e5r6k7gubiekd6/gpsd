@@ -16,7 +16,7 @@
 #define NTPSEGMENTS	256	/* NTPx for x any byte */
 
 static struct shmTime *segments[NTPSEGMENTS + 1];
-static int tick[NTPSEGMENTS + 1];
+static struct timespec tick[NTPSEGMENTS + 1];
 
 static int shm_startup(int count)
 /* open a specified number of segments */
@@ -86,13 +86,14 @@ int main(int argc, char **argv)
 	    switch(status)
 	    {
 	    case OK:
-		if (shm_stat.now >= tick[i]) {
-		    printf("sample %s %ld %ld %ld %ld %ld %d\n",
-			   shm_name(i), shm_stat.now,
+		if (shm_stat.tvc.tv_sec >= tick[i].tv_sec || shm_stat.tvc.tv_sec >= tick[i].tv_nsec) {
+		    printf("sample %s %ld %ld %ld %ld %ld %ld %d %d\n",
+			   shm_name(i),
+			   shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
 			   shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
 			   shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
-			shm_stat.leap);
-		    tick[i] = shm_stat.now;
+			   shm_stat.leap, shm_stat.precision);
+		    tick[i] = shm_stat.tvc;
 		}
 		break;
 	    case NOT_READY:
