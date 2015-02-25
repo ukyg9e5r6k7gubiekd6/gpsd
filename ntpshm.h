@@ -60,7 +60,7 @@ enum segstat_t {
     OK, NO_SEGMENT, NOT_READY, BAD_MODE, CLASH};
 
 struct shm_stat_t {
-    int mode;
+    int status;
     struct timespec tvc, tvr, tvt;
     int precision;
     int leap;

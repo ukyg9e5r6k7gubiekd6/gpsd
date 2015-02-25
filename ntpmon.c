@@ -62,9 +62,7 @@ int main(int argc, char **argv)
 	if (verbose && segments[i] != NULL)
 	    fprintf(stderr, "unit %d opened\n", i);
     }
-    if (verbose)
-
-    (void)printf("ntpmon version 1\n%%\n");
+    (void)printf("ntpmon version 1\n");
 
     for (;;) {
 	struct shm_stat_t	shm_stat;
@@ -94,7 +92,7 @@ int main(int argc, char **argv)
 		break;
 	    case BAD_MODE:
 		fprintf(stderr, "ntpmon: unknown mode %d on segment %s\n",
-			shm_stat.mode, shm_name(i));
+			shm_stat.status, shm_name(i));
 		break;
 	    case CLASH:
 		/* do nothing, data is corrupt, wait another cycle */

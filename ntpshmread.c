@@ -70,13 +70,15 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
     clock_gettime(CLOCK_REALTIME, &shm_stat->tvc);
 
     if (shm == NULL) {
-	shm_stat->mode = NO_SEGMENT;
+	shm_stat->status = NO_SEGMENT;
 	return NO_SEGMENT;
     }
     if (!shm->valid) {
-	shm_stat->mode = NOT_READY;
+	shm_stat->status = NOT_READY;
 	return NOT_READY;
     }
+
+    shm_stat->status = OK;
 
     switch (shm->mode) {
     case 0:
@@ -119,8 +121,7 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
 	shm_stat->tvt.tv_nsec	= shm->clockTimeStampUSec * 1000;
 	cns_new		= shm->clockTimeStampNSec;
 	if (cnt != shm->count) {
-	    shm_stat->mode = CLASH;
-	    return CLASH;
+	    shm_stat->status = CLASH;
 	}
 		
 	/* See the case above for an explanation of the
@@ -138,12 +139,9 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
 	break;
 
     default:
-	shm_stat->mode = BAD_MODE;
-	return BAD_MODE;
+	shm_stat->status = BAD_MODE;
 	break;
     }
-    shm->valid = 0;
-
     /*
      * leap field is not a leap offset but a leap notification code.
      * The values are magic numbers used by NTP and set by GPSD, if at all, in
@@ -151,8 +149,9 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
      */
     shm_stat->leap = shm->leap;
     shm_stat->precision = shm->precision;
-    shm_stat->mode = OK;
-    return OK;
+    shm->valid = 0;
+
+    return shm_stat->status;
 }
 
 /* end */

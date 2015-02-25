@@ -45,13 +45,10 @@ whitespace-separated textual fields.</para>
 
 <literallayout>
 ntpmon version 1
-%
 sample NTP2 1424865634 779678109 1424865634 109814469 1424865634 0 0 -1
 sample NTP3 1424865634 779693823 1424865633 999315444 1424865634 0 0 -20
-%
 sample NTP2 1424865635 779902553 1424865635 113981778 1424865635 0 0 -1
 sample NTP3 1424865635 779916521 1424865634 999344705 1424865635 0 0 -20
-%
 </literallayout></para>
 
 <para>The output always begins with a header line expressing the

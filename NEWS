@@ -2,6 +2,7 @@
 
 Repository head:
   TOFF JSON report gives the offset between GPS top of second and clock time.
+  A new ntpmon tool supports capturing clock samples from NTP SHM segments. 
 
 3.12: 2015-02-22 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The daemon's power utilization has been reduced by changing from
