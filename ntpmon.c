@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 	    switch(status)
 	    {
 	    case OK:
-		if (shm_stat.tvc.tv_sec != tick[i].tv_nsec || shm_stat.tvc.tv_sec != tick[i].tv_nsec) {
+		if (shm_stat.tvc.tv_sec != tick[i].tv_sec || shm_stat.tvc.tv_nsec != tick[i].tv_nsec) {
 		    printf("sample %s %ld %ld %ld %ld %ld %ld %d %d\n",
 			   shm_name(i),
 			   shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
