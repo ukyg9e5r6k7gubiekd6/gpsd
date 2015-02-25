@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	}
     }
 
-    (void)printf("ntpmon version 1\n");
+    (void)printf("ntpmon version 1\nunits %d\n", units);
 
     for (;;) {
 	struct shm_stat_t	shm_stat;
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 	    {
 	    case OK:
 		if (shm_stat.now >= tick[i]) {
-		    printf("%s %ld %ld %ld %ld %ld %d\n",
+		    printf("sample %s %ld %ld %ld %ld %ld %d\n",
 			   shm_name(i), shm_stat.now,
 			   shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
 			   shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
@@ -99,8 +99,8 @@ int main(int argc, char **argv)
 		/* do nothing, data not ready, wait another cycle */
 		break;
 	    case BAD_MODE:
-		fprintf(stderr, "ntpmon: unknown mode on segment %s\n",
-			shm_name(i));
+		fprintf(stderr, "ntpmon: unknown mode %d on segment %s\n",
+			shm_stat.mode, shm_name(i));
 		break;
 	    case CLASH:
 		/* do nothing, data is corrupt, wait another cycle */

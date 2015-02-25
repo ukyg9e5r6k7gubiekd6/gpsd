@@ -3,6 +3,7 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
+ * Some of this was swiped from the NTPD distribution.
  */
 #include <string.h>
 #include <stdbool.h>
@@ -68,9 +69,12 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
     shm_stat->now = 0;
     time(&shm_stat->now);
 
-    if (shm == NULL)
+    if (shm == NULL) {
+	shm_stat->mode = NO_SEGMENT;
 	return NO_SEGMENT;
+    }
     if (!shm->valid) {
+	shm_stat->mode = NOT_READY;
 	return NOT_READY;
     }
 
@@ -115,6 +119,7 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
 	shm_stat->tvt.tv_nsec	= shm->clockTimeStampUSec * 1000;
 	cns_new		= shm->clockTimeStampNSec;
 	if (cnt != shm->count) {
+	    shm_stat->mode = CLASH;
 	    return CLASH;
 	}
 		
@@ -133,11 +138,14 @@ enum segstat_t shm_query(struct shmTime *shm_in, struct shm_stat_t *shm_stat)
 	break;
 
     default:
+	shm_stat->mode = BAD_MODE;
 	return BAD_MODE;
+	break;
     }
     shm->valid = 0;
 
     shm_stat->leap = shm->leap;
+    shm_stat->mode = OK;
     return OK;
 }
 
