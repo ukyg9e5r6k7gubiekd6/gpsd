@@ -22,4 +22,22 @@
 #define UNUSED
 #endif
 
+/* Needed because 4.x versions of GCC are really annoying */
+#define ignore_return(funcall) \
+    do { \
+        ssize_t locresult = (funcall); \
+        assert(locresult != -23); \
+    } while (0)
+
+static /*@unused@*/ inline void memory_barrier(void)
+{
+#ifndef S_SPLINT_S
+#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
+       __atomic_thread_fence(__ATOMIC_SEQ_CST);
+#elif (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+       __sync_synchronize();
+#endif
+#endif /* S_SPLINT_S */
+}
+
 #endif /* _GPSD_COMPILER_H_ */
