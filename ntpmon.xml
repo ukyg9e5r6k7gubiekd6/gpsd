@@ -24,6 +24,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
   <command>ntpmon</command>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-s </arg>
+      <arg choice='opt'>-v </arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -91,9 +92,9 @@ nanoseconds part of receiver time to be zero.</para>
 
 <variablelist>
 <varlistentry>
-<term>-n</term>
+<term>-v</term>
 <listitem>
-<para>Argument specified the number of NTP units (segments) to query.</para>
+<para>Enable verbose sratus messages.</para>
 </listitem>
 </varlistentry>
 

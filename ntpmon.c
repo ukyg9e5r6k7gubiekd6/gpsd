@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     int	i;
     bool verbose = false;
 
-#define USAGE	"usage: ntpmon [-s]\n"
+#define USAGE	"usage: ntpmon [-s] [-v] [-h]\n"
     while ((option = getopt(argc, argv, "hsv")) != -1) {
 	switch (option) {
 	case 's':
