@@ -21,7 +21,6 @@ extern "C" {
 #ifndef S_SPLINT_S
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
 #endif
-#include "compiler.h"
 
 /*
  * 4.1 - Base version for initial JSON protocol (Dec 2009, release 2.90)

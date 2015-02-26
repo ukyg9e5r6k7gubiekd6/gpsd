@@ -100,6 +100,7 @@
 
 #include "gpsd_config.h"
 #include "gps.h"
+#include "compiler.h"	/* for UNUSED */
 #include "gpsdclient.h"
 #include "revision.h"
 

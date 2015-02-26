@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "gps.h"
 #include "gpsdclient.h"
+#include "compiler.h"	/* for UNUSED */
 
 /*
  * Client utility functions
