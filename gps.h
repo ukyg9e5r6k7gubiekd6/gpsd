@@ -2026,14 +2026,6 @@ struct gps_data_t {
     void *privdata;
 };
 
-/*
- * Preserve source compatibility with 6.0 (version 3.12).
- * Can go away on next object file bump.
- */
-#define timedrift_t	timedelta_t
-#define timedelta	pps
-#define PPSDRIFT_SET	PPS_SET
-
 extern int gps_open(/*@null@*/const char *, /*@null@*/const char *,
 		      /*@out@*/struct gps_data_t *);
 extern int gps_close(struct gps_data_t *);
