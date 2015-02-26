@@ -634,6 +634,11 @@ else:
     else:
         confdefs.append("/* #undef HAVE_TERMIOS_H */\n")
 
+    if config.CheckHeader("stdatomic.h"):
+        confdefs.append("#define HAVE_STDATOMIC_H 1\n")
+    else:
+        confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
+
     # endian.h is required for rtcm104v2 unless the compiler defines
     # __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
     if config.CheckCompilerDefines("__ORDER_BIG_ENDIAN__") \

@@ -7,6 +7,8 @@
 #ifndef _GPSD_COMPILER_H_
 #define _GPSD_COMPILER_H_
 
+#include "gpsd_config.h"	/* is STD_ATOMIC_H defined? */
+
 /* Macro for declaring function with printf-like arguments. */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
 #define PRINTF_FUNC(format_index, arg_index) \
@@ -32,11 +34,9 @@
 static /*@unused@*/ inline void memory_barrier(void)
 {
 #ifndef S_SPLINT_S
-#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
-       __atomic_thread_fence(__ATOMIC_SEQ_CST);
-#elif (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
-       __sync_synchronize();
-#endif
+#ifdef STD_ATOMIC_H
+    atomic_thread_fence(memory_order_seq_cst);
+#endif /* STD_ATOMIC_H */
 #endif /* S_SPLINT_S */
 }
 

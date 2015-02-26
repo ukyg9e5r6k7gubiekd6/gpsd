@@ -58,10 +58,17 @@ arrange this by putting symlink in a local directory on $PATH.
 === C compiler ===
 
 C99 conformance is required in the compiler. The C code depends on one
-non-C99 feature (supported by GCC, clang, and pretty much any C
-compiler that also speaks C++): anonymous unions.  We could eliminate
-these, but the cost would be source-level interface breakage if we
-have to move structure members in and out of unions.
+C11 feature (supported by GCC, clang, and pretty much any C compiler
+that also speaks C++): anonymous unions.  We could eliminate these,
+but the cost would be source-level interface breakage if we have to
+move structure members in and out of unions.
+
+Some portions of the code using shared-memory segments are improved by
+the C11 stdatomic.h features for lockless concurrency.  These are: the
+SHM export mode in shmexport.c, the code for writing clock corrections
+to NTP in ntpshm.c, and the code for reading NTP corrections in
+ntpshmread.c. These features have been supported in GCC since 4.7 and
+clang since 3.1.
 
 GPSD is normally built and tested with GCC. Do not compile with a version
 older than 4.1.1; there are several known issues with older versions,
@@ -71,9 +78,7 @@ generation, (c)  the option -Wno-missing-field-initializers is
 unavailable, leading to a flood of warnings (this is due to generated
 code and cannot be fixed).
 
-The shared-memory interface relies on one GCCism, but the code is
-otherwise pretty compiler-agnostic.  It is reported that clang
-produces a gpsd that passes all regression tests.
+clang produces a gpsd that passes all regression tests.
 
 === Python ===
 
