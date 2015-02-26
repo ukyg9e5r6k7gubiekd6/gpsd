@@ -1,6 +1,7 @@
 			GPSD project news
 
 Repository head:
+  compiler.h inclusion removed for gps.h so it's standalone for /usr/include. 
   TOFF JSON report gives the offset between GPS top of second and clock time.
   A new ntpmon tool supports capturing clock samples from NTP SHM segments. 
 

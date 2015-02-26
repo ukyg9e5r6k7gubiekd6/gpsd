@@ -673,9 +673,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	    /* check to see if we have a fresh timestamp from the
 	     * GPS serial input then use that */
+	    /*@-compdef@*/
 	    TS_SUB( &offset, &ppstimes.real, &ppstimes.clock);
 	    TS_SUB( &delay, &ppstimes.clock, &last_fixtime_clock);
 	    timespec_str( &delay, delay_str, sizeof(delay_str) );
+	    /*@+compdef@*/
 
 	    if ( 0> delay.tv_sec || 0 > delay.tv_nsec ) {
 		gpsd_report(&session->context->errout, LOG_RAW,
@@ -727,6 +729,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		/*@+type@*/
 		/*@+compdef@*/
             }
+	    /*@-compdef@*/
 	    /*@-type@*/ /* splint is confused about struct timespec */
 	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    timespec_str( &offset, offset_str, sizeof(offset_str) );
@@ -734,6 +737,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    "PPS edge %.20s @ %s offset %.20s\n",
 		    log1, ts_str1, offset_str);
 	    /*@+type@*/
+	    /*@+compdef@*/
 	} else {
 	    gpsd_report(&session->context->errout, LOG_RAW,
 			"PPS edge rejected %.100s", log);

@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
+#include <assert.h>
 #include <ctype.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
@@ -1417,7 +1418,6 @@ const struct gps_type_t driver_aivdm = {
 static void path_rewrite(struct gps_device_t *session, char *prefix)
 /* prepend the session path to the value of a specified attribute */
 {
-
     /*
      * Hack the packet to reflect its origin.  This code is supposed
      * to insert the path naming the remote gpsd instance into the
@@ -1425,6 +1425,10 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
      * from the device.
      */
     char *prefloc;
+
+#ifdef S_SPLINT_S
+    assert(prefix != NULL && session->lexer.outbuffer != NULL);
+#endif /* S_SPLINT_S */
 
     /* possibly the rewrite has been done already, this comw up in gpsmon */
     if (strstr((char *)session->lexer.outbuffer, session->gpsdata.dev.path) != NULL)

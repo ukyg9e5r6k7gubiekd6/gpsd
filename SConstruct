@@ -1485,6 +1485,7 @@ splint_table = [
     ('splint-gps2udp',['gps2udp.c'],'gps2udp', ['']),
     ('splint-gpsdecode',['gpsdecode.c'],'gpsdecode', ['']),
     ('splint-gpxlogger',['gpxlogger.c'],'gpxlogger', ['']),
+    ('splint-ntpmon',['ntpmon.c'],'ntpmon', ['']),
     ('splint-test_packet',['test_packet.c'],'test_packet test harness', ['']),
     ('splint-test_mktime',['test_mktime.c'],'test_mktime test harness', ['']),
     ('splint-test_geoid',['test_geoid.c'],'test_geoid test harness', ['']),
@@ -1927,7 +1928,7 @@ distclean = env.Alias('distclean', [clean, testclean, webclean])
 
 # Tags for Emacs and vi
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
-                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c']
+                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpmon']
 sources = libgpsd_sources + libgps_sources \
           + gpsd_sources + gpsmon_sources + misc_sources
 env.Command('TAGS', sources, ['etags ' + " ".join(sources)])

@@ -23,8 +23,9 @@ static void shm_shutdown(void)
 {
     struct shmTime **pp;
 
-    for (pp = segments; *pp; pp++)
-	(void)shmdt((void *)(*pp));
+    for (pp = segments; pp < segments + NTPSEGMENTS; pp++)
+	if (*pp != NULL)
+	    (void)shmdt((void *)(*pp));
 }
 
 int main(int argc, char **argv)
@@ -45,7 +46,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ntpmon: zero units declared.\n");
 		exit(EXIT_FAILURE);
 	    }
-	    break;
+	    //0break;
 	case 'v':
 	    verbose = true;
 	    break;
@@ -66,7 +67,6 @@ int main(int argc, char **argv)
 
     for (;;) {
 	struct shm_stat_t	shm_stat;
-	int i;
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
 	    enum segstat_t status = shm_query(segments[i], &shm_stat);
@@ -75,6 +75,8 @@ int main(int argc, char **argv)
 	    switch(status)
 	    {
 	    case OK:
+		/*@-mustfreefresh -formattype@*/
+		/*@-type@*//* splint is confused about struct timespec */
 		if (shm_stat.tvc.tv_sec != tick[i].tv_sec || shm_stat.tvc.tv_nsec != tick[i].tv_nsec) {
 		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
 			   shm_name(i),
@@ -84,6 +86,8 @@ int main(int argc, char **argv)
 			   shm_stat.leap, shm_stat.precision);
 		    tick[i] = shm_stat.tvc;
 		}
+		/*@+type@*/
+		/*@+mustfreefresh +formattype@*/
 		break;
 	    case NO_SEGMENT:
 		break;
@@ -91,15 +95,19 @@ int main(int argc, char **argv)
 		/* do nothing, data not ready, wait another cycle */
 		break;
 	    case BAD_MODE:
+		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpmon: unknown mode %d on segment %s\n",
 			shm_stat.status, shm_name(i));
+		/*@+mustfreefresh@*/
 		break;
 	    case CLASH:
 		/* do nothing, data is corrupt, wait another cycle */
 		break;
 	    default:
+		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpmon: unknown status %d on segment %s\n",
 			status, shm_name(i));
+		/*@+mustfreefresh@*/
 		break;
 	    }
 	}
@@ -110,10 +118,10 @@ int main(int argc, char **argv)
 	 * we're ignoring duplicates via timestamp, polling
 	 * at interval < 1 sec shouldn't be a problem.
 	 */
-	usleep(1000);
+	(void)usleep(1000);
     }
 
-    exit(EXIT_SUCCESS);
+    //exit(EXIT_SUCCESS);
 }
 
 /* end */

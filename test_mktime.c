@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "gps.h"
+#include "compiler.h"
 
 /*@-type@*/
 static struct

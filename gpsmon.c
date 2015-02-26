@@ -329,7 +329,7 @@ static void gpsmon_report(const char *buf)
 
 #ifdef PPS_ENABLE
 /*@-compdef@*/
-static void packet_vlog(/*@out@*/char *buf, size_t len, const char *fmt, va_list ap)
+static void packet_vlog(char *buf, size_t len, const char *fmt, va_list ap)
 {
     char buf2[BUFSIZ];
 

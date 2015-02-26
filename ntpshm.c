@@ -361,6 +361,7 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     sample.pulse = 0;
     sample.leap = session->context->leap_notify;
     sample.magic = SOCK_MAGIC;
+    /*@-compdef@*/
     /*@-type@*//* splint is confused about struct timespec */
     /* chronyd wants a timeval, not a timspec, not to worry, it is
      * just the top of the second */
