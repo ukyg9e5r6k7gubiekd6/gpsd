@@ -45,10 +45,13 @@ whitespace-separated textual fields.</para>
 
 <literallayout>
 ntpmon version 1
-sample NTP2 1424865634 779678109 1424865634 109814469 1424865634 0 0 -1
-sample NTP3 1424865634 779693823 1424865633 999315444 1424865634 0 0 -20
-sample NTP2 1424865635 779902553 1424865635 113981778 1424865635 0 0 -1
-sample NTP3 1424865635 779916521 1424865634 999344705 1424865635 0 0 -20
+sample NTP2 1424926256.443030206 1424926256.115869233 1424926256.000000000 0  -1
+sample NTP3 1424926256.443060517 1424926255.995430821 1424926256.000000000 0 -20
+sample NTP3 1424926256.995747347 1424926256.995422728 1424926257.000000000 0 -20
+sample NTP2 1424926257.112433572 1424926257.111936726 1424926257.000000000 0  -1
+sample NTP3 1424926257.996221153 1424926257.995410232 1424926258.000000000 0 -20
+sample NTP2 1424926258.107769409 1424926258.107451006 1424926258.000000000 0  -1
+sample NTP3 1424926258.995647636 1424926258.995406476 1424926259.000000000 0 -20
 </literallayout></para>
 
 <para>The output always begins with a header line expressing the
@@ -65,26 +68,20 @@ sample line are as follows:
 
 <listitem><para>Collection time of day, seconds.</para></listitem>
 
-<listitem><para>Collection time of day, nanoseconds.</para></listitem>
-
 <listitem><para>Receiver time of day, seconds.</para></listitem>
-
-<listitem><para>Receiver time of day, nanoseconds.</para></listitem>
 
 <listitem><para>Clock time of day, seconds.</para></listitem>
 
-<listitem><para>Clock time of day, nanoseconds</para></listitem>
+<listitem><para>Leap-second notification status.</para></listitem>
 
-<listitem><para>Leap-second offset.</para></listitem>
-
-<listitem><para>Source precision.</para></listitem>
+<listitem><para>Source precision (log(2) of source jitter).</para></listitem>
 </orderedlist>
 </para>
 
 <para>In these fields, "clock time" is the high-precision time
 measured by the source and "receiver time" is Unix UTC time at the
 receiver. It is normal for the seconds part of receiver time to
-coincide with the seconds part ofcollection time and for the
+coincide with the seconds part of collection time and for the
 nanoseconds part of receiver time to be zero.</para>
 
 <variablelist>
