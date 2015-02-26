@@ -1417,6 +1417,7 @@ const struct gps_type_t driver_aivdm = {
 static void path_rewrite(struct gps_device_t *session, char *prefix)
 /* prepend the session path to the value of a specified attribute */
 {
+
     /*
      * Hack the packet to reflect its origin.  This code is supposed
      * to insert the path naming the remote gpsd instance into the
@@ -1424,6 +1425,11 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
      * from the device.
      */
     char *prefloc;
+
+    /* possibly the rewrite has been done already, this comw up in gpsmon */
+    if (strstr((char *)session->lexer.outbuffer, session->gpsdata.dev.path) != NULL)
+	return;
+
     for (prefloc = (char *)session->lexer.outbuffer;
 	 prefloc < (char *)session->lexer.outbuffer+session->lexer.outbuflen;
 	 prefloc++)
