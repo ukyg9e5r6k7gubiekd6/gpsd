@@ -120,16 +120,18 @@
 #define FORCE_NOWAIT
 #endif /* defined(FIXED_PORT_SPEED) || !defined(SOCKET_EXPORT_ENABLE) */
 
+#ifdef SOCKET_EXPORT_ENABLE
 /* IP version used by the program */
 /* AF_UNSPEC: all
  * AF_INET: IPv4 only
  * AF_INET6: IPv6 only
  */
 #ifdef IPV6_ENABLE
-static const int af = AF_UNSPEC;
+static const int af_allowed = AF_UNSPEC;
 #else
-static const int af = AF_INET;
+static const int af_allowed = AF_INET;
 #endif
+#endif /* SOCKET_EXPORT_ENABLE */
 
 #define AFCOUNT 2
 
@@ -484,10 +486,10 @@ static int passivesocks(char *service, char *tcp_or_udp,
     }
 #endif
 
-    if (AF_UNSPEC == af || (AF_INET == af))
+    if (AF_UNSPEC == af_allowed || (AF_INET == af_allowed))
 	socks[0] = passivesock_af(AF_INET, service, tcp_or_udp, qlen);
 
-    if (AF_UNSPEC == af || (AF_INET6 == af))
+    if (AF_UNSPEC == af_allowed || (AF_INET6 == af_allowed))
 	socks[1] = passivesock_af(AF_INET6, service, tcp_or_udp, qlen);
 
     for (i = 0; i < AFCOUNT; i++)
