@@ -18,9 +18,10 @@
  * How to read and write fields in an NTP shared segment.
  * This definition of shmTime is from ntpd source ntpd/refclock_shm.c
  *
- * The fields aren't documented there.  It appears the only use of nsamples
- * is internal to the EES M201 receiver refclock. The precision field
- * is nominally log(2) of the jitter in seconds:
+ * The fields aren't documented there.  It appears the only use of
+ * nsamples is internal to the (obsolete and deprecated) EES M201
+ * receiver refclock. The precision field is nominally log(2) of the
+ * source's jitter in seconds:
  * 	-1 is about 100mSec jitter
  *	-10 is about 1 mSec jitter (GR-601W or other USB with 1ms poll interval)
  *	-13 is about 100 uSec
@@ -56,8 +57,7 @@ struct shmTime
 /*
  * These types are internal to GPSD
  */
-enum segstat_t {
-    OK, NO_SEGMENT, NOT_READY, BAD_MODE, CLASH};
+enum segstat_t {OK, NO_SEGMENT, NOT_READY, BAD_MODE, CLASH};
 
 struct shm_stat_t {
     enum segstat_t status;
