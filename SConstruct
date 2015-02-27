@@ -1379,7 +1379,8 @@ headerinstall = [ env.Install(installdir('includedir'), x) for x in ("libgpsmm.h
 
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
-binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gps2udp, gpxlogger, lcdgps]))
+binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gps2udp,
+                                                         gpxlogger, lcdgps, ntpmon]))
 if env["ncurses"]:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib))
