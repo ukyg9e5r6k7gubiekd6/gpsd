@@ -23,14 +23,14 @@
 #include "compiler.h"
 
 struct shmTime /*@null@*/ *shm_get(const int unit, const bool create, const bool forall)
-/* initialize an initial segment */
+/* initialize a SHM segment */
 {
     /*@-mustfreefresh@*/
     struct shmTime *p = NULL;
     int shmid;
 
     /*
-     * Big units will give non-ascii but that's OK
+     * Big units will give non-ASCII but that's OK
      * as long as everybody does it the same way.
      */
     shmid = shmget((key_t)(NTPD_BASE + unit), sizeof(struct shmTime),
@@ -104,7 +104,7 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
     memory_barrier();
 
     /* 
-     * Clash detection in case beither (a) nor (b) was true.
+     * Clash detection in case neither (a) nor (b) was true.
      * Not supported in mode 0, and word access to the count field 
      * must be atomic for this to work.
      */
@@ -135,7 +135,7 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
 	** wrap-arounds in the presence of rounded values is
 	** much more convoluted.
 	*/
-	if (   ((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
+	if (((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
 	       && ((rns_new - (unsigned)shm_stat->tvr.tv_nsec) < 1000)) {
 	    shm_stat->tvt.tv_nsec = cns_new;
 	    shm_stat->tvr.tv_nsec = rns_new;
@@ -147,7 +147,6 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
 	break;
 
     case 1:
-
 	shm_stat->tvr.tv_sec	= shmcopy.receiveTimeStampSec;
 	shm_stat->tvr.tv_nsec	= shmcopy.receiveTimeStampUSec * 1000;
 	rns_new		= shmcopy.receiveTimeStampNSec;
@@ -158,7 +157,7 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
 	/* See the case above for an explanation of the
 	** following test.
 	*/
-	if (   ((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
+	if (((cns_new - (unsigned)shm_stat->tvt.tv_nsec) < 1000)
 	       && ((rns_new - (unsigned)shm_stat->tvr.tv_nsec) < 1000)) {
 	    shm_stat->tvt.tv_nsec = cns_new;
 	    shm_stat->tvr.tv_nsec = rns_new;
