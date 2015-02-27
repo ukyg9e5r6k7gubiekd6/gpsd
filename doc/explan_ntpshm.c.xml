@@ -1,4 +1,4 @@
-<sect1 id="ntpshm.c"><title><filename>ntpshm.c</filename></title>
+<sect1 id="ntpshmwrite.c"><title><filename>ntpshmwrite.c</filename></title>
 <informaltable frame='all' pgwide='1'>
 <tgroup cols='2'>
 <colspec colname='c1'></colspec>

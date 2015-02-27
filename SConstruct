@@ -1027,7 +1027,7 @@ gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
 # Source groups
 
-gpsd_sources = ['gpsd.c','ntpshm.c','shmexport.c','dbusexport.c']
+gpsd_sources = ['gpsd.c','ntpshmwrite.c','shmexport.c','dbusexport.c']
 
 if env['systemd']:
     gpsd_sources.append("sd_socket.c")
@@ -1079,10 +1079,10 @@ env.Depends(lcdgps, compiled_gpslib)
 cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 env.Depends(cgps, compiled_gpslib)
 
-ntpmon = env.Program('ntpmon', ['ntpmon.c'], parse_flags=gpslibs)
+ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'], parse_flags=gpslibs)
 env.Depends(cgps, compiled_gpslib)
 
-binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps, ntpmon]
+binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps, ntpshmmon]
 if env["ncurses"]:
     binaries += [cgps, gpsmon]
 
@@ -1337,7 +1337,7 @@ base_manpages = {
     "gps2udp.1" : "gps2udp.xml",
     "gpsdecode.1" : "gpsdecode.xml",
     "srec.5" : "srec.xml",
-    "ntpmon.1" : "ntpmon.xml",
+    "ntpshmmon.1" : "ntpshmmon.xml",
     }
 python_manpages = {
     "gpsprof.1" : "gpsprof.xml",
@@ -1380,7 +1380,7 @@ headerinstall = [ env.Install(installdir('includedir'), x) for x in ("libgpsmm.h
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
 binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gps2udp,
-                                                         gpxlogger, lcdgps, ntpmon]))
+                                                         gpxlogger, lcdgps, ntpshmmon]))
 if env["ncurses"]:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib))
@@ -1491,7 +1491,7 @@ splint_table = [
     ('splint-gps2udp',['gps2udp.c'],'gps2udp', ['']),
     ('splint-gpsdecode',['gpsdecode.c'],'gpsdecode', ['']),
     ('splint-gpxlogger',['gpxlogger.c'],'gpxlogger', ['']),
-    ('splint-ntpmon',['ntpmon.c'],'ntpmon', ['']),
+    ('splint-ntpshmmon',['ntpshmmon.c'],'ntpshmmon', ['']),
     ('splint-test_packet',['test_packet.c'],'test_packet test harness', ['']),
     ('splint-test_mktime',['test_mktime.c'],'test_mktime test harness', ['']),
     ('splint-test_geoid',['test_geoid.c'],'test_geoid test harness', ['']),
@@ -1934,7 +1934,7 @@ distclean = env.Alias('distclean', [clean, testclean, webclean])
 
 # Tags for Emacs and vi
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
-                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpmon']
+                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpshmmon']
 sources = libgpsd_sources + libgps_sources \
           + gpsd_sources + gpsmon_sources + misc_sources
 env.Command('TAGS', sources, ['etags ' + " ".join(sources)])

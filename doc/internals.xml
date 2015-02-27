@@ -24,7 +24,7 @@
 <!ENTITY net_dgpsip.c             SYSTEM "explan_net_dgpsip.c.xml">
 <!ENTITY net_ntrip.c              SYSTEM "explan_net_ntrip.c.xml">
 <!ENTITY netlib.c                 SYSTEM "explan_netlib.c.xml">
-<!ENTITY ntpshm.c                 SYSTEM "explan_ntpshm.c.xml">
+<!ENTITY ntpshmwrite.c                 SYSTEM "explan_ntpshmwrite.c.xml">
 <!ENTITY packet.c                 SYSTEM "explan_packet.c.xml">
 <!ENTITY packet_names.h           SYSTEM "explan_packet_names.h.xml">
 <!ENTITY packet_states.h          SYSTEM "explan_packet_states.h.xml">
@@ -105,7 +105,7 @@ is not yet documented here.</para>
 &net_dgpsip.c;
 &net_ntrip.c;
 &netlib.c;
-&ntpshm.c;
+&ntpshmwrite.c;
 &packet.c;
 &packet_names.h;
 &packet_states.h;

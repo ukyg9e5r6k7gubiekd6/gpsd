@@ -6,22 +6,22 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
-<refentry id='ntpmon.1'>
+<refentry id='ntpshmmon.1'>
 <refentryinfo><date>25 Jan 2015</date></refentryinfo>
 <refmeta>
-<refentrytitle>ntpmon</refentrytitle>
+<refentrytitle>ntpshmmon</refentrytitle>
 <manvolnum>1</manvolnum>
 <refmiscinfo class="source">The GPSD Project</refmiscinfo>
 <refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
-<refname>ntpmon</refname>
+<refname>ntpshmmon</refname>
 <refpurpose>capture samples from GPS or other ntpd refclock sources</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>ntpmon</command>
+  <command>ntpshmmon</command>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-s </arg>
       <arg choice='opt'>-v </arg>
@@ -44,7 +44,7 @@ whitespace-separated textual fields.</para>
 <para>Here is an example of the beginning of a report file:
 
 <literallayout>
-ntpmon version 1
+ntpshmmon version 1
 sample NTP2 1424926256.443030206 1424926256.115869233 1424926256.000000000 0  -1
 sample NTP3 1424926256.443060517 1424926255.995430821 1424926256.000000000 0 -20
 sample NTP3 1424926256.995747347 1424926256.995422728 1424926257.000000000 0 -20
@@ -55,7 +55,7 @@ sample NTP3 1424926258.995647636 1424926258.995406476 1424926259.000000000 0 -20
 </literallayout></para>
 
 <para>The output always begins with a header line expressing the
-version of the output format; the version line begins with "ntpmon
+version of the output format; the version line begins with "ntpshmmon
 version" and is followed by a numeric version field.</para>
 
 <para>The remainder of the file is sample lines. The fields of a

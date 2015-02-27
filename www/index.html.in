@@ -306,7 +306,7 @@ protocol of the <code>gpsd</code> daemon.</dd>
 <dd>Feed the take from <code>gpsd</code> to one or more aggregation
 sites via UDP.</dd>
 
-<dt><a href="ntpmon.html">ntpmon.1</a></dt>
+<dt><a href="ntpshmmon.html">ntpshmmon.1</a></dt>
 <dd>Monitor the NTP shared-memory segments created by GPSD.</dd>
 </dl>
 

@@ -1,4 +1,4 @@
-/* ntpmon.c -- monitor the inner end of an ntpshm connection
+/* ntpshmmon.c -- monitor the inner end of an ntpshmwrite.connection
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     int	i;
     bool verbose = false;
 
-#define USAGE	"usage: ntpmon [-s] [-v] [-h]\n"
+#define USAGE	"usage: ntpshmmon [-s] [-v] [-h]\n"
     while ((option = getopt(argc, argv, "hsv")) != -1) {
 	switch (option) {
 	case 's':
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 		shm_shutdown();
 		exit(EXIT_SUCCESS);
 	    } else {
-		fprintf(stderr, "ntpmon: zero units declared.\n");
+		fprintf(stderr, "ntpshmmon: zero units declared.\n");
 		exit(EXIT_FAILURE);
 	    }
 	    //0break;
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	if (verbose && segments[i] != NULL)
 	    fprintf(stderr, "unit %d opened\n", i);
     }
-    (void)printf("ntpmon version 1\n");
+    (void)printf("ntpshmmon version 1\n");
 
     for (;;) {
 	struct shm_stat_t	shm_stat;
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 		break;
 	    case BAD_MODE:
 		/*@-mustfreefresh@*/
-		fprintf(stderr, "ntpmon: unknown mode %d on segment %s\n",
+		fprintf(stderr, "ntpshmmon: unknown mode %d on segment %s\n",
 			shm_stat.status, shm_name(i));
 		/*@+mustfreefresh@*/
 		break;
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 		break;
 	    default:
 		/*@-mustfreefresh@*/
-		fprintf(stderr, "ntpmon: unknown status %d on segment %s\n",
+		fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
 			status, shm_name(i));
 		/*@+mustfreefresh@*/
 		break;
