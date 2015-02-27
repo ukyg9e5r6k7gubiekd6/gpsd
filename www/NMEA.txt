@@ -1,6 +1,6 @@
 = NMEA Revealed =
 Eric S. Raymond <esr@thyrsus.com>
-v2.15, Feb 2015
+v2.16, Feb 2015
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -81,12 +81,17 @@ GPSes have not adopted it.  Thus we do not attempt to document NMEA
 
 No version earlier than 2.00 is listed or archived on the NMEA website.
 
+The NMEA 4.00 standard states, provocatively, that it is "in theory" 
+backwards compatible to 2.00, and that versions before 2.00 are not
+forward-compatible <<ANON>>.
+
 == NMEA 0183 physical protocol layer ==
 
 The NMEA specification requires a physical-level protocol compatible
 with RS422 at 4800bps, 8N1 or 7N2.  It is RS422 rather than RS232
 because NMEA expects many navigational devices to feed a common serial
-bus.  The data encoding is ASCII with the high data bit not used and zeroed.
+bus.  The data encoding is ASCII with the high data bit not used and
+zeroed.
 
 Consumer-grade GPS sensors normally report over an RS232 port or a USB
 port emulating an RS232 serial device; some use Bluetooth. Baud rate
@@ -136,9 +141,8 @@ comma-separated sequence of fields, followed by the character '\*'
 digits, followed by an end-of-line marker.
 
 The start delimiter is normally '$' (ASCII 36). Packets of AIVDM/AIVDO
-data, which are otherwise formatted like NMEA, use '!'.  It is
-possible that recent revisions of NMEA may allow other exceptions;
-we do not know.
+data, which are otherwise formatted like NMEA, use '!'.  Up to 4.00
+these are the only permitted start characters <<ANON>>.
 
 The first field of a sentence is called the "tag" and normally
 consists of a two-letter talker ID followed by a three-letter
@@ -154,6 +158,10 @@ exactly 21 seconds.
 
 Eg. 16708.033 is 167 degrees and 8.033 minutes. ".033" of a minute is
 about 2 seconds.
+
+In NMEA 4.00 (and possibly some earlier versions), the character "^"
+is reserved as an introducer for two-character hex escapes using 0-9
+and A-F, expressing an ISO 8859-1 (Latin-1) character <<ANON>>.
 
 According to <<UNMEA>>, the NMEA standard requires that a field (such as
 altitude, latitude, or longitude) must be left empty when the GPS has
@@ -222,8 +230,8 @@ The "Navigation receiver warning" is 'A' for Active and 'V' for Void.
 or to indicate a valid fix that has a DOP too high, or which fails an
 elevation test. In the latter case the visible sats are below some
 fixed elevation of the horizon (usually 15%, but some GPSes make this
-adjustable) making position unreliable due to poor geometrty and more
-variable signal lag induced by lengthened atmisphere transit.
+adjustable) making position unreliable due to poor geometry and more
+variable signal lag induced by lengthened atmosphere transit.
 
 Mode is associated with the GSA sentence associated with the last fix.
 It reports whether the fix was no good, sufficirnt for 2D, or 
@@ -258,6 +266,7 @@ the following are well known:
 |IN    |  Integrated Navigation
 |EC    |  Electronic Chart Display & Information System (ECDIS)
 |CD    |  Digital Selective Calling (DSC)
+|GA    |  Galileo Positioning System
 |GL    |  GLONASS, according to IEIC 61162-1
 |GN    |  Mixed GPS and GLONASS data, according to IEIC 61162-1
 |BD    |  Beidou regional GPS augmentation system (China)
@@ -302,6 +311,8 @@ relevant to GPS systems.
 
 .Big list of talker IDs
 |================================================================
+|AB	| Independent AIS Base Station
+|AD	| Dependent AIS Base Station
 |AG	| Autopilot - General
 |AP	| Autopilot - Magnetic
 |CC	| Computer - Programmed Calculator (obsolete)
@@ -492,8 +503,8 @@ the course line) at the destination waypoint.
 
 Field Number:
  
-1. Status, BOOLEAN, A = Arrival circle entered
-2. Status, BOOLEAN, A = perpendicular passed at waypoint
+1. Status, BOOLEAN, A = Arrival circle entered, V = not passed
+2. Status, BOOLEAN, A = perpendicular passed at waypoint, V = not passed
 3. Arrival circle radius
 4. Units of radius, nautical miles
 5. Waypoint ID
@@ -865,6 +876,9 @@ Field Number:
 9. Checksum.
 
 === FSI - Frequency Set Information ===
+
+Set (orv report) frequency, mode of operation and transmitter power level of a
+radiotelephone.
 
 ------------------------------------------------------------------------------
         1      2      3 4 5
@@ -2120,15 +2134,29 @@ Field Number:
 
 === Other sentences ===
 
-There is evidence for the existence ofv the following NMEA sentences
+There is evidence for the existence of the following NMEA sentences
 on the Web:
 
 |======================================================
+|ACK - Alarm Acknowldgement
+|ADS - Automatic Device Status
+|AKD - Acknowledge Detail Alarm Condition
+|ALA - Set Detail Alarm Condition
 |ASD - Autopilot System Data
+|BEC - Bearing & Distance to Waypoint - Dead Reckoning
+|CEK - Configure Encryption Key Command
+|COP - Configure the Operational Period, Command
+|CUR - Water Current Layer
+|DCR - Device Capability Report
+|DDC - Display Dimming Control
+|DOR - Door Status Detection
 |DSC - Digital Selective Calling Information
 |DSE - Extended DSC
 |DSI - DSC Transponder Initiate
 |DSR - DSC Transponder Response
+|ETL - Engine Telegraph Operation Status
+|EVE - General Event Message
+|FIR - Fire Detection
 |MWD - Wind Direction & Speed
 |TLL - Target Latitude and Longitude
 |WDR - Distance to Waypoint - Rhumb Line
@@ -2416,3 +2444,7 @@ Described in <<MALTESE>>, actually a Maltese government document.
 - [[CDDSC]]
   "Data Interface in Digital Selective Calling Class-D Radios"
   http://continuouswave.com/whaler/reference/DSC_Datagrams.html
+
+- [[ANON]]
+  Anonymous commentator(s) are persons who have volunteered information
+  about the NMEA standard(s) but do not wish to be identified.

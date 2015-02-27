@@ -1,6 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
 Eric S. Raymond <esr@thyrsus.com>
-v1.48, Feb 2015
+v1.49, Feb 2015
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -233,6 +233,15 @@ nonempty message ID field:
 !AIVDM,2,1,3,B,55P5TL01VIaAL@7WKO@mBplU@<PDhh000000001S;AJ::4A80?4i@E53,0*3E
 !AIVDM,2,2,3,B,1@0000000000000,2*55
 --------------------------------------------------------------------
+
+Technically, NMEA0183 does not actually require that a !-led sentence
+be AIS.  This format can be used for any encapsulated data. The
+syntax and semantics of fields 1-4 are fixed, and the fill-bit field
+and NEA checksum are required, but the payload fields may contain any
+encapsulated data.
+
+It is, however, a safe bet that any such sentence containing an A or B
+channel code in field 5 is AIVDM/AIVDO.
 
 == Talker IDS ==
 
@@ -5408,3 +5417,6 @@ Version 1.47 corrects some minor field type errors in Type 18 and Type
 
 Version 1.48 corrects two typos in the WMO289 Area Notice and Weather
 Report From Ship definitions.
+
+Version 1.49 adds a technical detail about non-AIS encapsulated
+sentences.
