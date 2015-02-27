@@ -5,6 +5,7 @@
  *
  * Some of this was swiped from the NTPD distribution.
  */
+#define _XOPEN_SOURCE 600
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
@@ -72,7 +73,17 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
 
     /*@-type@*//* splint is confused about struct timespec */
     shm_stat->tvc.tv_sec = shm_stat->tvc.tv_nsec = 0;
+
+#ifdef HAVE_CLOCK_GETTIME
     clock_gettime(CLOCK_REALTIME, &shm_stat->tvc);
+#else
+    {
+	struct timeval tv;
+	(void)gettimeofday(&tv, NULL);
+	shm_stat->tvc.tv_sec = tv.tv_sec;
+	shm_stat->tvc.tv_nsec = tv.tv_usec * 1000;
+    }
+#endif
 
     /* relying on word access to be atomic here */
     if (shm->valid == 0) {
