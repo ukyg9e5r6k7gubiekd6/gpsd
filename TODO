@@ -10,7 +10,7 @@ the "Upstream Bugs" page on the project website.
 
 ** Documentation **
 
-We now have two different calibration procedures in the Tine Service
+We now have two different calibration procedures in the Time Service
 HOWTO. One was written by Gary and is based on peerstats; the other by
 Sanjeev Gupta and is based on loopstats.
 
@@ -146,7 +146,7 @@ We caw now *really* measure latency from GPS top of second when it has
 1PPS.  Add this capability to gpsprof and revise the "Where's the
 Latency?" white paper.
 
-*** Low-pwer autoconfiguration in the uBlox driver ***
+*** Low-power autoconfiguration in the uBlox driver ***
 
 Anthony Stirk <upuaut@gmail.com> writes on Wed May 21 06:09:00 2014:
 
@@ -209,13 +209,6 @@ These are used for the '?DEVICE' command.  All work for 8N1.
 
 SiRF, UBX, TSIP, and even Zodiac can support non-8N1 modes; these need
 to be tested.
-
-*** Command to ship RTCM corrections to a specified device
-
-At the moment, if a GPS accepts RTCM corrections and they are
-available, gpsd ships them to the serial device from which the GPS is
-reporting fix data.  Some GPSes have auxiliary ports for RTCM; 
-there should be a (privileged) command to redirect RTCM connections.
 
 *** Per-driver restore of changed config settings on exit.
 
