@@ -670,7 +670,10 @@ destination waypoint! WARNING Again this information does not change
 until you are on the next leg of the route. (The bearing from POINTA
 to POINTB does not change during the time you are on this leg.)
 
-=== BWC - Bearing & Distance to Waypoint - Geat Circle ===
+This sentence has been replaced by BWW in NMEA 4.00 (and posssibly
+earlier versions) <<ANON>>.
+
+=== BWC - Bearing & Distance to Waypoint - Great Circle ===
 
 ------------------------------------------------------------------------------
                                                          12
@@ -726,6 +729,8 @@ Field Number:
 13. Checksum
 
 === BWW - Bearing - Waypoint to Waypoint ===
+
+Bearing calculated at the FROM waypoint.
 
 ------------------------------------------------------------------------------
         1   2 3   4 5    6    7
@@ -877,7 +882,7 @@ Field Number:
 
 === FSI - Frequency Set Information ===
 
-Set (orv report) frequency, mode of operation and transmitter power level of a
+Set (or report) frequency, mode of operation and transmitter power level of a
 radiotelephone.
 
 ------------------------------------------------------------------------------
