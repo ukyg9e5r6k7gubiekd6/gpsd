@@ -131,10 +131,6 @@ However, Iván Sánchez Ortega notes:
 >I, for one, would like to see the secs/msecs problem solved before GPSD
 >embarks on the enterprise of writing TAGblocks.
 
-**** Speed, mode and rate-changes in client-mode gpsmon.
-
-Are not implemented.  In theory they could be.
-
 **** Speed, mode and rate-changes in client-mode gpsctl.
 
 Baud rate and mode changes work in direct mode but are not
