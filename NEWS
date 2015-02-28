@@ -1,12 +1,13 @@
 			GPSD project news
 
 Repository head:
-  Skyview support for the Beidou and QZSS in the NMEA0183 driver.
+  Skyview support for the Beidou and QZSS constellations in the NMEA0183 driver.
+  ntpmon renamed to ntpsshmon - it doesn't actually monitor NTP itself.
 
 3.13: 2015-02-26 (Eric S. Raymond <esr@snark.thyrsus.com>)
   compiler.h inclusion removed for gps.h so it's standalone for /usr/include. 
   TOFF JSON report gives the offset between GPS top of second and clock time.
-  A new ntpshmmon tool supports capturing clock samples from NTP SHM segments. 
+  A new ntpmon tool supports capturing clock samples from NTP SHM segments. 
 
 3.12: 2015-02-22 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The daemon's power utilization has been reduced by changing from
