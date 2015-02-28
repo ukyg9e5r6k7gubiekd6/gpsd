@@ -7,7 +7,7 @@
 #ifndef _GPSD_COMPILER_H_
 #define _GPSD_COMPILER_H_
 
-#include "gpsd_config.h"	/* is STD_ATOMIC_H defined? */
+#include "gpsd_config.h"	/* is HAVE_STDATOMIC defined? */
 
 /* Macro for declaring function with printf-like arguments. */
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
@@ -30,6 +30,10 @@
         ssize_t locresult = (funcall); \
         assert(locresult != -23); \
     } while (0)
+
+#ifdef HAVE_STDATOMIC
+#include <stdatomic.h>
+#endif /* HAVE_STDATOMIC */
 
 static /*@unused@*/ inline void memory_barrier(void)
 {
