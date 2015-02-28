@@ -5,6 +5,7 @@
 # Submitter = Arn <arnerro@gmail.com>
 # Location = Sydney, NSW, AU, -33.68 151.29
 # type = device
+# Notes: Contains skyview sentences from QZSS.
 $GPTXT,TELIT SW Version: SL869 v3.1.2.1 -STD -N96
 $GPRMC,102136.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*79
 $GPGGA,102136.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*41

@@ -35,6 +35,8 @@
    ECDIS_LEAD_1,	/* ECDIS packet leader 'E' */
    SOUNDER_LEAD_1,	/* Depth sounder packet leader 'S' */
    TRANSDUCER_LEAD_1,	/* Generic transducer packet leader 'Y' */
+   BEIDOU_LEAD_1,	/* Beidou leader */
+   QZSS_LEAD_1,		/* Quasi-Zenith Satellite System leader */
 #endif /* NMEA_ENABLE */
 
    DLE_LEADER,		/* we've seen the TSIP/EverMore leader (DLE) */

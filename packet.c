@@ -94,6 +94,7 @@ PERMISSIONS
  *      $GP -- Global Positioning System.
  *      $GL -- GLONASS, according to IEIC 61162-1
  *      $GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
+ *      $BD -- Beidou
  *      $II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *      $IN -- Integrated Navigation (Garmin uses this).
  *      $WI -- Weather instrument (Airmar PB200, Radio Ocean ROWIND, Vaisala WXT520).
@@ -369,6 +370,10 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = SOUNDER_LEAD_1;
 	else if (c == 'Y')
 	    lexer->state = TRANSDUCER_LEAD_1;
+	else if (c == 'B')
+	    lexer->state = BEIDOU_LEAD_1;
+	else if (c == 'Q')
+	    lexer->state = QZSS_LEAD_1;
 #ifdef OCEANSERVER_ENABLE
 	else if (c == 'C')
 	    lexer->state = NMEA_LEADER_END;
@@ -600,6 +605,18 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	break;
     case TRANSDUCER_LEAD_1:
 	if (c == 'X')		/* Transducer leader accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    return character_pushback(lexer, GROUND_STATE);
+	break;
+    case BEIDOU_LEAD_1:
+	if (c == 'D')		/* Beidou leader accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else
+	    return character_pushback(lexer, GROUND_STATE);
+	break;
+    case QZSS_LEAD_1:
+	if (c == 'Z')		/* QZSS leader accepted */
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    return character_pushback(lexer, GROUND_STATE);

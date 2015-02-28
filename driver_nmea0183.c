@@ -456,6 +456,53 @@ static gps_mask_t processGST(int count, char *field[], struct gps_device_t *sess
     return GST_SET | ONLINE_SET;
 }
 
+static int nmeaid_to_prn(char *talker, int satnum)
+/* deal with range-mapping attempts to to use IDs 1-32 by Beidou, etc. */
+{
+    /*
+     * According to https://github.com/mvglasow/satstat/wiki/NMEA-IDs
+     * NMEA IDs can be roughly divided into the following ranges:
+     *
+     *   1..32:  GPS
+     *   33..54: Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)
+     *           ... some IDs still unused
+     *   55..64: not used (might be assigned to further SBAS systems)
+     *   65..88: GLONASS
+     *   89..96: GLONASS (future extensions?)
+     *   97..192: not used
+     *   193..195: QZSS
+     *   196..200: QZSS (future extensions?)
+     *   201..235: Beidou
+     *
+     * The issue is what to do when GPSes from these different systems
+     * fight for IDs in the  1-32 range, as in this pair of Beidou sentences
+     *
+     * $BDGSV,2,1,07,01,00,000,45,02,13,089,35,03,00,000,37,04,00,000,42*6E
+     * $BDGSV,2,2,07,05,27,090,,13,19,016,,11,07,147,*5E
+     *
+     * Because the PRNs are only used for generating a satellite
+     * chart, mistakes here aren't dangerous.  The code will record
+     * and use multiple sats with the same ID in one skyview; in
+     * effect, they're recorded by the order in which they occur
+     * rather than by PRN.
+     */
+    // NMEA-ID (33..64) to SBAS PRN 120-151.
+    if (satnum >= 33 && satnum <= 64)
+	satnum += 87;
+    if (satnum < 32) {
+	/* map Beidou IDs */
+	if (talker[0] == 'B' && talker[1] == 'D')
+	    satnum += 200;
+	/* GLONASS reports don't seem to do this, but better safe than sorry */
+	if (talker[0] == 'G' && (talker[1] == 'L' || talker[1] == 'N'))
+	    satnum += 37;
+	/* QZSS sentences have not been seen in the wild yet */
+	if (talker[0] == 'Q' && talker[1] == 'Z')
+	    satnum += 193;
+    }
+
+    return satnum;
+}
 
 static gps_mask_t processGSA(int count, char *field[],
 			       struct gps_device_t *session)
@@ -513,7 +560,7 @@ static gps_mask_t processGSA(int count, char *field[],
 	memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
 	for (i = 0; i < count - 6; i++) {
-	    int prn = atoi(field[i + 3]);
+	    int prn = nmeaid_to_prn(field[0], atoi(field[i + 3]));
 	    if (prn > 0)
 		session->nmea.sats_used[session->gpsdata.satellites_used++] =
 		    (unsigned short)prn;
@@ -547,10 +594,13 @@ static gps_mask_t processGSV(int count, char *field[],
      * <repeat for up to 4 satellites per sentence>
      * There my be up to three GSV sentences in a data packet
      *
-     * Can occur with talker ID GP (GNSS) or GL (GLONASS). In the
+     * Can occur with talker ID GP (GNSS), GL (GLONASS), GN (GLONASS),
+     *  BD (Beidou), or QZ (QZSS). GL is to be used when GSVs are mixed
+     * contaiuning GLONASS, GN when GSVs contain GLONASS only. In the
      * GLONASS version sat IDs run from 65-96 (NMEA0183 standardizes
      * this). At least one GPS, the BU-353 GLONASS, emits a GPGSV set
-     * followed by a GLGSV set.  We need to combine these.
+     * followed by a GLGSV set.  We have also seen a SiRF-IV variant
+     * that emits GPGSV followed by BDGSV. We need to combine these.
      */
     int n, fldnum;
     if (count <= 3) {
@@ -576,14 +626,20 @@ static gps_mask_t processGSV(int count, char *field[],
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
     } else if (session->nmea.part == 1) {
-	/* might have gone from GPGSV to GLGSV, in which case accumulate */
+	/* 
+	 * might have gone from GPGSV to GLGSV/BDGSV/QZGSV, 
+	 * in which case accumulate
+	 */
 	if (session->nmea.last_gsv_talker == '\0' || GSV_TALKER == session->nmea.last_gsv_talker) {
 	    gpsd_zero_satellites(&session->gpsdata);
 	}
 	session->nmea.last_gsv_talker = GSV_TALKER;
-	if (session->nmea.last_gsv_talker == 'L') {
+	if (session->nmea.last_gsv_talker == 'L')
 	    session->nmea.seen_glgsv = true;
-	}
+	if (session->nmea.last_gsv_talker == 'D')
+	    session->nmea.seen_bdgsv = true;
+	if (session->nmea.last_gsv_talker == 'Z')
+	    session->nmea.seen_qzss = true;
     }
 
     for (fldnum = 4; fldnum < count;) {
@@ -596,10 +652,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	    break;
 	}
 	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
-	sp->PRN = (short)atoi(field[fldnum++]);
-	// NMEA-ID (33..64) to SBAS PRN.
-	if (sp->PRN >= 33 && sp->PRN <= 64)
-	    sp->PRN += 87;
+	sp->PRN = nmeaid_to_prn(field[0], atoi(field[fldnum++]));
 	sp->elevation = (short)atoi(field[fldnum++]);
 	sp->azimuth = (short)atoi(field[fldnum++]);
 	sp->ss = (float)atoi(field[fldnum++]);
@@ -654,8 +707,8 @@ static gps_mask_t processGSV(int count, char *field[],
 		"GSV: Satellite data OK (%d of %d).\n",
 		session->nmea.part, session->nmea.await);
 
-    /* assumes the GLGSV group, if present, is emitted after the GPGSV */
-    if (session->nmea.seen_glgsv && GSV_TALKER == 'P')
+    /* assumes GLGSV or BDGSV group, if present, is emitted after the GPGSV */
+    if ((session->nmea.seen_glgsv || session->nmea.seen_bdgsv || session->nmea.seen_qzss) && GSV_TALKER == 'P')
 	return ONLINE_SET;
     return SATELLITE_SET;
 #undef GSV_TALKER

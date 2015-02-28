@@ -539,6 +539,8 @@ struct gps_device_t {
 	bool latch_mode;
 	char last_gga_timestamp[16];
 	bool seen_glgsv;
+	bool seen_bdgsv;
+	bool seen_qzss;
 	char last_gsv_talker;
 	/*
 	 * State for the cycle-tracking machinery.
