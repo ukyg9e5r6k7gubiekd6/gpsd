@@ -95,6 +95,7 @@ PERMISSIONS
  *      $GL -- GLONASS, according to IEIC 61162-1
  *      $GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
  *      $BD -- Beidou
+ *      $QZ -- QZSS GPS augmentation system
  *      $II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *      $IN -- Integrated Navigation (Garmin uses this).
  *      $WI -- Weather instrument (Airmar PB200, Radio Ocean ROWIND, Vaisala WXT520).
