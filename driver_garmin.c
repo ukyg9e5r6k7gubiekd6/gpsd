@@ -266,6 +266,7 @@ static inline uint16_t get_uint16(const uint8_t * buf)
 	| ((uint16_t) (0xFF & buf[1]) << 8);
 }
 
+#if defined(HAVE_LIBUSB)
 static inline uint32_t get_int32(const uint8_t * buf)
 {
     return (uint32_t) (0xFF & buf[0])
@@ -273,6 +274,7 @@ static inline uint32_t get_int32(const uint8_t * buf)
 	| ((uint32_t) (0xFF & buf[2]) << 16)
 	| ((uint32_t) (0xFF & buf[3]) << 24);
 }
+#endif /* HAVE_LIBUSB */
 
 // convert radians to degrees
 static inline double radtodeg(double rad)
