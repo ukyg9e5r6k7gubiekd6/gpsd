@@ -739,6 +739,7 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 #ifndef HAVE_CLOCK_GETTIME
 # ifdef __cplusplus
 extern "C" {
+# endif
 typedef int clockid_t;
 struct timespec {
     time_t  tv_sec;
@@ -746,6 +747,8 @@ struct timespec {
 };
 #define CLOCK_REALTIME	0
 int clock_gettime(clockid_t, struct timespec *);
+# ifdef __cplusplus
+}
 # endif
 #endif
 
