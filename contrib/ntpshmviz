@@ -6,15 +6,23 @@
 # pystripchart can be found at
 # https://sourceforge.net/projects/jstripchart
 #
+# To do:
+#
+# 1. Exaggerate vertical scale so data spans about 3/4ths of graph height
+#    and we can actually see features.
+# 2. Try using an impulse rather than line plut - this is bursty noise, not
+#    really a contour.
+# 3. Exit button - WM might be a tiler like i3.
+#
 
 import array, gtk, stripchart, sys
 
-class ntpDrift:
-    def __init__(self, filename):
+class ntpOffset:
+    def __init__(self, stream):
         # Initialize the class
 
         # get the data
-        self.read_data(filename)
+        self.read_data(stream)
 
         # create the GUI for the application
         self.create_GUI()
@@ -27,7 +35,7 @@ class ntpDrift:
 
         # create a standard top-level GTK window
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_title("NTP Drift")
+        self.window.set_title("NTP Offset")
         self.window.connect("destroy", gtk.mainquit)
         self.window.set_default_size(700, 400)
         self.window.show()
@@ -60,7 +68,7 @@ class ntpDrift:
         vadj_ntp2 = gtk.Adjustment(self.ntp2_lower, self.ntp2_lower-0.1, self.ntp2_upper+0.1, 0.1, 0, self.ntp2_upper+0.1)
         ntp2_item = self.striptableau.addChannel(self.ntp2, vadj_ntp2)
         ntp2_item.name = "NTP2"
-        ntp2_item.meta = self.create_text("NTP2 Drift Values")
+        ntp2_item.meta = self.create_text("NTP2 Offset Values")
 
         # add the channel for NTP3
         # adjust the size of the graph for NTP2 to allow all the data
@@ -68,7 +76,7 @@ class ntpDrift:
         vadj_ntp3 = gtk.Adjustment(self.ntp3_lower-0.1, self.ntp3_lower-0.1, self.ntp3_upper+0.1, 0.1, 0, self.ntp3_upper+0.1)
         ntp3_item = self.striptableau.addChannel(self.ntp3, vadj_ntp3)
         ntp3_item.name = "NTP3"
-        ntp3_item.meta = self.create_text("NTP3 Drift Values")
+        ntp3_item.meta = self.create_text("NTP3 Offset Values")
 
     def create_text(self, text):
         # Creates a text widget to contain a description of a channel.
@@ -115,11 +123,11 @@ class ntpDrift:
         # pack the toolbar into the main window
         self.vbox.pack_start(self.handlebox, gtk.FALSE)
 
-    def get_drift(self, data):
+    def get_offset(self, data):
         # get the difference between the clock time and receiver time of day
         return (float(data.split(' ')[3]) - float(data.split(' ')[4]))
 
-    def read_data(self, filename):
+    def read_data(self, stream):
         # Reads data from a ntp log file.  Layout is:
         #
         #   - The keyword "sample"
@@ -137,26 +145,25 @@ class ntpDrift:
         self.ntp2_lower = 0                # lowest value in ntp2 array
         self.ntp3_upper = 0                # highest value in ntp3 array
         self.ntp3_lower = 0                # lowest value in ntp3 array
-        drift           = 0                # drift value to add to the array and to check the upper and lower bounds of the graph
+        offset          = 0                # offset value to add to the array and to check the upper and lower bounds of the graph
 
-        with open(filename) as input_file:
-            for line in input_file:
-                if len(line.split(' ')) > 6:
-                    if 'NTP2' in line:
-                        drift = self.get_drift(line)
-                        self.ntp2.append(drift)
-                        if drift > self.ntp2_upper:
-                            self.ntp2_upper = round(drift, 5)
-                        if drift < self.ntp2_lower:
-                            self.ntp2_lower = round(drift, 5)
-                    if 'NTP3' in line:
-                        drift = self.get_drift(line)
-                        self.ntp3.append(drift)
-                        if drift > self.ntp3_upper:
-                            self.ntp3_upper = round(drift, 5)
-                        if drift < self.ntp3_lower:
-                            self.ntp3_lower = round(drift, 5)
-        input_file.close()
+        for line in stream:
+            if len(line.split(' ')) > 6:
+                if 'NTP2' in line:
+                    offset = self.get_offset(line)
+                    self.ntp2.append(offset)
+                    if offset > self.ntp2_upper:
+                        self.ntp2_upper = round(offset, 5)
+                    if offset < self.ntp2_lower:
+                        self.ntp2_lower = round(offset, 5)
+                if 'NTP3' in line:
+                    offset = self.get_offset(line)
+                    self.ntp3.append(offset)
+                    if offset > self.ntp3_upper:
+                        self.ntp3_upper = round(offset, 5)
+                    if offset < self.ntp3_lower:
+                        self.ntp3_lower = round(offset, 5)
+        stream.close()
 
         # Get the line count for the larger of the two arrays.
         # This will set the width of the graph when it is displayed.
@@ -167,12 +174,5 @@ class ntpDrift:
 
 # Run the class
 if __name__ == "__main__":
-    # If the user passes a file name, use that.
-    # Otherwise use the samples file.
-    if (len(sys.argv) < 2):
-        filename = "SAMPLES.txt"
-    else:
-        filename = sys.argv[1]
-
     # instantiate the application
-    app = ntpDrift(filename)
+    ntpOffset(sys.stdin)
