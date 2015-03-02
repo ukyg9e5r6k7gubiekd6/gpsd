@@ -1002,7 +1002,6 @@ extern bool shm_acquire(struct gps_context_t *);
 extern void shm_release(struct gps_context_t *);
 extern void shm_update(struct gps_context_t *, struct gps_data_t *);
 
-
 /* dbusexport.c */
 #if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
 int initialize_dbus_connection (void);
@@ -1016,6 +1015,10 @@ extern int bin2srec(unsigned int, unsigned int, unsigned int, unsigned char *, u
 extern int srec_hdr(unsigned int, unsigned char *, unsigned char *);
 extern int srec_fin(unsigned int, unsigned char *);
 extern unsigned char hc(unsigned char);
+
+/* a BSD transplant */
+int b64_ntop(unsigned char const *src, size_t srclength, char *target,
+    size_t targsize);
 
 /* application interface */
 extern void gps_context_init(struct gps_context_t *context, 
