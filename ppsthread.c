@@ -269,9 +269,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     /* the system clock ime, to the nSec, when the last fix received */
     /* using a double would cause loss of precision */
     struct timespec last_fixtime_clock = {0, 0};
-#ifndef HAVE_CLOCK_GETTIME
-    struct timeval  clock_tv = {0, 0};
-#endif /* HAVE_CLOCK_GETTIME */
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
 #if defined(TIOCMIWAIT)
@@ -359,24 +356,12 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 /*@-noeffect@*/
         /* get the time after we just woke up */
-#ifdef HAVE_CLOCK_GETTIME
-	/* using  clock_gettime() here, that is nSec,
-	 * not uSec like gettimeofday */
 	if ( 0 > clock_gettime(CLOCK_REALTIME, &clock_ts) ) {
 	    /* uh, oh, can not get time! */
 	    gpsd_report(&session->context->errout, LOG_ERROR,
 			"PPS clock_gettime() failed\n");
 	    break;
 	}
-#else
-	if ( 0 > gettimeofday(&clock_tv, NULL) ) {
-	    /* uh, oh, can not get time! */
-	    gpsd_report(&session->context->errout, LOG_ERROR,
-			"PPS gettimeofday() failed\n");
-	    break;
-	}
-	TVTOTS( &clock_ts, &clock_tv);
-#endif /* HAVE_CLOCK_GETTIME */
 /*@+noeffect@*/
      
         /* got the edge, got the time just after the edge, now quickly

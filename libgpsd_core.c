@@ -1658,13 +1658,7 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
     /* this should be an invariant of the way this function is called */
     assert(isnan(device->newdata.time)==0);
 
-#ifdef HAVE_CLOCK_GETTIME
     /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &td->clock);
-#else
-    struct timeval clock_tv;
-    (void)gettimeofday(&clock_tv, NULL);
-    TVTOTS(&td->clock, &clock_tv);
-#endif /* HAVE_CLOCK_GETTIME */
     fix_time = device->newdata.time;
 
 #ifdef TIMEHINT_ENABLE

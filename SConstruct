@@ -751,6 +751,14 @@ pid_t getsid(pid_t pid);
 }
 # endif
 #endif
+#ifndef HAVE_CLOCK_GETTIME
+# ifdef __cplusplus
+extern "C" {
+typedef int clockid_t;
+#define CLOCK_REALTIME	0
+int clock_gettime(clockid_t, struct timespec *);
+# endif
+#endif
 
 
 #define GPSD_CONFIG_H
@@ -823,6 +831,7 @@ libgpsd_version = "%d.%d.%d" %(libgpsd_version_soname, libgpsd_version_age, libg
 libgps_sources = [
     "ais_json.c",
     "bits.c",
+    "clock_gettime.c",
     "daemon.c",
     "gpsutils.c",
     "gpsdclient.c",

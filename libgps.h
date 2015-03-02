@@ -10,6 +10,8 @@
 #define SHM_PSEUDO_FD	-1
 #define DBUS_PSEUDO_FD	-2
 
+#include "compiler.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
