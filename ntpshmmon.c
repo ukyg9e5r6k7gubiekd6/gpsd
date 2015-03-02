@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <limits.h>
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
@@ -36,10 +37,15 @@ int main(int argc, char **argv)
     int option;
     int	i;
     bool verbose = false;
+    int timeout = INT_MAX, nsamples = INT_MAX;
+    time_t starttime = time(NULL);
 
-#define USAGE	"usage: ntpshmmon [-s] [-v] [-h] [-V]\n"
-    while ((option = getopt(argc, argv, "hsvV")) != -1) {
+#define USAGE	"usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
+    while ((option = getopt(argc, argv, "hn:st:vV")) != -1) {
 	switch (option) {
+	case 'n':
+	    nsamples = atoi(optarg);
+	    break;
 	case 's':
 	    if (units > 0) {
 		shm_shutdown();
@@ -48,7 +54,10 @@ int main(int argc, char **argv)
 		fprintf(stderr, "ntpshmmon: zero units declared.\n");
 		exit(EXIT_FAILURE);
 	    }
-	    //0break;
+	    //break;
+	case 't':
+	    timeout = atoi(optarg);
+	    break;
 	case 'v':
 	    verbose = true;
 	    break;
@@ -71,7 +80,7 @@ int main(int argc, char **argv)
     }
     (void)printf("ntpshmmon version 1\n");
 
-    for (;;) {
+    do {
 	struct shm_stat_t	shm_stat;
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
@@ -91,6 +100,7 @@ int main(int argc, char **argv)
 			   shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
 			   shm_stat.leap, shm_stat.precision);
 		    tick[i] = shm_stat.tvc;
+		    --nsamples;
 		}
 		/*@+type@*/
 		/*@+mustfreefresh +formattype@*/
@@ -113,7 +123,7 @@ int main(int argc, char **argv)
 		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
 			status, shm_name(i));
-		/*@+mustfreefresh@*/
+	/*@+mustfreefresh@*/
 		break;
 	    }
 	}
@@ -125,9 +135,10 @@ int main(int argc, char **argv)
 	 * at interval < 1 sec shouldn't be a problem.
 	 */
 	(void)usleep(1000);
-    }
+    } while 
+	    (nsamples != 0 && time(NULL) - starttime < timeout);
 
-    //exit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }
 
 /* end */

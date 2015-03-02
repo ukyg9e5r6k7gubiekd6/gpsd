@@ -23,7 +23,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <cmdsynopsis>
   <command>ntpshmmon</command>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-n <replaceable>nsamples</replaceable></arg>
       <arg choice='opt'>-s </arg>
+      <arg choice='opt'>-t <replaceable>seconds</replaceable></arg>
       <arg choice='opt'>-v </arg>
       <arg choice='opt'>-V </arg>
 </cmdsynopsis>
@@ -38,9 +40,10 @@ ntpd, the Network Time Protocol daemon. It reads these in exactly the way an
 ntpd instance does. It can be run concurrently with ntpd without
 interfering with ntpd's normal operation.</para>
 
-<para>This program runs forever or until interrupted, generating
-sample reports to standard output.  Each line consists of
-whitespace-separated textual fields.</para>
+<para>This program runs forever, or until a termination option is
+matched, or until interrupted, generating sample reports to standard
+output.  Each line consists of whitespace-separated textual
+fields.</para>
 
 <para>Here is an example of the beginning of a report file:
 
@@ -94,10 +97,24 @@ nanoseconds part of receiver time to be zero.</para>
 </varlistentry>
 
 <varlistentry>
+<term>-n</term>
+<listitem>
+<para>Set maximum number of samples to collect.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>-s</term>
 <listitem>
 <para>Remove all segments specified by the units argument. This
 option will normally only be of interest to GPSD developers.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-t</term>
+<listitem>
+<para>Set maximum time to collect samples in seconds.</para>
 </listitem>
 </varlistentry>
 
