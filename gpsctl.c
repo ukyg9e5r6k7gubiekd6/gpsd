@@ -71,9 +71,6 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
     char buf[BUFSIZ];
     va_list ap;
     time_t starttime;
-#ifdef COMPAT_SELECT
-    struct timeval tv;
-#else
     struct timespec tv;
     sigset_t oldset, blockset;
 
@@ -83,7 +80,6 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
     (void)sigaddset(&blockset, SIGTERM);
     (void)sigaddset(&blockset, SIGQUIT);
     (void)sigprocmask(SIG_BLOCK, &blockset, &oldset);
-#endif /* COMPAT_SELECT */
 
     va_start(ap, fmt);
     (void)vsnprintf(buf, sizeof(buf)-2, fmt, ap);
@@ -107,13 +103,8 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 
 	/*@ -usedef -type -nullpass -compdef @*/
 	tv.tv_sec = 2;
-#ifdef COMPAT_SELECT
-	tv.tv_usec = 0;
-	if (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == -1) {
-#else
 	tv.tv_nsec = 0;
 	if (pselect(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv, &oldset) == -1) {
-#endif
 	    if (errno == EINTR || !FD_ISSET(gpsdata->gps_fd, &rfds))
 		continue;
 	    gpsd_report(&context.errout, LOG_ERROR, "select %s\n", strerror(errno));

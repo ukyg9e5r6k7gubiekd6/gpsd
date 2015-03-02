@@ -998,9 +998,6 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
 /* await data from any socket in the all_fds set */
 {
     int status;
-#ifdef COMPAT_SELECT
-    struct timeval tv;
-#endif /* COMPAT_SELECT */
 
     FD_ZERO(efds);
     (void)memcpy((char *)rfds, (char *)all_fds, sizeof(fd_set));
@@ -1013,20 +1010,14 @@ int gpsd_await_data(/*@out@*/fd_set *rfds,
      * select(2) has to poll here as small as possible (for
      * low-clock-rate SBCs and the like).
      *
-     * pselect() is preferable, when we can have it, to eliminate
+     * pselect() is preferable to vanilla select, to eliminate
      * the once-per-second wakeup when no sensors are attached.
      * This cuts power consumption.
      */
     /*@ -usedef -nullpass @*/
     errno = 0;
 
-#ifdef COMPAT_SELECT
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
-    status = select(maxfd + 1, rfds, NULL, NULL, &tv);
-#else
     status = pselect(maxfd + 1, rfds, NULL, NULL, NULL, NULL);
-#endif
     if (status == -1) {
 	if (errno == EINTR)
 	    return AWAIT_NOT_READY;

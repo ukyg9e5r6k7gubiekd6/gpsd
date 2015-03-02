@@ -511,10 +511,10 @@ uClibc.  Instead, rely on what POSIX guarantees.</p>
 formatting.  Be aware that if your patch seems disharmonious with what
 is around it, your code may be reformatted, so try to blend in.</p>
 
-<p>You may rely on a full POSIX and Single Unix Standard binding to
-the operating system. Someday it is possible we may have a Windows
-port, but we refuse to cripple or overcomplicate the codebase in
-advance.</p>
+<p>You may rely on a full POSIX (in particular, POSIX-2001.1) and
+Single Unix Standard binding to the operating system. Someday it is
+possible we may have a Windows port, but we refuse to cripple or
+overcomplicate the codebase in advance.</p>
 
 <p>Do not litter the code with undocumented magic numbers!  This is
 especially important for buffer lengths, because unsynchronized

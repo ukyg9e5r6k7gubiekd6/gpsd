@@ -31,9 +31,7 @@ We consider failure to build and function on any of these platforms
 a serious bug; if you encounter it, please complain on the
 development list.
 
-Macintosh OS X has been dropped from the list of supported platforms
-due to serial-layer flakiness that has persisted through 10.9 and
-10.10.
+Port difficulty to any system conforming to POSIX-2001.1 should be minimal.
 
 A Cygwin port is in progress but not complete.
 
