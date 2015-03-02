@@ -109,7 +109,7 @@ static int init_kernel_pps(struct gps_device_t *session)
     pps_params_t pp;
 #endif /* S_SPLINT_S */
     int ret;
-#ifdef linux
+#ifdef __linux__
     /* These variables are only needed by Linux to find /dev/ppsN. */
     int ldisc = 18;   /* the PPS line discipline */
     glob_t globbuf;
@@ -129,7 +129,7 @@ static int init_kernel_pps(struct gps_device_t *session)
      * to use for RFC2783 calls.
      */
     ret = -1;
-#ifdef linux
+#ifdef __linux__
     /*
      * On Linux, one must make calls to associate a serial port with a
      * /dev/ppsN device and then grovel in system data to determine
@@ -203,7 +203,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 		    "KPPS cannot open %s: %s\n", path, strerror(errno));
     	return -1;
     }
-#else /* not linux */
+#else /* not __linux__ */
     /*
      * On BSDs that support RFC2783, one uses the API calls on serial
      * port file descriptor.
@@ -236,7 +236,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 			LOG_INF, "KPPS caps %0x\n", caps);
         }
 
-#ifdef linux
+#ifdef __linux__
         /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
         memset( (void *)&pp, 0, sizeof(pps_params_t));
         pp.mode = PPS_CAPTUREBOTH;
