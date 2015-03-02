@@ -25,6 +25,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-s </arg>
       <arg choice='opt'>-v </arg>
+      <arg choice='opt'>-V </arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -104,6 +105,13 @@ option will normally only be of interest to GPSD developers.</para>
 <term>-h</term>
 <listitem>
 <para>Display program usage and exit.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-V</term>
+<listitem>
+<para>Display program version and exit.</para>
 </listitem>
 </varlistentry>
 </variablelist>

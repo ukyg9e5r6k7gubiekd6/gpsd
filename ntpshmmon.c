@@ -11,7 +11,9 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
+#include "gpsd_config.h"
 #include "ntpshm.h"
+#include "revision.h"
 
 #define NTPSEGMENTS	256	/* NTPx for x any byte */
 
@@ -35,8 +37,8 @@ int main(int argc, char **argv)
     int	i;
     bool verbose = false;
 
-#define USAGE	"usage: ntpshmmon [-s] [-v] [-h]\n"
-    while ((option = getopt(argc, argv, "hsv")) != -1) {
+#define USAGE	"usage: ntpshmmon [-s] [-v] [-h] [-V]\n"
+    while ((option = getopt(argc, argv, "hsvV")) != -1) {
 	switch (option) {
 	case 's':
 	    if (units > 0) {
@@ -50,6 +52,10 @@ int main(int argc, char **argv)
 	case 'v':
 	    verbose = true;
 	    break;
+	case 'V':
+	    (void)fprintf(stderr, "version %s (revision %s)\n",
+			  VERSION, REVISION);
+	    exit(EXIT_SUCCESS);
 	case 'h':
 	default:
 	    fprintf(stderr, USAGE);
