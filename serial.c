@@ -18,12 +18,12 @@
 #include <sys/param.h>	/* defines BSD */
 
 #include "gpsd_config.h"
-#ifdef HAVE_BLUEZ
+#ifdef ENABLE_BLUEZ
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/rfcomm.h>
-#endif /* HAVE_BLUEZ */
+#endif /* ENABLE_BLUEZ */
 
 #include "gpsd.h"
 
@@ -429,7 +429,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 		    (int)session->sourcetype, session->gpsdata.dev.path);
     }
     /*@ +boolops +type @*/
-#ifdef HAVE_BLUEZ
+#ifdef ENABLE_BLUEZ
     if (bachk(session->gpsdata.dev.path) == 0) {
         struct sockaddr_rc addr = { 0, *BDADDR_ANY, 0};
         session->gpsdata.gps_fd = socket(AF_BLUETOOTH,

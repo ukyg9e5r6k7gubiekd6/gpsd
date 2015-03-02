@@ -600,10 +600,10 @@ else:
         env["dbus_export"] = False
 
     if env['bluez'] and config.CheckPKG('bluez'):
-        confdefs.append("#define HAVE_BLUEZ 1\n")
+        confdefs.append("#define ENABLE_BLUEZ 1\n")
         bluezlibs = pkg_config('bluez')
     else:
-        confdefs.append("/* #undef HAVE_BLUEZ */\n")
+        confdefs.append("/* #undef ENABLE_BLUEZ */\n")
         bluezlibs = []
         if env["bluez"]:
             announce("Turning off Bluetooth support, library not found.")
