@@ -337,6 +337,7 @@ int main(int argc, char **argv)
 		    struct timespec now;
 		    struct tm *tmp_now;
 
+		    /*@-type@*//* splint is confused about struct timespec */
 		    (void)clock_gettime(CLOCK_REALTIME, &now);
 		    tmp_now = localtime((time_t *)&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
@@ -365,6 +366,7 @@ int main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		    }
 		}
+		/*@+type@*/
 		if (fputc(c, fp) == EOF) {
 		    fprintf(stderr, "gpspipe: Write Error, %s(%d)\n",
 			    strerror(errno), errno);
