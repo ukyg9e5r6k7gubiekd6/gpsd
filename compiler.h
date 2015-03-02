@@ -18,7 +18,7 @@
 #endif
 
 /* Macro for declaring function arguments unused. */
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__clang__)
 #define UNUSED __attribute__((unused))
 #else
 #define UNUSED
