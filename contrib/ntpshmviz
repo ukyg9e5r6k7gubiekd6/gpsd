@@ -10,9 +10,10 @@
 #
 # 1. Exaggerate vertical scale so data spans about 3/4ths of graph height
 #    and we can actually see features.
-# 2. Try using an impulse rather than line plut - this is bursty noise, not
+# 2. Try using an impulse rather than line plot - this is bursty noise, not
 #    really a contour.
 # 3. Exit button - WM might be a tiler like i3.
+# 4. Program should dynamically handle any number of NTP units.
 #
 
 import array, gtk, stripchart, sys
