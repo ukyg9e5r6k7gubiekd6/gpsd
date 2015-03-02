@@ -12,10 +12,6 @@
 #ifdef ITRAX_ENABLE
 #include "driver_italk.h"
 
-#ifdef HAVE_STRLCAT
-#include <string.h>
-#endif
-
 extern const struct gps_type_t driver_italk;
 static WINDOW *satwin, *navfixwin;
 
@@ -70,7 +66,6 @@ static bool italk_initialize(void)
 
 static void display_itk_navfix(unsigned char *buf, size_t len)
 {
-
     unsigned int tow, tod, d, svlist;
     unsigned short gps_week, nsv;
     unsigned short year, mon, day, hour, min, sec;
