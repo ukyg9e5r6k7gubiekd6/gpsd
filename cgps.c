@@ -751,8 +751,8 @@ int main(int argc, char *argv[])
 	    break;
 	    /*@ +observertrans @*/
 	case 'V':
-	    (void)fprintf(stderr, "cgps: %s (revision %s)\n",
-			  VERSION, REVISION);
+	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
+			  argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'l':
 	    switch (optarg[0]) {

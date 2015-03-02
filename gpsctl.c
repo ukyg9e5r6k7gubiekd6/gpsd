@@ -315,8 +315,8 @@ int main(int argc, char **argv)
 #endif /* CLIENTDEBUG_ENABLE */
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "version %s (revision %s)\n",
-			  VERSION, REVISION);
+	    (void)fprintf(stderr, "%s: version %s (revision %s)\n",
+			  argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'h':
 	default:

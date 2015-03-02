@@ -1860,7 +1860,7 @@ int main(int argc, char *argv[])
 	    pid_file = optarg;
 	    break;
 	case 'V':
-	    (void)printf("gpsd: %s (revision %s)\n", VERSION, REVISION);
+	    (void)printf("%s: %s (revision %s)\n", argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'h':
 	case '?':

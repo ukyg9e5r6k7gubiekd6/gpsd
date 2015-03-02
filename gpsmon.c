@@ -1228,7 +1228,7 @@ int main(int argc, char **argv)
 	    }
 	    exit(EXIT_SUCCESS);
 	case 'V':
-	    (void)printf("gpsmon: %s (revision %s)\n", VERSION, REVISION);
+	    (void)printf("%s: %s (revision %s)\n", argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'l':		/* enable logging at startup */
 	    logfile = fopen(optarg, "w");

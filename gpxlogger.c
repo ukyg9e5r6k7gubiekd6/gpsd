@@ -276,7 +276,8 @@ int main(int argc, char **argv)
 	    minmove = (double )atoi(optarg);
 	    break;
 	case 'V':
-	    (void)fprintf(stderr, "%s revision " REVISION "\n", progname);
+	    (void)fprintf(stderr, "%s: version %s (revision %s)\n", 
+			  progname, VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	default:
 	    usage();
