@@ -269,6 +269,7 @@ the following are well known:
 |GA    |  Galileo Positioning System
 |GL    |  GLONASS, according to IEIC 61162-1
 |GN    |  Mixed GPS and GLONASS data, according to IEIC 61162-1
+|GB    |  Beidou regional GPS augmentation system (China)
 |BD    |  Beidou regional GPS augmentation system (China)
 |QZ    |  QZSS regional GPS augmentation system (Japan)
 |================================================================

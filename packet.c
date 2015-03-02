@@ -95,6 +95,7 @@ PERMISSIONS
  *      $GL -- GLONASS, according to IEIC 61162-1
  *      $GN -- Mixed GPS and GLONASS data, according to IEIC 61162-1
  *      $BD -- Beidou
+ *      $GB -- Beidou
  *      $QZ -- QZSS GPS augmentation system
  *      $II -- Integrated Instrumentation (Raytheon's SeaTalk system).
  *      $IN -- Integrated Navigation (Garmin uses this).
@@ -386,8 +387,10 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	/*
 	 * $GP == GPS, $GL = GLONASS only, $GN = mixed GPS and GLONASS,
 	 * according to NMEA (IEIC 61162-1) DRAFT 02/06/2009.
+	 * We have a log from China with a Beidou device using $GB
+	 * rather than $BD.
 	 */
-	if (c == 'P' || c == 'N' || c == 'L')
+	if (c == 'B' || c == 'P' || c == 'N' || c == 'L')
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    (void) character_pushback(lexer, GROUND_STATE);

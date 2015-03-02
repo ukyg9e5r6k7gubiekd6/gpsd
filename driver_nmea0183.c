@@ -493,6 +493,8 @@ static int nmeaid_to_prn(char *talker, int satnum)
 	/* map Beidou IDs */
 	if (talker[0] == 'B' && talker[1] == 'D')
 	    satnum += 200;
+	else if (talker[0] == 'G' && talker[1] == 'B')
+	    satnum += 200;
 	/* GLONASS reports don't seem to do this, but better safe than sorry */
 	if (talker[0] == 'G' && (talker[1] == 'L' || talker[1] == 'N'))
 	    satnum += 37;
