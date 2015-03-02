@@ -1,10 +1,15 @@
-# Name: AtlasVI/PrimaII SOC 
-# Chipset = SiRF-IV
+# Name: AtlasVI/PrimaII for SiRF-TriG
+# Chipset = SiRF-TriG
 # Date = 2015-02-25
 # Submitter = Eli Huang <eli.huang.cn@gmail.com>
-# Notes: Contains Beidou and GLONASS sentences. Use this to test that Beidou
-#	NMEA IDs are being mapped properly and that Beidou GSV sentences are
+# Notes: Contains Beidou and GLONASS sentences. The Beidou sentences use the 
+#	BD talker ID, which is mandated by the Chinese standard "Technical
+#	Specification of Communication Protocol for BDS Compatible Positioning
+#	Module" (TSCPB).  This standard is not available in English translation.
+#	Use this log to test that Beidou NMEA IDs are being mapped to
+#	the Beidou PRN range and that Beidou GSV sentences are
 #	properly integrated into a combined skyview.
+
 $PSRFEPE,074150.799,V,,,,,*23
 $GNGGA,074150.799,,,,,0,00,,,M,0.0,M,,0000,*64
 $GNGNS,074150.799,,,,,NNNN,00,,,0.0,,0000*63

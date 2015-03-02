@@ -1,12 +1,12 @@
-# Name: Unknown
-# Chipset = Unknown
+# Name: AtlasVI/PrimaII for SiRF-TriG with NMEA 4.00 conformance patch
+# Chipset = SiRF-Trig
 # Date = 2015-03-02
 # Submitter = Eli Huang <eli.huang.cn@gmail.com>
 # Notes: Contains Beidou and GLONASS sentences; Beidou sentences have the
-#	alternate GB talker ID rather than BD. Use this to test that
-#	Beidou NMEA IDs with GB are being mapped properly and that
-#	Beidou GSV sentences are properly integrated into a combined
-#	skyview.
+#	alternate GB talker ID rather than the BD mandated in the TSCPB 
+#	standard. Use this log to test that Beidou NMEA IDs with GB
+#	are being mapped to the Beidou PRN range and that Beidou GSV
+#	sentences with GB are properly integrated into a combined skyview.
 $PSRFEPE,053229.438,V,,,,,*23
 $GPGGA,053229.438,,,,,0,00,,,M,0.0,M,,0000*56
 $GNGNS,053229.438,,,,,NNNN,00,,,0.0,,0000*63
