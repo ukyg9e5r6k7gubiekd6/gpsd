@@ -654,7 +654,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	    break;
 	}
 	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
-	sp->PRN = nmeaid_to_prn(field[0], atoi(field[fldnum++]));
+	sp->PRN = (short)nmeaid_to_prn(field[0], atoi(field[fldnum++]));
 	sp->elevation = (short)atoi(field[fldnum++]);
 	sp->azimuth = (short)atoi(field[fldnum++]);
 	sp->ss = (float)atoi(field[fldnum++]);
