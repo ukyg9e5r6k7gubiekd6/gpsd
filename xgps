@@ -911,5 +911,3 @@ if __name__ == "__main__":
             w.destroy()
     except KeyboardInterrupt:
         pass
-
-
