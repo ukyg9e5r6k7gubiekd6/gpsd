@@ -666,7 +666,7 @@ else:
 
     # check function after libraries, because some function require library
     # for example clock_gettime() require librt on Linux
-    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime","getsid"):
+    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):
         if config.CheckFunc(f):
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
         else:
@@ -732,16 +732,6 @@ extern "C" {
 # endif
 #include <string.h>
 size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
-# ifdef __cplusplus
-}
-# endif
-#endif
-#ifndef HAVE_GETSID
-# ifdef __cplusplus
-extern "C" {
-# endif
-#include <unistd.h>
-pid_t getsid(pid_t pid);
 # ifdef __cplusplus
 }
 # endif
@@ -848,7 +838,6 @@ libgps_sources = [
     "rtcm3_json.c",
     "shared_json.c",
     "strl.c",
-    "getsid.c",
 ]
 
 if env['libgpsmm']:
