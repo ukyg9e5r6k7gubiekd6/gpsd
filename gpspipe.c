@@ -368,7 +368,7 @@ int main(int argc, char **argv)
 		}
 		/*@+type@*/
 		if (fputc(c, fp) == EOF) {
-		    fprintf(stderr, "gpspipe: Write Error, %s(%d)\n",
+		    fprintf(stderr, "gpspipe: write error, %s(%d)\n",
 			    strerror(errno), errno);
 		    exit(EXIT_FAILURE);
 		}
@@ -377,7 +377,7 @@ int main(int argc, char **argv)
 		    if (serialport != NULL) {
 			if (write(fd_out, serbuf, (size_t) j) == -1) {
 			    fprintf(stderr,
-				    "gpspipe: Serial port write Error, %s(%d)\n",
+				    "gpspipe: serial port write error, %s(%d)\n",
 				    strerror(errno), errno);
 			    exit(EXIT_FAILURE);
 			}
@@ -388,7 +388,7 @@ int main(int argc, char **argv)
 		    /* flush after every good line */
 		    if (fflush(fp)) {
 			(void)fprintf(stderr,
-				      "gpspipe: fflush Error, %s(%d)\n",
+				      "gpspipe: fflush error, %s(%d)\n",
 				      strerror(errno), errno);
 			exit(EXIT_FAILURE);
 		    }
@@ -418,7 +418,7 @@ int main(int argc, char **argv)
     if (serialport != NULL) {
 	/* Restore the old serial port settings. */
 	if (tcsetattr(fd_out, TCSANOW, &oldtio) != 0) {
-	    (void)fprintf(stderr, "Error restoring serial port settings\n");
+	    (void)fprintf(stderr, "gpsipe: error restoring serial port settings\n");
 	    exit(EXIT_FAILURE);
 	}
     }
