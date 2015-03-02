@@ -34,7 +34,6 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <time.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
@@ -43,6 +42,8 @@
 #endif /* S_SPLINT_S */
 
 #include "gpsd.h"
+
+#include "gpsd_config.h"
 #include "gpsdclient.h"
 #include "revision.h"
 
@@ -333,10 +334,10 @@ int main(int argc, char **argv)
 		}
 		if (new_line && timestamp) {
 		    char tmstr_u[20];            // time with "usec" resolution
-		    struct timeval now;
+		    struct timespec now;
 		    struct tm *tmp_now;
 
-		    (void)gettimeofday( &now, NULL );
+		    (void)clock_gettime(CLOCK_REALTIME, &now);
 		    tmp_now = localtime((time_t *)&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;
@@ -346,11 +347,11 @@ int main(int argc, char **argv)
 			(void)snprintf(tmstr_u, sizeof(tmstr_u), 
 				       " %ld.%06ld", 
 				       (long)now.tv_sec,
-				       (long)now.tv_usec);
+				       (long)now.tv_nsec/1000);
 			break;
 		    case 1:
 			(void)snprintf(tmstr_u, sizeof(tmstr_u), 
-				       ".%06ld", (long)now.tv_usec);
+				       ".%06ld", (long)now.tv_nsec/1000);
 			break;
 		    default:
 			*tmstr_u = '\0';

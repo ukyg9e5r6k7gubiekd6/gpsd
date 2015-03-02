@@ -755,6 +755,10 @@ pid_t getsid(pid_t pid);
 # ifdef __cplusplus
 extern "C" {
 typedef int clockid_t;
+struct timespec {
+    time_t  tv_sec;
+    long    tv_nsec;
+};
 #define CLOCK_REALTIME	0
 int clock_gettime(clockid_t, struct timespec *);
 # endif
