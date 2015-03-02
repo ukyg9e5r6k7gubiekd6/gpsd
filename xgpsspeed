@@ -20,6 +20,7 @@ from math import sqrt
 from math import radians
 from socket import error as SocketError
 
+
 class Speedometer(gtk.DrawingArea):
     def __init__(self, speed_unit=None):
         gtk.DrawingArea.__init__(self)
@@ -27,16 +28,17 @@ class Speedometer(gtk.DrawingArea):
         self.KPH_UNIT_LABEL = 'kmh'
         self.KNOTS_UNIT_LABEL = 'knots'
         self.conversions = {
-                self.MPH_UNIT_LABEL: gps.MPS_TO_MPH,
-                self.KPH_UNIT_LABEL: gps.MPS_TO_KPH,
-                self.KNOTS_UNIT_LABEL: gps.MPS_TO_KNOTS
+            self.MPH_UNIT_LABEL: gps.MPS_TO_MPH,
+            self.KPH_UNIT_LABEL: gps.MPS_TO_KPH,
+            self.KNOTS_UNIT_LABEL: gps.MPS_TO_KNOTS
         }
         self.speed_unit = speed_unit or self.MPH_UNIT_LABEL
-        if not self.speed_unit in self.conversions:
+        if self.speed_unit not in self.conversions:
             raise TypeError(
-                    '%s is not a valid speed unit'
-                    %(repr(speed_unit))
+                '%s is not a valid speed unit'
+                % (repr(speed_unit))
             )
+
 
 class LandSpeedometer(Speedometer):
     def __init__(self, speed_unit=None):
@@ -51,26 +53,26 @@ class LandSpeedometer(Speedometer):
         self.res_div_mul = 1
         self.last_speed = 0
         self.nums = {
-                -8:  0,
-                -7: 10,
-                -6: 20,
-                -5: 30,
-                -4: 40,
-                -3: 50,
-                -2: 60,
-                -1: 70,
-                0:  80,
-                1:  90,
-                2: 100
+            -8: 0,
+            -7: 10,
+            -6: 20,
+            -5: 30,
+            -4: 40,
+            -3: 50,
+            -2: 60,
+            -1: 70,
+            0: 80,
+            1: 90,
+            2: 100
         }
 
     def expose_event(self, _unused, event, _empty=None):
         self.cr = self.window.cairo_create()
         self.cr.rectangle(
-                event.area.x,
-                event.area.y,
-                event.area.width,
-                event.area.height
+            event.area.x,
+            event.area.y,
+            event.area.width,
+            event.area.height
         )
         self.cr.clip()
         x, y = self.get_x_y()
@@ -87,97 +89,87 @@ class LandSpeedometer(Speedometer):
         self.cr.fill()
         self.cr.set_source_rgb(0.0, 0.0, 0.0)
 
-        #draw the speedometer arc
+        # draw the speedometer arc
         self.cr.arc_negative(x, y, radius, radians(60), radians(120))
         self.cr.stroke()
         long_inset = self.long_inset(radius)
         middle_inset = self.middle_inset(radius)
         short_inset = self.short_inset(radius)
 
-        #draw the ticks
+        # draw the ticks
         for i in self.long_ticks:
             self.cr.move_to(
-                    x + (radius - long_inset) * cos(i * pi / 6.0),
-                    y + (radius - long_inset) * sin(i * pi / 6.0)
+                x + (radius - long_inset) * cos(i * pi / 6.0),
+                y + (radius - long_inset) * sin(i * pi / 6.0)
             )
             self.cr.line_to(
-                    x + (radius + (self.cr.get_line_width() / 2)) * cos(i * pi
-                        / 6.0),
-                    y + (radius + (self.cr.get_line_width() / 2)) * sin(i * pi
-                        / 6.0)
+                x + (radius + (self.cr.get_line_width() / 2)) * cos(i * pi / 6.0),
+                y + (radius + (self.cr.get_line_width() / 2)) * sin(i * pi / 6.0)
             )
             self.cr.select_font_face(
-                    'Georgia',
-                    cairo.FONT_SLANT_NORMAL,
+                'Georgia',
+                cairo.FONT_SLANT_NORMAL,
             )
             self.cr.set_font_size(radius / 10)
             self.cr.save()
             _num = str(self.nums.get(i) * self.res_div_mul)
             (
-                    _x_bearing,
-                    _y_bearing,
-                    t_width,
-                    t_height,
-                    _x_advance,
-                    _y_advance
-            )  =  self.cr.text_extents(_num)
+                _x_bearing,
+                _y_bearing,
+                t_width,
+                t_height,
+                _x_advance,
+                _y_advance
+            ) = self.cr.text_extents(_num)
 
             if i in (-8, -7, -6, -5, -4):
                 self.cr.move_to(
-                        (x + (radius - long_inset - (t_width / 2)) * cos(i * pi
-                            / 6.0)),
-                        (y + (radius - long_inset - (t_height * 2)) * sin(i * pi
-                            / 6.0))
+                    (x + (radius - long_inset - (t_width / 2)) * cos(i * pi / 6.0)),
+                    (y + (radius - long_inset - (t_height * 2)) * sin(i * pi / 6.0))
                 )
             elif i in (-2, -1, 0, 2, 1):
                 self.cr.move_to(
-                        (x + (radius - long_inset - (t_width * 1.5 )) * cos(i * pi
-                            / 6.0)),
-                        (y + (radius - long_inset - (t_height * 2 )) * sin(i * pi
-                            / 6.0))
+                    (x + (radius - long_inset - (t_width * 1.5)) * cos(i * pi / 6.0)),
+                    (y + (radius - long_inset - (t_height * 2)) * sin(i * pi / 6.0))
                 )
             elif i in (-3,):
                 self.cr.move_to(
-                        (x - t_width / 2), (y - radius +
-                            self.long_inset(radius) * 2 + t_height)
+                    (x - t_width / 2),
+                    (y - radius + self.long_inset(radius) * 2 + t_height)
                 )
             self.cr.show_text(_num)
             self.cr.restore()
 
             if i != self.long_ticks[0]:
                 self.cr.move_to(
-                        x + (radius - middle_inset) * cos((i + 0.5) * pi / 6.0),
-                        y + (radius - middle_inset) * sin((i + 0.5) * pi / 6.0)
+                    x + (radius - middle_inset) * cos((i + 0.5) * pi / 6.0),
+                    y + (radius - middle_inset) * sin((i + 0.5) * pi / 6.0)
                 )
                 self.cr.line_to(
-                        x + (radius + (self.cr.get_line_width() / 2)) * cos((i
-                            + 0.5) * pi / 6.0),
-                        y + (radius + (self.cr.get_line_width() / 2)) * sin((i
-                            + 0.5) * pi / 6.0)
+                    x + (radius + (self.cr.get_line_width() / 2)) *
+                    cos((i + 0.5) * pi / 6.0),
+                    y + (radius + (self.cr.get_line_width() / 2)) *
+                    sin((i + 0.5) * pi / 6.0)
                 )
 
             for z in self.short_ticks:
                 if i < 0:
                     self.cr.move_to(
-                            x + (radius - short_inset) * cos((i + z) * pi / 6.0),
-                            y + (radius - short_inset) * sin((i + z) * pi / 6.0)
+                        x + (radius - short_inset) * cos((i + z) * pi / 6.0),
+                        y + (radius - short_inset) * sin((i + z) * pi / 6.0)
                     )
                     self.cr.line_to(
-                            x + (radius + (self.cr.get_line_width() / 2)) * cos((i
-                                + z) * pi / 6.0),
-                            y + (radius + (self.cr.get_line_width() / 2)) * sin((i
-                                + z) * pi / 6.0)
+                        x + (radius + (self.cr.get_line_width() / 2)) * cos((i + z) * pi / 6.0),
+                        y + (radius + (self.cr.get_line_width() / 2)) * sin((i + z) * pi / 6.0)
                     )
                 else:
                     self.cr.move_to(
-                            x + (radius - short_inset) * cos((i - z) * pi / 6.0),
-                            y + (radius - short_inset) * sin((i - z) * pi / 6.0)
+                        x + (radius - short_inset) * cos((i - z) * pi / 6.0),
+                        y + (radius - short_inset) * sin((i - z) * pi / 6.0)
                     )
                     self.cr.line_to(
-                            x + (radius + (self.cr.get_line_width() / 2)) * cos((i
-                                - z) * pi / 6.0),
-                            y + (radius + (self.cr.get_line_width() / 2)) * sin((i
-                                - z) * pi / 6.0)
+                        x + (radius + (self.cr.get_line_width() / 2)) * cos((i - z) * pi / 6.0),
+                        y + (radius + (self.cr.get_line_width() / 2)) * sin((i - z) * pi / 6.0)
                     )
             self.cr.stroke()
 
@@ -193,22 +185,22 @@ class LandSpeedometer(Speedometer):
             actual = self.long_ticks[-1] + speed
         self.cr.move_to(x, y)
         self.cr.line_to(
-                x + (radius - (2 * inset)) * cos(actual * pi / 6.0),
-                y + (radius - (2 * inset)) * sin(actual * pi / 6.0)
+            x + (radius - (2 * inset)) * cos(actual * pi / 6.0),
+            y + (radius - (2 * inset)) * sin(actual * pi / 6.0)
         )
         self.cr.stroke()
         self.cr.restore()
 
     def draw_speed_text(self, speed, radius, x, y):
         self.cr.save()
-        speed = '%.2f %s'  %(
+        speed = '%.2f %s' % (
                 speed * self.conversions.get(self.speed_unit),
                 self.speed_unit
         )
         self.cr.select_font_face(
-                'Georgia',
-                cairo.FONT_SLANT_NORMAL,
-                #cairo.FONT_WEIGHT_BOLD
+            'Georgia',
+            cairo.FONT_SLANT_NORMAL,
+            # cairo.FONT_WEIGHT_BOLD
         )
         self.cr.set_font_size(radius / 10)
         _x_bearing, _y_bearing, t_width, _t_height = self.cr.text_extents(speed)[:4]
@@ -225,10 +217,12 @@ class LandSpeedometer(Speedometer):
     def get_radius(self, width, height):
         return min(width / 2.0, height / 2.0) - 20
 
+
 class NauticalSpeedometer(Speedometer):
     HEADING_SAT_GAP = 0.8
     GPS_PRNMAX = 32  # Above this number are SBAS satellites
     SAT_SIZE = 10  # radius of the satellite circle in skyview
+
     def __init__(self, speed_unit=None, maxspeed=100):
         Speedometer.__init__(self, speed_unit)
         self.connect('expose_event', self.expose_event)
@@ -254,10 +248,10 @@ class NauticalSpeedometer(Speedometer):
     def expose_event(self, _unused, event, _empty=None):
         self.cr = self.window.cairo_create()
         self.cr.rectangle(
-                event.area.x,
-                event.area.y,
-                event.area.width,
-                event.area.height
+            event.area.x,
+            event.area.y,
+            event.area.width,
+            event.area.height
         )
         self.cr.clip()
         x, y = self.get_x_y()
@@ -304,7 +298,7 @@ class NauticalSpeedometer(Speedometer):
         s_middle = self.mid_inset(radius)
         s_short = self.short_inset(radius)
         for i in xrange(11):
-            #draw the large ticks
+            # draw the large ticks
             alpha = (8 - i) * pi / 6
             self.cr.move_to(*NauticalSpeedometer.polar2xy(rspeed, alpha, x, y))
             self.cr.set_line_width(radius / 100)
@@ -328,7 +322,7 @@ class NauticalSpeedometer(Speedometer):
                 self.cr.move_to(*NauticalSpeedometer.polar2xy(rspeed, gamma, x, y))
                 self.cr.line_to(*NauticalSpeedometer.polar2xy(rspeed - s_short, gamma, x, y))
 
-        #draw the heading arc
+        # draw the heading arc
         self.cr.new_sub_path()
         self.cr.arc(x, y, radius, 0, 2 * pi)
         self.cr.stroke()
@@ -340,11 +334,12 @@ class NauticalSpeedometer(Speedometer):
         # heading label 90/180/270
         for n in xrange(0, 4):
             label = str(n * 90)
-            #self.cr.set_source_rgba(0, 1, 0)
-            #radius * (1 + NauticalSpeedometer.HEADING_SAT_GAP),
-            tbox_x, tbox_y = NauticalSpeedometer.polar2xy(radius * 0.88,
-                                    (1 - n) * pi / 2,
-                                    x, y)
+            # self.cr.set_source_rgba(0, 1, 0)
+            # radius * (1 + NauticalSpeedometer.HEADING_SAT_GAP),
+            tbox_x, tbox_y = NauticalSpeedometer.polar2xy(
+                radius * 0.88,
+                (1 - n) * pi / 2,
+                x, y)
             self.draw_text(tbox_x, tbox_y,
                            label, fontsize=radius / 20)
 
@@ -372,7 +367,7 @@ class NauticalSpeedometer(Speedometer):
         mid_inset = self.mid_inset(radius)
         short_inset = self.short_inset(radius)
 
-        #draw the large ticks
+        # draw the large ticks
         for i in xrange(12):
             agllong = i * pi / 6
             self.cr.move_to(*NauticalSpeedometer.polar2xy(radius - long_inset, agllong, x, y))
@@ -437,7 +432,7 @@ class NauticalSpeedometer(Speedometer):
         self.cr.line_to(xd, yd)
         self.cr.close_path()
         self.cr.fill()
-        #self.cr.stroke()
+        # self.cr.stroke()
 
     def set_color(self, spec):
         '''Set foreground color for drawing.'''
@@ -494,8 +489,8 @@ class NauticalSpeedometer(Speedometer):
 
         self.cr.arc(x, y, radius + 40, beta, beta + theta)
         self.cr.stroke()
-        #self.cr.close_path()
-        #self.cr.fill()
+        # self.cr.close_path()
+        # self.cr.fill()
         label = '%.2f %s' % (speed, self.speed_unit)
         self.draw_text(x, y + radius + 40, label, fontsize=20)
 
@@ -507,6 +502,7 @@ class NauticalSpeedometer(Speedometer):
 
     def get_radius(self, width, height):
         return min(width / 2.0, height / 2.0) - 70
+
 
 class Main(object):
     def __init__(self, host='localhost', port='2947', device=None, debug=0,
@@ -524,8 +520,9 @@ class Main(object):
         self.window.set_title('xgpsspeed')
         if self.nautical:
             self.window.set_size_request(500, 550)
-            self.widget = NauticalSpeedometer(speed_unit=self.speed_unit,
-                                       maxspeed=self.maxspeed)
+            self.widget = NauticalSpeedometer(
+                speed_unit=self.speed_unit,
+                maxspeed=self.maxspeed)
         else:
             self.widget = LandSpeedometer(speed_unit=self.speed_unit)
         self.window.connect('delete_event', self.delete_event)
@@ -540,21 +537,22 @@ class Main(object):
         self.window.add_accel_group(self.accelgroup)
         self.actiongroup = gtk.ActionGroup('gpsspeed-ng')
         self.actiongroup.add_actions(
-                [('Quit', gtk.STOCK_QUIT, '_Quit', None,
+            [
+                ('Quit', gtk.STOCK_QUIT, '_Quit', None,
                     'Quit the Program', lambda unused: gtk.main_quit()),
-                 ('File', None, '_File'),
-                 ('Units', None, '_Units')]
+                ('File', None, '_File'),
+                ('Units', None, '_Units')]
         )
         self.actiongroup.add_radio_actions(
-                [('Imperial', None, '_Imperial', '<Control>i',
+            [
+                ('Imperial', None, '_Imperial', '<Control>i',
                     'Imperial Units', 0),
-                 ('Metric', None, '_Metric', '<Control>m',
-                     'Metrical Units', 1),
-                 ('Nautical', None, '_Nautical', '<Control>n',
-                     'Nautical Units', 2)
-                 ],
-                0, lambda a, unused: setattr(self.widget, 'speed_unit', ['mph',
-                'kmh', 'knots'][a.get_current_value()])
+                ('Metric', None, '_Metric', '<Control>m',
+                    'Metrical Units', 1),
+                ('Nautical', None, '_Nautical', '<Control>n',
+                    'Nautical Units', 2)
+            ],
+            0, lambda a, unused: setattr(self.widget, 'speed_unit', ['mph', 'kmh', 'knots'][a.get_current_value()])
         )
 
         self.uimanager.insert_action_group(self.actiongroup, 0)
@@ -573,13 +571,13 @@ class Main(object):
 </ui>
 ''')
         self.active_unit_map = {
-                'mph': '/MenuBar/Units/Imperial',
-                'kmh': '/MenuBar/Units/Metric',
-                'knots': '/MenuBar/Units/Nautical'
+            'mph': '/MenuBar/Units/Imperial',
+            'kmh': '/MenuBar/Units/Metric',
+            'knots': '/MenuBar/Units/Nautical'
         }
         menubar = self.uimanager.get_widget('/MenuBar')
         self.uimanager.get_widget(
-                self.active_unit_map.get(self.speed_unit)
+            self.active_unit_map.get(self.speed_unit)
         ).set_active(True)
         vbox.pack_start(menubar, False, False, 0)
         vbox.add(self.widget)
@@ -605,9 +603,9 @@ class Main(object):
 
     def handle_hangup(self, _dummy, _unused):
         w = gtk.MessageDialog(
-                type=gtk.MESSAGE_ERROR,
-                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                buttons=gtk.BUTTONS_OK
+            type=gtk.MESSAGE_ERROR,
+            flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+            buttons=gtk.BUTTONS_OK
         )
         w.connect("destroy", lambda unused: gtk.main_quit())
         w.set_title('gpsd error')
@@ -650,9 +648,9 @@ class Main(object):
             gtk.main()
         except SocketError:
             w = gtk.MessageDialog(
-                    type=gtk.MESSAGE_ERROR,
-                    flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                    buttons=gtk.BUTTONS_OK
+                type=gtk.MESSAGE_ERROR,
+                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
+                buttons=gtk.BUTTONS_OK
             )
             w.set_title('socket error')
             w.set_markup(
@@ -669,55 +667,55 @@ if __name__ == '__main__':
     from optparse import OptionParser
     prog = basename(sys.argv[0])
     usage = ('%s [-V|--version] [-h|--help] [--debug] [--host] ' +
-            '[--port] [--device] [--speedunits {[mph] [kmh] [knots]}] ' +
-            '[host [:port [:device]]]') %(prog)
+             '[--port] [--device] [--speedunits {[mph] [kmh] [knots]}] ' +
+             '[host [:port [:device]]]') % (prog)
     epilog = 'BSD terms apply: see the file COPYING in the distribution root for details.'
 
     parser = OptionParser(usage=usage, epilog=epilog)
     parser.add_option(
-            '--host',
-            dest='host',
-            default='localhost',
-            help='The host to connect. [Default localhost]'
+        '--host',
+        dest='host',
+        default='localhost',
+        help='The host to connect. [Default localhost]'
     )
     parser.add_option(
-            '--port',
-            dest='port',
-            default='2947',
-            help='The port to connect. [Default 2947]'
+        '--port',
+        dest='port',
+        default='2947',
+        help='The port to connect. [Default 2947]'
     )
     parser.add_option(
-            '--device',
-            dest='device',
-            default=None,
-            help='The device to connet. [Default None]'
+        '--device',
+        dest='device',
+        default=None,
+        help='The device to connet. [Default None]'
     )
     parser.add_option(
-            '--speedunits',
-            dest='speedunits',
-            default='mph',
-            help='The unit of speed. Possible units are: mph, kmh, knots. [Default mph]'
+        '--speedunits',
+        dest='speedunits',
+        default='mph',
+        help='The unit of speed. Possible units are: mph, kmh, knots. [Default mph]'
     )
     parser.add_option(
-            '--maxspeed',
-            dest='maxspeed',
-            default='50',
-            help='max speed of the speedmeter [Default 50]'
+        '--maxspeed',
+        dest='maxspeed',
+        default='50',
+        help='max speed of the speedmeter [Default 50]'
     )
     parser.add_option(
-            '--nautical',
-            dest='nautical',
-            default=False,
-            action='store_true',
-            help='Enable nautical-style speed and track display.'
+        '--nautical',
+        dest='nautical',
+        default=False,
+        action='store_true',
+        help='Enable nautical-style speed and track display.'
     )
     parser.add_option(
-            '--debug',
-            dest='debug',
-            default=0,
-            action='store',
-            type='int',
-            help='Set level of debug. Must be integer. [Default 0]'
+        '--debug',
+        dest='debug',
+        default=0,
+        action='store',
+        type='int',
+        help='Set level of debug. Must be integer. [Default 0]'
     )
     (options, args) = parser.parse_args()
     if args:
@@ -733,11 +731,11 @@ if __name__ == '__main__':
             parser.print_help()
             sys.exit(0)
     Main(
-            host=options.host,
-            port=options.port,
-            device=options.device,
-            speed_unit=options.speedunits,
-            maxspeed=options.maxspeed,
-            nautical=options.nautical,
-            debug=options.debug
+        host=options.host,
+        port=options.port,
+        device=options.device,
+        speed_unit=options.speedunits,
+        maxspeed=options.maxspeed,
+        nautical=options.nautical,
+        debug=options.debug
     ).run()
