@@ -93,7 +93,7 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
     memcpy((void *)&shmcopy, (void *)shm, sizeof(struct shmTime));
 
     /*
-     * An update consumer such as ntp should zero the valid flag at this point.
+     * An update consumer such as ntpd should zero the valid flag at this point.
      * A program snooping the updates to collect statistics should not, lest
      * it make the data unavailable for consumers.
      */
