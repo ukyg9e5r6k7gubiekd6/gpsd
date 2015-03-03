@@ -61,9 +61,6 @@
 #include <fcntl.h>	/* needed for open() and friends */
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-#define PPS_MAX_OFFSET	100000	/* microseconds the PPS can 'pull' */
-#define PUT_MAX_OFFSET	1000000	/* microseconds for lost lock */
-
 /*
  * Warning: This is a potential portability problem.
  * It's needed so that TIOCMIWAIT will be defined and the plain PPS
