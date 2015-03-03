@@ -1075,7 +1075,7 @@ cgps = env.Program('cgps', ['cgps.c'], parse_flags=gpslibs + ncurseslibs)
 env.Depends(cgps, compiled_gpslib)
 
 ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'], parse_flags=gpslibs)
-env.Depends(cgps, compiled_gpslib)
+env.Depends(ntpshmmon, compiled_gpslib)
 
 binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps, ntpshmmon]
 if env["ncurses"]:
@@ -1929,7 +1929,7 @@ distclean = env.Alias('distclean', [clean, testclean, webclean])
 
 # Tags for Emacs and vi
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
-                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpshmmon']
+                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpshmmon.c']
 sources = libgpsd_sources + libgps_sources \
           + gpsd_sources + gpsmon_sources + misc_sources
 env.Command('TAGS', sources, ['etags ' + " ".join(sources)])
