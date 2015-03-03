@@ -333,10 +333,10 @@ do.  In general, you can't use a USB device for time service unless you
 know it has the Macx-1 mod.
 
 In the past, the RS232 variant of the Garmin GPS-18 has been very
-commonly used for time service.  While it is still a respectable
-choice, newer devices have better sensitivity and signal
-discrimination. This makes them superior for indoor use as time
-sources.
+commonly used for time service (see <<LVC>> for a typical setup very
+well described).  While it is still a respectable choice, newer
+devices have better sensitivity and signal discrimination. This makes
+them superior for indoor use as time sources.
 
 In general, use a GPS with an RS232 interface for time service if you
 can.  The GR601-W was designed (by one of the authors, as it happens)
@@ -1517,6 +1517,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[EEE]]] https://en.wikipedia.org/wiki/Energy-Efficient_Ethernet[Energy-Efficient Ethernet]
 
+- [[[LVC]]] http://www.rjsystems.nl/en/2100-ntpd-garmin-gps-18-lvc-gpsd.php
+
 == Changelog ==
 
 1.1, Nov 2013: Initial release.
@@ -1528,7 +1530,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 1.4, Dec 2014: Cleaned up Bibliography
 
 2.0, Feb 2015: More about troubleshooting PPS delivery.  Folded in Sanjeev
-Guota's Calibration Howto describing the loopstats-based procedure.  Added
+Gupta's Calibration Howto describing the loopstats-based procedure.  Added
 preliminary information on PTP.
 
-2.1 Mar 2015 More on PTP.
+2.1 Mar 2015: More on PTP. Added link to Jaap Winius's page on GPS-18 setup.
+
