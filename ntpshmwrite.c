@@ -248,6 +248,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
 
 #ifdef PPS_ENABLE
     /* ntpd sets -20 for PPS refclocks, thus -20 precision */
+    /* TODO: if PPS over USB 1.1, then precision = -10 */
     if (shmTime == session->shm_pps)
 	precision = -20;
 #endif	/* PPS_ENABLE */
