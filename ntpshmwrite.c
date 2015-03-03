@@ -372,9 +372,7 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
      * not a big deal as slewing will bbe required */
     sample.offset = TSTONS( &offset );
     /*@+compdef@*/
-#ifdef __COVERITY__
     sample._pad = 0;
-#endif /* __COVERITY__ */
     /*@+type@*/
 
     /*@-type@*/ /* splint is confused about struct timespec */
