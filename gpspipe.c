@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <time.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
@@ -338,7 +339,7 @@ int main(int argc, char **argv)
 		    struct tm *tmp_now;
 
 		    /*@-type@*//* splint is confused about struct timespec */
-		    (void)clock_gettime(CLOCK_REALTIME, &now);
+		    /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &now);
 		    tmp_now = localtime((time_t *)&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;

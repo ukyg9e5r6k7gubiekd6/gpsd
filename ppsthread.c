@@ -93,7 +93,7 @@ void pps_early_init( struct gps_context_t * context ) {
     /*@ +unrecog @*/
     if ( 0 != err ) {
 	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	gpsd_report(&context->errout, LOG_ERROR,
 		"PPS: pthread_mutex_init() : %s\n", errbuf);
     }
@@ -223,7 +223,7 @@ static int init_kernel_pps(struct gps_device_t *session)
      * keep root a tad longer just in case */
     if ( 0 > time_pps_create(ret, &session->kernelpps_handle )) {
 	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	gpsd_report(&session->context->errout, LOG_INF,
 		    "KPPS time_pps_create(%d) failed: %s\n",
 		    ret, errbuf);
@@ -255,7 +255,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 
         if ( 0 > time_pps_setparams(session->kernelpps_handle, &pp)) {
 	    char errbuf[BUFSIZ] = "unknown error";
-	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
+	    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	    gpsd_report(&session->context->errout, LOG_ERROR,
 		"KPPS time_pps_setparams() failed: %s\n", errbuf);
 	    time_pps_destroy(session->kernelpps_handle);
@@ -713,7 +713,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
                 if ( 0 != pthread_err ) {
 		    char errbuf[BUFSIZ] = "unknown error";
-		    (void)strerror_r(errno, errbuf, sizeof(errbuf));
+		    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 		    gpsd_report(&session->context->errout, LOG_ERROR,
 			    "PPS: pthread_mutex_unlock() : %s\n", errbuf);
 		}
@@ -797,7 +797,7 @@ void pps_thread_stash_fixtime(struct gps_device_t *session,
     int pthread_err = pthread_mutex_lock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
 	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	gpsd_report(&session->context->errout, LOG_ERROR,
 		"PPS: pthread_mutex_lock() : %s\n", errbuf);
     }
@@ -808,7 +808,7 @@ void pps_thread_stash_fixtime(struct gps_device_t *session,
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
 	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	gpsd_report(&session->context->errout, LOG_ERROR,
 		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
     }
@@ -826,7 +826,7 @@ int pps_thread_lastpps(struct gps_device_t *session, struct timedelta_t *td)
     pthread_err = pthread_mutex_lock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
 	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	(void)strerror_r(errno, errbuf,(int) sizeof(errbuf));
 	gpsd_report(&session->context->errout, LOG_ERROR,
 		"PPS: pthread_mutex_lock() : %s\n", errbuf);
     }
@@ -837,7 +837,7 @@ int pps_thread_lastpps(struct gps_device_t *session, struct timedelta_t *td)
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
 	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	gpsd_report(&session->context->errout, LOG_ERROR,
 		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
     }

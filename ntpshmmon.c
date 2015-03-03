@@ -37,8 +37,8 @@ int main(int argc, char **argv)
     int option;
     int	i;
     bool verbose = false;
-    int timeout = INT_MAX, nsamples = INT_MAX;
-    time_t starttime = time(NULL);
+    int nsamples = INT_MAX;
+    time_t timeout = (time_t)INT_MAX, starttime = time(NULL);
 
 #define USAGE	"usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
     while ((option = getopt(argc, argv, "hn:st:vV")) != -1) {
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	    }
 	    //break;
 	case 't':
-	    timeout = atoi(optarg);
+	    timeout = (time_t)atoi(optarg);
 	    break;
 	case 'v':
 	    verbose = true;
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
 			status, shm_name(i));
-	/*@+mustfreefresh@*/
+		/*@+mustfreefresh@*/
 		break;
 	    }
 	}
