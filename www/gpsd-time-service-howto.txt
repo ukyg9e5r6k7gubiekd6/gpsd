@@ -1,6 +1,6 @@
 = GPSD Time Service HOWTO =
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.0, Feb 2015
+v2.1, Mar 2015
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -1262,7 +1262,7 @@ SHM 0 source should be around 0.495.
 
 //FIXME: What more can we say about chronyd tuning?
 
-== Providing local NTP service ==
+== Providing local NTP service using PTP ==
 
 By now if you have a good serial PPS signal your local clock should have
 jitter on the order of 1 uSec.  You do not want the hassle of placing
@@ -1358,6 +1358,31 @@ priority2 10
 [eth0]
 -----------------------------------------------------------------------------
 
+One final wrinkle before going live with the PTP master.  Ethernet ports
+have something called <<EEE>> (IEEE 802.3az).  Sadly this small energy
+efficiency can be very disruptive to timekeeping.  Up to almost 1 Sec of
+errors in offset, wwander and jjitter.  To see if you have EEE enabled,
+and then turn it off:
+
+# ethtool --show-eee eth0
+EEE Settings for eth0:
+	EEE status: enabled - inactive
+	Tx LPI: 0 (us)
+	Supported EEE link modes:  100baseT/Full
+	                           1000baseT/Full
+	Advertised EEE link modes:  100baseT/Full
+	                            1000baseT/Full
+	Link partner advertised EEE link modes:  Not reported
+# ethtool --set-eee eth0 eee off
+# ethtool --show-eee eth0
+EEE Settings for eth1:
+	EEE status: disabled
+	Tx LPI: disabled
+	Supported EEE link modes:  100baseT/Full
+	                           1000baseT/Full
+	Advertised EEE link modes:  Not reported
+	Link partner advertised EEE link modes:  Not reported
+
 Now as root on the master, start the ptp4l daemon:
 
 # ptp4l -f /usr/local/etc/ptp4l.conf &
@@ -1399,8 +1424,10 @@ ntpshm_segment 0
 [eth0]
 -----------------------------------------------------------------------------
 
-Now as root on the slave, start the ptp4l daemon:
+Now as root on the slave, as with the master, turn off EEE and start the
+ptp4l daemon:
 
+# ethtool --set-eee eth0 eee off
 # ptp4l -f /usr/local/etc/ptp4l.conf &
 
 Configuration of the slave chimer is now complete.  Follow the earlier
@@ -1483,6 +1510,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[LINUX-PTP]]] http://linuxptp.sourceforge.net/[Linux PTP]
 
+- [[[EEE]]] https://en.wikipedia.org/wiki/Energy-Efficient_Ethernet[Energy-Efficient Ethernet]
+
 == Changelog ==
 
 1.1, Nov 2013: Initial release.
@@ -1497,3 +1526,4 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 Guota's Calibration Howto describing the loopstats-based procedure.  Added
 preliminary information on PTP.
 
+2.1 Mar 2015 More on PTP.
