@@ -389,9 +389,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	/*
 	 * If there was no valid time from the GPS when the PPS event was
-	 * asserted, we can do nothing further.  It will be strange if
-	 * this ever actually happens, since we expect PPS to be asserted
-	 * only after a valid fix - which should yield time.
+	 * asserted, we can do nothing further.  Some GPS like Garmin
+         * always send a PPS, valid or not.  Other GPS like some uBlox
+         * may only send PPS when valid.
+         * It is common to get PPS, and no fixtime, while autobauding.
 	 */
         if (isnan(last_fixtime_real))
 	    continue;
