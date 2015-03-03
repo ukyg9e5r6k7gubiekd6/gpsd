@@ -68,6 +68,8 @@ struct shm_stat_t {
 
 struct shmTime /*@null@*/ *shm_get(int, bool, bool);
 extern char *shm_name(const int);
-enum segstat_t shm_query(/*@null@*/struct shmTime *, /*@out@*/struct shm_stat_t *);
+enum segstat_t shm_query(/*@null@*/struct shmTime *, 
+			 /*@out@*/struct shm_stat_t *,
+			 const bool);
 
 /* end */

@@ -58,7 +58,7 @@ char *shm_name(const int unit)
 }
 /*@+statictrans@*/
 
-enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_stat_t *shm_stat)
+enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_stat_t *shm_stat, const bool consume)
 /* try to grab a sample from the specified SHM segment */
 {
     volatile struct shmTime shmcopy, *shm = shm_in;
@@ -91,7 +91,14 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
      */
     memory_barrier();
     memcpy((void *)&shmcopy, (void *)shm, sizeof(struct shmTime));
-    shm->valid = 0;
+
+    /*
+     * An update consumer such as ntp should zero the valid flag at this point.
+     * A program snooping the updates to collect statistics should not, lest
+     * it make the data unavailable for consumers.
+     */
+    if (consume)
+	shm->valid = 0;
     memory_barrier();
 
     /* 

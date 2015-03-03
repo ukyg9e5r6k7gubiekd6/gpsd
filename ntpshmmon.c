@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	struct shm_stat_t	shm_stat;
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
-	    enum segstat_t status = shm_query(segments[i], &shm_stat);
+	    enum segstat_t status = shm_query(segments[i], &shm_stat, false);
 	    if (verbose)
 		fprintf(stderr, "unit %d status %d\n", i, status);
 	    switch(status)
