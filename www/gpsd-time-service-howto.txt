@@ -801,8 +801,13 @@ allow
 # set larger delay to allow the NMEA source to overlap with
 # the other sources and avoid the falseticker status
 refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
-refclock SHM 1 refid PPS
+refclock SHM 1 refid PPS precision 1e-9
 -----------------------------------------------------------------------------
+
+You need to add the "precision 1e-9" on the SHM 1 line as chronyd fails
+to read the precision from the SHM structure.  Without knowing the high
+precision of the PPS on SHM 1 it may not place enough importance on its
+data.
 
 If you are outside of the USA replace the pool servers with one in your
 local area. See <<USE-POOL>> for further information.
@@ -1333,7 +1338,7 @@ master chronyd.conf file to configure the SHM.
 
 -----------------------------------------------------------------------------
 refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
-refclock SHM 1 refid PPS
+refclock SHM 1 refid PPS precision 1e-9
 refclock SHM 2 refid PTP
 -----------------------------------------------------------------------------
 
@@ -1404,7 +1409,7 @@ If you are using chronyd, then add the one line below to your master
 chronyd.conf file to configure your one and only SHM.
 
 -----------------------------------------------------------------------------
-refclock SHM 0 refid PTP
+refclock SHM 0 refid PTP precision 1e-9
 -----------------------------------------------------------------------------
 
 To configure the slave ptp4l, create a new file
