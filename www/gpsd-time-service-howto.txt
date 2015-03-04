@@ -176,7 +176,7 @@ To get accurate time, then, the in-band fix report from the GPS needs
 to be supplemented with an out-of-band signal that has a low and
 constant or near-constant latency with respect to the time of of the
 fix.  GPS satellites deliver a top-of-GPS-second notification that is
-nominally accurate to 50nSec; in capable GPses that becomes the 1PPS
+nominally accurate to 50nSec; in capable GPSes that becomes the 1PPS
 signal.
 
 1PPS-capable GPSes use an RS-232 control line to ship the 1PPS
@@ -311,7 +311,7 @@ where your machine has to be disconnected from the Internet for long
 enough periods of time for the clock to drift significantly.
 
 ntpd and chrony have differing philosophies, with ntpd more interested
-in deriving conensus time from multiple sources while chrony tries to
+in deriving consensus time from multiple sources while chrony tries to
 identify a single best source and track it closely.
 
 A feature comparison, part of the chrony documentation, is at
@@ -539,7 +539,7 @@ Segments 2, 3 and above::
  	 and write as any user. If ntpd has been
  	 configured to use these segments, any
  	 unprivileged user is allowed to provide data
- 	 for synchronisation.
+ 	 for synchronization.
 
 Because gpsd can be started either as root or non-root, it checks and
 attaches the more privileged segment pair it can - either 0 and 1 or 2
@@ -631,7 +631,7 @@ distribution supplies gives you a working setup. The two pairs of
 server and fudge declarations are the key.
 
 ntpd can be used in Denial of Service (DoS) attacks.  To prevent that,
-but still allow clients to requst the local time, be sure the restrict
+but still allow clients to request the local time, be sure the restrict
 statements are in your ntpd config file.  For more information see
 <<CVE-2009-3563>>.
 
@@ -800,7 +800,7 @@ allow
 
 # set larger delay to allow the NMEA source to overlap with
 # the other sources and avoid the falseticker status
-refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
+refclock SHM 0 refid GPS precision 1e-1 offset 0.9999 delay 0.2
 refclock SHM 1 refid PPS precision 1e-9
 -----------------------------------------------------------------------------
 
@@ -836,7 +836,7 @@ allow
 
 # set larger delay to allow the NMEA source to overlap with
 # the other sources and avoid the falseticker status
-refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
+refclock SHM 0 refid GPS precision 1e-1 offset 0.9999 delay 0.2
 refclock SOCK /var/run/chrony.ttyXX.sock refid PPS
 -----------------------------------------------------------------------------
 
@@ -971,7 +971,7 @@ factors are.
 
 This section deals specifically with ntpd.  It discusses algorithms
 used by the ntpd suite to measure and correct the system time.  It is not
-directly applicable to chronyd, althogh some design considerations
+directly applicable to chronyd, although some design considerations
 may be similar.
 
 === NTP performance tuning ===
@@ -979,7 +979,7 @@ may be similar.
 For good time stability, you should always have at least four other
 chimers in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
-satellite lock, or has an attack of temporarity insanity. You can find
+satellite lock, or has an attack of temporary insanity. You can find
 public NTP chimers to add to your configuration at <<USE-POOL>>. 
 
 To minimize latency variations, use the national and regional
@@ -997,7 +997,7 @@ implements a fast start algorithm that also weeds out bad servers.
 
 Note that a chimer can be a poor performer for any of three
 reasons. It may be shipping bad time, or the best routes between you
-and it have large latency variations (jitter), or it may have an asymetric
+and it have large latency variations (jitter), or it may have an asymmetric
 route, confusing NTP.
 
 The standard tool for tuning ntpd is "ntpq" ("NTP query program"). To
@@ -1279,20 +1279,60 @@ With your best setup on a lightly loaded GigE network you find that your
 NTP clients have jitter on the order of 150 uSec, or 150 times worse
 than your master.  Bummer, you want to do much better, so you look to
 the Precision Time Protocol <<PTP>> for help.  PTP is also known as IEEE
-1588.  With PTP you can easily synchronize NTP hosts to 5 uSec with
-generic hardware.  Even better with newer ethernet cards that contain
-hardware timers.
+1588.  
 
-To start you need to verify that your Linux kernel configuration
-includes either these two lines, or the same with "y" replaced by "m" to
-enable the drivers as modules:
+With PTP you can easily synchronize NTP hosts to 5 uSec with some
+generic NIC hardware and newer Linux kernels.  Some of the Ethernet
+drivers have been modified to time stamp network packets when sending and
+receiving.  This is done with the new SO_TIMESTAMPING socket option.  No
+hardware support is required.
+
+A more recent addition is PTP Hardware Clock (PHC) support.  This requires
+hardware support in the NIC.
+
+Software timestamping is more mature, available on more NICs, and almost
+as accurate as hardware timestamping.  Try it first.  This HOWTO will
+build on those results.
+
+One final wrinkle before proceeding with PTP.  Ethernet ports have
+something called <<EEE>> (IEEE 802.3az).  Percentage wise EEE can save
+50% of the Ethernet energy needs.  Sadly this is 50% of an already small
+energy usage.  Only important in large data centers.  EEE can be very
+disruptive to timekeeping.  Up to almost 1 Sec of errors in offset,
+wander and jitter.  To see if you have EEE enabled, and then turn it
+off:
+
+# ethtool --show-eee eth0
+EEE Settings for eth0:
+	EEE status: enabled - inactive
+	Tx LPI: 0 (us)
+	Supported EEE link modes:  100baseT/Full
+	                           1000baseT/Full
+	Advertised EEE link modes:  100baseT/Full
+	                            1000baseT/Full
+	Link partner advertised EEE link modes:  Not reported
+# ethtool --set-eee eth0 eee off
+# ethtool --show-eee eth0
+EEE Settings for eth1:
+	EEE status: disabled
+	Tx LPI: disabled
+	Supported EEE link modes:  100baseT/Full
+	                           1000baseT/Full
+	Advertised EEE link modes:  Not reported
+	Link partner advertised EEE link modes:  Not reported
+
+=== PTP with software timestamping ===
+
+To start you need to verify that your running Linux kernel configuration
+includes these two lines, or the same with "y" replaced by "m" to enable
+the drivers as modules:
 
 -----------------------------------------------------------------------------
 CONFIG_NETWORK_PHY_TIMESTAMPING=y
 PTP_1588_CLOCK=y
 -----------------------------------------------------------------------------
 
-Then you need to verify that your ethernet hardware supports PTP
+Then you need to verify that your Ethernet driver supports PTP
 by running this command as root:
 
 -----------------------------------------------------------------------------
@@ -1309,10 +1349,10 @@ for later.
 Next you will need the <<LINUX-PTP>> package, just follow the simple
 instructions on their web page to download, compile and install on your
 NTP chimer and its slaves.  Be sure to also follow their instructions on
-how to configure your linux kernel.
+how to configure your Linux kernel.
 
-In our setup we will just use the ptp4l program.  This program does
-special low level timing on ethernet frames and shares that information
+In this setup we will just use the ptp4l program.  This program measures
+the delay and offset between a master and slaves and shares that information
 with chronyd or ntpd using an SHM.  Since gpsd also uses SHM be very careful
 not to have the two SHM servers stepping on the same shmid.
 
@@ -1337,9 +1377,9 @@ If you are using chronyd, then add the last one line below to your
 master chronyd.conf file to configure the SHM.
 
 -----------------------------------------------------------------------------
-refclock SHM 0 offset 0.9999 delay 0.2 refid GPS
+refclock SHM 0 refid GPS precision 1e-1 offset 0.9999 delay 0.2
 refclock SHM 1 refid PPS precision 1e-9
-refclock SHM 2 refid PTP
+refclock SHM 2 refid PTP precision 1e-9
 -----------------------------------------------------------------------------
 
 To configure the master ptp4l, create a new file
@@ -1349,48 +1389,22 @@ To configure the master ptp4l, create a new file
 [global]
 # only syslog every 1024 seconds
 summary_interval 10
-# use software timestamping
-time_stamping software
 
 # send to to chronyd/ntpd using SHM 2
 clock_servo ntpshm
 ntpshm_segment 2
 
-# set our prioity hgh since we have PPS
+# set our priority high since we have PPS
 priority1 10
 priority2 10
 
 [eth0]
 -----------------------------------------------------------------------------
 
-One final wrinkle before going live with the PTP master.  Ethernet ports
-have something called <<EEE>> (IEEE 802.3az).  Sadly this small energy
-efficiency can be very disruptive to timekeeping.  Up to almost 1 Sec of
-errors in offset, wwander and jjitter.  To see if you have EEE enabled,
-and then turn it off:
-
-# ethtool --show-eee eth0
-EEE Settings for eth0:
-	EEE status: enabled - inactive
-	Tx LPI: 0 (us)
-	Supported EEE link modes:  100baseT/Full
-	                           1000baseT/Full
-	Advertised EEE link modes:  100baseT/Full
-	                            1000baseT/Full
-	Link partner advertised EEE link modes:  Not reported
-# ethtool --set-eee eth0 eee off
-# ethtool --show-eee eth0
-EEE Settings for eth1:
-	EEE status: disabled
-	Tx LPI: disabled
-	Supported EEE link modes:  100baseT/Full
-	                           1000baseT/Full
-	Advertised EEE link modes:  Not reported
-	Link partner advertised EEE link modes:  Not reported
-
 Now as root on the master, start the ptp4l daemon:
 
-# ptp4l -f /usr/local/etc/ptp4l.conf &
+# ethtool --set-eee eth0 eee off
+# ptp4l -S -f /usr/local/etc/ptp4l.conf &
 
 Configuration of the master chimer is now complete.  Now to configure
 the slaves.  If the slaves also have PPS then configure them as masters.
@@ -1419,10 +1433,8 @@ To configure the slave ptp4l, create a new file
 [global]
 # only syslog every 1024 seconds
 summary_interval 10
-# use software timestamping
-time_stamping software
 
-# send to to chronyd/ntpd using SHM 2
+# send to to chronyd/ntpd using SHM 0
 clock_servo ntpshm
 ntpshm_segment 0
 
@@ -1433,11 +1445,84 @@ Now as root on the slave, as with the master, turn off EEE and start the
 ptp4l daemon:
 
 # ethtool --set-eee eth0 eee off
-# ptp4l -f /usr/local/etc/ptp4l.conf &
+# ptp4l -S -f /usr/local/etc/ptp4l.conf &
 
 Configuration of the slave chimer is now complete.  Follow the earlier
 procedures for checking the jitter on the SHM on the slaves.  Give it
 a few hours to settle and your hosts will now be synced to around 5 uSec.
+
+=== PTP with hardware timestamping ===
+
+Some NICs requires two additional kernel options.  Just in case, verify
+that your running Linux kernel configuration includes these lines, or
+the same with "y" replaced by "m" to enable the drivers as modules:
+
+-----------------------------------------------------------------------------
+CONFIG_DP83640_PHY=y
+CONFIG_PTP_1588_CLOCK_PCH=y
+-----------------------------------------------------------------------------
+
+Then you need to verify that your Ethernet driver supports PTP
+by running ethtool  as root and verify at least the following lines are
+present in the output:
+
+-----------------------------------------------------------------------------
+# ethtool -T eth0  
+	hardware-transmit     (SOF_TIMESTAMPING_TX_HARDWARE)
+	hardware-receive      (SOF_TIMESTAMPING_RX_HARDWARE)
+	all                   (HWTSTAMP_FILTER_ALL)
+-----------------------------------------------------------------------------
+
+Your NIC may have more features, and your driver may support them for
+better results.
+
+In the software timestamping above the ptp4l program took care of all steps to
+determine the slave offset from the master and feeding that to a a SHM for
+ntpd or chronyd to use.o
+
+In hardware timestamping mode ptp4l will continue to perform most of
+the work.  An additional program, phc2sys, will take over the duties of
+reading the hardware timestamps from the NIC, computing the offset, and
+feeding that to the SHM.
+
+phc2sys will use the SHM exactly as ptp4l did previously so no
+change is required to your ntpd or chronyd configuration.
+
+To keep things simple, for now, we will not touch the already configured
+and working software timestamping master server.  We will proceed to
+configure a slave.
+
+To configure the slave ptp4l, edit your /usr/local/etc/ptp4l.conf
+to remove the ntpshm options:
+
+-----------------------------------------------------------------------------
+[global]
+# only syslog every 1024 seconds
+summary_interval 10
+
+clock_servo linreg
+
+[eth0]
+-----------------------------------------------------------------------------
+
+Now as root on the slave, as with the master, turn off EEE and start the
+ptp4l daemon:
+
+-----------------------------------------------------------------------------
+# ethtool --set-eee eth0 eee off
+# ptp4l -H -f /usr/local/etc/ptp4l.conf &
+# sleep 3
+# phc2sys -a -r -E ntpshm -m -M 0 &
+-----------------------------------------------------------------------------
+
+
+Configuration of the slave chimer is now complete.  Follow the earlier
+procedures for checking the jitter on the SHM on the slaves. 
+
+Sadly, theory and practice diverge here.  I have never succeeded in
+making hardware timestamping work.  I have successfully trashed my
+host system clock.  Tread carefully.  If you make progress please
+pass on some clue.
 
 == Providing public NTP service ==
 
