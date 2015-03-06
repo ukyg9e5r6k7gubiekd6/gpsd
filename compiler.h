@@ -40,6 +40,8 @@ static /*@unused@*/ inline void memory_barrier(void)
 #ifndef S_SPLINT_S
 #ifdef STD_ATOMIC_H
     atomic_thread_fence(memory_order_seq_cst);
+#elif defined(__GNUC__)
+     asm volatile ("" : : : "memory");
 #endif /* STD_ATOMIC_H */
 #endif /* S_SPLINT_S */
 }
