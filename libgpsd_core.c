@@ -280,35 +280,12 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 void gps_context_init(struct gps_context_t *context, 
 		      /*@observer@*/const char *label)
 {
-    /* *INDENT-OFF* */
-    /*@ -initallelements -nullassign -nullderef -fullinitblock @*/
-    struct gps_context_t nullcontext = {
-	.valid	        = 0,
-	.readonly	= false,
-	.fixcnt	        = 0,
-	.start_time     = 0,
-	.leap_seconds   = 0,
-	.gps_week	= 0,
-	.gps_tow        = 0,
-	.century	= 0,
-	.rollovers      = 0,
+    (void)memset(context, '\0', sizeof(struct gps_context_t));
+    //context.readonly = false;
 #ifdef TIMEHINT_ENABLE
-	.leap_notify    = LEAP_NOWARNING,
+    context->leap_notify    = LEAP_NOWARNING;
 #endif /* TIMEHINT_ENABLE */
-#ifdef NTPSHM_ENABLE
-	.shmTime	= {0},
-#endif /* NTPSHM_ENABLE */
-#ifdef PPS_ENABLE
-	.pps_hook       = NULL,
-#endif /* PPS_ENABLE */
-#ifdef SHM_EXPORT_ENABLE
-	.shmexport      = NULL,
-#endif /* SHM_EXPORT_ENABLE */
-	.serial_write    = gpsd_serial_write,
-    };
-    /*@ +initallelements +nullassign +nullderef +fullinitblock @*/
-    /* *INDENT-ON* */
-    (void)memcpy(context, &nullcontext, sizeof(struct gps_context_t));
+    context->serial_write = gpsd_serial_write;
 
     errout_reset(&context->errout);
     context->errout.label = (char *)label;
