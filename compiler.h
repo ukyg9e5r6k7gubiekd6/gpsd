@@ -36,12 +36,13 @@
 #endif /* HAVE_STDATOMIC_H */
 
 static /*@unused@*/ inline void memory_barrier(void)
+/* prevent instruction reordering across any call to this function */
 {
 #ifndef S_SPLINT_S
 #ifdef STD_ATOMIC_H
     atomic_thread_fence(memory_order_seq_cst);
 #elif defined(__GNUC__)
-     asm volatile ("" : : : "memory");
+    asm volatile ("" : : : "memory");
 #endif /* STD_ATOMIC_H */
 #endif /* S_SPLINT_S */
 }
