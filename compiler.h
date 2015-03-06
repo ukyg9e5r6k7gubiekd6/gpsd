@@ -31,9 +31,9 @@
         assert(locresult != -23); \
     } while (0)
 
-#ifdef HAVE_STDATOMIC
+#ifdef HAVE_STDATOMIC_H
 #include <stdatomic.h>
-#endif /* HAVE_STDATOMIC */
+#endif /* HAVE_STDATOMIC_H */
 
 static /*@unused@*/ inline void memory_barrier(void)
 {
