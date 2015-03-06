@@ -77,19 +77,23 @@ bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
 {
     volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
     timestamp_t basetime = timestamp();
+    volatile bool newdata = false;
 
     /* busy-waiting sucks, but there's not really an alternative */
     for (;;) {
-	bool newdata = false;
+	volatile int bookend1, bookend2;
 	memory_barrier();
-	if (shared->bookend1 == shared->bookend2 && shared->bookend1 > PRIVATE(gpsdata)->tick)
+	bookend1 = shared->bookend1;
+	memory_barrier();
+	bookend2 = shared->bookend2;
+	memory_barrier();
+	if (bookend1 == bookend2 && bookend1 > PRIVATE(gpsdata)->tick)
 	    newdata = true;
-	memory_barrier();
 	if (newdata || (timestamp() - basetime >= (double)timeout))
 	    break;
     }
 
-    return true;
+    return newdata;
 }
 
 int gps_shm_read(struct gps_data_t *gpsdata)
