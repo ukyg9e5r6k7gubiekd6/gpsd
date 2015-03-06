@@ -1,7 +1,7 @@
 /****************************************************************************
 
 NAME
-   libgps_shm.c - reasder access to shared-memory export
+   libgps_shm.c - reader access to shared-memory export
 
 DESCRIPTION
    This is a very lightweight alternative to JSON-over-sockets.  Clients

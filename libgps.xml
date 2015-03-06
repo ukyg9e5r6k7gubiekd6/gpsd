@@ -150,7 +150,11 @@ function is a convenience wrapper around a
 <citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
 call, and zeros <varname>errno</varname> on entry; you can test
 <varname>errno</varname> after exit to get more information about
-error conditions.</para>
+error conditions.  Warning: under the shared-memory interface there is
+a tiny race window between <function>gps_waiting()</function> and a
+following <function>gps_read()</function>; in that context, beause the
+latter does not block, it is probably better to write a simple read
+loop.</para>
 
 <para><function>gps_unpack()</function> parses JSON from the argument
 buffer into the target of the session structure pointer argument.

@@ -85,9 +85,11 @@ enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_s
     cnt = shm->count;
 
     /*
-     * This is proof against concurrency issues if either
-     * (a) the memory_barrier() call works on this host, or
-     * (b) memset compiles to an uninterruptible single-instruction bitblt.
+     * This is proof against concurrency issues if either (a) the
+     * memory_barrier() call works on this host, or (b) memset
+     * compiles to an uninterruptible single-instruction bitblt (this
+     * will probably cease to be true if the structure exceeds your VM
+     * page size).
      */
     memory_barrier();
     memcpy((void *)&shmcopy, (void *)shm, sizeof(struct shmTime));
