@@ -1082,6 +1082,8 @@ extern void libgps_dump_state(struct gps_data_t *);
 
 void gpsd_labeled_report(const int, const int,
 			 const char *, const char *, va_list);
+void gpsd_vlog(const struct gpsd_errout_t *, 
+	       const int, char *, size_t, const char *, va_list ap);
 PRINTF_FUNC(3, 4) void gpsd_log(const struct gpsd_errout_t *, const int, const char *, ...);
 
 #ifdef S_SPLINT_S

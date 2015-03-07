@@ -114,7 +114,7 @@ static void visibilize(/*@out@*/char *outbuf, size_t outlen,
 #endif /* !SQUELCH_ENABLE */
 
 
-static void gpsd_vlog(const struct gpsd_errout_t *errout, 
+void gpsd_vlog(const struct gpsd_errout_t *errout, 
 			 const int errlevel,
 			 char *outbuf, size_t outlen,
 			 const char *fmt, va_list ap)
