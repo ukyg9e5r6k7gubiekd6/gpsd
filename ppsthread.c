@@ -269,6 +269,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     struct gps_device_t *session = (struct gps_device_t *)arg;
+    volatile struct pps_thread_t *thread_context = &session->pps_thread;
     double last_fixtime_real = 0; 
     /* the system clock ime, to the nSec, when the last fix received */
     /* using a double would cause loss of precision */
@@ -313,7 +314,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * ntpshm and chrony_send
      */
 
-    while (session->pps_thread.report_hook != NULL 
+    while (thread_context->report_hook != NULL
            || session->context->pps_hook != NULL) {
 	bool ok = false;
 #ifndef S_SPLINT_S
@@ -350,8 +351,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    "PPS: pthread_mutex_lock() : %s\n", errbuf);
 	}
 	/*@ +unrecog @*/
-	last_fixtime_real = session->pps_thread.fixin_real;
-	last_fixtime_clock = session->pps_thread.fixin_clock;
+	last_fixtime_real = thread_context->fixin_real;
+	last_fixtime_clock = thread_context->fixin_clock;
 	/*@ -unrecog (splint has no pthread declarations as yet) @*/
 	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
 	if ( 0 != pthread_err ) {
@@ -407,7 +408,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	ok = false;  
 	log = NULL;  
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
-        if ( 0 <= session->pps_thread.kernelpps_handle ) {
+        if ( 0 <= thread_context->kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
 	    /* on a quad core 2.4GHz Xeon using KPPS timestamp instead of plain 
              * PPS timestamp removes about 20uS of latency, and about +/-5uS 
@@ -432,7 +433,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    kernelpps_tv.tv_sec = 1;
 	    kernelpps_tv.tv_nsec = 0;
 #endif
-	    if ( 0 > time_pps_fetch(session->pps_thread.kernelpps_handle, PPS_TSFMT_TSPEC
+	    if ( 0 > time_pps_fetch(thread_context->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
 		gpsd_log(&session->context->errout, LOG_ERROR,
 			    "KPPS kernel PPS failed\n");
@@ -633,7 +634,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			"PPS edge accepted %.100s", log);
 #ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
-            if ( 0 <= session->pps_thread.kernelpps_handle && ok_kpps) {
+            if ( 0 <= thread_context->kernelpps_handle && ok_kpps) {
 		/* use KPPS time */
 		gpsd_log(&session->context->errout, LOG_RAW,
 			    "KPPS using edge %d", edge_kpps );
@@ -688,8 +689,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } else {
 		/*@-compdef@*/
 		last_second_used = last_fixtime_real;
-		if (session->pps_thread.report_hook != NULL) 
-		    log1 = session->pps_thread.report_hook(session, &ppstimes);
+		if (thread_context->report_hook != NULL) 
+		    log1 = thread_context->report_hook(session, &ppstimes);
 		else
 		    log1 = "no report hook";
 		if (session->context->pps_hook != NULL)
@@ -704,9 +705,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
-		session->pps_thread.ppsout_last = ppstimes;
+		thread_context->ppsout_last = ppstimes;
 		/*@+type@*/
-		session->pps_thread.ppsout_count++;
+		thread_context->ppsout_count++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
 		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
                 if ( 0 != pthread_err ) {
@@ -740,14 +741,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
-    if (session->pps_thread.kernelpps_handle > 0) {
+    if (thread_context->kernelpps_handle > 0) {
 	gpsd_log(&session->context->errout, LOG_PROG, 
             "PPS descriptor cleaned up\n");
-	(void)time_pps_destroy(session->pps_thread.kernelpps_handle);
+	(void)time_pps_destroy(thread_context->kernelpps_handle);
     }
 #endif
-    if (session->pps_thread.wrap_hook != NULL)
-	session->pps_thread.wrap_hook(session);
+    if (thread_context->wrap_hook != NULL)
+	thread_context->wrap_hook(session);
     gpsd_log(&session->context->errout, LOG_PROG, 
          "PPS gpsd_ppsmonitor exited.\n");
     return NULL;
