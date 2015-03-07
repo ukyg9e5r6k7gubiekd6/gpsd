@@ -394,9 +394,6 @@ void gpsd_clear(struct gps_device_t *session)
 /* clear a device's storage for use */
 {
     session->gpsdata.online = timestamp();
-#ifdef SIRF_ENABLE
-    session->driver.sirf.satcounter = 0;
-#endif /* SIRF_ENABLE */
     lexer_init(&session->lexer);
     session->lexer.errout = session->context->errout;
     // session->gpsdata.online = 0;
