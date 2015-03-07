@@ -1519,7 +1519,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_report(&context.errout, LOG_PROG, "NTP: No time this packet\n");
     } else if (isnan(device->newdata.time)) {
 	//gpsd_report(&context.errout, LOG_PROG, "NTP: bad new time\n");
-    } else if (device->newdata.time == device->pps_thread.fixin_real) {
+    } else if (device->newdata.time == device->last_fixtime.real) {
 	//gpsd_report(&context.errout, LOG_PROG, "NTP: Not a new time\n");
     } else if (!device->ship_to_ntpd) {
 	//gpsd_report(&context.errout, LOG_PROG, "NTP: No precision time report\n");

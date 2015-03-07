@@ -303,8 +303,11 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 /* initialize GPS polling */
 {
     /* clear some times */
+    session->last_fixtime.real = 0.0;
+    /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
+    /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
 #ifdef PPS_ENABLE
-    memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
+    memset((void *)&session->pps_state, 0, sizeof(session->pps_state));
 #endif /* PPS_ENABLE */
 
     /*@ -mayaliasunique @*/
@@ -397,9 +400,12 @@ void gpsd_clear(struct gps_device_t *session)
 
     /* clear the private data union */
     memset( (void *)&session->driver, '\0', sizeof(session->driver));
-#ifdef PPS_ENABLE
     /* clear some times */
-    memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
+    session->last_fixtime.real = 0.0;
+    /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
+    /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
+#ifdef PPS_ENABLE
+    memset((void *)&session->pps_state, 0, sizeof(session->pps_state));
 #endif /* PPS_ENABLE */
 
     session->opentime = timestamp();
@@ -1641,7 +1647,7 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
 #ifdef PPS_ENABLE
     /* thread-safe update */
     /*@-compdef@*/
-    status = pps_thread_stash_fixtime(&device->pps_thread, 
+    status = pps_thread_stash_fixtime(&device->last_fixtime, 
 				      device->newdata.time, td->clock);
     /*@+compdef@*/
     if (status == PPS_LOCK_ERR) {
