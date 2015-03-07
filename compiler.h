@@ -31,9 +31,11 @@
         assert(locresult != -23); \
     } while (0)
 
+#ifndef S_SPLINT_S
 #ifdef HAVE_STDATOMIC_H
 #include <stdatomic.h>
 #endif /* HAVE_STDATOMIC_H */
+#endif /* S_SPLINT_S */
 
 static /*@unused@*/ inline void memory_barrier(void)
 /* prevent instruction reordering across any call to this function */
