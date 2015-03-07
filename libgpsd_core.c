@@ -307,7 +307,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
     /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
 #ifdef PPS_ENABLE
-    memset((void *)&session->pps_state, 0, sizeof(session->pps_state));
+    memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
+    session->ppscount = 0;
 #endif /* PPS_ENABLE */
 
     /*@ -mayaliasunique @*/
@@ -405,7 +406,8 @@ void gpsd_clear(struct gps_device_t *session)
     /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
     /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
 #ifdef PPS_ENABLE
-    memset((void *)&session->pps_state, 0, sizeof(session->pps_state));
+    memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
+    session->ppscount = 0;
 #endif /* PPS_ENABLE */
 
     session->opentime = timestamp();
@@ -1617,7 +1619,6 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
 /* latch the fact that we've saved a fix */
 {
     double fix_time, integral, fractional;
-    int status;
 
     /* this should be an invariant of the way this function is called */
     assert(isnan(device->newdata.time)==0);
@@ -1647,20 +1648,8 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
 #ifdef PPS_ENABLE
     /* thread-safe update */
     /*@-compdef@*/
-    status = pps_thread_stash_fixtime(&device->last_fixtime, 
-				      device->newdata.time, td->clock);
+    pps_thread_stash_fixtime(device, device->newdata.time, td->clock);
     /*@+compdef@*/
-    if (status == PPS_LOCK_ERR) {
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf,(int) sizeof(errbuf));
-	gpsd_report(&device->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
-    } else if (status == PPS_LOCK_ERR) {
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf,(int) sizeof(errbuf));
-	gpsd_report(&device->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_lock() : %s\n", errbuf);
-    }
 #endif /* PPS_ENABLE */
 }
 #endif /* NTP_ENABLE */
