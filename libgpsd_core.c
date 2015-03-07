@@ -317,11 +317,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 	       const char *device)
 /* initialize GPS polling */
 {
-    /* clear some times */
-#ifdef PPS_ENABLE
-    memset((void *)&session->pps_thread, '\0', sizeof(session->pps_thread));
-#endif /* PPS_ENABLE */
-
     /*@ -mayaliasunique @*/
     if (device != NULL)
 	(void)strlcpy(session->gpsdata.dev.path, device,
@@ -396,6 +391,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 
 /*@-usereleased -compdef@*/
 void gpsd_clear(struct gps_device_t *session)
+/* clear a device's storage for use */
 {
     session->gpsdata.online = timestamp();
 #ifdef SIRF_ENABLE
@@ -414,7 +410,7 @@ void gpsd_clear(struct gps_device_t *session)
     /* clear the private data union */
     memset( (void *)&session->driver, '\0', sizeof(session->driver));
 #ifdef PPS_ENABLE
-    /* clear some times */
+    /* clear the context structure for the PPS thread monitor */
     memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
 #endif /* PPS_ENABLE */
 
