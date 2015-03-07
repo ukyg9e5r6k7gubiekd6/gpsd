@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include "gps.h"
+#include "ppsthread.h"
 #include "compiler.h"
 
 /*
@@ -499,12 +500,7 @@ struct gps_device_t {
     volatile /*@null@*/ struct shmTime *shm_pps;
 # endif /* PPS_ENABLE */
 #endif /* NTP_ENABLE */
-    volatile struct {
-	timestamp_t real;
-        /* clock must be a timespec as it is in nSec and
-         * a timestamp_t will lose precision */
-	struct timespec clock; /* system clock time when last fix received */
-    } last_fixtime;	/* so updates happen once */
+    volatile struct pps_fixtime_t last_fixtime;	/* so updates happen once */
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
@@ -513,8 +509,7 @@ struct gps_device_t {
     /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
 					   struct timedelta_t *);
     /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
-    volatile struct timedelta_t ppslast;
-    volatile int ppscount;
+    struct pps_state_t pps_state;
 #endif /* PPS_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
     bool back_to_nmea;			/* back to NMEA on revert? */
@@ -971,13 +966,8 @@ extern void pps_early_init(struct gps_context_t *);
 extern void timespec_str(const struct timespec *, /*@out@*/char *, int);
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
-#ifdef PPS_ENABLE
-extern void pps_thread_stash_fixtime(struct gps_device_t *, 
-			      timestamp_t, struct timespec);
-#endif /* PPS_ENABLE */
 extern void pps_thread_activate(struct gps_device_t *);
 extern void pps_thread_deactivate(struct gps_device_t *);
-extern int pps_thread_lastpps(struct gps_device_t *, struct timedelta_t *);
 
 extern void errout_reset(struct gpsd_errout_t *errout);
 

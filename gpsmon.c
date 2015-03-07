@@ -249,7 +249,19 @@ void pps_update(WINDOW *win, int y, int x)
     /*@-type -noeffect@*/ /* splint is confused about struct timespec */
     struct timedelta_t ppstimes;
 
-    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
+    int status = pps_thread_lastpps(&session.pps_state, &ppstimes);
+
+    if (status == PPS_LOCK_ERR) {
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf,(int) sizeof(errbuf));
+	gpsd_report(&session.context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
+    } else if (status == PPS_LOCK_ERR) {
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf,(int) sizeof(errbuf));
+	gpsd_report(&session.context->errout, LOG_ERROR,
+		"PPS: pthread_mutex_lock() : %s\n", errbuf);
+    } else {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
 	(void)wmove(win, y, x);
@@ -790,9 +802,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			"------------------- PPS offset: %.20s ------\n ",
 			timedelta_str);
 	    /* coverity[missing_lock] */
-	    session.ppslast = noclobber.pps;
+	    session.pps_state.ppslast = noclobber.pps;
 	    /* coverity[missing_lock] */
-	    session.ppscount++;
+	    session.pps_state.ppscount++;
 	}
     }
     else

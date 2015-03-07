@@ -704,9 +704,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
-		session->ppslast = ppstimes;
+		session->pps_state.ppslast = ppstimes;
 		/*@+type@*/
-		session->ppscount++;
+		session->pps_state.ppscount++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
 		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
                 if ( 0 != pthread_err ) {
@@ -787,33 +787,31 @@ void pps_thread_deactivate(struct gps_device_t *session)
     /*@+nullstate +mustfreeonly@*/
 }
 
-void pps_thread_stash_fixtime(struct gps_device_t *session, 
+int pps_thread_stash_fixtime(volatile struct pps_fixtime_t *last_fixtime, 
 		   timestamp_t realtime, struct timespec clocktime)
 /* thread-safe update of last fix time - only way we pass data in */
 {
+    int ret = PPS_THREAD_OK;
+
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
     int pthread_err = pthread_mutex_lock(&ppslast_mutex);
-    if ( 0 != pthread_err ) {
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
-	gpsd_report(&session->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_lock() : %s\n", errbuf);
-    }
+    if ( 0 != pthread_err )
+	ret = PPS_LOCK_ERR;
+    else {
     /*@ +unrecog @*/
-    session->last_fixtime.real = realtime;
-    session->last_fixtime.clock = clocktime;
+	last_fixtime->real = realtime;
+	last_fixtime->clock = clocktime;
+    }
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
-    if ( 0 != pthread_err ) {
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
-	gpsd_report(&session->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
-    }
+    if ( 0 != pthread_err )
+	ret = PPS_UNLOCK_ERR;
     /*@ +unrecog @*/
+
+    return ret;
 }
 
-int pps_thread_lastpps(struct gps_device_t *session, struct timedelta_t *td)
+int pps_thread_lastpps(struct pps_state_t *pps_state, struct timedelta_t *td)
 /* return the delta at the time of the last PPS - only way we pass data out */
 {
     volatile int ret;
@@ -822,22 +820,17 @@ int pps_thread_lastpps(struct gps_device_t *session, struct timedelta_t *td)
 
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_lock(&ppslast_mutex);
-    if ( 0 != pthread_err ) {
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf,(int) sizeof(errbuf));
-	gpsd_report(&session->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_lock() : %s\n", errbuf);
+    if ( 0 != pthread_err ) 
+	ret = PPS_LOCK_ERR;
+    else {
+	/*@ +unrecog @*/
+	*td = pps_state->ppslast;
+	ret = pps_state->ppscount;
     }
-    /*@ +unrecog @*/
-    *td = session->ppslast;
-    ret = session->ppscount;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
-	gpsd_report(&session->context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
+	ret = PPS_UNLOCK_ERR;
     }
     /*@ +unrecog @*/
 
