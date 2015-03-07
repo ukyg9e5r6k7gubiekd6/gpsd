@@ -730,6 +730,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 
 #ifdef TIMEHINT_ENABLE
 		/* IS-GPS-200 Revision E, paragraph 20.3.3.5.2.4 */
+                /* FIXME: only allow LEAPs in June and December */
 		if (((session->context->gps_week % 256) == (unsigned short)subp->sub4_18.WNlsf) &&
 		    /* notify the leap seconds correction in the end of current day */
 		    ((double)((subp->sub4_18.DN - 1) * SECS_PER_DAY) < session->context->gps_tow) &&
