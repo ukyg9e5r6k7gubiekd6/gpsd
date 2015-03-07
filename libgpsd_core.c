@@ -97,25 +97,28 @@ void gpsd_release_reporting_lock(void)
 #endif /* PPS_ENABLE */
 
 #ifndef SQUELCH_ENABLE
-static void visibilize(/*@out@*/char *buf2, size_t len, const char *buf)
+static void visibilize(/*@out@*/char *outbuf, size_t outlen,
+		       const char *inbuf, size_t inlen)
 {
     const char *sp;
 
-    buf2[0] = '\0';
-    for (sp = buf; *sp != '\0' && strlen(buf2)+4 < len; sp++)
+    outbuf[0] = '\0';
+    for (sp = inbuf; sp < inbuf + inlen && strlen(outbuf)+6 < outlen; sp++)
 	if (isprint((unsigned char) *sp) || (sp[0] == '\n' && sp[1] == '\0')
 	  || (sp[0] == '\r' && sp[2] == '\0'))
-	    (void)snprintf(buf2 + strlen(buf2), 2, "%c", *sp);
+	    (void)snprintf(outbuf + strlen(outbuf), 2, "%c", *sp);
 	else
-	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
+	    (void)snprintf(outbuf + strlen(outbuf), 6, "\\x%02x",
 			   0x00ff & (unsigned)*sp);
 }
 #endif /* !SQUELCH_ENABLE */
 
-void gpsd_report(const struct gpsd_errout_t *errout, 
-		 const int errlevel,
-		 const char *fmt, ...)
-/* assemble msg in printf(3) style, use errout hook or syslog for delivery */
+
+static void gpsd_vreport(const struct gpsd_errout_t *errout, 
+			 const int errlevel,
+			 char *outbuf, size_t outlen,
+			 const char *fmt, va_list ap)
+/* assemble msg in vprintf(3) style, use errout hook or syslog for delivery */
 {
 #ifdef SQUELCH_ENABLE
     (void)errout;
@@ -123,9 +126,8 @@ void gpsd_report(const struct gpsd_errout_t *errout,
     (void)fmt;
 #else
     if (errout->debug >= errlevel) {
-	char buf[BUFSIZ], buf2[BUFSIZ];
+	char buf[BUFSIZ];
 	char *err_str;
-	va_list ap;
 
 #if defined(PPS_ENABLE)
 	gpsd_acquire_reporting_lock();
@@ -169,23 +171,35 @@ void gpsd_report(const struct gpsd_errout_t *errout,
 	(void)strlcpy(buf, errout->label, sizeof(buf));
 	(void)strlcat(buf, ":", sizeof(buf));
 	(void)strlcat(buf, err_str, sizeof(buf));
-	va_start(ap, fmt);
 	str_vappendf(buf, sizeof(buf), fmt, ap);
-	va_end(ap);
 
-	visibilize(buf2, sizeof(buf2), buf);
+	visibilize(outbuf, outlen, buf, strlen(buf));
 
 	if (getpid() == getsid(getpid()))
-	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", buf2);
+	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", outbuf);
 	else if (errout->report != NULL)
-	    errout->report(buf2);
+	    errout->report(outbuf);
 	else
-	    (void)fputs(buf2, stderr);
+	    (void)fputs(outbuf, stderr);
 #if defined(PPS_ENABLE)
 	gpsd_release_reporting_lock();
 #endif /* PPS_ENABLE */
     }
 #endif /* !SQUELCH_ENABLE */
+}
+
+void gpsd_report(const struct gpsd_errout_t *errout, 
+		 const int errlevel,
+		 const char *fmt, ...)
+/* assemble msg in printf(3) style, use errout hook or syslog for delivery */
+{
+    char buf[BUFSIZ];
+    va_list ap;
+
+    buf[0] = '\0';
+    va_start(ap, fmt);
+    gpsd_vreport(errout, errlevel, buf, sizeof(buf), fmt, ap);
+    va_end(ap);
 }
 
 const char *gpsd_prettydump(struct gps_device_t *session)
