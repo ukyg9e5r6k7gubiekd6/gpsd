@@ -790,9 +790,9 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			"------------------- PPS offset: %.20s ------\n ",
 			timedelta_str);
 	    /* coverity[missing_lock] */
-	    session.ppslast = noclobber.pps;
+	    session.pps_thread.ppsout_last = noclobber.pps;
 	    /* coverity[missing_lock] */
-	    session.ppscount++;
+	    session.pps_thread.ppsout_count++;
 	}
     }
     else
@@ -847,8 +847,10 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
      * and it is a new second. */
     if ( 0 != isnan(device->newdata.time)) {
 	// "NTP: bad new time
-    } else if (device->newdata.time == device->last_fixtime.real) {
+#ifdef PPS_ENABLE
+    } else if (device->newdata.time == device->pps_thread.fixin_real) {
 	// "NTP: Not a new time
+#endif /* PPS_ENABLE */
     } else 
 	ntp_latch(device, &time_offset);
 #endif /* NTP_ENABLE */
@@ -1316,7 +1318,7 @@ int main(int argc, char **argv)
 
 	/* this guard suppresses a warning on Bluetooth devices */
 	if (session.sourcetype == source_rs232 || session.sourcetype == source_usb) {
-	    session.thread_report_hook = pps_report;
+	    session.pps_thread.report_hook = pps_report;
 	    pps_thread_activate(&session);
 	}
 #endif /* PPS_ENABLE */

@@ -114,7 +114,7 @@ static int init_kernel_pps(struct gps_device_t *session)
     char path[GPS_PATH_MAX] = "";
 #endif
 
-    session->kernelpps_handle = -1;
+    session->pps_thread.kernelpps_handle = -1;
     if ( isatty(session->gpsdata.gps_fd) == 0 ) {
 	gpsd_report(&session->context->errout, LOG_INF, "KPPS gps_fd not a tty\n");
     	return -1;
@@ -218,7 +218,7 @@ static int init_kernel_pps(struct gps_device_t *session)
 
     /* RFC 2783 implies the time_pps_setcap() needs priviledges *
      * keep root a tad longer just in case */
-    if ( 0 > time_pps_create(ret, &session->kernelpps_handle )) {
+    if ( 0 > time_pps_create(ret, (pps_handle_t *)&session->pps_thread.kernelpps_handle )) {
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	gpsd_report(&session->context->errout, LOG_INF,
@@ -230,7 +230,7 @@ static int init_kernel_pps(struct gps_device_t *session)
     	/* have kernel PPS handle */
         int caps;
 	/* get features  supported */
-        if ( 0 > time_pps_getcap(session->kernelpps_handle, &caps)) {
+        if ( 0 > time_pps_getcap(session->pps_thread.kernelpps_handle, &caps)) {
 	    gpsd_report(&session->context->errout, LOG_ERROR,
 			"KPPS time_pps_getcap() failed\n");
         } else {
@@ -250,12 +250,12 @@ static int init_kernel_pps(struct gps_device_t *session)
 #endif
 #endif /* S_SPLINT_S */
 
-        if ( 0 > time_pps_setparams(session->kernelpps_handle, &pp)) {
+        if ( 0 > time_pps_setparams(session->pps_thread.kernelpps_handle, &pp)) {
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	    gpsd_report(&session->context->errout, LOG_ERROR,
 		"KPPS time_pps_setparams() failed: %s\n", errbuf);
-	    time_pps_destroy(session->kernelpps_handle);
+	    time_pps_destroy(session->pps_thread.kernelpps_handle);
 	    return -1;
         }
     }
@@ -313,7 +313,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * ntpshm and chrony_send
      */
 
-    while (session->thread_report_hook != NULL 
+    while (session->pps_thread.report_hook != NULL 
            || session->context->pps_hook != NULL) {
 	bool ok = false;
 #ifndef S_SPLINT_S
@@ -350,8 +350,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    "PPS: pthread_mutex_lock() : %s\n", errbuf);
 	}
 	/*@ +unrecog @*/
-	last_fixtime_real = session->last_fixtime.real;
-	last_fixtime_clock = session->last_fixtime.clock;
+	last_fixtime_real = session->pps_thread.fixin_real;
+	last_fixtime_clock = session->pps_thread.fixin_clock;
 	/*@ -unrecog (splint has no pthread declarations as yet) @*/
 	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
 	if ( 0 != pthread_err ) {
@@ -407,7 +407,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	ok = false;  
 	log = NULL;  
 #if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
-        if ( 0 <= session->kernelpps_handle ) {
+        if ( 0 <= session->pps_thread.kernelpps_handle ) {
 	    struct timespec kernelpps_tv;
 	    /* on a quad core 2.4GHz Xeon using KPPS timestamp instead of plain 
              * PPS timestamp removes about 20uS of latency, and about +/-5uS 
@@ -432,7 +432,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    kernelpps_tv.tv_sec = 1;
 	    kernelpps_tv.tv_nsec = 0;
 #endif
-	    if ( 0 > time_pps_fetch(session->kernelpps_handle, PPS_TSFMT_TSPEC
+	    if ( 0 > time_pps_fetch(session->pps_thread.kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
 		gpsd_report(&session->context->errout, LOG_ERROR,
 			    "KPPS kernel PPS failed\n");
@@ -633,7 +633,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 			"PPS edge accepted %.100s", log);
 #ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
-            if ( 0 <= session->kernelpps_handle && ok_kpps) {
+            if ( 0 <= session->pps_thread.kernelpps_handle && ok_kpps) {
 		/* use KPPS time */
 		gpsd_report(&session->context->errout, LOG_RAW,
 			    "KPPS using edge %d", edge_kpps );
@@ -688,8 +688,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    } else {
 		/*@-compdef@*/
 		last_second_used = last_fixtime_real;
-		if (session->thread_report_hook != NULL) 
-		    log1 = session->thread_report_hook(session, &ppstimes);
+		if (session->pps_thread.report_hook != NULL) 
+		    log1 = session->pps_thread.report_hook(session, &ppstimes);
 		else
 		    log1 = "no report hook";
 		if (session->context->pps_hook != NULL)
@@ -704,9 +704,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
-		session->ppslast = ppstimes;
+		session->pps_thread.ppsout_last = ppstimes;
 		/*@+type@*/
-		session->ppscount++;
+		session->pps_thread.ppsout_count++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
 		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
                 if ( 0 != pthread_err ) {
@@ -740,14 +740,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	}
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
-    if (session->kernelpps_handle > 0) {
+    if (session->pps_thread.kernelpps_handle > 0) {
 	gpsd_report(&session->context->errout, LOG_PROG, 
             "PPS descriptor cleaned up\n");
-	(void)time_pps_destroy(session->kernelpps_handle);
+	(void)time_pps_destroy(session->pps_thread.kernelpps_handle);
     }
 #endif
-    if (session->thread_wrap_hook != NULL)
-	session->thread_wrap_hook(session);
+    if (session->pps_thread.wrap_hook != NULL)
+	session->pps_thread.wrap_hook(session);
     gpsd_report(&session->context->errout, LOG_PROG, 
          "PPS gpsd_ppsmonitor exited.\n");
     return NULL;
@@ -766,7 +766,7 @@ void pps_thread_activate(struct gps_device_t *session)
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* some operations in init_kernel_pps() require root privs */
     (void)init_kernel_pps( session );
-    if ( 0 <= session->kernelpps_handle ) {
+    if ( 0 <= session->pps_thread.kernelpps_handle ) {
 	gpsd_report(&session->context->errout, LOG_WARN,
 		    "KPPS kernel PPS will be used\n");
     }
@@ -782,7 +782,7 @@ void pps_thread_deactivate(struct gps_device_t *session)
 /* cleanly terminate PPS thread */
 {
     /*@-nullstate -mustfreeonly@*/
-    session->thread_report_hook = NULL;
+    session->pps_thread.report_hook = NULL;
     session->context->pps_hook = NULL;
     /*@+nullstate +mustfreeonly@*/
 }
@@ -800,8 +800,8 @@ void pps_thread_stash_fixtime(struct gps_device_t *session,
 		"PPS: pthread_mutex_lock() : %s\n", errbuf);
     }
     /*@ +unrecog @*/
-    session->last_fixtime.real = realtime;
-    session->last_fixtime.clock = clocktime;
+    session->pps_thread.fixin_real = realtime;
+    session->pps_thread.fixin_clock = clocktime;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
@@ -829,8 +829,8 @@ int pps_thread_lastpps(struct gps_device_t *session, struct timedelta_t *td)
 		"PPS: pthread_mutex_lock() : %s\n", errbuf);
     }
     /*@ +unrecog @*/
-    *td = session->ppslast;
-    ret = session->ppscount;
+    *td = session->pps_thread.ppsout_last;
+    ret = session->pps_thread.ppsout_count;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {

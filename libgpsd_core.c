@@ -317,12 +317,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 /* initialize GPS polling */
 {
     /* clear some times */
-    session->last_fixtime.real = 0.0;
-    /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
-    /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
 #ifdef PPS_ENABLE
-    memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
-    session->ppscount = 0;
+    memset((void *)&session->pps_thread, '\0', sizeof(session->pps_thread));
 #endif /* PPS_ENABLE */
 
     /*@ -mayaliasunique @*/
@@ -389,7 +385,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 			     "DEACTIVATE");
 #ifdef PPS_ENABLE
     /*@-mustfreeonly@*/
-    session->thread_report_hook = NULL;	/* tell any PPS-watcher thread to die */
+    session->pps_thread.report_hook = NULL; /* tell any PPS-watcher thread to die */
 #endif /* PPS_ENABLE */
     /*@-mustfreeonly@*/
     /* mark it inactivated */
@@ -415,13 +411,9 @@ void gpsd_clear(struct gps_device_t *session)
 
     /* clear the private data union */
     memset( (void *)&session->driver, '\0', sizeof(session->driver));
-    /* clear some times */
-    session->last_fixtime.real = 0.0;
-    /*@i2@*/session->last_fixtime.clock.tv_sec = 0;
-    /*@i2@*/session->last_fixtime.clock.tv_nsec = 0;
 #ifdef PPS_ENABLE
-    memset( (void *)&session->ppslast, 0, sizeof(session->ppslast));
-    session->ppscount = 0;
+    /* clear some times */
+    memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
 #endif /* PPS_ENABLE */
 
     session->opentime = timestamp();

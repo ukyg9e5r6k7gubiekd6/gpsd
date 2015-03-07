@@ -458,6 +458,22 @@ struct ntrip_stream_t
     int bitrate;
 };
 
+#ifdef PPS_ENABLE
+struct pps_thread_t {
+    timestamp_t fixin_real;
+    struct timespec fixin_clock; /* system clock time when last fix received */
+#if defined(HAVE_SYS_TIMEPPS_H)
+    pps_handle_t kernelpps_handle;
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
+    int chronyfd;			/* for talking to chrony */
+    /*@null@*/ char *(*report_hook)(struct gps_device_t *,
+				    struct timedelta_t *);
+    /*@null@*/ void (*wrap_hook)(struct gps_device_t *);
+    struct timedelta_t ppsout_last;
+    int ppsout_count;
+};
+#endif /* PPS_ENABLE */
+
 struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
@@ -499,22 +515,8 @@ struct gps_device_t {
     volatile /*@null@*/ struct shmTime *shm_pps;
 # endif /* PPS_ENABLE */
 #endif /* NTP_ENABLE */
-    volatile struct {
-	timestamp_t real;
-        /* clock must be a timespec as it is in nSec and
-         * a timestamp_t will lose precision */
-	struct timespec clock; /* system clock time when last fix received */
-    } last_fixtime;	/* so updates happen once */
 #ifdef PPS_ENABLE
-#if defined(HAVE_SYS_TIMEPPS_H)
-    pps_handle_t kernelpps_handle;
-#endif /* defined(HAVE_SYS_TIMEPPS_H) */
-    int chronyfd;			/* for talking to chrony */
-    /*@null@*/ char *(*thread_report_hook)(struct gps_device_t *,
-					   struct timedelta_t *);
-    /*@null@*/ void (*thread_wrap_hook)(struct gps_device_t *);
-    volatile struct timedelta_t ppslast;
-    volatile int ppscount;
+    volatile struct pps_thread_t pps_thread;
 #endif /* PPS_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
     bool back_to_nmea;			/* back to NMEA on revert? */
