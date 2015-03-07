@@ -47,7 +47,7 @@ struct shmTime /*@null@*/ *shm_get(const int unit, const bool create, const bool
 }
 
 /*@-statictrans@*/
-char *shm_name(const int unit)
+char *ntp_name(const int unit)
 /* return the name of a specified segment */
 {
     static char name[5] = "NTP\0";
@@ -58,7 +58,7 @@ char *shm_name(const int unit)
 }
 /*@+statictrans@*/
 
-enum segstat_t shm_query(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_stat_t *shm_stat, const bool consume)
+enum segstat_t ntp_read(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_stat_t *shm_stat, const bool consume)
 /* try to grab a sample from the specified SHM segment */
 {
     volatile struct shmTime shmcopy, *shm = shm_in;

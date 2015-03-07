@@ -66,10 +66,21 @@ struct shm_stat_t {
     int leap;
 };
 
+#ifndef HAVE_TIMEDELTA
+
+struct timedelta_t {
+    struct timespec	real;
+    struct timespec	clock;
+};
+
+#define HAVE_TIMEDELTA
+#endif /* HAVE_TIMEDELTA */
+
 struct shmTime /*@null@*/ *shm_get(int, bool, bool);
-extern char *shm_name(const int);
-enum segstat_t shm_query(/*@null@*/struct shmTime *, 
+extern char *ntp_name(const int);
+enum segstat_t ntp_read(/*@null@*/struct shmTime *, 
 			 /*@out@*/struct shm_stat_t *,
 			 const bool);
+void ntp_write(volatile struct shmTime *, struct timedelta_t *, int, int);
 
 /* end */

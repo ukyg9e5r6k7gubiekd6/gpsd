@@ -838,6 +838,7 @@ libgps_sources = [
     "libgps_sock.c",
     "netlib.c",
     "ntpshmread.c",
+    "ntpshmwrite.c",
     "rtcm2_json.c",
     "rtcm3_json.c",
     "shared_json.c",
@@ -1023,7 +1024,7 @@ gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
 
 # Source groups
 
-gpsd_sources = ['gpsd.c','ntpshmwrite.c','shmexport.c','dbusexport.c']
+gpsd_sources = ['gpsd.c','timehint.c', 'shmexport.c','dbusexport.c']
 
 if env['systemd']:
     gpsd_sources.append("sd_socket.c")

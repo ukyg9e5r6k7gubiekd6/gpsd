@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	struct shm_stat_t	shm_stat;
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
-	    enum segstat_t status = shm_query(segments[i], &shm_stat, false);
+	    enum segstat_t status = ntp_read(segments[i], &shm_stat, false);
 	    if (verbose)
 		fprintf(stderr, "unit %d status %d\n", i, status);
 	    switch(status)
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 		/*@-type@*//* splint is confused about struct timespec */
 		if (shm_stat.tvc.tv_sec != tick[i].tv_sec || shm_stat.tvc.tv_nsec != tick[i].tv_nsec) {
 		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
-			   shm_name(i),
+			   ntp_name(i),
 			   shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
 			   shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
 			   shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 	    case BAD_MODE:
 		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpshmmon: unknown mode %d on segment %s\n",
-			shm_stat.status, shm_name(i));
+			shm_stat.status, ntp_name(i));
 		/*@+mustfreefresh@*/
 		break;
 	    case CLASH:
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 	    default:
 		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
-			status, shm_name(i));
+			status, ntp_name(i));
 		/*@+mustfreefresh@*/
 		break;
 	    }

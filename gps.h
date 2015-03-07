@@ -1883,10 +1883,13 @@ struct policy_t {
     char remote[GPS_PATH_MAX];		/* ...if this was passthrough */
 };
 
+#ifndef HAVE_TIMEDELTA
 struct timedelta_t {
     struct timespec	real;
     struct timespec	clock;
 };
+#define HAVE_TIMEDELTA
+#endif /* HAVE_TIMEDELTA */
 
 /* difference between timespecs in nanoseconds */
 /* int is too small, avoid floats  */
