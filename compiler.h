@@ -7,6 +7,23 @@
 #ifndef _GPSD_COMPILER_H_
 #define _GPSD_COMPILER_H_
 
+/*
+ * Tell GCC that we want thread-safe behavior with _REENTRANT;
+ * in particular, errno must be thread-local.
+ * Tell POSIX-conforming implementations with _POSIX_THREAD_SAFE_FUNCTIONS.
+ * See http://www.unix.org/whitepapers/reentrant.html
+ */
+#ifndef _REENTRANT
+#define _REENTRANT
+#endif
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+#define _POSIX_THREAD_SAFE_FUNCTIONS
+#endif
+
+#ifdef _WIN32
+typedef unsigned int speed_t;
+#endif
+
 #include "gpsd_config.h"	/* is HAVE_STDATOMIC defined? */
 
 /* Macro for declaring function with printf-like arguments. */
