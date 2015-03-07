@@ -130,23 +130,23 @@ static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *cont
     shmid = shmget((key_t) (NTPD_BASE + unit),
 		   sizeof(struct shmTime), (int)(IPC_CREAT | perms));
     if (shmid == -1) {
-	gpsd_report(&context->errout, LOG_ERROR,
-		    "NTPD shmget(%ld, %zd, %o) fail: %s\n",
-		    (long int)(NTPD_BASE + unit), sizeof(struct shmTime),
-		    (int)perms, strerror(errno));
+	gpsd_log(&context->errout, LOG_ERROR,
+		 "NTPD shmget(%ld, %zd, %o) fail: %s\n",
+		 (long int)(NTPD_BASE + unit), sizeof(struct shmTime),
+		 (int)perms, strerror(errno));
 	return NULL;
     }
     p = (struct shmTime *)shmat(shmid, 0, 0);
     /*@ -mustfreefresh */
     if ((int)(long)p == -1) {
-	gpsd_report(&context->errout, LOG_ERROR,
-		    "NTPD shmat failed: %s\n",
-		    strerror(errno));
+	gpsd_log(&context->errout, LOG_ERROR,
+		 "NTPD shmat failed: %s\n",
+		 strerror(errno));
 	return NULL;
     }
-    gpsd_report(&context->errout, LOG_PROG,
-		"NTPD shmat(%d,0,0) succeeded, segment %d\n",
-		shmid, unit);
+    gpsd_log(&context->errout, LOG_PROG,
+	     "NTPD shmat(%d,0,0) succeeded, segment %d\n",
+	     shmid, unit);
     return p;
     /*@ +mustfreefresh */
 }
@@ -233,7 +233,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     int precision = -1; /* default precision */
 
     if (shmseg == NULL) {
-	gpsd_report(&session->context->errout, LOG_RAW, "NTPD missing shm\n");
+	gpsd_log(&session->context->errout, LOG_RAW, "NTPD missing shm\n");
 	return 0;
     }
 
@@ -249,11 +249,11 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     /*@-type@*/ /* splint is confused about struct timespec */
     timespec_str( &td->real, real_str, sizeof(real_str) );
     timespec_str( &td->clock, clock_str, sizeof(clock_str) );
-    gpsd_report(&session->context->errout, LOG_RAW,
-		"NTP ntpshm_put(%s %s) %s @ %s\n",
-		session->gpsdata.dev.path,
-		(precision == -20) ? "pps" : "clock", 
-		real_str, clock_str);
+    gpsd_log(&session->context->errout, LOG_RAW,
+	     "NTP ntpshm_put(%s %s) %s @ %s\n",
+	     session->gpsdata.dev.path,
+	     (precision == -20) ? "pps" : "clock", 
+	     real_str, clock_str);
     /*@+type@*/
 
     return 1;
@@ -292,16 +292,16 @@ static void init_hook(struct gps_device_t *session)
     }
 
     if (access(chrony_path, F_OK) != 0) {
-	gpsd_report(&session->context->errout, LOG_PROG,
-		    "PPS chrony socket %s doesn't exist\n", chrony_path);
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "PPS chrony socket %s doesn't exist\n", chrony_path);
     } else {
 	session->pps_thread.chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
 	if (session->pps_thread.chronyfd < 0)
-	    gpsd_report(&session->context->errout, LOG_PROG,
-		"PPS connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
-		chrony_path, session->pps_thread.chronyfd, errno, strerror(errno));
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "PPS connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
+		     chrony_path, session->pps_thread.chronyfd, errno, strerror(errno));
 	else
-	    gpsd_report(&session->context->errout, LOG_RAW,
+	    gpsd_log(&session->context->errout, LOG_RAW,
 			"PPS using chrony socket: %s\n", chrony_path);
     }
 }
@@ -338,9 +338,9 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     /*@-type@*/ /* splint is confused about struct timespec */
     timespec_str( &td->real, real_str, sizeof(real_str) );
     timespec_str( &td->clock, clock_str, sizeof(clock_str) );
-    gpsd_report(&session->context->errout, LOG_RAW,
-		"PPS chrony_send %s @ %s Offset: %0.9f\n",
-		real_str, clock_str, sample.offset);
+    gpsd_log(&session->context->errout, LOG_RAW,
+	     "PPS chrony_send %s @ %s Offset: %0.9f\n",
+	     real_str, clock_str, sample.offset);
     /*@+type@*/
     (void)send(session->pps_thread.chronyfd, &sample, sizeof (sample), 0);
 }
@@ -414,8 +414,8 @@ void ntpshm_link_activate(struct gps_device_t *session)
     session->shm_clock = ntpshm_alloc(session->context);
 
     if (session->shm_clock == NULL) {
-	gpsd_report(&session->context->errout, LOG_INF, 
-                    "NTPD ntpshm_alloc() failed\n");
+	gpsd_log(&session->context->errout, LOG_INF, 
+		 "NTPD ntpshm_alloc() failed\n");
 #if defined(PPS_ENABLE)
     } else if (session->sourcetype == source_usb || session->sourcetype == source_rs232) {
 	/* We also have the 1pps capability, allocate a shared-memory segment
@@ -423,8 +423,8 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	 * transitions
 	 */
 	if ((session->shm_pps = ntpshm_alloc(session->context)) == NULL) {
-	    gpsd_report(&session->context->errout, LOG_INF, 
-                        "NTPD ntpshm_alloc(1) failed\n");
+	    gpsd_log(&session->context->errout, LOG_INF, 
+		     "NTPD ntpshm_alloc(1) failed\n");
 	} else {
 	    init_hook(session);
 	    session->pps_thread.report_hook = report_hook;

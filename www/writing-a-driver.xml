@@ -15,6 +15,16 @@
 
 <revhistory>
    <revision>
+      <revnumber>1.15</revnumber>
+      <date>7 Mar 2015</date>
+      <authorinitials>er</authorinitials>
+      <revremark>
+	 Updated by esr; track a function rename. Text now fibs about
+	 the original author thought the name was in order to avoid
+	 confusing current readers.
+      </revremark>
+   </revision>
+   <revision>
       <revnumber>1.13</revnumber>
       <date>25 Aug 2014</date>
       <authorinitials>er</authorinitials>
@@ -367,9 +377,10 @@ to experiment with the different commands and to swap between
 the three modes (Oncore/Jupiter/NMEA). This is crude, but I found it hard
 to get the right results with <function>minicom</function>.</para>
 
+<!-- ESR: gpsd_log had a different name when this was written -->
 <para>To return to the development, I liberally
 sprinkled the driver code with <quote>
-<function>gpsd_report</function></quote> statements set
+<function>gpsd_log</function></quote> statements set
 to trigger at the lowest level of debugging and invoked the
 daemon in <quote>non-daemon</quote> mode with
 debugging set to LOG_WARN. This made sure that I could watch
@@ -817,8 +828,9 @@ the routines such as
 <structfield>.trigger</structfield> along with some status
 requests.</para>
 
+<!-- ESR: gpsd_log had a different name when this was written -->
 <para>As I hinted earlier, I found that support code like <quote>
-<userinput>gpsd_report(LOG_WARN, "satellites tracked = %d, seen =
+<userinput>gpsd_log(..., LOG_WARN, "satellites tracked = %d, seen =
 %d\n", tracked, seen);</userinput></quote> was very helpful in the
 early stages. Once the driver reached a production stage, much of the
 support code was removed and that which was retained had the first
@@ -934,8 +946,9 @@ I looped again if the timer had not expired. If I encountered an
 error when reading the port I exited. All exits returned a
 success/fail value.</para>
 
+<!-- ESR: gpsd_log had a different name when this was written -->
 <para>This worked better, but still failed occasionally. I then used
-the <quote><function>gpsd_report</function></quote> to check the
+the <quote><function>gpsd_log</function></quote> to check the
 error returned and I saw that I was getting lots of <quote>EAGAIN</quote>
 errors. This suggested that the port was not able to handle all my
 read requests, so I suspected the rate of reading was too fast. Not knowing

@@ -1,4 +1,4 @@
-<sect1 id="gpsd_report.c"><title><filename>report.c</filename></title>
+<sect1 id="gpsd_log.c"><title><filename>libgpsd_core.c</filename></title>
 <informaltable frame='all' pgwide='1'>
 <tgroup cols='2'>
 <colspec colname='c1'></colspec>
@@ -13,15 +13,16 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on code as of Mon Apr 5 21:38:06 2010 -0400</entry>
+  <entry spanname='s1' align='left'>Notes based on code as of Sat Mar  7 10:11:55 EST 2015</entry>
 </row>
 </tfoot>
 
 <tbody>
 <row>
-  <entry><function>void gpsd_report(int errlevel UNUSED, const char *fmt, ... )</function></entry>
-  <entry><para>Provides the outputting of strings to stderr for anyone
-  who needs it. Used extensively by many functions to report errors or
+  <entry><function>void gpsd_log(struct gpsd_errout_t, int errlevel, const char *fmt, ... )</function></entry>
+  <entry><para>Provides the outputting of strings to stderr or through a
+  specified hook function in the errout structure for anyone
+  who needs it. Used extensively by many functions to log errors or
   progress. Responds according to the <function>errlevel</function>
   argument, which is filled by the DEBUG command line argument, so
   that the verbosity of output is conditional on the user's wishes at

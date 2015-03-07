@@ -619,9 +619,9 @@ In major versions before 5:
   'poll()' will at some point be reintroduced as an interface to the
   wire-protocol POLL command.
 
-* Clients needed to define a gpsd_report() function for client-side logging
-  if they didn't want code in netlib.c and libgps_core.c to occasionally
-  send messages to stderr.  This requirement is now gone.
+* Clients needed to define a hook for client-side logging if they
+  didn't want code in netlib.c and libgps_core.c to occasionally send
+  messages to stderr.  This requirement is now gone.
 
 * There was a set_raw_hook() method in the C and Python bindings, now gone.
   C clients should call gps_data(); the buffer is available directly in Python.

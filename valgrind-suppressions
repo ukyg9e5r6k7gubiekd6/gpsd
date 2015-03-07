@@ -5,7 +5,7 @@
    Memcheck:Cond
    fun:strlen
    fun:vsnprintf
-   fun:gpsd_report
+   fun:gpsd_log
    fun:main
 }
 {
@@ -13,7 +13,7 @@
    Memcheck:Value8
    fun:vfprintf
    fun:vsnprintf
-   fun:gpsd_report
+   fun:gpsd_log
    fun:sirf_parse
    fun:sirfbin_parse_input
    fun:gpsd_poll

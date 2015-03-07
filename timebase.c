@@ -223,8 +223,8 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
     context->rollovers = (int)((context->start_time-GPS_EPOCH) / GPS_ROLLOVER);
 
     if (context->start_time < GPS_EPOCH)
-	gpsd_report(&context->errout, LOG_ERROR,
-		    "system time looks bogus, dates may not be reliable.\n");
+	gpsd_log(&context->errout, LOG_ERROR,
+		 "system time looks bogus, dates may not be reliable.\n");
     else {
 	/* we've forced the UTC timezone, so this is actually UTC */
 	struct tm *now = localtime(&context->start_time);
@@ -236,9 +236,9 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 	now->tm_year += 1900;
 	context->century = now->tm_year - (now->tm_year % 100);
 	(void)unix_to_iso8601((timestamp_t)context->start_time, scr, sizeof(scr));
-	gpsd_report(&context->errout, LOG_INF,
-		    "startup at %s (%d)\n",
-		    scr, (int)context->start_time);
+	gpsd_log(&context->errout, LOG_INF,
+		 "startup at %s (%d)\n",
+		 scr, (int)context->start_time);
     }
 }
 
@@ -291,9 +291,9 @@ timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
     if (session->newdata.time < (timestamp_t)session->context->start_time) {
 	char scr[128];
 	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
-	gpsd_report(&session->context->errout, LOG_WARN,
-		    "GPS week rollover makes time %s (%f) invalid\n",
-		    scr, session->newdata.time);
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "GPS week rollover makes time %s (%f) invalid\n",
+		 scr, session->newdata.time);
     }
 
     return t;
@@ -310,16 +310,16 @@ void gpsd_century_update(/*@in@*/struct gps_device_t *session, int century)
 	 * certainly it means that a century mark has passed while
 	 * gpsd was running, and we should trust the new ZDA year.
 	 */
-	gpsd_report(&session->context->errout, LOG_WARN,
-		    "century rollover detected.\n");
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "century rollover detected.\n");
 	session->context->century = century;
     } else if (session->context->start_time >= GPS_EPOCH && century < session->context->century) {
 	/*
 	 * This looks like a GPS week-counter rollover.
 	 */
-	gpsd_report(&session->context->errout, LOG_WARN,
-		    "ZDA year less than clock year, "
-		    "probable GPS week rollover lossage\n");
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "ZDA year less than clock year, "
+		 "probable GPS week rollover lossage\n");
 	session->context->valid &=~ CENTURY_VALID;
     }
 }
@@ -338,8 +338,8 @@ timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
      * to 13 bits.
      */
     if ((int)week < (session->context->gps_week & 0x3ff)) {
-	gpsd_report(&session->context->errout, LOG_INF,
-		    "GPS week 10-bit rollover detected.\n");
+	gpsd_log(&session->context->errout, LOG_INF,
+		 "GPS week 10-bit rollover detected.\n");
 	++session->context->rollovers;
     }
 

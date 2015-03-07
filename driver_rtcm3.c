@@ -97,8 +97,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
     rtcm->length = (uint)ugrab(10);
     rtcm->type = (uint)ugrab(12);
 
-    gpsd_report(&context->errout, LOG_RAW, "RTCM3: type %d payload length %d\n",
-		rtcm->type, rtcm->length);
+    gpsd_log(&context->errout, LOG_RAW, "RTCM3: type %d payload length %d\n",
+	     rtcm->type, rtcm->length);
 
     switch (rtcm->type) {
     case 1001:			/* GPS Basic RTK, L1 Only */

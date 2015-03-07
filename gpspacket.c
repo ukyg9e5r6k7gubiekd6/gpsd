@@ -25,8 +25,8 @@ void errout_reset(struct gpsd_errout_t *errout)
     errout->report = basic_report;
 }
 
-void gpsd_report(const struct gpsd_errout_t *errout UNUSED, 
-		 int errlevel, const char *fmt, ... )
+void gpsd_log(const struct gpsd_errout_t *errout UNUSED,
+	      int errlevel, const char *fmt, ... )
 {
     char buf[BUFSIZ];
     PyObject *args;

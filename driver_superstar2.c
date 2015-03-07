@@ -57,10 +57,9 @@ superstar2_msg_ack(struct gps_device_t *session,
 		   unsigned char *buf, size_t data_len)
 {
     if (data_len == 11)
-	gpsd_report(&session->context->errout, LOG_PROG,
-		    "superstar2 #126 - "
-		    "ACK %d %d %d %d %d\n",
-		    buf[5], buf[6], buf[7], buf[8], buf[9]);
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "superstar2 #126 - ACK %d %d %d %d %d\n",
+		 buf[5], buf[6], buf[7], buf[8], buf[9]);
     return 0;
 }
 
@@ -83,8 +82,8 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     if (data_len != 77)
 	return 0;
 
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"superstar2 #20 - user navigation data\n");
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "superstar2 #20 - user navigation data\n");
     mask = 0;
 
     /*@ +charint @*/
@@ -146,20 +145,22 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     }
 
     mask |= MODE_SET | STATUS_SET;
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"NAVSOL_LLA: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f hdop=%.2f used=%d\n",
-		session->newdata.time,
-		session->newdata.latitude,
-		session->newdata.longitude,
-		session->newdata.altitude,
-		session->newdata.track,
-		session->newdata.speed,
-		session->newdata.climb,
-		session->newdata.mode,
-		session->gpsdata.status,
-		session->gpsdata.dop.hdop,
-		session->gpsdata.dop.vdop,
-		session->gpsdata.satellites_used);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "NAVSOL_LLA: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f "
+	     "speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f hdop=%.2f "
+	     "used=%d\n",
+	     session->newdata.time,
+	     session->newdata.latitude,
+	     session->newdata.longitude,
+	     session->newdata.altitude,
+	     session->newdata.track,
+	     session->newdata.speed,
+	     session->newdata.climb,
+	     session->newdata.mode,
+	     session->gpsdata.status,
+	     session->gpsdata.dop.hdop,
+	     session->gpsdata.dop.vdop,
+	     session->gpsdata.satellites_used);
     return mask;
 }
 
@@ -175,8 +176,8 @@ superstar2_msg_svinfo(struct gps_device_t *session,
     if (data_len != 67)
 	return 0;
 
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"superstar2 #33 - satellite data\n");
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "superstar2 #33 - satellite data\n");
 
     nchan = 12;
     gpsd_zero_satellites(&session->gpsdata);
@@ -206,10 +207,10 @@ superstar2_msg_svinfo(struct gps_device_t *session,
     session->gpsdata.skyview_time = NAN;
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
-		session->gpsdata.satellites_visible,
-		session->gpsdata.satellites_used);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "SVINFO: visible=%d used=%d mask={SATELLITE|USED}\n",
+	     session->gpsdata.satellites_visible,
+	     session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_IS;
 }
 
@@ -231,14 +232,13 @@ superstar2_msg_version(struct gps_device_t *session,
     (void)snprintf(boot_sw, 15, "%s", (char *)buf + 36);
     (void)snprintf(ser_num, 14, "%s", (char *)buf + 73);
 
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"superstar2 #45 - "
-		"hw part %s boot sw %s main sw %s ser num %s\n",
-		hw_part, boot_sw, main_sw, ser_num);
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "superstar2 #45 - hw part %s boot sw %s main sw %s ser num %s\n",
+	     hw_part, boot_sw, main_sw, ser_num);
     (void)strlcpy(session->subtype, main_sw, sizeof(session->subtype));
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"VERSION: subtype='%s' mask={DEVEICEID}\n",
-		session->subtype);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "VERSION: subtype='%s' mask={DEVEICEID}\n",
+	     session->subtype);
     return DEVICEID_SET;
 }
 
@@ -255,8 +255,8 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
     if (data_len != 65)
 	return 0;
 
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"superstar2 #113 - timing status\n");
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "superstar2 #113 - timing status\n");
     /*@ +charint @*/
     if ((getub(buf, 55) & 0x30) != 0)
 	mask = 0;
@@ -278,9 +278,9 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 	session->context->leap_seconds = (int)getsb(buf, 20);
 	mask = TIME_SET | PPSTIME_IS;
     }
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"TIMING: time=%.2f mask={TIME}\n",
-		session->newdata.time);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "TIMING: time=%.2f mask={TIME}\n",
+	     session->newdata.time);
     return mask;
 }
 
@@ -295,13 +295,13 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
     int i, n;
     double t;
 
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"superstar2 #23 - measurement block\n");
-
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "superstar2 #23 - measurement block\n");
+    
     n = (int)getub(buf, 6);	/* number of measurements */
     if ((n < 1) || (n > MAXCHANNELS)) {
-	gpsd_report(&session->context->errout, LOG_INF,
-		    "too many measurements\n");
+	gpsd_log(&session->context->errout, LOG_INF,
+		 "too many measurements\n");
 	return 0;
     }
     t = getled64((char *)buf, 7);		/* measurement time */
@@ -341,9 +341,9 @@ superstar2_msg_iono_utc(struct gps_device_t *session, unsigned char *buf,
 
     i = (unsigned int)getub(buf, 12);
     u = (unsigned int)getub(buf, 21);
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"superstar2 #75 - ionospheric & utc data: iono %s utc %s\n",
-		i ? "ok" : "bad", u ? "ok" : "bad");
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "superstar2 #75 - ionospheric & utc data: iono %s utc %s\n",
+	     i ? "ok" : "bad", u ? "ok" : "bad");
     session->driver.superstar2.last_iono = time(NULL);
 
     return 0;
@@ -359,8 +359,8 @@ superstar2_msg_ephemeris(struct gps_device_t *session, unsigned char *buf,
 {
     unsigned int prn;
     prn = (unsigned int)(getub(buf, 4) & 0x1f);
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"superstar2 #22 - ephemeris data - prn %u\n", prn);
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "superstar2 #22 - ephemeris data - prn %u\n", prn);
 
     /* ephemeris data updates fairly slowly, but when it does, poll UTC */
     if ((time(NULL) - session->driver.superstar2.last_iono) > 60)
@@ -382,9 +382,9 @@ superstar2_write(struct gps_device_t *session, char *msg, size_t msglen)
     c += 0x100;
     msg[(int)msg[3] + 4] = (char)((c >> 8) & 0xff);
     msg[(int)msg[3] + 5] = (char)(c & 0xff);
-    gpsd_report(&session->context->errout, LOG_PROG,
-		"writing superstar2 control type %d len %zu\n",
-		(int)msg[1] & 0x7f, msglen);
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "writing superstar2 control type %d len %zu\n",
+	     (int)msg[1] & 0x7f, msglen);
     return gpsd_write(session, msg, msglen);
 }
 
@@ -423,9 +423,9 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
 	return superstar2_msg_ephemeris(session, buf, len);
 
     default:
-	gpsd_report(&session->context->errout, LOG_WARN,
-		    "unknown superstar2 packet id 0x%02x length %zd\n",
-		    type, len);
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "unknown superstar2 packet id 0x%02x length %zd\n",
+		 type, len);
 	return 0;
     }
 }

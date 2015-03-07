@@ -12,7 +12,7 @@
 <!ENTITY gps.h                    SYSTEM "explan_gps.h.xml">
 <!ENTITY gpsd.c                   SYSTEM "explan_gpsd.c.xml">
 <!ENTITY gpsd.h                   SYSTEM "explan_gpsd.h.xml">
-<!ENTITY gpsd_report.c            SYSTEM "explan_gpsd_report.c.xml">
+<!ENTITY gpsd_log.c               SYSTEM "explan_gpsd_log.c.xml">
 <!ENTITY gpsdclient.c             SYSTEM "explan_gpsdclient.c.xml">
 <!ENTITY gpsutils.c               SYSTEM "explan_gpsutils.c.xml">
 <!ENTITY isgps.c                  SYSTEM "explan_isgps.c.xml">
@@ -93,7 +93,7 @@ is not yet documented here.</para>
 &gps.h;
 &gpsd.c;
 &gpsd.h;
-&gpsd_report.c;
+&gpsd_log.c;
 &gpsdclient.c;
 &gpsutils.c;
 &isgps.c;

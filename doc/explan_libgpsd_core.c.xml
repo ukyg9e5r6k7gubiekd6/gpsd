@@ -15,11 +15,34 @@
 
 <tfoot>
 <row>
-  <entry spanname='s1' align='left'>Notes based on code as of Mon Apr 5 21:38:06 2010 -0400.</entry>
+  <entry spanname='s1' align='left'>Notes based mostly on code as of Mon Apr 5 21:38:06 2010 -040.</entry>
 </row>
 </tfoot>
 
 <tbody>
+<row>
+  <entry><function>void gpsd_log(const struct errout_t, int errlevel, const char *fmt, ... )</function></entry>
+  <entry><para>This code is used for error reporting, but is dependant
+  on SQUELCH_DISABLE so that embedded systems (for example) are not
+  burdened with unnecessary noise. The first thing to check is if the
+  error level offered is high enough to be of interest (controlled by
+  the debug level we are running at).</para><para>If we are
+  interested, the first step is to protect the code with a mutex if we
+  are using the 1PPS input.</para><para>Now we build a message buffer
+  which has a fixed header (<quote>gpsd: </quote>) and the incoming
+  data. The output buffer is prepared (load the start with a NULL) and
+  then the input buffer is scanned, byte-by-byte, up to its
+  terminating NULL. The scanned data is transferred on the fly to the
+  output buffer subject to the following tests:-</para><para>If the
+  character is printable, it passes through unchanged.</para><para>If
+  it is a space and either of the next two bytes is NULL it will also
+  pass through unchanged.</para><para>In any other case, it is copied
+  across as a hexadecimal string like
+  <quote>x09</quote>.</para><para>The completed output buffer is then
+  either sent to the system logger if we are in background mode
+  (daemon) or to the stderr file if we are in foreground
+  mode.</para></entry>
+</row>
 <row>
   <entry><function>int gpsd_switch_driver(struct gps_device_t *session, char* typename)</function></entry>
   <entry><para>Test if the function is called with the same name as

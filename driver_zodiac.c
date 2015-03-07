@@ -86,8 +86,8 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
 	if (end_write(session->gpsdata.gps_fd, &h, hlen) != (ssize_t) hlen ||
 	    end_write(session->gpsdata.gps_fd, dat,
 		      datlen) != (ssize_t) datlen) {
-	    gpsd_report(&session->context->errout, LOG_RAW,
-			"Reconfigure write failed\n");
+	    gpsd_log(&session->context->errout, LOG_RAW,
+		     "Reconfigure write failed\n");
 	    return -1;
 	}
     }
@@ -98,8 +98,8 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
     for (i = 0; i < dlen; i++)
 	str_appendf(buf, sizeof(buf), " %04x", dat[i]);
 
-    gpsd_report(&session->context->errout, LOG_RAW,
-		"Sent Zodiac packet: %s\n", buf);
+    gpsd_log(&session->context->errout, LOG_RAW,
+	     "Sent Zodiac packet: %s\n", buf);
 
     return 0;
 }
@@ -204,13 +204,13 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     mask =
 	TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET |
 	TRACK_SET | STATUS_SET | MODE_SET;
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d\n",
-		session->newdata.time, session->newdata.latitude,
-		session->newdata.longitude, session->newdata.altitude,
-		session->newdata.track, session->newdata.speed,
-		session->newdata.climb, session->newdata.mode,
-		session->gpsdata.status);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d\n",
+	     session->newdata.time, session->newdata.latitude,
+	     session->newdata.longitude, session->newdata.altitude,
+	     session->newdata.track, session->newdata.speed,
+	     session->newdata.climb, session->newdata.mode,
+	     session->gpsdata.status);
     return mask;
 }
 
@@ -247,10 +247,10 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
 						      (unsigned short)gps_week,
 						      (double)gps_seconds);
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"1002: visible=%d used=%d mask={SATELLITE|USED}\n",
-		session->gpsdata.satellites_visible,
-		session->gpsdata.satellites_used);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "1002: visible=%d used=%d mask={SATELLITE|USED}\n",
+	     session->gpsdata.satellites_visible,
+	     session->gpsdata.satellites_used);
     return SATELLITE_SET | USED_IS;
 }
 
@@ -293,14 +293,14 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	}
     }
     session->gpsdata.skyview_time = NAN;
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"NAVDOP: visible=%d gdop=%.2f pdop=%.2f "
-		"hdop=%.2f vdop=%.2f tdop=%.2f mask={SATELLITE|DOP}\n",
-		session->gpsdata.satellites_visible,
-		session->gpsdata.dop.gdop,
-		session->gpsdata.dop.hdop,
-		session->gpsdata.dop.vdop,
-		session->gpsdata.dop.pdop, session->gpsdata.dop.tdop);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "NAVDOP: visible=%d gdop=%.2f pdop=%.2f "
+	     "hdop=%.2f vdop=%.2f tdop=%.2f mask={SATELLITE|DOP}\n",
+	     session->gpsdata.satellites_visible,
+	     session->gpsdata.dop.gdop,
+	     session->gpsdata.dop.hdop,
+	     session->gpsdata.dop.vdop,
+	     session->gpsdata.dop.pdop, session->gpsdata.dop.tdop);
     return SATELLITE_SET | DOP_SET;
 }
 
@@ -328,9 +328,9 @@ static gps_mask_t handle1011(struct gps_device_t *session)
      * The Zodiac is supposed to send one of these messages on startup.
      */
     getstringz(session->subtype, session->lexer.outbuffer, 19, 28);	/* software version field */
-    gpsd_report(&session->context->errout, LOG_DATA,
-		"1011: subtype=%s mask={DEVICEID}\n",
-		session->subtype);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "1011: subtype=%s mask={DEVICEID}\n",
+	     session->subtype);
     return DEVICEID_SET;
 }
 
@@ -353,9 +353,9 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     unsigned int id =
 	(unsigned int)((session->lexer.outbuffer[3] << 8) |
 		       session->lexer.outbuffer[2]);
-    gpsd_report(&session->context->errout, LOG_RAW,
-		"Raw Zodiac packet type %d length %zd: %s\n",
-		id, session->lexer.outbuflen, gpsd_prettydump(session));
+    gpsd_log(&session->context->errout, LOG_RAW,
+	     "Raw Zodiac packet type %d length %zd: %s\n",
+	     id, session->lexer.outbuflen, gpsd_prettydump(session));
 
     if (session->lexer.outbuflen < 10)
 	return 0;

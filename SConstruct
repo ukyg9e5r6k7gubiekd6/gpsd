@@ -153,7 +153,7 @@ boolopts = (
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("nofloats",      False, "float ops are expensive, suppress error estimates"),
-    ("squelch",       False, "squelch gpsd_report/gpsd_hexdump to save cpu"),
+    ("squelch",       False, "squelch gpsd_log/gpsd_hexdump to save cpu"),
     # Build control
     ("shared",        True,  "build shared libraries, not static"),
     ("implicit_link", imloads,"implicit linkage is supported in shared libs"),
