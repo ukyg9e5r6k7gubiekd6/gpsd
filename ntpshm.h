@@ -52,7 +52,6 @@ struct shmTime
     int             dummy[8];
 };
 
-#endif
 
 /*
  * These types are internal to GPSD
@@ -82,5 +81,7 @@ enum segstat_t ntp_read(/*@null@*/struct shmTime *,
 			 /*@out@*/struct shm_stat_t *,
 			 const bool);
 void ntp_write(volatile struct shmTime *, struct timedelta_t *, int, int);
+
+#endif /* GPSD_NTPSHM_H */
 
 /* end */
