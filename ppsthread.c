@@ -350,8 +350,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    "PPS: pthread_mutex_lock() : %s\n", errbuf);
 	}
 	/*@ +unrecog @*/
-	last_fixtime_real = session->last_fixtime.real;
-	last_fixtime_clock = session->last_fixtime.clock;
+	last_fixtime_real = session->pps_thread.fixin_real;
+	last_fixtime_clock = session->pps_thread.fixin_clock;
 	/*@ -unrecog (splint has no pthread declarations as yet) @*/
 	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
 	if ( 0 != pthread_err ) {
@@ -704,9 +704,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
-		session->pps_state.ppslast = ppstimes;
+		session->pps_thread.ppsout_last = ppstimes;
 		/*@+type@*/
-		session->pps_state.ppscount++;
+		session->pps_thread.ppsout_count++;
 		/*@ -unrecog (splint has no pthread declarations as yet) @*/
 		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
                 if ( 0 != pthread_err ) {
@@ -787,7 +787,7 @@ void pps_thread_deactivate(struct gps_device_t *session)
     /*@+nullstate +mustfreeonly@*/
 }
 
-int pps_thread_stash_fixtime(volatile struct pps_fixtime_t *last_fixtime, 
+int pps_thread_stash_fixtime(volatile struct pps_thread_t *pps_thread, 
 		   timestamp_t realtime, struct timespec clocktime)
 /* thread-safe update of last fix time - only way we pass data in */
 {
@@ -799,8 +799,8 @@ int pps_thread_stash_fixtime(volatile struct pps_fixtime_t *last_fixtime,
 	ret = PPS_LOCK_ERR;
     else {
     /*@ +unrecog @*/
-	last_fixtime->real = realtime;
-	last_fixtime->clock = clocktime;
+	pps_thread->fixin_real = realtime;
+	pps_thread->fixin_clock = clocktime;
     }
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
@@ -811,7 +811,8 @@ int pps_thread_stash_fixtime(volatile struct pps_fixtime_t *last_fixtime,
     return ret;
 }
 
-int pps_thread_lastpps(struct pps_state_t *pps_state, struct timedelta_t *td)
+int pps_thread_lastpps(volatile struct pps_thread_t *pps_thread,
+		       struct timedelta_t *td)
 /* return the delta at the time of the last PPS - only way we pass data out */
 {
     volatile int ret;
@@ -824,8 +825,8 @@ int pps_thread_lastpps(struct pps_state_t *pps_state, struct timedelta_t *td)
 	ret = PPS_LOCK_ERR;
     else {
 	/*@ +unrecog @*/
-	*td = pps_state->ppslast;
-	ret = pps_state->ppscount;
+	*td = pps_thread->ppsout_last;
+	ret = pps_thread->ppsout_count;
     }
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
