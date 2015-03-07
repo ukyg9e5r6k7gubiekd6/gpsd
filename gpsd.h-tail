@@ -24,22 +24,6 @@
 #define _POSIX_THREAD_SAFE_FUNCTIONS
 #endif
 
-/* use RFC 2782 PPS API */
-/* this needs linux >= 2.6.34 and
- * CONFIG_PPS=y
- * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
- * CONFIG_PPS_CLIENT_LDISC=y
- */
-#ifndef S_SPLINT_S
-#if defined(HAVE_SYS_TIMEPPS_H)
-// include unistd.h here as it is missing on older pps-tools releases.
-// 'close' is not defined otherwise.
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/timepps.h>
-#endif /* S_SPLINT_S */
-#endif
-
 #ifdef _WIN32
 typedef unsigned int speed_t;
 #endif
@@ -459,19 +443,7 @@ struct ntrip_stream_t
 };
 
 #ifdef PPS_ENABLE
-struct pps_thread_t {
-    timestamp_t fixin_real;
-    struct timespec fixin_clock; /* system clock time when last fix received */
-#if defined(HAVE_SYS_TIMEPPS_H)
-    pps_handle_t kernelpps_handle;
-#endif /* defined(HAVE_SYS_TIMEPPS_H) */
-    int chronyfd;			/* for talking to chrony */
-    /*@null@*/ char *(*report_hook)(struct gps_device_t *,
-				    struct timedelta_t *);
-    /*@null@*/ void (*wrap_hook)(struct gps_device_t *);
-    struct timedelta_t ppsout_last;
-    int ppsout_count;
-};
+#include "ppsthread.h"
 #endif /* PPS_ENABLE */
 
 struct gps_device_t {
@@ -972,14 +944,6 @@ extern void pps_early_init(struct gps_context_t *);
 
 extern void timespec_str(const struct timespec *, /*@out@*/char *, int);
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
-
-#ifdef PPS_ENABLE
-extern void pps_thread_stash_fixtime(struct gps_device_t *, 
-			      timestamp_t, struct timespec);
-#endif /* PPS_ENABLE */
-extern void pps_thread_activate(struct gps_device_t *);
-extern void pps_thread_deactivate(struct gps_device_t *);
-extern int pps_thread_lastpps(struct gps_device_t *, struct timedelta_t *);
 
 extern void errout_reset(struct gpsd_errout_t *errout);
 
