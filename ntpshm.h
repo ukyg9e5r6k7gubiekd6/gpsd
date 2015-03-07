@@ -65,15 +65,15 @@ struct shm_stat_t {
     int leap;
 };
 
-#ifndef HAVE_TIMEDELTA
+#ifndef TIMEDELTA_DEFINED
 
 struct timedelta_t {
     struct timespec	real;
     struct timespec	clock;
 };
 
-#define HAVE_TIMEDELTA
-#endif /* HAVE_TIMEDELTA */
+#define TIMEDELTA_DEFINED
+#endif /* TIMEDELTA_DEFINED */
 
 struct shmTime /*@null@*/ *shm_get(int, bool, bool);
 extern char *ntp_name(const int);
