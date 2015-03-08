@@ -44,7 +44,6 @@ struct pps_thread_t {
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     int devicefd;			/* device file descriptor */
     char *devicename;
-    int chronyfd;			/* for talking to chrony */
     /*@null@*/ char *(*report_hook)(volatile struct pps_thread_t *,
 				    struct timedelta_t *);
     /*@null@*/ void (*wrap_hook)(volatile struct pps_thread_t *);

@@ -468,6 +468,7 @@ struct gps_device_t {
 #endif /* NTPSHM_ENABLE */
 # ifdef PPS_ENABLE
     volatile /*@null@*/ struct shmTime *shm_pps;
+    int chronyfd;			/* for talking to chrony */
 # endif /* PPS_ENABLE */
 #endif /* NTP_ENABLE */
 #ifdef PPS_ENABLE

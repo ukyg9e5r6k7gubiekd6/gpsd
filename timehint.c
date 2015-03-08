@@ -279,7 +279,7 @@ static void init_hook(struct gps_device_t *session)
     /* open the chrony socket */
     char chrony_path[GPS_PATH_MAX];
 
-    session->pps_thread.chronyfd = -1;
+    session->chronyfd = -1;
     if ( 0 == getuid() ) {
 	/* this case will fire on command-line devices;
 	 * they're opened before priv-dropping.  Matters because
@@ -296,11 +296,11 @@ static void init_hook(struct gps_device_t *session)
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "PPS chrony socket %s doesn't exist\n", chrony_path);
     } else {
-	session->pps_thread.chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
-	if (session->pps_thread.chronyfd < 0)
+	session->chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
+	if (session->chronyfd < 0)
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "PPS connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
-		     chrony_path, session->pps_thread.chronyfd, errno, strerror(errno));
+		     chrony_path, session->chronyfd, errno, strerror(errno));
 	else
 	    gpsd_log(&session->context->errout, LOG_RAW,
 			"PPS using chrony socket: %s\n", chrony_path);
@@ -343,14 +343,14 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
 	     "PPS chrony_send %s @ %s Offset: %0.9f\n",
 	     real_str, clock_str, sample.offset);
     /*@+type@*/
-    (void)send(session->pps_thread.chronyfd, &sample, sizeof (sample), 0);
+    (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
 
 static void wrap_hook(volatile struct pps_thread_t *pps_thread)
 {
     struct gps_device_t *session = (struct gps_device_t *)pps_thread->context;
-    if (session->pps_thread.chronyfd != -1)
-	(void)close(session->pps_thread.chronyfd);
+    if (session->chronyfd != -1)
+	(void)close(session->chronyfd);
 }
 
 static /*@observer@*/ char *report_hook(volatile struct pps_thread_t *pps_thread,
@@ -376,7 +376,7 @@ static /*@observer@*/ char *report_hook(volatile struct pps_thread_t *pps_thread
 	return "no fix";
 
     log1 = "accepted";
-    if ( 0 <= session->pps_thread.chronyfd ) {
+    if ( 0 <= session->chronyfd ) {
 	log1 = "accepted chrony sock";
 	chrony_send(session, td);
     }
