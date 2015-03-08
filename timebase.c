@@ -325,10 +325,10 @@ void gpsd_century_update(/*@in@*/struct gps_device_t *session, int century)
 }
 #endif /* NMEA_ENABLE */
 
-timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
+time_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
 			 unsigned short week, double tow)
 {
-    timestamp_t t;
+    time_t t;
 
     /*
      * This code detects and compensates for week counter rollovers that

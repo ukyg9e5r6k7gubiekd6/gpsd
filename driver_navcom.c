@@ -404,7 +404,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Timestamp */
     week = (uint16_t) getleu16(buf, 3);
     tow = (uint32_t) getleu32(buf, 5);
-    session->newdata.time = gpsd_gpstime_resolve(session, week, tow / 1000.0);
+    session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session, week, tow / 1000.0);
 
     /* Get latitude, longitude */
     lat = getles32(buf, 13);
@@ -714,7 +714,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     //uint8_t pdop = getub(buf, 15);
 
     /* Timestamp */
-    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
+    session->gpsdata.skyview_time = (timestamp_t)gpsd_gpstime_resolve(session,
 						      (unsigned short)week,
 						      (double)tow / 1000.0f);
 
@@ -929,7 +929,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->newdata.epv = alt_sd * 1.96;
 	mask |= (HERR_SET | VERR_SET);
 #endif /*  __UNUSED__ */
-	session->newdata.time = gpsd_gpstime_resolve(session,
+	session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session,
 						  (unsigned short)week,
 						  (double)tow / 1000.0f);
 	gpsd_log(&session->context->errout, LOG_PROG,

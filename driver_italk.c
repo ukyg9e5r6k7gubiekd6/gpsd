@@ -60,7 +60,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 	|| 0 == (flags & FIXINFO_FLAG_VALID))
 	return mask;
 
-    session->newdata.time = gpsd_gpstime_resolve(session,
+    session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session,
 	(unsigned short) getles16(buf, 7 + 82),
 	(unsigned int)getleu32(buf, 7 + 84) / 1000.0);
     mask |= TIME_SET | PPSTIME_IS;
@@ -130,7 +130,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
     } else {
 	unsigned int i, nsv, nchan, st;
 
-	session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
+	session->gpsdata.skyview_time = (timestamp_t)gpsd_gpstime_resolve(session,
 	    (unsigned short)getleu16(buf, 7 + 4),
 	    (unsigned int)getleu32(buf, 7 + 6) / 1000.0),
 	gpsd_zero_satellites(&session->gpsdata);
@@ -190,7 +190,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     if (session->context->leap_seconds < leap)
 	session->context->leap_seconds = leap;
 
-    session->newdata.time = gpsd_gpstime_resolve(session,
+    session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session,
 	(unsigned short) getleu16(buf, 7 + 36),
 	(unsigned int)getleu32(buf, 7 + 38)  / 1000.0);
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -255,8 +255,8 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
     if ((flags & 0x3) != 0x3)
 	return 0; // bail if measurement time not valid.
 
-    session->newdata.time = gpsd_gpstime_resolve(session,
-						 (unsigned short int)getleu16((char *)buf, 7 + 8),
+    session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session,
+			 (unsigned short int)getleu16((char *)buf, 7 + 8),
 	(unsigned int)getleu32(buf, 7 + 38) / 1000.0);
 
     /*@-type@*/
