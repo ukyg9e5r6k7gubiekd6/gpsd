@@ -738,6 +738,8 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # endif
 #endif
 #ifndef HAVE_CLOCK_GETTIME
+/* OS X uses _STRUCT_TIMESPEC, but no clock_gettime */
+#ifndef _STRUCT_TIMESPEC
 # ifdef __cplusplus
 extern "C" {
 # endif
@@ -751,6 +753,7 @@ int clock_gettime(clockid_t, struct timespec *);
 # ifdef __cplusplus
 }
 # endif
+#endif
 #endif
 
 
