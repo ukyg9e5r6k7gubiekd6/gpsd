@@ -14,6 +14,7 @@ representations to libgps structures.
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <time.h>
 
 #include "gpsd_config.h"
 #include "gps.h"
