@@ -1884,17 +1884,13 @@ struct policy_t {
 };
 
 #ifndef TIMEDELTA_DEFINED
+#define TIMEDELTA_DEFINED
+
 struct timedelta_t {
     struct timespec	real;
     struct timespec	clock;
 };
-#define TIMEDELTA_DEFINED
 #endif /* TIMEDELTA_DEFINED */
-
-/* difference between timespecs in nanoseconds */
-/* int is too small, avoid floats  */
-/* WARNING!  this will overflow if x and y differ by more than a few seconds */
-#define timespec_diff_ns(x, y)	(long)(((x).tv_sec-(y).tv_sec)*1000000000+(x).tv_nsec-(y).tv_nsec)
 
 /*
  * Someday we may support Windows, under which socket_t is a separate type.
