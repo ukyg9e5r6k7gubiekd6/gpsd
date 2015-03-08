@@ -46,6 +46,8 @@
  */
 
 #include <string.h>
+#include <stdio.h>
+#include <limits.h>
 #include <errno.h>
 #include <pthread.h>
 #include <math.h>
@@ -95,7 +97,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     glob_t globbuf;
     size_t i;             /* to match type of globbuf.gl_pathc */
     char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
-    char path[GPS_PATH_MAX] = "";
+    char path[PATH_MAX] = "";
 #endif
 
     pps_thread->kernelpps_handle = -1;
@@ -253,7 +255,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     volatile struct pps_thread_t *thread_context = (struct pps_thread_t *)arg;
     double last_fixtime_real = 0; 
-    /* the system clock ime, to the nSec, when the last fix received */
+    /* the system clock time, to the nSec, when the last fix received */
     /* using a double would cause loss of precision */
     struct timespec last_fixtime_clock = {0, 0};
     struct timespec clock_ts = {0, 0};
