@@ -224,8 +224,10 @@ void toff_update(WINDOW *win, int y, int x)
     {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
+	int i;
 	(void)wmove(win, y, x);
-	(void)wclrtoeol(win);
+	for (i = 0; i < TIMESPEC_LEN; i++)
+	    (void)waddch(win, ' ');
 	TS_SUB(&timedelta, &time_offset.clock, &time_offset.real);
 	if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
@@ -253,8 +255,10 @@ void pps_update(WINDOW *win, int y, int x)
     if (pps_thread_lastpps(&session.pps_thread, &ppstimes) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
+	int i;
 	(void)wmove(win, y, x);
-	(void)wclrtoeol(win);
+	for (i = 0; i < TIMESPEC_LEN; i++)
+	    (void)waddch(win, ' ');
 	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
