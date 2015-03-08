@@ -47,6 +47,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
 #include <pthread.h>
@@ -56,8 +57,9 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
+#include "gpsd_config.h"
 #include "timespec_str.h"
-#include "gpsd.h"
+#include "ppsthread.h"
 
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
@@ -80,6 +82,54 @@
 #if defined(HAVE_SYS_TIMEPPS_H)
 #include <glob.h>
 #endif
+
+/* normalize a timespec
+ *
+ * three cases to note
+ * if tv_sec is positve, then tv_nsec must be positive
+ * if tv_sec is negative, then tv_nsec must be negative
+ * if tv_sec is zero, then tv_nsec may be positive or negative.
+ *
+ * this only handles the case where two normalized timespecs
+ * are added or subracted.  (e.g. only a one needs to be borrowed/carried
+ */
+/*@-type -noeffect@*/ /* splint is confused about struct timespec */
+/*@unused@*/static inline void TS_NORM( struct timespec *ts)
+{
+    if ( (  1 <= ts->tv_sec ) ||
+         ( (0 == ts->tv_sec ) && (0 <= ts->tv_nsec ) ) ) {
+        /* result is positive */
+	if ( 1000000000 <= ts->tv_nsec ) {
+            /* borrow from tv_sec */
+	    ts->tv_nsec -= 1000000000;
+	    ts->tv_sec++;
+	} else if ( 0 > (ts)->tv_nsec ) {
+            /* carry to tv_sec */
+	    ts->tv_nsec += 1000000000;
+	    ts->tv_sec--;
+	}
+    }  else {
+        /* result is negative */
+	if ( -1000000000 >= ts->tv_nsec ) {
+            /* carry to tv_sec */
+	    ts->tv_nsec += 1000000000;
+	    ts->tv_sec--;
+	} else if ( 0 < ts->tv_nsec ) {
+            /* borrow from tv_sec */
+	    ts->tv_nsec -= 1000000000;
+	    ts->tv_sec++;
+	}
+    }
+}
+/*@+type +noeffect@*/
+
+/* subtract two timespec */
+#define TS_SUB(r, ts1, ts2) \
+    do { \
+	(r)->tv_sec = (ts1)->tv_sec - (ts2)->tv_sec; \
+	(r)->tv_nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
+        TS_NORM( r ); \
+    } while (0)
 
 static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
 

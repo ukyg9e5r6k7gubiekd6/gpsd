@@ -31,6 +31,7 @@
 #include "gpsdclient.h"
 #include "revision.h"
 #include "strfuncs.h"
+#include "timespec_str.h"
 
 #define BUFLEN		2048
 

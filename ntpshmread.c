@@ -20,7 +20,6 @@
 #endif /* S_SPLINT_S*/
 
 #include "ntpshm.h"
-#include "compiler.h"
 
 struct shmTime /*@null@*/ *shm_get(const int unit, const bool create, const bool forall)
 /* initialize a SHM segment */
