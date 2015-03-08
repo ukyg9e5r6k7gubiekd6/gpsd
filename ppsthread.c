@@ -56,6 +56,7 @@
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
+#include "timespec_str.h"
 #include "gpsd.h"
 
 #ifdef PPS_ENABLE

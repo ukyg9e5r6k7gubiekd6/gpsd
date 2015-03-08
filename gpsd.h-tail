@@ -922,9 +922,6 @@ extern void ntpshm_link_activate(struct gps_device_t *);
  * is tv_sec > 2, then inevitable loss of precision in tv_nsec */
 #define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / 1e9)))
 
-extern void timespec_str(const struct timespec *, /*@out@*/char *, int);
-#define TIMESPEC_LEN	22	/* required length of a timespec buffer */
-
 extern void errout_reset(struct gpsd_errout_t *errout);
 
 extern void gpsd_acquire_reporting_lock(void);

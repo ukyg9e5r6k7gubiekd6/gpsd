@@ -866,6 +866,7 @@ libgpsd_sources = [
     "serial.c",
     "subframe.c",
     "timebase.c",
+    "timespec_str.c",
     "drivers.c",
     "driver_ais.c",
     "driver_evermore.c",

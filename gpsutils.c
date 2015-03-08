@@ -479,32 +479,4 @@ double earth_distance(double lat1, double lon1, double lat2, double lon2)
 	return earth_distance_and_bearings(lat1, lon1, lat2, lon2, NULL, NULL);
 }
 
-/* Convert a normailized timespec to a nice string 
- * put in it *buf, buf should be at least 22 bytes
- *
- * the returned buffer will look like, shortest case:
- *    sign character ' ' or '-'
- *    one digit of seconds
- *    decmal point '.'
- *    9 digits of nanoSec
- *
- * So 12 chars, like this: "-0.123456789"
- *
- * Absolute worst case is 10 digits of seconds.  
- * So 21 digits like this: "-2147483647.123456789"
- *
-*/
-void timespec_str(const struct timespec *ts, /*@out@*/char *buf, int buf_size)
-{
-    char sign = ' ';
-
-    /*@-type@*//* splint is confused about timespec*/
-    if ( (0 > ts->tv_nsec ) || ( 0 > ts->tv_sec ) ) {
-	sign = '-';
-    }
-    (void) snprintf( buf, buf_size, "%c%ld.%09ld",
-			  sign,
-			  (long)labs(ts->tv_sec),
-			  (long)labs(ts->tv_nsec));
-    /*@+type@*/
-}
+/* end */
