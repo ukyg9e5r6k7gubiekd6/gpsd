@@ -131,7 +131,8 @@
         TS_NORM( r ); \
     } while (0)
 
-static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+/*@i1@*/static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 /*@-compdestroy -nullpass -unrecog@*/
@@ -246,7 +247,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
      * port file descriptor.
      */
     // cppcheck-suppress redundantAssignment
-    ret  = pps_thread->device_fd;
+    ret  = pps_thread->devicefd;
 #endif
     /* assert(ret >= 0); */
     pps_thread->log_hook(pps_thread, THREAD_INF,

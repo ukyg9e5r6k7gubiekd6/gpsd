@@ -1526,7 +1526,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: No time this packet\n");
     } else if (isnan(device->newdata.time)) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: bad new time\n");
-#ifdef PPS_ENABLE
+#if defined(PPS_ENABLE) && !defined(S_SPLINT_S)
     } else if (device->newdata.time <= device->pps_thread.fixin_real.tv_sec) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: Not a new time\n");
 #endif /* PPS_ENABLE */

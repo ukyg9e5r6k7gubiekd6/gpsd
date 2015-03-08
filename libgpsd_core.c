@@ -422,7 +422,7 @@ static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
 }
 
 
-/*@-usereleased -compdef@*/
+/*@-usereleased -compdef -compmempass@*/
 void gpsd_clear(struct gps_device_t *session)
 /* device has been opened - clear its storage for use */
 {
@@ -443,15 +443,15 @@ void gpsd_clear(struct gps_device_t *session)
     /* set up the context structure for the PPS thread monitor */
     memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
     session->pps_thread.devicefd = session->gpsdata.gps_fd;
-    session->pps_thread.devicename = session->gpsdata.dev.path;
+    /*@i2@*/session->pps_thread.devicename = session->gpsdata.dev.path;
     session->pps_thread.pps_hook = NULL;
     session->pps_thread.log_hook = ppsthread_log;
-    session->pps_thread.context = (void *)session;
+    /*@i4@*/session->pps_thread.context = (void *)session;
 #endif /* PPS_ENABLE */
 
     session->opentime = timestamp();
 }
-/*@+usereleased +compdef@*/
+/*@+usereleased +compdef +compmempass@*/
 
 int gpsd_open(struct gps_device_t *session)
 /* open a device for access to its data */
