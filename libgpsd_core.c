@@ -1688,8 +1688,7 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
 #ifdef PPS_ENABLE
     /* thread-safe update */
     /*@-compdef@*/
-    pps_thread_stash_fixtime(&device->pps_thread, 
-			     device->newdata.time, td->clock);
+    pps_thread_stash_fixtime(&device->pps_thread, td->real, td->clock);
     /*@+compdef@*/
 #endif /* PPS_ENABLE */
 }

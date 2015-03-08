@@ -254,15 +254,15 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     volatile struct pps_thread_t *thread_context = (struct pps_thread_t *)arg;
-    double last_fixtime_real = 0; 
     /* the system clock time, to the nSec, when the last fix received */
     /* using a double would cause loss of precision */
     struct timespec last_fixtime_clock = {0, 0};
+    struct timespec last_fixtime_real = {0, 0};
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
 #if defined(TIOCMIWAIT)
     int cycle, duration; 
-    /* state is the last state of the tty control ssignals */
+    /* state is the last state of the tty control signals */
     int state = 0, unchanged = 0;
     /* state_last is previous state */
     int state_last = 0;
@@ -373,13 +373,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    thread_context->devicename);
 
 	/*
-	 * If there was no valid time from the GPS when the PPS event was
-	 * asserted, we can do nothing further.  Some GPS like Garmin
-         * always send a PPS, valid or not.  Other GPS like some uBlox
-         * may only send PPS when valid.
-         * It is common to get PPS, and no fixtime, while autobauding.
+	 * If there has not yet bben any valid in-band time stashed
+	 * from the GPS when the PPS event was asserted, we can do
+	 * nothing further.  Some GPSes like Garmin always send a PPS,
+	 * valid or not.  Other GPSes like some uBlox may only send
+	 * PPS when time is valid.  It is common to get PPS, and no
+	 * fixtime, while autobauding.
 	 */
-        if (isnan(last_fixtime_real))
+        if (last_fixtime_real.tv_sec == 0)
 	    continue;
 
 	/* mask for monitored lines */
@@ -596,7 +597,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    log = "Too long for 0.5Hz\n";
 	}
 #endif /* TIOCMIWAIT */
-	if ( ok && last_second_used >= last_fixtime_real ) {
+	if ( ok && last_second_used >= last_fixtime_real.tv_sec ) {
 		/* uh, oh, this second already handled */
 		ok = 0;
 		log = "this second already handled\n";
@@ -645,7 +646,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              */
 
 	    /*@+relaxtypes@*/
-	    ppstimes.real.tv_sec = (time_t)trunc(last_fixtime_real) + 1;
+	    ppstimes.real.tv_sec = (time_t)last_fixtime_real.tv_sec + 1;
 	    ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
 	    ppstimes.clock = clock_ts;
 	    /*@-relaxtypes@*/
@@ -672,7 +673,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		log1 = "timestamp out of range";
 	    } else {
 		/*@-compdef@*/
-		last_second_used = last_fixtime_real;
+		last_second_used = last_fixtime_real.tv_sec;
 		if (thread_context->report_hook != NULL) 
 		    log1 = thread_context->report_hook(thread_context, &ppstimes);
 		else
@@ -773,7 +774,7 @@ void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
 }
 
 void pps_thread_stash_fixtime(volatile struct pps_thread_t *pps_thread, 
-		   timestamp_t realtime, struct timespec clocktime)
+		   struct timespec realtime, struct timespec clocktime)
 /* thread-safe update of last fix time - only way we pass data in */
 {
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/

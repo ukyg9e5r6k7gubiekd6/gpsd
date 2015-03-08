@@ -848,7 +848,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     if ( 0 != isnan(device->newdata.time)) {
 	// "NTP: bad new time
 #ifdef PPS_ENABLE
-    } else if (device->newdata.time == device->pps_thread.fixin_real) {
+    } else if (device->newdata.time <= device->pps_thread.fixin_real.tv_sec) {
 	// "NTP: Not a new time
 #endif /* PPS_ENABLE */
     } else 

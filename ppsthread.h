@@ -23,8 +23,8 @@
 #endif /* S_SPLINT_S */
 
 struct pps_thread_t {
-    timestamp_t fixin_real;
-    struct timespec fixin_clock; /* system clock time when last fix received */
+    struct timespec fixin_real;		/* in-band time of the fix */
+    struct timespec fixin_clock;	/* system clock time when fix received */
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
@@ -50,7 +50,7 @@ struct pps_thread_t {
 extern void pps_thread_activate(volatile struct pps_thread_t *);
 extern void pps_thread_deactivate(volatile struct pps_thread_t *);
 extern void pps_thread_stash_fixtime(volatile struct pps_thread_t *, 
-			      timestamp_t, struct timespec);
+			      struct timespec, struct timespec);
 extern int pps_thread_lastpps(volatile struct pps_thread_t *,
 			      struct timedelta_t *);
 
