@@ -23,6 +23,7 @@
  *
  */
 
+#include <time.h>                /* for time_t */
 #include "gpsd_config.h"
 
 #include <stdio.h>
@@ -33,7 +34,6 @@
 #include <strings.h>
 #include <fcntl.h>
 #include <termios.h>
-#include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>

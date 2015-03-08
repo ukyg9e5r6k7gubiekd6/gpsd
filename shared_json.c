@@ -17,6 +17,7 @@ PERMISSIONS
 
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>    /* for time_t */
 
 #include "gpsd.h"
 #ifdef SOCKET_EXPORT_ENABLE

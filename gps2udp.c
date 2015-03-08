@@ -12,6 +12,7 @@
  *
  */
 
+#include <time.h>
 #include "gpsd_config.h"
 
 #include <stdio.h>
@@ -22,7 +23,6 @@
 #include <strings.h>
 #include <fcntl.h>
 #include <termios.h>
-#include <time.h>
 #include <assert.h>
 #include <sys/time.h>
 #include <sys/types.h>

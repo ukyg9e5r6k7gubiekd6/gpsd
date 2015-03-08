@@ -13,6 +13,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>    /* for time_t */
 
 #ifndef GPSD_CONFIG_H
 /* Feature configuration switches begin here */

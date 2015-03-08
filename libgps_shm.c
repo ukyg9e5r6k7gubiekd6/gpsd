@@ -14,6 +14,7 @@ PERMISSIONS
    BSD terms apply: see the file COPYING in the distribution root for details.
 
 ***************************************************************************/
+#include <time.h>             /* for time_t */
 #include "gpsd_config.h"
 
 #ifdef SHM_EXPORT_ENABLE

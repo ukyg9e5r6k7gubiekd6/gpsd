@@ -67,6 +67,7 @@ PERMISSIONS
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <time.h>               /* for time_t */
 #include <ctype.h>
 
 #include "gpsd_config.h"	/* for strlcpy() prototype */
