@@ -181,9 +181,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 
     switch (type) {
     case 0x02:			/* Navigation Data Output */
-	session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session,
-					  (unsigned short)getleu16(buf2, 3),
-					  (double)getleu32(buf2, 5) * 0.01);
+	session->newdata.time = gpsd_gpstime_resolve(session,
+	  (unsigned short)getleu16(buf2, 3),
+	  (double)getleu32(buf2, 5) * 0.01);
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 			 (double)getles32(buf2, 9) * 1.0,
 			 (double)getles32(buf2, 13) * 1.0,
@@ -219,7 +219,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return mask | CLEAR_IS | REPORT_IS;
 
     case 0x04:			/* DOP Data Output */
-	session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session,
+	session->newdata.time = gpsd_gpstime_resolve(session,
 						     (unsigned short)getleu16(buf2, 3),
 						     (double)getleu32(buf2, 5) * 0.01);
 	/*
@@ -263,7 +263,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	return mask;
 
     case 0x06:			/* Channel Status Output */
-	session->gpsdata.skyview_time = (timestamp_t)gpsd_gpstime_resolve(session,
+	session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
 	    (unsigned short)getleu16(buf2, 3),
 	    (double)getleu32(buf2, 5) * 0.01);
 	session->gpsdata.satellites_visible = (int)getub(buf2, 9);
@@ -318,7 +318,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x08:			/* Measurement Data Output */
 	/* clock offset is a manufacturer diagnostic */
 	/* (int)getleu16(buf2, 9);  clock offset, 29000..29850 ?? */
-	session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session,
+	session->newdata.time = gpsd_gpstime_resolve(session,
 	    (unsigned short)getleu16(buf2, 3),
 	    (double)getleu32(buf2, 5) * 0.01);
 	visible = (unsigned char)getub(buf2, 11);

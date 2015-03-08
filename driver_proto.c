@@ -154,7 +154,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     tow = GET_MS_TIMEOFWEEK();
     gps_week = GET_WEEKNUMBER();
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
-    session->newdata.time = (timestamp_t)gpsd_gpstime_resolve(session, gps_week, tow / 1000.0);
+    session->newdata.time = gpsd_gpstime_resolve(session, gps_week, tow / 1000.0);
 
     return TIME_SET | PPSTIME_IS | ONLINE_SET;
 }

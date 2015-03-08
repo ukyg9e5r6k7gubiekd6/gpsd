@@ -244,7 +244,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	session->gpsdata.skyview[i].ss = (float)getzword(17 + (3 * i));
 	session->gpsdata.skyview[i].used = (bool)(status & 1);
     }
-    session->gpsdata.skyview_time = (timestamp_t)gpsd_gpstime_resolve(session,
+    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
 						      (unsigned short)gps_week,
 						      (double)gps_seconds);
     gpsd_log(&session->context->errout, LOG_DATA,
