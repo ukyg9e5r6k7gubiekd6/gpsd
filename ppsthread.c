@@ -78,23 +78,7 @@
 #include <glob.h>
 #endif
 
-static pthread_mutex_t ppslast_mutex;
-
-void pps_early_init( struct gps_context_t * context ) {
-    int err;
-
-    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-    /*@ -nullpass @*/
-    err = pthread_mutex_init(&ppslast_mutex, NULL);
-    /*@ +nullpass@ */
-    /*@ +unrecog @*/
-    if ( 0 != err ) {
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
-	gpsd_log(&context->errout, LOG_ERROR,
-		"PPS: pthread_mutex_init() : %s\n", errbuf);
-    }
-}
+static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 /*@-compdestroy -nullpass -unrecog@*/

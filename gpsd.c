@@ -1886,10 +1886,6 @@ int main(int argc, char *argv[])
 	exit(1);
     }
 
-#if defined(PPS_ENABLE) 
-   pps_early_init( &context);
-#endif /* PPS_ENABLE */
-
 #if defined(SYSTEMD_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
     sd_socket_count = sd_get_socket_count();
     if (sd_socket_count > 0 && control_socket != NULL) {

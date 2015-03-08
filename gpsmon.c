@@ -1313,9 +1313,6 @@ int main(int argc, char **argv)
 
     if (serial) {
 #ifdef PPS_ENABLE
-	/* init the pps mutex */
-	pps_early_init( &context);
-
 	/* this guard suppresses a warning on Bluetooth devices */
 	if (session.sourcetype == source_rs232 || session.sourcetype == source_usb) {
 	    session.pps_thread.report_hook = pps_report;
