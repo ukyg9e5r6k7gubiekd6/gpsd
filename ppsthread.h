@@ -28,18 +28,30 @@ struct pps_thread_t {
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
+    int devicefd;			/* device file descriptor */
+    char *devicename;
     int chronyfd;			/* for talking to chrony */
-    /*@null@*/ char *(*report_hook)(struct gps_device_t *,
+    /*@null@*/ char *(*report_hook)(volatile struct pps_thread_t *,
 				    struct timedelta_t *);
-    /*@null@*/ void (*wrap_hook)(struct gps_device_t *);
+    /*@null@*/ void (*wrap_hook)(volatile struct pps_thread_t *);
     struct timedelta_t ppsout_last;
     int ppsout_count;
+    /*@null@*/ void (*pps_hook)(volatile struct pps_thread_t *, struct timedelta_t *);
+    /*@null@*/ void (*log_hook)(volatile struct pps_thread_t *, int errlevel, const char *fmt, ...);
+    void *context;
 };
 
-extern void pps_thread_activate(struct gps_device_t *);
-extern void pps_thread_deactivate(struct gps_device_t *);
-extern void pps_thread_stash_fixtime(struct gps_device_t *, 
+#define THREAD_ERROR	0
+#define THREAD_WARN	1
+#define THREAD_INF	2
+#define THREAD_PROG	3
+#define THREAD_RAW	4
+
+extern void pps_thread_activate(volatile struct pps_thread_t *);
+extern void pps_thread_deactivate(volatile struct pps_thread_t *);
+extern void pps_thread_stash_fixtime(volatile struct pps_thread_t *, 
 			      timestamp_t, struct timespec);
-extern int pps_thread_lastpps(struct gps_device_t *, struct timedelta_t *);
+extern int pps_thread_lastpps(volatile struct pps_thread_t *,
+			      struct timedelta_t *);
 
 #endif /* PPSTHREAD_H */

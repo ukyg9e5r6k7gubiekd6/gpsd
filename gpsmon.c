@@ -249,7 +249,7 @@ void pps_update(WINDOW *win, int y, int x)
     /*@-type -noeffect@*/ /* splint is confused about struct timespec */
     struct timedelta_t ppstimes;
 
-    if (pps_thread_lastpps(&session, &ppstimes) > 0) {
+    if (pps_thread_lastpps(&session.pps_thread, &ppstimes) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
 	(void)wmove(win, y, x);
@@ -1133,7 +1133,7 @@ static bool do_command(const char *line)
 /*@+globstate +usedef +compdef@*/
 
 #ifdef PPS_ENABLE
-static /*@observer@*/ char *pps_report(struct gps_device_t *session UNUSED,
+static /*@observer@*/ char *pps_report(volatile struct pps_thread_t *pps_thread UNUSED,
 			struct timedelta_t *td UNUSED) {
     packet_log(PPSBAR);
     return "gpsmon";
@@ -1319,7 +1319,7 @@ int main(int argc, char **argv)
 	/* this guard suppresses a warning on Bluetooth devices */
 	if (session.sourcetype == source_rs232 || session.sourcetype == source_usb) {
 	    session.pps_thread.report_hook = pps_report;
-	    pps_thread_activate(&session);
+	    pps_thread_activate(&session.pps_thread);
 	}
 #endif /* PPS_ENABLE */
     }
@@ -1450,7 +1450,7 @@ int main(int argc, char **argv)
 #ifdef PPS_ENABLE
     /* Shut down PPS monitoring. */
     if (serial)
-       (void)pps_thread_deactivate(&session);
+       (void)pps_thread_deactivate(&session.pps_thread);
 #endif /* PPS_ENABLE*/
 
     gpsd_close(&session);

@@ -389,9 +389,42 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->gpsdata.online = (timestamp_t)0;
 }
 
+static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
+			  int loglevel, const char *fmt, ...)
+/* shim function to decouple PPS monitor code from the session structure */
+{
+    struct gps_device_t *device = (struct gps_device_t *)pps_thread->context;
+    char buf[BUFSIZ];
+    va_list ap;
+
+    switch (loglevel) {
+    case THREAD_ERROR:
+	loglevel = LOG_ERROR;
+	break;
+    case THREAD_WARN:
+	loglevel = LOG_WARN;
+	break;
+    case THREAD_INF:
+	loglevel = LOG_INF;
+	break;
+    case THREAD_PROG:
+	loglevel = LOG_PROG;
+	break;
+    case THREAD_RAW:
+	loglevel = LOG_RAW;
+	break;
+    }
+
+    buf[0] = '\0';
+    va_start(ap, fmt);
+    gpsd_vlog(&device->context->errout, loglevel, buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+}
+
+
 /*@-usereleased -compdef@*/
 void gpsd_clear(struct gps_device_t *session)
-/* clear a device's storage for use */
+/* device has been opened - clear its storage for use */
 {
     session->gpsdata.online = timestamp();
     lexer_init(&session->lexer);
@@ -407,8 +440,13 @@ void gpsd_clear(struct gps_device_t *session)
     /* clear the private data union */
     memset( (void *)&session->driver, '\0', sizeof(session->driver));
 #ifdef PPS_ENABLE
-    /* clear the context structure for the PPS thread monitor */
+    /* set up the context structure for the PPS thread monitor */
     memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
+    session->pps_thread.devicefd = session->gpsdata.gps_fd;
+    session->pps_thread.devicename = session->gpsdata.dev.path;
+    session->pps_thread.pps_hook = NULL;
+    session->pps_thread.log_hook = ppsthread_log;
+    session->pps_thread.context = (void *)session;
 #endif /* PPS_ENABLE */
 
     session->opentime = timestamp();
@@ -1650,7 +1688,8 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
 #ifdef PPS_ENABLE
     /* thread-safe update */
     /*@-compdef@*/
-    pps_thread_stash_fixtime(device, device->newdata.time, td->clock);
+    pps_thread_stash_fixtime(&device->pps_thread, 
+			     device->newdata.time, td->clock);
     /*@+compdef@*/
 #endif /* PPS_ENABLE */
 }
