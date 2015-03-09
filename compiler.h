@@ -20,10 +20,6 @@
 #define _POSIX_THREAD_SAFE_FUNCTIONS
 #endif
 
-#ifdef _WIN32
-typedef unsigned int speed_t;
-#endif
-
 #include "gpsd_config.h"	/* is HAVE_STDATOMIC defined? */
 
 /* Macro for declaring function with printf-like arguments. */
