@@ -509,7 +509,7 @@ static int passivesocks(char *service, char *tcp_or_udp,
 struct subscriber_t
 {
     int fd;			/* client file descriptor. -1 if unused */
-    timestamp_t active;		/* when subscriber last polled for data */
+    time_t active;		/* when subscriber last polled for data */
     struct policy_t policy;	/* configurable bits */
     pthread_mutex_t mutex;	/* serialize access to fd */
 };
@@ -565,7 +565,7 @@ static void detach_client(struct subscriber_t *sub)
 	     c_ip, sub_index(sub), sub->fd);
     FD_CLR(sub->fd, &all_fds);
     adjust_max_fd(sub->fd, false);
-    sub->active = (timestamp_t)0;
+    sub->active = 0;
     sub->policy.watcher = false;
     sub->policy.json = false;
     sub->policy.nmea = false;
@@ -622,7 +622,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 	gpsd_log(&context.errout, LOG_WARN,
 		 "client(%d) has vanished.\n", sub_index(sub));
     else if (errno == EWOULDBLOCK
-	     && timestamp() - sub->active > NOREAD_TIMEOUT)
+	     && time(NULL) - sub->active > NOREAD_TIMEOUT)
 	gpsd_log(&context.errout, LOG_INF,
 		 "client(%d) timed out.\n", sub_index(sub));
     else
@@ -1101,7 +1101,9 @@ static void handle_request(struct subscriber_t *sub,
 	if (*buf == ';') {
 	    ++buf;
 	} else {
+	    /*@-nullstate@*/
 	    int status = json_watch_read(buf + 1, &sub->policy, &end);
+	    /*@+nullstate@*/
 #ifndef TIMING_ENABLE
 	    sub->policy.timing = false;
 #endif /* TIMING_ENABLE */
@@ -1167,8 +1169,10 @@ static void handle_request(struct subscriber_t *sub,
 	} else {
 #ifdef RECONFIGURE_ENABLE
 	    struct gps_device_t *device;
+	    /*@-nullstate@*/
 	    /* first, select a device to operate on */
 	    int status = json_device_read(buf + 1, &devconf, &end);
+	    /*@+nullstate@*/
 	    if (end == NULL)
 		buf += strlen(buf);
 	    else {
@@ -2224,7 +2228,7 @@ int main(int argc, char *argv[])
 			FD_SET(ssock, &all_fds);
 			adjust_max_fd(ssock, true);
 			client->fd = ssock;
-			client->active = timestamp();
+			client->active = time(NULL);
 			gpsd_log(&context.errout, LOG_SPIN,
 				 "client %s (%d) connect on fd %d\n", c_ip,
 				 sub_index(client), ssock);
@@ -2350,7 +2354,7 @@ int main(int argc, char *argv[])
 		     * after COMMAND_TIMEOUT seconds. This makes
 		     * COMMAND_TIMEOUT useful.
 		     */
-		    sub->active = timestamp();
+		    sub->active = time(NULL);
 		    if (handle_gpsd_request(sub, buf) < 0)
 			detach_client(sub);
 		}
@@ -2358,7 +2362,7 @@ int main(int argc, char *argv[])
 		unlock_subscriber(sub);
 
 		if (!sub->policy.watcher
-		    && timestamp() - sub->active > COMMAND_TIMEOUT) {
+		    && time(NULL) - sub->active > COMMAND_TIMEOUT) {
 		    gpsd_log(&context.errout, LOG_WARN,
 			     "client(%d) timed out on command wait.\n",
 			     sub_index(sub));
