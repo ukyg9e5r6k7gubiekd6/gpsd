@@ -632,8 +632,12 @@ else:
     if config.CheckHeader("stdatomic.h"):
         confdefs.append("#define HAVE_STDATOMIC_H 1\n")
     else:
-        confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
-        announce("No memory barriers - SHM export and time hinting may not be reliable.")
+	confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
+	if config.CheckHeader("libkern/OSAtomic.h"):
+	    confdefs.append("#define HAVE_OSATOMIC_H 1\n")
+        else:
+	    confdefs.append("/* #undef HAVE_OSATOMIC_H */\n")
+	    announce("No memory barriers - SHM export and time hinting may not be reliable.")
 
     # endian.h is required for rtcm104v2 unless the compiler defines
     # __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
