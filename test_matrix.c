@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>     /* for time_t */
 #include <math.h>
 
 #include "compiler.h"
