@@ -39,8 +39,8 @@ int clock_gettime(clockid_t clk_id UNUSED, struct timespec *tp)
 	(tv)->tv_usec += 1000000;
 	(tv)->tv_sec--;
     }
-    return 0;
 #endif /* __MACH__ */
+    return 0;
 }
 #endif /* HAVE_CLOCK_GETTIME */
 
