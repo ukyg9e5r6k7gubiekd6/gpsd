@@ -149,3 +149,5 @@ devtools/.flocktest.ini
 # QT stuff
 libQgpsmm.prl
 libQgpsmm/binaries/*
+# misc files
+nohup.out
