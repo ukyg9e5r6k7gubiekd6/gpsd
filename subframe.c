@@ -8,7 +8,7 @@
 #include "gpsd.h"
 
 /* convert unsigned to signed */
-#define uint2int( u, bit) ( u & (1<<(bit-1)) ? u - (1<<bit) : u)
+#define uint2int( u, bit) ( (u & (1<<(bit-1))) ? u - (1<<bit) : u)
 
 /*@ -usedef @*/
 gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,

@@ -739,7 +739,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /*@ -predboolothers @*/
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "Navcom: engine status = 0x%x, almanac = %s, time = 0x%x, pos = 0x%x\n",
-	     eng_status & 0x07, (eng_status & 0x08 ? "valid" : "invalid"),
+	     eng_status & 0x07, ((eng_status & 0x08) ? "valid" : "invalid"),
 	     eng_status & 0x30 >> 4, eng_status & 0xc0 >> 6);
     /*@ +predboolothers @*/
 
@@ -809,11 +809,11 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "Navcom:	    sol. valid = %c, clock = %s, pos. = %s, "
 		 "height = %s, err. code = 0x%x\n",
-		 (sol_status & 0x01 ? 'Y' : 'N'),
-		 (sol_status & 0x02 ? "stable" : "unstable"),
-		 (sol_status & 0x04 ? "dgps" : "unaided"),
-		 (sol_status & 0x08 ? "solved" : "constrained"),
-		 (sol_status & 0x01 ? 0x00 : sol_status & 0x0f00 >> 8));
+		 ((sol_status & 0x01) ? 'Y' : 'N'),
+		 ((sol_status & 0x02) ? "stable" : "unstable"),
+		 ((sol_status & 0x04) ? "dgps" : "unaided"),
+		 ((sol_status & 0x08) ? "solved" : "constrained"),
+		 ((sol_status & 0x01) ? 0x00 : sol_status & 0x0f00 >> 8));
 	/*@ +predboolothers -charint @*/
     }
 
@@ -849,8 +849,8 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
 	     session->context->gps_week,
 	     session->context->gps_tow,
 	     tm_slew_acc, status,
-	     (status & 0x80 ? "channel time set - " : ""),
-	     (status & 0x40 ? "stable" : "not stable"), status & 0x0f);
+	     ((status & 0x80) ? "channel time set - " : ""),
+	     ((status & 0x40) ? "stable" : "not stable"), status & 0x0f);
     /*@ +predboolothers @*/
     for (n = 11; n < msg_len - 1; n += 16) {
 	uint8_t sv_status = getub(buf, n);
@@ -865,28 +865,28 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
 	uint8_t l2_slips = (uint8_t) (getles3224(buf, n + 13) & 0x0f);
 	/*@ -predboolothers +charint @*/
 	double c1 =
-	    (sv_status & 0x80 ? (double)ca_pseudorange / 16.0 *
+	    ((sv_status & 0x80) ? (double)ca_pseudorange / 16.0 *
 	     LAMBDA_L1 : NAN);
 	double l1 =
-	    (sv_status & 0x80 ? (double)ca_pseudorange / 16.0 +
+	    ((sv_status & 0x80) ? (double)ca_pseudorange / 16.0 +
 	     (double)l1_phase / 256.0 : NAN);
 	double l2 =
-	    (sv_status & 0x20
+	    ((sv_status & 0x20)
 	     ? ((double)ca_pseudorange / 16.0 +
 		(double)p2_ca_pseudorange / 16.0) * (120.0 / 154.0)
 	     + (double)l2_phase / 256.0 : NAN);
 	double p1 =
-	    (sv_status & 0x40 ? c1 +
+	    ((sv_status & 0x40) ? c1 +
 	     (double)p1_ca_pseudorange / 16.0 * LAMBDA_L1 : NAN);
 	double p2 =
-	    (sv_status & 0x20 ? c1 +
+	    ((sv_status & 0x20) ? c1 +
 	     (double)p2_ca_pseudorange / 16.0 * LAMBDA_L1 : NAN);
 	gpsd_log(&session->context->errout, LOG_DATA + 1,
 		 "Navcom: >> sv status = 0x%02x (PRN %u - C/A & L1 %s - P1 %s - P2 & L2 %s)\n",
 		 sv_status, (sv_status & 0x1f),
-		 (sv_status & 0x80 ? "valid" : "invalid"),
-		 (sv_status & 0x40 ? "valid" : "invalid"),
-		 (sv_status & 0x20 ? "valid" : "invalid"));
+		 ((sv_status & 0x80) ? "valid" : "invalid"),
+		 ((sv_status & 0x40) ? "valid" : "invalid"),
+		 ((sv_status & 0x20) ? "valid" : "invalid"));
 	gpsd_log(&session->context->errout, LOG_DATA + 1,
 		 "Navcom: >>> ch status = 0x%02x (Logical channel: %u - CA C/No: %u dBHz) "
 		 "sL1: %u, sL2: %u\n", ch_status, ch_status & 0x0f,

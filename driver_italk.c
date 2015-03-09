@@ -218,8 +218,8 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "iTalk 50B SUBFRAME prn %u sf %u - decode %s %s\n",
 	     prn, sf,
-	     flags & SUBFRAME_WORD_FLAG_MASK ? "error" : "ok",
-	     flags & SUBFRAME_GPS_PREAMBLE_INVERTED ? "(inverted)" : "");
+	     (flags & SUBFRAME_WORD_FLAG_MASK) ? "error" : "ok",
+	     (flags & SUBFRAME_GPS_PREAMBLE_INVERTED) ? "(inverted)" : "");
     if (flags & SUBFRAME_WORD_FLAG_MASK)
 	return 0;	// don't try decode an erroneous packet
 

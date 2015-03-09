@@ -229,15 +229,15 @@ static void oncore_update(void)
 
 	/*@ -predboolothers @*/
 	(void)snprintf(statusbuf, sizeof(statusbuf), "%s%s%s%s%s%s%s%s%s",
-		       status & 0x80 ? "PProp " : "",
-		       status & 0x40 ? "PoorGeom " : "",
-		       status & 0x20 ? "3D " : "",
-		       status & 0x10 ? "2D " : "",
-		       status & 0x08 ? "Acq/PHold " : "",
-		       status & 0x04 ? "Diff " : "",
-		       status & 0x02 ? "Ins (<3 SV) " : "",
-		       status & 0x01 ? "BadAlm " : "",
-		       dopt   & 0x20 ? "survey " : "");
+		       (status & 0x80) ? "PProp " : "",
+		       (status & 0x40) ? "PoorGeom " : "",
+		       (status & 0x20) ? "3D " : "",
+		       (status & 0x10) ? "2D " : "",
+		       (status & 0x08) ? "Acq/PHold " : "",
+		       (status & 0x04) ? "Diff " : "",
+		       (status & 0x02) ? "Ins (<3 SV) " : "",
+		       (status & 0x01) ? "BadAlm " : "",
+		       (dopt   & 0x20) ? "survey " : "");
 	/*@ +predboolothers @*/
 
 	(void)mvwprintw(Ea1win, 3, 24, "%-37s", statusbuf);
@@ -246,7 +246,7 @@ static void oncore_update(void)
 
 	/*@ -predboolothers @*/
 	(void)mvwprintw(Ea1win, 2, 27, "%s %4.1f",
-			dopt & 1 ? "hdop" : "pdop", dop);
+			(dopt & 1) ? "hdop" : "pdop", dop);
 	/*@ +predboolothers @*/
 
 	(void)mvwprintw(Ea1win, 3, 10, "%d/%d ", nsat, nvis);
