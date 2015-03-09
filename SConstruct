@@ -505,7 +505,9 @@ else:
         if option not in config.env['CFLAGS']:
             config.CheckCompilerOption(option)
 
-    if config.CheckCompilerOption("-pthread"):
+    # OS X aliases gcc to clang
+    # clang accepts -pthread, then warns it is unused.
+    if config.CheckCompilerOption("-pthread") and not sys.platform.startswith('darwin'):
         env.MergeFlags("-pthread")
 
     env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
