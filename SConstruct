@@ -1399,7 +1399,7 @@ if env["shared"] and env["chrpath"]:
     env.AddPostAction(binaryinstall, '$CHRPATH -r "%s" "$TARGET"' \
                       % (installdir('libdir', False), ))
 
-if not env['debug'] and not env['profiling'] and not env['nostrip']:
+if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.platform.startswith('darwin'):
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
 if not env['python']:
@@ -1409,7 +1409,7 @@ else:
     python_module_dir = python_lib_dir + os.sep + 'gps'
     python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
                                                     python_built_extensions)
-    if not env['debug'] and not env['profiling'] and not env['nostrip']:
+    if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.platform.startswith('darwin'):
         python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
 
     python_modules_install = python_env.Install( DESTDIR + python_module_dir,
