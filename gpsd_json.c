@@ -26,6 +26,7 @@ PERMISSIONS
 
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
+#include "timespec_str.h"
 #include "revision.h"
 
 /* *INDENT-OFF* */
@@ -127,9 +128,6 @@ void json_tpv_dump(const struct gps_device_t *session,
 		   /*@out@*/ char *reply, size_t replylen)
 {
     const struct gps_data_t *gpsdata = &session->gpsdata;
-#ifdef TIMING_ENABLE
-    timestamp_t rtime = timestamp();
-#endif /* TIMING_ENABLE */
 
     assert(replylen > sizeof(char *));
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
@@ -191,9 +189,9 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    str_appendf(reply, replylen, "\"rtime\":%s,", rtime_str);
 #ifdef PPS_ENABLE
 	    /*@-type -formattype@*/ /* splint is confused about struct timespec */
-	    if (session->ppscount) {
+	    if (session->pps_thread.ppsout_count) {
 		char ts_str[TIMESPEC_LEN];
-		struct timespec clock_tmp = session->ppslast.clock;
+		struct timespec clock_tmp = session->pps_thread.ppsout_last.clock;
 		timespec_str( &clock_tmp, ts_str, sizeof(ts_str) );
 		str_appendf(reply, replylen, "\"pps\":%s,", ts_str);
 	    }
