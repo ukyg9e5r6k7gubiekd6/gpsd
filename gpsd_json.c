@@ -184,12 +184,15 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    str_appendf(reply, replylen, "\"epc\":%.2f,", gpsdata->fix.epc);
 #ifdef TIMING_ENABLE
 	if (policy->timing) {
+	    char rtime_str[TIMESPEC_LEN];
+	    struct timespec rtime_tmp;
+	    clock_gettime(CLOCK_REALTIME, &rtime_tmp);
+	    timespec_str(&rtime_tmp, rtime_str, sizeof(rtime_str));
+	    str_appendf(reply, replylen, "\"rtime\":%s,", rtime_str);
 #ifdef PPS_ENABLE
 	    /*@-type -formattype@*/ /* splint is confused about struct timespec */
 	    if (session->ppscount) {
-		char ts_str[TIMESPEC_LEN];  /* buffer to hold printable timespec */
-                /* you can not use a double here as you will lose 11 bits
-                 * of precision */
+		char ts_str[TIMESPEC_LEN];
 		struct timespec clock_tmp = session->ppslast.clock;
 		timespec_str( &clock_tmp, ts_str, sizeof(ts_str) );
 		str_appendf(reply, replylen, "\"pps\":%s,", ts_str);
@@ -197,14 +200,14 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    /*@+type +formattype@*/
 #endif /* PPS_ENABLE */
 	    str_appendf(reply, replylen,
-			   "\"sor\":%.9f,\"chars\":%lu,\"sats\":%2d,\"rtime\":%.9f,\"week\":%u,\"tow\":%.3f,\"rollovers\":%d",
-			   session->sor,
-			   session->chars,
-			   gpsdata->satellites_used,
-			   rtime,
-			   session->context->gps_week,
-			   session->context->gps_tow,
-			   session->context->rollovers);
+			"\"sor\":%.9f,\"chars\":%lu,\"sats\":%2d,"
+			"\"week\":%u,\"tow\":%.3f,\"rollovers\":%d",
+			session->sor,
+			session->chars,
+			gpsdata->satellites_used,
+			session->context->gps_week,
+			session->context->gps_tow,
+			session->context->rollovers);
 	}
 #endif /* TIMING_ENABLE */
     }
