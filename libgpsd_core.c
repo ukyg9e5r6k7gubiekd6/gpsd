@@ -389,6 +389,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     session->gpsdata.online = (timestamp_t)0;
 }
 
+#ifdef PPS_ENABLE
 static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
 			  int loglevel, const char *fmt, ...)
 /* shim function to decouple PPS monitor code from the session structure */
@@ -420,6 +421,7 @@ static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
     gpsd_vlog(&device->context->errout, loglevel, buf, sizeof(buf), fmt, ap);
     va_end(ap);
 }
+#endif /* PPS_ENABLE */
 
 
 /*@-usereleased -compdef -compmempass@*/
