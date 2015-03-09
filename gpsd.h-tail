@@ -442,9 +442,7 @@ struct gps_device_t {
     sourcetype_t sourcetype;
     servicetype_t servicetype;
     int mode;
-#ifndef _WIN32
     struct termios ttyset, ttyset_old;
-#endif
 #ifndef FIXED_PORT_SPEED
     unsigned int baudindex;
 #endif /* FIXED_PORT_SPEED */
