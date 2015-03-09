@@ -74,7 +74,7 @@ PERMISSIONS
 #ifdef SOCKET_EXPORT_ENABLE
 #include "json.h"
 
-#include "gps.h"		/* for safe_atof() & timestamp_t prototype */
+#include "gps.h"		/* for safe_atof() prototype */
 #include "strfuncs.h"
 
 #define JSON_MINIMAL	/* GPSD only uses a subset of the features */
