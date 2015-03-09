@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>     /* for strlcat() */
 
 #include "gpsd.h"
 #include "bits.h"
