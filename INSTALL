@@ -163,3 +163,43 @@ information; edit to taste.
 
 For special instructions related to using GPSD for time service, see the
 GPSD Time Service HOWTO in the distribution or on the web.
+
+== Special Notes for OS X Installation ==
+
+gpsd will build, install and run on OS X.  The easiest way to do so is
+to first install the MacPorts package.  Follow their install procedure
+at: http://www.macports.org/install.php
+
+Then use their port command to install scons, and optionally git if you 
+want to access the develpment source.
+
+--------------------------------------------------------------
+# port install scons
+# port install git
+--------------------------------------------------------------
+
+While runnning gpsd, or scons check, you may run out of shared memory
+segments.  If so, you will see this error message:
+
+--------------------------------------------------------------
+gpsd:ERROR: shmat failed: Too many open files
+--------------------------------------------------------------
+
+By default OS X allows a very small number of shared segments.  You
+can check your allowed maximum number of shared segments, then increase
+the maximum number, with these commands:
+
+--------------------------------------------------------------
+# sysctl kern.sysv.shmseg=8
+kern.sysv.shmseg: 32 -> 8
+#   sysctl -a  | fgrep shmseg
+kern.sysv.shmseg: 8
+# sysctl kern.sysv.shmseg=16
+kern.sysv.shmseg: 8 -> 16
+#   sysctl -a  | fgrep shmseg
+kern.sysv.shmseg: 16
+--------------------------------------------------------------
+
+If you are using a USB based GPS you will likely need the Prolific
+PL2303 driver.  You can find it here:
+http://www.prolific.com.tw/US/ShowProduct.aspx?p_id=229&pcid=41
