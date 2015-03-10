@@ -178,7 +178,9 @@ There is about three orders of magnitude between the best achievable
 wide-area-network accuracy and even the lowest-end GPS-constrained
 clock or time radio.  Of all the time sources described here, the only
 one not precise enough to drive WAN NTP is in-band time from a GPS
-without 1PPS <footnote>.
+without 1PPS footnote:[Actually, a non-1PPS GPS with sufficiently
+clever firmware can be good enough - but they almost never are in
+practice, and never in consumer-grade hardware.].
 
 Since the year 2000 GPSes have drastically decreased in price and
 improved in performance.  For time-service purposes the important
