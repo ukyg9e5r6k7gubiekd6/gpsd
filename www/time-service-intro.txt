@@ -15,7 +15,7 @@ included.
 
 == Use cases for precision time service ==
 
-More applications than is commonly realized require precise time -
+More applications than are commonly realized require precise time -
 which, in practice, means time accurate to a tenth of a second or
 less.  While sub-millisecond time requirements are rare outside of
 scientific work and the sharper end of industrial process control,
@@ -23,7 +23,7 @@ the range between 0.1sec and 0.001sec has a lot of customers.
 
 As one large example, the Payment Card Industry (PCI) standards used
 by the credit card industry mandate audited NTP time, which is on the
-order of 100ms accurate.
+order of 100 ms accurate.
 
 Modern cryptographic systems, such as Kerberos, also require accurate time.
 So do cellular networks and navigation systems for autonomous
@@ -33,9 +33,9 @@ high-precision time is likely to rise significantly in the future.
 There are several equivalent ways to state the precision of a clock.
 In the remainder of this introduction we will use "jitter" - the width
 of its random variation from Universal Coordinated Time (UTC), usually
-in nanoseconds (ns) or milliseconds (ms).  In these units 
-range of interest for most precision time applications is from
-100ms down to 1000ns.
+in nanoseconds (ns). microsconds (&mu;s), or milliseconds (ms).  In
+these units range of interest for most precision time applications is
+from 100 ms down to 1000 ns.
 
 == Time service types ==
 
@@ -49,25 +49,25 @@ ground states of cesium-133 atoms.
 National time standards are synchronized (essentially, averaged) to
 yield an international reference called Universal Coordinated Time.
 National time standards, including the U.S's, are normally considered
-accurate to UTC within 20ns <<WWVB>>.
+accurate to UTC within 20 ns <<WWVB>>.
 
 U.S. atomic clock time is propagated through the GPS system, which
 delivers to receivers a pulse-per-second signal ("1PPS" or just "PPS")
-accurate to the top of the current UTC second within 50ns.
+accurate to the top of the current UTC second within 50 ns.
 
 National time standards are also propagated through time radios. In
 the U.S., digital time signal is provided by WWVB in Colorado, driven
 directly by the NIST (National Institute of Standards and Technology)
 master civil time standard.  Propagation delay to U.S. receivers
-varies but is constant by location and no more than 200ms; being
+varies but is constant by location and no more than 200 ms; being
 fixed, this can be easily compensated out. The jitter added to NIST
-time by the WWVB transmission system is about 6ns <<WWVB>>, for a
-total jitter relative to UTC of about 26ns.
+time by the WWVB transmission system is about 6 ns <<WWVB>>, for a
+total jitter relative to UTC of about 26 ns.
 
 National time authorities may also offer a digital time reference via
 landline phone; the U.S.'s has two, supported by NIST and the U.S.
 Naval Observatory. NIST has a claimed accuracy of "a few milliseconds"
-<<ACTS1>>; USNO says 4ms <<ACTS2>>.
+<<ACTS1>>; USNO says 4 ms <<ACTS2>>.
 
 == Clock types ==
 
@@ -88,7 +88,7 @@ from a time authority.  The cost of a clock correlates with its
 thus how little the time drifts between conditioning signals.
 
 A "time radio" or "time receiver" is a clock that is conditioned by a
-national time radio source.  These can achieve 50ns accuracy <<RADIO>>
+national time radio source.  These can achieve 50 ns accuracy <<RADIO>>
 but are often constrained by siting problems and poor longwave
 propagation, leading to frequent loss of signal.  In some parts of the
 U.S., most notably the Boswash corridor and the southern tip of
@@ -107,9 +107,9 @@ at <<SPECTRUMWIKI>>.
 
 Devices described as "GPS clocks" (or more technically as 
 "GPS Disciplined Oscillators" or GPSDOs) are conditioned by the
-50ns-precision 1PPS, and so include a GPS receiver.  Worst-case
+50 ns-precision 1PPS, and so include a GPS receiver.  Worst-case
 accuracy depends on time since last 1PPS but vendor data sheets
-commonly claim 100ns.
+commonly claim 100 ns.
 
 A plain GPS, without a stabilized crystal, can serve as a clock
 source.  However, it will generally be unable to deliver time at all when
@@ -123,8 +123,8 @@ if it is, it becomes a pulse on a handshake line, usually DCD.
 
 In-band time is usually delivered to the second only and is shipped
 with significant and variable delay after 1PPS, typically on the order
-of 100ms. By contrast, 1PPS time output total error will typically be
-close to 1us.
+of 100 ms. By contrast, 1PPS time output total error will typically be
+close to 1&mu;s.
 
 == Basics of NTP ==
 
@@ -151,7 +151,7 @@ software timing loops to ever notice. But large changes are possible.
 Most computers are just NTP clients.  They send NTP requests to a set
 of servers and use it to adjust the local clock.  It is generally
 expected that NTP clients will have an accuracy (that is, maximum
-divergence from the master atomic clock) of at most 100ms,
+divergence from the master atomic clock) of at most 100 ms,
 possibly less depending upon the quality of your network connection.
 
 Some NTP hosts are time *servers*.  These are known as "chimers".
@@ -170,7 +170,7 @@ never see a public chimer higher than Stratum 3 or 4.
 Jitter induced by variable WAN propagation delays
 (including variations in switch latency and routing) makes it
 impractical to try to improve the accuracy of NTP time to much better
-than 100ms.  
+than 100 ms.
 
 == Cost-effective clocks ==
 
@@ -190,7 +190,7 @@ indoors.
 A 1PPS-capable plain GPS that can operate reliably near a window is
 for NTP purposes nearly as good as a time radio or GPS clock, and
 orders of magnitude less expensive.  Even the USB 1.1 polling interval
-of 1ms does not introduce a disqualifying amount of jitter for WAN
+of 1 ms does not introduce a disqualifying amount of jitter for WAN
 service. 
 
 LANs are a different matter. Because their propagation delays are
@@ -226,19 +226,19 @@ in more detail there.
 
 .Summary of worst-case deviation from UTC
 |==============================================================
-|National primary time standard | 20ns
-|WWVB time radio                | 26ns
-|GPS 1PPS top of second         | 50ns
-|Time from time radio           | 50ns
-|GPS-constrained clock          | 100ns
+|National primary time standard | 20 ns
+|WWVB time radio                | 26 ns
+|GPS 1PPS top of second         | 50 ns
+|Time from time radio           | 50 ns
+|GPS-constrained clock          | 100 ns
 |                               |
-|1PPS delivered by OS kernel    | 1uSec (1000ns)  
-|Serial 1PPS                    | 5uSec (5000ns)  
-|1PPS over USB                  | 1ms (1000000ns
+|1PPS delivered by OS kernel    | 1&mu;s (1000 ns)  
+|Serial 1PPS                    | 5&mu;s (5000 ns)  
+|1PPS over USB                  | 1 ms (1000000 ns
 |                               |
-|NIST/UNSO modem time           | 4ms (4000000ns)
-|Normal accuracy of NTP         | ~ 100ms (100000000ns)
-|Jitter of in-band GPS time     | > 100ms (100000000ns)
+|NIST/UNSO modem time           | 4 ms (4000000 ns)
+|Normal accuracy of NTP         | ~ 100 ms (100000000 ns)
+|Jitter of in-band GPS time     | > 100 ms (100000000 ns)
 |==============================================================
 
 == Further Reading ==
@@ -252,7 +252,7 @@ server using GPSD and an inexpensive GPS at <<GPSD-HOWTO>>.
 
 - [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
-- [[[WWWVB]]] http://tf.nist.gov/timefreq/pubs/bulletin/pdf/1999OCT_TF_BULLETIN.pdf[NIST
+- [[[WWVB]]] http://tf.nist.gov/timefreq/pubs/bulletin/pdf/1999OCT_TF_BULLETIN.pdf[NIST
 Time and Frequency Bulletin NISTIR 5082-10]
 
 - [[[WWVBMAP]]] http://tf.nist.gov/stations/wwvbcoverage.htm[WWVB Coverage Area]
@@ -265,6 +265,8 @@ Time and Frequency Bulletin NISTIR 5082-10]
 Clock via Modem]
 
 - [[[RADIO]]] http://en.wikipedia.org/wiki/Radio_clock[Radio clock]
+
+- [[[PTP]]] http://en.wikipedia.org/wiki/Precision_Time_Protocol[PTP]
 
 - [[[GPSD-HOWTO]]] link:gpsd-time-service-howto.html[GPSD Time Service HOWTO]
 
