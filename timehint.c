@@ -266,7 +266,7 @@ struct sock_sample {
     struct timeval tv;
     double offset;
     int pulse;
-    int leap;
+    int leap;    /* notify that a leap second is upcoming */
     // cppcheck-suppress unusedStructMember
     int _pad;
     int magic;      /* must be SOCK_MAGIC */
@@ -317,10 +317,23 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     char clock_str[TIMESPEC_LEN];
     struct timespec offset;
     struct sock_sample sample;
+    struct tm tm;
+    int leap_notify = session->context->leap_notify;
+
+    /* insist that leap seconds only happen in june and december 
+     * GPS emits leap pending for 3 months prior to insertion
+     * NTP expects leap pending for only 1 month prior to insertion 
+     * Per http://bugs.ntp.org/1090 */
+    (void)gmtime_r( &(td->real.tv_sec), &tm);
+    if ( 5 != tm.tm_mon && 11 != tm.tm_mon ) {
+        /* Not june, not December, no way */
+        leap_notify = LEAP_NOWARNING;
+    }
+
 
     /* chrony expects tv-sec since Jan 1970 */
     sample.pulse = 0;
-    sample.leap = session->context->leap_notify;
+    sample.leap = leap_notify;
     sample.magic = SOCK_MAGIC;
     /*@-compdef@*/
     /*@-type@*//* splint is confused about struct timespec */
