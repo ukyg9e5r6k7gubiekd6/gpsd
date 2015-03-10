@@ -464,18 +464,21 @@ int gpsd_serial_open(struct gps_device_t *session)
         if ((session->gpsdata.gps_fd =
 	     open(session->gpsdata.dev.path, (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
             gpsd_log(&session->context->errout, LOG_ERROR,
-		     "device open failed: %s - retrying read-only\n",
+		     "device open of %s failed: %s - retrying read-only\n",
+		     session->gpsdata.dev.path,
 		     strerror(errno));
 	    if ((session->gpsdata.gps_fd =
 		 open(session->gpsdata.dev.path, O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
 		gpsd_log(&session->context->errout, LOG_ERROR,
-			 "read-only device open failed: %s\n",
+			 "read-only device open of %s failed: %s\n",
+			 session->gpsdata.dev.path,
 			 strerror(errno));
 		return -1;
 	    }
 
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "file device open success: %s\n",
+		     "file device open of %s succeeded: %s\n",
+		     session->gpsdata.dev.path,
 		     strerror(errno));
 	}
     }
