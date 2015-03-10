@@ -137,7 +137,7 @@ www/protocol-evolution.html
 www/protocol-transition.html
 www/client-howto.html
 www/gpsd-time-service-howto.html
-www/calibrate-gpsd-ntpd-howto.html
+www/time-service-intro.html
 www/srec.html
 www/writing-a-driver.html
 www/internals.html

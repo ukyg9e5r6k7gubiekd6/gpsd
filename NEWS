@@ -3,6 +3,7 @@
 Repository head:
   Skyview support for the Beidou and QZSS constellations in the NMEA0183 driver.
   ntpmon renamed to ntpsshmon - it doesn't actually monitor NTP itself.
+  New HOWTO on the website: "Introduction to Time Service".
 
 3.13: 2015-02-26 (Eric S. Raymond <esr@snark.thyrsus.com>)
   compiler.h inclusion removed for gps.h so it's standalone for /usr/include. 

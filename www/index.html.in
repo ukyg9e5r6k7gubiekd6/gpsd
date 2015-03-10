@@ -394,6 +394,13 @@ ubiquity and what it's like to be an infrastructure gnome.</dd>
 <dd>Step-by-step instructions on setting up a Stratum 1 time server
 using GPSD and either ntpd or chrony. Documents the black art of
 tuning offsets for remote time servers.</dd>
+
+<dt><a href="time-service-intro.html">Introduction to Time Service</a></dt>
+<dd>All about time service, reference clocks, strata, chimers, and
+other mysteries. Written as a companion to <a
+href="gpsd-time-service-howto.html">GPSD Time Service HOWTO</a> for
+time-service novices.</dd>
+
 </dl>
 
 <h1 id='recipes'>Recipes and related resources</h1>

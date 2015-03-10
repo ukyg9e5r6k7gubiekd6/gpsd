@@ -1788,6 +1788,7 @@ if env.WhereIs('asciidoc'):
                 'protocol-evolution',
                 'protocol-transition',
                 'gpsd-time-service-howto',
+                'time-service-intro',
                 'client-howto']
     asciidocs = ["www/" + stem + ".html" for stem in txtfiles] \
                 + ["www/installation.html"]

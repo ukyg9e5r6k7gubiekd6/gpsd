@@ -1,6 +1,6 @@
 = GPSD Time Service HOWTO =
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.1, Mar 2015
+v2.2, Mar 2015
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -79,53 +79,19 @@ For a time server, the most common causes of wobble are varying GPS
 satellite geometries and the effect of daily temperature variations on
 the oscillators in your equipment.
 
-== How NTP Works ==
+== NTP with GPSD ==
 
-NTP (Network Time Protocol) is a set of protocols that attempts to
-synchronize computer clocks across the Internet - ultimately, Universal
-Coordinated Time (UTC) as defined by several scale-related atomic clocks
-run by national standards institutes.  NTP Version 4 is defined in
-<<RFC-5905>>.
+See <<TIME-INTRO>> for a technical description of how NTP corrects
+your computer's clock. For purposes of this how-to, the important
+concepts to take way are those of time strata, "chimers", and
+reference clocks.
 
-NTP service daemons running on each host do clock synchronization in
-the presence of variable network latency by monitoring those delays in
-real time and passing around messages that say, essentially, "I
-received your request at time X, I'm sending the reply at time Y and
-the propagation delay to my source of time is Z".  Each daemon then
-uses rather complex algorithms that we won't attempt to describe here
-to digest incoming messages into a composite "NTP time".
-
-NTP conditions your system clock by noticing how your system clock time
-differs from deduced NTP time, then speeding up or slowing down your
-clock's tick rate until it is synchronized.  These tick-rate changes
-are usually extremely small, much too small for a human or even most
-software timing loops to ever notice. But large changes are possible.
-
-Most computers are just NTP clients.  They send NTP requests to a set
-of servers and use it to adjust the local clock.  It is generally
-expected that NTP clients will have an accuracy (that is, maximum
-divergence from the master atomic clock) of at most &plusmn;100 mSec,
-possibly less depending upon the quality of your network connection.
-
-Some NTP hosts are time *servers*.  These are known as "chimers".
-They respond to NTP clients with time read from high-precision
-reference clocks (often abbreviated "refclocks") synchronized to
-national time standards.  GPSes, because they distribute a single
-atomic-clock time basis in a way that is generally accessible, are
-widely used as refclocks.
-
-You will hear time service people speak of "Stratum 0" (the reference
-clocks) "Stratum 1" (NTP servers directly connected to reference
-clocks) and "Stratum 2" (servers that get time from Stratum
-1). Stratum 3 chimers redistribute time from Stratum 2, and so
-forth. There are defined higher strata up to 15, but you will probably
-never see a public chimer higher than Stratum 3 or 4.
-
-Ordinary client computers are normally configured to get time from one
-or more Stratum 2 (or less commonly Stratum 3) servers. However, with GPSD and
-a suitable GPS device, you can easily condition your clock to higher accuracy
-than what you get from typical Stratum 2; with a little effort you can
-do better than you can get from most public Stratum 1 servers.
+Ordinary NTP client computers are normally configured to get time from
+one or more Stratum 2 (or less commonly Stratum 3) NTP
+servers. However, with GPSD and a suitable GPS device, you can easily
+condition your clock to higher accuracy than what you get from typical
+Stratum 2; with a little effort, you can do better than you can get
+from most public Stratum 1 servers.
 
 You can then make your high-quality time available to other systems on
 your network, or even run a public NTP server.  Anyone can do this;
@@ -136,8 +102,8 @@ statistical outliers so the timebase cannot be accidentally or
 deliberately compromised.
 
 In fact many public and widely-trusted Stratum 1 chimers use GPSes as
-their Stratum 0, and a significant fraction of those use GPSD in the
-way we will describe here.
+their reference clocks, and a significant fraction of those use GPSD
+in the way we will describe here.
 
 == 1PPS quality issues ==
 
@@ -1550,11 +1516,12 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 == References ==
 
 [bibliography]
+
+- [[[TIME-INTRO]]] link:time-service-intro.html[Introduction to Time Service]
+
 - [[[WIKI-NTP]]] http://en.wikipedia.org/wiki/Network_Time_Protocol[Network Time Protocol]
 
 - [[[NTP-FAQ]]] http://www.ntp.org/ntpfaq/[NTP FAQ]
-
-- [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
 - [[[SIRF-WOBBLE]]] http://www.megapathdsl.net/~hmurray/ntp/GPSSiRF-off.gif[Peer Offset of SiRF units]
 
@@ -1620,3 +1587,5 @@ preliminary information on PTP.
 
 2.1 Mar 2015: More on PTP. Added link to Jaap Winius's page on GPS-18 setup.
 
+2.2 Mar 2015: Detailed explanation of NTP has moved to a new page,
+link:time-service-intro.html[Introduction to Time Service].
