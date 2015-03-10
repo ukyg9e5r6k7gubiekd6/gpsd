@@ -151,7 +151,7 @@ software timing loops to ever notice. But large changes are possible.
 Most computers are just NTP clients.  They send NTP requests to a set
 of servers and use it to adjust the local clock.  It is generally
 expected that NTP clients will have an accuracy (that is, maximum
-divergence from the master atomic clock) of at most &plusmn;100 mSec,
+divergence from the master atomic clock) of at most 100ms,
 possibly less depending upon the quality of your network connection.
 
 Some NTP hosts are time *servers*.  These are known as "chimers".
@@ -238,7 +238,7 @@ in more detail there.
 |                               |
 |NIST/UNSO modem time           | 4ms (4000000ns)
 |Normal accuracy of NTP         | ~ 100ms (100000000ns)
-|Jitter of in-band GPS time     | > 100ns (100000000ns)
+|Jitter of in-band GPS time     | > 100ms (100000000ns)
 |==============================================================
 
 == Further Reading ==
