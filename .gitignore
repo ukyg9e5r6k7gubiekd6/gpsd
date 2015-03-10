@@ -151,3 +151,4 @@ libQgpsmm.prl
 libQgpsmm/binaries/*
 # misc files
 nohup.out
+*.bak
