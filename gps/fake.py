@@ -71,6 +71,7 @@ import os, sys, time, signal, pty, termios # fcntl, array, struct
 import exceptions, threading, socket, select
 import gps
 import packet as sniffer
+import stat
 
 # The magic number below has to be derived from observation.  If
 # it's too high you'll slow the tests down a lot.  If it's too low
@@ -262,6 +263,7 @@ class FakePTY(FakeGPS):
         }
         (self.fd, self.slave_fd) = pty.openpty()
         self.byname = os.ttyname(self.slave_fd)
+        os.chmod( self.byname,  stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH );
         (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(self.slave_fd)
         cc[termios.VMIN] = 1
         cflag &= ~(termios.PARENB | termios.PARODD | termios.CRTSCTS)
