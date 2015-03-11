@@ -354,8 +354,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * configuration switch. 
      *
      * Once we have the latest edge we compare it to the last edge which we
-     * stored.  If the edge passes sanity checks we use it to send to
-     * ntpshm and chrony_send
+     * stored.  If the edge passes sanity checks we pass is out through
+     * the call context.
      */
 
     while (thread_context->report_hook != NULL
@@ -371,7 +371,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 #if defined(TIOCMIWAIT)
         /* we are lucky to have TIOCMIWAIT, so wait for next edge */
-#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_CAR|TIOCM_RI|TIOCM_CTS)
+#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_RI|TIOCM_CTS)
         if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
