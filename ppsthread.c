@@ -60,6 +60,7 @@
 #include "gpsd_config.h"
 #include "timespec_str.h"
 #include "ppsthread.h"
+#include "compiler.h"	/* required for erno thread-safety */
 
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
