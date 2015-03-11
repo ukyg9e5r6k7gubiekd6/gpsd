@@ -125,7 +125,7 @@ static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *cont
 
     /*
      * Note: this call requires root under BSD, and possibly on
-     * well-secured Linux systems.  This is why ntpshmwrite.context_init() has to be
+     * well-secured Linux systems.  This is why ntpshm_context_init() has to be
      * called before privilege-dropping.
      */
     shmid = shmget((key_t) (NTPD_BASE + unit),
