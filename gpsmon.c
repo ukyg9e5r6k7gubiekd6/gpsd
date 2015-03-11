@@ -252,7 +252,7 @@ void pps_update(WINDOW *win, int y, int x)
     /*@-type -noeffect@*/ /* splint is confused about struct timespec */
     struct timedelta_t ppstimes;
 
-    if (pps_thread_lastpps(&session.pps_thread, &ppstimes) > 0) {
+    if (pps_thread_ppsout(&session.pps_thread, &ppstimes) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
 	int i;
@@ -853,7 +853,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     if ( 0 != isnan(device->newdata.time)) {
 	// "NTP: bad new time
 #if defined(PPS_ENABLE) && !defined(S_SPLINT_S)
-    } else if (device->newdata.time <= device->pps_thread.fixin_real.tv_sec) {
+    } else if (device->newdata.time <= device->pps_thread.fixin.real.tv_sec) {
 	// "NTP: Not a new time
 #endif /* PPS_ENABLE */
     } else 

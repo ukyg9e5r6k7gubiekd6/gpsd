@@ -316,8 +316,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     volatile struct pps_thread_t *thread_context = (struct pps_thread_t *)arg;
     /* the system clock time, to the nSec, when the last fix received */
     /* using a double would cause loss of precision */
-    struct timespec last_fixtime_clock = {0, 0};
-    struct timespec last_fixtime_real = {0, 0};
+    volatile struct timedelta_t last_fixtime = {{0, 0}, {0, 0}};
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
 #if defined(TIOCMIWAIT)
@@ -395,8 +394,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    "PPS: pthread_mutex_lock() : %s\n", errbuf);
 	}
 	/*@ +unrecog @*/
-	last_fixtime_real = thread_context->fixin_real;
-	last_fixtime_clock = thread_context->fixin_clock;
+	last_fixtime = thread_context->fixin;
 	/*@ -unrecog (splint has no pthread declarations as yet) @*/
 	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
 	if ( 0 != pthread_err ) {
@@ -440,7 +438,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	 * PPS when time is valid.  It is common to get PPS, and no
 	 * fixtime, while autobauding.
 	 */
-        if (last_fixtime_real.tv_sec == 0)
+        if (last_fixtime.real.tv_sec == 0)
 	    continue;
 
 	/* mask for monitored lines */
@@ -657,7 +655,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    log = "Too long for 0.5Hz\n";
 	}
 #endif /* TIOCMIWAIT */
-	if ( ok && last_second_used >= last_fixtime_real.tv_sec ) {
+	if ( ok && last_second_used >= last_fixtime.real.tv_sec ) {
 		/* uh, oh, this second already handled */
 		ok = 0;
 		log = "this second already handled\n";
@@ -706,7 +704,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              */
 
 	    /*@+relaxtypes@*/
-	    ppstimes.real.tv_sec = (time_t)last_fixtime_real.tv_sec + 1;
+	    ppstimes.real.tv_sec = (time_t)last_fixtime.real.tv_sec + 1;
 	    ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
 	    ppstimes.clock = clock_ts;
 	    /*@-relaxtypes@*/
@@ -715,7 +713,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	     * GPS serial input then use that */
 	    /*@-compdef@*/
 	    TS_SUB( &offset, &ppstimes.real, &ppstimes.clock);
-	    TS_SUB( &delay, &ppstimes.clock, &last_fixtime_clock);
+	    TS_SUB( &delay, &ppstimes.clock, &last_fixtime.clock);
 	    timespec_str( &delay, delay_str, sizeof(delay_str) );
 	    /*@+compdef@*/
 
@@ -733,7 +731,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		log1 = "timestamp out of range";
 	    } else {
 		/*@-compdef@*/
-		last_second_used = last_fixtime_real.tv_sec;
+		last_second_used = last_fixtime.real.tv_sec;
 		if (thread_context->report_hook != NULL) 
 		    log1 = thread_context->report_hook(thread_context, &ppstimes);
 		else
@@ -833,8 +831,8 @@ void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
     /*@+nullstate +mustfreeonly@*/
 }
 
-void pps_thread_stash_fixtime(volatile struct pps_thread_t *pps_thread, 
-		   struct timespec realtime, struct timespec clocktime)
+void pps_thread_fixin(volatile struct pps_thread_t *pps_thread, 
+			      volatile struct timedelta_t *fixin)
 /* thread-safe update of last fix time - only way we pass data in */
 {
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
@@ -846,8 +844,7 @@ void pps_thread_stash_fixtime(volatile struct pps_thread_t *pps_thread,
 		"PPS: pthread_mutex_lock() : %s\n", errbuf);
     }
     /*@ +unrecog @*/
-    pps_thread->fixin_real = realtime;
-    pps_thread->fixin_clock = clocktime;
+    pps_thread->fixin = *fixin;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
@@ -859,8 +856,8 @@ void pps_thread_stash_fixtime(volatile struct pps_thread_t *pps_thread,
     /*@ +unrecog @*/
 }
 
-int pps_thread_lastpps(volatile struct pps_thread_t *pps_thread,
-		       struct timedelta_t *td)
+int pps_thread_ppsout(volatile struct pps_thread_t *pps_thread,
+		       volatile struct timedelta_t *td)
 /* return the delta at the time of the last PPS - only way we pass data out */
 {
     volatile int ret;
