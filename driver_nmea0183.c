@@ -1077,6 +1077,18 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
 #endif /* OCEANSERVER_ENABLE */
 
 #ifdef ASHTECH_ENABLE
+/* Ashtech sentences take this format:
+ * $PASHDR,type[,val[,val]]*CS
+ * type is an alphabetic subsentence type
+ *
+ * Oxford Technical Solutions (OXTS) also uses the $PASHR sentence,
+ * but with a very different sentence contents:
+ * $PASHR,HHMMSS.SSS,HHH.HH,T,RRR.RR,PPP.PP,aaa.aa,r.rrr,p.ppp,h.hhh,Q1,Q2*CS
+ *
+ * so field 1 in ASHTECH is always alphabetic and numeric in OXTS
+ * FIXME: decode OXTS $PASHDR
+ *
+ */
 static gps_mask_t processPASHR(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
 {
