@@ -250,10 +250,11 @@ CONFIG_PPS_CLIENT_LDISC=y
 
 Some embedded systems, like the Rasberry Pi, detect PPS on a GPIO
 line instead of an a serial port line.  For those systems you will
-also need this line:
+also need these two lines:
 
 -----------------------------------------------------------------------------
 CONFIG_PPS_CLIENT_GPIO=y
+CONFIG_GPIO_SYSFS=y
 -----------------------------------------------------------------------------
 
 Your Linux distribution may ship a file /boot/config-XXX (where XXX is
