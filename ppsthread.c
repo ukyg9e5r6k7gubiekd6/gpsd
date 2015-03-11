@@ -165,67 +165,75 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     ret = -1;
 #ifdef __linux__
     /*
-     * On Linux, one must make calls to associate a serial port with a
-     * /dev/ppsN device and then grovel in system data to determine
-     * the association.
+     * Some Linuxes, like the RasbPi's, have PPS devices preexisting.
+     * Allow user to pass in an explicit PPS device path.
      */
-    /*@+ignoresigns@*/
-    /* Attach the line PPS discipline, so no need to ldattach */
-    /* This activates the magic /dev/pps0 device */
-    /* Note: this ioctl() requires root */
-    if ( 0 > ioctl(pps_thread->devicefd, TIOCSETD, &ldisc)) {
-	char errbuf[BUFSIZ] = "unknown error";
-	strerror_r(errno, errbuf, sizeof(errbuf));
-	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS cannot set PPS line discipline on %s : %s\n",
-		    pps_thread->devicename, errbuf);
-    	return -1;
-    }
-    /*@-ignoresigns@*/
-
-    /* uh, oh, magic file names!, RFC2783 neglects to specify how
-     * to associate the serial device and pps device names */
-    /* need to look in /sys/devices/virtual/pps/pps?/path
-     * (/sys/class/pps/pps?/path is just a link to that)
-     * to find the /dev/pps? that matches our serial port.
-     * this code fails if there are more then 10 pps devices.
-     *
-     * yes, this could be done with libsysfs, but trying to keep the
-     * number of required libs small, and libsysfs would still be linux only */
-    memset( (void *)&globbuf, 0, sizeof(globbuf));
-    (void)glob("/sys/devices/virtual/pps/pps?/path", 0, NULL, &globbuf);
-
-    memset( (void *)&path, 0, sizeof(path));
-    for ( i = 0; i < globbuf.gl_pathc; i++ ) {
-        int fd = open(globbuf.gl_pathv[i], O_RDONLY);
-	if ( 0 <= fd ) {
-	    ssize_t r = read( fd, path, sizeof(path) -1);
-	    if ( 0 < r ) {
-		path[r - 1] = '\0'; /* remove trailing \x0a */
-	    }
-	    (void)close(fd);
+    if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0)
+	strlcpy(path, pps_thread->devicename, sizeof(path));
+    else {
+	/*
+	 * Otherwise one must make calls to associate a serial port with a
+	 * /dev/ppsN device and then grovel in system data to determine
+	 * the association.
+	 */
+	/*@+ignoresigns@*/
+	/* Attach the line PPS discipline, so no need to ldattach */
+	/* This activates the magic /dev/pps0 device */
+	/* Note: this ioctl() requires root */
+	if ( 0 > ioctl(pps_thread->devicefd, TIOCSETD, &ldisc)) {
+	    char errbuf[BUFSIZ] = "unknown error";
+	    strerror_r(errno, errbuf, sizeof(errbuf));
+	    pps_thread->log_hook(pps_thread, THREAD_INF,
+				 "KPPS cannot set PPS line discipline on %s : %s\n",
+				 pps_thread->devicename, errbuf);
+	    return -1;
 	}
-	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS checking %s, %s\n",
-		    globbuf.gl_pathv[i], path);
-	if ( 0 == strncmp( path, pps_thread->devicename, sizeof(path))) {
-	    /* this is the pps we are looking for */
-	    /* FIXME, now build the proper pps device path */
-	    pps_num = globbuf.gl_pathv[i][28];
-	    break;
-	}
+	/*@-ignoresigns@*/
+
+	/* uh, oh, magic file names!, RFC2783 neglects to specify how
+	 * to associate the serial device and pps device names */
+	/* need to look in /sys/devices/virtual/pps/pps?/path
+	 * (/sys/class/pps/pps?/path is just a link to that)
+	 * to find the /dev/pps? that matches our serial port.
+	 * this code fails if there are more then 10 pps devices.
+	 *
+	 * yes, this could be done with libsysfs, but trying to keep the
+	 * number of required libs small, and libsysfs would still be linux only */
+	memset( (void *)&globbuf, 0, sizeof(globbuf));
+	(void)glob("/sys/devices/virtual/pps/pps?/path", 0, NULL, &globbuf);
+
 	memset( (void *)&path, 0, sizeof(path));
-    }
-    /* done with blob, clear it */
-    globfree(&globbuf);
+	for ( i = 0; i < globbuf.gl_pathc; i++ ) {
+	    int fd = open(globbuf.gl_pathv[i], O_RDONLY);
+	    if ( 0 <= fd ) {
+		ssize_t r = read( fd, path, sizeof(path) -1);
+		if ( 0 < r ) {
+		    path[r - 1] = '\0'; /* remove trailing \x0a */
+		}
+		(void)close(fd);
+	    }
+	    pps_thread->log_hook(pps_thread, THREAD_INF,
+				 "KPPS checking %s, %s\n",
+				 globbuf.gl_pathv[i], path);
+	    if ( 0 == strncmp( path, pps_thread->devicename, sizeof(path))) {
+		/* this is the pps we are looking for */
+		/* FIXME, now build the proper pps device path */
+		pps_num = globbuf.gl_pathv[i][28];
+		break;
+	    }
+	    memset( (void *)&path, 0, sizeof(path));
+	}
+	/* done with blob, clear it */
+	globfree(&globbuf);
 
-    if ( 0 == (int)pps_num ) {
-	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS device not found.\n");
-    	return -1;
+	if ( 0 == (int)pps_num ) {
+	    pps_thread->log_hook(pps_thread, THREAD_INF,
+				 "KPPS device not found.\n");
+	    return -1;
+	}
+	/* construct the magic device path */
+	(void)snprintf(path, sizeof(path), "/dev/pps%c", pps_num);
     }
-    /* contruct the magic device path */
-    (void)snprintf(path, sizeof(path), "/dev/pps%c", pps_num);
 
     /* root privs are required for this device open */
     if ( 0 != getuid() ) {
