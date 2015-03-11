@@ -44,16 +44,17 @@ oscillator (popularly called an "atomic clock") used as a source
 standard by a national time authority.  By international agreement,
 the U.S. and other major national time authorities use primary
 standards based on electronic transitions between the two hyperfine
-ground states of cesium-133 atoms.
+energy levels of the ground states of cesium-133 atoms.
 
 National time standards are synchronized (essentially, averaged) to
 yield an international reference called Universal Coordinated Time.
-National time standards, including the U.S's, are normally considered
+National time standards, including the U.S.'s, are normally considered
 accurate to UTC within 20 ns <<WWVB>>.
 
 U.S. atomic clock time is propagated through the GPS system, which
-delivers to receivers a pulse-per-second signal ("1PPS" or just "PPS")
-accurate to the top of the current UTC second within 50 ns.
+enables receivers to generate a pulse-per-second signal ("1PPS" or
+just "PPS") accurate to the top of the current UTC second within 50
+ns.
 
 National time standards are also propagated through time radios. In
 the U.S., digital time signal is provided by WWVB in Colorado, driven
@@ -88,8 +89,10 @@ from a time authority.  The cost of a clock correlates with its
 thus how little the time drifts between conditioning signals.
 
 A "time radio" or "time receiver" is a clock that is conditioned by a
-national time radio source.  These can achieve 50 ns accuracy <<RADIO>>
-but are often constrained by siting problems and poor longwave
+national time radio source.  High-end dedicated time receivers can
+achieve 50 ns accuracy <<RADIO>>; consumer-grade "atomic clocks" using
+a radio time signal achieve a much less impressive 30 ms <<HARCC>>.
+Both are often constrained by siting problems and poor longwave
 propagation, leading to frequent loss of signal.  In some parts of the
 U.S., most notably the Boswash corridor and the southern tip of
 Florida, coverage is so intermittent <<WWVBMAP>> as to make the WWVB
@@ -212,7 +215,7 @@ skyview problems as the GPSes of decades ago.
 
 Furthermore, the U.S. radio-clock industry was impacted when WWVB
 changed its modulation scheme in 2013.  This didn't affect
-consumer-grade "atomic" clocks, which resynchronize once a day at 2AM
+consumer-grade "atomic" clocks, which resynchronize once a day 
 and don't use the fine details of the signal, but it obsolesced all
 the high-end equipment that conditioned on shorter time scales. At
 least one major timing-systems vendor (Spectracom) bailed out of the
@@ -227,16 +230,17 @@ in more detail there.
 .Summary of worst-case deviation from UTC
 |==============================================================
 |National primary time standard | 20 ns
-|WWVB time radio                | 26 ns
+|WWVB time radio broadcast      | 26 ns
 |GPS 1PPS top of second         | 50 ns
-|Time from time radio           | 50 ns
+|Dedicated time receiver        | 50 ns
 |GPS-constrained clock          | 100 ns
 |                               |
 |1PPS delivered by OS kernel    | 1&mu;s (1000 ns)  
 |Serial 1PPS                    | 5&mu;s (5000 ns)  
-|1PPS over USB                  | 1 ms (1000000 ns
+|1PPS over USB                  | 1 ms (1000000 ns)
 |                               |
 |NIST/UNSO modem time           | 4 ms (4000000 ns)
+|Consumer-grade time radio      | 30 ms
 |Normal accuracy of NTP         | ~ 100 ms (100000000 ns)
 |Jitter of in-band GPS time     | > 100 ms (100000000 ns)
 |==============================================================
@@ -266,8 +270,18 @@ Clock via Modem]
 
 - [[[RADIO]]] http://en.wikipedia.org/wiki/Radio_clock[Radio clock]
 
+- [[[HARCC]]] http://tf.nist.gov/general/pdf/2429.pdf[How Accurate is a Radio Controlled Clock?]
+
 - [[[PTP]]] http://en.wikipedia.org/wiki/Precision_Time_Protocol[PTP]
 
 - [[[GPSD-HOWTO]]] link:gpsd-time-service-howto.html[GPSD Time Service HOWTO]
+
+== History ==
+
+v1.0, 2015-03-10::
+      Initial version.
+
+v1.1, 2015-03-11::
+      Lots of tiny corrections from G+ and the blog.
 
 //end
