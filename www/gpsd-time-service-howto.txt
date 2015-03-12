@@ -196,12 +196,12 @@ accuracy will ensue.
 
 .Summary of typical accuracy
 |=====================================================
-| GPS atomic clock      | &plusmn;50nSec 
-| KPPS                  | &plusmn;1uSec  
-| PPS                   | &plusmn;5uSec  
-| USB 1.1 poll interval | &plusmn;1mSec  
+| GPS atomic clock      | &plusmn;50nSec
+| KPPS                  | &plusmn;1uSec 
+| PPS                   | &plusmn;5uSec 
+| USB 1.1 poll interval | &plusmn;1mSec 
 | USB 2.0 poll interval | &plusmn;100&mu;Sec (100000 nSec)
-| Network NTP time      | ~&plusmn;30mSec footnote:[RFC5905 says "a few tens of milliseconds", but asymmetric routing can produce 100mSec jitter] 
+| Network NTP time      | ~&plusmn;30mSec footnote:[RFC5905 says "a few tens of milliseconds", but asymmetric routing can produce 100mSec jitter]
 |=====================================================
 
 Observed variations from the typical figure increase towards the bottom

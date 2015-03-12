@@ -235,8 +235,8 @@ in more detail there.
 |Dedicated time receiver        | 50 ns
 |GPS-constrained clock          | 100 ns
 |                               |
-|1PPS delivered by OS kernel    | 1 &mu;s (1000 ns)  
-|Serial 1PPS                    | 5 &mu;s (5000 ns)  
+|1PPS delivered by OS kernel    | 1 &mu;s (1000 ns)
+|Serial 1PPS                    | 5 &mu;s (5000 ns)
 |1PPS over USB 1.1              | 1 ms (1000000 ns)
 |1PPS over USB 2.0              | 100 &mu;s (100000 ns)
 |                               |
