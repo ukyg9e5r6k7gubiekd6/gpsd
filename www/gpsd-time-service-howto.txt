@@ -83,7 +83,7 @@ the oscillators in your equipment.
 
 See <<TIME-INTRO>> for a technical description of how NTP corrects
 your computer's clock. For purposes of this how-to, the important
-concepts to take way are those of time strata, "chimers", and
+concepts to take way are those of time strata, servers, and
 reference clocks.
 
 Ordinary NTP client computers are normally configured to get time from
@@ -96,12 +96,12 @@ from most public Stratum 1 servers.
 You can then make your high-quality time available to other systems on
 your network, or even run a public NTP server.  Anyone can do this;
 there is no official authority, and any NTP client may choose to use
-your host as a chimer by requesting time from it. The time-service
+your host as a server by requesting time from it. The time-service
 network is self-regulating, with NTP daemons constantly pruning
 statistical outliers so the timebase cannot be accidentally or
 deliberately compromised.
 
-In fact many public and widely-trusted Stratum 1 chimers use GPSes as
+In fact many public and widely-trusted Stratum 1 servers use GPSes as
 their reference clocks, and a significant fraction of those use GPSD
 in the way we will describe here.
 
@@ -212,8 +212,8 @@ cases.  The USB poll interval tends to be very stable (relative to its
 
 Network NTP time accuracy can be degraded below RFC5905's "a few tens
 of milliseconds" by a number of factors. Almost all have more to do
-with the quality of your Internet connection to your chimers than with
-the accuracy of the chimers themselves.  Some negatives:
+with the quality of your Internet connection to your servers than with
+the time accuracy of the servers themselves.  Some negatives:
 
 * Having a cable modem.  That is, as opposed to DSL or optical fiber, which
   tend to have less variable latencies.
@@ -223,7 +223,7 @@ the accuracy of the chimers themselves.  Some negatives:
 
 With these factors in play, worst-case error can reach up to
 &plusmn;100mSec.  Fortunately, errors of over &plusmn;100mSec are
-unusual and should occur only if all your network routes to chimers
+unusual and should occur only if all your network routes to servers
 have serious problems.
 
 == Software Prerequisites ==
@@ -320,7 +320,7 @@ for deployment with commodity TCP/IP routers that only have USB ports.
 RS232 is more fiddly to set up (with older devices like the GPS-18 you
 may even have to make your own cables) but it can deliver three orders
 of magnitude better accuracy and repeatability - enough to meet
-prevailing standards for a public Stratum 1 chimer.
+prevailing standards for a public Stratum 1 server.
 
 Among newer receiver designs we've found the the u-blox 6 receiver used
 in the GR601-W to be particularly good.  Very detailed information on
@@ -595,7 +595,7 @@ fudge 127.127.28.0 refid GPS
 
 This is equivalent to declaring a time1 of 0.
 
-The pool statement adds 4 chimers as additional time references needed
+The pool statement adds 4 servers as additional time references needed
 by ntpd for redundancy and to give you a reference to see how well
 your local GPS is performing.  If you are outside of the USA replace
 the pool servers with one in your local area. See <<USE-POOL>> for
@@ -711,17 +711,17 @@ Notice the 1st and 3rd servers, stratum 1 servers, disagree by more than
 PPS reference agrees to the clock.sjc.he.net server within the expected
 jitter of the GR-601W in use.
 
-When no other chimers or local reference clocks appear in the NTP
+When no other servers or local reference clocks appear in the NTP
 configuration, the system clock will lock onto the GPS clock, but this
 is a fragile setup - you can lose your only time reference if the GPS
 is temporarily unable to get satellite lock.
 
-You should always have at least two (preferably four) fallback chimers
+You should always have at least two (preferably four) fallback servers
 in your ntpd.conf for proper ntpd operation, in case your GPS fails to
 report time.  The 'pool' command makes this happen.  And you'll need
 to adjust the offsets (fudges) in your ntp.conf so the SHM(0) time is
-consistent with your other chimers (and other local reference clocks,
-if you have any). We'll describe how to diagnose and tune your chimer
+consistent with your other servers (and other local reference clocks,
+if you have any). We'll describe how to diagnose and tune your server
 configuration in a later section.
 
 Also note that after cold-starting ntpd it will calibrate for up to 15
@@ -953,10 +953,10 @@ may be similar.
 === NTP performance tuning ===
 
 For good time stability, you should always have at least four other
-chimers in your ntpd or chrony configuration besides your GPS
+servers in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
 satellite lock, or has an attack of temporary insanity. You can find
-public NTP chimers to add to your configuration at <<USE-POOL>>. 
+public NTP servers to add to your configuration at <<USE-POOL>>. 
 
 To minimize latency variations, use the national and regional
 pool domains for your country and/or nearby ones.  Your ntp.conf
@@ -971,10 +971,13 @@ project supports (list behind the "Global" link at <<ZONES>>). The
 "pool" tag expands to four randomly chosen servers by default.  "iburst"
 implements a fast start algorithm that also weeds out bad servers.
 
-Note that a chimer can be a poor performer for any of three
-reasons. It may be shipping bad time, or the best routes between you
-and it have large latency variations (jitter), or it may have an asymmetric
-route, confusing NTP.
+Note that a server can be a poor performer (what the NTP documentation
+colorfully calls a "falseticker") for any of three reasons. It may be
+shipping bad time, or the best routes between you and it have large
+latency variations (jitter), or it may have a time-asymmetric route,
+to you (that is, B-to-A time is omn average very different from A-to-B
+time).  Asymmetric routing is the most common cause of serious
+problems.
 
 The standard tool for tuning ntpd is "ntpq" ("NTP query program"). To
 show a list of all servers declared in ntp.conf and their statistics,
@@ -1249,7 +1252,7 @@ By now if you have a good serial PPS signal your local clock should have
 jitter on the order of 1 uSec.  You do not want the hassle of placing
 a GPS on each of your local computers.  So you install chrony or ntp
 on your other hosts and configure them to use your NTP PPS server as
-their local chimer.
+their local server.
 
 With your best setup on a lightly loaded GigE network you find that your
 NTP clients have jitter on the order of 150 uSec, or 150 times worse
@@ -1324,7 +1327,7 @@ for later.
 
 Next you will need the <<LINUX-PTP>> package, just follow the simple
 instructions on their web page to download, compile and install on your
-NTP chimer and its slaves.  Be sure to also follow their instructions on
+NTP server and its slaves.  Be sure to also follow their instructions on
 how to configure your Linux kernel.
 
 In this setup we will just use the ptp4l program.  This program measures
@@ -1382,7 +1385,7 @@ Now as root on the master, start the ptp4l daemon:
 # ethtool --set-eee eth0 eee off
 # ptp4l -S -f /usr/local/etc/ptp4l.conf &
 
-Configuration of the master chimer is now complete.  Now to configure
+Configuration of the master server is now complete.  Now to configure
 the slaves.  If the slaves also have PPS then configure them as masters.
 Otherwise you will stop on your SHMs.
 
@@ -1423,7 +1426,7 @@ ptp4l daemon:
 # ethtool --set-eee eth0 eee off
 # ptp4l -S -f /usr/local/etc/ptp4l.conf &
 
-Configuration of the slave chimer is now complete.  Follow the earlier
+Configuration of the slave server is now complete.  Follow the earlier
 procedures for checking the jitter on the SHM on the slaves.  Give it
 a few hours to settle and your hosts will now be synced to around 5 uSec.
 
@@ -1492,7 +1495,7 @@ ptp4l daemon:
 -----------------------------------------------------------------------------
 
 
-Configuration of the slave chimer is now complete.  Follow the earlier
+Configuration of the slave server is now complete.  Follow the earlier
 procedures for checking the jitter on the SHM on the slaves. 
 
 Sadly, theory and practice diverge here.  I have never succeeded in
@@ -1503,7 +1506,7 @@ pass on some clue.
 == Providing public NTP service ==
 
 <<NTP-FAQ>> has good advice on things to be sure you have done - and
-are ready to do - before becoming a public chimer. One detail it
+are ready to do - before becoming a public server. One detail it
 doesn't mention is that you'll need to un-firewall UDP port 123.  The
 NTP protocol does not use TCP, so no need to unblock TCP port 123.
 
