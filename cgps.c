@@ -682,6 +682,7 @@ int main(int argc, char *argv[])
 {
     int option;
     unsigned int flags = WATCH_ENABLE;
+    int wait_clicks = 0;  /* cycles to wait before gpsd timeout */
 
     /*@ -observertrans @*/
     switch (gpsd_units()) {
@@ -807,12 +808,11 @@ int main(int argc, char *argv[])
     /* heart of the client */
     for (;;) {
 	int c;
-        int wait_clicks = 0;  /* cycles to wait before gpsd timeout */
 
         /* wait 1/2 second for gpsd */
 	if (!gps_waiting(&gpsdata, 500000)) {
             /* 240 tries at .5 Sec a try is a 2 minute timeout */
-	    if ( 120 < wait_clicks++ ) 
+	    if ( 240 < wait_clicks++ ) 
 		die(GPS_TIMEOUT);
 	} else {
 	    wait_clicks = 0;
