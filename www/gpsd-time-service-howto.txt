@@ -1537,7 +1537,7 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[RFC-2783]]] http://tools.ietf.org/html/rfc2783[RFC 2783]
 
-- [[[RFC-5905]]] http://tools.ietf.org/html/rfc2783[RFC 5905]
+- [[[RFC-5905]]] http://tools.ietf.org/html/rfc5905[RFC 5905]
 
 - [[[CHRONY-COMPARE]]] http://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
 
