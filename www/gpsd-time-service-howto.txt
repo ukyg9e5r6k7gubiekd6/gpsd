@@ -1,6 +1,6 @@
 = GPSD Time Service HOWTO =
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.2, Mar 2015
+v2.3, Mar 2015
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -201,7 +201,7 @@ accuracy will ensue.
 | PPS                   | &plusmn;5uSec  
 | USB 1.1 poll interval | &plusmn;1mSec  
 | USB 2.0 poll interval | &plusmn;100&mu;Sec (100000 nSec)
-| Network NTP time      | &plusmn;10mSec 
+| Network NTP time      | ~&plusmn;30mSec footnote:[RFC5905 says "a few tens of milliseconds", but asymmetric routing can produce 100mSec jitter] 
 |=====================================================
 
 Observed variations from the typical figure increase towards the bottom
@@ -210,10 +210,10 @@ accuracy further, though not KPPS accuracy except in the most extreme
 cases.  The USB poll interval tends to be very stable (relative to its
 1mSec or 100&mu;Sec base).
 
-Network NTP time accuracy can be degraded below 10mSec by a number of
-factors. Almost all have more to do with the quality of your Internet
-connection to your chimers than with the accuracy of the chimers
-themselves.  Some negatives:
+Network NTP time accuracy can be degraded below RFC5905's "a few tens
+of milliseconds" by a number of factors. Almost all have more to do
+with the quality of your Internet connection to your chimers than with
+the accuracy of the chimers themselves.  Some negatives:
 
 * Having a cable modem.  That is, as opposed to DSL or optical fiber, which
   tend to have less variable latencies.
@@ -1537,6 +1537,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[RFC-2783]]] http://tools.ietf.org/html/rfc2783[RFC 2783]
 
+- [[[RFC-5905]]] http://tools.ietf.org/html/rfc2783[RFC 5905]
+
 - [[[CHRONY-COMPARE]]] http://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
 
 - [[[CHRONYDEFAULT]]] https://lists.fedoraproject.org/pipermail/devel/2010-May/135679.html
@@ -1599,3 +1601,6 @@ preliminary information on PTP.
 
 2.2 Mar 2015: Detailed explanation of NTP has moved to a new page,
 link:time-service-intro.html[Introduction to Time Service].
+
+2.3 Mar 2015: Use the NTP accuracy estimate from RFC 5905.
+

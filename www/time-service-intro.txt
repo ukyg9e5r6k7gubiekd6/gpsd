@@ -173,7 +173,7 @@ never see a public chimer higher than Stratum 3 or 4.
 Jitter induced by variable WAN propagation delays
 (including variations in switch latency and routing) makes it
 impractical to try to improve the accuracy of NTP time to much better
-than 100 ms.
+than the "a few tens of milliseconds" of <<RFC5905>>.
 
 == Cost-effective clocks ==
 
@@ -242,7 +242,7 @@ in more detail there.
 |                               |
 |NIST/UNSO modem time           | 4 ms (4000000 ns)
 |Consumer-grade time radio      | 30 ms
-|Normal accuracy of NTP         | ~ 100 ms (100000000 ns)
+|Normal accuracy of NTP         | ~ 30 ms (100000000 ns) footnote:[RFC5905 says "a few tens of milliseconds", but asymmetric routing can produce 100mSec jitter]
 |Jitter of in-band GPS time     | > 100 ms (100000000 ns)
 |==============================================================
 
@@ -283,6 +283,7 @@ v1.0, 2015-03-10::
       Initial version.
 
 v1.1, 2015-03-11::
-      Lots of tiny corrections from G+ and the blog.
+      Lots of tiny corrections from G+ and the blog.  Use the NTP
+      accuracy estimate from RFC 5905.
 
 //end
