@@ -195,19 +195,20 @@ USB 3.  When one does, and if it has the Macx-1 mod, higher USB
 accuracy will ensue.
 
 .Summary of typical accuracy
-|=======================================
-| GPS atomic clock    |  &plusmn;50nSec 
-| KPPS                |  &plusmn;1uSec  
-| PPS                 |  &plusmn;5uSec  
-| USB poll interval   |  &plusmn;1mSec  
-| Network NTP time    |  &plusmn;10mSec 
-|=======================================
+|=====================================================
+| GPS atomic clock      | &plusmn;50nSec 
+| KPPS                  | &plusmn;1uSec  
+| PPS                   | &plusmn;5uSec  
+| USB 1.1 poll interval | &plusmn;1mSec  
+| USB 2.0 poll interval | &plusmn;100&mu;Sec (100000 nSec)
+| Network NTP time      | &plusmn;10mSec 
+|=====================================================
 
 Observed variations from the typical figure increase towards the bottom
 of the table.  Notably, a heavily loaded host system can reduce PPS
 accuracy further, though not KPPS accuracy except in the most extreme
 cases.  The USB poll interval tends to be very stable (relative to its
-1mSec poll).
+1mSec or 100&mu;Sec base).
 
 Network NTP time accuracy can be degraded below 10mSec by a number of
 factors. Almost all have more to do with the quality of your Internet
