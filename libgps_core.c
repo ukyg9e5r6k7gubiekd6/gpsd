@@ -217,6 +217,7 @@ const char /*@null observer@*/ *gps_data(const struct gps_data_t *gpsdata CONDIT
 
 bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int timeout CONDITIONALLY_UNUSED)
 /* is there input waiting from the GPS? */
+/* timeout is in uSec */
 {
     /* this is bogus, but I can't think of a better solution yet */
     bool waiting = true;

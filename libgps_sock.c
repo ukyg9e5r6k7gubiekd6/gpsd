@@ -100,6 +100,7 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
 
 bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* is there input waiting from the GPS? */
+/* timeout is in uSec */
 {
 #ifndef USE_QT
     fd_set rfds;
