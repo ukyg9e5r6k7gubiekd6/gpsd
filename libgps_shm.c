@@ -79,7 +79,7 @@ bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
 {
     volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
     volatile bool newdata = false;
-    timestamp_t endtime = timestamp() + (((double)timeout)/1000000);;
+    timestamp_t endtime = timestamp() + (((double)timeout)/1000000);
 
     /* busy-waiting sucks, but there's not really an alternative */
     for (;;) {
