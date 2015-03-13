@@ -49,15 +49,15 @@ into more detail about the steps.
 8. (Optional and challenging.) Hand-tune your installation for the
    best possible performance.
 
-This document is intended to be a comprehensive guide suitable for
-people who know little about time service. We encourage others to
-contribute additions and corrections.
+This document does not attempt to explain all the intricacies of time
+service; it is focused on practical advice for one specific deployment
+case.  There is an introduction <<TIME-INTRO>> to basic concepts and
+terminology for those new to time service. An overview of the NTP
+protocols can be found at <<WIKI-NTP>>, and the official NTP FAQ
+<<NTP-FAQ>> is probably as gentle an introduction to the NTP reference
+implementation as presently exists.
 
-This document does not attempt to explain all the intricacies of
-time service; it is focused on practical advice for one specific
-deployment case.  An overview of the protocols can be found at
-<<WIKI-NTP>>, and the official NTP FAQ <<NTP-FAQ>> is probably
-as gentle an introduction as presently exists.
+We encourage others to contribute additions and corrections.
 
 .Units table
 |====================================================
@@ -82,8 +82,8 @@ the oscillators in your equipment.
 == NTP with GPSD ==
 
 See <<TIME-INTRO>> for a technical description of how NTP corrects
-your computer's clock. For purposes of this how-to, the important
-concepts to take way are those of time strata, servers, and
+your computer's clock against wobble. For purposes of this how-to, the
+important concepts to take way are those of time strata, servers, and
 reference clocks.
 
 Ordinary NTP client computers are normally configured to get time from
@@ -249,7 +249,7 @@ CONFIG_PPS=y
 CONFIG_PPS_CLIENT_LDISC=y
 -----------------------------------------------------------------------------
 
-Some embedded systems, like the Rasberry Pi, detect PPS on a GPIO
+Some embedded systems, like the Raspberry Pi, detect PPS on a GPIO
 line instead of an a serial port line.  For those systems you will
 also need these two lines:
 
