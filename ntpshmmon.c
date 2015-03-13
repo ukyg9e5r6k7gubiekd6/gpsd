@@ -21,21 +21,11 @@
 static struct shmTime *segments[NTPSEGMENTS + 1];
 static struct timespec tick[NTPSEGMENTS + 1];
 
-static void shm_shutdown(void)
-/* shut down all active segments */
-{
-    struct shmTime **pp;
-
-    for (pp = segments; pp < segments + NTPSEGMENTS; pp++)
-	if (*pp != NULL)
-	    (void)shmdt((void *)(*pp));
-}
-
 int main(int argc, char **argv)
 {
-    int units = 0;
     int option;
     int	i;
+    bool killall = false;
     bool verbose = false;
     int nsamples = INT_MAX;
     time_t timeout = (time_t)INT_MAX, starttime = time(NULL);
@@ -47,14 +37,8 @@ int main(int argc, char **argv)
 	    nsamples = atoi(optarg);
 	    break;
 	case 's':
-	    if (units > 0) {
-		shm_shutdown();
-		exit(EXIT_SUCCESS);
-	    } else {
-		fprintf(stderr, "ntpshmmon: zero units declared.\n");
-		exit(EXIT_FAILURE);
-	    }
-	    //break;
+	    killall = true;
+	    break;
 	case 't':
 	    timeout = (time_t)atoi(optarg);
 	    break;
@@ -78,6 +62,16 @@ int main(int argc, char **argv)
 	if (verbose && segments[i] != NULL)
 	    fprintf(stderr, "unit %d opened\n", i);
     }
+
+    if (killall) {
+	struct shmTime **pp;
+
+	for (pp = segments; pp < segments + NTPSEGMENTS; pp++)
+	    if (*pp != NULL)
+		(void)shmdt((void *)(*pp));
+	exit(EXIT_SUCCESS);
+    }
+
     (void)printf("ntpshmmon version 1\n");
 
     do {
