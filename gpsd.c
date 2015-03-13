@@ -1991,6 +1991,7 @@ int main(int argc, char *argv[])
 	gpsd_log(&context.errout, LOG_ERR,
 		 "command sockets creation failed, netlib errors %d, %d\n",
 		 msocks[0], msocks[1]);
+	(void)unlink(pid_file);
 	exit(EXIT_FAILURE);
     }
     gpsd_log(&context.errout, LOG_INF, "listening on port %s\n", gpsd_service);
