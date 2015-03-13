@@ -46,7 +46,9 @@
 
 #ifndef S_SPLINT_S
 #ifdef HAVE_STDATOMIC_H
+#ifndef __COVERITY__	/* Coverity is confused by a GNU typedef */
 #include <stdatomic.h>
+#endif /* __COVERITY__ */
 #endif /* HAVE_STDATOMIC_H */
 #endif /* S_SPLINT_S */
 
@@ -59,7 +61,9 @@ static /*@unused@*/ inline void memory_barrier(void)
 {
 #ifndef S_SPLINT_S
 #ifdef STD_ATOMIC_H
+#ifndef __COVERITY__
     atomic_thread_fence(memory_order_seq_cst);
+#endif /* __COVERITY__ */
 #elif defined(HAVE_OSATOMIC_H)
     OSMemoryBarrier();
 #elif defined(__GNUC__)

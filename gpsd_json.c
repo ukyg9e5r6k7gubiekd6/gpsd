@@ -182,13 +182,14 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    str_appendf(reply, replylen, "\"epc\":%.2f,", gpsdata->fix.epc);
 #ifdef TIMING_ENABLE
 	if (policy->timing) {
+	    /*@-type -formattype@*/ /* splint is confused about struct timespec */
 	    char rtime_str[TIMESPEC_LEN];
 	    struct timespec rtime_tmp;
-	    clock_gettime(CLOCK_REALTIME, &rtime_tmp);
-	    timespec_str(&rtime_tmp, rtime_str, sizeof(rtime_str));
+	    /*@i@*/(int)clock_gettime(CLOCK_REALTIME, &rtime_tmp);
+	    /*@i1@*/timespec_str(&rtime_tmp, rtime_str, sizeof(rtime_str));
+	    /*@-formattype@*/
 	    str_appendf(reply, replylen, "\"rtime\":%s,", rtime_str);
 #ifdef PPS_ENABLE
-	    /*@-type -formattype@*/ /* splint is confused about struct timespec */
 	    if (session->pps_thread.ppsout_count) {
 		char ts_str[TIMESPEC_LEN];
 		struct timespec clock_tmp = session->pps_thread.ppsout_last.clock;

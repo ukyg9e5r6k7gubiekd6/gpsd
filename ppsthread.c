@@ -148,8 +148,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     /* These variables are only needed by Linux to find /dev/ppsN. */
     int ldisc = 18;   /* the PPS line discipline */
     glob_t globbuf;
-    size_t i;             /* to match type of globbuf.gl_pathc */
-    char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
     char path[PATH_MAX] = "";
 #endif
 
@@ -172,6 +170,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0)
 	strlcpy(path, pps_thread->devicename, sizeof(path));
     else {
+	char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
+	size_t i;             /* to match type of globbuf.gl_pathc */
 	/*
 	 * Otherwise one must make calls to associate a serial port with a
 	 * /dev/ppsN device and then grovel in system data to determine

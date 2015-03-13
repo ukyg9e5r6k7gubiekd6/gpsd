@@ -33,11 +33,13 @@ void ntp_write(volatile struct shmTime *shmseg,
      * GPS emits leap pending for 3 months prior to insertion
      * NTP expects leap pending for only 1 month prior to insertion 
      * Per http://bugs.ntp.org/1090 */
+    /*@-type@*//* splint is confused about struct timespec */ 
     (void)gmtime_r( &(td->real.tv_sec), &tm);
     if ( 5 != tm.tm_mon && 11 != tm.tm_mon ) {
         /* Not june, not December, no way */
         leap_notify = LEAP_NOWARNING;
     }
+    /*@-type@*/
 
     /* we use the shmTime mode 1 protocol
      *

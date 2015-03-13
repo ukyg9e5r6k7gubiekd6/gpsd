@@ -1966,7 +1966,7 @@ int main(int argc, char *argv[])
     }
     /*@+unrecog@*/
 
-    if (pid_file) {
+    if (pid_file != NULL) {
 	FILE *fp;
 
 	if ((fp = fopen(pid_file, "w")) != NULL) {
@@ -1991,7 +1991,8 @@ int main(int argc, char *argv[])
 	gpsd_log(&context.errout, LOG_ERR,
 		 "command sockets creation failed, netlib errors %d, %d\n",
 		 msocks[0], msocks[1]);
-	(void)unlink(pid_file);
+	if (pid_file != NULL)
+	    (void)unlink(pid_file);
 	exit(EXIT_FAILURE);
     }
     gpsd_log(&context.errout, LOG_INF, "listening on port %s\n", gpsd_service);

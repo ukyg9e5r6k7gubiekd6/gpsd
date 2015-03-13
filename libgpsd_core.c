@@ -1438,7 +1438,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
 #ifndef NOFLOATS_ENABLE
-	gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
+	/*@i1@*/gpsd_error_model(session,
+				 &session->gpsdata.fix, &session->oldfix);
 #endif /* NOFLOATS_ENABLE */
 
 	/*@+nullderef -nullpass@*/
@@ -1665,7 +1666,7 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t /*@out@*/*td)
     /* this should be an invariant of the way this function is called */
     assert(isnan(device->newdata.time)==0);
 
-    /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &td->clock);
+    (void)clock_gettime(CLOCK_REALTIME, &td->clock);
     fix_time = device->newdata.time;
 
 #ifdef TIMEHINT_ENABLE

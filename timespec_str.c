@@ -36,7 +36,7 @@
  * So 21 digits like this: "-2147483647.123456789"
  *
 */
-void timespec_str(const struct timespec *ts, /*@out@*/char *buf, int buf_size)
+void timespec_str(const struct timespec *ts, /*@out@*/char *buf, size_t buf_size)
 {
     char sign = ' ';
 
