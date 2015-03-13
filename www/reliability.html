@@ -88,20 +88,19 @@ often. This makes it actively difficult for random code changes to
 break our device drivers without somebody noticing.</p>
 
 <p>Which isn't to say those drivers can't be wrong, just that the ways
-they can be wrong are constrained to be through either
+they can be wrong are constrained to be through either:</p>
+
 <ol>
 <li> a protocol-spec-level misunderstanding of what the driver is
 supposed to be doing, or </li>
 <li> an implementation bug somewhere in the program's
 state space that is obscure and difficult to reach.  </li>
 </ol>
-</p>
 
-<p>Coverity only
-turned up two driver bugs - static buffer overruns in methods for
-changing the device's reporting protocol and line speed that escaped
-notice because they can't be checked in our test harnesses but only on
-a live device.</p>
+<p>Our first Coverity run only turned up two driver bugs - static
+buffer overruns in methods for changing the device's reporting
+protocol and line speed that escaped notice because they can't be
+checked in our test harnesses but only on a live device.</p>
 
 <p>This is also why Coverity didn't find defects on commonly-used code
 paths. If there'd been any, the regression tests probably would have
