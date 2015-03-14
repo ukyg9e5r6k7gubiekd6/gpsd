@@ -1,6 +1,7 @@
 			GPSD project news
 
 Repository head:
+  The Pi Day release, 3.14 on 3/14 2015 at 9:26. Longer timeouts on test clients.
   Skyview support for the Beidou and QZSS constellations in the NMEA0183 driver.
   ntpmon renamed to ntpsshmon - it doesn't actually monitor NTP itself.
   New HOWTO on the website: "Introduction to Time Service".
