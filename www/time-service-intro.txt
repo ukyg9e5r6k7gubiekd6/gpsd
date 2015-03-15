@@ -22,7 +22,7 @@ scientific work and the sharper end of industrial process control,
 the range between 0.1sec and 0.001sec has a lot of customers.
 
 As one large example, the Payment Card Industry (PCI) standards used
-by the credit card industry mandate '''correct and consistent time''',
+by the credit card industry mandate "correct and consistent time"
 and gives NTP as an example of the syncronization technology <<PCI3>>.
 
 Modern cryptographic systems, such as Kerberos, also require accurate time.
@@ -31,12 +31,12 @@ vehicles.  As these cases suggest, the economic value of
 high-precision time is likely to rise significantly in the future.
 
 There are several equivalent ways to state the precision of a clock.
-In the remainder of this introduction we will use "jitter" - the width
-of its random variation from its '''correct''' time (commonly Universal
-Coordinated Time (UTC)); usually
-in nanoseconds (ns). microsconds (&mu;s), or milliseconds (ms).  In
-these units range of interest for most precision time applications is
-from 100 ms down to 1000 ns.
+In the remainder of this introduction we will use "jitter" - the
+width of its short term random variation from its "correct" time
+(commonly Universal Coordinated Time (UTC)); usually in nanoseconds
+(ns). microsconds (&mu;s), or milliseconds (ms).  In these units the
+range of interest for most precision time applications is from 100 ms
+down to 1000 ns.
 
 == Time service types ==
 
@@ -118,7 +118,7 @@ commonly claim 100 ns.
 A plain GPS, without a stabilized crystal, can serve as a clock
 source.  However, it will generally be unable to deliver time at all when
 it lacks memory of a previous 3D position fix and current lock on at
-least one satellite.  In other words, it has no ''holdover''.
+least one satellite.  In other words, it has no "holdover".
 
 GPSes actually deliver two times: 1PPS at top of second, and in-band
 time expressed in a message packet over the serial or USB link.  In
