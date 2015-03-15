@@ -43,7 +43,7 @@ into more detail about the steps.
    use to communicate has been attached; or you can impatiently skip
    to the next step and look for the segment only if that fails.
 
-7. Use ntpq or the chronyc sources command to verify that your device 
+7. Use ntpq or the chronyc sources command to verify that your device
    is feeding time corrections to your NTP daemon.
 
 8. (Optional and challenging.) Hand-tune your installation for the
@@ -111,7 +111,7 @@ GPSD is useful for precision time service because it can use the 1PPS
 pulse delivered by some GPSes to discipline (correct) a local NTP
 instance.
 
-It's tempting to think one could use a GPS for time service just by 
+It's tempting to think one could use a GPS for time service just by
 timestamping the arrival of the first character in the report on each fix
 and correcting for a relatively small fixed latency composed of
 fix-processing and RS232 transmission time.
@@ -155,9 +155,9 @@ latency and jitter.  But it's still often accurate to on the order of
 1 uSec.
 
 Under most Unixes there are two ways to watch 1PPS; Kernel PPS (KPPS)
-and plain PPS latching.  KPPS is an implementation of RFC 2783 <<RFC-2783>>.  
-Plain PPS just references the pulse to the system clock as 
-measured in user space.  These have different error budgets.  
+and plain PPS latching.  KPPS is an implementation of RFC 2783 <<RFC-2783>>.
+Plain PPS just references the pulse to the system clock as
+measured in user space.  These have different error budgets.
 
 Kernel PPS uses a kernel function to accurately timestamp the status
 change on the PPS line.  Plain PPS has the kernel wake up the GPSD PPS
@@ -240,7 +240,7 @@ called "pps-tools" that will install KPPS support and the time_pps.h
 header file.  We recommend you do that.  If your kernel is built in
 the normal modular way, this package installation will suffice.
 
-If you are scratch-building a Linux kernel, the configuration 
+If you are scratch-building a Linux kernel, the configuration
 must include either these two lines, or the same with "y" replaced
 by "m" to enable the drivers as modules:
 
@@ -326,7 +326,7 @@ Among newer receiver designs we've found the the u-blox 6 receiver used
 in the GR601-W to be particularly good.  Very detailed information on
 its timing performance can be found at <<UBLOX-TIMING>>. One of us
 (Raymond) has recent experience with an eval kit, the EVK 6H-0-001,
-that would make an excellent Stratum 0 device. 
+that would make an excellent Stratum 0 device.
 
 Both the EVK 6H and GR601-W are built around the LEA-6H module, which
 is a relatively inexpensive but high-quality navigation GPS. We make a
@@ -423,7 +423,7 @@ so the clock will be updated even when no clients are active.
 
 Note that gpsd assumes that after each fix the GPS will assert
 1PPS first and ship sentences reporting time of fix second. Every
-GPS we know of does things in this order.  If you ever encounter 
+GPS we know of does things in this order.  If you ever encounter
 an exception, it should manifest as reported times that look like
 they're from the future and require a negative fudge. If this
 ever happens, please report the device make and model to the GPSD
@@ -431,8 +431,8 @@ maintainers so we can flag it in our GPS hardware database.
 
 There is another possible cause of small negative offsets which
 shows up on the GR-601-W: implementation bugs in your USB driver,
-combining with quantization by the USB poll interval.  This 
-doesn't mean the u-blox 6 inside it is actually emitting PPS 
+combining with quantization by the USB poll interval.  This
+doesn't mean the u-blox 6 inside it is actually emitting PPS
 after the GPS timestamp is shipped.
 
 In order to present the smallest possible attack surface to
@@ -455,7 +455,7 @@ use, increasing the associated error from ~1 uSec to about ~5 uSec.
 
 2. gpsd will be unable to renice itself to a higher priority.  This
 action helps protect it against jitter induced by variable system
-load. It's particularly important if your NTP server is a general-use 
+load. It's particularly important if your NTP server is a general-use
 computer that's also handling mail or web service or development.
 
 3. The way you have to configure ntpd and chrony will change away
@@ -465,7 +465,7 @@ socket location.
 
 You may also find gpsd can't open serial devices at all if your
 OS distribution has done "secure" things with the permissions.
- 
+
 == Feeding NTPD from GPSD ==
 
 Most Unix systems get their time service through ntpd, a very old and
@@ -506,11 +506,11 @@ Now check to see if gpsd has correctly attached the shared-memory
 segments in needs to communicate with ntpd.  ntpd's rules for the
 creation of these segments are:
 
-Segments 0 and 1:: 
+Segments 0 and 1::
 	 Permissions are 0600 - other programs can only read and
 	 write this segment when running as root.
 
-Segments 2, 3 and above:: 
+Segments 2, 3 and above::
 	 Permissions are 0666 - other programs can read
  	 and write as any user. If ntpd has been
  	 configured to use these segments, any
@@ -576,7 +576,7 @@ restrict 127.0.0.1 mask 255.255.255.0
 restrict -6 ::1
 
 # GPS Serial data reference
-server 127.127.28.0 
+server 127.127.28.0
 fudge 127.127.28.0 time1 0.9999 refid GPS
 
 # GPS PPS reference
@@ -586,7 +586,7 @@ fudge 127.127.28.1 refid PPS
 
 The number "0.9999" is a placeholder, to be explained shortly.  It
 is *not a number to be used in production* - it's too large. If you
-can't replace it with a real value, it would be best to leave out the 
+can't replace it with a real value, it would be best to leave out the
 clause entirely so the entry looks like
 
 -----------------------------------------------------------------------------
@@ -649,7 +649,7 @@ notifications allows ntpd to use its normal heuristics to weight them.
 started as root.)
 
 With this configuration, ntpd will read the timestamp posted by gpsd
-every 64 seconds (16 if non-root) and send it to unit 0.  
+every 64 seconds (16 if non-root) and send it to unit 0.
 
 The number after the parameter time1 (0.9999 in the example above) is a
 "fudge", offset in seconds.  It's an estimate of the latency between
@@ -788,15 +788,15 @@ data.
 If you are outside of the USA replace the pool servers with one in your
 local area. See <<USE-POOL>> for further information.
 
-The offset option is functionally like ntpd's time1 option, used to 
+The offset option is functionally like ntpd's time1 option, used to
 correct known and constant latency.
 
 The allow option allows anyone on the internet to query your server's
 time.
 
-To get chronyd to connect to gpsd using the more precise socket 
+To get chronyd to connect to gpsd using the more precise socket
 method add this to your chrony.conf file (replacing ttyXX
-with your device name).  
+with your device name).
 
 If running as root:
 
@@ -862,14 +862,14 @@ The stratum is as in ntpq.  The Poll is how many seconds elapse between samples.
 The Reach is as in ntpq. LastRx is the time since the last successful
 sample.  Last sample is the offset and jitter of the source.
 
-To keep chronyd from preferring NMEA time over PPS time, you can add an 
+To keep chronyd from preferring NMEA time over PPS time, you can add an
 overlarge fudge to the NMEA time.  Or add the suffix 'noselect' so it
 is never used, just monitored.
 
 == Performance Tuning ==
 
 This section is general and can be used with either ntpd or chronyd.
-We'll have more to say about tuning techniques for the specific 
+We'll have more to say about tuning techniques for the specific
 implementations in later sections.
 
 The clock crystals used in consumer electronics have two properties we
@@ -956,7 +956,7 @@ For good time stability, you should always have at least four other
 servers in your ntpd or chrony configuration besides your GPS
 - in case, for example, your GPS is temporarily unable to achieve
 satellite lock, or has an attack of temporary insanity. You can find
-public NTP servers to add to your configuration at <<USE-POOL>>. 
+public NTP servers to add to your configuration at <<USE-POOL>>.
 
 To minimize latency variations, use the national and regional
 pool domains for your country and/or nearby ones.  Your ntp.conf
@@ -992,11 +992,11 @@ $ ntpq -p
 -arthur.testserv 162.23.41.56   2 u 62     64 377  5.835 -1.129   8.921
 -ntppublic.uzh.c 130.60.159.7   3 u 62     64 377  6.121 -4.102   6.336
 -smtp.irtech.ch  162.23.41.56   2 u 35     64 377 15.521 -1.677   8.678
-+time2.ethz.ch   .PPS.          1 u 27     64 377  5.938 -1.713  16.404 
--callisto.mysnip 192.53.103.104 2 u 53     64 377 49.357 -0.274   5.125 
--shore.naturalne 122.135.113.81 3 u 22     64 377 14.676 -0.528   2.601 
--ntp.univ-angers 195.220.94.163 2 u 41     64 377 40.678 -1.847  13.391 
-+SHM(0)          .GPS.          0 l  4     64 377  0.000 34.682   7.952 
++time2.ethz.ch   .PPS.          1 u 27     64 377  5.938 -1.713  16.404
+-callisto.mysnip 192.53.103.104 2 u 53     64 377 49.357 -0.274   5.125
+-shore.naturalne 122.135.113.81 3 u 22     64 377 14.676 -0.528   2.601
+-ntp.univ-angers 195.220.94.163 2 u 41     64 377 40.678 -1.847  13.391
++SHM(0)          .GPS.          0 l  4     64 377  0.000 34.682   7.952
 *SHM(1)          .PPS.          0 l  3     64 377  0.000 -2.664   0.457
 ------------------------------------------------------------------------
 
@@ -1258,7 +1258,7 @@ With your best setup on a lightly loaded GigE network you find that your
 NTP clients have jitter on the order of 150 uSec, or 150 times worse
 than your master.  Bummer, you want to do much better, so you look to
 the Precision Time Protocol <<PTP>> for help.  PTP is also known as IEEE
-1588.  
+1588.
 
 With PTP you can easily synchronize NTP hosts to 5 uSec with some
 generic NIC hardware and newer Linux kernels.  Some of the Ethernet
@@ -1446,7 +1446,7 @@ by running ethtool  as root and verify at least the following lines are
 present in the output:
 
 -----------------------------------------------------------------------------
-# ethtool -T eth0  
+# ethtool -T eth0
 	hardware-transmit     (SOF_TIMESTAMPING_TX_HARDWARE)
 	hardware-receive      (SOF_TIMESTAMPING_RX_HARDWARE)
 	all                   (HWTSTAMP_FILTER_ALL)
@@ -1496,7 +1496,7 @@ ptp4l daemon:
 
 
 Configuration of the slave server is now complete.  Follow the earlier
-procedures for checking the jitter on the SHM on the slaves. 
+procedures for checking the jitter on the SHM on the slaves.
 
 Sadly, theory and practice diverge here.  I have never succeeded in
 making hardware timestamping work.  I have successfully trashed my
@@ -1510,7 +1510,7 @@ are ready to do - before becoming a public server. One detail it
 doesn't mention is that you'll need to un-firewall UDP port 123.  The
 NTP protocol does not use TCP, so no need to unblock TCP port 123.
 
-If and when you are ready to go public, see <<JOIN-POOL>>. 
+If and when you are ready to go public, see <<JOIN-POOL>>.
 
 == Acknowledgments ==
 Beat Bolli <bbolli@ewanet.ch> wrote much of the section on NTP
