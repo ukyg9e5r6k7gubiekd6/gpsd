@@ -650,7 +650,7 @@ else:
 
     # check for C11 or better, and __STDC__NO_ATOMICS__ is no defined
     # before looking for stdatomic.h
-    if not config.CheckC11() and  not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and config.CheckHeader("stdatomic.h"):
+    if config.CheckC11() and  not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and config.CheckHeader("stdatomic.h"):
         confdefs.append("#define HAVE_STDATOMIC_H 1\n")
     else:
 	confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
