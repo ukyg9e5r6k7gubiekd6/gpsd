@@ -22,7 +22,7 @@ scientific work and the sharper end of industrial process control,
 the range between 0.1sec and 0.001sec has a lot of customers.
 
 As one large example, the Payment Card Industry (PCI) standards used
-by the credit card industry mandate '''correct and consistent time''', 
+by the credit card industry mandate '''correct and consistent time''',
 and gives NTP as an example of the syncronization technology <<PCI3>>.
 
 Modern cryptographic systems, such as Kerberos, also require accurate time.
@@ -32,7 +32,7 @@ high-precision time is likely to rise significantly in the future.
 
 There are several equivalent ways to state the precision of a clock.
 In the remainder of this introduction we will use "jitter" - the width
-of its random variation from its '''correct''' time (commonly Universal 
+of its random variation from its '''correct''' time (commonly Universal
 Coordinated Time (UTC)); usually
 in nanoseconds (ns). microsconds (&mu;s), or milliseconds (ms).  In
 these units range of interest for most precision time applications is
@@ -47,15 +47,15 @@ the U.S. and other major national time authorities use primary
 standards based on electronic transitions between the two hyperfine
 energy levels of the ground states of Cesium-133 atoms.
 
-National time standards are synchronized (essentially, averaged after 
+National time standards are synchronized (essentially, averaged after
 removing outliers and consistent errors) to
 yield an international reference called Universal Coordinated Time.
 The US National time standard, UTC(NIST), normally tracks
-UTC to within 5 ns <<BIPM-T>>.  
+UTC to within 5 ns <<BIPM-T>>.
 
-U.S. atomic clock time (UTC(NIST)) is propagated through the GPS 
-system, which enables receivers to generate a pulse-per-second 
-signal ("1PPS" or just "PPS") accurate to the top of the current 
+U.S. atomic clock time (UTC(NIST)) is propagated through the GPS
+system, which enables receivers to generate a pulse-per-second
+signal ("1PPS" or just "PPS") accurate to the top of the current
 UTC second within 50 ns.
 
 National time standards are also propagated through time radios. In
@@ -110,7 +110,7 @@ receivers (especially those made for the European market) can use
 multiple stations. A useful table of national time radio stations is
 at <<SPECTRUMWIKI>>.
 
-Devices described as "GPS clocks" (or more technically as 
+Devices described as "GPS clocks" (or more technically as
 "GPS Disciplined Oscillators" or GPSDOs) are conditioned by the
 50 ns-precision 1PPS, and so include a GPS receiver.  Worst-case
 accuracy depends on time since last 1PPS but vendor data sheets
@@ -126,9 +126,9 @@ time expressed in a message packet over the serial or USB link.  In
 consumer-grade GPSes, 1PPS may not be shipped to the serial connector;
 if it is, it becomes a pulse on a handshake line, usually DCD.
 
-In-band time is usually delivered accurate to the second only and is 
-shipped with significant and variable delay after 1PPS, typically on 
-the order of 100 ms. By contrast, 1PPS time output total error will 
+In-band time is usually delivered accurate to the second only and is
+shipped with significant and variable delay after 1PPS, typically on
+the order of 100 ms. By contrast, 1PPS time output total error will
 typically be close to 1&mu;s.
 
 == Basics of NTP ==
@@ -196,7 +196,7 @@ A 1PPS-capable plain GPS that can operate reliably near a window is
 for NTP purposes nearly as good as a time radio or GPS clock, and
 orders of magnitude less expensive.  Even the USB 1.1 polling interval
 of 1 ms does not introduce a disqualifying amount of jitter for WAN
-service. 
+service.
 
 LANs are a different matter. Because their propagation delays are
 lower and less variable, NTP can do about two orders of magnitude better
@@ -217,7 +217,7 @@ skyview problems as the GPSes of decades ago.
 
 Furthermore, the U.S. radio-clock industry was impacted when WWVB
 changed its modulation scheme in 2013.  This didn't affect
-consumer-grade "atomic" clocks, which resynchronize once a day 
+consumer-grade "atomic" clocks, which resynchronize once a day
 and don't use the fine details of the signal, but it obsolesced all
 the high-end equipment that conditioned on shorter time scales. At
 least one major timing-systems vendor (Spectracom) bailed out of the
@@ -257,7 +257,7 @@ server using GPSD and an inexpensive GPS at <<GPSD-HOWTO>>.
 
 [bibliography]
 
-- [[[PCI3]]] https://www.pcisecuritystandards.org/documents/PCI_DSS_v3.pdf[Requirements and Security Assessment 
+- [[[PCI3]]] https://www.pcisecuritystandards.org/documents/PCI_DSS_v3.pdf[Requirements and Security Assessment
 Procedures]
 
 - [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
@@ -294,6 +294,6 @@ v1.1, 2015-03-11::
       accuracy estimate from RFC 5905.
 
 v1.2, 2015-03-15::
-      Clarifying language, proof-reading, and minor corrections. 
+      Clarifying language, proof-reading, and minor corrections.
 
 //end
