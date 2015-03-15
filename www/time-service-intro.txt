@@ -48,12 +48,11 @@ standards based on electronic transitions between the two hyperfine
 energy levels of the ground states of Cesium-133 atoms.
 
 National time standards are synchronized (essentially, averaged after
-removing outliers and consistent errors) to
-yield an international reference called Universal Coordinated Time.
-The US National time standard, UTC(NIST), normally tracks
-UTC to within 5 ns <<BIPM-T>>.
+removing outliers and consistent errors) to yield an international
+reference called Universal Coordinated Time.  The US National time
+standard, UTC(NIST), normally tracks UTC to within 5 ns <<BIPM-T>>.
 
-U.S. atomic clock time (UTC(NIST)) is propagated through the GPS
+U.S. atomic clock time (UTC(USNO)) is propagated through the GPS
 system, which enables receivers to generate a pulse-per-second
 signal ("1PPS" or just "PPS") accurate to the top of the current
 UTC second within 50 ns.
