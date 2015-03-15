@@ -2,7 +2,7 @@
 :description: A programmer's guide to NMEA0183, the GPS protocol standard
 :keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v2.16, Feb 2015
+v2.17, Mar 2015
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -13,7 +13,7 @@ Marine Automatic Identification system, also uses NMEA0183-like
 packet formats.
 
 This document is a list of NMEA 0183 sentences with field descriptions.
-It is primarily intended to help people understand GPS reports. but
+It is primarily intended to help people understand GPS reports, but
 also exists because the author finds life-critical protocols with
 only closed/proprietary documentation deeply offensive.
 
@@ -927,6 +927,8 @@ a 9th data field. The 8-field version is in NMEA 3.0.
 
 === GGA - Global Positioning System Fix Data ===
 
+This is one of the sentences commonly emitted by GPS units.
+
 Time, Position and fix related data for a GPS receiver.
 
 ------------------------------------------------------------------------------
@@ -969,6 +971,10 @@ Field Number:
 
 === GLC - Geographic Position, Loran-C ===
 
+This sentence is obsolete over most of its former coverage area.  The
+US/Canadian/Russian Loran-C network was shut down in 2010; it is still
+as of 2015 in limited use around Great Britain and in Norwegian waters.
+
 ------------------------------------------------------------------------------
                                            12    14
         1    2   3 4   5 6   7 8   9 10  11|   13|
@@ -994,6 +1000,8 @@ Field Number:
 14. Checksum
 
 === GLL - Geographic Position - Latitude/Longitude ===
+
+This is one of the sentences commonly emitted by GPS units.
 
 ------------------------------------------------------------------------------
 	1       2 3        4 5         6 7   8
@@ -1090,6 +1098,8 @@ Field Number:
 
 === GSA - GPS DOP and active satellites ===
 
+This is one of the sentences commonly emitted by GPS units.
+
 ------------------------------------------------------------------------------
 	1 2 3                        14 15  16  17  18
 	| | |                         |  |   |   |   |
@@ -1118,6 +1128,8 @@ Field Number:
 18. Checksum
 
 === GSV - Satellites in view ===
+
+This is one of the sentences commonly emitted by GPS units.
 
 These sentences describe the sky position of a UPS satellite in view.
 Typically they're shipped in a group of 2 or 3.
@@ -1509,6 +1521,8 @@ Example: $GPRMB,A,0.66,L,003,004,4917.24,N,12309.57,W,001.3,052.5,000.5,V*0B
 
 
 === RMC - Recommended Minimum Navigation Information ===
+
+This is one of the sentences commonly emitted by GPS units.
 
 ------------------------------------------------------------------------------
                                                           12
@@ -1920,6 +1934,8 @@ Field Number:
 
 === VTG - Track made good and Ground speed ===
 
+This is one of the sentences commonly emitted by GPS units.
+
 ------------------------------------------------------------------------------
          1  2  3  4  5	6  7  8 9   10
          |  |  |  |  |	|  |  | |   |
@@ -2091,6 +2107,8 @@ Field Number:
 4. Checksum
 
 === ZDA - Time & Date - UTC, day, month, year and local time zone ===
+
+This is one of the sentences commonly emitted by GPS units.
 
 ------------------------------------------------------------------------------
 	1         2  3  4    5  6  7
@@ -2310,7 +2328,7 @@ $PUBX,04,073731.00,091202,113851.00,1196,113851.00,1930035,-2660.664,43,*3C<CR><
 
 Only emitted by u-blox Antaris chipset.
 
-== TMVTD - Transas VTS / SML tracking system report ==
+=== TMVTD - Transas VTS / SML tracking system report ===
 
 ------------------------------------------------------------------------------
 $TMVTD,DDMMYY,hhmmss.ss,a,xxxx,c—c,llll.llll,a,yyyyy.yyyy,a,x.x,a,x.x,a,a*hh<CR><LF>
