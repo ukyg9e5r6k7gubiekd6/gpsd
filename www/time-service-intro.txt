@@ -119,17 +119,17 @@ commonly claim 100 ns.
 A plain GPS, without a stabilized crystal, can serve as a clock
 source.  However, it will generally be unable to deliver time at all when
 it lacks memory of a previous 3D position fix and current lock on at
-least one satellite.
+least one satellite.  In other words, it has no ''holdover''.
 
-GPSes actually deliver two times: 1PPS at top of second and in-band
+GPSes actually deliver two times: 1PPS at top of second, and in-band
 time expressed in a message packet over the serial or USB link.  In
-consumer-grade GPSes 1PPS may not be shipped to the serial connector;
+consumer-grade GPSes, 1PPS may not be shipped to the serial connector;
 if it is, it becomes a pulse on a handshake line, usually DCD.
 
-In-band time is usually delivered to the second only and is shipped
-with significant and variable delay after 1PPS, typically on the order
-of 100 ms. By contrast, 1PPS time output total error will typically be
-close to 1&mu;s.
+In-band time is usually delivered accurate to the second only and is 
+shipped with significant and variable delay after 1PPS, typically on 
+the order of 100 ms. By contrast, 1PPS time output total error will 
+typically be close to 1&mu;s.
 
 == Basics of NTP ==
 
