@@ -15,15 +15,15 @@ included.
 
 == Use cases for precision time service ==
 
-More applications than are commonly realized require precise time -
+More applications than are commonly realized require precise time;
 which, in practice, means time accurate to a tenth of a second or
 less.  While sub-millisecond time requirements are rare outside of
 scientific work and the sharper end of industrial process control,
 the range between 0.1sec and 0.001sec has a lot of customers.
 
 As one large example, the Payment Card Industry (PCI) standards used
-by the credit card industry mandate audited NTP time, which is on the
-order of 100 ms accurate.
+by the credit card industry mandate '''correct and consistent time''', 
+and gives NTP as an example of the syncronization technology <<PCI3>>.
 
 Modern cryptographic systems, such as Kerberos, also require accurate time.
 So do cellular networks and navigation systems for autonomous
@@ -32,7 +32,8 @@ high-precision time is likely to rise significantly in the future.
 
 There are several equivalent ways to state the precision of a clock.
 In the remainder of this introduction we will use "jitter" - the width
-of its random variation from Universal Coordinated Time (UTC), usually
+of its random variation from its '''correct''' time (commonly Universal 
+Coordinated Time (UTC)); usually
 in nanoseconds (ns). microsconds (&mu;s), or milliseconds (ms).  In
 these units range of interest for most precision time applications is
 from 100 ms down to 1000 ns.
@@ -254,6 +255,9 @@ server using GPSD and an inexpensive GPS at <<GPSD-HOWTO>>.
 == References ==
 
 [bibliography]
+
+- [[[PCI3]]] https://www.pcisecuritystandards.org/documents/PCI_DSS_v3.pdf[Requirements and Security Assessment 
+Procedures]
 
 - [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
