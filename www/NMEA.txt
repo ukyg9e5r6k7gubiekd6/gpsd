@@ -1,4 +1,6 @@
 = NMEA Revealed =
+:description: A programmer's guide to NMEA0183, the GPS protocol standard
+:keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
 v2.16, Feb 2015
 

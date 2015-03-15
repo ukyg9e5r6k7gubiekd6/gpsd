@@ -1,4 +1,6 @@
 = AIVDM/AIVDO protocol decoding =
+:description: The AIVDM Marine AIS protocol demystified, for programmers.
+:keywords: AIS, AIVDM, AIVDO, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
 v1.49, Feb 2015
 
