@@ -175,7 +175,7 @@ never see a public chimer higher than Stratum 3 or 4.
 Jitter induced by variable WAN propagation delays
 (including variations in switch latency and routing) makes it
 impractical to try to improve the accuracy of NTP time to much better
-than the "a few tens of milliseconds" of <<RFC5905>>.
+than the "a few tens of milliseconds" <<RFC-5905>>.
 
 == Cost-effective clocks ==
 
