@@ -171,8 +171,8 @@ support for only one single GPS type compiled in.</p>
 
 <p>We have an important secondary interest in supporting network time
 service. Using GPSD to monitor a GPS with pulse-per-second capability
-is a perfectly servceable and unbeatably cheap way to provide Stratum
-I time, and we expect this use case to increase.</p>
+is a perfectly serviceable and unbeatably cheap way to provide Stratum
+I time, and we expect this use case to increase in importance.</p>
 
 <p>While we will support survey-grade GPSes when and if we have that
 hardware for testing, our focus will probably remain on inexpensive
