@@ -203,3 +203,25 @@ kern.sysv.shmseg: 16
 If you are using a USB based GPS you will likely need the Prolific
 PL2303 driver.  You can find it here:
 http://www.prolific.com.tw/US/ShowProduct.aspx?p_id=229&pcid=41
+
+== Special Notes for Rasberry Pi Installation ==
+
+gpsd will build, install and run on the Rasberry Pi (RasPi) using Debian
+Wheezy.  Other distributions will likely work fine as well.  The gpsd
+package in Debian Wheezy is known to be flakey, be sure to update to a
+new version of gpsd from source.
+
+Any USB connected GPS that is known to work with gpsd will work fine on
+the RasPi.  No special instructions apply.
+
+A very popular option is to install the AdaFruit Ultimate GPS HAT.  With
+this GPS you also get a good 1PPS signal.  This works as any other GPS
+with gpsd, but there are two things to note.  The GPS takes over the
+serial console: /dev/ttyAMA0.  The PPS signal will be on GPIO Pin #4.
+
+Detailed instructions are available from their web site:
+https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/
+
+You will need to dig deeper to make the PPS work, here is a good reference:
+http://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html
+
