@@ -1342,14 +1342,14 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 #endif
 	}
 
-	if (session->driver.nmea2000.unit_valid == 0) {
+	if (!session->driver.nmea2000.unit_valid) {
 	    unsigned int l1, l2;
 	    
 	    for (l1=0;l1<NMEA2000_NETS;l1++) {
 	        for (l2=0;l2<NMEA2000_UNITS;l2++) {
 		    if (session == nmea2000_units[l1][l2]) {
 		        session->driver.nmea2000.unit = l2;
-		        session->driver.nmea2000.unit_valid = 1;
+		        session->driver.nmea2000.unit_valid = true;
 			session->driver.nmea2000.can_net = l1;
 			can_net = l1;
 		    }
@@ -1357,9 +1357,9 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	    }
 	}
 
-	if (session->driver.nmea2000.unit_valid == 0) {
+	if (!session->driver.nmea2000.unit_valid) {
 	    session->driver.nmea2000.unit = source_unit;
-	    session->driver.nmea2000.unit_valid = 1;
+	    session->driver.nmea2000.unit_valid = true;
 	    nmea2000_units[can_net][source_unit] = session;
 	}
 
@@ -1651,12 +1651,12 @@ int nmea2000_open(struct gps_device_t *session)
     if (unit_ptr != NULL) {
         nmea2000_units[can_net][unit_number] = session;
 	session->driver.nmea2000.unit = unit_number;
-	session->driver.nmea2000.unit_valid = 1;
+	session->driver.nmea2000.unit_valid = true;
     } else {
         strncpy(can_interface_name[can_net],
 		interface_name, 
 		MIN(sizeof(can_interface_name[0]), sizeof(interface_name)));
-	session->driver.nmea2000.unit_valid = 0;
+	session->driver.nmea2000.unit_valid = false;
 	for (l=0;l<NMEA2000_UNITS;l++) {
 	    nmea2000_units[can_net][l] = NULL;	  
 	}
@@ -1678,13 +1678,13 @@ void nmea2000_close(struct gps_device_t *session)
 	(void)close(session->gpsdata.gps_fd);
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
 
-	if (session->driver.nmea2000.unit_valid != 0) {
+	if (session->driver.nmea2000.unit_valid) {
 	    unsigned int l1, l2;
 	    
 	    for (l1=0;l1<NMEA2000_NETS;l1++) {
 	        for (l2=0;l2<NMEA2000_UNITS;l2++) {
 		    if (session == nmea2000_units[l1][l2]) {
-		        session->driver.nmea2000.unit_valid = 0;
+		        session->driver.nmea2000.unit_valid = false;
 		        session->driver.nmea2000.unit = 0;
 			session->driver.nmea2000.can_net = 0;
 			nmea2000_units[l1][l2] = NULL;

@@ -642,7 +642,7 @@ struct gps_device_t {
 	    unsigned int can_msgcnt;
 	    unsigned int can_net;
 	    unsigned int unit;
-	    unsigned int unit_valid;
+	    bool unit_valid;
 	    int mode;
 	    unsigned int mode_valid;
 	    unsigned int idx;
