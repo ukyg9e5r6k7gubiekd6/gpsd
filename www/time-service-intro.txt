@@ -2,7 +2,7 @@
 :description: A primer on precision time sources and services.
 :keywords: time, UTC, atomic clock, GPS, NTP
 Eric S. Raymond <esr@thyrsus.com>
-v1.0, 2015-03-10
+v1.3, 2015-03-16
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -24,18 +24,19 @@ scientific work and the sharper end of industrial process control,
 the range between 0.1sec and 0.001sec has a lot of customers.
 
 As one large example, the Payment Card Industry (PCI) standards used
-by the credit card industry mandate "correct and consistent time"
-and gives NTP as an example of the syncronization technology <<PCI3>>.
+by the credit card industry mandate "correct and consistent time" and
+gives NTP as an example of qualifying synchronization technology
+<<PCI3>>.
 
-Modern cryptographic systems, such as Kerberos, also require accurate time.
+Modern cryptographic systems, such as Kerberos, require accurate time.
 So do cellular networks and navigation systems for autonomous
 vehicles.  As these cases suggest, the economic value of
 high-precision time is likely to rise significantly in the future.
 
 There are several equivalent ways to state the precision of a clock.
 In the remainder of this introduction we will use "jitter" - the
-width of its short term random variation from its "correct" time
-(commonly Universal Coordinated Time (UTC)); usually in nanoseconds
+width of its short term random variation from its "correct" time -
+(commonly Universal Coordinated Time or UTC); usually in nanoseconds
 (ns). microsconds (&mu;s), or milliseconds (ms).  In these units the
 range of interest for most precision time applications is from 100 ms
 down to 1000 ns.
@@ -51,7 +52,7 @@ energy levels of the ground states of Cesium-133 atoms.
 
 National time standards are synchronized (essentially, averaged after
 removing outliers and consistent errors) to yield an international
-reference called Universal Coordinated Time.  The US National time
+reference called Universal Coordinated Time.  The US national time
 standard, UTC(NIST), normally tracks UTC to within 5 ns <<BIPM-T>>.
 
 U.S. atomic clock time (UTC(USNO)) is propagated through the GPS
@@ -155,21 +156,23 @@ are usually extremely small, much too small for a human or even most
 software timing loops to ever notice. But large changes are possible.
 
 Most computers are just NTP clients.  They send NTP requests to a set
-of servers and use it to adjust the local clock.  It is generally
-expected that NTP clients will have an accuracy (that is, maximum
-divergence from the master atomic clock) of at most 100 ms,
-possibly less depending upon the quality of your network connection.
+of servers and use the relies to adjust the local clock.  It is
+generally expected that NTP clients will have an accuracy (that is,
+maximum divergence from the master atomic clock) of of "a few tens
+of milliseconds" <<RFC5985>>; however, problems such as asymmetric
+routing or the large time jitter introduced by cable networks can
+degrade accuracy to around 100 ms and even worse in extreme cases. 
 
-Some NTP hosts are time *servers*.  These are known as "chimers".
-They respond to NTP clients with time read from high-precision
-reference clocks (often abbreviated "refclocks") synchronized to
-national time standards. The refclocks are all the kinds of precision
-time source discussed earlier in this document.
+Some NTP hosts are time *servers*.  They respond to NTP clients with
+time read from high-precision reference clocks (often abbreviated
+"refclocks") synchronized to national time standards. The refclocks
+are all the kinds of precision time source discussed earlier in this
+document.
 
 You will hear time service people speak of "Stratum 0" (the reference
 clocks) "Stratum 1" (NTP servers directly connected to reference
 clocks) and "Stratum 2" (servers that get time from Stratum
-1). Stratum 3 chimers redistribute time from Stratum 2, and so
+1). Stratum 3 servers redistribute time from Stratum 2, and so
 forth. There are defined higher strata up to 15, but you will probably
 never see a public chimer higher than Stratum 3 or 4.
 
@@ -245,7 +248,7 @@ in more detail there.
 |                               |
 |NIST/UNSO modem time           | 4 ms (4000000 ns)
 |Consumer-grade time radio      | 30 ms
-|Normal accuracy of NTP         | ~ 30 ms (100000000 ns) footnote:[RFC5905 says "a few tens of milliseconds", but asymmetric routing can produce 100ms jitter]
+|Normal accuracy of NTP         | ~ 30 ms (100000000 ns)
 |Jitter of in-band GPS time     | > 100 ms (100000000 ns)
 |==============================================================
 
@@ -296,5 +299,8 @@ v1.1, 2015-03-11::
 
 v1.2, 2015-03-15::
       Clarifying language, proof-reading, and minor corrections.
+
+v1.3, 2015-03-16::
+      Text polishing, terminological cleanup.
 
 //end
