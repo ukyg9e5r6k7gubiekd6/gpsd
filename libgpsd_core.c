@@ -953,7 +953,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 	if (isnan(fix->eps) != 0) {
 	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX
 		&& isnan(oldfix->epx) == 0 && isnan(oldfix->epy) == 0
-		&& isnan(oldfix->time) == 0 && isnan(oldfix->time) == 0
+		&& isnan(oldfix->time) == 0 && isnan(fix->time) == 0
 		&& fix->time > oldfix->time) {
 		timestamp_t t = fix->time - oldfix->time;
 		double e =
