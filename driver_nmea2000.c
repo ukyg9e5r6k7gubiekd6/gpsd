@@ -1677,6 +1677,21 @@ void nmea2000_close(struct gps_device_t *session)
 		 session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
+
+	if (session->driver.nmea2000.unit_valid != 0) {
+	    unsigned int l1, l2;
+	    
+	    for (l1=0;l1<NMEA2000_NETS;l1++) {
+	        for (l2=0;l2<NMEA2000_UNITS;l2++) {
+		    if (session == nmea2000_units[l1][l2]) {
+		        session->driver.nmea2000.unit_valid = 0;
+		        session->driver.nmea2000.unit = 0;
+			session->driver.nmea2000.can_net = 0;
+			nmea2000_units[l1][l2] = NULL;
+		    }
+		}
+	    }
+	}
     }
 }
 
