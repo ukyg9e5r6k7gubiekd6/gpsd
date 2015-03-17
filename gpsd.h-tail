@@ -355,12 +355,12 @@ struct gps_type_t {
  *
  * (1) To determince if we require that gpsd be the only process opening a
  * device.  We make an exception for PTYs because the master side has to be
- * opened by test code,
+ * opened by test code.
  *
  * (2) To determine whether it's safe to send wakeup strings.  These are
  * required on some unusual RS-232 devices (such as the TNT compass and
  * Thales/Ashtech GPSes) but should not be shipped to unidentified USB
- * or Bluetooth devices as we don't even know in advance those are GPSEs;
+ * or Bluetooth devices as we don't even know in advance those are GPSes;
  * they might not cope well.
  *
  * Where it says "case detected but not used" it means that we can identify
