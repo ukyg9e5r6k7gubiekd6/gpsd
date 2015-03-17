@@ -18,6 +18,11 @@
 
 #define NTPSEGMENTS	256	/* NTPx for x any byte */
 
+/* difference between timespecs in nanoseconds */
+/* int is too small, avoid floats  */
+/* WARNING!  this will overflow if x and y differ by more than a few seconds */
+#define timespec_diff_ns(x, y)	(long)(((x).tv_sec-(y).tv_sec)*1000000000+(x).tv_nsec-(y).tv_nsec)
+
 static struct shmTime *segments[NTPSEGMENTS + 1];
 static struct timespec tick[NTPSEGMENTS + 1];
 
@@ -29,10 +34,14 @@ int main(int argc, char **argv)
     bool verbose = false;
     int nsamples = INT_MAX;
     time_t timeout = (time_t)INT_MAX, starttime = time(NULL);
+    double cycle = 1.0;
 
 #define USAGE	"usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
-    while ((option = getopt(argc, argv, "hn:st:vV")) != -1) {
+    while ((option = getopt(argc, argv, "c:hn:st:vV")) != -1) {
 	switch (option) {
+	case 'c':
+	    cycle = atof(optarg);
+	    break;
 	case 'n':
 	    nsamples = atoi(optarg);
 	    break;
@@ -86,7 +95,7 @@ int main(int argc, char **argv)
 	    case OK:
 		/*@-mustfreefresh -formattype@*/
 		/*@-type@*//* splint is confused about struct timespec */
-		if (shm_stat.tvc.tv_sec != tick[i].tv_sec || shm_stat.tvc.tv_nsec != tick[i].tv_nsec) {
+		if (timespec_diff_ns(shm_stat.tvc, tick[i]) >= cycle * 1000000000) {
 		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
 			   ntp_name(i),
 			   (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
@@ -128,7 +137,7 @@ int main(int argc, char **argv)
 	 * we're ignoring duplicates via timestamp, polling
 	 * at interval < 1 sec shouldn't be a problem.
 	 */
-	(void)usleep(1000);
+	(void)usleep(cycle * 1000);
     } while 
 	    (nsamples != 0 && time(NULL) - starttime < timeout);
 

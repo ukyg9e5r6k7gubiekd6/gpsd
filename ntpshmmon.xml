@@ -22,6 +22,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <cmdsynopsis>
   <command>ntpshmmon</command>
+      <arg choice='opt'>-c <replaceable>cycletime</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-n <replaceable>nsamples</replaceable></arg>
       <arg choice='opt'>-s </arg>
@@ -93,6 +94,13 @@ nanoseconds part of receiver time to be zero.</para>
 <term>-v</term>
 <listitem>
 <para>Enable verbose status messages.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-c</term>
+<listitem>
+<para>Device poll interval in fractional seconds - defaults to 1.</para>
 </listitem>
 </varlistentry>
 
