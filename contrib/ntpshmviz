@@ -8,25 +8,24 @@
 #
 # To do:
 #
-# 1. Exaggerate vertical scale so data spans about 3/4ths of graph height
-#    and we can actually see features.
-# 2. Try using an impulse rather than line plot - this is bursty noise, not
+# 1. Try using an impulse rather than line plot - this is bursty noise, not
 #    really a contour.
-# 3. Exit button - WM might be a tiler like i3.
-# 4. Program should dynamically handle any number of NTP units.
 #
 
-import array, gtk, stripchart, sys
+import gtk, stripchart, sys
 
 class ntpOffset:
     def __init__(self, stream):
         # Initialize the class
 
+        # create the GUI for the application
+        self.create_GUI()
+
         # get the data
         self.read_data(stream)
 
-        # create the GUI for the application
-        self.create_GUI()
+        self.create_StripTableau()
+        self.display_StripTableau()
 
         # enter the GTK main loop
         gtk.main()
@@ -46,41 +45,60 @@ class ntpOffset:
         self.vbox.show()
         self.window.add(self.vbox)
 
-        # create the StripTableau and add the data to it
-        self.create_StripTableau()
-
         # create the toolbar
         self.create_toolbar()
 
     def create_StripTableau(self):
         # create the striptable widget
 
-        # gtk adjustment (value, lower, upper, step_incr, page_incr, page_size)
-        hadj = gtk.Adjustment(0, 0, 1, 1, 1, self.lines)
-        sel = gtk.Adjustment(-1)
-        self.striptableau = stripchart.StripTableau(hadj, sel)
-        self.striptableau.metawidth  = 120
-        self.striptableau.gradewidth = 100
+        self.hadj = gtk.Adjustment(0, 0, self.lines, 1, 1, self.lines * 0.5)
+        self.sel  = gtk.Adjustment(0)
+        self.striptableau = stripchart.StripTableau(self.hadj, self.sel)
+        self.striptableau.metawidth  = 80
+        self.striptableau.gradewidth = 80
         self.vbox.pack_end(self.striptableau.widget, gtk.TRUE, gtk.TRUE)
 
-        # Add the channel for NTP2
-        # adjust the size of the graph for NTP2 to allow all the data
-        # to fit within the graph
-        vadj_ntp2 = gtk.Adjustment(self.ntp2_lower, self.ntp2_lower-0.1, self.ntp2_upper+0.1, 0.1, 0, self.ntp2_upper+0.1)
-        ntp2_item = self.striptableau.addChannel(self.ntp2, vadj_ntp2)
-        ntp2_item.name = "NTP2"
-        ntp2_item.meta = self.create_text("NTP2 Offset Values")
+    def create_toolbar(self):
+        # Create toolbar for zoom and quit buttons
 
-        # add the channel for NTP3
-        # adjust the size of the graph for NTP2 to allow all the data
-        # to fit within the graph
-        vadj_ntp3 = gtk.Adjustment(self.ntp3_lower-0.1, self.ntp3_lower-0.1, self.ntp3_upper+0.1, 0.1, 0, self.ntp3_upper+0.1)
-        ntp3_item = self.striptableau.addChannel(self.ntp3, vadj_ntp3)
-        ntp3_item.name = "NTP3"
-        ntp3_item.meta = self.create_text("NTP3 Offset Values")
+        self.toolbar = gtk.Toolbar()
+        self.toolbar.show()
+
+        # Zoom buttons
+        self.toolbar.insert_stock(gtk.STOCK_ZOOM_IN, "Zoom in", None,
+                lambda b, w: self.striptableau.zoomIn(), self.window, -1)
+        self.toolbar.insert_stock(gtk.STOCK_ZOOM_OUT, "Zoom out", None,
+                lambda b, w: self.striptableau.zoomOut(), self.window, -1)
+        self.toolbar.insert_stock(gtk.STOCK_ZOOM_FIT, "Zoom fit", None,
+                lambda b, w: self.striptableau.zoomSel(), self.window, -1)
+
+        # Quit button
+        self.toolbar.insert_stock(gtk.STOCK_QUIT, "Quit", None,
+                lambda b, w: gtk.mainquit(), self.window, -1)
+
+        # Put the toolbar into a HandleBox
+        self.handlebox = gtk.HandleBox()
+        self.handlebox.show()
+        self.handlebox.add(self.toolbar)
+
+        # Pack the toolbar into the main window
+        self.vbox.pack_start(self.handlebox, gtk.FALSE)
+
+    def display_StripTableau(self):
+        # Create the graphs for each ntp unit in the data dictionary
+
+        for ntp_unit in self.ntp_data:
+            vadj_ntp = gtk.Adjustment(self.ntp_lower[ntp_unit] - 0.001,
+                    self.ntp_lower[ntp_unit] - 0.001,
+                    self.ntp_upper[ntp_unit] + 0.001, 0, 0,
+                    self.ntp_upper[ntp_unit] * 0.5)
+            ntp_item = self.striptableau.addChannel(self.ntp_data[ntp_unit], 
+                    vadj_ntp)
+            ntp_item.name = ntp_unit
 
     def create_text(self, text):
         # Creates a text widget to contain a description of a channel.
+
         scrolled_window = gtk.ScrolledWindow()
         scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         scrolled_window.set_shadow_type(gtk.SHADOW_IN)
@@ -103,31 +121,6 @@ class ntpOffset:
 
         return scrolled_window
 
-    def create_toolbar(self):
-        # Create the toolbar
-        self.toolbar = gtk.Toolbar()
-        self.toolbar.show()
-
-        # add buttons for zoom and wire them to the StripTableau widget
-        self.toolbar.insert_stock(gtk.STOCK_ZOOM_IN, "Zoom in", None,
-                lambda b, w: self.striptableau.zoomIn(), self.window, -1)
-        self.toolbar.insert_stock(gtk.STOCK_ZOOM_OUT, "Zoom out", None,
-                lambda b, w: self.striptableau.zoomOut(), self.window, -1)
-        self.toolbar.insert_stock(gtk.STOCK_ZOOM_FIT, "Zoom fit", None,
-                lambda b, w: self.striptableau.zoomSel(), self.window, -1)
-
-        # sit the toolbar inside a HandleBox so that it can be detacjed
-        self.handlebox = gtk.HandleBox()
-        self.handlebox.show()
-        self.handlebox.add(self.toolbar)
-
-        # pack the toolbar into the main window
-        self.vbox.pack_start(self.handlebox, gtk.FALSE)
-
-    def get_offset(self, data):
-        # get the difference between the clock time and receiver time of day
-        return (float(data.split(' ')[3]) - float(data.split(' ')[4]))
-
     def read_data(self, stream):
         # Reads data from a ntp log file.  Layout is:
         #
@@ -139,41 +132,43 @@ class ntpOffset:
         #   - Leep-second notification status
         #   - Source precision (log(2) of source jitter)
 
-        self.ntp2       = array.array("d") # ntp2 array
-        self.ntp3       = array.array("d") # ntp3 array
-        self.lines      = 0                # width of graph - set to the size of the largest array
-        self.ntp2_upper = 0                # highest value in ntp2 array
-        self.ntp2_lower = 0                # lowest value in ntp2 array
-        self.ntp3_upper = 0                # highest value in ntp3 array
-        self.ntp3_lower = 0                # lowest value in ntp3 array
-        offset          = 0                # offset value to add to the array and to check the upper and lower bounds of the graph
+        self.ntp_data  = {} # Dictionary of arrays to contain the data of each NTP unit
+        record         = [] # A single record in the file or data stream
+        line_counts    = {} # Count of total lines for each ntp unit
+        self.lines     = 1  # width of graph
+        self.ntp_upper = {} # Upper limit of the data set
+        self.ntp_lower = {} # Lower limit of the data set
+        offset         = 0 # offset value to add to the array 
+        self.ntp_vadj  = {} # vertical adjustment for each graph
 
         for line in stream:
             if len(line.split(' ')) > 6:
-                if 'NTP2' in line:
-                    offset = self.get_offset(line)
-                    self.ntp2.append(offset)
-                    if offset > self.ntp2_upper:
-                        self.ntp2_upper = round(offset, 5)
-                    if offset < self.ntp2_lower:
-                        self.ntp2_lower = round(offset, 5)
-                if 'NTP3' in line:
-                    offset = self.get_offset(line)
-                    self.ntp3.append(offset)
-                    if offset > self.ntp3_upper:
-                        self.ntp3_upper = round(offset, 5)
-                    if offset < self.ntp3_lower:
-                        self.ntp3_lower = round(offset, 5)
+                record = line.split(' ')
+                offset = (float(record[3]) - float(record[4]))
+
+                # If the NTP unit is in the dictionary
+                # append the offset to the list
+                # Otherwise, create a new list in the dictionary
+                # and add the offset.
+                if record[1] not in self.ntp_data:
+                    self.ntp_data[record[1]]  = []
+                    line_counts[record[1]]    = 0
+                    self.ntp_upper[record[1]] = 0
+                    self.ntp_lower[record[1]] = 1
+
+                self.ntp_data[record[1]].append(offset)
+                line_counts[record[1]] += 1
+
+                # Update the upper and lower limits of the NTP unit if needed
+                if offset > self.ntp_upper[record[1]]:
+                    self.ntp_upper[record[1]] = round(offset, 5)
+                if offset < self.ntp_lower[record[1]]:
+                    self.ntp_lower[record[1]] = round(offset, 5)
+
+                # Update the max record count if needed
+                if line_counts[record[1]] > self.lines:
+                    self.lines = line_counts[record[1]]
         stream.close()
 
-        # Get the line count for the larger of the two arrays.
-        # This will set the width of the graph when it is displayed.
-        if len(self.ntp2) > len(self.ntp3):
-            self.lines = len(self.ntp2)
-        else:
-            self.lines = len(self.ntp3)
-
-# Run the class
 if __name__ == "__main__":
-    # instantiate the application
     ntpOffset(sys.stdin)
