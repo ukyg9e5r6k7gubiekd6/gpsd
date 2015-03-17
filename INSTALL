@@ -239,7 +239,7 @@ Git-core is only required to build from a git repository.  pps-tools is for
 testing PPS inputs.
 
 The rest of the installation is just as for any other source based
-install, as note in the file build.txt.
+install, as noted in the file build.txt.
 
 Any USB connected GPS that is known to work with gpsd will work fine on
 the RasPi.  No special instructions apply.
