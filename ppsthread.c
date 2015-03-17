@@ -371,7 +371,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 #if defined(TIOCMIWAIT)
         /* we are lucky to have TIOCMIWAIT, so wait for next edge */
-#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_RI|TIOCM_CTS)
+#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_RI|TIOCM_CTS|TIOCM_RTS)
         if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
