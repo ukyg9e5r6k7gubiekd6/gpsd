@@ -10,7 +10,7 @@
  * getting fixes before giving up on the possibility of 1PPS.
  *
  * Also, check your cable. Cheap DB9 to DB9 cables such as those
- * issued with UPSes often carry TXD/RXD/SG only, omitting handshake
+ * issued with UPSes often carry TXD/RXD/GND only, omitting handshake
  * lines such as DCD.  Suspect this especially if the cable jacket
  * looks too skinny to hold more than three leads!
  *
@@ -56,6 +56,7 @@ const static struct assoc hlines[] = {
     {TIOCM_RI, "TIOCM_RI"},
     {TIOCM_DSR, "TIOCM_DSR"},
     {TIOCM_CTS, "TIOCM_CTS"},
+    {TIOCM_RTS, "TIOCM_RTS"},
 };
 
 int main(int argc, char *argv[])
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
     }
 
     for (;;) {
-	if (ioctl(fd, TIOCMIWAIT, TIOCM_CD|TIOCM_DSR|TIOCM_CAR|TIOCM_RI|TIOCM_CTS) != 0) {
+	if (ioctl(fd, TIOCMIWAIT, TIOCM_CD|TIOCM_DSR|TIOCM_RTS|TIOCM_RI|TIOCM_CTS) != 0) {
 	    (void)fprintf(stderr,
 			  "PPS ioctl(TIOCMIWAIT) failed: %d %.40s\n",
 			  errno, strerror(errno));
