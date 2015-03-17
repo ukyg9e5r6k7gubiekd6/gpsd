@@ -5,8 +5,9 @@
 
 ashctl = Program("ashctl", ["ashctl.c", "../strl.c"])
 binlog = Program("binlog", "binlog.c")
+ppscheck = Program("ppscheck", "ppscheck.c")
 binreplay = Program("binreplay", "binreplay.c", parse_flags=['-lutil'])
 lla2ecef = Program("lla2ecef", "lla2ecef.c", parse_flags=['-lm'])
 motosend = Program("motosend", ["motosend.c", "../strl.c"])
 
-Default(ashctl, binlog, binreplay, lla2ecef, motosend)
+Default(ashctl, binlog, binreplay, lla2ecef, motosend, ppscheck)
