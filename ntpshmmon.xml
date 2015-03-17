@@ -63,8 +63,12 @@ sample NTP3 1424926258.995647636 1424926258.995406476 1424926259.000000000 0 -20
 version of the output format; the version line begins with "ntpshmmon
 version" and is followed by a numeric version field.</para>
 
-<para>The remainder of the file is sample lines. The fields of a
-sample line are as follows:
+<para>The remainder of the file is either commments or sample lines. A
+comment line begins with a # and should ignored by programs that
+interpret this format. This program never generates such lines
+itself.</para>
+
+<para>The fields of a sample line are as follows:
 
 <orderedlist>
 <listitem><para>The keyword "sample"</para></listitem>
