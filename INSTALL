@@ -96,7 +96,9 @@ The Python code in GPSD is actually compatible back to Python 2.4 except that
 you need either the json library module from 2.6 or the functionally
 equivalent simplejson backport.
 
-== Install your distributions package(s) ==
+== Installing gpsd ==
+
+=== Install your distributions package(s) ===
 
 Up-to-date gpsd packages are generally available for Linux
 distributions including Debian and derivatives (including Ubuntu and
@@ -112,29 +114,10 @@ However, many distributions break up GPSD into separate installable
 packages for the core daemon and clients; you should search your
 repository index for anything with gpsd as a prefix.
 
-== Install from source code ==
+=== Install from source code ===
 
-If an up to date gpsd package is not available for your distribution,
-then you can install gpsd from the release tarball.  Tarballs are
-available from: http://download.savannah.gnu.org/releases/gpsd/
-
-Before proceeding to build from source ensure that you have removed your
-distributions old gpsd files.
-
-Download the latest tar file.  Unpack the file, enter the build
-directory, build, test and install gpsd.  A sample procedure would be:
-
---------------------------------------------------------------
-# cd /usr/local/archive
-# wget http://download.savannah.gnu.org/releases/gpsd/gpsd-3.14.tar.gz
-# cd /usr/local/src
-# tar -xvzf /usr/local/archive/gpsd-3.14.tar.gz
-# cd gpsd-3.14
-# scons --clean && scons --config=force && scons check && scons install 
---------------------------------------------------------------
-
-You should now have a clean installation of gpsd from source.  The executable
-files have been installed in /usr/local/bin and /usr/local/sbin.
+Directions for installing from source are in the file build.txt found
+in the source distribution.
 
 == How to test the software ==
 
@@ -256,7 +239,7 @@ Git-core is only required to build from a git repository.  pps-tools is for
 testing PPS inputs.
 
 The rest of the installation is just as for any other source based
-install, as above.
+install, as note in the file build.txt.
 
 Any USB connected GPS that is known to work with gpsd will work fine on
 the RasPi.  No special instructions apply.
