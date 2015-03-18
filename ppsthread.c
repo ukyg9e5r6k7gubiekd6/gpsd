@@ -357,7 +357,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
      * stored.  If the edge passes sanity checks we pass is out through
      * the call context.
      */
-
     while (thread_context->report_hook != NULL
            || thread_context->pps_hook != NULL) {
 	bool ok = false;
@@ -371,7 +370,25 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 #if defined(TIOCMIWAIT)
         /* we are lucky to have TIOCMIWAIT, so wait for next edge */
-#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_RI|TIOCM_CTS|TIOCM_RTS)
+#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_RI|TIOCM_CTS|TIOCM_DSR)
+	/*
+	 * DB9  DB25  Name      Full name
+	 * ---  ----  ----      --------------------
+	 *  3     2    TXD  --> Transmit Data
+	 *  2     3    RXD  <-- Receive Data
+	 *  7     4    RTS  --> Request To Send
+	 *  8     5    CTS  <-- Clear To Send
+	 *  6     6    DSR  <-- Data Set Ready
+	 *  4    20    DTR  --> Data Terminal Ready
+	 *  1     8    DCD  <-- Data Carrier Detect
+	 *  9    22    RI   <-- Ring Indicator
+	 *  5     7    GND      Signal ground
+	 *
+	 * Note that it only makes sense to wait on handshake lines
+	 * activated from the receive side (DCE->DTE) here; in this
+	 * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
+	 * entire set of these.
+	 */
         if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
