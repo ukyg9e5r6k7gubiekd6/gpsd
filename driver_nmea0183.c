@@ -1298,30 +1298,30 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     * 4. The mode is changed back to NMEA, resulting in an
 	     *    infinite loop.
 	     */
-	{"RMC", 8,  false, processRMC},
+	{"DBT", 7,  true,  processDBT},
+	{"GBS", 7,  false, processGBS},
 	{"GGA", 13, false, processGGA},
-	{"GST", 8,  false, processGST},
 	{"GLL", 7,  false, processGLL},
 	{"GSA", 17, false, processGSA},
+	{"GST", 8,  false, processGST},
 	{"GSV", 0,  false, processGSV},
-	{"VTG", 0,  false, NULL},	/* ignore Velocity Track made Good */
-	{"ZDA", 4,  false, processZDA},
-	{"GBS", 7,  false, processGBS},
         {"HDT", 1,  false, processHDT},
-	{"DBT", 7,  true,  processDBT},
-#ifdef TNT_ENABLE
-	{"PTNTHTM", 9, false, processTNTHTM},
-#endif /* TNT_ENABLE */
-#ifdef ASHTECH_ENABLE
-	{"PASHR", 3, false, processPASHR},	/* general handler for Ashtech */
-#endif /* ASHTECH_ENABLE */
 #ifdef OCEANSERVER_ENABLE
 	{"OHPR", 18, false, processOHPR},
 #endif /* OCEANSERVER_ENABLE */
-	    /*@ +nullassign @*/
+#ifdef ASHTECH_ENABLE
+	{"PASHR", 3, false, processPASHR},	/* general handler for Ashtech */
+#endif /* ASHTECH_ENABLE */
 #ifdef MTK3301_ENABLE
 	{"PMTK", 3,  false, processMTK3301},
 #endif /* MTK3301_ENABLE */
+#ifdef TNT_ENABLE
+	{"PTNTHTM", 9, false, processTNTHTM},
+#endif /* TNT_ENABLE */
+	{"RMC", 8,  false, processRMC},
+	{"ZDA", 4,  false, processZDA},
+	{"VTG", 0,  false, NULL},	/* ignore Velocity Track made Good */
+	/*@ +nullassign @*/
     };
 
     int count;
