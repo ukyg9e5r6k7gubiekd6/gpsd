@@ -249,6 +249,17 @@ this GPS you also get a good 1PPS signal.  This works as any other GPS
 with gpsd, but there are two things to note.  The GPS takes over the
 serial console: /dev/ttyAMA0.  The PPS signal will be on GPIO Pin #4.
 
+Only two specific changes need to be made to make the HAT work.  First
+in the file /boot/cmdline.txt, remove this part "console=ttyAMA0,115200
+kgdboc=ttyAMA0,115200)".  That free the serial port from console use so
+the GPS can use it.
+
+Second you need to tell the boot process to load the pps_gpio module
+and attach /dev/pps0 to GPIO ping 4.  Do that by adding this line
+to the bottom of /boot/config.txt: dtoverlay=pps-gpio,gpiopin=4
+
+Reboot and proceed as for any other operating system to use gpsd.
+
 Detailed instructions are available from their web site:
 https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/
 
