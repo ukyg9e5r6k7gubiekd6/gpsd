@@ -3,6 +3,9 @@
  * Reference manuals are at
  * http://www.u-blox.com/en/download/documents-a-resources/u-blox-6-gps-modules-resources.html
  *
+ * updated for u-blox 8
+ * http://www.ublox.com/images/downloads/Product_Docs/u-bloxM8_ReceiverDescriptionProtocolSpec_%28UBX-13003221%29_Public.pdf
+ *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
  * be adding a fixed offset based on a hidden epoch value, in which case
