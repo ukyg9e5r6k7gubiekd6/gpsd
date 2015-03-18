@@ -597,13 +597,15 @@ static gps_mask_t processGSV(int count, char *field[],
      * There my be up to three GSV sentences in a data packet
      *
      * Can occur with talker ID GP (GNSS), GL (GLONASS), GN (GLONASS),
-     *  BD (Beidou), or QZ (QZSS). GL is to be used when GSVs are mixed
+     * BD (Beidou), or QZ (QZSS). GL is to be used when GSVs are mixed
      * contaiuning GLONASS, GN when GSVs contain GLONASS only. In the
      * GLONASS version sat IDs run from 65-96 (NMEA0183 standardizes
-     * this). At least one GPS, the BU-353 GLONASS, emits a GPGSV set
-     * followed by a GLGSV set.  We have also seen a SiRF-IV variant
-     * that emits GPGSV followed by BDGSV. We need to combine these.
+     * this). At least two GPS, the BU-353 GLONASS and the u-blox NEO-M8N,
+     * emit a GPGSV set followed by a GLGSV set.  We have also seen a
+     * SiRF-IV variant that emits GPGSV followed by BDGSV. We need to
+     * combine these. 
      */
+
     int n, fldnum;
     if (count <= 3) {
 	gpsd_log(&session->context->errout, LOG_WARN,
