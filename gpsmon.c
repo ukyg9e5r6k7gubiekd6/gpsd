@@ -838,7 +838,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
     if (logfile != NULL && device->lexer.outbuflen > 0) {
         /*@ -shiftimplementation -sefparams +charint @*/
-        size_t written_count = fwrite
+        UNUSED size_t written_count = fwrite
                (device->lexer.outbuffer, sizeof(char),
                 device->lexer.outbuflen, logfile);
         assert(written_count >= 1);

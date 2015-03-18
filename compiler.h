@@ -40,7 +40,7 @@
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall) \
     do { \
-        ssize_t locresult = (funcall); \
+        UNUSED ssize_t locresult = (funcall); \
         assert(locresult != -23); \
     } while (0)
 
