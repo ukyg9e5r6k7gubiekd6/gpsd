@@ -596,14 +596,23 @@ static gps_mask_t processGSV(int count, char *field[],
      * <repeat for up to 4 satellites per sentence>
      * There my be up to three GSV sentences in a data packet
      *
-     * Can occur with talker ID GP (GNSS), GL (GLONASS), GN (GLONASS),
-     * BD (Beidou), or QZ (QZSS). GL is to be used when GSVs are mixed
-     * contaiuning GLONASS, GN when GSVs contain GLONASS only. In the
-     * GLONASS version sat IDs run from 65-96 (NMEA0183 standardizes
+     * Can occur with talker IDs:
+     *   BD (Beidou),
+     *   GA (Galileo),
+     *   GB (Beidou),
+     *   GL (GLONASS),
+     *   GN (GLONASS, any combination GNSS),
+     *   GP (GPS, SBAS, QZSS),
+     *   QZ (QZSS).
+     *
+     * GL may to be used when GSVs are mixed containing GLONASS, GN maybe
+     * used when GSVs contain GLONASS only.  Usage is inconsistent.
+     *
+     * In the GLONASS version sat IDs run from 65-96 (NMEA0183 standardizes
      * this). At least two GPS, the BU-353 GLONASS and the u-blox NEO-M8N,
      * emit a GPGSV set followed by a GLGSV set.  We have also seen a
      * SiRF-IV variant that emits GPGSV followed by BDGSV. We need to
-     * combine these. 
+     * combine these.
      */
 
     int n, fldnum;
@@ -631,8 +640,8 @@ static gps_mask_t processGSV(int count, char *field[],
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
     } else if (session->nmea.part == 1) {
-	/* 
-	 * might have gone from GPGSV to GLGSV/BDGSV/QZGSV, 
+	/*
+	 * might have gone from GPGSV to GLGSV/BDGSV/QZGSV,
 	 * in which case accumulate
 	 */
 	if (session->nmea.last_gsv_talker == '\0' || GSV_TALKER == session->nmea.last_gsv_talker) {
@@ -950,6 +959,65 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
 	     "mode %d, depth %lf.\n",
 	     session->newdata.mode,
 	     session->newdata.altitude);
+    return mask;
+}
+
+static gps_mask_t processTXT(int count, char *field[],
+			       struct gps_device_t *session)
+/* GPS Text message */
+{
+    /*
+     * $GNTXT,01,01,01,PGRM inv format*2A
+     * 1                   Number of sentences for full data
+     * 1                   Sentence 1 of 1
+     * 01                  Message type
+     *       00 - error
+     *       01 - warning
+     *       02 - notice
+     *       07 - user
+     * PGRM inv format     ASCII text
+     *
+     * Can occur with talker IDs:
+     *   BD (Beidou),
+     *   GA (Galileo),
+     *   GB (Beidou),
+     *   GL (GLONASS),
+     *   GN (GLONASS, any combination GNSS),
+     *   GP (GPS, SBAS, QZSS),
+     *   QZ (QZSS).
+     */
+    gps_mask_t mask = 0;
+    int msgType = 0;
+    char *msgType_txt = "Unknown";
+
+    if ( 5 != count) {
+      return 0;
+    }
+
+    /* set something, so it won't look like an unknown sentence */
+    mask |= ONLINE_SET;
+
+    msgType = atoi(field[3]);
+
+    switch ( msgType ) {
+    case 0:
+	msgType_txt = "Error";
+        break;
+    case 1:
+	msgType_txt = "Warning";
+        break;
+    case 2:
+	msgType_txt = "Notice";
+        break;
+    case 7:
+	msgType_txt = "User";
+        break;
+    }
+
+    /* maximum text lenght unknown, guess 80 */
+    gpsd_log(&session->context->errout, LOG_WARN,
+	     "TXT: %.10s: %.80s\n",
+             msgType_txt, field[4]);
     return mask;
 }
 
@@ -1319,6 +1387,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"PTNTHTM", 9, false, processTNTHTM},
 #endif /* TNT_ENABLE */
 	{"RMC", 8,  false, processRMC},
+	{"TXT", 5,  false, processTXT},
 	{"ZDA", 4,  false, processZDA},
 	{"VTG", 0,  false, NULL},	/* ignore Velocity Track made Good */
 	/*@ +nullassign @*/
@@ -1380,7 +1449,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 		    sizeof(session->nmea.field[0])); i++)
 	session->nmea.field[i] = e;
 
-    /* sentences handlers will tell us whren they have fractional time */
+    /* sentences handlers will tell us when they have fractional time */
     session->nmea.latch_frac_time = false;
 
     /* dispatch on field zero, the sentence tag */
