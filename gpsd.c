@@ -2304,7 +2304,6 @@ int main(int argc, char *argv[])
 		    break;
 		case DEVICE_ERROR:
 		case DEVICE_EOF:
-		    FD_CLR(device->gpsdata.gps_fd, &rfds);
 		    deactivate_device(device);
 		    break;
 		default:
