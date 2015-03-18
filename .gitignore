@@ -14,9 +14,6 @@ gps2udp
 ntpshmmon
 *.exe
 # These are built from .in files
-gpscat
-gpsfake
-gpsprof
 jsongen.py
 maskaudit.py
 control
