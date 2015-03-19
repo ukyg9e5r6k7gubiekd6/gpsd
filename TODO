@@ -142,6 +142,11 @@ However, Iván Sánchez Ortega notes:
 Baud rate and mode changes work in direct mode but are not
 reliable in client mode.
 
+**** Optional dump of GPS configuration using gpsctl.
+
+Some setting, like antenna in use, dead-reckoning mode, would be
+helpful to see.
+
 **** Integrate 1PPS into profiling ***
 
 We caw now *really* measure latency from GPS top of second when it has
@@ -256,7 +261,7 @@ output enough data to make this a chore, rather than a hard problem.
 Probably the best way to do this would be to add support for unscaled
 output of pseudoranges in SKY and add clock and doppler carrier
 phase. This JSON could then be interpreted by a client program and
-dunmped in various standard formats.
+dumped in various standard formats.
 
 Currently the RT-IGS format is looking like the favorite for
 implementation; it's a fairly lightweight protocol, flexible enough to
