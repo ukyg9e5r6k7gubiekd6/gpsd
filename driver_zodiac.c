@@ -353,9 +353,15 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
     unsigned int id =
 	(unsigned int)((session->lexer.outbuffer[3] << 8) |
 		       session->lexer.outbuffer[2]);
-    gpsd_log(&session->context->errout, LOG_RAW,
-	     "Raw Zodiac packet type %d length %zd: %s\n",
-	     id, session->lexer.outbuflen, gpsd_prettydump(session));
+    /*
+     * The guard looks superfluous, but it keeps the rather expensive
+     * gpsd_packetdump() function from being called even when the debug
+     * level does not actually require it.
+     */
+    if (session->context->errout.debug >= LOG_RAW)
+	gpsd_log(&session->context->errout, LOG_RAW,
+		 "Raw Zodiac packet type %d length %zd: %s\n",
+		 id, session->lexer.outbuflen, gpsd_prettydump(session));
 
     if (session->lexer.outbuflen < 10)
 	return 0;
