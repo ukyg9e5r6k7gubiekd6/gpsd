@@ -81,22 +81,48 @@ static void ubx_mode(struct gps_device_t *session, int mode);
 
 /**
  * Receiver/Software Version
+ * UBX-MON-VER
+ *
+ * sadly more info than fits in session->swtype for now.
+ * so squish the data hard, max is maybe 100?
  */
 static void
 ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
 		size_t data_len)
 {
+    unsigned int n = 0;  /* extended info counter */
+    char obuf[128];      /* temp version string buffer */
+
+    if ( 44 > data_len ) {
+	/* incomplete message */
+        return;
+    }
 
     /* save SW and HW Version as subtype */
-    (void)snprintf(session->subtype, sizeof(session->subtype),
-		   "SW: %.30s, HW: %.10s", 
+    (void)snprintf(obuf, sizeof(obuf),
+		   "SW %.30s,HW %.10s", 
 		   (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 0],
 		   (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 30]);
+
+    /* get n number of Extended info strings.  what is max n? */
+    for ( n = 0; ; n++ ) {
+        unsigned int start_of_str = UBX_MESSAGE_DATA_OFFSET + 40 + (30 * n);
+
+        if ( (start_of_str + 2 ) > data_len ) {
+	    /* last one can be shorter than 30 */
+            /* no more data */
+            break;
+        }
+	(void)strlcat(obuf, ",", sizeof(obuf));
+	(void)strlcat(obuf, (char *)&buf[start_of_str], sizeof(obuf));
+    }
+    /* save what we can */
+    (void)strlcpy(session->subtype, obuf, sizeof(session->subtype));
+    
     /* output SW and HW Version at LOG_INFO */
     gpsd_log(&session->context->errout, LOG_INF,
-	     "UBX_MON_VER: %.40s, %d\n",
-	     session->subtype, (int)(data_len -UBX_MESSAGE_DATA_OFFSET));
-
+	     "UBX_MON_VER: %.*s\n",
+             (int)sizeof(obuf), obuf);
 }
 
 /**
