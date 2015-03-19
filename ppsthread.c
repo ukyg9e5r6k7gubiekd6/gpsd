@@ -165,6 +165,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 #ifdef __linux__
     /*
      * Some Linuxes, like the RasbPi's, have PPS devices preexisting.
+     * Other OS have no way to automatically determine the proper /dev/ppsX.
      * Allow user to pass in an explicit PPS device path.
      */
     if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0)
@@ -236,12 +237,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	(void)snprintf(path, sizeof(path), "/dev/pps%c", pps_num);
     }
 
-    /* root privs are required for this device open */
-    if ( 0 != getuid() ) {
-	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS only works as root \n");
-    	return -1;
-    }
+    /* root privs are probably required for this device open
+     * do not bother to check uid, just go for the open() */
     ret = open(path, O_RDWR);
     if ( 0 > ret ) {
 	char errbuf[BUFSIZ] = "unknown error";
