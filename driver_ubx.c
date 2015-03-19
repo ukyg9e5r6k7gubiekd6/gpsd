@@ -125,7 +125,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     session->newdata.eps = (double)(getles32(buf, 40) / 100.0);
     mask |= SPEEDERR_SET;
-    
+
     /* Better to have a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (double)(getleu16(buf, 44)/100.0);
     session->gpsdata.satellites_used = (int)getub(buf, 47);
@@ -473,8 +473,13 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_MON_VER:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_VER\n");
-	(void)strlcpy(session->subtype, 
+	(void)strlcpy(session->subtype,
 		      (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 0], 30);
+        /* output SW and HW Version at LOG_INFO */
+	gpsd_log(&session->context->errout, LOG_INF,
+                 "UBX_MON_VER: SW Ver: %.31s, HW Ver: %.11s\n",
+		 session->subtype,
+		(char *)&buf[UBX_MESSAGE_DATA_OFFSET + 30]);
 	break;
     case UBX_MON_EXCEPT:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_EXCEPT\n");
@@ -527,7 +532,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
 
     case UBX_ACK_NAK:
-	gpsd_log(&session->context->errout, LOG_DATA,
+	gpsd_log(&session->context->errout, LOG_WARN,
 		 "UBX_ACK_NAK, class: %02x, id: %02x\n",
 		 buf[UBX_CLASS_OFFSET],
 		 buf[UBX_TYPE_OFFSET]);
@@ -657,7 +662,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	/*@ +type @*/
 
 #ifdef RECONFIGURE_ENABLE
-	/* 
+	/*
 	 * Turn off NMEA output, turn on UBX on this port.
 	 */
 	if (session->mode == O_OPTIMIZE) {
@@ -681,8 +686,8 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 }
 
 #ifdef RECONFIGURE_ENABLE
-static void ubx_cfg_prt(struct gps_device_t *session, 
-			speed_t speed, const char parity, const int stopbits, 
+static void ubx_cfg_prt(struct gps_device_t *session,
+			speed_t speed, const char parity, const int stopbits,
 			const int mode)
 /* generare and send a configuration block */
 {
@@ -705,7 +710,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
      * What we'd like to do here is dispatch to USART1_ID or
      * USB_ID intelligently based on whether this is a USB or RS232
      * source.  Unfortunately the GR601-W screws that up by being
-     * a USB device with port_id 1.  So we bite the bullet and 
+     * a USB device with port_id 1.  So we bite the bullet and
      * default to port 1.
      *
      * Without further logic, this means gpsmon wouldn't be able to
@@ -786,7 +791,17 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	 * UBX after we've told it to start. Turning off the UBX protocol
 	 * mask, by itself, seems to be ineffective.
 	 */
+
+        /* FIXME: the problem is possibley sending too many messages
+         * without waiting for u-blox ACK, over running its input buffer.
+         *
+         * for example, the UBX_MON_VER fails here, but works in other
+         * contexts
+         */
 	unsigned char msg[3];
+        /* UBX_MON_VER: request SW and HW Versions */
+	(void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
+
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
 	msg[2] = 0x00;		/* rate */
@@ -850,7 +865,17 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	 * actually get UBX output; the sentence mix is initially empty.
 	 * Fix that...
 	 */
+
+        /* FIXME: possibly sending too many messages without waiting
+         * for u-blox ACK, over running its input buffer.
+         *
+         * for example, the UBX_MON_VER fails here, but works in other
+         * contexts
+         */
 	unsigned char msg[3];
+        /* request SW and HW Versions */
+	(void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
+
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
 	msg[2] = 0x01;		/* rate */
@@ -871,6 +896,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
 	msg[2] = 0x0a;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 
 #ifdef __UNUSED__
 	/*
@@ -916,7 +942,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 
 	buf[outProtoMask] &= ~NMEA_PROTOCOL_MASK;
 	buf[outProtoMask] |= UBX_PROTOCOL_MASK;
-    }    
+    }
     /*@ -ignoresigns -charint @*/
 
     (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));
@@ -924,7 +950,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 
 static void ubx_mode(struct gps_device_t *session, int mode)
 {
-    ubx_cfg_prt(session, 
+    ubx_cfg_prt(session,
 		gpsd_get_speed(session),
 		gpsd_get_parity(session),
 		gpsd_get_stopbits(session),
@@ -934,7 +960,7 @@ static void ubx_mode(struct gps_device_t *session, int mode)
 static bool ubx_speed(struct gps_device_t *session,
 		      speed_t speed, char parity, int stopbits)
 {
-    ubx_cfg_prt(session, 
+    ubx_cfg_prt(session,
 		speed,
 		parity,
 		stopbits,
