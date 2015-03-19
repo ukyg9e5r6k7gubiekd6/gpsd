@@ -1569,7 +1569,7 @@ const struct gps_type_t driver_sirf =
 {
     .type_name      = "SiRF",		/* full name of type */
     .packet_type    = SIRF_PACKET,	/* associated lexer packet type */
-    .flags	    = DRIVER_STICKY,	/* no flags set */
+    .flags	    = DRIVER_STICKY,	/* remember this */
     .trigger	    = NULL,		/* no trigger */
     .channels       = SIRF_CHANNELS,	/* consumer-grade GPS */
     .probe_detect   = NULL,		/* no probe */

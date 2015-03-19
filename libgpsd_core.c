@@ -1392,7 +1392,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 */
 	/*@-mustfreeonly@*/
 	if (!STICKY(session->device_type)
-	    && session->last_controller != NULL)
+	    && session->last_controller != NULL
+	    && STICKY(session->last_controller))
 	{
 	    session->device_type = session->last_controller;
 	    gpsd_log(&session->context->errout, LOG_PROG,
