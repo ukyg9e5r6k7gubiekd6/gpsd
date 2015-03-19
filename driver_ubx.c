@@ -689,7 +689,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 static void ubx_cfg_prt(struct gps_device_t *session,
 			speed_t speed, const char parity, const int stopbits,
 			const int mode)
-/* generare and send a configuration block */
+/* generate and send a configuration block */
 {
     unsigned long usart_mode = 0;
     unsigned char buf[UBX_CFG_LEN];
@@ -1017,7 +1017,7 @@ const struct gps_type_t driver_ubx = {
     .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
-    .control_send     = ubx_control_send,	/* no control sender yet */
+    .control_send     = ubx_control_send,/* how to send a control string */
 #endif /* CONTROLSEND_ENABLE */
 #ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
