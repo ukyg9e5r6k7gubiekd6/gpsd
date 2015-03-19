@@ -410,6 +410,10 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	    ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN],
 			    data_len) | (CLEAR_IS | REPORT_IS);
 	break;
+    case UBX_NAV_PVT:
+	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_PVT\n");
+	/* FIXME decode UBX_NAV_PVT */
+        break;
     case UBX_NAV_POSUTM:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSUTM\n");
 	break;
@@ -895,6 +899,13 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x06;		/* msg id  = NAV-SOL */
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x07;		/* msg id  = NAV-PVT */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
+
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x20;		/* msg id  = UBX_NAV_TIMEGPS */
 	msg[2] = 0x01;		/* rate */
