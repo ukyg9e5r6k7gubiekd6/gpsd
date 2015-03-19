@@ -64,6 +64,7 @@
 
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
+#define PPS_API_VERS_1  1
 #include <fcntl.h>	/* needed for open() and friends */
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
@@ -309,6 +310,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 #endif
 #endif /* S_SPLINT_S */
 
+        pp.api_version = PPS_API_VERS_1;
         if ( 0 > time_pps_setparams(pps_thread->kernelpps_handle, &pp)) {
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
