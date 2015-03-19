@@ -510,9 +510,6 @@ struct gps_device_t {
 	unsigned int lasttag;
 	unsigned int cycle_enders;
 	bool cycle_continue;
-#ifdef GPSCLOCK_ENABLE
-	bool ignore_trailing_edge;
-#endif /* GPSCLOCK_ENABLE */
     } nmea;
 #endif /* NMEA_ENABLE */
     /*
