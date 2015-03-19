@@ -61,21 +61,43 @@
 
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf,
 			    size_t len);
-static gps_mask_t ubx_msg_nav_pvt(struct gps_device_t *session,
-				  unsigned char *buf, size_t data_len);
-static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session,
-				  unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_dop(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
-static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session,
-				      unsigned char *buf, size_t data_len);
+static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_msg_nav_pvt(struct gps_device_t *session,
+				  unsigned char *buf, size_t data_len);
+static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
+static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session,
+				  unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session,
 				     unsigned char *buf, size_t data_len);
-static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
-static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session,
+				      unsigned char *buf, size_t data_len);
+static void ubx_msg_mon_ver(struct gps_device_t *session,
+				      unsigned char *buf, size_t data_len);
 #ifdef RECONFIGURE_ENABLE
 static void ubx_mode(struct gps_device_t *session, int mode);
 #endif /* RECONFIGURE_ENABLE */
+
+/**
+ * Receiver/Software Version
+ */
+static void
+ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
+		size_t data_len)
+{
+
+    /* save SW and HW Version as subtype */
+    (void)snprintf(session->subtype, sizeof(session->subtype),
+		   "SW: %.30s, HW: %.10s", 
+		   (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 0],
+		   (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 30]);
+    /* output SW and HW Version at LOG_INFO */
+    gpsd_log(&session->context->errout, LOG_INF,
+	     "UBX_MON_VER: %.40s, %d\n",
+	     session->subtype, (int)(data_len -UBX_MESSAGE_DATA_OFFSET));
+
+}
 
 /**
  * Navigation Position Velocity Time  solution message
@@ -513,13 +535,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_MON_VER:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_VER\n");
-	(void)strlcpy(session->subtype,
-		      (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 0], 30);
-        /* output SW and HW Version at LOG_INFO */
-	gpsd_log(&session->context->errout, LOG_INF,
-                 "UBX_MON_VER: SW Ver: %.31s, HW Ver: %.11s\n",
-		 session->subtype,
-		(char *)&buf[UBX_MESSAGE_DATA_OFFSET + 30]);
+	ubx_msg_mon_ver(session, buf, data_len);
 	break;
     case UBX_MON_EXCEPT:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_EXCEPT\n");
