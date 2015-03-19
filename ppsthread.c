@@ -144,6 +144,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     pps_params_t pp;
 #endif /* S_SPLINT_S */
     int ret;
+    bool not_a_tty = false;
 #ifdef __linux__
     /* These variables are only needed by Linux to find /dev/ppsN. */
     int ldisc = 18;   /* the PPS line discipline */
@@ -153,8 +154,13 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 
     pps_thread->kernelpps_handle = -1;
     if ( isatty(pps_thread->devicefd) == 0 ) {
-	pps_thread->log_hook(pps_thread, THREAD_INF, "KPPS gps_fd not a tty\n");
-    	return -1;
+	pps_thread->log_hook(pps_thread, THREAD_INF, 
+            "KPPS:%s gps_fd:%d not a tty\n", 
+            pps_thread->devicename,
+	    pps_thread->devicefd);
+        /* why do we care the device is a tty?
+         * /dev/pps0 is not a tty and we need that */
+        not_a_tty = true;
     }
 
     /*
@@ -186,7 +192,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	    char errbuf[BUFSIZ] = "unknown error";
 	    strerror_r(errno, errbuf, sizeof(errbuf));
 	    pps_thread->log_hook(pps_thread, THREAD_INF,
-				 "KPPS cannot set PPS line discipline on %s : %s\n",
+				 "KPPS:%s cannot set PPS line discipline %s\n",
 				 pps_thread->devicename, errbuf);
 	    return -1;
 	}
@@ -215,7 +221,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 		(void)close(fd);
 	    }
 	    pps_thread->log_hook(pps_thread, THREAD_INF,
-				 "KPPS checking %s, %s\n",
+				 "KPPS:%s checking %s, %s\n",
+				 pps_thread->devicename,
 				 globbuf.gl_pathv[i], path);
 	    if ( 0 == strncmp( path, pps_thread->devicename, sizeof(path))) {
 		/* this is the pps we are looking for */
@@ -230,7 +237,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 
 	if ( 0 == (int)pps_num ) {
 	    pps_thread->log_hook(pps_thread, THREAD_INF,
-				 "KPPS device not found.\n");
+				 "KPPS:%s device not found.\n",
+				 pps_thread->devicename);
 	    return -1;
 	}
 	/* construct the magic device path */
@@ -244,7 +252,9 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS cannot open %s: %s\n", path, errbuf);
+		    "KPPS:%s cannot open %s: %s\n", 
+		    pps_thread->devicename,
+                    path, errbuf);
     	return -1;
     }
 #else /* not __linux__ */
@@ -257,7 +267,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 #endif
     /* assert(ret >= 0); */
     pps_thread->log_hook(pps_thread, THREAD_INF,
-		"KPPS RFC2783 fd is %d\n",
+		"KPPS:%s RFC2783 fd is %d\n",
+	        pps_thread->devicename,
 		ret);
 
     /* RFC 2783 implies the time_pps_setcap() needs priviledges *
@@ -266,7 +277,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS time_pps_create(%d) failed: %s\n",
+		    "KPPS:%s time_pps_create(%d) failed: %s\n",
+	            pps_thread->devicename,
 		    ret, errbuf);
     	return -1;
     } else {
@@ -276,9 +288,13 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	/* get features  supported */
         if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &caps)) {
 	    pps_thread->log_hook(pps_thread, THREAD_ERROR,
-			"KPPS time_pps_getcap() failed\n");
+			"KPPS:%s time_pps_getcap() failed\n",
+	                pps_thread->devicename);
         } else {
-	    pps_thread->log_hook(pps_thread, THREAD_INF, "KPPS caps %0x\n", caps);
+	    pps_thread->log_hook(pps_thread, THREAD_INF, 
+                        "KPPS:%s caps %0x\n", 
+	                pps_thread->devicename,
+		        caps);
         }
 
 #ifdef __linux__
@@ -297,7 +313,9 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	    pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		"KPPS time_pps_setparams() failed: %s\n", errbuf);
+		"KPPS:%s time_pps_setparams() failed: %s\n", 
+		pps_thread->devicename,
+		errbuf);
 	    time_pps_destroy(pps_thread->kernelpps_handle);
 	    return -1;
         }
@@ -390,7 +408,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
 	    thread_context->log_hook(thread_context, THREAD_WARN,
-			"PPS ioctl(TIOCMIWAIT) on %s failed: %d %.40s\n",
+			"PPS:%s ioctl(TIOCMIWAIT) failed: %d %.40s\n",
 			thread_context->devicename, errno, errbuf);
 	    break;
 	}
@@ -406,7 +424,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
 	    thread_context->log_hook(thread_context, THREAD_ERROR,
-		    "PPS: pthread_mutex_lock() : %s\n", errbuf);
+		    "PPS:%s pthread_mutex_lock() : %s\n", 
+			thread_context->devicename, errno, errbuf);
 	}
 	/*@ +unrecog @*/
 	last_fixtime = thread_context->fixin;
@@ -416,7 +435,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
 	    thread_context->log_hook(thread_context, THREAD_ERROR,
-			"PPS: pthread_mutex_unlock() : %s\n", errbuf);
+			"PPS:%s pthread_mutex_unlock() : %s\n", 
+			thread_context->devicename, errno, errbuf);
 	}
 	/*@ +unrecog @*/
 
@@ -425,7 +445,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	if ( 0 > clock_gettime(CLOCK_REALTIME, &clock_ts) ) {
 	    /* uh, oh, can not get time! */
 	    thread_context->log_hook(thread_context, THREAD_ERROR,
-			"PPS clock_gettime() failed\n");
+			"PPS:%s clock_gettime() failed\n",
+			thread_context->devicename);
 	    break;
 	}
 /*@+noeffect@*/
@@ -435,14 +456,14 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	/*@ +ignoresigns */
 	if (ioctl(thread_context->devicefd, TIOCMGET, &state) != 0) {
 	    thread_context->log_hook(thread_context, THREAD_ERROR,
-			"PPS ioctl(TIOCMGET) on %s failed\n",
+			"PPS:%s ioctl(TIOCMGET) failed\n",
 			thread_context->devicename);
 	    break;
 	}
 	/*@ -ignoresigns */
         /* end of time critical section */
 	thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS ioctl(TIOCMIWAIT) on %s succeeded\n",
+		    "PPS:%s ioctl(TIOCMIWAIT) succeeded\n",
 		    thread_context->devicename);
 
 	/*
@@ -494,7 +515,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    if ( 0 > time_pps_fetch(thread_context->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
 		thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "KPPS kernel PPS failed\n");
+			    "KPPS:%s kernel PPS failed\n",
+			    thread_context->devicename);
 	    } else {
 		// find the last edge
 		// FIXME a bit simplistic, should hook into the
@@ -520,14 +542,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		timespec_str( &pi.assert_timestamp, ts_str1, sizeof(ts_str1) );
 		timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
 		thread_context->log_hook(thread_context, THREAD_PROG,
-			    "KPPS assert %s, sequence: %ld - "
+			    "KPP:%s assert %s, sequence: %ld - "
 			    "clear  %s, sequence: %ld\n",
+			    thread_context->devicename,
 			    ts_str1,
 			    (unsigned long) pi.assert_sequence,
 			    ts_str2,
 			    (unsigned long) pi.clear_sequence);
 		thread_context->log_hook(thread_context, THREAD_PROG,
-			    "KPPS data: using %s\n",
+			    "KPPS:%s data: using %s\n",
+			    thread_context->devicename,
 			    edge_kpps ? "assert" : "clear");
 
 		/* WARNING! this will fail if delta more than a few seconds,
@@ -536,7 +560,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	        duration_kpps = timespec_diff_ns(ts_kpps, pulse_kpps[(int)(edge_kpps == 0)])/1000;
 		timespec_str( &ts_kpps, ts_str1, sizeof(ts_str1) );
 	        thread_context->log_hook(thread_context, THREAD_PROG,
-		    "KPPS cycle: %7d uSec, duration: %7d uSec @ %s\n",
+		    "KPPS:%s cycle: %7d uSec, duration: %7d uSec @ %s\n",
+		    thread_context->devicename,
 		    cycle_kpps, duration_kpps, ts_str1);
 		pulse_kpps[edge_kpps] = ts_kpps;
 		if (990000 < cycle_kpps && 1010000 > cycle_kpps) {
@@ -559,18 +584,19 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		duration = 0;
 		unchanged = 0;
 		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS pps-detect on %s invisible pulse\n",
+			    "PPS:%s pps-detect invisible pulse\n",
 			    thread_context->devicename);
 	    } else if (++unchanged == 10) {
                 /* not really unchanged, just out of bounds */
 		unchanged = 1;
 		thread_context->log_hook(thread_context, THREAD_WARN,
-			    "PPS TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n");
+			    "PPS:%s TIOCMIWAIT returns unchanged state, ppsmonitor sleeps 10\n",
+			    thread_context->devicename);
 		(void)sleep(10);
 	    }
 	} else {
 	    thread_context->log_hook(thread_context, THREAD_RAW,
-			"PPS pps-detect on %s changed to %d\n",
+			"PPS:%s pps-detect changed to %d\n",
 			thread_context->devicename, state);
 	    unchanged = 0;
 	}
@@ -579,8 +605,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	pulse[edge] = clock_ts;
 	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS edge: %d, cycle: %7d uSec, duration: %7d uSec @ %s\n",
-		    edge, cycle, duration, ts_str1);
+	    "PPS:%s edge: %d, cycle: %7d uSec, duration: %7d uSec @ %s\n",
+	    thread_context->devicename,
+	    edge, cycle, duration, ts_str1);
 	if (unchanged) {
 	    // strange, try again
 	    continue;
@@ -689,13 +716,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* ppstimes.real is the time we think the pulse represents  */
 	    struct timedelta_t ppstimes;
 	    thread_context->log_hook(thread_context, THREAD_RAW,
-			"PPS edge accepted %.100s", log);
+			"PPS:%s edge accepted %.100s", 
+			thread_context->devicename, log);
 #ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
             if ( 0 <= thread_context->kernelpps_handle && ok_kpps) {
 		/* use KPPS time */
 		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "KPPS using edge %d", edge_kpps );
+			    "KPPS:%s using edge %d", 
+			    thread_context->devicename,
+			    edge_kpps );
 		/* pick the right edge */
 		if ( edge_kpps ) {
 		    clock_ts = pi.assert_timestamp; /* structure copy */
@@ -734,14 +764,16 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	    if ( 0> delay.tv_sec || 0 > delay.tv_nsec ) {
 		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS: system clock went backwards: %.20s\n",
+			    "PPS:%s system clock went backwards: %.20s\n",
+			    thread_context->devicename,
 			    delay_str);
 		log1 = "system clock went backwards";
 	    } else if ( ( 2 < delay.tv_sec) 
 	      || ( 1 == delay.tv_sec && 100000000 > delay.tv_nsec ) ) {
                 /* system clock could be slewing so allow 1.1 sec delay */
 		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS: no current GPS seconds: %.20s\n",
+			    "PPS:%s no current GPS seconds: %.20s\n",
+			    thread_context->devicename,
 			    delay_str);
 		log1 = "timestamp out of range";
 	    } else {
@@ -759,7 +791,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    char errbuf[BUFSIZ] = "unknown error";
 		    (void)strerror_r(errno, errbuf, sizeof(errbuf));
 		    thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "PPS: pthread_mutex_lock() : %s\n", errbuf);
+			    "PPS:%s pthread_mutex_lock() : %s\n", 
+			    thread_context->devicename, errbuf);
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
@@ -772,15 +805,17 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    char errbuf[BUFSIZ] = "unknown error";
 		    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 		    thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "PPS: pthread_mutex_unlock() : %s\n", errbuf);
+			    "PPS:%s pthread_mutex_unlock() : %s\n",
+			    thread_context->devicename, errbuf);
 		}
 		/*@ +unrecog @*/
 		/*@-type@*/ /* splint is confused about struct timespec */
 		timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
 		timespec_str( &ppstimes.real, ts_str2, sizeof(ts_str2) );
 		thread_context->log_hook(thread_context, THREAD_INF,
-			    "PPS hooks called with %.20s clock: %s real: %s\n",
-			    log1, ts_str1, ts_str2);
+		    "PPS:%s hooks called with %.20s clock: %s real: %s\n",
+		    thread_context->devicename,
+		    log1, ts_str1, ts_str2);
 		/*@+type@*/
 		/*@+compdef@*/
             }
@@ -789,26 +824,30 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    timespec_str( &offset, offset_str, sizeof(offset_str) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS edge %.20s @ %s offset %.20s\n",
+		    "PPS:%s edge %.20s @ %s offset %.20s\n",
+		    thread_context->devicename,
 		    log1, ts_str1, offset_str);
 	    /*@+type@*/
 	    /*@+compdef@*/
 	} else {
 	    thread_context->log_hook(thread_context, THREAD_RAW,
-			"PPS edge rejected %.100s", log);
+			"PPS:%s edge rejected %.100s", 
+			thread_context->devicename, log);
 	}
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
     if (thread_context->kernelpps_handle > 0) {
 	thread_context->log_hook(thread_context, THREAD_PROG, 
-            "PPS descriptor cleaned up\n");
+            "PPS:%s descriptor cleaned up\n",
+	    thread_context->devicename);
 	(void)time_pps_destroy(thread_context->kernelpps_handle);
     }
 #endif
     if (thread_context->wrap_hook != NULL)
 	thread_context->wrap_hook(thread_context);
     thread_context->log_hook(thread_context, THREAD_PROG, 
-         "PPS gpsd_ppsmonitor exited.\n");
+		"PPS:%s gpsd_ppsmonitor exited.\n",
+		thread_context->devicename);
     return NULL;
 }
 /*@+mustfreefresh +type +unrecog +branchstate@*/
@@ -827,13 +866,15 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
     (void)init_kernel_pps(pps_thread);
     if ( 0 <= pps_thread->kernelpps_handle ) {
 	pps_thread->log_hook(pps_thread, THREAD_WARN,
-		    "KPPS kernel PPS will be used\n");
+		    "KPPS:%s kernel PPS will be used\n",
+		    pps_thread->devicename);
     }
 #endif
     /*@-compdef -nullpass@*/
     retval = pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)pps_thread);
     /*@+compdef +nullpass@*/
-    pps_thread->log_hook(pps_thread, THREAD_PROG, "PPS thread %s\n",
+    pps_thread->log_hook(pps_thread, THREAD_PROG, "PPS:%s thread %s\n",
+	        pps_thread->devicename,
 		(retval==0) ? "launched" : "FAILED");
 }
 
@@ -856,7 +897,8 @@ void pps_thread_fixin(volatile struct pps_thread_t *pps_thread,
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		"PPS: pthread_mutex_lock() : %s\n", errbuf);
+		"PPS:%s pthread_mutex_lock() : %s\n", 
+	        pps_thread->devicename, errbuf);
     }
     /*@ +unrecog @*/
     pps_thread->fixin = *fixin;
@@ -866,7 +908,8 @@ void pps_thread_fixin(volatile struct pps_thread_t *pps_thread,
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
+		"PPS:%s pthread_mutex_unlock() : %s\n",
+	        pps_thread->devicename, errbuf);
     }
     /*@ +unrecog @*/
 }
@@ -885,7 +928,8 @@ int pps_thread_ppsout(volatile struct pps_thread_t *pps_thread,
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf,(int) sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		"PPS: pthread_mutex_lock() : %s\n", errbuf);
+		"PPS:%s pthread_mutex_lock() : %s\n", 
+	        pps_thread->devicename, errbuf);
     }
     /*@ +unrecog @*/
     *td = pps_thread->ppsout_last;
@@ -896,7 +940,8 @@ int pps_thread_ppsout(volatile struct pps_thread_t *pps_thread,
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		"PPS: pthread_mutex_unlock() : %s\n", errbuf);
+		"PPS:%s pthread_mutex_unlock() : %s\n",
+	        pps_thread->devicename, errbuf);
     }
     /*@ +unrecog @*/
 

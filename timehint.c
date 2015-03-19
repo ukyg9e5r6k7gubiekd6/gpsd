@@ -294,16 +294,19 @@ static void init_hook(struct gps_device_t *session)
 
     if (access(chrony_path, F_OK) != 0) {
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "PPS chrony socket %s doesn't exist\n", chrony_path);
+		"PPS:%s chrony socket %s doesn't exist\n", 
+		session->gpsdata.dev.path, chrony_path);
     } else {
 	session->chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
 	if (session->chronyfd < 0)
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "PPS connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
+		     "PPS:%s connect chrony socket failed: %s, error: %d, errno: %d/%s\n",
+		     session->gpsdata.dev.path,
 		     chrony_path, session->chronyfd, errno, strerror(errno));
 	else
 	    gpsd_log(&session->context->errout, LOG_RAW,
-			"PPS using chrony socket: %s\n", chrony_path);
+		     "PPS:%s using chrony socket: %s\n", 
+		     session->gpsdata.dev.path, chrony_path);
     }
 }
 /*@+mustfreefresh@*/
