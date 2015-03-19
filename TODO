@@ -18,6 +18,10 @@ Can these be merged? How do we know which is appropriate to use when?
 What could we build in the way of tools and visualization aids to make
 the calibration process less annoying?
 
+** Things to do when we can break compatibility **
+
+Make subtype longer.  100 chars long sounds good.
+
 ** Bugs in gpsd and its clients:
 
 *** Tracker bugs
