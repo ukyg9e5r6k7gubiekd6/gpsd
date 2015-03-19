@@ -195,6 +195,7 @@ void json_tpv_dump(const struct gps_device_t *session,
 		struct timespec clock_tmp = session->pps_thread.ppsout_last.clock;
 		timespec_str( &clock_tmp, ts_str, sizeof(ts_str) );
 		str_appendf(reply, replylen, "\"pps\":%s,", ts_str);
+                /* TODO: add PPS precision to JSON output */
 	    }
 	    /*@+type +formattype@*/
 #endif /* PPS_ENABLE */

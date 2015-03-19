@@ -20,7 +20,9 @@ the calibration process less annoying?
 
 ** Things to do when we can break compatibility **
 
-Make subtype longer.  100 chars long sounds good.
+In gps_device_t Make subtype longer.  128 chars long sounds good.
+
+In gps_device_t, save NTP precision in pps_precision
 
 ** Bugs in gpsd and its clients:
 
