@@ -404,6 +404,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	mask = ubx_msg_nav_dop(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_SOL:
+        /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SOL\n");
 	mask =
 	    ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN],
@@ -812,6 +813,8 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
+        /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x06;		/* msg id  = NAV-SOL */
 	msg[2] = 0x00;		/* rate */
@@ -886,6 +889,8 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
+        /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x06;		/* msg id  = NAV-SOL */
 	msg[2] = 0x01;		/* rate */
