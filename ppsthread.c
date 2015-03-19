@@ -285,21 +285,21 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 #ifndef S_SPLINT_S
     	/* have kernel PPS handle */
         int caps;
-	/* get features  supported */
+	/* get RFC2783 features supported */
         if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &caps)) {
 	    pps_thread->log_hook(pps_thread, THREAD_ERROR,
 			"KPPS:%s time_pps_getcap() failed\n",
 	                pps_thread->devicename);
         } else {
 	    pps_thread->log_hook(pps_thread, THREAD_INF, 
-                        "KPPS:%s caps %0x\n", 
+                        "KPPS:%s caps 0x%02X\n", 
 	                pps_thread->devicename,
 		        caps);
         }
 
+        memset( (void *)&pp, 0, sizeof(pps_params_t));
 #ifdef __linux__
         /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
-        memset( (void *)&pp, 0, sizeof(pps_params_t));
         pp.mode = PPS_CAPTUREBOTH;
 #else /* not linux */
 	/*
@@ -313,8 +313,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	    char errbuf[BUFSIZ] = "unknown error";
 	    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
 	    pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		"KPPS:%s time_pps_setparams() failed: %s\n", 
-		pps_thread->devicename,
+		"KPPS:%s time_pps_setparams(mode=0x%02X) failed: %s\n", 
+		pps_thread->devicename, pp.mode,
 		errbuf);
 	    time_pps_destroy(pps_thread->kernelpps_handle);
 	    return -1;
