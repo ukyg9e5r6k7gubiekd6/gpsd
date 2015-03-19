@@ -331,6 +331,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     /*@ +temptrans @*/
     /*@ +mayaliasunique @*/
     /*@ +mustfreeonly @*/
+    memset( session->subtype, 0, sizeof( session->subtype));
     gps_clear_fix(&session->gpsdata.fix);
     gps_clear_fix(&session->newdata);
     gps_clear_fix(&session->oldfix);

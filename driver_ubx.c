@@ -431,6 +431,16 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_NAV_SVINFO:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SVINFO\n");
 	mask = ubx_msg_nav_svinfo(session, &buf[UBX_PREFIX_LEN], data_len);
+
+	/* this is a hack to move some initialization until after we
+	 * get some u-blox message so we know the GPS is alive */
+	if ('\0' == session->subtype[0]) {
+	    /* one time only */
+	    (void)strlcpy(session->subtype, "Unknown", 8);
+	    /* request SW and HW Versions */
+	    (void)ubx_write(session, UBX_CLASS_MON, 0x04, NULL, 0);
+	}
+
 	break;
     case UBX_NAV_DGPS:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_DGPS\n");
@@ -549,7 +559,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 		 "UBX: unknown packet id 0x%04hx (length %zd)\n",
 		 msgid, len);
     }
-
     return mask | ONLINE_SET;
 }
 
@@ -632,11 +641,9 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 
 static void ubx_init_query(struct gps_device_t *session)
 {
-    unsigned char msg[32];
-
     /*@ -type -compdef @*/
     /* MON_VER: query for version information */
-    (void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
+    (void)ubx_write(session, UBX_CLASS_MON, 0x04, NULL, 0);
     /*@ +type +compdef @*/
 }
 
@@ -794,13 +801,12 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 
         /* FIXME: the problem is possibley sending too many messages
          * without waiting for u-blox ACK, over running its input buffer.
+         * Or maybe NMEA -> UBX move not done yet...
          *
          * for example, the UBX_MON_VER fails here, but works in other
          * contexts
          */
 	unsigned char msg[3];
-        /* UBX_MON_VER: request SW and HW Versions */
-	(void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
 
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x04;		/* msg id  = UBX_NAV_DOP */
