@@ -87,7 +87,6 @@ static bool ubx_initialize(void)
 #ifndef PPS_ENABLE
     (void)mvwaddstr(ppswin, PPS_LINE, PPS_COLUMN + 10, "N/A");
 #endif /* PPS_ENABLE */
-    display(ppswin, 2, 22, " PPS ");
     (void)wattrset(ppswin, A_NORMAL);
 
     return true;
