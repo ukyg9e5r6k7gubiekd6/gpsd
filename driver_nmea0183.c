@@ -1312,6 +1312,8 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 	 * 16368000 cycles/second = 1/128 seconds = 7.8125
 	 * milliseconds"
 	 */
+
+	/* too short?  Make it longer */
 	if (atoi(field[5]) < 127875)
 	    (void)nmea_send(session, "$PMTK324,0,0,1,0,127875");
 	return ONLINE_SET;
