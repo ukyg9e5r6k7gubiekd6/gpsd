@@ -180,7 +180,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	/*@+ignoresigns@*/
 	/* Attach the line PPS discipline, so no need to ldattach */
 	/* This activates the magic /dev/pps0 device */
-	/* Note: this ioctl() requires root */
+	/* Note: this ioctl() requires root, and device is a tty */
 	if ( 0 > ioctl(pps_thread->devicefd, TIOCSETD, &ldisc)) {
 	    char errbuf[BUFSIZ] = "unknown error";
 	    strerror_r(errno, errbuf, sizeof(errbuf));
@@ -279,25 +279,25 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     }
 #ifndef S_SPLINT_S
     /* have kernel PPS handle */
-    int caps;
+    int pps_caps;
     /* get RFC2783 features supported */
-    if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &caps)) {
-	caps = 0;
+    if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &pps_caps)) {
+	pps_caps = 0;
 	pps_thread->log_hook(pps_thread, THREAD_ERROR,
 		    "KPPS:%s time_pps_getcap() failed\n",
 		    pps_thread->devicename);
     } else {
 	pps_thread->log_hook(pps_thread, THREAD_INF, 
-		    "KPPS:%s caps 0x%02X\n", 
+		    "KPPS:%s pps_caps 0x%02X\n", 
 		    pps_thread->devicename,
-		    caps);
+		    pps_caps);
     }
 #endif /* S_SPLINT_S */
 
     /* construct the setparms structure */
     memset( (void *)&pp, 0, sizeof(pps_params_t));
     pp.api_version = PPS_API_VERS_1;  /* version 1 protocol */
-    if ( 0 == (PPS_TSFMT_TSPEC & caps ) ) {
+    if ( 0 == (PPS_TSFMT_TSPEC & pps_caps ) ) {
        /* PPS_TSFMT_TSPEC means return a timespec
         * mandatory for driver to implement, require it */
 	pps_thread->log_hook(pps_thread, THREAD_ERROR,
@@ -305,14 +305,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 		    pps_thread->devicename);
         return -1;
     }
-    if ( 0 != (PPS_CANWAIT, & caps ) ) {
-       /* we can wait! */
-	pps_thread->log_hook(pps_thread, THREAD_PROG,
-		    "KPPS:%s have PPS_CANWAIT\n",
-	 	    pps_thread->devicename);
-    }
     pp.mode = PPS_TSFMT_TSPEC;
-    switch ( (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR) & caps ) {
+    switch ( (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR) & pps_caps ) {
     case PPS_CAPTUREASSERT:
 	pps_thread->log_hook(pps_thread, THREAD_WARN,
 		    "KPPS:%s missing PPS_CAPTURECLEAR, pulse may be offset\n",
@@ -385,6 +379,48 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     /* pthread error return */
     int pthread_err; 
+    bool not_a_tty = false;
+    bool pps_can_wait = false;
+
+    if ( isatty(thread_context->devicefd) == 0 ) {
+	thread_context->log_hook(thread_context, THREAD_INF, 
+            "KPPS:%s gps_fd:%d not a tty\n", 
+            thread_context->devicename,
+            thread_context->devicefd);
+        /* why do we care the device is a tty? so as not to ioctl(TIO..)
+        * /dev/pps0 is not a tty and we need to use it */
+        not_a_tty = true;
+    }
+    /* if no TIOCMIWAIT, we hope to have PPS_CANWAIT */
+
+#if defined(HAVE_SYS_TIMEPPS_H)
+    int pps_caps;
+    /* get RFC2783 features supported */
+    if ( 0 > time_pps_getcap(thread_context->kernelpps_handle, &pps_caps)) {
+	pps_caps = 0;
+	thread_context->log_hook(thread_context, THREAD_ERROR,
+		    "KPPS:%s time_pps_getcap() failed\n",
+		    thread_context->devicename);
+    } else {
+	thread_context->log_hook(thread_context, THREAD_INF, 
+		    "KPPS:%s pps_caps 0x%02X\n", 
+		    thread_context->devicename,
+		    pps_caps);
+    }
+
+    if ( 0 != (PPS_CANWAIT & pps_caps ) ) {
+       /* we can wait! */
+	thread_context->log_hook(thread_context, THREAD_PROG,
+		    "KPPS:%s have PPS_CANWAIT\n",
+	 	    thread_context->devicename);
+        pps_can_wait = true;
+    }
+#endif  /* HAVE_SYS_TIMEPPS_H */
+
+    if ( not_a_tty && !pps_can_wait ) {
+	/* for now, no way to wait for an edge, in the future maybe figure out
+         * a sleep */
+    }
 
     /*
      * Wait for status change on any handshake line.  Just one edge,
