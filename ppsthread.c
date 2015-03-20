@@ -299,9 +299,11 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
         }
 
         memset( (void *)&pp, 0, sizeof(pps_params_t));
+        /* PPS_TSFMT_TSPEC means return a timespec
+         * mandatory for driver tom implement, so use it */
 #ifdef __linux__
         /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
-        pp.mode = PPS_CAPTUREBOTH;
+	pp.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREBOTH;
 #else /* not linux */
 	/*
 	 * Attempt to follow RFC2783 as straightforwardly as possible.
