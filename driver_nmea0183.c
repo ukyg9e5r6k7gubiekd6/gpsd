@@ -1384,8 +1384,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 #endif /* ASHTECH_ENABLE */
 #ifdef MTK3301_ENABLE
 	{"PMTK", 3,  false, processMTK3301},
+        /* for some reason thhe parser no longer triggering on leading chars */
 	{"PMTK001", 3,  false, processMTK3301},
 	{"PMTK424", 3,  false, processMTK3301},
+	{"PMTK705", 3,  false, processMTK3301},
 #endif /* MTK3301_ENABLE */
 #ifdef TNT_ENABLE
 	{"PTNTHTM", 9, false, processTNTHTM},
