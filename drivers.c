@@ -1067,7 +1067,7 @@ static const struct gps_type_t driver_garmintxt = {
  * The Trimble Condor appears to be an MTK3329.  It behaves as an MTK3301
  * and positively acknowledges all 3301 sentences as valid. It ignores $PMTK
  * sentence fields that are not implemented in the Trimble Condor. It does
- * not have power0save mode abd ignores $PMTK320.  For $PMTK314 it silently
+ * not have power-save mode and ignores $PMTK320.  For $PMTK314 it silently
  * ignores periodic enabling of messages that aren't supported.
  *
  **************************************************************************/
@@ -1097,12 +1097,16 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 	return;
     if (event == event_triggermatch) {
 	(void)nmea_send(session, "$PMTK320,0");	/* power save off */
-	(void)nmea_send(session, "$PMTK300,1000,0,0,0.0,0.0");	/* Fix interval */
+	(void)nmea_send(session, "$PMTK300,1000,0,0,0.0,0.0");/* Fix interval */
 	(void)nmea_send(session,
 			"$PMTK314,0,1,0,1,1,5,1,1,0,0,0,0,0,0,0,0,0,1,0");
 	(void)nmea_send(session, "$PMTK301,2");	/* DGPS is WAAS */
 	(void)nmea_send(session, "$PMTK313,1");	/* SBAS enable */
-	(void)nmea_send(session, "$PMTK424");	/* Query PPS pulse width */
+
+        /* PMTK_API_Q_OUTPUT_CTL - Query PPS pulse width - Trimble only? 
+         * http://trl.trimble.com/docushare/dsweb/Get/Document-482603/CONDOR_UG_2C_75263-00.pdf *
+         * badly documented */
+	 (void)nmea_send(session, "$PMTK424");	
     }
 }
 
