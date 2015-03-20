@@ -37,20 +37,22 @@ struct timedelta_t {
 #define timespec_diff_ns(x, y)	(long)(((x).tv_sec-(y).tv_sec)*1000000000+(x).tv_nsec-(y).tv_nsec)
 
 struct pps_thread_t {
+    void *context;
+    int devicefd;		/* device file descriptor */
+    char *devicename;
+    /*@null@*/ char *(*report_hook)(volatile struct pps_thread_t *,
+				    struct timedelta_t *);
+    /*@null@*/ void (*pps_hook)(volatile struct pps_thread_t *,
+				struct timedelta_t *);
+    /*@null@*/ void (*log_hook)(volatile struct pps_thread_t *,
+				int errlevel, const char *fmt, ...);
+    /*@null@*/ void (*wrap_hook)(volatile struct pps_thread_t *);
     struct timedelta_t fixin;	/* real & clock time when in-band fix received */
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
-    int devicefd;			/* device file descriptor */
-    char *devicename;
-    /*@null@*/ char *(*report_hook)(volatile struct pps_thread_t *,
-				    struct timedelta_t *);
-    /*@null@*/ void (*wrap_hook)(volatile struct pps_thread_t *);
     struct timedelta_t ppsout_last;
     int ppsout_count;
-    /*@null@*/ void (*pps_hook)(volatile struct pps_thread_t *, struct timedelta_t *);
-    /*@null@*/ void (*log_hook)(volatile struct pps_thread_t *, int errlevel, const char *fmt, ...);
-    void *context;
 };
 
 #define THREAD_ERROR	0

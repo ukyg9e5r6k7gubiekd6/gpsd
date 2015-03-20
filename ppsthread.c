@@ -28,11 +28,14 @@
  * Note that for easy debugging all logging from this file is prefixed
  * with PPS or KPPS.
  *
- * To use the thread manager, you need to first fill in the two
- * thread_* methods in the session structure and/or the pps_hook in
- * the context structure.  Then you can call pps_thread_activate() and
- * the thread will launch.  It is OK to do this before the device is
- * open, the thread will wait on that.
+ * To use the thread manager, you need to first fill in the
+ * devicefd, devicename, and the four hook function members in the thread
+ * context structure. The void *context member is available for your hook
+ * functions to use; the thread-monitor code doesn't touch it.
+ *
+ * After this setup, you can call pps_thread_activate() and the
+ * thread will launch.  It is OK to do this before the device is open,
+ * the thread will wait on that.
  * 
  * WARNING!  Loss of precision
  * UNIX time to nanoSec precision is 62 significant bits
