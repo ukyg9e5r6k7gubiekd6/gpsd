@@ -147,7 +147,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     pps_params_t pp;
 #endif /* S_SPLINT_S */
     int ret;
-    bool not_a_tty = false;
 #ifdef __linux__
     /* These variables are only needed by Linux to find /dev/ppsN. */
     int ldisc = 18;   /* the PPS line discipline */
@@ -156,15 +155,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 #endif
 
     pps_thread->kernelpps_handle = -1;
-    if ( isatty(pps_thread->devicefd) == 0 ) {
-	pps_thread->log_hook(pps_thread, THREAD_INF, 
-            "KPPS:%s gps_fd:%d not a tty\n", 
-            pps_thread->devicename,
-	    pps_thread->devicefd);
-        /* why do we care the device is a tty?
-         * /dev/pps0 is not a tty and we need that */
-        not_a_tty = true;
-    }
 
     /*
      * This next code block abuses "ret" by storing the filedescriptor
@@ -264,6 +254,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     /*
      * On BSDs that support RFC2783, one uses the API calls on serial
      * port file descriptor.
+     *
+     * FIXME! need more specific than 'not linux'
      */
     // cppcheck-suppress redundantAssignment
     ret  = pps_thread->devicefd;
@@ -312,6 +304,12 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 		    "KPPS:%s fail, missing PPS_TSFMT_TSPEC\n",
 		    pps_thread->devicename);
         return -1;
+    }
+    if ( 0 != (PPS_CANWAIT, & caps ) ) {
+       /* we can wait! */
+	pps_thread->log_hook(pps_thread, THREAD_PROG,
+		    "KPPS:%s have PPS_CANWAIT\n",
+	 	    pps_thread->devicename);
     }
     pp.mode = PPS_TSFMT_TSPEC;
     switch ( (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR) & caps ) {
