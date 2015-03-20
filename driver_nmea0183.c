@@ -1244,6 +1244,26 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 
     msg = atoi(&(session->nmea.field[0])[4]);
     switch (msg) {
+    case 001:			/* ACK / NACK */
+	reason = atoi(field[2]);
+	if (atoi(field[1]) == -1)
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "MTK NACK: unknown sentence\n");
+	else if (reason < 3) {
+	    const char *mtk_reasons[] = {
+		"Invalid",
+		"Unsupported",
+		"Valid but Failed",
+		"Valid success"
+	    };
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "MTK NACK: %s, reason: %s\n",
+		     field[1], mtk_reasons[reason]);
+	}
+	else
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "MTK ACK: %s\n", field[1]);
+	return ONLINE_SET;
     case 424:			/* PPS pulse width response */
 	/*
 	 * Response will look something like: $PMTK424,0,0,1,0,69*12
@@ -1299,26 +1319,6 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));
 	(void)strlcat(session->subtype, "-", sizeof(session->subtype));
 	(void)strlcat(session->subtype, field[2], sizeof(session->subtype));
-	return ONLINE_SET;
-    case 001:			/* ACK / NACK */
-	reason = atoi(field[2]);
-	if (atoi(field[1]) == -1)
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "MTK NACK: unknown sentence\n");
-	else if (reason < 3) {
-	    const char *mtk_reasons[] = {
-		"Invalid",
-		"Unsupported",
-		"Valid but Failed",
-		"Valid success"
-	    };
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "MTK NACK: %s, reason: %s\n",
-		     field[1], mtk_reasons[reason]);
-	}
-	else
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "MTK ACK: %s\n", field[1]);
 	return ONLINE_SET;
     default:
 	return ONLINE_SET;		/* ignore */
