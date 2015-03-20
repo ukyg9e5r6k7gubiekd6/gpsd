@@ -260,6 +260,10 @@ to the bottom of /boot/config.txt: dtoverlay=pps-gpio,gpiopin=4
 
 Reboot and proceed as for any other operating system to use gpsd.
 
+Warning, the pps_gpio driver in all linux kernels up to the current
+3.19 only report one edge.  Be sure to validate that your PPS signal
+is not offset by the pulse width.
+
 Detailed instructions are available from their web site:
 https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/
 
