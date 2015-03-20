@@ -1325,10 +1325,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    /*@-nullderef@*/
 	    /* coverity[var_deref_op] */
 	    gpsd_log(&session->context->errout, LOG_INF,
-		     "%s identified as type %s, %f sec @ %ubps\n",
+		     "%s identified as type %s, %ld sec @ %ubps\n",
 		     session->gpsdata.dev.path,
 		     session->device_type->type_name,
-		     timestamp() - session->opentime,
+		     time(NULL) - session->opentime,
 		     (unsigned int)speed);
 	    /*@+nullderef@*/
 

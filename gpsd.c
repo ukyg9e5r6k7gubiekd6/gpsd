@@ -2418,7 +2418,7 @@ int main(int argc, char *argv[])
 
 	    if (device_needed && BAD_SOCKET(device->gpsdata.gps_fd) &&
 		    (device->opentime == 0 ||
-		    timestamp() - device->opentime > DEVICE_RECONNECT)) {
+		    time(NULL) - device->opentime > DEVICE_RECONNECT)) {
 		device->opentime = time(NULL);
 		gpsd_log(&context.errout, LOG_INF,
 			 "reconnection attempt on device %d\n",
