@@ -1,5 +1,8 @@
 			GPSD project news
 
+Repository head:
+  Force static linking when chrpath=no, avoid RPATH/RUNPATH/LD_LIBRARY_PATH mess.
+
 3.14: 2015-03-14 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The Pi Day release, 3.14 on 3/14 2015 at 9:26. Longer timeouts on test clients.
   Skyview support for the Beidou and QZSS constellations in the NMEA0183 driver.
