@@ -224,21 +224,27 @@ void toff_update(WINDOW *win, int y, int x)
     {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
-	int i;
+	int i, ymax, xmax;
+	getmaxyx(win, ymax, xmax);
+	assert(ymax > 0);  /* squash a compiler warning */
 	(void)wmove(win, y, x);
-	for (i = 0; i < TIMESPEC_LEN; i++)
+	/* 
+	 * The magic number shortening the field works because
+	 * we know we'll never see more than 5 digits of seconds
+	 * rather than 10.
+	 */
+	for (i = 0; i < TIMESPEC_LEN-4 && x + i < xmax - 1; i++)
 	    (void)waddch(win, ' ');
 	TS_SUB(&timedelta, &time_offset.clock, &time_offset.real);
 	if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
 	    /* need a bigger field to show it */
-	    (void)mvwprintw(win, y, x, "> 1 day");
+	    (void)mvwaddstr(win, y, x, "> 1 day");
 	} else {
 	    char buf[TIMESPEC_LEN];
-	    timespec_str( &timedelta, buf, sizeof(buf) );
-	    (void)mvwprintw(win, y, x, "%s", buf);
+	    timespec_str(&timedelta, buf, sizeof(buf));
+	    (void)mvwaddstr(win, y, x, buf);
 	}
-	monitor_fixframe(win);
     }
 }
 /*@+type +noeffect@*/
@@ -255,21 +261,23 @@ void pps_update(WINDOW *win, int y, int x)
     if (pps_thread_ppsout(&session.pps_thread, &ppstimes) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
-	int i;
+	int i, ymax, xmax;
+	getmaxyx(win, ymax, xmax);
+	assert(ymax > 0);  /* squash a compiler warning */
 	(void)wmove(win, y, x);
-	for (i = 0; i < TIMESPEC_LEN; i++)
+	/* see toff_update() for explanation of the magic number */
+	for (i = 0; i < TIMESPEC_LEN-4 && x + i < xmax - 1; i++)
 	    (void)waddch(win, ' ');
 	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
         if ( 86400 < (long)labs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
-	    (void)mvwprintw(win, y, x, "> 1 day");
+	    (void)mvwaddstr(win, y, x, "> 1 day");
         } else {
 	    char buf[TIMESPEC_LEN];
-	    timespec_str( &timedelta, buf, sizeof(buf) );
-	    (void)mvwprintw(win, y, x, "%s", buf);
+	    timespec_str(&timedelta, buf, sizeof(buf));
+	    (void)mvwaddstr(win, y, x, buf);
         }
-	monitor_fixframe(win);
 	(void)wnoutrefresh(win);
     }
     /*@+type +noeffect@*/
