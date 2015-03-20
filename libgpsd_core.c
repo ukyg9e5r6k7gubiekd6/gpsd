@@ -437,7 +437,7 @@ void gpsd_clear(struct gps_device_t *session)
     session->gpsdata.status = STATUS_NO_FIX;
     session->gpsdata.separation = NAN;
     session->mag_var = NAN;
-    session->releasetime = (timestamp_t)0;
+    session->releasetime = (time_t)0;
     session->badcount = 0;
 
     /* clear the private data union */
@@ -452,7 +452,7 @@ void gpsd_clear(struct gps_device_t *session)
     /*@i4@*/session->pps_thread.context = (void *)session;
 #endif /* PPS_ENABLE */
 
-    session->opentime = timestamp();
+    session->opentime = time(NULL);
 }
 /*@+usereleased +compdef +compmempass@*/
 
@@ -1568,7 +1568,7 @@ int gpsd_multipoll(const bool data_ready,
 			gpsd_log(&device->context->errout, LOG_DATA,
 				 "%s will be repolled in %f seconds\n",
 				 device->gpsdata.dev.path, reawake_time);
-			device->reawake = timestamp() + reawake_time;
+			device->reawake = time(NULL) + reawake_time;
 			return DEVICE_UNREADY;
 		    }
 		}
@@ -1583,7 +1583,7 @@ int gpsd_multipoll(const bool data_ready,
 
 	    /* we got actual data, head off the reawake special case */
 	    device->zerokill = false;
-	    device->reawake = (timestamp_t)0;
+	    device->reawake = (time_t)0;
 
 	    /* must have a full packet to continue */
 	    if ((changed & PACKET_SET) == 0)
@@ -1623,12 +1623,12 @@ int gpsd_multipoll(const bool data_ready,
 #endif /* __future__ */
 	}
     }
-    else if (device->reawake>0 && timestamp()>device->reawake) {
+    else if (device->reawake>0 && time(NULL) >device->reawake) {
 	/* device may have had a zero-length read */
 	gpsd_log(&device->context->errout, LOG_DATA,
 		 "%s reawakened after zero-length read\n",
 		 device->gpsdata.dev.path);
-	device->reawake = (timestamp_t)0;
+	device->reawake = (time_t)0;
 	device->zerokill = true;
 	return DEVICE_READY;
     }

@@ -161,7 +161,7 @@ void gpsd_tty_init(struct gps_device_t *session)
     session->gpsdata.gps_fd = -1;
     session->saved_baud = -1;
     session->zerokill = false;
-    session->reawake = (timestamp_t)0;
+    session->reawake = (time_t)0;
 }
 
 #if defined(__CYGWIN__)

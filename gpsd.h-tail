@@ -451,10 +451,10 @@ struct gps_device_t {
     int badcount;
     int subframe_count;
     char subtype[64];			/* firmware version or subtype ID */
-    timestamp_t opentime;
-    timestamp_t releasetime;
+    time_t opentime;
+    time_t releasetime;
     bool zerokill;
-    timestamp_t reawake;
+    time_t reawake;
 #ifdef TIMING_ENABLE
     timestamp_t sor;	/* timestamp start of this reporting cycle */
     unsigned long chars;	/* characters in the cycle */

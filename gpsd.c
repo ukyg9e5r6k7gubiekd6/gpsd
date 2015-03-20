@@ -2400,13 +2400,12 @@ int main(int argc, char *argv[])
 	    if (!device_needed && device->gpsdata.gps_fd > -1 &&
 		    device->lexer.type != BAD_PACKET) {
 		if (device->releasetime == 0) {
-		    device->releasetime = timestamp();
+		    device->releasetime = time(NULL);
 		    gpsd_log(&context.errout, LOG_PROG,
 			     "device %d (fd %d) released\n",
 			     (int)(device - devices),
 			     device->gpsdata.gps_fd);
-		} else if (timestamp() - device->releasetime >
-			RELEASE_TIMEOUT) {
+		} else if (time(NULL) - device->releasetime > RELEASE_TIMEOUT) {
 		    gpsd_log(&context.errout, LOG_PROG,
 			     "device %d closed\n",
 			     (int)(device - devices));
@@ -2420,7 +2419,7 @@ int main(int argc, char *argv[])
 	    if (device_needed && BAD_SOCKET(device->gpsdata.gps_fd) &&
 		    (device->opentime == 0 ||
 		    timestamp() - device->opentime > DEVICE_RECONNECT)) {
-		device->opentime = timestamp();
+		device->opentime = time(NULL);
 		gpsd_log(&context.errout, LOG_INF,
 			 "reconnection attempt on device %d\n",
 			 (int)(device - devices));
