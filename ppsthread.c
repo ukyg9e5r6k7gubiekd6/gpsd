@@ -64,7 +64,6 @@
 
 #ifdef PPS_ENABLE
 #if defined(HAVE_SYS_TIMEPPS_H)
-#define PPS_API_VERS_1  1
 #include <fcntl.h>	/* needed for open() and friends */
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
