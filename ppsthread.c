@@ -281,47 +281,68 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	            pps_thread->devicename,
 		    ret, errbuf);
     	return -1;
-    } else {
+    }
 #ifndef S_SPLINT_S
-    	/* have kernel PPS handle */
-        int caps;
-	/* get RFC2783 features supported */
-        if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &caps)) {
-	    pps_thread->log_hook(pps_thread, THREAD_ERROR,
-			"KPPS:%s time_pps_getcap() failed\n",
-	                pps_thread->devicename);
-        } else {
-	    pps_thread->log_hook(pps_thread, THREAD_INF, 
-                        "KPPS:%s caps 0x%02X\n", 
-	                pps_thread->devicename,
-		        caps);
-        }
-
-        memset( (void *)&pp, 0, sizeof(pps_params_t));
-        /* PPS_TSFMT_TSPEC means return a timespec
-         * mandatory for driver tom implement, so use it */
-#ifdef __linux__
-        /* linux 2.6.34 can not PPS_ECHOASSERT | PPS_ECHOCLEAR */
-	pp.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREBOTH;
-#else /* not linux */
-	/*
-	 * Attempt to follow RFC2783 as straightforwardly as possible.
-	 */
-	pp.mode = PPS_TSFMT_TSPEC | PPS_CAPTUREBOTH;
-#endif
+    /* have kernel PPS handle */
+    int caps;
+    /* get RFC2783 features supported */
+    if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &caps)) {
+	caps = 0;
+	pps_thread->log_hook(pps_thread, THREAD_ERROR,
+		    "KPPS:%s time_pps_getcap() failed\n",
+		    pps_thread->devicename);
+    } else {
+	pps_thread->log_hook(pps_thread, THREAD_INF, 
+		    "KPPS:%s caps 0x%02X\n", 
+		    pps_thread->devicename,
+		    caps);
+    }
 #endif /* S_SPLINT_S */
 
-        pp.api_version = PPS_API_VERS_1;
-        if ( 0 > time_pps_setparams(pps_thread->kernelpps_handle, &pp)) {
-	    char errbuf[BUFSIZ] = "unknown error";
-	    (void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
-	    pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		"KPPS:%s time_pps_setparams(mode=0x%02X) failed: %s\n", 
-		pps_thread->devicename, pp.mode,
-		errbuf);
-	    time_pps_destroy(pps_thread->kernelpps_handle);
-	    return -1;
-        }
+    /* construct the setparms structure */
+    memset( (void *)&pp, 0, sizeof(pps_params_t));
+    pp.api_version = PPS_API_VERS_1;  /* version 1 protocol */
+    if ( 0 == (PPS_TSFMT_TSPEC & caps ) ) {
+       /* PPS_TSFMT_TSPEC means return a timespec
+        * mandatory for driver to implement, require it */
+	pps_thread->log_hook(pps_thread, THREAD_ERROR,
+		    "KPPS:%s fail, missing PPS_TSFMT_TSPEC\n",
+		    pps_thread->devicename);
+        return -1;
+    }
+    pp.mode = PPS_TSFMT_TSPEC;
+    switch ( (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR) & caps ) {
+    case PPS_CAPTUREASSERT:
+	pps_thread->log_hook(pps_thread, THREAD_WARN,
+		    "KPPS:%s missing PPS_CAPTURECLEAR, pulse may be offset\n",
+		    pps_thread->devicename);
+	pp.mode |= PPS_CAPTUREASSERT;
+        break;
+    case PPS_CAPTURECLEAR:
+	pps_thread->log_hook(pps_thread, THREAD_WARN,
+		    "KPPS:%s missing PPS_CAPTUREASSERT, pulse may be offset\n",
+		    pps_thread->devicename);
+	pp.mode |= PPS_CAPTURECLEAR;
+        break;
+    case PPS_CAPTUREASSERT | PPS_CAPTURECLEAR:
+	pp.mode |= PPS_CAPTUREASSERT | PPS_CAPTURECLEAR;
+        break;
+    default:
+	pps_thread->log_hook(pps_thread, THREAD_WARN,
+		    "KPPS:%s missing PPS_CAPTUREASSERT and CLEAR\n",
+		    pps_thread->devicename);
+        return -1;
+    }
+
+    if ( 0 > time_pps_setparams(pps_thread->kernelpps_handle, &pp)) {
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf, (int)sizeof(errbuf));
+	pps_thread->log_hook(pps_thread, THREAD_ERROR,
+	    "KPPS:%s time_pps_setparams(mode=0x%02X) failed: %s\n", 
+	    pps_thread->devicename, pp.mode,
+	    errbuf);
+	time_pps_destroy(pps_thread->kernelpps_handle);
+	return -1;
     }
     return 0;
 }
