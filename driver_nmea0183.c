@@ -1321,6 +1321,8 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 	(void)strlcat(session->subtype, field[2], sizeof(session->subtype));
 	return ONLINE_SET;
     default:
+	gpsd_log(&session->context->errout, LOG_PROG,
+	     "MTK: unknown msg: %d\n", msg);
 	return ONLINE_SET;		/* ignore */
     }
 }
@@ -1382,6 +1384,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 #endif /* ASHTECH_ENABLE */
 #ifdef MTK3301_ENABLE
 	{"PMTK", 3,  false, processMTK3301},
+	{"PMTK001", 3,  false, processMTK3301},
+	{"PMTK424", 3,  false, processMTK3301},
 #endif /* MTK3301_ENABLE */
 #ifdef TNT_ENABLE
 	{"PTNTHTM", 9, false, processTNTHTM},
