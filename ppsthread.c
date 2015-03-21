@@ -528,7 +528,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    thread_context->devicename);
 
 	/*
-	 * If there has not yet bben any valid in-band time stashed
+	 * If there has not yet been any valid in-band time stashed
 	 * from the GPS when the PPS event was asserted, we can do
 	 * nothing further.  Some GPSes like Garmin always send a PPS,
 	 * valid or not.  Other GPSes like some uBlox may only send
