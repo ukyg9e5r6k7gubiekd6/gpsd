@@ -1477,7 +1477,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Light Vessel / LANBY / Rigs",
     };
 
-#define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends[0])) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
+#define NAVAIDTYPE_DISPLAY(n) (((n) < (unsigned int)NITEMS(navaid_type_legends)) ? navaid_type_legends[n] : "INVALID NAVAID TYPE")
 
     // cppcheck-suppress variableScope
     static const char *signal_legends[] = {
@@ -1498,7 +1498,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"X = Vessels shall proceed only on direction.",
     };
 
-#define SIGNAL_DISPLAY(n) (((n) < (unsigned int)NITEMS(signal_legends[0])) ? signal_legends[n] : "INVALID SIGNAL TYPE")
+#define SIGNAL_DISPLAY(n) (((n) < (unsigned int)NITEMS(signal_legends)) ? signal_legends[n] : "INVALID SIGNAL TYPE")
 
     static const char *route_type[32] = {
 	"Undefined (default)",
