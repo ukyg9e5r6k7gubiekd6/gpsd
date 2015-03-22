@@ -313,7 +313,7 @@ if env["sysroot"]:
 # minimum default load path.
 if env["shared"]:
     if env["libdir"] not in ["/usr/lib", "/lib"]:
-        env.Prepend(RPATH=[installdir('libdir')])
+        env.Prepend(RPATH=[installdir('libdir')+",--enable-new-dtags"])
 
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
@@ -536,7 +536,7 @@ else:
             # all systems.  Not good to use '.' or a relative path
             # here; it's a security risk.  At install time we use
             # chrpath to edit this out of RPATH.
-            env.Prepend(RPATH=[os.path.realpath(os.curdir)])
+            env.Prepend(RPATH=[os.path.realpath(os.curdir)+",--enable-new-dtags"])
         else:
             print "chrpath is not available; please build with chrpath=no."
 
