@@ -21,7 +21,7 @@ static void basic_report(const char *buf)
 
 void errout_reset(struct gpsd_errout_t *errout)
 {
-    errout->debug = 0;
+    errout->debug = LOG_SHOUT;
     errout->report = basic_report;
 }
 

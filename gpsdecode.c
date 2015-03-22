@@ -639,7 +639,7 @@ static void encode(FILE *fpin, FILE *fpout)
     memset(&policy, '\0', sizeof(policy));
     memset(&session, '\0', sizeof(session));
     session.context = &context;
-    context.errout.debug = 0;
+    context.errout.debug = LOG_SHOUT;
     context.errout.label = "gpsdecode";
     (void)strlcpy(session.gpsdata.dev.path,
 		  "stdin",

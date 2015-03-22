@@ -53,7 +53,7 @@ static void basic_report(const char *buf)
 
 void errout_reset(struct gpsd_errout_t *errout)
 {
-    errout->debug = 0;
+    errout->debug = LOG_SHOUT;
     errout->report = basic_report;
 }
 
@@ -176,7 +176,7 @@ void gpsd_vlog(const struct gpsd_errout_t *errout,
 	visibilize(outbuf, outlen, buf, strlen(buf));
 
 	if (getpid() == getsid(getpid()))
-	    syslog((errlevel == 0) ? LOG_ERR : LOG_NOTICE, "%s", outbuf);
+	    syslog((errlevel == LOG_SHOUT) ? LOG_ERR : LOG_NOTICE, "%s", outbuf);
 	else if (errout->report != NULL)
 	    errout->report(outbuf);
 	else
