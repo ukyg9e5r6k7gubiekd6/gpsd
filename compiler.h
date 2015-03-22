@@ -37,6 +37,27 @@
 #define UNUSED
 #endif
 
+/*
+ * Macro for compile-time checking if argument is an array.
+ * It expands to constant expression with int value 0.
+ */
+#if defined(__GNUC__)
+#define COMPILE_CHECK_IS_ARRAY(arr) ( \
+    0 * (int) sizeof(({ \
+        struct { \
+            int unused_int; \
+            typeof(arr) unused_arr; \
+        } zero_init = {0}; \
+        typeof(arr) arg_is_not_array UNUSED = { \
+            zero_init.unused_arr[0], \
+        }; \
+        1; \
+    })) \
+)
+#else
+#define COMPILE_CHECK_IS_ARRAY(arr) 0
+#endif
+
 /* Needed because 4.x versions of GCC are really annoying */
 #define ignore_return(funcall) \
     do { \
