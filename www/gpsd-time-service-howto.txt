@@ -1117,7 +1117,7 @@ Example:    50935 75440.031 0.000006019 13.778 0.000351733 0.013380 6
 |================================
 |Item 		|Units 	|Description
 |50935 		|MJD 	|date
-|75440.031 	|s 	|time past midnight
+|75440.031 	|s 	|time past midnight (UTC)
 |0.000006019 	|s 	|clock offset
 |13.778 	|PPM 	|frequency offset
 |0.000351733 	|s 	|RMS jitter
@@ -1136,7 +1136,7 @@ Example:    48773 10847.650 127.127.4.1 9714 -0.001605376 0.000000000 0.00142487
 |================================
 |Item 		|Units 	|Description
 |48773 		|MJD 	|date
-|10847.650 	|s 	|time past midnight
+|10847.650 	|s 	|time past midnight (UTC)
 |127.127.4.1 	|IP 	|source address
 |9714 		|hex 	|status word
 |-0.001605376 	|s 	|clock offset
@@ -1622,4 +1622,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 2.3 Mar 2015:: 
     Use the NTP accuracy estimate from RFC 5905.
+
+2.3.1 Mar 2015:: 
+    Removed some typos, corrected formatting, and minor changes. 
+    No new info.
 
