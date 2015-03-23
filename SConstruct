@@ -1043,8 +1043,11 @@ if qt_env:
 # The libraries have dependencies on system libraries
 # libdbus appears multiple times because the linker only does one pass.
 
-gpslibs = ["-lgps", "-lm"] + dbus_libs
-gpsdlibs = ["-lgpsd"] + usblibs + bluezlibs + gpslibs
+gpsflags = ["-lm"] + dbus_libs
+gpsdflags = usblibs + bluezlibs + gpsflags
+
+gpslibs = ["-lgps"] + gpsflags
+gpsdlibs = ["-lgpsd"] + gpsdflags + gpslibs
 
 # Source groups
 
@@ -1105,24 +1108,28 @@ binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgp
 if env["ncurses"]:
     binaries += [cgps, gpsmon]
 
-# Test programs
+# Test programs - always link locally and statically
 test_float = env.Program('test_float', ['test_float.c'])
-test_geoid = env.Program('test_geoid', ['test_geoid.c'], parse_flags=gpsdlibs)
-test_json = env.Program('test_json', ['test_json.c'], parse_flags=gpslibs)
-env.Depends(test_json, compiled_gpslib)
-test_mktime = env.Program('test_mktime', ['test_mktime.c'], parse_flags=gpslibs)
-env.Depends(test_mktime, compiled_gpslib)
 test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
-test_packet = env.Program('test_packet', ['test_packet.c'], parse_flags=gpsdlibs)
-env.Depends(test_packet, [compiled_gpsdlib, compiled_gpslib])
-test_bits = env.Program('test_bits', ['test_bits.c'], parse_flags=gpslibs)
-env.Depends(test_bits, [compiled_gpsdlib, compiled_gpslib])
-test_matrix = env.Program('test_matrix', ['test_matrix.c'], parse_flags=gpsdlibs)
-env.Depends(test_matrix, [compiled_gpsdlib, compiled_gpslib])
-test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'], parse_flags=gpslibs)
-env.Depends(test_gpsmm, compiled_gpslib)
-test_libgps = env.Program('test_libgps', ['test_libgps.c'], parse_flags=gpslibs)
-env.Depends(test_libgps, compiled_gpslib)
+test_bits = env.Program('test_bits', ['test_bits.c'],
+                        LIBS=['gps'], LIBPATH='.')
+test_matrix = env.Program('test_matrix', ['test_matrix.c'],
+                          LIBS=['gpsd', 'gps'],
+                          LIBPATH='.', parse_flags=gpsdflags)
+test_packet = env.Program('test_packet', ['test_packet.c'],
+                          LIBS=['gpsd', 'gps'],
+                          LIBPATH='.', parse_flags=gpsdflags)
+test_geoid = env.Program('test_geoid', ['test_geoid.c'],
+                         LIBS=['gpsd', 'gps'],
+                         LIBPATH='.', parse_flags=gpsdflags)
+test_mktime = env.Program('test_mktime', ['test_mktime.c'],
+                          LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
+test_libgps = env.Program('test_libgps', ['test_libgps.c'],
+                          LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
+test_json = env.Program('test_json', ['test_json.c'],
+                        LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
+test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
+                         LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
 testprogs = [test_float, test_trig, test_bits, test_matrix, test_packet,
              test_mktime, test_geoid, test_libgps]
 if env['socket_export']:
