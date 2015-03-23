@@ -1261,7 +1261,7 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 		     field[1], mtk_reasons[reason]);
 	}
 	else
-	    gpsd_log(&session->context->errout, LOG_WARN,
+	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "MTK ACK: %s\n", field[1]);
 	return ONLINE_SET;
     case 424:			/* PPS pulse width response */
