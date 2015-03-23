@@ -1067,9 +1067,7 @@ gpsmon_sources = [
 
 ## Production programs
 
-gpsd_env = env.Clone()
-
-gpsd = gpsd_env.Program('gpsd', gpsd_sources, parse_flags = gpsdlibs)
+gpsd = env.Program('gpsd', gpsd_sources, parse_flags=gpsdlibs)
 env.Depends(gpsd, [compiled_gpsdlib, compiled_gpslib])
 
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs)
