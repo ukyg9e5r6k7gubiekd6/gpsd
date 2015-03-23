@@ -1950,7 +1950,7 @@ Utility('udev-test', '', [
 
 # Ordinary cleanup
 clean = env.Clean(build,
-          map(glob.glob,("*.[oa]", "*.[1358]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc", "TAGS", "config.log","lib*.so*","gps-*egg-info")) + testprogs + \
+          map(glob.glob,("*.[oa]", "*.[1358]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc", "TAGS", "config.log","lib*.so*","lib*.a","gps-*egg-info")) + testprogs + \
           generated_sources + base_manpages.keys() + \
           map(lambda f: f[:-3], templated))
 
