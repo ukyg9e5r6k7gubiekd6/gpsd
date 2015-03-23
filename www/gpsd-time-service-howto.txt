@@ -1386,12 +1386,14 @@ priority2 10
 
 Now as root on the master, start the ptp4l daemon:
 
+-----------------------------------------------------------------------------
 # ethtool --set-eee eth0 eee off
 # ptp4l -S -f /usr/local/etc/ptp4l.conf &
+-----------------------------------------------------------------------------
 
 Configuration of the master server is now complete.  Now to configure
 the slaves.  If the slaves also have PPS then configure them as masters.
-Otherwise you will stop on your SHMs.
+Otherwise you will stomp on your SHMs.
 
 If you are using ntpd, then add the last three lines below to your
 master ntp.conf file to configure your one and only SHM.
