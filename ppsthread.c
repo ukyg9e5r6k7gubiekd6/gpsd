@@ -380,7 +380,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     /* pthread error return */
     int pthread_err; 
     bool not_a_tty = false;
-    bool pps_can_wait = false;
+    bool pps_canwait = false;
 
     if ( isatty(thread_context->devicefd) == 0 ) {
 	thread_context->log_hook(thread_context, THREAD_INF, 
@@ -413,11 +413,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	thread_context->log_hook(thread_context, THREAD_PROG,
 		    "KPPS:%s have PPS_CANWAIT\n",
 	 	    thread_context->devicename);
-        pps_can_wait = true;
+        pps_canwait = true; 
     }
 #endif  /* HAVE_SYS_TIMEPPS_H */
 
-    if ( not_a_tty && !pps_can_wait ) {
+    if ( not_a_tty && !pps_canwait ) {
 	/* for now, no way to wait for an edge, in the future maybe figure out
          * a sleep */
     }
@@ -465,83 +465,78 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	 * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
 	 * entire set of these.
 	 */
-        if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
-	    char errbuf[BUFSIZ] = "unknown error";
-	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
-	    thread_context->log_hook(thread_context, THREAD_WARN,
+        if ( !not_a_tty && !pps_canwait ) {
+            /* we are a tty, so can TIOCMIWAIT */
+            /* we have no PPS_CANWAIT, so must TIOCMIWAIT */
+	    if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
+		char errbuf[BUFSIZ] = "unknown error";
+		(void)strerror_r(errno, errbuf, sizeof(errbuf));
+		thread_context->log_hook(thread_context, THREAD_WARN,
 			"PPS:%s ioctl(TIOCMIWAIT) failed: %d %.40s\n",
 			thread_context->devicename, errno, errbuf);
-	    break;
-	}
-        /*
-	 * Start of time critical section 
-         * Only error reporting, not success reporting in critical section
-	 */
+		break;
+	    }
+        
+	    /*
+	     * Start of time critical section 
+	     * Only error reporting, not success reporting in critical section
+	     */
 
-	/* quick, grab a copy of last_fixtime before it changes */
-	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
-	pthread_err = pthread_mutex_lock(&ppslast_mutex);
-	if ( 0 != pthread_err ) {
-	    char errbuf[BUFSIZ] = "unknown error";
-	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
-	    thread_context->log_hook(thread_context, THREAD_ERROR,
-		    "PPS:%s pthread_mutex_lock() : %s\n", 
-			thread_context->devicename, errno, errbuf);
-	}
-	/*@ +unrecog @*/
-	last_fixtime = thread_context->fixin;
-	/*@ -unrecog (splint has no pthread declarations as yet) @*/
-	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
-	if ( 0 != pthread_err ) {
-	    char errbuf[BUFSIZ] = "unknown error";
-	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
-	    thread_context->log_hook(thread_context, THREAD_ERROR,
-			"PPS:%s pthread_mutex_unlock() : %s\n", 
-			thread_context->devicename, errno, errbuf);
-	}
-	/*@ +unrecog @*/
+	    /* quick, grab a copy of last_fixtime before it changes */
+	    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+	    pthread_err = pthread_mutex_lock(&ppslast_mutex);
+	    if ( 0 != pthread_err ) {
+		char errbuf[BUFSIZ] = "unknown error";
+		(void)strerror_r(errno, errbuf, sizeof(errbuf));
+		thread_context->log_hook(thread_context, THREAD_ERROR,
+			"PPS:%s pthread_mutex_lock() : %s\n", 
+			    thread_context->devicename, errno, errbuf);
+	    }
+	    /*@ +unrecog @*/
+	    last_fixtime = thread_context->fixin;
+	    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+	    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+	    if ( 0 != pthread_err ) {
+		char errbuf[BUFSIZ] = "unknown error";
+		(void)strerror_r(errno, errbuf, sizeof(errbuf));
+		thread_context->log_hook(thread_context, THREAD_ERROR,
+			    "PPS:%s pthread_mutex_unlock() : %s\n", 
+			    thread_context->devicename, errno, errbuf);
+	    }
+	    /*@ +unrecog @*/
 
 /*@-noeffect@*/
-        /* get the time after we just woke up */
-	if ( 0 > clock_gettime(CLOCK_REALTIME, &clock_ts) ) {
-	    /* uh, oh, can not get time! */
-	    thread_context->log_hook(thread_context, THREAD_ERROR,
-			"PPS:%s clock_gettime() failed\n",
-			thread_context->devicename);
-	    break;
-	}
+	    /* get the time after we just woke up */
+	    if ( 0 > clock_gettime(CLOCK_REALTIME, &clock_ts) ) {
+		/* uh, oh, can not get time! */
+		thread_context->log_hook(thread_context, THREAD_ERROR,
+			    "PPS:%s clock_gettime() failed\n",
+			    thread_context->devicename);
+		break;
+	    }
 /*@+noeffect@*/
-     
-        /* got the edge, got the time just after the edge, now quickly
-         * get the edge state */
-	/*@ +ignoresigns */
-	if (ioctl(thread_context->devicefd, TIOCMGET, &state) != 0) {
-	    thread_context->log_hook(thread_context, THREAD_ERROR,
-			"PPS:%s ioctl(TIOCMGET) failed\n",
+	 
+	    /* got the edge, got the time just after the edge, now quickly
+	     * get the edge state */
+	    /*@ +ignoresigns */
+	    if (ioctl(thread_context->devicefd, TIOCMGET, &state) != 0) {
+		thread_context->log_hook(thread_context, THREAD_ERROR,
+			    "PPS:%s ioctl(TIOCMGET) failed\n",
+			    thread_context->devicename);
+		break;
+	    }
+	    /*@ -ignoresigns */
+	    /* end of time critical section */
+	    thread_context->log_hook(thread_context, THREAD_PROG,
+			"PPS:%s ioctl(TIOCMIWAIT) succeeded\n",
 			thread_context->devicename);
-	    break;
-	}
-	/*@ -ignoresigns */
-        /* end of time critical section */
-	thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS:%s ioctl(TIOCMIWAIT) succeeded\n",
-		    thread_context->devicename);
 
-	/*
-	 * If there has not yet been any valid in-band time stashed
-	 * from the GPS when the PPS event was asserted, we can do
-	 * nothing further.  Some GPSes like Garmin always send a PPS,
-	 * valid or not.  Other GPSes like some uBlox may only send
-	 * PPS when time is valid.  It is common to get PPS, and no
-	 * fixtime, while autobauding.
-	 */
-        if (last_fixtime.real.tv_sec == 0)
-	    continue;
-
-	/* mask for monitored lines */
-	state &= PPS_LINE_TIOC;
-	edge = (state > state_last) ? 1 : 0;
+	    /* mask for monitored lines */
+	    state &= PPS_LINE_TIOC;
+	    edge = (state > state_last) ? 1 : 0;
+        }
 #endif /* TIOCMIWAIT */
+
 
 	/* ok and log used by KPPS and TIOCMIWAIT */
 	// cppcheck-suppress redundantAssignment
@@ -554,31 +549,48 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
              * PPS timestamp removes about 20uS of latency, and about +/-5uS 
              * of jitter 
              */
-#ifdef TIOCMIWAIT
-	    /*
-	     * We use of a non-NULL zero timespec here,
-	     * which means to return immediately with -1 (section
-	     * 3.4.3).  This is because we know we just got a pulse because 
-             * TIOCMIWAIT just woke up.
-	     * The timestamp has already been captured in the kernel, and we 
-             * are merely fetching it here.
-	     */
-            memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
-#else /* not TIOCMIWAIT */
-	    /*
-	     * RFC2783 specifies that a NULL timeval means to wait.
-             *
-             * FIXME, this will fail on 2Hz 'PPS', maybe should wait 3 Sec.
-	     */
-	    kernelpps_tv.tv_sec = 1;
-	    kernelpps_tv.tv_nsec = 0;
-#endif
+	    if ( pps_canwait ) {
+		/*
+		 * RFC2783 specifies that a NULL timeval means to wait, if
+                 * PPS_CANWAIT is available.
+                 *
+                 * since we pps_canwait, we skipped the TIOMCIWAIT
+                 *
+                 * 3 second time out, some GPS output 0.5Hz and some RFC2783
+                 * can only trigger on one edge
+                 * a better and more complex solution would be to wait 
+                 * for 1/20 second and suffer the cycles
+		 */
+		kernelpps_tv.tv_sec = 3;
+		kernelpps_tv.tv_nsec = 0;
+	    } else {
+		/*
+		 * We use of a non-NULL zero timespec here,
+		 * which means to return immediately with -1 (section
+		 * 3.4.3).  This is because we know we just got a pulse because 
+		 * TIOCMIWAIT just woke up.
+		 * The timestamp has already been captured in the kernel, and we 
+		 * are merely fetching it here.
+		 */
+		memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
+	    }
 	    if ( 0 > time_pps_fetch(thread_context->kernelpps_handle, PPS_TSFMT_TSPEC
 	        , &pi, &kernelpps_tv)) {
+
+		char errbuf[BUFSIZ] = "unknown error";
+		(void)strerror_r(errno, errbuf, sizeof(errbuf));
 		thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "KPPS:%s kernel PPS failed\n",
-			    thread_context->devicename);
+			    "KPPS:%s kernel PPS failed %s\n",
+			    thread_context->devicename, errbuf);
+                if ( ETIMEDOUT == errno || EINTR == errno ) {
+			/* just a timeout */
+                        continue;
+                }
+                break;
 	    } else {
+thread_context->log_hook(thread_context, THREAD_ERROR,
+"KPPS:%s kernel PPS!\n",
+thread_context->devicename);
 		// find the last edge
 		// FIXME a bit simplistic, should hook into the
                 // cycle/duration check below.
@@ -633,6 +645,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    }
 	}
 #endif /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
+        if ( not_a_tty && !pps_canwait ) {
+	    /* uh, oh, no TIOMCIWAIT, nor RFC2783, die */
+	    break;
+	}
 
 #if defined(TIOCMIWAIT)
 	/*@ +boolint @*/
@@ -763,6 +779,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		ok = 0;
 		log = "this second already handled\n";
 	}
+
+	/*
+	 * If there has not yet been any valid in-band time stashed
+	 * from the GPS when the PPS event was asserted, we can do
+	 * nothing further.  Some GPSes like Garmin always send a PPS,
+	 * valid or not.  Other GPSes like some uBlox may only send
+	 * PPS when time is valid.  It is common to get PPS, and no
+	 * fixtime, while autobauding.
+	 */
+        if (last_fixtime.real.tv_sec == 0) {
+	    /* probably should log computed offset jjust for grins here */
+	    continue;
+        }
+
 
 	if (ok) {
 	    /* offset is the skew from expected to observed pulse time */
