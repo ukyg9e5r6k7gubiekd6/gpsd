@@ -1070,21 +1070,24 @@ gpsmon_sources = [
 
 ## Production programs
 
-gpsd = env.Program('gpsd', gpsd_sources, parse_flags=gpsdlibs)
-env.Depends(gpsd, [compiled_gpsdlib, compiled_gpslib])
+gpsd = env.Program('gpsd', gpsd_sources,
+                   LIBS=['gpsd'], parse_flags=gpsdflags+gpslibs)
+env.Depends(gpsd, [compiled_gpslib])
 
-gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'], parse_flags=gpsdlibs)
-env.Depends(gpsdecode, [compiled_gpsdlib, compiled_gpslib])
+gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'],
+                        LIBS=['gpsd'], parse_flags=gpsdflags+gpslibs)
+env.Depends(gpsdecode, [compiled_gpslib])
 
-gpsctl = env.Program('gpsctl', ['gpsctl.c'], parse_flags=gpsdlibs)
-env.Depends(gpsctl, [compiled_gpsdlib, compiled_gpslib])
+gpsctl = env.Program('gpsctl', ['gpsctl.c'],
+                     LIBS=['gpsd'], parse_flags=gpsdflags+gpslibs)
+env.Depends(gpsctl, [compiled_gpslib])
+
+gpsmon = env.Program('gpsmon', gpsmon_sources,
+                     LIBS=['gpsd'], parse_flags=gpsdflags + gpslibs + ncurseslibs + ['-lm'])
+env.Depends(gpsmon, [compiled_gpslib])
 
 gpsdctl = env.Program('gpsdctl', ['gpsdctl.c'], parse_flags=gpslibs)
 env.Depends(gpsdctl, compiled_gpslib)
-
-gpsmon = env.Program('gpsmon', gpsmon_sources,
-                     parse_flags=gpsdlibs + ncurseslibs + ['-lm'])
-env.Depends(gpsmon, [compiled_gpsdlib, compiled_gpslib])
 
 gpspipe = env.Program('gpspipe', ['gpspipe.c'], parse_flags=gpslibs)
 env.Depends(gpspipe, compiled_gpslib)
