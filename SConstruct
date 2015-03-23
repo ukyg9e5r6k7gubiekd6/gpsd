@@ -488,10 +488,10 @@ def GetLoadPath(context):
     context.Message("Getting system load path ...")
 
 if env.GetOption("clean") or env.GetOption("help"):
-    dbus_libs = []
+    dbusflags = []
     rtlibs = []
-    usblibs = []
-    bluezlibs = []
+    usbflags = []
+    bluezflags = []
     ncurseslibs = []
     confdefs = []
     manbuilder = False
@@ -581,19 +581,19 @@ else:
         if config.CheckPKG('libusb-1.0'):
             confdefs.append("#define HAVE_LIBUSB 1\n")
             try:
-                usblibs = pkg_config('libusb-1.0')
+                usbflags = pkg_config('libusb-1.0')
             except OSError:
                 announce("pkg_config is confused about the state of libusb-1.0.")
-                usblibs = []
+                usbflags = []
         elif sys.platform.startswith("freebsd"):
             confdefs.append("#define HAVE_LIBUSB 1\n")
-            usblibs = [ "-lusb"]
+            usbflags = [ "-lusb"]
         else:
             confdefs.append("/* #undef HAVE_LIBUSB */\n")
-            usblibs = []
+            usbflags = []
     else:
         confdefs.append("/* #undef HAVE_LIBUSB */\n")
-        usblibs = []
+        usbflags = []
         env["usb"] = False
 
     if config.CheckLib('librt'):
@@ -606,21 +606,21 @@ else:
 
     if env['dbus_export'] and config.CheckPKG('dbus-1'):
         confdefs.append("#define HAVE_DBUS 1\n")
-        dbus_libs = ["-ldbus-1"]
+        dbusflags = ["-ldbus-1"]
         env.MergeFlags(pkg_config("dbus-1"))
     else:
         confdefs.append("/* #undef HAVE_DBUS */\n")
-        dbus_libs = []
+        dbusflags = []
         if env["dbus_export"]:
             announce("Turning off dbus-export support, library not found.")
         env["dbus_export"] = False
 
     if env['bluez'] and config.CheckPKG('bluez'):
         confdefs.append("#define ENABLE_BLUEZ 1\n")
-        bluezlibs = pkg_config('bluez')
+        bluezflags = pkg_config('bluez')
     else:
         confdefs.append("/* #undef ENABLE_BLUEZ */\n")
-        bluezlibs = []
+        bluezflags = []
         if env["bluez"]:
             announce("Turning off Bluetooth support, library not found.")
         env["bluez"] = False
@@ -1013,7 +1013,7 @@ env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = env.StaticLibrary(target="gpsd",
                            source=libgpsd_sources,
-                           parse_flags=usblibs + rtlibs + bluezlibs + ["-lgps"])
+                           parse_flags=usbflags + rtlibs + bluezflags + ["-lgps"])
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
@@ -1043,8 +1043,8 @@ if qt_env:
 # The libraries have dependencies on system libraries
 # libdbus appears multiple times because the linker only does one pass.
 
-gpsflags = ["-lm"] + dbus_libs
-gpsdflags = usblibs + bluezlibs + gpsflags
+gpsflags = ["-lm"] + dbusflags
+gpsdflags = usbflags + bluezflags + gpsflags
 
 gpslibs = ["-lgps"] + gpsflags
 gpsdlibs = ["-lgpsd"] + gpsdflags + gpslibs
