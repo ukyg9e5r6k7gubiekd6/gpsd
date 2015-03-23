@@ -268,9 +268,6 @@ latest stable version.</p>
 <dt><a href="libgpsmm.html">libgpsmm.3</a></dt>
 <dd>C++ class wrapper for the libgps C binding.</dd>
 
-<dt><a href="libgpsd.html">libgpsd.3</a></dt>
-<dd>The low-level library used by <code>gpsd</code> to talk to a GPS.</dd>
-
 <dt><a href="gpsprof.html">gpsprof.1</a></dt>
 <dd>The <code>gpsprof</code> program for plotting spatial scatter of fixes
 and fix latency.</dd>

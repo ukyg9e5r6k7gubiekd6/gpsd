@@ -26,13 +26,10 @@
 # Release identification begins here
 gpsd_version = "3.15~dev"
 
-# library version
+# client library version
 libgps_version_current   = 22
 libgps_version_revision  = 0
 libgps_version_age       = 0
-libgpsd_version_current  = 22
-libgpsd_version_revision = 0
-libgpsd_version_age      = 0
 
 # Release identification ends here
 
@@ -848,8 +845,6 @@ int clock_gettime(clockid_t, struct timespec *);
 
 libgps_version_soname = libgps_version_current - libgps_version_age
 libgps_version = "%d.%d.%d" %(libgps_version_soname, libgps_version_age, libgps_version_revision)
-libgpsd_version_soname = libgpsd_version_current - libgpsd_version_age
-libgpsd_version = "%d.%d.%d" %(libgpsd_version_soname, libgpsd_version_age, libgpsd_version_revision)
 
 libgps_sources = [
     "ais_json.c",
@@ -1016,10 +1011,8 @@ compiled_gpslib = Library(env=env,
                           parse_flags=rtlibs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
-compiled_gpsdlib = Library(env=env,
-                           target="gpsd",
-                           sources=libgpsd_sources,
-                           version=libgpsd_version,
+compiled_gpsdlib = env.StaticLibrary(target="gpsd",
+                           source=libgpsd_sources,
                            parse_flags=usblibs + rtlibs + bluezlibs + ["-lgps"])
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
@@ -1357,7 +1350,6 @@ base_manpages = {
     "libgps.3" : "libgps.xml",
     "libgpsmm.3" : "libgpsmm.xml",
     "libQgpsmm.3" : "libgpsmm.xml",
-    "libgpsd.3" : "libgpsd.xml",
     "gpsmon.1": "gpsmon.xml",
     "gpsctl.1" : "gpsctl.xml",
     "gpsdctl.8" : "gpsdctl.xml",
@@ -1412,7 +1404,6 @@ binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpsp
 if env["ncurses"]:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib))
-binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpsdlib))
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
 
