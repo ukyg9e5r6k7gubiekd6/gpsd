@@ -1043,7 +1043,7 @@ if qt_env:
 # The libraries have dependencies on system libraries
 # libdbus appears multiple times because the linker only does one pass.
 
-gpsflags = ["-lm"] + dbusflags
+gpsflags = ["-lm"] + rtlibs + dbusflags
 gpsdflags = usbflags + bluezflags + gpsflags
 
 gpslibs = ["-lgps"] + gpsflags
