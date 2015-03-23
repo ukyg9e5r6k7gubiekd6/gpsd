@@ -1241,10 +1241,10 @@ mort.cihar.com             21   8   72m      0.148      0.798   +668us   490us
 vps2.martinpoljak.net       6   4   17m    -53.200    141.596    -24ms    15ms
 ntp1.kajot.cz              25  16   91m     -0.774      1.494    -11ms  1859us
 ntp1.karneval.cz           17  10   89m      0.127      0.539  -4131us   574us
+-----------------------------------------------------------------------------
 
 In this case (Garmin 18x) the offset specified in the config for the
 SHM 0 source should be around 0.495.
------------------------------------------------------------------------------
 
 //FIXME: What more can we say about chronyd tuning?
 
@@ -1283,6 +1283,7 @@ disruptive to timekeeping.  Up to almost 1 Sec of errors in offset,
 wander and jitter.  To see if you have EEE enabled, and then turn it
 off:
 
+-----------------------------------------------------------------------------
 # ethtool --show-eee eth0
 EEE Settings for eth0:
 	EEE status: enabled - inactive
@@ -1301,6 +1302,7 @@ EEE Settings for eth1:
 	                           1000baseT/Full
 	Advertised EEE link modes:  Not reported
 	Link partner advertised EEE link modes:  Not reported
+-----------------------------------------------------------------------------
 
 === PTP with software timestamping ===
 
