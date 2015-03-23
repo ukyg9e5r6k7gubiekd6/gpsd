@@ -1013,7 +1013,7 @@ env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 compiled_gpsdlib = env.StaticLibrary(target="gpsd",
                            source=libgpsd_sources,
-                           parse_flags=usbflags + rtlibs + bluezflags + ["-lgps"])
+                           parse_flags=usbflags + bluezflags)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
