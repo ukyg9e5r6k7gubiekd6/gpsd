@@ -1429,8 +1429,10 @@ ntpshm_segment 0
 Now as root on the slave, as with the master, turn off EEE and start the
 ptp4l daemon:
 
+-----------------------------------------------------------------------------
 # ethtool --set-eee eth0 eee off
 # ptp4l -S -f /usr/local/etc/ptp4l.conf &
+-----------------------------------------------------------------------------
 
 Configuration of the slave server is now complete.  Follow the earlier
 procedures for checking the jitter on the SHM on the slaves.  Give it
