@@ -513,8 +513,7 @@ else:
     # because we can't seem to keep scons from passing these to g++.
     for option in ('-Wextra','-Wall', '-Wno-uninitialized','-Wno-missing-field-initializers',
                    '-Wcast-align','-Wmissing-declarations', '-Wmissing-prototypes',
-                   '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type', 
-                   '-fstack-protector-all'):
+                   '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
         if option not in config.env['CFLAGS']:
             config.CheckCompilerOption(option)
 
