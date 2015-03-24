@@ -589,9 +589,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
                 }
                 break;
 	    } else {
-thread_context->log_hook(thread_context, THREAD_ERROR,
-"KPPS:%s kernel PPS!\n",
-thread_context->devicename);
 		// find the last edge
 		// FIXME a bit simplistic, should hook into the
                 // cycle/duration check below.
