@@ -689,7 +689,7 @@ else:
             env["rtcm104v2"] = False
 
     # check function after libraries, because some function require library
-    # for example clock_gettime() require librt on Linux
+    # for example clock_gettime() require librt on Linux glibc < 2.17
     for f in ("daemon", "strlcpy", "strlcat", "clock_gettime"):
         if config.CheckFunc(f):
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
