@@ -436,7 +436,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
     /* got the edge, got the time just after the edge, now quickly
      * get the edge state */
     /*@ +ignoresigns */
-    if (ioctl(thread_context->devicefd, TIOCMGET, &state) != 0) {
+    if (ioctl(thread_context->devicefd, TIOCMGET, state) != 0) {
 	thread_context->log_hook(thread_context, THREAD_ERROR,
 		    "PPS:%s ioctl(TIOCMGET) failed\n",
 		    thread_context->devicename);
