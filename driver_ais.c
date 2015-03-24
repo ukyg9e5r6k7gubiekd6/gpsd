@@ -811,7 +811,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	//ais->type17.spare         = UBITS(38, 2);
 	ais->type17.lon		= UBITS(40, 18);
 	ais->type17.lat		= UBITS(58, 17);
-	//ais->type17.spare	        = UBITS(75, 4);
+	//ais->type17.spare	        = UBITS(75, 5);
 	ais->type17.bitcount        = bitlen - 80;
 	(void)memcpy(ais->type17.bitdata,
 		     (char *)bits + (80 / CHAR_BIT),
