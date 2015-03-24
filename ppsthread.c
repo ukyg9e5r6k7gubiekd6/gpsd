@@ -156,8 +156,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     /* These variables are only needed by Linux to find /dev/ppsN. */
     int ldisc = 18;   /* the PPS line discipline */
     glob_t globbuf;
-    char path[PATH_MAX] = "";
 #endif
+    char path[PATH_MAX] = "";
 
     pps_thread->kernelpps_handle = -1;
 
