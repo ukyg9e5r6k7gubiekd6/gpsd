@@ -809,8 +809,8 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
     case 17:	/* GNSS Broadcast Binary Message */
 	RANGE_CHECK(80, 816);
 	//ais->type17.spare         = UBITS(38, 2);
-	ais->type17.lon		= UBITS(40, 18);
-	ais->type17.lat		= UBITS(58, 17);
+	ais->type17.lon		= SBITS(40, 18);
+	ais->type17.lat		= SBITS(58, 17);
 	//ais->type17.spare	        = UBITS(75, 5);
 	ais->type17.bitcount        = bitlen - 80;
 	(void)memcpy(ais->type17.bitdata,

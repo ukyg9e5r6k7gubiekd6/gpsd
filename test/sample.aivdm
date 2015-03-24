@@ -667,12 +667,21 @@
 # decoders. 
 !AIVDM,2,1,5,A,A02VqLPA4I6C07h5Ed1h<OrsuBTTwS?r:C?w`?la<gno1RTRwSP9:BcurA8a,0*3A
 !AIVDM,2,2,5,A,:Oko02TSwu8<:Jbb,0*11
-Message Type             : 17
-Repeat Indicator         : 0
-MMSI                     : 2734450
-Longitude                : 17478
-Latitude                 : 35992
-DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062922fe3809292afde9122929fcf7002923ffd20c29aaaa
+#	Message Type             : 17
+#	Repeat Indicator         : 0
+#	MMSI                     : 2734450
+#	Longitude                : 17478
+#	Latitude                 : 35992
+#	DGNSS data               : 376:7c0556c07031febbf52924fe33fa2933ffa0fd2932fdb7062922fe3809292afde9122929fcf7002923ffd20c29aaaa
+#
+# This one was found in the wild.  It has a negative latitude.
+!AIVDM,1,1,1,A,A;wUJKU>io;WlWuwH`W1PpnuN<isf;5iHtOM1S6q?vsvNrNGOqLcr5mfD6t,2*51,d-127,S1378,t024436.00,T36.76385108,r09SCHA1,1272422678
+#	Message Type             : 17
+#	Repeat Indicator         : 0
+#	MMSI                     : 804870766
+#	Longitude                : 80669
+#	Latitude                 : -26818
+#	DGNSS data               : 272:7f7f6289c1838dbd78cc7bb8b17163c7dd0631b93feefe7ba7977f972be85d6e506f
 #
 # Type 18:
 # From Kurt Schwehr. Checked with the noaadata tools.
