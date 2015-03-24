@@ -81,7 +81,7 @@ static /*@unused@*/ inline void memory_barrier(void)
 /* prevent instruction reordering across any call to this function */
 {
 #ifndef S_SPLINT_S
-#ifdef STD_ATOMIC_H
+#ifdef _STDATOMIC_H
 #ifndef __COVERITY__
     atomic_thread_fence(memory_order_seq_cst);
 #endif /* __COVERITY__ */
