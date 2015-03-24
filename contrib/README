@@ -18,11 +18,6 @@ protocol (like motorola oncore or rockwell jupiter). it's a little
 buggy with syncing up to the start of a packet, but it'll send control
 strings OK.
 
-maxsats.pl analyzes a collection of "Y" messages and outputs records
-describing periods of excellent visibility (ie. 10 or more PRNs tracked).
-With over 30 SVs on orbit, there are periods where 14 PRNs are above the
-horizon, 13 are tracking, and at least 12 are actually used in a solution.
-
 lla2ecef transforms latitude/longitude/altitude (aka north-east-up or local
 tangential plane) coordinates into the earth-centered-earth-fixed frame. If
 invoked as "ecef2lla" it will transform coordinates in the opposite manner.
@@ -57,4 +52,12 @@ some purpose. This tool requires about 24hrs worth of "Y" messages and
 outputs an image of accumulated SV position and signal strength. It is
 sometimes entertaining to "see" occulted SVs using multipath. You must
 have the PHP-GD library installed to use this script.
+
+[The GPSD protocol changed in 2.90, and messages emitted are no longer
+of the form that this script expects.]
+
+maxsats.pl analyzes a collection of "Y" messages and outputs records
+describing periods of excellent visibility (ie. 10 or more PRNs tracked).
+With over 30 SVs on orbit, there are periods where 14 PRNs are above the
+horizon, 13 are tracking, and at least 12 are actually used in a solution.
 
