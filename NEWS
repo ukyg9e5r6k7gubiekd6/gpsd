@@ -1,4 +1,6 @@
 			GPSD project news
+Repository head:
+  Fixed incorrect decode of south latitudes in AIS Type 17 messages.
 
 3.14: 2015-03-14 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The Pi Day release, 3.14 on 3/14 2015 at 9:26. Longer timeouts on test clients.
