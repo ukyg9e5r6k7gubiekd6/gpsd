@@ -22,12 +22,6 @@ lla2ecef transforms latitude/longitude/altitude (aka north-east-up or local
 tangential plane) coordinates into the earth-centered-earth-fixed frame. If
 invoked as "ecef2lla" it will transform coordinates in the opposite manner.
 
-ppscheck watches a specified serial device for changes in handshake lines
-CD, RI, and CTS by running ioctl(...., TIOCMIWAIT, ...) in a loop.  When it
-sees a state change it emits a timestamped line of output dumping the state
-of the handshake signals. It's useful for checking whether a device is
-emitting 1PPS.  There is troubleshooting advice in the header comment.
-  
 ------
 The files below have been tested to work with gpsd v3.14, as of 2015-03-23
 
@@ -43,6 +37,12 @@ ntpoffset generate an estimate of your GPS's offset from a peerstats
 file.  For instructions on how to use this script, see the GPSD Time
 Service HOWTO in this distrubution, in the www/ subdirectory.
 
+ppscheck watches a specified serial device for changes in handshake lines
+CD, RI, and CTS by running ioctl(...., TIOCMIWAIT, ...) in a loop.  When it
+sees a state change it emits a timestamped line of output dumping the state
+of the handshake signals. It's useful for checking whether a device is
+emitting 1PPS.  There is troubleshooting advice in the header comment.
+  
 ------
 The files below do not work with current versions of gpsd.
 
