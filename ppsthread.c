@@ -87,6 +87,12 @@
 #include <glob.h>
 #endif
 
+#if defined(TIOCMIWAIT)
+static int get_edge_tiocmiwait( volatile struct pps_thread_t *, 
+                         struct timespec *, int *, 
+                         volatile struct timedelta_t *);
+#endif /* TIOCMIWAIT */
+
 /* normalize a timespec
  *
  * three cases to note
@@ -134,7 +140,6 @@
 	(r)->tv_nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
         TS_NORM( r ); \
     } while (0)
-
 
 /*@i1@*/static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -345,6 +350,114 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 /*@+compdestroy +nullpass +unrecog@*/
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
+#if defined(TIOCMIWAIT)
+/* wait for, and get, an edge using TIOCMIWAIT 
+ * return -1 for error
+ *         0 for OK
+ */
+static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
+                         struct timespec *clock_ts, 
+                         int *state,
+                         volatile struct timedelta_t *last_fixtime)
+{
+    char ts_str[TIMESPEC_LEN];
+    int pthread_err;  /* return code from pthread functions */
+
+    /* we are lucky to have TIOCMIWAIT, so wait for next edge */
+    #define PPS_LINE_TIOC (TIOCM_CD|TIOCM_RI|TIOCM_CTS|TIOCM_DSR)
+    /*
+     * DB9  DB25  Name      Full name
+     * ---  ----  ----      --------------------
+     *  3     2    TXD  --> Transmit Data
+     *  2     3    RXD  <-- Receive Data
+     *  7     4    RTS  --> Request To Send
+     *  8     5    CTS  <-- Clear To Send
+     *  6     6    DSR  <-- Data Set Ready
+     *  4    20    DTR  --> Data Terminal Ready
+     *  1     8    DCD  <-- Data Carrier Detect
+     *  9    22    RI   <-- Ring Indicator
+     *  5     7    GND      Signal ground
+     *
+     * Note that it only makes sense to wait on handshake lines
+     * activated from the receive side (DCE->DTE) here; in this
+     * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
+     * entire set of these.
+     */
+
+    if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	thread_context->log_hook(thread_context, THREAD_WARN,
+		"PPS:%s ioctl(TIOCMIWAIT) failed: %d %.40s\n",
+		thread_context->devicename, errno, errbuf);
+	return -1;;
+    }
+
+    /*
+     * Start of time critical section 
+     * Only error reporting, not success reporting in critical section
+     */
+
+    /* quick, grab a copy of last_fixtime before it changes */
+    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
+    pthread_err = pthread_mutex_lock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	thread_context->log_hook(thread_context, THREAD_ERROR,
+		"PPS:%s pthread_mutex_lock() : %s\n", 
+		    thread_context->devicename, errno, errbuf);
+    }
+    /*@ +unrecog @*/
+    memcpy( (void*) last_fixtime, (const void *) &thread_context->fixin, 
+		sizeof( struct timedelta_t ));
+    /*@ -unrecog (splint has no pthread declarations as yet) @*/
+    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+    if ( 0 != pthread_err ) {
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	thread_context->log_hook(thread_context, THREAD_ERROR,
+		    "PPS:%s pthread_mutex_unlock() : %s\n", 
+		    thread_context->devicename, errno, errbuf);
+    }
+    /*@ +unrecog @*/
+
+/*@-noeffect@*/
+    /* get the time after we just woke up */
+    if ( 0 > clock_gettime(CLOCK_REALTIME, clock_ts) ) {
+	/* uh, oh, can not get time! */
+	thread_context->log_hook(thread_context, THREAD_ERROR,
+		    "PPS:%s clock_gettime() failed\n",
+		    thread_context->devicename);
+	return -1;;
+    }
+/*@+noeffect@*/
+ 
+    /* got the edge, got the time just after the edge, now quickly
+     * get the edge state */
+    /*@ +ignoresigns */
+    if (ioctl(thread_context->devicefd, TIOCMGET, &state) != 0) {
+	thread_context->log_hook(thread_context, THREAD_ERROR,
+		    "PPS:%s ioctl(TIOCMGET) failed\n",
+		    thread_context->devicename);
+	return -1;
+    }
+    /*@ -ignoresigns */
+    /* end of time critical section */
+    /* mask for monitored lines */
+
+    *state = *state & PPS_LINE_TIOC;
+
+    timespec_str( clock_ts, ts_str, sizeof(ts_str) );
+    thread_context->log_hook(thread_context, THREAD_PROG,
+		"PPS:%s ioctl(TIOCMIWAIT) succeeded, time:%s,  state: %d\n",
+		thread_context->devicename, ts_str, *state);
+
+    return 0;
+}
+
+#endif /* TIOCMIWAIT */
+
 /*@-mustfreefresh -type -unrecog -branchstate@*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
@@ -446,95 +559,25 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
 
 #if defined(TIOCMIWAIT)
-        /* we are lucky to have TIOCMIWAIT, so wait for next edge */
-#define PPS_LINE_TIOC (TIOCM_CD|TIOCM_RI|TIOCM_CTS|TIOCM_DSR)
-	/*
-	 * DB9  DB25  Name      Full name
-	 * ---  ----  ----      --------------------
-	 *  3     2    TXD  --> Transmit Data
-	 *  2     3    RXD  <-- Receive Data
-	 *  7     4    RTS  --> Request To Send
-	 *  8     5    CTS  <-- Clear To Send
-	 *  6     6    DSR  <-- Data Set Ready
-	 *  4    20    DTR  --> Data Terminal Ready
-	 *  1     8    DCD  <-- Data Carrier Detect
-	 *  9    22    RI   <-- Ring Indicator
-	 *  5     7    GND      Signal ground
-	 *
-	 * Note that it only makes sense to wait on handshake lines
-	 * activated from the receive side (DCE->DTE) here; in this
-	 * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
-	 * entire set of these.
-	 */
         if ( !not_a_tty && !pps_canwait ) {
+            int ret;
+
             /* we are a tty, so can TIOCMIWAIT */
             /* we have no PPS_CANWAIT, so must TIOCMIWAIT */
-	    if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
-		char errbuf[BUFSIZ] = "unknown error";
-		(void)strerror_r(errno, errbuf, sizeof(errbuf));
-		thread_context->log_hook(thread_context, THREAD_WARN,
-			"PPS:%s ioctl(TIOCMIWAIT) failed: %d %.40s\n",
-			thread_context->devicename, errno, errbuf);
+
+	    ret = get_edge_tiocmiwait( thread_context, &clock_ts, &state,
+			&last_fixtime );
+            if ( 0 != ret ) {
 		break;
 	    }
         
-	    /*
-	     * Start of time critical section 
-	     * Only error reporting, not success reporting in critical section
-	     */
-
-	    /* quick, grab a copy of last_fixtime before it changes */
-	    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
-	    pthread_err = pthread_mutex_lock(&ppslast_mutex);
-	    if ( 0 != pthread_err ) {
-		char errbuf[BUFSIZ] = "unknown error";
-		(void)strerror_r(errno, errbuf, sizeof(errbuf));
-		thread_context->log_hook(thread_context, THREAD_ERROR,
-			"PPS:%s pthread_mutex_lock() : %s\n", 
-			    thread_context->devicename, errno, errbuf);
-	    }
-	    /*@ +unrecog @*/
-	    last_fixtime = thread_context->fixin;
-	    /*@ -unrecog (splint has no pthread declarations as yet) @*/
-	    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
-	    if ( 0 != pthread_err ) {
-		char errbuf[BUFSIZ] = "unknown error";
-		(void)strerror_r(errno, errbuf, sizeof(errbuf));
-		thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "PPS:%s pthread_mutex_unlock() : %s\n", 
-			    thread_context->devicename, errno, errbuf);
-	    }
-	    /*@ +unrecog @*/
-
-/*@-noeffect@*/
-	    /* get the time after we just woke up */
-	    if ( 0 > clock_gettime(CLOCK_REALTIME, &clock_ts) ) {
-		/* uh, oh, can not get time! */
-		thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "PPS:%s clock_gettime() failed\n",
-			    thread_context->devicename);
-		break;
-	    }
-/*@+noeffect@*/
-	 
-	    /* got the edge, got the time just after the edge, now quickly
-	     * get the edge state */
-	    /*@ +ignoresigns */
-	    if (ioctl(thread_context->devicefd, TIOCMGET, &state) != 0) {
-		thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "PPS:%s ioctl(TIOCMGET) failed\n",
-			    thread_context->devicename);
-		break;
-	    }
-	    /*@ -ignoresigns */
-	    /* end of time critical section */
-	    thread_context->log_hook(thread_context, THREAD_PROG,
-			"PPS:%s ioctl(TIOCMIWAIT) succeeded\n",
-			thread_context->devicename);
-
-	    /* mask for monitored lines */
-	    state &= PPS_LINE_TIOC;
 	    edge = (state > state_last) ? 1 : 0;
+
+            /* three things now known about the current edge:
+             * clock_ts - time of the edge
+             * state - the serial line input states
+             * edge - rising edge (1), falling edge (0) or invisble edge (0)
+             */
         }
 #endif /* TIOCMIWAIT */
 
