@@ -510,7 +510,7 @@ else:
     # missing-field-initializers, which we can't help triggering because
     # of the way some of the JSON-parsing code is generated.
     # Also not including -Wcast-qual and -Wimplicit-function-declaration,
-    # because we can't seem to keep scons from passing it to g++.
+    # because we can't seem to keep scons from passing these to g++.
     for option in ('-Wextra','-Wall', '-Wno-uninitialized','-Wno-missing-field-initializers',
                    '-Wcast-align','-Wmissing-declarations', '-Wmissing-prototypes',
                    '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
@@ -645,7 +645,7 @@ else:
         announce("You do not have kernel CANbus available.")
         env["nmea2000"] = False
 
-    # check for C11 or better, and __STDC__NO_ATOMICS__ is no defined
+    # check for C11 or better, and __STDC__NO_ATOMICS__ is not defined
     # before looking for stdatomic.h
     if config.CheckC11() and  not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and config.CheckHeader("stdatomic.h"):
         confdefs.append("#define HAVE_STDATOMIC_H 1\n")
@@ -1083,7 +1083,7 @@ gpsctl = env.Program('gpsctl', ['gpsctl.c'],
 env.Depends(gpsctl, [compiled_gpslib])
 
 gpsmon = env.Program('gpsmon', gpsmon_sources,
-                     LIBS=['gpsd'], parse_flags=gpsdflags + gpslibs + ncurseslibs + ['-lm'])
+                     LIBS=['gpsd'], parse_flags=gpsdflags+gpslibs + ncurseslibs)
 env.Depends(gpsmon, [compiled_gpslib])
 
 gpsdctl = env.Program('gpsdctl', ['gpsdctl.c'], parse_flags=gpslibs)
