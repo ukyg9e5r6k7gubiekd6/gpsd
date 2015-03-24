@@ -1011,6 +1011,8 @@ compiled_gpslib = Library(env=env,
                           parse_flags=rtlibs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
+static_gpslib = env.StaticLibrary("gps_static", libgps_sources, rtlibs)
+
 compiled_gpsdlib = env.StaticLibrary(target="gpsd",
                            source=libgpsd_sources,
                            parse_flags=usbflags + bluezflags)
@@ -1117,22 +1119,22 @@ test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
 test_bits = env.Program('test_bits', ['test_bits.c'],
                         LIBS=['gps'], LIBPATH='.')
 test_matrix = env.Program('test_matrix', ['test_matrix.c'],
-                          LIBS=['gpsd', 'gps'],
+                          LIBS=['gpsd', 'gps_static'],
                           LIBPATH='.', parse_flags=gpsdflags)
 test_packet = env.Program('test_packet', ['test_packet.c'],
-                          LIBS=['gpsd', 'gps'],
+                          LIBS=['gpsd', 'gps_static'],
                           LIBPATH='.', parse_flags=gpsdflags)
 test_geoid = env.Program('test_geoid', ['test_geoid.c'],
-                         LIBS=['gpsd', 'gps'],
+                         LIBS=['gpsd', 'gps_static'],
                          LIBPATH='.', parse_flags=gpsdflags)
 test_mktime = env.Program('test_mktime', ['test_mktime.c'],
-                          LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
+                          LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
 test_libgps = env.Program('test_libgps', ['test_libgps.c'],
-                          LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
+                          LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
 test_json = env.Program('test_json', ['test_json.c'],
-                        LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
+                        LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
-                         LIBS=['gps'], LIBPATH='.', parse_flags=["-lm"])
+                         LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
 testprogs = [test_float, test_trig, test_bits, test_matrix, test_packet,
              test_mktime, test_geoid, test_libgps]
 if env['socket_export']:
