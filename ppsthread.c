@@ -446,7 +446,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
     /* end of time critical section */
     /* mask for monitored lines */
 
-    *state = *state & PPS_LINE_TIOC;
+    *state &= PPS_LINE_TIOC;
 
     timespec_str( clock_ts, ts_str, sizeof(ts_str) );
     thread_context->log_hook(thread_context, THREAD_PROG,
