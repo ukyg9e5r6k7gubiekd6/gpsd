@@ -257,13 +257,14 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
      *
      * FIXME! need more specific than 'not linux'
      */
+    strlcpy(path, pps_thread->devicename, sizeof(path));
     // cppcheck-suppress redundantAssignment
     ret  = pps_thread->devicefd;
 #endif
     /* assert(ret >= 0); */
     pps_thread->log_hook(pps_thread, THREAD_INF,
-		"KPPS:%s RFC2783 fd is %d\n",
-	        pps_thread->devicename,
+		"KPPS:%s RFC2783 path:%s, fd is %d\n",
+	        pps_thread->devicename, path,
 		ret);
 
     /* RFC 2783 implies the time_pps_setcap() needs priviledges *
@@ -413,7 +414,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	thread_context->log_hook(thread_context, THREAD_PROG,
 		    "KPPS:%s have PPS_CANWAIT\n",
 	 	    thread_context->devicename);
-        pps_canwait = true; 
+        // pps_canwait = true; // broken now, 
     }
 #endif  /* HAVE_SYS_TIMEPPS_H */
 
