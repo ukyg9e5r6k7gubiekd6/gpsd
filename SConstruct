@@ -1027,7 +1027,7 @@ static_gpslib = env.StaticLibrary("gps_static",
                                   rtlibs)
 
 compiled_gpsdlib = env.StaticLibrary(target="gpsd",
-                           source=[env.StaticObject(s) for s in libgpsd_sources],
+                           source=[env.StaticObject(s, parse_flags=usbflags + bluezflags) for s in libgpsd_sources],
                            parse_flags=usbflags + bluezflags)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
