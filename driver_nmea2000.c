@@ -67,7 +67,7 @@ static int scale_int(int32_t var, const int64_t factor)
 
         ret   = var;
         ret  *= factor;
-        /*@i1@*/ret >>= 32;
+        ret >>= 32;
 
         return((int)ret);
 }
@@ -1395,16 +1395,15 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    gpsd_log(&session->context->errout, LOG_DATA,
 			     "pgn %6d:%s \n", work->pgn, work->name);
 		    session->driver.nmea2000.workpgn = (void *) work;
-		    /*@i1@*/session->lexer.outbuflen =  frame->can_dlc & 0x0f;
+		    session->lexer.outbuflen =  frame->can_dlc & 0x0f;
 		    for (l2=0;l2<session->lexer.outbuflen;l2++) {
-		        /*@i3@*/session->lexer.outbuffer[l2]= frame->data[l2];
+		        session->lexer.outbuffer[l2]= frame->data[l2];
 		    }
-		}
-		/*@i2@*/else if ((frame->data[0] & 0x1f) == 0) {
+		} else if ((frame->data[0] & 0x1f) == 0) {
 		    unsigned int l2;
 
-		    /*@i2@*/session->driver.nmea2000.fast_packet_len = frame->data[1];
-		    /*@i2@*/session->driver.nmea2000.idx = frame->data[0];
+		    session->driver.nmea2000.fast_packet_len = frame->data[1];
+		    session->driver.nmea2000.idx = frame->data[0];
 #if NMEA2000_FAST_DEBUG
 		    gpsd_log(&session->context->errout, LOG_ERROR,
 			     "Set idx    %2x    %2x %2x %6d\n",
@@ -1416,17 +1415,16 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    session->lexer.inbuflen = 0;
 		    session->driver.nmea2000.idx += 1;
 		    for (l2=2;l2<8;l2++) {
-		        /*@i3@*/session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
+		        session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
 		    }
 		    gpsd_log(&session->context->errout, LOG_DATA,
 			     "pgn %6d:%s \n", work->pgn, work->name);
-		}
-		/*@i2@*/else if (frame->data[0] == session->driver.nmea2000.idx) {
+		} else if (frame->data[0] == session->driver.nmea2000.idx) {
 		    unsigned int l2;
 
 		    for (l2=1;l2<8;l2++) {
 		        if (session->driver.nmea2000.fast_packet_len > session->lexer.inbuflen) {
-			    /*@i3@*/session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
+			    session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
 			}
 		    }
 		    if (session->lexer.inbuflen == session->driver.nmea2000.fast_packet_len) {
@@ -1452,7 +1450,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    gpsd_log(&session->context->errout, LOG_ERROR,
 			     "Fast error %2x %2x %2x %2x %6d\n",
 			     session->driver.nmea2000.idx,
-			     /*@i2@*/frame->data[0],
+			     frame->data[0],
 			     session->driver.nmea2000.unit,
 			     (unsigned int) session->driver.nmea2000.fast_packet_len,
 				                                               source_pgn);
