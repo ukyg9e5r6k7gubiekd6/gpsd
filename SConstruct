@@ -1744,10 +1744,13 @@ geoid_regress = Utility('geoid-regress', [test_geoid], [
     ])
 
 # Regression-test the Maidenhead Locator
-maidenhead_locator_regress = Utility('maidenhead-locator-regress', [python_built_extensions], [
-    '@echo "Testing the Maidenhead Locator conversion..."',
-    '$SRCDIR/test_maidenhead.py >/dev/null',
-    ])
+if not env['python']:
+    maidenhead_locator_regress = None
+else:
+    maidenhead_locator_regress = Utility('maidenhead-locator-regress', [python_built_extensions], [
+        '@echo "Testing the Maidenhead Locator conversion..."',
+        '$SRCDIR/test_maidenhead.py >/dev/null',
+        ])
 
 # Regression-test the calendar functions
 time_regress = Utility('time-regress', [test_mktime], [
@@ -1755,10 +1758,13 @@ time_regress = Utility('time-regress', [test_mktime], [
     ])
 
 # Regression test the unpacking code in libgps
-unpack_regress = Utility('unpack-regress', [test_libgps], [
-    '@echo "Testing the client-library sentence decoder..."',
-    '$SRCDIR/regress-driver -c $SRCDIR/test/clientlib/*.log',
-    ])
+if not env['python']:
+    unpack_regress = None
+else:
+    unpack_regress = Utility('unpack-regress', [test_libgps], [
+        '@echo "Testing the client-library sentence decoder..."',
+        '$SRCDIR/regress-driver -c $SRCDIR/test/clientlib/*.log',
+        ])
 
 # Build the regression test for the sentence unpacker
 Utility('unpack-makeregress', [test_libgps], [
@@ -1767,9 +1773,12 @@ Utility('unpack-makeregress', [test_libgps], [
     ])
 
 # Unit-test the JSON parsing
-json_regress = Utility('json-regress', [test_json], [
-    '$SRCDIR/test_json'
-    ])
+if not env['socket_export']:
+    json_regress = None
+else:
+    json_regress = Utility('json-regress', [test_json], [
+        '$SRCDIR/test_json'
+        ])
 
 # consistency-check the driver methods
 method_regress = Utility('packet-regress', [test_packet], [
