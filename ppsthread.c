@@ -488,7 +488,6 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
                          volatile struct timedelta_t *last_fixtime)
 {
 
-    int pthread_err;  /* return code from pthread functions */
     pps_info_t pi;
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     struct timespec kernelpps_tv;
@@ -533,6 +532,8 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 	return 0;
     }
     if ( pps_canwait ) {
+	int pthread_err;  /* return code from pthread functions */
+
         /* get_edge_tiocmiwait() got this if !pps_canwait */
 
 	/* duplicate copy in get_edge_tiocmiwait */
