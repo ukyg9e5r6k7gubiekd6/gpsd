@@ -99,7 +99,8 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *,
                          struct timespec *,
                          int *,
                          struct timespec *,
-                         int *);
+                         int *,
+                         volatile struct timedelta_t *);
 #endif  /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
 
 /* normalize a timespec
@@ -407,6 +408,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
      * Only error reporting, not success reporting in critical section
      */
 
+    /* duplicate copy in get_edge_rfc2783 */
     /* quick, grab a copy of last_fixtime before it changes */
     /*@ -unrecog  (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_lock(&ppslast_mutex);
@@ -418,8 +420,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 		    thread_context->devicename, errno, errbuf);
     }
     /*@ +unrecog @*/
-    memcpy( (void*) last_fixtime, (const void *) &thread_context->fixin,
-		sizeof( struct timedelta_t ));
+    *last_fixtime = thread_context->fixin;
     /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
@@ -430,6 +431,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 		    thread_context->devicename, errno, errbuf);
     }
     /*@ +unrecog @*/
+    /* end duplicate copy in get_edge_rfc2783 */
 
 /*@-noeffect@*/
     /* get the time after we just woke up */
@@ -482,9 +484,11 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
                          struct timespec *prev_clock_ts,
                          int *prev_edge,
                          struct timespec *clock_ts,
-                         int *edge)
+                         int *edge,
+                         volatile struct timedelta_t *last_fixtime)
 {
 
+    int pthread_err;  /* return code from pthread functions */
     pps_info_t pi;
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     struct timespec kernelpps_tv;
@@ -528,6 +532,35 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 	}
 	return 0;
     }
+    if ( pps_canwait ) {
+        /* get_edge_tiocmiwait() got this if !pps_canwait */
+
+	/* duplicate copy in get_edge_tiocmiwait */
+	/* quick, grab a copy of last_fixtime before it changes */
+	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
+	pthread_err = pthread_mutex_lock(&ppslast_mutex);
+	if ( 0 != pthread_err ) {
+	    char errbuf[BUFSIZ] = "unknown error";
+	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
+	    thread_context->log_hook(thread_context, THREAD_ERROR,
+		    "TPPS:%s pthread_mutex_lock() : %s\n",
+			thread_context->devicename, errno, errbuf);
+	}
+	/*@ +unrecog @*/
+	*last_fixtime = thread_context->fixin;
+	/*@ -unrecog (splint has no pthread declarations as yet) @*/
+	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+	if ( 0 != pthread_err ) {
+	    char errbuf[BUFSIZ] = "unknown error";
+	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
+	    thread_context->log_hook(thread_context, THREAD_ERROR,
+			"TPPS:%s pthread_mutex_unlock() : %s\n",
+			thread_context->devicename, errno, errbuf);
+	}
+	/*@ +unrecog @*/
+	/* end duplicate copy in get_edge_tiocmiwait */
+    }
+
 
     // find the last edge
     if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
@@ -583,8 +616,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 {
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     volatile struct pps_thread_t *thread_context = (struct pps_thread_t *)arg;
-    /* the system clock time, to the nSec, when the last fix received */
-    /* using a double would cause loss of precision */
+    /* the GPS time and system clock timme, to the nSec, 
+     * when the last fix received
+     * using a double would cause loss of precision */
     volatile struct timedelta_t last_fixtime = {{0, 0}, {0, 0}};
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
@@ -648,11 +682,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     }
 
     if ( 0 != (PPS_CANWAIT & pps_caps ) ) {
-       /* we can wait! */
+       /* we can wait! so no need for TIOCMIWAIT */
 	thread_context->log_hook(thread_context, THREAD_PROG,
 		    "KPPS:%s have PPS_CANWAIT\n",
 	 	    thread_context->devicename);
-        // pps_canwait = true; // broken now,
+        pps_canwait = true;
     }
 #endif  /* HAVE_SYS_TIMEPPS_H */
 
@@ -747,7 +781,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
                          &prev_clock_ts,
                          &prev_edge,
                          &clock_ts_kpps,
-                         &edge_kpps);
+                         &edge_kpps,
+			 &last_fixtime);
 
             if ( -1 == ret ) {
 		/* error, so break */
@@ -1037,7 +1072,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /*@+type@*/
 	    /*@+compdef@*/
 	} else {
-	    thread_context->log_hook(thread_context, THREAD_RAW,
+	    thread_context->log_hook(thread_context, THREAD_PROG,
 			"PPS:%s edge rejected %.100s",
 			thread_context->devicename, log);
 	}
