@@ -156,6 +156,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 #ifndef S_SPLINT_S
     pps_params_t pp;
 #endif /* S_SPLINT_S */
+    int pps_caps;
     int ret;
 #ifdef __linux__
     /* These variables are only needed by Linux to find /dev/ppsN. */
@@ -287,9 +288,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 		    ret, errbuf);
     	return -1;
     }
-#ifndef S_SPLINT_S
+
     /* have kernel PPS handle */
-    int pps_caps;
     /* get RFC2783 features supported */
     if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &pps_caps)) {
 	pps_caps = 0;
@@ -302,7 +302,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 		    pps_thread->devicename,
 		    pps_caps);
     }
-#endif /* S_SPLINT_S */
 
     /* construct the setparms structure */
     memset( (void *)&pp, 0, sizeof(pps_params_t));
@@ -463,7 +462,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 
 #endif /* TIOCMIWAIT */
 
-#if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
+#if defined(HAVE_SYS_TIMEPPS_H)
 /* wait for, and get, last two edges using RFC2783
  * return -1 for error
  *         0 for OK
@@ -482,7 +481,9 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
                          volatile struct timedelta_t *last_fixtime)
 {
 
+#ifndef S_SPLINT_S
     pps_info_t pi;
+#endif /* S_SPLINT_S */
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     struct timespec kernelpps_tv;
 
@@ -604,7 +605,7 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 
     return 0;
 }
-#endif  /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
+#endif  /* defined(HAVE_SYS_TIMEPPS_H) */
 
 /*@-mustfreefresh -type -unrecog -branchstate@*/
 static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
@@ -640,11 +641,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 #if defined(HAVE_SYS_TIMEPPS_H)
     int pps_caps;
-#ifndef S_SPLINT_S
     int cycle_kpps, duration_kpps;
     /* kpps_pulse stores the time of the last two edges */
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
-#endif /* S_SPLINT_S */
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     /* pthread error return */
     int pthread_err;
@@ -757,7 +756,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	// cppcheck-suppress redundantAssignment
 	ok = false;
 	log = NULL;
-#if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
+#if defined(HAVE_SYS_TIMEPPS_H)
         if ( 0 <= thread_context->kernelpps_handle ) {
 	    int ret;
 	    int edge_kpps = 0;       /* 0 = clear edge, 1 = assert edge */
@@ -815,7 +814,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    cycle = cycle_kpps;
 	    duration = duration_kpps;
 	}
-#endif /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
+#endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
         if ( not_a_tty && !pps_canwait ) {
 	    /* uh, oh, no TIOMCIWAIT, nor RFC2783, die */
