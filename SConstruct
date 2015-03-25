@@ -1145,9 +1145,9 @@ test_mktime = env.Program('test_mktime', ['test_mktime.c'],
                           LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
 # test_libgps for glibc older than 2.17
 test_libgps = env.Program('test_libgps', ['test_libgps.c'],
-                          LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"] + rtlibs)
+                          LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"] + rtlibs + dbusflags)
 test_json = env.Program('test_json', ['test_json.c'],
-                        LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"] + rtlibs)
+                        LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
                          LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
 testprogs = [test_float, test_trig, test_bits, test_matrix, test_packet,
