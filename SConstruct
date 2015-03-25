@@ -990,14 +990,16 @@ def VersionedSharedLibraryInstall(env, destination, libs):
 
 if not env["shared"]:
     def Library(env, target, sources, version, parse_flags=[]):
-        return env.StaticLibrary(target, sources, parse_flags=parse_flags)
+        return env.StaticLibrary(target,
+                                 [env.StaticObject(s) for s in sources],
+                                 parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: env.Install(libdir, sources)
 else:
     def Library(env, target, sources, version, parse_flags=[]):
         return VersionedSharedLibrary(env=env,
                                      libname=target,
                                      version=version,
-                                     lib_objs=sources,
+                                     lib_objs=[env.SharedObject(s) for s in sources],
                                      parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: \
                      VersionedSharedLibraryInstall(env, libdir, sources)
@@ -1006,13 +1008,13 @@ else:
 
 compiled_gpslib = Library(env=env,
                           target="gps",
-                          sources=[env.Object(s) for s in libgps_sources],
+                          sources=libgps_sources,
                           version=libgps_version,
                           parse_flags=rtlibs)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 static_gpslib = env.StaticLibrary("gps_static",
-                                  [env.Object(s) for s in libgps_sources],
+                                  [env.StaticObject(s) for s in libgps_sources],
                                   rtlibs)
 
 compiled_gpsdlib = env.StaticLibrary(target="gpsd",
