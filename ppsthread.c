@@ -80,9 +80,7 @@
  */
 #include <sys/ioctl.h>
 
-#ifndef S_SPLINT_S
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
-#endif
 #if defined(HAVE_SYS_TIMEPPS_H)
 #include <glob.h>
 #endif
@@ -93,7 +91,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *,
                          volatile struct timedelta_t *);
 #endif /* TIOCMIWAIT */
 
-#if defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S)
+#if defined(HAVE_SYS_TIMEPPS_H)
 static int get_edge_rfc2783( volatile struct pps_thread_t *,
                          int ,
                          struct timespec *,
@@ -101,7 +99,7 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *,
                          struct timespec *,
                          int *,
                          volatile struct timedelta_t *);
-#endif  /* defined(HAVE_SYS_TIMEPPS_H) && !defined(S_SPLINT_S) */
+#endif  /* defined(HAVE_SYS_TIMEPPS_H) */
 
 /* normalize a timespec
  *
@@ -113,7 +111,6 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *,
  * this only handles the case where two normalized timespecs
  * are added or subracted.  (e.g. only a one needs to be borrowed/carried
  */
-/*@-type -noeffect@*/ /* splint is confused about struct timespec */
 /*@unused@*/static inline void TS_NORM( struct timespec *ts)
 {
     if ( (  1 <= ts->tv_sec ) ||
@@ -141,7 +138,6 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *,
 	}
     }
 }
-/*@+type +noeffect@*/
 
 /* subtract two timespec */
 #define TS_SUB(r, ts1, ts2) \
@@ -151,10 +147,9 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *,
         TS_NORM( r ); \
     } while (0)
 
-/*@i1@*/static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 #if defined(HAVE_SYS_TIMEPPS_H)
-/*@-compdestroy -nullpass -unrecog@*/
 static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 /* return handle for kernel pps, or -1; requires root privileges */
 {
@@ -192,7 +187,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	 * /dev/ppsN device and then grovel in system data to determine
 	 * the association.
 	 */
-	/*@+ignoresigns@*/
+
 	/* Attach the line PPS discipline, so no need to ldattach */
 	/* This activates the magic /dev/pps0 device */
 	/* Note: this ioctl() requires root, and device is a tty */
@@ -204,7 +199,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 				 pps_thread->devicename, errbuf);
 	    return -1;
 	}
-	/*@-ignoresigns@*/
 
 	/* uh, oh, magic file names!, RFC2783 neglects to specify how
 	 * to associate the serial device and pps device names */
