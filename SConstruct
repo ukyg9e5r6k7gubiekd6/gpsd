@@ -833,6 +833,7 @@ int clock_gettime(clockid_t, struct timespec *);
     if env["qt"]:
         qt_env = env.Clone()
         qt_env.MergeFlags('-DUSE_QT')
+        qt_env.Append(OBJPREFIX='qt-')
         try:
             qt_env.MergeFlags(pkg_config('QtNetwork'))
         except OSError:
@@ -996,10 +997,18 @@ if not env["shared"]:
     LibraryInstall = lambda env, libdir, sources: env.Install(libdir, sources)
 else:
     def Library(env, target, sources, version, parse_flags=[]):
+        # Note: We have a possiblity of getting either Object or file list for
+	# sources so we run through the sources and try to make them into SharedObject's
+        obj_list = []
+        for s in Flatten(sources):
+            if type(s) is str:
+                obj_list.append(env.SharedObject(s))
+            else:
+                obj_list.append(s)
         return VersionedSharedLibrary(env=env,
                                      libname=target,
                                      version=version,
-                                     lib_objs=[env.SharedObject(s) for s in sources],
+                                     lib_objs=obj_list,
                                      parse_flags=parse_flags)
     LibraryInstall = lambda env, libdir, sources: \
                      VersionedSharedLibraryInstall(env, libdir, sources)
@@ -1018,12 +1027,13 @@ static_gpslib = env.StaticLibrary("gps_static",
                                   rtlibs)
 
 compiled_gpsdlib = env.StaticLibrary(target="gpsd",
-                           source=libgpsd_sources,
+                           source=[env.StaticObject(s) for s in libgpsd_sources],
                            parse_flags=usbflags + bluezflags)
 
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
-if qt_env:
+# Only attempt to create the qt library if we have shared turned on otherwise we have a mismash of objects in library
+if qt_env and env["shared"]:
     qtobjects = []
     qt_flags = qt_env['CFLAGS']
     for c_only in ('-Wmissing-prototypes', '-Wstrict-prototypes'):
@@ -1040,7 +1050,7 @@ if qt_env:
         else:
             compile_with = qt_env['CC']
             compile_flags = qt_env['CFLAGS']
-        qtobjects.append(qt_env.SharedObject(src.split(".")[0] + '-qt', src,
+        qtobjects.append(qt_env.SharedObject(src,
                                              CC=compile_with,
                                              CFLAGS=compile_flags))
     compiled_qgpsmmlib = Library(qt_env, "Qgpsmm", qtobjects, libgps_version)
