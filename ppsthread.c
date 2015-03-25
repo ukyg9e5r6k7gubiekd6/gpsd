@@ -715,6 +715,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    ret = get_edge_tiocmiwait( thread_context, &clock_ts_tio,
                         &state_tio, &last_fixtime );
             if ( 0 != ret ) {
+		thread_context->log_hook(thread_context, THREAD_PROG,
+			    "PPS:%s die: TIOCMIWAIT Error\n",
+			    thread_context->devicename);
 		break;
 	    }
 
@@ -780,6 +783,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
             if ( -1 == ret ) {
 		/* error, so break */
+		thread_context->log_hook(thread_context, THREAD_PROG,
+			    "PPS:%s die: RFC2783 Error\n",
+			    thread_context->devicename);
 		break;
             }
 
@@ -818,6 +824,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
         if ( not_a_tty && !pps_canwait ) {
 	    /* uh, oh, no TIOMCIWAIT, nor RFC2783, die */
+	    thread_context->log_hook(thread_context, THREAD_PROG,
+			"PPS:%s die: no TIOMCIWAIT, nor RFC2783 CANWAIT\n",
+			thread_context->devicename);
 	    break;
 	}
 
