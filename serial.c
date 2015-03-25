@@ -18,6 +18,9 @@
 #include <sys/param.h>	/* defines BSD */
 
 #include "gpsd_config.h"
+#ifdef S_SPLINT_S
+#undef ENABLE_BLUEZ
+#endif /* S_SPLINT_S */
 #ifdef ENABLE_BLUEZ
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
