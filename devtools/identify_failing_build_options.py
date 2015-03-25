@@ -115,7 +115,7 @@ def main(starting_number_of_options=0):
                 with open('failed_build_configs.txt', 'a') as failed_configs:
                     failed_configs.write(' '.join(command) + '\n')
 
-            if 'python' in row and retval == 0:
+            if retval == 0:
                 command = ['scons', 'check']
                 command.extend(params)
                 retval = subprocess.call(command, stdout=dev_null)
