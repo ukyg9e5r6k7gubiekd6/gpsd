@@ -665,8 +665,6 @@ static void deactivate_device(struct gps_device_t *device)
     if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
-#if defined(PPS_ENABLE) && defined(TIOCMIWAIT)
-#endif /* defined(PPS_ENABLE) && defined(TIOCMIWAIT) */
 #ifdef NTPSHM_ENABLE
 	ntpshm_link_deactivate(device);
 #endif /* NTPSHM_ENABLE */
