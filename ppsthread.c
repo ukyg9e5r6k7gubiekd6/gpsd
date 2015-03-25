@@ -645,6 +645,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
+    int pps_caps;
 #ifndef S_SPLINT_S
     int cycle_kpps, duration_kpps;
     /* kpps_pulse stores the time of the last two edges */
@@ -668,7 +669,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     /* if no TIOCMIWAIT, we hope to have PPS_CANWAIT */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
-    int pps_caps;
     /* get RFC2783 features supported */
     if ( 0 > time_pps_getcap(thread_context->kernelpps_handle, &pps_caps)) {
 	pps_caps = 0;
