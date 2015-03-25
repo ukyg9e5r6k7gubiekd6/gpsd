@@ -830,7 +830,7 @@ int clock_gettime(clockid_t, struct timespec *);
         announce("Adjust your PYTHONPATH to see library directories under /usr/local/lib")
 
     # Should we build the Qt binding?
-    if env["qt"]:
+    if env["qt"] and env["shared"]:
         qt_env = env.Clone()
         qt_env.MergeFlags('-DUSE_QT')
         qt_env.Append(OBJPREFIX='qt-')
@@ -1033,7 +1033,7 @@ compiled_gpsdlib = env.StaticLibrary(target="gpsd",
 libraries = [compiled_gpslib, compiled_gpsdlib]
 
 # Only attempt to create the qt library if we have shared turned on otherwise we have a mismash of objects in library
-if qt_env and env["shared"]:
+if qt_env:
     qtobjects = []
     qt_flags = qt_env['CFLAGS']
     for c_only in ('-Wmissing-prototypes', '-Wstrict-prototypes'):
