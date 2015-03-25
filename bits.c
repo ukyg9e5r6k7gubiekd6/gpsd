@@ -25,16 +25,16 @@ uint64_t ubits(unsigned char buf[], unsigned int start, unsigned int width, bool
     unsigned int i;
     unsigned end;
 
-    /*@i1@*/ assert(width <= sizeof(uint64_t) * CHAR_BIT);
+    assert(width <= sizeof(uint64_t) * CHAR_BIT);
     for (i = start / CHAR_BIT;
 	 i < (start + width + CHAR_BIT - 1) / CHAR_BIT; i++) {
-	/*@i1@*/fld <<= CHAR_BIT;
+	fld <<= CHAR_BIT;
 	fld |= (unsigned char)buf[i];
     }
 
     end = (start + width) % CHAR_BIT;
     if (end != 0) {
-	/*@i1@*/fld >>= (CHAR_BIT - end);
+	fld >>= (CHAR_BIT - end);
     }
 
     /*@ -shiftimplementation @*/

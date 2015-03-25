@@ -52,7 +52,7 @@ char *ntp_name(const int unit)
 {
     static char name[5] = "NTP\0";
 
-    /*@i2@*/name[3] = '0' + (char)unit;
+    name[3] = '0' + (char)unit;
 
     return name;
 }

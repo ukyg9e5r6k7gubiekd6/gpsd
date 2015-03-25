@@ -189,7 +189,7 @@ char *netlib_sock2ip(socket_t fd)
 {
     sockaddr_t fsin;
     socklen_t alen = (socklen_t) sizeof(fsin);
-    /*@i1@*/ static char ip[INET6_ADDRSTRLEN];
+    static char ip[INET6_ADDRSTRLEN];
     int r;
 
     r = getpeername(fd, &(fsin.sa), &alen);

@@ -300,8 +300,8 @@ void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 timestamp_t timestamp(void)
 {
      struct timespec ts;
-     /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &ts);
-     /*@i3@*/return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
+     (void)clock_gettime(CLOCK_REALTIME, &ts);
+     return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
 }
 
 time_t mkgmtime(register struct tm * t)
@@ -343,7 +343,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
     struct tm tm;
     memset(&tm,0,sizeof(tm));
 
-    /*@i1@*/ dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
+    dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
     if (dp != NULL && *dp == '.')
 	usec = strtod(dp, NULL);
     else
@@ -392,7 +392,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
      */
     (void)snprintf(fractstr, sizeof(fractstr), "%.3f", fractional);
     /* add fractional part, ignore leading 0; "0.2" -> ".2" */
-    /*@i2@*/(void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
+    (void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
     return isotime;
 }
 /* *INDENT-ON* */
