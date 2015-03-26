@@ -16,20 +16,20 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 // This program originally read a logfile of filtered gpsd messages,
-// type Y.  The gpsd protocal changed in 2.90, since when this became 
+// type Y.  The gpsd protocal changed in 2.90, since when this became
 // non-functional.
-// 
+//
 // The program has been updated (the first while loop) to read messages
-// over tcp; of type SKY.  These are unpacked from JSON.  No attempt has 
+// over tcp; of type SKY.  These are unpacked from JSON.  No attempt has
 // been made to touch the actual calculation or plotting routines.
-// 
+//
 // Because it now reads a live stream, the program must be run with an
 // option, "count", to specify the number of SKY messages it reads.  SKY
 // messages are ussually emitted every 5 secs, so a number close to 700
 // will cover an hour's worth.
-// 
+//
 // Tested to work with php5.6 , although earlier versions may work.
-// 
+//
 
 $cellmode = 0;
 if ($argc != 3){
@@ -86,7 +86,7 @@ while (($out = socket_read($socket, 2048)) && ( $j < $count) ){
 
 	$PRN = json_decode($out,true);
 // var_dump($PRN) ;
-// object(stdClass)#12 (5) 
+// object(stdClass)#12 (5)
 //       ["PRN"]=>
 //       int(137)
 //       ["el"]=>
