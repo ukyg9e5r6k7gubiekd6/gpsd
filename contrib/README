@@ -47,7 +47,8 @@ emitting 1PPS.  There is troubleshooting advice in the header comment.
 The files below do not work with current versions of gpsd.
 
 [The GPSD protocol changed in 2.90, and messages emitted are no longer
-of the form that this script expects.]
+of the form that this script expects. It is currently being updated
+by Sanjeev Gupta]
 
 skyview.php is used to generate pictures of your skyview, and may be
 used to help determine if a given antenna placement is appropriate for

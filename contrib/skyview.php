@@ -18,7 +18,7 @@
 $cellmode = 0;
 if ($argc != 3){
 	if (($argc != 4) || strcmp("cells", $argv[3])){
-		die("usage: ${argv[0]} logfile imagefile [cells]\n");
+		die("usage: ${argv[0]} count imagefile [cells]\n");
 	} else {
 		$cellmode = 1;
 	}
@@ -29,6 +29,10 @@ $cellsize = 5; # degrees
 $radius = 8; # pixels
 $filled = 0;
 
+$j = 0 ;
+$count = $argv[1] ;
+print $count ;
+
 $im = imageCreate($sz, $sz);
 $C = colorsetup($im);
 skyview($im, $sz, $C);
@@ -36,14 +40,60 @@ legend($im, $sz, $C);
 
 $sky = array();
 
-$fd = @fopen($argv[1], 'r');
-while (!feof($fd)){
-	$line = fgets($fd);
-	if (preg_match('/,Y=\S+ [0-9\.\?]+ (\d+):/', $line, $m)){
-		$n = $m[1];	
-		$s = explode(':', $line);
-		for($i = 1; $i <= $n; $i++){
-			list($sv, $el, $az, $snr, $u) = explode(' ', $s[$i]);
+error_reporting(E_ALL);
+
+/* Get the port for the GPSD service. */
+$service_port = 2947 ;
+/* Get the IP address for the target host. */
+$address = "127.0.0.1" ;
+/* Create a TCP/IP socket. */
+$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+if ($socket === false) {
+    echo "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n";
+}
+
+$result = socket_connect($socket, $address, $service_port);
+if ($result === false) {
+    echo "socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($socket)) . "\n";
+}
+
+$in = "?WATCH={\"enable\":true,\"json\":true};" ;
+
+$out = '';
+
+socket_write($socket, $in, strlen($in));
+
+while (($out = socket_read($socket, 2048)) && ( $j < $count) ){
+
+	if (strpos($out, "SKY")) {
+
+	print $j ;
+	$j = $j + 1;
+
+	$PRN = json_decode($out,true);
+// var_dump($PRN) ;
+// object(stdClass)#12 (5) 
+//       ["PRN"]=>
+//       int(137)
+//       ["el"]=>
+//       int(42)
+//       ["az"]=>
+//       int(91)
+//       ["ss"]=>
+//       int(32)
+//       ["used"]=>
+//       bool(false)
+
+	$n =  count($PRN["satellites"]) ;
+
+		for($i = 0; $i < $n; $i++){
+
+        $sv = $PRN["satellites"][$i]["PRN"] ;
+        $el = $PRN["satellites"][$i]["el"] ;
+        $az = $PRN["satellites"][$i]["az"] ;
+        $snr = $PRN["satellites"][$i]["ss"];
+        $u = $PRN["satellites"][$i]["used"];
+
 			if ($cellmode){
 				$az = $cellsize * (int)($az/$cellsize);
 				$el = $cellsize * (int)($el/$cellsize);
@@ -58,7 +108,10 @@ while (!feof($fd)){
 			$sky[$az][$el]['avg'] = $sky[$az][$el]['snr'] / $sky[$az][$el]['num'];
 		}
 	}
+
 }
+
+
 foreach($sky as $az => $x){
 	foreach ($sky[$az] as $el => $y){
 		$e = array(-1, $el, $az, $sky[$az][$el]['avg'], -1);
@@ -68,6 +121,7 @@ foreach($sky as $az => $x){
 			splot($im, $sz, $C, $radius, $filled, $e);
 	}
 }
+
 
 skygrid($im, $sz, $C);	# redraw grid over satellites
 imagePNG($im, $argv[2]);
