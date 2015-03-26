@@ -575,7 +575,15 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
     if ( 1 == *edge ) {
         /* assert after clear */
 	*prev_edge = 0;
-	*prev_clock_ts = pi.clear_timestamp;
+	if ( 0 == pi.clear_timestamp.tv_sec ) {
+                /* brain damaged pps-gpio sometimes never fills in clear
+                 * so make it look like an invisible pulse
+                 * if clear is the leading edge, then we are off by the
+                 * pulse width */
+		*prev_clock_ts = pi.assert_timestamp;
+	} else {
+		*prev_clock_ts = pi.clear_timestamp;
+        }
 	*clock_ts = pi.assert_timestamp;
     } else {
         /* assert before clear */
