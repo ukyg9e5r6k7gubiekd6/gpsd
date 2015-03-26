@@ -1438,7 +1438,8 @@ def Utility(target, source, action):
 # Report splint warnings
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
 # If you get preprocessor or fatal errors, add +showscan.
-splintopts = "-I/usr/include/libusb-1.0 +quiet"
+# explicitly force splint to only use our splintrc file
+splintopts = "-I/usr/include/libusb-1.0 +quiet +nof -f .splintrc"
 # splint does not know about multi-arch, work around that
 ma_status, ma = _getstatusoutput('dpkg-architecture -qDEB_HOST_MULTIARCH')
 if ma_status == 0:
