@@ -1,6 +1,7 @@
 <?php
 
 # Copyright (c) 2006,2007 Chris Kuethe <chris.kuethe@gmail.com>
+# Copyright (c) 2015 Sanjeev Gupta <ghane0@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -13,6 +14,22 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+// This program originally read a logfile of filtered gpsd messages,
+// type Y.  The gpsd protocal changed in 2.90, since when this became 
+// non-functional.
+// 
+// The program has been updated (the first while loop) to read messages
+// over tcp; of type SKY.  These are unpacked from JSON.  No attempt has 
+// been made to touch the actual calculation or plotting routines.
+// 
+// Because it now reads a live stream, the program must be run with an
+// option, "count", to specify the number of SKY messages it reads.  SKY
+// messages are ussually emitted every 5 secs, so a number close to 700
+// will cover an hour's worth.
+// 
+// Tested to work with php5.6 , although earlier versions may work.
+// 
 
 $cellmode = 0;
 if ($argc != 3){
@@ -30,7 +47,6 @@ $filled = 0;
 
 $j = 0 ;
 $count = $argv[1] ;
-print $count ;
 
 $im = imageCreate($sz, $sz);
 $C = colorsetup($im);
@@ -66,7 +82,6 @@ while (($out = socket_read($socket, 2048)) && ( $j < $count) ){
 
 	if (strpos($out, "SKY")) {
 
-	print $j ;
 	$j = $j + 1;
 
 	$PRN = json_decode($out,true);
