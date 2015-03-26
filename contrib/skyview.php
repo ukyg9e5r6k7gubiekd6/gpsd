@@ -1,4 +1,3 @@
-#!/usr/local/bin/php
 <?php
 
 # Copyright (c) 2006,2007 Chris Kuethe <chris.kuethe@gmail.com>
@@ -18,7 +17,7 @@
 $cellmode = 0;
 if ($argc != 3){
 	if (($argc != 4) || strcmp("cells", $argv[3])){
-		die("usage: ${argv[0]} count imagefile [cells]\n");
+		die("usage: ${argv[0]} count imagefile.png [cells]\n");
 	} else {
 		$cellmode = 1;
 	}

@@ -43,19 +43,15 @@ sees a state change it emits a timestamped line of output dumping the state
 of the handshake signals. It's useful for checking whether a device is
 emitting 1PPS.  There is troubleshooting advice in the header comment.
   
-------
-The files below do not work with current versions of gpsd.
-
-[The GPSD protocol changed in 2.90, and messages emitted are no longer
-of the form that this script expects. It is currently being updated
-by Sanjeev Gupta]
-
 skyview.php is used to generate pictures of your skyview, and may be
 used to help determine if a given antenna placement is appropriate for
-some purpose. This tool requires about 24hrs worth of "Y" messages and
+some purpose. This tool take a count of samples to collect from GPSD, and
 outputs an image of accumulated SV position and signal strength. It is
 sometimes entertaining to "see" occulted SVs using multipath. You must
 have the PHP-GD library installed to use this script.
+
+------
+The files below do not work with current versions of gpsd.
 
 [The GPSD protocol changed in 2.90, and messages emitted are no longer
 of the form that this script expects.]
