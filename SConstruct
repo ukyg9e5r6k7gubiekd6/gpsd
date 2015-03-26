@@ -62,7 +62,7 @@ tipwidget  = "<script data-gratipay-username='esr' \
 	data-gratipay-widget='button' src='//gttp.co/v1.js'></script>"
 # Hosting information ends here
 
-EnsureSConsVersion(2,0,1)
+EnsureSConsVersion(2,3,0)
 
 import copy, os, sys, glob, re, platform, time
 from distutils import sysconfig
@@ -917,59 +917,6 @@ libgpsd_sources = [
 # Inspired by Richard Levitte's (slightly buggy) code at
 # http://markmail.org/message/spttz3o4xrsftofr
 
-def VersionedSharedLibrary(env, libname, version, lib_objs=[], parse_flags=[]):
-    platform = env.subst('$PLATFORM')
-    shlib_pre_action = None
-    shlib_suffix = env.subst('$SHLIBSUFFIX')
-    shlib_post_action = None
-    shlink_flags = SCons.Util.CLVar(env.subst('$SHLINKFLAGS'))
-
-    if platform == 'posix':
-        ilib_suffix = shlib_suffix + '.' + version
-        (major, age, revision) = version.split(".")
-        soname = "lib" + libname + shlib_suffix + "." + major
-        shlink_flags += [ '-Wl,-Bsymbolic', '-Wl,-soname=%s' % soname ]
-    elif platform == 'cygwin':
-        ilib_suffix = shlib_suffix
-        shlink_flags += [ '-Wl,-Bsymbolic',
-                          '-Wl,--out-implib,${TARGET.base}.a' ]
-    elif platform == 'darwin':
-        ilib_suffix = '.' + version + shlib_suffix
-        shlink_flags += [ '-current_version', '%s' % version,
-                          '-compatibility_version', '%s' % version,
-                          '-undefined', 'dynamic_lookup' ]
-
-    ilib = env.SharedLibrary(libname,lib_objs,
-                            SHLIBSUFFIX=ilib_suffix,
-                            SHLINKFLAGS=shlink_flags, parse_flags=parse_flags)
-
-    if platform == 'darwin':
-        if version.count(".") != 2:
-            # We need a library name in libfoo.x.y.z.dylib form to proceed
-            raise ValueError
-        lib = 'lib' + libname + '.' + version + '.dylib'
-        lib_no_ver = 'lib' + libname + '.dylib'
-        # Link libfoo.x.y.z.dylib to libfoo.dylib
-        env.AddPostAction(ilib, 'rm -f %s; ln -s %s %s' % (
-            lib_no_ver, lib, lib_no_ver))
-        env.Clean(lib, lib_no_ver)
-    elif platform == 'posix':
-        if version.count(".") != 2:
-            # We need a library name in libfoo.so.x.y.z form to proceed
-            raise ValueError
-        lib = "lib" + libname + ".so." + version
-        suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
-        # For libfoo.so.x.y.z, links libfoo.so libfoo.so.x.y libfoo.so.x
-        major_name = shlib_suffix + "." + lib.split(".")[2]
-        minor_name = major_name + "." + lib.split(".")[3]
-        for linksuffix in [shlib_suffix, major_name, minor_name]:
-            linkname = re.sub(suffix_re, linksuffix, lib)
-            env.AddPostAction(ilib, 'rm -f %s; ln -s %s %s' % (
-                linkname, lib, linkname))
-            env.Clean(lib, linkname)
-
-    return ilib
-
 def VersionedSharedLibraryInstall(env, destination, libs):
     platform = env.subst('$PLATFORM')
     shlib_suffix = env.subst('$SHLIBSUFFIX')
@@ -997,19 +944,19 @@ if not env["shared"]:
     LibraryInstall = lambda env, libdir, sources: env.Install(libdir, sources)
 else:
     def Library(env, target, sources, version, parse_flags=[]):
-        # Note: We have a possiblity of getting either Object or file list for
-	# sources so we run through the sources and try to make them into SharedObject's
+        # Note: We have a possibility of getting either Object or file
+        # list for sources, so we run through the sources and try to make
+        # them into SharedObject instances.
         obj_list = []
         for s in Flatten(sources):
             if type(s) is str:
                 obj_list.append(env.SharedObject(s))
             else:
                 obj_list.append(s)
-        return VersionedSharedLibrary(env=env,
-                                     libname=target,
-                                     version=version,
-                                     lib_objs=obj_list,
-                                     parse_flags=parse_flags)
+        return env.SharedLibrary(target=target,
+                                 source=obj_list,
+                                 parse_flags=parse_flags,
+                                 SHLIBVERSION=version)
     LibraryInstall = lambda env, libdir, sources: \
                      VersionedSharedLibraryInstall(env, libdir, sources)
 

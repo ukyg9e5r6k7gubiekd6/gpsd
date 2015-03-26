@@ -102,8 +102,7 @@ The xgps test client requires the following Python extensions:
 
 === Scons ===
 
-You will need scons version 2.0.1 or later to build the code. The
-autotools build from 2.96 and earlier versions has been dropped.
+You will need scons version 2.3.0 (from 2013-03-02) or later to build the code.
 
 === Optional build components ===
 
