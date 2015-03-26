@@ -1093,8 +1093,16 @@ test_mktime = env.Program('test_mktime', ['test_mktime.c'],
 # test_libgps for glibc older than 2.17
 test_libgps = env.Program('test_libgps', ['test_libgps.c'],
                           LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"] + rtlibs + dbusflags)
-test_json = env.Program('test_json', ['test_json.c'],
-                        LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
+
+if not env['socket_export']:
+    announce("test_json not building because socket_export is disabled")
+    test_json = None
+else:
+    test_json = env.Program(
+        'test_json', ['test_json.c'],
+	LIBS=['gps_static'], LIBPATH='.',
+	parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
+
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
                          LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
 testprogs = [test_float, test_trig, test_bits, test_matrix, test_packet,
@@ -1562,8 +1570,8 @@ else:
     python_compilation_regress = None
 
 # using regress-drivers requires socket_export being enabled.
-if not env['socket_export']:
-    announce("GPS regression tests suppressed because socket_export is off.")
+if not env['socket_export'] or not env['python']:
+    announce("GPS regression tests suppressed because socket_export or python is off.")
     gps_regress = None
 else:
     # Regression-test the daemon. But first:
