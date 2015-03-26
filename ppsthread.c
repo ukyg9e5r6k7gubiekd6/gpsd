@@ -350,7 +350,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     }
     return 0;
 }
-/*@+compdestroy +nullpass +unrecog@*/
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
 #if defined(TIOCMIWAIT)
@@ -403,7 +402,6 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 
     /* duplicate copy in get_edge_rfc2783 */
     /* quick, grab a copy of last_fixtime before it changes */
-    /*@ -unrecog  (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_lock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
 	char errbuf[BUFSIZ] = "unknown error";
@@ -412,9 +410,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 		"TPPS:%s pthread_mutex_lock() : %s\n",
 		    thread_context->devicename, errno, errbuf);
     }
-    /*@ +unrecog @*/
     *last_fixtime = thread_context->fixin;
-    /*@ -unrecog (splint has no pthread declarations as yet) @*/
     pthread_err = pthread_mutex_unlock(&ppslast_mutex);
     if ( 0 != pthread_err ) {
 	char errbuf[BUFSIZ] = "unknown error";
@@ -423,10 +419,8 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 		    "TPPS:%s pthread_mutex_unlock() : %s\n",
 		    thread_context->devicename, errno, errbuf);
     }
-    /*@ +unrecog @*/
     /* end duplicate copy in get_edge_rfc2783 */
 
-/*@-noeffect@*/
     /* get the time after we just woke up */
     if ( 0 > clock_gettime(CLOCK_REALTIME, clock_ts) ) {
 	/* uh, oh, can not get time! */
@@ -435,18 +429,15 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 		    thread_context->devicename);
 	return -1;;
     }
-/*@+noeffect@*/
 
     /* got the edge, got the time just after the edge, now quickly
      * get the edge state */
-    /*@ +ignoresigns */
     if (ioctl(thread_context->devicefd, TIOCMGET, state) != 0) {
 	thread_context->log_hook(thread_context, THREAD_ERROR,
 		    "TPPS:%s ioctl(TIOCMGET) failed\n",
 		    thread_context->devicename);
 	return -1;
     }
-    /*@ -ignoresigns */
     /* end of time critical section */
     /* mask for monitored lines */
 
@@ -533,7 +524,6 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 
 	/* duplicate copy in get_edge_tiocmiwait */
 	/* quick, grab a copy of last_fixtime before it changes */
-	/*@ -unrecog  (splint has no pthread declarations as yet) @*/
 	pthread_err = pthread_mutex_lock(&ppslast_mutex);
 	if ( 0 != pthread_err ) {
 	    char errbuf[BUFSIZ] = "unknown error";
@@ -542,9 +532,7 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 		    "TPPS:%s pthread_mutex_lock() : %s\n",
 			thread_context->devicename, errno, errbuf);
 	}
-	/*@ +unrecog @*/
 	*last_fixtime = thread_context->fixin;
-	/*@ -unrecog (splint has no pthread declarations as yet) @*/
 	pthread_err = pthread_mutex_unlock(&ppslast_mutex);
 	if ( 0 != pthread_err ) {
 	    char errbuf[BUFSIZ] = "unknown error";
@@ -553,7 +541,6 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 			"TPPS:%s pthread_mutex_unlock() : %s\n",
 			thread_context->devicename, errno, errbuf);
 	}
-	/*@ +unrecog @*/
 	/* end duplicate copy in get_edge_tiocmiwait */
     }
 
