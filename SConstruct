@@ -913,29 +913,6 @@ libgpsd_sources = [
     "driver_zodiac.c",
 ]
 
-# Cope with scons's failure to set SONAME in its builtins.
-# Inspired by Richard Levitte's (slightly buggy) code at
-# http://markmail.org/message/spttz3o4xrsftofr
-
-def VersionedSharedLibraryInstall(env, destination, libs):
-    platform = env.subst('$PLATFORM')
-    shlib_suffix = env.subst('$SHLIBSUFFIX')
-    ilibs = env.Install(destination, libs)
-    if platform == 'posix':
-        suffix_re = '%s\\.[0-9\\.]*$' % re.escape(shlib_suffix)
-        for lib in map(str, libs):
-            if lib.count(".") != 4:
-                # We need a library name in libfoo.so.x.y.z form to proceed
-                raise ValueError
-            # For libfoo.so.x.y.z, links libfoo.so libfoo.so.x.y libfoo.so.x
-            major_name = shlib_suffix + "." + lib.split(".")[2]
-            minor_name = major_name + "." + lib.split(".")[3]
-            for linksuffix in [shlib_suffix, major_name, minor_name]:
-                linkname = re.sub(suffix_re, linksuffix, lib)
-                env.AddPostAction(ilibs, 'cd %s; rm -f %s; ln -s %s %s' % (destination, linkname, lib, linkname))
-                env.Clean(lib, linkname)
-    return ilibs
-
 if not env["shared"]:
     def Library(env, target, sources, version, parse_flags=[]):
         return env.StaticLibrary(target,
@@ -958,9 +935,7 @@ else:
                                  parse_flags=parse_flags,
                                  SHLIBVERSION=version)
     LibraryInstall = lambda env, libdir, sources: \
-                     VersionedSharedLibraryInstall(env, libdir, sources)
-
-# Klugery to handle sonames ends
+                     env.InstallVersionedLib(libdir, sources)
 
 compiled_gpslib = Library(env=env,
                           target="gps",
