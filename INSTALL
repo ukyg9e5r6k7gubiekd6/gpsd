@@ -242,6 +242,48 @@ Next, Wheezy requires a few tools for compiling and testing gpsd:
 Git-core is only required to build from a git repository.  pps-tools is for
 testing PPS inputs.  You need scons at 2.3.0 or higher to build.
 
+If your scons is less than 2.3.0 you will need to get a newer scons
+from wheezy-backport.  Partial instructions are detailed here:
+http://backports.debian.org/Instructions/
+
+Basically you need to add  this line to /etc/apt/sources.list:
+
+--------------------------------------------------------------
+deb http://http.debian.net/debian wheezy-backports main
+--------------------------------------------------------------
+
+Then do another update:
+
+--------------------------------------------------------------
+apt-get update
+--------------------------------------------------------------
+
+Which may lead you to this error if you lack a full set of debian keys:
+
+--------------------------------------------------------------
+W: GPG error: http://http.debian.net wheezy-backports Release: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 8B48AD6246925553
+--------------------------------------------------------------
+
+Partial but detailed instructions to fix that are here:
+
+--------------------------------------------------------------
+https://wiki.debian.org/SecureApt
+--------------------------------------------------------------
+
+In short, get the missing key, import into apt, and do the update:
+
+--------------------------------------------------------------
+gpg  --recv-keys 8B48AD6246925553
+gpg -a --export 46925553 |  apt-key add -
+apt-get update
+--------------------------------------------------------------
+
+You can now install scons from the wheezy-backports repository:
+
+--------------------------------------------------------------
+apt-get -t wheezy-backports install scons
+--------------------------------------------------------------
+
 The rest of the installation is just as for any other source based
 install, as noted in the file build.txt.
 
