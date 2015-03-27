@@ -37,8 +37,6 @@
 #endif /* INADDR_ANY */
 #include <sys/un.h>
 #include <arpa/inet.h>     /* for htons() and friends */
-#endif /* S_SPLINT_S */
-#ifndef S_SPLINT_S
 #include <unistd.h>
 #endif /* S_SPLINT_S */
 
