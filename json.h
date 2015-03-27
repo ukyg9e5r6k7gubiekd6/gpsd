@@ -5,7 +5,9 @@
  */
 
 #include <stdbool.h>
-#include <ctype.h>
+#ifndef S_SPLINT_S
+#include <ctype.h>       /* raspbian splint hates this */
+#endif /* S_SPLINT_S */
 
 typedef enum {t_integer, t_uinteger, t_real,
 	      t_string, t_boolean, t_character,
