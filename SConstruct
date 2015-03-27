@@ -1440,6 +1440,9 @@ def Utility(target, source, action):
 # If you get preprocessor or fatal errors, add +showscan.
 # explicitly force splint to only use our splintrc file
 splintopts = "-I/usr/include/libusb-1.0 +quiet +nof -f .splintrc"
+if sys.platform.startswith('darwin'):
+    splintopts = splintopts + " +skip-sys-headers"
+
 # splint does not know about multi-arch, work around that
 ma_status, ma = _getstatusoutput('dpkg-architecture -qDEB_HOST_MULTIARCH')
 if ma_status == 0:
