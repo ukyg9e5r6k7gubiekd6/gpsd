@@ -5,7 +5,9 @@
  */
 #endif /* GPSD_CONFIG_H */
 
-#include <termios.h>
+#ifndef S_SPLINT_S
+#include <termios.h>     /* raspbian splint hates this */
+#endif /* S_SPLINT_S */
 #include <stdint.h>
 #include <stdarg.h>
 #include "gps.h"

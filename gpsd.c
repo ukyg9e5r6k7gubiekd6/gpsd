@@ -16,18 +16,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
-#include <ctype.h>
 #include <setjmp.h>
 #include <assert.h>
-#include <pwd.h>
-#include <grp.h>
 #include <math.h>
 #include <syslog.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <signal.h>
-#include <pthread.h>
 #ifndef S_SPLINT_S
+#include <ctype.h>         /* raspbian splint hates this */
+#include <pwd.h>           /* raspbian splint hates this */
+#include <grp.h>           /* raspbian splint hates this */
+#include <fcntl.h>         /* raspbian splint hates this */
+#include <pthread.h>       /* raspbian splint hates this */
 #include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/socket.h>
