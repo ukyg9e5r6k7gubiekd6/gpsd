@@ -14,10 +14,12 @@
 -Ddbus_uint32_t=uint
 -Disgps30bits_t=uint
 -DFD_SETSIZE=31
+-DB230400=010000
 -DB57600=010001
 -DB115200=0010011
 -DCRTSCTS=0x00020000
 -DONLCR=0x00000002
+-DINET6_ADDRSTRLEN=48
 -D__gnuc_va_list=va_list
 -D__signed__=signed
 -D__pid_t=int

@@ -90,8 +90,8 @@ static void
 ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
 		size_t data_len)
 {
-    unsigned int n = 0;  /* extended info counter */
-    char obuf[128];      /* temp version string buffer */
+    size_t n = 0;	/* extended info counter */
+    char obuf[128];     /* temp version string buffer */
 
     if ( 44 > data_len ) {
 	/* incomplete message */
@@ -106,7 +106,7 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
 
     /* get n number of Extended info strings.  what is max n? */
     for ( n = 0; ; n++ ) {
-        unsigned int start_of_str = UBX_MESSAGE_DATA_OFFSET + 40 + (30 * n);
+        size_t start_of_str = UBX_MESSAGE_DATA_OFFSET + 40 + (30 * n);
 
         if ( (start_of_str + 2 ) > data_len ) {
 	    /* last one can be shorter than 30 */
@@ -945,7 +945,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
          * for example, the UBX_MON_VER fails here, but works in other
          * contexts
          */
-	unsigned char msg[3];
+	unsigned char msg[3] = {0, 0, 0};
         /* request SW and HW Versions */
 	(void)ubx_write(session, UBX_CLASS_MON, 0x04, msg, 0);
 

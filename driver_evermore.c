@@ -451,7 +451,7 @@ static ssize_t evermore_control_send(struct gps_device_t *session, char *buf,
 
 static bool evermore_protocol(struct gps_device_t *session, int protocol)
 {
-    /*@ +charint */
+    /*@ +charint @*/
     char tmp8;
     char evrm_protocol_config[] = {
 	(char)0x84,		/* 0: msg ID, Protocol Configuration */
@@ -459,7 +459,7 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
 	(char)0x00,		/* 2: reserved */
 	(char)0x00,		/* 3: reserved */
     };
-    /*@ -charint */
+    /*@ -charint @*/
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "evermore_protocol(%d)\n", protocol);
     tmp8 = (protocol != 0) ? 1 : 0;

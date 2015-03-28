@@ -242,7 +242,9 @@ int gpsd_get_stopbits(const struct gps_device_t *dev)
 
 bool gpsd_set_raw(struct gps_device_t * session)
 {
+#ifndef S_SPLINT_S
     (void)cfmakeraw(&session->ttyset);
+#endif /* S_SPLINT_S */
     if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) == -1) {
 	gpsd_log(&session->context->errout, LOG_ERROR,
 		 "error changing port attributes: %s\n", strerror(errno));

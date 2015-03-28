@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 	 * we're ignoring duplicates via timestamp, polling
 	 * at interval < 1 sec shouldn't be a problem.
 	 */
-	(void)usleep(cycle * 1000);
+	(void)usleep((useconds_t)(cycle * 1000));
     } while 
 	    (nsamples != 0 && time(NULL) - starttime < timeout);
 

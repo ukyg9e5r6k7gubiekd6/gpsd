@@ -716,7 +716,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if ((session->newdata.track = atan2(d1, d2) * RAD_2_DEG) < 0)
 		session->newdata.track += 360.0;
 	    session->newdata.latitude = (double)sl1 * SEMI_2_DEG;
-	    session->newdata.longitude = ul2 * SEMI_2_DEG;
+	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
 	    session->gpsdata.separation =
