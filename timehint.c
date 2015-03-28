@@ -15,7 +15,15 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef S_SPLINT_S
+#ifdef S_SPLINT_S
+/*@-matchfields@*/
+struct timespec
+{
+  time_t tv_sec;
+  long tv_nsec;
+};
+/*@+matchfields@*/
+#else
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>

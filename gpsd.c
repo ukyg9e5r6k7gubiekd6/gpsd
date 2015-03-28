@@ -22,7 +22,10 @@
 #include <syslog.h>
 #include <errno.h>
 #include <signal.h>
-#ifndef S_SPLINT_S
+#ifdef S_SPLINT_S
+extern int pthread_mutex_lock (pthread_mutex_t *__mutex);
+extern int pthread_mutex_unlock (pthread_mutex_t *__mutex);
+#else
 #include <ctype.h>         /* raspbian splint hates this */
 #include <pwd.h>           /* raspbian splint hates this */
 #include <grp.h>           /* raspbian splint hates this */
