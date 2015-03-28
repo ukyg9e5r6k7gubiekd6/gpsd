@@ -23,7 +23,7 @@
  *
  */
 
-#include <time.h>                /* for time_t */
+#include <time.h>               /* for time_t */
 #include "gpsd_config.h"
 
 #include <stdio.h>
@@ -81,8 +81,10 @@ static void open_serial(char *device)
     /* Clear struct for new port settings. */
     /*@i@*/ bzero(&newtio, sizeof(newtio));
 
+#ifndef S_SPLINT_S
     /* make it raw */
     (void)cfmakeraw(&newtio);
+#endif /* S_SPLINT_S */
     /* set speed */
     /*@i@*/ (void)cfsetospeed(&newtio, BAUDRATE);
 
@@ -339,7 +341,7 @@ int main(int argc, char **argv)
 		    struct tm *tmp_now;
 
 		    /*@-type@*//* splint is confused about struct timespec */
-		    (void)clock_gettime(CLOCK_REALTIME, &now);
+		    /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &now);
 		    tmp_now = localtime((time_t *)&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;

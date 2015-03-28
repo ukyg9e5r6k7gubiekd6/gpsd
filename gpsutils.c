@@ -27,6 +27,15 @@
 #include <QStringList>
 #endif
 
+#ifdef S_SPLINT_S
+/*@-matchfields@*/
+struct timespec
+  {
+    time_t tv_sec;	/* Seconds.  */
+    long tv_nsec;	/* Nanoseconds.  */
+  };
+/*@+matchfields@*/
+#endif /* S_SPLINT_S */
 /*
  * Berkeley implementation of strtod(), inlined to avoid locale problems
  * with the decimal point and stripped down to an atof()-equivalent.
@@ -300,8 +309,8 @@ void gps_merge_fix( /*@ out @*/ struct gps_fix_t *to,
 timestamp_t timestamp(void)
 {
      struct timespec ts;
-     (void)clock_gettime(CLOCK_REALTIME, &ts);
-     return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
+     /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &ts);
+     /*@i2@*/return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
 }
 
 time_t mkgmtime(register struct tm * t)
@@ -343,7 +352,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
     struct tm tm;
     memset(&tm,0,sizeof(tm));
 
-    dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
+    /*@i1@*/ dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
     if (dp != NULL && *dp == '.')
 	usec = strtod(dp, NULL);
     else
@@ -392,7 +401,7 @@ timestamp_t iso8601_to_unix( /*@in@*/ char *isotime)
      */
     (void)snprintf(fractstr, sizeof(fractstr), "%.3f", fractional);
     /* add fractional part, ignore leading 0; "0.2" -> ".2" */
-    (void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
+    /*@i2@*/(void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
     return isotime;
 }
 /* *INDENT-ON* */

@@ -136,7 +136,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	    (void)memcpy((void *)gpsdata,
 			 (void *)&noclobber,
 			 sizeof(struct gps_data_t));
-	    gpsdata->privdata = private_save;
+	    /*@i1@*/gpsdata->privdata = private_save;
 	    PRIVATE(gpsdata)->tick = after;
 	    if ((gpsdata->set & REPORT_IS)!=0) {
 		if (gpsdata->fix.mode >= 2)

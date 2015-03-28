@@ -657,7 +657,7 @@ int main(int argc, char **argv)
 	    }
 	    gpsd_log(&context.errout, LOG_INF, 
 		     "device %s activated\n", session.gpsdata.dev.path);
-	    FD_SET(session.gpsdata.gps_fd, &all_fds);
+	    /*@i1@*/FD_SET(session.gpsdata.gps_fd, &all_fds);
 	    if (session.gpsdata.gps_fd > maxfd)
 		 maxfd = session.gpsdata.gps_fd;
 

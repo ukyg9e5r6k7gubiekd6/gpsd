@@ -220,6 +220,7 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
 /*@-type -noeffect@*/ /* splint is confused about struct timespec */
 void toff_update(WINDOW *win, int y, int x)
 {
+    assert(win != NULL);
     if (time_offset.real.tv_sec != 0)
     {
 	/* NOTE: can not use double here due to precision requirements */
@@ -258,6 +259,7 @@ void pps_update(WINDOW *win, int y, int x)
     /*@-type -noeffect@*/ /* splint is confused about struct timespec */
     struct timedelta_t ppstimes;
 
+    assert(win != NULL);
     if (pps_thread_ppsout(&session.pps_thread, &ppstimes) > 0) {
 	/* NOTE: can not use double here due to precision requirements */
 	struct timespec timedelta;
@@ -601,7 +603,7 @@ static void select_packet_monitor(struct gps_device_t *device)
 }
 /*@+globstate@*/
 
-/*@-statictrans -globstate@*/
+/*@-statictrans -globstate -unrecog@*/
 static /*@null@*/ char *curses_get_command(void)
 /* char-by-char nonblocking input, return accumulated command line on \n */
 {
@@ -655,7 +657,7 @@ static /*@null@*/ char *curses_get_command(void)
 
     return line;
 }
-/*@+statictrans +globstate@*/
+/*@+statictrans +globstate +unrecog@*/
 
 /******************************************************************************
  *
@@ -1377,7 +1379,7 @@ int main(int argc, char **argv)
 	    (void)tcgetattr(0, &cooked);
 	    (void)tcgetattr(0, &rare);
 	    rare.c_lflag &=~ (ICANON | ECHO);
-	    rare.c_cc[VMIN] = (cc_t)1;
+	    /*@i2@*/rare.c_cc[VMIN] = (cc_t)1;
 	    (void)tcflush(0, TCIFLUSH);
 	    (void)tcsetattr(0, TCSANOW, &rare);
 	} else if (!curses_init())

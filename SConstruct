@@ -1439,7 +1439,7 @@ def Utility(target, source, action):
 # Note: test_bits.c is unsplintable because of the PRI64 macros.
 # If you get preprocessor or fatal errors, add +showscan.
 # explicitly force splint to only use our splintrc file
-splintopts = "-I/usr/include/libusb-1.0 +quiet +nof -f .splintrc"
+splintopts = "-I/usr/include/libusb-1.0 +quiet +nof +showscan -f .splintrc"
 if sys.platform.startswith('darwin'):
     splintopts = splintopts + " +skip-sys-headers"
 

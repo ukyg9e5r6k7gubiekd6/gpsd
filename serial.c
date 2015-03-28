@@ -529,10 +529,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 #endif
 
     if (session->saved_baud != -1) {
-	/*@i@*/ (void)
-	    cfsetispeed(&session->ttyset, (speed_t) session->saved_baud);
-	/*@i@*/ (void)
-	    cfsetospeed(&session->ttyset, (speed_t) session->saved_baud);
+	/*@i@*/(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
+	/*@i@*/(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }

@@ -446,10 +446,10 @@ void gpsd_clear(struct gps_device_t *session)
     /* set up the context structure for the PPS thread monitor */
     memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
     session->pps_thread.devicefd = session->gpsdata.gps_fd;
-    session->pps_thread.devicename = session->gpsdata.dev.path;
+    /*@i2@*/session->pps_thread.devicename = session->gpsdata.dev.path;
     session->pps_thread.pps_hook = NULL;
     session->pps_thread.log_hook = ppsthread_log;
-    session->pps_thread.context = (void *)session;
+    /*@i4@*/session->pps_thread.context = (void *)session;
 #endif /* PPS_ENABLE */
 
     session->opentime = time(NULL);
@@ -1440,7 +1440,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
 #ifndef NOFLOATS_ENABLE
-	gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
+	/*@i1@*/gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
 #endif /* NOFLOATS_ENABLE */
 
 	/*@+nullderef -nullpass@*/
@@ -1605,7 +1605,7 @@ int gpsd_multipoll(const bool data_ready,
 
 	    /* handle data contained in this packet */
 	    if (device->lexer.type != BAD_PACKET)
-		handler(device, changed);
+		/*@i1@*/handler(device, changed);
 
 #ifdef __future__
 	    /*
