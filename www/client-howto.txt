@@ -1,6 +1,6 @@
 = GPSD Client HOWTO =
 Eric S. Raymond <esr@thyrsus.com>
-v1.17, Mar 2015
+v1.18, Mar 2015
 
 == Introduction ==
 
@@ -230,7 +230,7 @@ However, until the sensor achieves satellite lock, those fixes will be
 Here's what that looks like:
 
 -----------------------------------------------------------------------------
-{"class":"TPV","tag":"MID2","device":"/dev/ttyUSB0",
+{"class":"TPV","device":"/dev/ttyUSB0",
                "time":"2010-04-30T11:47:43.28Z","ept":0.005,"mode":1}
 -----------------------------------------------------------------------------
 
@@ -239,7 +239,7 @@ satellite skyview.  But TPV is the important one.  Here's what it
 looks like when the sensor has a fix to report:
 
 -----------------------------------------------------------------------------
-{"class":"TPV","tag":"MID2","time":"2010-04-30T11:48:20.10Z","ept":0.005,
+{"class":"TPV","time":"2010-04-30T11:48:20.10Z","ept":0.005,
                "lat":46.498204497,"lon":7.568061439,"alt":1327.689,
                 "epx":15.319,"epy":17.054,"epv":124.484,"track":10.3797,
                 "speed":0.091,"climb":-0.085,"eps":34.11,"mode":3}
@@ -286,8 +286,8 @@ can then say "?POLL;" to poll gpsd's recorded data.
 -----------------------------------------------------------------------------
 ?POLL;
 {"class":"POLL","time":"2012-04-05T15:00:01.501Z","active":1,
-    "tpv":[{"class":"TPV","tag":"MID7","device":"/dev/ttyUSB0","mode":3,"time":"2012-04-05T15:00:00.000Z","ept":0.005,"lat":40.035083522,"lon":-75.519982905,"alt":166.145,"epx":9.125,"epy":17.778,"epv":34.134,"track":0.0000,"speed":0.000,"climb":0.000,"eps":36.61}],"gst":[{"class":"GST","tag":"MID7","device":"/dev/ttyUSB0","time":"1970-01-01T00:00:00.000Z","rms":0.000,"major":0.000,"minor":0.000,"orient":0.000,"lat":0.000,"lon":0.000,"alt":0.000}],
-     "sky":[{"class":"SKY","tag":"MID7","device":"/dev/ttyUSB0","time":"2012-04-05T15:00:00.000Z","xdop":0.61,"ydop":1.19,"vdop":1.48,"tdop":1.14,"hdop":1.40,"gdop":2.30,"pdop":1.99,"satellites":[{"PRN":26,"el":15,"az":49,"ss":29,"used":true},{"PRN":18,"el":62,"az":315,"ss":31,"used":true},{"PRN":15,"el":60,"az":43,"ss":44,"used":true},{"PRN":21,"el":71,"az":237,"ss":0,"used":false},{"PRN":27,"el":52,"az":94,"ss":40,"used":true},{"PRN":9,"el":48,"az":136,"ss":33,"used":true},{"PRN":22,"el":21,"az":291,"ss":36,"used":true},{"PRN":3,"el":8,"az":303,"ss":25,"used":true}]}]}
+    "tpv":[{"class":"TPV","device":"/dev/ttyUSB0","mode":3,"time":"2012-04-05T15:00:00.000Z","ept":0.005,"lat":40.035083522,"lon":-75.519982905,"alt":166.145,"epx":9.125,"epy":17.778,"epv":34.134,"track":0.0000,"speed":0.000,"climb":0.000,"eps":36.61}],"gst":[{"class":"GST","device":"/dev/ttyUSB0","time":"1970-01-01T00:00:00.000Z","rms":0.000,"major":0.000,"minor":0.000,"orient":0.000,"lat":0.000,"lon":0.000,"alt":0.000}],
+     "sky":[{"class":"SKY","device":"/dev/ttyUSB0","time":"2012-04-05T15:00:00.000Z","xdop":0.61,"ydop":1.19,"vdop":1.48,"tdop":1.14,"hdop":1.40,"gdop":2.30,"pdop":1.99,"satellites":[{"PRN":26,"el":15,"az":49,"ss":29,"used":true},{"PRN":18,"el":62,"az":315,"ss":31,"used":true},{"PRN":15,"el":60,"az":43,"ss":44,"used":true},{"PRN":21,"el":71,"az":237,"ss":0,"used":false},{"PRN":27,"el":52,"az":94,"ss":40,"used":true},{"PRN":9,"el":48,"az":136,"ss":33,"used":true},{"PRN":22,"el":21,"az":291,"ss":36,"used":true},{"PRN":3,"el":8,"az":303,"ss":25,"used":true}]}]}
 -----------------------------------------------------------------------------
 
 This interface is intended for use with applications like CGI scripts
