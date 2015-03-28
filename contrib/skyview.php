@@ -1,7 +1,7 @@
 <?php
 
 # Copyright (c) 2006,2007 Chris Kuethe <chris.kuethe@gmail.com>
-# Copyright (c) 2015 Sanjeev Gupta <ghane0@gmail.com>
+# Updated 2015 by Sanjeev Gupta <ghane0@gmail.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -25,11 +25,11 @@
 //
 // Because it now reads a live stream, the program must be run with an
 // option, "count", to specify the number of SKY messages it reads.  SKY
-// messages are ussually emitted every 5 secs, so a number close to 700
+// messages are usually emitted every 5 secs, so a number close to 700
 // will cover an hour's worth.
 //
 // Tested to work with php5.6 , although earlier versions may work.
-//
+
 
 $cellmode = 0;
 if ($argc != 3){
@@ -40,13 +40,13 @@ if ($argc != 3){
 	}
 }
 
+// How many samples to read of SKY messages.
+$count = $argv[1] ;
+
 $sz = 640;
 $cellsize = 5; # degrees
 $radius = 8; # pixels
 $filled = 0;
-
-$j = 0 ;
-$count = $argv[1] ;
 
 $im = imageCreate($sz, $sz);
 $C = colorsetup($im);
@@ -57,11 +57,11 @@ $sky = array();
 
 error_reporting(E_ALL);
 
-/* Get the port for the GPSD service. */
+// Get the port for the GPSD service.
 $service_port = 2947 ;
-/* Get the IP address for the target host. */
+// Get the IP address for the target host. 
 $address = "127.0.0.1" ;
-/* Create a TCP/IP socket. */
+// Create a TCP/IP socket.
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 if ($socket === false) {
     echo "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n";
@@ -72,19 +72,19 @@ if ($result === false) {
     echo "socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($socket)) . "\n";
 }
 
-$in = "?WATCH={\"enable\":true,\"json\":true};" ;
+// Send a WATCH command.
+$cmd = "?WATCH={\"enable\":true,\"json\":true};" ;
 
+socket_write($socket, $cmd, strlen($in));
+
+// Start the loop to start reading from gpsd.
 $out = '';
-
-socket_write($socket, $in, strlen($in));
-
-while (($out = socket_read($socket, 2048)) && ( $j < $count) ){
+$j = 0 ;
+while (($out = socket_read($socket, 2048)) && ( $j < $count) ) {
 
 	if (strpos($out, "SKY")) {
-
-	$j = $j + 1;
-
-	$PRN = json_decode($out,true);
+		$j = $j + 1;
+		$PRN = json_decode($out,true);
 // var_dump($PRN) ;
 // object(stdClass)#12 (5)
 //       ["PRN"]=>
@@ -98,15 +98,15 @@ while (($out = socket_read($socket, 2048)) && ( $j < $count) ){
 //       ["used"]=>
 //       bool(false)
 
-	$n =  count($PRN["satellites"]) ;
+		$n =  count($PRN["satellites"]) ;
+		for($i = 0; $i < $n; $i++) {
+        		$sv = $PRN["satellites"][$i]["PRN"] ;
+        		$el = $PRN["satellites"][$i]["el"] ;
+        		$az = $PRN["satellites"][$i]["az"] ;
+        		$snr = $PRN["satellites"][$i]["ss"] ;
+        		$u = $PRN["satellites"][$i]["used"] ;
 
-		for($i = 0; $i < $n; $i++){
-
-        $sv = $PRN["satellites"][$i]["PRN"] ;
-        $el = $PRN["satellites"][$i]["el"] ;
-        $az = $PRN["satellites"][$i]["az"] ;
-        $snr = $PRN["satellites"][$i]["ss"];
-        $u = $PRN["satellites"][$i]["used"];
+// Below this, Chris' original code, more or less. -- Sanjeev 20150326
 
 			if ($cellmode){
 				$az = $cellsize * (int)($az/$cellsize);
