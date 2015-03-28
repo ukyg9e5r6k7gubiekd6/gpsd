@@ -991,7 +991,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    struct timespec  delay;
 	    /* delay as a printable string */
 	    char delay_str[TIMESPEC_LEN];
-	    char *log1 = "";
+	    /*@observer@*/ char *log1 = "";
 	    /* ppstimes.real is the time we think the pulse represents  */
 	    struct timedelta_t ppstimes;
 	    thread_context->log_hook(thread_context, THREAD_RAW,
