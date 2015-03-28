@@ -85,6 +85,12 @@
 #include <glob.h>
 #endif
 
+#ifdef S_SPLINT_S
+/* work around incorrect definition of struct timespec in splint 3.12 */
+#define tv_sec ts_sec
+#define tv_nsec        ts_nsec
+#endif /* S_SPLINT_S */
+
 #if defined(TIOCMIWAIT)
 static int get_edge_tiocmiwait( volatile struct pps_thread_t *,
                          struct timespec *, int *,
