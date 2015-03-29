@@ -54,6 +54,8 @@ static sourcetype_t gpsd_classify(const char *path)
     /* OS-independent check for ptys using Unix98 naming convention */
     else if (strncmp(path, "/dev/pts/", 9) == 0)
 	return source_pty;
+    else if (strncmp(path, "/dev/pps", 8) == 0)
+	return source_pps;
     else if (S_ISCHR(sb.st_mode)) {
 	sourcetype_t devtype = source_rs232;
 #ifdef __linux__
@@ -635,6 +637,10 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 {
     /* don't waste time in the hunt loop if this is not actually a tty */
     if (isatty(session->gpsdata.gps_fd) == 0)
+	return false;
+
+    /* ...or if it's nominally a tty but delivers only PPS and no data */
+    if (session->sourcetype == source_pps)
 	return false;
 
     if (session->lexer.retry_counter++ >= SNIFF_RETRIES) {

@@ -1683,6 +1683,42 @@ static void ship_pps_message(struct gps_device_t *session,
 				   struct timedelta_t *td)
 /* on PPS interrupt, ship a message to all clients */
 {
+    volatile struct timedelta_t tc;
+    /*
+     * If device delivers only PPS, find the most recent fix delivered by
+     * another device and use it.  If no such device, punt - PPS alone
+     * is not usable.
+     */
+    if (session->sourcetype == source_pps) {
+	struct gps_device_t *device;
+	timestamp_t recent = 0;
+	for (device = devices; device < devices + MAX_DEVICES; device++) {
+	    if (!allocated_device(device))
+		continue;
+	    if (device->sourcetype == source_pps)
+		continue;
+	    if ((device->gpsdata.set & TIME_SET) == 0)
+		continue;
+	    if (device->gpsdata.fix.time < recent)
+		continue;
+	    recent = device->gpsdata.fix.time;
+	}
+	if (recent > 0) {
+	    /*
+	     * This read access is safe - PPS threads read fixin
+	     * locations asynchronously but don't write them.
+	     *
+	     * FIXME: may not be right if device cycle time != 1 sec.
+	     * Device better have reported in its last cycle or
+	     * time will be misleading.
+	     */
+	    tc = device->pps_thread.fixin;
+	    tc.real.tv_sec += 1;
+	    td = (struct timedelta_t *)&tc;	/* cast discards volatile */
+	} else
+	    return;
+    }
+
     /*@-type@*//* splint is confused about struct timespec */
     notify_watchers(session, true, true,
 		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
@@ -1690,7 +1726,12 @@ static void ship_pps_message(struct gps_device_t *session,
 		    td->real.tv_sec, td->real.tv_nsec,
 		    td->clock.tv_sec, td->clock.tv_nsec);
     /*@+type@*/
-	return;
+
+    /*
+     * PPS receipt resets the device's timeout.  This keeps PPS-only
+     * devices, which never deliver in-band data, from timing out.
+     */
+    session->gpsdata.online = timestamp();
 }
 #endif
 
