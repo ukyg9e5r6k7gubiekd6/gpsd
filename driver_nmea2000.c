@@ -1397,9 +1397,9 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    session->driver.nmea2000.workpgn = (void *) work;
 		    /*@i1@*/session->lexer.outbuflen =  frame->can_dlc & 0x0f;
 		    for (l2=0;l2<session->lexer.outbuflen;l2++) {
-		        /*@i1@*/session->lexer.outbuffer[l2]= frame->data[l2];
+		        /*@i3@*/session->lexer.outbuffer[l2]= frame->data[l2];
 		    }
-		/*@i1@*/} else if ((frame->data[0] & 0x1f) == 0) {
+		/*@i2@*/} else if ((frame->data[0] & 0x1f) == 0) {
 		    unsigned int l2;
 
 		    /*@i2@*/session->driver.nmea2000.fast_packet_len = frame->data[1];
@@ -1415,16 +1415,16 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 		    session->lexer.inbuflen = 0;
 		    session->driver.nmea2000.idx += 1;
 		    for (l2=2;l2<8;l2++) {
-		        /*@i1@*/session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
+		        /*@i3@*/session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
 		    }
 		    gpsd_log(&session->context->errout, LOG_DATA,
 			     "pgn %6d:%s \n", work->pgn, work->name);
-		/*@i1@*/} else if (frame->data[0] == session->driver.nmea2000.idx) {
+		/*@i2@*/} else if (frame->data[0] == session->driver.nmea2000.idx) {
 		    unsigned int l2;
 
 		    for (l2=1;l2<8;l2++) {
 		        if (session->driver.nmea2000.fast_packet_len > session->lexer.inbuflen) {
-			    /*@i1@*/session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
+			    /*@i3@*/session->lexer.inbuffer[session->lexer.inbuflen++] = frame->data[l2];
 			}
 		    }
 		    if (session->lexer.inbuflen == session->driver.nmea2000.fast_packet_len) {
