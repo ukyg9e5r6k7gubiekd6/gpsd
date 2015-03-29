@@ -1690,31 +1690,30 @@ static void ship_pps_message(struct gps_device_t *session,
      * is not usable.
      */
     if (session->sourcetype == source_pps) {
-	struct gps_device_t *device;
-	timestamp_t recent = 0;
+	struct gps_device_t *device, *recent = NULL;
 	for (device = devices; device < devices + MAX_DEVICES; device++) {
 	    if (!allocated_device(device))
 		continue;
 	    if (device->sourcetype == source_pps)
 		continue;
-	    if ((device->gpsdata.set & TIME_SET) == 0)
+	    if (isnan(device->newdata.time))
 		continue;
-	    if (device->gpsdata.fix.time < recent)
+	    if (recent == NULL || device->newdata.time < recent->newdata.time)
 		continue;
-	    recent = device->gpsdata.fix.time;
+	    recent = device;
 	}
-	if (recent > 0) {
+	if (recent != NULL) {
 	    /*
-	     * This read access is safe - PPS threads read fixin
-	     * locations asynchronously but don't write them.
+	     * Since this hook is called on PPS, the fixin data is for the
+	     * *previous* cycle.  Relies on all_reports() to mung the driver
+	     * report of new time into the fixin member for the device's thread.
 	     *
-	     * FIXME: may not be right if device cycle time != 1 sec.
-	     * Device better have reported in its last cycle or
-	     * time will be misleading.
+	     * This read access should be safe - PPS threads
+	     * read fixin locations asynchronously but don't write them.
 	     */
 	    /*@-type@*//* splint is confused about struct timespec */
-	    tc = device->pps_thread.fixin;
-	    tc.real.tv_sec += 1;
+	    tc = recent->pps_thread.fixin;
+	    tc.real.tv_sec += recent->gpsdata.dev.cycle;
 	    td = (struct timedelta_t *)&tc;	/* cast discards volatile */
 	    /*@-type@*/
 	} else
