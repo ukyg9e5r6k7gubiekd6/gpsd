@@ -416,12 +416,17 @@ void gpsd_set_speed(struct gps_device_t *session,
 }
 
 int gpsd_serial_open(struct gps_device_t *session)
-/* open a device for access to its data */
+/* open a device for access to its data
+ * return the fd of the open device, or -1 for failure, -2 is a PPS device */
 {
     mode_t mode = (mode_t) O_RDWR;
 
     session->sourcetype = gpsd_classify(session->gpsdata.dev.path);
     session->servicetype = service_sensor;
+
+    if ( source_pps == session->sourcetype ) {
+	return -2;
+    }
 
     /*@ -boolops -type @*/
     if (session->context->readonly
