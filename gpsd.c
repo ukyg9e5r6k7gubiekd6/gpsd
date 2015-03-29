@@ -1712,9 +1712,11 @@ static void ship_pps_message(struct gps_device_t *session,
 	     * Device better have reported in its last cycle or
 	     * time will be misleading.
 	     */
+	    /*@-type@*//* splint is confused about struct timespec */
 	    tc = device->pps_thread.fixin;
 	    tc.real.tv_sec += 1;
 	    td = (struct timedelta_t *)&tc;	/* cast discards volatile */
+	    /*@-type@*/
 	} else
 	    return;
     }
