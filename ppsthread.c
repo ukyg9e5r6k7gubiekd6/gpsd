@@ -1077,8 +1077,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
             }
 	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    timespec_str( &offset, offset_str, sizeof(offset_str) );
+	    /* FIXME? show edge here ? */
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS:%s edge %.20s @ %s offset %.20s\n",
+		    "PPS:%s %.30s @ %s offset %.20s\n",
 		    thread_context->devicename,
 		    log1, ts_str1, offset_str);
 	} else {
