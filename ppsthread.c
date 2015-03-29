@@ -311,6 +311,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	pps_thread->log_hook(pps_thread, THREAD_ERROR,
 		    "KPPS:%s time_pps_getcap() failed\n",
 		    pps_thread->devicename);
+    	return -1;
     } else {
 	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s pps_caps 0x%02X\n",
@@ -681,7 +682,10 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* get RFC2783 features supported */
     pps_caps = 0;
-    if ( 0 > time_pps_getcap(thread_context->kernelpps_handle, &pps_caps)) {
+    if ( 0 <= thread_context->kernelpps_handle ) {
+        /* no pps handle to use, thus no caps */
+	pps_caps = 0;
+    } else if ( 0 > time_pps_getcap(thread_context->kernelpps_handle, &pps_caps)) {
 	pps_caps = 0;
 	thread_context->log_hook(thread_context, THREAD_ERROR,
 		    "KPPS:%s time_pps_getcap() failed\n",
