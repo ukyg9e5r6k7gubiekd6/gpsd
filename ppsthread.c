@@ -237,7 +237,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 		}
 		(void)close(fd);
 	    }
-	    pps_thread->log_hook(pps_thread, THREAD_INF,
+	    pps_thread->log_hook(pps_thread, THREAD_PROG,
 				 "KPPS:%s checking %s, %s\n",
 				 pps_thread->devicename,
 				 globbuf.gl_pathv[i], path);
@@ -264,6 +264,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 
     /* root privs are probably required for this device open
      * do not bother to check uid, just go for the open() */
+
     ret = open(path, O_RDWR);
     if ( 0 > ret ) {
 	char errbuf[BUFSIZ] = "unknown error";
@@ -308,10 +309,12 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     /* get RFC2783 features supported */
     pps_caps = 0;
     if ( 0 > time_pps_getcap(pps_thread->kernelpps_handle, &pps_caps)) {
+	char errbuf[BUFSIZ] = "unknown error";
 	pps_caps = 0;
-	pps_thread->log_hook(pps_thread, THREAD_ERROR,
-		    "KPPS:%s time_pps_getcap() failed\n",
-		    pps_thread->devicename);
+	(void)strerror_r(errno, errbuf, sizeof(errbuf));
+	pps_thread->log_hook(pps_thread, THREAD_INF,
+		    "KPPS:%s time_pps_getcap() failed: %.100s\n",
+		    pps_thread->devicename, errbuf);
     	return -1;
     } else {
 	pps_thread->log_hook(pps_thread, THREAD_INF,
@@ -326,7 +329,7 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
     if ( 0 == (PPS_TSFMT_TSPEC & pps_caps ) ) {
        /* PPS_TSFMT_TSPEC means return a timespec
         * mandatory for driver to implement, require it */
-	pps_thread->log_hook(pps_thread, THREAD_ERROR,
+	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s fail, missing PPS_TSFMT_TSPEC\n",
 		    pps_thread->devicename);
         return -1;
@@ -349,7 +352,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	pp.mode |= PPS_CAPTUREASSERT | PPS_CAPTURECLEAR;
         break;
     default:
-	pps_thread->log_hook(pps_thread, THREAD_WARN,
+        /* THREAD_ERR in the calling routine */
+	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s missing PPS_CAPTUREASSERT and CLEAR\n",
 		    pps_thread->devicename);
         return -1;
@@ -442,18 +446,22 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
     /* get the time after we just woke up */
     if ( 0 > clock_gettime(CLOCK_REALTIME, clock_ts) ) {
 	/* uh, oh, can not get time! */
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf, sizeof(errbuf));
 	thread_context->log_hook(thread_context, THREAD_ERROR,
-		    "TPPS:%s clock_gettime() failed\n",
-		    thread_context->devicename);
+		    "TPPS:%s clock_gettime() failed: %.100s\n",
+		    thread_context->devicename, errbuf);
 	return -1;;
     }
 
     /* got the edge, got the time just after the edge, now quickly
      * get the edge state */
     if (ioctl(thread_context->devicefd, (unsigned long)TIOCMGET, state) != 0) {
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf, sizeof(errbuf));
 	thread_context->log_hook(thread_context, THREAD_ERROR,
-		    "TPPS:%s ioctl(TIOCMGET) failed\n",
-		    thread_context->devicename);
+		    "TPPS:%s ioctl(TIOCMGET) failed: %.100s\n",
+		    thread_context->devicename, errbuf);
 	return -1;
     }
     /* end of time critical section */
@@ -607,18 +615,15 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
     timespec_str( &pi.assert_timestamp, ts_str1, sizeof(ts_str1) );
     timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
     thread_context->log_hook(thread_context, THREAD_PROG,
-		"KPP:%s assert %s, sequence: %ld - "
+		"KPP:%s assert %s, sequence: %ld - using: %.10s\n"
 		"clear  %s, sequence: %ld\n",
 		thread_context->devicename,
 		ts_str1,
 		(unsigned long) pi.assert_sequence,
 		ts_str2,
-		(unsigned long) pi.clear_sequence);
-#endif /* S_SPLINT_S */
-    thread_context->log_hook(thread_context, THREAD_PROG,
-		"KPPS:%s data: last edge %s\n",
-		thread_context->devicename,
+		(unsigned long) pi.clear_sequence,
 		*edge ? "assert" : "clear");
+#endif /* S_SPLINT_S */
 
     return 0;
 }
@@ -688,9 +693,11 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	pps_caps = 0;
     } else if ( 0 > time_pps_getcap(thread_context->kernelpps_handle, &pps_caps)) {
 	pps_caps = 0;
+	char errbuf[BUFSIZ] = "unknown error";
+	(void)strerror_r(errno, errbuf, sizeof(errbuf));
 	thread_context->log_hook(thread_context, THREAD_ERROR,
-		    "KPPS:%s time_pps_getcap() failed\n",
-		    thread_context->devicename);
+		    "KPPS:%s time_pps_getcap() failed: %.100s\n",
+		    thread_context->devicename, errbuf);
     } else {
 	thread_context->log_hook(thread_context, THREAD_INF,
 		    "KPPS:%s pps_caps 0x%02X\n",
@@ -765,16 +772,17 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
             /* use this data */
             ok = true;
+	    clock_ts = clock_ts_tio;
 	    state = edge_tio;
 	    edge = edge_tio;
             edge_str = edge ? "Assert" : "Clear";
 	    cycle = cycle_tio;
 	    duration = duration_tio;
 
-	    timespec_str( &clock_ts_tio, ts_str1, sizeof(ts_str1) );
+	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "TPPS:%s TIOCMIWAIT, cycle: %d, duration: %d, %.10s @ %s\n",
-		    thread_context->devicename, cycle, duration, edge_str,
+		    "TPPS:%s %.10s cycle: %d, duration: %d @ %s\n",
+		    thread_context->devicename, edge_str, cycle, duration,
                     ts_str1);
 
         }
@@ -809,7 +817,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
             if ( -1 == ret ) {
 		/* error, so break */
-		thread_context->log_hook(thread_context, THREAD_PROG,
+		thread_context->log_hook(thread_context, THREAD_ERROR,
 			    "PPS:%s die: RFC2783 Error\n",
 			    thread_context->devicename);
 		break;
@@ -828,12 +836,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    cycle_kpps /= 1000;
 	    duration_kpps = timespec_diff_ns(clock_ts_kpps, prev_clock_ts)/1000;
 
-	    timespec_str( &clock_ts_kpps, ts_str1, sizeof(ts_str1) );
-	    thread_context->log_hook(thread_context, THREAD_PROG,
-		"KPPS:%s cycle: %7d uSec, duration: %7d uSec @ %s\n",
-		thread_context->devicename,
-		cycle_kpps, duration_kpps, ts_str1);
-
 	    /* save for later */
 	    pulse_kpps[edge_kpps] = clock_ts_kpps;
 	    pulse_kpps[edge_kpps ? 0 : 1] = prev_clock_ts;
@@ -847,12 +849,20 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    clock_ts = clock_ts_kpps;
 	    cycle = cycle_kpps;
 	    duration = duration_kpps;
+
+	    timespec_str( &clock_ts_kpps, ts_str1, sizeof(ts_str1) );
+	    thread_context->log_hook(thread_context, THREAD_PROG,
+		"KPPS:%s %.10s cycle: %7d, duration: %7d @ %s\n",
+		thread_context->devicename,
+		edge_str, 
+		cycle_kpps, duration_kpps, ts_str1);
+
 	}
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
         if ( not_a_tty && !pps_canwait ) {
 	    /* uh, oh, no TIOMCIWAIT, nor RFC2783, die */
-	    thread_context->log_hook(thread_context, THREAD_PROG,
+	    thread_context->log_hook(thread_context, THREAD_WARN,
 			"PPS:%s die: no TIOMCIWAIT, nor RFC2783 CANWAIT\n",
 			thread_context->devicename);
 	    break;
@@ -865,28 +875,29 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		duration = 0;
 		unchanged = 0;
 		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS:%s pps-detect invisible pulse\n",
-			    thread_context->devicename);
+			    "PPS:%s %.10s pps-detect invisible pulse\n",
+			    thread_context->devicename, edge_str);
 	    } else if (++unchanged == 10) {
                 /* not really unchanged, just out of bounds */
 		unchanged = 1;
 		thread_context->log_hook(thread_context, THREAD_WARN,
-			    "PPS:%s unchanged state, ppsmonitor sleeps 10\n",
-			    thread_context->devicename);
+			"PPS:%s %.10s unchanged state, ppsmonitor sleeps 10\n",
+			thread_context->devicename, edge_str);
 		(void)sleep(10);
 	    }
 	} else {
 	    thread_context->log_hook(thread_context, THREAD_RAW,
-			"PPS:%s pps-detect changed to %d\n",
-			thread_context->devicename, state);
+			"PPS:%s %.10s pps-detect changed to %d\n",
+			thread_context->devicename, edge_str, state);
 	    unchanged = 0;
 	}
 	state_last = state;
 	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
-	    "PPS:%s cycle: %7d uSec, duration: %7d, %s @ %s\n",
+	    "PPS:%s %.10s cycle: %7d uSec, duration: %7d @ %s\n",
 	    thread_context->devicename,
-	    cycle, duration, edge_str, ts_str1);
+	    edge_str, 
+	    cycle, duration, ts_str1);
 	if (unchanged) {
 	    // strange, try again
 	    continue;
@@ -1009,8 +1020,8 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* ppstimes.real is the time we think the pulse represents  */
 	    struct timedelta_t ppstimes;
 	    thread_context->log_hook(thread_context, THREAD_RAW,
-			"PPS:%s edge accepted %.100s",
-			thread_context->devicename, log);
+			"PPS:%s %.10s categorized %.100s",
+			thread_context->devicename, edge_str, log);
 
             /* This innocuous-looking "+ 1" embodies a significant
              * assumption: that GPSes report time to the second over the
@@ -1035,16 +1046,18 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 
 	    if ( 0> delay.tv_sec || 0 > delay.tv_nsec ) {
 		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS:%s system clock went backwards: %.20s\n",
+			    "PPS:%s %.10s system clock went backwards: %.20s\n",
 			    thread_context->devicename,
+			    edge_str, 
 			    delay_str);
 		log1 = "system clock went backwards";
 	    } else if ( ( 2 < delay.tv_sec)
 	      || ( 1 == delay.tv_sec && 100000000 > delay.tv_nsec ) ) {
                 /* system clock could be slewing so allow 1.1 sec delay */
 		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS:%s no current GPS seconds: %.20s\n",
+			    "PPS:%s %.10s no current GPS seconds: %.20s\n",
 			    thread_context->devicename,
+			    edge_str, 
 			    delay_str);
 		log1 = "timestamp out of range";
 	    } else {
@@ -1076,22 +1089,22 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
 		timespec_str( &ppstimes.real, ts_str2, sizeof(ts_str2) );
 		thread_context->log_hook(thread_context, THREAD_INF,
-		    "PPS:%s hooks called with %.20s clock: %s real: %s\n",
+		    "PPS:%s %.10s hooks called with %.20s clock: %s real: %s\n",
 		    thread_context->devicename,
+                    edge_str, 
 		    log1, ts_str1, ts_str2);
             }
 	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    timespec_str( &offset, offset_str, sizeof(offset_str) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS:%s %.30s %.10s @ %s offset %.20s\n",
+		    "PPS:%s %.10s %.30s @ %s offset %.20s\n",
 		    thread_context->devicename,
                     edge_str, 
 		    log1, ts_str1, offset_str);
 	} else {
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-			"PPS:%s edge %.10s rejected %.100s",
-		        edge_str, 
-			thread_context->devicename, log);
+			"PPS:%s %.10s rejected %.100s",
+			thread_context->devicename, edge_str,  log);
 	}
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
