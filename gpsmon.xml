@@ -156,10 +156,11 @@ the contents of several especially interesting packet types.  The
 second and the system clock at that time.</para>
 
 <para>The bottom half of the screen is a scrolling hex dump of all
-packets the GPS is issuing.  Dump lines beginning &gt;&gt;&gt;
-represent control packets sent to the GPS. Lines consisting of "PPS"
-surrounded by dashes, if present, indicate 1PPS and the start of the
-reporting cycle.</para>
+packets the GPS is issuing.  If the packet type is textual, any
+trailing CR/LF is omitted. Dump lines beginning &gt;&gt;&gt; represent
+control packets sent to the GPS. Lines consisting of "PPS" surrounded
+by dashes, if present, indicate 1PPS and the start of the reporting
+cycle.</para>
 
 </refsect1>
 <refsect1 id='commands'><title>COMMANDS</title>

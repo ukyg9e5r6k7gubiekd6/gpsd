@@ -204,6 +204,12 @@ static void cond_hexdump(/*@out@*/char *buf2, size_t len2,
 		buf2[j] = '\0';
 	    }
 	    else {
+		if (TEXTUAL_PACKET_TYPE(session.lexer.type)) {
+		    if (i == len - 1 && buf[i] == '\n')
+			continue;
+		    if (i == len - 2 && buf[i] == '\r')
+			continue;
+		}
 		(void)snprintf(&buf2[j], len2-strlen(buf2), "\\x%02x", (unsigned int)(buf[i] & 0xff));
 		j = strlen(buf2);
 	    }
