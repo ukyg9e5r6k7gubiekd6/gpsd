@@ -12,7 +12,6 @@
  * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
  * CONFIG_PPS_CLIENT_LDISC=y
  */
-#ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
 // include unistd.h here as it is missing on older pps-tools releases.
 // 'close' is not defined otherwise.
@@ -20,7 +19,6 @@
 #include <sys/time.h>
 #include <sys/timepps.h>
 #endif
-#endif /* S_SPLINT_S */
 
 #ifndef TIMEDELTA_DEFINED
 #define TIMEDELTA_DEFINED
