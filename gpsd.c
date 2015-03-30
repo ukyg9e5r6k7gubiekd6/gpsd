@@ -988,13 +988,13 @@ static void set_serial(struct gps_device_t *device,
 
     while (isspace((unsigned char) *modestring))
 	modestring++;
-    if (strchr("78", *modestring) != NULL) {
+    if (*modestring && strchr("78", *modestring) != NULL) {
 	wordsize = (int)(*modestring++ - '0');
-	if (strchr("NOE", *modestring) != NULL) {
+	if (*modestring && strchr("NOE", *modestring) != NULL) {
 	    parity = *modestring++;
 	    while (isspace((unsigned char) *modestring))
 		modestring++;
-	    if (strchr("12", *modestring) != NULL)
+	    if (*modestring && strchr("12", *modestring) != NULL)
 		stopbits = (unsigned int)(*modestring - '0');
 	}
     }
