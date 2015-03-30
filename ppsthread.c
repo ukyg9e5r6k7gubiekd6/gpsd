@@ -184,7 +184,8 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
      * This next code block abuses "ret" by storing the filedescriptor
      * to use for RFC2783 calls.
      */
-    ret = -1;
+    ret = -1;  /* this ret will not be unneeded when the 'else' part
+                * of the followinng ifdef becomes an #elif */
 #ifdef __linux__
     /*
      * Some Linuxes, like the RasbPi's, have PPS devices preexisting.
@@ -1117,11 +1118,17 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
     /* some operations in init_kernel_pps() require root privs */
     (void)init_kernel_pps(pps_thread);
     if ( 0 <= pps_thread->kernelpps_handle ) {
-	pps_thread->log_hook(pps_thread, THREAD_WARN,
+	pps_thread->log_hook(pps_thread, THREAD_INFO,
 		    "KPPS:%s kernel PPS will be used\n",
 		    pps_thread->devicename);
-    }
+    } else
 #endif
+    {
+	pps_thread->log_hook(pps_thread, THREAD_WARN,
+		    "KPPS:%s kernel PPS unavailable, PPS accuracy will suffer\n",
+		    pps_thread->devicename);
+    }
+
     memset( &pt, 0, sizeof(pt));
     /*@i1@*/retval = pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)pps_thread);
     pps_thread->log_hook(pps_thread, THREAD_PROG, "PPS:%s thread %s\n",
