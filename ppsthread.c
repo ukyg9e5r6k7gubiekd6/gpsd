@@ -697,7 +697,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    thread_context->devicename,
 		    pps_caps);
     }
-pps_caps = 0; /* DEBUG, do not ccommmit!! */
 
     if ( 0 != (PPS_CANWAIT & pps_caps ) ) {
        /* we can wait! so no need for TIOCMIWAIT */
@@ -729,6 +728,7 @@ pps_caps = 0; /* DEBUG, do not ccommmit!! */
            || thread_context->pps_hook != NULL) {
 	bool ok = false;
 	char *log = NULL;
+        char *edge_str = "";
 
 #if defined(TIOCMIWAIT)
         if ( !not_a_tty && !pps_canwait ) {
@@ -767,13 +767,14 @@ pps_caps = 0; /* DEBUG, do not ccommmit!! */
             ok = true;
 	    state = edge_tio;
 	    edge = edge_tio;
+            edge_str = edge ? "Assert" : "Clear";
 	    cycle = cycle_tio;
 	    duration = duration_tio;
 
 	    timespec_str( &clock_ts_tio, ts_str1, sizeof(ts_str1) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "TPPS:%s TIOCMIWAIT, cycle: %d, duration: %d, edge:%d @ %s\n",
-		    thread_context->devicename, cycle, duration, edge,
+		    "TPPS:%s TIOCMIWAIT, cycle: %d, duration: %d, %.10s @ %s\n",
+		    thread_context->devicename, cycle, duration, edge_str,
                     ts_str1);
 
         }
@@ -841,6 +842,8 @@ pps_caps = 0; /* DEBUG, do not ccommmit!! */
 
             /* use this data */
 	    state = edge_kpps;
+	    edge = edge_kpps;
+            edge_str = edge ? "Assert" : "Clear";
 	    clock_ts = clock_ts_kpps;
 	    cycle = cycle_kpps;
 	    duration = duration_kpps;
@@ -881,9 +884,9 @@ pps_caps = 0; /* DEBUG, do not ccommmit!! */
 	state_last = state;
 	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
-	    "PPS:%s cycle: %7d uSec, duration: %7d, edge: %d, uSec @ %s\n",
+	    "PPS:%s cycle: %7d uSec, duration: %7d, %s @ %s\n",
 	    thread_context->devicename,
-	    cycle, duration, edge, ts_str1);
+	    cycle, duration, edge_str, ts_str1);
 	if (unchanged) {
 	    // strange, try again
 	    continue;
@@ -1079,14 +1082,15 @@ pps_caps = 0; /* DEBUG, do not ccommmit!! */
             }
 	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    timespec_str( &offset, offset_str, sizeof(offset_str) );
-	    /* FIXME? show edge here ? */
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS:%s %.30s @ %s offset %.20s\n",
+		    "PPS:%s %.30s %.10s @ %s offset %.20s\n",
 		    thread_context->devicename,
+                    edge_str, 
 		    log1, ts_str1, offset_str);
 	} else {
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-			"PPS:%s edge rejected %.100s",
+			"PPS:%s edge %.10s rejected %.100s",
+		        edge_str, 
 			thread_context->devicename, log);
 	}
     }
