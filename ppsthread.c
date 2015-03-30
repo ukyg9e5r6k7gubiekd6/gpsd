@@ -173,7 +173,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
      * This next code block abuses "ret" by storing the filedescriptor
      * to use for RFC2783 calls.
      */
-    ret = -1;
 #ifdef __linux__
     /*
      * Some Linuxes, like the RasbPi's, have PPS devices preexisting.
@@ -687,7 +686,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		if (990000 < cycle_kpps && 1010000 > cycle_kpps) {
 		    /* KPPS passes a basic sanity check */
 		    ok_kpps = true;
-		    log = "KPPS";
 		}
 	    }
 	}
