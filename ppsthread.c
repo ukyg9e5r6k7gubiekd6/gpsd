@@ -697,6 +697,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 		    thread_context->devicename,
 		    pps_caps);
     }
+pps_caps = 0; /* DEBUG, do not ccommmit!! */
 
     if ( 0 != (PPS_CANWAIT & pps_caps ) ) {
        /* we can wait! so no need for TIOCMIWAIT */
@@ -1118,7 +1119,7 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
     /* some operations in init_kernel_pps() require root privs */
     (void)init_kernel_pps(pps_thread);
     if ( 0 <= pps_thread->kernelpps_handle ) {
-	pps_thread->log_hook(pps_thread, THREAD_INFO,
+	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s kernel PPS will be used\n",
 		    pps_thread->devicename);
     } else
