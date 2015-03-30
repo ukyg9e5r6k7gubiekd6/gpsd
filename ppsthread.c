@@ -765,8 +765,6 @@ static void *gpsd_ppsmonitor(void *arg)
 
 
 	/* ok and log used by KPPS and TIOCMIWAIT */
-	// cppcheck-suppress redundantAssignment
-	ok = false;
 	log = NULL;
 #if defined(HAVE_SYS_TIMEPPS_H)
         if ( 0 <= thread_context->kernelpps_handle ) {
