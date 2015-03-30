@@ -416,16 +416,16 @@ void gpsd_set_speed(struct gps_device_t *session,
 }
 
 int gpsd_serial_open(struct gps_device_t *session)
-/* open a device for access to its data
- * return the fd of the open device, or -1 for failure, -2 is a PPS device */
+/* open a device for access to its data */
 {
     mode_t mode = (mode_t) O_RDWR;
 
     session->sourcetype = gpsd_classify(session->gpsdata.dev.path);
     session->servicetype = service_sensor;
 
-    if ( source_pps == session->sourcetype ) {
-	return -2;
+    /* we may need to hold on to this slot without opening the device */ 
+    if (source_pps == session->sourcetype) {
+	return PLACEHOLDING_FD;
     }
 
     /*@ -boolops -type @*/
@@ -456,7 +456,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 		gpsd_log(&session->context->errout, LOG_ERROR,
 			 "bluetooth socket connect failed: %s\n",
 			 strerror(errno));
-		return -1;
+		return UNALLOCATED_FD;
 	    }
 	    gpsd_log(&session->context->errout, LOG_ERROR,
 		     "bluetooth socket connect in progress or again : %s\n",
@@ -485,7 +485,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 			 "read-only device open of %s failed: %s\n",
 			 session->gpsdata.dev.path,
 			 strerror(errno));
-		return -1;
+		return UNALLOCATED_FD;
 	    }
 
 	    gpsd_log(&session->context->errout, LOG_PROG,
@@ -525,8 +525,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 		     "%s already opened by another process\n",
 		     session->gpsdata.dev.path);
 	    (void)close(session->gpsdata.gps_fd);
-	    session->gpsdata.gps_fd = -1;
-	    return -1;
+	    session->gpsdata.gps_fd = UNALLOCATED_FD;
+	    return UNALLOCATED_FD;
 	}
 #endif /* __linux__ */
     }
@@ -546,7 +546,7 @@ int gpsd_serial_open(struct gps_device_t *session)
     if (isatty(session->gpsdata.gps_fd) != 0) {
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd, &session->ttyset_old) != 0)
-	    return -1;
+	    return UNALLOCATED_FD;
 	(void)memcpy(&session->ttyset,
 		     &session->ttyset_old, sizeof(session->ttyset));
 	/*@ ignore @*/

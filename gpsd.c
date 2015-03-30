@@ -161,8 +161,6 @@ static int sd_socket_count = 0;
 #endif
 #endif
 
-#define UNALLOCATED_FD	-1
-
 static volatile sig_atomic_t signalled;
 
 static void onsig(int sig)

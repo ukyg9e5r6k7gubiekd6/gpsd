@@ -702,6 +702,12 @@ struct gps_device_t {
     } dgpsip;
 };
 
+/*
+ * These are used where a file descriptor of 0 or greater indicaes open device.
+ */
+#define UNALLOCATED_FD	-1	/* this slot is available for reallocation */
+#define PLACEHOLDING_FD	-2	/* this slot *not* available for reallocation */
+
 /* logging levels */
 #define LOG_ERROR 	-1	/* errors, display always */
 #define LOG_SHOUT	0	/* not an error but we should always see it */
