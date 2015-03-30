@@ -744,9 +744,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    pulse_tio[edge_tio] = clock_ts_tio;
 
             /* use this data */
-#ifndef __clang_analyzer__
             ok = true;
-#endif /* __clang_analyzer__ */
 	    clock_ts = clock_ts_tio;
 	    state = edge_tio;
 	    edge = edge_tio;
