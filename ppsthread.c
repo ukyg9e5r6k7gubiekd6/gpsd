@@ -593,8 +593,8 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
     timespec_str( &pi.assert_timestamp, ts_str1, sizeof(ts_str1) );
     timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
     thread_context->log_hook(thread_context, THREAD_PROG,
-		"KPP:%s assert %s, sequence: %ld - using: %.10s\n"
-		"clear  %s, sequence: %ld\n",
+		"KPPS:%s assert %s, sequence: %lu, "
+		"clear  %s, sequence: %lu - using: %.10s\n",
 		thread_context->devicename,
 		ts_str1,
 		(unsigned long) pi.assert_sequence,
