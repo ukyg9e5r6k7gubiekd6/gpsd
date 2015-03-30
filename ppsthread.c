@@ -867,7 +867,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	state_last = state;
 	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
-	    "PPS:%s %.10s cycle: %7d uSec, duration: %7d @ %s\n",
+	    "PPS:%s %.10s cycle: %7d, duration: %7d @ %s\n",
 	    thread_context->devicename,
 	    edge_str, 
 	    cycle, duration, ts_str1);
