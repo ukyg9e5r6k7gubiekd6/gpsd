@@ -5,9 +5,7 @@
  */
 
 #include <stdbool.h>
-#ifndef S_SPLINT_S
-#include <ctype.h>       /* raspbian splint hates this */
-#endif /* S_SPLINT_S */
+#include <ctype.h>
 
 typedef enum {t_integer, t_uinteger, t_real,
 	      t_string, t_boolean, t_character,
@@ -83,10 +81,10 @@ struct json_attr_t {
 extern "C" {
 #endif
 int json_read_object(const char *, const struct json_attr_t *,
-		     /*@null@*/const char **);
+		     const char **);
 int json_read_array(const char *, const struct json_array_t *,
-		    /*@null@*/const char **);
-const /*@observer@*/char *json_error_string(int);
+		    const char **);
+const char *json_error_string(int);
 
 void json_enable_debug(int, FILE *);
 #ifdef __cplusplus

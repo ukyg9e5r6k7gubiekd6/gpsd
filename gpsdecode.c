@@ -7,9 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdarg.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "bits.h"
@@ -40,7 +38,6 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 
     (void)snprintf(buf, buflen, "%u|%u|%09u|", ais->type, ais->repeat,
 		   ais->mmsi);
-    /*@ -formatcode @*/
     switch (ais->type) {
     case 1:			/* Position Report */
     case 2:
@@ -471,7 +468,6 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	str_appendf(buf, buflen, "unknown AIVDM message content.");
 	break;
     }
-    /*@ +formatcode @*/
     (void)strlcat(buf, "\r\n", buflen);
 }
 #endif
@@ -529,7 +525,6 @@ static void pseudonmea_report(gps_mask_t changed, struct gps_device_t *device)
     }
 }
 
-/*@ -mustfreeonly -compdestroy -compdef -usedef -uniondef -immediatetrans -observertrans -statictrans @*/
 static void decode(FILE *fpin, FILE*fpout)
 /* sensor data on fpin to dump format on fpout */
 {
@@ -669,7 +664,6 @@ static void encode(FILE *fpin, FILE *fpout)
 	(void)fputs(inbuf, fpout);
     }
 }
-/*@ +mustfreeonly +compdestroy +compdef +usedef +immediatetrans +observertrans @ +statictrans*/
 #endif /* SOCKET_EXPORT_ENABLE */
 
 int main(int argc, char **argv)
@@ -711,7 +705,6 @@ int main(int argc, char **argv)
 	    break;
 
 	case 't':
-	    /*@-nullpass@*/
 	    typelist[ntypes++] = (unsigned int)atoi(strtok(optarg, ","));
 	    for(;;) {
 		char *next = strtok(NULL, ",");
@@ -719,7 +712,6 @@ int main(int argc, char **argv)
 		    break;
 		typelist[ntypes++] = (unsigned int)atoi(next);
 	    }
-	    /*@+nullpass@*/
 	    break;
 
 	case 'u':

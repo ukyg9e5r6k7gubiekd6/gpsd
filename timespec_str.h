@@ -8,7 +8,7 @@
 
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
-extern void timespec_str(const struct timespec *, /*@out@*/char *, size_t);
+extern void timespec_str(const struct timespec *, char *, size_t);
 
 #endif /* GPSD_TIMESPEC_H */
 

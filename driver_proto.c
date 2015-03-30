@@ -269,7 +269,6 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
 /**
  * Parse the data from the device
  */
-/*@ +charint @*/
 gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, size_t len)
 {
     size_t i;
@@ -305,7 +304,6 @@ gps_mask_t _proto__dispatch(struct gps_device_t *session, unsigned char *buf, si
 	return 0;
     }
 }
-/*@ -charint @*/
 
 /**********************************************************
  *
@@ -333,7 +331,6 @@ static bool _proto__probe_detect(struct gps_device_t *session)
 /**
  * Write data to the device, doing any required padding or checksumming
  */
-/*@ +charint -usedef -compdef @*/
 static ssize_t _proto__control_send(struct gps_device_t *session,
 			   char *msg, size_t msglen)
 {
@@ -355,7 +352,6 @@ static ssize_t _proto__control_send(struct gps_device_t *session,
 	       "writing _proto_ control type %02x\n");
    return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
-/*@ -charint +usedef +compdef @*/
 #endif /* CONTROLSEND_ENABLE */
 
 #ifdef RECONFIGURE_ENABLE

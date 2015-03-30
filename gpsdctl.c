@@ -7,17 +7,13 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <syslog.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#ifndef S_SPLINT_S
 #include <sys/socket.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 
@@ -62,7 +58,6 @@ static int gpsd_control(char *action, char *argument)
      * gpsd.c. Be careful about keeping them in sync, or hotplugging
      * will have mysterious failures.
      */
-    /*@ -sefparams @*/
     if (strcmp(action, "add") == 0) {
 	/*
 	 * Force the group-read & group-write bits on, so gpsd will still be
@@ -84,7 +79,6 @@ static int gpsd_control(char *action, char *argument)
 	(void)syslog(LOG_ERR, "unknown action \"%s\"", action);
 	status = -1;
     }
-    /*@ +sefparams @*/
     (void)close(connect);
     //syslog(LOG_DEBUG, "gpsd_control ends");
     return status;
@@ -97,7 +91,6 @@ int main(int argc, char *argv[])
 	(void)syslog(LOG_ERR, "requires action and argument (%d)", argc);
 	exit(EXIT_FAILURE);
     } else {
-	/*@-observertrans@*/
 	char *sockenv = getenv("GPSD_SOCKET");
 	char *optenv = getenv("GPSD_OPTIONS");
 
@@ -113,6 +106,5 @@ int main(int argc, char *argv[])
 	    exit(EXIT_FAILURE);
 	else
 	    exit(EXIT_SUCCESS);
-	/*@+observertrans@*/
     }
 }

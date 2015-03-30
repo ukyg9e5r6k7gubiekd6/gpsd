@@ -28,22 +28,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
-
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 #include "gpsd.h"
 #include "gpsdclient.h"
 #include "revision.h"
 #include "strfuncs.h"
-
-#ifndef S_SPLINT_S
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#endif /* S_SPLINT_S */
 
 #define MAX_TIME_LEN 80
 #define MAX_GPSD_RETRY 10
@@ -62,8 +56,7 @@ static unsigned int flags;
 static int debug = 0;
 static bool aisonly = false;
 
-/*@-statictrans@*/
-/*@observer@*/static char* time2string(void)  
+static char* time2string(void)  
 /* return local time hh:mm:ss */
 {
    static char buffer[MAX_TIME_LEN];
@@ -81,7 +74,6 @@ static bool aisonly = false;
      
    return (buffer);
 }
-/*@+statictrans@*/
 
 static int send_udp (char *nmeastring, size_t ind)
 {
@@ -116,7 +108,6 @@ static int send_udp (char *nmeastring, size_t ind)
     }
 
     /* send message on udp channel */
-    /*@-type@*/
     for (channel=0; channel < udpchannel; channel ++) {
 	ssize_t status = sendto(sock[channel],
 				buffer,
@@ -129,7 +120,6 @@ static int send_udp (char *nmeastring, size_t ind)
 	    return -1;
 	}
     }
-    /*@=type@*/
     return 0;
 }
 
@@ -148,10 +138,8 @@ static int open_udp(char **hostport)
        struct hostent *hp;
 
        /* parse argument */
-       /*@-unrecog@*/
        hostname = strsep(&hostport[channel], ":");
        portname = strsep(&hostport[channel], ":");
-       /*@=unrecog@*/
        if ((hostname == NULL) || (portname == NULL)) {
 	   (void)fprintf(stderr, "gps2udp: syntax is [-u hostname:port]\n");
 	   return (-1);
@@ -159,12 +147,10 @@ static int open_udp(char **hostport)
 
        errno = 0;
        portnum = (int)strtol(portname, &endptr, 10);
-       /*@+charint@*/
        if (1 > portnum || 65535 < portnum || '\0' != *endptr || 0 != errno) {
 	   (void)fprintf(stderr, "gps2udp: syntax is [-u hostname:port] [%s] is not a valid port number\n",portname);
 	   return (-1);
        }
-       /*@-charint@*/
 
        sock[channel]= socket(AF_INET, SOCK_DGRAM, 0);
        if (sock[channel] < 0) {
@@ -235,7 +221,6 @@ static void connect2gpsd(bool restart)
     
 }
 
-/*@+voidabstract@*/
 static ssize_t read_gpsd(char *message, size_t len)
 /* get data from gpsd */
 {   
@@ -305,10 +290,8 @@ static ssize_t read_gpsd(char *message, size_t len)
 		connect2gpsd(true);
 		retry = 0;
 	    }
-	    /*@-sefparams@*/
 	    if (debug > 0)
 		ignore_return(write (1, ".", 1));
-	    /*@+sefparams@*/
 	    break;
 
         default:	/* we lost connection with gpsd */
@@ -320,7 +303,6 @@ static ssize_t read_gpsd(char *message, size_t len)
     (void)fprintf (stderr,"\n gps2udp: message too big [%s]\n", message);
     return(-1);
 }
-/*@=voidabstract@*/
 
 static unsigned char AISto6bit(unsigned char c)
 /* 6 bits decoding of AIS payload */
@@ -363,7 +345,6 @@ static unsigned int AISGetInt(unsigned char *bitbytes, unsigned int sp, unsigned
     return acc;
 }
 
-/*@-compdef -usedef@*/
 int main(int argc, char **argv)
 {
     bool daemonize = false;
@@ -440,7 +421,6 @@ int main(int argc, char **argv)
     }
 
     /* Daemonize if the user requested it. */
-    /*@-unrecog@*/
     if (daemonize) {
 	if (daemon(0, 0) != 0) {
 	    (void)fprintf(stderr, 
@@ -448,7 +428,6 @@ int main(int argc, char **argv)
 			  strerror(errno));
         }
     }
-    /*@=unrecog@*/
 
     /* infinite loop to get data from gpsd and push them to aggregators */
     for (;;)
@@ -511,10 +490,8 @@ int main(int argc, char **argv)
     } // end for (;;)
  
     // This is an infinite loop, should never be here
-    /*@-unreachable@*/
     fprintf (stderr, "gpsd2udp ERROR abnormal exit\n");
     exit (-1);
 }
-/*@=compdef =usedef@*/
 
 /* end */

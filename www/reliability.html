@@ -111,28 +111,27 @@ off hugely.</p>
 <h2>We use every fault scanner we can lay our hands on.</h2>
 
 <p>We regulary apply Coverity, <a
-href='http://www.splint.org'>splint</a>, <a
 href='http://sourceforge.net/apps/mediawiki/cppcheck/'>cppcheck</a>,
 and <a
 href="http://clang-analyzer.llvm.org/scan-build.html">scan-build</a>.
 We've as yet been unable to eliminate all scan-build warnings, but we
 require the code to audit clean under all the other tools on each
-release.</p>
+release. </p>
 
-<p>Of these, splint is (a) the oldest, (b) the second most effective
-after Coverity at turning up bugs, and (c) far and away the biggest
+<p>We used to use <a href='http://www.splint.org'>splint</a>, until 
+we found that we couldn't replicate the results of splint runs
+reliably in different Linux distributions. Also, far and away the biggest
 pain in the ass to use. You have to drop cryptic, cluttery magic
 comments all over your source to pass hints to splint and suppress its
-extremely voluminous and picky output. The thing is, splint checking
-turns up real bugs at a low but consistent rate - one or two each
-release cycle.</p>
+extremely voluminous and picky output. We have retired in favor of more
+modern analyzers.</p>
 
 <p>cppcheck is much newer and much less prone to false
 positives. Likewise scan-build. But here's what experience tells us:
-each of these four tools finds overlapping but different sets of
+each of these tools finds overlapping but different sets of
 bugs. Coverity is, by reputation at least, capable enough that it
 might dominate one or more of them - but why take chances? Best to use
-all four and constrain the population of undiscovered bugs into as
+all and constrain the population of undiscovered bugs into as
 small a fraction of the state space as we can.</p>
 
 <p>We also use <a href='http://valgrind.org/'>valgrind</a> to check

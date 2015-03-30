@@ -33,21 +33,17 @@
 
 #define CLIMB 3
 
-#ifndef S_SPLINT_S
 #include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */
-#endif /* S_SPLINT_S */
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
-#ifndef S_SPLINT_S
 #include <arpa/inet.h>
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -259,7 +255,6 @@ int main(int argc, char *argv[])
     int n;
     for(n=0;n<CLIMB;n++) climb[n]=0.0;
 
-    /*@ -observertrans @*/
     switch (gpsd_units())
     {
     case imperial:
@@ -284,7 +279,6 @@ int main(int argc, char *argv[])
 	/* leave the default alone */
 	break;
     }
-    /*@ +observertrans @*/
 
     /* Process the options.  Print help if requested. */
     while ((option = getopt(argc, argv, "Vhl:su:")) != -1) {
@@ -309,7 +303,6 @@ int main(int argc, char *argv[])
 		continue;
 	    default:
 		(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
-		/*@ -casebreak @*/
 	    }
 	case 's':
 	    sleep(10);
@@ -336,7 +329,6 @@ int main(int argc, char *argv[])
 		continue;
 	    default:
 		(void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
-		/*@ -casebreak @*/
 	    }
 	}
     }

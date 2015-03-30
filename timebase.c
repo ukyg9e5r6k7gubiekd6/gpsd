@@ -205,9 +205,7 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
      * the timezone offset).  Avoid this and all manner of other local
      * time issues by telling the system we want times returned in UTC.
      */
-    /*@-observertrans@*/
     (void)putenv("TZ=UTC");
-    /*@+observertrans@*/
 
     /*
      * Provides a start time for getting the century.  Do this, just
@@ -262,7 +260,7 @@ void gpsd_set_century(struct gps_device_t *session)
 }
 
 #ifdef NMEA_ENABLE
-timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
+timestamp_t gpsd_utc_resolve(struct gps_device_t *session)
 /* resolve a UTC date, checking for rollovers */
 {
     /*
@@ -299,7 +297,7 @@ timestamp_t gpsd_utc_resolve(/*@in@*/struct gps_device_t *session)
     return t;
 }
 
-void gpsd_century_update(/*@in@*/struct gps_device_t *session, int century)
+void gpsd_century_update(struct gps_device_t *session, int century)
 {
     session->context->valid |= CENTURY_VALID;
     if (century > session->context->century) {
@@ -325,7 +323,7 @@ void gpsd_century_update(/*@in@*/struct gps_device_t *session, int century)
 }
 #endif /* NMEA_ENABLE */
 
-timestamp_t gpsd_gpstime_resolve(/*@in@*/struct gps_device_t *session,
+timestamp_t gpsd_gpstime_resolve(struct gps_device_t *session,
 			 unsigned short week, double tow)
 {
     timestamp_t t;

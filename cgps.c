@@ -93,9 +93,7 @@
 #include <curses.h>
 #include <time.h>
 #include <signal.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <ctype.h>
 
 #include "gpsd_config.h"
@@ -174,7 +172,6 @@ static void die(int sig)
 
 static enum deg_str_type deg_type = deg_dd;
 
-/*@ -globstate @*/
 static void windowsetup(void)
 /* inotialize curses and set up screen windows */
 {
@@ -217,9 +214,7 @@ static void windowsetup(void)
 	    (void)mvprintw(0, 0,
 			   "Your screen must be at least 80x%d to run cgps.",
 			   MIN_COMPASS_DATAWIN_SIZE);
-	    /*@ -nullpass @*/
 	    (void)refresh();
-	    /*@ +nullpass @*/
 	    (void)sleep(5);
 	    die(0);
 	}
@@ -242,9 +237,7 @@ static void windowsetup(void)
 	    (void)mvprintw(0, 0,
 			   "Your screen must be at least 80x%d to run cgps.",
 			   MIN_GPS_DATAWIN_SIZE);
-	    /*@ -nullpass @*/
 	    (void)refresh();
-	    /*@ +nullpass @*/
 	    (void)sleep(5);
 	    die(0);
 	}
@@ -256,20 +249,16 @@ static void windowsetup(void)
     if (compass_flag) {
 	/* We're a compass, set up accordingly. */
 
-	/*@ -onlytrans @*/
 	datawin = newwin(window_length, DATAWIN_WIDTH, 0, 0);
 	(void)nodelay(datawin, (bool) TRUE);
 	if (raw_flag) {
 	    messages = newwin(0, 0, window_length, 0);
 
-	    /*@ +onlytrans @*/
 	    (void)scrollok(messages, true);
 	    (void)wsetscrreg(messages, 0, ysize - (window_length));
 	}
 
-	/*@ -nullpass @*/
 	(void)refresh();
-	/*@ +nullpass @*/
 
 	/* Do the initial field label setup. */
 	(void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
@@ -285,7 +274,6 @@ static void windowsetup(void)
     {
 	/* We're a GPS, set up accordingly. */
 
-	/*@ -onlytrans @*/
 	datawin = newwin(window_length, DATAWIN_WIDTH, 0, 0);
 	satellites =
 	    newwin(window_length, SATELLITES_WIDTH, 0, DATAWIN_WIDTH);
@@ -294,14 +282,11 @@ static void windowsetup(void)
 	    messages =
 		newwin(ysize - (window_length), xsize, window_length, 0);
 
-	    /*@ +onlytrans @*/
 	    (void)scrollok(messages, true);
 	    (void)wsetscrreg(messages, 0, ysize - (window_length));
 	}
 
-	/*@ -nullpass @*/
 	(void)refresh();
-	/*@ +nullpass @*/
 
 	/* Do the initial field label setup. */
 	(void)mvwprintw(datawin, 1, DATAWIN_DESC_OFFSET, "Time:");
@@ -341,7 +326,6 @@ static void windowsetup(void)
     }
 }
 
-/*@ +globstate @*/
 
 static void resize(int sig UNUSED)
 /* cope with terminal resize */
@@ -408,7 +392,6 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 }
 #endif /* TRUENORTH */
 
-/*@-mustfreefresh@*/
 static void update_gps_panel(struct gps_data_t *gpsdata)
 /* This gets called once for each new GPS sentence. */
 {
@@ -623,24 +606,20 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	(void)mvwprintw(datawin, 14, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22,
 			scr);
 	/* Fill in the grid square (esr thought *this* one was interesting). */
-	/*@-branchstate@*/
 	if (isnan(gpsdata->fix.longitude)==0 && isnan(gpsdata->fix.latitude)==0)
 	    s = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
 	else
 	    s = "n/a";
 	(void)mvwprintw(datawin, 15, DATAWIN_VALUE_OFFSET + 5, "%-*s", 22, s);
-	/*@+branchstate@*/
     }
 
     /* Be quiet if the user requests silence. */
-    /*@-modobserver@*/
     if (!silent_flag && raw_flag && (s = (char *)gps_data(gpsdata)) != NULL) {
 	char *p;
 	for (p = s + strlen(s); --p > s && isspace((unsigned char) *p); *p = '\0')
 	    ;
 	(void)wprintw(messages, "%s\n", s);
     }
-    /*@+modobserver@*/
 
     /* Reset the status_timer if the state has changed. */
     if (newstate != state) {
@@ -654,7 +633,6 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	(void)wrefresh(messages);
     }
 }
-/*@+mustfreefresh@*/
 
 static void usage(char *prog)
 {
@@ -684,7 +662,6 @@ int main(int argc, char *argv[])
     unsigned int flags = WATCH_ENABLE;
     int wait_clicks = 0;  /* cycles to wait before gpsd timeout */
 
-    /*@ -observertrans @*/
     switch (gpsd_units()) {
     case imperial:
 	altfactor = METERS_TO_FEET;
@@ -708,7 +685,6 @@ int main(int argc, char *argv[])
 	/* leave the default alone */
 	break;
     }
-    /*@ +observertrans @*/
 
     /* Process the options.  Print help if requested. */
     while ((option = getopt(argc, argv, "hVl:smu:D:")) != -1) {
@@ -726,7 +702,6 @@ int main(int argc, char *argv[])
 	    silent_flag = true;
 	    break;
 	case 'u':
-	    /*@ -observertrans @*/
 	    switch (optarg[0]) {
 	    case 'i':
 		altfactor = METERS_TO_FEET;
@@ -750,7 +725,6 @@ int main(int argc, char *argv[])
 		(void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
 	    }
 	    break;
-	    /*@ +observertrans @*/
 	case 'V':
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
 			  argv[0], VERSION, REVISION);
@@ -768,7 +742,6 @@ int main(int argc, char *argv[])
 		continue;
 	    default:
 		(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
-		/*@ -casebreak @*/
 	    }
 	    break;
 	case 'h':

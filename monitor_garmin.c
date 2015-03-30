@@ -97,7 +97,6 @@ static char *fixdesc[] = {
 
 static bool garmin_bin_initialize(void)
 {
-    /*@-globstate@*/
     unsigned int i;
 
 #ifndef CONTROLSEND_ENABLE
@@ -107,7 +106,6 @@ static bool garmin_bin_initialize(void)
     }
 #endif
 
-    /*@ -onlytrans @*/
     miscwin = subwin(devicewin, 1, 80, 1, 0);
     mid51win = subwin(devicewin, 12, 18, 2, 0);
     mid114win = subwin(devicewin, GARMIN_CHANNELS + 3, 23, 2, 18);
@@ -118,7 +116,6 @@ static bool garmin_bin_initialize(void)
     (void)syncok(mid51win, true);
     (void)syncok(mid114win, true);
 
-    /*@ -nullpass @*/
     (void)wattrset(miscwin, A_BOLD);
     display(miscwin, 0, 0, "Time:");
     (void)wattrset(miscwin, A_NORMAL);
@@ -155,10 +152,8 @@ static bool garmin_bin_initialize(void)
     gpsd_time_init(session.context, time(NULL));
 
     return true;
-    /*@+globstate@*/
 }
 
-/*@ -globstate -compdef */
 static void garmin_bin_update(uint16_t pkt_id, uint32_t pkt_size UNUSED, unsigned char *pkt_data)
 {
     int i;
@@ -287,7 +282,6 @@ static void garmin_bin_ser_update(void)
 	monitor_log("BAD 0x%02x=", buf[1]);
    }
 }
-/*@ +globstate +compdef */
 
 static void garmin_bin_wrap(void)
 {

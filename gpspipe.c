@@ -38,9 +38,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 
@@ -79,14 +77,12 @@ static void open_serial(char *device)
     }
 
     /* Clear struct for new port settings. */
-    /*@i@*/ bzero(&newtio, sizeof(newtio));
+    bzero(&newtio, sizeof(newtio));
 
-#ifndef S_SPLINT_S
     /* make it raw */
     (void)cfmakeraw(&newtio);
-#endif /* S_SPLINT_S */
     /* set speed */
-    /*@i@*/ (void)cfsetospeed(&newtio, BAUDRATE);
+    (void)cfsetospeed(&newtio, BAUDRATE);
 
     /* Clear the modem line and activate the settings for the port. */
     (void)tcflush(fd_out, TCIFLUSH);
@@ -122,7 +118,6 @@ static void usage(void)
 		  "You must use -o if you use -d.\n");
 }
 
-/*@ -compdestroy @*/
 int main(int argc, char **argv)
 {
     char buf[4096];
@@ -148,7 +143,6 @@ int main(int argc, char **argv)
     char *serialport = NULL;
     char *outfile = NULL;
 
-    /*@-branchstate@*/
     flags = WATCH_ENABLE;
     while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVn:s:o:pPu2")) != -1) {
 	switch (option) {
@@ -226,7 +220,6 @@ int main(int argc, char **argv)
 	    exit(EXIT_FAILURE);
 	}
     }
-    /*@+branchstate@*/
 
     /* Grok the server, port, and device. */
     if (optind < argc) {
@@ -251,13 +244,11 @@ int main(int argc, char **argv)
     }
 
     /* Daemonize if the user requested it. */
-    /*@ -unrecog @*/
     if (daemonize)
 	if (daemon(0, 0) != 0)
 	    (void)fprintf(stderr,
 			  "gpspipe: demonization failed: %s\n",
 			  strerror(errno));
-    /*@ +unrecog @*/
 
     /* Sleep for ten seconds if the user requested it. */
     if (sleepy)
@@ -286,14 +277,12 @@ int main(int argc, char **argv)
     if (serialport)
 	open_serial(serialport);
 
-    /*@ -nullpass -onlytrans @*/
     if (gps_open(source.server, source.port, &gpsdata) != 0) {
 	(void)fprintf(stderr,
 		      "gpspipe: could not connect to gpsd %s:%s, %s(%d)\n",
 		      source.server, source.port, gps_errstr(errno), errno);
 	exit(EXIT_FAILURE);
     }
-    /*@ +nullpass +onlytrans @*/
 
     if (profile)
 	flags |= WATCH_TIMING;
@@ -340,8 +329,7 @@ int main(int argc, char **argv)
 		    struct timespec now;
 		    struct tm *tmp_now;
 
-		    /*@-type@*//* splint is confused about struct timespec */
-		    /*@i2@*/(void)clock_gettime(CLOCK_REALTIME, &now);
+		    (void)clock_gettime(CLOCK_REALTIME, &now);
 		    tmp_now = localtime((time_t *)&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;
@@ -369,7 +357,6 @@ int main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		    }
 		}
-		/*@+type@*/
 		if (fputc(c, fp) == EOF) {
 		    fprintf(stderr, "gpspipe: write error, %s(%d)\n",
 			    strerror(errno), errno);
@@ -430,7 +417,6 @@ int main(int argc, char **argv)
     exit(EXIT_SUCCESS);
 }
 
-/*@ +compdestroy @*/
 
 static void spinner(unsigned int v, unsigned int num)
 {

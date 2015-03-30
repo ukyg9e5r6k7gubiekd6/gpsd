@@ -10,7 +10,6 @@
 /* convert unsigned to signed */
 #define uint2int( u, bit) ( (u & (1<<(bit-1))) ? u - (1<<bit) : u)
 
-/*@ -usedef @*/
 gps_mask_t gpsd_interpret_subframe_raw(struct gps_device_t *session,
 				unsigned int tSVID, uint32_t words[])
 {
@@ -90,9 +89,8 @@ static void subframe_almanac(const struct gpsd_errout_t *errout,
 			     uint8_t tSVID, uint32_t words[],
 			     uint8_t subframe, uint8_t sv,
 			     uint8_t data_id,
-			     /*@out@*/struct almanac_t *almp)
+			     struct almanac_t *almp)
 {
-    /*@+matchanyintegral -shiftimplementation@*/
     almp->sv     = sv; /* ignore the 0 sv problem for now */
     almp->e      = ( words[2] & 0x00FFFF);
     almp->d_eccentricity  = pow(2.0,-21) * almp->e;
@@ -142,7 +140,6 @@ static void subframe_almanac(const struct gpsd_errout_t *errout,
 	     almp->d_M0,
 	     almp->d_af0,
 	     almp->d_af1);
-    /*@-matchanyintegral -shiftimplementation@*/
 }
 
 gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
@@ -419,7 +416,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		/* NMCT */
 		sv = -1;
 		subp->sub4_13.ai      = (unsigned char)((words[2] >> 22) & 0x000003);
-		/*@+charint@*/
 		subp->sub4_13.ERD[1]  = (char)((words[2] >>  8) & 0x00003F);
 		subp->sub4_13.ERD[2]  = (char)((words[2] >>  2) & 0x00003F);
 		subp->sub4_13.ERD[3]  = (char)((words[2] >>  0) & 0x000003);
@@ -475,7 +471,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		for ( i = 1; i < 31; i++ ) {
 		    subp->sub4_13.ERD[i]  = uint2int(subp->sub4_13.ERD[i], 6);
 		}
-		/*@-charint@*/
 
 		gpsd_log(&session->context->errout, LOG_PROG,
 			 "50B: SF:4-13 data_id %d ai:%u "
@@ -630,7 +625,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		 * and shifted the data to a byte boundary, we can just
 		 * copy it out. */
 
-		/*@ -type @*/
 		i = 0;
 		subp->sub4_17.str[i++] = (words[2] >> 8) & 0xff;
 		subp->sub4_17.str[i++] = (words[2]) & 0xff;
@@ -662,7 +656,6 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->sub4_17.str[i++] = (words[9] >> 16) & 0xff;
 		subp->sub4_17.str[i++] = (words[9] >> 8) & 0xff;
 		subp->sub4_17.str[i] = '\0';
-		/*@ +type @*/
 		gpsd_log(&session->context->errout, LOG_PROG,
 			 "50B: SF:4-17 system message: %.24s\n",
 			 subp->sub4_17.str);
@@ -846,4 +839,3 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     return SUBFRAME_SET;
 }
 
-/*@ +usedef @*/

@@ -12,7 +12,6 @@
 #include <stdbool.h>
 #include "bits.h"
 
-/*@ -duplicatequals -formattype */
 static unsigned char buf[80];
 static signed char sb1, sb2;
 static unsigned char ub1, ub2;
@@ -25,19 +24,17 @@ static uint64_t uL1, uL2;
 static float f1;
 static double d1;
 
-static char /*@ observer @*/ *hexdump(const void *binbuf, size_t len)
+static char *hexdump(const void *binbuf, size_t len)
 {
     static char hexbuf[BUFSIZ];
     size_t i, j = 0;
     const char *ibuf = (const char *)binbuf;
     const char *hexchar = "0123456789abcdef";
 
-    /*@ -shiftimplementation @*/
     for (i = 0; i < len; i++) {
 	hexbuf[j++] = hexchar[(ibuf[i] & 0xf0) >> 4];
 	hexbuf[j++] = hexchar[ibuf[i] & 0x0f];
     }
-    /*@ +shiftimplementation @*/
     hexbuf[j] = '\0';
     return hexbuf;
 }
@@ -111,13 +108,11 @@ struct unsigned_test
     char *description;
 };
 
-/*@ -duplicatequals +ignorequals @*/
 int main(int argc, char *argv[])
 {
     bool failures = false;
     bool quiet = (argc > 1) && (strcmp(argv[1], "--quiet") == 0);
 
-    /*@ -observertrans -usereleased @*/
     struct unsigned_test *up, unsigned_tests[] = {
 	/* tests using the big buffer */
 	{buf, 0,  1,  0,    false, "first bit of first byte"},
@@ -139,17 +134,14 @@ int main(int argc, char *argv[])
     memcpy(buf + 8, "\xff\xfe\xfd\xfc\xfb\xfa\xf9\xf8", 8);
     memcpy(buf + 16, "\x40\x09\x21\xfb\x54\x44\x2d\x18", 8);
     memcpy(buf + 24, "\x40\x49\x0f\xdb", 4);
-    /*@ +observertrans +usereleased @*/
 
     if (!quiet)
 	(void)printf("Testing bitfield extraction\n");
 
-    /*@-type@*/
     sb1 = getsb(buf, 0);
     sb2 = getsb(buf, 8);
     ub1 = getub(buf, 0);
     ub2 = getub(buf, 8);
-    /*@+type@*/
 
     if (!quiet) {
 	unsigned char *sp;
@@ -161,7 +153,6 @@ int main(int argc, char *argv[])
 
 	/* big-endian test */
 	printf("Big-endian:\n");
-	/*@-type@*/
 	sw1 = getbes16(buf, 0);
 	sw2 = getbes16(buf, 8);
 	uw1 = getbeu16(buf, 0);
@@ -176,12 +167,10 @@ int main(int argc, char *argv[])
 	uL2 = getbeu64(buf, 8);
 	f1 = getbef32((const char *)buf, 24);
 	d1 = getbed64((const char *)buf, 16);
-	/*@+type@*/
 	bedumpall();
 
 	/* little-endian test */
 	printf("Little-endian:\n");
-	/*@-type@*/
 	sw1 = getles16(buf, 0);
 	sw2 = getles16(buf, 8);
 	uw1 = getleu16(buf, 0);
@@ -196,7 +185,6 @@ int main(int argc, char *argv[])
 	uL2 = getleu64(buf, 8);
 	f1 = getlef32((const char *)buf, 24);
 	d1 = getled64((const char *)buf, 16);
-	/*@+type@*/
 	ledumpall();
     }
 

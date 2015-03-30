@@ -67,7 +67,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 #define W_DATA_MASK	0x3fffffc0u
 
-/*@ +charint @*/
 static unsigned char parity_array[] = {
     0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
     1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
@@ -94,7 +93,6 @@ static unsigned int reverse_bits[] = {
     3, 35, 19, 51, 11, 43, 27, 59, 7, 39, 23, 55, 15, 47, 31, 63
 };
 
-/*@ -charint @*/
 
 unsigned int isgps_parity(isgps30bits_t th)
 {
@@ -114,7 +112,6 @@ unsigned int isgps_parity(isgps30bits_t th)
      * th ^= W_DATA_MASK;
      */
 
-    /*@ +charint @*/
     t = th & PARITY_25;
     p = parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
 	parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) & 0xff];
@@ -138,7 +135,6 @@ unsigned int isgps_parity(isgps30bits_t th)
     p = (p << 1) | (parity_array[t & 0xff] ^ parity_array[(t >> 8) & 0xff] ^
 		    parity_array[(t >> 16) & 0xff] ^ parity_array[(t >> 24) &
 								  0xff]);
-    /*@ -charint @*/
 
 #ifdef __UNUSED__
     gpsd_log(errout, ISGPS_ERRLEVEL_BASE + 2, "ISGPS parity %u\n", p);
@@ -167,7 +163,7 @@ unsigned int isgps_parity(isgps30bits_t th)
  */
 #define isgps_parityok(w)	(isgps_parity(w) == ((w) & 0x3f))
 
-void isgps_init( /*@out@*/ struct gps_lexer_t *lexer)
+void isgps_init(struct gps_lexer_t *lexer)
 {
     lexer->isgps.curr_word = 0;
     lexer->isgps.curr_offset = 24;	/* first word */
@@ -176,7 +172,6 @@ void isgps_init( /*@out@*/ struct gps_lexer_t *lexer)
     lexer->isgps.buflen = 0;
 }
 
-/*@ -usereleased -compdef @*/
 // This works around cppcheck not looking into enough config branches
 // cppcheck-suppress unusedFunction
 enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
@@ -193,7 +188,6 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 
     c = reverse_bits[c & 0x3f];
 
-    /*@ -shiftnegative @*/
     if (!lexer->isgps.locked) {
 	lexer->isgps.curr_offset = -5;
 	lexer->isgps.bufindex = 0;
@@ -309,7 +303,6 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 		 lexer->isgps.curr_offset);
 	return res;
     }
-    /*@ +shiftnegative @*/
 
     /* never achieved lock */
     gpsd_log(&lexer->errout, ISGPS_ERRLEVEL_BASE + 1,
@@ -317,4 +310,3 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
     return ISGPS_NO_SYNC;
 }
 
-/*@ +usereleased +compdef @*/

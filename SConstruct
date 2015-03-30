@@ -1435,54 +1435,10 @@ def Utility(target, source, action):
     env.Precious(target)
     return target
 
-# Report splint warnings
-# Note: test_bits.c is unsplintable because of the PRI64 macros.
-# If you get preprocessor or fatal errors, add +showscan.
-# explicitly force splint to only use our splintrc file
-splintopts = "-I/usr/include/libusb-1.0 +quiet +nof -f .splintrc"
-if sys.platform.startswith('darwin'):
-    splintopts = splintopts + " +skip-sys-headers"
-
-# splint does not know about multi-arch, work around that
-ma_status, ma = _getstatusoutput('dpkg-architecture -qDEB_HOST_MULTIARCH')
-if ma_status == 0:
-    splintopts = '-I/usr/include/%s %s' %(ma.strip(),splintopts)
-env['SPLINTOPTS']=splintopts
-
-def Splint(target,sources, description, params):
-    return Utility(target,sources+generated_sources,[
-            '@echo "Running splint on %s..."'%description,
-            '-splint $SPLINTOPTS %s %s'%(" ".join(params)," ".join(sources)),
-            ])
-
-splint_table = [
-    ('splint-daemon',gpsd_sources,'daemon', ['-exportlocal', '-redef']),
-    ('splint-libgpsd',libgpsd_sources,'libgpsd', ['-exportlocal', '-redef']),
-    ('splint-libgps',libgps_sources,'user-side libraries', ['-exportlocal',
-                                                            '-fileextensions',
-                                                            '-redef']),
-    ('splint-cgps',['cgps.c'],'cgps', ['-exportlocal']),
-    ('splint-gpsctl',['gpsctl.c'],'gpsctl', ['']),
-    ('splint-gpsdctl',['gpsdctl.c'],'gpsdctl', ['']),
-    ('splint-gpsmon',gpsmon_sources,'gpsmon', ['-exportlocal']),
-    ('splint-gpspipe',['gpspipe.c'],'gpspipe', ['']),
-    ('splint-gps2udp',['gps2udp.c'],'gps2udp', ['']),
-    ('splint-gpsdecode',['gpsdecode.c'],'gpsdecode', ['']),
-    ('splint-gpxlogger',['gpxlogger.c'],'gpxlogger', ['']),
-    ('splint-ntpshmmon',['ntpshmmon.c'],'ntpshmmon', ['']),
-    ('splint-test_packet',['test_packet.c'],'test_packet test harness', ['']),
-    ('splint-test_mktime',['test_mktime.c'],'test_mktime test harness', ['']),
-    ('splint-test_geoid',['test_geoid.c'],'test_geoid test harness', ['']),
-    ('splint-test_json',['test_json.c'],'test_json test harness', ['']),
-    ]
-
-for (target,sources,description,params) in splint_table:
-    env.Alias('splint',Splint(target,sources,description,params))
-
 # Putting in all these -U flags speeds up cppcheck and allows it to look
 # at configurations we actually care about.
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
-        "cppcheck -U__UNUSED__ -UUSE_QT -US_SPLINT_S -U__COVERITY__ -U__future__ -ULIMITED_MAX_CLIENTS -ULIMITED_MAX_DEVICES -UAF_UNSPEC -UINADDR_ANY -UFIXED_PORT_SPEED -UFIXED_STOP_BITS -U_WIN32 -U__CYGWIN__ -UPATH_MAX -UHAVE_STRLCAT -UHAVE_STRLCPY -UIPTOS_LOWDELAY -UIPV6_TCLASS -UTCP_NODELAY -UTIOCMIWAIT --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
+        "cppcheck -U__UNUSED__ -UUSE_QT -U__COVERITY__ -U__future__ -ULIMITED_MAX_CLIENTS -ULIMITED_MAX_DEVICES -UAF_UNSPEC -UINADDR_ANY -UFIXED_PORT_SPEED -UFIXED_STOP_BITS -U_WIN32 -U__CYGWIN__ -UPATH_MAX -UHAVE_STRLCAT -UHAVE_STRLCPY -UIPTOS_LOWDELAY -UIPV6_TCLASS -UTCP_NODELAY -UTIOCMIWAIT --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
 
 # Experimental check with clang analyzer
 Utility("scan-build", ["gpsd.h", "packet_names.h"],
@@ -1513,8 +1469,7 @@ Utility("deheader", generated_sources, [
 
 # Perform all local code-sanity checks (but not the Coverity scan).
 audit = env.Alias('audit',
-                  ['splint',
-                   'cppcheck',
+                  ['cppcheck',
                    'pylint',
                    'xmllint',
                    'valgrind-audit',

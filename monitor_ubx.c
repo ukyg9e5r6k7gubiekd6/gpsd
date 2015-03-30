@@ -21,7 +21,6 @@ static bool ubx_initialize(void)
 {
     int i;
 
-    /*@ -onlytrans @*/
     /* "heavily inspired" by monitor_nmea.c */
     if ((satwin = derwin(devicewin, 19, 28, 0, 0)) == NULL)
 	return false;
@@ -32,7 +31,6 @@ static bool ubx_initialize(void)
 	display(satwin, (int)(i + 2), 1, "%2d", i);
     display(satwin, 18, 7, " NAV_SVINFO ");
     (void)wattrset(satwin, A_NORMAL);
-    /*@ -onlytrans @*/
 
     /* "heavily inspired" by monitor_nmea.c */
     if ((navsolwin = derwin(devicewin, 13, 51, 0, 28)) == NULL)
@@ -123,7 +121,6 @@ static void display_nav_svinfo(unsigned char *buf, size_t data_len)
     return;
 }
 
-/*@ -mustfreeonly -compdestroy @*/
 static void display_nav_sol(unsigned char *buf, size_t data_len)
 {
     unsigned short gw = 0;
@@ -135,10 +132,6 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 
     if (data_len != 52)
 	return;
-
-#ifdef S_SPLINT_S
-    assert(navsolwin != NULL);
-#endif /* S_SPLINT_S */
 
     navmode = (unsigned char)getub(buf, 10);
     flags = (unsigned int)getub(buf, 11);
@@ -178,7 +171,6 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     (void)wattrset(navsolwin, A_NORMAL);
 
     (void)wmove(navsolwin, 7, 7);
-    /*@ -compdef @*/
     {
 	unsigned int day = tow / 8640000;
 	unsigned int tod = tow % 8640000;
@@ -192,7 +184,6 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 	(void)wprintw(navsolwin, "%u %02u:%02u:%05.2f", day, h, m, (double)s / 100);
 	(void)wattrset(navsolwin, A_NORMAL);
     }
-    /*@ +compdef @*/
     (void)wmove(navsolwin, 8, 11);
     if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
 	(void)wprintw(navsolwin, "%d+%10.3lf", gw, (double)(tow / 1000.0));
@@ -216,7 +207,6 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     (void)wnoutrefresh(navsolwin);
 }
 
-/*@ +mustfreeonly +compdestroy @*/
 
 static void display_nav_dop(unsigned char *buf, size_t data_len)
 {

@@ -75,11 +75,9 @@ struct timedelta_t {
 #define TIMEDELTA_DEFINED
 #endif /* TIMEDELTA_DEFINED */
 
-struct shmTime /*@null@*/ *shm_get(int, bool, bool);
+struct shmTime *shm_get(int, bool, bool);
 extern char *ntp_name(const int);
-enum segstat_t ntp_read(/*@null@*/struct shmTime *, 
-			 /*@out@*/struct shm_stat_t *,
-			 const bool);
+enum segstat_t ntp_read(struct shmTime *, struct shm_stat_t *, const bool);
 void ntp_write(volatile struct shmTime *, struct timedelta_t *, int, int);
 
 #endif /* GPSD_NTPSHM_H */

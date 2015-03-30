@@ -8,15 +8,13 @@
 #include <errno.h>
 #include <libgen.h>
 #include <signal.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gps.h"
 #include "gpsd_config.h"
 #include "libgps.h"
 
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
+#if defined(DBUS_EXPORT_ENABLE)
 
 struct privdata_t
 {
@@ -137,4 +135,4 @@ int gps_dbus_mainloop(struct gps_data_t *gpsdata,
     return 0;
 }
 
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
+#endif /* defined(DBUS_EXPORT_ENABLE) */

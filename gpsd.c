@@ -22,15 +22,11 @@
 #include <syslog.h>
 #include <errno.h>
 #include <signal.h>
-#ifdef S_SPLINT_S
-extern int pthread_mutex_lock (pthread_mutex_t *__mutex);
-extern int pthread_mutex_unlock (pthread_mutex_t *__mutex);
-#else
-#include <ctype.h>         /* raspbian splint hates this */
-#include <pwd.h>           /* raspbian splint hates this */
-#include <grp.h>           /* raspbian splint hates this */
-#include <fcntl.h>         /* raspbian splint hates this */
-#include <pthread.h>       /* raspbian splint hates this */
+#include <ctype.h>
+#include <pwd.h>
+#include <grp.h>
+#include <fcntl.h>
+#include <pthread.h>
 #include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/socket.h>
@@ -41,7 +37,6 @@ extern int pthread_mutex_unlock (pthread_mutex_t *__mutex);
 #include <sys/un.h>
 #include <arpa/inet.h>     /* for htons() and friends */
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 
@@ -252,7 +247,6 @@ static socket_t filesock(char *filename)
     struct sockaddr_un addr;
     socket_t sock;
 
-    /*@ -mayaliasunique -usedef @*/
     if (BAD_SOCKET(sock = socket(AF_UNIX, SOCK_STREAM, 0))) {
 	gpsd_log(&context.errout, LOG_ERROR,
 		 "Can't create device-control socket\n");
@@ -272,7 +266,6 @@ static socket_t filesock(char *filename)
 	(void)close(sock);
 	return -1;
     }
-    /*@ +mayaliasunique +usedef @*/
 
     /* coverity[leaked_handle] This is an intentional allocation */
     return sock;
@@ -324,7 +317,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
      * qlen = maximum wait-queue length for connections
      */
     struct servent *pse;
-    struct protoent *ppe;	/* splint has a bug here */
+    struct protoent *ppe;
     sockaddr_t sat;
     int sin_len = 0;
     int type, proto, one = 1;
@@ -343,20 +336,18 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     ppe = getprotobyname(tcp_or_udp);
     if (strcmp(tcp_or_udp, "udp") == 0) {
 	type = SOCK_DGRAM;
-	/*@i@*/ proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
+	proto = (ppe) ? ppe->p_proto : IPPROTO_UDP;
     } else {
 	type = SOCK_STREAM;
-	/*@i@*/ proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
+	proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
 
-    /*@ -mustfreefresh +matchanyintegral @*/
     switch (af) {
     case AF_INET:
 	sin_len = sizeof(sat.sa_in);
 
 	memset((char *)&sat.sa_in, 0, sin_len);
 	sat.sa_in.sin_family = (sa_family_t) AF_INET;
-#ifndef S_SPLINT_S
 #ifndef FORCE_GLOBAL_ENABLE
 	if (!listen_global)
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
@@ -364,24 +355,20 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 #endif /* FORCE_GLOBAL_ENABLE */
 	    sat.sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
 	sat.sa_in.sin_port = htons(port);
-#endif /* S_SPLINT_S */
 
 	af_str = "IPv4";
 	/* see PF_INET6 case below */
 	s = socket(PF_INET, type, proto);
 	if (s > -1 ) {
-	/*@-unrecog@*/
 	/* Set packet priority */
 	if (setsockopt(s, IPPROTO_IP, IP_TOS, &dscp, sizeof(dscp)) == -1)
 	    gpsd_log(&context.errout, LOG_WARN,
 		     "Warning: SETSOCKOPT TOS failed\n");
 	}
-	/*@+unrecog@*/
 
 	break;
 #ifdef IPV6_ENABLE
     case AF_INET6:
-#ifndef S_SPLINT_S
 	sin_len = sizeof(sat.sa_in6);
 
 	memset((char *)&sat.sa_in6, 0, sin_len);
@@ -424,7 +411,6 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 		gpsd_log(&context.errout, LOG_WARN,
 			 "Warning: SETSOCKOPT TOS failed\n");
 	}
-#endif /* S_SPLINT_S */
 	break;
 #endif  /* IPV6_ENABLE */
     default:
@@ -467,12 +453,11 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 
     gpsd_log(&context.errout, LOG_SPIN, "passivesock_af() -> %d\n", s);
     return s;
-    /*@ +mustfreefresh -matchanyintegral @*/
 }
 
 /* *INDENT-OFF* */
 static int passivesocks(char *service, char *tcp_or_udp,
-			int qlen, /*@out@*/socket_t socks[])
+			int qlen, socket_t socks[])
 {
     int numsocks = AFCOUNT;
     int i;
@@ -527,7 +512,7 @@ static void unlock_subscriber(struct subscriber_t *sub)
     (void)pthread_mutex_unlock(&sub->mutex);
 }
 
-static /*@null@*//*@observer@ */ struct subscriber_t *allocate_client(void)
+static struct subscriber_t *allocate_client(void)
 /* return the address of a subscriber structure allocated for a new session */
 {
     int si;
@@ -575,7 +560,6 @@ static void detach_client(struct subscriber_t *sub)
     sub->policy.devpath[0] = '\0';
     sub->fd = UNALLOCATED_FD;
     unlock_subscriber(sub);
-    /*@+mustfreeonly@*/
 }
 
 static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
@@ -673,7 +657,7 @@ static void deactivate_device(struct gps_device_t *device)
 
 #if defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE)
 /* *INDENT-OFF* */
-/*@null@*//*@observer@*/ static struct gps_device_t *find_device(/*@null@*/const char
+static struct gps_device_t *find_device(const char
 								 *device_name)
 /* find the device block for an existing device name */
 {
@@ -690,7 +674,7 @@ static void deactivate_device(struct gps_device_t *device)
 /* *INDENT-ON* */
 #endif /* defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE) */
 
-static bool open_device( /*@null@*/struct gps_device_t *device)
+static bool open_device( struct gps_device_t *device)
 {
     if (NULL == device || gpsd_activate(device, O_OPTIMIZE) < 0) {
 	return false;
@@ -755,21 +739,19 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
 }
 
 #ifdef CONTROL_SOCKET_ENABLE
-/*@ observer @*/ static char *snarfline(char *p, /*@out@*/ char **out)
+static char *snarfline(char *p, char **out)
 /* copy the rest of the command line, before CR-LF */
 {
     char *q;
     static char stash[BUFSIZ];
 
-    /*@ -temptrans -mayaliasunique @*/
-    for (q = p; isprint((unsigned char) *p) && !isspace((unsigned char) *p) && /*@i@*/ (p - q < (ssize_t) sizeof(stash) - 1);
+    for (q = p; isprint((unsigned char) *p) && !isspace((unsigned char) *p) && (p - q < (ssize_t) sizeof(stash) - 1);
 	 p++)
 	continue;
     (void)memcpy(stash, q, (size_t) (p - q));
     stash[p - q] = '\0';
     *out = stash;
     return p;
-    /*@ +temptrans +mayaliasunique @*/
 }
 
 static void handle_control(int sfd, char *buf)
@@ -784,7 +766,6 @@ static void handle_control(int sfd, char *buf)
       * gpsdctl.c.  Be careful about keeping them in sync, or
       * hotplugging will have mysterious failures.
       */
-    /*@ -sefparams @*/
     if (buf[0] == '-') {
 	/* remove device named after - */
 	(void)snarfline(buf + 1, &stash);
@@ -916,7 +897,6 @@ static void handle_control(int sfd, char *buf)
 	/* unknown command */
 	ignore_return(write(sfd, "ERROR\n", 6));
     }
-    /*@ +sefparams @*/
 }
 #endif /* CONTROL_SOCKET_ENABLE */
 
@@ -1074,18 +1054,6 @@ static void handle_request(struct subscriber_t *sub,
     struct gps_device_t *devp;
     const char *end = NULL;
 
-    /*
-     * There's a splint limitation that parameters can be declared
-     * @out@ or @null@ but not, apparently, both.  This collides with
-     * the (admittedly tricky) way we use endptr. The workaround is to
-     * declare it @null@ and use -compdef around the JSON reader calls.
-     */
-    /*@-compdef@*/
-    /*
-     * See above...
-     */
-    /*@-nullderef -nullpass@*/
-
     if (buf[0] == '?')
 	++buf;
     if (str_starts_with(buf, "DEVICES;")) {
@@ -1098,9 +1066,7 @@ static void handle_request(struct subscriber_t *sub,
 	if (*buf == ';') {
 	    ++buf;
 	} else {
-	    /*@-nullstate@*/
 	    int status = json_watch_read(buf + 1, &sub->policy, &end);
-	    /*@+nullstate@*/
 #ifndef TIMING_ENABLE
 	    sub->policy.timing = false;
 #endif /* TIMING_ENABLE */
@@ -1166,10 +1132,8 @@ static void handle_request(struct subscriber_t *sub,
 	} else {
 #ifdef RECONFIGURE_ENABLE
 	    struct gps_device_t *device;
-	    /*@-nullstate@*/
 	    /* first, select a device to operate on */
 	    int status = json_device_read(buf + 1, &devconf, &end);
-	    /*@+nullstate@*/
 	    if (end == NULL)
 		buf += strlen(buf);
 	    else {
@@ -1178,7 +1142,6 @@ static void handle_request(struct subscriber_t *sub,
 		buf = end;
 	    }
 	    device = NULL;
-	    /*@-branchstate@*/
 	    if (status != 0) {
 		(void)snprintf(reply, replylen,
 			       "{\"class\":\"ERROR\",\"message\":\"Invalid DEVICE: \"%s\"}\r\n",
@@ -1268,7 +1231,6 @@ static void handle_request(struct subscriber_t *sub,
 			    device->gpsdata.dev.cycle = devconf.cycle;
 		}
 	    }
-	    /*@+branchstate@*/
 #else /* RECONFIGURE_ENABLE */
 	    str_appendf(reply, replylen,
 			   "{\"class\":\"ERROR\",\"message\":\"Device configuration support not compiled.\"}\r\n");
@@ -1352,8 +1314,6 @@ static void handle_request(struct subscriber_t *sub,
     }
   bailout:
     *after = buf;
-    /*@+nullderef +nullpass@*/
-    /*@+compdef@*/
 }
 
 static void raw_report(struct subscriber_t *sub, struct gps_device_t *device)
@@ -1527,7 +1487,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: No time this packet\n");
     } else if (isnan(device->newdata.time)) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: bad new time\n");
-#if defined(PPS_ENABLE) && !defined(S_SPLINT_S)
+#if defined(PPS_ENABLE)
     } else if (device->newdata.time <= device->pps_thread.fixin.real.tv_sec) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: Not a new time\n");
 #endif /* PPS_ENABLE */
@@ -1538,20 +1498,16 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	ntp_latch(device, &td);
 #ifdef NTPSHM_ENABLE
 	if (device->shm_clock != NULL) {
-	    /*@-compdef@*/
 	    (void)ntpshm_put(device, device->shm_clock, &td);
-	    /*@+compdef@*/
 	}
 #endif /* NTPSHM_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
-	/*@-type@*//* splint is confused about struct timespec */
 	notify_watchers(device, false, true,
 			"{\"class\":\"TOFF\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 			device->gpsdata.dev.path,
 			td.real.tv_sec, td.real.tv_nsec,
 			td.clock.tv_sec, td.clock.tv_nsec);
-	/*@+type@*/
 #endif /* SOCKET_EXPORT_ENABLE */
 
     }
@@ -1580,10 +1536,10 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 		    netgnss_report(&context, device, dgnss);
 	}
 #endif /* NETFEED_ENABLE */
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
+#if defined(DBUS_EXPORT_ENABLE)
 	if (device->gpsdata.fix.mode > MODE_NO_FIX)
 	    send_dbus_fix(device);
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
+#endif /* defined(DBUS_EXPORT_ENABLE) */
     }
 
 #ifdef SHM_EXPORT_ENABLE
@@ -1595,7 +1551,6 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #ifdef SOCKET_EXPORT_ENABLE
     /* update all subscribers associated with this device */
     for (sub = subscribers; sub < subscribers + MAX_CLIENTS; sub++) {
-	/*@-nullderef@*/
 	if (sub == NULL || sub->active == 0 || !subscribed(sub, device))
 	    continue;
 
@@ -1650,7 +1605,6 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 		}
 	    }
 	}
-	/*@+nullderef@*/
     } /* subscribers */
 #endif /* SOCKET_EXPORT_ENABLE */
 }
@@ -1709,22 +1663,18 @@ static void ship_pps_message(struct gps_device_t *session,
 	     * This read access should be safe - PPS threads
 	     * read fixin locations asynchronously but don't write them.
 	     */
-	    /*@-type@*//* splint is confused about struct timespec */
 	    tc = recent->pps_thread.fixin;
 	    tc.real.tv_sec += recent->gpsdata.dev.cycle;
 	    td = (struct timedelta_t *)&tc;	/* cast discards volatile */
-	    /*@-type@*/
 	} else
 	    return;
     }
 
-    /*@-type@*//* splint is confused about struct timespec */
     notify_watchers(session, true, true,
 		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
 		    td->real.tv_sec, td->real.tv_nsec,
 		    td->clock.tv_sec, td->clock.tv_nsec);
-    /*@+type@*/
 
     /*
      * PPS receipt resets the device's timeout.  This keeps PPS-only
@@ -1768,7 +1718,6 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 	sp->dist = DGPS_THRESHOLD;
 	sp->server[0] = '\0';
     }
-    /*@ -usedef @*/
     while (fgets(buf, (int)sizeof(buf), sfp)) {
 	char *cp = strchr(buf, '#');
 	if (cp != NULL)
@@ -1799,7 +1748,6 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 		 (int)(DGPS_THRESHOLD / 1000));
 	return;
     }
-    /*@ +usedef @*/
 
     /* sort them and try the closest first */
     qsort((void *)keep, SERVER_SAMPLE, sizeof(struct dgps_server_t), srvcmp);
@@ -1835,12 +1783,11 @@ static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
 #endif /* PPS_ENABLE */
 }
 
-/*@ -mustfreefresh @*/
 int main(int argc, char *argv[])
 {
     /* some of these statics suppress -W warnings due to longjmp() */
 #ifdef SOCKET_EXPORT_ENABLE
-    static char *gpsd_service = NULL;	/* this static pacifies splint */
+    static char *gpsd_service = NULL;
     struct subscriber_t *sub;
 #endif /* SOCKET_EXPORT_ENABLE */
     fd_set rfds;
@@ -1996,14 +1943,12 @@ int main(int argc, char *argv[])
 
 
     /* might be time to daemonize */
-    /*@-unrecog@*/
     if (go_background) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
 	if (daemon(0, 0) != 0)
 	    gpsd_log(&context.errout, LOG_ERROR,
 		     "demonization failed: %s\n",strerror(errno));
     }
-    /*@+unrecog@*/
 
     if (pid_file != NULL) {
 	FILE *fp;
@@ -2021,11 +1966,9 @@ int main(int argc, char *argv[])
     gpsd_log(&context.errout, LOG_INF, "launching (Version %s)\n", VERSION);
 
 #ifdef SOCKET_EXPORT_ENABLE
-    /*@ -observertrans @*/
     if (!gpsd_service)
 	gpsd_service =
 	    getservbyname("gpsd", "tcp") ? "gpsd" : DEFAULT_GPSD_PORT;
-    /*@ +observertrans @*/
     if (passivesocks(gpsd_service, "tcp", QLEN, msocks) < 1) {
 	gpsd_log(&context.errout, LOG_ERR,
 		 "command sockets creation failed, netlib errors %d, %d\n",
@@ -2054,7 +1997,7 @@ int main(int argc, char *argv[])
     (void)ntpshm_context_init(&context);
 #endif /* NTPSHM_ENABLE */
 
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
+#if defined(DBUS_EXPORT_ENABLE)
     /* we need to connect to dbus as root */
     if (initialize_dbus_connection()) {
 	/* the connection could not be started */
@@ -2063,7 +2006,7 @@ int main(int argc, char *argv[])
     } else
 	gpsd_log(&context.errout, LOG_PROG,
 		 "successfully connected to the DBUS system bus\n");
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
+#endif /* defined(DBUS_EXPORT_ENABLE) */
 
 #ifdef SHM_EXPORT_ENABLE
     /* create the shared segment as root so readers can't mess with it */
@@ -2102,13 +2045,10 @@ int main(int argc, char *argv[])
 	 * of any compromises in the code.  It requires that all GPS
 	 * devices have their group read/write permissions set.
 	 */
-	/*@-nullpass@*/
 	if (setgroups(0, NULL) != 0)
 	    gpsd_log(&context.errout, LOG_ERROR,
 		     "setgroups() failed, errno %s\n",
 		     strerror(errno));
-	/*@+nullpass@*/
-	/*@-type@*/
 #ifdef GPSD_GROUP
 	{
 	    struct group *grp = getgrnam(GPSD_GROUP);
@@ -2135,7 +2075,6 @@ int main(int argc, char *argv[])
 		gpsd_log(&context.errout, LOG_ERROR,
 			    "setuid() failed, errno %s\n",
 			    strerror(errno));
-	/*@+type@*/
     }
     gpsd_log(&context.errout, LOG_INF,
 	     "running with effective group ID %d\n", getegid());
@@ -2145,13 +2084,10 @@ int main(int argc, char *argv[])
 #ifdef SOCKET_EXPORT_ENABLE
     for (i = 0; i < NITEMS(subscribers); i++) {
 	subscribers[i].fd = UNALLOCATED_FD;
-#ifndef S_SPLINT_S
 	(void)pthread_mutex_init(&subscribers[i].mutex, NULL);
-#endif /* S_SPLINT_S */
     }
 #endif /* SOCKET_EXPORT_ENABLE*/
 
-    /*@-compdef -compdestroy@*/
     {
 	struct sigaction sa;
 
@@ -2172,7 +2108,6 @@ int main(int argc, char *argv[])
 	(void)sigaction(SIGQUIT, &sa, NULL);
 	(void)signal(SIGPIPE, SIG_IGN);
     }
-    /*@+compdef +compdestroy@*/
 
     /* daemon got termination or interrupt signal */
     if (setjmp(restartbuf) > 0) {
@@ -2232,10 +2167,8 @@ int main(int argc, char *argv[])
 	for (i = 0; i < AFCOUNT; i++) {
 	    if (msocks[i] >= 0 && FD_ISSET(msocks[i], &rfds)) {
 		socklen_t alen = (socklen_t) sizeof(fsin);
-		/*@+matchanyintegral@*/
 		socket_t ssock =
 		    accept(msocks[i], (struct sockaddr *)&fsin, &alen);
-		/*@+matchanyintegral@*/
 
 		if (BAD_SOCKET(ssock))
 		    gpsd_log(&context.errout, LOG_ERROR,
@@ -2287,9 +2220,7 @@ int main(int argc, char *argv[])
 	/* also be open to new control-socket connections */
 	if (csock > -1 && FD_ISSET(csock, &rfds)) {
 	    socklen_t alen = (socklen_t) sizeof(fsin);
-	    /*@+matchanyintegral@*/
 	    socket_t ssock = accept(csock, (struct sockaddr *)&fsin, &alen);
-	    /*@-matchanyintegral@*/
 
 	    if (BAD_SOCKET(ssock))
 		gpsd_log(&context.errout, LOG_ERROR,
@@ -2534,4 +2465,3 @@ shutdown:
     return 0;
 }
 
-/*@ +mustfreefresh @*/

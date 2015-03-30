@@ -30,23 +30,19 @@ PERMISSIONS
 #include "gpsd.h"
 #include "libgps.h"
 
-/*@-matchfields@*/
 struct privdata_t
 {
     void *shmseg;
     int tick;
 };
-/*@+matchfields@*/
 
 
-int gps_shm_open(/*@out@*/struct gps_data_t *gpsdata)
+int gps_shm_open(struct gps_data_t *gpsdata)
 /* open a shared-memory connection to the daemon */
 {
     int shmid;
 
-    /*@-nullpass@*/
     long shmkey = getenv("GPSD_SHM_KEY") ? strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : GPSD_SHM_KEY;
-    /*@+nullpass@*/
 
     libgps_debug_trace((DEBUG_CALLS, "gps_shm_open()\n"));
 
@@ -101,7 +97,6 @@ bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
 int gps_shm_read(struct gps_data_t *gpsdata)
 /* read an update from the shared-memory segment */
 {
-    /*@ -compdestroy */
     if (gpsdata->privdata == NULL)
 	return -1;
     else
@@ -136,7 +131,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	    (void)memcpy((void *)gpsdata,
 			 (void *)&noclobber,
 			 sizeof(struct gps_data_t));
-	    /*@i1@*/gpsdata->privdata = private_save;
+	    gpsdata->privdata = private_save;
 	    PRIVATE(gpsdata)->tick = after;
 	    if ((gpsdata->set & REPORT_IS)!=0) {
 		if (gpsdata->fix.mode >= 2)
@@ -148,7 +143,6 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	    return (int)sizeof(struct gps_data_t);
 	}
     }
-    /*@ +compdestroy */
 }
 
 void gps_shm_close(struct gps_data_t *gpsdata)

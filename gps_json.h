@@ -16,31 +16,31 @@ extern "C" {
 void json_data_report(const gps_mask_t,
 		      const struct gps_device_t *,
 		      const struct policy_t *,
-		      /*@out@*/char *, size_t);
-char *json_stringify(/*@out@*/char *, size_t, /*@in@*/const char *);
+		      char *, size_t);
+char *json_stringify(char *, size_t, const char *);
 void json_tpv_dump(const struct gps_device_t *,
-		   const struct policy_t *, /*@out@*/char *, size_t);
-void json_noise_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
-void json_sky_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
-void json_att_dump(const struct gps_data_t *, /*@out@*/char *, size_t);
-void json_subframe_dump(const struct gps_data_t *, /*@out@*/ char buf[], size_t);
-void json_device_dump(const struct gps_device_t *, /*@out@*/char *, size_t);
-void json_watch_dump(const struct policy_t *, /*@out@*/char *, size_t);
-int json_watch_read(const char *, /*@out@*/struct policy_t *,
-		    /*@null@*/const char **);
-int json_device_read(const char *, /*@out@*/struct devconfig_t *,
-		     /*@null@*/const char **);
-void json_version_dump(/*@out@*/char *, size_t);
-void json_aivdm_dump(const struct ais_t *, /*@null@*/const char *, bool,
-		     /*@out@*/char *, size_t);
+		   const struct policy_t *, char *, size_t);
+void json_noise_dump(const struct gps_data_t *, char *, size_t);
+void json_sky_dump(const struct gps_data_t *, char *, size_t);
+void json_att_dump(const struct gps_data_t *, char *, size_t);
+void json_subframe_dump(const struct gps_data_t *, char buf[], size_t);
+void json_device_dump(const struct gps_device_t *, char *, size_t);
+void json_watch_dump(const struct policy_t *, char *, size_t);
+int json_watch_read(const char *, struct policy_t *,
+		    const char **);
+int json_device_read(const char *, struct devconfig_t *,
+		     const char **);
+void json_version_dump(char *, size_t);
+void json_aivdm_dump(const struct ais_t *, const char *, bool,
+		     char *, size_t);
 int json_rtcm2_read(const char *, char *, size_t, struct rtcm2_t *,
-		    /*@null@*/const char **);
+		    const char **);
 int json_rtcm3_read(const char *, char *, size_t, struct rtcm3_t *,
-		    /*@null@*/const char **);
+		    const char **);
 int json_ais_read(const char *, char *, size_t, struct ais_t *,
-		  /*@null@*/const char **);
+		  const char **);
 int libgps_json_unpack(const char *, struct gps_data_t *,
-		       /*@null@*/const char **);
+		       const char **);
 #ifdef __cplusplus
 }
 #endif

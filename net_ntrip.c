@@ -11,13 +11,11 @@
 #include <fcntl.h>
 #include <math.h>
 #include <strings.h>
-#ifndef S_SPLINT_S
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "strfuncs.h"
@@ -32,11 +30,10 @@
 #define NTRIP_ICY		"ICY 200 OK"
 #define NTRIP_UNAUTH		"401 Unauthorized"
 
-/*@ -temptrans -mustfreefresh @*/
-static /*@null@*/ char *ntrip_field_iterate( /*@null@ */ char *start,
-					     /*@null@*/ char *prev,
-					     const char *eol,
-					     const struct gpsd_errout_t *errout)
+static char *ntrip_field_iterate(char *start,
+				 char *prev,
+				 const char *eol,
+				 const struct gpsd_errout_t *errout)
 {
     char *s, *t, *u;
 
@@ -63,11 +60,9 @@ static /*@null@*/ char *ntrip_field_iterate( /*@null@ */ char *start,
     return s;
 }
 
-/*@ +temptrans +mustfreefresh @*/
 
-/*@ -mustfreefresh @*/
 static void ntrip_str_parse(char *str, size_t len,
-			    /*@out@*/ struct ntrip_stream_t *hold,
+			    struct ntrip_stream_t *hold,
 			    const struct gpsd_errout_t *errout)
 {
     char *s, *eol = str + len;
@@ -337,9 +332,9 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream,
 }
 
 static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
-	const char *auth,
-	/*@out@*/ char buf[],
-	size_t size)
+			     const char *auth,
+			     char buf[],
+			     size_t size)
 {
     memset(buf, 0, size);
     if (stream->authentication == auth_none)
@@ -401,7 +396,6 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream,
 				  const int dsock, 
 				  const struct gpsd_errout_t *errout)
 {
-/*@-nullpass@*/
     char buf[BUFSIZ];
     int opts;
     memset(buf, 0, sizeof(buf));
@@ -445,10 +439,8 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream,
 close:
     (void)close(dsock);
     return -1;
-/*@+nullpass@*/
 }
 
-/*@ -branchstate -nullpass @*/
 int ntrip_open(struct gps_device_t *device, char *caster)
     /* open a connection to a Ntrip broadcaster */
 {
@@ -470,7 +462,6 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 	    device->ntrip.stream.set = false;
 	    (void)strlcpy(tmp, caster, sizeof(t));
 
-	    /*@ -boolops @*/
 	    if ((amp = strchr(tmp, '@')) != NULL) {
 		if (((colon = strchr(tmp, ':')) != NULL) && colon < amp) {
 		    auth = tmp;
@@ -485,7 +476,6 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		    return -1;
 		}
 	    }
-	    /*@ +boolops @*/
 	    if ((slash = strchr(tmp, '/')) != NULL) {
 		*slash = '\0';
 		stream = slash + 1;
@@ -576,7 +566,6 @@ int ntrip_open(struct gps_device_t *device, char *caster)
     }
     return ret;
 }
-/*@ +branchstate +nullpass @*/
 
 void ntrip_report(struct gps_context_t *context,
 		  struct gps_device_t *gps,

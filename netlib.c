@@ -4,7 +4,6 @@
  */
 #include <string.h>
 #include <fcntl.h>
-#ifndef S_SPLINT_S
 #include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/types.h>
@@ -18,12 +17,10 @@
 #include <arpa/inet.h>     /* for htons() and friends */
 #include <unistd.h>
 #include <netinet/ip.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "sockaddr.h"
 
-/*@-mustfreefresh -usedef@*/
 socket_t netlib_connectsock(int af, const char *host, const char *service,
 			    const char *protocol)
 {
@@ -35,7 +32,6 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     bool bind_me;
 
     INVALIDATE_SOCKET(s);
-    /*@-type@*/
     ppe = getprotobyname(protocol);
     if (strcmp(protocol, "udp") == 0) {
 	type = SOCK_DGRAM;
@@ -44,7 +40,6 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	type = SOCK_STREAM;
 	proto = (ppe) ? ppe->p_proto : IPPROTO_TCP;
     }
-    /*@+type@*/
 
     /* we probably ought to pass this in as an explicit flag argument */
     bind_me = (type == SOCK_DGRAM);
@@ -53,13 +48,11 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     hints.ai_family = af;
     hints.ai_socktype = type;
     hints.ai_protocol = proto;
-#ifndef S_SPLINT_S
     if (bind_me)
 	hints.ai_flags = AI_PASSIVE;
     if ((ret = getaddrinfo(host, service, &hints, &result))) {
 	return NL_NOHOST;
     }
-#endif /* S_SPLINT_S */
 
     /*
      * From getaddrinfo(3):
@@ -71,7 +64,6 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
      *     IPv4 addresses.
      * Thus, with the default parameters, we get IPv6 addresses first.
      */
-    /*@-type@*/
     for (rp = result; rp != NULL; rp = rp->ai_next) {
 	ret = NL_NOCONNECT;
 	if ((s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) < 0)
@@ -98,22 +90,17 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
 	    (void)close(s);
 	}
     }
-    /*@+type@*/
-#ifndef S_SPLINT_S
     freeaddrinfo(result);
-#endif /* S_SPLINT_S */
     if (ret != 0 || BAD_SOCKET(s))
 	return ret;
 
 #ifdef IPTOS_LOWDELAY
     {
 	int opt = IPTOS_LOWDELAY;
-	/*@ -unrecog @*/
 	(void)setsockopt(s, IPPROTO_IP, IP_TOS, &opt, sizeof(opt));
 #ifdef IPV6_TCLASS
 	(void)setsockopt(s, IPPROTO_IPV6, IPV6_TCLASS, &opt, sizeof(opt));
 #endif
-	/*@ +unrecog @*/
     }
 #endif
 #ifdef TCP_NODELAY
@@ -132,12 +119,10 @@ socket_t netlib_connectsock(int af, const char *host, const char *service,
     (void)fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
 
     return s;
-    /*@ +type +mustfreefresh @*/
 }
 
-/*@+mustfreefresh +usedef@*/
 
-const char /*@observer@*/ *netlib_errstr(const int err)
+const char *netlib_errstr(const int err)
 {
     switch (err) {
     case NL_NOSERVICE:
@@ -173,12 +158,10 @@ socket_t netlib_localsocket(const char *sockfile, int socktype)
 		      sockfile,
 		      sizeof(saddr.sun_path));
 
-	/*@-unrecog@*/
 	if (connect(sock, (struct sockaddr *)&saddr, SUN_LEN(&saddr)) < 0) {
 	    (void)close(sock);
 	    return -2;
 	}
-	/*@+unrecog@*/
 
 	return sock;
     }
@@ -193,7 +176,6 @@ char *netlib_sock2ip(socket_t fd)
     int r;
 
     r = getpeername(fd, &(fsin.sa), &alen);
-    /*@ -branchstate -unrecog +boolint @*/
     if (r == 0) {
 	switch (fsin.sa.sa_family) {
 	case AF_INET:
@@ -214,6 +196,5 @@ char *netlib_sock2ip(socket_t fd)
     if (r != 0) {
 	(void)strlcpy(ip, "<unknown>", sizeof(ip));
     }
-    /*@ +branchstate +unrecog -boolint @*/
     return ip;
 }

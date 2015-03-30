@@ -11,16 +11,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
 #include <sys/socket.h>
-#endif /* S_SPLINT_S */
 #include <sys/param.h>	/* defines BSD */
 
 #include "gpsd_config.h"
-#ifdef S_SPLINT_S
-#undef ENABLE_BLUEZ
-#endif /* S_SPLINT_S */
 #ifdef ENABLE_BLUEZ
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
@@ -244,9 +239,7 @@ int gpsd_get_stopbits(const struct gps_device_t *dev)
 
 bool gpsd_set_raw(struct gps_device_t * session)
 {
-#ifndef S_SPLINT_S
     (void)cfmakeraw(&session->ttyset);
-#endif /* S_SPLINT_S */
     if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) == -1) {
 	gpsd_log(&session->context->errout, LOG_ERROR,
 		 "error changing port attributes: %s\n", strerror(errno));
@@ -303,12 +296,10 @@ void gpsd_set_speed(struct gps_device_t *session,
 	 * get packet lock within 1.5 seconds.  Alas, the BSDs and OS X
 	 * aren't so nice.
 	 */
-	/*@ignore@*/
 	if (rate != B0) {
 	    (void)cfsetispeed(&session->ttyset, rate);
 	    (void)cfsetospeed(&session->ttyset, rate);
 	}
-	/*@end@*/
 	session->ttyset.c_iflag &= ~(PARMRK | INPCK);
 	session->ttyset.c_cflag &= ~(CSIZE | CSTOPB | PARENB | PARODD);
 	session->ttyset.c_cflag |= (stopbits == 2 ? CS7 | CSTOPB : CS8);
@@ -428,7 +419,6 @@ int gpsd_serial_open(struct gps_device_t *session)
 	return PLACEHOLDING_FD;
     }
 
-    /*@ -boolops -type @*/
     if (session->context->readonly
 	|| (session->sourcetype <= source_blockdev)) {
 	mode = (mode_t) O_RDONLY;
@@ -440,7 +430,6 @@ int gpsd_serial_open(struct gps_device_t *session)
 		 "opening GPS data source type %d at '%s'\n",
 		 (int)session->sourcetype, session->gpsdata.dev.path);
     }
-    /*@ +boolops +type @*/
 #ifdef ENABLE_BLUEZ
     if (bachk(session->gpsdata.dev.path) == 0) {
         struct sockaddr_rc addr = { 0, *BDADDR_ANY, 0};
@@ -536,8 +525,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 #endif
 
     if (session->saved_baud != -1) {
-	/*@i@*/(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
-	/*@i@*/(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
+	(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
+	(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
@@ -549,10 +538,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 	    return UNALLOCATED_FD;
 	(void)memcpy(&session->ttyset,
 		     &session->ttyset_old, sizeof(session->ttyset));
-	/*@ ignore @*/
 	memset(session->ttyset.c_cc, 0, sizeof(session->ttyset.c_cc));
 	//session->ttyset.c_cc[VTIME] = 1;
-	/*@ end @*/
 	/*
 	 * Tip from Chris Kuethe: the FIDI chip used in the Trip-Nav
 	 * 200 (and possibly other USB GPSes) gets completely hosed
@@ -709,10 +696,8 @@ void gpsd_close(struct gps_device_t *session)
 	(void)tcdrain(session->gpsdata.gps_fd);
 	if (isatty(session->gpsdata.gps_fd) != 0) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
-	    /*@ ignore @*/
 	    (void)cfsetispeed(&session->ttyset, (speed_t) B0);
 	    (void)cfsetospeed(&session->ttyset, (speed_t) B0);
-	    /*@ end @*/
 	    (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
 			    &session->ttyset);
 	}
@@ -729,12 +714,10 @@ void gpsd_close(struct gps_device_t *session)
 	     * If we revert, keep the most recent baud rate.
 	     * Cuts down on autobaud overhead the next time.
 	     */
-	    /*@ ignore @*/
 	    (void)cfsetispeed(&session->ttyset_old,
 			      (speed_t) session->gpsdata.dev.baudrate);
 	    (void)cfsetospeed(&session->ttyset_old,
 			      (speed_t) session->gpsdata.dev.baudrate);
-	    /*@ end @*/
 	    (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
 			    &session->ttyset_old);
 	}

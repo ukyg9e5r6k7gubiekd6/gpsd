@@ -946,10 +946,8 @@ def generate(spec):
     # to make a separate parse control initializer for each one.  The
     # attribute name is the name of the array; substructure and length
     # fieldnames must be given in the defaults part.
-    pacify_splint = False
     for (attr, itype, arrayparts) in spec["fieldmap"]:
         if itype == 'array':
-            pacify_splint = True
             (innerstruct, lengthfield, elements) = arrayparts
             report += "    const struct json_attr_t %s_%s_subtype[] = {\n" % (initname, attr)
             for (subattr, subitype, default) in elements:
@@ -968,8 +966,6 @@ def generate(spec):
 """
     # Generate the main structure definition describing this parse.
     # It may have object subarrays.
-    if pacify_splint:
-        report += "/*@-type@*//* STRUCTARRAY confuses splint */\n"
     report += "    const struct json_attr_t %s[] = {\n" % initname
     if "headers" in spec:
         for header in spec["headers"]:
@@ -1003,8 +999,6 @@ def generate(spec):
         {NULL}
     };
 """
-    if pacify_splint:
-        report += "/*@+type@*/\n"
     print report
 
 if __name__ == '__main__':

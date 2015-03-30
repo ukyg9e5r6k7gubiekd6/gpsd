@@ -8,8 +8,7 @@
 
 #include "matrix.h"
 
-/*@ -fixedformalarray -mustdefine @*/
-bool matrix_invert(double mat[4][4], /*@out@*/ double inverse[4][4])
+bool matrix_invert(double mat[4][4], double inverse[4][4])
 /* selected elements from 4x4 matrox inversion */
 {
     // Find all NECESSARY 2x2 subdeterminants
@@ -98,11 +97,10 @@ bool matrix_invert(double mat[4][4], /*@out@*/ double inverse[4][4])
 
     return true;
 }
-/*@ +fixedformalarray +mustdefine @*/
 
 #ifdef __UNUSED_
 // cppcheck-suppress unusedFunction
-void matrix_symmetrize(double mat[4][4], /*@out@*/ double prod[4][4])
+void matrix_symmetrize(double mat[4][4], double prod[4][4])
 /* symmetrize a matrix, multiply it by its transpose */
 {
     int i, j, k;

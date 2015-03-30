@@ -25,21 +25,19 @@ uint64_t ubits(unsigned char buf[], unsigned int start, unsigned int width, bool
     unsigned int i;
     unsigned end;
 
-    /*@i1@*/ assert(width <= sizeof(uint64_t) * CHAR_BIT);
+    assert(width <= sizeof(uint64_t) * CHAR_BIT);
     for (i = start / CHAR_BIT;
 	 i < (start + width + CHAR_BIT - 1) / CHAR_BIT; i++) {
-	/*@i1@*/ fld <<= CHAR_BIT;
+	fld <<= CHAR_BIT;
 	fld |= (unsigned char)buf[i];
     }
 
     end = (start + width) % CHAR_BIT;
     if (end != 0) {
-	/*@i1@*/ fld >>= (CHAR_BIT - end);
+	fld >>= (CHAR_BIT - end);
     }
 
-    /*@ -shiftimplementation @*/
     fld &= ~(-1LL << width);
-    /*@ +shiftimplementation @*/
 
     /* was extraction as a little-endian requested? */
     if (le)
@@ -69,14 +67,10 @@ int64_t sbits(signed char buf[], unsigned int start, unsigned int width, bool le
        is undefined for width <= 0 */
     assert(width > 0);
 
-    /*@ +relaxtypes */
     if (fld & (1LL << (width - 1))) {
-	/*@ -shiftimplementation @*/
 	fld |= (-1LL << (width - 1));
-	/*@ +shiftimplementation @*/
     }
     return (int64_t)fld;
-    /*@ -relaxtypes */
 }
 
 union int_float {
@@ -126,15 +120,12 @@ void putbef32(char *buf, int off, float val)
     union int_float i_f;
 
     i_f.f = val;
-    /*@-shiftimplementation +ignoresigns@*/
     putbe32(buf, off, i_f.i);
-    /*@+shiftimplementation -ignoresigns@*/
 }
 
 
 void shiftleft(unsigned char *data, int size, unsigned short left)
 {
-    /*@+matchanyintegral +ignoresigns -type -shiftnegative@*/
     unsigned char *byte;
 
     if (left >= CHAR_BIT) {
@@ -153,7 +144,6 @@ void shiftleft(unsigned char *data, int size, unsigned short left)
       *byte <<= left;
       *byte |= bits;
     }
-    /*@-matchanyintegral -ignoresigns +type +shiftnegative@*/
 }
 
 #ifdef __UNUSED__
@@ -162,10 +152,8 @@ void putbed64(char *buf, int off, double val)
     union long_double l_d;
 
     l_d.d = val;
-    /*@-shiftimplementation +ignoresigns@*/
     putbe32(buf, (off), (l_d.l) >> 32);
     putbe32(buf, (off)+4, (l_d.l));
-    /*@+shiftimplementation -ignoresigns@*/
 }
 
 u_int16_t swap_u16(u_int16_t i)

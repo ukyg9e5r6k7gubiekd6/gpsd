@@ -17,9 +17,9 @@
 #include "gpsdclient.h"
 
 static struct exportmethod_t exportmethods[] = {
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
+#if defined(DBUS_EXPORT_ENABLE)
     {"dbus", GPSD_DBUS_EXPORT, "DBUS broadcast"},
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
+#endif /* defined(DBUS_EXPORT_ENABLE) */
 #ifdef SHM_EXPORT_ENABLE
     {"shm", GPSD_SHARED_MEMORY, "shared memory"},
 #endif /* SOCKET_EXPORT_ENABLE */
@@ -36,7 +36,7 @@ static struct exportmethod_t exportmethods[] = {
  *      deg_ddmmss : return DD MM' SS.sss"
  *
  */
-/*@observer@*/ char *deg_to_str(enum deg_str_type type, double f)
+char *deg_to_str(enum deg_str_type type, double f)
 {
     static char str[40];
     int dsec, sec, deg, min;
@@ -134,7 +134,6 @@ enum unit gpsd_units(void)
     return unspecified;
 }
 
-/*@ -observertrans -statictrans -mustfreeonly -branchstate -kepttrans @*/
 void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 /* standard parsing of a GPS data source spec */
 {
@@ -143,7 +142,6 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
     source->port = (char *)DEFAULT_GPSD_PORT;
     source->device = NULL;
 
-    /*@-usedef@ Sigh, splint is buggy */
     if (arg != NULL) {
 	char *colon1, *skipto, *rbrk;
 	source->spec = strdup(arg);
@@ -174,18 +172,14 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 	}
     }
 
-    /*@-modobserver@*/
     if (*source->server == '[') {
 	char *rbrk = strchr(source->server, ']');
 	++source->server;
 	if (rbrk != NULL)
 	    *rbrk = '\0';
     }
-    /*@+modobserver@*/
-    /*@+usedef@*/
 }
 
-/*@ +observertrans -statictrans +mustfreeonly +branchstate +kepttrans @*/
 
 char *maidenhead(double n, double e)
 /* lat/lon to Maidenhead */
@@ -234,10 +228,9 @@ char *maidenhead(double n, double e)
 
 #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0])) /* from gpsd.h-tail */
 
-/*@null observer@*/struct exportmethod_t *export_lookup(const char *name)
+struct exportmethod_t *export_lookup(const char *name)
 /* Look up an available export method by name */
 {
-    /*@-globstate@*/
     struct exportmethod_t *mp, *method = NULL;
 
     for (mp = exportmethods;
@@ -246,7 +239,6 @@ char *maidenhead(double n, double e)
 	if (strcmp(mp->name, name) == 0)
 	    method = mp;
     return method;
-    /*@+globstate@*/
 }
 
 void export_list(FILE *fp)
@@ -260,7 +252,7 @@ void export_list(FILE *fp)
 	(void)fprintf(fp, "%s: %s\n", method->name, method->description);
 }
 
-/*@null observer@*/struct exportmethod_t *export_default(void)
+struct exportmethod_t *export_default(void)
 {
     return (NITEMS(exportmethods) > 0) ? &exportmethods[0] : NULL;
 }
@@ -285,7 +277,6 @@ void export_list(FILE *fp)
 float true2magnetic(double lat, double lon, double heading)
 {
     /* Western Europe */
-    /*@ -evalorder +relaxtypes @*/
     if ((lat > 36.0) && (lat < 68.0) && (lon > -10.0) && (lon < 28.0)) {
 	heading =
 	    (10.4768771667158 - (0.507385322418858 * lon) +
@@ -330,7 +321,6 @@ float true2magnetic(double lat, double lon, double heading)
 	heading += 360.0;
 
     return (heading);
-    /*@ +evalorder -relaxtypes @*/
 }
 
 /* gpsclient.c ends here */

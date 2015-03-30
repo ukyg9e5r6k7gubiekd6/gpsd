@@ -5,9 +5,7 @@
 
 #include <limits.h>
 #include <stdlib.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif
 
 #include "sd_socket.h"
 

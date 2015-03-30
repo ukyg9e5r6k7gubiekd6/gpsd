@@ -351,12 +351,6 @@ go through the following checklist:</p>
     include the test changes in your patch, and (c) <b>explain
     in detail why the regression broke</b> in your change comment.</li>
 
-<li>Check that the patched code displays no warnings when you run '<code>scons
-    splint</code>' (see <a href="http://www.splint.org">the Splint
-    website</a> for further description of this tool if you don't
-    already know about it). Yes, tweaking your code to be splint-clean is
-    a pain in the ass.  Experience shows it's worth it.</li>
-
 <li>After code changes that do anything to the storage handling, run
     valgrind-audit and look out for reports of memory leaks and other
     dynamic-allocation problems (see <a href="http://valgrind.org">the
@@ -368,11 +362,6 @@ go through the following checklist:</p>
 on these to catch damaging side-effects of seemingly innocent but
 ill-thought-out changes, and to nail problems before they become
 user-visible.</p>
-
-<p>The reason we use splint is twofold: (1) it's good at catching
-static buffer overruns, and (2) <code>gpsd</code> does a lot of
-low-level bit-bashing that can be sensitive to 32-vs.-64-bit
-problems. Getting the code splint-clean tends to prevent these.</p>
 
 <p>If you are contributing a driver for a new GPS, please also do the
 following things:</p>
@@ -489,8 +478,7 @@ that type specifiers will default to int.</p>
 <p>You are allowed, but not required, to use C99 // comments.</p>
 
 <p>Though C99 allows it, do not intermix declarations with executable
-statements within a block, because that gives one of our code checkers
-the screaming fantods (splint dies with an internal error).  Do,
+statements within a block, that's too hard to read.  Do,
 however, declare variables at the front of the <em>smallest</em> enclosing
 block.</p>
 
@@ -545,8 +533,8 @@ is easier.<p>
 <ol>
 <li><p>Use asserts sparingly.</p></li>
 
-<li><p>One valid use is to pass hints to splint and other analyzers. This
-sort of assert should be guarded with #ifdef S_SPLINT_S or #ifdef
+<li><p>One valid use is to pass hints to sratic analyzers. This
+sort of assert should be guarded with, e.g., #ifdef
 __COVERITY_ so we get the benefit of asserting the invariant without
 the risk of the assertion failing in production.</p></li>
 
@@ -1119,7 +1107,7 @@ done.</p>
 
 <h2 id="newstyle">Points for style</h2>
 
-<p>Audit your code with splint and cppcheck (there are productions in
+<p>Audit your code with cppcheck and scan-build (there are productions in
 the SConstruct file).  Patches that are not just clean but properly
 annotated for static checking will give the maintainers warm
 fuzzy feelings and go right to the front of the queue.</p>

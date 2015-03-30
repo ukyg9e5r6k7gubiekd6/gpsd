@@ -13,9 +13,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #if defined(ITRAX_ENABLE) && defined(BINARY_ENABLE)
@@ -259,7 +257,6 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 						 (unsigned short int)getleu16((char *)buf, 7 + 8),
 	(unsigned int)getleu32(buf, 7 + 38) / 1000.0);
 
-    /*@-type@*/
     for (i = 0; i < n; i++){
 	session->gpsdata.skyview[i].PRN = getleu16(buf, 7 + 26 + (i*36)) & 0xff;
 	session->gpsdata.skyview[i].ss = getleu16(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
@@ -272,11 +269,9 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 	session->gpsdata.raw.codephase[i] = NAN;
 	session->gpsdata.raw.deltarange[i] = NAN;
     }
-    /*@+type@*/
     return RAW_IS;
 }
 
-/*@ +charint @*/
 static gps_mask_t italk_parse(struct gps_device_t *session,
 			      unsigned char *buf, size_t len)
 {
@@ -383,7 +378,6 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
     return mask | ONLINE_SET;
 }
 
-/*@ -charint @*/
 
 static gps_mask_t italk_parse_input(struct gps_device_t *session)
 {

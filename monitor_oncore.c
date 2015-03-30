@@ -75,10 +75,8 @@ static const char *pos_hold_mode[] = {
 
 static bool oncore_initialize(void)
 {
-    /*@-globstate@*/
     unsigned int i;
 
-    /*@ -onlytrans @*/
     Ea1win = subwin(devicewin, 5, 80, 1, 0);
     Eawin = subwin(devicewin, MAXTRACKSATS + 3, 27, 6, 0);
     Bbwin = subwin(devicewin, MAXVISSATS + 3, 22, 6, 28);
@@ -87,7 +85,6 @@ static bool oncore_initialize(void)
     Aywin = subwin(devicewin, 4, 15, 17, 12);
     Atwin = subwin(devicewin, 5, 9, 16, 51);
     Aswin = subwin(devicewin, 5, 19, 16, 61);
-    /*@ +onlytrans @*/
 
     if (Ea1win == NULL || Eawin == NULL || Bbwin == NULL || Enwin == NULL
 	|| Bowin == NULL || Aswin == NULL || Atwin == NULL || Aywin == NULL)
@@ -173,7 +170,6 @@ static bool oncore_initialize(void)
     memset(EaSVlines, 0, sizeof(EaSVlines));
 
     return true;
-    /*@+globstate@*/
 }
 
 static void oncore_update(void)
@@ -227,7 +223,6 @@ static void oncore_update(void)
 	(void)mvwprintw(Ea1win, 2, 70, "%5.1f", track);
 	(void)mvwprintw(Ea1win, 3, 68, "%8.2f m", alt);
 
-	/*@ -predboolothers @*/
 	(void)snprintf(statusbuf, sizeof(statusbuf), "%s%s%s%s%s%s%s%s%s",
 		       (status & 0x80) ? "PProp " : "",
 		       (status & 0x40) ? "PoorGeom " : "",
@@ -238,16 +233,13 @@ static void oncore_update(void)
 		       (status & 0x02) ? "Ins (<3 SV) " : "",
 		       (status & 0x01) ? "BadAlm " : "",
 		       (dopt   & 0x20) ? "survey " : "");
-	/*@ +predboolothers @*/
 
 	(void)mvwprintw(Ea1win, 3, 24, "%-37s", statusbuf);
 
 	(void)mvwprintw(Ea1win, 2, 10, "%-10s", antenna[dopt >> 6]);
 
-	/*@ -predboolothers @*/
 	(void)mvwprintw(Ea1win, 2, 27, "%s %4.1f",
 			(dopt & 1) ? "hdop" : "pdop", dop);
-	/*@ +predboolothers @*/
 
 	(void)mvwprintw(Ea1win, 3, 10, "%d/%d ", nsat, nvis);
     }
@@ -268,7 +260,6 @@ static void oncore_update(void)
 	    else
 		(void)wprintw(Eawin, "    -");
 	    (void)wprintw(Eawin, " %3d", sn);
-	    /*@ -predboolothers @*/
 	    (void)wprintw(Eawin, " %c%c%c%c%c%c%c%c", (status & 0x80) ? 'p' : ' ',	/* used for pos fix  */
 			  (status & 0x40) ? 'M' : ' ',	/* momentum alert    */
 			  (status & 0x20) ? 's' : ' ',	/* anti-spoof   */
@@ -277,7 +268,6 @@ static void oncore_update(void)
 			  (status & 0x04) ? 'S' : ' ',	/* spare             */
 			  (status & 0x02) ? 't' : ' ',	/* used for time sol */
 			  (status & 0x01) ? 'P' : ' ');	/* parity error      */
-	    /*@ +predboolothers @*/
 	}
 
 	monitor_log("Ea =");
@@ -303,13 +293,11 @@ static void oncore_update(void)
 	    unsigned int j;
 	    off = 5 + 7 * i;
 	    sv = (unsigned char)getub(buf, off);
-	    /*@ -boolops @*/
 	    for (j = 0; j < 8; j++)
 		if (EaSVlines[j] == sv && !(Bblines_mask & (1 << (j + 2)))) {
 		    Bblines[i] = j + 2;
 		    Bblines_mask |= 1 << Bblines[i];
 		}
-	    /*@ +boolops @*/
 	}
 	/* SVs not seen in Ea fill lines left over. */
 	next_line = 2;
@@ -338,12 +326,10 @@ static void oncore_update(void)
 	}
 
 	for (i = 2; i < 14; i++)
-	    /*@ -boolops @*/
 	    if (!(Bblines_mask & (1 << i))) {
 		(void)wmove(Bbwin, (int)i, 1);
 		(void)wprintw(Bbwin, "                   ");
 	    }
-	/*@ +boolops @*/
     }
 
 	monitor_log("Bb =");
@@ -363,7 +349,6 @@ static void oncore_update(void)
 	status = (unsigned char)getub(buf, 22);
 	sigma = (float)(getbeu16(buf, 23));
 
-	/*@ -predboolothers @*/
 	(void)mvwprintw(Enwin, 1, 24, "%3s", traim ? "on" : "off");
 	(void)mvwprintw(Enwin, 2, 18, "%6.1f us", alarm);
 	(void)mvwprintw(Enwin, 3, 13, "%14s", pps_ctrl[ctrl]);
@@ -372,7 +357,6 @@ static void oncore_update(void)
 	(void)mvwprintw(Enwin, 6, 20, "%7s", traim_sol[sol_stat]);
 	(void)mvwprintw(Enwin, 7, 11, "%16s", traim_status[status]);
 	(void)mvwprintw(Enwin, 8, 18, "%6.3f us", sigma * 0.001);
-	/*@ +predboolothers @*/
     }
 
 	monitor_log("En =");

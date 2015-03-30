@@ -41,7 +41,6 @@ double wgs84_separation(double lat, double lon)
 #define GEOID_ROW	19
 #define GEOID_COL	37
     /* *INDENT-OFF* */
-    /*@ +charint @*/
     const int geoid_delta[GEOID_COL*GEOID_ROW]={
 	/* 90S */ -30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30, -30,-30,-30,-30,-30,-30,-30,-30,-30,-30,-30,
 	/* 80S */ -53,-54,-55,-52,-48,-42,-38,-38,-29,-26,-26,-24,-23,-21,-19,-16,-12, -8, -4, -1,  1,  4,  4,  6,  5,  4,   2, -6,-15,-24,-33,-40,-48,-50,-53,-52,-53,
@@ -63,7 +62,6 @@ double wgs84_separation(double lat, double lon)
 	/* 80N */   3,  1, -2, -3, -3, -3, -1,  3,  1,  5,  9, 11, 19, 27, 31, 34, 33, 34, 33, 34, 28, 23, 17, 13,  9,  4,   4,  1, -2, -2,  0,  2,  3,  2,  1,  1,  3,
 	/* 90N */  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,  13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13
     };
-    /*@ -charint @*/
     /* *INDENT-ON* */
     int ilat, ilon;
     int ilat1, ilat2, ilon1, ilon2;
@@ -105,7 +103,6 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 
     /* geodetic location */
     lambda = atan2(y, x);
-    /*@ -evalorder @*/
     p = sqrt(pow(x, 2) + pow(y, 2));
     theta = atan2(z * a, p * b);
     phi =
@@ -127,7 +124,6 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 	vz * sin(phi);
     fix->speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
     heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
-    /*@ +evalorder @*/
     if (heading < 0)
 	heading += 2 * GPS_PI;
     fix->track = heading * RAD_2_DEG;

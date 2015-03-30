@@ -36,11 +36,10 @@
  * So 21 digits like this: "-2147483647.123456789"
  *
 */
-void timespec_str(const struct timespec *ts, /*@out@*/char *buf, size_t buf_size)
+void timespec_str(const struct timespec *ts, char *buf, size_t buf_size)
 {
     char sign = ' ';
 
-    /*@-type@*//* splint is confused about timespec*/
     if ( (0 > ts->tv_nsec ) || ( 0 > ts->tv_sec ) ) {
 	sign = '-';
     }
@@ -48,7 +47,6 @@ void timespec_str(const struct timespec *ts, /*@out@*/char *buf, size_t buf_size
 			  sign,
 			  (long)labs(ts->tv_sec),
 			  (long)labs(ts->tv_nsec));
-    /*@+type@*/
 }
 
 /* end */

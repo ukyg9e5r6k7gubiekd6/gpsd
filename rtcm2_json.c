@@ -27,7 +27,7 @@ PERMISSIONS
 
 int json_rtcm2_read(const char *buf,
 		    char *path, size_t pathlen, struct rtcm2_t *rtcm2,
-		    /*@null@*/ const char **endptr)
+		    const char **endptr)
 {
 
     static char *stringptrs[NITEMS(rtcm2->words)];
@@ -49,7 +49,6 @@ int json_rtcm2_read(const char *buf,
 
     int status = 0, satcount = 0;
 
-    /*@ -fullinitblock @*/
     const struct json_attr_t rtcm1_satellite[] = {
 	{"ident",     t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, ident)},
 	{"udre",      t_uinteger, STRUCTOBJECT(struct gps_rangesat_t, udre)},
@@ -58,14 +57,12 @@ int json_rtcm2_read(const char *buf,
 	{"rrc",       t_real,     STRUCTOBJECT(struct gps_rangesat_t, rrc)},
 	{NULL},
     };
-    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm1[] = {
 	RTCM2_HEADER
         {"satellites", t_array,	STRUCTARRAY(rtcm2->gps_ranges.sat,
 					    rtcm1_satellite, &satcount)},
 	{NULL},
     };
-    /*@+type@*/
 
     const struct json_attr_t json_rtcm3[] = {
 	RTCM2_HEADER
@@ -115,14 +112,12 @@ int json_rtcm2_read(const char *buf,
 	{"tou",         t_uinteger, STRUCTOBJECT(struct consat_t, tou)},
 	{NULL},
     };
-    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm5[] = {
 	RTCM2_HEADER
         {"satellites", t_array,	STRUCTARRAY(rtcm2->conhealth.sat,
 					    rtcm5_satellite, &satcount)},
 	{NULL},
     };
-    /*@+type@*/
 
     const struct json_attr_t json_rtcm6[] = {
 	RTCM2_HEADER
@@ -140,14 +135,12 @@ int json_rtcm2_read(const char *buf,
 	{"bitrate",     t_uinteger, STRUCTOBJECT(struct station_t, bitrate)},
 	{NULL},
     };
-    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm7[] = {
 	RTCM2_HEADER
         {"satellites", t_array,	STRUCTARRAY(rtcm2->almanac.station,
 					    rtcm7_satellite, &satcount)},
 	{NULL},
     };
-    /*@+type@*/
 
     const struct json_attr_t json_rtcm13[] = {
 	RTCM2_HEADER
@@ -185,16 +178,13 @@ int json_rtcm2_read(const char *buf,
 	{"rrc",       t_real,     STRUCTOBJECT(struct glonass_rangesat_t, rrc)},
 	{NULL},
     };
-    /*@-type@*//* STRUCTARRAY confuses splint */
     const struct json_attr_t json_rtcm31[] = {
 	RTCM2_HEADER
         {"satellites", t_array,	STRUCTARRAY(rtcm2->glonass_ranges.sat,
 					    rtcm31_satellite, &satcount)},
 	{NULL},
     };
-    /*@+type@*/
 
-    /*@-type@*//* complex union array initislizations confuses splint */
     const struct json_attr_t json_rtcm2_fallback[] = {
 	RTCM2_HEADER
 	{"data",         t_array, .addr.array.element_type = t_string,
@@ -205,8 +195,6 @@ int json_rtcm2_read(const char *buf,
 	                             .addr.array.maxlen = NITEMS(stringptrs)},
 	{NULL},
     };
-    /*@+type@*/
-    /*@ +fullinitblock @*/
 
 #undef RTCM2_HEADER
 /* *INDENT-ON* */

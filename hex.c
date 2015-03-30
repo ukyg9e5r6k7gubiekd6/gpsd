@@ -8,9 +8,8 @@
 
 #include "gpsd.h"
 
-/*@-mustdefine@*/
-const char /*@ observer @*/ *gpsd_packetdump(char *scbuf, size_t scbuflen,
-					     char *binbuf, size_t binbuflen)
+const char *gpsd_packetdump(char *scbuf, size_t scbuflen,
+			    char *binbuf, size_t binbuflen)
 {
     char *cp;
     bool printable = true;
@@ -24,10 +23,8 @@ const char /*@ observer @*/ *gpsd_packetdump(char *scbuf, size_t scbuflen,
     else
 	return gpsd_hexdump(scbuf, scbuflen, binbuf, binbuflen);
 }
-/*@+mustdefine@*/
 
-/*@-mustdefine@*/
-const char /*@ observer @*/ *gpsd_hexdump(char *scbuf, size_t scbuflen,
+const char *gpsd_hexdump(char *scbuf, size_t scbuflen,
 					  char *binbuf, size_t binbuflen)
 {
 #ifndef SQUELCH_ENABLE
@@ -41,12 +38,10 @@ const char /*@ observer @*/ *gpsd_hexdump(char *scbuf, size_t scbuflen,
     if (NULL == binbuf || 0 == binbuflen)
 	return "";
 
-    /*@ -shiftimplementation @*/
     for (i = 0; i < len && i * 2 < scbuflen - 2; i++) {
 	scbuf[j++] = hexchar[(ibuf[i] & 0xf0) >> 4];
 	scbuf[j++] = hexchar[ibuf[i] & 0x0f];
     }
-    /*@ +shiftimplementation @*/
     scbuf[j] = '\0';
 #else /* SQUELCH defined */
     scbuf[0] = '\0';
@@ -56,9 +51,7 @@ const char /*@ observer @*/ *gpsd_hexdump(char *scbuf, size_t scbuflen,
 #endif /* SQUELCH_ENABLE */
     return scbuf;
 }
-/*@+mustdefine@*/
 
-/*@ +charint -shiftimplementation @*/
 static int hex2bin(const char *s)
 {
     int a, b;
@@ -87,12 +80,11 @@ static int hex2bin(const char *s)
     return ((a << 4) + b);
 }
 
-int gpsd_hexpack( /*@in@*/ const char *src, /*@out@ */ char *dst, size_t len)
+int gpsd_hexpack(const char *src, char *dst, size_t len)
 /* hex2bin source string to destination - destination can be same as source */
 {
     int i, j;
 
-    /*@ -mustdefine @*/
     j = (int)(strlen(src) / 2);
     if ((j < 1) || ((size_t) j > len))
 	return -2;
@@ -106,17 +98,14 @@ int gpsd_hexpack( /*@in@*/ const char *src, /*@out@ */ char *dst, size_t len)
     }
     (void)memset(dst + i, '\0', (size_t) (len - i));
     return j;
-    /*@ +mustdefine @*/
 }
 
-/*@ -charint +shiftimplementation @*/
 
-ssize_t hex_escapes( /*@out@*/ char *cooked, const char *raw)
+ssize_t hex_escapes(char *cooked, const char *raw)
 /* interpret C-style hex escapes */
 {
     char c, *cookend;
 
-    /*@ +charint -mustdefine -compdef @*/
     for (cookend = cooked; *raw != '\0'; raw++)
 	if (*raw != '\\')
 	    *cookend++ = *raw;
@@ -270,5 +259,4 @@ ssize_t hex_escapes( /*@out@*/ char *cooked, const char *raw)
 	    }
 	}
     return (ssize_t) (cookend - cooked);
-    /*@ +charint +mustdefine +compdef @*/
 }

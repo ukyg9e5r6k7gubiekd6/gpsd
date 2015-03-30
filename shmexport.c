@@ -30,14 +30,11 @@ PERMISSIONS
 #include "gpsd.h"
 #include "libgps.h" /* for SHM_PSEUDO_FD */
 
-/*@ -mustfreeonly -nullstate -mayaliasunique @*/
 
 bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
-    /*@-nullpass@*/
     long shmkey = getenv("GPSD_SHM_KEY") ? strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : GPSD_SHM_KEY;
-    /*@+nullpass@*/
 
     int shmid = shmget((key_t)shmkey, sizeof(struct gps_data_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {
@@ -107,7 +104,6 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
     }
 }
 
-/*@ +mustfreeonly +nullstate +mayaliasunique @*/
 
 #endif /* SHM_EXPORT_ENABLE */
 

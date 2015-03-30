@@ -13,9 +13,7 @@
 #include <libgen.h>
 #include <signal.h>
 #include <assert.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gps.h"
 #include "gpsd_config.h"
@@ -141,12 +139,10 @@ static void conditionally_log_fix(struct gps_data_t *gpsdata)
      * backward when gpsd is submitting junk on the
      * dbus.
      */
-    /*@-type@*/
     if (fabs(int_time - old_int_time) > timeout && !first) {
 	print_gpx_trk_end();
 	intrack = false;
     }
-    /*@+type@*/
 
     if (!intrack) {
 	print_gpx_trk_start();
@@ -181,17 +177,14 @@ static void quit_handler(int signum)
 
 static void usage(void)
 {
-    /*@-nullderef@*/
     fprintf(stderr,
 	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-f filename] [-m minmove]\n"
 	    "\t[-e exportmethod] [server[:port:[device]]]\n\n"
 	    "defaults to '%s -i 5 -e %s localhost:2947'\n",
 	    progname, progname, export_default()->name);
-    /*@-nullderef@*/
     exit(EXIT_FAILURE);
 }
 
-/*@-mustfreefresh -mustfreeonly -branchstate -globstate@*/
 int main(int argc, char **argv)
 {
     int ch;
@@ -231,7 +224,6 @@ int main(int argc, char **argv)
 	    break;
        case 'f':       /* Output file name. */
             {
-		/*@-usedef@*/
                 char   *fname = NULL;
                 time_t  t;
                 size_t  s = 0;
@@ -249,7 +241,6 @@ int main(int argc, char **argv)
 		    }
 		    s = strftime(fname, fnamesize-1, optarg, localtime(&t));
                 }
-		assert(fname != NULL); /* pacify splint */
                 fname[s] = '\0';;
                 logfile = fopen(fname, "w");
                 if (logfile == NULL)
@@ -259,7 +250,6 @@ int main(int argc, char **argv)
 	    bailout:
                 free(fname);
                 break;
-		/*@+usedef@*/
             }
 	case 'i':		/* set polling interfal */
 	    timeout = (time_t) atoi(optarg);
@@ -295,11 +285,9 @@ int main(int argc, char **argv)
 	source.port = NULL;
 	source.device = NULL;
     } else {
-	/*@-statictrans -observertrans@*/
 	source.server = (char *)"localhost";
 	source.port = (char *)DEFAULT_GPSD_PORT;
 	source.device = NULL;
-	/*@+statictrans +observertrans@*/
     }
 
     if (optind < argc) {
@@ -316,14 +304,12 @@ int main(int argc, char **argv)
     (void)signal(SIGQUIT, quit_handler);
     (void)signal(SIGINT, quit_handler);
 
-    /*@-unrecog@*/
     /* might be time to daemonize */
     if (daemonize) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
 	if (daemon(0, 0) != 0)
 	    (void) fprintf(stderr,"demonization failed: %s\n", strerror(errno));
     }
-    /*@+unrecog@*/
 
     //syslog (LOG_INFO, "---------- STARTED ----------");
 
@@ -345,4 +331,3 @@ int main(int argc, char **argv)
 
     exit(EXIT_SUCCESS);
 }
-/*@+mustfreefresh +mustfreeonly +branchstate +globstate@*/

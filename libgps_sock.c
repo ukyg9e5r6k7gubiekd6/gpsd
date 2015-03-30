@@ -17,15 +17,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
-#ifndef S_SPLINT_S
 #include <sys/socket.h>
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #ifndef USE_QT
-#ifndef S_SPLINT_S
 #include <sys/socket.h>
-#endif /* S_SPLINT_S */
 #else
 #include <QTcpSocket>
 #endif /* USE_QT */
@@ -37,11 +33,6 @@
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
-#ifdef S_SPLINT_S
-extern char *strtok_r(char *, const char *, char **);
-#endif /* S_SPLINT_S */
-
-/*@-matchfields@*/
 struct privdata_t
 {
     bool newstyle;
@@ -52,11 +43,9 @@ struct privdata_t
     int waitcount;
 #endif /* LIBGPS_DEBUG */
 };
-/*@+matchfields@*/
 
-/*@-branchstate@*/
-int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
-		  /*@out@*/ struct gps_data_t *gpsdata)
+int gps_sock_open(const char *host, const char *port,
+		  struct gps_data_t *gpsdata)
 {
     if (!host)
 	host = "localhost";
@@ -96,7 +85,6 @@ int gps_sock_open(/*@null@*/const char *host, /*@null@*/const char *port,
 #endif /* LIBGPS_DEBUG */
     return 0;
 }
-/*@+branchstate@*/
 
 bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* is there input waiting from the GPS? */
@@ -124,7 +112,6 @@ bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 #endif
 }
 
-/*@-usereleased -compdef@*/
 int gps_sock_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
@@ -143,10 +130,8 @@ int gps_sock_close(struct gps_data_t *gpsdata)
     return 0;
 #endif
 }
-/*@+usereleased +compdef@*/
 
-/*@-compdef -usedef -uniondef@*/
-int gps_sock_read(/*@out@*/struct gps_data_t *gpsdata)
+int gps_sock_read(struct gps_data_t *gpsdata)
 /* wait for and read data being streamed from the daemon */
 {
     char *eol;
@@ -213,18 +198,14 @@ int gps_sock_read(/*@out@*/struct gps_data_t *gpsdata)
     response_length = eol - PRIVATE(gpsdata)->buffer + 1;
     gpsdata->online = timestamp();
     status = gps_unpack(PRIVATE(gpsdata)->buffer, gpsdata);
-    /*@+matchanyintegral@*/
     memmove(PRIVATE(gpsdata)->buffer,
 	    PRIVATE(gpsdata)->buffer + response_length, PRIVATE(gpsdata)->waiting - response_length);
-    /*@-matchanyintegral@*/
     PRIVATE(gpsdata)->waiting -= response_length;
     gpsdata->set |= PACKET_SET;
 
     return (status == 0) ? (int)response_length : status;
 }
-/*@+compdef -usedef +uniondef@*/
 
-/*@ -branchstate -usereleased -mustfreefresh -nullstate -usedef @*/
 int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 /* unpack a gpsd response into a status structure, buf must be writeable.
  * gps_unpack() currently returns 0 in all cases, but should it ever need to
@@ -253,9 +234,8 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
 #endif
     return 0;
 }
-/*@ +compdef @*/
 
-const char /*@observer@*/ *gps_sock_data(const struct gps_data_t *gpsdata)
+const char *gps_sock_data(const struct gps_data_t *gpsdata)
 /* return the contents of the client data buffer */
 {
     return PRIVATE(gpsdata)->buffer;
@@ -281,8 +261,7 @@ int gps_sock_send(struct gps_data_t *gpsdata, const char *buf)
 #endif
 }
 
-int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
-	       /*@null@*/ void *d)
+int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d)
 /* ask gpsd to stream reports at you, hiding the command details */
 {
     char buf[GPS_JSON_COMMAND_MAX];
@@ -330,10 +309,8 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags,
 	    (void)strlcat(buf, "\"split24\":true,", sizeof(buf));
 	if (flags & WATCH_PPS)
 	    (void)strlcat(buf, "\"pps\":true,", sizeof(buf));
-	/*@-nullpass@*//* shouldn't be needed, splint has a bug */
 	if (flags & WATCH_DEVICE)
 	    str_appendf(buf, sizeof(buf), "\"device\":\"%s\",", (char *)d);
-	/*@+nullpass@*/
 	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "};", sizeof(buf));
 	libgps_debug_trace((DEBUG_CALLS, "gps_stream() enable command: %s\n", buf));

@@ -12,11 +12,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef S_SPLINT_S
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "ntpshm.h"
 #include "compiler.h"
@@ -33,13 +31,11 @@ void ntp_write(volatile struct shmTime *shmseg,
      * GPS emits leap pending for 3 months prior to insertion
      * NTP expects leap pending for only 1 month prior to insertion 
      * Per http://bugs.ntp.org/1090 */
-    /*@-type@*//* splint is confused about struct timespec */ 
     (void)gmtime_r( &(td->real.tv_sec), &tm);
     if ( 5 != tm.tm_mon && 11 != tm.tm_mon ) {
         /* Not june, not December, no way */
         leap_notify = LEAP_NOWARNING;
     }
-    /*@-type@*/
 
     /* we use the shmTime mode 1 protocol
      *
@@ -61,14 +57,12 @@ void ntp_write(volatile struct shmTime *shmseg,
     /* We need a memory barrier here to prevent write reordering by
      * the compiler or CPU cache */
     memory_barrier();
-    /*@-type@*/ /* splint is confused about struct timespec */
     shmseg->clockTimeStampSec = (time_t)td->real.tv_sec;
     shmseg->clockTimeStampUSec = (int)(td->real.tv_nsec/1000);
     shmseg->clockTimeStampNSec = (unsigned)td->real.tv_nsec;
     shmseg->receiveTimeStampSec = (time_t)td->clock.tv_sec;
     shmseg->receiveTimeStampUSec = (int)(td->clock.tv_nsec/1000);
     shmseg->receiveTimeStampNSec = (unsigned)td->clock.tv_nsec;
-    /*@+type@*/
     shmseg->leap = leap_notify;
     shmseg->precision = precision;
     memory_barrier();

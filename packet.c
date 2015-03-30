@@ -33,11 +33,9 @@ PERMISSIONS
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
-#ifndef S_SPLINT_S
 #include <netinet/in.h>
 #include <arpa/inet.h>		/* for htons() */
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "bits.h"
 #include "gpsd.h"
@@ -194,9 +192,7 @@ static size_t oncore_payload_cksum_length(unsigned char id1, unsigned char id2)
 static bool character_pushback(struct gps_lexer_t *lexer, unsigned int newstate)
 /* push back the last character grabbed, setting a specified state */
 {
-    /*@-modobserver@*//* looks like a splint bug */
     --lexer->inbufptr;
-    /*@+modobserver@*/
     --lexer->char_counter;
     lexer->state = newstate;
     if (lexer->errout.debug >= LOG_RAW + 2)
@@ -221,7 +217,6 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 #ifdef SUPERSTAR2_ENABLE
     static unsigned char ctmp;
 #endif /* SUPERSTAR2_ENABLE */
-/*@ +charint -casebreak @*/
     n++;
     switch (lexer->state) {
     case GROUND_STATE:
@@ -1427,7 +1422,6 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	break;
 #endif /* PASSTHROUGH_ENABLE */
     }
-/*@ -charint +casebreak @*/
 
     return true;	/* no pushback */
 }
@@ -1495,7 +1489,7 @@ static void character_discard(struct gps_lexer_t *lexer)
 
 /* entry points begin here */
 
-void lexer_init( /*@out@*/ struct gps_lexer_t *lexer)
+void lexer_init(struct gps_lexer_t *lexer)
 {
     lexer->char_counter = 0;
     lexer->retry_counter = 0;
@@ -1514,9 +1508,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 {
     lexer->outbuflen = 0;
     while (packet_buffered_input(lexer) > 0) {
-	/*@ -modobserver @*/
 	unsigned char c = *lexer->inbufptr++;
-	/*@ +modobserver @*/
 	unsigned int oldstate = lexer->state;
 	if (!nextstate(lexer, c))
 	    continue;
@@ -1685,7 +1677,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 		size_t n;
 		unsigned int ch, chksum;
 		n = 0;
-		/*@ +charint */
 #ifdef TSIP_ENABLE
 		/* shortcut garmin */
 		if (TSIP_PACKET == lexer->type)
@@ -1719,7 +1710,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 		/* we used to say n++ here, but scan-build complains */
 		if (lexer->inbuffer[n] != ETX)
 		    goto not_garmin;
-		/*@ +charint */
 		chksum &= 0xff;
 		if (chksum) {
 		    gpsd_log(&lexer->errout, LOG_IO,
@@ -1772,7 +1762,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 * specification, nor does it cover every packet type we
 		 * may see on the wire.
 		 */
-		/*@ +charint @*/
 		pkt_id = lexer->inbuffer[1];	/* packet ID */
                 /* *INDENT-OFF* */
 		if (!((0x13 == pkt_id) || 
@@ -1787,7 +1776,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 		    goto not_tsip;
 		}
                 /* *INDENT-ON* */
-		/*@ -ifempty */
 #define TSIP_ID_AND_LENGTH(id, len)	((id == pkt_id) && (len == packetlen-4))
 		if ((0x13 == pkt_id) && (1 <= packetlen))
 		    /* pass */ ;
@@ -1875,7 +1863,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 		gpsd_log(&lexer->errout, LOG_RAW,
 			 "TSIP pkt_id = %#02x, packetlen= %zu\n",
 			 pkt_id, packetlen);
-		/*@ -charint +ifempty @*/
 		packet_accept(lexer, TSIP_PACKET);
 		packet_discard(lexer);
 		break;
@@ -1969,7 +1956,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 	else if (lexer->state == EVERMORE_RECOGNIZED) {
 	    unsigned int n, crc, checksum, len;
 	    n = 0;
-	    /*@ +charint */
 	    if (lexer->inbuffer[n++] != DLE)
 		goto not_evermore;
 	    if (lexer->inbuffer[n++] != STX)
@@ -2005,7 +1991,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 			 crc, checksum);
 		goto not_evermore;
 	    }
-	    /*@ +charint */
 	    packet_accept(lexer, EVERMORE_PACKET);
 	    packet_discard(lexer);
 	    break;
@@ -2027,7 +2012,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 	    /* number of words */
 	    len = (uint16_t) (lexer->inbuffer[6] & 0xff);
 
-	    /*@ -type @*/
 	    /* expected checksum */
 	    xsum = getiw(7 + 2 * len);
 
@@ -2038,7 +2022,6 @@ void packet_parse(struct gps_lexer_t *lexer)
 		volatile uint32_t tmpdw  = (csum + 1) * (tmpw + n);
 		csum ^= (tmpdw & 0xffff) ^ ((tmpdw >> 16) & 0xffff);
 	    }
-	    /*@ +type @*/
 	    if (len == 0 || csum == xsum)
 		packet_accept(lexer, ITALK_PACKET);
 	    else {
@@ -2136,11 +2119,9 @@ ssize_t packet_get(int fd, struct gps_lexer_t *lexer)
 {
     ssize_t recvd;
 
-    /*@ -modobserver @*/
     errno = 0;
     recvd = read(fd, lexer->inbuffer + lexer->inbuflen,
 		 sizeof(lexer->inbuffer) - (lexer->inbuflen));
-    /*@ +modobserver @*/
     if (recvd == -1) {
 	if ((errno == EAGAIN) || (errno == EINTR)) {
 	    gpsd_log(&lexer->errout, LOG_RAW + 2, "no bytes ready\n");
@@ -2214,7 +2195,7 @@ ssize_t packet_get(int fd, struct gps_lexer_t *lexer)
 	return recvd;
 }
 
-void packet_reset( /*@out@*/ struct gps_lexer_t *lexer)
+void packet_reset(struct gps_lexer_t *lexer)
 /* return the packet machine to the ground state */
 {
     lexer->type = BAD_PACKET;

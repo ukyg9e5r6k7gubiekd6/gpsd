@@ -23,11 +23,10 @@ representations to libgps structures.
 #include "libgps.h"
 
 /* kluge because we don't want to include gpsd.h here */
-extern int gpsd_hexpack(/*@in@*/const char *, /*@out@*/char *, size_t);
+extern int gpsd_hexpack(const char *, char *, size_t);
 
-/*@ -mustdefine @*/
 static void lenhex_unpack(const char *from,
-			  size_t * plen, /*@out@*/ char *to, size_t maxlen)
+			  size_t * plen, char *to, size_t maxlen)
 {
     char *colon = strchr(from, ':');
 
@@ -36,16 +35,13 @@ static void lenhex_unpack(const char *from,
 	(void)gpsd_hexpack(colon + 1, to, maxlen);
 }
 
-/*@ +mustdefine @*/
 
 int json_ais_read(const char *buf,
 		  char *path, size_t pathlen, struct ais_t *ais,
-		  /*@null@*/ const char **endptr)
+		  const char **endptr)
 {
     /* collected but not actually used yet */
     bool scaled;
-    /*@-compdef@*//* splint is confused by storage declared in the .i file */
-    /*@-nullstate@*/
 
 #define AIS_HEADER \
 	{"class",          t_check,    .dflt.check = "AIS"}, \
@@ -82,7 +78,6 @@ int json_ais_read(const char *buf,
 
     memset(ais, '\0', sizeof(struct ais_t));
 
-    /*@-usedef@*/
     if (strstr(buf, "\"type\":1,") != NULL
 	|| strstr(buf, "\"type\":2,") != NULL
 	|| strstr(buf, "\"type\":3,") != NULL) {
@@ -464,7 +459,6 @@ int json_ais_read(const char *buf,
 	return JSON_ERR_MISC;
     }
     return status;
-    /*@+compdef +usedef +nullstate@*/
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 

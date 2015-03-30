@@ -63,10 +63,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 /* Large case statements make GNU indent very confused */
 /* *INDENT-OFF* */
-/*@ -type @*//* re-enable when we're ready to take this live */
 
 void rtcm3_unpack(const struct gps_context_t *context,
-		  /*@out@*/ struct rtcm3_t *rtcm, char *buf)
+		  struct rtcm3_t *rtcm, char *buf)
 /* break out the raw bits into the scaled report-structure fields */
 {
     unsigned int n, n2, n3, n4;
@@ -74,7 +73,6 @@ void rtcm3_unpack(const struct gps_context_t *context,
     unsigned int i;
     signed long temp;
 
-    /*@ -evalorder -sefparams -mayaliasunique @*/
 #define ugrab(width)	(bitcount += width, ubits((unsigned char *)buf, bitcount-width, width, false))
 #define sgrab(width)	(bitcount += width, sbits((signed char *)buf, bitcount-width, width, false))
 #define GPS_PSEUDORANGE(fld, len) \
@@ -418,10 +416,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
 #undef GPS_PSEUDORANGE
 #undef sgrab
 #undef ugrab
-    /*@ +evalorder +sefparams +mayaliasunique @*/
 }
 
 /* *INDENT-ON* */
-/*@ +type @*/
 
 #endif /* RTCM104V3_ENABLE */

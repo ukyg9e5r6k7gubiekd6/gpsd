@@ -89,7 +89,6 @@ void hexdump(size_t len, unsigned char *bbuf, unsigned char *abuf)
     }
 }
 
-/*@ -type @*/
 unsigned char hc(unsigned char x)
 {
     switch (x) {
@@ -117,7 +116,6 @@ unsigned char hc(unsigned char x)
     }
 }
 
-/*@ -type @*/
 
 unsigned char
 sr_sum(unsigned int count, unsigned int addr, unsigned char *bbuf)

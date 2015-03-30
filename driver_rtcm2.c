@@ -460,7 +460,6 @@ struct rtcm2_msg_t {
 #endif /* LITTLE_ENDIAN */
 
 #ifdef WORDS_BIGENDIAN
-#ifndef S_SPLINT_S	/* splint thinks it's a duplicate definition */
 
 struct rtcm2_msg_t {
     struct rtcm2_msghw1 {			/* header word 1 */
@@ -737,7 +736,6 @@ struct rtcm2_msg_t {
     } msg_type;
 } __attribute__((__packed__));
 
-#endif /* S_SPLINT_S */
 #endif /* BIG ENDIAN */
 
 #ifdef RTCM104V2_ENABLE
@@ -748,8 +746,7 @@ static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
 #define DIMENSION(a) (unsigned)(sizeof(a)/sizeof(a[0]))
 
-/*@-type */
-void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
+void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
 /* break out the raw bits into the content fields */
 {
     int len;
@@ -796,13 +793,11 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 		tp->gps_ranges.sat[n].ident = m->w6.satident3;
 		tp->gps_ranges.sat[n].udre = m->w6.udre3;
 		tp->gps_ranges.sat[n].iod = m->w7.iod3;
-		/*@ -shiftimplementation @*/
 		tp->gps_ranges.sat[n].prc =
 		    ((m->w6.prc3_h << 8) | (m->w7.prc3_l)) *
 		    (m->w6.scale3 ? PRCLARGE : PRCSMALL);
 		tp->gps_ranges.sat[n].rrc =
 		    m->w7.rrc3 * (m->w6.scale3 ? RRLARGE : RRSMALL);
-		/*@ +shiftimplementation @*/
 		n++;
 	    }
 	    len -= 5;
@@ -865,9 +860,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    csp->ident = m->sat_id;
 	    csp->iodl = m->issue_of_data_link != 0;
 	    csp->health = m->data_health;
-	    /*@+ignoresigns@*/
 	    csp->snr = (int)(m->cn0 ? (m->cn0 + CNR_OFFSET) : SNR_BAD);
-	    /*@-ignoresigns@*/
 	    csp->health_en = m->health_enable != 0;
 	    csp->new_data = m->new_nav_data != 0;
 	    csp->los_warning = m->loss_warn != 0;
@@ -881,9 +874,7 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
 
 	    np->latitude = mp->w3.lat * LA_SCALE;
-	    /*@-shiftimplementation@*/
 	    np->longitude = ((mp->w3.lon_h << 8) | mp->w4.lon_l) * LO_SCALE;
-	    /*@+shiftimplementation@*/
 	    np->range = mp->w4.range;
 	    np->frequency =
 		(((mp->w4.freq_h << 6) | mp->w5.freq_l) * FREQ_SCALE) +
@@ -910,7 +901,6 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	tp->gpstime.leapsecs = msg->msg_type.type14.w1.leapsecs;
 	break;
     case 16:
-	/*@ -boolops @*/
 	for (w = 0; w < (unsigned)len; w++) {
 	    if (!msg->msg_type.type16.txt[w].byte1) {
 		break;
@@ -925,7 +915,6 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 	    }
 	    tp->message[n++] = (char)(msg->msg_type.type16.txt[w].byte3);
 	}
-	/*@ +boolops @*/
 	tp->message[n] = '\0';
 	break;
 
@@ -961,13 +950,11 @@ void rtcm2_unpack( /*@out@*/ struct rtcm2_t *tp, char *buf)
 		tp->glonass_ranges.sat[n].udre = m->w6.udre3;
 		tp->glonass_ranges.sat[n].change = (bool)m->w7.change3;
 		tp->glonass_ranges.sat[n].tod = m->w7.tod3;
-		/*@ -shiftimplementation @*/
 		tp->glonass_ranges.sat[n].prc =
 		    ((m->w6.prc3_h << 8) | (m->w7.prc3_l)) *
 		    (m->w6.scale3 ? PRCLARGE : PRCSMALL);
 		tp->glonass_ranges.sat[n].rrc =
 		    m->w7.rrc3 * (m->w6.scale3 ? RRLARGE : RRSMALL);
-		/*@ +shiftimplementation @*/
 		n++;
 	    }
 	    len -= 5;
@@ -995,7 +982,6 @@ static bool length_check(struct gps_lexer_t *lexer)
 	&& lexer->isgps.bufindex >=
 	((struct rtcm2_msg_t *)lexer->isgps.buf)->w2.frmlen + 2u;
 }
-/*@+type */
 
 enum isgpsstat_t rtcm2_decode(struct gps_lexer_t *lexer, unsigned int c)
 {

@@ -85,9 +85,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 
@@ -322,7 +320,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	break;
     case GARMIN_PKTID_L001_COMMAND_DATA:
 	prod_id = get_uint16((uint8_t *) buf);
-	/*@ -branchstate @*/
 	switch (prod_id) {
 	case CMND_ABORT:
 	    msg = "Abort current xfer";
@@ -342,7 +339,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    msg = msg_buf;
 	    break;
 	}
-	/*@ +branchstate @*/
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Garmin: Appl, Command Data: %s\n", msg);
 	break;
@@ -625,7 +621,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 
 #if defined(HAVE_LIBUSB)
-/*@ -branchstate @*/
 // This works around cppcheck not looking into enough config branches
 // cppcheck-suppress unusedFunction
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
@@ -732,11 +727,10 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
     return mask;
 }
 
-/*@ +branchstate @*/
 #endif /* HAVE_LIBUSB */
 
 
-#if defined(HAVE_LIBUSB) && (defined(__linux__) || defined(S_SPLINT_S))
+#if defined(HAVE_LIBUSB) && defined(__linux__)
 /* build and send a packet w/ USB protocol */
 static void Build_Send_USB_Packet(struct gps_device_t *session,
 				  uint32_t layer_id, uint32_t pkt_id,
@@ -776,7 +770,7 @@ static void Build_Send_USB_Packet(struct gps_device_t *session,
 	(void)gpsd_write(session, n, 0);
     }
 }
-#endif /* HAVE_LIBUSB && (__linux__ || S_SPLINT_S) */
+#endif /* HAVE_LIBUSB && __linux__ */
 
 /* build and send a packet in serial protocol */
 /* layer_id unused */
@@ -848,7 +842,6 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
  *
  * libudev: http://www.kernel.org/pub/linux/utils/kernel/hotplug/libudev/
  */
-/*@-compdef -usedef -nullpass@*/
 // This works around cppcheck not looking into enough config branches
 // cppcheck-suppress unusedFunction
 static bool is_usb_device(const char *path UNUSED, int vendor, int product,
@@ -902,7 +895,6 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product,
     return found;
 }
 
-/*@-compdef -usedef -nullpass@*/
 #endif /* HAVE_LIBUSB */
 
 /*
@@ -932,7 +924,7 @@ static bool is_usb_device(const char *path UNUSED, int vendor, int product,
  */
 static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
 {
-#if defined(__linux__) || defined(S_SPLINT_S)
+#if defined(__linux__)
     /*
      * Only perform this check if we're looking at a USB-serial
      * device.  This prevents drivers for attached serial GPSes
@@ -977,7 +969,7 @@ static bool garmin_usb_detect(struct gps_device_t *session UNUSED)
     }
 #else
     return false;
-#endif /* __linux__ || S_SPLINT_S */
+#endif /* __linux__ */
 }
 
 static void garmin_event_hook(struct gps_device_t *session, event_t event)
@@ -1021,7 +1013,6 @@ static void garmin_event_hook(struct gps_device_t *session, event_t event)
 #define Send_ACK()    Build_Send_SER_Packet(session, 0, ACK, 0, 0)
 #define Send_NAK()    Build_Send_SER_Packet(session, 0, NAK, 0, 0)
 
-/*@ +charint @*/
 gps_mask_t garmin_ser_parse(struct gps_device_t *session)
 {
     unsigned char *buf = session->lexer.outbuffer;
@@ -1154,7 +1145,6 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     }
 
     /* debug */
-    /*@ -usedef -compdef @*/
     for (i = 0; i < data_index; i++) {
 	gpsd_log(&session->context->errout, LOG_RAW + 1,
 		 "Garmin: Char: %#02x\n", data_buf[i]);
@@ -1170,35 +1160,29 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     // so send ACK last, after a pause
     (void)usleep(300);
     Send_ACK();
-    /*@ +usedef +compdef @*/
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "Garmin: garmin_ser_parse( )\n");
     return mask;
 }
 
-/*@ -charint @*/
 
 #ifdef RECONFIGURE_ENABLE
 static void settle(void)
 {
     struct timespec delay, rem;
-    /*@ -type -unrecog @*/
     memset(&delay, 0, sizeof(delay));
     delay.tv_sec = 0;
     delay.tv_nsec = 333000000L;
     nanosleep(&delay, &rem);
-    /*@ +type +unrecog @*/
 }
 
 static void garmin_switcher(struct gps_device_t *session, int mode)
 {
     if (mode == MODE_NMEA) {
-	/*@ +charint @*/
 	const char switcher[] =
 	    { 0x10, 0x0A, 0x02, 0x26, 0x00, 0xCE, 0x10, 0x03 };
 	// Note hard-coded string length in the next line...
 	ssize_t status = gpsd_write(session, switcher, sizeof(switcher));
-	/*@ -charint @*/
 	if (status == (ssize_t)sizeof(switcher)) {
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "Garmin: => GPS: turn off binary %02x %02x %02x... \n",
@@ -1227,11 +1211,9 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 				   char *buf, size_t buflen)
 /* not used by the daemon, it's for gpsctl and friends */
 {
-    /*@ -mayaliasunique @*/
     session->msgbuflen = buflen;
     (void)memcpy(session->msgbuf, buf, buflen);
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
-    /*@ +mayaliasunique @*/
 }
 #endif /* CONTROLSEND_ENABLE */
 
@@ -1344,12 +1326,10 @@ static int GetPacket(struct gps_device_t *session)
 	}
 
 
-	/*@ ignore @*/
 	delay.tv_sec = 0;
 	delay.tv_nsec = 3330000L;
 	while (nanosleep(&delay, &rem) == -1)
 	    continue;
-	/*@ end @*/
     }
     // dump the individual bytes, debug only
     // for ( x = 0; x < session->driver.garmin.BufferLen; x++ ) {

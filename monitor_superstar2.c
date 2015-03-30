@@ -15,7 +15,6 @@ static bool superstar2_initialize(void)
 {
     int i;
 
-    /*@ -onlytrans @*/
     /* "heavily inspired" by monitor_nmea.c */
     if ((satwin = derwin(devicewin, 15, 27, 7, 0)) == NULL)
 	return false;
@@ -26,7 +25,6 @@ static bool superstar2_initialize(void)
 	(void)mvwprintw(satwin, (int)(i + 2), 1, "%2d", i);
     (void)mvwprintw(satwin, 14, 1, " Satellite Data & Status ");
     (void)wattrset(satwin, A_NORMAL);
-    /*@ +onlytrans @*/
 
     return true;
 }
@@ -45,10 +43,8 @@ static void display_superstar2_svinfo(unsigned char *buf, size_t data_len)
 	char el;
 	unsigned short az;
 
-	/*@ +charint */
 	if ((porn = (unsigned char)getub(buf, off) & 0x1f) == 0)
 	    porn = ((unsigned char)getub(buf, off + 3) >> 1) + 87;
-	/*@ -charint */
 
 	ss = (unsigned char)getub(buf, off + 4);
 	el = (char)getsb(buf, off + 1);
@@ -56,11 +52,9 @@ static void display_superstar2_svinfo(unsigned char *buf, size_t data_len)
 			      ((getub(buf, off + 3) & 0x1) << 1));
 	fl = (unsigned char)getub(buf, off) & 0xe0;
 	(void)wmove(satwin, i + 2, 4);
-	/*@ +charint */
 	(void)wprintw(satwin, "%3u %3d %2d  %02d %02x %c",
 		      porn, az, el, ss, fl,
 		      ((fl & 0x60) == 0x60) ? 'Y' : ' ');
-	/*@ -charint */
     }
     (void)wnoutrefresh(satwin);
     return;

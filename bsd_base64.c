@@ -118,7 +118,6 @@ static const char Pad64 = '=';
 	   characters followed by one "=" padding character.
    */
 
-/*@ +matchanyintegral -type @*/
 int
 b64_ntop(unsigned char const *src, size_t srclength, char *target,
 	 size_t targsize)

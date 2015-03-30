@@ -24,11 +24,10 @@ PERMISSIONS
 #include "gps_json.h"
 
 int json_device_read(const char *buf,
-		     /*@out@*/ struct devconfig_t *dev,
-		     /*@null@*/ const char **endptr)
+		     struct devconfig_t *dev,
+		     const char **endptr)
 {
     char tbuf[JSON_DATE_MAX+1];
-    /*@ -fullinitblock @*/
     /* *INDENT-OFF* */
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      t_check,      .dflt.check = "DEVICE"},
@@ -58,7 +57,6 @@ int json_device_read(const char *buf,
 	{NULL},
     };
     /* *INDENT-ON* */
-    /*@ +fullinitblock @*/
     int status;
 
     tbuf[0] = '\0';
@@ -66,24 +64,21 @@ int json_device_read(const char *buf,
     if (status != 0)
 	return status;
 
-    /*@-usedef@*/
     if (isnan(dev->activated)!=0) {
 	if (tbuf[0] == '\0')
 	    dev->activated = NAN;
 	else
 	    dev->activated = iso8601_to_unix(tbuf);
     }
-    /*@+usedef@*/
 
     return 0;
 }
 
 int json_watch_read(const char *buf,
-		    /*@out@*/ struct policy_t *ccp,
-		    /*@null@*/ const char **endptr)
+		    struct policy_t *ccp,
+		    const char **endptr)
 {
     bool dummy_pps_flag;
-    /*@ -fullinitblock @*/
     /* *INDENT-OFF* */
     struct json_attr_t chanconfig_attrs[] = {
 	{"class",          t_check,    .dflt.check = "WATCH"},
@@ -109,7 +104,6 @@ int json_watch_read(const char *buf,
 	{NULL},
     };
     /* *INDENT-ON* */
-    /*@ +fullinitblock @*/
     int status;
 
     status = json_read_object(buf, chanconfig_attrs, endptr);

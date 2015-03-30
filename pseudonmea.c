@@ -29,9 +29,8 @@ static double degtodm(double angle)
     return floor(angle) * 100 + fraction * 60;
 }
 
-/*@ -mustdefine @*/
 void gpsd_position_fix_dump(struct gps_device_t *session,
-			    /*@out@*/ char bufp[], size_t len)
+			    char bufp[], size_t len)
 {
     struct tm tm;
     time_t intfixtime;
@@ -72,7 +71,6 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
     }
 }
 
-/*@ +mustdefine @*/
 
 static void gpsd_transit_fix_dump(struct gps_device_t *session,
 				  char bufp[], size_t len)
@@ -89,7 +87,6 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 	tm.tm_year %= 100;
     }
 #define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
-    /*@ -usedef @*/
     (void)snprintf(bufp, len,
 		   "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 		   tm.tm_hour,
@@ -103,7 +100,6 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 		   ZEROIZE(session->gpsdata.fix.speed * MPS_TO_KNOTS),
 		   ZEROIZE(session->gpsdata.fix.track),
 		   tm.tm_mday, tm.tm_mon, tm.tm_year);
-    /*@ +usedef @*/
 #undef ZEROIZE
     nmea_add_checksum(bufp);
 }
@@ -295,9 +291,7 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
 	if ((datalen % (6*60)) != 0) {
 	    msg1 += 1;
 	}
-	/*@ +charint */
 	numc[0] = '0' + (char)(number1 & 0x0f);
-	/*@ -charint */
 	numc[1] = '\0';
 	number1 += 1;
 	if (number1 > 9) {
@@ -377,10 +371,9 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
 }
 #endif /* AIVDM_ENABLE */
 
-/*@-compdef -mustdefine@*/
 /* *INDENT-OFF* */
 void nmea_tpv_dump(struct gps_device_t *session,
-		   /*@out@*/ char bufp[], size_t len)
+		   char bufp[], size_t len)
 {
     bufp[0] = '\0';
     if ((session->gpsdata.set & TIME_SET) != 0)
@@ -400,7 +393,7 @@ void nmea_tpv_dump(struct gps_device_t *session,
 /* *INDENT-ON* */
 
 void nmea_sky_dump(struct gps_device_t *session,
-		   /*@out@*/ char bufp[], size_t len)
+		   char bufp[], size_t len)
 {
     bufp[0] = '\0';
     if ((session->gpsdata.set & SATELLITE_SET) != 0)
@@ -409,7 +402,7 @@ void nmea_sky_dump(struct gps_device_t *session,
 }
 
 void nmea_subframe_dump(struct gps_device_t *session,
-		   /*@out@*/ char bufp[], size_t len)
+		   char bufp[], size_t len)
 {
     bufp[0] = '\0';
     if ((session->gpsdata.set & SUBFRAME_SET) != 0)
@@ -419,7 +412,7 @@ void nmea_subframe_dump(struct gps_device_t *session,
 
 #ifdef AIVDM_ENABLE
 void nmea_ais_dump(struct gps_device_t *session,
-		   /*@out@*/ char bufp[], size_t len)
+		   char bufp[], size_t len)
 {
     bufp[0] = '\0';
     if ((session->gpsdata.set & AIS_SET) != 0)
@@ -428,6 +421,5 @@ void nmea_ais_dump(struct gps_device_t *session,
 }
 #endif /* AIVDM_ENABLE */
 
-/*@+compdef +mustdefine@*/
 
 /* pseudonmea.c ends here */

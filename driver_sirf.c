@@ -42,9 +42,7 @@
 #include <strings.h>
 #include <math.h>
 #include <ctype.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "bits.h"
@@ -60,7 +58,6 @@
  */
 #define SIRF_RETRY_TIME	6
 
-/*@ +charint @*/
 /* Poll Software Version MID 132 */
 static unsigned char versionprobe[] = {
     0xa0, 0xa2, 0x00, 0x02,
@@ -209,7 +206,6 @@ static unsigned char enablemid52[] = {
     0x00, 0xdb, 0xb0, 0xb3
 };
 #endif /* RECONFIGURE_ENABLE */
-/*@ -charint @*/
 
 
 static gps_mask_t sirf_msg_debug(struct gps_device_t *,
@@ -285,7 +281,6 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
 static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
 				 size_t len)
 {
-    /*@ +charint +matchanyintegral -initallelements -mayaliasunique @*/
     session->msgbuf[0] = (char)0xa0;
     session->msgbuf[1] = (char)0xa2;
     session->msgbuf[2] = (len >> 8) & 0xff;
@@ -299,7 +294,6 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
     return sirf_write(session,
 	      (unsigned char *)session->msgbuf) ? (int)session->msgbuflen : -1;
     /* *INDENT-ON* */
-    /*@ -charint -matchanyintegral +initallelements +mayaliasunique @*/
 }
 #endif /* CONTROLSEND_ENABLE */
 
@@ -307,7 +301,6 @@ static ssize_t sirf_control_send(struct gps_device_t *session, char *msg,
 static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char parity, int stopbits)
 /* change speed in binary mode */
 {
-    /*@ +charint @*/
     static unsigned char msg[] = {
 	0xa0, 0xa2, 0x00, 0x09,
 	0x86,			/* byte 4:
@@ -320,7 +313,6 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char pari
 	0x00,			/* byte 12: reserved pad */
 	0x00, 0x00, 0xb0, 0xb3
     };
-    /*@ -charint @*/
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "SiRF: sirf_speed(%u,%c,%d)\n",
 	     (unsigned int)speed, parity, stopbits);
@@ -356,7 +348,6 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char pari
 static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 /* switch from binary to NMEA at specified baud */
 {
-    /*@ +charint @*/
     static unsigned char msg[] = { 0xa0, 0xa2, 0x00, 0x18,
 	0x81, 0x02,
 	0x01, 0x01,		/* GGA */
@@ -373,7 +364,6 @@ static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 	0x12, 0xc0,		/* 4800 bps */
 	0xb0, 0xb3
     };
-    /*@ -charint @*/
 
     if (speed >= 0xffff) {
 	gpsd_log(&session->context->errout, LOG_ERROR,
@@ -426,7 +416,6 @@ static gps_mask_t sirf_msg_debug(struct gps_device_t *device,
 
     bzero(msgbuf, (int)sizeof(msgbuf));
 
-    /*@ +charint @*/
     if (0xe1 == buf[0]) {	/* Development statistics messages */
 	for (i = 2; i < (int)len; i++)
 	    str_appendf(msgbuf, sizeof(msgbuf), "%c", buf[i] ^ 0xff);
@@ -442,7 +431,6 @@ static gps_mask_t sirf_msg_debug(struct gps_device_t *device,
 	gpsd_log(&device->context->errout, LOG_PROG,
 		 "SiRF: DBG 0xff: %s\n", msgbuf);
     }
-    /*@ -charint @*/
     return 0;
 }
 
@@ -886,13 +874,9 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	unpacked_date.tm_min = (int)getub(buf, 16);
 	unpacked_date.tm_sec = 0;
 	unpacked_date.tm_isdst = 0;
-#ifdef S_SPLINT_S
 	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
-#endif /* S_SPLINT_S */
 	subseconds = getbeu16(buf, 17) * 1e-3;
-	/*@ -compdef -unrecog */
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
-	/*@ +compdef +unrecog */
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "SiRF: GND 0x29 UTC: %lf\n",
 		 session->newdata.time);
@@ -1019,13 +1003,9 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	unpacked_date.tm_min = (int)getub(buf, 31);
 	unpacked_date.tm_sec = 0;
 	unpacked_date.tm_isdst = 0;
-#ifdef S_SPLINT_S
 	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
-#endif /* S_SPLINT_S */
 	subseconds = ((unsigned short)getbeu16(buf, 32)) * 1e-3;
-	/*@ -compdef */
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
-	/*@ +compdef */
 #ifdef TIMEHINT_ENABLE
 	if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
 	    gpsd_log(&session->context->errout, LOG_RAW,
@@ -1077,9 +1057,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
 	unpacked_date.tm_year = (int)getbeu16(buf, 6) - 1900;
 	unpacked_date.tm_isdst = 0;
-	/*@ -compdef */
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
-	/*@ +compdef */
 	session->context->leap_seconds = (int)getbeu16(buf, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
 #ifdef TIMEHINT_ENABLE
@@ -1531,7 +1509,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 
     if (event == event_deactivate) {
 
-	/*@ +charint @*/
 	static unsigned char moderevert[] = { 0xa0, 0xa2, 0x00, 0x0e,
 	    0x88,
 	    0x00, 0x00,		/* pad bytes */
@@ -1546,7 +1523,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    0x00,		/* track smoothing */
 	    0x00, 0x00, 0xb0, 0xb3
 	};
-	/*@ -charint -shiftimplementation @*/
 	putbyte(moderevert, 7, session->driver.sirf.degraded_mode);
 	putbe16(moderevert, 10, session->driver.sirf.altitude_source_input);
 	putbyte(moderevert, 12, session->driver.sirf.altitude_hold_mode);
@@ -1554,7 +1530,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	putbyte(moderevert, 15, session->driver.sirf.degraded_timeout);
 	putbyte(moderevert, 16, session->driver.sirf.dr_timeout);
 	putbyte(moderevert, 17, session->driver.sirf.track_smooth_mode);
-	/*@ +shiftimplementation @*/
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "SiRF: Reverting navigation parameters...\n");
 	(void)sirf_write(session, moderevert);

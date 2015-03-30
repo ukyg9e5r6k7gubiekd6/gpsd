@@ -48,10 +48,8 @@ static int geostar_write(struct gps_device_t *session,
     putbyte(session->msgbuf, 2, 'G');
     putbyte(session->msgbuf, 3, 'G');
 
-    /*@-shiftimplementation +ignoresigns@*/
     putbe16(session->msgbuf, 4, id);
     putbe16(session->msgbuf, 6, len);
-    /*@+shiftimplementation -ignoresigns@*/
 
     /* Copy content */
     memcpy(session->msgbuf + 8, data, len * 4);
@@ -63,9 +61,7 @@ static int geostar_write(struct gps_device_t *session,
 	cs ^= getleu32(session->msgbuf, i * 4);
     }
 
-    /*@-shiftimplementation +ignoresigns@*/
     putle32(session->msgbuf, len * 4, cs);
-    /*@+shiftimplementation -ignoresigns@*/
 
     len += 1; /* Checksum */
 
@@ -96,9 +92,7 @@ static bool geostar_detect(struct gps_device_t *session)
     myfd = session->gpsdata.gps_fd;
 
     /* request firmware revision and look for a valid response */
-    /*@-shiftimplementation +ignoresigns@*/
     putbe32(buf, 0, 0);
-    /*@+shiftimplementation +ignoresigns@*/
     if (geostar_write(session, 0xc1, buf, 1) == 0) {
 	unsigned int n;
 	for (n = 0; n < 3; n++) {
@@ -140,7 +134,6 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	return 0;
     }
 
-    /*@ +charint @*/
     if (session->lexer.outbuflen < 12 || session->lexer.outbuffer[0] != 'P')
 	return 0;
 
@@ -155,7 +148,6 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	str_appendf(buf2, sizeof(buf2),
 		       "%02x", buf[len++] = session->lexer.outbuffer[i]);
     }
-    /*@ -charint @*/
 
     id = (unsigned int)getleu16(session->lexer.outbuffer, OFFSET(0));
 
@@ -443,10 +435,8 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul1 = getleu32(buf, OFFSET(2));
 	ul2 = getleu32(buf, OFFSET(3));
 	ul3 = getleu32(buf, OFFSET(4));
-	/*@ -formattype @*/
 	(void)snprintf(session->subtype, sizeof(session->subtype), "%d.%d %d.%d.%d %x %c-%d\n",
 		ul4>>16, ul4&0xFFFF, ul1>>9, (ul1>>5)&0xF, ul1&0x1F, ul2, ul3>>24, ul3&0x00FFFFFF);
-	/*@ +formattype @*/
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "Response to Request FW version command: %s\n",
 		 session->subtype);
@@ -503,11 +493,9 @@ static ssize_t geostar_control_send(struct gps_device_t *session,
 
 static void geostar_init_query(struct gps_device_t *session)
 {
-    /*@-compdef@*/
     unsigned char buf[2 * 4];
     /* Poll Software Version */
     (void)geostar_write(session, 0xc1, buf, 1);
-    /*@+compdef@*/
 }
 
 static void geostar_event_hook(struct gps_device_t *session, event_t event)
@@ -517,7 +505,6 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
     if (session->context->readonly)
 	return;
 
-    /*@-shiftimplementation +ignoresigns@*/
     if (event == event_identified || event == event_reactivate) {
 	/* Select binary packets */
 	putbe32(buf, 0, 0xffff0000);
@@ -552,7 +539,6 @@ static void geostar_event_hook(struct gps_device_t *session, event_t event)
 	putbe32(buf, 0, 3);
 	(void)geostar_write(session, 0xc2, buf, 1);
     }
-    /*@+shiftimplementation -ignoresigns@*/
 }
 
 #ifdef RECONFIGURE_ENABLE
@@ -577,12 +563,10 @@ static bool geostar_speed_switch(struct gps_device_t *session,
 	break;
     }
 
-    /*@-shiftimplementation@*/
     putbe32(buf, 0, session->driver.geostar.physical_port);
     putbe32(buf, 4, speed);
     putbe32(buf, 8, stopbits);
     putbe32(buf, 12, parity);
-    /*@+shiftimplementation@*/
     (void)geostar_write(session, 0x41, buf, 4);
 
     return true;	/* it would be nice to error-check this */
@@ -590,7 +574,6 @@ static bool geostar_speed_switch(struct gps_device_t *session,
 
 static void geostar_mode(struct gps_device_t *session, int mode)
 {
-    /*@-shiftimplementation@*/
     if (mode == MODE_NMEA) {
 	unsigned char buf[1 * 4];
 	/* Switch to NMEA mode */
@@ -603,7 +586,6 @@ static void geostar_mode(struct gps_device_t *session, int mode)
 	gpsd_log(&session->context->errout, LOG_ERROR,
 		 "unknown mode %i requested\n", mode);
     }
-    /*@+shiftimplementation@*/
 }
 #endif /* RECONFIGURE_ENABLE */
 

@@ -156,14 +156,17 @@ of test logs.  Almost every time a user fills out one of these, the
 number of devices for which we can guarantee good performance in the
 future goes up. Currently it's 87 devices from 39 vendors.</p>
 
-<p>We also routinely audit our code with <a
-href="http://www.splint.org/">splint</a>. Not many people do this,
-because splint is very finicky and a pain in the ass to use and
-requires you to litter your code with cryptic annotations. But I
-believe accepting that discipline is the main reason the Coverity scan
-went so well. After hacking through the underbrush of false positives,
-I generally find that splint heads off about two potentially serious
-bugs per release cycle, averaging out to about one every 17 weeks.</p>
+<!-- splint was dropped in March 2015 --> <p>We also used to routinely
+audit our code with <a href="http://www.splint.org/">splint</a>. Not
+many people do this, because splint is very finicky and a pain in the
+ass to use and requires you to litter your code with cryptic
+annotations. We stopped doing this because splint gave us randomly
+variable warnings across different Linux distributions, and has been
+obsolesced by newer static analyzers. But I believe accepting that
+discipline was the main reason the Coverity scan went so well. After
+hacking through the underbrush of false positives, I generally find
+that splint heads off about two potentially serious bugs per release
+cycle, averaging out to about one every 17 weeks.</p>
 
 <p>We have a policy of not using C where a scripting language will do.
 Python is what we mostly use, but not the actual point here (though I

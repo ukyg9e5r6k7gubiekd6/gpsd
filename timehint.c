@@ -15,19 +15,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef S_SPLINT_S
-/*@-matchfields@*/
-struct timespec
-{
-  time_t tv_sec;
-  long tv_nsec;
-};
-/*@+matchfields@*/
-#else
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "timespec_str.h"
 #include "gpsd.h"
@@ -117,7 +107,7 @@ struct timespec
 
 #define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
 
-static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *context, int unit)
+static volatile struct shmTime *getShmTime(struct gps_context_t *context, int unit)
 {
     int shmid;
     unsigned int perms;
@@ -146,7 +136,6 @@ static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *cont
 	return NULL;
     }
     p = (struct shmTime *)shmat(shmid, 0, 0);
-    /*@ -mustfreefresh */
     if ((int)(long)p == -1) {
 	gpsd_log(&context->errout, LOG_ERROR,
 		 "NTPD shmat failed: %s\n",
@@ -157,7 +146,6 @@ static /*@null@*/ volatile struct shmTime *getShmTime(struct gps_context_t *cont
 	     "NTPD shmat(%d,0,0) succeeded, segment %d\n",
 	     shmid, unit);
     return p;
-    /*@ +mustfreefresh */
 }
 
 void ntpshm_context_init(struct gps_context_t *context)
@@ -174,8 +162,7 @@ void ntpshm_context_init(struct gps_context_t *context)
     memset(context->shmTimeInuse, 0, sizeof(context->shmTimeInuse));
 }
 
-/*@-unqualifiedtrans@*/
-static /*@null@*/ volatile struct shmTime *ntpshm_alloc(struct gps_context_t *context)
+static volatile struct shmTime *ntpshm_alloc(struct gps_context_t *context)
 /* allocate NTP SHM segment.  return its segment number, or -1 */
 {
     int i;
@@ -203,7 +190,6 @@ static /*@null@*/ volatile struct shmTime *ntpshm_alloc(struct gps_context_t *co
 
     return NULL;
 }
-/*@+unqualifiedtrans@*/
 
 static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime *s)
 /* free NTP SHM segment */
@@ -221,7 +207,6 @@ static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime 
 
 void ntpshm_session_init(struct gps_device_t *session)
 {
-    /*@-mustfreeonly@*/
 #ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
     session->shm_clock = NULL;
@@ -229,7 +214,6 @@ void ntpshm_session_init(struct gps_device_t *session)
 #ifdef PPS_ENABLE
     session->shm_pps = NULL;
 #endif	/* PPS_ENABLE */
-    /*@+mustfreeonly@*/
 }
 
 int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedelta_t *td)
@@ -255,7 +239,6 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
 
     ntp_write(shmseg, td, precision, session->context->leap_notify);
 
-    /*@-type@*/ /* splint is confused about struct timespec */
     timespec_str( &td->real, real_str, sizeof(real_str) );
     timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_log(&session->context->errout, LOG_RAW,
@@ -263,7 +246,6 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
 	     session->gpsdata.dev.path,
 	     (precision == -20) ? "pps" : "clock", 
 	     real_str, clock_str);
-    /*@+type@*/
 
     return 1;
 }
@@ -280,7 +262,6 @@ struct sock_sample {
     int magic;      /* must be SOCK_MAGIC */
 };
 
-/*@-mustfreefresh@*/
 static void init_hook(struct gps_device_t *session)
 /* for chrony SOCK interface, which allows nSec timekeeping */
 {
@@ -317,7 +298,6 @@ static void init_hook(struct gps_device_t *session)
 		     session->gpsdata.dev.path, chrony_path);
     }
 }
-/*@+mustfreefresh@*/
 
 
 /* td is the real time and clock time of the edge */
@@ -346,8 +326,6 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     sample.pulse = 0;
     sample.leap = leap_notify;
     sample.magic = SOCK_MAGIC;
-    /*@-compdef@*/
-    /*@-type@*//* splint is confused about struct timespec */
     /* chronyd wants a timeval, not a timspec, not to worry, it is
      * just the top of the second */
     TSTOTV(&sample.tv, &td->clock);
@@ -356,17 +334,13 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     /* if tv_sec greater than 2 then tv_nsec loses precision, but
      * not a big deal as slewing will bbe required */
     sample.offset = TSTONS( &offset );
-    /*@+compdef@*/
     sample._pad = 0;
-    /*@+type@*/
 
-    /*@-type@*/ /* splint is confused about struct timespec */
     timespec_str( &td->real, real_str, sizeof(real_str) );
     timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_log(&session->context->errout, LOG_RAW,
 	     "PPS chrony_send %s @ %s Offset: %0.9f\n",
 	     real_str, clock_str, sample.offset);
-    /*@+type@*/
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
 
@@ -377,7 +351,7 @@ static void wrap_hook(volatile struct pps_thread_t *pps_thread)
 	(void)close(session->chronyfd);
 }
 
-static /*@observer@*/ char *report_hook(volatile struct pps_thread_t *pps_thread,
+static char *report_hook(volatile struct pps_thread_t *pps_thread,
 					struct timedelta_t *td)
 /* ship the time of a PPS event to ntpd and/or chrony */
 {
@@ -411,7 +385,6 @@ static /*@observer@*/ char *report_hook(volatile struct pps_thread_t *pps_thread
 }
 #endif	/* PPS_ENABLE */
 
-/*@-mustfreeonly@*/
 void ntpshm_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
 {
@@ -427,9 +400,7 @@ void ntpshm_link_deactivate(struct gps_device_t *session)
     }
 #endif	/* PPS_ENABLE */
 }
-/*@+mustfreeonly@*/
 
-/*@-mustfreeonly@*/
 void ntpshm_link_activate(struct gps_device_t *session)
 /* set up ntpshm storage for a session */
 {
@@ -461,7 +432,6 @@ void ntpshm_link_activate(struct gps_device_t *session)
 #endif /* PPS_ENABLE */
     }
 }
-/*@+mustfreeonly@*/
 
 #endif /* NTPSHM_ENABLE */
 /* end */

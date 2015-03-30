@@ -57,14 +57,12 @@ static void assert_uinteger(char *attr, uint fld, uint val)
 
 static void assert_boolean(char *attr, bool fld, bool val)
 {
-    /*@-boolcompare@*/
     if (fld != val) {
 	(void)fprintf(stderr,
 		      "'%s' boolean attribute eval failed, value = %s.\n",
 		      attr, fld ? "true" : "false");
 	exit(EXIT_FAILURE);
     }
-    /*@+boolcompare@*/
 }
 
 /*
@@ -81,7 +79,6 @@ static void assert_real(char *attr, double fld, double val)
     }
 }
 
-/*@ -fullinitblock @*/
 
 static struct gps_data_t gpsdata;
 
@@ -114,7 +111,6 @@ static char *stringptrs[3];
 static char stringstore[256];
 static int stringcount;
 
-/*@-type@*/
 static const struct json_array_t json_array_3 = {
     .element_type = t_string,
     .arr.strings.ptrs = stringptrs,
@@ -123,7 +119,6 @@ static const struct json_array_t json_array_3 = {
     .count = &stringcount,
     .maxlen = sizeof(stringptrs)/sizeof(stringptrs[0]),
 };
-/*@+type@*/
 
 /* Case 4: test defaulting of unspecified attributes */
 
@@ -167,7 +162,6 @@ struct dumbstruct_t {
 static struct dumbstruct_t dumbstruck[5];
 static int dumbcount;
 
-/*@-type@*/
 static const struct json_attr_t json_attrs_6_subtype[] = {
     {"name",  t_string,  .addr.offset = offsetof(struct dumbstruct_t, name),
                          .len = 64},
@@ -185,7 +179,6 @@ static const struct json_attr_t json_attrs_6[] = {
                        .addr.array.maxlen = sizeof(dumbstruck)/sizeof(dumbstruck[0])},
     {NULL},
 };
-/*@+type@*/
 
 /* Case 7: test parsing of version response */
 
@@ -218,14 +211,12 @@ static const char *json_str9 = "{\"parts\":[]}";
 static const char *json_str10 = "[23,-17,5]";
 static int intstore[4], intcount;
 
-/*@-type@*/
 static const struct json_array_t json_array_10 = {
     .element_type = t_integer,
     .arr.integers.store = intstore,
     .count = &intcount,
     .maxlen = sizeof(intstore)/sizeof(intstore[0]),
 };
-/*@+type@*/
 
 /* Case 11: Read array of booleans */
 
@@ -233,14 +224,12 @@ static const char *json_str11 = "[true,false,true]";
 static bool boolstore[4];
 static int boolcount;
 
-/*@-type@*/
 static const struct json_array_t json_array_11 = {
     .element_type = t_boolean,
     .arr.booleans.store = boolstore,
     .count = &boolcount,
     .maxlen = sizeof(boolstore)/sizeof(boolstore[0]),
 };
-/*@+type@*/
 
 /* Case 12: Read array of reals */
 
@@ -248,17 +237,14 @@ static const char *json_str12 = "[23.1,-17.2,5.3]";
 static double realstore[4]; 
 static int realcount;
 
-/*@-type@*/
 static const struct json_array_t json_array_12 = {
     .element_type = t_real,
     .arr.reals.store = realstore,
     .count = &realcount,
     .maxlen = sizeof(realstore)/sizeof(realstore[0]),
 };
-/*@+type@*/
 #endif /* JSON_MINIMAL */
 
-/*@ +fullinitblock @*/
 /* *INDENT-ON* */
 
 static void jsontest(int i)

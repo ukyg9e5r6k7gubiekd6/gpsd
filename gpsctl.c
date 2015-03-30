@@ -15,9 +15,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/select.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "revision.h"
@@ -61,7 +59,7 @@ static void settle(struct gps_device_t *session)
  */
 #define NON_ERROR	0	/* must be distinct from any gps_mask_t value */
 
-static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
+static bool gps_query(struct gps_data_t *gpsdata,
 		       gps_mask_t expect,
 		       const int timeout,
 		       const char *fmt, ... )
@@ -86,12 +84,10 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
     va_end(ap);
     if (buf[strlen(buf)-1] != '\n')
 	(void)strlcat(buf, "\n", sizeof(buf));
-    /*@-usedef@*/
     if (write(gpsdata->gps_fd, buf, strlen(buf)) <= 0) {
 	gpsd_log(&context.errout, LOG_ERROR, "gps_query(), write failed\n");
 	return false;
     }
-    /*@+usedef@*/
     gpsd_log(&context.errout, LOG_PROG, "gps_query(), wrote, %s\n", buf);
 
     FD_ZERO(&rfds);
@@ -101,7 +97,6 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 
 	gpsd_log(&context.errout, LOG_PROG, "waiting...\n");
 
-	/*@ -usedef -type -nullpass -compdef @*/
 	tv.tv_sec = 2;
 	tv.tv_nsec = 0;
 	if (pselect(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv, &oldset) == -1) {
@@ -110,7 +105,6 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 	    gpsd_log(&context.errout, LOG_ERROR, "select %s\n", strerror(errno));
 	    exit(EXIT_FAILURE);
 	}
-	/*@ +usedef +type +nullpass +compdef @*/
 
 	gpsd_log(&context.errout, LOG_PROG, "reading...\n");
 
@@ -120,7 +114,6 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 	    return false;
 	}
 
-	/*@ +ignorequals @*/
 	if ((expect == NON_ERROR) || (expect & gpsdata->set) != 0)
 	    return true;
 	else if (timeout > 0 && (time(NULL) - starttime > timeout)) {
@@ -129,7 +122,6 @@ static bool gps_query(/*@out@*/struct gps_data_t *gpsdata,
 		     timeout);
 	    return false;
 	}
-	/*@ -ignorequals @*/
     }
 
     return false;
@@ -146,7 +138,7 @@ static void onsig(int sig)
     }
 }
 
-static char /*@observer@*/ *gpsd_id( /*@in@ */ struct gps_device_t *session)
+static char *gpsd_id(struct gps_device_t *session)
 /* full ID of the device for reports, including subtype */
 {
     static char buf[128];
@@ -178,7 +170,6 @@ static void ctlhook(struct gps_device_t *device UNUSED, gps_mask_t changed UNUSE
     }
 }
 
-/*@-mustfreeonly -observertrans -statictrans@*/
 int main(int argc, char **argv)
 {
     int option, status;
@@ -286,7 +277,6 @@ int main(int argc, char **argv)
 	    break;
 	case 'R':		/* remove the SHM export segment */
 #ifdef SHM_EXPORT_ENABLE
-	    /*@-nullpass@*/
 	    status = shmget(getenv("GPSD_SHM_KEY") ? (key_t)strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : (key_t)GPSD_SHM_KEY, 0, 0);
 	    if (status == -1) {
 		gpsd_log(&context.errout, LOG_WARN,
@@ -301,7 +291,6 @@ int main(int argc, char **argv)
 		    exit(1);
 		}
 	    }
-	    /*@+nullpass@*/
 	    exit(0);
 #endif /* SHM_EXPORT_ENABLE */
 	case 'T':		/* set the timeout on packet recognition */
@@ -360,7 +349,6 @@ int main(int argc, char **argv)
     (void) signal(SIGTERM, onsig);
     (void) signal(SIGQUIT, onsig);
 
-    /*@-nullpass@*/ /* someday, add null annotation to the gpsopen() params */
     if (!lowlevel) {
 	/* Try to open the stream to gpsd. */
 	if (gps_open(NULL, NULL, &gpsdata) != 0) {
@@ -370,7 +358,6 @@ int main(int argc, char **argv)
 	    lowlevel = true;
 	}
     }
-    /*@-nullpass@*/
 
     if (!lowlevel) {
 	int i, devcount;
@@ -480,7 +467,6 @@ int main(int argc, char **argv)
 	    exit(EXIT_SUCCESS);
 	}
 
-	/*@-boolops@*/
 	/*
 	 * We used to wait on DEVICE_SET here.  That doesn't work
 	 * anymore because when the demon generates its response it
@@ -514,7 +500,6 @@ int main(int argc, char **argv)
 			 "%s mode change succeeded\n",
 			 gpsdata.dev.path);
 	}
-	/*@+boolops@*/
 	if (speed != NULL) {
 	    char parity = 'N';
 	    char stopbits = '1';
@@ -525,7 +510,6 @@ int main(int argc, char **argv)
 				 device, speed);
 	    else {
 		char *modespec = strchr(speed, ':');
-		/*@ +charint @*/
 		status = 0;
 		if (modespec!=NULL) {
 		    *modespec = '\0';
@@ -587,7 +571,6 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	    }
 
-	/*@ -mustfreeonly -immediatetrans @*/
 	gps_context_init(&context, "gpsctl");
 	context.errout.debug = debuglevel;
 	session.context = &context;
@@ -609,7 +592,6 @@ int main(int argc, char **argv)
 		session.device_type->mode_switcher(&session, MODE_NMEA);
 	gpsd_wrap(&session);
 	exit(EXIT_SUCCESS);
-	/*@ +mustfreeonly +immediatetrans @*/
 #endif /* RECONFIGURE_ENABLE */
     } else {
 	/* access to the daemon failed, use the low-level facilities */
@@ -623,7 +605,6 @@ int main(int argc, char **argv)
 	 * that spuriously look like failure at high baud rates. 
 	 */
 
-	/*@ -mustfreeonly -immediatetrans @*/
 	gps_context_init(&context, "gpsctl");
 	context.errout.debug = debuglevel;
 	session.context = &context;	/* in case gps_init isn't called */
@@ -657,14 +638,13 @@ int main(int argc, char **argv)
 	    }
 	    gpsd_log(&context.errout, LOG_INF, 
 		     "device %s activated\n", session.gpsdata.dev.path);
-	    /*@i1@*/FD_SET(session.gpsdata.gps_fd, &all_fds);
+	    FD_SET(session.gpsdata.gps_fd, &all_fds);
 	    if (session.gpsdata.gps_fd > maxfd)
 		 maxfd = session.gpsdata.gps_fd;
 
 	    /* initialize the GPS context's time fields */
 	    gpsd_time_init(&context, time(NULL));
 
-	    /*@-compdef@*/
 	    /* grab packets until we time out, get sync, or fail sync */
 	    for (hunting = true; hunting; )
 	    {
@@ -704,7 +684,6 @@ int main(int argc, char **argv)
 		    break;
 		}
 	    }
-	    /*@+compdef@*/
 
 	    gpsd_log(&context.errout, LOG_PROG,
 		     "%s looks like a %s at %d.\n",
@@ -738,7 +717,6 @@ int main(int argc, char **argv)
 	/* now perform the actual control function */
 	status = 0;
 #ifdef RECONFIGURE_ENABLE
-	/*@ -nullderef @*/
 	if (to_nmea || to_binary) {
 	    bool write_enable = context.readonly;
 	    context.readonly = false;
@@ -764,7 +742,6 @@ int main(int argc, char **argv)
 	    char *modespec;
 
 	    modespec = strchr(speed, ':');
-	    /*@ +charint @*/
 	    status = 0;
 	    if (modespec!=NULL) {
 		*modespec = '\0';
@@ -834,7 +811,6 @@ int main(int argc, char **argv)
 	}
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
-	/*@ -compdef @*/
 	if (control) {
 	    bool write_enable = context.readonly;
 	    context.readonly = false;
@@ -855,14 +831,10 @@ int main(int argc, char **argv)
 	    }
 	    context.readonly = write_enable;
 	}
-	/*@ +compdef @*/
 #endif /* CONTROLSEND_ENABLE */
 
 	exit(status);
-	/*@ +nullderef @*/
-	/*@ +mustfreeonly +immediatetrans @*/
     }
 }
-/*@+mustfreeonly +observertrans +statictrans@*/
 
 /* end */

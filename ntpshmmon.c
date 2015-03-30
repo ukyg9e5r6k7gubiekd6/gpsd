@@ -8,9 +8,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <limits.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #include "ntpshm.h"
@@ -93,8 +91,6 @@ int main(int argc, char **argv)
 	    switch(status)
 	    {
 	    case OK:
-		/*@-mustfreefresh -formattype@*/
-		/*@-type@*//* splint is confused about struct timespec */
 		if (timespec_diff_ns(shm_stat.tvc, tick[i]) >= cycle * 1000000000) {
 		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
 			   ntp_name(i),
@@ -105,8 +101,6 @@ int main(int argc, char **argv)
 		    tick[i] = shm_stat.tvc;
 		    --nsamples;
 		}
-		/*@+type@*/
-		/*@+mustfreefresh +formattype@*/
 		break;
 	    case NO_SEGMENT:
 		break;
@@ -114,19 +108,15 @@ int main(int argc, char **argv)
 		/* do nothing, data not ready, wait another cycle */
 		break;
 	    case BAD_MODE:
-		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpshmmon: unknown mode %d on segment %s\n",
 			shm_stat.status, ntp_name(i));
-		/*@+mustfreefresh@*/
 		break;
 	    case CLASH:
 		/* do nothing, data is corrupt, wait another cycle */
 		break;
 	    default:
-		/*@-mustfreefresh@*/
 		fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
 			status, ntp_name(i));
-		/*@+mustfreefresh@*/
 		break;
 	    }
 	}

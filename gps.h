@@ -18,9 +18,7 @@ extern "C" {
 #include <time.h>
 #include <signal.h>
 #include <stdio.h>
-#ifndef S_SPLINT_S
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
-#endif
 
 /*
  * 4.1 - Base version for initial JSON protocol (Dec 2009, release 2.90)
@@ -138,14 +136,12 @@ struct gst_t {
 /* RTCM104 doesn't specify this, so give it the largest reasonable value */
 #define MAXHEALTH	(RTCM2_WORDS_MAX-2)
 
-#ifndef S_SPLINT_S
 /*
  * A nominally 30-bit word (24 bits of data, 6 bits of parity)
  * used both in the GPS downlink protocol described in IS-GPS-200
  * and in the format for DGPS corrections used in RTCM-104v2.
  */
-typedef /*@unsignedintegraltype@*/ uint32_t isgps30bits_t;
-#endif /* S_SPLINT_S */
+typedef uint32_t isgps30bits_t;
 
 /*
  * Values for "system" fields.  Note, the encoding logic is senstive to the
@@ -830,11 +826,7 @@ struct subframe_t {
     };
 };
 
-#ifndef S_SPLINT_S
 typedef uint64_t gps_mask_t;
-#else
-typedef /*@unsignedintegraltype@*/ unsigned long long gps_mask_t;
-#endif /* S_SPLINT_S */
 
 /*
  * Is an MMSI number that of an auxiliary associated with a mother ship?
@@ -2025,45 +2017,43 @@ struct gps_data_t {
     void *privdata;
 };
 
-extern int gps_open(/*@null@*/const char *, /*@null@*/const char *,
-		      /*@out@*/struct gps_data_t *);
+extern int gps_open(const char *, const char *,
+		      struct gps_data_t *);
 extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *, const char *, ... );
-extern int gps_read(/*@out@*/struct gps_data_t *);
+extern int gps_read(struct gps_data_t *);
 extern int gps_unpack(char *, struct gps_data_t *);
 extern bool gps_waiting(const struct gps_data_t *, int);
-extern int gps_stream(struct gps_data_t *, unsigned int, /*@null@*/void *);
+extern int gps_stream(struct gps_data_t *, unsigned int, void *);
 extern int gps_mainloop(struct gps_data_t *, int,
 			void (*)(struct gps_data_t *));
-extern const char /*@null observer@*/ *gps_data(const struct gps_data_t *);
-extern const char /*@observer@*/ *gps_errstr(const int);
+extern const char *gps_data(const struct gps_data_t *);
+extern const char *gps_errstr(const int);
 
 int json_toff_read(const char *buf, struct gps_data_t *,
-		  /*@null@*/ const char **);
+		  const char **);
 int json_pps_read(const char *buf, struct gps_data_t *,
-		  /*@null@*/ const char **);
+		  const char **);
 
 /* dependencies on struct gpsdata_t end here */
 
 extern void libgps_trace(int errlevel, const char *, ...);
 
-extern void gps_clear_fix(/*@ out @*/struct gps_fix_t *);
-extern void gps_clear_dop( /*@out@*/ struct dop_t *);
-extern void gps_merge_fix(/*@ out @*/struct gps_fix_t *,
-			  gps_mask_t,
-			  /*@ in @*/struct gps_fix_t *);
+extern void gps_clear_fix(struct gps_fix_t *);
+extern void gps_clear_dop( struct dop_t *);
+extern void gps_merge_fix(struct gps_fix_t *, gps_mask_t, struct gps_fix_t *);
 extern void gps_enable_debug(int, FILE *);
-extern /*@observer@*/const char *gps_maskdump(gps_mask_t);
+extern const char *gps_maskdump(gps_mask_t);
 
 extern double safe_atof(const char *);
 extern time_t mkgmtime(register struct tm *);
 extern timestamp_t timestamp(void);
 extern timestamp_t iso8601_to_unix(char *);
-extern /*@observer@*/char *unix_to_iso8601(timestamp_t t, /*@ out @*/char[], size_t len);
+extern char *unix_to_iso8601(timestamp_t t, char[], size_t len);
 extern double earth_distance(double, double, double, double);
 extern double earth_distance_and_bearings(double, double, double, double,
-					  /*@null@*//*@out@*/double *,
-					  /*@null@*//*@out@*/double *);
+					  double *,
+					  double *);
 extern double wgs84_separation(double, double);
 
 /* some multipliers for interpreting GPS output */

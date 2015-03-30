@@ -13,9 +13,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "bits.h"
@@ -145,13 +143,11 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
     /* measurement_sequence       = getzword(9); */
-    /*@ -boolops -predboolothers @*/
     session->gpsdata.status = (getzword(10) & 0x1c) ? 0 : 1;
     if (session->gpsdata.status != 0)
 	session->newdata.mode = (getzword(10) & 1) ? MODE_2D : MODE_3D;
     else
 	session->newdata.mode = MODE_NO_FIX;
-    /*@ +boolops -predboolothers @*/
 
     /* solution_type                 = getzword(11); */
     session->gpsdata.satellites_used = (int)getzword(12);
@@ -167,10 +163,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     unpacked_date.tm_sec = (int)getzword(24);
     unpacked_date.tm_isdst = 0;
     subseconds = (int)getzlong(25) / 1e9;
-    /*@ -compdef */
     session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
-    /*@ +compdef */
-    /*@ -type @*/
     session->newdata.latitude = ((long)getzlong(27)) * RAD_2_DEG * 1e-8;
     session->newdata.longitude = ((long)getzlong(29)) * RAD_2_DEG * 1e-8;
     /*
@@ -179,7 +172,6 @@ static gps_mask_t handle1000(struct gps_device_t *session)
      * specify whether word 31 is geodetic or WGS 84.
      */
     session->newdata.altitude = ((long)getzlong(31)) * 1e-2;
-    /*@ +type @*/
     session->gpsdata.separation = ((short)getzword(33)) * 1e-2;
     session->newdata.altitude -= session->gpsdata.separation;
     session->newdata.speed = (int)getzlong(34) * 1e-2;
@@ -222,20 +214,16 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
     /* measurement_sequence       = getzword(9); */
-    /*@+charint@*/
     int gps_week = getzword(10);
     int gps_seconds = getzlong(11);
     /* gps_nanoseconds            = getzlong(13); */
-    /*@-charint@*/
     /* Note: this week counter is not limited to 10 bits. */
     session->context->gps_week = (unsigned short)gps_week;
     session->gpsdata.satellites_used = 0;
     for (i = 0; i < ZODIAC_CHANNELS; i++) {
 	int status, prn;
-	/*@ -type @*/
 	session->driver.zodiac.Zv[i] = status = (int)getzword(15 + (3 * i));
 	session->driver.zodiac.Zs[i] = prn = (int)getzword(16 + (3 * i));
-	/*@ +type @*/
 
 	if (status & 1)
 	    session->gpsdata.satellites_used++;
@@ -397,7 +385,6 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
 static ssize_t zodiac_control_send(struct gps_device_t *session,
 				   char *msg, size_t len)
 {
-    /*@-usedef -compdef@*/
     unsigned short shortwords[256];
 
 #define min(x,y)	((x) < (y) ? x : y)
@@ -410,7 +397,6 @@ static ssize_t zodiac_control_send(struct gps_device_t *session,
     /* and if len isn't even, it's your own fault */
     return zodiac_spew(session, shortwords[0], shortwords + 1,
 		       (int)(len / 2 - 1));
-    /*@+usedef +compdef@*/
 }
 #endif /* CONTROLSEND_ENABLE */
 

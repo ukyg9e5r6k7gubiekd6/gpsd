@@ -27,7 +27,6 @@ static WINDOW *mid19win, *mid27win;
 static bool dispmode = false, subframe_enabled = false, ppstime_enabled = false;
 static int leapseconds;
 
-/*@ -nullassign @*/
 static char *verbpat[] = {
     "#Time:",
     "@R Time:",
@@ -39,7 +38,6 @@ static char *verbpat[] = {
     NULL
 };
 
-/*@ +nullassign @*/
 
 static char *dgpsvec[] = {
     "None",
@@ -64,10 +62,8 @@ static char *dgpsvec[] = {
 
 static bool sirf_initialize(void)
 {
-    /*@-globstate@*/
     unsigned int i;
 
-    /*@ -onlytrans @*/
     mid2win = subwin(devicewin, 6, 80, 1, 0);
     mid4win = subwin(devicewin, SIRF_CHANNELS + 3, 30, 7, 0);
     mid6win = subwin(devicewin, 3, 50, 7, 30);
@@ -89,7 +85,6 @@ static bool sirf_initialize(void)
     (void)syncok(mid13win, true);
     (void)syncok(mid27win, true);
 
-    /*@ -nullpass @*/
     (void)wborder(mid2win, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(mid2win, A_BOLD);
     (void)wmove(mid2win, 0, 1);
@@ -200,21 +195,16 @@ static bool sirf_initialize(void)
     display(mid27win, 0, 1, " DGPS Status ");
     display(mid27win, 2, 8, " Packet type 27 (0x1B) ");
     (void)wattrset(mid27win, A_NORMAL);
-    /*@ +nullpass @*/
-    /*@ -onlytrans @*/
 
 #ifdef CONTROLSEND_ENABLE
     /* probe for version */
-    /*@ -compdef @*/
     (void)monitor_control_send((unsigned char *)"\x84\x00", 2);
-    /*@ +compdef @*/
 #endif /* CONTROLSEND_ENABLE */
 
     /* initialize the GPS context's time fields */
     gpsd_time_init(session.context, time(NULL));
 
     return true;
-    /*@+globstate@*/
 }
 
 static void decode_ecef(double x, double y, double z,
@@ -226,11 +216,7 @@ static void decode_ecef(double x, double y, double z,
     const double e_2 = (a * a - b * b) / (b * b);
     double lambda, p, theta, phi, n, h, vnorth, veast, vup, speed, heading;
 
-    /* splint pacification */
-    assert(mid2win!=NULL);
-
     lambda = atan2(y, x);
-    /*@ -evalorder @*/
     p = sqrt(pow(x, 2) + pow(y, 2));
     theta = atan2(z * a, p * b);
     phi =
@@ -249,7 +235,6 @@ static void decode_ecef(double x, double y, double z,
 	vz * sin(phi);
     speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
     heading = atan2(veast, vnorth);
-    /*@ +evalorder @*/
     if (heading < 0)
 	heading += 2 * GPS_PI;
 
@@ -274,7 +259,6 @@ static void decode_ecef(double x, double y, double z,
     (void)wattrset(mid2win, A_NORMAL);
 }
 
-/*@ -globstate */
 static void sirf_update(void)
 {
     int i, j, ch, sv;
@@ -282,9 +266,6 @@ static void sirf_update(void)
     size_t len;
     uint8_t dgps;
     char tbuf[JSON_DATE_MAX+1];
-
-    /* splint pacification */
-    assert(mid2win!=NULL && mid27win != NULL);
 
     buf = session.lexer.outbuffer + 4;
     len = session.lexer.outbuflen - 8;
@@ -507,14 +488,12 @@ static void sirf_update(void)
 	total               3 x 12 = 36 bytes
 	******************************************************************/
 	dgps = getub(buf, 1);
-	/*@ -type @*/
 	display(mid27win, 1, 1, "%8s =                                      ",
 		(CHECK_RANGE(dgpsvec, dgps) ? dgpsvec[dgps] : "???"));
 	(void)wmove(mid27win, 1, 11);
 	for (ch = 0; ch < SIRF_CHANNELS; ch++)
 	    if (getub(buf, 16 + 3 * ch) != '\0')
 		(void)wprintw(mid27win, " %d", getub(buf, 16 + 3 * ch));
-	/*@ +type @*/
 	monitor_log("DST 0x1b=");
 	break;
 
@@ -541,12 +520,10 @@ static void sirf_update(void)
 	break;
 
     case 0xff:			/* Development Data */
-	/*@ +ignoresigns @*/
 	while (len > 0 && buf[len - 1] == '\n')
 	    len--;
 	while (len > 0 && buf[len - 1] == ' ')
 	    len--;
-	/*@ -ignoresigns @*/
 	buf[len] = '\0';
 	j = 1;
 	for (i = 0; verbpat[i] != NULL; i++)
@@ -577,19 +554,15 @@ static void sirf_update(void)
 	   display(mid4win, ch + 2, 27, "  ");
     }
 
-    /*@ -nullpass -nullderef @*/
     if (dispmode) {
 	(void)touchwin(mid19win);
 	(void)wnoutrefresh(mid19win);
     }
-    /*@ +nullpass -nullderef @*/
 
 #ifdef PPS_ENABLE
     pps_update(mid7win, 2, 32);
 #endif /* PPS_ENABLE */
 }
-
-/*@ +globstate */
 
 #ifdef CONTROLSEND_ENABLE
 static int sirf_command(char line[])

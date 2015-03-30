@@ -15,17 +15,14 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S*/
 
 #include "ntpshm.h"
 #include "compiler.h"
 
-struct shmTime /*@null@*/ *shm_get(const int unit, const bool create, const bool forall)
+struct shmTime *shm_get(const int unit, const bool create, const bool forall)
 /* initialize a SHM segment */
 {
-    /*@-mustfreefresh@*/
     struct shmTime *p = NULL;
     int shmid;
 
@@ -43,10 +40,8 @@ struct shmTime /*@null@*/ *shm_get(const int unit, const bool create, const bool
 	return NULL;
     }
     return p;
-    /*@+mustfreefresh@*/
 }
 
-/*@-statictrans@*/
 char *ntp_name(const int unit)
 /* return the name of a specified segment */
 {
@@ -56,9 +51,8 @@ char *ntp_name(const int unit)
 
     return name;
 }
-/*@+statictrans@*/
 
-enum segstat_t ntp_read(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_stat_t *shm_stat, const bool consume)
+enum segstat_t ntp_read(struct shmTime *shm_in, struct shm_stat_t *shm_stat, const bool consume)
 /* try to grab a sample from the specified SHM segment */
 {
     volatile struct shmTime shmcopy, *shm = shm_in;
@@ -71,7 +65,6 @@ enum segstat_t ntp_read(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_st
 	return NO_SEGMENT;
     }
 
-    /*@-type@*//* splint is confused about struct timespec */
     shm_stat->tvc.tv_sec = shm_stat->tvc.tv_nsec = 0;
 
     clock_gettime(CLOCK_REALTIME, &shm_stat->tvc);
@@ -172,7 +165,6 @@ enum segstat_t ntp_read(/*@null@*/struct shmTime *shm_in, /*@out@*/struct shm_st
 	shm_stat->status = BAD_MODE;
 	break;
     }
-    /*@-type@*/
 
     /*
      * leap field is not a leap offset but a leap notification code.

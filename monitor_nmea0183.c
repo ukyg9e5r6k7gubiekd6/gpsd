@@ -12,9 +12,7 @@
 #include <stdlib.h> /* for labs() */
 #include <assert.h>
 #include <stdarg.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "gpsmon.h"
@@ -41,7 +39,6 @@ static bool nmea_initialize(void)
 {
     int i;
 
-    /*@ -globstate -onlytrans @*/
     cookedwin = derwin(devicewin, 3, 80, 0, 0);
     assert(cookedwin !=NULL);
     (void)wborder(cookedwin, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -142,14 +139,12 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgstwin, 5, 12, " GST ");
     (void)wattrset(gpgstwin, A_NORMAL);
 
-    /*@ +onlytrans @*/
 
     last_tick = timestamp();
 
     sentences[0] = '\0';
 
     return (nmeawin != NULL);
-    /*@ +globstate @*/
 }
 
 static void cooked_pvt(void)
@@ -211,7 +206,6 @@ static void monitor_satlist(WINDOW *win, int y, int x)
     monitor_fixframe(win);
 }
 
-/*@ -globstate -nullpass (splint is confused) */
 static void nmea_update(void)
 {
     char **fields;
@@ -348,8 +342,6 @@ static void nmea_update(void)
     pps_update(gpgsawin, PPS_LINE, 6);
 #endif /* PPS_ENABLE */
 }
-
-/*@ +globstate +nullpass */
 
 #undef SENTENCELINE
 

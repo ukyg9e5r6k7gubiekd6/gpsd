@@ -141,7 +141,7 @@ invalid data.
 **************************************************************************/
 static int gar_decode(const struct gps_context_t *context,
 		      const char *data, const size_t length, 
-		      const char *prefix, const double dividor,	/*@out@*/
+		      const char *prefix, const double dividor,
 		      double *result)
 {
     char buf[10];
@@ -150,8 +150,6 @@ static int gar_decode(const struct gps_context_t *context,
     int offset = 1;		/* assume one character prefix (E,W,S,N,U,D, etc) */
     long int intresult;
 
-    /* splint is buggy here, thinks buf can be a null pointer */
-    /*@ -mustdefine -nullderef -nullpass @*/
     if (length >= sizeof(buf)) {
 	gpsd_log(&context->errout, LOG_ERROR, "internal buffer too small\n");
 	return -1;
@@ -196,7 +194,6 @@ static int gar_decode(const struct gps_context_t *context,
 	gpsd_log(&context->errout, LOG_WARN, "Invalid value %s\n", buf);
 	return -1;
     }
-    /*@ +mustdefine +nullderef +nullpass @*/
 
     intresult = atol(buf + offset);
     if (intresult == 0L)
@@ -216,12 +213,11 @@ static int gar_decode(const struct gps_context_t *context,
 static int gar_int_decode(const struct gps_context_t *context,
 			  const char *data, const size_t length,
 			  const unsigned int min, const unsigned int max,
-			  /*@out@*/ unsigned int *result)
+			  unsigned int *result)
 {
     char buf[6];
     unsigned int res;
 
-    /*@ -mustdefine @*/
     if (length >= sizeof(buf)) {
 	gpsd_log(&context->errout, LOG_ERROR, "internal buffer too small\n");
 	return -1;
@@ -236,7 +232,6 @@ static int gar_int_decode(const struct gps_context_t *context,
 	return -2;
     }
 
-    /*@ -nullpass @*//* splint bug */
     if (strspn(buf, "0123456789") != length) {
 	gpsd_log(&context->errout, LOG_WARN, "Invalid value %s\n", buf);
 	return -1;
@@ -252,7 +247,6 @@ static int gar_int_decode(const struct gps_context_t *context,
 		 max);
 	return -1;
     }
-    /*@ +mustdefine +nullpass @*/
 }
 
 

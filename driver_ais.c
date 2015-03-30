@@ -29,14 +29,8 @@
 static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
 /* beginning at bitvec bit start, unpack count sixbit characters */
 {
-    /*@ +type @*/
-#ifdef S_SPLINT_S
-    /* the real string causes a splint internal error */
-    const char sixchr[] = "abcd";
-#else
     const char sixchr[64] =
 	"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_ !\"#$%&'()*+,-./0123456789:;<=>?";
-#endif /* S_SPLINT_S */
     int i;
 
     /* six-bit to ASCII */
@@ -55,10 +49,8 @@ static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
 	    to[i] = '\0';
 	else
 	    break;
-    /*@ -type @*/
 }
 
-/*@ +charint @*/
 bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		       struct ais_t *ais,
 		       const unsigned char *bits, size_t bitlen,
@@ -67,9 +59,6 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 {
     unsigned int u; int i;
 
-#ifdef S_SPLINT_S
-    assert(type24_queue != NULL);
-#endif /* S_SPLINT_S */
 #define UBITS(s, l)	ubits((unsigned char *)bits, s, l, false)
 #define SBITS(s, l)	sbits((signed char *)bits, s, l, false)
 #define UCHARS(s, to)	from_sixbit((unsigned char *)bits, s, sizeof(to)-1, to)
@@ -439,12 +428,10 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		mmsi[u] = UBITS(40 + 32*u, 30);
 	    else
 		mmsi[u] = 0;
-	/*@ -usedef @*/
 	ais->type7.mmsi1 = mmsi[0];
 	ais->type7.mmsi2 = mmsi[1];
 	ais->type7.mmsi3 = mmsi[2];
 	ais->type7.mmsi4 = mmsi[3];
-	/*@ +usedef @*/
 	break;
     }
     case 8: /* Binary Broadcast Message */
@@ -1098,6 +1085,5 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
     /* data is fully decoded */
     return true;
 }
-/*@ -charint @*/
 
 /* driver_ais.c ends here */

@@ -3,7 +3,7 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 #include "gpsd.h"
-#if defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S)
+#if defined(DBUS_EXPORT_ENABLE)
 #include <dbus/dbus.h>
 
 static DBusConnection *connection = NULL;
@@ -72,4 +72,4 @@ void send_dbus_fix(struct gps_device_t *channel)
     dbus_message_unref(message);
 }
 
-#endif /* defined(DBUS_EXPORT_ENABLE) && !defined(S_SPLINT_S) */
+#endif /* defined(DBUS_EXPORT_ENABLE) */

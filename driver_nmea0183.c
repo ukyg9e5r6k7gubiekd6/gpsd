@@ -1336,7 +1336,6 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
  *
  **************************************************************************/
 
-/*@ -mayaliasunique @*/
 gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
@@ -1349,7 +1348,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	bool cycle_continue;	/* cycle continuer? */
 	nmea_decoder decoder;
     } nmea_phrase[] = {
-	/*@ -nullassign @*/
 	{"PGRMC", 0, false, NULL},	/* ignore Garmin Sensor Config */
 	{"PGRME", 7, false, processPGRME},
 	{"PGRMI", 0, false, NULL},	/* ignore Garmin Sensor Init */
@@ -1398,7 +1396,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"TXT", 5,  false, processTXT},
 	{"ZDA", 4,  false, processZDA},
 	{"VTG", 0,  false, NULL},	/* ignore Velocity Track made Good */
-	/*@ +nullassign @*/
     };
 
     int count;
@@ -1422,7 +1419,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	return ONLINE_SET;
     }
 
-    /*@ -usedef @*//* splint 3.1.1 seems to have a bug here */
     /* make an editable copy of the sentence */
     (void)strlcpy((char *)session->nmea.fieldcopy, sentence, sizeof(session->nmea.fieldcopy) - 1);
     /* discard the checksum part */
@@ -1441,13 +1437,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* while there is a search string and we haven't run off the buffer... */
     while ((p != NULL) && (p <= t)) {
 	session->nmea.field[count] = p;	/* we have a field. record it */
-	/*@ -compdef @*/
 	if ((p = strchr(p, ',')) != NULL) {	/* search for the next delimiter */
 	    *p = '\0';		/* replace it with a NUL */
 	    count++;		/* bump the counters and continue */
 	    p++;
 	}
-	/*@ +compdef @*/
     }
 
     /* point remaining fields at empty string, just in case */
@@ -1586,7 +1580,6 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     return retval;
 }
 
-/*@ +mayaliasunique @*/
 #endif /* NMEA_ENABLE */
 
 void nmea_add_checksum(char *sentence)

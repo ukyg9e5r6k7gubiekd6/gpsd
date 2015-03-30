@@ -25,7 +25,7 @@ PERMISSIONS
 
 int json_rtcm3_read(const char *buf,
 		    char *path, size_t pathlen, struct rtcm3_t *rtcm3,
-		    /*@null@*/ const char **endptr)
+		    const char **endptr)
 {
     static char *stringptrs[NITEMS(rtcm3->rtcmtypes.data)];
     static char stringstore[sizeof(rtcm3->rtcmtypes.data) * 2];
@@ -41,7 +41,6 @@ int json_rtcm3_read(const char *buf,
     int status = 0, satcount = 0;
 
 #define RTCM3FIELD(type, fld)	STRUCTOBJECT(struct rtcm3_ ## type ## _t, fld)
-    /*@ -fullinitblock @*/
     const struct json_attr_t rtcm1001_satellite[] = {
 	{"ident",     t_uinteger, RTCM3FIELD(1001, ident)},
 	{"ind",       t_uinteger, RTCM3FIELD(1001, L1.indicator)},
@@ -85,7 +84,6 @@ int json_rtcm3_read(const char *buf,
     };
 #undef RTCM3FIELD
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1001	&rtcm3->rtcmtypes.rtcm3_1001.header
     const struct json_attr_t json_rtcm1001[] = {
 	RTCM3_HEADER
@@ -99,9 +97,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1001
-    /*@+type@*/
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1002	&rtcm3->rtcmtypes.rtcm3_1002.header
     const struct json_attr_t json_rtcm1002[] = {
 	RTCM3_HEADER
@@ -115,9 +111,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1002
-    /*@+type@*/
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1007	rtcm3->rtcmtypes.rtcm3_1007
     const struct json_attr_t json_rtcm1007[] = {
 	RTCM3_HEADER
@@ -128,9 +122,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1002
-    /*@+type@*/
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1008	rtcm3->rtcmtypes.rtcm3_1008
     const struct json_attr_t json_rtcm1008[] = {
 	RTCM3_HEADER
@@ -143,9 +135,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1008
-    /*@+type@*/
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1009	&rtcm3->rtcmtypes.rtcm3_1009.header
     const struct json_attr_t json_rtcm1009[] = {
 	RTCM3_HEADER
@@ -159,9 +149,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1010
-    /*@+type@*/
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1010	&rtcm3->rtcmtypes.rtcm3_1010.header
     const struct json_attr_t json_rtcm1010[] = {
 	RTCM3_HEADER
@@ -175,9 +163,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1010
-    /*@+type@*/
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1014	&rtcm3->rtcmtypes.rtcm3_1014
     const struct json_attr_t json_rtcm1014[] = {
 	RTCM3_HEADER
@@ -192,9 +178,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1014
-    /*@+type@*/
 
-    /*@-type@*//* STRUCTARRAY confuses splint */
 #define R1033	rtcm3->rtcmtypes.rtcm3_1033
     const struct json_attr_t json_rtcm1033[] = {
 	RTCM3_HEADER
@@ -211,9 +195,7 @@ int json_rtcm3_read(const char *buf,
 	{NULL},
     };
 #undef R1033
-    /*@+type@*/
 
-    /*@-type@*//* complex union array initislizations confuses splint */
     const struct json_attr_t json_rtcm3_fallback[] = {
 	RTCM3_HEADER
 	{"data",     t_array, .addr.array.element_type = t_string,
@@ -224,8 +206,6 @@ int json_rtcm3_read(const char *buf,
 	                             .addr.array.maxlen = NITEMS(stringptrs)},
 	{NULL},
     };
-    /*@+type@*/
-    /*@ +fullinitblock @*/
 
 #undef RTCM3_HEADER
 /* *INDENT-ON* */

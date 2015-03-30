@@ -9,15 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#ifndef S_SPLINT_S
 #include <netdb.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 
-/*@ -branchstate */
 int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 /* open a connection to a DGPSIP server */
 {
@@ -59,8 +56,6 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
     device->servicetype = service_dgpsip;
     return device->gpsdata.gps_fd;
 }
-
-/*@ +branchstate */
 
 void dgpsip_report(struct gps_context_t *context,
 		   struct gps_device_t *gps,

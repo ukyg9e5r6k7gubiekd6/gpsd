@@ -9,7 +9,6 @@
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 #include "bits.h"
 
-/*@ +charint @*/
 static char enableEa[] = { 'E', 'a', 1 };
 static char enableBb[] = { 'B', 'b', 1 };
 static char getfirmware[] = { 'C', 'j' };
@@ -28,7 +27,6 @@ static unsigned char pollEn[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
-/*@ -charint @*/
 
 /*
  * These routines are specific to this driver
@@ -80,7 +78,6 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 
     flags = (unsigned char)getub(buf, 72);
 
-    /*@ -predboolothers @*/
     if (flags & 0x20) {
 	session->gpsdata.status = STATUS_FIX;
 	session->newdata.mode = MODE_3D;
@@ -94,7 +91,6 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.status = STATUS_NO_FIX;
     }
     mask |= MODE_SET;
-    /*@ +predboolothers @*/
 
     /* Unless we have seen non-zero utc offset data, the time is GPS time
      * and not UTC time.  Do not use it.
@@ -108,14 +104,10 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	unpacked_date.tm_min = (int)getub(buf, 9);
 	unpacked_date.tm_sec = (int)getub(buf, 10);
 	unpacked_date.tm_isdst = 0;
-#ifdef S_SPLINT_S
 	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
-#endif /* S_SPLINT_S */
 	nsec = (uint) getbeu32(buf, 11);
 
-	/*@ -unrecog */
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + nsec * 1e-9;
-	/*@ +unrecog */
 	mask |= TIME_SET;
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",
@@ -124,14 +116,12 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		 unpacked_date.tm_min, unpacked_date.tm_sec, nsec);
     }
 
-    /*@-type@*/
     lat = getbes32(buf, 15) / 3600000.0f;
     lon = getbes32(buf, 19) / 3600000.0f;
     alt = getbes32(buf, 23) / 100.0f;
     speed = getbeu16(buf, 31) / 100.0f;
     track = getbeu16(buf, 33) / 10.0f;
     dop = getbeu16(buf, 35) / 10.0f;
-    /*@+type@*/
 
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "oncore NAVSOL - %lf %lf %.2lfm-%.2lfm | %.2fm/s %.1fdeg dop=%.1f\n",
@@ -197,7 +187,6 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	}
     }
     for (j = 0; (int)j < session->driver.oncore.visible; j++)
-	/*@ -boolops @*/
 	if (!(Bbused & (1 << j))) {
 	    session->gpsdata.skyview[st].PRN = (short)session->driver.oncore.PRN[j];
 	    session->gpsdata.skyview[st].elevation =
@@ -206,7 +195,6 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		(short)session->driver.oncore.azimuth[j];
 	    st++;
 	}
-    /*@ +boolops @*/
     session->gpsdata.skyview_time = session->newdata.time;
     session->gpsdata.satellites_used = (int)nsv;
     session->gpsdata.satellites_visible = (int)st;
@@ -361,7 +349,6 @@ oncore_msg_firmware(struct gps_device_t *session UNUSED,
 /**
  * Parse the data from the device
  */
-/*@ +charint @*/
 gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
 			   size_t len)
 {
@@ -405,7 +392,6 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
     }
 }
 
-/*@ -charint @*/
 
 /**********************************************************
  *
@@ -416,7 +402,6 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
 /**
  * Write data to the device, doing any required padding or checksumming
  */
-/*@ +charint -usedef -compdef @*/
 static ssize_t oncore_control_send(struct gps_device_t *session,
 				   char *msg, size_t msglen)
 {
@@ -438,7 +423,6 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
 
-/*@ -charint +usedef +compdef @*/
 
 static void oncore_event_hook(struct gps_device_t *session, event_t event)
 {

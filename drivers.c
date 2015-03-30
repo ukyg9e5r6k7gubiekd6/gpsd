@@ -9,9 +9,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <ctype.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd.h"
 #include "bits.h"		/* for getbeu16(), to extract big-endian words */
@@ -614,7 +612,6 @@ static void earthmate_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-/*@ -redef @*/
 /* *INDENT-OFF* */
 static const struct gps_type_t driver_earthmate = {
     .type_name     = "Pre-2003 Delorme EarthMate",
@@ -641,7 +638,6 @@ static const struct gps_type_t driver_earthmate = {
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 #endif /* TIMEHINT_ENABLE */
 };
-/*@ -redef @*/
 /* *INDENT-ON* */
 #endif /* EARTHMATE_ENABLE */
 
@@ -1163,7 +1159,6 @@ const struct gps_type_t driver_mtk3301 = {
  *
  **************************************************************************/
 
-/*@ -fixedformalarray -usedef -branchstate @*/
 static bool aivdm_decode(const char *buf, size_t buflen,
 		  struct gps_device_t *session,
 		  struct ais_t *ais,
@@ -1247,13 +1242,11 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 		     "ignoring bogus AIS channel '12'.\n");
 	    return false;
 	}
-	/*@fallthrough@*/
     case 'A':
 	ais_context = &session->driver.aivdm.context[0];
 	session->driver.aivdm.ais_channel ='A';
 	break;
     case '2':
-	/*@fallthrough@*/
     case 'B':
 	ais_context = &session->driver.aivdm.context[1];
 	session->driver.aivdm.ais_channel ='B';
@@ -1295,7 +1288,6 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     }
 
     /* wacky 6-bit encoding, shades of FIELDATA */
-    /*@ +charint @*/
     for (cp = data; cp < data + strlen((char *)data); cp++) {
 	unsigned char ch;
 	ch = *cp;
@@ -1306,7 +1298,6 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	gpsd_log(&session->context->errout, LOG_RAW,
 		 "%c: %s\n", *cp, sixbits[ch]);
 #endif /* __UNUSED_DEBUG__ */
-	/*@ -shiftnegative @*/
 	for (i = 5; i >= 0; i--) {
 	    if ((ch >> i) & 0x01) {
 		ais_context->bits[ais_context->bitlen / 8] |=
@@ -1319,11 +1310,9 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 		return false;
 	    }
 	}
-	/*@ +shiftnegative @*/
     }
     if (isdigit(pad))
 	ais_context->bitlen -= (pad - '0');	/* ASCII assumption */
-    /*@ -charint @*/
 
     /* time to pass buffered-up data to where it's actually processed? */
     if (ifrag == nfrags) {
@@ -1351,7 +1340,6 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     ais_context->decoded_frags++;
     return false;
 }
-/*@ +fixedformalarray +usedef +branchstate @*/
 
 static gps_mask_t aivdm_analyze(struct gps_device_t *session)
 {
@@ -1419,9 +1407,7 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
      */
     char *prefloc;
 
-#ifdef S_SPLINT_S
     assert(prefix != NULL && session->lexer.outbuffer != NULL);
-#endif /* S_SPLINT_S */
 
     /* possibly the rewrite has been done already, this comw up in gpsmon */
     if (strstr((char *)session->lexer.outbuffer, session->gpsdata.dev.path) != NULL)
@@ -1455,7 +1441,6 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
 
     if (strstr(session->gpsdata.dev.path, ":/") != NULL && strstr(session->gpsdata.dev.path, "localhost") == NULL)
     {
-	/*@-nullpass@*/ /* required only because splint is buggy */
 	/* devices and paths need to be edited */
 	if (strstr((char *)session->lexer.outbuffer, "DEVICE") != NULL)
 	    path_rewrite(session, "\"path\":\"");
@@ -1481,7 +1466,6 @@ static gps_mask_t json_pass_packet(struct gps_device_t *session)
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "JSON, passing through %s\n",
 	     (char *)session->lexer.outbuffer);
-    /*@-nullpass@*/
     return PASSTHROUGH_IS;
 }
 
@@ -1529,7 +1513,6 @@ extern const struct gps_type_t driver_tsip;
 extern const struct gps_type_t driver_ubx;
 extern const struct gps_type_t driver_zodiac;
 
-/*@ -nullassign @*/
 /* the point of this rigamarole is to not have to export a table size */
 static const struct gps_type_t *gpsd_driver_array[] = {
     &driver_unknown,
@@ -1627,5 +1610,4 @@ static const struct gps_type_t *gpsd_driver_array[] = {
     NULL,
 };
 
-/*@ +nullassign @*/
 const struct gps_type_t **gpsd_drivers = &gpsd_driver_array[0];
