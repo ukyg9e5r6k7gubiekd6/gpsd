@@ -51,9 +51,10 @@ class ntpOffset:
     def create_StripTableau(self):
         # create the striptable widget
 
-        self.hadj = gtk.Adjustment(0, 0, self.lines, 1, 1, self.lines * 0.5)
-        self.sel  = gtk.Adjustment(0)
-        self.striptableau = stripchart.StripTableau(self.hadj, self.sel)
+        # gtk.Adjustment(value, lower, upper, step_incr, page_incr, page_size)
+        hadj = gtk.Adjustment(0, 0, self.lines, 1, 1, self.lines * 0.5)
+        sel  = gtk.Adjustment(0)
+        self.striptableau = stripchart.StripTableau(hadj, sel)
         self.striptableau.metawidth  = 80
         self.striptableau.gradewidth = 80
         self.vbox.pack_end(self.striptableau.widget, gtk.TRUE, gtk.TRUE)
@@ -85,41 +86,22 @@ class ntpOffset:
         self.vbox.pack_start(self.handlebox, gtk.FALSE)
 
     def display_StripTableau(self):
-        # Create the graphs for each ntp unit in the data dictionary
+        # display the graph of each ntp_unit
 
         for ntp_unit in self.ntp_data:
-            vadj_ntp = gtk.Adjustment(self.ntp_lower[ntp_unit] - 0.001,
-                    self.ntp_lower[ntp_unit] - 0.001,
-                    self.ntp_upper[ntp_unit] + 0.001, 0, 0,
-                    self.ntp_upper[ntp_unit] * 0.5)
+            # gtk.Adjustment(value, lower, upper, step_incr, page_incr,
+            #                page_size)
+            spread = self.ntp_upper[ntp_unit] - self.ntp_lower[ntp_unit]
+            vadj_ntp = gtk.Adjustment(
+                    self.ntp_lower[ntp_unit],         # initial  value
+                    self.ntp_lower[ntp_unit] - 0.001, # lower extreme
+                    self.ntp_upper[ntp_unit] + 0.001, # upper extreme
+                    1 / spread,                       # step_incr
+                    spread,                           # page_incr
+                    spread)                           # page size
             ntp_item = self.striptableau.addChannel(self.ntp_data[ntp_unit], 
                     vadj_ntp)
             ntp_item.name = ntp_unit
-
-    def create_text(self, text):
-        # Creates a text widget to contain a description of a channel.
-
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        scrolled_window.set_shadow_type(gtk.SHADOW_IN)
-
-        textview = gtk.TextView()
-        buffer   = gtk.TextBuffer()
-        iter     = buffer.get_iter_at_offset(0)
-        buffer.insert(iter, text)
-        textview.set_buffer(buffer)
-        textview.set_editable(gtk.TRUE)
-        textview.set_cursor_visible(gtk.TRUE)
-        textview.set_wrap_mode(gtk.WRAP_WORD)
-        textview.set_left_margin(5)
-        textview.set_right_margin(5)
-        textview.set_pixels_above_lines(5)
-        textview.set_pixels_below_lines(5)
-
-        scrolled_window.add(textview)
-        scrolled_window.show()
-
-        return scrolled_window
 
     def read_data(self, stream):
         # Reads data from a ntp log file.  Layout is:
@@ -132,43 +114,46 @@ class ntpOffset:
         #   - Leep-second notification status
         #   - Source precision (log(2) of source jitter)
 
-        self.ntp_data  = {} # Dictionary of arrays to contain the data of each NTP unit
+        self.ntp_data  = {} # data sets for each ntp unit
         record         = [] # A single record in the file or data stream
         line_counts    = {} # Count of total lines for each ntp unit
-        self.lines     = 1  # width of graph
+        self.lines     = 0  # width of graph
         self.ntp_upper = {} # Upper limit of the data set
         self.ntp_lower = {} # Lower limit of the data set
-        offset         = 0 # offset value to add to the array 
+        offset         = 0  # offset value to add to the array 
         self.ntp_vadj  = {} # vertical adjustment for each graph
 
         for line in stream:
             if len(line.split(' ')) > 6:
-                record = line.split(' ')
-                offset = (float(record[3]) - float(record[4]))
+                if line[:1] != '#':
+                    line = line.lstrip()
+                    record = line.split(' ')
+                    offset = (float(record[3]) - float(record[4]))
 
-                # If the NTP unit is in the dictionary
-                # append the offset to the list
-                # Otherwise, create a new list in the dictionary
-                # and add the offset.
-                if record[1] not in self.ntp_data:
-                    self.ntp_data[record[1]]  = []
-                    line_counts[record[1]]    = 0
-                    self.ntp_upper[record[1]] = 0
-                    self.ntp_lower[record[1]] = 1
+                    # If the NTP unit is in the dictionary
+                    # append the offset to the list
+                    # Otherwise, create a new list in the dictionary
+                    # and add the offset.
+                    if record[1] not in self.ntp_data:
+                        self.ntp_data[record[1]]  = []
+                        line_counts[record[1]]    = 0
+                        self.ntp_upper[record[1]] = round(offset, 5)
+                        self.ntp_lower[record[1]] = round(offset, 5)
 
-                self.ntp_data[record[1]].append(offset)
-                line_counts[record[1]] += 1
+                    self.ntp_data[record[1]].append(offset)
+                    line_counts[record[1]] += 1
 
-                # Update the upper and lower limits of the NTP unit if needed
-                if offset > self.ntp_upper[record[1]]:
-                    self.ntp_upper[record[1]] = round(offset, 5)
-                if offset < self.ntp_lower[record[1]]:
-                    self.ntp_lower[record[1]] = round(offset, 5)
+                    # Update the bounds of the NTP unit if needed
+                    if offset > self.ntp_upper[record[1]]:
+                        self.ntp_upper[record[1]] = round(offset, 5)
+                    if offset < self.ntp_lower[record[1]]:
+                        self.ntp_lower[record[1]] = round(offset, 5)
 
-                # Update the max record count if needed
-                if line_counts[record[1]] > self.lines:
-                    self.lines = line_counts[record[1]]
+                    # Update the max record count if needed
+                    if line_counts[record[1]] > self.lines:
+                        self.lines = line_counts[record[1]]
         stream.close()
 
 if __name__ == "__main__":
     ntpOffset(sys.stdin)
+    sys.exit()
