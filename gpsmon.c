@@ -1317,7 +1317,10 @@ int main(int argc, char **argv)
     }
 
     FD_ZERO(&all_fds);
+#ifndef __clang_analyzer__
     FD_SET(0, &all_fds);	/* accept keystroke inputs */
+#endif /* __clang_analyzer__ */
+
 
     FD_SET(session.gpsdata.gps_fd, &all_fds);
     if (session.gpsdata.gps_fd > maxfd)

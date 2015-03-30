@@ -168,19 +168,21 @@ char *gpsd_hexdump(char *binbuf, size_t binbuflen)
 
 int gpsd_hexpack(char *src, char *dst, int len)
 {
-    int i, l, k;
+    int i, l;
 
-	l = (int)(strlen(src) / 2);
-	if ((l < 1) || (l > len))
-		return -1;
+    l = (int)(strlen(src) / 2);
+    if ((l < 1) || (l > len))
+	return -1;
 
-	bzero(dst, len);
-	for (i = 0; i < l; i++)
-	    if ((k = hex2bin(src+i*2)) != -1)
-			dst[i] = (char)(k & 0xff);
-		else
-			return -1;
-	return l;
+    bzero(dst, len);
+    for (i = 0; i < l; i++) {
+	int k;
+	if ((k = hex2bin(src+i*2)) != -1)
+	    dst[i] = (char)(k & 0xff);
+	else
+	    return -1;
+    }
+    return l;
 }
 
 int hex2bin(char *s)

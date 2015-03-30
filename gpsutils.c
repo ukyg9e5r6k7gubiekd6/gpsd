@@ -333,6 +333,7 @@ time_t mkgmtime(register struct tm * t)
 timestamp_t iso8601_to_unix(char *isotime)
 /* ISO8601 UTC to Unix UTC, no leapsecond correction. */
 {
+#ifndef __clang_analyzer__
 #ifndef USE_QT
     char *dp = NULL;
     double usec;
@@ -362,6 +363,7 @@ timestamp_t iso8601_to_unix(char *isotime)
 	usec = sl[1].toInt() / pow(10., (double)sl[1].size());
     return (timestamp_t)(d.toTime_t() + usec);
 #endif
+#endif /* __clang_analyzer__ */
 }
 
 /* *INDENT-OFF* */

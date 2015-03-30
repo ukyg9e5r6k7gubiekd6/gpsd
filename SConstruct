@@ -1440,7 +1440,7 @@ def Utility(target, source, action):
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck -U__UNUSED__ -UUSE_QT -U__COVERITY__ -U__future__ -ULIMITED_MAX_CLIENTS -ULIMITED_MAX_DEVICES -UAF_UNSPEC -UINADDR_ANY -UFIXED_PORT_SPEED -UFIXED_STOP_BITS -U_WIN32 -U__CYGWIN__ -UPATH_MAX -UHAVE_STRLCAT -UHAVE_STRLCPY -UIPTOS_LOWDELAY -UIPV6_TCLASS -UTCP_NODELAY -UTIOCMIWAIT --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
 
-# Experimental check with clang analyzer
+# Check with clang analyzer
 Utility("scan-build", ["gpsd.h", "packet_names.h"],
         "scan-build scons")
 
@@ -1469,7 +1469,8 @@ Utility("deheader", generated_sources, [
 
 # Perform all local code-sanity checks (but not the Coverity scan).
 audit = env.Alias('audit',
-                  ['cppcheck',
+                  ['scan-build',
+                   'cppcheck',
                    'pylint',
                    'xmllint',
                    'valgrind-audit',

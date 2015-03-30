@@ -573,6 +573,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 	    gpsd_log(&context.errout, LOG_CLIENT,
 		     "=> client(%d): %s\n", sub_index(sub), buf);
 	else {
+#ifndef __clang_analyzer__
 	    char *cp, buf2[MAX_PACKET_LENGTH * 3];
 	    buf2[0] = '\0';
 	    for (cp = buf; cp < buf + len; cp++)
@@ -580,6 +581,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 			       "%02x", (unsigned int)(*cp & 0xff));
 	    gpsd_log(&context.errout, LOG_CLIENT,
 		     "=> client(%d): =%s\n", sub_index(sub),	buf2);
+#endif /* __clang_analyzer__ */
 	}
     }
 
@@ -966,6 +968,7 @@ static void set_serial(struct gps_device_t *device,
     char parity = device->gpsdata.dev.parity;
     int wordsize = 8;
 
+#ifndef __clang_analyzer__
     while (isspace((unsigned char) *modestring))
 	modestring++;
     if (*modestring && strchr("78", *modestring) != NULL) {
@@ -978,6 +981,7 @@ static void set_serial(struct gps_device_t *device,
 		stopbits = (unsigned int)(*modestring - '0');
 	}
     }
+#endif /* __clang_analyzer__ */
 
     gpsd_log(&context.errout, LOG_PROG,
 	     "set_serial(%s,%u,%s) %c%d\n",

@@ -54,22 +54,9 @@
 #include <limits.h>
 #include <errno.h>
 #include <math.h>
-#ifdef S_SPLINT_S
-/*@-type@*/
-int strerror_r(int errnum, char *buf, size_t buflen);
-/*@+type@*/
-/*@-matchfields@*/
-struct timespec
-  {
-    time_t tv_sec;		/* Seconds.  */
-    long tv_nsec;	/* Nanoseconds.  */
-  };
-/*@+matchfields@*/
-#else 
 #include <pthread.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 
 #include "gpsd_config.h"
 #include "timespec_str.h"
@@ -158,18 +145,14 @@ static inline void TS_NORM( struct timespec *ts)
         TS_NORM( r ); \
     } while (0)
 
-/*@-type@*/
 static pthread_mutex_t ppslast_mutex = PTHREAD_MUTEX_INITIALIZER;
-/*@+type@*/
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 /* return handle for kernel pps, or -1; requires root privileges */
 {
-#ifndef S_SPLINT_S
     pps_params_t pp;
     int pps_caps;
-#endif /* S_SPLINT_S */
     int ret;
 #ifdef __linux__
     /* These variables are only needed by Linux to find /dev/ppsN. */
@@ -184,8 +167,10 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
      * This next code block abuses "ret" by storing the filedescriptor
      * to use for RFC2783 calls.
      */
+#ifndef __clang_analyzer__
     ret = -1;  /* this ret will not be unneeded when the 'else' part
                 * of the followinng ifdef becomes an #elif */
+#endif /* __clang_analyzer__ */
 #ifdef __linux__
     /*
      * Some Linuxes, like the RasbPi's, have PPS devices preexisting.
@@ -292,7 +277,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	        pps_thread->devicename, path,
 		ret);
 
-#ifndef S_SPLINT_S
     /* RFC 2783 implies the time_pps_setcap() needs priviledges *
      * keep root a tad longer just in case */
     if ( 0 > time_pps_create(ret, (pps_handle_t *)&pps_thread->kernelpps_handle )) {
@@ -369,7 +353,6 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
 	(void)time_pps_destroy(pps_thread->kernelpps_handle);
 	return -1;
     }
-#endif /* S_SPLINT_S */
     return 0;
 }
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
@@ -497,10 +480,8 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
                          int *edge,
                          volatile struct timedelta_t *last_fixtime)
 {
-#ifndef S_SPLINT_S
     pps_info_t pi;
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
-#endif /* S_SPLINT_S */
     struct timespec kernelpps_tv;
 
     if ( pps_canwait ) {
@@ -528,8 +509,7 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 	 */
 	memset( (void *)&kernelpps_tv, 0, sizeof(kernelpps_tv));
     }
-#ifndef S_SPLINT_S
-    memset( (void *)&pi, 0, sizeof(pi)); /* paranoiia, and to shutup splint */
+    memset( (void *)&pi, 0, sizeof(pi)); /* paranoia */
     if ( 0 > time_pps_fetch(thread_context->kernelpps_handle, PPS_TSFMT_TSPEC
 	, &pi, &kernelpps_tv)) {
 
@@ -544,7 +524,6 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 	}
 	return 0;
     }
-#endif /* S_SPLINT_S */
     if ( pps_canwait ) {
 	int pthread_err;  /* return code from pthread functions */
 
@@ -573,7 +552,6 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
     }
 
 
-#ifndef S_SPLINT_S
     // find the last edge
     if ( pi.assert_timestamp.tv_sec > pi.clear_timestamp.tv_sec ) {
         /* assert 1 sec or more after than clear */
@@ -623,13 +601,12 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 		ts_str2,
 		(unsigned long) pi.clear_sequence,
 		*edge ? "assert" : "clear");
-#endif /* S_SPLINT_S */
 
     return 0;
 }
 #endif  /* defined(HAVE_SYS_TIMEPPS_H) */
 
-static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
+static void *gpsd_ppsmonitor(void *arg)
 {
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     volatile struct pps_thread_t *thread_context = (struct pps_thread_t *)arg;
@@ -661,9 +638,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
-#ifndef S_SPLINT_S
     int pps_caps;
-#endif /* S_SPLINT_S */
     long cycle_kpps = 0, duration_kpps = 0;
     /* kpps_pulse stores the time of the last two edges */
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
@@ -684,7 +659,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
     }
     /* if no TIOCMIWAIT, we hope to have PPS_CANWAIT */
 
-#ifndef S_SPLINT_S
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* get RFC2783 features supported */
     pps_caps = 0;
@@ -713,7 +687,6 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
         pps_canwait = true;
     }
 #endif  /* HAVE_SYS_TIMEPPS_H */
-#endif /* S_SPLINT_S */
 
     if ( not_a_tty && !pps_canwait ) {
 	/* for now, no way to wait for an edge, in the future maybe figure out
@@ -771,7 +744,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    pulse_tio[edge_tio] = clock_ts_tio;
 
             /* use this data */
+#ifndef __clang_analyzer__
             ok = true;
+#endif /* __clang_analyzer__ */
 	    clock_ts = clock_ts_tio;
 	    state = edge_tio;
 	    edge = edge_tio;
@@ -840,7 +815,9 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    pulse_kpps[edge_kpps] = clock_ts_kpps;
 	    pulse_kpps[edge_kpps ? 0 : 1] = prev_clock_ts;
             /* sanity checks are later */
+#ifndef __clang_analyzer__
 	    log = "KPPS";
+#endif /* __clang_analyzer__ */
 
             /* use this data */
 	    state = edge_kpps;
@@ -999,9 +976,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    /* probably should log computed offset just for grins here */
 	    ok = false;
 	    log = "missing last_fixtime\n";
-            /*@+longintegral@*/
         } else if ( ok && last_second_used >= last_fixtime.real.tv_sec ) {
-            /*@-longintegral@*/
 	    /* uh, oh, this second already handled */
 	    ok = false;
 	    log = "this second already handled\n";
@@ -1016,7 +991,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	    struct timespec  delay;
 	    /* delay as a printable string */
 	    char delay_str[TIMESPEC_LEN];
-	    /*@observer@*/ char *log1 = "";
+	    char *log1 = "";
 	    /* ppstimes.real is the time we think the pulse represents  */
 	    struct timedelta_t ppstimes;
 	    thread_context->log_hook(thread_context, THREAD_RAW,
@@ -1112,7 +1087,7 @@ static /*@null@*/ void *gpsd_ppsmonitor(void *arg)
 	thread_context->log_hook(thread_context, THREAD_PROG,
             "PPS:%s descriptor cleaned up\n",
 	    thread_context->devicename);
-	/*@i1@*/(void)time_pps_destroy(thread_context->kernelpps_handle);
+	(void)time_pps_destroy(thread_context->kernelpps_handle);
     }
 #endif
     if (thread_context->wrap_hook != NULL)
@@ -1148,7 +1123,7 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
     }
 
     memset( &pt, 0, sizeof(pt));
-    /*@i1@*/retval = pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)pps_thread);
+    retval = pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)pps_thread);
     pps_thread->log_hook(pps_thread, THREAD_PROG, "PPS:%s thread %s\n",
 	        pps_thread->devicename,
 		(retval==0) ? "launched" : "FAILED");
@@ -1157,9 +1132,7 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
 void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
 /* cleanly terminate PPS thread */
 {
-    /*@-mustfreeonly@*/
     pps_thread->report_hook = NULL;
-    /*@+mustfreeonly@*/
     pps_thread->pps_hook = NULL;
 }
 
