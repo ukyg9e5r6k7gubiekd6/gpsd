@@ -408,21 +408,28 @@ void ntpshm_link_activate(struct gps_device_t *session)
     if (session->sourcetype == source_pty)
 	return;
 
-    /* allocate a shared-memory segment for "NMEA" time data */
-    session->shm_clock = ntpshm_alloc(session->context);
+    if (session->sourcetype != source_pps ) { 
+	/* allocate a shared-memory segment for "NMEA" time data */
+	session->shm_clock = ntpshm_alloc(session->context);
 
-    if (session->shm_clock == NULL) {
-	gpsd_log(&session->context->errout, LOG_INF, 
-		 "NTPD ntpshm_alloc() failed\n");
+	if (session->shm_clock == NULL) {
+	    gpsd_log(&session->context->errout, LOG_WARN, 
+		     "NTPD: ntpshm_alloc() failed\n");
+	    return;
+        }
+    }
+
 #if defined(PPS_ENABLE)
-    } else if (session->sourcetype == source_usb || session->sourcetype == source_rs232) {
+    if (session->sourcetype == source_usb 
+            || session->sourcetype == source_rs232
+            || session->sourcetype == source_pps) {
 	/* We also have the 1pps capability, allocate a shared-memory segment
 	 * for the 1pps time data and launch a thread to capture the 1pps
 	 * transitions
 	 */
 	if ((session->shm_pps = ntpshm_alloc(session->context)) == NULL) {
-	    gpsd_log(&session->context->errout, LOG_INF, 
-		     "NTPD ntpshm_alloc(1) failed\n");
+	    gpsd_log(&session->context->errout, LOG_WARN, 
+		     "PPS: ntpshm_alloc(1) failed\n");
 	} else {
 	    init_hook(session);
 	    session->pps_thread.report_hook = report_hook;

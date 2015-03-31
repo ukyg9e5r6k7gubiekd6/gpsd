@@ -554,6 +554,10 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
     // cppcheck-suppress pointerLessThanZero
     if (session->gpsdata.gps_fd < 0) {
         /* return could be -1, PLACEHOLDING_FD, of UNALLOCATED_FD */
+        if ( PLACEHOLDING_FD == session->gpsdata.gps_fd ) {
+            /* it is /dev/ppsX, need to set devicename, etc. */
+	    gpsd_clear(session);
+        }
 	return session->gpsdata.gps_fd;
     }
 
