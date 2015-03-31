@@ -774,6 +774,15 @@ static void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
         char *edge_str = "";
 
+	if (++unchanged == 10) {
+            /* last ten edges no good, stop spinning, just wait 10 seconds */
+	    unchanged = 0;
+	    thread_context->log_hook(thread_context, THREAD_WARN,
+		    "PPS:%s unchanged state, ppsmonitor sleeps 10\n",
+		    thread_context->devicename);
+	    (void)sleep(10);
+        }
+
         /* Stage One; wait for the next edge */
 #if defined(TIOCMIWAIT)
         if ( !not_a_tty && !pps_canwait ) {
@@ -926,17 +935,9 @@ static void *gpsd_ppsmonitor(void *arg)
 	    /* some pulses may be so short that state never changes */
 	    if (999000 < cycle && 1001000 > cycle) {
 		duration = 0;
-		unchanged = 0;
 		thread_context->log_hook(thread_context, THREAD_RAW,
 			    "PPS:%s %.10s pps-detect invisible pulse\n",
 			    thread_context->devicename, edge_str);
-	    } else if (++unchanged == 10) {
-                /* not really unchanged, just out of bounds */
-		unchanged = 1;
-		thread_context->log_hook(thread_context, THREAD_WARN,
-			"PPS:%s %.10s unchanged state, ppsmonitor sleeps 10\n",
-			thread_context->devicename, edge_str);
-		(void)sleep(10);
 	    }
 	} else {
 	    thread_context->log_hook(thread_context, THREAD_RAW,
@@ -1078,6 +1079,8 @@ static void *gpsd_ppsmonitor(void *arg)
 	    continue;
         }
 
+        /* we have valiidated a goood cycle, mark it */
+	unchanged = 0;
 	/* offset is the skew from expected to observed pulse time */
 	struct timespec offset;
 	/* offset as a printable string */
