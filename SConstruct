@@ -14,7 +14,7 @@
 # release   - ship a release
 #
 # clean      - clean all normal build targets
-# sconsclean - clean up scons dotfiles
+# sconsclean - clean up scons dotfiles (but not the database)
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
 # without changing the --prefix prefix.
@@ -1869,7 +1869,7 @@ clean = env.Clean(build,
           map(lambda f: f[:-3], templated))
 
 # Nuke scons state files 
-sconsclean = Utility("sconsclean", '', ["rm -f .sconsign.dblite .sconf_temp .scons-option-cache config.log"])
+sconsclean = Utility("sconsclean", '', ["rm -fr .sconf_temp .scons-option-cache config.log"])
 
 # Tags for Emacs and vi
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
