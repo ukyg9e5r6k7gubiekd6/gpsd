@@ -701,7 +701,8 @@ static bool open_device( struct gps_device_t *device)
      */
     ntpshm_link_activate(device);
     gpsd_log(&context.errout, LOG_INF, 
-	     "NTPD ntpshm_link_activate: %d\n",
+	     "PPS:%s ntpshm_link_activate: %d\n",
+	     device->gpsdata.dev.path,
 	     device->shm_clock != NULL);
 #endif /* NTPSHM_ENABLE */
 
@@ -2008,8 +2009,8 @@ int main(int argc, char *argv[])
 	// nice() can ONLY succeed when run as root!
 	// do not even bother as non-root
 	if (nice(NICEVAL) == -1 && errno != 0)
-	    gpsd_log(&context.errout, LOG_INF,
-		     "NTPD o=priority setting failed.\n");
+	    gpsd_log(&context.errout, LOG_WARN,
+		     "PPS: o=priority setting failed. Time accuracty will be degraded\n");
     }
     /*
      * By initializing before we drop privileges, we guarantee that even
