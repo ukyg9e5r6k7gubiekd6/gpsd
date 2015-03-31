@@ -25,6 +25,7 @@ struct timedelta_t {
 #if defined(HAVE_SYS_TIMEPPS_H)
 // include unistd.h here as it is missing on older pps-tools releases.
 // 'close' is not defined otherwise.
+#include <unistd.h>
 #include <sys/time.h>
 #include <sys/timepps.h>
 #endif
