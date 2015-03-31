@@ -1,6 +1,8 @@
 /*
  * ppsthread.c - manage PPS watcher threads
  *
+ * To enable KPPS, this file needs to be compiled with -DHAVE_SYS_TIMEPPS_H
+ *
  * If you are not good at threads do not touch this file!
  * For example: errno is thread safe; strerror() is not.
  *
@@ -59,7 +61,6 @@
 #include <unistd.h>
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 
-#include "gpsd_config.h"
 #include "timespec_str.h"
 #include "ppsthread.h"
 
@@ -184,9 +185,12 @@ static int init_kernel_pps(volatile struct pps_thread_t *pps_thread)
      * Some Linuxes, like the RasbPi's, have PPS devices preexisting.
      * Other OS have no way to automatically determine the proper /dev/ppsX.
      * Allow user to pass in an explicit PPS device path.
+     *
+     * (We use strncpy() here because this might be compiled where
+     * strlcpy() is not available.) 
      */
     if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0)
-	(void)strlcpy(path, pps_thread->devicename, sizeof(path));
+	(void)strncpy(path, pps_thread->devicename, sizeof(path));
     else {
 	char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
 	size_t i;             /* to match type of globbuf.gl_pathc */

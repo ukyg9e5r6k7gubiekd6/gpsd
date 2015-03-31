@@ -6,19 +6,7 @@
 #ifndef PPSTHREAD_H
 #define PPSTHREAD_H
 
-/* use RFC 2782 PPS API */
-/* this needs linux >= 2.6.34 and
- * CONFIG_PPS=y
- * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
- * CONFIG_PPS_CLIENT_LDISC=y
- */
-#if defined(HAVE_SYS_TIMEPPS_H)
-// include unistd.h here as it is missing on older pps-tools releases.
-// 'close' is not defined otherwise.
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/timepps.h>
-#endif
+#include <time.h>
 
 #ifndef TIMEDELTA_DEFINED
 #define TIMEDELTA_DEFINED
@@ -28,6 +16,18 @@ struct timedelta_t {
 };
 #endif /* TIMEDELTA_DEFINED */
 
+/* use RFC 2782 PPS API */
+/* this needs linux >= 2.6.34 and
+ * CONFIG_PPS=y
+ * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
+ * CONFIG_PPS_CLIENT_LDISC=y
+ */
+#if defined(HAVE_SYS_TIMEPPS_H)
+// include unistd.h here as it is missing on older pps-tools releases.
+// 'close' is not defined otherwise.
+#include <sys/time.h>
+#include <sys/timepps.h>
+#endif
 
 /* difference between timespecs in nanoseconds */
 /* int is too small, avoid floats  */

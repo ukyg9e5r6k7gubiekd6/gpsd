@@ -727,10 +727,9 @@ else:
                 confdefs.append("#define %s \"%s\"\n" % (key.upper(), value))
 
     if config.CheckHeader(["sys/types.h", "sys/time.h", "sys/timepps.h"]):
-        confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
+        env.MergeFlags("-DHAVE_SYS_TIMEPPS_H=1")
         kpps = True
     else:
-        confdefs.append("/* #undef HAVE_SYS_TIMEPPS_H */\n")
         kpps = False
     tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
     if env["pps"] and not tiocmiwait and not kpps:
