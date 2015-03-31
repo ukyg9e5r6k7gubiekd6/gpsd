@@ -431,7 +431,12 @@ void gpsd_clear(struct gps_device_t *session)
 }
 
 int gpsd_open(struct gps_device_t *session)
-/* open a device for access to its data */
+/* open a device for access to its data *
+ * return: the opened file descriptor
+ *         PLACEHOLDING_FD - for /dev/ppsX
+ *         UNALLOCATED_FD - for open failure
+ *         -1 - for open failure
+ */
 {
 #ifdef NETFEED_ENABLE
     /* special case: source may be a URI to a remote GNSS or DGPS service */
@@ -532,6 +537,7 @@ int gpsd_open(struct gps_device_t *session)
     }
 #endif /* defined(NMEA2000_ENABLE) */
     /* fall through to plain serial open */
+    /* could be a naked /dev/ppsX */
     return gpsd_serial_open(session);
 }
 

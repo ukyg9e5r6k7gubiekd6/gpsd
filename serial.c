@@ -407,7 +407,12 @@ void gpsd_set_speed(struct gps_device_t *session,
 }
 
 int gpsd_serial_open(struct gps_device_t *session)
-/* open a device for access to its data */
+/* open a device for access to its data 
+ * return: the opened file descriptor
+ *         PLACEHOLDING_FD - for /dev/ppsX
+ *         UNALLOCATED_FD - for open failure
+ */
+
 {
     mode_t mode = (mode_t) O_RDWR;
 
