@@ -114,6 +114,8 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *,
 
 struct inner_context_t {
     volatile struct pps_thread_t	*pps_thread;
+    int pps_caps;                       /* RFC2783 getcaps() */
+    bool pps_canwait;                   /* can RFC2783 wait? */
 #if defined(HAVE_SYS_TIMEPPS_H)
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
@@ -121,7 +123,6 @@ struct inner_context_t {
 
 #if defined(HAVE_SYS_TIMEPPS_H)
 static int get_edge_rfc2783(struct inner_context_t *,
-                         bool ,
                          struct timespec *,
                          int *,
                          struct timespec *,
@@ -206,7 +207,6 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 /* return handle for kernel pps, or -1; requires root privileges */
 {
     pps_params_t pp;
-    int pps_caps;
     int ret;
 #ifdef __linux__
     /* These variables are only needed by Linux to find /dev/ppsN. */
@@ -217,6 +217,7 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
     volatile struct pps_thread_t *pps_thread = inner_context->pps_thread;
 
     inner_context->kernelpps_handle = -1;
+    inner_context->pps_canwait = false;
 
     /*
      * This next code block abuses "ret" by storing the filedescriptor
@@ -349,10 +350,11 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 
     /* have kernel PPS handle */
     /* get RFC2783 features supported */
-    pps_caps = 0;
-    if ( 0 > time_pps_getcap(inner_context->kernelpps_handle, &pps_caps)) {
+    inner_context->pps_caps = 0;
+    if ( 0 > time_pps_getcap(inner_context->kernelpps_handle, 
+				&inner_context->pps_caps)) {
 	char errbuf[BUFSIZ] = "unknown error";
-	pps_caps = 0;
+	inner_context->pps_caps = 0;
 	(void)strerror_r(errno, errbuf, sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s time_pps_getcap() failed: %.100s\n",
@@ -362,22 +364,30 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s pps_caps 0x%02X\n",
 		    pps_thread->devicename,
-		    pps_caps);
+		    inner_context->pps_caps);
     }
 
     /* construct the setparms structure */
     memset( (void *)&pp, 0, sizeof(pps_params_t));
     pp.api_version = PPS_API_VERS_1;  /* version 1 protocol */
-    if ( 0 == (PPS_TSFMT_TSPEC & pps_caps ) ) {
+    if ( 0 == (PPS_TSFMT_TSPEC & inner_context->pps_caps ) ) {
        /* PPS_TSFMT_TSPEC means return a timespec
         * mandatory for driver to implement, require it */
-	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS:%s fail, missing PPS_TSFMT_TSPEC\n",
+	pps_thread->log_hook(pps_thread, THREAD_WARN,
+		    "KPPS:%s fail, missing mandatory PPS_TSFMT_TSPEC\n",
 		    pps_thread->devicename);
         return -1;
     }
+    if ( 0 != (PPS_CANWAIT & inner_context->pps_caps ) ) {
+       /* we can wait! so no need for TIOCMIWAIT */
+       pps_thread->log_hook(pps_thread, THREAD_INF,
+                   "KPPS:%s have PPS_CANWAIT\n",
+                   pps_thread->devicename);
+        inner_context->pps_canwait = true;
+    }
+
     pp.mode = PPS_TSFMT_TSPEC;
-    switch ( (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR) & pps_caps ) {
+    switch ( (PPS_CAPTUREASSERT | PPS_CAPTURECLEAR) & inner_context->pps_caps ) {
     case PPS_CAPTUREASSERT:
 	pps_thread->log_hook(pps_thread, THREAD_WARN,
 		    "KPPS:%s missing PPS_CAPTURECLEAR, pulse may be offset\n",
@@ -523,7 +533,6 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
  * of jitter
  */
 static int get_edge_rfc2783(struct inner_context_t *inner_context,
-                         bool pps_canwait,
                          struct timespec *prev_clock_ts,
                          int *prev_edge,
                          struct timespec *clock_ts,
@@ -535,7 +544,7 @@ static int get_edge_rfc2783(struct inner_context_t *inner_context,
     struct timespec kernelpps_tv;
     volatile struct pps_thread_t *thread_context = inner_context->pps_thread;
 
-    if ( pps_canwait ) {
+    if ( inner_context->pps_canwait ) {
 	/*
 	 * RFC2783 specifies that a NULL timeval means to wait, if
 	 * PPS_CANWAIT is available.
@@ -575,7 +584,7 @@ static int get_edge_rfc2783(struct inner_context_t *inner_context,
 	}
 	return 0;
     }
-    if ( pps_canwait ) {
+    if ( inner_context->pps_canwait ) {
         /* get_edge_tiocmiwait() got this if !pps_canwait */
 
 	/* quick, grab a copy of last fixtime before it changes */
@@ -677,13 +686,11 @@ static void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
-    int pps_caps;
     long cycle_kpps = 0, duration_kpps = 0;
     /* kpps_pulse stores the time of the last two edges */
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     bool not_a_tty = false;
-    bool pps_canwait = false;
 
     /* before the loop, figure out how we can detect edges:
      * TIOMCIWAIT, which is linux specifix
@@ -700,38 +707,7 @@ static void *gpsd_ppsmonitor(void *arg)
     }
     /* if no TIOCMIWAIT, we hope to have PPS_CANWAIT */
 
-#if defined(HAVE_SYS_TIMEPPS_H)
-    /* get RFC2783 features supported */
-    pps_caps = 0;
-    if ( 0 >= inner_context.kernelpps_handle ) {
-        /* no pps handle to use, thus no caps */
-	pps_caps = 0;
-    } else if ( 0 > time_pps_getcap(inner_context.kernelpps_handle, &pps_caps)) {
-	pps_caps = 0;
-	char errbuf[BUFSIZ] = "unknown error";
-	(void)strerror_r(errno, errbuf, sizeof(errbuf));
-	thread_context->log_hook(thread_context, THREAD_ERROR,
-		    "KPPS:%s time_pps_getcap() failed: %.100s\n",
-		    thread_context->devicename, errbuf);
-    } else {
-        /* we have read KPPS capabilities */
-	thread_context->log_hook(thread_context, THREAD_INF,
-		    "KPPS:%s pps_caps 0x%02X\n",
-		    thread_context->devicename,
-		    pps_caps);
-    }
-
-    if ( 0 != (PPS_CANWAIT & pps_caps ) ) {
-       /* we can wait! so no need for TIOCMIWAIT */
-	thread_context->log_hook(thread_context, THREAD_PROG,
-		    "KPPS:%s have PPS_CANWAIT\n",
-	 	    thread_context->devicename);
-        pps_canwait = true;
-    }
-
-#endif  /* HAVE_SYS_TIMEPPS_H */
-
-    if ( not_a_tty && !pps_canwait ) {
+    if ( not_a_tty && !inner_context.pps_canwait ) {
 	/* for now, no way to wait for an edge, in the future maybe figure out
          * a sleep */
     }
@@ -798,7 +774,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
         /* Stage One; wait for the next edge */
 #if defined(TIOCMIWAIT)
-        if ( !not_a_tty && !pps_canwait ) {
+        if ( !not_a_tty && !inner_context.pps_canwait ) {
             int ret;
 
             /* we are a tty, so can TIOCMIWAIT */
@@ -865,7 +841,6 @@ static void *gpsd_ppsmonitor(void *arg)
              * optionally wait for goood data
              */
 	    ret = get_edge_rfc2783(&inner_context,
-                         pps_canwait,
                          &prev_clock_ts,
                          &prev_edge,
                          &clock_ts_kpps,
@@ -917,7 +892,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	}
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 
-        if ( not_a_tty && !pps_canwait ) {
+        if ( not_a_tty && !inner_context.pps_canwait ) {
 	    /* uh, oh, no TIOMCIWAIT, nor RFC2783, die */
 	    thread_context->log_hook(thread_context, THREAD_WARN,
 			"PPS:%s die: no TIOMCIWAIT, nor RFC2783 CANWAIT\n",
