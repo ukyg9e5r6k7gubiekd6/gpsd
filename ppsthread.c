@@ -385,10 +385,17 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
      *  9    22    RI   <-- Ring Indicator
      *  5     7    GND      Signal ground
      *
+     * Wait for status change on any handshake line.  Just one edge,
+     * we do not want to be spinning waiting for the trailing edge of
+     * a pulse. The only assumption here is that no GPS lights up more
+     * than one of these pins.  By waiting on all of them we remove a
+     * configuration switch.
+     *
      * Note that it only makes sense to wait on handshake lines
      * activated from the receive side (DCE->DTE) here; in this
      * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
      * entire set of these.
+     *
      */
 
     if (ioctl(thread_context->devicefd, TIOCMIWAIT, PPS_LINE_TIOC) != 0) {
@@ -606,11 +613,16 @@ static int get_edge_rfc2783( volatile struct pps_thread_t *thread_context,
 }
 #endif  /* defined(HAVE_SYS_TIMEPPS_H) */
 
+/* gpsd_ppsmonitor()
+ *
+ * the core loop of the ppsthread.
+ * All else is initialization, cleanup or subroutine
+ */
 static void *gpsd_ppsmonitor(void *arg)
 {
     char ts_str1[TIMESPEC_LEN], ts_str2[TIMESPEC_LEN];
     volatile struct pps_thread_t *thread_context = (struct pps_thread_t *)arg;
-    /* the GPS time and system clock timme, to the nSec, 
+    /* the GPS time and system clock timme, to the nSec,
      * when the last fix received
      * using a double would cause loss of precision */
     volatile struct timedelta_t last_fixtime = {{0, 0}, {0, 0}};
@@ -648,6 +660,10 @@ static void *gpsd_ppsmonitor(void *arg)
     bool not_a_tty = false;
     bool pps_canwait = false;
 
+    /* before the loop, figure out how we can detect edges:
+     * TIOMCIWAIT, which is linux specifix
+     * RFC2783, a.k.a kernel PPS (KPPS)
+     * or if KPPS is deficient a combination of the two */
     if ( isatty(thread_context->devicefd) == 0 ) {
 	thread_context->log_hook(thread_context, THREAD_INF,
             "KPPS:%s gps_fd:%d not a tty\n",
@@ -673,6 +689,7 @@ static void *gpsd_ppsmonitor(void *arg)
 		    "KPPS:%s time_pps_getcap() failed: %.100s\n",
 		    thread_context->devicename, errbuf);
     } else {
+        /* we have read KPPS capabilities */
 	thread_context->log_hook(thread_context, THREAD_INF,
 		    "KPPS:%s pps_caps 0x%02X\n",
 		    thread_context->devicename,
@@ -695,15 +712,49 @@ static void *gpsd_ppsmonitor(void *arg)
     }
 
     /*
-     * Wait for status change on any handshake line.  Just one edge,
-     * we do not want to be spinning waiting for the trailing edge of
-     * a pulse. The only assumption here is that no GPS lights up more
-     * than one of these pins.  By waiting on all of them we remove a
-     * configuration switch.
+     * this is the main loop, exit and never any further PPS processing.
      *
-     * Once we have the latest edge we compare it to the last edge which we
-     * stored.  If the edge passes sanity checks we pass is out through
-     * the call context.
+     * Four stages to the loop,
+     * an unwanted condition at any point and the loop restarts
+     * an error condition and we exit for all time.
+     *
+     * Stage One: wait for the next edge.
+     *      If we have KPPS
+     *         If we have PPS_CANWAIT
+     *             use KPPS and PPS_CANWAIT - this is the most accurate
+     *         else
+     *             use KPPS and TIOMCIWAIT together - this is pretty accurate
+     *      else If we have TIOMCIWAIT
+     *         use TIOMCIWAIT - this is the least accurate
+     *      else
+     *         give up
+     *
+     * Success is we have a good edge, otherwise loop some more
+     *
+     * On a successul stage one, we know this about the exact moment
+     * of current pulse:
+     *      GPS (real) time
+     *      system (clock) time
+     *      edge type: Assert (rising) or Clear (falling)
+     *
+     * From the above 3 items, we can compute:
+     *      cycle length - elapsed time from the previous edge of the same type
+     *      pulse length (duration) - elapsed time from the previous edge
+     *                            (the previous edge would be the opposite type)
+     *
+     * Stage Two:  Categorize the current edge
+     *      Decide if we have 0.5Hz, 1Hz, 5 Hz cycle time
+     *      knowing cycle time determine if we have the leading or trailing edge
+     *      restart the loop if the edge looks dodgy
+     *
+     * Stage Three: Calculate
+     *	    Calculate the offset (difference) between the system time
+     *      and the GPS time at the pulse moment
+     *      restart the loop if the offset looks dodgy
+     *
+     * Stage Four: Tell ntpd, chronyd, or gpsmon what we learned
+     *       a few more sanity checks
+     *       call the report hook with our PPS report
      */
     while (thread_context->report_hook != NULL
            || thread_context->pps_hook != NULL) {
@@ -711,6 +762,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	char *log = NULL;
         char *edge_str = "";
 
+        /* Stage One; wait for the next edge */
 #if defined(TIOCMIWAIT)
         if ( !not_a_tty && !pps_canwait ) {
             int ret;
@@ -762,7 +814,6 @@ static void *gpsd_ppsmonitor(void *arg)
         }
 #endif /* TIOCMIWAIT */
 
-
 	/* ok and log used by KPPS and TIOCMIWAIT */
 	log = NULL;
 #if defined(HAVE_SYS_TIMEPPS_H)
@@ -803,18 +854,16 @@ static void *gpsd_ppsmonitor(void *arg)
             /* for now, as we have been doing all of gpsd 3.x, just
              *use the last edge, not the previous edge */
 
-            /* compare to previous saved similar edge */
+            /* compute time from previous saved similar edge */
 	    cycle_kpps = timespec_diff_ns(clock_ts_kpps, pulse_kpps[edge_kpps]);
 	    cycle_kpps /= 1000;
+            /* compute time from previous saved dis-similar edge */
 	    duration_kpps = timespec_diff_ns(clock_ts_kpps, prev_clock_ts)/1000;
 
 	    /* save for later */
 	    pulse_kpps[edge_kpps] = clock_ts_kpps;
 	    pulse_kpps[edge_kpps ? 0 : 1] = prev_clock_ts;
             /* sanity checks are later */
-#ifndef __clang_analyzer__
-	    log = "KPPS";
-#endif /* __clang_analyzer__ */
 
             /* use this data */
 	    state = edge_kpps;
@@ -828,7 +877,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    thread_context->log_hook(thread_context, THREAD_PROG,
 		"KPPS:%s %.10s cycle: %7d, duration: %7d @ %s\n",
 		thread_context->devicename,
-		edge_str, 
+		edge_str,
 		cycle_kpps, duration_kpps, ts_str1);
 
 	}
@@ -841,8 +890,26 @@ static void *gpsd_ppsmonitor(void *arg)
 			thread_context->devicename);
 	    break;
 	}
+	/*
+         * End of Stge One
+	 * we now know this about the exact moment of current pulse:
+	 *      GPS (real) time
+	 *      system (clock) time
+	 *      edge type: Assert (rising) or Clear (falling)
+	 *
+	 * we have computed:
+	 *      cycle length
+	 *      pulse length (duration)
+	 */
 
-	/* now, validate, using TIOCMIWAIT or RFC2783 values */
+	/*
+	 * Stage Two:  Categorize the current edge
+	 *      Decide if we have 0.5Hz, 1Hz, 5 Hz cycle time
+	 *      determine if we have the leading or trailing edge
+	 */
+
+	/* FIXME! this block fails to fix invisible pulses on
+         *0.5Hz and 5Hz PPS !! */
 	if (state == state_last) {
 	    /* some pulses may be so short that state never changes */
 	    if (999000 < cycle && 1001000 > cycle) {
@@ -870,7 +937,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	thread_context->log_hook(thread_context, THREAD_PROG,
 	    "PPS:%s %.10s cycle: %7d, duration: %7d @ %s\n",
 	    thread_context->devicename,
-	    edge_str, 
+	    edge_str,
 	    cycle, duration, ts_str1);
 	if (unchanged) {
 	    // strange, try again
@@ -882,20 +949,20 @@ static void *gpsd_ppsmonitor(void *arg)
 	 * 1 Hz, and the UTC second is defined by the front edge. But we
 	 * don't know the polarity of the pulse (different receivers
 	 * emit different polarities). The duration variable is used to
-	 * determine which way the pulse is going. The code assumes
-	 * that the UTC second is changing when the signal has not
-	 * been changing for at least 800ms, i.e. it assumes the duty
-	 * cycle is at most 20%.
+	 * determine which way the pulse is going.  When the duration
+         * is less than 1/2 the cycle we are on the trailing edge.
 	 *
 	 * Some GPSes instead output a square wave that is 0.5 Hz and each
 	 * edge denotes the start of a second.
 	 *
 	 * Some GPSes, like the Globalsat MR-350P, output a 1uS pulse.
 	 * The pulse is so short that TIOCMIWAIT sees a state change
-	 * but by the time TIOCMGET is called the pulse is gone.
+	 * but by the time TIOCMGET is called the pulse is gone.  gpsd
+         * calls that an invisible pulse.
 	 *
 	 * A few stupid GPSes, like the Furuno GPSClock, output a 1.0 Hz
 	 * square wave where the leading edge is the start of a second
+         * gpsd can only guess the correct edge.
 	 *
 	 * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to
 	 * 40ms which gives a 160ms pulse before going high.
@@ -961,13 +1028,25 @@ static void *gpsd_ppsmonitor(void *arg)
 	    log = "Too long for 0.5Hz\n";
 	}
 
+	/* end of Stage two
+         * we now know what type of PPS pulse, and if we have the
+         * leading edge
+         */
+
+	/* Stage Three: Calculate
+	 *	Calculate the offset (difference) between the system time
+	 *      and the GPS time at the pulse moment
+         */
+
 	/*
 	 * If there has not yet been any valid in-band time stashed
 	 * from the GPS when the PPS event was asserted, we can do
-	 * nothing further.  Some GPSes like Garmin always send a PPS,
-	 * valid or not.  Other GPSes like some uBlox may only send
-	 * PPS when time is valid.  It is common to get PPS, and no
-	 * fixtime, while autobauding.
+	 * nothing further.  gpsd can not tell what second this pulse is
+         * in reference to.
+         *
+         * Some GPSes like Garmin always send a PPS, valid or not.
+         * Other GPSes like some uBlox may only send PPS when time is valid.
+         * It is common to get PPS, and no fixtime, while autobauding.
 	 */
         if (last_fixtime.real.tv_sec == 0) {
 	    /* probably should log computed offset just for grins here */
@@ -979,105 +1058,116 @@ static void *gpsd_ppsmonitor(void *arg)
 	    log = "this second already handled\n";
 	}
 
-	if (ok) {
-	    /* offset is the skew from expected to observed pulse time */
-            struct timespec offset;
-	    /* offset as a printable string */
-	    char offset_str[TIMESPEC_LEN];
-	    /* delay after last fix */
-	    struct timespec  delay;
-	    /* delay as a printable string */
-	    char delay_str[TIMESPEC_LEN];
-	    char *log1 = "";
-	    /* ppstimes.real is the time we think the pulse represents  */
-	    struct timedelta_t ppstimes;
-	    thread_context->log_hook(thread_context, THREAD_RAW,
-			"PPS:%s %.10s categorized %.100s",
-			thread_context->devicename, edge_str, log);
-
-            /* This innocuous-looking "+ 1" embodies a significant
-             * assumption: that GPSes report time to the second over the
-             * serial stream *after* emitting PPS for the top of second.
-             * Thus, when we see PPS our available report is from the
-             * previous cycle and we must increment.
-             *
-             * FIXME! The GR-601W at 38,400 or faster can send the
-             * serial fix before the interrupt event carrying the PPS
-	     * line assertion by about 10 mSec!
-             */
-
-	    ppstimes.real.tv_sec = (time_t)last_fixtime.real.tv_sec + 1;
-	    ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
-	    ppstimes.clock = clock_ts;
-
-	    /* check to see if we have a fresh timestamp from the
-	     * GPS serial input then use that */
-	    TS_SUB( &offset, &ppstimes.real, &ppstimes.clock);
-	    TS_SUB( &delay, &ppstimes.clock, &last_fixtime.clock);
-	    timespec_str( &delay, delay_str, sizeof(delay_str) );
-
-	    if ( 0> delay.tv_sec || 0 > delay.tv_nsec ) {
-		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS:%s %.10s system clock went backwards: %.20s\n",
-			    thread_context->devicename,
-			    edge_str, 
-			    delay_str);
-		log1 = "system clock went backwards";
-	    } else if ( ( 2 < delay.tv_sec)
-	      || ( 1 == delay.tv_sec && 100000000 > delay.tv_nsec ) ) {
-                /* system clock could be slewing so allow 1.1 sec delay */
-		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS:%s %.10s no current GPS seconds: %.20s\n",
-			    thread_context->devicename,
-			    edge_str, 
-			    delay_str);
-		log1 = "timestamp out of range";
-	    } else {
-		last_second_used = last_fixtime.real.tv_sec;
-		if (thread_context->report_hook != NULL)
-		    log1 = thread_context->report_hook(thread_context, &ppstimes);
-		else
-		    log1 = "no report hook";
-		if (thread_context->pps_hook != NULL)
-		    thread_context->pps_hook(thread_context, &ppstimes);
-		pthread_err = pthread_mutex_lock(&ppslast_mutex);
-                if ( 0 != pthread_err ) {
-		    char errbuf[BUFSIZ] = "unknown error";
-		    (void)strerror_r(errno, errbuf, sizeof(errbuf));
-		    thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "PPS:%s pthread_mutex_lock() : %s\n",
-			    thread_context->devicename, errbuf);
-		}
-		thread_context->ppsout_last = ppstimes;
-		thread_context->ppsout_count++;
-		pthread_err = pthread_mutex_unlock(&ppslast_mutex);
-                if ( 0 != pthread_err ) {
-		    char errbuf[BUFSIZ] = "unknown error";
-		    (void)strerror_r(errno, errbuf, sizeof(errbuf));
-		    thread_context->log_hook(thread_context, THREAD_ERROR,
-			    "PPS:%s pthread_mutex_unlock() : %s\n",
-			    thread_context->devicename, errbuf);
-		}
-		timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
-		timespec_str( &ppstimes.real, ts_str2, sizeof(ts_str2) );
-		thread_context->log_hook(thread_context, THREAD_INF,
-		    "PPS:%s %.10s hooks called with %.20s clock: %s real: %s\n",
-		    thread_context->devicename,
-                    edge_str, 
-		    log1, ts_str1, ts_str2);
-            }
-	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
-	    timespec_str( &offset, offset_str, sizeof(offset_str) );
-	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "PPS:%s %.10s %.30s @ %s offset %.20s\n",
-		    thread_context->devicename,
-                    edge_str, 
-		    log1, ts_str1, offset_str);
-	} else {
+	if ( !ok ) {
+            /* can not use this pulse, reject and retry */
 	    thread_context->log_hook(thread_context, THREAD_PROG,
 			"PPS:%s %.10s rejected %.100s",
 			thread_context->devicename, edge_str,  log);
+	    continue;
+        }
+
+	/* offset is the skew from expected to observed pulse time */
+	struct timespec offset;
+	/* offset as a printable string */
+	char offset_str[TIMESPEC_LEN];
+	/* delay after last fix */
+	struct timespec  delay;
+	/* delay as a printable string */
+	char delay_str[TIMESPEC_LEN];
+	char *log1 = "";
+	/* ppstimes.real is the time we think the pulse represents  */
+	struct timedelta_t ppstimes;
+	thread_context->log_hook(thread_context, THREAD_RAW,
+		    "PPS:%s %.10s categorized %.100s",
+		    thread_context->devicename, edge_str, log);
+
+	/* This innocuous-looking "+ 1" embodies a significant
+	 * assumption: that GPSes report time to the second over the
+	 * serial stream *after* emitting PPS for the top of second.
+	 * Thus, when we see PPS our available report is from the
+	 * previous cycle and we must increment.
+	 *
+	 * FIXME! The GR-601W at 38,400 or faster can send the
+	 * serial fix before the interrupt event carrying the PPS
+	 * line assertion by about 10 mSec!
+	 */
+
+	ppstimes.real.tv_sec = (time_t)last_fixtime.real.tv_sec + 1;
+	ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
+	ppstimes.clock = clock_ts;
+
+	TS_SUB( &offset, &ppstimes.real, &ppstimes.clock);
+	TS_SUB( &delay, &ppstimes.clock, &last_fixtime.clock);
+	timespec_str( &delay, delay_str, sizeof(delay_str) );
+
+	/* end Stage Three: now known about the exact edge moment:
+	 *	UTC time of PPS edge
+	 *      offset of system time to PS time
+         */
+
+	/* Stage Four: Tell ntpd, chronyd, or gpsmon what we learned
+	 *       a few more sanity checks
+	 *       call the report hook with our PPS report
+         */
+
+	if ( 0> delay.tv_sec || 0 > delay.tv_nsec ) {
+	    thread_context->log_hook(thread_context, THREAD_RAW,
+			"PPS:%s %.10s system clock went backwards: %.20s\n",
+			thread_context->devicename,
+			edge_str,
+			delay_str);
+	    log1 = "system clock went backwards";
+	} else if ( ( 2 < delay.tv_sec)
+	  || ( 1 == delay.tv_sec && 100000000 > delay.tv_nsec ) ) {
+	    /* system clock could be slewing so allow 1.1 sec delay */
+	    thread_context->log_hook(thread_context, THREAD_RAW,
+			"PPS:%s %.10s no current GPS seconds: %.20s\n",
+			thread_context->devicename,
+			edge_str,
+			delay_str);
+	    log1 = "timestamp out of range";
+	} else {
+	    last_second_used = last_fixtime.real.tv_sec;
+	    if (thread_context->report_hook != NULL)
+		log1 = thread_context->report_hook(thread_context, &ppstimes);
+	    else
+		log1 = "no report hook";
+	    if (thread_context->pps_hook != NULL)
+		thread_context->pps_hook(thread_context, &ppstimes);
+	    pthread_err = pthread_mutex_lock(&ppslast_mutex);
+	    if ( 0 != pthread_err ) {
+		char errbuf[BUFSIZ] = "unknown error";
+		(void)strerror_r(errno, errbuf, sizeof(errbuf));
+		thread_context->log_hook(thread_context, THREAD_ERROR,
+			"PPS:%s pthread_mutex_lock() : %s\n",
+			thread_context->devicename, errbuf);
+	    }
+	    thread_context->ppsout_last = ppstimes;
+	    thread_context->ppsout_count++;
+	    pthread_err = pthread_mutex_unlock(&ppslast_mutex);
+	    if ( 0 != pthread_err ) {
+		char errbuf[BUFSIZ] = "unknown error";
+		(void)strerror_r(errno, errbuf, sizeof(errbuf));
+		thread_context->log_hook(thread_context, THREAD_ERROR,
+			"PPS:%s pthread_mutex_unlock() : %s\n",
+			thread_context->devicename, errbuf);
+	    }
+	    timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
+	    timespec_str( &ppstimes.real, ts_str2, sizeof(ts_str2) );
+	    thread_context->log_hook(thread_context, THREAD_INF,
+		"PPS:%s %.10s hooks called with %.20s clock: %s real: %s\n",
+		thread_context->devicename,
+		edge_str,
+		log1, ts_str1, ts_str2);
 	}
+	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
+	timespec_str( &offset, offset_str, sizeof(offset_str) );
+	thread_context->log_hook(thread_context, THREAD_PROG,
+		"PPS:%s %.10s %.30s @ %s offset %.20s\n",
+		thread_context->devicename,
+		edge_str,
+		log1, ts_str1, offset_str);
+        /* end Stage four, end of the loop, do it again */
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
     if (thread_context->kernelpps_handle > 0) {
