@@ -16,20 +16,6 @@ struct timedelta_t {
 };
 #endif /* TIMEDELTA_DEFINED */
 
-/* use RFC 2782 PPS API */
-/* this needs linux >= 2.6.34 and
- * CONFIG_PPS=y
- * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
- * CONFIG_PPS_CLIENT_LDISC=y
- */
-#if defined(HAVE_SYS_TIMEPPS_H)
-// include unistd.h here as it is missing on older pps-tools releases.
-// 'close' is not defined otherwise.
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/timepps.h>
-#endif
-
 /* difference between timespecs in nanoseconds */
 /* int is too small, avoid floats  */
 /* WARNING!  this will overflow if x and y differ by more than a few seconds */
@@ -47,9 +33,6 @@ struct pps_thread_t {
 		     int errlevel, const char *fmt, ...);
     void (*wrap_hook)(volatile struct pps_thread_t *);
     struct timedelta_t fixin;	/* real & clock time when in-band fix received */
-#if defined(HAVE_SYS_TIMEPPS_H)
-    pps_handle_t kernelpps_handle;
-#endif /* defined(HAVE_SYS_TIMEPPS_H) */
     struct timedelta_t ppsout_last;
     int ppsout_count;
 };
