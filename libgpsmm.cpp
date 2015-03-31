@@ -6,7 +6,6 @@
  *
  */
 
-#ifndef S_SPLINT_S
 #include <cstdlib>
 #include "libgpsmm.h"
 #include "gpsd_config.h"
@@ -96,4 +95,3 @@ gpsmm::~gpsmm()
 	delete to_user;
     }
 }
-#endif /* S_SPLINT_S */
