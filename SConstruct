@@ -2,18 +2,18 @@
 
 # Important targets:
 #
-# build     - build the software (default)
-# dist      - make distribution tarball
-# install   - install programs, libraries, and manual pages
-# uninstall - undo an install
+# build      - build the software (default)
+# dist       - make distribution tarball
+# install    - install programs, libraries, and manual pages
+# uninstall  - undo an install
 #
-# check     - run regression and unit tests.
-# audit     - run code-auditing tools
-# testbuild - test-build the code from a tarball
-# website   - refresh the website
-# release   - ship a release
+# check      - run regression and unit tests.
+# audit      - run code-auditing tools
+# testbuild  - test-build the code from a tarball
+# website    - refresh the website
+# release    - ship a release
 #
-# clean      - clean all normal build targets
+# --clean    - clean all normal build targets
 # sconsclean - clean up scons dotfiles (but not the database)
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
