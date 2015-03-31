@@ -662,7 +662,7 @@ static void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H)
     /* get RFC2783 features supported */
     pps_caps = 0;
-    if ( 0 <= thread_context->kernelpps_handle ) {
+    if ( 0 >= thread_context->kernelpps_handle ) {
         /* no pps handle to use, thus no caps */
 	pps_caps = 0;
     } else if ( 0 > time_pps_getcap(thread_context->kernelpps_handle, &pps_caps)) {
@@ -686,6 +686,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	 	    thread_context->devicename);
         pps_canwait = true;
     }
+
 #endif  /* HAVE_SYS_TIMEPPS_H */
 
     if ( not_a_tty && !pps_canwait ) {
