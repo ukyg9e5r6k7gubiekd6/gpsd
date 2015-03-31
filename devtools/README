@@ -108,3 +108,8 @@ this itself now, so this script has a lot of dust on it.
 Generate most of the code required to support a message type from
 AIVDM message layout tables.  Also, redo their bit offsets to be
 conformant with field lengths.
+
+== test_json_validity.py ==
+
+Test a file full of lines containing GPSD-JSON reports to verify that each
+line is in fact well-formed JSON.
