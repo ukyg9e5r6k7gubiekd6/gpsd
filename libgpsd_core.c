@@ -552,54 +552,56 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
 	session->mode = mode;
 
     // cppcheck-suppress pointerLessThanZero
-    if (session->gpsdata.gps_fd < 0)
-	return -1;
-    else {
-#ifdef NON_NMEA_ENABLE
-	/* if it's a sensor, it must be probed */
-        if ((session->servicetype == service_sensor) && 
-	    (session->sourcetype != source_can)) {
-	    const struct gps_type_t **dp;
-
-	    for (dp = gpsd_drivers; *dp; dp++) {
-		if ((*dp)->probe_detect != NULL) {
-		    gpsd_log(&session->context->errout, LOG_PROG,
-			     "Probing \"%s\" driver...\n",
-			     (*dp)->type_name);
-		    /* toss stale data */
-		    (void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
-		    if ((*dp)->probe_detect(session) != 0) {
-			gpsd_log(&session->context->errout, LOG_PROG,
-				 "Probe found \"%s\" driver...\n",
-				 (*dp)->type_name);
-			session->device_type = *dp;
-			gpsd_assert_sync(session);
-			goto foundit;
-		    } else
-			gpsd_log(&session->context->errout, LOG_PROG,
-				 "Probe not found \"%s\" driver...\n",
-				 (*dp)->type_name);
-		}
-	    }
-	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "no probe matched...\n");
-	}
-      foundit:
-#endif /* NON_NMEA_ENABLE */
-	gpsd_clear(session);
-	gpsd_log(&session->context->errout, LOG_INF,
-		 "gpsd_activate(%d): activated GPS (fd %d)\n",
-		 session->mode, session->gpsdata.gps_fd);
-	/*
-	 * We might know the device's type, but we shouldn't assume it has
-	 * retained its settings.  A revert hook might well have undone
-	 * them on the previous close.  Fire a reactivate event so drivers
-	 * can do something about this if they choose.
-	 */
-	if (session->device_type != NULL
-	    && session->device_type->event_hook != NULL)
-	    session->device_type->event_hook(session, event_reactivate);
+    if (session->gpsdata.gps_fd < 0) {
+        /* return could be -1, PLACEHOLDING_FD, of UNALLOCATED_FD */
+	return session->gpsdata.gps_fd;
     }
+
+#ifdef NON_NMEA_ENABLE
+    /* if it's a sensor, it must be probed */
+    if ((session->servicetype == service_sensor) && 
+	(session->sourcetype != source_can)) {
+	const struct gps_type_t **dp;
+
+	for (dp = gpsd_drivers; *dp; dp++) {
+	    if ((*dp)->probe_detect != NULL) {
+		gpsd_log(&session->context->errout, LOG_PROG,
+			 "Probing \"%s\" driver...\n",
+			 (*dp)->type_name);
+		/* toss stale data */
+		(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
+		if ((*dp)->probe_detect(session) != 0) {
+		    gpsd_log(&session->context->errout, LOG_PROG,
+			     "Probe found \"%s\" driver...\n",
+			     (*dp)->type_name);
+		    session->device_type = *dp;
+		    gpsd_assert_sync(session);
+		    goto foundit;
+		} else
+		    gpsd_log(&session->context->errout, LOG_PROG,
+			     "Probe not found \"%s\" driver...\n",
+			     (*dp)->type_name);
+	    }
+	}
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "no probe matched...\n");
+    }
+foundit:
+#endif /* NON_NMEA_ENABLE */
+
+    gpsd_clear(session);
+    gpsd_log(&session->context->errout, LOG_INF,
+	     "gpsd_activate(%d): activated GPS (fd %d)\n",
+	     session->mode, session->gpsdata.gps_fd);
+    /*
+     * We might know the device's type, but we shouldn't assume it has
+     * retained its settings.  A revert hook might well have undone
+     * them on the previous close.  Fire a reactivate event so drivers
+     * can do something about this if they choose.
+     */
+    if (session->device_type != NULL
+	&& session->device_type->event_hook != NULL)
+	session->device_type->event_hook(session, event_reactivate);
     return session->gpsdata.gps_fd;
 }
 
