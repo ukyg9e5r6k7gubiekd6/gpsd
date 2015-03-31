@@ -304,12 +304,6 @@ def installdir(dir, add_destdir=True):
 if env["sysroot"]:
     env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir', add_destdir=False)])
 
-# Don't hack RPATH unless libdir points somewhere that is not on the
-# minimum default load path.
-if env["shared"]:
-    if env["libdir"] not in ["/usr/lib", "/lib"]:
-        env.Prepend(RPATH=[installdir('libdir')+",--enable-new-dtags"])
-
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
