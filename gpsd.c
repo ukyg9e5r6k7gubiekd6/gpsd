@@ -677,8 +677,19 @@ static struct gps_device_t *find_device(const char
 #endif /* defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE) */
 
 static bool open_device( struct gps_device_t *device)
+/* open the input device
+ * return: false on failure
+ *         true on success
+ */
 {
-    if (NULL == device || gpsd_activate(device, O_OPTIMIZE) < 0) {
+    int activated = -1;
+
+    if (NULL == device ) {
+	return false;
+    }
+    activated = gpsd_activate(device, O_OPTIMIZE);
+    if ( ( 0 > activated ) && ( PLACEHOLDING_FD != activated ) ) {
+	/* failed to open device, and it is not a /dev/ppsX */
 	return false;
     }
 
@@ -696,6 +707,10 @@ static bool open_device( struct gps_device_t *device)
 
     gpsd_log(&context.errout, LOG_INF, 
 	     "device %s activated\n", device->gpsdata.dev.path);
+    if ( PLACEHOLDING_FD == activated ) {
+	/* it is a /dev/ppsX, no need to select() it */
+        return true;
+    }
     FD_SET(device->gpsdata.gps_fd, &all_fds);
     adjust_max_fd(device->gpsdata.gps_fd, true);
     ++highwater;
@@ -703,7 +718,10 @@ static bool open_device( struct gps_device_t *device)
 }
 
 bool gpsd_add_device(const char *device_name, bool flag_nowait)
-/* add a device to the pool; open it right away if in nowait mode */
+/* add a device to the pool; open it right away if in nowait mode 
+ * return: false on failure
+ *         true on success
+ */
 {
     struct gps_device_t *devp;
     bool ret = false;
