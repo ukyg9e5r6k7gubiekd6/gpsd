@@ -505,15 +505,14 @@ you disable /etc/dhcp3/dhclient-exit-hooks.d/ntp, as dhclient would
 restart ntpd with an automatically created ntp.conf otherwise - and
 gpsd would not be able to talk with ntpd any more.
 
-While gpsd can be run as non-root, you will get slightly better
-accuracy of time reporting in root mode; the difference, while
-almost certainly insignificant for feeding Stratum 1 time to
-clients over the Internet, may matter for PTP service over a LAN.
-In root mode, 1PPS is captured by code running at kernel priority
-(the RFC2783  Pulse Per Second API), whereas in non-root mode 1PPS
-is captured by waiting with TIOCMIWAIT on an RS232 handshake line.
-As noted in the previous section on 1PPS quality issues, this
-difference has performance implications.
+While gpsd may be be runnable as non-root, you will get significantly
+better accuracy of time reporting in root mode; the difference, while
+almost certainly insignificant for feeding Stratum 1 time to clients
+over the Internet, may matter for PTP service over a LAN.  Only
+root enables kernel PPS, whereas in non-root mode you're limited to
+plain PPS (if that feature is available).  As noted in the previous
+section on 1PPS quality issues, this difference has performance
+implications.
 
 The rest of these setup instructions will assume that you are starting
 gpsd as root, with occasional glances at the non-root case.
