@@ -14,10 +14,6 @@ else
     GPSD_HOME=`dirname $0`
 fi
 
-# Avoid dynamic-linking failures if we don't happen to have the GPSD
-# libraries installed in system space yet.
-export LD_LIBRARY_PATH=$GPSD_HOME
-
 # Arrange to call a gpsfake in the source directory without fuss.
 if [ -z ${PYTHON} ]; then
     PYTHON="python"
