@@ -57,16 +57,24 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <pthread.h>		/* pacifies OpenBSD's compiler */
 
 #include "gpsd_config.h"
 #include "timespec_str.h"
 #include "ppsthread.h"
-#include "compiler.h"	/* required for erno thread-safety */
 
-#ifdef PPS_ENABLE
-#if defined(HAVE_SYS_TIMEPPS_H)
-#include <fcntl.h>	/* needed for open() and friends */
-#endif /* defined(HAVE_SYS_TIMEPPS_H) */
+/*
+ * Tell GCC that we want thread-safe behavior with _REENTRANT;
+ * in particular, errno must be thread-local.
+ * Tell POSIX-conforming implementations with _POSIX_THREAD_SAFE_FUNCTIONS.
+ * See http://www.unix.org/whitepapers/reentrant.html
+ */
+#ifndef _REENTRANT
+#define _REENTRANT
+#endif
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+#define _POSIX_THREAD_SAFE_FUNCTIONS
+#endif
 
 /*
  * Warning: This is a potential portability problem.
@@ -78,9 +86,9 @@
  */
 #include <sys/ioctl.h>
 
-#include <pthread.h>		/* pacifies OpenBSD's compiler */
 #if defined(HAVE_SYS_TIMEPPS_H)
 #include <glob.h>
+#include <fcntl.h>	/* needed for open() and friends */
 #endif
 
 #if defined(TIOCMIWAIT)
@@ -1275,8 +1283,6 @@ int pps_thread_ppsout(volatile struct pps_thread_t *pps_thread,
 
     return ret;
 }
-
-#endif /* PPS_ENABLE */
 
 /* end */
 
