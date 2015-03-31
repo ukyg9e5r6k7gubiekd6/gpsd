@@ -942,22 +942,28 @@ static void *gpsd_ppsmonitor(void *arg)
 	 *      determine if we have the leading or trailing edge
 	 */
 
-	/* FIXME! this block fails to fix invisible pulses on
-         *0.5Hz and 5Hz PPS !! */
-	if (state == state_last) {
-	    /* some pulses may be so short that state never changes */
-	    if (999000 < cycle && 1001000 > cycle) {
-		duration = 0;
-		thread_context->log_hook(thread_context, THREAD_RAW,
-			    "PPS:%s %.10s pps-detect invisible pulse\n",
-			    thread_context->devicename, edge_str);
-	    }
-	} else {
+	/* FIXME! this block duplicates a lot of the next block
+         * of cycle detetion code */
+	if (state != state_last) {
 	    thread_context->log_hook(thread_context, THREAD_RAW,
 			"PPS:%s %.10s pps-detect changed to %d\n",
 			thread_context->devicename, edge_str, state);
 	    unchanged = 0;
+        } else if ( (180000 < cycle &&  220000 > cycle)      /* 5Hz */
+	        ||  (900000 < cycle && 1100000 > cycle)      /* 1Hz */
+	        || (1800000 < cycle && 2200000 > cycle) ) {  /* 2Hz */
+
+	    /* some pulses may be so short that state never changes 
+	     * and some RFC2783 only can detect one edge */
+
+	    duration = 0;
+	    unchanged = 0;
+	    thread_context->log_hook(thread_context, THREAD_RAW,
+			"PPS:%s %.10s pps-detect invisible pulse\n",
+			thread_context->devicename, edge_str);
 	}
+        /* else, unchannged state, and weird cycle time */
+
 	state_last = state;
 	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
@@ -993,6 +999,13 @@ static void *gpsd_ppsmonitor(void *arg)
 	 * 5Hz GPS (Garmin 18-5Hz) pulses at 5Hz. Set the pulse length to
 	 * 40ms which gives a 160ms pulse before going high.
 	 *
+	 * You may think that PPS is very accurate, so the cycle time
+         * valid window should be very small.  This is not the case,
+         * The Rasberry Pi clock is very coarse when it starts and chronyd 
+         * may be doing a fast slew.  chronyd by default will slew up 
+         * to 8.334%!  So the cycle time as measured by the system clock 
+         * may be almost +/- 9%. Therefore, gpsd uses a 10% window.  
+	 * Don't worry, ntpd and chronyd will do further validation.
 	 */
 
 	log = "Unknown error";
