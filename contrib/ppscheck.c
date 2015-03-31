@@ -23,9 +23,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef S_SPLINT_S
 #include <unistd.h>
-#endif /* S_SPLINT_S */
 #include <fcntl.h>	/* needed for open() and friends */
 #include <sys/ioctl.h>
 #include <errno.h>
