@@ -1295,7 +1295,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		     "%s identified as type %s, %ld sec @ %ubps\n",
 		     session->gpsdata.dev.path,
 		     session->device_type->type_name,
-		     time(NULL) - session->opentime,
+		     (long)(time(NULL) - session->opentime),
 		     (unsigned int)speed);
 
 	    /* fire the init_query method */
