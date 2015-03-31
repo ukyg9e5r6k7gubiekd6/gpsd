@@ -13,8 +13,8 @@
 # website   - refresh the website
 # release   - ship a release
 #
-# clean     - clean all normal build targets
-# distclean - clean up to a state like a fresh repo pull
+# clean      - clean all normal build targets
+# sconsclean - clean up scons dotfiles
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
 # without changing the --prefix prefix.
@@ -1688,7 +1688,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 # Run all normal regression tests
 describe = Utility('describe', [],
                    ['@echo "Run normal regression tests for %s..."' %(rev.strip(),)])
-testclean = Utility('test_cleanup', [],
+testclean = Utility('testclean', [],
                     'rm -f test_bits test_matrix test_geoid test_json test_libgps test_mktime test_packet')
 check = env.Alias('check', [
     describe,
@@ -1742,7 +1742,6 @@ htmlpages = Split('''www/installation.html
     www/libgpsd.html www/libgpsmm.html www/libgps.html
     www/srec.html www/writing-a-driver.html www/hardware.html
     www/performance/performance.html www/internals.html
-    www/cycle.svg
     ''')
 
 webpages = htmlpages + asciidocs + map(lambda f: f[:-3], glob.glob("www/*.in"))
@@ -1866,14 +1865,11 @@ Utility('udev-test', '', [
 # Ordinary cleanup
 clean = env.Clean(build,
           map(glob.glob,("*.[oa]", "*.[1358]", "*.os", "*.os.*", "*.gcno", "*.pyc", "gps/*.pyc", "TAGS", "config.log","lib*.so*","lib*.a","gps-*egg-info","contrib/ppscheck","*.gcda")) + testprogs + \
-          generated_sources + base_manpages.keys() + \
+          generated_sources + base_manpages.keys() + webpages + \
           map(lambda f: f[:-3], templated))
 
-# Clean up web directory
-webclean = env.Clean(www, [])
-
-# Clean up to a close approximation of a fresh repository pull
-distclean = env.Alias('distclean', [clean, testclean, webclean])
+# Nuke scons state files 
+sconsclean = Utility("sconsclean", '', ["rm -f .sconsign.dblite .sconf_temp .scons-option-cache config.log"])
 
 # Tags for Emacs and vi
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
