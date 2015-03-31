@@ -333,11 +333,18 @@ For instructions on how to live-test the software, see the file INSTALL.
 
 == Reverting to a clean state ==
 
-The scons equivalent of 'make clean' is 'scons -c'. This will revert
-your source tree to a clean state nearly as though you had just cloned or
-downloaded it; some scons housekeeping stuff is left in place.  If you
-interrupted a regression test, 'scons testclean' will remove generated test
-programs.
+The scons equivalent of 'make clean' is 'scons -c' or 'scons
+--clean'. This will revert your source tree to a clean state nearly as
+though you had just cloned or downloaded it; some scons housekeeping
+stuff is left in place.
+
+If you interrupted a regression test, 'scons testclean' will remove
+generated test programs.
+
+You can run 'scons sconsclean' to temove most of the configuration
+state that scons keeps.  Be aware, however, thatr doing this can
+confuse scons; you may need to run 'scons --config=force' afterwards
+to make your build succeed.
 
 == Notes on Android:
 
