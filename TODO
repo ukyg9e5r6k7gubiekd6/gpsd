@@ -94,15 +94,6 @@ Our goal is to be independent of the system clock.
 
 See <http://www.febo.com/pipermail/time-nuts/2013-August/079271.html>
 
-**** Track gpsd's confidence in the GPS time it's seeing
-
-This would increase when we see a leap-second offset or get GPZDA from
-the device, decrease when we detect a rollover.  Some devices that are
-known to deliver high-quality time (notably u-blox GPSes) would peg the
-confidence measure at a high level.  We'd use the confidence level to
-control (a) whether gpsd ships to NTP, and (b) how it sets time
-uncertainty in output JSON.
-
 *** Optionally use tag blocks in NMEA output
 
 Ed W. writes:
