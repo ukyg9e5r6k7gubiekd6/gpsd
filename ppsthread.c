@@ -61,7 +61,7 @@
 #include <unistd.h>
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 
-/* use RFC 2782 PPS API */
+/* use RFC 2783 PPS API */
 /* this needs linux >= 2.6.34 and
  * CONFIG_PPS=y
  * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
@@ -266,8 +266,9 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 	 * to find the /dev/pps? that matches our serial port.
 	 * this code fails if there are more then 10 pps devices.
 	 *
-	 * yes, this could be done with libsysfs, but trying to keep the
-	 * number of required libs small, and libsysfs would still be linux only */
+	 * yes, this could be done with libsysfs, but trying to keep
+	 * the number of required libs small, and libsysfs would still
+	 * be linux only */
 	memset( (void *)&globbuf, 0, sizeof(globbuf));
 	(void)glob("/sys/devices/virtual/pps/pps?/path", 0, NULL, &globbuf);
 
@@ -650,7 +651,7 @@ static int get_edge_rfc2783(struct inner_context_t *inner_context,
 
 /* gpsd_ppsmonitor()
  *
- * the core loop of the ppsthread.
+ * the core loop of the PPS thread.
  * All else is initialization, cleanup or subroutine
  */
 static void *gpsd_ppsmonitor(void *arg)
@@ -797,7 +798,7 @@ static void *gpsd_ppsmonitor(void *arg)
              * edge - rising edge (1), falling edge (0) or invisble edge (0)
              */
 
-	    /* calculate cycle and duration from previsou edges */
+	    /* calculate cycle and duration from previous edges */
 	    cycle_tio = timespec_diff_ns(clock_ts_tio, pulse_tio[edge_tio]);
 	    cycle_tio /= 1000;  /* nsec to usec */
 	    duration_tio = timespec_diff_ns(clock_ts_tio,
@@ -1201,6 +1202,7 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
      * It would be if inner_context could be auto, but the monitor
      * routine gets garbage when we try that.  Ideally the body
      * of this function would be guarded by a separate mutex.
+     * Either that, or this should be an exception to the no-malloc rule.
      */
     static struct inner_context_t	inner_context;
 
