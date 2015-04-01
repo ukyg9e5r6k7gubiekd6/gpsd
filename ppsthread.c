@@ -114,9 +114,9 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *,
 
 struct inner_context_t {
     volatile struct pps_thread_t	*pps_thread;
+    bool pps_canwait;                   /* can RFC2783 wait? */
 #if defined(HAVE_SYS_TIMEPPS_H)
     int pps_caps;                       /* RFC2783 getcaps() */
-    bool pps_canwait;                   /* can RFC2783 wait? */
     pps_handle_t kernelpps_handle;
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
 };
