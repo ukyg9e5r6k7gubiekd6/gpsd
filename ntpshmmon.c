@@ -80,6 +80,7 @@ int main(int argc, char **argv)
     }
 
     (void)printf("ntpshmmon version 1\n");
+    (void)printf("       Name   Seen@    Clock    Real   L Prec\n");
 
     do {
 	struct shm_stat_t	shm_stat;

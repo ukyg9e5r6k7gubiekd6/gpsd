@@ -60,7 +60,9 @@ enum segstat_t {OK, NO_SEGMENT, NOT_READY, BAD_MODE, CLASH};
 
 struct shm_stat_t {
     enum segstat_t status;
-    struct timespec tvc, tvr, tvt;
+    struct timespec tvc;    /* System time when SHM read, for debug only */
+    struct timespec tvr;    /* System time at GPS time */
+    struct timespec tvt;    /* GPS time */
     int precision;
     int leap;
 };
