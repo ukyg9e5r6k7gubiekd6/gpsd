@@ -1177,8 +1177,6 @@ static void *gpsd_ppsmonitor(void *arg)
 	(void)time_pps_destroy(inner_context.kernelpps_handle);
     }
 #endif
-    if (thread_context->wrap_hook != NULL)
-	thread_context->wrap_hook(thread_context);
     thread_context->log_hook(thread_context, THREAD_PROG,
 		"PPS:%s gpsd_ppsmonitor exited.\n",
 		thread_context->devicename);

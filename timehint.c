@@ -344,13 +344,6 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
 
-static void wrap_hook(volatile struct pps_thread_t *pps_thread)
-{
-    struct gps_device_t *session = (struct gps_device_t *)pps_thread->context;
-    if (session->chronyfd != -1)
-	(void)close(session->chronyfd);
-}
-
 static char *report_hook(volatile struct pps_thread_t *pps_thread,
 					struct timedelta_t *td)
 /* ship the time of a PPS event to ntpd and/or chrony */
@@ -399,6 +392,8 @@ void ntpshm_link_deactivate(struct gps_device_t *session)
 #if defined(PPS_ENABLE)
     if (session->shm_pps != NULL) {
 	pps_thread_deactivate(&session->pps_thread);
+	if (session->chronyfd != -1)
+	    (void)close(session->chronyfd);
 	(void)ntpshm_free(session->context, session->shm_pps);
 	session->shm_pps = NULL;
     }
@@ -437,7 +432,6 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	} else {
 	    init_hook(session);
 	    session->pps_thread.report_hook = report_hook;
-	    session->pps_thread.wrap_hook = wrap_hook;
 	    pps_thread_activate(&session->pps_thread);
 	}
 #endif /* PPS_ENABLE */

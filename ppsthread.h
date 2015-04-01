@@ -31,9 +31,7 @@ struct timedelta_t {
  * two functions are for.
  *
  * The report hook is called when each PPS event is recognized.  The log
- * hook is called to log error and status indications from the thread. The
- * wrap hook is called when the thread terminates as the result of a
- * deactivate call.
+ * hook is called to log error and status indications from the thread.
  */
 struct pps_thread_t {
     void *context;		/* PPS thread code leaves this alone */
@@ -43,7 +41,6 @@ struct pps_thread_t {
 			 struct timedelta_t *);
     void (*log_hook)(volatile struct pps_thread_t *,
 		     int errlevel, const char *fmt, ...);
-    void (*wrap_hook)(volatile struct pps_thread_t *);
     struct timedelta_t fix_in;	/* real & clock time when in-band fix received */
     struct timedelta_t pps_out;	/* real & clock time of last PPS event */
     int ppsout_count;
