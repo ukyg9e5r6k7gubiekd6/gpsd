@@ -269,17 +269,27 @@ int test_double(void) {
 int test_modulo(void) {
     static int e = 0;
 
-    if (-5 % 2 != -1) {
+    /* make sure that gcc does not optimize these away */
+    volatile int a;
+    volatile int b;
+
+    a = -5;
+    b = 2;
+    if (a % b != -1) {
 	printf("m1 ");
 	e++;
     }
 
-    if (-5 % -2 != -1) {
+    a = -5;
+    b = -2;
+    if (a % b != -1) {
 	printf("m2 ");
 	e++;
     }
 
-    if (5 % -2 != 1) {
+    a = 5;
+    b = -2;
+    if (a % b != 1) {
 	printf("m3 ");
 	e++;
     }
