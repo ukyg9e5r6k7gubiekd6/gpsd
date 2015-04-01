@@ -487,10 +487,14 @@ them, add a brief description of the change.</p></li>
 clients (possibly including gpsmon) will throw an error when they trip over the
 new field.</p></li>
 
+<li><p>There may be a unit test for parsing of the JSON object in
+test_json.c.  If there is, it needs to be modified.  If not, add
+one.</p></li>
+
 <li><p>The hard part: the data wants to go somewhere on the client side, but
 doing this may involve a compatibility break in the user-visible core
 structures.  You need to make a call on whether to extend them or accept 
-that the new data will be invisible untol the next structure upgrade
+that the new data will be invisible until the next structure upgrade
 and if so document that as an item in TODO.</p></li>
 </ol>
 
