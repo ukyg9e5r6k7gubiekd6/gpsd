@@ -1511,7 +1511,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
     } else if (isnan(device->newdata.time)) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: bad new time\n");
 #if defined(PPS_ENABLE)
-    } else if (device->newdata.time <= device->pps_thread.fixin.real.tv_sec) {
+    } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: Not a new time\n");
 #endif /* PPS_ENABLE */
     } else if (!device->ship_to_ntpd) {
@@ -1528,7 +1528,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	/* propagate this in-band-time to all PPS-only devices */
 	for (ppsonly = devices; ppsonly < devices + MAX_DEVICES; ppsonly++)
 	    if (ppsonly->sourcetype == source_pps)
-		pps_thread_fixin(&ppsonly->pps_thread, &td);
+		pps_thread_fix_in(&ppsonly->pps_thread, &td);
 #endif /* PPS_ENABLE */
 
 #ifdef NTPSHM_ENABLE

@@ -483,7 +483,7 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
     /* duplicate copy in get_edge_rfc2783 */
     /* quick, grab a copy of last_fixtime before it changes */
     thread_lock(thread_context);
-    *last_fixtime = thread_context->fixin;
+    *last_fixtime = thread_context->fix_in;
     thread_unlock(thread_context);
     /* end duplicate copy in get_edge_rfc2783 */
 
@@ -590,7 +590,7 @@ static int get_edge_rfc2783(struct inner_context_t *inner_context,
 
 	/* quick, grab a copy of last fixtime before it changes */
 	thread_lock(thread_context);
-	*last_fixtime = thread_context->fixin;
+	*last_fixtime = thread_context->fix_in;
 	thread_unlock(thread_context);
     }
 
@@ -1149,7 +1149,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    else
 		log1 = "no report hook";
 	    thread_lock(thread_context);
-	    thread_context->ppsout_last = ppstimes;
+	    thread_context->pps_out = ppstimes;
 	    thread_context->ppsout_count++;
 	    thread_unlock(thread_context);
 	    timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
@@ -1232,12 +1232,12 @@ void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
     pps_thread->report_hook = NULL;
 }
 
-void pps_thread_fixin(volatile struct pps_thread_t *pps_thread,
-			      volatile struct timedelta_t *fixin)
+void pps_thread_fix_in(volatile struct pps_thread_t *pps_thread,
+			      volatile struct timedelta_t *fix_in)
 /* thread-safe update of last fix time - only way we pass data in */
 {
     thread_lock(pps_thread);
-    pps_thread->fixin = *fixin;
+    pps_thread->fix_in = *fix_in;
     thread_unlock(pps_thread);
 }
 
@@ -1248,7 +1248,7 @@ int pps_thread_ppsout(volatile struct pps_thread_t *pps_thread,
     volatile int ret;
 
     thread_lock(pps_thread);
-    *td = pps_thread->ppsout_last;
+    *td = pps_thread->pps_out;
     ret = pps_thread->ppsout_count;
     thread_unlock(pps_thread);
 

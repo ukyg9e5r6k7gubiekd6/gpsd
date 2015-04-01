@@ -21,17 +21,31 @@ struct timedelta_t {
 /* WARNING!  this will overflow if x and y differ by more than a few seconds */
 #define timespec_diff_ns(x, y)	(long)(((x).tv_sec-(y).tv_sec)*1000000000+(x).tv_nsec-(y).tv_nsec)
 
+/*
+ * Set context, devicefd, and devicename at initialization time, before
+ * you call pps_thread_activate().  The context pointer can be used to
+ * pass data to the hook routines.
+ *
+ * Do not set the fix_in member or read the pps_out member directly,
+ * these accesses need to be mutex-locked and that is what the last
+ * two functions are for.
+ *
+ * The report hook is called when each PPS event is recognized.  The log
+ * hook is called to log error and status indications from the thread. The
+ * wrap hook is called when the thread terminates as the result of a
+ * deactivate call.
+ */
 struct pps_thread_t {
-    void *context;
+    void *context;		/* PPS thread code leaves this alone */
     int devicefd;		/* device file descriptor */
-    char *devicename;
+    char *devicename;		/* device path */
     char *(*report_hook)(volatile struct pps_thread_t *,
 			 struct timedelta_t *);
     void (*log_hook)(volatile struct pps_thread_t *,
 		     int errlevel, const char *fmt, ...);
     void (*wrap_hook)(volatile struct pps_thread_t *);
-    struct timedelta_t fixin;	/* real & clock time when in-band fix received */
-    struct timedelta_t ppsout_last;
+    struct timedelta_t fix_in;	/* real & clock time when in-band fix received */
+    struct timedelta_t pps_out;	/* real & clock time of last PPS event */
     int ppsout_count;
 };
 
@@ -43,7 +57,7 @@ struct pps_thread_t {
 
 extern void pps_thread_activate(volatile struct pps_thread_t *);
 extern void pps_thread_deactivate(volatile struct pps_thread_t *);
-extern void pps_thread_fixin(volatile struct pps_thread_t *, 
+extern void pps_thread_fix_in(volatile struct pps_thread_t *,
 				     volatile struct timedelta_t *);
 extern int pps_thread_ppsout(volatile struct pps_thread_t *,
 			      volatile struct timedelta_t *);

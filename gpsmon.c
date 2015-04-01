@@ -777,8 +777,12 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    (void)snprintf(buf, sizeof(buf), 
 			"------------------- PPS offset: %.20s ------\n ",
 			timedelta_str);
+	    /*
+	     * In direct mode this would be a bad idea, but we're not actually
+	     * watching for handshake events on a spawned thread here.
+	     */
 	    /* coverity[missing_lock] */
-	    session.pps_thread.ppsout_last = noclobber.pps;
+	    session.pps_thread.pps_out = noclobber.pps;
 	    /* coverity[missing_lock] */
 	    session.pps_thread.ppsout_count++;
 	}
@@ -834,7 +838,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     if ( 0 != isnan(device->newdata.time)) {
 	// "NTP: bad new time
 #if defined(PPS_ENABLE)
-    } else if (device->newdata.time <= device->pps_thread.fixin.real.tv_sec) {
+    } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
 	// "NTP: Not a new time
 #endif /* PPS_ENABLE */
     } else 
