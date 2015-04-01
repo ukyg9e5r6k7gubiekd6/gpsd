@@ -1670,11 +1670,19 @@ static void ship_pps_message(struct gps_device_t *session,
 				   struct timedelta_t *td)
 /* on PPS interrupt, ship a message to all clients */
 {
+    int precision = -20;
+
+    if ( source_usb == session->sourcetype) {
+        /* PPS over USB not so good */
+	precision = -10;
+    }
+
     notify_watchers(session, true, true,
-		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
+		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld,\"precision\":%d}\r\n",
 		    session->gpsdata.dev.path,
 		    td->real.tv_sec, td->real.tv_nsec,
-		    td->clock.tv_sec, td->clock.tv_nsec);
+		    td->clock.tv_sec, td->clock.tv_nsec,
+                    precision);
 
     /*
      * PPS receipt resets the device's timeout.  This keeps PPS-only
