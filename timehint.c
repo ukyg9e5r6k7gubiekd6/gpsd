@@ -350,6 +350,7 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
 {
     char *log1;
     struct gps_device_t *session = (struct gps_device_t *)pps_thread->context;
+    struct timedelta_t tc;
 
     if (!session->ship_to_ntpd)
 	return "skipped ship_to_ntp=0";
@@ -366,17 +367,26 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
     if (session->fixcnt <= PPS_MIN_FIXES)
 	return "no fix";
 
+    /*
+     * We get the time of the last fix recorded before the PPS came in,
+     * which is for the previous cycle.  So here, we need to increment it
+     * using our knowledge of the device's cycle time.
+     * FIXME: Only works for integral cycle times.
+     */
+    tc = *td;
+    tc.real.tv_sec += (int)session->gpsdata.dev.cycle;
+
     log1 = "accepted";
     if ( 0 <= session->chronyfd ) {
 	log1 = "accepted chrony sock";
-	chrony_send(session, td);
+	chrony_send(session, &tc);
     }
     if (session->shm_pps != NULL)
-	(void)ntpshm_put(session, session->shm_pps, td);
+	(void)ntpshm_put(session, session->shm_pps, &tc);
 
     /* session context might have a hook set, too */
     if (session->context->pps_hook != NULL)
-	session->context->pps_hook(session, td);
+	session->context->pps_hook(session, &tc);
 
     return log1;
 }

@@ -1080,7 +1080,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    continue;
         }
 
-        /* we have valiidated a goood cycle, mark it */
+        /* we have validated a goood cycle, mark it */
 	unchanged = 0;
 	/* offset is the skew from expected to observed pulse time */
 	struct timespec offset;
@@ -1097,18 +1097,12 @@ static void *gpsd_ppsmonitor(void *arg)
 		    "PPS:%s %.10s categorized %.100s",
 		    thread_context->devicename, edge_str, log);
 
-	/* This innocuous-looking "+ 1" embodies a significant
-	 * assumption: that GPSes report time to the second over the
-	 * serial stream *after* emitting PPS for the top of second.
-	 * Thus, when we see PPS our available report is from the
-	 * previous cycle and we must increment.
-	 *
-	 * FIXME! The GR-601W at 38,400 or faster can send the
+	/* FIXME! The GR-601W at 38,400 or faster can send the
 	 * serial fix before the interrupt event carrying the PPS
 	 * line assertion by about 10 mSec!
 	 */
 
-	ppstimes.real.tv_sec = (time_t)last_fixtime.real.tv_sec + 1;
+	ppstimes.real.tv_sec = (time_t)last_fixtime.real.tv_sec;
 	ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
 	ppstimes.clock = clock_ts;
 
