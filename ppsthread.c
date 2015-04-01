@@ -1109,10 +1109,10 @@ static void *gpsd_ppsmonitor(void *arg)
 	    timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
 	    timespec_str( &ppstimes.real, ts_str2, sizeof(ts_str2) );
 	    thread_context->log_hook(thread_context, THREAD_INF,
-		"PPS:%s %.10s hooks called with %.20s clock: %s real: %s\n",
+		"PPS:%s %.10s hooks called clock: %s real: %s: %.20s\n",
 		thread_context->devicename,
 		edge_str,
-		log1, ts_str1, ts_str2);
+		ts_str1, ts_str2, log1);
 	}
 	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	timespec_str( &offset, offset_str, sizeof(offset_str) );
