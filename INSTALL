@@ -167,10 +167,14 @@ number known to work with hardware already supported.
 
 3. GPSD includes a PHP script that you can use to generate a PHP
 status page for your GPS if you wish. (It may not be in the core
-package.)  It will be installed in your HTTP document directory. The
-first time it's invoked, it will generate a file called
+package.)  It should be manually copied to your HTTP document directory. 
+The first time it's invoked, it will generate a file called
 'gpsd_config.inc' in that directory containing configuration
-information; edit to taste.
+information; edit to taste.  
+
+4. There are other non-essential scripts that may be useful; these
+are in the contrib/ directory of the source.  They may not be available
+in the packages available from distributions.
 
 For special instructions related to using GPSD for time service, see the
 GPSD Time Service HOWTO in the distribution or on the web.
