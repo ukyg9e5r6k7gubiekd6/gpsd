@@ -16,29 +16,32 @@
  * this only handles the case where two normalized timespecs
  * are added or subracted.  (e.g. only a one needs to be borrowed/carried
  */
+#define NS_IN_SEC	1000000000
+#define MS_IN_SEC	1000000
+
 static inline void TS_NORM( struct timespec *ts)
 {
     if ( (  1 <= ts->tv_sec ) ||
          ( (0 == ts->tv_sec ) && (0 <= ts->tv_nsec ) ) ) {
         /* result is positive */
-	if ( 1000000000 <= ts->tv_nsec ) {
+	if ( NS_IN_SEC <= ts->tv_nsec ) {
             /* borrow from tv_sec */
-	    ts->tv_nsec -= 1000000000;
+	    ts->tv_nsec -= NS_IN_SEC;
 	    ts->tv_sec++;
 	} else if ( 0 > (ts)->tv_nsec ) {
             /* carry to tv_sec */
-	    ts->tv_nsec += 1000000000;
+	    ts->tv_nsec += NS_IN_SEC;
 	    ts->tv_sec--;
 	}
     }  else {
         /* result is negative */
-	if ( -1000000000 >= ts->tv_nsec ) {
+	if ( -NS_IN_SEC >= ts->tv_nsec ) {
             /* carry to tv_sec */
-	    ts->tv_nsec += 1000000000;
+	    ts->tv_nsec += NS_IN_SEC;
 	    ts->tv_sec--;
 	} else if ( 0 < ts->tv_nsec ) {
             /* borrow from tv_sec */
-	    ts->tv_nsec -= 1000000000;
+	    ts->tv_nsec -= NS_IN_SEC;
 	    ts->tv_sec++;
 	}
     }
@@ -47,11 +50,11 @@ static inline void TS_NORM( struct timespec *ts)
 /* normalize a timeval */
 #define TV_NORM(tv)  \
     do { \
-	if ( 1000000 <= (tv)->tv_usec ) { \
-	    (tv)->tv_usec -= 1000000; \
+	if ( MS_IN_SEC <= (tv)->tv_usec ) { \
+	    (tv)->tv_usec -= MS_IN_SEC; \
 	    (tv)->tv_sec++; \
 	} else if ( 0 > (tv)->tv_usec ) { \
-	    (tv)->tv_usec += 1000000; \
+	    (tv)->tv_usec += MS_IN_SEC; \
 	    (tv)->tv_sec--; \
 	} \
     } while (0)
