@@ -1230,7 +1230,7 @@ void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
     pps_thread->report_hook = NULL;
 }
 
-void pps_thread_fix_in(volatile struct pps_thread_t *pps_thread,
+void pps_thread_fixin(volatile struct pps_thread_t *pps_thread,
 			      volatile struct timedelta_t *fix_in)
 /* thread-safe update of last fix time - only way we pass data in */
 {

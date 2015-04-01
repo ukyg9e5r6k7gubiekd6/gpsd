@@ -1528,7 +1528,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	/* propagate this in-band-time to all PPS-only devices */
 	for (ppsonly = devices; ppsonly < devices + MAX_DEVICES; ppsonly++)
 	    if (ppsonly->sourcetype == source_pps)
-		pps_thread_fix_in(&ppsonly->pps_thread, &td);
+		pps_thread_fixin(&ppsonly->pps_thread, &td);
 #endif /* PPS_ENABLE */
 
 #ifdef NTPSHM_ENABLE

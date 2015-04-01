@@ -54,7 +54,7 @@ struct pps_thread_t {
 
 extern void pps_thread_activate(volatile struct pps_thread_t *);
 extern void pps_thread_deactivate(volatile struct pps_thread_t *);
-extern void pps_thread_fix_in(volatile struct pps_thread_t *,
+extern void pps_thread_fixin(volatile struct pps_thread_t *,
 				     volatile struct timedelta_t *);
 extern int pps_thread_ppsout(volatile struct pps_thread_t *,
 			      volatile struct timedelta_t *);

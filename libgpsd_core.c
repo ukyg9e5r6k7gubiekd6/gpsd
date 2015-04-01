@@ -1648,7 +1648,7 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t *td)
 
 #ifdef PPS_ENABLE
     /* thread-safe update */
-    pps_thread_fix_in(&device->pps_thread, td);
+    pps_thread_fixin(&device->pps_thread, td);
 #endif /* PPS_ENABLE */
 }
 #endif /* NTP_ENABLE */
