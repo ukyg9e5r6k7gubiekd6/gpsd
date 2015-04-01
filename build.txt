@@ -192,8 +192,10 @@ in a working-directory copy. (Cross-build is described in a later
 section.)
 
 To clean the built files, call 'scons -c' .  To clean scons' cache,
-call 'scons sconsclean' .  This should return your working directory
-to a pristine state.
+call 'scons sconsclean'.  Doing both should return your working directory
+to a near pristine state as far as building is concerned.  Some user 
+created files may remain, and source code changes will not have been 
+reverted..
 
 You can specify the installation prefix, as for an autotools build, by
 running "scons prefix=<installation_root>". The default value is
