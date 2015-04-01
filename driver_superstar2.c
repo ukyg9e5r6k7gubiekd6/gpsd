@@ -426,8 +426,6 @@ superstar2_dispatch(struct gps_device_t * session, unsigned char *buf,
  *
  **********************************************************/
 
-/* FIXME: factor out Superstar init_query for version */
-
 static void superstar2_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
