@@ -1327,7 +1327,7 @@ backup battery.</para>
 
 <para>A DEVICE object has the following elements:</para>
 
-<table frame="all" pgwide="0"><title>CONFIGCHAN object</title>
+<table frame="all" pgwide="0"><title>DEVICE object</title>
 <tgroup cols="4" align="left" colsep="1" rowsep="1">
 <thead>
 <row>
@@ -1424,7 +1424,7 @@ backup battery.</para>
 	<entry>No</entry>
 	<entry>real</entry>
         <entry>Device minimum cycle time in seconds. Reported from
-	?CONFIGDEV when (and only when) the rate is switchable. It is
+	?DEVICE when (and only when) the rate is switchable. It is
 	read-only and not settable.</entry>
 </row>
 </tbody>
