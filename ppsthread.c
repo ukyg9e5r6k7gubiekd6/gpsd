@@ -758,8 +758,7 @@ static void *gpsd_ppsmonitor(void *arg)
      *       a few more sanity checks
      *       call the report hook with our PPS report
      */
-    while (thread_context->report_hook != NULL
-           || thread_context->pps_hook != NULL) {
+    while (thread_context->report_hook != NULL) {
 	bool ok = false;
 	char *log = NULL;
         char *edge_str = "";
@@ -1149,8 +1148,6 @@ static void *gpsd_ppsmonitor(void *arg)
 		log1 = thread_context->report_hook(thread_context, &ppstimes);
 	    else
 		log1 = "no report hook";
-	    if (thread_context->pps_hook != NULL)
-		thread_context->pps_hook(thread_context, &ppstimes);
 	    thread_lock(thread_context);
 	    thread_context->ppsout_last = ppstimes;
 	    thread_context->ppsout_count++;
@@ -1233,7 +1230,6 @@ void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
 /* cleanly terminate PPS thread */
 {
     pps_thread->report_hook = NULL;
-    pps_thread->pps_hook = NULL;
 }
 
 void pps_thread_fixin(volatile struct pps_thread_t *pps_thread,

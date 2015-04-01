@@ -381,6 +381,10 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
     if (session->shm_pps != NULL)
 	(void)ntpshm_put(session, session->shm_pps, td);
 
+    /* session context might have a hook set, too */
+    if (session->context->pps_hook != NULL)
+	session->context->pps_hook(session, td);
+
     return log1;
 }
 #endif	/* PPS_ENABLE */

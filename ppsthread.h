@@ -27,8 +27,6 @@ struct pps_thread_t {
     char *devicename;
     char *(*report_hook)(volatile struct pps_thread_t *,
 			 struct timedelta_t *);
-    void (*pps_hook)(volatile struct pps_thread_t *,
-		     struct timedelta_t *);
     void (*log_hook)(volatile struct pps_thread_t *,
 		     int errlevel, const char *fmt, ...);
     void (*wrap_hook)(volatile struct pps_thread_t *);
