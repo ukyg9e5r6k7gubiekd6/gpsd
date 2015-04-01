@@ -1187,6 +1187,12 @@ between the host's clock time and the GPS time at top of second
 	<entry>numeric</entry>
         <entry>nanoseconds from the system clock</entry>
 </row>
+<row>
+	<entry>precision</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>log(2) of source jitter in seconds</entry>
+</row>
 </tbody>
 </tgroup>
 </table>

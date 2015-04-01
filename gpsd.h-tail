@@ -30,9 +30,11 @@
  *      (Thus, the 'scaled' flag no longer affects display of these fields.)
  *      PPS drift message ships nsec rather than msec.
  * 3.10 The obsolete tag field has been dropped from JSON.
+ * 3.11 A precision field, log2 of the time source jitter, as been added
+ *      to the PPS report.  See ntpshm.h for more details.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	10	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	11	/* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
