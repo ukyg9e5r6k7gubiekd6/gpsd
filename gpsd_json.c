@@ -188,8 +188,11 @@ void json_tpv_dump(const struct gps_device_t *session,
 #ifdef PPS_ENABLE
 	    if (session->pps_thread.ppsout_count) {
 		char ts_str[TIMESPEC_LEN];
-		struct timespec clock_tmp = session->pps_thread.ppsout_last.clock;
-		timespec_str( &clock_tmp, ts_str, sizeof(ts_str) );
+		struct timedelta_t timedelta;
+		/* ugh - de-consting this might get us in trouble someday */
+		pps_thread_ppsout(&((struct gps_device_t *)session)->pps_thread,
+				  &timedelta);
+		timespec_str(&timedelta.clock, ts_str, sizeof(ts_str) );
 		str_appendf(reply, replylen, "\"pps\":%s,", ts_str);
                 /* TODO: add PPS precision to JSON output */
 	    }
