@@ -86,6 +86,7 @@ file in the source distribution.</p>
       <li><a href="#statics">Don't create static variables in the libraries!</a></li>
       <li><a href="#malloc">Don't use malloc!</a></li>
       <li><a href="#sizeof">Avoid use of sizeof(&lt;int type&gt;)!</a></li>
+      <li><a href="#newdata">Adding new data fields or JSON objects</a></li>
       <li><a href="#standards">C, standards and style</a></li>
       <li><a href="#asserts">Use assert(3) sparingly and
       carefully!</a></li>
@@ -467,6 +468,31 @@ form "<code>for(i = 0; i &lt; len; i += sizeof(long))</code>". Don't do that;
 not all integer types have the same length across architectures. A long may
 be 4 bytes on a 32-bit machine and 8 bytes on a 64-bit. If you mean to skip
 4 bytes in a packet, then say so (or use sizeof(int32_t)).</p>
+
+<h2 id="newdata">Adding new data fields or JSON objects</h2>
+
+<p>Here's what you have to do when adding a field to a JSON report, or
+a new JSON report to the object set.</p>
+
+<ol>
+<li><p>Make the daemon emit the new field(s).</p></li>
+
+<li><p>Document it in gpsd_json.xml.</p></li>
+
+<li><p>Decide whether it warrants a minor or major protocol bump.
+Update the appropriate macros in gpsd.h-tail.  In the comment above
+them, add a brief description of the change.</p></li>
+
+<li><p>Update the JSON parse templates in libgps_json.c.  If you don't do this, 
+clients (possibly including gpsmon) will throw an error when they trip over the
+new field.</p></li>
+
+<li><p>The hard part: the data wants to go somewhere on the client side, but
+doing this may involve a compatibility break in the user-visible core
+structures.  You need to make a call on whether to extend them or accept 
+that the new data will be invisible untol the next structure upgrade
+and if so document that as an item in TODO.</p></li>
+</ol>
 
 <h2 id="standards">C, standards and style</h2>
 
