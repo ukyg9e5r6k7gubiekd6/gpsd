@@ -725,8 +725,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 				   &session.gpsdata,
 				   &end);
 	if (status != 0) {
-	    /* FIXME: figure out why using json_error_string() core dumps */
-	    complain("Ill-formed TOFF packet: %d", status);
+	    complain("Ill-formed TOFF packet: %d (%s)", status, json_error_string(status));
 	    return;
 	} else {
 	    if (!curses_active)
@@ -748,8 +747,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 				   &noclobber,
 				   &end);
 	if (status != 0) {
-	    /* FIXME: figure out why using json_error_string() core dumps */
-	    complain("Ill-formed PPS packet: %d", status);
+	    complain("Ill-formed PPS packet: %d (%s)", status, json_error_string(status));
 	    return;
 	} else {
 	    struct timespec timedelta;
