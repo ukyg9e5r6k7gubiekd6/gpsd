@@ -893,7 +893,7 @@ if not env["shared"]:
         return env.StaticLibrary(target,
                                  [env.StaticObject(s) for s in sources],
                                  parse_flags=parse_flags)
-    LibraryInstall = lambda env, libdir, sources: env.Install(libdir, sources)
+    LibraryInstall = lambda env, libdir, sources, version: env.Install(libdir, sources)
 else:
     def Library(env, target, sources, version, parse_flags=[]):
         # Note: We have a possibility of getting either Object or file
@@ -909,8 +909,9 @@ else:
                                  source=obj_list,
                                  parse_flags=parse_flags,
                                  SHLIBVERSION=version)
-    LibraryInstall = lambda env, libdir, sources: \
-                     env.InstallVersionedLib(libdir, sources)
+    LibraryInstall = lambda env, libdir, sources, version: \
+                     env.InstallVersionedLib(libdir, sources,
+                                             SHLIBVERSION=version)
 
 compiled_gpslib = Library(env=env,
                           target="gps",
@@ -1327,9 +1328,9 @@ binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpsp
                                                          gpxlogger, lcdgps, ntpshmmon]))
 if env["ncurses"]:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
-binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib))
+binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib, libgps_version))
 if qt_env:
-    binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib))
+    binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib, libgps_version))
 
 if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.platform.startswith('darwin'):
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
