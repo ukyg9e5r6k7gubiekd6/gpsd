@@ -1056,7 +1056,13 @@ static void *gpsd_ppsmonitor(void *arg)
 	 * line assertion by about 10 mSec!
 	 */
 
-	ppstimes.real.tv_sec = (time_t)last_fixtime.real.tv_sec;
+	/*
+	 * We get the time of the last fix recorded before the PPS came in,
+	 * which is for the previous cycle.  Only works for integral cycle 
+         * times, but more than 1Hz is pointless.
+	 */
+
+	ppstimes.real.tv_sec = (time_t)last_fixtime.real.tv_sec + 1;
 	ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
 	ppstimes.clock = clock_ts;
 
