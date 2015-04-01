@@ -232,9 +232,15 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
 
 #ifdef PPS_ENABLE
     /* ntpd sets -20 for PPS refclocks, thus -20 precision */
-    /* TODO: if PPS over USB 1.1, then precision = -10 */
-    if (shmseg == session->shm_pps)
-	precision = -20;
+    if (shmseg == session->shm_pps) {
+        if ( source_usb == session->sourcetype ) {
+	    /* if PPS over USB 1.1, then precision = -10 */
+	    precision = -10;
+        } else {
+	    /* likely PPS over serial, precision = -20 */
+	    precision = -20;
+        }
+    }
 #endif	/* PPS_ENABLE */
 
     ntp_write(shmseg, td, precision, session->context->leap_notify);
@@ -372,17 +378,18 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
 	    return "no fix";
     }
 
+    /* FIXME?  how to log socket AND shm reported? */
     log1 = "accepted";
     if ( 0 <= session->chronyfd ) {
 	log1 = "accepted chrony sock";
-	chrony_send(session, &td);
+	chrony_send(session, td);
     }
     if (session->shm_pps != NULL)
-	(void)ntpshm_put(session, session->shm_pps, &td);
+	(void)ntpshm_put(session, session->shm_pps, td);
 
     /* session context might have a hook set, too */
     if (session->context->pps_hook != NULL)
-	session->context->pps_hook(session, &td);
+	session->context->pps_hook(session, td);
 
     return log1;
 }
