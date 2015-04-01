@@ -35,9 +35,11 @@ also exist for other languages) and take appropriate care to
 conditionalize their code on the major and minor protocol version
 symbols.</para>
 
-<para>The GPSD protocol is built on top of JSON, JavaScript
-Object Notation. GPSD's use of JSON is restricted in some ways
-that make parsing it in fixed-extent languages (such as C) easier.</para>
+<para>The GPSD protocol is built on top of JSON, JavaScript Object
+Notation, as specified in RFC 7159: <citetitle>The JavaScript Object
+Notation (JSON) Data Interchange Format</citetitle>. GPSD's use of
+JSON is restricted in some ways that make parsing it in fixed-extent
+languages (such as C) easier.</para>
 
 <para>A request line is introduced by "?" and may include multiple
 commands.  Commands begin with a command identifier, followed either

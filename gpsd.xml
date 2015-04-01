@@ -835,6 +835,9 @@ understood by this program is defined in Section 20 (Appendix II) of
 the IS-GPS-200E, <citetitle>GPS NAVIGATION DATA STRUCTURE FOR DATA,
 D(t)</citetitle></para>
 
+<para>JSON is specified by RFC 7159, <citetitle>The JavaScript Object
+Notation (JSON) Data Interchange Format</citetitle>.</para>
+
 <para>The API for PPS time service is specified by RFC 2783,
 <citetitle>Pulse-Per-Second API for UNIX-like Operating Systems,
 Version 1.0</citetitle></para>
