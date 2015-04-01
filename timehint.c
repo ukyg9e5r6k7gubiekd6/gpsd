@@ -444,8 +444,8 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	    session->pps_thread.report_hook = report_hook;
 	    pps_thread_activate(&session->pps_thread);
 	}
-#endif /* PPS_ENABLE */
     }
+#endif /* PPS_ENABLE */
 }
 
 #endif /* NTPSHM_ENABLE */
