@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "timespec_str.h"
+#include "timespec.h"
 
 /* Convert a normalized timespec to a nice string 
  * put in it *buf, buf should be at least 22 bytes

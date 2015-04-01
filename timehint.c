@@ -19,7 +19,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "timespec_str.h"
+#include "timespec.h"
 #include "gpsd.h"
 
 #ifdef NTPSHM_ENABLE

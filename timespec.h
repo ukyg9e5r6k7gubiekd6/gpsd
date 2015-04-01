@@ -1,0 +1,93 @@
+/*
+ * This file is Copyright (c) 2015 by the GPSD project
+ * BSD terms apply: see the file COPYING in the distribution root for details.
+ */
+
+#ifndef GPSD_TIMESPEC_H
+#define GPSD_TIMESPEC_H
+
+/* normalize a timespec 
+ * 
+ * three cases to note
+ * if tv_sec is positve, then tv_nsec must be positive
+ * if tv_sec is negative, then tv_nsec must be negative
+ * if tv_sec is zero, then tv_nsec may be positive or negative.
+ *
+ * this only handles the case where two normalized timespecs
+ * are added or subracted.  (e.g. only a one needs to be borrowed/carried
+ */
+static inline void TS_NORM( struct timespec *ts)
+{
+    if ( (  1 <= ts->tv_sec ) ||
+         ( (0 == ts->tv_sec ) && (0 <= ts->tv_nsec ) ) ) {
+        /* result is positive */
+	if ( 1000000000 <= ts->tv_nsec ) {
+            /* borrow from tv_sec */
+	    ts->tv_nsec -= 1000000000;
+	    ts->tv_sec++;
+	} else if ( 0 > (ts)->tv_nsec ) {
+            /* carry to tv_sec */
+	    ts->tv_nsec += 1000000000;
+	    ts->tv_sec--;
+	}
+    }  else {
+        /* result is negative */
+	if ( -1000000000 >= ts->tv_nsec ) {
+            /* carry to tv_sec */
+	    ts->tv_nsec += 1000000000;
+	    ts->tv_sec--;
+	} else if ( 0 < ts->tv_nsec ) {
+            /* borrow from tv_sec */
+	    ts->tv_nsec -= 1000000000;
+	    ts->tv_sec++;
+	}
+    }
+}
+
+/* normalize a timeval */
+#define TV_NORM(tv)  \
+    do { \
+	if ( 1000000 <= (tv)->tv_usec ) { \
+	    (tv)->tv_usec -= 1000000; \
+	    (tv)->tv_sec++; \
+	} else if ( 0 > (tv)->tv_usec ) { \
+	    (tv)->tv_usec += 1000000; \
+	    (tv)->tv_sec--; \
+	} \
+    } while (0)
+
+/* convert timespec to timeval, with rounding */
+#define TSTOTV(tv, ts) \
+    do { \
+	(tv)->tv_sec = (ts)->tv_sec; \
+	(tv)->tv_usec = ((ts)->tv_nsec + 500)/1000; \
+        TV_NORM( tv ); \
+    } while (0)
+
+/* convert timeval to timespec */
+#define TVTOTS(ts, tv) \
+    do { \
+	(ts)->tv_sec = (tv)->tv_sec; \
+	(ts)->tv_nsec = (tv)->tv_usec*1000; \
+        TS_NORM( ts ); \
+    } while (0)
+
+/* subtract two timespec */
+#define TS_SUB(r, ts1, ts2) \
+    do { \
+	(r)->tv_sec = (ts1)->tv_sec - (ts2)->tv_sec; \
+	(r)->tv_nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
+        TS_NORM( r ); \
+    } while (0)
+
+/* convert a timespec to a double.
+ * is tv_sec > 2, then inevitable loss of precision in tv_nsec */
+#define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / 1e9)))
+
+#define TIMESPEC_LEN	22	/* required length of a timespec buffer */
+
+extern void timespec_str(const struct timespec *, char *, size_t);
+
+#endif /* GPSD_TIMESPEC_H */
+
+/* end */

@@ -26,7 +26,7 @@ PERMISSIONS
 
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
-#include "timespec_str.h"
+#include "timespec.h"
 #include "revision.h"
 
 /* *INDENT-OFF* */
