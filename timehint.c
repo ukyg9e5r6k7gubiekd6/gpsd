@@ -351,20 +351,26 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
     char *log1;
     struct gps_device_t *session = (struct gps_device_t *)pps_thread->context;
 
-    if (!session->ship_to_ntpd)
-	return "skipped ship_to_ntp=0";
+    /* PPS only source never get any serial info
+     * so no PPSTIME_IS or fixcnt */
+    if ( source_pps != session->sourcetype) {
+        /* FIXME! these two validations need to move back into ppsthread.c */
 
-    /*
-     * Only listen to PPS after several consecutive fixes,
-     * otherwise time may be inaccurate.  (We know this is
-     * required on all Garmin and u-blox; safest to do it 
-     * for all cases as we have no other general way to know 
-     * if PPS is good.
-     *
-     * Not sure yet how to handle u-blox UBX_MODE_TMONLY
-     */
-    if (session->fixcnt <= PPS_MIN_FIXES)
-	return "no fix";
+	if ( !session->ship_to_ntpd)
+	    return "skipped ship_to_ntp=0";
+
+	/*
+	 * Only listen to PPS after several consecutive fixes,
+	 * otherwise time may be inaccurate.  (We know this is
+	 * required on all Garmin and u-blox; safest to do it 
+	 * for all cases as we have no other general way to know 
+	 * if PPS is good.
+	 *
+	 * Not sure yet how to handle u-blox UBX_MODE_TMONLY
+	 */
+	if (session->fixcnt <= PPS_MIN_FIXES)
+	    return "no fix";
+    }
 
     log1 = "accepted";
     if ( 0 <= session->chronyfd ) {
