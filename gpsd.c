@@ -1518,7 +1518,19 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: No precision time report\n");
     } else {
 	struct timedelta_t td;
+#if defined(PPS_ENABLE)
+	struct gps_device_t *ppsonly;
+#endif /* PPS_ENABLE */
+
 	ntp_latch(device, &td);
+
+#if defined(PPS_ENABLE)
+	/* propagate this in-band-time to all PPS-only devices */
+	for (ppsonly = devices; ppsonly < devices + MAX_DEVICES; ppsonly++)
+	    if (ppsonly->sourcetype == source_pps)
+		pps_thread_fixin(&ppsonly->pps_thread, &td);
+#endif /* PPS_ENABLE */
+
 #ifdef NTPSHM_ENABLE
 	if (device->shm_clock != NULL) {
 	    (void)ntpshm_put(device, device->shm_clock, &td);
@@ -1658,41 +1670,6 @@ static void ship_pps_message(struct gps_device_t *session,
 				   struct timedelta_t *td)
 /* on PPS interrupt, ship a message to all clients */
 {
-    volatile struct timedelta_t tc;
-    /*
-     * If device delivers only PPS, find the most recent fix delivered by
-     * another device and use it.  If no such device, punt - PPS alone
-     * is not usable.
-     */
-    if (session->sourcetype == source_pps) {
-	struct gps_device_t *device, *recent = NULL;
-	for (device = devices; device < devices + MAX_DEVICES; device++) {
-	    if (!allocated_device(device))
-		continue;
-	    if (device->sourcetype == source_pps)
-		continue;
-	    if (isnan(device->newdata.time))
-		continue;
-	    if (recent == NULL || device->newdata.time < recent->newdata.time)
-		continue;
-	    recent = device;
-	}
-	if (recent != NULL) {
-	    /*
-	     * Since this hook is called on PPS, the fixin data is for the
-	     * *previous* cycle.  Relies on all_reports() to mung the driver
-	     * report of new time into the fixin member for the device's thread.
-	     *
-	     * This read access should be safe - PPS threads
-	     * read fixin locations asynchronously but don't write them.
-	     */
-	    tc = recent->pps_thread.fixin;
-	    tc.real.tv_sec += recent->gpsdata.dev.cycle;
-	    td = (struct timedelta_t *)&tc;	/* cast discards volatile */
-	} else
-	    return;
-    }
-
     notify_watchers(session, true, true,
 		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
 		    session->gpsdata.dev.path,
