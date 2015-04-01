@@ -20,9 +20,9 @@ the calibration process less annoying?
 
 ** Things to do when we can break compatibility **
 
-In gps_data_t Make subtype longer.  128 chars long sounds good.
+In gps_data_t Make subtype longer. 128 chars long sounds good.
 
-In gps_data_t, save NTP precision in pps_precision
+In gps_data_t, save PPS precision; this will require creating a pps struct.
 
 In gps_fix_t, maybe change time away from float to timespec?
 

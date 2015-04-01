@@ -358,8 +358,7 @@ int json_toff_read(const char *buf, struct gps_data_t *gpsdata,
 int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
 		  const char **endptr)
 {
-    int real_sec = 0, real_nsec = 0, clock_sec = 0, clock_nsec = 0;
-    int precision = 0;
+    int real_sec = 0, real_nsec = 0, clock_sec = 0, clock_nsec = 0, precision=0;
     const struct json_attr_t json_attrs_pps[] = {
 	/* *INDENT-OFF* */
         {"class",     t_check,   .dflt.check = "PPS"},
@@ -394,6 +393,7 @@ int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
     if (status != 0)
 	return status;
 
+    /* FIXME: precision is currently parsed but discarded */
     return status;
 }
 
