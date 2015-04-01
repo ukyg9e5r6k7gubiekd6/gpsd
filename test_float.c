@@ -26,6 +26,9 @@
  * Hard To Do(tm) on embedded systems, judging by the number of broken
  * ARM toolchains I've seen... :(
  *
+ * Added in 2015 by ESR: Test for C99 behavior on negative operand(s)
+ * of %, that is the result should have the sign of the left operand.
+ *
  * compile with: gcc -O -o test_float test_float.c
  *     (use whatever -O level you like)
  */
@@ -33,9 +36,10 @@
 int main(void);
 int test_single(void);
 int test_double(void);
+int test_modulo(void);
 
 int main(void) {
-	int i, j;
+    int i, j, k;
 
 	if ((i = test_single()))
 		printf("WARNING: Single-precision "
@@ -45,9 +49,13 @@ int main(void) {
 		printf("WARNING: Double-precision "
 			"floating point math might be broken\n");
 
+	if ((k = test_modulo()))
+		printf("WARNING: Modular arithmetic is broken\n");
+
 	i += j;
+	i += k;
 	if (i == 0)
-		printf("floating point math appears to work\n");
+		printf("floating point and modular math appears to work\n");
 	return i;
 }
 
@@ -256,4 +264,29 @@ int test_double(void) {
 		return 1;
 	}
 	return 0;
+}
+
+int test_modulo(void) {
+    static int e = 0;
+
+    if (-5 % 2 != -1) {
+	printf("m1 ");
+	e++;
+    }
+
+    if (-5 % -2 != -1) {
+	printf("m2 ");
+	e++;
+    }
+
+    if (5 % -2 != 1) {
+	printf("m3 ");
+	e++;
+    }
+
+    if (e) {
+	printf("\n");
+	return 1;
+    }
+    return 0;
 }
