@@ -623,6 +623,8 @@ int main(int argc, char **argv)
 	 */
 	if (!(forcetype != NULL && echo)) {
 	    int maxfd = 0;
+	    int activated = -1;
+
 	    if (device == NULL) {
 		gpsd_log(&context.errout, LOG_ERROR,
 			 "device must be specified for low-level access.\n");
@@ -630,7 +632,13 @@ int main(int argc, char **argv)
 	    }
 
 	    gpsd_init(&session, &context, device);
-	    if (gpsd_activate(&session, O_PROBEONLY) < 0) {
+	    activated = gpsd_activate(&session, O_PROBEONLY);
+	    if ( 0 > activated ) {
+		if ( PLACEHOLDING_FD == activated ) {
+		    (void)printf("%s identified as a %s.\n",
+                       device, gpsd_id(&session));
+		    exit(EXIT_SUCCESS);
+	        }
 		gpsd_log(&context.errout, LOG_ERROR,
 			 "initial GPS device %s open failed\n",
 			 device);
