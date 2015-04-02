@@ -390,6 +390,7 @@ int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
     gpsdata->pps.real.tv_nsec = (long)real_nsec;
     gpsdata->pps.clock.tv_sec = (time_t)clock_sec;
     gpsdata->pps.clock.tv_nsec = (long)clock_nsec;
+    /* FIXME! find a place to stash precision */
     if (status != 0)
 	return status;
 
