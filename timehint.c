@@ -130,7 +130,7 @@ static volatile struct shmTime *getShmTime(struct gps_context_t *context, int un
 		   sizeof(struct shmTime), (int)(IPC_CREAT | perms));
     if (shmid == -1) {
 	gpsd_log(&context->errout, LOG_ERROR,
-		 "NTPD shmget(%ld, %zd, %o) fail: %s\n",
+		 "NTP: shmget(%ld, %zd, %o) fail: %s\n",
 		 (long int)(NTPD_BASE + unit), sizeof(struct shmTime),
 		 (int)perms, strerror(errno));
 	return NULL;
@@ -138,12 +138,12 @@ static volatile struct shmTime *getShmTime(struct gps_context_t *context, int un
     p = (struct shmTime *)shmat(shmid, 0, 0);
     if ((int)(long)p == -1) {
 	gpsd_log(&context->errout, LOG_ERROR,
-		 "NTPD shmat failed: %s\n",
+		 "NTP: shmat failed: %s\n",
 		 strerror(errno));
 	return NULL;
     }
     gpsd_log(&context->errout, LOG_PROG,
-	     "NTPD shmat(%d,0,0) succeeded, segment %d\n",
+	     "NTP: shmat(%d,0,0) succeeded, segment %d\n",
 	     shmid, unit);
     return p;
 }
@@ -226,7 +226,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     int precision = -1; /* default precision */
 
     if (shmseg == NULL) {
-	gpsd_log(&session->context->errout, LOG_RAW, "NTPD missing shm\n");
+	gpsd_log(&session->context->errout, LOG_RAW, "NTP:PPS: missing shm\n");
 	return 0;
     }
 
@@ -248,7 +248,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     timespec_str( &td->real, real_str, sizeof(real_str) );
     timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "NTP ntpshm_put(%s %s) %s @ %s\n",
+	     "NTP: ntpshm_put(%s %s) %s @ %s\n",
 	     session->gpsdata.dev.path,
 	     (precision == -20) ? "pps" : "clock", 
 	     real_str, clock_str);
@@ -426,7 +426,7 @@ void ntpshm_link_activate(struct gps_device_t *session)
 
 	if (session->shm_clock == NULL) {
 	    gpsd_log(&session->context->errout, LOG_WARN, 
-		     "NTPD: ntpshm_alloc() failed\n");
+		     "NTP: ntpshm_alloc() failed\n");
 	    return;
         }
     }
