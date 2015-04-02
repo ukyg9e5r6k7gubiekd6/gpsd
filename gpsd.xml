@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
@@ -237,6 +237,15 @@ special source types recognized, for a total of four:</para>
 <para>A normal Unix device name of a serial or USB device to which a
 sensor is attached. Example:
 <filename>/dev/ttyUSB0</filename>.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Local PPS device</term>
+<listitem>
+<para>A normal Unix device name of a PPS device to which a PPS source
+is attached.  The device name must start with "/dev/pps" and a local
+serial or USB GPS device must also be available. Example:
+<filename>/dev/pps0</filename>.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
