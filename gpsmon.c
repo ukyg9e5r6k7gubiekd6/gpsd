@@ -1146,9 +1146,10 @@ int main(int argc, char **argv)
     volatile int maxfd = 0;
     char inbuf[80];
     volatile bool nocurses = false;
+    int activated = -1;
 
     (void)putenv("TZ=UTC");	// for ctime()
-    gps_context_init(&context, "gsmon");	// initialize the report mutex
+    gps_context_init(&context, "gpsmon");	// initialize the report mutex
     context.serial_write = gpsmon_serial_write;
     context.errout.report = gpsmon_report;
     while ((option = getopt(argc, argv, "aD:LVhl:nt:?")) != -1) {
@@ -1275,10 +1276,11 @@ int main(int argc, char **argv)
 		       "%s:%s", source.server, source.port);
     }
 
-    if (gpsd_activate(&session, O_PROBEONLY) == -1) {
-	(void)fprintf(stderr,
-		      "gpsmon: activation of device %s failed, errno=%d (%s)\n",
-		      session.gpsdata.dev.path, errno, strerror(errno));
+    activated = gpsd_activate(&session, O_PROBEONLY);
+    if ( 0 > activated ) {
+	if ( PLACEHOLDING_FD == activated ) {
+		(void)fputs("gpsmon:ERROR: PPS device unsupported\n", stderr);
+        }
 	exit(EXIT_FAILURE);
     }
 
