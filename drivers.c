@@ -1499,6 +1499,38 @@ const struct gps_type_t driver_json_passthrough = {
 
 #endif /* PASSTHROUGH_ENABLE */
 
+#if defined(PPS_ENABLE)
+/* *INDENT-OFF* */
+const struct gps_type_t driver_pps = {
+    .type_name      = "PPS",		/* full name of type */
+    .packet_type    = BAD_PACKET,	/* associated lexer packet type */
+    .flags	    = DRIVER_NOFLAGS,	/* don't remember this */
+    .trigger	    = NULL,		/* it's the default */
+    .channels       = 0,		/* not used */
+    .probe_detect   = NULL,		/* no probe */
+    .get_packet     = NULL,		/* use generic packet getter */
+    .parse_packet   = NULL,		/* how to interpret a packet */
+    .rtcm_writer    = NULL,		/* write RTCM data straight */
+    .init_query     = NULL,		/* non-perturbing initial query */
+    .event_hook     = NULL,		/* lifetime event handler */
+#ifdef RECONFIGURE_ENABLE
+    .speed_switcher = NULL,		/* no speed switcher */
+    .mode_switcher  = NULL,		/* no mode switcher */
+    .rate_switcher  = NULL,		/* no sample-rate switcher */
+    .min_cycle      = 1,		/* not relevant, no rate switch */
+#endif /* RECONFIGURE_ENABLE */
+#ifdef CONTROLSEND_ENABLE
+    .control_send   = NULL,		/* how to send control strings */
+#endif /* CONTROLSEND_ENABLE */
+#ifdef TIMEHINT_ENABLE
+    .time_offset     = NULL,		/* no method for NTP fudge factor */
+#endif /* TIMEHINT_ENABLE */
+};
+/* *INDENT-ON* */
+
+#endif /* PPS_ENABLE */
+
+
 extern const struct gps_type_t driver_evermore;
 extern const struct gps_type_t driver_garmin_ser_binary;
 extern const struct gps_type_t driver_garmin_usb_binary;
@@ -1606,6 +1638,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef PASSTHROUGH_ENABLE
     &driver_json_passthrough,
 #endif /* PASSTHROUGH_ENABLE */
+#if defined(PPS_ENABLE)
+    &driver_pps,
+#endif /* PPS_ENABLE */
 
     NULL,
 };

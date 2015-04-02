@@ -421,6 +421,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 
     /* we may need to hold on to this slot without opening the device */ 
     if (source_pps == session->sourcetype) {
+	(void)gpsd_switch_driver(session, "PPS");
 	return PLACEHOLDING_FD;
     }
 
