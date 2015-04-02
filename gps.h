@@ -2012,6 +2012,7 @@ struct gps_data_t {
 	struct timedelta_t toff;
 	struct timedelta_t pps;
     };
+    /* FIXME! next lib rev need to add a place to put PPS precision */
 
     /* Private data - client code must not set this */
     void *privdata;

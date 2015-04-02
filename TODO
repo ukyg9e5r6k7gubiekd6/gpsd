@@ -22,7 +22,7 @@ the calibration process less annoying?
 
 In gps_data_t Make subtype longer.  128 chars long sounds good.
 
-In gps_device_t, save NTP precision in pps_precision
+In gps_data_t, save NTP precision in pps_precision
 
 In gps_fix_t, maybe change time away from float to timespec?
 
