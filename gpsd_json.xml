@@ -1217,7 +1217,7 @@ and the ordinary system clock (which may be NTP corrected).</para>
 <term>PPS</term>
 <listitem>
 
-<para>This message is emitted each time the daemon sees a PPS (Pulse
+<para>This message is emitted each time the daemon sees a valid PPS (Pulse
 Per Second) strobe from a device.</para>
 
 <para>A PPS object has the following elements:</para>
@@ -1268,6 +1268,12 @@ Per Second) strobe from a device.</para>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
         <entry>nanoseconds from the system clock</entry>
+</row>
+<row>
+	<entry>precision</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>NTP style estimate of PPS precision</entry>
 </row>
 </tbody>
 </tgroup>
