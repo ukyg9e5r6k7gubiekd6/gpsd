@@ -1176,7 +1176,8 @@ revision='#define REVISION "%s"\n' %(rev.strip(),)
 env.Textfile(target="revision.h", source=[revision])
 
 generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
-                     'gps_maskdump.c', 'revision.h', 'gpsd.php']
+                     'gps_maskdump.c', 'revision.h', 'gpsd.php',
+                     'gpsd_config.h']
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
