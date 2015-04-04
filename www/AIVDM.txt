@@ -2,7 +2,7 @@
 :description: The AIVDM Marine AIS protocol demystified, for programmers.
 :keywords: AIS, AIVDM, AIVDO, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v1.49, Feb 2015
+v1.50, Apr 2015
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -1257,7 +1257,7 @@ bit is on.
 |183-184 |  2 |Regional reserved 1|regional1   |e|See "Service Status"
 |185-186 |  2 |Regional reserved 2|regional2   |e|See "Service Status"
 |187-188 |  2 |Reserved for future|future1     |e|See "Service Status"
-|189-190 |  2 |Reserved for future|future1     |e|See "Service Status"
+|189-190 |  2 |Reserved for future|future2     |e|See "Service Status"
 |191-310 |120 |Name of Berth      |berth_name  |t|20 6-bit characters
 |311-335 | 25 |Longitude          |berth_lon   |I3|Minutes * 0.001,
                                                   181000 = N/A (default)
@@ -1793,7 +1793,7 @@ There is an equivalent subtype of message 8 that is a broadcast description.
 
 See the <<IMO239>> version of this message for intended meaning.
 
-A message 6 subtype. DAC = 001 FID = 32. Variable length: 185-350 bits.
+A message 6 subtype. DAC = 001 FID = 32. Variable length: 186-362 bits.
 This is the <<IMO289>> version; there is an <<IMO289>> version with 
 different bit widths for the latitude and longitude fields.
 
@@ -5422,3 +5422,6 @@ Report From Ship definitions.
 
 Version 1.49 adds a technical detail about non-AIS encapsulated
 sentences.
+
+Version 1.50 fixes a couple of typos in the ISO289 Berthing Data and
+Tidal Window message descriptions.
