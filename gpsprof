@@ -51,7 +51,7 @@ class Baton:
 
 
 class plotter:
-    "Generic class for gatherling and plotting sensor statistics."
+    "Generic class for gathering and plotting sensor statistics."
     def __init__(self):
         self.fixes = []
         self.start_time = int(time.time())
