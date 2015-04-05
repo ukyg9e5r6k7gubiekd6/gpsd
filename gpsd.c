@@ -1677,6 +1677,8 @@ static void ship_pps_message(struct gps_device_t *session,
 	precision = -10;
     }
 
+    /* real_XXX - the time the GPS thinks it is at the PPS edge */
+    /* clock_XXX - the time the system clock thinks it is at the PPS edge */
     notify_watchers(session, true, true,
 		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld,\"precision\":%d}\r\n",
 		    session->gpsdata.dev.path,
