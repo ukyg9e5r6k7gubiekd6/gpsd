@@ -62,7 +62,7 @@ limit for responses and reports is 1536 characters, including trailing
 newline; longer responses will be truncated, so client code must be
 prepared for the possibility of invalid JSON fragments.</para>
 
-<para>In JSON reports, if an attribute is present only if the parent 
+<para>In JSON reports, if an attribute is present only if the parent
 attribute is present or has a particular range, then the parent
 attribute is emitted first.</para>
 
@@ -125,14 +125,14 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Time/date stamp in ISO8601 format, UTC. May have a
-	fractional part of up to .001sec precision. May be absent if mode 
+	fractional part of up to .001sec precision. May be absent if mode
         is not 2 or 3.</entry>
 </row>
 <row>
 	<entry>ept</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Estimated timestamp error (%f, seconds, 95% confidence). 
+        <entry>Estimated timestamp error (%f, seconds, 95% confidence).
         Present if time is present.</entry>
 </row>
 <row>
@@ -159,24 +159,24 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>epx</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Longitude error estimate in meters, 95% confidence. Present 
-        if mode is 2 or 3 and DOPs can be calculated from the satellite 
+        <entry>Longitude error estimate in meters, 95% confidence. Present
+        if mode is 2 or 3 and DOPs can be calculated from the satellite
         view.</entry>
 </row>
 <row>
 	<entry>epy</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Latitude error estimate in meters, 95% confidence. Present 
-        if mode is 2 or 3 and DOPs can be calculated from the satellite 
+        <entry>Latitude error estimate in meters, 95% confidence. Present
+        if mode is 2 or 3 and DOPs can be calculated from the satellite
         view.</entry>
 </row>
 <row>
 	<entry>epv</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Estimated vertical error in meters, 95% confidence. Present 
-        if mode is 3 and DOPs can be calculated from the satellite 
+        <entry>Estimated vertical error in meters, 95% confidence. Present
+        if mode is 3 and DOPs can be calculated from the satellite
         view.</entry>
 </row>
 <row>
@@ -369,7 +369,7 @@ error modeling than the covariance calculation.</para>
 	<entry>PRN</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>PRN ID of the satellite. 1-63 are GNSS satellites, 
+        <entry>PRN ID of the satellite. 1-63 are GNSS satellites,
 	64-96 are GLONASS satellites, 100-164 are SBAS satellites</entry>
 </row>
 <row>
@@ -1138,8 +1138,13 @@ into this response.</para>
 between the host's clock time and the GPS time at top of second
 (actually, when the first data for the reporting cycle is received).</para>
 
-<para>This message exactly mirrors the PPS message except for one
-detail.  The TOFF message reports the GPS time as derived from the GPS
+<para>This message exactly mirrors the PPS message except for two
+details.</para>
+
+<para>TOFF emits no NTP precision, this is assumed to be -2.  See
+the NTP documentation for their definition of precision.</para>
+
+<para>  The TOFF message reports the GPS time as derived from the GPS
 serial data stream.  The PPS message reports the GPS time as derived
 from the GPS PPS pulse.</para>
 
@@ -1192,12 +1197,6 @@ from the GPS PPS pulse.</para>
 	<entry>numeric</entry>
         <entry>nanoseconds from the system clock</entry>
 </row>
-<row>
-	<entry>precision</entry>
-	<entry>Yes</entry>
-	<entry>numeric</entry>
-        <entry>NTP style estimate of PPS precision</entry>
-</row>
 </tbody>
 </tgroup>
 </table>
@@ -1234,8 +1233,13 @@ precision on most systems.</para>
 <para>This message is emitted each time the daemon sees a valid PPS (Pulse
 Per Second) strobe from a device.</para>
 
-<para>This message exactly mirrors the TOFF message except for one
-detail.  The TOFF message reports the GPS time as derived from the GPS
+<para>This message exactly mirrors the PPS message except for two
+details.</para>
+
+<para>PPS emits the NTP precision.  See the NTP documentation for their
+definition of precision.</para>
+
+<para>The TOFF message reports the GPS time as derived from the GPS
 serial data stream.  The PPS message reports the GPS time as derived
 from the GPS PPS pulse.</para>
 
@@ -1307,8 +1311,8 @@ time derived from the start of the GPS cycle can have offsets of
 </table>
 
 <para>This message is emitted once per second to watchers of a device
-emitting PPS, and reports the time of the start of the GPS second (when 
-the 1PPS arrives) and seconds as reported by the system clock (which 
+emitting PPS, and reports the time of the start of the GPS second (when
+the 1PPS arrives) and seconds as reported by the system clock (which
 may be NTP-corrected) at that moment.</para>
 
 <para>The message contains two second/nanosecond pairs: real_sec and
@@ -1320,7 +1324,7 @@ is nanosecond precision on most systems.</para>
 <para>There are various sources of error in the reported clock times.
 For PPS delivered via a real serial-line strobe, serial-interrupt
 latency plus processing time to the timer call should be bounded above
-by about 10 microseconds; that can be reduced to less than 1 microsecond if 
+by about 10 microseconds; that can be reduced to less than 1 microsecond if
 your kernel supports RFC 2783.   USB1.1-to-serial control-line emulation is
 limited to about 1 millisecond. seconds.</para>
 
@@ -2354,7 +2358,7 @@ message:</para>
 <row>
 	<entry>tod</entry>
 	<entry>uinteger</entry>
-        <entry><para>Count of 30-second periods since the top of the 
+        <entry><para>Count of 30-second periods since the top of the
 	hour.</para></entry>
 </row>
 <row>
