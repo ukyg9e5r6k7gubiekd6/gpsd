@@ -381,10 +381,8 @@ int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
 
     memset(&gpsdata->pps, '\0', sizeof(gpsdata->pps));
     status = json_read_object(buf, json_attrs_pps, endptr);
-    /*
-     * This is theoretically dodgy, but in practice likely not
-     * to break until GPSes are obsolete.
-     */
+
+    /* This is good until GPS are more than nanosec accurate */
     gpsdata->pps.real.tv_sec = (time_t)real_sec;
     gpsdata->pps.real.tv_nsec = (long)real_nsec;
     gpsdata->pps.clock.tv_sec = (time_t)clock_sec;
