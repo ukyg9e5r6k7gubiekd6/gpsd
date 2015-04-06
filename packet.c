@@ -1573,6 +1573,18 @@ void packet_parse(struct gps_lexer_t *lexer)
 		packet_accept(lexer, AIVDM_PACKET);
 	    else if (str_starts_with((char *)lexer->inbuffer, "!BSVDO"))
 		packet_accept(lexer, AIVDM_PACKET);
+	    else if (str_starts_with((char *)lexer->inbuffer, "!ABVDM"))
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (str_starts_with((char *)lexer->inbuffer, "!ABVDO"))
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (str_starts_with((char *)lexer->inbuffer, "!ANVDM"))
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (str_starts_with((char *)lexer->inbuffer, "!ANVDO"))
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (str_starts_with((char *)lexer->inbuffer, "!SAVDM"))
+		packet_accept(lexer, AIVDM_PACKET);
+	    else if (str_starts_with((char *)lexer->inbuffer, "!SAVDO"))
+		packet_accept(lexer, AIVDM_PACKET);
 	    else
 #endif /* AIVDM_ENABLE */
 		packet_accept(lexer, NMEA_PACKET);
