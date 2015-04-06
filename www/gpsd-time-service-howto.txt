@@ -1642,5 +1642,5 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 2.4 Mar 2015:: 
     Removed some typos, corrected formatting, and minor changes.
-    A bit more specificity about rtoot vs. non-root.
+    A bit more specificity about root vs. non-root.
 
