@@ -1138,6 +1138,11 @@ into this response.</para>
 between the host's clock time and the GPS time at top of second
 (actually, when the first data for the reporting cycle is received).</para>
 
+<para>This message exactly mirrors the PPS message except for one
+detail.  The TOFF message reports the GPS time as derived from the GPS
+serial data stream.  The PPS message reports the GPS time as derived
+from the GPS PPS pulse.</para>
+
 <para>A TOFF object has the following elements:</para>
 
 <table frame="all" pgwide="0"><title>TOFF object</title>
@@ -1191,29 +1196,32 @@ between the host's clock time and the GPS time at top of second
 	<entry>precision</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>log(2) of source jitter in seconds</entry>
+        <entry>NTP style estimate of PPS precision</entry>
 </row>
 </tbody>
 </tgroup>
 </table>
 
 <para>This message is emitted once per second to watchers of a device
-and is intended to report the offset between the in-band report of the
+and is intended to report the time stamps of the in-band report of the
 GPS and seconds as reported by the system clock (which may be
 NTP-corrected) when the first valid timestamp of the reporting cycle
-is seen.</para>
+was seen.</para>
 
-<para>The message contains second/microsecond pairs for two clocks;
-the realtime clock without NTP correction (the result of 
-clock_gettime(CLOCK_REALTIME), but only to microsecond precision) 
-and the ordinary system clock (which may be NTP corrected).</para>
+<para>The message contains two second/nanosecond pairs: real_sec and
+real_nsec contain the time the GPS thinks it was at the start of the
+current cycle; clock_sec and clock_nsec contain the time the system
+clock thinks it was on receipt of the first timing message of the cycle.
+real_nsec is always to nanosecond precision. clock_nsec is nanosecond
+precision on most systems.</para>
 
 <para>Here's an example:</para>
 
 <programlisting>
 {"class":"TOFF","device":"/dev/ttyUSB0",
      "real_sec":1330212592, "real_nsec":343182,
-     "clock_sec":1330212592,"clock_nsec":343184}
+     "clock_sec":1330212592,"clock_nsec":343184,
+     "precision":-2}}
 </programlisting>
 
 </listitem>
@@ -1225,6 +1233,19 @@ and the ordinary system clock (which may be NTP corrected).</para>
 
 <para>This message is emitted each time the daemon sees a valid PPS (Pulse
 Per Second) strobe from a device.</para>
+
+<para>This message exactly mirrors the TOFF message except for one
+detail.  The TOFF message reports the GPS time as derived from the GPS
+serial data stream.  The PPS message reports the GPS time as derived
+from the GPS PPS pulse.</para>
+
+<para>There are various sources of error in the reported clock times.
+The speed of the serial connection between the GPS and the system adds
+a delay to start of cycle detection.  An even bigger error is added
+by the variable computation time inside the GPS.  Taken together the
+time derived from the start of the GPS cycle can have offsets of
+10 millisecond to 700 milliseconds and combined jjitter and wander of
+100 to 300 millisecond.</para>
 
 <para>A PPS object has the following elements:</para>
 
@@ -1290,10 +1311,10 @@ emitting PPS, and reports the time of the start of the GPS second (when
 the 1PPS arrives) and seconds as reported by the system clock (which 
 may be NTP-corrected) at that moment.</para>
 
-<para>The message contains two second/nanosecond pairs:
-real_sec and real_nsec contain the time the GPS thinks it was at the PPS edge;
-clock_sec and clock_nsec contain the time the system clock thinks it was at
-the PPS edge.   real_nsec is always to nanosecond precision.  clock_nsec
+<para>The message contains two second/nanosecond pairs: real_sec and
+real_nsec contain the time the GPS thinks it was at the PPS edge;
+clock_sec and clock_nsec contain the time the system clock thinks it was
+at the PPS edge. real_nsec is always to nanosecond precision. clock_nsec
 is nanosecond precision on most systems.</para>
 
 <para>There are various sources of error in the reported clock times.
