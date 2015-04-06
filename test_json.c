@@ -212,39 +212,45 @@ static const char *json_strPPS = "{\"class\":\"PPS\",\"device\":\"GPS#1\"," \
     "\"clock_sec\":1428001513,\"clock_nsec\":999999999," \
     "\"precision\":-20}";
 
-#ifndef JSON_MINIMAL
-/* Case 11: Read array of integers */
+/* Case 11: test parsing of TOFF message  */
 
-static const char *json_str11 = "[23,-17,5]";
+static const char *json_strTOFF = "{\"class\":\"TOFF\",\"device\":\"GPS#1\"," \
+    "\"real_sec\":1428001514, \"real_nsec\":1000000," \
+    "\"clock_sec\":1428001513,\"clock_nsec\":999999999}";
+
+#ifndef JSON_MINIMAL
+/* Case 12: Read array of integers */
+
+static const char *json_strInt = "[23,-17,5]";
 static int intstore[4], intcount;
 
-static const struct json_array_t json_array_11 = {
+static const struct json_array_t json_array_Int = {
     .element_type = t_integer,
     .arr.integers.store = intstore,
     .count = &intcount,
     .maxlen = sizeof(intstore)/sizeof(intstore[0]),
 };
 
-/* Case 12: Read array of booleans */
+/* Case 13: Read array of booleans */
 
-static const char *json_str12 = "[true,false,true]";
+static const char *json_strBool = "[true,false,true]";
 static bool boolstore[4];
 static int boolcount;
 
-static const struct json_array_t json_array_12 = {
+static const struct json_array_t json_array_Bool = {
     .element_type = t_boolean,
     .arr.booleans.store = boolstore,
     .count = &boolcount,
     .maxlen = sizeof(boolstore)/sizeof(boolstore[0]),
 };
 
-/* Case 13: Read array of reals */
+/* Case 14: Read array of reals */
 
-static const char *json_str13 = "[23.1,-17.2,5.3]";
+static const char *json_str14 = "[23.1,-17.2,5.3]";
 static double realstore[4]; 
 static int realcount;
 
-static const struct json_array_t json_array_13 = {
+static const struct json_array_t json_array_14 = {
     .element_type = t_real,
     .arr.reals.store = realstore,
     .count = &realcount,
@@ -365,11 +371,21 @@ static void jsontest(int i)
 	assert_integer("clock_nsec", gpsdata.pps.clock.tv_nsec, 999999999);
 	break;
 
-#ifdef JSON_MINIMAL
-#define MAXTEST 10
-#else
     case 11:
-	status = json_read_array(json_str11, &json_array_11, NULL);
+	status = json_toff_read(json_strTOFF, &gpsdata, NULL);
+	assert_case(11, status);
+	assert_string("device", gpsdata.dev.path, "GPS#1");
+	assert_integer("real_sec", gpsdata.pps.real.tv_sec, 1428001514);
+	assert_integer("real_nsec", gpsdata.pps.real.tv_nsec, 1000000);
+	assert_integer("clock_sec", gpsdata.pps.clock.tv_sec, 1428001513);
+	assert_integer("clock_nsec", gpsdata.pps.clock.tv_nsec, 999999999);
+	break;
+
+#ifdef JSON_MINIMAL
+#define MAXTEST 11
+#else
+    case 12:
+	status = json_read_array(json_strInt, &json_array_Int, NULL);
 	assert_integer("count", intcount, 3);
 	assert_integer("intstore[0]", intstore[0], 23);
 	assert_integer("intstore[1]", intstore[1], -17);
@@ -377,8 +393,8 @@ static void jsontest(int i)
 	assert_integer("intstore[3]", intstore[3], 0);
 	break;
 
-    case 12:
-	status = json_read_array(json_str12, &json_array_12, NULL);
+    case 13:
+	status = json_read_array(json_strBool, &json_array_Bool, NULL);
 	assert_integer("count", boolcount, 3);
 	assert_boolean("boolstore[0]", boolstore[0], true);
 	assert_boolean("boolstore[1]", boolstore[1], false);
@@ -386,8 +402,8 @@ static void jsontest(int i)
 	assert_boolean("boolstore[3]", boolstore[3], false);
 	break;
 
-    case 13:
-	status = json_read_array(json_str13, &json_array_13, NULL);
+    case 14:
+	status = json_read_array(json_str14, &json_array_14, NULL);
 	assert_integer("count", realcount, 3);
 	assert_real("realstore[0]", realstore[0], 23.1);
 	assert_real("realstore[1]", realstore[1], -17.2);
@@ -395,13 +411,12 @@ static void jsontest(int i)
 	assert_real("realstore[3]", realstore[3], 0);
 	break;
 
-#define MAXTEST 13
+#define MAXTEST 14
 #endif /* JSON_MINIMAL */
 
     default:
-	if (fputs("Unknown test number\n", stderr) == EOF)
-	    exit(1);
-	break;
+	(void)fputs("Unknown test number\n", stderr);
+	exit(EXIT_FAILURE);
     }
 }
 
