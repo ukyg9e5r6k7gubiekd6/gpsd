@@ -312,12 +312,16 @@ System receiver.
 Here is a more complete list of talker ID prefixes.  Most are not
 relevant to GPS systems.
 
+Note that talker IDs made obsolete by newer revisions of the
+standards may still be emitted by older devices.
+
 .Big list of talker IDs
 |================================================================
 |AB	| Independent AIS Base Station
 |AD	| Dependent AIS Base Station
 |AG	| Autopilot - General
 |AP	| Autopilot - Magnetic
+|BN	| Bridge navigational watch alarm system
 |CC	| Computer - Programmed Calculator (obsolete)
 |CD	| Communications - Digital Selective Calling (DSC)
 |CM	| Computer - Memory Data (obsolete)
@@ -327,6 +331,7 @@ relevant to GPS systems.
 |CX	| Communications - Scanning Receiver
 |DE	| DECCA Navigation (obsolete)
 |DF	| Direction Finder
+|DU	| Duplex repeater station
 |EC	| Electronic Chart Display & Information System (ECDIS)
 |EP	| Emergency Position Indicating Beacon (EPIRB)
 |ER	| Engine Room Monitoring Systems
@@ -339,6 +344,7 @@ relevant to GPS systems.
 |LA	| Loran A (obsolete)
 |LC	| Loran C (obsolete)
 |MP	| Microwave Positioning System (obsolete)
+|NL	| Navigation light controller
 |OM	| OMEGA Navigation System (obsolete)
 |OS	| Distress Alarm System (obsolete)
 |RA	| RADAR and/or ARPA
@@ -347,6 +353,8 @@ relevant to GPS systems.
 |SS	| Sounder, Scanning
 |TI	| Turn Rate Indicator
 |TR	| TRANSIT Navigation System
+|U#	| '#' is a digit 0 ... 9; User Configured
+|UP	| Microprocessor controller
 |VD	| Velocity Sensor, Doppler, other/general
 |DM	| Velocity Sensor, Speed Log, Water, Magnetic
 |VW	| Velocity Sensor, Speed Log, Water, Mechanical
@@ -434,8 +442,15 @@ table:
 | 201 - 235 | Beidou
 |====================================================
 
-QZSS and Beidou are regional GPS augmentation systems using
-geostationary satellites fielded by Japan and China respectively.
+QZSS is a geosynchronous (*not geostationary*) system of three
+(possibly four) satellites in highly eliptical, inclined, orbits.  It
+is designed to provide coverage in Japan's urban canyons.
+
+Beidou-1 consists of 4 geostationary satellites operated by China,
+operational since 2004.  Coverage area is the Chinese mainland.
+Beidou-2 (also known as COMPASS) is a system of 35 satellites,
+including 5 geostationary for compatibility with BeiDou-1.  It is
+expected to be fully operational by 2019.  Coverage area is worldwide.
 
 GLONASS satellite numbers come in two flavors.  If a sentence has a
 GN talker ID, expect the skyviews to be GLONASS-only and in the
@@ -445,53 +460,56 @@ skyview with GLONASS IDs aleady in the 65-96 range
 
 == Obsolete sentences ==
 
+Note that sentances made obsolete by newer revisions of the
+standards may still be emitted by devices.
+
 The following NMEA sentences have been designated "obsolete" in a
 publicly available NMEA document dated 2009.
 
 |================================================================
-|APA - Autopilot Sentence "A"
-|BER - Bearing & Distance to Waypoint, Dead Reckoning, Rhumb Line
-|BPI - Bearing & Distance to Point of Interest
-|DBK - Depth Below Keel
-|DBS - Depth Below Surface
+|APA | Autopilot Sentence "A"
+|BER | Bearing & Distance to Waypoint, Dead Reckoning, Rhumb Line
+|BPI | Bearing & Distance to Point of Interest
+|DBK | Depth Below Keel
+|DBS | Depth Below Surface
 |
-|DRU - Dual Doppler Auxiliary Data
-|GDA - Dead Reckoning Positions
-|GLA - Loran-C Positions
-|GOA - OMEGA Positions
-|GXA - TRANSIT Positions
-|GTD - Geographical Position, Loran-C TDs
-|GXA - TRANSIT Position
-|HCC - Compass Heading
-|HCD - Heading and Deviation
-|HDM - Heading, Magnetic
-|HDT - Heading, True
-|HVD - Magnetic Variation, Automatic
-|HVM - Magnetic Variation, Manually Set
-|IMA - Vessel Identification
-|MDA - Meteorological Composite
-|MHU - Humidity
-|MMB - Barometer
-|MTA - Air Temperature
-|MWH - Wave Height
-|MWS - Wind & Sea State
+|DRU | Dual Doppler Auxiliary Data
+|GDA | Dead Reckoning Positions
+|GLA | Loran|=C Positions
+|GOA |  OMEGA Positions
+|GXA |  TRANSIT Positions
+|GTD |  Geographical Position, Loran-C TDs
+|GXA |  TRANSIT Position
+|HCC |  Compass Heading
+|HCD |  Heading and Deviation
+|HDM |  Heading, Magnetic
+|HDT |  Heading, True
+|HVD |  Magnetic Variation, Automatic
+|HVM |  Magnetic Variation, Manually Set
+|IMA |  Vessel Identification
+|MDA |  Meteorological Composite
+|MHU |  Humidity
+|MMB |  Barometer
+|MTA |  Air Temperature
+|MWH |  Wave Height
+|MWS |  Wind & Sea State
 |
-|Rnn - Routes
-|SBK - Loran-C Blink Status
-|SCY - Loran-C Cycle Lock Status
-|SCD - Loran-C ECDs
-|SDB - Loran-C Signal Strength
-|SGD - Position Accuracy Estimate
-|SGR - Loran-C Chain Identifier
-|SIU - Loran-C Stations in Use
-|SLC - Loran-C Status
-|SNC - Navigation Calculation Basis
-|SNU - Loran-C SNR Status
-|SPS - Loran-C Predicted Signal Strength
-|SSF - Position Correction Offset
-|STC - Time Constant
-|STR - Tracking Reference
-|SYS - Hybrid System Configuration
+|Rnn |  Routes
+|SBK |  Loran-C Blink Status
+|SCY |  Loran-C Cycle Lock Status
+|SCD |  Loran-C ECDs
+|SDB |  Loran-C Signal Strength
+|SGD |  Position Accuracy Estimate
+|SGR |  Loran-C Chain Identifier
+|SIU |  Loran-C Stations in Use
+|SLC |  Loran-C Status
+|SNC |  Navigation Calculation Basis
+|SNU |  Loran-C SNR Status
+|SPS |  Loran-C Predicted Signal Strength
+|SSF |  Position Correction Offset
+|STC |  Time Constant
+|STR |  Tracking Reference
+|SYS |  Hybrid System Configuration
 |================================================================
 
 == NMEA-Standard Sentences ==
