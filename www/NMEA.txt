@@ -276,10 +276,10 @@ the following are well known:
 |QZ    |  QZSS regional GPS augmentation system (Japan)
 |================================================================
 
-LC - LORAN-C is a marine navigation system run by the U.S. government,
-which is planning to shut it down in favor of GPS.  Some non-LORAN
+LC - Loran-C is a marine navigation system run by the U.S. government,
+which is planning to shut it down in favor of GPS.  Some non-Loran
 devices emit GLL but use this talker ID for backward-compatibility
-reasons, so it may outlast the actual LORAN system.
+reasons, so it may outlast the actual Loran system.
 
 II - II is emitted by the NMEA interfaces of several widely-used lines
 of marine-navigation electronics. One is the AutoHelm system by
@@ -575,7 +575,7 @@ destination waypoint for the active navigation leg of the journey.
 Field Number: 
 
 1. Status
-     V = LORAN-C Blink or SNR warning
+     V = Loran-C Blink or SNR warning
      V = general warning flag or other navigation systems when a reliable
          fix is not available
 2. Status
@@ -618,7 +618,7 @@ bearings are different.
 Field Number: 
 
 1. Status
-     V = LORAN-C Blink or SNR warning
+     V = Loran-C Blink or SNR warning
      V = general warning flag or other navigation systems when a reliable
          fix is not available
 2. Status
@@ -979,7 +979,8 @@ Field Number:
 
 This sentence is obsolete over most of its former coverage area.  The
 US/Canadian/Russian Loran-C network was shut down in 2010; it is still
-as of 2015 in limited use around Great Britain and in Norwegian waters.
+as of 2015 in limited use in Europe.  Loran-C operations in Norway
+will cease from 1st Jan 2016. <<NORWAY>>
 
 ------------------------------------------------------------------------------
                                            12    14
@@ -2085,7 +2086,7 @@ sensor.  The last field will be a checksum as usual.
 Field Number: 
 
 1. Status
-     - V = LORAN-C Blink or SNR warning
+     - V = Loran-C Blink or SNR warning
      - V = general warning flag or other navigation systems when a reliable
          fix is not available
 2. Status
@@ -2403,7 +2404,7 @@ Described in <<MALTESE>>, actually a Maltese government document.
     http://www.mx-marine.com/downloads/MX521_Install_manual_051804.pdf
     Used for GBS, GRS.
 
-- [[[MX535]]
+- [[[MX535]]]
     "MX535 UAIS Ship Borne Class A Transponder Unit Techical & Installation Manual"
     http://www.mx-marine.com/downloads/mx535/MX535_Tech_Manual_Rev_E.pdf
     Used for GNS.
@@ -2480,3 +2481,7 @@ Described in <<MALTESE>>, actually a Maltese government document.
 - [[ANON]]
   Anonymous commentator(s) are persons who have volunteered information
   about the NMEA standard(s) but do not wish to be identified.
+
+- [[[NORWAY]]]
+  "Etterretninger for sjøfarende" Notoces for Mariners, see p26
+  http://kartverket.no/efs-documents/editions/2015/efs01-2015.pdf
