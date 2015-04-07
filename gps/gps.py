@@ -351,6 +351,10 @@ class gps(gpscommon, gpsdata, gpsjson):
             else:
                 gpsjson.stream(self, flags, devpath)
 
+def is_sbas(prn):
+    "Is this the NMEA ID of an SBAS satellite?"
+    return prn >= 120 and prn <= 158
+
 if __name__ == '__main__':
     import getopt, sys
     (options, arguments) = getopt.getopt(sys.argv[1:], "v")

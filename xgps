@@ -88,7 +88,6 @@ class SkyView(gtk.DrawingArea):
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
     HORIZON_PAD = 40    # How much whitespace to leave around horizon
     SAT_RADIUS = 5      # Diameter of satellite circle
-    GPS_PRNMAX = 96     # Above this number are SBAS satellites
 
     def __init__(self):
         gtk.DrawingArea.__init__(self)
@@ -243,7 +242,7 @@ class SkyView(gtk.DrawingArea):
                 self.set_color("Green3")
             else:
                 self.set_color("Green1")
-            if sat.PRN > SkyView.GPS_PRNMAX:
+            if gps.is_sbas(sat.PRN):
                 self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
             else:
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)

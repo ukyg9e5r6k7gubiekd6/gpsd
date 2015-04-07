@@ -220,7 +220,6 @@ class LandSpeedometer(Speedometer):
 
 class NauticalSpeedometer(Speedometer):
     HEADING_SAT_GAP = 0.8
-    GPS_PRNMAX = 96  # Above this number are SBAS satellites
     SAT_SIZE = 10  # radius of the satellite circle in skyview
 
     def __init__(self, speed_unit=None, maxspeed=100):
@@ -454,7 +453,7 @@ class NauticalSpeedometer(Speedometer):
         x0, y0 = NauticalSpeedometer.polar2xy(radius * (90 - satsoup['el']) / 90, h, x, y)
 
         self.cr.new_sub_path()
-        if satsoup['PRN'] > NauticalSpeedometer.GPS_PRNMAX:
+        if gps.is_sbas(satsoup['PRN']):
             self.cr.rectangle(x0 - NauticalSpeedometer.SAT_SIZE, y0 - NauticalSpeedometer.SAT_SIZE,
                               NauticalSpeedometer.SAT_SIZE * 2, NauticalSpeedometer.SAT_SIZE * 2)
         else:
