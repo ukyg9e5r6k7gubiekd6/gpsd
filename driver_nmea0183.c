@@ -469,14 +469,10 @@ static int nmeaid_to_prn(char *talker, int satnum)
      *   55..64: not used (might be assigned to further SBAS systems)
      *   65..88: GLONASS
      *   89..96: GLONASS (future extensions?)
-     *   97..192: not used
+     *   97..192: not used (SBAS PRNs 120-151 fall in here)
      *   193..195: QZSS
      *   196..200: QZSS (future extensions?)
      *   201..235: Beidou
-     *
-     * Also see the *_PRN macros in gps.h for a slightly different mapping 
-     * apparently described in IS-GPS-200 Revision H, paragraph 6.3.6.
-     * There's a potential conflict in the 33-64 range.
      *
      * The issue is what to do when GPSes from these different systems
      * fight for IDs in the  1-32 range, as in this pair of Beidou sentences
@@ -499,7 +495,7 @@ static int nmeaid_to_prn(char *talker, int satnum)
 	    satnum += 200;
 	else if (talker[0] == 'G' && talker[1] == 'B')
 	    satnum += 200;
-	/* GLONASS reports don't seem to do this, but better safe than sorry */
+	/* GLONASS GL doesn't seem to do this, but better safe than sorry */
 	if (talker[0] == 'G' && (talker[1] == 'L' || talker[1] == 'N'))
 	    satnum += 37;
 	/* QZSS */

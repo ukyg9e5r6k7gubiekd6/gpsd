@@ -2,7 +2,7 @@
 :description: A programmer's guide to NMEA0183, the GPS protocol standard
 :keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v2.17, Mar 2015
+v2.18, Apr 2015
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -428,7 +428,7 @@ table:
 | 55 - 64   | not used (might be assigned to further SBAS systems)
 | 65 - 88   | GLONASS
 | 89 - 96   | GLONASS (future extensions?)
-| 97 - 192  | not used
+| 97 - 192  | not used  (SBAS PRNs 120-151 fall here)
 | 193 - 195 | QZSS
 | 196 - 200 | QZSS (future extensions?)
 | 201 - 235 | Beidou
@@ -436,6 +436,12 @@ table:
 
 QZSS and Beidou are regional GPS augmentation systems using
 geostationary satellites fielded by Japan and China respectively.
+
+GLONASS satellite numbers come in two flavors.  If a sentence has a
+GN talker ID, expect the skyviews to be GLONASS-only and in the
+range 1-32; you must add 64 to get a globally-unique ID.  If the
+sentence has a GL talker ID, the device emits a multi-constellation
+skyview with GLONASS IDs aleady in the 65-96 range
 
 == Obsolete sentences ==
 
