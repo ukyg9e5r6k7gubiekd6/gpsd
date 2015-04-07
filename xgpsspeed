@@ -220,7 +220,7 @@ class LandSpeedometer(Speedometer):
 
 class NauticalSpeedometer(Speedometer):
     HEADING_SAT_GAP = 0.8
-    GPS_PRNMAX = 32  # Above this number are SBAS satellites
+    GPS_PRNMAX = 64  # Above this number are SBAS satellites
     SAT_SIZE = 10  # radius of the satellite circle in skyview
 
     def __init__(self, speed_unit=None, maxspeed=100):
