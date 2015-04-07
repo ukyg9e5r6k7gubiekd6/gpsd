@@ -475,7 +475,7 @@ publicly available NMEA document dated 2009.
 |
 |DRU | Dual Doppler Auxiliary Data
 |GDA | Dead Reckoning Positions
-|GLA | Loran|=C Positions
+|GLA | Loran-xC Positions
 |GOA |  OMEGA Positions
 |GXA |  TRANSIT Positions
 |GTD |  Geographical Position, Loran-C TDs
