@@ -475,41 +475,41 @@ publicly available NMEA document dated 2009.
 |
 |DRU | Dual Doppler Auxiliary Data
 |GDA | Dead Reckoning Positions
-|GLA | Loran-xC Positions
-|GOA |  OMEGA Positions
-|GXA |  TRANSIT Positions
-|GTD |  Geographical Position, Loran-C TDs
-|GXA |  TRANSIT Position
-|HCC |  Compass Heading
-|HCD |  Heading and Deviation
-|HDM |  Heading, Magnetic
-|HDT |  Heading, True
-|HVD |  Magnetic Variation, Automatic
-|HVM |  Magnetic Variation, Manually Set
-|IMA |  Vessel Identification
-|MDA |  Meteorological Composite
-|MHU |  Humidity
-|MMB |  Barometer
-|MTA |  Air Temperature
-|MWH |  Wave Height
-|MWS |  Wind & Sea State
+|GLA | Loran-C Positions
+|GOA | OMEGA Positions
+|GXA | TRANSIT Positions
+|GTD | Geographical Position, Loran-C TDs
+|GXA | TRANSIT Position
+|HCC | Compass Heading
+|HCD | Heading and Deviation
+|HDM | Heading, Magnetic
+|HDT | Heading, True
+|HVD | Magnetic Variation, Automatic
+|HVM | Magnetic Variation, Manually Set
+|IMA | Vessel Identification
+|MDA | Meteorological Composite
+|MHU | Humidity
+|MMB | Barometer
+|MTA | Air Temperature
+|MWH | Wave Height
+|MWS | Wind & Sea State
 |
-|Rnn |  Routes
-|SBK |  Loran-C Blink Status
-|SCY |  Loran-C Cycle Lock Status
-|SCD |  Loran-C ECDs
-|SDB |  Loran-C Signal Strength
-|SGD |  Position Accuracy Estimate
-|SGR |  Loran-C Chain Identifier
-|SIU |  Loran-C Stations in Use
-|SLC |  Loran-C Status
-|SNC |  Navigation Calculation Basis
-|SNU |  Loran-C SNR Status
-|SPS |  Loran-C Predicted Signal Strength
-|SSF |  Position Correction Offset
-|STC |  Time Constant
-|STR |  Tracking Reference
-|SYS |  Hybrid System Configuration
+|Rnn | Routes
+|SBK | Loran-C Blink Status
+|SCY | oran-C Cycle Lock Status
+|SCD | Loran-C ECDs
+|SDB | Loran-C Signal Strength
+|SGD | Position Accuracy Estimate
+|SGR | Loran-C Chain Identifier
+|SIU | Loran-C Stations in Use
+|SLC | Loran-C Status
+|SNC | Navigation Calculation Basis
+|SNU | Loran-C SNR Status
+|SPS | Loran-C Predicted Signal Strength
+|SSF | Position Correction Offset
+|STC | Time Constant
+|STR | Tracking Reference
+|SYS | Hybrid System Configuration
 |================================================================
 
 == NMEA-Standard Sentences ==
