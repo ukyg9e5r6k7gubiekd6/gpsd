@@ -88,7 +88,7 @@ class SkyView(gtk.DrawingArea):
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
     HORIZON_PAD = 40    # How much whitespace to leave around horizon
     SAT_RADIUS = 5      # Diameter of satellite circle
-    GPS_PRNMAX = 64     # Above this number are SBAS satellites
+    GPS_PRNMAX = 96     # Above this number are SBAS satellites
 
     def __init__(self):
         gtk.DrawingArea.__init__(self)
