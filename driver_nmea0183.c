@@ -476,7 +476,7 @@ static int nmeaid_to_prn(char *talker, int satnum)
      *
      * Also see the *_PRN macros in gps.h for a slightly different mapping 
      * apparently described in IS-GPS-200 Revision H, paragraph 6.3.6.
-     * There's a conflict in the 33-64 range.
+     * There's a potential conflict in the 33-64 range.
      *
      * The issue is what to do when GPSes from these different systems
      * fight for IDs in the  1-32 range, as in this pair of Beidou sentences
@@ -502,7 +502,7 @@ static int nmeaid_to_prn(char *talker, int satnum)
 	/* GLONASS reports don't seem to do this, but better safe than sorry */
 	if (talker[0] == 'G' && (talker[1] == 'L' || talker[1] == 'N'))
 	    satnum += 37;
-	/* QZSS sentences have not been seen in the wild yet */
+	/* QZSS */
 	if (talker[0] == 'Q' && talker[1] == 'Z')
 	    satnum += 193;
     }

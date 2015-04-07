@@ -40,7 +40,6 @@ extern "C" {
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
-#define GPS_PRNMAX	96	/* above this number are SBAS satellites */
 #define MAXUSERDEVS	4	/* max devices per user */
 #define GPS_PATH_MAX	128	/* for names like /dev/serial/by-id/... */
 
@@ -89,16 +88,19 @@ struct gps_fix_t {
 
 /*
  * Satellite ID classes.
- * IS-GPS-200 Revision H, paragraph 6.3.6
+ * According to IS-GPS-200 Revision H paragraph 6.3.6, and earlier revisions
+ * at least back to E, the upper bound of U.S. GPS PRNs is actually 64. However,
+ * NMEA0183 only allocates 1-32 for U.S. GPS IDs; it uses 33-64 for IDs ub the
+ * SBAS range.
  */
-#define GPS_PRN(n)	(((n) >= 1) && ((n) <= 63))	/* U.S. GPS satellite */
+#define GPS_PRN(n)	(((n) >= 1) && ((n) <= 32))	/* U.S. GPS satellite */
 #define GBAS_PRN(n)	((n) >= 64 && ((n) <= 119))	/* Other GNSS (GLONASS) and Ground Based Augmentation System (eg WAAS)*/
 #define SBAS_PRN(n)	((n) >= 120 && ((n) <= 158))	/* Satellite Based Augmentation System (eg GAGAN)*/
 #define GNSS_PRN(n)	((n) >= 159 && ((n) <= 210))	/* other GNSS (eg BeiDou) */
 
 /*
  * GLONASS birds reuse GPS PRNs.
- * it is a GPSD convention to map them to IDs 65..96.
+ * It is an NMEA0183 convention to map them to pseudo-PRNs 65..96.
  * (some other programs push them to 33 and above).
  * The US GPS constellation plans to use the 33-63 range.
  */

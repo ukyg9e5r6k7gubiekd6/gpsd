@@ -2,7 +2,8 @@
 Repository head:
   Fixed incorrect decode of south latitudes in AIS Type 17 messages.
   splint has been retired; this removes almost 2KLOC of annotations.
-  chrpath is no longer a build dependency.
+  chrpath is no longer a build dependency. Corrected Beidou/QZNSS display
+  in the Python clients so the graphics don't look like SBAS.
 
 3.14: 2015-03-14 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The Pi Day release, 3.14 on 3/14 2015 at 9:26. Longer timeouts on test clients.
