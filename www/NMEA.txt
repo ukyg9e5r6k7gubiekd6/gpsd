@@ -1,8 +1,8 @@
 = NMEA Revealed =
-:description: A programmer's guide to NMEA0183, the GPS protocol standard
+:description: A programmer's guide to NMEA0183, the GPS protocol reporting standard
 :keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v2.18, Apr 2015
+v2.19, Apr 2015
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -271,8 +271,8 @@ the following are well known:
 |GA    |  Galileo Positioning System
 |GL    |  GLONASS, according to IEIC 61162-1
 |GN    |  Mixed GPS and GLONASS data, according to IEIC 61162-1
-|GB    |  Beidou regional GPS augmentation system (China)
-|BD    |  Beidou regional GPS augmentation system (China)
+|GB    |  BeiDou (China)
+|BD    |  BeiDou (China)
 |QZ    |  QZSS regional GPS augmentation system (Japan)
 |================================================================
 
@@ -313,7 +313,8 @@ Here is a more complete list of talker ID prefixes.  Most are not
 relevant to GPS systems.
 
 Note that talker IDs made obsolete by newer revisions of the
-standards may still be emitted by older devices.
+standards may still be emitted by older devices.  Support
+for them may be present in the GPSD project.
 
 .Big list of talker IDs
 |================================================================
@@ -436,32 +437,38 @@ table:
 | 55 - 64   | not used (might be assigned to further SBAS systems)
 | 65 - 88   | GLONASS
 | 89 - 96   | GLONASS (future extensions?)
-| 97 - 192  | not used  (SBAS PRNs 120-151 fall here)
+| 97 - 119  | not used
+| 120 - 151 | not used (SBAS PRNs occupy this range)
+| 152 - 192 | not used
 | 193 - 195 | QZSS
 | 196 - 200 | QZSS (future extensions?)
-| 201 - 235 | Beidou
+| 201 - 235 | BeiDou
 |====================================================
+ 
+GLONASS satellite numbers come in two flavors.  If a sentence 
+has a GN talker ID, expect the skyviews to be GLONASS-only and 
+in the range 1-32; you must add 64 to get a globally-unique 
+NMEA ID.  If the sentence has a GL talker ID, the device emits 
+a multi-constellation skyview with GLONASS IDs aleady in 
+the 65-96 range
 
-QZSS is a geosynchronous (*not geostationary*) system of three
-(possibly four) satellites in highly eliptical, inclined, orbits.  It
-is designed to provide coverage in Japan's urban canyons.
+QZSS is a  geosynchronous (*not geostationary*) system of three
+(possibly four) satellites in highly eliptical, inclined,
+orbits.  It is designed to provide coverage in Japan's
+urban canyons.
 
-Beidou-1 consists of 4 geostationary satellites operated by China,
+BeiDou-1 consists of 4 geostationary satellites operated by China, 
 operational since 2004.  Coverage area is the Chinese mainland.
-Beidou-2 (also known as COMPASS) is a system of 35 satellites,
-including 5 geostationary for compatibility with BeiDou-1.  It is
-expected to be fully operational by 2019.  Coverage area is worldwide.
-
-GLONASS satellite numbers come in two flavors.  If a sentence has a
-GN talker ID, expect the skyviews to be GLONASS-only and in the
-range 1-32; you must add 64 to get a globally-unique ID.  If the
-sentence has a GL talker ID, the device emits a multi-constellation
-skyview with GLONASS IDs aleady in the 65-96 range
+BeiDou-2 (also known as COMPASS) is a system of 35 satellites, 
+including 5 geostationary for compatability with BeiDou-1.  It is 
+expected to be fully operational by 2019.  Coverage area is
+expected to be worldwide.
 
 == Obsolete sentences ==
 
-Note that sentances made obsolete by newer revisions of the
+Note that sentances made obsolete by newer revisions of the 
 standards may still be emitted by devices.
+Support for them may be present in the GPSD project.
 
 The following NMEA sentences have been designated "obsolete" in a
 publicly available NMEA document dated 2009.
