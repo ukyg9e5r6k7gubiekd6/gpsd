@@ -119,6 +119,16 @@ else
 exit(0);
 
 ###########################################################################
+# Function to decide if a PRN is a true GPS bird or SBAS, GBAS, etc.
+# Sanjeev Gupta <ghane0@gmail.com> 20150408
+# Please refer to gps.h lines ~~ 95 , for a central definition
+function isGPS($PRN) {
+	if ($PRN <= 32) return TRUE ; 			# Navstar GPS
+	if ($PRN >= 64 && $PRN <= 96) return TRUE ; 	# GLONASS
+	if ($PRN >= 159 ) return TRUE ; 		# BeiDou ?
+	return FALSE ;					# SBAS, GBAS, unknown
+	}
+
 function colorsetup($im){
 	$C['white']	= imageColorAllocate($im, 255, 255, 255);
 	$C['ltgray']	= imageColorAllocate($im, 191, 191, 191);
@@ -215,17 +225,18 @@ function splot($im, $sz, $C, $e){
 		$r = 8;
 
 	imageString($im, 3, $x+4, $y+4, $e['PRN'], $C['black']);
-	if ($e['used'] == true)
-		if ($e['PRN'] > 32)
-			imageFilledDiamond($im, $x, $y, $r, $color);
-		else
+        if ($e['used'] == true)
+		if (isGPS($e['PRN']))
 			imageFilledArc($im, $x, $y, $r, $r, 0, 360, $color, 0);
-	else
-		if ($e['PRN'] > 32)
-			imageDiamond($im, $x, $y, $r, $color);
 		else
+			imageFilledDiamond($im, $x, $y, $r, $color);
+	else
+		if (isGPS($e['PRN']))
 			imageArc($im, $x, $y, $r, $r, 0, 360, $color);
+		else
+			imageDiamond($im, $x, $y, $r, $color);
 }
+
 
 function imageDiamond($im, $x, $y, $r, $color){
 	$t = $r/2;
@@ -419,7 +430,7 @@ width="600" height="600"/>
 <br clear="all"/>
 <p class="caption">A filled circle means the satellite was used in
 the last fix. Green-yellow-red colors indicate signal strength in dB,
-green=most and red=least.  Diamonds indicate SBAS satellites.</p>
+green=most and red=least.  Diamonds indicate Augmentation satellites.</p>
 {$map_code}</td>
 </tr>
 EOF;
