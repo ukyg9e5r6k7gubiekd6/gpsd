@@ -1,12 +1,18 @@
 = GPSD Installation Instructions =
+:title: GPSD Installation Instructions
+:description: Here are the steps for installing GPSD and verifying its performance.
+:keywords: GPSD, GPS, installation
+:author: Eric S. Raymond <esr@thyrsus.com>
+:robots:index,follow
+:revised:April 2015
 
 Here are the steps for installing GPSD and verifying its performance.
-They assume you have GPSD available as an installable binary package, 
+They assume you have GPSD available as an installable binary package,
 
 Instructions for building GPSD from source (including cross-building)
 are in the file "build.txt" in the source distribution.
 
-Most of these installation instructions are generic to Linux (inc 
+Most of these installation instructions are generic to Linux (inc
 There are some special notes on installation for OS X and the Raspberry Pi
 near the end of this file.
 
@@ -63,7 +69,7 @@ devices given to it on the command line by forcing their group read
 and write permissions on.
 
 On a Linux with udev, check the files in /etc/udev/permissions.d to
-ensure that /dev/tty* devices are all created with the same group 
+ensure that /dev/tty* devices are all created with the same group
 and with 0660 permissions.
 
 When gpsd drops privileges, its default is to set uid to 'nobody' and
@@ -84,7 +90,7 @@ various additional features have additional prerequisites:
 
 |==========================================================================
 |pthreads library       | support for PPS timekeeping on serial GPSes
-|DBUS                   | gpsd will issue DBUS notifications 
+|DBUS                   | gpsd will issue DBUS notifications
 |ncurses                | a test client and the GPS monitor depend on this
 |libtinfo5              | shared low-level terminfo library (see below)
 |libusb-1.0.x or later  | better USB device discovery
@@ -125,7 +131,7 @@ in the source distribution.
 
 == How to test the software ==
 
-1. Start gpsd.  You'll need to give it as an argument a path to 
+1. Start gpsd.  You'll need to give it as an argument a path to
 a serial or USB port with a GPS attached to it.  Your test command
 should look something like this:
 
@@ -150,12 +156,12 @@ lock.
 15-20 minutes after it gets a skyview for it to download an ephemeris
 and begin delivering fixes.
 
-6. A FAQ and troubleshooting instructions can be found at the GPSD 
+6. A FAQ and troubleshooting instructions can be found at the GPSD
 project site.
 
 == Once you have verified correct operation ==
 
-1. If you installed from a .deb under Debian or a Debian-derived 
+1. If you installed from a .deb under Debian or a Debian-derived
 system, you may need to `dpkg-reconfigure -plow gpsd' to enable the
 hotplug magic ("Start gpsd automatically").
 
@@ -167,10 +173,10 @@ number known to work with hardware already supported.
 
 3. GPSD includes a PHP script that you can use to generate a PHP
 status page for your GPS if you wish. (It may not be in the core
-package.)  It should be manually copied to your HTTP document directory. 
+package.)  It should be manually copied to your HTTP document directory.
 The first time it's invoked, it will generate a file called
 'gpsd_config.inc' in that directory containing configuration
-information; edit to taste.  
+information; edit to taste.
 
 4. There are other non-essential scripts that may be useful; these
 are in the contrib/ directory of the source.  They may not be available
@@ -185,7 +191,7 @@ gpsd will build, install and run on OS X.  The easiest way to do so is
 to first install the MacPorts package.  Follow their install procedure
 at: http://www.macports.org/install.php
 
-Then use their port command to install scons, and optionally git if you 
+Then use their port command to install scons, and optionally git if you
 want to access the develpment source.
 
 --------------------------------------------------------------
