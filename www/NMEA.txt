@@ -1,6 +1,10 @@
 = NMEA Revealed =
+:title: NMEA Revealed
 :description: A programmer's guide to NMEA0183, the GPS protocol reporting standard
 :keywords: NMEA0183, GPS, standard, protocol
+:author: Eric S. Raymond <esr@thyrsus.com>
+:robots:index,follow
+:revised:April 2015
 Eric S. Raymond <esr@thyrsus.com>
 v2.19, Apr 2015
 
