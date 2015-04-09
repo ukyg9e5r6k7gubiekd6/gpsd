@@ -7,7 +7,7 @@ v2.19, Apr 2015
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
 systems.  Because early GPS sensors were designed for compatibility
-with these systems, GPS reporting protocols are often a small 
+with these systems, GPS reporting protocols are often a small
 subset of NMEA 0183 or mutated from such as subset.  AIS, the
 Marine Automatic Identification system, also uses NMEA0183-like
 packet formats.
@@ -51,7 +51,7 @@ distribution, but adds more information on the following topics:
 * Common talker IDs
 * Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from [GLOBALSAT].
 * Sentence PASHR from <<PASHR>>.
-* Satellite IDs: PRN vs NMEA-ID. 
+* Satellite IDs: PRN vs NMEA-ID.
 * Error status indications.
 
 == Relationship to NMEA 2000 ==
@@ -65,7 +65,7 @@ be transmitted over serial links.
 
 While newer marine electronics uses this protocol, general-purpose
 GPSes have not adopted it.  Thus we do not attempt to document NMEA
-2000 here; see <<CANBUS>>, <<NMEA2000>>, and <<KEVERSOFT>> instead.  
+2000 here; see <<CANBUS>>, <<NMEA2000>>, and <<KEVERSOFT>> instead.
 
 == NMEA version timeline ==
 
@@ -83,7 +83,7 @@ GPSes have not adopted it.  Thus we do not attempt to document NMEA
 
 No version earlier than 2.00 is listed or archived on the NMEA website.
 
-The NMEA 4.00 standard states, provocatively, that it is "in theory" 
+The NMEA 4.00 standard states, provocatively, that it is "in theory"
 backwards compatible to 2.00, and that versions before 2.00 are not
 forward-compatible <<ANON>>.
 
@@ -236,7 +236,7 @@ adjustable) making position unreliable due to poor geometry and more
 variable signal lag induced by lengthened atmosphere transit.
 
 Mode is associated with the GSA sentence associated with the last fix.
-It reports whether the fix was no good, sufficirnt for 2D, or 
+It reports whether the fix was no good, sufficirnt for 2D, or
 sufficient for 3D (values 1, 2, and 3).
 
 Status will be 0 ehen the sample from from which the reporting
@@ -248,12 +248,12 @@ In addition, some sentences may use empty fields to signify invalid
 data. It is not clear whether NMEA 0183 allows this, but real-world
 software must cope.
 
-== Talker IDs == 
+== Talker IDs ==
 
 NMEA sentences do not identify the individual device that issued
 them; the format was originally designed for shipboard multidrop
 networks on which it's possible only to broadcast to all devices,. not
-address a specific one.  
+address a specific one.
 
 NMEA sentences do, however, include a "talker ID" a two-character
 prefix that identifies the type of the transmitting unit.  By far the
@@ -359,7 +359,7 @@ for them may be present in the GPSD project.
 |VD	| Velocity Sensor, Doppler, other/general
 |DM	| Velocity Sensor, Speed Log, Water, Magnetic
 |VW	| Velocity Sensor, Speed Log, Water, Mechanical
-|WI	| Weather Instruments 
+|WI	| Weather Instruments
 |YC	| Transducer - Temperature (obsolete)
 |YD	| Transducer - Displacement, Angular or Linear (obsolete)
 |YF	| Transducer - Frequency (obsolete)
@@ -379,7 +379,7 @@ for them may be present in the GPSD project.
 
 Satellites may be identified by one of two different numbers in
 sentences such as GSV: a PRN number associated with their radio code,
-or an NMEA-ID.  
+or an NMEA-ID.
 
 For satellites 1-32, the GPS constellation, these numbers are the
 same. For satellites associated with WAAS (Wide Area Augmentation
@@ -399,7 +399,7 @@ Here is a table of NMEA-ID allocations above 32 as of March 2010:
 |EGNOS      |IOR-E           |131            |44
 |WAAS       |AMR             |133            |46
 |WAAS       |PanAm           |135            |48
-|MSAS       |MTSAT-2         |137            |50 
+|MSAS       |MTSAT-2         |137            |50
 |WAAS       |Anik            |138            |51
 |====================================================
 
@@ -444,12 +444,12 @@ table:
 | 196 - 200 | QZSS (future extensions?)
 | 201 - 235 | BeiDou
 |====================================================
- 
-GLONASS satellite numbers come in two flavors.  If a sentence 
-has a GN talker ID, expect the skyviews to be GLONASS-only and 
-in the range 1-32; you must add 64 to get a globally-unique 
-NMEA ID.  If the sentence has a GL talker ID, the device emits 
-a multi-constellation skyview with GLONASS IDs aleady in 
+
+GLONASS satellite numbers come in two flavors.  If a sentence
+has a GN talker ID, expect the skyviews to be GLONASS-only and
+in the range 1-32; you must add 64 to get a globally-unique
+NMEA ID.  If the sentence has a GL talker ID, the device emits
+a multi-constellation skyview with GLONASS IDs aleady in
 the 65-96 range
 
 QZSS is a  geosynchronous (*not geostationary*) system of three
@@ -457,16 +457,16 @@ QZSS is a  geosynchronous (*not geostationary*) system of three
 orbits.  It is designed to provide coverage in Japan's
 urban canyons.
 
-BeiDou-1 consists of 4 geostationary satellites operated by China, 
+BeiDou-1 consists of 4 geostationary satellites operated by China,
 operational since 2004.  Coverage area is the Chinese mainland.
-BeiDou-2 (also known as COMPASS) is a system of 35 satellites, 
-including 5 geostationary for compatability with BeiDou-1.  It is 
+BeiDou-2 (also known as COMPASS) is a system of 35 satellites,
+including 5 geostationary for compatability with BeiDou-1.  It is
 expected to be fully operational by 2019.  Coverage area is
 expected to be worldwide.
 
 == Obsolete sentences ==
 
-Note that sentances made obsolete by newer revisions of the 
+Note that sentances made obsolete by newer revisions of the
 standards may still be emitted by devices.
 Support for them may be present in the GPSD project.
 
@@ -536,7 +536,7 @@ the course line) at the destination waypoint.
 ------------------------------------------------------------------------------
 
 Field Number:
- 
+
 1. Status, BOOLEAN, A = Arrival circle entered, V = not passed
 2. Status, BOOLEAN, A = perpendicular passed at waypoint, V = not passed
 3. Arrival circle radius
@@ -597,7 +597,7 @@ destination waypoint for the active navigation leg of the journey.
  $--APA,A,A,x.xx,L,N,A,A,xxx,M,c---c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Status
      V = Loran-C Blink or SNR warning
@@ -640,7 +640,7 @@ bearings are different.
  $--APB,A,A,x.x,a,N,A,A,x.x,a,c--c,x.x,a,x.x,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Status
      V = Loran-C Blink or SNR warning
@@ -675,7 +675,7 @@ Example: $GPAPB,A,A,0.10,R,N,V,V,011,M,DEST,011,M,011,M*82
  $--BOD,x.x,T,x.x,M,c--c,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Bearing Degrees, TRUE
 2. T = True
@@ -716,7 +716,7 @@ earlier versions) <<ANON>>.
  $--BWC,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c,m,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. UTCTime
 2. Waypoint Latitude
@@ -746,7 +746,7 @@ Example 2: GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*11
  $--BWR,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. UTCTime
 2. Waypoint Latitude
@@ -772,7 +772,7 @@ Bearing calculated at the FROM waypoint.
  $--BWW,x.x,T,x.x,M,c--c,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
- Field Number: 
+ Field Number:
 1. Bearing Degrees, TRUE
 2. T = True
 3. Bearing Degrees, Magnetic
@@ -808,7 +808,7 @@ Field Number:
  $--DBS,x.x,f,x.x,M,x.x,F*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Depth, feet
 2. f = feet
@@ -826,7 +826,7 @@ Field Number:
  $--DBT,x.x,f,x.x,M,x.x,F*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Depth, feet
 2. f = feet
@@ -848,7 +848,7 @@ So you night see something like $SDDBT,,f,22.5,M,,F*cs
  $--DCN,xx,cc,x.x,A,cc,x.x,A,cc,x.x,A,A,A,A,x.x,N,x*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Decca chain identifier
 2. Red Zone Identifier
@@ -881,10 +881,10 @@ Field Number:
  $--DPT,x.x,x.x*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Depth, meters
-2. Offset from transducer, 
+2. Offset from transducer,
      positive means distance from tansducer to water line
      negative means distance from transducer to keel
 3. Checksum
@@ -901,12 +901,12 @@ in <<BETKE>>.  It's documented at
  $ --DTM,ref,x,llll,c,llll,c,aaa,ref*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
-1. Local datum code.  
+1. Local datum code.
 2. Local datum subcode.  May be blank.
 3. Latitude offset (minutes)
-4. N or S 
+4. N or S
 5. Longitude offset (minutes)
 6. E or W
 7. Altitude offset in meters
@@ -925,7 +925,7 @@ radiotelephone.
  $--FSI,xxxxxx,xxxxxx,c,x*hh<CR><LF>
 ------------------------------------------------------------------------------
 
- Field Number: 
+ Field Number:
 1. Transmitting Frequency
 2. Receiving Frequency
 3. Communications Mode (NMEA Syntax 2)
@@ -941,7 +941,7 @@ radiotelephone.
  $--GBS,hhmmss.ss,x.x,x.x,x.x,x.x,x.x,x.x,x.x*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. UTC time of the GGA or GNS fix associated with this sentence
 2. Expected error in latitude (meters)
@@ -969,7 +969,7 @@ Time, Position and fix related data for a GPS receiver.
  $--GGA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x,xx,x.x,x.x,M,x.x,M,x.x,xxxx*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Universal Time Coordinated (UTC)
 2. Latitude
@@ -1014,7 +1014,7 @@ will cease from 1st Jan 2016. <<NORWAY>>
  $--GLC,xxxx,x.x,a,x.x,a,x.x,a.x,x,a,x.x,a,x.x,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. GRI Microseconds/10
 2. Master TOA Microseconds
@@ -1041,7 +1041,7 @@ This is one of the sentences commonly emitted by GPS units.
  $--GLL,llll.ll,a,yyyyy.yy,a,hhmmss.ss,a,m,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Latitude
 2. N or S (North or South)
@@ -1084,7 +1084,7 @@ Field Number:
  $ --GRS,hhmmss.ss,m,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,xx,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. TC time of associated GGA fix
 2. 0 = Residuals used in GGA, 1 = residuals calculated after GGA
@@ -1115,7 +1115,7 @@ Example: $GPGRS,024603.00,1,-1.8,-2.7,0.3,,,,,,,,,*6C
  $ --GST,hhmmss.ss,x,x,x,x,x,x,x,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. TC time of associated GGA fix
 2. Total RMS standard deviation of ranges inputs to the navigation solution
@@ -1138,7 +1138,7 @@ This is one of the sentences commonly emitted by GPS units.
  $--GSA,a,a,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x.x,x.x,x.x*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Selection mode: M=Manual, forced to operate in 2D or 3D, A=Automatic, 3D/2D
 2. Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
@@ -1172,7 +1172,7 @@ Typically they're shipped in a group of 2 or 3.
  $--GSV,x,x,x,x,x,x,x,...*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. total number of GSV messages to be transmitted in this group
 2. 1-origin number of this GSV message  within current group
@@ -1205,7 +1205,7 @@ or not.
  $--GTD,x.x,x.x,x.x,x.x,x.x*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. time difference
 2. time difference
@@ -1225,7 +1225,7 @@ Location and time of TRANSIT fix at waypoint
  $--GXA,hhmmss.ss,llll.ll,a,yyyyy.yy,a,c--c,X*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. UTC of position fix
 2. Latitude
@@ -1247,7 +1247,7 @@ Field Number:
  $--HDG,x.x,x.x,a,x.x,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Magnetic Sensor heading in degrees
 2. Magnetic Deviation, degrees
@@ -1268,7 +1268,7 @@ any device or system producing magnetic heading.
  $--HDM,x.x,M*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Heading Degrees, magnetic
 2. M = magnetic
@@ -1285,7 +1285,7 @@ producing true heading.
  $--HDT,x.x,T*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Heading Degrees, true
 2. T = True
@@ -1299,7 +1299,7 @@ Field Number:
  $--HFB,x.x,M,y.y,M*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Distance from headrope to footrope
 2. Meters (0-100)
@@ -1317,7 +1317,7 @@ From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
  $--HSC,x.x,T,x.x,M,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Heading Degrees, True
 2. T = True
@@ -1326,7 +1326,7 @@ Field Number:
 5. Checksum
 
 <<GLOBALSAT>> describes a completely different meaning for this
-sentence, having to do with water temperature sensors.  It is 
+sentence, having to do with water temperature sensors.  It is
 unclear which is correct.
 
 === ITS - Trawl Door Spread 2 Distance ===
@@ -1353,7 +1353,7 @@ From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
  $--LCD,xxxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx,xxx*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. GRI Microseconds/10
 2. Master Relative SNR
@@ -1409,11 +1409,11 @@ Field Number:
 
 ------------------------------------------------------------------------------
         1   2 3
-        |   | | 
+        |   | |
  $--MTW,x.x,C*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Degrees
 2. Unit of Measurement, Celcius
@@ -1430,7 +1430,7 @@ is probably incorrect.
  $--MWV,x.x,a,x.x,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Wind Angle, 0 to 360 degrees
 2. Reference, R = Relative, T = True
@@ -1448,7 +1448,7 @@ Field Number:
  $--OLN,aa,xxx,xxx,aa,xxx,xxx,aa,xxx,xxx*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Omega Pair 1
 2. Omega Pair 1
@@ -1465,7 +1465,7 @@ Field Number:
  $--OSD,x.x,A,x.x,a,x.x,a,x.x,x.x,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Heading, degrees true
 2. Status, A = Data Valid
@@ -1483,11 +1483,11 @@ Field Number:
 
 ------------------------------------------------------------------------------
         1                n
-        |                | 
+        |                |
  $--R00,c---c,c---c,....*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. waypoint ID
 
@@ -1504,7 +1504,7 @@ n) checksum
  $--RMA,A,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,x.x,x.x,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Blink Warning
 2. Latitude
@@ -1531,7 +1531,7 @@ To be sent by a navigation receiver when a destination waypoint is active.
  $--RMB,A,x.x,a,c--c,c--c,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,A,m,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Status, A= Active, V = Void
 2. Cross Track error - nautical miles
@@ -1580,7 +1580,7 @@ Field Number:
 13. Checksum
 
 A status of V means the GPS has a valid fix that is below an internal
-quality threshold, e.g. because the dilution of precision is too high 
+quality threshold, e.g. because the dilution of precision is too high
 or an elevation mask test failed.
 
 === ROT - Rate Of Turn ===
@@ -1591,7 +1591,7 @@ or an elevation mask test failed.
  $--ROT,x.x,A*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Rate Of Turn, degrees per minute, "-" means bow turns to port
 2. Status, A means data is valid
@@ -1605,7 +1605,7 @@ Field Number:
  $--RPM,a,x,x.x,x.x,A*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Sourse, S = Shaft, E = Engine
 2. Engine or shaft number
@@ -1623,7 +1623,7 @@ Field Number:
  $--RSA,x.x,A,x.x,A*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Starboard (or single) rudder sensor, "-" means Turn To Port
 2. Status, A means data is valid
@@ -1642,7 +1642,7 @@ Field Number:
 
 (Some fields are missing from this description.)
 
-Field Number: 
+Field Number:
 1. Unknown
 2. Unknown
 3. Unknown
@@ -1667,7 +1667,7 @@ Field Number:
  $--RTE,x.x,x.x,a,c--c,c--c, ..... c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Total number of messages being transmitted
 2. Message Number
@@ -1689,7 +1689,7 @@ The Garmin 65 and possibly other units report a $GPR00 in the same format.
  $--SFI,x.x,x.x,xxxxxx,c .......... xxxxxx,c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 1. Total Number Of Messages
 2. Message Number
 3. Frequency 1
@@ -1710,7 +1710,7 @@ and produces a single output.
  $--STN,x.x,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Talker ID Number
 2. Checksum
@@ -1758,9 +1758,9 @@ From <<GLOBALSAT>>.  Shown with a "@II" leader rather than "$GP".
 Field Number:
 
 1. Horizontal distance from the vessel center line
-2. Meters 
+2. Meters
 3. Horizontal distance from the transducer to the trawl along the
-     vessel center line. The value is normally positive assuming the 
+     vessel center line. The value is normally positive assuming the
      trawl is located behind the vessel.
 4. Meters
 5. Depth of the trawl below the surface
@@ -1823,7 +1823,7 @@ From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
  $--TRF,hhmmss.ss,xxxxxx,llll.ll,a,yyyyy.yy,a,x.x,x.x,x.x,x.x,xxx,A*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. UTC Time
 2. Date, ddmmyy
@@ -1851,7 +1851,7 @@ Field Number:
  $--TTM,xx,x.x,x.x,a,x.x,x.x,a,x.x,x.x,a,c--c,a,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Target Number (0-99)
 2. Target Distance
@@ -1880,7 +1880,7 @@ acquisition was automatic or manual.
  $--VBW,x.x,x.x,A,x.x,x.x,A*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Longitudinal water speed, "-" means astern
 2. Transverse water speed, "-" means port
@@ -1898,7 +1898,7 @@ Field Number:
  $--VDR,x.x,T,x.x,M,x.x,N*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Degress True
 2. T = True
@@ -1916,7 +1916,7 @@ Field Number:
  $--VHW,x.x,T,x.x,M,x.x,N,x.x,K*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Degress True
 2. T = True
@@ -1929,7 +1929,7 @@ Field Number:
 9. Checksum
 
 <<GLOBALSAT>> describes a different format in which the first three
-fields are water-temperature measurements.  It's not clear which 
+fields are water-temperature measurements.  It's not clear which
 is correct.
 
 === VLW - Distance Traveled through Water ===
@@ -1940,7 +1940,7 @@ is correct.
  $--VLW,x.x,N,x.x,N*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Total cumulative distance
 2. N = Nautical Miles
@@ -1956,7 +1956,7 @@ Field Number:
  $--VPW,x.x,N,x.x,M*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Speed, "-" means downwind
 2. N = Knots
@@ -1974,7 +1974,7 @@ This is one of the sentences commonly emitted by GPS units.
  $--VTG,x.x,T,x.x,M,x.x,N,x.x,K,m,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Track Degrees
 2. T = True
@@ -1995,7 +1995,7 @@ Note: in some older versions of NMEA 0183, the sentence looks like this:
  $--VTG,x.x,x,x.x,x.x,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. True course over ground (degrees) 000 to 359
 2. Magnetic course over ground 000 to 359
@@ -2018,7 +2018,7 @@ magnetic-bearing fields 3 and 4 empty.
  $--VWR,x.x,a,x.x,N,x.x,M,x.x,K*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Wind direction magnitude in degrees
 2. Wind direction Left/Right of bow
@@ -2038,7 +2038,7 @@ Field Number:
  $--WCV,x.x,N,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Velocity
 2. N = knots
@@ -2053,7 +2053,7 @@ Field Number:
  $--WNC,x.x,N,x.x,K,c--c,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Distance, Nautical Miles
 2. N = Nautical Miles
@@ -2072,14 +2072,14 @@ Field Number:
  $--WPL,llll.ll,a,yyyyy.yy,a,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Latitude
 2. N or S (North or South)
 3. Longitude
 4. E or W (East or West)
 5. Waypoint name
-6. Checksum     
+6. Checksum
 
 
 === XDR - Transducer Measurement ===
@@ -2090,7 +2090,7 @@ Field Number:
  $--XDR,a,x.x,a,c--c, ..... *hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Transducer Type
 2. Measurement Data
@@ -2108,7 +2108,7 @@ sensor.  The last field will be a checksum as usual.
  $--XTE,A,A,x.x,a,N,m,*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Status
      - V = Loran-C Blink or SNR warning
@@ -2131,7 +2131,7 @@ Field Number:
  $--XTR,x.x,a,N*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Magnitude of cross track error
 2. Direction to steer, L or R
@@ -2168,7 +2168,7 @@ Example: $GPZDA,160012.71,11,03,2004,-1,00*7D
  $--ZFO,hhmmss.ss,hhmmss.ss,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Universal Time Coordinated (UTC)
 2. Elapsed Time
@@ -2183,7 +2183,7 @@ Field Number:
  $--ZTG,hhmmss.ss,hhmmss.ss,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Universal Time Coordinated (UTC)
 2. Time Remaining
@@ -2224,20 +2224,20 @@ on the Web:
 
 $CDDSC is described in <<CDDSC>>.
 
-== Vendor extensions == 
+== Vendor extensions ==
 
 This list is very incomplete.
 
 === PASHR - RT300 proprietary roll and pitch sentence ===
 
 ------------------------------------------------------------------------------
-         1           2   3    4      5      6     7     8     9  10 11 12 
+         1           2   3    4      5      6     7     8     9  10 11 12
          |           |   |    |      |      |     |     |     |   | |  |
 $PASHR,hhmmss.sss,hhh.hh,T,rrr.rr,ppp.pp,xxx.xx,a.aaa,b.bbb,c.ccc,d,e*hh<CR><LF>
 ------------------------------------------------------------------------------
- 
+
 Field number:
- 
+
 1.  hhmmss.sss - UTC time
 2.  hhh.hh - Heading in degrees
 3.  T - flag to indicate that the Heading is True Heading (i.e. to True North)
@@ -2252,7 +2252,7 @@ Field number:
 12. hh - Checksum
 
 <<PASHR>> describes this sentence as NMEA, though other sources say it
-is Ashtech proprietary and describe a different format.  
+is Ashtech proprietary and describe a different format.
 
 Example:
 
@@ -2266,9 +2266,9 @@ $PASHR,085335.000,224.19,T,-01.26,+00.83,+00.00,0.101,0.113,0.267,1,0*06
  $PGRME,hhh,M,vvv,M,ttt,M*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
-1. Estimated horizontal position error (HPE), 
+1. Estimated horizontal position error (HPE),
 2. M=meters
 3. Estimated vertical position error (VPE)
 4. M=meters
@@ -2286,7 +2286,7 @@ Example: $PGRME,15.0,M,45.0,M,25.0,M*22
  $PMGNST,xx.xx,m,t,nnn,xx.xx,nnn,nn,c
 ------------------------------------------------------------------------------
 
-Field Number: 
+Field Number:
 
 1. Firmware version number?
 2. Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
@@ -2305,8 +2305,8 @@ Only supported on Magellan GPSes.
  $PRWIZCH,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,n,s,c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
-Fields consist of 12 pairs of a satellite PRN followed by a 
-signal quality number in the range 0-7 (0 worst, 7 best).  
+Fields consist of 12 pairs of a satellite PRN followed by a
+signal quality number in the range 0-7 (0 worst, 7 best).
 
 Only emitted by the now-obsolete Zodiac (Rockwell) chipset.
 
@@ -2409,11 +2409,11 @@ Described in <<MALTESE>>, actually a Maltese government document.
     and dated May 2000 with a revision in 2001.
 
 - [[[CANBUS]]]
-  "Wikipedia: CAN bus" 
+  "Wikipedia: CAN bus"
   http://en.wikipedia.org/wiki/CAN_bus
 
 - [[[NMEA2000]]]
-  "Wikipedia: NMEA 2000" 
+  "Wikipedia: NMEA 2000"
   http://en.wikipedia.org/wiki/NMEA_2000
 
 - [[[KEVERSOFT]]]
@@ -2496,7 +2496,7 @@ Described in <<MALTESE>>, actually a Maltese government document.
   https://secure2.gov.mt/eprocurement/Tenders/file.ashx?f=9832DB05E65C774258580284031EC72CC315D954A7108B5E.
 
 - [[NMEA-ADVANCE]]
-  "NMEA 0183 Advancements" (describes 'P' value of FAA mode) 
+  "NMEA 0183 Advancements" (describes 'P' value of FAA mode)
   http://www.nmea.org/Assets/0183_advancements_nmea_oct_1_2010%20(2).pdf
 
 - [[CDDSC]]
