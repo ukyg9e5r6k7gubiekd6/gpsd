@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
 <html>
 <!-- @MASTER@ -->
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="Author" content="Eric S. Raymond">
    <meta name="Description" content="GPSD Frequently Asked Questions">
-   <meta name="Keywords" content="GPS, translator, GIS">
+   <meta name="Keywords" content="GPS,gpsd,FAQ,frequently asked questions,android,garmin,raspberry pi,fix">
+   <meta name="revised" content="9 April 2015">
+   <meta name="robots" content="index,follow">
    <link rel="stylesheet" href="main.css" type="text/css">
    <title>GPSD FAQ</title>
 </head>
@@ -186,8 +188,8 @@ receive data check for it with <b>lsmod(1)</b>.</p>
 
 <p>On Linux systems with module autoloading disabled or misconfigured,
 it is possible you may need to load the module manually with a command
-such as <code>sudo modprobe usbserial vendor=0×1a86
-product=0×7523</code>.  Do not copy those hex numbers slavishly, they
+such as <code>sudo modprobe usbserial vendor=0x1a86
+product=0x7523</code>.  Do not copy those hex numbers slavishly, they
 are examples.  To get the right numbers, you will need to dig up the
 vendor and product ID of your USB-serial converter device.</p>
 
