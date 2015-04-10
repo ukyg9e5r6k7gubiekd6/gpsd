@@ -1,12 +1,8 @@
 = AIVDM/AIVDO protocol decoding =
-:description: The AIVDM Marine AIS protocol demystified, for programmers.
-:keywords: AIS, AIVDM, AIVDO, standard, protocol, Autommatic Identification
-System
-:revised: 9 April 2015
-:robots: index,follow
-;author: Eric S. Raymond <esr@thyrsus.com>
 Eric S. Raymond <esr@thyrsus.com>
 v1.50, Apr 2015
+:description: The AIVDM Marine AIS protocol demystified, for programmers.
+:keywords: AIS, AIVDM, AIVDO, standard, protocol, Automatic Identification System
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
