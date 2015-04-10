@@ -1,9 +1,8 @@
 = NMEA Revealed =
-Eric S. Raymond <esr@thyrsus.com>
-v2.19, Apr 2015
-:title: NMEA Revealed
 :description: A programmer's guide to NMEA0183, the GPS protocol reporting standard
 :keywords: NMEA0183, GPS, standard, protocol
+Eric S. Raymond <esr@thyrsus.com>
+v2.19, Apr 2015
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control

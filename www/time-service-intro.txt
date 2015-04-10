@@ -1,8 +1,6 @@
 = Introduction to Time Service =
 :description: A primer on precision time sources and services.
 :keywords: time, UTC, atomic clock, GPS, NTP
-:author: Eric S. Raymond <esr@thyrsus.com>
-:revised: 9 April 15
 Eric S. Raymond <esr@thyrsus.com>
 v1.3, 2015-03-16
 
