@@ -1,4 +1,8 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
+:description: A Guide for Client Developers moving to GPSD-ND
+:keywords: time, GPSD, gpsd, guide, developers, client
+:Author: Eric S. Raymond <esr@thyrsus.com>
+:Revised: 9 April 2015
 Eric S. Raymond <esr@thyrsus.com>
 v1.10, Febuary 2011
 
