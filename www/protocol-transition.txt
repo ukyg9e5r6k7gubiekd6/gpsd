@@ -1,8 +1,6 @@
 = Moving to GPSD-NG: a Guide for Client Developers =
 :description: A Guide for Client Developers moving to GPSD-ND
 :keywords: time, GPSD, gpsd, guide, developers, client
-:Author: Eric S. Raymond <esr@thyrsus.com>
-:Revised: 9 April 2015
 Eric S. Raymond <esr@thyrsus.com>
 v1.10, Febuary 2011
 
@@ -95,11 +93,11 @@ it right, you have been telling gpsd to stream data at you with the
 If you have been virtuous, you need only to make four small changes to
 your code.
 
-1. Give gps_open() a third argument that is the address of a struct gps_data_t.
+. Give gps_open() a third argument that is the address of a struct gps_data_t.
 (This interface changed to avoid malloc(3) and make it possible to write
 re-entrant client code.)
 
-2. Replace the gps_query() call with:
+. Replace the gps_query() call with:
 
 -------------------------------------------------------------------
 gps_stream(gpsdata, WATCH_ENABLE, NULL) 
@@ -111,9 +109,9 @@ or new protocol. Unless a target system carries a version of the
 libgps shared library different from the gpsd version, everything
 should work and continue to work through future updates.
 
-3. Change gps_poll calls to gps_read calls.
+. Change gps_poll calls to gps_read calls.
 
-4. If you have references to the 'satellites' member of the structure,
+. If you have references to the 'satellites' member of the structure,
 those need to change them to 'satellites_visible'.  
 
 There. You're probably done, unless you relied on some parts of 
