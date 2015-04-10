@@ -1,4 +1,8 @@
 = GPSD-NG: A Case Study in Application Protocol Evolution =
+:description: A case study in the evolution of the gpsd protocol
+:keywords: GPSD, protocol, evolution
+:Author: Eric S. Raymond <esr@thyrsus.com>
+:Revised: 9 April 2015
 Eric S. Raymond <esr@thyrsus.com>
 v1.5.1, November 2013
 
