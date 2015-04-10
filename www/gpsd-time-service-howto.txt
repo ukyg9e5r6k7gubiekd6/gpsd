@@ -1,6 +1,9 @@
 = GPSD Time Service HOWTO =
 :description: How to set up an NTP Stratum 1 server using GPSD.
-:keywords: time, GPSD, NTP, precision, 1PPS, PPS
+:keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
+:Author: Gary E. Miller <gem@rellim.com>
+:Author: Eric S. Raymond <esr@thyrsus.com>
+:Revised: 9 April 2015
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
 v2.4, Mar 2015
 
