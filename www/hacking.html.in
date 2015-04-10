@@ -1,10 +1,13 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<!DOCTYPE HTML>
 <html>
 <!-- @MASTER@ -->
 <head>
-   <meta name="Description" content="Programmer's references for GPSD">
-   <meta name="Keywords" content="GPS, translator, GIS">
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <meta name="Description" content="Hacking GPSD, a guide">
+   <meta name="Keywords" content="GPS, gpsd, translator, hackers">
+   <meta name="Author" content="Eric S. Raymond">
+   <meta name="robots" content="index,follow">
+   <meta name="Revised" content="9 April 2015">
    <title>Hacker's Guide to GPSD</title>
    <link rel="stylesheet" href="main.css" type="text/css">
 </head>
@@ -966,7 +969,7 @@ GPS World , Vol. 8, No. 3, pp. 51-56</p>
 
 <div>&nbsp;</div>
 
-<table border='1'>
+<table style="border: 1px solid gray">
   <tr><td>Atmospheric error &mdash; ionosphere</td><td>7.0m</td></tr>
   <tr><td>Atmospheric error &mdash; troposphere</td><td>0.7m</td></tr>
   <tr><td>Clock and ephemeris error</td><td>3.6m</td></tr>
@@ -979,7 +982,7 @@ Ed., Springer.</p>
 
 <div>&nbsp;</div>
 
-<table border='1'>
+<table style="border: 1px solid gray">
   <tr><td>Code range noise (C/A)</td><td>0.3m</td></tr>
   <tr><td>Code range noise (P-code)</td><td>0.03m</td></tr>
   <tr><td>Phase range</td><td>0.005m</td></tr>
@@ -1400,7 +1403,7 @@ confidence interval units you might see in vendor documentation.</p>
 
 <div>&nbsp;</div>
 
-<table border='1'>
+<table style="border: 1px solid gray">
 <tr><td>sqr(alpha)</td><td>Probability</td><td>Notation</td></tr>
 <tr><td>1.00      </td><td>39.4%      </td><td>1-sigma or standard ellipse</td></tr>
 <tr><td>1.18      </td><td>50.0%      </td><td>Circular Error Probable (CEP)</td></tr>
@@ -1636,7 +1639,7 @@ the following order:</p>
 <dl>
 <dt>1. Check the <a href="@BUGTRACKER@">bug tracker</a> for
 release blockers.</dt>  
-<dd><p>Check support requests, too, and <a href="https://bugs.debian.org/cgi-bin/pkgreport.cgi?src=gpsd&repeatmerged=yes">Debian's GPSD buglist</a>.</p></dd>
+<dd><p>Check support requests, too, and <a href="https://bugs.debian.org/cgi-bin/pkgreport.cgi?src=gpsd&amp;repeatmerged=yes">Debian's GPSD buglist</a>.</p></dd>
 
 <dt>2. Issue the pre-release heads-up</dt>
 <dd><p>About 48 hours before release, announce that it's coming so people
