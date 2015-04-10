@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML>
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -72,7 +71,7 @@
 
 <div id="Content">
 
-<table class="centered" width="80%" border="1" cellpadding="20" style="background-color:white" >
+<table class="centered" style="background-color:white;border:1;width:80%;border-collapse:separate;border-spacing:20px;" >
 <tr>
 <td>
 <script type="text/javascript"
@@ -503,8 +502,8 @@ Design, nor the Glatt Plagiarism Self-Detection Program.</p>
 <div style="text-align: left; margin: 1em auto; width: 50%;">
 <!-- SiteSearch Google -->
 <form method="get" action="http://www.google.com/custom">
-<table border="0"  style="background-color:white">
-<tr><td valign="top" align="left">
+<table style="background-color:white;border: 0;">
+<tr><td style="vertical-align:top;text-align=left">
 <a href="http://www.google.com/">
 <img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google"></a>
 </td>
