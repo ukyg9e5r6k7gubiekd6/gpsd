@@ -1054,7 +1054,7 @@ In order to determine the correct GPS offset, do one of the following:
 ==== Peerstats-based procedure ====
 
 [start=1]
-1. Add these lines to ntp.conf:
+. Add these lines to ntp.conf:
 
 -----------------------------------------------------------------------------
 statsdir /var/log/ntpstats/
@@ -1064,21 +1064,18 @@ filegen peerstats file peerstats type day enable
 
 This enables logging of the peer server statistics.
 
-[start=2]
-2. Make sure the directory exists properly.  For ntpd as root do:
+. Make sure the directory exists properly.  For ntpd as root do:
 
 -----------------------------------------------------------------------------
    # mkdir -p /var/log/ntpstats
    # chown ntp:ntp /var/log/ntpstats
 -----------------------------------------------------------------------------
 
-[start=3]
-3. Start ntpd and let it run for at least four hours.
+. Start ntpd and let it run for at least four hours.
 Periodically check progress with "ntpq -p" and wait
 until change has settled out.
 
-[start=4]
-4. Calculate the average GPS offset using this script (a copy is
+. Calculate the average GPS offset using this script (a copy is
 included as contrib/ntpoffset in the GPSD distribution):
 
 -----------------------------------------------------------------------------
@@ -1090,12 +1087,10 @@ awk '
 
 This prints the average offset.
 
-[start=5]
-5. Adjust the "time1" value for unit 0 of your ntp.conf (the non-PPS
+. Adjust the "time1" value for unit 0 of your ntp.conf (the non-PPS
    channel) by subtracting the average offset from step 4.
 
-[start=6]
-6. Restart ntpd.
+. Restart ntpd.
 
 ==== Loopstats-based procedure ====
 
@@ -1174,7 +1169,7 @@ We assume that you have successfully integrated GPSD with ntpd already.
 You should also have a decent set of NTP servers you are syncing to.
 
 [start=1]
-1. Running ntpd without IMT
+. Running ntpd without IMT
 
 Locate the line in your ntp.conf that refers to the shm0 segment and
 append 'noselect' to it.  As an example, the first two lines in the sample
@@ -1190,8 +1185,7 @@ for its clock selection algorithm.  It will still write out statistics to
 the peerstats file.  Once ntpd is stable (a few hours or so), we can
 process the peerstats file.
 
-[start=2]
-2. Measuring the delay between the two messages
+. Measuring the delay between the two messages
 
 From the 'peerstats' file, extract the lines corresponding to
 127.127.28.0
@@ -1226,8 +1220,7 @@ satisfaction.)
         gnuplot> replot "peerstats.shm" using ($2):($5) with lines
 ------------------
 
-[start=3]
-3. Applying the correction factor
+. Applying the correction factor
 
 By examining the plot generated above, you should be able to estimate
 the offset between the 1PPS time and the GPS time.
