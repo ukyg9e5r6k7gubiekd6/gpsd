@@ -1,4 +1,8 @@
 = GPSD Client HOWTO =
+:description: This document is a guide to interfacing client applications with GPSD.
+:keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
+:Author: Eric S. Raymond <esr@thyrsus.com>
+:Revised: 9 April 2015
 Eric S. Raymond <esr@thyrsus.com>
 v1.18, Mar 2015
 
