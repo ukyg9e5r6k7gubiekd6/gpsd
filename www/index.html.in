@@ -71,7 +71,7 @@
 
 <div id="Content">
 
-<table class="centered" style="background-color:white;border:1;width:80%;border-collapse:separate;border-spacing:20px;" >
+<table class="centered" style="background-color:white;border:1px;width:80%;border-collapse:separate;border-spacing:20px;" >
 <tr>
 <td>
 <script type="text/javascript"
@@ -503,7 +503,7 @@ Design, nor the Glatt Plagiarism Self-Detection Program.</p>
 <!-- SiteSearch Google -->
 <form method="get" action="http://www.google.com/custom">
 <table style="background-color:white;border: 0;">
-<tr><td style="vertical-align:top;text-align=left">
+<tr><td style="vertical-align:top;text-align:left">
 <a href="http://www.google.com/">
 <img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google"></a>
 </td>
