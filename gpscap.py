@@ -56,7 +56,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     raise ConfigParser.Error("%s has invalid vendor" % section)
 
     def HTMLDump(self, ofp):
-        thead = """<table border='1' style='font-size:small;background-color:#CCCCCC'>
+        thead = """<table style='border:1px solid gray;font-size:small;background-color:#CCCCCC'>
 <caption>Listing %s devices from %s vendors</caption>
 <tr>
 <th>Name</th>
@@ -69,8 +69,8 @@ class GPSDictionary(ConfigParser.RawConfigParser):
 <th style='width:50%%'>Notes</th>
 </tr>
 """
-        vhead1 = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a></td></tr>\n"
-        vhead2 = "<tr><td style='text-align:center;' colspan='7'><a href='%s'>%s</a><br><p>%s</p></td></tr>\n"
+        vhead1 = "<tr><td style='text-align:center;' colspan='8'><a href='%s'>%s</a></td></tr>\n"
+        vhead2 = "<tr><td style='text-align:center;' colspan='8'><a href='%s'>%s</a><br><p>%s</p></td></tr>\n"
         hotpluggables = ("pl2303", "CP2101")
         ofp.write(thead % (len(self.devices), len(self.vendors)))
         for vendor in self.vendors:
