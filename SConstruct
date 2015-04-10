@@ -1707,7 +1707,7 @@ htmlpages = Split('''www/installation.html
     www/gpscat.html www/gpsctl.html www/gpsdecode.html 
     www/gpsd.html www/gpsd_json.html www/gpsfake.html www/gpsmon.html 
     www/gpspipe.html www/gps2udp.html www/gpsprof.html www/gps.html 
-    www/libgpsmm.html www/libgps.html
+    www/libgpsmm.html www/libgps.html www/ntpshmmon.html
     www/srec.html www/writing-a-driver.html www/hardware.html
     www/performance/performance.html www/internals.html
     ''')
