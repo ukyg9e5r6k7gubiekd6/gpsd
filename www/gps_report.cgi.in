@@ -125,14 +125,15 @@ defaults['output_sample_content'] = output_sample_content
 defaults['armored_sample_content'] = base64.b64encode(output_sample_content)
 
 print '''\
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<!DOCTYPE HTML>
 <html>
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="Author" content="Eric S. Raymond">
    <meta name="Description" content="Report the GPSD compatibility of your GPS.">
-   <meta name="Keywords" content="GPS, translator, GIS">
+   <meta name="Keywords" content="GPS, gpsd,report">
+   <meta name="Revised" content="9 Apr 2015">
+   <meta name="robots" content="index,follow">
    <title></title>
    <link rel="stylesheet" href="main.css" type="text/css">
 </head>
@@ -147,9 +148,9 @@ output so we can add it to our regression tests and ensure continued
 support of the device.</p>
 
 <p>Information gathered so far:</p>
+<table style="border:0;width:100%"><tr><td style="text-align:center">
 '''
 
-print "<table border='0' width='100%'><tr><td align='center'>";
 
 if form.getvalue("vendor"):
     print "Vendor is <code>"+cgi.escape(form.getvalue("vendor"))+"</code><br>\n";
@@ -172,7 +173,7 @@ if form.getvalue("submitter"):
 else:
     print "<span style='color:#ff0000;'>No contact address.</span><br>\n";
 
-print "</td><td align='center'>";
+print "</td><td style='text-align:center'>";
 
 if form.getvalue("packaging"):
     print "Packaging type is <code>"+cgi.escape(form.getvalue("packaging"))+"</code><br>\n";
@@ -204,7 +205,7 @@ if form.getvalue("tested"):
 else:
     print "No GPSD version specified.<br>\n";
 
-print "</td><td align='center'>";
+print "</td><td style='text-align:center'>";
 
 if form.getvalue("rating"):
     print "GPSD compatibility is <code>"+cgi.escape(form.getvalue("rating"))+"</code><br>\n";
@@ -357,7 +358,7 @@ tell us about it in "Technical Notes".</p>
 ''' % defaults
 
 ifline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
-print "<table border='1'><tr>"
+print "<table style='border:1'><tr>"
 for itype in ('USB', 'Bluetooth', 'Compact Flash', 'RS-232', 'TTL', 'CAN', 'Other'):
     print ifline % (itype, itype)
 print "</tr></table>"
@@ -369,7 +370,7 @@ chip.  Try to find out what this is by looking at the output of
 '''
 
 cline = '<td><input type="radio" name="interfaces" value="%s">%s</td>'
-print "<table border='1'><tr>"
+print "<table style='border:1'><tr>"
 for ctype in ('PL2303', 'UC-232A', 'FTDI', 'Cypress M8', 'CP210x', 'Other'):
     print cline % (ctype, ctype)
 print "</tr></table>"
@@ -542,9 +543,9 @@ if hasRequiredElements(form):
 developers.  Eventually, your report is likely to appear on our <a
 href="%(website)s/hardware.html">Hardware</a> page.</p>
 
-<table width="100%%" border="0">
+<table style="width:100%;border:0">
 <tr>
-<td align="center">
+<td style="text-align:center">
 <a href="%(request_uri)s">Reset Form</a>
 <input type="submit" name="action" value="Review">
 <input type="submit" name="action" value="Send Report">
@@ -556,9 +557,9 @@ else:
     print '''
 <p style="color:#ff0000;">Required fields are missing; please fill them in.</p>
 
-<table width="100%%" border="0">
+<table style="width:100%;border:0">
 <tr>
-<td align="center">
+<td style="text-align:center">
 	<a href="%(request_uri)s">Reset Form</a>
 	<input type="submit" name="action" value="Review">
 </td>
