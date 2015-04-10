@@ -1762,17 +1762,18 @@ env.Command('www/hardware.html', ['gpscap.py',
 # Utility("www/cycle.svg", ["www/cycle.dia"], ["dia -e www/cycle.svg www/cycle.dia"])
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
+# scons www/ dies with this
 
-if env['python']:
-    env.Alias('pydoc', "www/pydoc/index.html")
-
-    # We need to run epydoc with the Python version we built the modules for.
-    # So we define our own epydoc instead of using /usr/bin/epydoc
-    EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
-    env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glob("gps/*.py"), [
-        'mkdir -p www/pydoc',
-        EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
-            ])
+## if env['python']:
+##     env.Alias('pydoc', "www/pydoc/index.html")
+## 
+##     # We need to run epydoc with the Python version we built the modules for.
+##     # So we define our own epydoc instead of using /usr/bin/epydoc
+##     EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
+##     env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glob("gps/*.py"), [
+##         'mkdir -p www/pydoc',
+##         EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
+##             ])
 
 # Productions for setting up and performing udev tests.
 #
