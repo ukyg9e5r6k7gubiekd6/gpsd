@@ -1,9 +1,6 @@
 = GPSD Time Service HOWTO =
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
-:Author: Gary E. Miller <gem@rellim.com>
-:Author: Eric S. Raymond <esr@thyrsus.com>
-:Revised: 9 April 2015
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
 v2.4, Mar 2015
 
@@ -1603,8 +1600,6 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 - [[[NTP-MONOPT]]] http://www.eecis.udel.edu/~mills/ntp/html/monopt.html[NTP Monitoring]
 
 - [[[GPSD-LIST]]]http://lists.gnu.org/archive/html/gpsd-dev[gpsd-dev Archives]
-
-- [[[WIKI-NTP]]] http://en.wikipedia.org/wiki/Network_Time_Protocol[Network Time Protocol]
 
 - [[[PTP]]] http://www.nist.gov/el/isd/ieee/ieee1588.cfm/[PTP]
 
