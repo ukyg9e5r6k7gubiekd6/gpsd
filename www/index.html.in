@@ -129,7 +129,6 @@ presently use <code>gpsd</code> include
 <a href="http://www.kismetwireless.net/">Kismet</a>,
 <a href="http://www.gpsdrive.de/">GPSdrive</a>,
 <a href="http://qpegps.sourceforge.net/">gpeGPS</a>,
-<a href="http://www.gnustep.it/enrico/position/">position</a>,
 <a href="http://roadmap.sourceforge.net/">roadmap</a>,
 <a href="http://roadnav.sourceforge.net/">roadnav</a>,
 <a href="http://www.navit-project.org/">navit</a>,
@@ -412,10 +411,10 @@ of the problem.</p>
 
 <p>If you have an Android phone, it is possible to access its onboard
 GPS by pairing it as a Bluetooth device.  Directions from <a
-href="http://bvargo.net/blog/2010/oct/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/">Vargoville</a>. There
-is also a <a
-href="http://www.appszoom.com/android_applications/tools/gps-tether_blgt.html">GPS
-Tether</a> app designed to work with GPSD, but it seems to be in early
+href="https://bvargo.net/blog/2010/10/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/"
+>Vargoville</a>. There is also a <a
+href="http://www.appszoom.com/android_applications/tools/gps-tether_blgt.html"
+>GPS Tether</a> app designed to work with GPSD, but it seems to be in early
 alpha.</p>
 
 <p>The <a href="http://gpsdproxy.sourceforge.net/">GPSDproxy

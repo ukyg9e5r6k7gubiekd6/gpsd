@@ -39,7 +39,7 @@ libgps_version_age       = 0
 # anywhere else in the distribution; preserve this property!
 sitename   = "Savannah"
 sitesearch = "catb.org"
-website    = "http://catb.org/gpsd" 
+website    = "http://catb.org/gpsd"
 mainpage   = "https://savannah.nongnu.org/projects/gpsd/"
 webupload  = "login.ibiblio.org:/public/html/catb/gpsd"
 cgiupload  = "thyrsus.com:/home/www/thyrsus.com/cgi-bin/"
@@ -161,7 +161,7 @@ boolopts = (
     ("nostrip",       False, "don't symbol-strip binaries at link time"),
     ("manbuild",      True,  "build help in man and HTML formats"),
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
-    ("minimal",       False, "turn off every option not set on the command line"), 
+    ("minimal",       False, "turn off every option not set on the command line"),
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
     )
@@ -464,7 +464,7 @@ def CheckCompilerDefines(context, define):
 def CheckC11(context):
     context.Message( 'Checking if compiler is C11 ...' )
     ret = context.TryLink("""
-	#if (__STDC_VERSION__ < 201112L) 
+	#if (__STDC_VERSION__ < 201112L)
         #error Not C11
         #endif
         int main(int argc, char **argv) {
@@ -789,7 +789,7 @@ int clock_gettime(clockid_t, struct timespec *);
     env = config.Finish()
 
     # Be explicit about what we're doing.
-    changelatch = False 
+    changelatch = False
     for (name, default, help) in boolopts + nonboolopts + pathopts:
         if env[name] != env.subst(default):
             if not changelatch:
@@ -1064,7 +1064,7 @@ if not env['python']:
     python_progs = []
 else:
     python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed", "gegps"]
-    python_modules = Glob('gps/*.py') 
+    python_modules = Glob('gps/*.py')
 
     # Build Python binding
     #
@@ -1459,7 +1459,7 @@ matrix_regress = Utility('matrix-regress', [test_matrix], [
     '$SRCDIR/test_matrix --quiet'
     ])
 
-# Check that all Python modules compile properly 
+# Check that all Python modules compile properly
 if env['python']:
     def check_compile(target, source, env):
         for pyfile in source:
@@ -1561,7 +1561,7 @@ else:
         '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
             'grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk | diff -ub - $${TMPFILE}; '
             'rm -f $${TMPFILE}; ',
-        # Parse the unscaled json reference, dump it as scaled json, 
+        # Parse the unscaled json reference, dump it as scaled json,
         # and finally compare it with the scaled json reference
         '@echo "Testing idempotency of scaled JSON dump/decode for AIS"',
         '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
@@ -1694,7 +1694,7 @@ if env.WhereIs('asciidoc'):
     asciidocs = ["www/" + stem + ".html" for stem in txtfiles] \
                 + ["www/installation.html"]
     for stem in txtfiles:
-        env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
+        env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,
                     ['asciidoc -b html5 -a toc -o www/%s.html www/%s.txt' % (stem,stem)])
     env.Command("www/installation.html",
                 "INSTALL",
@@ -1703,13 +1703,28 @@ else:
     announce("Part of the website build requires asciidoc, not installed.")
     asciidocs = []
 
-htmlpages = Split('''www/installation.html
-    www/gpscat.html www/gpsctl.html www/gpsdecode.html 
-    www/gpsd.html www/gpsd_json.html www/gpsfake.html www/gpsmon.html 
-    www/gpspipe.html www/gps2udp.html www/gpsprof.html www/gps.html 
-    www/libgpsmm.html www/libgps.html www/ntpshmmon.html
-    www/srec.html www/writing-a-driver.html www/hardware.html
-    www/performance/performance.html www/internals.html
+htmlpages = Split('''
+    www/gps2udp.html
+    www/gpscat.html
+    www/gpsctl.html
+    www/gpsdecode.html
+    www/gpsd.html
+    www/gpsd_json.html
+    www/gpsfake.html
+    www/gps.html
+    www/gpsmon.html
+    www/gpspipe.html
+    www/gpsprof.html
+    www/hardware.html
+    www/installation.html
+    www/internals.html
+    www/libgps.html
+    www/libgpsmm.html
+    www/ntpshmmon.html
+    www/performance/performance.html
+    www/replacing-nmea.html
+    www/srec.html
+    www/writing-a-driver.html
     ''')
 
 webpages = htmlpages + asciidocs + map(lambda f: f[:-3], glob.glob("www/*.in"))
@@ -1717,7 +1732,7 @@ webpages = htmlpages + asciidocs + map(lambda f: f[:-3], glob.glob("www/*.in"))
 www = env.Alias('www', webpages)
 
 # Paste 'scons --quiet validation-list' to a batch validator such as
-# http://htmlhelp.com/tools/validator/batch.html.en 
+# http://htmlhelp.com/tools/validator/batch.html.en
 def validation_list(target, source, env):
     for page in glob.glob("www/*.html"):
         if not '-head' in page:
@@ -1742,9 +1757,9 @@ if htmlbuilder:
     # Manual pages
     for xml in glob.glob("*.xml"):
         env.HTML('www/%s.html' % xml[:-4], xml)
-    
+
     # DocBook documents
-    for stem in ['writing-a-driver', 'performance/performance']:
+    for stem in ['writing-a-driver', 'performance/performance','replacing-nmea']:
         env.HTML('www/%s.html' % stem, 'www/%s.xml' % stem)
 
     # The internals manual.
@@ -1766,7 +1781,7 @@ env.Command('www/hardware.html', ['gpscap.py',
 
 ## if env['python']:
 ##     env.Alias('pydoc', "www/pydoc/index.html")
-## 
+##
 ##     # We need to run epydoc with the Python version we built the modules for.
 ##     # So we define our own epydoc instead of using /usr/bin/epydoc
 ##     EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
@@ -1837,7 +1852,7 @@ clean = env.Clean(build,
           generated_sources + base_manpages.keys() + webpages + \
           map(lambda f: f[:-3], templated))
 
-# Nuke scons state files 
+# Nuke scons state files
 sconsclean = Utility("sconsclean", '', ["rm -fr .sconf_temp .scons-option-cache config.log"])
 
 # Tags for Emacs and vi
@@ -1912,7 +1927,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # but it doesn't do any uploads or public repo mods.
     #
     # Note that tag_release has to fire early, otherwise the value of REVISION
-    # won't be right when revision.h is generated for the tarball. 
+    # won't be right when revision.h is generated for the tarball.
     releaseprep = env.Alias("releaseprep",
                             [Utility("distclean", [], ["rm -f revision.h"]),
                              tag_release,
