@@ -6,7 +6,9 @@
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
    <meta name="Author" content="Eric Raymond">
    <meta name="Description" content="Hardware known to work with GPSD.">
-   <meta name="Keywords" content="GPS, translator, mxmap, GIS">
+   <meta name="Keywords" content="GPS, gpsd, hardware">
+   <meta name="Revised" content="9 April 2015">
+   <meta name="robots" content="index,follow">
    <title>Compatible GPSes</title>
    <link rel="stylesheet" href="main.css" type="text/css">
 </head>
