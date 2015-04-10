@@ -86,13 +86,13 @@ class GPSDictionary(ConfigParser.RawConfigParser):
             for dev in relevant:
                 rowcolor = "white"
                 if self.get(dev, "packaging") == "OEM module":
-                    rowcolor = "LimeGreen"
+                    rowcolor = "#32CD32"
                 elif self.get(dev, "packaging") == "chipset":
-                    rowcolor = "LightYellow"
+                    rowcolor = "#FFFFE0"
                 elif self.get(dev, "packaging") == "handset":
-                    rowcolor = "Cyan"
+                    rowcolor = "#00FFFF"
                 elif self.get(dev, "packaging") == "hansdfree":
-                    rowcolor = "DarkCyan"
+                    rowcolor = "#008B8B"
 
                 ofp.write("<tr style='background-color:%s'>\n" % rowcolor)
                 namefield = dev
