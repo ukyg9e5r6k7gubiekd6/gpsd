@@ -1695,7 +1695,7 @@ if env.WhereIs('asciidoc'):
                 + ["www/installation.html"]
     for stem in txtfiles:
         env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,    
-                    ['asciidoc -a toc -o www/%s.html www/%s.txt' % (stem,stem)])
+                    ['asciidoc -b html5 -a toc -o www/%s.html www/%s.txt' % (stem,stem)])
     env.Command("www/installation.html",
                 "INSTALL",
                 ["asciidoc -o www/installation.html INSTALL"])
