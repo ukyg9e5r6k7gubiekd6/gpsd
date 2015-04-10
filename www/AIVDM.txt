@@ -1,6 +1,10 @@
 = AIVDM/AIVDO protocol decoding =
 :description: The AIVDM Marine AIS protocol demystified, for programmers.
-:keywords: AIS, AIVDM, AIVDO, standard, protocol
+:keywords: AIS, AIVDM, AIVDO, standard, protocol, Autommatic Identification
+System
+:revised: 9 April 2015
+:robots: index,follow
+;author: Eric S. Raymond <esr@thyrsus.com>
 Eric S. Raymond <esr@thyrsus.com>
 v1.50, Apr 2015
 
@@ -254,7 +258,7 @@ for a mobile AIS station.  Other possible values are as listed:
 [width="25%",frame="topbot",options="header"]
 |================================================
 | !AB | NMEA 4.0 Base AIS station
-| !AD | MMEA 4.0 Dependent AIS Base Station 
+| !AD | MMEA 4.0 Dependent AIS Base Station
 | !AI | Mobile AIS station
 | !AN | NMEA 4.0 Aid to Navigation AIS station
 | !AR | NMEA 4.0 AIS Receiving Station
@@ -272,7 +276,7 @@ represents six bits of data.  To recover the six bits, subtract 48
 from the ASCII character value; if the result is greater than 40
 subtract 8. According to <<IEC-PAS>>, the valid ASCII characters for
 this encoding begin with "0" (64) and end with "w" (87); however, the
-intermediate range "X" (88) to "\_" (95) is not used.  
+intermediate range "X" (88) to "\_" (95) is not used.
 
 .ASCII payload armoring
 [width="25%",frame="topbot",options="header"]
@@ -345,7 +349,7 @@ intermediate range "X" (88) to "\_" (95) is not used.
 |======================================
 
 Concatenate all six-bit quantities found in the payload, MSB first.
-This is the binary payload of the sentence.  
+This is the binary payload of the sentence.
 
 == AIS Payload Data Types ==
 
@@ -362,7 +366,7 @@ interpreted in one of the following ways:
 - Strings
 
 Numeric bitfields are interpreted as big-endian twos-complement
-integers; when signed, the sign bit is the highest.  
+integers; when signed, the sign bit is the highest.
 
 Float fields have an associated divisor which should be applied
 to convert to the correct units. In one case, the ROT field in message
@@ -469,9 +473,9 @@ types are as follows:
 |22 |Channel Management
 |23 |Group Assignment Command
 |24 |Static Data Report
-|25 |Single Slot Binary Message, 
-|26 |Multiple Slot Binary Message With Communications State 
-|27 |Position Report For Long-Range Applications 
+|25 |Single Slot Binary Message,
+|26 |Multiple Slot Binary Message With Communications State
+|27 |Position Report For Long-Range Applications
 |======================================================
 
 In normal operation, an AIS transceiver will broadcast a position report
@@ -482,7 +486,7 @@ minutes. (More detail is at <<IALA>>, part 2.3)
 
 Class 6 is used for unencrypted structured extension messages systems
 conforming to the Inland AIS standard defined by <<INLAND>>, and by local
-authorities such as the St. Lawrence Seaway and the U.S Coast Guard's 
+authorities such as the St. Lawrence Seaway and the U.S Coast Guard's
 PAWSS.  This document describes all of the Class 6 special message
 formats approved for use in <<IMO236>>, <<IMO289>>, and <<INLAND>>.
 
@@ -551,7 +555,7 @@ type descriptions.
 [frame="topbot",options="header"]
 |==============================================================================
 |u|   Unsigned integer
-|U|   Unsigned integer with scale - renders as float, suffix is decimal places 
+|U|   Unsigned integer with scale - renders as float, suffix is decimal places
 |i|   Signed integer
 |I|   Signed integer with scale - renders as float, suffix is decimal places
 |b|   Boolean
@@ -560,15 +564,15 @@ type descriptions.
 |t|   String (packed six-bit ASCII)
 |d|   Data (uninterpreted binary)
 |a|   Array boundary, numeric suffix is maximum array size.
-      ^ before suffix means preceding fields is the length. 
+      ^ before suffix means preceding fields is the length.
       Following fields are repeated to end of message
 |==============================================================================
 
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
-1-15, 18-21, and 24.  Described but unchecked are 16-17, 22-23, and 
+1-15, 18-21, and 24.  Described but unchecked are 16-17, 22-23, and
 25-27. Also, the interpretation of IMO extension subtypes of messages
-6 and 8 has yet to be tested. 
+6 and 8 has yet to be tested.
 
 Bit lengths and length ranges are given because decoders should check
 them against the message type. Messages with correct checksums but the
@@ -711,7 +715,7 @@ values:
 |===========================================================
 
 The interpretation of bits 143-147 has been a bit unstable. In
-<<IALA>>. and therefore in the original <<ITU1371>>, they were 
+<<IALA>>. and therefore in the original <<ITU1371>>, they were
 described like this:
 
 [width="50%",frame="topbot",options="header"]
@@ -735,7 +739,7 @@ Bits 149-167 are diagnostic information for the radio system.  Consult
 === Type 4: Base Station Report ===
 
 This message is to be used by fixed-location base stations to
-periodically report a position and time reference. Total of 168 bits, 
+periodically report a position and time reference. Total of 168 bits,
 occupying one AIVDM sentence.
 
 The standard uses "EPFD" to designate any Electronic Position Fixing Device.
@@ -961,7 +965,7 @@ to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
 Interpretation of the binary payload is controlled by:
 
-* The Designated Area Code, which is a jurisdiction code: 366 for the 
+* The Designated Area Code, which is a jurisdiction code: 366 for the
   United States.  It uses the same encoding as the area designator in
   MMMSIs; see <<ITU-MID>>. 1 designates international (ITU) messages.
 
@@ -972,7 +976,7 @@ The following is a non-exhaustive list of standardized DAC-FID pairs
 in use for type 6.
 
 |==============================================================================
-| DAC |FID | Source        | Status           | Description     
+| DAC |FID | Source        | Status           | Description
 |   1 | 12 | <<IMO236>>    | Deprecated       | Dangerous cargo indication
 |   1 | 14 | <<IMO236>>    | Deprecated       | Tidal window
 |   1 | 16 | <<IMO236>>    | Deprecated/In Use| Num persons on board
@@ -994,7 +998,7 @@ in use for type 6.
 DAC/FID pairs are assigned separately per message type.
 
 Note that the apparent presence of one of these DAC/FID pairs dooes
-not guarantee that the message is structured.  Decoders should 
+not guarantee that the message is structured.  Decoders should
 perform range validation on the structured fields and interpret the
 message as unstructured if any check fails. (As of Aug 2014 no such
 collisions have been in the wild; but see the parallel note for Type 8.)
@@ -1010,8 +1014,8 @@ cargo can be found, e. g. last and next port of call, and to allow
 the requesting authority to form a danger estimate.
 
 A message 6 subtype. DAC = 001 FID = 12. Fixed length: 360 bits.
-This is the <<IMO236>> version, now deprecated; there is a later 
-<<IMO289>> version. 
+This is the <<IMO236>> version, now deprecated; there is a later
+<<IMO289>> version.
 
 //: Type 6(1/12)
 [frame="topbot",options="header"]
@@ -1051,7 +1055,7 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |Code |Unit
 |0    |Not available (default)
 |1    |kg
-|2    |metric tons 
+|2    |metric tons
 |3    |metric kilotons
 |===================================
 
@@ -1100,7 +1104,7 @@ different widths for the latitude, longitude, and current-speed fields
 |=============================================================================
 
 The group of fields from longitude on may repeat twice more to convey up to
-three points of tidal information. 
+three points of tidal information.
 
 ==== IMO236 Number of persons on board ====
 
@@ -1108,7 +1112,7 @@ This message should be used by a ship to report the number of persons
 on board, e.g. on request by a competent authority.  Acknowledgement
 required.
 
-A message 6 subtype. DAC = 001 FID = 16.  
+A message 6 subtype. DAC = 001 FID = 16.
 
 <<IMO236>> describes a fixed-length, 72-bit message with this layout:
 
@@ -1294,8 +1298,8 @@ The longitude and latitude refer to the center of the berth.
 
 ==== IMO289 Area Notice (addressed) ====
 
-This should be used to convey time- and location-dependent information about 
-hazards to navigation.  For information-lifetime restrictions and usage 
+This should be used to convey time- and location-dependent information about
+hazards to navigation.  For information-lifetime restrictions and usage
 guidance, refer to <<ITU1371>>.
 
 A message 6 subtype. DAC = 001 FID = 23. 230 to 1013 bits.  There is a
@@ -1334,8 +1338,8 @@ is the message header format:
 |3-86    | 85 |Subarea Payload      |payload    |d|Subarea payload
 |==============================================================================
 
-The Message Linkage field is, as usual, for linking to a textual explanatory 
-message sent with the same linkage ID. The standard says that in this context 
+The Message Linkage field is, as usual, for linking to a textual explanatory
+message sent with the same linkage ID. The standard says that in this context
 it has the semantics of being an identifier of or reference to an area.
 
 Notice description types are as follows:
@@ -1344,7 +1348,7 @@ Notice description types are as follows:
 [frame="topbot",options="header"]
 |==============================================================================
 |  0| Caution Area: Marine mammals habitat
-|  1| Caution Area: Marine mammals in area - reduce speed 
+|  1| Caution Area: Marine mammals in area - reduce speed
 |  2| Caution Area: Marine mammals in area - stay clear
 |  3| Caution Area: Marine mammals in area - report sightings
 |  4| Caution Area: Protected habitat - reduce speed
@@ -1357,38 +1361,38 @@ Notice description types are as follows:
 | 11| Caution Area: Swim area
 | 12| Caution Area: Dredge operations
 | 13| Caution Area: Survey operations
-| 14| Caution Area: Underwater operation 
-| 15| Caution Area: Seaplane operations 
-| 16| Caution Area: Fishery – nets in water 
+| 14| Caution Area: Underwater operation
+| 15| Caution Area: Seaplane operations
+| 16| Caution Area: Fishery – nets in water
 | 17| Caution Area: Cluster of fishing vessels
 | 18| Caution Area: Fairway closed
-| 19| Caution Area: Harbour closed 
-| 20| Caution Area: Risk (define in associated text field) 
-| 21| Caution Area: Underwater vehicle operation 
+| 19| Caution Area: Harbour closed
+| 20| Caution Area: Risk (define in associated text field)
+| 21| Caution Area: Underwater vehicle operation
 | 22| (reserved for future use)
-| 23| Environmental Caution Area: Storm front (line squall) 
-| 24| Environmental Caution Area: Hazardous sea ice 
-| 25| Environmental Caution Area: Storm warning (storm cell or line of storms) 
-| 26| Environmental Caution Area: High wind 
+| 23| Environmental Caution Area: Storm front (line squall)
+| 24| Environmental Caution Area: Hazardous sea ice
+| 25| Environmental Caution Area: Storm warning (storm cell or line of storms)
+| 26| Environmental Caution Area: High wind
 | 27| Environmental Caution Area: High waves
-| 28| Environmental Caution Area: Restricted visibility (fog, rain, etc.) 
-| 29| Environmental Caution Area: Strong currents 
+| 28| Environmental Caution Area: Restricted visibility (fog, rain, etc.)
+| 29| Environmental Caution Area: Strong currents
 | 30| Environmental Caution Area: Heavy icing
 | 31| (reserved for future use)
-| 32| Restricted Area: Fishing prohibited 
-| 33| Restricted Area: No anchoring. 
-| 34| Restricted Area: Entry approval required prior to transit 
-| 35| Restricted Area: Entry prohibited 
-| 36| Restricted Area: Active military OPAREA 
-| 37| Restricted Area: Firing – danger area. 
-| 38| Restricted Area: Drifting Mines 
+| 32| Restricted Area: Fishing prohibited
+| 33| Restricted Area: No anchoring.
+| 34| Restricted Area: Entry approval required prior to transit
+| 35| Restricted Area: Entry prohibited
+| 36| Restricted Area: Active military OPAREA
+| 37| Restricted Area: Firing – danger area.
+| 38| Restricted Area: Drifting Mines
 | 39| (reserved for future use)
-| 40| Anchorage Area: Anchorage open 
+| 40| Anchorage Area: Anchorage open
 | 41| Anchorage Area: Anchorage closed
-| 42| Anchorage Area: Anchorage prohibited 
-| 43| Anchorage Area: Deep draft anchorage 
-| 44| Anchorage Area: Shallow draft anchorage 
-| 45| Anchorage Area: Vessel transfer operations 
+| 42| Anchorage Area: Anchorage prohibited
+| 43| Anchorage Area: Deep draft anchorage
+| 44| Anchorage Area: Shallow draft anchorage
+| 45| Anchorage Area: Vessel transfer operations
 | 46| (reserved for future use)
 | 47| (reserved for future use)
 | 48| (reserved for future use)
@@ -1407,37 +1411,37 @@ Notice description types are as follows:
 | 61| (reserved for future use)
 | 62| (reserved for future use)
 | 63| (reserved for future use)
-| 64| Distress Area: Vessel disabled and adrift 
-| 65| Distress Area: Vessel sinking 
-| 66| Distress Area: Vessel abandoning ship 
-| 67| Distress Area: Vessel requests medical assistance 
-| 68| Distress Area: Vessel flooding 
-| 69| Distress Area: Vessel fire/explosion 
-| 70| Distress Area: Vessel grounding 
-| 71| Distress Area: Vessel collision 
-| 72| Distress Area: Vessel listing/capsizing 
-| 73| Distress Area: Vessel under assault 
+| 64| Distress Area: Vessel disabled and adrift
+| 65| Distress Area: Vessel sinking
+| 66| Distress Area: Vessel abandoning ship
+| 67| Distress Area: Vessel requests medical assistance
+| 68| Distress Area: Vessel flooding
+| 69| Distress Area: Vessel fire/explosion
+| 70| Distress Area: Vessel grounding
+| 71| Distress Area: Vessel collision
+| 72| Distress Area: Vessel listing/capsizing
+| 73| Distress Area: Vessel under assault
 | 74| Distress Area: Person overboard
-| 75| Distress Area: SAR area 
-| 76| Distress Area: Pollution response area 
+| 75| Distress Area: SAR area
+| 76| Distress Area: Pollution response area
 | 77| (reserved for future use)
 | 78| (reserved for future use)
 | 79| (reserved for future use)
-| 80| Instruction: Contact VTS at this point/juncture 
-| 81| Instruction: Contact Port Administration at this point/juncture 
-| 82| Instruction: Do not proceed beyond this point/juncture 
-| 83| Instruction: Await instructions prior to proceeding beyond this point/juncture 
-| 84| Proceed to this location – await instructions 
-| 85| Clearance granted – proceed to berth 
+| 80| Instruction: Contact VTS at this point/juncture
+| 81| Instruction: Contact Port Administration at this point/juncture
+| 82| Instruction: Do not proceed beyond this point/juncture
+| 83| Instruction: Await instructions prior to proceeding beyond this point/juncture
+| 84| Proceed to this location – await instructions
+| 85| Clearance granted – proceed to berth
 | 86| (reserved for future use)
 | 87| (reserved for future use)
-| 88| Information: Pilot boarding position 
-| 89| Information: Icebreaker waiting area 
-| 90| Information: Places of refuge 
-| 91| Information: Position of icebreakers 
+| 88| Information: Pilot boarding position
+| 89| Information: Icebreaker waiting area
+| 90| Information: Places of refuge
+| 91| Information: Position of icebreakers
 | 92| Information: Location of response units
-| 93| VTS active target 
-| 94| Rogue or suspicious vessel 
+| 93| VTS active target
+| 94| Rogue or suspicious vessel
 | 95| Vessel requesting non-distress assistance
 | 96| Chart Feature: Sunken vessel
 | 97| Chart Feature: Submerged object
@@ -1618,7 +1622,7 @@ an implied boundary from the last polygon vertex to the zero vertex.
 See the IMO236 variant for the meaning of this message.
 
 A message 6 subtype. DAC = 001 FID = 25. Variable length: 117-576 bits.
-This is the <<IMO289>> version; there is an earlier <<IMO236>> version 
+This is the <<IMO289>> version; there is an earlier <<IMO236>> version
 with a different layout, deprecated in <<IMO289>>.
 
 //: Type 6(1/25)
@@ -1648,7 +1652,7 @@ with a different layout, deprecated in <<IMO289>>.
 The last two fields may repeat to describe up to 28 subcargos. The count
 of repetitions must be computed from the message payload length.
 
-For cargo unit codes, see the description of the IMO236 variant of 
+For cargo unit codes, see the description of the IMO236 variant of
 this message.
 
 .Cargo Codes
@@ -1720,7 +1724,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 |72-81   | 10 |DAC               |dac       |u|DAC = 001
 |82-87   |  6 |FID               |fid       |u|FID = 28
 |88-97   | 10 |Message Linkage ID|linkage   |u|Unsigned integer
-|98-100  |  3 |Sender Class      |sender    |u|0 = ship (default), 
+|98-100  |  3 |Sender Class      |sender    |u|0 = ship (default),
                                                1 = authority,
                                                27 = reserved for future use
 |101-105 |  5 |Route Type        |rtype     |e|See "Route Type Codes"
@@ -1760,13 +1764,13 @@ end with 1 to 16 waypoints.
 
 ==== IMO289 Text description (addressed) ====
 
-This message may be used to attach a text description to another message with 
+This message may be used to attach a text description to another message with
 a Message Linkage ID matching this one.  It is intended that the combination
 of MMSI and Message Linkage ID should be unique.
 
 A message 6 subtype. DAC = 001 FID = 30. Variable length: 104-1028 bits.
 
-Intended to be used to associate a text annotation with another message 
+Intended to be used to associate a text annotation with another message
 via the Message Linkage ID field.
 
 //: Type 6(1/30)
@@ -1794,7 +1798,7 @@ There is an equivalent subtype of message 8 that is a broadcast description.
 See the <<IMO239>> version of this message for intended meaning.
 
 A message 6 subtype. DAC = 001 FID = 32. Variable length: 186-362 bits.
-This is the <<IMO289>> version; there is an <<IMO289>> version with 
+This is the <<IMO289>> version; there is an <<IMO289>> version with
 different bit widths for the latitude and longitude fields.
 
 //: Type 6(1/32)
@@ -1832,7 +1836,7 @@ different bit widths for the latitude and longitude fields.
 |=============================================================================
 
 The group of fields from longitude on may repeat twice more to convey up to
-three points of tidal information. 
+three points of tidal information.
 
 ==== ETA at lock/bridge/terminal (Inland AIS) ====
 
@@ -1881,7 +1885,7 @@ route messages addressed to other countries using this virtual MMSI
 number".
 
 OPEN-QUESTION: <<INLAND>> does not specify whether ETA time is UTC
-or local. 
+or local.
 
 ==== RTA at lock/bridge/terminal (Inland AIS) ====
 
@@ -1918,7 +1922,7 @@ preceding ETA request.
 |==============================================================================
 
 OPEN-QUESTION: <<INLAND>> does not specify whether ETA time is UTC
-or local. 
+or local.
 
 OPEN-QUESTION: No default is specified for the Status field.
 
@@ -2014,8 +2018,8 @@ process this variant.
                                                 10 = RACON operational
 						11 = RACON ERROR
 |120-121 |  2 |Light status      |light      |u|00 = no light or no monitoring
-                                                01 = Light ON 
-                                                10 = Light OFF  
+                                                01 = Light ON
+                                                10 = Light OFF
                                                 11 = Light ERROR
 |122     |  1 |Health            |health     |b|0 = Good Health, 1 = Alarm
 |123-130 |  8 |Status (external) |stat_ext   |u|7  Digital Input 0=Off, 1=On
@@ -2080,7 +2084,7 @@ DAC-FID pairs in use for type 8:
 
 [frame="topbot",options="header"]
 |==============================================================================
-| DAC     |FID | Sub | Source     | Status     | Description     
+| DAC     |FID | Sub | Source     | Status     | Description
 |   1     | 11 |     | <<IMO236>> | Deprecated/In Use | Meteorological/Hydrological Data
 |   1     | 13 |     | <<IMO236>> | Deprecated | Fairway closed
 |   1     | 15 |     | <<IMO236>> | Deprecated | Extended ship and voyage
@@ -2114,7 +2118,7 @@ Seaway messages, the DAC may be 316 (Canada) or 366 (U.S.) depending
 on the transmitter location.
 
 Note that the apparent presence of one of these DAC/FID pairs dooes
-not guarantee that the message is structured.  Decoders should 
+not guarantee that the message is structured.  Decoders should
 perform range validation on the structured fields and interpret the
 message as unstructured if any check fails. Actual false matches with
 DAC/FID = 200/10 have been observed in the wild.
@@ -2235,12 +2239,12 @@ for a signed integer is -1, which would forbid the -0.001/-0.001
 position.  The replacement FID=31 message has different default values
 that remove any ambiguities.
 
-<<IMO236>> gives the length of this message as 352, but lists only 336 
+<<IMO236>> gives the length of this message as 352, but lists only 336
 payload bits.
 
 Water level is deviation from local chart datum and includes tide.
 
-The waveheight field is labeled as "Significant" in <<IMO236>>, 
+The waveheight field is labeled as "Significant" in <<IMO236>>,
 for whatever that means.
 
 The seastate field has a note in <<IMO236>> reading "(manual input?)"?
@@ -2267,23 +2271,23 @@ WMO 306 Code table 4.201 specifies the following precipitatiuon type values:
 |Scale|Description    | Sea Conditions
 |0    |Calm           |Flat.
 |1    |Light air      |Ripples without crests.
-|2    |Light breeze   |Small wavelets. 
+|2    |Light breeze   |Small wavelets.
 |     |               |Crests of glassy appearance, not breaking.
-|3    |Gentle breeze  |Large wavelets. 
+|3    |Gentle breeze  |Large wavelets.
 |     |               |Crests begin to break; scattered whitecaps.
 |4    |Moderate breeze|Small waves.
 |5    |Fresh breeze   |Moderate (1.2 m) longer waves. Some foam and spray.
 |6    |Strong breeze  |Large waves with foam crests and some spray.
 |7    |High wind      |Sea heaps up and foam begins to streak.
-|8    |Gale           |Moderately high waves with breaking crests 
+|8    |Gale           |Moderately high waves with breaking crests
 |     |               |forming spindrift. Streaks of foam.
-|9    |Strong gale    |High waves (6-7 m) with dense foam. 
+|9    |Strong gale    |High waves (6-7 m) with dense foam.
 |     |               |Wave crests start to roll over. Considerable spray.
-|10   |Storm          |Very high waves. The sea surface is white and there 
+|10   |Storm          |Very high waves. The sea surface is white and there
 |     |               |is considerable tumbling. Visibility is reduced.
 |11   |Violent storm  |Exceptionally high waves.
 |12   |Hurricane force|Huge waves. Air filled with foam and spray. Sea
-|     |               |completely white with driving spray. Visibility 
+|     |               |completely white with driving spray. Visibility
 |     |               |greatly reduced.
 |13   |               |N/A (default)
 |14-15|               |Reserved
@@ -2442,14 +2446,14 @@ length: 360 bits.
 |===========================================================================
 |Code |Position Fix Type
 |  0  |N/A (default)
-|  1  |IALA port traffic signal 1: Serious emergency – all vessels to stop 
+|  1  |IALA port traffic signal 1: Serious emergency – all vessels to stop
 |     |or divert according to instructions.
 |  2  |IALA port traffic signal 2: Vessels shall not proceed.
 |  3  |IALA port traffic signal 3: Vessels may proceed. One way traffic.
 |  4  |IALA port traffic signal 4: Vessels may proceed. Two way traffic.
-|  5  |IALA port traffic signal 5: A vessel may proceed only when it has 
+|  5  |IALA port traffic signal 5: A vessel may proceed only when it has
 |     |received specific orders to do so.
-|  6  |IALA port traffic signal 2a: Vessels shall not proceed, except that 
+|  6  |IALA port traffic signal 2a: Vessels shall not proceed, except that
 |     |vessels which navigate outside the main channel need not comply with
 |     |the main message.
 |  7  |IALA port traffic signal 5a: A vessel may proceed only when it has
@@ -2709,8 +2713,8 @@ Swell directions are arrival directions.
 
 ==== IMO289 Area Notice (broadcast) ====
 
-This should be used to broadcast time- and location-dependent information about 
-hazards to navigation.  For information-lifetime restrictions and usage 
+This should be used to broadcast time- and location-dependent information about
+hazards to navigation.  For information-lifetime restrictions and usage
 guidance, refer to <<ITU1371>>.
 
 A message 8 subtype. DAC = 001 FID = 22. 196 to 981 bits.  There is a
@@ -2745,7 +2749,7 @@ is the message header format:
 |3-86    | 85 |Subarea Payload      |payload    |d|Subarea payload
 |==============================================================================
 
-The sub-area indications are as described under the addressed form, 
+The sub-area indications are as described under the addressed form,
 message type 6 with DAC = 1 and FID = 23.
 
 ==== IMO289 Extended Ship Static and Voyage Related Data ====
@@ -2839,9 +2843,9 @@ error in <<IMO289>>, as the scaled field does not have the precision
 required to represent it. The actual special value is unknown.
 
 The 2-bit _state fields describe the operational state of various sorts of
-SOLAS-required navigational equipment.  GNSS systems may include GPS, Loran-C, or GLONASS. BNWAS is the Bridge Navigational Watch Alarm System.  THD is a 
-Transmitting Heading Device.  Paper Nautical Chart state is officially 
-"ECDIS/Paper Nautical Chart" state in <<IMO289>>.  Status codes should be 
+SOLAS-required navigational equipment.  GNSS systems may include GPS, Loran-C, or GLONASS. BNWAS is the Bridge Navigational Watch Alarm System.  THD is a
+Transmitting Heading Device.  Paper Nautical Chart state is officially
+"ECDIS/Paper Nautical Chart" state in <<IMO289>>.  Status codes should be
 interpreted according to the following table:
 
 .SOLAS Status
@@ -3451,7 +3455,7 @@ Information (addressed)" message (DAC=1, FID=28).
 
 A message 8 subtype. DAC = 001 FID = 29. Variable length: 72-1032 bits.
 
-Intended to be used to associate a text annotation with another message 
+Intended to be used to associate a text annotation with another message
 via the Message Linkage ID field.
 
 //: Type 8(1/29)
@@ -3517,7 +3521,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 |172-181 | 10 |Dew Point          |dewpoint    |I1|-20.0 to +50.0: units 0.1C,
                                                   501 = N/A (default).
 |182-190 |  9 |Air Pressure       |pressure    |u|800-1200hPa, 1hPa,
-                                                  0 = pressure <= 799hPa, 
+                                                  0 = pressure <= 799hPa,
                                                   402 = pressure >= 1201 hPa,
                                                   511 = N/A (default).
 |191-192 |  2 |Pressure Tendency  |pressuretend|e|0 = steady,
@@ -3574,7 +3578,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
                                                    501 = N/A (default)
 |336-338 |  3 |Precipitation        |preciptype  |e|See "Precipitation type"
 |339-347 |  9 |Salinity             |salinity   |U1|0.0-50.0%: units of 0.1%
-                                                   501 = salinity >= 50.1% 
+                                                   501 = salinity >= 50.1%
                                                    510 = N/A (default)
                                                    511 = sensor not available
 |348-349 |  2 |Ice                  |ice        |u| 0 = No
@@ -3629,7 +3633,7 @@ expand both.  Full ERI codes have been observed in the wild.
 .ERI Classification
 [frame="topbot",options="header"]
 |==============================================================================
-|Code | SOLAS | Description 
+|Code | SOLAS | Description
 |8000 |  99   | Vessel, type unknown
 |8010 |  79   | Motor freighter
 |8020 |  89   | Motor tanker
@@ -3825,7 +3829,7 @@ messages.
 |11-24   | 14 |Water Level         |level      |i|cm, 0=unknown (defailt)
 |===============================================================================
 
-Water levels are relative to the local standard, e.g. GIW in Germany 
+Water levels are relative to the local standard, e.g. GIW in Germany
 and RNW on the Danube.
 
 ==== Signal Strength (Inland AIS) ====
@@ -3862,7 +3866,7 @@ the longitude and latitude fields; these semantics are assumed here
 from 28 and 27-bit fields in other messages.
 
 The Signal Form field describes the physical arrangement of the
-signal lights.  Values 0 and 15 indicate the shape is unknown or 
+signal lights.  Values 0 and 15 indicate the shape is unknown or
 unspecified.
 
 //: direction vocabulary
@@ -3983,7 +3987,7 @@ highly variable, ranging from fairly plain English ("PLEASE REPORT TO
 JOBOURG TRAFFIC CHANNEL 13") through snippets of tabular data ("PAX
 589 FG 36 IX 74 MOTO 10 CREW 108+1" through what look like opaque
 commercial codes ("EP285 IX46 FG3 DK8 PL56") to empty strings and
-content that looks like line noise ("]XFD5D/\7`>PA!Q DX0??K?8?>D"). 
+content that looks like line noise ("]XFD5D/\7`>PA!Q DX0??K?8?>D").
 
 Such apparently garbled content does *not* mean there is an error in
 your decoder. It may indicate faulty encoders, operator error, or even
@@ -4027,7 +4031,7 @@ transceivers for status messages of specified types. "Source MMSI" is
 the interrogating station.  88-160 bits depending on the number of queries.
 
 This message is probably not interesting unless you are doing traffic
-analysis of information flow in an AIS station network.  The "slot offset" 
+analysis of information flow in an AIS station network.  The "slot offset"
 members are a request for the response to interrogation to occupy
 a particular time division in the TDMA packet layer.
 
@@ -4106,7 +4110,7 @@ padding follows.
 When increment is zero, the offset field is interpreted as the
 frequency with which the subordinate station should report per
 10-minute interval. When increment is nonzero, reporting interval
-is specified at the level of TDMA slot numbers; see <<IALA>> for the 
+is specified at the level of TDMA slot numbers; see <<IALA>> for the
 detailed specification.
 
 Note: While the 96-bit form of Type 16 is not uncommon, the 144-bit
@@ -4173,7 +4177,7 @@ understand these fields."
 |139-140 | 2  |Regional reserved  |regional |u|Uninterpreted
 |141-141 | 1  |CS Unit            |cs       |b|0=Class B SOTDMA unit
                                                1=Class B CS (Carrier Sense) unit
-|142-142 | 1  |Display flag       |display  |b|0=No visual display, 
+|142-142 | 1  |Display flag       |display  |b|0=No visual display,
                                                1=Has display,
                                                (Probably not reliable).
 |143-143 | 1  |DSC Flag           |dsc      |b|If 1, unit is attached to a VHF
@@ -4279,7 +4283,7 @@ See <<IALA>> for details on the meaning of these fields.
 Identification and location message to be emitted by aids to
 navigation such as buoys and lighthouses.
 
-This message is unusual in that it varies in length depending on the 
+This message is unusual in that it varies in length depending on the
 presence and size of the Name Extension field. May vary between 272
 and 360 bits.
 
@@ -4386,7 +4390,7 @@ region.  Length is 168 bits.
 
 This message contains no navigational information, and is unlikely to be of
 interest unless you are implementing or studying an AIS base station
-network. 
+network.
 
 //: Type 22
 [frame="topbot",options="header"]
@@ -4436,7 +4440,7 @@ interpretation of.
 
 Note that the 'not available' values for longitude and latitudes
 match the short ones used in message 17, not the long ones used in the
-common navigation block and elsewhere. 
+common navigation block and elsewhere.
 
 The band fields control channel bandwidth for channels A and B, and
 the zonesize field describes the size of the transition zone around the
@@ -4510,7 +4514,7 @@ VHF channels as in Message Type 22. The field is interpreted as follows:
 |======================================================
 
 <<INLAND>> specifies 6 (only) as the station type value for inland
-waterways, reserving 7-9 for (other) regional uses.  
+waterways, reserving 7-9 for (other) regional uses.
 
 Reporting Interval is a 4 bit unsigned integer, how often to report
 while within the area specified by this message. When the dual-channel
@@ -4633,7 +4637,7 @@ Indicator; they always occur in the same order but some may be omitted.
 |===============================================================================
 
 If the 'addressed' flag is on, 30 bits of data at offset 40 are
-interpreted as a destination MMSI.  Otherwise that field span becomes 
+interpreted as a destination MMSI.  Otherwise that field span becomes
 part of the message payload, with the first 16 bits used as an
 Application ID if the 'structured' flag is on.
 
@@ -4710,7 +4714,7 @@ should warn when this occurs but decode the first 96 bits.
 |62-78   | 17   |Latitude            |lat      |I4|minutes/10
                                                   North positive, South negative
                                                   91000 = N/A (default)
-|79-84   | 6    |Speed Over Ground   |speed    |u|Knots (0-62); 
+|79-84   | 6    |Speed Over Ground   |speed    |u|Knots (0-62);
                                                   63 = N/A (default)
 |85-93   | 9    |Course Over Ground  |course   |u|0 to 359 degrees,
                                                   511 = not available.
@@ -4721,7 +4725,7 @@ should warn when this occurs but decode the first 96 bits.
 
 == Local extensions ==
 
-Some regional authorities extend the AIS message set. 
+Some regional authorities extend the AIS message set.
 
 The St. Lawrence Seaway broadcasts hydrological and lock-scheduling
 messages using special encodings of the binary data of message types 6
@@ -4731,7 +4735,7 @@ under the description of type 8.
 
 The U.S. Coast Guard has a system called PAWSS (Port and Water Safety
 System) which uses extended AIS binary formats. <<SEAWAY>> says it's
-intercompatible with the St. Lawrence Seaway system and describes three 
+intercompatible with the St. Lawrence Seaway system and describes three
 PAWSS-specific messages in its Appendix A.
 
 Since 2007 the Port Authority of London has operated a Thames AIS
@@ -4761,44 +4765,44 @@ Here's a sample sentence and field breakdown:
 !AIVDM,1,1,,B,15Cjtd0Oj;Jp7ilG7=UkKBoB0<06,0*63,s1234,d-119,T12.34567123,r003669958,1085889680
 -------------------------------------------------------------------------------
 
-Following the "*63" checksum are additional fields delimited by commas.  
-These fields provide additional metadata about the reception of each AIS  
+Following the "*63" checksum are additional fields delimited by commas.
+These fields provide additional metadata about the reception of each AIS
 broadcast.
 
-The field beginning with the lower case "s" is a Relative Signal  
-Strength Indicator (RSSI) measurement from the receiver. This  
-measurement has a range of 0-65535. This is one of the parameters used  
-internally by the AIS receiver to determine the signal strength value as  
-reported in the field beginning with the lower case "d". This field only  
+The field beginning with the lower case "s" is a Relative Signal
+Strength Indicator (RSSI) measurement from the receiver. This
+measurement has a range of 0-65535. This is one of the parameters used
+internally by the AIS receiver to determine the signal strength value as
+reported in the field beginning with the lower case "d". This field only
 exists when the AIS receiver provides this data.
 
-The field beginning with a lower case "d" is the signal strength  
-measurement for this broadcast in dBm. This field only exists when the  
+The field beginning with a lower case "d" is the signal strength
+measurement for this broadcast in dBm. This field only exists when the
 AIS receiver provides this data.
 
-The field beginning with the upper case "T" is the Time of Arrival  
-of the received broadcast in seconds from UTC 0. This field only exists  
+The field beginning with the upper case "T" is the Time of Arrival
+of the received broadcast in seconds from UTC 0. This field only exists
 when the AIS receiver provides this data.
 
-Another optional field not shown is one that begins with an upper  
-case "S" and represents the slot number in which the reception occurred.  
-The field would appear after the checksum and before the station  
-identifier field. This field only exists when the AIS receiver provides  
+Another optional field not shown is one that begins with an upper
+case "S" and represents the slot number in which the reception occurred.
+The field would appear after the checksum and before the station
+identifier field. This field only exists when the AIS receiver provides
 this data. Example: S0042
 
-The field beginning with the lower case "r" is a station identifier  
-field. This field is always provided, regardless of the type of AIS  
+The field beginning with the lower case "r" is a station identifier
+field. This field is always provided, regardless of the type of AIS
 equipment.  (Occasionally a base station identifier will be prefixed with
 "b" instead.)
 
-The last field is a time tag based on the standard C programming  
-language time function. Both date and time to the nearest second can be  
-derived from this field. This field is always provided, regardless of  
+The last field is a time tag based on the standard C programming
+language time function. Both date and time to the nearest second can be
+derived from this field. This field is always provided, regardless of
 the type of AIS equipment.
 
 == NMEA Tag Blocks ==
 
-Beginning with NMEA 4.10, the standard describes a way to intersperse 
+Beginning with NMEA 4.10, the standard describes a way to intersperse
 "tag blocks" with AIS sentences in order to supply additional
 metadata, udually a Unix timestamp to be associated with a sentence
 (or contiguous group of sentences such as an armored AIS Type 5).
@@ -4853,7 +4857,7 @@ block simply applies to the following sentence.
 As of May 2014 no NMEA 4.10 relative time fields have been observed in the
 wild. It is unknown whether the unit is seconds or milliseconds.
 
-The d, i/t, and s fields are intended to be used for fitering by 
+The d, i/t, and s fields are intended to be used for fitering by
 station IDs included in them.
 
 Part of the NMEA 4.10 standard describes a configuration message facility by
@@ -4889,7 +4893,7 @@ One is an apparent error in the format design.  The type 15 message
 has a variant with 108 data bits and a trailing 2-bit spare field, for
 110. This spare should have been 4 bits to guarantee a byte boundary
 at 112 bits. Decoders need to be prepared to encounter this length
-in case the transmitter has implemented the padding reqirement 
+in case the transmitter has implemented the padding reqirement
 properly.
 
 The other is messages containing variable-length text packed into
@@ -4923,11 +4927,11 @@ nibble should be ignored.
 Because these requirements are tricky and poorly documented in the
 official standards, receivers not uncommonly get them wrong.  The most
 common way to get them wrong seems to be by computing the pad
-character incorrectly.  
+character incorrectly.
 
 The most common error observed in the wild on AISHub is reporting a
 pad 2 bits too small, making the message look like it is 2 bits longer
-than it actually is.  This seems for some reason to be most common 
+than it actually is.  This seems for some reason to be most common
 on Type 5 messages, which then decode as 426 bits rather than 424.
 
 Accordingly, we recommend that when validating fixed-size messages by
@@ -4962,7 +4966,7 @@ ones (1s) should be removed."
 It appears that this bit stuffing is meant to be performed by the AIS
 radio link layer at transmission time and undone at reception time,
 and should not be visible in AIVDM payloads reported by the
-receiver.  
+receiver.
 
 == AIS feed sites ==
 
@@ -4977,7 +4981,7 @@ See their siting maps for details.
 Share alike. You contribute a feed, you get back all feeds.
 
 - http://www.aislive.com/[AIS Live]:
-Subscription access to real-time data. No longer has free access even 
+Subscription access to real-time data. No longer has free access even
 to delayed data.
 
 - hd-sf.com:9009
@@ -5004,11 +5008,11 @@ The general ground rules for JSON-AIS encoding are as follows:
 
 1. Each sentence decodes to a JSON object.
 
-2. When multiple kinds of JSON objects may occur in a data stream, AIS 
+2. When multiple kinds of JSON objects may occur in a data stream, AIS
 objects have the attribute "class":"AIS".
 
 3. Some collections of fields aggregating to a timestamp are dumped in
-ISO8601 format. 
+ISO8601 format.
 
 .Timestamp fields
 [frame="topbot",options="header"]
@@ -5049,7 +5053,7 @@ table below.
 6. Each field in the Controlled Vocabularies list in the following
 table is dumped twice: once with its base name as an integer, once
 with "_text" appended to the name and the vocabulary item as value.
-(This behavior is new in GPSD protocol version 3.9; older versions 
+(This behavior is new in GPSD protocol version 3.9; older versions
 made integer or string display dependent on the "scaled" flag.)
 
 .Special fields
@@ -5079,7 +5083,7 @@ made integer or string display dependent on the "scaled" flag.)
 |        | swellheight, speed, pressure, pdelta,|
 |        | rwindspeed, mgustspeed, airtemp,     |
 |        | surftemp, cloudbase,                 |
-|        | swheight1, swheight2                 | 
+|        | swheight1, swheight2                 |
 | 8(1/22)| lon, lat                             | -
 | 8(1/25)| -                                    | iceclass*
 | 8(1/27)| lon, lat                             | rtype
@@ -5111,26 +5115,26 @@ should do so rather than expanding to its controlled vocabulary.
 [frame="topbot",options="header"]
 |===========================================================================
 |Message | Fieldname | Special values
-| 1-3    | turn      | 
+| 1-3    | turn      |
 "nan" = not available, "fastright" = fast right turn (above 5deg/30sec degrees),
 "fastleft" = fast left turn (above 5deg/30sec degrees).
 | 1-3    | speed     | "nan" = not available, "fast" = speed >= 102.2 knots
-|  9     | alt       | "nan" = not available, "high" = alt >= 4094 meters 
+|  9     | alt       | "nan" = not available, "high" = alt >= 4094 meters
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
 |===========================================================================
 
-7. Trailing arrays are dumped as JSON subobject arrays.  The name of the 
-array item is the name given in the 'a' table entry.  Explicit array count 
+7. Trailing arrays are dumped as JSON subobject arrays.  The name of the
+array item is the name given in the 'a' table entry.  Explicit array count
 fields (presently "waycount" in Route Info messages") are not dumped.
 
 8. In the VTS-Generated/Synthetic Targets message, the id field is
 dumped as the value of an attribute the name of which is specified by
 the idtype field.
 
-== Open Questions == 
+== Open Questions ==
 
 The AIS standards are not marvels of clear and unambiguous drafting.
-We list here some open questions which could usefully be addressed 
+We list here some open questions which could usefully be addressed
 by governing authorities.
 
 Some of these duplicate material in paragraphs tagged with OPEN-QUESTION.
@@ -5218,10 +5222,10 @@ Identification System]
 
 - [[[IMO289]]]
   http://vislab-ccom.unh.edu/~schwehr/papers/2010-IMO-SN.1-Circ.289.pdf[IMO
-  289: Guidance on the Use of AIS Application-Specific Messages 
+  289: Guidance on the Use of AIS Application-Specific Messages
   (June 2010)]
 
-- [[IALA-A126]] 
+- [[IALA-A126]]
   http://www.ialathree.org/chapo/publications/documentspdf/doc_235_eng.pdf[IALA
   Recommendation A-126 On The Use of the Automatic Identification System (AIS)
   in Marine Aids to Navigation Services
@@ -5230,7 +5234,7 @@ Identification System]
 
 - [[[IEC-PAS]]] IEC-PAS 61162-100, "Maritime navigation and
   radiocommunication equipment and systems"  The ASCII armoring
-  is described on page 26 of Annex C, Table C-1. Communicated by 
+  is described on page 26 of Annex C, Table C-1. Communicated by
   Kurt Schwehr; I have not looked at it.
 
 - [[[IEC-62287]]] "Maritime Navigation and Radiocommunication
@@ -5238,7 +5242,7 @@ Identification System]
   Automatic Identification System (AIS)" Communicated by Mike Greene;
   I have not looked at it.
 
-- [[[ITU-MID]]] http://www.itu.int/cgi-bin/htsh/glad/cga_mids.sh?lng=E[Table 
+- [[[ITU-MID]]] http://www.itu.int/cgi-bin/htsh/glad/cga_mids.sh?lng=E[Table
   of Maritime Identification Digits]
 
 - [[[RAIM]]] http://en.wikipedia.org/wiki/RAIM[Receiver Autonomous
@@ -5247,7 +5251,7 @@ Identification System]
 - [[[C2]]] http://www.uais.org/AISspecificationCorrigendum2.pdf[AIS
   Specification Corrigendum 2]
 
-- [[[MMSI]]] http://www.navcen.uscg.gov/marcomms/gmdss/mmsi.htm#format[MMSI 
+- [[[MMSI]]] http://www.navcen.uscg.gov/marcomms/gmdss/mmsi.htm#format[MMSI
   Format]
 
 - [[[HAM-JSON-AIS]]] http://wiki.ham.fi/JSON_AIS.en[JSON AIS transmission protocol]
@@ -5339,10 +5343,10 @@ Version 1.23 corrects some typos and numbering errors in the
 description of message 19 (field widths were correct, though).
 Also, AISlive no longer offers free delayed access.
 
-Version 1.24 breaks the Type 6 and 8 application_id field into 
+Version 1.24 breaks the Type 6 and 8 application_id field into
 DAC and FID and adds tables for know DAC/FID pairs and their sources.
 Unspecified fields are now omitted in JSON dumps.  A new section
-"AIS byte alignment, bit stuffing, and padding", reveals some 
+"AIS byte alignment, bit stuffing, and padding", reveals some
 particularly black magic.
 
 Version 1.25 adds clarifications and more message subtypes for
@@ -5353,7 +5357,7 @@ AIS Type 1, 2, and 3 messages,
 
 Version 1.27 describes the sometime U.S. practice of omitting the leading
 '3' region code from MMSIs.
-  
+
 Version 1.28 merges updates from IMO 289, communicated by Kurt Schwehr.
 
 Version 1.29 added much information on WMO special message formats in
@@ -5363,7 +5367,7 @@ Version 1.30 was revised because M.1371-4 is now a free download.
 Also, we describe "pilot plugs" and AIS message type 27.  We get
 much more explicit about defaults in IMO236 and IMO289 messages.
 
-Version 1.31 shortened some C names in the Meteorological/Hydrological 
+Version 1.31 shortened some C names in the Meteorological/Hydrological
 messages and fixed typos.
 
 Version 1.32 adds descriptions of IMO Area Notice and Environmental
