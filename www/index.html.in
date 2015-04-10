@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="Author" content="Eric S. Raymond">
+   <meta name="Revised" content="9 April 2015">
+   <meta name="robots" content="index,follow">
    <meta name="Description" content="gpsd is a utility that can listen to a GPS or AIS receiver and re-publish the positional data in a simpler format.">
    <meta name="Keywords" content="GPS, translator, GIS">
    <!-- the following is a verification tag for Google Analytics -->
@@ -122,7 +124,7 @@ generations of manned aircraft, marine navigation systems, and
 military vehicles.</p>
 
 <p>Applications that
-presently use <code>gpsd</code> include 
+presently use <code>gpsd</code> include
 <a href="http://www.pygps.org">pyGPS</a>,
 <a href="http://www.gpsdrive.de/">gpsdrive</a>,
 <a href="http://www.kismetwireless.net/">Kismet</a>,
@@ -146,7 +148,7 @@ presently use <code>gpsd</code> include
 <a href="https://github.com/infinet/gpsd-navigator.git">gpsd-navigator</a>,
 <a href="https://github.com/IvanSanchez/gpsd-ais-viewer">gpsd-ais-viewer</a>,
 and <a
-href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>. 
+href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>.
 In addition, the Android smartphone operating system (from version
 4.0 onwards and possibly earlier; we don't know for sure when the
 change happened) uses GPSD to monitor the phone's on-board GPS, so
@@ -164,7 +166,7 @@ launching <code>gpsd</code> if needed and telling <code>gpsd</code>
 which device to read data from.  Then, <code>gpsd</code> deduces a
 baud rate and GPS/AIS type by looking at the data stream.</p>
 
-<p><code>gpsd</code> is high-quality, carefully-audited code; see 
+<p><code>gpsd</code> is high-quality, carefully-audited code; see
 our <a href="reliability.html">notes on reliability engineering</a>. In
 January 2010, the GPSD project <a
 href="http://thedailywtf.com/Articles/Bad-Code-Offsets-Open-Web-Innovation.asp">won</a>
@@ -184,8 +186,8 @@ issues</a>.  Older drivers are buggy and prevent <code>gpsd</code>
 from being able to read from USB-serial devices. No, we don't support
 Windows &mdash; get a better operating system.</p>
 
-<p>If you represent a GPS manufacturer interested in qualifying your 
-device for use with Linux and other open-source operating systems, 
+<p>If you represent a GPS manufacturer interested in qualifying your
+device for use with Linux and other open-source operating systems,
 we are your contact point.  We'll need (1) on-line access to interface
 documentation, (2) a few (as in, no more than three) eval units, and (3)
 an engineering contact at your firm.  For more, see our page
@@ -203,14 +205,14 @@ please @TIPLINK@.</p>
 
 <p>This web page was last updated on @DATE@.  You can browse the
 project's <a href='NEWS'>news file</a> or <a href='TODO'>to-do
-list</a> here.  Note: because of the way this website is maintained, 
+list</a> here.  Note: because of the way this website is maintained,
 these files may reflect the state of the repository tip (development
 version) rather than the latest released stable version.</p>
 
 <h1 id='downloads'>Repository, Downloads and Packages</h1>
 
 <dl>
-<dt><a href='@MAINPAGE@'>Project page</a></dt> 
+<dt><a href='@MAINPAGE@'>Project page</a></dt>
 <dd>The main project page</dd>
 
 <dt><a
@@ -345,7 +347,7 @@ source code, warns you what the edge cases and gotchas are.</dd>
 <dt><a href="http://esr.ibiblio.org/?p=801">Why GPSes suck, and what
 to do about it</a></dt>
 <dd>The designer of <code>gpsd</code> 2.0 rants in an at least
-semi-humorous way about everything that's wrong with GPS standards 
+semi-humorous way about everything that's wrong with GPS standards
 and vendors.</dd>
 
 <dt><a href="protocol-evolution.html">GPSD-NG: A Case Study in
@@ -354,15 +356,15 @@ Application Protocol Evolution</a></dt>
 larger trends in application protocol design.</dd>
 
 <dt><a href="protocol-transition.html">Moving to GPSD-NG: a Guide for Client Developers</a></dt>
-<dd>A practical explanation of GPSD-NG, and how to move to it as painlessly as 
+<dd>A practical explanation of GPSD-NG, and how to move to it as painlessly as
 possible.</dd>
 
 <dt><a href="replacing-nmea.html">Towards A Better GPS Protocol</a></dt>
-<dd>An analysis of what's wrong with NMEA 0183, and a simple way to fix 
+<dd>An analysis of what's wrong with NMEA 0183, and a simple way to fix
 it.</dd>
 
 <dt><a href="performance.html">Where's the Latency?  Performance analysis of GPSes and GPSD</a></dt>
-<dd>An analysis of latency in the GPS/GPSD system. Has implications for the 
+<dd>An analysis of latency in the GPS/GPSD system. Has implications for the
 design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 
 <dt><a href="writing-a-driver.html">Notes on Writing a GPSD Driver</a></dt>
@@ -404,10 +406,10 @@ time-service novices.</dd>
 <h1 id='recipes'>Recipes and related resources</h1>
 
 <p><code>gpsd</code> also works with some <a href="bt.html">bluetooth
-GPS</a> receivers.  Warning: there are serious problems with the 
+GPS</a> receivers.  Warning: there are serious problems with the
 firmware in at least one family of Bluetooth implementations shipped
-by Holux that may result in <code>gpsd</code> bricking your GPS.  See this 
-<a href="upstream-bugs.html#bluetooth">bug warning</a> for a description 
+by Holux that may result in <code>gpsd</code> bricking your GPS.  See this
+<a href="upstream-bugs.html#bluetooth">bug warning</a> for a description
 of the problem.</p>
 
 <p>If you have an Android phone, it is possible to access its onboard
@@ -434,11 +436,11 @@ of the setup steps and caveats will be the same.</p>
 href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <code>xgps</code> with a Qt look and feel.</p>
 
-<p>Egil Möller has written <a
+<p>Egil M&#246;ller has written <a
 href="http://redhog.github.com/agpsd">agpsd</a>,
-a gpsd replication and logging daemon with support for KML.</p> 
+a gpsd replication and logging daemon with support for KML.</p>
 
-<p>You can find Debian-unstable packages 
+<p>You can find Debian-unstable packages
 <a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
