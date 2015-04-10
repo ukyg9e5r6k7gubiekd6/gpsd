@@ -1,8 +1,8 @@
 = AIVDM/AIVDO protocol decoding =
-Eric S. Raymond <esr@thyrsus.com>
-v1.50, Apr 2015
 :description: The AIVDM Marine AIS protocol demystified, for programmers.
 :keywords: AIS, AIVDM, AIVDO, standard, protocol, Automatic Identification System
+Eric S. Raymond <esr@thyrsus.com>
+v1.50, Apr 2015
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -5002,12 +5002,12 @@ when HAM-JSON-AIS includes that field.
 
 The general ground rules for JSON-AIS encoding are as follows:
 
-1. Each sentence decodes to a JSON object.
+. Each sentence decodes to a JSON object.
 
-2. When multiple kinds of JSON objects may occur in a data stream, AIS
+. When multiple kinds of JSON objects may occur in a data stream, AIS
 objects have the attribute "class":"AIS".
 
-3. Some collections of fields aggregating to a timestamp are dumped in
+. Some collections of fields aggregating to a timestamp are dumped in
 ISO8601 format.
 
 .Timestamp fields
@@ -5032,7 +5032,7 @@ ISO8601 format.
 |8(200/23)| year,month,day,hour,minute     | end          |%4u-%02u-%02uT%02u:%02u
 |===========================================================================
 
-4. There are two variants of the encoding, one scaled and one
+. There are two variants of the encoding, one scaled and one
 unscaled, which differ in the treatment of float and
 controlled-vocabulary fields. An AIS-JSON object may have the optional
 attribute "scaled":true to signify that the rest of its fields are
@@ -5040,13 +5040,13 @@ scaled; if this attribute has the value 'false' or is omitted, no
 scaling has been performed.  Message types for which the unscaled and
 scaled dumps will differ are 1-5, 9, 11, 17-19, 21-24, and 27.
 
-5. In unscaled mode, float-valued fields are dumped in their unscaled
+. In unscaled mode, float-valued fields are dumped in their unscaled
 integer form. In scaled mode, division or other specified scaling is
 applied and the value dumped as a float, *except* that certain extreme
 or data-unavailable value as may be dumped as fixed strings; see the
 table below.
 
-6. Each field in the Controlled Vocabularies list in the following
+. Each field in the Controlled Vocabularies list in the following
 table is dumped twice: once with its base name as an integer, once
 with "_text" appended to the name and the vocabulary item as value.
 (This behavior is new in GPSD protocol version 3.9; older versions
@@ -5119,11 +5119,11 @@ should do so rather than expanding to its controlled vocabulary.
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
 |===========================================================================
 
-7. Trailing arrays are dumped as JSON subobject arrays.  The name of the
+. Trailing arrays are dumped as JSON subobject arrays.  The name of the
 array item is the name given in the 'a' table entry.  Explicit array count
 fields (presently "waycount" in Route Info messages") are not dumped.
 
-8. In the VTS-Generated/Synthetic Targets message, the id field is
+. In the VTS-Generated/Synthetic Targets message, the id field is
 dumped as the value of an attribute the name of which is specified by
 the idtype field.
 
