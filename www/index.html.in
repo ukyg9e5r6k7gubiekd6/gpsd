@@ -48,7 +48,7 @@
     src='http://www.catb.org/hacker-emblem/glider.png'
     alt='hacker emblem'></a><br>
 
-    <script type="text/javascript" src="http://www.ohloh.net/p/3944/widgets/project_thin_badge.js"></script>
+    <script type="text/javascript" src="http://www.openhub.net/p/3944/widgets/project_thin_badge.js"></script>
 
     <hr>
     <script type="text/javascript"><!--
@@ -75,21 +75,21 @@
 <tr>
 <td>
 <script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_basic_stats.js"></script>
+src="http://www.openhub.net/p/3944/widgets/project_basic_stats.js"></script>
 </td>
 <td>
 <script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_factoids.js"></script>
+src="http://www.openhub.net/p/3944/widgets/project_factoids.js"></script>
 </td>
 </tr>
 <tr>
 <td>
 <script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_languages.js"></script>
+src="http://www.openhub.net/p/3944/widgets/project_languages.js"></script>
 </td>
 <td>
 <script type="text/javascript"
-src="http://www.ohloh.net/p/3944/widgets/project_cocomo.js"></script>
+src="http://www.openhub.net/p/3944/widgets/project_cocomo.js"></script>
 </td>
 </tr>
 </table>
@@ -124,7 +124,7 @@ military vehicles.</p>
 
 <p>Applications that
 presently use <code>gpsd</code> include
-<a href="http://www.pygps.org">pyGPS</a>,
+<a href="http://pygps.org">pyGPS</a>,
 <a href="http://www.gpsdrive.de/">gpsdrive</a>,
 <a href="http://www.kismetwireless.net/">Kismet</a>,
 <a href="http://www.gpsdrive.de/">GPSdrive</a>,
@@ -147,7 +147,7 @@ presently use <code>gpsd</code> include
 <a href="https://github.com/infinet/gpsd-navigator.git">gpsd-navigator</a>,
 <a href="https://github.com/IvanSanchez/gpsd-ais-viewer">gpsd-ais-viewer</a>,
 and <a
-href="http://www.mozilla.com/en-US/firefox/">firefox/mozilla</a>.
+href="http://www.mozilla.com/en-US/firefox/new/">firefox/mozilla</a>.
 In addition, the Android smartphone operating system (from version
 4.0 onwards and possibly earlier; we don't know for sure when the
 change happened) uses GPSD to monitor the phone's on-board GPS, so
@@ -173,17 +173,16 @@ the first Good Code Grant from the Alliance for Code Excellence.</p>
 
 <p>Statistics about the code volume, commit history, and contributors
 associated with this project are <a
-href="https://www.ohloh.net/p/3944">available at Ohloh</a></p>
+href="https://www.openhub.net/p/gpsd">available at OpenHUB</a></p>
 
 <p>Our development platforms are open-source Unixes &mdash; Linux, and
 the *BSD family.  Presently Linux, OpenBSD and NetBSD are directly
-supported.  The code is also exttremely widely deployed on Android
-phones.  We'll support proprietary Unixes if it's not too much work
-(and it usually isn't). Apple's OS X is currently <a
-href="upstream-bugs.html#appleserial">unsupported due to serial-layer
-issues</a>.  Older drivers are buggy and prevent <code>gpsd</code>
-from being able to read from USB-serial devices. No, we don't support
-Windows &mdash; get a better operating system.</p>
+supported.  The code is also extremely widely deployed on Android
+phones.  We'll support proprietary Unixes if it's not too much work (and
+it usually isn't). Apple's OS X is supported in a limited fashion.  Some
+older OS X drivers are buggy and prevent <code>gpsd</code> from being
+able to read from some USB-serial devices. No, we don't support Windows
+&mdash; get a better operating system.</p>
 
 <p>If you represent a GPS manufacturer interested in qualifying your
 device for use with Linux and other open-source operating systems,
@@ -232,14 +231,14 @@ line.</p>
 <p>There are four project mailing lists:</p>
 
 <ul>
-<li><a href="@MAILMAN@/gpsd-announce">gpsd-announce</a>
+<li><a href="@MAILMAN@gpsd-announce">gpsd-announce</a>
 is for release announcements and project news.</li>
-<li><a href="@MAILMAN@/gpsd-users">gpsd-users</a>
+<li><a href="@MAILMAN@gpsd-users">gpsd-users</a>
 is for questions and technical support on <code>gpsd</code>, including support
 for application builders using <code>gpsd</code> as a component.</li>
-<li><a href="@MAILMAN@/gpsd-dev">gpsd-dev</a>
+<li><a href="@MAILMAN@gpsd-dev">gpsd-dev</a>
 is for <code>gpsd</code> developers.</li>
-<li><a href="@MAILMAN@/gpsd-commit-watch">gpsd-commit-watch</a>
+<li><a href="@MAILMAN@gpsd-commit-watch">gpsd-commit-watch</a>
 sends automatic broadcast notifications of commits to the <code>gpsd</code>
 repository.</li>
 
@@ -415,11 +414,11 @@ of the problem.</p>
 GPS by pairing it as a Bluetooth device.  Directions from <a
 href="http://bvargo.net/blog/2010/oct/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/">Vargoville</a>. There
 is also a <a
-href="http://www.androidzoom.com/android_applications/tools/gps-tether_blgt.html">GPS
-Tether</a> app designed to work with GPSD, but it eems to be in early
+href="http://www.appszoom.com/android_applications/tools/gps-tether_blgt.html">GPS
+Tether</a> app designed to work with GPSD, but it seems to be in early
 alpha.</p>
 
-<p>The <a href="http://gpsdproxy.sourceforge.net/">gGPSDproxy
+<p>The <a href="http://gpsdproxy.sourceforge.net/">GPSDproxy
 project</a> is a small program which reads GPS data from a running
 gpsd process and forwards it to a remote server via an UDP
 connection. GPSDproxy is intended to be run on GPS enabled mobile
@@ -436,7 +435,7 @@ href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <code>xgps</code> with a Qt look and feel.</p>
 
 <p>Egil M&#246;ller has written <a
-href="http://redhog.github.com/agpsd">agpsd</a>,
+href="http://redhog.github.com/agpsd/">agpsd</a>,
 a gpsd replication and logging daemon with support for KML.</p>
 
 <p>You can find Debian-unstable packages
@@ -452,7 +451,7 @@ page</a> devoted to gpsd helper applications.</p>
 aiming to build a freely available, world-wide streetmap.</p>
 
 <p>Freedesktop.org is hosting a project called <a
-href="http://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>
+href="http://www.freedesktop.org/wiki/Software/GeoClue/">geoclue</a>
 that aims to provide a location service layer for all D-Bus-using
 applications. It can use <code>gpsd</code> as a source for location
 info.</p>
@@ -482,7 +481,7 @@ to provide location information for browsers.</p>
 href='http://www2.musatcha.com/musatcha/computers/software/gpsd/'>Microsoft
 Windows</a>. It provides gpsd service from data in netstumbler under
 win32.  This way programs such as <a
-href='http://www.wigle.net'>JiGLE</a> can still get GPS data from
+href='http://wigle.net'>JiGLE</a> can still get GPS data from
 netstumbler. This program is not genetically related to
 <code>gpsd</code>.</p>
 
