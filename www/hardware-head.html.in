@@ -138,7 +138,7 @@ correct.</li>
 
 <li><img src="star.png" alt="Star icon"><img src="star.png" alt="Star
 icon"><img src="star.png" alt="Star icon"> marks devices with
-<b>Good</b> performance: <tt>gpsd</tt> has minor problems or lag
+<b>Good</b> performance: <code>gpsd</code> has minor problems or lag
 recognizing the device, but reports are complete and correct.</li>
 
 <li><img src="star.png" alt="Star icon"><img src="star.png" alt="Star
