@@ -4,7 +4,6 @@
 :keywords: GPSD, GPS, installation
 :author: Eric S. Raymond <esr@thyrsus.com>
 :robots:index,follow
-:revised:April 2015
 
 Here are the steps for installing GPSD and verifying its performance.
 They assume you have GPSD available as an installable binary package,
