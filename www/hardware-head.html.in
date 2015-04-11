@@ -113,7 +113,7 @@ Web
 <p><code>gpsd</code> should work with any GPS or AIS receiver using an
 RS232C or USB interface that advertises NMEA-0183 compliance.  Here
 are some notes on hardware we have tested.  Hyperlinks lead to
-technical information.  The "Works with" column is the last
+technical information.  The "Tested with" column is the last
 <code>gpsd</code> version with which this receiver is known to have
 been successfully tested; A <img src="regression.png" alt="Regression
 icon"> in this column means we have a regression test load for the
