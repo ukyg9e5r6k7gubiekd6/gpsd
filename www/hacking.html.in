@@ -7,7 +7,7 @@
    <meta name="Keywords" content="GPS, gpsd, translator, hackers">
    <meta name="Author" content="Eric S. Raymond">
    <meta name="robots" content="index,follow">
-   <meta name="Revised" content="9 April 2015">
+   <meta name="Revised" content="10 April 2015">
    <title>Hacker's Guide to GPSD</title>
    <link rel="stylesheet" href="main.css" type="text/css">
 </head>
@@ -76,7 +76,6 @@ file in the source distribution.</p>
     <ol>
       <li><a href="#service">The time and location service</a></li>
       <li><a href="#tuning">The testing and tuning tools</a></li>
-      <li><a href="#upgrading">The upgrading tools</a></li>
       <li><a href="#monitoring">The GPS/GNSS monitoring tools</a></li>
     </ol>
   </li>
@@ -546,7 +545,7 @@ value it does.  If it occurs multiple times, make it the value of
 a macro that is defined in one place so that all instances can be
 changed sanely.</p>
 
-<h2 id="assers">Use assert(3) sparingly and carefully!</h2>
+<h2 id="asserts">Use assert(3) sparingly and carefully!</h2>
 
 <p>gpsd - I'm speaking of the daemon itself, not the clients and test
 tools - runs in a lot of contexts where it provides a life-critical
@@ -1702,7 +1701,7 @@ regular commits on the dev list.</p></dd>
 <h2>Packaging links</h2>
 
 <p><a
-href='http://git.recluse.de/?p=debian/pkg-gpsd.git;a=summary'>Debian
+href='https://git.recluse.de/?p=debian/pkg-gpsd.git;a=summary'>Debian
 build controls</a></p>
 
 <hr>
