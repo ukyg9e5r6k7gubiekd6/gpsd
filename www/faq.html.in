@@ -45,7 +45,7 @@ GPSD Frequently Asked Questions
     src='http://www.catb.org/hacker-emblem/glider.png'
     alt='hacker emblem'></a><br>
 
-    <script type="text/javascript" src="http://www.ohloh.net/p/3944/widgets/project_thin_badge.js"></script>
+    <script type="text/javascript" src="http://www.openhub.net/p/3944/widgets/project_thin_badge.js"></script>
 
     <hr>
     <script type="text/javascript"><!--
@@ -248,7 +248,7 @@ was something called <code>buienradar</code></p>.
 <p>On the Samsung Galaxy SIII, vendor firmware provides a "Remote
 Location" service with a similar bug. You can disable this through
 Settings.  See <a
-href="http://blog.gadgethelpline.com/gpsd-stop-samsung-galaxy-siiis-battery-life/">this
+href="http://www.gadgethelpline.com/gpsd-stop-samsung-galaxy-siiis-battery-life/">this
 blog post</a> for a fix.</p>
 
 <h1 id='garmin'>My Garmin USB GPS doesn't work.</h1>
@@ -473,7 +473,7 @@ describe that procedure here.</p>
 a copy of the source repository.</p></li>
 
 <li><p>Use <a
-href="http://www.kernel.org/pub/software/scm/git/docs/git-bisect.html">git
+href="https://www.kernel.org/pub/software/scm/git/docs/git-bisect.html">git
 bisect</a> to locate the exact revision that introduced your bug.
 This will happen very quickly, as the number of tests required will be
 the log to the base 2 of the number of revisions in your original
@@ -689,7 +689,7 @@ accuracy</a> will help. Time referencing at accuracies below
 0.01sec has its own set of issues related to latency in your
 sensor and computer.</p>
 
-<p>There is now a <a href="www/gpsd-time-service-howto.html">GPSD Time
+<p>There is now a <a href="gpsd-time-service-howto.html">GPSD Time
 Service HOWTO</a> that gives detailed setup instructions.</p>
 
 <h1 id='waas'>How can I tell if WAAS/EGNOS is working?</h1>
@@ -783,8 +783,8 @@ the ports open at a fixed speed, usually 9600.  So to suppress the
 hunt loop you may have to actually compile at a fixed baud rate and
 then use the stty trick - unless your BSD has an "init" device paired
 with each real one in which case <a
-href="m/blog/posts/using-serial-devices-in-freebsd-how-to-set-a-terminal-baud-rate">this
-note on how to set a baud rate</a> may be relevant.</p>
+href="https://www.clearchain.com/blog/posts/using-serial-devices-in-freebsd-how-to-set-a-terminal-baud-rate"
+>this note on how to set a baud rate</a> may be relevant.</p>
 
 <h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
 
