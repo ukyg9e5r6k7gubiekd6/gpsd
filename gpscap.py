@@ -132,7 +132,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 elif self.get(dev, "rating") == "broken":
                     testfield += "<img title='Device is broken' src='bomb.png' alt='Bomb icon'>"
                 if self.has_option(dev, "usbchip") and self.get(dev, "usbchip") in hotpluggables:
-                    testfield += "<img src='hotplug.png' alt='Hotplug icon'>"
+                    testfield += "<img title='udev hotplug' src='hotplug.png' alt='Hotplug icon'>"
                 ofp.write("<td>%s</td>\n" % testfield)
                 nmea = "&nbsp;"
                 if self.has_option(dev, "nmea"):
