@@ -115,10 +115,14 @@ RS232C or USB interface that advertises NMEA-0183 compliance.  Here
 are some notes on hardware we have tested.  Hyperlinks lead to
 technical information.  The "Tested with" column is the last
 <code>gpsd</code> version with which this receiver is known to have
-been successfully tested; A <img src="regression.png" alt="Regression
-icon"> in this column means we have a regression test load for the
-device that is checked before each release. Vendors are listed in
-alphabetical order.</p>
+been successfully tested.  It is likely that later releases will 
+support the receiver, especially if there is a 
+<img src="regression.png" alt="Regression icon"> in this column;
+this means we have a regression test load for the
+device that is checked before each release. 
+</p>
+
+<p>Vendors are listed in alphabetical order.</p>
 
 <p><b>Warning:</b> the baudrate-hunting code in <code>gpsd</code>
 tickles serious firmware bugs on some Bluetooth and USB devices.
