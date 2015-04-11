@@ -30,8 +30,8 @@ fix-quality information in atomized partial form, without timestamps.
 
 There was also no way to support returning more than single-line
 responses to a client. This was a problem for returning things like
-http://gps.wva.net/html.com[RINEX] format, which we'd like to be able
-to do when a device can report pseudoranges.
+[RINEX] format, which we'd like to be able to do when a device can
+report pseudoranges.
 
 == The transition plan ==
 
