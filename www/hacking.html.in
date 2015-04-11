@@ -991,10 +991,6 @@ Ed., Springer.</p>
 be checked in the sources.  If they're 1-sigma the resulting UEREs
 need to be doubled.</p>
 
-<p>See <a
-href="http://www.seismo.berkeley.edu/~battag/GAMITwrkshp/lecturenotes/unit1/">
-this discussion</a> of conversion factors.</p>
-
 <p>Carl Carter of SiRF says: "Ionospheric error is typically corrected
 for at least in large part, by receivers applying the Klobuchar model
 using data supplied in the navigation message (subframe 4, page 18,
