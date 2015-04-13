@@ -10,6 +10,8 @@
    <meta name="Keywords" content="GPS, gpsd, code, project, service, applications, time service, gpsd project">
    <!-- the following is a verification tag for Google Analytics -->
    <meta name="verify-v1" content="kb4f3qxJPMaOltYTpJHnvbnteza1PHO4EhrRIfcq2gk=">
+   <!-- the following is a verification tag for Google Webmaster Tools -->
+   <meta name="google-site-verification" content="ANgmGfxgaTJkcljaXur3xcZMpyPWrvjzZzPSO8rmcIc" />
    <title>GPSd &mdash; Put your GPS on the net!</title>
    <link rel="stylesheet" href="main.css" type="text/css">
 </head>
