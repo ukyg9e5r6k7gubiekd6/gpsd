@@ -463,7 +463,7 @@ int gpsd_open(struct gps_device_t *session)
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "opening TCP feed at %s, port %s.\n", server,
 		 port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	if ((dsock = netlibconnectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
 	    gpsd_log(&session->context->errout, LOG_ERROR,
 		     "TCP device open error %s.\n",
 		     netlib_errstr(dsock));

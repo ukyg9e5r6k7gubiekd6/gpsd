@@ -7,7 +7,7 @@
    <meta name="Keywords" content="GPS, gpsd, translator, hackers">
    <meta name="Author" content="Eric S. Raymond">
    <meta name="robots" content="index,follow">
-   <meta name="Revised" content="10 April 2015">
+   <meta name="revised" content="@DATE@">
    <title>Hacker's Guide to GPSD</title>
    <link rel="stylesheet" href="main.css" type="text/css">
 </head>

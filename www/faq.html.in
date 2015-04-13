@@ -6,7 +6,7 @@
    <meta name="Author" content="Eric S. Raymond">
    <meta name="Description" content="GPSD Frequently Asked Questions">
    <meta name="Keywords" content="GPS,gpsd,FAQ,frequently asked questions,android,garmin,raspberry pi,fix">
-   <meta name="revised" content="9 April 2015">
+   <meta name="revised" content="@DATE@">
    <meta name="robots" content="index,follow">
    <link rel="stylesheet" href="main.css" type="text/css">
    <title>GPSD FAQ</title>

@@ -6,7 +6,7 @@
    <meta name="Author" content="Eric Raymond">
    <meta name="Description" content="Hardware known to work with GPSD.">
    <meta name="Keywords" content="GPS, gpsd, hardware">
-   <meta name="Revised" content="9 April 2015">
+   <meta name="revised" content="@DATE@">
    <meta name="robots" content="index,follow">
    <title>Compatible GPSes</title>
    <link rel="stylesheet" href="main.css" type="text/css">
