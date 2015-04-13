@@ -94,13 +94,13 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                 elif self.get(dev, "packaging") == "hansdfree":
                     rowcolor = "#008B8B"
 
-                ofp.write("<tr style='background-color:%s'>\n" % rowcolor)
+                ofp.write("<tr itemscope itemtype='http://schema.org/Product' style='background-color:%s'>\n" % rowcolor)
                 namefield = dev
                 if self.has_option(dev, "techdoc"):
                     namefield = "<a href='%s'>%s</a>" % (self.get(dev, "techdoc"), dev)
                 if self.has_option(dev, "discontinued") and self.getboolean(dev, "discontinued"):
                     namefield = namefield + "&nbsp;<img title='Device discontinued' src='discontinued.png' alt='Discontinued icon'>"
-                ofp.write("<td>%s</td>\n" % namefield)
+                ofp.write("<td itemprop='name'>%s</td>\n" % namefield)
                 ofp.write("<td>%s</td>\n" % self.get(dev, "packaging"))
                 engine = self.get(dev, "engine")
                 if self.has_option(engine, "techdoc"):
@@ -156,7 +156,7 @@ class GPSDictionary(ConfigParser.RawConfigParser):
                     notes = ""
                 if self.has_option(dev, "submitter"):
                     notes += " Reported by %s." % self.get(dev, "submitter").replace("@", "&#x40;").replace("<", "&lt;").replace(">", "&gt;")
-                ofp.write("<td>%s</td>\n" % notes)
+                ofp.write("<td itemscope itemtype='http://schema.org/description'>%s</td>\n" % notes)
                 ofp.write("</tr>\n")
         ofp.write("</table>\n")
 
