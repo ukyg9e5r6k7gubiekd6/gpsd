@@ -1330,6 +1330,9 @@ binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpsp
 if env["ncurses"]:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib, libgps_version))
+# Work arount a minor bug in InstallSharedLib() link handling
+env.AddPreAction(binaryinstall, 'rm -f %s/libgps.*' % (installdir('libdir'), ))
+
 if qt_env:
     binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib, libgps_version))
 
