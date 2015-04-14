@@ -144,12 +144,13 @@ the signals.  The U.S. military knew the pattern, but nobody else did
 natural.  One is a variable amount of signal lag produced as the GPS
 signals pass through the ionosphere, which partly refracts radio
 waves.  This can be largely compensated for by a technique called
-"Differential GPS" or DGPS, in which your receiver takes timings both
-from satellites and ground stations.  The ground stations are in a
-known fixed positions, so they can compute the exact distance to
-satellites from an ephemeris. Thus, they can measure the for the
-ionospheric lag and tell nearby GPSes how to correct ranges for it.
-WAAS and EGNOS are similar systems.  See <a href="#ggps">DGPS, WAAS,
+"Differential GPS" or DGPS.  Ground stations are established in
+known fixed positions, and compare their calculated GPS locations
+with their known values.  Thus, they can measure for the
+ionospheric lag and tell nearby GPSes the corrections required.
+This information may be broadcast via radio (Ground Based Augmentation
+Systems), or via satellites (Space Based Augmentation Systems).
+Examples of SBAS are WAAS and EGNOS.  See <a href="#ggps">DGPS, WAAS,
 and EGNOS</a> for details on how this works.</p>
 
 <p>In practice, the most important limit on accuracy is the actual
