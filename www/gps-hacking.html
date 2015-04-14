@@ -78,7 +78,7 @@ GPS works and ending with architectural suggestions about how to use
 <h2>How GPS Works</h2>
 
 <p>First, the basics of how GPS works.  It depends on the fact that
-satellite orbits are very predictable.  A GPS sensor is a specialized
+satellite orbits can be modelled accurately.  A GPS sensor is a specialized
 computer that knows about the orbits of GPS satellites, and in
 particular can predict exactly where each satellite will be at any
 given time with respect to the fixed Earth.  (For those of you who
@@ -86,31 +86,50 @@ enjoy such details, what they actually predict is each satellite's
 position with respect to an imaginary ellipsoid called the "WGS 84
 geoid" which closely fits the mean sea level of Earth.)</p>
 
-<p>There are presently 28 dedicated GPS satellites, 11,000 miles up in
-high-inclination orbits so that each one's trajectory wraps around the
-Earth like a ball of yarn as the planet spins beneath them.  The
+<p>Note that although the term <strong>GPS</strong> strictly refers
+only to the system operated by the United States Air Force, it has
+become generic over time, and now is used to refer interchangably
+with other space-based navigation systems (collectively called
+GNSS: Global Navigation Satellite System).  In this document,
+and this project, we will use <strong>GPS</strong> to refer to 
+all such systems, and <strong>Navstar</strong> to refer particulary
+to the US system.  After all, we are <code>gpsd</code>, not
+<code>gnssd</code>.</p>
+
+<p>This paragraph is specific to the Navstar system, the principles
+largely apply to other systems.
+
+There are presently about 30 dedicated Navstar satellites (full coverage
+can be achieved with 24), twenty thousand km (twelve thousand miles),
+up in high-inclination orbits, so that each one's trajectory wraps around
+the Earth like a ball of yarn as the planet spins beneath them.  The
 inclinations are tuned to guarantee that about twelve will be visible
 at any given time from anywhere on Earth (coverage falls off a little
-at high latitudes).  Additional GPS coverage is provided by a couple
-of maritime navigation satellites parked in geosynchronous orbits over
-the middle of the Atlantic and Pacific oceans.</p>
+at high latitudes).</p>
 
 <p>You can look at a very nifty <a
 href="http://rhp.detmich.com/gps.html">simulation</a>
-of GPS satellite orbits. (Also includes GLONASS, the Russian military 
-equivalent of GPS.)  You can also look at 
+of Navstar satellite orbits. (Requires Java, also includes 
+GLONASS, the Russian military equivalent).</p>  
+<!-- You can also look at 
 <a href='http://www.tsgc.utexas.edu/images/spacecraft/gps/'>pictures</a> 
-of GPS satellites and the control system.</p>
+of GPS satellites and the control system. (link dead, TOFIX)-->
 
 <p>Each satellite broadcasts identification pulses, each one including
-the clock time it was sent. A GPS receiver, picking up one of these
-pulses, can compare it to an internal clock and know the time it took
-to arrive. Multiplying by light speed gives the distance to the
-satellite.  This starts to be useful when the GPS can get accurate
-timings to three or more satellites; at that point, computing the
-GPS's exact position with respect to the satellites becomes a relatively
+the clock time it was sent. A GPS receiver, picking up these
+pulses, and knowing the speed of light, can recover its 
+4-dimensional location (Latitude, Longitude, Altitude, and Time).
+Ideally, you would need to solve four simultaneous equations with
+the four unknowns, so would need four visible satellites.  This
+is known as a <strong>3D</strong> fix.  Computing the GPS's exact 
+position with respect to the satellites becomes a relatively
 simple if tedious exercise in spherical trigonometry (which,
-fortunately, the GPS's firmware does for you).</p>
+fortunately, the GPS's firmware does for you).
+Note that the GPS reciever does <b>not</b> need to know its own time
+or location to begin with.</p>
+
+<p>An excellent introduction is available at:
+<a href="http://electronics.howstuffworks.com/gadgets/travel/gps.htm">How GPS Receivers Work</a>, see page 4 in particular.
 
 <p>That's the theory.  In practice, the system has important limits.
 Anything, natural or artificial, that messes with the signal timings
