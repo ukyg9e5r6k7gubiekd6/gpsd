@@ -233,7 +233,7 @@ to interpolate a good value for atmospheric display.</p>
 
 <h1>How GPS Hardware Talks To Computers</h1>
 
-<p>From  a software designer's point of view, a GPS sensor is an
+<p>From  a software designer's point of view, a GPS receiver is an
 oracle that tells you its location whenever it can get line-of-sight
 to four satellites.  Our next topic is how it gets that information
 to a computer in a form your application can use.</p>
@@ -310,7 +310,7 @@ fresher by a few milliseconds (which might make a difference if, say,
 you're using a GPS-enabled autopilot to land an aircraft).  Some GPSes
 feature data rates upwards of 38400bps. However, this actually does
 little good unless the application polls the GPS at a rate faster than
-1Hz rather than waiting for it, as most GPS sensors cannot be told to
+1Hz rather than waiting for it, as most GPS receivers cannot be told to
 ship updates faster than once per second &mdash; and the polling
 commands (when they exist at all) are proprietary. And the fact that
 GPSes don't have a single data rate graven in stone brings back all
@@ -329,7 +329,7 @@ GPSes (like the DeLorme EarthMates made before they switched over to a
 SiRF chipset in 2003) are still around.</p>
 
 <p>2004's equivalent of the Zodiac is the SiRF-II chipset, which seems
-to be nearly ubiquitous in inexpensive GPS sensors.  It too speaks 
+to be nearly ubiquitous in inexpensive GPS receivers.  It too speaks 
 a binary protocol, but only if you ask it to; it's fully capable
 in NMEA mode. Which is where it boots up.  The idea seems to be
 that you can switch to binary to improve your bits-per-second
@@ -358,7 +358,7 @@ violations.</p>
 <p><a href='NMEA.txt'>Here</a> is the best compendium I know of.  I
 have never seen a copy of the official NMEA standard.  Fortunately, it
 isn't necessary for even <code>gpsd</code> developers to know most of
-it, since most modern GPS sensors only emit about a half-dozen of the
+it, since most modern GPS receivers only emit about a half-dozen of the
 eighty or so NMEA sentences.  RMC, GGA, GSA, GSV (and now possibly
 GBS) are all you are ever likely to need to know about.</p>
 
@@ -444,7 +444,7 @@ while just to figure out what satellites might be available in line of
 sight.  The speed at which it can do this is inversely proportional to
 the number of GPS channels it can sample simultaneously.  Older one-
 or two-channel units could take several minutes at this.  In 2004,
-even low-end GPS sensors have twelve channels and can thus cock a
+even low-end GPS receivers have twelve channels and can thus cock a
 separate ear for as many satellites as they're ever likely to see.
 Even so, it's not uncommon for them to take 30 or 40 seconds after a
 cold boot to get a fix.</p>
