@@ -86,18 +86,21 @@ enjoy such details, what they actually predict is each satellite's
 position with respect to an imaginary ellipsoid called the "WGS 84
 geoid" which closely fits the mean sea level of Earth.)</p>
 
-<p>Note that although the term <strong>GPS</strong> strictly refers
-only to the system operated by the United States Air Force, it has
-become generic over time, and now is used to refer interchangably
-with other space-based navigation systems (collectively called
-GNSS: Global Navigation Satellite System).  In this document,
-and this project, we will use <strong>GPS</strong> to refer to 
-all such systems, and <strong>Navstar</strong> to refer particulary
-to the US system.  After all, we are <code>gpsd</code>, not
-<code>gnssd</code>.</p>
+<p>Although the term <strong>GPS</strong> properly refers only to the
+system operated by the United States Air Force (also
+called <strong>NAVSTAR</strong>, it is sometimes used loosely to refer
+to similar systems.  We use the accepted term <strong>Global
+Navigation Satellite System (GNSS)</strong> to refer to all
+satellite-based navigation systems.  The main systems other than GPS
+are GLONASS (Russia), Galileo (EU) and BeidDou (China).  Because
+the <strong>gpsd</strong> project originated when GPS was the
+overwhelmingly dominant paradigm, many parts of the documentation and
+code refer to GPS when GNSS is more accurate.  Our intent is to adjust
+the documentation and to leave the code alone because there is a real
+cost to changing code.</p>
 
-<p>This paragraph is specific to the Navstar system, the principles
-largely apply to other systems.
+<p>This paragraph and much of the following text is specific to
+GPS/NAVSTAR, but the principles largely apply to other systems.
 
 There are presently about 30 dedicated Navstar satellites (full coverage
 can be achieved with 24), twenty thousand km (twelve thousand miles),
