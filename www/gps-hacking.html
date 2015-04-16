@@ -113,19 +113,19 @@ at high latitudes).</p>
 
 <p>You can look at a very nifty <a
 href="http://rhp.detmich.com/gps.html">simulation</a>
-of Navstar satellite orbits. (Requires Java, also includes 
-GLONASS, the Russian military equivalent).</p>  
-<!-- You can also look at 
-<a href='http://www.tsgc.utexas.edu/images/spacecraft/gps/'>pictures</a> 
+of Navstar satellite orbits. (Requires Java, also includes
+GLONASS, the Russian military equivalent).</p>
+<!-- You can also look at
+<a href='http://www.tsgc.utexas.edu/images/spacecraft/gps/'>pictures</a>
 of GPS satellites and the control system. (link dead, TOFIX)-->
 
 <p>Each satellite broadcasts identification pulses, each one including
 the clock time it was sent. A GPS receiver, picking up these
-pulses, and knowing the speed of light, can recover its 
+pulses, and knowing the speed of light, can recover its
 4-dimensional location (Latitude, Longitude, Altitude, and Time).
 Ideally, you would need to solve four simultaneous equations with
 the four unknowns, so would need four visible satellites.  This
-is known as a <strong>3D</strong> fix.  Computing the GPS's exact 
+is known as a <strong>3D</strong> fix.  Computing the GPS's exact
 position with respect to the satellites becomes a relatively
 simple if tedious exercise in spherical trigonometry (which,
 fortunately, the GPS's firmware does for you).
@@ -184,12 +184,12 @@ you're not there any more.</p>
 <p>Another limit, implicit in the geometry, is that GPS is relatively
 poor at getting your precise altitude.  When you can get a signal lock
 on four satellites, a modern GPS will give you longitude and latitude
-within about 10 meters or yards, down to 2 with DGPS correction.  Vertical 
+within about 10 meters or yards, down to 2 with DGPS correction.  Vertical
 uncertainty will be much higher, as much as fifty meters.</p>
 
 <p>People who really <a
 href="http://www.wsrcc.com/wolfgang/gps/accuracy.html">obsess</a>
-about GPS accuracy quote it not as a single figure but as a 
+about GPS accuracy quote it not as a single figure but as a
 probability-of-error: e.g., you're within 10 meters 95% of the
 time and 2 meters 50% of the time.</p>
 
@@ -248,10 +248,10 @@ to four satellites.  Our next topic is how it gets that information
 to a computer in a form your application can use.</p>
 
 <p>Almost all GPSes are serial devices that use either RS-232C or USB
-to communicate with the host machine.  Most track a standard called 
+to communicate with the host machine.  Most track a standard called
 NMEA 0183 which prescribes both electrical signal levels and a data
 encoding.  The protocol is bidirectional, but designed in the expectation
-that most of the traffic will be GPS-to-computer, with commands 
+that most of the traffic will be GPS-to-computer, with commands
 going in the computer-to-GPS direction rare.</p>
 
 <p>The modern trend in GPSes is away from RS232C and towards USB.  USB
@@ -333,12 +333,12 @@ binary protocols.  For example, there was a GPS chipset called
 OEMed by GPS makers.  It spoke NMEA, but had irritating limitations in
 that mode like not being able to accept DGPS corrections.  It
 preferred a tight-packed binary protocol.  There haven't been any new
-Zodiac-based designs in a few years, but a lot of Zodiac-based 
+Zodiac-based designs in a few years, but a lot of Zodiac-based
 GPSes (like the DeLorme EarthMates made before they switched over to a
 SiRF chipset in 2003) are still around.</p>
 
 <p>2004's equivalent of the Zodiac is the SiRF-II chipset, which seems
-to be nearly ubiquitous in inexpensive GPS receivers.  It too speaks 
+to be nearly ubiquitous in inexpensive GPS receivers.  It too speaks
 a binary protocol, but only if you ask it to; it's fully capable
 in NMEA mode. Which is where it boots up.  The idea seems to be
 that you can switch to binary to improve your bits-per-second
@@ -463,7 +463,7 @@ power-management issue.  When no clients are active, <code>gpsd</code> will
 automatically close the GPS device, re-opening it only when another
 client connects to the daemon.</p>
 
-<p>For more details on programming with <code>gpsd</code>, see the 
+<p>For more details on programming with <code>gpsd</code>, see the
 <a href="faq.html">FAQ</a>.</p>
 
 <h1>Where to learn more</h1>
@@ -486,12 +486,12 @@ and DGPS</a>.</dd>
 <dt><a href="http://www.ualberta.ca/~ckuethe/gps/">GPS Hackery</a></dt>
 <dd>Chris Kuethe's page has links to many interesting resources.</dd>
 
-<dt><a href="http://www.ualberta.ca/~norris/gps/DOPnontech.html">DOP, 
+<dt><a href="http://www.ualberta.ca/~norris/gps/DOPnontech.html">DOP,
 the non-technical description</a></dt>
 <dd>Explains the most obscure statistic in GPS output.</dd>
 
 <dt>
-<a href='http://www.eomonline.com/Common/Archives/1995aug/95aug_gps.html'>Two</a> <a href='http://www.eomonline.com/Common/Archives/1996feb/96feb_gps.html'>articles</a> from Earth Observation Magazine</dt> 
+<a href='http://www.eomonline.com/Common/Archives/1995aug/95aug_gps.html'>Two</a> <a href='http://www.eomonline.com/Common/Archives/1996feb/96feb_gps.html'>articles</a> from Earth Observation Magazine</dt>
 <dd>These delve into the mysteries of GPS accuracy.</dd>
 
 <dt><a href='http://users.erols.com/dlwilson/gps.htm'>David L. Wilson's GPS Accuracy Web Page</a></dt>
@@ -505,7 +505,7 @@ href='http://home-2.worldonline.nl/~samsvl/nav2eu.htm'>short
 description</a> I've seen of the GPS Navigation Message as it comes
 down from the satellite.</dd>
 
-<dt><a href='http://www.topology.org/soft/gps.html'>GPS interfaces and 
+<dt><a href='http://www.topology.org/soft/gps.html'>GPS interfaces and
 software</a></dt>
 <dd>Linux and open-source resources for working with GPSes.</dd>
 </dl>
