@@ -75,7 +75,7 @@ writing location-aware applications.</p>
 GPS works and ending with architectural suggestions about how to use
 <code>gpsd</code> to make your application location-aware.</p>
 
-<h2>How GPS Works</h2>
+<h1>How GPS Works</h1>
 
 <p>First, the basics of how GPS works.  It depends on the fact that
 satellite orbits can be modelled accurately.  A GPS receiver is a
@@ -269,7 +269,7 @@ and terminated by CR/LF, at the host machine.  Usually the host gets
 one update a second, but the GPS has the option of sending more
 frequently when it detects a change of position or velocity or status.
 The standard prescribes a serial encoding at 4800bps, 8 bits, one stop
-bit, no parity.</p>
+bit, no parity; although most consumers recievers use 9600bps.</p>
 
 <p>Here are some sample NMEA sentences:</p>
 
@@ -348,7 +348,7 @@ in latency-critical applications.</p>
 information that the GPS has in one atomic message.  In particular,
 you can't get altitude (delivered in the GPGGA sentence only) and speed
 (delivered in GPRMC and GPVTG) at the same time.  This is annoying;
-ideal, you want you position/velocity/time oracle to deliver one
+ideally, you want your position/velocity/time oracle to deliver one
 observation tuple conveying all seven degrees of freedom (t, x, y, z,
 vx, vy, vz) and their error estimates.</p>
 
