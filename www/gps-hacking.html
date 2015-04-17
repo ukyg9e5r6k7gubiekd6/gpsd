@@ -151,7 +151,7 @@ The important limits are on accuracy are now due to physics.
 One is a variable amount of signal lag produced as the GPS
 signals pass through the ionosphere and troposphere, which partly
 refracts radio waves.  This can be largely compensated for by a
-technique called "Differential GPS" or DGPS.  Ground-based reference
+technique called "Differential GPS" (DGPS).  Ground-based reference
 stations are established in well-surveyed locations, and compare
 measured ranges (pseudoranges to be precise) with their calculated
 values.  These errors account for unknown propagation delays, clock
@@ -160,9 +160,7 @@ then tell nearby GPS receivers the required corrections, which are
 then applied to observed pseudoranges before computing a position.
 This information may be broadcast via radio (called "Ground Based
 Augmentation Systems"), or via satellites (called "Space Based
-Augmentation Systems").  An example of GBAS is the National
-Differential GPS system (NDGPS) in the US, transmitting corrections
-around 300 kHz.  Examples of SBAS are WAAS and EGNOS.
+Augmentation Systems").
 See <a href="#dgps">DGPS and friends</a> for details on how this
 works.</p>
 
@@ -204,14 +202,26 @@ Dead link TOFIX -->
 
 <p>DGPS requires out-of-band communication with a service
 providing GPS signal correction information to make the GPS
-positioning more accurate.  WAAS and EGNOS are almost identical
-systems, WAAS being the system covering USA, and EGNOS being the
-system covering Europe.  They provide DGPS-like corrections with
+positioning more accurate.  There are two ways of communicating
+this in real-time, GBAS and SBAS.  An example of GBAS is the National
+Differential GPS system (NDGPS) in the US, transmitting corrections
+around 300 kHz.   There are similar systems all over
+the worldwide, usually run by maritime navigation authorities. A
+disadvantage of these systems is that consumer GPSes do not
+listen on these frequencies, so this information is not really
+available to them.  Another example is the system being installed
+at airports worldwide, to enable precision landing.  Coverage for both
+these system types is between 30km and 40km.</p>
+
+
+<p>Examples of SBAS include WAAS (US), EGNOS (Europe), GAGAN (India), 
+and MSAS and QZSS (Japan).  These systems are almost identical
+in their operation.  They provide DGPS corrections with
 in-band communication &mdash; geo-stationary satellites broadcasting
 GPS signal correction information on the same frequency and format as the
-GPS satellites.  The WAAS/EGNOS system makes GPSes more accurate,
+GPS satellites.  The system makes GPSes more accurate,
 and adds integrity checks making it possible to detect when the
-GPS location is totally wrong.  Unlike DGPS, your GPS will generally
+GPS location is totally wrong.  Unlike GBAS, your GPS will generally
 use these systems automatically whenever it can see the satellites.</p>
 
 <p>WAAS/EGNOS data starts out as normal DGPS stations observing the
