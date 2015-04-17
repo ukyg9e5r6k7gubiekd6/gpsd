@@ -213,8 +213,7 @@ available to them.  Another example is the system being installed
 at airports worldwide, to enable precision landing.  Coverage for both
 these system types is between 30km and 40km.</p>
 
-
-<p>Examples of SBAS include WAAS (US), EGNOS (Europe), GAGAN (India), 
+<p>Examples of SBAS include WAAS (US), EGNOS (Europe), GAGAN (India),
 and MSAS and QZSS (Japan).  These systems are almost identical
 in their operation.  They provide DGPS corrections with
 in-band communication &mdash; geo-stationary satellites broadcasting
@@ -224,31 +223,19 @@ and adds integrity checks making it possible to detect when the
 GPS location is totally wrong.  Unlike GBAS, your GPS will generally
 use these systems automatically whenever it can see the satellites.</p>
 
-<p>WAAS/EGNOS data starts out as normal DGPS stations observing the
+<p>SBAS data starts out as normal DGPS stations observing the
 errors.  That data gets processed and interpolated into a grid which
-models ionospheric and tropospheric delay over the WAAS/EGNOS coverage
+models ionospheric and tropospheric delay over the SBAS coverage
 area.  The GPSes then interpolate into that grid to get an estimate of
-lag for their current position. For points close to a DGPS station,
-raw DGPS should give better accuracy than WAAS/EGNOS.  For points far
-between any reference stations, WAAS should be more accurate than
-software arbitrarily choosing one 'nearby' DGPS station or
-another.</p>
+lag for their current position.  Accuracy will vary based on how
+close a GPS is to a DGPS station.
+</p>
 
-<p>The definitive <a href='http://gps.gov/gps/WAAS-DGPS.htm'>FAQ</a>
-says this: "On the average, WAAS and DGPS accuracy are virtually the
-same, although DGPS accuracy is better when the user is near a DGPS
-transmitting site.  The WAAS architecture is designed to provide
-uniform 7m accuracy (95%) regardless of the location of the receiver
-within the WAAS service area. DGPS is designed to provide better than
-10m navigation service (95%), but typically provides better than 1
-meter horizontal positioning accuracy (95%) when the user is less than
-100 nautical miles from the DGPS transmitting site. Accuracy then
-degrades at a rate of approximately 1 meter per hundred nautical miles
-as the user moves away from the transmitting site."</p>
-
-<p>An important caveat about WAAS is that it doesn't work at sea.
-You're too far away from any DGPS ground stations for the WAAS birds
-to interpolate a good value for atmospheric display.</p>
+<p>SBAS systems have wider coverage areas than GBAS, but still
+not worldwide; as can be seen from the list above, each country
+has a system covering its area of interest.  See
+<a href="https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/SBAS_Service_Areas.png/800px-SBAS_Service_Areas.png">SBAS Service Areas</a>.
+</p>
 
 <h1>How GPS Hardware Talks To Computers</h1>
 
