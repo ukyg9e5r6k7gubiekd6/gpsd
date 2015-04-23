@@ -36,7 +36,7 @@ If this file is present on start of webgps.py, it is loaded. This allows to
 restart webgps.py without losing accumulated satellite tracks.
 """
 
-import time, calendar, math, socket, sys, os, select, pickle
+import time, math, sys, os, pickle
 try:
     from gps import *
 except ImportError:
