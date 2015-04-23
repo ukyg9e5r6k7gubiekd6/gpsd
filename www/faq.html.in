@@ -159,7 +159,7 @@ a new USB device of that kind and giving you the device path -
 
 <p>3b. If your receiver lists in lsusb(1) but doesn't show up as a ttyUSBx
 device, don't lose hope.  It might be a ttyACM device, probably
-/dev/ttyACM0; some receivers, including for example the u-blox EVK 6H 
+/dev/ttyACM0; some receivers, including for example the u-blox EVK 6H
 evaluation kit, announce themselves as USB modems.</p>
 
 <p>3c. For a Bluetooth device, see our <a href="bt.html">Bluetooth
@@ -270,7 +270,7 @@ install gps-clients gpsbabel' and a 'sudo modprobe garmin_gps' and all
 was working.
 </blockquote>
 
-<p>On the BSDs and Mac OS X, you're out of luck. As of April 2013 we 
+<p>On the BSDs and Mac OS X, you're out of luck. As of April 2013 we
 don't know of any shim that makes USB Garmins work on these.</p>
 
 <h1 id='raspberry'>Time is wrong on my Raspberry Pi</h1>
@@ -699,9 +699,9 @@ Service HOWTO</a> that gives detailed setup instructions.</p>
 India (GAGAN), etc, with more being deployed.</p>
 
 <p>In your skyview, look for GPS sats with numbers 120 and above;
-those are the Space Based Augmentation System (SBAS) birds. For U.S. 
-users 138 is the most likely PRN to show up. 
-If your GPS receiver can see them at all, it can probably use them 
+those are the Space Based Augmentation System (SBAS) birds. For U.S.
+users 138 is the most likely PRN to show up.
+If your GPS receiver can see them at all, it can probably use them
 for correction when you're within the coverage area of a
 SBAS. But you can't be sure of this unless
 they're marked as part of the satellite set for a fix. On the other
@@ -875,7 +875,7 @@ chipset on your motherboard or in a hub can do it, too.</p>
 <dt><b>1. Suppress the autobauding loop</b></dt>
 <dd>The autobauding hunt loop in <code>gpsd</code> stresses chipsets and
 drivers in unusual ways, which is why these sorts of bugs show up more
-often under <code>gpsd</code> than most other USB-using software.  The first 
+often under <code>gpsd</code> than most other USB-using software.  The first
 thing to try is to <a href="#baud">suppress the autobauding loop</a>.</dd>
 
 <dt><b>2. Upgrade your kernel</b></dt>
@@ -883,7 +883,7 @@ thing to try is to <a href="#baud">suppress the autobauding loop</a>.</dd>
 up relatively often and are usually fixed pretty quickly.</dd>
 
 <dt><b>3. Try a different USB-to-serial chip</b></dt>
-<dd>Another thing to try is a GPS with a different USB-to-serial chip.  
+<dd>Another thing to try is a GPS with a different USB-to-serial chip. 
 You probably do not have a a chip-specific problem if you're using
 a PL23203, as those drivers have been tested a lot.  But we've seen
 reports that were definitely chip-specific on less common chipsets
@@ -896,7 +896,7 @@ information to allow a decent open-source driver to be written.</dd>
 </dl>
 
 <p>When you have had such a problem with <code>gpsd</code>, and are
-able to work around it or fix it, please inform us so we can 
+able to work around it or fix it, please inform us so we can
 improve this FAQ.</p>
 
 <h1 id='lockup'>My <code>gpsd</code> sometimes stops responding overnight</h1>
