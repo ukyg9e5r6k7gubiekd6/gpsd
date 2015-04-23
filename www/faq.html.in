@@ -95,7 +95,7 @@ GPSD Frequently Asked Questions
     <li><a href='#speed'>Why does my receiver report wildly fluctuating speed?</a></li>
     <li><a href='#accuracy'>How can I improve fix accuracy from my GPS?</a></li>
     <li><a href='#time'>How can I improve time reference accuracy from my GPS?</a></li>
-    <li><a href='#waas'>How can I tell if WAAS/EGNOS is working?</a></li>
+    <li><a href='#waas'>How can I tell if SBAS Augmentation (eg WAAS/EGNOS) is working?</a></li>
   </ul>
   </li>
 
@@ -692,15 +692,20 @@ sensor and computer.</p>
 <p>There is now a <a href="gpsd-time-service-howto.html">GPSD Time
 Service HOWTO</a> that gives detailed setup instructions.</p>
 
-<h1 id='waas'>How can I tell if WAAS/EGNOS is working?</h1>
+<h1 id='waas'>How can I tell if SBAS Augmentation (eg WAAS/EGNOS) is working?</h1>
+
+<p>The earliest SBAS systems were WAAS (North America) and EGNOS
+(Europe).  Multiple such systems exist, covering Japan (MSAS),
+India (GAGAN), etc, with more being deployed.</p>
 
 <p>In your skyview, look for GPS sats with numbers 120 and above;
-those are the WAAS/EGNOS birds. For U.S. users 138 is the most likely
-PRN to show up. If your GPS receiver can see them at all, it can
-probably use them for correction when you're within range of a
-WAAS/EGNOS ground station. But you can't be sure of this unless
+those are the Space Based Augmentation System (SBAS) birds. For U.S. 
+users 138 is the most likely PRN to show up. 
+If your GPS receiver can see them at all, it can probably use them 
+for correction when you're within the coverage area of a
+SBAS. But you can't be sure of this unless
 they're marked as part of the satellite set for a fix. On the other
-hand, some receivers may use them <em>without</em> marking the WAAS/EGNOS
+hand, some receivers may use them <em>without</em> marking the SBAS
 satellites as part of the fix set. Vendor documentation in this area
 tends to be murky or nonexistent.</p>
 
@@ -708,11 +713,7 @@ tends to be murky or nonexistent.</p>
 after the E or W qualifier for the latitude.  This is the GPS fix
 quality indicator field. 2 indicates that the receiver is getting and
 using differential-GPS corrections.  On a consumer-grade GPS this
-usually means WAAS/EGNOS is in use.</p>
-
-<p>Note that for WAAS to work, you need to be within 500 miles of a
-WAAS ground station.  At present (2013) coverage is only available
-in the U.S., Europe, and the near ocean waters of these regions.</p>
+usually means SBAS is in use.</p>
 
 <p>Unfortunately, the mere presence of "WAAS" in your receiver's
 feature list is not a guarantee that WAAS is actually supported.  This
