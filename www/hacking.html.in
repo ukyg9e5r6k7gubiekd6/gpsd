@@ -272,7 +272,7 @@ to support an RTCM104 encoder.</p>
 <p>The project implementation languages are C and Python.  The core
 libgpsd libraries (and the daemon, which is a thin wrapper around
 them) are written in C; the test and profiling tools are written in
-Python, with a limited amount of glue in POSIX-conformant sh and some 
+Python, with a limited amount of glue in POSIX-conformant sh and some
 bash.</p>
 
 <p>Code in other languages will, in general, be accepted only if
@@ -485,7 +485,7 @@ a new JSON report to the object set.</p>
 Update the appropriate macros in gpsd.h-tail.  In the comment above
 them, add a brief description of the change.</p></li>
 
-<li><p>Update the JSON parse templates in libgps_json.c.  If you don't do this, 
+<li><p>Update the JSON parse templates in libgps_json.c.  If you don't do this,
 clients (possibly including gpsmon) will throw an error when they trip over the
 new field.</p></li>
 
@@ -495,7 +495,7 @@ one.</p></li>
 
 <li><p>The hard part: the data wants to go somewhere on the client side, but
 doing this may involve a compatibility break in the user-visible core
-structures.  You need to make a call on whether to extend them or accept 
+structures.  You need to make a call on whether to extend them or accept
 that the new data will be invisible until the next structure upgrade
 and if so document that as an item in TODO.</p></li>
 </ol>
@@ -503,7 +503,7 @@ and if so document that as an item in TODO.</p></li>
 <h2 id="standards">C, standards and style</h2>
 
 <p>The C code is written with a large subset of C99.  You are
-encouraged to use <code>bool</code>, designated initializers, 
+encouraged to use <code>bool</code>, designated initializers,
 <code>inline</code> and <code>restrict</code>.  Do not assume
 that type specifiers will default to int.</p>
 
@@ -659,7 +659,7 @@ would be nearly too small to see.</p>
 
 <div>&nbsp;</div>
 <div>
-<img style="display: block;margin-left: auto;margin-right:auto" 
+<img style="display: block;margin-left: auto;margin-right:auto"
 src="cycle.svg" alt="Cycle timing diagram">
 </div>
 <div>&nbsp;</div>
@@ -686,7 +686,7 @@ Unix time.</li>
 
 <li><code>chars:</code> Total characters transmitted between SOC
 and RTIME. Note; this could be fewer than the number of characters
-in the entire cycle; the packet-sniffer might assemble later packets 
+in the entire cycle; the packet-sniffer might assemble later packets
 which are not analyzed by the driver.</li>
 
 <li><code>sats:</code> Number of satellites used in the cycle's fix.</li>
@@ -1051,7 +1051,7 @@ cleaning up after you.  Here are the things we'll be looking for.
 need to parse the sentences coming in from your sensor and unpack them
 into a substructure that lives inside struct gps_data_t in gps.h.</p>
 
-<p>In the most general case this might require you to 
+<p>In the most general case this might require you to
 <a href="writing-a-driver.html">write a new driver</a>.  We won't
 cover that case here; more usually what you'll be doing is
 adding support for a few new NMEA sentence types.</p>
@@ -1116,13 +1116,13 @@ your sentences. Clients need to be able to handle these, and that means
 our client libraries need to know how to unpack the JSON into
 client-side versions of the data structures updated at driver level
 inside the daemon.</p>
- 
+
 <p>This is actually the trickiest part of adding a new sentence. For
 bindings other than the core C one the binding maintainers usually
 handle it, but you must write the C support yourself.</p>
 
 <p>This will require that you learn how to tell GPSD's internal JSON
-parser how to unpack your objects.  This will come down to composing 
+parser how to unpack your objects.  This will come down to composing
 C initializers that control the parse; look in libgps_json.c for
 examples of how to do this.</p>
 
@@ -1140,8 +1140,8 @@ the SConstruct file).  Patches that are not just clean but properly
 annotated for static checking will give the maintainers warm
 fuzzy feelings and go right to the front of the queue.</p>
 
-<p>Adding sentence support to the Python binding is usually trivial; 
-if you've stuck to a simple enough design of your JSON object(s) you 
+<p>Adding sentence support to the Python binding is usually trivial;
+if you've stuck to a simple enough design of your JSON object(s) you
 may not have to do any work at all.  If you have any Python chops,
 looking into this yourself will make the maintainers happy.</p>
 
@@ -1633,7 +1633,7 @@ the following order:</p>
 
 <dl>
 <dt>1. Check the <a href="@BUGTRACKER@">bug tracker</a> for
-release blockers.</dt>  
+release blockers.</dt> 
 <dd><p>Check support requests, too, and <a href="https://bugs.debian.org/cgi-bin/pkgreport.cgi?src=gpsd&amp;repeatmerged=yes">Debian's GPSD buglist</a>.</p></dd>
 
 <dt>2. Issue the pre-release heads-up</dt>
@@ -1644,7 +1644,7 @@ will have a day or so to get their urgent fixes in.</p></dd>
 <dd><p>See the instructions near validation-list in the scons recipe.</p></dd>
 
 <dt>4. Check that the version number is correct</dt>
-<dd><p>It will need to be modified in SConstruct.  Make sure the 'dev' 
+<dd><p>It will need to be modified in SConstruct.  Make sure the 'dev'
 suffix is gone.</p></dd>
 
 <dt>5. Update the NEWS file</dt>
@@ -1656,7 +1656,7 @@ SConstruct.</p></dd>
 href="http://devel.recluse.de/~bzed/scan-build/gpsd/">scan-build</a>,
 and Coverity warnings and fix them.</p></dd>
 
-<dt>7. Run the regression tests and other checks</dt> 
+<dt>7. Run the regression tests and other checks</dt>
 <dd><p>If it doesn't pass regressions, it isn't ready to ship.  Run
 <code>scons releasecheck</code> and watch for errors on a
 representative selection of <a
