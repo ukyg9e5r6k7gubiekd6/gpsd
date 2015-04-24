@@ -119,18 +119,14 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	 */
 	before = shared->bookend1;
 	memory_barrier();
-	(void)memcpy((void *)&noclobber,
-		     (void *)&shared->gpsdata,
-		     sizeof(struct gps_data_t));
+	noclobber = shared->gpsdata;
 	memory_barrier();
 	after = shared->bookend2;
 
 	if (before != after)
 	    return 0;
 	else {
-	    (void)memcpy((void *)gpsdata,
-			 (void *)&noclobber,
-			 sizeof(struct gps_data_t));
+	    *gpsdata = noclobber;
 	    gpsdata->privdata = private_save;
 	    PRIVATE(gpsdata)->tick = after;
 	    if ((gpsdata->set & REPORT_IS)!=0) {

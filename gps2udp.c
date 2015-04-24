@@ -240,7 +240,7 @@ static ssize_t read_gpsd(char *message, size_t len)
         /* prepare for a blocking read with a 10s timeout */
         tv.tv_sec =  10;
         tv.tv_usec = 0;
-        memcpy(&fds, &master, sizeof(fd_set));
+        fds = master;
         result = select(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv);
       
         switch (result)

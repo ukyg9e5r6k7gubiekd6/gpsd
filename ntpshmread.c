@@ -85,7 +85,7 @@ enum segstat_t ntp_read(struct shmTime *shm_in, struct shm_stat_t *shm_stat, con
      * page size).
      */
     memory_barrier();
-    memcpy((void *)&shmcopy, (void *)shm, sizeof(struct shmTime));
+    shmcopy = *shm;
 
     /*
      * An update consumer such as ntpd should zero the valid flag at this point.
