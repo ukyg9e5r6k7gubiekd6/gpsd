@@ -90,9 +90,7 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 */
 	shared->bookend2 = tick;
 	memory_barrier();
-	memcpy((void *)((char *)context->shmexport + offsetof(struct shmexport_t, gpsdata)),
-	       (void *)gpsdata,
-	       sizeof(struct gps_data_t));
+	shared->gpsdata = *gpsdata;
 	memory_barrier();
 #ifndef USE_QT
 	shared->gpsdata.gps_fd = SHM_PSEUDO_FD;
