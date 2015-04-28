@@ -1681,6 +1681,18 @@ check = env.Alias('check', [
 
 env.Alias('testregress', check)
 
+# Remove all shared-memory segments.  Normally only needs to be run
+# when a segment size changes.
+Utility('shmclean', [], ["ipcrm  -M 0x4e545030;"
+                         "ipcrm  -M 0x4e545031;"
+                         "ipcrm  -M 0x4e545032;"
+                         "ipcrm  -M 0x4e545033;"
+                         "ipcrm  -M 0x4e545034;"
+                         "ipcrm  -M 0x4e545035;"
+                         "ipcrm  -M 0x4e545036;"
+                         "ipcrm  -M 0x47505345;"
+                         ])
+
 # The website directory
 #
 # None of these productions are fired by default.
