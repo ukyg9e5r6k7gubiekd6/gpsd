@@ -15,6 +15,8 @@
  *
  * this only handles the case where two normalized timespecs
  * are added or subracted.  (e.g. only a one needs to be borrowed/carried
+ *
+ * NOTE: this normalization is not the same as ntpd uses
  */
 #define NS_IN_SEC	1000000000
 #define MS_IN_SEC	1000000
