@@ -21,18 +21,19 @@ upload
 gpsd.php
 valgrind-audit.py
 # Unit tests
-test_float
 test_bits
-test_matrix
-test_gpsmm
-test_qgpsmm
-test_packet
-test_mktime
-test_mkgmtime
+test_float
 test_geoid
+test_gpsmm
 test_json
-test_trig
 test_libgps
+test_matrix
+test_mkgmtime
+test_mktime
+test_packet
+test_qgpsmm
+test_timespec
+test_trig
 # Other generated files
 gpsd.rules
 gps.html
