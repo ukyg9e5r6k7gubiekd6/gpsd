@@ -68,7 +68,7 @@ struct format_test format_tests[] = {
 	{ { -1, -1}, "-1.000000001", 1},
 };
 
-static int test_subtract( void) 
+static int test_subtract( void)
 {
     struct subtract_test *p = subtract_tests;
     int fail_count = 0;
@@ -99,7 +99,7 @@ static int test_subtract( void)
 	}
 	p++;
     };
-    
+
     if ( fail_count ) {
 	printf("subtract test failed %d tests\n", fail_count );
     } else {
@@ -108,7 +108,7 @@ static int test_subtract( void)
     return fail_count;
 }
 
-static int test_format(void) 
+static int test_format(void)
 {
     struct format_test *p = format_tests;
     int fail_count = 0;
