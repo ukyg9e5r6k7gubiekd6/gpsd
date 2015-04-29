@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "compiler.h"
+#include "revision.h"
 #include "timespec.h"
 
 #define TS_ZERO         {0,0}
@@ -27,6 +28,8 @@
 /* Dec 31, 23:59 2037 GMT */
 #define TS_2037         {2145916799, 0}
 #define TS_2037_ONE     {2145916799, 1}
+#define TS_2037_TWO     {2145916799, 2}
+#define TS_2037_X       {2145916799, 123456789}
 #define TS_2037_NINES   {2145916799, 999999999}
 
 struct subtract_test {
@@ -160,6 +163,46 @@ static int test_format(int verbose )
     return fail_count;
 }
 
+struct timespec exs[] = {
+	TS_ZERO_ONE,
+	TS_ZERO_TWO,
+	TS_ZERO_NINES,
+	TS_ONE,
+	TS_ONE_ONE,
+	TS_TWO,
+	TS_2037,
+	TS_2037_ONE,
+	TS_2037_TWO,
+	TS_2037_X,
+	TS_2037_NINES,
+	TS_ZERO,
+};
+
+static void ex_precision(void)
+{
+	float f;
+	double d;
+	char buf[TIMESPEC_LEN];
+	struct timespec *v = exs;
+
+	puts( "\nPrecision examples:\n\n");
+	printf( "\n%10stimespec%14sdouble%16sfloat\n\n", "", "", "");
+
+	while ( 1 ) {
+	    d = TSTONS( v );
+	    f = (float) d;
+	    timespec_str( v, buf, sizeof(buf) );
+	    printf( "%21s %21.9f %21.9f \n", buf, d, f);
+
+	    if ( ( 0 == v->tv_sec ) && ( 0 == v->tv_nsec) ) {
+		/* done */
+		break;
+	    }
+	    v++;
+	}
+
+}
+
 int main(int argc, char *argv[])
 {
     int fail_count = 0;
@@ -168,13 +211,16 @@ int main(int argc, char *argv[])
 
     while ((option = getopt(argc, argv, "h?vV")) != -1) {
 	switch (option) {
+	default:
+		fail_count = 1;
+		/* FALL THROUGH! */
 	case '?':
 	case 'h':
-	default:
 	    (void)fputs("usage: test_timespec [-v] [-V]\n", stderr);
-	    exit(EXIT_FAILURE);
+	    exit(fail_count);
 	case 'V':
-	    (void)fprintf( stderr, "test_timespec version %s\n", "");
+	    (void)fprintf( stderr, "test_timespec %s\n", 
+		VERSION);
 	    exit(EXIT_SUCCESS);
 	case 'v':
 	    verbose = 1;
@@ -191,5 +237,9 @@ int main(int argc, char *argv[])
 	exit(1);
     }
     printf("timespec tests succeeded\n");
+
+    if ( verbose ) {
+	ex_precision();
+    }
     exit(0);
 }
