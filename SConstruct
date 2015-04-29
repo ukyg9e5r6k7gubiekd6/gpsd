@@ -1662,7 +1662,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 describe = Utility('describe', [],
                    ['@echo "Run normal regression tests for %s..."' %(rev.strip(),)])
 testclean = Utility('testclean', [],
-                    'rm -f test_bits test_matrix test_geoid test_json test_libgps test_mktime test_packet')
+                    'rm -f test_bits test_geoid test_json test_libgps test_matrix test_mktime test_packet test_timespec')
 check = env.Alias('check', [
     describe,
     python_compilation_regress,
@@ -1679,6 +1679,7 @@ check = env.Alias('check', [
     unpack_regress,
     json_regress,
     testclean,
+    test_timespec,
     ])
 
 env.Alias('testregress', check)
