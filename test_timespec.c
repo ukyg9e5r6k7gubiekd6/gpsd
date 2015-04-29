@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <time.h>     /* for time_t */
 #include <math.h>
+#include <unistd.h>
 
 #include "compiler.h"
 #include "timespec.h"
@@ -19,8 +20,14 @@
 #define TS_ONE          {1,0}
 #define TS_ONE_ONE      {1,1}
 #define TS_TWO          {2,0}
-#define TS_N_ONE        {-1,0}
 #define TS_N_ZERO_ONE   {0,-1}
+#define TS_N_ZERO_TWO   {0,-2}
+#define TS_N_ZERO_NINES {0,-999999999}
+#define TS_N_ONE        {-1,0}
+/* Dec 31, 23:59 2037 GMT */
+#define TS_2037         {2145916799, 0}
+#define TS_2037_ONE     {2145916799, 1}
+#define TS_2037_NINES   {2145916799, 999999999}
 
 struct subtract_test {
 	struct timespec a;
@@ -30,25 +37,30 @@ struct subtract_test {
 };
 
 struct subtract_test subtract_tests[] = {
-	{ TS_ZERO,        TS_ZERO,        TS_ZERO,       0},
-	{ TS_ONE,         TS_ONE,         TS_ZERO,       0},
-	{ TS_ZERO_ONE,    TS_ZERO_ONE,    TS_ZERO,       0},
-	{ TS_ONE_ONE,     TS_ONE_ONE,     TS_ZERO,       0},
-	{ TS_N_ONE,       TS_N_ONE,       TS_ZERO,       0},
-	{ TS_N_ZERO_ONE,  TS_N_ZERO_ONE,  TS_ZERO,       0},
-	{ TS_ZERO_NINES,  TS_ZERO_NINES,  TS_ZERO,       0},
-	{ TS_ZERO,        TS_N_ONE,       TS_ONE,        0},
-	{ TS_ONE,         TS_ZERO,        TS_ONE,        0},
-	{ TS_TWO,         TS_ONE,         TS_ONE,        0},
-	{ TS_ONE_ONE,     TS_ONE,         TS_ZERO_ONE,   0},
-	{ TS_ONE,         TS_ZERO_NINES,  TS_ZERO_ONE,   0},
-	{ TS_ZERO_TWO,    TS_ZERO_ONE,    TS_ZERO_ONE,   0},
-	{ TS_ZERO,        TS_ONE,         TS_N_ONE,      0},
-	{ TS_ONE,         TS_TWO,         TS_N_ONE,      0},
-	{ TS_ZERO,        TS_ZERO_ONE,    TS_N_ZERO_ONE, 0},
-	{ TS_ONE,         TS_ONE_ONE,     TS_N_ZERO_ONE, 0},
-	{ TS_ZERO_ONE,    TS_ZERO_TWO,    TS_N_ZERO_ONE, 0},
-	{ TS_ZERO_NINES,  TS_ONE,         TS_N_ZERO_ONE, 1},
+	{ TS_ZERO,        TS_ZERO,        TS_ZERO,         0},
+	{ TS_ONE,         TS_ONE,         TS_ZERO,         0},
+	{ TS_ZERO_ONE,    TS_ZERO_ONE,    TS_ZERO,         0},
+	{ TS_ONE_ONE,     TS_ONE_ONE,     TS_ZERO,         0},
+	{ TS_N_ONE,       TS_N_ONE,       TS_ZERO,         0},
+	{ TS_N_ZERO_ONE,  TS_N_ZERO_ONE,  TS_ZERO,         0},
+	{ TS_ZERO_NINES,  TS_ZERO_NINES,  TS_ZERO,         0},
+	{ TS_ZERO,        TS_N_ONE,       TS_ONE,          0},
+	{ TS_ONE,         TS_ZERO,        TS_ONE,          0},
+	{ TS_TWO,         TS_ONE,         TS_ONE,          0},
+	{ TS_ONE_ONE,     TS_ONE,         TS_ZERO_ONE,     0},
+	{ TS_ONE,         TS_ZERO_NINES,  TS_ZERO_ONE,     0},
+	{ TS_ZERO_TWO,    TS_ZERO_ONE,    TS_ZERO_ONE,     0},
+	{ TS_2037_ONE,    TS_2037,        TS_ZERO_ONE,     0},
+	{ TS_ONE_ONE,     TS_ZERO_NINES,  TS_ZERO_TWO,     0},
+	{ TS_2037_NINES,  TS_2037,        TS_ZERO_NINES,   0},
+	{ TS_ZERO,        TS_ONE,         TS_N_ONE,        0},
+	{ TS_ONE,         TS_TWO,         TS_N_ONE,        0},
+	{ TS_ZERO,        TS_ZERO_ONE,    TS_N_ZERO_ONE,   0},
+	{ TS_ONE,         TS_ONE_ONE,     TS_N_ZERO_ONE,   0},
+	{ TS_ZERO_ONE,    TS_ZERO_TWO,    TS_N_ZERO_ONE,   0},
+	{ TS_2037,        TS_2037_ONE,    TS_N_ZERO_ONE,   0},
+	{ TS_ZERO_NINES,  TS_ONE_ONE,     TS_N_ZERO_TWO,   0},
+	{ TS_2037,        TS_2037_NINES,  TS_N_ZERO_NINES, 1},
 };
 
 struct format_test {
@@ -58,17 +70,25 @@ struct format_test {
 };
 
 struct format_test format_tests[] = {
-	{ TS_ZERO,   " 0.000000000", 0},
-	{ { 0, 1},   " 0.000000001", 0},
-	{ TS_ONE,    " 1.000000000", 0},
-	{ { 1, 1},   " 1.000000001", 0},
-	{ { 0, -1},  "-0.000000001", 0},
-	{ TS_N_ONE,  "-1.000000000", 0},
-	{ { -1, 1},  "-1.000000001", 0},
-	{ { -1, -1}, "-1.000000001", 1},
+	{ TS_ZERO,         " 0.000000000", 0},
+	{ TS_ZERO_ONE,     " 0.000000001", 0},
+	{ TS_ZERO_TWO,     " 0.000000002", 0},
+	{ TS_ZERO_NINES,   " 0.999999999", 0},
+	{ TS_ONE,          " 1.000000000", 0},
+	{ TS_ONE_ONE,      " 1.000000001", 0},
+	{ TS_TWO,          " 2.000000000", 0},
+	{ TS_N_ZERO_ONE,   "-0.000000001", 0},
+	{ TS_N_ZERO_TWO,   "-0.000000002", 0},
+	{ TS_N_ZERO_NINES, "-0.999999999", 0},
+	{ TS_N_ONE,        "-1.000000000", 0},
+	{ { -1, 1},        "-1.000000001", 0},
+	{ { -1, -1},       "-1.000000001", 0},
+	{ TS_2037,         " 2145916799.000000000", 0},
+	{ TS_2037_ONE,     " 2145916799.000000001", 0},
+	{ TS_2037_NINES,   " 2145916799.999999999", 1},
 };
 
-static int test_subtract( void)
+static int test_subtract( int verbose )
 {
     struct subtract_test *p = subtract_tests;
     int fail_count = 0;
@@ -85,12 +105,12 @@ static int test_subtract( void)
         timespec_str( &p->b, buf_b, sizeof(buf_b) );
         timespec_str( &p->c, buf_c, sizeof(buf_c) );
         timespec_str( &r,    buf_r, sizeof(buf_r) );
-	printf("%s - %s = %s", buf_a, buf_b, buf_r);
 	if ( (p->c.tv_sec != r.tv_sec) || (p->c.tv_nsec != r.tv_nsec) ) {
-		printf(", FAIL s/b: %s\n", buf_c);
+		printf("%21s - %21s = %21s, FAIL s/b %21s\n", 
+		buf_a, buf_b, buf_r, buf_c);
 		fail_count++;
-	} else {
-		printf("\n");
+	} else if ( verbose ) {
+		printf("%21s - %21s = %21s\n", buf_a, buf_b, buf_r);
 	}
 		
 	
@@ -103,12 +123,12 @@ static int test_subtract( void)
     if ( fail_count ) {
 	printf("subtract test failed %d tests\n", fail_count );
     } else {
-	printf("subtract test succeeded\n");
+	puts("subtract test succeeded\n");
     }
     return fail_count;
 }
 
-static int test_format(void)
+static int test_format(int verbose )
 {
     struct format_test *p = format_tests;
     int fail_count = 0;
@@ -118,13 +138,12 @@ static int test_format(void)
 	int fail;
 
         timespec_str( &p->input, buf, sizeof(buf) );
-	printf("%s", buf);
 	fail = strncmp( buf, p->expected, TIMESPEC_LEN);
 	if ( fail ) {
-		printf(", FAIL s/b: %s\n", p->expected);
+		printf("%21s, FAIL s/b: %21s\n", buf,  p->expected);
 		fail_count++;
-	} else {
-		printf("\n");
+	} else if ( verbose )  {
+		printf("%21s\n", buf);
 	}
 	
 	if ( p->last ) {
@@ -136,17 +155,36 @@ static int test_format(void)
     if ( fail_count ) {
 	printf("timespec_str test failed %d tests\n", fail_count );
     } else {
-	printf("timespec_str test succeeded\n");
+	puts("timespec_str test succeeded\n");
     }
     return fail_count;
 }
 
-int main(int argc UNUSED, char *argv[] UNUSED)
+int main(int argc, char *argv[])
 {
     int fail_count = 0;
+    int verbose = 0;
+    int option;
 
-    fail_count = test_format();
-    fail_count = test_subtract();
+    while ((option = getopt(argc, argv, "h?vV")) != -1) {
+	switch (option) {
+	case '?':
+	case 'h':
+	default:
+	    (void)fputs("usage: test_timespec [-v] [-V]\n", stderr);
+	    exit(EXIT_FAILURE);
+	case 'V':
+	    (void)fprintf( stderr, "test_timespec version %s\n", "");
+	    exit(EXIT_SUCCESS);
+	case 'v':
+	    verbose = 1;
+	    break;
+	}
+    }
+
+
+    fail_count = test_format( verbose );
+    fail_count += test_subtract( verbose );
 
     if ( fail_count ) {
 	printf("timespec tests failed %d tests\n", fail_count );
