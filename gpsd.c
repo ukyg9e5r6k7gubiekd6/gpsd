@@ -1747,7 +1747,7 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 		    && (tp == NULL || hold.dist > tp->dist))
 		    tp = sp;
 	    if (tp != NULL)
-		*tp = hold;
+		memcpy(tp, &hold, sizeof(struct dgps_server_t));
 	}
     }
     (void)fclose(sfp);

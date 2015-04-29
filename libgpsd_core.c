@@ -985,7 +985,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 
     /* save old fix for later error computations */
     if (fix->mode >= MODE_2D)
-	*oldfix = *fix;
+	(void)memcpy(oldfix, fix, sizeof(struct gps_fix_t));
 }
 #endif /* NOFLOATS_ENABLE */
 
@@ -999,7 +999,7 @@ int gpsd_await_data(fd_set *rfds,
     int status;
 
     FD_ZERO(efds);
-    *rfds = *all_fds;
+    (void)memcpy((char *)rfds, (char *)all_fds, sizeof(fd_set));
     gpsd_log(errout, LOG_RAW + 2, "select waits\n");
     /*
      * Poll for user commands or GPS data.  The timeout doesn't
