@@ -12,6 +12,7 @@
 
 #include "compiler.h"
 #include "revision.h"
+#include "ppsthread.h"
 #include "timespec.h"
 
 #define TS_ZERO         {0,0}
@@ -180,12 +181,16 @@ struct timespec exs[] = {
 
 static void ex_precision(void)
 {
+	long l;
 	float f;
 	double d;
 	char buf[TIMESPEC_LEN];
+	char buf1[TIMESPEC_LEN];
 	struct timespec *v = exs;
+	struct timespec v1 = TS_2037;
+	struct timespec v2 = TS_2037_X;
 
-	puts( "\nPrecision examples:\n\n");
+	puts( "\nPrecision examples:\n\n  Simple conversions\n");
 	printf( "\n%10stimespec%14sdouble%16sfloat\n\n", "", "", "");
 
 	while ( 1 ) {
@@ -200,6 +205,20 @@ static void ex_precision(void)
 	    }
 	    v++;
 	}
+
+	printf( "\n\nSubtraction:\n");
+	printf( "\n\ntimespec_diff_ns( x, y) = z\n");
+
+	timespec_str( &v1, buf, sizeof(buf) );
+	timespec_str( &v2, buf1, sizeof(buf1) );
+	l = timespec_diff_ns( v1, v2);
+	printf( "%21s - %21s =  %21ld\n", buf, buf1, l);
+
+	v1.tv_sec += 4;
+	timespec_str( &v1, buf, sizeof(buf) );
+	timespec_str( &v2, buf1, sizeof(buf1) );
+	l = timespec_diff_ns( v1, v2);
+	printf( "%21s - %21s =  %21ld\n", buf, buf1, l);
 
 }
 
