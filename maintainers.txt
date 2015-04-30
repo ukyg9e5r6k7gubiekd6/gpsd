@@ -1,7 +1,7 @@
 = GPSD area maintainers =
 
 This file points at responsible submaintainers for various portions
-of the GPSD code, packaging, and ports. 
+of the GPSD code, packaging, and ports.
 
 == Modules and drivers ==
 

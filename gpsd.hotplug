@@ -65,13 +65,13 @@ fi
 # the node, and the node is not created until after you kill the
 # gpsd script, because the gpsd script waits forever for the node
 # to appear.
-# 
+#
 # This is a race condition, and is best fixed by running the
 # actual wait/hotplug portion in the background.
 
 {
     #logger -t gpsd.hotplug -p daemon.info "waiting for" $DEVNAME
-    while [ -x $DEVNAME ] 
+    while [ -x $DEVNAME ]
     do
 	sleep 1
     done

@@ -10,9 +10,9 @@ Description: A monitoring daemon for GPSes, AIS radios, and other nav sensors.
  expected to generate position information in a well-known format -- as
  NMEA-0183 sentences, SiRF binary, Rockwell binary, Garmin binary
  format, or other vendor binary protocols.  gpsd takes this
- information from the GPS and translates it into JSON objects in a uniform 
- and well-documented format that easier for clients to understand.  The 
- distribution includes sample clients, application interface libraries, 
+ information from the GPS and translates it into JSON objects in a uniform
+ and well-documented format that easier for clients to understand.  The
+ distribution includes sample clients, application interface libraries,
  and test/profiling tools.
 
 XBS-Destinations: savannah, freecode, mailto:@ANNOUNCE@

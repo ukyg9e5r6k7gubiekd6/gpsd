@@ -46,7 +46,7 @@ done
 shift $((${OPTIND} - 1))
 
 candevice=$1
- 
+
 case ${candevice} in
 plx_pci)
     # For the SJA1000 based PCI or PCI-Express CAN interface
@@ -74,7 +74,7 @@ slcan)
     device=${2:-/dev/ttyUSB0};
     modprobe slcan;
     slcan_attach -f -s5 -o ${device};
-    slcand `basename ${device}`; 
+    slcand `basename ${device}`;
     ip link set slcan${net} up;;
 beaglebone)
     # For CAN interface on a BeagleBone

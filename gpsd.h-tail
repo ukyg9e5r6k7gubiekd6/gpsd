@@ -40,7 +40,7 @@
 
 #ifndef DEFAULT_GPSD_SOCKET
 #define DEFAULT_GPSD_SOCKET	"/var/run/gpsd.sock"
-#endif 
+#endif
 
 /* Some internal capabilities depend on which drivers we're compiling. */
 #if !defined(AIVDM_ENABLE) && defined(NMEA2000_ENABLE)
@@ -320,7 +320,7 @@ typedef unsigned int driver_mask_t;
 				  || (dp)->rate_switcher != NULL))
 
 /*
- * True if a driver selection of it should be sticky. 
+ * True if a driver selection of it should be sticky.
  */
 #define STICKY(dp)		((dp) != NULL && ((dp)->flags & DRIVER_STICKY) != 0)
 
@@ -741,7 +741,7 @@ extern void json_rtcm2_dump(const struct rtcm2_t *,
 extern void rtcm2_unpack(struct rtcm2_t *, char *);
 extern void json_rtcm3_dump(const struct rtcm3_t *,
 			    const char *, char[], size_t);
-extern void rtcm3_unpack(const struct gps_context_t *, 
+extern void rtcm3_unpack(const struct gps_context_t *,
 			 struct rtcm3_t *, char *);
 
 /* here are the available GPS drivers */
@@ -888,7 +888,7 @@ int b64_ntop(unsigned char const *src, size_t srclength, char *target,
     size_t targsize);
 
 /* application interface */
-extern void gps_context_init(struct gps_context_t *context, 
+extern void gps_context_init(struct gps_context_t *context,
 			     const char *label);
 extern void gpsd_init(struct gps_device_t *,
 		      struct gps_context_t *,
@@ -906,7 +906,7 @@ extern void gpsd_deactivate(struct gps_device_t *);
 #define AWAIT_FAILED	-1
 extern int gpsd_await_data(fd_set *,
 			   fd_set *,
-			    const int, 
+			    const int,
 			    fd_set *,
 			    struct gpsd_errout_t *errout);
 extern gps_mask_t gpsd_poll(struct gps_device_t *);
@@ -947,7 +947,7 @@ extern void libgps_dump_state(struct gps_data_t *);
 
 void gpsd_labeled_report(const int, const int,
 			 const char *, const char *, va_list);
-void gpsd_vlog(const struct gpsd_errout_t *, 
+void gpsd_vlog(const struct gpsd_errout_t *,
 	       const int, char *, size_t, const char *, va_list ap);
 PRINTF_FUNC(3, 4) void gpsd_log(const struct gpsd_errout_t *, const int, const char *, ...);
 

@@ -193,8 +193,8 @@ section.)
 
 To clean the built files, call 'scons -c' .  To clean scons' cache,
 call 'scons sconsclean'.  Doing both should return your working directory
-to a near pristine state as far as building is concerned.  Some user 
-created files may remain, and source code changes will not have been 
+to a near pristine state as far as building is concerned.  Some user
+created files may remain, and source code changes will not have been
 reverted..
 
 You can specify the installation prefix, as for an autotools build, by
@@ -296,7 +296,7 @@ with pps=no.  You'll lose support for updating the clock from PPS
 pulses.
 
 dbus_export=no: for systems using DBUS: gpsd includes support for
-shipping fixes as DBUS notifications, compiled in by default.  This 
+shipping fixes as DBUS notifications, compiled in by default.  This
 may lead to complaint messages during testing  on systems that don't
 support DBUS. Build with the option "dbus_export=no" to disable it
 

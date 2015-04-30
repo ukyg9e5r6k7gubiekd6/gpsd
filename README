@@ -45,7 +45,7 @@ into one package and autoconfiscated it.
 Derrick J. Brashear <shadow@dementia.org> (KB3EGH) added code for the
 EarthMate DeLorme. He also added "incredibly gross code to output
 NMEA sentences" (his own words :-) He also did the first cut at
-DGPS support (see http://www.wsrcc.com/wolfgang/gps/dgps-ip.html), 
+DGPS support (see http://www.wsrcc.com/wolfgang/gps/dgps-ip.html),
 for the Earthmate.
 
 Curt Mills <BowHunter@mail.com> (WE7U) furthered the dgps support,
@@ -65,27 +65,27 @@ included:
    * Documentation (what a concept!)
    * Cleaned up, simplified command-line options.
    * Now understands the GLL (Geographic position - Latitude, Longitude)
-     sentence from NMEA 3.0. 
-   * Now parses both the NMEA 3.01 and pre-3.01 variants of the VTG sentence 
+     sentence from NMEA 3.0.
+   * Now parses both the NMEA 3.01 and pre-3.01 variants of the VTG sentence
      correctly.
    * New commands including 'y', 'w', and 'x', since obsolesced by a
      JSON-based protocol.
    * Massive refactoring -- one main loop now calls a self-contained
      driver object for each type.
    * The GPS-bashing code the daemon uses can now be directly linked as a
-     library, libgpsd(3). 
+     library, libgpsd(3).
    * C and Python libraries are available to encapsulate the client side of
      querying gpsd, see libgps(3).
    * Cleaned-up error reporting, we don't use syslog when running in foreground
      but send all error and status messages to the tty instead.
    * Added -n option to do batch monitoring of GPSes.
    * xgpsspeed is working again; xgps has been seriously reworked and improved.
-   * RPMs which include installation of gpsd to start up at boot time 
+   * RPMs which include installation of gpsd to start up at boot time
      are available.
    * New gpsprobe program probes the capabilities of GPSes and generates
      error scattergrams from fixes.  (Later this moved to gpsprof.)
    * Autobauding, self-configuration, and hotplugging.  gpsd can now get
-     its device from a hotplug script, and figures out itself which baud 
+     its device from a hotplug script, and figures out itself which baud
      rate to use and what the GPS's device type is.
    * Support for SiRF binary mode.
    * Support for RTCM104 and AIVDM.
@@ -93,7 +93,7 @@ included:
    * Other test tools -- gpsfake, gpscat, gpsmon.
 
 Chris Kuethe <ckuethe@mainframe.cx> maintains the OpenBSD port, shipped
-the 2.34 release, is our SiRF and low-level protocols expert, and does a 
+the 2.34 release, is our SiRF and low-level protocols expert, and does a
 lot of general hacking and support.  He has release authority.
 
 Gary Miller <gem@rellim.com> wrote the driver for Garmin binary protocol
@@ -106,7 +106,7 @@ Ville Nuorvala <vnuorval@tcs.hut.fi> wrote the NTRIP support.
 
 We are delighted to acknowlege the assistance of Carl Carter, a field
 application engineer at SiRF.  He assisted us with the correction and
-tuning of the SiRF binary-protocol driver, shedding a good deal of 
+tuning of the SiRF binary-protocol driver, shedding a good deal of
 light on murky aspects of the chip's behavior.
 
 We are also delighted to acknowlege the assistance of Timo Ylhainen, VP of
@@ -116,6 +116,6 @@ the iTalk protocol, helping to further development of iTalk support.
 3.X CREDITS
 ===========
 
-The main feature of the 3.x versions is a stabilized and finalized 
+The main feature of the 3.x versions is a stabilized and finalized
 version of the JSON command/response protocol. This was designed and mainly
 implemented by ESR.  Gary Miller wrote the subframe support.

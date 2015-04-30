@@ -1,5 +1,5 @@
 This is the gpsd to-do list.  If you're viewing it with Emacs, try
-doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a 
+doing Ctl-C Ctl-t and browsing through the outline headers.  Ctl-C Ctl-a
 will unfold them again.
 
 For contribution guidelines and internals documentation, please see
@@ -74,7 +74,7 @@ revision (all we have is revision 3).
 
 The support for unpacking RTCM3 sentences in the client library is
 limited to 1001, 1002, 1007, 1008, 1009, 1010, 1014, and 1033. There
-are some design issues with the baby JSON parser that are going to 
+are some design issues with the baby JSON parser that are going to
 make extending this set difficult.
 
 **** Reporting code for specialized Type 6 and 8 AIS messages is incomplete.
@@ -130,7 +130,7 @@ However, Iván Sánchez Ortega notes:
 >I, for one, would like to see the secs/msecs problem solved before GPSD
 >embarks on the enterprise of writing TAGblocks.
 
-If someone is working on this, please see: 
+If someone is working on this, please see:
 http://www.nmea.org/Assets/0183_errata_tag_block_final.pdf
 
 **** Speed, mode and rate-changes in client-mode gpsctl.
@@ -183,9 +183,9 @@ The baud-rate switcher in the TNT driver needs to be tested.
 
 gpsmon could support a number of TNT configuration commands, including
 unit changes. See http://gpsd.googlecode.com/truenorth-reference.pdf
-for possibilities.  
+for possibilities.
 
-Jon Schlueter has one of these on a flock machine, so testing 
+Jon Schlueter has one of these on a flock machine, so testing
 shouldn't be difficult.
 
 *** Enable flocktest on the Debian server farm
@@ -224,7 +224,7 @@ some (but not all) of the things it tweaks in binary mode -- at the
 moment, just the Navigation Parameters from message 0x13.  With more
 work, we should be able to do a full revert.
 
-The TSIP driver changes its per-cycle sentence inventory and thus 
+The TSIP driver changes its per-cycle sentence inventory and thus
 needs some state-restore logic.  This can be done; the same packet 0x35
 we use to configure it can be sent in a no-argument mode to query
 the current sentence mix for later restore.

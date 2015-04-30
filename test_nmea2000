@@ -94,7 +94,7 @@ ${GPSD_HOME}/gpsd -n -G -D0 -S ${GPSD_PORT} -P ${TMP_PID_FILE} nmea2000://${CAN_
 
 sleep 1
 
-${GPSD_HOME}/gpspipe -d -r -w -S -o ${TMP_OUT_FILE} :${GPSD_PORT} 
+${GPSD_HOME}/gpspipe -d -r -w -S -o ${TMP_OUT_FILE} :${GPSD_PORT}
 
 sleep 1
 

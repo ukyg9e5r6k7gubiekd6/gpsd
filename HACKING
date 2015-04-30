@@ -3,7 +3,7 @@ this file is in the repository as:
 
   www/hacking.html
 
-If you only have www/hacking.html.in, run 
+If you only have www/hacking.html.in, run
 
   scons www
 
