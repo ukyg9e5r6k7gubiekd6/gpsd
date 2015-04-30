@@ -209,11 +209,11 @@ int main(int argc, char *argv[])
 			 success ? "succeeded" : "FAILED");
     }
 
-    
+
     shiftleft(buf, 28, 30);
     if (!quiet)
 	printf("Left-shifted 30 bits: %s\n", hexdump(buf, 28));
-    /* 
+    /*
      * After the 24-bit shift, the bit array loses its first three bytes:
      * 0x0405060708 = 00000100 00000101 00000110 00000111 00001000
      * By inspection, the results of the 6-bit shift are

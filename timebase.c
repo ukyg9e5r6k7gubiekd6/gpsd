@@ -117,7 +117,7 @@ not be available at all when a GPS receiver has just
 cold-booted.  Thus, the time reported from GPS devices, although
 supposed to be UTC, may be offset by an integer number of seconds
 between a cold boot or leap second and the following
-subframe broadcast. 
+subframe broadcast.
 
 It might be best not to trust time for 20 minutes after GPSD startup
 if it is more than 500ms from current system time (that is long enough
@@ -200,7 +200,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 /* initialize the GPS context's time fields */
 {
-    /* 
+    /*
      * gpsd can't work with 'right' timezones (leapseconds inserted in
      * the timezone offset).  Avoid this and all manner of other local
      * time issues by telling the system we want times returned in UTC.

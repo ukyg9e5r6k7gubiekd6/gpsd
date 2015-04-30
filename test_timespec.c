@@ -110,7 +110,7 @@ static int test_subtract( int verbose )
         timespec_str( &p->c, buf_c, sizeof(buf_c) );
         timespec_str( &r,    buf_r, sizeof(buf_r) );
 	if ( (p->c.tv_sec != r.tv_sec) || (p->c.tv_nsec != r.tv_nsec) ) {
-		printf("%21s - %21s = %21s, FAIL s/b %21s\n", 
+		printf("%21s - %21s = %21s, FAIL s/b %21s\n",
 		buf_a, buf_b, buf_r, buf_c);
 		fail_count++;
 	} else if ( verbose ) {
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
 	    (void)fputs("usage: test_timespec [-v] [-V]\n", stderr);
 	    exit(fail_count);
 	case 'V':
-	    (void)fprintf( stderr, "test_timespec %s\n", 
+	    (void)fprintf( stderr, "test_timespec %s\n",
 		VERSION);
 	    exit(EXIT_SUCCESS);
 	case 'v':

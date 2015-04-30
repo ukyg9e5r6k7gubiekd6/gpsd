@@ -21,7 +21,7 @@
 
 #include "timespec.h"
 
-/* Convert a normalized timespec to a nice string 
+/* Convert a normalized timespec to a nice string
  * put in it *buf, buf should be at least 22 bytes
  *
  * the returned buffer will look like, shortest case:
@@ -32,7 +32,7 @@
  *
  * So 12 chars, like this: "-0.123456789"
  *
- * Absolute worst case is 10 digits of seconds.  
+ * Absolute worst case is 10 digits of seconds.
  * So 21 digits like this: "-2147483647.123456789"
  *
 */

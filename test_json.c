@@ -247,7 +247,7 @@ static const struct json_array_t json_array_Bool = {
 /* Case 14: Read array of reals */
 
 static const char *json_str14 = "[23.1,-17.2,5.3]";
-static double realstore[4]; 
+static double realstore[4];
 static int realcount;
 
 static const struct json_array_t json_array_14 = {
@@ -264,7 +264,7 @@ static void jsontest(int i)
 {
     int status = 0;
 
-    switch (i) 
+    switch (i)
     {
     case 1:
 	status = libgps_json_unpack(json_str1, &gpsdata, NULL);
@@ -355,7 +355,7 @@ static void jsontest(int i)
 	break;
 
     case 9:
-	/* yes, the '6' in the next line is correct */ 
+	/* yes, the '6' in the next line is correct */
 	status = json_read_object(json_str9, json_attrs_6, NULL);
 	assert_case(9, status);
 	assert_integer("dumbcount", dumbcount, 0);

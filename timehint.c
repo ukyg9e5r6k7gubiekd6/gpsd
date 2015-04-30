@@ -31,13 +31,13 @@
  * Ntpd always runs as root (to be able to control the system clock).
  * After that it often (depending on its host configuration) drops to run as
  * user ntpd and group ntpd.
- * 
+ *
  * As of February 2015 its rules for the creation of ntpshm segments are:
  *
  * Segments 0 and 1: permissions 0600, i.e. other programs can only
  *                   read and write as root.
  *
- * Segments 2, 3, and higher: 
+ * Segments 2, 3, and higher:
  *                   permissions 0666, i.e. other programs can read
  *                   and write as any user.  I.e.: if ntpd has been
  *                   configured to use these segments, any
@@ -74,7 +74,7 @@
  * To debug, try looking at the live segments this way:
  *
  *  ipcs -m
- * 
+ *
  * results  should look like this:
  * ------ Shared Memory Segments --------
  *  key        shmid      owner      perms      bytes      nattch     status
@@ -101,7 +101,7 @@
  * ipcrm  -M 0x4e545034
  * ipcrm  -M 0x4e545035
  *
- * Removing these segments is usually not necessary, as the operating system 
+ * Removing these segments is usually not necessary, as the operating system
  * garbage-collects them when they have no attached processes.
  */
 
@@ -250,7 +250,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "NTP: ntpshm_put(%s %s) %s @ %s\n",
 	     session->gpsdata.dev.path,
-	     (precision == -20) ? "pps" : "clock", 
+	     (precision == -20) ? "pps" : "clock",
 	     real_str, clock_str);
 
     return 1;
@@ -289,7 +289,7 @@ static void init_hook(struct gps_device_t *session)
 
     if (access(chrony_path, F_OK) != 0) {
 	gpsd_log(&session->context->errout, LOG_PROG,
-		"PPS:%s chrony socket %s doesn't exist\n", 
+		"PPS:%s chrony socket %s doesn't exist\n",
 		session->gpsdata.dev.path, chrony_path);
     } else {
 	session->chronyfd = netlib_localsocket(chrony_path, SOCK_DGRAM);
@@ -300,7 +300,7 @@ static void init_hook(struct gps_device_t *session)
 		     chrony_path, session->chronyfd, errno, strerror(errno));
 	else
 	    gpsd_log(&session->context->errout, LOG_RAW,
-		     "PPS:%s using chrony socket: %s\n", 
+		     "PPS:%s using chrony socket: %s\n",
 		     session->gpsdata.dev.path, chrony_path);
     }
 }
@@ -317,9 +317,9 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     struct tm tm;
     int leap_notify = session->context->leap_notify;
 
-    /* insist that leap seconds only happen in june and december 
+    /* insist that leap seconds only happen in june and december
      * GPS emits leap pending for 3 months prior to insertion
-     * NTP expects leap pending for only 1 month prior to insertion 
+     * NTP expects leap pending for only 1 month prior to insertion
      * Per http://bugs.ntp.org/1090 */
     (void)gmtime_r( &(td->real.tv_sec), &tm);
     if ( 5 != tm.tm_mon && 11 != tm.tm_mon ) {
@@ -368,8 +368,8 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
 	/*
 	 * Only listen to PPS after several consecutive fixes,
 	 * otherwise time may be inaccurate.  (We know this is
-	 * required on all Garmin and u-blox; safest to do it 
-	 * for all cases as we have no other general way to know 
+	 * required on all Garmin and u-blox; safest to do it
+	 * for all cases as we have no other general way to know
 	 * if PPS is good.
 	 *
 	 * Not sure yet how to handle u-blox UBX_MODE_TMONLY
@@ -420,19 +420,19 @@ void ntpshm_link_activate(struct gps_device_t *session)
     if (session->sourcetype == source_pty)
 	return;
 
-    if (session->sourcetype != source_pps ) { 
+    if (session->sourcetype != source_pps ) {
 	/* allocate a shared-memory segment for "NMEA" time data */
 	session->shm_clock = ntpshm_alloc(session->context);
 
 	if (session->shm_clock == NULL) {
-	    gpsd_log(&session->context->errout, LOG_WARN, 
+	    gpsd_log(&session->context->errout, LOG_WARN,
 		     "NTP: ntpshm_alloc() failed\n");
 	    return;
         }
     }
 
 #if defined(PPS_ENABLE)
-    if (session->sourcetype == source_usb 
+    if (session->sourcetype == source_usb
             || session->sourcetype == source_rs232
             || session->sourcetype == source_pps) {
 	/* We also have the 1pps capability, allocate a shared-memory segment
@@ -440,7 +440,7 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	 * transitions
 	 */
 	if ((session->shm_pps = ntpshm_alloc(session->context)) == NULL) {
-	    gpsd_log(&session->context->errout, LOG_WARN, 
+	    gpsd_log(&session->context->errout, LOG_WARN,
 		     "PPS: ntpshm_alloc(1) failed\n");
 	} else {
 	    init_hook(session);

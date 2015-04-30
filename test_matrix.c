@@ -1,7 +1,7 @@
 /*
  * Unit test for matrix-algebra code
  *
- * Check examples computed at 
+ * Check examples computed at
  * http://www.elektro-energetika.cz/calculations/matreg.php
  */
 #include <stdlib.h>
@@ -55,7 +55,7 @@ static bool check_diag(int n, double a[4][4], double b[4][4])
     if (approx(b[0][0], a[0][0]) && approx(b[1][1], a[1][1]) &&
 	approx(b[2][2], a[2][2]) && approx(b[3][3], a[3][3]))
 	return true;
-    
+
     dump("a", a);
     dump("b", b);
     printf("Test %d residuals: %f %f %f %f\n",

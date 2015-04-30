@@ -407,7 +407,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 }
 
 int gpsd_serial_open(struct gps_device_t *session)
-/* open a device for access to its data 
+/* open a device for access to its data
  * return: the opened file descriptor
  *         PLACEHOLDING_FD - for /dev/ppsX
  *         UNALLOCATED_FD - for open failure
@@ -419,7 +419,7 @@ int gpsd_serial_open(struct gps_device_t *session)
     session->sourcetype = gpsd_classify(session->gpsdata.dev.path);
     session->servicetype = service_sensor;
 
-    /* we may need to hold on to this slot without opening the device */ 
+    /* we may need to hold on to this slot without opening the device */
     if (source_pps == session->sourcetype) {
 	(void)gpsd_switch_driver(session, "PPS");
 	return PLACEHOLDING_FD;

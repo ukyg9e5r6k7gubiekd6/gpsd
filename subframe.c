@@ -748,7 +748,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		subp->is_almanac = 1;
 		subframe_almanac(&session->context->errout,
 				 subp->tSVID, words, subp->subframe_num,
-				 (uint8_t)sv, subp->data_id, 
+				 (uint8_t)sv, subp->data_id,
 				 &subp->sub4.almanac);
 	    } else if ( -2 == sv ) {
 		/* unknown or secret page */
