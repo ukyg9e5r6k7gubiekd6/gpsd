@@ -173,7 +173,7 @@ static unsigned char disablesubframe[] = {
 
     /* 0x00 turns off MIDs 7, 8, 17, 28, 29, 30 and 31 */
     0x00,                       /* reset bit map */
-                               
+
     0x00, 0x00, 0xb0, 0xb3
 };
 
@@ -246,7 +246,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     /*
      * Control strings spaced too closely together confuse the SiRF
      * IV.  This wasn't an issue on older SiRFs, but they've gone to a
-     * lower-powered processor that apparently has trouble keeping up.  
+     * lower-powered processor that apparently has trouble keeping up.
      * Now you have to wait for the ACK, otherwise chaos ensues.
      * Add instrumentation to reveal when this may happen.
      */
@@ -272,7 +272,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "SiRF: Writing control type %02x:\n", type);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
- 
+
     session->driver.sirf.need_ack = type;
     return (ok);
 }
@@ -1399,7 +1399,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 
     if (event == event_configure) {
 #ifdef __UNUSED__
-	/* might not be time for the next init string yet */ 
+	/* might not be time for the next init string yet */
 	if (session->driver.sirf.need_ack > 0)
 	    return;
 #endif /* UNUSED */
@@ -1490,10 +1490,10 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    break;
 
 	case 11:
-	    /* 
+	    /*
 	     * Disable navigation debug messages (the value 5 is magic)
 	     * must be done *after* subframe enable.
-	     */ 
+	     */
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: disable MID 7, 28, 29, 30, 31.\n");
 	    putbyte(unsetmidXX, 5, 0x05);

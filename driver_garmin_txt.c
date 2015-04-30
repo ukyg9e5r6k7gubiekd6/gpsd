@@ -140,7 +140,7 @@ invalid data.
 
 **************************************************************************/
 static int gar_decode(const struct gps_context_t *context,
-		      const char *data, const size_t length, 
+		      const char *data, const size_t length,
 		      const char *prefix, const double dividor,
 		      double *result)
 {

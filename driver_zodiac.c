@@ -56,7 +56,7 @@ static ssize_t end_write(int fd, void *d, size_t len)
 
     size_t n;
     for (n = 0; n < (size_t)(len/2); n++)
-	putle16(buf, n*2, data[n]); 
+	putle16(buf, n*2, data[n]);
     return write(fd, (char*)buf, len);
 }
 

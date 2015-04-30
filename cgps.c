@@ -785,7 +785,7 @@ int main(int argc, char *argv[])
         /* wait 1/2 second for gpsd */
 	if (!gps_waiting(&gpsdata, 500000)) {
             /* 240 tries at .5 Sec a try is a 2 minute timeout */
-	    if ( 240 < wait_clicks++ ) 
+	    if ( 240 < wait_clicks++ )
 		die(GPS_TIMEOUT);
 	} else {
 	    wait_clicks = 0;

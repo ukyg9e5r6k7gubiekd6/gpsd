@@ -351,7 +351,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	ver = get_uint16((uint8_t *) & buf[2]);
 	maj_ver = (int)(ver / 100);
 	min_ver = (int)(ver - (maj_ver * 100));
-	gpsd_log(&session->context->errout, LOG_PROG, 
+	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Garmin: Appl, Product Data, sz: %d\n",
 		 pkt_len);
 	(void)snprintf(session->subtype, sizeof(session->subtype),
@@ -603,7 +603,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		 pkt_len);
 	for (i = 0; i < pkt_len; i += 3) {
 	    gpsd_log(&session->context->errout, LOG_INF,
-		     "Garmin:   %c%03d\n", 
+		     "Garmin:   %c%03d\n",
 		     buf[i],	get_uint16((uint8_t *) & buf[i + 1]));
 	}
 	break;
@@ -690,7 +690,7 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 	switch (pkt->mPacketId) {
 	case PRIV_PKTID_SET_MODE:
 	    prod_id = get_uint16(&pkt->mData.uchars[0]);
-	    gpsd_log(&session->context->errout, LOG_PROG, 
+	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "Garmin: Private, Set Mode: %d\n", prod_id);
 	    break;
 	case PRIV_PKTID_INFO_REQ:
@@ -997,7 +997,7 @@ static void garmin_event_hook(struct gps_device_t *session, event_t event)
 
 #if USE_RMD
 	// turn on RMD data 110
-	gpsd_log(&session->context->errout, LOG_PROG, 
+	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Garmin: Set to send Raw sat data\n");
 	Build_Send_SER_Packet(session, GARMIN_LAYERID_APPL,
 			      GARMIN_PKTID_L001_COMMAND_DATA, 2,
@@ -1065,7 +1065,7 @@ gps_mask_t garmin_ser_parse(struct gps_device_t *session)
     chksum += pkt_len;
     if ('\x10' == pkt_len) {
 	if ('\x10' != buf[n++]) {
-	    gpsd_log(&session->context->errout, LOG_RAW + 1, 
+	    gpsd_log(&session->context->errout, LOG_RAW + 1,
 		     "Garmin: Bad pkt_len %#02x\n", pkt_len);
 	    Send_NAK();
 	    return 0;

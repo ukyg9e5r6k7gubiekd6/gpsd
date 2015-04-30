@@ -182,7 +182,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	/*
 	 * FIXME: We could get both kinds of version info.
 	 */
-	u1 = (uint8_t) getub(buf, 0); 
+	u1 = (uint8_t) getub(buf, 0);
 	if (u1 == 0x81) { /* Software Version Information */
 		uint8_t u6, u7;
 		u2 = getub(buf, 2); /* Major version */
@@ -201,7 +201,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 			       "sw %u %u %u %02u.%02u.%04u %s",
 			       u2, u3, u4, u6, u5, s1, buf2);
 		gpsd_log(&session->context->errout, LOG_INF,
-			 "Software version: %s\n", 
+			 "Software version: %s\n",
 			 session->subtype);
 
 		mask |= DEVICEID_SET;
@@ -223,7 +223,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 			       "hw %u %02u.%02u.%04u %02u %u %s",
 			       ul1, u2, u3, s1, u4, s2, buf2);
 		gpsd_log(&session->context->errout, LOG_INF,
-			 "Hardware version: %s\n", 
+			 "Hardware version: %s\n",
 			 session->subtype);
 
 		mask |= DEVICEID_SET;
@@ -285,15 +285,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    break;
 	(void)snprintf(session->subtype, sizeof(session->subtype),
 		       "%d.%d %02d%02d%02d %d.%d %02d%02d%02d",
-		       getub(buf, 0), 
-		       getub(buf, 1), 
-		       getub(buf, 4), 
+		       getub(buf, 0),
+		       getub(buf, 1),
+		       getub(buf, 4),
 		       getub(buf, 2),
 		       getub(buf, 3),
 		       getub(buf, 5),
-		       getub(buf, 6), 
+		       getub(buf, 6),
 		       getub(buf, 9),
-		       getub(buf, 7), 
+		       getub(buf, 7),
 		       getub(buf, 8));
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "Software version: %s\n", session->subtype);
@@ -361,7 +361,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    mask |= TIME_SET | PPSTIME_IS;
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
-	gpsd_log(&session->context->errout, LOG_DATA, 
+	gpsd_log(&session->context->errout, LOG_DATA,
 		 "SPPLLA 0x4a time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
 		 session->newdata.time,
 		 session->newdata.latitude,
@@ -435,7 +435,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "GPS Velocity ENU %f %f %f %f %f\n", f1, f2, f3,
 		 f4, f5);
 	mask |= SPEED_SET | TRACK_SET | CLIMB_SET;
-	gpsd_log(&session->context->errout, LOG_DATA, 
+	gpsd_log(&session->context->errout, LOG_DATA,
 		 "VFENU 0x56 time=%.2f speed=%.2f track=%.2f climb=%.2f\n",
 		 session->newdata.time,
 		 session->newdata.speed,
@@ -889,7 +889,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    }
 
 	    mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
-	    gpsd_log(&session->context->errout, LOG_DATA, 
+	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-TPS 0xac time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
 		     session->newdata.time,
 		     session->newdata.latitude,
@@ -994,8 +994,8 @@ static void tsip_init_query(struct gps_device_t *session)
     /* Request Hardware Version Information */
     putbyte(buf, 0, 0x03); /* Subcode */
     (void)tsip_write(session, 0x1c, buf, 1);
-    /* 
-     * After HW information packet is received, a 
+    /*
+     * After HW information packet is received, a
      * decision is made how to configure the device.
      */
 }

@@ -98,7 +98,7 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
 
     /* save SW and HW Version as subtype */
     (void)snprintf(obuf, sizeof(obuf),
-		   "SW %.30s,HW %.10s", 
+		   "SW %.30s,HW %.10s",
 		   (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 0],
 		   (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 30]);
 
@@ -116,7 +116,7 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
     }
     /* save what we can */
     (void)strlcpy(session->subtype, obuf, sizeof(session->subtype));
-    
+
     /* output SW and HW Version at LOG_INFO */
     gpsd_log(&session->context->errout, LOG_INF,
 	     "UBX_MON_VER: %.*s\n",
@@ -139,7 +139,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     flags = (unsigned int)getub(buf, 21);
 
     /* TODO: finish decoding UBX_MON_PVT
-     * no need until depreacaed UBX_MON_SOL is dead 
+     * no need until depreacaed UBX_MON_SOL is dead
      */
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "NAV-PVT: flags:%02x\n", flags);

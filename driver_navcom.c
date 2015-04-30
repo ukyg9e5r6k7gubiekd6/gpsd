@@ -471,9 +471,9 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     if (tdop != DOP_UNDEFINED)
 	session->gpsdata.dop.tdop = tdop / 10.0;
 
-    gpsd_log(&session->context->errout, LOG_PROG, 
+    gpsd_log(&session->context->errout, LOG_PROG,
 	     "Navcom: received packet type 0xb1 (PVT Report)\n");
-    gpsd_log(&session->context->errout, LOG_DATA, 
+    gpsd_log(&session->context->errout, LOG_DATA,
 	     "Navcom: navigation mode %s (0x%02x) - %s - %s\n",
 	     ((-nav_mode & 0x80)!='\0' ? "invalid" : "valid"), nav_mode,
 	     ((nav_mode & 0x40)!='\0' ? "3D" : "2D"),
@@ -744,7 +744,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	 * B2-B3: P1 tracking status
 	 * B4-B5: P2 tracking status
 	 *    00 Acquisition or reacquisition
-	 *    01 Code loop locked 
+	 *    01 Code loop locked
 	 *    02 Costas loop locked
 	 *    11 Full tracking with aiding and active
 	 *       multipath reduction - all data is valid

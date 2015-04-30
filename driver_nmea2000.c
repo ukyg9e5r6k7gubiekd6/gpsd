@@ -105,7 +105,7 @@ static gps_mask_t get_mode(struct gps_device_t *session)
     } else {
         session->newdata.mode = MODE_NOT_SEEN;
     }
-    
+
     if (session->driver.nmea2000.mode_valid & 2) {
         return MODE_SET | USED_IS;
     } else {
@@ -513,7 +513,7 @@ static gps_mask_t hnd_129039(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type18.course   = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 14), 10.0);
 	ais->type18.speed    = (unsigned int) (getleu16(bu, 16) * MPS_TO_KNOTS * 0.01 / 0.1);
 	ais->type18.radio    = (unsigned int) (getleu32(bu, 18) & 0x7ffff);
-	ais->type18.heading  = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 21), 1.0);    
+	ais->type18.heading  = (unsigned int)  ais_direction((unsigned int) getleu16(bu, 21), 1.0);
 	ais->type18.reserved = 0;
 	ais->type18.regional = (unsigned int) ((bu[24] >> 0) & 0x03);
 	ais->type18.cs	     = (bool)         ((bu[24] >> 2) & 0x01);
@@ -671,7 +671,7 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	       ais->type5.to_starboard,
 	       ais->type5.draught/10.0);
 	printf("AIS: arival:%-20.20s at %02u-%02u-%04d %02u:%0u\n",
-	       ais->type5.destination, 
+	       ais->type5.destination,
 	       ais->type5.day,
 	       ais->type5.month,
 	       date2.tm_year+1900,
@@ -946,7 +946,7 @@ static gps_mask_t hnd_127245(unsigned char *bu, int len, PGN *pgn, struct gps_de
 static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     int aux;
-  
+
     print_data(session->context, bu, len, pgn);
 
     session->gpsdata.attitude.heading = getleu16(bu, 1) * RAD_2_DEG * 0.0001;
@@ -1306,7 +1306,7 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 
 	if (!session->driver.nmea2000.unit_valid) {
 	    unsigned int l1, l2;
-	    
+
 	    for (l1=0;l1<NMEA2000_NETS;l1++) {
 	        for (l2=0;l2<NMEA2000_UNITS;l2++) {
 		    if (session == nmea2000_units[l1][l2]) {
@@ -1522,7 +1522,7 @@ int nmea2000_open(struct gps_device_t *session)
 	    return -1;
 	}
 	for (l = 0; l < NMEA2000_NETS; l++) {
-	    if (strncmp(can_interface_name[l], 
+	    if (strncmp(can_interface_name[l],
 			interface_name,
 			MIN(sizeof(interface_name), sizeof(can_interface_name[l]))) == 0) {
 	        can_net = l;
@@ -1536,7 +1536,7 @@ int nmea2000_open(struct gps_device_t *session)
 	}
     } else {
 	for (l = 0; l < NMEA2000_NETS; l++) {
-	    if (strncmp(can_interface_name[l], 
+	    if (strncmp(can_interface_name[l],
 			interface_name,
 			MIN(sizeof(interface_name), sizeof(can_interface_name[l]))) == 0) {
 	        gpsd_log(&session->context->errout, LOG_ERROR, "NMEA2000 open: CAN device duplicate open: %s .\n", interface_name);
@@ -1558,7 +1558,7 @@ int nmea2000_open(struct gps_device_t *session)
 
     /* Create the socket */
     sock = socket(PF_CAN, SOCK_RAW, CAN_RAW);
- 
+
     if (BAD_SOCKET(sock)) {
         gpsd_log(&session->context->errout, LOG_ERROR,
 		 "NMEA2000 open: can not get socket.\n");
@@ -1608,11 +1608,11 @@ int nmea2000_open(struct gps_device_t *session)
 	session->driver.nmea2000.unit_valid = true;
     } else {
         strncpy(can_interface_name[can_net],
-		interface_name, 
+		interface_name,
 		MIN(sizeof(can_interface_name[0]), sizeof(interface_name)));
 	session->driver.nmea2000.unit_valid = false;
 	for (l=0;l<NMEA2000_UNITS;l++) {
-	    nmea2000_units[can_net][l] = NULL;	  
+	    nmea2000_units[can_net][l] = NULL;
 	}
     }
 
@@ -1633,7 +1633,7 @@ void nmea2000_close(struct gps_device_t *session)
 
 	if (session->driver.nmea2000.unit_valid) {
 	    unsigned int l1, l2;
-	    
+
 	    for (l1=0;l1<NMEA2000_NETS;l1++) {
 	        for (l2=0;l2<NMEA2000_UNITS;l2++) {
 		    if (session == nmea2000_units[l1][l2]) {

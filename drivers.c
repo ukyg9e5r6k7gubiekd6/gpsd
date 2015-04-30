@@ -667,7 +667,7 @@ static ssize_t tnt_control_send(struct gps_device_t *session,
 
     if (*p == '@') {
 	p++;
-    } 
+    }
 #ifdef __UNUSED__
     else {
 	gpsd_log(&session->context->errout, LOG_ERROR,
@@ -780,7 +780,7 @@ const struct gps_type_t driver_trueNorth = {
  *
  **************************************************************************/
 
-static int oceanserver_send(struct gpsd_errout_t *errout, 
+static int oceanserver_send(struct gpsd_errout_t *errout,
 			    const int fd, const char *fmt, ...)
 {
     int status;
@@ -981,7 +981,7 @@ static gps_mask_t rtcm104v3_analyze(struct gps_device_t *session)
 
     gpsd_log(&session->context->errout, LOG_RAW, "RTCM 3.x packet %d\n", type);
     rtcm3_unpack(session->context,
-		 &session->gpsdata.rtcm3, 
+		 &session->gpsdata.rtcm3,
 		 (char *)session->lexer.outbuffer);
     session->cycle_end_reliable = true;
     return RTCM3_SET;
@@ -1099,7 +1099,7 @@ static void mtk3301_event_hook(struct gps_device_t *session, event_t event)
 	(void)nmea_send(session, "$PMTK301,2");	/* DGPS is WAAS */
 	(void)nmea_send(session, "$PMTK313,1");	/* SBAS enable */
 
-        /* PMTK_API_Q_OUTPUT_CTL - Query PPS pulse width - Trimble only? 
+        /* PMTK_API_Q_OUTPUT_CTL - Query PPS pulse width - Trimble only?
          * http://trl.trimble.com/docushare/dsweb/Get/Document-482603/CONDOR_UG_2C_75263-00.pdf *
          * badly documented */
 	 (void)nmea_send(session, "$PMTK424");	
@@ -1346,7 +1346,7 @@ static gps_mask_t aivdm_analyze(struct gps_device_t *session)
     if (session->lexer.type == AIVDM_PACKET) {
 	if (aivdm_decode
 	    ((char *)session->lexer.outbuffer, session->lexer.outbuflen,
-	     session, &session->gpsdata.ais, 
+	     session, &session->gpsdata.ais,
 	     session->context->errout.debug)) {
 	    return ONLINE_SET | AIS_SET;
 	} else

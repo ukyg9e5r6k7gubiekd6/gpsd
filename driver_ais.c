@@ -172,7 +172,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type6.dac            = UBITS(72, 10);
 	ais->type6.fid            = UBITS(82, 6);
 	ais->type6.bitcount       = bitlen - 88;
-	/* not strictly required - helps stability in testing */ 
+	/* not strictly required - helps stability in testing */
 	(void)memset(ais->type6.bitdata, '\0', sizeof(ais->type6.bitdata));
 	ais->type6.structured = false;
 	/* Inland AIS */
@@ -440,7 +440,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type8.dac            = UBITS(40, 10);
 	ais->type8.fid            = UBITS(50, 6);
 	ais->type8.bitcount       = bitlen - 56;
-	/* not strictly required - helps stability in testing */ 
+	/* not strictly required - helps stability in testing */
 	(void)memset(ais->type8.bitdata, '\0', sizeof(ais->type8.bitdata));
 	ais->type8.structured = false;
 	if (ais->type8.dac == 1)
@@ -653,7 +653,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		ais->type8.dac200fid10.heading_q	= (bool)UBITS(159, 1);
 		/* skip 8 bits */
 		/*
-		 * Attempt to prevent false matches with this message type 
+		 * Attempt to prevent false matches with this message type
 		 * by range-checking certain fields.
 		 */
 		if (ais->type8.dac200fid10.hazard > DAC200FID10_HAZARD_MAX

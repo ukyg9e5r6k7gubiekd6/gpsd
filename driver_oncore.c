@@ -191,7 +191,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	    session->gpsdata.skyview[st].PRN = (short)session->driver.oncore.PRN[j];
 	    session->gpsdata.skyview[st].elevation =
 		(short)session->driver.oncore.elevation[j];
-	    session->gpsdata.skyview[st].azimuth = 
+	    session->gpsdata.skyview[st].azimuth =
 		(short)session->driver.oncore.azimuth[j];
 	    st++;
 	}
