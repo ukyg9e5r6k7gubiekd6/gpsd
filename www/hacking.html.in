@@ -1633,7 +1633,7 @@ the following order:</p>
 
 <dl>
 <dt>1. Check the <a href="@BUGTRACKER@">bug tracker</a> for
-release blockers.</dt> 
+release blockers.</dt>
 <dd><p>Check support requests, too, and <a href="https://bugs.debian.org/cgi-bin/pkgreport.cgi?src=gpsd&amp;repeatmerged=yes">Debian's GPSD buglist</a>.</p></dd>
 
 <dt>2. Issue the pre-release heads-up</dt>

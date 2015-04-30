@@ -44,7 +44,7 @@ def hasRequiredElements(form):
     for fld in ("submitter", "vendor", "model", "techdoc"):
         if not form.getvalue(fld):
             return False
-    return not not output_sample_content 
+    return not not output_sample_content
 
 formfields = ("submitter",
               "vendor",
@@ -261,15 +261,15 @@ your device.</p>
 <p>Example: <code>Haicom</code> and <code>303S</code>.</p>
 
 <p><em>Vendor:&nbsp;</em>
-<input type="text" 
-       name="vendor" 
-       size="72" 
+<input type="text"
+       name="vendor"
+       size="72"
        value="%(vendor)s"></p>
 
 <p><em>Model:&nbsp;&nbsp;</em>
-<input type="text" 
-       name="model" 
-       size="72" 
+<input type="text"
+       name="model"
+       size="72"
        value="%(model)s"></p>
 
 <p><em style="color: #ff0000;">Important!</em> We need a URL pointing to a
@@ -282,8 +282,8 @@ main page.</p>
 <p>Example: <code>http://www.haicom.com.tw/gps303s.shtml</code></p>
 
 <p><em>URL of a technical manual:</em>
-<input type="text" 
-       name="techdoc" 
+<input type="text"
+       name="techdoc"
        size="72"
        value="%(techdoc)s"></p>
 
@@ -323,15 +323,15 @@ it in the technical manual.</p>
 <p>Example: <code>SiRF-II</code> and <code>2.31ES</code>.</p>
 
 <p><em>Chipset:&nbsp;&nbsp;</em>
-<input type="text" 
-       name="chipset" 
-       size="72" 
+<input type="text"
+       name="chipset"
+       size="72"
        value="%(chipset)s"></p>
 
 <p><em>Firmware:&nbsp;</em>
-<input type="text" 
-       name="firmware" 
-       size="72" 
+<input type="text"
+       name="firmware"
+       size="72"
        value="%(firmware)s"></p>
 
 <p>Please identify, if possible, the NMEA version the receiver emits.  You may
@@ -341,9 +341,9 @@ be able to get this information from the technical manual.  Likely values are
 protocol, leave this field blank.</p>
 
 <p><em>NMEA version emitted:&nbsp;</em>
-<input type="text" 
-       name="nmea" 
-       size="6" 
+<input type="text"
+       name="nmea"
+       size="6"
        value="%(nmea)s"></p>
 
 <hr/>
@@ -384,9 +384,9 @@ give us the full release number, like <code>3.5</code>.  If you built
 your code from our development repository please give the revision ID.</p>
 
 <p><em>GPSD version:&nbsp;</em>
-<input type="text" 
-       name="tested" 
-       size="6" 
+<input type="text"
+       name="tested"
+       size="6"
        value="%(tested)s"></p>
 
 <p>Please rate how well this receiver functions with GPSD:</p>
@@ -459,7 +459,7 @@ this output to a file with the <code>gpscat</code> utility.</p>
 because the device needs some kind of activation sequence written to
 it before it will start reporting.  Some Garmin GPSes (the ones that
 speak Garmin binary protocol rather than NMEA) are like this.  If you
-think you have one of these, ask for help on GPSD\'s development mailing 
+think you have one of these, ask for help on GPSD\'s development mailing
 list</a>.</p>
 
 <p>A log file is most useful when it contains (a) some sentences
@@ -481,9 +481,9 @@ want this as a sanity check.</p>
 <p>Example: <code>Groningen, NL, 53.2N 6.6E</code></p>
 
 <p><em>Location:&nbsp;</em>
-<input type="text" 
-       name="location" 
-       size="72" 
+<input type="text"
+       name="location"
+       size="72"
        value="%(location)s"></p>
 
 <p>Year-Month-Day of the log capture (the receiver will give us
@@ -492,9 +492,9 @@ hour/minute/second).</p>
 <p>Example: <code>2011-05-14</code>.</p>
 
 <p><em>Date:&nbsp;</em>
-<input type="text" 
-       name="date" 
-       size="72" 
+<input type="text"
+       name="date"
+       size="72"
        value="%(date)s"></p>
 
 
@@ -519,9 +519,9 @@ which is publicly archived.</p>
 <p>Example: <code>Eric Raymond &lt;esr&#x40;thyrsus.com&gt;</code></p>
 
 <p><em>Name and email address: </em>
-<input type="text" 
-       name="submitter" 
-       size="72" 
+<input type="text"
+       name="submitter"
+       size="72"
        value="%(submitter)s"></p>
 
 <p>(It is not actually very likely we will contact you, but we need to
