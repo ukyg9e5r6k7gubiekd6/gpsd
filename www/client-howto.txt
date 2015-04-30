@@ -159,7 +159,7 @@ back some information on available devices.
 -----------------------------------------------------------------------------
 {"class":"DEVICES","devices":[{"class":"DEVICE","path":"/dev/ttyUSB0",
                    "activated":1269959537.20,"native":0,"bps":4800,"parity":"N",
-                   "stopbits":1,"cycle":1.00}]} 
+                   "stopbits":1,"cycle":1.00}]}
 {"class":"WATCH","enable":true,"json":true,"nmea":false,"raw":0,
                  "scaled":false,"timing":false,"pps":false}
 -----------------------------------------------------------------------------
@@ -312,7 +312,7 @@ time in which to come back around your main loop.
 
 == Interfacing from the client side ==
 
-The gpsd daemon exports data in three different ways: via a sockets 
+The gpsd daemon exports data in three different ways: via a sockets
 interface, via DBUS broadcasts, and via a shared-memory interface,
 It is possible one or more of these may be configured out in your
 installation.
@@ -444,9 +444,9 @@ point when the socket is closed from the daemon side.
 
 === Shared-memory interface ===
 
-Whenever gpsd recognizes a packet from any attached device, it writes 
+Whenever gpsd recognizes a packet from any attached device, it writes
 the accumulated state from that device to a shared memory segment.  The
-C and C++ client libraries shipped with GPSD can read this segment.  
+C and C++ client libraries shipped with GPSD can read this segment.
 
 The API for reading the segment uses the same gps_open(), gps_read()
 and gps_close() entry points as the sockets interface. To enable using

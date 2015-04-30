@@ -1535,7 +1535,7 @@ performance tuning. Hal Murray <hmurray@megapathdsl.net> wrote
 much of the section on NTP working and performance details.
 Sanjeev Gupta <ghane0@gmail.com> assisted with editing.
 Shawn Kohlsmith <skohlsmith@gmail.com> tweaked the Bibliography.
-Jaap Winius <jwinius@rjsystems.nl> cleaned up some terminology. 
+Jaap Winius <jwinius@rjsystems.nl> cleaned up some terminology.
 
 The loopstats-based tuning procedure for ntpd was drafted by Sanjeev
 Gupta <ghane0@gmail.com>, based on discussions on the GPSD list
@@ -1621,17 +1621,17 @@ by Jaap Winius <jwinius@rjsystems.nl>.
      Gupta's Calibration Howto describing the loopstats-based
      procedure.  Added preliminary information on PTP.
 
-2.1 Mar 2015:: 
+2.1 Mar 2015::
     More on PTP. Added link to Jaap Winius's page on GPS-18 setup.
 
 2.2 Mar 2015::
     Detailed explanation of NTP has moved to a new page,
     link:time-service-intro.html[Introduction to Time Service].
 
-2.3 Mar 2015:: 
+2.3 Mar 2015::
     Use the NTP accuracy estimate from RFC 5905.
 
-2.4 Mar 2015:: 
+2.4 Mar 2015::
     Removed some typos, corrected formatting, and minor changes.
     A bit more specificity about root vs. non-root.
 

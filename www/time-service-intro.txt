@@ -161,7 +161,7 @@ generally expected that NTP clients will have an accuracy (that is,
 maximum divergence from the master atomic clock) of of "a few tens
 of milliseconds" <<RFC5985>>; however, problems such as asymmetric
 routing or the large time jitter introduced by cable networks can
-degrade accuracy to around 100 ms and even worse in extreme cases. 
+degrade accuracy to around 100 ms and even worse in extreme cases.
 
 Some NTP hosts are time *servers*.  They respond to NTP clients with
 time read from high-precision reference clocks (often abbreviated

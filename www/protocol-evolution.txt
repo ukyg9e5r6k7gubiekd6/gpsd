@@ -45,7 +45,7 @@ to port 2947 and have a conversation that looked like this:
 
 -------------------------------------------------------------------------
 -> P
-<- GPSD,P=4002.1207 07531.2540 
+<- GPSD,P=4002.1207 07531.2540
 -------------------------------------------------------------------------
 
 That is GPSD reporting, the only way it could in the earliest protocol
@@ -54,7 +54,7 @@ version, that I'm at latitude about 40 north and 75 west.
 If you are a mathematician or a physicist, you're probably noticing
 some things missing in this report.  Like a timestamp, and a circular
 error estimate, and an altitude.  In fact, it was possible to get some
-these data using the old protocol. You could make a compound request 
+these data using the old protocol. You could make a compound request
 like this:
 
 -------------------------------------------------------------------------
@@ -113,7 +113,7 @@ how it looks:
 The fields in the O report are tag (an indication of the device
 sentence that produced this report), time, time error estimate,
 longitude, latitude, altitude, horizontal error estimate, vertical
-error estimate, course, speed, climb/sink, error estimates for 
+error estimate, course, speed, climb/sink, error estimates for
 those last three fields, and mode (an indication of fix quality).  If
 you care about issues like reporting units, read the documentation.
 
@@ -200,7 +200,7 @@ that I would come to gravely regret later on.
 == JSON and the AISonauts ==
 
 What finally got me off the dime in early 2009 were two developments - the
-push of AIS and the pull of JSON.  
+push of AIS and the pull of JSON.
 
 AIS is the marine http://www.navcen.uscg.gov/enav/ais/[Automatic
 Identification System]. All the open-source implementations of AIS
@@ -221,7 +221,7 @@ is *really nifty*, one of those ideas that seem so simple and
 powerful and obvious once you've seen it that you wonder why it wasn't
 invented sooner.
 
-In brief, JSON is a lightweight and human-readable way to serialize 
+In brief, JSON is a lightweight and human-readable way to serialize
 data structures equivalent to Python dictionaries, with attributes
 that can be numbers, strings, booleans, nested dictionary objects,
 or variable-extent lists of any of these things.
@@ -246,7 +246,7 @@ linewraps):
    "eps":50.73,"mode":3}
 -------------------------------------------------------------------------
 
-To really appreciate what you can do with object-valued attributes, 
+To really appreciate what you can do with object-valued attributes,
 however, consider this JSON equivalent of a 'Y' record.  The skyview
 is a sublist of objects, one per satellite in view:
 
@@ -258,7 +258,7 @@ is a sublist of objects, one per satellite in view:
    {"PRN":28,"el":7,"az":160,"ss":0,"used":false},
    {"PRN":8,"el":66,"az":189,"ss":40,"used":true},
    {"PRN":29,"el":13,"az":273,"ss":0,"used":false},
-   {"PRN":10,"el":51,"az":304,"ss":36,"used":true}, 
+   {"PRN":10,"el":51,"az":304,"ss":36,"used":true},
    {"PRN":4,"el":15,"az":199,"ss":27,"used":false},
    {"PRN":2,"el":34,"az":241,"ss":36,"used":true},
    {"PRN":27,"el":71,"az":76,"ss":43,"used":true}
@@ -280,8 +280,8 @@ compensating advantages:
   'O' record.
 * It includes the name of the device reporting the fix. This opens up
   some design possibilities I will discuss in more detail in a bit.
-* It includes, up front, a "class" tag that tells client software what it 
-  is, which can be used to drive a parse.  
+* It includes, up front, a "class" tag that tells client software what it
+  is, which can be used to drive a parse.
 
 My first key decision was that these benefits are a good trade for the
 increased verbosity.  I had to wrestle with this a bit; I've been
@@ -301,15 +301,15 @@ runtime.
 This is a problem, because one of my design rules for gpsd is no use
 of malloc. Memory leaks in long-running service daemons are bad things;
 using only static, fixed-extent data structures is a brutally effective
-strategy for avoiding them. Note, this is only possible because the maximum 
-size of the packets gpsd sees is fairly small, and its algorithms are O(1) 
+strategy for avoiding them. Note, this is only possible because the maximum
+size of the packets gpsd sees is fairly small, and its algorithms are O(1)
 in memory utilization.
 
 "Um, wait..." I hear you asking "...why accept that constraint when
 gpsd hasn't had a requirement to parse JSON yet, just emit it as
 responses?"  Because I fully expected gpsd to have to parse structured
 JSON arguments for commands.  Here's an example, which I'll explain fully
-later but right now just hint at the (approximate) GPSD-NG equivalent 
+later but right now just hint at the (approximate) GPSD-NG equivalent
 of a 'W+R+' command.
 
 -------------------------------------------------------------------------
@@ -338,11 +338,11 @@ have to replace it.  Of course this just opened up the next question -
 now that I can readily pass complex objects between gpsd and its
 client libraries, what do I actually do with this capability?
 
-The possibility that immediately suggested itself was "get rid of channels".  
-In the old interface, subscribers could only listen to one device at 
-a time - again, this was a consequence of the fact that 'O' and 'Y' 
+The possibility that immediately suggested itself was "get rid of channels".
+In the old interface, subscribers could only listen to one device at
+a time - again, this was a consequence of the fact that 'O' and 'Y'
 reports were designed before multi-device support and didn't include a
-device field.  JSON reports can easily include a device field and 
+device field.  JSON reports can easily include a device field and
 thus need not have this problem.
 
 Instead of a channel-oriented interface, then, how about one where the
@@ -380,7 +380,7 @@ gpsd internals enhancements needed to support multi-device listening?
 About a working week.
 
 Just to round out this section, here is an example of what an
-actual AIS transponder report looks like in JSON.  
+actual AIS transponder report looks like in JSON.
 
 -------------------------------------------------------------------------
 {"class"="AIS","msgtype":5,"repeat":0,"mmsi":"351759000","imo":9134270,
@@ -394,12 +394,12 @@ The above is an AIS type 5 message identifying a ship - giving, among
 other things, the ship's name and radio callsign and and destination
 and ETA.  You might get this from an AIS transceiver, if you had one
 hooked up to your host machine; gpsd would recognize those data
-packets coming in and automatically make AIS reports available as 
-an event stream.  
+packets coming in and automatically make AIS reports available as
+an event stream.
 
 == The lessons of history ==
 
-In the introduction, I called out three trends apparent over time in 
+In the introduction, I called out three trends apparent over time in
 protocol design.  Let's now consider these in more detail.
 
 === Bandwidth economy versus extensibility and explicitness ===
@@ -408,16 +408,16 @@ First, I noted *changing tradeoffs of bandwidth economy versus
 extensibility and explicitness*.
 
 One way you can compare protocols is by the amount of overhead they
-incur.  In a binary format this is the percentage of the bit stream 
+incur.  In a binary format this is the percentage of the bit stream
 that goes to magic numbers, framing bits, padding, checksums, and
 the like.  In a textual format the equivalent is the percentage
-of the bitstream devoted to field delimiters, sentence start and 
+of the bitstream devoted to field delimiters, sentence start and
 sentence-end sentinels, and (in protocols like NMEA 0183) textual
 checksum fields.
 
-Another way you can compare protocols is by implicitness versus 
+Another way you can compare protocols is by implicitness versus
 explicitness.  In the old GPSD protocol, you know the semantics of a
-request parameter within a request implicitly, by where it is in 
+request parameter within a request implicitly, by where it is in
 the order. In GPSD-NG, you know more explicitly because every parameter is a
 name-attribute pair and you can inspect the name.
 
@@ -431,7 +431,7 @@ has much higher overhead than the O record it replaces, but what
 we gain from that is lots and *lots* of extensibility room. We
 win three different ways:
 
-* The command/response namespace in inexhaustibly huge.  
+* The command/response namespace in inexhaustibly huge.
 * Individual requests and responses can readily be extended by adding
   new attributes without breaking old implementations.
 * The type ontology of JSON is rich enough to make passing arbitrarily
@@ -442,7 +442,7 @@ overhead, we're at a very different place on the cost-benefit curves
 today from when the original GPSD protocol was designed.
 
 Communications costs for the pipes that GPSD uses have
-dropped by orders of magnitude in the decade-and-change since GPSD 
+dropped by orders of magnitude in the decade-and-change since GPSD
 was designed. Thus, squeezing every last bit of overhead out of the
 protocol representation doesn't have the real economic payoff it used to.
 
@@ -450,16 +450,16 @@ Under modern conditions, there is a strong case that implicit,
 tightly-packed protocols are false economy. If (as with the first GPSD
 protocol) they're so inextensible that natural growth in the
 software breaks them, that's a clear down-check.  It's better to design
-for extensibility up front in order to avoid having to throw out 
+for extensibility up front in order to avoid having to throw out
 a lot of work later on.
 
-The direction this points in for the future is clear, especially 
+The direction this points in for the future is clear, especially
 in combination with the increasing use of metaprotocols.
 
 === From lockstep to streaming ===
 
 Second, I noted *a shift from lockstep conversational interfaces to
-event streams*.  
+event streams*.
 
 The big change in the second protocol version was watcher mode.  One
 of the possibilities this opens up is that you can put the report
@@ -513,7 +513,7 @@ type (c.1986) and Python built an object system around them (after
 
 Thus, GPSD-NG (and the JSON it's built on) reflects and recapitulates
 long-term trends in language design, especially those associated with
-the rise of scripting languages and of dictionaries as a  first-class 
+the rise of scripting languages and of dictionaries as a  first-class
 type within them.
 
 This produces several mutually reinforcing feedback loops.  The
@@ -541,10 +541,10 @@ progeny SOAP and XML-RPC, are the best known metaprotocols. YAML
 
 Designing on top of a metaprotocol has several advantages.  The most
 obvious one is the presence of lots of open-source software to use for
-parsing the metaprotocol.  
+parsing the metaprotocol.
 
 But it is probably more important in the long run that it saves one
-from having to reinvent a lot of wheels and ad-hoc representations 
+from having to reinvent a lot of wheels and ad-hoc representations
 at the design level.  This effect is muted in XML, which has a weak
 type ontology, but much more pronounced in YAML or JSON.  As a
 relevant example, I didn't have to think three seconds about the right
@@ -554,7 +554,7 @@ representation even for the relatively complex SKY object.
 
 Following the first public release of this paper, the major questions
 to come up from early readers were "Why not XML?" and "Why not a
-super-efficient packed binary protocol?" 
+super-efficient packed binary protocol?"
 
 I would have thought the case against packed binary application
 protocols was obvious from my preceding arguments, but I'll make it
@@ -564,7 +564,7 @@ likely to break as your application evolves. They have significant
 portability issues around things like byte order in numeric fields.
 They are opaque; they cannot be audited or analyzed without bug-prone
 special-purpose tools, adding a forbidding degree of complexity and
-friction to the life-cycle maintenance costs. 
+friction to the life-cycle maintenance costs.
 
 When the type ontology of your application includes only objects like
 strings or numbers that (as opposed to large binary blobs like images)
@@ -594,6 +594,6 @@ expressiveness certainly isn't matched by XML, for reasons already
 called out in my discussion of paths not taken.
 
 I have found JSON pleasant to work with, liberating, and
-thought-provoking; hence this paper. I will certainly reach for this 
+thought-provoking; hence this paper. I will certainly reach for this
 Swiss-army knife first thing, next time I have to design an
 application protocol.

@@ -16,12 +16,12 @@ codes. 25 of 26 ASCII alphabetics were already in use by 2006, and
 there have been functional challenges accumulating over the last three
 years that will require several more request/response codes - things
 like reporting AIS data, reporting raw pseudoranges, and reporting
-RTCM3.  
+RTCM3.
 
 Yes, we could as a desperate expedient have pressed non-alphabetic
 printables into service - but the result would have looked like
 line noise and only delayed the day of reckoning.  Instead, we've
-written a new protocol that is upward-compatible with the old one 
+written a new protocol that is upward-compatible with the old one
 in that you can mix old and new syntax.
 
 There were other problems as well. The old command set encouraged
@@ -85,7 +85,7 @@ it right, you have been telling gpsd to stream data at you with the
    // This is in your application's main event loop somewhere.
    // It polls gpsd for new data.
    ... gps_poll(gpsdata) ...
-   
+
    gps_close()
 
 -------------------------------------------------------------------
@@ -100,7 +100,7 @@ re-entrant client code.)
 . Replace the gps_query() call with:
 
 -------------------------------------------------------------------
-gps_stream(gpsdata, WATCH_ENABLE, NULL) 
+gps_stream(gpsdata, WATCH_ENABLE, NULL)
 -------------------------------------------------------------------
 
 This will tell whatever version of the client library your application
@@ -112,9 +112,9 @@ should work and continue to work through future updates.
 . Change gps_poll calls to gps_read calls.
 
 . If you have references to the 'satellites' member of the structure,
-those need to change them to 'satellites_visible'.  
+those need to change them to 'satellites_visible'.
 
-There. You're probably done, unless you relied on some parts of 
+There. You're probably done, unless you relied on some parts of
 struct gpsdata_t that application developers usually don't or issued
 unusual configuration commands. Here are the exceptions:
 
@@ -137,13 +137,13 @@ unusual configuration commands. Here are the exceptions:
 
 You can probably ignore the rest of this document, unless
 either (a) you want to learn about gpsd's new capabilities so you
-can use them in creative ways, or (b) you want to caper with unholy glee 
+can use them in creative ways, or (b) you want to caper with unholy glee
 as you contemplate the trials awaiting the non-virtuous.
 
 If you are non-virtuous -- that is, you rolled your own client-side
-interface -- you've had years of warning that this choice would 
+interface -- you've had years of warning that this choice would
 fail to insulate you from protocol details and cost you pain in the
-future. That future is now.  
+future. That future is now.
 
 In the remainder of this document we will try to help you minimize the
 pain.  The main strategy for doing so is to *use libgps* (or its
@@ -164,8 +164,8 @@ We're not going to do this any more. It has been pointed out to us
 that the friction costs of breaking shared-library compatibility are
 higher than we were reckoning. The new layout has no sections
 conditionalized; instead, we have moved a number of fields into
-a union. From 2.90 on, the structure layout will change rarely, 
-only at major version bumps. 
+a union. From 2.90 on, the structure layout will change rarely,
+only at major version bumps.
 
 == When the bough breaks ==
 
@@ -190,8 +190,8 @@ library-internal thread hook.  Here's why:
 2. Applications that want location handing to run in a thread are in
    a better position to manage thread locks and mutexes themselves
    than our client library can possibly be -- after all, the
-   application knows what all the other threads and mutex locks 
-   are, and our library doesn't. 
+   application knows what all the other threads and mutex locks
+   are, and our library doesn't.
 
 3. We don't like to ship code we can't test, we didn't have a
    regression test for the thread stuff, and writing one would
@@ -207,7 +207,7 @@ Since we knew we were going to have a forced compatibility break at the
 wire-protocol level anyway, we decided not to do things by halves.  One
 big break -- in the application model, struct gpsdata_t, and the
 wire protocol behind it -- is better than three or four spread out
-over a period of time.  
+over a period of time.
 
 As a result, the new protocol is not an exact superset of the old one.
 It reflects a different way of carving up the behavior space in gpsd's
@@ -243,10 +243,10 @@ structure along with the rest of the new data.
 In both protocols, when you poll gpsd and get data the client library
 takes care of interpreting what comes up the wire from the daemon, and
 merges the resulting data into your client structure (struct
-gpsdata_t).  
+gpsdata_t).
 
 The difference is that before, the API locked you to one device during
-the life of the session.  Now it potentially has to deal with a *set* 
+the life of the session.  Now it potentially has to deal with a *set*
 of devices, treated symmetrically.
 
 There are multiple reasons this change is a good idea.  One is that it
@@ -261,7 +261,7 @@ reporting different kinds of data.
 
 === From lockstep to streaming ===
 
-A subtler change has to do with the difference between a lockstep 
+A subtler change has to do with the difference between a lockstep
 or conversational interface and a streaming, stateless one.
 
 In the earliest versions of GPSD, clients requested various pieces of
@@ -284,7 +284,7 @@ transponders.
 === Asynchronous-write handling ===
 
 The old client code had an assumption baked into it that gps_poll()
-can do one read call end expect the daemon to hand it an entire 
+can do one read call end expect the daemon to hand it an entire
 \n-terminated packet. 99.9% of the time this is true, but socket
 layers can do some remarkably perverse things.
 
@@ -294,7 +294,7 @@ before, but the incoming data is now buffered; the logic to interpret
 the buffer and empty it is called only when the read() contains a \n.
 When that happens, the validity flags include the PACKET_SET mask.
 
-== How the command set has changed == 
+== How the command set has changed ==
 
 If your code issues old-protocol commands 'A', 'D', 'E', 'M', 'P',
 'T', 'U', or 'V', it is a wretched hive of scum and villainy that
@@ -353,11 +353,11 @@ with whatever options you want to set.
 The old 'X' command is gone.  Instead, you will see an object of
 class DEVICE from the daemon whenever a device is opened or closed.
 
-The old 'Z' and '$' commands, used by the developers for profiling, 
+The old 'Z' and '$' commands, used by the developers for profiling,
 have equivalents, which are presently considered unstable and thus
 are undocumented.
 
-== How the C API and gps_data_t structure has changed == 
+== How the C API and gps_data_t structure has changed ==
 
 gps_open() now takes a third argument and is re-entrant - it's the
 old undocumented gps_open_r().
