@@ -14,7 +14,7 @@
 
 #define NTPD_BASE	0x4e545030	/* "NTP0" */
 
-/* 
+/*
  * How to read and write fields in an NTP shared segment.
  * This definition of shmTime is from ntpd source ntpd/refclock_shm.c
  *

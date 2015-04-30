@@ -11,7 +11,7 @@ typedef enum {t_integer, t_uinteger, t_real,
 	      t_string, t_boolean, t_character,
 	      t_time,
 	      t_object, t_structobject, t_array,
-	      t_check, t_ignore} 
+	      t_check, t_ignore}
     json_type;
 
 struct json_enum_t {

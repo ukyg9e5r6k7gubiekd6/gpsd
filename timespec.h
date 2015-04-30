@@ -6,8 +6,8 @@
 #ifndef GPSD_TIMESPEC_H
 #define GPSD_TIMESPEC_H
 
-/* normalize a timespec 
- * 
+/* normalize a timespec
+ *
  * three cases to note
  * if tv_sec is positve, then tv_nsec must be positive
  * if tv_sec is negative, then tv_nsec must be negative
