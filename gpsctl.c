@@ -53,9 +53,9 @@ static void settle(struct gps_device_t *session)
 #endif /* defined(RECONFIGURE_ENABLE) || defined(CONTROLSEND_ENABLE) */
 
 /*
- * Allows any response other than ERROR.  Use it for queries where a 
- * failure return (due to, for example, a missing driver method) is 
- * immediate, but successful responses have unpredictable lag.  
+ * Allows any response other than ERROR.  Use it for queries where a
+ * failure return (due to, for example, a missing driver method) is
+ * immediate, but successful responses have unpredictable lag.
  */
 #define NON_ERROR	0	/* must be distinct from any gps_mask_t value */
 
@@ -446,7 +446,7 @@ int main(int argc, char **argv)
 
 	/* if no control operation was specified, just ID the device */
 	if (speed==NULL && rate == NULL && !to_nmea && !to_binary && !reset) {
-	    (void)printf("%s identified as a %s", 
+	    (void)printf("%s identified as a %s",
 			 gpsdata.dev.path, gpsdata.dev.driver);
 	    if (gpsdata.dev.subtype[0] != '\0') {
 		(void)fputc(' ', stdout);
@@ -476,7 +476,7 @@ int main(int argc, char **argv)
 	 * sent and will shortly take effect.
 	 */
 	if (to_nmea) {
-	    if (!gps_query(&gpsdata, NON_ERROR, (int)timeout, 
+	    if (!gps_query(&gpsdata, NON_ERROR, (int)timeout,
 			   "?DEVICE={\"path\":\"%s\",\"native\":0}\r\n",
 			   device)) {
 		gpsd_log(&context.errout, LOG_ERROR,
@@ -600,9 +600,9 @@ int main(int argc, char **argv)
 	fd_set rfds;
 
 	/*
-	 * Unless the user explicitly requested it, always run to end of 
+	 * Unless the user explicitly requested it, always run to end of
 	 * hunt rather than timing out. Otherwise we can easily get messages
-	 * that spuriously look like failure at high baud rates. 
+	 * that spuriously look like failure at high baud rates.
 	 */
 
 	gps_context_init(&context, "gpsctl");
@@ -644,7 +644,7 @@ int main(int argc, char **argv)
 			 device);
 		exit(EXIT_FAILURE);
 	    }
-	    gpsd_log(&context.errout, LOG_INF, 
+	    gpsd_log(&context.errout, LOG_INF,
 		     "device %s activated\n", session.gpsdata.dev.path);
 	    FD_SET(session.gpsdata.gps_fd, &all_fds);
 	    if (session.gpsdata.gps_fd > maxfd)

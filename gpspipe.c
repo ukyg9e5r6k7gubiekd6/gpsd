@@ -336,13 +336,13 @@ int main(int argc, char **argv)
 
 		    switch( option_u ) {
 		    case 2:
-			(void)snprintf(tmstr_u, sizeof(tmstr_u), 
-				       " %ld.%06ld", 
+			(void)snprintf(tmstr_u, sizeof(tmstr_u),
+				       " %ld.%06ld",
 				       (long)now.tv_sec,
 				       (long)now.tv_nsec/1000);
 			break;
 		    case 1:
-			(void)snprintf(tmstr_u, sizeof(tmstr_u), 
+			(void)snprintf(tmstr_u, sizeof(tmstr_u),
 				       ".%06ld", (long)now.tv_nsec/1000);
 			break;
 		    default:

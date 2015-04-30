@@ -256,7 +256,7 @@ level of the message and the message itself.\n\
 extern PyMODINIT_FUNC initpacket(void);
 
 PyMODINIT_FUNC
-// cppcheck-suppress unusedFunction 
+// cppcheck-suppress unusedFunction
 initpacket(void)
 {
     PyObject *m;

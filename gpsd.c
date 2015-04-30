@@ -612,7 +612,7 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 		 "client(%d) timed out.\n", sub_index(sub));
     else
 	gpsd_log(&context.errout, LOG_INF,
-		 "client(%d) write: %s\n", 
+		 "client(%d) write: %s\n",
 		 sub_index(sub), strerror(errno));
     detach_client(sub);
     return status;
@@ -700,13 +700,13 @@ static bool open_device( struct gps_device_t *device)
      * 1PPS derived time data to ntpd/chrony.
      */
     ntpshm_link_activate(device);
-    gpsd_log(&context.errout, LOG_INF, 
+    gpsd_log(&context.errout, LOG_INF,
 	     "PPS:%s ntpshm_link_activate: %d\n",
 	     device->gpsdata.dev.path,
 	     device->shm_clock != NULL);
 #endif /* NTPSHM_ENABLE */
 
-    gpsd_log(&context.errout, LOG_INF, 
+    gpsd_log(&context.errout, LOG_INF,
 	     "device %s activated\n", device->gpsdata.dev.path);
     if ( PLACEHOLDING_FD == activated ) {
 	/* it is a /dev/ppsX, no need to select() it */
@@ -719,7 +719,7 @@ static bool open_device( struct gps_device_t *device)
 }
 
 bool gpsd_add_device(const char *device_name, bool flag_nowait)
-/* add a device to the pool; open it right away if in nowait mode 
+/* add a device to the pool; open it right away if in nowait mode
  * return: false on failure
  *         true on success
  */
@@ -973,7 +973,7 @@ static bool privileged_user(struct gps_device_t *device)
     /*
      * Yes, zero subscribers is possible. For example, gpsctl talking
      * to the daemon connects but doesn't necessarily issue a ?WATCH
-     * before shipping a request, which means it isn't marked as a 
+     * before shipping a request, which means it isn't marked as a
      * subscriber.
      */
     return subcount <= 1;
@@ -1392,7 +1392,7 @@ static void pseudonmea_report(struct subscriber_t *sub,
 
 	if ((changed & REPORT_IS) != 0) {
 	    nmea_tpv_dump(device, buf, sizeof(buf));
-	    gpsd_log(&context.errout, LOG_IO, 
+	    gpsd_log(&context.errout, LOG_IO,
 		     "<= GPS (binary tpv) %s: %s\n",
 		     device->gpsdata.dev.path, buf);
 	    (void)throttled_write(sub, buf, strlen(buf));
@@ -2001,7 +2001,7 @@ int main(int argc, char *argv[])
     }
     /*
      * By initializing before we drop privileges, we guarantee that even
-     * hotplugged devices added *after* we drop privileges will be able 
+     * hotplugged devices added *after* we drop privileges will be able
      * to use segments 0 and 1.
      */
     (void)ntpshm_context_init(&context);

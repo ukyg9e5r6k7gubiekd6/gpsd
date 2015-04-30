@@ -324,7 +324,7 @@ void json_device_dump(const struct gps_device_t *device,
      */
     if (device->gpsdata.online > 0) {	
 	str_appendf(reply, replylen,
-		       "\"activated\":\"%s\",", 
+		       "\"activated\":\"%s\",",
 		       unix_to_iso8601(device->gpsdata.online, buf1, sizeof(buf1)));
 	if (device->observed != 0) {
 	    int mask = 0;
@@ -382,7 +382,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 {
     const struct subframe_t *subframe = &datap->subframe;
     const bool scaled = datap->policy.scaled;
- 
+
     (void)snprintf(buf, buflen, "{\"class\":\"SUBFRAME\",\"device\":\"%s\","
 		   "\"tSV\":%u,\"TOW17\":%u,\"frame\":%u,\"scaled\":%s",
 		   datap->dev.path,
@@ -2108,7 +2108,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			   "\"data\":\"%zd:%s\"}\r\n",
 			   ais->type8.bitcount,
 			   json_stringify(buf1, sizeof(buf1),
-					  gpsd_hexdump(scratchbuf, sizeof(scratchbuf), 
+					  gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
 						       (char *)ais->type8.bitdata,
 						       BITS_TO_BYTES(ais->type8.bitcount))));
 	    break;

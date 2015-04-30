@@ -1,7 +1,7 @@
 /*
  * gps2udp
  *
- * Dump NMEA to UDP socket for AIShub 
+ * Dump NMEA to UDP socket for AIShub
  *      gps2udp -u data.aishub.net:1234
  *
  * Author: Fulup Ar Foll (directly inspired from gpspipe.c)
@@ -56,22 +56,22 @@ static unsigned int flags;
 static int debug = 0;
 static bool aisonly = false;
 
-static char* time2string(void)  
+static char* time2string(void)
 /* return local time hh:mm:ss */
 {
    static char buffer[MAX_TIME_LEN];
    time_t curtime;
    struct tm *loctime;
-     
+
    /* Get the current time. */
    curtime = time (NULL);
-     
+
    /* Convert it to local time representation. */
    loctime = localtime (&curtime);
-     
+
    /* Print it out in a nice format. */
    (void)strftime (buffer, sizeof(buffer), "%H:%M:%S", loctime);
-     
+
    return (buffer);
 }
 
@@ -175,14 +175,14 @@ static void usage(void)
 {
     (void)fprintf(stderr,
 		  "Usage: gps2udp [OPTIONS] [server[:port[:device]]]\n\n"
-		  "-h Show this help.\n" 
+		  "-h Show this help.\n"
                   "-u Send UDP NMEA/JASON feed to host:port [multiple -u host:port accepted\n"
 		  "-n Feed NMEA.\n"
 		  "-j Feed Jason.\n"
 		  "-a Select !AISDM message only.\n"
 		  "-c [count] exit after count packets.\n"
-		  "-b Run in background as a daemon.\n" 
-		  "-d [0-2] 1 display sent packets, 2 ignored packets.\n" 
+		  "-b Run in background as a daemon.\n"
+		  "-d [0-2] 1 display sent packets, 2 ignored packets.\n"
 		  "-v Print version and exit.\n\n"
                   "example: gps2udp -a -n -c 2 -d 1 -u data.aishub.net:2222 fridu.net\n"
 		  );
@@ -218,12 +218,12 @@ static void connect2gpsd(bool restart)
     }
     /* select the right set of gps data */
     (void)gps_stream(&gpsdata, flags, gpsd_source.device);
-    
+
 }
 
 static ssize_t read_gpsd(char *message, size_t len)
 /* get data from gpsd */
-{   
+{
     struct timeval tv;
     fd_set fds,master;
     int ind;
@@ -242,7 +242,7 @@ static ssize_t read_gpsd(char *message, size_t len)
         tv.tv_usec = 0;
         memcpy(&fds, &master, sizeof(fd_set));
         result = select(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv);
-      
+
         switch (result)
 	{
         case 1: /* we have data waiting, let's process them */
@@ -252,7 +252,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 	    if (result != 1) {
 		connect2gpsd (true);
 	    }
-            
+
 	    if ((c == '\n') || (c == '\r')){
 		message[ind]='\0';
 
@@ -274,7 +274,7 @@ static ssize_t read_gpsd(char *message, size_t len)
 			return(0);
 		    }
 		}
-                     
+
 		return ((ssize_t)ind+1);
 	    } else {
 		message[ind]= c;
@@ -384,7 +384,7 @@ int main(int argc, char **argv)
 	    break;
         case 'u':
             if (udpchannel >= MAX_UDP_DEST) {
-		(void)fprintf(stderr, 
+		(void)fprintf(stderr,
 			      "gps2udp: too many UDP destinations (max=%d)\n",
 			      MAX_UDP_DEST);
             } else {
@@ -423,7 +423,7 @@ int main(int argc, char **argv)
     /* Daemonize if the user requested it. */
     if (daemonize) {
 	if (daemon(0, 0) != 0) {
-	    (void)fprintf(stderr, 
+	    (void)fprintf(stderr,
 			  "gps2udp: demonization failed: %s\n",
 			  strerror(errno));
         }
@@ -436,7 +436,7 @@ int main(int argc, char **argv)
 	ssize_t  len;
 
 	len = read_gpsd(buffer, sizeof(buffer));
- 
+
 	/* ignore empty message */
 	if (len > 3)
 	{
@@ -466,10 +466,10 @@ int main(int argc, char **argv)
 			bitstrings[i] = AISto6bit(info[5][i]);
 		    }
 
-		    mmsi = AISGetInt(bitstrings, 9, 30); 
+		    mmsi = AISGetInt(bitstrings, 9, 30);
 		    (void)fprintf(stdout," MMSI=%9u", mmsi);
 
-		} 
+		}
 		fprintf(stdout,"\n");
 	    }
 
@@ -481,14 +481,14 @@ int main(int argc, char **argv)
 	    if (count >= 0) {
 		if (count-- == 0) {
 		    /* completed count */
-		    (void)fprintf(stderr, 
+		    (void)fprintf(stderr,
 				  "gpsd2udp: normal exit after counted packets\n");
 		    exit (0);
 		}
-	    }  // end count  
+	    }  // end count
         } // end len > 3
     } // end for (;;)
- 
+
     // This is an infinite loop, should never be here
     fprintf (stderr, "gpsd2udp ERROR abnormal exit\n");
     exit (-1);

@@ -30,7 +30,7 @@ static int gpsd_control(char *action, char *argument)
     int status;
 
     (void)syslog(LOG_ERR, "gpsd_control(action=%s, arg=%s)", action, argument);
-    if (access(control_socket, F_OK) == 0 && 
+    if (access(control_socket, F_OK) == 0 &&
 	    (connect = netlib_localsocket(control_socket, SOCK_STREAM)) >= 0)
 	syslog(LOG_INFO, "reached a running gpsd");
     else if (strcmp(action, "add") == 0) {

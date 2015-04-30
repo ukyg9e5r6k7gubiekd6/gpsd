@@ -182,7 +182,7 @@ static void visibilize(char *buf2, size_t len2, const char *buf)
 }
 #endif /* PPS_ENABLE */
 
-static void cond_hexdump(char *buf2, size_t len2, 
+static void cond_hexdump(char *buf2, size_t len2,
 			 const char *buf, size_t len)
 /* pass through visibilized if all printable, hexdump otherwise */
 {
@@ -227,7 +227,7 @@ void toff_update(WINDOW *win, int y, int x)
 	getmaxyx(win, ymax, xmax);
 	assert(ymax > 0);  /* squash a compiler warning */
 	(void)wmove(win, y, x);
-	/* 
+	/*
 	 * The magic number shortening the field works because
 	 * we know we'll never see more than 5 digits of seconds
 	 * rather than 10.
@@ -354,7 +354,7 @@ static void announce_log(const char *fmt, ...)
     va_start(ap, fmt);
     (void)vsnprintf(buf, sizeof(buf) - 5, fmt, ap);
     va_end(ap);
- 
+
    if (packetwin != NULL) {
 	report_lock();
 	(void)wattrset(packetwin, A_BOLD);
@@ -709,7 +709,7 @@ static void complain(const char *fmt, ...)
 
 /*****************************************************************************
  *
- * Main sequence 
+ * Main sequence
  *
  *****************************************************************************/
 
@@ -772,7 +772,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
                               timedelta_str);
 	    }
 
-	    (void)snprintf(buf, sizeof(buf), 
+	    (void)snprintf(buf, sizeof(buf),
 			"------------------- PPS offset: %.20s ------\n ",
 			timedelta_str);
 	    /*
@@ -839,7 +839,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
     } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
 	// "NTP: Not a new time
 #endif /* PPS_ENABLE */
-    } else 
+    } else
 	ntp_latch(device, &time_offset);
 #endif /* NTP_ENABLE */
 }
@@ -885,7 +885,7 @@ static bool do_command(const char *line)
 		/* *INDENT-ON* */
 	    } else
 		complain
-		    ("Device type %s has no rate switcher", 
+		    ("Device type %s has no rate switcher",
 		     switcher->type_name);
 	}
 #endif /* RECONFIGURE_ENABLE */
@@ -960,7 +960,7 @@ static bool do_command(const char *line)
 		    fallback = switcher;
 	    } else
 		complain
-		    ("Device type %s has no mode switcher", 
+		    ("Device type %s has no mode switcher",
 		     switcher->type_name);
 	}
 	break;
@@ -1080,7 +1080,7 @@ static bool do_command(const char *line)
 	    if (st < 0)
 		complain("Invalid hex string (error %d)", st);
 	    else if (session.device_type->control_send == NULL)
-		complain("Device type %s has no control-send method.", 
+		complain("Device type %s has no control-send method.",
 			 session.device_type->type_name);
 	    else if (!monitor_control_send(buf, (size_t) st))
 		complain("Control send failed.");
@@ -1262,12 +1262,12 @@ int main(int argc, char **argv)
     }
 
     if (serial) {
-	(void) strlcpy(session.gpsdata.dev.path, 
-		       source.device, 
+	(void) strlcpy(session.gpsdata.dev.path,
+		       source.device,
 		       sizeof(session.gpsdata.dev.path));
     } else {
 	if (strstr(source.server, "//") == 0)
-	    (void) strlcpy(session.gpsdata.dev.path, 
+	    (void) strlcpy(session.gpsdata.dev.path,
 			   "tcp://",
 			   sizeof(session.gpsdata.dev.path));
 	else
@@ -1347,7 +1347,7 @@ int main(int argc, char **argv)
 	} else if (!curses_init())
 	    goto quit;
 
-	for (;;) 
+	for (;;)
 	{
 	    fd_set efds;
 	    switch(gpsd_await_data(&rfds, &efds, maxfd, &all_fds, &context.errout))

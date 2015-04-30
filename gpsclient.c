@@ -84,7 +84,7 @@ PyDoc_STRVAR(module_doc,
 extern PyMODINIT_FUNC initclienthelpers(void);
 
 PyMODINIT_FUNC
-// cppcheck-suppress unusedFunction 
+// cppcheck-suppress unusedFunction
 initclienthelpers(void)
 {
     PyObject *m;
