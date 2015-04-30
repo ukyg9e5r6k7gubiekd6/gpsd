@@ -179,13 +179,26 @@ struct timespec exs[] = {
 	TS_ZERO,
 };
 
+static void ex_precision1( struct timespec a, struct timespec b)
+{
+	char buf[TIMESPEC_LEN];
+	char buf1[TIMESPEC_LEN];
+	long l;
+
+	timespec_str( &a, buf, sizeof(buf) );
+	timespec_str( &b, buf1, sizeof(buf1) );
+	l = timespec_diff_ns( a, b);
+	printf( "%21s - %21s =  %21ld\n", buf, buf1, l);
+
+
+}
+
 static void ex_precision(void)
 {
-	long l;
+	int i;
 	float f;
 	double d;
 	char buf[TIMESPEC_LEN];
-	char buf1[TIMESPEC_LEN];
 	struct timespec *v = exs;
 	struct timespec v1 = TS_2037;
 	struct timespec v2 = TS_2037_X;
@@ -209,16 +222,11 @@ static void ex_precision(void)
 	printf( "\n\nSubtraction:\n");
 	printf( "\n\ntimespec_diff_ns( x, y) = z\n");
 
-	timespec_str( &v1, buf, sizeof(buf) );
-	timespec_str( &v2, buf1, sizeof(buf1) );
-	l = timespec_diff_ns( v1, v2);
-	printf( "%21s - %21s =  %21ld\n", buf, buf1, l);
+	for ( i = 0 ; i < 6 ; i++ ) {
+	    ex_precision1( v1, v2);
+	    v1.tv_sec += 1000;
+	}
 
-	v1.tv_sec += 4;
-	timespec_str( &v1, buf, sizeof(buf) );
-	timespec_str( &v2, buf1, sizeof(buf1) );
-	l = timespec_diff_ns( v1, v2);
-	printf( "%21s - %21s =  %21ld\n", buf, buf1, l);
 
 }
 
