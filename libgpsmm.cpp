@@ -68,13 +68,13 @@ const char *gpsmm::data(void)
     return gps_data(gps_state());
 }
 
-// cppcheck-suppress unusedFunction 
+// cppcheck-suppress unusedFunction
 void gpsmm::clear_fix(void)
 {
     gps_clear_fix(&(gps_state()->fix));
 }
 
-// cppcheck-suppress unusedFunction 
+// cppcheck-suppress unusedFunction
 void gpsmm::enable_debug(int level, FILE *fp)
 {
 #ifdef CLIENTDEBUG_ENABLE
@@ -82,7 +82,7 @@ void gpsmm::enable_debug(int level, FILE *fp)
 #endif /* CLIENTDEBUG_ENABLE */
 }
 
-// cppcheck-suppress unusedFunction 
+// cppcheck-suppress unusedFunction
 bool gpsmm::is_open(void)
 {
 	return to_user != NULL;
