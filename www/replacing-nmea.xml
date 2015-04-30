@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!DOCTYPE article PUBLIC 
+<!DOCTYPE article PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 <!ENTITY howto         "http://en.tldp.org/HOWTO/">
@@ -17,7 +17,7 @@
   <surname>Raymond</surname>
   <affiliation>
     <orgname><ulink url="&homepage;">
-    Thyrsus Enterprises</ulink></orgname> 
+    Thyrsus Enterprises</ulink></orgname>
     <address>
     <email>esr@thyrsus.com</email>
     </address>
@@ -25,7 +25,7 @@
 </author>
 <copyright>
   <year>2004</year>
-  <holder role="mailto:esr@thyrsus.com">Eric S. Raymond</holder> 
+  <holder role="mailto:esr@thyrsus.com">Eric S. Raymond</holder>
 </copyright>
 <!-- legalnotice>
   <title>Copyright</title>
@@ -73,7 +73,7 @@
       <date>21 November 2006</date>
       <authorinitials>esr</authorinitials>
       <revremark>
-         Fixed timestamp to Zulu time.  Specified signed latitude.  
+         Fixed timestamp to Zulu time.  Specified signed latitude.
       </revremark>
    </revision>
    <revision>
@@ -114,7 +114,7 @@ identifying text tag, followed by multiple comma-separated textual
 fields, ended by an asterisk, a checksum, and LF/CR.  This is a
 simple, clean format with good extensibility, easy to parse and
 generate.  It is well adapted to its job, which is to pass
-small amounts of numeric and status information.  The textual 
+small amounts of numeric and status information.  The textual
 format makes it easy to log NMEA sessions, edit them, and play them
 back &mdash; a substantial advantage in developing talker and
 parser software.</para>
@@ -134,7 +134,7 @@ precision.  </para></listitem>
 
 <listitem><para>
 It is not possible to get a time/position/velocity report in a single
-sentence.  Some sentences (GPRMC) report time and 2D position and velocity, 
+sentence.  Some sentences (GPRMC) report time and 2D position and velocity,
 some (GPGGA) report time and 3D position, some (GPVTG) report velocity
 only.  As a result, the API for a protocol client is complicated by
 the necessity of maintaining separate age indications for 2D position,
@@ -171,7 +171,7 @@ complexity in the receiver by not requiring a stateful parser.
 
 <listitem><para>
 Position accuracy estimates are not easy to compute from
-NMEA reports.  Reporting a measurement without giving its 95% 
+NMEA reports.  Reporting a measurement without giving its 95%
 confidence interval is bad practice.
 </para></listitem>
 
@@ -185,7 +185,7 @@ is more powerful and flexible at these things; thus, the GPS only
 needs to be a time/position/velocity oracle.
 </para></listitem>
 
-<listitem><para> 
+<listitem><para>
 NMEA 0183 is in general very loosely specified and
 poorly documented. Its problems are compounded by the fact that it is
 a proprietary specification, jealously guarded by IP lawyers.
@@ -213,14 +213,14 @@ a protocol for GPS reports;</para>
 Keep the low-level syntax, because it's not broken.  It has all the
 advantages of textual protocols.  Going to a more tightly-packed
 binary format might look attractive at first glance, but the gain in
-information would be marginal at best. Textual formats already use 
-7 out of 8 bits per byte and encode variable-length numeric fields more 
+information would be marginal at best. Textual formats already use
+7 out of 8 bits per byte and encode variable-length numeric fields more
 efficiently than binary; also they avoid endianness issues.
 </para></listitem>
 
-<listitem><para> 
+<listitem><para>
 Add to the syntax standard ways of indicating that either (a) the
-GPS cannot now ship valid data for the field, or (b) the GPS will 
+GPS cannot now ship valid data for the field, or (b) the GPS will
 <emphasis>never</emphasis> ship data for this field.
 </para></listitem>
 
@@ -230,7 +230,7 @@ every sentence.  Every timestamp should be in the same standard form
 and should include a full date with century.</para>
 </listitem>
 
-<listitem><para> 
+<listitem><para>
 Report the uncertainty corresponding to a 95% confidence interval on a
 standard normal distribution for each measurement field.
 </para></listitem>
@@ -241,7 +241,7 @@ time/position/velocity and the uncertainties in same.
 </para></listitem>
 
 <listitem><para>
-Make it an objective of the design for an informal specification to fit 
+Make it an objective of the design for an informal specification to fit
 on a single page.
 </para></listitem>
 </itemizedlist>
@@ -274,7 +274,7 @@ url='http://www.w3.org/TR/NOTE-datetime'>W3C profile of ISO
 
 <orderedlist>
 <listitem><para>
-The sentence tag is GPTPV, standing for Time/Position/Velocity.  
+The sentence tag is GPTPV, standing for Time/Position/Velocity.
 </para></listitem>
 
 <listitem><para>
@@ -320,7 +320,7 @@ The tenth field is course over ground in degrees from true north.
 </para></listitem>
 
 <listitem><para>
-The eleventh field is uncertainty of course over ground in degrees  (95% 
+The eleventh field is uncertainty of course over ground in degrees  (95%
 confidence).
 </para></listitem>
 
@@ -347,7 +347,7 @@ mode field is added to satisfy a U.S. regulator's requirement.</para>
 <programlisting>
 $GPTPV,2005-02-11T04:40:51.231Z,?,49.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A*31
 
-     2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 EST 2005) 
+     2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 EST 2005)
      ?,                         Timestamp uncertainty will never be reported
      49.45,                     Latitude (- sign indicates latitude south)
      -123.12,                   Longitude (- sign indicates longitude west)
@@ -371,7 +371,7 @@ $GPTPV,2005-02-11T04:40:51.231Z,?,49.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0.6
 
 <orderedlist>
 <listitem><para>
-The sentence tag is GPSVU, standing for Satellite View Update.  
+The sentence tag is GPSVU, standing for Satellite View Update.
 </para></listitem>
 
 <listitem><para>
@@ -419,7 +419,7 @@ ID, and the fields are as follows:</para>
 
 <orderedlist>
 <listitem><para>
-The sentence tag is GPVID, standing for Vendor ID.  
+The sentence tag is GPVID, standing for Vendor ID.
 </para></listitem>
 
 <listitem><para>
@@ -427,19 +427,19 @@ The first field is the required timestamp.
 </para></listitem>
 
 <listitem><para>
-The second field is the SGPS revision level.  
+The second field is the SGPS revision level.
 </para></listitem>
 
 <listitem><para>
-The third field is the vendor name.  
+The third field is the vendor name.
 </para></listitem>
 
 <listitem><para>
-The fourth field is the device name or model number.  
+The fourth field is the device name or model number.
 </para></listitem>
 
 <listitem><para>
-The fifth field is a chipset designation.  
+The fifth field is a chipset designation.
 </para></listitem>
 
 <listitem><para>
@@ -461,7 +461,7 @@ $GPVID,2006-11-17T12:29:37Z,1.0,Haicom,H204S,SiRF-II,231.00.00*5C
 </sect2>
 <sect2><title>GPGSP</title>
 
-<para>With the addition of a fourth sentence, $GPSGP, transition to the 
+<para>With the addition of a fourth sentence, $GPSGP, transition to the
 new protocol would be easy.  It would have two forms:</para>
 
 <para>$GPSGP,1: directs the receiver to emit GPPVT and GPSVU
@@ -478,7 +478,7 @@ $GPGSP,1*4E
 
 
 <para>An SGPS-conformant receiver is required to respond with
-$GPSGP,timestamp,x,y where x is 1 or 0 reflecting the command, and y is 1 or 0 
+$GPSGP,timestamp,x,y where x is 1 or 0 reflecting the command, and y is 1 or 0
 reporting its new mode.</para>
 
 <para>Other listeners can distinguish GPGSP responses from requests
@@ -498,7 +498,7 @@ corresponding report based on most recent available data.</para>
 
 <para>Astute readers will already have noted that the SGPS sentences
 might be sold as a minor extension to NMEA 0183. first supplementing
-and eventually obsolescing the half-dozen or so sentences emitted by 
+and eventually obsolescing the half-dozen or so sentences emitted by
 most modern GPSes.</para>
 
 <para>The only fields reported in the SGPS set that cannot be
