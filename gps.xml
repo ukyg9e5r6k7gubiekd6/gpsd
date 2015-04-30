@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gps.1'>
@@ -26,7 +26,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>xgps</command>  
+  <command>xgps</command>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
@@ -34,8 +34,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
-	  <group> 
-	    <replaceable>:port</replaceable> 
+	  <group>
+	    <replaceable>:port</replaceable>
 	      <group><replaceable>:device</replaceable></group>
 	  </group>
       </group>
@@ -43,7 +43,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <cmdsynopsis>
   <command>xgpsspeed</command>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
-      <arg choice='opt'>-h </arg> 
+      <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>--speedunits
 	      <group choice='req'>
@@ -52,14 +52,14 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       </arg>
       <group>
 	<replaceable>server</replaceable>
-	  <group> 
-	    <replaceable>:port</replaceable> 
+	  <group>
+	    <replaceable>:port</replaceable>
 	      <group><replaceable>:device</replaceable></group>
 	  </group>
       </group>
 </cmdsynopsis>
 <cmdsynopsis>
-  <command>cgps</command>  
+  <command>cgps</command>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
@@ -69,28 +69,28 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
-	  <group> 
-	    <replaceable>:port</replaceable> 
+	  <group>
+	    <replaceable>:port</replaceable>
 	      <group><replaceable>:device</replaceable></group>
 	  </group>
       </group>
 </cmdsynopsis>
 <cmdsynopsis>
-  <command>lcdgps</command>  
+  <command>lcdgps</command>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
       <group>
 	<replaceable>server</replaceable>
-	  <group> 
-	    <replaceable>:port</replaceable> 
+	  <group>
+	    <replaceable>:port</replaceable>
 	      <group><replaceable>:device</replaceable></group>
 	  </group>
       </group>
 </cmdsynopsis>
 <cmdsynopsis>
-  <command>gpxlogger</command>  
+  <command>gpxlogger</command>
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-d </arg>
       <arg choice='opt'>-e <replaceable>export-method</replaceable></arg>
@@ -102,8 +102,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-i <replaceable>track timeout</replaceable></arg>
       <group>
 	<replaceable>server</replaceable>
-	  <group> 
-	    <replaceable>:port</replaceable> 
+	  <group>
+	    <replaceable>:port</replaceable>
 	      <group><replaceable>:device</replaceable></group>
 	  </group>
       </group>
@@ -118,7 +118,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsect1 id='description'><title>DESCRIPTION</title>
 
 <para>These are the demonstration clients shipped with
-<application>gpsd</application>. They have some common options:</para> 
+<application>gpsd</application>. They have some common options:</para>
 
 <para>The <option>-h</option> option causes each client to emit a summary of its
 options and then exit.</para>
@@ -139,7 +139,7 @@ should default to using for display &mdash; imperial, nautical, or
 metric.  Here are the variables and values they check:</para>
 
 <screen>
-    GPSD_UNITS one of: 
+    GPSD_UNITS one of:
               imperial   = miles/feet
               nautical   = knots/feet
               metric     = km/meters
@@ -191,12 +191,12 @@ IPv4 and IPv6.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>71.162.241.5:2317:/dev/ttyS3</term>
-<listitem><para>Look at port 2317 at the specified IPv4 
+<listitem><para>Look at port 2317 at the specified IPv4
 address, collecting data from attached serial device 3.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:2317:/dev/ttyS5</term>
-<listitem><para>Look at port 2317 at the specified IPv6 
+<listitem><para>Look at port 2317 at the specified IPv6
 address, collecting data from attached serial device 5.</para></listitem>
 </varlistentry>
 </variablelist>
@@ -217,7 +217,7 @@ support the feature) the locations of accessible satellites.</para>
 <para>In the sky view, satellites are color-coded to indicate quality
 of signal; consult the data display to the left for exact figures in
 dB. Square icons indicate WAAS/EGNOS satellites, circles indicate
-ordinary GPS satellites.  Filled icons were used in the last fix, 
+ordinary GPS satellites.  Filled icons were used in the last fix,
 outline icons were not.</para>
 
 </refsect2>
@@ -243,8 +243,8 @@ speedometer.</para>
 </refsect2>
 <refsect2><title>cgps</title>
 
-<para><application>cgps</application> is a client resembling 
-<application>xgps</application>, but without the pictorial 
+<para><application>cgps</application> is a client resembling
+<application>xgps</application>, but without the pictorial
 satellite display and able to run on a serial terminal or
 terminal emulator.</para>
 
@@ -277,7 +277,7 @@ Also displays 4- or 6-character Maidenhead grid square output.</para>
 <refsect2><title>gpxlogger</title>
 
 <para>This program collects fixes from <application>gpsd</application>
-and logs them to standard output in GPX, an XML profile for track 
+and logs them to standard output in GPX, an XML profile for track
 logging.</para>
 
 <para>The output may be composed of multiple tracks. A new track is
@@ -293,7 +293,7 @@ specified logfile.</para>
 meters (it may include a fractional decimal part).  Motions shorter
 than this will not be logged.</para>
 
-<para><application>gpxlogger</application> can use any of the 
+<para><application>gpxlogger</application> can use any of the
 export methods that <application>gpsd</application> supports.
 For a list of these methods, use the <option>-l</option>.
 To force the method, give the <option>-e</option> one of
@@ -314,7 +314,7 @@ arguments.</para>
 <refsect2><title>gegps</title>
 
 <para>This program collects fixes from <application>gpsd</application>
-and feeds them to a running instance of Google Earth for live location 
+and feeds them to a running instance of Google Earth for live location
 tracking.</para>
 
 <para>The <option>-d</option> argument is the location of the Google
@@ -344,7 +344,7 @@ after that.</para>
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHORS</title> 
+<refsect1 id='maintainer'><title>AUTHORS</title>
 
 <para>
 Remco Treffcorn, Derrick Brashear, Russ Nelson &amp; Eric S. Raymond,

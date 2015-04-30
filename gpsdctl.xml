@@ -51,7 +51,7 @@ this program is root, <filename>/tmp/gpsd.sock</filename>
 otherwise.</para>
 
 <para><envar>GPSD_OPTIONS</envar>
-may be a list of options to be passed to <application>gpsd</application> 
+may be a list of options to be passed to <application>gpsd</application>
 when this tool launches it.  It defaults to an empty string.</para>
 </refsect1>
 

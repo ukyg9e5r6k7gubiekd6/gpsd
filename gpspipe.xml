@@ -105,7 +105,7 @@ output.</para>
 
 <para>-S sets the scaled flag.</para>
 
-<para>-2 sets the split24 flag on AIS reports. Note: this option 
+<para>-2 sets the split24 flag on AIS reports. Note: this option
 is experimental and may be changed or removed in a future release.</para>
 
 <para>-t adds a timestamp to each sentence output.</para>

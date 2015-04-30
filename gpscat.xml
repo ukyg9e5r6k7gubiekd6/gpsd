@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpscat.1'>
@@ -21,7 +21,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpscat</command>  
+  <command>gpscat</command>
       <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-p</arg>
       <arg choice='opt'>-t</arg>
@@ -127,7 +127,7 @@ devices.</para>
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHOR</title> 
+<refsect1 id='maintainer'><title>AUTHOR</title>
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 </refsect1>

@@ -42,11 +42,11 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <para><application>gpsinit</application> initializes whatever
 kernel-level modules are needed to enable special non-serial hardware
 to communicate with a gpsd instance.  Note: it will need root permissions
-to load modules and perform other special operations, such as changing 
+to load modules and perform other special operations, such as changing
 kernel-interface baudrates.</para>
 
 <para>At present, all modes of this tool are concerned with setting up
-kernel-level interfaces to hardware on a CAN (Control Area Network) speaking 
+kernel-level interfaces to hardware on a CAN (Control Area Network) speaking
 NMEA2000.</para>
 
 <para>The program accepts the following options:</para>

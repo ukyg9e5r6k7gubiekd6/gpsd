@@ -216,7 +216,7 @@ other WATCH flags are set, this is the default.</para>
 <varlistentry>
 <term>WATCH_SCALED</term>
 <listitem>
-<para>When reporting AIS or Subframe data, scale integer quantities to 
+<para>When reporting AIS or Subframe data, scale integer quantities to
 floats if they have a divisor or rendering formula associated with them.</para>
 </listitem>
 </varlistentry>
@@ -308,7 +308,7 @@ libgps interface code from
 
 <refsect1 id='limitations'><title>LIMITATIONS</title>
 
-<para>On some systems (those which do not support implicit linking in 
+<para>On some systems (those which do not support implicit linking in
 libraries) you may need to add -lm to your link line when you link libgps.
 It is always safe to do this.</para>
 

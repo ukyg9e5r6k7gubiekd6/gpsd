@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpsprof.1'>
@@ -21,7 +21,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsprof</command>  
+  <command>gpsprof</command>
       <arg choice='opt'>-f <replaceable>plot_type</replaceable></arg>
       <arg choice='opt'>-m <replaceable>threshold</replaceable></arg>
       <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
@@ -81,7 +81,7 @@ following plot types are defined:</para>
 <listitem>
 <para>Generate a scattergram of fixes and plot a probable-error
 circle.  This data is only meaningful if the GPS is held stationary
-while <application>gpsprof</application> is running. 
+while <application>gpsprof</application> is running.
 This is the default.</para>
 </listitem>
 </varlistentry>
@@ -105,8 +105,8 @@ from reports without fixes is lumped in.</para>
 <varlistentry>
 <term>instrumented</term>
 <listitem>
-<para>Plot instrumented profile. 
-Plots various components of the total latency between the GPS's fix time 
+<para>Plot instrumented profile.
+Plots various components of the total latency between the GPS's fix time
 fix and when the client receives the fix.</para>
 </listitem>
 </varlistentry>
@@ -135,7 +135,7 @@ a fix to the client.</para>
 <varlistentry>
 <term>RS232 time</term>
 <listitem>
-<para>RS232 transmission time for data shipped during the cycle 
+<para>RS232 transmission time for data shipped during the cycle
 (computed from character volume and baud rate).</para>
 </listitem>
 </varlistentry>
@@ -177,11 +177,11 @@ code, to a specified file for post-analysis.</para>
 <para>The -l option dumps the raw JSON reports collected from the device
 to a specified file.</para>
 
-<para>The -r option replots from a JSON logfile (such as -l produces) 
+<para>The -r option replots from a JSON logfile (such as -l produces)
 on standard input. Both -n and -l options are ignored when this
 one is selected.</para>
 
-<para>The -h option makes <application>gpsprof</application> print 
+<para>The -h option makes <application>gpsprof</application> print
 a usage message and exit.</para>
 
 <para>The -D sets debug level.</para>
@@ -204,7 +204,7 @@ first number in the startup message is the process ID to signal.</para>
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHOR</title> 
+<refsect1 id='maintainer'><title>AUTHOR</title>
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 

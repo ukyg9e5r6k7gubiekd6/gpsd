@@ -101,7 +101,7 @@ that speaks either the standard textual NMEA 0183 protocol, or the
 (differing) extended NMEA dialects used by MKT-3301, iTrax, Motorola
 OnCore, Sony CXD2951, and Ashtech/Thales devices.  It can also
 interpret the binary protocols used by EverMore, Garmin, Navcom,
-Rockwell/Zodiac, SiRF, Trimble, and u-blox ANTARIS devices. Under Linux 
+Rockwell/Zodiac, SiRF, Trimble, and u-blox ANTARIS devices. Under Linux
 it can read NMEA2000 packets through the kernel CAN socket. It can read
 heading and attitude information from the Oceanserver 5000 or TNT
 Revolution digital compasses.</para>
@@ -194,7 +194,7 @@ battery power. (This capability is rare in consumer-grade devices).
 </varlistentry>
 <varlistentry>
 <term>-N</term>
-<listitem><para>Don't daemonize; run in foreground. 
+<listitem><para>Don't daemonize; run in foreground.
 This switch is mainly useful for debugging.</para>
 </listitem>
 </varlistentry>
@@ -343,7 +343,7 @@ set to the pathname of the device and the second to
 <option>ACTIVATE</option>. On deactivation it does the same passing
 <option>DEACTIVATE</option> for the second argument.</para>
 
-<para><application>gpsd</application> can export data to client applications 
+<para><application>gpsd</application> can export data to client applications
 in three ways: via a sockets interface, via a shared-memory segment, and
 via D-Bus. The next three major sections describe these interfaces.</para>
 
@@ -357,10 +357,10 @@ directly: rather, they should use the
 care to conditionalize their code on the major and minor protocol
 version symbols.</para>
 
-<para>The request-response protocol for the socket interface is fully 
+<para>The request-response protocol for the socket interface is fully
 documented in
 <citerefentry><refentrytitle>gpsd_json</refentrytitle><manvolnum>5</manvolnum></citerefentry>.</para>
-  
+
 </refsect1>
 
 <refsect1 id='shm'><title>SHARED-MEMORY AND DBUS INTERFACES</title>
@@ -440,7 +440,7 @@ signal name is "fix".  The signal payload layout is as follows:</para>
 </row>
 <row>
 	<entry>DBUS_TYPE_DOUBLE</entry>
-        <entry><para>Speed uncertainty in meters per second, 
+        <entry><para>Speed uncertainty in meters per second,
 	95% confidence.</para></entry>
 </row>
 <row>
@@ -449,7 +449,7 @@ signal name is "fix".  The signal payload layout is as follows:</para>
 </row>
 <row>
 	<entry>DBUS_TYPE_DOUBLE</entry>
-        <entry><para>Climb uncertainty in meters per second, 
+        <entry><para>Climb uncertainty in meters per second,
 	95% confidence.</para></entry>
 </row>
 <row>

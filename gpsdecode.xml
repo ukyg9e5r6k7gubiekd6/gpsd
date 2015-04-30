@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpsdecode.1'>
@@ -21,7 +21,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsdecode</command>  
+  <command>gpsdecode</command>
       <arg choice='opt'>-c</arg>
       <arg choice='opt'>-d</arg>
       <arg choice='opt'>-e</arg>
@@ -98,7 +98,7 @@ quantities and text expansion of numeric codes.  A dump with this
 option is lossless.</para>
 
 <para>The <option>-v</option> enables dumping of textual packets
-to output as they are received on input, immediately preceding 
+to output as they are received on input, immediately preceding
 corresponding output.</para>
 
 <para>The <option>-c</option> sets the AIS dump format to separate
@@ -113,7 +113,7 @@ version number, then exit.</para>
 mainly of interest to developers.</para>
 
 </refsect1>
-<refsect1 id='json_ais'><title>AIS DSV FORMAT</title> 
+<refsect1 id='json_ais'><title>AIS DSV FORMAT</title>
 
 <para>With the <option>-c</option> option, dump lines are values of AIS
 payload fields, pipe-separated, in the order that they occur in the
@@ -139,7 +139,7 @@ dump.</para>
 <citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
 </para>
 </refsect1>
-<refsect1 id='maintainer'><title>AUTHOR</title> 
+<refsect1 id='maintainer'><title>AUTHOR</title>
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 </refsect1>

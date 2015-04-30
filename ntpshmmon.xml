@@ -34,7 +34,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para>This program monitors the shared-memory segments updated by 
+<para>This program monitors the shared-memory segments updated by
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
 (and possibly other refclock sources) as a way of communicating with
 ntpd, the Network Time Protocol daemon. It reads these in exactly the way an

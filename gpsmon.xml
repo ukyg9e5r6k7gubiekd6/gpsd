@@ -106,12 +106,12 @@ IPv4 and IPv6.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>71.162.241.5:2317:/dev/ttyS3</term>
-<listitem><para>Look at port 2317 at the specified IPv4 
+<listitem><para>Look at port 2317 at the specified IPv4
 address, collecting data from attached serial device 3.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:2317:/dev/ttyS5</term>
-<listitem><para>Look at port 2317 at the specified IPv6 
+<listitem><para>Look at port 2317 at the specified IPv6
 address, collecting data from attached serial device 5.</para></listitem>
 </varlistentry>
 </variablelist>
@@ -154,7 +154,7 @@ packet type is NMEA but the device is known to have a binary mode,
 such as SiRF binary.</para>
 
 <para>The -a option enables a special debugging mode that does not
-use screen painting.  Packets are dumped normally; any character 
+use screen painting.  Packets are dumped normally; any character
 typed suspends packet dumping and brings up a command prompt. This
 feature will mainly be of interest to GPSD developers.</para>
 

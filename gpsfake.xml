@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpsfake.1'>
@@ -21,7 +21,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
-  <command>gpsfake</command>  
+  <command>gpsfake</command>
       <arg choice='opt'>-1</arg>
       <arg choice='opt'>-h</arg>
       <arg choice='opt'>-b</arg>
@@ -49,7 +49,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <refsect1 id='description'><title>DESCRIPTION</title>
 
-<para><application>gpsfake</application> is a test harness for 
+<para><application>gpsfake</application> is a test harness for
 <application>gpsd</application> and its clients.  It opens a pty
 (pseudo-TTY), launches a <application>gpsd</application> instance that
 thinks the slave side of the pty is its GPS device, and repeatedly
@@ -58,7 +58,7 @@ GPS. If there are multiple logfiles, sentences from them are
 interleaved in the order the files are specified.</para>
 
 <para><application>gpsfake</application> does not require root
-privileges, and can be run concurrently with a production 
+privileges, and can be run concurrently with a production
 <application>gpsd</application> instance without causing problems.</para>
 
 <para>The logfiles may contain packets in any supported format,
@@ -84,7 +84,7 @@ rather than the normal pty.
 </itemizedlist>
 
 <para>The <application>gpsd</application> instance is run in
-foreground.  The thread sending fake GPS data to the daemon 
+foreground.  The thread sending fake GPS data to the daemon
 is run in background.</para>
 
 </refsect1>
@@ -134,7 +134,7 @@ for regression-testing.</para>
 
 <para>The -P ("port") option sets the daemon's listening port.</para>
 
-<para>The <option>-r</option> specifies an initialization command to use in pipe mode.  
+<para>The <option>-r</option> specifies an initialization command to use in pipe mode.
 The default is <command>?WATCH={"enable":true,"json":true}</command>.</para>
 
 <para>The <option>-s</option> sets the baud rate for the slave tty.  The
@@ -164,11 +164,11 @@ itself.</para>
 <application>gpsfake</application> gathers them.  It is mainly useful
 for debugging <application>gpsfake</application> itself.</para>
 
-<para>The <option>-h</option> makes <application>gpsfake</application> print 
+<para>The <option>-h</option> makes <application>gpsfake</application> print
 a usage message and exit.</para>
 
-<para>The argument must be the name of a file containing the 
-data to be cycled at the device. <application>gpsfake</application> 
+<para>The argument must be the name of a file containing the
+data to be cycled at the device. <application>gpsfake</application>
 will print a notification each time it cycles.</para>
 
 <para>Normally, gpsfake creates a pty for each logfile and passes the
@@ -180,7 +180,7 @@ this: <command>tcpdump -s0 -n -A -i lo udp and port 5000</command>.</para>
 </refsect1>
 <refsect1 id='magic'><title>MAGIC COMMENTS</title>
 
-<para>Certain magic comments in test load headers can change the 
+<para>Certain magic comments in test load headers can change the
 conditions of the test.  These are:</para>
 
 <variablelist>
@@ -216,7 +216,7 @@ sessions involving a <application>gpsd</application> instance, any
 number of client sessions, and any number of fake GPSes feeding the
 daemon instance with data from specified sentence logs.</para>
 
-<para>Source and embedded documentation for this module is shipped with the 
+<para>Source and embedded documentation for this module is shipped with the
 <application>gpsd</application> development tools.  You can use it to
 torture-test either <application>gpsd</application> itself or any
 <application>gpsd</application>-aware client application.</para>
@@ -246,7 +246,7 @@ to the PATH environment variable</para>
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHOR</title> 
+<refsect1 id='maintainer'><title>AUTHOR</title>
 
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 

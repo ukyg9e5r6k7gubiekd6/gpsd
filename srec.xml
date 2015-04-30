@@ -3,7 +3,7 @@
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for -details.
 -->
-<!DOCTYPE refentry PUBLIC 
+<!DOCTYPE refentry PUBLIC
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='srec.5'>
@@ -44,7 +44,7 @@ no particular order may be assumed.</para>
 
 <variablelist>
 <varlistentry>
-<term>type</term> 
+<term>type</term>
 <listitem><para>A char[2] field. These characters
 describe the type of record (S0, S1, S2, S3, S5, S7, S8, or
 S9).</para></listitem>
@@ -75,7 +75,7 @@ or descriptive information.</para></listitem>
 </varlistentry>
 
 <varlistentry>
-<term>checksum</term> 
+<term>checksum</term>
 <listitem><para>A char[2] field. These characters when paired and
 interpreted as a big-endian hexadecimal integer display the least
 significant byte of the ones complement of the sum of the byte values
@@ -187,13 +187,13 @@ record and an S9 record.</para>
 <para>The S0 record is comprised as follows:</para>
 
 <itemizedlist>
-<listitem><para>S0 S-record type S0, indicating it is a header 
+<listitem><para>S0 S-record type S0, indicating it is a header
 record.</para></listitem>
 
 <listitem><para>06 Hexadecimal 06 (decimal 6), indicating that six
 character pairs (or ASCII bytes) follow.</para></listitem>
 
-<listitem><para>00 00 Four character 2-byte address field, zeroes in 
+<listitem><para>00 00 Four character 2-byte address field, zeroes in
 this example.</para></listitem>
 
 <listitem><para>48 44 52 ASCII H, D, and R - "HDR".</para></listitem>
@@ -298,7 +298,7 @@ indicating the starting execution address.  </para></listitem>
 </para>
 </refsect1>
 
-<refsect1 id='maintainer'><title>AUTHOR</title> 
+<refsect1 id='maintainer'><title>AUTHOR</title>
 
 <para>From an anonymous web page, itself claiming to have been derived
 from an old Unix manual page. Now maintained by the GPSD
