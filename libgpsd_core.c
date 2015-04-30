@@ -67,7 +67,7 @@ void gpsd_acquire_reporting_lock(void)
         thread holding the lock has died.  Best for gppsd to just die
         because things are FUBAR. */
 
-	(void) fprintf(stderr,"pthread_mutex_lock() failed: %s\n", 
+	(void) fprintf(stderr,"pthread_mutex_lock() failed: %s\n",
             strerror(errno));
 	exit(EXIT_FAILURE);
     }
@@ -83,7 +83,7 @@ void gpsd_release_reporting_lock(void)
         this thread.  This should never happen, so best for gpsd to die
         because things are FUBAR. */
 
-	(void) fprintf(stderr,"pthread_mutex_unlock() failed: %s\n", 
+	(void) fprintf(stderr,"pthread_mutex_unlock() failed: %s\n",
             strerror(errno));
 	exit(EXIT_FAILURE);
     }
@@ -108,7 +108,7 @@ static void visibilize(char *outbuf, size_t outlen,
 #endif /* !SQUELCH_ENABLE */
 
 
-void gpsd_vlog(const struct gpsd_errout_t *errout, 
+void gpsd_vlog(const struct gpsd_errout_t *errout,
 			 const int errlevel,
 			 char *outbuf, size_t outlen,
 			 const char *fmt, va_list ap)
@@ -182,7 +182,7 @@ void gpsd_vlog(const struct gpsd_errout_t *errout,
 #endif /* !SQUELCH_ENABLE */
 }
 
-void gpsd_log(const struct gpsd_errout_t *errout, 
+void gpsd_log(const struct gpsd_errout_t *errout,
 		 const int errlevel,
 		 const char *fmt, ...)
 /* assemble msg in printf(3) style, use errout hook or syslog for delivery */
@@ -200,7 +200,7 @@ const char *gpsd_prettydump(struct gps_device_t *session)
 /* dump the current packet in a form optimised for eyeballs */
 {
     return gpsd_packetdump(session->msgbuf, sizeof(session->msgbuf),
-			   (char *)session->lexer.outbuffer, 
+			   (char *)session->lexer.outbuffer,
 			   session->lexer.outbuflen);
 }
 
@@ -279,7 +279,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
     return 0;
 }
 
-void gps_context_init(struct gps_context_t *context, 
+void gps_context_init(struct gps_context_t *context,
 		      const char *label)
 {
     (void)memset(context, '\0', sizeof(struct gps_context_t));
@@ -356,7 +356,7 @@ void gpsd_deactivate(struct gps_device_t *session)
 #endif /* of defined(NMEA2000_ENABLE) */
         (void)gpsd_close(session);
     if (session->mode == O_OPTIMIZE)
-	gpsd_run_device_hook(&session->context->errout, 
+	gpsd_run_device_hook(&session->context->errout,
 			     session->gpsdata.dev.path,
 			     "DEACTIVATE");
 #ifdef PPS_ENABLE
@@ -469,7 +469,7 @@ int gpsd_open(struct gps_device_t *session)
 		     netlib_errstr(dsock));
 	    return -1;
 	} else
-	    gpsd_log(&session->context->errout, LOG_SPIN, 
+	    gpsd_log(&session->context->errout, LOG_SPIN,
 		     "TCP device opened on fd %d\n", dsock);
 	session->gpsdata.gps_fd = dsock;
 	session->sourcetype = source_tcp;
@@ -562,7 +562,7 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
 
 #ifdef NON_NMEA_ENABLE
     /* if it's a sensor, it must be probed */
-    if ((session->servicetype == service_sensor) && 
+    if ((session->servicetype == service_sensor) &&
 	(session->sourcetype != source_can)) {
 	const struct gps_type_t **dp;
 
@@ -700,7 +700,7 @@ driver.
 
 
 static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
-			   const struct gps_data_t * gpsdata, 
+			   const struct gps_data_t * gpsdata,
 			   struct dop_t * dop)
 {
     double prod[4][4];
@@ -992,7 +992,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 int gpsd_await_data(fd_set *rfds,
 		    fd_set *efds,
 		     const int maxfd,
-		     fd_set *all_fds, 
+		     fd_set *all_fds,
 		     struct gpsd_errout_t *errout)
 /* await data from any socket in the all_fds set */
 {
@@ -1083,7 +1083,7 @@ static bool hunt_failure(struct gps_device_t *session)
      * enough).  Removing this conjunct resurrected the failure
      * of test/daemon/tcp-torture.log.
      *
-     * Our third attempt, isatty(session->gpsdata.gps_fd) != 0 
+     * Our third attempt, isatty(session->gpsdata.gps_fd) != 0
      * && session->badcount++>1, reverts to the old test that worked
      * well on ttys for ttys and prevents non-tty devices from *ever*
      * having hunt failures. This has the cost that non-tty devices
@@ -1229,7 +1229,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		 * Are we seeing a new packet type? Then we probably
 		 * want to change drivers.
 		 */
-		bool new_packet_type = 
+		bool new_packet_type =
 		    (newtype != session->device_type->packet_type);
 		/*
 		 * Possibly the old driver has a mode-switcher method, in
@@ -1290,7 +1290,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		 session->gpsdata.dev.path);
 
 	/* track the packet count since achieving sync on the device */
-	if (driver_change 
+	if (driver_change
 		&& (session->drivers_identified & (1 << session->driver_index)) == 0) {
 	    speed_t speed = gpsd_get_speed(session);
 
@@ -1390,7 +1390,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if ((received & SATELLITE_SET) != 0
 	    && session->gpsdata.satellites_visible > 0) {
 	    session->gpsdata.set |= fill_dop(&session->context->errout,
-					     &session->gpsdata, 
+					     &session->gpsdata,
 					     &session->gpsdata.dop);
 	    session->gpsdata.epe = NAN;
 	}
@@ -1460,7 +1460,7 @@ int gpsd_multipoll(const bool data_ready,
     {
 	int fragments;
 
-	gpsd_log(&device->context->errout, LOG_RAW + 1, 
+	gpsd_log(&device->context->errout, LOG_RAW + 1,
 		 "polling %d\n", device->gpsdata.gps_fd);
 
 #ifdef NETFEED_ENABLE

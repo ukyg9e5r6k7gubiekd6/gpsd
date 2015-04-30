@@ -54,7 +54,7 @@ everything will work. Strings are supported but all string storage
 has to be inline in the struct.
 
 NOTE
-   This code has been spun out, packaged, and documented as a 
+   This code has been spun out, packaged, and documented as a
 reusable module; search for "microjson".
 
 PERMISSIONS
@@ -659,7 +659,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    if (*cp != '"')
 		return JSON_ERR_BADSTRING;
 	    else
-		++cp; 
+		++cp;
 	    break;
 #endif /* JSON_MINIMAL */
 	case t_real:

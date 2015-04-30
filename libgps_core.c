@@ -228,8 +228,8 @@ bool gps_waiting(const struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, int time
     return waiting;
 }
 
-int gps_mainloop(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED, 
-		 int timeout CONDITIONALLY_UNUSED, 
+int gps_mainloop(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
+		 int timeout CONDITIONALLY_UNUSED,
 		 void (*hook)(struct gps_data_t *gpsdata) CONDITIONALLY_UNUSED)
 {
     int status = -1;
