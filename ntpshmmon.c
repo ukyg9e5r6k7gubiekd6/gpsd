@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 		break;
 	    }
 	}
- 
+
 	/*
 	 * Even on a 1 Hz PPS, a sleep(1) may end up
          * being sleep(1.1) and missing a beat.  Since
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
 	 * at interval < 1 sec shouldn't be a problem.
 	 */
 	(void)usleep((useconds_t)(cycle * 1000));
-    } while 
+    } while
 	    (nsamples != 0 && time(NULL) - starttime < timeout);
 
     exit(EXIT_SUCCESS);

@@ -21,15 +21,15 @@
 
 #define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
 
-void ntp_write(volatile struct shmTime *shmseg, 
+void ntp_write(volatile struct shmTime *shmseg,
 	       struct timedelta_t *td, int precision, int leap_notify)
 /* put a received fix time into shared memory for NTP */
 {
     struct tm tm;
 
-    /* insist that leap seconds only happen in june and december 
+    /* insist that leap seconds only happen in june and december
      * GPS emits leap pending for 3 months prior to insertion
-     * NTP expects leap pending for only 1 month prior to insertion 
+     * NTP expects leap pending for only 1 month prior to insertion
      * Per http://bugs.ntp.org/1090 */
     (void)gmtime_r( &(td->real.tv_sec), &tm);
     if ( 5 != tm.tm_mon && 11 != tm.tm_mon ) {

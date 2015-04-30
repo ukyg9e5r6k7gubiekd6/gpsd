@@ -264,7 +264,7 @@ static void gpsd_binary_almanac_dump(struct gps_device_t *session,
 
 #ifdef AIVDM_ENABLE
 
-#define GETLEFT(a) (((a%6) == 0) ? 0 : (6 - (a%6))) 
+#define GETLEFT(a) (((a%6) == 0) ? 0 : (6 - (a%6)))
 
 static void gpsd_binary_ais_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
@@ -277,12 +277,12 @@ static void gpsd_binary_ais_dump(struct gps_device_t *session,
     unsigned int left;
     unsigned int datalen;
     unsigned int offset;
-  
+
     channel = 'A';
     if (session->driver.aivdm.ais_channel == 'B') {
         channel = 'B';
     }
- 
+
     memset(data, 0, sizeof(data));
     datalen = ais_binary_encode(&session->gpsdata.ais, &data[0], 0);
     if (datalen > 6*60) {

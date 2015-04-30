@@ -106,7 +106,7 @@ PERMISSIONS
  *      $P  -- Vendor-specific sentence
  *
  *      !AB -- NMEA 4.0 Base AIS station
- *      !AD -- MMEA 4.0 Dependent AIS Base Station 
+ *      !AD -- MMEA 4.0 Dependent AIS Base Station
  *      !AI -- Mobile AIS station
  *      !AN -- NMEA 4.0 Aid to Navigation AIS station
  *      !AR -- NMEA 4.0 AIS Receiving Station
@@ -1752,7 +1752,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 * 0x4c, Operating Parameters Report, data length 17
 		 * 0x54, One Satellite Bias, data length 4
 		 * 0x56, Velocity Fix (ENU), data length 20
-		 * 0x57, Last Computed Fix Report, data length 8 
+		 * 0x57, Last Computed Fix Report, data length 8
 		 * 0x5a, Raw Measurements
 		 * 0x5b, Satellite Ephemeris Status, data length 16
 		 * 0x5c, Satellite Tracking Status, data length 24
@@ -1766,9 +1766,9 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 *
 		 * <DLE>[pkt id] [data] <DLE><ETX>
 		 *
-		 * The best description is in [TSIP], the Trimble Standard 
+		 * The best description is in [TSIP], the Trimble Standard
 		 * Interface Protocol manual; unless otherwise specified
-		 * that is where these type/length notifications are from. 
+		 * that is where these type/length notifications are from.
 		 *
 		 * Note that not all Trimble chips conform perfectly to this
 		 * specification, nor does it cover every packet type we
@@ -1776,9 +1776,9 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 */
 		pkt_id = lexer->inbuffer[1];	/* packet ID */
                 /* *INDENT-OFF* */
-		if (!((0x13 == pkt_id) || 
-		      (0x1c == pkt_id) || 
-		      (0xbb == pkt_id) || 
+		if (!((0x13 == pkt_id) ||
+		      (0x1c == pkt_id) ||
+		      (0xbb == pkt_id) ||
 		      (0xbc == pkt_id) ||
 		      (0x38 == pkt_id))
 		    && ((0x41 > pkt_id) || (0x8f < pkt_id))) {

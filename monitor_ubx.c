@@ -34,7 +34,7 @@ static bool ubx_initialize(void)
 
     /* "heavily inspired" by monitor_nmea.c */
     if ((navsolwin = derwin(devicewin, 13, 51, 0, 28)) == NULL)
-	return false;    
+	return false;
     (void)wborder(navsolwin, 0, 0, 0, 0, 0, 0, 0, 0),
 	(void)wattrset(navsolwin, A_BOLD);
     (void)wmove(navsolwin, 1, 1);

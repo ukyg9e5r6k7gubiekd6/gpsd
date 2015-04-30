@@ -51,7 +51,7 @@ static void ais_addbits(unsigned char *bits,
 
     for(l=0;l<len;l++) {
         if (data & mask) {
-	    bits[pos] |= mask1; 
+	    bits[pos] |= mask1;
 	}
 	mask  <<= 1;
 	mask1 <<= 1;
@@ -71,7 +71,7 @@ static void ais_addchar(unsigned char *bits,
 {
     unsigned int l;
     unsigned int flag;
-    
+
     for(l=0,flag=0;l<len;l++) {
         unsigned char a, b;
 	
@@ -84,7 +84,7 @@ static void ais_addchar(unsigned char *bits,
 	} else {
 	  b = (unsigned char) '\0';
 	}
-	ais_addbits(bits, start+6*l, 6, (uint64_t)b); 
+	ais_addbits(bits, start+6*l, 6, (uint64_t)b);
     }
     return;
 }
@@ -96,9 +96,9 @@ static void ais_adddata(unsigned char *bits,
 		   char          *data)
 {
     unsigned int l;
-    
+
     for(l=0;l<len;l++) {
-        ais_addbits(bits, start+6*l, 6, (uint64_t)data[l]); 
+        ais_addbits(bits, start+6*l, 6, (uint64_t)data[l]);
     }
     return;
 }
@@ -127,7 +127,7 @@ unsigned int ais_binary_encode(struct ais_t *ais,
     unsigned int len;
 
     len = 0;
-    
+
     if (flag != 0) {
         flag = AIS_MSG_PART2_FLAG;
     }

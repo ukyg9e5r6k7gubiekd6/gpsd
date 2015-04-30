@@ -178,7 +178,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	    if (match) {
 		return 1;
 	    }
-	    gpsd_log(&device->context->errout, LOG_ERROR, 
+	    gpsd_log(&device->context->errout, LOG_ERROR,
 		     "ntrip stream read error %d on fd %d\n",
 		     errno, fd);
 	    return -1;
@@ -232,7 +232,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	    /* parse STR */
 	    if (str_starts_with(line, NTRIP_STR)) {
 		ntrip_str_parse(line + strlen(NTRIP_STR),
-				(size_t) (llen - strlen(NTRIP_STR)), 
+				(size_t) (llen - strlen(NTRIP_STR)),
 				&hold, &device->context->errout);
 		if (strcmp(device->ntrip.stream.mountpoint, hold.mountpoint) == 0) {
 		    /* todo: support for RTCM 3.0, SBAS (WAAS, EGNOS), ... */
@@ -321,7 +321,7 @@ static int ntrip_stream_req_probe(const struct ntrip_stream_t *stream,
 	    "\r\n", VERSION, stream->url);
     r = write(dsock, buf, strlen(buf));
     if (r != (ssize_t)strlen(buf)) {
-	gpsd_log(errout, LOG_ERROR, 
+	gpsd_log(errout, LOG_ERROR,
 		 "ntrip stream write error %d on fd %d during probe request %zd\n",
 		 errno, dsock, r);
 	(void)close(dsock);
@@ -393,7 +393,7 @@ static int ntrip_stream_get_req(const struct ntrip_stream_t *stream,
 }
 
 static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream,
-				  const int dsock, 
+				  const int dsock,
 				  const struct gpsd_errout_t *errout)
 {
     char buf[BUFSIZ];
@@ -402,7 +402,7 @@ static int ntrip_stream_get_parse(const struct ntrip_stream_t *stream,
     while (read(dsock, buf, sizeof(buf) - 1) == -1) {
 	if (errno == EINTR)
 	    continue;
-	gpsd_log(errout, LOG_ERROR, 
+	gpsd_log(errout, LOG_ERROR,
 		 "ntrip stream read error %d on fd %d during get rsp\n", errno,
 		 dsock);
 	goto close;

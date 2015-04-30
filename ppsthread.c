@@ -188,7 +188,7 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
      * Allow user to pass in an explicit PPS device path.
      *
      * (We use strncpy() here because this might be compiled where
-     * strlcpy() is not available.) 
+     * strlcpy() is not available.)
      */
     if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0)
 	(void)strncpy(path, pps_thread->devicename, sizeof(path));
@@ -306,7 +306,7 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
     /* have kernel PPS handle */
     /* get RFC2783 features supported */
     inner_context->pps_caps = 0;
-    if ( 0 > time_pps_getcap(inner_context->kernelpps_handle, 
+    if ( 0 > time_pps_getcap(inner_context->kernelpps_handle,
 				&inner_context->pps_caps)) {
 	char errbuf[BUFSIZ] = "unknown error";
 	inner_context->pps_caps = 0;
@@ -882,7 +882,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	        ||  (900000 < cycle && 1100000 > cycle)      /* 1Hz */
 	        || (1800000 < cycle && 2200000 > cycle) ) {  /* 2Hz */
 
-	    /* some pulses may be so short that state never changes 
+	    /* some pulses may be so short that state never changes
 	     * and some RFC2783 only can detect one edge */
 
 	    duration = 0;
@@ -930,10 +930,10 @@ static void *gpsd_ppsmonitor(void *arg)
 	 *
 	 * You may think that PPS is very accurate, so the cycle time
          * valid window should be very small.  This is not the case,
-         * The Rasberry Pi clock is very coarse when it starts and chronyd 
-         * may be doing a fast slew.  chronyd by default will slew up 
-         * to 8.334%!  So the cycle time as measured by the system clock 
-         * may be almost +/- 9%. Therefore, gpsd uses a 10% window.  
+         * The Rasberry Pi clock is very coarse when it starts and chronyd
+         * may be doing a fast slew.  chronyd by default will slew up
+         * to 8.334%!  So the cycle time as measured by the system clock
+         * may be almost +/- 9%. Therefore, gpsd uses a 10% window.
 	 * Don't worry, ntpd and chronyd will do further validation.
 	 */
 
@@ -1058,7 +1058,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
 	/*
 	 * We get the time of the last fix recorded before the PPS came in,
-	 * which is for the previous cycle.  Only works for integral cycle 
+	 * which is for the previous cycle.  Only works for integral cycle
          * times, but more than 1Hz is pointless.
 	 */
 
@@ -1146,7 +1146,7 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
 {
     int retval;
     pthread_t pt;
-    /* 
+    /*
      * FIXME: this launch code is not itself thread-safe!
      * It would be if inner_context could be auto, but the monitor
      * routine gets garbage when we try that.  Ideally the body
