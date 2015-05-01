@@ -193,24 +193,17 @@ struct timespec exs[] = {
 	TS_ZERO,
 };
 
-static void ex_precision1( struct timespec a, struct timespec b)
-{
-	char buf[TIMESPEC_LEN];
-	char buf1[TIMESPEC_LEN];
-	long l;
-
-	timespec_str( &a, buf, sizeof(buf) );
-	timespec_str( &b, buf1, sizeof(buf1) );
-	l = timespec_diff_ns( a, b);
-	printf( "%21s - %21s =  %21ld\n", buf, buf1, l);
-
-
-}
-
 static int ex_subtract_float( void )
 {
     struct subtract_test *p = subtract_tests;
     int fail_count = 0;
+
+    printf( "\n\nsubtract test examples using doubles/floats:\n"
+            " TS: TS_SUB()\n"
+            " l: timespec_to_ns() math\n"
+            " d: double float math\n"
+            " f: float math\n"
+	    "\n");
 
     while ( 1 ) {
 	char buf_a[TIMESPEC_LEN];
@@ -220,22 +213,31 @@ static int ex_subtract_float( void )
 	struct timespec ts_r;
 	float f_a, f_b, f_r;
 	double d_a, d_b, d_r;
+	long l;
 
+	/* timespec math */
         TS_SUB(&ts_r, &p->a, &p->b);
+
+	/* float math */
+	f_a = TSTONS( &p->a );
+	f_b = TSTONS( &p->b );
+	f_r = f_a - f_b;
+
+	/* double float math */
+	d_a = TSTONS( &p->a );
+	d_b = TSTONS( &p->b );
+	d_r = d_a - d_b;
+
+	/* long math */
+	l = timespec_diff_ns( p->a, p->b);
+
         timespec_str( &p->a, buf_a, sizeof(buf_a) );
         timespec_str( &p->b, buf_b, sizeof(buf_b) );
         timespec_str( &p->c, buf_c, sizeof(buf_c) );
         timespec_str( &ts_r, buf_r, sizeof(buf_r) );
 
-	f_a = TSTONS( &p->a );
-	f_b = TSTONS( &p->b );
-	f_r = f_a - f_b;
-
-	d_a = TSTONS( &p->a );
-	d_b = TSTONS( &p->b );
-	d_r = d_a - d_b;
-
 	printf(" TS; %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
+	printf(" l;  %21s - %21s = %21ld\n", buf_a, buf_b, l);
 	printf(" d;  %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
 	printf(" f;  %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
 	puts("\n");
@@ -258,11 +260,8 @@ static int ex_subtract_float( void )
 
 static void ex_precision(void)
 {
-	int i;
 	char buf[TIMESPEC_LEN];
 	struct timespec *v = exs;
-	struct timespec v1 = TS_2037;
-	struct timespec v2 = TS_2037_X;
 
 	puts( "\nPrecision examples:\n\n  Simple conversions\n");
 	printf( "\n%10stimespec%14sdouble%16sfloat\n\n", "", "", "");
@@ -284,18 +283,8 @@ static void ex_precision(void)
 	}
 
 	printf( "\n\nSubtraction examples:\n");
-	printf( "\n\nsubtract test examples using doubles/floats:\n");
 
         ex_subtract_float();
-
-	printf( "\n\ntimespec_diff_ns( x, y) = z\n");
-
-	for ( i = 0 ; i < 6 ; i++ ) {
-	    ex_precision1( v1, v2);
-	    v1.tv_sec += 1000;
-	}
-
-
 }
 
 int main(int argc, char *argv[])
