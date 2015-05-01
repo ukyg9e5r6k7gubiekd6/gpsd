@@ -738,8 +738,9 @@ size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
 # ifdef __cplusplus
 extern "C" {
 # endif
-#ifndef clockid_t
+#ifndef CLOCKID_T_DEFINED
 typedef int clockid_t;
+#define CLOCKID_T_DEFINED
 # endif
 /* OS X uses _STRUCT_TIMESPEC, but no clock_gettime */
 #ifndef _STRUCT_TIMESPEC
