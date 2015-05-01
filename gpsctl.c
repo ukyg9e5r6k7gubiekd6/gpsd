@@ -400,9 +400,7 @@ int main(int argc, char **argv)
 	    exit(EXIT_FAILURE);
 	devicelist_entry_matches:;
 	}
-	(void)memcpy(&gpsdata.dev,
-		     &gpsdata.devices.list[i],
-		     sizeof(struct devconfig_t));
+	gpsdata.dev = gpsdata.devices.list[i];
 	devcount = gpsdata.devices.ndevices;
 
 	/* if the device has not identified, watch it until it does so */

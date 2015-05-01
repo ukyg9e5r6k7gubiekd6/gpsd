@@ -542,8 +542,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd, &session->ttyset_old) != 0)
 	    return UNALLOCATED_FD;
-	(void)memcpy(&session->ttyset,
-		     &session->ttyset_old, sizeof(session->ttyset));
+	session->ttyset = session->ttyset_old;
 	memset(session->ttyset.c_cc, 0, sizeof(session->ttyset.c_cc));
 	//session->ttyset.c_cc[VTIME] = 1;
 	/*
