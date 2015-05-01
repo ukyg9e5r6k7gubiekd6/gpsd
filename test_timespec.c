@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>   /* required by C99, for int32_t */
 #include <time.h>     /* for time_t */
 #include <math.h>
 #include <unistd.h>
@@ -39,6 +40,9 @@
 #define TS_2037_NINES   {2145916799, 999999999}
 #define TS_N_2037_TREES {-2145916799, -333333333}
 #define TS_N_2037_NINES {-2145916799, -999999999}
+
+/* a 32 bit copy to force a 32 bit long */
+#define timespec_diff_ns32(x, y)	(int32_t)((int32_t)(((x).tv_sec-(y).tv_sec)*1000000000)+(x).tv_nsec-(y).tv_nsec)
 
 struct subtract_test {
 	struct timespec a;
@@ -199,10 +203,11 @@ static int ex_subtract_float( void )
     int fail_count = 0;
 
     printf( "\n\nsubtract test examples using doubles/floats:\n"
-            " TS: TS_SUB()\n"
-            " l: timespec_to_ns() math\n"
-            " d: double float math\n"
-            " f: float math\n"
+            " TS:  TS_SUB()\n"
+            " l:   timespec_to_ns() math\n"
+            " l32: timespec_to_ns() math with 32 bit long\n"
+            " d:   double float math\n"
+            " f:   float math\n"
 	    "\n");
 
     while ( 1 ) {
@@ -214,6 +219,7 @@ static int ex_subtract_float( void )
 	float f_a, f_b, f_r;
 	double d_a, d_b, d_r;
 	long l;
+	int32_t l32;  /* simulate a 32 bit long */
 
 	/* timespec math */
         TS_SUB(&ts_r, &p->a, &p->b);
@@ -230,16 +236,18 @@ static int ex_subtract_float( void )
 
 	/* long math */
 	l = timespec_diff_ns( p->a, p->b);
+	l32 = timespec_diff_ns32( p->a, p->b);
 
         timespec_str( &p->a, buf_a, sizeof(buf_a) );
         timespec_str( &p->b, buf_b, sizeof(buf_b) );
         timespec_str( &p->c, buf_c, sizeof(buf_c) );
         timespec_str( &ts_r, buf_r, sizeof(buf_r) );
 
-	printf(" TS; %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
-	printf(" l;  %21s - %21s = %21ld\n", buf_a, buf_b, l);
-	printf(" d;  %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
-	printf(" f;  %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
+	printf(" TS;  %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
+	printf(" l;   %21s - %21s = %21ld\n", buf_a, buf_b, l);
+	printf(" l32; %21s - %21s = %21ld\n", buf_a, buf_b, (long)l32);
+	printf(" d;   %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
+	printf(" f;   %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
 	puts("\n");
 		
 	
