@@ -24,7 +24,7 @@ Options:
 
   -v be verbose
 
-  -g generate a plot of the leap-second trend over time. The command you
+  -g generate a plot of leap-second dates over time. The command you
      probably want is something like (depending on if your gnuplot install
      does or does not support X11.
 
@@ -302,15 +302,16 @@ def graph_history(filename):
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
     fmt += '# Maximum residual error is %.2f weeks\n' % e
     fmt += 'set autoscale\n'
-    fmt += 'set xlabel "Leap second offset"\n'
-    fmt += 'set xrange [0:%d]\n' % (len(dates) - 1)
-    fmt += 'set ylabel "Leap second date"\n'
+    fmt += 'set ylabel "Leap second offset"\n'
+    fmt += 'set yrange [0:%d]\n' % (len(dates) - 1)
+    fmt += 'set xlabel "Leap second date"\n'
+    fmt += 'set xtics rotate by 300\n'
     fmt += 'set timefmt "%Y-%m-%d"\n'
-    fmt += 'set ydata time\n'
-    fmt += 'set format y "%Y-%m-%d"\n'
-    fmt += 'set yrange ["%s":"%s"]\n' % (dates[0], dates[-1])
+    fmt += 'set xdata time\n'
+    fmt += 'set format x "%Y-%m-%d"\n'
+    fmt += 'set xrange ["%s":"%s"]\n' % (dates[0], dates[-1])
     fmt += 'set key left top box\n'
-    fmt += 'plot "-" using 1:3 title "Leap-second trend" with linespoints ;\n'
+    fmt += 'plot "-" using 3:1 title "Leap-second trend" with linespoints ;\n'
     for (i, (r, d)) in enumerate(zip(raw, dates)):
         fmt += "%d\t%s\t%s\n" % (i, r, d)
     fmt += 'e\n'
