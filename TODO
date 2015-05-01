@@ -26,6 +26,8 @@ In gps_data_t, save PPS precision; this will require creating a pps struct.
 
 In gps_fix_t, maybe change time away from float to timespec?
 
+Add MMSI sequence number fields to type 7.
+
 ** Bugs in gpsd and its clients:
 
 *** Tracker bugs
