@@ -303,7 +303,7 @@ def graph_history(filename):
     fmt += '# Maximum residual error is %.2f weeks\n' % e
     fmt += 'set autoscale\n'
     fmt += 'set ylabel "GPS-UTC (s)"\n'
-    fmt += 'set yrange [0:%d]\n' % (len(dates) - 1)
+    fmt += 'set yrange [-1:%d]\n' % (len(dates))
     fmt += 'set xlabel "Leap second date"\n'
     fmt += 'set xtics rotate by 300\n'
     fmt += 'set timefmt "%Y-%m-%d"\n'
