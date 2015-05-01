@@ -302,7 +302,7 @@ def graph_history(filename):
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
     fmt += '# Maximum residual error is %.2f weeks\n' % e
     fmt += 'set autoscale\n'
-    fmt += 'set ylabel "Leap second offset"\n'
+    fmt += 'set ylabel "GPS-UTC (s)"\n'
     fmt += 'set yrange [0:%d]\n' % (len(dates) - 1)
     fmt += 'set xlabel "Leap second date"\n'
     fmt += 'set xtics rotate by 300\n'
@@ -311,7 +311,7 @@ def graph_history(filename):
     fmt += 'set format x "%Y-%m-%d"\n'
     fmt += 'set xrange ["%s":"%s"]\n' % (dates[0], dates[-1])
     fmt += 'set key left top box\n'
-    fmt += 'plot "-" using 3:1 title "Leap-second trend" with linespoints ;\n'
+    fmt += 'plot "-" using 3:1 title "Leap second inserted" with points ;\n'
     for (i, (r, d)) in enumerate(zip(raw, dates)):
         fmt += "%d\t%s\t%s\n" % (i, r, d)
     fmt += 'e\n'
