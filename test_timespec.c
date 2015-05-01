@@ -272,16 +272,18 @@ static void ex_precision(void)
 	struct timespec *v = exs;
 
 	puts( "\nPrecision examples:\n\n  Simple conversions\n");
-	printf( "\n%10stimespec%14sdouble%16sfloat\n\n", "", "", "");
+	printf( "\n%10stimespec%14s32 bit long%11sdouble%16sfloat\n\n", "", "", "", "");
 
 	while ( 1 ) {
 	    float f;
 	    double d;
+	    int32_t l32;
 
 	    d = TSTONS( v );
+	    l32 = (int32_t)(v->tv_sec * 1000000000)+(int32_t)v->tv_nsec;
 	    f = (float) d;
 	    timespec_str( v, buf, sizeof(buf) );
-	    printf( "%21s %21.9f %21.9f \n", buf, d, f);
+	    printf( "%21s %21ld %21.9f %21.9f \n", buf, (long)l32, d, f);
 
 	    if ( ( 0 == v->tv_sec ) && ( 0 == v->tv_nsec) ) {
 		/* done */
