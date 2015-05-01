@@ -1424,12 +1424,12 @@ if len(python_progs) > 0:
 # Additional Python readablity style checks
 if len(python_progs) > 0:
     pep8 = Utility("pep8", ["jsongen.py", "maskaudit.py", python_built_extensions],
-        ['''pep8 --ignore=E501,W602,E122,E241,E401 {} gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
+        ['''pep8 --ignore=E501,W602,E122,E241,E401 {0} gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
 
 # Additional Python readablity style checks
 if len(python_progs) > 0:
     flake8 = Utility("flake8", ["jsongen.py", "maskaudit.py", python_built_extensions],
-        ['''flake8 --ignore=E501,W602,E122,E241,E401 {} gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
+        ['''flake8 --ignore=E501,W602,E122,E241,E401 {0} gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
 
 
 # Check the documentation for bogons, too
