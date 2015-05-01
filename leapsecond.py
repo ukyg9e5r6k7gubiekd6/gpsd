@@ -297,6 +297,7 @@ def graph_history(filename):
     (b, c, e) = leastsquares(zip(range(len(raw)), raw))
     e /= (60 * 60 * 24 * 7)
     dates = map(lambda t: time.strftime("%Y-%m-%d", time.localtime(t)), raw)
+    enddate = time.strftime("%Y-%m-%d", time.localtime(raw[-1]+16416000)) # Adding 190 days to scale
     fmt = ''
     fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
@@ -309,7 +310,7 @@ def graph_history(filename):
     fmt += 'set timefmt "%Y-%m-%d"\n'
     fmt += 'set xdata time\n'
     fmt += 'set format x "%Y-%m-%d"\n'
-    fmt += 'set xrange ["%s":"%s"]\n' % (dates[0], dates[-1])
+    fmt += 'set xrange ["%s":"%s"]\n' % ("1979-09-01", enddate)
     fmt += 'set key left top box\n'
     fmt += 'plot "-" using 3:1 title "Leap second inserted" with points ;\n'
     for (i, (r, d)) in enumerate(zip(raw, dates)):
