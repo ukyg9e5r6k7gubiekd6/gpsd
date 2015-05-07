@@ -607,6 +607,7 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	uint32_t  time;
 	time_t    date1;
         struct tm date2;
+        int       cpy_stop;
 
         ais->type5.ais_version   = (unsigned int) ((bu[73] >> 0) & 0x03);
 	ais->type5.imo           = (unsigned int)  getleu32(bu,  5);
@@ -644,18 +645,39 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type5.draught       = (unsigned int) (getleu16(bu, 51)/10);
 	ais->type5.dte           = (unsigned int) ((bu[73] >> 6) & 0x01);
 
-	for (l=0;l<7;l++) {
-	    ais->type5.callsign[l] = (char) bu[9+l];
+	for (l=0,cpy_stop=0;l<7;l++) {
+	    if (((char) bu[9+l] < ' ') || ((char) bu[9+l] > 0x7e)) {
+	        cpy_stop = 1;
+	    }
+	    if (cpy_stop == 0) {
+	        ais->type5.callsign[l] = (char) bu[9+l];
+	    } else {
+	        ais->type5.callsign[l] = 0;
+	    }
 	}
 	ais->type5.callsign[7]   = (char) 0;
 
-	for (l=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    ais->type5.shipname[l] = (char) bu[16+l];
+	for (l=0,cpy_stop=0;l<AIS_SHIPNAME_MAXLEN;l++) {
+	    if (((char) bu[16+l] < ' ') || ((char) bu[16+l] > 0x7e)) {
+	        cpy_stop = 1;
+	    }
+	    if (cpy_stop == 0) {
+	        ais->type5.shipname[l] = (char) bu[16+l];
+	    } else {
+	        ais->type5.shipname[l] = 0;
+	    }
 	}
 	ais->type5.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
 
-	for (l=0;l<20;l++) {
-	    ais->type5.destination[l] = (char) bu[53+l];
+	for (l=0,cpy_stop=0;l<20;l++) {
+	    if (((char) bu[53+l] < ' ') || ((char) bu[53+l] > 0x7e)) {
+	        cpy_stop = 1;
+	    }
+	    if (cpy_stop == 0) {
+	        ais->type5.destination[l] = (char) bu[53+l];
+	    } else {
+	        ais->type5.destination[l] = 0;
+	    }
 	}
 	ais->type5.destination[20] = (char) 0;
 #if NMEA2000_DEBUG_AIS
