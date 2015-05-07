@@ -25,7 +25,7 @@
  * 	-1 is about 100mSec jitter
  *	-10 is about 1 mSec jitter (GR-601W or other USB with 1ms poll interval)
  *	-13 is about 100 uSec
- *	-20 is about 1 nSec (typical for serial PPS)
+ *	-20 is about 1 uSec (typical for serial PPS)
  */
 
 struct shmTime
