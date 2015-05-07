@@ -482,7 +482,7 @@ static gps_mask_t hnd_129038(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type1.radio     = (unsigned int) (getleu32(bu, 18) & 0x7ffff);
 	ais->type1.heading   = (unsigned int)  ais_direction((unsigned int)getleu16(bu, 21), 1.0);
 	ais->type1.turn      =                 ais_turn_rate((int)getles16(bu, 23));
-	ais->type1.status    = (unsigned int) ((bu[25] >> 0) & 0xff);
+	ais->type1.status    = (unsigned int) ((bu[25] >> 0) & 0x0f);
 	ais->type1.maneuver  = 0; /* Not transmitted ???? */
 	decode_ais_channel_info(bu, len, 163, session);
 
