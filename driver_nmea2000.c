@@ -590,6 +590,30 @@ static gps_mask_t hnd_129040(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 
 /*
+ *   PGN 129793: AIS UTC and Date Report
+ */
+static gps_mask_t hnd_129793(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
+{
+    struct ais_t *ais;
+
+    ais =  &session->gpsdata.ais;
+    print_data(session->context, bu, len, pgn);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
+
+    if (decode_ais_header(session->context, bu, len, ais, 0xffffffffU) != 0) {
+        ais->type4.lon          = (int)          scale_int(getles32(bu, 5), (int64_t)(SHIFT32 *.06L));
+	ais->type4.lat          = (int)          scale_int(getles32(bu, 9), (int64_t)(SHIFT32 *.06L));
+	ais->type4.accuracy     = (bool)         ((bu[13] >> 0) & 0x01);
+	ais->type4.raim         = (bool)         ((bu[13] >> 1) & 0x01);
+
+	return(ONLINE_SET | AIS_SET);
+    }
+    return(0);
+}
+
+
+/*
  *   PGN 129794: AIS Class A Static and Voyage Related Data
  */
 static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
@@ -1170,6 +1194,7 @@ static const char msg_129540[] = {"GNSS Satellites in View"};
 static const char msg_129038[] = {"AIS  Class A Position Report"};
 static const char msg_129039[] = {"AIS  Class B Position Report"};
 static const char msg_129040[] = {"AIS  Class B Extended Position Report"};
+static const char msg_129793[] = {"AIS  UTC and Date report"};
 static const char msg_129794[] = {"AIS  Class A Static and Voyage Related Data"};
 static const char msg_129798[] = {"AIS  SAR Aircraft Position Report"};
 static const char msg_129802[] = {"AIS  Safty Related Broadcast Message"};
@@ -1218,6 +1243,7 @@ static PGN aispgn[] = {{ 59392, 0, 0, hnd_059392, &msg_059392[0]},
 		       {129038, 1, 2, hnd_129038, &msg_129038[0]},
 		       {129039, 1, 2, hnd_129039, &msg_129039[0]},
 		       {129040, 1, 2, hnd_129040, &msg_129040[0]},
+		       {129793, 1, 2, hnd_129793, &msg_129793[0]},
 		       {129794, 1, 2, hnd_129794, &msg_129794[0]},
 		       {129798, 1, 2, hnd_129798, &msg_129798[0]},
 		       {129802, 1, 2, hnd_129802, &msg_129802[0]},
