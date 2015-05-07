@@ -646,11 +646,14 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type5.dte           = (unsigned int) ((bu[73] >> 6) & 0x01);
 
 	for (l=0,cpy_stop=0;l<7;l++) {
-	    if (((char) bu[9+l] < ' ') || ((char) bu[9+l] > 0x7e)) {
+            char next;
+
+	    next = (char) bu[9+l];
+	    if ((next < ' ') || (next > 0x7e)) {
 	        cpy_stop = 1;
 	    }
 	    if (cpy_stop == 0) {
-	        ais->type5.callsign[l] = (char) bu[9+l];
+	        ais->type5.callsign[l] = next;
 	    } else {
 	        ais->type5.callsign[l] = 0;
 	    }
@@ -658,11 +661,14 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type5.callsign[7]   = (char) 0;
 
 	for (l=0,cpy_stop=0;l<AIS_SHIPNAME_MAXLEN;l++) {
-	    if (((char) bu[16+l] < ' ') || ((char) bu[16+l] > 0x7e)) {
+	    char next;
+
+	    next = (char) bu[16+l];
+	    if ((next < ' ') || (next > 0x7e)) {
 	        cpy_stop = 1;
 	    }
 	    if (cpy_stop == 0) {
-	        ais->type5.shipname[l] = (char) bu[16+l];
+	        ais->type5.shipname[l] = next;
 	    } else {
 	        ais->type5.shipname[l] = 0;
 	    }
@@ -670,11 +676,14 @@ static gps_mask_t hnd_129794(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	ais->type5.shipname[AIS_SHIPNAME_MAXLEN] = (char) 0;
 
 	for (l=0,cpy_stop=0;l<20;l++) {
-	    if (((char) bu[53+l] < ' ') || ((char) bu[53+l] > 0x7e)) {
+            char next;
+
+	    next = (char) bu[53+l];
+	    if ((next < ' ') || (next > 0x7e)) {
 	        cpy_stop = 1;
 	    }
 	    if (cpy_stop == 0) {
-	        ais->type5.destination[l] = (char) bu[53+l];
+	        ais->type5.destination[l] = next;
 	    } else {
 	        ais->type5.destination[l] = 0;
 	    }
