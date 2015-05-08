@@ -1646,6 +1646,11 @@ else:
         '$SRCDIR/test_json'
         ])
 
+# Unit-test timespec math
+timespec_regress = Utility('timespec-regress', [test_timespec], [
+    '$SRCDIR/test_timespec'
+    ])
+
 # consistency-check the driver methods
 method_regress = Utility('packet-regress', [test_packet], [
     '@echo "Consistency-checking driver methods..."',
@@ -1666,7 +1671,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 describe = Utility('describe', [],
                    ['@echo "Run normal regression tests for %s..."' %(rev.strip(),)])
 testclean = Utility('testclean', [],
-                    'rm -f test_bits test_geoid test_json test_libgps test_matrix test_mktime test_packet test_timespec')
+                    'rm -f test_bits test_geoid test_json test_libgps test_matrix test_mktime test_packet')
 check = env.Alias('check', [
     describe,
     python_compilation_regress,
@@ -1684,6 +1689,7 @@ check = env.Alias('check', [
     json_regress,
     testclean,
     test_timespec,
+    timespec_regress,
     ])
 
 env.Alias('testregress', check)
