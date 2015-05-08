@@ -602,10 +602,45 @@ static gps_mask_t hnd_129793(unsigned char *bu, int len, PGN *pgn, struct gps_de
 	     "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
     if (decode_ais_header(session->context, bu, len, ais, 0xffffffffU) != 0) {
+        uint32_t  time;
+        uint32_t  date;
+	time_t    date1;
+        struct tm date2;
+
         ais->type4.lon          = (int)          scale_int(getles32(bu, 5), (int64_t)(SHIFT32 *.06L));
 	ais->type4.lat          = (int)          scale_int(getles32(bu, 9), (int64_t)(SHIFT32 *.06L));
 	ais->type4.accuracy     = (bool)         ((bu[13] >> 0) & 0x01);
 	ais->type4.raim         = (bool)         ((bu[13] >> 1) & 0x01);
+
+	time = getleu32(bu, 14);
+	if (time != 0xffffffff) {
+	    ais->type4.second   = time % 60; time = time / 60;
+	    ais->type4.minute   = time % 60; time = time / 60;
+	    ais->type4.hour     = time % 24;
+	} else {
+	    ais->type4.second   = AIS_SECOND_NOT_AVAILABLE;
+	    ais->type4.minute   = AIS_MINUTE_NOT_AVAILABLE;
+	    ais->type4.hour     = AIS_HOUR_NOT_AVAILABLE;
+	}
+
+        ais->type4.radio        = (unsigned int) (getleu32(bu, 18) & 0x7ffff);
+
+	date = getleu16(bu, 21);
+	if (date != 0xffff) {
+	    date1 = (time_t)date * (24L *60L *60L);
+	    (void) gmtime_r(&date1, &date2);
+            ais->type4.year     = (unsigned int) (date2.tm_year+1900);
+            ais->type4.month    = (unsigned int) (date2.tm_mon+1);
+	    ais->type4.day      = (unsigned int) (date2.tm_mday);
+	} else {
+	    ais->type4.day      = AIS_DAY_NOT_AVAILABLE;
+	    ais->type4.month    = AIS_MONTH_NOT_AVAILABLE;
+	    ais->type4.year     = AIS_YEAR_NOT_AVAILABLE;
+	}
+
+	ais->type4.epfd         = (unsigned int) ((bu[23] >> 4) & 0x0f);
+
+        decode_ais_channel_info(bu, len, 163, session);
 
 	return(ONLINE_SET | AIS_SET);
     }
