@@ -24,7 +24,7 @@ Options:
 
   -v be verbose
 
-  -g generate a plot of the leap-second trend over time. The command you
+  -g generate a plot of leap-second dates over time. The command you
      probably want is something like (depending on if your gnuplot install
      does or does not support X11.
 
@@ -297,20 +297,22 @@ def graph_history(filename):
     (b, c, e) = leastsquares(zip(range(len(raw)), raw))
     e /= (60 * 60 * 24 * 7)
     dates = map(lambda t: time.strftime("%Y-%m-%d", time.localtime(t)), raw)
+    enddate = time.strftime("%Y-%m-%d", time.localtime(raw[-1]+16416000)) # Adding 190 days to scale
     fmt = ''
     fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
     fmt += '# Maximum residual error is %.2f weeks\n' % e
     fmt += 'set autoscale\n'
-    fmt += 'set xlabel "Leap second offset"\n'
-    fmt += 'set xrange [0:%d]\n' % (len(dates) - 1)
-    fmt += 'set ylabel "Leap second date"\n'
+    fmt += 'set ylabel "GPS-UTC (s)"\n'
+    fmt += 'set yrange [-1:%d]\n' % (len(dates))
+    fmt += 'set xlabel "Leap second date"\n'
+    fmt += 'set xtics rotate by 300\n'
     fmt += 'set timefmt "%Y-%m-%d"\n'
-    fmt += 'set ydata time\n'
-    fmt += 'set format y "%Y-%m-%d"\n'
-    fmt += 'set yrange ["%s":"%s"]\n' % (dates[0], dates[-1])
+    fmt += 'set xdata time\n'
+    fmt += 'set format x "%Y-%m-%d"\n'
+    fmt += 'set xrange ["%s":"%s"]\n' % ("1979-09-01", enddate)
     fmt += 'set key left top box\n'
-    fmt += 'plot "-" using 1:3 title "Leap-second trend" with linespoints ;\n'
+    fmt += 'plot "-" using 3:1 title "Leap second inserted" with points ;\n'
     for (i, (r, d)) in enumerate(zip(raw, dates)):
         fmt += "%d\t%s\t%s\n" % (i, r, d)
     fmt += 'e\n'
