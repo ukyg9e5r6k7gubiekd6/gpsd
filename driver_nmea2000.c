@@ -614,6 +614,7 @@ static gps_mask_t hnd_129793(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 	time = getleu32(bu, 14);
 	if (time != 0xffffffff) {
+	    time                = time / 10000;
 	    ais->type4.second   = time % 60; time = time / 60;
 	    ais->type4.minute   = time % 60; time = time / 60;
 	    ais->type4.hour     = time % 24;
