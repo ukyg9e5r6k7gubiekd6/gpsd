@@ -13,6 +13,8 @@
 #
 
 import gtk, stripchart, sys
+# need numpy for float128, normal python floats are too small to hold a timespec
+import numpy
 
 class ntpOffset:
     def __init__(self, stream):
@@ -92,6 +94,9 @@ class ntpOffset:
             # gtk.Adjustment(value, lower, upper, step_incr, page_incr,
             #                page_size)
             spread = self.ntp_upper[ntp_unit] - self.ntp_lower[ntp_unit]
+            # prevent divide by zero
+            if spread == 0:
+                spread = 1
             vadj_ntp = gtk.Adjustment(
                     self.ntp_lower[ntp_unit],         # initial  value
                     self.ntp_lower[ntp_unit] - 0.001, # lower extreme
@@ -128,7 +133,7 @@ class ntpOffset:
                 if line[:1] != '#':
                     line = line.lstrip()
                     record = line.split(' ')
-                    offset = (float(record[3]) - float(record[4]))
+                    offset = numpy.float128(record[3]) - numpy.float128(record[4])
 
                     # If the NTP unit is in the dictionary
                     # append the offset to the list
@@ -137,17 +142,17 @@ class ntpOffset:
                     if record[1] not in self.ntp_data:
                         self.ntp_data[record[1]]  = []
                         line_counts[record[1]]    = 0
-                        self.ntp_upper[record[1]] = round(offset, 5)
-                        self.ntp_lower[record[1]] = round(offset, 5)
+                        self.ntp_upper[record[1]] = round(offset, 9)
+                        self.ntp_lower[record[1]] = round(offset, 9)
 
                     self.ntp_data[record[1]].append(offset)
                     line_counts[record[1]] += 1
 
                     # Update the bounds of the NTP unit if needed
                     if offset > self.ntp_upper[record[1]]:
-                        self.ntp_upper[record[1]] = round(offset, 5)
+                        self.ntp_upper[record[1]] = round(offset, 9)
                     if offset < self.ntp_lower[record[1]]:
-                        self.ntp_lower[record[1]] = round(offset, 5)
+                        self.ntp_lower[record[1]] = round(offset, 9)
 
                     # Update the max record count if needed
                     if line_counts[record[1]] > self.lines:
