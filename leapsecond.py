@@ -14,8 +14,6 @@ Options:
 
   -o take a date in Unix gmt time and convert to RFC822.
 
-  -c generate a C initializer listing leap seconds in Unix time.
-
   -f fetch leap-second offset data and save to local cache file
 
   -H make leapsecond include
