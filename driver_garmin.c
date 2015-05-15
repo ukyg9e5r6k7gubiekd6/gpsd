@@ -264,7 +264,7 @@ static inline uint16_t get_uint16(const uint8_t * buf)
 	| ((uint16_t) (0xFF & buf[1]) << 8);
 }
 
-#if defined(HAVE_LIBUSB)
+#if defined(HAVE_LIBUSB) && defined(__linux__)
 static inline uint32_t get_int32(const uint8_t * buf)
 {
     return (uint32_t) (0xFF & buf[0])
@@ -283,7 +283,7 @@ static inline double radtodeg(double rad)
 static gps_mask_t PrintSERPacket(struct gps_device_t *session,
 				 unsigned char pkt_id, int pkt_len,
 				 unsigned char *buf);
-#if defined(HAVE_LIBUSB)
+#if defined(HAVE_LIBUSB) && defined(__linux__)
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session,
 				 Packet_t * pkt);
 #endif /* HAVE_LIBUSB */
@@ -620,7 +620,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 }
 
 
-#if defined(HAVE_LIBUSB)
+#if defined(HAVE_LIBUSB) && defined(__linux__)
 // This works around cppcheck not looking into enough config branches
 // cppcheck-suppress unusedFunction
 static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
@@ -832,7 +832,7 @@ static void Build_Send_SER_Packet(struct gps_device_t *session,
 
 }
 
-#if defined(HAVE_LIBUSB)
+#if defined(HAVE_LIBUSB) && defined(__linux__)
 /*
  * is_usb_device() - is a specified device USB matching given vendor/product?
  *
