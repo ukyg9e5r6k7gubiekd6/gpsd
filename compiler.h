@@ -66,9 +66,9 @@
     } while (0)
 
 #ifdef HAVE_STDATOMIC_H
-#ifndef __COVERITY__	/* Coverity is confused by a GNU typedef */
+#if !defined(__COVERITY__) && !defined(__cplusplus)
 #include <stdatomic.h>
-#endif /* __COVERITY__ */
+#endif /* __COVERITY__ || __cplusplus */
 #endif /* HAVE_STDATOMIC_H */
 
 #ifdef HAVE_OSATOMIC_H
