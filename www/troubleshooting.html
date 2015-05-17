@@ -268,16 +268,21 @@ curses utility for the job. Watch the output.</p>
 <h2>Ubuntu/Debian</h2>
 
 <p>The .deb package supplied for the Debian and Ubuntu Linux
-distributions launch at boot from the system V-like script
-<code>/etc/init.d/gpsd</code>. However, it is governed by a control
+distributions launch at boot either using systemd with gpsd.socket
+and gpsd.service, or on older releases from the system V-like script
+<code>/etc/init.d/gpsd</code>. However, both are governed by a control
 file, <code>/etc/default/gpsd</code>. If necessary, edit the control
-file by running <code>dpkg-reconfigure gpsd</code> as root.</p>
+file as root.</p>
 
 <p>You will likely want the gpsd-clients package as a debugging
 tool. These are the clients maintained as part of the gpsd
 project. Other clients may or may not use the right libgpsd or the
 right protocol, or something. So make sure gpsd is working correctly
 with the gpsd clients. You can always purge them later.</p>
+
+<p>In case you need to debug the gpsd or its clients using gdb or
+the python debugger the gpsd-dbg package is provided. It should
+contain all necessary debug symbols to create useful backtraces.</p>
 
 <p>If you have a prior installation of gpsd from a deb package, and
 are switching to compiling your own, from a recent tarball or from the
@@ -290,19 +295,20 @@ client packages can force installation of gpsd as well. This can also
 happen on debian systems when apt is set up to install recommended
 packages as dependencies.</p>
 
-<p>One culprit is <a href="http://www.tangogps.org/">tangogps</a>,
-which recommends gpsd. Fortunately, since it recommends gpsd, you can
-let apt-get install it, and then purge it and reinstall your own
-compiled version. Other client packages may not be so lenient, and you
-will have to force purging the gpsd packages.</p>
-
-<p>A more elegant and more permanent solution is to turn off
-installing recommended packages as dependencies. Put the following in
+<p>One culprit are packages like
+<a href="http://www.tangogps.org/">tangogps</a>, which recommendd gpsd.
+Fortunately, since it recommends gpsd, you can install it using
+<code>apt-get install --no-install-recommends</code> or disable the
+installation of recommended packages permanently. Put the following in
 a file with a high leading number in <code>/etc/apt/apt.conf.d</code>,
 e.g. <code>90no.recommendations</code>:</p>
 
 <pre>APT::Install-Recommends &quot;false&quot;;
 </pre>
+
+Other client packages may not be so lenient, but you can use the tool
+<b>equivs</b> to create an empty fake package which provides gpsd.</p>
+
 
 <h2>Red Hat</h2>
 
