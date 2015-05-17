@@ -157,6 +157,15 @@ running:</p>
 
 <pre>sudo rm /var/run/gpsd.sock</pre>
 
+<h2>Ensure no other programs are using your device</h2>
+<p>Tools like modemmanager might be sing your device, probably
+automatically attached to it by udev/systemd. To check if your
+device is ready to be used by gpsd try running <b>lsof(8)</b>
+and search the output for your GPS device path (for example
+<code>lsof -n | grep /dev/ttyUSB0</code>). If something is
+listed in the output you'll have to stop these processes and
+reconfigure them to ignore your GPS device.
+
 <h2>Use gpsmon to check that your device is emitting data</h2>
 
 <p>Try running <b>gpsmon(1)</b>, giving it your GPS device path as an
