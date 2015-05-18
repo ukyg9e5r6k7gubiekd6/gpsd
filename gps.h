@@ -1818,6 +1818,25 @@ struct attitude_t {
     char yaw_st;
 };
 
+struct navdata_t {
+    unsigned int version;
+    double compass_heading;
+    double compass_deviation;
+    double compass_variation;
+    double air_temp;
+    double air_pressure;
+    double water_temp;
+    double depth;
+    double depth_offset;
+    double wind_speed;
+    double wind_dir;
+    double crosstrack_error;
+    unsigned int compass_status;
+    unsigned int log_cumulative;
+    unsigned int log_trip;
+    unsigned int crosstrack_status;
+};
+
 struct dop_t {
     /* Dilution of precision factors */
     double xdop, ydop, pdop, hdop, vdop, tdop, gdop;
@@ -1950,7 +1969,8 @@ struct gps_data_t {
 #define ERROR_SET	(1llu<<31)
 #define TOFF_SET	(1llu<<32)	/* not yet used */
 #define PPS_SET 	(1llu<<33)
-#define SET_HIGH_BIT	34
+#define NAVDATA_SET     (1llu<<34)
+#define SET_HIGH_BIT	35
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -2007,6 +2027,7 @@ struct gps_data_t {
 	struct subframe_t subframe;
 	struct ais_t ais;
 	struct attitude_t attitude;
+        struct navdata_t navdata;
 	struct rawdata_t raw;
 	struct gst_t gst;
 	/* "artificial" structures for various protocol responses */
