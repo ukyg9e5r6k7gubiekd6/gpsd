@@ -133,8 +133,8 @@ vendor and product ID of your USB-serial converter device.</p>
 you should see an additional line indicating a new device.  Expect the
 new line to describe a serial-to-USB adapter chip, often (but not
 always) the Prolific Technology PL2303.  Then run <b>dmesg(8)</b>,
-looking near the end for a message indicating a new USB device of 
-that kind and giving you the device path - <code>/dev/ttyUSBn</code> 
+looking near the end for a message indicating a new USB device of
+that kind and giving you the device path - <code>/dev/ttyUSBn</code>
 for some number n.</p>
 
 <p>If you have installed a GPSD binary package on a Linux system and
@@ -236,10 +236,10 @@ sure <a href="#hotplugtroubleshooting">udev is working correctly</a>.</p>
 <p>If you pull the plug on the receiver, gpsd will note the change.</p>
 
 <p>With the receiver plugged in and gpsd running as above, you can
-launch a client. <code>xgps</code> comes with the distribution. 
-On some Linuxes, it may be in a separate package, e.g. gpsd-clients. 
-You should then see a lot of traffic between gpsd and the client in 
-the gpsd terminal window. For example, here's a fix as reported by 
+launch a client. <code>xgps</code> comes with the distribution.
+On some Linuxes, it may be in a separate package, e.g. gpsd-clients.
+You should then see a lot of traffic between gpsd and the client in
+the gpsd terminal window. For example, here's a fix as reported by
 gpsd:</p>
 
 <pre>gpsd: SiRF: MND 0x02: time=1293859466.85 lat=42.64 lon=-118.21 alt=1315.15 track=0.00 speed=0.00 mode=1 status=0 hdop=0.00 used=0 mask={TIME|LATLON|ALTITUDE|SPEED|TRACK|STATUS|MODE|DOP|USED}</pre>
@@ -339,7 +339,7 @@ Escape character is '^]'.
 {&quot;class&quot;:&quot;VERSION&quot;,&quot;release&quot;:&quot;2.96~dev&quot;,&quot;rev&quot;:&quot;2011-03-15T03:05:33&quot;,&quot;proto_major&quot;:3,&quot;proto_minor&quot;:4}
 </pre>
 
-<p>Note that the <code>release</code> strings will be different in 
+<p>Note that the <code>release</code> strings will be different in
 your case.</p>
 
 <p>To see data from the receiver in JSON (if any), enter the command
