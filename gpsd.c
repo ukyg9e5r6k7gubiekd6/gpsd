@@ -947,6 +947,10 @@ static bool awaken(struct gps_device_t *device)
 	    gpsd_log(&context.errout, LOG_ERROR,
 		     "%s: device activation failed.\n",
 		     device->gpsdata.dev.path);
+		    gpsd_log(&context.errout, LOG_ERROR,
+				"%s: activation failed, freeing device\n",
+				device->gpsdata.dev.path);
+		    free_device(device);
 	    return false;
 	} else {
 	    gpsd_log(&context.errout, LOG_RAW,
