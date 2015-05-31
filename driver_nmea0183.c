@@ -624,7 +624,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	session->gpsdata.satellites_visible = 0;
 	return ONLINE_SET;
     }
-    if ((count % 4 == 2) || (count %4 == 3)) {
+    if (count % 4 != 0) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "malformed GPGSV - fieldcount %d %% 4 != 0\n",
 		 count);
