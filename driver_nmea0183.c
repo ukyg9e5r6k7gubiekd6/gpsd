@@ -613,6 +613,9 @@ static gps_mask_t processGSV(int count, char *field[],
      * emit a GPGSV set followed by a GLGSV set.  We have also seen a
      * SiRF-IV variant that emits GPGSV followed by BDGSV. We need to
      * combine these.
+     *
+     * NMEA 4.1 adds a signal-ID field just before the checksum. First
+     * seen in May 2015 on a u-blox M8,
      */
 
     int n, fldnum;
@@ -624,7 +627,11 @@ static gps_mask_t processGSV(int count, char *field[],
 	session->gpsdata.satellites_visible = 0;
 	return ONLINE_SET;
     }
-    if (count % 4 != 0) {
+    /*
+     * This check used to be !=0, but we have loosen it a little to let by
+     * NMEA 4.1 GSVs with an extra signal-ID field at the end.  
+     */
+    if (count % 4 > 1) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "malformed GPGSV - fieldcount %d %% 4 != 0\n",
 		 count);
