@@ -422,7 +422,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
     case 13: /* Safety Related Acknowledge */
     {
 	unsigned int mmsi[4];
-	RANGE_CHECK(72, 158);
+	RANGE_CHECK(72, 168);
 	for (u = 0; u < sizeof(mmsi)/sizeof(mmsi[0]); u++)
 	    if (bitlen > 40 + 32*u)
 		mmsi[u] = UBITS(40 + 32*u, 30);
