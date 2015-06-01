@@ -1,6 +1,6 @@
 			GPSD project news
 Repository head:
-  Fix a rarte crash bug related to devices becomin inaccessible while timed out.
+  Fix a rare crash bug related to devices becomin inaccessible while timed out.
   Accept NMEA 4.1 GSV sententences with the trailing signal-ID field.
   Fixed incorrect decode of south latitudes in AIS Type 17 messages.
   splint has been retired; this removes almost 2KLOC of annotations.
