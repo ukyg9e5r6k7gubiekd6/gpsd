@@ -226,13 +226,16 @@ http://www.prolific.com.tw/US/ShowProduct.aspx?p_id=229&pcid=41
 
 == Special Notes for Rasberry Pi Installation ==
 
-gpsd will build, install and run on the Rasberry Pi (RasPi) using Debian
-Wheezy.  Other distributions will likely work fine as well.  The gpsd
+gpsd will build, install and run on the Rasberry Pi (RasPi) and Pi 2
+using Debian jessie.  Other distributions based on
+Debian (raspbian, etc) will work fine as well.  The gpsd
 package in Debian Wheezy is known to be flakey, be sure to update to a
 new version of gpsd from source.
 
+=== Raspbian ===
 Before compiling gpsd from source, you will need to update your system
-as root:
+as root.  Switching to the latest raspbian distribution (jessie)
+is strongly recommended.
 
 --------------------------------------------------------------
 # apt-get update
@@ -241,16 +244,36 @@ as root:
 # reboot
 --------------------------------------------------------------
 
-Next, Wheezy requires a few tools for compiling and testing gpsd:
-
 --------------------------------------------------------------
 # apt-get install scons libncurses5-dev python-dev pps-tools
 # apt-get install git-core
 --------------------------------------------------------------
 
 Git-core is only required to build from a git repository.  pps-tools is for
-testing PPS inputs.  You need scons at 2.3.0 or higher to build.
+testing PPS inputs.
 
+The rest of the installation is just as for any other source based
+install, as noted in the file *build.txt* .
+
+=== Other Debian derivitives (including stock) ===
+==== Jessie ====
+--------------------------------------------------------------
+# apt-get install scons libncurses5-dev python-dev pps-tools
+# apt-get install git-core
+--------------------------------------------------------------
+
+Git-core is only required to build from a git repository.  pps-tools is for
+testing PPS inputs.
+
+The rest of the installation is just as for any other source based
+install, as noted in the file *build.txt* .
+
+
+==== Wheezy ====
+Wheezy, being older, requires updating the tools for compiling
+and testing gpsd:
+
+You need scons at 2.3.0 or higher to build.
 If your scons is less than 2.3.0 you will need to get a newer scons
 from wheezy-backport.  Partial instructions are detailed here:
 http://backports.debian.org/Instructions/
@@ -279,10 +302,14 @@ Partial but detailed instructions to fix that are here:
 https://wiki.debian.org/SecureApt
 --------------------------------------------------------------
 
-In short, get the missing key, import into apt, and do the update:
+Use either of the following code blocks.  The first is more robust:
 
 --------------------------------------------------------------
-gpg  --recv-keys 8B48AD6246925553
+apt-get install debian-archive-keyring
+--------------------------------------------------------------
+
+--------------------------------------------------------------
+gpg --keyserver pgpkeys.mit.edu --recv 8B48AD6246925553
 gpg -a --export 46925553 |  apt-key add -
 apt-get update
 --------------------------------------------------------------
@@ -293,8 +320,20 @@ You can now install scons from the wheezy-backports repository:
 apt-get -t wheezy-backports install scons
 --------------------------------------------------------------
 
+and other tools:
+
+--------------------------------------------------------------
+# apt-get install scons libncurses5-dev python-dev pps-tools
+# apt-get install git-core
+--------------------------------------------------------------
+
+Git-core is only required to build from a git repository.  pps-tools is for
+testing PPS inputs.
+
 The rest of the installation is just as for any other source based
-install, as noted in the file build.txt.
+install, as noted in the file *build.txt* .
+
+=== Other Raspberry Pi tips ===
 
 Any USB connected GPS that is known to work with gpsd will work fine on
 the RasPi.  No special instructions apply.
@@ -324,4 +363,3 @@ https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/
 
 You will need to dig deeper to make the PPS work, here is a good reference:
 http://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html
-
