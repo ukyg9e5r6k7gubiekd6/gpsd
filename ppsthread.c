@@ -619,7 +619,7 @@ static void *gpsd_ppsmonitor(void *arg)
     volatile struct timedelta_t last_fixtime = {{0, 0}, {0, 0}};
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
-    long cycle = 0, duration = 0;
+    long long cycle = 0, duration = 0;
     /* state is the last state of the tty control signals */
     int state = 0;
     /* count of how many cycles unchanged data */
@@ -631,8 +631,8 @@ static void *gpsd_ppsmonitor(void *arg)
 
 #if defined(TIOCMIWAIT)
     int edge_tio = 0;
-    long cycle_tio = 0;
-    long duration_tio = 0;
+    long long cycle_tio = 0;
+    long long duration_tio = 0;
     int state_tio = 0;
     int state_last_tio = 0;
     struct timespec clock_ts_tio = {0, 0};
@@ -641,7 +641,7 @@ static void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
-    long cycle_kpps = 0, duration_kpps = 0;
+    long long cycle_kpps = 0, duration_kpps = 0;
     /* kpps_pulse stores the time of the last two edges */
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
