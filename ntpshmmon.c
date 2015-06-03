@@ -17,9 +17,9 @@
 #define NTPSEGMENTS	256	/* NTPx for x any byte */
 
 /* difference between timespecs in nanoseconds */
-/* int is too small, avoid floats  */
-/* WARNING!  this will overflow if x and y differ by more than a few seconds */
-#define timespec_diff_ns(x, y)	(long)(((x).tv_sec-(y).tv_sec)*1000000000+(x).tv_nsec-(y).tv_nsec)
+/* int is too small, 32 bit long is too small, avoid floats  */
+/* MUST be long long to maintain precision on 32 bit code */
+#define timespec_diff_ns(x, y)	(long long)(((x).tv_sec-(y).tv_sec)*1000000000+(x).tv_nsec-(y).tv_nsec)
 
 static struct shmTime *segments[NTPSEGMENTS + 1];
 static struct timespec tick[NTPSEGMENTS + 1];
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     bool verbose = false;
     int nsamples = INT_MAX;
     time_t timeout = (time_t)INT_MAX, starttime = time(NULL);
-    double cycle = 1.0;
+    double cycle = 1.0; /* FIXME, One Sec cycle time a bad assumption */
 
 #define USAGE	"usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
     while ((option = getopt(argc, argv, "c:hn:st:vV")) != -1) {
@@ -86,13 +86,19 @@ int main(int argc, char **argv)
 	struct shm_stat_t	shm_stat;
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
+	    long long diff;  /* 32 bit long is too short for a timespec */
 	    enum segstat_t status = ntp_read(segments[i], &shm_stat, false);
 	    if (verbose)
 		fprintf(stderr, "unit %d status %d\n", i, status);
 	    switch(status)
 	    {
 	    case OK:
-		if (timespec_diff_ns(shm_stat.tvc, tick[i]) >= cycle * 1000000000) {
+		/* ntpd can slew the clock at 120% real time 
+                 * so do not lock out slightly short cycles 
+		 * use 50% of cycle time as lock out limit.
+                 * ignore that system time may jump. */
+		diff = timespec_diff_ns(shm_stat.tvc, tick[i]);
+		if ( (cycle * 500000000LL) <= diff) {
 		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
 			   ntp_name(i),
 			   (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
