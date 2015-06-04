@@ -202,7 +202,7 @@ static int ex_subtract_float( void )
     struct subtract_test *p = subtract_tests;
     int fail_count = 0;
 
-    printf( "\n\nsubtract test examples using doubles/floats:\n"
+    printf( "\n\nsubtract test examples using doubles,floats,longs:\n"
             " TS:  TS_SUB()\n"
             " l:   timespec_to_ns() math\n"
             " l32: timespec_to_ns() math with 32 bit long\n"
@@ -218,7 +218,7 @@ static int ex_subtract_float( void )
 	struct timespec ts_r;
 	float f_a, f_b, f_r;
 	double d_a, d_b, d_r;
-	long l;
+	long long l;
 	int32_t l32;  /* simulate a 32 bit long */
 
 	/* timespec math */
@@ -244,8 +244,8 @@ static int ex_subtract_float( void )
         timespec_str( &ts_r, buf_r, sizeof(buf_r) );
 
 	printf(" TS;  %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
-	printf(" l;   %21s - %21s = %21ld\n", buf_a, buf_b, l);
-	printf(" l32; %21s - %21s = %21ld\n", buf_a, buf_b, (long)l32);
+	printf(" l;   %21s - %21s = %21lld\n", buf_a, buf_b, l);
+	printf(" l32; %21s - %21s = %21lld\n", buf_a, buf_b, (long long)l32);
 	printf(" d;   %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
 	printf(" f;   %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
 	puts("\n");
