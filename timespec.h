@@ -21,6 +21,13 @@
 #define NS_IN_SEC	1000000000
 #define MS_IN_SEC	1000000
 
+/* return the difference between timespecs in nanoseconds
+ * int may be too small, 32 bit long is too small, floats are too imprecise,
+ * doubles are not quite precise enough 
+ * MUST be long long to maintain precision on 32 bit code */
+#define timespec_diff_ns(x, y) \
+    (long long)((((x).tv_sec-(y).tv_sec)*NS_IN_SEC)+(x).tv_nsec-(y).tv_nsec)
+
 static inline void TS_NORM( struct timespec *ts)
 {
     if ( (  1 <= ts->tv_sec ) ||
