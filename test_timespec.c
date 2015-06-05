@@ -30,6 +30,21 @@
 #define TS_N_ZERO_TREES {0,-333333333}
 #define TS_N_ZERO_NINES {0,-999999999}
 #define TS_N_ONE        {-1,0}
+
+/* minutes, hours, days */
+#define TS_ONEM         {60,0}			/* one minute */
+#define TS_ONEM_TREES   {60,333333333}		/* one minute, threes */
+#define TS_ONEM_NINES   {60,999999999}		/* one minute, nines */
+#define TS_ONEH         {3600,0}		/* one hour */
+#define TS_ONEH_TREES   {3600,333333333}	/* one hour, threes */
+#define TS_ONEH_NINES   {3600,999999999}	/* one hour, nines */
+#define TS_ONED         {86400,0}		/* one day */
+#define TS_ONED_TREES   {86400,333333333}	/* one day, threes */
+#define TS_ONED_NINES   {86400,999999999}	/* one day, nines */
+#define TS_N_ONEM       {-60,0}			/* negative one minute */
+#define TS_N_ONEH       {-3600,0}		/* negative one hour */
+#define TS_N_ONED       {-86400,0}		/* negative one day */
+
 /* Dec 31, 23:59 2037 GMT */
 #define TS_2037         {2145916799, 0}
 #define TS_2037_ONE     {2145916799, 1}
@@ -84,6 +99,7 @@ struct subtract_test subtract_tests[] = {
 	{ TS_N_ZERO_ONE,  TS_N_ZERO_ONE,  TS_ZERO,         0},
 	{ TS_ZERO_TREES,  TS_ZERO_TREES,  TS_ZERO,         0},
 	{ TS_ZERO_NINES,  TS_ZERO_NINES,  TS_ZERO,         0},
+	{ TS_ZERO_TREES,  TS_ZERO,        TS_ZERO_TREES,   0},
 	{ TS_ZERO,        TS_N_ONE,       TS_ONE,          0},
 	{ TS_ONE,         TS_ZERO,        TS_ONE,          0},
 	{ TS_TWO,         TS_ONE,         TS_ONE,          0},
@@ -93,6 +109,18 @@ struct subtract_test subtract_tests[] = {
 	{ TS_ZERO_TWO,    TS_ZERO_ONE,    TS_ZERO_ONE,     0},
 	{ TS_2037_ONE,    TS_2037,        TS_ZERO_ONE,     0},
 	{ TS_ONE_ONE,     TS_ZERO_NINES,  TS_ZERO_TWO,     0},
+	{ TS_ONEM,        TS_ZERO,        TS_ONEM,         0},
+	{ TS_ONEM_TREES,  TS_ZERO,        TS_ONEM_TREES,   0},
+	{ TS_ONEM_NINES,  TS_ZERO,        TS_ONEM_NINES,   0},
+	{ TS_ZERO,        TS_ONEM,        TS_N_ONEM,       0},
+	{ TS_ONEH,        TS_ZERO,        TS_ONEH,         0},
+	{ TS_ONEH_TREES,  TS_ZERO,        TS_ONEH_TREES,   0},
+	{ TS_ONEH_NINES,  TS_ZERO,        TS_ONEH_NINES,   0},
+	{ TS_ZERO,        TS_ONEH,        TS_N_ONEH,       0},
+	{ TS_ONED,        TS_ZERO,        TS_ONED,         0},
+	{ TS_ONED_TREES,  TS_ZERO,        TS_ONED_TREES,   0},
+	{ TS_ONED_NINES,  TS_ZERO,        TS_ONED_NINES,   0},
+	{ TS_ZERO,        TS_ONED,        TS_N_ONED,       0},
 	{ TS_2037_NINES,  TS_2037,        TS_ZERO_NINES,   0},
 	{ TS_2037_TREES,  TS_ZERO,        TS_2037_TREES,   0},
 	{ TS_2037_SIXS7,  TS_2037,        TS_ZERO_SIXS7,   0},
@@ -127,10 +155,20 @@ struct format_test format_tests[] = {
 	{ TS_N_ZERO_TWO,   "-0.000000002", 0},
 	{ TS_N_ZERO_NINES, "-0.999999999", 0},
 	{ TS_N_ONE,        "-1.000000000", 0},
+	{ TS_ONEM,         " 60.000000000", 0},
+	{ TS_ONEM_TREES,   " 60.333333333", 0},
+	{ TS_ONEH,         " 3600.000000000", 0},
+	{ TS_ONEH_TREES,   " 3600.333333333", 0},
+	{ TS_ONED,         " 86400.000000000", 0},
+	{ TS_ONED_TREES,   " 86400.333333333", 0},
+	{ TS_N_ONEM,        "-60.000000000", 0},
+	{ TS_N_ONEH,        "-3600.000000000", 0},
+	{ TS_N_ONED,        "-86400.000000000", 0},
 	{ { -1, 1},        "-1.000000001", 0},
 	{ { -1, -1},       "-1.000000001", 0},
 	{ TS_2037,         " 2145916799.000000000", 0},
 	{ TS_2037_ONE,     " 2145916799.000000001", 0},
+	{ TS_2037_TREES,   " 2145916799.333333333", 1},
 	{ TS_2037_NINES,   " 2145916799.999999999", 1},
 };
 
