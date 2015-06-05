@@ -56,6 +56,17 @@
 	(ts).tv_sec  = ns / NS_IN_SEC; \
 	(ts).tv_nsec = ns % NS_IN_SEC;
 
+/* convert double to a timespec */
+static inline void d_str( const double d, char *buf, size_t buf_size)
+{
+    /* convert to string */
+    if ( 0 <= d ) {
+	(void) snprintf( buf, buf_size, " %.9f", d);
+    } else {
+	(void) snprintf( buf, buf_size, "%.9f", d);
+    }
+}
+
 /* a - b should be c */
 struct subtract_test {
 	struct timespec a;	
@@ -123,7 +134,7 @@ struct format_test format_tests[] = {
 	{ TS_2037_NINES,   " 2145916799.999999999", 1},
 };
 
-/* 
+/*
  * test subtractions using native timespec math: TS_SUB()
  *
  */
@@ -167,7 +178,7 @@ static int test_ts_subtract( int verbose )
     return fail_count;
 }
 
-/* 
+/*
  * test subtractions using timespec_diff_ns()
  *
  */
@@ -324,7 +335,6 @@ static int ex_subtract_float( void )
  */
 static void ex_precision(void)
 {
-	char buf[TIMESPEC_LEN];
 	format_test_t *p = format_tests;
 
 	puts( "\n\n  Simple conversion examples\n\n"
@@ -339,22 +349,63 @@ static void ex_precision(void)
 	    double d;
 	    int32_t l32;
 	    int64_t l64;
+	    char buf_ts[TIMESPEC_LEN];
+	    char buf_l32[TIMESPEC_LEN];
+	    char buf_l64[TIMESPEC_LEN];
+	    char buf_f[TIMESPEC_LEN];
+	    char buf_d[TIMESPEC_LEN];
+	    const char *fail_ts = "";
+	    const char *fail_l32 = "";
+	    const char *fail_l64 = "";
+	    const char *fail_f = "";
+	    const char *fail_d = "";
 
 	    struct timespec *v = &(p->input);
+	    struct timespec ts_l32;
+	    struct timespec ts_l64;
 
-	    // timespec_str( &p->a, buf_a, sizeof(buf_a) );
 
+	    /* convert to test size */
 	    l32 = (int32_t)(v->tv_sec * NS_IN_SEC)+(int32_t)v->tv_nsec;
 	    l64 = (int64_t)(v->tv_sec * NS_IN_SEC)+(int64_t)v->tv_nsec;
 	    f = (float)TSTONS( v );
 	    d = TSTONS( v );
-	    timespec_str( v, buf, sizeof(buf) );
-	    printf( "ts:  %21s\n"
-	            "l32: %21lld\n"
-                    "l64: %21lld\n"
-                    "f:   %21.9f\n"
-		    "d:   %21.9f\n\n", 
-			buf, (long long)l32, (long long)l64,  f, d);
+
+	    /* now convert to strings */
+	    timespec_str( v, buf_ts, sizeof(buf_ts) );
+	    ns_to_timespec( ts_l32, l32);
+	    timespec_str( &ts_l32, buf_l32, sizeof(buf_l32) );
+	    ns_to_timespec( ts_l64, l64);
+	    timespec_str( &ts_l64, buf_l64, sizeof(buf_l64) );
+	    d_str( f, buf_f, sizeof(buf_f) );
+	    d_str( d, buf_d, sizeof(buf_d) );
+
+	    /* test strings */
+	    if ( strcmp( buf_ts, p->expected) ) {
+		fail_ts = "FAIL";
+            }
+	    if ( strcmp( buf_l32, p->expected) ) {
+		fail_l32 = "FAIL";
+            }
+	    if ( strcmp( buf_l64, p->expected) ) {
+		fail_l64 = "FAIL";
+            }
+	    if ( strcmp( buf_f, p->expected) ) {
+		fail_f = "FAIL";
+            }
+	    if ( strcmp( buf_d, p->expected) ) {
+		fail_d = "FAIL";
+            }
+	    printf( "ts:  %21s %s\n"
+	            "l32: %21lld %s\n"
+                    "l64: %21lld %s\n"
+                    "f:   %21.9f %s\n"
+		    "d:   %21.9f %s\n\n",
+			buf_ts, fail_ts,
+			(long long)l32, fail_l32,
+			(long long)l64, fail_l64,
+			f, fail_f,
+			d, fail_d);
 
 	    if ( p->last ) {
 		    break;
