@@ -41,14 +41,22 @@
 #define TS_N_2037_TREES {-2145916799, -333333333}
 #define TS_N_2037_NINES {-2145916799, -999999999}
 
-/* a 32 bit copy to force a 32 bit long */
-#define timespec_diff_ns32(x, y)	(int32_t)((int32_t)(((x).tv_sec-(y).tv_sec)*1000000000)+(x).tv_nsec-(y).tv_nsec)
+/* a 32 bit copy of timespec_diff_ns() to force a 32 bit long */
+/* used to demonstrate how 32 bit longs can not work */
+#define timespec_diff_ns32(x, y) \
+ (int32_t)((int32_t)(((x).tv_sec-(y).tv_sec)*NS_IN_SEC)+(x).tv_nsec-(y).tv_nsec)
 
+/* convert long long ns to a timespec */
+#define ns_to_timespec(ts, ns) \
+	(ts).tv_sec  = ns / NS_IN_SEC; \
+	(ts).tv_nsec = ns % NS_IN_SEC;
+
+/* a - b should be c */
 struct subtract_test {
-	struct timespec a;
+	struct timespec a;	
 	struct timespec b;
 	struct timespec c;
-	bool last;
+	bool last;  		/* last test marker */
 };
 
 struct subtract_test subtract_tests[] = {
@@ -110,7 +118,11 @@ struct format_test format_tests[] = {
 	{ TS_2037_NINES,   " 2145916799.999999999", 1},
 };
 
-static int test_subtract( int verbose )
+/* 
+ * test subtractions using native timespec math: TS_SUB()
+ *
+ */
+static int test_ts_subtract( int verbose )
 {
     struct subtract_test *p = subtract_tests;
     int fail_count = 0;
@@ -143,9 +155,55 @@ static int test_subtract( int verbose )
     };
 
     if ( fail_count ) {
-	printf("subtract test failed %d tests\n", fail_count );
+	printf("timespec subtract test failed %d tests\n", fail_count );
     } else {
-	puts("subtract test succeeded\n");
+	puts("timespec subtract test succeeded\n");
+    }
+    return fail_count;
+}
+
+/* 
+ * test subtractions using timespec_diff_ns()
+ *
+ */
+static int test_ns_subtract( int verbose )
+{
+    struct subtract_test *p = subtract_tests;
+    int fail_count = 0;
+
+    while ( 1 ) {
+	char buf_a[TIMESPEC_LEN];
+	char buf_b[TIMESPEC_LEN];
+	char buf_c[TIMESPEC_LEN];
+	char buf_r[TIMESPEC_LEN];
+	struct timespec r;
+	long long r_ns;
+
+        r_ns = timespec_diff_ns(p->a, p->b);
+        timespec_str( &p->a, buf_a, sizeof(buf_a) );
+        timespec_str( &p->b, buf_b, sizeof(buf_b) );
+        timespec_str( &p->c, buf_c, sizeof(buf_c) );
+	ns_to_timespec( r, r_ns);
+        timespec_str( &r,    buf_r, sizeof(buf_r) );
+	if ( (p->c.tv_sec != r.tv_sec) || (p->c.tv_nsec != r.tv_nsec) ) {
+		printf("%21s - %21s = %21s, FAIL s/b %21s\n",
+			buf_a, buf_b, buf_r, buf_c);
+		fail_count++;
+	} else if ( verbose ) {
+		printf("%21s - %21s = %21s\n", buf_a, buf_b, buf_r);
+	}
+		
+	
+	if ( p->last ) {
+		break;
+	}
+	p++;
+    };
+
+    if ( fail_count ) {
+	printf("ns subtract test failed %d tests\n", fail_count );
+    } else {
+	puts("ns subtract test succeeded\n");
     }
     return fail_count;
 }
@@ -324,7 +382,8 @@ int main(int argc, char *argv[])
 
 
     fail_count = test_format( verbose );
-    fail_count += test_subtract( verbose );
+    fail_count += test_ts_subtract( verbose );
+    fail_count += test_ns_subtract( verbose );
 
     if ( fail_count ) {
 	printf("timespec tests failed %d tests\n", fail_count );
