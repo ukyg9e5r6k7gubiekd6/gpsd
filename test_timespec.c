@@ -275,12 +275,26 @@ static int ex_subtract_float( void )
 	char buf_b[TIMESPEC_LEN];
 	char buf_c[TIMESPEC_LEN];
 	char buf_r[TIMESPEC_LEN];
+	char buf_l[TIMESPEC_LEN];
+	char buf_l32[TIMESPEC_LEN];
+	char buf_l64[TIMESPEC_LEN];
+	char buf_f[TIMESPEC_LEN];
+	char buf_d[TIMESPEC_LEN];
 	struct timespec ts_r;
+	struct timespec ts_l;
+	struct timespec ts_l32;
+	struct timespec ts_l64;
 	float f_a, f_b, f_r;
 	double d_a, d_b, d_r;
 	long long l;
 	int32_t l32;  /* simulate a 32 bit long */
 	int64_t l64;  /* simulate a 64 bit long */
+	const char *fail_ts = "";
+	const char *fail_l = "";
+	const char *fail_l32 = "";
+	const char *fail_l64 = "";
+	const char *fail_f = "";
+	const char *fail_d = "";
 
 	/* timespec math */
         TS_SUB(&ts_r, &p->a, &p->b);
@@ -300,18 +314,53 @@ static int ex_subtract_float( void )
 	l32 = timespec_diff_ns32( p->a, p->b);
 	l64 = timespec_diff_ns64( p->a, p->b);
 
+	/* now convert to strings */
         timespec_str( &p->a, buf_a, sizeof(buf_a) );
         timespec_str( &p->b, buf_b, sizeof(buf_b) );
         timespec_str( &p->c, buf_c, sizeof(buf_c) );
         timespec_str( &ts_r, buf_r, sizeof(buf_r) );
 
-	printf("ts:  %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
-	printf("l;   %21s - %21s = %21lld\n", buf_a, buf_b, l);
-	printf("l32; %21s - %21s = %21lld\n", buf_a, buf_b, (long long)l32);
-	printf("l64; %21s - %21s = %21lld\n", buf_a, buf_b, (long long)l64);
-	printf("f;   %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
-	printf("d;   %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
-	puts("\n");
+	ns_to_timespec( ts_l, l );
+	timespec_str( &ts_l, buf_l, sizeof(buf_l) );
+	ns_to_timespec( ts_l32, l32 );
+	timespec_str( &ts_l32, buf_l32, sizeof(buf_l32) );
+	ns_to_timespec( ts_l64, l64);
+	timespec_str( &ts_l64, buf_l64, sizeof(buf_l64) );
+	d_str( f_r, buf_f, sizeof(buf_f) );
+	d_str( d_r, buf_d, sizeof(buf_d) );
+
+	/* test strings */
+	if ( strcmp( buf_r, buf_c) ) {
+	    fail_ts = "FAIL";
+	}
+	if ( strcmp( buf_l, buf_c) ) {
+	    fail_l = "FAIL";
+	}
+	if ( strcmp( buf_l32, buf_c) ) {
+	    fail_l32 = "FAIL";
+	}
+	if ( strcmp( buf_l64, buf_c) ) {
+	    fail_l64 = "FAIL";
+	}
+	if ( strcmp( buf_f, buf_c) ) {
+	    fail_f = "FAIL";
+	}
+	if ( strcmp( buf_d, buf_c) ) {
+	    fail_d = "FAIL";
+	}
+	printf("ts:  %21s - %21s = %21s %s\n"
+	       "l;   %21s - %21s = %21lld %s\n"
+	       "l32; %21s - %21s = %21lld %s\n"
+	       "l64; %21s - %21s = %21lld %s\n"
+	       "f;   %21.9f - %21.9f = %21.9f %s\n"
+	       "d;   %21.9f - %21.9f = %21.9f %s\n"
+	       "\n",
+		buf_a, buf_b, buf_r, fail_ts,
+		buf_a, buf_b, l, fail_l,
+		buf_a, buf_b, (long long)l32, fail_l32,
+		buf_a, buf_b, (long long)l64, fail_l64,
+		f_a, f_b, f_r, fail_f,
+		d_a, d_b, d_r, fail_d);
 		
 	
 	if ( p->last ) {
