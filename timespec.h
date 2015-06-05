@@ -18,8 +18,8 @@
  *
  * NOTE: this normalization is not the same as ntpd uses
  */
-#define NS_IN_SEC	1000000000
-#define MS_IN_SEC	1000000
+#define NS_IN_SEC	1000000000LL
+#define MS_IN_SEC	1000000LL
 
 /* return the difference between timespecs in nanoseconds
  * int may be too small, 32 bit long is too small, floats are too imprecise,
