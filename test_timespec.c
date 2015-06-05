@@ -41,10 +41,15 @@
 #define TS_N_2037_TREES {-2145916799, -333333333}
 #define TS_N_2037_NINES {-2145916799, -999999999}
 
-/* a 32 bit copy of timespec_diff_ns() to force a 32 bit long */
+/* a 32 bit copy of timespec_diff_ns() to force a 32 bit int */
 /* used to demonstrate how 32 bit longs can not work */
 #define timespec_diff_ns32(x, y) \
  (int32_t)((int32_t)(((x).tv_sec-(y).tv_sec)*NS_IN_SEC)+(x).tv_nsec-(y).tv_nsec)
+
+/* a 64 bit copy of timespec_diff_ns() to force a 64 bit int */
+/* used to demonstrate how 64 bit long longs can work */
+#define timespec_diff_ns64(x, y) \
+ (int64_t)((int64_t)(((x).tv_sec-(y).tv_sec)*NS_IN_SEC)+(x).tv_nsec-(y).tv_nsec)
 
 /* convert long long ns to a timespec */
 #define ns_to_timespec(ts, ns) \
@@ -261,11 +266,12 @@ static int ex_subtract_float( void )
     int fail_count = 0;
 
     printf( "\n\nsubtract test examples using doubles,floats,longs:\n"
-            " TS:  TS_SUB()\n"
+            " ts:  TS_SUB()\n"
             " l:   timespec_to_ns() math\n"
             " l32: timespec_to_ns() math with 32 bit long\n"
-            " d:   double float math\n"
+            " l64: timespec_to_ns() math with 64 bit long\n"
             " f:   float math\n"
+            " d:   double float math\n"
 	    "\n");
 
     while ( 1 ) {
@@ -278,6 +284,7 @@ static int ex_subtract_float( void )
 	double d_a, d_b, d_r;
 	long long l;
 	int32_t l32;  /* simulate a 32 bit long */
+	int64_t l64;  /* simulate a 64 bit long */
 
 	/* timespec math */
         TS_SUB(&ts_r, &p->a, &p->b);
@@ -295,17 +302,19 @@ static int ex_subtract_float( void )
 	/* long math */
 	l = timespec_diff_ns( p->a, p->b);
 	l32 = timespec_diff_ns32( p->a, p->b);
+	l64 = timespec_diff_ns64( p->a, p->b);
 
         timespec_str( &p->a, buf_a, sizeof(buf_a) );
         timespec_str( &p->b, buf_b, sizeof(buf_b) );
         timespec_str( &p->c, buf_c, sizeof(buf_c) );
         timespec_str( &ts_r, buf_r, sizeof(buf_r) );
 
-	printf(" TS;  %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
-	printf(" l;   %21s - %21s = %21lld\n", buf_a, buf_b, l);
-	printf(" l32; %21s - %21s = %21lld\n", buf_a, buf_b, (long long)l32);
-	printf(" d;   %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
-	printf(" f;   %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
+	printf("ts:  %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
+	printf("l;   %21s - %21s = %21lld\n", buf_a, buf_b, l);
+	printf("l32; %21s - %21s = %21lld\n", buf_a, buf_b, (long long)l32);
+	printf("l64; %21s - %21s = %21lld\n", buf_a, buf_b, l64);
+	printf("f;   %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
+	printf("d;   %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
 	puts("\n");
 		
 	
@@ -329,19 +338,30 @@ static void ex_precision(void)
 	char buf[TIMESPEC_LEN];
 	struct timespec *v = exs;
 
-	puts( "\nPrecision examples:\n\n  Simple conversions\n");
-	printf( "\n%10stimespec%14s32 bit long%11sdouble%16sfloat\n\n", "", "", "", "");
+	puts( "\n\n  Simple conversion examples\n\n"
+		"ts:  timespec\n"
+		"l32: 32 bit long\n"
+		"l64: 64 bit long\n"
+		"f:   float\n"
+		"d:   double\n\n");
 
 	while ( 1 ) {
 	    float f;
 	    double d;
 	    int32_t l32;
+	    int64_t l64;
 
+	    l32 = (int32_t)(v->tv_sec * NS_IN_SEC)+(int32_t)v->tv_nsec;
+	    l64 = (int64_t)(v->tv_sec * NS_IN_SEC)+(int64_t)v->tv_nsec;
 	    d = TSTONS( v );
-	    l32 = (int32_t)(v->tv_sec * 1000000000)+(int32_t)v->tv_nsec;
 	    f = (float) d;
 	    timespec_str( v, buf, sizeof(buf) );
-	    printf( "%21s %21ld %21.9f %21.9f \n", buf, (long)l32, d, f);
+	    printf( "ts:  %21s\n"
+	            "l32: %21lld\n"
+                    "l64: %21lld\n"
+                    "f:   %21.9f\n"
+		    "d:   %21.9f\n\n", 
+			buf, (long long)l32, (long long)l64,  f, d);
 
 	    if ( ( 0 == v->tv_sec ) && ( 0 == v->tv_nsec) ) {
 		/* done */
