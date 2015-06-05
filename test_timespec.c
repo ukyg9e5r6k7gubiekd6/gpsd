@@ -312,7 +312,7 @@ static int ex_subtract_float( void )
 	printf("ts:  %21s - %21s = %21s\n", buf_a, buf_b, buf_r);
 	printf("l;   %21s - %21s = %21lld\n", buf_a, buf_b, l);
 	printf("l32; %21s - %21s = %21lld\n", buf_a, buf_b, (long long)l32);
-	printf("l64; %21s - %21s = %21lld\n", buf_a, buf_b, l64);
+	printf("l64; %21s - %21s = %21lld\n", buf_a, buf_b, (long long)l64);
 	printf("f;   %21.9f - %21.9f = %21.9f\n", f_a, f_b, f_r);
 	printf("d;   %21.9f - %21.9f = %21.9f\n", d_a, d_b, d_r);
 	puts("\n");
@@ -353,8 +353,8 @@ static void ex_precision(void)
 
 	    l32 = (int32_t)(v->tv_sec * NS_IN_SEC)+(int32_t)v->tv_nsec;
 	    l64 = (int64_t)(v->tv_sec * NS_IN_SEC)+(int64_t)v->tv_nsec;
+	    f = (float)TSTONS( v );
 	    d = TSTONS( v );
-	    f = (float) d;
 	    timespec_str( v, buf, sizeof(buf) );
 	    printf( "ts:  %21s\n"
 	            "l32: %21lld\n"
