@@ -93,8 +93,9 @@ static inline void TS_NORM( struct timespec *ts)
     } while (0)
 
 /* convert a timespec to a double.
- * is tv_sec > 2, then inevitable loss of precision in tv_nsec */
-#define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / 1e9)))
+ * if tv_sec > 2, then inevitable loss of precision in tv_nsec
+ 8 so best to NEVER use TSTONS() */
+#define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / NS_IN_SEC)))
 
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
