@@ -98,11 +98,11 @@ struct subtract_test subtract_tests[] = {
 	{ TS_ZERO,        TS_2037_NINES,  TS_N_2037_NINES, 1},
 };
 
-struct format_test {
+typedef struct format_test {
 	struct timespec input;
 	char *expected;
 	bool last;
-};
+} format_test_t;
 
 struct format_test format_tests[] = {
 	{ TS_ZERO,         " 0.000000000", 0},
@@ -215,7 +215,7 @@ static int test_ns_subtract( int verbose )
 
 static int test_format(int verbose )
 {
-    struct format_test *p = format_tests;
+    format_test_t *p = format_tests;
     int fail_count = 0;
 
     while ( 1 ) {
@@ -244,21 +244,6 @@ static int test_format(int verbose )
     }
     return fail_count;
 }
-
-struct timespec exs[] = {
-	TS_ZERO_ONE,
-	TS_ZERO_TWO,
-	TS_ZERO_NINES,
-	TS_ONE,
-	TS_ONE_ONE,
-	TS_TWO,
-	TS_2037,
-	TS_2037_ONE,
-	TS_2037_TWO,
-	TS_2037_X,
-	TS_2037_NINES,
-	TS_ZERO,
-};
 
 static int ex_subtract_float( void )
 {
@@ -333,10 +318,14 @@ static int ex_subtract_float( void )
 }
 
 
+/*
+ * show examples of how integers and floats fail
+ *
+ */
 static void ex_precision(void)
 {
 	char buf[TIMESPEC_LEN];
-	struct timespec *v = exs;
+	format_test_t *p = format_tests;
 
 	puts( "\n\n  Simple conversion examples\n\n"
 		"ts:  timespec\n"
@@ -351,6 +340,10 @@ static void ex_precision(void)
 	    int32_t l32;
 	    int64_t l64;
 
+	    struct timespec *v = &(p->input);
+
+	    // timespec_str( &p->a, buf_a, sizeof(buf_a) );
+
 	    l32 = (int32_t)(v->tv_sec * NS_IN_SEC)+(int32_t)v->tv_nsec;
 	    l64 = (int64_t)(v->tv_sec * NS_IN_SEC)+(int64_t)v->tv_nsec;
 	    f = (float)TSTONS( v );
@@ -363,11 +356,10 @@ static void ex_precision(void)
 		    "d:   %21.9f\n\n", 
 			buf, (long long)l32, (long long)l64,  f, d);
 
-	    if ( ( 0 == v->tv_sec ) && ( 0 == v->tv_nsec) ) {
-		/* done */
-		break;
+	    if ( p->last ) {
+		    break;
 	    }
-	    v++;
+	    p++;
 	}
 
 	printf( "\n\nSubtraction examples:\n");
