@@ -583,6 +583,9 @@ static void select_packet_monitor(struct gps_device_t *device)
 	(void)wnoutrefresh(devicewin);
 }
 
+/* Control-L character */
+#define CTRL_L 0x0C
+
 static char *curses_get_command(void)
 /* char-by-char nonblocking input, return accumulated command line on \n */
 {
@@ -591,7 +594,8 @@ static char *curses_get_command(void)
     int c;
 
     c = wgetch(cmdwin);
-    if (c == CTRL('L')) {
+    if (CTRL_L == c) {
+        /* ^L is to repaint the screen */
 	(void)clearok(stdscr, true);
 	if (active != NULL && (*active)->initialize != NULL)
 	    (void)(*active)->initialize();
