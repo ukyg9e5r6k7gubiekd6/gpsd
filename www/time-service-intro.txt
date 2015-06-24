@@ -28,6 +28,12 @@ by the credit card industry mandate "correct and consistent time" and
 gives NTP as an example of qualifying synchronization technology
 <<PCI3>>.
 
+The Financial Industry Regulatory Authority (FINRA) currently requires
+that clocks used for business must be syncronized to within one second
+of NIST time.  The synchronization must occur at least once a day and
+before the start of business.  A pending rule change <<FINRA_14-47>>
+proposes to tighten that to just 50 mSec.
+
 Modern cryptographic systems, such as Kerberos, require accurate time.
 So do cellular networks and navigation systems for autonomous
 vehicles.  As these cases suggest, the economic value of
@@ -263,6 +269,9 @@ server using GPSD and an inexpensive GPS at <<GPSD-HOWTO>>.
 
 - [[[PCI3]]] https://www.pcisecuritystandards.org/documents/PCI_DSS_v3.pdf[Requirements and Security Assessment
 Procedures]
+
+- [[[FINRA_14-47]]]
+http://www.finra.org/sites/default/files/notice_doc_file_ref/Notice_Regulatory_14-47.pdf[14-47]
 
 - [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
