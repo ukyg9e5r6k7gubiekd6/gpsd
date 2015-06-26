@@ -123,11 +123,13 @@ Disciplined Oscillators" or GPSDOs) are conditioned by the 1PPS output
 of a GPS receiver.  Worst-case accuracy depends on the accuracy or the
 1PPS and vendor data sheets commonly claim 100 ns, sometimes even 20 ns.
 
-The GPS system standard <<IS-GPS-200G>> Section 3.3.4 specifies that GPS
-time as broadcast from each satellite be within 90 ns of USNO time to a
-certainty of one sigma.  Any GPS propogation and reception errors will
-add to that uncertainly.  Thus one needs to assume a GPSDO can not
-relate to USNO time to much better than about 200 to 110 ns.
+The GPS system standard <<IS-GPS-200G>> Section 3.3.4 specifies that
+GPS Sat clock (MSC) from each satellite be within 90 ns of USNO time to
+a certainty of one sigma.  Further adding in GPS satellelite postiion
+uncertainty widens the time uncertain as broadcast from the GPS Sat to
+97 ns at one sigma.  Any GPS propogation and reception errors will add
+to that uncertainly.  Thus one needs to assume a GPSDO can not relate to
+USNO time to better than about 200 to 120 ns.
 
 A plain GPS, without a stabilized crystal, can serve as a clock
 source.  However, it will generally be unable to deliver time at all when
