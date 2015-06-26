@@ -118,11 +118,16 @@ receivers (especially those made for the European market) can use
 multiple stations. A useful table of national time radio stations is
 at <<SPECTRUMWIKI>>.
 
-Devices described as "GPS clocks" (or more technically as
-"GPS Disciplined Oscillators" or GPSDOs) are conditioned by the
-50 ns-precision 1PPS, and so include a GPS receiver.  Worst-case
-accuracy depends on time since last 1PPS but vendor data sheets
-commonly claim 100 ns.
+Devices described as "GPS clocks" (or more technically as "GPS
+Disciplined Oscillators" or GPSDOs) are conditioned by the 1PPS output
+of a GPS receiver.  Worst-case accuracy depends on the accuracy or the
+1PPS and vendor data sheets commonly claim 100 ns, sometimes even 20 ns.
+
+The GPS system standard <<IS-GPS-200G>> Section 3.3.4 specifies that GPS
+time as broadcast from each satellite be within 90 ns of USNO time to a
+certainty of one sigma.  Any GPS propogation and reception errors will
+add to that uncertainly.  Thus one needs to assume a GPSDO can not
+relate to USNO time to much better than about 200 to 110 ns.
 
 A plain GPS, without a stabilized crystal, can serve as a clock
 source.  However, it will generally be unable to deliver time at all when
@@ -283,6 +288,8 @@ Time and Frequency Bulletin NISTIR 5082-10]
 - [[[WWVBMAP]]] http://tf.nist.gov/stations/wwvbcoverage.htm[WWVB Coverage Area]
 
 - [[[SPECTRUMWIKI]]] http://www.spectrumwiki.com/wiki/DisplayEntry.aspx?DisplyId=51[Low Frequency Time Signals]
+
+- [[[IS-GPS-200G]]] http://www.gps.gov/technical/icwg/IS-GPS-200G.pdf[IS-GPS-200G]
 
 - [[[ACTS1]]] http://www.nist.gov/pml/div688/grp40/acts.cfm[NIST Automated Computer Time Service (ACTS)]
 
