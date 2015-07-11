@@ -280,6 +280,26 @@ leap-second offset bumps to affect your installation so that it begins
 as late as possible, at your build time rather than from when the
 source tree was copied.
 
+If you have had a leap-second transition, the following regression tests
+will break:
+
+	  bu303-climbing.log
+	  bu303-moving.log
+	  bu303-nofix.log
+	  bu303-stillfix.log
+	  bu303b-nofix.log
+	  italk-binary.log
+	  navcom.log
+	  ublox-aek-4t.log
+	  ublox-lea-4t.log
+	  ublox-sirf1.log
+
+There is no help for this other than a test rebuild.  The problem is
+that these devices rely on the build-time leap-second offset; you'll
+see times one second off.  Other GPSes either return
+leap-second-corrected time or the test loads include a
+leapsecond-offset report before any time is reported.
+
 == Optional features ==
 
 By giving command-line options to scons you can configure certain rarely-used
