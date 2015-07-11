@@ -2,7 +2,7 @@
 :description: A primer on precision time sources and services.
 :keywords: time, UTC, atomic clock, GPS, NTP
 Eric S. Raymond <esr@thyrsus.com>
-v1.3, 2015-03-16
+v1.4, 2015-07-11
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -32,7 +32,7 @@ The Financial Industry Regulatory Authority (FINRA) currently requires
 that clocks used for business must be syncronized to within one second
 of NIST time.  The synchronization must occur at least once a day and
 before the start of business.  A pending rule change <<FINRA_14-47>>
-proposes to tighten that to just 50 mSec.
+proposes to tighten that to just 50 ms.
 
 Modern cryptographic systems, such as Kerberos, require accurate time.
 So do cellular networks and navigation systems for autonomous
@@ -41,9 +41,9 @@ high-precision time is likely to rise significantly in the future.
 
 There are several equivalent ways to state the precision of a clock.
 In the remainder of this introduction we will use "jitter" - the
-width of its short term random variation from its "correct" time -
+width of its short-term random variation from its "correct" time -
 (commonly Universal Coordinated Time or UTC); usually in nanoseconds
-(ns). microsconds (&mu;s), or milliseconds (ms).  In these units the
+(ns), microsconds (&mu;s), or milliseconds (ms).  In these units the
 range of interest for most precision time applications is from 100 ms
 down to 1000 ns.
 
@@ -87,7 +87,7 @@ of a national time standard at a user's location.
 
 High-end precision clocks are based on rubidium oscillators (close
 relatives of the cesium time standards). Less expensive ones are based
-on temperature-controlled crystal oscillator or TCXO, sometimes also
+on a temperature-controlled crystal oscillator or TCXO, sometimes also
 seen as OCXO for "oven-controlled crystal oscillator"; these are more
 closely related to the non-temperature-stabilized oscillator in a
 quartz-crystal watch.
@@ -127,7 +127,7 @@ The GPS system standard <<IS-GPS-200G>> Section 3.3.4 specifies that
 GPS Sat clock (MSC) from each satellite be within 90 ns of USNO time to
 a certainty of one sigma.  Further adding in GPS satellelite postiion
 uncertainty widens the time uncertain as broadcast from the GPS Sat to
-97 ns at one sigma.  Any GPS propoaation and reception errors will add
+97 ns at one sigma.  Any GPS propagation and reception errors will add
 to that uncertainly.  Thus one needs to assume a GPSDO can not relate to
 USNO time to better than about 200 to 120 ns.
 
@@ -187,7 +187,7 @@ clocks) "Stratum 1" (NTP servers directly connected to reference
 clocks) and "Stratum 2" (servers that get time from Stratum
 1). Stratum 3 servers redistribute time from Stratum 2, and so
 forth. There are defined higher strata up to 15, but you will probably
-never see a public chimer higher than Stratum 3 or 4.
+never see a public time server higher than Stratum 3 or 4.
 
 Jitter induced by variable WAN propagation delays
 (including variations in switch latency and routing) makes it
@@ -217,7 +217,7 @@ service.
 
 LANs are a different matter. Because their propagation delays are
 lower and less variable, NTP can do about two orders of magnitude better
-in this context, easily sustaining 1ms accuracy.  The combination of
+in this context, easily sustaining 1 ms accuracy.  The combination of
 NTP and <<PTP>> can achieve LAN time service another two orders of
 magnitude better.
 
@@ -320,5 +320,8 @@ v1.2, 2015-03-15::
 
 v1.3, 2015-03-16::
       Text polishing, terminological cleanup.
+
+v1.4, 2015-07-11::
+      Text polishing, note upcoming change in FINRA, more about GPSDO precision.
 
 //end
