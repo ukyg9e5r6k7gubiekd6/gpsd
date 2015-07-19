@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
 
 Usage: leapsecond.py [-v] { [-h] | [-f filename] | [-g filename] | [-H filename]
