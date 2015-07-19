@@ -139,7 +139,7 @@ actually ship this sentence.
 
 An NMEA sentence consists of a start delimiter, followed by a
 comma-separated sequence of fields, followed by the character '\*'
-(ASCII 42), followed by a CRC32 checksum expressed as two hexadecimal
+(ASCII 42), followed by a bitwise-xor checksum expressed as two hexadecimal
 digits, followed by an end-of-line marker.
 
 The start delimiter is normally '$' (ASCII 36). Packets of AIVDM/AIVDO
@@ -1074,7 +1074,7 @@ Field Number:
 10. Goeidal separation meters
 11. Age of diferential data
 12. Differential reference station ID
-13. CRC
+13. Checksum
 
 === GRS - GPS Range Residuals ===
 
