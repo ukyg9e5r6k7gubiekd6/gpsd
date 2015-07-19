@@ -16,6 +16,12 @@ this line will do:
 
 If you get any errors, you need to read the detailed instructions that follow.
 
+If 'scons' fails, it is possible that your target system has moved to
+Python 3 as its default 'python' interpreter, but you can work around
+it by saying "python2 /usr/bin/scons" or something similar.  GPSD's
+own Python scripts assume that "#!/usr/bin/env python2" will invoke a
+Python 2 interpreter.
+
 == Supported platforms ==
 
 Native-build success should be expected on the following platforms,
