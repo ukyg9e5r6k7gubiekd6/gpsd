@@ -16,7 +16,7 @@ fi
 
 # Arrange to call a gpsfake in the source directory without fuss.
 if [ -z ${PYTHON} ]; then
-    PYTHON="python"
+    PYTHON="python2"
 fi
 # Define the directories we ask setup.py to install the
 # modules/extensions and scripts to. The way chosen here reproduces
