@@ -2,7 +2,7 @@
 :description: This document is a guide to interfacing client applications with GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Eric S. Raymond <esr@thyrsus.com>
-v1.18, Mar 2015
+v1.19, Jul 2015
 
 == Introduction ==
 
@@ -83,18 +83,6 @@ packets translate the GPS's stream of datagrams into
 device-type-independent datagrams, but it can't impose timing and
 sequencing regularities on them that the underlying device doesn't
 already obey.
-
-A note to authors of AIVDM clients: Unlike GPS data, you have the
-problem that later sentences of (say) Type 1 don't obsolete the data
-in earlier ones. This is a problem, because the library is designed
-so that read calls pull any JSON reports waiting from the daemon and
-interpret them all.
-
-To avoid losing data, you want to poll the daemon more often than once
-per two seconds (that being the minimum transmission period for the
-most frequently shipped sentences, Type 1/2/3). That way the read
-buffer will never contain both a message and a later message of the
-same type that steps on it.
 
 == What GPSD does, and what it cannot do ==
 
@@ -441,6 +429,31 @@ no unpack() method because it doesn't fit the gpsmm object's RAII model.
 
 All bindings will throw a recognizable error from the read entry
 point when the socket is closed from the daemon side.
+
+[WARNING]
+The timing of your read loop is important. When it has satellite lock,
+the daemon will be writing into its end of the socket once per
+whatever the normal reporting-cycle time of your device is - for a GPS
+normally one peer second.  *You must poll the socket more often that
+that.*
+
+If necessary, spawn a worker thread to do this, mutex-locking the
+structure where it outs the reports.  If you don't do this, data
+will back up in your socket buffers and position reports will be
+more and more delayed until the socket FIFO fills, at which point the
+daemon will conclude the client has died and drop the connection.
+
+AIVDM clients have a longer maximum allowable poll interval, but a
+problem of a different kind. you have the problem that later sentences
+of (say) Type 1 don't obsolete the data in earlier ones. This is a
+problem, because the library is designed so that read calls pull any
+JSON reports waiting from the daemon and interpret them all.
+
+To avoid losing data, you want to poll the daemon more often than once
+per two seconds (that being the minimum transmission period for the
+most frequently shipped sentences, Type 1/2/3). That way the read
+buffer will never contain both a message and a later message of the
+same type that steps on it.
 
 === Shared-memory interface ===
 
