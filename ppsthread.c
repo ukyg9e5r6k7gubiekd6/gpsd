@@ -529,13 +529,16 @@ static int get_edge_rfc2783(struct inner_context_t *inner_context,
 
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, sizeof(errbuf));
-	thread_context->log_hook(thread_context, THREAD_ERROR,
-		    "KPPS:%s kernel PPS failed %s\n",
-		    thread_context->devicename, errbuf);
 	if ( ETIMEDOUT == errno || EINTR == errno ) {
 		/* just a timeout */
+		thread_context->log_hook(thread_context, THREAD_INF,
+			    "KPPS:%s kernel PPS timeout %s\n",
+			    thread_context->devicename, errbuf);
 		return 1;
 	}
+	thread_context->log_hook(thread_context, THREAD_WARN,
+		    "KPPS:%s kernel PPS failed %s\n",
+		    thread_context->devicename, errbuf);
 	return 0;
     }
     if ( inner_context->pps_canwait ) {
