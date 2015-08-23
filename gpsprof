@@ -59,11 +59,16 @@ class plotter:
 
     def whatami(self):
         "How do we identify this plotting run?"
-        return "%s, %s, %d %dN%d, cycle %ds" % \
+        desc = "%s, %s, " % \
                (gps.misc.isotime(self.start_time),
-                self.device.get('driver', "unknown"), self.device['bps'],
-                9 - self.device['stopbits'],
-                self.device['stopbits'], self.device['cycle'])
+                self.device.get('driver', "unknown"))
+        if 'bps' in self.device:
+            desc + "%d %dN%d, cycle %ds" % \
+                 (self.device['bps'], 9 - self.device['stopbits'],
+                  self.device['stopbits'], self.device['cycle'])
+        else:
+            desc += self.device['path']
+        return desc
 
     def collect(self, verbose, logfp=None):
         "Collect data from the GPS."
