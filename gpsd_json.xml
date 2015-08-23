@@ -1434,7 +1434,7 @@ backup battery.</para>
 </row>
 <row>
 	<entry>parity</entry>
-        <entry>Yes</entry>
+        <entry>No</entry>
         <entry>string</entry>
 	<entry><para>N, O or E for no parity, odd, or even.</para></entry>
 </row>
@@ -1471,8 +1471,9 @@ backup battery.</para>
 </tgroup>
 </table>
 
-<para>The serial parameters will be omitted in a response describing a
-TCP/IP source such as an Ntrip, DGPSIP, or AIS feed.</para>
+<para>The serial parameters will (bps, parity, stopbits) be omitted in
+a response describing a TCP/IP source such as an Ntrip, DGPSIP, or AIS
+feed; on a serial device they will always be present.</para>
 
 <para>The contents of the flags field should be interpreted as follows:</para>
 
