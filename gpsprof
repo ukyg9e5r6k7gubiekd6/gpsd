@@ -63,7 +63,7 @@ class plotter:
                (gps.misc.isotime(self.start_time),
                 self.device.get('driver', "unknown"))
         if 'bps' in self.device:
-            desc + "%d %dN%d, cycle %ds" % \
+            desc += "%d %dN%d, cycle %ds" % \
                  (self.device['bps'], 9 - self.device['stopbits'],
                   self.device['stopbits'], self.device['cycle'])
         else:
