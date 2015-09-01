@@ -208,10 +208,6 @@ running "scons prefix=<installation_root>". The default value is
 "/usr/local".  The environment variable DESTDIR also works in the
 usual way.
 
-If your scons fails with the complaint "No tool named 'textfile'",
-you need to upgrade it.  This feature was introduced during the long
-interval after the 1.2.0 release; 1.2.1 and later versions will have it.
-
 If your linker run fails with missing math symbols, see the FIXME
 comment relating to implicit_links in the scons recipe; you probably
 need to build with implicit_link=no.  If this happens, please report
