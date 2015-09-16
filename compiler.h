@@ -73,12 +73,12 @@
 
 #ifdef HAVE_OSATOMIC_H
 #include <libkern/OSAtomic.h>
-#endif /* HAVE_STDATOMIC_H */
+#endif /* HAVE_OSATOMIC_H */
 
 static inline void memory_barrier(void)
 /* prevent instruction reordering across any call to this function */
 {
-#ifdef _STDATOMIC_H
+#ifdef HAVE_STDATOMIC_H
 #ifndef __COVERITY__
     atomic_thread_fence(memory_order_seq_cst);
 #endif /* __COVERITY__ */
@@ -86,7 +86,7 @@ static inline void memory_barrier(void)
     OSMemoryBarrier();
 #elif defined(__GNUC__)
     asm volatile ("" : : : "memory");
-#endif /* STD_ATOMIC_H */
+#endif /* HAVE_STD_ATOMIC_H */
 }
 
 #endif /* _GPSD_COMPILER_H_ */
