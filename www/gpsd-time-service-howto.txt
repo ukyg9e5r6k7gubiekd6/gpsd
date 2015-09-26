@@ -240,7 +240,7 @@ time-service features and PPS are enabled.
 
 If your kernel provides the RFC 2783 KPPS (kernel PPS) API, gpsd will
 use that for extra accuracy. Many Linux distributions have a package
-called "pps-tools" that will install KPPS support and the time_pps.h
+called "pps-tools" that will install KPPS support and the timepps.h
 header file.  We recommend you do that.  If your kernel is built in
 the normal modular way, this package installation will suffice.
 
