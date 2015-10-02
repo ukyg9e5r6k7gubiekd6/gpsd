@@ -560,7 +560,7 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
 	return session->gpsdata.gps_fd;
     }
 
-#ifdef NON_NMEA_ENABLE
+#ifdef NON_NMEA0183_ENABLE
     /* if it's a sensor, it must be probed */
     if ((session->servicetype == service_sensor) &&
 	(session->sourcetype != source_can)) {
@@ -590,7 +590,7 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
 		 "no probe matched...\n");
     }
 foundit:
-#endif /* NON_NMEA_ENABLE */
+#endif /* NON_NMEA0183_ENABLE */
 
     gpsd_clear(session);
     gpsd_log(&session->context->errout, LOG_INF,

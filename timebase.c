@@ -259,7 +259,7 @@ void gpsd_set_century(struct gps_device_t *session)
     }
 }
 
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
 timestamp_t gpsd_utc_resolve(struct gps_device_t *session)
 /* resolve a UTC date, checking for rollovers */
 {
@@ -321,7 +321,7 @@ void gpsd_century_update(struct gps_device_t *session, int century)
 	session->context->valid &=~ CENTURY_VALID;
     }
 }
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
 
 timestamp_t gpsd_gpstime_resolve(struct gps_device_t *session,
 			 unsigned short week, double tow)

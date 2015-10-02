@@ -19,7 +19,7 @@
 #include "gpsdclient.h"
 #include "strfuncs.h"
 
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
 extern const struct gps_type_t driver_nmea0183;
 
 static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
@@ -390,7 +390,7 @@ static void monitor_nmea_send(const char *fmt, ...)
  * display or implement device-specific commands.
  */
 
-#if defined(GARMIN_ENABLE) && defined(NMEA_ENABLE)
+#if defined(GARMIN_ENABLE) && defined(NMEA0183_ENABLE)
 extern const struct gps_type_t driver_garmin;
 
 const struct monitor_object_t garmin_mmt = {
@@ -401,7 +401,7 @@ const struct monitor_object_t garmin_mmt = {
     .min_y = 21,.min_x = 80,
     .driver = &driver_garmin,
 };
-#endif /* GARMIN_ENABLE && NMEA_ENABLE */
+#endif /* GARMIN_ENABLE && NMEA0183_ENABLE */
 
 #ifdef ASHTECH_ENABLE
 extern const struct gps_type_t driver_ashtech;
@@ -524,4 +524,4 @@ const struct monitor_object_t aivdm_mmt = {
     .driver = &driver_aivdm,
 };
 #endif /* AIVDM_ENABLE */
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */

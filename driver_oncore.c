@@ -468,10 +468,10 @@ static gps_mask_t oncore_parse_input(struct gps_device_t *session)
     if (session->lexer.type == ONCORE_PACKET) {
 	return oncore_dispatch(session, session->lexer.outbuffer,
 			     session->lexer.outbuflen);
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
     } else if (session->lexer.type == NMEA_PACKET) {
 	return nmea_parse((char *)session->lexer.outbuffer, session);
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
     } else
 	return 0;
 }

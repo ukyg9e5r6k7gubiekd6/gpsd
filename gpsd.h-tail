@@ -46,8 +46,8 @@
 #if !defined(AIVDM_ENABLE) && defined(NMEA2000_ENABLE)
 #define AIVDM_ENABLE
 #endif
-#if !defined(NMEA_ENABLE) && (defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE) || defined(FURY_ENABLE))
-#define NMEA_ENABLE
+#if !defined(NMEA0183_ENABLE) && (defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE) || defined(FURY_ENABLE))
+#define NMEA0183_ENABLE
 #endif
 #ifdef EARTHMATE_ENABLE
 #define ZODIAC_ENABLE
@@ -485,7 +485,7 @@ struct gps_device_t {
     int fixcnt;				/* count of fixes from this device */
     struct gps_fix_t newdata;		/* where drivers put their data */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
     struct {
 	unsigned short sats_used[MAXCHANNELS];
 	int part, await;		/* for tracking GSV parts */
@@ -515,7 +515,7 @@ struct gps_device_t {
 	unsigned int cycle_enders;
 	bool cycle_continue;
     } nmea;
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
     /*
      * The rest of this structure is driver-specific private storage.
      * Only put a driver's scratch storage in here if it is never

@@ -225,7 +225,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = COMMENT_BODY;
 	    break;
 	}
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
 	if (c == '$') {
 	    lexer->state = NMEA_DOLLAR;
 	    break;
@@ -234,7 +234,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = NMEA_BANG;
 	    break;
 	}
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
 #if defined(TNT_ENABLE) || defined(GARMINTXT_ENABLE) || defined(ONCORE_ENABLE)
 	if (c == '@') {
 #ifdef RTCM104V2_ENABLE
@@ -345,7 +345,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	else if (!isprint(c))
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
     case NMEA_DOLLAR:
 	if (c == 'G')
 	    lexer->state = NMEA_PUB_LEAD;
@@ -788,7 +788,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	else
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
 #ifdef SIRF_ENABLE
     case SIRF_LEADER_1:
 	if (c == 0xa2)
@@ -1118,10 +1118,10 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
     case UBX_RECOGNIZED:
 	if (c == 0xb5)
 	    lexer->state = UBX_LEADER_1;
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
 	else if (c == '$')	/* LEA-5H can and will output NMEA and UBX back to back */
 	    lexer->state = NMEA_DOLLAR;
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
 #ifdef PASSTHROUGH_ENABLE
 	else if (c == '{')
 	    return character_pushback(lexer, JSON_LEADER);
@@ -1526,7 +1526,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 	    lexer->state = GROUND_STATE;
 	    break;
 	}
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
 	else if (lexer->state == NMEA_RECOGNIZED) {
 	    /*
 	     * $PASHR packets have no checksum. Avoid the possibility
@@ -1591,7 +1591,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 	    packet_discard(lexer);
 	    break;
 	}
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
 #ifdef SIRF_ENABLE
 	else if (lexer->state == SIRF_RECOGNIZED) {
 	    unsigned char *trailer = lexer->inbufptr - 4;

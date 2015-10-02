@@ -4,7 +4,7 @@
    COMMENT_BODY,	/* pound comment for a test load */
    COMMENT_RECOGNIZED,	/* comment recognized */
 
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
    NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
    NMEA_BANG,		/* we've seen first character of an AIS message '!' */
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
@@ -37,7 +37,7 @@
    TRANSDUCER_LEAD_1,	/* Generic transducer packet leader 'Y' */
    BEIDOU_LEAD_1,	/* Beidou leader */
    QZSS_LEAD_1,		/* Quasi-Zenith Satellite System leader */
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
 
    DLE_LEADER,		/* we've seen the TSIP/EverMore leader (DLE) */
 

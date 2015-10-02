@@ -13,7 +13,7 @@
 #include "gpsd.h"
 #include "strfuncs.h"
 
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
 /**************************************************************************
  *
  * Parser helpers begin here
@@ -1587,7 +1587,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     return retval;
 }
 
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
 
 void nmea_add_checksum(char *sentence)
 /* add NMEA checksum to a possibly  *-terminated sentence */

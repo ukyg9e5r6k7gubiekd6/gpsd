@@ -385,12 +385,12 @@ static gps_mask_t evermore_parse_input(struct gps_device_t *session)
 			    session->lexer.outbuflen);
 	return st;
     }
-#ifdef NMEA_ENABLE
+#ifdef NMEA0183_ENABLE
     else if (session->lexer.type == NMEA_PACKET) {
 	st = nmea_parse((char *)session->lexer.outbuffer, session);
 	return st;
     }
-#endif /* NMEA_ENABLE */
+#endif /* NMEA0183_ENABLE */
     else
 	return 0;
 }
