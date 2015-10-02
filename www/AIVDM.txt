@@ -1121,7 +1121,7 @@ A message 6 subtype. DAC = 001 FID = 16.
 |38-39   |  2 |Spare                |         |x|Not used
 |40-49   | 10 |DAC                  |dac      |u|DAC = 001
 |50-55   |  6 |FID                  |fid      |u|FID = 16
-|55-68   | 13 |# persons on board   |persons  |u|Unsigned integer
+|55-68   | 14 |# persons on board   |persons  |u|Unsigned integer
                                                  0 = N/A (default)
                                                  8191 = >= 8191 persons.
 |69-71   |  3 |Spare                |         |x|Not used
@@ -5429,3 +5429,6 @@ sentences.
 
 Version 1.50 fixes a couple of typos in the ISO289 Berthing Data and
 Tidal Window message descriptions.
+
+Version 1.51 fixes an incorrect bit length in the IMO289 Hydrologial
+Data message.
