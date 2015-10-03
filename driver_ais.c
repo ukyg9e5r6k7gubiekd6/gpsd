@@ -26,7 +26,7 @@
  * Parse the data from the device
  */
 
-static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
+static void from_sixbit_untrimmed(unsigned char *bitvec, uint start, int count, char *to)
 /* beginning at bitvec bit start, unpack count sixbit characters */
 {
     const char sixchr[64] =
@@ -43,12 +43,31 @@ static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
 	    to[i] = newchar;
     }
     to[i] = '\0';
-    /* trim spaces on right end */
-    for (i = count - 2; i >= 0; i--)
+}
+
+static void trim_spaces_on_right_end(char* to)
+/* trim spaces on right end */
+{
+    int i;
+    for (i = strlen(to) - 1; i >= 0; i--)
+    {
 	if (to[i] == ' ' || to[i] == '@')
+	{
 	    to[i] = '\0';
+	}
 	else
+	{
 	    break;
+	}
+    }
+}
+
+static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
+/* beginning at bitvec bit start, unpack count sixbit characters and remove trailing
+ * spaces */
+{
+       from_sixbit_untrimmed(bitvec, start, count, to);
+       trim_spaces_on_right_end(to);
 }
 
 bool ais_binary_decode(const struct gpsd_errout_t *errout,
@@ -870,7 +889,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
     case 21:	/* Aid-to-Navigation Report */
 	RANGE_CHECK(272, 360);
 	ais->type21.aid_type = UBITS(38, 5);
-	from_sixbit((unsigned char *)bits,
+	from_sixbit_untrimmed((unsigned char *)bits,
 		    43, 20, ais->type21.name);
 	ais->type21.accuracy     = UBITS(163, 1);
 	ais->type21.lon          = SBITS(164, 28);
@@ -889,6 +908,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	//ais->type21.spare      = UBITS(271, 1);
 	if (strlen(ais->type21.name) == 20 && bitlen > 272)
 	    ENDCHARS(272, ais->type21.name+20);
+        trim_spaces_on_right_end(ais->type21.name);
 	break;
     case 22:	/* Channel Management */
 	PERMISSIVE_LENGTH_CHECK(168)

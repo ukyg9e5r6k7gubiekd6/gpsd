@@ -1,0 +1,32 @@
+!AIVDM,2,1,7,B,53aDpaT000010;CKKB0h4Q8TpLDr222222222216<P:656rd07Tai0CKk5hD,0*74
+!AIVDM,2,2,7,B,Q1C`8888880,2*63
+{"class":"AIS","type":5,"repeat":0,"mmsi":244660390,"scaled":false,"imo":0,"ais_version":1,"callsign":"PB4664","shipname":"LAHRINGEN","shiptype":70,"shiptype_text":"Cargo - all ships of this type","to_bow":100,"to_stern":10,"to_port":6,"to_starboard":5,"epfd":1,"epfd_text":"GPS","eta":"11-21T12:00Z","draught":30,"destination":"R'DAM/LWARDEN","dte":0}
+!AIVDM,2,1,2,B,53a=JT41haoI0GKSG6058=@T>1=Dq8U<F222220V1pR847<:0<hCDm1DQ0CH8888,0*0B
+!AIVDM,2,2,2,B,8888882,2*27
+{"class":"AIS","type":5,"repeat":0,"mmsi":244538000,"scaled":false,"imo":7382902,"ais_version":1,"callsign":"PE6851","shipname":"ARCTIC SUNRISE","shiptype":38,"shiptype_text":"Reserved","to_bow":15,"to_stern":34,"to_port":8,"to_starboard":4,"epfd":1,"epfd_text":"GPS","eta":"12-24T10:00Z","draught":51,"destination":"AMSTERDAM","dte":0}
+!AIVDM,2,1,2,B,5UNJ`i000001L@K?;O1LThh4lEA@F0<P4m0Ttr0O10C,0*5D
+!AIVDM,2,2,2,B,2640Ht043lU30CQ8888888888880,2*06
+{"class":"AIS","type":5,"repeat":2,"mmsi":367438020,"scaled":false,"imo":0,"ais_version":0,"callsign":"WDF3270","shipname":"WILLAMETTE CHAMPION","shiptype":31,"shiptype_text":"Towing","to_bow":8,"to_stern":19,"to_port":2,"to_starboard":6,"epfd":1,"epfd_text":"GPS","eta":"00-00T24:60Z","draught":0,"destination":"PORTLAND","dte":0}
+!AIVDM,2,1,9,A,53<@V;@220A8E8qF2204hU`F2222222222222216000004I1093SmSlSlljF,0*68
+!AIVDM,2,2,9,A,DjvlUDlj@H0,2*06
+{"class":"AIS","type":5,"repeat":0,"mmsi":214181421,"scaled":false,"imo":8519954,"ais_version":0,"callsign":"ERNU","shipname":"ALIZE","shiptype":70,"shiptype_text":"Cargo - all ships of this type","to_bow":0,"to_stern":0,"to_port":0,"to_starboard":0,"epfd":1,"epfd_text":"GPS","eta":"01-18T01:00Z","draught":36,"destination":"NOVOROSSIYSK;RUSSIA","dte":0}
+!AIVDM,2,1,5,B,ENk`sBG37a:@84Ra1Rh4W62b@61=8Ab37o5n,0*1A
+!AIVDM,2,2,5,B,000003vP08=P,0*50
+{"class":"AIS","type":21,"repeat":1,"mmsi":993672009,"scaled":false,"aid_type":14,"aid_type_text":"Beacon, Starboard hand","name":"FORT PIERCE INLET LB 6","accuracy":false,"lon":-48162173,"lat":16485296,"to_bow":0,"to_stern":0,"to_port":0,"to_starboard":0,"epfd":7,"epfd_text":"Surveyed","second":61,"regional":0,"off_position":false,"raim":false,"virtual_aid":false}
+!AIVDM,2,1,0,1,53aI9sl000010WCC;@1LTh`t000000000000001S0h;41vqa00PCDm1DQ0CO,0*55
+!AIVDM,2,2,0,1,`8800000000,2*04
+{"class":"AIS","type":5,"repeat":0,"mmsi":244730351,"scaled":false,"imo":0,"ais_version":1,"callsign":"PI4424","shipname":"WILJO","shiptype":99,"shiptype_text":"Other Type - no additional information","to_bow":6,"to_stern":11,"to_port":4,"to_starboard":1,"epfd":15,"epfd_text":"INVALID EPFD","eta":"11-19T09:00Z","draught":2,"destination":"AMSTERDAM>","dte":0}
+!AIVDM,1,1,,A,ENk`sG6T4V69Q93T@1bb@1h1T@6=3BiM7uUb`00003vP00`<Mh0,2*4A
+{"class":"AIS","type":21,"repeat":1,"mmsi":993672028,"scaled":false,"aid_type":13,"aid_type_text":"Beacon, Port hand","name":"HILLSBRGH CUT C CH LB 17","accuracy":false,"lon":-49468323,"lat":16698197,"to_bow":0,"to_stern":0,"to_port":0,"to_starboard":0,"epfd":7,"epfd_text":"Surveyed","second":61,"regional":0,"off_position":false,"raim":false,"virtual_aid":false}
+!AIVDM,2,1,5,B,53aC2TT000010GK;?F0@ThTLDq@T62220000001?78825w?os0K`88888888,0*4A
+!AIVDM,2,2,5,B,88888888800,2*2A
+{"class":"AIS","type":5,"repeat":0,"mmsi":244630162,"scaled":false,"imo":0,"ais_version":1,"callsign":"PE6235","shipname":"DILIGENTIA","shiptype":79,"shiptype_text":"Cargo - No additional information","to_bow":57,"to_stern":8,"to_port":2,"to_starboard":5,"epfd":15,"epfd_text":"INVALID EPFD","eta":"12-31T23:59Z","draught":1,"destination":".","dte":0}
+!AIVDM,1,1,,B,ENk`sBG37a:@84Ra1Rh4W62b@61=8Ab37o5n000003vP08=P,0*6C
+{"class":"AIS","type":21,"repeat":1,"mmsi":993672009,"scaled":false,"aid_type":14,"aid_type_text":"Beacon, Starboard hand","name":"FORT PIERCE INLET LB 6","accuracy":false,"lon":-48162173,"lat":16485296,"to_bow":0,"to_stern":0,"to_port":0,"to_starboard":0,"epfd":7,"epfd_text":"Surveyed","second":61,"regional":0,"off_position":false,"raim":false,"virtual_aid":false}
+!AIVDM,1,1,,B,C6:W26h00:9RAr4THs4cTRv0jbhBL@bOSQWii0000000S4862S0P,0*71
+{"class":"AIS","type":19,"repeat":0,"mmsi":413778459,"scaled":false,"reserved":0,"speed":0,"accuracy":true,"lon":72108276,"lat":19162033,"course":697,"heading":69,"second":60,"regional":0,"shipname":"YUXINHUO10388","shiptype":70,"shiptype_text":"Cargo - all ships of this type","to_bow":66,"to_stern":12,"to_port":5,"to_starboard":6,"epfd":0,"epfd_text":"Undefined","raim":false,"dte":1,"assigned":false}
+!AIVDM,1,1,,B,C6:kuiP0021mUQSCHwAvKwk2>bB>2L?0>2L>`2C1iik0S38351P7,0*06
+{"class":"AIS","type":19,"repeat":0,"mmsi":413990342,"scaled":false,"reserved":0,"speed":0,"accuracy":false,"lon":68072131,"lat":13853684,"course":2022,"heading":511,"second":38,"regional":1,"shipname":"GUIGANG GANGTAI 889","shiptype":70,"shiptype_text":"Cargo - all ships of this type","to_bow":50,"to_stern":6,"to_port":10,"to_starboard":3,"epfd":0,"epfd_text":"Undefined","raim":false,"dte":0,"assigned":false}
+!AIVDM,1,1,,A,H7lca<@P5<qE9w3F22222222220,2*2F
+!AIVDM,1,1,,A,H7lca<DlPPPPPPPI4koloP1h>550,0*0E
+{"class":"AIS","type":24,"repeat":0,"mmsi":525003057,"scaled":false,"shipname":"HASNUR_05","shiptype":52,"shiptype_text":"Tug","vendorid":"","model":8,"serial":133152,"callsign":"YD3747","to_bow":14,"to_stern":14,"to_port":5,"to_starboard":5}
