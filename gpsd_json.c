@@ -1902,7 +1902,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 16:	/* IMO236 - Number of persons on board */
 		str_appendf(buf, buflen,
-			       "\"persons\":%u}\t\n", ais->type6.dac1fid16.persons);
+			       "\"persons\":%u}\r\n", ais->type6.dac1fid16.persons);
 		break;
 	    case 18:	/* IMO289 - Clearance time to enter port */
 		str_appendf(buf, buflen,
@@ -2296,7 +2296,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 16:	/* IMO289 - Number of persons on board */
 		str_appendf(buf, buflen,
-			       "\"persons\":%u}\t\n", ais->type6.dac1fid16.persons);
+			       "\"persons\":%u}\r\n", ais->type6.dac1fid16.persons);
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 		(void)strlcat(buf, "\"targets\":[", buflen);
