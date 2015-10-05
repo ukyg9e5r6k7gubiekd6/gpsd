@@ -87,6 +87,11 @@ void shm_update(struct gps_context_t *context, struct gps_data_t *gpsdata)
 	 * Reader copies what it sees in normal order; that way, if we
 	 * start to write the segment during the read, the second bookend will
 	 * get clobbered first and the data can be detected as bad.
+	 *
+	 * Of course many architectures, like Intel, make no guarantees
+	 * about the actual memory read or write order into RAM, so this
+         * is partly wishful thinking.  Thus the need for the memory_barriers()
+         * to enforce the required order.
 	 */
 	shared->bookend2 = tick;
 	memory_barrier();
