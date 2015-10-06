@@ -93,8 +93,8 @@ void json_enable_debug(int level, FILE * fp)
 static void json_trace(int errlevel, const char *fmt, ...)
 /* assemble command in printf(3) style */
 {
-    if (errlevel <= debuglevel) {
-	char buf[BUFSIZ];
+    if (errlevel <= debuglevel && NULL != debugfp) {
+	char buf[BUFSIZ] = {0};
 	va_list ap;
 
 	(void)strlcpy(buf, "json: ", sizeof(buf));
