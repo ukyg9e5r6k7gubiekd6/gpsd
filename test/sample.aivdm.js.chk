@@ -24,7 +24,7 @@
 {"class":"AIS","device":"stdin","type":10,"repeat":0,"mmsi":366814480,"scaled":true,"dest_mmsi":366832740}
 {"class":"AIS","device":"stdin","type":10,"repeat":0,"mmsi":440882000,"scaled":true,"dest_mmsi":366972000}
 {"class":"AIS","device":"stdin","type":11,"repeat":0,"mmsi":304137000,"scaled":true,"timestamp":"2009-05-22T02:22:40Z","accuracy":true,"lon":-94.4077,"lat":28.4091,"epfd":1,"epfd_text":"GPS","raim":false,"radio":0}
-{"class":"AIS","device":"stdin","type":12,"repeat":0,"mmsi":2275200,"scaled":true,"seqno":0,"dest_mmsi":215724000,"retransmit":false,"text":"PLEASE REPORT TO JOBOURG TRAFFIC CHANNEL 13 "}
+{"class":"AIS","device":"stdin","type":12,"repeat":0,"mmsi":2275200,"scaled":true,"seqno":0,"dest_mmsi":215724000,"retransmit":false,"text":"PLEASE REPORT TO JOBOURG TRAFFIC CHANNEL 13"}
 {"class":"AIS","device":"stdin","type":12,"repeat":0,"mmsi":351853000,"scaled":true,"seqno":0,"dest_mmsi":316123456,"retransmit":false,"text":"GOOD"}
 {"class":"AIS","device":"stdin","type":12,"repeat":0,"mmsi":351853000,"scaled":true,"seqno":1,"dest_mmsi":351809000,"retransmit":false,"text":"THANX"}
 {"class":"AIS","device":"stdin","type":12,"repeat":0,"mmsi":271002099,"scaled":true,"seqno":0,"dest_mmsi":271002111,"retransmit":true,"text":"MSG FROM 271002099"}
