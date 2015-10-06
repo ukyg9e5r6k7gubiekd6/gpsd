@@ -1517,7 +1517,7 @@ else:
     rtcm_regress = Utility('rtcm-regress', [gpsdecode], [
         '@echo "Testing RTCM decoding..."',
         '@for f in $SRCDIR/test/*.rtcm2; do '
-            'echo "Testing $${f}..."; '
+            'echo "\tTesting $${f}..."; '
             'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
             '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.chk $${TMPFILE}; '
@@ -1545,7 +1545,7 @@ else:
     aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
         '@echo "Testing AIVDM decoding w/ CSV format..."',
         '@for f in $SRCDIR/test/*.aivdm; do '
-            'echo "Testing $${f}..."; '
+            'echo "\tTesting $${f}..."; '
             'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
             '$SRCDIR/gpsdecode -u -c <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.chk $${TMPFILE} || echo "Test FAILED!"; '
@@ -1553,7 +1553,7 @@ else:
         'done;',
         '@echo "Testing AIVDM decoding w/ JSON unscaled format..."',
         '@for f in $SRCDIR/test/*.aivdm; do '
-            'echo "  Testing $${f}..."; '
+            'echo "\tTesting $${f}..."; '
             'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
             '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.ju.chk $${TMPFILE} || echo "Test FAILED!"; '
@@ -1561,7 +1561,7 @@ else:
         'done;',
         '@echo "Testing AIVDM decoding w/ JSON scaled format..."',
         '@for f in $SRCDIR/test/*.aivdm; do '
-            'echo "  Testing $${f}..."; '
+            'echo "\tTesting $${f}..."; '
             'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
             '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.js.chk $${TMPFILE} || echo "Test FAILED!"; '
