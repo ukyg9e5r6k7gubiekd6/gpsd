@@ -483,6 +483,25 @@
 #       RAIM flag                : 0
 #       Radio status             : 24597
 #
+# Type 9:
+# From AISHub
+!AIVDM,1,1,,B,91b55wi;hbOS@OdQAC062Ch2089h,0*30
+#       Message Type             : 9
+#       Repeat Indicator         : 0
+#       MMSI                     : 111232511
+#       Altitude                 : 303
+#       SOG                      : 42
+#       Position Accuracy        : 0
+#       Longitude                : 0xFC683F6 (-6.27884)
+#       Latitude                 : 0x2145300 ( 58.144 )
+#       Course Over Ground       : 0x0609 (154.5)
+#       Time Stamp               : 15
+#       Regional reserved        : 0
+#       DTE                      : 1
+#       Assigned                 : 0
+#       RAIM flag                : 0
+#       Radio status             : 33392
+#
 # Type 10:
 # From Kurt Schwehr. Two destination MMSIs. Checked with the noaadata tools.
 !AIVDM,1,1,,B,:5MlU41GMK6@,0*6C

@@ -2804,7 +2804,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		(void)strlcpy(speedlegend, "\"fast\"", sizeof(speedlegend));
 	    else
 		(void)snprintf(speedlegend, sizeof(speedlegend),
-			       "%u", ais->type1.speed);
+			       "%u", ais->type9.speed);
 
 	    str_appendf(buf, buflen,
 			   "\"alt\":%s,\"speed\":%s,\"accuracy\":%s,"
