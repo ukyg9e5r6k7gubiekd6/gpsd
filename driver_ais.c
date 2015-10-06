@@ -896,7 +896,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type20.increment4	= UBITS(149, 11);
 	break;
     case 21:	/* Aid-to-Navigation Report */
-	RANGE_CHECK(272, 360);
+	RANGE_CHECK(272, 368);
 	ais->type21.aid_type = UBITS(38, 5);
 	from_sixbit_untrimmed((unsigned char *)bits,
 		    43, 20, ais->type21.name);
