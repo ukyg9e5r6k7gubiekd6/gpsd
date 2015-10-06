@@ -1065,3 +1065,11 @@ AIVDM,2,2,1,B,00000000000,2*26
 !AIVDM,3,2,7,A,?A;J6b7AwuiqIGLeNiKCPDR7HQR<u;TTFufegr>kCSF,0*41
 !AIVDM,3,3,7,A,Uq:1Kk`e8,4*27
 # {"class":"AIS","type":8,"repeat":0,"mmsi":366999607,"scaled":false,"dac":366,"fid":57,"data":"510:7ffdef068fbded3c0a1943dfb997b4a10fadec21e6e0a6608f0f44b686a8747ff71e595dcb5ec5b4e05221d886233d2e4916f6eb6fe8ecd38d69792816f3a2d0"}
+# sample of type 8 fid 16 where persons shouldn't be parsed
+!AIVDM,1,1,,A,802At?00D000qFap02:lA0b@?3fw0001<:iFP2:rf0cCGp0w00,4*5E
+#{"class":"AIS","type":8,"repeat":0,"mmsi":2391100,"scaled":false,"dac":1,"fid":16,"data":"240:0000e56a780022b4440a903c3bbf00000130ac568022bab80ad35f803f00"}
+# I do also have some examples of the type 8 DAC 1 FID 16 messages that should not be converted. I have no examples of the ones that should, but from the documentation, it seems not sure that they actually exist.
+!AIVDM,3,1,0,A,802UMp@0D002G`lCH2FuR@mE8;;w2d00001h82F0@hm;gh0w00010Wk3<2FG,0*00
+!AIVDM,3,2,0,A,ePm;5@0w0000iLBaP2F4khlwAH0w0000u7fUP2G=u0m3T@0w00010W:s02F>,0*72
+!AIVDM,3,3,0,A,Ghm4utWw2P,4*27
+# 8|0|002711009|1|16|720:00025e8d136025bd890d5520b2ff0ac000000070202580430d4bbf003f000001027cc3302597b60d4b15003f000000c5c4a9802584cf0d3f45803f000000f47ba58025cdf40d4391003f0000010272bb00258e5f0d44f7c9ff0a

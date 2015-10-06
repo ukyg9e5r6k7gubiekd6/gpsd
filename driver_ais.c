@@ -526,10 +526,15 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		break;
 	    case 16:	    /* Number of Persons On Board */
 		if (ais->type8.bitcount == 136)
-		    ais->type8.dac1fid16.persons = UBITS(88, 13);/* 289 */
-		else
-		    ais->type8.dac1fid16.persons = UBITS(55, 13);/* 236 */
-		ais->type8.structured = true;
+		{
+			ais->type8.dac1fid16.persons = UBITS(88, 13);/* 289 */
+			ais->type8.structured = true;
+		}
+		else if (ais->type8.bitcount == 72)
+		{
+			ais->type8.dac1fid16.persons = UBITS(55, 13);/* 236 */
+			ais->type8.structured = true;
+		}
 		break;
 	    case 17:        /* IMO289 - VTS-generated/synthetic targets */
 #define ARRAY_BASE 56

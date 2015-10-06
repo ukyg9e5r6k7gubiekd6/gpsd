@@ -316,7 +316,9 @@ int json_ais_read(const char *buf,
 	    }
 	    else if (strstr(buf, "\"fid\":16,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid16, endptr);
-		structured = true;
+		if (status == 0) {
+			structured = true;
+		}
 	    }
 	    else if (strstr(buf, "\"fid\":17,") != NULL) {
 		status = json_read_object(buf, json_ais8_fid17, endptr);
