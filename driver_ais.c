@@ -240,7 +240,6 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		ais->type6.structured = true;
 		break;
 	    }
-	    break;
 	}
 	/* UK and Republic Of Ireland */
 	else if (ais->type6.dac == 235 || ais->type6.dac == 250) {
@@ -260,7 +259,6 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 		ais->type6.structured = true;
 		break;
 	    }
-	    break;
 	}
 	/* International */
 	else if (ais->type6.dac == 1)

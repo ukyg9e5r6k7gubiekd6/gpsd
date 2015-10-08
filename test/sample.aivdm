@@ -1056,3 +1056,6 @@ AIVDM,2,2,1,B,00000000000,2*26
 !AIVDM,2,1,7,B,802`m000BkGTp0b<j59?000000000000000O,0*14
 !AIVDM,2,2,7,B,p0000000000<0000000@000,2*1C
 #{"class":"AIS","device":"stdin","type":8,"repeat":0,"mmsi":2766080,"scaled":true,"dac":1,"fid":11,"lat":58.867,"lon":23.047,"timestamp":"20T18:30Z","wspeed":0,"wgust":0,"wdir":0,"wgustdir":0,"humidity":0,"airtemp":-60.0,"dewpoint":-20.0,"pressure":800,"pressuretend":"steady","visibility":0.0,"waterlevel":-10.0,"leveltrend":"steady","cspeed":25.5,"cdir":0,"cspeed2":0.0,"cdir2":0,"cdepth2":0,"cspeed3":0.0,"cdir3":0,"cdepth3":0,"waveheight":0.0,"waveperiod":3,"wavedir":0,"swellheight":0.0,"swellperiod":0,"swelldir":0,"seastate":0,"watertemp":429496729.6,"preciptype":0,"preciptype_text":"reserved","salinity":0.0,"ice":0,"ice_text":"no"}
+# type 6 with unhandled type
+!AIVDM,1,1,,A,601uEPprEH2@<P<j00,4*32
+#{"class":"AIS","device":"stdin","type":6,"repeat":0,"mmsi":2053507,"scaled":true,"seqno":2,"dest_mmsi":244670500,"retransmit":false,"dac":200,"fid":3,"data":"16:3200"}
