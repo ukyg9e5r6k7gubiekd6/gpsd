@@ -736,10 +736,16 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	    }
 	}
 	/* land here if we failed to match a known DAC/FID */
-	if (!ais->type8.structured)
-	    (void)memcpy(ais->type8.bitdata,
-			 (char *)bits + (56 / CHAR_BIT),
-			 BITS_TO_BYTES(ais->type8.bitcount));
+	if (!ais->type8.structured) {
+		size_t number_of_bytes = BITS_TO_BYTES(ais->type8.bitcount);
+		(void)memcpy(ais->type8.bitdata,
+				(char *)bits + (56 / CHAR_BIT),
+				number_of_bytes);
+		size_t valid_bits_in_last_byte = ais->type8.bitcount % CHAR_BIT;
+		if(valid_bits_in_last_byte>0)
+			ais->type8.bitdata[number_of_bytes-1] &= (0xFF
+					<< (8-valid_bits_in_last_byte));
+	}
 	break;
     case 9: /* Standard SAR Aircraft Position Report */
 	PERMISSIVE_LENGTH_CHECK(168);

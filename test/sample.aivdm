@@ -1059,3 +1059,9 @@ AIVDM,2,2,1,B,00000000000,2*26
 # type 6 with unhandled type
 !AIVDM,1,1,,A,601uEPprEH2@<P<j00,4*32
 #{"class":"AIS","device":"stdin","type":6,"repeat":0,"mmsi":2053507,"scaled":true,"seqno":2,"dest_mmsi":244670500,"retransmit":false,"dac":200,"fid":3,"data":"16:3200"}
+#
+# Handle bad padding at the end of type 8 with non byte aligned data blob
+!AIVDM,3,1,7,A,85Mwp=iKfGwushJ?gNlt2QU3osVGe:4?cNhQqf2VH8t,0*08
+!AIVDM,3,2,7,A,?A;J6b7AwuiqIGLeNiKCPDR7HQR<u;TTFufegr>kCSF,0*41
+!AIVDM,3,3,7,A,Uq:1Kk`e8,4*27
+# {"class":"AIS","type":8,"repeat":0,"mmsi":366999607,"scaled":false,"dac":366,"fid":57,"data":"510:7ffdef068fbded3c0a1943dfb997b4a10fadec21e6e0a6608f0f44b686a8747ff71e595dcb5ec5b4e05221d886233d2e4916f6eb6fe8ecd38d69792816f3a2d0"}
