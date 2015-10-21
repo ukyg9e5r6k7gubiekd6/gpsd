@@ -29,7 +29,7 @@ gives NTP as an example of qualifying synchronization technology
 <<PCI3>>.
 
 The Financial Industry Regulatory Authority (FINRA) currently requires
-that clocks used for business must be syncronized to within one second
+that clocks used for business must be synchronized to within one second
 of NIST time.  The synchronization must occur at least once a day and
 before the start of business.  A pending rule change <<FINRA_14-47>>
 proposes to tighten that to just 50 ms.
@@ -73,7 +73,8 @@ master civil time standard.  Propagation delay to U.S. receivers
 varies but is constant by location and no more than 200 ms; being
 fixed, this can be easily compensated out. The jitter added to NIST
 time by the WWVB transmission system is about 6 ns <<WWVB>>, for a
-total jitter relative to UTC of about 26 ns.
+total jitter relative to UTC of about 26 ns.  Signal-processing jitter
+in the receiver may degrade this somewhat.
 
 National time authorities may also offer a digital time reference via
 landline phone; the U.S.'s has two, supported by NIST and the U.S.
@@ -125,8 +126,8 @@ of a GPS receiver.  Worst-case accuracy depends on the accuracy or the
 
 The GPS system standard <<IS-GPS-200G>> Section 3.3.4 specifies that
 GPS Sat clock (MSC) from each satellite be within 90 ns of USNO time to
-a certainty of one sigma.  Further adding in GPS satellelite postiion
-uncertainty widens the time uncertain as broadcast from the GPS Sat to
+a certainty of one sigma. Adding in GPS satellelite position
+uncertainty widens the time uncertainty as broadcast from the GPS Sat to
 97 ns at one sigma.  Any GPS propagation and reception errors will add
 to that uncertainly.  Thus one needs to assume a GPSDO can not relate to
 USNO time to better than about 200 to 120 ns.
@@ -192,7 +193,7 @@ never see a public time server higher than Stratum 3 or 4.
 Jitter induced by variable WAN propagation delays
 (including variations in switch latency and routing) makes it
 impractical to try to improve the accuracy of NTP time to much better
-than the "a few tens of milliseconds" <<RFC-5905>>.
+than the "a few tens of milliseconds" of <<RFC-5905>>.
 
 == Cost-effective clocks ==
 
