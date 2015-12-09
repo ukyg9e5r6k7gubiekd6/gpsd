@@ -2,7 +2,7 @@
 :description: A primer on precision time sources and services.
 :keywords: time, UTC, atomic clock, GPS, NTP
 Eric S. Raymond <esr@thyrsus.com>
-v1.4, 2015-07-11
+v1.5, 2015-12-08
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -70,9 +70,9 @@ National time standards are also propagated through time radios. In
 the U.S., digital time signal is provided by WWVB in Colorado, driven
 directly by the NIST (National Institute of Standards and Technology)
 master civil time standard.  Propagation delay to U.S. receivers
-varies but is constant by location and no more than 200 ms; being
+varies but is constant by location and no more than 20 ms; being
 fixed, this can be easily compensated out. The jitter added to NIST
-time by the WWVB transmission system is about 6 ns <<WWVB>>, for a
+time by the WWVB transmission system is about 6 ns <<WWVBPRECISION>>, for a
 total jitter relative to UTC of about 26 ns.  Signal-processing jitter
 in the receiver may degrade this somewhat.
 
@@ -233,14 +233,14 @@ weak-signal performance in the dramatic way GPSes and GPS clocks
 have; they remain finicky and nearly as vulnerable to siting and
 skyview problems as the GPSes of decades ago.
 
-Furthermore, the U.S. radio-clock industry was impacted when WWVB
-changed its modulation scheme in 2013.  This didn't affect
-consumer-grade "atomic" clocks, which resynchronize once a day
+Furthermore, the U.S. radio-clock industry was impacted when <<WWVB>>
+changed its modulation scheme at 2012-10-29T15:00:00Z.  This didn't
+affect consumer-grade "atomic" clocks, which resynchronize once a day
 and don't use the fine details of the signal, but it obsolesced all
 the high-end equipment that conditioned on shorter time scales. At
 least one major timing-systems vendor (Spectracom) bailed out of the
-time-radio market entirely, and it is not clear there are any
-high-end vendors at all left in the U.S.
+time-radio market entirely, and it is not clear there are any high-end
+vendors at all left in the U.S.
 
 == Summary ==
 
@@ -283,7 +283,7 @@ http://www.finra.org/sites/default/files/notice_doc_file_ref/Notice_Regulatory_1
 
 - [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
-- [[[WWVB]]] http://tf.nist.gov/timefreq/pubs/bulletin/pdf/1999OCT_TF_BULLETIN.pdf[NIST
+- [[[WWVBPRECION]]] http://tf.nist.gov/timefreq/pubs/bulletin/pdf/1999OCT_TF_BULLETIN.pdf[NIST
 Time and Frequency Bulletin NISTIR 5082-10]
 
 - [[[BIPM-T]]] ftp://ftp2.bipm.org/pub/tai/publication/cirt/[See latest Circular T from BIPM]
@@ -307,6 +307,8 @@ Clock via Modem]
 
 - [[[GPSD-HOWTO]]] link:gpsd-time-service-howto.html[GPSD Time Service HOWTO]
 
+- [[WWVB]] http://www.nist.gov/pml/div688/grp40/wwvb.cfm[NIST Radio Station WWVB]
+
 == History ==
 
 v1.0, 2015-03-10::
@@ -324,5 +326,8 @@ v1.3, 2015-03-16::
 
 v1.4, 2015-07-11::
       Text polishing, note upcoming change in FINRA, more about GPSDO precision.
+
+v1.5, 2015-12-10::
+      Fix typo in WWVB delay figure and date of modulation change.
 
 //end
