@@ -546,7 +546,7 @@ int gpsd_open(struct gps_device_t *session)
 int gpsd_activate(struct gps_device_t *session, const int mode)
 /* acquire a connection to the GPS device */
 {
-    if (session->mode == O_OPTIMIZE)
+    if (mode == O_OPTIMIZE)
 	gpsd_run_device_hook(&session->context->errout,
 			     session->gpsdata.dev.path, "ACTIVATE");
     session->gpsdata.gps_fd = gpsd_open(session);
