@@ -250,10 +250,10 @@ adjustable) making position unreliable due to poor geometry and more
 variable signal lag induced by lengthened atmosphere transit.
 
 Mode is associated with the GSA sentence associated with the last fix.
-It reports whether the fix was no good, sufficirnt for 2D, or
+It reports whether the fix was no good, sufficient for 2D, or
 sufficient for 3D (values 1, 2, and 3).
 
-Status will be 0 ehen the sample from from which the reporting
+Status will be 0 when the sample from from which the reporting
 sentence was generated does not have a valid fix, 1 when it has
 a valid (normal-precision) fix, and 2 when the fig is DGPS corrected
 (reducing the base error).
