@@ -2,7 +2,7 @@
 :description: A programmer's guide to NMEA0183, the GPS protocol reporting standard
 :keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v2.19, Apr 2015
+v2.20, Jan 2016
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -459,10 +459,15 @@ urban canyons.
 
 BeiDou-1 consists of 4 geostationary satellites operated by China,
 operational since 2004.  Coverage area is the Chinese mainland.
-BeiDou-2 (also known as COMPASS) is a system of 35 satellites,
-including 5 geostationary for compatability with BeiDou-1.  It is
-expected to be fully operational by 2019.  Coverage area is
-expected to be worldwide.
+gpsd does not support this, as this requires special hardware,
+and prior arrangements with the operator, who calculates and
+returns the position fix.
+
+BeiDou-2 (earlier known as COMPASS) is a system of 35 satellites,
+including 5 geostationary for compatability with BeiDou-1.  
+As of late 2015, coverage is complete over most of Asia and the
+West Pacific.  It is expected to be fully operational by 2020, by
+when coverage area is expected to be worldwide.
 
 == Obsolete sentences ==
 
