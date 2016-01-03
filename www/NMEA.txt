@@ -137,10 +137,14 @@ actually ship this sentence.
 
 == NMEA Encoding Conventions ==
 
+Data is transmitted in serial async, 1 start-bit, 8 data-bits,
+1 stop-bit, no parity.  Data-bits are in least-significant-bit
+order.  The standard specifies 4800 as the speed, but this is no
+longer common. The most-signifacant-bit is always zero.
+
 An NMEA sentence consists of a start delimiter, followed by a
-comma-separated sequence of fields, followed by the character '\*'
-(ASCII 42), followed by a bitwise-xor checksum expressed as two hexadecimal
-digits, followed by an end-of-line marker.
+comma-separated sequence of fields, followed by the character '*'
+(ASCII 42), the checksum and an end-of-line marker.
 
 The start delimiter is normally '$' (ASCII 36). Packets of AIVDM/AIVDO
 data, which are otherwise formatted like NMEA, use '!'.  Up to 4.00
@@ -161,9 +165,19 @@ exactly 21 seconds.
 Eg. 16708.033 is 167 degrees and 8.033 minutes. ".033" of a minute is
 about 2 seconds.
 
-In NMEA 4.00 (and possibly some earlier versions), the character "^"
-is reserved as an introducer for two-character hex escapes using 0-9
-and A-F, expressing an ISO 8859-1 (Latin-1) character <<ANON>>.
+In NMEA 3.01 (and possibly some earlier versions), the character "^"
+(HEX 5E) is reserved as an introducer for two-character hex escapes
+using 0-9 and A-F, expressing an ISO 8859-1 (Latin-1) character <<ANON>>.
+
+The Checksum is mandatory, and the last field in a sentance.  It is
+the 8-bit XOR of all characters in the sentance, exclusing the "$", "I",
+or "*" characters; but including all "," and "^".  It is encoded as
+two hexadecimal characters (0-9, A-F), the most-significant-nibble
+being sent first.
+
+Sentences are terminated by a <CR><LF> sequence.
+
+Maximum sentence length, including the $ and <CR><LF> is 82 bytes.
 
 According to <<UNMEA>>, the NMEA standard requires that a field (such as
 altitude, latitude, or longitude) must be left empty when the GPS has
