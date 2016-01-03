@@ -252,7 +252,7 @@ software must cope.
 
 NMEA sentences do not identify the individual device that issued
 them; the format was originally designed for shipboard multidrop
-networks on which it's possible only to broadcast to all devices,. not
+networks on which it's possible only to broadcast to all devices, not
 address a specific one.
 
 NMEA sentences do, however, include a "talker ID" a two-character
@@ -450,7 +450,7 @@ has a GN talker ID, expect the skyviews to be GLONASS-only and
 in the range 1-32; you must add 64 to get a globally-unique
 NMEA ID.  If the sentence has a GL talker ID, the device emits
 a multi-constellation skyview with GLONASS IDs aleady in
-the 65-96 range
+the 65-96 range.
 
 QZSS is a  geosynchronous (*not geostationary*) system of three
 (possibly four) satellites in highly eliptical, inclined,
@@ -464,7 +464,7 @@ and prior arrangements with the operator, who calculates and
 returns the position fix.
 
 BeiDou-2 (earlier known as COMPASS) is a system of 35 satellites,
-including 5 geostationary for compatability with BeiDou-1.  
+including 5 geostationary for compatability with BeiDou-1.
 As of late 2015, coverage is complete over most of Asia and the
 West Pacific.  It is expected to be fully operational by 2020, by
 when coverage area is expected to be worldwide.
