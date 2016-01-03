@@ -1086,7 +1086,7 @@ Field Number:
 3. N or S (North or South)
 4. Longitude
 5. E or W (East or West)
-6. Mode indicator
+6. Mode indicator (non-null)
 7. Total number of satelites in use,00-99
 8. HDROP
 9. Antenna altitude, meters, re:mean-sea-level(geoid.
@@ -1094,6 +1094,20 @@ Field Number:
 11. Age of diferential data
 12. Differential reference station ID
 13. Checksum
+
+The Mode indicator is two or more characters, with the first and second 
+defined for GPS and GLONASS.  Further characters may be defined.  For
+each system, the character can have a value (table may be incomplete):
+
+* N = Constellation not in use, or no valid fix
+* A = Autonomous (non-differential)
+* D = Differential mode
+* P = Precise (no degradation, like Selective Availability)
+* R = Real Time Kinematic
+* F = Float RTK
+* E = Estimated (dead reckoning) Mode
+* M = Manual Input Mode
+* S = Simulator Mode 
 
 === GRS - GPS Range Residuals ===
 
@@ -1121,10 +1135,12 @@ Field Number:
 14. Satellite 12 residual in meters (blank if unused)
 15. Checksum
 
-The order of satellites the same as those in the last GSA.
+The order of satellites MUST match those in the last GSA.
 
 Example: $GPGRS,024603.00,1,-1.8,-2.7,0.3,,,,,,,,,*6C
 
+Note that the talker ID may be GP, GL, or GN, depending on if the residuals
+are for GPS-only, GLONASS-only, or combined solution, respectively.
 
 === GST - GPS Pseudorange Noise Statistics ===
 
