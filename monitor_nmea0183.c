@@ -107,6 +107,7 @@ static bool nmea_initialize(void)
 #endif /* PPS_ENABLE */
     (void)mvwprintw(gpgsawin, 5, 9, " GSA + PPS ");
     (void)wattrset(gpgsawin, A_NORMAL);
+    (void)syncok(gpgsawin, true);
 
     gpggawin = derwin(devicewin, 9, 30, 6, 50);
     assert(gpggawin !=NULL);

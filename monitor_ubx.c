@@ -72,6 +72,7 @@ static bool ubx_initialize(void)
     if ((ppswin = derwin(devicewin, 3, 51, 16, 28)) == NULL)
 	return false;
     (void)wborder(ppswin, 0, 0, 0, 0, 0, 0, 0, 0);
+    (void)syncok(ppswin, true);
     (void)wattrset(ppswin, A_BOLD);
 #define TOFF_LINE	1
 #define TOFF_COLUMN	1

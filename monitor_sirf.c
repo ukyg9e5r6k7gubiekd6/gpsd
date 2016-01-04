@@ -168,6 +168,7 @@ static bool sirf_initialize(void)
     display(mid7win, 1, 23, "Bias: ");
     display(mid7win, 2, 1, "GPS Time: ");
     display(mid7win, 2, 23, "PPS: ");
+    (void)syncok(mid7win, true);
 #ifndef PPS_ENABLE
     (void)mvwaddstr(mid7win, 2, 40, "N/A");
 #endif /* PPS_ENABLE */
