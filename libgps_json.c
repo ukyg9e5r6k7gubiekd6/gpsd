@@ -109,9 +109,9 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 {
     const struct json_attr_t json_attrs_satellites[] = {
 	/* *INDENT-OFF* */
-	{"PRN",	   t_integer, STRUCTOBJECT(struct satellite_t, PRN)},
-	{"el",	   t_integer, STRUCTOBJECT(struct satellite_t, elevation)},
-	{"az",	   t_integer, STRUCTOBJECT(struct satellite_t, azimuth)},
+	{"PRN",	   t_short, STRUCTOBJECT(struct satellite_t, PRN)},
+	{"el",	   t_short, STRUCTOBJECT(struct satellite_t, elevation)},
+	{"az",	   t_short, STRUCTOBJECT(struct satellite_t, azimuth)},
 	{"ss",	   t_real,    STRUCTOBJECT(struct satellite_t, ss)},
 	{"used",   t_boolean, STRUCTOBJECT(struct satellite_t, used)},
 	/* *INDENT-ON* */

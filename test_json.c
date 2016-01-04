@@ -90,7 +90,12 @@ static const char json_str1[] = "{\"class\":\"TPV\",\
     \"time\":\"2005-06-19T08:12:41.89Z\",\"lon\":46.498203637,\"lat\":7.568074350,\
     \"alt\":1327.780,\"epx\":21.000,\"epy\":23.000,\"epv\":124.484,\"mode\":3}";
 
-/* Case 2: SKY report */
+/*
+ * Case 2: SKY report
+ *
+ * The fields of the last satellite entry are arranged in the reverse order
+ * of the structure fields, in order to test for field overflow.
+ */
 
 static const char *json_str2 = "{\"class\":\"SKY\",\
          \"time\":\"2005-06-19T12:12:42.03Z\",   \
@@ -101,7 +106,7 @@ static const char *json_str2 = "{\"class\":\"SKY\",\
          {\"PRN\":26,\"el\":51,\"az\":304,\"ss\":43,\"used\":true},\
          {\"PRN\":8,\"el\":44,\"az\":58,\"ss\":41,\"used\":true},\
          {\"PRN\":27,\"el\":16,\"az\":66,\"ss\":39,\"used\":true},\
-         {\"PRN\":21,\"el\":10,\"az\":301,\"ss\":0,\"used\":false}]}";
+         {\"az\":301,\"el\":10,\"PRN\":21,\"used\":false,\"ss\":0}]}";
 
 /* Case 3: String list syntax */
 
