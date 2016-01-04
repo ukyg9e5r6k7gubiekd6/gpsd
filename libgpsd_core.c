@@ -305,6 +305,9 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 	(void)strlcpy(session->gpsdata.dev.path, device,
 		      sizeof(session->gpsdata.dev.path));
     session->device_type = NULL;	/* start by hunting packets */
+#ifdef RECONFIGURE_ENABLE
+    session->last_controller = NULL;
+#endif /* RECONFIGURE_ENABLE */
     session->observed = 0;
     session->sourcetype = source_unknown;	/* gpsd_open() sets this */
     session->servicetype = service_unknown;	/* gpsd_open() sets this */
