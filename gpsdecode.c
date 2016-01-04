@@ -31,6 +31,26 @@ static struct gps_context_t context;
  **************************************************************************/
 
 #ifdef AIVDM_ENABLE
+static const char *raw_hexdump(char *scbuf, size_t scbuflen, int structured,
+					  char *binbuf, size_t binbuflen)
+{
+    if (!structured)
+	return gpsd_hexdump(scbuf, scbuflen, binbuf, binbuflen);
+/* Data parsed as structured doesn't have correct raw data */
+#ifndef SQUELCH_ENABLE
+    size_t len =
+	(size_t) ((binbuflen >
+		   MAX_PACKET_LENGTH) ? MAX_PACKET_LENGTH : binbuflen) * 2;
+    if (len > scbuflen - 1) len = scbuflen - 1;
+
+    memset(scbuf, 'x', len);
+    scbuf[len] = '\0';
+#else /* SQUELCH defined */
+    scbuf[0] = '\0';
+#endif /* SQUELCH_ENABLE */
+    return scbuf;
+}
+
 static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 {
     char scratchbuf[MAX_PACKET_LENGTH*2+1];
@@ -124,9 +144,10 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	    str_appendf(buf, buflen,
 			   "|%zd:%s",
 			   ais->type6.bitcount,
-			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
-					ais->type6.bitdata,
-					BITS_TO_BYTES(ais->type6.bitcount)));
+			   raw_hexdump(scratchbuf, sizeof(scratchbuf),
+				       ais->type6.structured,
+				       ais->type6.bitdata,
+				       BITS_TO_BYTES(ais->type6.bitcount)));
 	break;
     case 7:			/* Binary Acknowledge */
     case 13:			/* Safety Related Acknowledge */
@@ -229,9 +250,10 @@ static void aivdm_csv_dump(struct ais_t *ais, char *buf, size_t buflen)
 	    str_appendf(buf, buflen,
 			   "|%zd:%s",
 			   ais->type8.bitcount,
-			   gpsd_hexdump(scratchbuf, sizeof(scratchbuf),
-					ais->type8.bitdata,
-					BITS_TO_BYTES(ais->type8.bitcount)));
+			   raw_hexdump(scratchbuf, sizeof(scratchbuf),
+				       ais->type8.structured,
+				       ais->type8.bitdata,
+				       BITS_TO_BYTES(ais->type8.bitcount)));
 	break;
     case 9:
 	str_appendf(buf, buflen,
