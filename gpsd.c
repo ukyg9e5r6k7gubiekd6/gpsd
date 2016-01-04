@@ -2171,7 +2171,14 @@ int main(int argc, char *argv[])
 	    break;
 	case AWAIT_NOT_READY:
 	    for (device = devices; device < devices + MAX_DEVICES; device++)
-		if (allocated_device(device) && FD_ISSET(device->gpsdata.gps_fd, &efds)) {
+		/*
+		 * The file descriptor validity check is reqiured on some ARM 
+		 * platforms to prevent a core dump.  This may be due to an
+		 * implimentation error in FD_ISSET().
+		 */
+		if (allocated_device(device)
+		    && (0 <= device->gpsdata.gps_fd && device->gpsdata.gps_fd < FD_SETSIZE)
+		    && FD_ISSET(device->gpsdata.gps_fd, &efds)) {
 		    deactivate_device(device);
 		    free_device(device);
 		}
