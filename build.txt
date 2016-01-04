@@ -168,7 +168,9 @@ The build degrades gracefully in the absence of any of these. You should
 be able to tell from scons messages which extensions you will get.
 
 Under Ubuntu and most other Debian-derived distributions, an easy way
-to pick up the prerequisites is: "apt-get build-dep gpsd"
+to pick up the prerequisites is: "apt-get build-dep gpsd".  Note
+that your sources.list will need "deb-src" lines for this, not
+just "deb" lines.
 
 If you are custom-building a Linux kernel for embedded deployment, you
 will need some subset of the following modules:
