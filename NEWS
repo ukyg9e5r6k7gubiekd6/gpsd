@@ -1,9 +1,11 @@
 			GPSD project news
 
 Repository head:
-  Test rebuilds for nmid-2015 keapsecond bump. Regression tests will run even
-  if "python" in Python 3.  Bukd correctly on systems where -ltinfo is
+  Test rebuilds for mid-2015 leapsecond bump. Regression tests will run even
+  if "python" in Python 3.  Build correctly on systems where -ltinfo is
   split from -lncurses. Avoid some rare overflow conditions in PPS code.
+  Fix bugs in JSON sat-view parsing due to the JSON parser stuffing ints
+  into shorts.  Various small fixes to AIS interpretation 
 
 3.15: 2015-06-03 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix a rare crash bug related to devices becoming inaccessible while timed out.
