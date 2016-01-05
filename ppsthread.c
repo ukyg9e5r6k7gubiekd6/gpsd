@@ -1090,8 +1090,9 @@ static void *gpsd_ppsmonitor(void *arg)
 			delay_str);
 	    log1 = "system clock went backwards";
 	} else if ( ( 2 < delay.tv_sec)
-	  || ( 1 == delay.tv_sec && 100000000 > delay.tv_nsec ) ) {
-	    /* system clock could be slewing so allow 1.1 sec delay */
+	  || ( 1 == delay.tv_sec && 100000000 < delay.tv_nsec ) ) {
+	    /* system clock could be slewing so allow up to 1.1 sec delay */
+	    /* chronyd can slew +/-8.33% */
 	    thread_context->log_hook(thread_context, THREAD_RAW,
 			"PPS:%s %.10s no current GPS seconds: %.20s\n",
 			thread_context->devicename,
