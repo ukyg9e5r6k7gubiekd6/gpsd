@@ -2,7 +2,7 @@
 :description: A programmer's guide to NMEA0183, the GPS protocol reporting standard
 :keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v2.20, Jan 2016
+v2.21, Jan 2016
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -460,9 +460,9 @@ table:
 |====================================================
 
 GLONASS satellite numbers come in two flavors.  If a sentence
-has a GN talker ID, expect the skyviews to be GLONASS-only and
+has a GL talker ID, expect the skyviews to be GLONASS-only and
 in the range 1-32; you must add 64 to get a globally-unique
-NMEA ID.  If the sentence has a GL talker ID, the device emits
+NMEA ID.  If the sentence has a GN talker ID, the device emits
 a multi-constellation skyview with GLONASS IDs aleady in
 the 65-96 range.
 
