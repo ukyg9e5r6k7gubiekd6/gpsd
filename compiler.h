@@ -66,9 +66,15 @@
     } while (0)
 
 #ifdef HAVE_STDATOMIC_H
-#if !defined(__COVERITY__) && !defined(__cplusplus)
-#include <stdatomic.h>
-#endif /* __COVERITY__ || __cplusplus */
+#if !defined(__COVERITY__)
+#if !defined(__cplusplus)
+    #include <stdatomic.h>
+#elif __cplusplus >= 201103L
+    /* C++ before C++11 can not handle stdatomic.h or atomic */
+    /* atomic is just C++ for stdatomic.h */
+    #include <atomic>
+#endif /* __cplusplus */
+#endif /* __COVERITY__ */
 #endif /* HAVE_STDATOMIC_H */
 
 #ifdef HAVE_OSATOMIC_H
@@ -78,15 +84,23 @@
 static inline void memory_barrier(void)
 /* prevent instruction reordering across any call to this function */
 {
-#ifdef HAVE_STDATOMIC_H
-#ifndef __COVERITY__
+#ifdef __COVERITY__
+    /* do nothing */
+#elif defined(__cplusplus)
+  /* we are C++ */
+  #if __cplusplus >= 201103L
+    /* C++11 and later has atomics, earlier do not */
     atomic_thread_fence(memory_order_seq_cst);
-#endif /* __COVERITY__ */
+  #endif
+#elif defined HAVE_STDATOMIC_H
+    /* we are C and atomics are in C98 and newer */
+    atomic_thread_fence(memory_order_seq_cst);
 #elif defined(HAVE_OSATOMIC_H)
+    /* do it the OS X way */
     OSMemoryBarrier();
 #elif defined(__GNUC__)
     asm volatile ("" : : : "memory");
-#endif /* HAVE_STD_ATOMIC_H */
+#endif
 }
 
 #endif /* _GPSD_COMPILER_H_ */
