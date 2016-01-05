@@ -694,11 +694,20 @@ static gps_mask_t processGSV(int count, char *field[],
 	if (sp->PRN != 0)
 	    session->gpsdata.satellites_visible++;
     }
-    if (session->nmea.part == session->nmea.await
-	&& atoi(field[3]) != session->gpsdata.satellites_visible)
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "GPGSV field 3 value of %d != actual count %d\n",
-		 atoi(field[3]), session->gpsdata.satellites_visible);
+
+    /*
+     * Alas, we can't sanity check field counts when there are multiple sat 
+     * pictures, because the visible member counts *all* satellites - you 
+     * get a bad result on the second and later SV spans.  Note, this code
+     * assumes that if any of the special sat pics occur they come right
+     * after a stock GPGSV one.
+     */
+    if (session->nmea.seen_glgsv || session->nmea.seen_bdgsv || session->nmea.seen_qzss)
+	if (session->nmea.part == session->nmea.await
+		&& atoi(field[3]) != session->gpsdata.satellites_visible)
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "GPGSV field 3 value of %d != actual count %d\n",
+		     atoi(field[3]), session->gpsdata.satellites_visible);
 
     /* not valid data until we've seen a complete set of parts */
     if (session->nmea.part < session->nmea.await) {
