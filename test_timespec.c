@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>   /* required by C99, for int32_t */
+#include <string.h>
 #include <time.h>     /* for time_t */
 #include <math.h>
 #include <unistd.h>
