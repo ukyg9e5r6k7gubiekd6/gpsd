@@ -51,6 +51,8 @@ static sourcetype_t gpsd_classify(const char *path)
 	return source_pty;
     else if (strncmp(path, "/dev/pps", 8) == 0)
 	return source_pps;
+    else if (S_ISFIFO(sb.st_mode))
+	return source_pipe;
     else if (S_ISCHR(sb.st_mode)) {
 	sourcetype_t devtype = source_rs232;
 #ifdef __linux__
@@ -579,7 +581,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 	    );
     }
 
-    /* Switch back to blocking I/O now that CLOCAL is set. */
+    /* Probably want to switch back to blocking I/O now that CLOCAL is set. */
+    if (session->sourcetype != source_pipe)
     {
 	int oldfl = fcntl(session->gpsdata.gps_fd, F_GETFL);
 	if (oldfl != -1)

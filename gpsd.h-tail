@@ -30,7 +30,7 @@
  *      (Thus, the 'scaled' flag no longer affects display of these fields.)
  *      PPS drift message ships nsec rather than msec.
  * 3.10 The obsolete tag field has been dropped from JSON.
- * 3.11 A precision field, log2 of the time source jitter, as been added
+ * 3.11 A precision field, log2 of the time source jitter, has been added
  *      to the PPS report.  See ntpshm.h for more details.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
@@ -385,6 +385,7 @@ typedef enum {source_unknown,
 	      source_udp,	/* UDP stream: case detected but not used */
 	      source_gpsd,	/* Remote gpsd instance over TCP/IP */
 	      source_pps,	/* PPS-only device, such as /dev/ppsN */
+	      source_pipe,	/* Unix FIFO; don't use blocking I/O */
 } sourcetype_t;
 
 /*
