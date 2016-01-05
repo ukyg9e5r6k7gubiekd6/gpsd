@@ -1233,7 +1233,7 @@ precision on most systems.</para>
 <para>This message is emitted each time the daemon sees a valid PPS (Pulse
 Per Second) strobe from a device.</para>
 
-<para>This message exactly mirrors the PPS message except for two
+<para>This message exactly mirrors the TOFF message except for two
 details.</para>
 
 <para>PPS emits the NTP precision.  See the NTP documentation for their
