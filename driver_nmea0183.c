@@ -605,8 +605,9 @@ static gps_mask_t processGSV(int count, char *field[],
      *   GP (GPS, SBAS, QZSS),
      *   QZ (QZSS).
      *
-     * GL may to be used when GSVs are mixed containing GLONASS, GN maybe
-     * used when GSVs contain GLONASS only.  Usage is inconsistent.
+     * GL may be (incorrectly) used when GSVs are mixed containing
+     * GLONASS, GN may be (incorrectly) used when GSVs contain GLONASS
+     * only.  Usage is inconsistent.
      *
      * In the GLONASS version sat IDs run from 65-96 (NMEA0183 standardizes
      * this). At least two GPS, the BU-353 GLONASS and the u-blox NEO-M8N,
