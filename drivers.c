@@ -1219,6 +1219,11 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	    *cp = '\0';
 	    field[nfields++] = cp + 1;
 	}
+    }
+#ifdef __UNDEF_DEBUG_
+    for(int i=0;i<nfields;i++)
+        gpsd_log(&session->context->errout, LOG_DATA, "field [%d] [%s]\n",i,field[i]);
+#endif
 
     /* discard sentences with exiguous commas; catches run-ons */
     if (nfields < 7) {
@@ -1273,8 +1278,8 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     if(isdigit(field[6][0]))
         pad = field[6][0] - '0'; /* number of padding bits ASCII encoded*/
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "nfrags=%d, ifrag=%d, decoded_frags=%d, data=%s\n",
-	     nfrags, ifrag, ais_context->decoded_frags, data);
+	     "nfrags=%d, ifrag=%d, decoded_frags=%d, data=%s, pad=%d\n",
+	     nfrags, ifrag, ais_context->decoded_frags, data, pad);
 
     /* assemble the binary data */
 
