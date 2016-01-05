@@ -118,7 +118,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
     case 1:	/* Position Report */
     case 2:
     case 3:
-	PERMISSIVE_LENGTH_CHECK(168)
+	PERMISSIVE_LENGTH_CHECK(163)
 	ais->type1.status	= UBITS(38, 4);
 	ais->type1.turn		= SBITS(42, 8);
 	ais->type1.speed	= UBITS(50, 10);
@@ -131,7 +131,10 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	ais->type1.maneuver	= UBITS(143, 2);
 	//ais->type1.spare	= UBITS(145, 3);
 	ais->type1.raim		= UBITS(148, 1)!=0;
-	ais->type1.radio	= UBITS(149, 19);
+	if(bitlen >= 168)
+		ais->type1.radio	= UBITS(149, 19);
+	if(bitlen < 168)
+		ais->type1.radio	= UBITS(149, bitlen - 149);
 	break;
     case 4: 	/* Base Station Report */
     case 11:	/* UTC/Date Response */
