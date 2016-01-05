@@ -516,6 +516,8 @@ static bool switch_type(const struct gps_type_t *devtype)
 		(void)delwin(devicewin);
 	    }
 	    active = newobject;
+	    if (devicewin)
+		delwin(devicewin);
 	    devicewin = newwin((*active)->min_y, (*active)->min_x, 1, 0);
 	    /* screen might have JSOM on it from the init sequence */
 	    (void)clearok(stdscr, true);
