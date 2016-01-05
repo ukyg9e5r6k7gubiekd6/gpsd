@@ -2,7 +2,7 @@
 :description: A case study in the evolution of the gpsd protocol
 :keywords: GPSD, protocol, evolution
 Eric S. Raymond <esr@thyrsus.com>
-v1.5.1, November 2013
+v1.5.2, January 2016
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -119,7 +119,7 @@ you care about issues like reporting units, read the documentation.
 
 The 'Y' report is a satellite skyview, giving right-ascension,
 declination, and signal quality for each of the visible satellites.
-GPSes usually report this every five minutes.
+GPSes usually report this every five cycles (seconds).
 
 The 'W', 'O' and 'Y' sentences, together, effectively constituted
 version 2 of the protocol - designed for streaming use. The other
