@@ -876,7 +876,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	//ais->type19.spare      = UBITS(308, 4);
 	break;
     case 20:	/* Data Link Management Message */
-	RANGE_CHECK(72, 160);
+	RANGE_CHECK(72, 186);
 	//ais->type20.spare		= UBITS(38, 2);
 	ais->type20.offset1		= UBITS(40, 12);
 	ais->type20.number1		= UBITS(52, 4);
