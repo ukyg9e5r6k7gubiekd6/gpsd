@@ -809,7 +809,7 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
 	}
 	break;
     case 16:	/* Assigned Mode Command */
-	RANGE_CHECK(96, 144);
+	RANGE_CHECK(96, 168);
 	ais->type16.mmsi1		= UBITS(40, 30);
 	ais->type16.offset1		= UBITS(70, 12);
 	ais->type16.increment1	= UBITS(82, 10);

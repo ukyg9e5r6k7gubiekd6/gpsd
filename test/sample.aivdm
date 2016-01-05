@@ -1079,3 +1079,7 @@ AIVDM,2,2,1,B,00000000000,2*26
 # has data length of 368
 !AIVDM,2,1,8,B,E03l90w4Q1h3h1:WdPOwwwwwwwwlQdn`:e55020@@@gP0000000000000000,0*47\x0d\x0a
 !AIVDM,2,2,8,B,00,4*19\x0d\x0a
+#
+# type 16 168 bits long
+#
+!AIVDM,1,1,,B,@6STUk004lQ206bCKNOBAb6SJ@5s,0*74
