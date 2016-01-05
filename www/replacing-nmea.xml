@@ -88,6 +88,15 @@
          Changed sentence length limit to 255.
       </revremark>
    </revision>
+   <revision>
+      <revnumber>1.6</revnumber>
+      <date>5 January 2016</date>
+      <authorinitials>esr</authorinitials>
+      <revremark>
+        Corrected timezone in example
+        W3 datetime document has disapperard, point to Internet Archive
+      </revremark>
+   </revision>
 </revhistory>
 
 <abstract>
@@ -265,8 +274,9 @@ not expect to ever ship valid information for this field.</para>
 
 <para>The first field of every SGPS report sentence is a full
 timestamp in the format of the <ulink
-url='http://www.w3.org/TR/NOTE-datetime'>W3C profile of ISO
-8601</ulink>, with the timezone required to be Zulu (UTC) time.</para>
+url='https://web.archive.org/web/20150919174330/http://www.w3.org/TR/1998/NOTE-datetime-19980827'>W3C 
+profile of ISO 8601</ulink>, with the timezone required to be 
+Zulu (UTC) time.</para>
 
 <sect2><title>GPTPV</title>
 
@@ -347,7 +357,7 @@ mode field is added to satisfy a U.S. regulator's requirement.</para>
 <programlisting>
 $GPTPV,2005-02-11T04:40:51.231Z,?,49.45,-123.12,2.3,70.1,52.0,01.0,02.1,23.1,0.6,,,8,A*31
 
-     2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 EST 2005)
+     2005-02-11T04:40:51.231Z,  Time (Feb 11 04:40:51 UTC 2005)
      ?,                         Timestamp uncertainty will never be reported
      49.45,                     Latitude (- sign indicates latitude south)
      -123.12,                   Longitude (- sign indicates longitude west)
