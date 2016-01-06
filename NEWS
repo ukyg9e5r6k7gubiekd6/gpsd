@@ -1,12 +1,23 @@
 			GPSD project news
 
 Repository head:
-  Test rebuilds for mid-2015 leapsecond bump. Regression tests will run even
-  if "python" in Python 3.  Build correctly on systems where -ltinfo is
-  split from -lncurses. Avoid some rare overflow conditions in PPS code.
-  Fix bugs in JSON sat-view parsing due to the JSON parser stuffing ints
-  into shorts.  Various small fixes to AIS interpretation.  Prevent a memory
-  leak in long-running gpsmon instances.
+
+  Test rebuilds for mid-2015 leapsecond bump. Regression tests will
+  run even if "python" in Python 3.  Build correctly on systems where
+  -ltinfo is split from -lncurses. Avoid some rare overflow conditions
+  in PPS code.  Fix bugs in JSON sat-view parsing due to the JSON
+  parser stuffing ints into shorts.  Various small fixes to AIS
+  interpretation.  Prevent a memory leak in long-running gpsmon
+  instances.  Fix Savannah bug #45270: serial driver does not work
+  properly on pipes.  Fix Savannah bug #44648: GPSD won't build if
+  CCFLAGS contains options that are only compatible with the
+  cros1s-compiler. Fix Savannah bug #45342: SConstruct generates wrong
+  *.pc files.  Fix Savannah bug #46495: gpsd_poll may crash due to
+  unitialized pointer (probably due to bugg FD_ISSET on hos
+  system). Fix Savannah bug #46648: gpsd crashes and buffer overflow
+  is reported when terminated.  Fix Savannah bug #46802: AIVDM to CSV
+  is broken in some weird cases. Fix Savannah bug #46804: JSON
+  satellite view parsing is somewhat broken.
 
 3.15: 2015-06-03 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix a rare crash bug related to devices becoming inaccessible while timed out.
