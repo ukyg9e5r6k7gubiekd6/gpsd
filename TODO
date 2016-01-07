@@ -20,13 +20,13 @@ the calibration process less annoying?
 
 ** Things to do when we can break compatibility **
 
-In gps_data_t Make subtype longer. 128 chars long sounds good.
+In gps_data_t make device subtype longer. 128 chars long sounds good.
 
 In gps_data_t, save PPS precision; this will require creating a pps struct.
 
 In gps_fix_t, maybe change time away from float to timespec?
 
-Add MMSI sequence number fields to type 7.
+Add MMSI sequence number fields to AIS type 7.
 
 ** Bugs in gpsd and its clients:
 
@@ -142,7 +142,7 @@ reliable in client mode.
 
 **** Optional dump of GPS configuration using gpsctl.
 
-Some setting, like antenna in use, dead-reckoning mode, would be
+Some settings, like antenna in use, dead-reckoning mode, would be
 helpful to see.
 
 **** Integrate 1PPS into profiling ***
