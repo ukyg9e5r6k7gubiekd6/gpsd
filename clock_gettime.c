@@ -6,7 +6,6 @@
  */
 #include <time.h>
 #include <sys/time.h>
-#include <unistd.h>	/* for _POSIX_TIMERS */
 
 #include "compiler.h"
 
@@ -15,7 +14,7 @@
 #include <mach/mach.h>
 #endif
 
-#ifndef _POSIX_TIMERS
+#ifndef HAVE_CLOCK_GETTIME
 int clock_gettime(clockid_t clk_id UNUSED, struct timespec *ts)
 {
 #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
@@ -43,6 +42,6 @@ int clock_gettime(clockid_t clk_id UNUSED, struct timespec *ts)
 #endif /* __MACH__ */
     return 0;
 }
-#endif /* _POSIX_TIMERS */
+#endif /* HAVE_CLOCK_GETTIME */
 
 /* end */
