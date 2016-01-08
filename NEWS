@@ -1,7 +1,6 @@
 			GPSD project news
 
-Repository head:
-
+3.16: 2016-01-08 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Test rebuilds for mid-2015 leapsecond bump. Regression tests will
   run even if "python" in Python 3.  Build correctly on systems where
   -ltinfo is split from -lncurses. Avoid some rare overflow conditions
