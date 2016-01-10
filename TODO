@@ -51,12 +51,6 @@ uses the serial port for time_pps_init).
 
 *** Client bugs
 
-**** In gpsmon's PPS Offset field
-
-Presently PPS Offset is displayed in direct mode for NMEA, SiRF, and
-UBX devices.  Others should probably do likewise, notably the
-Motorola Oncore and Garmin drivers.
-
 *** Dispatcher/network issues
 
 **** Reading AISHub data via UDP confuses xgps with short writes
