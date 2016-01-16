@@ -57,7 +57,7 @@ do
 	u) opts="$opts -u" ;;	# Force UDP
 	v) mode=view ;;		# View result of generating a check file
 	o) opts="$opts $OPTARG" ;;	# Pass options to gpsfake
-	h) help="1"
+	h) help="1" ;;
     esac
 done
 shift $(($OPTIND - 1))
