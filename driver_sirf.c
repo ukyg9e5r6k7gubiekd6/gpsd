@@ -633,7 +633,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 static double sirf_time_offset(struct gps_device_t *session)
 /* return NTP time-offset fudge factor for this device */
 {
-    double retval = NAN;
+    double retval = 0;
 
     /* we need to have seen UTC time with a valid leap-year offset */
     if ((session->driver.sirf.time_seen & TIME_SEEN_UTC_2) != 0) {
