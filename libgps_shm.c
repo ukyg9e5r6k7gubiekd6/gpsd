@@ -62,7 +62,7 @@ int gps_shm_open(struct gps_data_t *gpsdata)
 	free(gpsdata->privdata);
 	return -2;
     }
-#ifndef USE_QT1
+#ifndef USE_QT
     gpsdata->gps_fd = SHM_PSEUDO_FD;
 #else
     gpsdata->gps_fd = (void *)(intptr_t)SHM_PSEUDO_FD;
