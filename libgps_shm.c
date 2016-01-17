@@ -102,7 +102,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 	return -1;
     else
     {
-	int before, after;
+	int before, after, gpsfd = gpsdata->gps_fd;
 	void *private_save = gpsdata->privdata;
 	volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
 	struct gps_data_t noclobber;
@@ -133,6 +133,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 			 (void *)&noclobber,
 			 sizeof(struct gps_data_t));
 	    gpsdata->privdata = private_save;
+	    gpsdata->gps_fd=gpsfd;
 	    PRIVATE(gpsdata)->tick = after;
 	    if ((gpsdata->set & REPORT_IS)!=0) {
 		if (gpsdata->fix.mode >= 2)
