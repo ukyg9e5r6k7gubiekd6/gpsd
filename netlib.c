@@ -21,6 +21,15 @@
 #include "gpsd.h"
 #include "sockaddr.h"
 
+/* work around the unfinished ipv6 implementation on hurd and OSX <10.6 */
+#ifndef IPV6_TCLASS
+# if defined(__GNU__)
+#  define IPV6_TCLASS 61
+# elif defined(__APPLE__)
+#  define IPV6_TCLASS 36
+# endif
+#endif
+
 socket_t netlib_connectsock(int af, const char *host, const char *service,
 			    const char *protocol)
 {

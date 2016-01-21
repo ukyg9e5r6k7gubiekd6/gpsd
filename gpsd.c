@@ -149,11 +149,13 @@ static struct gps_context_t context;
 static int sd_socket_count = 0;
 #endif
 
-/* work around the unfinished ipv6 implementation on hurd */
-#ifdef __GNU__
+/* work around the unfinished ipv6 implementation on hurd and OSX <10.6 */
 #ifndef IPV6_TCLASS
-#define IPV6_TCLASS 61
-#endif
+# if defined(__GNU__)
+#  define IPV6_TCLASS 61
+# elif defined(__APPLE__)
+#  define IPV6_TCLASS 36
+# endif
 #endif
 
 static volatile sig_atomic_t signalled;
@@ -406,10 +408,12 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 		(void)close(s);
 		return -1;
 	    }
+#ifdef IPV6_TCLASS
 	    /* Set packet priority */
 	    if (setsockopt(s, IPPROTO_IPV6, IPV6_TCLASS, &dscp, sizeof(dscp)) == -1)
 		gpsd_log(&context.errout, LOG_WARN,
 			 "Warning: SETSOCKOPT TOS failed\n");
+#endif /* IPV6_TCLASS */
 	}
 	break;
 #endif  /* IPV6_ENABLE */
