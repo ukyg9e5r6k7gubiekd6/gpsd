@@ -88,6 +88,20 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #endif
 
 /*
+ * Darwin (Mac OS X) uses special defines.
+ * This must precede the BSD case, since _BIG_ENDIAN may be incorrectly defined
+ */
+#if !defined( __BYTE_ORDER) && defined(__DARWIN_BYTE_ORDER)
+#define __BYTE_ORDER __DARWIN_BYTE_ORDER
+#endif
+#if !defined( __BIG_ENDIAN) && defined(__DARWIN_BIG_ENDIAN)
+#define __BIG_ENDIAN __DARWIN_BIG_ENDIAN
+#endif
+#if !defined( __LITTLE_ENDIAN) && defined(__DARWIN_LITTLE_ENDIAN)
+#define __LITTLE_ENDIAN __DARWIN_LITTLE_ENDIAN
+#endif
+
+/*
  * BSD uses _BYTE_ORDER, and Linux uses __BYTE_ORDER.
  */
 #if !defined( __BYTE_ORDER) && defined(_BYTE_ORDER)
@@ -98,19 +112,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 #endif
 #if !defined( __LITTLE_ENDIAN) && defined(_LITTLE_ENDIAN)
 #define __LITTLE_ENDIAN _LITTLE_ENDIAN
-#endif
-
-/*
- * Darwin (Mac OS X) uses special defines.
- */
-#if !defined( __BYTE_ORDER) && defined(__DARWIN_BYTE_ORDER)
-#define __BYTE_ORDER __DARWIN_BYTE_ORDER
-#endif
-#if !defined( __BIG_ENDIAN) && defined(__DARWIN_BIG_ENDIAN)
-#define __BIG_ENDIAN __DARWIN_BIG_ENDIAN
-#endif
-#if !defined( __LITTLE_ENDIAN) && defined(__DARWIN_LITTLE_ENDIAN)
-#define __LITTLE_ENDIAN __DARWIN_LITTLE_ENDIAN
 #endif
 
 #if !defined(__BYTE_ORDER) || !defined(__BIG_ENDIAN) || !defined(__LITTLE_ENDIAN)
