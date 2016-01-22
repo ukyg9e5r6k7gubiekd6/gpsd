@@ -1,5 +1,10 @@
 			GPSD project news
 
+Repository head:
+  Repair support for non-NMEA devices requring active probing
+  (e.g. Garmin USB GPSes). Apply OS X build fixes.  Fix a SiRF driver
+  bug that occasionally confused NTP.
+
 3.16: 2016-01-08 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Test rebuilds for mid-2015 leapsecond bump. Regression tests will
   run even if "python" in Python 3.  Build correctly on systems where
@@ -12,7 +17,7 @@
   CCFLAGS contains options that are only compatible with the
   cros1s-compiler. Fix Savannah bug #45342: SConstruct generates wrong
   *.pc files.  Fix Savannah bug #46495: gpsd_poll may crash due to
-  unitialized pointer (probably due to bugg FD_ISSET on hos
+  unitialized pointer (probably due to buggy FD_ISSET on host
   system). Fix Savannah bug #46648: gpsd crashes and buffer overflow
   is reported when terminated.  Fix Savannah bug #46802: AIVDM to CSV
   is broken in some weird cases. Fix Savannah bug #46804: JSON
