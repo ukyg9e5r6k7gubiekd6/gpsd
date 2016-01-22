@@ -56,7 +56,7 @@
 #define BINARY_ENABLE
 #endif
 #if defined(TRIPMATE_ENABLE) || defined(BINARY_ENABLE)
-#define NON_NMEA_ENABLE
+#define NON_NMEA0183_ENABLE
 #endif
 #if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
 #define COMPASS_ENABLE
