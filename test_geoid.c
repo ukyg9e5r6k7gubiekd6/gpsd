@@ -22,13 +22,13 @@ int main(int argc, char **argv)
     lat = atof(argv[1]);
     lon = atof(argv[2]);
 
-    if (lat > 90. || lat < -90.) {
-	fprintf(stderr, " -90 <= lat=%s(%.f) <= 90 ?\n", argv[1], lat);
+    if (lon > 180.0 || lat < -180.0) {
+	fprintf(stderr, " -180 <= lon=%s(%.f) <= 180 ?\n", argv[2], lon);
 	return 1;
     }
 
-    if (lon > 180. || lat < -180.) {
-	fprintf(stderr, " -180 <= lon=%s(%.f) <= 180 ?\n", argv[2], lon);
+    if (lat > 90.0 || lat < -90.0) {
+	fprintf(stderr, " -90 <= lat=%s(%.f) <= 90 ?\n", argv[1], lat);
 	return 1;
     }
 

@@ -304,6 +304,7 @@ int main(int argc, char *argv[])
 	    default:
 		(void)fprintf(stderr, "Unknown -l argument: %s\n", optarg);
 	    }
+	    break;
 	case 's':
 	    sleep(10);
 	    continue;

@@ -1251,6 +1251,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 		     "ignoring bogus AIS channel '12'.\n");
 	    return false;
 	}
+	/* fall through */
     case 'A':
 	ais_context = &session->driver.aivdm.context[0];
 	session->driver.aivdm.ais_channel ='A';
