@@ -238,7 +238,7 @@ in a future release.</para>
 <varlistentry>
 <term>WATCH_DEVICE</term>
 <listitem>
-<para>Restrict watching to a specified device, patch given as second
+<para>Restrict watching to a specified device, path given as second
 argument.</para>
 </listitem>
 </varlistentry>
