@@ -166,6 +166,7 @@ boolopts = (
     ("manbuild",      True,  "build help in man and HTML formats"),
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
     ("minimal",       False, "turn off every option not set on the command line"),
+    ("xgps",          True,  "include xgps and xgpsspeed."),
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
     )
@@ -1080,7 +1081,9 @@ if not env['python']:
     python_targets = []
     python_progs = []
 else:
-    python_progs = ["gpscat", "gpsfake", "gpsprof", "xgps", "xgpsspeed", "gegps"]
+    python_progs = ["gpscat", "gpsfake", "gpsprof", "gegps"]
+    if env['xgps']:
+        python_progs.extend(["xgps", "xgpsspeed"])
     python_modules = Glob('gps/*.py')
 
     # Build Python binding
@@ -1322,10 +1325,13 @@ python_manpages = {
     "gpsprof.1": "gpsprof.xml",
     "gpsfake.1": "gpsfake.xml",
     "gpscat.1": "gpscat.xml",
-    "xgpsspeed.1": "gps.xml",
-    "xgps.1": "gps.xml",
     "gegps.1": "gps.xml",
     }
+if env['xgps']:
+    python_manpages.update({
+        "xgpsspeed.1": "gps.xml",
+        "xgps.1": "gps.xml",
+    })
 
 manpage_targets = []
 if manbuilder:
