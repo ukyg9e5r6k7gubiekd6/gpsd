@@ -87,20 +87,23 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
 	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altitude);
     (void)fprintf(logfile,"    <time>%s</time>\n",
 		 unix_to_iso8601(time, tbuf, sizeof(tbuf)));
-    switch (gpsdata->fix.mode) {
-    case MODE_3D:
-	(void)fprintf(logfile,"    <fix>3d</fix>\n");
-	break;
-    case MODE_2D:
-	(void)fprintf(logfile,"    <fix>2d</fix>\n");
-	break;
-    case MODE_NO_FIX:
-	(void)fprintf(logfile,"    <fix>none</fix>\n");
-	break;
-    default:
-	/* don't print anything if no fix indicator */
-	break;
-    }
+    if (gpsdata->status == STATUS_DGPS_FIX)
+	(void)fprintf(logfile,"    <fix>dgps</fix>\n");
+    else
+	switch (gpsdata->fix.mode) {
+	case MODE_3D:
+	    (void)fprintf(logfile,"    <fix>3d</fix>\n");
+	    break;
+	case MODE_2D:
+	    (void)fprintf(logfile,"    <fix>2d</fix>\n");
+	    break;
+	case MODE_NO_FIX:
+	    (void)fprintf(logfile,"    <fix>none</fix>\n");
+	    break;
+	default:
+	    /* don't print anything if no fix indicator */
+	    break;
+	}
 
     if ((gpsdata->fix.mode > MODE_NO_FIX) && (gpsdata->satellites_used > 0))
 	(void)fprintf(logfile,"    <sat>%d</sat>\n", gpsdata->satellites_used);

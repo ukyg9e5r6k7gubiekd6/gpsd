@@ -524,16 +524,17 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 	(void)snprintf(scr, sizeof(scr), "OFFLINE");
     } else {
 	newstate = gpsdata->fix.mode;
-	/*
-	 * DGPS
-	 */
 	switch (gpsdata->fix.mode) {
 	case MODE_2D:
-	    (void)snprintf(scr, sizeof(scr), "2D FIX (%d secs)",
+	    (void)snprintf(scr, sizeof(scr), "2D %sFIX (%d secs)",
+			   (gpsdata->status ==
+			    STATUS_DGPS_FIX) ? "DIFF " : "",
 			   (int)(time(NULL) - status_timer));
 	    break;
 	case MODE_3D:
-	    (void)snprintf(scr, sizeof(scr), "3D FIX (%d secs)",
+	    (void)snprintf(scr, sizeof(scr), "3D %sFIX (%d secs)",
+			   (gpsdata->status ==
+			    STATUS_DGPS_FIX) ? "DIFF " : "",
 			   (int)(time(NULL) - status_timer));
 	    break;
 	default:

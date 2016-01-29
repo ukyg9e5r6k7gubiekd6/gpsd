@@ -287,12 +287,6 @@ typedef enum {
     event_reactivate,
 } event_t;
 
-/*
- * Used internally only in the gpsdata status field; not exported to
- * client-side gpsdata structures.  Instead this is used to change
- * the base U_ERE values used by the error modeler.
- */
-#define STATUS_DGPS_FIX	2	/* yes, with DGPS */
 
 #define INTERNAL_SET(n)	((gps_mask_t)(1llu<<(SET_HIGH_BIT+(n))))
 #define RAW_IS  	INTERNAL_SET(1) 	/* raw pseudoranges available */
