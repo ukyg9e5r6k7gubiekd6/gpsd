@@ -353,6 +353,7 @@ static void oncore_update(void)
 	(void)mvwprintw(Enwin, 2, 18, "%6.1f us", alarm);
 	(void)mvwprintw(Enwin, 3, 13, "%14s", pps_ctrl[ctrl]);
 	(void)mvwprintw(Enwin, 4, 24, "%3s", pulse ? "on" : "off");
+	/* coverity_submit[tainted_data] */
 	(void)mvwprintw(Enwin, 5, 24, "%3s", pps_sync[sync]);
 	(void)mvwprintw(Enwin, 6, 20, "%7s", traim_sol[sol_stat]);
 	(void)mvwprintw(Enwin, 7, 11, "%16s", traim_status[status]);

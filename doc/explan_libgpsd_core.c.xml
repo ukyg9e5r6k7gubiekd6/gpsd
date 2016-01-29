@@ -94,7 +94,7 @@
 </row>
 <row>
   <entry><function>int gpsd_activate(struct gps_device_t *session, bool reconfigurable)</function></entry>
-  <entry><para>Id tge devicename matches an NTRIP or DGNSS URI, hand
+  <entry><para>If the devicename matches an NTRIP or DGNSS URI, hand
   off to special code for opening a socket to that source over the
   network.</para><para>Try and open the device, returning -1 if we
   fail.</para><para>Probe all possible drivers to see if one

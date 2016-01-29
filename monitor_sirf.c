@@ -312,6 +312,7 @@ static void sirf_update(void)
 		      (int)getub(buf, 28));
 	/* SV list */
 	(void)wmove(mid2win, 4, 10);
+	/* coverity_submit[tainted_data] */
 	for (i = 0; i < (int)getub(buf, 28); i++)
 	   (void)wprintw(mid2win, " %2d", (int)getub(buf, 29 + i));
 	monitor_log("MND 0x02=");

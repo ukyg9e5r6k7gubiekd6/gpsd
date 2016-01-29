@@ -36,7 +36,7 @@
 #define NMEA2000_FAST_DEBUG 0
 
 static struct gps_device_t *nmea2000_units[NMEA2000_NETS][NMEA2000_UNITS];
-static char can_interface_name[NMEA2000_NETS][CAN_NAMELEN];
+static char can_interface_name[NMEA2000_NETS][CAN_NAMELEN+1];
 
 typedef struct PGN
     {

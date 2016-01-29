@@ -237,6 +237,7 @@ static void ubx_update(void)
     data_len = (size_t) getles16(buf, 4);
     switch (msgid) {
     case UBX_NAV_SVINFO:
+	/* coverity_submit[tainted_data] */
 	display_nav_svinfo(&buf[6], data_len);
 	break;
     case UBX_NAV_DOP:

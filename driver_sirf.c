@@ -261,6 +261,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
 
     /* calculate CRC */
     crc = 0;
+    /* coverity_submit[tainted_data] */
     for (i = 0; i < len; i++)
 	crc += (int)msg[4 + i];
     crc &= 0x7fff;

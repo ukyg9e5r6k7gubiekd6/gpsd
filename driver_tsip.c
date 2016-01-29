@@ -214,6 +214,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		u4 = getub(buf, 6); /* Build hour */
 		s2 = (int16_t)getbeu16(buf, 10); /* Hardware Code */
 		u5 = getub(buf, 12); /* Length of Hardware ID */
+		/* coverity_submit[tainted_data] */
 		for (i=0; i < (int)u5; i++) {
 		    buf2[i] = (char)getub(buf, 13+i); /* Hardware ID in ASCII */
 		}

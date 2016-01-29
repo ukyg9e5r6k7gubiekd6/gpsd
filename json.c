@@ -421,6 +421,7 @@ static int json_internal_read_object(const char *cp,
 	    } else
 		*pval++ = *cp;
 	    break;
+	    /* coverity[unterminated_case] */
 	case post_val:
 	    /*
 	     * We know that cursor points at the first spec matching

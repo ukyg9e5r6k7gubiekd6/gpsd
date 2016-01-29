@@ -546,6 +546,7 @@ static bool geostar_speed_switch(struct gps_device_t *session,
 			      speed_t speed, char parity, int stopbits)
 {
     unsigned char buf[4 * 4];
+    int iparity;
 
     switch (parity) {
     case 'E':
@@ -562,11 +563,12 @@ static bool geostar_speed_switch(struct gps_device_t *session,
 	parity = (char)0;
 	break;
     }
+    iparity = parity;
 
     putbe32(buf, 0, session->driver.geostar.physical_port);
     putbe32(buf, 4, speed);
     putbe32(buf, 8, stopbits);
-    putbe32(buf, 12, parity);
+    putbe32(buf, 12, iparity);
     (void)geostar_write(session, 0x41, buf, 4);
 
     return true;	/* it would be nice to error-check this */

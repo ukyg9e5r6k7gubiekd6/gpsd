@@ -1467,7 +1467,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 	"Vessels may proceed. One way traffic.",
 	"Vessels may proceed. Two way traffic.",
 	"Vessels shall proceed on specific orders only.",
-	"Vessels in main channel shall not proceed."
+	"Vessels in main channel shall not proceed.",
 	"Vessels in main channel shall proceed on specific orders only.",
 	"Vessels in main channel shall proceed on specific orders only.",
 	"I = \"in-bound\" only acceptable.",
