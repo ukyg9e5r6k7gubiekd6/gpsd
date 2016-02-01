@@ -779,7 +779,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    }
 
 	    (void)snprintf(buf, sizeof(buf),
-			"------------------- PPS offset: %.20s ------\n ",
+			"------------------- PPS offset: %.20s ------\n",
 			timedelta_str);
 	    /*
 	     * In direct mode this would be a bad idea, but we're not actually

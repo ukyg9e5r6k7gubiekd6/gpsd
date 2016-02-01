@@ -232,7 +232,7 @@ mode at current speed; with an argument of 1, change to binary
 (native) mode. With no argument, toggle the setting. Will show an
 error if the device doesn't have such modes.</para>
 
-<para>After you switch a dual-protocol GPS to NMEA mode wityh this
+<para>After you switch a dual-protocol GPS to NMEA mode with this
 command, it retains the information about the original type and its
 control capabilities. That is why the device type listed before the
 prompt doesn't change.</para>
