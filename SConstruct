@@ -58,8 +58,8 @@ usermail   = "gpsd-users@lists.nongnu.org"
 annmail    = "gpsd-announce@nongnu.org"
 ircchan    = "irc://chat.freenode.net/#gpsd"
 tiplink    = "<a href='http://gratipay.com/esr'>leave a tip at Gratipay</a>"
-tipwidget  = "<script data-gratipay-username='esr' \
-	data-gratipay-widget='button' src='//gttp.co/v1.js'></script>"
+tipwidget  = ("<script data-gratipay-username='esr' "
+              "data-gratipay-widget='button' src='//gttp.co/v1.js'></script>")
 # Hosting information ends here
 
 EnsureSConsVersion(2,3,0)
@@ -464,7 +464,7 @@ def CheckCompilerDefines(context, define):
 def CheckC11(context):
     context.Message( 'Checking if compiler is C11 ...' )
     ret = context.TryLink("""
-	#if (__STDC_VERSION__ < 201112L)
+        #if (__STDC_VERSION__ < 201112L)
         #error Not C11
         #endif
         int main(int argc, char **argv) {
@@ -541,8 +541,8 @@ else:
     if env['ncurses']:
         if config.CheckPKG('ncurses'):
             ncurseslibs = pkg_config('ncurses')
-	    if config.CheckPKG('tinfo'):
-		ncurseslibs += pkg_config('tinfo')
+            if config.CheckPKG('tinfo'):
+                ncurseslibs += pkg_config('tinfo')
         elif WhereIs('ncurses5-config'):
             ncurseslibs = ['!ncurses5-config --libs --cflags']
         elif WhereIs('ncursesw5-config'):
@@ -628,12 +628,12 @@ else:
     if config.CheckC11() and  not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and config.CheckHeader("stdatomic.h"):
         confdefs.append("#define HAVE_STDATOMIC_H 1\n")
     else:
-	confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
-	if config.CheckHeader("libkern/OSAtomic.h"):
-	    confdefs.append("#define HAVE_OSATOMIC_H 1\n")
+        confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
+        if config.CheckHeader("libkern/OSAtomic.h"):
+            confdefs.append("#define HAVE_OSATOMIC_H 1\n")
         else:
-	    confdefs.append("/* #undef HAVE_OSATOMIC_H */\n")
-	    announce("No memory barriers - SHM export and time hinting may not be reliable.")
+            confdefs.append("/* #undef HAVE_OSATOMIC_H */\n")
+            announce("No memory barriers - SHM export and time hinting may not be reliable.")
 
     # endian.h is required for rtcm104v2 unless the compiler defines
     # __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
@@ -751,7 +751,7 @@ struct timespec {
     long    tv_nsec;
 };
 #endif
-#define CLOCK_REALTIME	0
+#define CLOCK_REALTIME 0
 int clock_gettime(clockid_t, struct timespec *);
 # ifdef __cplusplus
 }
@@ -1051,8 +1051,8 @@ if not env['socket_export']:
 else:
     test_json = env.Program(
         'test_json', ['test_json.c'],
-	LIBS=['gps_static'], LIBPATH='.',
-	parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
+        LIBS=['gps_static'], LIBPATH='.',
+        parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
 
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
                          LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"])
