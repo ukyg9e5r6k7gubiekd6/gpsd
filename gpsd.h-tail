@@ -32,9 +32,10 @@
  * 3.10 The obsolete tag field has been dropped from JSON.
  * 3.11 A precision field, log2 of the time source jitter, has been added
  *      to the PPS report.  See ntpshm.h for more details.
+ * 3.12 OSC message added to repertoire.
  */
 #define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	11	/* bump on compatible changes */
+#define GPSD_PROTO_MINOR_VERSION	12	/* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 

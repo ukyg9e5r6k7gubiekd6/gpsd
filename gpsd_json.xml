@@ -1341,6 +1341,77 @@ limited to about 1 millisecond. seconds.</para>
 </varlistentry>
 
 <varlistentry>
+<term>OSC</term>
+<listitem>
+
+<para>This message reports the status of a GPS-disciplined oscillator
+(GPSDO).  The GPS PPS output (which has excellent long-term stability)
+is typically used to discipline a local oscillator with much better
+short-term stability (such as a rubidium atomic clock).</para>
+
+<para>An OSC object has the following elements:</para>
+
+<table frame="all" pgwide="0"><title>OSC object</title>
+<tgroup cols="3" align="left" colsep="1" rowsep="1">
+<thead>
+<row>
+	<entry>Name</entry>
+	<entry>Always?</entry>
+	<entry>Type</entry>
+	<entry>Description</entry>
+</row>
+</thead>
+<tbody>
+<row>
+	<entry>class</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Fixed: "OSC"</entry>
+</row>
+<row>
+	<entry>device</entry>
+	<entry>Yes</entry>
+	<entry>string</entry>
+        <entry>Name of originating device.</entry>
+</row>
+<row>
+	<entry>running</entry>
+	<entry>Yes</entry>
+	<entry>boolean</entry>
+        <entry>If true, the oscillator is currently running.  Oscillators may require warm-up time at start of day.</entry>
+</row>
+<row>
+	<entry>reference</entry>
+	<entry>Yes</entry>
+	<entry>boolean</entry>
+        <entry>If true, the oscillator is receiving a GPS PPS signal.</entry>
+</row>
+<row>
+	<entry>disciplined</entry>
+	<entry>Yes</entry>
+	<entry>boolean</entry>
+        <entry>If true, the GPS PPS signal is sufficiently stable and is being used to discipline the local oscillator.</entry>
+</row>
+<row>
+	<entry>delta</entry>
+	<entry>Yes</entry>
+	<entry>numeric</entry>
+        <entry>The time difference (in nanoseconds) between the GPS-disciplined oscillator PPS output pulse and the most recent GPS PPS input pulse.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+<para>Here's an example:</para>
+
+<programlisting>
+{"class":"OSC","running":true,"device":"/dev/ttyUSB0",
+    "reference":true,"disciplined":true,"delta":67}
+</programlisting>
+</listitem>
+</varlistentry>
+
+<varlistentry>
 <term>?DEVICE</term>
 <listitem>
 

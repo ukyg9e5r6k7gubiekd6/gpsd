@@ -3366,6 +3366,21 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 }
 #endif /* COMPASS_ENABLE */
 
+#ifdef OSCILLATOR_ENABLE
+void json_oscillator_dump(const struct gps_data_t *datap,
+			  char *reply, size_t replylen)
+/* dump the contents of an oscillator_t structure as JSON */
+{
+    (void)snprintf(reply, replylen,
+		   "{\"class\":\"OSC\",\"device\":\"%s\",\"running\":%s,\"reference\":%s,\"disciplined\":%s,\"delta\":%d}\r\n",
+		   datap->dev.path,
+		   JSON_BOOL(datap->osc.running),
+		   JSON_BOOL(datap->osc.reference),
+		   JSON_BOOL(datap->osc.disciplined),
+		   datap->osc.delta);
+}
+#endif /* OSCILLATOR_ENABLE */
+
 void json_data_report(const gps_mask_t changed,
 		 const struct gps_device_t *session,
 		 const struct policy_t *policy,
@@ -3418,6 +3433,12 @@ void json_data_report(const gps_mask_t changed,
 			buf+strlen(buf), buflen-strlen(buf));
     }
 #endif /* AIVDM_ENABLE */
+
+#ifdef OSCILLATOR_ENABLE
+    if ((changed & OSCILLATOR_SET) != 0) {
+	json_oscillator_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+#endif /* OSCILLATOR_ENABLE */
 }
 
 #undef JSON_BOOL

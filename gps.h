@@ -1907,6 +1907,13 @@ struct timedelta_t {
 };
 #endif /* TIMEDELTA_DEFINED */
 
+struct oscillator_t {
+    bool running;			/* oscillator is running */
+    bool reference;			/* PPS reference is available */
+    bool disciplined;			/* oscillator is GPS-disciplined */
+    int delta;				/* last observed PPS delta */
+};
+
 /*
  * Someday we may support Windows, under which socket_t is a separate type.
  * In the meantime, having a typedef for this semantic kind is no bad thing,
@@ -1971,7 +1978,8 @@ struct gps_data_t {
 #define TOFF_SET	(1llu<<32)	/* not yet used */
 #define PPS_SET 	(1llu<<33)
 #define NAVDATA_SET     (1llu<<34)
-#define SET_HIGH_BIT	35
+#define OSCILLATOR_SET	(1llu<<35)
+#define SET_HIGH_BIT	36
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -2021,7 +2029,7 @@ struct gps_data_t {
     } devices;
 
     /* pack things never reported together to reduce structure size */
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|VERSION_SET|LOGMESSAGE_SET|ERROR_SET|TOFF_SET|PPS_SET)
+#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|OSCILLATOR_SET|VERSION_SET|LOGMESSAGE_SET|ERROR_SET|TOFF_SET|PPS_SET)
     union {
 	/* unusual forms of sensor data that might come up the pipe */
 	struct rtcm2_t	rtcm2;
@@ -2032,6 +2040,7 @@ struct gps_data_t {
         struct navdata_t navdata;
 	struct rawdata_t raw;
 	struct gst_t gst;
+	struct oscillator_t osc;
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
 	char error[256];
@@ -2061,6 +2070,8 @@ int json_toff_read(const char *buf, struct gps_data_t *,
 		  const char **);
 int json_pps_read(const char *buf, struct gps_data_t *,
 		  const char **);
+int json_oscillator_read(const char *buf, struct gps_data_t *,
+			 const char **);
 
 /* dependencies on struct gpsdata_t end here */
 

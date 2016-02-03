@@ -131,6 +131,7 @@ boolopts = (
     ("ntp",           True,  "NTP time hinting support"),
     ("ntpshm",        True,  "NTP time hinting via shared memory"),
     ("pps",           True,  "PPS time syncing support"),
+    ("oscillator",    True,  "Disciplined oscillator support"),
     # Export methods
     ("socket_export", True,  "data export over sockets"),
     ("dbus_export",   True,  "enable DBUS export support"),
