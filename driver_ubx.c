@@ -633,12 +633,8 @@ static gps_mask_t parse_input(struct gps_device_t *session)
     if (session->lexer.type == UBX_PACKET) {
 	return ubx_parse(session, session->lexer.outbuffer,
 			 session->lexer.outbuflen);
-#ifdef NMEA0183_ENABLE
-    } else if (session->lexer.type == NMEA_PACKET) {
-	return nmea_parse((char *)session->lexer.outbuffer, session);
-#endif /* NMEA0183_ENABLE */
     } else
-	return 0;
+	return generic_parse_input(session);
 }
 
 bool ubx_write(struct gps_device_t * session,
@@ -730,6 +726,8 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	 */
 	if (session->mode == O_OPTIMIZE) {
 	    ubx_mode(session, MODE_BINARY);
+	} else {
+	    ubx_mode(session, MODE_NMEA);
 	}
 #endif /* RECONFIGURE_ENABLE */
     } else if (event == event_deactivate) {

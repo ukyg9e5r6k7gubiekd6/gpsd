@@ -363,11 +363,6 @@ static int property_check(void)
 			  (*dp)->type_name);
 	    status = EXIT_FAILURE;
 	}
-	if ((*dp)->probe_detect != NULL && (*dp)->trigger != NULL) {
-	    (void)fprintf(stderr, "%s both a probe and a trigger string\n",
-			  (*dp)->type_name);
-	    status = EXIT_FAILURE;
-	}
 #endif /* CONTROLSEND_ENABLE && RECONFIGURE_ENABLE*/
     }
 
