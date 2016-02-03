@@ -1105,6 +1105,63 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
 	     session->gpsdata.attitude.mag_st);
     return mask;
 }
+
+static gps_mask_t processTNTA(int c UNUSED, char *field[],
+			      struct gps_device_t *session)
+{
+    /*
+     * Proprietary sentence for iSync GRClok/LNRClok.
+
+     $PTNTA,20000102173852,1,T4,,,6,1,0*32
+
+     1. Date/time in format year, month, day, hour, minute, second
+     2. Oscillator quality 0:warming up, 1:freerun, 2:disciplined.
+     3. Always T4. Format indicator.
+     4. Interval ppsref-ppsout in [ns]. Blank if no ppsref.
+     5. Fine phase comparator in approx. [ns]. Always close to -500 or
+        +500 if not disciplined. Blank if no ppsref.
+     6. iSync Status.  0:warming up or no light, 1:tracking set-up,
+        2:track to PPSREF, 3:synch to PPSREF, 4:Free Run. Track OFF,
+        5:FR. PPSREF unstable, 6:FR. No PPSREF, 7:FREEZE, 8:factory
+        used, 9:searching Rb line
+     7. GPS messages indicator. 0:do not take account, 1:take account,
+        but no message, 2:take account, partially ok, 3:take account,
+        totally ok.
+     8. Transfer quality of date/time. 0:no, 1:manual, 2:GPS, older
+        than x hours, 3:GPS, fresh.
+
+     */
+    gps_mask_t mask;
+    mask = ONLINE_SET;
+
+    if (strcmp(field[3], "T4") == 0) {
+	struct oscillator_t *osc = &session->gpsdata.osc;
+	unsigned int quality = atoi(field[2]);
+	unsigned int delta = atoi(field[4]);
+	unsigned int fine = atoi(field[5]);
+	unsigned int status = atoi(field[6]);
+	char deltachar = field[4][0];
+
+	osc->running = (quality > 0);
+	osc->reference = (deltachar && (deltachar != '?'));
+	if (osc->reference) {
+	    if (abs(delta) < 500) {
+		osc->delta = fine;
+	    } else {
+		osc->delta = ((delta < 500000000) ? delta : 1000000000 - delta);
+	    }
+	} else {
+	    osc->delta = 0;
+	}
+	osc->disciplined = ((quality == 2) && (status == 3));
+	mask |= OSCILLATOR_SET;
+
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "PTNTA,T4: quality=%s, delta=%s, fine=%s, status=%s\n",
+		 field[2], field[4], field[5], field[6]);
+    }
+    return mask;
+}
 #endif /* TNT_ENABLE */
 
 #ifdef OCEANSERVER_ENABLE
@@ -1408,6 +1465,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 #endif /* MTK3301_ENABLE */
 #ifdef TNT_ENABLE
 	{"PTNTHTM", 9, false, processTNTHTM},
+	{"PTNTA", 8, false, processTNTA},
 #endif /* TNT_ENABLE */
 	{"RMC", 8,  false, processRMC},
 	{"TXT", 5,  false, processTXT},
