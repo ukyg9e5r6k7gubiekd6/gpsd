@@ -1848,7 +1848,7 @@ env.Command('www/hardware.html', ['gpscap.py',
 # udevadm trigger --sysname-match=ttyUSB0 --action add
 
 if env['systemd']:
-    systemdinstall_target = [ env.Install(DESTDIR + systemd_dir, "systemd/%s" %(x,)) for x in ("gpsdctl@.service", "gpsd.service", "gpsd.socket") ]
+    systemdinstall_target = [env.Install(DESTDIR + systemd_dir, "systemd/%s" %(x,)) for x in ("gpsdctl@.service", "gpsd.service", "gpsd.socket")]
     systemd_install = env.Alias('systemd_install', systemdinstall_target)
     systemd_uninstall = env.Command('systemd_uninstall', '', Flatten(Uninstall(Alias("systemd_install"))) or "")
 
@@ -1870,7 +1870,7 @@ udev_install = Utility('udev-install', 'install', [
     ] + hotplug_wrapper_install)
 
 if env['systemd']:
-    systemctl_daemon_reload = Utility('systemctl-daemon-reload', '', [ 'systemctl daemon-reload || true'])
+    systemctl_daemon_reload = Utility('systemctl-daemon-reload', '', ['systemctl daemon-reload || true'])
     env.AlwaysBuild(systemctl_daemon_reload)
     env.Precious(systemctl_daemon_reload)
     env.Requires(udev_install, systemd_install)
