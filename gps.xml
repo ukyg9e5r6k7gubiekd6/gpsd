@@ -281,7 +281,7 @@ and logs them to standard output in GPX, an XML profile for track
 logging.</para>
 
 <para>The output may be composed of multiple tracks. A new track is
-created if there's no fix for an interval specified by the
+created if there's no fix written for an interval specified by the
 <option>-i</option> and defaulting to 5 seconds.</para>
 
 <para>The <option>-d</option> option tells
@@ -292,6 +292,11 @@ specified logfile.</para>
 <para>The <option>-m</option> option sets a minimum move distance in
 meters (it may include a fractional decimal part).  Motions shorter
 than this will not be logged.</para>
+
+<para>The <option>-r</option> option tells
+<application>gpxlogger</application> to retry when GPSd loses the fix.
+Without <option>-r</option>, <application>gpxlogger</application>
+would quit in this case.</para>
 
 <para><application>gpxlogger</application> can use any of the
 export methods that <application>gpsd</application> supports.
