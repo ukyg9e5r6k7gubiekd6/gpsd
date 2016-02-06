@@ -498,11 +498,7 @@ The source distribution includes two example clients in C;
 gpxlogger.c and cgps.c.
 
 gpxlogger.c illustrates the simplest possible program flow; open,
-followed by stream, followed by blocking reads forever.  The use of
-select is not strictly necessary, but illustrates how to wait for data
-from the daemon; it would work even if the read were
-non-blocking. This would only be appropriate for a batch-mode report
-generator.
+followed by stream, followed by the library main loop.
 
 cgps.c shows what an interactive application using the library and
 also hw processing user commands works.  Note the use of the curses
