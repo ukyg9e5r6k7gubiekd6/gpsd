@@ -182,7 +182,7 @@ static void usage(void)
 {
     fprintf(stderr,
 	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-f filename] [-m minmove]\n"
-	    "\t[-e exportmethod] [server[:port:[device]]]\n\n"
+	    "\t[-r] [-e exportmethod] [server[:port:[device]]]\n\n"
 	    "defaults to '%s -i 5 -e %s localhost:2947'\n",
 	    progname, progname, export_default()->name);
     exit(EXIT_FAILURE);
@@ -192,8 +192,10 @@ int main(int argc, char **argv)
 {
     int ch;
     bool daemonize = false;
+    bool reconnect = false;
     unsigned int flags = WATCH_ENABLE;
     struct exportmethod_t *method = NULL;
+    const int GPS_TIMEOUT = 5000000;    /* microseconds */
 
     progname = argv[0];
 
@@ -204,7 +206,7 @@ int main(int argc, char **argv)
     }
 
     logfile = stdout;
-    while ((ch = getopt(argc, argv, "dD:e:f:hi:lm:V")) != -1) {
+    while ((ch = getopt(argc, argv, "dD:e:f:hi:lm:rV")) != -1) {
 	switch (ch) {
 	case 'd':
 	    openlog(basename(progname), LOG_PID | LOG_PERROR, LOG_DAEMON);
@@ -268,6 +270,9 @@ int main(int argc, char **argv)
         case 'm':
 	    minmove = (double )atoi(optarg);
 	    break;
+        case 'r':
+	    reconnect = true;
+	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: version %s (revision %s)\n",
 			  progname, VERSION, REVISION);
@@ -328,7 +333,14 @@ int main(int argc, char **argv)
     (void)gps_stream(&gpsdata, flags, source.device);
 
     print_gpx_header();
-    (void)gps_mainloop(&gpsdata, 5000000, conditionally_log_fix);
+
+    while (gps_mainloop(&gpsdata, GPS_TIMEOUT, conditionally_log_fix) < 0 &&
+	   reconnect) {
+	/* avoid busy-calling gps_mainloop() */
+	(void)sleep(GPS_TIMEOUT / 1000000);
+	syslog(LOG_INFO, "timeout; about to reconnect");
+    }
+
     print_gpx_footer();
     (void)gps_close(&gpsdata);
 
