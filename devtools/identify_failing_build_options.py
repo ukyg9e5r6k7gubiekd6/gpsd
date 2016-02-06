@@ -73,6 +73,7 @@ knobs = [
     'tsip',
     'ublox',
     'usb',
+    'xgps',
 ]
 
 
