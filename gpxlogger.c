@@ -254,7 +254,7 @@ int main(int argc, char **argv)
                 free(fname);
                 break;
             }
-	case 'i':		/* set polling interfal */
+	case 'i':		/* set polling interval */
 	    timeout = (time_t) atoi(optarg);
 	    if (timeout < 1)
 		timeout = 1;
