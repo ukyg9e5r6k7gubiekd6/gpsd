@@ -314,12 +314,12 @@ if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
 # Don't change CFLAGS if already set by environment.
-if not 'CFLAGS' in os.environ:
+if 'CFLAGS' not in os.environ:
     if '-Wmissing-prototypes' not in env['CFLAGS']:
         env.Append(CFLAGS=['-Wmissing-prototypes'])
 
 # Don't change CCFLAGS if already set by environment.
-if not 'CCFLAGS' in os.environ:
+if 'CCFLAGS' not in os.environ:
     env.Append(CCFLAGS=['-Wmissing-declarations'])
     # Should we build with profiling?
     if env['profiling']:
@@ -1797,7 +1797,7 @@ www = env.Alias('www', webpages)
 
 def validation_list(target, source, env):
     for page in glob.glob("www/*.html"):
-        if not '-head' in page:
+        if '-head' not in page:
             fp = open(page)
             if "Valid HTML" in fp.read():
                 print os.path.join(website, os.path.basename(page))
