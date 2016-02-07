@@ -212,14 +212,14 @@ for (name, default, help) in pathopts:
 # Environment creation
 #
 import_env = (
-    "MACOSX_DEPLOYMENT_TARGET", # Required by MacOSX 10.4 (and probably earlier)
+    "MACOSX_DEPLOYMENT_TARGET",  # Required by MacOSX 10.4 (and probably earlier)
     "DISPLAY",         # Required for dia to run under scons
     "GROUPS",          # Required by gpg
     "HOME",            # Required by gpg
     "LOGNAME",         # LOGNAME is required for the flocktest production.
     'PATH',            # Required for ccache and Coverity scan-build
-    'PKG_CONFIG_PATH', # Set .pc file directory in a crossbuild
-    'PKG_CONFIG_SYSROOT_DIR', # Pass more environment variables to pkg-config (required for crossbuilds)
+    'PKG_CONFIG_PATH',  # Set .pc file directory in a crossbuild
+    'PKG_CONFIG_SYSROOT_DIR',  # Pass more environment variables to pkg-config (required for crossbuilds)
     'PKG_CONFIG_LIBDIR',      # Pass more environment variables to pkg-config (required for crossbuilds)
     'STAGING_DIR',     # Required by the OpenWRT and CeroWrt builds.
     'STAGING_PREFIX',  # Required by the OpenWRT and CeroWrt builds.
@@ -616,12 +616,12 @@ else:
             announce("Turning off Bluetooth support, library not found.")
         env["bluez"] = False
 
-    #in_port_t is not defined on Android
+    # in_port_t is not defined on Android
     if not config.CheckType("in_port_t", "#include <netinet/in.h>"):
         announce("Did not find in_port_t typedef, assuming unsigned short int")
         confdefs.append("typedef unsigned short int in_port_t;\n")
 
-    #SUN_LEN is not defined on Android
+    # SUN_LEN is not defined on Android
     if not config.CheckDeclaration("SUN_LEN", "#include <sys/un.h>") and not config.CheckDeclaration("SUN_LEN", "#include <linux/un.h>"):
         announce("SUN_LEN is not system-defined, using local definition")
         confdefs.append("#ifndef SUN_LEN\n")
@@ -1121,7 +1121,7 @@ else:
         # compiler. If we should use other flags, the variable or the
         # variable for this should be predefined.
         if cxx.split()[0] != env['CXX']:
-            python_env['CCFLAGS'] = '' 
+            python_env['CCFLAGS'] = ''
             python_env['CXXFLAGS'] = ''
     else:
         python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])
