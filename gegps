@@ -37,6 +37,7 @@ KML_OPEN_IN_GE = '''\
 </kml>
 '''
 
+
 def kmlize(tpv):
     '''http://code.google.com/apis/kml/documentation/kmlreference.html
        for official kml document'''
@@ -63,7 +64,7 @@ def kmlize(tpv):
         <coordinates>%s,%s,%s</coordinates>
     </Point>
 </Placemark>
-</kml>""" % (speed,heading,longitude,latitude,longitude,latitude,altitude)
+</kml>""" % (speed, heading, longitude, latitude, longitude, latitude, altitude)
 
 
 if __name__ == "__main__":

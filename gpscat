@@ -16,6 +16,7 @@ BASELEVEL = sniffer.LOG_IO
 
 highhalf_latch = True
 
+
 def hexdump(st):
     dmp = ""
     for (_i, ch) in enumerate(st):
@@ -27,9 +28,11 @@ def hexdump(st):
 
 debuglevel = 0
 
+
 def reporter(errlevel, msg):
     if errlevel <= debuglevel:
         sys.stdout.write(msg)
+
 
 def printusage():
     sys.stderr.write("usage: gpscat [-s speed] [-p] [-t] [-D debuglevel] serial-port\n")

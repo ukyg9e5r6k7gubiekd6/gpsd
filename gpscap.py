@@ -7,6 +7,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 """
 import ConfigParser
 
+
 class GPSDictionary(ConfigParser.RawConfigParser):
     def __init__(self, *files):
         "Initialize the capability dictionary"

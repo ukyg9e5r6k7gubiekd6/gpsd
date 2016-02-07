@@ -37,6 +37,7 @@ SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 
 class unit_adjustments:
     "Encapsulate adjustments for unit systems."
+
     def __init__(self, units=None):
         self.altfactor = gps.METERS_TO_FEET
         self.altunits = "ft"
@@ -306,6 +307,7 @@ class NoiseView:
 
 class MaidenheadView:
     "Encapsulate view object for watching Maidenhead grid location."
+
     def __init__(self):
         self.widget = gtk.Entry()
         self.widget.set_editable(False)

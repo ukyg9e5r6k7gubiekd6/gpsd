@@ -18,13 +18,16 @@ MPS_TO_KNOTS	= 1.9438445	# Meters per second to knots
 
 # EarthDistance code swiped from Kismet and corrected
 
+
 def Deg2Rad(x):
     "Degrees to radians."
     return x * (math.pi/180)
 
+
 def Rad2Deg(x):
     "Radians to degress."
     return x * (180/math.pi)
+
 
 def CalcRad(lat):
     "Radius of curvature in meters at specified latitude."
@@ -51,6 +54,7 @@ def CalcRad(lat):
     r = r * 1000.0      # Convert to meters
     return r
 
+
 def EarthDistance((lat1, lon1), (lat2, lon2)):
     "Distance in meters between two points specified in degrees."
     x1 = CalcRad(lat1) * math.cos(Deg2Rad(lon1)) * math.sin(Deg2Rad(90-lat1))
@@ -68,6 +72,7 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
     elif a < -1: a = -1
     return CalcRad((lat1+lat2) / 2) * math.acos(a)
 
+
 def MeterOffset((lat1, lon1), (lat2, lon2)):
     "Return offset in meters of second arg from first."
     dx = EarthDistance((lat1, lon1), (lat1, lon2))
@@ -75,6 +80,7 @@ def MeterOffset((lat1, lon1), (lat2, lon2)):
     if lat1 < lat2: dy *= -1
     if lon1 < lon2: dx *= -1
     return (dx, dy)
+
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."

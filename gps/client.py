@@ -20,6 +20,7 @@ class json_error(exceptions.Exception):
 
 class gpscommon:
     "Isolate socket handling and buffering from the protocol interpretation."
+
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
         self.sock = None        # in case we blow up in connect
         self.linebuffer = ""
@@ -139,6 +140,7 @@ WATCH_DEVICE = 0x000800 	# watch specific device
 
 class gpsjson:
     "Basic JSON decoding."
+
     def __iter__(self):
         return self
 
@@ -197,6 +199,7 @@ class gpsjson:
 
 class dictwrapper:
     "Wrapper that yields both class and dictionary behavior,"
+
     def __init__(self, ddict):
         self.__dict__ = ddict
 

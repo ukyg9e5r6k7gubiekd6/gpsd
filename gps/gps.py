@@ -18,6 +18,8 @@ from client import *
 from misc import isotime
 
 NaN = float('nan')
+
+
 def isnan(x): return str(x) == 'nan'
 
 # Don't hand-hack this list, it's generated.
@@ -96,6 +98,7 @@ class gpsfix:
         self.eps = NaN
         self.epc = NaN
 
+
 class gpsdata:
     "Position, track, velocity and status information returned by a GPS."
 
@@ -106,6 +109,7 @@ class gpsdata:
             self.azimuth = azimuth
             self.ss = ss
             self.used = used
+
         def __repr__(self):
             return "PRN: %3d  E: %3d  Az: %3d  Ss: %3d  Used: %s" % (
                 self.PRN, self.elevation, self.azimuth, self.ss, "ny"[self.used]
@@ -164,8 +168,10 @@ class gpsdata:
             st += "    %r\n" % sat
         return st
 
+
 class gps(gpscommon, gpsdata, gpsjson):
     "Client interface to a running gpsd instance."
+
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
         gpscommon.__init__(self, host, port, verbose)
         gpsdata.__init__(self)
@@ -332,7 +338,7 @@ class gps(gpscommon, gpsdata, gpsjson):
 
     def stream(self, flags=0, devpath=None):
         "Ask gpsd to stream reports at your client."
-        if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
+        if (flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA | WATCH_RAW)) == 0:
             flags |= WATCH_JSON
         if flags & WATCH_DISABLE:
             if flags & WATCH_OLDSTYLE:
@@ -350,6 +356,7 @@ class gps(gpscommon, gpsdata, gpsjson):
                     return self.send(arg)
             else:
                 gpsjson.stream(self, flags, devpath)
+
 
 def is_sbas(prn):
     "Is this the NMEA ID of an SBAS satellite?"
