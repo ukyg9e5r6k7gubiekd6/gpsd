@@ -71,11 +71,15 @@ import SCons
 
 # replacement for functions from the commands module, which is deprecated.
 from subprocess import PIPE, STDOUT, Popen
+
+
 def _getstatusoutput(cmd, input=None, cwd=None, env=None):
     pipe = Popen(cmd, shell=True, cwd=cwd, env=env, stdout=PIPE, stderr=STDOUT)
     (output, errout) = pipe.communicate(input=input)
     status = pipe.returncode
     return (status, output)
+
+
 def _getoutput(cmd, input=None, cwd=None, env=None):
     return _getstatusoutput(cmd, input, cwd, env)[1]
 
@@ -170,9 +174,9 @@ for (name, default, help) in boolopts:
 
 # Gentoo, Fedora, opensuse systems use uucp for ttyS* and ttyUSB*
 if os.path.exists("/etc/gentoo-release"):
-   def_group = "uucp"
+    def_group = "uucp"
 else:
-   def_group = "dialout"
+    def_group = "dialout"
 
 nonboolopts = (
     ("gpsd_user",           "nobody",      "privilege revocation user",),
@@ -283,12 +287,14 @@ if env["slow"]:
 else:
     env['REGRESSOPTS'] = ""
 
+
 def announce(msg):
     if not env.GetOption("silent"):
         print msg
 
 # DESTDIR environment variable means user wants to prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
+
 
 def installdir(dir, add_destdir=True):
     # use os.path.join to handle absolute paths properly.
@@ -383,16 +389,18 @@ values can be listed with 'scons -h'.
 
 ## Configuration
 
+
 def CheckPKG(context, name):
-    context.Message( 'Checking for %s... ' % name )
+    context.Message('Checking for %s... ' % name)
     ret = context.TryAction('%s --exists \'%s\'' % (env['PKG_CONFIG'], name))[0]
-    context.Result( ret )
+    context.Result(ret)
     return ret
 
 # Stylesheet URLs for making HTML and man pages from DocBook XML.
 docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
 docbook_man_uri = docbook_url_stem + 'manpages/docbook.xsl'
 docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
+
 
 def CheckXsltproc(context):
     context.Message('Checking that xsltproc can make man pages... ')
@@ -416,11 +424,12 @@ def CheckXsltproc(context):
     os.remove("xmltest.xml")
     if os.path.exists("foo.1"):
         os.remove("foo.1")
-    context.Result( ret )
+    context.Result(ret)
     return ret
 
+
 def CheckCompilerOption(context, option):
-    context.Message( 'Checking if compiler accepts %s ...' % (option,) )
+    context.Message('Checking if compiler accepts %s ...' % (option,))
     old_CFLAGS=context.env['CFLAGS']
     context.env.Append(CFLAGS=option)
     ret = context.TryLink("""
@@ -433,8 +442,9 @@ def CheckCompilerOption(context, option):
     context.Result(ret)
     return ret
 
+
 def CheckHeaderDefines(context, file, define):
-    context.Message( 'Checking if %s supplies %s ...' % (file,define) )
+    context.Message('Checking if %s supplies %s ...' % (file,define))
     ret = context.TryLink("""
         #include <%s>
         #ifndef %s
@@ -447,8 +457,9 @@ def CheckHeaderDefines(context, file, define):
     context.Result(ret)
     return ret
 
+
 def CheckCompilerDefines(context, define):
-    context.Message( 'Checking if compiler supplies %s ...' % (define,) )
+    context.Message('Checking if compiler supplies %s ...' % (define,))
     ret = context.TryLink("""
         #ifndef %s
         #error %s is not defined
@@ -461,8 +472,10 @@ def CheckCompilerDefines(context, define):
     return ret
 
 # Check if this compiler is C11 or better
+
+
 def CheckC11(context):
-    context.Message( 'Checking if compiler is C11 ...' )
+    context.Message('Checking if compiler is C11 ...')
     ret = context.TryLink("""
         #if (__STDC_VERSION__ < 201112L)
         #error Not C11
@@ -473,6 +486,7 @@ def CheckC11(context):
     """,'.c')
     context.Result(ret)
     return ret
+
 
 def GetLoadPath(context):
     context.Message("Getting system load path ...")
@@ -488,13 +502,12 @@ if env.GetOption("clean") or env.GetOption("help"):
     htmlbuilder = False
     qt_env = None
 else:
-    config = Configure(env, custom_tests = { 'CheckPKG' : CheckPKG,
+    config = Configure(env, custom_tests = {'CheckPKG' : CheckPKG,
                                              'CheckXsltproc' : CheckXsltproc,
                                              'CheckCompilerOption' : CheckCompilerOption,
                                              'CheckCompilerDefines' : CheckCompilerDefines,
                                              'CheckC11' : CheckC11,
                                              'CheckHeaderDefines' : CheckHeaderDefines})
-
 
     # If supported by the compiler, enable all warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
@@ -548,11 +561,11 @@ else:
         elif WhereIs('ncursesw5-config'):
             ncurseslibs = ['!ncursesw5-config --libs --cflags']
         elif sys.platform.startswith('freebsd'):
-            ncurseslibs= [ '-lncurses' ]
+            ncurseslibs= ['-lncurses']
         elif sys.platform.startswith('openbsd'):
-            ncurseslibs= [ '-lcurses' ]
+            ncurseslibs= ['-lcurses']
         elif sys.platform.startswith('darwin'):
-            ncurseslibs= [ '-lcurses' ]
+            ncurseslibs= ['-lcurses']
 
     if env['usb']:
         # In FreeBSD except version 7, USB libraries are in the base system
@@ -565,7 +578,7 @@ else:
                 usbflags = []
         elif sys.platform.startswith("freebsd"):
             confdefs.append("#define HAVE_LIBUSB 1\n")
-            usbflags = [ "-lusb"]
+            usbflags = ["-lusb"]
         else:
             confdefs.append("/* #undef HAVE_LIBUSB */\n")
             usbflags = []
@@ -761,7 +774,6 @@ int clock_gettime(clockid_t, struct timespec *);
 #define GPSD_CONFIG_H
 #endif /* GPSD_CONFIG_H */
 ''')
-
 
     manbuilder = mangenerator = htmlbuilder = None
     if env['manbuild']:
@@ -1160,6 +1172,8 @@ env.Command(target = "packet_names.h", source="packet_states.h", action="""
     chmod a-w $TARGET""")
 
 # timebase.h - always built in order to include current GPS week
+
+
 def timebase_h(target, source, env):
     from leapsecond import make_leapsecond_include
     f = open(target[0].abspath, 'w')
@@ -1201,6 +1215,7 @@ generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
 # by the U.S. Naval observatory. It gets kept in the repository so we can
 # build without Internet access.
 from leapsecond import conditional_leapsecond_fetch
+
 
 def leapseconds_cache_rebuild(target, source, env):
     if not env["leapfetch"]:
@@ -1273,7 +1288,7 @@ templated = glob.glob("*.in") + glob.glob("*/*.in") + glob.glob("*/*/*.in")
 
 # ignore files in subfolder called 'debian' - the Debian packaging
 # tools will handle them.
-templated = [ x for x in templated if not x.startswith('debian/') ]
+templated = [x for x in templated if not x.startswith('debian/')]
 
 
 for fn in templated:
@@ -1339,7 +1354,7 @@ if env['python']:
 
 # It's deliberate that we don't install gpsd.h. It's full of internals that
 # third-party client programs should not see.
-headerinstall = [ env.Install(installdir('includedir'), x) for x in ("libgpsmm.h", "gps.h")]
+headerinstall = [env.Install(installdir('includedir'), x) for x in ("libgpsmm.h", "gps.h")]
 
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
@@ -1362,28 +1377,27 @@ if not env['python']:
 else:
     python_lib_dir = env['python_libdir']
     python_module_dir = python_lib_dir + os.sep + 'gps'
-    python_extensions_install = python_env.Install( DESTDIR + python_module_dir,
+    python_extensions_install = python_env.Install(DESTDIR + python_module_dir,
                                                     python_built_extensions)
     if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.platform.startswith('darwin'):
         python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
 
-    python_modules_install = python_env.Install( DESTDIR + python_module_dir,
+    python_modules_install = python_env.Install(DESTDIR + python_module_dir,
                                                 python_modules)
 
     python_progs_install = python_env.Install(installdir('bindir'), python_progs)
 
     python_egg_info_install = python_env.Install(DESTDIR + python_lib_dir,
                                                  python_egg_info)
-    python_install = [  python_extensions_install,
+    python_install = [python_extensions_install,
                         python_modules_install,
                         python_progs_install,
                         python_egg_info_install]
 
-pc_install = [ env.Install(installdir('pkgconfig'), x) for x in ("libgps.pc", "libgpsd.pc") ]
+pc_install = [env.Install(installdir('pkgconfig'), x) for x in ("libgps.pc", "libgpsd.pc")]
 if qt_env:
     pc_install.append(qt_env.Install(installdir('pkgconfig'), 'Qgpsmm.pc'))
     pc_install.append(qt_env.Install(installdir('libdir'), 'libQgpsmm.prl'))
-
 
 
 maninstall = []
@@ -1394,6 +1408,7 @@ for manpage in base_manpages.keys() + python_manpages.keys():
     dest = os.path.join(installdir('mandir'), "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
 install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install + headerinstall)
+
 
 def Uninstall(nodes):
     deletes = []
@@ -1410,12 +1425,14 @@ env.Precious(uninstall)
 # Target selection for '.' is badly broken. This is a general scons problem,
 # not a glitch in this particular recipe. Avoid triggering the bug.
 
+
 def error_action(target, source, env):
     from SCons.Errors import UserError
     raise UserError, "Target selection for '.' is broken."
 AlwaysBuild(Alias(".", [], error_action))
 
 # Utility productions
+
 
 def Utility(target, source, action):
     target = env.Command(target=target, source=source, action=action)
@@ -1776,6 +1793,8 @@ www = env.Alias('www', webpages)
 
 # Paste 'scons --quiet validation-list' to a batch validator such as
 # http://htmlhelp.com/tools/validator/batch.html.en
+
+
 def validation_list(target, source, env):
     for page in glob.glob("www/*.html"):
         if not '-head' in page:
