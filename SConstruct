@@ -268,7 +268,7 @@ for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "LINKFL
             env.Replace(**{j: os.getenv(i)})
 for flag in ["LDFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
     if os.environ.has_key(flag):
-        env.MergeFlags({flag : [os.getenv(flag)]})
+        env.MergeFlags({flag: [os.getenv(flag)]})
 
 
 # Keep scan-build options in the environment
@@ -502,12 +502,12 @@ if env.GetOption("clean") or env.GetOption("help"):
     htmlbuilder = False
     qt_env = None
 else:
-    config = Configure(env, custom_tests = {'CheckPKG' : CheckPKG,
-                                             'CheckXsltproc' : CheckXsltproc,
-                                             'CheckCompilerOption' : CheckCompilerOption,
-                                             'CheckCompilerDefines' : CheckCompilerDefines,
-                                             'CheckC11' : CheckC11,
-                                             'CheckHeaderDefines' : CheckHeaderDefines})
+    config = Configure(env, custom_tests = {'CheckPKG': CheckPKG,
+                                             'CheckXsltproc': CheckXsltproc,
+                                             'CheckCompilerOption': CheckCompilerOption,
+                                             'CheckCompilerDefines': CheckCompilerDefines,
+                                             'CheckC11': CheckC11,
+                                             'CheckHeaderDefines': CheckHeaderDefines})
 
     # If supported by the compiler, enable all warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
@@ -689,7 +689,7 @@ else:
     # Map options to libraries required to support them that might be absent.
     optionrequires = {
         "bluez": ["libbluetooth"],
-        "dbus_export" : ["libdbus-1"],
+        "dbus_export": ["libdbus-1"],
         }
 
     keys = map(lambda x: (x[0],x[2]), boolopts) + map(lambda x: (x[0],x[2]), nonboolopts) + map(lambda x: (x[0],x[2]), pathopts)
@@ -1086,9 +1086,9 @@ else:
     # Build Python binding
     #
     python_extensions = {
-        "gps" + os.sep + "packet" : ["gpspacket.c", "packet.c", "isgps.c",
+        "gps" + os.sep + "packet": ["gpspacket.c", "packet.c", "isgps.c",
                                         "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"],
-        "gps" + os.sep + "clienthelpers" : ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"]
+        "gps" + os.sep + "clienthelpers": ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"]
     }
 
     python_env = env.Clone()
@@ -1300,31 +1300,31 @@ for fn in templated:
 # Documentation
 
 base_manpages = {
-    "gpsd.8" : "gpsd.xml",
-    "gpsd_json.5" : "gpsd_json.xml",
-    "gps.1" : "gps.xml",
-    "cgps.1" : "gps.xml",
+    "gpsd.8": "gpsd.xml",
+    "gpsd_json.5": "gpsd_json.xml",
+    "gps.1": "gps.xml",
+    "cgps.1": "gps.xml",
     "gpsinit.8": "gpsinit.xml",
-    "lcdgps.1" : "gps.xml",
-    "libgps.3" : "libgps.xml",
-    "libgpsmm.3" : "libgpsmm.xml",
-    "libQgpsmm.3" : "libgpsmm.xml",
+    "lcdgps.1": "gps.xml",
+    "libgps.3": "libgps.xml",
+    "libgpsmm.3": "libgpsmm.xml",
+    "libQgpsmm.3": "libgpsmm.xml",
     "gpsmon.1": "gpsmon.xml",
-    "gpsctl.1" : "gpsctl.xml",
-    "gpsdctl.8" : "gpsdctl.xml",
-    "gpspipe.1" : "gpspipe.xml",
-    "gps2udp.1" : "gps2udp.xml",
-    "gpsdecode.1" : "gpsdecode.xml",
-    "srec.5" : "srec.xml",
-    "ntpshmmon.1" : "ntpshmmon.xml",
+    "gpsctl.1": "gpsctl.xml",
+    "gpsdctl.8": "gpsdctl.xml",
+    "gpspipe.1": "gpspipe.xml",
+    "gps2udp.1": "gps2udp.xml",
+    "gpsdecode.1": "gpsdecode.xml",
+    "srec.5": "srec.xml",
+    "ntpshmmon.1": "ntpshmmon.xml",
     }
 python_manpages = {
-    "gpsprof.1" : "gpsprof.xml",
-    "gpsfake.1" : "gpsfake.xml",
-    "gpscat.1" : "gpscat.xml",
-    "xgpsspeed.1" : "gps.xml",
-    "xgps.1" : "gps.xml",
-    "gegps.1" : "gps.xml",
+    "gpsprof.1": "gpsprof.xml",
+    "gpsfake.1": "gpsfake.xml",
+    "gpscat.1": "gpscat.xml",
+    "xgpsspeed.1": "gps.xml",
+    "xgps.1": "gps.xml",
+    "gegps.1": "gps.xml",
     }
 
 manpage_targets = []
