@@ -502,7 +502,7 @@ if env.GetOption("clean") or env.GetOption("help"):
     htmlbuilder = False
     qt_env = None
 else:
-    config = Configure(env, custom_tests = {'CheckPKG': CheckPKG,
+    config = Configure(env, custom_tests={'CheckPKG': CheckPKG,
                                              'CheckXsltproc': CheckXsltproc,
                                              'CheckCompilerOption': CheckCompilerOption,
                                              'CheckCompilerDefines': CheckCompilerDefines,
@@ -1130,7 +1130,7 @@ else:
     ldshared=ldshared.replace('-pie', '')
     python_env.Replace(SHLINKFLAGS=[],
                        LDFLAGS=ldflags,
-                       LINK = ldshared,
+                       LINK=ldshared,
                        SHLIBPREFIX="",
                        SHLIBSUFFIX=so_ext,
                        CPPPATH=[includepy],
@@ -1166,7 +1166,7 @@ Platform: UNKNOWN
     python_built_extensions = python_compiled_libs.values()
     python_targets = python_built_extensions + [python_egg_info]
 
-env.Command(target = "packet_names.h", source="packet_states.h", action="""
+env.Command(target="packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
     sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
     chmod a-w $TARGET""")
