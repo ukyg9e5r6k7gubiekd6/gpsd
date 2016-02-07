@@ -638,7 +638,7 @@ else:
 
     # check for C11 or better, and __STDC__NO_ATOMICS__ is not defined
     # before looking for stdatomic.h
-    if config.CheckC11() and  not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and config.CheckHeader("stdatomic.h"):
+    if config.CheckC11() and not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and config.CheckHeader("stdatomic.h"):
         confdefs.append("#define HAVE_STDATOMIC_H 1\n")
     else:
         confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
@@ -1358,7 +1358,7 @@ headerinstall = [env.Install(installdir('includedir'), x) for x in ("libgpsmm.h"
 
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
-binaryinstall.append(env.Install(installdir('bindir'),  [gpsdecode, gpsctl, gpspipe, gps2udp,
+binaryinstall.append(env.Install(installdir('bindir'), [gpsdecode, gpsctl, gpspipe, gps2udp,
                                                          gpxlogger, lcdgps, ntpshmmon]))
 if env["ncurses"]:
     binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
