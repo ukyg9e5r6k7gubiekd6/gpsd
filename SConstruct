@@ -238,7 +238,7 @@ env.SConsignFile(".sconsign.dblite")
 #  Minimal build turns off every option not set on the command line,
 if env['minimal']:
     for (name, default, help) in boolopts:
-        if default == True and not ARGUMENTS.get(name):
+        if default is True and not ARGUMENTS.get(name):
             env[name] = False
 
 # NTPSHM requires NTP
