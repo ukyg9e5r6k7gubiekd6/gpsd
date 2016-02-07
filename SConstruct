@@ -258,7 +258,7 @@ env['PYTHON'] = sys.executable
 env['STRIP'] = "strip"
 env['PKG_CONFIG'] = "pkg-config"
 for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "LINKFLAGS", "STRIP", "PKG_CONFIG", "LD", "TAR"]:
-    if os.environ.has_key(i):
+    if i in os.environ:
         j = i
         if i == "LD":
             i = "SHLINK"
@@ -267,7 +267,7 @@ for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "LINKFL
         else:
             env.Replace(**{j: os.getenv(i)})
 for flag in ["LDFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
-    if os.environ.has_key(flag):
+    if i in os.environ:
         env.MergeFlags({flag: [os.getenv(flag)]})
 
 
