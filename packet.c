@@ -221,6 +221,9 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
     switch (lexer->state) {
     case GROUND_STATE:
 	n = 0;
+#ifdef STASH_ENABLE
+	lexer->stashbuflen = 0;
+#endif
 	if (c == '#') {
 	    lexer->state = COMMENT_BODY;
 	    break;
@@ -531,9 +534,13 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	else if (c == '\n')
 	    /* not strictly correct, but helps for interpreting logfiles */
 	    lexer->state = NMEA_RECOGNIZED;
-	else if (c == '$')
+	else if (c == '$') {
+#ifdef STASH_ENABLE
+	    (void) character_pushback(lexer, STASH_RECOGNIZED);
+#else
 	    (void) character_pushback(lexer, GROUND_STATE);
-	else if (!isprint(c))
+#endif
+	} else if (!isprint(c))
 	    (void) character_pushback(lexer, GROUND_STATE);
 	break;
     case NMEA_CR:
@@ -1421,6 +1428,14 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
 #endif /* PASSTHROUGH_ENABLE */
+#ifdef STASH_ENABLE
+    case STASH_RECOGNIZED:
+	if (c == '$')
+	    lexer->state = NMEA_DOLLAR;
+	else
+	    return character_pushback(lexer, GROUND_STATE);
+	break;
+#endif /* STASH_ENABLE */
     }
 
     return true;	/* no pushback */
@@ -1468,6 +1483,52 @@ static void packet_discard(struct gps_lexer_t *lexer)
 				    (char *)lexer->inbuffer, lexer->inbuflen));
     }
 }
+
+#ifdef STASH_ENABLE
+static void packet_stash(struct gps_lexer_t *lexer)
+/* stash the input buffer up to current input pointer */
+{
+    size_t stashlen = lexer->inbufptr - lexer->inbuffer;
+
+    memcpy(lexer->stashbuffer, lexer->inbuffer, stashlen);
+    lexer->stashbuflen = stashlen;
+    if (lexer->errout.debug >= LOG_RAW+1) {
+	char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	gpsd_log(&lexer->errout, LOG_RAW+1,
+		 "Packet stash of %zu = %s\n",
+		 stashlen,
+		 gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
+				 (char *)lexer->stashbuffer,
+				 lexer->stashbuflen));
+    }
+}
+
+static void packet_unstash(struct gps_lexer_t *lexer)
+/* return stash to start of input buffer */
+{
+    size_t available = sizeof(lexer->inbuffer) - lexer->inbuflen;
+    size_t stashlen = lexer->stashbuflen;
+
+    if (stashlen <= available) {
+	memmove(lexer->inbuffer + stashlen, lexer->inbuffer, lexer->inbuflen);
+	memcpy(lexer->inbuffer, lexer->stashbuffer, stashlen);
+	lexer->inbuflen += stashlen;
+	lexer->stashbuflen = 0;
+	if (lexer->errout.debug >= LOG_RAW+1) {
+	    char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	    gpsd_log(&lexer->errout, LOG_RAW+1,
+		     "Packet unstash of %zu, reconstructed is %zu = %s\n",
+		     stashlen, lexer->inbuflen,
+		     gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
+				     (char *)lexer->inbuffer, lexer->inbuflen));
+	}
+    } else {
+	gpsd_log(&lexer->errout, LOG_ERROR,
+		 "Rejected too long unstash of %zu\n", stashlen);
+	lexer->stashbuflen = 0;
+    }
+}
+#endif /* STASH_ENABLE */
 
 static void character_discard(struct gps_lexer_t *lexer)
 /* shift the input buffer to discard one character and reread data */
@@ -1589,6 +1650,10 @@ void packet_parse(struct gps_lexer_t *lexer)
 #endif /* AIVDM_ENABLE */
 		packet_accept(lexer, NMEA_PACKET);
 	    packet_discard(lexer);
+#ifdef STASH_ENABLE
+	    if (lexer->stashbuflen)
+		packet_unstash(lexer);
+#endif /* STASH_ENABLE */
 	    break;
 	}
 #endif /* NMEA0183_ENABLE */
@@ -2121,6 +2186,12 @@ void packet_parse(struct gps_lexer_t *lexer)
 	    break;
 	}
 #endif /* PASSTHROUGH_ENABLE */
+#ifdef STASH_ENABLE
+	else if (lexer->state == STASH_RECOGNIZED) {
+	    packet_stash(lexer);
+	    packet_discard(lexer);
+	}
+#endif /* STASH_ENABLE */
     }				/* while */
 }
 
@@ -2217,6 +2288,9 @@ void packet_reset(struct gps_lexer_t *lexer)
 #ifdef BINARY_ENABLE
     isgps_init(lexer);
 #endif /* BINARY_ENABLE */
+#ifdef STASH_ENABLE
+    lexer->stashbuflen = 0;
+#endif /* STASH_ENABLE */
 }
 
 

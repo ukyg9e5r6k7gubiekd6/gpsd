@@ -187,6 +187,10 @@ struct gps_lexer_t {
     unsigned int json_depth;
     unsigned int json_after;
 #endif /* PASSTHROUGH_ENABLE */
+#ifdef STASH_ENABLE
+    unsigned char stashbuffer[MAX_PACKET_LENGTH];
+    size_t stashbuflen;
+#endif /* STASH_ENABLE */
 };
 
 extern void lexer_init(struct gps_lexer_t *);

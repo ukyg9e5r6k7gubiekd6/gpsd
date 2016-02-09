@@ -62,6 +62,20 @@ static struct map singletests[] = {
 	.garbage_offset = 0,
 	.type = BAD_PACKET,
     },
+    {
+	.legend = "NMEA interspersed packet",
+	.test = "$GPZDA,112533.00,20,01,20$PTNTA,20000102173852,1,T4,,,6,1,0*32\r\n",
+	.testlen = 64,
+	.garbage_offset = 25,
+	.type = NMEA_PACKET,
+    },
+    {
+	.legend = "NMEA interrupted packet",
+	.test = "$GPZDA,112533.00,20,01,2016,00,00*67\r\n$GPZDA,112533.00,20,01,20$PTNTA,20000102173852,1,T4,,,6,1,0*32\r\n16,00,00*67\r\n",
+	.testlen = 115,
+	.garbage_offset = 0,
+	.type = NMEA_PACKET,
+    },
     /* SiRF tests */
     {
 	.legend = "SiRF WAAS version ID",

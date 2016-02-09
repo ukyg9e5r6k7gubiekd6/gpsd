@@ -206,4 +206,8 @@
    JSON_RECOGNIZED,     /* JSON packet recognized */
 #endif
 
+#ifdef STASH_ENABLE
+   STASH_RECOGNIZED,    /* stashable prefix recognized */
+#endif
+
 /* end of packet_states.h */
