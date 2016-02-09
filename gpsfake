@@ -222,7 +222,11 @@ if __name__ == '__main__':
                 # sentences to arrive before the watch takes effect.
                 # This needs to increase if leading sentences in
                 # test loads aren't being processed.
-                time.sleep(1)
+                # Until the ISYNC driver was introduced, 1 sec was
+                # sufficient here. The extra 0.4s allows for the
+                # additional two 200ms delays introduced by the
+                # calls to gpsd_set_speed() in isync_detect()
+                time.sleep(1.4)
             test.run()
         except socket.error, msg:
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)
