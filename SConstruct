@@ -194,6 +194,7 @@ nonboolopts = (
     ("fixed_stop_bits",     0,             "fixed serial port stop bits"),
     ("target",              "",            "cross-development target"),
     ("sysroot",             "",            "cross-development system root"),
+    ("qt_versioned",        "",            "version for versioned Qt"),
     )
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
@@ -801,9 +802,11 @@ int clock_gettime(clockid_t, struct timespec *);
                                           src_suffix=".xml", suffix=".html")
 
     # Determine if Qt network libraries are present, and if not, force qt to off
-    qt_network = config.CheckPKG('QtNetwork')
-    if not qt_network:
-        env["qt"] = False
+    if env["qt"]:
+        qt_net_name = 'Qt%sNetwork' % env["qt_versioned"]
+        qt_network = config.CheckPKG(qt_net_name)
+        if not qt_network:
+            env["qt"] = False
 
     env = config.Finish()
 
@@ -829,9 +832,10 @@ int clock_gettime(clockid_t, struct timespec *);
         qt_env.MergeFlags('-DUSE_QT')
         qt_env.Append(OBJPREFIX='qt-')
         try:
-            qt_env.MergeFlags(pkg_config('QtNetwork'))
+            qt_env.MergeFlags(pkg_config(qt_net_name))
         except OSError:
-            announce("pkg_config is confused about the state of QtNetwork.")
+            announce("pkg_config is confused about the state of %s."
+                     % qt_net_name)
             qt_env = None
     else:
         qt_env = None
