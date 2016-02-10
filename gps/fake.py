@@ -67,7 +67,7 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
-import os, sys, time, signal, pty, termios # fcntl, array, struct
+import os, sys, time, signal, pty, termios  # fcntl, array, struct
 import exceptions, threading, socket, select
 import gps
 import packet as sniffer
@@ -117,7 +117,7 @@ class TestLoad:
     "Digest a logfile into a list of sentences we can cycle through."
 
     def __init__(self, logfp, predump=False, slow=False, oneshot=False):
-        self.sentences = []	# This is the interesting part
+        self.sentences = []  # This is the interesting part
         if type(logfp) == type(""):
             logfp = open(logfp, "r")
         self.name = logfp.name
@@ -135,7 +135,7 @@ class TestLoad:
         logfp = open(logfp.name)
         # Grab the packets in the normal way
         getter = sniffer.new()
-        #gps.packet.register_report(reporter)
+        # gps.packet.register_report(reporter)
         type_latch = None
         commentlen = 0
         while True:
@@ -164,7 +164,7 @@ class TestLoad:
                         else:
                             raise ValueError
                     except (ValueError, IndexError):
-                        raise TestLoadError("bad serial-parameter spec in %s" %\
+                        raise TestLoadError("bad serial-parameter spec in %s" %
                                             self.name)
                     self.serial = (baud, databits, parity, stopbits)
                 elif "Transport: UDP" in packet:
@@ -178,7 +178,7 @@ class TestLoad:
                         (_dummy, self.delimiter, delay) = packet.strip().split()
                         self.delay = float(delay)
                     except ValueError:
-                        raise TestLoadError("bad Delay-Cookie line in %s" %\
+                        raise TestLoadError("bad Delay-Cookie line in %s" %
                                             self.name)
                     self.resplit = True
             else:
@@ -187,7 +187,7 @@ class TestLoad:
                 if self.predump:
                     print repr(packet)
                 if not packet:
-                    raise TestLoadError("zero-length packet from %s" %\
+                    raise TestLoadError("zero-length packet from %s" %
                                         self.name)
                 self.sentences.append(packet)
         # Look at the first packet to grok the GPS type
@@ -270,7 +270,7 @@ class FakePTY(FakeGPS):
         }
         (self.fd, self.slave_fd) = pty.openpty()
         self.byname = os.ttyname(self.slave_fd)
-        os.chmod( self.byname,  stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH )
+        os.chmod(self.byname, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH)
         (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(self.slave_fd)
         cc[termios.VMIN] = 1
         cflag &= ~(termios.PARENB | termios.PARODD | termios.CRTSCTS)
@@ -294,9 +294,9 @@ class FakePTY(FakeGPS):
         ispeed = ospeed = baudrates[speed]
         try:
             termios.tcsetattr(self.slave_fd, termios.TCSANOW,
-                          [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
+                              [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
         except termios.error:
-            raise TestLoadError("error attempting to set serial mode to %s %s%s%s" \
+            raise TestLoadError("error attempting to set serial mode to %s %s%s%s"
                                 % (speed, databits, parity, stopbits))
 
     def read(self):
@@ -304,12 +304,12 @@ class FakePTY(FakeGPS):
         # A tcflush implementation works on Linux but fails on OpenBSD 4.
         termios.tcflush(self.fd, termios.TCIFLUSH)
         # Alas, the FIONREAD version also works on Linux and fails on OpenBSD.
-        #try:
+        # try:
         #    buf = array.array('i', [0])
         #    fcntl.ioctl(self.master_fd, termios.FIONREAD, buf, True)
         #    n = struct.unpack('i', buf)[0]
         #    os.read(self.master_fd, n)
-        #except IOError:
+        # except IOError:
         #    pass
 
     def write(self, line):
@@ -349,11 +349,11 @@ class FakeTCP(FakeGPS):
         "Handle connection requests and data."
         readable, _writable, _errored = select.select(self.readables, [], [], 0)
         for s in readable:
-            if s == self.dispatcher:	# Connection request
+            if s == self.dispatcher:  # Connection request
                 client_socket, _address = s.accept()
                 self.readables = [client_socket]
                 self.dispatcher.close()
-            else:			# Incoming data
+            else:  # Incoming data
                 data = s.recv(1024)
                 if not data:
                     s.close()
@@ -395,7 +395,7 @@ class FakeUDP(FakeGPS):
 
     def drain(self):
         "Wait for the associated device to drain (e.g. before closing)."
-        pass	# shutdown() fails on UDP
+        pass  # shutdown() fails on UDP
 
 
 class DaemonError(exceptions.Exception):
@@ -434,7 +434,7 @@ class DaemonInstance:
 
         # if we could not find it yet try PATH env variable for it
         if not self.spawncmd:
-            if not '/usr/sbin' in os.environ['PATH']:
+            if '/usr/sbin' not in os.environ['PATH']:
                 os.environ['PATH'] = os.environ['PATH'] + ":/usr/sbin"
             for path in os.environ['PATH'].split(':'):
                 _spawncmd = "%s/gpsd" % path
@@ -470,7 +470,7 @@ class DaemonInstance:
                 self.pid = int(pidstr)
             except ValueError:
                 time.sleep(0.5)
-                continue	# Avoid race condition -- PID not yet written
+                continue  # Avoid race condition -- PID not yet written
             fp.close()
             break
 
@@ -549,7 +549,7 @@ class TestSession:
         self.writers = 0
         self.runqueue = []
         self.index = 0
-        self.baseport = 49194	# In the IANA orivate port range
+        self.baseport = 49194  # In the IANA orivate port range
         if port:
             self.port = port
         else:
@@ -590,7 +590,7 @@ class TestSession:
                 self.baseport += 1
             else:
                 newgps = FakePTY(testload, speed=speed,
-                                   progress=self.progress)
+                                 progress=self.progress)
             if pred:
                 newgps.go_predicate = pred
             elif self.default_predicate:
@@ -638,7 +638,6 @@ class TestSession:
     def gather(self, seconds):
         "Wait, doing nothing but watching for sentences."
         self.progress("gpsfake: gather(%d)\n" % seconds)
-        #mark = time.time()
         time.sleep(seconds)
 
     def cleanup(self):
@@ -717,7 +716,7 @@ class TestSession:
             self.writers -= 1
         elif isinstance(obj, gps.gps):
             self.readers -= 1
-        self.index = min(len(self.runqueue)-1, self.index)
+        self.index = min(len(self.runqueue) - 1, self.index)
         if self.threadlock:
             self.threadlock.release()
 
