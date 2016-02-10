@@ -81,6 +81,7 @@ WATCH_PPS	= 0x002000	# enable PPS JSON
 WATCH_NEWSTYLE	= 0x010000	# force JSON streaming
 WATCH_OLDSTYLE	= 0x020000	# force old-style streaming
 
+
 class gpsfix:
     def __init__(self):
         self.mode = MODE_NO_FIX
@@ -286,23 +287,23 @@ class gps(gpscommon, gpsdata, gpsjson):
                     self.fix.time = self.utc
                 else:
                     self.fix.time = isotime(self.utc.encode("ascii"))
-            self.fix.ept =       default("ept",   NaN, TIMERR_SET)
-            self.fix.latitude =  default("lat",   NaN, LATLON_SET)
+            self.fix.ept       = default("ept",   NaN, TIMERR_SET)
+            self.fix.latitude  = default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)
-            self.fix.altitude =  default("alt",   NaN, ALTITUDE_SET)
-            self.fix.epx =       default("epx",   NaN, HERR_SET)
-            self.fix.epy =       default("epy",   NaN, HERR_SET)
-            self.fix.epv =       default("epv",   NaN, VERR_SET)
-            self.fix.track =     default("track", NaN, TRACK_SET)
-            self.fix.speed =     default("speed", NaN, SPEED_SET)
-            self.fix.climb =     default("climb", NaN, CLIMB_SET)
-            self.fix.epd =       default("epd",   NaN)
-            self.fix.eps =       default("eps",   NaN, SPEEDERR_SET)
-            self.fix.epc =       default("epc",   NaN, CLIMBERR_SET)
-            self.fix.mode =      default("mode",  0,   MODE_SET)
+            self.fix.altitude  = default("alt",   NaN, ALTITUDE_SET)
+            self.fix.epx       = default("epx",   NaN, HERR_SET)
+            self.fix.epy       = default("epy",   NaN, HERR_SET)
+            self.fix.epv       = default("epv",   NaN, VERR_SET)
+            self.fix.track     = default("track", NaN, TRACK_SET)
+            self.fix.speed     = default("speed", NaN, SPEED_SET)
+            self.fix.climb     = default("climb", NaN, CLIMB_SET)
+            self.fix.epd       = default("epd",   NaN)
+            self.fix.eps       = default("eps",   NaN, SPEEDERR_SET)
+            self.fix.epc       = default("epc",   NaN, CLIMBERR_SET)
+            self.fix.mode      = default("mode",  0,   MODE_SET)
         elif self.data.get("class") == "SKY":
             for attrp in ("x", "y", "v", "h", "p", "g"):
-                setattr(self, attrp+"dop", default(attrp+"dop", NaN, DOP_SET))
+                setattr(self, attrp + "dop", default(attrp + "dop", NaN, DOP_SET))
             if "satellites" in self.data.keys():
                 self.satellites = []
                 for sat in self.data['satellites']:
@@ -348,7 +349,7 @@ class gps(gpscommon, gpsdata, gpsjson):
                     return self.send(arg)
             else:
                 gpsjson.stream(self, ~flags, devpath)
-        else: # flags & WATCH_ENABLE:
+        else:  # flags & WATCH_ENABLE:
             if flags & WATCH_OLDSTYLE:
                 arg = 'w+'
                 if flags & WATCH_NMEA:
@@ -374,7 +375,7 @@ if __name__ == '__main__':
         print 'Usage: gps.py [-v] [host [port]]'
         sys.exit(1)
 
-    opts = { "verbose" : verbose }
+    opts = {"verbose": verbose}
     if len(arguments) > 0:
         opts["host"] = arguments[0]
     if len(arguments) > 1:
