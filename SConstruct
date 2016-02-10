@@ -762,13 +762,20 @@ extern "C" {
 typedef int clockid_t;
 #define CLOCKID_T_DEFINED
 # endif
-/* OS X uses _STRUCT_TIMESPEC, but no clock_gettime */
-#ifndef _STRUCT_TIMESPEC
+/*
+ * OS X 10.5 and later use _STRUCT_TIMESPEC (like other OSes)
+ * 10.4 uses _TIMESPEC
+ * 10.3 and earlier use _TIMESPEC_DECLARED
+ */
+#if !defined(_STRUCT_TIMESPEC) \
+    && !defined(_TIMESPEC) && !defined(_TIMESPEC_DECLARED)
+#define _STRUCT_TIMESPEC
 struct timespec {
     time_t  tv_sec;
     long    tv_nsec;
 };
 #endif
+/* OS X does not have clock_gettime */
 #define CLOCK_REALTIME 0
 int clock_gettime(clockid_t, struct timespec *);
 # ifdef __cplusplus
