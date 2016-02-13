@@ -191,14 +191,14 @@ to first install the MacPorts package.  Follow their install procedure
 at: http://www.macports.org/install.php
 
 Then use their port command to install scons, and optionally git if you
-want to access the develpment source.
+want to access the development source.
 
 --------------------------------------------------------------
 # port install scons
 # port install git
 --------------------------------------------------------------
 
-While runnning gpsd, or scons check, you may run out of shared memory
+While running gpsd, or scons check, you may run out of shared memory
 segments.  If so, you will see this error message:
 
 --------------------------------------------------------------
@@ -255,7 +255,7 @@ testing PPS inputs.
 The rest of the installation is just as for any other source based
 install, as noted in the file *build.txt* .
 
-=== Other Debian derivitives (including stock) ===
+=== Other Debian derivatives (including stock) ===
 ==== Jessie ====
 --------------------------------------------------------------
 # apt-get install scons libncurses5-dev python-dev pps-tools

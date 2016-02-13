@@ -371,8 +371,8 @@ stuff is left in place.
 If you interrupted a regression test, 'scons testclean' will remove
 generated test programs.
 
-You can run 'scons sconsclean' to temove most of the configuration
-state that scons keeps.  Be aware, however, thatr doing this can
+You can run 'scons sconsclean' to remove most of the configuration
+state that scons keeps.  Be aware, however, that doing this can
 confuse scons; you may need to run 'scons --config=force' afterwards
 to make your build succeed.
 
