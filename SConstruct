@@ -1909,10 +1909,12 @@ udev_install = Utility('udev-install', 'install', [
     ] + hotplug_wrapper_install)
 
 if env['systemd']:
+    env.Requires(udev_install, systemd_install)
+
+if env['systemd'] and not env["sysroot"]:
     systemctl_daemon_reload = Utility('systemctl-daemon-reload', '', ['systemctl daemon-reload || true'])
     env.AlwaysBuild(systemctl_daemon_reload)
     env.Precious(systemctl_daemon_reload)
-    env.Requires(udev_install, systemd_install)
     env.Requires(systemctl_daemon_reload, systemd_install)
     env.Requires(udev_install, systemctl_daemon_reload)
 
