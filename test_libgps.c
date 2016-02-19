@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	    }
 	}
 #endif
-    } else if (gps_open(NULL, 0, &collect) <= 0) {
+    } else if (gps_open(NULL, 0, &collect) != 0) {
 	(void)fputs("Daemon is not running.\n", stdout);
 	exit(EXIT_FAILURE);
     } else if (optind < argc) {
