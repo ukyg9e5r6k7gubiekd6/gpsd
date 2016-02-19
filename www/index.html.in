@@ -128,9 +128,8 @@ military vehicles.</p>
 <p>Applications that
 presently use <code>gpsd</code> include
 <a href="http://pygps.org">pyGPS</a>,
-<a href="http://www.gpsdrive.de/">gpsdrive</a>,
 <a href="http://www.kismetwireless.net/">Kismet</a>,
-<a href="http://www.gpsdrive.de/">GPSdrive</a>,
+<a href="http://www.gpsdrive.de/">GpsDrive</a>,
 <a href="http://qpegps.sourceforge.net/">gpeGPS</a>,
 <a href="http://roadmap.sourceforge.net/">roadmap</a>,
 <a href="http://roadnav.sourceforge.net/">roadnav</a>,
@@ -138,7 +137,6 @@ presently use <code>gpsd</code> include
 <a href="http://viking.sf.net">viking</a>,
 <a href="http://www.tangogps.org/">tangogps</a>,
 <a href="http://www.foxtrotGPS.org/">foxtrot</a>,
-<a href="http://sourceforge.net/projects/opencpn/">opencpn</a>,
 <a href="http://icculus.org/obdgpslogger/">obdgpslogger</a>,
 <a href="http://www.virtualroadside.com/geoHist/">geohist</a>,
 <a href="http://wiki.openstreetmap.org/wiki/JOSM/Plugins/LiveGPS">LiveGPS</a>,
