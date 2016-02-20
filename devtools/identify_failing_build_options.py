@@ -88,10 +88,9 @@ def main(starting_number_of_options=0):
     static_params += [key + '=off' for key in always_off]
 
     for i in range(starting_number_of_options, len(knobs)):
-        jj = itertools.combinations(knobs, i)
         print 'Testing at length {}'.format(i)
 
-        for row in list(jj):
+        for row in itertools.combinations(knobs, i):
             print row
             params = static_params + [key + '=on' for key in row]
 
