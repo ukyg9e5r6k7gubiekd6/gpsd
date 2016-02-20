@@ -79,7 +79,10 @@ knobs = [
 
 def main(starting_number_of_options=0):
     import itertools
+    import subprocess
+
     failed_configurations = []
+    dev_null = open('/dev/null', 'w')
 
     static_params = [key + '=on' for key in always_on]
     static_params += [key + '=off' for key in always_off]
@@ -94,8 +97,6 @@ def main(starting_number_of_options=0):
 
             # print {'on_params': row, 'scons_params': params}
 
-            dev_null = open('/dev/null', 'w')
-            import subprocess
             command = ['scons', '-j9']
             command.extend(params)
             if os.path.exists('.scons-option-cache'):
