@@ -20,6 +20,7 @@ int initialize_dbus_connection(void)
     dbus_error_init(&error);
     connection = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
     if (connection == NULL) {
+	dbus_error_free(&error);
 	/* report error */
 	return 1;
     }
