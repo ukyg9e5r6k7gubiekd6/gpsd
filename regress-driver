@@ -14,6 +14,9 @@ else
     GPSD_HOME=`dirname $0`
 fi
 
+# sed may choke on binary data with some LANG settings
+unset LANG
+
 # Arrange to call a gpsfake in the source directory without fuss.
 if [ -z ${PYTHON} ]; then
     PYTHON="python2"
