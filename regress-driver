@@ -197,8 +197,9 @@ endtime=`date +"%s * 1000000000 + %N" | sed '/+ N/s///' 2>/dev/null`
 
 if [ "$starttime" -a "$endtime" ]
 then
-    echo -n "Elapsed time: "
-    echo "scale=2; (${endtime} - ${starttime}) / 1000000000" | bc
+    # Avoid using -n here since some shells don't support it.
+    echo "Elapsed time:" \
+    $(echo "scale=2; (${endtime} - ${starttime}) / 1000000000" | bc) >&2
 fi
 
 rm -fr ${TMP}
