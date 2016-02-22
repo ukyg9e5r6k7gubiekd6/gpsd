@@ -140,7 +140,10 @@ case $mode in
 		fi
 		if test -s ${TMP}/diff-$$ ; then
 		    errors=`expr $errors + 1`;
-                    error_list="$error_list \"${f}\""
+		    error_list="$error_list \"${f}\""
+		    if ! test -s ${TMP}/test-$$.chk ; then
+			echo " Output missing for ${f}" >${TMP}/diff-$$
+		    fi
 		    if [ -z "$logfile" ]
 		    then
 			cat ${TMP}/diff-$$
