@@ -144,7 +144,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 
     if (arg != NULL) {
 	char *colon1, *skipto, *rbrk;
-	source->spec = strdup(arg);
+	source->spec = (char *)arg;
 	assert(source->spec != NULL);
 
 	skipto = source->spec;
