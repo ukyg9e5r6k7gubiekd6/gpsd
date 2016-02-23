@@ -1982,17 +1982,17 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
 
     # How to build a tarball.
-    tarball = env.Command('tarball', distfiles, [
+    dist = env.Command('dist', distfiles, [
         '@tar --transform "s:^:gpsd-${VERSION}/:" -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
         ])
-    env.Clean(tarball, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
+    env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
 
     # Make RPM from the specfile in packaging
-    Utility('dist-rpm', tarball, 'rpmbuild -ta gpsd-${VERSION}.tar.gz')
+    Utility('dist-rpm', dist, 'rpmbuild -ta gpsd-${VERSION}.tar.gz')
 
     # Make sure build-from-tarball works.
-    testbuild = Utility('testbuild', [tarball], [
+    testbuild = Utility('testbuild', [dist], [
         'tar -xzvf gpsd-${VERSION}.tar.gz',
         'cd gpsd-${VERSION}; scons',
         'rm -fr gpsd-${VERSION}',
@@ -2008,7 +2008,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # This is how to ship a release to the hosting site.
     # The chmod copes with the fact that scp will give a
     # replacement the permissions of the *original*...
-    upload_release = Utility('upload-release', [tarball], [
+    upload_release = Utility('upload-release', [dist], [
             'gpg -b gpsd-${VERSION}.tar.gz',
             'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
             'scp gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig ' + scpupload,
@@ -2028,7 +2028,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     releaseprep = env.Alias("releaseprep",
                             [Utility("distclean", [], ["rm -f revision.h"]),
                              tag_release,
-                             tarball])
+                             dist])
     # Undo local release preparation
     Utility("undoprep", [], ['rm -f gpsd-${VERSION}.tar.gz;',
                              'git tag -d release-${VERSION};'])
@@ -2041,7 +2041,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # Experimental release mechanics using shipper
     # This will ship a freecode metadata update
-    Utility("ship", [tarball, "control"], ['shipper version=%s | sh -e -x' % gpsd_version])
+    Utility("ship", [dist, "control"], ['shipper version=%s | sh -e -x' % gpsd_version])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
