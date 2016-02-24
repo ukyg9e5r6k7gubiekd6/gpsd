@@ -1414,7 +1414,7 @@ else:
                         python_progs_install,
                         python_egg_info_install]
 
-pc_install = [env.Install(installdir('pkgconfig'), x) for x in ("libgps.pc", "libgpsd.pc")]
+pc_install = [env.Install(installdir('pkgconfig'), x) for x in ("libgps.pc")]
 if qt_env:
     pc_install.append(qt_env.Install(installdir('pkgconfig'), 'Qgpsmm.pc'))
     pc_install.append(qt_env.Install(installdir('libdir'), 'libQgpsmm.prl'))
