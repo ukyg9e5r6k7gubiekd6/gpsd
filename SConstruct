@@ -1357,7 +1357,7 @@ if manbuilder:
 build = env.Alias('build',
                   [libraries, binaries, python_targets,
                    "gpsd.php", manpage_targets,
-                   "libgps.pc", "libgpsd.pc", "gpsd.rules"])
+                   "libgps.pc", "gpsd.rules"])
 env.Default(*build)
 
 if qt_env:
