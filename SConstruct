@@ -1568,13 +1568,13 @@ else:
         '@echo "Testing RTCM decoding..."',
         '@for f in $SRCDIR/test/*.rtcm2; do '
             'echo "\tTesting $${f}..."; '
-            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            'TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
             '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.chk $${TMPFILE} || echo "Test FAILED!"; '
             'rm -f $${TMPFILE}; '
         'done;',
         '@echo "Testing idempotency of JSON dump/decode for RTCM2"',
-        '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '@TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
         '$SRCDIR/gpsdecode -u -e -j <test/synthetic-rtcm2.json >$${TMPFILE}; '
             'grep -v "^#" test/synthetic-rtcm2.json | diff -ub - $${TMPFILE} '
             '|| echo "Test FAILED!"; '
@@ -1597,7 +1597,7 @@ else:
         '@echo "Testing AIVDM decoding w/ CSV format..."',
         '@for f in $SRCDIR/test/*.aivdm; do '
             'echo "\tTesting $${f}..."; '
-            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            'TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
             '$SRCDIR/gpsdecode -u -c <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.chk $${TMPFILE} || echo "Test FAILED!"; '
             'rm -f $${TMPFILE}; '
@@ -1605,7 +1605,7 @@ else:
         '@echo "Testing AIVDM decoding w/ JSON unscaled format..."',
         '@for f in $SRCDIR/test/*.aivdm; do '
             'echo "\tTesting $${f}..."; '
-            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            'TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
             '$SRCDIR/gpsdecode -u -j <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.ju.chk $${TMPFILE} || echo "Test FAILED!"; '
             'rm -f $${TMPFILE}; '
@@ -1613,20 +1613,20 @@ else:
         '@echo "Testing AIVDM decoding w/ JSON scaled format..."',
         '@for f in $SRCDIR/test/*.aivdm; do '
             'echo "\tTesting $${f}..."; '
-            'TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+            'TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
             '$SRCDIR/gpsdecode -j <$${f} >$${TMPFILE}; '
             'diff -ub $${f}.js.chk $${TMPFILE} || echo "Test FAILED!"; '
             'rm -f $${TMPFILE}; '
         'done;',
         '@echo "Testing idempotency of unscaled JSON dump/decode for AIS"',
-        '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '@TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
         '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
             'grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk | diff -ub - $${TMPFILE} || echo "Test FAILED!"; '
             'rm -f $${TMPFILE}; ',
         # Parse the unscaled json reference, dump it as scaled json,
         # and finally compare it with the scaled json reference
         '@echo "Testing idempotency of scaled JSON dump/decode for AIS"',
-        '@TMPFILE=`mktemp -t gpsd-test-XXXXXXXXXXXXXX.chk`; '
+        '@TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
         '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
             'grep -v "^#" $SRCDIR/test/sample.aivdm.js.chk | diff -ub - $${TMPFILE} || echo "Test FAILED!"; '
             'rm -f $${TMPFILE}; ',
