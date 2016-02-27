@@ -1745,13 +1745,13 @@ describe = Utility('describe', [],
                    ['@echo "Run normal regression tests for %s..."' % (rev.strip(),)])
 testclean = Utility('testclean', [],
                     'rm -f test_bits test_geoid test_json test_libgps test_matrix test_mktime test_packet')
-check = env.Alias('check', [
+
+test_nondaemon = [
     describe,
     python_compilation_regress,
     method_regress,
     bits_regress,
     matrix_regress,
-    gps_regress,
     rtcm_regress,
     aivdm_regress,
     packet_regress,
@@ -1760,11 +1760,15 @@ check = env.Alias('check', [
     time_regress,
     unpack_regress,
     json_regress,
-    testclean,
     test_timespec,
     timespec_regress,
-    ])
+    ]
 
+test_noclean = test_nondaemon + [gps_regress]
+
+env.Alias('test-nondaemon', test_nondaemon)
+env.Alias('test-noclean', test_noclean)
+check = env.Alias('check', test_noclean + [testclean])
 env.Alias('testregress', check)
 
 # Remove all shared-memory segments.  Normally only needs to be run
