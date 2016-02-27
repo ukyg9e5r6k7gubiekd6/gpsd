@@ -1743,8 +1743,12 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 # Run all normal regression tests
 describe = Utility('describe', [],
                    ['@echo "Run normal regression tests for %s..."' % (rev.strip(),)])
+
+# Delete all test programs
+test_exes = [str(p) for p in Flatten(testprogs)]
+test_objs = [p + '.o' for p in test_exes]
 testclean = Utility('testclean', [],
-                    'rm -f test_bits test_geoid test_json test_libgps test_matrix test_mktime test_packet')
+                    'rm -f %s' % ' '.join(test_exes + test_objs))
 
 test_nondaemon = [
     describe,
