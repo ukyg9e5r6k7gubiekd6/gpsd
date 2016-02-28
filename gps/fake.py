@@ -365,7 +365,12 @@ class FakeTCP(FakeGPS):
             if s == self.dispatcher:  # Connection request
                 client_socket, _address = s.accept()
                 self.readables = [client_socket]
-                self.dispatcher.close()
+                # Depending on timing, gpsd may try to reconnect between the
+                # end of the log data and the remove_device.  With no listener,
+                # this results in spurious error messages.  Keeping the listener
+                # around avoids this.  It will eventually be closed by the
+                # Python object cleanup.
+                ## self.dispatcher.close()
             else:  # Incoming data
                 data = s.recv(1024)
                 if not data:
