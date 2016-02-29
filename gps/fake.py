@@ -321,14 +321,27 @@ class FakePTY(FakeGPS):
         termios.tcdrain(self.fd)
 
 
-def cleansocket(host, port):
+def cleansocket(host, port, type=socket.SOCK_STREAM):
     "Get a socket that we can re-use cleanly after it's closed."
-    cs = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    cs = socket.socket(socket.AF_INET, type)
     # This magic prevents "Address already in use" errors after
     # we release the socket.
     cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     cs.bind((host, port))
     return cs
+
+
+def freeport(type=socket.SOCK_STREAM):
+    """Get a free port number for the given connection type.
+
+    This lets the OS assign a unique port, and then assumes
+    that it will become available for reuse once the socket
+    is closed, and remain so long enough for the real use.
+    """
+    s = cleansocket("127.0.0.1", 0, type=type)
+    port = s.getsockname()[1]
+    s.close()
+    return port
 
 
 class FakeTCP(FakeGPS):
@@ -339,9 +352,9 @@ class FakeTCP(FakeGPS):
                  progress=None):
         FakeGPS.__init__(self, testload, progress)
         self.host = host
-        self.port = int(port)
-        self.byname = "tcp://" + host + ":" + str(port)
-        self.dispatcher = cleansocket(self.host, self.port)
+        self.dispatcher = cleansocket(self.host, int(port))
+        self.port = self.dispatcher.getsockname()[1]  # Get actual assigned port
+        self.byname = "tcp://" + host + ":" + str(self.port)
         self.dispatcher.listen(5)
         self.readables = [self.dispatcher]
 
@@ -549,14 +562,10 @@ class TestSession:
         self.writers = 0
         self.runqueue = []
         self.index = 0
-        self.baseport = 49194  # In the IANA orivate port range
         if port:
             self.port = port
         else:
-            # Magic way to get a socket with an unused port number
-            s = cleansocket("localhost", 0)
-            self.port = s.getsockname()[1]
-            s.close()
+            self.port = freeport()
         self.progress = lambda x: None
         self.reporter = lambda x: None
         self.default_predicate = None
@@ -580,14 +589,12 @@ class TestSession:
             testload = TestLoad(logfile, predump=self.predump, slow=self.slow, oneshot=oneshot)
             if testload.sourcetype == "UDP" or self.udp:
                 newgps = FakeUDP(testload, ipaddr="127.0.0.1",
-                                 port=self.baseport,
+                                 port=freeport(socket.SOCK_DGRAM),
                                  progress=self.progress)
-                self.baseport += 1
             elif testload.sourcetype == "TCP" or self.tcp:
-                newgps = FakeTCP(testload, host="127.0.0.1",
-                                 port=self.baseport,
+                # Let OS assign the port
+                newgps = FakeTCP(testload, host="127.0.0.1", port=0,
                                  progress=self.progress)
-                self.baseport += 1
             else:
                 newgps = FakePTY(testload, speed=speed,
                                  progress=self.progress)
