@@ -189,7 +189,7 @@ if __name__ == '__main__':
         test.reporter = sys.stdout.write
         if verbose:
             progress = False
-            test.progress = sys.stdout.write
+            test.progress = sys.stderr.write
     test.spawn()
     try:
         for logfile in arguments:
