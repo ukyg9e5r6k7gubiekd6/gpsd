@@ -1537,23 +1537,43 @@ if not env['socket_export'] or not env['python']:
     announce("GPS regression tests suppressed because socket_export or python is off.")
     gps_regress = None
 else:
-    # Regression-test the daemon. But first:
-    # (1) Clear GPSD's SHM segment in case a previous abort didn't.  This
-    # prevents spurious error messages.
-    # (2) Dump the platform and its delay parameters.
-    # The ":;" in this production and the next one forestalls an attempt by
+    # Regression-test the daemon.
+    # But first dump the platform and its delay parameters.
+    # The ":;" in this production and the later one forestalls an attempt by
     # SCons to install up to date versions of gpsfake and gpsctl if it can
     # find older versions of them in a directory on your $PATH.
-    gps_regress = Utility("gps-regress", [gpsd, gpsctl, python_built_extensions],
-            ':; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver $REGRESSOPTS test/daemon/*.log')
+    gps_herald = Utility('gps-herald', [gpsd, gpsctl, python_built_extensions],
+                         ':; $SRCDIR/gpsfake -T')
+    gps_log_pattern = os.path.join('test', 'daemon', '*.log')
+    gps_logs = glob.glob(gps_log_pattern)
+    gps_names = [os.path.split(x)[-1][:-4] for x in gps_logs]
+    gps_tests = []
+    for gps_name, gps_log in zip(gps_names, gps_logs):
+        gps_tests.append(Utility('gps-regress-' + gps_name, gps_herald,
+                                 '$SRCDIR/regress-driver -qu $REGRESSOPTS '
+                                 + gps_log))
+    if GetOption('num_jobs') <= 1:
+        gps_regress = Utility('gps-regress', gps_herald,
+                              '$SRCDIR/regress-driver $REGRESSOPTS %s'
+                              % gps_log_pattern)
+    else:
+        gps_regress = env.Alias('gps-regress', gps_tests)
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
     # changes in timebase.h.  The problem is in the SiRF tests;
     # that driver relies on the default until it gets the current
     # offset from subframe data.
-    Utility('gps-makeregress', [gpsd, gpsctl, python_built_extensions],
-        ':; $SRCDIR/gpsfake -T; $SRCDIR/regress-driver -b $REGRESSOPTS test/daemon/*.log')
+    gps_rebuilds = []
+    for gps_name, gps_log in zip(gps_names, gps_logs):
+        gps_rebuilds.append(Utility('gps-makeregress-' + gps_name, gps_herald,
+                                    '$SRCDIR/regress-driver -bqu $REGRESSOPTS '
+                                    + gps_log))
+    if GetOption('num_jobs') <= 1:
+        Utility('gps-makeregress', gps_herald,
+                '$SRCDIR/regress-driver -b $REGRESSOPTS %s' % gps_log_pattern)
+    else:
+        env.Alias('gps-makeregress', gps_rebuilds)
 
 # To build an individual test for a load named foo.log, put it in
 # test/daemon and do this:
