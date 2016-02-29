@@ -48,7 +48,8 @@ opts=""
 logfile=""
 help="0"
 baton=false
-while getopts cl:sStbuvo:h opt
+quiet=false
+while getopts cl:sStbuvo:qh opt
 do
     case $opt in
 	c) testing=clientlib ;;	# Can be 'daemon'
@@ -60,6 +61,7 @@ do
 	u) opts="$opts -u" ;;	# Force UDP
 	v) mode=view ;;		# View result of generating a check file
 	o) opts="$opts $OPTARG" ;;	# Pass options to gpsfake
+	q) quiet=true ;;	# Suppress header/trailer messages
 	h) help="1" ;;
     esac
 done
@@ -80,6 +82,7 @@ then
 	echo "-u - Force UDP"
 	echo "-v  - view result of generating a check file"
 	echo "-o <opt> - Pass options to gpsfake"
+	echo "-q  - Suppress header/trailer messages"
 	echo
 
 	exit 0
@@ -119,7 +122,7 @@ fi
 
 case $mode in
     regress|slowregress)
-        echo "Testing the $testing..." >&2
+        [ $quiet = true ] || echo "Testing the $testing..." >&2
         errors=0; total=0; notfound=0;error_list="";
         for f in $*; do
 	    if [ -r $f.chk ]
@@ -174,7 +177,7 @@ case $mode in
         fi
         ;;
     build)
-	echo "Rebuilding $testing regressions..." >&2
+	[ $quiet = true ] || echo "Rebuilding $testing regressions..." >&2
         for f in $*; do
 	    case $testing in
             daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
@@ -184,7 +187,7 @@ case $mode in
         status=0
         ;;
     view)
-        echo "Viewing..." >&2
+        [ $quiet = true ] || echo "Viewing..." >&2
         for f in $*; do
 	    case $testing in
             daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
@@ -198,7 +201,7 @@ esac
 # See starttime above
 endtime=`date +"%s * 1000000000 + %N" | sed '/+ N/s///' 2>/dev/null`
 
-if [ "$starttime" -a "$endtime" ]
+if [ $quiet = false ] && [ "$starttime" -a "$endtime" ]
 then
     # Avoid using -n here since some shells don't support it.
     echo "Elapsed time:" \
