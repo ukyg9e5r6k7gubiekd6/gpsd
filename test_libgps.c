@@ -12,7 +12,8 @@
 
 #define LIBGPS_DEBUG
 
-#include "gpsd.h"
+#include "gps.h"
+#include "libgps.h"
 #include "gpsdclient.h"
 
 #include <unistd.h>

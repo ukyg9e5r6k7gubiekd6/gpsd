@@ -10,6 +10,8 @@
 #define SHM_PSEUDO_FD	-1
 #define DBUS_PSEUDO_FD	-2
 
+#include "gps.h"
+#include "gpsd_config.h"
 #include "compiler.h"
 
 #ifdef __cplusplus
@@ -38,6 +40,21 @@ extern int gps_dbus_mainloop(struct gps_data_t *, int,
 
 extern int json_ais_read(const char *, char *, size_t, struct ais_t *,
 			 const char **);
+
+/* debugging apparatus for the client library */
+#ifdef CLIENTDEBUG_ENABLE
+#define LIBGPS_DEBUG
+#endif /* CLIENTDEBUG_ENABLE */
+#ifdef LIBGPS_DEBUG
+#define DEBUG_CALLS	1	/* shallowest debug level */
+#define DEBUG_JSON	5	/* minimum level for verbose JSON debugging */
+# define libgps_debug_trace(args) (void) libgps_trace args
+extern int libgps_debuglevel;
+extern void libgps_dump_state(struct gps_data_t *);
+#else
+# define libgps_debug_trace(args) do { } while (0)
+#endif /* LIBGPS_DEBUG */
+
 #ifdef __cplusplus
 }
 #endif

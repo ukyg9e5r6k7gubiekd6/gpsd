@@ -931,20 +931,6 @@ extern bool ais_binary_decode(const struct gpsd_errout_t *errout,
 			      const unsigned char *, size_t,
 			      struct ais_type24_queue_t *);
 
-/* debugging apparatus for the client library */
-#ifdef CLIENTDEBUG_ENABLE
-#define LIBGPS_DEBUG
-#endif /* CLIENTDEBUG_ENABLE */
-#ifdef LIBGPS_DEBUG
-#define DEBUG_CALLS	1	/* shallowest debug level */
-#define DEBUG_JSON	5	/* minimum level for verbose JSON debugging */
-# define libgps_debug_trace(args) (void) libgps_trace args
-extern int libgps_debuglevel;
-extern void libgps_dump_state(struct gps_data_t *);
-#else
-# define libgps_debug_trace(args) do { } while (0)
-#endif /* LIBGPS_DEBUG */
-
 void gpsd_labeled_report(const int, const int,
 			 const char *, const char *, va_list);
 void gpsd_vlog(const struct gpsd_errout_t *,

@@ -19,6 +19,7 @@
 #include <sys/ioctl.h>
 
 #include "gpsd.h"
+#include "libgps.h"
 #if defined(NMEA2000_ENABLE)
 #include "driver_nmea2000.h"
 #include "bits.h"
