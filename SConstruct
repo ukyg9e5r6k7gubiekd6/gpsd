@@ -1753,6 +1753,7 @@ testclean = Utility('testclean', [],
 test_nondaemon = [
     describe,
     python_compilation_regress,
+    testprogs,
     method_regress,
     bits_regress,
     matrix_regress,
@@ -1772,7 +1773,7 @@ test_noclean = test_nondaemon + [gps_regress]
 
 env.Alias('test-nondaemon', test_nondaemon)
 env.Alias('test-noclean', test_noclean)
-check = env.Alias('check', test_noclean + [testclean])
+check = env.Alias('check', [testclean] + test_noclean)
 env.Alias('testregress', check)
 
 # Remove all shared-memory segments.  Normally only needs to be run
