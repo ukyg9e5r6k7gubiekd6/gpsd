@@ -172,7 +172,12 @@ case $mode in
             echo "================================================================"
             status=1;
         else
-            echo "Regression test successful: no errors in $total tests ($notfound not found).";
+            if [ $quiet = true ] && [ $total -eq 1 ] && [ $notfound -eq 0 ]
+            then
+                echo "Regression test $1 successful"
+            else
+                echo "Regression test successful: no errors in $total tests ($notfound not found).";
+            fi
             status=0;
         fi
         ;;
