@@ -96,15 +96,22 @@ elif sys.platform.startswith("darwin"):
 else:
     WRITE_PAD = 0.004
 
-# Make it easier to test pad values
-if os.getenv("WRITE_PAD"):
-    WRITE_PAD = eval(os.getenv("WRITE_PAD"))
-
 # Additional delays in slow mode
 WRITE_PAD_SLOWDOWN = 0.01
 
 # If a test takes longer than this, we deem it to have timed out
 TEST_TIMEOUT = 60
+
+
+def GetDelay(slow=False):
+    "Get appropriate per-line delay."
+    delay = WRITE_PAD
+    # Make it easier to test pad values
+    if os.getenv("WRITE_PAD"):
+        delay = eval(os.getenv("WRITE_PAD"))
+    if slow:
+        delay += WRITE_PAD_SLOWDOWN
+    return delay
 
 
 class TestLoadError(exceptions.Exception):
@@ -126,9 +133,7 @@ class TestLoad:
         self.type = None
         self.sourcetype = "pty"
         self.serial = None
-        self.delay = WRITE_PAD
-        if slow:
-            self.delay += WRITE_PAD_SLOWDOWN
+        self.delay = GetDelay(slow)
         self.delimiter = None
         # Stash away a copy in case we need to resplit
         text = logfp.read()
@@ -674,7 +679,7 @@ class TestSession:
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
                     if chosen.exhausted and (time.time() - chosen.exhausted > TEST_TIMEOUT) and chosen.byname in self.fakegpslist:
-                        sys.stderr.write("Test timed out: increase WRITE_PAD = %s\n" % WRITE_PAD)
+                        sys.stderr.write("Test timed out: increase WRITE_PAD = %s\n" % GetDelay(self.slow))
                         raise SystemExit, 1
                     elif not chosen.go_predicate(chosen.index, chosen):
                         if chosen.exhausted == 0:
