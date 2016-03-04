@@ -1764,7 +1764,6 @@ test_nondaemon = [
     time_regress,
     unpack_regress,
     json_regress,
-    test_timespec,
     timespec_regress,
     ]
 
@@ -1774,6 +1773,8 @@ env.Alias('test-nondaemon', test_nondaemon)
 env.Alias('test-noclean', test_noclean)
 check = env.Alias('check', test_noclean)
 env.Alias('testregress', check)
+env.Alias('build-tests', testprogs)
+env.Alias('build-all', build + testprogs)
 
 # Remove all shared-memory segments.  Normally only needs to be run
 # when a segment size changes.
