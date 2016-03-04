@@ -1772,7 +1772,7 @@ test_noclean = test_nondaemon + [gps_regress]
 
 env.Alias('test-nondaemon', test_nondaemon)
 env.Alias('test-noclean', test_noclean)
-check = env.Alias('check', test_noclean + [testclean] )
+check = env.Alias('check', test_noclean)
 env.Alias('testregress', check)
 
 # Remove all shared-memory segments.  Normally only needs to be run
