@@ -64,6 +64,8 @@ static DBusHandlerResult handle_gps_fix(DBusMessage * message)
     else
 	share_gpsdata->status = STATUS_NO_FIX;
 
+    dbus_error_free(&error);
+
     PRIVATE(share_gpsdata)->handler(share_gpsdata);
     return DBUS_HANDLER_RESULT_HANDLED;
 }
@@ -96,6 +98,7 @@ int gps_dbus_open(struct gps_data_t *gpsdata)
     connection = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
     if (dbus_error_is_set(&error)) {
 	syslog(LOG_CRIT, "%s: %s", error.name, error.message);
+	dbus_error_free(&error);
 	return 3;
     }
 
@@ -103,6 +106,7 @@ int gps_dbus_open(struct gps_data_t *gpsdata)
     if (dbus_error_is_set(&error)) {
 	syslog(LOG_CRIT, "unable to add match for signals %s: %s", error.name,
 	       error.message);
+	dbus_error_free(&error);
 	return 4;
     }
 
