@@ -602,8 +602,8 @@ else:
 
     if env['dbus_export'] and config.CheckPKG('dbus-1'):
         confdefs.append("#define HAVE_DBUS 1\n")
-        dbusflags = ["-ldbus-1"]
-        env.MergeFlags(pkg_config("dbus-1"))
+        dbusflags = pkg_config("dbus-1")
+        env.MergeFlags(dbusflags)
     else:
         confdefs.append("/* #undef HAVE_DBUS */\n")
         dbusflags = []
