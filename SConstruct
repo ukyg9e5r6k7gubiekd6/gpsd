@@ -546,10 +546,14 @@ else:
 
     # define a helper function for pkg-config - we need to pass
     # --static for static linking, too.
+    #
+    # Using "--libs-only-L --libs-only-l" instead of "--libs" avoids
+    # a superfluous "-rpath" option in some FreeBSD cases, and the resulting 
+    # scons crash.
     if env["shared"]:
-        pkg_config = lambda pkg: ['!%s --cflags --libs %s' % (env['PKG_CONFIG'], pkg, )]
+        pkg_config = lambda pkg: ['!%s --cflags --libs-only-L --libs-only-l %s' % (env['PKG_CONFIG'], pkg, )]
     else:
-        pkg_config = lambda pkg: ['!%s --cflags --libs --static %s' % (env['PKG_CONFIG'], pkg, )]
+        pkg_config = lambda pkg: ['!%s --cflags --libs-only-L --libs-only-l --static %s' % (env['PKG_CONFIG'], pkg, )]
 
     # The actual distinction here is whether the platform has ncurses in the
     # base system or not. If it does, pkg-config is not likely to tell us
@@ -561,6 +565,8 @@ else:
             ncurseslibs = pkg_config('ncurses')
             if config.CheckPKG('tinfo'):
                 ncurseslibs += pkg_config('tinfo')
+        # It's not yet known whether the above "--libs" tweak is appropriate
+        # for ncurses5-config.
         elif WhereIs('ncurses5-config'):
             ncurseslibs = ['!ncurses5-config --libs --cflags']
         elif WhereIs('ncursesw5-config'):
