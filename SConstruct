@@ -396,7 +396,7 @@ values can be listed with 'scons -h'.
 
 
 def CheckPKG(context, name):
-    context.Message('Checking for %s... ' % name)
+    context.Message('Checking pkg-config for %s... ' % name)
     ret = context.TryAction('%s --exists \'%s\'' % (env['PKG_CONFIG'], name))[0]
     context.Result(ret)
     return ret
@@ -559,7 +559,6 @@ else:
     # base system or not. If it does, pkg-config is not likely to tell us
     # anything useful. FreeBSD does, Linux doesn't. Most likely other BSDs
     # are like FreeBSD.
-    ncurseslibs = []
     if env['ncurses']:
         if config.CheckPKG('ncurses'):
             ncurseslibs = pkg_config('ncurses')
@@ -577,6 +576,10 @@ else:
             ncurseslibs = ['-lcurses']
         elif sys.platform.startswith('darwin'):
             ncurseslibs = ['-lcurses']
+        else:
+            ncurseslibs = []
+            announce('Turning off ncurses support, library not found.')
+            env['ncurses'] = False
 
     if env['usb']:
         # In FreeBSD except version 7, USB libraries are in the base system
