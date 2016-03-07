@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <syslog.h>
 #include <math.h>
 #include <time.h>
 #include <errno.h>
@@ -15,6 +14,7 @@
 #include "libgps.h"
 
 #if defined(DBUS_EXPORT_ENABLE)
+#include <syslog.h>
 
 struct privdata_t
 {
