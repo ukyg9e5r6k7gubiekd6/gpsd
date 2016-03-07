@@ -17,7 +17,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
-#include <sys/socket.h>
 #include <unistd.h>
 
 #ifndef USE_QT
