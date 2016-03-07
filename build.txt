@@ -9,9 +9,14 @@ Some hints for people building binary packages are in packaging/readme.txt.
 
 == Quick start ==
 
-Under Linux, assuming you have all your build prerequisites in place,
-this line will do:
+You can download the lastest gpsd tarball from:
+http://download.savannah.gnu.org/releases/gpsd/
 
+Under Linux, assuming you have all your build prerequisites in place,
+these lines will do:
+
+   tar -xzf gpsd-X.YY.tar.gz
+   cd gpsd-X.YY
    scons && scons check && sudo scons udev-install
 
 If you get any errors, you need to read the detailed instructions that follow.
