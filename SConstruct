@@ -1355,6 +1355,7 @@ if env['xgps']:
         "xgpsspeed.1": "gps.xml",
         "xgps.1": "gps.xml",
     })
+all_manpages = base_manpages.keys() + python_manpages.keys()
 
 manpage_targets = []
 if manbuilder:
@@ -1367,7 +1368,6 @@ build = env.Alias('build',
                   [libraries, binaries, python_targets,
                    "gpsd.php", manpage_targets,
                    "libgps.pc", "gpsd.rules"])
-env.Default(*build)
 
 if qt_env:
     build_qt = qt_env.Alias('build', [compiled_qgpsmmlib])
@@ -1783,7 +1783,7 @@ env.Alias('test-noclean', test_noclean)
 check = env.Alias('check', test_noclean)
 env.Alias('testregress', check)
 env.Alias('build-tests', testprogs)
-env.Alias('build-all', build + testprogs)
+build_all = env.Alias('build-all', build + testprogs)
 
 # Remove all shared-memory segments.  Normally only needs to be run
 # when a segment size changes.
@@ -1969,29 +1969,26 @@ Utility('udev-test', '', [
 
 # Cleanup
 
-# Ordinary cleanup
-clean = env.Clean(
-    build,
-    (
-        map(
-            glob.glob,
-            (
-                "*.[oa]", "*.[1358]", "*.os", "*.os.*",
-                "*.gcno", "*.pyc", "gps/*.pyc", "TAGS",
-                "config.log", "lib*.so*", "lib*.a",
-                "gps-*egg-info", "contrib/ppscheck", "*.gcda"
-            )
-        ) +
-        testprogs +
-        generated_sources +
-        base_manpages.keys() +
-        webpages +
-        map(lambda f: f[:-3], templated)
-    )
-)
+# Dummy target for cleaning misc files
+clean_misc = env.Alias('clean-misc')
+# Since manpage targets are disabled in clean mode, we cover them here
+env.Clean(clean_misc, all_manpages)
+# Clean compiled Python
+env.Clean(clean_misc, glob.glob('*.pyc') + glob.glob('gps/*.pyc'))
+# Clean coverage and profiling files
+env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
+# Other misc items
+env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'TAGS'])
 
 # Nuke scons state files
 sconsclean = Utility("sconsclean", '', ["rm -fr .sconf_temp .scons-option-cache config.log"])
+
+# Default targets
+
+if env.GetOption('clean'):
+    env.Default(build_all, audit, clean_misc)
+else:
+    env.Default(build)
 
 # Tags for Emacs and vi
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
