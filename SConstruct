@@ -553,10 +553,13 @@ else:
     # Using "--libs-only-L --libs-only-l" instead of "--libs" avoids
     # a superfluous "-rpath" option in some FreeBSD cases, and the resulting 
     # scons crash.
-    if env["shared"]:
-        pkg_config = lambda pkg: ['!%s --cflags --libs-only-L --libs-only-l %s' % (env['PKG_CONFIG'], pkg, )]
-    else:
-        pkg_config = lambda pkg: ['!%s --cflags --libs-only-L --libs-only-l --static %s' % (env['PKG_CONFIG'], pkg, )]
+    # However, it produces incorrect results for Qt5Network in OSX, so
+    # it can't be used unconditionally.
+    def pkg_config(pkg, shared=env['shared'], rpath_hack=False):
+        libs = '--libs-only-L --libs-only-l' if rpath_hack else '--libs'
+        if not shared:
+            libs += ' --static'
+        return ['!%s --cflags %s %s' % (env['PKG_CONFIG'], libs, pkg)]
 
     # The actual distinction here is whether the platform has ncurses in the
     # base system or not. If it does, pkg-config is not likely to tell us
@@ -564,11 +567,11 @@ else:
     # are like FreeBSD.
     if env['ncurses']:
         if config.CheckPKG('ncurses'):
-            ncurseslibs = pkg_config('ncurses')
+            ncurseslibs = pkg_config('ncurses', rpath_hack=True)
             if config.CheckPKG('tinfo'):
-                ncurseslibs += pkg_config('tinfo')
-        # It's not yet known whether the above "--libs" tweak is appropriate
-        # for ncurses5-config.
+                ncurseslibs += pkg_config('tinfo', rpath_hack=True)
+        # It's not yet known whether rpath_hack is appropriate for
+        # ncurses5-config.
         elif WhereIs('ncurses5-config'):
             ncurseslibs = ['!ncurses5-config --libs --cflags']
         elif WhereIs('ncursesw5-config'):
@@ -826,6 +829,7 @@ int clock_gettime(clockid_t, struct timespec *);
         qt_network = config.CheckPKG(qt_net_name)
         if not qt_network:
             env["qt"] = False
+            announce('Turning off Qt support, library not found.')
 
     env = config.Finish()
 
