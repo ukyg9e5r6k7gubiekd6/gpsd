@@ -496,7 +496,11 @@ def CheckC11(context):
 def GetLoadPath(context):
     context.Message("Getting system load path ...")
 
-if env.GetOption("clean") or env.GetOption("help"):
+
+cleaning = env.GetOption('clean')
+helping = env.GetOption('help')
+
+if cleaning or helping:
     dbusflags = []
     rtlibs = []
     usbflags = []
@@ -505,7 +509,6 @@ if env.GetOption("clean") or env.GetOption("help"):
     confdefs = []
     manbuilder = False
     htmlbuilder = False
-    qt_env = None
 else:
     config = Configure(env, custom_tests={'CheckPKG': CheckPKG,
                                              'CheckXsltproc': CheckXsltproc,
@@ -842,19 +845,20 @@ int clock_gettime(clockid_t, struct timespec *);
         announce("This is a Gentoo system.")
         announce("Adjust your PYTHONPATH to see library directories under /usr/local/lib")
 
-    # Should we build the Qt binding?
-    if env["qt"] and env["shared"]:
-        qt_env = env.Clone()
-        qt_env.MergeFlags('-DUSE_QT')
-        qt_env.Append(OBJPREFIX='qt-')
+# Should we build the Qt binding?
+if env["qt"] and env["shared"]:
+    qt_env = env.Clone()
+    qt_env.MergeFlags('-DUSE_QT')
+    qt_env.Append(OBJPREFIX='qt-')
+    if not (cleaning or helping):
         try:
             qt_env.MergeFlags(pkg_config(qt_net_name))
         except OSError:
             announce("pkg_config is confused about the state of %s."
                      % qt_net_name)
             qt_env = None
-    else:
-        qt_env = None
+else:
+    qt_env = None
 
 ## Two shared libraries provide most of the code for the C programs
 
@@ -1984,7 +1988,7 @@ sconsclean = Utility("sconsclean", '', ["rm -fr .sconf_temp .scons-option-cache 
 
 # Default targets
 
-if env.GetOption('clean'):
+if cleaning:
     env.Default(build_all, audit, clean_misc)
 else:
     env.Default(build)
