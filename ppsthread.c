@@ -773,7 +773,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
 	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "TPPS:%s %.10s cycle: %d, duration: %d @ %s\n",
+		    "TPPS:%s %.10s, cycle: %lld, duration: %lld @ %s\n",
 		    thread_context->devicename, edge_str, cycle, duration,
                     ts_str1);
 
@@ -840,7 +840,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
 	    timespec_str( &clock_ts_kpps, ts_str1, sizeof(ts_str1) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		"KPPS:%s %.10s cycle: %7d, duration: %7d @ %s\n",
+		"KPPS:%s %.10s cycle: %7lld, duration: %7lld @ %s\n",
 		thread_context->devicename,
 		edge_str,
 		cycle_kpps, duration_kpps, ts_str1);
@@ -898,7 +898,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	state_last = state;
 	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
-	    "PPS:%s %.10s cycle: %7d, duration: %7d @ %s\n",
+	    "PPS:%s %.10s cycle: %7lld, duration: %7lld @ %s\n",
 	    thread_context->devicename,
 	    edge_str,
 	    cycle, duration, ts_str1);
