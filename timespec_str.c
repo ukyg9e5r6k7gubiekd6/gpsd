@@ -33,7 +33,7 @@
  * So 12 chars, like this: "-0.123456789"
  *
  * Absolute worst case is 10 digits of seconds.
- * So 21 digits like this: "-2147483647.123456789"
+ * So 21 characters like this: "-2147483647.123456789"
  *
 */
 void timespec_str(const struct timespec *ts, char *buf, size_t buf_size)
