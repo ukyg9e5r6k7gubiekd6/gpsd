@@ -747,6 +747,8 @@ static void *gpsd_ppsmonitor(void *arg)
 
 	    edge_tio = (state_tio > state_last_tio) ? 1 : 0;
 
+	    state_last_tio = state_tio;
+
             /* three things now known about the current edge:
              * clock_ts - time of the edge
              * state - the serial line input states
