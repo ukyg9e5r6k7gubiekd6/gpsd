@@ -256,6 +256,7 @@ for (name, default, help) in pathopts:
 
 env['VERSION'] = gpsd_version
 env['PYTHON'] = sys.executable
+env['ENV']['PYTHON'] = sys.executable  # Also pass it to regress-driver
 
 # Set defaults from environment.  Note that scons doesn't cope well
 # with multi-word CPPFLAGS/LDFLAGS/SHLINKFLAGS values; you'll have to
@@ -1579,7 +1580,7 @@ else:
     # SCons to install up to date versions of gpsfake and gpsctl if it can
     # find older versions of them in a directory on your $PATH.
     gps_herald = Utility('gps-herald', [gpsd, gpsctl, python_built_extensions],
-                         ':; $PYTHON_COVERAGE $SRCDIR/gpsfake -T')
+                         ':; $PYTHON $PYTHON_COVERAGE $SRCDIR/gpsfake -T')
     gps_log_pattern = os.path.join('test', 'daemon', '*.log')
     gps_logs = glob.glob(gps_log_pattern)
     gps_names = [os.path.split(x)[-1][:-4] for x in gps_logs]
@@ -1733,7 +1734,7 @@ if not env['python']:
 else:
     maidenhead_locator_regress = Utility('maidenhead-locator-regress', [python_built_extensions], [
         '@echo "Testing the Maidenhead Locator conversion..."',
-        '$PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
+        '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
         ])
 
 # Regression-test the calendar functions

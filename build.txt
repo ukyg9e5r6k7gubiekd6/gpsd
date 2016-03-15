@@ -60,10 +60,6 @@ Necessary components for any build:
 |scons              | for executing the build recipe
 |============================================================================
 
-Note: There must be a Python 2 interpreter named 'python2' in your path,
-or the regression tests will fail.  On some systems you might need to
-arrange this by putting symlink in a local directory on $PATH.
-
 === C compiler ===
 
 C99 conformance is required in the compiler. The C code depends on one
