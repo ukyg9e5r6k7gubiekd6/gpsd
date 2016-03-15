@@ -371,6 +371,18 @@ Because the output from the various jobs is interleaved, it may be more
 difficult to understand error results with multiple jobs.  In that event,
 simply rerun without the -j option for more straightforward output.
 
+If coveraging is enabled (coveraging=yes), then Python programs run
+during testing are run via Python coveraging.  This prefixes the relevant
+commands with the content of the python_coverage option, whose default
+value of "coverage run" is appropriate if the standard Python coverage
+package is installed and accessible in the command path.  It can be
+set to a different value if necessary, or set to the empty string to
+disable Python coveraging.  The latter happens automatically (with a
+message) if the tool cannot be found.  When running multiple jobs with
+"-j", if python_coverage has its default value, "--parallel" is automatically
+appended to the command.  With a non-default setting, accomodating
+parallelism is the user's responsibility.
+
 For instructions on how to live-test the software, see the file INSTALL.
 
 == Reverting to a clean state ==

@@ -148,6 +148,11 @@ devtools/.flocktest.ini
 # QT stuff
 libQgpsmm.prl
 libQgpsmm/binaries/*
+# C coverage-related files
+*.gcda
+# Python coverage-related files/directories
+.coverage*
+htmlcov/
 # misc files
 nohup.out
 *.bak

@@ -194,6 +194,8 @@ nonboolopts = (
     ("target",              "",            "cross-development target"),
     ("sysroot",             "",            "cross-development system root"),
     ("qt_versioned",        "",            "version for versioned Qt"),
+    ("python_coverage",     "coverage run",
+                                           "coverage command for Python progs"),
     )
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
@@ -862,6 +864,23 @@ if env["qt"] and env["shared"]:
             qt_env = None
 else:
     qt_env = None
+
+# Set up for Python coveraging if needed
+if env['coveraging'] and env['python_coverage'] and not (cleaning or helping):
+    pycov_default = opts.options[opts.keys().index('python_coverage')].default
+    pycov_current = env['python_coverage']
+    pycov_list = pycov_current.split()
+    if env.GetOption('num_jobs') > 1 and pycov_current == pycov_default:
+        pycov_list.append('--parallel-mode')
+    # May need absolute path to coveraging tool if 'PythonXX' is prefixed
+    pycov_path = env.WhereIs(pycov_list[0])
+    if pycov_path:
+        pycov_list[0] = pycov_path
+        env['PYTHON_COVERAGE'] = ' '.join(pycov_list)
+        env['ENV']['PYTHON_COVERAGE'] = ' '.join(pycov_list)
+    else:
+        announce('Python coverage tool not found - disabling Python coverage.')
+        env['python_coverage'] = ''  # So we see it in the options
 
 ## Two shared libraries provide most of the code for the C programs
 
@@ -1559,7 +1578,7 @@ else:
     # SCons to install up to date versions of gpsfake and gpsctl if it can
     # find older versions of them in a directory on your $PATH.
     gps_herald = Utility('gps-herald', [gpsd, gpsctl, python_built_extensions],
-                         ':; $SRCDIR/gpsfake -T')
+                         ':; $PYTHON_COVERAGE $SRCDIR/gpsfake -T')
     gps_log_pattern = os.path.join('test', 'daemon', '*.log')
     gps_logs = glob.glob(gps_log_pattern)
     gps_names = [os.path.split(x)[-1][:-4] for x in gps_logs]
@@ -1704,7 +1723,7 @@ if not env['python']:
 else:
     maidenhead_locator_regress = Utility('maidenhead-locator-regress', [python_built_extensions], [
         '@echo "Testing the Maidenhead Locator conversion..."',
-        '$SRCDIR/test_maidenhead.py >/dev/null',
+        '$PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
         ])
 
 # Regression-test the calendar functions
@@ -1983,6 +2002,8 @@ env.Clean(clean_misc, all_manpages)
 env.Clean(clean_misc, glob.glob('*.pyc') + glob.glob('gps/*.pyc'))
 # Clean coverage and profiling files
 env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
+# Clean Python coverage files
+env.Clean(clean_misc, glob.glob('.coverage*') + ['htmlcov/'])
 # Other misc items
 env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'TAGS'])
 

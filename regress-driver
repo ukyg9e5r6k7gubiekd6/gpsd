@@ -129,7 +129,7 @@ case $mode in
 	    then
 		trap 'rm -f ${TMP}/test-$$.chk; exit $errors' EXIT HUP INT TERM
 		case $testing in
-		daemon) TMPDIR=${TMP} ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
+		daemon) TMPDIR=${TMP} ${PYTHON} ${PYTHON_COVERAGE} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
 		clientlib) ${GPSD_HOME}/test_libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
 		if [ "${ALTFILTER}" ]
@@ -185,7 +185,7 @@ case $mode in
 	[ $quiet = true ] || echo "Rebuilding $testing regressions..." >&2
         for f in $*; do
 	    case $testing in
-            daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
+            daemon) ${PYTHON} ${PYTHON_COVERAGE} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} >${f}.chk;;
 	    clientlib) ${GPSD_HOME}/test_libgps -b <${f} >${f}.chk ;;
             esac
         done
@@ -195,7 +195,7 @@ case $mode in
         [ $quiet = true ] || echo "Viewing..." >&2
         for f in $*; do
 	    case $testing in
-            daemon) ${PYTHON} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
+            daemon) ${PYTHON} ${PYTHON_COVERAGE} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
             clientlib) ${GPSD_HOME}/libgps -b <${f} ;;
             esac
         done
