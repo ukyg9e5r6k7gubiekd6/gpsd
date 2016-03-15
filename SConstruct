@@ -1587,7 +1587,7 @@ else:
     gps_tests = []
     for gps_name, gps_log in zip(gps_names, gps_logs):
         gps_tests.append(Utility('gps-regress-' + gps_name, gps_herald,
-                                 '$SRCDIR/regress-driver -qu $REGRESSOPTS '
+                                 '$SRCDIR/regress-driver -q -o -t $REGRESSOPTS '
                                  + gps_log))
     if GetOption('num_jobs') <= 1:
         gps_regress = Utility('gps-regress', gps_herald,
@@ -1613,7 +1613,8 @@ else:
     gps_rebuilds = []
     for gps_name, gps_log in zip(gps_names, gps_logs):
         gps_rebuilds.append(Utility('gps-makeregress-' + gps_name, gps_herald,
-                                    '$SRCDIR/regress-driver -bqu $REGRESSOPTS '
+                                    '$SRCDIR/regress-driver -bq -o -t '
+                                    '$REGRESSOPTS '
                                     + gps_log))
     if GetOption('num_jobs') <= 1:
         Utility('gps-makeregress', gps_herald,
