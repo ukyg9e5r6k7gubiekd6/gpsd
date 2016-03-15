@@ -1571,6 +1571,7 @@ else:
 if not env['socket_export'] or not env['python']:
     announce("GPS regression tests suppressed because socket_export or python is off.")
     gps_regress = None
+    gpsfake_tests = None
 else:
     # Regression-test the daemon.
     # But first dump the platform and its delay parameters.
@@ -1593,6 +1594,15 @@ else:
                               % gps_log_pattern)
     else:
         gps_regress = env.Alias('gps-regress', gps_tests)
+
+    # Run the passthrough log in all transport modes for better coverage
+    gpsfake_log = os.path.join('test', 'daemon', 'passthrough.log')
+    gpsfake_tests = []
+    for name, opts in [['pty', ''], ['udp', '-u'], ['tcp', '-o -t']]:
+        gpsfake_tests.append(Utility('gpsfake-' + name, gps_herald,
+                                     '$SRCDIR/regress-driver -q %s %s'
+                                     % (opts, gpsfake_log)))
+    env.Alias('gpsfake-tests', gpsfake_tests)
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
@@ -1802,9 +1812,11 @@ test_nondaemon = [
     timespec_regress,
     ]
 
-test_noclean = test_nondaemon + [gps_regress]
+test_quick = test_nondaemon + [gpsfake_tests]
+test_noclean = test_quick + [gps_regress]
 
 env.Alias('test-nondaemon', test_nondaemon)
+env.Alias('test-quick', test_quick)
 check = env.Alias('check', test_noclean)
 env.Alias('testregress', check)
 env.Alias('build-tests', testprogs)
