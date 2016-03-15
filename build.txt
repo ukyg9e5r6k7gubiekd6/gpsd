@@ -60,7 +60,7 @@ Necessary components for any build:
 |scons              | for executing the build recipe
 |============================================================================
 
-Note: There must be a Python 2 interpreter named 'python' in your path,
+Note: There must be a Python 2 interpreter named 'python2' in your path,
 or the regression tests will fail.  On some systems you might need to
 arrange this by putting symlink in a local directory on $PATH.
 
@@ -104,7 +104,7 @@ extensions.  Usually these are called "python" and "python-dev". You
 will know you are missing the latter if your compilation fails
 because of a missing Python.h.
 
-The xgps test client requires the following Python extensions:
+The xgps and xgpsspeed test clients require the following Python extensions:
 
 |============================================================================
 |gobject            | GNOME object introspection library
@@ -124,7 +124,7 @@ various additional capabilities and extensions:
 |C++ compiler     | allows building libgpsmm C++ wrapper for client library
 |Qt 4.53+         | allows building libQgpsmm C++ wrapper for client library
 |libcap           | Capabilities library, allows 1PPS support under Linux
-|curses           | curses screen-painting library, allows building cgps
+|(n)curses        | curses screen-painting library, used by cgps and gpsmon
 |============================================================================
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect
@@ -361,8 +361,15 @@ than would ever occur in production.  If you get regression-test
 failures that aren't repeatable and look like the test framework is
 sporadically failing to feed the last line or two of test loads, try
 using the slow=yes option with scons check.  If that fails, try
-increasing the delay constants in gps/fake.py.  If you have to do this,
+increasing the delay value via the WRITE_PAD environment variable
+(above the value reported in the test output).  If you have to do this,
 please report your experience to the GPSD maintainers.
+
+Both the builds and the tests are highly parallelizable via the scons
+-j option, which can gain a substantial speedup on a multicore machine.
+Because the output from the various jobs is interleaved, it may be more
+difficult to understand error results with multiple jobs.  In that event,
+simply rerun without the -j option for more straightforward output.
 
 For instructions on how to live-test the software, see the file INSTALL.
 

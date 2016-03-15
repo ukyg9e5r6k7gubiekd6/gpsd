@@ -95,7 +95,7 @@ various additional features have additional prerequisites:
 |libusb-1.0.x or later  | better USB device discovery
 |Qt + qmake             | libQgpsmm depends on this
 |python2.x, x >=6       | required for various clients and utilities
-|pgtk-2/cairo bindings  | the main test client, xgps, needs this
+|pygtk/gobject bindings | the test clients xgps and xgpsspeed, need this
 |==========================================================================
 
 Some ncurses packages contain the terminfo library; some break it out
