@@ -147,7 +147,6 @@ boolopts = (
     ("timing",        False, "latency timing support"),
     ("control_socket", True,  "control socket for hotplug notifications"),
     ("systemd",       systemd, "systemd socket activation"),
-    ("stash",         True,  "enable stash buffer"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("ncurses",       True,  "build with ncurses"),

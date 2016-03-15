@@ -65,6 +65,9 @@
 #ifdef NTPSHM_ENABLE
 #define TIMEHINT_ENABLE
 #endif
+#ifdef ISYNC_ENABLE
+#define STASH_ENABLE
+#endif
 
 /* First, declarations for the packet layer... */
 
