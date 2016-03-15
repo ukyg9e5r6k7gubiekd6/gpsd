@@ -83,6 +83,8 @@ maintainer, we've tried to kick these upstream.</p>
 <li><a href="#gcc421">Compiler optimizer bugs can produce error-modeling errors</a></li>
 <li><a href="#sconscxx">scons doesn't honor parse_flags in a Program() using C++</a></li>
 <li><a href="#mfence">Illegal-instruction errors near fence operations</a></li>
+<li><a href="#netbsd-curses">gpsmon won't build with the curses
+library on NetBSD 6</a></li>
 </ul>
 
 <h1>Links to Fixed Bugs</h1>
@@ -277,6 +279,21 @@ operation.</p>
 
 <p>To work around this, disable the shared-memory export by building
 with "scons shm_export=no".</p>
+
+<h2 id="#netbsd-curses">gpsmon won't build with the curses library on NetBSD 6</h2>
+
+<p>The base NetBSD install (netBSD 6, anyway) includes curses, but
+it's an old version that lacks the "syncok" function used by gpsmon. A
+simple '-lcurses' is sufficient to make cgps work, but not gpsmon.</p>
+
+<p>It's possible to install a reasonably current ncurses on NetBSD as
+a package, but the package setup doesn't include pkg-config data, so
+the ability to use it doesn't get discovered automatically.</p>
+
+<p>It's possible to check the existence of the package with the
+NetBSD-specific "pkg_info -E", and then fake the options that one
+would expect to be supplied by pkg-config, but the resulting setup
+still doesn't build, for an as-yet-undetermined reason.</p>
 
 <h1>Fixed Problems</h1>
 
