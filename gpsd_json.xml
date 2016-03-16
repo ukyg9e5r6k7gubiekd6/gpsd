@@ -1082,13 +1082,13 @@ will be reported with a mode field of zero.</para>
         <entry>Count of active devices.</entry>
 </row>
 <row>
-	<entry>fixes</entry>
+	<entry>tpv</entry>
 	<entry>Yes</entry>
 	<entry>JSON array</entry>
         <entry>Comma-separated list of TPV objects.</entry>
 </row>
 <row>
-	<entry>skyviews</entry>
+	<entry>sky</entry>
 	<entry>Yes</entry>
 	<entry>JSON array</entry>
         <entry>Comma-separated list of SKY objects.</entry>
