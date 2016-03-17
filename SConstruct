@@ -158,6 +158,8 @@ boolopts = (
     ("nofloats",      False, "float ops are expensive, suppress error estimates"),
     ("squelch",       False, "squelch gpsd_log/gpsd_hexdump to save cpu"),
     # Build control
+    ("gpsd",          True,  "gpsd itself"),
+    ("gpsdclients",   True,  "gspd client programs"),
     ("shared",        True,  "build shared libraries, not static"),
     ("implicit_link", imloads, "implicit linkage is supported in shared libs"),
     ("python",        True,  "build Python support and modules."),
@@ -244,7 +246,8 @@ env.SConsignFile(".sconsign.dblite")
 #  Minimal build turns off every option not set on the command line,
 if env['minimal']:
     for (name, default, help) in boolopts:
-        if default is True and not ARGUMENTS.get(name):
+        # Ensure gpsd and gpsdclients are always enabled unless explicitly turned off.
+        if default is True and not ARGUMENTS.get(name) and not (name is "gpsd" or name is "gpsdclients"):
             env[name] = False
 
 # NTPSHM requires NTP
@@ -1081,7 +1084,11 @@ ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'],
                         LIBS=['gps_static'], LIBPATH='.',
                         parse_flags=gpsflags)
 
-binaries = [gpsd, gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps, ntpshmmon]
+binaries = []
+if env["gpsd"]:
+    binaries += [gpsd]
+if env["gpsdclients"]:
+    binaries += [gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps, ntpshmmon]
 if env["ncurses"]:
     binaries += [cgps, gpsmon]
 
