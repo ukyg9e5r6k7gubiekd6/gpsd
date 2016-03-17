@@ -163,7 +163,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     flags = (unsigned int)getub(buf, 11);
     mask = 0;
-    if ((flags & (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)) != 0) {
+#define DATE_VALID	(UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)
+    if ((flags & DATE_VALID) == DATE_VALID) {
 	unsigned short gw;
 	unsigned int tow;
 	tow = (unsigned int)getleu32(buf, 0);
@@ -171,6 +172,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);
 	mask |= TIME_SET | PPSTIME_IS;
     }
+#undef DATE_VALID
 
     epx = (double)(getles32(buf, 12) / 100.0);
     epy = (double)(getles32(buf, 16) / 100.0);
