@@ -567,6 +567,7 @@ else:
     # base system or not. If it does, pkg-config is not likely to tell us
     # anything useful. FreeBSD does, Linux doesn't. Most likely other BSDs
     # are like FreeBSD.
+    ncurseslibs = []
     if env['ncurses']:
         if config.CheckPKG('ncurses'):
             ncurseslibs = pkg_config('ncurses', rpath_hack=True)
@@ -585,7 +586,6 @@ else:
         elif sys.platform.startswith('darwin'):
             ncurseslibs = ['-lcurses']
         else:
-            ncurseslibs = []
             announce('Turning off ncurses support, library not found.')
             env['ncurses'] = False
 
