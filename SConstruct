@@ -990,11 +990,11 @@ static_gpslib = env.StaticLibrary("gps_static",
                                   [env.StaticObject(s) for s in libgps_sources],
                                   rtlibs)
 
-compiled_gpsdlib = env.StaticLibrary(target="gpsd",
+static_gpsdlib = env.StaticLibrary(target="gpsd",
                            source=[env.StaticObject(s, parse_flags=usbflags + bluezflags) for s in libgpsd_sources],
                            parse_flags=usbflags + bluezflags)
 
-libraries = [compiled_gpslib, compiled_gpsdlib]
+libraries = [compiled_gpslib]
 
 # Only attempt to create the qt library if we have shared turned on otherwise we have a mismash of objects in library
 if qt_env:
