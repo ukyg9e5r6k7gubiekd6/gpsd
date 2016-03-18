@@ -27,7 +27,8 @@ Repository head:
 
 3.15: 2015-06-03 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Fix a rare crash bug related to devices becoming inaccessible while timed out.
-  Accept NMEA 4.1 GSV sententences with the trailing signal-ID field.
+  Accept NMEA 4.1 GSV sententences with the trailing signal-ID field,
+  as well as GSV sentences with fields for fewer than four satellites.
   Fixed incorrect decode of south latitudes in AIS Type 17 messages.
   splint has been retired; this removes almost 2KLOC of annotations.
   chrpath is no longer a build dependency. Corrected Beidou/QZNSS display
