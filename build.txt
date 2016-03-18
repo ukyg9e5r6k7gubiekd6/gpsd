@@ -364,7 +364,7 @@ machine type.  GPSD does enough bit-twiddling and floating point that
 it is very sensitive to toolchain problems; you'll want to be sure
 those aren't going to bite you in production.
 
-So the tests will run fast and be easy to do often, we make the test
+So that the tests will run fast and be easy to do often, we make the test
 framework shove data through the pty and socket layers *way* faster
 than would ever occur in production.  If you get regression-test
 failures that aren't repeatable and look like the test framework is
