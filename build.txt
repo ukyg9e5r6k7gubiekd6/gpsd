@@ -343,6 +343,19 @@ scons minimal=yes socket_export=yes nmea0183=yes
 
 will do that.
 
+-----------------------------------------------
+scons minimal=yes gpsd=False gpsdclients=False
+-----------------------------------------------
+
+generates only libgps.a
+
+-----------------------------------------------
+scons minimal=yes shared=True gpsd=False gpsdclients=False
+-----------------------------------------------
+
+generates only libgps.so
+
+
 == Port and toolchain testing ==
 
 'scons check' will run a comprehensive regression-test suite.  You
