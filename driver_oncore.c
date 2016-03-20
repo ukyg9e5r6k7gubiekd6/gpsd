@@ -176,9 +176,9 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	    }
 	    /* bit 2 of the status word: using for time solution */
 	    if (status & 0x02)
-		mask |= PPSTIME_IS;
+		mask |= PPSTIME_IS | GOODTIME_IS;
 	    /*
-	     * The PPSTIME_IS mask bit exists distinctly from TIME_SET exactly
+	     * The GOODTIME_IS mask bit exists distinctly from TIME_SET exactly
 	     * so an OnCore running in time-service mode (and other GPS clocks)
 	     * can signal that it's returning time even though no position fixes
 	     * have been available.
