@@ -371,8 +371,6 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
 	 * required on all Garmin and u-blox; safest to do it
 	 * for all cases as we have no other general way to know
 	 * if PPS is good.
-	 *
-	 * Not sure yet how to handle u-blox UBX_MODE_TMONLY
 	 */
 	if (session->fixcnt <= PPS_MIN_FIXES)
 	    return "no fix";
