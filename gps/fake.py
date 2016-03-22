@@ -328,9 +328,9 @@ class FakePTY(FakeGPS):
         termios.tcdrain(self.fd)
 
 
-def cleansocket(host, port, type=socket.SOCK_STREAM):
+def cleansocket(host, port, socktype=socket.SOCK_STREAM):
     "Get a socket that we can re-use cleanly after it's closed."
-    cs = socket.socket(socket.AF_INET, type)
+    cs = socket.socket(socket.AF_INET, socktype)
     # This magic prevents "Address already in use" errors after
     # we release the socket.
     cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -338,14 +338,14 @@ def cleansocket(host, port, type=socket.SOCK_STREAM):
     return cs
 
 
-def freeport(type=socket.SOCK_STREAM):
+def freeport(socktype=socket.SOCK_STREAM):
     """Get a free port number for the given connection type.
 
     This lets the OS assign a unique port, and then assumes
     that it will become available for reuse once the socket
     is closed, and remain so long enough for the real use.
     """
-    s = cleansocket("127.0.0.1", 0, type=type)
+    s = cleansocket("127.0.0.1", 0, socktype)
     port = s.getsockname()[1]
     s.close()
     return port

@@ -182,7 +182,7 @@ def save_leapseconds(outfile):
                 continue
             md = leapbound(fields[0], fields[1])
             if verbose:
-                sus.stderr.write("# %s\n" % md)
+                sys.stderr.write("# %s\n" % md)
             fp.write(repr(iso_to_unix(md)) + "\t# " + str(md) + "\n")
         fp.close()
         return
