@@ -5,7 +5,7 @@ A GPS simulator.
 
 This is proof-of-concept code, not production ready; some functions are stubs.
 """
-import sys, math, random, exceptions, time
+import sys, math, random, time
 import gps, gpslib
 
 # First, the mathematics.  We simulate a moving viewpoint on the Earth
@@ -77,9 +77,9 @@ class satellite:
 # class to generate output.
 
 
-class gpssimException(exceptions.Exception):
+class gpssimException(BaseException):
     def __init__(self, message, filename, lineno):
-        exceptions.Exception.__init__(self)
+        BaseException.__init__(self)
         self.message = message
         self.filename = filename
         self.lineno = lineno
@@ -90,14 +90,14 @@ class gpssimException(exceptions.Exception):
 
 class gpssim:
     "Simulate a moving sensor, with skyview."
-    active_PRNs = range(1, 24 + 1) + [134, ]
+    active_PRNs = list(range(1, 24 + 1)) + [134, ]
 
     def __init__(self, outfmt):
         self.ksv = ksv()
         self.ephemeris = {}
         # This sets up satellites at random.  Not really what we want.
         for prn in gpssim.active_PRNs:
-            for (prn, _satellite) in self.ephemeris.items():
+            for (prn, _satellite) in list(self.ephemeris.items()):
                 self.skyview[prn] = (random.randint(-60, +61),
                                      random.randint(0, 359))
         self.have_ephemeris = False
@@ -122,7 +122,7 @@ class gpssim:
         if command == "time":
             self.ksv.time = gps.isotime(fields[1])
         elif command == "location":
-            (self.lat, self.lon, self.alt) = map(float, fields[1:])
+            (self.lat, self.lon, self.alt) = list(map(float, fields[1:]))
         elif command == "course":
             self.ksv.time = float(fields[1])
         elif command == "speed":
@@ -130,7 +130,7 @@ class gpssim:
         elif command == "climb":
             self.ksv.climb = float(fields[1])
         elif command == "acceleration":
-            (self.ksv.h_acc, self.ksv.h_acc) = map(float, fields[1:])
+            (self.ksv.h_acc, self.ksv.h_acc) = list(map(float, fields[1:]))
         elif command == "snr":
             self.channels[int(fields[1])] = float(fields[2])
         elif command == "go":
@@ -170,10 +170,10 @@ class gpssim:
     def go(self, seconds):
         "Run the simulation for a specified number of seconds."
         for i in range(seconds):
-            self.ksv.next()
+            next(self.ksv)
             if self.have_ephemeris:
                 self.skyview = {}
-                for (prn, satellite) in self.ephemeris.items():
+                for (prn, satellite) in list(self.ephemeris.items()):
                     self.skyview[prn] = satellite.position(i)
             self.output.write(self.gpstype.report(self))
 
@@ -295,7 +295,7 @@ class NMEA:
                 (interval, sentence) = sentence
                 if self.counter % interval:
                     continue
-            out += apply(getattr(self, sentence), [sim])
+            out += getattr(self, sentence)(*[sim])
         self.counter += 1
         return out
 
@@ -304,7 +304,7 @@ class NMEA:
 if __name__ == "__main__":
     try:
         gpssim(NMEA).filter(sys.stdin, sys.stdout)
-    except gpssimException, e:
-        print >>sys.stderr, e
+    except gpssimException as e:
+        sys.stderr.write(repr(e)+"\n")
 
 # gpssim.py ends here.

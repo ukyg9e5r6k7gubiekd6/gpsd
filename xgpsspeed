@@ -296,7 +296,7 @@ class NauticalSpeedometer(Speedometer):
         s_long = self.long_inset(rspeed)
         s_middle = self.mid_inset(radius)
         s_short = self.short_inset(radius)
-        for i in xrange(11):
+        for i in range(11):
             # draw the large ticks
             alpha = (8 - i) * pi / 6
             self.cr.move_to(*NauticalSpeedometer.polar2xy(rspeed, alpha, x, y))
@@ -308,7 +308,7 @@ class NauticalSpeedometer(Speedometer):
             stxt = (self.maxspeed / 10) * i
             self.draw_text(xf, yf, stxt, fontsize=radius / 15)
 
-        for i in xrange(1, 11):
+        for i in range(1, 11):
             # middle tick
             alpha = (8 - i) * pi / 6
             beta = (17 - 2 * i) * pi / 12
@@ -316,7 +316,7 @@ class NauticalSpeedometer(Speedometer):
             self.cr.line_to(*NauticalSpeedometer.polar2xy(rspeed - s_middle, beta, x, y))
 
             #  short tick
-            for n in xrange(10):
+            for n in range(10):
                 gamma = alpha + n * pi / 60
                 self.cr.move_to(*NauticalSpeedometer.polar2xy(rspeed, gamma, x, y))
                 self.cr.line_to(*NauticalSpeedometer.polar2xy(rspeed - s_short, gamma, x, y))
@@ -331,7 +331,7 @@ class NauticalSpeedometer(Speedometer):
         self.cr.set_source_rgba(0, 0, 0)
 
         # heading label 90/180/270
-        for n in xrange(0, 4):
+        for n in range(0, 4):
             label = str(n * 90)
             # self.cr.set_source_rgba(0, 1, 0)
             # radius * (1 + NauticalSpeedometer.HEADING_SAT_GAP),
@@ -367,7 +367,7 @@ class NauticalSpeedometer(Speedometer):
         short_inset = self.short_inset(radius)
 
         # draw the large ticks
-        for i in xrange(12):
+        for i in range(12):
             agllong = i * pi / 6
             self.cr.move_to(*NauticalSpeedometer.polar2xy(radius - long_inset, agllong, x, y))
             self.cr.line_to(*NauticalSpeedometer.polar2xy(radius, agllong, x, y))
@@ -381,7 +381,7 @@ class NauticalSpeedometer(Speedometer):
             self.cr.line_to(*NauticalSpeedometer.polar2xy(radius, aglmid, x, y))
 
             #  short tick
-            for n in xrange(1, 10):
+            for n in range(1, 10):
                 aglshrt = agllong + n * pi / 60
                 self.cr.move_to(*NauticalSpeedometer.polar2xy(radius - short_inset, aglshrt, x, y))
                 self.cr.line_to(*NauticalSpeedometer.polar2xy(radius, aglshrt, x, y))

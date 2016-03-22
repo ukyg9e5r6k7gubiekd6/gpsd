@@ -6,6 +6,8 @@ xgps -- test client for gpsd
 usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
 '''
 
+from __future__ import print_function
+
 gui_about = '''\
 This is xgps, a test client for the gpsd daemon.
 
@@ -642,8 +644,7 @@ class Base:
             "AIS": self.aisbox}
 
         # Discard field labels and associate data hooks with their widgets
-        Base.gpsfields = map(lambda ((label, hook), widget): (hook, widget),
-                             zip(Base.gpsfields, gpswidgets))
+        Base.gpsfields = [(label_hook_widget[0][1], label_hook_widget[1]) for label_hook_widget in zip(Base.gpsfields, gpswidgets)]
 
     def view_toggle(self, action):
         # print "View toggle:", action.get_active(), action.get_name()
@@ -874,7 +875,7 @@ if __name__ == "__main__":
             elif opt == '-u':
                 unit_system = val
             elif opt in ('-?', '-h', '--help'):
-                print __doc__
+                print(__doc__)
                 sys.exit(0)
             elif opt == 'V':
                 sys.stderr.write("xgps 1.0\n")

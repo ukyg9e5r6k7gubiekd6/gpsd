@@ -9,6 +9,8 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
+from __future__ import print_function
+
 import getopt
 import gps
 import gps.fake as gpsfake   # The "as" pacifies pychecker
@@ -19,6 +21,10 @@ import socket
 import sys
 import time
 
+try:
+    my_input = raw_input
+except NameError:
+    my_input = input
 
 class Baton:
     "Ship progress indications to stderr."
@@ -70,8 +76,8 @@ def hexdump(s):
 
 def fakehook(linenumber, fakegps):
     if len(fakegps.testload.sentences) == 0:
-        print >>sys.stderr, "fakegps: no sentences in test load."
-        raise SystemExit, 1
+        sys.stderr.write("fakegps: no sentences in test load.\n")
+        raise SystemExit(1)
     if linenumber % len(fakegps.testload.sentences) == 0:
         if singleshot and linenumber > 0:
             return False
@@ -86,9 +92,9 @@ def fakehook(linenumber, fakegps):
             ml = hexdump(ml)
         announce = fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
         if promptme:
-            raw_input(announce + "? ")
+            my_input(announce + "? ")
         else:
-            print announce
+            print(announce)
     if progress:
         baton.twirl()
     return True
@@ -96,9 +102,9 @@ def fakehook(linenumber, fakegps):
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:ghilm:no:pP:r:s:StTuvx")
-    except getopt.GetoptError, msg:
-        print "gpsfake: " + str(msg)
-        raise SystemExit, 1
+    except getopt.GetoptError as msg:
+        print("gpsfake: " + str(msg))
+        raise SystemExit(1)
 
     port = None
     progress = False
@@ -153,29 +159,29 @@ if __name__ == '__main__':
             tcp = True
         elif switch == '-T':
             sys.stdout.write("sys %s platform %s: WRITE_PAD = %.5f\n" % (sys.platform, platform.platform(), gpsfake.GetDelay(slow)))
-            raise SystemExit, 0
+            raise SystemExit(0)
         elif switch == '-u':
             udp = True
         elif switch == '-v':
             verbose += 1
         elif switch == '-h':
             sys.stderr.write("usage: gpsfake [-h] [-l] [-m monitor] [--D debug] [-o options] [-p] [-s speed] [-S] [-c cycle] [-b] logfile\n")
-            raise SystemExit, 0
+            raise SystemExit(0)
 
     try:
         pty.openpty()
     except (AttributeError, OSError):
-        print >>sys.stderr, "gpsfake: ptys not available, falling back to UDP."
+        sys.stderr.write("gpsfake: ptys not available, falling back to UDP.\n")
         udp = True
 
     if not arguments:
-        print >>sys.stderr, "gpsfake: requires at least one logfile argument."
-        raise SystemExit, 1
+        sys.stderr.write("gpsfake: requires at least one logfile argument.\n")
+        raise SystemExit(1)
 
     if progress:
         baton = Baton("Processing %s" % ",".join(arguments), "done")
     else:
-        print >>sys.stderr, "Processing %s" % ",".join(arguments)
+        sys.stderr.write("Processing %s\n" % ",".join(arguments))
 
     # Don't allocate a private port when cycling logs for client testing.
     if port is None and not pipe:
@@ -195,24 +201,24 @@ if __name__ == '__main__':
         for logfile in arguments:
             try:
                 test.gps_add(logfile, speed=speed, pred=fakehook, oneshot=singleshot)
-            except gpsfake.TestLoadError, e:
+            except gpsfake.TestLoadError as e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
-                raise SystemExit, 1
-            except gpsfake.PacketError, e:
+                raise SystemExit(1)
+            except gpsfake.PacketError as e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
-                raise SystemExit, 1
-            except gpsfake.DaemonError, e:
+                raise SystemExit(1)
+            except gpsfake.DaemonError as e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
-                raise SystemExit, 1
-            except IOError, e:
+                raise SystemExit(1)
+            except IOError as e:
                 if e.filename is None:
                     sys.stderr.write("gpsfake: unknown internal I/O error %s\n" % e)
                 else:
                     sys.stderr.write("gpsfake: no such file as %s or file unreadable\n" % e.filename)
-                raise SystemExit, 1
+                raise SystemExit(1)
             except OSError:
                 sys.stderr.write("gpsfake: can't open pty.\n")
-                raise SystemExit, 1
+                raise SystemExit(1)
 
         try:
             if pipe:
@@ -228,15 +234,15 @@ if __name__ == '__main__':
                 # calls to gpsd_set_speed() in isync_detect()
                 time.sleep(1.4)
             test.run()
-        except socket.error, msg:
+        except socket.error as msg:
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)
-            raise SystemExit, 1
-        except gps.client.json_error, e:
+            raise SystemExit(1)
+        except gps.client.json_error as e:
             sys.stderr.write("gpsfake: JSON error on line %s is %s.\n" % (repr(e.data), e.explanation))
-            raise SystemExit, 1
+            raise SystemExit(1)
         except KeyboardInterrupt:
             sys.stderr.write("gpsfake: aborted\n")
-            raise SystemExit, 1
+            raise SystemExit(1)
     finally:
         test.cleanup()
 

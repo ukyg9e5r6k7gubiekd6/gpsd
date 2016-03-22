@@ -7,6 +7,8 @@
 # Test conversions generated using
 #       http://f6fvy.free.fr/qthLocator/
 
+from __future__ import print_function
+
 import sys, gps.clienthelpers
 
 errors = 0
@@ -18,11 +20,11 @@ for (lat, lon, maidenhead, location) in [
 ]:
     converted = gps.clienthelpers.maidenhead(lat, lon)
     if converted != maidenhead:
-        print >>sys.stderr, "maidenhead test: from %s %s (%s) expected %s got %s" \
-            % (lat, lon, location, maidenhead, converted)
+        sys.stderr.write("maidenhead test: from %s %s (%s) expected %s got %s\n" \
+            % (lat, lon, location, maidenhead, converted))
         errors += 1
     else:
-        print "%s OK" % location
+        print("%s OK" % location)
 
 if errors:
     sys.exit(1)

@@ -43,6 +43,7 @@ This file is Copyright (c) 2013 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 
 """
+from __future__ import print_function
 
 import os, urllib, re, random, time, calendar, math, sys, signal
 
@@ -94,7 +95,7 @@ def isotime(s):
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
         return date + "." + repr(msec)[3:]
-    elif type(s) == type("") or type(s) == type(u""):
+    elif type(s) == type("") or type(s) == type(""):
         if s[-1] == "Z":
             s = s[:-1]
         if "." in s:
@@ -120,13 +121,13 @@ def retrieve():
             txt = ifp.read()
             ifp.close()
             if verbose:
-                print >>sys.stderr, "%s" % txt
+                sys.stderr.write("%s\n" % txt)
             m = re.search(regexp, txt)
             if m:
                 return int(m.group(1)) * sign - offset
         except IOError:
             if verbose:
-                print >>sys.stderr, "IOError: %s" % url
+                sys.stderr.write("IOError: %s\n" % url)
     return None
 
 
@@ -163,14 +164,14 @@ def save_leapseconds(outfile):
         try:
             fetchobj = urllib.urlopen(url)
         except IOError:
-            print >>sys.stderr, "Fetch from %s failed." % url
+            sys.stderr.write("Fetch from %s failed.\n" % url)
             continue
         # This code assumes that after 1980, leap-second increments are
         # always integrally one second and every increment is listed here
         fp = open(outfile, "w")
         for line in fetchobj:
             if verbose:
-                print >>sys.stderr, "%s" % line[:-1]
+                sys.stderr.write("%s\n" % line[:-1])
             if line.startswith(" 1980"):
                 skip = False
             if skip:
@@ -180,11 +181,11 @@ def save_leapseconds(outfile):
                 continue
             md = leapbound(fields[0], fields[1])
             if verbose:
-                print >>sys.stderr, "# %s" % md
+                sus.stderr.write("# %s\n" % md)
             fp.write(repr(iso_to_unix(md)) + "\t# " + str(md) + "\n")
         fp.close()
         return
-    print >>sys.stderr, "%s not updated." % outfile
+    sys.stderr.write("%s not updated.\n" % outfile)
 
 
 def fetch_leapsecs(filename):
@@ -292,9 +293,9 @@ def unix_to_iso(tv):
 def graph_history(filename):
     "Generate a GNUPLOT plot of the leap-second history."
     raw = fetch_leapsecs(filename)
-    (b, c, e) = leastsquares(zip(range(len(raw)), raw))
+    (b, c, e) = leastsquares(list(zip(list(range(len(raw))), raw)))
     e /= (60 * 60 * 24 * 7)
-    dates = map(lambda t: time.strftime("%Y-%m-%d", time.localtime(t)), raw)
+    dates = [time.strftime("%Y-%m-%d", time.localtime(t)) for t in raw]
     enddate = time.strftime("%Y-%m-%d", time.localtime(raw[-1]+16416000)) # Adding 190 days to scale
     fmt = ''
     fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
@@ -314,7 +315,7 @@ def graph_history(filename):
     for (i, (r, d)) in enumerate(zip(raw, dates)):
         fmt += "%d\t%s\t%s\n" % (i, r, d)
     fmt += 'e\n'
-    print fmt
+    print(fmt)
 
 
 def rfc822_to_unix(tv):
@@ -330,24 +331,24 @@ def unix_to_rfc822(tv):
 def printnext(val):
     "Compute Unix time correponsing to a scheduled leap second."
     if val[:3].lower() not in ("jun", "dec"):
-        print >>sys.stderr, "leapsecond.py: -n argument must begin with "\
-            "'Jun' or 'Dec'"
-        raise SystemExit, 1
+        sys.stderr.write("leapsecond.py: -n argument must begin with "\
+            "'Jun' or 'Dec'\n")
+        raise SystemExit(1)
     else:
         month = val[:3].lower()
         if len(val) != 7:
-            print >>sys.stderr, "leapsecond.py: -n argument must be of "\
-                "the form {jun|dec}nnnn."
-            raise SystemExit, 1
+            sys.stderr.wrrite("leapsecond.py: -n argument must be of "\
+                "the form {jun|dec}nnnn.\n")
+            raise SystemExit(1)
         try:
             year = int(val[3:])
         except ValueError:
-            print >>sys.stderr, "leapsecond.py: -n argument must end "\
-                "with a 4-digit year."
-            raise SystemExit, 1
+            sys.stderr.write("leapsecond.py: -n argument must end "\
+                "with a 4-digit year.\n")
+            raise SystemExit(1)
         # Date looks valid
         tv = leapbound(year, month)
-        print "%d       /* %s */" % (iso_to_unix(tv), tv)
+        print("%d       /* %s */" % (iso_to_unix(tv), tv))
 
 
 def leapbound(year, month):
@@ -368,8 +369,8 @@ def leapbound(year, month):
 
 
 def usage():
-    print __doc__
-    raise SystemExit, 0
+    print(__doc__)
+    raise SystemExit(0)
 
 if __name__ == '__main__':
     import getopt
@@ -381,27 +382,27 @@ if __name__ == '__main__':
             verbose = 1
         elif switch == '-f':    # Fetch USNO data to cache locally
             save_leapseconds(val)
-            raise SystemExit, 0
+            raise SystemExit(0)
         elif switch == '-g':  # Graph the leap_second history
             graph_history(val)
-            raise SystemExit, 0
+            raise SystemExit(0)
         elif switch == '-H':  # make leapsecond include
             sys.stdout.write(make_leapsecond_include(val))
-            raise SystemExit, 0
+            raise SystemExit(0)
         elif switch == '-i':  # Compute Unix time from RFC822 date
-            print rfc822_to_unix(val)
-            raise SystemExit, 0
+            print(rfc822_to_unix(val))
+            raise SystemExit(0)
         elif switch == '-n':  # Compute possible next leapsecond
             printnext(val)
-            raise SystemExit, 0
+            raise SystemExit(0)
         elif switch == '-o':  # Compute RFC822 date from Unix time
-            print unix_to_rfc822(float(val))
-            raise SystemExit, 0
+            print(unix_to_rfc822(float(val)))
+            raise SystemExit(0)
         elif switch == '-I':  # Compute Unix time from ISO8601 date
-            print isotime(val)
-            raise SystemExit, 0
+            print(isotime(val))
+            raise SystemExit(0)
         elif switch == '-O':  # Compute ISO8601 date from Unix time
-            print isotime(float(val))
-            raise SystemExit, 0
+            print(isotime(float(val)))
+            raise SystemExit(0)
 
 # End

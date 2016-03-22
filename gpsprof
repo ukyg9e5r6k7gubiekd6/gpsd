@@ -181,11 +181,11 @@ class spaceplot(plotter):
     def postprocess(self):
         if not self.recentered:
             # centroid is just arithmetic avg of lat,lon
-            self.centroid = (sum(map(lambda x: x[0], self.fixes)) / len(self.fixes), sum(map(lambda x: x[1], self.fixes)) / len(self.fixes))
+            self.centroid = (sum([x[0] for x in self.fixes]) / len(self.fixes), sum([x[1] for x in self.fixes]) / len(self.fixes))
             # Sort fixes by distance from centroid
             self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
             # Convert fixes to offsets from centroid in meters
-            self.recentered = map(lambda fix: gps.MeterOffset(self.centroid, fix[:2]), self.fixes)
+            self.recentered = [gps.MeterOffset(self.centroid, fix[:2]) for fix in self.fixes]
 
     def data(self):
         res = ""
@@ -446,7 +446,7 @@ if __name__ == '__main__':
             elif switch == '-h':
                 sys.stderr.write(
                     "usage: gpsprof [-h] [-D debuglevel] [-m threshold] [-n samplecount] [-d]\n"
-                    + "\t[-f {" + "|".join(map(lambda x: x.name, formatters)) + "}] [-s speed] [-t title] [-T terminal] [server[:port[:device]]]\n")
+                    + "\t[-f {" + "|".join([x.name for x in formatters]) + "}] [-s speed] [-t title] [-T terminal] [server[:port[:device]]]\n")
                 sys.exit(0)
 
         (host, port, device) = ("localhost", "2947", None)
