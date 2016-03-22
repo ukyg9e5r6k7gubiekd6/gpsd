@@ -10,6 +10,21 @@ else:
 
 GPSD_PORT = "2947"
 
+binary_encoding = 'latin-1'
+
+def polystr(o):
+    if isinstance(o, str):
+        return o
+    if isinstance(o, bytes):
+        return str(o, encoding=binary_encoding)
+    raise ValueError
+
+def polybytes(o):
+    if isinstance(o, bytes):
+        return o
+    if isinstance(o, str):
+        return bytes(o, encoding=binary_encoding)
+    raise ValueError
 
 class json_error(BaseException):
     def __init__(self, data, explanation):
@@ -82,7 +97,7 @@ class gpscommon:
             sys.stderr.write("poll: reading from daemon...\n")
         eol = self.linebuffer.find('\n')
         if eol == -1:
-            frag = self.sock.recv(4096).decode('ascii')
+            frag = polystr(self.sock.recv(4096))
             self.linebuffer += frag
             if self.verbose > 1:
                 sys.stderr.write("poll: read complete.\n")
@@ -123,7 +138,7 @@ class gpscommon:
         "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
-        self.sock.send(commands.encode('ascii'))
+        self.sock.send(polybytes(commands))
 
 WATCH_ENABLE = 0x000001 	# enable streaming
 WATCH_DISABLE = 0x000002 	# disable watching
