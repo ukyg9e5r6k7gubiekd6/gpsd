@@ -178,83 +178,8 @@ class gps(gpscommon, gpsdata, gpsjson):
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
         gpscommon.__init__(self, host, port, verbose)
         gpsdata.__init__(self)
-        self.newstyle = False
         if mode:
             self.stream(mode)
-
-    def __oldstyle_unpack(self, buf):
-        # unpack a daemon response into the gps instance members
-        self.fix.time = 0.0
-        fields = buf.strip().split(",")
-        if fields[0] == "GPSD":
-            for field in fields[1:]:
-                if not field or field[1] != '=':
-                    continue
-                cmd = field[0].upper()
-                data = field[2:]
-                if data[0] == "?":
-                    continue
-                if cmd == 'F':
-                    self.device = data
-                elif cmd == 'I':
-                    self.gps_id = data
-                elif cmd == 'O':
-                    fields = data.split()
-                    if fields[0] == '?':
-                        self.fix.mode = MODE_NO_FIX
-                    else:
-                        def default(i, vbit=0, cnv=float):
-                            if fields[i] == '?':
-                                return NaN
-                            else:
-                                try:
-                                    value = cnv(fields[i])
-                                except ValueError:
-                                    return NaN
-                                self.valid |= vbit
-                                return value
-                        # clear all valid bits that might be set again below
-                        self.valid &= ~(
-                            TIME_SET | TIMERR_SET | LATLON_SET | ALTITUDE_SET |
-                            HERR_SET | VERR_SET | TRACK_SET | SPEED_SET |
-                            CLIMB_SET | SPEEDERR_SET | CLIMBERR_SET | MODE_SET
-                        )
-                        self.utc = fields[1]
-                        self.fix.time = default(1, TIME_SET)
-                        if not isnan(self.fix.time):
-                            self.utc = isotime(self.fix.time)
-                        self.fix.ept = default(2, TIMERR_SET)
-                        self.fix.latitude = default(3, LATLON_SET)
-                        self.fix.longitude = default(4)
-                        self.fix.altitude = default(5, ALTITUDE_SET)
-                        self.fix.epx = self.epy = default(6, HERR_SET)
-                        self.fix.epv = default(7, VERR_SET)
-                        self.fix.track = default(8, TRACK_SET)
-                        self.fix.speed = default(9, SPEED_SET)
-                        self.fix.climb = default(10, CLIMB_SET)
-                        self.fix.epd = default(11)
-                        self.fix.eps = default(12, SPEEDERR_SET)
-                        self.fix.epc = default(13, CLIMBERR_SET)
-                        if len(fields) > 14:
-                            self.fix.mode = default(14, MODE_SET, int)
-                        else:
-                            if self.valid & ALTITUDE_SET:
-                                self.fix.mode = MODE_2D
-                            else:
-                                self.fix.mode = MODE_3D
-                            self.valid |= MODE_SET
-                elif cmd == 'X':
-                    self.online = float(data)
-                    self.valid |= ONLINE_SET
-                elif cmd == 'Y':
-                    satellites = data.split(":")
-                    prefix = satellites.pop(0).split()
-                    d1 = int(prefix.pop())
-                    newsats = []
-                    for i in range(d1):
-                        newsats.append(gps.satellite(*map(int, satellites[i].split())))
-                    self.satellites = newsats
-                    self.valid |= SATELLITE_SET
 
     def __oldstyle_shim(self):
         # The rest is backwards compatibility for the old interface
@@ -325,9 +250,6 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.unpack(self.response)
             self.__oldstyle_shim()
             self.newstyle = True
-            self.valid |= PACKET_SET
-        elif self.response.startswith("GPSD"):
-            self.__oldstyle_unpack(self.response)
             self.valid |= PACKET_SET
         return 0
 
