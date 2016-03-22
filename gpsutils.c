@@ -336,15 +336,99 @@ timestamp_t iso8601_to_unix(char *isotime)
 #ifndef __clang_analyzer__
 #ifndef USE_QT
     char *dp = NULL;
-    double usec;
+    double usec = 0;
     struct tm tm;
     memset(&tm,0,sizeof(tm));
 
+#ifdef HAVE_STRPTIME
     dp = strptime(isotime, "%Y-%m-%dT%H:%M:%S", &tm);
+#else
+    /* Fallback for systems without strptime (i.e. Windows)
+       This is a simplistic conversion for iso8601 strings only,
+       rather than embedding a full copy of strptime() that handles all formats */
+    double sec;
+    unsigned int tmp; // Thus avoiding needing to test for (broken) negative date/time numbers in token reading - only need to check the upper range
+    bool failed = false;
+    char *isotime_tokenizer = strdup(isotime);
+    if (isotime_tokenizer) {
+      char *tmpbuf;
+      char *pch = strtok_r(isotime_tokenizer, "-T:", &tmpbuf);
+      int token_number = 0;
+      while (pch != NULL) {
+	token_number++;
+	// Give up if encountered way too many tokens.
+	if (token_number > 10) {
+	  failed = true;
+	  break;
+	}
+	switch (token_number) {
+	case 1: // Year token
+	  tmp = atoi(pch);
+	  if (tmp < 9999)
+	    tm.tm_year = tmp - 1900; // Adjust to tm year
+	  else
+	    failed = true;
+	  break;
+	case 2: // Month token
+	  tmp = atoi(pch);
+	  if (tmp < 13)
+	    tm.tm_mon = tmp - 1; // Month indexing starts from zero
+	  else
+	    failed = true;
+	  break;
+	case 3: // Day token
+	  tmp = atoi(pch);
+	  if (tmp < 32)
+	    tm.tm_mday = tmp;
+	  else
+	    failed = true;
+	  break;
+	case 4: // Hour token
+	  tmp = atoi(pch);
+	  if (tmp < 24)
+	    tm.tm_hour = tmp;
+	  else
+	    failed = true;
+	  break;
+	case 5: // Minute token
+	  tmp = atoi(pch);
+	  if (tmp < 60)
+	    tm.tm_min = tmp;
+	  else
+	    failed = true;
+	  break;
+	case 6: // Seconds token
+	  sec = safe_atof(pch);
+	  // NB To handle timestamps with leap seconds
+	  if (sec >= 0.0 && sec < 61.5 ) {
+	    tm.tm_sec = (unsigned int)sec; // Truncate to get integer value
+	    usec = sec - (unsigned int)sec; // Get the fractional part (if any)
+	  }
+	  else
+	    failed = true;
+	  break;
+	default: break;
+	}
+	pch = strtok_r(NULL, "-T:", &tmpbuf);
+      }
+      free(isotime_tokenizer);
+      // Split may result in more than 6 tokens if the TZ has any t's in it
+      // So check that we've seen enough tokens rather than an exact number
+      if (token_number < 6)
+	failed = true;
+    }
+    if (failed)
+      memset(&tm,0,sizeof(tm));
+    else {
+      // When successful this normalizes tm so that tm_yday is set
+      //  and thus tm is valid for use with other functions
+      if (mktime(&tm) == (time_t)-1)
+	// Failed mktime - so reset the timestamp
+	memset(&tm,0,sizeof(tm));
+    }
+#endif
     if (dp != NULL && *dp == '.')
 	usec = strtod(dp, NULL);
-    else
-	usec = 0;
     /*
      * It would be nice if we could say mktime(&tm) - timezone + usec instead,
      * but timezone is not available at all on some BSDs. Besides, when working
@@ -380,7 +464,12 @@ char *unix_to_iso8601(timestamp_t fixtime, /*@ out @*/
 
     fractional = modf(fixtime, &integral);
     intfixtime = (time_t) integral;
+#ifdef HAVE_GMTIME_R
     (void)gmtime_r(&intfixtime, &when);
+#else
+    /* Fallback to try with gmtime_s - primarily for Windows */
+    (void)gmtime_s(&when, &intfixtime);
+#endif
 
     (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
     /*
