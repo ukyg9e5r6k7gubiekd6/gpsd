@@ -249,7 +249,6 @@ class gps(gpscommon, gpsdata, gpsjson):
         if self.response.startswith("{") and self.response.endswith("}\r\n"):
             self.unpack(self.response)
             self.__oldstyle_shim()
-            self.newstyle = True
             self.valid |= PACKET_SET
         return 0
 

@@ -1,4 +1,4 @@
-#!@PYTHON@
+#!/usr/bin/env python
 #
 # @MASTER@
 #
@@ -10,6 +10,7 @@
 # This code generates template declarations for AIS-JSON parsing from a
 # declarative specification of a JSON structure.
 #
+# This code runs under both Python 2 and Python 3. Preserve this property!
 from __future__ import print_function
 
 import sys, getopt
