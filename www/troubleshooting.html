@@ -275,6 +275,19 @@ and gpsd.service, or on older releases from the system V-like script
 file, <code>/etc/default/gpsd</code>. If necessary, edit the control
 file as root.</p>
 
+<p>Please note that systemd will only start gpsd on request
+by clients connecting to the unix or tcp socket. In case you need
+gpsd to run always, you'll need to configure systemd to start it.
+One way would be to create a file called
+<code>/etc/systemd/system/gpsd.service.d/startup.conf</code> with
+the following content:
+<pre>
+[Install]
+WantedBy=multi-user.target
+</pre>
+To ask systemd to reload its config run <code>systemctl daemon-reload</code>.
+</p>
+
 <p>You will likely want the gpsd-clients package as a debugging
 tool. These are the clients maintained as part of the gpsd
 project. Other clients may or may not use the right libgpsd or the
