@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # usage: gegps [-i] [-d kmldir]
@@ -20,6 +20,7 @@
 # Modified by Chen Wei <weichen302@aol.com> for use with gpsd
 # Cleaned up and adapted for the GPSD project by Eric S. Raymond.
 
+# This code runs under both Python 2 and Python 3. Preserve this property!
 from __future__ import print_function
 
 import sys, os, getopt
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     else:
         try:
             while True:
-                report = next(session)
+                report = session.next()
                 if report['class'] == 'TPV':
                     f = open(os.path.join(kmldir, 'Realtime_GPS.kml'), 'w')
                     f.write(kmlize(report))
