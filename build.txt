@@ -247,8 +247,8 @@ To enable hotplugging of USB GPSes under Linux, you may do 'scons
 udev-install' to put the appropriate udev rules and wrapper files in
 place.
 
-You will need php and php-gd installed to support the PHP web page.
-included with the distribution. To install it, copy the file
+You will need php and php-gd installed to support the PHP web page
+generator included with the distribution. To install it, copy the file
 'gpsd.php' to your HTML document directory. Then see the
 post-installation instructions in INSTALL for how to configure it.
 
