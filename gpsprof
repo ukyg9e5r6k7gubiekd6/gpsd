@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
@@ -6,6 +6,7 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
+# This code runs under both Python 2 and Python 3. Preserve this property!
 import copy
 import getopt
 import gps
@@ -183,7 +184,7 @@ class spaceplot(plotter):
             # centroid is just arithmetic avg of lat,lon
             self.centroid = (sum([x[0] for x in self.fixes]) / len(self.fixes), sum([x[1] for x in self.fixes]) / len(self.fixes))
             # Sort fixes by distance from centroid
-            self.fixes.sort(lambda x, y: cmp(self.d(self.centroid, x), self.d(self.centroid, y)))
+            self.fixes.sort(key=lambda p: self.d(self.centroid, p))
             # Convert fixes to offsets from centroid in meters
             self.recentered = [gps.MeterOffset(self.centroid, fix[:2]) for fix in self.fixes]
 
@@ -219,8 +220,8 @@ class spaceplot(plotter):
         else:
             alt_avg = alt_sum / alt_num
             # Sort fixes by distance from average altitude
-            alt_fixes.sort(lambda x, y: cmp(abs(alt_avg - x), abs(alt_avg - y)))
-            alt_ep = abs(alt_fixes[len(alt_fixes) / 2] - alt_avg)
+            alt_fixes.sort(key=lambda a: abs(alt_avg - a))
+            alt_ep = abs(alt_fixes[len(alt_fixes) // 2] - alt_avg)
         if self.centroid[0] < 0:
             latstring = "%fS" % -self.centroid[0]
         elif self.centroid[0] == 0:
@@ -246,7 +247,7 @@ class spaceplot(plotter):
             fmt += 'set y2label "Meters Altitude from %f"\n' % alt_avg
             fmt += 'set ytics nomirror\n'
             fmt += 'set y2tics\n'
-        fmt += 'cep=%f\n' % self.d((0, 0), self.recentered[len(self.fixes) / 2])
+        fmt += 'cep=%f\n' % self.d((0, 0), self.recentered[len(self.fixes) // 2])
         fmt += 'cep95=%f\n' % self.d((0, 0), self.recentered[int(len(self.fixes) * 0.95)])
         fmt += 'cep99=%f\n' % self.d((0, 0), self.recentered[int(len(self.fixes) * 0.99)])
         fmt += 'set parametric\n'

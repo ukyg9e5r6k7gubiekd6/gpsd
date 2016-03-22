@@ -1,7 +1,7 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
-import time, socket, sys, select, exceptions
+import time, socket, sys, select
 
 if sys.hexversion >= 0x2060000:
     import json			# For Python 2.6
@@ -11,9 +11,9 @@ else:
 GPSD_PORT = "2947"
 
 
-class json_error(exceptions.Exception):
+class json_error(BaseException):
     def __init__(self, data, explanation):
-        exceptions.Exception.__init__(self)
+        BaseException.__init__(self)
         self.data = data
         self.explanation = explanation
 
@@ -42,7 +42,7 @@ class gpscommon:
             try:
                 port = int(port)
             except ValueError:
-                raise socket.error, "nonnumeric port"
+                raise socket.error("nonnumeric port")
         # if self.verbose > 0:
         #    print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
@@ -53,13 +53,13 @@ class gpscommon:
                 self.sock = socket.socket(af, socktype, proto)
                 # if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
-            except socket.error, msg:
+            except socket.error(msg):
                 # if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
                 continue
             break
         if not self.sock:
-            raise socket.error, msg
+            raise socket.error(msg)
 
     def close(self):
         if self.sock:
@@ -82,7 +82,7 @@ class gpscommon:
             sys.stderr.write("poll: reading from daemon...\n")
         eol = self.linebuffer.find('\n')
         if eol == -1:
-            frag = self.sock.recv(4096)
+            frag = self.sock.recv(4096).decode('ascii')
             self.linebuffer += frag
             if self.verbose > 1:
                 sys.stderr.write("poll: read complete.\n")
@@ -123,7 +123,7 @@ class gpscommon:
         "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
-        self.sock.send(commands)
+        self.sock.send(commands.encode('ascii'))
 
 WATCH_ENABLE = 0x000001 	# enable streaming
 WATCH_DISABLE = 0x000002 	# disable watching
@@ -147,7 +147,7 @@ class gpsjson:
     def unpack(self, buf):
         try:
             self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
-        except ValueError, e:
+        except ValueError(e):
             raise json_error(buf, e.args[0])
         # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.

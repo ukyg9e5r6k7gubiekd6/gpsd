@@ -55,8 +55,10 @@ def CalcRad(lat):
     return r
 
 
-def EarthDistance((lat1, lon1), (lat2, lon2)):
+def EarthDistance(c1, c2):
     "Distance in meters between two points specified in degrees."
+    (lat1, lon1) = c1
+    (lat2, lon2) = c2
     x1 = CalcRad(lat1) * math.cos(Deg2Rad(lon1)) * math.sin(Deg2Rad(90 - lat1))
     x2 = CalcRad(lat2) * math.cos(Deg2Rad(lon2)) * math.sin(Deg2Rad(90 - lat2))
     y1 = CalcRad(lat1) * math.sin(Deg2Rad(lon1)) * math.sin(Deg2Rad(90 - lat1))
@@ -75,8 +77,10 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
     return CalcRad((lat1 +lat2) / 2) * math.acos(a)
 
 
-def MeterOffset((lat1, lon1), (lat2, lon2)):
+def MeterOffset(c1, c2):
     "Return offset in meters of second arg from first."
+    (lat1, lon1) = c1
+    (lat2, lon2) = c2
     dx = EarthDistance((lat1, lon1), (lat1, lon2))
     dy = EarthDistance((lat1, lon1), (lat2, lon1))
     if lat1 < lat2:

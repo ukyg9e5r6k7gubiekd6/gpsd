@@ -14,8 +14,10 @@
 # The JSON parts of this (which will be reused by any new interface)
 # now live in a different module.
 #
-from client import *
-from misc import isotime
+from __future__ import print_function
+
+from .client import *
+from .misc import isotime
 
 NaN = float('nan')
 
@@ -286,7 +288,7 @@ class gps(gpscommon, gpsdata, gpsjson):
                 if type(self.fix.time) == type(0.0):
                     self.fix.time = self.utc
                 else:
-                    self.fix.time = isotime(self.utc.encode("ascii"))
+                    self.fix.time = isotime(self.utc)
             self.fix.ept       = default("ept",   NaN, TIMERR_SET)
             self.fix.latitude  = default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)
@@ -372,7 +374,7 @@ if __name__ == '__main__':
         if switch == '-v':
             verbose = True
     if len(arguments) > 2:
-        print 'Usage: gps.py [-v] [host [port]]'
+        print('Usage: gps.py [-v] [host [port]]')
         sys.exit(1)
 
     opts = {"verbose": verbose}
@@ -385,9 +387,9 @@ if __name__ == '__main__':
     session.stream(WATCH_ENABLE)
     try:
         for report in session:
-            print report
+            print(report)
     except KeyboardInterrupt:
         # Avoid garble on ^C
-        print ""
+        print("")
 
 # gps.py ends here

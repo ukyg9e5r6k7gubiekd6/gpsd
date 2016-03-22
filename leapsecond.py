@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """
 
 Usage: leapsecond.py [-v] { [-h] | [-f filename] | [-g filename] | [-H filename]
@@ -43,6 +43,7 @@ This file is Copyright (c) 2013 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 
 """
+# This code runs under both Python 2 and Python 3. Preserve this property!
 from __future__ import print_function
 
 import os, urllib, re, random, time, calendar, math, sys, signal

@@ -67,8 +67,10 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
+from __future__ import print_function
+
 import os, sys, time, signal, pty, termios  # fcntl, array, struct
-import exceptions, threading, socket, select
+import threading, socket, select
 import gps
 import packet as sniffer
 import stat
@@ -114,9 +116,9 @@ def GetDelay(slow=False):
     return delay
 
 
-class TestLoadError(exceptions.Exception):
+class TestLoadError(BaseException):
     def __init__(self, msg):
-        exceptions.Exception.__init__(self)
+        BaseException.__init__(self)
         self.msg = msg
 
 
@@ -190,7 +192,7 @@ class TestLoad:
                 if type_latch is None:
                     type_latch = ptype
                 if self.predump:
-                    print repr(packet)
+                    print(repr(packet))
                 if not packet:
                     raise TestLoadError("zero-length packet from %s" %
                                         self.name)
@@ -209,9 +211,9 @@ class TestLoad:
             self.sentences.append("# EOF\n")
 
 
-class PacketError(exceptions.Exception):
+class PacketError(BaseException):
     def __init__(self, msg):
-        exceptions.Exception.__init__(self)
+        BaseException.__init__(self)
         self.msg = msg
 
 
@@ -421,9 +423,9 @@ class FakeUDP(FakeGPS):
         pass  # shutdown() fails on UDP
 
 
-class DaemonError(exceptions.Exception):
+class DaemonError(BaseException):
     def __init__(self, msg):
-        exceptions.Exception.__init__(self)
+        BaseException.__init__(self)
         self.msg = msg
 
     def __str__(self):
@@ -546,9 +548,9 @@ class DaemonInstance:
             self.pid = None
 
 
-class TestSessionError(exceptions.Exception):
+class TestSessionError(BaseException):
     def __init__(self, msg):
-        exceptions.Exception.__init__(self)
+        BaseException.__init__(self)
         self.msg = msg
 
 
