@@ -278,14 +278,29 @@ file as root.</p>
 <p>Please note that systemd will only start gpsd on request
 by clients connecting to the unix or tcp socket. In case you need
 gpsd to run always, you'll need to configure systemd to start it.
-One way would be to create a file called
-<code>/etc/systemd/system/gpsd.service.d/startup.conf</code> with
-the following content:
+One way would be to create <code>/etc/systemd/system/gpsd.service</code>
+with the following content:
 <pre>
+[Unit]
+Description=GPS (Global Positioning System) Daemon
+Requires=gpsd.socket
+# Needed with chrony SOCK refclock
+After=chronyd.service
+
+[Service]
+EnvironmentFile=-/etc/default/gpsd
+EnvironmentFile=-/etc/sysconfig/gpsd
+ExecStart=/usr/sbin/gpsd -N $GPSD_OPTIONS $DEVICES
+
 [Install]
 WantedBy=multi-user.target
+Also=gpsd.socket
 </pre>
-To ask systemd to reload its config run <code>systemctl daemon-reload</code>.
+To ask systemd to reload its config run
+<code>systemctl daemon-reload; systemctl reenable gpsd.service</code>.
+Instead of using the EnvironmentFile(s) you could just edit the command
+line as necessary for your system. Don't forget to run
+<code>systemctl daemon-reload</code> after changing the file.
 </p>
 
 <p>You will likely want the gpsd-clients package as a debugging
