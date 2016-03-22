@@ -4,6 +4,7 @@ gpscap - GPS/AIS capability dictionary class.
 This file is Copyright (c) 2010 by the GPSD project
 BSD terms apply: see the file COPYING in the distribution root for details.
 """
+# This code runs under both Python 2 and Python 3. Preserve this property!
 from __future__ import print_function
 
 try:
