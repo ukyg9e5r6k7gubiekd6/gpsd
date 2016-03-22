@@ -207,7 +207,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     switch (navmode) {
     case UBX_MODE_TMONLY:
 	session->newdata.mode = MODE_NO_FIX;
-	/* mask |= GOODTIME_IS; */
+	mask |= GOODTIME_IS;
 	break;
     case UBX_MODE_3D:
 	session->newdata.mode = MODE_3D;
