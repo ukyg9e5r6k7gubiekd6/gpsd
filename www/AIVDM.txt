@@ -509,7 +509,7 @@ of 669.
 
 According to <<MMSI>>, different formats of MMSI are used for
 different classes of transmitter. In the format descriptions below, a
-MID is a three-digit decimal literal ranging from 201 to 275 that
+MID is a three-digit decimal literal ranging from 201 to 775 that
 identifies a country or other maritime jurisdiction.  See <<ITU-MID>>
 for a list of MIDs.
 
