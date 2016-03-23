@@ -5430,5 +5430,7 @@ sentences.
 Version 1.50 fixes a couple of typos in the ISO289 Berthing Data and
 Tidal Window message descriptions.
 
-Version 1.51 fixes an incorrect bit length in the IMO289 Hydrologial
+Version 1.51 fixes an incorrect bit length in the IMO289 Hydrological
 Data message.
+
+// end
