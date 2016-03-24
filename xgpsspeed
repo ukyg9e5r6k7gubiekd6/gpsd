@@ -67,7 +67,7 @@ class LandSpeedometer(Speedometer):
         }
 
     def expose_event(self, _unused, event, _empty=None):
-        self.cr = self.window.cairo_create()
+        self.cr = self.get_window().cairo_create()
         self.cr.rectangle(
             event.area.x,
             event.area.y,
@@ -76,7 +76,7 @@ class LandSpeedometer(Speedometer):
         )
         self.cr.clip()
         x, y = self.get_x_y()
-        width, height = self.window.get_size()
+        width, height = self.get_window().get_geometry()[2:4]
         radius = self.get_radius(width, height)
         self.cr.set_line_width(radius / 100)
         self.draw_arc_and_ticks(width, height, radius, x, y)
@@ -245,7 +245,7 @@ class NauticalSpeedometer(Speedometer):
         return (polex + cos(angle) * radius, poley - sin(angle) * radius)
 
     def expose_event(self, _unused, event, _empty=None):
-        self.cr = self.window.cairo_create()
+        self.cr = self.get_window().cairo_create()
         self.cr.rectangle(
             event.area.x,
             event.area.y,
@@ -254,7 +254,7 @@ class NauticalSpeedometer(Speedometer):
         )
         self.cr.clip()
         x, y = self.get_x_y()
-        width, height = self.window.get_size()
+        width, height = self.get_window().get_geometry()[2:4]
         radius = self.get_radius(width, height)
         self.cr.set_line_width(radius / 100)
         self.draw_arc_and_ticks(width, height, radius, x, y)
