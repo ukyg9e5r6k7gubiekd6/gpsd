@@ -22,10 +22,11 @@ import socket
 import sys
 import time
 
-import gobject
-import pygtk
-pygtk.require('2.0')
-import gtk
+from gi.repository import GObject
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+from gi.repository import Gdk
 import cairo
 
 import gps
@@ -86,21 +87,21 @@ def fit_circle_to_grid(x, y, radius, line_width):
     return x, y, r
 
 
-class SkyView(gtk.DrawingArea):
+class SkyView(Gtk.DrawingArea):
     "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
     HORIZON_PAD = 40    # How much whitespace to leave around horizon
     SAT_RADIUS = 5      # Diameter of satellite circle
 
     def __init__(self):
-        gtk.DrawingArea.__init__(self)
+        GObject.GObject.__init__(self)
         self.set_size_request(400, 400)
         self.cr = None   # New cairo context for each expose event
         self.width = 0   # Updated in size-allocate handler
         self.height = 0  # Updated in size-allocate handler
         self.step_of_grid = 45  # default step of polar grid
         self.connect('size-allocate', self.on_size_allocate)
-        self.connect('expose-event', self.on_expose_event)
+        self.connect('draw', self.on_expose_event)
         self.satellites = []
         self.center_x = self.center_y = self.radius = None
 
@@ -117,7 +118,7 @@ class SkyView(gtk.DrawingArea):
 
     def set_color(self, spec):
         "Set foreground color for drawing."
-        gdkcolor = gtk.gdk.color_parse(spec)
+        gdkcolor = Gdk.color_parse(spec)
         r = gdkcolor.red / 65535.0
         g = gdkcolor.green / 65535.0
         b = gdkcolor.blue / 65535.0
@@ -189,7 +190,7 @@ class SkyView(gtk.DrawingArea):
         return (xout, yout)
 
     def on_expose_event(self, widget, _unused):
-        self.cr = widget.window.cairo_create()
+        self.cr = widget.get_window().cairo_create()
 
         self.cr.set_line_width(1)
 
@@ -279,17 +280,17 @@ class NoiseView:
     )
 
     def __init__(self):
-        self.widget = gtk.Table(NoiseView.COLUMNS, NoiseView.ROWS, False)
+        self.widget = Gtk.Table(NoiseView.COLUMNS, NoiseView.ROWS, False)
         self.noisewidgets = []
         for i in range(len(NoiseView.noisefields)):
             colbase = (i / NoiseView.ROWS) * 2
-            label = gtk.Label(NoiseView.noisefields[i][0] + ": ")
+            label = Gtk.Label(label=NoiseView.noisefields[i][0] + ": ")
             # Wacky way to force right alignment
             label.set_alignment(xalign=1, yalign=0.5)
             self.widget.attach(
                 label, colbase, colbase + 1,
                 i % NoiseView.ROWS, i % NoiseView.ROWS + 1)
-            entry = gtk.Entry()
+            entry = Gtk.Entry()
             # The right size for the ISO8601 timestamp
             entry.set_width_chars(20)
             entry.set_text("n/a")
@@ -311,7 +312,7 @@ class MaidenheadView:
     "Encapsulate view object for watching Maidenhead grid location."
 
     def __init__(self):
-        self.widget = gtk.Entry()
+        self.widget = Gtk.Entry()
         self.widget.set_editable(False)
 
     def update(self, tpv):
@@ -331,17 +332,17 @@ class AISView:
         self.deg_type = deg_type
         self.name_to_mmsi = {}
         self.named = {}
-        self.store = gtk.ListStore(str, str, str, str, str, str)
-        self.widget = gtk.ScrolledWindow()
-        self.widget.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.view = gtk.TreeView(model=self.store)
+        self.store = Gtk.ListStore(str, str, str, str, str, str)
+        self.widget = Gtk.ScrolledWindow()
+        self.widget.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        self.view = Gtk.TreeView(model=self.store)
         self.widget.set_size_request(-1, 300)
         self.widget.add_with_viewport(self.view)
 
         for (i, label) in enumerate(('#', 'Name:', 'Callsign:', 'Destination:', "Lat/Lon:", "Information")):
-            column = gtk.TreeViewColumn(label)
-            renderer = gtk.CellRendererText()
-            column.pack_start(renderer)
+            column = Gtk.TreeViewColumn(label)
+            renderer = Gtk.CellRendererText()
+            column.pack_start(renderer, expand=True)
             column.add_attribute(renderer, 'text', i)
             self.view.append_column(column)
 
@@ -464,25 +465,25 @@ class Base:
         self.ais_latch = False
         self.noise_latch = False
 
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
         self.window.set_title("xgps")
         self.window.connect("delete_event", self.delete_event)
         self.window.set_resizable(False)
 
-        vbox = gtk.VBox(False, 0)
+        vbox = Gtk.VBox(False, 0)
         self.window.add(vbox)
 
-        self.window.connect("destroy", lambda _unused: gtk.main_quit())
+        self.window.connect("destroy", lambda _unused: Gtk.main_quit())
 
-        self.uimanager = gtk.UIManager()
+        self.uimanager = Gtk.UIManager()
         self.accelgroup = self.uimanager.get_accel_group()
         self.window.add_accel_group(self.accelgroup)
-        self.actiongroup = gtk.ActionGroup('xgps')
+        self.actiongroup = Gtk.ActionGroup('xgps')
         self.actiongroup.add_actions(
-            [('Quit', gtk.STOCK_QUIT, '_Quit', None,
-              'Quit the Program', lambda _unused: gtk.main_quit()),
+            [('Quit', Gtk.STOCK_QUIT, '_Quit', None,
+              'Quit the Program', lambda _unused: Gtk.main_quit()),
              ('File', None, '_File'),
              ('View', None, '_View'),
              ('Units', None, '_Units'),
@@ -515,7 +516,7 @@ class Base:
              ('Off', None, 'Off', None, 'Off', 0),
              ], 45, lambda a, _unused: self.set_step_of_grid(a.get_current_value()))
         self.uimanager.insert_action_group(self.actiongroup, 0)
-        self.uimanager.add_ui_from_string('''
+        self.uimanager.add_ui_from_string(u'''
 <ui>
     <menubar name="MenuBar">
       <menu action="File">
@@ -549,21 +550,21 @@ class Base:
         self.uimanager.get_widget('/MenuBar/View/Maidenhead').set_active(True)
         self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
         menubar = self.uimanager.get_widget('/MenuBar')
-        vbox.pack_start(menubar, False)
+        vbox.pack_start(menubar, expand=False, fill=True, padding=0)
 
-        self.satbox = gtk.HBox(False, 0)
+        self.satbox = Gtk.HBox(False, 0)
         vbox.add(self.satbox)
 
-        skyframe = gtk.Frame(label="Satellite List")
+        skyframe = Gtk.Frame(label="Satellite List")
         self.satbox.add(skyframe)
 
-        self.satlist = gtk.ListStore(str, str, str, str, str)
-        view = gtk.TreeView(model=self.satlist)
+        self.satlist = Gtk.ListStore(str, str, str, str, str)
+        view = Gtk.TreeView(model=self.satlist)
 
         for (i, label) in enumerate(('PRN:', 'Elev:', 'Azim:', 'SNR:', 'Used:')):
-            column = gtk.TreeViewColumn(label)
-            renderer = gtk.CellRendererText()
-            column.pack_start(renderer)
+            column = Gtk.TreeViewColumn(label)
+            renderer = Gtk.CellRendererText()
+            column.pack_start(renderer, expand=True)
             column.add_attribute(renderer, 'text', i)
             view.append_column(column)
 
@@ -574,27 +575,27 @@ class Base:
 
         skyframe.add(view)
 
-        viewframe = gtk.Frame(label="Skyview")
+        viewframe = Gtk.Frame(label="Skyview")
         self.satbox.add(viewframe)
         self.skyview = SkyView()
         viewframe.add(self.skyview)
 
-        self.rawdisplay = gtk.Entry()
+        self.rawdisplay = Gtk.Entry()
         self.rawdisplay.set_editable(False)
         vbox.add(self.rawdisplay)
 
-        self.dataframe = gtk.Frame(label="GPS data")
-        datatable = gtk.Table(Base.COLUMNS, Base.ROWS, False)
+        self.dataframe = Gtk.Frame(label="GPS data")
+        datatable = Gtk.Table(Base.COLUMNS, Base.ROWS, False)
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
             colbase = (i / Base.ROWS) * 2
-            label = gtk.Label(Base.gpsfields[i][0] + ": ")
+            label = Gtk.Label(label=Base.gpsfields[i][0] + ": ")
             # Wacky way to force right alignment
             label.set_alignment(xalign=1, yalign=0.5)
             datatable.attach(label, colbase, colbase + 1,
                              i % Base.ROWS, i % Base.ROWS + 1)
-            entry = gtk.Entry()
+            entry = Gtk.Entry()
             # The right size for the ISO8601 timestamp
             entry.set_width_chars(20)
             entry.set_text("n/a")
@@ -603,23 +604,23 @@ class Base:
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
-        self.noisebox = gtk.HBox(False, 0)
+        self.noisebox = Gtk.HBox(False, 0)
         vbox.add(self.noisebox)
-        noiseframe = gtk.Frame(label="Noise Statistics")
+        noiseframe = Gtk.Frame(label="Noise Statistics")
         self.noisebox.add(noiseframe)
         self.noiseview = NoiseView()
         noiseframe.add(self.noiseview.widget)
 
-        self.gsbox = gtk.HBox(False, 0)
+        self.gsbox = Gtk.HBox(False, 0)
         vbox.add(self.gsbox)
-        gsframe = gtk.Frame(label="Maidenhead Grid Square")
+        gsframe = Gtk.Frame(label="Maidenhead Grid Square")
         self.gsbox.add(gsframe)
         self.gsview = MaidenheadView()
         gsframe.add(self.gsview.widget)
 
-        self.aisbox = gtk.HBox(False, 0)
+        self.aisbox = Gtk.HBox(False, 0)
         vbox.add(self.aisbox)
-        aisframe = gtk.Frame(label="AIS Data")
+        aisframe = Gtk.Frame(label="AIS Data")
         self.aisbox.add(aisframe)
         self.aisview = AISView(self.deg_type)
         aisframe.add(self.aisview.widget)
@@ -661,12 +662,12 @@ class Base:
     def set_satlist_field(self, row, column, value):
         "Set a specified field in the satellite list."
         try:
-            self.satlist.set_value(self.row_iters[row], column, value)
+            self.satlist.set_value(self.row_iters[row], column, str(value))
         except IndexError:
             sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n" % (row, gps.MAXCHANNELS))
 
     def delete_event(self, _widget, _event, _data=None):
-        gtk.main_quit()
+        Gtk.main_quit()
         return False
 
     # State updates
@@ -814,9 +815,9 @@ class Base:
         "Set up monitoring of a daemon instance."
         self.daemon = daemon
         self.device = device
-        gobject.io_add_watch(daemon.sock, gobject.IO_IN, self.handle_response)
-        gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_hangup)
-        gobject.io_add_watch(daemon.sock, gobject.IO_HUP, self.handle_hangup)
+        GObject.io_add_watch(daemon.sock, GObject.IO_IN, self.handle_response)
+        GObject.io_add_watch(daemon.sock, GObject.IO_ERR, self.handle_hangup)
+        GObject.io_add_watch(daemon.sock, GObject.IO_HUP, self.handle_hangup)
 
     def handle_response(self, source, condition):
         "Handle ordinary I/O ready condition from the daemon."
@@ -847,17 +848,17 @@ class Base:
 
     def handle_hangup(self, _source, _condition):
         "Handle hangup condition from the daemon."
-        w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
-                              flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                              buttons=gtk.BUTTONS_CANCEL)
-        w.connect("destroy", lambda _unused: gtk.main_quit())
+        w = Gtk.MessageDialog(type=Gtk.MessageType.ERROR,
+                              flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                              buttons=Gtk.ButtonsType.CANCEL)
+        w.connect("destroy", lambda _unused: Gtk.main_quit())
         w.set_markup("gpsd has stopped sending data.")
         w.run()
-        gtk.main_quit()
+        Gtk.main_quit()
         return True
 
     def main(self):
-        gtk.main()
+        Gtk.main()
 
 if __name__ == "__main__":
     try:
@@ -905,9 +906,9 @@ if __name__ == "__main__":
             base.watch(daemon, device)
             base.main()
         except socket.error:
-            w = gtk.MessageDialog(type=gtk.MESSAGE_ERROR,
-                                  flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                                  buttons=gtk.BUTTONS_CANCEL)
+            w = Gtk.MessageDialog(type=Gtk.MessageType.ERROR,
+                                  flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                                  buttons=Gtk.ButtonsType.CANCEL)
             w.set_markup("gpsd is not running.")
             w.run()
             w.destroy()
