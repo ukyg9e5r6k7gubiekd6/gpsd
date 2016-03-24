@@ -97,11 +97,9 @@ class SkyView(Gtk.DrawingArea):
         GObject.GObject.__init__(self)
         self.set_size_request(400, 400)
         self.cr = None   # New cairo context for each expose event
-        self.width = 0   # Updated in size-allocate handler
-        self.height = 0  # Updated in size-allocate handler
         self.step_of_grid = 45  # default step of polar grid
         self.connect('size-allocate', self.on_size_allocate)
-        self.connect('draw', self.on_expose_event)
+        self.connect('draw', self.on_draw)
         self.satellites = []
         self.center_x = self.center_y = self.radius = None
 
@@ -189,7 +187,7 @@ class SkyView(Gtk.DrawingArea):
         yout = self.center_y - math.cos(az) * el * self.radius
         return (xout, yout)
 
-    def on_expose_event(self, widget, _unused):
+    def on_draw(self, widget, _unused):
         self.cr = widget.get_window().cairo_create()
 
         self.cr.set_line_width(1)
