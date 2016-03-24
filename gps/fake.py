@@ -228,7 +228,7 @@ class FakeGPS:
 
     def write(self, line):
         "Throw an error if this superclass is ever instantiated."
-        raise ValueError, line
+        raise ValueError(line)
 
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
@@ -682,7 +682,7 @@ class TestSession:
                 if isinstance(chosen, FakeGPS):
                     if chosen.exhausted and (time.time() - chosen.exhausted > TEST_TIMEOUT) and chosen.byname in self.fakegpslist:
                         sys.stderr.write("Test timed out: increase WRITE_PAD = %s\n" % GetDelay(self.slow))
-                        raise SystemExit, 1
+                        raise SystemExit(1)
                     elif not chosen.go_predicate(chosen.index, chosen):
                         if chosen.exhausted == 0:
                             chosen.exhausted = time.time()
