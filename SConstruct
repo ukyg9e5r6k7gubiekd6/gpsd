@@ -1913,9 +1913,9 @@ Utility("validation-list", [www], validation_list)
 # How to update the website
 upload_web = Utility("website", [www],
                      ['rsync --exclude="*.in" -avz www/ ' + webupload,
-                      'scp README TODO NEWS ' + webupload,
+                      'scp -q README TODO NEWS ' + webupload,
                       'chmod ug+w,a+x www/gps_report.cgi',
-                      'scp www/gps_report.cgi ' + cgiupload + "gps_report.cgi"])
+                      'scp -q www/gps_report.cgi ' + cgiupload + "gps_report.cgi"])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
