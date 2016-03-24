@@ -58,8 +58,7 @@ usermail   = "gpsd-users@lists.nongnu.org"
 annmail    = "gpsd-announce@nongnu.org"
 ircchan    = "irc://chat.freenode.net/#gpsd"
 tiplink    = "<a href='http://gratipay.com/esr'>leave a tip at Gratipay</a>"
-tipwidget  = ("<script data-gratipay-username='esr' "
-              "data-gratipay-widget='button' src='//gttp.co/v1.js'></script>")
+tipwidget  = '<p><a href="https://www.patreon.com/esr">Donate here to support continuing development.</a></p>'
 # Hosting information ends here
 
 EnsureSConsVersion(2, 3, 0)

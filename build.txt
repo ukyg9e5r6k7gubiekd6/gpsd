@@ -103,8 +103,8 @@ because of a missing Python.h.
 The xgps and xgpsspeed test clients require the following Python extensions:
 
 |============================================================================
-|gobject            | GNOME object introspection library
-|pygtk              | Python bindings for GTK
+|python-gi          | Python bindings for gobject-introspection libraries
+|python-gi-cairo    | Python bindings for Cairo toolkit under GI
 |===========================================================================
 
 === Scons ===
