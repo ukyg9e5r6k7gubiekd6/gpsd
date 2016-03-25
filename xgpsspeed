@@ -693,7 +693,7 @@ if __name__ == '__main__':
         '--device',
         dest='device',
         default=None,
-        help='The device to connet. [Default None]'
+        help='The device to connect. [Default None]'
     )
     parser.add_option(
         '--speedunits',
@@ -705,7 +705,7 @@ if __name__ == '__main__':
         '--maxspeed',
         dest='maxspeed',
         default='50',
-        help='max speed of the speedmeter [Default 50]'
+        help='Max speed of the speedmeter [Default 50]'
     )
     parser.add_option(
         '--nautical',
