@@ -45,6 +45,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-V </arg>
+      <arg choice='opt'>--nautical </arg>
+      <arg choice='opt'>--landspeed </arg>
       <arg choice='opt'>--speedunits
 	      <group choice='req'>
 		      <arg>mph</arg><arg>kph</arg><arg>knots</arg>
@@ -228,9 +230,10 @@ position information from the GPS. It accepts an -h option and
 optional argument as for <application>gps</application>, or a -V
 option to dump the package version and exit.</para>
 
-<para>The default display mode resembles a car speedometer.  With the
-option --nautical you get a more elaborate speed and track presentation
-modeled after a marine navigation display.</para>
+<para>The default display mode is a speed and track presentation
+modeled after a marine navigation display; for backward compatibility
+the --nautical option forces this mode. The --landspeed option produces
+a simple speedometer.</para>
 
 <para>The -speedunits option can be used to set the speed units for
 display; follow the keyword with knots for nautical miles per hour,

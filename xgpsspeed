@@ -707,9 +707,16 @@ if __name__ == '__main__':
     parser.add_option(
         '--nautical',
         dest='nautical',
-        default=False,
+        default=True,
         action='store_true',
         help='Enable nautical-style speed and track display.'
+    )
+    parser.add_option(
+        '--landspeed',
+        dest='nautical',
+        default=True,
+        action='store_false',
+        help='Enable dashboard-style speedometer.'
     )
     parser.add_option(
         '--debug',
