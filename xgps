@@ -6,7 +6,8 @@ xgps -- test client for gpsd
 usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
 '''
 
-from __future__ import print_function
+# This code runs under both Python 2 and Python 3. Preserve this property!
+from __future__ import print_function, division
 
 gui_about = '''\
 This is xgps, a test client for the gpsd daemon.
@@ -587,7 +588,7 @@ class Base:
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
-            colbase = (i / Base.ROWS) * 2
+            colbase = (i // Base.ROWS) * 2
             label = Gtk.Label(label=Base.gpsfields[i][0] + ": ")
             # Wacky way to force right alignment
             label.set_alignment(xalign=1, yalign=0.5)
@@ -646,7 +647,7 @@ class Base:
         Base.gpsfields = [(label_hook_widget[0][1], label_hook_widget[1]) for label_hook_widget in zip(Base.gpsfields, gpswidgets)]
 
     def view_toggle(self, action):
-        # print "View toggle:", action.get_active(), action.get_name()
+        # print("View toggle:", action.get_active(), action.get_name())
         if hasattr(self, 'view_name_to_widget'):
             if action.get_active():
                 self.view_name_to_widget[action.get_name()].show()

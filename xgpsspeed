@@ -7,6 +7,9 @@
 #
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
+# This code runs under both Python 2 and Python 3. Preserve this property!
+from __future__ import division
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
