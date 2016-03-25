@@ -105,11 +105,7 @@ The xgps and xgpsspeed test clients require the following Python extensions:
 |============================================================================
 |python-gi          | Python bindings for gobject-introspection libraries
 |python-gi-cairo    | Python bindings for Cairo toolkit under GI
-|gobject            | GNOME object introspection library (xgpsspeed only)
-|pygtk              | Python bindings for GTK (xgpsspeed only)
 |===========================================================================
-
-Note: Our intention is to forward-port xgpsspeed to python-gi.
 
 === Scons ===
 

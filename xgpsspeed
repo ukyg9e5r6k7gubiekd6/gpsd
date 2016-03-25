@@ -7,11 +7,12 @@
 #
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
-import pygtk
-pygtk.require('2.0')
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+from gi.repository import Gdk
 import cairo
-import gobject
+from gi.repository import GObject
 import gps
 from math import pi
 from math import cos
@@ -21,9 +22,9 @@ from math import radians
 from socket import error as SocketError
 
 
-class Speedometer(gtk.DrawingArea):
+class Speedometer(Gtk.DrawingArea):
     def __init__(self, speed_unit=None):
-        gtk.DrawingArea.__init__(self)
+        GObject.GObject.__init__(self)
         self.MPH_UNIT_LABEL = 'mph'
         self.KPH_UNIT_LABEL = 'kmh'
         self.KNOTS_UNIT_LABEL = 'knots'
@@ -45,7 +46,7 @@ class LandSpeedometer(Speedometer):
         Speedometer.__init__(self, speed_unit)
         self.connect('size-allocate', self.on_size_allocate)
         self.width = self.height = 0
-        self.connect('expose_event', self.expose_event)
+        self.connect('draw', self.draw)
         self.long_ticks = (2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8)
         self.short_ticks = (0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9)
         self.long_inset = lambda x: 0.1 * x
@@ -72,7 +73,7 @@ class LandSpeedometer(Speedometer):
         self.width = allocation.width
         self.height = allocation.height
 
-    def expose_event(self, _unused, _event, _empty=None):
+    def draw(self, _unused, _event, _empty=None):
         self.cr = self.get_window().cairo_create()
         self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
@@ -227,7 +228,7 @@ class NauticalSpeedometer(Speedometer):
         Speedometer.__init__(self, speed_unit)
         self.connect('size-allocate', self.on_size_allocate)
         self.width = self.height = 0
-        self.connect('expose_event', self.expose_event)
+        self.connect('draw', self.draw)
         self.long_inset = lambda x: 0.05 * x
         self.mid_inset = lambda x: self.long_inset(x) / 1.5
         self.short_inset = lambda x: self.long_inset(x) / 3
@@ -251,7 +252,7 @@ class NauticalSpeedometer(Speedometer):
         self.width = allocation.width
         self.height = allocation.height
 
-    def expose_event(self, _unused, _event, _empty=None):
+    def draw(self, _unused, _event, _empty=None):
         self.cr = self.get_window().cairo_create()
         self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
@@ -437,7 +438,7 @@ class NauticalSpeedometer(Speedometer):
 
     def set_color(self, spec):
         '''Set foreground color for drawing.'''
-        gdkcolor = gtk.gdk.color_parse(spec)
+        gdkcolor = Gdk.color_parse(spec)
         r = gdkcolor.red / 65535.0
         g = gdkcolor.green / 65535.0
         b = gdkcolor.blue / 65535.0
@@ -515,7 +516,7 @@ class Main(object):
         self.speed_unit = speed_unit
         self.maxspeed = maxspeed
         self.nautical = nautical
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
         self.window.set_title('xgpsspeed')
@@ -529,18 +530,18 @@ class Main(object):
         self.window.connect('delete_event', self.delete_event)
         self.window.connect('destroy', self.destroy)
         self.widget.show()
-        vbox = gtk.VBox(False, 0)
+        vbox = Gtk.VBox(False, 0)
         self.window.add(vbox)
 
         self.window.present()
-        self.uimanager = gtk.UIManager()
+        self.uimanager = Gtk.UIManager()
         self.accelgroup = self.uimanager.get_accel_group()
         self.window.add_accel_group(self.accelgroup)
-        self.actiongroup = gtk.ActionGroup('gpsspeed-ng')
+        self.actiongroup = Gtk.ActionGroup('gpsspeed-ng')
         self.actiongroup.add_actions(
             [
-                ('Quit', gtk.STOCK_QUIT, '_Quit', None,
-                    'Quit the Program', lambda unused: gtk.main_quit()),
+                ('Quit', Gtk.STOCK_QUIT, '_Quit', None,
+                    'Quit the Program', lambda unused: Gtk.main_quit()),
                 ('File', None, '_File'),
                 ('Units', None, '_Units')]
         )
@@ -587,9 +588,9 @@ class Main(object):
     def watch(self, daemon, device):
         self.daemon = daemon
         self.device = device
-        gobject.io_add_watch(daemon.sock, gobject.IO_IN, self.handle_response)
-        gobject.io_add_watch(daemon.sock, gobject.IO_ERR, self.handle_hangup)
-        gobject.io_add_watch(daemon.sock, gobject.IO_HUP, self.handle_hangup)
+        GObject.io_add_watch(daemon.sock, GObject.IO_IN, self.handle_response)
+        GObject.io_add_watch(daemon.sock, GObject.IO_ERR, self.handle_hangup)
+        GObject.io_add_watch(daemon.sock, GObject.IO_HUP, self.handle_hangup)
         return True
 
     def handle_response(self, source, condition):
@@ -603,16 +604,16 @@ class Main(object):
         return True
 
     def handle_hangup(self, _dummy, _unused):
-        w = gtk.MessageDialog(
-            type=gtk.MESSAGE_ERROR,
-            flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-            buttons=gtk.BUTTONS_OK
+        w = Gtk.MessageDialog(
+            type=Gtk.MessageType.ERROR,
+            flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+            buttons=Gtk.ButtonsType.OK
         )
-        w.connect("destroy", lambda unused: gtk.main_quit())
+        w.connect("destroy", lambda unused: Gtk.main_quit())
         w.set_title('gpsd error')
         w.set_markup("gpsd has stopped sending data.")
         w.run()
-        gtk.main_quit()
+        Gtk.main_quit()
         return True
 
     def update_speed(self, data):
@@ -635,7 +636,7 @@ class Main(object):
         return False
 
     def destroy(self, _unused, _empty=None):
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def run(self):
         try:
@@ -646,12 +647,12 @@ class Main(object):
                 verbose=self.debug
             )
             self.watch(daemon, self.device)
-            gtk.main()
+            Gtk.main()
         except SocketError:
-            w = gtk.MessageDialog(
-                type=gtk.MESSAGE_ERROR,
-                flags=gtk.DIALOG_DESTROY_WITH_PARENT,
-                buttons=gtk.BUTTONS_OK
+            w = Gtk.MessageDialog(
+                type=Gtk.MessageType.ERROR,
+                flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                buttons=Gtk.ButtonsType.OK
             )
             w.set_title('socket error')
             w.set_markup(
@@ -660,7 +661,7 @@ class Main(object):
             w.run()
             w.destroy()
         except KeyboardInterrupt:
-            self.window.emit('delete_event', gtk.gdk.Event(gtk.gdk.NOTHING))
+            self.window.emit('delete_event', Gdk.Event(Gdk.NOTHING))
 
 if __name__ == '__main__':
     import sys
