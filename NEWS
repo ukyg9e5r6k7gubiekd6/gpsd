@@ -5,7 +5,8 @@ Repository head:
   (e.g. Garmin USB GPSes). Apply OS X build fixes.  Fix a SiRF driver
   bug that occasionally confused NTP.  Support for Spectratime iSync
   GRClok and LNRClok oscillators. gpxlogger can reconnect when
-  the GPS loses the fix.
+  the GPS loses the fix. xgps and xgpsspeed moved to python-gi,
+  getting shut of the deprecated pygtk2 bindings.
 
 3.16: 2016-01-08 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Test rebuilds for mid-2015 leapsecond bump. Regression tests will
