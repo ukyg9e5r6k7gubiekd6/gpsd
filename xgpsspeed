@@ -43,6 +43,8 @@ class Speedometer(gtk.DrawingArea):
 class LandSpeedometer(Speedometer):
     def __init__(self, speed_unit=None):
         Speedometer.__init__(self, speed_unit)
+        self.connect('size-allocate', self.on_size_allocate)
+        self.width = self.height = 0
         self.connect('expose_event', self.expose_event)
         self.long_ticks = (2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8)
         self.short_ticks = (0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9)
@@ -66,14 +68,13 @@ class LandSpeedometer(Speedometer):
             2: 100
         }
 
-    def expose_event(self, _unused, event, _empty=None):
+    def on_size_allocate(self, _unused, allocation):
+        self.width = allocation.width
+        self.height = allocation.height
+
+    def expose_event(self, _unused, _event, _empty=None):
         self.cr = self.get_window().cairo_create()
-        self.cr.rectangle(
-            event.area.x,
-            event.area.y,
-            event.area.width,
-            event.area.height
-        )
+        self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
         x, y = self.get_x_y()
         width, height = self.get_window().get_geometry()[2:4]
@@ -224,6 +225,8 @@ class NauticalSpeedometer(Speedometer):
 
     def __init__(self, speed_unit=None, maxspeed=100):
         Speedometer.__init__(self, speed_unit)
+        self.connect('size-allocate', self.on_size_allocate)
+        self.width = self.height = 0
         self.connect('expose_event', self.expose_event)
         self.long_inset = lambda x: 0.05 * x
         self.mid_inset = lambda x: self.long_inset(x) / 1.5
@@ -244,14 +247,13 @@ class NauticalSpeedometer(Speedometer):
         return a tuple contains (x, y)'''
         return (polex + cos(angle) * radius, poley - sin(angle) * radius)
 
-    def expose_event(self, _unused, event, _empty=None):
+    def on_size_allocate(self, _unused, allocation):
+        self.width = allocation.width
+        self.height = allocation.height
+
+    def expose_event(self, _unused, _event, _empty=None):
         self.cr = self.get_window().cairo_create()
-        self.cr.rectangle(
-            event.area.x,
-            event.area.y,
-            event.area.width,
-            event.area.height
-        )
+        self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
         x, y = self.get_x_y()
         width, height = self.get_window().get_geometry()[2:4]
