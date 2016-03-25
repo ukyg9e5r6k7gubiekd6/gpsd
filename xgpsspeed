@@ -453,7 +453,7 @@ class NauticalSpeedometer(Speedometer):
         self.cr.set_line_width(2)
         self.cr.set_source_rgb(0, 0, 0)
 
-        x0, y0 = NauticalSpeedometer.polar2xy(radius * (90 - satsoup['el']) / 90, h, x, y)
+        x0, y0 = NauticalSpeedometer.polar2xy(radius * (90 - satsoup['el']) // 90, h, x, y)
 
         self.cr.new_sub_path()
         if gps.is_sbas(satsoup['PRN']):
