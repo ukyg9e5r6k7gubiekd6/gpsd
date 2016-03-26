@@ -39,6 +39,8 @@ knobs = [
     'garmintxt',
     'geostar',
     'gpsclock',
+    'gpsd',
+    'gpsdclients',
     'itrax',
     'libgpsmm',
     'mtk3301',
@@ -79,7 +81,12 @@ knobs = [
 
 def main(starting_number_of_options=0):
     import itertools
+    import multiprocessing
+    import shutil
     import subprocess
+
+    num_cpus = multiprocessing.cpu_count()
+    job_arg = '-j%d' % num_cpus
 
     failed_configurations = []
     dev_null = open('/dev/null', 'w')
@@ -89,7 +96,7 @@ def main(starting_number_of_options=0):
             return True
         failed_configurations.append(command)
         print command
-        with open(phase + '_build_configs.txt', 'a') as failed_configs:
+        with open('failed_%s_configs.txt' % phase, 'a') as failed_configs:
             failed_configs.write(' '.join(command) + '\n')
         return False
 
@@ -105,12 +112,22 @@ def main(starting_number_of_options=0):
 
             # print {'on_params': row, 'scons_params': params}
 
-            if os.path.exists('.scons-option-cache'):
-                os.remove('.scons-option-cache')
+            # Clean before clearing cached options, in case options
+            # affect what's cleaned.
             subprocess.call(['scons', '-c'], stdout=dev_null)
+            # Now remove all the scons temporaries
+            try:
+                shutil.rmtree('.sconf_temp')
+            except OSError:
+                pass
+            for f in ['.sconsign.dblite', '.scons-option-cache']:
+                try:
+                    os.remove(f)
+                except OSError:
+                    pass
 
-            if _run(['scons', '-j9'] + params, 'build'):
-                _run(['scons', 'check'] + params, 'check')
+            if _run(['scons', job_arg, 'build-all'] + params, 'build'):
+                _run(['scons', job_arg, 'check'] + params, 'check')
 
     return failed_configurations
 
