@@ -1518,7 +1518,7 @@ if len(python_progs) > 0:
     pylint = Utility("pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --reports=n --disable=F0001,C0103,C0111,C1001,C0301,C0302,C0322,C0324,C0323,C0321,C0330,R0201,R0801,R0902,R0903,R0904,R0911,R0912,R0913,R0914,R0915,W0110,W0201,W0121,W0123,W0231,W0232,W0234,W0401,W0403,W0141,W0142,W0603,W0614,W0640,W0621,W1504,E0602,E0611,E1101,E1102,E1103,F0401 gps/*.py *.py ''' + " ".join(python_progs)])
 
-# Additional Python readablity style checks
+# Additional Python readability style checks
 if len(python_progs) > 0:
     pep8 = Utility("pep8", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''pep8 --ignore=E501,W602,E122,E241,E401 {0} gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])

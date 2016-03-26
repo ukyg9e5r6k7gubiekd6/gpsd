@@ -1,6 +1,4 @@
-#!@PYTHON@
-#
-# @MASTER@
+#!/usr/bin/env python
 #
 # This is a valgrind torture test for the gpsd daemon.
 # It's not really expected to spot anything as long as we aren't using
