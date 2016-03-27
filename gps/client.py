@@ -1,12 +1,11 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
-import time, socket, sys, select
+# This code run compatibly under Python 2 and 3.x for x >= 3.
+# Preserve this property!
+from __future__ import print_function, division
 
-if sys.hexversion >= 0x2060000:
-    import json			# For Python 2.6
-else:
-    import simplejson as json 	# For Python 2.4 and 2.5
+import time, socket, sys, select, json
 
 GPSD_PORT = "2947"
 

@@ -7,6 +7,8 @@
 # Requires gnuplot.
 #
 # This code runs under both Python 2 and Python 3. Preserve this property!
+from __future__ import print_function, division
+
 import copy
 import getopt
 import gps

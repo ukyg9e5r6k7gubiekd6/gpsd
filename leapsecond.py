@@ -6,13 +6,13 @@ Usage: leapsecond.py [-v] { [-h] | [-f filename] | [-g filename] | [-H filename]
 
 Options:
 
-  -I take a date in ISO8601 format and convert to Unix gmt time
+  -I take a date in ISO8601 format and convert to Unix-UTC time
 
-  -O take a date in Unix gmt time and convert to ISO8601.
+  -O take a date in Unix-UTC time and convert to ISO8601.
 
-  -i take a date in RFC822 format and convert to Unix gmt time
+  -i take a date in RFC822 format and convert to Unix-UTC time
 
-  -o take a date in Unix gmt time and convert to RFC822.
+  -o take a date in Unix-UTC time and convert to RFC822.
 
   -f fetch leap-second offset data and save to local cache file
 
@@ -44,7 +44,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 """
 # This code runs under both Python 2 and Python 3. Preserve this property!
-from __future__ import print_function
+from __future__ import print_function, division
 
 import os, urllib, re, random, time, calendar, math, sys, signal
 

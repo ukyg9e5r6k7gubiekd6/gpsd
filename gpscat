@@ -5,7 +5,7 @@
 #
 # Display GPS output.  Hexify it if necessary.
 #
-from __future__ import print_function
+from __future__ import print_function, division
 
 import os, sys, termios, socket, select, getopt, curses.ascii
 import gps.packet as sniffer

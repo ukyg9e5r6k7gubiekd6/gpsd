@@ -21,7 +21,7 @@
 # Cleaned up and adapted for the GPSD project by Eric S. Raymond.
 
 # This code runs under both Python 2 and Python 3. Preserve this property!
-from __future__ import print_function
+from __future__ import print_function, division
 
 import sys, os, getopt
 import gps
