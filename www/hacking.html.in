@@ -82,7 +82,7 @@ file in the source distribution.</p>
   <li><a href="#contribution">Contribution guidelines</a>
     <ol>
       <li><a href="#verify">Verify your patch or commit</a></li>
-      <li><a href="#patches">Send patches in diff -u or -c format</a></li>
+      <li><a href="#patches">Send patches in git-format-patch, diff -u or -c format</a></li>
       <li><a href="#license">The license on contributions</a></li>
       <li><a href="#options">Don't add invocation options!</a></li>
       <li><a href="#statics">Don't create static variables in the libraries!</a></li>
@@ -324,7 +324,7 @@ never have any affect on or reveal bugs in the C code.</p>
 
 <p>A significant part of the reason is that in GPSD-world the notion
 of "target Python" is not actually meaningful for anything but a
-handful of test and profiling utilities. On the <em>very</p> rare occasions
+handful of test and profiling utilities. On the <em>very</em> rare occasions
 that those have had bugs (fewer than a half-dozen in the entire
 project history) they have generally been due to glitches in Python's
 OS bindings - the least rare categories related to the socket and pty
@@ -332,7 +332,7 @@ libraries.</p>
 
 <p>Therefore, what version of Python code such as the regression-test
 framework is running under is generally unimportant if it runs at all.
-To minimize prroblems do to the ongoing Python 2 to 3 transition,
+To minimize problems due to the ongoing Python 2 to 3 transition,
 follow the "polyglot" guidelines in <a
 href="http://www.catb.org/esr/faqs/practical-python-porting/">Practical
 Python porting for systems programmers</a>.
@@ -399,7 +399,7 @@ following things:</p>
 
 <h2 id="patches">Send patches in git-format-patch, diff -u or -c format</h2>
 
-<p>Wee like getting patxges mnade using git format-patch from a
+<p>We like getting patches made using git format-patch from a
 repository clone, as this means we don't have to compose a change
 comment and attribution.</p>
 
