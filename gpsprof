@@ -58,7 +58,7 @@ class plotter:
     def __init__(self):
         self.fixes = []
         self.start_time = int(time.time())
-        self.watch = {"TPV"}
+        self.watch = set(['TPV'])
 
     def whatami(self):
         "How do we identify this plotting run?"
@@ -282,7 +282,7 @@ class timeplot(plotter):
 
     def __init__(self):
         plotter.__init__(self)
-        self.watch = {"PPS"}
+        self.watch = set(['PPS'])
 
     def sample(self):
         if self.session.data["class"] == "PPS":
