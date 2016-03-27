@@ -284,10 +284,7 @@ our long-term maintenance problem as tractable as possible.</p>
 system. Thus, the daemon and libgpsd libraries need to stay pure C.
 Anything that links direct to the core libraries should also be in C,
 because Python's alien-type facilities are still just a little too
-complex and painful to be a net win for our situation. (We know this
-may be about to change with the advent of the ctypes module in Python
-2.6 and will keep an open mind, especially to anyone who actually
-supplies a ctypes Python wrapper for libgpsd.)</p>
+complex and painful to be a net win for our situation.</p>
 
 <p>We prefer Python anywhere we aren't required to use C by
 technical constraints &mdash; in particular, for
@@ -318,6 +315,27 @@ language (Python, in particular) doesn't belong in C.</p>
 costs from the places in the codebase where we can least afford it
 to the places where it is most manageable and inflicts the least
 long-term maintenance burden.</p>
+
+<h2 id="pyversion">Python version issues and good style</h2>
+
+<p>Because Python is not used at runtime by the daemon, Python
+version-skew problem (such as the 2 to 3 transition) essentally
+never have any affect on or reveal bugs in the C code.</p>
+
+<p>A significant part of the reason is that in GPSD-world the notion
+of "target Python" is not actually meaningful for anything but a
+handful of test and profiling utilities. On the <em>very</p> rare occasions
+that those have had bugs (fewer than a half-dozen in the entire
+project history) they have generally been due to glitches in Python's
+OS bindings - the least rare categories related to the socket and pty
+libraries.</p>
+
+<p>Therefore, what version of Python code such as the regression-test
+framework is running under is generally unimportant if it runs at all.
+To minimize prroblems do to the ongoing Python 2 to 3 transition,
+follow the "polyglot" guidelines in <a
+href="http://www.catb.org/esr/faqs/practical-python-porting/">Practical
+Python porting for systems programmers</a>.
 
 <h2 id="verify">Verify your patch or commit</h2>
 
@@ -355,7 +373,7 @@ go through the following checklist:</p>
     in detail why the regression broke</b> in your change comment.</li>
 
 <li>After code changes that do anything to the storage handling, run
-    valgrind-audit and look out for reports of memory leaks and other
+    valgrind-audit.py and look out for reports of memory leaks and other
     dynamic-allocation problems (see <a href="http://valgrind.org">the
     Valgrind website</a> for a description of this tool if you don't
     already know about it).</li>
@@ -379,10 +397,15 @@ following things:</p>
 
 <p>There's a whole section on adding new drivers later in this document.</p>
 
-<h2 id="patches">Send patches in diff -u or -c format</h2>
+<h2 id="patches">Send patches in git-format-patch, diff -u or -c format</h2>
 
-<p>We prefer diff -u format, but diff -c is acceptable.  Do not send
-patches in the default (-e or ed) mode, as they are too brittle.</p>
+<p>Wee like getting patxges mnade using git format-patch from a
+repository clone, as this means we don't have to compose a change
+comment and attribution.</p>
+
+<p>Failing that prefer diff -u format, but diff -c is acceptable.  Do
+not send patches in the default (-e or ed) mode, as they are too
+brittle.</p>
 
 <p>When you send a patch, we expect you to do at least the first three
 of the same verification steps we <a href='#verify'>require</a> from
