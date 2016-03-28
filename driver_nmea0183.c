@@ -630,7 +630,7 @@ static gps_mask_t processGSV(int count, char *field[],
     }
     /*
      * This check used to be !=0, but we have loosen it a little to let by
-     * NMEA 4.1 GSVs with an extra signal-ID field at the end.  
+     * NMEA 4.1 GSVs with an extra signal-ID field at the end.
      */
     if (count % 4 > 1) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -696,8 +696,8 @@ static gps_mask_t processGSV(int count, char *field[],
     }
 
     /*
-     * Alas, we can't sanity check field counts when there are multiple sat 
-     * pictures, because the visible member counts *all* satellites - you 
+     * Alas, we can't sanity check field counts when there are multiple sat
+     * pictures, because the visible member counts *all* satellites - you
      * get a bad result on the second and later SV spans.  Note, this code
      * assumes that if any of the special sat pics occur they come right
      * after a stock GPGSV one.
@@ -1404,6 +1404,42 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 }
 #endif /* MTK3301_ENABLE */
 
+#ifdef SKYTRAQ_ENABLE
+/* Skytraq sentences take this format:
+ * $PSTI,type[,val[,val]]*CS
+ * type is a 2 digit subsentence type
+ *
+ * Note: this sentence can be at least 100 chars long.
+ * That violates the NMEA max of 82.
+ *
+ */
+static gps_mask_t processPSTI(int count, char *field[],
+			       struct gps_device_t *session)
+{
+    gps_mask_t mask;
+    mask = 0;
+
+    if (0 == strcmp("00", field[1]) && 4 == count) {
+	/* 1 PPS Timing report ID */
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "PSTI,00: Mode: %s, Length: %s, Quant: %s\n",
+		field[2], field[3], field[4]);
+	return mask;
+    }
+    if (0 == strcmp("030", field[1])) {	/* 1 PPS Timing report ID */
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "PSTI,030: Count: %d\n", count);
+	return mask;
+    }
+    gpsd_log(&session->context->errout, LOG_DATA,
+		 "PSTI,%s: Unknown type, Count: %d\n", field[1], count);
+
+    /* set something, so it won't look like an unknown sentence */
+    mask |= ONLINE_SET;
+    return mask;
+}
+#endif /* SKYTRAQ_ENABLE */
+
 /**************************************************************************
  *
  * Entry points begin here
@@ -1467,6 +1503,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"PTNTHTM", 9, false, processTNTHTM},
 	{"PTNTA", 8, false, processTNTA},
 #endif /* TNT_ENABLE */
+#ifdef SKYTRAQ_ENABLE
+	{"PSTI", 2, false, processPSTI},	/* 1 PPS timing report */
+#endif /* SKYTRAQ_ENABLE */
 	{"RMC", 8,  false, processRMC},
 	{"TXT", 5,  false, processTXT},
 	{"ZDA", 4,  false, processZDA},
