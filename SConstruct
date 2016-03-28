@@ -111,6 +111,7 @@ boolopts = (
     ("navcom",        True,  "Navcom NCT support"),
     ("oncore",        True,  "Motorola OnCore chipset support"),
     ("sirf",          True,  "SiRF chipset support"),
+    ("skytraq",       True,  "Skytraq chipset support"),
     ("superstar2",    True,  "Novatel SuperStarII chipset support"),
     ("tnt",           True,  "True North Technologies support"),
     ("tripmate",      True,  "DeLorme TripMate support"),
