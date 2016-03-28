@@ -190,7 +190,7 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
      * strlcpy() is not available.)
      */
     if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0)
-	(void)strncpy(path, pps_thread->devicename, sizeof(path));
+	(void)strncpy(path, pps_thread->devicename, sizeof(path)-1);
     else {
 	char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
 	size_t i;             /* to match type of globbuf.gl_pathc */
