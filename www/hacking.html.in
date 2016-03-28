@@ -399,9 +399,12 @@ following things:</p>
 
 <h2 id="patches">Send patches in git-format-patch, diff -u or -c format</h2>
 
-<p>We like getting patches made using git format-patch from a
-repository clone, as this means we don't have to compose a change
-comment and attribution.</p>
+<p>We like getting patches made using <code>git format-patch
+--signoff</code> from a repository clone, as this means we don't
+have to compose a change comment and attribution. The --signoff option
+of git format-patch adds a Signed-off-by: line to the end of your commit
+message. It certifies that you have the rights to submit the patch under
+GPSD's BSD licence (see the <a href='#license'>next section</a>).</p>
 
 <p>Failing that prefer diff -u format, but diff -c is acceptable.  Do
 not send patches in the default (-e or ed) mode, as they are too
