@@ -438,7 +438,7 @@ def CheckXsltproc(context):
 
 
 def CheckCompilerOption(context, option):
-    context.Message('Checking if compiler accepts %s ...' % (option,))
+    context.Message('Checking if compiler accepts %s... ' % (option,))
     old_CFLAGS = context.env['CFLAGS']
     context.env.Append(CFLAGS=option)
     ret = context.TryLink("""
@@ -453,7 +453,7 @@ def CheckCompilerOption(context, option):
 
 
 def CheckHeaderDefines(context, file, define):
-    context.Message('Checking if %s supplies %s ...' % (file, define))
+    context.Message('Checking if %s supplies %s... ' % (file, define))
     ret = context.TryLink("""
         #include <%s>
         #ifndef %s
@@ -468,7 +468,7 @@ def CheckHeaderDefines(context, file, define):
 
 
 def CheckCompilerDefines(context, define):
-    context.Message('Checking if compiler supplies %s ...' % (define,))
+    context.Message('Checking if compiler supplies %s... ' % (define,))
     ret = context.TryLink("""
         #ifndef %s
         #error %s is not defined
@@ -484,7 +484,7 @@ def CheckCompilerDefines(context, define):
 
 
 def CheckC11(context):
-    context.Message('Checking if compiler is C11 ...')
+    context.Message('Checking if compiler is C11... ')
     ret = context.TryLink("""
         #if (__STDC_VERSION__ < 201112L)
         #error Not C11
@@ -498,7 +498,7 @@ def CheckC11(context):
 
 
 def GetLoadPath(context):
-    context.Message("Getting system load path ...")
+    context.Message("Getting system load path... ")
 
 
 cleaning = env.GetOption('clean')
