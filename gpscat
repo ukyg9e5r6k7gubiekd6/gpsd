@@ -11,7 +11,8 @@ import os, sys, termios, socket, select, getopt, curses.ascii
 import gps.packet as sniffer
 
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
-NMEA_MAX = 86
+# the Skyrtaq S2525F8 emits 100 chars
+NMEA_MAX = 102
 
 # Lowest debug level at which packet getter begins to emit messages, minus one
 BASELEVEL = sniffer.LOG_IO

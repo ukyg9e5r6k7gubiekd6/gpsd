@@ -74,10 +74,11 @@
 /*
  * For NMEA-conforming receivers this is supposed to be 82, but
  * some receivers (TN-200, GSW 2.3.2) emit oversized sentences.
- * The current hog champion is the Trimble BX-960 receiver, which
- * emits a 91-character GGA message.
+ * The Trimble BX-960 receiver emits a 91-character GGA message.
+ * The current hog champion is the Skytraq S2525F8 which emits
+ * a 100-character PSTI message.
  */
-#define NMEA_MAX	91		/* max length of NMEA sentence */
+#define NMEA_MAX	102	/* max length of NMEA sentence */
 #define NMEA_BIG_BUF	(2*NMEA_MAX+1)	/* longer than longest NMEA sentence */
 
 /* a few bits of ISGPS magic */
