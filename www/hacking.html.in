@@ -404,7 +404,9 @@ following things:</p>
 have to compose a change comment and attribution. The --signoff option
 of git format-patch adds a Signed-off-by: line to the end of your commit
 message. It certifies that you have the rights to submit the patch under
-GPSD's BSD licence (see the <a href='#license'>next section</a>).</p>
+GPSD's BSD licence (see the <a href='#license'>next section</a> and the
+<a href='http://developercertificate.org/'>Developer Certificate of
+Origin</a>).</p>
 
 <p>Failing that prefer diff -u format, but diff -c is acceptable.  Do
 not send patches in the default (-e or ed) mode, as they are too
