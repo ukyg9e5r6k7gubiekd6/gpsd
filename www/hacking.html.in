@@ -489,6 +489,9 @@ to be embedding a PATH_MAX-sized buffer in the gpsd.h structure.</p>
 
 <p>Don't undo this by using malloc/free in a driver or anywhere else.</p>
 
+<p>Please note that this restriction includes indirect callers of malloc
+like strdup.</p>
+
 <h2 id="sizeof">Avoid use of sizeof(&lt;int type&gt;)!</h2>
 
 <p>It's tempting to extract parts of packets with by using a loop of the
