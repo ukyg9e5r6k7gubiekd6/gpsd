@@ -392,6 +392,20 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 }
 #endif /* TRUENORTH */
 
+/* sort the skyviews
+ * Used = Y first, then used = N
+ * then sort by PRN
+ */
+static int sat_cmp(const void *p1, const void *p2)
+{
+
+   if ( ((struct satellite_t*)p2)->used - ((struct satellite_t*)p1)->used ) {
+	return ((struct satellite_t*)p2)->used - ((struct satellite_t*)p1)->used;
+   }
+   return ((struct satellite_t*)p1)->PRN - ((struct satellite_t*)p2)->PRN;
+}
+
+
 static void update_gps_panel(struct gps_data_t *gpsdata)
 /* This gets called once for each new GPS sentence. */
 {
@@ -404,6 +418,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
      * fix.  */
     if (gpsdata->satellites_visible != 0) {
 	int i;
+	qsort( gpsdata->skyview, gpsdata->satellites_visible,
+		sizeof( struct satellite_t), sat_cmp);
 	if (display_sats >= MAX_POSSIBLE_SATS) {
 	    for (i = 0; i < MAX_POSSIBLE_SATS; i++) {
 		if (i < gpsdata->satellites_visible) {
