@@ -282,7 +282,7 @@ class NoiseView:
         self.widget = Gtk.Table(NoiseView.COLUMNS, NoiseView.ROWS, False)
         self.noisewidgets = []
         for i in range(len(NoiseView.noisefields)):
-            colbase = (i / NoiseView.ROWS) * 2
+            colbase = (i // NoiseView.ROWS) * 2
             label = Gtk.Label(label=NoiseView.noisefields[i][0] + ": ")
             # Wacky way to force right alignment
             label.set_alignment(xalign=1, yalign=0.5)
