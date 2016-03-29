@@ -21,7 +21,16 @@
  **************************************************************************/
 
 static void do_lat_lon(char *field[], struct gps_fix_t *out)
-/* process a pair of latitude/longitude fields starting at field index BEGIN */
+/* process a pair of latitude/longitude fields starting at field index BEGIN
+ * The input fields look like this:
+ *     field[0]: 4404.1237962
+ *     field[1]: N
+ *     field[2]: 12118.8472460
+ *     field[3]: W
+ * input format of lat/lon is NMEA style  DDDMM.mmmmmmm
+ * yes, 7 digits of precision from survey grade GPS
+ *
+ */
 {
     double d, m;
     char str[20], *p;

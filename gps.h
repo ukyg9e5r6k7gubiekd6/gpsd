@@ -63,6 +63,17 @@ extern "C" {
  * timestamp_t is only microSec precision
  * timestamp_t and PPS do not play well together
  */
+
+/* we want cm accuracy and 0.0000001 degrees is 1.11 cm at the equator
+ * the equator is best case for longitude. At 45lat cut that in half.
+ * at 85lat make it 0.00000001
+ *
+ * this easily fits in a C double which has 15.95 digits of precision
+ * printf() format %f defaults to %.6f, which will truncate the result.
+ * so print with %.7f if you have a survey grade GPS.
+ *
+ * ref: https://en.wikipedia.org/wiki/Decimal_degrees
+ */
 typedef double timestamp_t;	/* Unix time in seconds with fractional part */
 
 struct gps_fix_t {
