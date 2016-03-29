@@ -624,6 +624,15 @@ static gps_mask_t processGSV(int count, char *field[],
      * SiRF-IV variant that emits GPGSV followed by BDGSV. We need to
      * combine these.
      *
+     * The Skytraq S2525F8-BD-RTK output both GPGSA and BDGSA in the
+     * same cycle:
+     * $GPGSV,4,1,13,23,66,310,29,03,65,186,33,26,43,081,27,16,41,124,38*78
+     * $GPGSV,4,2,13,51,37,160,38,04,37,066,25,09,34,291,07,22,26,156,37*77
+     * $GPGSV,4,3,13,06,19,301,,31,17,052,20,193,11,307,,07,11,232,27*4F
+     * $GPGSV,4,4,13,01,03,202,30*4A
+     * $BDGSV,1,1,02,214,55,153,40,208,01,299,*67
+     * FIXME, these are not currently combined properly
+     *
      * NMEA 4.1 adds a signal-ID field just before the checksum. First
      * seen in May 2015 on a u-blox M8,
      */
