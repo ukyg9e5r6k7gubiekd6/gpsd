@@ -72,8 +72,10 @@
 /* First, declarations for the packet layer... */
 
 /*
- * For NMEA-conforming receivers this is supposed to be 82, but
- * some receivers (TN-200, GSW 2.3.2) emit oversized sentences.
+ * NMEA 3.01, Section 5.3 says the max sentence length shall be
+ * 82 chars, including the leading $ and terminating \r\n.
+ *
+ * Some receivers (TN-200, GSW 2.3.2) emit oversized sentences.
  * The Trimble BX-960 receiver emits a 91-character GGA message.
  * The current hog champion is the Skytraq S2525F8 which emits
  * a 100-character PSTI message.
