@@ -67,6 +67,20 @@
    SIRF_RECOGNIZED,	/* saw second byte of SiRF trailer */
 #endif /* SIRF_ENABLE */
 
+#ifdef SKYTRAQ_ENABLE
+   /* <0xA0,0xA1><Len><Message ID><Message Body><csum><0x0D,0x0A> */
+   /* Len is of Message ID and Message Body */
+   SKY_EXPECTED,	/* expecting Skytraq packet */
+   SKY_LEADER_1,	/* saw leading 0xA0 */
+   SKY_LEADER_2,	/* saw leading 0xA1 */
+   SKY_LENGTH_1,	/* saw first byte of packet length */
+   SKY_LENGTH_2,	/* saw second byte of packet length */
+   SKY_MID,		/* saw message one byte ID */
+   SKY_PAYLOAD,		/* we're in a Skytraq payload */
+   SKY_CSUM,		/* saw Skytraq checksum */
+   SKY_RECOGNIZED,	/* found end of the Skytraq packet */
+#endif /* SKYTRAQ_ENABLE */
+
 #ifdef ZODIAC_ENABLE
    ZODIAC_EXPECTED,	/* expecting Zodiac packet */
    ZODIAC_LEADER_1,	/* saw leading 0xff */
