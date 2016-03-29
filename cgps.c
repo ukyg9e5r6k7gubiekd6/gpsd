@@ -643,9 +643,9 @@ static void usage(char *prog)
 		  "  -V	  Show version, then exit\n"
 		  "  -s	  Be silent (don't print raw gpsd data)\n"
 		  "  -l {d|m|s}  Select lat/lon format\n"
-		  "		d = DD.dddddd\n"
-		  "		m = DD MM.mmmm'\n"
-		  "		s = DD MM' SS.sss\"\n"
+		  "		d = DD.ddddddd\n"
+		  "		m = DD MM.mmmmmm'\n"
+		  "		s = DD MM' SS.sssss\"\n"
 		  " -m      Display heading as the estimated magnetic heading\n"
 		  "         Valid only for USA (Lower 48 + AK) and Western Europe.\n",
 		  prog);
