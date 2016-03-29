@@ -425,7 +425,7 @@ static gps_mask_t processGST(int count, char *field[], struct gps_device_t *sess
 {
     /*
      * GST,hhmmss.ss,x,x,x,x,x,x,x,*hh
-     * 1 TC time of associated GGA fix
+     * 1 UTC time of associated GGA fix
      * 2 Total RMS standard deviation of ranges inputs to the navigation solution
      * 3 Standard deviation (meters) of semi-major axis of error ellipse
      * 4 Standard deviation (meters) of semi-minor axis of error ellipse
@@ -452,7 +452,7 @@ static gps_mask_t processGST(int count, char *field[], struct gps_device_t *sess
     register_fractional_time(field[0], field[1], session);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GST: utc = %.2f, rms = %.2f, maj = %.2f, min = %.2f, ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
+	     "GST: utc = %.3f, rms = %.2f, maj = %.2f, min = %.2f, ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
 	     session->gpsdata.gst.utctime,
 	     session->gpsdata.gst.rms_deviation,
 	     session->gpsdata.gst.smajor_deviation,
