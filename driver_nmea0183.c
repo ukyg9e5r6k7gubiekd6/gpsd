@@ -1419,6 +1419,9 @@ static gps_mask_t processPSTI(int count, char *field[],
     gps_mask_t mask;
     mask = 0;
 
+    (void)snprintf(session->subtype, sizeof(session->subtype) - 1,
+		   "Skytraq");
+
     if (0 == strcmp("00", field[1]) && 4 == count) {
 	/* 1 PPS Timing report ID */
 	gpsd_log(&session->context->errout, LOG_DATA,
