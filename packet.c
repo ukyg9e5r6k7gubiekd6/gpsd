@@ -250,12 +250,12 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    break;
 	}
 #endif
-#ifdef SIRF_ENABLE
+#if defined(SIRF_ENABLE) || defined(SKYTRAQ_ENABLE)
 	if (c == 0xa0) {
 	    lexer->state = SIRF_LEADER_1;
 	    break;
 	}
-#endif /* SIRF_ENABLE */
+#endif /* SIRF_ENABLE || SKYTRAQ_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
 	if (c == SOH) {
 	    lexer->state = SUPERSTAR2_LEADER;
@@ -796,13 +796,24 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
 #endif /* NMEA0183_ENABLE */
-#ifdef SIRF_ENABLE
+#if defined(SIRF_ENABLE) || defined(SKYTRAQ_ENABLE)
     case SIRF_LEADER_1:
+# ifdef SIRF_ENABLE
+        /* SIRF leads with 0xA0,0xA2 */
 	if (c == 0xa2)
 	    lexer->state = SIRF_LEADER_2;
 	else
+# endif /* SIRF_ENABLE */
+# ifdef SKYTRAQ_ENABLE
+        /* Skytraq leads with 0xA0,0xA1 */
+	if (c == 0xa1)
+	    lexer->state = SKY_LEADER_2;
+	else
+# endif /* SKYTRAQ_ENABLE */
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
+#endif /* SIRF_ENABLE || SKYTRAQ_ENABLE */
+#ifdef SIRF_ENABLE
     case SIRF_LEADER_2:
 	lexer->length = (size_t) (c << 8);
 	lexer->state = SIRF_LENGTH_1;
@@ -837,6 +848,66 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
 #endif /* SIRF_ENABLE */
+#ifdef SKYTRAQ_ENABLE
+    case SKY_LEADER_2:
+        /* MSB of length is first */
+	lexer->length = (size_t) (c << 8);
+	lexer->state = SKY_LENGTH_1;
+	break;
+    case SKY_LENGTH_1:
+        /* Skytraq length can be any 16 bit number, except 0 */
+	lexer->length += c;
+	if ( 0 == lexer->length )
+	    return character_pushback(lexer, GROUND_STATE);
+	if (lexer->length > MAX_PACKET_LENGTH)
+	    return character_pushback(lexer, GROUND_STATE);
+	lexer->state = SKY_PAYLOAD;
+	break;
+    case SKY_PAYLOAD:
+	if ( 00 == --lexer->length)
+	    lexer->state = SKY_DELIVERED;
+	break;
+    case SKY_DELIVERED:
+	if ( lexer->errout.debug >= LOG_RAW+1) {
+	    char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	    gpsd_log(&lexer->errout, LOG_RAW+1,
+		     "Skytraq = %s\n",
+		     gpsd_packetdump(scratchbuf,  sizeof(scratchbuf),
+			 (char *)lexer->inbuffer,
+			 lexer->inbufptr - (unsigned char *)lexer->inbuffer));
+	}
+	{
+	    unsigned char csum = 0;
+	    for (n = 4;
+		 (unsigned char *)(lexer->inbuffer + n) < lexer->inbufptr - 1;
+		 n++)
+		csum ^= lexer->inbuffer[n];
+	    if (csum != c) {
+		gpsd_log(&lexer->errout, LOG_IO,
+			 "Skytraq bad checksum 0x%hhx, expecting 0x%x\n",
+			 csum, c);
+		lexer->state = GROUND_STATE;
+		break;
+	    }
+	}
+	lexer->state = SKY_CSUM;
+	break;
+    case SKY_CSUM:
+	if ( 0x0d != c)
+	    return character_pushback(lexer, GROUND_STATE);
+	lexer->state = SKY_TRAILER_1;
+	break;
+    case SKY_TRAILER_1:
+	if ( 0x0a != c)
+	    return character_pushback(lexer, GROUND_STATE);
+	lexer->state = SKY_RECOGNIZED;
+	break;
+    case SKY_RECOGNIZED:
+	if ( 0xa0 != c)
+	    return character_pushback(lexer, GROUND_STATE);
+	lexer->state = SIRF_LEADER_1;
+	break;
+#endif /* SKYTRAQ */
 #ifdef SUPERSTAR2_ENABLE
     case SUPERSTAR2_LEADER:
 	ctmp = c;
@@ -1676,6 +1747,13 @@ void packet_parse(struct gps_lexer_t *lexer)
 	    break;
 	}
 #endif /* SIRF_ENABLE */
+#ifdef SKYTRAQ_ENABLE
+	else if (lexer->state == SKY_RECOGNIZED) {
+	    // packet_accept(lexer, SKY_PACKET);
+	    packet_discard(lexer);
+	    break;
+	}
+#endif /* SKYTRAQ_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
 	else if (lexer->state == SUPERSTAR2_RECOGNIZED) {
 	    unsigned a = 0, b;
