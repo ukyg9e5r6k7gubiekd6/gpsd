@@ -30,18 +30,65 @@
 
 static gps_mask_t sky_parse(struct gps_device_t *, unsigned char *, size_t);
 
-static gps_mask_t sky_msg_svinfo(struct gps_device_t *, unsigned char *,
-				  size_t);
+static gps_mask_t sky_msg_DC(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sky_msg_DD(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sky_msg_DE(struct gps_device_t *, unsigned char *, size_t);
+
+/*
+ * decode MID 0xDC, Measurement Time
+ *
+ * 9 bytes
+ */
+static gps_mask_t sky_msg_DC(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    unsigned int iod;   /* Issue of data 0 - 255 */
+    unsigned int wn;    /* week number 0 - 65535 */
+    unsigned int tow;   /* receiver tow 0 - 604799999 in mS */
+    unsigned int mp;    /* measurement period 1 - 1000 ms */
+
+    if ( 9 != len)
+	// return 0;
+
+    iod = (unsigned int)buf[1];
+    wn = getles16(buf, 2);
+    tow = getles32(buf, 4);
+    mp = getles16(buf, 8);
+
+    gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
+	     "Skytraq: MID 0xDC: iod=%d, wn=%d, tow=%d, mp=%d, len=%d\n",
+	     iod, wn, tow, mp, len);
+    return 0;
+}
+
+/*
+ * decode MID 0xDD, Raw Measurements
+ *
+ */
+static gps_mask_t sky_msg_DD(struct gps_device_t *session,
+				  unsigned char *buf, size_t len UNUSED)
+{
+    unsigned int iod;   /* Issue of data 0 - 255 */
+    unsigned int nmeas; /* number of measurements */
+
+    iod = (unsigned int)buf[1];
+    nmeas = (unsigned int)buf[2];
+
+    gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
+	     "Skytraq: MID 0xDD: iod=%d, nmeas=%d\n",
+	     iod, nmeas);
+    return 0;
+}
 
 /*
  * decode MID 0xDE, SV and channel status
  *
  * max payload: 3 + (Num_sats * 10) = 483 bytes
  */
-static gps_mask_t sky_msg_svinfo(struct gps_device_t *session,
-				  unsigned char *buf, size_t len)
+static gps_mask_t sky_msg_DE(struct gps_device_t *session,
+				  unsigned char *buf, size_t len UNUSED)
 {
-    int st, i, j, nsv;
+    int st, i, nsv;
     unsigned int iod;   /* Issue of data 0 - 255 */
     int nsvs;  /* number of SVs in this packet */
 
@@ -115,8 +162,14 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
     session->cycle_end_reliable = true;
 
     switch (buf[0]) {
+    case 0xDC:
+	return sky_msg_DC(session, buf, len);
+
+    case 0xDD:
+	return sky_msg_DD(session, buf, len);
+
     case 0xDE:
-	return sky_msg_svinfo(session, buf, len);
+	return sky_msg_DE(session, buf, len);
 
     default:
 	gpsd_log(&session->context->errout, LOG_PROG,
