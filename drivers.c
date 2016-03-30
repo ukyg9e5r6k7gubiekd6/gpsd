@@ -1719,6 +1719,7 @@ extern const struct gps_type_t driver_navcom;
 extern const struct gps_type_t driver_nmea2000;
 extern const struct gps_type_t driver_oncore;
 extern const struct gps_type_t driver_sirf;
+extern const struct gps_type_t driver_skytraq;
 extern const struct gps_type_t driver_superstar2;
 extern const struct gps_type_t driver_tsip;
 extern const struct gps_type_t driver_ubx;
@@ -1787,6 +1788,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef SIRF_ENABLE
     &driver_sirf,
 #endif /* SIRF_ENABLE */
+#ifdef SKYTRAQ_ENABLE
+    &driver_skytraq,
+#endif /* SKYTRAQ_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
     &driver_superstar2,
 #endif /* SUPERSTAR2_ENABLE */

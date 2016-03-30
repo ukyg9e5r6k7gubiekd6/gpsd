@@ -1749,7 +1749,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 #endif /* SIRF_ENABLE */
 #ifdef SKYTRAQ_ENABLE
 	else if (lexer->state == SKY_RECOGNIZED) {
-	    // packet_accept(lexer, SKY_PACKET);
+	    packet_accept(lexer, SKY_PACKET);
 	    packet_discard(lexer);
 	    break;
 	}

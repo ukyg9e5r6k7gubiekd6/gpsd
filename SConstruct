@@ -951,6 +951,7 @@ libgpsd_sources = [
     "driver_rtcm2.c",
     "driver_rtcm3.c",
     "driver_sirf.c",
+    "driver_skytraq.c",
     "driver_superstar2.c",
     "driver_tsip.c",
     "driver_ubx.c",
