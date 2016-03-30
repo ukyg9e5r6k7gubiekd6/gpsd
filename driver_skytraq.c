@@ -167,7 +167,8 @@ static gps_mask_t sky_msg_E0(struct gps_device_t *session,
 {
     unsigned int prn;   /* GPS sat PRN */
     unsigned int subf;  /* subframe 1-5 */
-    unsigned int words[10];  /* subframe 1-5 */
+    /* the words are preprocessed, not raw, just the 24bits of data */
+    uint32_t words[10];  /* subframe 1-5 */
 
     if ( 33 != len)
 	return 0;
@@ -175,13 +176,17 @@ static gps_mask_t sky_msg_E0(struct gps_device_t *session,
     prn = (unsigned int)getub(buf, 1);
     subf = (unsigned int)getub(buf, 2);
     for ( int i = 0; i < 10; i++ ) {
-	words[i] = getbeu24(buf, 4 + (i * 3));
+	words[i] = (uint32_t)getbeu24(buf, 3 + (i * 3));
     }
 
     gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
-	     "Skytraq: MID 0xE0: prn=%u, subf=%u\n",
-	     prn, subf);
-    return 0;
+	     "Skytraq: 50B MID 0xE0: prn=%u, subf=%u,"
+	     "%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
+	     prn, subf,
+	     words[0], words[1], words[2], words[3], words[4],
+	     words[5], words[6], words[7], words[8], words[9]);
+
+    return gpsd_interpret_subframe(session, prn, words);
 }
 
 
