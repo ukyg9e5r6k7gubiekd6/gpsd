@@ -56,7 +56,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     mp = getles16(buf, 8);
 
     gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
-	     "Skytraq: MID 0xDC: iod=%d, wn=%d, tow=%d, mp=%d, len=%d\n",
+	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, len=%u\n",
 	     iod, wn, tow, mp, len);
     return 0;
 }
@@ -75,7 +75,7 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
     nmeas = (unsigned int)buf[2];
 
     gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
-	     "Skytraq: MID 0xDD: iod=%d, nmeas=%d\n",
+	     "Skytraq: MID 0xDD: iod=%u, nmeas=%u\n",
 	     iod, nmeas);
     return 0;
 }
@@ -141,7 +141,7 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
     session->gpsdata.satellites_used = nsv;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Skytraq: MID 0xDE: nsvs=%d visible=%d iod=%d\n", nsvs,
+	     "Skytraq: MID 0xDE: nsvs=%u visible=%u iod=%u\n", nsvs,
 	     session->gpsdata.satellites_visible, iod);
     return SATELLITE_SET;
 }
