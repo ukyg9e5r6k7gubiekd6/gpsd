@@ -33,6 +33,7 @@ static gps_mask_t sky_parse(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DC(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DD(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DE(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sky_msg_E0(struct gps_device_t *, unsigned char *, size_t);
 
 /*
  * decode MID 0xDC, Measurement Time
@@ -63,7 +64,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     session->gpsdata.skyview_time = gpsd_gpstime_resolve(session, wn, f_tow );
 
     gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
-	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%lu.%3u\n",
+	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%lld.%3u\n",
 	     iod, wn, tow, mp,
 	     (long long)session->gpsdata.skyview_time, msec);
     return 0;
@@ -96,7 +97,8 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
 static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 				  unsigned char *buf, size_t len UNUSED)
 {
-    int st, i, nsv;
+    int st, nsv;
+    unsigned int i;
     unsigned int iod;   /* Issue of data 0 - 255 */
     unsigned int nsvs;  /* number of SVs in this packet */
 
@@ -154,6 +156,34 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
     return SATELLITE_SET;
 }
 
+/*
+ * decode MID 0xE0, GPS Subframe data
+ *
+ * len 33 bytes
+ *
+ */
+static gps_mask_t sky_msg_E0(struct gps_device_t *session,
+				  unsigned char *buf, size_t len UNUSED)
+{
+    unsigned int prn;   /* GPS sat PRN */
+    unsigned int subf;  /* subframe 1-5 */
+    unsigned int words[10];  /* subframe 1-5 */
+
+    if ( 33 != len)
+	return 0;
+
+    prn = (unsigned int)getub(buf, 1);
+    subf = (unsigned int)getub(buf, 2);
+    for ( int i = 0; i < 10; i++ ) {
+	words[i] = getbeu24(buf, 4 + (i * 3));
+    }
+
+    gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
+	     "Skytraq: MID 0xE0: prn=%u, subf=%u\n",
+	     prn, subf);
+    return 0;
+}
+
 
 static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 		      size_t len)
@@ -171,17 +201,24 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 
     switch (buf[0]) {
     case 0xDC:
+	/* 220 */
 	return sky_msg_DC(session, buf, len);
 
     case 0xDD:
+	/* 221 */
 	return sky_msg_DD(session, buf, len);
 
     case 0xDE:
+	/* 222 */
 	return sky_msg_DE(session, buf, len);
+
+    case 0xE0:
+	/* 224 */
+	return sky_msg_E0(session, buf, len);
 
     default:
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "Skytraq: Unknown packet id %d length %zd\n",
+		 "Skytraq: Unknown packet id %#x length %zd\n",
 		 buf[0], len);
 	return 0;
     }
