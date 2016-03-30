@@ -37,7 +37,7 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *, unsigned char *, size_t);
 /*
  * decode MID 0xDC, Measurement Time
  *
- * 9 bytes
+ * 10 bytes
  */
 static gps_mask_t sky_msg_DC(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
@@ -46,18 +46,26 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     unsigned int wn;    /* week number 0 - 65535 */
     unsigned int tow;   /* receiver tow 0 - 604799999 in mS */
     unsigned int mp;    /* measurement period 1 - 1000 ms */
+    /* calculated */
+    double	f_tow;  /* tow in seconds */
+    unsigned int msec;  /* mSec part of tow */
 
-    if ( 9 != len)
-	// return 0;
+    if ( 10 != len)
+	return 0;
 
-    iod = (unsigned int)buf[1];
-    wn = getles16(buf, 2);
-    tow = getles32(buf, 4);
-    mp = getles16(buf, 8);
+    iod = (unsigned int)getub(buf, 1);
+    wn = getbeu16(buf, 2);
+    tow = getbeu32(buf, 4);
+    f_tow = (double)(tow / 1000);
+    msec = tow % 1000;
+    mp = getbeu16(buf, 8);
+
+    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session, wn, f_tow );
 
     gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
-	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, len=%u\n",
-	     iod, wn, tow, mp, len);
+	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%lu.%3u\n",
+	     iod, wn, tow, mp,
+	     (long long)session->gpsdata.skyview_time, msec);
     return 0;
 }
 
@@ -71,8 +79,8 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
     unsigned int iod;   /* Issue of data 0 - 255 */
     unsigned int nmeas; /* number of measurements */
 
-    iod = (unsigned int)buf[1];
-    nmeas = (unsigned int)buf[2];
+    iod = (unsigned int)getub(buf, 1);
+    nmeas = (unsigned int)getub(buf, 2);
 
     gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
 	     "Skytraq: MID 0xDD: iod=%u, nmeas=%u\n",
@@ -90,10 +98,10 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 {
     int st, i, nsv;
     unsigned int iod;   /* Issue of data 0 - 255 */
-    int nsvs;  /* number of SVs in this packet */
+    unsigned int nsvs;  /* number of SVs in this packet */
 
-    iod = (unsigned int)buf[1];
-    nsvs = (int)buf[2];
+    iod = (unsigned int)getub(buf, 1);
+    nsvs = (unsigned int)getub(buf, 2);
     /* too many sats? */
     if ( SKY_CHANNELS < nsvs )
 	return 0;
@@ -111,9 +119,9 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 	ura = (unsigned short)getub(buf, off + 3);
 	session->gpsdata.skyview[st].ss = (float)getub(buf, off + 4);
 	session->gpsdata.skyview[st].elevation =
-	    (short)getles16(buf, off + 5);
+	    (short)getbes16(buf, off + 5);
 	session->gpsdata.skyview[st].azimuth =
-	    (short)getles16(buf, off + 7);
+	    (short)getbes16(buf, off + 7);
 	chan_stat = (unsigned short)getub(buf, off + 9);
 
 	session->gpsdata.skyview[st].used = (bool)(chan_stat & 0x30);
@@ -154,8 +162,8 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
     if (len == 0)
 	return 0;
 
-    buf += 4;
-    len -= 8;
+    buf += 4;   /* skip the leaders and length */
+    len -= 7;   /* don't count the leaders, length, csum and terminators */
     // session->driver.sirf.lastid = buf[0];
 
     /* could change if the set of messages we enable does */
