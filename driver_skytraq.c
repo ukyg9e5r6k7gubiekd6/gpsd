@@ -45,15 +45,15 @@ static gps_mask_t sky_msg_svinfo(struct gps_device_t *session,
     unsigned int iod;   /* Issue of data 0 - 255 */
     int nsvs;  /* number of SVs in this packet */
 
-    iod = (unsigned int)buf[5];
-    nsvs = (int)buf[6];
+    iod = (unsigned int)buf[1];
+    nsvs = (int)buf[2];
     /* too many sats? */
     if ( SKY_CHANNELS < nsvs )
 	return 0;
 
     gpsd_zero_satellites(&session->gpsdata);
     for (i = st = nsv =  0; i < nsvs; i++) {
-	int off = 5 + 10 * i; /* offset into buffer of start of this sat */
+	int off = 3 + (10 * i); /* offset into buffer of start of this sat */
 	bool good;	      /* do we have a good record ? */
 	unsigned short sv_stat;
 	unsigned short chan_stat;
@@ -75,7 +75,7 @@ static gps_mask_t sky_msg_svinfo(struct gps_device_t *session,
 	    session->gpsdata.skyview[st].elevation != 0;
 // #ifndef UNUSED
 	gpsd_log(&session->context->errout, 1, /* PROG, */
-		 "SiRF: PRN=%2d El=%d Az=%d ss=%3.2f stat=%02x,%02x ura=%d %c\n",
+		 "Skytraq: PRN=%2d El=%d Az=%d ss=%3.2f stat=%02x,%02x ura=%d %c\n",
 		session->gpsdata.skyview[st].PRN,
 		session->gpsdata.skyview[st].elevation,
 		session->gpsdata.skyview[st].azimuth,
@@ -83,7 +83,7 @@ static gps_mask_t sky_msg_svinfo(struct gps_device_t *session,
 		chan_stat, sv_stat, ura,
 		good ? '*' : ' ');
 // #endif /* UNUSED */
-	if ( 0 != good ) {
+	if ( good ) {
 	    st += 1;
 	    if (session->gpsdata.skyview[st].used)
 		nsv++;
@@ -94,7 +94,7 @@ static gps_mask_t sky_msg_svinfo(struct gps_device_t *session,
     session->gpsdata.satellites_used = nsv;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Skytraq: MID 0xDE: visible=%d mask={SATELLITE} iod=%d\n",
+	     "Skytraq: MID 0xDE: nsvs=%d visible=%d iod=%d\n", nsvs,
 	     session->gpsdata.satellites_visible, iod);
     return SATELLITE_SET;
 }
