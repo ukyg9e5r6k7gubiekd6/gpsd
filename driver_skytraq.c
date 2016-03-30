@@ -63,7 +63,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
 
     session->gpsdata.skyview_time = gpsd_gpstime_resolve(session, wn, f_tow );
 
-    gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
+    gpsd_log(&session->context->errout, LOG_DATA,
 	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%lld.%3u\n",
 	     iod, wn, tow, mp,
 	     (long long)session->gpsdata.skyview_time, msec);
@@ -83,7 +83,7 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
     iod = (unsigned int)getub(buf, 1);
     nmeas = (unsigned int)getub(buf, 2);
 
-    gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
+    gpsd_log(&session->context->errout, LOG_DATA,
 	     "Skytraq: MID 0xDD: iod=%u, nmeas=%u\n",
 	     iod, nmeas);
     return 0;
@@ -130,8 +130,8 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 	good = session->gpsdata.skyview[st].PRN != 0 &&
 	    session->gpsdata.skyview[st].azimuth != 0 &&
 	    session->gpsdata.skyview[st].elevation != 0;
-// #ifndef UNUSED
-	gpsd_log(&session->context->errout, 1, /* PROG, */
+
+	gpsd_log(&session->context->errout, LOG_DATA,
 		 "Skytraq: PRN=%2d El=%d Az=%d ss=%3.2f stat=%02x,%02x ura=%d %c\n",
 		session->gpsdata.skyview[st].PRN,
 		session->gpsdata.skyview[st].elevation,
@@ -139,7 +139,7 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 		session->gpsdata.skyview[st].ss,
 		chan_stat, sv_stat, ura,
 		good ? '*' : ' ');
-// #endif /* UNUSED */
+
 	if ( good ) {
 	    st += 1;
 	    if (session->gpsdata.skyview[st].used)
@@ -179,12 +179,9 @@ static gps_mask_t sky_msg_E0(struct gps_device_t *session,
 	words[i] = (uint32_t)getbeu24(buf, 3 + (i * 3));
     }
 
-    gpsd_log(&session->context->errout, 1, /* LOG_DATA, */
-	     "Skytraq: 50B MID 0xE0: prn=%u, subf=%u,"
-	     "%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
-	     prn, subf,
-	     words[0], words[1], words[2], words[3], words[4],
-	     words[5], words[6], words[7], words[8], words[9]);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "Skytraq: 50B MID 0xE0: prn=%u, subf=%u\n",
+	     prn, subf);
 
     return gpsd_interpret_subframe(session, prn, words);
 }
