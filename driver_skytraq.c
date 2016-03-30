@@ -26,9 +26,78 @@
  * No ACK/NAK?  Just rety after 6 seconds
  */
 #define SKY_RETRY_TIME	6
-#define SKY_CHANNELS	28	/* max channels allowed in format */
+#define SKY_CHANNELS	48	/* max channels allowed in format */
 
 static gps_mask_t sky_parse(struct gps_device_t *, unsigned char *, size_t);
+
+static gps_mask_t sky_msg_svinfo(struct gps_device_t *, unsigned char *,
+				  size_t);
+
+/*
+ * decode MID 0xDE, SV and channel status
+ *
+ * max payload: 3 + (Num_sats * 10) = 483 bytes
+ */
+static gps_mask_t sky_msg_svinfo(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    int st, i, j, nsv;
+    unsigned int iod;   /* Issue of data 0 - 255 */
+    int nsvs;  /* number of SVs in this packet */
+
+    iod = (unsigned int)buf[5];
+    nsvs = (int)buf[6];
+    /* too many sats? */
+    if ( SKY_CHANNELS < nsvs )
+	return 0;
+
+    gpsd_zero_satellites(&session->gpsdata);
+    for (i = st = nsv =  0; i < nsvs; i++) {
+	int off = 5 + 10 * i; /* offset into buffer of start of this sat */
+	bool good;	      /* do we have a good record ? */
+	unsigned short sv_stat;
+	unsigned short chan_stat;
+	unsigned short ura;
+
+	session->gpsdata.skyview[st].PRN = (short)getub(buf, off + 1);
+	sv_stat = (unsigned short)getub(buf, off + 2);
+	ura = (unsigned short)getub(buf, off + 3);
+	session->gpsdata.skyview[st].ss = (float)getub(buf, off + 4);
+	session->gpsdata.skyview[st].elevation =
+	    (short)getles16(buf, off + 5);
+	session->gpsdata.skyview[st].azimuth =
+	    (short)getles16(buf, off + 7);
+	chan_stat = (unsigned short)getub(buf, off + 9);
+
+	session->gpsdata.skyview[st].used = (bool)(chan_stat & 0x30);
+	good = session->gpsdata.skyview[st].PRN != 0 &&
+	    session->gpsdata.skyview[st].azimuth != 0 &&
+	    session->gpsdata.skyview[st].elevation != 0;
+// #ifndef UNUSED
+	gpsd_log(&session->context->errout, 1, /* PROG, */
+		 "SiRF: PRN=%2d El=%d Az=%d ss=%3.2f stat=%02x,%02x ura=%d %c\n",
+		session->gpsdata.skyview[st].PRN,
+		session->gpsdata.skyview[st].elevation,
+		session->gpsdata.skyview[st].azimuth,
+		session->gpsdata.skyview[st].ss,
+		chan_stat, sv_stat, ura,
+		good ? '*' : ' ');
+// #endif /* UNUSED */
+	if ( 0 != good ) {
+	    st += 1;
+	    if (session->gpsdata.skyview[st].used)
+		nsv++;
+	}
+    }
+
+    session->gpsdata.satellites_visible = st;
+    session->gpsdata.satellites_used = nsv;
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "Skytraq: MID 0xDE: visible=%d mask={SATELLITE} iod=%d\n",
+	     session->gpsdata.satellites_visible, iod);
+    return SATELLITE_SET;
+}
 
 
 static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
@@ -46,6 +115,9 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
     session->cycle_end_reliable = true;
 
     switch (buf[0]) {
+    case 0xDE:
+	return sky_msg_svinfo(session, buf, len);
+
     default:
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Skytraq: Unknown packet id %d length %zd\n",
