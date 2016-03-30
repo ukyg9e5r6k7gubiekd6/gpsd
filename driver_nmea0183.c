@@ -627,7 +627,7 @@ static gps_mask_t processGSV(int count, char *field[],
      * In the GLONASS version sat IDs run from 65-96 (NMEA0183
      * standardizes this). At least two GPSes, the BU-353 GLONASS and
      * the u-blox NEO-M8N, emit a GPGSV set followed by a GLGSV set.
-     * We have also seen two GPSses, the Skytraq S2525F8-BD-RTK and a
+     * We have also seen two GPSes, the Skytraq S2525F8-BD-RTK and a
      * SiRF-IV variant, that emit GPGSV followed by BDGSV. We need to
      * combine these.
      *
@@ -638,6 +638,10 @@ static gps_mask_t processGSV(int count, char *field[],
      * $GPGSV,4,3,13,06,19,301,,31,17,052,20,193,11,307,,07,11,232,27*4F
      * $GPGSV,4,4,13,01,03,202,30*4A
      * $BDGSV,1,1,02,214,55,153,40,208,01,299,*67
+     *
+     * The driver automatically adapts to either case, but it takes until the
+     * second cycle (usually 10 seconds from device connect) for it to
+     * learn to expect BSDGV or GLGSV.
      *
      * NMEA 4.1 adds a signal-ID field just before the checksum. First
      * seen in May 2015 on a u-blox M8.
