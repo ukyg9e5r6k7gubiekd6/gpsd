@@ -624,14 +624,15 @@ static gps_mask_t processGSV(int count, char *field[],
      * GLONASS, GN may be (incorrectly) used when GSVs contain GLONASS
      * only.  Usage is inconsistent.
      *
-     * In the GLONASS version sat IDs run from 65-96 (NMEA0183 standardizes
-     * this). At least two GPS, the BU-353 GLONASS and the u-blox NEO-M8N,
-     * emit a GPGSV set followed by a GLGSV set.  We have also seen a
-     * SiRF-IV variant that emits GPGSV followed by BDGSV. We need to
+     * In the GLONASS version sat IDs run from 65-96 (NMEA0183
+     * standardizes this). At least two GPSes, the BU-353 GLONASS and
+     * the u-blox NEO-M8N, emit a GPGSV set followed by a GLGSV set.
+     * We have also seen two GPSses, the Skytraq S2525F8-BD-RTK and a
+     * SiRF-IV variant, that emit GPGSV followed by BDGSV. We need to
      * combine these.
      *
-     * The Skytraq S2525F8-BD-RTK output both GPGSV and BDGSV in the
-     * same cycle:
+     * The following shows how the Skytraq S2525F8-BD-RTK output both
+     * GPGSV and BDGSV in the same cycle:
      * $GPGSV,4,1,13,23,66,310,29,03,65,186,33,26,43,081,27,16,41,124,38*78
      * $GPGSV,4,2,13,51,37,160,38,04,37,066,25,09,34,291,07,22,26,156,37*77
      * $GPGSV,4,3,13,06,19,301,,31,17,052,20,193,11,307,,07,11,232,27*4F
@@ -639,7 +640,7 @@ static gps_mask_t processGSV(int count, char *field[],
      * $BDGSV,1,1,02,214,55,153,40,208,01,299,*67
      *
      * NMEA 4.1 adds a signal-ID field just before the checksum. First
-     * seen in May 2015 on a u-blox M8,
+     * seen in May 2015 on a u-blox M8.
      */
 
     int n, fldnum;
