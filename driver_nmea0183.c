@@ -440,6 +440,10 @@ static gps_mask_t processGST(int count, char *field[], struct gps_device_t *sess
     }
 
 #define PARSE_FIELD(n) (*field[n]!='\0' ? safe_atof(field[n]) : NAN)
+    /* note this is not full UTC, just HHMMSS.ss */
+    /* this is not the current time,
+     * it references another GPA of the same stamp. So do not set
+     * any time stamps with it */
     session->gpsdata.gst.utctime             = PARSE_FIELD(1);
     session->gpsdata.gst.rms_deviation       = PARSE_FIELD(2);
     session->gpsdata.gst.smajor_deviation    = PARSE_FIELD(3);
@@ -449,7 +453,9 @@ static gps_mask_t processGST(int count, char *field[], struct gps_device_t *sess
     session->gpsdata.gst.lon_err_deviation   = PARSE_FIELD(7);
     session->gpsdata.gst.alt_err_deviation   = PARSE_FIELD(8);
 #undef PARSE_FIELD
-    register_fractional_time(field[0], field[1], session);
+    /* add in the time of start of today */
+    /* since it is NOT current time, do not register_fractional_time() */
+    session->gpsdata.gst.utctime += mkgmtime(&session->nmea.date);
 
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "GST: utc = %.3f, rms = %.2f, maj = %.2f, min = %.2f, ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
