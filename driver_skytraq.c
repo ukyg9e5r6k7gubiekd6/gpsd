@@ -64,7 +64,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     session->gpsdata.skyview_time = gpsd_gpstime_resolve(session, wn, f_tow );
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%lld.%3u\n",
+	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%lld.%03u\n",
 	     iod, wn, tow, mp,
 	     (long long)session->gpsdata.skyview_time, msec);
     return 0;
