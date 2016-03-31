@@ -519,6 +519,7 @@ static gps_mask_t processGSA(int count, char *field[],
 			       struct gps_device_t *session)
 /* GPS DOP and Active Satellites */
 {
+#define GSA_TALKER	field[0][1]
     /*
      * eg1. $GPGSA,A,3,,,,,,16,18,,22,24,,,3.6,2.1,2.2*3C
      * eg2. $GPGSA,A,3,19,28,14,18,27,22,31,39,,,,,1.7,1.0,1.3*35
@@ -548,7 +549,7 @@ static gps_mask_t processGSA(int count, char *field[],
      */
     if (count < 17) {
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "GPGSA: malformed, setting ONLINE_SET only.\n");
+		 "xxGSA: malformed, setting ONLINE_SET only.\n");
 	mask = ONLINE_SET;
     } else if (session->nmea.latch_mode) {
 	/* last GGA had a non-advancing timestamp; don't trust this GSA */
@@ -566,32 +567,56 @@ static gps_mask_t processGSA(int count, char *field[],
 	else
 	    mask = MODE_SET;
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "GPGSA sets mode %d\n", session->newdata.mode);
+		 "xxGSA sets mode %d\n", session->newdata.mode);
 	if (field[15][0] != '\0')
 	    session->gpsdata.dop.pdop = safe_atof(field[15]);
 	if (field[16][0] != '\0')
 	    session->gpsdata.dop.hdop = safe_atof(field[16]);
 	if (field[17][0] != '\0')
 	    session->gpsdata.dop.vdop = safe_atof(field[17]);
-	session->gpsdata.satellites_used = 0;
-	memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
+	/*
+	 * might have gone from GPGSA to GLGSA/BDGSA
+	 * in which case accumulate
+	 */
+	if ( '\0' == session->nmea.last_gsa_talker
+          || GSA_TALKER == session->nmea.last_gsa_talker) {
+	    session->gpsdata.satellites_used = 0;
+	    memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
+	}
+	session->nmea.last_gsa_talker = GSA_TALKER;
+	if (session->nmea.last_gsa_talker == 'L')
+	    session->nmea.seen_glgsa = true;
+	if (session->nmea.last_gsa_talker == 'D')
+	    session->nmea.seen_bdgsa = true;
+
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
 	for (i = 0; i < count - 6; i++) {
 	    int prn = nmeaid_to_prn(field[0], atoi(field[i + 3]));
-	    if (prn > 0)
+	    if (prn > 0) {
 		session->nmea.sats_used[session->gpsdata.satellites_used++] =
 		    (unsigned short)prn;
+		if ( MAXCHANNELS <= session->gpsdata.satellites_used ) {
+		    /* this should never happen as xxGSA is limited to 12 */
+		    break;
+		}
+            }
 	}
 	mask |= DOP_SET | USED_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "GPGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f\n",
+		 "xxGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f\n",
 		 session->newdata.mode,
 		 session->gpsdata.satellites_used,
 		 session->gpsdata.dop.pdop,
 		 session->gpsdata.dop.hdop,
 		 session->gpsdata.dop.vdop);
     }
+    /* assumes GLGSA or BDGSA, if present, is emitted  directly
+     * after the GPGSA*/
+    if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa)
+       && GSA_TALKER == 'P')
+	return ONLINE_SET;
     return mask;
+#undef GSA_TALKER
 }
 
 static gps_mask_t processGSV(int count, char *field[],
@@ -1628,6 +1653,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* prevent overaccumulation of sat reports */
     if (!str_starts_with(session->nmea.field[0] + 2, "GSV"))
 	session->nmea.last_gsv_talker = '\0';
+    if (!str_starts_with(session->nmea.field[0] + 2, "GSA"))
+	session->nmea.last_gsa_talker = '\0';
 
     /* timestamp recording for fixes happens here */
     if ((retval & TIME_SET) != 0) {

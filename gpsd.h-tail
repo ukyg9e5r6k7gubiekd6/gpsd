@@ -508,6 +508,9 @@ struct gps_device_t {
 	bool seen_bdgsv;
 	bool seen_qzss;
 	char last_gsv_talker;
+	bool seen_glgsa;
+	bool seen_bdgsa;
+	char last_gsa_talker;
 	/*
 	 * State for the cycle-tracking machinery.
 	 * The reason these timestamps are separate from the
