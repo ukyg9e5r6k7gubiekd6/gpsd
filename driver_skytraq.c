@@ -165,6 +165,7 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 static gps_mask_t sky_msg_E0(struct gps_device_t *session,
 				  unsigned char *buf, size_t len UNUSED)
 {
+    int i;
     unsigned int prn;   /* GPS sat PRN */
     unsigned int subf;  /* subframe 1-5 */
     /* the words are preprocessed, not raw, just the 24bits of data */
@@ -175,7 +176,7 @@ static gps_mask_t sky_msg_E0(struct gps_device_t *session,
 
     prn = (unsigned int)getub(buf, 1);
     subf = (unsigned int)getub(buf, 2);
-    for ( int i = 0; i < 10; i++ ) {
+    for ( i = 0; i < 10; i++ ) {
 	words[i] = (uint32_t)getbeu24(buf, 3 + (i * 3));
     }
 
