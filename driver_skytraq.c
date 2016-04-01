@@ -33,6 +33,7 @@ static gps_mask_t sky_parse(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DC(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DD(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DE(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sky_msg_DF(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_E0(struct gps_device_t *, unsigned char *, size_t);
 
 /*
@@ -61,6 +62,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     msec = tow % 1000;
     mp = getbeu16(buf, 8);
 
+    /* should this be newdata.skyview_time? */
     session->gpsdata.skyview_time = gpsd_gpstime_resolve(session, wn, f_tow );
 
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -153,7 +155,95 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "Skytraq: MID 0xDE: nsvs=%u visible=%u iod=%u\n", nsvs,
 	     session->gpsdata.satellites_visible, iod);
-    return SATELLITE_SET;
+    return SATELLITE_SET | USED_IS;
+}
+
+/*
+ * decode MID 0xDF, Nav status (PVT)
+ *
+ * 81 bytes
+ */
+static gps_mask_t sky_msg_DF(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    unsigned int iod;   /* Issue of data 0 - 255 */
+    unsigned short navstat;
+    unsigned int wn;    /* week number 0 - 65535 */
+    double f_tow;         /* receiver tow Sec */
+    double clock_bias;
+    double clock_drift;
+    gps_mask_t mask = 0;
+
+    if ( 81 != len)
+	return 0;
+
+    iod = (unsigned int)getub(buf, 1);
+
+    /* fix status is byte 2 */
+    navstat = (unsigned short)getub(buf, 2);
+    session->gpsdata.status = STATUS_NO_FIX;
+    session->newdata.mode = MODE_NO_FIX;
+    switch ( navstat ) {
+    case 1:
+	/* fix prediction, ignore */
+	break;
+    case 2:
+	session->gpsdata.status = STATUS_FIX;
+	session->newdata.mode = MODE_2D;
+	break;
+    case 3:
+	session->gpsdata.status = STATUS_FIX;
+	session->newdata.mode = MODE_3D;
+	mask |= ALTITUDE_SET | CLIMB_SET;
+	break;
+    case 4:
+	session->gpsdata.status = STATUS_DGPS_FIX;
+	session->newdata.mode = MODE_3D;
+	mask |= ALTITUDE_SET | CLIMB_SET;
+	break;
+    default:
+	break;
+    }
+
+    wn = getbeu16(buf, 3);
+    f_tow = getbed64((const char *)buf, 5);
+
+    /* position/velocity is bytes 13-48, meters and m/s */
+    ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
+		     (double)getbed64((const char *)buf, 13),
+		     (double)getbed64((const char *)buf, 21),
+		     (double)getbed64((const char *)buf, 29),
+		     (double)getbef32((const char *)buf, 37),
+		     (double)getbef32((const char *)buf, 41),
+		     (double)getbef32((const char *)buf, 46));
+
+    clock_bias = getbed64((const char *)buf, 49);
+    clock_drift = getbes32(buf, 57);
+
+    session->gpsdata.dop.gdop = getbef32((const char *)buf, 61);
+    session->gpsdata.dop.pdop = getbef32((const char *)buf, 65);
+    session->gpsdata.dop.hdop = getbef32((const char *)buf, 69);
+    session->gpsdata.dop.vdop = getbef32((const char *)buf, 73);
+    session->gpsdata.dop.tdop = getbef32((const char *)buf, 77);
+
+    session->newdata.time = gpsd_gpstime_resolve(session, wn, f_tow );
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	    "Skytraq: MID 0xDF: iod=%u, stat=%u, wn=%u, tow=%f, t=%.6f "
+	    "cb: %f, cd: %f "
+	    "gdop: %.2f, pdop: %.2f, hdop: %.2f, vdop: %.2f, tdop: %.2f\n",
+	    iod, navstat, wn, f_tow,
+	    session->newdata.time,
+	    clock_bias, clock_drift,
+	    session->gpsdata.dop.gdop,
+	    session->gpsdata.dop.pdop,
+	    session->gpsdata.dop.hdop,
+	    session->gpsdata.dop.vdop,
+	    session->gpsdata.dop.tdop);
+
+    mask |= TIME_SET | LATLON_SET | TRACK_SET |
+	SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | CLEAR_IS | REPORT_IS;
+    return mask;
 }
 
 /*
@@ -191,16 +281,17 @@ static gps_mask_t sky_msg_E0(struct gps_device_t *session,
 static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 		      size_t len)
 {
+    gps_mask_t mask = 0;
 
     if (len == 0)
-	return 0;
+	return mask;
 
     buf += 4;   /* skip the leaders and length */
     len -= 7;   /* don't count the leaders, length, csum and terminators */
     // session->driver.sirf.lastid = buf[0];
 
     /* could change if the set of messages we enable does */
-    session->cycle_end_reliable = true;
+    /* session->cycle_end_reliable = true; */
 
     switch (buf[0]) {
     case 0xDC:
@@ -215,17 +306,34 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 	/* 222 */
 	return sky_msg_DE(session, buf, len);
 
+    case 0xDF:
+	/* 223 - Nave status (PVT)  */
+	return sky_msg_DF(session, buf, len);
+
     case 0xE0:
 	/* 224 */
 	return sky_msg_E0(session, buf, len);
+
+    case 0xE2:
+	/* 226 */
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "Skytraq: Ignoring Beidou D1 subframe data, length %zd\n",
+		 len);
+        break;
+
+    case 0xE3:
+	/* 227 */
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "Skytraq: Ignoring Beidou D2 subframe data, length %zd\n",
+		 len);
+        break;
 
     default:
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Skytraq: Unknown packet id %#x length %zd\n",
 		 buf[0], len);
-	return 0;
     }
-    return 0;
+    return mask;
 }
 
 static gps_mask_t skybin_parse_input(struct gps_device_t *session)
