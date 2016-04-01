@@ -119,10 +119,23 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 	-vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
 	vz * cos(phi);
     veast = -vx * sin(lambda) + vy * cos(lambda);
+
     fix->climb =
 	vx * cos(phi) * cos(lambda) + vy * cos(phi) * sin(lambda) +
 	vz * sin(phi);
+    /* sanity check the climb, 10,000 m/s max will do */
+    if ( 9999.9 < fix->climb )
+	fix->climb = 9999.9;
+    else if ( -9999.9 > fix->speed )
+	fix->climb = -9999.9;
+
     fix->speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
+    /* sanity check the speed, 10,000 m/s max will do */
+    if ( 9999.9 < fix->speed )
+	fix->speed = 9999.9;
+    else if ( -9999.9 > fix->speed )
+	fix->speed = -9999.9;
+
     heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
     if (heading < 0)
 	heading += 2 * GPS_PI;
