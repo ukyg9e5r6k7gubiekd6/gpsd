@@ -128,7 +128,7 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 	vz * sin(phi);
     /* sanity check the climb, 10,000 m/s max will do */
     if ( isnan(fix->climb) )
-	fix->climb = 9999.9;
+	fix->climb = 0;
     else if ( 9999.9 < fix->climb )
 	fix->climb = 9999.9;
     else if ( -9999.9 > fix->speed )
@@ -137,7 +137,7 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     fix->speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
     /* sanity check the speed, 10,000 m/s max will do */
     if ( isnan(fix->speed) )
-	fix->speed = 9999.9;
+	fix->speed = 0;
     else if ( 9999.9 < fix->speed )
 	fix->speed = 9999.9;
     else if ( -9999.9 > fix->speed )
