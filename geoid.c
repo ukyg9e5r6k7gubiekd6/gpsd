@@ -93,7 +93,10 @@ double wgs84_separation(double lat, double lon)
 void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 		      double x, double y, double z,
 		      double vx, double vy, double vz)
-/* fill in WGS84 position/velocity fields from ECEF coordinates */
+/* fill in WGS84 position/velocity fields from ECEF coordinates
+ * x, y, z are all in meters
+ * vx, vy, vz are all in meters/second
+ */
 {
     double lambda, phi, p, theta, n, h, vnorth, veast, heading;
     const double a = WGS84A;	/* equatorial radius */
@@ -124,14 +127,18 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 	vx * cos(phi) * cos(lambda) + vy * cos(phi) * sin(lambda) +
 	vz * sin(phi);
     /* sanity check the climb, 10,000 m/s max will do */
-    if ( 9999.9 < fix->climb )
+    if ( isnan(fix->climb) )
+	fix->climb = 9999.9;
+    else if ( 9999.9 < fix->climb )
 	fix->climb = 9999.9;
     else if ( -9999.9 > fix->speed )
 	fix->climb = -9999.9;
 
     fix->speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
     /* sanity check the speed, 10,000 m/s max will do */
-    if ( 9999.9 < fix->speed )
+    if ( isnan(fix->speed) )
+	fix->speed = 9999.9;
+    else if ( 9999.9 < fix->speed )
 	fix->speed = 9999.9;
     else if ( -9999.9 > fix->speed )
 	fix->speed = -9999.9;
