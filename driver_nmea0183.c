@@ -1493,7 +1493,7 @@ static gps_mask_t processPSTI(int count, char *field[],
 	return mask;
     }
     if (0 == strcmp("005", field[1])) {
-	/* Time & Position */
+	/* GPIO 10 event-triggered time & position stamp. */
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "PSTI,005: Count: %d\n", count);
 	return mask;
@@ -1521,7 +1521,7 @@ static gps_mask_t processPSTI(int count, char *field[],
 		return 0;
 	/* RTK Baseline */
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,032: stat:%s mode: %s, E: %s N: %s, U:%s, L:%s C:%s\n",
+		 "PSTI,032: stat:%s mode: %s E: %s N: %s U:%s L:%s C:%s\n",
 		field[4], field[5],
 		field[6], field[7], field[8],
 		field[9], field[10]);
