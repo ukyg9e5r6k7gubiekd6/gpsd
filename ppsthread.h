@@ -16,6 +16,8 @@ struct timedelta_t {
 };
 #endif /* TIMEDELTA_DEFINED */
 
+#define PPS_MIN_FIXES	3  /* # fixes to wait for before shipping NTP time */
+
 /*
  * Set context, devicefd, and devicename at initialization time, before
  * you call pps_thread_activate().  The context pointer can be used to

@@ -105,8 +105,6 @@
  * garbage-collects them when they have no attached processes.
  */
 
-#define PPS_MIN_FIXES	3	/* # fixes to wait for before shipping PPS */
-
 static volatile struct shmTime *getShmTime(struct gps_context_t *context, int unit)
 {
     int shmid;
