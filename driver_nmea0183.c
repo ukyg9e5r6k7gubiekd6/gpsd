@@ -1476,29 +1476,61 @@ static gps_mask_t processPSTI(int count, char *field[],
 			       struct gps_device_t *session)
 {
     gps_mask_t mask;
-    mask = 0;
+
+    /* set something, so it won't look like an unknown sentence */
+    mask |= ONLINE_SET;
 
     (void)snprintf(session->subtype, sizeof(session->subtype) - 1,
 		   "Skytraq");
 
-    if (0 == strcmp("00", field[1]) && 4 == count) {
+    if (0 == strcmp("00", field[1]) ) {
+	if ( 4 != count )
+		return 0;
 	/* 1 PPS Timing report ID */
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "PSTI,00: Mode: %s, Length: %s, Quant: %s\n",
 		field[2], field[3], field[4]);
 	return mask;
     }
-    if (0 == strcmp("030", field[1])) {	/* 1 PPS Timing report ID */
+    if (0 == strcmp("005", field[1])) {
+	/* Time & Position */
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,030: Count: %d\n", count);
+		 "PSTI,005: Count: %d\n", count);
+	return mask;
+    }
+    if (0 == strcmp("030", field[1])) {
+	if ( 16 != count )
+		return 0;
+	/*  Recommended Minimum 3D GNSS Data */
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "PSTI,030: Stat:%s Lat:%s%s Lon:%s%s Alt:%s "
+		 "E:%s N:%s U:%s Mode:%s RTK(Age:%s Ratio%s)\n",
+		field[3],
+		field[4], field[5],
+		field[6], field[7],
+		field[8],
+		field[11], field[10], field[11],
+		field[13],
+		field[14], field[15]);
+
+	return mask;
+    }
+    if (0 == strcmp("032", field[1])) {
+
+	if ( 16 != count )
+		return 0;
+	/* RTK Baseline */
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "PSTI,032: stat:%s mode: %s, E: %s N: %s, U:%s, L:%s C:%s\n",
+		field[4], field[5],
+		field[6], field[7], field[8],
+		field[9], field[10]);
 	return mask;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
 		 "PSTI,%s: Unknown type, Count: %d\n", field[1], count);
 
-    /* set something, so it won't look like an unknown sentence */
-    mask |= ONLINE_SET;
-    return mask;
+    return 0;
 }
 #endif /* SKYTRAQ_ENABLE */
 
@@ -1566,7 +1598,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"PTNTA", 8, false, processTNTA},
 #endif /* TNT_ENABLE */
 #ifdef SKYTRAQ_ENABLE
-	{"PSTI", 2, false, processPSTI},	/* 1 PPS timing report */
+	{"PSTI", 2, false, processPSTI},	/* Skytraq */
 #endif /* SKYTRAQ_ENABLE */
 	{"RMC", 8,  false, processRMC},
 	{"TXT", 5,  false, processTXT},
