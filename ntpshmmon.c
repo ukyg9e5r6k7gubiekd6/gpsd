@@ -34,7 +34,7 @@ int main(int argc, char **argv)
     while ((option = getopt(argc, argv, "c:hn:st:vV")) != -1) {
 	switch (option) {
 	case 'c':
-	    cycle = atof(optarg);
+	    cycle = safe_atof(optarg);
 	    break;
 	case 'n':
 	    nsamples = atoi(optarg);

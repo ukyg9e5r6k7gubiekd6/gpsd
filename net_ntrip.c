@@ -108,11 +108,11 @@ static void ntrip_str_parse(char *str, size_t len,
     /* <latitude> */
     hold->latitude = NAN;
     if ((s = ntrip_field_iterate(NULL, s, eol, errout)))
-	hold->latitude = atof(s);
+	hold->latitude = safe_atof(s);
     /* <longitude> */
     hold->longitude = NAN;
     if ((s = ntrip_field_iterate(NULL, s, eol, errout)))
-	hold->longitude = atof(s);
+	hold->longitude = safe_atof(s);
     /* <nmea> */
     if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
 	hold->nmea = atoi(s);

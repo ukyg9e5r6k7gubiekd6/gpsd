@@ -38,7 +38,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
     if (*(p = field[0]) != '\0') {
 	double lat;
 	(void)strlcpy(str, p, sizeof(str));
-	lat = atof(str);
+	lat = safe_atof(str);
 	m = 100.0 * modf(lat / 100.0, &d);
 	lat = d + m / 60.0;
 	p = field[1];
@@ -49,7 +49,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
     if (*(p = field[2]) != '\0') {
 	double lon;
 	(void)strlcpy(str, p, sizeof(str));
-	lon = atof(str);
+	lon = safe_atof(str);
 	m = 100.0 * modf(lon / 100.0, &d);
 	lon = d + m / 60.0;
 
