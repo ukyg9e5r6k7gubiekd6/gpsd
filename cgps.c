@@ -372,7 +372,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 
     /* Fill in the altitude. */
     if (isnan(gpsdata->fix.altitude) == 0)
-	(void)snprintf(scr, sizeof(scr), "%.1f", gpsdata->fix.altitude);
+	(void)snprintf(scr, sizeof(scr), "%.3f", gpsdata->fix.altitude);
     else
 	(void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
@@ -495,7 +495,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 
     /* Fill in the altitude. */
     if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.altitude) == 0)
-	(void)snprintf(scr, sizeof(scr), "%.1f %s",
+	(void)snprintf(scr, sizeof(scr), "%.3f %s",
 		       gpsdata->fix.altitude * altfactor, altunits);
     else
 	(void)snprintf(scr, sizeof(scr), "n/a");
