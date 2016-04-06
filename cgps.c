@@ -356,21 +356,21 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
 	(void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-    /* Fill in the pitch. */
+    /* Fill in the climb. */
     if (isnan(gpsdata->fix.climb) == 0) {
-	(void)snprintf(scr, sizeof(scr), "%.1f", gpsdata->fix.climb);
+	(void)snprintf(scr, sizeof(scr), "%.2f", gpsdata->fix.climb);
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-    /* Fill in the roll. */
+    /* Fill in the speed. */
     if (isnan(gpsdata->fix.speed) == 0)
-	(void)snprintf(scr, sizeof(scr), "%.1f", gpsdata->fix.speed);
+	(void)snprintf(scr, sizeof(scr), "%.2f", gpsdata->fix.speed);
     else
 	(void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-    /* Fill in the speed. */
+    /* Fill in the altitude. */
     if (isnan(gpsdata->fix.altitude) == 0)
 	(void)snprintf(scr, sizeof(scr), "%.1f", gpsdata->fix.altitude);
     else
@@ -503,7 +503,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 
     /* Fill in the speed. */
     if (gpsdata->fix.mode >= MODE_2D && isnan(gpsdata->fix.track) == 0)
-	(void)snprintf(scr, sizeof(scr), "%.1f %s",
+	(void)snprintf(scr, sizeof(scr), "%.2f %s",
 		       gpsdata->fix.speed * speedfactor, speedunits);
     else
 	(void)snprintf(scr, sizeof(scr), "n/a");
@@ -527,7 +527,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 
     /* Fill in the rate of climb. */
     if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.climb) == 0)
-	(void)snprintf(scr, sizeof(scr), "%.1f %s/min",
+	(void)snprintf(scr, sizeof(scr), "%.2f %s/min",
 		       gpsdata->fix.climb * altfactor * 60, altunits);
     else
 	(void)snprintf(scr, sizeof(scr), "n/a");
