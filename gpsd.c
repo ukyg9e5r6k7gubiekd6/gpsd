@@ -1474,9 +1474,15 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
      * If the device provided an RTCM packet, repeat it to all devices.
      */
     if ((changed & RTCM2_SET) != 0 || (changed & RTCM3_SET) != 0) {
-	if (device->lexer.outbuflen > RTCM_MAX) {
+	if ((changed & RTCM2_SET) != 0
+                   && device->lexer.outbuflen > RTCM_MAX) {
 	    gpsd_log(&context.errout, LOG_ERROR,
 		     "overlong RTCM packet (%zd bytes)\n",
+		     device->lexer.outbuflen);
+	} else if ((changed & RTCM3_SET) != 0
+		   && device->lexer.outbuflen > RTCM3_MAX) {
+	    gpsd_log(&context.errout, LOG_ERROR,
+		     "overlong RTCM3 packet (%zd bytes)\n",
 		     device->lexer.outbuflen);
 	} else {
 	    struct gps_device_t *dp;
