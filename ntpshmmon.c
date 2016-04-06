@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <unistd.h>
 
+#include "gps.h"	/* for safe_atof() */
 #include "gpsd_config.h"
 #include "ntpshm.h"
 #include "revision.h"
