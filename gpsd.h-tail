@@ -422,7 +422,9 @@ struct ntrip_stream_t
 	fmt_rtcm2_1,
 	fmt_rtcm2_2,
 	fmt_rtcm2_3,
-	fmt_rtcm3,
+	fmt_rtcm3_0,
+	fmt_rtcm3_1,
+	fmt_rtcm3_2,
 	fmt_unknown
     } format;
     int carrier;

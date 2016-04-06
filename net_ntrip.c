@@ -90,7 +90,11 @@ static void ntrip_str_parse(char *str, size_t len,
 	else if (strcasecmp("RTCM1_", s) == 0)
 	    hold->format = fmt_rtcm2_3;
 	else if (strcasecmp("RTCM 3.0", s) == 0)
-	    hold->format = fmt_rtcm3;
+	    hold->format = fmt_rtcm3_0;
+	else if (strcasecmp("RTCM 3.1", s) == 0)
+	    hold->format = fmt_rtcm3_1;
+	else if (strcasecmp("RTCM 3.2", s) == 0)
+	    hold->format = fmt_rtcm3_2;
 	else
 	    hold->format = fmt_unknown;
     }
