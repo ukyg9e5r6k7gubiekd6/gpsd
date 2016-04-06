@@ -64,9 +64,10 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 /* Large case statements make GNU indent very confused */
 /* *INDENT-OFF* */
 
-/* good srouce on message types:
+/* good source on message types:
  * https://software.rtcm-ntrip.org/export/HEAD/ntrip/trunk/BNC/src/bnchelp.html
  * Also look in the BNC source
+ * and look at the tklib source: http://www.rtklib.com/
  */
 void rtcm3_unpack(const struct gps_context_t *context,
 		  struct rtcm3_t *rtcm, char *buf)
@@ -428,6 +429,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * GPS Ephemeris
 	 * length 19
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1020:
@@ -435,6 +437,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * GLONASS Ephemeris
 	 * length 45
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1029:
@@ -452,7 +455,12 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	break;
 
     case 1033:			/* see note in header */
-	/* Receiver and Antenna Descriptor */
+	/* Receiver and Antenna Descriptor
+         * Type1033 is a combined Message Types 1007 and 1008
+         * and hence contains antenna descriptor and serial number
+	 * as well as receiver descriptor and serial number.
+	 */
+	/* TODO: rtklib has C code for this one.  */
 	rtcm->rtcmtypes.rtcm3_1033.station_id = (unsigned short)ugrab(12);
 	n = (unsigned long)ugrab(8);
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.descriptor, buf + 7, n);
@@ -471,6 +479,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	(void)memcpy(rtcm->rtcmtypes.rtcm3_1033.firmware, buf + 11+n+n2+n3, n3);
 	rtcm->rtcmtypes.rtcm3_1033.firmware[n4] = '\0';
 	//bitcount += 8 * n4;
+	// TODO: next is receiver serial number
 	unknown = false;
 	break;
 
@@ -486,6 +495,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * QZSS ephemeris
          * length 61
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1045:
@@ -493,6 +503,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * Galileo Ephemeris FNAV data
 	 * length 62
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1046:
@@ -500,6 +511,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * Galileo Ephemeris INAV data
 	 * length 63
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1077:
@@ -508,6 +520,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	 * signal strength (high resolution)
          * length 438
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1087:
@@ -516,6 +529,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	 * signal strength (high resolution)
          * length 417 or 427
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1097:
@@ -524,6 +538,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	 * signal strength (high resolution)
          * length 96
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     case 1107:
@@ -533,6 +548,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	 * signal strength (high resolution)
          * length 96
 	 */
+	/* TODO: rtklib has C code for this one.  */
 	break;
 
     default:
