@@ -125,8 +125,7 @@ static void register_fractional_time(const char *tag, const char *fld,
 				     struct gps_device_t *session)
 {
     if (fld[0] != '\0') {
-	session->nmea.last_frac_time =
-	    session->nmea.this_frac_time;
+	session->nmea.last_frac_time = session->nmea.this_frac_time;
 	session->nmea.this_frac_time = safe_atof(fld);
 	session->nmea.latch_frac_time = true;
 	gpsd_log(&session->context->errout, LOG_DATA,
@@ -1483,6 +1482,96 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 #endif /* MTK3301_ENABLE */
 
 #ifdef SKYTRAQ_ENABLE
+
+static gps_mask_t processPSTI030(int count, char *field[],
+			       struct gps_device_t *session)
+/*  Recommended Minimum 3D GNSS Data */
+{
+    /*
+     * $PSTI,030,hhmmss.sss,A,dddmm.mmmmmmm,a,dddmm.mmmmmmm,a,x.x,x.x,x.x,x.x,ddmmyy,a.x.x,x.x*hh<CR><LF>
+     * 1     225446.334    Time of fix 22:54:46 UTC
+     * 2     A          Status of Fix: A = Autonomous, valid;
+     *                                 V = invalid
+     * 3,4   4916.45,N    Latitude 49 deg. 16.45 min North
+     * 5,6   12311.12,W   Longitude 123 deg. 11.12 min West
+     * 7     103.323      Mean Sea Level meters
+     * 8     0.00         East Velocity meters/sec
+     * 9     0.00         North Velocity meters/sec
+     * 10    0.00         Up Velocity meters/sec
+     * 11    181194       Date of fix  18 November 1994
+     * 12    A            FAA mode indicator
+     * A=autonomous, D=differential, E=Estimated,
+     * F=Float RTK, M=Manual input mode, N=not valid, R=Integer RTK
+     * S=Simulator
+     * 13    1.2          RTK Age
+     * 14    4.2          RTK Ratio
+     * 15    *68          mandatory nmea_checksum
+     */
+    gps_mask_t mask = 0;
+
+    if ( 16 != count )
+	    return 0;
+
+    if ( 0 == strcmp(field[3], "V")) {
+        /* nav warning, ignore the rest of the data */
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= STATUS_SET | MODE_SET;
+    } else if ( 0 == strcmp(field[3], "A")) {
+	double east, north;
+
+        /* data valid */
+	if (field[2][0] != '\0' && field[12][0] != '\0') {
+	    /* good date and time */
+	    merge_hhmmss(field[2], session);
+	    merge_ddmmyy(field[12], session);
+	    mask |= TIME_SET;
+	    register_fractional_time( "PSTI030", field[2], session);
+	}
+	do_lat_lon(&field[4], &session->newdata);
+	mask |= LATLON_SET;
+
+	/* convert ENU to speed/track */
+	/* this has more precision than GPVTG, GPVTG comes earlier
+	 * in the cycle */
+	east = safe_atof(field[9]);     /* east velocity m/s */
+	north = safe_atof(field[10]);   /* north velocity m/s */
+	session->newdata.speed = sqrt(pow(east, 2) + pow(north, 2));
+	session->newdata.track = atan2(east, north) * RAD_2_DEG;
+	if ( 0 > session->newdata.track )
+	    session->newdata.track += 360.0;
+
+	/* up velocity m/s */
+	session->newdata.climb = safe_atof(field[11]);
+        mask |= SPEED_SET | TRACK_SET | CLIMB_SET;
+
+        switch ( field[13][0] ) {
+	case 'A':
+	    session->gpsdata.status = STATUS_FIX;
+	    break;
+	case 'D':
+	    session->gpsdata.status = STATUS_DGPS_FIX;
+	    break;
+        default:
+	    session->gpsdata.status = STATUS_NO_FIX;
+	    break;
+        }
+	mask |= STATUS_SET;
+	/* RTK Age and RTK Ratio, for now */
+    }
+    // else WTF?
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "PSTI,030: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
+	     "status=%d, RTK(Age=%s Ratio=%s)\n",
+	     field[12], field[2],
+	     session->newdata.latitude,
+	     session->newdata.longitude,
+	     session->gpsdata.status,
+	     field[14], field[15]);
+    return mask;
+}
+
 /* Skytraq sentences take this format:
  * $PSTI,type[,val[,val]]*CS
  * type is a 2 digit subsentence type
@@ -1511,6 +1600,12 @@ static gps_mask_t processPSTI(int count, char *field[],
 		field[2], field[3], field[4]);
 	return mask;
     }
+    if (0 == strcmp("001", field[1])) {
+	/* Active Antenna Status Report */
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "PSTI,001: Count: %d\n", count);
+	return mask;
+    }
     if (0 == strcmp("005", field[1])) {
 	/* GPIO 10 event-triggered time & position stamp. */
 	gpsd_log(&session->context->errout, LOG_DATA,
@@ -1518,27 +1613,24 @@ static gps_mask_t processPSTI(int count, char *field[],
 	return mask;
     }
     if (0 == strcmp("030", field[1])) {
-	if ( 16 != count )
-		return 0;
 	/*  Recommended Minimum 3D GNSS Data */
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,030: Stat:%s Lat:%s%s Lon:%s%s Alt:%s "
-		 "E:%s N:%s U:%s Mode:%s RTK(Age:%s Ratio%s)\n",
-		field[3],
-		field[4], field[5],
-		field[6], field[7],
-		field[8],
-		field[11], field[10], field[11],
-		field[13],
-		field[14], field[15]);
-
-	return mask;
+	return processPSTI030( count, field, session);
     }
     if (0 == strcmp("032", field[1])) {
 
 	if ( 16 != count )
 		return 0;
 	/* RTK Baseline */
+	if ( 0 == strcmp(field[4], "A")) {
+	    /* Status Valid */
+	    if (field[2][0] != '\0' && field[3][0] != '\0') {
+		/* good date and time */
+		merge_hhmmss(field[2], session);
+		merge_ddmmyy(field[3], session);
+		mask |= TIME_SET;
+		register_fractional_time( "PSTI032", field[2], session);
+	    }
+	}
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "PSTI,032: stat:%s mode: %s E: %s N: %s U:%s L:%s C:%s\n",
 		field[4], field[5],
@@ -1746,9 +1838,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * this should work perfectly, locking in detection after one
      * cycle.  Most split-cycle devices (Garmin 48, for example) will
      * work fine.  Problems will only arise if a a sentence that
-     * occurs just befiore timestamp increments also occurs in
+     * occurs just before timestamp increments also occurs in
      * mid-cycle, as in the Garmin eXplorist 210; those might jitter.
      */
+    /* FIXME, Skytraq may end in $PSTI,030 and $PSTI,032 */
     if (session->nmea.latch_frac_time) {
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "%s sentence timestamped %.2f.\n",
