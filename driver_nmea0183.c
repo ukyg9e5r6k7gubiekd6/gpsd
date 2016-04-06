@@ -543,8 +543,17 @@ static gps_mask_t processGSA(int count, char *field[],
      * $GPGSA,A,3,23,31,22,16,03,07,,,,,,,1.8,1.1,1.4*3E
      * $BDGSA,A,3,214,,,,,,,,,,,,1.8,1.1,1.4*18
      * These need to be combined like GPGSV and BDGSV
+     *
+     * Some GPS emit GNGSA.  So far we have not seen a GPS emit GNGSA
+     * and then another flavor of xxGSA
+     *
+     * SEANEXX and others will emit two adjacent GNGSA:
+     * $GNGSA,A,3,31,26,21,,,,,,,,,,3.77,2.55,2.77*1A
+     * $GNGSA,A,3,75,86,87,,,,,,,,,,3.77,2.55,2.77*1C
+     * seems like the first is GNSS and the second GLONASS
      */
     gps_mask_t mask;
+    char last_last_gsa_talker = session->nmea.last_gsa_talker;
 
     /*
      * One chipset called the i.Trek M3 issues GPGSA lines that look like
@@ -582,18 +591,22 @@ static gps_mask_t processGSA(int count, char *field[],
 	    session->gpsdata.dop.vdop = safe_atof(field[17]);
 	/*
 	 * might have gone from GPGSA to GLGSA/BDGSA
+	 * or GNGSA to GNGSA
 	 * in which case accumulate
 	 */
 	if ( '\0' == session->nmea.last_gsa_talker
-          || GSA_TALKER == session->nmea.last_gsa_talker) {
+          || (GSA_TALKER == session->nmea.last_gsa_talker
+              && 'N' != GSA_TALKER) ) {
 	    session->gpsdata.satellites_used = 0;
 	    memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
 	}
 	session->nmea.last_gsa_talker = GSA_TALKER;
-	if (session->nmea.last_gsa_talker == 'L')
-	    session->nmea.seen_glgsa = true;
 	if (session->nmea.last_gsa_talker == 'D')
 	    session->nmea.seen_bdgsa = true;
+	else if (session->nmea.last_gsa_talker == 'L')
+	    session->nmea.seen_glgsa = true;
+	else if (session->nmea.last_gsa_talker == 'N')
+	    session->nmea.seen_gngsa = true;
 
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
 	for (i = 0; i < count - 6; i++) {
@@ -621,6 +634,12 @@ static gps_mask_t processGSA(int count, char *field[],
     if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa)
        && GSA_TALKER == 'P')
 	return ONLINE_SET;
+
+    /* first of two GNGSA */
+    /* if mode == 1 some GPS only output 1 GNGSA, so ship mode always */
+    if ( 'N' != last_last_gsa_talker && 'N' == GSA_TALKER)
+	return ONLINE_SET | MODE_SET;
+
     return mask;
 #undef GSA_TALKER
 }

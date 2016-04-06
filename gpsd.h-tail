@@ -509,6 +509,7 @@ struct gps_device_t {
 	bool seen_qzss;
 	char last_gsv_talker;
 	bool seen_glgsa;
+	bool seen_gngsa;
 	bool seen_bdgsa;
 	char last_gsa_talker;
 	/*
