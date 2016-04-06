@@ -1227,7 +1227,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	str_appendf(buf, buflen,
 		       "\"station_id\":%u,\"desc\":\"%s\","
 		       "\"setup_id\":%u,\"serial\":\"%s\","
-		       "\"receiver\":%s,\"firmware\":\"%s\"",
+		       "\"receiver\":\"%s\",\"firmware\":\"%s\"",
 		       rtcm->rtcmtypes.rtcm3_1033.station_id,
 		       rtcm->rtcmtypes.rtcm3_1033.descriptor,
 		       INT(rtcm->rtcmtypes.rtcm3_1033.setup_id),
