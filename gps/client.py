@@ -67,7 +67,7 @@ class gpscommon:
                 self.sock = socket.socket(af, socktype, proto)
                 # if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
-            except socket.error(msg):
+            except socket.error as msg:
                 # if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
                 continue
@@ -161,7 +161,7 @@ class gpsjson:
     def unpack(self, buf):
         try:
             self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
-        except ValueError(e):
+        except ValueError as e:
             raise json_error(buf, e.args[0])
         # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.
