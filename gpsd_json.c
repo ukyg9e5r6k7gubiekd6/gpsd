@@ -131,6 +131,8 @@ void json_tpv_dump(const struct gps_device_t *session,
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
+    if (gpsdata->status == STATUS_DGPS_FIX)
+	str_appendf(reply, replylen, "\"status\":2,");
     str_appendf(reply, replylen, "\"mode\":%d,", gpsdata->fix.mode);
     if (isnan(gpsdata->fix.time) == 0) {
 	char tbuf[JSON_DATE_MAX+1];

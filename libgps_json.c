@@ -64,6 +64,8 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			         .dflt.real = NAN},
 	{"mode",   t_integer, .addr.integer = &gpsdata->fix.mode,
 			         .dflt.integer = MODE_NOT_SEEN},
+	{"status", t_integer, .addr.integer = &gpsdata->status,
+			         .dflt.integer = STATUS_FIX},
 	{NULL},
 	/* *INDENT-ON* */
     };
@@ -440,7 +442,6 @@ int libgps_json_unpack(const char *buf,
 	return -1;
     if (str_starts_with(classtag, "\"class\":\"TPV\"")) {
 	status = json_tpv_read(buf, gpsdata, end);
-	gpsdata->status = STATUS_FIX;
 	gpsdata->set = STATUS_SET;
 	if (isnan(gpsdata->fix.time) == 0)
 	    gpsdata->set |= TIME_SET;
