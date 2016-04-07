@@ -871,6 +871,19 @@ static void gpsd_error_model(struct gps_device_t *session,
 	(session->gpsdata.status ==
 	 STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
+    /* sanity check the speed, 10,000 m/s should be a nice max */
+    if ( 9999.9 < fix->speed )
+	fix->speed = NAN;
+    else if ( -9999.9 > fix->speed )
+	fix->speed = NAN;
+
+    /* sanity check the climb, 10,000 m/s should be a nice max */
+    if ( 9999.9 < fix->climb )
+	fix->climb = NAN;
+    else if ( -9999.9 > fix->climb )
+	fix->climb = NAN;
+
+
     /*
      * OK, this is not an error computation, but we're at the right
      * place in the architecture for it.  Compute speed over ground
