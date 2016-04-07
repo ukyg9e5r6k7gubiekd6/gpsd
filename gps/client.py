@@ -110,6 +110,7 @@ class gpscommon:
                 if self.verbose > 1:
                     sys.stderr.write("poll: returning 0.\n")
                 # Read succeeded, but only got a fragment
+                self.response = ''  # Don't duplicate last response
                 return 0
         else:
             if self.verbose > 1:
