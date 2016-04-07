@@ -96,7 +96,8 @@ class gpscommon:
             sys.stderr.write("poll: reading from daemon...\n")
         eol = self.linebuffer.find('\n')
         if eol == -1:
-            frag = polystr(self.sock.recv(4096))
+            # RTCM3 JSON can be over 4.4k long, so go big
+            frag = polystr(self.sock.recv(8192))
             self.linebuffer += frag
             if self.verbose > 1:
                 sys.stderr.write("poll: read complete.\n")
