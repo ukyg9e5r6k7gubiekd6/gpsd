@@ -510,12 +510,12 @@ class Base:
               'Metric Units', 2),
              ], 0, lambda a, _unused: self.set_units(['i', 'n', 'm'][a.get_current_value()]))
         self.actiongroup.add_radio_actions(
-            [('30°', None, '30°', None, '30°', 30),
-             ('45°', None, '45°', None, '45°', 45),
+            [('30deg', None, '30°', None, '30°', 30),
+             ('45deg', None, '45°', None, '45°', 45),
              ('Off', None, 'Off', None, 'Off', 0),
              ], 45, lambda a, _unused: self.set_step_of_grid(a.get_current_value()))
         self.uimanager.insert_action_group(self.actiongroup, 0)
-        self.uimanager.add_ui_from_string(u'''
+        self.uimanager.add_ui_from_string('''
 <ui>
     <menubar name="MenuBar">
       <menu action="File">
@@ -535,8 +535,8 @@ class Base:
         <menuitem action="Metric"/>
       </menu>
       <menu action="Step of grid">
-        <menuitem action="30°"/>
-        <menuitem action="45°"/>
+        <menuitem action="30deg"/>
+        <menuitem action="45deg"/>
         <menuitem action="Off"/>
       </menu>
     </menubar>
