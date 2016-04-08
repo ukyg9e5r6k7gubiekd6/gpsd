@@ -61,8 +61,12 @@ removing outliers and consistent errors) to yield an international
 reference called Universal Coordinated Time.  The US national time
 standard, UTC(NIST), normally tracks UTC to within 5 ns <<BIPM-T>>.
 
-U.S. atomic clock time (UTC(USNO)) is propagated through the GPS
-system, which enables receivers to generate a pulse-per-second
+In practice, the U.S. has a competing time standard; UTC(USNO),
+military clock time propagated through the GPS system.  As the skew
+between UTC(NIST) and UTC(USNO seldom if ever exceeds 10ns
+<<TIMESCALE>> they are for practical purposes identical.
+
+GPS enables receivers to generate a pulse-per-second
 signal ("1PPS" or just "PPS") accurate to the top of the current
 UTC second within 50 ns.
 
@@ -72,9 +76,12 @@ directly by the NIST (National Institute of Standards and Technology)
 master civil time standard.  Propagation delay to U.S. receivers
 varies but is constant by location and no more than 20 ms; being
 fixed, this can be easily compensated out. The jitter added to NIST
-time by the WWVB transmission system is about 6 ns <<WWVBPRECISION>>, for a
-total jitter relative to UTC of about 26 ns.  Signal-processing jitter
-in the receiver may degrade this somewhat.
+time by the WWVB transmission system is about 6 ns <<WWVBPRECISION>>,
+for a total jitter relative to UTC of about 26 ns at the
+transmitter. Atmospheric conditions and signal-processing jitter in
+the receiver may degrade this considerably, to the tune of 10-100ns
+- however some of that is fixed delay that can be compensated out by
+knowing your distance from the transmitter. Accuracy is better at night. 
 
 National time authorities may also offer a digital time reference via
 landline phone; the U.S.'s has two, supported by NIST and the U.S.
@@ -88,8 +95,8 @@ of a national time standard at a user's location.
 
 High-end precision clocks are based on rubidium oscillators (close
 relatives of the cesium time standards). Less expensive ones are based
-on a temperature-controlled crystal oscillator or TCXO, sometimes also
-seen as OCXO for "oven-controlled crystal oscillator"; these are more
+on a temperature-compensated crystal oscillator or TCXO, sometimes also
+seen as OCXO for "oven-compensated crystal oscillator"; these are more
 closely related to the non-temperature-stabilized oscillator in a
 quartz-crystal watch.
 
@@ -101,8 +108,9 @@ thus how little the time drifts between conditioning signals.
 
 A "time radio" or "time receiver" is a clock that is conditioned by a
 national time radio source.  High-end dedicated time receivers can
-achieve 50 ns accuracy <<RADIO>>; consumer-grade "atomic clocks" using
-a radio time signal achieve a much less impressive 30 ms <<HARCC>>.
+achieve 50 ns accuracy <<RADIO>>; consumer-grade "atomic clocks" (not
+actually atomic at all but using a radio time signal) achieve a much
+less impressive 30 ms <<HARCC>> or even as poor as 150 ms <<JUNGHANS>>.
 Both are often constrained by siting problems and poor longwave
 propagation, leading to frequent loss of signal.  In some parts of the
 U.S., most notably the Boswash corridor and the southern tip of
@@ -121,21 +129,22 @@ at <<SPECTRUMWIKI>>.
 
 Devices described as "GPS clocks" (or more technically as "GPS
 Disciplined Oscillators" or GPSDOs) are conditioned by the 1PPS output
-of a GPS receiver.  Worst-case accuracy depends on the accuracy or the
+of a GPS receiver.  Worst-case accuracy depends on the accuracy of the
 1PPS and vendor data sheets commonly claim 100 ns, sometimes even 20 ns.
 
 The GPS system standard <<IS-GPS-200G>> Section 3.3.4 specifies that
-GPS Sat clock (MSC) from each satellite be within 90 ns of USNO time to
-a certainty of one sigma. Adding in GPS satellelite position
-uncertainty widens the time uncertainty as broadcast from the GPS Sat to
-97 ns at one sigma.  Any GPS propagation and reception errors will add
-to that uncertainly.  Thus one needs to assume a GPSDO can not relate to
-USNO time to better than about 200 to 120 ns.
+GPS satellite clock (MSC) from each satellite be within 90 ns of USNO
+time to a certainty of one sigma. Adding in GPS satellite position
+uncertainty widens the time uncertainty as broadcast from the GPS Sat
+to 97 ns at one sigma.  Any GPS propagation and reception errors will
+add to that uncertainly.  Thus one needs to assume a GPSDO will track
+USNO time to better than to about 120-200 ns.
 
 A plain GPS, without a stabilized crystal, can serve as a clock
 source.  However, it will generally be unable to deliver time at all when
 it lacks memory of a previous 3D position fix and current lock on at
-least one satellite.  In other words, it has no "holdover".
+least one satellite.  In other words, it has no "holdover".  (NTP
+patches around this by using the system clock for holdover.)
 
 GPSes actually deliver two times: 1PPS at top of second, and in-band
 time expressed in a message packet over the serial or USB link.  In
@@ -165,17 +174,22 @@ to digest incoming messages into a composite "NTP time".
 
 NTP conditions your system clock by noticing how your system clock time
 differs from deduced NTP time, then speeding up or slowing down your
-clock's tick rate until it is synchronized.  These tick-rate changes
+clock's tick rate until it is synchronized. These tick-rate changes
 are usually extremely small, much too small for a human or even most
 software timing loops to ever notice. But large changes are possible.
 
+NTP's technique exploits the fact that while the quartz crystals used
+in PC clocks are not very accurate, they are quite stable - that is,
+their frequency drift in response to environmental changes is slow.
+
 Most computers are just NTP clients.  They send NTP requests to a set
-of servers and use the relies to adjust the local clock.  It is
+of servers and use the replies to adjust the local clock.  It is
 generally expected that NTP clients will have an accuracy (that is,
-maximum divergence from the master atomic clock) of of "a few tens
-of milliseconds" <<RFC5985>>; however, problems such as asymmetric
-routing or the large time jitter introduced by cable networks can
-degrade accuracy to around 100 ms and even worse in extreme cases.
+maximum divergence from the master atomic clock) of of "a few tens of
+milliseconds" <<RFC5985>>; however, problems such as asymmetric
+routing, bufferbloat, or large time jitter (especially likely on cable
+networks) can degrade accuracy to around 100 ms and even worse in
+extreme cases.
 
 Some NTP hosts are time *servers*.  They respond to NTP clients with
 time read from high-precision reference clocks (often abbreviated
@@ -260,9 +274,9 @@ in more detail there.
 |1PPS over USB 1.1              | 1 ms (1000000 ns)
 |1PPS over USB 2.0              | 100 &mu;s (100000 ns)
 |                               |
-|NIST/UNSO modem time           | 4 ms (4000000 ns)
-|Consumer-grade time radio      | 30 ms
-|Normal accuracy of NTP         | ~ 30 ms (100000000 ns)
+|NIST/USNO modem time           | 4 ms (4000000 ns)
+|Consumer-grade time radio      | 30-150 ms
+|Normal accuracy of NTP         | ~ 30 ms (3000000 ns)
 |Jitter of in-band GPS time     | > 100 ms (100000000 ns)
 |==============================================================
 
@@ -294,6 +308,8 @@ Time and Frequency Bulletin NISTIR 5082-10]
 
 - [[[IS-GPS-200G]]] http://www.gps.gov/technical/icwg/IS-GPS-200G.pdf[IS-GPS-200G]
 
+- [[[TIMESCALE]] http://www.nist.gov/pml/div688/grp50/nistusno.cfm[NIST Time Scale Data Archive]
+
 - [[[ACTS1]]] http://www.nist.gov/pml/div688/grp40/acts.cfm[NIST Automated Computer Time Service (ACTS)]
 
 - [[[ACTS2]]] http://tycho.usno.navy.mil/modem_time.html[USNO Master
@@ -302,6 +318,8 @@ Clock via Modem]
 - [[[RADIO]]] http://en.wikipedia.org/wiki/Radio_clock[Radio clock]
 
 - [[[HARCC]]] http://tf.nist.gov/general/pdf/2429.pdf[How Accurate is a Radio Controlled Clock?]
+
+- [[[JUNGHANS]]] http://www.leapsecond.com/pages/Junghans/[Junghans Solar WWVB watch]
 
 - [[[PTP]]] http://en.wikipedia.org/wiki/Precision_Time_Protocol[PTP]
 
