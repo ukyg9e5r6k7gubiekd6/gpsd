@@ -608,6 +608,7 @@ class Main(object):
 
     def handle_hangup(self, _dummy, _unused):
         w = Gtk.MessageDialog(
+            parent=self.window,
             type=Gtk.MessageType.ERROR,
             flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
             buttons=Gtk.ButtonsType.OK
@@ -653,6 +654,7 @@ class Main(object):
             Gtk.main()
         except SocketError:
             w = Gtk.MessageDialog(
+                parent=self.window,
                 type=Gtk.MessageType.ERROR,
                 flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                 buttons=Gtk.ButtonsType.OK

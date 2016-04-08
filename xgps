@@ -850,7 +850,8 @@ class Base:
 
     def handle_hangup(self, _source, _condition):
         "Handle hangup condition from the daemon."
-        w = Gtk.MessageDialog(type=Gtk.MessageType.ERROR,
+        w = Gtk.MessageDialog(parent=self.window,
+                              type=Gtk.MessageType.ERROR,
                               flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                               buttons=Gtk.ButtonsType.CANCEL)
         w.connect("destroy", lambda _unused: Gtk.main_quit())
@@ -908,7 +909,8 @@ if __name__ == "__main__":
             base.watch(daemon, device)
             base.main()
         except socket.error:
-            w = Gtk.MessageDialog(type=Gtk.MessageType.ERROR,
+            w = Gtk.MessageDialog(parent=base.window,
+                                  type=Gtk.MessageType.ERROR,
                                   flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                   buttons=Gtk.ButtonsType.CANCEL)
             w.set_markup("gpsd is not running.")
