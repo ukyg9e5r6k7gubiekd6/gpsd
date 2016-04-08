@@ -785,7 +785,7 @@ class Base:
                     fld = fld[1:]
                 satellites = sorted(
                     satellites[:],
-                    cmp=lambda x, y: cmp(x[fld], y[fld]), reverse=rev)
+                    key=lambda x: x[fld], reverse=rev)
 
             for (i, satellite) in enumerate(satellites):
                 self.set_satlist_field(i, 0, satellite.PRN)
