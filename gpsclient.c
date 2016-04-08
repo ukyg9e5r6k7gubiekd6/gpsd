@@ -10,6 +10,7 @@
 #include "gps.h"
 #include "gpsdclient.h"
 #include "compiler.h"	/* for UNUSED */
+#include "python_compatibility.h"
 
 /*
  * Client utility functions
@@ -83,13 +84,16 @@ PyDoc_STRVAR(module_doc,
 /* banishes a pointless compiler warning */
 extern PyMODINIT_FUNC initclienthelpers(void);
 
-PyMODINIT_FUNC
 // cppcheck-suppress unusedFunction
-initclienthelpers(void)
+GPSD_PY_MODULE_INIT(clienthelpers)
 {
     PyObject *m;
 
-    m = Py_InitModule3("gps.clienthelpers", gpsclient_methods, module_doc);
+    /* Create the module and add the functions */
+    GPSD_PY_MODULE_DEF(m, "clienthelpers", module_doc, gpsclient_methods)
+
+    if (m == NULL)
+	return GPSD_PY_MODULE_ERROR_VAL;
 
     PyModule_AddIntConstant(m, "deg_dd", deg_dd);
     PyModule_AddIntConstant(m, "deg_ddmm", deg_ddmm);
@@ -99,5 +103,6 @@ initclienthelpers(void)
     PyModule_AddIntConstant(m, "imperial", imperial);
     PyModule_AddIntConstant(m, "nautical", nautical);
     PyModule_AddIntConstant(m, "metric", metric);
-}
 
+    return GPSD_PY_MODULE_SUCCESS_VAL(m);
+}
