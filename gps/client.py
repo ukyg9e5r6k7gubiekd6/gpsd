@@ -7,30 +7,9 @@ from __future__ import absolute_import, print_function, division
 
 import time, socket, sys, select, json
 
+from .misc import polystr, polybytes
+
 GPSD_PORT = "2947"
-
-binary_encoding = 'latin-1'
-
-def polystr(o):
-    if isinstance(o, str):
-        return o
-    if isinstance(o, bytes):
-        return str(o, encoding=binary_encoding)
-    raise ValueError
-
-def polybytes(o):
-    if isinstance(o, bytes):
-        return o
-    if isinstance(o, str):
-        return bytes(o, encoding=binary_encoding)
-    raise ValueError
-
-class json_error(BaseException):
-    def __init__(self, data, explanation):
-        BaseException.__init__(self)
-        self.data = data
-        self.explanation = explanation
-
 
 class gpscommon:
     "Isolate socket handling and buffering from the protocol interpretation."
