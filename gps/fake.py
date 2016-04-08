@@ -67,13 +67,14 @@ To allow for adding and removing clients while the test is running,
 run in threaded mode by calling the start() method.  This simply calls
 the run method in a subthread, with locking of critical regions.
 """
-# This code run compatibly under Python 2 and 3.x for x >= 3.
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
 import os, sys, time, signal, pty, termios  # fcntl, array, struct
 import threading, socket, select
 import gps
+from gps import polybytes
 from . import packet as sniffer
 import stat
 
@@ -130,7 +131,7 @@ class TestLoad:
     def __init__(self, logfp, predump=False, slow=False, oneshot=False):
         self.sentences = []  # This is the interesting part
         if type(logfp) == type(""):
-            logfp = open(logfp, "r")
+            logfp = open(logfp, "rb")
         self.name = logfp.name
         self.logfp = logfp
         self.predump = predump
@@ -141,34 +142,35 @@ class TestLoad:
         self.delimiter = None
         # Stash away a copy in case we need to resplit
         text = logfp.read()
-        logfp = open(logfp.name)
+        logfp = open(logfp.name, 'rb')
         # Grab the packets in the normal way
         getter = sniffer.new()
         # gps.packet.register_report(reporter)
         type_latch = None
         commentlen = 0
         while True:
+            # Note that packet data is bytes rather than str
             (plen, ptype, packet, _counter) = getter.get(logfp.fileno())
             if plen <= 0:
                 break
             elif ptype == sniffer.COMMENT_PACKET:
                 commentlen += len(packet)
                 # Some comments are magic
-                if "Serial:" in packet:
+                if b"Serial:" in packet:
                     # Change serial parameters
                     packet = packet[1:].strip()
                     try:
                         (_xx, baud, params) = packet.split()
                         baud = int(baud)
-                        if params[0] in ('7', '8'):
+                        if params[0] in (b'7', b'8'):
                             databits = int(params[0])
                         else:
                             raise ValueError
-                        if params[1] in ('N', 'O', 'E'):
+                        if params[1] in (b'N', b'O', b'E'):
                             parity = params[1]
                         else:
                             raise ValueError
-                        if params[2] in ('1', '2'):
+                        if params[2] in (b'1', b'2'):
                             stopbits = int(params[2])
                         else:
                             raise ValueError
@@ -176,12 +178,12 @@ class TestLoad:
                         raise TestLoadError("bad serial-parameter spec in %s" %
                                             self.name)
                     self.serial = (baud, databits, parity, stopbits)
-                elif "Transport: UDP" in packet:
+                elif b"Transport: UDP" in packet:
                     self.sourcetype = "UDP"
-                elif "Transport: TCP" in packet:
+                elif b"Transport: TCP" in packet:
                     self.sourcetype = "TCP"
-                elif "Delay-Cookie:" in packet:
-                    if packet.startswith("#"):
+                elif b"Delay-Cookie:" in packet:
+                    if packet.startswith(b"#"):
                         packet = packet[1:]
                     try:
                         (_dummy, self.delimiter, delay) = packet.strip().split()
@@ -210,7 +212,7 @@ class TestLoad:
             self.sentences = text[commentlen:].split(self.delimiter)
         # Do we want single-shot operation?
         if oneshot:
-            self.sentences.append("# EOF\n")
+            self.sentences.append(b"# EOF\n")
 
 
 class PacketError(BaseException):
@@ -235,7 +237,7 @@ class FakeGPS:
     def feed(self):
         "Feed a line from the contents of the GPS log to the daemon."
         line = self.testload.sentences[self.index % len(self.testload.sentences)]
-        if "%Delay:" in line:
+        if b"%Delay:" in line:
             # Delay specified number of seconds
             delay = line.split()[1]
             time.sleep(int(delay))
@@ -525,14 +527,14 @@ class DaemonInstance:
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
         if self.__get_control_socket():
-            self.sock.sendall("+%s\r\n\x00" % path)
+            self.sock.sendall(polybytes("+%s\r\n\x00" % path))
             self.sock.recv(12)
             self.sock.close()
 
     def remove_device(self, path):
         "Remove a device from the daemon's internal search list."
         if self.__get_control_socket():
-            self.sock.sendall("-%s\r\n\x00" % path)
+            self.sock.sendall(polybytes("-%s\r\n\x00" % path))
             self.sock.recv(12)
             self.sock.close()
 
