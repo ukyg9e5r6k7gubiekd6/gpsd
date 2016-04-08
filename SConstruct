@@ -63,24 +63,27 @@ tipwidget  = '<p><a href="https://www.patreon.com/esr">Donate here to support co
 
 EnsureSConsVersion(2, 3, 0)
 
-import copy, os, sys, glob, re, platform, time
+import copy, os, sys, glob, re, platform, time, subprocess, ast
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
+
+PYTHON_SYSCONFIG_IMPORT = 'from distutils import sysconfig'
 
 # replacement for functions from the commands module, which is deprecated.
 from subprocess import PIPE, STDOUT, Popen
 
 
-def _getstatusoutput(cmd, input=None, cwd=None, env=None):
-    pipe = Popen(cmd, shell=True, cwd=cwd, env=env, stdout=PIPE, stderr=STDOUT)
+def _getstatusoutput(cmd, input=None, shell=True, cwd=None, env=None):
+    pipe = Popen(cmd, shell=shell, cwd=cwd, env=env,
+                 stdout=PIPE, stderr=STDOUT)
     (output, errout) = pipe.communicate(input=input)
     status = pipe.returncode
     return (status, output)
 
 
-def _getoutput(cmd, input=None, cwd=None, env=None):
-    return _getstatusoutput(cmd, input, cwd, env)[1]
+def _getoutput(cmd, input=None, shell=True, cwd=None, env=None):
+    return _getstatusoutput(cmd, input, shell, cwd, env)[1]
 
 
 #
@@ -187,8 +190,8 @@ nonboolopts = (
     ("gpsd_user",           "nobody",      "privilege revocation user",),
     ("gpsd_group",          def_group,     "privilege revocation group"),
     ("prefix",              "/usr/local",  "installation directory prefix"),
-    ("python_libdir",       sysconfig.get_python_lib(plat_specific=1),
-                                           "Python module directory prefix"),
+    ("target_python",       "",            "target Python version as command"),
+    ("python_libdir",       "",            "Python module directory prefix"),
     ("max_clients",         '64',          "maximum allowed clients"),
     ("max_devices",         '4',           "maximum allowed devices"),
     ("fixed_port_speed",    0,             "fixed serial port speed"),
@@ -258,8 +261,7 @@ for (name, default, help) in pathopts:
     env[name] = env.subst(env[name])
 
 env['VERSION'] = gpsd_version
-env['PYTHON'] = sys.executable
-env['ENV']['PYTHON'] = sys.executable  # Also pass it to regress-driver
+env['SC_PYTHON'] = sys.executable  # Path to SCons Python
 
 # Set defaults from environment.  Note that scons doesn't cope well
 # with multi-word CPPFLAGS/LDFLAGS/SHLINKFLAGS values; you'll have to
@@ -498,6 +500,25 @@ def CheckC11(context):
     return ret
 
 
+def GetPythonValue(context, name, imp, expr, brief=False):
+    context.Message('Obtaining Python %s... ' % name)
+    context.sconf.cached = 0  # Avoid bogus "(cached)"
+    if not env['target_python']:
+        status, value = 0, str(eval(expr))
+    else:
+        command = [target_python_path, '-c',
+                   '%s; print(%s)' % (imp, expr)]
+        status, value = _getstatusoutput(command, shell=False)
+        if status == 0:
+            value = value.strip()
+        else:
+            value = None
+            announce("Python command failed - disabling Python.")
+            env['python'] = False
+    context.Result('failed' if status else 'ok' if brief else value)
+    return value
+
+
 def GetLoadPath(context):
     context.Message("Getting system load path... ")
 
@@ -516,11 +537,12 @@ if cleaning or helping:
     htmlbuilder = False
 else:
     config = Configure(env, custom_tests={'CheckPKG': CheckPKG,
-                                             'CheckXsltproc': CheckXsltproc,
-                                             'CheckCompilerOption': CheckCompilerOption,
-                                             'CheckCompilerDefines': CheckCompilerDefines,
-                                             'CheckC11': CheckC11,
-                                             'CheckHeaderDefines': CheckHeaderDefines})
+                                          'CheckXsltproc': CheckXsltproc,
+                                          'CheckCompilerOption': CheckCompilerOption,
+                                          'CheckCompilerDefines': CheckCompilerDefines,
+                                          'CheckC11': CheckC11,
+                                          'CheckHeaderDefines': CheckHeaderDefines,
+                                          'GetPythonValue': GetPythonValue})
 
     # If supported by the compiler, enable all warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
@@ -835,6 +857,43 @@ int clock_gettime(clockid_t, struct timespec *);
         if not qt_network:
             env["qt"] = False
             announce('Turning off Qt support, library not found.')
+
+    # Set up configuration for target Python
+
+    PYTHON_LIBDIR_CALL = 'sysconfig.get_python_lib()'
+
+    PYTHON_CONFIG_NAMES = ['CC', 'CXX', 'OPT', 'BASECFLAGS',
+                           'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY', 'LDFLAGS']
+    PYTHON_CONFIG_QUOTED = ["'%s'" % s for s in PYTHON_CONFIG_NAMES]
+    PYTHON_CONFIG_CALL = ('sysconfig.get_config_vars(%s)'
+                          % ', '.join(PYTHON_CONFIG_QUOTED))
+
+    if env['python'] and env['target_python']:
+        target_python_path = config.CheckProg(env['target_python'])
+        if not target_python_path:
+            announce("Target Python doesn't exist - disabling Python.")
+            env['python'] = False
+    if env['python']:
+        # Maximize consistency by using the reported sys.executable
+        target_python_path = config.GetPythonValue('exe path',
+                                                   'import sys',
+                                                   'sys.executable')
+        if env['python_libdir']:
+            python_libdir = env['python_libdir']
+        else:
+            python_libdir = config.GetPythonValue('lib dir',
+                                                  PYTHON_SYSCONFIG_IMPORT,
+                                                  PYTHON_LIBDIR_CALL)
+        py_config_text = config.GetPythonValue('config vars',
+                                                   PYTHON_SYSCONFIG_IMPORT,
+                                                   PYTHON_CONFIG_CALL,
+                                                   brief=True)
+        py_config_vars =  ast.literal_eval(py_config_text)
+        py_config_vars = [[] if x is None else x for x in py_config_vars]
+        python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
+    env['PYTHON'] = target_python_path
+    env['ENV']['PYTHON'] = target_python_path  # Also pass it to regress-driver
+
 
     env = config.Finish()
 
@@ -1153,51 +1212,49 @@ else:
     }
 
     python_env = env.Clone()
-    vars = sysconfig.get_config_vars('CC', 'CXX', 'OPT', 'BASECFLAGS', 'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY', 'LDFLAGS')
-    for i in range(len(vars)):
-        if vars[i] is None:
-            vars[i] = []
-    (cc, cxx, opt, basecflags, ccshared, ldshared, so_ext, includepy, ldflags) = vars
     # FIXME: build of python wrappers doesn't pickup flags set for coveraging, manually add them here
     if env['coveraging']:
-        basecflags += ' -coverage'
-        ldflags += ' -coverage'
-        ldshared += ' -coverage'
+        python_config['BASECFLAGS'] += ' -coverage'
+        python_config['LDFLAGS'] += ' -coverage'
+        python_config['LDSHARED'] += ' -coverage'
     # in case CC/CXX was set to the scan-build wrapper,
     # ensure that we build the python modules with scan-build, too
     if env['CC'] is None or env['CC'].find('scan-build') < 0:
-        python_env['CC'] = cc
+        python_env['CC'] = python_config['CC']
         # As we seem to be changing compilers we must assume that the
         # CCFLAGS are incompatible with the new compiler. If we should
         # use other flags, the variable or the variable for this
         # should be predefined.
-        if cc.split()[0] != env['CC']:
+        if python_config['CC'].split()[0] != env['CC']:
             python_env['CCFLAGS'] = ''
     else:
-        python_env['CC'] = ' '.join([env['CC']] + cc.split()[1:])
+        python_env['CC'] = (' '.join([env['CC']]
+                            + python_config['CC'].split()[1:]))
     if env['CXX'] is None or env['CXX'].find('scan-build') < 0:
-        python_env['CXX'] = cxx
+        python_env['CXX'] = python_config['CXX']
         # As we seem to be changing compilers we must assume that the
         # CCFLAGS or CXXFLAGS are incompatible with the new
         # compiler. If we should use other flags, the variable or the
         # variable for this should be predefined.
-        if cxx.split()[0] != env['CXX']:
+        if python_config['CXX'].split()[0] != env['CXX']:
             python_env['CCFLAGS'] = ''
             python_env['CXXFLAGS'] = ''
     else:
-        python_env['CXX'] = ' '.join([env['CXX']] + cxx.split()[1:])
+        python_env['CXX'] = (' '.join([env['CXX']]
+                             + python_config['CXX'].split()[1:]))
 
+    ldshared = python_config['LDSHARED']
     ldshared = ldshared.replace('-fPIE', '')
     ldshared = ldshared.replace('-pie', '')
     python_env.Replace(SHLINKFLAGS=[],
-                       LDFLAGS=ldflags,
+                       LDFLAGS=python_config['LDFLAGS'],
                        LINK=ldshared,
                        SHLIBPREFIX="",
-                       SHLIBSUFFIX=so_ext,
-                       CPPPATH=[includepy],
-                       CPPFLAGS=opt,
-                       CFLAGS=basecflags,
-                       CXXFLAGS=basecflags)
+                       SHLIBSUFFIX=python_config['SO'],
+                       CPPPATH=[python_config['INCLUDEPY']],
+                       CPPFLAGS=python_config['OPT'],
+                       CFLAGS=python_config['BASECFLAGS'],
+                       CXXFLAGS=python_config['BASECFLAGS'])
 
     python_objects = {}
     python_compiled_libs = {}
@@ -1207,7 +1264,7 @@ else:
             python_objects[ext].append(
                 python_env.NoCache(
                     python_env.SharedObject(
-                        src.split(".")[0] + '-py_' + '_'.join(['%s' % (x) for x in sys.version_info]) + so_ext, src
+                        src.split(".")[0] + '-py_' + '_'.join(['%s' % (x) for x in sys.version_info]) + python_config['SO'], src
                     )
                 )
             )
@@ -1249,12 +1306,12 @@ env.Textfile(target="gpsd.h", source=[File("gpsd.h-head"), File("gpsd_config.h")
 
 env.Command(target="gps_maskdump.c", source=["maskaudit.py", "gps.h", "gpsd.h"], action='''
     rm -f $TARGET &&\
-        $PYTHON $SOURCE -c $SRCDIR >$TARGET &&\
+        $SC_PYTHON $SOURCE -c $SRCDIR >$TARGET &&\
         chmod a-w $TARGET''')
 
 env.Command(target="ais_json.i", source="jsongen.py", action='''\
     rm -f $TARGET &&\
-    $PYTHON $SOURCE --ais --target=parser >$TARGET &&\
+    $SC_PYTHON $SOURCE --ais --target=parser >$TARGET &&\
     chmod a-w $TARGET''')
 
 # generate revision.h
@@ -1306,7 +1363,6 @@ def substituter(target, source, env):
         ('@prefix@',     env['prefix']),
         ('@libdir@',     env['libdir']),
         ('@udevcommand@',    udevcommand),
-        ('@PYTHON@',     sys.executable),
         ('@DATE@',       time.asctime()),
         ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),
         ('@SITENAME@',   sitename),
@@ -1439,8 +1495,7 @@ if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.
 if not env['python']:
     python_install = []
 else:
-    python_lib_dir = env['python_libdir']
-    python_module_dir = python_lib_dir + os.sep + 'gps'
+    python_module_dir = python_libdir + os.sep + 'gps'
     python_extensions_install = python_env.Install(DESTDIR + python_module_dir,
                                                     python_built_extensions)
     if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.platform.startswith('darwin'):
@@ -1451,7 +1506,7 @@ else:
 
     python_progs_install = python_env.Install(installdir('bindir'), python_progs)
 
-    python_egg_info_install = python_env.Install(DESTDIR + python_lib_dir,
+    python_egg_info_install = python_env.Install(DESTDIR + python_libdir,
                                                  python_egg_info)
     python_install = [python_extensions_install,
                         python_modules_install,
@@ -1790,7 +1845,7 @@ method_regress = Utility('packet-regress', [test_packet], [
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit',
     ['$SRCDIR/valgrind-audit.py', python_built_extensions, gpsd],
-    './valgrind-audit.py'
+    '$PYTHON $SRCDIR/valgrind-audit.py'
     )
 
 # Run test builds on remote machines
@@ -1941,7 +1996,7 @@ env.Command('www/hardware.html', ['gpscap.py',
                                   'www/hardware-head.html',
                                   'gpscap.ini',
                                   'www/hardware-tail.html'],
-            ['(cat www/hardware-head.html; $PYTHON gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
+            ['(cat www/hardware-head.html; $SC_PYTHON gpscap.py; cat www/hardware-tail.html) >www/hardware.html'])
 
 # The diagram editor dia is required in order to edit the diagram masters
 # Utility("www/cycle.svg", ["www/cycle.dia"], ["dia -e www/cycle.svg www/cycle.dia"])
