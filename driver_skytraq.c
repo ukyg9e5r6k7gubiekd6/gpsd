@@ -30,11 +30,92 @@
 
 static gps_mask_t sky_parse(struct gps_device_t *, unsigned char *, size_t);
 
+static gps_mask_t sky_msg_80(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DC(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DD(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DE(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DF(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_E0(struct gps_device_t *, unsigned char *, size_t);
+
+#ifdef __UNUSED
+/* Poll Software Version MID 2 */
+static unsigned char versionprobe[] = {
+    0xa0, 0xa1, 0x00, 0x02,
+    0x02,		/* MID 2 */
+    0x01,		/* System */
+    0x00, 0x0d, 0x0a
+};
+
+static bool sky_write(struct gps_device_t *session, unsigned char *msg)
+{
+    unsigned int crc;
+    size_t i, len;
+    bool ok;
+    unsigned int type = (unsigned int)msg[4];
+
+    len = (size_t) ((msg[2] << 8) | msg[3]);
+
+    /* calculate Checksum */
+    crc = 0;
+    /* coverity_submit[tainted_data] */
+    for (i = 0; i < len; i++)
+	crc ^= (int)msg[4 + i];
+
+    /* enter CRC after payload */
+    msg[len + 4] = (unsigned char)(crc & 0x00ff);
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "Skytraq: Writing control type %02x:\n", type);
+    ok = (gpsd_write(session, (const char *)msg, len+7) == (ssize_t) (len+7));
+
+    return (ok);
+}
+#endif /* __UNUSED */
+
+/*
+ * decode MID 0x*), Software Version
+ *
+ * 10 bytes
+ */
+static gps_mask_t sky_msg_80(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    unsigned int kver_x;  /* kernel version */
+    unsigned int kver_y;  /* kernel version */
+    unsigned int kver_z;  /* kernel version */
+    unsigned int over_x;  /* ODM version */
+    unsigned int over_y;  /* ODM version */
+    unsigned int over_z;  /* ODM version */
+    unsigned int rev_yy;   /* revision */
+    unsigned int rev_mm;   /* revision */
+    unsigned int rev_dd;   /* revision */
+
+    if ( 14 != len)
+	return 0;
+
+    kver_x  = getbeu16(buf, 2);
+    kver_y  = getub(buf, 4);
+    kver_z  = getub(buf, 5);
+    over_x  = getbeu16(buf, 6);
+    over_y  = getub(buf, 8);
+    over_z  = getub(buf, 9);
+    rev_yy  = getbeu16(buf, 10);
+    rev_mm  = getub(buf, 12);
+    rev_dd  = getub(buf, 13);
+
+    (void)snprintf(session->subtype, sizeof(session->subtype) - 1,
+	     "Skytraq: kver=%u.%u,%u, over=%u.%u,%u, rev=%u.%u.%u",
+	    kver_x, kver_y, kver_z,
+	    over_x, over_y, over_z,
+	    rev_yy, rev_mm, rev_dd);
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "Skytraq: MID 0x80: kver=%u.%u,%u, over=%u.%u,%u, rev=%u.%u.%u\n",
+	    kver_x, kver_y, kver_z,
+	    over_x, over_y, over_z,
+	    rev_yy, rev_mm, rev_dd);
+    return 0;
+}
 
 /*
  * decode MID 0xDC, Measurement Time
@@ -290,10 +371,26 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
     len -= 7;   /* don't count the leaders, length, csum and terminators */
     // session->driver.sirf.lastid = buf[0];
 
+    /* check the checksum?? */
+
     /* could change if the set of messages we enable does */
     /* session->cycle_end_reliable = true; */
 
     switch (buf[0]) {
+    case 0x80:
+	/* 128 */
+	return sky_msg_80(session, buf, len);
+
+    case 0x83:
+	/* 131 - ACK */
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "Skytraq: ACK to MID %#02x\n", buf[1]);
+	break;
+    case 0x84:
+	/* 132 - NACK */
+	gpsd_log(&session->context->errout, LOG_INF,
+		 "Skytraq: NACK to MID %#02x\n", buf[1]);
+	break;
     case 0xDC:
 	/* 220 */
 	return sky_msg_DC(session, buf, len);
@@ -330,7 +427,7 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "Skytraq: Unknown packet id %#x length %zd\n",
+		 "Skytraq: Unknown packet id %#02x length %zd\n",
 		 buf[0], len);
     }
     return mask;
