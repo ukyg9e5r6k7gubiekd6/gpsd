@@ -1,10 +1,13 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 # Display GPS output.  Hexify it if necessary.
 #
+
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
 from __future__ import print_function, division
 
 import os, sys, termios, socket, select, getopt, curses.ascii
@@ -22,11 +25,11 @@ highhalf_latch = True
 
 def hexdump(st):
     dmp = ""
-    for (_i, ch) in enumerate(st):
-        if curses.ascii.isprint(ord(ch)) or curses.ascii.isspace(ord(ch)):
-            dmp += ch
+    for ch in bytearray(st):  # bytearray gets array of ints in Python 2 and 3
+        if curses.ascii.isprint(ch) or curses.ascii.isspace(ch):
+            dmp += chr(ch)
         else:
-            dmp += "\\x%02x" % ord(ch)
+            dmp += "\\x%02x" % ch
     return dmp
 
 debuglevel = 0
@@ -41,7 +44,7 @@ def printusage():
     sys.stderr.write("usage: gpscat [-s speed] [-p] [-t] [-D debuglevel] serial-port\n")
 
 if __name__ == '__main__':
-    buf = ""
+    buf = bytes()
     try:
         try:
             (options, arguments) = getopt.getopt(sys.argv[1:], "hps:tD:V")
@@ -111,7 +114,7 @@ if __name__ == '__main__':
         poller = select.poll()
         poller.register(tty, select.POLLIN)
 
-        buf = ""
+        buf = bytes()
         if not rawmode:
             getter = sniffer.new()
             sniffer.register_report(reporter)
@@ -122,7 +125,7 @@ if __name__ == '__main__':
                 if rawmode:
                     buf += os.read(tty, NMEA_MAX)
                     sys.stdout.write(hexdump(buf))
-                    buf = ""
+                    buf = bytes()
                 else:
                     (length, ptype, packet, counter) = getter.get(tty)
                     seqno += 1

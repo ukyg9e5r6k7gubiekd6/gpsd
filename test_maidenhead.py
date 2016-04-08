@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #
 # Test grid locator conversion.
 #
@@ -7,6 +7,8 @@
 # Test conversions generated using
 #       http://f6fvy.free.fr/qthLocator/
 
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
 from __future__ import print_function
 
 import sys, gps.clienthelpers
