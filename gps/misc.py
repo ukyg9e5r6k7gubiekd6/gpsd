@@ -9,6 +9,12 @@ from __future__ import absolute_import, print_function, division
 
 import time, calendar, math
 
+# Determine a single class for testing "stringness"
+try:
+    STR_CLASS = basestring  # Base class for 'str' and 'unicode' in Python 2
+except NameError:
+    STR_CLASS = str         # In Python 3, 'str' is the base class
+
 # some multipliers for interpreting GPS output
 METERS_TO_FEET	= 3.2808399	# Meters to U.S./British feet
 METERS_TO_MILES	= 0.00062137119	# Meters to miles
@@ -96,14 +102,14 @@ def MeterOffset(c1, c2):
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
-    if type(s) == type(1):
+    if isinstance(s, int):
         return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-    elif type(s) == type(1.0):
+    elif isinstance(s, float):
         date = int(s)
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
         return date + "." + repr(msec)[3:]
-    elif type(s) == type("") or type(s) == type(u""):
+    elif isinstance(s, STR_CLASS):
         if s[-1] == "Z":
             s = s[:-1]
         if "." in s:
