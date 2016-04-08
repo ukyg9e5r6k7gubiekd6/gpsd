@@ -67,7 +67,8 @@ class gpscommon:
                 self.sock = socket.socket(af, socktype, proto)
                 # if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
-            except socket.error as msg:
+            except socket.error as e:
+                msg = str(e)
                 # if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
                 continue
