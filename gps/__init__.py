@@ -3,6 +3,8 @@
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 
+from __future__ import absolute_import  # Ensure Python2 behaves like Python 3
+
 api_major_version = 5   # bumped on incompatible changes
 api_minor_version = 0   # bumped on compatible changes
 

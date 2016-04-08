@@ -17,7 +17,7 @@
 
 # This code run compatibly under Python 2 and 3.x for x >= 3.
 # Preserve this property!
-from __future__ import print_function, division
+from __future__ import absolute_import, print_function, division
 
 from .client import *
 from .misc import isotime

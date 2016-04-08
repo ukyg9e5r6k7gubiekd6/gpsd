@@ -69,7 +69,7 @@ the run method in a subthread, with locking of critical regions.
 """
 # This code run compatibly under Python 2 and 3.x for x >= 3.
 # Preserve this property!
-from __future__ import print_function, division
+from __future__ import absolute_import, print_function, division
 
 import os, sys, time, signal, pty, termios  # fcntl, array, struct
 import threading, socket, select
