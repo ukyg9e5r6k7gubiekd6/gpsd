@@ -386,7 +386,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	}
 	do_lat_lon(&field[2], &session->newdata);
 	mask |= LATLON_SET;
-	session->gpsdata.satellites_used = atoi(field[7]);
+	session->gpsdata.satellites_visible = atoi(field[7]);
 	altitude = field[9];
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
