@@ -527,7 +527,7 @@ static int nmeaid_to_prn(char *talker, int satnum)
 	else if (talker[0] == 'G' && talker[1] == 'B')
 	    satnum += 200;
 	/* GLONASS GL doesn't seem to do this, but better safe than sorry */
-	if (talker[0] == 'G' && (talker[1] == 'L' || talker[1] == 'N'))
+	if (talker[0] == 'G' && talker[1] == 'L')
 	    satnum += 37;
 	/* QZSS */
 	if (talker[0] == 'Q' && talker[1] == 'Z')
