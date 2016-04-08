@@ -286,10 +286,24 @@ static gps_mask_t processGLL(int count, char *field[],
 
 	do_lat_lon(&field[1], &session->newdata);
 	mask |= LATLON_SET;
-	if (count >= 8 && *status == 'D')
-	    newstatus = STATUS_DGPS_FIX;	/* differential */
-	else
-	    newstatus = STATUS_FIX;
+
+	newstatus = STATUS_FIX;
+	if (count >= 8 ) {
+	    switch ( *status ) {
+	    case 'D':	/* differential */
+	    case 'F':	/* float RTK */
+	    case 'R':	/* integer RTK */
+		newstatus = STATUS_DGPS_FIX;	/* differential */
+		break;
+	    case 'S':	/* simulator */
+		newstatus = STATUS_NO_FIX;
+		break;
+	    case 'A':
+	    default:
+		newstatus = STATUS_FIX;
+		break;
+	    }
+        }
 	/*
 	 * This is a bit dodgy.  Technically we shouldn't set the mode
 	 * bit until we see GSA.  But it may be later in the cycle,
@@ -1588,8 +1602,10 @@ static gps_mask_t processPSTI(int count, char *field[],
     /* set something, so it won't look like an unknown sentence */
     mask |= ONLINE_SET;
 
-    (void)snprintf(session->subtype, sizeof(session->subtype) - 1,
-		   "Skytraq");
+    if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
+	/* this is skytraq, but marked yet, so probe for Skytraq */
+	(void)gpsd_write(session, "\xA0\xA1\x00\x02\x02\x01\x03\x0d\x0a",9);
+    }
 
     if (0 == strcmp("00", field[1]) ) {
 	if ( 4 != count )
