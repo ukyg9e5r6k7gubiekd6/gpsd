@@ -74,7 +74,7 @@ from __future__ import print_function, division
 import os, sys, time, signal, pty, termios  # fcntl, array, struct
 import threading, socket, select
 import gps
-import packet as sniffer
+from . import packet as sniffer
 import stat
 
 # The magic number below has to be derived from observation.  If
