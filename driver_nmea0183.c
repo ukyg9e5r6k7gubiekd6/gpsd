@@ -626,14 +626,20 @@ static gps_mask_t processGSA(int count, char *field[],
 
 	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
 	for (i = 0; i < count - 6; i++) {
-	    int prn = nmeaid_to_prn(field[0], atoi(field[i + 3]));
+	    int prn;
+	    /* skip empty fields, otherwise empty becomes prn=200 */
+	    if ( '\0' == field[i + 3][0] ) {
+		continue;
+	    }
+	    prn = nmeaid_to_prn(field[0], atoi(field[i + 3]));
 	    if (prn > 0) {
-		session->nmea.sats_used[session->gpsdata.satellites_used++] =
-		    (unsigned short)prn;
+		/* check first BEFORE over-writing memory */
 		if ( MAXCHANNELS <= session->gpsdata.satellites_used ) {
 		    /* this should never happen as xxGSA is limited to 12 */
 		    break;
 		}
+		session->nmea.sats_used[session->gpsdata.satellites_used++] =
+		    (unsigned short)prn;
             }
 	}
 	mask |= DOP_SET | USED_IS;
