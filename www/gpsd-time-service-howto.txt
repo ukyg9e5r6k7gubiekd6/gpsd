@@ -613,9 +613,9 @@ fudge 127.127.28.0 refid GPS
 
 This is equivalent to declaring a time1 of 0.
 
-The pool statement adds a variable servers (often 10) as additional
-time references needed by ntpd for redundancy and to give you a
-reference to see how well your local GPS receiver is performing.  If
+The pool statement adds a variable number of servers (often 10) as
+additional time references needed by ntpd for redundancy and to give you
+a reference to see how well your local GPS receiver is performing.  If
 you are outside of the USA replace the pool servers with one in your
 local area. See <<USE-POOL>> for further information.
 
