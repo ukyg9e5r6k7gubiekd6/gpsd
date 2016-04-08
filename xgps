@@ -759,7 +759,8 @@ class Base:
             status = "3D FIX"
         else:
             status = "NO FIX"
-        if data.status == gps.STATUS_DGPS_FIX:
+
+        if hasattr(data, 'status') and data.status == gps.STATUS_DGPS_FIX:
             status += " DIFF"
         if data.mode != self.saved_mode:
             self.last_transition = time.time()
