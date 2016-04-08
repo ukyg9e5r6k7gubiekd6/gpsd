@@ -2,7 +2,7 @@
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.4, Mar 2015
+v2.5, Apr 2016
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -177,13 +177,13 @@ plain-vanilla x86 PCs with clock speeds in the 2GHz range.
 
 All the previous figures assume you're using PPS delivered over RS232.
 USB GPS receivers that deliver 1PPS are rare, but do exist. Notably,
-there's the Navisys GR601-W. In case this device goes out of
-production it's worth noting that it's a trivial modification of the
-stock two-chip-on-a-miniboard commodity-GPS-receiver design of engine
-plus USB-to-serial adapter; the GR601-W wires a u-blox 6 to a Prolific
-Logic PL23203.  To get 1PPS out, just wire the 1PPS pin from the GPS
-engine to the Carrier Detect pin on the USB adapter. (This is known as
-the "Macx-1 mod".)
+there's the Navisys GR601-W and GR701-W. In case these devices go out
+of production it's worth noting that they are a trivial modification
+of the stock two-chip-on-a-miniboard commodity-GPS-receiver design of
+engine plus USB-to-serial adapter; the GR601-W wires a u-blox 6 to a
+Prolific Logic PL23203, the GR-701 uses a u-blox 7.  To get 1PPS out,
+this design just wires the 1PPS pin from the GPS engine to the Carrier
+Detect pin on the USB adapter. (This is known as the "Macx-1 mod".)
 
 With this design, 1PPS from the engine will turn into a USB event that
 becomes visible to the host system (and GPSD) the next time the USB
@@ -271,7 +271,7 @@ set. Usually they will be set to "m", which is sufficient.
 NetBSD has included the RFC2783 Pulse Per Second API for real serial
 ports by default since 1998, and it works with ntpd.  NetBSD 7
 (forthcoming) includes RFC2783 support for USB-serial devices, and
-this works (with ntpd) with the GR601-W.  However, gpsd's code
+this works (with ntpd) with the GR601-W/GR701-W.  However, gpsd's code
 interacts badly with the NetBSD implementation, and gpsd's support for
 RFC2783 PPS does not yet work on NetBSD (for serial or USB).
 
@@ -304,7 +304,7 @@ are unlikely to be significant to you; flip a coin.
 
 To get 1PPS to your NTP daemon, you first need to get it from a
 PPS-capable GPS receiver. As of early 2015 this means either the
-previously mentioned GR601-W or a serial GPS receiver with 1PPS.
+previously mentioned GR devices or a serial GPS receiver with 1PPS.
 
 You can find 1PPS-capable devices supported by GPSD at <<HARDWARE>>.
 Note that the most popular consumer-grade GPS receivers do not usually
@@ -327,13 +327,13 @@ deliver three orders of magnitude better accuracy and repeatability -
 enough to meet prevailing standards for a public Stratum 1 server.
 
 Among newer receiver designs the authors found the the u-blox line of
-receivers used in the GR601-W to be particularly good.  Very detailed
-information on its timing performance can be found at
+receivers used in the GR601-W and GR701-W to be particularly good.
+Very detailed information on its timing performance can be found at
 <<UBLOX-TIMING>>. One of us (Raymond) has recent experience with an
 eval kit, the EVK 6H-0-001, that would make an excellent Stratum 0
 device.
 
-Both the EVK 6H and GR601-W are built around the LEA-6H module, which
+Both the EVK 6H and GR601-W.GR701-W are built around the LEA-6H module, which
 is a relatively inexpensive but high-quality navigation GPS
 receiver. We make a note of this because u-blox also has a specialized
 timing variant, the LEA 6T, which would be expensive overkill for an
@@ -727,7 +727,7 @@ the system logs for error messages from ntpd.
 Notice the 1st and 3rd servers, stratum 1 servers, disagree by more than
 8 mSec.  The 1st and 2nd servers disagree by over 12 mSec.  Our local
 PPS reference agrees to the clock.sjc.he.net server within the expected
-jitter of the GR-601W in use.
+jitter of the GR-601-W in use.
 
 When no other servers or local reference clocks appear in the NTP
 configuration, the system clock will lock onto the GPS clock, but this
@@ -1634,4 +1634,7 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 2.4 Mar 2015::
     Removed some typos, corrected formatting, and minor changes.
     A bit more specificity about root vs. non-root.
+
+2.5 Apr 2016::
+    Note the existence of the GR701-W.
 
