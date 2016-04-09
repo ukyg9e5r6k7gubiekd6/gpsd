@@ -714,7 +714,6 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
 
     memset(satpos, 0, sizeof(satpos));
 
-    gpsd_log(errout, LOG_INF, "Sats used (%d):\n", gpsdata->satellites_used);
     for (n = k = 0; k < gpsdata->satellites_visible; k++) {
 	if (gpsdata->skyview[k].used && !SBAS_PRN(gpsdata->skyview[k].PRN))
 	{
@@ -733,6 +732,9 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
 	    n++;
 	}
     }
+    /* can't use gpsdata->satellites_used as that is a counter for xxGSA,
+     * and gets cleared at odd times */
+    gpsd_log(errout, LOG_INF, "Sats used (%d):\n", n);
 
     /* If we don't have 4 satellites then we don't have enough information to calculate DOPS */
     if (n < 4) {
