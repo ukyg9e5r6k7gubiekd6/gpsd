@@ -340,7 +340,7 @@ receiver. We make a note of this because u-blox also has a specialized
 timing variant, the LEA 6T, which would probably be overkill for an
 NTP server. (The 6T does have the virtue that you could probably get a
 good fix from one satellite in view once it knows its location, but
-the part is expensive nd difficult to find.)
+the part is expensive and difficult to find.)
 
 Unfortunately as of early 2015 the LEA-6H is still hard to find in a
 packaged RS232 version, as opposed to a bare OEM module exporting TTL
