@@ -526,6 +526,14 @@ def GetLoadPath(context):
 cleaning = env.GetOption('clean')
 helping = env.GetOption('help')
 
+config = Configure(env, custom_tests={'CheckPKG': CheckPKG,
+                                      'CheckXsltproc': CheckXsltproc,
+                                      'CheckCompilerOption': CheckCompilerOption,
+                                      'CheckCompilerDefines': CheckCompilerDefines,
+                                      'CheckC11': CheckC11,
+                                      'CheckHeaderDefines': CheckHeaderDefines,
+                                      'GetPythonValue': GetPythonValue})
+
 if cleaning or helping:
     dbusflags = []
     rtlibs = []
@@ -536,13 +544,6 @@ if cleaning or helping:
     manbuilder = False
     htmlbuilder = False
 else:
-    config = Configure(env, custom_tests={'CheckPKG': CheckPKG,
-                                          'CheckXsltproc': CheckXsltproc,
-                                          'CheckCompilerOption': CheckCompilerOption,
-                                          'CheckCompilerDefines': CheckCompilerDefines,
-                                          'CheckC11': CheckC11,
-                                          'CheckHeaderDefines': CheckHeaderDefines,
-                                          'GetPythonValue': GetPythonValue})
 
     # If supported by the compiler, enable all warnings except uninitialized and
     # missing-field-initializers, which we can't help triggering because
@@ -858,15 +859,24 @@ int clock_gettime(clockid_t, struct timespec *);
             env["qt"] = False
             announce('Turning off Qt support, library not found.')
 
-    # Set up configuration for target Python
+# Set up configuration for target Python
 
-    PYTHON_LIBDIR_CALL = 'sysconfig.get_python_lib()'
+PYTHON_LIBDIR_CALL = 'sysconfig.get_python_lib()'
 
-    PYTHON_CONFIG_NAMES = ['CC', 'CXX', 'OPT', 'BASECFLAGS',
-                           'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY', 'LDFLAGS']
-    PYTHON_CONFIG_QUOTED = ["'%s'" % s for s in PYTHON_CONFIG_NAMES]
-    PYTHON_CONFIG_CALL = ('sysconfig.get_config_vars(%s)'
-                          % ', '.join(PYTHON_CONFIG_QUOTED))
+PYTHON_CONFIG_NAMES = ['CC', 'CXX', 'OPT', 'BASECFLAGS',
+                       'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY', 'LDFLAGS']
+PYTHON_CONFIG_QUOTED = ["'%s'" % s for s in PYTHON_CONFIG_NAMES]
+PYTHON_CONFIG_CALL = ('sysconfig.get_config_vars(%s)'
+                      % ', '.join(PYTHON_CONFIG_QUOTED))
+
+if helping:
+
+    # If helping just get usable config info from the local Python
+    target_python_path = ''
+    py_config_text = str(eval(PYTHON_CONFIG_CALL))
+    python_libdir = str(eval(PYTHON_LIBDIR_CALL))
+
+else:
 
     if env['python'] and env['target_python']:
         target_python_path = config.CheckProg(env['target_python'])
@@ -877,25 +887,31 @@ int clock_gettime(clockid_t, struct timespec *);
         # Maximize consistency by using the reported sys.executable
         target_python_path = config.GetPythonValue('exe path',
                                                    'import sys',
-                                                   'sys.executable')
+                                                   'sys.executable',
+                                                   brief=cleaning)
         if env['python_libdir']:
             python_libdir = env['python_libdir']
         else:
             python_libdir = config.GetPythonValue('lib dir',
                                                   PYTHON_SYSCONFIG_IMPORT,
-                                                  PYTHON_LIBDIR_CALL)
+                                                  PYTHON_LIBDIR_CALL,
+                                                  brief=cleaning)
         py_config_text = config.GetPythonValue('config vars',
                                                    PYTHON_SYSCONFIG_IMPORT,
                                                    PYTHON_CONFIG_CALL,
                                                    brief=True)
-        py_config_vars =  ast.literal_eval(py_config_text)
-        py_config_vars = [[] if x is None else x for x in py_config_vars]
-        python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
+
+if env['python']:  # May have been turned off by error
     env['PYTHON'] = target_python_path
-    env['ENV']['PYTHON'] = target_python_path  # Also pass it to regress-driver
+    env['ENV']['PYTHON'] = target_python_path  # For regress-driver
+    py_config_vars =  ast.literal_eval(py_config_text)
+    py_config_vars = [[] if x is None else x for x in py_config_vars]
+    python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
 
 
-    env = config.Finish()
+env = config.Finish()
+
+if not (cleaning or helping):
 
     # Be explicit about what we're doing.
     changelatch = False
