@@ -46,12 +46,68 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 # This code runs under both Python 2 and Python 3. Preserve this property!
 from __future__ import print_function, division
 
-import os, urllib, re, random, time, calendar, math, sys, signal
+import os, re, random, time, calendar, math, sys, signal
+
+try:
+    import urllib.request as urlrequest  # Python 3
+except ImportError:
+    import urllib as urlrequest          # Python 2
 
 # Set a socket timeout for slow servers
 import socket
 socket.setdefaulttimeout(30)
 del socket
+
+# *** Duplicate some code from gps.misc to avoid a dependency ***
+
+# Determine a single class for testing "stringness"
+try:
+    STR_CLASS = basestring  # Base class for 'str' and 'unicode' in Python 2
+except NameError:
+    STR_CLASS = str         # In Python 3, 'str' is the base class
+
+# Polymorphic str/bytes handling
+
+BINARY_ENCODING = 'latin-1'
+
+if bytes is str:  # In Python 2 these functions can be null transformations
+
+    polystr = str
+
+else:  # Otherwise we do something real
+
+    def polystr(o):
+        "Convert bytes or str to str with proper encoding."
+        if isinstance(o, str):
+            return o
+        if isinstance(o, bytes):
+            return str(o, encoding=BINARY_ENCODING)
+        raise ValueError
+
+
+def isotime(s):
+    "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
+    if isinstance(s, int):
+        return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
+    elif isinstance(s, float):
+        date = int(s)
+        msec = s - date
+        date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
+        return date + "." + repr(msec)[3:]
+    elif isinstance(s, STR_CLASS):
+        if s[-1] == "Z":
+            s = s[:-1]
+        if "." in s:
+            (date, msec) = s.split(".")
+        else:
+            date = s
+            msec = "0"
+        # Note: no leap-second correction!
+        return calendar.timegm(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
+    else:
+        raise TypeError
+
+# *** End of duplicated code ***
 
 verbose = 0
 
@@ -87,29 +143,6 @@ def gps_rollovers(t):
     return (t - GPS_EPOCH) // SECS_PER_WEEK // ROLLOVER
 
 
-def isotime(s):
-    "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
-    if type(s) == type(1):
-        return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-    elif type(s) == type(1.0):
-        date = int(s)
-        msec = s - date
-        date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-        return date + "." + repr(msec)[3:]
-    elif type(s) == type("") or type(s) == type(""):
-        if s[-1] == "Z":
-            s = s[:-1]
-        if "." in s:
-            (date, msec) = s.split(".")
-        else:
-            date = s
-            msec = "0"
-        # Note: no leap-second correction!
-        return calendar.timegm(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
-    else:
-        raise TypeError
-
-
 def retrieve():
     "Retrieve current leap-second from Web sources."
     random.shuffle(__locations)  # To spread the load
@@ -118,8 +151,8 @@ def retrieve():
             if os.path.exists(url):
                 ifp = open(url)
             else:
-                ifp = urllib.urlopen(url)
-            txt = ifp.read()
+                ifp = urlrequest.urlopen(url)
+            txt = polystr(ifp.read())
             ifp.close()
             if verbose:
                 sys.stderr.write("%s\n" % txt)
@@ -163,7 +196,7 @@ def save_leapseconds(outfile):
     for (_, _, _, _, url) in __locations:
         skip = True
         try:
-            fetchobj = urllib.urlopen(url)
+            fetchobj = urlrequest.urlopen(url)
         except IOError:
             sys.stderr.write("Fetch from %s failed.\n" % url)
             continue
@@ -171,6 +204,7 @@ def save_leapseconds(outfile):
         # always integrally one second and every increment is listed here
         fp = open(outfile, "w")
         for line in fetchobj:
+            line = polystr(line)
             if verbose:
                 sys.stderr.write("%s\n" % line[:-1])
             if line.startswith(" 1980"):
