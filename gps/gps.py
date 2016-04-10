@@ -15,7 +15,7 @@
 # now live in a different module.
 #
 
-# This code run compatibly under Python 2 and 3.x for x >= 3.
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 

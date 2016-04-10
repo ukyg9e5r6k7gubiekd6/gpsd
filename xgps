@@ -6,8 +6,9 @@ xgps -- test client for gpsd
 usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
 '''
 
-# This code runs under both Python 2 and Python 3. Preserve this property!
-from __future__ import print_function, division
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
 
 gui_about = '''\
 This is xgps, a test client for the gpsd daemon.

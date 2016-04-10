@@ -6,8 +6,9 @@
 # Collect and plot latency-profiling data from a running gpsd.
 # Requires gnuplot.
 #
-# This code runs under both Python 2 and Python 3. Preserve this property!
-from __future__ import print_function, division
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
 
 import copy
 import getopt

@@ -9,8 +9,9 @@
 #
 # With -t, tabulate usage of defines to find unused ones.  Requires -c or -d.
 
-# This code runs under both Python 2 and Python 3. Preserve this property!
-from __future__ import print_function
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
 
 import getopt
 import glob
