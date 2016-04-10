@@ -69,10 +69,10 @@ def fit_to_grid(x, y, line_width):
     "Adjust coordinates to produce sharp lines."
     if line_width % 1.0 != 0:
         # Can't have sharp lines for non-integral line widths.
-        return x, y
+        return float(x), float(y)  # Be consistent about returning floats
     if line_width % 2 == 0:
         # Round to a pixel corner.
-        return int(x + 0.5), int(y + 0.5)
+        return round(x), round(y)
     else:
         # Round to a pixel center.
         return int(x) + 0.5, int(y) + 0.5
@@ -107,9 +107,9 @@ class SkyView(Gtk.DrawingArea):
     def on_size_allocate(self, _unused, allocation):
         width = allocation.width
         height = allocation.height
-        x = width / 2
-        y = height / 2
-        r = (min(width, height) - SkyView.HORIZON_PAD) / 2
+        x = width // 2
+        y = height // 2
+        r = (min(width, height) - SkyView.HORIZON_PAD) // 2
         x, y, r = fit_circle_to_grid(x, y, r, 1)
         self.center_x = x
         self.center_y = y
@@ -126,7 +126,7 @@ class SkyView(Gtk.DrawingArea):
     def draw_circle(self, x, y, radius, filled=False):
         "Draw a circle centered on the specified midpoint."
         lw = self.cr.get_line_width()
-        r = int(2 * radius + 0.5) / 2
+        r = int(2 * radius + 0.5) // 2
 
         x, y, r = fit_circle_to_grid(x, y, radius, lw)
 
