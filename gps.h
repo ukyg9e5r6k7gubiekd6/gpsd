@@ -282,7 +282,7 @@ struct rtcm3_basic_rtk {
     unsigned int channel;	/* Satellite Frequency Channel Number
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */
-    double rangediff;		/* PhaseRange – Pseudorange in meters */
+    double rangediff;		/* PhaseRange - Pseudorange in meters */
     unsigned char locktime;	/* Lock time Indicator */
 };
 
@@ -291,7 +291,7 @@ struct rtcm3_extended_rtk {
     unsigned int channel;	/* Satellite Frequency Channel Number
 				   (GLONASS only) */
     double pseudorange;		/* Pseudorange */
-    double rangediff;		/* PhaseRange – L1 Pseudorange */
+    double rangediff;		/* PhaseRange - L1 Pseudorange */
     unsigned char locktime;	/* Lock time Indicator */
     unsigned char ambiguity;	/* Integer Pseudorange
 					   Modulus Ambiguity */
