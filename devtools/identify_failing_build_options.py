@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
+
 import os
 
 always_on = [
@@ -95,7 +99,7 @@ def main(starting_number_of_options=0):
         if subprocess.call(command, stdout=dev_null) == 0:
             return True
         failed_configurations.append(command)
-        print command
+        print(command)
         with open('failed_%s_configs.txt' % phase, 'a') as failed_configs:
             failed_configs.write(' '.join(command) + '\n')
         return False
@@ -104,10 +108,10 @@ def main(starting_number_of_options=0):
     static_params += [key + '=off' for key in always_off]
 
     for i in range(starting_number_of_options, len(knobs)):
-        print 'Testing at length {}'.format(i)
+        print('Testing at length {}'.format(i))
 
         for row in itertools.combinations(knobs, i):
-            print row
+            print(row)
             params = static_params + [key + '=on' for key in row]
 
             # print {'on_params': row, 'scons_params': params}
@@ -134,4 +138,4 @@ def main(starting_number_of_options=0):
 if __name__ == '__main__':
     failed = main(0)
     for row in failed:
-        print ' '.join(row)
+        print(' '.join(row))
