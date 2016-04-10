@@ -54,7 +54,7 @@ running Fedora Core, Ubuntu, or stock Debian you can skip this step,
 as the stock configuration has the right properties.
 
 gpsd requires two things: (1) that GPS devices have group read and
-write enabled, and (2) all of them are have the same group ID as a
+write enabled, and (2) all of them have the same group ID as a
 prototypical device, typically /dev/ttyS0 under Linux or /dev/tty00
 under *BSD. It does not actually matter what the owning group is, as
 gpsd will look this up on startup.  Alternatively, (3), you can set a
@@ -87,16 +87,16 @@ A minimum build of GPSD can run pretty close to the metal; all it
 absolutely needs is the C runtime support. The test clients and
 various additional features have additional prerequisites:
 
-|================================================================================
+|===============================================================================
 |pthreads library             | support for PPS timekeeping on serial GPSes
 |DBUS                         | gpsd will issue DBUS notifications
 |ncurses                      | a test client and the GPS monitor depend on this
 |libtinfo5                    | shared low-level terminfo library (see below)
 |libusb-1.0.x or later        | better USB device discovery
 |Qt + qmake                   | libQgpsmm depends on this
-|python2.x(x>=6) or 3.y(y>=3) | required for various clients and utilities
+|python2.x(x>=6) or 3.y(y>=2) | required for various clients and utilities
 |python-GI bindings           | the test clients xgps and xgpsspeed, need this
-|================================================================================
+|===============================================================================
 
 Some ncurses packages contain the terminfo library; some break it out
 separately as libtinfo5 or libtinfo.
@@ -225,7 +225,7 @@ http://www.prolific.com.tw/US/ShowProduct.aspx?p_id=229&pcid=41
 gpsd will build, install and run on the Rasberry Pi (RasPi) and Pi 2
 using Debian jessie.  Other distributions based on
 Debian (raspbian, etc) will work fine as well.  The gpsd
-package in Debian Wheezy is known to be flakey, be sure to update to a
+package in Debian Wheezy is known to be flaky, be sure to update to a
 new version of gpsd from source.
 
 === Raspbian ===

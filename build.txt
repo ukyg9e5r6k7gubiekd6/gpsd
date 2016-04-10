@@ -23,9 +23,12 @@ If you get any errors, you need to read the detailed instructions that follow.
 
 If 'scons' fails, it is possible that your target system has moved to
 Python 3 as its default 'python' interpreter, but you can work around
-it by saying "python2 /usr/bin/scons" or something similar.  GPSD's
-own Python scripts assume that "#!/usr/bin/env python2" will invoke a
-Python 2 interpreter.
+it by saying "python2 /usr/bin/scons" or something similar.
+
+Occasionally, builds may fail in completely bizarre ways due to a corrupted
+scons database.  This seems to relate to ^Cing the build at an inopportune
+moment.  If you suspect that, see "Reverting to a clean state" below and
+then try again.
 
 == Supported platforms ==
 
@@ -56,8 +59,8 @@ Necessary components for any build:
 
 |============================================================================
 |C compiler                    | gpsd and client library are written in C
-|Python 2.x(x>=6) or 3.y(y>=3) | some code is generated from python scripts
 |scons                         | for executing the build recipe
+|Python 2.x(x>=6)              | for scons and some helper scripts
 |============================================================================
 
 === C compiler ===
@@ -190,7 +193,7 @@ These are listed in rough order of devices covered as of 2013; the
 PL23203 by itself accounts for over 70% of deployed USB mice.  We
 recommend building with pl2303, ftdi_sio, cypress_m8, and cp210x.
 
-We've receive a bug report that suggests the Python test framework
+We've received a bug report that suggests the Python test framework
 requires legacy PTY support (CONFIG_LEGACY_PTYS) from the Linux
 kernel.  You should make sure you're in the 'dialout' group in order
 to have permission to use these devices.
@@ -390,7 +393,7 @@ set to a different value if necessary, or set to the empty string to
 disable Python coveraging.  The latter happens automatically (with a
 message) if the tool cannot be found.  When running multiple jobs with
 "-j", if python_coverage has its default value, "--parallel" is automatically
-appended to the command.  With a non-default setting, accomodating
+appended to the command.  With a non-default setting, accommodating
 parallelism is the user's responsibility.
 
 For instructions on how to live-test the software, see the file INSTALL.
@@ -408,7 +411,20 @@ generated test programs.
 You can run 'scons sconsclean' to remove most of the configuration
 state that scons keeps.  Be aware, however, that doing this can
 confuse scons; you may need to run 'scons --config=force' afterwards
-to make your build succeed.
+to make your build succeed.  At the time of this writing, you can also
+remove all the scons state with "rm -rf .scon*", though that could change
+in a future release of scons.  This method does not "confuse scons".
+If you use any of these actions in combination with "scons -c", do the
+latter first, as removing scons's state may change its notions of what
+needs to be cleaned.
+
+If you're building in a clone of the git repository, you can use
+"git clean -dxf" to remove all untracked files.  Note, however, that
+this will remove any files you have created on your own, in addition
+to build products and scons temporaries.  You can alternatively use
+"git clean -dxn" to see what would be removed without actually removing
+anything, or "git clean -dxi" to remove things selectively.  Using
+"git clean" after "scons -c" usually results in a fairly short list.
 
 == Notes on Android:
 
