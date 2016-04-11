@@ -121,7 +121,7 @@ def GetDelay(slow=False):
 
 class TestLoadError(BaseException):
     def __init__(self, msg):
-        BaseException.__init__(self)
+        super(TestLoadError, self).__init__()
         self.msg = msg
 
 
@@ -217,7 +217,7 @@ class TestLoad(object):
 
 class PacketError(BaseException):
     def __init__(self, msg):
-        BaseException.__init__(self)
+        super(PacketError, self).__init__()
         self.msg = msg
 
 
@@ -253,7 +253,7 @@ class FakePTY(FakeGPS):
     def __init__(self, testload,
                  speed=4800, databits=8, parity='N', stopbits=1,
                  progress=None):
-        FakeGPS.__init__(self, testload, progress)
+        super(FakePTY, self).__init__(testload, progress)
         # Allow Serial: header to be overridden by explicit speed.
         if self.testload.serial:
             (speed, databits, parity, stopbits) = self.testload.serial
@@ -361,7 +361,7 @@ class FakeTCP(FakeGPS):
     def __init__(self, testload,
                  host, port,
                  progress=None):
-        FakeGPS.__init__(self, testload, progress)
+        super(FakeTCP, self).__init__(testload, progress)
         self.host = host
         self.dispatcher = cleansocket(self.host, int(port))
         self.port = self.dispatcher.getsockname()[1]  # Get actual assigned port
@@ -408,7 +408,7 @@ class FakeUDP(FakeGPS):
     def __init__(self, testload,
                  ipaddr, port,
                  progress=None):
-        FakeGPS.__init__(self, testload, progress)
+        super(FakeUDP, self).__init__(testload, progress)
         self.ipaddr = ipaddr
         self.port = port
         self.byname = "udp://" + ipaddr + ":" + str(port)
@@ -429,7 +429,7 @@ class FakeUDP(FakeGPS):
 
 class DaemonError(BaseException):
     def __init__(self, msg):
-        BaseException.__init__(self)
+        super(DaemonError, self).__init__()
         self.msg = msg
 
     def __str__(self):
@@ -554,7 +554,7 @@ class DaemonInstance(object):
 
 class TestSessionError(BaseException):
     def __init__(self, msg):
-        BaseException.__init__(self)
+        super(TestSessionError, self).__init__()
         self.msg = msg
 
 
