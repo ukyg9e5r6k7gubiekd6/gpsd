@@ -87,7 +87,7 @@ WATCH_NEWSTYLE	= 0x010000	# force JSON streaming
 WATCH_OLDSTYLE	= 0x020000	# force old-style streaming
 
 
-class gpsfix:
+class gpsfix(object):
     def __init__(self):
         self.mode = MODE_NO_FIX
         self.time = NaN
@@ -105,7 +105,7 @@ class gpsfix:
         self.epc = NaN
 
 
-class gpsdata:
+class gpsdata(object):
     "Position, track, velocity and status information returned by a GPS."
 
     class satellite:

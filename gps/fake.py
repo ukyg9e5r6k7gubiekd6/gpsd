@@ -125,7 +125,7 @@ class TestLoadError(BaseException):
         self.msg = msg
 
 
-class TestLoad:
+class TestLoad(object):
     "Digest a logfile into a list of sentences we can cycle through."
 
     def __init__(self, logfp, predump=False, slow=False, oneshot=False):
@@ -221,7 +221,7 @@ class PacketError(BaseException):
         self.msg = msg
 
 
-class FakeGPS:
+class FakeGPS(object):
     def __init__(self, testload, progress=None):
         self.testload = testload
         self.progress = progress
@@ -436,7 +436,7 @@ class DaemonError(BaseException):
         return repr(self.msg)
 
 
-class DaemonInstance:
+class DaemonInstance(object):
     "Control a gpsd instance."
 
     def __init__(self, control_socket=None):
@@ -558,7 +558,7 @@ class TestSessionError(BaseException):
         self.msg = msg
 
 
-class TestSession:
+class TestSession(object):
     "Manage a session including a daemon with fake GPSes and clients."
 
     def __init__(self, prefix=None, port=None, options=None, verbose=0, predump=False, udp=False, tcp=False, slow=False):

@@ -11,7 +11,7 @@ from .misc import polystr, polybytes
 
 GPSD_PORT = "2947"
 
-class gpscommon:
+class gpscommon(object):
     "Isolate socket handling and buffering from the protocol interpretation."
 
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
@@ -134,7 +134,7 @@ WATCH_PPS = 0x002000    	# enable PPS in raw/NMEA
 WATCH_DEVICE = 0x000800 	# watch specific device
 
 
-class gpsjson:
+class gpsjson(object):
     "Basic JSON decoding."
 
     def __iter__(self):
@@ -193,7 +193,7 @@ class gpsjson:
         return self.send(arg + "}")
 
 
-class dictwrapper:
+class dictwrapper(object):
     "Wrapper that yields both class and dictionary behavior,"
 
     def __init__(self, ddict):
