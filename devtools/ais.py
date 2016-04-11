@@ -40,7 +40,7 @@ except AttributeError:
 
 # Here are the pseudoinstructions in the pseudolanguage.
 
-class bitfield:
+class bitfield(object):
     "Object defining the interpretation of an AIS bitfield."
     # The only un-obvious detail is the use of the oob (out-of-band)
     # member.  This isn't used in data extraction, but rather to cut
@@ -58,13 +58,13 @@ class bitfield:
         self.formatter = formatter	# Custom reporting hook.
         self.conditional = conditional	# Evaluation guard for this field
 
-class spare:
+class spare(object):
     "Describes spare bits,, not to be interpreted."
     def __init__(self, width, conditional=None):
         self.width = width
         self.conditional = conditional	# Evaluation guard for this field
 
-class dispatch:
+class dispatch(object):
     "Describes how to dispatch to a message type variant on a subfield value."
     def __init__(self, fieldname, subtypes, compute=lambda x: x, conditional=None):
         self.fieldname = fieldname	# Value of view to dispatch on
@@ -944,7 +944,7 @@ from array import array
 
 BITS_PER_BYTE = 8
 
-class BitVector:
+class BitVector(object):
     "Fast bit-vector class based on Python built-in array type."
     def __init__(self, data=None, length=None):
         self.bits = array('B')
