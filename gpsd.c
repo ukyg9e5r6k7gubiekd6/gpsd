@@ -1407,7 +1407,7 @@ static void pseudonmea_report(struct subscriber_t *sub,
 	    (void)throttled_write(sub, buf, strlen(buf));
 	}
 
-	if ((changed & SATELLITE_SET) != 0) {
+	if ((changed & (SATELLITE_SET|USED_IS)) != 0) {
 	    nmea_sky_dump(device, buf, sizeof(buf));
 	    gpsd_log(&context.errout, LOG_IO,
 		     "<= GPS (binary sky) %s: %s\n",
