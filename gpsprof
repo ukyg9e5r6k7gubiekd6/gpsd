@@ -21,7 +21,7 @@ import sys
 import time
 
 
-class Baton:
+class Baton(object):
     "Ship progress indication to stderr."
 
     def __init__(self, prompt, endmsg=None):
@@ -55,7 +55,7 @@ class Baton:
         return
 
 
-class plotter:
+class plotter(object):
     "Generic class for gathering and plotting sensor statistics."
 
     def __init__(self):

@@ -22,7 +22,8 @@ try:
 except ImportError:
     from commands import getstatusoutput
 
-class SourceExtractor:
+
+class SourceExtractor(object):
     def __init__(self, sourcefile, clientside):
         self.sourcefile = sourcefile
         self.clientside = clientside

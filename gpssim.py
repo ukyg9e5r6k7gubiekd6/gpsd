@@ -12,7 +12,7 @@ import gps, gpslib
 # and a satellite with specified orbital elements in the sky.
 
 
-class ksv:
+class ksv(object):
     "Kinematic state vector."
 
     def __init__(self, time=0, lat=0, lon=0, alt=0, course=0,
@@ -61,7 +61,7 @@ class ksv:
 # <http://www.wolffdata.se/gps/gpshtml/anomalies.html>
 
 
-class satellite:
+class satellite(object):
     "Orbital elements of one satellite. PRESENTLY A STUB"
 
     def __init__(self, prn):
@@ -88,7 +88,7 @@ class gpssimException(BaseException):
         return '"%s", %d:' % (self.filename, self.lineno)
 
 
-class gpssim:
+class gpssim(object):
     "Simulate a moving sensor, with skyview."
     active_PRNs = list(range(1, 24 + 1)) + [134, ]
 
@@ -186,7 +186,7 @@ class gpssim:
 MPS_TO_KNOTS = 1.9438445	# Meters per second to knots
 
 
-class NMEA:
+class NMEA(object):
     "NMEA output generator."
 
     def __init__(self):

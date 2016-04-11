@@ -40,7 +40,7 @@ import gps.clienthelpers
 SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 
 
-class unit_adjustments:
+class unit_adjustments(object):
     "Encapsulate adjustments for unit systems."
 
     def __init__(self, units=None):
@@ -262,7 +262,7 @@ class SkyView(Gtk.DrawingArea):
         self.queue_draw()
 
 
-class NoiseView:
+class NoiseView(object):
     "Encapsulate view object for watching noise statistics."
     COLUMNS = 2
     ROWS = 4
@@ -308,7 +308,7 @@ class NoiseView:
                 widget.set_text("n/a")
 
 
-class MaidenheadView:
+class MaidenheadView(object):
     "Encapsulate view object for watching Maidenhead grid location."
 
     def __init__(self):
@@ -322,7 +322,7 @@ class MaidenheadView:
             return self.widget.set_text("n/a")
 
 
-class AISView:
+class AISView(object):
     "Encapsulate store and view objects for watching AIS data."
     AIS_ENTRIES = 10
     DWELLTIME = 360
@@ -436,7 +436,7 @@ class AISView:
                     (ais.type, ais.name, "(%s navaid)" % ais.epfd_text, "", where, ais.aid_type_text))
 
 
-class Base:
+class Base(object):
     COLUMNS = 3
     ROWS = 7
     gpsfields = (

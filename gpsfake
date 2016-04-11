@@ -31,7 +31,7 @@ except NameError:
 # Make sure stdout can accept binary data in Python 3
 sys.stdout = gps.make_std_wrapper(sys.stdout)
 
-class Baton:
+class Baton(object):
     "Ship progress indications to stderr."
     # By setting this > 1 we reduce the frequency of the twirl
     # and speed up test runs.  Should be relatively prime to the
