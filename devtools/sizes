@@ -2,6 +2,10 @@
 #
 # sizes -- explore the sizes of static gpsd binaries
 #
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
+
 import os
 
 # NMEA variants other than vanilla NMEA
@@ -49,13 +53,23 @@ debugging = [
   "oldstyle=no",
   ]
 
+
+class BuildFailed(BaseException):
+    "Build failed for this configuration."
+    pass
+
+
 def sizeit(legend, tag, options):
-    print legend + ":"
-    print "Options:", " ".join(options)
-    os.system("scons -c > /dev/null; rm -fr .scons*")
-    os.system("scons shared=no " + " ".join(options) + " gpsd >/dev/null")
+    print(legend + ":")
+    print("Options:", " ".join(options))
+    os.system("scons -c > /dev/null; rm -fr .scon*")
+    status = os.system("scons shared=no " + " ".join(options)
+                       + " gpsd >/dev/null")
+    if status != 0:
+        raise BuildFailed(options)
     os.rename("gpsd", "gpsd-" + tag + "-build")
     os.rename("gpsd_config.h", "gpsd_config.h-" + tag)
+
 
 # Main sequence
 os.system("uname -a")

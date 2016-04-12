@@ -4,6 +4,10 @@
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
+#
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
 
 sixbits = (
 	"000000", "000001", "000010", "000011", "000100",
@@ -24,10 +28,10 @@ sixbits = (
 def asciiarmor():
     print("`--------`-------`---------`-------")
     print(" Char    ASCII   Decimal   Bits")
-    for ch in range(ord('0'), ord('W')+1) + range(ord('`'), ord('w')+1):
+    for ch in list(range(ord('0'), ord('W')+1)) + list(range(ord('`'), ord('w')+1)):
         n = ch - 48
         if n >= 40: n -= 8
-        print '"%s"      %3d    %3d        %s' % (chr(ch), ch, n, sixbits[n])
+        print('"%s"      %3d    %3d        %s' % (chr(ch), ch, n, sixbits[n]))
     print("---------------------------------------")
 
 if __name__ == "__main__":

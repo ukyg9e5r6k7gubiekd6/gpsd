@@ -5,12 +5,16 @@
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
+#
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
 
 import sys
 
-class BufferedFile(file):
+class BufferedFile(object):
       def __init__(self, name):
-            file.__init__(self, name)
+            self.file = open(name)
             self.linebuffer = []
             self.lineno = 0
       def readline(self):
@@ -18,7 +22,7 @@ class BufferedFile(file):
             if self.linebuffer:
                   return self.linebuffer.pop()
             else:
-                  return file.readline(self)
+                  return self.file.readline()
       def pushback(self, line):
             self.lineno -= 1
             self.linebuffer.append(line)
@@ -42,6 +46,6 @@ if __name__ == "__main__":
       f2 = BufferedFile(sys.argv[2])
 
       eaten = eatspan(f1, f2)
-      print "First %d lines match" % eaten
-      print `f1.peek()`
-      print `f2.peek()`
+      print("First %d lines match" % eaten)
+      print(f1.peek())
+      print(f2.peek())
