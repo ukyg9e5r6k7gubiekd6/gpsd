@@ -36,6 +36,8 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DE(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_DF(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t sky_msg_E0(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sky_msg_E2(struct gps_device_t *, unsigned char *, size_t);
+static gps_mask_t sky_msg_E3(struct gps_device_t *, unsigned char *, size_t);
 
 #ifdef __UNUSED
 /* Poll Software Version MID 2 */
@@ -358,6 +360,89 @@ static gps_mask_t sky_msg_E0(struct gps_device_t *session,
     return gpsd_interpret_subframe(session, prn, words);
 }
 
+/*
+ * pretend to decode MID 0xE2, Beiduo D1 Subframe data
+ *
+ * from Beidou Standard BDS-SIS-ICD-2.0
+ * D1, with the data rate of 50 bps, is broadcasted by the MEO/IGSO satellites
+ *
+ * len 31 bytes
+ *
+ */
+static gps_mask_t sky_msg_E2(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    int i;
+    unsigned int prn;   /* BeidouPS sat PRN 206-214 */
+    unsigned int subf;  /* subframe 1-5 */
+    /* the words are preprocessed, not raw, just the 28 bytes of data */
+    uint8_t bytes[28];  /* raw data */
+
+    if ( 31 != len)
+	return 0;
+
+    prn = (unsigned int)getub(buf, 1);
+    subf = (unsigned int)getub(buf, 2);
+    for ( i = 0; i < 28; i++ ) {
+	bytes[i] = getub(buf, 3 + i);
+    }
+
+    /* extra guard prevents expensive hexdump calls */
+    if (session->context->errout.debug >= LOG_PROG) {
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "Skytraq: Beidou D1 subframe PRN %d Subframe %d "
+	         "length %zd byte:%s\n",
+		 prn, subf,
+		 len,
+		 gpsd_hexdump(session->msgbuf, sizeof(session->msgbuf),
+				 (char *)bytes, 28));
+    }
+
+    return ONLINE_SET;
+}
+
+/*
+ * pretend to decode MID 0xE3, Beiduo D2 Subframe data
+ *
+ * from Beidou Standard BDS-SIS-ICD-2.0
+ * D2, with the data rate of 500 bps, is broadcasted by the GEO satellites.
+ *
+ * len 31 bytes
+ *
+ */
+static gps_mask_t sky_msg_E3(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    int i;
+    unsigned int prn;   /* BeidouPS sat PRN 201-205 */
+    unsigned int subf;  /* subframe 1-5 */
+    /* the words are preprocessed, not raw, just the 28 bytes of data */
+    uint8_t bytes[28];  /* raw data */
+
+    if ( 31 != len)
+	return 0;
+
+    prn = (unsigned int)getub(buf, 1);
+    subf = (unsigned int)getub(buf, 2);
+    for ( i = 0; i < 28; i++ ) {
+	bytes[i] = getub(buf, 3 + i);
+    }
+
+    /* extra guard prevents expensive hexdump calls */
+    if (session->context->errout.debug >= LOG_PROG) {
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "Skytraq: Beidou D2 subframe PRN %d Subframe %d "
+	         "length %zd byte:%s\n",
+		 prn, subf,
+		 len,
+		 gpsd_hexdump(session->msgbuf, sizeof(session->msgbuf),
+				 (char *)bytes, 28));
+    }
+
+
+    return ONLINE_SET;
+}
+
 
 static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 		      size_t len)
@@ -412,18 +497,12 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 	return sky_msg_E0(session, buf, len);
 
     case 0xE2:
-	/* 226 */
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "Skytraq: Ignoring Beidou D1 subframe data, length %zd\n",
-		 len);
-        break;
+	/* 226 - Beidou2 D1 Subframe data */
+	return sky_msg_E2(session, buf, len);
 
     case 0xE3:
-	/* 227 */
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "Skytraq: Ignoring Beidou D2 subframe data, length %zd\n",
-		 len);
-        break;
+	/* 227 - Beidou2 D2 Subframe data */
+	return sky_msg_E3(session, buf, len);
 
     default:
 	gpsd_log(&session->context->errout, LOG_PROG,
