@@ -1797,10 +1797,11 @@ struct ais_t
     };
 };
 
+/* basic data, per PRN, from GPGSA and GPGSV */
 struct satellite_t {
     double ss;		/* signal-to-noise ratio (dB) */
-    bool used;		/* PRNs of satellites used in solution */
-    short PRN;		/* PRNs of satellite */
+    bool used;		/* this satellite used in solution */
+    short PRN;		/* PRN of this satellite */
     short elevation;	/* elevation of satellite */
     short azimuth;	/* azimuth */
 };
