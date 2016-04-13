@@ -134,6 +134,13 @@ WATCH_PPS = 0x002000    	# enable PPS in raw/NMEA
 WATCH_DEVICE = 0x000800 	# watch specific device
 
 
+class json_error(BaseException):
+    def __init__(self, data, explanation):
+        BaseException.__init__(self)
+        self.data = data
+        self.explanation = explanation
+
+
 class gpsjson(object):
     "Basic JSON decoding."
 
