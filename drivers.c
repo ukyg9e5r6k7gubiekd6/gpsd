@@ -1055,16 +1055,25 @@ static const struct gps_type_t driver_garmintxt = {
 #ifdef MTK3301_ENABLE
 /**************************************************************************
  *
- * MediaTek MTK-3301 and 3329
+ * MediaTek MTK-3301, 3329, 3339
  *
- * OEMs for several GPS vendors, notably including Garmin and FasTrax.
- * Website at <http://www.mediatek.com/>.
+ * OEMs for several GPS vendors, notably including Garmin, FasTrax, Trimble,
+ * and AdaFruit. Website at <http://www.mediatek.com/>.
  *
  * The Trimble Condor appears to be an MTK3329.  It behaves as an MTK3301
  * and positively acknowledges all 3301 sentences as valid. It ignores $PMTK
  * sentence fields that are not implemented in the Trimble Condor. It does
  * not have power-save mode and ignores $PMTK320.  For $PMTK314 it silently
  * ignores periodic enabling of messages that aren't supported.
+ *
+ * From its datasheet the MTK3339 seems to add QZSS support not present in
+ * earlier versions. The data sheet says it has 66 channels, which mkes
+ * sense given the multi-constellation capability. The channel count
+ * in the driver is never used by the NMEA driver so leaving the lower MTK3301
+ * value in there is OK.
+ *
+ * The Adafruit GPS HAT for the Raspberry Pi is an MTK3339. It works with this
+ * driver; in fact AdaFruit's overview page for the product features GPSD.
  *
  **************************************************************************/
 
