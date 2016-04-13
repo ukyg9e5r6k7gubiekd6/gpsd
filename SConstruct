@@ -508,11 +508,14 @@ def GetPythonValue(context, name, imp, expr, brief=False):
     else:
         command = [target_python_path, '-c',
                    '%s; print(%s)' % (imp, expr)]
-        status, value = _getstatusoutput(command, shell=False)
+        try:
+            status, value = _getstatusoutput(command, shell=False)
+        except OSError:
+            status = -1
         if status == 0:
             value = value.strip()
         else:
-            value = None
+            value = ''
             announce("Python command failed - disabling Python.")
             env['python'] = False
     context.Result('failed' if status else 'ok' if brief else value)
@@ -879,7 +882,12 @@ if helping:
 else:
 
     if env['python'] and env['target_python']:
-        target_python_path = config.CheckProg(env['target_python'])
+        try:
+            config.CheckProg
+        except AttributeError:  # Older scons versions don't have CheckProg
+            target_python_path = env['target_python']
+        else:
+            target_python_path = config.CheckProg(env['target_python'])
         if not target_python_path:
             announce("Target Python doesn't exist - disabling Python.")
             env['python'] = False
