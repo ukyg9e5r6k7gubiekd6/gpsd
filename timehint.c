@@ -370,7 +370,7 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
 	 * for all cases as we have no other general way to know
 	 * if PPS is good.
 	 */
-	if (session->fixcnt <= PPS_MIN_FIXES &&
+	if (session->fixcnt <= NTP_MIN_FIXES &&
 	    (session->gpsdata.set & GOODTIME_IS) == 0)
 	    return "no fix";
     }

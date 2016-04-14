@@ -221,6 +221,8 @@ extern int packet_sniff(struct gps_lexer_t *);
 #define GPSD_CONFIDENCE	CEP95_SIGMA
 
 #define NTPSHMSEGS	(MAX_DEVICES * 2)	/* number of NTP SHM segments */
+#define NTP_MIN_FIXES	3  /* # fixes to wait for before shipping NTP time */
+
 
 #define AIVDM_CHANNELS	2		/* A, B */
 
