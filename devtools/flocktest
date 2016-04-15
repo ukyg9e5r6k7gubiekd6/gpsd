@@ -32,8 +32,21 @@ are redundant with your local ones.
 Known bug: The -k has no atomicity check.  Running it from two
 flocktest instances concurrently could result in a scrambled keyfile.
 """
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
 
-import os, sys, ConfigParser, getopt, socket, threading, commands, time
+import os, sys, getopt, socket, threading, time
+
+try:
+    import configparser                  # Python 2
+except ImportError:
+    import ConfigParser as configparser  # Python 3
+
+try:
+    import commands                # Python 2
+except ImportError:
+    import subprocess as commands  # Python 3
 
 flockdriver = '''
 #!/bin/sh
@@ -176,7 +189,7 @@ class FlockThread(threading.Thread):
     def run(self):
         (self.status, self.output) = commands.getstatusoutput(self.command)
 
-class TestSite:
+class TestSite(object):
     "Methods for performing tests on a single remote site."
     def __init__(self, fqdn, config, execute=True):
         self.fqdn = fqdn
@@ -193,7 +206,7 @@ class TestSite:
             command += "-p %s " % self.config["port"]
         command += "%s '%s'" %  (self.me, remote)
         if self.verbose:
-            print command
+            print(command)
         self.thread =  FlockThread(self, command)
         self.thread.start()
     def update_keys(self, filename):
@@ -203,7 +216,7 @@ class TestSite:
             return 1
         command = "scp '%s' %s:~/.ssh/.authorized_keys" % (os.path.expanduser(filename), self.me)
         if self.verbose:
-            print command
+            print(command)
         status = os.system(command)
         if status:
             self.error("copy with '%s' failed" % command)
@@ -219,17 +232,17 @@ class TestSite:
         uploader = "ssh -p %s %s 'cat >%s'" \
                        % (self.config.get("port", "22"), self.me, agent)
         if self.verbose:
-            print uploader
+            print(uploader)
         ofp = os.popen(uploader, "w")
         self.config['date'] = time.ctime() 
         ofp.write(flockdriver % self.config)
         if ofp.close():
-            print >>sys.stderr, "flocktest: agent upload failed"
+            print("flocktest: agent upload failed", file=sys.stderr)
         else:
             self.do_remote(invocation)
         self.elapsed = time.time() - self.starttime
 
-class TestFlock:
+class TestFlock(object):
     "Methods for performing parallel tests on a flock of remote sites."
     ssh_options = "no-port-forwarding,no-X11-forwarding," \
                  "no-agent-forwarding,no-pty "
@@ -243,7 +256,7 @@ class TestFlock:
     def do_remotes(self, agent, invocation):
         "Execute a command on all machines in the flock."
         slaves = []
-        print "== testing at: %s ==" % flock.listdump()
+        print("== testing at: %s ==" % flock.listdump())
         starttime = time.time()
         for site in self.sitelist:
             site.do_flockdriver(agent, invocation)
@@ -252,32 +265,32 @@ class TestFlock:
         failed = 0
         for site in sites:
             if site.thread.status:
-                print "== %s test FAILED in %.2f seconds, status %d ==" % (site.fqdn, site.elapsed, site.thread.status)
+                print("== %s test FAILED in %.2f seconds, status %d ==" % (site.fqdn, site.elapsed, site.thread.status))
                 failed += 1
-                print site.thread.output
+                print(site.thread.output)
             else:
-                print "== %s test succeeded in %.2f seconds ==" % (site.fqdn, site.elapsed)
+                print("== %s test succeeded in %.2f seconds ==" % (site.fqdn, site.elapsed))
                 if self.verbose:
-                    print site.thread.output
+                    print(site.thread.output)
         elapsed = time.time() - starttime
-        print "== %d tests completed in %.2f seconds: %d failed ==" % (len(sites), elapsed, failed)
+        print("== %d tests completed in %.2f seconds: %d failed ==" % (len(sites), elapsed, failed))
     def exclude(self, exclusions):
         "Delete matching sites."
-        self.sitelist = filter(lambda x: x.fqdn not in exclusions and x.config["arch"] not in exclusions, self.sitelist)
+        self.sitelist = [x for x in self.sitelist if x.fqdn not in exclusions and x.config["arch"] not in exclusions]
     def update_keys(self, keyfile):
         "Copy the specified public key file to all sites."
         for site in self.sitelist:
             site.update_keys(keyfile)
     def listdump(self):
         "Return a dump of the site list."
-        return ", ".join(map(lambda x: x.fqdn, self.sitelist))
+        return ", ".join([x.fqdn for x in self.sitelist])
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "cd:kqvx:?")
-    except getopt.GetoptError, msg:
-        print "flocktest: " + str(msg)
-        raise SystemExit, 1
+    except getopt.GetoptError as msg:
+        print("flocktest: " + str(msg))
+        raise SystemExit(1)
 
     exclusions = []
     subdir = None
@@ -297,17 +310,17 @@ if __name__ == '__main__':
         elif switch == '-v':	# Display build log even when no error
             verbose = True
         elif switch == '-x':	# Exclude specified sites or architectures
-            exclusions = map(lambda x: x.strip(), val.split(","))
+            exclusions = [x.strip() for x in val.split(",")]
         else: # switch == '-?':
-            print __doc__
+            print(__doc__)
             sys.exit(0)
 
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.read(["flocktest.ini", ".flocktest.ini"])
     if arguments:
         config.set("DEFAULT", "origin", arguments[0])
     if not config.has_option("DEFAULT", "origin"):
-        print >>sys.stderr, "flocktest: repository required."
+        print("flocktest: repository required.", file=sys.stderr)
         sys.exit(1)
     sites = []
     for site in config.sections():
@@ -327,7 +340,7 @@ if __name__ == '__main__':
         if not subdir:
             subdir = os.getenv("LOGNAME")
         if not subdir:
-            print "flocktest: you don't exist, go away!"
+            print("flocktest: you don't exist, go away!")
             sys.exit(1)
         agent = "flockdriver.%s" % subdir
         invocation = "sh flockdriver.%s -d %s" % (subdir, subdir,)
