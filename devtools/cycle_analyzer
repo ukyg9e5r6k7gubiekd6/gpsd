@@ -52,20 +52,26 @@ device will confuse the NMEA cycle detector, leading to more reports per cycle
 than the ideal.
 
 """
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
+
 import sys, os, getopt, json
+
+from gps.misc import polystr, isotime
 
 verbose = 0
 suppress_regular = False
 parse_json = False
 
-class analyze_error:
+class analyze_error(BaseException):
     def __init__(self, filename, msg):
         self.filename = filename
         self.msg = msg
     def __repr__(self):
         return '%s: %s' % (self.filename, self.msg)
 
-class event:
+class event(object):
     def __init__(self, tag, time=0):
         self.tag = tag
         self.time = time
@@ -77,7 +83,7 @@ class event:
     __repr__ = __str__
 
 def tags(lst):
-    return map(lambda x: x.tag, lst)
+    return [x.tag for x in lst]
 
 def extract_from_nmea(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from an NMEA sentence"
@@ -86,7 +92,7 @@ def extract_from_nmea(filename, lineno, line):
         "GLL": 5,
         "GGA": 1,
         "GBS": 1,
-        "PASHR": 4,
+        "PASHR": {"POS": 4},
         }
     fields = line.split(",")
     tag = fields[0]
@@ -94,8 +100,11 @@ def extract_from_nmea(filename, lineno, line):
         tag = tag[3:]
     elif tag[0] == "$":
         tag = tag[1:]
-    if tag in hhmmss:
-        timestamp = fields[hhmmss[tag]]
+    field = hhmmss.get(tag)
+    if isinstance(field, dict):
+        field = field.get(fields[1])
+    if field:
+        timestamp = fields[field]
         return [event(tag, timestamp)]
     else:
         return []
@@ -106,12 +115,12 @@ def extract_from_json(filename, lineno, line):
         return []
     try:
         sentence = json.loads(line)
-        if u"time" not in sentence:
+        if "time" not in sentence:
             return []
-        return [event(sentence[u"tag"].encode("iso-8859-1"), "%.2f" % sentence[u"time"])]
-    except ValueError, e:
-        print line.rstrip()
-        print e
+        return [event(polystr(sentence["class"]), "%.2f" % isotime(sentence["time"]))]
+    except ValueError as e:
+        print(line.rstrip(), file=sys.stderr)
+        print(repr(e), file=sys.stderr)
         return []
 
 def extract_timestamped_sentences(fp, json_parse=parse_json):
@@ -119,7 +128,7 @@ def extract_timestamped_sentences(fp, json_parse=parse_json):
     sequence = []
     lineno = 0
     while True:
-        line = fp.readline()
+        line = polystr(fp.readline())
         if not line:
             break
         lineno += 1
@@ -140,9 +149,9 @@ def analyze(sequence, name):
     if not sequence:
         return
     if "sequence" in stages:
-        print "Raw tag/timestamp sequence"
+        print("Raw tag/timestamp sequence")
         for e in sequence:
-            print e
+            print(e)
     # Then, do cycle detection
     events = []
     out_of_order = False
@@ -161,9 +170,9 @@ def analyze(sequence, name):
     if out_of_order and verbose:
         sys.stderr.write("%s: has some timestamps out of order.\n" % name)
     if "events" in stages:
-        print "Event list:"
+        print("Event list:")
         for e in events:
-            print e
+            print(e)
     # Now group events into bursts
     bursts = []
     current = []
@@ -174,9 +183,9 @@ def analyze(sequence, name):
         else:
             current.append(e)
     if "bursts" in stages:
-        print "Burst list:"
+        print("Burst list:")
         for burst in bursts:
-            print burst
+            print(burst)
     # We need 4 cycles because the first and last might be incomplete.
     if tags(events).count("<") < 4:
         sys.stderr.write("%s: has fewer than 4 cycles.\n" % name)
@@ -196,7 +205,7 @@ def analyze(sequence, name):
         if "trim" in stages:
             "After trimming:"
             for burst in bursts:
-                print burst
+                print(burst)
         # Now the actual clique analysis
         unequal = False
         for i in range(len(bursts)-1):
@@ -208,7 +217,7 @@ def analyze(sequence, name):
     # Should know now if cycle is regular
     if regular:
         if not suppress_regular:
-            print "%s: has a regular cycle %s." % (name, " ".join(tags(bursts[0])))
+            print("%s: has a regular cycle %s." % (name, " ".join(tags(bursts[0]))))
     else:
         # If it was not the case that all cycles matched, then we need
         # a minimum of 6 cycles because the first and last might be
@@ -218,16 +227,16 @@ def analyze(sequence, name):
             sys.stderr.write("%s: variable-cycle log has has fewer than 6 cycles.\n" % name)
             return
         if verbose > 0:
-            print "%s: has a split or variable cycle." % name
+            print("%s: has a split or variable cycle." % name)
         cycle_enders = []
         for burst in bursts:
             if burst[-1].tag not in cycle_enders:
                 cycle_enders.append(burst[-1].tag)
         if len(cycle_enders) == 1:
             if not suppress_regular:
-                print "%s: has a fixed end-of-cycle sentence %s." % (name, cycle_enders[0])
+                print("%s: has a fixed end-of-cycle sentence %s." % (name, cycle_enders[0]))
         else:
-            print "%s: has multiple cycle-enders %s." % (name, " ".join(cycle_enders))
+            print("%s: has multiple cycle-enders %s." % (name, " ".join(cycle_enders)))
         # Sanity check
         pathological = []
         for ender in cycle_enders:
@@ -235,7 +244,7 @@ def analyze(sequence, name):
                 if ender in tags(burst) and not ender == burst[-1].tag and not ender in pathological:
                     pathological.append(ender)
         if pathological:
-            print "%s: cycle-enders %s also occur in mid-cycle!" % (name, " ".join(pathological))
+            print("%s: cycle-enders %s also occur in mid-cycle!" % (name, " ".join(pathological)))
 
 if __name__ == "__main__":
     stages = ""
@@ -250,32 +259,31 @@ if __name__ == "__main__":
                 verbose += 1
             elif (switch == '-s'):		# Suppress logs with no problems
                 suppress_regular = True
-    except getopt.GetoptError, msg:
-        print "cycle_analyzer: " + str(msg)
-        raise SystemExit, 1
+    except getopt.GetoptError as msg:
+        print("cycle_analyzer: " + str(msg))
+        raise SystemExit(1)
 
     try:
         if arguments:
             for filename in arguments:
-                fp = open(filename)
+                fp = open(filename, 'rb')
                 try:
                     sequence = extract_timestamped_sentences(fp)
                     analyze(sequence, filename)
-                except analyze_error, e:
+                except analyze_error as e:
                     if filename.endswith(".log") and os.path.exists(filename+".chk"):
-                        fp2 = open(filename+".chk")
+                        fp2 = open(filename+".chk", "rb")
                         try:
                             sequence = extract_timestamped_sentences(fp2, json_parse=True)
                             analyze(sequence, filename+".chk")
                         finally:
                             fp2.close()
                     else:
-                        print e
+                        print(repr(e), file=sys.stderr)
                 fp.close()
         else:
             sequence = extract_timestamped_sentences(sys.stdin)
             analyze(sequence, "standard input")
-    except analyze_error, e:
-        print str(e)
-        raise SystemExit, 1
-        
+    except analyze_error as e:
+        print(repr(e), file=sys.stderr)
+        raise SystemExit(1)
