@@ -256,13 +256,18 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.valid |= PACKET_SET
         return 0
 
-    def next(self):
+    def __next__(self):
+        "Python 3 version of next()."
         if self.read() == -1:
             raise StopIteration
         if hasattr(self, "data"):
             return self.data
         else:
             return self.response
+
+    def next(self):
+        "Python 2 backward compatibility."
+        return self.__next__()
 
     def stream(self, flags=0, devpath=None):
         "Ask gpsd to stream reports at your client."
