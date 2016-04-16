@@ -3,3 +3,6 @@ binlog
 binreplay
 lla2ecef
 motosend
+gpsd-*.html
+gpsd-*.js
+tracks.p

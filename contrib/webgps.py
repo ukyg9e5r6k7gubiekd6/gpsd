@@ -36,12 +36,11 @@ If this file is present on start of webgps.py, it is loaded. This allows to
 restart webgps.py without losing accumulated satellite tracks.
 """
 
+from __future__ import absolute_import, print_function, division
+
 import time, math, sys, os, pickle
-try:
-    from gps import *
-except ImportError:
-    sys.path.append('..')
-    from gps import *
+
+from gps import *
 
 TRACKMAX = 1024
 STALECOUNT = 10
@@ -52,7 +51,8 @@ def polartocart(el, az):
     radius = DIAMETER * (1 - el / 90.0) # * math.cos(Deg2Rad(float(el)))
     theta = Deg2Rad(float(az - 90))
     return (
-        -int(radius * math.cos(theta) + 0.5),        # switch sides for a skyview!
+        # Changed this back to normal orientation - fw
+        int(radius * math.cos(theta) + 0.5),
         int(radius * math.sin(theta) + 0.5)
     )
 
@@ -83,7 +83,7 @@ class SatTracks(gps):
     '''gpsd client writing HTML5 and <canvas> output.'''
 
     def __init__(self):
-        gps.__init__(self)
+        super(SatTracks, self).__init__()
         self.sattrack = {}      # maps PRNs to Tracks
         self.state = None
         self.statetimer = time.time()
@@ -112,7 +112,7 @@ class SatTracks(gps):
 """ % jsfile)
 
         sats = self.satellites[:]
-        sats.sort(lambda a, b: a.PRN - b.PRN)
+        sats.sort(key=lambda x: x.PRN)
         for s in sats:
             fh.write("\t\t\t\t\t<tr><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%s</td></tr>\n" % (
                 s.PRN, s.elevation, s.azimuth, s.ss, s.used and 'Y' or 'N'
@@ -203,8 +203,8 @@ function draw_satview() {
 
     ctx.beginPath();
     ctx.strokeText('N', -4, -202);
-    ctx.strokeText('E', -210, 4);
-    ctx.strokeText('W', 202, 4);
+    ctx.strokeText('W', -210, 4);
+    ctx.strokeText('E', 202, 4);
     ctx.strokeText('S', -4, 210);
 
     ctx.strokeStyle = 'grey';
@@ -271,10 +271,13 @@ function draw_satview() {
                 t.stale -= 1
 
     def delete_stale(self):
+        stales = []
         for prn in self.sattrack.keys():
             if self.sattrack[prn].stale == 0:
-                del self.sattrack[prn]
+                stales.append(prn)
                 self.needsupdate = 1
+        for prn in stales:
+            del self.sattrack[prn]
 
     def insert_sat(self, prn, x, y):
         try:
@@ -342,15 +345,20 @@ def main():
     # restore the tracks
     pfile = 'tracks.p'
     if os.path.isfile(pfile):
-        p = open(pfile)
-        sat.sattrack = pickle.load(p)
+        p = open(pfile, 'rb')
+        try:
+            sat.sattrack = pickle.load(p)
+        except ValueError:
+            print("Ignoring incompatible tracks file.", file=sys.stderr)
         p.close()
 
     try:
         sat.run(prefix, period)
     except KeyboardInterrupt:
         # save the tracks
-        p = open(pfile, 'w')
+        p = open(pfile, 'wb')
+        # No protocol is backward-compatible from Python 3 to Python 2,
+        # so we just use the default and punt at load time if needed.
         pickle.dump(sat.sattrack, p)
         p.close()
 
