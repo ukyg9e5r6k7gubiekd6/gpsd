@@ -34,6 +34,7 @@ PERMISSIONS
 bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
+    int status;
     long shmkey = getenv("GPSD_SHM_KEY") ? strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : GPSD_SHM_KEY;
 
     int shmid = shmget((key_t)shmkey, sizeof(struct shmexport_t), (int)(IPC_CREAT|0666));
@@ -57,6 +58,17 @@ bool shm_acquire(struct gps_context_t *context)
 	context->shmexport = NULL;
 	return false;
     }
+    /* mark shmid to go away when no longer used
+     * Having it linger forever is bad, and when the size enlarges
+     * it can no longer be opened */
+    status = shmctl(shmid, IPC_RMID, NULL);
+    if (status == -1) {
+	gpsd_log(&context->errout, LOG_ERROR,
+		 "shmctl failed, errno = %d (%s)\n",
+		 errno, strerror(errno));
+	exit(1);
+    }
+
     gpsd_log(&context->errout, LOG_PROG,
 	     "shmat() for SHM export succeeded, segment %d\n", shmid);
     return true;
