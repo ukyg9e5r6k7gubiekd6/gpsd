@@ -1535,7 +1535,10 @@ else:
     python_install = [python_extensions_install,
                         python_modules_install,
                         python_progs_install,
-                        python_egg_info_install]
+                        python_egg_info_install,
+                        # We don't need the directory explicitly for the
+                        # install, but we do need it for the uninstall
+                        Dir(DESTDIR + python_module_dir)]
 
 pc_install = [env.Install(installdir('pkgconfig'), 'libgps.pc')]
 if qt_env:
