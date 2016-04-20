@@ -533,7 +533,7 @@ struct rtcm3_t {
 	    char receiver[RTCM3_MAX_DESCRIPTOR+1];	/* Receiver string */
 	    char firmware[RTCM3_MAX_DESCRIPTOR+1];	/* Firmware string */
 	} rtcm3_1033;
-	char data[1024];		/* Max RTCM3 msg length is 1023 bytes */
+	unsigned char data[1024];	/* Max RTCM3 msg length is 1023 bytes */
     } rtcmtypes;
 };
 
