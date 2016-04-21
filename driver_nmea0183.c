@@ -520,7 +520,7 @@ static int nmeaid_to_prn(char *talker, int satnum)
     // NMEA-ID (33..64) to SBAS PRN 120-151.
     if (satnum >= 33 && satnum <= 64)
 	satnum += 87;
-    if (satnum < 32) {
+    if (satnum != 0 && satnum < 32) {
 	/* map Beidou IDs */
 	if (talker[0] == 'B' && talker[1] == 'D')
 	    satnum += 200;
