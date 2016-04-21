@@ -514,6 +514,12 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	/* TODO: rtklib has C code for this one.  */
 	break;
 
+    case 1074:
+	/* RTCM 3.x
+	 * GPS Multi Signal Message
+	 */
+	break;
+
     case 1077:
         /* RTCM 3.x - 1077
 	 * Full GPS pseudo-ranges, carrier phases, Doppler and
@@ -549,6 +555,18 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 96
 	 */
 	/* TODO: rtklib has C code for this one.  */
+	break;
+
+    case 1114:
+	/* RTCM 3.x
+	 * QZSS Multi Signal Message
+	 */
+	break;
+
+    case 1124:
+	/* RTCM 3.x
+	 * BeiDou Multi Signal Message
+	 */
 	break;
 
     default:
