@@ -681,7 +681,6 @@ static gps_mask_t processGSV(int count, char *field[],
      * 083         Azimuth, degrees
      * 46          Signal-to-noise ratio in decibels
      * <repeat for up to 4 satellites per sentence>
-     * There my be up to three GSV sentences in a data packet
      *
      * Can occur with talker IDs:
      *   BD (Beidou),
@@ -764,7 +763,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	    session->nmea.seen_qzss = true;
     }
 
-    for (fldnum = 4; fldnum < count;) {
+    for (fldnum = 4; fldnum < count / 4 * 4;) {
 	struct satellite_t *sp;
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
 	    gpsd_log(&session->context->errout, LOG_ERROR,
