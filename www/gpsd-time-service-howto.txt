@@ -593,11 +593,11 @@ restrict -6 default kod nomodify notrap nopeer noquery
 restrict 127.0.0.1 mask 255.255.255.0
 restrict -6 ::1
 
-# GPS Serial data reference
+# GPS Serial data reference (NTP0)
 server 127.127.28.0
 fudge 127.127.28.0 time1 0.9999 refid GPS
 
-# GPS PPS reference
+# GPS PPS reference (NTP1)
 server 127.127.28.1 prefer
 fudge 127.127.28.1 refid PPS
 -----------------------------------------------------------------------------
@@ -643,11 +643,11 @@ restrict -6 default kod nomodify notrap nopeer noquery
 restrict 127.0.0.1 mask 255.255.255.0
 restrict -6 ::1
 
-# GPS Serial data reference
+# GPS Serial data reference (NTP0)
 server 127.127.28.0 minpoll 4 maxpoll 4
 fudge 127.127.28.0 time1 0.9999 refid GPS
 
-# GPS PPS reference
+# GPS PPS reference (NTP1)
 server 127.127.28.1 minpoll 4 maxpoll 4 prefer
 fudge 127.127.28.1 refid PPS
 -----------------------------------------------------------------------------
@@ -657,14 +657,16 @@ Alternative configurations exist, but it is recommended that you upgrade
 ntpd, if feasible.
 
 The magic pseudo-IP address 127.127.28.0 identifies unit 0 of the ntpd
-shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0 is used
-for in-band message timestamps and unit 1 for the (more accurate,
-when available) time derived from combining in-band message timestamps
-with the out-of-band PPS synchronization pulse.  Splitting these
-notifications allows ntpd to use its normal heuristics to weight them.
+shared-memory driver (NTP0); 127.127.28.1 identifies unit 1 (NTP1).
+Unit 0 is used for in-band message timestamps and unit 1 for the (more
+accurate, when available) time derived from combining in-band message
+timestamps with the out-of-band PPS synchronization pulse.  Splitting
+these notifications allows ntpd to use its normal heuristics to weight
+them.
 
-(Different units - 2 and 3, respectively - must be used when gpsd is not
-started as root.)
+Different units - 2 (NTP2) and 3 (NTP3), respectively - must be used
+when gpsd is not started as root.  Some GPS HATs put PPS time on a GPIO
+pin and will also use unit 2 (NTP2) for the PPS time correction.
 
 With this configuration, ntpd will read the timestamp posted by gpsd
 every 64 seconds (16 if non-root) and send it to unit 0.
@@ -862,8 +864,23 @@ $ su - (or sudo -s )
 -----------------------------------------------------------------------------
 
 After you have verified with cgps that your GPS receiver has a good 3D
-lock you can check how chrony is doing by running 'chronyc sources'.
-Your output will look like this:
+lock you can check that gpsd is outputing good time by running ntpshmmon.
+
+-----------------------------------------------------------------------------
+# ntpshmmon 
+ntpshmmon version 1
+#      Name   Seen@                Clock                Real               L Prec
+sample NTP0 1461537438.593729271 1461537438.593633306 1461537438.703999996 0 -1
+sample NTP1 1461537439.000421494 1461537439.000007374 1461537439.000000000 0 -20
+sample NTP0 1461537439.093844900 1461537438.593633306 1461537438.703999996 0 -1
+sample NTP0 1461537439.621309382 1461537439.620958240 1461537439.703999996 0 -1
+sample NTP1 1461537440.000615395 1461537439.999994105 1461537440.000000000 0 -20
+sample NTP0 1461537440.122079148 1461537439.620958240 1461537439.703999996 0 -1
+^C
+-----------------------------------------------------------------------------
+
+Once ntpshmmon shows good time data you can see how chrony is doing by
+running 'chronyc sources'.  Your output will look like this:
 
 -----------------------------------------------------------------------------
 # chronyc sources
@@ -1098,11 +1115,11 @@ This prints the average offset.
 ==== Loopstats-based procedure ====
 
 Recall that magic pseudo-IP address 127.127.28.0 identifies unit 0 of
-the ntpd shared-memory driver; 127.127.28.1 identifies unit 1.  Unit 0
-is used for in-band message timestamps (IMT) and unit 1 for the (more
-accurate, when available) time derived from combining IMT with the
-out-of-band PPS synchronization pulse.  Splitting these notifications
-allows ntpd to use its normal heuristics to weight them.
+the ntpd shared-memory driver (NTP0); 127.127.28.1 identifies unit
+1(NTP1).  Unit 0 is used for in-band message timestamps (IMT) and unit
+1 for the (more accurate, when available) time derived from combining
+IMT with the out-of-band PPS synchronization pulse.  Splitting these
+notifications allows ntpd to use its normal heuristics to weight them.
 
 We assume that the 1PPS signal, being just one bit long, and directly
 triggering an interrupt, is always on time (sic).  Correcting for latency
@@ -1355,15 +1372,15 @@ If you are using ntpd, then add the last three lines below to your
 master ntp.conf file to configure the SHM.
 
 -----------------------------------------------------------------------------
-# GPS Serial data reference
+# GPS Serial data reference (NTP0)
 server 127.127.28.0
 fudge 127.127.28.0 time1 0.9999 refid GPS
 
-# GPS PPS reference
+# GPS PPS reference (NTP1)
 server 127.127.28.1 prefer
 fudge 127.127.28.1 refid PPS
 
-# local PTP reference
+# local PTP reference (NTP2)
 server 127.127.28.2
 fudge 127.127.28.2 refid PTP
 -----------------------------------------------------------------------------
@@ -1411,7 +1428,7 @@ If you are using ntpd, then add the last three lines below to your
 master ntp.conf file to configure your one and only SHM.
 
 -----------------------------------------------------------------------------
-# local PTP reference
+# local PTP reference (NTP0)
 server 127.127.28.0
 fudge 127.127.28.0 refid PTP
 -----------------------------------------------------------------------------
