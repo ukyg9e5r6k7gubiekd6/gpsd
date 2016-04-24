@@ -497,7 +497,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
 	| STATUS_SET | MODE_SET | USED_IS | HERR_SET | VERR_SET
 	| TIMERR_SET | DOP_SET
-	| TIME_SET | PPSTIME_IS;
+	| TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
 	     "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "

@@ -1511,11 +1511,11 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #ifdef NTP_ENABLE
     /*
      * Time is eligible for shipping to NTPD if the driver has
-     * asserted PPSTIME_IS at any point in the current cycle.
+     * asserted NTPTIME_IS at any point in the current cycle.
      */
     if ((changed & CLEAR_IS)!=0)
 	device->ship_to_ntpd = false;
-    if ((changed & PPSTIME_IS)!=0)
+    if ((changed & NTPTIME_IS)!=0)
 	device->ship_to_ntpd = true;
     /*
      * Only update the NTP time if we've seen the leap-seconds data.

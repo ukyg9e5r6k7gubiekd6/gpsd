@@ -101,7 +101,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     tm.tm_year = (int)getleu16(buf, 16) - 1900;
     tm.tm_isdst = 0;
     session->newdata.time = (timestamp_t)mkgmtime(&tm) + (d - tm.tm_sec);
-    mask |= TIME_SET | PPSTIME_IS;
+    mask |= TIME_SET | NTPTIME_IS;
 
     /* extract the local tangential plane (ENU) solution */
     session->newdata.latitude = getled64((char *)buf, 18) * RAD_2_DEG;
@@ -268,7 +268,7 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 	tm.tm_isdst = 0;
 	session->newdata.time = (timestamp_t)mkgmtime(&tm);
 	session->context->leap_seconds = (int)getsb(buf, 20);
-	mask = TIME_SET | PPSTIME_IS;
+	mask = TIME_SET | NTPTIME_IS;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "TIMING: time=%.2f mask={TIME}\n",

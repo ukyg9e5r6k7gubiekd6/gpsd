@@ -1851,7 +1851,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 * information for a sharper test, so we'll leave it up to the
 	 * PPS code to do its own sanity filtering.
 	 */
-	retval |= PPSTIME_IS;
+	retval |= NTPTIME_IS;
     }
 
     /*

@@ -499,7 +499,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	     * time service.
 	     */
 	    if (session->fixcnt > 3)
-		mask |= PPSTIME_IS;
+		mask |= NTPTIME_IS;
 	}
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "Garmin: PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "

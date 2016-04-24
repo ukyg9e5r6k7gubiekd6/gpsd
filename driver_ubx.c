@@ -170,7 +170,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
 	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);
-	mask |= TIME_SET | PPSTIME_IS;
+	mask |= TIME_SET | NTPTIME_IS;
     }
 #undef DATE_VALID
 
@@ -309,7 +309,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "TIMEGPS: time=%.2f leap=%d, mask={TIME}\n",
 	     session->newdata.time, session->context->leap_seconds);
-    return TIME_SET | PPSTIME_IS;
+    return TIME_SET | NTPTIME_IS;
 }
 
 /**

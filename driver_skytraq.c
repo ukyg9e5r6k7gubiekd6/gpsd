@@ -543,3 +543,4 @@ const struct gps_type_t driver_skytraq =
 };
 /* *INDENT-ON* */
 #endif /* defined( SKYTRAQ_ENABLE) && defined(BINARY_ENABLE) */
+

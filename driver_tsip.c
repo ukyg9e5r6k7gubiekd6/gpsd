@@ -254,7 +254,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->context->valid |= LEAP_SECOND_VALID;
 	    session->newdata.time =
 		gpsd_gpstime_resolve(session, (unsigned short)s1, (double)f1);
-	    mask |= TIME_SET | PPSTIME_IS;
+	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "GPS Time %f %d %f\n", f1, s1, f2);
@@ -359,7 +359,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		gpsd_gpstime_resolve(session,
 				  (unsigned short)session->context->gps_week,
 				  (double)f2);
-	    mask |= TIME_SET | PPSTIME_IS;
+	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
@@ -621,7 +621,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		gpsd_gpstime_resolve(session,
 				  (unsigned short)session->context->gps_week,
 				  (double)f1);
-	    mask |= TIME_SET | PPSTIME_IS;
+	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "GPS DP LLA %f %f %f %f\n",
@@ -713,7 +713,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 						      (unsigned short)s4,
 						      (double)ul1 *1e-3);
 	    mask |=
-		TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
+		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
 		TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS;
 	    gpsd_log(&session->context->errout, LOG_DATA,
@@ -783,7 +783,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if ((session->newdata.track = atan2(d1, d2) * RAD_2_DEG) < 0)
 		session->newdata.track += 360.0;
 	    mask |=
-		TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
+		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
 		TRACK_SET |CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS;
 	    gpsd_log(&session->context->errout, LOG_DATA,
@@ -811,7 +811,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->context->valid |= LEAP_SECOND_VALID;
 		session->newdata.time =
 		    gpsd_gpstime_resolve(session, (unsigned short)s1, (double)ul1);
-		mask |= TIME_SET | PPSTIME_IS | CLEAR_IS;
+		mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;
 		gpsd_log(&session->context->errout, LOG_DATA,
 			 "SP-TTS 0xab time=%.2f mask={TIME}\n",
 			 session->newdata.time);

@@ -156,7 +156,7 @@ _proto__msg_utctime(struct gps_device_t *session, unsigned char *buf, size_t dat
     session->context->leap_seconds = GET_GPS_LEAPSECONDS();
     session->newdata.time = gpsd_gpstime_resolve(session, gps_week, tow / 1000.0);
 
-    return TIME_SET | PPSTIME_IS | ONLINE_SET;
+    return TIME_SET | NTPTIME_IS | ONLINE_SET;
 }
 
 /**

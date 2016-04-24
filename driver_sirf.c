@@ -749,7 +749,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	TIME_SET | LATLON_SET | ALTITUDE_SET | TRACK_SET |
 	SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
     if ( 3 <= session->gpsdata.satellites_visible ) {
-	mask |= PPSTIME_IS;
+	mask |= NTPTIME_IS;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d\n",
@@ -896,7 +896,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 		     session->driver.sirf.time_seen);
 	}
 	if ( 3 <= session->gpsdata.satellites_visible ) {
-	    mask |= PPSTIME_IS;
+	    mask |= NTPTIME_IS;
 	}
 
 #endif /* TIMEHINT_ENABLE */
@@ -995,7 +995,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	double subseconds;
 	mask |= TIME_SET;
 	if ( 3 <= session->gpsdata.satellites_visible ) {
-	    mask |= PPSTIME_IS;
+	    mask |= NTPTIME_IS;
 	}
 	unpacked_date.tm_year = (int)getbeu16(buf, 26) - 1900;
 	unpacked_date.tm_mon = (int)getub(buf, 28) - 1;
@@ -1074,7 +1074,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 #endif /* TIMEHINT_ENABLE */
 	mask |= TIME_SET;
 	if ( 3 <= session->gpsdata.satellites_visible ) {
-	    mask |= PPSTIME_IS;
+	    mask |= NTPTIME_IS;
 	}
     }
     return mask;

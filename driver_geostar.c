@@ -203,7 +203,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 		mask |= STATUS_SET;
 	    }
 	}
-	mask |= TIME_SET | PPSTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | DOP_SET | USED_IS | REPORT_IS;
+	mask |= TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | DOP_SET | USED_IS | REPORT_IS;
 
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "Geographic coordinates %f %g %g %g %g %g\n",

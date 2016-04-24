@@ -356,7 +356,7 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
     struct gps_device_t *session = (struct gps_device_t *)pps_thread->context;
 
     /* PPS only source never get any serial info
-     * so no PPSTIME_IS or fixcnt */
+     * so no NTPTIME_IS or fixcnt */
     if ( source_pps != session->sourcetype) {
         /* FIXME! these two validations need to move back into ppsthread.c */
 
