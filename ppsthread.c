@@ -653,9 +653,10 @@ static void *gpsd_ppsmonitor(void *arg)
      * TIOMCIWAIT, which is linux specifix
      * RFC2783, a.k.a kernel PPS (KPPS)
      * or if KPPS is deficient a combination of the two */
-    if ( isatty(thread_context->devicefd) == 0 ) {
-	thread_context->log_hook(thread_context, THREAD_INF,
-            "KPPS:%s gps_fd:%d not a tty\n",
+    if ( 0 > thread_context->devicefd
+      || 0 == isatty(thread_context->devicefd) ) {
+	thread_context->log_hook(thread_context, THREAD_PROG,
+            "KPPS:%s gps_fd:%d not a tty, can not use TIOMCIWAIT\n",
             thread_context->devicename,
             thread_context->devicefd);
         /* why do we care the device is a tty? so as not to ioctl(TIO..)
