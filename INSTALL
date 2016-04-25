@@ -355,7 +355,40 @@ Reboot so those changes take effect.
 Run gpsd like this:
 
 --------------------------------------------------------------
-# gpsd -D 5 -N -n /dev/ttyAMA0
+~ # gpsd -D 5 -N -n /dev/ttyAMA0
+--------------------------------------------------------------
+
+For the RasPi only, the /dev/pps0 will be auto detected and used
+for PPS if available.  You can verify the autodection worked by
+running ntpshmmon:
+
+--------------------------------------------------------------
+~ # ntpshmmon
+#      Name   Seen@                Clock                Real               L Prec
+sample NTP0 1461619703.641899335 1461619703.445224418 1461619703.000000000 0  -1
+sample NTP2 1461619703.642203397 1461619702.999262204 1461619703.000000000 0 -20
+sample NTP0 1461619704.142097363 1461619703.445224418 1461619703.000000000 0  -1
+sample NTP2 1461619704.142204134 1461619703.999258157 1461619704.000000000 0 -20
+--------------------------------------------------------------
+
+If you do not see NTP2 then you misconfigured the pps_gpio driver.
+
+The serial time is provided to ntpd on NTP0, the PPS time is on NTP2, not
+on NTP1 like described earlier.  So your ntp.conf will need to be adjusted
+from:
+
+--------------------------------------------------------------
+# GPS PPS reference (NTP1)
+server 127.127.28.1 prefer
+fudge 127.127.28.1 refid PPS
+--------------------------------------------------------------
+
+To:
+
+--------------------------------------------------------------
+# GPS PPS reference (NTP2)
+server 127.127.28.2 prefer
+fudge 127.127.28.2 refid PPS
 --------------------------------------------------------------
 
 Now proceed as for any other operating system to use gpsd.
