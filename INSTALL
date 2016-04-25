@@ -331,6 +331,8 @@ install, as noted in the file *build.txt* .
 
 === Other Raspberry Pi tips ===
 
+Note: this does not apply to the RasPi3.
+
 Any USB connected GPS that is known to work with gpsd will work fine on
 the RasPi.  No special instructions apply.
 
@@ -339,7 +341,7 @@ this GPS you also get a good 1PPS signal.  This works as any other GPS
 with gpsd, but there are two things to note.  The GPS takes over the
 serial console: /dev/ttyAMA0.  The PPS signal will be on GPIO Pin #4.
 
-Only two specific changes need to be made to make the HAT work.  First
+Only three specific changes need to be made to make the HAT work.  First
 in the file /boot/cmdline.txt, remove this part "console=ttyAMA0,115200
 kgdboc=ttyAMA0,115200)".  That frees the serial port from console use so
 the GPS can use it.
@@ -348,7 +350,20 @@ Second you need to tell the boot process to load the pps_gpio module
 and attach /dev/pps0 to GPIO pin 4.  Do that by adding this line
 to the bottom of /boot/config.txt: dtoverlay=pps-gpio,gpiopin=4
 
-Reboot and proceed as for any other operating system to use gpsd.
+Reboot so those changes take effect.
+
+Your PPS is not associated with the serial input device.  You need to
+tell gpsd to look for and use /dev/pps0.  Add the /dev/pps0 to your
+command line, like this:
+
+--------------------------------------------------------------
+# gpsd -D 5 -N -n /dev/ttyAMA0 /dev/ttypps0
+--------------------------------------------------------------
+
+You will get error messages about no PPS on /dev/ttyAMA0.  You can
+ignore those, you just care about PPS on /dev/pps0.
+
+Now proceed as for any other operating system to use gpsd.
 
 Warning, the pps_gpio driver in all linux kernels up to the current
 3.19 only reports one edge.  Be sure to validate that your PPS signal
