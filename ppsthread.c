@@ -269,8 +269,8 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 	(void)strerror_r(errno, errbuf, sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s running as %d/%d, cannot open %s: %s\n",
-		    getuid(), geteuid(),
 		    pps_thread->devicename,
+		    getuid(), geteuid(),
                     path, errbuf);
     	return -1;
     }
