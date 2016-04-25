@@ -268,7 +268,8 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 	char errbuf[BUFSIZ] = "unknown error";
 	(void)strerror_r(errno, errbuf, sizeof(errbuf));
 	pps_thread->log_hook(pps_thread, THREAD_INF,
-		    "KPPS:%s cannot open %s: %s\n",
+		    "KPPS:%s running as %d/, cannot open %s: %s\n",
+		    getuid(), geteuid(),
 		    pps_thread->devicename,
                     path, errbuf);
     	return -1;
