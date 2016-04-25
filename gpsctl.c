@@ -366,7 +366,7 @@ int main(int argc, char **argv)
 	    timeout = HIGH_LEVEL_TIMEOUT;
 
 	/* what devices have we available? */
-	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\n")) {
+	if (!gps_query(&gpsdata, DEVICELIST_SET, (int)timeout, "?DEVICES;\r\n")) {
 	    gpsd_log(&context.errout, LOG_ERROR, "no DEVICES response received.\n");
 	    (void)gps_close(&gpsdata);
 	    exit(EXIT_FAILURE);
@@ -550,7 +550,7 @@ int main(int argc, char **argv)
 	if (rate != NULL) {
 	    (void)gps_query(&gpsdata,
 			    DEVICE_SET, (int)timeout,
-			    "?DEVICE={\"path\":\"%s\",\"cycle\":%s}\n",
+			    "?DEVICE={\"path\":\"%s\",\"cycle\":%s}\r\n",
 			    device, rate);
 	}
 #endif /* RECONFIGURE_ENABLE */
