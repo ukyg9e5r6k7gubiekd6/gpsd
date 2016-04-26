@@ -778,6 +778,14 @@ else:
         announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 API is available)")
         env["pps"] = False
 
+    # This works for the Raspberry Pi.  Someday, configure more interlligently
+    # for workalikes like the ODROID C2.
+    confdefs.append('''\
+/* Magic device which, if present, means to grab a static /dev/pps0 for KPPS */
+#define MAGIC_HAT_GPS	"/dev/ttyAMA0"
+''')
+
+
     confdefs.append('''\
 /* Some libcs do not have strlcat/strlcpy. Local copies are provided */
 #ifndef HAVE_STRLCAT
