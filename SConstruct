@@ -821,8 +821,10 @@ typedef int clockid_t;
  * 10.4 uses _TIMESPEC
  * 10.3 and earlier use _TIMESPEC_DECLARED
  */
-#if !defined(_STRUCT_TIMESPEC) \
-    && !defined(_TIMESPEC) && !defined(_TIMESPEC_DECLARED)
+#if !defined(_STRUCT_TIMESPEC) && \
+    !defined(_TIMESPEC) && \
+    !defined(_TIMESPEC_DECLARED) && \
+    !defined(__timespec_defined)
 #define _STRUCT_TIMESPEC
 struct timespec {
     time_t  tv_sec;
