@@ -280,7 +280,7 @@ for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "LINKFL
             env.Replace(**{j: os.getenv(i)})
 for flag in ["LDFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
     if i in os.environ:
-        env.MergeFlags({flag: [os.getenv(flag)]})
+        env.MergeFlags({flag: Split(os.getenv(flag))})
 
 
 # Keep scan-build options in the environment
