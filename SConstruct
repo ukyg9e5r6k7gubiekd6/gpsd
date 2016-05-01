@@ -401,6 +401,51 @@ values can be listed with 'scons -h'.
 
 ## Configuration
 
+# CheckFunc from upstream scons fails always with -Wstrict-prototypes
+
+def CheckFuncFor_Wstrict_prototypes(context, function_name, header = None, language = None):
+    if context.headerfilename:
+        includetext = '#include "%s"' % context.headerfilename
+    else:
+        includetext = ''
+    if not header:
+        header = """
+#ifdef __cplusplus
+extern "C"
+#endif
+char %s(void);""" % function_name
+
+    if not language or language in ["C", "c"]:
+        lang, suffix, msg = ("C", ".c", None)
+    elif language in ["c++", "C++", "cpp", "CXX", "cxx"]:
+        lang, suffix, msg = ("C++", ".cpp", None)
+
+    if msg:
+        context.Display("Cannot check for %s(): %s\n" % (function_name, msg))
+        return msg
+
+    text = """
+%(include)s
+#include <assert.h>
+%(hdr)s
+
+int main(void) {
+#if defined (__stub_%(name)s) || defined (__stub___%(name)s)
+  fail fail fail
+#else
+  %(name)s();
+#endif
+
+  return 0;
+}
+""" % { 'name': function_name,
+        'include': includetext,
+        'hdr': header }
+
+    context.Display("Checking for %s function %s()... " % (lang, function_name))
+    ret = context.TryBuild(context.env.Program, text, suffix)
+    context.Result(ret)
+
 
 def CheckPKG(context, name):
     context.Message('Checking pkg-config for %s... ' % name)
@@ -529,7 +574,8 @@ def GetLoadPath(context):
 cleaning = env.GetOption('clean')
 helping = env.GetOption('help')
 
-config = Configure(env, custom_tests={'CheckPKG': CheckPKG,
+config = Configure(env, custom_tests={'CheckFuncFor_Wstrict_prototypes': CheckFuncFor_Wstrict_prototypes,
+				      'CheckPKG': CheckPKG,
                                       'CheckXsltproc': CheckXsltproc,
                                       'CheckCompilerOption': CheckCompilerOption,
                                       'CheckCompilerDefines': CheckCompilerDefines,
@@ -732,7 +778,7 @@ else:
     # check function after libraries, because some function require libraries
     # for example clock_gettime() require librt on Linux glibc < 2.17
     for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r" ):
-        if config.CheckFunc(f):
+        if config.CheckFuncFor_Wstrict_prototypes(f):
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
         else:
             confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
