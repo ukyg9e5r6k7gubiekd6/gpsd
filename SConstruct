@@ -445,6 +445,7 @@ int main(void) {
     context.Display("Checking for %s function %s()... " % (lang, function_name))
     ret = context.TryBuild(context.env.Program, text, suffix)
     context.Result(ret)
+    return ret
 
 
 def CheckPKG(context, name):
