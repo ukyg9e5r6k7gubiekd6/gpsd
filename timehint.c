@@ -443,11 +443,12 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	    init_hook(session);
 	    session->pps_thread.report_hook = report_hook;
 	    /*
-	     * The Raspberry Pi kludge. If we're using /dev/ttyAMA0, 
-	     * and there is a static /dev/pps0, and we have access because
-	     * we're root, assume we want to use KPPS. 
+	     * The HAT kludge. If we're using the HAT GPS on a
+	     * Raspberry Pi or a workalike like the ODROIDC2, and
+	     * there is a static /dev/pps0, and we have access because
+	     * we're root, assume we want to use KPPS.
 	     */
-	    if (strcmp(session->pps_thread.devicename, "/dev/ttyAMA0") == 0
+	    if (strcmp(session->pps_thread.devicename, MAGIC_HAT_GPS) == 0
 	    		&& access("/dev/pps0", R_OK | W_OK) == 0)
 		session->pps_thread.devicename = "/dev/pps0";
 	    pps_thread_activate(&session->pps_thread);
