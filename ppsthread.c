@@ -1170,13 +1170,16 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
 	pps_thread->log_hook(pps_thread, THREAD_INF,
 		    "KPPS:%s kernel PPS will be used\n",
 		    pps_thread->devicename);
-    } else
-#endif
-    {
+    } else {
 	pps_thread->log_hook(pps_thread, THREAD_WARN,
 		    "KPPS:%s kernel PPS unavailable, PPS accuracy will suffer\n",
 		    pps_thread->devicename);
     }
+#else 
+    pps_thread->log_hook(pps_thread, THREAD_WARN,
+		"KPPS:%s no HAVE_SYS_TIMEPPS_H, PPS accuracy will suffer\n",
+		pps_thread->devicename);
+#endif
 
     memset( &pt, 0, sizeof(pt));
     retval = pthread_create(&pt, NULL, gpsd_ppsmonitor, (void *)&inner_context);
