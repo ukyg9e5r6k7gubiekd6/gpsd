@@ -1133,7 +1133,7 @@ static void *gpsd_ppsmonitor(void *arg)
 #if defined(HAVE_SYS_TIMEPPS_H)
     if (inner_context.kernelpps_handle > 0) {
 	thread_context->log_hook(thread_context, THREAD_PROG,
-            "PPS:%s descriptor cleaned up\n",
+            "KPPS:%s descriptor cleaned up\n",
 	    thread_context->devicename);
 	(void)time_pps_destroy(inner_context.kernelpps_handle);
     }
