@@ -2,7 +2,7 @@
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.6, May 2016
+v2.7, May 2016
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -307,7 +307,7 @@ assumes 8 bit bytes, so the above locks the daeon to 9600 8N1. Besides
 the daemon, this also builds gpsmon and ntpshmmon.
 
 When gpsd is built in this way, the -n (nowait) option is forced;
-gpsd opensd its command-line devices immediately on startup.
+gpsd opens its command-line devices immediately on startup.
 
 Otherwise, make sure the build is with pps=yes and ntpshm=yes (the
 default).  The command "gpsd -L" should indicate that time-service
