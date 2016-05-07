@@ -173,6 +173,7 @@ boolopts = (
     ("manbuild",      True,  "build help in man and HTML formats"),
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
     ("minimal",       False, "turn off every option not set on the command line"),
+    ("timeservice",   False, "time-service configuration"),
     ("xgps",          True,  "include xgps and xgpsspeed."),
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
@@ -251,6 +252,13 @@ if env['minimal']:
     for (name, default, help) in boolopts:
         # Ensure gpsd and gpsdclients are always enabled unless explicitly turned off.
         if default is True and not ARGUMENTS.get(name) and not (name is "gpsd" or name is "gpsdclients"):
+            env[name] = False
+
+# Time-service build = stripped-down and some disgnostic tools
+if env['timeservice']:
+    timerelated = ("gpsd", "ncurses", "ntp", "ntpshm", "pps", "oscillator")
+    for (name, default, help) in boolopts:
+        if default is True and not ARGUMENTS.get(name) and not name in timerelated:
             env[name] = False
 
 # NTPSHM requires NTP
@@ -1229,9 +1237,13 @@ binaries = []
 if env["gpsd"]:
     binaries += [gpsd]
 if env["gpsdclients"]:
-    binaries += [gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps, ntpshmmon]
+    binaries += [gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps]
+if env["timeservice"] or env["gpsdclients"]:
+    binaries += [ntpshmmon]
 if env["ncurses"]:
-    binaries += [cgps, gpsmon]
+    binaries += [cgps]
+if env["ncurses"] and (env["timeservice"] or env["gpsdclients"]):
+    binaries += [gpsmon]
 
 # Test programs - always link locally and statically
 test_bits = env.Program('test_bits', ['test_bits.c'],

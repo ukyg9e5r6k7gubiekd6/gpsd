@@ -281,17 +281,31 @@ have serious problems.
 
 == Software Prerequisites ==
 
-gpsd includes support for interpreting 1PPS pulses that is mostly
-autoconfiguring and requires no special setup.  If you built GPSD from
-sources, make sure the build is with pps=yes and ntpshm=yes (the
-default).  The command "gpsd -L" should indicate that
-time-service features and PPS are enabled.
-
 If your kernel provides the RFC 2783 KPPS (kernel PPS) API, gpsd will
 use that for extra accuracy. Many Linux distributions have a package
 called "pps-tools" that will install KPPS support and the timepps.h
 header file.  We recommend you do that.  If your kernel is built in
 the normal modular way, this package installation will suffice.
+
+=== Building gpsd ==
+
+A full gpsd build includes support for interpreting 1PPS pulses that is mostly
+autoconfiguring and requires no special setup.
+
+You can build a version stripped to the mimimum configuration required
+for time service like this:
+
+-----------------------------------------------------------------------------
+scons timeservice=yes nmea0183=yes
+-----------------------------------------------------------------------------
+
+You may substitute a different GPS (e.g. "ublox" or "sirf")
+
+Otherwise, make sure the build is with pps=yes and ntpshm=yes (the
+default).  The command "gpsd -L" should indicate that time-service
+features and PPS are enabled.
+
+=== Kernel support ===
 
 If you are scratch-building a Linux kernel, the configuration
 must include either these two lines, or the same with "y" replaced
@@ -328,6 +342,8 @@ USB).
 Other OSes have different ways to enable KPPS in their kernels.
 When we learn what those are, we'll document them or point
 at references.
+
+=== Time service daemon ===
 
 You will need to have either ntpd or chrony installed. If you are
 running a Unix variant with a package system, the packages will
