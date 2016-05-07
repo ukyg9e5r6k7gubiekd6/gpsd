@@ -289,17 +289,25 @@ the normal modular way, this package installation will suffice.
 
 === Building gpsd ==
 
-A full gpsd build includes support for interpreting 1PPS pulses that is mostly
+A normal gpsd build includes support for interpreting 1PPS pulses that is mostly
 autoconfiguring and requires no special setup.
 
 You can build a version stripped to the mimimum configuration required
-for time service like this:
+for time service.  This reduces the size of the binary and may
+
+like this:
 
 -----------------------------------------------------------------------------
-scons timeservice=yes nmea0183=yes
+scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
 -----------------------------------------------------------------------------
 
-You may substitute a different GPS (e.g. "ublox" or "sirf")
+You may substitute a different GPS (e.g. "ublox" or "sirf"), You can
+also fix the serial parameters to avoid autobauding lag; the code
+assumes 8 bit bytes, so the above locks the daeon to 9600 8N1. Besides
+the daemon, this also builds gpsmon and ntpshmmon.
+
+When gpsd is built in this way, the -n (nowait) option is forced;
+gpsd opensd its command-line devices immediately on startup.
 
 Otherwise, make sure the build is with pps=yes and ntpshm=yes (the
 default).  The command "gpsd -L" should indicate that time-service
