@@ -293,9 +293,9 @@ A normal gpsd build includes support for interpreting 1PPS pulses that is mostly
 autoconfiguring and requires no special setup.
 
 You can build a version stripped to the mimimum configuration required
-for time service.  This reduces the size of the binary and may
-
-like this:
+for time service.  This reduces the size of the binary and may be
+helpful on embedded systems or for SBCs like the Raspberry Pi, Odroid,
+or BeagleBone.  Do it like this:
 
 -----------------------------------------------------------------------------
 scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
@@ -355,7 +355,7 @@ at references.
 
 You will need to have either ntpd or chrony installed. If you are
 running a Unix variant with a package system, the packages will
-probably be named 'ntpd' and either 'chrony' or 'chronyd'.
+probably be named 'ntp' (or 'ntpsec') and either 'chrony' or 'chronyd'.
 
 Of these two, ntpd is the older and more popular choice - thus, the
 one with the best-established peer community if you need help in
@@ -501,7 +501,8 @@ sources to check:
 == Running GPSD ==
 
 If you're going to use gpsd for time service, you must run in -n mode
-so the clock will be updated even when no clients are active.
+so the clock will be updated even when no clients are active.  This
+is forced if you built GPSD with timeservice=yes as an option.
 
 Note that gpsd assumes that after each fix the GPS receiver will
 assert 1PPS first and ship sentences reporting time of fix
@@ -552,7 +553,9 @@ OS distribution has done "secure" things with the permissions.
 
 Most Unix systems get their time service through ntpd, a very old and
 stable open-source software suite which is the reference
-implementation of NTP.  The project home page is <<NTP.ORG>>.
+implementation of NTP.  The project home page is <<NTP.ORG>>. We
+recommend using NTPsec, a recent fork that is improved and
+security-hardened <<NTPSEC.ORG>>.
 
 When gpsd receives a sentence with a timestamp, it packages the
 received timestamp with current local time and sends it to a
@@ -585,7 +588,7 @@ While gpsd may be runnable as non-root, you will get significantly
 better accuracy of time reporting in root mode; the difference, while
 almost certainly insignificant for feeding Stratum 1 time to clients
 over the Internet, may matter for PTP service over a LAN.  Typically
-Only root can access kernel PPS, whereas in non-root mode you're limited to
+only root can access kernel PPS, whereas in non-root mode you're limited to
 plain PPS (if that feature is available).  As noted in the previous
 section on 1PPS quality issues, this difference has performance
 implications.
@@ -1665,6 +1668,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[NTP.ORG]]] http://www.ntp.org/[Home of the Network Time Protocol project]
 
+- [[[NTPSEC.ORG]]] http://www.ntpsec.org/[Wecome to NTPsec]
+
 - [[[USE-POOL]]] http://www.pool.ntp.org/en/use.html[How do I use pool.ntp.org?]
 
 - [[[CVE-2009-3563]]] http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2009-3563
@@ -1731,5 +1736,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 2.5 Apr 2016::
     Note the existence of the GR701-W.
 
-2.6 May 2015::
+2.6 May 2016::
     New section on GPS time.  Note the existence of the GR801-W.
+
+2.7 May 2016::
+    Describe the special timeserver build of GPSD. Recommend NTPsec.
