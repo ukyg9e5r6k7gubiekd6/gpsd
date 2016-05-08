@@ -1233,17 +1233,20 @@ ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'],
                         LIBS=['gps_static'], LIBPATH='.',
                         parse_flags=gpsflags)
 
-binaries = []
+bin_binaries = []
+sbin_binaries = []
 if env["gpsd"]:
-    binaries += [gpsd]
+    sbin_binaries += [gpsd]
 if env["gpsdclients"]:
-    binaries += [gpsdecode, gpsctl, gpsdctl, gpspipe, gps2udp, gpxlogger, lcdgps]
+    sbin_binaries += [gpsdctl]
+    bin_binaries += [gpsdecode, gpsctl, gpspipe, gps2udp, gpxlogger, lcdgps]
 if env["timeservice"] or env["gpsdclients"]:
-    binaries += [ntpshmmon]
+    bin_binaries += [ntpshmmon]
 if env["ncurses"]:
-    binaries += [cgps]
-if env["ncurses"] and (env["timeservice"] or env["gpsdclients"]):
-    binaries += [gpsmon]
+    if env["gpsdclients"]:
+        bin_binaries += [cgps]
+    if env["timeservice"] or env["gpsdclients"]:
+        bin_binaries += [gpsmon]
 
 # Test programs - always link locally and statically
 test_bits = env.Program('test_bits', ['test_bits.c'],
@@ -1549,7 +1552,7 @@ if manbuilder:
 ## Where it all comes together
 
 build = env.Alias('build',
-                  [libraries, binaries, python_targets,
+                  [libraries, sbin_binaries, bin_binaries, python_targets,
                    "gpsd.php", manpage_targets,
                    "libgps.pc", "gpsd.rules"])
 
@@ -1570,13 +1573,10 @@ if env['python']:
 headerinstall = [env.Install(installdir('includedir'), x) for x in ("libgpsmm.h", "gps.h")]
 
 binaryinstall = []
-binaryinstall.append(env.Install(installdir('sbindir'), [gpsd, gpsdctl]))
-binaryinstall.append(env.Install(installdir('bindir'), [gpsdecode, gpsctl, gpspipe, gps2udp,
-                                                         gpxlogger, lcdgps, ntpshmmon]))
-if env["ncurses"]:
-    binaryinstall.append(env.Install(installdir('bindir'), [cgps, gpsmon]))
+binaryinstall.append(env.Install(installdir('sbindir'), sbin_binaries))
+binaryinstall.append(env.Install(installdir('bindir'), bin_binaries))
 binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib, libgps_version))
-# Work arount a minor bug in InstallSharedLib() link handling
+# Work around a minor bug in InstallSharedLib() link handling
 env.AddPreAction(binaryinstall, 'rm -f %s/libgps.*' % (installdir('libdir'), ))
 
 if qt_env:
