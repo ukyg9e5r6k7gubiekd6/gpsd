@@ -295,7 +295,11 @@ autoconfiguring and requires no special setup.
 You can build a version stripped to the mimimum configuration required
 for time service.  This reduces the size of the binary and may be
 helpful on embedded systems or for SBCs like the Raspberry Pi, Odroid,
-or BeagleBone.  Do it like this:
+or BeagleBone.  Also, when gpsd is built in this way, the -n (nowait)
+option is forced; gpsd opens its command-line devices immediately on
+startup.
+
+Do it like this:
 
 -----------------------------------------------------------------------------
 scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
@@ -303,11 +307,8 @@ scons timeservice=yes nmea0183=yes fixed_port_speed=9600 fixed_stop_bits=1
 
 You may substitute a different GPS (e.g. "ublox" or "sirf"), You can
 also fix the serial parameters to avoid autobauding lag; the code
-assumes 8 bit bytes, so the above locks the daeon to 9600 8N1. Besides
+assumes 8 bit bytes, so the above locks the daemon to 9600 8N1. Besides
 the daemon, this also builds gpsmon and ntpshmmon.
-
-When gpsd is built in this way, the -n (nowait) option is forced;
-gpsd opens its command-line devices immediately on startup.
 
 Otherwise, make sure the build is with pps=yes and ntpshm=yes (the
 default).  The command "gpsd -L" should indicate that time-service
@@ -954,6 +955,8 @@ sample NTP1 1461537440.000615395 1461537439.999994105 1461537440.000000000 0 -20
 sample NTP0 1461537440.122079148 1461537439.620958240 1461537439.703999996 0 -1
 ^C
 -----------------------------------------------------------------------------
+
+If you see only "NTP2", instead, you forgot to go root before starting gpsd.
 
 Once ntpshmmon shows good time data you can see how chrony is doing by
 running 'chronyc sources'.  Your output will look like this:
