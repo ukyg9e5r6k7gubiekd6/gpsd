@@ -45,11 +45,11 @@ class SourceExtractor(object):
                     self.primitive_masks.append((fields[1], fields[2]))
 
     def in_library(self, flag):
-        (status, _output) = getstatusoutput("grep %s libgps_core.c libgps_json.c gpsctl.c" % flag)
+        (status, _output) = getstatusoutput("grep '%s' libgps_core.c libgps_json.c gpsctl.c" % flag)
         return status == 0
 
     def in_daemon(self, flag):
-        (status, _output) = getstatusoutput("grep %s %s" % (flag, " ".join(self.daemonfiles)))
+        (status, _output) = getstatusoutput("grep '%s' %s" % (flag, " ".join(self.daemonfiles)))
         return status == 0
 
     def relevant(self, flag):
