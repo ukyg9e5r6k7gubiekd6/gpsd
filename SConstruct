@@ -836,7 +836,9 @@ else:
     # Simplifies life on hackerboards like the Raspberry Pi
     confdefs.append('''\
 /* Magic device which, if present, means to grab a static /dev/pps0 for KPPS */
-#define MAGIC_HAT_GPS	"/dev/gps0"
+#define MAGIC_HAT_GPS	"/dev/ttyAMA0"
+/* Generic device which, if present, means to grab a static /dev/pps0 for KPPS */
+#define MAGIC_LINK_GPS	"/dev/gpsd0"
 ''')
 
 

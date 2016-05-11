@@ -448,8 +448,9 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	     * there is a static /dev/pps0, and we have access because
 	     * we're root, assume we want to use KPPS.
 	     */
-	    if (strcmp(session->pps_thread.devicename, MAGIC_HAT_GPS) == 0
-	    		&& access("/dev/pps0", R_OK | W_OK) == 0)
+	    if ((strcmp(session->pps_thread.devicename, MAGIC_HAT_GPS) == 0
+		 || strcmp(session->pps_thread.devicename, MAGIC_HAT_GPS) == 0)
+		&& access("/dev/pps0", R_OK | W_OK) == 0)
 		session->pps_thread.devicename = "/dev/pps0";
 	    pps_thread_activate(&session->pps_thread);
 	}

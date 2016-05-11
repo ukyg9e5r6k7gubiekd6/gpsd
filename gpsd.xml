@@ -327,6 +327,25 @@ is first seen. Example: <filename>nmea2000://can0</filename>.
 the daemon has been retired in favor of the more general
 "tcp://".)</para>
 
+<para>Additionally, two serial device names have a side effect:
+<variablelist>
+<varlistentry>
+<term>/dev/ttyAMA0</term>
+<listitem>
+<para>The UART device on a Raspberry Pi. Has the side effect of
+opening /dev/pps0 for RFC2783 1PPS data.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>Generic GPS device 0. Has the side effect of
+opening /dev/pps0 for RFC2783 1PPS data/</term>
+<listitem>
+<para> </para>
+</listitem>
+</varlistentry>
+</variablelist>
+</para>
+
 <para>Internally, the daemon maintains a device pool holding the
 pathnames of devices and remote servers known to the
 daemon. Initially, this list is the list of device-name arguments
