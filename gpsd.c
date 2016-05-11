@@ -218,9 +218,11 @@ static void usage(void)
 {
     (void)printf("usage: gpsd [-b] [-n] [-N] [-D n] [-F sockfile] [-G] [-P pidfile] [-S port] [-h] device...\n\
   Options include: \n\
-  -b		     	    = bluetooth-safe: open data sources read-only\n\
-  -n			    = don't wait for client connects to poll GPS\n\
-  -N			    = don't go into background\n\
+  -b		     	    = bluetooth-safe: open data sources read-only\n"
+#ifndef FORCE_NOWAIT
+"  -n			    = don't wait for client connects to poll GPS\n"
+#endif /* FORCE_NOWAIT */
+"  -N			    = don't go into background\n\
   -F sockfile		    = specify control socket location\n"
 #ifndef FORCE_GLOBAL_ENABLE
 "  -G         		    = make gpsd listen on INADDR_ANY\n"
@@ -229,15 +231,17 @@ static void usage(void)
   -D integer (default 0)    = set debug level \n\
   -S integer (default %s) = set port for daemon \n\
   -h		     	    = help message \n\
-  -V			    = emit version and exit.\n\
-A device may be a local serial device for GPS input, or a URL in one \n\
+  -V			    = emit version and exit.\n"
+#ifdef NETFEED_ENABLE
+"A device may be a local serial device for GPS input, or a URL in one \n\
 of the following forms:\n\
      tcp://host[:port]\n\
      udp://host[:port]\n\
      {dgpsip|ntrip}://[user:passwd@]host[:port][/stream]\n\
      gpsd://host[:port][/device][?protocol]\n\
-in which case it specifies an input source for device, DGPS or ntrip data.\n\
-\n\
+in which case it specifies an input source for device, DGPS or ntrip data.\n"
+#endif /* NETFEED_ENABLE */
+"\n\
 The following driver types are compiled into this gpsd instance:\n",
 		 DEFAULT_GPSD_PORT);
     typelist();
