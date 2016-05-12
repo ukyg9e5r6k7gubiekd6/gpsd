@@ -265,6 +265,24 @@ if env['timeservice']:
 if env['ntpshm']:
     env['ntp'] = True
 
+# Many drivers require NMEA0183 - in case we select timeerver/minimal
+# followed by one of these.
+for driver in (
+    'ashtech',
+    'earthmate',
+    'fury',
+    'fv18',
+    'gpsclock',
+    'mtk3301',
+    'oceanserver',
+    'skytraq',
+    'tnt',
+    'tripmate',
+    ):
+    if env[driver]:
+        env['nmea0183'] = True
+        break
+
 for (name, default, help) in pathopts:
     env[name] = env.subst(env[name])
 
