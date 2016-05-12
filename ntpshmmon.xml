@@ -119,7 +119,7 @@ nanoseconds part of receiver time to be zero.</para>
 <varlistentry>
 <term>-s</term>
 <listitem>
-<para>Remove all segments specified by the units argument. This
+<para>Remove all SHM segments used by GPSD. This
 option will normally only be of interest to GPSD developers.</para>
 </listitem>
 </varlistentry>
