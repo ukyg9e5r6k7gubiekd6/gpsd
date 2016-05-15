@@ -2,7 +2,7 @@
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.7, May 2016
+v2.8, May 2016
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -225,7 +225,7 @@ plain-vanilla x86 PCs with clock speeds in the 2GHz range.
 
 All the previous figures assume you're using PPS delivered over RS232.
 USB GPS receivers that deliver 1PPS are rare, but do exist. Notably,
-there's the Navisys GR601-W/GR701-W/GR801-W. In case these devices go
+there's the Navisys GR601-W/GR701-W/GR801-W <<MACX-1>>. In case these devices go
 out of production it's worth noting that they are a trivial
 modification of the stock two-chip-on-a-miniboard
 commodity-GPS-receiver design of engine plus USB-to-serial adapter;
@@ -1659,6 +1659,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[RFC-5905]]] http://tools.ietf.org/html/rfc5905[RFC 5905]
 
+- [[[MACX-1]]] https://www.etsy.com/listing/280336400/navisys-gr-601w-u-blox-6-macx-1-usb-gps[Navisys GR-601W u-blox-6 "Macx-1" USB GPS receiver]
+
 - [[[CHRONY-COMPARE]]] http://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
 
 - [[[CHRONYDEFAULT]]] https://lists.fedoraproject.org/pipermail/devel/2010-May/135679.html
@@ -1744,3 +1746,6 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 2.7 May 2016::
     Describe the special timeserver build of GPSD. Recommend NTPsec.
+
+2.8 May 2016::
+    Add Macx-1 link.
