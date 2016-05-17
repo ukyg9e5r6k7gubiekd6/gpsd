@@ -317,9 +317,12 @@ void gpsd_set_speed(struct gps_device_t *session,
 	    session->ttyset.c_cflag |= PARENB | PARODD;
 	    break;
 	}
-	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) !=
-	    0)
+	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0) {
+	    gpsd_log(&session->context->errout, LOG_ERROR,
+		     "SER: error setting port attributes: %s\n",
+		     strerror(errno));
 	    return;
+	}
 
 	/*
 	 * Serious black magic begins here.  Getting this code wrong can cause
@@ -535,7 +538,11 @@ int gpsd_serial_open(struct gps_device_t *session)
     if (session->saved_baud != -1) {
 	(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
-	(void)tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset);
+	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0) {
+	    gpsd_log(&session->context->errout, LOG_ERROR,
+		     "SER: Error setting port attributes: %s\n",
+		     strerror(errno));
+	}
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
 
