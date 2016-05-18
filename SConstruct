@@ -244,18 +244,17 @@ for var in import_env:
 envs["GPSD_HOME"] = os.getcwd()
 
 env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV=envs)
-opts.Save('.scons-option-cache', env)
-env.SConsignFile(".sconsign.dblite")
 
 #  Minimal build turns off every option not set on the command line,
-if 'minimal' in ARGUMENTS:
+if ARGUMENTS.get('minimal'):
     for (name, default, help) in boolopts:
-        # Ensure gpsd and gpsdclients are always enabled unless explicitly turned off.
+        # Ensure gpsd and gpsdclients are always enabled unless explicitly
+        # turned off.
         if default is True and not ARGUMENTS.get(name) and not (name is "gpsd" or name is "gpsdclients"):
             env[name] = False
 
 # Time-service build = stripped-down and some diagnostic tools
-if 'timeservice' in ARGUMENTS:
+if ARGUMENTS.get('timeservice'):
     timerelated = ("gpsd", "ncurses", "ntp", "ntpshm", "pps", "oscillator")
     for (name, default, help) in boolopts:
         if default is True and not ARGUMENTS.get(name) and not name in timerelated:
@@ -267,7 +266,6 @@ if env['ntpshm']:
 
 # Many drivers require NMEA0183 - in case we select timeerver/minimal
 # followed by one of these.
-#  FIXME: Doesn't work right when we scons without arguments.
 for driver in (
     'ashtech',
     'earthmate',
@@ -283,6 +281,9 @@ for driver in (
     if env[driver]:
         env['nmea0183'] = True
         break
+
+opts.Save('.scons-option-cache', env)
+env.SConsignFile(".sconsign.dblite")
 
 for (name, default, help) in pathopts:
     env[name] = env.subst(env[name])
@@ -423,9 +424,6 @@ Important switches include:
 Options are cached in a file named .scons-option-cache and persist to later
 invocations.  The file is editable.  Delete it to start fresh.  Current option
 values can be listed with 'scons -h'.
-
-Known bug: if you use minimal=yes or timeserver=yes, you can't specify an
-NMEA0183-derived driver and expect nmea0183 to be forced on.
 """ + opts.GenerateHelpText(env, sort=cmp))
 
 ## Configuration
