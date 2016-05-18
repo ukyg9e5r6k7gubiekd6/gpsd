@@ -57,7 +57,7 @@ devmail    = "gpsd-dev@lists.nongnu.org"
 usermail   = "gpsd-users@lists.nongnu.org"
 annmail    = "gpsd-announce@nongnu.org"
 ircchan    = "irc://chat.freenode.net/#gpsd"
-tiplink    = "<a href='http://gratipay.com/esr'>leave a tip at Gratipay</a>"
+tiplink    = "<a href='https://www.patreon.com/esr'>leace a remittance at Patreon</a>"
 tipwidget  = '<p><a href="https://www.patreon.com/esr">Donate here to support continuing development.</a></p>'
 # Hosting information ends here
 
@@ -254,7 +254,7 @@ if env['minimal']:
         if default is True and not ARGUMENTS.get(name) and not (name is "gpsd" or name is "gpsdclients"):
             env[name] = False
 
-# Time-service build = stripped-down and some disgnostic tools
+# Time-service build = stripped-down and some diagnostic tools
 if env['timeservice']:
     timerelated = ("gpsd", "ncurses", "ntp", "ntpshm", "pps", "oscillator")
     for (name, default, help) in boolopts:
@@ -267,6 +267,7 @@ if env['ntpshm']:
 
 # Many drivers require NMEA0183 - in case we select timeerver/minimal
 # followed by one of these.
+#  FIXME: Doesn't work right when we scons without arguments.
 for driver in (
     'ashtech',
     'earthmate',
@@ -423,6 +424,8 @@ Options are cached in a file named .scons-option-cache and persist to later
 invocations.  The file is editable.  Delete it to start fresh.  Current option
 values can be listed with 'scons -h'.
 
+Known bug: if you use minimal=yes or timeserver=yes, you can't specify an
+NMEA0183-derived driver and expect nmea0183 to be forced on.
 """ + opts.GenerateHelpText(env, sort=cmp))
 
 ## Configuration
