@@ -7,7 +7,8 @@ Repository head:
   GRClok and LNRClok oscillators. gpxlogger can reconnect when
   the GPS loses the fix. xgps and xgpsspeed moved to python-gi,
   getting shut of the deprecated pygtk2 bindings. Default mode for
-  xgpsspeed is now the more interesting nautical display.
+  xgpsspeed is now the more interesting nautical display. gpsmon
+  includes the hostname with the device display.
 
 3.16: 2016-01-08 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Test rebuilds for mid-2015 leapsecond bump. Regression tests will

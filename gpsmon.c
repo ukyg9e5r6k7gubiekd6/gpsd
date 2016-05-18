@@ -56,10 +56,11 @@ static WINDOW *packetwin;
 static FILE *logfile;
 static char *type_name;
 static size_t promptlen = 0;
-struct termios cooked, rare;
-struct fixsource_t source;
+static struct termios cooked, rare;
+static struct fixsource_t source;
+static char hostname[HOST_NAME_MAX];
 #ifdef NTP_ENABLE
-struct timedelta_t time_offset;
+static struct timedelta_t time_offset;
 #endif /* NTP_ENABLE */
 
 #ifdef PASSTHROUGH_ENABLE
@@ -415,7 +416,8 @@ static const char *promptgen(void)
 
     if (serial)
 	(void)snprintf(buf, sizeof(buf),
-		       "%s %u %u%c%u",
+		       "%s:%s %u %u%c%u",
+		       hostname,
 		       session.gpsdata.dev.path,
 		       session.gpsdata.dev.baudrate,
 		       9 - session.gpsdata.dev.stopbits,
@@ -519,7 +521,7 @@ static bool switch_type(const struct gps_type_t *devtype)
 	    if (devicewin)
 		delwin(devicewin);
 	    devicewin = newwin((*active)->min_y, (*active)->min_x, 1, 0);
-	    /* screen might have JSOM on it from the init sequence */
+	    /* screen might have JSON on it from the init sequence */
 	    (void)clearok(stdscr, true);
 	    (void)clear();
 	    if ((devicewin == NULL) || ((*active)->initialize != NULL && !(*active)->initialize())) {
@@ -1154,6 +1156,7 @@ int main(int argc, char **argv)
     volatile bool nocurses = false;
     int activated = -1;
 
+    gethostname(hostname, sizeof(hostname)-1);
     (void)putenv("TZ=UTC");	// for ctime()
     gps_context_init(&context, "gpsmon");	// initialize the report mutex
     context.serial_write = gpsmon_serial_write;
