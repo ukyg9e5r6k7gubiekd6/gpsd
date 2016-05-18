@@ -248,14 +248,14 @@ opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
 #  Minimal build turns off every option not set on the command line,
-if env['minimal']:
+if 'minimal' in ARGUMENTS:
     for (name, default, help) in boolopts:
         # Ensure gpsd and gpsdclients are always enabled unless explicitly turned off.
         if default is True and not ARGUMENTS.get(name) and not (name is "gpsd" or name is "gpsdclients"):
             env[name] = False
 
 # Time-service build = stripped-down and some diagnostic tools
-if env['timeservice']:
+if 'timeservice' in ARGUMENTS:
     timerelated = ("gpsd", "ncurses", "ntp", "ntpshm", "pps", "oscillator")
     for (name, default, help) in boolopts:
         if default is True and not ARGUMENTS.get(name) and not name in timerelated:
