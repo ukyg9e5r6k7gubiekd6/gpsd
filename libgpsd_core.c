@@ -214,31 +214,26 @@ static void gpsd_run_device_hook(struct gpsd_errout_t *errout,
 		 "no %s present, skipped running %s hook\n",
 		 DEVICEHOOKPATH, hook);
     else {
-	/*
-	 * We make an exception to the no-malloc rule here because
-	 * the pointer will never persist outside this small scope
-	 * and can thus never cause a leak or stale-pointer problem.
+	/* use alloca(), which is not malloc(), here because
+	 * the pointer will never persist outside this small scope.
 	 */
 	size_t bufsize = strlen(DEVICEHOOKPATH) + 1 + strlen(device_name) + 1 + strlen(hook) + 1;
-	char *buf = malloc(bufsize);
-	if (buf == NULL)
-	    gpsd_log(errout, LOG_ERROR,
-		     "error allocating run-hook buffer\n");
+	char *buf = alloca(bufsize);
+	/* no need to check the return code of alloca()
+         * by definition, if alloca() fails the program segfaults
+         */
+	int status;
+	(void)snprintf(buf, bufsize, "%s %s %s",
+		       DEVICEHOOKPATH, device_name, hook);
+	gpsd_log(errout, LOG_INF, "running %s\n", buf);
+	status = system(buf);
+	if (status == -1)
+	    gpsd_log(errout, LOG_ERROR, "error running %s\n", buf);
 	else
-	{
-	    int status;
-	    (void)snprintf(buf, bufsize, "%s %s %s",
-			   DEVICEHOOKPATH, device_name, hook);
-	    gpsd_log(errout, LOG_INF, "running %s\n", buf);
-	    status = system(buf);
-	    if (status == -1)
-		gpsd_log(errout, LOG_ERROR, "error running %s\n", buf);
-	    else
-		gpsd_log(errout, LOG_INF,
-			 "%s returned %d\n", DEVICEHOOKPATH,
-			 WEXITSTATUS(status));
-	    free(buf);
-	}
+	    gpsd_log(errout, LOG_INF,
+		     "%s returned %d\n", DEVICEHOOKPATH,
+		     WEXITSTATUS(status));
+	/* buf automatically freed here as the stack pops */
     }
 }
 
