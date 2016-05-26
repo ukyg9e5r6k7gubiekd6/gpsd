@@ -419,7 +419,6 @@ int gpsd_serial_open(struct gps_device_t *session)
  */
 
 {
-    bool no_ttyset = false;
     mode_t mode = (mode_t) O_RDWR;
 
     session->sourcetype = gpsd_classify(session->gpsdata.dev.path);
@@ -530,7 +529,6 @@ int gpsd_serial_open(struct gps_device_t *session)
 	    return UNALLOCATED_FD;
 	}
 #endif /* __linux__ */
-	no_ttyset = true;
     }
 
 #ifdef FIXED_PORT_SPEED
@@ -549,7 +547,7 @@ int gpsd_serial_open(struct gps_device_t *session)
     }
 
     session->lexer.type = BAD_PACKET;
-    if ( 0 != isatty(session->gpsdata.gps_fd) && false == no_ttyset ) {
+    if ( 0 != isatty(session->gpsdata.gps_fd) ) {
 
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd, &session->ttyset_old) != 0)
