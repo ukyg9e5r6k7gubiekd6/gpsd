@@ -471,9 +471,10 @@ int gpsd_serial_open(struct gps_device_t *session)
 #endif /* BLUEZ */
     {
 	/*
-	 * We open with O_NONBLOCK because we want to now get hung if
+	 * We open with O_NONBLOCK because we want to not get hung if
 	 * the clocal flag is off, but we don't want to stay in that mode.
 	 */
+	errno = 0;
         if ((session->gpsdata.gps_fd =
 	     open(session->gpsdata.dev.path, (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
             gpsd_log(&session->context->errout, LOG_ERROR,
@@ -490,9 +491,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 	    }
 
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "SER: file device open of %s succeeded: %s\n",
-		     session->gpsdata.dev.path,
-		     strerror(errno));
+		     "SER: file device open of %s succeeded\n",
+		     session->gpsdata.dev.path);
 	}
     }
 
