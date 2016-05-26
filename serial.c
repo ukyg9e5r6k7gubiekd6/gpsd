@@ -318,10 +318,16 @@ void gpsd_set_speed(struct gps_device_t *session,
 	    break;
 	}
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0) {
-	    gpsd_log(&session->context->errout, LOG_ERROR,
-		     "SER: error setting port attributes: %s, sourcetype: %d\n",
-		     strerror(errno), session->sourcetype);
-	    return;
+	    /* strangely this fails on non-serial ports, but if
+             * we do not try, we get other failures.
+             * so ignore for now, as we always have, until it can
+             * be nailed down.
+             *
+	     * gpsd_log(&session->context->errout, LOG_ERROR,
+	     *	     "SER: error setting port attributes: %s, sourcetype: %d\n",
+	     *	     strerror(errno), session->sourcetype);
+	     * return;
+             */
 	}
 
 	/*
