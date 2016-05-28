@@ -33,6 +33,11 @@
 
 #define BUFLEN		2048
 
+/* needed under FreeBSD */
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX	255
+#endif /* HOST_NAME_MAX */
+
 /* external capability tables */
 extern struct monitor_object_t nmea_mmt, sirf_mmt, ashtech_mmt;
 extern struct monitor_object_t garmin_mmt, garmin_bin_ser_mmt;
