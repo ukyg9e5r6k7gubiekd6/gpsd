@@ -300,7 +300,7 @@ static void adjust_max_fd(int fd, bool on)
 	if (fd == maxfd) {
 	    int tfd;
 
-	    for (maxfd = tfd = 0; tfd < FD_SETSIZE; tfd++)
+	    for (maxfd = tfd = 0; tfd < (int)FD_SETSIZE; tfd++)
 		if (FD_ISSET(tfd, &all_fds))
 		    maxfd = tfd;
 	}
@@ -2192,7 +2192,7 @@ int main(int argc, char *argv[])
 		 * implimentation error in FD_ISSET().
 		 */
 		if (allocated_device(device)
-		    && (0 <= device->gpsdata.gps_fd && device->gpsdata.gps_fd < FD_SETSIZE)
+		    && (0 <= device->gpsdata.gps_fd && device->gpsdata.gps_fd < (socket_t)FD_SETSIZE)
 		    && FD_ISSET(device->gpsdata.gps_fd, &efds)) {
 		    deactivate_device(device);
 		    free_device(device);
@@ -2473,7 +2473,7 @@ int main(int argc, char *argv[])
 	longjmp(restartbuf, 1);
 
     gpsd_log(&context.errout, LOG_WARN,
-	     "received terminating signal %d.\n", signalled);
+	     "received terminating signal %d.\n", (int)signalled);
 shutdown:
     gpsd_terminate(&context);
 
