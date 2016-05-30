@@ -944,7 +944,7 @@ After you have verified with cgps that your GPS receiver has a good 3D
 lock you can check that gpsd is outputing good time by running ntpshmmon.
 
 -----------------------------------------------------------------------------
-# ntpshmmon 
+# ntpshmmon
 ntpshmmon version 1
 #      Name   Seen@                Clock                Real               L Prec
 sample NTP0 1461537438.593729271 1461537438.593633306 1461537438.703999996 0 -1
@@ -1059,6 +1059,21 @@ value and quickly converge to the newer slightly different value.  If
 you reboot, expect it to converge to a new/different drift value and
 that may take a while depending on how different the basic calibration
 factors are.
+
+=== ARP is the sound of your server choking ===
+
+By default ntpd and chronyd poll remote servers every 64 seconds.  This
+is an unfortuneate choice.  Linux by default only keeps an ARP table
+entry for 60 seconds, anytime thereafter it may be flushed.
+
+If the ARP table has flushed the entry for a remote peer or server then
+when the NTP server sends a request to the remote server an entire ARP
+cycle will be added to the NTP packet round trip time (RTT).  This will
+throw off the time measurements to servers on the local lan.
+
+The colution is the same for both ntpd and chronyd, add the "minpoll 5"
+command to any 'server" or "peer directive.  This will cause the maximum
+polling period to be 32 seconds, well under the 60 second ARP timeout.
 
 == NTP tuning and performance details ==
 
@@ -1743,9 +1758,7 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 2.6 May 2016::
     New section on GPS time.  Note the existence of the GR801-W.
-
-2.7 May 2016::
     Describe the special timeserver build of GPSD. Recommend NTPsec.
-
-2.8 May 2016::
     Add Macx-1 link.
+    Add section on ARP problems
+
