@@ -1071,9 +1071,23 @@ when the NTP server sends a request to the remote server an entire ARP
 cycle will be added to the NTP packet round trip time (RTT).  This will
 throw off the time measurements to servers on the local lan.
 
+On a RasberryPi ARP has been shown to impact the remote offset by up to
+600 uSec in some rar cases.
+
 The colution is the same for both ntpd and chronyd, add the "minpoll 5"
 command to any 'server" or "peer directive.  This will cause the maximum
 polling period to be 32 seconds, well under the 60 second ARP timeout.
+
+=== Watch your temperatures ===
+
+The stability of the system clock is very temperature dependent.  A one
+degree change in room temperature can create 0.1 ppm of clock frequency
+change.  Once simple way to see the effect is to place your running
+NTP server inside bubble wrap.  The time will take a quick and noticeable
+jump.
+
+If you leave your NTP server in the bubble wrap you will notice some
+improved local and remote offsets.
 
 == NTP tuning and performance details ==
 
@@ -1760,5 +1774,5 @@ by Jaap Winius <jwinius@rjsystems.nl>.
     New section on GPS time.  Note the existence of the GR801-W.
     Describe the special timeserver build of GPSD. Recommend NTPsec.
     Add Macx-1 link.
-    Add section on ARP problems
+    Add sections on ARP and temperature problems
 
