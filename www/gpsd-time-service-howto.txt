@@ -502,16 +502,21 @@ sources to check:
 == Running GPSD ==
 
 If you're going to use gpsd for time service, you must run in -n mode
-so the clock will be updated even when no clients are active.  This
+so the clock will be updated even when no clients are active.  This option
 is forced if you built GPSD with timeservice=yes as an option.
 
 Note that gpsd assumes that after each fix the GPS receiver will
 assert 1PPS first and ship sentences reporting time of fix
-second. Every GPS we know of does things in this order.  If you ever
-encounter an exception, it should manifest as reported times that look
-like they're from the future and require a negative fudge. If this
-ever happens, please report the device make and model to the GPSD
-maintainers so we can flag it in our GPS hardware database.
+second (and the sentence burst will end before the next 1PPS). Every
+GPS we know of does things in this order.  (However, on some very old
+GPSes that defaulted to 4800 baud, long sentence bursts - notably
+those containing a skyview - could slop over into the next second.)
+
+If you ever encounter an exception, it should manifest as reported
+times that look like they're from the future and require a negative
+fudge. If this ever happens, please report the device make and model
+to the GPSD maintainers so we can flag it in our GPS hardware
+database.
 
 There is another possible cause of small negative offsets which
 shows up on the GR-601-W: implementation bugs in your USB driver,
@@ -569,9 +574,9 @@ When in doubt, the preferred method to start your timekeeping is:
 -----------------------------------------------------------------------------
 $ su - (or sudo -s )
 # killall -9 gpsd ntpd
-# ntpd -gN
-# sleep 2
 # gpsd -n /dev/ttyXX
+# sleep 2
+# ntpd -gN
 # sleep 2
 # cgps
 -----------------------------------------------------------------------------
@@ -579,6 +584,11 @@ $ su - (or sudo -s )
 where /dev/ttyXX is whatever 1PPS-capable device you have.  In a
 binary-package-based Linux distribution it is probable that ntpd
 will already have been launched at boot time.
+
+It's best to have gpsd start first.  That way when ntpd restarts it has
+a good local time handy.  If ntpd starts first, it will set the local
+clock using a remote, probably pool, server.  Then ntpd has to spend a
+whole day slowly resynching the clock.
 
 If you're using dhcp3-client to configure your system, make sure
 you disable /etc/dhcp3/dhclient-exit-hooks.d/ntp, as dhclient would
