@@ -355,12 +355,19 @@ Reboot so those changes take effect.
 Run gpsd like this:
 
 --------------------------------------------------------------
+~ # gpsd -D 5 -N -n /dev/ttyAMA0/dev/pps0
+--------------------------------------------------------------
+
+If you are on the RasPi with gpsd version 3.17, or above, /dev/pps0 can
+be autodetected. and used for PPS if available.
+
+gpsd 3.17 and up only:
+
+--------------------------------------------------------------
 ~ # gpsd -D 5 -N -n /dev/ttyAMA0
 --------------------------------------------------------------
 
-For the RasPi only, the /dev/pps0 will be auto detected and used
-for PPS if available.  You can verify the autodection worked by
-running ntpshmmon:
+You can verify gpsd is using the PPS by running ntpshmmon:
 
 --------------------------------------------------------------
 ~ # ntpshmmon
