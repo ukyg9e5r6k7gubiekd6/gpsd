@@ -115,6 +115,12 @@ Others may be reported or not depending on the fix quality.</para>
         <entry>Name of originating device.</entry>
 </row>
 <row>
+	<entry>status</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>GPS status: %d, 2=DGPS fix, otherwise not present.</entry>
+</row>
+<row>
 	<entry>mode</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
