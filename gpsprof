@@ -118,7 +118,7 @@ class plotter(object):
                         if self.device['path'] == device:
                             break
                 if self.session.data["class"] == "WATCH":
-                    if "timing" in options and not self.session.data.get("timing"):
+                    if self.requires_time and not self.session.data.get("timing"):
                         sys.stderr.write("timing is not enabled.\n")
                         sys.exit(1)
                 # Log before filtering - might be good for post-analysis.
@@ -134,9 +134,9 @@ class plotter(object):
                     continue
                 if self.session.fix.mode <= gps.MODE_NO_FIX:
                     continue
-                if countdown == await:
-                    sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time() - basetime, await))
                 if self.sample():
+		    if countdown == await:
+                        sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time() - basetime, await))
                     countdown -= 1
             baton.end()
         finally:
@@ -368,8 +368,7 @@ class instrumented(plotter):
 
     def sample(self):
         if 'rtime' in self.session.data:
-            self.fixes.append((self.session.data['tag'],
-                               gps.misc.isotime(self.session.data['time']),
+            self.fixes.append((gps.misc.isotime(self.session.data['time']),
                                self.session.data["chars"],
                                self.session.data['sats'],
                                self.session.data['sor'],
@@ -381,7 +380,7 @@ class instrumented(plotter):
 
     def header(self):
         res = "# Analyzed latency, " + self.whatami() + "\n"
-        res += "# Tag   -- Fix time --  - Chars -  --   Latency  - RS232-  Analysis  - Recv -\n"
+        res += "#-- Fix time --  - Chars -  --   Latency  - RS232-  Analysis  - Recv -\n"
         return res
 
     def postprocess(self):
@@ -389,9 +388,9 @@ class instrumented(plotter):
 
     def data(self):
         res = ""
-        for (tag, fix_time, chars, sats, start, xmit, recv) in self.fixes:
+        for (fix_time, chars, sats, start, xmit, recv) in self.fixes:
             rs232_time = (chars * 10.0) / self.device['bps']
-            res += "%-6s  %.3f  %9u  %2u  %.6f  %.6f  %.6f  %.6f\n" % (tag, fix_time, chars, sats, start - fix_time, (start - fix_time) + rs232_time, xmit - fix_time, recv - fix_time)
+            res += "%.3f  %9u  %2u  %.6f  %.6f  %.6f  %.6f\n" % (fix_time, chars, sats, start - fix_time, (start - fix_time) + rs232_time, xmit - fix_time, recv - fix_time)
         return res
 
     def plot(self):
