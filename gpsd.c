@@ -1839,6 +1839,7 @@ int main(int argc, char *argv[])
     struct gps_device_t *device;
     int i, option;
     int msocks[2] = {-1, -1};
+    bool device_opened = false;
     bool go_background = true;
     volatile bool in_restart;
 
@@ -2057,8 +2058,24 @@ int main(int argc, char *argv[])
 	    gpsd_log(&context.errout, LOG_ERROR,
 		     "initial GPS device %s open failed\n",
 		     argv[i]);
+	} else {
+            device_opened = true;
 	}
     }
+
+    if (
+#ifdef CONTROL_SOCKET_ENABLE
+       control_socket == NULL &&
+#endif
+#ifdef SYSTEMD_ENABLE
+       sd_socket_count <= 0 &&
+#endif
+       !device_opened) {
+       gpsd_log(&context.errout, LOG_ERROR,
+                "can't run with neither control socket nor devices open\n");
+       exit(EXIT_FAILURE);
+    }
+
 
     /* drop privileges */
     if (0 == getuid()) {
