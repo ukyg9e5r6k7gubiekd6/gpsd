@@ -280,7 +280,7 @@ class gps(gpscommon, gpsdata, gpsjson):
                     arg += 'r-'
                     return self.send(arg)
             else:
-                gpsjson.stream(self, ~flags, devpath)
+                gpsjson.stream(self, flags, devpath)
         else:  # flags & WATCH_ENABLE:
             if flags & WATCH_OLDSTYLE:
                 arg = 'w+'
