@@ -22,7 +22,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 <cmdsynopsis>
   <command>ntpshmmon</command>
-      <arg choice='opt'>-c <replaceable>cycletime</replaceable></arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-n <replaceable>nsamples</replaceable></arg>
       <arg choice='opt'>-s </arg>

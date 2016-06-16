@@ -19,7 +19,6 @@
 #define NTPSEGMENTS	256	/* NTPx for x any byte */
 
 static struct shmTime *segments[NTPSEGMENTS + 1];
-static struct timespec tick[NTPSEGMENTS + 1];
 
 int main(int argc, char **argv)
 {
@@ -29,14 +28,14 @@ int main(int argc, char **argv)
     bool verbose = false;
     int nsamples = INT_MAX;
     time_t timeout = (time_t)INT_MAX, starttime = time(NULL);
-    double cycle = 1.0; /* FIXME, One Sec cycle time a bad assumption */
+    /* a copy of all old segments */
+    struct shm_stat_t	shm_stat_old[NTPSEGMENTS + 1];;
+
+    memset( shm_stat_old, 0 ,sizeof( shm_stat_old));
 
 #define USAGE	"usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
-    while ((option = getopt(argc, argv, "c:hn:st:vV")) != -1) {
+    while ((option = getopt(argc, argv, "hn:st:vV")) != -1) {
 	switch (option) {
-	case 'c':
-	    cycle = safe_atof(optarg);
-	    break;
 	case 'n':
 	    nsamples = atoi(optarg);
 	    break;
@@ -80,6 +79,7 @@ int main(int argc, char **argv)
     (void)printf("#      Name   Seen@                Clock                Real               L Prec\n");
 
     do {
+	/* the current segment */
 	struct shm_stat_t	shm_stat;
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
@@ -87,24 +87,32 @@ int main(int argc, char **argv)
 	    enum segstat_t status = ntp_read(segments[i], &shm_stat, false);
 	    if (verbose)
 		fprintf(stderr, "unit %d status %d\n", i, status);
-	    switch(status)
-	    {
+	    switch(status) {
 	    case OK:
-		/* ntpd can slew the clock at 120% real time 
-                 * so do not lock out slightly short cycles 
+		/* ntpd can slew the clock at 120% real time
+                 * so do not lock out slightly short cycles
 		 * use 50% of cycle time as lock out limit.
                  * ignore that system time may jump. */
-		diff = timespec_diff_ns(shm_stat.tvc, tick[i]);
-		if ( (cycle * 500000000LL) <= diff) {
-		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
-			   ntp_name(i),
-			   (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
-			   (long)shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
-			   (long)shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
-			   shm_stat.leap, shm_stat.precision);
-		    tick[i] = shm_stat.tvc;
-		    --nsamples;
+		diff = timespec_diff_ns(shm_stat.tvr, shm_stat_old[i].tvr);
+		if ( 0 == diff) {
+		    /* no change in tvr */
+		    break;
 		}
+		diff = timespec_diff_ns(shm_stat.tvt, shm_stat_old[i].tvt);
+		if ( 0 == diff) {
+		    /* no change in tvt */
+		    break;
+		}
+		printf("%s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
+		       ntp_name(i),
+		       (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
+		       (long)shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
+		       (long)shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
+		       shm_stat.leap, shm_stat.precision);
+		--nsamples;
+		/* save the new time stamp */
+		shm_stat_old[i] = shm_stat; /* structure copy */
+
 		break;
 	    case NO_SEGMENT:
 		break;
@@ -124,14 +132,22 @@ int main(int argc, char **argv)
 		break;
 	    }
 	}
+	/* all segments now checked */
 
 	/*
 	 * Even on a 1 Hz PPS, a sleep(1) may end up
          * being sleep(1.1) and missing a beat.  Since
 	 * we're ignoring duplicates via timestamp, polling
-	 * at interval < 1 sec shouldn't be a problem.
+	 * at fast intervals should not be a problem
+	 *
+	 * PPS is not always one pulse per second.
+	 * the Garmin GPS 18x-5Hz outputs 5 pulses per second.
+         * That is a 200 millSec cycle, minimum 20 milliSec duration
+         * we will wait 1 milliSec out of caution
+         *
+         * and, of course, usleep() may sleep a lot longer than we ask...
 	 */
-	(void)usleep((useconds_t)(cycle * 1000));
+	(void)usleep((useconds_t)1000);
     } while
 	    (nsamples != 0 && time(NULL) - starttime < timeout);
 
