@@ -886,7 +886,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    unchanged = 0;
         } else if ( (180000 < cycle &&  220000 > cycle)      /* 5Hz */
 	        ||  (900000 < cycle && 1100000 > cycle)      /* 1Hz */
-	        || (1800000 < cycle && 2200000 > cycle) ) {  /* 2Hz */
+	        || (1800000 < cycle && 2200000 > cycle) ) {  /* 0.5Hz */
 
 	    /* some pulses may be so short that state never changes
 	     * and some RFC2783 only can detect one edge */
@@ -936,7 +936,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	 *
 	 * You may think that PPS is very accurate, so the cycle time
          * valid window should be very small.  This is not the case,
-         * The Rasberry Pi clock is very coarse when it starts and chronyd
+         * The Rasberry Pi clock is very coarse when it starts and/or chronyd
          * may be doing a fast slew.  chronyd by default will slew up
          * to 8.334%!  So the cycle time as measured by the system clock
          * may be almost +/- 9%. Therefore, gpsd uses a 10% window.
@@ -946,65 +946,90 @@ static void *gpsd_ppsmonitor(void *arg)
 	log = "Unknown error";
         if ( 0 > cycle ) {
 	    log = "Rejecting negative cycle\n";
-	} else if (199000 > cycle) {
-	    // too short to even be a 5Hz pulse
+	} else if (180000 > cycle) {
+	    /* shorter than 200 milliSec - 10%
+	     * too short to even be a 5Hz pulse */
 	    log = "Too short for 5Hz\n";
 	} else if (201000 > cycle) {
-	    /* 5Hz cycle */
+	    /* longer than 200 milliSec - 10%
+	     * shorter than 200 milliSec + 10%
+	     * about 200 milliSec cycle */
 	    /* looks like 5hz PPS pulse */
 	    if (100000 > duration) {
+		/* this is the end of the long part */
 		/* BUG: how does the code know to tell ntpd
 		 * which 1/5 of a second to use?? */
 		ok = true;
 		log = "5Hz PPS pulse\n";
 	    }
 	} else if (900000 > cycle) {
+	    /* longer than 200 milliSec + 10%
+             * shorter than 1.000 Sec - 10% */
             /* Yes, 10% window.  The Rasberry Pi clock is very coarse
              * when it starts and chronyd may be doing a fast slew.
-             * chronyd by default will slew up to 8.334% !
-             * Don't worry, ntpd and chronyd will do further sanitizing.*/
+             * chronyd by default will slew up to 8.334% ! */
 	    log = "Too long for 5Hz, too short for 1Hz\n";
 	} else if (1100000 > cycle) {
+	    /* longer than 1.000 Sec - 10%
+	     * shorter than 1.000 Sec + 10% */
             /* Yes, 10% window.  */
-	    /* looks like PPS pulse or square wave */
+	    /* looks like 1Hz PPS pulse or square wave */
 	    if (0 == duration) {
 		ok = true;
 		log = "invisible pulse\n";
-	    } else if (499000 > duration) {
-		/* end of the short "half" of the cycle */
-		/* aka the trailing edge */
+	    } else if (450000 > duration) {
+	        /* pulse shorter than 500 milliSec - 10%
+		 * end of the short "half" of the cycle
+		 * aka the trailing edge */
 		log = "1Hz trailing edge\n";
-	    } else if (501000 > duration) {
-		/* looks like 1.0 Hz square wave, ignore trailing edge */
+	    } else if (555000 > duration) {
+	        /* pulse longer than 500 milliSec - 10%
+	         * pulse shorter than 500 milliSec + 10%
+		 * looks like 1.0 Hz square wave, ignore trailing edge
+		 * except we can't tell which is which, so we guess */
 		if (edge == 1) {
 		    ok = true;
 		    log = "square\n";
 		}
 	    } else {
-		/* end of the long "half" of the cycle */
-		/* aka the leading edge */
+	        /* pulse longer than 500 milliSec + 10%
+		 * end of the long "half" of the cycle
+		 * aka the leading edge,
+		 * the edge that marks the start of the second */
 		ok = true;
 		log = "1Hz leading edge\n";
 	    }
-	} else if (1999000 > cycle) {
+	} else if (1800000 > cycle) {
+	    /* cycle longer than 1.000 Sec + 10%
+	     * cycle shorter than 2.000 Sec - 10%
+	     * Too long for 1Hz, too short for 2Hz */
 	    log = "Too long for 1Hz, too short for 2Hz\n";
-	} else if (2001000 > cycle) {
-	    /* looks like 0.5 Hz square wave */
-	    if (999000 > duration) {
+	} else if (2200000 > cycle) {
+	    /* cycle longer than 2.000 Sec - 10%
+	     * cycle shorter than 2.000 Sec + 10%
+	     * looks like 0.5 Hz square wave */
+	    if (990000 > duration) {
+		 /* pulse shorter than 1.000 Sec - 10%
+		  * too short to be a 2Hx square wave */
 		log = "0.5 Hz square too short duration\n";
-	    } else if (1001000 > duration) {
+	    } else if (1100000 > duration) {
+		 /* pulse longer than 1.000 Sec - 10%
+		  * pulse shorter than 1.000 Sec + 10%
+		  * and nice 0.5Hz square wave */
 		ok = true;
 		log = "0.5 Hz square wave\n";
 	    } else {
 		log = "0.5 Hz square too long duration\n";
 	    }
 	} else {
+	    /* cycle longer than 2.000 Sec + 10%
+	     * can't be anything */
 	    log = "Too long for 0.5Hz\n";
 	}
 
 	/* end of Stage two
-         * we now know what type of PPS pulse, and if we have the
-         * leading edge
+         * we now know what type of PPS pulse, and if we have  a good
+         * leading edge or not
          */
 
 	/* Stage Three: Calculate
@@ -1022,6 +1047,8 @@ static void *gpsd_ppsmonitor(void *arg)
          * Other GPSes like some uBlox may only send PPS when time is valid.
          * It is common to get PPS, and no fixtime, while autobauding.
 	 */
+	/* FIXME, some GPS, like Skytraq, may output a the fixtime so
+         * late in the cycle as to be ambiguous. */
         if (last_fixtime.real.tv_sec == 0) {
 	    /* probably should log computed offset just for grins here */
 	    ok = false;
@@ -1175,7 +1202,7 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
 		    "KPPS:%s kernel PPS unavailable, PPS accuracy will suffer\n",
 		    pps_thread->devicename);
     }
-#else 
+#else
     pps_thread->log_hook(pps_thread, THREAD_WARN,
 		"KPPS:%s no HAVE_SYS_TIMEPPS_H, PPS accuracy will suffer\n",
 		pps_thread->devicename);
