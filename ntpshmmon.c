@@ -33,7 +33,6 @@ int main(int argc, char **argv)
 
     memset( shm_stat_old, 0 ,sizeof( shm_stat_old));
 
-#define USAGE	"usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
     while ((option = getopt(argc, argv, "hn:st:vV")) != -1) {
 	switch (option) {
 	case 'n':
@@ -53,8 +52,18 @@ int main(int argc, char **argv)
 			  argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'h':
+	    fprintf(stderr,
+                "usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
+                "  -h           print this help\n"
+                "  -n nsamples  exit after nsamples\n"
+                "  -s           remove SHMs and exit\n"
+                "  -t nseconds  exit after nseconds\n"
+                "  -v           be verbose\n"
+                "  -V           print version and exit\n"
+		);
+	    exit(EXIT_SUCCESS);
 	default:
-	    fprintf(stderr, USAGE);
+	    /* no option, just go and do it */
 	    break;
 	}
     }
