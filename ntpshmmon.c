@@ -112,6 +112,8 @@ int main(int argc, char **argv)
 		    /* no change in tvt */
 		    break;
 		}
+		/* time stamp it */
+		clock_gettime(CLOCK_REALTIME, &shm_stat.tvc);
 		printf("%s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
 		       ntp_name(i),
 		       (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,

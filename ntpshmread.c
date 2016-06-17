@@ -67,8 +67,6 @@ enum segstat_t ntp_read(struct shmTime *shm_in, struct shm_stat_t *shm_stat, con
 
     shm_stat->tvc.tv_sec = shm_stat->tvc.tv_nsec = 0;
 
-    clock_gettime(CLOCK_REALTIME, &shm_stat->tvc);
-
     /* relying on word access to be atomic here */
     if (shm->valid == 0) {
 	shm_stat->status = NOT_READY;
