@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     bool killall = false;
     bool verbose = false;
     int nsamples = INT_MAX;
-    time_t timeout = (time_t)INT_MAX, starttime = time(NULL);
+    time_t timeout = (time_t)0, starttime = time(NULL);
     /* a copy of all old segments */
     struct shm_stat_t	shm_stat_old[NTPSEGMENTS + 1];;
 
@@ -158,9 +158,15 @@ int main(int argc, char **argv)
          *
          * and, of course, usleep() may sleep a lot longer than we ask...
 	 */
+	if ( timeout ) {
+	    /* do not read time unless it matters */
+	    if ( time(NULL) > (starttime + timeout ) ) {
+		/* time to exit */
+		break;
+	    }
+	}
 	(void)usleep((useconds_t)1000);
-    } while
-	    (nsamples != 0 && time(NULL) - starttime < timeout);
+    } while ( 0 < nsamples );
 
     exit(EXIT_SUCCESS);
 }
