@@ -554,11 +554,17 @@ static gps_mask_t processGSA(int count, char *field[],
      * 16   = HDOP
      * 17   = VDOP
      *
+     * Not all documentation specifies the number of PRN fields, it
+     * may be variable.  Most doc that specifies says 12 PRNs.
+     *
      * The Skytraq S2525F8-BD-RTK output both GPGSA and BDGSA in the
      * same cycle:
      * $GPGSA,A,3,23,31,22,16,03,07,,,,,,,1.8,1.1,1.4*3E
      * $BDGSA,A,3,214,,,,,,,,,,,,1.8,1.1,1.4*18
      * These need to be combined like GPGSV and BDGSV
+     *
+     * Some Skytraq will emit all GPS in one GNGSA, Then follow with
+     * another GNGSA with the BeiDou birds.
      *
      * Some GPS emit GNGSA.  So far we have not seen a GPS emit GNGSA
      * and then another flavor of xxGSA
