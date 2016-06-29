@@ -1082,9 +1082,9 @@ cycle will be added to the NTP packet round trip time (RTT).  This will
 throw off the time measurements to servers on the local lan.
 
 On a RasberryPi ARP has been shown to impact the remote offset by up to
-600 uSec in some rar cases.
+600 uSec in some rare cases.
 
-The colution is the same for both ntpd and chronyd, add the "minpoll 5"
+The solution is the same for both ntpd and chronyd, add the "minpoll 5"
 command to any 'server" or "peer directive.  This will cause the maximum
 polling period to be 32 seconds, well under the 60 second ARP timeout.
 
@@ -1098,6 +1098,27 @@ jump.
 
 If you leave your NTP server in the bubble wrap you will notice some
 improved local and remote offsets.
+
+=== Powersaving is not your friend ===
+
+Normally enabling power saving features is a good thing: it saves you power.
+But when your CPU changes power saving modes (cstates for Intel CPUs) the
+impact on PPS timing is noticeable.  For some reason the NO_HZ kernel
+mode has a similar bad effecct on timekeeping.
+
+To improve your timekeeping, turn off both features on Intel CPUs by
+adding this to your boot command line:
+
+-----------------------------------------------------------------------------
+nohz=off intel_idle.max_cstate=0
+-----------------------------------------------------------------------------
+
+For ARM, be sure NO_HZ is off:
+
+-----------------------------------------------------------------------------
+nohz=off
+-----------------------------------------------------------------------------
+
 
 == NTP tuning and performance details ==
 
@@ -1786,3 +1807,5 @@ by Jaap Winius <jwinius@rjsystems.nl>.
     Add Macx-1 link.
     Add sections on ARP and temperature problems
 
+2.7 June 2016
+    Add section on avoiding power saving.
