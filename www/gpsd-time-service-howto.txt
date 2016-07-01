@@ -1104,7 +1104,7 @@ improved local and remote offsets.
 Normally enabling power saving features is a good thing: it saves you power.
 But when your CPU changes power saving modes (cstates for Intel CPUs) the
 impact on PPS timing is noticeable.  For some reason the NO_HZ kernel
-mode has a similar bad effecct on timekeeping.
+mode has a similar bad effect on timekeeping.
 
 To improve your timekeeping, turn off both features on Intel CPUs by
 adding this to your boot command line:
@@ -1119,6 +1119,10 @@ For ARM, be sure NO_HZ is off:
 nohz=off
 -----------------------------------------------------------------------------
 
+You will also need to select the 'performance' CPU governor to keep ypur
+CPU set to the maximum speed for continuous usage.  How you see and set
+your governor will be distribution specific.  The easiest way it to
+recompile your kernel to only provide the performance governor.
 
 == NTP tuning and performance details ==
 
