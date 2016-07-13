@@ -490,7 +490,7 @@ if __name__ == '__main__':
         if not title:
             title = plot.whatami()
         if terminal:
-            sys.stdout.write("set terminal %s\n" % terminal)
+            sys.stdout.write("set terminal %s size 800,600\n" % terminal)
         sys.stdout.write("set title \"%s\"\n" % title)
         sys.stdout.write(plot.plot())
     except KeyboardInterrupt:
