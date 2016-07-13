@@ -2,111 +2,50 @@
 # 
 # ntpshmviz - graph the drift of NTP servers
 # Written by Keane Wolter <daemoneye2@gmail.com>
-# 
-# pystripchart can be found at
-# https://sourceforge.net/projects/jstripchart
 #
 # To do:
 #
-# 1. Try using an impulse rather than line plot - this is bursty noise, not
-#    really a contour.
+# 1. Add exit button so the user does not need to do <Ctrl>-w
 #
 
-import gtk, stripchart, sys
+import sys
 # need numpy for float128, normal python floats are too small to hold a timespec
 import numpy
+import matplotlib.pyplot as PLT
+from matplotlib.figure import Figure
 
 class ntpOffset:
     def __init__(self, stream):
-        # Initialize the class
-
-        # create the GUI for the application
-        self.create_GUI()
-
         # get the data
         self.read_data(stream)
 
-        self.create_StripTableau()
-        self.display_StripTableau()
+        # display the data
+        self.display()
 
-        # enter the GTK main loop
-        gtk.main()
+    def display(self):
+        # display the graphs
 
-    def create_GUI(self):
-        # Creates the gui for the class
+        # Alert the user that closing the graphs can be done with "Ctrl-w"
+        print ("Please note that the graph can be closed with the key combination of <Ctrl-w>")
 
-        # create a standard top-level GTK window
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.window.set_title("NTP Offset")
-        self.window.connect("destroy", gtk.mainquit)
-        self.window.set_default_size(700, 400)
-        self.window.show()
-
-        # create a VBox to hold all the top-level GUI items
-        self.vbox = gtk.VBox()
-        self.vbox.show()
-        self.window.add(self.vbox)
-
-        # create the toolbar
-        self.create_toolbar()
-
-    def create_StripTableau(self):
-        # create the striptable widget
-
-        # gtk.Adjustment(value, lower, upper, step_incr, page_incr, page_size)
-        hadj = gtk.Adjustment(0, 0, self.lines, 1, 1, self.lines * 0.5)
-        sel  = gtk.Adjustment(0)
-        self.striptableau = stripchart.StripTableau(hadj, sel)
-        self.striptableau.metawidth  = 80
-        self.striptableau.gradewidth = 80
-        self.vbox.pack_end(self.striptableau.widget, gtk.TRUE, gtk.TRUE)
-
-    def create_toolbar(self):
-        # Create toolbar for zoom and quit buttons
-
-        self.toolbar = gtk.Toolbar()
-        self.toolbar.show()
-
-        # Zoom buttons
-        self.toolbar.insert_stock(gtk.STOCK_ZOOM_IN, "Zoom in", None,
-                lambda b, w: self.striptableau.zoomIn(), self.window, -1)
-        self.toolbar.insert_stock(gtk.STOCK_ZOOM_OUT, "Zoom out", None,
-                lambda b, w: self.striptableau.zoomOut(), self.window, -1)
-        self.toolbar.insert_stock(gtk.STOCK_ZOOM_FIT, "Zoom fit", None,
-                lambda b, w: self.striptableau.zoomSel(), self.window, -1)
-
-        # Quit button
-        self.toolbar.insert_stock(gtk.STOCK_QUIT, "Quit", None,
-                lambda b, w: gtk.mainquit(), self.window, -1)
-
-        # Put the toolbar into a HandleBox
-        self.handlebox = gtk.HandleBox()
-        self.handlebox.show()
-        self.handlebox.add(self.toolbar)
-
-        # Pack the toolbar into the main window
-        self.vbox.pack_start(self.handlebox, gtk.FALSE)
-
-    def display_StripTableau(self):
-        # display the graph of each ntp_unit
-
-        for ntp_unit in self.ntp_data:
-            # gtk.Adjustment(value, lower, upper, step_incr, page_incr,
-            #                page_size)
-            spread = self.ntp_upper[ntp_unit] - self.ntp_lower[ntp_unit]
-            # prevent divide by zero
-            if spread == 0:
-                spread = 1
-            vadj_ntp = gtk.Adjustment(
-                    self.ntp_lower[ntp_unit],         # initial  value
-                    self.ntp_lower[ntp_unit] - 0.001, # lower extreme
-                    self.ntp_upper[ntp_unit] + 0.001, # upper extreme
-                    1 / spread,                       # step_incr
-                    spread,                           # page_incr
-                    spread)                           # page size
-            ntp_item = self.striptableau.addChannel(self.ntp_data[ntp_unit], 
-                    vadj_ntp)
-            ntp_item.name = ntp_unit
+        PLT.figure()
+        subplot_value = 211
+        for ntp_item in self.ntp_data:
+            # create the subplot for the data
+            PLT.subplot(subplot_value)
+            # setup and create the vlines graph
+            t = numpy.arange(0, self.line_counts[ntp_item], 1)
+            PLT.vlines(t, 0, self.ntp_data[ntp_item], color='r')
+            # add labels
+            PLT.title("NTP drift for " + ntp_item)
+            PLT.xlabel('sample')
+            PLT.ylabel('drift')
+            # increment the subplot by 1.
+            # this allows for each data group to have it's own graph
+            subplot_value += 1
+        # make sure there is no graph or data overlapping each other and display the graph
+        PLT.tight_layout()
+        PLT.show()
 
     def read_data(self, stream):
         # Reads data from a ntp log file.  Layout is:
@@ -119,14 +58,11 @@ class ntpOffset:
         #   - Leep-second notification status
         #   - Source precision (log(2) of source jitter)
 
-        self.ntp_data  = {} # data sets for each ntp unit
-        record         = [] # A single record in the file or data stream
-        line_counts    = {} # Count of total lines for each ntp unit
-        self.lines     = 0  # width of graph
-        self.ntp_upper = {} # Upper limit of the data set
-        self.ntp_lower = {} # Lower limit of the data set
-        offset         = 0  # offset value to add to the array 
-        self.ntp_vadj  = {} # vertical adjustment for each graph
+        self.ntp_data    = {} # data sets for each ntp unit
+        self.line_counts = {} # Count of total lines for each ntp unit
+        record           = [] # A single record in the file or data stream
+        offset           = 0  # offset value to add to the array 
+        self.lines       = 0  # width of graph
 
         for line in stream:
             if len(line.split(' ')) > 6:
@@ -141,24 +77,29 @@ class ntpOffset:
                     # and add the offset.
                     if record[1] not in self.ntp_data:
                         self.ntp_data[record[1]]  = []
-                        line_counts[record[1]]    = 0
-                        self.ntp_upper[record[1]] = round(offset, 9)
-                        self.ntp_lower[record[1]] = round(offset, 9)
+                        self.line_counts[record[1]] = 0
 
                     self.ntp_data[record[1]].append(offset)
-                    line_counts[record[1]] += 1
-
-                    # Update the bounds of the NTP unit if needed
-                    if offset > self.ntp_upper[record[1]]:
-                        self.ntp_upper[record[1]] = round(offset, 9)
-                    if offset < self.ntp_lower[record[1]]:
-                        self.ntp_lower[record[1]] = round(offset, 9)
-
-                    # Update the max record count if needed
-                    if line_counts[record[1]] > self.lines:
-                        self.lines = line_counts[record[1]]
+                    self.line_counts[record[1]] += 1
         stream.close()
 
 if __name__ == "__main__":
+    if (len(sys.argv) == 2):
+        if (sys.argv[1] == "-V" or sys.argv[1] == "--version"):
+            print ("Version 2.0")
+            sys.exit()
+
+        if (sys.argv[1] == "-H" or sys.argv[1] == "--help"):
+            print ("Usage: <input stream> | ntpshmviz")
+            print ("Example: cat SAMPLES | ntpshmviz")
+            print ("")
+            print ("Options:")
+            print ("\t-V: version information")
+            print ("\t-H: help message")
+            print ("")
+            print ("Report ntpshmviz bugs to Keane Wolter, daemoneye2@gmail.com")
+            print ("gpsd homepage: www.catb.org/gpsd/")
+            sys.exit()
+
     ntpOffset(sys.stdin)
     sys.exit()
