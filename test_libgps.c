@@ -10,8 +10,6 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#define LIBGPS_DEBUG
-
 #include "gps.h"
 #include "libgps.h"
 #include "gpsdclient.h"
@@ -94,7 +92,9 @@ int main(int argc, char *argv[])
 	while (fgets(buf, sizeof(buf), stdin) != NULL) {
 	    if (buf[0] == '{' || isalpha(buf[0])) {
 		gps_unpack(buf, &gpsdata);
+#ifdef LIBGPS_DEBUG
 		libgps_dump_state(&gpsdata);
+#endif
 	    }
 	}
 #endif
@@ -107,7 +107,9 @@ int main(int argc, char *argv[])
 	(void)gps_send(&collect, fmsg);
 	(void)gps_read(&collect);
 #ifdef SOCKET_EXPORT_ENABLE
+#ifdef LIBGPS_DEBUG
 	libgps_dump_state(&collect);
+#endif
 #endif
 	(void)gps_close(&collect);
     } else {
@@ -127,7 +129,9 @@ int main(int argc, char *argv[])
 	    (void)gps_send(&collect, buf);
 	    (void)gps_read(&collect);
 #ifdef SOCKET_EXPORT_ENABLE
+#ifdef LIBGPS_DEBUG
 	    libgps_dump_state(&collect);
+#endif
 #endif
 	}
 	(void)gps_close(&collect);
