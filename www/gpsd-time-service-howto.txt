@@ -120,21 +120,22 @@ broadcast a current leap-second correction which is updated on
 six-month boundaries according to rotational bulletins issued by the
 International Earth Rotation and Reference Systems Service (IERS).
 
-The leap-second correction is only included in the satellite subframe
-broadcast, roughly once ever 20 minutes. While the satellites do
+The leap-second correction is only included in the multiplexed satellite
+subframe broadcast, once every 12.5 minutes.  While the satellites do
 notify GPSes of upcoming leap-seconds, this notification is not
-necessarily processed correctly on consumer-grade devices, and will
-not be available at all when a GPS receiver has just
-cold-booted. Thus, UTC time reported from devices may be slightly
-inaccurate between a cold boot or leap second and the following
-subframe broadcast.
+necessarily processed correctly on consumer-grade devices, and may not
+be available at all when a GPS receiver has just cold-booted. Thus,
+reported UTC time may be slightly inaccurate between a cold boot or leap
+second and the following subframe broadcast.
 
 GPS date and time are subject to a rollover problem in the 10-bit week
-number counter, which will re-zero every 1024 weeks (roughly every 20
+number counter, which will re-zero every 1024 weeks (roughly every 19.6
 years). The last rollover (and the first since GPS went live in 1980)
-was 0000 22 August 1999; the next would fall in 2019, but plans are
-afoot to upgrade the satellite counters to 13 bits; this will delay
-the next rollover until 2173.
+was in Aug-1999; the next will fall in Apr-2019.  The new "CNAV" data
+format extends the week number to 13 bits, with the first rollover
+occurring in Jan-2137, but this is only used with some newly added GPS
+signals, and is unlikely to be usable in most consumer-grade receivers
+prior to the 2019 rollover.
 
 For accurate time reporting, therefore, a GPS requires a supplemental
 time references sufficient to identify the current rollover period,
