@@ -78,6 +78,7 @@ int gps_sock_open(const char *host, const char *port,
 	return -1;
     PRIVATE(gpsdata)->newstyle = false;
     PRIVATE(gpsdata)->waiting = 0;
+    PRIVATE(gpsdata)->buffer[0] = 0;
 
 #ifdef LIBGPS_DEBUG
     PRIVATE(gpsdata)->waitcount = 0;
