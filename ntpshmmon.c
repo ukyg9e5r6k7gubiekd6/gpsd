@@ -84,6 +84,13 @@ int main(int argc, char **argv)
 	exit(EXIT_SUCCESS);
     }
 
+    /*
+     * We want line buffering even if stdout is going to a file.  This
+     * is a (possibly futile) attempt to avoid writing an incomplete
+     * line on interrupt.
+     */
+    setvbuf(stdout, NULL, _IOLBF, 0);
+
     (void)printf("ntpshmmon version 1\n");
     (void)printf("#      Name Seen@                Clock                Real                 L Prec\n");
 
