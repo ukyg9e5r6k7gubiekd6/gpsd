@@ -1192,11 +1192,11 @@ and bite on various future dates. </p>
 
 <ol>
   <li>The GPS radio format has a Y2K-style bug, the week counter
-  rollover, which happens either every 1024 weeks (roughly 20 years) or
-  every 8192 weeks (roughly 157 years), depending on whether your
-  receiver can decode a 10-bit or 13-bit GPS week field. At time of
-  writing the last 0 week was in 1999, the next 10-bit wraparound will
-  be in 2019, and the next 13-bit wraparound will be in 2157.</li>
+  rollover, which happens either every 1024 weeks (roughly 19.6 years)
+  or every 8192 weeks (roughly 157 years), depending on whether your
+  receiver can decode a 10-bit or 13-bit GPS week field.  At the time of
+  this writing the last 0 week was in 1999, the next 10-bit wraparound
+  will be in 2019, and the next 13-bit wraparound will be in 2137.</li>
 
   <li>NMEA delivers only two-digit years.</li>
 
@@ -1216,20 +1216,22 @@ after a rollover.  This can have side effects:</p>
   have a recent ephemeris.</li>
 </ol>
 
-<p>The public documentation is unclear, but it appears from a
-reference in the Transmission Week Number section of IS-GPS-200
-PIRN-002 that whether you can get 10 or 13 bits is a function of the
-satellite firmware revision, with 13 bits in the Block IIF and later
-birds (the first of these was launched in May 2010). Of course your
-receiver firmware also has to know that the extra three bits are
-present; at time of writing in late 2010 this capability is very rare
-and unavailable on consumer-grade receivers.</p>
+<p>The new 13-bit week number is only provided by the new "CNAV" data,
+which in turn is (or will be) available only in newly added GPS signals.
+Based on the carrier frequencies used, only the newest of the new
+signals (L1C) will be available to common civilian receivers, even with
+compatible hardware and firmware.  This signal is unavailable from
+satellites earlier than Block III, which are currently (July 2016) not
+expected to begin to launch earlier than September 2016.  Given that it
+takes years to launch a full constellation of satellites, it's highly
+unlikely that CNAV data with "operational" status will be available to
+common civilian receivers in time for the April 2019 10-bit rollover.</p>
 
 <p>For these reasons, GPSD needs the host computer's system clock to
 be accurate to within one second.</p>
 
-<p>When debugging time and date issues, you may find an
-<a href="http://adn.agi.com/GNSSWeb/">interactive GPS calendar</a>
+<p>When debugging time and date issues, you may find an interactive
+<a href="http://navigationservices.agi.com/GNSSWeb/">GPS Date Calendar</a>
 useful.</p>
 
 <h2 id="hotplug">Hotplug interface problems</h2>
