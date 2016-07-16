@@ -1527,8 +1527,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
      */
     if ((changed & TIME_SET) == 0) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: No time this packet\n");
-    } else if ( NTP_MIN_FIXES > device->fixcnt &&
-		(changed & GOODTIME_IS) == 0) {
+    } else if ( NTP_MIN_FIXES > device->fixcnt ) {
         /* many GPS spew random times until a valid GPS fix */
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: no fix\n");
     } else if (isnan(device->newdata.time)) {
