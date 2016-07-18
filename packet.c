@@ -1881,29 +1881,57 @@ void packet_parse(struct gps_lexer_t *lexer)
 #ifdef TSIP_ENABLE
 		/* check for some common TSIP packet types:
 		 * 0x13, TSIP Parsing Error Notification
-		 * 0x38, Request SV system data
 		 * 0x1c, Hardware/Software Version Information
+		 * 0x38, Request SV system data
+		 * 0x40, Almanac
 		 * 0x41, GPS time, data length 10
-		 * 0x42, Single Precision Fix, data length 16
-		 * 0x43, Velocity Fix, data length 20
+		 * 0x42, Single Precision Fix XYZ, data length 16
+		 * 0x43, Velocity Fix XYZ, ECEF, data length 20
 		 * 0x45, Software Version Information, data length 10
 		 * 0x46, Health of Receiver, data length 2
+		 * 0x47, Signal Levels for all sats
 		 * 0x48, GPS System Messages, data length 22
 		 * 0x49, Almanac Health Page, data length 32
-		 * 0x4a, LLA Position, data length 20
+		 * 0x4a, Signle Precision Fix LLA, data length 20
 		 * 0x4b, Machine Code Status, data length 3
 		 * 0x4c, Operating Parameters Report, data length 17
-		 * 0x54, One Satellite Bias, data length 4
-		 * 0x56, Velocity Fix (ENU), data length 20
+		 * 0x4d, Oscillator Offset
+		 * 0x4e, Response to set GPS time
+		 * 0x54, One Satellite Bias, data length 12
+		 * 0x55, I/O Options, data length 4
+		 * 0x56, Velocity Fix ENU, data length 20
 		 * 0x57, Last Computed Fix Report, data length 8
+		 * 0x58, Satellite System Data
+		 * 0x58-05, UTC
+		 * 0x59, Satellite Health
 		 * 0x5a, Raw Measurements
 		 * 0x5b, Satellite Ephemeris Status, data length 16
 		 * 0x5c, Satellite Tracking Status, data length 24
 		 * 0x5e, Additional Fix Status Report
-		 * 0x6d, All-In-View Satellite Selection, data length 16+numSV
+		 * 0x5f, Severe Failure Notification
+		 * 0x5F-01-0B: Reset Error Codes
+		 * 0x5F-02: Ascii text message
+		 * 0x6d, All-In-View Satellite Selection, data length 17+numSV
+		 * 0x6f, Synced Measurement Packet
+		 * 0x72, PV filter parameters
+		 * 0x74, Altitude filter parameters
+		 * 0x78, Max DGPS correction age
+		 * 0x7b, NMEA message schedule
 		 * 0x82, Differential Position Fix Mode, data length 1
-		 * 0x83, Double Precision XYZ, data length 36
-		 * 0x84, Double Precision LLA, data length 36
+		 * 0x83, Double Precision Fix XYZ, data length 36
+		 * 0x84, Double Precision Fix LLA, data length 36
+		 * 0x85, DGPS Correction status
+		 * 0x8f, Superpackets
+		 * 0x8f-01,
+		 * 0x8f-02,
+		 * 0x8f-03, port configration
+		 * 0x8f-14, datum
+		 * 0x8f-15, datum
+		 * 0x8f-17, Single Precision UTM
+		 * 0x8f-18, Double Precision UTM
+		 * 0x8f-20, LLA & ENU
+		 * 0x8f-26, SEEPROM write status
+		 * 0x8f-40, TAIP Configuration
 		 * 0xbb, GPS Navigation Configuration
 		 * 0xbc, Receiver Port Configuration
 		 *
@@ -1976,8 +2004,8 @@ void packet_parse(struct gps_lexer_t *lexer)
 		else if (TSIP_ID_AND_LENGTH(0x5e, 2))
 		    /* pass */ ;
 		/*
-		 * Not in [TSIP]. It's unclear where this test came from or
-		 * why it's here; the TSIP driver doesn't use type 0x5f.
+		 * Not in [TSIP]. the TSIP driver doesn't use type 0x5f.
+	         * but we test for it so as to avoid setting packet not_tsip
 		 */
 		else if (TSIP_ID_AND_LENGTH(0x5f, 66))
 		    /* pass */ ;

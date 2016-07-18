@@ -2,6 +2,7 @@
  * Handle the Trimble TSIP packet format
  * by Rob Janssen, PE1CHL.
  * Accutime Gold support by Igor Socec <igorsocec@gmail.com>
+ * Trimble RES multi-constelation support by Nuno Goncalves <nunojpg@gmail.com>
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
@@ -948,6 +949,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     }
 
     if ((now - session->driver.tsip.last_5c) >= 5) {
+	/* 5d in multi-gnss devices */
 	/* Request Current Satellite Tracking Status */
 	putbyte(buf, 0, 0x00);	/* All satellites */
 	(void)tsip_write(session, 0x3c, buf, 1);
