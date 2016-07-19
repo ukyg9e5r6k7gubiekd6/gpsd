@@ -1892,7 +1892,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 * 0x47, Signal Level all Sats Tracked, data length 1+5*numSV
 		 * 0x48, GPS System Messages, data length 22
 		 * 0x49, Almanac Health Page, data length 32
-		 * 0x4a, Signle Precision Fix LLA, data length 20
+		 * 0x4a, Single Precision Fix LLA, data length 20
 		 * 0x4b, Machine Code Status, data length 3
 		 * 0x4c, Operating Parameters Report, data length 17
 		 * 0x4d, Oscillator Offset
