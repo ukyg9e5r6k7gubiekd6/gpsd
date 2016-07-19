@@ -34,7 +34,7 @@ void configuration_packets_accutime_gold(struct gps_device_t *session);
 void configuration_packets_generic(struct gps_device_t *session);
 
 #ifdef TSIP_ENABLE
-#define TSIP_CHANNELS	12
+#define TSIP_CHANNELS	15
 
 static int tsip_write(struct gps_device_t *session,
 		      unsigned int id, unsigned char *buf, size_t len)
@@ -120,7 +120,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     int i, j, len, count;
     gps_mask_t mask = 0;
     unsigned int id;
-    uint8_t u1, u2, u3, u4, u5;
+    uint8_t u1, u2, u3, u4, u5, u6, u7, u8, u9, u10;
     int16_t s1, s2, s3, s4;
     int32_t sl1, sl2, sl3;
     uint32_t ul1, ul2;
@@ -513,7 +513,113 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.satellites_visible = i;
 	}
 	break;
+     case 0x5d:
+        /* GNSS Satellite Tracking Status (multi-GNSS operation) */
+	if (len != 26)
+	    break;
+	u1 = getub(buf, 0);	/* PRN */
+	u2 = getub(buf, 1);	/* chan */
+	u3 = getub(buf, 2);	/* Acquisition flag */
+	u4 = getub(buf, 3);	/* SV used in Position or Time calculation*/
+	f1 = getbef32((char *)buf, 4);	/* Signal level */
+	f2 = getbef32((char *)buf, 8);	/* time of Last measurement */
+	d1 = getbef32((char *)buf, 12) * RAD_2_DEG;	/* Elevation */
+	d2 = getbef32((char *)buf, 16) * RAD_2_DEG;	/* Azimuth */
+	u5 = getub(buf, 20);	/* old measurement flag */
+	u6 = getub(buf, 21);	/* integer msec flag */
+	u7 = getub(buf, 22);	/* bad data flag */
+	u8 = getub(buf, 23);	/* data collection flag */
+	u9 = getub(buf, 24);	/* Used flags */
+	u10 = getub(buf, 25);	/* SV Type */
+
+	i = u2;			/* channel number */
+	gpsd_log(&session->context->errout, LOG_INF,
+		"Satellite Tracking Status: Ch %2d Con %d PRN %3d Acq %d "
+		"Use %d SNR %4.1f LMT %.04f El %4.1f Az %5.1f Old %d Int %d "
+	        "Bad %d Col %d TPF %d SVT %d\n",
+		i, u10, u1, u3, u4, f1, f2, d1, d2, u5, u6, u7, u8, u9, u10);
+	if (i < TSIP_CHANNELS) {
+	    if (d1 >= 0.0) {
+		session->gpsdata.skyview[i].PRN = (short)u1;
+		session->gpsdata.skyview[i].ss = (double)f1;
+		session->gpsdata.skyview[i].elevation = (short)round(d1);
+		session->gpsdata.skyview[i].azimuth = (short)round(d2);
+		session->gpsdata.skyview[i].used = (bool)u4;
+	    } else {
+		session->gpsdata.skyview[i].PRN = (short)u1;
+		session->gpsdata.skyview[i].elevation =
+		    session->gpsdata.skyview[i].azimuth = 0;
+		session->gpsdata.skyview[i].ss = 0.0;
+		session->gpsdata.skyview[i].used = false;
+	    }
+	    if (++i == session->gpsdata.satellites_visible) {
+		session->gpsdata.skyview_time = NAN;
+		mask |= SATELLITE_SET;	/* last of the series */
+	    }
+	    if (i > session->gpsdata.satellites_visible)
+		session->gpsdata.satellites_visible = i;
+	}
+	break;
     case 0x5e:			/* Additional Fix Status Report */
+	break;
+    case 0x6c:			/* Satellite Selection List */
+	u1 = getub(buf, 0);	/* nsvs/dimension */
+	count = (int)getub(buf, 17);
+	if (len != (18 + count))
+	    break;
+	session->driver.tsip.last_6d = now;	/* keep timestamp for request */
+#ifdef __UNUSED__
+	/*
+	 * This looks right, but it sets a spurious mode value when
+	 * the satellite constellation looks good to the chip but no
+	 * actual fix has yet been acquired.  We should set the mode
+	 * field (which controls gpsd's fix reporting) only from sentences
+	 * that convey actual fix information, like 0x20, otherwise we
+	 * get results like triggering their error modeler spuriously.
+	 */
+	switch (u1 & 7) {	/* dimension */
+	case 3:
+	    // session->gpsdata.status = STATUS_FIX;
+	    session->newdata.mode = MODE_2D;
+	    break;
+	case 4:
+	    // session->gpsdata.status = STATUS_FIX;
+	    session->newdata.mode = MODE_3D;
+	    break;
+	default:
+	    // session->gpsdata.status = STATUS_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
+	    break;
+	}
+	mask |= MODE_SET;
+#endif /* __UNUSED__ */
+	session->gpsdata.satellites_used = count;
+	session->gpsdata.dop.pdop = getbef32((char *)buf, 1);
+	session->gpsdata.dop.hdop = getbef32((char *)buf, 5);
+	session->gpsdata.dop.vdop = getbef32((char *)buf, 9);
+	session->gpsdata.dop.tdop = getbef32((char *)buf, 13);
+	session->gpsdata.dop.gdop =
+	    sqrt(pow(session->gpsdata.dop.pdop, 2) +
+		 pow(session->gpsdata.dop.tdop, 2));
+
+	memset(session->driver.tsip.sats_used, 0,
+		sizeof(session->driver.tsip.sats_used));
+	buf2[0] = '\0';
+	for (i = 0; i < count; i++)
+	    str_appendf(buf2, sizeof(buf2),
+			   " %d", session->driver.tsip.sats_used[i] =
+			   (short)getub(buf, 18 + i));
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "AIVSS: 0x6d status=%d used=%d "
+		 "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdup=%.1f\n",
+		 session->gpsdata.status,
+		 session->gpsdata.satellites_used,
+		 session->gpsdata.dop.pdop,
+		 session->gpsdata.dop.hdop,
+		 session->gpsdata.dop.vdop,
+		 session->gpsdata.dop.tdop,
+		 session->gpsdata.dop.gdop);
+	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
     case 0x6d:			/* All-In-View Satellite Selection */
 	u1 = getub(buf, 0);	/* nsvs/dimension */
@@ -797,6 +903,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 
+	case 0x4a:		/* Set PPS Characteristics */
+	    break;
+
+	case 0x4e:		/* PPS Output */
+	    break;
+
+	case 0xa2:		/* UTC/GPS Timing */
+	    break;
+
 	case 0xab:		/* Thunderbolt Timing Superpacket */
 	    if (len != 17) {
 		gpsd_log(&session->context->errout, 4, "pkt 0xab len=%d\n", len);
@@ -1009,7 +1124,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	return;
     if (event == event_identified) {
 	unsigned char buf[100];
-	
+
 	/*
 	 * Set basic configuration, in case no hardware config response
 	 * comes back.
@@ -1148,14 +1263,14 @@ void configuration_packets_generic(struct gps_device_t *session)
 /* configure generic Trimble TSIP device to a known state */
 {
 	unsigned char buf[100];
-	
+
 	/* I/O Options */
 	putbyte(buf, 0, 0x1e);	/* Position: DP, MSL, LLA */
 	putbyte(buf, 1, 0x02);	/* Velocity: ENU */
 	putbyte(buf, 2, 0x00);	/* Time: GPS */
 	putbyte(buf, 3, 0x08);	/* Aux: dBHz */
 	(void)tsip_write(session, 0x35, buf, 4);
-	
+
 	/* Request Software Versions */
 	(void)tsip_write(session, 0x1f, NULL, 0);
 	/* Request Current Time */

@@ -1889,7 +1889,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 * 0x43, Velocity Fix XYZ, ECEF, data length 20
 		 * 0x45, Software Version Information, data length 10
 		 * 0x46, Health of Receiver, data length 2
-		 * 0x47, Signal Levels for all sats
+		 * 0x47, Signal Level all Sats Tracked, data length 1+5*numSV
 		 * 0x48, GPS System Messages, data length 22
 		 * 0x49, Almanac Health Page, data length 32
 		 * 0x4a, Signle Precision Fix LLA, data length 20
@@ -1907,10 +1907,12 @@ void packet_parse(struct gps_lexer_t *lexer)
 		 * 0x5a, Raw Measurements
 		 * 0x5b, Satellite Ephemeris Status, data length 16
 		 * 0x5c, Satellite Tracking Status, data length 24
+		 * 0x5d, Satellite Tracking Status (multi-gnss), data length 26
 		 * 0x5e, Additional Fix Status Report
 		 * 0x5f, Severe Failure Notification
 		 * 0x5F-01-0B: Reset Error Codes
 		 * 0x5F-02: Ascii text message
+		 * 0x6c, Satellite Selection List, data length 18+numSV
 		 * 0x6d, All-In-View Satellite Selection, data length 17+numSV
 		 * 0x6f, Synced Measurement Packet
 		 * 0x72, PV filter parameters
@@ -1949,10 +1951,16 @@ void packet_parse(struct gps_lexer_t *lexer)
                 /* *INDENT-OFF* */
 		if (!((0x13 == pkt_id) ||
 		      (0x1c == pkt_id) ||
+		      (0x38 == pkt_id) ||
+		      ((0x41 <= pkt_id) && (0x4c >= pkt_id)) ||
+		      ((0x54 <= pkt_id) && (0x57 >= pkt_id)) ||
+		      ((0x5a <= pkt_id) && (0x5f >= pkt_id)) ||
+		      (0x6c == pkt_id) ||
+		      (0x6d == pkt_id) ||
+		      ((0x82 <= pkt_id) && (0x84 >= pkt_id)) ||
+		      (0x8f == pkt_id) ||
 		      (0xbb == pkt_id) ||
-		      (0xbc == pkt_id) ||
-		      (0x38 == pkt_id))
-		    && ((0x41 > pkt_id) || (0x8f < pkt_id))) {
+		      (0xbc == pkt_id))) {
 		    gpsd_log(&lexer->errout, LOG_IO,
 			     "Packet ID 0x%02x out of range for TSIP\n",
 			     pkt_id);
@@ -1977,6 +1985,12 @@ void packet_parse(struct gps_lexer_t *lexer)
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x46, 2))
 		    /* pass */ ;
+		else if ((0x47 == pkt_id) && ((packetlen % 5) == 0))
+		    /*
+                     * 0x47 data length 1+5*numSV, packetlen is 5+5*numSV
+                     * FIXME, should be a proper length calculation
+                     */
+		     /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x48, 22))
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x49, 32))
@@ -2001,6 +2015,8 @@ void packet_parse(struct gps_lexer_t *lexer)
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x5c, 24))
 		    /* pass */ ;
+		else if (TSIP_ID_AND_LENGTH(0x5d, 26))
+		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x5e, 2))
 		    /* pass */ ;
 		/*
@@ -2008,10 +2024,20 @@ void packet_parse(struct gps_lexer_t *lexer)
 	         * but we test for it so as to avoid setting packet not_tsip
 		 */
 		else if (TSIP_ID_AND_LENGTH(0x5f, 66))
+		    /*
+		     * 0x6c data length 18+numSV, total packetlen is 22+numSV
+		     * numSV up to 224
+		     */
 		    /* pass */ ;
-		/* 0x6d is variable length depending on the sat picture */
+		else if ((0x6c == pkt_id)
+			 && ((22 <= packetlen) && (246 >= packetlen)))
+		    /*
+		     * 0x6d data length 17+numSV, total packetlen is 21+numSV
+	             * numSV up to 32
+		     */
+		    /* pass */ ;
 		else if ((0x6d == pkt_id)
-			 && ((0x14 <= packetlen) && (0x20 >= packetlen)))
+			 && ((21 <= packetlen) && (53 >= packetlen)))
 		    /* pass */ ;
 		else if (TSIP_ID_AND_LENGTH(0x82, 1))
 		    /* pass */ ;
@@ -2020,7 +2046,7 @@ void packet_parse(struct gps_lexer_t *lexer)
 		else if (TSIP_ID_AND_LENGTH(0x84, 36))
 		    /* pass */ ;
 		/* super packets, variable length */
-		else if ((0x8e == pkt_id) || (0x8f == pkt_id))
+		else if (0x8f == pkt_id)
 		    /* pass */ ;
 		/*
 		 * This is according to [TSIP].
