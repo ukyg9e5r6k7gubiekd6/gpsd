@@ -156,31 +156,48 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 
     if (session->device_type != NULL && (session->gpsdata.set & MODE_SET) != 0) {
 	int i, j;
+	int max_channels = session->device_type->channels;
+
+	/* GPGSA commonly has exactly 12 channels, enforce that as a MAX */
+	if ( 12 < max_channels ) {
+	    /* what to do with the excess channels? */
+	    max_channels = 12;
+	}
 
 	bufp2 = bufp + strlen(bufp);
 	(void)snprintf(bufp, len,
 		       "$GPGSA,%c,%d,", 'A', session->gpsdata.fix.mode);
 	j = 0;
-	for (i = 0; i < session->device_type->channels; i++) {
+	for (i = 0; i < max_channels; i++) {
 	    if (session->gpsdata.skyview[i].used == true){
-		str_appendf(bufp, len,
-			       "%d,",
-			       session->gpsdata.skyview[i].PRN);
+		str_appendf(bufp, len, "%d,", session->gpsdata.skyview[i].PRN);
 	        j++;
 	    }
 	}
-	for (i = j; i < session->device_type->channels; i++) {
+	for (i = j; i < max_channels; i++) {
+	    /* fill out the empty slots */
 	    (void)strlcat(bufp, ",", len);
 	}
-#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
 	if (session->gpsdata.fix.mode == MODE_NO_FIX)
 	    (void)strlcat(bufp, ",,,", len);
-	else
-	    str_appendf(bufp, len,
-			   "%.1f,%.1f,%.1f*",
-			   ZEROIZE(session->gpsdata.dop.pdop),
-			   ZEROIZE(session->gpsdata.dop.hdop),
-			   ZEROIZE(session->gpsdata.dop.vdop));
+	else {
+            /* output the DOPs, NaN as blanks */
+	    if ( 0 == isnan( session->gpsdata.dop.pdop ) ) {
+		str_appendf(bufp, len, "%.1f,", session->gpsdata.dop.pdop);
+	    } else {
+		(void)strlcat(bufp, ",", len);
+	    }
+	    if ( 0 == isnan( session->gpsdata.dop.hdop ) ) {
+		str_appendf(bufp, len, "%.1f,", session->gpsdata.dop.hdop);
+	    } else {
+		(void)strlcat(bufp, ",", len);
+	    }
+	    if ( 0 == isnan( session->gpsdata.dop.vdop ) ) {
+		str_appendf(bufp, len, "%.1f*", session->gpsdata.dop.vdop);
+	    } else {
+		(void)strlcat(bufp, "*", len);
+	    }
+	}
 	nmea_add_checksum(bufp2);
     }
     if (isfinite(session->gpsdata.fix.epx)!=0
@@ -196,6 +213,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	    (void)gmtime_r(&intfixtime, &tm);
 	}
 	bufp2 = bufp + strlen(bufp);
+#define ZEROIZE(x)      (isnan(x)!=0 ? 0.0 : x)
 	str_appendf(bufp, len,
 		       "$GPGBS,%02d%02d%02d,%.2f,M,%.2f,M,%.2f,M",
 		       tm.tm_hour, tm.tm_min, tm.tm_sec,
