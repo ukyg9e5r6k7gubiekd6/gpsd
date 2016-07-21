@@ -1605,7 +1605,7 @@ static gps_mask_t processPSTI030(int count, char *field[],
 /*
  * Skytraq sentences take this format:
  * $PSTI,type[,val[,val]]*CS
- * type is a 2 digit subsentence type
+ * type is a 2 or 3 digit subsentence type
  *
  * Note: this sentence can be at least 100 chars long.
  * That violates the NMEA max of 82.
@@ -1680,7 +1680,8 @@ static gps_mask_t processPSTI(int count, char *field[],
 /*
  * Skytraq undocumented debug sentences take this format:
  * $STI,type,val*CS
- * type is a 2 digit subsentence type
+ * type is a 2 char subsentence type
+ * Note: NO checksum
  */
 static gps_mask_t processSTI(int count, char *field[],
 			       struct gps_device_t *session)
@@ -1695,10 +1696,16 @@ static gps_mask_t processSTI(int count, char *field[],
 	(void)gpsd_write(session, "\xA0\xA1\x00\x02\x02\x01\x03\x0d\x0a",9);
     }
 
+    if ( 0 == strcmp( field[1], "IC") ) {
+	/* $STI,IC,error=XX, this is always very bad, but undocumented */
+	gpsd_log(&session->context->errout, LOG_ERROR,
+		     "Skytraq: $STI,%s,%s\n", field[1], field[2]);
+        return mask;
+    }
     gpsd_log(&session->context->errout, LOG_DATA,
 		 "STI,%s: Unknown type, Count: %d\n", field[1], count);
 
-    return 0;
+    return mask;
 }
 #endif /* SKYTRAQ_ENABLE */
 
@@ -1766,8 +1773,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"PTNTA", 8, false, processTNTA},
 #endif /* TNT_ENABLE */
 #ifdef SKYTRAQ_ENABLE
-	{"PSTI", 2, false, processPSTI},	/* Skytraq */
-	{"STI", 2, false, processSTI},	/* Skytraq */
+	{"PSTI", 2, false, processPSTI},	/* $PSTI Skytraq */
+	{"STI", 2, false, processSTI},		/* $STI  Skytraq */
 #endif /* SKYTRAQ_ENABLE */
 	{"RMC", 8,  false, processRMC},
 	{"TXT", 5,  false, processTXT},
@@ -1780,6 +1787,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     unsigned int i, thistag;
     char *p, *s, *e;
     volatile char *t;
+#ifdef SKYTRAQ_ENABLE
+    bool skytraq_sti = false;
+#endif
 
     /*
      * We've had reports that on the Garmin GPS-10 the device sometimes
@@ -1804,6 +1814,13 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	++p;
     if (*p == '*')
 	*p++ = ',';		/* otherwise we drop the last field */
+#ifdef SKYTRAQ_ENABLE
+    /* $STI is special, no trailing *, or chacksum */
+    if ( 0 != strncmp( "STI,", sentence, 4) ) {
+	skytraq_sti = true;
+	*p++ = ',';		/* otherwise we drop the last field */
+    }
+#endif
     *p = '\0';
     e = p;
 
@@ -1835,8 +1852,14 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     for (thistag = i = 0;
 	 i < (unsigned)(sizeof(nmea_phrase) / sizeof(nmea_phrase[0])); ++i) {
 	s = session->nmea.field[0];
-	if (strlen(nmea_phrase[i].name) == 3)
+	if (strlen(nmea_phrase[i].name) == 3
+#ifdef SKYTRAQ_ENABLE
+	        /* $STI is special */
+		&& !skytraq_sti
+#endif
+		) {
 	    s += 2;		/* skip talker ID */
+        }
 	if (strcmp(nmea_phrase[i].name, s) == 0) {
 	    if (nmea_phrase[i].decoder != NULL
 		&& (count >= nmea_phrase[i].nf)) {

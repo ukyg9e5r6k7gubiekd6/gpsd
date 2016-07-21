@@ -1,0 +1,14 @@
+# Name: skytraq
+# Description: Skytraq S2525F8-BD-RTK DGPS NMEA
+# Submitter: Gary E. Miller <gem@rellim.com>
+# Date: 2016-07-21
+# Location: Bend, OR, USA
+#
+# Notes: This is a Skytraq with a firmware loader error
+# the codes are undocumented
+$STI,IC,error=4
+$STI,IC,error=4
+$STI,IC,error=4
+$STI,IC,error=6
+$STI,IC,error=6
+$STI,IC,error=6

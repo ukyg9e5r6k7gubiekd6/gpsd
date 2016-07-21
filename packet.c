@@ -607,8 +607,10 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
     case SOUNDER_LEAD_1:
 	if (c == 'D')		/* Depth-sounder leader accepted */
 	    lexer->state = NMEA_LEADER_END;
+#ifdef SKYTRAQ_ENABLE
 	else if (c == 'T')		/* $ST leader accepted, to $STI */
 	    lexer->state = NMEA_LEADER_END;
+#endif /* SKYTRAQ_ENABLE */
 	else
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
