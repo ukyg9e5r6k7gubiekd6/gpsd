@@ -1602,7 +1602,8 @@ static gps_mask_t processPSTI030(int count, char *field[],
     return mask;
 }
 
-/* Skytraq sentences take this format:
+/*
+ * Skytraq sentences take this format:
  * $PSTI,type[,val[,val]]*CS
  * type is a 2 digit subsentence type
  *
@@ -1675,6 +1676,30 @@ static gps_mask_t processPSTI(int count, char *field[],
 
     return 0;
 }
+
+/*
+ * Skytraq undocumented debug sentences take this format:
+ * $STI,type,val*CS
+ * type is a 2 digit subsentence type
+ */
+static gps_mask_t processSTI(int count, char *field[],
+			       struct gps_device_t *session)
+{
+    gps_mask_t mask;
+
+    /* set something, so it won't look like an unknown sentence */
+    mask |= ONLINE_SET;
+
+    if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
+	/* this is skytraq, but marked yet, so probe for Skytraq */
+	(void)gpsd_write(session, "\xA0\xA1\x00\x02\x02\x01\x03\x0d\x0a",9);
+    }
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+		 "STI,%s: Unknown type, Count: %d\n", field[1], count);
+
+    return 0;
+}
 #endif /* SKYTRAQ_ENABLE */
 
 /**************************************************************************
@@ -1742,6 +1767,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 #endif /* TNT_ENABLE */
 #ifdef SKYTRAQ_ENABLE
 	{"PSTI", 2, false, processPSTI},	/* Skytraq */
+	{"STI", 2, false, processSTI},	/* Skytraq */
 #endif /* SKYTRAQ_ENABLE */
 	{"RMC", 8,  false, processRMC},
 	{"TXT", 5,  false, processTXT},
