@@ -246,7 +246,7 @@ class spaceplot(plotter):
         fmt += 'set style line 2 pt 1\n'
         fmt += 'set style line 3 pt 2\n'
         fmt += 'set xlabel "Meters east from %s"\n' % lonstring
-        fmt += 'set xtic rotate by -45'
+        fmt += 'set xtic rotate by -45\n'
         fmt += 'set ylabel "Meters north from %s"\n' % latstring
         fmt += 'set border 15\n'
         if not gps.isnan(alt_avg):
