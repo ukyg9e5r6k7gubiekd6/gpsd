@@ -1814,7 +1814,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	++p;
     if (*p == '*')
 	*p++ = ',';		/* otherwise we drop the last field */
-#ifdef SKYTRAQ_ENABLE
+#ifdef SKYTRAQ_ENABLE_UNUSED
     /* $STI is special, no trailing *, or chacksum */
     if ( 0 != strncmp( "STI,", sentence, 4) ) {
 	skytraq_sti = true;
