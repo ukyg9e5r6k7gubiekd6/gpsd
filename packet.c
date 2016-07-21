@@ -102,6 +102,7 @@ PERMISSIONS
  *      $TI -- Turn indicator (Airmar PB200).
  *      $EC -- Electronic Chart Display & Information System (ECDIS)
  *      $SD -- Depth Sounder
+ *      $ST -- $STI, Skytraq Debug Output
  *      $YX -- Transducer (used by some Airmar equipment including PB100)
  *      $P  -- Vendor-specific sentence
  *
@@ -605,6 +606,8 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	break;
     case SOUNDER_LEAD_1:
 	if (c == 'D')		/* Depth-sounder leader accepted */
+	    lexer->state = NMEA_LEADER_END;
+	else if (c == 'T')		/* $ST leader accepted, to $STI */
 	    lexer->state = NMEA_LEADER_END;
 	else
 	    return character_pushback(lexer, GROUND_STATE);
