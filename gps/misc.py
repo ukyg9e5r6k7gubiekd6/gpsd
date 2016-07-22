@@ -70,15 +70,15 @@ else:  # Otherwise we do something real
 
 
 # some multipliers for interpreting GPS output
-METERS_TO_FEET	= 3.2808399	# Meters to U.S./British feet
-METERS_TO_MILES	= 0.00062137119	# Meters to miles
-METERS_TO_FATHOMS	= 0.54680665	# Meters to fathoms
-KNOTS_TO_MPH	= 1.1507794	# Knots to miles per hour
-KNOTS_TO_KPH	= 1.852		# Knots to kilometers per hour
-KNOTS_TO_MPS	= 0.51444444	# Knots to meters per second
-MPS_TO_KPH	= 3.6		# Meters per second to klicks/hr
-MPS_TO_MPH	= 2.2369363	# Meters/second to miles per hour
-MPS_TO_KNOTS	= 1.9438445	# Meters per second to knots
+METERS_TO_FEET	= 3.28083989501312	# Meters to U.S./British feet
+METERS_TO_MILES	= 0.000621371192237334	# Meters to miles
+METERS_TO_FATHOMS = 0.546806649168854	# Meters to fathoms
+KNOTS_TO_MPH	= 1.15077944802354	# Knots to miles per hour
+KNOTS_TO_KPH	= 1.852		        # Knots to kilometers per hour
+KNOTS_TO_MPS	= 0.514444444444445	# Knots to meters per second
+MPS_TO_KPH	= 3.6		        # Meters per second to klicks/hr
+MPS_TO_MPH	= 2.2369362920544	# Meters/second to miles per hour
+MPS_TO_KNOTS	= 1.9438444924406	# Meters per second to knots
 
 # EarthDistance code swiped from Kismet and corrected
 
