@@ -196,7 +196,7 @@ class spaceplot(plotter):
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
             (raw1, raw2, alt) = self.fixes[i]
-            res += "%.7f\t%.9f\t%.9f\t%.9f\t%.9f\n" % (lat, lon, raw1, raw2, alt)
+            res += "%.9f\t%.9f\t%.9f\t%.9f\t%.9f\n" % (lat, lon, raw1, raw2, alt)
         return res
 
     def plot(self):
