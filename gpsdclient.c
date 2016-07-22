@@ -35,7 +35,7 @@ static struct exportmethod_t exportmethods[] = {
  *      deg_ddmm   : return DD MM.mmmmmm'
  *      deg_ddmmss : return DD MM' SS.sssss"
  *
- * for cm level accuracy we need degrees to 7 decimal places
+ * for cm level accuracy we need degrees to 7+ decimal places
  * Ref: https://en.wikipedia.org/wiki/Decimal_degrees
  *
  */
@@ -53,20 +53,20 @@ char *deg_to_str(enum deg_str_type type, double f)
 
     fmin = modf(f, &fdeg);
     deg = (int)fdeg;
-    frac_deg = (long)(fmin * 10000000);
 
     if (deg_dd == type) {
-	/* DD.ddddddd */
-        /* cm level accuracy requires the %07ld */
-	(void)snprintf(str, sizeof(str), "%3d.%07ld", deg, frac_deg);
+	/* DD.dddddddd */
+        /* cm level accuracy requires the %08ld */
+	frac_deg = (long)(fmin * 100000000);
+	(void)snprintf(str, sizeof(str), "%3d.%08ld", deg, frac_deg);
 	return str;
     }
     fsec = modf(fmin * 60, &fmin);
     min = (int)fmin;
-    sec = (int)(fsec * 1000000.0);
 
     if (deg_ddmm == type) {
-	/* DD MM.mmmm */
+	/* DD MM.mmmmmm */
+	sec = (int)(fsec * 1000000.0);
 	(void)snprintf(str, sizeof(str), "%3d %02d.%06d'", deg, min, sec);
 	return str;
     }
