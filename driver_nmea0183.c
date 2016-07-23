@@ -1536,6 +1536,9 @@ static gps_mask_t processPSTI030(int count, char *field[],
      * 13    1.2          RTK Age
      * 14    4.2          RTK Ratio
      * 15    *68          mandatory nmea_checksum
+     *
+     * In private email, SkyTraq says F mode is 10x more accurate
+     * than R mode.
      */
     gps_mask_t mask = 0;
 
