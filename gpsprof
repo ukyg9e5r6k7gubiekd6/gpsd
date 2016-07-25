@@ -20,6 +20,22 @@ import socket
 import sys
 import time
 
+def EarthDistanceSmall(c1, c2):
+    "Distance in meters between two close points specified in degrees."
+    # This calculation is known as an Equirectangular Projection
+    # fewer numeric issues for small angles that other methods
+    (lat1, lon1) = c1
+    (lat2, lon2) = c2
+    dlat = lat1 - lat2
+    avglat = (lat1 + lat2 ) /2
+    dlon = (lon1 - lon2) * math.cos( math.radians( avglat ) )
+    # Earth Mean Radius 6371000 meters.
+    # one degree lat, average 111.133000
+    # at equator 110.567 km
+    # at poll 111.699 km
+    dist = math.sqrt( dlat * dlat + dlon * dlon) * 111133
+    return dist;
+
 
 class Baton(object):
     "Ship progress indication to stderr."
@@ -201,9 +217,9 @@ class spaceplot(plotter):
 
     def plot(self):
         # Compute CEP(50%)
-        cep_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.50)][:2])
-        cep95_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
-        cep99_meters = gps.EarthDistance(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
+        cep_meters = EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.50)][:2])
+        cep95_meters = EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
+        cep99_meters = EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
         alt_sum = 0
         alt_num = 0
         alt_fixes = []
