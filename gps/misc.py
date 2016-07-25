@@ -71,7 +71,7 @@ else:  # Otherwise we do something real
 
 # some multipliers for interpreting GPS output
 # Note: A Texas Foot is ( meters * 3937/1200)
-#       (Texas Natural Resources Code, Subchapter D, §21.071 – 79)
+#       (Texas Natural Resources Code, Subchapter D, Sec 21.071 – 79)
 #       not the same as an international fooot.
 METERS_TO_FEET	= 3.28083989501312	# Meters to U.S./British feet
 METERS_TO_MILES	= 0.000621371192237334	# Meters to miles
