@@ -146,6 +146,24 @@ def EarthDistance(c1, c2):
         a = -1
     return CalcRad((lat1 +lat2) / 2) * math.acos(a)
 
+def EarthDistanceSmall(c1, c2):
+    "Distance in meters between two close points specified in degrees."
+    # This calculation is known as an Equirectangular Projection
+    # fewer numeric issues for small angles that other methods
+    (lat1, lon1) = c1
+    (lat2, lon2) = c2
+    avglat = (lat1 + lat2 ) /2
+    phi = math.radians( avglat )  # radians of avg latitude
+    # meters per degree at this latitude, corrected for WGS84 ellipsoid
+    # Note the wikipedia numbers are NOT ellipsoid corrected:
+    # https://en.wikipedia.org/wiki/Decimal_degrees#Precision
+    m_per_d = (111132.954 - 559.822 * math.cos(2 * phi)
+                          +   1.175 * math.cos(4 * phi))
+    dlat = (lat1 - lat2) * m_per_d
+    dlon = (lon1 - lon2) * m_per_d * math.cos( phi )
+
+    dist = math.sqrt( math.pow(dlat, 2) + math.pow(dlon, 2 ))
+    return dist;
 
 def MeterOffset(c1, c2):
     "Return offset in meters of second arg from first."
