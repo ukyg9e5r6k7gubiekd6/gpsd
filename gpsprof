@@ -201,9 +201,9 @@ class spaceplot(plotter):
 
     def plot(self):
         # Compute CEP(50%)
-        cep_meters = EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.50)][:2])
-        cep95_meters = EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
-        cep99_meters = EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
+        cep_meters = gps.misc.EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.50)][:2])
+        cep95_meters = gps.misc.EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
+        cep99_meters = gps.misc.EarthDistanceSmall(self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
         alt_sum = 0
         alt_num = 0
         alt_fixes = []
