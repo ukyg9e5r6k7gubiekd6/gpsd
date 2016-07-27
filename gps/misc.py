@@ -83,11 +83,6 @@ MPS_TO_KPH	= 3.6		        # Meters per second to klicks/hr
 MPS_TO_MPH	= 2.2369362920544	# Meters/second to miles per hour
 MPS_TO_KNOTS	= 1.9438444924406	# Meters per second to knots
 
-# for high precision the geoid height should be used.
-# this code does not do that,
-
-# EarthDistance code swiped from Kismet and corrected
-
 
 def Deg2Rad(x):
     "Degrees to radians."
@@ -132,30 +127,82 @@ def CalcRad(lat):
 
 
 def EarthDistance(c1, c2):
-    "Distance in meters between two points specified in degrees."
+    """
+    Vincenty's formula (inverse method) to calculate the distance (in
+    kilometers or miles) between two points on the surface of a spheroid
+    WGS 84 accurate to 1mm!
+    """
+
     (lat1, lon1) = c1
     (lat2, lon2) = c2
-    x1 = CalcRad(lat1) * math.cos(Deg2Rad(lon1)) * math.sin(Deg2Rad(90 - lat1))
-    x2 = CalcRad(lat2) * math.cos(Deg2Rad(lon2)) * math.sin(Deg2Rad(90 - lat2))
-    y1 = CalcRad(lat1) * math.sin(Deg2Rad(lon1)) * math.sin(Deg2Rad(90 - lat1))
-    y2 = CalcRad(lat2) * math.sin(Deg2Rad(lon2)) * math.sin(Deg2Rad(90 - lat2))
-    z1 = CalcRad(lat1) * math.cos(Deg2Rad(90 - lat1))
-    z2 = CalcRad(lat2) * math.cos(Deg2Rad(90 -lat2))
-    a = (x1 *x2 + y1 *y2 + z1 *z2) /pow(CalcRad((lat1 +lat2) /2), 2)
-    # a should be in [1, -1] but can sometimes fall outside it by
-    # a very small amount due to rounding errors in the preceding
-    # calculations (this is prone to happen when the argument points
-    # are very close together).  Thus we constrain it here.
-    if abs(a) > 1:
-        a = 1
-    elif a < -1:
-        a = -1
-    return CalcRad((lat1 +lat2) / 2) * math.acos(a)
+
+    # WGS 84
+    a = 6378137  # meters
+    f = 1 / 298.257223563
+    b = 6356752.314245  # meters; b = (1 - f)a
+
+    MILES_PER_KILOMETER = 0.621371
+
+    MAX_ITERATIONS = 200
+    CONVERGENCE_THRESHOLD = 1e-12  # .000,000,000,001
+
+    # short-circuit coincident points
+    if lat1 == lat2 and lon1 == lon2:
+        return 0.0
+
+    U1 = math.atan((1 - f) * math.tan(math.radians(lat1)))
+    U2 = math.atan((1 - f) * math.tan(math.radians(lat2)))
+    L = math.radians(lon1 - lon2)
+    Lambda = L
+
+    sinU1 = math.sin(U1)
+    cosU1 = math.cos(U1)
+    sinU2 = math.sin(U2)
+    cosU2 = math.cos(U2)
+
+    for iteration in range(MAX_ITERATIONS):
+        sinLambda = math.sin(Lambda)
+        cosLambda = math.cos(Lambda)
+        sinSigma = math.sqrt((cosU2 * sinLambda) ** 2 +
+                             (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) ** 2)
+        if sinSigma == 0:
+            return 0.0  # coincident points
+        cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda
+        sigma = math.atan2(sinSigma, cosSigma)
+        sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma
+        cosSqAlpha = 1 - sinAlpha ** 2
+        try:
+            cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha
+        except ZeroDivisionError:
+            cos2SigmaM = 0
+        C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha))
+        LambdaPrev = Lambda
+        Lambda = L + (1 - C) * f * sinAlpha * (sigma + C * sinSigma *
+                                               (cos2SigmaM + C * cosSigma *
+                                                (-1 + 2 * cos2SigmaM ** 2)))
+        if abs(Lambda - LambdaPrev) < CONVERGENCE_THRESHOLD:
+            break  # successful convergence
+    else:
+        # failure to converge
+        # fall back top EarthDistanceSmall
+        return EarthDistanceSmall(c1, c2)
+
+    uSq = cosSqAlpha * (a ** 2 - b ** 2) / (b ** 2)
+    A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)))
+    B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)))
+    deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma *
+                 (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM *
+                 (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)))
+    s = b * A * (sigma - deltaSigma)
+
+    # return meters to 6 decimal places
+    return round(s, 6)
 
 def EarthDistanceSmall(c1, c2):
     "Distance in meters between two close points specified in degrees."
     # This calculation is known as an Equirectangular Projection
     # fewer numeric issues for small angles that other methods
+    # the main use here is for when Vincenty's fails to converge.
     (lat1, lon1) = c1
     (lat2, lon2) = c2
     avglat = (lat1 + lat2 ) /2
@@ -170,19 +217,6 @@ def EarthDistanceSmall(c1, c2):
 
     dist = math.sqrt( math.pow(dlat, 2) + math.pow(dlon, 2 ))
     return dist;
-
-def MeterOffset(c1, c2):
-    "Return offset in meters of second arg from first."
-    (lat1, lon1) = c1
-    (lat2, lon2) = c2
-    dx = EarthDistance((lat1, lon1), (lat1, lon2))
-    dy = EarthDistance((lat1, lon1), (lat2, lon1))
-    if lat1 < lat2:
-        dy *= -1
-    if lon1 < lon2:
-        dx *= -1
-    return (dx, dy)
-
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
