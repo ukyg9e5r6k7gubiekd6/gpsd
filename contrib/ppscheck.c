@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
 	    (void)clock_gettime(CLOCK_REALTIME, &ts);
 	    (void)ioctl(fd, TIOCMGET, &handshakes);
-	    (void)fprintf(stdout, "%10ld %010ld", ts.tv_sec, ts.tv_nsec);
+	    (void)fprintf(stdout, "%10ld %09ld", ts.tv_sec, ts.tv_nsec);
 	    for (sp = hlines;
 		 sp < hlines + sizeof(hlines)/sizeof(hlines[0]);
 		 sp++)
