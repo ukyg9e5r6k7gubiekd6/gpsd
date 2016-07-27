@@ -100,24 +100,30 @@ def Rad2Deg(x):
 
 
 def CalcRad(lat):
-    "Radius of curvature in meters at specified latitude."
-    a = 6378.137
-    e2 = 0.081082 * 0.081082
+    "Radius of curvature in meters at specified latitude WGS-84."
     # the radius of curvature of an ellipsoidal Earth in the plane of a
     # meridian of latitude is given by
     #
     # R' = a * (1 - e^2) / (1 - e^2 * (sin(lat))^2)^(3/2)
     #
-    # where a is the equatorial radius,
-    # b is the polar radius, and
-    # e is the eccentricity of the ellipsoid = sqrt(1 - b^2/a^2)
+    # where
+    #   a   is the equatorial radius (surface to center distance),
+    #   b   is the polar radius (surface to center distance),
+    #   e   is the first  eccentricity of the ellipsoid
+    #   e2  is e^2  = (a^2 - b^2) / a^2
+    #   es  is the second eccentricity of the ellipsoid (UNUSED)
+    #   es2 is es^2 = (a^2 - b^2) / b^2
     #
-    # a = 6378 km (3963 mi) Equatorial radius (surface to center distance)
-    # b = 6356.752 km (3950 mi) Polar radius (surface to center distance)
-    # e = 0.081082 Eccentricity
-    sc = math.sin(Deg2Rad(lat))
+    # for WGS-84:
+    # a   = 6378.137 km (3963 mi)
+    # b   = 6356.752314245 km (3950 mi)
+    # e2  = 0.00669437999014132
+    # es2 = 0.00673949674227643
+    a = 6378.137
+    e2 = 0.00669437999014132
+    sc = math.sin( math.radians(lat))
     x = a * (1.0 - e2)
-    z = 1.0 - e2 * sc * sc
+    z = 1.0 - e2 * pow(sc, 2)
     y = pow(z, 1.5)
     r = x / y
 
