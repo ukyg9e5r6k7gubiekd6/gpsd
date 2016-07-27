@@ -2,7 +2,7 @@
  * Watch a specified serial port for transitions that might be 1PPS.
  *
  * Each output line is the second and nanosecond parts of a timestamp
- * followed by the names of handshake signals then asserted.  Off 
+ * followed by the names of handshake signals then asserted.  Off
  * transitions may generate lines with no signals aserted.
  *
  * If you don't see output within a second, use gpsmon or some other
@@ -20,6 +20,7 @@
  * This code by ESR, Copyright (C) 2013, under BSD terms.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -61,16 +62,44 @@ const static struct assoc hlines[] = {
     {TIOCM_CTS, "TIOCM_CTS"},
 };
 
+void usage(void)
+{
+	fprintf(stderr, "usage: ppscheck [-h] [ -V] <device>\n");
+	fprintf(stderr, "                 -h   print usage\n");
+	fprintf(stderr, "                 -V   print cwVersion\n");
+	exit(1);
+}
+
 int main(int argc, char *argv[])
 {
     struct timespec ts;
-    int fd = open(argv[1], O_RDONLY);
+    int fd;
+    int c;
+
+    while((c = getopt(argc, argv, "hV")) != -1) {
+	    switch(c){
+	    case 'h':
+	    default:
+		usage();
+		exit(0);
+	    case 'V':
+		(void)printf("%s: %s\n", argv[0], "3.17");
+		exit(EXIT_SUCCESS);
+	    }
+    }
+    argc -= optind;
+    argv += optind;
+
+    if (argc != 1)
+	    usage();
+
+    fd = open(argv[0], O_RDONLY);
 
     if (fd == -1) {
 	(void)fprintf(stderr,
 		      "open(%s) failed: %d %.40s\n",
-		      argv[1], errno, strerror(errno));
-	return 1;
+		      argv[0], errno, strerror(errno));
+	exit(1);
     }
 
     (void)fprintf(stdout, "# Seconds  nanoSecs   Signals\n");
@@ -96,7 +125,7 @@ int main(int argc, char *argv[])
 		}
 	    (void)fputc('\n', stdout);
 	}
-    } 
+    }
 }
 
 /* end */
