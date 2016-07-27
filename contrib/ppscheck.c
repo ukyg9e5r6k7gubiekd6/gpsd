@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
 	return 1;
     }
 
+    (void)fprintf(stdout, "# Seconds  nanoSecs   Signals\n");
     for (;;) {
 	if (ioctl(fd, TIOCMIWAIT, TIOCM_CD|TIOCM_DSR|TIOCM_RI|TIOCM_CTS) != 0) {
 	    (void)fprintf(stderr,
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
 
 	    (void)clock_gettime(CLOCK_REALTIME, &ts);
 	    (void)ioctl(fd, TIOCMGET, &handshakes);
-	    (void)fprintf(stdout, "%10ld %10ld", ts.tv_sec, ts.tv_nsec);
+	    (void)fprintf(stdout, "%10ld %010ld", ts.tv_sec, ts.tv_nsec);
 	    for (sp = hlines;
 		 sp < hlines + sizeof(hlines)/sizeof(hlines[0]);
 		 sp++)
