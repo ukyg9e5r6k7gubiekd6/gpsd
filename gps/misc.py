@@ -218,6 +218,18 @@ def EarthDistanceSmall(c1, c2):
     dist = math.sqrt( math.pow(dlat, 2) + math.pow(dlon, 2 ))
     return dist;
 
+def MeterOffset(c1, c2):
+    "Return offset in meters of second arg from first."
+    (lat1, lon1) = c1
+    (lat2, lon2) = c2
+    dx = EarthDistance((lat1, lon1), (lat1, lon2))
+    dy = EarthDistance((lat1, lon1), (lat2, lon1))
+    if lat1 < lat2:
+        dy = -dy
+    if lon1 < lon2:
+        dx = -dx
+    return (dx, dy)
+
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
     if isinstance(s, int):
