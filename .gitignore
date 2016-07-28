@@ -12,6 +12,7 @@ cgpxlogger
 gpspipe
 gps2udp
 ntpshmmon
+ppscheck
 *.exe
 # These are built from .in files
 jsongen.py

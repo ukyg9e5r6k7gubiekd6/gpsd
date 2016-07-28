@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+This file is Copyright (c) 2016 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+-->
+<!DOCTYPE refentry PUBLIC
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='ppscheck.8'>
+<refentryinfo><date>28 Jul 2016</date></refentryinfo>
+<refmeta>
+<refentrytitle>ppscheck</refentrytitle>
+<manvolnum>8</manvolnum>
+<refmiscinfo class="source">The GPSD Project</refmiscinfo>
+<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+</refmeta>
+<refnamediv id='name'>
+<refname>ppscheck</refname>
+<refpurpose>tool to check a serial port for PPS</refpurpose>
+</refnamediv>
+<refsynopsisdiv id='synopsis'>
+
+<cmdsynopsis>
+  <command>ppscheck</command>
+	<arg choice='opt'>-h </arg>
+	<arg choice='opt'>-V </arg>
+ 	<arg choice='plain'><replaceable>device</replaceable></arg>
+</cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id='description'><title>DESCRIPTION</title>
+
+<para>ppscheck watches a specified serial port for transitions that
+might be PPS.  It looks for changes in handshake lines CD, RI, and CTS
+by running ioctl(...., TIOCMIWAIT, ...) in a loop.  When it sees a state
+change it emits a timestamped line of output dumping the state of the
+handshake signals. It's useful for checking whether a device is emitting
+PPS.</para>
+
+<para>To check the first serial port do this:</para>
+
+<programlisting>
+ppscheck /dev/ttyS0
+</programlisting>
+
+<para>ppscheck is not intended for routine use, but rather for
+diagnostic purposes. Once you have verified a particular device can
+output PPS signals you will never need to use it again on tha device.
+</para>
+
+<para>The program accepts the following options:</para>
+<variablelist remap='TP'>
+<varlistentry>
+<term>-h</term>
+<listitem><para>Display help message and terminate.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-V</term>
+<listitem>
+<para>Dump version and exit.</para>
+</listitem>
+</varlistentry>
+</variablelist>
+
+<para>The "device" argument should be the pathname of a device. It will
+be the device monitored. </para>
+
+<para>Each output line is the second and nanosecond parts of a timestamp
+followed by the names of the handshake signals then asserted.  Off
+transitions may generate lines with no signals aserted. </para>
+
+<para>If you don't see output within a second, use gpsmon or some other
+equivalent tool to check that your device has a satellite lock and is
+getting 3D fixes before giving up on the possibility of PPS. </para>
+
+<para>Check your cable. Cheap DB9 to DB9 cables such as those issued
+with UPSes often carry TXD/RXD/GND only, omitting handshake lines such
+as DCD.  Suspect this especially if the cable jacket looks too skinny to
+hold more than three leads! </para>
+
+<para>Most GPS that have built in USB do not support PPS.  When in doubt,
+contact the vendor for confirmation that your device does supply PPS.
+</para>
+
+</refsect1>
+
+<refsect1 id='exit_status'><title>RETURN VALUES</title>
+
+<para>1 if the device counld not be opened. 0 otherwise</para>
+
+</refsect1>
+
+<refsect1 id='see_also'><title>SEE ALSO</title>
+<para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>.
+</para>
+</refsect1>
+
+<refsect1 id='maintainer'><title>AUTHOR</title>
+
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
+</refsect1>
+</refentry>

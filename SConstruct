@@ -1252,6 +1252,8 @@ cgps = env.Program('cgps', ['cgps.c'],
 ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'],
                         LIBS=['gps_static'], LIBPATH='.',
                         parse_flags=gpsflags)
+ppscheck = env.Program('ppscheck', ['ppscheck.c'],
+                        parse_flags=gpsflags)
 
 bin_binaries = []
 sbin_binaries = []
@@ -1261,7 +1263,7 @@ if env["gpsdclients"]:
     sbin_binaries += [gpsdctl]
     bin_binaries += [gpsdecode, gpsctl, gpspipe, gps2udp, gpxlogger, lcdgps]
 if env["timeservice"] or env["gpsdclients"]:
-    bin_binaries += [ntpshmmon]
+    bin_binaries += [ntpshmmon, "ppscheck"]
 if env["ncurses"]:
     if env["gpsdclients"]:
         bin_binaries += [cgps]
@@ -1550,6 +1552,7 @@ base_manpages = {
     "gpsdecode.1": "gpsdecode.xml",
     "srec.5": "srec.xml",
     "ntpshmmon.1": "ntpshmmon.xml",
+    "ppscheck.8": "ppscheck.xml",
     }
 python_manpages = {
     "gpsprof.1": "gpsprof.xml",
@@ -2060,6 +2063,7 @@ htmlpages = Split('''
     www/libgps.html
     www/libgpsmm.html
     www/ntpshmmon.html
+    www/ppscheck.html
     www/performance/performance.html
     www/replacing-nmea.html
     www/srec.html
@@ -2215,7 +2219,8 @@ else:
 
 # Tags for Emacs and vi
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
-                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpshmmon.c']
+                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpshmmon.c',
+                'ppscheck.c']
 sources = libgpsd_sources + libgps_sources \
           + gpsd_sources + gpsmon_sources + misc_sources
 env.Command('TAGS', sources, ['etags ' + " ".join(sources)])
