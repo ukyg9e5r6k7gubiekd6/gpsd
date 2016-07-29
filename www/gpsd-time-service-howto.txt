@@ -2,7 +2,7 @@
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.8, May 2016
+v2.8, July 2016
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -23,33 +23,40 @@ into more detail about the steps.
    which to use yet if you have easy access to both, but knowing which
    alternatives are readily available to you is a good place to start.
 
-2. Connect a PPS-capable GPS receiver to one of your serial or USB
+2. Verify that your gpsd version is at least 3.17.  Many problems are
+   caused by the use of old versions.  When in doubt, reinstall
+   gpsd from the upstream source.  Many distributions ship old
+   and/or broken versions of gpsd.
+
+3. Connect a PPS-capable GPS receiver to one of your serial or USB
    ports.  A random cheap consumer-grade GPS receiver won't do; you
    may have to do some hunting to find a usable one.
 
-3. Check that it actually emits PPS by pointing GPSD's gpsmon utility
+4. Check that it actually emits PPS by pointing GPSD's gpsmon utility
    at the port.  If it has a good (3D-mode) fix, lines marked "PPS"
-   should scroll by in the packet-logging window.
+   should scroll by in the packet-logging window.  A new device out of
+   the box may take up to 30 minutes for the first 3D fix.  If gpsmon
+   shows a 3D fix, but does not show PPS lines, try running ppscheck.
 
-4. If you persistently fail to get live PPS, (1) you may have a
-   skyview problem, (2) you may have a cabling problem, (3) you may
-   have a gpsd or kernel configuration problem, (4) you may have a
-   device problem, (5) there may be a bug in the core GPSD code used
-   by gpsmon.  These are listed in roughly decreasing probability
-   order.  Troubleshoot appropriately.
+5. If you persistently fail to get live PPS, (a) you may have a
+   skyview problem, (b) you may have a cabling problem, (c) your GPS
+   may not support PPS, (d) you may have a gpsd or kernel configuration
+   problem, (e) you may have a device problem, (e) there may be a bug
+   in the core GPSD code used by gpsmon.  These are listed in roughly
+   decreasing probability.  Troubleshoot appropriately.
 
-5. Edit your ntpd or chronyd configuration to tell your NTP daemon to
+6. Edit your ntpd or chronyd configuration to tell your NTP daemon to
    listen for time hints. (This step is somewhat tricky.)
 
-6. Start up gpsd.  If you are using ntpd, you can use ipcrm(1) to check that
+7. Start up gpsd.  If you are using ntpd, you can use ipcrm(1) to check that
    verify that the shared-memory segment that gpsd and ntpd want to
    use to communicate has been attached; or you can impatiently skip
    to the next step and look for the segment only if that fails.
 
-7. Use ntpq or the chronyc sources command to verify that your device
+8. Use ntpq or the chronyc sources command to verify that your device
    is feeding time corrections to your NTP daemon.
 
-8. (Optional and challenging.) Hand-tune your installation for the
+9. (Optional and challenging.) Hand-tune your installation for the
    best possible performance.
 
 This document does not attempt to explain all the intricacies of time
@@ -226,11 +233,11 @@ plain-vanilla x86 PCs with clock speeds in the 2GHz range.
 
 All the previous figures assume you're using PPS delivered over RS232.
 USB GPS receivers that deliver 1PPS are rare, but do exist. Notably,
-there's the Navisys GR601-W/GR701-W/GR801-W <<MACX-1>>. In case these devices go
+there's the Navisys GR-601W/GR-701W/GR-801W <<MACX-1>>. In case these devices go
 out of production it's worth noting that they are a trivial
 modification of the stock two-chip-on-a-miniboard
 commodity-GPS-receiver design of engine plus USB-to-serial adapter;
-the GR[678]01-W wires a u-blox 6/7/8 to a Prolific Logic PL23203.  To
+the GR-[678]01W wires a u-blox 6/7/8 to a Prolific Logic PL23203.  To
 get 1PPS out, this design just wires the 1PPS pin from the GPS engine
 to the Carrier Detect pin on the USB adapter. (This is known as the
 "Macx-1 mod".)
@@ -290,8 +297,8 @@ the normal modular way, this package installation will suffice.
 
 === Building gpsd ==
 
-A normal gpsd build includes support for interpreting 1PPS pulses that is mostly
-autoconfiguring and requires no special setup.
+A normal gpsd build includes support for interpreting 1PPS pulses that
+is mostly autoconfiguring and requires no special setup.
 
 You can build a version stripped to the mimimum configuration required
 for time service.  This reduces the size of the binary and may be
@@ -344,7 +351,7 @@ set. Usually they will be set to "m", which is sufficient.
 NetBSD has included the RFC2783 Pulse Per Second API for real serial
 ports by default since 1998, and it works with ntpd.  NetBSD 7
 (forthcoming) includes RFC2783 support for USB-serial devices, and
-this works (with ntpd) with the GR601-W/GR701-W/GR801-W.  However,
+this works (with ntpd) with the GR-601W/GR-701W/GR-801W.  However,
 gpsd's code interacts badly with the NetBSD implementation, and gpsd's
 support for RFC2783 PPS does not yet work on NetBSD (for serial or
 USB).
@@ -395,7 +402,7 @@ devices have better sensitivity and signal discrimination. This makes
 them superior for indoor use as time sources.
 
 In general, use a GPS receiver with an RS232 interface for time
-service if you can.  The GR601-W was designed (by one of the authors,
+service if you can.  The GR-601W was designed (by one of the authors,
 as it happens) for deployment with commodity TCP/IP routers that only
 have USB ports.  RS232 is more fiddly to set up (with older devices
 like the GPS-18 you may even have to make your own cables) but it can
@@ -403,13 +410,13 @@ deliver three orders of magnitude better accuracy and repeatability -
 enough to meet prevailing standards for a public Stratum 1 server.
 
 Among newer receiver designs the authors found the the u-blox line of
-receivers used in the GR[678]01-W to be particularly good.  Very
+receivers used in the GR-[678]01W to be particularly good.  Very
 detailed information on its timing performance can be found at
 <<UBLOX-TIMING>>. One of us (Raymond) has recent experience with an
 eval kit, the EVK 6H-0-001, that would make an excellent Stratum 0
 device.
 
-Both the EVK 6H and GR601-W are built around the LEA-6H module, which
+Both the EVK 6H and GR-601W are built around the LEA-6H module, which
 is a relatively inexpensive but high-quality navigation GPS
 receiver. We make a note of this because u-blox also has a specialized
 timing variant, the LEA 6T, which would probably be overkill for an
@@ -461,8 +468,8 @@ there will also be a "PPS offset:" field in the data panels above
 showing the delta between PPS and your local clock.
 
 If you don't have gpsmon available, or you don't see PPS lines in it,
-you can run gpsd at -D 5 and watch for carrier-detect state change
-messages in the logfile.
+you can run ppscheck.  As a last resort you can gpsd at -D 5 and watch
+for PPS state change messages in the logfile.
 
 If you don't see evidence of incoming PPS, here are some trouble
 sources to check:
@@ -520,7 +527,7 @@ to the GPSD maintainers so we can flag it in our GPS hardware
 database.
 
 There is another possible cause of small negative offsets which
-shows up on the GR-601-W: implementation bugs in your USB driver,
+shows up on the GR-601W: implementation bugs in your USB driver,
 combining with quantization by the USB poll interval.  This
 doesn't mean the u-blox 6 inside it is actually emitting PPS
 after the GPS timestamp is shipped.
@@ -820,7 +827,7 @@ the system logs for error messages from ntpd.
 Notice the 1st and 3rd servers, stratum 1 servers, disagree by more than
 8 mSec.  The 1st and 2nd servers disagree by over 12 mSec.  Our local
 PPS reference agrees to the clock.sjc.he.net server within the expected
-jitter of the GR-601-W in use.
+jitter of the GR-601W in use.
 
 When no other servers or local reference clocks appear in the NTP
 configuration, the system clock will lock onto the GPS clock, but this
@@ -1804,13 +1811,17 @@ by Jaap Winius <jwinius@rjsystems.nl>.
     A bit more specificity about root vs. non-root.
 
 2.5 Apr 2016::
-    Note the existence of the GR701-W.
+    Note the existence of the GR-701W.
 
 2.6 May 2016::
-    New section on GPS time.  Note the existence of the GR801-W.
+    New section on GPS time.  Note the existence of the GR-801W.
     Describe the special timeserver build of GPSD. Recommend NTPsec.
     Add Macx-1 link.
     Add sections on ARP and temperature problems
 
 2.7 June 2016
     Add section on avoiding power saving.
+
+2.8 July 2016
+    Mention required version of gpsd
+    Fix Typos.
