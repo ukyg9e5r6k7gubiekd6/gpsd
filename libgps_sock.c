@@ -119,6 +119,7 @@ int gps_sock_close(struct gps_data_t *gpsdata)
     int status;
 
     free(PRIVATE(gpsdata));
+    gpsdata->privdata = NULL;
     status = close(gpsdata->gps_fd);
     gpsdata->gps_fd = -1;
     return status;
