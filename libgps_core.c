@@ -49,6 +49,10 @@ void libgps_trace(int errlevel, const char *fmt, ...)
 	(void)fputs(buf, debugfp);
     }
 }
+#else
+// Functions defined as so to furfil the API but otherwise do nothing when built with debug capability turned off
+void gps_enable_debug(int level UNUSED, FILE * fp UNUSED) {}
+void libgps_trace(int errlevel UNUSED, const char *fmt UNUSED, ...){}
 #endif /* LIBGPS_DEBUG */
 
 #ifdef SOCKET_EXPORT_ENABLE
