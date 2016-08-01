@@ -45,7 +45,7 @@ ppscheck /dev/ttyS0
 
 <para>ppscheck is not intended for routine use, but rather for
 diagnostic purposes. Once you have verified a particular device can
-output PPS signals you will never need to use it again on tha device.
+output PPS signals you will never need to use it again on that device.
 </para>
 
 <para>The program accepts the following options:</para>
