@@ -154,7 +154,7 @@ int gps_shm_read(struct gps_data_t *gpsdata)
 
 void gps_shm_close(struct gps_data_t *gpsdata)
 {
-    if (PRIVATE(gpsdata)->shmseg != NULL)
+    if (PRIVATE(gpsdata) && PRIVATE(gpsdata)->shmseg != NULL)
 	(void)shmdt((const void *)PRIVATE(gpsdata)->shmseg);
 }
 
