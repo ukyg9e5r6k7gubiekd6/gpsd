@@ -92,7 +92,8 @@ del session
 
 <para><emphasis remap='B'>libgps</emphasis> is a service library which
 supports communicating with an instance of the
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>; link it with the linker option -lgps.</para>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum>
+</citerefentry>; link it with the linker option -lgps.</para>
 
 <warning><para>Take care to conditionalize your code on the major and
 minor API version symbols in <filename>gps.h</filename>; ideally,
@@ -102,7 +103,8 @@ the protocol and API changes.</para></warning>
 
 <para>Calling <function>gps_open()</function> initializes a GPS-data
 structure to hold the data collected by the GPS, and sets up access to
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum>
+</citerefentry>
 via either the socket or shared-memory export. The shared-memory
 export is faster, but does not carry information about device
 activation and deactivation events and will not allow you to monitor
@@ -118,19 +120,22 @@ an IPv4 dotted quad, an IPV6 address, or the special value
 shared-memory export; the library will do the right thing for any of
 these.</para>
 
-<para><function>gps_close()</function> ends the session and should only be called after a successful <function>gps_open()</function>.
-It returns 0 on success, -1 on errors.
-The shared-memory interface close always returns 0, whereas a socket close can result in an error.
-For a socket close error it will have set an errno from the call to the system's <function>close()</function>.
-</para>
+<para><function>gps_close()</function> ends the session and should only be
+called after a successful <function>gps_open()</function>.
+It returns 0 on success, -1 on errors.  The shared-memory interface
+close always returns 0, whereas a socket close can result in an error.
+For a socket close error it will have set an errno from the call to the
+system's <function>close()</function>. </para>
 
 <para><function>gps_send()</function> writes a command to the daemon.
 It does nothing when using the shared-memory export.
 The second argument must be a format string containing elements from
 the command set documented at
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>1</manvolnum>
+</citerefentry>.
 It may have % elements as for
-<citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>sprintf</refentrytitle><manvolnum>3</manvolnum>
+</citerefentry>,
 which will be filled in from any following arguments.  This function
 returns a -1 if there was a Unix-level write error, otherwise
 0. Please read the LIMITATIONS section for additional information and
@@ -151,7 +156,8 @@ amount of time to wait (in microseconds) on input before returning.
 It returns true if there is input waiting, false on timeout (no data
 waiting) or error condition. When using the socket export, this
 function is a convenience wrapper around a
-<citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum></citerefentry>
+<citerefentry><refentrytitle>select</refentrytitle><manvolnum>2</manvolnum>
+</citerefentry>
 call, and zeros <varname>errno</varname> on entry; you can test
 <varname>errno</varname> after exit to get more information about
 error conditions.  Warning: under the shared-memory interface there is
@@ -283,7 +289,8 @@ will be useful mainly when isolating test instances of
 
 <para>The following is an excerpted and simplified version of the
 libgps interface code from
-<citerefentry><refentrytitle>cgps</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
+<citerefentry><refentrytitle>cgps</refentrytitle><manvolnum>1</manvolnum>
+</citerefentry>.</para>
 
 <programlisting>
     struct gps_data_t gps_data;
@@ -356,15 +363,20 @@ in <filename>gps.h</filename> for recent changes.</para>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
-<citerefentry><refentrytitle>libgpsmm</refentrytitle><manvolnum>3</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum>
+</citerefentry>,
+<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum>
+</citerefentry>,
+<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum>
+</citerefentry>.
+<citerefentry><refentrytitle>libgpsmm</refentrytitle><manvolnum>3</manvolnum>
+</citerefentry>.
 </para>
 </refsect1>
 
 <refsect1 id='author'><title>AUTHOR</title>
-<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;, C sample code Charles Curley &lt;charlescurley@charlescurley.com&gt;</para>
+<para>Eric S. Raymond &lt;esr@thyrsus.com&gt;,
+ C sample code Charles Curley &lt;charlescurley@charlescurley.com&gt;</para>
 </refsect1>
 </refentry>
 
