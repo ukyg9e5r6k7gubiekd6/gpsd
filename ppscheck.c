@@ -55,14 +55,14 @@ struct assoc {
  * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
  * entire set of these.
  */
-const static struct assoc hlines[] = {
+static const struct assoc hlines[] = {
     {TIOCM_CD, "TIOCM_CD"},
     {TIOCM_RI, "TIOCM_RI"},
     {TIOCM_DSR, "TIOCM_DSR"},
     {TIOCM_CTS, "TIOCM_CTS"},
 };
 
-void usage(void)
+static void usage(void)
 {
 	fprintf(stderr, "usage: ppscheck [-h] [ -V] <device>\n");
 	fprintf(stderr, "                 -h   print usage\n");
@@ -126,6 +126,8 @@ int main(int argc, char *argv[])
 	    (void)fputc('\n', stdout);
 	}
     }
+
+    return 0;
 }
 
 /* end */
