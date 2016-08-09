@@ -1262,8 +1262,10 @@ if env["gpsd"]:
 if env["gpsdclients"]:
     sbin_binaries += [gpsdctl]
     bin_binaries += [gpsdecode, gpsctl, gpspipe, gps2udp, gpxlogger, lcdgps]
-if env["timeservice"] or env["gpsdclients"]:
-    bin_binaries += [ntpshmmon, "ppscheck"]
+if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
+    bin_binaries += [ntpshmmon]
+    if tiocmiwait:
+	bin_binaries += [ppscheck]
 if env["ncurses"]:
     if env["gpsdclients"]:
         bin_binaries += [cgps]
