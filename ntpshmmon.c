@@ -5,6 +5,7 @@
  *
  */
 #include <stdio.h>
+#include <string.h>     /* for memset() */
 #include <stdlib.h>
 #include <getopt.h>
 #include <limits.h>
