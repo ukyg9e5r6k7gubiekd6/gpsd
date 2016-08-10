@@ -55,12 +55,14 @@ struct assoc {
  * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
  * entire set of these.
  */
-static const struct assoc hlines[] = {
+const struct assoc hlines[] = {
     {TIOCM_CD, "TIOCM_CD"},
     {TIOCM_RI, "TIOCM_RI"},
     {TIOCM_DSR, "TIOCM_DSR"},
     {TIOCM_CTS, "TIOCM_CTS"},
 };
+
+static void usage(void);
 
 static void usage(void)
 {
@@ -115,7 +117,7 @@ int main(int argc, char *argv[])
 
 	    (void)clock_gettime(CLOCK_REALTIME, &ts);
 	    (void)ioctl(fd, TIOCMGET, &handshakes);
-	    (void)fprintf(stdout, "%10ld %09ld", ts.tv_sec, ts.tv_nsec);
+	    (void)fprintf(stdout, "%10ld %09ld", (long)ts.tv_sec, ts.tv_nsec);
 	    for (sp = hlines;
 		 sp < hlines + sizeof(hlines)/sizeof(hlines[0]);
 		 sp++)
@@ -127,7 +129,7 @@ int main(int argc, char *argv[])
 	}
     }
 
-    return 0;
+    exit(EXIT_SUCCESS);
 }
 
 /* end */
