@@ -32,10 +32,14 @@
  *
  * So 12 chars, like this: "-0.123456789"
  *
- * Absolute worst case is 10 digits of seconds.
+ * Probable worst case is 10 digits of seconds,
+ * but standards do not provide hard limits to time_t
  * So 21 characters like this: "-2147483647.123456789"
  *
-*/
+ * date --date='@2147483647' is: Mon Jan 18 19:14:07 PST 2038
+ * date --date='@9999999999' is: Sat Nov 20 09:46:39 PST 2286
+ *
+ */
 void timespec_str(const struct timespec *ts, char *buf, size_t buf_size)
 {
     char sign = ' ';
@@ -43,9 +47,9 @@ void timespec_str(const struct timespec *ts, char *buf, size_t buf_size)
     if ( (0 > ts->tv_nsec ) || ( 0 > ts->tv_sec ) ) {
 	sign = '-';
     }
-    (void) snprintf( buf, buf_size, "%c%ld.%09ld",
+    (void) snprintf( buf, buf_size, "%c%lld.%09ld",
 			  sign,
-			  (long)labs(ts->tv_sec),
+			  (long long)llabs(ts->tv_sec),
 			  (long)labs(ts->tv_nsec));
 }
 
