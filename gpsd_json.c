@@ -1985,16 +1985,16 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       ais->type6.dac1fid20.future2,
 			       json_stringify(buf1, sizeof(buf1),
 					      ais->type6.dac1fid20.berth_name));
-            if (scaled)
-		str_appendf(buf, buflen,
+		if (scaled)
+		    str_appendf(buf, buflen,
 			       "\"berth_lon\":%.3f,"
 			       "\"berth_lat\":%.3f,"
 			       "\"berth_depth\":%.1f}\r\n",
 			       ais->type6.dac1fid20.berth_lon / AIS_LATLON3_DIV,
 			       ais->type6.dac1fid20.berth_lat / AIS_LATLON3_DIV,
 			       ais->type6.dac1fid20.berth_depth * 0.1);
-            else
-                str_appendf(buf, buflen,
+		else
+		    str_appendf(buf, buflen,
 			       "\"berth_lon\":%d,"
 			       "\"berth_lat\":%d,"
 			       "\"berth_depth\":%u}\r\n",
