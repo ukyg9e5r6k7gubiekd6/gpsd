@@ -32,7 +32,7 @@ cellphones do to avoid mutual interference. AIS receivers make this data
 available for navigation, anti-collision systems, and other uses.
 
 The International Maritime Organization's (IMO) International
-Convention for the Safety of Life at Sea (SOLAS) reqires operating AIS
+Convention for the Safety of Life at Sea (SOLAS) requires operating AIS
 transmitters on all international cargo vessels of more than 300 tons
 displacement, all cargo vessels of more than 500 tons displacement,
 and all passenger vessels; see <<SOLAS>> for details.  Individual
@@ -522,14 +522,14 @@ for a list of MIDs.
 |00MIDXXXX  | Coastal stations
 |111MIDXXX  | SAR (Search and Rescue) aircraft
 |99MIDXXXX  | Aids to Navigation
-|98MIDXXXX  | Auxilary craft associated with a parent ship
+|98MIDXXXX  | Auxiliary craft associated with a parent ship
 |970MIDXXX  | AIS SART (Search and Rescue Transmitter)
 |972XXXXXX  | MOB (Man Overboard) device
 |974XXXXXX  | EPIRB (Emergency Position Indicating Radio Beacon) AIS
 |==============================================================================
 
 Detailed descriptions of message types 1-24 follow. Message types 1-22
-are derived from <<IALA>>. Message type 23 was decribed to me by Mike
+are derived from <<IALA>>. Message type 23 was described to me by Mike
 Greene based on <<IEC-62287>>.  Message type 24 was described to me by
 <<Schwehr>>, whose Python toolkit decodes it. Message types 25-26 are
 reported by <<Schwehr>>, who observes they were added in Version 3 of
@@ -993,7 +993,7 @@ in use for type 6.
 
 DAC/FID pairs are assigned separately per message type.
 
-Note that the apparent presence of one of these DAC/FID pairs dooes
+Note that the apparent presence of one of these DAC/FID pairs does
 not guarantee that the message is structured.  Decoders should
 perform range validation on the structured fields and interpret the
 message as unstructured if any check fails. (As of Aug 2014 no such
@@ -1200,7 +1200,7 @@ authority it is a berthing assignment.
 
 A message 6 subtype. DAC = 001 FID = 20. Fixed Length: 360 bits.
 
-The 2-bit fields after "availabilty" describe services which may be
+The 2-bit fields after "availability" describe services which may be
 available at the berth.  They are valid only if this master availability
 bit is on.
 
@@ -1875,7 +1875,7 @@ once.
 |243-247 |  5 |Spare              |          |x|Not used
 |==============================================================================
 
-<<INLAND>> says of the Destunation MMSI field "a virtual MMSI number
+<<INLAND>> says of the Destination MMSI field "a virtual MMSI number
 should be used for each country, each national AIS network should
 route messages addressed to other countries using this virtual MMSI
 number".
@@ -2123,7 +2123,7 @@ perform range validation on the structured fields and interpret the
 message as unstructured if any check fails. Actual false matches with
 DAC/FID = 200/10 have been observed in the wild.
 
-DAC/FID pairs 1/23, 1/28, and 1/30 have addressed versions descrubed
+DAC/FID pairs 1/23, 1/28, and 1/30 have addressed versions described
 under type 6.
 
 FID types 11-15 are being phased out and are not to be used after 1
@@ -2249,7 +2249,7 @@ for whatever that means.
 
 The seastate field has a note in <<IMO236>> reading "(manual input?)"?
 
-WMO 306 Code table 4.201 specifies the following precipitatiuon type values:
+WMO 306 Code table 4.201 specifies the following precipitation type values:
 
 .Precipitation Types
 [width="50%",frame="topbot",options="header"]
@@ -2312,9 +2312,9 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 |38-39   |  2 |Spare                   |         |x|Not used
 |40-49   | 10 |DAC                     |dac      |u|DAC = 001
 |50-55   |  6 |FID                     |fid      |u|FID = 13
-|56-175  |120 |Reason For Closing      |reason   |t|20 6-bit characcters
-|176-295 |120 |Location Of Closing From|closefrom|t|20 6-bit characcters
-|296-415 |120 |Location of Closing To  |closeto  |t|20 6-bit characcters
+|56-175  |120 |Reason For Closing      |reason   |t|20 6-bit characters
+|176-295 |120 |Location Of Closing From|closefrom|t|20 6-bit characters
+|296-415 |120 |Location of Closing To  |closeto  |t|20 6-bit characters
 |416-425 | 10 |Radius extension        |radius   |u|0-1000, 10001 = N/A (default)
 |426-427 |  2 |Unit of extension       |extunit  |u|0=m, 1=km, 2=nm, 3=cables
 |428-432 |  5 |From day (UTC)          |fday     |u|1-31, 0=N/A (default)
@@ -3321,7 +3321,7 @@ The standard does not fix the meaning of a water temperature depth of 127.
                                                    504-511 reserved.
 |45-46   |  2 |Salinity Type      |salinitytype|e|0 = measured,
                                                   1 = calculated using PSS-78,
-                                                  2 = calclated using other method,
+                                                  2 = calculated using other method,
                                                   3 = reserved.
 |47-49   |  3 |Sensor Description |sensortype  |e|See "Sensor Types"
 |50-84   | 35 |Spare              |            |x|Not used
@@ -3350,8 +3350,8 @@ No default is specified for salinity type.
                                                   244-255 reserved.
 |24-33   | 10 |Dew Point           |dewpoint    |i|-20.0 to +50.0: 0.1 deg C,
                                                   501 = N/A (default),
-                                                  502-511 rsserved,
-                                                  -511--201 rsserved.
+                                                  502-511 reserved,
+                                                  -511--201 reserved.
 |34-36   |  3 |Dewpoint Sensor Type|dewtype     |e|See "Sensor Types".
 
 
@@ -3666,7 +3666,7 @@ expand both.  Full ERI codes have been observed in the wild.
 |8250 |  79   | Pushtow, five cargo barges
 |8260 |  79   | Pushtow, six cargo barges
 |8270 |  79   | Pushtow, seven cargo barges
-|8280 |  79   | Pushtow, eigth cargo barges
+|8280 |  79   | Pushtow, eight cargo barges
 |8290 |  79   | Pushtow, nine or more barges
 |8310 |  80   | Pushtow, one tank/gas barge
 |8320 |  80   | Pushtow, two barges at least one tanker or gas barge
@@ -3826,7 +3826,7 @@ messages.
 |56-67   | 12 |UN Country Code     |country    |t|2 six-bit characters
 |68      |    |                    |gauges     |a4|Gauge measurement array
 |0-10    | 11 |Gauge ID            |id         |u|0=unknown (default)
-|11-24   | 14 |Water Level         |level      |i|cm, 0=unknown (defailt)
+|11-24   | 14 |Water Level         |level      |i|cm, 0=unknown (default)
 |===============================================================================
 
 Water levels are relative to the local standard, e.g. GIW in Germany
@@ -4079,7 +4079,7 @@ one message type.  Length is 160 bits.
 
 Message type 16 is used by a base station with control authority to
 configure the scheduling of AIS informational messages from
-subordinate stations, either as a frquency per 10-minute interval or
+subordinate stations, either as a frequency per 10-minute interval or
 by specifying the TDMA slot(s) offset on which those messages should
 be transmitted.  It is probably not of interest unless you are
 studying the internal operation of an AIS base station network.
@@ -4418,7 +4418,7 @@ network.
 |==============================================================================
 
 The values of the channel_a and channel_b fields are ITU frequency
-designators for channelas A and B. Normally these will be 2087 and
+designators for channels A and B. Normally these will be 2087 and
 2088, the AIS 1 and AIS 2 frequencies of 87B (161.975 MHz) and 88B
 (162.025 MHz) respectively. Regional authorities may set different
 frequencies.
@@ -4481,7 +4481,7 @@ station network.
 
 The target set of mobile stations is specified by the station-type and
 ship-type fields. An addressed (non-broadcast) message 22 overrides a
-message 23, but a message 23 ovewrrides a broadcast message 22.
+message 23, but a message 23 overrides a broadcast message 22.
 
 Note that the 'not available' values for longitude and latitudes
 match the short ones used in messages 17 and 22, not the long ones
@@ -4552,7 +4552,7 @@ used to associate an MMSI with a name on either class A or class B equipment.
 A "Type 24" may be in part A or part B format; According to the
 standard, parts A and B are expected to be broadcast in adjacent
 pairs; in the real world they may (due to quirks in various
-aggregation methods) be separated by other sentances or even
+aggregation methods) be separated by other sentences or even
 interleaved with different Type 24 pairs; decoders must cope with
 this.  The interpretation of some fields in Type B format changes
 depending on the range of the Type B MMSI field. 160 bits for part A,
@@ -4610,7 +4610,7 @@ dimensions as in Message Type 5.
 
 According to <<MMSI>>, an MMSI is associated with an auxiliary craft
 when it is of the form 98XXXYYYY, where (1) the '98' in positions 1
-and 2 is required to designate an auxilary craft, (2) the digits XXX
+and 2 is required to designate an auxiliary craft, (2) the digits XXX
 in the 3, 4 and 5 positions are the MID (the three-digit country code
 as described in <<ITU-MID>>) and (3) YYYY is any decimal literal from
 0000 to 9999.
@@ -4681,7 +4681,7 @@ note "Allows for 32 bits of bit-stuffing."
 The 20 radio status bits are always present after end-of-data in the
 last slot and are in the format specified by <<IALA>>.  The radio
 status is 20 bits rather than 19 because an extra first bit selects
-whether it should be interpretred as a SOTDMA or ITDMA state.
+whether it should be interpreted as a SOTDMA or ITDMA state.
 i
 Note: Type 26 is extremely rare. As of April 2011 it has not been
 observed even in long-duration samples from AISHub.
@@ -4804,7 +4804,7 @@ the type of AIS equipment.
 
 Beginning with NMEA 4.10, the standard describes a way to intersperse
 "tag blocks" with AIS sentences in order to supply additional
-metadata, udually a Unix timestamp to be associated with a sentence
+metadata, usually a Unix timestamp to be associated with a sentence
 (or contiguous group of sentences such as an armored AIS Type 5).
 
 The tag block facility is complex, in some respects poorly specified,
@@ -4893,7 +4893,7 @@ One is an apparent error in the format design.  The type 15 message
 has a variant with 108 data bits and a trailing 2-bit spare field, for
 110. This spare should have been 4 bits to guarantee a byte boundary
 at 112 bits. Decoders need to be prepared to encounter this length
-in case the transmitter has implemented the padding reqirement
+in case the transmitter has implemented the padding requirement
 properly.
 
 The other is messages containing variable-length text packed into
@@ -4992,7 +4992,7 @@ Free San Francisco Bay Area AIS feed. For non-commercial use only.
 Here is an application of the JSON metaformat to present AIS data in a
 form more convenient for application use than AIVDM/AIVDO sentences.
 This encoding is implemented by GPSD and its client libraries.  It is
-decribed here because (a) the specification is closely tied to the
+described here because (a) the specification is closely tied to the
 field encodings, and (b) the author wishes to offer it as an
 interoperability standard for other applications.
 
