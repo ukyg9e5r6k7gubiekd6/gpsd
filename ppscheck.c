@@ -62,8 +62,6 @@ static const struct assoc hlines[] = {
     {TIOCM_CTS, "TIOCM_CTS"},
 };
 
-static void usage(void);
-
 static void usage(void)
 {
 	fprintf(stderr, "usage: ppscheck [-h] [ -V] <device>\n");
