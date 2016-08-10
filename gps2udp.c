@@ -234,6 +234,9 @@ static ssize_t read_gpsd(char *message, size_t len)
     FD_ZERO(&master);
     FD_SET(gpsdata.gps_fd, &master);
 
+    /* allow room for trailing NUL */
+    len--;
+
     /* loop until we get some data or an error */
     for (ind = 0; ind < (int)len;) {
 	int result;

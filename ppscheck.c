@@ -55,7 +55,7 @@ struct assoc {
  * context "DCE" is the GPS. {CD,RI,CTS,DSR} is the
  * entire set of these.
  */
-const struct assoc hlines[] = {
+static const struct assoc hlines[] = {
     {TIOCM_CD, "TIOCM_CD"},
     {TIOCM_RI, "TIOCM_RI"},
     {TIOCM_DSR, "TIOCM_DSR"},
