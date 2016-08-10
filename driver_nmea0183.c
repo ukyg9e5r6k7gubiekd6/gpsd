@@ -1252,7 +1252,7 @@ static gps_mask_t processTNTA(int c UNUSED, char *field[],
 	osc->running = (quality > 0);
 	osc->reference = (deltachar && (deltachar != '?'));
 	if (osc->reference) {
-	    if (abs(delta) < 500) {
+	    if (delta < 500) {
 		osc->delta = fine;
 	    } else {
 		osc->delta = ((delta < 500000000) ? delta : 1000000000 - delta);
