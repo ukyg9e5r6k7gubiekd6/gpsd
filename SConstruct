@@ -99,9 +99,6 @@ systemd = os.path.exists(systemd_dir)
 # Set distribution-specific defaults here
 imloads = True
 
-# default tiocmiwait to off, until we know better
-tiocmiwait = False
-
 boolopts = (
     # GPS protocols
     ("nmea0183",      True,  "NMEA0183 support"),
@@ -623,6 +620,7 @@ if cleaning or helping:
     confdefs = []
     manbuilder = False
     htmlbuilder = False
+    tiocmiwait = True  # For cleaning, which works on any OS
 else:
 
     # If supported by the compiler, enable all warnings except uninitialized and
@@ -1557,8 +1555,11 @@ base_manpages = {
     "gpsdecode.1": "gpsdecode.xml",
     "srec.5": "srec.xml",
     "ntpshmmon.1": "ntpshmmon.xml",
-    "ppscheck.8": "ppscheck.xml",
     }
+if tiocmiwait:
+    base_manpages.update({
+    "ppscheck.8": "ppscheck.xml",
+    })
 python_manpages = {
     "gpsprof.1": "gpsprof.xml",
     "gpsfake.1": "gpsfake.xml",
