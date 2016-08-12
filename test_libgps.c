@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     if (batchmode) {
 #ifdef SOCKET_EXPORT_ENABLE
 	while (fgets(buf, sizeof(buf), stdin) != NULL) {
-	    if (buf[0] == '{' || isalpha(buf[0])) {
+	    if (buf[0] == '{' || isalpha( (int) buf[0])) {
 		gps_unpack(buf, &gpsdata);
 #ifdef LIBGPS_DEBUG
 		libgps_dump_state(&gpsdata);
