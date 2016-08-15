@@ -999,6 +999,7 @@ static void set_serial(struct gps_device_t *device,
     unsigned int stopbits = device->gpsdata.dev.stopbits;
     char parity = device->gpsdata.dev.parity;
     int wordsize = 8;
+    struct timespec delay;
 
 #ifndef __clang_analyzer__
     while (isspace((unsigned char) *modestring))
@@ -1041,7 +1042,12 @@ static void set_serial(struct gps_device_t *device,
 	     * across any given type of UART.
 	     */
 	    (void)tcdrain(device->gpsdata.gps_fd);
-	    (void)usleep(50000);
+
+	    /* wait 50,000 uSec */
+	    delay.tv_sec = 0;
+	    delay.tv_nsec = 50000000L;
+	    nanosleep(&delay, NULL);
+
 	    gpsd_set_speed(device, speed, parity, stopbits);
 	}
     }

@@ -43,11 +43,18 @@ static bool hunting = true;
 static void settle(struct gps_device_t *session)
 /* allow the device to settle after a control operation */
 {
+    struct timespec delay;
+
     /*
      * See the 'deep black magic' comment in serial.c:set_serial().
      */
     (void)tcdrain(session->gpsdata.gps_fd);
-    (void)usleep(50000);
+
+    /* wait 50,000 uSec */
+    delay.tv_sec = 0;
+    delay.tv_nsec = 50000000L;
+    nanosleep(&delay, NULL);
+
     (void)tcdrain(session->gpsdata.gps_fd);
 }
 #endif /* defined(RECONFIGURE_ENABLE) || defined(CONTROLSEND_ENABLE) */

@@ -157,6 +157,7 @@ static int nmea_send(int fd, const char *fmt, ... )
 	size_t status;
 	char buf[BUFSIZ];
 	va_list ap;
+	struct timespec delay;
 
 	va_start(ap, fmt) ;
 	(void)vsnprintf(buf, sizeof(buf)-5, fmt, ap);
@@ -167,7 +168,11 @@ static int nmea_send(int fd, const char *fmt, ... )
 	tcflush(fd, TCIOFLUSH);
 	status = (size_t)write(fd, buf, strlen(buf));
 	tcdrain(fd);
-	usleep(100000);
+        /* wait 100,000 uSec */
+	delay.tv_sec = 0;
+	delay.tv_nsec = 100000000L;
+	nanosleep(&delay, NULL);
+
 	if (status == strlen(buf)) {
 		return (int)status;
 	} else {

@@ -31,6 +31,7 @@ int main( int argc, char **argv){
 	char *buf, tn[32];
 	int ifd, ofd, sfd;
 	int dflag = 0, c, sleeptime, len, speed = 0;
+	struct timespec delay;
 
 	while((c = getopt(argc, argv, "d:r:s:")) != -1) {
 		switch(c){
@@ -117,7 +118,10 @@ int main( int argc, char **argv){
 			tcflush(sfd, TCIFLUSH);
 		}
 		spinner( len );
-		usleep(sleeptime);
+		/* wait sleeptime Sec */
+		delay.tv_sec = (time_t)(sleeptime / 1000000000L);
+		delay.tv_nsec = sleeptime % 1000000000L;
+		nanosleep(&delay, NULL);
 	}
 
 	munmap(buf, sb.st_size);

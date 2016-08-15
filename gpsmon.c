@@ -861,6 +861,7 @@ static bool do_command(const char *line)
 {
 #ifdef RECONFIGURE_ENABLE
     unsigned int v;
+    struct timespec delay;
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     unsigned char buf[BUFLEN];
@@ -963,7 +964,12 @@ static bool do_command(const char *line)
 		switcher->mode_switcher(&session, (int)v);
 		context.readonly = true;
 		(void)tcdrain(session.gpsdata.gps_fd);
-		(void)usleep(50000);
+
+		/* wait 50,000 uSec */
+		delay.tv_sec = 0;
+		delay.tv_nsec = 50000000L;
+		nanosleep(&delay, NULL);
+
 		/*
 		 * Session device change will be set to NMEA when
 		 * gpsmon resyncs.  So stash the current type to
@@ -1035,7 +1041,11 @@ static bool do_command(const char *line)
 		     * buffer.
 		     */
 		    (void)tcdrain(session.gpsdata.gps_fd);
-		    (void)usleep(50000);
+		    /* wait 50,000 uSec */
+		    delay.tv_sec = 0;
+		    delay.tv_nsec = 50000000L;
+		    nanosleep(&delay, NULL);
+
 		    (void)gpsd_set_speed(&session, speed,
 					 parity, stopbits);
 		} else

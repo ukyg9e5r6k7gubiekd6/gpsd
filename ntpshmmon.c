@@ -98,6 +98,7 @@ int main(int argc, char **argv)
     do {
 	/* the current segment */
 	struct shm_stat_t	shm_stat;
+	struct timespec delay;
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
 	    long long diff;  /* 32 bit long is too short for a timespec */
@@ -164,7 +165,7 @@ int main(int argc, char **argv)
          * That is a 200 millSec cycle, minimum 20 milliSec duration
          * we will wait 1 milliSec out of caution
          *
-         * and, of course, usleep() may sleep a lot longer than we ask...
+         * and, of course, nanosleep() may sleep a lot longer than we ask...
 	 */
 	if ( timeout ) {
 	    /* do not read time unless it matters */
@@ -173,7 +174,11 @@ int main(int argc, char **argv)
 		break;
 	    }
 	}
-	(void)usleep((useconds_t)1000);
+
+        /* wait 1,000 uSec */
+	delay.tv_sec = 0;
+	delay.tv_nsec = 1000000L;
+	nanosleep(&delay, NULL);
     } while ( 0 < nsamples );
 
     exit(EXIT_SUCCESS);

@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
 	struct termios term;
 	char buf[BSIZ];
 	time_t s, t;
+	struct timespec delay;
 
 	if (argc != 5){
 		fprintf(stderr, "usage: motosend <speed> <port> msgtype moto-body-hex\n");
@@ -82,8 +83,12 @@ int main(int argc, char **argv) {
 	tcflush(fd, TCIOFLUSH);
 	t = 0; n = 0;
 	while (1){
-		usleep(1000);
-		bzero(buf, BSIZ);
+		/* wait 1,000 uSec */
+		delay.tv_sec = 0;
+		delay.tv_nsec = 1000000L;
+		nanosleep(&delay, NULL);
+
+			bzero(buf, BSIZ);
 		if ((l = read(fd, buf, BSIZ)) == -1)
 			if (!(EINTR == errno || EAGAIN == errno))
 				err(1, "read");

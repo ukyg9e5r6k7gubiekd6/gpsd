@@ -255,6 +255,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 		    speed_t speed, char parity, unsigned int stopbits)
 {
     speed_t rate;
+    struct timespec delay;
 
     /*
      * Yes, you can set speeds that aren't in the hunt loop.  If you
@@ -380,7 +381,11 @@ void gpsd_set_speed(struct gps_device_t *session,
 	 * occasional failure to lock.
 	 */
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
-	(void)usleep(200000);
+
+        /* wait 200,000 uSec */
+	delay.tv_sec = 0;
+	delay.tv_nsec = 200000000L;
+	nanosleep(&delay, NULL);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
     gpsd_log(&session->context->errout, LOG_INF,
