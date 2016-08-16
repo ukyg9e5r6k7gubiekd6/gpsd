@@ -9,6 +9,10 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+/* getsid() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
+#define _XOPEN_SOURCE 500
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
