@@ -33,6 +33,9 @@
 
 #define CLIMB 3
 
+/* daemon() needs _DEFAULT_SOURCE */
+#define _DEFAULT_SOURCE
+
 #include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/types.h>
