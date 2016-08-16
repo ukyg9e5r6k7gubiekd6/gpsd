@@ -5,8 +5,8 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-/* I can not figure out why this file will not compile C99 */
-#undef _ISOC99_SOURCE
+/* need this for strnlen() and struct ifreq */
+#define _DEFAULT_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>
