@@ -28,6 +28,7 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <alloca.h>	/* for alloca(), not POSIX */
 
 #include "gpsd.h"
 #include "matrix.h"
