@@ -5,6 +5,9 @@
  * see the file COPYING in the distribution root for details.
  */
 
+/* sys/ipc.h needs _XOPEN_SOURCE, 500 means X/Open 1995 */
+#define _XOPEN_SOURCE 500
+
 #include <string.h>
 #include <libgen.h>
 #include <stdbool.h>

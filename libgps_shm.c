@@ -15,7 +15,7 @@ PERMISSIONS
 
 ***************************************************************************/
 
-/* sys/ipc.h needs _XOPEN_SOURCE, 500 mean X/Open 1995 */
+/* sys/ipc.h needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
 
 #include <time.h>             /* for time_t */

@@ -4,6 +4,12 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  *
  */
+
+/* sys/ipc.h needs _XOPEN_SOURCE, 500 means X/Open 1995 */
+#define _XOPEN_SOURCE 500
+/* pselect() needs _POSIX_C_SOURCE >= 200112L */
+#define _POSIX_C_SOURCE 200112L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
