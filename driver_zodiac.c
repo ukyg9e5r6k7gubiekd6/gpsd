@@ -9,6 +9,11 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+/* if we insisnt on C99, then we need this to get M_LN2 from math.h */
+/* 500 means X/Open 1995 */
+#define _XOPEN_SOURCE 500
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
