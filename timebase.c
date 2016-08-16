@@ -190,6 +190,9 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 
 *****************************************************************************/
 
+/* putenv() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
+#define _XOPEN_SOURCE 500
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
