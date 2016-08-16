@@ -21,6 +21,9 @@ PERMISSIONS
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
 
+/* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
+#define __ISO_C_VISIBLE 1999
+
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
