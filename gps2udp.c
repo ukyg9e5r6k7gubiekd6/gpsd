@@ -12,6 +12,9 @@
  *
  */
 
+/* strsep() and daemon() needs _DEFAULT_SOURCE */
+#define _DEFAULT_SOURCE
+
 #include <time.h>
 #include "gpsd_config.h"
 
@@ -165,7 +168,7 @@ static int open_udp(char **hostport)
 	   return (-1);
        }
 
-       bcopy((char *)hp->h_addr, (char *)&remote[channel].sin_addr, hp->h_length);
+       memcpy( &remote[channel].sin_addr, hp->h_addr, hp->h_length);
        remote[channel].sin_port = htons((in_port_t)portnum);
    }
 return (0);
