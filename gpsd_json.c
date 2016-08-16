@@ -14,6 +14,9 @@ PERMISSIONS
 
 ***************************************************************************/
 
+/* isascii() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
+#define _XOPEN_SOURCE 500
+
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
