@@ -4,6 +4,10 @@
  * This file is Copyright (c) 2012 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
+/* I can not figure out why this file will not compile C99 */
+#undef _ISOC99_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -15,8 +19,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <net/if.h>
 #include <sys/ioctl.h>
+#include <net/if.h>
 
 #include "gpsd.h"
 #include "libgps.h"
