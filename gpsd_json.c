@@ -16,6 +16,10 @@ PERMISSIONS
 
 /* isascii() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
+/* vsnprintf() needs __DARWIN_C_LEVEL >= 200112L */
+#define __DARWIN_C_LEVEL 200112L
+/* strlcpy() needs _DARWIN_C_SOURCE */
+#define _DARWIN_C_SOURCE
 
 #include <stdio.h>
 #include <math.h>

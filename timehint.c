@@ -10,6 +10,10 @@
 
 /* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
+/* snprintf() needs __DARWIN_C_LEVEL >= 200112L */
+#define __DARWIN_C_LEVEL 200112L
+/* snprintf() needs _DARWIN_C_SOURCE */
+#define _DARWIN_C_SOURCE
 
 #include <string.h>
 #include <libgen.h>

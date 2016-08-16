@@ -14,6 +14,9 @@
 #define _XOPEN_SOURCE 500
 /* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
+/* strlcpy() needs _DARWIN_C_SOURCE */
+#define _DARWIN_C_SOURCE
+
 
 #include <time.h>
 #include <stdio.h>
