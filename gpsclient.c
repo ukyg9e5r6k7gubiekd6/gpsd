@@ -42,7 +42,7 @@ gpsclient_gpsd_units(PyObject *self UNUSED, PyObject *args)
 static PyObject *
 gpsclient_wgs84_separation(PyObject *self UNUSED, PyObject *args)
 {
-    const double lat = 0.0, lon = 0.0;
+    double lat = 0.0, lon = 0.0;
     double sep;
 
     if (!PyArg_ParseTuple(args, "dd", &lat, &lon))
@@ -54,7 +54,7 @@ gpsclient_wgs84_separation(PyObject *self UNUSED, PyObject *args)
 static PyObject *
 gpsclient_maidenhead(PyObject *self UNUSED, PyObject *args)
 {
-    const double lat = 0.0, lon = 0.0;
+    double lat = 0.0, lon = 0.0;
     char *gs;
 
     if (!PyArg_ParseTuple(args, "dd", &lat, &lon))
