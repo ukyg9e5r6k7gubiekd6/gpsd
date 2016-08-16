@@ -6,6 +6,11 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+/* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
+#define _XOPEN_SOURCE 500
+/* setgroups() and daemon() needs _DEFAULT_SOURCE */
+#define _DEFAULT_SOURCE
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>		/* for select() */
