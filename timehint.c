@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
-#include <time.h>
+#include <time.h>        /* for timespec */
 #include <unistd.h>
 
 #include "timespec.h"
