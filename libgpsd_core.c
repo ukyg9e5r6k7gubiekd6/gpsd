@@ -20,7 +20,11 @@
 
 #include <time.h>
 #include <stdio.h>
+
+/* alloca() in stdlib.h needs __USE_MISC on Linux */
+#define __USE_MISC
 #include <stdlib.h>
+
 #include <stdbool.h>
 #include <libgen.h>
 #include <math.h>
@@ -37,7 +41,6 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <alloca.h>	/* for alloca(), not POSIX */
 
 #include "gpsd.h"
 #include "matrix.h"
