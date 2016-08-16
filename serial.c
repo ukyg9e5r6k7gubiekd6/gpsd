@@ -17,7 +17,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/param.h>		/* defines BSD */
+#ifdef __linux__
 #include <sys/sysmacros.h>	/* defines major() */
+#endif	/* __linux__ */
 
 #include "gpsd_config.h"
 #ifdef ENABLE_BLUEZ
