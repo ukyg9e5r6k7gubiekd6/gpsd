@@ -13,7 +13,8 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sys/param.h>	/* defines BSD */
+#include <sys/param.h>		/* defines BSD */
+#include <sys/sysmacros.h>	/* defines major() */
 
 #include "gpsd_config.h"
 #ifdef ENABLE_BLUEZ
