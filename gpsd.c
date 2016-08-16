@@ -17,6 +17,8 @@
 
 /* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
 #define __ISO_C_VISIBLE 1999
+/* for INADDR_LOOPBACK() FreeBSD wants __BSD_VISIBLE */
+#define __BSD_VISIBLE
 
 #include <sys/stat.h>
 #include <sys/types.h>
