@@ -23,6 +23,12 @@
  *
  */
 
+/* cfmakeraw() needs _DEFAULT_SOURCE */
+#define _DEFAULT_SOURCE
+/* daemon() needs _DEFAULT_SOURCE */
+#define _DEFAULT_SOURCE
+
+
 #include <time.h>               /* for time_t */
 #include "gpsd_config.h"
 
@@ -77,7 +83,7 @@ static void open_serial(char *device)
     }
 
     /* Clear struct for new port settings. */
-    bzero(&newtio, sizeof(newtio));
+    memset(&newtio, 0, sizeof(newtio));
 
     /* make it raw */
     (void)cfmakeraw(&newtio);

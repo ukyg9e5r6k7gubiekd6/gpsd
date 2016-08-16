@@ -415,7 +415,7 @@ static gps_mask_t sirf_msg_debug(struct gps_device_t *device,
     char msgbuf[MAX_PACKET_LENGTH * 3 + 2];
     int i;
 
-    bzero(msgbuf, (int)sizeof(msgbuf));
+    memset(msgbuf, 0, (int)sizeof(msgbuf));
 
     if (0xe1 == buf[0]) {	/* Development statistics messages */
 	for (i = 2; i < (int)len; i++)

@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 		delay.tv_sec = 0;
 		delay.tv_nsec = 1000000L;
 		nanosleep(&delay, NULL);
-		bzero(buf, BUFSIZ);
+		memset(buf, 0, BUFSIZ);
 		spinner( n++ );
 	}
 	/* NOTREACHED */
