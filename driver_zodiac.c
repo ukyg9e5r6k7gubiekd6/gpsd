@@ -13,6 +13,8 @@
 /* if we insisnt on C99, then we need this to get M_LN2 from math.h */
 /* 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
+/* round() needs  _POSIX_C_SOURCE >= 200112L */
+#define  _POSIX_C_SOURCE 200112L
 
 #include <stdio.h>
 #include <stdbool.h>
