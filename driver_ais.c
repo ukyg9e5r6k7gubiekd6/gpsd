@@ -26,7 +26,8 @@
  * Parse the data from the device
  */
 
-static void from_sixbit_untrimmed(unsigned char *bitvec, uint start, int count, char *to)
+static void from_sixbit_untrimmed(unsigned char *bitvec, unsigned int start,
+  int count, char *to)
 /* beginning at bitvec bit start, unpack count sixbit characters */
 {
     const char sixchr[64] =
@@ -62,7 +63,8 @@ static void trim_spaces_on_right_end(char* to)
     }
 }
 
-static void from_sixbit(unsigned char *bitvec, uint start, int count, char *to)
+static void from_sixbit(unsigned char *bitvec, unsigned int start, int count,
+  char *to)
 /* beginning at bitvec bit start, unpack count sixbit characters and remove trailing
  * spaces */
 {

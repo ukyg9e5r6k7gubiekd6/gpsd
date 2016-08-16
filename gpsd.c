@@ -11,6 +11,7 @@
 #include <sys/time.h>		/* for select() */
 #include <sys/select.h>
 #include <stdio.h>
+#include <stdint.h>		/* for uint32_t, etc. */
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1245,7 +1246,7 @@ static void handle_request(struct subscriber_t *sub,
 		    /* interpret defaults */
 		    if (devconf.baudrate == DEVDEFAULT_BPS)
 			devconf.baudrate =
-			    (uint) gpsd_get_speed(device);
+			    (unsigned int) gpsd_get_speed(device);
 		    if (devconf.parity == DEVDEFAULT_PARITY)
 			devconf.stopbits = device->gpsdata.dev.stopbits;
 		    if (devconf.stopbits == DEVDEFAULT_STOPBITS)

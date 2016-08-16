@@ -105,7 +105,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	unpacked_date.tm_sec = (int)getub(buf, 10);
 	unpacked_date.tm_isdst = 0;
 	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
-	nsec = (uint) getbeu32(buf, 11);
+	nsec = (unsigned int) getbeu32(buf, 11);
 
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + nsec * 1e-9;
 	mask |= TIME_SET;

@@ -1145,7 +1145,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	 */
 	session->driver.tsip.parity = session->gpsdata.dev.parity;
 	session->driver.tsip.stopbits =
-	    (uint) session->gpsdata.dev.stopbits;
+	    (unsigned int) session->gpsdata.dev.stopbits;
 	// gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
     }
     if (event == event_deactivate) {
