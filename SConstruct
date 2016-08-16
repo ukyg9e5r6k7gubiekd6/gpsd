@@ -383,7 +383,7 @@ if 'CCFLAGS' not in os.environ:
 env.Append(CFLAGS=['-D_ISOC99_SOURCE'])
 
 # We are POSIX 2001, tell the world
-#env.Append(CFLAGS=['-D_POSIX_C_SOURCE=200112L'])
+env.Append(CFLAGS=['-D_POSIX_C_SOURCE=200112L'])
 
 # Get a slight speedup by not doing automatic RCS and SCCS fetches.
 env.SourceCode('.', None)
