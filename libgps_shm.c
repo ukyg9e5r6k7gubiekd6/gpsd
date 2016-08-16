@@ -14,6 +14,10 @@ PERMISSIONS
    BSD terms apply: see the file COPYING in the distribution root for details.
 
 ***************************************************************************/
+
+/* sys/ipc.h needs _XOPEN_SOURCE, 500 mean X/Open 1995 */
+#define _XOPEN_SOURCE 500
+
 #include <time.h>             /* for time_t */
 #include "gpsd_config.h"
 
