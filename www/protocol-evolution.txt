@@ -66,7 +66,7 @@ For some devices (not all) you could add E and get error estimates.
 Other data such as course and rate of climb/sink might be available
 via other single-letter commands. I say "might be" because in those
 early days gpsd didn't attempt to compute error estimates or velocities
-if the GPS didn't explicitly supply them.  I fixed that, later. but
+if the GPS didn't explicitly supply them.  I fixed that, later, but
 this essay is about protocol design so I'm going to ignore all the
 issues associated with the implementation for the rest of the discussion.
 
@@ -534,7 +534,7 @@ GPSD-NG is an application of JSON.  Not a completely pure one; the
 request identifiers, are, for convenience reasons, outside the JSON
 objects. But close enough.
 
-In recent years, metaprotocols have become in important weapon in
+In recent years, metaprotocols have become an important weapon in
 the application-protocol designer's toolkit.  XML, and its
 progeny SOAP and XML-RPC, are the best known metaprotocols. YAML
 (of which JSON is essentially a subset) has a following as well.

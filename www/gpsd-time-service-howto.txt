@@ -2,7 +2,7 @@
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.8, July 2016
+v2.9, Aug 2016
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -244,13 +244,13 @@ to the Carrier Detect pin on the USB adapter. (This is known as the
 
 With this design, 1PPS from the engine will turn into a USB event that
 becomes visible to the host system (and GPSD) the next time the USB
-device is polled. USB 1.1 polls 1024 slots ever second.  Each slot is
+device is polled. USB 1.1 polls 1024 slots every second.  Each slot is
 polled in the same order every second.  When a device is added it is
 assigned to one of those 1024 polling slots.  It should then be clear
 that the accuracy of a USB 1.1 connected GPS receiver would be about 1
 mSec.
 
-As of early 2015 no USB GPS receiver we know of implements the higher
+As of mid-2016 no USB GPS receiver we know of implements the higher
 polling-rate options in USB 2 and 3 or the interrupt capability in USB
 3.  When one does, and if it has the Macx-1 mod, higher USB accuracy
 will ensue.
@@ -1825,3 +1825,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 2.8 July 2016
     Mention required version of gpsd
     Fix Typos.
+
+2.9 August 2016
+    Fix typos.
+
+// end
