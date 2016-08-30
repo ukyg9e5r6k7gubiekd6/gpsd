@@ -2224,7 +2224,7 @@ int main(int argc, char *argv[])
 	case AWAIT_NOT_READY:
 	    for (device = devices; device < devices + MAX_DEVICES; device++)
 		/*
-		 * The file descriptor validity check is reqiured on some ARM 
+		 * The file descriptor validity check is reqiured on some ARM
 		 * platforms to prevent a core dump.  This may be due to an
 		 * implimentation error in FD_ISSET().
 		 */
