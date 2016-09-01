@@ -30,8 +30,10 @@ const char *gpsd_packetdump(char *scbuf, size_t scbuflen,
 
     assert(binbuf != NULL);
     for (cp = binbuf; cp < binbuf + binbuflen; cp++)
-	if (!isprint((unsigned char) *cp) && !isspace((unsigned char) *cp))
+	if (!isprint((unsigned char) *cp) && !isspace((unsigned char) *cp)) {
 	    printable = false;
+	    break;	/* no need to keep iterating */
+        }
     if (printable)
 	return binbuf;
     else
