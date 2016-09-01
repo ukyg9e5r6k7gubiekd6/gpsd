@@ -54,7 +54,7 @@ const char *gpsd_hexdump(char *scbuf, size_t scbuflen,
     if (NULL == binbuf || 0 == binbuflen)
 	return "";
 
-    for (i = 0; i < len && i * 2 < scbuflen - 2; i++) {
+    for (i = 0; i < len && j < (scbuflen - 3); i++) {
 	scbuf[j++] = hexchar[(ibuf[i] & 0xf0) >> 4];
 	scbuf[j++] = hexchar[ibuf[i] & 0x0f];
     }
