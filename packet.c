@@ -874,7 +874,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	break;
     case SKY_DELIVERED:
 	if ( lexer->errout.debug >= LOG_RAW+1) {
-	    char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	    char scratchbuf[MAX_PACKET_LENGTH*4+1];
 	    gpsd_log(&lexer->errout, LOG_RAW+1,
 		     "Skytraq = %s\n",
 		     gpsd_packetdump(scratchbuf,  sizeof(scratchbuf),
@@ -1528,7 +1528,7 @@ static void packet_accept(struct gps_lexer_t *lexer, int packet_type)
 	lexer->outbuffer[packetlen] = '\0';
 	lexer->type = packet_type;
 	if (lexer->errout.debug >= LOG_RAW+1) {
-	    char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	    char scratchbuf[MAX_PACKET_LENGTH*4+1];
 	    gpsd_log(&lexer->errout, LOG_RAW+1,
 		     "Packet type %d accepted %zu = %s\n",
 		     packet_type, packetlen,
@@ -1551,7 +1551,7 @@ static void packet_discard(struct gps_lexer_t *lexer)
     lexer->inbufptr = memmove(lexer->inbuffer, lexer->inbufptr, remaining);
     lexer->inbuflen = remaining;
     if (lexer->errout.debug >= LOG_RAW+1) {
-	char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	char scratchbuf[MAX_PACKET_LENGTH*4+1];
 	gpsd_log(&lexer->errout, LOG_RAW + 1,
 		 "Packet discard of %zu, chars remaining is %zu = %s\n",
 		 discard, remaining,
@@ -1569,7 +1569,7 @@ static void packet_stash(struct gps_lexer_t *lexer)
     memcpy(lexer->stashbuffer, lexer->inbuffer, stashlen);
     lexer->stashbuflen = stashlen;
     if (lexer->errout.debug >= LOG_RAW+1) {
-	char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	char scratchbuf[MAX_PACKET_LENGTH*4+1];
 	gpsd_log(&lexer->errout, LOG_RAW+1,
 		 "Packet stash of %zu = %s\n",
 		 stashlen,
@@ -1591,7 +1591,7 @@ static void packet_unstash(struct gps_lexer_t *lexer)
 	lexer->inbuflen += stashlen;
 	lexer->stashbuflen = 0;
 	if (lexer->errout.debug >= LOG_RAW+1) {
-	    char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	    char scratchbuf[MAX_PACKET_LENGTH*4+1];
 	    gpsd_log(&lexer->errout, LOG_RAW+1,
 		     "Packet unstash of %zu, reconstructed is %zu = %s\n",
 		     stashlen, lexer->inbuflen,
@@ -1612,7 +1612,7 @@ static void character_discard(struct gps_lexer_t *lexer)
     memmove(lexer->inbuffer, lexer->inbuffer + 1, (size_t)-- lexer->inbuflen);
     lexer->inbufptr = lexer->inbuffer;
     if (lexer->errout.debug >= LOG_RAW+1) {
-	char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	char scratchbuf[MAX_PACKET_LENGTH*4+1];
 	gpsd_log(&lexer->errout, LOG_RAW + 1,
 		 "Character discarded, buffer %zu chars = %s\n",
 		 lexer->inbuflen,
@@ -2354,7 +2354,7 @@ ssize_t packet_get(int fd, struct gps_lexer_t *lexer)
 	}
     } else {
 	if (lexer->errout.debug >= LOG_RAW+1) {
-	    char scratchbuf[MAX_PACKET_LENGTH*2+1];
+	    char scratchbuf[MAX_PACKET_LENGTH*4+1];
 	    gpsd_log(&lexer->errout, LOG_RAW + 1,
 		     "Read %zd chars to buffer offset %zd (total %zd): %s\n",
 		     recvd, lexer->inbuflen, lexer->inbuflen + recvd,

@@ -492,7 +492,11 @@ struct gps_device_t {
 #endif /* PPS_ENABLE */
     double mag_var;			/* magnetic variation in degrees */
     bool back_to_nmea;			/* back to NMEA on revert? */
-    char msgbuf[MAX_PACKET_LENGTH*2+1];	/* command message buffer for sends */
+    /*
+     * msgbuf needs to hold the hex decode of inbuffer
+     * so msgbuf must be 2x the size of inbuffer
+     */
+    char msgbuf[MAX_PACKET_LENGTH*4+1];	/* command message buffer for sends */
     size_t msgbuflen;
     int observed;			/* which packet type`s have we seen? */
     bool cycle_end_reliable;		/* does driver signal REPORT_MASK */

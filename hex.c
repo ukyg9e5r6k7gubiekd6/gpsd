@@ -18,6 +18,8 @@
  * scbuflen -- sizeof(scbuf)
  * *binbuf  -- the binary to convert to hex and place in scbuf
  * binbuflen -- sizeof(binbuf)
+ *
+ * scbuflen needs to be 2x binbuflen to hold the hex conversion
  */
 
 const char *gpsd_packetdump(char *scbuf, size_t scbuflen,
