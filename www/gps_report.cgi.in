@@ -378,9 +378,9 @@ print '''
 <hr>
 <h2>GPSD compatibility</h2>
 
-<p>Please tell us what version you tested with.  If you used us a release,
-give us the full release number, like <code>3.5</code>.  If you built
-your code from our development repository please give the revision ID.</p>
+<p>Please tell us what version you tested with.  If you used a published
+release, give us the full release number, like <code>3.5</code>.  If you built
+your code from our development repository, please give the revision ID.</p>
 
 <p><em>GPSD version:&nbsp;</em>
 <input type="text"
