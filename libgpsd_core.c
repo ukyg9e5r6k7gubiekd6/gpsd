@@ -218,25 +218,27 @@ const char *gpsd_prettydump(struct gps_device_t *session)
 }
 
 
+
+/* Define the possible hook strings here so we can get the length */
+#define HOOK_ACTIVATE "ACTIVATE"
+#define HOOK_DEACTIVATE "DEACTIVATE"
+
+#define HOOK_CMD_MAX (sizeof(DEVICEHOOKPATH) + GPS_PATH_MAX \
+                      + sizeof(HOOK_DEACTIVATE))
+
 static void gpsd_run_device_hook(struct gpsd_errout_t *errout,
 				 char *device_name, char *hook)
 {
     struct stat statbuf;
+    char buf[HOOK_CMD_MAX];
+
     if (stat(DEVICEHOOKPATH, &statbuf) == -1)
 	gpsd_log(errout, LOG_PROG,
 		 "no %s present, skipped running %s hook\n",
 		 DEVICEHOOKPATH, hook);
     else {
-	/* use alloca(), which is not malloc(), here because
-	 * the pointer will never persist outside this small scope.
-	 */
-	size_t bufsize = strlen(DEVICEHOOKPATH) + 1 + strlen(device_name) + 1 + strlen(hook) + 1;
-	char *buf = alloca(bufsize);
-	/* no need to check the return code of alloca()
-         * by definition, if alloca() fails the program segfaults
-         */
 	int status;
-	(void)snprintf(buf, bufsize, "%s %s %s",
+	(void)snprintf(buf, sizeof(buf), "%s %s %s",
 		       DEVICEHOOKPATH, device_name, hook);
 	gpsd_log(errout, LOG_INF, "running %s\n", buf);
 	status = system(buf);
@@ -246,7 +248,6 @@ static void gpsd_run_device_hook(struct gpsd_errout_t *errout,
 	    gpsd_log(errout, LOG_INF,
 		     "%s returned %d\n", DEVICEHOOKPATH,
 		     WEXITSTATUS(status));
-	/* buf automatically freed here as the stack pops */
     }
 }
 
@@ -369,7 +370,7 @@ void gpsd_deactivate(struct gps_device_t *session)
     if (session->mode == O_OPTIMIZE)
 	gpsd_run_device_hook(&session->context->errout,
 			     session->gpsdata.dev.path,
-			     "DEACTIVATE");
+			     HOOK_DEACTIVATE);
 #ifdef PPS_ENABLE
     session->pps_thread.report_hook = NULL; /* tell any PPS-watcher thread to die */
 #endif /* PPS_ENABLE */
@@ -556,7 +557,7 @@ int gpsd_activate(struct gps_device_t *session, const int mode)
 {
     if (mode == O_OPTIMIZE)
 	gpsd_run_device_hook(&session->context->errout,
-			     session->gpsdata.dev.path, "ACTIVATE");
+			     session->gpsdata.dev.path, HOOK_ACTIVATE);
     session->gpsdata.gps_fd = gpsd_open(session);
     if (mode != O_CONTINUE)
 	session->mode = mode;
