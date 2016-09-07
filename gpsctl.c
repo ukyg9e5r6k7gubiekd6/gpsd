@@ -5,15 +5,16 @@
  *
  */
 
+#ifdef __linux__
+/* FreeBSD chokes on this */
 /* sys/ipc.h needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
 /* pselect() needs _POSIX_C_SOURCE >= 200112L */
 #define _POSIX_C_SOURCE 200112L
+#endif /* __linux__ */
+
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
-
-/* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
-#define __ISO_C_VISIBLE 1999
 
 #include <stdio.h>
 #include <stdlib.h>

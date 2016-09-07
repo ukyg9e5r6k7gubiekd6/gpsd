@@ -16,8 +16,12 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#ifdef __linux__
+/* FreeBSD chokes on this */
 /* isascii() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
+#endif /* __linux__ */
+
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
 

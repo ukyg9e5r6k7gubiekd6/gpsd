@@ -14,15 +14,16 @@ PERMISSIONS
 
 ***************************************************************************/
 
+#ifdef __linux__
+/* FreeBSD chokes on this */
 /* isascii() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
+#endif /* __linux__ */
+
 /* vsnprintf() needs __DARWIN_C_LEVEL >= 200112L */
 #define __DARWIN_C_LEVEL 200112L
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
-
-/* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
-#define __ISO_C_VISIBLE 1999
 
 #include <stdio.h>
 #include <math.h>
