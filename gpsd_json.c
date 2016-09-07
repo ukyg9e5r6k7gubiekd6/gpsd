@@ -194,7 +194,7 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if (policy->timing) {
 	    char rtime_str[TIMESPEC_LEN];
 	    struct timespec rtime_tmp;
-	    (int)clock_gettime(CLOCK_REALTIME, &rtime_tmp);
+	    (void)clock_gettime(CLOCK_REALTIME, &rtime_tmp);
 	    timespec_str(&rtime_tmp, rtime_str, sizeof(rtime_str));
 	    str_appendf(reply, replylen, "\"rtime\":%s,", rtime_str);
 #ifdef PPS_ENABLE
