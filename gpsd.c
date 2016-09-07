@@ -6,6 +6,8 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
+#ifdef __linux__
+/* FreeBSD chokes on this */
 /* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
 /* setgroups() and daemon() needs _DEFAULT_SOURCE */
@@ -14,11 +16,7 @@
 #define __DARWIN_C_LEVEL 200112L
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
-
-/* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
-#define __ISO_C_VISIBLE 1999
-/* for INADDR_LOOPBACK() FreeBSD wants __BSD_VISIBLE */
-#define __BSD_VISIBLE
+#endif /* __linux__ */
 
 #include <sys/stat.h>
 #include <sys/types.h>
