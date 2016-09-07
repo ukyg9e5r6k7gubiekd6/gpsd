@@ -12,11 +12,12 @@
 #define _XOPEN_SOURCE 500
 /* setgroups() and daemon() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
+#endif /* __linux__ */
+
 /* vsnprintf() needs __DARWIN_C_LEVEL >= 200112L */
 #define __DARWIN_C_LEVEL 200112L
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
-#endif /* __linux__ */
 
 #include <sys/stat.h>
 #include <sys/types.h>
