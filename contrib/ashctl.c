@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>  /* For nanosleep() */
 #include <termios.h>
 #include <unistd.h>
 

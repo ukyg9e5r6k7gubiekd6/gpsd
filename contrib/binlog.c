@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
+#include <time.h>  /* For nanosleep() */
 #include <unistd.h>
 
 void spinner(int );

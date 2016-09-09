@@ -13,10 +13,11 @@
 #include <termios.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>  /* For nanosleep() */
 #ifndef __GLIBC__
   #include <util.h>
 #else
-  #include <stdlib.h>
   #include <pty.h>
 #endif
 

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <termios.h>
+#include <time.h>  /* For nanosleep() and time() */
 #include <unistd.h>
 #include <limits.h>
 
