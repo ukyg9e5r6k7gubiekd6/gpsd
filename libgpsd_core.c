@@ -21,12 +21,8 @@
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
 
-
 #include <time.h>
 #include <stdio.h>
-
-/* alloca() in stdlib.h needs __USE_MISC on Linux */
-#define __USE_MISC
 #include <stdlib.h>
 
 #include <stdbool.h>
