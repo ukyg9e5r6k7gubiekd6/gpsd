@@ -2,7 +2,7 @@
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.9, Aug 2016
+v2.10, Sep 2016
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -366,12 +366,12 @@ You will need to have either ntpd or chrony installed. If you are
 running a Unix variant with a package system, the packages will
 probably be named 'ntp' (or 'ntpsec') and either 'chrony' or 'chronyd'.
 
-Of these two, ntpd is the older and more popular choice - thus, the
-one with the best-established peer community if you need help in
-unusual situations.  On the other hand, chrony has a reputation for
-being easier to set up and configure, and is better in situations
-where your machine has to be disconnected from the Internet for long
-enough periods of time for the clock to drift significantly.
+Between ntp and chrony, ntp is the older and more popular choice -
+thus, the one with the best-established peer community if you need
+help in unusual situations.  On the other hand, chrony has a
+reputation for being easier to set up and configure, and is better in
+situations where your machine has to be disconnected from the Internet
+for long enough periods of time for the clock to drift significantly.
 
 ntpd and chrony have differing philosophies, with ntpd more interested
 in deriving consensus time from multiple sources while chrony tries to
@@ -382,6 +382,12 @@ A feature comparison, part of the chrony documentation, is at
 is <<CHRONYDEFAULT>>. If you don't already know enough about time
 service to have a preference, the functional differences between them
 are unlikely to be significant to you; flip a coin.
+
+If you choose ntpd, it's best to go with the NTPsec version rather
+than legacy ntpd.  (As of September 2016 NTPsec is not yet generally
+available in binary package form. You will have to build it from
+source.) NTPsec shares some maintainers with GPSD, and has some
+significant improvements in security and performance.
 
 == Choice of Hardware ==
 
@@ -1856,5 +1862,6 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 2.10 September 2016
     Mention ntpviz
     Recommend minpoll=maxpoll=0 for PPS refclocks
+    Recommend NTPsec.
 
 // end
