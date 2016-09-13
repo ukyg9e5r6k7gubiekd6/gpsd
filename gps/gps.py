@@ -28,41 +28,41 @@ NaN = float('nan')
 def isnan(x): return str(x) == 'nan'
 
 # Don't hand-hack this list, it's generated.
-ONLINE_SET     	= (1<<1)
-TIME_SET       	= (1<<2)
-TIMERR_SET     	= (1<<3)
-LATLON_SET     	= (1<<4)
-ALTITUDE_SET   	= (1<<5)
-SPEED_SET      	= (1<<6)
-TRACK_SET      	= (1<<7)
-CLIMB_SET      	= (1<<8)
-STATUS_SET     	= (1<<9)
-MODE_SET       	= (1<<10)
-DOP_SET        	= (1<<11)
-HERR_SET       	= (1<<12)
-VERR_SET       	= (1<<13)
-ATTITUDE_SET   	= (1<<14)
-SATELLITE_SET  	= (1<<15)
-SPEEDERR_SET   	= (1<<16)
-TRACKERR_SET   	= (1<<17)
-CLIMBERR_SET   	= (1<<18)
-DEVICE_SET     	= (1<<19)
-DEVICELIST_SET 	= (1<<20)
-DEVICEID_SET   	= (1<<21)
-RTCM2_SET      	= (1<<22)
-RTCM3_SET      	= (1<<23)
-AIS_SET        	= (1<<24)
-PACKET_SET     	= (1<<25)
-SUBFRAME_SET   	= (1<<26)
-GST_SET        	= (1<<27)
-VERSION_SET    	= (1<<28)
-POLICY_SET     	= (1<<29)
-LOGMESSAGE_SET	= (1<<30)
-ERROR_SET      	= (1<<31)
-TIMEDRIFT_SET	= (1<<32)
+ONLINE_SET      = (1<<1)
+TIME_SET        = (1<<2)
+TIMERR_SET      = (1<<3)
+LATLON_SET      = (1<<4)
+ALTITUDE_SET    = (1<<5)
+SPEED_SET       = (1<<6)
+TRACK_SET       = (1<<7)
+CLIMB_SET       = (1<<8)
+STATUS_SET      = (1<<9)
+MODE_SET        = (1<<10)
+DOP_SET         = (1<<11)
+HERR_SET        = (1<<12)
+VERR_SET        = (1<<13)
+ATTITUDE_SET    = (1<<14)
+SATELLITE_SET   = (1<<15)
+SPEEDERR_SET    = (1<<16)
+TRACKERR_SET    = (1<<17)
+CLIMBERR_SET    = (1<<18)
+DEVICE_SET      = (1<<19)
+DEVICELIST_SET  = (1<<20)
+DEVICEID_SET    = (1<<21)
+RTCM2_SET       = (1<<22)
+RTCM3_SET       = (1<<23)
+AIS_SET         = (1<<24)
+PACKET_SET      = (1<<25)
+SUBFRAME_SET    = (1<<26)
+GST_SET         = (1<<27)
+VERSION_SET     = (1<<28)
+POLICY_SET      = (1<<29)
+LOGMESSAGE_SET  = (1<<30)
+ERROR_SET       = (1<<31)
+TIMEDRIFT_SET   = (1<<32)
 EOF_SET         = (1<<33)
-SET_HIGH_BIT	= 34
-UNION_SET      	= (RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET|GST_SET)
+SET_HIGH_BIT    = 34
+UNION_SET       = (RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|VERSION_SET|DEVICELIST_SET|ERROR_SET|GST_SET)
 STATUS_NO_FIX = 0
 STATUS_FIX = 1
 STATUS_DGPS_FIX = 2
@@ -72,19 +72,19 @@ MODE_3D = 3
 MAXCHANNELS = 20
 SIGNAL_STRENGTH_UNKNOWN = NaN
 
-WATCH_ENABLE	= 0x000001	# enable streaming
-WATCH_DISABLE	= 0x000002	# disable watching
-WATCH_JSON	= 0x000010	# JSON output
-WATCH_NMEA	= 0x000020	# output in NMEA
-WATCH_RARE	= 0x000040	# output of packets in hex
-WATCH_RAW	= 0x000080	# output of raw packets
-WATCH_SCALED	= 0x000100	# scale output to floats
-WATCH_TIMING	= 0x000200	# timing information
-WATCH_DEVICE	= 0x000800	# watch specific device
-WATCH_SPLIT24	= 0x001000	# split AIS Type 24s
-WATCH_PPS	= 0x002000	# enable PPS JSON
-WATCH_NEWSTYLE	= 0x010000	# force JSON streaming
-WATCH_OLDSTYLE	= 0x020000	# force old-style streaming
+WATCH_ENABLE    = 0x000001      # enable streaming
+WATCH_DISABLE   = 0x000002      # disable watching
+WATCH_JSON      = 0x000010      # JSON output
+WATCH_NMEA      = 0x000020      # output in NMEA
+WATCH_RARE      = 0x000040      # output of packets in hex
+WATCH_RAW       = 0x000080      # output of raw packets
+WATCH_SCALED    = 0x000100      # scale output to floats
+WATCH_TIMING    = 0x000200      # timing information
+WATCH_DEVICE    = 0x000800      # watch specific device
+WATCH_SPLIT24   = 0x001000      # split AIS Type 24s
+WATCH_PPS       = 0x002000      # enable PPS JSON
+WATCH_NEWSTYLE  = 0x010000      # force JSON streaming
+WATCH_OLDSTYLE  = 0x020000      # force old-style streaming
 
 
 class gpsfix(object):
@@ -165,10 +165,13 @@ class gpsdata(object):
             st += "Track:    ?\n"
         else:
             st += "Track:    %f\n" % (self.fix.track)
-        st += "Status:   STATUS_%s\n" % ("NO_FIX", "FIX", "DGPS_FIX")[self.status]
-        st += "Mode:     MODE_%s\n" % ("ZERO", "NO_FIX", "2D", "3D")[self.fix.mode]
+        st += "Status:   STATUS_%s\n" \
+            % ("NO_FIX", "FIX", "DGPS_FIX")[self.status]
+        st += "Mode:     MODE_%s\n" \
+             % ("ZERO", "NO_FIX", "2D", "3D")[self.fix.mode]
         st += "Quality:  %d p=%2.2f h=%2.2f v=%2.2f t=%2.2f g=%2.2f\n" % \
-              (self.satellites_used, self.pdop, self.hdop, self.vdop, self.tdop, self.gdop)
+              (self.satellites_used, self.pdop, self.hdop, self.vdop,
+               self.tdop, self.gdop)
         st += "Y: %s satellites in view:\n" % len(self.satellites)
         for sat in self.satellites:
             st += "    %r\n" % sat
