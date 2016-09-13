@@ -215,11 +215,9 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.valid = ONLINE_SET
             self.utc = default("time", None, TIME_SET)
             if self.utc is not None:
-                # Time can be either Unix time as a float or an ISO8601 string
-                if type(self.fix.time) == type(0.0):
-                    self.fix.time = self.utc
-                else:
-                    self.fix.time = isotime(self.utc)
+                # self.utc is always iso 8601 string
+                # just copy to fix.time
+                self.fix.time = self.utc
             self.fix.ept       = default("ept",   NaN, TIMERR_SET)
             self.fix.latitude  = default("lat",   NaN, LATLON_SET)
             self.fix.longitude = default("lon",   NaN)
