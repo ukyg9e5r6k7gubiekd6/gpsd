@@ -218,24 +218,25 @@ class gps(gpscommon, gpsdata, gpsjson):
                 # self.utc is always iso 8601 string
                 # just copy to fix.time
                 self.fix.time = self.utc
-            self.fix.ept       = default("ept",   NaN, TIMERR_SET)
-            self.fix.latitude  = default("lat",   NaN, LATLON_SET)
-            self.fix.longitude = default("lon",   NaN)
             self.fix.altitude  = default("alt",   NaN, ALTITUDE_SET)
-            self.fix.epx       = default("epx",   NaN, HERR_SET)
-            self.fix.epy       = default("epy",   NaN, HERR_SET)
-            self.fix.epv       = default("epv",   NaN, VERR_SET)
-            self.fix.track     = default("track", NaN, TRACK_SET)
-            self.fix.speed     = default("speed", NaN, SPEED_SET)
             self.fix.climb     = default("climb", NaN, CLIMB_SET)
+            self.fix.epc       = default("epc",   NaN, CLIMBERR_SET)
             self.fix.epd       = default("epd",   NaN)
             self.fix.eps       = default("eps",   NaN, SPEEDERR_SET)
-            self.fix.epc       = default("epc",   NaN, CLIMBERR_SET)
+            self.fix.ept       = default("ept",   NaN, TIMERR_SET)
+            self.fix.epv       = default("epv",   NaN, VERR_SET)
+            self.fix.epx       = default("epx",   NaN, HERR_SET)
+            self.fix.epy       = default("epy",   NaN, HERR_SET)
+            self.fix.latitude  = default("lat",   NaN, LATLON_SET)
+            self.fix.longitude = default("lon",   NaN)
             self.fix.mode      = default("mode",  0,   MODE_SET)
+            self.fix.speed     = default("speed", NaN, SPEED_SET)
             self.fix.status    = default("status",1)
+            self.fix.track     = default("track", NaN, TRACK_SET)
         elif self.data.get("class") == "SKY":
-            for attrp in ("x", "y", "v", "h", "p", "g"):
-                setattr(self, attrp + "dop", default(attrp + "dop", NaN, DOP_SET))
+            for attrp in ( "g", "h", "p", "t", "v", "x", "y"):
+                n = attrp + "dop"
+                setattr(self, n, default(n, NaN, DOP_SET))
             if "satellites" in self.data.keys():
                 self.satellites = []
                 for sat in self.data['satellites']:
