@@ -206,34 +206,38 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.gps_id      = driver
             if subtype:
                 self.gps_id += " " + subtype
-            self.driver_mode = default("native", 0)
             self.baudrate    = default("bps", 0)
+            self.cycle       = default("cycle",       NaN)
+            self.driver_mode = default("native",      0)
+            self.mincycle    = default("mincycle",    NaN)
             self.serialmode  = default("serialmode", "8N1")
-            self.cycle       = default("cycle",    NaN)
-            self.mincycle    = default("mincycle", NaN)
+            # FIXME: decode DEVICSES
+            # FIXME: decode PPS
         elif self.data.get("class") == "TPV":
+            self.device = default("device", "missing")
+            self.utc    = default("time",   None, TIME_SET)
             self.valid = ONLINE_SET
-            self.utc = default("time", None, TIME_SET)
             if self.utc is not None:
                 # self.utc is always iso 8601 string
                 # just copy to fix.time
                 self.fix.time = self.utc
-            self.fix.altitude  = default("alt",   NaN, ALTITUDE_SET)
-            self.fix.climb     = default("climb", NaN, CLIMB_SET)
-            self.fix.epc       = default("epc",   NaN, CLIMBERR_SET)
-            self.fix.epd       = default("epd",   NaN)
-            self.fix.eps       = default("eps",   NaN, SPEEDERR_SET)
-            self.fix.ept       = default("ept",   NaN, TIMERR_SET)
-            self.fix.epv       = default("epv",   NaN, VERR_SET)
-            self.fix.epx       = default("epx",   NaN, HERR_SET)
-            self.fix.epy       = default("epy",   NaN, HERR_SET)
-            self.fix.latitude  = default("lat",   NaN, LATLON_SET)
-            self.fix.longitude = default("lon",   NaN)
-            self.fix.mode      = default("mode",  0,   MODE_SET)
-            self.fix.speed     = default("speed", NaN, SPEED_SET)
-            self.fix.status    = default("status",1)
-            self.fix.track     = default("track", NaN, TRACK_SET)
+            self.fix.altitude  = default("alt",    NaN, ALTITUDE_SET)
+            self.fix.climb     = default("climb",  NaN, CLIMB_SET)
+            self.fix.epc       = default("epc",    NaN, CLIMBERR_SET)
+            self.fix.epd       = default("epd",    NaN)
+            self.fix.eps       = default("eps",    NaN, SPEEDERR_SET)
+            self.fix.ept       = default("ept",    NaN, TIMERR_SET)
+            self.fix.epv       = default("epv",    NaN, VERR_SET)
+            self.fix.epx       = default("epx",    NaN, HERR_SET)
+            self.fix.epy       = default("epy",    NaN, HERR_SET)
+            self.fix.latitude  = default("lat",    NaN, LATLON_SET)
+            self.fix.longitude = default("lon",    NaN)
+            self.fix.mode      = default("mode",   0,   MODE_SET)
+            self.fix.speed     = default("speed",  NaN, SPEED_SET)
+            self.fix.status    = default("status", 1)
+            self.fix.track     = default("track",  NaN, TRACK_SET)
         elif self.data.get("class") == "SKY":
+            self.device = default("device", "missing")
             for attrp in ( "g", "h", "p", "t", "v", "x", "y"):
                 n = attrp + "dop"
                 setattr(self, n, default(n, NaN, DOP_SET))
