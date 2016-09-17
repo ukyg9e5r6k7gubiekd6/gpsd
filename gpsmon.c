@@ -1439,8 +1439,9 @@ int main(int argc, char **argv)
 			(void)fputs(promptgen(), stdout);
 			(void)fputs("> ", stdout);
 			(void)putchar(inbuf[0]);
-			cmdline = fgets(inbuf+1, (int)strlen(inbuf)-1, stdin);
-			cmdline--;
+			cmdline = fgets(inbuf+1, sizeof(inbuf)-1, stdin);
+			if (cmdline)
+			    cmdline--;
 		    }
 		}
 		if (cmdline != NULL && !do_command(cmdline))
