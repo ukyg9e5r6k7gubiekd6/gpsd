@@ -770,7 +770,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    struct timespec timedelta;
 	    char timedelta_str[TIMESPEC_LEN];
 
-	    TS_SUB( &timedelta, &noclobber.pps.real, &noclobber.pps.clock);
+	    TS_SUB( &timedelta, &noclobber.pps.clock, &noclobber.pps.real);
 	    timespec_str( &timedelta, timedelta_str, sizeof(timedelta_str) );
 
 	    if (!curses_active) {
