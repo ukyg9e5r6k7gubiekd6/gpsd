@@ -16,6 +16,14 @@ to seed from the system time.
 If no options are given, the script performs a sequential test of all
 possibilities.  This requires time on the order of 2 ** n where n is
 the count of options.
+
+***IMPORTANT***:
+Not only has this program not been updated for Python 3, but it hasn't been
+touched in such a long time that it still expects to use make rather than
+SCons to do builds (and probably has outdated notions of the drivers as well).
+Although updating it for Python 3 doesn't look too difficult, it doesn't make
+sense to do so without first restoring it to correct operation with Python 2,
+since the former fixes would otherwise be untestable.
 """
 import os, sys, random, getopt, time
 
