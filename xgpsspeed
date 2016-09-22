@@ -228,7 +228,7 @@ class NauticalSpeedometer(Speedometer):
     HEADING_SAT_GAP = 0.8
     SAT_SIZE = 10  # radius of the satellite circle in skyview
 
-    def __init__(self, speed_unit=None, maxspeed=100):
+    def __init__(self, speed_unit=None, maxspeed=100, rotate=0.0):
         Speedometer.__init__(self, speed_unit)
         self.connect('size-allocate', self.on_size_allocate)
         self.width = self.height = 0
@@ -240,9 +240,9 @@ class NauticalSpeedometer(Speedometer):
         self.satellites = []
         self.last_heading = 0
         self.maxspeed = int(maxspeed)
+        self.rotate = radians(rotate)
 
-    @staticmethod
-    def polar2xy(radius, angle, polex, poley):
+    def polar2xy(self, radius, angle, polex, poley):
         '''convert Polar coordinate to Cartesian coordinate system
         the y axis in pygtk points downward
         Args:
@@ -250,6 +250,7 @@ class NauticalSpeedometer(Speedometer):
            angle: azimuth from from Polar coordinate system, in radian
            polex and poley are the Cartesian coordinate of the pole
         return a tuple contains (x, y)'''
+        angle = (angle + self.rotate) % (pi * 2)  # Note reversed sense
         return (polex + cos(angle) * radius, poley - sin(angle) * radius)
 
     def on_size_allocate(self, _unused, allocation):
@@ -306,12 +307,12 @@ class NauticalSpeedometer(Speedometer):
         for i in range(11):
             # draw the large ticks
             alpha = (8 - i) * pi / 6
-            self.cr.move_to(*NauticalSpeedometer.polar2xy(rspeed, alpha, x, y))
+            self.cr.move_to(*self.polar2xy(rspeed, alpha, x, y))
             self.cr.set_line_width(radius / 100)
-            self.cr.line_to(*NauticalSpeedometer.polar2xy(rspeed - s_long, alpha, x, y))
+            self.cr.line_to(*self.polar2xy(rspeed - s_long, alpha, x, y))
             self.cr.stroke()
             self.cr.set_line_width(radius / 200)
-            xf, yf = NauticalSpeedometer.polar2xy(rspeed + 10, alpha, x, y)
+            xf, yf = self.polar2xy(rspeed + 10, alpha, x, y)
             stxt = (self.maxspeed // 10) * i
             self.draw_text(xf, yf, stxt, fontsize=radius / 15)
 
@@ -319,14 +320,14 @@ class NauticalSpeedometer(Speedometer):
             # middle tick
             alpha = (8 - i) * pi / 6
             beta = (17 - 2 * i) * pi / 12
-            self.cr.move_to(*NauticalSpeedometer.polar2xy(rspeed, beta, x, y))
-            self.cr.line_to(*NauticalSpeedometer.polar2xy(rspeed - s_middle, beta, x, y))
+            self.cr.move_to(*self.polar2xy(rspeed, beta, x, y))
+            self.cr.line_to(*self.polar2xy(rspeed - s_middle, beta, x, y))
 
             #  short tick
             for n in range(10):
                 gamma = alpha + n * pi / 60
-                self.cr.move_to(*NauticalSpeedometer.polar2xy(rspeed, gamma, x, y))
-                self.cr.line_to(*NauticalSpeedometer.polar2xy(rspeed - s_short, gamma, x, y))
+                self.cr.move_to(*self.polar2xy(rspeed, gamma, x, y))
+                self.cr.line_to(*self.polar2xy(rspeed - s_short, gamma, x, y))
 
         # draw the heading arc
         self.cr.new_sub_path()
@@ -342,7 +343,7 @@ class NauticalSpeedometer(Speedometer):
             label = str(n * 90)
             # self.cr.set_source_rgba(0, 1, 0)
             # radius * (1 + NauticalSpeedometer.HEADING_SAT_GAP),
-            tbox_x, tbox_y = NauticalSpeedometer.polar2xy(
+            tbox_x, tbox_y = self.polar2xy(
                 radius * 0.88,
                 (1 - n) * pi / 2,
                 x, y)
@@ -359,13 +360,14 @@ class NauticalSpeedometer(Speedometer):
         self.cr.set_source_rgba(0, 0, 0)
 
         self.cr.arc(x, y, skyradius * 2 / 3, 0, 2 * pi)
+        self.cr.move_to(x + skyradius / 3, y)  # Avoid line connecting circles
         self.cr.arc(x, y, skyradius / 3, 0, 2 * pi)
 
         # draw the cross hair
-        self.cr.move_to(x - skyradius, y)
-        self.cr.line_to(x + skyradius, y)
-        self.cr.move_to(x, y - skyradius)
-        self.cr.line_to(x, y + skyradius)
+        self.cr.move_to(*self.polar2xy(skyradius, 1.5 * pi, x, y))
+        self.cr.line_to(*self.polar2xy(skyradius, 0.5 * pi, x, y))
+        self.cr.move_to(*self.polar2xy(skyradius, 0.0, x, y))
+        self.cr.line_to(*self.polar2xy(skyradius, pi, x, y))
         self.cr.set_line_width(radius / 200)
         self.cr.stroke()
 
@@ -376,22 +378,22 @@ class NauticalSpeedometer(Speedometer):
         # draw the large ticks
         for i in range(12):
             agllong = i * pi / 6
-            self.cr.move_to(*NauticalSpeedometer.polar2xy(radius - long_inset, agllong, x, y))
-            self.cr.line_to(*NauticalSpeedometer.polar2xy(radius, agllong, x, y))
+            self.cr.move_to(*self.polar2xy(radius - long_inset, agllong, x, y))
+            self.cr.line_to(*self.polar2xy(radius, agllong, x, y))
             self.cr.set_line_width(radius / 100)
             self.cr.stroke()
             self.cr.set_line_width(radius / 200)
 
             # middle tick
             aglmid = (i + 0.5) * pi / 6
-            self.cr.move_to(*NauticalSpeedometer.polar2xy(radius - mid_inset, aglmid, x, y))
-            self.cr.line_to(*NauticalSpeedometer.polar2xy(radius, aglmid, x, y))
+            self.cr.move_to(*self.polar2xy(radius - mid_inset, aglmid, x, y))
+            self.cr.line_to(*self.polar2xy(radius, aglmid, x, y))
 
             #  short tick
             for n in range(1, 10):
                 aglshrt = agllong + n * pi / 60
-                self.cr.move_to(*NauticalSpeedometer.polar2xy(radius - short_inset, aglshrt, x, y))
-                self.cr.line_to(*NauticalSpeedometer.polar2xy(radius, aglshrt, x, y))
+                self.cr.move_to(*self.polar2xy(radius - short_inset, aglshrt, x, y))
+                self.cr.line_to(*self.polar2xy(radius, aglshrt, x, y))
             self.cr.stroke()
 
     def draw_heading(self, trig_height, heading, radius, x, y):
@@ -419,16 +421,16 @@ class NauticalSpeedometer(Speedometer):
         self.cr.stroke()
 
         # heading text
-        (tbox_x, tbox_y) = NauticalSpeedometer.polar2xy(radius * 1.1, h, x, y)
+        (tbox_x, tbox_y) = self.polar2xy(radius * 1.1, h, x, y)
         self.draw_text(tbox_x, tbox_y, int(heading), fontsize=radius / 15)
 
         # the ship shape, based on test and try
         shiplen = radius * NauticalSpeedometer.HEADING_SAT_GAP / 4
-        xh, yh = NauticalSpeedometer.polar2xy(shiplen * 2.3, h, x, y)
-        xa, ya = NauticalSpeedometer.polar2xy(shiplen * 2.2, h + pi - 0.3, x, y)
-        xb, yb = NauticalSpeedometer.polar2xy(shiplen * 2.2, h + pi + 0.3, x, y)
-        xc, yc = NauticalSpeedometer.polar2xy(shiplen * 1.4, h - pi / 5, x, y)
-        xd, yd = NauticalSpeedometer.polar2xy(shiplen * 1.4, h + pi / 5, x, y)
+        xh, yh = self.polar2xy(shiplen * 2.3, h, x, y)
+        xa, ya = self.polar2xy(shiplen * 2.2, h + pi - 0.3, x, y)
+        xb, yb = self.polar2xy(shiplen * 2.2, h + pi + 0.3, x, y)
+        xc, yc = self.polar2xy(shiplen * 1.4, h - pi / 5, x, y)
+        xd, yd = self.polar2xy(shiplen * 1.4, h + pi / 5, x, y)
 
         self.cr.set_source_rgba(0, 0.3, 0.2, 0.5)
         self.cr.move_to(xa, ya)
@@ -460,7 +462,7 @@ class NauticalSpeedometer(Speedometer):
         self.cr.set_line_width(2)
         self.cr.set_source_rgb(0, 0, 0)
 
-        x0, y0 = NauticalSpeedometer.polar2xy(radius * (90 - el) // 90, h, x, y)
+        x0, y0 = self.polar2xy(radius * (90 - el) // 90, h, x, y)
 
         self.cr.new_sub_path()
         if gps.is_sbas(satsoup['PRN']):
@@ -515,7 +517,7 @@ class NauticalSpeedometer(Speedometer):
 
 class Main(object):
     def __init__(self, host='localhost', port='2947', device=None, debug=0,
-                 speed_unit=None, maxspeed=0, nautical=False):
+                 speed_unit=None, maxspeed=0, nautical=False, rotate=0.0):
         self.host = host
         self.port = port
         self.device = device
@@ -523,6 +525,7 @@ class Main(object):
         self.speed_unit = speed_unit
         self.maxspeed = maxspeed
         self.nautical = nautical
+        self.rotate = rotate
         self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
@@ -531,7 +534,8 @@ class Main(object):
             self.window.set_size_request(500, 550)
             self.widget = NauticalSpeedometer(
                 speed_unit=self.speed_unit,
-                maxspeed=self.maxspeed)
+                maxspeed=self.maxspeed,
+                rotate=self.rotate)
         else:
             self.widget = LandSpeedometer(speed_unit=self.speed_unit)
         self.window.connect('delete_event', self.delete_event)
@@ -735,6 +739,14 @@ if __name__ == '__main__':
         type='int',
         help='Set level of debug. Must be integer. [Default 0]'
     )
+    parser.add_option(
+        '--rotate',
+        dest='rotate',
+        default=0,
+        action='store',
+        type='float',
+        help='Rotation of skyview ("up" direction) in degrees. [Default 0]'
+    )
     (options, args) = parser.parse_args()
     if args:
         arg = args[0].split(':')
@@ -755,5 +767,6 @@ if __name__ == '__main__':
         speed_unit=options.speedunits,
         maxspeed=options.maxspeed,
         nautical=options.nautical,
-        debug=options.debug
+        debug=options.debug,
+        rotate=options.rotate,
     ).run()

@@ -3,7 +3,7 @@
 '''
 xgps -- test client for gpsd
 
-usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [server[:port[:device]]]
+usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [-r rotation] [server[:port[:device]]]
 '''
 
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
@@ -95,7 +95,7 @@ class SkyView(Gtk.DrawingArea):
     HORIZON_PAD = 40    # How much whitespace to leave around horizon
     SAT_RADIUS = 5      # Diameter of satellite circle
 
-    def __init__(self):
+    def __init__(self, rotate=0.0):
         GObject.GObject.__init__(self)
         self.set_size_request(400, 400)
         self.cr = None   # New cairo context for each expose event
@@ -104,6 +104,7 @@ class SkyView(Gtk.DrawingArea):
         self.connect('draw', self.on_draw)
         self.satellites = []
         self.center_x = self.center_y = self.radius = None
+        self.rotate = rotate
 
     def on_size_allocate(self, _unused, allocation):
         width = allocation.width
@@ -181,6 +182,7 @@ class SkyView(Gtk.DrawingArea):
 
     def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
+        az = (az - self.rotate) % 360.0
         az *= (math.pi / 180)  # Degrees to radians
         # Exact spherical projection would be like this:
         # el = sin((90.0 - el) * DEG_2_RAD);
@@ -223,14 +225,14 @@ class SkyView(Gtk.DrawingArea):
         self.draw_line(x1, y1, x2, y2)
 
         # The compass-point letters
-        (x, y) = self.pol2cart(0, 0)
-        self.draw_string(x, y - 10, "N")
-        (x, y) = self.pol2cart(90, 0)
-        self.draw_string(x + 10, y, "E")
-        (x, y) = self.pol2cart(180, 0)
-        self.draw_string(x, y + 10, "S")
-        (x, y) = self.pol2cart(270, 0)
-        self.draw_string(x - 10, y, "W")
+        (x, y) = self.pol2cart(0, -5)
+        self.draw_string(x, y, "N")
+        (x, y) = self.pol2cart(90, -5)
+        self.draw_string(x, y, "E")
+        (x, y) = self.pol2cart(180, -5)
+        self.draw_string(x, y, "S")
+        (x, y) = self.pol2cart(270, -5)
+        self.draw_string(x, y, "W")
 
         # The satellites
         self.cr.set_line_width(2)
@@ -460,8 +462,9 @@ class Base(object):
         ("EPD", lambda s, r: s.update_err_degrees(r, "epd")),
     )
 
-    def __init__(self, deg_type):
+    def __init__(self, deg_type, rotate=0.0):
         self.deg_type = deg_type
+        self.rotate = rotate
         self.conversions = unit_adjustments()
         self.saved_mode = -1
         self.ais_latch = False
@@ -579,7 +582,7 @@ class Base(object):
 
         viewframe = Gtk.Frame(label="Skyview")
         self.satbox.add(viewframe)
-        self.skyview = SkyView()
+        self.skyview = SkyView(self.rotate)
         viewframe.add(self.skyview)
 
         self.rawdisplay = Gtk.Entry()
@@ -869,11 +872,12 @@ class Base(object):
 if __name__ == "__main__":
     try:
         import getopt
-        (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:u:V?",
+        (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:u:r:V?",
                                              ['verbose'])
         debug = 0
         degreefmt = 'd'
         unit_system = None
+        rotate = 0.0
         for (opt, val) in options:
             if opt in '-D':
                 debug = int(val)
@@ -881,6 +885,11 @@ if __name__ == "__main__":
                 degreeformat = val
             elif opt == '-u':
                 unit_system = val
+            elif opt == '-r':
+                try:
+                    rotate = float(val)
+                except ValueError:
+                    rotate = 0.0
             elif opt in ('-?', '-h', '--help'):
                 print(__doc__)
                 sys.exit(0)
@@ -902,7 +911,7 @@ if __name__ == "__main__":
             if len(args) >= 3:
                 device = args[2]
 
-        base = Base(deg_type=degreefmt)
+        base = Base(deg_type=degreefmt, rotate=rotate)
         base.set_units(unit_system)
         try:
             daemon = gps.gps(host=host,
