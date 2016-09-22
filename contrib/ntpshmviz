@@ -11,8 +11,12 @@
 import sys
 # need numpy for float128, normal python floats are too small to hold a timespec
 import numpy
-import matplotlib.pyplot as PLT
-from matplotlib.figure import Figure
+try:
+    import matplotlib.pyplot as PLT
+    from matplotlib.figure import Figure
+except:
+    print("Please make sure matplotlib is installed properly:", sys.exc_info()[0])
+    sys.exit(1)
 
 class ntpOffset:
     def __init__(self, stream):
@@ -69,7 +73,11 @@ class ntpOffset:
                 if line[:1] != '#':
                     line = line.lstrip()
                     record = line.split(' ')
-                    offset = numpy.float128(record[3]) - numpy.float128(record[4])
+                    try:
+                        offset = numpy.float128(record[3]) - numpy.float128(record[4])
+                    except:
+                        print ("Invalid data: ", sys.exc_info()[0], ". Data was: ", line)
+                        continue
 
                     # If the NTP unit is in the dictionary
                     # append the offset to the list
