@@ -244,7 +244,10 @@ function draw_satview() {
 
         # Draw the satellites
         for s in self.satellites:
-            x, y = polartocart(s.elevation, s.azimuth)
+            el, az = s.elevation, s.azimuth
+            if el == 0 and az == 0:
+                continue  # Skip satellites with unknown position
+            x, y = polartocart(el, az)
             fill = not s.used and 'lightgrey' or \
                 s.ss < 30 and 'red' or \
                 s.ss < 35 and 'yellow' or \

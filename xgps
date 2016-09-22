@@ -235,6 +235,8 @@ class SkyView(Gtk.DrawingArea):
         # The satellites
         self.cr.set_line_width(2)
         for sat in self.satellites:
+            if sat.az == 0 and sat.el == 0:
+                continue  # Skip satellites with unknown position
             (x, y) = self.pol2cart(sat.az, sat.el)
             if sat.ss < 10:
                 self.set_color("Gray")
