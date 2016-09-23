@@ -5,10 +5,13 @@
 
 # Note that ../gpsd_config.h is required and is built separately
 
-ashctl = Program("ashctl", ["ashctl.c", "../strl.c"])
+
+strl = StaticObject("strl", "../strl.c")
+
+ashctl = Program("ashctl", ["ashctl.c", strl])
 binlog = Program("binlog", "binlog.c")
 binreplay = Program("binreplay", "binreplay.c", parse_flags=['-lutil'])
 lla2ecef = Program("lla2ecef", "lla2ecef.c", parse_flags=['-lm'])
-motosend = Program("motosend", ["motosend.c", "../strl.c"])
+motosend = Program("motosend", ["motosend.c", strl])
 
 Default(ashctl, binlog, binreplay, lla2ecef, motosend)
