@@ -1312,7 +1312,8 @@ else:
         parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
 
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
-                         LIBS=['gps_static'], LIBPATH='.', parse_flags=["-lm"] + dbusflags)
+                         LIBS=['gps_static'], LIBPATH='.',
+                         parse_flags=["-lm"] + rtlibs + dbusflags)
 testprogs = [test_bits, test_float, test_geoid, test_libgps, test_matrix, test_mktime, test_packet, test_timespec, test_trig]
 if env['socket_export']:
     testprogs.append(test_json)
