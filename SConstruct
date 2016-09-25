@@ -372,7 +372,7 @@ if 'CCFLAGS' not in os.environ:
         env.Append(LINKFLAGS=['-coverage'])
     # Should we build with debug symbols?
     if env['debug']:
-        env.Append(CCFLAGS=['-g'])
+        env.Append(CCFLAGS=['-g3'])
     # Should we build with optimisation?
     if env['debug'] or env['coveraging']:
         env.Append(CCFLAGS=['-O0'])
