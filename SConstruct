@@ -63,7 +63,7 @@ tipwidget  = '<p><a href="https://www.patreon.com/esr">Donate here to support co
 
 EnsureSConsVersion(2, 3, 0)
 
-import copy, os, sys, glob, re, platform, time, subprocess, ast
+import copy, os, sys, glob, re, platform, time, subprocess, ast, operator
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
@@ -1442,20 +1442,48 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     $SC_PYTHON $SOURCE --ais --target=parser >$TARGET &&\
     chmod a-w $TARGET''')
 
+generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
+                     'gps_maskdump.c', 'revision.h', 'gpsd.php',
+                     'gpsd_config.h']
+
+# Helper functions for revision hackery
+
+def GetMtime(file):
+    """Get mtime of given file, or 0."""
+    try:
+        return os.stat(file).st_mtime
+    except OSError:
+        return 0
+
+def FileList(patterns, exclusions=[]):
+    """Get list of files based on patterns, minus excluded files."""
+    files = reduce(operator.add, map(glob.glob, patterns), [])
+    for file in exclusions:
+        try:
+            files.remove(file)
+        except ValueError:
+            pass
+    return files
+
 # generate revision.h
 if 'dev' in gpsd_version:
     (st, rev) = _getstatusoutput('git describe --tags')
     if st != 0:
-        from datetime import datetime
-        rev = datetime.now().isoformat()[:-4]
+        # Use timestamp from latest relevant file
+        files = FileList(['*.c', '*.cpp', '*.h', '*.in',
+                          'gpsd.h-*', 'SConstruct'],
+                         generated_sources)
+        timestamps = map(GetMtime, files)
+        if timestamps:
+            from datetime import datetime
+            latest = datetime.fromtimestamp(sorted(timestamps)[-1])
+            rev = '%s-%s' % (gpsd_version, latest.isoformat())
+        else:
+            rev = gpsd_version  # Paranoia
 else:
     rev = gpsd_version
 revision = '#define REVISION "%s"\n' % (rev.strip(),)
 env.Textfile(target="revision.h", source=[revision])
-
-generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
-                     'gps_maskdump.c', 'revision.h', 'gpsd.php',
-                     'gpsd_config.h']
 
 # leapseconds.cache is a local cache for information on leapseconds issued
 # by the U.S. Naval observatory. It gets kept in the repository so we can
