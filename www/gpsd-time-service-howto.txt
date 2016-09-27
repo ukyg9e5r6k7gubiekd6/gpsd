@@ -151,7 +151,7 @@ undocumented) assumption about the UTC time of the last rollover and
 will thus report incorrect times outside the rollover period they were
 designed in.
 
-For accurate time service via GPSD, you require two things:
+For accurate time service via GPSD, you require three things:
 
 * A GPS made since the last rollover, so its hidden assumption about
  the epoch will be correct.
