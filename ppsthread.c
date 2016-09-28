@@ -57,6 +57,7 @@
 #include <errno.h>
 #include <math.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <pthread.h>		/* pacifies OpenBSD's compiler */
 
@@ -70,7 +71,6 @@
 // include unistd.h here as it is missing on older pps-tools releases.
 // 'close' is not defined otherwise.
 #include <unistd.h>
-#include <sys/time.h>
 #include <sys/timepps.h>
 #endif
 
@@ -650,6 +650,9 @@ static void *gpsd_ppsmonitor(void *arg)
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
     bool not_a_tty = false;
 
+    /* Acknowledge that we've grabbed the inner_context data */
+    ((volatile struct inner_context_t *)arg)->pps_thread = NULL;
+
     /* before the loop, figure out how we can detect edges:
      * TIOMCIWAIT, which is linux specifix
      * RFC2783, a.k.a kernel PPS (KPPS)
@@ -1180,6 +1183,7 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
 {
     int retval;
     pthread_t pt;
+    struct timespec start_delay = {0, 1000000};  /* 1 ms */
     /*
      * FIXME: this launch code is not itself thread-safe!
      * It would be if inner_context could be auto, but the monitor
@@ -1213,6 +1217,12 @@ void pps_thread_activate(volatile struct pps_thread_t *pps_thread)
     pps_thread->log_hook(pps_thread, THREAD_PROG, "PPS:%s thread %s\n",
 	        pps_thread->devicename,
 		(retval==0) ? "launched" : "FAILED");
+    /* The monitor thread may not run immediately, particularly on a single-
+     * core machine, so we need to wait for it to acknowledge its copying
+     * of the inner_context struct before proceeding.
+     */
+    while (inner_context.pps_thread)
+	(void) nanosleep(&start_delay, NULL);
 }
 
 void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
