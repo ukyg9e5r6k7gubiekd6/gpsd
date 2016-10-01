@@ -353,14 +353,8 @@ if env["sysroot"]:
 if 'MORECFLAGS' in os.environ:
     env.Append(CFLAGS=Split(os.environ['MORECFLAGS']))
 
-# Don't change CFLAGS if already set by environment.
-if 'CFLAGS' not in os.environ:
-    if '-Wmissing-prototypes' not in env['CFLAGS']:
-        env.Append(CFLAGS=['-Wmissing-prototypes'])
-
 # Don't change CCFLAGS if already set by environment.
 if 'CCFLAGS' not in os.environ:
-    env.Append(CCFLAGS=['-Wmissing-declarations'])
     # Should we build with profiling?
     if env['profiling']:
         env.Append(CCFLAGS=['-pg'])
