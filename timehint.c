@@ -192,7 +192,7 @@ static volatile struct shmTime *ntpshm_alloc(struct gps_context_t *context)
 	    memset((void *)context->shmTime[i], 0, sizeof(struct shmTime));
 	    context->shmTime[i]->mode = 1;
 	    context->shmTime[i]->leap = LEAP_NOTINSYNC;
-	    context->shmTime[i]->precision = -1;	/* initially 0.5 sec */
+	    context->shmTime[i]->precision = -20;/* initially 1 micro sec */
 	    context->shmTime[i]->nsamples = 3;	/* stages of median filter */
 
 	    return context->shmTime[i];
@@ -233,7 +233,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     char clock_str[TIMESPEC_LEN];
 
     /* Any NMEA will be about -1 or -2. Garmin GPS-18/USB is around -6 or -7. */
-    int precision = -1; /* default precision */
+    int precision = -20; /* default precision, 1 micro sec */
 
     if (shmseg == NULL) {
 	gpsd_log(&session->context->errout, LOG_RAW, "NTP:PPS: missing shm\n");
@@ -241,14 +241,14 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     }
 
 #ifdef PPS_ENABLE
-    /* ntpd sets -20 for PPS refclocks, thus -20 precision */
     if (shmseg == session->shm_pps) {
+        /* precision is a floor so do not make it tight */
         if ( source_usb == session->sourcetype ) {
-	    /* if PPS over USB 1.1, then precision = -10 */
+	    /* if PPS over USB, then precision = -20, 1 micro sec  */
 	    precision = -10;
         } else {
-	    /* likely PPS over serial, precision = -20 */
-	    precision = -20;
+	    /* likely PPS over serial, precision = -30, 1 nano sec */
+	    precision = -30;
         }
     }
 #endif	/* PPS_ENABLE */
@@ -258,9 +258,9 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     timespec_str( &td->real, real_str, sizeof(real_str) );
     timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "NTP: ntpshm_put(%s %s) %s @ %s\n",
+	     "NTP: ntpshm_put(%s,%s) %s @ %s\n",
 	     session->gpsdata.dev.path,
-	     (precision == -20) ? "pps" : "clock",
+	     precision,
 	     real_str, clock_str);
 
     return 1;
@@ -353,7 +353,7 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     /* calculate the offset as a timespec to not lose precision */
     TS_SUB( &offset, &td->real, &td->clock);
     /* if tv_sec greater than 2 then tv_nsec loses precision, but
-     * not a big deal as slewing will bbe required */
+     * not a big deal as slewing will be required */
     sample.offset = TSTONS( &offset );
     sample._pad = 0;
 
