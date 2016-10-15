@@ -245,7 +245,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
         /* precision is a floor so do not make it tight */
         if ( source_usb == session->sourcetype ) {
 	    /* if PPS over USB, then precision = -20, 1 micro sec  */
-	    precision = -10;
+	    precision = -20;
         } else {
 	    /* likely PPS over serial, precision = -30, 1 nano sec */
 	    precision = -30;
