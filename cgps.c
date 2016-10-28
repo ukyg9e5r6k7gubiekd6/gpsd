@@ -126,7 +126,7 @@ static bool compass_flag = false;
 #endif /* TRUENORTH */
 
 /* pseudo-signals indicating reason for termination */
-#define CGPS_QUIT	0	/* voluntary yterminastion */
+#define CGPS_QUIT	0	/* voluntary termination */
 #define GPS_GONE	-1	/* GPS device went away */
 #define GPS_ERROR	-2	/* low-level failure in GPS read */
 #define GPS_TIMEOUT	-3	/* low-level failure in GPS waiting */
