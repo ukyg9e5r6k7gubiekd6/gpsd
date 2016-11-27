@@ -462,7 +462,7 @@ class Base(object):
         ("EPD", lambda s, r: s.update_err_degrees(r, "epd")),
     )
 
-    def __init__(self, deg_type, rotate=0.0):
+    def __init__(self, deg_type, rotate=0.0, target=[]):
         self.deg_type = deg_type
         self.rotate = rotate
         self.conversions = unit_adjustments()
@@ -473,7 +473,7 @@ class Base(object):
         self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
-        self.window.set_title("xgps")
+        self.window.set_title(" ".join(["xgps"] + target))
         self.window.connect("delete_event", self.delete_event)
         self.window.set_resizable(False)
 
@@ -901,17 +901,20 @@ if __name__ == "__main__":
                      'm': gps.clienthelpers.deg_ddmm,
                      's': gps.clienthelpers.deg_ddmmss}[degreefmt]
 
-        (host, port, device) = ("localhost", "2947", None)
+        (host, port, device) = ("localhost", gps.GPSD_PORT, None)
         if len(arguments):
             args = arguments[0].split(":")
-            if len(args) >= 1:
+            if len(args) >= 1 and args[0]:
                 host = args[0]
-            if len(args) >= 2:
+            if len(args) >= 2 and args[1]:
                 port = args[1]
             if len(args) >= 3:
                 device = args[2]
+            target = arguments[0:]
+        else:
+            target = []
 
-        base = Base(deg_type=degreefmt, rotate=rotate)
+        base = Base(deg_type=degreefmt, rotate=rotate, target=target)
         base.set_units(unit_system)
         try:
             daemon = gps.gps(host=host,
