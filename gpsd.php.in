@@ -461,6 +461,9 @@ EOF;
 		$sky = $GPS['sky'][0];
 		$sats = $sky['satellites'];
 
+		$fixtype = array('Unknown' => 0, 'No Fix' => 1,'2D Fix' => 2, '3D Fix' => 3);
+		$type = array_search($fix['mode'],$fixtype);
+
 		$nsv = count($sats);
                 $ts = $fix['time'];
                 $sat = '';
@@ -478,7 +481,7 @@ EOF;
         <tr><td>Latitude</td><td>{$fix['lat']}</td></tr>
         <tr><td>Longitude</td><td>{$fix['lon']}</td></tr>
         <tr><td>Altitude</td><td>{$fix['alt']}</td></tr>
-        <tr><td>Fix Type</td><td>{$fix['mode']}</td></tr>
+        <tr><td>Fix Type</td><td>{$type}</td></tr>
         <tr><td>Satellites</td><td>{$nsv}</td></tr>
         <tr><td>HDOP</td><td>{$sky['hdop']}</td></tr>
         <tr><td>VDOP</td><td>{$sky['vdop']}</td></tr>
