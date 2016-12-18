@@ -623,17 +623,6 @@ if cleaning or helping:
     tiocmiwait = True  # For cleaning, which works on any OS
 else:
 
-    # If supported by the compiler, enable all warnings except uninitialized and
-    # missing-field-initializers, which we can't help triggering because
-    # of the way some of the JSON-parsing code is generated.
-    # Also not including -Wcast-qual and -Wimplicit-function-declaration,
-    # because we can't seem to keep scons from passing these to g++.
-    for option in ('-Wextra', '-Wall', '-Wno-uninitialized', '-Wno-missing-field-initializers',
-                   '-Wcast-align', '-Wmissing-declarations', '-Wmissing-prototypes',
-                   '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
-        if option not in config.env['CFLAGS']:
-            config.CheckCompilerOption(option)
-
     # OS X aliases gcc to clang
     # clang accepts -pthread, then warns it is unused.
     if config.CheckCompilerOption("-pthread") and not sys.platform.startswith('darwin'):
@@ -947,6 +936,19 @@ int clock_gettime(clockid_t, struct timespec *);
         if not qt_network:
             env["qt"] = False
             announce('Turning off Qt support, library not found.')
+
+    # If supported by the compiler, enable all warnings except uninitialized and
+    # missing-field-initializers, which we can't help triggering because
+    # of the way some of the JSON-parsing code is generated.
+    # Also not including -Wcast-qual and -Wimplicit-function-declaration,
+    # because we can't seem to keep scons from passing these to g++.
+    #
+    # Do this after the other config checks, to keep warnings out of them.
+    for option in ('-Wextra', '-Wall', '-Wno-uninitialized', '-Wno-missing-field-initializers',
+                   '-Wcast-align', '-Wmissing-declarations', '-Wmissing-prototypes',
+                   '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
+        if option not in config.env['CFLAGS']:
+            config.CheckCompilerOption(option)
 
 # Set up configuration for target Python
 
