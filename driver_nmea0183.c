@@ -812,8 +812,10 @@ static gps_mask_t processGSV(int count, char *field[],
      * get a bad result on the second and later SV spans.  Note, this code
      * assumes that if any of the special sat pics occur they come right
      * after a stock GPGSV one.
+     *
+     * FIXME: Add per-talker totals so we can do this check properly.
      */
-    if (session->nmea.seen_glgsv || session->nmea.seen_bdgsv || session->nmea.seen_qzss)
+    if (!(session->nmea.seen_glgsv || session->nmea.seen_bdgsv || session->nmea.seen_qzss))
 	if (session->nmea.part == session->nmea.await
 		&& atoi(field[3]) != session->gpsdata.satellites_visible)
 	    gpsd_log(&session->context->errout, LOG_WARN,
