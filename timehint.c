@@ -463,14 +463,17 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	    /*
 	     * The HAT kludge. If we're using the HAT GPS on a
 	     * Raspberry Pi or a workalike like the ODROIDC2, and
-	     * there is a static /dev/pps0, and we have access because
+	     * there is a static "first PPS", and we have access because
 	     * we're root, assume we want to use KPPS.
 	     */
-	    if ((strcmp(session->pps_thread.devicename, MAGIC_HAT_GPS) == 0
-		 || strcmp(session->pps_thread.devicename, MAGIC_LINK_GPS) == 0)
-		 && access("/dev/pps0", R_OK | W_OK) == 0)
-			session->pps_thread.devicename = "/dev/pps0";
-		#endif /* MAGIC_HAT_GPS && MAGIC_LINK_GPS */
+	    if (strcmp(session->pps_thread.devicename, MAGIC_HAT_GPS) == 0
+		|| strcmp(session->pps_thread.devicename,
+		          MAGIC_LINK_GPS) == 0) {
+		char *first_pps = pps_get_first();
+		if (access(first_pps, R_OK | W_OK) == 0)
+			session->pps_thread.devicename = first_pps;
+		}
+	    #endif /* MAGIC_HAT_ENABLE */
 	    pps_thread_activate(&session->pps_thread);
 	}
     }

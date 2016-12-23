@@ -66,7 +66,15 @@
  * CONFIG_PPS=y
  * CONFIG_PPS_DEBUG=y  [optional to kernel log pulses]
  * CONFIG_PPS_CLIENT_LDISC=y
+ *
+ * Also beware that setting
+ * CONFIG_PPS_CLIENT_KTIMER=y
+ * adds a fake software-generated PPS intended for testing.  This
+ * doesn't even run at exactly 1Hz, so any attempt to use it for
+ * real timing is disastrous.  Hence we try to avoid it.
  */
+#define FAKE_PPS_NAME "ktimer"
+
 #if defined(HAVE_SYS_TIMEPPS_H)
 // include unistd.h here as it is missing on older pps-tools releases.
 // 'close' is not defined otherwise.
@@ -156,6 +164,39 @@ static void thread_unlock(volatile struct pps_thread_t *pps_thread)
 }
 
 #if defined(HAVE_SYS_TIMEPPS_H)
+#ifdef __linux__
+/* Obtain contents of specified sysfs variable; null string if failure */
+static void get_sysfs_var(const char *path, char *buf, size_t bufsize)
+{
+    buf[0] = '\0';
+    int fd = open(path, O_RDONLY);
+    if ( 0 <= fd ) {
+	ssize_t r = read( fd, buf, bufsize -1);
+	if ( 0 < r ) {
+	    buf[r - 1] = '\0'; /* remove trailing \x0a */
+	}
+	(void)close(fd);
+    }
+}
+
+/* Check to see whether the named PPS source is the fake one */
+int pps_check_fake(const char *name) {
+    char path[PATH_MAX] = "";
+    char buf[32] = "";
+    snprintf(path, sizeof(path), "/sys/devices/virtual/pps/%s/name", name);
+    get_sysfs_var(path, buf, sizeof(buf));
+    return strcmp(buf, FAKE_PPS_NAME) == 0;
+}
+
+/* Get first "real" PPS device, skipping the fake, if any */
+char *pps_get_first(void)
+{
+    if (pps_check_fake("pps0"))
+	return "/dev/pps1";
+    return "/dev/pps0";
+}
+#endif /* __linux__ */
+
 static int init_kernel_pps(struct inner_context_t *inner_context)
 /* return handle for kernel pps, or -1; requires root privileges */
 {
@@ -189,8 +230,14 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
      * (We use strncpy() here because this might be compiled where
      * strlcpy() is not available.)
      */
-    if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0)
+    if (strncmp(pps_thread->devicename, "/dev/pps", 8) == 0) {
+	if (pps_check_fake(pps_thread->devicename + 5))
+	    pps_thread->log_hook(pps_thread, THREAD_WARN,
+				 "KPPS:%s is fake PPS,"
+				 " timing will be inaccurate\n",
+				 pps_thread->devicename);
 	(void)strncpy(path, pps_thread->devicename, sizeof(path)-1);
+    }
     else {
 	char pps_num = '\0';  /* /dev/pps[pps_num] is our device */
 	size_t i;             /* to match type of globbuf.gl_pathc */
@@ -227,14 +274,7 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 
 	memset( (void *)&path, 0, sizeof(path));
 	for ( i = 0; i < globbuf.gl_pathc; i++ ) {
-	    int fd = open(globbuf.gl_pathv[i], O_RDONLY);
-	    if ( 0 <= fd ) {
-		ssize_t r = read( fd, path, sizeof(path) -1);
-		if ( 0 < r ) {
-		    path[r - 1] = '\0'; /* remove trailing \x0a */
-		}
-		(void)close(fd);
-	    }
+	    get_sysfs_var(globbuf.gl_pathv[i], path, sizeof(path));
 	    pps_thread->log_hook(pps_thread, THREAD_PROG,
 				 "KPPS:%s checking %s, %s\n",
 				 pps_thread->devicename,

@@ -53,5 +53,7 @@ extern void pps_thread_fixin(volatile struct pps_thread_t *,
 				     volatile struct timedelta_t *);
 extern int pps_thread_ppsout(volatile struct pps_thread_t *,
 			      volatile struct timedelta_t *);
+int pps_check_fake(const char *);
+char *pps_get_first(void);
 
 #endif /* PPSTHREAD_H */
