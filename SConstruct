@@ -174,6 +174,8 @@ boolopts = (
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
     ("minimal",       False, "turn off every option not set on the command line"),
     ("timeservice",   False, "time-service configuration"),
+    ("magic_hat", sys.platform.startswith('linux'),
+     "special Linux PPS hack for Raspberry Pi et al"),
     ("xgps",          True,  "include xgps and xgpsspeed."),
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
@@ -845,7 +847,8 @@ else:
         env["pps"] = False
 
     # Simplifies life on hackerboards like the Raspberry Pi
-    confdefs.append('''\
+    if env['magic_hat']:
+        confdefs.append('''\
 /* Magic device which, if present, means to grab a static /dev/pps0 for KPPS */
 #define MAGIC_HAT_GPS	"/dev/ttyAMA0"
 /* Generic device which, if present, means to grab a static /dev/pps0 for KPPS */

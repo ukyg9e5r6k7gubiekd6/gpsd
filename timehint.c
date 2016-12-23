@@ -459,6 +459,7 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	} else {
 	    init_hook(session);
 	    session->pps_thread.report_hook = report_hook;
+	    #ifdef MAGIC_HAT_ENABLE
 	    /*
 	     * The HAT kludge. If we're using the HAT GPS on a
 	     * Raspberry Pi or a workalike like the ODROIDC2, and
@@ -467,8 +468,9 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	     */
 	    if ((strcmp(session->pps_thread.devicename, MAGIC_HAT_GPS) == 0
 		 || strcmp(session->pps_thread.devicename, MAGIC_LINK_GPS) == 0)
-		&& access("/dev/pps0", R_OK | W_OK) == 0)
-		session->pps_thread.devicename = "/dev/pps0";
+		 && access("/dev/pps0", R_OK | W_OK) == 0)
+			session->pps_thread.devicename = "/dev/pps0";
+		#endif /* MAGIC_HAT_GPS && MAGIC_LINK_GPS */
 	    pps_thread_activate(&session->pps_thread);
 	}
     }

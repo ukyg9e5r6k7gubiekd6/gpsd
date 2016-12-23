@@ -1318,6 +1318,7 @@ int main(int argc, char **argv)
 	/* this guard suppresses a warning on Bluetooth devices */
 	if (session.sourcetype == source_rs232 || session.sourcetype == source_usb) {
 	    session.pps_thread.report_hook = pps_report;
+	    #ifdef MAGIC_HAT_ENABLE
 	    /*
 	     * The HAT kludge. If we're using the HAT GPS on a
 	     * Raspberry Pi or a workalike like the ODROIDC2, and
@@ -1326,8 +1327,9 @@ int main(int argc, char **argv)
 	     */
 	    if ((strcmp(session.pps_thread.devicename, MAGIC_HAT_GPS) == 0
 		 || strcmp(session.pps_thread.devicename, MAGIC_LINK_GPS) == 0)
-	    		&& access("/dev/pps0", R_OK | W_OK) == 0)
-		session.pps_thread.devicename = "/dev/pps0";
+	    	 && access("/dev/pps0", R_OK | W_OK) == 0)
+			session.pps_thread.devicename = "/dev/pps0";
+		#endif /* MAGIC_HAT_GPS && MAGIC_LINK_GPS */
 	    pps_thread_activate(&session.pps_thread);
 	}
 #endif /* PPS_ENABLE */
