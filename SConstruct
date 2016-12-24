@@ -805,6 +805,19 @@ else:
         else:
             confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
 
+    if config.CheckHeader(["sys/types.h", "sys/time.h", "sys/timepps.h"]):
+        env.MergeFlags("-DHAVE_SYS_TIMEPPS_H=1")
+        kpps = True
+    else:
+        kpps = False
+        if env["magic_hat"]:
+            announce("Forcing magic_hat=no since RFC2783 API is unavailable")
+            env["magic_hat"] = False
+    tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
+    if env["pps"] and not tiocmiwait and not kpps:
+        announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 API is available)")
+        env["pps"] = False
+
     # Map options to libraries required to support them that might be absent.
     optionrequires = {
         "bluez": ["libbluetooth"],
@@ -835,16 +848,6 @@ else:
                 confdefs.append("#define %s %s\n" % (key.upper(), value))
             else:
                 confdefs.append("#define %s \"%s\"\n" % (key.upper(), value))
-
-    if config.CheckHeader(["sys/types.h", "sys/time.h", "sys/timepps.h"]):
-        env.MergeFlags("-DHAVE_SYS_TIMEPPS_H=1")
-        kpps = True
-    else:
-        kpps = False
-    tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
-    if env["pps"] and not tiocmiwait and not kpps:
-        announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 API is available)")
-        env["pps"] = False
 
     # Simplifies life on hackerboards like the Raspberry Pi
     if env['magic_hat']:
