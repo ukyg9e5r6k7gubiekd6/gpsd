@@ -16,7 +16,7 @@ class gpscommon(object):
 
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
         self.sock = None        # in case we blow up in connect
-        self.linebuffer = ""
+        self.linebuffer = b''
         self.verbose = verbose
         if host is not None:
             self.connect(host, port)
@@ -74,10 +74,10 @@ class gpscommon(object):
         "Wait for and read data being streamed from the daemon."
         if self.verbose > 1:
             sys.stderr.write("poll: reading from daemon...\n")
-        eol = self.linebuffer.find('\n')
+        eol = self.linebuffer.find(b'\n')
         if eol == -1:
             # RTCM3 JSON can be over 4.4k long, so go big
-            frag = polystr(self.sock.recv(8192))
+            frag = self.sock.recv(8192)
             self.linebuffer += frag
             if self.verbose > 1:
                 sys.stderr.write("poll: read complete.\n")
@@ -86,7 +86,7 @@ class gpscommon(object):
                     sys.stderr.write("poll: returning -1.\n")
                 # Read failed
                 return -1
-            eol = self.linebuffer.find('\n')
+            eol = self.linebuffer.find(b'\n')
             if eol == -1:
                 if self.verbose > 1:
                     sys.stderr.write("poll: returning 0.\n")
@@ -99,7 +99,9 @@ class gpscommon(object):
 
         # We got a line
         eol += 1
-        self.response = self.linebuffer[:eol]
+        # Provide the response in both 'str' and 'bytes' form
+        self.bresponse = self.linebuffer[:eol]
+        self.response = polystr(self.bresponse)
         self.linebuffer = self.linebuffer[eol:]
 
         # Can happen if daemon terminates while we're reading.
@@ -110,6 +112,11 @@ class gpscommon(object):
         self.received = time.time()
         # We got a \n-terminated line
         return len(self.response)
+
+    # Note that the 'data' method is sometimes shadowed by a name
+    # collision, rendering it unusable.  The documentation recommends
+    # accessing 'response' directly.  Consequently, no accessor method
+    # for 'bresponse' is currently provided.
 
     def data(self):
         "Return the client data buffer."

@@ -635,6 +635,8 @@ In major versions before 5:
   messages to stderr.  This requirement is now gone.
 
 * There was a set_raw_hook() method in the C and Python bindings, now gone.
-  C clients should call gps_data(); the buffer is available directly in Python.
+  C clients should call gps_data(); the buffer is available directly in Python,
+  both as str (response) and bytes (bresponse).  The distinction matters
+  in Python 3.
 
 //end
