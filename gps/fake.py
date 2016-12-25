@@ -31,10 +31,12 @@ identified by the string naming its slave device.
 
 TestSession also has methods to start and end client sessions.  Daemon
 responses to a client are fed to a hook function which, by default,
-discards them.  You can change the hook to sys.stdout.write() to dump
-responses to standard output (this is what the gpsfake executable
-does) or do something more exotic. A client session is identified by a
-small integer that counts the number of client session starts.
+discards them.  Note that this data is 'bytes' to accommodate possible
+binary data in Python 3; use polystr() if you need a str.  You can
+change the hook to misc.get_bytes_stream(sys.stdout).write to dump
+responses to standard output (this is what the gpsfake executable does)
+or do something more exotic. A client session is identified by a small
+integer that counts the number of client session starts.
 
 There are a couple of convenience methods.  TestSession.wait() does nothing,
 allowing a specified number of seconds to elapse.  TestSession.send()
@@ -700,7 +702,7 @@ class TestSession(object):
                     while chosen.waiting():
                         chosen.read()
                         if chosen.valid & gps.PACKET_SET:
-                            self.reporter(chosen.response)
+                            self.reporter(chosen.bresponse)
                             if chosen.data["class"] == "DEVICE" and chosen.data["activated"] == 0 and chosen.data["path"] in self.fakegpslist:
                                 self.gps_remove(chosen.data["path"])
                                 self.progress("gpsfake: GPS %s removed (notification)\n" % chosen.data["path"])

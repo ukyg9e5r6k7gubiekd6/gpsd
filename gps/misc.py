@@ -38,6 +38,10 @@ if bytes is str:  # In Python 2 these functions can be null transformations
         "Dummy stdio wrapper function."
         return stream
 
+    def get_bytes_stream(stream):
+        "Dummy stdio bytes buffer function."
+        return stream
+
 else:  # Otherwise we do something real
 
     def polystr(o):
@@ -67,6 +71,10 @@ else:  # Otherwise we do something real
         # work as expected
         return io.TextIOWrapper(stream.buffer, encoding=BINARY_ENCODING,
                                 newline="\n", line_buffering=True)
+
+    def get_bytes_stream(stream):
+        "Standard input/output bytes buffer function"
+        return stream.buffer
 
 
 # some multipliers for interpreting GPS output

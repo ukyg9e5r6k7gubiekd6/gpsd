@@ -28,8 +28,8 @@ try:
 except NameError:
     my_input = input
 
-# Make sure stdout can accept binary data in Python 3
-sys.stdout = gps.make_std_wrapper(sys.stdout)
+# Get version of stdout for bytes data (NOP in Python 2)
+bytesout = gps.get_bytes_stream(sys.stdout)
 
 class Baton(object):
     "Ship progress indications to stderr."
@@ -197,7 +197,7 @@ if __name__ == '__main__':
                                predump=predump, slow=slow)
 
     if pipe:
-        test.reporter = sys.stdout.write
+        test.reporter = bytesout.write
         if verbose:
             progress = False
             test.progress = sys.stderr.write
