@@ -37,7 +37,7 @@ uint64_t ubits(unsigned char buf[], unsigned int start, unsigned int width, bool
 	fld >>= (CHAR_BIT - end);
     }
 
-    fld &= ~(0xffffFFFFffffFFFF << width);
+    fld &= ~(~0ULL << width);
 
     /* was extraction as a little-endian requested? */
     if (le)
@@ -63,12 +63,12 @@ int64_t sbits(signed char buf[], unsigned int start, unsigned int width, bool le
     uint64_t fld = ubits((unsigned char *)buf, start, width, le);
 
     /* ensure width > 0 as the result of
-       1LL << (width - 1)
+       1ULL << (width - 1)
        is undefined for width <= 0 */
     assert(width > 0);
 
-    if (fld & (1LL << (width - 1))) {
-	fld |= (0xffffffffffffffff << (width - 1));
+    if (fld & (1ULL << (width - 1))) {
+	fld |= (~0ULL << (width - 1));
     }
     return (int64_t)fld;
 }
