@@ -111,17 +111,14 @@ if __name__ == '__main__':
             termios.tcsetattr(tty, termios.TCSANOW,
                          [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
 
-        poller = select.poll()
-        poller.register(tty, select.POLLIN)
-
         buf = bytes()
         if not rawmode:
             getter = sniffer.new()
             sniffer.register_report(reporter)
         seqno = 0
         while True:
-            (fd, event) = poller.poll()[0]
-            if fd == tty and event == select.POLLIN:
+            rlist, wlist, xlist = select.select([tty], [], [])
+            if rlist == [tty]:
                 if rawmode:
                     buf += os.read(tty, NMEA_MAX)
                     sys.stdout.write(hexdump(buf))
