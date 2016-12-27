@@ -135,7 +135,7 @@ class plotter(object):
                 if self.session.fix.mode <= gps.MODE_NO_FIX:
                     continue
                 if self.sample():
-		    if countdown == await:
+                    if countdown == await:
                         sys.stderr.write("first fix in %.2fsec, gathering %d samples..." % (time.time() - basetime, await))
                     countdown -= 1
             baton.end()
