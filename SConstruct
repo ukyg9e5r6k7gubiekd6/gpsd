@@ -193,7 +193,7 @@ nonboolopts = (
     ("gpsd_user",           "nobody",      "privilege revocation user",),
     ("gpsd_group",          def_group,     "privilege revocation group"),
     ("prefix",              "/usr/local",  "installation directory prefix"),
-    ("target_python",       "",            "target Python version as command"),
+    ("target_python",       "python",      "target Python version as command"),
     ("python_libdir",       "",            "Python module directory prefix"),
     ("max_clients",         '64',          "maximum allowed clients"),
     ("max_devices",         '4',           "maximum allowed devices"),
