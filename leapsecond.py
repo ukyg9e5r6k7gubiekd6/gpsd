@@ -242,7 +242,7 @@ def make_leapsecond_include(infile):
     _week = gps_week(now)
     _rollovers = gps_rollovers(now)
     _isodate = isotime(now - now % SECS_PER_WEEK)
-    _leapsecs = -1
+    _leapsecs = 0
     for leapjump in leapjumps:
         if leapjump < time.time():
             _leapsecs += 1
