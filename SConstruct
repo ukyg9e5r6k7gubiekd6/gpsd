@@ -257,7 +257,7 @@ if ARGUMENTS.get('minimal'):
 
 # Time-service build = stripped-down and some diagnostic tools
 if ARGUMENTS.get('timeservice'):
-    timerelated = ("gpsd", "socket_export", "ncurses", "ntp", "ntpshm", "pps", "oscillator")
+    timerelated = ("gpsd", "socket_export", "ncurses", "ntp", "ntpshm", "pps", "oscillator", "magic_hat")
     for (name, default, help) in boolopts:
         if default is True and not ARGUMENTS.get(name) and not name in timerelated:
             env[name] = False
