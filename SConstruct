@@ -266,7 +266,7 @@ if ARGUMENTS.get('timeservice'):
 if env['ntpshm']:
     env['ntp'] = True
 
-# Many drivers require NMEA0183 - in case we select timeerver/minimal
+# Many drivers require NMEA0183 - in case we select timeserver/minimal
 # followed by one of these.
 for driver in (
     'ashtech',
