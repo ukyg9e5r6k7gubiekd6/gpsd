@@ -868,7 +868,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    }
 	    session->newdata.time =
 		gpsd_gpstime_resolve(session,
-				  (unsigned short)s1, (double)ul1 *1e3);
+				  (unsigned short)s1, (double)ul1 *1e-3);
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t) 0) {	/* Fix Available */
