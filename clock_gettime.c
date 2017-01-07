@@ -4,45 +4,29 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
+
 #include <time.h>
 #include <sys/time.h>
 
 #include "compiler.h"
 
-// check for osx only - hurd doesn't have/need these includes.
-#ifdef __APPLE__
-#include <mach/clock.h>
-#include <mach/mach.h>
-#endif
-
 #ifndef HAVE_CLOCK_GETTIME
+
+/*
+ * Note that previous versions of this code made use of clock_get_time()
+ * on OSX, as a way to get time of day with nanosecond resolution.  But
+ * it turns out that clock_get_time() only has microsecond resolution,
+ * in spite of the data format, and it's also substantially slower than
+ * gettimeofday().  Thus, it makes no sense to do anything special for OSX.
+ */
+
 int clock_gettime(clockid_t clk_id UNUSED, struct timespec *ts)
 {
-#ifdef __MACH__ // OS X and hurd do not have clock_gettime, use clock_get_time
-    clock_serv_t cclock;
-    mach_timespec_t mts;
-    mach_port_t mach_host = mach_host_self();
-    host_get_clock_service(mach_host, CALENDAR_CLOCK, &cclock);
-    mach_port_deallocate(mach_task_self(), mach_host);
-    clock_get_time(cclock, &mts);
-    mach_port_deallocate(mach_task_self(), cclock);
-    ts->tv_sec = mts.tv_sec;
-    ts->tv_nsec = mts.tv_nsec;
-#else
     struct timeval tv;
     if (gettimeofday(&tv, NULL) < 0)
 	return -1;
     ts->tv_sec = tv.tv_sec;
     ts->tv_nsec = tv.tv_usec * 1000;
-    /* paranoid programming */
-    if (1000000 <= (tv)->tv_usec) {
-	(tv)->tv_usec -= 1000000;
-	(tv)->tv_sec++;
-    } else if (0 > (tv)->tv_usec) {
-	(tv)->tv_usec += 1000000;
-	(tv)->tv_sec--;
-    }
-#endif /* __MACH__ */
     return 0;
 }
 #endif /* HAVE_CLOCK_GETTIME */
