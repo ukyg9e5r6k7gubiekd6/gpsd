@@ -617,8 +617,6 @@ static gps_mask_t processGSA(int count, char *field[],
 	    session->gpsdata.dop.hdop = safe_atof(field[16]);
 	if (field[17][0] != '\0')
 	    session->gpsdata.dop.vdop = safe_atof(field[17]);
-	/* clear computed DOPs so they get recomputed. */
-	session->gpsdata.dop.tdop = NAN;
 	/*
 	 * might have gone from GPGSA to GLGSA/BDGSA
 	 * or GNGSA to GNGSA
@@ -856,6 +854,12 @@ static gps_mask_t processGSV(int count, char *field[],
     /* assumes GLGSV or BDGSV group, if present, is emitted after the GPGSV */
     if ((session->nmea.seen_glgsv || session->nmea.seen_bdgsv || session->nmea.seen_qzss) && GSV_TALKER == 'P')
 	return ONLINE_SET;
+
+    /* clear computed DOPs so they get recomputed. */
+    session->gpsdata.dop.xdop = NAN;
+    session->gpsdata.dop.ydop = NAN;
+    session->gpsdata.dop.tdop = NAN;
+    session->gpsdata.dop.gdop = NAN;
     return SATELLITE_SET;
 #undef GSV_TALKER
 }
