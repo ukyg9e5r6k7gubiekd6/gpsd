@@ -745,6 +745,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 #endif /* TIMEHINT_ENABLE */
     /* fix quality data */
     session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
+    /* clear computed DOPs so they get recomputed. */
+    session->gpsdata.dop.tdop = NAN;
     mask |=
 	TIME_SET | LATLON_SET | ALTITUDE_SET | TRACK_SET |
 	SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
