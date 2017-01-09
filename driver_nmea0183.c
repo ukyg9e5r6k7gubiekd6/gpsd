@@ -617,6 +617,8 @@ static gps_mask_t processGSA(int count, char *field[],
 	    session->gpsdata.dop.hdop = safe_atof(field[16]);
 	if (field[17][0] != '\0')
 	    session->gpsdata.dop.vdop = safe_atof(field[17]);
+	/* clear computed DOPs so they get recomputed. */
+	session->gpsdata.dop.tdop = NAN;
 	/*
 	 * might have gone from GPGSA to GLGSA/BDGSA
 	 * or GNGSA to GNGSA
