@@ -354,6 +354,9 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 	st++;
     }
 
+    /* UBX does not give us these, so recompute */
+    session->gpsdata.dop.xdop = NAN;
+    session->gpsdata.dop.ydop = NAN;
     session->gpsdata.skyview_time = NAN;
     session->gpsdata.satellites_visible = (int)st;
     session->gpsdata.satellites_used = (int)nsv;
