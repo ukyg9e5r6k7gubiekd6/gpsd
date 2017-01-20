@@ -169,6 +169,9 @@ static inline void report_unlock(void) { }
 	       " PPS " \
 	       "-------------------------------------\n"
 
+/* Dummy conditional for *display* of (possibly remote) PPS events */
+#define PPS_DISPLAY_ENABLE 1
+
 /******************************************************************************
  *
  * Visualization helpers
@@ -258,6 +261,7 @@ void toff_update(WINDOW *win, int y, int x)
 }
 #endif /* NTP_ENABLE */
 
+/* FIXME:  Decouple this reporting from local PPS monitoring. */
 #ifdef PPS_ENABLE
 void pps_update(WINDOW *win, int y, int x)
 {
@@ -354,7 +358,7 @@ static void packet_vlog(char *buf, size_t len, const char *fmt, va_list ap)
     gpsmon_report(buf2);
     report_unlock();
 }
-#endif
+#endif /* PPS_ENABLE */
 
 #ifdef RECONFIGURE_ENABLE
 static void announce_log(const char *fmt, ...)
@@ -735,7 +739,8 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 {
     char buf[BUFSIZ];
 
-#if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_ENABLE)
+/* FIXME:  If the following condition is false, the display is screwed up. */
+#if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_DISPLAY_ENABLE)
     if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"TOFF\",")) {
 	const char *end = NULL;
 	int status = json_toff_read((const char *)device->lexer.outbuffer,
@@ -792,6 +797,8 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    (void)snprintf(buf, sizeof(buf),
 			"------------------- PPS offset: %.20s ------\n",
 			timedelta_str);
+/* FIXME:  Decouple this from the pps_thread code. */
+#ifdef PPS_ENABLE
 	    /*
 	     * In direct mode this would be a bad idea, but we're not actually
 	     * watching for handshake events on a spawned thread here.
@@ -800,10 +807,11 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    session.pps_thread.pps_out = noclobber.pps;
 	    /* coverity[missing_lock] */
 	    session.pps_thread.ppsout_count++;
+#endif /* PPS_ENABLE */
 	}
     }
     else
-#endif /* PPS_ENABLE */
+#endif /* SOCKET_EXPORT_ENABLE && PPS_DISPLAY_ENABLE */
     {
 #ifdef __future__
 	if (!serial)
@@ -1434,9 +1442,7 @@ int main(int argc, char **argv)
 		    ssize_t st = read(0, &inbuf, 1);
 
 		    if (st == 1) {
-#ifdef PPS_ENABLE
-			gpsd_acquire_reporting_lock();
-#endif /* PPS_ENABLE*/
+			report_lock();
 			(void)tcflush(0, TCIFLUSH);
 			(void)tcsetattr(0, TCSANOW, &cooked);
 			(void)fputs("gpsmon: ", stdout);
@@ -1453,9 +1459,7 @@ int main(int argc, char **argv)
 		if (!curses_active) {
 		    (void)sleep(2);
 		    (void)tcsetattr(0, TCSANOW, &rare);
-#ifdef PPS_ENABLE
-		    gpsd_release_reporting_lock();
-#endif /* PPS_ENABLE*/
+		    report_unlock();
 		}
 	    }
 	}
