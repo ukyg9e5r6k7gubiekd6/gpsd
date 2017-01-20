@@ -69,7 +69,7 @@ STATUS_DGPS_FIX = 2
 MODE_NO_FIX = 1
 MODE_2D = 2
 MODE_3D = 3
-MAXCHANNELS = 20
+MAXCHANNELS = 72  # Copied from gps.h, but not required to match
 SIGNAL_STRENGTH_UNKNOWN = NaN
 
 WATCH_ENABLE    = 0x000001      # enable streaming
