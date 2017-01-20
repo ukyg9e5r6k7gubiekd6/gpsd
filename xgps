@@ -34,6 +34,10 @@ import cairo
 import gps
 import gps.clienthelpers
 
+# Use our own MAXCHANNELS value, due to the tradeoff between max sats and
+# the window size.  Ideally, this should be dynamic.
+MAXCHANNELS = 28
+
 # how to sort the Satellite List
 # some of ("PRN","el","az","ss","used") with optional '-' to reverse sort
 # by default, used at the top, then sort PRN
@@ -574,7 +578,7 @@ class Base(object):
             view.append_column(column)
 
         self.row_iters = []
-        for i in range(gps.MAXCHANNELS):
+        for i in range(MAXCHANNELS):
             self.satlist.append(["", "", "", "", ""])
             self.row_iters.append(self.satlist.get_iter(i))
 
@@ -669,7 +673,7 @@ class Base(object):
         try:
             self.satlist.set_value(self.row_iters[row], column, str(value))
         except IndexError:
-            sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n" % (row, gps.MAXCHANNELS))
+            sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n" % (row, MAXCHANNELS))
 
     def delete_event(self, _widget, _event, _data=None):
         Gtk.main_quit()
@@ -802,7 +806,7 @@ class Base(object):
                 if satellite.used:
                     yesno = 'Y'
                 self.set_satlist_field(i, 4, yesno)
-            for i in range(len(satellites), gps.MAXCHANNELS):
+            for i in range(len(satellites), MAXCHANNELS):
                 for j in range(0, 5):
                     self.set_satlist_field(i, j, "")
             self.skyview.redraw(satellites)
