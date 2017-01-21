@@ -1073,8 +1073,6 @@ libgps_version = "%d.%d.%d" % (libgps_version_soname, libgps_version_age, libgps
 libgps_sources = [
     "ais_json.c",
     "bits.c",
-    "clock_gettime.c",
-    "daemon.c",
     "gpsutils.c",
     "gpsdclient.c",
     "gps_maskdump.c",
@@ -1087,10 +1085,10 @@ libgps_sources = [
     "libgps_sock.c",
     "netlib.c",
     "ntpshmread.c",
+    "os_compat.c",
     "rtcm2_json.c",
     "rtcm3_json.c",
     "shared_json.c",
-    "strl.c",
 ]
 
 if env['libgpsmm']:
@@ -1340,8 +1338,10 @@ else:
     #
     python_extensions = {
         "gps" + os.sep + "packet": ["gpspacket.c", "packet.c", "isgps.c",
-                                        "driver_rtcm2.c", "strl.c", "hex.c", "crc24q.c"],
-        "gps" + os.sep + "clienthelpers": ["gpsclient.c", "geoid.c", "gpsdclient.c", "strl.c"]
+                                    "driver_rtcm2.c", "os_compat.c", "hex.c",
+                                    "crc24q.c"],
+        "gps" + os.sep + "clienthelpers": ["gpsclient.c", "geoid.c",
+                                           "gpsdclient.c", "os_compat.c"]
     }
 
     python_env = env.Clone()

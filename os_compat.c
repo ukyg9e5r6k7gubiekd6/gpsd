@@ -1,9 +1,19 @@
 /*
- * Simulate ANSI/POSIX conformance on platforms that don't have it
- *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2017 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
+ *
+ * This file contains functions to deal with compatibility issues across OSes.
+ *
+ * The initial version of this file is a near-verbatim concatenation of the
+ * following three source files:
+ *     clock_gettime.c
+ *     daemon.c
+ *     strl.c
+ * History of this code prior to the creation of this file can be found
+ * in the histories of those files.
  */
+
+/* Simulate ANSI/POSIX clock_gettime() on platforms that don't have it */
 
 #include <time.h>
 #include <sys/time.h>
@@ -31,7 +41,10 @@ int clock_gettime(clockid_t clk_id UNUSED, struct timespec *ts)
 }
 #endif /* HAVE_CLOCK_GETTIME */
 
-/* end */
+/* End of clock_gettime section */
+
+/* Simulate Linux/BSD daemon() on platforms that don't have it */
+
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -79,11 +92,10 @@ int daemon(int nochdir, int noclose)
 
 #endif /* HAVE_DAEMON */
 
-// end
-/*
- * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
- */
+/* End of daemon section */
+
+/* Provide BSD strlcat()/strlcpy() on platforms that don't have it */
+
 #include <string.h>
 #include <time.h>       /* for time_t */
 #include "gpsd_config.h"
@@ -228,3 +240,5 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
 }
 #endif /* __UNUSED__ */
 #endif /* HAVE_STRLCPY */
+
+/* End of strlcat()/strlcpy() section */
