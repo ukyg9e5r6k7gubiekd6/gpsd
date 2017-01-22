@@ -20,7 +20,11 @@ SCONSOPTS="${SCONSOPTS} debug=yes"
 
 export SCONSOPTS
 
-export PYTHONS="$(pyversions -vr)"
+export PYTHONS="$(pyversions -v -r '>= 2.3')"
+
+if [ "$PYTHONS" = "" ]; then
+    export PYTHONS="2"
+fi
 
 for py in $PYTHONS; do
     python${py}     /usr/bin/scons ${SCONSOPTS}
