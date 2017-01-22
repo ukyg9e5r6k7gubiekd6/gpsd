@@ -11,6 +11,7 @@
 
 #include "gps.h"
 #include "compiler.h"
+#include "os_compat.h"
 
 /*
  * Constants for the VERSION response

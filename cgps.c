@@ -101,6 +101,7 @@
 #include "compiler.h"	/* for UNUSED */
 #include "gpsdclient.h"
 #include "revision.h"
+#include "os_compat.h"
 
 static struct gps_data_t gpsdata;
 static time_t status_timer;	/* Time of last state change. */

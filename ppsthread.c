@@ -84,6 +84,7 @@
 
 #include "timespec.h"
 #include "ppsthread.h"
+#include "os_compat.h"
 
 /*
  * Tell GCC that we want thread-safe behavior with _REENTRANT;

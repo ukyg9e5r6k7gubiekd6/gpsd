@@ -67,10 +67,9 @@ PERMISSIONS
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
-#include <time.h>               /* for time_t */
 #include <ctype.h>
 
-#include "gpsd_config.h"	/* for strlcpy() prototype */
+#include "os_compat.h"
 #ifdef SOCKET_EXPORT_ENABLE
 #include "json.h"
 

@@ -860,57 +860,6 @@ else:
 
 
     confdefs.append('''\
-/* Some libcs do not have strlcat/strlcpy. Local copies are provided */
-#ifndef HAVE_STRLCAT
-# ifdef __cplusplus
-extern "C" {
-# endif
-#include <string.h>
-size_t strlcat(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
-# ifdef __cplusplus
-}
-# endif
-#endif
-#ifndef HAVE_STRLCPY
-# ifdef __cplusplus
-extern "C" {
-# endif
-#include <string.h>
-size_t strlcpy(/*@out@*/char *dst, /*@in@*/const char *src, size_t size);
-# ifdef __cplusplus
-}
-# endif
-#endif
-#ifndef HAVE_CLOCK_GETTIME
-# ifdef __cplusplus
-extern "C" {
-# endif
-#ifndef CLOCKID_T_DEFINED
-typedef int clockid_t;
-#define CLOCKID_T_DEFINED
-# endif
-/*
- * OS X 10.5 and later use _STRUCT_TIMESPEC (like other OSes)
- * 10.4 uses _TIMESPEC
- * 10.3 and earlier use _TIMESPEC_DECLARED
- */
-#if !defined(_STRUCT_TIMESPEC) && \
-    !defined(_TIMESPEC) && \
-    !defined(_TIMESPEC_DECLARED) && \
-    !defined(__timespec_defined)
-#define _STRUCT_TIMESPEC
-struct timespec {
-    time_t  tv_sec;
-    long    tv_nsec;
-};
-#endif
-/* OS X does not have clock_gettime */
-#define CLOCK_REALTIME 0
-int clock_gettime(clockid_t, struct timespec *);
-# ifdef __cplusplus
-}
-# endif
-#endif
 
 #define GPSD_CONFIG_H
 #endif /* GPSD_CONFIG_H */

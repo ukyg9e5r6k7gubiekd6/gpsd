@@ -21,6 +21,7 @@
 
 #include "gps.h"
 #include "libgps.h"
+#include "os_compat.h"
 
 #ifdef USE_QT
 #include <QDateTime>

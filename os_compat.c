@@ -13,9 +13,7 @@
  * in the histories of those files.
  */
 
-/* Determine which of these functions we need */
-#include <time.h>	/* For time_t (temp until we fix gpsd_config.h) */
-#include "gpsd_config.h"
+#include "os_compat.h"	/* Includes gpsd_config.h */
 
 #ifndef HAVE_CLOCK_GETTIME
 

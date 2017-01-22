@@ -8,13 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>   /* for strcasecmp() */
-#include <time.h>      /* for time_t */
 #include <math.h>
 #include <assert.h>
 
 #include "gpsd_config.h"
 #include "gps.h"
 #include "gpsdclient.h"
+#include "os_compat.h"
 
 static struct exportmethod_t exportmethods[] = {
 #if defined(DBUS_EXPORT_ENABLE)
