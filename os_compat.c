@@ -13,14 +13,16 @@
  * in the histories of those files.
  */
 
+/* Determine which of these functions we need */
+#include <time.h>	/* For time_t (temp until we fix gpsd_config.h) */
+#include "gpsd_config.h"
+
+#ifndef HAVE_CLOCK_GETTIME
+
 /* Simulate ANSI/POSIX clock_gettime() on platforms that don't have it */
 
 #include <time.h>
 #include <sys/time.h>
-
-#include "compiler.h"
-
-#ifndef HAVE_CLOCK_GETTIME
 
 /*
  * Note that previous versions of this code made use of clock_get_time()
@@ -30,8 +32,9 @@
  * gettimeofday().  Thus, it makes no sense to do anything special for OSX.
  */
 
-int clock_gettime(clockid_t clk_id UNUSED, struct timespec *ts)
+int clock_gettime(clockid_t clk_id, struct timespec *ts)
 {
+    (void) clk_id;
     struct timeval tv;
     if (gettimeofday(&tv, NULL) < 0)
 	return -1;
@@ -43,6 +46,8 @@ int clock_gettime(clockid_t clk_id UNUSED, struct timespec *ts)
 
 /* End of clock_gettime section */
 
+#ifndef HAVE_DAEMON
+
 /* Simulate Linux/BSD daemon() on platforms that don't have it */
 
 #include <stdlib.h>
@@ -51,8 +56,6 @@ int clock_gettime(clockid_t clk_id UNUSED, struct timespec *ts)
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "gpsd_config.h"
-#ifndef HAVE_DAEMON
 #if defined (HAVE_PATH_H)
 #include <paths.h>
 #else
@@ -96,10 +99,6 @@ int daemon(int nochdir, int noclose)
 
 /* Provide BSD strlcat()/strlcpy() on platforms that don't have it */
 
-#include <string.h>
-#include <time.h>       /* for time_t */
-#include "gpsd_config.h"
-
 /*
  * These versions use memcpy and strlen() because they are often
  * heavily optimized down to assembler level. Thus, likely to be
@@ -107,6 +106,9 @@ int daemon(int nochdir, int noclose)
  */
 
 #ifndef HAVE_STRLCAT
+
+#include <string.h>
+
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
  * full size of dst, not space left).  At most siz-1 characters
@@ -178,6 +180,9 @@ size_t strlcat(char *dst, const char *src, size_t siz)
 #endif /* HAVE_STRLCAT */
 
 #ifndef HAVE_STRLCPY
+
+#include <string.h>
+
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).
