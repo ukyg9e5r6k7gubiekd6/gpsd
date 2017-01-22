@@ -1,0 +1,12 @@
+sudo: required
+language: generic
+
+env:
+    - TRAVIS_DEBIAN_BUILD_DEPENDENCIES=build-essential debhelper po-debconf python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev libdbus-glib-1-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd
+    - TRAVIS_DEBIAN_BUILD_COMMAND=/bin/bash .travis.build
+
+services:
+  - docker
+
+script:
+  - wget -O- http://build-in-debian.bzed.at/script.sh | sh -
