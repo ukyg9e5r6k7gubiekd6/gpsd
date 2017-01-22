@@ -17,6 +17,8 @@ extern "C" {
 
 #ifndef HAVE_CLOCK_GETTIME
 
+/* Simulate ANSI/POSIX clock_gettime() on platforms that don't have it */
+
 #include <time.h>
 
 #ifndef CLOCKID_T_DEFINED
@@ -45,6 +47,17 @@ struct timespec {
 int clock_gettime(clockid_t, struct timespec *);
 
 #endif /* !HAVE_CLOCK_GETTIME */
+
+/*
+ * Wrapper or substitute for Linux/BSD daemon()
+ *
+ * There are some issues with this function even when it's present, so
+ * wrapping it confines the issues to a single place in os_compat.c.
+ */
+
+int os_daemon(int nochdir, int noclose);
+
+/* Provide BSD strlcat()/strlcpy() on platforms that don't have it */
 
 #ifndef HAVE_STRLCAT
 

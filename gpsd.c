@@ -10,7 +10,7 @@
 /* FreeBSD chokes on this */
 /* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
-/* setgroups() and daemon() needs _DEFAULT_SOURCE */
+/* setgroups() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 #endif /* __linux__ */
 
@@ -1998,7 +1998,7 @@ int main(int argc, char *argv[])
     /* might be time to daemonize */
     if (go_background) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
-	if (daemon(0, 0) != 0)
+	if (os_daemon(0, 0) != 0)
 	    gpsd_log(&context.errout, LOG_ERROR,
 		     "demonization failed: %s\n",strerror(errno));
     }

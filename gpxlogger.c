@@ -3,9 +3,6 @@
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
 
-/* daemon() needs _DEFAULT_SOURCE */
-#define _DEFAULT_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -23,6 +20,7 @@
 #include "gpsd_config.h"
 #include "gpsdclient.h"
 #include "revision.h"
+#include "os_compat.h"
 
 static char *progname;
 static struct fixsource_t source;
@@ -319,7 +317,7 @@ int main(int argc, char **argv)
     /* might be time to daemonize */
     if (daemonize) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
-	if (daemon(0, 0) != 0)
+	if (os_daemon(0, 0) != 0)
 	    (void) fprintf(stderr,"demonization failed: %s\n", strerror(errno));
     }
 

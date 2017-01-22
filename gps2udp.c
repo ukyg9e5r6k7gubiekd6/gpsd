@@ -12,7 +12,7 @@
  *
  */
 
-/* strsep() and daemon() needs _DEFAULT_SOURCE */
+/* strsep() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 
 #include <time.h>
@@ -428,7 +428,7 @@ int main(int argc, char **argv)
 
     /* Daemonize if the user requested it. */
     if (daemonize) {
-	if (daemon(0, 0) != 0) {
+	if (os_daemon(0, 0) != 0) {
 	    (void)fprintf(stderr,
 			  "gps2udp: demonization failed: %s\n",
 			  strerror(errno));

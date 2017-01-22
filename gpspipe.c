@@ -25,8 +25,6 @@
 
 /* cfmakeraw() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
-/* daemon() needs _DEFAULT_SOURCE */
-#define _DEFAULT_SOURCE
 
 
 #include <time.h>               /* for time_t */
@@ -251,7 +249,7 @@ int main(int argc, char **argv)
 
     /* Daemonize if the user requested it. */
     if (daemonize)
-	if (daemon(0, 0) != 0)
+	if (os_daemon(0, 0) != 0)
 	    (void)fprintf(stderr,
 			  "gpspipe: demonization failed: %s\n",
 			  strerror(errno));

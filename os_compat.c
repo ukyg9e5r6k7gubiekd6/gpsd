@@ -62,7 +62,7 @@ int clock_gettime(clockid_t clk_id, struct timespec *ts)
 #endif
 #endif
 
-int daemon(int nochdir, int noclose)
+int os_daemon(int nochdir, int noclose)
 /* compatible with the daemon(3) found on Linuxes and BSDs */
 {
     int fd;
@@ -89,6 +89,26 @@ int daemon(int nochdir, int noclose)
     }
     /* coverity[leaked_handle] Intentional handle duplication */
     return 0;
+}
+
+#else /* HAVE_DAEMON */
+
+#ifdef __linux__
+
+/* daemon() needs _DEFAULT_SOURCE */
+#undef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#include <unistd.h>
+
+#else /* !__linux__ */
+
+#include <stdlib.h>
+
+#endif /* !__linux__ */
+
+int os_daemon(int nochdir, int noclose)
+{
+    return daemon(nochdir, noclose);
 }
 
 #endif /* HAVE_DAEMON */
@@ -175,7 +195,7 @@ size_t strlcat(char *dst, const char *src, size_t siz)
     return (dlen + (s - src));	/* count does not include NUL */
 }
 #endif /* __UNUSED__ */
-#endif /* HAVE_STRLCAT */
+#endif /* !HAVE_STRLCAT */
 
 #ifndef HAVE_STRLCPY
 
@@ -242,6 +262,6 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
     return ((size_t) (s - src - 1));	/* count does not include NUL */
 }
 #endif /* __UNUSED__ */
-#endif /* HAVE_STRLCPY */
+#endif /* !HAVE_STRLCPY */
 
 /* End of strlcat()/strlcpy() section */

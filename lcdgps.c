@@ -33,9 +33,6 @@
 
 #define CLIMB 3
 
-/* daemon() needs _DEFAULT_SOURCE */
-#define _DEFAULT_SOURCE
-
 #include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/types.h>
@@ -56,6 +53,7 @@
 #include "gps.h"
 #include "gpsdclient.h"
 #include "revision.h"
+#include "os_compat.h"
 
 /* Prototypes. */
 ssize_t sockreadline(int sockd,void *vptr,size_t maxlen);
@@ -344,7 +342,7 @@ int main(int argc, char *argv[])
       gpsd_source_spec(NULL, &source);
 
     /* Daemonize... */
-  if (daemon(0, 0) != 0)
+  if (os_daemon(0, 0) != 0)
       (void)fprintf(stderr,
 		    "lcdgps: demonization failed: %s\n",
 		    strerror(errno));
