@@ -1,9 +1,21 @@
-/* Feature configuration switches end here
+/* gpsd.h -- fundamental types and structures for the gpsd library
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2017 by the GPSD project
  * BSD terms apply: see the file COPYING in the distribution root for details.
  */
-#endif /* GPSD_CONFIG_H */
+
+#ifndef _GPSD_H_
+#define _GPSD_H_
+
+# ifdef __cplusplus
+extern "C" {
+# endif
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <time.h>    /* for time_t */
+
+#include "gpsd_config.h"
 
 #include <stdint.h>
 #include <stdarg.h>

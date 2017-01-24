@@ -1384,7 +1384,6 @@ timebase = env.Command(target="timebase.h",
 env.AlwaysBuild(timebase)
 
 env.Textfile(target="gpsd_config.h", source=confdefs)
-env.Textfile(target="gpsd.h", source=[File("gpsd.h-head"), File("gpsd_config.h"), File("gpsd.h-tail")])
 
 env.Command(target="gps_maskdump.c", source=["maskaudit.py", "gps.h", "gpsd.h"], action='''
     rm -f $TARGET &&\
@@ -1396,7 +1395,7 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     $SC_PYTHON $SOURCE --ais --target=parser >$TARGET &&\
     chmod a-w $TARGET''')
 
-generated_sources = ['packet_names.h', 'timebase.h', 'gpsd.h', "ais_json.i",
+generated_sources = ['packet_names.h', 'timebase.h', "ais_json.i",
                      'gps_maskdump.c', 'revision.h', 'gpsd.php',
                      'gpsd_config.h']
 
@@ -1424,8 +1423,7 @@ if 'dev' in gpsd_version:
     (st, rev) = _getstatusoutput('git describe --tags')
     if st != 0:
         # Use timestamp from latest relevant file
-        files = FileList(['*.c', '*.cpp', '*.h', '*.in',
-                          'gpsd.h-*', 'SConstruct'],
+        files = FileList(['*.c', '*.cpp', '*.h', '*.in', 'SConstruct'],
                          generated_sources)
         timestamps = map(GetMtime, files)
         if timestamps:
@@ -2231,7 +2229,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         distfiles.remove(".gitignore")
     distfiles += generated_sources
     distfiles += base_manpages.keys() + python_manpages.keys()
-    distfiles.remove("gpsd.h")
     if "packaging/rpm/gpsd.spec" not in distfiles:
         distfiles.append("packaging/rpm/gpsd.spec")
 
