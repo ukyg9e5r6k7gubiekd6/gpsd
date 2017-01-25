@@ -1095,7 +1095,7 @@ when the NTP server sends a request to the remote server an entire ARP
 cycle will be added to the NTP packet round trip time (RTT).  This will
 throw off the time measurements to servers on the local lan.
 
-On a RasberryPi ARP has been shown to impact the remote offset by up to
+On a RaspberryPi ARP has been shown to impact the remote offset by up to
 600 uSec in some rare cases.
 
 The solution is the same for both ntpd and chronyd, add the "minpoll 5"

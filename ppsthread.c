@@ -224,7 +224,7 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 #endif /* __clang_analyzer__ */
 #ifdef __linux__
     /*
-     * Some Linuxes, like the RasbPi's, have PPS devices preexisting.
+     * Some Linuxes, like the RasPi's, have PPS devices preexisting.
      * Other OS have no way to automatically determine the proper /dev/ppsX.
      * Allow user to pass in an explicit PPS device path.
      *
@@ -980,7 +980,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	 *
 	 * You may think that PPS is very accurate, so the cycle time
          * valid window should be very small.  This is not the case,
-         * The Rasberry Pi clock is very coarse when it starts and/or chronyd
+         * The Raspberry Pi clock is very coarse when it starts and/or chronyd
          * may be doing a fast slew.  chronyd by default will slew up
          * to 8.334%!  So the cycle time as measured by the system clock
          * may be almost +/- 9%. Therefore, gpsd uses a 10% window.
@@ -1009,7 +1009,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	} else if (900000 > cycle) {
 	    /* longer than 200 milliSec + 10%
              * shorter than 1.000 Sec - 10% */
-            /* Yes, 10% window.  The Rasberry Pi clock is very coarse
+            /* Yes, 10% window.  The Raspberry Pi clock is very coarse
              * when it starts and chronyd may be doing a fast slew.
              * chronyd by default will slew up to 8.334% ! */
 	    log = "Too long for 5Hz, too short for 1Hz\n";
