@@ -7,22 +7,21 @@
 #ifndef _GPSD_H_
 #define _GPSD_H_
 
+#include "compiler.h"	/* Must be outside extern "C" for "atomic" */
+
 # ifdef __cplusplus
 extern "C" {
 # endif
 
+#include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <termios.h>
 #include <time.h>    /* for time_t */
 
-#include "gpsd_config.h"
-
-#include <stdint.h>
-#include <stdarg.h>
-#include <termios.h>
-
 #include "gps.h"
-#include "compiler.h"
+#include "gpsd_config.h"
 #include "os_compat.h"
 
 /*
@@ -991,7 +990,7 @@ PRINTF_FUNC(3, 4) void gpsd_log(const struct gpsd_errout_t *, const int, const c
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
 
-#define DEVICEHOOKPATH "/"SYSCONFDIR"/gpsd/device-hook"
+#define DEVICEHOOKPATH "/" SYSCONFDIR "/gpsd/device-hook"
 
 # ifdef __cplusplus
 }

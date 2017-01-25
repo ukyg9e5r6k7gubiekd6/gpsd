@@ -90,7 +90,7 @@ static inline void memory_barrier(void)
   /* we are C++ */
   #if __cplusplus >= 201103L
     /* C++11 and later has atomics, earlier do not */
-    atomic_thread_fence(memory_order_seq_cst);
+    std::atomic_thread_fence(std::memory_order_seq_cst);
   #endif
 #elif defined HAVE_STDATOMIC_H
     /* we are C and atomics are in C98 and newer */
