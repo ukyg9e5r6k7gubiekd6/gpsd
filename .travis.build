@@ -6,10 +6,6 @@ export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
 eval "$(dpkg-buildflags --export=sh)"
 
-# make QT build
-export CFLAGS="${CFLAGS} -std=gnu++98"
-export CXXFLAGS="${CXXFLAGS} -std=gnu++98"
-
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 SCONSOPTS="prefix=/usr"
