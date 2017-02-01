@@ -10,8 +10,9 @@
 /* FreeBSD chokes on this */
 /* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
-/* setgroups() needs _DEFAULT_SOURCE */
+/* setgroups() needs _DEFAULT_SOURCE or _BSD_SOURCE (glibc-dependent) */
 #define _DEFAULT_SOURCE
+#define _BSD_SOURCE
 #endif /* __linux__ */
 
 /* vsnprintf() needs __DARWIN_C_LEVEL >= 200112L */
