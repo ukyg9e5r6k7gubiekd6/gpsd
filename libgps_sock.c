@@ -115,11 +115,10 @@ bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 int gps_sock_close(struct gps_data_t *gpsdata)
 /* close a gpsd connection */
 {
-#ifndef USE_QT
-    int status;
-
     free(PRIVATE(gpsdata));
     gpsdata->privdata = NULL;
+#ifndef USE_QT
+    int status;
     status = close(gpsdata->gps_fd);
     gpsdata->gps_fd = -1;
     return status;
