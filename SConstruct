@@ -1484,6 +1484,7 @@ base_manpages = {
     "cgps.1": "gps.xml",
     "gpsinit.8": "gpsinit.xml",
     "lcdgps.1": "gps.xml",
+    "gpxlogger.1": "gps.xml",
     "libgps.3": "libgps.xml",
     "libgpsmm.3": "libgpsmm.xml",
     "libQgpsmm.3": "libgpsmm.xml",
