@@ -99,7 +99,7 @@ GPSFILTER="sed -e /^gpsd:/d -e /^gpsfake/d -e /GPS-DATA/d -e /WATCH/d -e /DEVICE
 
 # Use ALTFILTER to set up custom filtering when a regression test fails
 # This example filters out altitude and some fields computed by gpsd's error
-# modeling - these are fragile in the prsence of changes to the fix-buffering
+# modeling - these are fragile in the presence of changes to the fix-buffering
 # logic. Note that as the last attribute mode needs to be handled differently.
 #ALTFILTER="-e s/\"alt\":[^,]*,// -e s/\"ep[vhs]\":[-+0-9.]*// -e s/,\"mode\":[^}]*//"
 
