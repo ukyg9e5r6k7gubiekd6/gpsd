@@ -40,6 +40,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-S</arg>
       <arg choice='opt'>-u</arg>
       <arg choice='opt'>-t</arg>
+      <arg choice='opt'>-T</arg>
       <arg choice='opt'>-v</arg>
       <arg rep='repeat'>
             <arg choice='plain'><replaceable>logfile</replaceable></arg>
@@ -150,6 +151,9 @@ the pty layer.</para>
 rather than pty devices. Besides being a test of TCP source handling,
 this may be useful for testing from within chroot jails where access
 to pty devices is locked out.</para>
+
+<para>The <option>-T</option> makes <application>gpsfake</application> print
+some system information and then exits.</para>
 
 <para>The <option>-u</option> forces the test framework to use UDP
 rather than pty devices. Besides being a test of UDP source handling,
