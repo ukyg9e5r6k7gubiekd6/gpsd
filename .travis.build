@@ -31,5 +31,5 @@ for py in $PYTHONS; do
     python${py}-dbg /usr/bin/scons ${SCONSOPTS}
 done
 
-/usr/bin/scons check
+/usr/bin/scons build-all check
 
