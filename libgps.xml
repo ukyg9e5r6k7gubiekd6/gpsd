@@ -367,8 +367,6 @@ in <filename>gps.h</filename> for recent changes.</para>
 </citerefentry>,
 <citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum>
 </citerefentry>,
-<citerefentry><refentrytitle>libgpsd</refentrytitle><manvolnum>3</manvolnum>
-</citerefentry>.
 <citerefentry><refentrytitle>libgpsmm</refentrytitle><manvolnum>3</manvolnum>
 </citerefentry>.
 </para>
