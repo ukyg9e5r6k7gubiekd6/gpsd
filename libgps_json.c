@@ -149,7 +149,7 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	{NULL},
 	/* *INDENT-ON* */
     };
-    int status, i, j;
+    int status, i;
 
     for (i = 0; i < MAXCHANNELS; i++) {
 	gpsdata->skyview[i].PRN = 0;
@@ -162,7 +162,7 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 
     gpsdata->satellites_used = 0;
     gpsdata->satellites_visible = 0;
-    for (i = j = 0; i < MAXCHANNELS; i++) {
+    for (i = 0; i < MAXCHANNELS; i++) {
 	if(gpsdata->skyview[i].PRN > 0)
 	    gpsdata->satellites_visible++;
 	if (gpsdata->skyview[i].used) {
