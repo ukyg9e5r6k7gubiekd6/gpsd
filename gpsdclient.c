@@ -327,4 +327,4 @@ float true2magnetic(double lat, double lon, double heading)
     return (heading);
 }
 
-/* gpsclient.c ends here */
+/* gpsdclient.c ends here */
