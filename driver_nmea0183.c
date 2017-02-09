@@ -1632,7 +1632,7 @@ static gps_mask_t processPSTI(int count, char *field[],
     gps_mask_t mask;
 
     /* set something, so it won't look like an unknown sentence */
-    mask |= ONLINE_SET;
+    mask = ONLINE_SET;
 
     if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
 	/* this is skytraq, but marked yet, so probe for Skytraq */
@@ -1704,7 +1704,7 @@ static gps_mask_t processSTI(int count, char *field[],
     gps_mask_t mask;
 
     /* set something, so it won't look like an unknown sentence */
-    mask |= ONLINE_SET;
+    mask = ONLINE_SET;
 
     if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
 	/* this is skytraq, but marked yet, so probe for Skytraq */
