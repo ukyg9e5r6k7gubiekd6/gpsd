@@ -52,7 +52,7 @@ quiet=false
 while getopts cl:sStbuvo:qh opt
 do
     case $opt in
-	c) testing=clientlib ;;	# Can be 'daemon'
+	c) testing=clientlib ;;	# 'client' rather than the daemon
 	l) logfile=$OPTARG ;;	# Logfile to save diffs to
 	s) mode=regress ;;	# Run regression tests
 	S) mode=slowregress ;;	# Run regression tests with big delays
@@ -73,7 +73,7 @@ then
 	echo
 	echo "Regression test driver script"
 	echo "-h  - this help"
-	echo "-c  - can be 'daemon'"
+	echo "-c  - test with 'client' rather than the daemon"
 	echo "-l <filename>  - where to log diffs to"
 	echo "-s  - run regression tests"
 	echo "-S  - run regression tests with realistic timing delays"
