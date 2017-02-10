@@ -12,7 +12,12 @@
 #include <getopt.h>
 
 #include "libgpsmm.h"
-
+#include "gpsdclient.c"
+/*     YES   --->  ^^^^
+ Using .c rather than the .h to embed gpsd_source_spec() source here
+  so that it is compiled in C++ rather than C of the gps library
+ (otherwise fails to link as the signatures are unavailable/different)
+*/
 using namespace std;
 
 /*
@@ -127,7 +132,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
+    struct fixsource_t source;
+    /* Grok the server, port, and device. */
+    if (optind < argc) {
+	gpsd_source_spec(argv[optind], &source);
+    } else
+	gpsd_source_spec(NULL, &source);
+
+    //gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
+    gpsmm gps_rec(source.server, source.port);
 
     if (gps_rec.stream(WATCH_ENABLE|WATCH_JSON) == NULL) {
         cerr << "No GPSD running.\n";
