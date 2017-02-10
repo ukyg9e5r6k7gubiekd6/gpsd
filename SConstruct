@@ -1527,8 +1527,13 @@ build = env.Alias('build',
                    "libgps.pc", "gpsd.rules"])
 
 if qt_env:
-    build_qt = qt_env.Alias('build', [compiled_qgpsmmlib])
+    test_qgpsmm = env.Program('test_qgpsmm', ['test_gpsmm.cpp'],
+                              LIBPATH=['.'],
+                              OBJPREFIX='qt-',
+                              LIBS=['Qgpsmm'])
+    build_qt = qt_env.Alias('build', [compiled_qgpsmmlib,test_qgpsmm])
     qt_env.Default(*build_qt)
+    testprogs.append(test_qgpsmm)
 
 if env['python']:
     build_python = python_env.Alias('build', python_targets)
