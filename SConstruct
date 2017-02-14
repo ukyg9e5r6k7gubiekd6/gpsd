@@ -986,7 +986,6 @@ libgps_sources = [
     "libgps_shm.c",
     "libgps_sock.c",
     "netlib.c",
-    "ntpshmread.c",
     "os_compat.c",
     "rtcm2_json.c",
     "rtcm3_json.c",
@@ -1007,6 +1006,7 @@ libgpsd_sources = [
     "net_dgpsip.c",
     "net_gnss_dispatch.c",
     "net_ntrip.c",
+    "ntpshmread.c",
     "ntpshmwrite.c",
     "ppsthread.c",
     "packet.c",
@@ -1161,7 +1161,7 @@ cgps = env.Program('cgps', ['cgps.c'],
                    LIBS=['gps_static'],
                    parse_flags=gpsflags + ncurseslibs)
 ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'],
-                        LIBS=['gps_static'],
+                        LIBS=['gpsd', 'gps_static'],
                         parse_flags=gpsflags)
 ppscheck = env.Program('ppscheck', ['ppscheck.c'],
                         parse_flags=gpsflags)
