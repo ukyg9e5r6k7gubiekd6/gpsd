@@ -750,9 +750,15 @@ else:
             announce("You do not have the endian.h header file. RTCM V2 support disabled.")
             env["rtcm104v2"] = False
 
+    for hdr in ("sys/un", "sys/socket", "sys/select", "netdb", "netinet/in", "netinet/ip", "arpa/inet", "termios", "winsock2"):
+        if config.CheckHeader(hdr + ".h"):
+            confdefs.append("#define HAVE_%s_H 1\n" % hdr.replace("/","_").upper())
+        else:
+            confdefs.append("/* #undef HAVE_%s_H */\n" % hdr.replace("/","_").upper())
+
     # check function after libraries, because some function require libraries
     # for example clock_gettime() require librt on Linux glibc < 2.17
-    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r" ):
+    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r", "inet_ntop", "fcntl"):
         if config.CheckFunc(f):
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
         else:

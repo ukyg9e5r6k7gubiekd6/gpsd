@@ -45,7 +45,8 @@ int clock_gettime(clockid_t clk_id, struct timespec *ts)
 /* End of clock_gettime section */
 
 #ifndef HAVE_DAEMON
-
+#ifndef HAVE_WINSOCK2_H
+/* No daemon() provided for Windows as not currently needed */
 /* Simulate Linux/BSD daemon() on platforms that don't have it */
 
 #include <stdlib.h>
@@ -90,7 +91,7 @@ int os_daemon(int nochdir, int noclose)
     /* coverity[leaked_handle] Intentional handle duplication */
     return 0;
 }
-
+#endif /* HAVE_WINSOCK2_H */
 #else /* HAVE_DAEMON */
 
 #ifdef __linux__

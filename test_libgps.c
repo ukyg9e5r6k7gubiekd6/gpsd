@@ -43,7 +43,9 @@ int main(int argc, char *argv[])
 #endif
 
     (void)signal(SIGSEGV, onsig);
+#ifdef SIGBUS
     (void)signal(SIGBUS, onsig);
+#endif
 
     while ((option = getopt(argc, argv, "bf:hsD:?")) != -1) {
 	switch (option) {
@@ -144,7 +146,6 @@ int main(int argc, char *argv[])
 	}
 	(void)gps_close(&collect);
     }
-
     return 0;
 }
 
