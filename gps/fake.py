@@ -641,7 +641,12 @@ class TestSession(object):
     def client_add(self, commands):
         "Initiate a client session and force connection to a fake GPS."
         self.progress("gpsfake: client_add()\n")
-        newclient = gps.gps(port=self.port, verbose=self.verbose)
+        try:
+            newclient = gps.gps(port=self.port, verbose=self.verbose)
+        except socket.error:
+            if not self.daemon.is_alive():
+                raise TestSessionError("daemon died")
+            raise
         self.append(newclient)
         newclient.id = self.client_id + 1
         self.client_id += 1
