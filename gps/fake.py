@@ -75,6 +75,8 @@ from __future__ import absolute_import, print_function, division
 
 import os, sys, time, signal, pty, termios  # fcntl, array, struct
 import threading, socket, select
+import subprocess
+
 import gps
 from gps import polybytes
 from . import packet as sniffer
@@ -429,81 +431,108 @@ class FakeUDP(FakeGPS):
         pass  # shutdown() fails on UDP
 
 
-class DaemonError(BaseException):
+class SubprogramError(BaseException):
     def __init__(self, msg):
-        super(DaemonError, self).__init__()
+        super(SubprogramError, self).__init__()
         self.msg = msg
 
     def __str__(self):
         return repr(self.msg)
 
 
-class DaemonInstance(object):
-    "Control a gpsd instance."
+class SubprogramInstance(object):
+    "Class for generic subprogram."
+    ERROR = SubprogramError
 
-    def __init__(self, control_socket=None):
-        self.sockfile = None
-        self.pid = None
-        self.tmpdir = os.environ.get('TMPDIR', '/tmp')
-        if control_socket:
-            self.control_socket = control_socket
-        else:
-            self.control_socket = "%s/gpsfake-%d.sock" % (self.tmpdir, os.getpid())
-        self.pidfile = "%s/gpsfake-%d.pid" % (self.tmpdir, os.getpid())
-
-    def spawn(self, options, port, background=False, prefix=""):
-        "Spawn a daemon instance."
+    def __init__(self):
         self.spawncmd = None
+        self.process = None
+        self.returncode = None
 
-        # Look for gpsd in GPSD_HOME env variable
+    def spawn(self, program, options, background=False, prefix=""):
+        "Spawn a subprogram instance."
+        spawncmd = None
+
+        # Look for program in GPSD_HOME env variable
         if os.environ.get('GPSD_HOME'):
             for path in os.environ['GPSD_HOME'].split(':'):
-                _spawncmd = "%s/gpsd" % path
+                _spawncmd = "%s/%s" % (path, program)
                 if os.path.isfile(_spawncmd) and os.access(_spawncmd, os.X_OK):
-                    self.spawncmd = _spawncmd
+                    spawncmd = _spawncmd
                     break
 
         # if we could not find it yet try PATH env variable for it
-        if not self.spawncmd:
+        if not spawncmd:
             if '/usr/sbin' not in os.environ['PATH']:
                 os.environ['PATH'] = os.environ['PATH'] + ":/usr/sbin"
             for path in os.environ['PATH'].split(':'):
-                _spawncmd = "%s/gpsd" % path
+                _spawncmd = "%s/%s" % (path, program)
                 if os.path.isfile(_spawncmd) and os.access(_spawncmd, os.X_OK):
-                    self.spawncmd = _spawncmd
+                    spawncmd = _spawncmd
                     break
 
-        if not self.spawncmd:
-            raise DaemonError("Cannot execute gpsd: executable not found. Set GPSD_HOME env variable")
+        if not spawncmd:
+            raise self.ERROR("Cannot execute %s: executable not found. Set GPSD_HOME env variable" % program)
+        self.spawncmd = [spawncmd] + options.split()
+        if prefix:
+            self.spawncmd = prefix.split() + self.spawncmd
+        self.process = subprocess.Popen(self.spawncmd)
+        if not background:
+            self.returncode = status = self.process.wait()
+            if os.WIFSIGNALED(status) or os.WEXITSTATUS(status):
+                raise self.ERROR("%s exited with status %d" % (program, status))
+
+    def is_alive(self):
+        "Is the program still alive?"
+        if not self.process:
+            return False
+        self.returncode = self.process.poll()
+        if self.returncode is None:
+            return True
+        self.process = None
+        return False
+
+    def kill(self):
+        "Kill the program instance."
+        while self.is_alive():
+            try:  # terminate() may fail if already killed
+                self.process.terminate()
+            except OSError:
+                continue
+            time.sleep(0.01)
+
+
+class DaemonError(SubprogramError):
+    pass
+
+
+class DaemonInstance(SubprogramInstance):
+    "Control a gpsd instance."
+    ERROR = DaemonError
+
+    def __init__(self, control_socket=None):
+        super(DaemonInstance, self).__init__()
+        if control_socket:
+            self.control_socket = control_socket
+        else:
+            tmpdir = os.environ.get('TMPDIR', '/tmp')
+            self.control_socket = "%s/gpsfake-%d.sock" % (tmpdir, os.getpid())
+
+    def spawn(self, options, port, background=False, prefix=""):
+        "Spawn a daemon instance."
         # The -b option to suppress hanging on probe returns is needed to cope
         # with OpenBSD (and possibly other non-Linux systems) that don't support
         # anything we can use to implement the FakeGPS.read() method
-        self.spawncmd += " -b -N -S %s -F %s -P %s %s" % (port, self.control_socket, self.pidfile, options)
-        if prefix:
-            self.spawncmd = prefix + " " + self.spawncmd.strip()
-        if background:
-            self.spawncmd += " &"
-        status = os.system(self.spawncmd)
-        if os.WIFSIGNALED(status) or os.WEXITSTATUS(status):
-            raise DaemonError("daemon exited with status %d" % status)
+        opts = (" -b -N -S %s -F %s %s"
+                       % (port, self.control_socket, options))
+        super(DaemonInstance, self).spawn('gpsd', opts, background, prefix)
 
-    def wait_pid(self):
-        "Wait for the daemon, get its PID and a control-socket connection."
-        while True:
-            try:
-                fp = open(self.pidfile)
-            except IOError:
-                time.sleep(0.1)
-                continue
-            try:
-                fp.seek(0)
-                pidstr = fp.read()
-                self.pid = int(pidstr)
-            except ValueError:
-                time.sleep(0.5)
-                continue  # Avoid race condition -- PID not yet written
-            fp.close()
-            break
+    def wait_ready(self):
+        "Wait for the daemon to create the control socket."
+        while self.is_alive():
+            if os.path.exists(self.control_socket):
+                return
+            time.sleep(0.1)
 
     def __get_control_socket(self):
         # Now we know it's running, get a connection to the control socket.
@@ -518,14 +547,6 @@ class DaemonInstance(object):
             self.sock = None
         return self.sock
 
-    def is_alive(self):
-        "Is the daemon still alive?"
-        try:
-            os.kill(self.pid, 0)
-            return True
-        except OSError:
-            return False
-
     def add_device(self, path):
         "Add a device to the daemon's internal search list."
         if self.__get_control_socket():
@@ -539,19 +560,6 @@ class DaemonInstance(object):
             self.sock.sendall(polybytes("-%s\r\n\x00" % path))
             self.sock.recv(12)
             self.sock.close()
-
-    def kill(self):
-        "Kill the daemon instance."
-        if self.pid:
-            try:
-                os.kill(self.pid, signal.SIGTERM)
-                # Raises an OSError for ESRCH when we've killed it.
-                while True:
-                    os.kill(self.pid, signal.SIGTERM)
-                    time.sleep(0.01)
-            except OSError:
-                pass
-            self.pid = None
 
 
 class TestSessionError(BaseException):
@@ -594,7 +602,7 @@ class TestSession(object):
         for sig in (signal.SIGQUIT, signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, lambda unused, dummy: self.cleanup())
         self.daemon.spawn(background=True, prefix=self.prefix, port=self.port, options=self.options)
-        self.daemon.wait_pid()
+        self.daemon.wait_ready()
 
     def set_predicate(self, pred):
         "Set a default go predicate for the session."
