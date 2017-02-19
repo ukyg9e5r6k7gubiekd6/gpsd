@@ -71,12 +71,12 @@ import SCons
 PYTHON_SYSCONFIG_IMPORT = 'from distutils import sysconfig'
 
 # replacement for functions from the commands module, which is deprecated.
-from subprocess import PIPE, STDOUT, Popen
+import subprocess
 
 
 def _getstatusoutput(cmd, input=None, shell=True, cwd=None, env=None):
-    pipe = Popen(cmd, shell=shell, cwd=cwd, env=env,
-                 stdout=PIPE, stderr=STDOUT)
+    pipe = subprocess.Popen(cmd, shell=shell, cwd=cwd, env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     (output, errout) = pipe.communicate(input=input)
     status = pipe.returncode
     return (status, output)
