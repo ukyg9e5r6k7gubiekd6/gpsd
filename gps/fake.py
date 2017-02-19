@@ -123,10 +123,14 @@ def GetDelay(slow=False):
     return delay
 
 
-class TestLoadError(BaseException):
+class TestError(BaseException):
     def __init__(self, msg):
-        super(TestLoadError, self).__init__()
+        super(TestError, self).__init__()
         self.msg = msg
+
+
+class TestLoadError(TestError):
+    pass
 
 
 class TestLoad(object):
@@ -219,10 +223,8 @@ class TestLoad(object):
             self.sentences.append(b"# EOF\n")
 
 
-class PacketError(BaseException):
-    def __init__(self, msg):
-        super(PacketError, self).__init__()
-        self.msg = msg
+class PacketError(TestError):
+    pass
 
 
 class FakeGPS(object):
@@ -431,11 +433,7 @@ class FakeUDP(FakeGPS):
         pass  # shutdown() fails on UDP
 
 
-class SubprogramError(BaseException):
-    def __init__(self, msg):
-        super(SubprogramError, self).__init__()
-        self.msg = msg
-
+class SubprogramError(TestError):
     def __str__(self):
         return repr(self.msg)
 
@@ -562,10 +560,8 @@ class DaemonInstance(SubprogramInstance):
             self.sock.close()
 
 
-class TestSessionError(BaseException):
-    def __init__(self, msg):
-        super(TestSessionError, self).__init__()
-        self.msg = msg
+class TestSessionError(TestError):
+    pass
 
 
 class TestSession(object):
