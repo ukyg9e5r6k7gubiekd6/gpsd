@@ -250,10 +250,12 @@ int main(int argc, char **argv)
                 }
                 fname[s] = '\0';;
                 logfile = fopen(fname, "w");
-                if (logfile == NULL)
+                if (logfile == NULL) {
 		    syslog(LOG_ERR,
 			   "Failed to open %s: %s, logging to stdout.",
 			   fname, strerror(errno));
+		    logfile = stdout;
+		}
 	    bailout:
                 free(fname);
                 break;
