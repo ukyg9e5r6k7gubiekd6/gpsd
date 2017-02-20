@@ -64,9 +64,9 @@ static const struct assoc hlines[] = {
 
 static void usage(void)
 {
-	fprintf(stderr, "usage: ppscheck [-h] [ -V] <device>\n");
-	fprintf(stderr, "                 -h   print usage\n");
-	fprintf(stderr, "                 -V   print cwVersion\n");
+	(void)fprintf(stderr, "usage: ppscheck [-h] [ -V] <device>\n");
+	(void)fprintf(stderr, "                 -h   print usage\n");
+	(void)fprintf(stderr, "                 -V   print cwVersion\n");
 	exit(1);
 }
 

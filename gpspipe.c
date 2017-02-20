@@ -70,13 +70,13 @@ static void open_serial(char *device)
      * tty.
      */
     if ((fd_out = open(device, O_RDWR | O_NOCTTY)) == -1) {
-	fprintf(stderr, "gpspipe: error opening serial port\n");
+	(void)fprintf(stderr, "gpspipe: error opening serial port\n");
 	exit(EXIT_FAILURE);
     }
 
     /* Save current serial port settings for later */
     if (tcgetattr(fd_out, &oldtio) != 0) {
-	fprintf(stderr, "gpspipe: error reading serial port settings\n");
+	(void)fprintf(stderr, "gpspipe: error reading serial port settings\n");
 	exit(EXIT_FAILURE);
     }
 
@@ -362,17 +362,17 @@ int main(int argc, char **argv)
 		    }
 		}
 		if (fputc(c, fp) == EOF) {
-		    fprintf(stderr, "gpspipe: write error, %s(%d)\n",
-			    strerror(errno), errno);
+		    (void)fprintf(stderr, "gpspipe: write error, %s(%d)\n",
+		                  strerror(errno), errno);
 		    exit(EXIT_FAILURE);
 		}
 
 		if (c == '\n') {
 		    if (serialport != NULL) {
 			if (write(fd_out, serbuf, (size_t) j) == -1) {
-			    fprintf(stderr,
-				    "gpspipe: serial port write error, %s(%d)\n",
-				    strerror(errno), errno);
+			    (void)fprintf(stderr,
+			                  "gpspipe: serial port write error, %s(%d)\n",
+			                  strerror(errno), errno);
 			    exit(EXIT_FAILURE);
 			}
 			j = 0;

@@ -182,11 +182,11 @@ static void quit_handler(int signum)
 
 static void usage(void)
 {
-    fprintf(stderr,
-	    "Usage: %s [-V] [-h] [-d] [-i timeout] [-f filename] [-m minmove]\n"
-	    "\t[-r] [-e exportmethod] [server[:port:[device]]]\n\n"
-	    "defaults to '%s -i 5 -e %s localhost:2947'\n",
-	    progname, progname, export_default()->name);
+    (void)fprintf(stderr,
+                  "Usage: %s [-V] [-h] [-d] [-i timeout] [-f filename] [-m minmove]\n"
+                  "\t[-r] [-e exportmethod] [server[:port:[device]]]\n\n"
+                  "defaults to '%s -i 5 -e %s localhost:2947'\n",
+                  progname, progname, export_default()->name);
     exit(EXIT_FAILURE);
 }
 
@@ -263,8 +263,8 @@ int main(int argc, char **argv)
 	    if (timeout < 1)
 		timeout = 1;
 	    if (timeout >= 3600)
-		fprintf(stderr,
-			"WARNING: track timeout is an hour or more!\n");
+		(void)fprintf(stderr,
+		              "WARNING: track timeout is an hour or more!\n");
 	    break;
 	case 'l':
 	    export_list(stderr);

@@ -89,7 +89,7 @@ static int send_udp (char *nmeastring, size_t ind)
 	/* compute message size and add 0x0a 0x0d */
 	for (ind=0; nmeastring [ind] != '\0'; ind ++) {
 	    if (ind >= sizeof(message) - 3) {
-		fprintf(stderr, "gps2udp: too big [%s] \n", nmeastring);
+		(void)fprintf(stderr, "gps2udp: too big [%s] \n", nmeastring);
 		return -1;
 	    }
 	    message[ind] = nmeastring[ind];
@@ -157,14 +157,14 @@ static int open_udp(char **hostport)
 
        sock[channel]= socket(AF_INET, SOCK_DGRAM, 0);
        if (sock[channel] < 0) {
-	   fprintf(stderr, "gps2udp: error creating UDP socket\n");
+	   (void)fprintf(stderr, "gps2udp: error creating UDP socket\n");
 	   return (-1);
        }
 
        remote[channel].sin_family = (sa_family_t)AF_INET;
        hp = gethostbyname(hostname);
        if (hp==NULL) {
-	   fprintf(stderr, "gps2udp: syntax is [-u hostname:port] [%s] is not a valid hostname\n",hostname);
+	   (void)fprintf(stderr, "gps2udp: syntax is [-u hostname:port] [%s] is not a valid hostname\n",hostname);
 	   return (-1);
        }
 
@@ -476,7 +476,7 @@ int main(int argc, char **argv)
 		    (void)fprintf(stdout," MMSI=%9u", mmsi);
 
 		}
-		fprintf(stdout,"\n");
+		(void)fprintf(stdout,"\n");
 	    }
 
 	    // send to all UDP destinations
@@ -496,7 +496,7 @@ int main(int argc, char **argv)
     } // end for (;;)
 
     // This is an infinite loop, should never be here
-    fprintf (stderr, "gpsd2udp ERROR abnormal exit\n");
+    (void)fprintf (stderr, "gpsd2udp ERROR abnormal exit\n");
     exit (-1);
 }
 

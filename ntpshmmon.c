@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 			  argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'h':
-	    fprintf(stderr,
+	  (void)fprintf(stderr,
                 "usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
                 "  -h           print this help\n"
                 "  -n nsamples  exit after nsamples\n"
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
     for (i = 0; i < NTPSEGMENTS; i++) {
 	segments[i] = shm_get(i, false, true);
 	if (verbose && segments[i] != NULL)
-	    fprintf(stderr, "unit %d opened\n", i);
+	  (void)fprintf(stderr, "unit %d opened\n", i);
     }
 
     if (killall) {
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	    long long diff;  /* 32 bit long is too short for a timespec */
 	    enum segstat_t status = ntp_read(segments[i], &shm_stat, false);
 	    if (verbose)
-		fprintf(stderr, "unit %d status %d\n", i, status);
+		(void)fprintf(stderr, "unit %d status %d\n", i, status);
 	    switch(status) {
 	    case OK:
 		/* ntpd can slew the clock at 120% real time
@@ -144,15 +144,15 @@ int main(int argc, char **argv)
 		/* do nothing, data not ready, wait another cycle */
 		break;
 	    case BAD_MODE:
-		fprintf(stderr, "ntpshmmon: unknown mode %d on segment %s\n",
-			shm_stat.status, ntp_name(i));
+		(void)fprintf(stderr, "ntpshmmon: unknown mode %d on segment %s\n",
+		              shm_stat.status, ntp_name(i));
 		break;
 	    case CLASH:
 		/* do nothing, data is corrupt, wait another cycle */
 		break;
 	    default:
-		fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
-			status, ntp_name(i));
+		(void)fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
+		              status, ntp_name(i));
 		break;
 	    }
 	}

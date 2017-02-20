@@ -1370,18 +1370,18 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 	    struct timespec  msgTime;
 
 	    clock_gettime(CLOCK_REALTIME, &msgTime);
-	    fprintf(logFile,
-		    "(%010d.%06d) can0 %08x#",
-		    (unsigned int)msgTime.tv_sec,
-		    (unsigned int)msgTime.tv_nsec/1000,
-		    frame->can_id & 0x1ffffff);
+	    (void)fprintf(logFile,
+	                  "(%010d.%06d) can0 %08x#",
+	                  (unsigned int)msgTime.tv_sec,
+	                  (unsigned int)msgTime.tv_nsec/1000,
+	                  frame->can_id & 0x1ffffff);
 	    if ((frame->can_dlc & 0x0f) > 0) {
 		int l1;
 	        for(l1=0;l1<(frame->can_dlc & 0x0f);l1++) {
-		    fprintf(logFile, "%02x", frame->data[l1]);
+		    (void)fprintf(logFile, "%02x", frame->data[l1]);
 		}
 	    }
-	    fprintf(logFile, "\n");
+	    (void)fprintf(logFile, "\n");
 	}
 #endif /* of if LOG_FILE */
 	session->driver.nmea2000.can_msgcnt += 1;

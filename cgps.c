@@ -809,7 +809,7 @@ int main(int argc, char *argv[])
 	    wait_clicks = 0;
 	    errno = 0;
 	    if (gps_read(&gpsdata) == -1) {
-		fprintf(stderr, "cgps: socket error 4\n");
+		(void)fprintf(stderr, "cgps: socket error 4\n");
 		die(errno == 0 ? GPS_GONE : GPS_ERROR);
 	    } else {
 		/* Here's where updates go now that things are established. */

@@ -328,7 +328,7 @@ int main(int argc, char **argv)
 	    exit(EXIT_SUCCESS);
 	case 'h':
 	default:
-	    fprintf(stderr, USAGE);
+	    (void)fprintf(stderr, USAGE);
 	    break;
 	}
     }
