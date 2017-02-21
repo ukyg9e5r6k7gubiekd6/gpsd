@@ -371,7 +371,8 @@ int main(int argc, char **argv)
 		    if (serialport != NULL) {
 			if (write(fd_out, serbuf, (size_t) j) == -1) {
 			    (void)fprintf(stderr,
-			                  "gpspipe: serial port write error, %s(%d)\n",
+			                  "gpspipe: serial port write error,"
+			                  " %s(%d)\n",
 			                  strerror(errno), errno);
 			    exit(EXIT_FAILURE);
 			}

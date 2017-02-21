@@ -405,7 +405,7 @@ int main(int argc, char *argv[])
 
     for (;;) { /* heart of the client */
 	if (!gps_waiting(&gpsdata, 50000000)) {
-	    (void)fprintf( stderr, "lcdgps: error while waiting\n");
+	    (void)fprintf(stderr, "lcdgps: error while waiting\n");
 	    exit(EXIT_FAILURE);
 	} else {
 	    (void)gps_read(&gpsdata);

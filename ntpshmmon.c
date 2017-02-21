@@ -57,7 +57,8 @@ int main(int argc, char **argv)
 			  argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'h':
-	  (void)fprintf(stderr,
+	    (void)fprintf(
+	        stderr,
                 "usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
                 "  -h           print this help\n"
                 "  -n nsamples  exit after nsamples\n"
@@ -77,7 +78,7 @@ int main(int argc, char **argv)
     for (i = 0; i < NTPSEGMENTS; i++) {
 	segments[i] = shm_get(i, false, true);
 	if (verbose && segments[i] != NULL)
-	  (void)fprintf(stderr, "unit %d opened\n", i);
+	    (void)fprintf(stderr, "unit %d opened\n", i);
     }
 
     if (killall) {
@@ -144,14 +145,16 @@ int main(int argc, char **argv)
 		/* do nothing, data not ready, wait another cycle */
 		break;
 	    case BAD_MODE:
-		(void)fprintf(stderr, "ntpshmmon: unknown mode %d on segment %s\n",
+		(void)fprintf(stderr,
+		              "ntpshmmon: unknown mode %d on segment %s\n",
 		              shm_stat.status, ntp_name(i));
 		break;
 	    case CLASH:
 		/* do nothing, data is corrupt, wait another cycle */
 		break;
 	    default:
-		(void)fprintf(stderr, "ntpshmmon: unknown status %d on segment %s\n",
+		(void)fprintf(stderr,
+		              "ntpshmmon: unknown status %d on segment %s\n",
 		              status, ntp_name(i));
 		break;
 	    }

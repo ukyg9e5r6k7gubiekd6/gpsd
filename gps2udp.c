@@ -164,7 +164,10 @@ static int open_udp(char **hostport)
        remote[channel].sin_family = (sa_family_t)AF_INET;
        hp = gethostbyname(hostname);
        if (hp==NULL) {
-	   (void)fprintf(stderr, "gps2udp: syntax is [-u hostname:port] [%s] is not a valid hostname\n",hostname);
+	   (void)fprintf(stderr,
+	                 "gps2udp: syntax is [-u hostname:port] [%s]"
+	                 " is not a valid hostname\n",
+	                 hostname);
 	   return (-1);
        }
 

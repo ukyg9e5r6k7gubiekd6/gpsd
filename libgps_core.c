@@ -102,7 +102,9 @@ int gps_open(const char *host,
 #endif /* SOCKET_EXPORT_ENABLE */
 
 #ifndef USES_HOST
-    (void)fprintf(stderr, "No methods available for connnecting to %s!\n", host);
+    (void)fprintf(stderr,
+                  "No methods available for connnecting to %s!\n",
+                  host);
 #endif /* USES_HOST */
 #undef USES_HOST
 
