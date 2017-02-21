@@ -183,7 +183,8 @@ static void quit_handler(int signum)
 static void usage(void)
 {
     (void)fprintf(stderr,
-                  "Usage: %s [-V] [-h] [-l] [-d] [D debuglevel] [-i timeout] [-f filename] [-m minmove]\n"
+                  "Usage: %s [-V] [-h] [-l] [-d] [-D debuglevel]"
+                  " [-i timeout] [-f filename] [-m minmove]\n"
                   "\t[-r] [-e exportmethod] [server[:port:[device]]]\n\n"
                   "defaults to '%s -i 5 -e %s localhost:2947'\n",
                   progname, progname, export_default()->name);
