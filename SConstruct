@@ -2074,7 +2074,7 @@ env.Command('www/hardware.html', ['gpscap.py',
                                   'www/hardware-head.html',
                                   'gpscap.ini',
                                   'www/hardware-tail.html'],
-            ['(cat www/hardware-head.html && $SC_PYTHON gpscap.py && cat www/hardware-tail.html) >www/hardware.html'])
+            ['(cat www/hardware-head.html && PYTHONIOENCODING=utf-8 $SC_PYTHON gpscap.py && cat www/hardware-tail.html) >www/hardware.html'])
 
 # The diagram editor dia is required in order to edit the diagram masters
 # Utility("www/cycle.svg", ["www/cycle.dia"], ["dia -e www/cycle.svg www/cycle.dia"])

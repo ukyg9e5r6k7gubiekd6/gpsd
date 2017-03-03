@@ -19,7 +19,10 @@ class GPSDictionary(configparser.RawConfigParser):
         configparser.RawConfigParser.__init__(self)
         if not files:
             files = ["gpscap.ini", "/usr/share/gpsd/gpscap.ini"]
-        self.read(files)
+        try:
+            self.read(files, encoding='utf-8')
+        except TypeError:
+            self.read(files)  # For Python 2.6
         # Resolve uses= members
         while True:
             keepgoing = False
