@@ -111,7 +111,7 @@ static void libgps_dump_state(struct gps_data_t *collect)
 
 int main(int argc, char *argv[])
 {
-    uint looper = 0;
+    uint looper = UINT_MAX;
 
     // A typical C++ program may look to use a more native option parsing method
     //  such as boost::program_options
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     // If not specified then by default it loops until ll simply goes out of bounds
     // So with the 5 second wait & a 4 byte uint - this equates to ~680 years
     //  - long enough for a test program :)
-    for (uint ll = 0; ll < looper ; ll++) {
+    for (uint ll = 0; ll < looper; ll++) {
 	struct gps_data_t* newdata;
 
 	if (!gps_rec.waiting(5000000))
