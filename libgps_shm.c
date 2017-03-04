@@ -161,7 +161,7 @@ void gps_shm_close(struct gps_data_t *gpsdata)
 	(void)shmdt((const void *)PRIVATE(gpsdata)->shmseg);
 }
 
-int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout UNUSED,
+int gps_shm_mainloop(struct gps_data_t *gpsdata, int timeout,
 			 void (*hook)(struct gps_data_t *gpsdata))
 /* run a shm main loop with a specified handler */
 {
