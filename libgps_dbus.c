@@ -134,7 +134,7 @@ int gps_dbus_mainloop(struct gps_data_t *gpsdata,
     share_gpsdata = gpsdata;
     PRIVATE(share_gpsdata)->handler = (void (*)(struct gps_data_t *))hook;
     for (;;)
-	if (dbus_connection_read_write_dispatch(connection, timeout * 1000) != TRUE)
+	if (dbus_connection_read_write_dispatch(connection, (int)(timeout/1000)) != TRUE)
 	    return -1;
     return 0;
 }
