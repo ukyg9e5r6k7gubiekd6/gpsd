@@ -2003,6 +2003,7 @@ else:
     announce("Part of the website build requires asciidoc, not installed.")
     asciidocs = []
 
+# Non-asciidoc webpages only
 htmlpages = Split('''
     www/gps2udp.html
     www/gpscat.html
@@ -2016,7 +2017,6 @@ htmlpages = Split('''
     www/gpspipe.html
     www/gpsprof.html
     www/hardware.html
-    www/installation.html
     www/internals.html
     www/libgps.html
     www/libgpsmm.html
