@@ -98,7 +98,7 @@ int os_daemon(int nochdir, int noclose)
 int os_daemon(int nochdir, int noclose)
 {
     (void) nochdir; (void) noclose;
-    errno = EINVAL;
+    errno = EPERM;
     return -1;
 }
 
