@@ -66,6 +66,12 @@ C:
     <paramdef>void *<parameter>data</parameter></paramdef>
 </funcprototype>
 <funcprototype>
+<funcdef>int <function>gps_mainloop</function></funcdef>
+    <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>int <parameter>timeout</parameter></paramdef>
+    <paramdef>void (*<parameter>hook</parameter>)(struct gps_data_t *gpsdata)</paramdef>
+</funcprototype>
+<funcprototype>
 <funcdef>const char *<function>gps_errstr</function></funcdef>
     <paramdef>int <parameter>err</parameter></paramdef>
 </funcprototype>
@@ -165,6 +171,13 @@ a tiny race window between <function>gps_waiting()</function> and a
 following <function>gps_read()</function>; in that context, because the
 latter does not block, it is probably better to write a simple read
 loop.</para>
+
+<para><function>gps_mainloop()</function> enables the provided hook
+function to be continually called whenever there is gpsd data.
+The second argument is the maximum amount of time to wait (in microseconds)
+on input before exiting the loop (and return a value of -1).
+It will also return a negative value on various errors.
+</para>
 
 <para><function>gps_unpack()</function> parses JSON from the argument
 buffer into the target of the session structure pointer argument.
