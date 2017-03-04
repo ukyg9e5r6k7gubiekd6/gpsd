@@ -73,6 +73,15 @@ size_t strlcpy(char *dst, const char *src, size_t size);
 
 #endif /* !HAVE_STRLCPY */
 
+/* Provide missing signal numbers for non-POSIX builds */
+
+#ifndef SIGHUP
+#define SIGHUP  1
+#endif
+#ifndef SIGQUIT
+#define SIGQUIT 3
+#endif
+
 # ifdef __cplusplus
 }
 # endif
