@@ -2001,7 +2001,7 @@ int main(int argc, char *argv[])
 	/* not SuS/POSIX portable, but we have our own fallback version */
 	if (os_daemon(0, 0) != 0)
 	    gpsd_log(&context.errout, LOG_ERROR,
-		     "demonization failed: %s\n",strerror(errno));
+		     "daemonization failed: %s\n",strerror(errno));
     }
 
     if (pid_file != NULL) {

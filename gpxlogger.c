@@ -321,7 +321,7 @@ int main(int argc, char **argv)
     if (daemonize) {
 	/* not SuS/POSIX portable, but we have our own fallback version */
 	if (os_daemon(0, 0) != 0)
-	    (void) fprintf(stderr,"demonization failed: %s\n", strerror(errno));
+	    (void) fprintf(stderr,"daemonization failed: %s\n", strerror(errno));
     }
 
     //syslog (LOG_INFO, "---------- STARTED ----------");

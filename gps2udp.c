@@ -433,7 +433,7 @@ int main(int argc, char **argv)
     if (daemonize) {
 	if (os_daemon(0, 0) != 0) {
 	    (void)fprintf(stderr,
-			  "gps2udp: demonization failed: %s\n",
+			  "gps2udp: daemonization failed: %s\n",
 			  strerror(errno));
         }
     }

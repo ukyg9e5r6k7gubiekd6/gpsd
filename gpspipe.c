@@ -251,7 +251,7 @@ int main(int argc, char **argv)
     if (daemonize)
 	if (os_daemon(0, 0) != 0)
 	    (void)fprintf(stderr,
-			  "gpspipe: demonization failed: %s\n",
+			  "gpspipe: daemonization failed: %s\n",
 			  strerror(errno));
 
     /* Sleep for ten seconds if the user requested it. */

@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
     /* Daemonize... */
   if (os_daemon(0, 0) != 0)
       (void)fprintf(stderr,
-		    "lcdgps: demonization failed: %s\n",
+		    "lcdgps: daemonization failed: %s\n",
 		    strerror(errno));
 
     /* Open the stream to gpsd. */
