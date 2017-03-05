@@ -1648,6 +1648,11 @@ def Utility(target, source, action):
     env.Precious(target)
     return target
 
+def UtilityWithHerald(herald, target, source, action):
+    if not env.GetOption('silent'):
+        action = ['@echo "%s"' % herald] + action
+    Utility(target=target, source=source, action=action)
+
 # Putting in all these -U flags speeds up cppcheck and allows it to look
 # at configurations we actually care about.
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
@@ -1864,9 +1869,10 @@ Utility('aivdm-makeregress', [gpsdecode], [
         ])
 
 # Regression-test the packet getter.
-packet_regress = Utility('packet-regress', [test_packet], [
-    '@echo "Testing detection of invalid packets..."',
-    '$SRCDIR/test_packet | diff -u $SRCDIR/test/packet.test.chk -',
+packet_regress = UtilityWithHerald(
+    'Testing detection of invalid packets...',
+    'packet-regress', [test_packet], [
+        '$SRCDIR/test_packet | diff -u $SRCDIR/test/packet.test.chk -',
     ])
 
 # Rebuild the packet-getter regression test
@@ -1879,18 +1885,21 @@ Utility('geoid-makeregress', [test_geoid], [
     '$SRCDIR/test_geoid 37.371192 122.014965 >$SRCDIR/test/geoid.test.chk'])
 
 # Regression-test the geoid tester.
-geoid_regress = Utility('geoid-regress', [test_geoid], [
-    '@echo "Testing the geoid model..."',
-    '$SRCDIR/test_geoid 37.371192 122.014965 | diff -u $SRCDIR/test/geoid.test.chk -',
+geoid_regress = UtilityWithHerald(
+    'Testing the geoid model...',
+    'geoid-regress', [test_geoid], [
+        '$SRCDIR/test_geoid 37.371192 122.014965'
+        ' | diff -u $SRCDIR/test/geoid.test.chk -',
     ])
 
 # Regression-test the Maidenhead Locator
 if not env['python']:
     maidenhead_locator_regress = None
 else:
-    maidenhead_locator_regress = Utility('maidenhead-locator-regress', [python_built_extensions], [
-        '@echo "Testing the Maidenhead Locator conversion..."',
-        '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
+    maidenhead_locator_regress = UtilityWithHerald(
+        'Testing the Maidenhead Locator conversion...',
+        'maidenhead-locator-regress', [python_built_extensions], [
+            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
         ])
 
 # Regression-test the calendar functions
@@ -1902,15 +1911,17 @@ time_regress = Utility('time-regress', [test_mktime], [
 if not env['python']:
     unpack_regress = None
 else:
-    unpack_regress = Utility('unpack-regress', [test_libgps], [
-        '@echo "Testing the client-library sentence decoder..."',
-        '$SRCDIR/regress-driver -c $SRCDIR/test/clientlib/*.log',
+    unpack_regress = UtilityWithHerald(
+        'Testing the client-library sentence decoder...',
+        'unpack-regress', [test_libgps], [
+            '$SRCDIR/regress-driver $REGRESSOPTS -c'
+            ' $SRCDIR/test/clientlib/*.log',
         ])
 
 # Build the regression test for the sentence unpacker
 Utility('unpack-makeregress', [test_libgps], [
     '@echo "Rebuilding the client sentence-unpacker tests..."',
-    '$SRCDIR/regress-driver -c -b $SRCDIR/test/clientlib/*.log'
+    '$SRCDIR/regress-driver $REGRESSOPTS -c -b $SRCDIR/test/clientlib/*.log'
     ])
 
 # Unit-test the JSON parsing
@@ -1927,9 +1938,10 @@ timespec_regress = Utility('timespec-regress', [test_timespec], [
     ])
 
 # consistency-check the driver methods
-method_regress = Utility('packet-regress', [test_packet], [
-    '@echo "Consistency-checking driver methods..."',
-    '$SRCDIR/test_packet -c >/dev/null',
+method_regress = UtilityWithHerald(
+    'Consistency-checking driver methods...',
+    'packet-regress', [test_packet], [
+        '$SRCDIR/test_packet -c >/dev/null',
     ])
 
 # Run a valgrind audit on the daemon  - not in normal tests
@@ -1943,8 +1955,9 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 
 
 # Run all normal regression tests
-describe = Utility('describe', [],
-                   ['@echo "Run normal regression tests for %s..."' % (rev.strip(),)])
+describe = UtilityWithHerald(
+    'Run normal regression tests for %s...' % rev.strip(),
+    'describe', [], [])
 
 # Delete all test programs
 test_exes = [str(p) for p in Flatten(testprogs)]
