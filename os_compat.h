@@ -57,6 +57,38 @@ int clock_gettime(clockid_t, struct timespec *);
 
 int os_daemon(int nochdir, int noclose);
 
+
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
+#else
+/*
+ * Substitutes for syslog functions
+ *  (only subset of defines used by gpsd components listed)
+ *
+ */
+/* Copy of syslog.h defines when otherwise not available */
+/* priorities (these are ordered) */
+#define	LOG_EMERG	0	/* system is unusable */
+#define	LOG_ALERT	1	/* action must be taken immediately */
+#define	LOG_CRIT	2	/* critical conditions */
+#define	LOG_ERR		3	/* error conditions */
+#define	LOG_WARNING	4	/* warning conditions */
+#define	LOG_NOTICE	5	/* normal but significant condition */
+#define	LOG_INFO	6	/* informational */
+#define	LOG_DEBUG	7	/* debug-level messages */
+/* Option flags for openlog */
+#define	LOG_PID		0x01	/* log the pid with each message */
+#define	LOG_PERROR	0x20	/* log to stderr as well */
+/* facility codes */
+#define	LOG_USER	(1<<3)	/* random user-level messages */
+#define	LOG_DAEMON	(3<<3)	/* system daemons */
+
+void syslog(int priority, const char *format, ...);
+void openlog(const char *__ident, int __option, int __facility);
+void closelog(void);
+#endif /* !HAVE_SYSLOG_H */
+
+
 /* Provide BSD strlcat()/strlcpy() on platforms that don't have it */
 
 #ifndef HAVE_STRLCAT

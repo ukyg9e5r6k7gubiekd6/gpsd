@@ -130,6 +130,36 @@ int os_daemon(int nochdir, int noclose)
 
 /* Provide BSD strlcat()/strlcpy() on platforms that don't have it */
 
+#ifndef HAVE_SYSLOG_H
+#include "compiler.h"
+#include <stdarg.h>
+#include <stdio.h>
+/*
+ * Minimal syslog() fallback to print to stderr
+ *
+ */
+PRINTF_FUNC(2, 3) void syslog(int priority UNUSED, const char *format, ...)
+{
+  /* ATM ignore priority (i.e. don't even both prepending to output) */
+  char buf[BUFSIZ];
+  va_list ap;
+  va_start(ap, format);
+  /* Always append a new line to the message */
+  (void)vsnprintf(buf, sizeof(buf) - 2, format, ap);
+  (void)fprintf(stderr, "%s\n", buf);
+  va_end(ap);
+}
+
+void openlog (const char *__ident UNUSED, int __option UNUSED, int __facility UNUSED)
+{
+  (void)fprintf(stderr, "Warning openlog() not available\n");
+}
+
+void closelog (void)
+{
+}
+#endif /* !HAVE_SYSLOG_H */
+
 /*
  * These versions use memcpy and strlen() because they are often
  * heavily optimized down to assembler level. Thus, likely to be
