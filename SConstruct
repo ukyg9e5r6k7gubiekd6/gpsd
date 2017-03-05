@@ -86,6 +86,15 @@ def _getoutput(cmd, input=None, shell=True, cwd=None, env=None):
     return _getstatusoutput(cmd, input, shell, cwd, env)[1]
 
 
+# Spawn replacement that suppresses non-error stderr
+def filtered_spawn(sh, escape, cmd, args, env):
+    proc = subprocess.Popen([sh, '-c', ' '.join(args)],
+                            env = env, close_fds=True, stderr=subprocess.PIPE)
+    _, stderr = proc.communicate()
+    if proc.returncode:
+        sys.stderr.write(stderr)
+    return proc.returncode
+
 #
 # Build-control options
 #
@@ -824,15 +833,13 @@ else:
 #endif /* GPSD_CONFIG_H */
 ''')
 
-    manbuilder = mangenerator = htmlbuilder = None
+    manbuilder = htmlbuilder = None
     if env['manbuild']:
         if config.CheckXsltproc():
-            mangenerator = 'xsltproc'
             build = "xsltproc --nonet %s $SOURCE >$TARGET"
             htmlbuilder = build % docbook_html_uri
             manbuilder = build % docbook_man_uri
         elif WhereIs("xmlto"):
-            mangenerator = 'xmlto'
             xmlto = "xmlto %s $SOURCE || mv `basename $TARGET` `dirname $TARGET`"
             htmlbuilder = xmlto % "html-nochunks"
             manbuilder = xmlto % "man"
@@ -1520,10 +1527,13 @@ if env['xgps']:
     })
 all_manpages = base_manpages.keys() + python_manpages.keys()
 
+man_env = env.Clone()
+if man_env.GetOption('silent'):
+    man_env['SPAWN'] = filtered_spawn  # Suppress stderr chatter
 manpage_targets = []
 if manbuilder:
     for (man, xml) in base_manpages.items() + python_manpages.items():
-        manpage_targets.append(env.Man(source=xml, target=man))
+        manpage_targets.append(man_env.Man(source=xml, target=man))
 
 ## Where it all comes together
 
