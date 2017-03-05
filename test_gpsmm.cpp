@@ -141,9 +141,12 @@ int main(int argc, char *argv[])
     //gpsmm gps_rec("localhost", DEFAULT_GPSD_PORT);
     gpsmm gps_rec(source.server, source.port);
 
-    if (gps_rec.stream(WATCH_ENABLE|WATCH_JSON) == NULL) {
-        cerr << "No GPSD running.\n";
-        return 1;
+    if ( !((std::string)source.server == (std::string)GPSD_SHARED_MEMORY ||
+	   (std::string)source.server == (std::string)GPSD_DBUS_EXPORT) ) {
+        if (gps_rec.stream(WATCH_ENABLE|WATCH_JSON) == NULL) {
+            cerr << "No GPSD running.\n";
+            return 1;
+        }
     }
 
     // Loop for the specified number of times
