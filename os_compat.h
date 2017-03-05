@@ -114,6 +114,12 @@ size_t strlcpy(char *dst, const char *src, size_t size);
 #define SIGQUIT 3
 #endif
 
+/* Provide missing open flags for non-POSIX builds */
+
+#ifndef O_NOCTTY
+#define O_NOCTTY   0400
+#endif
+
 # ifdef __cplusplus
 }
 # endif
