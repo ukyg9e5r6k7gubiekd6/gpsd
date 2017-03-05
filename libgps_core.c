@@ -295,7 +295,6 @@ void libgps_dump_state(struct gps_data_t *collect)
 {
     /* no need to dump the entire state, this is a sanity check */
 #ifndef USE_QT
-    /* will fail on a 32-bit machine */
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n",
 		  (unsigned int)collect->set, gps_maskdump(collect->set));
 #endif
