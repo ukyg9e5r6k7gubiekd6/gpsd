@@ -49,7 +49,8 @@ logfile=""
 help="0"
 baton=false
 quiet=false
-while getopts cl:sStbuvo:qh opt
+quieter=false
+while getopts cl:sStbuvo:qQh opt
 do
     case $opt in
 	c) testing=clientlib ;;	# 'client' rather than the daemon
@@ -62,6 +63,7 @@ do
 	v) mode=view ;;		# View result of generating a check file
 	o) opts="$opts $OPTARG" ;;	# Pass options to gpsfake
 	q) quiet=true ;;	# Suppress header/trailer messages
+	Q) quiet=true; quieter=true ;;	# Suppress all success chatter
 	h) help="1" ;;
     esac
 done
@@ -79,10 +81,11 @@ then
 	echo "-S  - run regression tests with realistic timing delays"
 	echo "-t <ots>  - Run regression tests w/baton"
 	echo "-b  - Rebuild regression check files"
-	echo "-u - Force UDP"
+	echo "-u  - Force UDP"
 	echo "-v  - view result of generating a check file"
 	echo "-o <opt> - Pass options to gpsfake"
 	echo "-q  - Suppress header/trailer messages"
+	echo "-Q  - Suppress all success chatter"
 	echo
 
 	exit 0
@@ -118,6 +121,11 @@ fi
 if [ $mode = slowregress ]
 then
     opts="$opts -S"
+fi
+
+if [ $quieter = true ]
+then
+    opts="$opts -q"
 fi
 
 case $mode in
@@ -174,7 +182,7 @@ case $mode in
         else
             if [ $quiet = true ] && [ $total -eq 1 ] && [ $notfound -eq 0 ]
             then
-                echo "Regression test $1 successful"
+                [ $quieter = true ] || echo "Regression test $1 successful"
             else
                 echo "Regression test successful: no errors in $total tests ($notfound not found).";
             fi

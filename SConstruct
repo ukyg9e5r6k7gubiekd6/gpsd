@@ -338,6 +338,8 @@ if env["slow"]:
 else:
     env['REGRESSOPTS'] = ""
 
+if env.GetOption("silent"):
+    env['REGRESSOPTS'] += " -Q"
 
 def announce(msg):
     if not env.GetOption("silent"):
@@ -1753,7 +1755,8 @@ else:
     gpsfake_tests = []
     for name, opts in [['pty', ''], ['udp', '-u'], ['tcp', '-o -t']]:
         gpsfake_tests.append(Utility('gpsfake-' + name, gps_herald,
-                                     '$SRCDIR/regress-driver -q %s %s'
+                                     '$SRCDIR/regress-driver'
+                                     ' $REGRESSOPTS -q %s %s'
                                      % (opts, gpsfake_log)))
     env.Alias('gpsfake-tests', gpsfake_tests)
 

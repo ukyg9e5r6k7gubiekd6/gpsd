@@ -106,7 +106,7 @@ def fakehook(linenumber, fakegps):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:ghilm:no:pP:r:s:StTuvx")
+        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:ghilm:no:pP:qr:s:StTuvx")
     except getopt.GetoptError as msg:
         print("gpsfake: " + str(msg))
         raise SystemExit(1)
@@ -127,6 +127,7 @@ if __name__ == '__main__':
     udp = False
     verbose = 0
     slow = False
+    quiet = False
     for (switch, val) in options:
         if switch == '-1':
             singleshot = True
@@ -154,6 +155,8 @@ if __name__ == '__main__':
             pipe = True
         elif switch == '-P':
             port = int(val)
+        elif switch == '-q':
+            quiet = True
         elif switch == '-r':
             client_init = val
         elif switch == '-s':
@@ -185,7 +188,7 @@ if __name__ == '__main__':
 
     if progress:
         baton = Baton("Processing %s" % ",".join(arguments), "done")
-    else:
+    elif not quiet:
         sys.stderr.write("Processing %s\n" % ",".join(arguments))
 
     # Don't allocate a private port when cycling logs for client testing.
