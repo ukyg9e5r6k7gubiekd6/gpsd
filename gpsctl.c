@@ -195,6 +195,7 @@ int main(int argc, char **argv)
     char *device = NULL, *devtype = NULL;
     char *speed = NULL, *control = NULL, *rate = NULL;
     bool to_binary = false, to_nmea = false, reset = false;
+    bool control_stdout = false;
     bool lowlevel=false, echo=false;
     struct gps_data_t gpsdata;
     const struct gps_type_t *forcetype = NULL;
@@ -236,6 +237,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'e':		/* echo specified control string with wrapper */
 	    lowlevel = true;
+	    control_stdout = true;  /* Prevent message going to stdout */
 	    echo = true;
 	    break;
 	case 'f':		/* force direct access to the device */
@@ -723,9 +725,10 @@ int main(int argc, char **argv)
 	    }
 	}
 
-	(void)printf("%s identified as a %s at %u baud.\n",
-                       device, gpsd_id(&session),
-                       session.gpsdata.dev.baudrate);
+	if(!control_stdout)
+	    (void)printf("%s identified as a %s at %u baud.\n",
+			 device, gpsd_id(&session),
+			 session.gpsdata.dev.baudrate);
 
 	/* if no control operation was specified, we're done */
 	if (speed==NULL && !to_nmea && !to_binary && control==NULL)
