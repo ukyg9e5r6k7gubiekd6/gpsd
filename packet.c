@@ -1104,7 +1104,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	if (c == 0x81)
 	    lexer->state = ZODIAC_LEADER_2;
 	else
-	    return character_pushback(lexer, GROUND_STATE);
+	    (void) character_pushback(lexer, GROUND_STATE);
 	break;
     case ZODIAC_LEADER_2:
 	lexer->state = ZODIAC_ID_1;
