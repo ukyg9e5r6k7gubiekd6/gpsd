@@ -1651,7 +1651,7 @@ def Utility(target, source, action):
 def UtilityWithHerald(herald, target, source, action):
     if not env.GetOption('silent'):
         action = ['@echo "%s"' % herald] + action
-    Utility(target=target, source=source, action=action)
+    return Utility(target=target, source=source, action=action)
 
 # Putting in all these -U flags speeds up cppcheck and allows it to look
 # at configurations we actually care about.
