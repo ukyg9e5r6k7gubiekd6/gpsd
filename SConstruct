@@ -1940,7 +1940,7 @@ timespec_regress = Utility('timespec-regress', [test_timespec], [
 # consistency-check the driver methods
 method_regress = UtilityWithHerald(
     'Consistency-checking driver methods...',
-    'packet-regress', [test_packet], [
+    'method-regress', [test_packet], [
         '$SRCDIR/test_packet -c >/dev/null',
     ])
 
