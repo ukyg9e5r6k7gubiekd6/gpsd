@@ -48,6 +48,7 @@ gpsmon.html
 gpspipe.html
 gpsprof.html
 gps2udp.html
+gpxlogger.html
 ntpmon.html
 libgps.html
 libgpsd.html
@@ -123,6 +124,7 @@ www/gpsmon.html
 www/gpspipe.html
 www/gpsprof.html
 www/gps_report.cgi
+www/gpxlogger.html
 www/hacking.html
 www/hardware-head.html
 www/hardware.html

@@ -1499,7 +1499,7 @@ base_manpages = {
     "cgps.1": "gps.xml",
     "gpsinit.8": "gpsinit.xml",
     "lcdgps.1": "gps.xml",
-    "gpxlogger.1": "gps.xml",
+    "gpxlogger.1": "gpxlogger.xml",
     "libgps.3": "libgps.xml",
     "libgpsmm.3": "libgpsmm.xml",
     "libQgpsmm.3": "libgpsmm.xml",
@@ -2042,6 +2042,7 @@ htmlpages = Split('''
     www/gpsmon.html
     www/gpspipe.html
     www/gpsprof.html
+    www/gpxlogger.html
     www/hardware.html
     www/internals.html
     www/libgps.html

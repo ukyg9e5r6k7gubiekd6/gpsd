@@ -20,7 +20,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 <refname>xgpsspeed</refname>
 <refname>cgps</refname>
 <refname>lcdgps</refname>
-<refname>gpxlogger</refname>
 <refname>gegps</refname>
 <refpurpose>test clients for gpsd</refpurpose>
 </refnamediv>
@@ -84,25 +83,6 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-V </arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
-      <group>
-	<replaceable>server</replaceable>
-	  <group>
-	    <replaceable>:port</replaceable>
-	      <group><replaceable>:device</replaceable></group>
-	  </group>
-      </group>
-</cmdsynopsis>
-<cmdsynopsis>
-  <command>gpxlogger</command>
-      <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
-      <arg choice='opt'>-d </arg>
-      <arg choice='opt'>-e <replaceable>export-method</replaceable></arg>
-      <arg choice='opt'>-f <replaceable>filename</replaceable></arg>
-      <arg choice='opt'>-l </arg>
-      <arg choice='opt'>-m <replaceable>minmove</replaceable></arg>
-      <arg choice='opt'>-h </arg>
-      <arg choice='opt'>-V </arg>
-      <arg choice='opt'>-i <replaceable>track timeout</replaceable></arg>
       <group>
 	<replaceable>server</replaceable>
 	  <group>
@@ -208,7 +188,10 @@ address, collecting data from attached serial device 5.</para></listitem>
 the separate manual pages for
 <citerefentry><refentrytitle>gpspipe</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 and
-<citerefentry><refentrytitle>gpsmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>.</para>
+<citerefentry><refentrytitle>gpsmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+and
+<citerefentry><refentrytitle>gpxlogger</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+.</para>
 
 <refsect2><title>xgps</title>
 
@@ -278,48 +261,7 @@ assumes a 4x40 LCD and writes data formatted to fit that size screen.
 Also displays 4- or 6-character Maidenhead grid square output.</para>
 
 </refsect2>
-<refsect2><title>gpxlogger</title>
 
-<para>This program collects fixes from <application>gpsd</application>
-and logs them to standard output in GPX, an XML profile for track
-logging.</para>
-
-<para>The output may be composed of multiple tracks. A new track is
-created if there's no fix written for an interval specified by the
-<option>-i</option> and defaulting to 5 seconds.</para>
-
-<para>The <option>-d</option> option tells
-<application>gpxlogger</application> to run as a daemon in background.
-It requires the <option>-f</option> option, which directs output to a
-specified logfile.</para>
-
-<para>The <option>-m</option> option sets a minimum move distance in
-meters (it may include a fractional decimal part).  Motions shorter
-than this will not be logged.</para>
-
-<para>The <option>-r</option> option tells
-<application>gpxlogger</application> to retry when GPSd loses the fix.
-Without <option>-r</option>, <application>gpxlogger</application>
-would quit in this case.</para>
-
-<para><application>gpxlogger</application> can use any of the
-export methods that <application>gpsd</application> supports.
-For a list of these methods, use the <option>-l</option>.
-To force the method, give the <option>-e</option> one of
-the colon-terminated method names from the <option>-l</option>
-table.</para>
-<!-- ipcrm -M 0x47505344 will remove a stuck segment -->
-
-<para>If D-Bus support is available on the host, GPSD is configured to
-use it, and <command>-e dbus</command> is specified, this program
-listens to DBUS broadcasts from
-<application>gpsd</application> via org.gpsd.fix.</para>
-
-<para>With <command>-e sockets</command>, or if sockets is the method
-defaulted to, you may give a server-port-device specification as
-arguments.</para>
-
-</refsect2>
 <refsect2><title>gegps</title>
 
 <para>This program collects fixes from <application>gpsd</application>
@@ -350,6 +292,7 @@ after that.</para>
 <citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 <citerefentry><refentrytitle>gpspipe</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 <citerefentry><refentrytitle>gpsmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+<citerefentry><refentrytitle>gpxlogger</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </refsect1>
 
@@ -357,11 +300,8 @@ after that.</para>
 
 <para>
 Remco Treffcorn, Derrick Brashear, Russ Nelson &amp; Eric S. Raymond,
-Jeff Francis (cgps). Amaury Jacquot <email>sxpert@sxpert.org</email>
-&amp; Petter Reinholdtsen <email>pere@hungry.com</email> (gpxlogger).
-Chris Kuethe <email>chris.kuethe@gmail.com</email> (gpxlogger), Chen
-Wei <email>weichen302@aol.com</email> (gegps &amp; xgpsspeed), Robin Wittler
-<email>real@the-real.org</email> (xgpsspeed).
+Jeff Francis (cgps), Chen Wei <email>weichen302@aol.com</email> (gegps &amp; xgpsspeed),
+Robin Wittler <email>real@the-real.org</email> (xgpsspeed).
 </para>
 
 <para>This manual page by Eric S. Raymond <email>esr@thyrsus.com</email></para>
