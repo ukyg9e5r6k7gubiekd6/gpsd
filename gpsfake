@@ -89,7 +89,8 @@ def fakehook(linenumber, fakegps):
         if progress:
             baton.twirl('*\b')
         elif not singleshot:
-            sys.stderr.write("gpsfake: log cycle of %s begins.\n" % fakegps.testload.name)
+            if not quiet:
+                sys.stderr.write("gpsfake: log cycle of %s begins.\n" % fakegps.testload.name)
     time.sleep(cycle)
     if linedump and fakegps.testload.legend:
         ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
