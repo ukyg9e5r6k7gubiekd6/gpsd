@@ -175,8 +175,10 @@ if __name__ == '__main__':
             verbose += 1
         elif switch == '-h':
             sys.stderr.write("usage: gpsfake"
-                     " [-1] [-h] [-i] [-l] [-g] [-m monitor] [-D debug] [-n] [-o options] [-p]\n"
-                     "\t[-P port] [-r initcmd] [-t] [-T] [-v] [-x] [-s speed] [-S] [-c cycle] [-b] logfile...\n")
+                             " [-1] [-h] [-i] [-l] [-g] [-q] [-m monitor]"
+                             " [-D debug] [-n] [-o options] [-p]\n"
+                             "\t[-P port] [-r initcmd] [-t] [-T] [-v] [-x]"
+                             " [-s speed] [-S] [-c cycle] [-b] logfile...\n")
             raise SystemExit(0)
 
     try:
