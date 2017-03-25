@@ -446,8 +446,9 @@ class SubprogramInstance(object):
         self.spawncmd = None
         self.process = None
         self.returncode = None
+        self.env = None
 
-    def spawn(self, program, options, background=False, prefix=""):
+    def spawn(self, program, options, background=False, prefix="", env=None):
         "Spawn a subprogram instance."
         spawncmd = None
 
@@ -474,7 +475,10 @@ class SubprogramInstance(object):
         self.spawncmd = [spawncmd] + options.split()
         if prefix:
             self.spawncmd = prefix.split() + self.spawncmd
-        self.process = subprocess.Popen(self.spawncmd)
+        if env:
+            self.env = os.environ.copy()
+            self.env.update(env)
+        self.process = subprocess.Popen(self.spawncmd, env=self.env)
         if not background:
             self.returncode = status = self.process.wait()
             if os.WIFSIGNALED(status) or os.WEXITSTATUS(status):
@@ -523,7 +527,11 @@ class DaemonInstance(SubprogramInstance):
         # anything we can use to implement the FakeGPS.read() method
         opts = (" -b -N -S %s -F %s %s"
                        % (port, self.control_socket, options))
-        super(DaemonInstance, self).spawn('gpsd', opts, background, prefix)
+        # Derive a unique SHM key from the port # to avoid collisions.
+        # Use 'Gp' as the prefix to avoid colliding with 'GPSD'.
+        shmkey = '0x4770%.04X' % port
+        env = {'GPSD_SHM_KEY': shmkey}
+        super(DaemonInstance, self).spawn('gpsd', opts, background, prefix, env)
 
     def wait_ready(self):
         "Wait for the daemon to create the control socket."
