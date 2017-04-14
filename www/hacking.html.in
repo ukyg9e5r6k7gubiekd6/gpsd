@@ -182,6 +182,19 @@ hardware for testing, our focus will probably remain on inexpensive
 and readily-available consumer-grade GPS hardware, especially GPS
 mice.</p>
 
+<p>The <code>gpsd</code> daemon and most <code>gpsd</code> tools are for
+Unix like systems since this is where they are developed and tested.</p>
+
+<p>Remote access over sockets via the C library and the simple command
+line tools of <code>gpspipe</code> and <code>gpxlogger</code> are
+supported on Windows platforms, albeit they currently have some minor
+limitations compared to the Unix versions:</p>
+<ol>
+  <li><code>gpspipe</code> and <code>gpxlogger</code> can not be run as
+    daemons on Windows.</li>
+  <li><code>gpspipe</code> can not write to the serial port on Windows.</li>
+</ol>
+
 <h2 id="service">The time and location service</h2>
 
 <p>The primary aim of the GPSD project is to support a simple
