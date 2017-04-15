@@ -74,6 +74,7 @@ file in the source distribution.</p>
   <li><a href="#goals">Goals and philosophy of the project</a></li>
   <li><a href="#audience">Audience and supported hardware</a>
     <ol>
+      <li><a href="#windows">Windows support (limited)</a></li>
       <li><a href="#service">The time and location service</a></li>
       <li><a href="#tuning">The testing and tuning tools</a></li>
       <li><a href="#monitoring">The GPS/GNSS monitoring tools</a></li>
@@ -182,17 +183,19 @@ hardware for testing, our focus will probably remain on inexpensive
 and readily-available consumer-grade GPS hardware, especially GPS
 mice.</p>
 
-<p>The <code>gpsd</code> daemon and most <code>gpsd</code> tools are for
-Unix like systems since this is where they are developed and tested.</p>
+<h2 id="windows">Windows support (limited)</h2>
 
-<p>Remote access over sockets via the C library and the simple command
-line tools of <code>gpspipe</code> and <code>gpxlogger</code> are
-supported on Windows platforms, albeit they currently have some minor
+<p>The <code>gpsd</code> daemon and most <code>gpsd</code> tools are for
+Unix-like systems since this is where they are developed and tested.</p>
+
+<p>Remote access over sockets via the C library and the simple command-line
+tools <code>gpspipe</code> and <code>gpxlogger</code> are
+supported on Windows platforms, although they currently have some minor
 limitations compared to the Unix versions:</p>
 <ol>
   <li><code>gpspipe</code> and <code>gpxlogger</code> can not be run as
     daemons on Windows.</li>
-  <li><code>gpspipe</code> can not write to the serial port on Windows.</li>
+  <li><code>gpspipe</code> cannot write to the serial port on Windows.</li>
 </ol>
 
 <h2 id="service">The time and location service</h2>
@@ -333,7 +336,7 @@ long-term maintenance burden.</p>
 
 <p>Because Python is not used at runtime by the daemon, Python
 version-skew problem (such as the 2 to 3 transition) essentally
-never have any affect on or reveal bugs in the C code.</p>
+never have any effect on or reveal bugs in the C code.</p>
 
 <p>A significant part of the reason is that in GPSD-world the notion
 of "target Python" is not actually meaningful for anything but a
