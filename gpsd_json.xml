@@ -574,7 +574,7 @@ may be reported or not depending on the specific device type.</para>
 </row>
 <row>
 	<entry>time</entry>
-	<entry>Yes</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Seconds since the Unix epoch, UTC. May have a
 	fractional part of up to .001sec precision.</entry>
@@ -701,7 +701,7 @@ field points downward (into the Earth).</entry>
         <entry>Water depth in meters.</entry>
 </row>
 <row>
-	<entry>temperature</entry>
+	<entry>temp</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Temperature at sensor, degrees centigrade.</entry>
