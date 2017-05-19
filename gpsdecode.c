@@ -17,8 +17,9 @@
 static int verbose = 0;
 static bool scaled = true;
 static bool json = true;
+#define MAX_TYPES 32
 static unsigned int ntypes = 0;
-static unsigned int typelist[32];
+static unsigned int typelist[MAX_TYPES];
 
 /**************************************************************************
  *
@@ -618,6 +619,7 @@ static void encode(FILE *fpin, FILE *fpout)
 int main(int argc, char **argv)
 {
     int c;
+    char *next;
     enum
     { doencode, dodecode } mode = dodecode;
 
@@ -640,15 +642,15 @@ int main(int argc, char **argv)
 	    break;
 
 	case 't':
-	    /*@-nullpass@*/
-	    typelist[ntypes++] = (unsigned int)atoi(strtok(optarg, ","));
-	    for(;;) {
-		char *next = strtok(NULL, ",");
-		if (next == NULL)
-		    break;
-		typelist[ntypes++] = (unsigned int)atoi(next);
+            next = strtok(optarg, ",");
+	    for(ntypes=0; next != NULL && ntypes < MAX_TYPES; ntypes++) {
+	    	typelist[ntypes] = (unsigned int)atoi(next);
+                next = strtok(NULL, ",");
 	    }
-	    /*@+nullpass@*/
+            if(next != NULL) {
+              (void)fprintf(stderr, "gpsdecode: error: too many types specified\n");
+              exit(EXIT_FAILURE);
+            }
 	    break;
 
 	case 'u':
