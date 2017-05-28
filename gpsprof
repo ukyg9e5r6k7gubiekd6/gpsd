@@ -190,9 +190,11 @@ class spaceplot(plotter):
 
     def sample(self):
         # Watch out for the NaN value from gps.py.
-        self.fixes.append((self.session.fix.latitude,
-                           self.session.fix.longitude,
-                           self.session.fix.altitude))
+        if (self.session.valid &
+            (gps.ONLINE_SET | gps.PACKET_SET | gps.LATLON_SET)):
+            self.fixes.append((self.session.fix.latitude,
+                               self.session.fix.longitude,
+                               self.session.fix.altitude))
         return True
 
     def header(self):
