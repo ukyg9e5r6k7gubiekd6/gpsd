@@ -53,7 +53,8 @@ void gpsd_log(const struct gpsd_errout_t *errout UNUSED,
     if (!args)
 	return;
 
-    PyObject_Call(report_callback, args, NULL);
+    PyObject *result = PyObject_Call(report_callback, args, NULL);
+    Py_XDECREF(result);
     Py_DECREF(args);
 }
 
