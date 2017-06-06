@@ -153,6 +153,42 @@ static void register_fractional_time(const char *tag, const char *fld,
  * NMEA sentence handling begins here
  *
  **************************************************************************/
+static gps_mask_t processVTG(int count UNUSED,
+                             char *field[],
+                             struct gps_device_t *session)
+//     $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K
+//
+// where:
+//         1,2     054.7,T      True track made good (degrees)
+//         3,4     034.4,M      Magnetic track made good
+//         5,6     005.5,N      Ground speed, knots
+//         7,8     010.2,K      Ground speed, Kilometers per hour
+//
+// see also:
+//     http://www.catb.org/gpsd/NMEA.html#_vtg_track_made_good_and_ground_speed
+{
+    if( (field[1][0] == '\0') || (field[5][0] == '\0')){
+        return 0;
+    }
+
+    gps_mask_t mask = 0;
+
+    // set true track
+    session->newdata.track = safe_atof(field[1]);
+    mask |= TRACK_SET;
+
+    // set magnetic variation
+    if (field[3][0] != '\0'){  // ignore empty fields
+        session->newdata.magnetic_track = safe_atof(field[3]);
+        mask |= MAGNETIC_TRACK_SET;
+    }
+
+    session->newdata.speed = safe_atof(field[5]) * KNOTS_TO_MPS;
+    mask |= SPEED_SET;
+
+    gpsd_log(&session->context->errout, LOG_DATA, "VTG: course(T)=%.2f, course(M)=%.2f, speed=%.2f", session->newdata.track, session->newdata.magnetic_track, session->newdata.speed);
+    return mask;
+}
 
 static gps_mask_t processRMC(int count, char *field[],
 			       struct gps_device_t *session)
@@ -1794,7 +1830,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"RMC", 8,  false, processRMC},
 	{"TXT", 5,  false, processTXT},
 	{"ZDA", 4,  false, processZDA},
-	{"VTG", 0,  false, NULL},	/* ignore Velocity Track made Good */
+	{"VTG", 5,  false, processVTG},
     };
 
     int count;
