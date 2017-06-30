@@ -33,6 +33,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
       <arg choice='opt'>-n </arg>
       <arg choice='opt'>-N </arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-r </arg>
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-V </arg>
@@ -201,6 +202,14 @@ This switch is mainly useful for debugging.</para>
 <varlistentry>
 <term>-h</term>
 <listitem><para>Display help message and terminate.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-r</term>
+<listitem><para>Use GPS time even with no current fix.  Some GPS's have
+battery powered Real Time Clocks (RTC's) built in, makeing them a valid time
+source even before a fix is acquired.  This can be useful on a Raspberry Pi,
+or other device that has no battery powered RTC, and thus has no valid
+time at startup.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-P</term>

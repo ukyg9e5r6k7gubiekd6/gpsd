@@ -158,6 +158,7 @@ static bool nowait = false;
 #else /* FORCE_NOWAIT */
 #define NOWAIT true
 #endif /* FORCE_NOWAIT */
+static bool batteryRTC = false;
 static jmp_buf restartbuf;
 static struct gps_context_t context;
 #if defined(SYSTEMD_ENABLE)
@@ -1548,8 +1549,9 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
      */
     if ((changed & TIME_SET) == 0) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: No time this packet\n");
-    } else if ( NTP_MIN_FIXES > device->fixcnt ) {
+    } else if ( 0 >= device->fixcnt && !batteryRTC ) {
         /* many GPS spew random times until a valid GPS fix */
+        /* allow override with -r optin */
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: no fix\n");
     } else if (isnan(device->newdata.time)) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: bad new time\n");
@@ -1872,7 +1874,7 @@ int main(int argc, char *argv[])
 #endif /* PPS_ENABLE && SOCKET_EXPORT_ENABLE */
 #endif /* CONTROL_SOCKET_ENABLE */
 
-    while ((option = getopt(argc, argv, "F:D:S:bGhlNnP:V")) != -1) {
+    while ((option = getopt(argc, argv, "F:D:S:bGhlNnrP:V")) != -1) {
 	switch (option) {
 	case 'D':
 	    context.errout.debug = (int)strtol(optarg, 0, 0);
@@ -1908,6 +1910,9 @@ int main(int argc, char *argv[])
 #ifndef FORCE_NOWAIT
 	    nowait = true;
 #endif /* FORCE_NOWAIT */
+	    break;
+	case 'r':
+	    batteryRTC = true;
 	    break;
 	case 'P':
 	    pid_file = optarg;
