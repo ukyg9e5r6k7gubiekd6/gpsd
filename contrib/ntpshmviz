@@ -97,13 +97,13 @@ if __name__ == "__main__":
             print ("Version 2.0")
             sys.exit()
 
-        if (sys.argv[1] == "-H" or sys.argv[1] == "--help"):
+        if (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
             print ("Usage: <input stream> | ntpshmviz")
             print ("Example: cat SAMPLES | ntpshmviz")
             print ("")
             print ("Options:")
+            print ("\t-h: help message")
             print ("\t-V: version information")
-            print ("\t-H: help message")
             print ("")
             print ("Report ntpshmviz bugs to Keane Wolter, daemoneye2@gmail.com")
             print ("gpsd homepage: www.catb.org/gpsd/")
