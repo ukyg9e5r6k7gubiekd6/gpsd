@@ -1066,7 +1066,8 @@ if not env["shared"]:
         return env.StaticLibrary(target,
                                  [env.StaticObject(s) for s in sources],
                                  parse_flags=parse_flags)
-    LibraryInstall = lambda env, libdir, sources, version: env.Install(libdir, sources)
+    LibraryInstall = lambda env, libdir, sources, version: \
+        env.Install(libdir, sources)
 else:
     def Library(env, target, sources, version, parse_flags=[]):
         # Note: We have a possibility of getting either Object or file
@@ -1083,8 +1084,7 @@ else:
                                  parse_flags=parse_flags,
                                  SHLIBVERSION=version)
     LibraryInstall = lambda env, libdir, sources, version: \
-                     env.InstallVersionedLib(libdir, sources,
-                                             SHLIBVERSION=version)
+        env.InstallVersionedLib(libdir, sources, SHLIBVERSION=version)
 
 compiled_gpslib = Library(env=env,
                           target="gps",
@@ -1094,16 +1094,19 @@ compiled_gpslib = Library(env=env,
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 static_gpslib = env.StaticLibrary("gps_static",
-                                  [env.StaticObject(s) for s in libgps_sources],
-                                  rtlibs)
+                                  [env.StaticObject(s)
+                                   for s in libgps_sources], rtlibs)
 
-static_gpsdlib = env.StaticLibrary(target="gpsd",
-                           source=[env.StaticObject(s, parse_flags=usbflags + bluezflags) for s in libgpsd_sources],
-                           parse_flags=usbflags + bluezflags)
+static_gpsdlib = env.StaticLibrary(
+    target="gpsd",
+    source=[env.StaticObject(s, parse_flags=usbflags + bluezflags)
+            for s in libgpsd_sources],
+    parse_flags=usbflags + bluezflags)
 
 libraries = [compiled_gpslib]
 
-# Only attempt to create the qt library if we have shared turned on otherwise we have a mismash of objects in library
+# Only attempt to create the qt library if we have shared turned on
+# otherwise we have a mismash of objects in library
 if qt_env:
     qtobjects = []
     qt_flags = qt_env['CFLAGS']
@@ -1115,7 +1118,8 @@ if qt_env:
     # infamous "Two environments with different actions were specified
     # for the same target" error.
     for src in libgps_sources:
-        if src not in ('ais_json.c', 'json.c', 'libgps_json.c', 'rtcm2_json.c', 'rtcm3_json.c', 'shared_json.c'):
+        if src not in ('ais_json.c', 'json.c', 'libgps_json.c',
+                       'rtcm2_json.c', 'rtcm3_json.c', 'shared_json.c'):
             compile_with = qt_env['CXX']
             compile_flags = qt_flags
         else:
@@ -1152,7 +1156,7 @@ gpsmon_sources = [
     'monitor_garmin.c',
     ]
 
-## Production programs
+# Production programs
 
 gpsd = env.Program('gpsd', gpsd_sources,
                    LIBS=['gpsd', 'gps_static'],
@@ -1187,8 +1191,7 @@ cgps = env.Program('cgps', ['cgps.c'],
 ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'],
                         LIBS=['gpsd', 'gps_static'],
                         parse_flags=gpsflags)
-ppscheck = env.Program('ppscheck', ['ppscheck.c'],
-                        parse_flags=gpsflags)
+ppscheck = env.Program('ppscheck', ['ppscheck.c'], parse_flags=gpsflags)
 
 bin_binaries = []
 sbin_binaries = []
@@ -1200,7 +1203,7 @@ if env["gpsdclients"]:
 if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
     bin_binaries += [ntpshmmon]
     if tiocmiwait:
-	bin_binaries += [ppscheck]
+        bin_binaries += [ppscheck]
 if env["ncurses"]:
     if env["gpsdclients"]:
         bin_binaries += [cgps]
@@ -1223,8 +1226,8 @@ test_packet = env.Program('test_packet', ['test_packet.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
 test_timespec = env.Program('test_timespec', ['test_timespec.c'],
-                          LIBS=['gpsd', 'gps_static'],
-                          parse_flags=gpsdflags)
+                            LIBS=['gpsd', 'gps_static'],
+                            parse_flags=gpsdflags)
 test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
 # test_libgps for glibc older than 2.17
 test_libgps = env.Program('test_libgps', ['test_libgps.c'],
@@ -1243,7 +1246,8 @@ else:
 test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
                          LIBS=['gps_static'],
                          parse_flags=["-lm"] + rtlibs + dbusflags)
-testprogs = [test_bits, test_float, test_geoid, test_libgps, test_matrix, test_mktime, test_packet, test_timespec, test_trig]
+testprogs = [test_bits, test_float, test_geoid, test_libgps, test_matrix,
+             test_mktime, test_packet, test_timespec, test_trig]
 if env['socket_export']:
     testprogs.append(test_json)
 if env["libgpsmm"]:
@@ -1271,7 +1275,8 @@ else:
     }
 
     python_env = env.Clone()
-    # FIXME: build of python wrappers doesn't pickup flags set for coveraging, manually add them here
+    # FIXME: build of python wrappers doesn't pickup flags set for coveraging,
+    # manually add them here
     if env['coveraging']:
         python_config['BASECFLAGS'] += ' -coverage'
         python_config['LDFLAGS'] += ' -coverage'
@@ -1339,7 +1344,9 @@ Home-page: %s
 Author: the GPSD project
 Author-email: %s
 License: BSD
-Description: The gpsd service daemon can monitor one or more GPS devices connected to a host computer, making all data on the location and movements of the sensors available to be queried on TCP port 2947.
+Description: The gpsd service daemon can monitor one or more GPS devices \
+connected to a host computer, making all data on the location and movements \
+of the sensors available to be queried on TCP port 2947.
 Platform: UNKNOWN
 """ % (gpsd_version, website, devmail)
     python_egg_info = python_env.Textfile(target="gps-%s.egg-info"
@@ -1973,9 +1980,7 @@ Utility('unpack-makeregress', [test_libgps], [
 if not env['socket_export']:
     json_regress = None
 else:
-    json_regress = Utility('json-regress', [test_json], [
-        '$SRCDIR/test_json'
-        ])
+    json_regress = Utility('json-regress', [test_json], ['$SRCDIR/test_json'])
 
 # Unit-test timespec math
 timespec_regress = Utility('timespec-regress', [test_timespec], [
