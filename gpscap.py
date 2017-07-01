@@ -207,5 +207,5 @@ if __name__ == "__main__":
         d = GPSDictionary()
         d.HTMLDump(sys.stdout)
     except configparser.Error as e:
-        sys.stderr.write(sys.argv[0]+":%s\n" % e)
+        sys.stderr.write(sys.argv[0] + ":%s\n" % e)
         raise SystemExit(1)
