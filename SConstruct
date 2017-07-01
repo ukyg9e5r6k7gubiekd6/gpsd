@@ -21,15 +21,16 @@
 
 # Unfinished items:
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
-# * Coveraging mode: gcc "-coverage" flag requires a hack for building the python bindings
+# * Coveraging mode: gcc "-coverage" flag requires a hack
+#   for building the python bindings
 
 # Release identification begins here
 gpsd_version = "3.17~dev"
 
 # client library version
-libgps_version_current   = 23
-libgps_version_revision  = 0
-libgps_version_age       = 0
+libgps_version_current = 23
+libgps_version_revision = 0
+libgps_version_age = 0
 
 # Release identification ends here
 
@@ -37,28 +38,28 @@ libgps_version_age       = 0
 # Each variable foo has a corresponding @FOO@ expanded in .in files.
 # There are no project-dependent URLs or references to the hosting site
 # anywhere else in the distribution; preserve this property!
-sitename   = "Savannah"
+sitename  = "Savannah"
 sitesearch = "catb.org"
-website    = "http://catb.org/gpsd"
-mainpage   = "https://savannah.nongnu.org/projects/gpsd/"
-webupload  = "login.ibiblio.org:/public/html/catb/gpsd"
-cgiupload  = "root@thyrsus.com:/var/www/cgi-bin/"
-scpupload  = "dl.sv.nongnu.org:/releases/gpsd/"
-mailman    = "https://lists.nongnu.org/mailman/listinfo/"
-admin      = "https://savannah.nongnu.org/project/admin/?group=gpsd"
-download   = "http://download-mirror.savannah.gnu.org/releases/gpsd/"
+website = "http://catb.org/gpsd"
+mainpage = "https://savannah.nongnu.org/projects/gpsd/"
+webupload = "login.ibiblio.org:/public/html/catb/gpsd"
+cgiupload = "root@thyrsus.com:/var/www/cgi-bin/"
+scpupload = "dl.sv.nongnu.org:/releases/gpsd/"
+mailman = "https://lists.nongnu.org/mailman/listinfo/"
+admin = "https://savannah.nongnu.org/project/admin/?group=gpsd"
+download = "http://download-mirror.savannah.gnu.org/releases/gpsd/"
 bugtracker = "https://savannah.nongnu.org/bugs/?group=gpsd"
 browserepo = "http://git.savannah.gnu.org/cgit/gpsd.git"
-clonerepo  = "https://savannah.nongnu.org/git/?group=gpsd"
-gitrepo    = "git://git.savannah.nongnu.org/gpsd.git"
-webform    = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
+clonerepo = "https://savannah.nongnu.org/git/?group=gpsd"
+gitrepo = "git://git.savannah.nongnu.org/gpsd.git"
+webform = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
 formserver = "www@thyrsus.com"
-devmail    = "gpsd-dev@lists.nongnu.org"
-usermail   = "gpsd-users@lists.nongnu.org"
-annmail    = "gpsd-announce@nongnu.org"
-ircchan    = "irc://chat.freenode.net/#gpsd"
-tiplink    = "<a href='https://www.patreon.com/esr'>leace a remittance at Patreon</a>"
-tipwidget  = '<p><a href="https://www.patreon.com/esr">Donate here to support continuing development.</a></p>'
+devmail = "gpsd-dev@lists.nongnu.org"
+usermail = "gpsd-users@lists.nongnu.org"
+annmail = "gpsd-announce@nongnu.org"
+ircchan = "irc://chat.freenode.net/#gpsd"
+tiplink = "<a href='https://www.patreon.com/esr'>leace a remittance at Patreon</a>"
+tipwidget = '<p><a href="https://www.patreon.com/esr">Donate here to support continuing development.</a></p>'
 # Hosting information ends here
 
 EnsureSConsVersion(2, 3, 0)
@@ -277,7 +278,9 @@ if ARGUMENTS.get('timeservice'):
 		   "socket_export",
 		   )
     for (name, default, help) in boolopts:
-        if default is True and not ARGUMENTS.get(name) and not name in timerelated:
+        if ((default is True
+             and not ARGUMENTS.get(name)
+             and name not in timerelated)):
             env[name] = False
 
 # NTPSHM requires NTP
@@ -286,18 +289,16 @@ if env['ntpshm']:
 
 # Many drivers require NMEA0183 - in case we select timeserver/minimal
 # followed by one of these.
-for driver in (
-    'ashtech',
-    'earthmate',
-    'fury',
-    'fv18',
-    'gpsclock',
-    'mtk3301',
-    'oceanserver',
-    'skytraq',
-    'tnt',
-    'tripmate',
-    ):
+for driver in ('ashtech',
+               'earthmate',
+               'fury',
+               'fv18',
+               'gpsclock',
+               'mtk3301',
+               'oceanserver',
+               'skytraq',
+               'tnt',
+               'tripmate', ):
     if env[driver]:
         env['nmea0183'] = True
         break
@@ -317,7 +318,8 @@ env['SC_PYTHON'] = sys.executable  # Path to SCons Python
 # settings.
 env['STRIP'] = "strip"
 env['PKG_CONFIG'] = "pkg-config"
-for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS", "LINKFLAGS", "STRIP", "PKG_CONFIG", "LD", "TAR"]:
+for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS",
+          "LINKFLAGS", "STRIP", "PKG_CONFIG", "LD", "TAR"]:
     if i in os.environ:
         j = i
         if i == "LD":
@@ -350,11 +352,12 @@ else:
 if env.GetOption("silent"):
     env['REGRESSOPTS'] += " -Q"
 
+
 def announce(msg):
     if not env.GetOption("silent"):
         print msg
 
-# DESTDIR environment variable means user wants to prefix the installation root.
+# DESTDIR environment variable means user prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
 
@@ -369,7 +372,8 @@ def installdir(dir, add_destdir=True):
 
 # Honor the specified installation prefix in link paths.
 if env["sysroot"]:
-    env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir', add_destdir=False)])
+    env.Prepend(LIBPATH=[env["sysroot"] + installdir('libdir',
+                add_destdir=False)])
 
 # Give deheader a way to set compiler flags
 if 'MORECFLAGS' in os.environ:
