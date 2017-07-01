@@ -104,7 +104,7 @@ if __name__ == '__main__':
                 raise SystemExit(1)
             if stopbits:
                 cflag &= ~termios.CSIZE
-                cflag |= (termios.CS8, termios.CS7)[stopbits-1]
+                cflag |= (termios.CS8, termios.CS7)[stopbits - 1]
             if parity:
                 if parity == 'N':
                     iflag &= ~termios.PARENB
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                         break
                     if typeflag:
                         sys.stdout.write(repr(ptype) + " (" + repr(length)
-                                         + "@" + repr(counter-length) + "): "
+                                         + "@" + repr(counter - length) + "): "
                                          + hexdump(packet))
                         sys.stdout.write("\n")
                     else:
