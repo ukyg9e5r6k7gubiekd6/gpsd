@@ -132,8 +132,8 @@ const char *gps_maskdump(gps_mask_t set)
         gps_mask_t      mask;
         const char      *name;
     } *sp, names[] = {""" % (maxout + 3,))
-            for (((flag, value)
-                  in clientside.primitive_masks + daemonside.primitive_masks)):
+            masks = clientside.primitive_masks + daemonside.primitive_masks
+            for (flag, value) in masks:
                 stem = flag
                 if stem.endswith("_SET"):
                     stem = stem[:-4]
