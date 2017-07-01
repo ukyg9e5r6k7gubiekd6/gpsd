@@ -11,11 +11,13 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import sys, gps.fake
+import sys
+import gps.fake
 
 debuglevel = 1
 
-invocation = "valgrind --tool=memcheck --gen-suppressions=yes --leak-check=yes --suppressions=valgrind-suppressions"
+invocation = "valgrind --tool=memcheck --gen-suppressions=yes " \
+             "--leak-check=yes --suppressions=valgrind-suppressions"
 test = gps.fake.TestSession(prefix=invocation, options="-D %d" % debuglevel)
 test.progress = sys.stderr.write
 
