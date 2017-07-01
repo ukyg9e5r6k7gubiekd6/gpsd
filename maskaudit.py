@@ -38,18 +38,22 @@ class SourceExtractor(object):
         self.masks = []
         self.primitive_masks = []
         for line in open(self.sourcefile):
-            if line.startswith("#define") and ("_SET" in line or "_IS" in line):
+            if ((line.startswith("#define")
+                 and ("_SET" in line or "_IS" in line))):
                 fields = line.split()
                 self.masks.append((fields[1], fields[2]))
-                if fields[2].startswith("(1llu<<") or fields[2].startswith("INTERNAL_SET"):
+                if ((fields[2].startswith("(1llu<<")
+                     or fields[2].startswith("INTERNAL_SET"))):
                     self.primitive_masks.append((fields[1], fields[2]))
 
     def in_library(self, flag):
-        (status, _output) = getstatusoutput("grep '%s' libgps_core.c libgps_json.c gpsctl.c" % flag)
+        (status, _output) = getstatusoutput(
+            "grep '%s' libgps_core.c libgps_json.c gpsctl.c" % flag)
         return status == 0
 
     def in_daemon(self, flag):
-        (status, _output) = getstatusoutput("grep '%s' %s" % (flag, " ".join(self.daemonfiles)))
+        (status, _output) = getstatusoutput(
+            "grep '%s' %s" % (flag, " ".join(self.daemonfiles)))
         return status == 0
 
     def relevant(self, flag):
@@ -128,7 +132,8 @@ const char *gps_maskdump(gps_mask_t set)
         gps_mask_t      mask;
         const char      *name;
     } *sp, names[] = {""" % (maxout + 3,))
-            for (flag, value) in clientside.primitive_masks + daemonside.primitive_masks:
+            for (((flag, value)
+                  in clientside.primitive_masks + daemonside.primitive_masks)):
                 stem = flag
                 if stem.endswith("_SET"):
                     stem = stem[:-4]
