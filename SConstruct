@@ -168,7 +168,7 @@ boolopts = (
     # Daemon options
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
-    ("nofloats",      False, "float ops are expensive, suppress error estimates"),
+    ("nofloats", False, "float ops are expensive, suppress error estimates"),
     ("squelch",       False, "squelch gpsd_log/gpsd_hexdump to save cpu"),
     # Build control
     ("gpsd",          True,  "gpsd itself"),
@@ -182,7 +182,7 @@ boolopts = (
     ("nostrip",       False, "don't symbol-strip binaries at link time"),
     ("manbuild",      True,  "build help in man and HTML formats"),
     ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
-    ("minimal",       False, "turn off every option not set on the command line"),
+    ("minimal", False, "turn off every option not set on the command line"),
     ("timeservice",   False, "time-service configuration"),
     ("magic_hat", sys.platform.startswith('linux'),
      "special Linux PPS hack for Raspberry Pi et al"),
@@ -200,20 +200,19 @@ else:
     def_group = "dialout"
 
 nonboolopts = (
-    ("gpsd_user",           "nobody",      "privilege revocation user",),
-    ("gpsd_group",          def_group,     "privilege revocation group"),
-    ("prefix",              "/usr/local",  "installation directory prefix"),
-    ("target_python",       "python",      "target Python version as command"),
-    ("python_libdir",       "",            "Python module directory prefix"),
-    ("max_clients",         '64',          "maximum allowed clients"),
-    ("max_devices",         '4',           "maximum allowed devices"),
-    ("fixed_port_speed",    0,             "fixed serial port speed"),
-    ("fixed_stop_bits",     0,             "fixed serial port stop bits"),
-    ("target",              "",            "cross-development target"),
-    ("sysroot",             "",            "cross-development system root"),
-    ("qt_versioned",        "",            "version for versioned Qt"),
-    ("python_coverage",     "coverage run",
-                                           "coverage command for Python progs"),
+    ("gpsd_user",        "nobody",      "privilege revocation user",),
+    ("gpsd_group",       def_group,     "privilege revocation group"),
+    ("prefix",           "/usr/local",  "installation directory prefix"),
+    ("target_python",    "python",      "target Python version as command"),
+    ("python_libdir",    "",            "Python module directory prefix"),
+    ("max_clients",      '64',          "maximum allowed clients"),
+    ("max_devices",      '4',           "maximum allowed devices"),
+    ("fixed_port_speed", 0,             "fixed serial port speed"),
+    ("fixed_stop_bits",  0,             "fixed serial port stop bits"),
+    ("target",           "",            "cross-development target"),
+    ("sysroot",          "",            "cross-development system root"),
+    ("qt_versioned",     "",            "version for versioned Qt"),
+    ("python_coverage",  "coverage run", "coverage command for Python progs"),
     )
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
@@ -236,15 +235,17 @@ for (name, default, help) in pathopts:
 # Environment creation
 #
 import_env = (
-    "MACOSX_DEPLOYMENT_TARGET",  # Required by MacOSX 10.4 (and probably earlier)
     "DISPLAY",         # Required for dia to run under scons
     "GROUPS",          # Required by gpg
     "HOME",            # Required by gpg
     "LOGNAME",         # LOGNAME is required for the flocktest production.
+    "MACOSX_DEPLOYMENT_TARGET",  # Required by MacOSX 10.4 and probably earlier
     'PATH',            # Required for ccache and Coverity scan-build
+    # Pass more environment variables to pkg-config (required for crossbuilds)
+    'PKG_CONFIG_LIBDIR',
     'PKG_CONFIG_PATH',  # Set .pc file directory in a crossbuild
-    'PKG_CONFIG_SYSROOT_DIR',  # Pass more environment variables to pkg-config (required for crossbuilds)
-    'PKG_CONFIG_LIBDIR',      # Pass more environment variables to pkg-config (required for crossbuilds)
+    # Pass more environment variables to pkg-config (required for crossbuilds)
+    'PKG_CONFIG_SYSROOT_DIR',
     'STAGING_DIR',     # Required by the OpenWRT and CeroWrt builds.
     'STAGING_PREFIX',  # Required by the OpenWRT and CeroWrt builds.
     'WRITE_PAD',       # So we can test WRITE_PAD values on the fly.
@@ -262,21 +263,22 @@ if ARGUMENTS.get('minimal'):
     for (name, default, help) in boolopts:
         # Ensure gpsd and gpsdclients are always enabled unless explicitly
         # turned off.
-        if default is True and not ARGUMENTS.get(name) and not (name is "gpsd" or name is "gpsdclients"):
+        if ((default is True
+             and not ARGUMENTS.get(name)
+             and not (name is "gpsd" or name is "gpsdclients"))):
             env[name] = False
 
 # Time-service build = stripped-down and some diagnostic tools
 if ARGUMENTS.get('timeservice'):
     timerelated = ("gpsd",
-		   "ipv6",
-		   "magic_hat",
-		   "ncurses",
-		   "ntp",
-		   "ntpshm",
-		   "oscillator",
-		   "pps",
-		   "socket_export",
-		   )
+                   "ipv6",
+                   "magic_hat",
+                   "ncurses",
+                   "ntp",
+                   "ntpshm",
+                   "oscillator",
+                   "pps",
+                   "socket_export", )
     for (name, default, help) in boolopts:
         if ((default is True
              and not ARGUMENTS.get(name)
