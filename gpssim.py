@@ -5,8 +5,12 @@ A GPS simulator.
 
 This is proof-of-concept code, not production ready; some functions are stubs.
 """
-import sys, math, random, time
-import gps, gpslib
+import gps
+import gpslib
+import math
+import random
+import sys
+import time
 
 # First, the mathematics.  We simulate a moving viewpoint on the Earth
 # and a satellite with specified orbital elements in the sky.
@@ -17,15 +21,15 @@ class ksv(object):
 
     def __init__(self, time=0, lat=0, lon=0, alt=0, course=0,
                  speed=0, climb=0, h_acc=0, v_acc=0):
-        self.time = time	# Seconds from epoch
-        self.lat = lat		# Decimal degrees
-        self.lon = lon		# Decimal degrees
-        self.alt = alt		# Meters
-        self.course = course	# Degrees from true North
-        self.speed = speed	# Meters per second
-        self.climb = climb	# Meters per second
-        self.h_acc = h_acc	# Meters per second per second
-        self.v_acc = v_acc	# Meters per second per second
+        self.time = time        # Seconds from epoch
+        self.lat = lat          # Decimal degrees
+        self.lon = lon          # Decimal degrees
+        self.alt = alt          # Meters
+        self.course = cour      # Degrees from true North
+        self.speed = speed      # Meters per second
+        self.climb = climb      # Meters per second
+        self.h_acc = h_acc      # Meters per second per second
+        self.v_acc = v_acc      # Meters per second per second
 
     def next(self, quantum=1):
         "State after quantum."
@@ -46,13 +50,15 @@ class ksv(object):
         lat = gps.Deg2Rad(self.lat)
         lon = gps.Deg2Rad(self.lon)
         lat += distance * math.cos(tc)
-        dphi = math.log(math.tan(lat / 2 + math.pi / 4) / math.tan(self.lat / 2 + math.pi / 4))
+        dphi = math.log(math.tan(lat / 2 + math.pi / 4)
+                        / math.tan(self.lat / 2 + math.pi / 4))
         if abs(lat - self.lat) < math.sqrt(1e-15):
             q = math.cos(self.lat)
         else:
             q = (lat - self.lat) / dphi
         dlon = -distance * math.sin(tc) / q
-        self.lon = gps.Rad2Deg(math.mod(lon + dlon + math.pi, 2 * math.pi) - math.pi)
+        self.lon = gps.Rad2Deg(math.mod(lon + dlon + math.pi, 2 * math.pi)
+                               - math.pi)
         self.lat = gps.Rad2Deg(lat)
 
 # Satellite orbital elements are available at:
@@ -138,7 +144,8 @@ class gpssim(object):
         elif command == "status":
             try:
                 code = fields[1]
-                self.status = {"no_fix": 0, "fix": 1, "dgps_fix": 2}[code.lower()]
+                self.status = {"no_fix": 0, "fix": 1, "dgps_fix": 2}[
+                    code.lower()]
             except KeyError:
                 raise gpssimException("invalid status code '%s'" % code,
                                       self.filename, self.lineno)
@@ -183,7 +190,7 @@ class gpssim(object):
 # devices, but the point of the architecture is so that we could simulate
 # others - SirF, Evermore, whatever.
 
-MPS_TO_KNOTS = 1.9438445	# Meters per second to knots
+MPS_TO_KNOTS = 1.9438445      # Meters per second to knots
 
 
 class NMEA(object):
@@ -211,8 +218,7 @@ class NMEA(object):
     def GGA(self, sim):
         "Emit GGA sentence describing the simulation state."
         tm = time.gmtime(sim.ksv.time)
-        gga = \
-            "$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d," % (
+        gga = "$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d," % (
             tm.tm_hour,
             tm.tm_min,
             tm.tm_sec,
@@ -237,16 +243,14 @@ class NMEA(object):
     def GLL(self, sim):
         "Emit GLL sentence describing the simulation state."
         tm = time.gmtime(sim.ksv.time)
-        gll = \
-            "$GPLL,%09.4f,%c,%010.4f,%c,%02d%02d%02d,%s," % (
+        gll = "$GPLL,%09.4f,%c,%010.4f,%c,%02d%02d%02d,%s," % (
             self.degtodm(abs(sim.ksv.lat)), "SN"[sim.ksv.lat > 0],
             self.degtodm(abs(sim.ksv.lon)), "WE"[sim.ksv.lon > 0],
             tm.tm_hour,
             tm.tm_min,
             tm.tm_sec,
-            sim.validity,
-            )
-            # FAA mode indicator could go after these fields.
+            sim.validity, )
+        # FAA mode indicator could go after these fields.
         return self.add_checksum(gll)
 
     def RMC(self, sim):
@@ -254,16 +258,16 @@ class NMEA(object):
         tm = time.gmtime(sim.ksv.time)
         rmc = \
             "GPRMC,%02d%02d%02d,%s,%09.4f,%c,%010.4f,%c,%.1f,%02d%02d%02d," % (
-            tm.tm_hour,
-            tm.tm_min,
-            tm.tm_sec,
-            sim.validity,
-            self.degtodm(abs(sim.ksv.lat)), "SN"[sim.ksv.lat > 0],
-            self.degtodm(abs(sim.ksv.lon)), "WE"[sim.ksv.lon > 0],
-            sim.course * MPS_TO_KNOTS,
-            tm.tm_mday,
-            tm.tm_mon,
-            tm.tm_year % 100)
+                tm.tm_hour,
+                tm.tm_min,
+                tm.tm_sec,
+                sim.validity,
+                self.degtodm(abs(sim.ksv.lat)), "SN"[sim.ksv.lat > 0],
+                self.degtodm(abs(sim.ksv.lon)), "WE"[sim.ksv.lon > 0],
+                sim.course * MPS_TO_KNOTS,
+                tm.tm_mday,
+                tm.tm_mon,
+                tm.tm_year % 100)
         # Magnetic variation goes here
         # rmc += "%3.2f,M," % mag_var
         rmc += ",,"
@@ -279,8 +283,7 @@ class NMEA(object):
             tm.tm_sec,
             tm.tm_mday,
             tm.tm_mon,
-            tm.tm_year,
-            )
+            tm.tm_year, )
         # Local zone description, 00 to +- 13 hours, goes here
         zda += ","
         # Local zone minutes description goes here
@@ -291,7 +294,7 @@ class NMEA(object):
         "Report the simulation state."
         out = ""
         for sentence in self.sentences:
-            if type(sentence) == type(()):
+            if isinstance(sentence, 'tuple'):
                 (interval, sentence) = sentence
                 if self.counter % interval:
                     continue
@@ -305,6 +308,6 @@ if __name__ == "__main__":
     try:
         gpssim(NMEA).filter(sys.stdin, sys.stdout)
     except gpssimException as e:
-        sys.stderr.write(repr(e)+"\n")
+        sys.stderr.write(repr(e) + "\n")
 
 # gpssim.py ends here.
