@@ -1,4 +1,4 @@
-## SCons build recipe for the GPSD project
+# SCons build recipe for the GPSD project
 
 # Important targets:
 #
@@ -266,7 +266,16 @@ if ARGUMENTS.get('minimal'):
 
 # Time-service build = stripped-down and some diagnostic tools
 if ARGUMENTS.get('timeservice'):
-    timerelated = ("gpsd", "socket_export", "ncurses", "ntp", "ntpshm", "pps", "oscillator", "magic_hat")
+    timerelated = ("gpsd",
+		   "ipv6",
+		   "magic_hat",
+		   "ncurses",
+		   "ntp",
+		   "ntpshm",
+		   "oscillator",
+		   "pps",
+		   "socket_export",
+		   )
     for (name, default, help) in boolopts:
         if default is True and not ARGUMENTS.get(name) and not name in timerelated:
             env[name] = False
