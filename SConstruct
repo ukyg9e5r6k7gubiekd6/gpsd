@@ -714,10 +714,13 @@ else:
         confdefs.append("typedef unsigned short int in_port_t;\n")
 
     # SUN_LEN is not defined on Android
-    if not config.CheckDeclaration("SUN_LEN", "#include <sys/un.h>") and not config.CheckDeclaration("SUN_LEN", "#include <linux/un.h>"):
+    if ((not config.CheckDeclaration("SUN_LEN", "#include <sys/un.h>")
+         and not config.CheckDeclaration("SUN_LEN", "#include <linux/un.h>"))):
         announce("SUN_LEN is not system-defined, using local definition")
         confdefs.append("#ifndef SUN_LEN\n")
-        confdefs.append("#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) + strlen((ptr)->sun_path))\n")
+        confdefs.append("#define SUN_LEN(ptr) "
+                        "((size_t) (((struct sockaddr_un *) 0)->sun_path) "
+                        "+ strlen((ptr)->sun_path))\n")
         confdefs.append("#endif /* SUN_LEN */\n")
 
     if config.CheckHeader(["bits/sockaddr.h", "linux/can.h"]):
@@ -730,7 +733,9 @@ else:
 
     # check for C11 or better, and __STDC__NO_ATOMICS__ is not defined
     # before looking for stdatomic.h
-    if config.CheckC11() and not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and config.CheckHeader("stdatomic.h"):
+    if ((config.CheckC11()
+         and not config.CheckCompilerDefines("__STDC_NO_ATOMICS__")
+         and config.CheckHeader("stdatomic.h"))):
         confdefs.append("#define HAVE_STDATOMIC_H 1\n")
     else:
         confdefs.append("/* #undef HAVE_STDATOMIC_H */\n")
@@ -738,13 +743,14 @@ else:
             confdefs.append("#define HAVE_OSATOMIC_H 1\n")
         else:
             confdefs.append("/* #undef HAVE_OSATOMIC_H */\n")
-            announce("No memory barriers - SHM export and time hinting may not be reliable.")
+            announce("No memory barriers - SHM export and time hinting "
+                     "may not be reliable.")
 
     # endian.h is required for rtcm104v2 unless the compiler defines
     # __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
     if config.CheckCompilerDefines("__ORDER_BIG_ENDIAN__") \
-    and config.CheckCompilerDefines("__ORDER_LITTLE_ENDIAN__") \
-    and config.CheckCompilerDefines("__BYTE_ORDER__"):
+       and config.CheckCompilerDefines("__ORDER_LITTLE_ENDIAN__") \
+       and config.CheckCompilerDefines("__BYTE_ORDER__"):
         confdefs.append("#define HAVE_BUILTIN_ENDIANNESS 1\n")
         confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
         confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
@@ -767,18 +773,23 @@ else:
             confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
             confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
             confdefs.append("/* #undef HAVE_MACHINE_ENDIAN_H */\n")
-            announce("You do not have the endian.h header file. RTCM V2 support disabled.")
+            announce("You do not have the endian.h header file. "
+                     "RTCM V2 support disabled.")
             env["rtcm104v2"] = False
 
-    for hdr in ("sys/un", "sys/socket", "sys/select", "netdb", "netinet/in", "netinet/ip", "arpa/inet", "syslog", "termios", "winsock2"):
+    for hdr in ("sys/un", "sys/socket", "sys/select", "netdb", "netinet/in",
+                "netinet/ip", "arpa/inet", "syslog", "termios", "winsock2"):
         if config.CheckHeader(hdr + ".h"):
-            confdefs.append("#define HAVE_%s_H 1\n" % hdr.replace("/","_").upper())
+            confdefs.append("#define HAVE_%s_H 1\n"
+                            % hdr.replace("/", "_").upper())
         else:
-            confdefs.append("/* #undef HAVE_%s_H */\n" % hdr.replace("/","_").upper())
+            confdefs.append("/* #undef HAVE_%s_H */\n"
+                            % hdr.replace("/", "_").upper())
 
     # check function after libraries, because some function require libraries
     # for example clock_gettime() require librt on Linux glibc < 2.17
-    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime", "gmtime_r", "inet_ntop", "fcntl", "fork"):
+    for f in ("daemon", "strlcpy", "strlcat", "clock_gettime", "strptime",
+              "gmtime_r", "inet_ntop", "fcntl", "fork"):
         if config.CheckFunc(f):
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
         else:
@@ -794,7 +805,8 @@ else:
             env["magic_hat"] = False
     tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
     if env["pps"] and not tiocmiwait and not kpps:
-        announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 API is available)")
+        announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 "
+                 "API is available)")
         env["pps"] = False
 
     # Map options to libraries required to support them that might be absent.
