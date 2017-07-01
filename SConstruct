@@ -38,7 +38,7 @@ libgps_version_age = 0
 # Each variable foo has a corresponding @FOO@ expanded in .in files.
 # There are no project-dependent URLs or references to the hosting site
 # anywhere else in the distribution; preserve this property!
-sitename  = "Savannah"
+sitename = "Savannah"
 sitesearch = "catb.org"
 website = "http://catb.org/gpsd"
 mainpage = "https://savannah.nongnu.org/projects/gpsd/"
@@ -58,13 +58,24 @@ devmail = "gpsd-dev@lists.nongnu.org"
 usermail = "gpsd-users@lists.nongnu.org"
 annmail = "gpsd-announce@nongnu.org"
 ircchan = "irc://chat.freenode.net/#gpsd"
-tiplink = "<a href='https://www.patreon.com/esr'>leace a remittance at Patreon</a>"
-tipwidget = '<p><a href="https://www.patreon.com/esr">Donate here to support continuing development.</a></p>'
+tiplink = "<a href='https://www.patreon.com/esr'>" \
+          "leave a remittance at Patreon</a>"
+tipwidget = '<p><a href="https://www.patreon.com/esr">' \
+            'Donate here to support continuing development.</a></p>'
 # Hosting information ends here
 
 EnsureSConsVersion(2, 3, 0)
 
-import copy, os, sys, glob, re, platform, time, subprocess, ast, operator
+import ast
+import copy
+import glob
+import operator
+import os
+import platform
+import re
+import subprocess
+import sys
+import time
 from distutils import sysconfig
 from distutils.util import get_platform
 import SCons
@@ -90,7 +101,7 @@ def _getoutput(cmd, input=None, shell=True, cwd=None, env=None):
 # Spawn replacement that suppresses non-error stderr
 def filtered_spawn(sh, escape, cmd, args, env):
     proc = subprocess.Popen([sh, '-c', ' '.join(args)],
-                            env = env, close_fds=True, stderr=subprocess.PIPE)
+                            env=env, close_fds=True, stderr=subprocess.PIPE)
     _, stderr = proc.communicate()
     if proc.returncode:
         sys.stderr.write(stderr)
