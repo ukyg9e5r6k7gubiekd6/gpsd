@@ -927,14 +927,14 @@ else:
                                                   PYTHON_LIBDIR_CALL,
                                                   brief=cleaning)
         py_config_text = config.GetPythonValue('config vars',
-                                                   PYTHON_SYSCONFIG_IMPORT,
-                                                   PYTHON_CONFIG_CALL,
-                                                   brief=True)
+                                               PYTHON_SYSCONFIG_IMPORT,
+                                               PYTHON_CONFIG_CALL,
+                                               brief=True)
 
 if env['python']:  # May have been turned off by error
     env['PYTHON'] = target_python_path
     env['ENV']['PYTHON'] = target_python_path  # For regress-driver
-    py_config_vars =  ast.literal_eval(py_config_text)
+    py_config_vars = ast.literal_eval(py_config_text)
     py_config_vars = [[] if x is None else x for x in py_config_vars]
     python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
 
@@ -950,14 +950,16 @@ if not (cleaning or helping):
             if not changelatch:
                 announce("Altered configuration variables:")
                 changelatch = True
-            announce("%s = %s (default %s): %s" % (name, env[name], env.subst(default), help))
+            announce("%s = %s (default %s): %s"
+                     % (name, env[name], env.subst(default), help))
     if not changelatch:
         announce("All configuration flags are defaulted.")
 
     # Gentoo systems can have a problem with the Python path
     if os.path.exists("/etc/gentoo-release"):
         announce("This is a Gentoo system.")
-        announce("Adjust your PYTHONPATH to see library directories under /usr/local/lib")
+        announce("Adjust your PYTHONPATH to see library directories "
+                 "under /usr/local/lib")
 
 # Should we build the Qt binding?
 if env["qt"] and env["shared"]:
@@ -991,10 +993,11 @@ if env['coveraging'] and env['python_coverage'] and not (cleaning or helping):
         announce('Python coverage tool not found - disabling Python coverage.')
         env['python_coverage'] = ''  # So we see it in the options
 
-## Two shared libraries provide most of the code for the C programs
+# Two shared libraries provide most of the code for the C programs
 
 libgps_version_soname = libgps_version_current - libgps_version_age
-libgps_version = "%d.%d.%d" % (libgps_version_soname, libgps_version_age, libgps_version_revision)
+libgps_version = "%d.%d.%d" % (libgps_version_soname, libgps_version_age,
+                               libgps_version_revision)
 
 libgps_sources = [
     "ais_json.c",
@@ -1795,9 +1798,9 @@ else:
     gps_names = [os.path.split(x)[-1][:-4] for x in gps_logs]
     gps_tests = []
     for gps_name, gps_log in zip(gps_names, gps_logs):
-        gps_tests.append(Utility('gps-regress-' + gps_name, gps_herald,
-                                 '$SRCDIR/regress-driver -q -o -t $REGRESSOPTS '
-                                 + gps_log))
+        gps_tests.append(Utility(
+            'gps-regress-' + gps_name, gps_herald,
+            '$SRCDIR/regress-driver -q -o -t $REGRESSOPTS ' + gps_log))
     if GetOption('num_jobs') <= 1:
         gps_regress = Utility('gps-regress', gps_herald,
                               '$SRCDIR/regress-driver $REGRESSOPTS %s'
@@ -1897,7 +1900,8 @@ else:
         'done;',
         '@echo "Testing idempotency of unscaled JSON dump/decode for AIS"',
         '@TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
-        '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE}; '
+        '$SRCDIR/gpsdecode -u -e -j <$SRCDIR/test/sample.aivdm.ju.chk '
+        ' >$${TMPFILE}; '
         '    grep -v "^#" $SRCDIR/test/sample.aivdm.ju.chk '
         '    | diff -ub - $${TMPFILE} || echo "Test FAILED!"; '
         '    rm -f $${TMPFILE}; ',
@@ -1905,7 +1909,8 @@ else:
         # and finally compare it with the scaled json reference
         '@echo "Testing idempotency of scaled JSON dump/decode for AIS"',
         '@TMPFILE=`mktemp -t gpsd-test.chk-XXXXXXXXXXXXXX`; '
-        '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/sample.aivdm.ju.chk >$${TMPFILE};'
+        '$SRCDIR/gpsdecode -e -j <$SRCDIR/test/sample.aivdm.ju.chk '
+        ' >$${TMPFILE};'
         '    grep -v "^#" $SRCDIR/test/sample.aivdm.js.chk '
         '    | diff -ub - $${TMPFILE} || echo "Test FAILED!"; '
         '    rm -f $${TMPFILE}; ',
