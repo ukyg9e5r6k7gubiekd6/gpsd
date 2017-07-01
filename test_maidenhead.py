@@ -22,7 +22,8 @@ for (lat, lon, maidenhead, location) in [
 ]:
     converted = gps.clienthelpers.maidenhead(lat, lon)
     if converted != maidenhead:
-        sys.stderr.write("maidenhead test: from %s %s (%s) expected %s got %s\n" \
+        sys.stderr.write(
+            "maidenhead test: from %s %s (%s) expected %s got %s\n"
             % (lat, lon, location, maidenhead, converted))
         errors += 1
     else:
