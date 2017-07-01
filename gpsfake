@@ -31,6 +31,7 @@ except NameError:
 # Get version of stdout for bytes data (NOP in Python 2)
 bytesout = gps.get_bytes_stream(sys.stdout)
 
+
 class Baton(object):
     "Ship progress indications to stderr."
     # By setting this > 1 we reduce the frequency of the twirl
@@ -68,7 +69,8 @@ class Baton(object):
         if msg is None:
             msg = self.endmsg
         if self.stream:
-            self.stream.write("...(%2.2f sec) %s.\n" % (time.time() - self.time, msg))
+            self.stream.write("...(%2.2f sec) %s.\n"
+                              % (time.time() - self.time, msg))
         return
 
 
@@ -90,13 +92,16 @@ def fakehook(linenumber, fakegps):
             baton.twirl('*\b')
         elif not singleshot:
             if not quiet:
-                sys.stderr.write("gpsfake: log cycle of %s begins.\n" % fakegps.testload.name)
+                sys.stderr.write("gpsfake: log cycle of %s begins.\n"
+                                 % fakegps.testload.name)
     time.sleep(cycle)
     if linedump and fakegps.testload.legend:
-        ml = fakegps.testload.sentences[linenumber % len(fakegps.testload.sentences)].strip()
+        ml = fakegps.testload.sentences[
+            linenumber % len(fakegps.testload.sentences)].strip()
         if not fakegps.testload.textual:
             ml = hexdump(ml)
-        announce = fakegps.testload.legend % (linenumber % len(fakegps.testload.sentences) + 1) + ml
+        announce = fakegps.testload.legend \
+            % (linenumber % len(fakegps.testload.sentences) + 1) + ml
         if promptme:
             my_input(announce + "? ")
         else:
@@ -107,7 +112,8 @@ def fakehook(linenumber, fakegps):
 
 if __name__ == '__main__':
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:], "1bc:D:ghilm:no:pP:qr:s:StTuvx")
+        (options, arguments) = getopt.getopt(sys.argv[1:],
+                                             "1bc:D:ghilm:no:pP:qr:s:StTuvx")
     except getopt.GetoptError as msg:
         print("gpsfake: " + str(msg))
         raise SystemExit(1)
@@ -167,7 +173,9 @@ if __name__ == '__main__':
         elif switch == '-t':
             tcp = True
         elif switch == '-T':
-            sys.stdout.write("sys %s platform %s: WRITE_PAD = %.5f\n" % (sys.platform, platform.platform(), gpsfake.GetDelay(slow)))
+            sys.stdout.write("sys %s platform %s: WRITE_PAD = %.5f\n"
+                             % (sys.platform, platform.platform(),
+                                gpsfake.GetDelay(slow)))
             raise SystemExit(0)
         elif switch == '-u':
             udp = True
@@ -213,7 +221,8 @@ if __name__ == '__main__':
     try:
         for logfile in arguments:
             try:
-                test.gps_add(logfile, speed=speed, pred=fakehook, oneshot=singleshot)
+                test.gps_add(logfile, speed=speed, pred=fakehook,
+                             oneshot=singleshot)
             except gpsfake.TestLoadError as e:
                 sys.stderr.write("gpsfake: " + e.msg + "\n")
                 raise SystemExit(1)
@@ -225,9 +234,11 @@ if __name__ == '__main__':
                 raise SystemExit(1)
             except IOError as e:
                 if e.filename is None:
-                    sys.stderr.write("gpsfake: unknown internal I/O error %s\n" % e)
+                    sys.stderr.write("gpsfake: unknown internal I/O error %s\n"
+                                     % e)
                 else:
-                    sys.stderr.write("gpsfake: no such file as %s or file unreadable\n" % e.filename)
+                    sys.stderr.write("gpsfake: no such file as %s or "
+                                     "file unreadable\n" % e.filename)
                 raise SystemExit(1)
             except OSError:
                 sys.stderr.write("gpsfake: can't open pty.\n")
@@ -251,7 +262,8 @@ if __name__ == '__main__':
             sys.stderr.write("gpsfake: socket error %s.\n" % msg)
             raise SystemExit(1)
         except gps.client.json_error as e:
-            sys.stderr.write("gpsfake: JSON error on line %s is %s.\n" % (repr(e.data), e.explanation))
+            sys.stderr.write("gpsfake: JSON error on line %s is %s.\n"
+                             % (repr(e.data), e.explanation))
             raise SystemExit(1)
         except KeyboardInterrupt:
             sys.stderr.write("gpsfake: aborted\n")
