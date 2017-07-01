@@ -1680,24 +1680,30 @@ if len(python_progs) > 0:
 
 # Additional Python readability style checks
 if len(python_progs) > 0:
-    pep8 = Utility("pep8", ["jsongen.py", "maskaudit.py", python_built_extensions],
-        ['''pep8 --ignore=E501,W602,E122,E241,E401 {0} gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
+    pep8 = Utility("pep8",
+                   ["jsongen.py", "maskaudit.py", python_built_extensions],
+                   ['pep8 --ignore=E501,W602,E122,E241,E401 {0} '
+                    'gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
 
 # Additional Python readablity style checks
 if len(python_progs) > 0:
-    flake8 = Utility("flake8", ["jsongen.py", "maskaudit.py", python_built_extensions],
-        ['''flake8 --ignore=E501,W602,E122,E241,E401 {0} gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
+    flake8 = Utility("flake8",
+                     ["jsongen.py", "maskaudit.py", python_built_extensions],
+                     ['flake8 --ignore=E501,W602,E122,E241,E401 {0} '
+                      'gps/[a-zA-Z]*.py *.py'.format(" ".join(python_progs))])
 
 
 # Check the documentation for bogons, too
 Utility("xmllint", glob.glob("*.xml"),
-    "for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
+        "for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
 
 # Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
 Utility("deheader", generated_sources, [
-    'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c -x monitor_proto.c -i gpsd_config.h -i gpsd.h -m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
-        ])
+    'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c '
+    '-x monitor_proto.c -i gpsd_config.h -i gpsd.h '
+    '-m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
+    ])
 
 # Perform all local code-sanity checks (but not the Coverity scan).
 audit = env.Alias('audit',
@@ -1732,13 +1738,16 @@ if env['python']:
             '%s -tt -m py_compile tmp.py' % (sys.executable, )
             'rm -f tmp.py tmp.pyc'
     python_compilation_regress = Utility('python-compilation-regress',
-            Glob('*.py') + python_modules + python_progs + ['SConstruct'], check_compile)
+                                         Glob('*.py') + python_modules
+                                         + python_progs
+                                         + ['SConstruct'], check_compile)
 else:
     python_compilation_regress = None
 
 # using regress-drivers requires socket_export being enabled.
 if not env['socket_export'] or not env['python']:
-    announce("GPS regression tests suppressed because socket_export or python is off.")
+    announce("GPS regression tests suppressed because socket_export "
+             "or python is off.")
     gps_regress = None
     gpsfake_tests = None
 else:
