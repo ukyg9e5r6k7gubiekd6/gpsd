@@ -2016,7 +2016,8 @@ Utility('shmclean', [], ["ipcrm  -M 0x4e545030;"
 # The website directory
 #
 # None of these productions are fired by default.
-# The content they handle is the GPSD website, not included in release tarballs.
+# The content they handle is the GPSD website, not included in
+# release tarballs.
 
 # asciidoc documents
 if env.WhereIs('asciidoc'):
@@ -2027,10 +2028,11 @@ if env.WhereIs('asciidoc'):
                 'time-service-intro',
                 'client-howto']
     asciidocs = ["www/" + stem + ".html" for stem in txtfiles] \
-                + ["www/installation.html"]
+        + ["www/installation.html"]
     for stem in txtfiles:
         env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,
-                    ['asciidoc -b html5 -a toc -o www/%s.html www/%s.txt' % (stem, stem)])
+                    ['asciidoc -b html5 -a toc -o www/%s.html www/%s.txt'
+                     % (stem, stem)])
     env.Command("www/installation.html",
                 "INSTALL",
                 ["asciidoc -o www/installation.html INSTALL"])
@@ -2086,7 +2088,8 @@ upload_web = Utility("website", [www],
                      ['rsync --exclude="*.in" -avz www/ ' + webupload,
                       'scp -q README TODO NEWS ' + webupload,
                       'chmod ug+w,a+x www/gps_report.cgi',
-                      'scp -q www/gps_report.cgi ' + cgiupload + "gps_report.cgi"])
+                      'scp -q www/gps_report.cgi ' + cgiupload +
+                      "gps_report.cgi"])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
@@ -2098,7 +2101,8 @@ if htmlbuilder:
         env.HTML('www/%s.html' % xml[:-4], xml)
 
     # DocBook documents
-    for stem in ['writing-a-driver', 'performance/performance', 'replacing-nmea']:
+    for stem in ['writing-a-driver', 'performance/performance',
+                 'replacing-nmea']:
         env.HTML('www/%s.html' % stem, 'www/%s.xml' % stem)
 
     # The internals manual.
@@ -2110,24 +2114,28 @@ env.Command('www/hardware.html', ['gpscap.py',
                                   'www/hardware-head.html',
                                   'gpscap.ini',
                                   'www/hardware-tail.html'],
-            ['(cat www/hardware-head.html && PYTHONIOENCODING=utf-8 $SC_PYTHON gpscap.py && cat www/hardware-tail.html) >www/hardware.html'])
+            ['(cat www/hardware-head.html && PYTHONIOENCODING=utf-8 '
+             '$SC_PYTHON gpscap.py && cat www/hardware-tail.html) '
+             '>www/hardware.html'])
 
 # The diagram editor dia is required in order to edit the diagram masters
-# Utility("www/cycle.svg", ["www/cycle.dia"], ["dia -e www/cycle.svg www/cycle.dia"])
+# Utility("www/cycle.svg", ["www/cycle.dia"],
+#         ["dia -e www/cycle.svg www/cycle.dia"])
 
 # Experimenting with pydoc.  Not yet fired by any other productions.
 # scons www/ dies with this
 
-## if env['python']:
-##     env.Alias('pydoc', "www/pydoc/index.html")
-##
-##     # We need to run epydoc with the Python version we built the modules for.
-##     # So we define our own epydoc instead of using /usr/bin/epydoc
-##     EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
-##     env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")  + glob.glob("gps/*.py"), [
-##         'mkdir -p www/pydoc',
-##         EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
-##             ])
+# # if env['python']:
+# #     env.Alias('pydoc', "www/pydoc/index.html")
+# #
+# #     # We need to run epydoc with the Python version the modules built for.
+# #     # So we define our own epydoc instead of using /usr/bin/epydoc
+# #     EPYDOC = "python -c 'from epydoc.cli import cli; cli()'"
+# #     env.Command('www/pydoc/index.html', python_progs + glob.glob("*.py")
+# #                 + glob.glob("gps/*.py"), [
+# #         'mkdir -p www/pydoc',
+# #         EPYDOC + " -v --html --graph all -n GPSD $SOURCES -o www/pydoc",
+# #             ])
 
 # Productions for setting up and performing udev tests.
 #
@@ -2144,9 +2152,14 @@ env.Command('www/hardware.html', ['gpscap.py',
 # udevadm trigger --sysname-match=ttyUSB0 --action add
 
 if env['systemd']:
-    systemdinstall_target = [env.Install(DESTDIR + systemd_dir, "systemd/%s" % (x,)) for x in ("gpsdctl@.service", "gpsd.service", "gpsd.socket")]
+    systemdinstall_target = [env.Install(DESTDIR + systemd_dir,
+                             "systemd/%s" % (x,)) for x in
+                             ("gpsdctl@.service", "gpsd.service",
+                              "gpsd.socket")]
     systemd_install = env.Alias('systemd_install', systemdinstall_target)
-    systemd_uninstall = env.Command('systemd_uninstall', '', Flatten(Uninstall(Alias("systemd_install"))) or "")
+    systemd_uninstall = env.Command(
+        'systemd_uninstall', '',
+        Flatten(Uninstall(Alias("systemd_install"))) or "")
 
     env.AlwaysBuild(systemd_uninstall)
     env.Precious(systemd_uninstall)
@@ -2162,14 +2175,16 @@ else:
 
 udev_install = Utility('udev-install', 'install', [
     'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
-    'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] + '/rules.d/25-gpsd.rules',
+    'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] +
+    '/rules.d/25-gpsd.rules',
     ] + hotplug_wrapper_install)
 
 if env['systemd']:
     env.Requires(udev_install, systemd_install)
 
 if env['systemd'] and not env["sysroot"]:
-    systemctl_daemon_reload = Utility('systemctl-daemon-reload', '', ['systemctl daemon-reload || true'])
+    systemctl_daemon_reload = Utility('systemctl-daemon-reload', '',
+                                      ['systemctl daemon-reload || true'])
     env.AlwaysBuild(systemctl_daemon_reload)
     env.Precious(systemctl_daemon_reload)
     env.Requires(systemctl_daemon_reload, systemd_install)
@@ -2179,11 +2194,9 @@ if env['systemd'] and not env["sysroot"]:
 Utility('udev-uninstall', '', [
     'rm -f %s/gpsd.hotplug' % env['udevdir'],
     'rm -f %s/rules.d/25-gpsd.rules' % env['udevdir'],
-        ])
+    ])
 
-Utility('udev-test', '', [
-    '$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5',
-        ])
+Utility('udev-test', '', ['$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5', ])
 
 # Cleanup
 
