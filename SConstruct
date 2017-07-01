@@ -803,19 +803,22 @@ else:
         "dbus_export": ["libdbus-1"],
         }
 
-    keys = map(lambda x: (x[0], x[2]), boolopts) + map(lambda x: (x[0], x[2]), nonboolopts) + map(lambda x: (x[0], x[2]), pathopts)
+    keys = map(lambda x: (x[0], x[2]), boolopts)  \
+        + map(lambda x: (x[0], x[2]), nonboolopts) \
+        + map(lambda x: (x[0], x[2]), pathopts)
     keys.sort()
     for (key, help) in keys:
         value = env[key]
         if value and key in optionrequires:
             for required in optionrequires[key]:
                 if not config.CheckLib(required):
-                    announce("%s not found, %s cannot be enabled." % (required, key))
+                    announce("%s not found, %s cannot be enabled."
+                             % (required, key))
                     value = False
                     break
 
         confdefs.append("/* %s */" % help)
-        if type(value) == type(True):
+        if isinstance(value, bool):
             if value:
                 confdefs.append("#define %s_ENABLE 1\n" % key.upper())
             else:
@@ -833,10 +836,10 @@ else:
         confdefs.append('''\
 /* Magic device which, if present, means to grab a static /dev/pps0 for KPPS */
 #define MAGIC_HAT_GPS	"/dev/ttyAMA0"
-/* Generic device which, if present, means to grab a static /dev/pps0 for KPPS */
+/* Generic device which, if present, means: */
+/* to grab a static /dev/pps0 for KPPS */
 #define MAGIC_LINK_GPS	"/dev/gpsd0"
 ''')
-
 
     confdefs.append('''\
 
@@ -851,11 +854,13 @@ else:
             htmlbuilder = build % docbook_html_uri
             manbuilder = build % docbook_man_uri
         elif WhereIs("xmlto"):
-            xmlto = "xmlto %s $SOURCE || mv `basename $TARGET` `dirname $TARGET`"
+            xmlto = "xmlto %s $SOURCE || mv `basename $TARGET` " \
+                    "`dirname $TARGET`"
             htmlbuilder = xmlto % "html-nochunks"
             manbuilder = xmlto % "man"
         else:
-            announce("Neither xsltproc nor xmlto found, documentation cannot be built.")
+            announce("Neither xsltproc nor xmlto found, documentation "
+                     "cannot be built.")
     else:
         announce("Build of man and HTML documentation is disabled.")
     if manbuilder:
@@ -863,7 +868,8 @@ else:
         env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
                                           src_suffix=".xml", suffix=".html")
 
-    # Determine if Qt network libraries are present, and if not, force qt to off
+    # Determine if Qt network libraries are present, and
+    # if not, force qt to off
     if env["qt"]:
         qt_net_name = 'Qt%sNetwork' % env["qt_versioned"]
         qt_network = config.CheckPKG(qt_net_name)
@@ -871,15 +877,17 @@ else:
             env["qt"] = False
             announce('Turning off Qt support, library not found.')
 
-    # If supported by the compiler, enable all warnings except uninitialized and
-    # missing-field-initializers, which we can't help triggering because
+    # If supported by the compiler, enable all warnings except uninitialized
+    # and missing-field-initializers, which we can't help triggering because
     # of the way some of the JSON-parsing code is generated.
     # Also not including -Wcast-qual and -Wimplicit-function-declaration,
     # because we can't seem to keep scons from passing these to g++.
     #
     # Do this after the other config checks, to keep warnings out of them.
-    for option in ('-Wextra', '-Wall', '-Wno-uninitialized', '-Wno-missing-field-initializers',
-                   '-Wcast-align', '-Wmissing-declarations', '-Wmissing-prototypes',
+    for option in ('-Wextra', '-Wall', '-Wno-uninitialized',
+                   '-Wno-missing-field-initializers',
+                   '-Wcast-align', '-Wmissing-declarations',
+                   '-Wmissing-prototypes',
                    '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
         if option not in config.env['CFLAGS']:
             config.CheckCompilerOption(option)
