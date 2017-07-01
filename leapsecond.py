@@ -332,7 +332,8 @@ def graph_history(filename):
     (b, c, e) = leastsquares(list(zip(list(range(len(raw))), raw)))
     e /= (60 * 60 * 24 * 7)
     dates = [time.strftime("%Y-%m-%d", time.localtime(t)) for t in raw]
-    enddate = time.strftime("%Y-%m-%d", time.localtime(raw[-1]+16416000)) # Adding 190 days to scale
+    # Adding 190 days to scale
+    enddate = time.strftime("%Y-%m-%d", time.localtime(raw[-1] + 16416000))
     fmt = ''
     fmt += '# Least-squares approximation of Unix time from leapsecond is:\n'
     fmt += 'lsq(x) = %s * x + %s\n' % (b, c)
@@ -367,20 +368,20 @@ def unix_to_rfc822(tv):
 def printnext(val):
     "Compute Unix time correponsing to a scheduled leap second."
     if val[:3].lower() not in ("jun", "dec"):
-        sys.stderr.write("leapsecond.py: -n argument must begin with "\
-            "'Jun' or 'Dec'\n")
+        sys.stderr.write("leapsecond.py: -n argument must begin with "
+                         "'Jun' or 'Dec'\n")
         raise SystemExit(1)
     else:
         month = val[:3].lower()
         if len(val) != 7:
-            sys.stderr.wrrite("leapsecond.py: -n argument must be of "\
-                "the form {jun|dec}nnnn.\n")
+            sys.stderr.wrrite("leapsecond.py: -n argument must be of "
+                              "the form {jun|dec}nnnn.\n")
             raise SystemExit(1)
         try:
             year = int(val[3:])
         except ValueError:
-            sys.stderr.write("leapsecond.py: -n argument must end "\
-                "with a 4-digit year.\n")
+            sys.stderr.write("leapsecond.py: -n argument must end "
+                             "with a 4-digit year.\n")
             raise SystemExit(1)
         # Date looks valid
         tv = leapbound(year, month)
