@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 """
 
-Usage: leapsecond.py [-v] { [-h] | [-f filename] | [-g filename] | [-H filename]
-    | [-I isodate] | [-O unixdate] | [-i rfcdate] | [-o unixdate] | [-n MMMYYYY] }
+Usage: leapsecond.py [-v] { [-h] | [-f filename] | [-g filename]
+                     | [-H filename] | [-I isodate] | [-O unixdate]
+                     | [-i rfcdate] | [-o unixdate] | [-n MMMYYYY] }
 
 Options:
 
@@ -27,10 +28,12 @@ Options:
      does or does not support X11.
 
      leapsecond.py -g leapseconds.cache | gnuplot --persist
-     leapsecond.py -g leapseconds.cache | gnuplot -e 'set terminal svg' - | display
+     leapsecond.py -g leapseconds.cache | gnuplot -e 'set terminal svg' - \\
+         | display
 
-  -n compute Unix gmt time for an IERS leap-second event given as a three-letter
-     English Gregorian month abbreviation followed by a 4-digit year.
+  -n compute Unix gmt time for an IERS leap-second event given as a
+     three-letter English Gregorian month abbreviation followed by a
+     4-digit year.
 
 Public urls and local cache file used:
 
@@ -47,7 +50,14 @@ BSD terms apply: see the file COPYING in the distribution root for details.
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import os, re, random, time, calendar, math, sys, signal
+import calendar
+import math
+import os
+import random
+import re
+import signal
+import sys
+import time
 
 try:
     import urllib.request as urlrequest  # Python 3
@@ -87,7 +97,8 @@ else:  # Otherwise we do something real
 
 
 def isotime(s):
-    "Convert timestamps in ISO8661 format to and from Unix time including optional fractional seconds."
+    "Convert timestamps in ISO8661 format to and from Unix time including " \
+    "optional fractional seconds."
     if isinstance(s, int):
         return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
     elif isinstance(s, float):
@@ -104,7 +115,8 @@ def isotime(s):
             date = s
             msec = "0"
         # Note: no leap-second correction!
-        return calendar.timegm(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
+        return calendar.timegm(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) \
+            + float("0." + msec)
     else:
         raise TypeError
 
@@ -192,7 +204,8 @@ def last_insertion_time():
 
 
 def save_leapseconds(outfile):
-    "Fetch the leap-second history data and make a leap-second list since Unix epoch GMT (1970-01-01T00:00:00)."
+    "Fetch the leap-second history data and make a leap-second list since " \
+    "Unix epoch GMT (1970-01-01T00:00:00)."
     random.shuffle(__locations)  # To spread the load
     for (_, _, _, _, url) in __locations:
         skip = True
@@ -233,7 +246,8 @@ def fetch_leapsecs(filename):
 
 
 def make_leapsecond_include(infile):
-    "Get the current leap second count and century from the local cache usable as C preprocessor #define"
+    "Get the current leap second count and century from the local cache " \
+    "usable as C preprocessor #define"
     # Underscore prefixes avoids warning W0612 from pylint,
     # which doesn't count substitution through locals() as use.
     leapjumps = fetch_leapsecs(infile)
@@ -260,7 +274,8 @@ def make_leapsecond_include(infile):
 
 
 def conditional_leapsecond_fetch(outfile, timeout):
-    "Conditionally fetch leapsecond data, w. timeout in case of evil firewalls."
+    "Conditionally fetch leapsecond data, " \
+    "w. timeout in case of evil firewalls."
     if not os.path.exists(outfile):
         stale = True
     else:
@@ -392,8 +407,8 @@ def leapbound(year, month):
     "Return a leap-second date in RFC822 form."
     # USNO lists JAN and JUL (month following the leap second).
     # IERS lists DEC. and JUN. (month preceding the leap second).
-    # Note: It is also possible for leap seconds to occur in end-Mar and end-Sep
-    #  although none have occurred yet
+    # Note: It is also possible for leap seconds to occur in end-Mar and
+    # end-Sep although none have occurred yet
     if month.upper()[:3] == "JAN":
         tv = "%s-12-31T23:59:60" % (int(year) - 1)
     elif month.upper()[:3] in ("JUN", "JUL"):
