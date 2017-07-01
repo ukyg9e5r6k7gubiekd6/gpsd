@@ -7,7 +7,8 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import sys, gps.misc
+import sys
+import gps.misc
 
 errors = 0
 # values from here: https://en.wikipedia.org/wiki/Decimal_degrees#Precision

@@ -11,7 +11,8 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import sys, gps.clienthelpers
+import sys
+import gps.clienthelpers
 
 errors = 0
 for (lat, lon, maidenhead, location) in [
