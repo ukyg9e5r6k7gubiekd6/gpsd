@@ -2202,7 +2202,8 @@ env.Clean(clean_misc, glob.glob('.coverage*') + ['htmlcov/'])
 env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'TAGS'])
 
 # Nuke scons state files
-sconsclean = Utility("sconsclean", '', ["rm -fr .sconf_temp .scons-option-cache config.log"])
+sconsclean = Utility("sconsclean", '',
+                     ["rm -fr .sconf_temp .scons-option-cache config.log"])
 
 # Default targets
 
@@ -2215,8 +2216,8 @@ else:
 misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
                 'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpshmmon.c',
                 'ppscheck.c']
-sources = libgpsd_sources + libgps_sources \
-          + gpsd_sources + gpsmon_sources + misc_sources
+sources = libgpsd_sources + libgps_sources + gpsd_sources + gpsmon_sources + \
+    misc_sources
 env.Command('TAGS', sources, ['etags ' + " ".join(sources)])
 
 # Release machinery begins here
@@ -2242,7 +2243,8 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # How to build a tarball.
     dist = env.Command('dist', distfiles, [
-        '@tar --transform "s:^:gpsd-${VERSION}/:" -czf gpsd-${VERSION}.tar.gz $SOURCES',
+        '@tar --transform "s:^:gpsd-${VERSION}/:" '
+        ' -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
         ])
     env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
@@ -2268,14 +2270,15 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # The chmod copes with the fact that scp will give a
     # replacement the permissions of the *original*...
     upload_release = Utility('upload-release', [dist], [
-            'gpg -b gpsd-${VERSION}.tar.gz',
-            'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
-            'scp gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig ' + scpupload,
-            ])
+        'gpg -b gpsd-${VERSION}.tar.gz',
+        'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
+        'scp gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig ' + scpupload,
+        ])
 
     # How to tag a release
     tag_release = Utility('tag-release', [], [
-        'git tag -s -m "Tagged for external release ${VERSION}" release-${VERSION}'
+        'git tag -s -m "Tagged for external release ${VERSION}" \
+         release-${VERSION}'
         ])
     upload_tags = Utility('upload-tags', [], ['git push --tags'])
 
@@ -2300,7 +2303,8 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # Experimental release mechanics using shipper
     # This will ship a freecode metadata update
-    Utility("ship", [dist, "control"], ['shipper version=%s | sh -e -x' % gpsd_version])
+    Utility("ship", [dist, "control"],
+            ['shipper version=%s | sh -e -x' % gpsd_version])
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
