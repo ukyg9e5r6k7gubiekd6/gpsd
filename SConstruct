@@ -1323,11 +1323,14 @@ else:
             python_objects[ext].append(
                 python_env.NoCache(
                     python_env.SharedObject(
-                        src.split(".")[0] + '-py_' + '_'.join(['%s' % (x) for x in sys.version_info]) + python_config['SO'], src
+                        src.split(".")[0] + '-py_'
+                        + '_'.join(['%s' % (x) for x in sys.version_info])
+                        + python_config['SO'], src
                     )
                 )
             )
-        python_compiled_libs[ext] = python_env.SharedLibrary(ext, python_objects[ext])
+        python_compiled_libs[ext] = python_env.SharedLibrary(
+            ext, python_objects[ext])
     python_egg_info_source = """Metadata-Version: 1.0
 Name: gps
 Version: %s
@@ -1339,7 +1342,9 @@ License: BSD
 Description: The gpsd service daemon can monitor one or more GPS devices connected to a host computer, making all data on the location and movements of the sensors available to be queried on TCP port 2947.
 Platform: UNKNOWN
 """ % (gpsd_version, website, devmail)
-    python_egg_info = python_env.Textfile(target="gps-%s.egg-info" % (gpsd_version, ), source=python_egg_info_source)
+    python_egg_info = python_env.Textfile(target="gps-%s.egg-info"
+                                          % (gpsd_version, ),
+                                          source=python_egg_info_source)
     python_built_extensions = python_compiled_libs.values()
     python_targets = python_built_extensions + [python_egg_info]
 
@@ -1378,12 +1383,14 @@ generated_sources = ['packet_names.h', 'timebase.h', "ais_json.i",
 
 # Helper functions for revision hackery
 
+
 def GetMtime(file):
     """Get mtime of given file, or 0."""
     try:
         return os.stat(file).st_mtime
     except OSError:
         return 0
+
 
 def FileList(patterns, exclusions=[]):
     """Get list of files based on patterns, minus excluded files."""
@@ -1427,8 +1434,8 @@ def leapseconds_cache_rebuild(target, source, env):
         sys.stdout.write("try building with leapfetch=no.\n")
 if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
     leapseconds_cache = env.Command(target="leapseconds.cache",
-                                source="leapsecond.py",
-                                action=leapseconds_cache_rebuild)
+                                    source="leapsecond.py",
+                                    action=leapseconds_cache_rebuild)
     env.Clean(leapseconds_cache, "leapsecond.pyc")
     env.NoClean(leapseconds_cache)
     env.Precious(leapseconds_cache)
@@ -1481,7 +1488,8 @@ def substituter(target, source, env):
         content = content.replace(s, t)
     m = re.search("@[A-Z]+@", content)
     if m and m.group(0) not in map(lambda x: x[0], substmap):
-        print >>sys.stderr, "Unknown subst token %s in %s." % (m.group(0), sfp.name)
+        print >>sys.stderr, "Unknown subst token %s in %s." \
+            % (m.group(0), sfp.name)
     tfp = open(str(target[0]), "w")
     tfp.write(content)
     tfp.close()
@@ -1523,8 +1531,9 @@ base_manpages = {
     }
 if tiocmiwait:
     base_manpages.update({
-    "ppscheck.8": "ppscheck.xml",
-    })
+        "ppscheck.8": "ppscheck.xml",
+        })
+
 python_manpages = {
     "gpsprof.1": "gpsprof.xml",
     "gpsfake.1": "gpsfake.xml",
@@ -1546,7 +1555,7 @@ if manbuilder:
     for (man, xml) in base_manpages.items() + python_manpages.items():
         manpage_targets.append(man_env.Man(source=xml, target=man))
 
-## Where it all comes together
+# Where it all comes together
 
 build = env.Alias('build',
                   [libraries, sbin_binaries, bin_binaries, python_targets,
@@ -1558,7 +1567,7 @@ if qt_env:
                               LIBPATH=['.'],
                               OBJPREFIX='qt-',
                               LIBS=['Qgpsmm'])
-    build_qt = qt_env.Alias('build', [compiled_qgpsmmlib,test_qgpsmm])
+    build_qt = qt_env.Alias('build', [compiled_qgpsmmlib, test_qgpsmm])
     qt_env.Default(*build_qt)
     testprogs.append(test_qgpsmm)
 
@@ -1566,25 +1575,29 @@ if env['python']:
     build_python = python_env.Alias('build', python_targets)
     python_env.Default(*build_python)
 
-## Installation and deinstallation
+# Installation and deinstallation
 
 # Not here because too distro-specific: udev rules, desktop files, init scripts
 
 # It's deliberate that we don't install gpsd.h. It's full of internals that
 # third-party client programs should not see.
-headerinstall = [env.Install(installdir('includedir'), x) for x in ("libgpsmm.h", "gps.h")]
+headerinstall = [env.Install(installdir('includedir'), x)
+                 for x in ("libgpsmm.h", "gps.h")]
 
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), sbin_binaries))
 binaryinstall.append(env.Install(installdir('bindir'), bin_binaries))
-binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib, libgps_version))
+binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib,
+                                    libgps_version))
 # Work around a minor bug in InstallSharedLib() link handling
 env.AddPreAction(binaryinstall, 'rm -f %s/libgps.*' % (installdir('libdir'), ))
 
 if qt_env:
-    binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'), compiled_qgpsmmlib, libgps_version))
+    binaryinstall.append(LibraryInstall(qt_env, installdir('libdir'),
+                         compiled_qgpsmmlib, libgps_version))
 
-if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.platform.startswith('darwin'):
+if ((not env['debug'] and not env['profiling'] and not env['nostrip']
+     and not sys.platform.startswith('darwin'))):
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
 if not env['python']:
@@ -1592,24 +1605,26 @@ if not env['python']:
 else:
     python_module_dir = python_libdir + os.sep + 'gps'
     python_extensions_install = python_env.Install(DESTDIR + python_module_dir,
-                                                    python_built_extensions)
-    if not env['debug'] and not env['profiling'] and not env['nostrip'] and not sys.platform.startswith('darwin'):
+                                                   python_built_extensions)
+    if ((not env['debug'] and not env['profiling']
+         and not env['nostrip'] and not sys.platform.startswith('darwin'))):
         python_env.AddPostAction(python_extensions_install, '$STRIP $TARGET')
 
     python_modules_install = python_env.Install(DESTDIR + python_module_dir,
                                                 python_modules)
 
-    python_progs_install = python_env.Install(installdir('bindir'), python_progs)
+    python_progs_install = python_env.Install(installdir('bindir'),
+                                              python_progs)
 
     python_egg_info_install = python_env.Install(DESTDIR + python_libdir,
                                                  python_egg_info)
     python_install = [python_extensions_install,
-                        python_modules_install,
-                        python_progs_install,
-                        python_egg_info_install,
-                        # We don't need the directory explicitly for the
-                        # install, but we do need it for the uninstall
-                        Dir(DESTDIR + python_module_dir)]
+                      python_modules_install,
+                      python_progs_install,
+                      python_egg_info_install,
+                      # We don't need the directory explicitly for the
+                      # install, but we do need it for the uninstall
+                      Dir(DESTDIR + python_module_dir)]
 
 pc_install = [env.Install(installdir('pkgconfig'), 'libgps.pc')]
 if qt_env:
@@ -1624,7 +1639,8 @@ for manpage in base_manpages.keys() + python_manpages.keys():
     section = manpage.split(".")[1]
     dest = os.path.join(installdir('mandir'), "man"+section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
-install = env.Alias('install', binaryinstall + maninstall + python_install + pc_install + headerinstall)
+install = env.Alias('install', binaryinstall + maninstall + python_install
+                    + pc_install + headerinstall)
 
 
 def Uninstall(nodes):
@@ -1635,7 +1651,8 @@ def Uninstall(nodes):
         else:
             deletes.append(Delete(str(node)))
     return deletes
-uninstall = env.Command('uninstall', '', Flatten(Uninstall(Alias("install"))) or "")
+uninstall = env.Command('uninstall', '',
+                        Flatten(Uninstall(Alias("install"))) or "")
 env.AlwaysBuild(uninstall)
 env.Precious(uninstall)
 
@@ -1645,7 +1662,7 @@ env.Precious(uninstall)
 
 def error_action(target, source, env):
     from SCons.Errors import UserError
-    raise UserError, "Target selection for '.' is broken."
+    raise UserError("Target selection for '.' is broken.")
 AlwaysBuild(Alias(".", [], error_action))
 
 # Utility productions
@@ -1657,6 +1674,7 @@ def Utility(target, source, action):
     env.Precious(target)
     return target
 
+
 def UtilityWithHerald(herald, target, source, action):
     if not env.GetOption('silent'):
         action = ['@echo "%s"' % herald] + action
@@ -1665,7 +1683,13 @@ def UtilityWithHerald(herald, target, source, action):
 # Putting in all these -U flags speeds up cppcheck and allows it to look
 # at configurations we actually care about.
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
-        "cppcheck -U__UNUSED__ -UUSE_QT -U__COVERITY__ -U__future__ -ULIMITED_MAX_CLIENTS -ULIMITED_MAX_DEVICES -UAF_UNSPEC -UINADDR_ANY -UFIXED_PORT_SPEED -UFIXED_STOP_BITS -U_WIN32 -U__CYGWIN__ -UPATH_MAX -UHAVE_STRLCAT -UHAVE_STRLCPY -UIPTOS_LOWDELAY -UIPV6_TCLASS -UTCP_NODELAY -UTIOCMIWAIT --template gcc --enable=all --inline-suppr --suppress='*:driver_proto.c' --force $SRCDIR")
+        "cppcheck -U__UNUSED__ -UUSE_QT -U__COVERITY__ -U__future__ "
+        "-ULIMITED_MAX_CLIENTS -ULIMITED_MAX_DEVICES -UAF_UNSPEC -UINADDR_ANY "
+        "-UFIXED_PORT_SPEED -UFIXED_STOP_BITS -U_WIN32 -U__CYGWIN__ "
+        "-UPATH_MAX -UHAVE_STRLCAT -UHAVE_STRLCPY -UIPTOS_LOWDELAY "
+        "-UIPV6_TCLASS -UTCP_NODELAY -UTIOCMIWAIT --template gcc "
+        "--enable=all --inline-suppr --suppress='*:driver_proto.c' "
+        "--force $SRCDIR")
 
 # Check with clang analyzer
 Utility("scan-build", ["gpsd.h", "packet_names.h"],
@@ -1675,7 +1699,8 @@ Utility("scan-build", ["gpsd.h", "packet_names.h"],
 # Bletch.  We don't really want to suppress W0231 E0602 E0611, but Python 3
 # syntax confuses a pylint running under Python 2.
 if len(python_progs) > 0:
-    pylint = Utility("pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
+    pylint = Utility("pylint", ["jsongen.py", "maskaudit.py",
+                                python_built_extensions],
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" --reports=n --disable=F0001,C0103,C0111,C1001,C0301,C0302,C0322,C0324,C0323,C0321,C0330,R0201,R0801,R0902,R0903,R0904,R0911,R0912,R0913,R0914,R0915,W0110,W0201,W0121,W0123,W0231,W0232,W0234,W0401,W0403,W0141,W0142,W0603,W0614,W0640,W0621,W1504,E0602,E0611,E1101,E1102,E1103,F0401 gps/*.py *.py ''' + " ".join(python_progs)])
 
 # Additional Python readability style checks
