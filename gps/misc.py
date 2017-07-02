@@ -7,7 +7,10 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import time, calendar, math, io
+import calendar
+import io
+import math
+import time
 
 # Determine a single class for testing "stringness"
 try:
@@ -81,15 +84,15 @@ else:  # Otherwise we do something real
 # Note: A Texas Foot is ( meters * 3937/1200)
 #       (Texas Natural Resources Code, Subchapter D, Sec 21.071 - 79)
 #       not the same as an international fooot.
-METERS_TO_FEET	= 3.28083989501312	# Meters to U.S./British feet
-METERS_TO_MILES	= 0.000621371192237334	# Meters to miles
-METERS_TO_FATHOMS = 0.546806649168854	# Meters to fathoms
-KNOTS_TO_MPH	= 1.15077944802354	# Knots to miles per hour
-KNOTS_TO_KPH	= 1.852		        # Knots to kilometers per hour
-KNOTS_TO_MPS	= 0.514444444444445	# Knots to meters per second
-MPS_TO_KPH	= 3.6		        # Meters per second to klicks/hr
-MPS_TO_MPH	= 2.2369362920544	# Meters/second to miles per hour
-MPS_TO_KNOTS	= 1.9438444924406	# Meters per second to knots
+METERS_TO_FEET = 3.28083989501312         # Meters to U.S./British feet
+METERS_TO_MILES = 0.000621371192237334    # Meters to miles
+METERS_TO_FATHOMS = 0.546806649168854     # Meters to fathoms
+KNOTS_TO_MPH = 1.15077944802354           # Knots to miles per hour
+KNOTS_TO_KPH = 1.852                      # Knots to kilometers per hour
+KNOTS_TO_MPS = 0.514444444444445          # Knots to meters per second
+MPS_TO_KPH = 3.6                          # Meters per second to klicks/hr
+MPS_TO_MPH = 2.2369362920544              # Meters/second to miles per hour
+MPS_TO_KNOTS = 1.9438444924406            # Meters per second to knots
 
 
 def Deg2Rad(x):
@@ -124,7 +127,7 @@ def CalcRad(lat):
     # es2 = 0.00673949674227643
     a = 6378.137
     e2 = 0.00669437999014132
-    sc = math.sin( math.radians(lat))
+    sc = math.sin(math.radians(lat))
     x = a * (1.0 - e2)
     z = 1.0 - e2 * pow(sc, 2)
     y = pow(z, 1.5)
@@ -198,13 +201,14 @@ def EarthDistance(c1, c2):
     uSq = cosSqAlpha * (a ** 2 - b ** 2) / (b ** 2)
     A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)))
     B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)))
-    deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma *
-                 (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM *
-                 (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)))
+    deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (
+        cosSigma * (-1 + 2 * cos2SigmaM ** 2) - B / 6 * cos2SigmaM *
+        (-3 + 4 * sinSigma ** 2) * (-3 + 4 * cos2SigmaM ** 2)))
     s = b * A * (sigma - deltaSigma)
 
     # return meters to 6 decimal places
     return round(s, 6)
+
 
 def EarthDistanceSmall(c1, c2):
     "Distance in meters between two close points specified in degrees."
@@ -213,18 +217,19 @@ def EarthDistanceSmall(c1, c2):
     # the main use here is for when Vincenty's fails to converge.
     (lat1, lon1) = c1
     (lat2, lon2) = c2
-    avglat = (lat1 + lat2 ) /2
-    phi = math.radians( avglat )  # radians of avg latitude
+    avglat = (lat1 + lat2) / 2
+    phi = math.radians(avglat)    # radians of avg latitude
     # meters per degree at this latitude, corrected for WGS84 ellipsoid
     # Note the wikipedia numbers are NOT ellipsoid corrected:
     # https://en.wikipedia.org/wiki/Decimal_degrees#Precision
     m_per_d = (111132.954 - 559.822 * math.cos(2 * phi)
-                          +   1.175 * math.cos(4 * phi))
+               + 1.175 * math.cos(4 * phi))
     dlat = (lat1 - lat2) * m_per_d
-    dlon = (lon1 - lon2) * m_per_d * math.cos( phi )
+    dlon = (lon1 - lon2) * m_per_d * math.cos(phi)
 
-    dist = math.sqrt( math.pow(dlat, 2) + math.pow(dlon, 2 ))
-    return dist;
+    dist = math.sqrt(math.pow(dlat, 2) + math.pow(dlon, 2))
+    return dist
+
 
 def MeterOffset(c1, c2):
     "Return offset in meters of second arg from first."
@@ -237,6 +242,7 @@ def MeterOffset(c1, c2):
     if lon1 < lon2:
         dx = -dx
     return (dx, dy)
+
 
 def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
@@ -256,9 +262,9 @@ def isotime(s):
             date = s
             msec = "0"
         # Note: no leap-second correction!
-        return calendar.timegm(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
+        return calendar.timegm(
+            time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
     else:
         raise TypeError
 
 # End
-
