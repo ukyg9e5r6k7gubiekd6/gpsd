@@ -5,11 +5,16 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import time, socket, sys, select, json
+import json
+import select
+import socket
+import sys
+import time
 
 from .misc import polystr, polybytes
 
 GPSD_PORT = "2947"
+
 
 class gpscommon(object):
     "Isolate socket handling and buffering from the protocol interpretation."
@@ -67,7 +72,8 @@ class gpscommon(object):
         "Return True if data is ready for the client."
         if self.linebuffer:
             return True
-        (winput, _woutput, _wexceptions) = select.select((self.sock,), (), (), timeout)
+        (winput, _woutput, _wexceptions) = select.select(
+            (self.sock,), (), (), timeout)
         return winput != []
 
     def read(self):
@@ -162,7 +168,8 @@ class gpsjson(object):
         # Should be done for any other array-valued subobjects, too.
         # This particular logic can fire on SKY or RTCM2 objects.
         if hasattr(self.data, "satellites"):
-            self.data.satellites = [dictwrapper(x) for x in self.data.satellites]
+            self.data.satellites = [dictwrapper(x)
+                                    for x in self.data.satellites]
 
     def stream(self, flags=0, devpath=None):
         "Control streaming reports from the daemon,"
