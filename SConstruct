@@ -200,7 +200,8 @@ boolopts = (
     ("xgps",          True,  "include xgps and xgpsspeed."),
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
-    )
+)
+
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
 
@@ -224,7 +225,8 @@ nonboolopts = (
     ("sysroot",          "",            "cross-development system root"),
     ("qt_versioned",     "",            "version for versioned Qt"),
     ("python_coverage",  "coverage run", "coverage command for Python progs"),
-    )
+)
+
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
@@ -238,7 +240,8 @@ pathopts = (
     ("docdir",              "share/doc",     "documents directory"),
     ("udevdir",             "/lib/udev",     "udev rules directory"),
     ("pkgconfig",           "$libdir/pkgconfig", "pkgconfig file directory"),
-    )
+)
+
 for (name, default, help) in pathopts:
     opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
 
@@ -260,7 +263,8 @@ import_env = (
     'STAGING_DIR',     # Required by the OpenWRT and CeroWrt builds.
     'STAGING_PREFIX',  # Required by the OpenWRT and CeroWrt builds.
     'WRITE_PAD',       # So we can test WRITE_PAD values on the fly.
-    )
+)
+
 envs = {}
 for var in import_env:
     if var in os.environ:
@@ -834,7 +838,7 @@ else:
     optionrequires = {
         "bluez": ["libbluetooth"],
         "dbus_export": ["libdbus-1"],
-        }
+    }
 
     keys = map(lambda x: (x[0], x[2]), boolopts)  \
         + map(lambda x: (x[0], x[2]), nonboolopts) \
@@ -1198,19 +1202,19 @@ gpsmon_sources = [
     'monitor_tnt.c',
     'monitor_ubx.c',
     'monitor_garmin.c',
-    ]
+]
 
 # Production programs
 
 gpsd = env.Program('gpsd', gpsd_sources,
                    LIBS=['gpsd', 'gps_static'],
-                   parse_flags=gpsdflags+gpsflags)
+                   parse_flags=gpsdflags + gpsflags)
 gpsdecode = env.Program('gpsdecode', ['gpsdecode.c'],
                         LIBS=['gpsd', 'gps_static'],
-                        parse_flags=gpsdflags+gpsflags)
+                        parse_flags=gpsdflags + gpsflags)
 gpsctl = env.Program('gpsctl', ['gpsctl.c'],
                      LIBS=['gpsd', 'gps_static'],
-                     parse_flags=gpsdflags+gpsflags)
+                     parse_flags=gpsdflags + gpsflags)
 gpsmon = env.Program('gpsmon', gpsmon_sources,
                      LIBS=['gpsd', 'gps_static'],
                      parse_flags=gpsdflags + gpsflags + ncurseslibs)
@@ -1531,7 +1535,8 @@ def substituter(target, source, env):
         ('@LIBGPSVERSION@', libgps_version),
         ('@TIPLINK@',    tiplink),
         ('@TIPWIDGET@',  tipwidget),
-        )
+    )
+
     sfp = open(str(source[0]))
     content = sfp.read()
     sfp.close()
@@ -1579,18 +1584,19 @@ base_manpages = {
     "gpsdecode.1": "gpsdecode.xml",
     "srec.5": "srec.xml",
     "ntpshmmon.1": "ntpshmmon.xml",
-    }
+}
+
 if tiocmiwait:
     base_manpages.update({
         "ppscheck.8": "ppscheck.xml",
-        })
+    })
 
 python_manpages = {
     "gpsprof.1": "gpsprof.xml",
     "gpsfake.1": "gpsfake.xml",
     "gpscat.1": "gpscat.xml",
     "gegps.1": "gps.xml",
-    }
+}
 if env['xgps']:
     python_manpages.update({
         "xgpsspeed.1": "gps.xml",
@@ -1688,7 +1694,7 @@ for manpage in base_manpages.keys() + python_manpages.keys():
     if not manbuilder and not os.path.exists(manpage):
         continue
     section = manpage.split(".")[1]
-    dest = os.path.join(installdir('mandir'), "man"+section, manpage)
+    dest = os.path.join(installdir('mandir'), "man" + section, manpage)
     maninstall.append(env.InstallAs(source=manpage, target=dest))
 install = env.Alias('install', binaryinstall + maninstall + python_install
                     + pc_install + headerinstall)
@@ -1787,7 +1793,7 @@ Utility("deheader", generated_sources, [
     'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c '
     '-x monitor_proto.c -i gpsd_config.h -i gpsd.h '
     '-m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
-    ])
+])
 
 # Perform all local code-sanity checks (but not the Coverity scan).
 audit = env.Alias('audit',
@@ -1807,12 +1813,12 @@ audit = env.Alias('audit',
 # Unit-test the bitfield extractor
 bits_regress = Utility('bits-regress', [test_bits], [
     '$SRCDIR/test_bits --quiet'
-    ])
+])
 
 # Unit-test the bitfield extractor
 matrix_regress = Utility('matrix-regress', [test_matrix], [
     '$SRCDIR/test_matrix --quiet'
-    ])
+])
 
 # Check that all Python modules compile properly
 if env['python']:
@@ -1908,14 +1914,14 @@ else:
         '    grep -v "^#" test/synthetic-rtcm2.json | diff -ub - $${TMPFILE} '
         '    || echo "Test FAILED!"; '
         '    rm -f $${TMPFILE}; ',
-        ])
+    ])
 
 # Rebuild the RTCM regression tests.
 Utility('rtcm-makeregress', [gpsdecode], [
     'for f in $SRCDIR/test/*.rtcm2; do '
     '    $SRCDIR/gpsdecode -j <$${f} >$${f}.chk; '
     'done'
-    ])
+])
 
 # Regression-test the AIVDM decoder.
 if not env["aivdm"]:
@@ -1963,7 +1969,7 @@ else:
         '    grep -v "^#" $SRCDIR/test/sample.aivdm.js.chk '
         '    | diff -ub - $${TMPFILE} || echo "Test FAILED!"; '
         '    rm -f $${TMPFILE}; ',
-        ])
+    ])
 
 # Rebuild the AIVDM regression tests.
 Utility('aivdm-makeregress', [gpsdecode], [
@@ -1972,19 +1978,19 @@ Utility('aivdm-makeregress', [gpsdecode], [
     '    $SRCDIR/gpsdecode -u -j <$${f} > $${f}.ju.chk; '
     '    $SRCDIR/gpsdecode -j  <$${f} > $${f}.js.chk; '
     'done',
-    ])
+])
 
 # Regression-test the packet getter.
 packet_regress = UtilityWithHerald(
     'Testing detection of invalid packets...',
     'packet-regress', [test_packet], [
         '$SRCDIR/test_packet | diff -u $SRCDIR/test/packet.test.chk -',
-    ])
+])
 
 # Rebuild the packet-getter regression test
 Utility('packet-makeregress', [test_packet], [
     '$SRCDIR/test_packet >$SRCDIR/test/packet.test.chk',
-    ])
+])
 
 # Rebuild the geoid test
 Utility('geoid-makeregress', [test_geoid], [
@@ -1996,7 +2002,7 @@ geoid_regress = UtilityWithHerald(
     'geoid-regress', [test_geoid], [
         '$SRCDIR/test_geoid 37.371192 122.014965'
         ' | diff -u $SRCDIR/test/geoid.test.chk -',
-    ])
+])
 
 # Regression-test the Maidenhead Locator
 if not env['python']:
@@ -2006,12 +2012,12 @@ else:
         'Testing the Maidenhead Locator conversion...',
         'maidenhead-locator-regress', [python_built_extensions], [
             '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
-        ])
+    ])
 
 # Regression-test the calendar functions
 time_regress = Utility('time-regress', [test_mktime], [
     '$SRCDIR/test_mktime'
-    ])
+])
 
 # Regression test the unpacking code in libgps
 if not env['python']:
@@ -2022,13 +2028,13 @@ else:
         'unpack-regress', [test_libgps], [
             '$SRCDIR/regress-driver $REGRESSOPTS -c'
             ' $SRCDIR/test/clientlib/*.log',
-        ])
+    ])
 
 # Build the regression test for the sentence unpacker
 Utility('unpack-makeregress', [test_libgps], [
     '@echo "Rebuilding the client sentence-unpacker tests..."',
     '$SRCDIR/regress-driver $REGRESSOPTS -c -b $SRCDIR/test/clientlib/*.log'
-    ])
+])
 
 # Unit-test the JSON parsing
 if not env['socket_export']:
@@ -2039,20 +2045,20 @@ else:
 # Unit-test timespec math
 timespec_regress = Utility('timespec-regress', [test_timespec], [
     '$SRCDIR/test_timespec'
-    ])
+])
 
 # consistency-check the driver methods
 method_regress = UtilityWithHerald(
     'Consistency-checking driver methods...',
     'method-regress', [test_packet], [
         '$SRCDIR/test_packet -c >/dev/null',
-    ])
+])
 
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit', [
     '$SRCDIR/valgrind-audit.py', python_built_extensions, gpsd],
     '$PYTHON $SRCDIR/valgrind-audit.py'
-    )
+)
 
 # Run test builds on remote machines
 flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
@@ -2084,7 +2090,7 @@ test_nondaemon = [
     unpack_regress,
     json_regress,
     timespec_regress,
-    ]
+]
 
 test_quick = test_nondaemon + [gpsfake_tests]
 test_noclean = test_quick + [gps_regress]
@@ -2271,8 +2277,7 @@ else:
 udev_install = Utility('udev-install', 'install', [
     'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
     'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] +
-    '/rules.d/25-gpsd.rules',
-    ] + hotplug_wrapper_install)
+    '/rules.d/25-gpsd.rules', ] + hotplug_wrapper_install)
 
 if env['systemd']:
     env.Requires(udev_install, systemd_install)
@@ -2289,7 +2294,7 @@ if env['systemd'] and not env["sysroot"]:
 Utility('udev-uninstall', '', [
     'rm -f %s/gpsd.hotplug' % env['udevdir'],
     'rm -f %s/rules.d/25-gpsd.rules' % env['udevdir'],
-    ])
+])
 
 Utility('udev-test', '', ['$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5', ])
 
@@ -2346,7 +2351,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     zip = env.Command('zip', distfiles, [
         '@zip -r gpsd-${VERSION}.zip $SOURCES',
         '@ls -l gpsd-${VERSION}.zip',
-        ])
+    ])
     env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
 
     # How to build a tarball.
@@ -2354,7 +2359,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         '@tar --transform "s:^:gpsd-${VERSION}/:" '
         ' -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
-        ])
+    ])
     env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
 
     # Make RPM from the specfile in packaging
@@ -2365,14 +2370,14 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         'tar -xzvf gpsd-${VERSION}.tar.gz',
         'cd gpsd-${VERSION}; scons',
         'rm -fr gpsd-${VERSION}',
-        ])
+    ])
 
     releasecheck = env.Alias('releasecheck', [
         testbuild,
         check,
         audit,
         flocktest,
-        ])
+    ])
 
     # This is how to ship a release to the hosting site.
     # The chmod copes with the fact that scp will give a
@@ -2381,13 +2386,12 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         'gpg -b gpsd-${VERSION}.tar.gz',
         'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
         'scp gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig ' + scpupload,
-        ])
+    ])
 
     # How to tag a release
     tag_release = Utility('tag-release', [], [
         'git tag -s -m "Tagged for external release ${VERSION}" \
-         release-${VERSION}'
-        ])
+         release-${VERSION}'])
     upload_tags = Utility('upload-tags', [], ['git push --tags'])
 
     # Local release preparation. This production will require Internet access,
