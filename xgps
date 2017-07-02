@@ -3,7 +3,8 @@
 '''
 xgps -- test client for gpsd
 
-usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [-r rotation] [server[:port[:device]]]
+usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [-r rotation]
+            [server[:port[:device]]]
 '''
 
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
@@ -54,7 +55,8 @@ class unit_adjustments(object):
         self.speedunits = "mph"
         if units is None:
             units = gps.clienthelpers.gpsd_units()
-        if units in (gps.clienthelpers.unspecified, gps.clienthelpers.imperial, "imperial", "i"):
+        if units in (gps.clienthelpers.unspecified, gps.clienthelpers.imperial,
+                     "imperial", "i"):
             pass
         elif units in (gps.clienthelpers.nautical, "nautical", "n"):
             self.altfactor = gps.METERS_TO_FEET
@@ -84,7 +86,8 @@ def fit_to_grid(x, y, line_width):
 
 
 def fit_circle_to_grid(x, y, radius, line_width):
-    "Adjust circle coordinates and radius to produce sharp horizontal and vertical tangents."
+    """Adjust circle coordinates and radius to produce sharp horizontal
+    and vertical tangents."""
     r = radius
     x1, y1 = fit_to_grid(x - r, y - r, line_width)
     x2, y2 = fit_to_grid(x + r, y + r, line_width)
@@ -170,7 +173,8 @@ class SkyView(Gtk.DrawingArea):
 
     def draw_string(self, x, y, text, centered=True):
         "Draw a text on the skyview."
-        self.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+        self.cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL,
+                                 cairo.FONT_WEIGHT_BOLD)
         self.cr.set_font_size(10)
 
         if centered:
@@ -214,11 +218,15 @@ class SkyView(Gtk.DrawingArea):
             # on the display plane, the circle would have a diameter of
             # sin(45) ~ 0.7.  But the naive linear mapping, just splitting
             # the horizon diameter in half, seems to work better visually.
-            self.draw_circle(self.center_x, self.center_y, self.radius / 2, filled=False)
+            self.draw_circle(self.center_x, self.center_y, self.radius / 2,
+                             filled=False)
         elif self.step_of_grid == 30:
-            self.draw_circle(self.center_x, self.center_y, self.radius * 2 / 3, filled=False)
-            self.draw_circle(self.center_x, self.center_y, self.radius / 3, filled=False)
-        self.draw_circle(self.center_x, self.center_y, self.radius, filled=False)
+            self.draw_circle(self.center_x, self.center_y, self.radius * 2 / 3,
+                             filled=False)
+            self.draw_circle(self.center_x, self.center_y, self.radius / 3,
+                             filled=False)
+        self.draw_circle(self.center_x, self.center_y, self.radius,
+                         filled=False)
 
         (x1, y1) = self.pol2cart(0, 0)
         (x2, y2) = self.pol2cart(180, 0)
@@ -260,7 +268,9 @@ class SkyView(Gtk.DrawingArea):
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
 
             self.cr.set_source_rgb(1, 1, 1)
-            self.draw_string(x + SkyView.SAT_RADIUS, y + (SkyView.SAT_RADIUS * 2), str(sat.PRN), centered=False)
+            self.draw_string(x + SkyView.SAT_RADIUS,
+                             y + (SkyView.SAT_RADIUS * 2), str(sat.PRN),
+                             centered=False)
 
         self.cr = None
 
@@ -324,8 +334,11 @@ class MaidenheadView(object):
         self.widget.set_editable(False)
 
     def update(self, tpv):
-        if tpv.mode >= gps.MODE_2D and hasattr(tpv, "lat") and hasattr(tpv, "lon"):
-            self.widget.set_text(gps.clienthelpers.maidenhead(tpv.lat, tpv.lon))
+        if ((tpv.mode >= gps.MODE_2D
+             and hasattr(tpv, "lat")
+             and hasattr(tpv, "lon"))):
+            self.widget.set_text(gps.clienthelpers.maidenhead(tpv.lat,
+                                                              tpv.lon))
         else:
             return self.widget.set_text("n/a")
 
@@ -342,12 +355,15 @@ class AISView(object):
         self.named = {}
         self.store = Gtk.ListStore(str, str, str, str, str, str)
         self.widget = Gtk.ScrolledWindow()
-        self.widget.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        self.widget.set_policy(Gtk.PolicyType.AUTOMATIC,
+                               Gtk.PolicyType.AUTOMATIC)
         self.view = Gtk.TreeView(model=self.store)
         self.widget.set_size_request(-1, 300)
         self.widget.add_with_viewport(self.view)
 
-        for (i, label) in enumerate(('#', 'Name:', 'Callsign:', 'Destination:', "Lat/Lon:", "Information")):
+        for (i, label) in enumerate(('#', 'Name:', 'Callsign:',
+                                     'Destination:', "Lat/Lon:",
+                                     "Information")):
             column = Gtk.TreeViewColumn(label)
             renderer = Gtk.CellRendererText()
             column.pack_start(renderer, expand=True)
@@ -368,7 +384,8 @@ class AISView(object):
                     here = self.store.get_iter(i)
                     name = self.store.get_value(here, 1)
                     mmsi = self.name_to_mmsi[name]
-                    if self.named[mmsi].entry_time < time.time() - AISView.DWELLTIME:
+                    if ((self.named[mmsi].entry_time
+                         < time.time() - AISView.DWELLTIME)):
                         del self.named[mmsi]
                         if name in self.name_to_mmsi:
                             del self.name_to_mmsi[name]
@@ -413,17 +430,20 @@ class AISView(object):
             if self.enter(ais, ais.mmsi):
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
-                    (ais.type, ais.mmsi, "(shore)", ais.timestamp, where, ais.epfd_text))
+                    (ais.type, ais.mmsi, "(shore)", ais.timestamp, where,
+                     ais.epfd_text))
         elif ais.type == 5:
             if self.enter(ais, ais.shipname):
                 self.store.prepend(
-                    (ais.type, ais.shipname, ais.callsign, ais.destination, "", ais.shiptype))
+                    (ais.type, ais.shipname, ais.callsign, ais.destination,
+                     "", ais.shiptype))
         elif ais.type == 12:
             sender = ais.mmsi
             if sender in self.named:
                 sender = self.named[sender].shipname
             recipient = ais.dest_mmsi
-            if recipient in self.named and hasattr(self.named[recipient], "shipname"):
+            if ((recipient in self.named
+                 and hasattr(self.named[recipient], "shipname"))):
                 recipient = self.named[recipient].shipname
             self.store.prepend(
                 (ais.type, sender, "", recipient, "", ais.text))
@@ -436,12 +456,14 @@ class AISView(object):
         elif ais.type in (19, 24):
             if self.enter(ais, ais.shipname):
                 self.store.prepend(
-                    (ais.type, ais.shipname, "(class B)", "", "", ais.shiptype_text))
+                    (ais.type, ais.shipname, "(class B)", "", "",
+                     ais.shiptype_text))
         elif ais.type == 21:
             if self.enter(ais, ais.name):
                 where = self.latlon(ais.lat, ais.lon)
                 self.store.prepend(
-                    (ais.type, ais.name, "(%s navaid)" % ais.epfd_text, "", where, ais.aid_type_text))
+                    (ais.type, ais.name, "(%s navaid)" % ais.epfd_text,
+                     "", where, ais.aid_type_text))
 
 
 class Base(object):
@@ -518,12 +540,14 @@ class Base(object):
               'Nautical units', 1),
              ('Metric', None, '_Metric', '<Control>m',
               'Metric Units', 2),
-             ], 0, lambda a, _unused: self.set_units(['i', 'n', 'm'][a.get_current_value()]))
+             ], 0, lambda a, _unused: self.set_units(
+                 ['i', 'n', 'm'][a.get_current_value()]))
         self.actiongroup.add_radio_actions(
             [('30deg', None, '30°', None, '30°', 30),
              ('45deg', None, '45°', None, '45°', 45),
              ('Off', None, 'Off', None, 'Off', 0),
-             ], 45, lambda a, _unused: self.set_step_of_grid(a.get_current_value()))
+             ], 45, lambda a, _unused: self.set_step_of_grid(
+                 a.get_current_value()))
         self.uimanager.insert_action_group(self.actiongroup, 0)
         self.uimanager.add_ui_from_string('''
 <ui>
@@ -570,7 +594,8 @@ class Base(object):
         self.satlist = Gtk.ListStore(str, str, str, str, str)
         view = Gtk.TreeView(model=self.satlist)
 
-        for (i, label) in enumerate(('PRN:', 'Elev:', 'Azim:', 'SNR:', 'Used:')):
+        for (i, label) in enumerate(('PRN:', 'Elev:', 'Azim:', 'SNR:',
+                                     'Used:')):
             column = Gtk.TreeViewColumn(label)
             renderer = Gtk.CellRendererText()
             column.pack_start(renderer, expand=True)
@@ -654,7 +679,9 @@ class Base(object):
             "AIS": self.aisbox}
 
         # Discard field labels and associate data hooks with their widgets
-        Base.gpsfields = [(label_hook_widget[0][1], label_hook_widget[1]) for label_hook_widget in zip(Base.gpsfields, gpswidgets)]
+        Base.gpsfields = [(label_hook_widget[0][1], label_hook_widget[1])
+                          for label_hook_widget
+                          in zip(Base.gpsfields, gpswidgets)]
 
     def view_toggle(self, action):
         # print("View toggle:", action.get_active(), action.get_name())
@@ -673,7 +700,8 @@ class Base(object):
         try:
             self.satlist.set_value(self.row_iters[row], column, str(value))
         except IndexError:
-            sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n" % (row, MAXCHANNELS))
+            sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n"
+                             % (row, MAXCHANNELS))
 
     def delete_event(self, _widget, _event, _data=None):
         Gtk.main_quit()
@@ -836,7 +864,9 @@ class Base(object):
         if self.daemon.read() == -1:
             self.handle_hangup(source, condition)
         if self.daemon.valid & gps.PACKET_SET:
-            if self.device and "device" in self.daemon.data and self.device != self.daemon.data["device"]:
+            if ((self.device
+                 and "device" in self.daemon.data
+                 and self.device != self.daemon.data["device"])):
                 return True
             self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
@@ -847,13 +877,15 @@ class Base(object):
                 self.noiseview.update(self.daemon.data)
                 if not self.noise_latch:
                     self.noise_latch = True
-                    self.uimanager.get_widget('/MenuBar/View/Noise').set_active(True)
+                    self.uimanager.get_widget(
+                        '/MenuBar/View/Noise').set_active(True)
                     self.noisebox.show()
             elif self.daemon.data["class"] == "AIS":
                 self.aisview.update(self.daemon.data)
                 if not self.ais_latch:
                     self.ais_latch = True
-                    self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
+                    self.uimanager.get_widget(
+                        '/MenuBar/View/AIS').set_active(True)
                     self.aisbox.show()
 
         return True
@@ -923,7 +955,8 @@ if __name__ == "__main__":
         try:
             daemon = gps.gps(host=host,
                              port=port,
-                             mode=gps.WATCH_ENABLE | gps.WATCH_JSON | gps.WATCH_SCALED,
+                             mode=gps.WATCH_ENABLE | gps.WATCH_JSON
+                             | gps.WATCH_SCALED,
                              verbose=debug)
             base.watch(daemon, device)
             base.main()
