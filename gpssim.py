@@ -294,7 +294,7 @@ class NMEA(object):
         "Report the simulation state."
         out = ""
         for sentence in self.sentences:
-            if isinstance(sentence, 'tuple'):
+            if isinstance(sentence, tuple):
                 (interval, sentence) = sentence
                 if self.counter % interval:
                     continue
