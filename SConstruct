@@ -283,9 +283,12 @@ if ARGUMENTS.get('minimal'):
              and not (name is "gpsd" or name is "gpsdclients"))):
             env[name] = False
 
-# Time-service build = stripped-down and some diagnostic tools
+# Time-service build = stripped-down with some diagnostic tools
 if ARGUMENTS.get('timeservice'):
     timerelated = ("gpsd",
+                   "nmea0183",	# For generic hats of unknown type.
+                   "ublox",	# For the Uputronics board
+                   "mtk3301",	# For the Adafruit HAT
                    "ipv6",
                    "magic_hat",
                    "ncurses",
@@ -1253,10 +1256,8 @@ if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
     if tiocmiwait:
         bin_binaries += [ppscheck]
 if env["ncurses"]:
-    if env["gpsdclients"]:
-        bin_binaries += [cgps]
     if env["timeservice"] or env["gpsdclients"]:
-        bin_binaries += [gpsmon]
+        bin_binaries += [cgps, gpsmon]
 
 # Test programs - always link locally and statically
 test_bits = env.Program('test_bits', ['test_bits.c'],
