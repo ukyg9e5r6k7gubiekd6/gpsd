@@ -549,7 +549,7 @@ class DaemonInstance(SubprogramInstance):
                 % (port, self.control_socket, options))
         # Derive a unique SHM key from the port # to avoid collisions.
         # Use 'Gp' as the prefix to avoid colliding with 'GPSD'.
-        shmkey = '0x4770%.04X' % port
+        shmkey = '0x4770%.04X' % int(port)
         env = {'GPSD_SHM_KEY': shmkey}
         super(DaemonInstance, self).spawn('gpsd', opts, background, prefix,
                                           env)
