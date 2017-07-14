@@ -152,7 +152,7 @@ def EarthDistance(c1, c2):
     f = 1 / 298.257223563
     b = 6356752.314245  # meters; b = (1 - f)a
 
-    MILES_PER_KILOMETER = 0.621371
+    # MILES_PER_KILOMETER = 1000.0 / (.3048 * 5280.0)
 
     MAX_ITERATIONS = 200
     CONVERGENCE_THRESHOLD = 1e-12  # .000,000,000,001
@@ -171,7 +171,7 @@ def EarthDistance(c1, c2):
     sinU2 = math.sin(U2)
     cosU2 = math.cos(U2)
 
-    for iteration in range(MAX_ITERATIONS):
+    for _ in range(MAX_ITERATIONS):
         sinLambda = math.sin(Lambda)
         cosLambda = math.cos(Lambda)
         sinSigma = math.sqrt((cosU2 * sinLambda) ** 2 +

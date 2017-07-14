@@ -12,13 +12,14 @@ from __future__ import absolute_import, print_function, division
 
 import copy
 import getopt
-import gps
 import math
 import os
 import signal
 import socket
 import sys
 import time
+
+import gps
 
 
 class Baton(object):

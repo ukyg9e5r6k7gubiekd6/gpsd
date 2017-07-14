@@ -20,7 +20,6 @@
 from __future__ import absolute_import, print_function, division
 
 from .client import *
-from .misc import isotime
 
 NaN = float('nan')
 
@@ -213,7 +212,7 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.driver_mode = default("native", 0)
             self.mincycle = default("mincycle", NaN)
             self.serialmode = default("serialmode", "8N1")
-            # FIXME: decode DEVICSES
+            # FIXME: decode DEVICES
             # FIXME: decode PPS
         elif self.data.get("class") == "TPV":
             self.device = default("device", "missing")

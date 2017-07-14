@@ -14,14 +14,15 @@
 from __future__ import absolute_import, print_function, division
 
 import getopt
-import gps
-import gps.fake as gpsfake   # The "as" pacifies pychecker
 import os
 import platform
 import pty
 import socket
 import sys
 import time
+
+import gps
+import gps.fake as gpsfake   # The "as" pacifies pychecker
 
 try:
     my_input = raw_input

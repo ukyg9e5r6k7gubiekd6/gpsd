@@ -25,9 +25,10 @@
 from __future__ import absolute_import, print_function, division
 
 import getopt
-import gps
 import os
 import sys
+
+import gps
 
 KML_OPEN_IN_GE = '''\
 <?xml version="1.0" encoding="UTF-8"?>

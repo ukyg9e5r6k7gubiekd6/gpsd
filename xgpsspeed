@@ -11,19 +11,24 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
-from gi.repository import Gdk
-import cairo
-from gi.repository import GObject
-import gps
 from math import pi
 from math import cos
 from math import sin
 from math import sqrt
 from math import radians
 from socket import error as SocketError
+
+import gps
+
+import cairo
+
+# Gtk3 imports.  Gtk3 requires the require_version(), which then causes
+# pylint to complain about the subsequent "non-top" imports.
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk  # pylint: disable=wrong-import-position
+from gi.repository import Gdk  # pylint: disable=wrong-import-position
+from gi.repository import GObject  # pylint: disable=wrong-import-position
 
 
 class Speedometer(Gtk.DrawingArea):

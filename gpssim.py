@@ -5,12 +5,13 @@ A GPS simulator.
 
 This is proof-of-concept code, not production ready; some functions are stubs.
 """
-import gps
-import gpslib
 import math
 import random
 import sys
 import time
+
+import gps
+import gpslib
 
 # First, the mathematics.  We simulate a moving viewpoint on the Earth
 # and a satellite with specified orbital elements in the sky.

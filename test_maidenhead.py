@@ -12,6 +12,7 @@
 from __future__ import absolute_import, print_function, division
 
 import sys
+
 import gps.clienthelpers
 
 errors = 0

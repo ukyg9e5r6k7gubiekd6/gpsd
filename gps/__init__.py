@@ -7,11 +7,11 @@
 # Preserve this property!
 from __future__ import absolute_import  # Ensure Python2 behaves like Python 3
 
-api_major_version = 5   # bumped on incompatible changes
-api_minor_version = 0   # bumped on compatible changes
-
 from .gps import *
 from .misc import *
+
+api_major_version = 5   # bumped on incompatible changes
+api_minor_version = 0   # bumped on compatible changes
 
 # The 'client' module exposes some C utility functions for Python clients.
 # The 'packet' module exposes the packet getter via a Python interface.

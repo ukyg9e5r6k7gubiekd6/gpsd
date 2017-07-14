@@ -10,14 +10,16 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import curses.ascii
 import getopt
-import gps.packet as sniffer
 import os
 import select
 import socket
 import sys
 import termios
+
+import curses.ascii
+
+import gps.packet as sniffer
 
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
 # the Skyrtaq S2525F8 emits 100 chars

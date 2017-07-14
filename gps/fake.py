@@ -78,6 +78,7 @@ import pty
 import select
 import signal
 import socket
+import stat
 import subprocess
 import sys
 import termios  # fcntl, array, struct
@@ -87,7 +88,6 @@ import time
 import gps
 from gps import polybytes
 from . import packet as sniffer
-import stat
 
 # The magic number below has to be derived from observation.  If
 # it's too high you'll slow the tests down a lot.  If it's too low
