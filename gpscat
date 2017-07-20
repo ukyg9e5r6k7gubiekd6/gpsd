@@ -53,7 +53,6 @@ def printusage():
                      "serial-port\n")
 
 if __name__ == '__main__':
-    buf = bytes()
     try:
         try:
             (options, arguments) = getopt.getopt(sys.argv[1:], "hps:tD:V")
@@ -122,7 +121,6 @@ if __name__ == '__main__':
             termios.tcsetattr(tty, termios.TCSANOW,
                               [iflag, oflag, cflag, lflag, ispeed, ospeed, cc])
 
-        buf = bytes()
         if not rawmode:
             getter = sniffer.new()
             sniffer.register_report(reporter)
@@ -131,9 +129,10 @@ if __name__ == '__main__':
             rlist, wlist, xlist = select.select([tty], [], [])
             if rlist == [tty]:
                 if rawmode:
-                    buf += os.read(tty, NMEA_MAX)
+                    buf = os.read(tty, NMEA_MAX)
+                    if not buf:
+                        break
                     sys.stdout.write(hexdump(buf))
-                    buf = bytes()
                 else:
                     (length, ptype, packet, counter) = getter.get(tty)
                     seqno += 1
