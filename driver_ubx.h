@@ -102,6 +102,10 @@ typedef enum {
 #define UBX_SOL_VALID_WEEK 0x04
 #define UBX_SOL_VALID_TIME 0x08
 
+#define UBX_TIMEGPS_VALID_TIME        0x01
+#define UBX_TIMEGPS_VALID_WEEK        0x02
+#define UBX_TIMEGPS_VALID_LEAP_SECOND 0x04
+
 /* from UBX_NAV_SVINFO */
 #define UBX_SAT_USED 0x01
 #define UBX_SAT_DGPS 0x02
@@ -117,5 +121,12 @@ typedef enum {
 #define UBX_SIG_CDCRLK1 5
 #define UBX_SIG_CDCRLK2 6
 #define UBX_SIG_NAVMSG 7
+
+#define UBX_NAV_PVT_VALID_DATE      0x01
+#define UBX_NAV_PVT_VALID_TIME      0x02
+#define UBX_NAV_PVT_VALID_DATE_TIME (UBX_NAV_PVT_VALID_DATE | UBX_NAV_PVT_VALID_TIME)
+
+#define UBX_NAV_PVT_FLAG_GPS_FIX_OK 0x01
+#define UBX_NAV_PVT_FLAG_DGPS       0x02
 
 #endif /* _GPSD_UBX_H_ */
