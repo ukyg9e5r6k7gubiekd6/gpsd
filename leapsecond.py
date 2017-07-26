@@ -188,13 +188,13 @@ def last_insertion_time():
     tm_mday = 1
     tm_hour = tm_min = tm_sec = 0
     tm_mon = 1
-    jan = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
+    jan_t = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
            tm_sec, tm_wday, tm_yday, tm_isdst)
-    jan = int(calendar.timegm(jan))
+    jan = int(calendar.timegm(jan_t))
     tm_mon = 7
-    jul = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
+    jul_t = (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
            tm_sec, tm_wday, tm_yday, tm_isdst)
-    jul = int(calendar.timegm(jul))
+    jul = int(calendar.timegm(jul_t))
     # We have the UTC times of the potential insertion points this year.
     now = time.time()
     if now > jul:
