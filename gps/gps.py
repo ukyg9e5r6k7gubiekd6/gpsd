@@ -212,8 +212,6 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.driver_mode = default("native", 0)
             self.mincycle = default("mincycle", NaN)
             self.serialmode = default("serialmode", "8N1")
-            # FIXME: decode DEVICES
-            # FIXME: decode PPS
         elif self.data.get("class") == "TPV":
             self.device = default("device", "missing")
             self.utc = default("time", None, TIME_SET)
@@ -254,6 +252,15 @@ class gps(gpscommon, gpsdata, gpsjson):
                 if sat.used:
                     self.satellites_used += 1
             self.valid = ONLINE_SET | SATELLITE_SET
+        elif self.data.get("class") == "PPS":
+            self.device = default("device", "missing")
+            self.real_sec = default("real_sec", NaN)
+            self.real_nsec = default("real_nsec", NaN)
+            self.clock_sec = default("clock_sec", NaN)
+            self.clock_nsec = default("clock_nsec", NaN)
+            self.precision = default("precision", 0)
+        # elif self.data.get("class") == "DEVICES":
+        # TODO: handle class DEVICES
 
     def read(self):
         "Read and interpret data from the daemon."
