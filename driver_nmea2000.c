@@ -1371,9 +1371,9 @@ static void find_pgn(struct can_frame *frame, struct gps_device_t *session)
 
 	    clock_gettime(CLOCK_REALTIME, &msgTime);
 	    (void)fprintf(logFile,
-	                  "(%010d.%06d) can0 %08x#",
-	                  (unsigned int)msgTime.tv_sec,
-	                  (unsigned int)msgTime.tv_nsec/1000,
+	                  "(%010ld.%06ld) can0 %08x#",
+	                  (long)msgTime.tv_sec,
+	                  msgTime.tv_nsec / 1000,
 	                  frame->can_id & 0x1ffffff);
 	    if ((frame->can_dlc & 0x0f) > 0) {
 		int l1;
