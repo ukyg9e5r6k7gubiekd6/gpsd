@@ -272,16 +272,16 @@ static int packet_test(struct map *mp)
     lexer.inbuflen = mp->testlen;
     packet_parse(&lexer);
     if (lexer.type != mp->type)
-	printf("%2zi: %s test FAILED (packet type %d wrong).\n",
+	printf("%2ti: %s test FAILED (packet type %d wrong).\n",
 	       mp - singletests + 1, mp->legend, lexer.type);
     else if (memcmp
 	     (mp->test + mp->garbage_offset, lexer.outbuffer,
 	      lexer.outbuflen)) {
-	printf("%2zi: %s test FAILED (data garbled).\n", mp - singletests + 1,
+	printf("%2ti: %s test FAILED (data garbled).\n", mp - singletests + 1,
 	       mp->legend);
 	++failure;
     } else
-	printf("%2zi: %s test succeeded.\n", mp - singletests + 1,
+	printf("%2ti: %s test succeeded.\n", mp - singletests + 1,
 	       mp->legend);
 
     return failure;
