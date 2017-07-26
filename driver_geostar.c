@@ -435,8 +435,10 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul1 = getleu32(buf, OFFSET(2));
 	ul2 = getleu32(buf, OFFSET(3));
 	ul3 = getleu32(buf, OFFSET(4));
-	(void)snprintf(session->subtype, sizeof(session->subtype), "%d.%d %d.%d.%d %x %c-%d\n",
-		ul4>>16, ul4&0xFFFF, ul1>>9, (ul1>>5)&0xF, ul1&0x1F, ul2, ul3>>24, ul3&0x00FFFFFF);
+        (void)snprintf(session->subtype, sizeof(session->subtype),
+                "%u.%u %u.%u.%u %x %c-%u\n",
+                ul4>>16, ul4&0xFFFF, ul1>>9, (ul1>>5)&0xF, ul1&0x1F, ul2,
+                ul3>>24, ul3&0x00FFFFFF);
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "Response to Request FW version command: %s\n",
 		 session->subtype);
