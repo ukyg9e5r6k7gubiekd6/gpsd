@@ -381,7 +381,7 @@ int main(int argc, char *argv[])
     /* coverity[uninit_use_in_call] */
     rc = bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr));
     if (rc == -1) {
-	printf("%s: cannot bind port TCP %u\n",argv[0],LCDDPORT);
+	printf("%s: cannot bind port TCP %d\n",argv[0],LCDDPORT);
 	perror("error ");
 	exit(EXIT_FAILURE);
     }
