@@ -574,7 +574,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     case 0x5e:			/* Additional Fix Status Report */
 	break;
     case 0x6c:			/* Satellite Selection List */
-	u1 = getub(buf, 0);	/* nsvs/dimension */
+	u1 = getub(buf, 0);	/* nsvs/dimension UNUSED */
 	count = (int)getub(buf, 17);
 	if (len != (18 + count))
 	    break;
