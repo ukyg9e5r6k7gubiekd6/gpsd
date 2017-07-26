@@ -26,7 +26,7 @@ class ksv(object):
         self.lat = lat          # Decimal degrees
         self.lon = lon          # Decimal degrees
         self.alt = alt          # Meters
-        self.course = cour      # Degrees from true North
+        self.course = course    # Degrees from true North
         self.speed = speed      # Meters per second
         self.climb = climb      # Meters per second
         self.h_acc = h_acc      # Meters per second per second
