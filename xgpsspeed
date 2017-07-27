@@ -559,7 +559,7 @@ class Main(object):
                 rotate=self.rotate)
         else:
             self.widget = LandSpeedometer(speed_unit=self.speed_unit)
-        self.window.connect('delete_event', self.delete_event)
+        self.window.connect('delete-event', self.delete_event)
         self.window.connect('destroy', self.destroy)
         self.widget.show()
         vbox = Gtk.VBox(False, 0)

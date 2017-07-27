@@ -506,7 +506,7 @@ class Base(object):
         if len(target):
             target = " " + target
         self.window.set_title("xgps" + target)
-        self.window.connect("delete_event", self.delete_event)
+        self.window.connect("delete-event", self.delete_event)
         self.window.set_resizable(False)
 
         vbox = Gtk.VBox(False, 0)
