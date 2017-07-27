@@ -67,7 +67,7 @@ class unit_adjustments(object):
             self.speedfactor = gps.MPS_TO_KNOTS
             self.speedunits = "knots"
         elif units in (gps.clienthelpers.metric, "metric", "m"):
-            self.altfactor = 1
+            self.altfactor = 1.0
             self.altunits = "m"
             self.speedfactor = gps.MPS_TO_KPH
             self.speedunits = "kph"
@@ -491,7 +491,7 @@ class Base(object):
         ("EPD", lambda s, r: s.update_err_degrees(r, "epd")),
     )
 
-    def __init__(self, deg_type, rotate=0.0, target=[]):
+    def __init__(self, deg_type, rotate=0.0, target=""):
         self.deg_type = deg_type
         self.rotate = rotate
         self.conversions = unit_adjustments()
@@ -951,7 +951,7 @@ if __name__ == "__main__":
                 device = args[2]
             target = arguments[0:]
         else:
-            target = []
+            target = ""
 
         base = Base(deg_type=degreefmt, rotate=rotate, target=target)
         base.set_units(unit_system)
