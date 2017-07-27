@@ -33,7 +33,7 @@ from gi.repository import GObject  # pylint: disable=wrong-import-position
 
 class Speedometer(Gtk.DrawingArea):
     def __init__(self, speed_unit=None):
-        GObject.GObject.__init__(self)
+        Gtk.DrawingArea.__init__(self)
         self.MPH_UNIT_LABEL = 'mph'
         self.KPH_UNIT_LABEL = 'kmh'
         self.KNOTS_UNIT_LABEL = 'knots'
