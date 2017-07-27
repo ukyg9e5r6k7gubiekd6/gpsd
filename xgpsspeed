@@ -55,7 +55,7 @@ class LandSpeedometer(Speedometer):
         Speedometer.__init__(self, speed_unit)
         self.connect('size-allocate', self.on_size_allocate)
         self.width = self.height = 0
-        self.connect('draw', self.draw)
+        self.connect('draw', self.draw_s)
         self.long_ticks = (2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8)
         self.short_ticks = (0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.8, 0.9)
         self.long_inset = lambda x: 0.1 * x
@@ -82,7 +82,7 @@ class LandSpeedometer(Speedometer):
         self.width = allocation.width
         self.height = allocation.height
 
-    def draw(self, _unused, _event, _empty=None):
+    def draw_s(self, _unused, _event, _empty=None):
         self.cr = self.get_window().cairo_create()
         self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
@@ -246,7 +246,7 @@ class NauticalSpeedometer(Speedometer):
         Speedometer.__init__(self, speed_unit)
         self.connect('size-allocate', self.on_size_allocate)
         self.width = self.height = 0
-        self.connect('draw', self.draw)
+        self.connect('draw', self.draw_s)
         self.long_inset = lambda x: 0.05 * x
         self.mid_inset = lambda x: self.long_inset(x) / 1.5
         self.short_inset = lambda x: self.long_inset(x) / 3
@@ -271,7 +271,7 @@ class NauticalSpeedometer(Speedometer):
         self.width = allocation.width
         self.height = allocation.height
 
-    def draw(self, _unused, _event, _empty=None):
+    def draw_s(self, _unused, _event, _empty=None):
         self.cr = self.get_window().cairo_create()
         self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
