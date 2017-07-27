@@ -536,7 +536,7 @@ class NauticalSpeedometer(Speedometer):
 class Main(object):
     def __init__(self, host='localhost', port=gps.GPSD_PORT, device=None,
                  debug=0, speed_unit=None, maxspeed=0, nautical=False,
-                 rotate=0.0, target=[]):
+                 rotate=0.0, target=""):
         self.host = host
         self.port = port
         self.device = device
@@ -548,7 +548,9 @@ class Main(object):
         self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
-        self.window.set_title(' '.join(['xgpsspeed'] + target))
+        if len(target):
+            target = " " + target
+        self.window.set_title('xgpsspeed' + target)
         if self.nautical:
             self.window.set_size_request(500, 550)
             self.widget = NauticalSpeedometer(
@@ -783,16 +785,16 @@ if __name__ == '__main__':
         else:
             parser.print_help()
             sys.exit(0)
-        target = args[0:]
+        target = ':'.join(args[0:])
     elif options.host or options.port or options.device:
         target = [options.host or 'localhost']
         if options.port or options.device:
             target += [options.port or '']
         if options.device:
             target += [options.device]
-        target = [':'.join(target)]
+        target = ':'.join(target)
     else:
-        target = []
+        target = ""
     Main(
         host=options.host or 'localhost',
         port=options.port or gps.GPSD_PORT,
