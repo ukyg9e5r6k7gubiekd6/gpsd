@@ -600,7 +600,6 @@ class TestSession(object):
                  predump=False, udp=False, tcp=False, slow=False):
         "Initialize the test session by launching the daemon."
         self.prefix = prefix
-        self.port = port
         self.options = options
         self.verbose = verbose
         self.predump = predump
