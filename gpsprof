@@ -228,7 +228,7 @@ class spaceplot(plotter):
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
         cep99_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
-        alt_sum = 0
+        alt_sum = 0.0
         alt_num = 0
         alt_fixes = []
         lon_max = -9999
