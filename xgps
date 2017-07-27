@@ -106,7 +106,8 @@ class SkyView(Gtk.DrawingArea):
     SAT_RADIUS = 5      # Diameter of satellite circle
 
     def __init__(self, rotate=0.0):
-        GObject.GObject.__init__(self)
+        Gtk.DrawingArea.__init__(self)
+        # GObject.GObject.__init__(self)
         self.set_size_request(400, 400)
         self.cr = None   # New cairo context for each expose event
         self.step_of_grid = 45  # default step of polar grid
