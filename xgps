@@ -502,7 +502,9 @@ class Base(object):
         self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
-        self.window.set_title(" ".join(["xgps"] + target))
+        if len(target):
+            target = " " + target
+        self.window.set_title("xgps" + target)
         self.window.connect("delete_event", self.delete_event)
         self.window.set_resizable(False)
 
@@ -949,7 +951,7 @@ if __name__ == "__main__":
                 port = args[1]
             if len(args) >= 3:
                 device = args[2]
-            target = arguments[0:]
+            target = ":".join(arguments[0:])
         else:
             target = ""
 
