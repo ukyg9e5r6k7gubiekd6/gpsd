@@ -260,7 +260,7 @@ class gps(gpscommon, gpsdata, gpsjson):
             self.clock_nsec = default("clock_nsec", NaN)
             self.precision = default("precision", 0)
         # elif self.data.get("class") == "DEVICES":
-        # TODO: handle class DEVICES
+        # TODO: handle class DEVICES    # pylint: disable=fixme
 
     def read(self):
         "Read and interpret data from the daemon."
