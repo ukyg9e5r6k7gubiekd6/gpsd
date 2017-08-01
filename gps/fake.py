@@ -590,6 +590,7 @@ class DaemonInstance(SubprogramInstance):
 
 
 class TestSessionError(TestError):
+    # why does testSessionError() return pass? "
     pass
 
 
@@ -747,16 +748,17 @@ class TestSession(object):
                         chosen.enqueued = ""
                     while chosen.waiting():
                         chosen.read()
-                        if chosen.valid & gps.PACKET_SET:
-                            self.reporter(chosen.bresponse)
-                            if ((chosen.data["class"] == "DEVICE"
-                                 and chosen.data["activated"] == 0
-                                 and chosen.data["path"] in self.fakegpslist)):
-                                self.gps_remove(chosen.data["path"])
-                                self.progress(
-                                    "gpsfake: GPS %s removed (notification)\n"
-                                    % chosen.data["path"])
                         had_output = True
+                        if not chosen.valid & gps.PACKET_SET:
+                            continue
+                        self.reporter(chosen.bresponse)
+                        if ((chosen.data["class"] == "DEVICE"
+                             and chosen.data["activated"] == 0
+                             and chosen.data["path"] in self.fakegpslist)):
+                            self.gps_remove(chosen.data["path"])
+                            self.progress(
+                                "gpsfake: GPS %s removed (notification)\n"
+                                % chosen.data["path"])
                 else:
                     raise TestSessionError("test object of unknown type")
                 if not self.writers and not had_output:
