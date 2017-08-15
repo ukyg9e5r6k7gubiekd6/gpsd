@@ -542,7 +542,7 @@ Note the absence of explicit open and close methods.  The object
 interface is designed on the RAII (Resource Acquisition Is
 Initialization) model; you close it by deallocating it.
 
-Look at test_libgpsmm.cpp in the distribution for a full example.
+Look at test_gpsmm.cpp in the distribution for a full example.
 
 == Python examples ==
 
