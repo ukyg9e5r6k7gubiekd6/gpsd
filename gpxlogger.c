@@ -197,7 +197,6 @@ int main(int argc, char **argv)
     bool reconnect = false;
     unsigned int flags = WATCH_ENABLE;
     struct exportmethod_t *method = NULL;
-    const int GPS_TIMEOUT = 5000000;    /* microseconds */
 
     progname = argv[0];
 
@@ -338,10 +337,10 @@ int main(int argc, char **argv)
 
     print_gpx_header();
 
-    while (gps_mainloop(&gpsdata, GPS_TIMEOUT, conditionally_log_fix) < 0 &&
+    while (gps_mainloop(&gpsdata, timeout * 1000000, conditionally_log_fix) < 0 &&
 	   reconnect) {
 	/* avoid busy-calling gps_mainloop() */
-	(void)sleep(GPS_TIMEOUT / 1000000);
+	(void)sleep(timeout);
 	syslog(LOG_INFO, "timeout; about to reconnect");
     }
 
