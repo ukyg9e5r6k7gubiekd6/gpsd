@@ -1757,6 +1757,12 @@ Utility("scan-build", ["gpsd.h", "packet_names.h"],
 # Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123, but Python 3
 # syntax confuses a pylint running under Python 2.
 if len(python_progs) > 0:
+    checkable = python_progs[:]
+    # Theres's an internal error in astroid that requires we disable some
+    # auditing. This is irritating as hell but there's no help for it short
+    # of an upstream fix.
+    checkable.remove("xgps")
+    checkable.remove("xgpsspeed")
     pylint = Utility(
         "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
@@ -1769,7 +1775,7 @@ if len(python_progs) > 0:
          '''W0614,W0640,W0621,W1504,E0602,E0611,E1101,E1102,E1103,E1123,'''
          '''F0401,I0011 '''
          '''gps/*.py *.py '''
-         + " ".join(python_progs)])
+         + " ".join(checkable)])
 
 # Additional Python readability style checks
 if len(python_progs) > 0:
