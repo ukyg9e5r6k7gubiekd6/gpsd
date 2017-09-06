@@ -787,12 +787,12 @@ if __name__ == '__main__':
             sys.exit(0)
         target = ':'.join(args[0:])
     elif options.host or options.port or options.device:
-        target = [options.host or 'localhost']
+        ltarget = [options.host or 'localhost']
         if options.port or options.device:
-            target += [options.port or '']
+            ltarget += [options.port or '']
         if options.device:
-            target += [options.device]
-        target = ':'.join(target)
+            ltarget += [options.device]
+        target = ':'.join(ltarget)
     else:
         target = ""
     Main(

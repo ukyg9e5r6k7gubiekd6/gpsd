@@ -1800,7 +1800,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     int count;
     gps_mask_t retval = 0;
     unsigned int i, thistag;
-    char *p, *s, *e;
+    char *p, *e;
     volatile char *t;
 #ifdef SKYTRAQ_ENABLE
     bool skytraq_sti = false;
@@ -1866,7 +1866,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* dispatch on field zero, the sentence tag */
     for (thistag = i = 0;
 	 i < (unsigned)(sizeof(nmea_phrase) / sizeof(nmea_phrase[0])); ++i) {
-	s = session->nmea.field[0];
+	char *s = session->nmea.field[0];
 	if (strlen(nmea_phrase[i].name) == 3
 #ifdef SKYTRAQ_ENABLE
 	        /* $STI is special */

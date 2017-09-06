@@ -48,6 +48,7 @@ static unsigned char versionprobe[] = {
     0x00, 0x0d, 0x0a
 };
 
+// cppcheck-suppress unusedFunction
 static bool sky_write(struct gps_device_t *session, unsigned char *msg)
 {
     unsigned int crc;

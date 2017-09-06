@@ -43,7 +43,6 @@ char *deg_to_str(enum deg_str_type type, double f)
 {
     static char str[40];
     int dsec, sec, deg, min;
-    long frac_deg;
     double fdsec, fsec, fdeg, fmin;
 
     if (f < 0 || f > 360) {
@@ -57,7 +56,7 @@ char *deg_to_str(enum deg_str_type type, double f)
     if (deg_dd == type) {
 	/* DD.dddddddd */
         /* cm level accuracy requires the %08ld */
-	frac_deg = (long)(fmin * 100000000);
+	long frac_deg = (long)(fmin * 100000000);
 	(void)snprintf(str, sizeof(str), "%3d.%08ld", deg, frac_deg);
 	return str;
     }

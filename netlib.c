@@ -210,8 +210,8 @@ char *netlib_sock2ip(socket_t fd)
 /* retrieve the IP address corresponding to a socket */
 {
     static char ip[INET6_ADDRSTRLEN];
-    int r = 1;
 #ifdef HAVE_INET_NTOP
+    int r;
     sockaddr_t fsin;
     socklen_t alen = (socklen_t) sizeof(fsin);
     r = getpeername(fd, &(fsin.sa), &alen);
@@ -232,9 +232,9 @@ char *netlib_sock2ip(socket_t fd)
 	    return ip;
 	}
     }
+    /* Ugh... */
+    if (r != 0)
 #endif /* HAVE_INET_NTOP */
-    if (r != 0) {
 	(void)strlcpy(ip, "<unknown>", sizeof(ip));
-    }
     return ip;
 }

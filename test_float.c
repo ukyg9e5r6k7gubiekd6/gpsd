@@ -275,6 +275,7 @@ int test_modulo(void) {
 
     a = -5;
     b = 2;
+    //cppcheck-suppress comparisonError
     if (a % b != -1) {
 	printf("m1 ");
 	e++;
@@ -282,6 +283,7 @@ int test_modulo(void) {
 
     a = -5;
     b = -2;
+    //cppcheck-suppress comparisonError
     if (a % b != -1) {
 	printf("m2 ");
 	e++;
@@ -289,6 +291,7 @@ int test_modulo(void) {
 
     a = 5;
     b = -2;
+    //cppcheck-suppress comparisonError
     if (a % b != 1) {
 	printf("m3 ");
 	e++;

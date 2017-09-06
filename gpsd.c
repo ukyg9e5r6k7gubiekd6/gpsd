@@ -1774,6 +1774,7 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 	sp->dist = DGPS_THRESHOLD;
 	sp->server[0] = '\0';
     }
+    hold.lat = hold.lon = 0;
     while (fgets(buf, (int)sizeof(buf), sfp)) {
 	char *cp = strchr(buf, '#');
 	if (cp != NULL)

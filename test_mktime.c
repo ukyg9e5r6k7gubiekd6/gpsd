@@ -86,13 +86,12 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 {
     int i;
     char tbuf[128];
-    time_t ts;
     bool failed = false;
 
     (void)setenv("TZ", "GMT", 1);
 
     for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++) {
-	ts = mktime(&tests[i].t);
+	time_t ts = mktime(&tests[i].t);
 	if (ts != tests[i].result) {
 	    failed = true;
 	    (void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);

@@ -230,7 +230,6 @@ static void gpsd_run_device_hook(struct gpsd_errout_t *errout,
 				 char *device_name, char *hook)
 {
     struct stat statbuf;
-    char buf[HOOK_CMD_MAX];
 
     if (stat(DEVICEHOOKPATH, &statbuf) == -1)
 	gpsd_log(errout, LOG_PROG,
@@ -238,6 +237,7 @@ static void gpsd_run_device_hook(struct gpsd_errout_t *errout,
 		 DEVICEHOOKPATH, hook);
     else {
 	int status;
+	char buf[HOOK_CMD_MAX];
 	(void)snprintf(buf, sizeof(buf), "%s %s %s",
 		       DEVICEHOOKPATH, device_name, hook);
 	gpsd_log(errout, LOG_INF, "running %s\n", buf);

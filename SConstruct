@@ -1754,7 +1754,7 @@ Utility("scan-build", ["gpsd.h", "packet_names.h"],
         "scan-build scons")
 
 # Sanity-check Python code.
-# Bletch.  We don't really want to suppress W0231 E0602 E0611, but Python 3
+# Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123, but Python 3
 # syntax confuses a pylint running under Python 2.
 if len(python_progs) > 0:
     pylint = Utility(
@@ -1762,11 +1762,12 @@ if len(python_progs) > 0:
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
          '''--msg-template='''
          '''"{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" '''
-         '''--reports=n --disable=F0001,C0103,C0111,C1001,C0301,'''
-         '''C0302,C0322,C0324,C0323,C0321,C0330,R0201,R0801,R0902,R0903,'''
-         '''R0904,R0911,R0912,R0913,R0914,R0915,W0110,W0201,W0121,W0123,'''
-         '''W0231,W0232,W0234,W0401,W0403,W0141,W0142,W0603,W0614,W0640,'''
-         '''W0621,W1504,E0602,E0611,E1101,E1102,E1103,F0401,I0011 '''
+         '''--reports=n --disable=F0001,C0103,C0111,C1001,C0301,C0302,'''
+         '''C0322,C0324,C0323,C0321,C0330,C0411,C0413,R0201,R0204,R0801,'''
+         '''R0902,R0903,R0904,R0911,R0912,R0913,R0914,R0915,W0110,W0201,'''
+         '''W0121,W0123,W0231,W0232,W0234,W0401,W0403,W0141,W0142,W0603,'''
+         '''W0614,W0640,W0621,W1504,E0602,E0611,E1101,E1102,E1103,E1123,'''
+         '''F0401,I0011 '''
          '''gps/*.py *.py '''
          + " ".join(python_progs)])
 

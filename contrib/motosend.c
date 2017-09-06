@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 	int speed, l, fd, n;
 	struct termios term;
 	char buf[BSIZ];
-	time_t s, t;
+	time_t t;
 	struct timespec delay;
 
 	if (argc != 5){
@@ -84,6 +84,7 @@ int main(int argc, char **argv) {
 	tcflush(fd, TCIOFLUSH);
 	t = 0; n = 0;
 	while (1){
+		time_t s;
 		/* wait 1,000 uSec */
 		delay.tv_sec = 0;
 		delay.tv_nsec = 1000000L;

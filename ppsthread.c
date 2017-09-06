@@ -1031,6 +1031,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	         * pulse shorter than 500 milliSec + 10%
 		 * looks like 1.0 Hz square wave, ignore trailing edge
 		 * except we can't tell which is which, so we guess */
+		// cppcheck-suppress knownConditionTrueFalse
 		if (edge == 1) {
 		    ok = true;
 		    log = "square\n";

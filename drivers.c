@@ -1608,7 +1608,7 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
      * beginning of the path attribute, followed by a # to separate it
      * from the device.
      */
-    char *prefloc, *sfxloc;
+    char *prefloc;
 
     assert(prefix != NULL && session->lexer.outbuffer != NULL);
 
@@ -1620,6 +1620,7 @@ static void path_rewrite(struct gps_device_t *session, char *prefix)
 	 prefloc < (char *)session->lexer.outbuffer+session->lexer.outbuflen;
 	 prefloc++)
 	if (str_starts_with(prefloc, prefix)) {
+	    char *sfxloc;
 	    char copy[sizeof(session->lexer.outbuffer)+1];
 	    (void)strlcpy(copy,
 			  (char *)session->lexer.outbuffer,
