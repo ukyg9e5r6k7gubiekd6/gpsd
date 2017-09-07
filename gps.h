@@ -940,8 +940,10 @@ struct ais_t
 	struct {
 	    unsigned int ais_version;	/* AIS version level */
 	    unsigned int imo;		/* IMO identification */
+	    // cppcheck-suppress arrayIndexOutOfBounds
 	    char callsign[7+1];		/* callsign */
 #define AIS_SHIPNAME_MAXLEN	20
+	    // cppcheck-suppress arrayIndexOutOfBounds
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];	/* vessel name */
 	    unsigned int shiptype;	/* ship type code */
 	    unsigned int to_bow;	/* dimension to bow */
@@ -970,6 +972,7 @@ struct ais_t
 #define AIS_TYPE6_BINARY_MAX	920	/* 920 bits */
 	    size_t bitcount;		/* bit count of the data */
 	    union {
+		// cppcheck-suppress arrayIndexOutOfBounds
 		char bitdata[(AIS_TYPE6_BINARY_MAX + 7) / 8];
 		/* Inland AIS - ETA at lock/bridge/terminal */
 		struct {
@@ -1240,6 +1243,7 @@ struct ais_t
 	    size_t bitcount;		/* bit count of the data */
 	    bool structured;		/* True match for DAC/FID? */
 	    union {
+		// cppcheck-suppress arrayIndexOutOfBounds
 		char bitdata[(AIS_TYPE8_BINARY_MAX + 7) / 8];
 		/* Inland static ship and voyage-related data */
 		struct {
@@ -1422,6 +1426,7 @@ struct ais_t
 			    unsigned int mmsi;
 			    unsigned int imo;
 #define DAC1FID17_ID_LENGTH		7
+			    // cppcheck-suppress arrayIndexOutOfBounds
 			    char callsign[DAC1FID17_ID_LENGTH+1];
 			    char other[DAC1FID17_ID_LENGTH+1];
 			} id;
@@ -1642,6 +1647,7 @@ struct ais_t
 	    unsigned int heading;	/* true heading */
 	    unsigned int second;	/* seconds of UTC timestamp */
 	    unsigned int regional;	/* regional reserved */
+	    // cppcheck-suppress arrayIndexOutOfBounds
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];		/* ship name */
 	    unsigned int shiptype;	/* ship type code */
 	    unsigned int to_bow;	/* dimension to bow */
