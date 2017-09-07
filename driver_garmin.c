@@ -236,7 +236,8 @@ typedef struct __attribute__((__packed__))
     union
     {
 	//int8_t chars[MAX_BUFFER_SIZE];
-	//uint8_t uchars[MAX_BUFFER_SIZE];
+	// cppcheck-suppress unusedStructMember
+	uint8_t uchars[MAX_BUFFER_SIZE];
 	cpo_pvt_data pvt;
 	cpo_sat_data sats;
     } mData;

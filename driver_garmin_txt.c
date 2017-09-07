@@ -172,6 +172,7 @@ static int gar_decode(const struct gps_context_t *context,
 	}
 	/* second character in prefix is flag for negative number */
 	if (preflen >= 2) {
+	    // cppcheck-suppress arrayIndexOutOfBounds
 	    if (buf[0] == prefix[1]) {
 		sign = -1.0;
 		break;
