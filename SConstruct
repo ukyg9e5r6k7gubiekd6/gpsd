@@ -1509,7 +1509,8 @@ def substituter(target, source, env):
     substmap = (
         ('@VERSION@',    gpsd_version),
         ('@prefix@',     env['prefix']),
-        ('@libdir@',     env['libdir']),
+        ('@libdir@',     installdir('libdir', add_destdir=False)),
+        ('@includedir@',     installdir('includedir', add_destdir=False)),
         ('@udevcommand@',    udevcommand),
         ('@DATE@',       time.asctime()),
         ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),

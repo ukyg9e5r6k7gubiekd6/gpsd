@@ -1,7 +1,7 @@
 prefix=@prefix@
 exec_prefix=${prefix}
-libdir=${exec_prefix}/@libdir@
-includedir=${prefix}/include
+libdir=@libdir@
+includedir=@includedir@
 
 Name: GPSD
 Description: GPS Daemon communication library

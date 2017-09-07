@@ -1,7 +1,7 @@
 prefix=@prefix@
 exec_prefix=${prefix}
-libdir=${exec_prefix}@libdir@
-includedir=${prefix}/include
+libdir=@libdir@
+includedir=@includedir@
 qt_config=lex yacc warn_on uic resources qt release incremental link_prl def_files_disabled exceptions no_mocdepend stl qt_no_framework create_pc create_prl moc thread dll
 
 Name: Qgpsmm
