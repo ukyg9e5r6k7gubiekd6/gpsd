@@ -25,7 +25,7 @@
 #   for building the python bindings
 
 # Release identification begins here
-gpsd_version = "3.17"
+gpsd_version = "3.18~dev"
 
 # client library version
 libgps_version_current = 23
