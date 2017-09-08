@@ -129,14 +129,14 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     /* sanity check the climb, 10,000 m/s should be a nice max */
     if ( 9999.9 < fix->climb )
 	fix->climb = NAN;
-    else if ( -9999.9 > fix->speed )
+    else if ( -9999.9 > fix->climb )
 	fix->climb = NAN;
 
     fix->speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
     /* sanity check the speed, 10,000 m/s should be a nice max */
     if ( 9999.9 < fix->speed )
 	fix->speed = NAN;
-    else if ( -9999.9 > fix->climb )
+    else if ( -9999.9 > fix->speed )
 	fix->speed = NAN;
 
     heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
