@@ -1762,8 +1762,9 @@ if len(python_progs) > 0:
     # Theres's an internal error in astroid that requires we disable some
     # auditing. This is irritating as hell but there's no help for it short
     # of an upstream fix.
-    checkable.remove("xgps")
-    checkable.remove("xgpsspeed")
+    if env['xgps']:
+        checkable.remove("xgps")
+        checkable.remove("xgpsspeed")
     pylint = Utility(
         "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
