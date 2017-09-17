@@ -292,24 +292,36 @@ static gps_mask_t
 ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 		    size_t data_len)
 {
-    unsigned int gw, tow, flags;
+    unsigned int gw, iTOW, flags;
+    int fTOW;
+    gps_mask_t mask = 0;
 
     if (data_len != 16)
 	return 0;
 
-    tow = (unsigned int)getleu32(buf, 0);
-    gw = (unsigned int)getles16(buf, 8);
     flags = (unsigned int)getub(buf, 11);
-    if ((flags & 0x7) != 0)
+    // Valid leap seconds
+    if ((flags & UBX_TIMEGPS_VALID_LEAP_SECOND) == UBX_TIMEGPS_VALID_LEAP_SECOND)
 	session->context->leap_seconds = (int)getub(buf, 10);
-    session->newdata.time = gpsd_gpstime_resolve(session,
-					      (unsigned short int)gw,
-					      (double)tow / 1000.0);
+    // Valid GPS time of week and week number
+#define VALID_TIME (UBX_TIMEGPS_VALID_TIME | UBX_TIMEGPS_VALID_WEEK)
+    if ((flags & VALID_TIME) == VALID_TIME)
+#undef VALID_TIME
+    {
+	iTOW = (unsigned int)getleu32(buf, 0);
+	fTOW = (int)getles32(buf, 4);
+	gw = (unsigned int)getles16(buf, 8);
+	session->newdata.time =
+	  gpsd_gpstime_resolve(session,
+			       (unsigned short int)gw,
+			       ((double)iTOW * 1e-3));
+	mask |= (TIME_SET | NTPTIME_IS);
+    }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "TIMEGPS: time=%.2f leap=%d, mask={TIME}\n",
-	     session->newdata.time, session->context->leap_seconds);
-    return TIME_SET | NTPTIME_IS;
+	     "TIMEGPS: time=%.2f mask={TIME}\n",
+	     session->newdata.time);
+    return mask;
 }
 
 /**
