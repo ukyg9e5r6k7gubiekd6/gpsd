@@ -130,19 +130,129 @@ static gps_mask_t
 ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 		size_t data_len)
 {
-    unsigned int flags;
+    uint8_t valid;
+    uint8_t flags;
+    uint8_t navmode;
+    struct tm unpacked_date;
+    double subseconds;
+    double hacc, vacc, sacc;
+    int *status = &session->gpsdata.status;
+    int *mode = &session->newdata.mode;
     gps_mask_t mask = 0;
 
     if (data_len != 92)
 	return 0;
 
+    valid = (unsigned int)getub(buf, 11);
+    navmode = (unsigned char)getub(buf, 20);
     flags = (unsigned int)getub(buf, 21);
 
-    /* TODO: finish decoding UBX_MON_PVT
-     * no need until depreacaed UBX_MON_SOL is dead
-     */
+    switch (navmode)
+    {
+    case UBX_MODE_TMONLY:
+    {
+	if (*mode != MODE_NO_FIX) {
+	    *mode = MODE_NO_FIX;
+	    mask |= MODE_SET;
+	}
+	if (*status != STATUS_NO_FIX) {
+	    *status = STATUS_NO_FIX;
+	    mask |= STATUS_SET;
+	}
+	break;
+    }
+    case UBX_MODE_3D:
+    case UBX_MODE_GPSDR:
+    {
+	if (*mode != MODE_3D) {
+	    *mode = MODE_3D;
+	    mask |= MODE_SET;
+	}
+	if ((flags & UBX_NAV_PVT_FLAG_DGPS) == UBX_NAV_PVT_FLAG_DGPS) {
+	    if (*status != STATUS_DGPS_FIX) {
+		*status = STATUS_DGPS_FIX;
+		mask |= STATUS_SET;
+	    }
+	} else {
+	    if (*status != STATUS_FIX) {
+		*status = STATUS_FIX;
+		mask |= STATUS_SET;
+	    }
+	}
+	mask |=	  LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLEAR_IS
+		| REPORT_IS;
+	break;
+    }
+    case UBX_MODE_2D:
+    case UBX_MODE_DR:		/* consider this too as 2D */
+    {
+	if (*mode != MODE_2D) {
+	    *mode = MODE_2D;
+	    mask |= MODE_SET;
+	};
+	if (*status != STATUS_FIX) {
+	    *status = STATUS_FIX;
+	    mask |= STATUS_SET;
+	}
+	mask |= LATLON_SET | SPEED_SET;
+	break;
+    }
+    default:
+    {
+	if (*mode != MODE_NO_FIX) {
+	    *mode = MODE_NO_FIX;
+	    mask |= MODE_SET;
+	};
+	if (*status != STATUS_NO_FIX) {
+	    *status = STATUS_NO_FIX;
+	    mask |= STATUS_SET;
+	}
+	break;
+    }
+    }
+
+    if ((valid & UBX_NAV_PVT_VALID_DATE_TIME) == UBX_NAV_PVT_VALID_DATE_TIME) {
+	unpacked_date.tm_year = (uint16_t)getleu16(buf, 4) - 1900;
+	unpacked_date.tm_mon = (uint8_t)getub(buf, 6) - 1;
+	unpacked_date.tm_mday = (uint8_t)getub(buf, 7);
+	unpacked_date.tm_hour = (uint8_t)getub(buf, 8);
+	unpacked_date.tm_min = (uint8_t)getub(buf, 9);
+	unpacked_date.tm_sec = (uint8_t)getub(buf, 10);
+	unpacked_date.tm_isdst = 0;
+	unpacked_date.tm_wday = 0;
+	unpacked_date.tm_yday = 0;
+	subseconds = 1e-9 * (int32_t)getles32(buf, 16);
+	session->newdata.time = \
+	    (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
+	mask |= TIME_SET | NTPTIME_IS;
+    }
+
+    session->newdata.longitude = 1e-7 * (int32_t)getles32(buf, 24);
+    session->newdata.latitude = 1e-7 * (int32_t)getles32(buf, 28);
+    session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 32);
+    session->newdata.speed = 1e-3 * (int32_t)getles32(buf, 60);
+    session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
+    hacc = (double)(getles32(buf, 40) / 1000.0);
+    vacc = (double)(getles32(buf, 44) / 1000.0);
+    sacc = (double)(getles32(buf, 48) / 1000.0);
+    // Assuming hacc == epx == epy is the best we can do
+    session->newdata.epx = session->newdata.epy = hacc;
+    session->newdata.epv = vacc;
+    session->newdata.eps = sacc;
+    mask |= HERR_SET | VERR_SET | SPEEDERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAV-PVT: flags:%02x\n", flags);
+	 "NAV_PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
+	 flags,
+	 session->newdata.time,
+	 session->newdata.latitude,
+	 session->newdata.longitude,
+	 session->newdata.altitude,
+	 session->newdata.track,
+	 session->newdata.speed,
+	 session->newdata.climb,
+	 session->newdata.mode,
+	 session->gpsdata.status,
+	 session->gpsdata.satellites_used);
     return mask;
 }
 
@@ -498,7 +608,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_PVT:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_PVT\n");
-	mask = ubx_msg_nav_pvt(session, &buf[UBX_PREFIX_LEN], data_len);
+	mask = ubx_msg_nav_pvt(session, &buf[UBX_PREFIX_LEN], data_len)
+	     | (CLEAR_IS | REPORT_IS);
         break;
     case UBX_NAV_POSUTM:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSUTM\n");
