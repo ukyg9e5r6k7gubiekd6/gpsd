@@ -1107,7 +1107,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	if ( !ok ) {
             /* can not use this pulse, reject and retry */
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-			"PPS:%s %.10s rejected %.100s",
+			"PPS:%s %.10s ignored %.100s",
 			thread_context->devicename, edge_str,  log);
 	    continue;
         }
