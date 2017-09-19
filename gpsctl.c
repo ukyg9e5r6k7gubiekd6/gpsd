@@ -295,6 +295,9 @@ int main(int argc, char **argv)
 	    break;
 	case 't':		/* force the device type */
 	    devtype = optarg;
+	    /* experimental kluge */
+	    if (strcmp(devtype, "u-blox") == 0)
+		timeout = 2;
 	    break;
 	case 'R':		/* remove the SHM export segment */
 #ifdef SHM_EXPORT_ENABLE
