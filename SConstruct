@@ -2333,6 +2333,8 @@ env.Clean(clean_misc,
 env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
 # Clean Python coverage files
 env.Clean(clean_misc, glob.glob('.coverage*') + ['htmlcov/'])
+# Clean Qt stuff
+env.Clean(clean_misc, ['libQgpsmm.prl', 'Qgpsmm.pc'])
 # Other misc items
 env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'TAGS'])
 
