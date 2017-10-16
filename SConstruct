@@ -2334,8 +2334,7 @@ env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'TAGS'])
 
 # Nuke scons state files
 sconsclean = Utility("sconsclean", '',
-                     ["rm -fr config.log .sconf_temp .sconsign.dblite "
-                      ".scons-option-cache"]
+                     ["rm -fr .sconf_temp .scons-option-cache config.log"])
 
 # Default targets
 
