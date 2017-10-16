@@ -118,6 +118,10 @@ def filtered_spawn(sh, escape, cmd, args, env):
 # Build-control options
 #
 
+# without this, scons will not rebuild an existing target when the
+# source changes.
+Decider('timestamp-match')
+
 # Start by reading configuration variables from the cache
 opts = Variables('.scons-option-cache')
 
