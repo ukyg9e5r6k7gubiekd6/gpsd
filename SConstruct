@@ -14,7 +14,7 @@
 # release    - ship a release
 #
 # --clean    - clean all normal build targets
-# sconsclean - clean up scons dotfiles (but not the database)
+# sconsclean - clean up scons dotfiles (but not the database: .sconsign.dblite)
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
 # without changing the --prefix prefix.
