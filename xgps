@@ -27,7 +27,13 @@ import cairo
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes
 # pylint to complain about the subsequent "non-top" imports.
 import gi
-gi.require_version('Gtk', '3.0')
+try:
+    gi.require_version('Gtk', '3.0')
+except:
+    # Gtk2 may be installed, has no equire_version()
+    sys.stderr.write("Unsupported Gtk version\n")
+    exit(1)
+
 from gi.repository import GObject  # pylint: disable=wrong-import-position
 from gi.repository import Gtk  # pylint: disable=wrong-import-position
 from gi.repository import Gdk  # pylint: disable=wrong-import-position
