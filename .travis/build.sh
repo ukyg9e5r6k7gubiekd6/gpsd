@@ -21,8 +21,6 @@ SCONSOPTS="${SCONSOPTS} qt=yes"
 
 if dpkg -s qtbase5-dev 1>/dev/null 2>&1; then
     SCONSOPTS="${SCONSOPTS} qt_versioned=5"
-else
-    SCONSOPTS="${SCONSOPTS} qt_versioned=4"
 fi
 
 export SCONSOPTS
