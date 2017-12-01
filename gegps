@@ -53,7 +53,13 @@ def kmlize(tpv):
     speed_in = tpv['speed']               # meter/second
     speed = speed_in * gps.MPS_TO_KPH     # Km/h
     heading = int(round(tpv['track'], 0))
-    altitude = tpv['alt']
+
+    # not all TPV includes altitude
+    # like ublox8 in fixed position (time) mode
+    if 'alt' in tpv:
+        altitude = tpv['alt']
+    else:
+        altitude = 0
 
     if speed < 1:
         heading = 0
