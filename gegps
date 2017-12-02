@@ -58,7 +58,11 @@ def kmlize(tpv):
     else:
         speed = 0
 
-    heading = int(round(tpv['track'], 0))
+    # not all TPV includes heading, like when acquiring fix
+    if speed >= 1 and 'track' in tpv:
+        heading = int(round(tpv['track'], 0))
+    else:
+        heading = 0
 
     # not all TPV includes altitude
     # like ublox8 in fixed position (time) mode
@@ -66,9 +70,6 @@ def kmlize(tpv):
         altitude = tpv['alt']
     else:
         altitude = 0
-
-    if speed < 1:
-        heading = 0
 
     return """<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.0">
