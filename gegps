@@ -50,8 +50,14 @@ def kmlize(tpv):
        for official kml document'''
     latitude = tpv['lat']
     longitude = tpv['lon']
-    speed_in = tpv['speed']               # meter/second
-    speed = speed_in * gps.MPS_TO_KPH     # Km/h
+
+    # not all TPV includes speed, like when acquiring fix
+    if 'speed' in tpv:
+        speed_in = tpv['speed']               # meter/second
+        speed = speed_in * gps.MPS_TO_KPH     # Km/h
+    else:
+        speed = 0
+
     heading = int(round(tpv['track'], 0))
 
     # not all TPV includes altitude
