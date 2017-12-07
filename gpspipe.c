@@ -128,6 +128,7 @@ static void usage(void)
 		  "-u usec time stamp, implies -t. Use -uu to output sec.usec\n"
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
 		  "-n [count] exit after count packets.\n"
+		  "-x [seconds] Exit after given delay.\n"
 		  "-v Print a little spinner.\n"
 		  "-p Include profiling info in the JSON.\n"
 		  "-P Include PPS JSON in NMEA or raw mode.\n"
@@ -151,6 +152,7 @@ int main(int argc, char **argv)
     bool profile = false;
     int option_u = 0;                   // option to show uSeconds
     long count = -1;
+    time_t exit_timer = 0;
     int option;
     unsigned int vflag = 0, l = 0;
     FILE *fp;
@@ -162,7 +164,7 @@ int main(int argc, char **argv)
     char *outfile = NULL;
 
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVn:s:o:pPu2")) != -1) {
+    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVx:n:s:o:pPu2")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -222,6 +224,9 @@ int main(int argc, char **argv)
 	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
 			  argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
+	case 'x':
+	    exit_timer = time(NULL) + strtol(optarg, 0, 0);
+	    break;
 	case 's':
 	    serialport = optarg;
 	    break;
@@ -321,6 +326,8 @@ int main(int argc, char **argv)
 	FD_SET(gpsdata.gps_fd, &fds);
 	errno = 0;
 	r = select(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv);
+	if (r >= 0 && exit_timer && time(NULL) >= exit_timer)
+		break;
 	if (r == -1 && errno != EINTR) {
 	    (void)fprintf(stderr, "gpspipe: select error %s(%d)\n",
 			  strerror(errno), errno);
