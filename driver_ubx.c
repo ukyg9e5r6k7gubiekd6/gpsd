@@ -786,9 +786,20 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
 
     case UBX_CFG_PRT:
-	session->driver.ubx.port_id = (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0];
-	gpsd_log(&session->context->errout, LOG_INF, "UBX_CFG_PRT: port %d\n",
-		 session->driver.ubx.port_id);
+        if ( session->driver.ubx.port_id != (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0] ) {
+	    session->driver.ubx.port_id = (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0];
+	    gpsd_log(&session->context->errout, LOG_INF,
+		     "UBX_CFG_PRT: port %d\n", session->driver.ubx.port_id);
+
+#ifdef RECONFIGURE_ENABLE
+	    /* Need to reinitialize since port changed */
+	    if (session->mode == O_OPTIMIZE) {
+		ubx_mode(session, MODE_BINARY);
+	    } else {
+		ubx_mode(session, MODE_NMEA);
+	    }
+#endif /* RECONFIGURE_ENABLE */
+	}
 	break;
 
     case UBX_TIM_TP:
@@ -980,9 +991,9 @@ static void ubx_cfg_prt(struct gps_device_t *session,
      * has port ID 3 the way it ought to.
      */
     else if (strstr(session->gpsdata.dev.path, "/ACM") != NULL)
-	buf[0] = USB_ID;
+	session->driver.ubx.port_id = buf[0] = USB_ID;
     else
-	buf[0] = USART1_ID;
+	session->driver.ubx.port_id = buf[0] = USART1_ID;
 
     putle32(buf, 8, speed);
 
@@ -1040,6 +1051,10 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 
     /* enable all input protocols by default */
     buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
+
+    buf[outProtoMask] = (mode == MODE_NMEA
+                         ? NMEA_PROTOCOL_MASK : UBX_PROTOCOL_MASK);
+    (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));
 
     gpsd_log(&session->context->errout, LOG_DATA,
 	"UBX ubx_cfg_prt mode:%d, port:%d\n", mode, buf[0]);
@@ -1110,9 +1125,6 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x08;		/* msg id  = ZDA */
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-
-	buf[outProtoMask] &= ~UBX_PROTOCOL_MASK;
-	buf[outProtoMask] |= NMEA_PROTOCOL_MASK;
     } else { /* MODE_BINARY */
 	/*
 	 * Just enabling the UBX protocol for output is not enough to
@@ -1214,12 +1226,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 #endif /* __UNUSED __ */
-
-	buf[outProtoMask] &= ~NMEA_PROTOCOL_MASK;
-	buf[outProtoMask] |= UBX_PROTOCOL_MASK;
     }
-
-    (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));
 }
 
 static void ubx_mode(struct gps_device_t *session, int mode)
