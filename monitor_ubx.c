@@ -173,16 +173,16 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
 
     (void)wmove(navsolwin, 7, 7);
     {
-	unsigned int day = tow / 8640000;
-	unsigned int tod = tow % 8640000;
-	unsigned int h = tod / 360000;
-	unsigned int m = tod % 360000;
-	unsigned int s = m % 6000;
+	unsigned int day = tow / 86400000;
+	unsigned int tod = tow % 86400000;
+	unsigned int h = tod / 3600000;
+	unsigned int m = tod % 3600000;
+	unsigned int s = m % 60000;
 
-	m = (m - s) / 6000;
+	m = (m - s) / 60000;
 
 	(void)wattrset(navsolwin, A_UNDERLINE);
-	(void)wprintw(navsolwin, "%u %02u:%02u:%05.2f", day, h, m, (double)s / 100);
+	(void)wprintw(navsolwin, "%u %02u:%02u:%05.2f", day, h, m, (double)s / 1000);
 	(void)wattrset(navsolwin, A_NORMAL);
     }
     (void)wmove(navsolwin, 8, 11);
