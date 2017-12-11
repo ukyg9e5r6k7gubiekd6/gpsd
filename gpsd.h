@@ -539,10 +539,12 @@ struct gps_device_t {
 	bool seen_glgsv;
 	bool seen_bdgsv;
 	bool seen_qzss;
+	bool seen_gagsv;
 	char last_gsv_talker;
 	bool seen_glgsa;
 	bool seen_gngsa;
 	bool seen_bdgsa;
+	bool seen_gagsa;
 	char last_gsa_talker;
 	/*
 	 * State for the cycle-tracking machinery.

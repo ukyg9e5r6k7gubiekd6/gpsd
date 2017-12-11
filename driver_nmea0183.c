@@ -615,6 +615,8 @@ static int nmeaid_to_prn(char *talker, int satnum)
 	/* QZSS */
 	if (talker[0] == 'Q' && talker[1] == 'Z')
 	    satnum += 193;
+	if (talker[0] == 'G' && talker[1] == 'A')
+	    satnum += 300; /* Used by u-blox at least */
     }
 
     return satnum;
@@ -708,12 +710,15 @@ static gps_mask_t processGSA(int count, char *field[],
 	    memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
 	}
 	session->nmea.last_gsa_talker = GSA_TALKER;
-	if (session->nmea.last_gsa_talker == 'D')
+	if ((session->nmea.last_gsa_talker == 'D')
+            || (session->nmea.last_gsa_talker == 'B'))
 	    session->nmea.seen_bdgsa = true;
 	else if (session->nmea.last_gsa_talker == 'L')
 	    session->nmea.seen_glgsa = true;
 	else if (session->nmea.last_gsa_talker == 'N')
 	    session->nmea.seen_gngsa = true;
+ 	else if (session->nmea.last_gsa_talker == 'A')
+ 	    session->nmea.seen_gagsa = true;
 
 	/* the magic 6 here counts the tag, two mode fields, and DOP fields */
 	for (i = 0; i < count - 6; i++) {
@@ -744,7 +749,7 @@ static gps_mask_t processGSA(int count, char *field[],
     }
     /* assumes GLGSA or BDGSA, if present, is emitted  directly
      * after the GPGSA*/
-    if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa)
+    if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa || session->nmea.seen_gagsa)
        && GSA_TALKER == 'P')
 	return ONLINE_SET;
 
@@ -849,10 +854,12 @@ static gps_mask_t processGSV(int count, char *field[],
 	session->nmea.last_gsv_talker = GSV_TALKER;
 	if (session->nmea.last_gsv_talker == 'L')
 	    session->nmea.seen_glgsv = true;
-	if (session->nmea.last_gsv_talker == 'D')
+	if (session->nmea.last_gsv_talker == 'D' || session->nmea.last_gsv_talker == 'B')
 	    session->nmea.seen_bdgsv = true;
 	if (session->nmea.last_gsv_talker == 'Z')
 	    session->nmea.seen_qzss = true;
+	if (session->nmea.last_gsv_talker == 'A')
+	    session->nmea.seen_gagsv = true;
     }
 
     for (fldnum = 4; fldnum < count / 4 * 4;) {
@@ -896,13 +903,12 @@ static gps_mask_t processGSV(int count, char *field[],
      * FIXME: Add per-talker totals so we can do this check properly.
      */
     if (!(session->nmea.seen_glgsv || session->nmea.seen_bdgsv
-          || session->nmea.seen_qzss)) {
+        || session->nmea.seen_qzss || session->nmea.seen_gagsv))
 	if (session->nmea.part == session->nmea.await
 		&& atoi(field[3]) != session->gpsdata.satellites_visible)
 	    gpsd_log(&session->context->errout, LOG_WARN,
 		     "GPGSV field 3 value of %d != actual count %d\n",
 		     atoi(field[3]), session->gpsdata.satellites_visible);
-    }
 
     /* not valid data until we've seen a complete set of parts */
     if (session->nmea.part < session->nmea.await) {
@@ -935,7 +941,8 @@ static gps_mask_t processGSV(int count, char *field[],
 
     /* assumes GLGSV or BDGSV group, if present, is emitted after the GPGSV */
     if ((session->nmea.seen_glgsv || session->nmea.seen_bdgsv
-         || session->nmea.seen_qzss) && GSV_TALKER == 'P')
+         || session->nmea.seen_qzss  || session->nmea.seen_gagsv)
+        && GSV_TALKER == 'P')
 	return ONLINE_SET;
 
     /* clear computed DOPs so they get recomputed. */
