@@ -67,7 +67,9 @@ static void spinner(unsigned int, unsigned int);
 #define BAUDRATE B4800
 
 /* Serial port variables */
+#ifdef HAVE_TERMIOS_H
 static struct termios oldtio, newtio;
+#endif /* HAVE_TERMIOS_H */
 static int fd_out = 1;		/* output initially goes to standard output */
 static char serbuf[255];
 static int debug;
