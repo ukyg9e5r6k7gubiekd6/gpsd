@@ -1596,8 +1596,12 @@ base_manpages = {
     "gps2udp.1": "gps2udp.xml",
     "gpsdecode.1": "gpsdecode.xml",
     "srec.5": "srec.xml",
-    "ntpshmmon.1": "ntpshmmon.xml",
 }
+
+if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
+    base_manpages.update({
+        "ntpshmmon.1": "ntpshmmon.xml",
+    })
 
 if tiocmiwait:
     base_manpages.update({
