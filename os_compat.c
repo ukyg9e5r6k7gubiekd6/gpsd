@@ -106,7 +106,7 @@ int os_daemon(int nochdir, int noclose)
 
 #else /* HAVE_DAEMON */
 
-#ifdef __linux__
+#if defined (__linux__) || defined (__GLIBC__)
 
 /* daemon() needs _DEFAULT_SOURCE */
 #undef _DEFAULT_SOURCE
