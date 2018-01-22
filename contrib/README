@@ -2,6 +2,8 @@ The following tools are not production-ready. They are included only as
 conveniences, examples or rudimetary starting points for other development
 efforts.
 
+clock_test is used to test the latency of the system call clock_getttime().
+
 binlog and binreplay are probably only useful for people developing
 drivers for new protocols, when gpsfake does not yet know what to do
 with a log file. These utilities are not particularly clever - they

@@ -27,13 +27,7 @@ import cairo
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes
 # pylint to complain about the subsequent "non-top" imports.
 import gi
-try:
-    gi.require_version('Gtk', '3.0')
-except:
-    # Gtk2 may be installed, has no equire_version()
-    sys.stderr.write("Unsupported Gtk version\n")
-    exit(1)
-
+gi.require_version('Gtk', '3.0')
 from gi.repository import GObject  # pylint: disable=wrong-import-position
 from gi.repository import Gtk  # pylint: disable=wrong-import-position
 from gi.repository import Gdk  # pylint: disable=wrong-import-position
@@ -53,6 +47,50 @@ MAXCHANNELS = 28
 # by default, used at the top, then sort PRN
 SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 
+# Each GNSS constellation reuses the same PRNs.  To differentiate they are
+# all mushed into the PRN by Universal Satellite Index (USI)
+
+# here is the mapping.
+# USI           constellation
+# ----------- | --------------
+# 0             Unused. Ignore satellites with this USI
+# [1...37]      GPS PRNs [1...37]
+# [38...69]     GLONASS FCNs [-7...24]
+# 70            GLONASS satellite with unknown FCN
+# [71...119]    GALILEO PRNs [1...49]
+# [120...142]   SBAS PRNs [120...142]
+# [143...192]   Reserved
+# [193...197]   QZSS PRNs [193...197]
+# [198...210]   Reserved
+# [211...247]   BeiDou (COMPASS) PRNs [1...37]
+# [248...254]   Reserved
+# 255           Unused.  Ignore satellites with this USI
+
+# FIXME: should be in gps.py, will move when tested
+def gps_type( prn ):
+     # return a string of the GPS constellation this PRN is in
+     if prn == 0:
+         return 'Unused'
+     if prn < 38:
+         return 'GPS'
+     if prn < 71:
+         return 'GLONASS'
+     if prn < 120:
+         return 'GALILEO'
+     if prn < 143:
+         return 'SBAS'
+     if prn < 193:
+         return 'Reserved'
+     if prn < 198:
+         return 'QZSS'
+     if prn < 211:
+         return 'Reserved'
+     if prn < 248:
+         return 'BeiDou'
+     if prn < 255:
+         return 'Reserved'
+     # else 255
+     return 'Unused'
 
 class unit_adjustments(object):
     "Encapsulate adjustments for unit systems."
@@ -198,6 +236,32 @@ class SkyView(Gtk.DrawingArea):
         self.cr.show_text(text)
         self.cr.new_path()
 
+    def draw_triangle(self, x, y, radius, filled=False, flip=False):
+        "Draw a triangle centered on the specified midpoint."
+        lw = self.cr.get_line_width()
+        if flip:
+            ytop = y + radius
+            ybot = y - radius
+        else:
+            ytop = y - radius
+            ybot = y + radius
+
+        x1, y1 = fit_to_grid(x, ytop, lw)
+        x2, y2 = fit_to_grid(x + radius, ybot, lw)
+        x3, y3 = fit_to_grid(x - radius, ybot, lw)
+
+        self.cr.move_to(x1, y1)
+        self.cr.line_to(x2, y2)
+        self.cr.line_to(x3, y3)
+        self.cr.close_path()
+
+        self.cr.stroke()
+
+        if filled:
+            self.cr.fill()
+        else:
+            self.cr.stroke()
+
     def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
         az = (az - self.rotate) % 360.0
@@ -262,6 +326,7 @@ class SkyView(Gtk.DrawingArea):
             if sat.az == 0 and sat.el == 0:
                 continue  # Skip satellites with unknown position
             (x, y) = self.pol2cart(sat.az, sat.el)
+            # colorize by signal strength
             if sat.ss < 10:
                 self.set_color("Gray")
             elif sat.ss < 30:
@@ -272,10 +337,18 @@ class SkyView(Gtk.DrawingArea):
                 self.set_color("Green3")
             else:
                 self.set_color("Green1")
-            if gps.is_sbas(sat.PRN):
-                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
-            else:
+
+            # shape by constellation
+            constellation = gps_type(sat.PRN)
+            if constellation == 'GPS':
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
+            elif constellation == 'SBAS':
+                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
+            elif constellation == 'GALILEO':
+                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, False)
+            else:
+                # QZSS, GLONASS, BeiDou, Reserved or Unused
+                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, True)
 
             self.cr.set_source_rgb(1, 1, 1)
             self.draw_string(x + SkyView.SAT_RADIUS,
@@ -606,8 +679,7 @@ class Base(object):
         self.satlist = Gtk.ListStore(str, str, str, str, str)
         view = Gtk.TreeView(model=self.satlist)
 
-        for (i, label) in enumerate(('PRN:', 'Elev:', 'Azim:', 'SNR:',
-                                     'Used:')):
+        for (i, label) in enumerate(('PRN', 'Elev', 'Azim', 'SNR', 'Used')):
             column = Gtk.TreeViewColumn(label)
             renderer = Gtk.CellRendererText()
             column.pack_start(renderer, expand=True)
@@ -752,7 +824,7 @@ class Base(object):
 
     def update_altitude(self, data):
         if data.mode >= gps.MODE_3D and hasattr(data, "alt"):
-            return "%.3f %s" % (
+            return "%9.3f %s" % (
                 data.alt * self.conversions.altfactor,
                 self.conversions.altunits)
         else:
@@ -760,7 +832,7 @@ class Base(object):
 
     def update_speed(self, data):
         if hasattr(data, "speed"):
-            return "%.3f %s" % (
+            return "%9.3f %s" % (
                 data.speed * self.conversions.speedfactor,
                 self.conversions.speedunits)
         else:
@@ -768,7 +840,7 @@ class Base(object):
 
     def update_climb(self, data):
         if hasattr(data, "climb"):
-            return "%.3f %s" % (
+            return "%9.3f %s" % (
                 data.climb * self.conversions.speedfactor,
                 self.conversions.speedunits)
         else:
@@ -838,10 +910,10 @@ class Base(object):
                     key=lambda x: x[fld], reverse=rev)
 
             for (i, satellite) in enumerate(satellites):
-                self.set_satlist_field(i, 0, satellite.PRN)
-                self.set_satlist_field(i, 1, satellite.el)
-                self.set_satlist_field(i, 2, satellite.az)
-                self.set_satlist_field(i, 3, satellite.ss)
+                self.set_satlist_field(i, 0, "%3d" % satellite.PRN)
+                self.set_satlist_field(i, 1, "%3d" % satellite.el)
+                self.set_satlist_field(i, 2, "%3d" % satellite.az)
+                self.set_satlist_field(i, 3, "%3d" % satellite.ss)
                 yesno = 'N'
                 if satellite.used:
                     yesno = 'Y'
