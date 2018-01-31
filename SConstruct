@@ -334,6 +334,11 @@ for driver in ('ashtech',
         env['nmea0183'] = True
         break
 
+
+# iSync uses ublox underneath, so we force to enable it
+if env['isync']:
+    env['ublox'] = True
+
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
