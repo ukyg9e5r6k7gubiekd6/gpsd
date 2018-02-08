@@ -36,9 +36,10 @@ extern "C" {
  *       structure has changed to make working with the satellites-used
  *       bits less confusing. (January 2015, release 3.12).
  * 6.1 - Add navdata_t for more (nmea2000) info.
+ * 7.0 - add gps_fix_t.ecef
  */
-#define GPSD_API_MAJOR_VERSION	6	/* bump on incompatible changes */
-#define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
+#define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
+#define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
 #define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
 #define MAXUSERDEVS	4	/* max devices per user */
@@ -96,6 +97,10 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
+    struct {		/* ECEF data */
+	bool valid;		/* is message well-formed? */
+	double x, y, z;
+    } ecef;
 };
 
 /*
