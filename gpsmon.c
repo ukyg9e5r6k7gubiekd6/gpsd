@@ -425,7 +425,7 @@ void monitor_log(const char *fmt, ...)
 
 static const char *promptgen(void)
 {
-    static char buf[sizeof(session.gpsdata.dev.path)];
+    static char buf[256];
 
     if (serial)
 	(void)snprintf(buf, sizeof(buf),
