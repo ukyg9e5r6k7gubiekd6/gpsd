@@ -132,7 +132,7 @@ static int fusercount(const char *path)
 {
     DIR *procd, *fdd;
     struct dirent *procentry, *fdentry;
-    char procpath[32], fdpath[64], linkpath[64];
+    char procpath[64], fdpath[64], linkpath[64];
     int cnt = 0;
 
     if ((procd = opendir("/proc")) == NULL)
@@ -140,8 +140,9 @@ static int fusercount(const char *path)
     while ((procentry = readdir(procd)) != NULL) {
 	if (isdigit(procentry->d_name[0])==0)
 	    continue;
+        /* longest procentry->d_name I could find was 12 */
 	(void)snprintf(procpath, sizeof(procpath),
-		       "/proc/%s/fd/", procentry->d_name);
+		       "/proc/%.20s/fd/", procentry->d_name);
 	if ((fdd = opendir(procpath)) == NULL)
 	    continue;
 	while ((fdentry = readdir(fdd)) != NULL) {
