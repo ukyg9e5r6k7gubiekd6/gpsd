@@ -76,7 +76,7 @@ static bool sky_write(struct gps_device_t *session, unsigned char *msg)
 #endif /* __UNUSED */
 
 /*
- * decode MID 0x*), Software Version
+ * decode MID 0x80, Software Version
  *
  * 10 bytes
  */
@@ -107,7 +107,7 @@ static gps_mask_t sky_msg_80(struct gps_device_t *session,
     rev_dd  = getub(buf, 13);
 
     (void)snprintf(session->subtype, sizeof(session->subtype) - 1,
-	     "Skytraq: kver=%u.%u,%u, over=%u.%u,%u, rev=%u.%u.%u",
+	     "kver=%3u.%2u,%2u, over=%3u.%2u,%2u, rev=%02u.%02u.%02u",
 	    kver_x, kver_y, kver_z,
 	    over_x, over_y, over_z,
 	    rev_yy, rev_mm, rev_dd);
