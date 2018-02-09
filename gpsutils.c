@@ -237,6 +237,7 @@ done:
 void gps_clear_fix(struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
+    memset(fixp, 0, sizeof(struct gps_fix_t));
     fixp->time = NAN;
     fixp->mode = MODE_NOT_SEEN;
     fixp->latitude = fixp->longitude = NAN;
@@ -251,6 +252,15 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->epd = NAN;
     fixp->eps = NAN;
     fixp->epc = NAN;
+    /* clear ECEF too */
+    fixp->ecef.x = NAN;
+    fixp->ecef.y = NAN;
+    fixp->ecef.z = NAN;
+    fixp->ecef.vx = NAN;
+    fixp->ecef.vy = NAN;
+    fixp->ecef.vz = NAN;
+    fixp->ecef.pAcc = NAN;
+    fixp->ecef.vAcc = NAN;
 }
 
 void gps_clear_dop( struct dop_t *dop)
@@ -292,6 +302,20 @@ void gps_merge_fix(struct gps_fix_t *to,
 	to->epv = from->epv;
     if ((transfer & SPEEDERR_SET) != 0)
 	to->eps = from->eps;
+    if ((transfer & ECEF_SET) != 0) {
+	to->ecef.valid = true;
+	to->ecef.x = from->ecef.x;
+	to->ecef.y = from->ecef.y;
+	to->ecef.z = from->ecef.z;
+	to->ecef.pAcc = from->ecef.pAcc;
+    }
+    if ((transfer & VECEF_SET) != 0) {
+	to->ecef.valid = true;
+	to->ecef.vx = from->ecef.vx;
+	to->ecef.vy = from->ecef.vy;
+	to->ecef.vz = from->ecef.vz;
+	to->ecef.vAcc = from->ecef.vAcc;
+    }
 }
 
 /* NOTE: timestamp_t is a double, so this is only precise to

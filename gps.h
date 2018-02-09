@@ -36,7 +36,7 @@ extern "C" {
  *       structure has changed to make working with the satellites-used
  *       bits less confusing. (January 2015, release 3.12).
  * 6.1 - Add navdata_t for more (nmea2000) info.
- * 7.0 - add gps_fix_t.ecef
+ * 7.0 - add gps_fix_t.ecef (February 2018)
  */
 #define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -97,9 +97,14 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
-    struct {		/* ECEF data */
-	bool valid;		/* is message well-formed? */
-	double x, y, z;
+
+    /* ECEF data, all data in meters, and meters/second, or NaN */
+    struct {
+	bool valid;	        /* is ECEF data valid */
+	double x, y, z; 	/* ECEF x, y, z */
+	double vx, vy, vz;	/* ECEF x, y, z velocity */
+	double pAcc;            /* 3D Position Accuracy Estimate, probably SEP */
+	double vAcc;            /* Velocity Accuracy Estimate, probably SEP */
     } ecef;
 };
 
@@ -2002,7 +2007,9 @@ struct gps_data_t {
 #define PPS_SET 	(1llu<<33)
 #define NAVDATA_SET     (1llu<<34)
 #define OSCILLATOR_SET	(1llu<<35)
-#define SET_HIGH_BIT	36
+#define ECEF_SET	(1llu<<36)
+#define VECEF_SET	(1llu<<37)
+#define SET_HIGH_BIT	38
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences

@@ -1429,8 +1429,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	/* don't downgrade mode if holding previous fix */
 	if (session->gpsdata.fix.mode > session->newdata.mode)
 	    session->gpsdata.set &= ~MODE_SET;
-	//gpsd_log(&session->context->errout, LOG_PROG,
-	//              "transfer mask: %02x\n", session->gpsdata.set);
+	/* gpsd_log(&session->context->errout, LOG_PROG,
+	                 "transfer mask: %s\n",
+                         gps_maskdump(session->gpsdata.set)); */
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
 #ifndef NOFLOATS_ENABLE

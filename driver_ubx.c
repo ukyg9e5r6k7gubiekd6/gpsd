@@ -62,6 +62,8 @@ static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf,
 static gps_mask_t ubx_msg_nav_dop(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
 static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_msg_nav_posecef(struct gps_device_t *session,
+				      unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_pvt(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
@@ -70,6 +72,8 @@ static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session,
 static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session,
 				     unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session,
+				      unsigned char *buf, size_t data_len);
+static gps_mask_t ubx_msg_nav_velecef(struct gps_device_t *session,
 				      unsigned char *buf, size_t data_len);
 static void ubx_msg_mon_ver(struct gps_device_t *session,
 				      unsigned char *buf, size_t data_len);
@@ -121,6 +125,38 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
     gpsd_log(&session->context->errout, LOG_INF,
 	     "UBX_MON_VER: %.*s\n",
              (int)sizeof(obuf), obuf);
+}
+
+/*
+ * Navigation Position ECEF message
+ */
+static gps_mask_t
+ubx_msg_nav_posecef(struct gps_device_t *session, unsigned char *buf,
+		size_t data_len)
+{
+    gps_mask_t mask = ECEF_SET;
+    double fTOW;
+
+    if (data_len < 20) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "Invalid NAV POSECEF message, payload len %ld", data_len);
+	return 0;
+    }
+
+    fTOW = getleu32(buf, 0) / 1000.0;
+    session->newdata.ecef.valid = true;
+    session->newdata.ecef.x = getles32(buf, 4) / 100.0;
+    session->newdata.ecef.y = getles32(buf, 8) / 100.0;
+    session->newdata.ecef.z = getles32(buf, 12) / 100.0;
+    session->newdata.ecef.pAcc = getleu32(buf, 16) / 100.0;
+    gpsd_log(&session->context->errout, LOG_DATA,
+	"UBX_NAV_POSECEF: fTOW=%.3f ECEF x=%.2f y=%.2f z=%.2f pAcc=%.2f\n",
+	fTOW,
+	session->newdata.ecef.x,
+	session->newdata.ecef.y,
+	session->newdata.ecef.z,
+	session->newdata.ecef.pAcc);
+    return mask;
 }
 
 /**
@@ -179,8 +215,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 		mask |= STATUS_SET;
 	    }
 	}
-	mask |=	  LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLEAR_IS
-		| REPORT_IS;
+	mask |=	  LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
 	break;
     }
     case UBX_MODE_2D:
@@ -338,7 +373,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
+	     "UBX_NAV_SOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
@@ -490,6 +525,38 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 }
 
 /*
+ * Velocity Position ECEF message
+ */
+static gps_mask_t
+ubx_msg_nav_velecef(struct gps_device_t *session, unsigned char *buf,
+		size_t data_len)
+{
+    gps_mask_t mask = VECEF_SET;
+    double fTOW;
+
+    if (data_len < 20) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "Invalid NAV VELECEF message, payload len %ld", data_len);
+	return 0;
+    }
+
+    fTOW = getleu32(buf, 0) / 1000.0;
+    session->newdata.ecef.valid = true;
+    session->newdata.ecef.vx = getles32(buf, 4) / 100.0;
+    session->newdata.ecef.vy = getles32(buf, 8) / 100.0;
+    session->newdata.ecef.vz = getles32(buf, 12) / 100.0;
+    session->newdata.ecef.vAcc = getleu32(buf, 16) / 100.0;
+    gpsd_log(&session->context->errout, LOG_DATA,
+	"UBX_NAV_VELECEF: fTOW=%.3f ECEF vx=%.2f vy=%.2f vz=%.2f vAcc=%.2f\n",
+	fTOW,
+	session->newdata.ecef.vx,
+	session->newdata.ecef.vy,
+	session->newdata.ecef.vz,
+	session->newdata.ecef.vAcc);
+    return mask;
+}
+
+/*
  * SBAS Info
  */
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
@@ -584,9 +651,11 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     /* extract message id and length */
     msgid = (buf[2] << 8) | buf[3];
     data_len = (size_t) getles16(buf, 4);
+
     switch (msgid) {
     case UBX_NAV_POSECEF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSECEF\n");
+	mask = ubx_msg_nav_posecef(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_POSLLH:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSLLH\n");
@@ -596,6 +665,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_STATUS\n");
 	break;
     case UBX_NAV_DOP:
+        /* DOP seems to be the last NAV sent in a cycle */
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_DOP\n");
 	mask = ubx_msg_nav_dop(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
@@ -603,19 +673,19 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
         /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SOL\n");
 	mask =
-	    ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN],
-			    data_len) | (CLEAR_IS | REPORT_IS);
+	    ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_PVT:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_PVT\n");
-	mask = ubx_msg_nav_pvt(session, &buf[UBX_PREFIX_LEN], data_len)
-	     | (CLEAR_IS | REPORT_IS);
+	mask = ubx_msg_nav_pvt(session, &buf[UBX_PREFIX_LEN], data_len);
         break;
     case UBX_NAV_POSUTM:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSUTM\n");
 	break;
     case UBX_NAV_VELECEF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_VELECEF\n");
+	mask = ubx_msg_nav_velecef(session, &buf[UBX_PREFIX_LEN], data_len)
+	     | REPORT_IS;
 	break;
     case UBX_NAV_VELNED:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_VELNED\n");
@@ -828,7 +898,7 @@ static ssize_t ubx_control_send(struct gps_device_t *session, char *msg,
 
 static void ubx_init_query(struct gps_device_t *session)
 {
-    /* MON_VER: query for version information */
+    /* UBX-MON-VER: query for version information */
     (void)ubx_write(session, UBX_CLASS_MON, 0x04, NULL, 0);
 }
 
@@ -849,6 +919,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	msg[5] = 0x00;
 	msg[6] = 0x00;
 	msg[7] = 0x00;
+        /* UBX-CFG-SBAS */
 	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
 
 #ifdef RECONFIGURE_ENABLE
@@ -871,7 +942,7 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX revert\n");
 
 	/* Reverting all in one fast and reliable reset */
-	(void)ubx_write(session, 0x06, 0x04, msg, 4);	/* CFG-RST */
+	(void)ubx_write(session, 0x06, 0x04, msg, 4);	/* UBX-CFG-RST */
     }
 }
 
@@ -972,6 +1043,9 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 
     /* enable all input protocols by default */
     buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	"UBX ubx_cfg_prt mode:%d, port:%d\n", mode, buf[0]);
 
     /* selectively enable output protocols */
     if (mode == MODE_NMEA) {
@@ -1091,6 +1165,14 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
 	msg[2] = 0x0a;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x01;		/* msg id  = UBX-NAV-POSECEF */
+	msg[2] = 0x01;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x11;		/* msg id  = UBX-NAV-VELECEF */
+	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
 
