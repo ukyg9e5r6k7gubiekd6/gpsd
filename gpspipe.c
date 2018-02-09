@@ -341,7 +341,7 @@ int main(int argc, char **argv)
 		    serbuf[j++] = buf[i];
 		}
 		if (new_line && timestamp) {
-		    char tmstr_u[20];            // time with "usec" resolution
+		    char tmstr_u[40];            // time with "usec" resolution
 		    struct timespec now;
 		    struct tm *tmp_now;
 
