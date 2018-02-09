@@ -1,5 +1,8 @@
 			GPSD project news
 
+3.18: not released yet
+  Add ECEF support to U-blox driver.
+
 3.17: 2017-09-07 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Repair support for non-NMEA devices requring active probing
   (e.g. Garmin USB GPSes). Apply OS X build fixes.  Fix a SiRF driver
