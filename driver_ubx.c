@@ -672,8 +672,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_NAV_SOL:
         /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SOL\n");
-	mask =
-	    ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN], data_len);
+	mask = ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN], data_len)
+	     | REPORT_IS;
 	break;
     case UBX_NAV_PVT:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_PVT\n");
@@ -684,8 +684,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_VELECEF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_VELECEF\n");
-	mask = ubx_msg_nav_velecef(session, &buf[UBX_PREFIX_LEN], data_len)
-	     | REPORT_IS;
+	mask = ubx_msg_nav_velecef(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_VELNED:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_VELNED\n");
