@@ -303,14 +303,12 @@ void gps_merge_fix(struct gps_fix_t *to,
     if ((transfer & SPEEDERR_SET) != 0)
 	to->eps = from->eps;
     if ((transfer & ECEF_SET) != 0) {
-	to->ecef.valid = true;
 	to->ecef.x = from->ecef.x;
 	to->ecef.y = from->ecef.y;
 	to->ecef.z = from->ecef.z;
 	to->ecef.pAcc = from->ecef.pAcc;
     }
     if ((transfer & VECEF_SET) != 0) {
-	to->ecef.valid = true;
 	to->ecef.vx = from->ecef.vx;
 	to->ecef.vy = from->ecef.vy;
 	to->ecef.vz = from->ecef.vz;

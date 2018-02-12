@@ -144,7 +144,6 @@ ubx_msg_nav_posecef(struct gps_device_t *session, unsigned char *buf,
     }
 
     fTOW = getleu32(buf, 0) / 1000.0;
-    session->newdata.ecef.valid = true;
     session->newdata.ecef.x = getles32(buf, 4) / 100.0;
     session->newdata.ecef.y = getles32(buf, 8) / 100.0;
     session->newdata.ecef.z = getles32(buf, 12) / 100.0;
@@ -541,7 +540,6 @@ ubx_msg_nav_velecef(struct gps_device_t *session, unsigned char *buf,
     }
 
     fTOW = getleu32(buf, 0) / 1000.0;
-    session->newdata.ecef.valid = true;
     session->newdata.ecef.vx = getles32(buf, 4) / 100.0;
     session->newdata.ecef.vy = getles32(buf, 8) / 100.0;
     session->newdata.ecef.vz = getles32(buf, 12) / 100.0;

@@ -100,7 +100,6 @@ struct gps_fix_t {
 
     /* ECEF data, all data in meters, and meters/second, or NaN */
     struct {
-	bool valid;	        /* is ECEF data valid */
 	double x, y, z; 	/* ECEF x, y, z */
 	double vx, vy, vz;	/* ECEF x, y, z velocity */
 	double pAcc;            /* 3D Position Accuracy Estimate, probably SEP */

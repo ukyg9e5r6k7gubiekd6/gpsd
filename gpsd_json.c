@@ -192,32 +192,30 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if (gpsdata->fix.mode >= MODE_3D) {
             if (isnan(gpsdata->fix.epc) == 0)
 		str_appendf(reply, replylen, "\"epc\":%.2f,", gpsdata->fix.epc);
-	    if ( 1 || gpsdata->fix.ecef.valid) {
-		if (0 == isnan(gpsdata->fix.ecef.x))
-		    str_appendf(reply, replylen, "\"ecefx\":%.2f,",
-                                gpsdata->fix.ecef.x);
-		if (0 == isnan(gpsdata->fix.ecef.y))
-		    str_appendf(reply, replylen, "\"ecefy\":%.2f,",
-                                gpsdata->fix.ecef.y);
-		if (0 == isnan(gpsdata->fix.ecef.z))
-		    str_appendf(reply, replylen, "\"ecefz\":%.2f,",
-                                gpsdata->fix.ecef.z);
-		if (0 == isnan(gpsdata->fix.ecef.vx))
-		    str_appendf(reply, replylen, "\"ecefvx\":%.2f,",
-                                gpsdata->fix.ecef.vx);
-		if (0 == isnan(gpsdata->fix.ecef.vy))
-		    str_appendf(reply, replylen, "\"ecefvy\":%.2f,",
-                                gpsdata->fix.ecef.vy);
-		if (0 == isnan(gpsdata->fix.ecef.vz))
-		    str_appendf(reply, replylen, "\"ecefvz\":%.2f,",
-                                gpsdata->fix.ecef.vz);
-		if (0 == isnan(gpsdata->fix.ecef.pAcc))
-		    str_appendf(reply, replylen, "\"ecefpAcc\":%.2f,",
-                                gpsdata->fix.ecef.pAcc);
-		if (0 == isnan(gpsdata->fix.ecef.vAcc))
-		    str_appendf(reply, replylen, "\"ecefvAcc\":%.2f,",
-                                gpsdata->fix.ecef.vAcc);
-            }
+	    if (0 == isfinite(gpsdata->fix.ecef.x))
+		str_appendf(reply, replylen, "\"ecefx\":%.2f,",
+			    gpsdata->fix.ecef.x);
+	    if (0 == isfinite(gpsdata->fix.ecef.y))
+		str_appendf(reply, replylen, "\"ecefy\":%.2f,",
+			    gpsdata->fix.ecef.y);
+	    if (0 == isfinite(gpsdata->fix.ecef.z))
+		str_appendf(reply, replylen, "\"ecefz\":%.2f,",
+			    gpsdata->fix.ecef.z);
+	    if (0 == isfinite(gpsdata->fix.ecef.vx))
+		str_appendf(reply, replylen, "\"ecefvx\":%.2f,",
+			    gpsdata->fix.ecef.vx);
+	    if (0 == isfinite(gpsdata->fix.ecef.vy))
+		str_appendf(reply, replylen, "\"ecefvy\":%.2f,",
+			    gpsdata->fix.ecef.vy);
+	    if (0 == isfinite(gpsdata->fix.ecef.vz))
+		str_appendf(reply, replylen, "\"ecefvz\":%.2f,",
+			    gpsdata->fix.ecef.vz);
+	    if (0 == isfinite(gpsdata->fix.ecef.pAcc))
+		str_appendf(reply, replylen, "\"ecefpAcc\":%.2f,",
+			    gpsdata->fix.ecef.pAcc);
+	    if (0 == isfinite(gpsdata->fix.ecef.vAcc))
+		str_appendf(reply, replylen, "\"ecefvAcc\":%.2f,",
+			    gpsdata->fix.ecef.vAcc);
         }
 #ifdef TIMING_ENABLE
 	if (policy->timing) {
