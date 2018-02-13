@@ -20,6 +20,9 @@
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
 
+/* some distros don't include isfinite() without next line */
+#define _POSIX_C_SOURCE 200112L
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>		/* for select() */
