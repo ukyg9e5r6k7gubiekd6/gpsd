@@ -9,7 +9,8 @@
 #ifdef __linux__
 /* FreeBSD chokes on this */
 /* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
-#define _XOPEN_SOURCE 500
+/* Ubuntu isfinite() needs _XOPEN_SOURCE, 600 means X/Open 2004 */
+#define _XOPEN_SOURCE 600
 /* setgroups() needs _DEFAULT_SOURCE or _BSD_SOURCE (glibc-dependent) */
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
@@ -19,9 +20,6 @@
 #define __DARWIN_C_LEVEL 200112L
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
-
-/* some distros don't include isfinite() without next line */
-#define _POSIX_C_SOURCE 200112L
 
 #include <sys/stat.h>
 #include <sys/types.h>

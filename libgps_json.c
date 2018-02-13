@@ -14,8 +14,9 @@ PERMISSIONS
 
 ***************************************************************************/
 
-/* some distros don't include isfinite() without next line */
-#define _POSIX_C_SOURCE 200112L
+/* Ubuntu isfinite() needs _XOPEN_SOURCE, 600 means X/Open 2004 */
+/* Ubuntu man page says _POSIX_C_SOURCE 200112L should work, it fails */
+#define _XOPEN_SOURCE 600
 
 #include <stdbool.h>
 #include <math.h>
