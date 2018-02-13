@@ -85,6 +85,7 @@ import sys
 import time
 from distutils import sysconfig
 from distutils.util import get_platform
+from functools import reduce
 import SCons
 
 PYTHON_SYSCONFIG_IMPORT = 'from distutils import sysconfig'
