@@ -30,7 +30,7 @@ will match the right spec against the actual data.
 recognize the JSON "null" value.  Secondly, arrays may not have
 character values as elements (this limitation could be easily removed
 if required). Third, all elements of an array must be of the same
-type.
+type.  Fourth, it can not handle NaN's in doubles (Issue 53150).
 
    There are separate entry points for beginning a parse of either
 JSON object or a JSON array. JSON "float" quantities are actually
