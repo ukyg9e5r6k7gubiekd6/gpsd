@@ -711,12 +711,22 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 
     }
 
-    /* Be quiet if the user requests silence. */
-    if (!silent_flag && raw_flag && (s = (char *)gps_data(gpsdata)) != NULL) {
-	char *p;
-	for (p = s + strlen(s); --p > s && isspace((unsigned char) *p); *p = '\0')
-	    ;
-	(void)wprintw(messages, "%s\n", s);
+    if ( raw_flag) {
+        /* Be quiet if the user requests silence. */
+        if (!silent_flag && (s = gps_data(gpsdata)) != NULL) {
+            char *p, *pe;
+
+            /* make a copy of the const char *, then trim trailing spaces */
+            p = strdup(s);
+            if ( NULL != p ) {
+		pe = p + strlen(p);
+		for ( ; --pe > p && isspace((int) *pe); *pe = '\0')
+		    ;
+		(void)wprintw(messages, "%s\n", p);
+		free(p);
+            }
+        }
+        (void)wrefresh(messages);
     }
 
     /* Reset the status_timer if the state has changed. */
@@ -727,9 +737,6 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 
     (void)wrefresh(datawin);
     (void)wrefresh(satellites);
-    if (raw_flag) {
-	(void)wrefresh(messages);
-    }
 }
 
 static void usage(char *prog)
