@@ -496,6 +496,14 @@ class Base(object):
         ("EPS", lambda s, r: s.update_err_speed(r, "eps")),
         ("EPC", lambda s, r: s.update_err_speed(r, "epc")),
         ("EPD", lambda s, r: s.update_err_degrees(r, "epd")),
+        # third column
+        ("ECEF X", lambda s, r: s.update_ecef(r, "ecefx")),
+        ("ECEF Y", lambda s, r: s.update_ecef(r, "ecefy")),
+        ("ECEF Z", lambda s, r: s.update_ecef(r, "ecefz")),
+        ("ECEF VX", lambda s, r: s.update_ecef(r, "ecefvx", "/s")),
+        ("ECEF VY", lambda s, r: s.update_ecef(r, "ecefvy", "/s")),
+        ("ECEF VZ", lambda s, r: s.update_ecef(r, "ecefvz", "/s")),
+        ("ECEF pAcc", lambda s, r: s.update_ecef(r, "ecefpAcc")),
     )
 
     def __init__(self, deg_type, rotate=0.0, target=""):
@@ -780,6 +788,16 @@ class Base(object):
         else:
             return "n/a"
 
+    def update_ecef(self, data, eceftype, speedunit = ''):
+        # update a ECEF in the GPS Data window
+        if hasattr(data, eceftype):
+            val = getattr(data, eceftype)
+            return ("% 14.3f %s%s" %
+                    (val * self.conversions.altfactor,
+                    self.conversions.altunits, speedunit))
+        else:
+            return "n/a"
+
     def update_err(self, data, errtype):
         if hasattr(data, errtype):
             return "%.3f %s" % (
@@ -819,8 +837,8 @@ class Base(object):
 
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
-        # the first 14 fields are updated using TPV data
-        for (hook, widget) in Base.gpsfields[:14]:
+        # the first 21 fields are updated using TPV data
+        for (hook, widget) in Base.gpsfields[:21]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_text(hook(self, tpv))
         self.gsview.update(tpv)
