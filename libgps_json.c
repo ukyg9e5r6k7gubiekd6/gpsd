@@ -14,10 +14,6 @@ PERMISSIONS
 
 ***************************************************************************/
 
-/* Ubuntu isfinite() needs _XOPEN_SOURCE, 600 means X/Open 2004 */
-/* Ubuntu man page says _POSIX_C_SOURCE 200112L should work, it fails */
-#define _XOPEN_SOURCE 600
-
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
@@ -77,6 +73,10 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 	{"ecefvy", t_real,    .addr.real = &gpsdata->fix.ecef.vy,
 			         .dflt.real = NAN},
 	{"ecefvz", t_real,    .addr.real = &gpsdata->fix.ecef.vz,
+			         .dflt.real = NAN},
+	{"ecefpAcc", t_real,  .addr.real = &gpsdata->fix.ecef.vAcc,
+			         .dflt.real = NAN},
+	{"ecefvAcc", t_real,  .addr.real = &gpsdata->fix.ecef.pAcc,
 			         .dflt.real = NAN},
 	{"mode",   t_integer, .addr.integer = &gpsdata->fix.mode,
 			         .dflt.integer = MODE_NOT_SEEN},

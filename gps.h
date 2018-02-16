@@ -101,8 +101,8 @@ struct gps_fix_t {
     /* ECEF data, all data in meters, and meters/second, or NaN */
     struct {
 	double x, y, z; 	/* ECEF x, y, z */
+	double pAcc;            /* 3D Position Accuracy Estimate, likely SEP */
 	double vx, vy, vz;	/* ECEF x, y, z velocity */
-	double pAcc;            /* 3D Position Accuracy Estimate, probably SEP */
 	double vAcc;            /* Velocity Accuracy Estimate, probably SEP */
     } ecef;
 };
