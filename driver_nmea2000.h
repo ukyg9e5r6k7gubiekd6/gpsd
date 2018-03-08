@@ -4,7 +4,7 @@
  * The entry points for driver_nmea2000
  *
  * This file is Copyright (c) 2012 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #ifndef _DRIVER_NMEA2000_H_

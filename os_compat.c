@@ -1,6 +1,6 @@
 /*
  * This file is Copyright (c) 2017 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  *
  * This file contains functions to deal with compatibility issues across OSes.
  *

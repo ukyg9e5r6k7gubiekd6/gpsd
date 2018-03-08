@@ -1,7 +1,7 @@
 /* gpsd.h -- fundamental types and structures for the gpsd library
  *
  * This file is Copyright (c) 2017 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #ifndef _GPSD_H_

@@ -10,7 +10,7 @@ representations to libgps structures.
 PERMISSIONS
    Written by Eric S. Raymond, 2009
    This file is Copyright (c) 2010 by the GPSD project
-   BSD terms apply: see the file COPYING in the distribution root for details.
+   SPDX-License-Identifier: BSD-2-clause
 
 ***************************************************************************/
 

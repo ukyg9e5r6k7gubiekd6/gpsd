@@ -54,7 +54,7 @@ handing GPS-subframe and RTCM decoding.
 You are not expected to understand any of this.
 
 This file is Copyright (c) 2010 by the GPSD project
-BSD terms apply: see the file COPYING in the distribution root for details.
+SPDX-License-Identifier: BSD-2-clause
 
 *****************************************************************************/
 

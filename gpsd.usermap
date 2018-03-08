@@ -1,7 +1,7 @@
 # Hotplug device map for GPSD
 #
 # This file is Copyright (c) 2010 by the GPSD project
-# BSD terms apply: see the file COPYING in the distribution root for details.
+# SPDX-License-Identifier: BSD-2-clause
 #
 # GPSes don't have their own USB device class.  They're serial-over-USB
 # devices, so what you see is actually the ID of the serial-over-USB chip.

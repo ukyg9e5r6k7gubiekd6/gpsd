@@ -9,7 +9,7 @@
  * Both 32- and 64-bit systems with gcc are OK with this set.
  *
  * This file is Copyright (c)2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #ifndef _GPSD_BITS_H_
 #define _GPSD_BITS_H_

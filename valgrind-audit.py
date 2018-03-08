@@ -5,7 +5,7 @@
 # malloc and friends in the daemon.
 #
 # This file is Copyright (c) 2010 by the GPSD project
-# BSD terms apply: see the file COPYING in the distribution root for details.
+# SPDX-License-Identifier: BSD-2-clause
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!

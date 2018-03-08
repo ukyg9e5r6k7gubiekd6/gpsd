@@ -1,6 +1,6 @@
 /*
  * This file is Copyright (c) 2017 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  *
  * This is the header for os_compat.c, which contains functions dealing with
  * compatibility issues across OSes.

@@ -6,7 +6,7 @@
  * This file is build from driver_ais.c
  *
  * This file is Copyright (c) 2013 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #include <stdlib.h>
 #include <string.h>

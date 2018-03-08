@@ -74,7 +74,7 @@
  *	?? Add probe function for Serial Binary to start PVT output.
  *
  * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #define __USE_POSIX199309 1

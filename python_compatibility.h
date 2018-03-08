@@ -2,7 +2,7 @@
  * python_compatibility.h -- macros for Python 2/3 compatibility
  *
  * This file is Copyright (c) 2016 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  *
  * Definitions based on examples in "Supporting Python 3 - The Book Site"
  *     http://python3porting.com/cextensions.html

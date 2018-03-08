@@ -1,7 +1,7 @@
 /* gps.h -- interface of the libgps library */
 /*
  * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #ifndef _GPSD_GPS_H_
 #define _GPSD_GPS_H_

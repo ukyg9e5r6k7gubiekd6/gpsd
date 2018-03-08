@@ -1,7 +1,7 @@
 /* gpsutils.c -- code shared between low-level and high-level interfaces
  *
  * This file is Copyright (c) 2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 /* The strptime prototype is not provided unless explicitly requested.

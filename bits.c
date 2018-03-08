@@ -1,7 +1,7 @@
 /* bits.c - bitfield extraction code
  *
  * This file is Copyright (c)2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  *
  * Bitfield extraction functions.  In each, start is a bit index  - not
  * a byte index - and width is a bit width.  The width is bounded above by

@@ -1,6 +1,6 @@
 /*
  * This file is Copyright (c) 2011 by Eckhart Wörner
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #ifndef GPSD_SD_SOCKET_H
