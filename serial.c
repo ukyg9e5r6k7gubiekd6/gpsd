@@ -728,7 +728,8 @@ void gpsd_close(struct gps_device_t *session)
 #ifdef TIOCNXCL
 	(void)ioctl(session->gpsdata.gps_fd, (unsigned long)TIOCNXCL);
 #endif /* TIOCNXCL */
-	(void)tcdrain(session->gpsdata.gps_fd);
+	if (!session->context->readonly)
+		(void)tcdrain(session->gpsdata.gps_fd);
 	if (isatty(session->gpsdata.gps_fd) != 0) {
 	    /* force hangup on close on systems that don't do HUPCL properly */
 	    (void)cfsetispeed(&session->ttyset, (speed_t) B0);
