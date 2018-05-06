@@ -480,7 +480,7 @@ netstumbler. This program is not genetically related to
 <code>gpsd</code>.</p>
 
 <p><a
-href='http://users.hol.gr/~dzach/gpsfeed/index.html'>gpsfeed+</a> is a
+href='http://gpsfeed.sourceforge.net/'>gpsfeed+</a> is a
 program that simulates the output of a GPS in motion, and can be used
 for testing GPS-aware applications.</p>
 
