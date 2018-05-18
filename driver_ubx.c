@@ -477,7 +477,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 {
     unsigned int i, nchan, nsv, st;
 
-    if (data_len < 152) {
+    if (data_len < 8) {
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "runt svinfo (datalen=%zd)\n", data_len);
 	return 0;
