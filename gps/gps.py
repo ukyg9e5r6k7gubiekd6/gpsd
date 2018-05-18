@@ -19,13 +19,14 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+# since Python 2.6
+from math import isnan
+
 from .client import *
+from .watch_options import *
 
 NaN = float('nan')
 
-
-def isnan(x):
-    return str(x) == 'nan'
 
 # Don't hand-hack this list, it's generated.
 ONLINE_SET = (1 << 1)
@@ -62,8 +63,8 @@ ERROR_SET = (1 << 31)
 TIMEDRIFT_SET = (1 << 32)
 EOF_SET = (1 << 33)
 SET_HIGH_BIT = 34
-UNION_SET = (RTCM2_SET | RTCM3_SET | SUBFRAME_SET | AIS_SET | VERSION_SET
-             | DEVICELIST_SET | ERROR_SET | GST_SET)
+UNION_SET = (RTCM2_SET | RTCM3_SET | SUBFRAME_SET | AIS_SET | VERSION_SET |
+             DEVICELIST_SET | ERROR_SET | GST_SET)
 STATUS_NO_FIX = 0
 STATUS_FIX = 1
 STATUS_DGPS_FIX = 2
@@ -72,20 +73,6 @@ MODE_2D = 2
 MODE_3D = 3
 MAXCHANNELS = 72  # Copied from gps.h, but not required to match
 SIGNAL_STRENGTH_UNKNOWN = NaN
-
-WATCH_ENABLE = 0x000001        # enable streaming
-WATCH_DISABLE = 0x000002       # disable watching
-WATCH_JSON = 0x000010          # JSON output
-WATCH_NMEA = 0x000020          # output in NMEA
-WATCH_RARE = 0x000040          # output of packets in hex
-WATCH_RAW = 0x000080           # output of raw packets
-WATCH_SCALED = 0x000100        # scale output to floats
-WATCH_TIMING = 0x000200        # timing information
-WATCH_DEVICE = 0x000800        # watch specific device
-WATCH_SPLIT24 = 0x001000       # split AIS Type 24s
-WATCH_PPS = 0x002000           # enable PPS JSON
-WATCH_NEWSTYLE = 0x010000      # force JSON streaming
-WATCH_OLDSTYLE = 0x020000      # force old-style streaming
 
 
 class gpsfix(object):
@@ -182,8 +169,9 @@ class gpsdata(object):
 class gps(gpscommon, gpsdata, gpsjson):
     "Client interface to a running gpsd instance."
 
-    def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0):
-        gpscommon.__init__(self, host, port, verbose)
+    def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0,
+                 reconnect=False):
+        gpscommon.__init__(self, host, port, verbose, reconnect)
         gpsdata.__init__(self)
         if mode:
             self.stream(mode)
@@ -288,25 +276,8 @@ class gps(gpscommon, gpsdata, gpsjson):
 
     def stream(self, flags=0, devpath=None):
         "Ask gpsd to stream reports at your client."
-        if (flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA
-                     | WATCH_RAW)) == 0:
-            flags |= WATCH_JSON
-        if flags & WATCH_DISABLE:
-            if flags & WATCH_OLDSTYLE:
-                arg = "w-"
-                if flags & WATCH_NMEA:
-                    arg += 'r-'
-                    return self.send(arg)
-            else:
-                gpsjson.stream(self, flags, devpath)
-        else:  # flags & WATCH_ENABLE:
-            if flags & WATCH_OLDSTYLE:
-                arg = 'w+'
-                if flags & WATCH_NMEA:
-                    arg += 'r+'
-                    return self.send(arg)
-            else:
-                gpsjson.stream(self, flags, devpath)
+
+        gpsjson.stream(self, flags, devpath)
 
 
 def is_sbas(prn):

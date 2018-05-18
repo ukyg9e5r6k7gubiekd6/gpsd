@@ -12,6 +12,7 @@ import sys
 import time
 
 from .misc import polystr, polybytes
+from .watch_options import *
 
 GPSD_PORT = "2947"
 
@@ -19,12 +20,18 @@ GPSD_PORT = "2947"
 class gpscommon(object):
     "Isolate socket handling and buffering from the protocol interpretation."
 
-    def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0):
+    def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0,
+                 should_reconnect=False):
         self.sock = None        # in case we blow up in connect
         self.linebuffer = b''
+        self.received = time.time()
         self.verbose = verbose
+        self.reconnect = should_reconnect
+
         if host is not None:
-            self.connect(host, port)
+            self.host = host
+        if port is not None:
+            self.port = port
 
     def connect(self, host, port):
         """Connect to a host on a given port.
@@ -51,14 +58,21 @@ class gpscommon(object):
                 self.sock = socket.socket(af, socktype, proto)
                 # if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
-            except socket.error as e:
-                msg = str(e)
-                # if self.debuglevel > 0: print 'connect fail:', (host, port)
+                if self.verbose > 0:
+                    print('connected to tcp://{}:{}'.format(host, port))
+                break
+            except ConnectionRefusedError as cre:
+                if self.verbose > 1:
+                    msg = str(cre) + ' (to {}:{})'.format(host, port)
+                    sys.stderr.write("error: {}\n".format(msg.strip()))
                 self.close()
-                continue
-            break
-        if not self.sock:
-            raise socket.error(msg)
+                return  # relatively routine error
+            except socket.error as e:
+                if self.verbose > 1:
+                    msg = str(e) + ' (to {}:{})'.format(host, port)
+                    sys.stderr.write("error: {}\n".format(msg.strip()))
+                self.close()
+                raise  # propogate error to caller
 
     def close(self):
         if self.sock:
@@ -78,24 +92,30 @@ class gpscommon(object):
 
     def read(self):
         "Wait for and read data being streamed from the daemon."
-        if self.verbose > 1:
-            sys.stderr.write("poll: reading from daemon...\n")
+
+        if None is self.sock:
+            self.connect(self.host, self.port)
+            if None is self.sock:
+                return -1
+            self.stream()
+
         eol = self.linebuffer.find(b'\n')
         if eol == -1:
             # RTCM3 JSON can be over 4.4k long, so go big
             frag = self.sock.recv(8192)
+
             self.linebuffer += frag
-            if self.verbose > 1:
-                sys.stderr.write("poll: read complete.\n")
             if not self.linebuffer:
                 if self.verbose > 1:
-                    sys.stderr.write("poll: returning -1.\n")
+                    sys.stderr.write(
+                        "poll: no available data: returning -1.\n")
                 # Read failed
                 return -1
+
             eol = self.linebuffer.find(b'\n')
             if eol == -1:
                 if self.verbose > 1:
-                    sys.stderr.write("poll: returning 0.\n")
+                    sys.stderr.write("poll: partial message: returning 0.\n")
                 # Read succeeded, but only got a fragment
                 self.response = ''  # Don't duplicate last response
                 return 0
@@ -113,7 +133,7 @@ class gpscommon(object):
         # Can happen if daemon terminates while we're reading.
         if not self.response:
             return -1
-        if self.verbose:
+        if 1 < self.verbose:
             sys.stderr.write("poll: data is %s\n" % repr(self.response))
         self.received = time.time()
         # We got a \n-terminated line
@@ -132,19 +152,8 @@ class gpscommon(object):
         "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
-        self.sock.send(polybytes(commands))
-
-WATCH_ENABLE = 0x000001 	# enable streaming
-WATCH_DISABLE = 0x000002 	# disable watching
-WATCH_JSON = 0x000010   	# JSON output
-WATCH_NMEA = 0x000020   	# output in NMEA
-WATCH_RARE = 0x000040   	# output of packets in hex
-WATCH_RAW = 0x000080    	# output of raw packets
-WATCH_SCALED = 0x000100 	# scale output to floats
-WATCH_TIMING = 0x000200 	# timing information
-WATCH_SPLIT24 = 0x001000 	# split AIS Type 24s
-WATCH_PPS = 0x002000    	# enable PPS in raw/NMEA
-WATCH_DEVICE = 0x000800 	# watch specific device
+        if None is not self.sock:
+            self.sock.send(polybytes(commands))
 
 
 class json_error(BaseException):
@@ -173,6 +182,46 @@ class gpsjson(object):
 
     def stream(self, flags=0, devpath=None):
         "Control streaming reports from the daemon,"
+
+        if 0 < flags:
+            self.stream_command = self.generate_stream_command(flags, devpath)
+
+        if self.stream_command:
+            if self.verbose > 1:
+                sys.stderr.write(
+                    "send: stream as: {}\n".format(self.stream_command))
+            self.send(self.stream_command)
+        else:
+            raise TypeError("Could not request a stream: "
+                            "Invalid streaming command!!")
+
+    def generate_stream_command(self, flags=0, devpath=None):
+        if flags & WATCH_OLDSTYLE:
+            return self.generate_stream_command_old_style(flags)
+        else:
+            return self.generate_stream_command_new_style(flags, devpath)
+
+    @staticmethod
+    def generate_stream_command_old_style(flags=0):
+        if flags & WATCH_DISABLE:
+            arg = "w-"
+            if flags & WATCH_NMEA:
+                arg += 'r-'
+
+        elif flags & WATCH_ENABLE:
+            arg = 'w+'
+            if flags & WATCH_NMEA:
+                arg += 'r+'
+
+        return arg
+
+    @staticmethod
+    def generate_stream_command_new_style(flags=0, devpath=None):
+
+        if (flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA |
+                     WATCH_RAW)) == 0:
+            flags |= WATCH_JSON
+
         if flags & WATCH_DISABLE:
             arg = '?WATCH={"enable":false'
             if flags & WATCH_JSON:
@@ -211,7 +260,8 @@ class gpsjson(object):
                 arg += ',"pps":true'
             if flags & WATCH_DEVICE:
                 arg += ',"device":"%s"' % devpath
-        return self.send(arg + "}")
+        arg += "}"
+        return arg
 
 
 class dictwrapper(object):
@@ -230,6 +280,9 @@ class dictwrapper(object):
         "Emulate dictionary, for new-style interface."
         return self.__dict__[key]
 
+    def __iter__(self):
+        return self.__dict__.__iter__()
+
     def __setitem__(self, key, val):
         "Emulate dictionary, for new-style interface."
         self.__dict__[key] = val
@@ -240,6 +293,9 @@ class dictwrapper(object):
     def __str__(self):
         return "<dictwrapper: " + str(self.__dict__) + ">"
     __repr__ = __str__
+
+    def __len__(self):
+        return len(self.__dict__)
 
 #
 # Someday a cleaner Python interface using this machinery will live here
