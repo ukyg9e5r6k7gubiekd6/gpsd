@@ -32,6 +32,7 @@ class gpscommon(object):
             self.host = host
         if port is not None:
             self.port = port
+        self.connect(self.host, self.port)
 
     def connect(self, host, port):
         """Connect to a host on a given port.
@@ -86,6 +87,9 @@ class gpscommon(object):
         "Return True if data is ready for the client."
         if self.linebuffer:
             return True
+        if self.sock is None:
+            return False
+
         (winput, _woutput, _wexceptions) = select.select(
             (self.sock,), (), (), timeout)
         return winput != []
@@ -152,7 +156,10 @@ class gpscommon(object):
         "Ship commands to the daemon."
         if not commands.endswith("\n"):
             commands += "\n"
-        if None is not self.sock:
+
+        if self.sock is None:
+            self.stream_command = commands
+        else:
             self.sock.send(polybytes(commands))
 
 
@@ -165,6 +172,11 @@ class json_error(BaseException):
 
 class gpsjson(object):
     "Basic JSON decoding."
+
+    def __init__(self):
+        self.stream_command = None
+        self.data = None
+        self.verbose = -1
 
     def __iter__(self):
         return self
@@ -185,15 +197,15 @@ class gpsjson(object):
 
         if 0 < flags:
             self.stream_command = self.generate_stream_command(flags, devpath)
+        else:
+            self.steam_command = self.enqueued
 
         if self.stream_command:
-            if self.verbose > 1:
-                sys.stderr.write(
-                    "send: stream as: {}\n".format(self.stream_command))
+            # if self.verbose > 1:
+            sys.stderr.write("send: stream as: {}\n".format(self.stream_command))
             self.send(self.stream_command)
         else:
-            raise TypeError("Could not request a stream: "
-                            "Invalid streaming command!!")
+            raise TypeError("Invalid streaming command!! : "+str(flags))
 
     def generate_stream_command(self, flags=0, devpath=None):
         if flags & WATCH_OLDSTYLE:

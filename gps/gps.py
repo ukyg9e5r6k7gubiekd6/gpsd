@@ -173,6 +173,7 @@ class gps(gpscommon, gpsdata, gpsjson):
                  reconnect=False):
         gpscommon.__init__(self, host, port, verbose, reconnect)
         gpsdata.__init__(self)
+        gpsjson.__init__(self)
         if mode:
             self.stream(mode)
 
