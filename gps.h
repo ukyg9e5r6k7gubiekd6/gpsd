@@ -98,6 +98,8 @@ struct gps_fix_t {
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
 
+    double magnetic_track;  /* Course (relative to Magnetic North) */
+
     /* ECEF data, all data in meters, and meters/second, or NaN */
     struct {
 	double x, y, z; 	/* ECEF x, y, z */
@@ -2008,7 +2010,8 @@ struct gps_data_t {
 #define OSCILLATOR_SET	(1llu<<35)
 #define ECEF_SET	(1llu<<36)
 #define VECEF_SET	(1llu<<37)
-#define SET_HIGH_BIT	38
+#define MAGNETIC_TRACK_SET (1llu<<38)
+#define SET_HIGH_BIT	39
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences

@@ -242,6 +242,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->mode = MODE_NOT_SEEN;
     fixp->latitude = fixp->longitude = NAN;
     fixp->track = NAN;
+    fixp->magnetic_track = NAN;
     fixp->speed = NAN;
     fixp->climb = NAN;
     fixp->altitude = NAN;
@@ -287,7 +288,9 @@ void gps_merge_fix(struct gps_fix_t *to,
     if ((transfer & ALTITUDE_SET) != 0)
 	to->altitude = from->altitude;
     if ((transfer & TRACK_SET) != 0)
-	to->track = from->track;
+        to->track = from->track;
+    if ((transfer & MAGNETIC_TRACK_SET) != 0)
+        to->magnetic_track = from->magnetic_track;
     if ((transfer & SPEED_SET) != 0)
 	to->speed = from->speed;
     if ((transfer & CLIMB_SET) != 0)

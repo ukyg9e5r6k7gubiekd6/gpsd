@@ -313,6 +313,9 @@ void libgps_dump_state(struct gps_data_t *collect)
 	(void)fprintf(debugfp, "SPEED: %lf\n", collect->fix.speed);
     if (collect->set & TRACK_SET)
 	(void)fprintf(debugfp, "TRACK: track: %lf\n", collect->fix.track);
+    if (collect->set & MAGNETIC_TRACK_SET)
+        (void)fprintf(debugfp, "MAGNETIC_TRACK: magtrack: %lf\n",
+                      collect->fix.magnetic_track);
     if (collect->set & CLIMB_SET)
 	(void)fprintf(debugfp, "CLIMB: climb: %lf\n", collect->fix.climb);
     if (collect->set & STATUS_SET) {
