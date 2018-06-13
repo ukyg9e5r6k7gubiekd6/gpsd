@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-This file is Copyright (c) 2010 by the GPSD project
+This file is Copyright (c) 2010-2018 by the GPSD project
 SPDX-License-Identifier: BSD-2-clause
 -->
 <!DOCTYPE refentry PUBLIC
@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-clause
 <!ENTITY gpsdsock	 "/var/run/gpsd.sock">
 ]>
 <refentry id='gpsd_json.5'>
-<refentryinfo><date>28 Aug 2011</date></refentryinfo>
+<refentryinfo><date>13 Jun 2018</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpsd_json</refentrytitle>
 <manvolnum>5</manvolnum>
@@ -190,6 +190,12 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Course over ground, degrees from true north.</entry>
+</row>
+<row>
+	<entry>magtrack</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Course over ground, degrees magnetic.</entry>
 </row>
 <row>
 	<entry>speed</entry>
