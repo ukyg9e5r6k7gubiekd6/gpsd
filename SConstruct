@@ -2348,7 +2348,8 @@ env.Clean(clean_misc, glob.glob('.coverage*') + ['htmlcov/'])
 # Clean Qt stuff
 env.Clean(clean_misc, ['libQgpsmm.prl', 'Qgpsmm.pc'])
 # Other misc items
-env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'TAGS'])
+env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'contrib/clock_test',
+                       'TAGS'])
 
 # Nuke scons state files
 sconsclean = Utility("sconsclean", '',

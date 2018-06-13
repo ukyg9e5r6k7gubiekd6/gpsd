@@ -11,6 +11,7 @@ strl = StaticObject("strl", "../strl.c")
 ashctl = Program("ashctl", ["ashctl.c", strl])
 binlog = Program("binlog", "binlog.c")
 binreplay = Program("binreplay", "binreplay.c", parse_flags=['-lutil'])
+clock_test = Program("clock_test", "clock_test.c", parse_flags=['-lm'])
 lla2ecef = Program("lla2ecef", "lla2ecef.c", parse_flags=['-lm'])
 motosend = Program("motosend", ["motosend.c", strl])
 

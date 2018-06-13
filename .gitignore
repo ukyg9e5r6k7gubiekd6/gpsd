@@ -13,6 +13,7 @@ gpspipe
 gps2udp
 ntpshmmon
 ppscheck
+contrib/clock_test
 *.exe
 # These are built from .in files
 jsongen.py
