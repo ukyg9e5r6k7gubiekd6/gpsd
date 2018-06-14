@@ -220,7 +220,10 @@ static gps_mask_t processVTG(int count,
     session->newdata.speed = safe_atof(field[5]) * KNOTS_TO_MPS;
     mask |= SPEED_SET;
 
-    gpsd_log(&session->context->errout, LOG_DATA, "VTG: course(T)=%.2f, course(M)=%.2f, speed=%.2f", session->newdata.track, session->newdata.magnetic_track, session->newdata.speed);
+    gpsd_log(&session->context->errout, LOG_DATA,
+             "VTG: course(T)=%.2f, course(M)=%.2f, speed=%.2f",
+             session->newdata.track, session->newdata.magnetic_track,
+             session->newdata.speed);
     return mask;
 }
 
@@ -284,7 +287,8 @@ static gps_mask_t processRMC(int count, char *field[],
 	 * received a fix.
 	 */
 	if (session->gpsdata.status == STATUS_NO_FIX) {
-	    session->gpsdata.status = STATUS_FIX;	/* could be DGPS_FIX, we can't tell */
+            /* could be DGPS_FIX, we can't tell */
+	    session->gpsdata.status = STATUS_FIX;
 	    mask |= STATUS_SET;
 	}
 	if (session->newdata.mode < MODE_2D) {
@@ -350,7 +354,8 @@ static gps_mask_t processGLL(int count, char *field[],
 	register_fractional_time(field[0], field[5], session);
 	if (session->nmea.date.tm_year == 0)
 	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "can't use GLL time until after ZDA or RMC has supplied a year.\n");
+		     "can't use GLL time until after ZDA or RMC"
+                     " has supplied a year.\n");
 	else {
 	    mask = TIME_SET;
 	}
@@ -437,8 +442,9 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * nicer to do it on GSA but GSA has no timestamp).
      */
     session->nmea.latch_mode = strncmp(field[1],
-					      session->nmea.last_gga_timestamp,
-					      sizeof(session->nmea.last_gga_timestamp))==0;
+			  session->nmea.last_gga_timestamp,
+			  sizeof(session->nmea.last_gga_timestamp))==0;
+
     if (session->nmea.latch_mode) {
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
@@ -454,7 +460,8 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	register_fractional_time(field[0], field[1], session);
 	if (session->nmea.date.tm_year == 0)
 	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "can't use GGA time until after ZDA or RMC has supplied a year.\n");
+		     "can't use GGA time until after ZDA or RMC"
+                     " has supplied a year.\n");
 	else {
 	    mask |= TIME_SET;
 	}
@@ -510,13 +517,14 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 }
 
 
-static gps_mask_t processGST(int count, char *field[], struct gps_device_t *session)
+static gps_mask_t processGST(int count, char *field[],
+                             struct gps_device_t *session)
 /* GST - GPS Pseudorange Noise Statistics */
 {
     /*
      * GST,hhmmss.ss,x,x,x,x,x,x,x,*hh
      * 1 UTC time of associated GGA fix
-     * 2 Total RMS standard deviation of ranges inputs to the navigation solution
+     * 2 Total RMS standard deviation of ranges inputs to the nav solution
      * 3 Standard deviation (meters) of semi-major axis of error ellipse
      * 4 Standard deviation (meters) of semi-minor axis of error ellipse
      * 5 Orientation of semi-major axis of error ellipse (true north degrees)
@@ -548,7 +556,8 @@ static gps_mask_t processGST(int count, char *field[], struct gps_device_t *sess
     session->gpsdata.gst.utctime += mkgmtime(&session->nmea.date);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GST: utc = %.3f, rms = %.2f, maj = %.2f, min = %.2f, ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
+	     "GST: utc = %.3f, rms = %.2f, maj = %.2f, min = %.2f,"
+             " ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
 	     session->gpsdata.gst.utctime,
 	     session->gpsdata.gst.rms_deviation,
 	     session->gpsdata.gst.smajor_deviation,
@@ -706,7 +715,7 @@ static gps_mask_t processGSA(int count, char *field[],
 	else if (session->nmea.last_gsa_talker == 'N')
 	    session->nmea.seen_gngsa = true;
 
-	/* the magic 6 here counts the tag, two mode fields, and the DOP fields */
+	/* the magic 6 here counts the tag, two mode fields, and DOP fields */
 	for (i = 0; i < count - 6; i++) {
 	    int prn;
 	    /* skip empty fields, otherwise empty becomes prn=200 */
@@ -833,7 +842,8 @@ static gps_mask_t processGSV(int count, char *field[],
 	 * might have gone from GPGSV to GLGSV/BDGSV/QZGSV,
 	 * in which case accumulate
 	 */
-	if (session->nmea.last_gsv_talker == '\0' || GSV_TALKER == session->nmea.last_gsv_talker) {
+	if (session->nmea.last_gsv_talker == '\0'
+            || GSV_TALKER == session->nmea.last_gsv_talker) {
 	    gpsd_zero_satellites(&session->gpsdata);
 	}
 	session->nmea.last_gsv_talker = GSV_TALKER;
@@ -885,12 +895,14 @@ static gps_mask_t processGSV(int count, char *field[],
      *
      * FIXME: Add per-talker totals so we can do this check properly.
      */
-    if (!(session->nmea.seen_glgsv || session->nmea.seen_bdgsv || session->nmea.seen_qzss))
+    if (!(session->nmea.seen_glgsv || session->nmea.seen_bdgsv
+          || session->nmea.seen_qzss)) {
 	if (session->nmea.part == session->nmea.await
 		&& atoi(field[3]) != session->gpsdata.satellites_visible)
 	    gpsd_log(&session->context->errout, LOG_WARN,
 		     "GPGSV field 3 value of %d != actual count %d\n",
 		     atoi(field[3]), session->gpsdata.satellites_visible);
+    }
 
     /* not valid data until we've seen a complete set of parts */
     if (session->nmea.part < session->nmea.await) {
@@ -922,7 +934,8 @@ static gps_mask_t processGSV(int count, char *field[],
 	     session->nmea.part, session->nmea.await);
 
     /* assumes GLGSV or BDGSV group, if present, is emitted after the GPGSV */
-    if ((session->nmea.seen_glgsv || session->nmea.seen_bdgsv || session->nmea.seen_qzss) && GSV_TALKER == 'P')
+    if ((session->nmea.seen_glgsv || session->nmea.seen_bdgsv
+         || session->nmea.seen_qzss) && GSV_TALKER == 'P')
 	return ONLINE_SET;
 
     /* clear computed DOPs so they get recomputed. */
@@ -962,7 +975,8 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
 	mask = 0;
     } else {
 	session->newdata.epx = session->newdata.epy =
-	    safe_atof(field[1]) * (1 / sqrt(2)) * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	    safe_atof(field[1]) * (1 / sqrt(2))
+                      * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	session->newdata.epv =
 	    safe_atof(field[3]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	session->gpsdata.epe =
@@ -1465,7 +1479,9 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
+		     "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f"
+                     " speed=%.2f track=%.2f climb=%.2f mode=%d status=%d"
+                     " pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
 		     field[4], session->newdata.latitude,
 		     session->newdata.longitude, session->newdata.altitude,
 		     session->newdata.speed, session->newdata.track,
@@ -1478,7 +1494,9 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	struct satellite_t *sp;
 	int i, n = session->gpsdata.satellites_visible = atoi(field[2]);
 	session->gpsdata.satellites_used = 0;
-	for (i = 0, sp = session->gpsdata.skyview; sp < session->gpsdata.skyview + n; sp++, i++) {
+	for (i = 0, sp = session->gpsdata.skyview;
+            sp < session->gpsdata.skyview + n; sp++, i++) {
+
 	    sp->PRN = (short)atoi(field[3 + i * 5 + 0]);
 	    sp->azimuth = (short)atoi(field[3 + i * 5 + 1]);
 	    sp->elevation = (short)atoi(field[3 + i * 5 + 2]);
@@ -1844,7 +1862,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"OHPR", 18, false, processOHPR},
 #endif /* OCEANSERVER_ENABLE */
 #ifdef ASHTECH_ENABLE
-	{"PASHR", 3, false, processPASHR},	/* general handler for Ashtech */
+        /* general handler for Ashtech */
+	{"PASHR", 3, false, processPASHR},
 #endif /* ASHTECH_ENABLE */
 #ifdef MTK3301_ENABLE
 	{"PMTK", 3,  false, processMTK3301},
@@ -1892,7 +1911,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     }
 
     /* make an editable copy of the sentence */
-    (void)strlcpy((char *)session->nmea.fieldcopy, sentence, sizeof(session->nmea.fieldcopy) - 1);
+    (void)strlcpy((char *)session->nmea.fieldcopy, sentence,
+                  sizeof(session->nmea.fieldcopy) - 1);
     /* discard the checksum part */
     for (p = (char *)session->nmea.fieldcopy;
 	 (*p != '*') && (*p >= ' ');)
@@ -1912,11 +1932,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* split sentence copy on commas, filling the field array */
     count = 0;
     t = p;			/* end of sentence */
-    p = (char *)session->nmea.fieldcopy + 1;	/* beginning of tag, 'G' not '$' */
+    p = (char *)session->nmea.fieldcopy + 1; /* beginning of tag, 'G' not '$' */
     /* while there is a search string and we haven't run off the buffer... */
     while ((p != NULL) && (p <= t)) {
 	session->nmea.field[count] = p;	/* we have a field. record it */
-	if ((p = strchr(p, ',')) != NULL) {	/* search for the next delimiter */
+	if ((p = strchr(p, ',')) != NULL) {  /* search for the next delimiter */
 	    *p = '\0';		/* replace it with a NUL */
 	    count++;		/* bump the counters and continue */
 	    p++;
