@@ -153,25 +153,59 @@ static void register_fractional_time(const char *tag, const char *fld,
  * NMEA sentence handling begins here
  *
  **************************************************************************/
-static gps_mask_t processVTG(int count UNUSED,
+static gps_mask_t processVTG(int count,
                              char *field[],
                              struct gps_device_t *session)
 //     $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K
+//     $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K,A
 //
 // where:
 //         1,2     054.7,T      True track made good (degrees)
 //         3,4     034.4,M      Magnetic track made good
 //         5,6     005.5,N      Ground speed, knots
 //         7,8     010.2,K      Ground speed, Kilometers per hour
+//         9       A            Mode Indicator (optional)
+//                              A=autonomous, D=differential, E=Estimated,
+//                              N=not valid, S=Simulator, M=Manual input mode
 //
 // see also:
 //     http://www.catb.org/gpsd/NMEA.html#_vtg_track_made_good_and_ground_speed
 {
+    gps_mask_t mask = 0;
+
     if( (field[1][0] == '\0') || (field[5][0] == '\0')){
         return 0;
     }
 
-    gps_mask_t mask = 0;
+    /* ignore empty/missing field, fix mode of last resort */
+    if ((count > 9) && ('\0' != field[9][0]) &&
+        (MODE_NOT_SEEN == session->newdata.mode)) {
+
+        switch (field[9][0]) {
+        case 'A':
+            /* Autonomous, 2D or 3D fix */
+            /* FALL THROUGH */
+        case 'D':
+            /* Differential, 2D or 3D fix */
+	    session->newdata.mode = MODE_2D;
+            // MODE_SET here causes issues
+	    // mask |= MODE_SET;
+            break;
+        case 'E':
+            /* Estimated, DR only */
+            /* FALL THROUGH */
+        case 'N':
+            /* Not Valid */
+	    session->newdata.mode = MODE_NO_FIX;
+            // MODE_SET here causes issues
+	    // mask |= MODE_SET;
+            // nothing to use here, leave
+            return 0;
+        default:
+            /* Huh? */
+            break;
+        }
+    }
 
     // set true track
     session->newdata.track = safe_atof(field[1]);
