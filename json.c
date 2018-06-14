@@ -188,7 +188,7 @@ static int json_internal_read_object(const char *cp,
     char *lptr;
 
     if (end != NULL)
-	*end = NULL;		/* give it a well-defined value on parse failure */
+	*end = NULL;	/* give it a well-defined value on parse failure */
 
     /* stuff fields with defaults in case they're omitted in the JSON input */
     for (cursor = attrs; cursor->attribute != NULL; cursor++)
@@ -294,7 +294,8 @@ static int json_internal_read_object(const char *cp,
 		}
 		if (cursor->attribute == NULL) {
 		    json_debug_trace((1,
-				      "Unknown attribute name '%s' (attributes begin with '%s').\n",
+				      "Unknown attribute name '%s'"
+                                      " (attributes begin with '%s').\n",
 				      attrbuf, attrs->attribute));
 		    /* don't update end here, leave at attribute start */
 		    return JSON_ERR_BADATTR;
@@ -432,7 +433,8 @@ static int json_internal_read_object(const char *cp,
 	     */
 	    for (;;) {
 		int seeking = cursor->type;
-		if (value_quoted && (cursor->type == t_string || cursor->type == t_time))
+		if (value_quoted && (cursor->type == t_string
+                    || cursor->type == t_time))
 		    break;
 		if ((strcmp(valbuf, "true")==0 || strcmp(valbuf, "false")==0)
 			&& seeking == t_boolean)
@@ -441,7 +443,8 @@ static int json_internal_read_object(const char *cp,
 		    bool decimal = strchr(valbuf, '.') != NULL;
 		    if (decimal && seeking == t_real)
 			break;
-		    if (!decimal && (seeking == t_integer || seeking == t_uinteger))
+		    if (!decimal && (seeking == t_integer
+                                     || seeking == t_uinteger))
 			break;
 		}
 		if (cursor[1].attribute==NULL)	/* out of possiblities */
@@ -454,15 +457,15 @@ static int json_internal_read_object(const char *cp,
 		&& (cursor->type != t_string && cursor->type != t_character
 		    && cursor->type != t_check && cursor->type != t_time
 		    && cursor->type != t_ignore && cursor->map == 0)) {
-		json_debug_trace((1,
-				  "Saw quoted value when expecting non-string.\n"));
+		json_debug_trace((1, "Saw quoted value when expecting"
+                                  " non-string.\n"));
 		return JSON_ERR_QNONSTRING;
 	    }
 	    if (!value_quoted
 		&& (cursor->type == t_string || cursor->type == t_check
 		    || cursor->type == t_time || cursor->map != 0)) {
-		json_debug_trace((1,
-				  "Didn't see quoted value when expecting string.\n"));
+		json_debug_trace((1, "Didn't see quoted value when expecting"
+                                  " string.\n"));
 		return JSON_ERR_NONQSTRING;
 	    }
 	    if (cursor->map != 0) {
@@ -542,8 +545,8 @@ static int json_internal_read_object(const char *cp,
 		    break;
 		case t_check:
 		    if (strcmp(cursor->dflt.check, valbuf) != 0) {
-			json_debug_trace((1,
-					  "Required attribute value %s not present.\n",
+			json_debug_trace((1, "Required attribute value %s"
+                                          " not present.\n",
 					  cursor->dflt.check));
 			/* don't update end here, leave at start of attribute */
 			return JSON_ERR_CHECKFAIL;
@@ -587,7 +590,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
     char *tp;
 
     if (end != NULL)
-	*end = NULL;		/* give it a well-defined value on parse failure */
+	*end = NULL;	/* give it a well-defined value on parse failure */
 
     json_debug_trace((1, "Entered json_read_array()\n"));
 
@@ -663,7 +666,8 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 #endif /* JSON_MINIMAL */
 	case t_uinteger:
 #ifndef JSON_MINIMAL
-	    arr->arr.uintegers.store[offset] = (unsigned int)strtoul(cp, &ep, 0);
+	    arr->arr.uintegers.store[offset] = (unsigned int)strtoul(cp,
+                                                                     &ep, 0);
 	    if (ep == cp)
 		return JSON_ERR_BADNUM;
 	    else
@@ -681,7 +685,8 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 #endif /* JSON_MINIMAL */
 	case t_ushort:
 #ifndef JSON_MINIMAL
-	    arr->arr.ushorts.store[offset] = (unsigned short)strtoul(cp, &ep, 0);
+	    arr->arr.ushorts.store[offset] = (unsigned short)strtoul(cp,
+                                                                     &ep, 0);
 	    if (ep == cp)
 		return JSON_ERR_BADNUM;
 	    else
