@@ -375,6 +375,12 @@ static int json_internal_read_object(const char *cp,
 	    if (pval == NULL)
 		/* don't update end here, leave at value start */
 		return JSON_ERR_NULLPTR;
+	    else if (pval > valbuf + JSON_VAL_MAX - 1
+		       || pval > valbuf + maxlen) {
+		json_debug_trace((1, "String value too long.\n"));
+		/* don't update end here, leave at value start */
+		return JSON_ERR_STRLONG;	/*  */
+	    }
 	    switch (*cp) {
 	    case 'b':
 		*pval++ = '\b';
@@ -400,7 +406,7 @@ static int json_internal_read_object(const char *cp,
 		if (1 != sscanf(uescape, "%4x", &u)) {
 		    return JSON_ERR_BADSTRING;
                 }
-		*pval++ = (char)u;  /* will truncate values above 0xff */
+		*pval++ = (unsigned char)u;  /* will truncate values above 0xff */
 		break;
 	    default:		/* handles double quote and solidus */
 		*pval++ = *cp;
