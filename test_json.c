@@ -1,4 +1,4 @@
-/* json.c - unit test for JSON partsing into fixed-extent structures
+/* json.c - unit test for JSON parsing into fixed-extent structures
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
@@ -14,7 +14,11 @@
 #include "gpsd.h"
 #include "gps_json.h"
 
-#define JSON_MINIMAL	/* GPSD only uses a subset of the features */
+/* GPSD is built with JSON_MINIMAL.  Any !JSON_MINIMAL tests,
+ * like 13, 14 and 15 will thus fail.
+ * So this define removes them, they never execute.
+ */
+#define JSON_MINIMAL
 
 static void assert_case(int num, int status)
 {
