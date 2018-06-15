@@ -396,8 +396,9 @@ static int json_internal_read_object(const char *cp,
 		    uescape[n] = *cp++;
 		uescape[n] = '\0';      /* terminate */
 		--cp;
-		(void)sscanf(uescape, "%04x", &u);
-		*pval++ = (char)u;	/* will truncate values above 0xff */
+		if (1 != sscanf(uescape, "%4x", &u))
+		    return JSON_ERR_BADSTRING;
+		*pval++ = (char)u;  /* will truncate values above 0xff */
 		break;
 	    default:		/* handles double quote and solidus */
 		*pval++ = *cp;
