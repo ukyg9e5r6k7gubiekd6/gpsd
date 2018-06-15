@@ -403,10 +403,11 @@ static int json_internal_read_object(const char *cp,
 		    uescape[n] = *cp++;
                 uescape[n] = '\0';      /* terminate */
 		--cp;
-		if (1 != sscanf(uescape, "%4x", &u)) {
+                /* ECMA-404 says JSON \u must have 4 hex digits */
+		if ((4 != n) || (1 != sscanf(uescape, "%4x", &u))) {
 		    return JSON_ERR_BADSTRING;
                 }
-		*pval++ = (unsigned char)u;  /* will truncate values above 0xff */
+		*pval++ = (unsigned char)u;  /* truncate values above 0xff */
 		break;
 	    default:		/* handles double quote and solidus */
 		*pval++ = *cp;
