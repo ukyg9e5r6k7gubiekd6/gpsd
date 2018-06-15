@@ -394,6 +394,7 @@ static int json_internal_read_object(const char *cp,
 	    case 'u':
 		for (n = 0; n < 4 && cp[n] != '\0'; n++)
 		    uescape[n] = *cp++;
+		uescape[n] = '\0';      /* terminate */
 		--cp;
 		(void)sscanf(uescape, "%04x", &u);
 		*pval++ = (char)u;	/* will truncate values above 0xff */
