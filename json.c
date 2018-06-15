@@ -392,12 +392,14 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = '\t';
 		break;
 	    case 'u':
-		for (n = 0; n < 4 && cp[n] != '\0'; n++)
+                cp++;                   /* skip the 'u' */
+		for (n = 0; n < 4 && isxdigit(*cp); n++)
 		    uescape[n] = *cp++;
-		uescape[n] = '\0';      /* terminate */
+                uescape[n] = '\0';      /* terminate */
 		--cp;
-		if (1 != sscanf(uescape, "%4x", &u))
+		if (1 != sscanf(uescape, "%4x", &u)) {
 		    return JSON_ERR_BADSTRING;
+                }
 		*pval++ = (char)u;  /* will truncate values above 0xff */
 		break;
 	    default:		/* handles double quote and solidus */
