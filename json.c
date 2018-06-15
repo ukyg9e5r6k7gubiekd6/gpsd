@@ -557,6 +557,7 @@ static int json_internal_read_object(const char *cp,
 		    }
 		    break;
 		}
+	    __attribute__ ((fallthrough));
 	case post_array:
 	    if (isspace((unsigned char) *cp))
 		continue;
