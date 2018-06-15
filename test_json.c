@@ -20,6 +20,8 @@
  */
 #define JSON_MINIMAL
 
+static int debug = 0;
+
 static void assert_case(int num, int status)
 {
     if (status != 0) {
@@ -233,8 +235,17 @@ static const char *json_strOSC = "{\"class\":\"OSC\",\"device\":\"GPS#1\"," \
     "\"running\":true,\"reference\":true,\"disciplined\":false," \
     "\"delta\":67}";
 
+/* Case 13: test parsing of ERROR message */
+
+static char *json_strErr = "{\"class\":\"ERROR\",\"message\":" \
+                           "\"Hello\b\f\n\r\t\"}";
+
+/* Case 14: test parsing of ERROR message and escape sequences */
+
+static char json_strErr1[512];  /* dynamically built */
+
 #ifndef JSON_MINIMAL
-/* Case 13: Read array of integers */
+/* Case 15: Read array of integers */
 
 static const char *json_strInt = "[23,-17,5]";
 static int intstore[4], intcount;
@@ -246,7 +257,7 @@ static const struct json_array_t json_array_Int = {
     .maxlen = sizeof(intstore)/sizeof(intstore[0]),
 };
 
-/* Case 14: Read array of booleans */
+/* Case 16: Read array of booleans */
 
 static const char *json_strBool = "[true,false,true]";
 static bool boolstore[4];
@@ -259,13 +270,13 @@ static const struct json_array_t json_array_Bool = {
     .maxlen = sizeof(boolstore)/sizeof(boolstore[0]),
 };
 
-/* Case 15: Read array of reals */
+/* Case 17: Read array of reals */
 
-static const char *json_str15 = "[23.1,-17.2,5.3]";
+static const char *json_strReal = "[23.1,-17.2,5.3]";
 static double realstore[4];
 static int realcount;
 
-static const struct json_array_t json_array_15 = {
+static const struct json_array_t json_array_Real = {
     .element_type = t_real,
     .arr.reals.store = realstore,
     .count = &realcount,
@@ -279,11 +290,18 @@ static void jsontest(int i)
 {
     int status = 0;
 
+    if (0 < debug) {
+	(void)fprintf(stderr, "Running test #%d.\n", i);
+    }
+
+    /* do not keep old data! */
+    memset((void *)&gpsdata, 0, sizeof(gpsdata));
+
     switch (i)
     {
     case 1:
 	status = libgps_json_unpack(json_str1, &gpsdata, NULL);
-	assert_case(1, status);
+	assert_case(i, status);
 	assert_string("device", gpsdata.dev.path, "GPS#1");
 	assert_integer("mode", gpsdata.fix.mode, 3);
 	assert_real("time", gpsdata.fix.time, 1119168761.8900001);
@@ -293,7 +311,7 @@ static void jsontest(int i)
 
     case 2:
 	status = libgps_json_unpack(json_str2, &gpsdata, NULL);
-	assert_case(2, status);
+	assert_case(i, status);
 	assert_integer("used", gpsdata.satellites_used, 6);
 	assert_integer("PRN[0]", gpsdata.skyview[0].PRN, 10);
 	assert_integer("el[0]", gpsdata.skyview[0].elevation, 45);
@@ -309,7 +327,7 @@ static void jsontest(int i)
 
     case 3:
 	status = json_read_array(json_str3, &json_array_3, NULL);
-	assert_case(3, status);
+	assert_case(i, status);
 	assert(stringcount == 3);
 	assert(strcmp(stringptrs[0], "foo") == 0);
 	assert(strcmp(stringptrs[1], "bar") == 0);
@@ -318,17 +336,17 @@ static void jsontest(int i)
 
     case 4:
 	status = json_read_object(json_str4, json_attrs_4, NULL);
-	assert_case(4, status);
-	assert_integer("dftint", dftinteger, -5);	/* did the default work? */
-	assert_uinteger("dftuint", dftuinteger, 10);	/* did the default work? */
-	assert_real("dftreal", dftreal, 23.17);	/* did the default work? */
+	assert_case(i, status);
+	assert_integer("dftint", dftinteger, -5);    /* did the default work? */
+	assert_uinteger("dftuint", dftuinteger, 10); /* did the default work? */
+	assert_real("dftreal", dftreal, 23.17);	     /* did the default work? */
 	assert_boolean("flag1", flag1, true);
 	assert_boolean("flag2", flag2, false);
 	break;
 
     case 5:
 	status = libgps_json_unpack(json_str5, &gpsdata, NULL);
-	assert_case(5, status);
+	assert_case(i, status);
 	assert_string("path", gpsdata.dev.path, "/dev/ttyUSB0");
 	assert_integer("flags", gpsdata.dev.flags, 5);
 	assert_string("driver", gpsdata.dev.driver, "Foonly");
@@ -336,7 +354,7 @@ static void jsontest(int i)
 
     case 6:
 	status = json_read_object(json_str6, json_attrs_6, NULL);
-	assert_case(6, status);
+	assert_case(i, status);
 	assert_integer("dumbcount", dumbcount, 4);
 	assert_string("dumbstruck[0].name", dumbstruck[0].name, "Urgle");
 	assert_string("dumbstruck[1].name", dumbstruck[1].name, "Burgle");
@@ -354,7 +372,7 @@ static void jsontest(int i)
 
     case 7:
 	status = libgps_json_unpack(json_str7, &gpsdata, NULL);
-	assert_case(7, status);
+	assert_case(i, status);
 	assert_string("release", gpsdata.version.release, "2.40dev");
 	assert_string("rev", gpsdata.version.rev, "dummy-revision");
 	assert_integer("proto_major", gpsdata.version.proto_major, 3);
@@ -363,7 +381,7 @@ static void jsontest(int i)
 
     case 8:
 	status = json_read_object(json_str8, json_attrs_8, NULL);
-	assert_case(8, status);
+	assert_case(i, status);
 	assert_integer("fee", fee, 3);
 	assert_integer("fie", fie, 6);
 	assert_integer("foe", foe, 14);
@@ -372,13 +390,13 @@ static void jsontest(int i)
     case 9:
 	/* yes, the '6' in the next line is correct */
 	status = json_read_object(json_str9, json_attrs_6, NULL);
-	assert_case(9, status);
+	assert_case(i, status);
 	assert_integer("dumbcount", dumbcount, 0);
 	break;
 
     case 10:
 	status = json_pps_read(json_strPPS, &gpsdata, NULL);
-	assert_case(10, status);
+	assert_case(i, status);
 	assert_string("device", gpsdata.dev.path, "GPS#1");
 	assert_integer("real_sec", gpsdata.pps.real.tv_sec, 1428001514);
 	assert_integer("real_nsec", gpsdata.pps.real.tv_nsec, 1000000);
@@ -388,7 +406,7 @@ static void jsontest(int i)
 
     case 11:
 	status = json_toff_read(json_strTOFF, &gpsdata, NULL);
-	assert_case(11, status);
+	assert_case(i, status);
 	assert_string("device", gpsdata.dev.path, "GPS#1");
 	assert_integer("real_sec", gpsdata.pps.real.tv_sec, 1428001514);
 	assert_integer("real_nsec", gpsdata.pps.real.tv_nsec, 1000000);
@@ -398,7 +416,7 @@ static void jsontest(int i)
 
     case 12:
 	status = json_oscillator_read(json_strOSC, &gpsdata, NULL);
-	assert_case(12,status);
+	assert_case(i,status);
 	assert_string("device", gpsdata.dev.path, "GPS#1");
 	assert_boolean("running", gpsdata.osc.running, true);
 	assert_boolean("reference", gpsdata.osc.reference, true);
@@ -406,10 +424,31 @@ static void jsontest(int i)
 	assert_integer("delta", gpsdata.osc.delta, 67);
 	break;
 
-#ifdef JSON_MINIMAL
-#define MAXTEST 12
-#else
     case 13:
+	if (2 < debug) {
+	    (void)fprintf(stderr, "test string: %s.\n", json_strErr);
+	}
+	status = libgps_json_unpack(json_strErr, &gpsdata, NULL);
+	assert_case(i, status);
+	assert_string("message", gpsdata.error, "Hello\b\f\n\r\t");
+	break;
+
+    case 14:
+        snprintf(json_strErr1, sizeof(json_strErr1),
+                 "{\"class\":\"ERROR\",\"message\":\"0\\u31\\u032\\u00334\"}");
+
+	if (2 < debug) {
+	    (void)fprintf(stderr, "test string: %s.\n", json_strErr1);
+	}
+	status = libgps_json_unpack(json_strErr1, &gpsdata, NULL);
+	assert_case(i, status);
+	assert_string("message", gpsdata.error, "01234");
+	break;
+
+#ifdef JSON_MINIMAL
+#define MAXTEST 14
+#else
+    case 15:
 	status = json_read_array(json_strInt, &json_array_Int, NULL);
 	assert_integer("count", intcount, 3);
 	assert_integer("intstore[0]", intstore[0], 23);
@@ -418,7 +457,7 @@ static void jsontest(int i)
 	assert_integer("intstore[3]", intstore[3], 0);
 	break;
 
-    case 14:
+    case 16:
 	status = json_read_array(json_strBool, &json_array_Bool, NULL);
 	assert_integer("count", boolcount, 3);
 	assert_boolean("boolstore[0]", boolstore[0], true);
@@ -427,8 +466,8 @@ static void jsontest(int i)
 	assert_boolean("boolstore[3]", boolstore[3], false);
 	break;
 
-    case 15:
-	status = json_read_array(json_str15, &json_array_15, NULL);
+    case 17:
+	status = json_read_array(json_strReal, &json_array_Real, NULL);
 	assert_integer("count", realcount, 3);
 	assert_real("realstore[0]", realstore[0], 23.1);
 	assert_real("realstore[1]", realstore[1], -17.2);
@@ -436,7 +475,7 @@ static void jsontest(int i)
 	assert_real("realstore[3]", realstore[3], 0);
 	break;
 
-#define MAXTEST 15
+#define MAXTEST 17
 #endif /* JSON_MINIMAL */
 
     default:
@@ -454,7 +493,8 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 	switch (option) {
 #ifdef CLIENTDEBUG_ENABLE
 	case 'D':
-	    gps_enable_debug(atoi(optarg), stdout);
+	    debug = atoi(optarg);
+	    gps_enable_debug(debug, stdout);
 	    break;
 #endif
 	case 'n':
@@ -468,14 +508,15 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 	}
     }
 
-    (void)fprintf(stderr, "JSON unit test ");
+    (void)fprintf(stderr, "JSON unit tests\n");
 
     if (individual)
 	jsontest(individual);
     else {
 	int i;
-	for (i = 1; i <= MAXTEST; i++)
+	for (i = 1; i <= MAXTEST; i++) {
 	    jsontest(i);
+        }
     }
 
     (void)fprintf(stderr, "succeeded.\n");
