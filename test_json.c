@@ -250,11 +250,13 @@ static char *json_strErr1 = "{\"class\":\"ERROR\",\"message\":\"0\\u00334\"}";
 // static char json_strErr2[7 * JSON_VAL_MAX];  /* dynamically built */
 static char *json_strOver = "{\"name\":\"\\u0033\\u0034\\u0035\\u0036\"}";
 
-char json_short_string_dst[1];
+char json_short_string_dst[2];
+int json_short_string_cnt = 5;
 static const struct json_attr_t json_short_string[] = {
     {"name", t_string,
         .addr.string = json_short_string_dst,
         .len = sizeof(json_short_string_dst)},
+    {"count", t_integer, .addr.integer = &json_short_string_cnt},
     {NULL},
 };
 
@@ -457,12 +459,15 @@ static void jsontest(int i)
 	break;
 
     case 15:
+        /* check for string overrun caught */
 	if (2 < debug) {
 	    (void)fprintf(stderr, "test string: %s.\n", json_strOver);
 	}
+	json_short_string_cnt = 7;
 	status = json_read_object(json_strOver, json_short_string, NULL);
-	assert_case(i, status);
+	assert_case(i, JSON_ERR_STRLONG != status);
 	assert_string("name", json_short_string_dst, "");
+	assert_integer("count", json_short_string_cnt, 0);
 	break;
 
 #ifdef JSON_MINIMAL
@@ -523,7 +528,10 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 	case '?':
 	case 'h':
 	default:
-	    (void)fputs("usage: test_json [-D lvl]\n", stderr);
+	    (void)fputs("usage: test_json [-D lvl] [-n tst]\n"
+                        "       -D lvl      set debug level\n"
+                        "       -n tst      run only test tst\n",
+                        stderr);
 	    exit(EXIT_FAILURE);
 	}
     }
