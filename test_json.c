@@ -15,7 +15,7 @@
 #include "gps_json.h"
 
 /* GPSD is built with JSON_MINIMAL.  Any !JSON_MINIMAL tests,
- * like 13, 14 and 15 will thus fail.
+ * like 16, 17 and 18 will thus fail.
  * So this define removes them, they never execute.
  */
 #define JSON_MINIMAL
@@ -235,17 +235,31 @@ static const char *json_strOSC = "{\"class\":\"OSC\",\"device\":\"GPS#1\"," \
     "\"running\":true,\"reference\":true,\"disciplined\":false," \
     "\"delta\":67}";
 
-/* Case 13: test parsing of ERROR message */
+/* Case 13: test parsing of ERROR message, and some escape sequences */
 
 static char *json_strErr = "{\"class\":\"ERROR\",\"message\":" \
                            "\"Hello\b\f\n\r\t\"}";
 
-/* Case 14: test parsing of ERROR message and escape sequences */
+/* Case 14: test parsing of ERROR message and \u escape */
+/* per ECMA-404, \u must be followed by 4 hex digits */
 
-static char json_strErr1[512];  /* dynamically built */
+static char *json_strErr1 = "{\"class\":\"ERROR\",\"message\":\"0\\u00334\"}";
+
+/* Case 15: test buffer overflow of short string destination */
+
+// static char json_strErr2[7 * JSON_VAL_MAX];  /* dynamically built */
+static char *json_strOver = "{\"name\":\"\\u0033\\u0034\\u0035\\u0036\"}";
+
+char json_short_string_dst[1];
+static const struct json_attr_t json_short_string[] = {
+    {"name", t_string,
+        .addr.string = json_short_string_dst,
+        .len = sizeof(json_short_string_dst)},
+    {NULL},
+};
 
 #ifndef JSON_MINIMAL
-/* Case 15: Read array of integers */
+/* Case 16: Read array of integers */
 
 static const char *json_strInt = "[23,-17,5]";
 static int intstore[4], intcount;
@@ -257,7 +271,7 @@ static const struct json_array_t json_array_Int = {
     .maxlen = sizeof(intstore)/sizeof(intstore[0]),
 };
 
-/* Case 16: Read array of booleans */
+/* Case 17: Read array of booleans */
 
 static const char *json_strBool = "[true,false,true]";
 static bool boolstore[4];
@@ -270,7 +284,7 @@ static const struct json_array_t json_array_Bool = {
     .maxlen = sizeof(boolstore)/sizeof(boolstore[0]),
 };
 
-/* Case 17: Read array of reals */
+/* Case 18: Read array of reals */
 
 static const char *json_strReal = "[23.1,-17.2,5.3]";
 static double realstore[4];
@@ -434,21 +448,27 @@ static void jsontest(int i)
 	break;
 
     case 14:
-        snprintf(json_strErr1, sizeof(json_strErr1),
-                 "{\"class\":\"ERROR\",\"message\":\"0\\u31\\u032\\u00334\"}");
-
 	if (2 < debug) {
 	    (void)fprintf(stderr, "test string: %s.\n", json_strErr1);
 	}
 	status = libgps_json_unpack(json_strErr1, &gpsdata, NULL);
 	assert_case(i, status);
-	assert_string("message", gpsdata.error, "01234");
+	assert_string("message", gpsdata.error, "034");
+	break;
+
+    case 15:
+	if (2 < debug) {
+	    (void)fprintf(stderr, "test string: %s.\n", json_strOver);
+	}
+	status = json_read_object(json_strOver, json_short_string, NULL);
+	assert_case(i, status);
+	assert_string("name", json_short_string_dst, "");
 	break;
 
 #ifdef JSON_MINIMAL
-#define MAXTEST 14
+#define MAXTEST 15
 #else
-    case 15:
+    case 16:
 	status = json_read_array(json_strInt, &json_array_Int, NULL);
 	assert_integer("count", intcount, 3);
 	assert_integer("intstore[0]", intstore[0], 23);
@@ -457,7 +477,7 @@ static void jsontest(int i)
 	assert_integer("intstore[3]", intstore[3], 0);
 	break;
 
-    case 16:
+    case 17:
 	status = json_read_array(json_strBool, &json_array_Bool, NULL);
 	assert_integer("count", boolcount, 3);
 	assert_boolean("boolstore[0]", boolstore[0], true);
@@ -466,7 +486,7 @@ static void jsontest(int i)
 	assert_boolean("boolstore[3]", boolstore[3], false);
 	break;
 
-    case 17:
+    case 18:
 	status = json_read_array(json_strReal, &json_array_Real, NULL);
 	assert_integer("count", realcount, 3);
 	assert_real("realstore[0]", realstore[0], 23.1);
@@ -475,7 +495,7 @@ static void jsontest(int i)
 	assert_real("realstore[3]", realstore[3], 0);
 	break;
 
-#define MAXTEST 17
+#define MAXTEST 18
 #endif /* JSON_MINIMAL */
 
     default:
