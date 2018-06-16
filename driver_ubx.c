@@ -855,6 +855,10 @@ bool ubx_write(struct gps_device_t * session,
     size_t i;
     bool ok;
 
+    /* do not write if -b (readonly) option set */
+    if (session->context->readonly)
+        return true;
+
     session->msgbuf[0] = 0xb5;
     session->msgbuf[1] = 0x62;
 
