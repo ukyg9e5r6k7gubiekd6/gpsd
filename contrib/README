@@ -2,6 +2,7 @@ The following tools are not production-ready. They are included only as
 conveniences, examples or rudimetary starting points for other development
 efforts.
 
+gpssnmp a tool to return some SNMP values from the running local gpsd.
  
 clock_test is used to test the latency of the system call clock_getttime().
 
