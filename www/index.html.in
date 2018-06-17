@@ -299,6 +299,9 @@ standard output.</dd>
 <dt><a href="gpsd_json.html">gpsd.5</a></dt> <dd>The request/response
 protocol of the <code>gpsd</code> daemon.</dd>
 
+<dt><a href="gpsdctl.html">gpsdctl.8</a></dt>
+<dd>Tool for sending commands to <code>gpsd</code> over its control socket.</dd>
+
 <dt><a href="gpsinit.html">gpsinit.8</a></dt>
 <dd>Initialize kernel modules for use with <code>gpsd</code> daemon.</dd>
 

@@ -2180,6 +2180,7 @@ htmlpages = Split('''
     www/gps2udp.html
     www/gpscat.html
     www/gpsctl.html
+    www/gpsdctl.html
     www/gpsdecode.html
     www/gpsd.html
     www/gpsd_json.html
@@ -2194,8 +2195,8 @@ htmlpages = Split('''
     www/libgps.html
     www/libgpsmm.html
     www/ntpshmmon.html
-    www/ppscheck.html
     www/performance/performance.html
+    www/ppscheck.html
     www/replacing-nmea.html
     www/srec.html
     www/writing-a-driver.html
