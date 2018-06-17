@@ -770,7 +770,7 @@ else:
                         "+ strlen((ptr)->sun_path))\n")
         confdefs.append("#endif /* SUN_LEN */\n")
 
-    if config.CheckHeader(["bits/sockaddr.h", "linux/can.h"]):
+    if config.CheckHeader(["linux/can.h"]):
         confdefs.append("#define HAVE_LINUX_CAN_H 1\n")
         announce("You have kernel CANbus available.")
     else:
