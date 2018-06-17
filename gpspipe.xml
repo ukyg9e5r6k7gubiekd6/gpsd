@@ -7,162 +7,176 @@ SPDX-License-Identifier: BSD-2-clause
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpspipe.1'>
-<refentryinfo><date>03 Aug 2005</date></refentryinfo>
-<refmeta>
-<refentrytitle>gpspipe</refentrytitle>
-<manvolnum>1</manvolnum>
-<refmiscinfo class="source">The GPSD Project</refmiscinfo>
-<refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
-</refmeta>
-<refnamediv id='name'>
-<refname>gpspipe</refname>
-<refpurpose>tool to connect to gpsd and retrieve sentences</refpurpose>
-</refnamediv>
-<refsynopsisdiv id='synopsis'>
-
-<cmdsynopsis>
-  <command>gpspipe</command>
-      <arg choice='opt'>-2</arg>
-      <arg choice='opt'>-d</arg>
-      <arg choice='opt'>-D <replaceable>debug-level</replaceable></arg>
-      <arg choice='opt'>-h</arg>
-      <arg choice='opt'>-l</arg>
-      <arg choice='opt'>-n <replaceable>count</replaceable></arg>
-      <arg choice='opt'>-o <replaceable>filename</replaceable></arg>
-      <arg choice='opt'>-p</arg>
-      <arg choice='opt'>-r</arg>
-      <arg choice='opt'>-R</arg>
-      <arg choice='opt'>-S</arg>
-      <arg choice='opt'>-s <replaceable>serial-device</replaceable></arg>
-      <arg choice='opt'>-t</arg>
-      <arg choice='opt'>-T <replaceable>timestamp-format</replaceable></arg>
-      <arg choice='opt'>-u</arg>
-      <arg choice='opt'>-v</arg>
-      <arg choice='opt'>-w</arg>
-      <arg choice='opt'>-x</arg>
-      <group>
-	<replaceable>server</replaceable>
-	  <group><replaceable>:port</replaceable>
-	    <group><replaceable>:device</replaceable></group>
-	</group>
-      </group>
-</cmdsynopsis>
-</refsynopsisdiv>
-
-<refsect1 id='description'><title>DESCRIPTION</title>
-
-<para><application>gpspipe</application> is a tool to connect
+ <refentryinfo>
+  <date>17 Jun 2018</date>
+ </refentryinfo>
+ <refmeta>
+  <refentrytitle>gpspipe</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">The GPSD Project</refmiscinfo>
+  <refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+ </refmeta>
+ <refnamediv id='name'>
+  <refname>gpspipe</refname>
+  <refpurpose>tool to connect to gpsd and retrieve sentences</refpurpose>
+ </refnamediv>
+ <refsynopsisdiv id='synopsis'>
+  <cmdsynopsis>
+   <command>gpspipe</command>
+   <arg choice='opt'>-2</arg>
+   <arg choice='opt'>-d</arg>
+   <arg choice='opt'>-D <replaceable>debug-level</replaceable>
+   </arg>
+   <arg choice='opt'>-h</arg>
+   <arg choice='opt'>-l</arg>
+   <arg choice='opt'>-n <replaceable>count</replaceable>
+   </arg>
+   <arg choice='opt'>-o <replaceable>filename</replaceable>
+   </arg>
+   <arg choice='opt'>-p</arg>
+   <arg choice='opt'>-r</arg>
+   <arg choice='opt'>-R</arg>
+   <arg choice='opt'>-S</arg>
+   <arg choice='opt'>-s <replaceable>serial-device</replaceable>
+   </arg>
+   <arg choice='opt'>-t</arg>
+   <arg choice='opt'>-T <replaceable>timestamp-format</replaceable>
+   </arg>
+   <arg choice='opt'>-u</arg>
+   <arg choice='opt'>-v</arg>
+   <arg choice='opt'>-w</arg>
+   <arg choice='opt'>-x</arg>
+   <group>
+    <replaceable>server</replaceable>
+    <group>
+     <replaceable>:port</replaceable>
+     <group>
+      <replaceable>:device</replaceable>
+     </group>
+    </group>
+   </group>
+  </cmdsynopsis>
+ </refsynopsisdiv>
+ <refsect1 id='description'>
+  <title>DESCRIPTION</title>
+  <para>
+   <application>gpspipe</application> is a tool to connect
 to <application>gpsd</application> and output the received
 sentences to stdout.  This makes the program useful as a pipe from
 <application>gpsd</application> to another program or file. </para>
-
-<para><application>gpspipe</application> does not require root
+  <para>
+   <application>gpspipe</application> does not require root
 privileges, and can be run concurrently with other tools connecting
 to the local <application>gpsd</application> without causing problems.</para>
-
-<para>The output will consist of one or both of the raw NMEA or native
+  <para>The output will consist of one or both of the raw NMEA or native
 <application>gpsd</application> sentences.  Each line can be optionally
 time stamped.  There is also an option to exit gracefully after a
 given count of packets.</para>
-
-<para>Optionally a server, TCP/IP port number and remote device can be given.
+  <para>Optionally a server, TCP/IP port number and remote device can be given.
 If omitted, <application>gpspipe</application> connects to localhost on
 the default port (2947) and watches all devices opened by
 <application>gpsd</application>.</para>
-
-<para><application>gpspipe</application> may be run as a daemon, but
+  <para>
+   <application>gpspipe</application> may be run as a daemon, but
 requires the -o flag for writing the output to a file.</para>
-
-</refsect1>
-<refsect1 id='options'><title>OPTIONS</title>
-
-<para>-2 sets the split24 flag on AIS reports. Note: this option
+ </refsect1>
+ <refsect1 id='options'>
+  <title>OPTIONS</title>
+  <para>-2 sets the split24 flag on AIS reports. Note: this option
 is experimental and may be changed or removed in a future release.</para>
-
-<para>-d causes <application>gpspipe</application> to run as a daemon.</para>
-
-<para>-h makes <application>gpspipe</application> print
+  <para>-d causes <application>gpspipe</application> to run as a daemon.</para>
+  <para>-h makes <application>gpspipe</application> print
 a usage message and exit.</para>
-
-<para>-l causes <application>gpspipe</application> to sleep for ten
+  <para>-l causes <application>gpspipe</application> to sleep for ten
 seconds before attempting to connect to gpsd.  This is very useful
 when running as a daemon, giving gpsd time to start before
 attempting a connection.</para>
-
-<para>-n [count] causes [count] sentences to be output.
+  <para>-n [count] causes [count] sentences to be output.
 <application>gpspipe</application> will then exit gracefully.</para>
-
-<para>-o option causes the collected data to be written to the
+  <para>-o option causes the collected data to be written to the
 specified file.  Use of this option is mandatory
 if <application>gpspipe</application> is run as a daemon.</para>
-
-<para>-p enables dumping of profiling information in JSON.</para>
-
-<para>-P enables dumping of PPS drift JSON in NMEA and raw modes.</para>
-
-<para>-r causes raw NMEA sentences to be output.</para>
-
-<para>-R causes super-raw (gps binary) data to be output.  This overrides
+  <para>-p enables dumping of profiling information in JSON.</para>
+  <para>-P enables dumping of PPS drift JSON in NMEA and raw modes.</para>
+  <para>-r causes raw NMEA sentences to be output.</para>
+  <para>-R causes super-raw (gps binary) data to be output.  This overrides
 NMEA and gpsd output modes.</para>
-
-<para>-s option causes the collected data to be written to the
+  <para>-s option causes the collected data to be written to the
 specified serial device with settings 4800 8N1.  Thus
 <application>gpspipe</application> can be used with -s and -r options
 to emulate a serial port hardwired to a GPS that
 <application>gpsd</application> is managing.</para>
-
-<para>-S sets the scaled flag.</para>
-
-<para>-t adds a timestamp to each sentence output.</para>
-
-<para>-T sets the format of the timestamp. See
-<citerefentry><refentrytitle>strftime</refentrytitle><manvolnum>3</manvolnum></citerefentry>
+  <para>-S sets the scaled flag.</para>
+  <para>-t adds a timestamp to each sentence output.</para>
+  <para>-T sets the format of the timestamp. See
+<citerefentry>
+    <refentrytitle>strftime</refentrytitle>
+    <manvolnum>3</manvolnum>
+   </citerefentry>
 for the available placeholders. Setting this option implies -t.
 Default setting is "%F %T"</para>
-
-<para>-u usec resolution time stamp, implies -t. Use -uu to output sec.usec.</para>
-
-<para>-v causes <application>gpspipe</application> to show a spinning
+  <para>-u usec resolution time stamp, implies -t. Use -uu to output sec.usec.</para>
+  <para>-v causes <application>gpspipe</application> to show a spinning
 activity indicator on stderr. This is useful if stdout is redirected
 into a file or a pipe. By default the spinner is advanced with every
 messages written; specifying -v more than once will double the number
 of messages required to rotate the spinner.</para>
-
-<para>-V prints the version, then exits.</para>
-
-<para>-w causes native <application>gpsd</application>sentences to be
+  <para>-V prints the version, then exits.</para>
+  <para>-w causes native <application>gpsd</application>sentences to be
 output.</para>
-
-<para>-x [seconds] Exit after delay of [seconds].</para>
-
-<para>At least one of -R, -r or -w must be specified.</para>
-</refsect1>
-
-<refsect1 id='exampletitle'><title>EXAMPLE</title>
-<para>When <application>gpsd is running</application> <command>gpspipe
+  <para>-x [seconds] Exit after delay of [seconds].</para>
+  <para>At least one of -R, -r or -w must be specified.</para>
+ </refsect1>
+ <refsect1 id='exampletitle'>
+  <title>EXAMPLE</title>
+  <para>When <application>gpsd is running</application>
+   <command>gpspipe
 -r -n 100</command> will send one hundred raw NMEA sentences to
 standard output, then exit.</para>
-</refsect1>
-
-<refsect1 id='see_also'><title>SEE ALSO</title>
-<para>
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gps</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>libgpsmm</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpsprof</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpsctl</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>gpscat</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-<citerefentry><refentrytitle>gpsmon</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+ </refsect1>
+ <refsect1 id='see_also'>
+  <title>SEE ALSO</title>
+  <para>
+   <citerefentry>
+    <refentrytitle>gpsd</refentrytitle>
+    <manvolnum>8</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>libgps</refentrytitle>
+    <manvolnum>3</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>libgpsmm</refentrytitle>
+    <manvolnum>3</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpsprof</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpsfake</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpsctl</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpscat</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>.
+<citerefentry>
+    <refentrytitle>gpsmon</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>.
 </para>
-</refsect1>
-
-<refsect1 id='maintainer'><title>AUTHOR</title>
-
-<para>Gary E. Miller <email>gem@rellim.com</email>.</para>
-
-</refsect1>
-
+ </refsect1>
+ <refsect1 id='maintainer'>
+  <title>AUTHOR</title>
+  <para>Gary E. Miller <email>gem@rellim.com</email>.</para>
+ </refsect1>
 </refentry>
-
