@@ -998,9 +998,19 @@ else:
                                                PYTHON_CONFIG_CALL,
                                                brief=True)
 
+
+# ugly hack from http://www.catb.org/esr/faqs/practical-python-porting/
+# handle python2/3 strings
+def polystr(o):
+    if isinstance(o, str):
+        return o
+    if isinstance(o, bytes):
+        return str(o, encoding='latin-1')
+    raise ValueError
+
 if env['python']:  # May have been turned off by error
-    env['PYTHON'] = target_python_path
-    env['ENV']['PYTHON'] = target_python_path  # For regress-driver
+    env['PYTHON'] = polystr(target_python_path)
+    env['ENV']['PYTHON'] = polystr(target_python_path)  # For regress-driver
     py_config_vars = ast.literal_eval(py_config_text.decode())
     py_config_vars = [[] if x is None else x for x in py_config_vars]
     python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
