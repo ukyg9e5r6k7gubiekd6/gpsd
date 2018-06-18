@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-clause
 <!ENTITY gpsdsock	 "/var/run/gpsd.sock">
 ]>
 <refentry id='gpsd_json.5'>
-<refentryinfo><date>13 Jun 2018</date></refentryinfo>
+<refentryinfo><date>17 Jun 2018</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpsd_json</refentrytitle>
 <manvolnum>5</manvolnum>
@@ -227,6 +227,54 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Climb/sink error estimate in meters/sec, 95% confidence.</entry>
+</row>
+<row>
+	<entry>ecefx</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF X position in meters.</entry>
+</row>
+<row>
+	<entry>ecefy</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF Y position in meters.</entry>
+</row>
+<row>
+	<entry>ecefz</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF Z position in meters.</entry>
+</row>
+<row>
+	<entry>ecefpAcc</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF position error in meters.</entry>
+</row>
+<row>
+	<entry>ecefvx</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF X velocity in meters/second.</entry>
+</row>
+<row>
+	<entry>ecefvy</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF Y velocity in meters/second.</entry>
+</row>
+<row>
+	<entry>ecefvz</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF Z velocity in meters/second.</entry>
+</row>
+<row>
+	<entry>ecefvAcc</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>ECEF velocity error in meters/second.</entry>
 </row>
 
 </tbody>
