@@ -291,14 +291,13 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 }
 
 /**
- * Navigation solution message
+ * Navigation solution message: UBX-NAV-SOL
  */
 static gps_mask_t
 ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 		size_t data_len)
 {
     unsigned int flags;
-    double epx, epy, epz, evx, evy, evz;
     unsigned char navmode;
     gps_mask_t mask;
 
@@ -318,18 +317,25 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     }
 #undef DATE_VALID
 
-    epx = (double)(getles32(buf, 12) / 100.0);
-    epy = (double)(getles32(buf, 16) / 100.0);
-    epz = (double)(getles32(buf, 20) / 100.0);
-    evx = (double)(getles32(buf, 28) / 100.0);
-    evy = (double)(getles32(buf, 32) / 100.0);
-    evz = (double)(getles32(buf, 36) / 100.0);
+    session->newdata.ecef.x = getles32(buf, 12) / 100.0;
+    session->newdata.ecef.y = getles32(buf, 16) / 100.0;
+    session->newdata.ecef.z = getles32(buf, 20) / 100.0;
+    session->newdata.ecef.pAcc = getleu32(buf, 24) / 100.0;
+    session->newdata.ecef.vx = getles32(buf, 28) / 100.0;
+    session->newdata.ecef.vy = getles32(buf, 32) / 100.0;
+    session->newdata.ecef.vz = getles32(buf, 36) / 100.0;
+    session->newdata.ecef.vAcc = getleu32(buf, 40) / 100.0;
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-		     epx, epy, epz, evx, evy, evz);
-    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET;
+	session->newdata.ecef.x, session->newdata.ecef.y,
+	session->newdata.ecef.z, session->newdata.ecef.vx,
+	session->newdata.ecef.vy, session->newdata.ecef.vz);
+
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET \
+            | ECEF_SET | VECEF_SET;
 
     if (session->driver.ubx.last_herr > 0.0) {
-	session->newdata.epx = session->newdata.epy = session->driver.ubx.last_herr;
+	session->newdata.epx = session->newdata.epy \
+                             = session->driver.ubx.last_herr;
 	mask |= HERR_SET;
 	session->driver.ubx.last_herr = 0.0;
     }
