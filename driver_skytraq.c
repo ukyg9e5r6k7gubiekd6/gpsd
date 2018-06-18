@@ -293,13 +293,17 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     f_tow = getbed64((const char *)buf, 5);
 
     /* position/velocity is bytes 13-48, meters and m/s */
+    session->newdata.ecef.x = (double)getbed64((const char *)buf, 13),
+    session->newdata.ecef.y = (double)getbed64((const char *)buf, 21),
+    session->newdata.ecef.z = (double)getbed64((const char *)buf, 29),
+    session->newdata.ecef.vx = (double)getbef32((const char *)buf, 37),
+    session->newdata.ecef.vy = (double)getbef32((const char *)buf, 41),
+    session->newdata.ecef.vz = (double)getbef32((const char *)buf, 46);
+
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-		     (double)getbed64((const char *)buf, 13),
-		     (double)getbed64((const char *)buf, 21),
-		     (double)getbed64((const char *)buf, 29),
-		     (double)getbef32((const char *)buf, 37),
-		     (double)getbef32((const char *)buf, 41),
-		     (double)getbef32((const char *)buf, 46));
+	session->newdata.ecef.x, session->newdata.ecef.y,
+	session->newdata.ecef.z, session->newdata.ecef.vx,
+	session->newdata.ecef.vy, session->newdata.ecef.vz);
 
     clock_bias = getbed64((const char *)buf, 49);
     clock_drift = getbes32(buf, 57);
@@ -325,7 +329,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
 	    session->gpsdata.dop.vdop,
 	    session->gpsdata.dop.tdop);
 
-    mask |= TIME_SET | LATLON_SET | TRACK_SET |
+    mask |= TIME_SET | LATLON_SET | TRACK_SET | ECEF_SET | VECEF_SET |
 	SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | CLEAR_IS | REPORT_IS;
     return mask;
 }
