@@ -1,6 +1,6 @@
 = GPSD Installation Instructions =
 :title: GPSD Installation Instructions
-:description: Here are the steps for installing GPSD and verifying its performance.
+:description: Steps for installing GPSD and verifying its performance.
 :keywords: GPSD, GPS, installation
 :author: Eric S. Raymond <esr@thyrsus.com>
 :robots:index,follow
@@ -105,13 +105,13 @@ separately as libtinfo5 or libtinfo.
 
 === Install your distributions package(s) ===
 
-Up-to-date gpsd packages are generally available for Linux
-distributions including Debian and derivatives (including Ubuntu and
-Mint), Fedora and derivatives (including CentOS), openSUSE, PCLinuxOS,
-Mageia, and Slackware.  In the embedded space, CeroWRT carries
-GPSD. The GPSD package in the FreeBSD ports tree is also reliably up
-to date.  Even if your distribution is not on this list, it is quite
-likely GPSD has already been packaged for it.
+Up-to-date gpsd packages are generally available for Linux distributions
+including Debian and derivatives (including Ubuntu and Mint), Fedora and
+derivatives (including CentOS), openSUSE, PCLinuxOS, Mageia, Gentoo, and
+Slackware.  In the embedded space, CeroWRT and Yocto carry GPSD. The
+GPSD package in the FreeBSD ports tree is also reliably up to date.
+Even if your distribution is not on this list, it is quite likely GPSD
+has already been packaged for it.
 
 Whatever distribution you are running, the name of the core GPSD
 package containing the service daemon is almost certainly "gpsd".
@@ -141,8 +141,8 @@ watcher modes.  You should see lines beginning with '{' that are
 JSON objects representing reports from your GPS; these are reports
 in GPSD protocol.
 
-4. Start the xgps or cgps client.  Calling it with no arguments should
-do the right thing.  You should see a display panel with
+4. Start the xgps or cgps client.  Calling it with no arguments
+should do the right thing.  You should see a display panel with
 position/velocity-time information, and a satellite display.  The
 displays won't look very interesting until the GPS acquires satellite
 lock.
@@ -166,11 +166,11 @@ us information to add a new line to the table.  Directions are
 included on that page. We can also use updates of the latest version
 number known to work with hardware already supported.
 
-3. GPSD includes a PHP script that you can use to generate a PHP
-status page for your GPS if you wish. (It may not be in the core
-package.)  It should be manually copied to your HTTP document directory.
-The first time it's invoked, it will generate a file called
-'gpsd_config.inc' in that directory containing configuration
+3. GPSD includes gpsd.php, a PHP script, that you can use to generate
+a PHP status page for your GPS if you wish. (It may not be in the
+core package.)  It should be manually copied to your HTTP document
+directory.  The first time it's invoked, it will generate a file
+called 'gpsd_config.inc' in that directory containing configuration
 information; edit to taste.
 
 4. There are other non-essential scripts that may be useful; these
@@ -331,8 +331,6 @@ install, as noted in the file *build.txt* .
 
 === Other Raspberry Pi tips ===
 
-Note: this does not apply to the RasPi3.
-
 Any USB connected GPS that is known to work with gpsd will work fine on
 the RasPi.  No special instructions apply.
 
@@ -355,7 +353,7 @@ Reboot so those changes take effect.
 Run gpsd like this:
 
 --------------------------------------------------------------
-~ # gpsd -D 5 -N -n /dev/ttyAMA0/dev/pps0
+~ # gpsd -D 5 -N -n /dev/ttyAMA0 /dev/pps0
 --------------------------------------------------------------
 
 If you are on the RasPi with gpsd version 3.17, or above, /dev/pps0 can
