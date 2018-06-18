@@ -329,8 +329,9 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
 	    session->gpsdata.dop.vdop,
 	    session->gpsdata.dop.tdop);
 
-    mask |= TIME_SET | LATLON_SET | TRACK_SET | ECEF_SET | VECEF_SET |
-	SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | CLEAR_IS | REPORT_IS;
+    mask |= TIME_SET | LATLON_SET | TRACK_SET | ECEF_SET | VECEF_SET
+            | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | CLEAR_IS
+            | REPORT_IS;
     return mask;
 }
 
