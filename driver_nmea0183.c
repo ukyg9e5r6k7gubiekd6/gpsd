@@ -1435,12 +1435,11 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
  * $PASHDR,type[,val[,val]]*CS
  * type is an alphabetic subsentence type
  *
- * Oxford Technical Solutions (OXTS) also uses the $PASHR sentence,
+ * Oxford Technical Solutions (OxTS) also uses the $PASHR sentence,
  * but with a very different sentence contents:
  * $PASHR,HHMMSS.SSS,HHH.HH,T,RRR.RR,PPP.PP,aaa.aa,r.rrr,p.ppp,h.hhh,Q1,Q2*CS
  *
  * so field 1 in ASHTECH is always alphabetic and numeric in OXTS
- * FIXME: decode OXTS $PASHDR
  *
  */
 static gps_mask_t processPASHR(int c UNUSED, char *field[],
@@ -1519,6 +1518,19 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 		 session->gpsdata.satellites_used);
 	session->gpsdata.skyview_time = NAN;
 	mask |= SATELLITE_SET | USED_IS;
+
+    } else if (0 == strcmp("T", field[3])) { /* Assume OxTS PASHR */
+	/* FIXME: decode OxTS $PASHDR, time is wrong, breaks cycle order */
+	merge_hhmmss(field[1], session);
+	register_fractional_time(field[0], field[1], session);
+	session->gpsdata.attitude.heading = safe_atof(field[2]);
+	session->gpsdata.attitude.roll = safe_atof(field[4]);
+	session->gpsdata.attitude.pitch = safe_atof(field[5]);
+	/* mask |= (TIME_SET | ATTITUDE_SET); confuses cycle order */
+	gpsd_log(&session->context->errout, LOG_RAW,
+	    "PASHR (OxTS) time %.3f, heading %lf.\n",
+	    session->newdata.time,
+	    session->gpsdata.attitude.heading);
     }
     return mask;
 }
