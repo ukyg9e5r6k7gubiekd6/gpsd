@@ -13,7 +13,7 @@ You can download the lastest gpsd tarball from:
 http://download.savannah.gnu.org/releases/gpsd/
 
 Under Linux, assuming you have all your build prerequisites in place,
-these lines will do:
+these lines will do, and need to be run as root:
 
    tar -xzf gpsd-X.YY.tar.gz
    cd gpsd-X.YY
@@ -22,13 +22,21 @@ these lines will do:
 If you get any errors, you need to read the detailed instructions that follow.
 
 If 'scons' fails, it is possible that your target system has moved to
-Python 3 as its default 'python' interpreter, but you can work around
-it by saying "python2 /usr/bin/scons" or something similar.
+Python 3 and removed the program 'python'.  Python.org says that if you
+have an installed Python, there should be a program in your path called
+'python'.  This rule is not always followed.  You can work around
+this by linking python3 to python like this
 
-Occasionally, builds may fail in completely bizarre ways due to a corrupted
-scons database.  This seems to relate to ^Cing the build at an inopportune
-moment.  If you suspect that, see "Reverting to a clean state" below and
-then try again.
+    ln -s /usr/bin/python3 /usr/bin/python
+
+Both 'scons' and 'gpsd' work fine on either Python 2 or Python 3.  Which
+python you have installed should be transparent to the user, if python
+is installed correctly.
+
+Occasionally, builds may fail in completely bizarre ways due to a
+corrupted scons database.  This seems to relate to ^Cing the build at
+an inopportune moment.  If you suspect that, see "Reverting to a clean
+state" below and then try again.
 
 == Supported platforms ==
 
@@ -41,9 +49,9 @@ installed:
 * FreeBSD, NetBSD, OpenBSD
 * Android, using the official Google toolchain from the NDK
 
-We consider failure to build and function on any of these platforms
-a serious bug; if you encounter it, please complain on the
-development list.
+We consider failure to build and function on any of these platforms a
+serious bug; if you encounter it, please complain on the development
+list <gpsd-dev@nongnu.org>.
 
 Port difficulty to any system conforming to POSIX-2001.1 should be minimal.
 
@@ -60,7 +68,7 @@ Necessary components for any build:
 |============================================================================
 |C compiler                    | gpsd and client library are written in C
 |scons                         | for executing the build recipe
-|Python 2.x(x>=6)              | for scons and some helper scripts
+|Python2.x(x>=6) or 3.y(y>=2)  | for scons and some helper scripts
 |============================================================================
 
 === C compiler ===
