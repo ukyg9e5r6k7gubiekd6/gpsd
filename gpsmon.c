@@ -1298,9 +1298,16 @@ int main(int argc, char **argv)
     }
 
     if (serial) {
-	(void) strlcpy(session.gpsdata.dev.path,
-		       source.device,
-		       sizeof(session.gpsdata.dev.path));
+        if (NULL == source.device) {
+            /* this can happen with "gpsmon /dev:dd" */
+	    (void) strlcpy(session.gpsdata.dev.path,
+			   argv[optind],
+			   sizeof(session.gpsdata.dev.path));
+        } else {
+	    (void) strlcpy(session.gpsdata.dev.path,
+			   source.device,
+			   sizeof(session.gpsdata.dev.path));
+        }
     } else {
 	if (strstr(source.server, "//") == 0)
 	    (void) strlcpy(session.gpsdata.dev.path,
