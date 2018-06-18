@@ -35,9 +35,9 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 				    unsigned char *buf, size_t len)
 {
     unsigned short flags, pflags;
-    gps_mask_t mask = 0;
-    double epx, epy, epz, evx, evy, evz, eph;
+    double eph;
 
+    gps_mask_t mask = 0;
     if (len != 296) {
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "ITALK: bad NAV_FIX (len %zu, should be 296)\n",
