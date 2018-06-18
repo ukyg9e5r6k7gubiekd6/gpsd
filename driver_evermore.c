@@ -179,13 +179,16 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	session->newdata.time = gpsd_gpstime_resolve(session,
 	  (unsigned short)getleu16(buf2, 3),
 	  (double)getleu32(buf2, 5) * 0.01);
+	session->newdata.ecef.x = (double)getles32(buf2, 9) * 1.0,
+	session->newdata.ecef.y = (double)getles32(buf2, 13) * 1.0,
+	session->newdata.ecef.z = (double)getles32(buf2, 17) * 1.0,
+	session->newdata.ecef.vx = (double)getles16(buf2, 21) / 10.0,
+	session->newdata.ecef.vy = (double)getles16(buf2, 23) / 10.0,
+	session->newdata.ecef.vz = (double)getles16(buf2, 25) / 10.0;
 	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
-			 (double)getles32(buf2, 9) * 1.0,
-			 (double)getles32(buf2, 13) * 1.0,
-			 (double)getles32(buf2, 17) * 1.0,
-			 (double)getles16(buf2, 21) / 10.0,
-			 (double)getles16(buf2, 23) / 10.0,
-			 (double)getles16(buf2, 25) / 10.0);
+		     session->newdata.ecef.x, session->newdata.ecef.y,
+		     session->newdata.ecef.z, session->newdata.ecef.vx,
+		     session->newdata.ecef.vy, session->newdata.ecef.vz);
 	used = (unsigned char)getub(buf2, 27) & 0x0f;
 	//visible = (getub(buf2, 27) & 0xf0) >> 4;
 	version = (unsigned int) getleu16(buf2, 28) / 100.0;
@@ -198,7 +201,8 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->newdata.mode = MODE_3D;
 	    mask |= ALTITUDE_SET | CLIMB_SET;
 	}
-	mask |= TIME_SET | NTPTIME_IS | LATLON_SET | TRACK_SET | SPEED_SET | MODE_SET;
+	mask |= TIME_SET | NTPTIME_IS | LATLON_SET | TRACK_SET | SPEED_SET
+                | MODE_SET | ECEF_SET | VECEF_SET;
 	if (session->subtype[0] == '\0') {
 	    (void)snprintf(session->subtype, sizeof(session->subtype),
 			   "%3.2f", version);
