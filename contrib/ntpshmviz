@@ -6,6 +6,7 @@
 # To do:
 #
 # 1. Add exit button so the user does not need to do <Ctrl>-w
+# 2. Allow for a continuous stream of data to be graphed
 #
 
 import sys
@@ -108,7 +109,8 @@ if __name__ == "__main__":
         if (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
             print ("""
 Usage: <input stream> | ntpshmviz
-Example: cat SAMPLES | ntpshmviz
+
+Example: ntpshmmon -n 100 | ntpshmviz
 
 Options:
 \t-h: help message
