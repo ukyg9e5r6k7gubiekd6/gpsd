@@ -51,15 +51,15 @@ class ksv(object):
         lat = gps.Deg2Rad(self.lat)
         lon = gps.Deg2Rad(self.lon)
         lat += distance * math.cos(tc)
-        dphi = math.log(math.tan(lat / 2 + math.pi / 4)
-                        / math.tan(self.lat / 2 + math.pi / 4))
+        dphi = math.log(math.tan(lat / 2 + math.pi / 4) /
+                        math.tan(self.lat / 2 + math.pi / 4))
         if abs(lat - self.lat) < math.sqrt(1e-15):
             q = math.cos(self.lat)
         else:
             q = (lat - self.lat) / dphi
         dlon = -distance * math.sin(tc) / q
-        self.lon = gps.Rad2Deg(math.mod(lon + dlon + math.pi, 2 * math.pi)
-                               - math.pi)
+        self.lon = gps.Rad2Deg(math.mod(lon + dlon + math.pi, 2 * math.pi) -
+                               math.pi)
         self.lat = gps.Rad2Deg(lat)
 
 # Satellite orbital elements are available at:
