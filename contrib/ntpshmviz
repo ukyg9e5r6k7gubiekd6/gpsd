@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 # ntpshmviz - graph the drift of NTP servers
 # Written by Keane Wolter <daemoneye2@gmail.com>
 #
@@ -9,14 +9,17 @@
 #
 
 import sys
-# need numpy for float128, normal python floats are too small to hold a timespec
+# need numpy for float128, normal python floats are too small to
+# hold a timespec
 import numpy
 try:
     import matplotlib.pyplot as PLT
     from matplotlib.figure import Figure
 except:
-    print("Please make sure matplotlib is installed properly:", sys.exc_info()[0])
+    print("Please make sure matplotlib is installed properly:",
+          sys.exc_info()[0])
     sys.exit(1)
+
 
 class ntpOffset:
     def __init__(self, stream):
@@ -30,7 +33,8 @@ class ntpOffset:
         # display the graphs
 
         # Alert the user that closing the graphs can be done with "Ctrl-w"
-        print ("Please note that the graph can be closed with the key combination of <Ctrl-w>")
+        print ("Please note that the graph can be closed with the "
+               "key combination of <Ctrl-w>")
 
         PLT.figure()
         subplot_value = 211
@@ -47,7 +51,9 @@ class ntpOffset:
             # increment the subplot by 1.
             # this allows for each data group to have it's own graph
             subplot_value += 1
-        # make sure there is no graph or data overlapping each other and display the graph
+
+        # make sure there is no graph or data overlapping each other and
+        # display the graph
         PLT.tight_layout()
         PLT.show()
 
@@ -62,11 +68,11 @@ class ntpOffset:
         #   - Leep-second notification status
         #   - Source precision (log(2) of source jitter)
 
-        self.ntp_data    = {} # data sets for each ntp unit
-        self.line_counts = {} # Count of total lines for each ntp unit
-        record           = [] # A single record in the file or data stream
-        offset           = 0  # offset value to add to the array 
-        self.lines       = 0  # width of graph
+        self.ntp_data = {}      # data sets for each ntp unit
+        self.line_counts = {}   # Count of total lines for each ntp unit
+        record = []             # A single record in the file or data stream
+        offset = 0              # offset value to add to the array
+        self.lines = 0          # width of graph
 
         for line in stream:
             if len(line.split(' ')) > 6:
@@ -74,9 +80,11 @@ class ntpOffset:
                     line = line.lstrip()
                     record = line.split(' ')
                     try:
-                        offset = numpy.float128(record[3]) - numpy.float128(record[4])
+                        offset = (numpy.float128(record[3]) -
+                                  numpy.float128(record[4]))
                     except:
-                        print ("Invalid data: ", sys.exc_info()[0], ". Data was: ", line)
+                        print ("Invalid data: ", sys.exc_info()[0],
+                               ". Data was: ", line)
                         continue
 
                     # If the NTP unit is in the dictionary
@@ -84,7 +92,7 @@ class ntpOffset:
                     # Otherwise, create a new list in the dictionary
                     # and add the offset.
                     if record[1] not in self.ntp_data:
-                        self.ntp_data[record[1]]  = []
+                        self.ntp_data[record[1]] = []
                         self.line_counts[record[1]] = 0
 
                     self.ntp_data[record[1]].append(offset)
@@ -98,15 +106,18 @@ if __name__ == "__main__":
             sys.exit()
 
         if (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
-            print ("Usage: <input stream> | ntpshmviz")
-            print ("Example: cat SAMPLES | ntpshmviz")
-            print ("")
-            print ("Options:")
-            print ("\t-h: help message")
-            print ("\t-V: version information")
-            print ("")
-            print ("Report ntpshmviz bugs to Keane Wolter, daemoneye2@gmail.com")
-            print ("gpsd homepage: www.catb.org/gpsd/")
+            print ("""
+Usage: <input stream> | ntpshmviz
+Example: cat SAMPLES | ntpshmviz
+
+Options:
+\t-h: help message
+\t-V: version information
+
+Report ntpshmviz bugs to Keane Wolter, daemoneye2@gmail.com
+                      or gpsd-users@nongnu.org
+gpsd homepage: www.catb.org/gpsd/
+""")
             sys.exit()
 
     ntpOffset(sys.stdin)
