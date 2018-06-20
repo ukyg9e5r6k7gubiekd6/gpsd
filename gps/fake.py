@@ -297,8 +297,8 @@ class FakePTY(FakeGPS):
         }
         (self.fd, self.slave_fd) = pty.openpty()
         self.byname = os.ttyname(self.slave_fd)
-        os.chmod(self.byname, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
-                 | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH)
+        os.chmod(self.byname, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP |
+                 stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH)
         (iflag, oflag, cflag, lflag, ispeed, ospeed, cc) = termios.tcgetattr(
             self.slave_fd)
         cc[termios.VMIN] = 1
@@ -306,8 +306,8 @@ class FakePTY(FakeGPS):
         cflag |= termios.CREAD | termios.CLOCAL
         iflag = oflag = lflag = 0
         iflag &= ~ (termios.PARMRK | termios.INPCK)
-        cflag &= ~ (termios.CSIZE | termios.CSTOPB | termios.PARENB
-                    | termios.PARODD)
+        cflag &= ~ (termios.CSIZE | termios.CSTOPB | termios.PARENB |
+                    termios.PARODD)
         if databits == 7:
             cflag |= termios.CS7
         else:
@@ -728,9 +728,9 @@ class TestSession(object):
                 had_output = False
                 chosen = self.choose()
                 if isinstance(chosen, FakeGPS):
-                    if ((chosen.exhausted
-                         and (time.time() - chosen.exhausted > TEST_TIMEOUT)
-                         and chosen.byname in self.fakegpslist)):
+                    if (((chosen.exhausted and
+                         (time.time() - chosen.exhausted > TEST_TIMEOUT) and
+                         chosen.byname in self.fakegpslist))):
                         sys.stderr.write(
                             "Test timed out: increase WRITE_PAD = %s\n"
                             % GetDelay(self.slow))
@@ -752,9 +752,9 @@ class TestSession(object):
                         if not chosen.valid & gps.PACKET_SET:
                             continue
                         self.reporter(chosen.bresponse)
-                        if ((chosen.data["class"] == "DEVICE"
-                             and chosen.data["activated"] == 0
-                             and chosen.data["path"] in self.fakegpslist)):
+                        if ((chosen.data["class"] == "DEVICE" and
+                             chosen.data["activated"] == 0 and
+                             chosen.data["path"] in self.fakegpslist)):
                             self.gps_remove(chosen.data["path"])
                             self.progress(
                                 "gpsfake: GPS %s removed (notification)\n"
