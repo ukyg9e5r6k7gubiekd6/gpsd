@@ -4,7 +4,10 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import glob, os, subprocess, sys
+import glob
+import os
+import subprocess
+import sys
 
 GPS_LIB_NAME = 'gps'
 
@@ -103,8 +106,8 @@ class PythonExecutable(object):
         return self
 
     def __lt__(self, other):
-         "Allow sorting."
-         return self.path < other.path
+        "Allow sorting."
+        return self.path < other.path
 
     @classmethod
     def GetAllExecutables(cls, command_list):
