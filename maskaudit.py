@@ -38,12 +38,12 @@ class SourceExtractor(object):
         self.masks = []
         self.primitive_masks = []
         for line in open(self.sourcefile):
-            if ((line.startswith("#define")
-                 and ("_SET" in line or "_IS" in line))):
+            if (((line.startswith("#define") and
+                 ("_SET" in line or "_IS" in line)))):
                 fields = line.split()
                 self.masks.append((fields[1], fields[2]))
-                if ((fields[2].startswith("(1llu<<")
-                     or fields[2].startswith("INTERNAL_SET"))):
+                if ((fields[2].startswith("(1llu<<") or
+                     fields[2].startswith("INTERNAL_SET"))):
                     self.primitive_masks.append((fields[1], fields[2]))
 
     def in_library(self, flag):
