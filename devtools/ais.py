@@ -9,6 +9,11 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+from array import array
+import exceptions
+import re
+import sys
+
 try:
     BaseException.with_traceback
 
@@ -28,7 +33,7 @@ except AttributeError:
 # Known bugs:
 # * Doesn't join parts A and B of Type 24 together yet.
 # * Only handles the broadcast case of type 22.  The problem is that the
-#   addressed field is located *after* the variant parts. Grrrr... 
+#   addressed field is located *after* the variant parts. Grrrr...
 # * Message type 26 is presently unsupported. It hasn't been observed
 #   in the wild yet as of Jan 2010; not a lot of point in trying util
 #   we have test data.  We'd need new machinery to constrain how many
@@ -40,6 +45,7 @@ except AttributeError:
 
 # Here are the pseudoinstructions in the pseudolanguage.
 
+
 class bitfield(object):
     "Object defining the interpretation of an AIS bitfield."
     # The only un-obvious detail is the use of the oob (out-of-band)
@@ -47,30 +53,36 @@ class bitfield(object):
     # down on the number of custom formatting hooks.  With this we
     # handle the case where the field should be reported as an integer
     # or "n/a".
+
     def __init__(self, name, width, dtype, oob, legend,
                  validator=None, formatter=None, conditional=None):
-        self.name = name		# Fieldname, for internal use and JSON
-        self.width = width		# Bit width
-        self.type = dtype		# Data type: signed/unsigned/string/raw
-        self.oob = oob			# Out-of-band value to be shown as n/a
-        self.legend = legend		# Human-friendly description of field
-        self.validator = validator	# Validation checker
-        self.formatter = formatter	# Custom reporting hook.
-        self.conditional = conditional	# Evaluation guard for this field
+        self.name = name                # Fieldname, for internal use and JSON
+        self.width = width              # Bit width
+        self.type = dtype               # Data type: signed/unsigned/string/raw
+        self.oob = oob                  # Out-of-band value to be shown as n/a
+        self.legend = legend            # Human-friendly description of field
+        self.validator = validator      # Validation checker
+        self.formatter = formatter      # Custom reporting hook.
+        self.conditional = conditional  # Evaluation guard for this field
+
 
 class spare(object):
     "Describes spare bits,, not to be interpreted."
+
     def __init__(self, width, conditional=None):
         self.width = width
-        self.conditional = conditional	# Evaluation guard for this field
+        self.conditional = conditional  # Evaluation guard for this field
+
 
 class dispatch(object):
     "Describes how to dispatch to a message type variant on a subfield value."
-    def __init__(self, fieldname, subtypes, compute=lambda x: x, conditional=None):
-        self.fieldname = fieldname	# Value of view to dispatch on
-        self.subtypes = subtypes	# Possible subtypes to dispatch to
-        self.compute = compute		# Pass value through this pre-dispatch
-        self.conditional = conditional	# Evaluation guard for this field
+
+    def __init__(self, fieldname, subtypes, compute=lambda x: x,
+                 conditional=None):
+        self.fieldname = fieldname      # Value of view to dispatch on
+        self.subtypes = subtypes        # Possible subtypes to dispatch to
+        self.compute = compute          # Pass value through this pre-dispatch
+        self.conditional = conditional  # Evaluation guard for this field
 
 # Message-type-specific information begins here. There are four
 # different kinds of things in it: (1) string tables for expanding
@@ -82,23 +94,24 @@ class dispatch(object):
 # code generation in Python, Java, Perl, etc.
 
 cnb_status_legends = (
-	"Under way using engine",
-	"At anchor",
-	"Not under command",
-	"Restricted manoeuverability",
-	"Constrained by her draught",
-	"Moored",
-	"Aground",
-	"Engaged in fishing",
-	"Under way sailing",
-	"Reserved for HSC",
-	"Reserved for WIG",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Reserved",
-	"Not defined",
+        "Under way using engine",
+        "At anchor",
+        "Not under command",
+        "Restricted manoeuverability",
+        "Constrained by her draught",
+        "Moored",
+        "Aground",
+        "Engaged in fishing",
+        "Under way sailing",
+        "Reserved for HSC",
+        "Reserved for WIG",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Not defined",
     )
+
 
 def cnb_rot_format(n):
     if n == -128:
@@ -108,10 +121,12 @@ def cnb_rot_format(n):
     elif n == 127:
         return "fastright"
     else:
-        return str((n / 4.733) ** 2);
+        return str((n / 4.733) ** 2)
+
 
 def cnb_latlon_format(n):
     return str(n / 600000.0)
+
 
 def cnb_speed_format(n):
     if n == 1023:
@@ -119,10 +134,12 @@ def cnb_speed_format(n):
     elif n == 1022:
         return "fast"
     else:
-        return str(n / 10.0);
+        return str(n / 10.0)
+
 
 def cnb_course_format(n):
-    return str(n / 10.0);
+    return str(n / 10.0)
+
 
 def cnb_second_format(n):
     if n == 60:
@@ -134,14 +151,14 @@ def cnb_second_format(n):
     elif n == 63:
         return "inoperative"
     else:
-        return str(n);
+        return str(n)
 
 # Common Navigation Block is the format for AIS types 1, 2, and 3
 cnb = (
     bitfield("status",   4, 'unsigned', 0,         "Navigation Status",
              formatter=cnb_status_legends),
     bitfield("turn",     8, 'signed',   -128,      "Rate of Turn",
-             formatter=cnb_rot_format),       
+             formatter=cnb_rot_format),
     bitfield("speed",   10, 'unsigned', 1023,      "Speed Over Ground",
              formatter=cnb_speed_format),
     bitfield("accuracy", 1, 'unsigned', None,      "Position Accuracy"),
@@ -149,27 +166,27 @@ cnb = (
              formatter=cnb_latlon_format),
     bitfield("lat",     27, 'signed',   0x3412140,  "Latitude",
              formatter=cnb_latlon_format),
-    bitfield("course",  12, 'unsigned',	0xe10,      "Course Over Ground",
+    bitfield("course",  12, 'unsigned', 0xe10,      "Course Over Ground",
              formatter=cnb_course_format),
     bitfield("heading",  9, 'unsigned', 511,        "True Heading"),
     bitfield("second",   6, 'unsigned', None,       "Time Stamp",
              formatter=cnb_second_format),
     bitfield("maneuver", 2, 'unsigned', None,       "Maneuver Indicator"),
-    spare(3),  
+    spare(3),
     bitfield("raim",     1, 'unsigned', None,       "RAIM flag"),
     bitfield("radio",   19, 'unsigned', None,       "Radio status"),
 )
 
 epfd_type_legends = (
-	"Undefined",
-	"GPS",
-	"GLONASS",
-	"Combined GPS/GLONASS",
-	"Loran-C",
-	"Chayka",
-	"Integrated navigation system",
-	"Surveyed",
-	"Galileo",
+        "Undefined",
+        "GPS",
+        "GLONASS",
+        "Combined GPS/GLONASS",
+        "Loran-C",
+        "Chayka",
+        "Integrated navigation system",
+        "Surveyed",
+        "Galileo",
     )
 
 type4 = (
@@ -193,115 +210,116 @@ type4 = (
     )
 
 ship_type_legends = (
-	"Not available",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Wing in ground (WIG) - all ships of this type",
-	"Wing in ground (WIG) - Hazardous category A",
-	"Wing in ground (WIG) - Hazardous category B",
-	"Wing in ground (WIG) - Hazardous category C",
-	"Wing in ground (WIG) - Hazardous category D",
-	"Wing in ground (WIG) - Reserved for future use",
-	"Wing in ground (WIG) - Reserved for future use",
-	"Wing in ground (WIG) - Reserved for future use",
-	"Wing in ground (WIG) - Reserved for future use",
-	"Wing in ground (WIG) - Reserved for future use",
-	"Fishing",
-	"Towing",
-	"Towing: length exceeds 200m or breadth exceeds 25m",
-	"Dredging or underwater ops",
-	"Diving ops",
-	"Military ops",
-	"Sailing",
-	"Pleasure Craft",
-	"Reserved",
-	"Reserved",
-	"High speed craft (HSC) - all ships of this type",
-	"High speed craft (HSC) - Hazardous category A",
-	"High speed craft (HSC) - Hazardous category B",
-	"High speed craft (HSC) - Hazardous category C",
-	"High speed craft (HSC) - Hazardous category D",
-	"High speed craft (HSC) - Reserved for future use",
-	"High speed craft (HSC) - Reserved for future use",
-	"High speed craft (HSC) - Reserved for future use",
-	"High speed craft (HSC) - Reserved for future use",
-	"High speed craft (HSC) - No additional information",
-	"Pilot Vessel",
-	"Search and Rescue vessel",
-	"Tug",
-	"Port Tender",
-	"Anti-pollution equipment",
-	"Law Enforcement",
-	"Spare - Local Vessel",
-	"Spare - Local Vessel",
-	"Medical Transport",
-	"Ship according to RR Resolution No. 18",
-	"Passenger - all ships of this type",
-	"Passenger - Hazardous category A",
-	"Passenger - Hazardous category B",
-	"Passenger - Hazardous category C",
-	"Passenger - Hazardous category D",
-	"Passenger - Reserved for future use",
-	"Passenger - Reserved for future use",
-	"Passenger - Reserved for future use",
-	"Passenger - Reserved for future use",
-	"Passenger - No additional information",
-	"Cargo - all ships of this type",
-	"Cargo - Hazardous category A",
-	"Cargo - Hazardous category B",
-	"Cargo - Hazardous category C",
-	"Cargo - Hazardous category D",
-	"Cargo - Reserved for future use",
-	"Cargo - Reserved for future use",
-	"Cargo - Reserved for future use",
-	"Cargo - Reserved for future use",
-	"Cargo - No additional information",
-	"Tanker - all ships of this type",
-	"Tanker - Hazardous category A",
-	"Tanker - Hazardous category B",
-	"Tanker - Hazardous category C",
-	"Tanker - Hazardous category D",
-	"Tanker - Reserved for future use",
-	"Tanker - Reserved for future use",
-	"Tanker - Reserved for future use",
-	"Tanker - Reserved for future use",
-	"Tanker - No additional information",
-	"Other Type - all ships of this type",
-	"Other Type - Hazardous category A",
-	"Other Type - Hazardous category B",
-	"Other Type - Hazardous category C",
-	"Other Type - Hazardous category D",
-	"Other Type - Reserved for future use",
-	"Other Type - Reserved for future use",
-	"Other Type - Reserved for future use",
-	"Other Type - Reserved for future use",
-	"Other Type - no additional information",
+        "Not available",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Wing in ground (WIG) - all ships of this type",
+        "Wing in ground (WIG) - Hazardous category A",
+        "Wing in ground (WIG) - Hazardous category B",
+        "Wing in ground (WIG) - Hazardous category C",
+        "Wing in ground (WIG) - Hazardous category D",
+        "Wing in ground (WIG) - Reserved for future use",
+        "Wing in ground (WIG) - Reserved for future use",
+        "Wing in ground (WIG) - Reserved for future use",
+        "Wing in ground (WIG) - Reserved for future use",
+        "Wing in ground (WIG) - Reserved for future use",
+        "Fishing",
+        "Towing",
+        "Towing: length exceeds 200m or breadth exceeds 25m",
+        "Dredging or underwater ops",
+        "Diving ops",
+        "Military ops",
+        "Sailing",
+        "Pleasure Craft",
+        "Reserved",
+        "Reserved",
+        "High speed craft (HSC) - all ships of this type",
+        "High speed craft (HSC) - Hazardous category A",
+        "High speed craft (HSC) - Hazardous category B",
+        "High speed craft (HSC) - Hazardous category C",
+        "High speed craft (HSC) - Hazardous category D",
+        "High speed craft (HSC) - Reserved for future use",
+        "High speed craft (HSC) - Reserved for future use",
+        "High speed craft (HSC) - Reserved for future use",
+        "High speed craft (HSC) - Reserved for future use",
+        "High speed craft (HSC) - No additional information",
+        "Pilot Vessel",
+        "Search and Rescue vessel",
+        "Tug",
+        "Port Tender",
+        "Anti-pollution equipment",
+        "Law Enforcement",
+        "Spare - Local Vessel",
+        "Spare - Local Vessel",
+        "Medical Transport",
+        "Ship according to RR Resolution No. 18",
+        "Passenger - all ships of this type",
+        "Passenger - Hazardous category A",
+        "Passenger - Hazardous category B",
+        "Passenger - Hazardous category C",
+        "Passenger - Hazardous category D",
+        "Passenger - Reserved for future use",
+        "Passenger - Reserved for future use",
+        "Passenger - Reserved for future use",
+        "Passenger - Reserved for future use",
+        "Passenger - No additional information",
+        "Cargo - all ships of this type",
+        "Cargo - Hazardous category A",
+        "Cargo - Hazardous category B",
+        "Cargo - Hazardous category C",
+        "Cargo - Hazardous category D",
+        "Cargo - Reserved for future use",
+        "Cargo - Reserved for future use",
+        "Cargo - Reserved for future use",
+        "Cargo - Reserved for future use",
+        "Cargo - No additional information",
+        "Tanker - all ships of this type",
+        "Tanker - Hazardous category A",
+        "Tanker - Hazardous category B",
+        "Tanker - Hazardous category C",
+        "Tanker - Hazardous category D",
+        "Tanker - Reserved for future use",
+        "Tanker - Reserved for future use",
+        "Tanker - Reserved for future use",
+        "Tanker - Reserved for future use",
+        "Tanker - No additional information",
+        "Other Type - all ships of this type",
+        "Other Type - Hazardous category A",
+        "Other Type - Hazardous category B",
+        "Other Type - Hazardous category C",
+        "Other Type - Hazardous category D",
+        "Other Type - Reserved for future use",
+        "Other Type - Reserved for future use",
+        "Other Type - Reserved for future use",
+        "Other Type - Reserved for future use",
+        "Other Type - no additional information",
 )
 
 type5 = (
     bitfield("ais_version",   2, 'unsigned', None, "AIS Version"),
-    bitfield("imo_id",       30, 'unsigned',    0, "IMO Identification Number"),
-    bitfield("callsign",     42, 'string',   None, "Call Sign"),              
+    bitfield("imo_id",       30, 'unsigned',    0,
+             "IMO Identification Number"),
+    bitfield("callsign",     42, 'string',   None, "Call Sign"),
     bitfield("shipname",    120, 'string',   None, "Vessel Name"),
     bitfield("shiptype",      8, 'unsigned', None, "Ship Type",
-             #validator=lambda n: n >= 0 and n <= 99,
+             # validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     bitfield("to_bow",        9, 'unsigned',    0, "Dimension to Bow"),
     bitfield("to_stern",      9, 'unsigned',    0, "Dimension to Stern"),
@@ -345,7 +363,8 @@ type6_dac235_fid10 = (
 type6_dac235_dispatch[10] = type6_dac235_fid10
 
 type6_dac235 = (
-    dispatch("fid", type6_dac235_dispatch, lambda m: m if m in type6_dac235_dispatch else 0),
+    dispatch("fid", type6_dac235_dispatch,
+             lambda m: m if m in type6_dac235_dispatch else 0),
     )
 type6_dispatch[235] = type6_dac235
 type6_dispatch[250] = type6_dac235
@@ -373,8 +392,10 @@ type7 = (
     )
 
 #
-# Type 8 have subtypes identified by DAC (Designated Area Code) and FID (Functional ID)
+# Type 8 have subtypes identified by DAC (Designated Area Code) and
+# FID (Functional ID)
 #
+
 
 def type8_latlon_format(n):
     return str(n / 60000.0)
@@ -390,24 +411,31 @@ type8_dispatch[0] = type8_dac_or_fid_unknown
 type8_dac1_dispatch = {}
 type8_dac1_dispatch[0] = type8_dac_or_fid_unknown
 
+
 # DAC 1, FID 11: IMO236 Met/Hydro message
 def type8_dac1_fid11_airtemp_format(n):
     return str(n * 0.1 - 60)
 
+
 def type8_dac1_fid11_dewpoint_format(n):
     return str(n * 0.1 - 20)
+
 
 def type8_dac1_fid11_pressure_format(n):
     return str(n + 800)
 
+
 def type8_dac1_fid11_visibility_format(n):
     return str(n * 0.1)
+
 
 def type8_dac1_fid11_waterlevel_format(n):
     return str(n * 0.1 - 10)
 
+
 def type8_dac1_fid11_cspeed_format(n):
     return str(n * 0.1)
+
 
 def type8_dac1_fid11_waveheight_format(n):
     return str(n * 0.1)
@@ -431,6 +459,7 @@ type8_dac1_fid11_seastate_legend = (
     "Reserved"
 )
 
+
 def type8_dac1_fid11_watertemp_format(n):
     return str(n * 0.1 - 10)
 
@@ -444,6 +473,7 @@ type8_dac1_fid11_preciptype_legend = (
     "Reserved",
     "Reserved"
 )
+
 
 def type8_dac1_fid11_salinity_format(n):
     return str(n * 0.1)
@@ -472,7 +502,8 @@ type8_dac1_fid11 = (
              formatter=type8_dac1_fid11_dewpoint_format),
     bitfield("pressure",      9, 'unsigned', 511,   "Atmospheric pressure",
              formatter=type8_dac1_fid11_pressure_format),
-    bitfield("pressuretend",  2, 'unsigned', 3,     "Atmospheric pressure tendency"),
+    bitfield("pressuretend",  2, 'unsigned', 3,
+             "Atmospheric pressure tendency"),
     bitfield("visibility",    8, 'unsigned', 255,   "Horizontal visibility",
              formatter=type8_dac1_fid11_visibility_format),
     bitfield("waterlevel",    9, 'unsigned', 511,    "Water level",
@@ -480,19 +511,23 @@ type8_dac1_fid11 = (
     bitfield("leveltrend",    2, 'unsigned', 3,     "Water level trend"),
     bitfield("cspeed",        8, 'unsigned', 255,   "Surface current speed",
              formatter=type8_dac1_fid11_cspeed_format),
-    bitfield("cdir",          9, 'unsigned', 511,   "Surface current direction"),
+    bitfield("cdir",          9, 'unsigned', 511,
+             "Surface current direction"),
     bitfield("cspeed2",       8, 'unsigned', 255,   "Current speed #2",
              formatter=type8_dac1_fid11_cspeed_format),
     bitfield("cdir2",         9, 'unsigned', 511,   "Current direction #2"),
-    bitfield("cdepth2",       5, 'unsigned', 31,    "Current measuring level #2"),
+    bitfield("cdepth2",       5, 'unsigned', 31,
+             "Current measuring level #2"),
     bitfield("cspeed3",       8, 'unsigned', 255,   "Current speed #3",
              formatter=type8_dac1_fid11_cspeed_format),
     bitfield("cdir3",         9, 'unsigned', 511,   "Current direction #3"),
-    bitfield("cdepth3",       5, 'unsigned', 31,    "Current measuring level #3"),
+    bitfield("cdepth3",       5, 'unsigned', 31,
+             "Current measuring level #3"),
     bitfield("waveheight",    8, 'unsigned', 255,   "Significant wave height",
              formatter=type8_dac1_fid11_waveheight_format),
     bitfield("waveperiod",    6, 'unsigned', 63,    "Significant wave period"),
-    bitfield("wavedir",       9, 'unsigned', 511,   "Significant wave direction"),
+    bitfield("wavedir",       9, 'unsigned', 511,
+             "Significant wave direction"),
     bitfield("swellheight",   8, 'unsigned', 255,   "Swell height",
              formatter=type8_dac1_fid11_waveheight_format),
     bitfield("swellperiod",   6, 'unsigned', 63,    "Swell period"),
@@ -512,7 +547,8 @@ type8_dac1_fid11 = (
 type8_dac1_dispatch[11] = type8_dac1_fid11
 
 type8_dac1 = (
-    dispatch("fid", type8_dac1_dispatch, lambda m: m if m in type8_dac1_dispatch else 0),
+    dispatch("fid", type8_dac1_dispatch,
+             lambda m: m if m in type8_dac1_dispatch else 0),
     )
 type8_dispatch[1] = type8_dac1
 
@@ -523,11 +559,13 @@ type8 = (
     dispatch("dac", type8_dispatch, lambda m: m if m in type8_dispatch else 0),
     )
 
+
 def type9_alt_format(n):
     if n == 4094:
         return ">=4094"
     else:
         return str(n)
+
 
 def type9_speed_format(n):
     if n == 1023:
@@ -535,7 +573,7 @@ def type9_speed_format(n):
     elif n == 1022:
         return "fast"
     else:
-        return str(n);
+        return str(n)
 
 type9 = (
     bitfield("alt",         12, 'unsigned', 4095,      "Altitude",
@@ -561,7 +599,7 @@ type9 = (
 
 type10 = (
     spare(2),
-    bitfield("dest_mmsi",       30, 'unsigned', None, "Destination MMSI"), 
+    bitfield("dest_mmsi",       30, 'unsigned', None, "Destination MMSI"),
     spare(2),
    )
 
@@ -595,14 +633,15 @@ type15 = (
 
 type16 = (
     spare(2),
-    bitfield("mmsi1",     30, 'unsigned', 0, "Interrogated MMSI 1"),
-    bitfield("offset1",   12, 'unsigned', 0, "First slot offset"),
-    bitfield("increment1",10, 'unsigned', 0, "First slot increment"),
-    bitfield("mmsi2",     30, 'unsigned', 0, "Interrogated MMSI 2"),
-    bitfield("offset2",   12, 'unsigned', 0, "Second slot offset"),
-    bitfield("increment2",10, 'unsigned', 0, "Second slot increment"),
+    bitfield("mmsi1",      30, 'unsigned', 0, "Interrogated MMSI 1"),
+    bitfield("offset1",    12, 'unsigned', 0, "First slot offset"),
+    bitfield("increment1", 10, 'unsigned', 0, "First slot increment"),
+    bitfield("mmsi2",      30, 'unsigned', 0, "Interrogated MMSI 2"),
+    bitfield("offset2",    12, 'unsigned', 0, "Second slot offset"),
+    bitfield("increment2", 10, 'unsigned', 0, "Second slot increment"),
     spare(2),
     )
+
 
 def short_latlon_format(n):
     return str(n / 600.0)
@@ -618,59 +657,59 @@ type17 = (
     )
 
 type18 = (
-    bitfield("reserved",    8,  'unsigned', None,      "Regional reserved"),
-    bitfield("speed",       10, 'unsigned', 1023,      "Speed Over Ground",
+    bitfield("reserved",    8,  'unsigned', None,    "Regional reserved"),
+    bitfield("speed",       10, 'unsigned', 1023,    "Speed Over Ground",
              formatter=cnb_speed_format),
-    bitfield("accuracy",    1,  'unsigned', None,      "Position Accuracy"),
+    bitfield("accuracy",    1,  'unsigned', None,    "Position Accuracy"),
     bitfield("lon",         28, 'signed',   0x6791AC0, "Longitude",
              formatter=cnb_latlon_format),
     bitfield("lat",         27, 'signed',   0x3412140, "Latitude",
              formatter=cnb_latlon_format),
-    bitfield("course",      12, 'unsigned', 0xE10,     "Course Over Ground",
+    bitfield("course",      12, 'unsigned', 0xE10,   "Course Over Ground",
              formatter=cnb_course_format),
-    bitfield("heading",     9,  'unsigned', 511,       "True Heading"),
-    bitfield("second",      6,  'unsigned', None,      "Time Stamp",
+    bitfield("heading",     9,  'unsigned', 511,     "True Heading"),
+    bitfield("second",      6,  'unsigned', None,    "Time Stamp",
              formatter=cnb_second_format),
-    bitfield("regional",    2,  'unsigned', None,      "Regional reserved"),
-    bitfield("cs",          1,  'unsigned', None,      "CS Unit"),
-    bitfield("display",     1,  'unsigned', None,      "Display flag"),
-    bitfield("dsc",         1,  'unsigned', None,      "DSC flag"),
-    bitfield("band",        1,  'unsigned', None,      "Band flag"),
-    bitfield("msg22",       1,  'unsigned', None,      "Message 22 flag"),
-    bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
-    bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
-    bitfield("radio",       20, 'unsigned', None,      "Radio status"),
+    bitfield("regional",    2,  'unsigned', None,    "Regional reserved"),
+    bitfield("cs",          1,  'unsigned', None,    "CS Unit"),
+    bitfield("display",     1,  'unsigned', None,    "Display flag"),
+    bitfield("dsc",         1,  'unsigned', None,    "DSC flag"),
+    bitfield("band",        1,  'unsigned', None,    "Band flag"),
+    bitfield("msg22",       1,  'unsigned', None,    "Message 22 flag"),
+    bitfield("assigned",    1,  'unsigned', None,    "Assigned"),
+    bitfield("raim",        1,  'unsigned', None,    "RAIM flag"),
+    bitfield("radio",       20, 'unsigned', None,    "Radio status"),
     )
 
 type19 = (
-    bitfield("reserved",    8,  'unsigned', None,      "Regional reserved"),
-    bitfield("speed",       10, 'unsigned', 1023,      "Speed Over Ground",
+    bitfield("reserved",    8,  'unsigned', None,    "Regional reserved"),
+    bitfield("speed",       10, 'unsigned', 1023,    "Speed Over Ground",
              formatter=cnb_speed_format),
-    bitfield("accuracy",    1,  'unsigned', None,      "Position Accuracy"),
+    bitfield("accuracy",    1,  'unsigned', None,    "Position Accuracy"),
     bitfield("lon",         28, 'signed',   0x6791AC0, "Longitude",
              formatter=cnb_latlon_format),
     bitfield("lat",         27, 'signed',   0x3412140, "Latitude",
              formatter=cnb_latlon_format),
-    bitfield("course",      12, 'unsigned', 0xE10,     "Course Over Ground",
+    bitfield("course",      12, 'unsigned', 0xE10,   "Course Over Ground",
              formatter=cnb_course_format),
-    bitfield("heading",     9,  'unsigned', 511,       "True Heading"),
-    bitfield("second",      6,  'unsigned', None,      "Time Stamp",
+    bitfield("heading",     9,  'unsigned', 511,     "True Heading"),
+    bitfield("second",      6,  'unsigned', None,    "Time Stamp",
              formatter=cnb_second_format),
-    bitfield("regional",    4,  'unsigned', None,      "Regional reserved"),
-    bitfield("shipname",  120,  'string',   None,      "Vessel Name"),
-    bitfield("shiptype",    8,  'unsigned', None,      "Ship Type",
-             #validator=lambda n: n >= 0 and n <= 99,
+    bitfield("regional",    4,  'unsigned', None,    "Regional reserved"),
+    bitfield("shipname",  120,  'string',   None,    "Vessel Name"),
+    bitfield("shiptype",    8,  'unsigned', None,    "Ship Type",
+             # validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
-    bitfield("to_bow",      9,  'unsigned', 0,         "Dimension to Bow"),
-    bitfield("to_stern",    9,  'unsigned', 0,         "Dimension to Stern"),
-    bitfield("to_port",     6,  'unsigned', 0,         "Dimension to Port"),
-    bitfield("to_starbord", 6,  'unsigned', 0,         "Dimension to Starboard"),
-    bitfield("epfd",        4,  'unsigned', 0,         "Position Fix Type",
+    bitfield("to_bow",      9,  'unsigned', 0,       "Dimension to Bow"),
+    bitfield("to_stern",    9,  'unsigned', 0,       "Dimension to Stern"),
+    bitfield("to_port",     6,  'unsigned', 0,       "Dimension to Port"),
+    bitfield("to_starbord", 6,  'unsigned', 0,       "Dimension to Starboard"),
+    bitfield("epfd",        4,  'unsigned', 0,       "Position Fix Type",
              validator=lambda n: n >= 0 and n <= 8 or n == 15,
              formatter=epfd_type_legends),
-    bitfield("assigned",    1,  'unsigned', None,      "Assigned"),
-    bitfield("raim",        1,  'unsigned', None,      "RAIM flag"),
-    bitfield("radio",       20, 'unsigned', None,      "Radio status"),
+    bitfield("assigned",    1,  'unsigned', None,    "Assigned"),
+    bitfield("raim",        1,  'unsigned', None,    "RAIM flag"),
+    bitfield("radio",       20, 'unsigned', None,    "Radio status"),
     )
 
 type20 = (
@@ -694,64 +733,64 @@ type20 = (
     )
 
 aide_type_legends = (
-	"Unspecified",
-	"Reference point",
-	"RACON",
-	"Fixed offshore structure",
-	"Spare, Reserved for future use.",
-	"Light, without sectors",
-	"Light, with sectors",
-	"Leading Light Front",
-	"Leading Light Rear",
-	"Beacon, Cardinal N",
-	"Beacon, Cardinal E",
-	"Beacon, Cardinal S",
-	"Beacon, Cardinal W",
-	"Beacon, Port hand",
-	"Beacon, Starboard hand",
-	"Beacon, Preferred Channel port hand",
-	"Beacon, Preferred Channel starboard hand",
-	"Beacon, Isolated danger",
-	"Beacon, Safe water",
-	"Beacon, Special mark",
-	"Cardinal Mark N",
-	"Cardinal Mark E",
-	"Cardinal Mark S",
-	"Cardinal Mark W",
-	"Port hand Mark",
-	"Starboard hand Mark",
-	"Preferred Channel Port hand",
-	"Preferred Channel Starboard hand",
-	"Isolated danger",
-	"Safe Water",
-	"Special Mark",
-	"Light Vessel / LANBY / Rigs",
+        "Unspecified",
+        "Reference point",
+        "RACON",
+        "Fixed offshore structure",
+        "Spare, Reserved for future use.",
+        "Light, without sectors",
+        "Light, with sectors",
+        "Leading Light Front",
+        "Leading Light Rear",
+        "Beacon, Cardinal N",
+        "Beacon, Cardinal E",
+        "Beacon, Cardinal S",
+        "Beacon, Cardinal W",
+        "Beacon, Port hand",
+        "Beacon, Starboard hand",
+        "Beacon, Preferred Channel port hand",
+        "Beacon, Preferred Channel starboard hand",
+        "Beacon, Isolated danger",
+        "Beacon, Safe water",
+        "Beacon, Special mark",
+        "Cardinal Mark N",
+        "Cardinal Mark E",
+        "Cardinal Mark S",
+        "Cardinal Mark W",
+        "Port hand Mark",
+        "Starboard hand Mark",
+        "Preferred Channel Port hand",
+        "Preferred Channel Starboard hand",
+        "Isolated danger",
+        "Safe Water",
+        "Special Mark",
+        "Light Vessel / LANBY / Rigs",
         )
 
 type21 = (
-    bitfield("aid_type",        5, 'unsigned',  0,         "Aid type",
+    bitfield("aid_type",        5, 'unsigned',  0,      "Aid type",
              formatter=aide_type_legends),
-    bitfield("name",          120, 'string',    None,      "Name"),
-    bitfield("accuracy",        1, 'unsigned',  0,         "Position Accuracy"),
+    bitfield("name",          120, 'string',    None,   "Name"),
+    bitfield("accuracy",        1, 'unsigned',  0,      "Position Accuracy"),
     bitfield("lon",            28, 'signed',    0x6791AC0, "Longitude",
              formatter=cnb_latlon_format),
     bitfield("lat",            27, 'signed',    0x3412140, "Latitude",
              formatter=cnb_latlon_format),
-    bitfield("to_bow",          9, 'unsigned',  0,         "Dimension to Bow"),
-    bitfield("to_stern",        9, 'unsigned',  0,         "Dimension to Stern"),
-    bitfield("to_port",         6, 'unsigned',  0,         "Dimension to Port"),
-    bitfield("to_starboard",    6, 'unsigned',  0,         "Dimension to Starboard"),
-    bitfield("epfd",            4, 'unsigned',  0,         "Position Fix Type",
+    bitfield("to_bow",          9, 'unsigned',  0,   "Dimension to Bow"),
+    bitfield("to_stern",        9, 'unsigned',  0,   "Dimension to Stern"),
+    bitfield("to_port",         6, 'unsigned',  0,   "Dimension to Port"),
+    bitfield("to_starboard",    6, 'unsigned',  0,   "Dimension to Starboard"),
+    bitfield("epfd",            4, 'unsigned',  0,   "Position Fix Type",
              validator=lambda n: n >= 0 and n <= 8 or n == 15,
              formatter=epfd_type_legends),
-    bitfield("second",          6, 'unsigned',  0,         "UTC Second"),
-    bitfield("off_position",    1, 'unsigned',  0,         "Off-Position Indicator"),
-    bitfield("regional",        8, 'unsigned',  0,         "Regional reserved"),
-    bitfield("raim",            1, 'unsigned',  0,         "RAIM flag"),
-    bitfield("virtual_aid",     1, 'unsigned',  0,         "Virtual-aid flag"),
-    bitfield("assigned",        1, 'unsigned',  0,         "Assigned-mode flag"),
+    bitfield("second",          6, 'unsigned',  0,   "UTC Second"),
+    bitfield("off_position",    1, 'unsigned',  0,   "Off-Position Indicator"),
+    bitfield("regional",        8, 'unsigned',  0,   "Regional reserved"),
+    bitfield("raim",            1, 'unsigned',  0,   "RAIM flag"),
+    bitfield("virtual_aid",     1, 'unsigned',  0,   "Virtual-aid flag"),
+    bitfield("assigned",        1, 'unsigned',  0,   "Assigned-mode flag"),
     spare(1),
-    bitfield("name",           88, 'string',    0,         "Name Extension"),
+    bitfield("name",           88, 'string',    0,   "Name Extension"),
     )
 
 type22 = (
@@ -776,22 +815,22 @@ type22 = (
     )
 
 station_type_legends = (
-	"All types of mobiles",
-	"Reserved for future use",
-	"All types of Class B mobile stations",
-	"SAR airborne mobile station",
-	"Aid to Navigation station",
-	"Class B shipborne mobile station",
-	"Regional use and inland waterways",
-	"Regional use and inland waterways",
-	"Regional use and inland waterways",
-	"Regional use and inland waterways",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
-	"Reserved for future use",
+        "All types of mobiles",
+        "Reserved for future use",
+        "All types of Class B mobile stations",
+        "SAR airborne mobile station",
+        "Aid to Navigation station",
+        "Class B shipborne mobile station",
+        "Regional use and inland waterways",
+        "Regional use and inland waterways",
+        "Regional use and inland waterways",
+        "Regional use and inland waterways",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
+        "Reserved for future use",
         )
 
 type23 = (
@@ -804,11 +843,11 @@ type23 = (
              formatter=short_latlon_format),
     bitfield("sw_lat",    17, 'signed',    0xd548,  "SW Latitude",
              formatter=short_latlon_format),
-    bitfield("stationtype",4, 'unsigned',  0,       "Station Type",
+    bitfield("stationtype", 4, 'unsigned',  0,       "Station Type",
              validator=lambda n: n >= 0 and n <= 31,
              formatter=station_type_legends),
     bitfield("shiptype",   8, 'unsigned',  0,       "Ship Type",
-             #validator=lambda n: n >= 0 and n <= 99,
+             # validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     spare(22),
     bitfield("txrx",       2, 'unsigned',  0,       "Tx/Rx mode"),
@@ -823,7 +862,7 @@ type24a = (
 
 
 type24b1 = (
-    bitfield("callsign",     42, 'string',   None, "Call Sign"),              
+    bitfield("callsign",     42, 'string',   None, "Call Sign"),
     bitfield("to_bow",        9, 'unsigned',    0, "Dimension to Bow"),
     bitfield("to_stern",      9, 'unsigned',    0, "Dimension to Stern"),
     bitfield("to_port",       6, 'unsigned',    0, "Dimension to Port"),
@@ -841,12 +880,13 @@ type24b = (
              validator=lambda n: n >= 0 and n <= 99,
              formatter=ship_type_legends),
     bitfield("vendorid",     42, 'string',   None, "Vendor ID"),
-    dispatch("mmsi", {0:type24b1, 1:type24b2}, lambda m: 1 if repr(m)[:2]=='98' else 0),
+    dispatch("mmsi", {0: type24b1, 1: type24b2},
+             lambda m: 1 if repr(m)[:2] == '98' else 0),
     )
 
 type24 = (
     bitfield('partno', 2, 'unsigned', None, "Part Number"),
-    dispatch('partno', {0:type24a, 1:type24b}),
+    dispatch('partno', {0: type24a, 1: type24b}),
     )
 
 type25 = (
@@ -874,21 +914,22 @@ type27 = (
              formatter=cnb_speed_format),
     bitfield("course",    9, 'unsigned', 511,       "Course Over Ground"),
     bitfield("GNSS",      1, 'unsigned', None,      "GNSS flag"),
-    spare(1),  
+    spare(1),
     )
 
 aivdm_decode = (
     bitfield('msgtype',       6, 'unsigned',    0, "Message Type",
-        validator=lambda n: n > 0 and n <= 27),
-    bitfield('repeat',	      2, 'unsigned', None, "Repeat Indicator"),
+             validator=lambda n: n > 0 and n <= 27),
+    bitfield('repeat',        2, 'unsigned', None, "Repeat Indicator"),
     bitfield('mmsi',         30, 'unsigned',    0, "MMSI"),
     # This is the master dispatch on AIS message type
-    dispatch('msgtype',      {0:None,    1:cnb,    2:cnb,     3:cnb,    4:type4,
-                              5:type5,   6:type6,  7:type7,   8:type8,  9:type9,
-                              10:type10, 11:type4, 12:type12, 13:type7, 14:type14,
-                              15:type15, 16:type16,17:type17, 18:type18,19:type19,
-                              20:type20, 21:type21,22:type22, 23:type23,24:type24,
-                              25:type25, 26:None,  27:type27}),
+    dispatch('msgtype',      {0: None,    1: cnb,     2: cnb,     3: cnb,
+                              4: type4,   5: type5,   6: type6,   7: type7,
+                              8: type8,   9: type9,   10: type10, 11: type4,
+                              12: type12, 13: type7,  14: type14, 15: type15,
+                              16: type16, 17: type17, 18: type18, 19: type19,
+                              20: type20, 21: type21, 22: type22, 23: type23,
+                              24: type24, 25: type25, 26: None,   27: type27}),
     )
 
 # Length ranges.  We use this for integrity checking.
@@ -927,7 +968,8 @@ field_groups = (
     # This one occurs in message type 4
     (3, ["year", "month", "day", "hour", "minute", "second"],
      "time", "Timestamp",
-     lambda y, m, d, h, n, s: "%02d-%02d-%02dT%02d:%02d:%02dZ" % (y, m, d, h, n, s)),
+     lambda y, m, d, h, n, s: "%02d-%02d-%02dT%02d:%02d:%02dZ" %
+     (y, m, d, h, n, s)),
     # This one is in message 5
     (13, ["month", "day", "hour", "minute", "second"],
      "eta", "Estimated Time of Arrival",
@@ -940,12 +982,12 @@ field_groups = (
 # this: the whole point of the design is to embody most of the information
 # about the AIS format in the pseudoinstruction tables.
 
-from array import array
-
 BITS_PER_BYTE = 8
+
 
 class BitVector(object):
     "Fast bit-vector class based on Python built-in array type."
+
     def __init__(self, data=None, length=None):
         self.bits = array('B')
         self.bitlen = 0
@@ -955,11 +997,13 @@ class BitVector(object):
                 self.bitlen = len(data) * 8
             else:
                 self.bitlen = length
+
     def extend_to(self, length):
         "Extend vector to given bitlength."
         if length > self.bitlen:
-            self.bits.extend([0] * ((length - self.bitlen + 7 ) // 8))
+            self.bits.extend([0] * ((length - self.bitlen + 7) // 8))
             self.bitlen = length
+
     def from_sixbit(self, data, pad=0):
         "Initialize bit vector from AIVDM-style six-bit armoring."
         self.bits.extend([0] * len(data))
@@ -972,6 +1016,7 @@ class BitVector(object):
                     self.bits[self.bitlen // 8] |= (1 << (7 - self.bitlen % 8))
                 self.bitlen += 1
         self.bitlen -= pad
+
     def ubits(self, start, width):
         "Extract a (zero-origin) bitfield from the buffer as an unsigned int."
         fld = 0
@@ -984,27 +1029,35 @@ class BitVector(object):
             fld >>= (BITS_PER_BYTE - end)
         fld &= ~(-1 << width)
         return fld
+
     def sbits(self, start, width):
         "Extract a (zero-origin) bitfield from the buffer as a signed int."
-        fld = self.ubits(start, width);
+        fld = self.ubits(start, width)
         if fld & (1 << (width-1)):
             fld = -(2 ** width - fld)
         return fld
+
     def __len__(self):
         return self.bitlen
+
     def __repr__(self):
         "Used for dumping binary data."
-        return str(self.bitlen) + ":" + "".join(["%02x" % d for d in self.bits[:(self.bitlen + 7) // 8]])
+        return (str(self.bitlen) + ":" +
+                "".join(["%02x" %
+                         d for d in self.bits[:(self.bitlen + 7) // 8]]))
 
-import sys, exceptions, re
 
 class AISUnpackingException(exceptions.Exception):
+
     def __init__(self, lc, fieldname, value):
         self.lc = lc
         self.fieldname = fieldname
         self.value = value
+
     def __repr__(self):
-        return "%d: validation on fieldname %s failed (value %s)" % (self.lc, self.fieldname, self.value)
+        return ("%d: validation on fieldname %s failed (value %s)" %
+                (self.lc, self.fieldname, self.value))
+
 
 def aivdm_unpack(lc, data, offset, values, instructions):
     "Unpack fields from data according to instructions."
@@ -1012,7 +1065,8 @@ def aivdm_unpack(lc, data, offset, values, instructions):
     for inst in instructions:
         if offset >= len(data):
             break
-        elif inst.conditional is not None and not inst.conditional(inst,values):
+        elif (inst.conditional is not None and
+              not inst.conditional(inst, values)):
             continue
         elif isinstance(inst, spare):
             offset += inst.width
@@ -1031,7 +1085,9 @@ def aivdm_unpack(lc, data, offset, values, instructions):
                 # of a variable-length string field, as in messages 12 and 14
                 try:
                     for i in range(inst.width // 6):
-                        newchar = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&'()*+,-./0123456789:;<=>?"[data.ubits(offset + 6*i, 6)]
+                        newchar = ("@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\""
+                                   "#$%&'()*+,-./0123456789:;<=>?"
+                                   [data.ubits(offset + 6 * i, 6)])
                         if newchar == '@':
                             break
                         else:
@@ -1053,23 +1109,24 @@ def aivdm_unpack(lc, data, offset, values, instructions):
             cooked.append([inst, value])
     return cooked
 
+
 def packet_scanner(source):
     "Get a span of AIVDM packets with contiguous fragment numbers."
-    payloads = {'A':'', 'B':''}
+    payloads = {'A': '', 'B': ''}
     raw = ''
     well_formed = False
     lc = 0
     while True:
-        lc += 1;
+        lc += 1
         line = source.readline()
         if not line:
             return
         raw += line
         line = line.strip()
-        # Strip off USCG metadata 
+        # Strip off USCG metadata
         line = re.sub(r"(?<=\*[0-9A-F][0-9A-F]),.*", "", line)
         # Compute CRC-16 checksum
-        packet = line[1:-3]	# Strip leading !, trailing * and CRC
+        packet = line[1:-3]     # Strip leading !, trailing * and CRC
         csum = 0
         for c in packet:
             csum ^= ord(c)
@@ -1089,20 +1146,22 @@ def packet_scanner(source):
             payloads[channel] += fields[5]
             try:
                 # This works because a mangled pad literal means
-                # a malformed packet that will be caught by the CRC check. 
+                # a malformed packet that will be caught by the CRC check.
                 pad = int(fields[6].split('*')[0])
             except ValueError:
                 pad = 0
             crc = fields[6].split('*')[1].strip()
         except IndexError:
             if skiperr:
-                sys.stderr.write("%d: malformed line: %s\n" % (lc, line.strip()))
+                sys.stderr.write("%d: malformed line: %s\n" %
+                                 (lc, line.strip()))
                 well_formed = False
             else:
                 raise AISUnpackingException(lc, "checksum", crc)
         if csum != crc:
             if skiperr:
-                sys.stderr.write("%d: bad checksum %s, expecting %s: %s\n" % (lc, repr(crc), csum, line.strip()))
+                sys.stderr.write("%d: bad checksum %s, expecting %s: %s\n" %
+                                 (lc, repr(crc), csum, line.strip()))
                 well_formed = False
             else:
                 raise AISUnpackingException(lc, "checksum", crc)
@@ -1114,6 +1173,7 @@ def packet_scanner(source):
         yield (lc, raw, bits)
         raw = ''
 
+
 def postprocess(cooked):
     "Postprocess cooked fields from a message."
     # Handle type 21 name extension
@@ -1121,6 +1181,7 @@ def postprocess(cooked):
         cooked[4][1] += cooked[19][1]
         cooked.pop(-1)
     return cooked
+
 
 def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
     "Generator code - read forever from source stream, parsing AIS messages."
@@ -1145,7 +1206,8 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 if [x[0] for x in segment] == template:
                     group = formatter(*[x[1] for x in segment])
                     group = (label, group, 'string', legend, None)
-                    cooked = cooked[:offset]+[group]+cooked[offset+len(template):]
+                    cooked = (cooked[:offset] + [group] +
+                              cooked[offset+len(template):])
             # Apply the postprocessor stage
             cooked = postprocess(cooked)
             # Now apply custom formatting hooks.
@@ -1154,30 +1216,34 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                     if value == inst.oob:
                         cooked[i][1] = "n/a"
                     elif inst.formatter:
-                        if type(inst.formatter) == type(()):
-                            # Assumes 0 is the legend for the "undefined" value 
+                        if isinstance(inst.formatter, tuple):
+                            # Assumes 0 is the legend for the "undefined" value
                             if value >= len(inst.formatter):
                                 value = 0
                             cooked[i][1] = inst.formatter[value]
-                        elif type(formatter) == type(lambda x: x):
+                        elif isinstance(formatter, function):
                             cooked[i][1] = inst.formatter(value)
             expected = lengths.get(values['msgtype'], None)
-            # Check length; has to be done after so we have the type field 
+            # Check length; has to be done after so we have the type field
             bogon = False
             if expected is not None:
-                if type(expected) == type(0):
+                if isinstance(expected, int):
                     expected_range = (expected, expected)
                 else:
                     expected_range = expected
                 actual = values['length']
-                if not (actual >= expected_range[0] and actual <= expected_range[1]):
+                if not (actual >= expected_range[0] and
+                        actual <= expected_range[1]):
                     bogon = True
                     if skiperr:
-                        sys.stderr.write("%d: type %d expected %s bits but saw %s: %s\n" % (lc, values['msgtype'], expected, actual, raw.strip().split()))
+                        sys.stderr.write(
+                            "%d: type %d expected %s bits but saw %s: %s\n" %
+                            (lc, values['msgtype'], expected,
+                             actual, raw.strip().split()))
                     else:
                         raise AISUnpackingException(lc, "length", actual)
             # We're done, hand back a decoding
-            values = {}                    
+            values = {}
             yield (raw, cooked, bogon)
             raw = ''
         except KeyboardInterrupt:
@@ -1192,7 +1258,8 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 raise
         except:
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
-            sys.stderr.write("%d: Unknown exception: %s\n" % (lc, raw.strip().split()))
+            sys.stderr.write("%d: Unknown exception: %s\n" %
+                             (lc, raw.strip().split()))
             if skiperr:
                 continue
             else:
@@ -1201,7 +1268,8 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
 # The rest is just sequencing and report generation.
 
 if __name__ == "__main__":
-    import sys, getopt
+    import getopt
+    import sys
 
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "cdhjmqst:vx")
@@ -1245,7 +1313,8 @@ if __name__ == "__main__":
     if not dsv and not histogram and not json and not malformed and not quiet:
             dump = True
     try:
-        for (raw, parsed, bogon) in parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
+        for (raw, parsed, bogon) in \
+            parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
             msgtype = parsed[0][1]
             if types and msgtype not in types:
                 continue
@@ -1254,18 +1323,20 @@ if __name__ == "__main__":
             if not bogon:
                 if json:
                     def quotify(x):
-                        if type(x) == type(""):
+                        if isinstance(x, str):
                             return '"' + str(x) + '"'
                         else:
                             return str(x)
-                    print("{" + ",".join(['"' + x[0].name + '":' + quotify(x[1]) for x in parsed]) + "}")
+                    print("{" + ",".join(['"' + x[0].name + '":' +
+                          quotify(x[1]) for x in parsed]) + "}")
                 elif dsv:
                     print("|".join([str(x[1]) for x in parsed]))
                 elif histogram:
                     key = "%02d" % msgtype
                     frequencies[key] = frequencies.get(key, 0) + 1
                     if msgtype == 6 or msgtype == 8:
-                        dac = 0; fid = 0
+                        dac = 0
+                        fid = 0
                         if msgtype == 8:
                             dac = parsed[3][1]
                             fid = parsed[4][1]
