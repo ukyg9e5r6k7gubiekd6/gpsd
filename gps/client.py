@@ -202,7 +202,8 @@ class gpsjson(object):
 
         if self.stream_command:
             # if self.verbose > 1:
-            sys.stderr.write("send: stream as: {}\n".format(self.stream_command))
+            sys.stderr.write("send: stream as:"
+                             " {}\n".format(self.stream_command))
             self.send(self.stream_command)
         else:
             raise TypeError("Invalid streaming command!! : "+str(flags))
