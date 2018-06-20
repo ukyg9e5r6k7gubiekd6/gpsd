@@ -9,7 +9,8 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import json, sys
+import json
+import sys
 
 success = True
 lc = 0
