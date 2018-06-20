@@ -115,8 +115,8 @@ class GPSDictionary(configparser.RawConfigParser):
                 if self.has_option(dev, "techdoc"):
                     namefield = "<a href='%s'>%s</a>" \
                         % (self.get(dev, "techdoc"), dev)
-                if ((self.has_option(dev, "discontinued")
-                     and self.getboolean(dev, "discontinued"))):
+                if ((self.has_option(dev, "discontinued") and
+                     self.getboolean(dev, "discontinued"))):
                     namefield = namefield + "&nbsp;<img title='Device " \
                         "discontinued' src='discontinued.png' " \
                         "alt='Discontinued icon'>"
@@ -142,8 +142,8 @@ class GPSDictionary(configparser.RawConfigParser):
                                      "alt='Regression-test icon'>"
                     else:
                         testfield += tested
-                if ((self.has_option(dev, "configurable")
-                     and self.get(dev, "configurable") == 'insane')):
+                if ((self.has_option(dev, "configurable") and
+                     self.get(dev, "configurable") == 'insane')):
                     testfield += "<img title='Requires -b option' " \
                                  "src='noconfigure.png' " \
                                  "alt='No-configure icon'>"
@@ -164,8 +164,8 @@ class GPSDictionary(configparser.RawConfigParser):
                 elif self.get(dev, "rating") == "broken":
                     testfield += "<img title='Device is broken' " \
                                  "src='bomb.png' alt='Bomb icon'>"
-                if ((self.has_option(dev, "usbchip")
-                     and self.get(dev, "usbchip") in hotpluggables)):
+                if ((self.has_option(dev, "usbchip") and
+                     self.get(dev, "usbchip") in hotpluggables)):
                     testfield += "<img title='udev hotplug' " \
                                  "src='hotplug.png' alt='Hotplug icon'>"
                 ofp.write("<td>%s</td>\n" % testfield)
@@ -173,8 +173,8 @@ class GPSDictionary(configparser.RawConfigParser):
                 if self.has_option(dev, "nmea"):
                     nmea = self.get(dev, "nmea")
                 ofp.write("<td>%s</td>\n" % nmea)
-                if ((self.has_option(dev, "pps")
-                     and self.get(dev, "pps") == "True")):
+                if ((self.has_option(dev, "pps") and
+                     self.get(dev, "pps") == "True")):
                     pps_accuracy = time_offset = ""
                     if self.has_option(dev, "pps_accuracy"):
                         pps_accuracy = self.get(dev, "pps_accuracy")
