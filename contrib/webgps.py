@@ -3,7 +3,8 @@
 
 """webgps.py
 
-This is a Python port of webgps.c from http://www.wireless.org.au/~jhecker/gpsd/
+This is a Python port of webgps.c
+from http://www.wireless.org.au/~jhecker/gpsd/
 by Beat Bolli <me+gps@drbeat.li>
 
 It creates a skyview of the currently visible GPS satellites and their tracks
@@ -38,7 +39,11 @@ restart webgps.py without losing accumulated satellite tracks.
 
 from __future__ import absolute_import, print_function, division
 
-import time, math, sys, os, pickle
+import math
+import os
+import pickle
+import sys
+import time
 
 from gps import *
 
@@ -47,8 +52,9 @@ STALECOUNT = 10
 
 DIAMETER = 200
 
+
 def polartocart(el, az):
-    radius = DIAMETER * (1 - el / 90.0) # * math.cos(Deg2Rad(float(el)))
+    radius = DIAMETER * (1 - el / 90.0)   # * math.cos(Deg2Rad(float(el)))
     theta = Deg2Rad(float(az - 90))
     return (
         # Changed this back to normal orientation - fw
@@ -77,7 +83,9 @@ class Track:
 
     def track(self):
         '''Return the track as canvas drawing operations.'''
-        return 'M(%d,%d); ' % self.posn[0] + ''.join(['L(%d,%d); ' % p for p in self.posn[1:]])
+        return('M(%d,%d); ' % self.posn[0] + ''.join(['L(%d,%d); ' %
+               p for p in self.posn[1:]]))
+
 
 class SatTracks(gps):
     '''gpsd client writing HTML5 and <canvas> output.'''
@@ -108,15 +116,17 @@ class SatTracks(gps):
 \t\t<tr>
 \t\t\t<td>
 \t\t\t\t<table border=0 class=num>
-\t\t\t\t\t<tr><th>PRN:</th><th>Elev:</th><th>Azim:</th><th>SNR:</th><th>Used:</th></tr>
+\t\t\t\t\t<tr><th>PRN:</th><th>Elev:</th><th>Azim:</th><th>SNR:</th>
+<th>Used:</th></tr>
 """ % jsfile)
 
         sats = self.satellites[:]
         sats.sort(key=lambda x: x.PRN)
         for s in sats:
-            fh.write("\t\t\t\t\t<tr><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%s</td></tr>\n" % (
-                s.PRN, s.elevation, s.azimuth, s.ss, s.used and 'Y' or 'N'
-            ))
+            fh.write("\t\t\t\t\t<tr><td>%d</td><td>%d</td><td>%d</td>"
+                     "<td>%d</td><td>%s</td></tr>\n" %
+                     (s.PRN, s.elevation, s.azimuth, s.ss,
+                      s.used and 'Y' or 'N'))
 
         fh.write("\t\t\t\t</table>\n\t\t\t\t<table border=0>\n")
 
@@ -131,9 +141,12 @@ class SatTracks(gps):
         if self.fix.mode >= MODE_2D:
             row('Latitude', deg_to_str(self.fix.latitude, 'SN'))
             row('Longitude', deg_to_str(self.fix.longitude, 'WE'))
-            row('Altitude', self.fix.mode == MODE_3D and "%f m" % self.fix.altitude or 'N/A')
-            row('Speed', not isnan(self.fix.speed) and "%f m/s" % self.fix.speed or 'N/A')
-            row('Course', not isnan(self.fix.track) and "%f°" % self.fix.track or 'N/A')
+            row('Altitude', self.fix.mode == MODE_3D and "%f m" %
+                self.fix.altitude or 'N/A')
+            row('Speed', not isnan(self.fix.speed) and "%f m/s" %
+                self.fix.speed or 'N/A')
+            row('Course', not isnan(self.fix.track) and "%f°" %
+                self.fix.track or 'N/A')
         else:
             row('Latitude', 'N/A')
             row('Longitude', 'N/A')
@@ -145,8 +158,7 @@ class SatTracks(gps):
         row('EPY', not isnan(self.fix.epy) and "%f m" % self.fix.epy or 'N/A')
         row('EPV', not isnan(self.fix.epv) and "%f m" % self.fix.epv or 'N/A')
         row('Climb', self.fix.mode == MODE_3D and not isnan(self.fix.climb) and
-            "%f m/s" % self.fix.climb or 'N/A'
-        )
+            "%f m/s" % self.fix.climb or 'N/A')
 
         if not (self.valid & ONLINE_SET):
             newstate = 0
@@ -154,9 +166,11 @@ class SatTracks(gps):
         else:
             newstate = self.fix.mode
             if newstate == MODE_2D:
-                state = self.status == STATUS_DGPS_FIX and "2D DIFF FIX" or "2D FIX"
+                state = self.status == (STATUS_DGPS_FIX and
+                                        "2D DIFF FIX" or "2D FIX")
             elif newstate == MODE_3D:
-                state = self.status == STATUS_DGPS_FIX and "3D DIFF FIX" or "3D FIX"
+                state = self.status == (STATUS_DGPS_FIX and
+                                        "3D DIFF FIX" or "3D FIX")
             else:
                 state = "NO FIX"
         if newstate != self.state:
@@ -168,7 +182,8 @@ class SatTracks(gps):
 \t\t\t</td>
 \t\t\t<td>
 \t\t\t\t<canvas id=satview width=425 height=425>
-\t\t\t\t\t<p>Your browser needs HTML5 &lt;canvas> support to display the satellite view correctly.</p>
+\t\t\t\t\t<p>Your browser needs HTML5 &lt;canvas> support to display
+ the satellite view correctly.</p>
 \t\t\t\t</canvas>
 \t\t\t\t<script type='text/javascript'>draw_satview();</script>
 \t\t\t</td>
@@ -227,14 +242,14 @@ function draw_satview() {
     // tracks
     ctx.lineWidth = 0.6;
     ctx.strokeStyle = 'red';
-""");
+""")
 
         # Draw the tracks
         for t in self.sattrack.values():
             if t.posn:
-                fh.write("    ctx.globalAlpha = %s; ctx.beginPath(); %sctx.stroke();\n" % (
-                    t.stale == 0 and '0.66' or '1', t.track()
-                ))
+                fh.write("    ctx.globalAlpha = %s; ctx.beginPath(); "
+                         "%sctx.stroke();\n" %
+                         (t.stale == 0 and '0.66' or '1', t.track()))
 
         fh.write("""
     // satellites
@@ -261,7 +276,9 @@ function draw_satview() {
                 fh.write("ctx.rect(%d, %d, 16, 16); " % (x - 8, y - 8))
             else:
                 fh.write("ctx.arc(%d, %d, 8, 0, circle, 0); " % (x, y))
-            fh.write("ctx.fill(); ctx.stroke(); ctx.strokeText('%s', %d, %d);\n" % (s.PRN, x - 6 + offset, y + 4))
+            fh.write("ctx.fill(); ctx.stroke(); "
+                     "ctx.strokeText('%s', %d, %d);\n" %
+                     (s.PRN, x - 6 + offset, y + 4))
 
         fh.write("""
     ctx.restore();
@@ -327,6 +344,7 @@ function draw_satview() {
                 period > 0 and time.time() > end
             ):
                 break
+
 
 def main():
     argv = sys.argv[1:]
