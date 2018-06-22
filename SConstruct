@@ -2297,6 +2297,11 @@ env.Command('www/hardware.html', ['gpscap.py',
 # Note that a udev event can be triggered with an invocation like:
 # udevadm trigger --sysname-match=ttyUSB0 --action add
 
+udev_install = Utility('udev-install', 'install', [
+    'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
+    'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] +
+    '/rules.d/25-gpsd.rules', ] + hotplug_wrapper_install)
+
 if env['systemd']:
     systemdinstall_target = [env.Install(DESTDIR + systemd_dir,
                              "systemd/%s" % (x,)) for x in
@@ -2309,32 +2314,22 @@ if env['systemd']:
 
     env.AlwaysBuild(systemd_uninstall)
     env.Precious(systemd_uninstall)
-
-
-if env['systemd']:
     hotplug_wrapper_install = []
+    env.Requires(udev_install, systemd_install)
+
+    if not env["sysroot"]:
+        systemctl_daemon_reload = Utility('systemctl-daemon-reload', '',
+                                          ['systemctl daemon-reload || true'])
+        env.AlwaysBuild(systemctl_daemon_reload)
+        env.Precious(systemctl_daemon_reload)
+        env.Requires(systemctl_daemon_reload, systemd_install)
+        env.Requires(udev_install, systemctl_daemon_reload)
+
 else:
     hotplug_wrapper_install = [
         'cp $SRCDIR/gpsd.hotplug ' + DESTDIR + env['udevdir'],
         'chmod a+x ' + DESTDIR + env['udevdir'] + '/gpsd.hotplug'
     ]
-
-udev_install = Utility('udev-install', 'install', [
-    'mkdir -p ' + DESTDIR + env['udevdir'] + '/rules.d',
-    'cp $SRCDIR/gpsd.rules ' + DESTDIR + env['udevdir'] +
-    '/rules.d/25-gpsd.rules', ] + hotplug_wrapper_install)
-
-if env['systemd']:
-    env.Requires(udev_install, systemd_install)
-
-if env['systemd'] and not env["sysroot"]:
-    systemctl_daemon_reload = Utility('systemctl-daemon-reload', '',
-                                      ['systemctl daemon-reload || true'])
-    env.AlwaysBuild(systemctl_daemon_reload)
-    env.Precious(systemctl_daemon_reload)
-    env.Requires(systemctl_daemon_reload, systemd_install)
-    env.Requires(udev_install, systemctl_daemon_reload)
-
 
 Utility('udev-uninstall', '', [
     'rm -f %s/gpsd.hotplug' % env['udevdir'],
