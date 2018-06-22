@@ -5,6 +5,10 @@ Description=GPS (Global Positioning System) Daemon Sockets
 ListenStream=/var/run/gpsd.sock
 ListenStream=[::1]:2947
 ListenStream=127.0.0.1:2947
+# To allow gpsd remote access, start gpsd with the -G option and
+# uncomment the next two lines:
+# ListenStream=[::1]:2947
+# ListenStream=0.0.0.0:2947
 SocketMode=0600
 
 [Install]
