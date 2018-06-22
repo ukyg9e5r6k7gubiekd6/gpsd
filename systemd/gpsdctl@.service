@@ -10,5 +10,5 @@ Environment="GPSD_SOCKET=/var/run/gpsd.sock"
 EnvironmentFile=-/etc/default/gpsd
 EnvironmentFile=-/etc/sysconfig/gpsd
 RemainAfterExit=yes
-ExecStart=/bin/sh -c "[ \"$USBAUTO\" = true ] && /usr/sbin/gpsdctl add /dev/%I || :"
-ExecStop=/bin/sh -c "[ \"$USBAUTO\" = true ] && /usr/sbin/gpsdctl remove /dev/%I || :"
+ExecStart=/bin/sh -c "[ \"$USBAUTO\" = true ] && /usr/local/sbin/gpsdctl add /dev/%I || :"
+ExecStop=/bin/sh -c "[ \"$USBAUTO\" = true ] && /usr/local/sbin/gpsdctl remove /dev/%I || :"

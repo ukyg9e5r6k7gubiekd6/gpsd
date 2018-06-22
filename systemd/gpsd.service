@@ -8,7 +8,7 @@ After=chronyd.service
 Type=forking
 EnvironmentFile=-/etc/default/gpsd
 EnvironmentFile=-/etc/sysconfig/gpsd
-ExecStart=/usr/sbin/gpsd $GPSD_OPTIONS $OPTIONS $DEVICES
+ExecStart=/usr/local/sbin/gpsd $GPSD_OPTIONS $OPTIONS $DEVICES
 
 [Install]
 WantedBy=multi-user.target
