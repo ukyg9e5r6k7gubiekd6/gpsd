@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-clause
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='gpsprof.1'>
-<refentryinfo><date>10 Feb 2005</date></refentryinfo>
+<refentryinfo><date>30 May 2018</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpsprof</refentrytitle>
 <manvolnum>1</manvolnum>
@@ -22,16 +22,17 @@ SPDX-License-Identifier: BSD-2-clause
 
 <cmdsynopsis>
   <command>gpsprof</command>
-      <arg choice='opt'>-f <replaceable>plot_type</replaceable></arg>
-      <arg choice='opt'>-m <replaceable>threshold</replaceable></arg>
-      <arg choice='opt'>-n <replaceable>packetcount</replaceable></arg>
-      <arg choice='opt'>-t <replaceable>title</replaceable></arg>
-      <arg choice='opt'>-T <replaceable>terminal</replaceable></arg>
-      <arg choice='opt'>-d <replaceable>dumpfile</replaceable></arg>
-      <arg choice='opt'>-l <replaceable>logfile</replaceable></arg>
-      <arg choice='opt'>-r </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice='opt'>-d <replaceable>dumpfile</replaceable></arg>
+      <arg choice='opt'>-f <replaceable>plot_type</replaceable></arg>
       <arg choice='opt'>-h </arg>
+      <arg choice='opt'>-l <replaceable>logfile</replaceable></arg>
+      <arg choice='opt'>-m <replaceable>threshold</replaceable></arg>
+      <arg choice='opt'>-n <replaceable>samplecount</replaceable></arg>
+      <arg choice='opt'>-r </arg>
+      <arg choice='opt'>-S <replaceable>subtitle</replaceable></arg>
+      <arg choice='opt'>-T <replaceable>terminal</replaceable></arg>
+      <arg choice='opt'>-t <replaceable>title</replaceable></arg>
       <arg choice='opt'>[server[:port[:device]]]</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -39,79 +40,94 @@ SPDX-License-Identifier: BSD-2-clause
 <refsect1 id='description'><title>DESCRIPTION</title>
 
 <para><application>gpsprof</application> performs accuracy, latency,
-and time drift profiling on a GPS. It emits to standard output a
-GNUPLOT program that draws one of several illustrative graphs. It can
+skyview, and time drift profiling on a GPS. It emits to standard output
+a GNUPLOT program that draws one of several illustrative graphs. It can
 also be told to emit the raw profile data.</para>
 
 <para>Information from the default spatial plot it provides can be
-useful for establishing an upper bound on latency, and thus on
-position accuracy of a GPS in motion.</para>
+useful for characterizing position accuracy of a GPS.</para>
 
 <para><application>gpsprof</application> uses instrumentation built
-into <application>gpsd</application>.</para>
+into <application>gpsd</application>.  It can read data from a local
+or remote running <application>gpsd</application>.  Or it can read
+data from a saved logfile.</para>
 
-<para>To display the graph, use
-<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-Thus, for example, to display the default spatial scatter plot, do
-this:
-
-<programlisting>
-gpsprof | gnuplot -persist
-</programlisting>
-</para>
-
-<para>To generate an image file:
-
-<programlisting>
-gpsprof -T png | gnuplot >image.png
-</programlisting>
+<para><application>gpsprof</application> is designed to be lightweight
+and use minimal host resources.  No graphics subsystem needs to be
+installed on the host running <application>gpsprof</application>.  Simply
+copy the resultant plot file to another host to be rendered
+with <application>gnuplot</application>.
 </para>
 
 </refsect1>
 <refsect1 id='options'><title>OPTIONS</title>
 
-<para>The -f option sets the plot type. The X axis is samples (either
-sentences with timestamps or PPS time drift messages).  The Y axis is
-normally latency in seconds, except for the spatial plot.  Currently the
-following plot types are defined:</para>
+<para>The -f option sets the plot type.  Currently the following plot
+types are defined:</para>
 
 <variablelist>
 <varlistentry>
 <term>space</term>
 <listitem>
-<para>Generate a scattergram of fixes and plot a probable-error
-circle.  This data is only meaningful if the GPS is held stationary
-while <application>gpsprof</application> is running.
-This is the default.</para>
+<para>Generate a scatterplot of fixes and plot probable error circles.
+This data is only meaningful if the GPS is held stationary while
+<application>gpsprof</application> is running.  Various statistics about
+the fixes are listed at the bottom.  This is the default plot type.</para>
 </listitem>
 </varlistentry>
+<varlistentry>
+<term>polar</term>
+<listitem>
+<para>Generate a heat map of reported satellite Signal to Noise Ratio
+(SNR) using polar coordinates.  A colored dot is plotted for
+each satellite seen by the GPS.  The color of dot corresponds to the
+SNR of the satellite.  The dots are plotted by azimuth and
+elevation.  North, azimuth 0 degrees, is at the top of the plot.
+Directly overhead, elevation of 90 degrees, is plotted at the center.
+Useful for analyzing the quality of the skyview as seen by the GPS.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>polarunused</term>
+<listitem>
+<para>Similar to the polar plot, but only unused satellites
+are plotted.  Useful for seeing which parts of the antenna skyview
+are obstructed, degraded, below the GPS elevation mask, or otherwise
+rejected.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>polarused</term>
+<listitem>
+<para>Similar to the polar plot, but only satellites used to compute
+fixs are plotted.  Useful for seeing which parts of the antenna
+skyview are being used in fixes.</para>
+</listitem>
+</varlistentry>
+
 <varlistentry>
 <term>time</term>
 <listitem>
 <para>Plot delta of system clock (NTP corrected time) against GPS time
-as reported in PPS messages.</para>
+as reported in PPS messages.  The X axis is sample time in seconds
+from the start of the plot.  The Y axis is the system clock delta from
+GPS time.  This plot only works if <application>gpsd</application> was
+built with the timing (latency timing support) configure option
+enabled.</para>
 </listitem>
 </varlistentry>
-<varlistentry>
-<term>uninstrumented</term>
-<listitem>
-<para>Plot total latency without instrumentation.  Useful mainly as a
-check that the instrumentation is not producing significant
-distortion.  It only plots times for reports that contain fixes;
-staircase-like artifacts in the plot are created when elapsed time
-from reports without fixes is lumped in.</para>
-</listitem>
-</varlistentry>
+
 <varlistentry>
 <term>instrumented</term>
 <listitem>
-<para>Plot instrumented profile.
-Plots various components of the total latency between the GPS's fix time
-fix and when the client receives the fix.</para>
-</listitem>
-</varlistentry>
-</variablelist>
-
+<para>Plot instrumented profile.  Plots various components of the total
+latency between the GPS's fix time and when the client receives the
+fix.  This plot only works if <application>gpsd</application> was built
+with the timing (latency timing support) configuration option enabled.
+</para>
 <para>For purposes of the description, below, start-of-reporting-cycle
 (SORC) is when a device's reporting cycle begins. This time is
 detected by watching to see when data availability follows a long
@@ -161,34 +177,95 @@ beginning of a session.  The -m option lets you set a latency
 threshold, in multiples of the cycle time, above which reports are
 discarded.</para>
 
-<para>The -n option sets the number of packets to sample.  The default
-is 100.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
+<term>uninstrumented</term>
+<listitem>
+<para>Plot total latency without instrumentation.  Useful mainly as a
+check that the instrumentation is not producing significant distortion.
+The X axis is sample time in seconds from the start of the plot.  The Y
+axs is latency in seconds.It only plots times for reports that contain
+fixes; staircase-like artifacts in the plot are created when elapsed
+time from reports without fixes is lumped in.</para>
+</listitem>
+</varlistentry>
+</variablelist>
 
-<para>The -t option sets a text string to be included in the plot
-title.</para>
-
-<para>The -T option generates a terminal type setting into the gnuplot code.
-Typical usage is "-T png" telling gnuplot to write a PNG file.  Without
-this option gnuplot will call its X11 display code.</para>
 
 <para>The -d option dumps the plot data, without attached gnuplot
 code, to a specified file for post-analysis.</para>
 
+<para>The -D sets debug level.</para>
+
+<para>The -h option makes <application>gpsprof</application> print
+a usage message and exit.</para>
+
 <para>The -l option dumps the raw JSON reports collected from the device
 to a specified file.</para>
+
+<para>The -n option sets the number of packets to sample.  The default
+is 100.  Most GPS are configured to emit one fix per second, so 100
+samples would then span 100 seconds.</para>
 
 <para>The -r option replots from a JSON logfile (such as -l produces)
 on standard input. Both -n and -l options are ignored when this
 one is selected.</para>
 
-<para>The -h option makes <application>gpsprof</application> print
-a usage message and exit.</para>
+<para>The -S option sets a text string to be included in the plot
+as a subtitle.  This will be below the title.</para>
 
-<para>The -D sets debug level.</para>
+<para>The -t option sets a text string to be the plot title.  This
+will replace the default title.</para>
 
+<para>The -T option generates a terminal type setting into the gnuplot
+code.  Typical usage is "-T png", or "-T pngcairo" telling gnuplot to
+write a PNG file.  Without this option gnuplot will call its X11 display
+code.</para>
+<para> Different installations of <application>gnuplot</application> will
+support different terminal types.  Different terminal types may work better
+for you than other ones.  "-T png" will generate PNG images.  Use "-T jpeg"
+to generate JPEG images.  "-T pngcairo" often works best, but is not
+supported by some distributions.</para>
+
+</refsect1>
+<refsect1 id='signals'><title>SIGNALS</title>
 <para>Sending SIGUSR1 to a running instance causes it to write a
 completion message to standard error and resume processing.  The
 first number in the startup message is the process ID to signal.</para>
+</refsect1>
+
+<refsect1 id='examples'><title>EXAMPLES</title>
+<para>To display the graph, use
+<citerefentry><refentrytitle>gnuplot</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+Thus, for example, to display the default spatial scatter plot, do
+this:
+
+<programlisting>
+gpsprof | gnuplot -persist
+</programlisting>
+</para>
+
+<para>To generate an image file:
+
+<programlisting>
+gpsprof -T png | gnuplot &gt; image.png
+</programlisting>
+</para>
+<para>
+To generate a polar plot, and save the GPS data for further plots:
+<programlisting>
+gpsprof -f polar -T jpeg -l polar.json | gnuplot &gt; polar.png
+</programlisting>
+Then to make the matching polarused and polarunused plots and pngs from
+the just saved the GPS data:
+<programlisting>
+gpsprof -f polarused -T jpeg -r &lt; polar.json &gt; polarused.plot
+gnuplot &lt; polarused.plot &gt; polarused.png
+gpsprof -f polarunused -T jpeg -r &lt; polar.json &gt; polarunused.plot
+gnuplot &lt; polarunused.plot  &gt; polarunused.png
+</programlisting>
+</para>
 
 </refsect1>
 <refsect1 id='see_also'><title>SEE ALSO</title>
