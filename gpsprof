@@ -323,6 +323,9 @@ class spaceplot(plotter):
                 if sat.used:
                     sats_used += 1
 
+            if 'alt' not in self.session.data:
+                self.session.data['alt'] = gps.NaN
+
             self.fixes.append((self.session.data['lat'],
                                self.session.data['lon'],
                                self.session.data['alt'], sats_used))
