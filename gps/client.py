@@ -20,6 +20,9 @@ GPSD_PORT = "2947"
 class gpscommon(object):
     "Isolate socket handling and buffering from the protocol interpretation."
 
+    host = "127.0.0.1"
+    port = GPSD_PORT
+
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0,
                  should_reconnect=False):
         self.sock = None        # in case we blow up in connect
