@@ -484,7 +484,7 @@ Help("""Arguments may be a mixture of switches and targets in any order.
 Switches apply to the entire build regardless of where they are in the order.
 Important switches include:
 
-    prefix=/usr     probably what you want for production tools
+    prefix=/usr     probably what packagers want
 
 Options are cached in a file named .scons-option-cache and persist to later
 invocations.  The file is editable.  Delete it to start fresh.  Current option
