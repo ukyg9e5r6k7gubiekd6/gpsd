@@ -993,6 +993,10 @@ else:
                                                   PYTHON_SYSCONFIG_IMPORT,
                                                   PYTHON_LIBDIR_CALL,
                                                   brief=cleaning)
+            # follow FHS, put in /usr/local/libXX, not /usr/libXX
+            # may be lib, lib32 or lib64
+            python_libdir = python_libdir.replace("/usr/lib", "/usr/local/lib")
+
         py_config_text = config.GetPythonValue('config vars',
                                                PYTHON_SYSCONFIG_IMPORT,
                                                PYTHON_CONFIG_CALL,
