@@ -37,6 +37,7 @@ except:
 from gi.repository import GObject  # pylint: disable=wrong-import-position
 from gi.repository import Gtk  # pylint: disable=wrong-import-position
 from gi.repository import Gdk  # pylint: disable=wrong-import-position
+from gi.repository import Pango  # pylint: disable=wrong-import-position
 
 gui_about = '''\
 This is xgps, a test client for the gpsd daemon.
@@ -49,9 +50,56 @@ By Eric S. Raymond for the GPSD project, December 2009
 MAXCHANNELS = 28
 
 # how to sort the Satellite List
-# some of ("PRN","el","az","ss","used") with optional '-' to reverse sort
-# by default, used at the top, then sort PRN
+# some of ("USI","el","az","ss","used") with optional '-' to reverse sort
+# by default, used at the top, then sort USI
+# module gps still uses PRN
 SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
+
+# Each GNSS constellation reuses the same PRNs.  To differentiate they are
+# all mushed into the PRN by Universal Satellite Index (USI)
+
+# here is the mapping GREIS GPS uses.  NMEA and u-blox are different.
+# USI           constellation
+# ----------- | --------------
+# 0             Unused. Ignore satellites with this USI
+# [1...37]      GPS PRNs [1...37]
+# [38...69]     GLONASS FCNs [-7...24]
+# 70            GLONASS satellite with unknown FCN
+# [71...119]    GALILEO PRNs [1...49]
+# [120...142]   SBAS PRNs [120...142]
+# [143...192]   Reserved
+# [193...197]   QZSS PRNs [193...197]
+# [198...210]   Reserved
+# [211...247]   BeiDou (COMPASS) PRNs [1...37]
+# [248...254]   Reserved
+# 255           Unused.  Ignore satellites with this USI
+
+
+def gps_type(prn):
+    # FIXME: should be in gps.py, will move when tested
+    # return a string of the GPS constellation this PRN is in
+    if prn == 0:
+        return 'Unused'
+    if prn < 38:
+        return 'GPS'
+    if prn < 71:
+        return 'GLONASS'
+    if prn < 120:
+        return 'GALILEO'
+    if prn < 143:
+        return 'SBAS'
+    if prn < 193:
+        return 'Reserved'
+    if prn < 198:
+        return 'QZSS'
+    if prn < 211:
+        return 'Reserved'
+    if prn < 248:
+        return 'BeiDou'
+    if prn < 255:
+        return 'Reserved'
+    # else
+    return 'Unused'
 
 
 class unit_adjustments(object):
@@ -198,6 +246,30 @@ class SkyView(Gtk.DrawingArea):
         self.cr.show_text(text)
         self.cr.new_path()
 
+    def draw_triangle(self, x, y, radius, filled=False, flip=False):
+        "Draw a triangle centered on the specified midpoint."
+        lw = self.cr.get_line_width()
+        if flip:
+            ytop = y + radius
+            ybot = y - radius
+        else:
+            ytop = y - radius
+            ybot = y + radius
+
+        x1, y1 = fit_to_grid(x, ytop, lw)
+        x2, y2 = fit_to_grid(x + radius, ybot, lw)
+        x3, y3 = fit_to_grid(x - radius, ybot, lw)
+
+        self.cr.move_to(x1, y1)
+        self.cr.line_to(x2, y2)
+        self.cr.line_to(x3, y3)
+        self.cr.close_path()
+
+        if filled:
+            self.cr.fill()
+        else:
+            self.cr.stroke()
+
     def pol2cart(self, az, el):
         "Polar to Cartesian coordinates within the horizon circle."
         az = (az - self.rotate) % 360.0
@@ -255,13 +327,24 @@ class SkyView(Gtk.DrawingArea):
         self.draw_string(x, y, "S")
         (x, y) = self.pol2cart(270, -5)
         self.draw_string(x, y, "W")
+        (x, y) = self.pol2cart(0, -10)
+        self.draw_string(x, y, "X")
 
         # The satellites
         self.cr.set_line_width(2)
         for sat in self.satellites:
-            if sat.az == 0 and sat.el == 0:
-                continue  # Skip satellites with unknown position
+            if not (1 <= sat.PRN <= 437):
+                # Bad PRN, skip.  NMEA uses up to 437
+                continue
+            if not (0 <= sat.az <= 359):
+                # Bad azimuth, skip.
+                continue
+            if not (-10 <= sat.el <= 90):
+                # Bad elevation, skip.  Allow just below horizon
+                continue
+
             (x, y) = self.pol2cart(sat.az, sat.el)
+            # colorize by signal to noise ratio
             if sat.ss < 10:
                 self.set_color("Gray")
             elif sat.ss < 30:
@@ -272,10 +355,18 @@ class SkyView(Gtk.DrawingArea):
                 self.set_color("Green3")
             else:
                 self.set_color("Green1")
-            if gps.is_sbas(sat.PRN):
-                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
-            else:
+
+            # shape by constellation
+            constellation = gps_type(sat.PRN)
+            if constellation == 'GPS':
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
+            elif constellation == 'SBAS':
+                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
+            elif constellation == 'GALILEO':
+                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, False)
+            else:
+                # QZSS, GLONASS, BeiDou, Reserved or Unused
+                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, True)
 
             self.cr.set_source_rgb(1, 1, 1)
             self.draw_string(x + SkyView.SAT_RADIUS,
@@ -320,7 +411,8 @@ class NoiseView(object):
                 i % NoiseView.ROWS, i % NoiseView.ROWS + 1)
             entry = Gtk.Entry()
             # The right size for the ISO8601 timestamp
-            entry.set_width_chars(20)
+            entry.modify_font(Pango.FontDescription("Monospace 10"))
+            entry.set_width_chars(24)
             entry.set_text("n/a")
             self.widget.attach(
                 entry, colbase + 1, colbase + 2,
@@ -344,9 +436,9 @@ class MaidenheadView(object):
         self.widget.set_editable(False)
 
     def update(self, tpv):
-        if ((tpv.mode >= gps.MODE_2D
-             and hasattr(tpv, "lat")
-             and hasattr(tpv, "lon"))):
+        if ((tpv.mode >= gps.MODE_2D and
+             hasattr(tpv, "lat") and
+             hasattr(tpv, "lon"))):
             self.widget.set_text(gps.clienthelpers.maidenhead(tpv.lat,
                                                               tpv.lon))
         else:
@@ -394,8 +486,8 @@ class AISView(object):
                     here = self.store.get_iter(i)
                     name = self.store.get_value(here, 1)
                     mmsi = self.name_to_mmsi[name]
-                    if ((self.named[mmsi].entry_time
-                         < time.time() - AISView.DWELLTIME)):
+                    if ((self.named[mmsi].entry_time <
+                         time.time() - AISView.DWELLTIME)):
                         del self.named[mmsi]
                         if name in self.name_to_mmsi:
                             del self.name_to_mmsi[name]
@@ -452,8 +544,8 @@ class AISView(object):
             if sender in self.named:
                 sender = self.named[sender].shipname
             recipient = ais.dest_mmsi
-            if ((recipient in self.named
-                 and hasattr(self.named[recipient], "shipname"))):
+            if ((recipient in self.named and
+                 hasattr(self.named[recipient], "shipname"))):
                 recipient = self.named[recipient].shipname
             self.store.prepend(
                 (ais.type, sender, "", recipient, "", ais.text))
@@ -504,6 +596,14 @@ class Base(object):
         ("ECEF VY", lambda s, r: s.update_ecef(r, "ecefvy", "/s")),
         ("ECEF VZ", lambda s, r: s.update_ecef(r, "ecefvz", "/s")),
         ("ECEF pAcc", lambda s, r: s.update_ecef(r, "ecefpAcc")),
+        # fourth column
+        ("Sats", lambda s, r: s.update_seen(r)),
+        ("XDOP", lambda s, r: s.update_dop(r, "xdop")),
+        ("YDOP", lambda s, r: s.update_dop(r, "ydop")),
+        ("VDOP", lambda s, r: s.update_dop(r, "vdop")),
+        ("HDOP", lambda s, r: s.update_dop(r, "hdop")),
+        ("TDOP", lambda s, r: s.update_dop(r, "tdop")),
+        ("GDOP", lambda s, r: s.update_dop(r, "gdop")),
     )
 
     def __init__(self, deg_type, rotate=0.0, target=""):
@@ -614,10 +714,9 @@ class Base(object):
         self.satlist = Gtk.ListStore(str, str, str, str, str)
         view = Gtk.TreeView(model=self.satlist)
 
-        for (i, label) in enumerate(('PRN:', 'Elev:', 'Azim:', 'SNR:',
-                                     'Used:')):
+        for (i, label) in enumerate(('USI', 'Elev', 'Azim', 'SNR', 'Used')):
             column = Gtk.TreeViewColumn(label)
-            renderer = Gtk.CellRendererText()
+            renderer = Gtk.CellRendererText(xalign=1.0)
             column.pack_start(renderer, expand=True)
             column.add_attribute(renderer, 'text', i)
             view.append_column(column)
@@ -651,7 +750,8 @@ class Base(object):
                              i % Base.ROWS, i % Base.ROWS + 1)
             entry = Gtk.Entry()
             # The right size for the ISO8601 timestamp
-            entry.set_width_chars(20)
+            entry.modify_font(Pango.FontDescription("Monospace 10"))
+            entry.set_width_chars(24)
             entry.set_text("n/a")
             datatable.attach(entry, colbase + 1, colbase + 2,
                              i % Base.ROWS, i % Base.ROWS + 1)
@@ -743,7 +843,7 @@ class Base(object):
                 ns = 'S'
             else:
                 ns = 'N'
-            return "%s %s" % (lat, ns)
+            return "%14s %s" % (lat, ns)
         else:
             return "n/a"
 
@@ -754,13 +854,13 @@ class Base(object):
                 ew = 'W'
             else:
                 ew = 'E'
-            return "%s %s" % (lon, ew)
+            return "%14s %s" % (lon, ew)
         else:
             return "n/a"
 
     def update_altitude(self, data):
         if data.mode >= gps.MODE_3D and hasattr(data, "alt"):
-            return "%.3f %s" % (
+            return "%9.3f %s" % (
                 data.alt * self.conversions.altfactor,
                 self.conversions.altunits)
         else:
@@ -768,7 +868,7 @@ class Base(object):
 
     def update_speed(self, data):
         if hasattr(data, "speed"):
-            return "%.3f %s" % (
+            return "%9.3f %s" % (
                 data.speed * self.conversions.speedfactor,
                 self.conversions.speedunits)
         else:
@@ -776,7 +876,7 @@ class Base(object):
 
     def update_climb(self, data):
         if hasattr(data, "climb"):
-            return "%.3f %s" % (
+            return "%9.3f %s" % (
                 data.climb * self.conversions.speedfactor,
                 self.conversions.speedunits)
         else:
@@ -784,23 +884,40 @@ class Base(object):
 
     def update_track(self, data):
         if hasattr(data, "track"):
-            return gps.clienthelpers.deg_to_str(self.deg_type, abs(data.track))
+            return "%14s °" % (
+                gps.clienthelpers.deg_to_str(self.deg_type, abs(data.track)))
         else:
             return "n/a"
 
-    def update_ecef(self, data, eceftype, speedunit = ''):
+    def update_seen(self, data):
+        # update sats seen/used in the GPS Data window
+        if hasattr(data, 'satellites_seen'):
+            return ("Seen %d, Used %d" % (
+                    getattr(data, 'satellites_seen'),
+                    getattr(data, 'satellites_used')))
+        else:
+            return "n/a"
+
+    def update_dop(self, data, doptype):
+        # update a DOP in the GPS Data window
+        if hasattr(data, doptype):
+            return "%5.2f" % getattr(data, doptype)
+        else:
+            return "n/a"
+
+    def update_ecef(self, data, eceftype, speedunit=''):
         # update a ECEF in the GPS Data window
         if hasattr(data, eceftype):
             val = getattr(data, eceftype)
             return ("% 14.3f %s%s" %
                     (val * self.conversions.altfactor,
-                    self.conversions.altunits, speedunit))
+                     self.conversions.altunits, speedunit))
         else:
             return "n/a"
 
     def update_err(self, data, errtype):
         if hasattr(data, errtype):
-            return "%.3f %s" % (
+            return "%8.3f %s" % (
                 getattr(data, errtype) * self.conversions.altfactor,
                 self.conversions.altunits)
         else:
@@ -808,7 +925,7 @@ class Base(object):
 
     def update_err_speed(self, data, errtype):
         if hasattr(data, errtype):
-            return "%.3f %s" % (
+            return "%8.3f %s" % (
                 getattr(data, errtype) * self.conversions.speedfactor,
                 self.conversions.speedunits)
         else:
@@ -816,7 +933,7 @@ class Base(object):
 
     def update_err_degrees(self, data, errtype):
         if hasattr(data, errtype):
-            return "%.3f °" % (getattr(data, errtype))
+            return "%8.3f °" % (getattr(data, errtype))
         else:
             return "n/a"
 
@@ -838,13 +955,22 @@ class Base(object):
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
         # the first 21 fields are updated using TPV data
+        # the next 7 fields are updated using SKY data
         for (hook, widget) in Base.gpsfields[:21]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_text(hook(self, tpv))
         self.gsview.update(tpv)
 
+    def _int_to_str(self, val, min, max):
+        "test val in range min to max, or return"
+        if not (min <= val <= max):
+            return 'n/a'
+        return '%3d' % val
+
     def update_skyview(self, data):
         "Update the satellite list and skyview."
+        data.satellites_seen = 0
+        data.satellites_used = 0
         if hasattr(data, 'satellites'):
             satellites = data.satellites
             for fld in reversed(SKY_VIEW_SORT_FIELDS):
@@ -856,18 +982,31 @@ class Base(object):
                     key=lambda x: x[fld], reverse=rev)
 
             for (i, satellite) in enumerate(satellites):
-                self.set_satlist_field(i, 0, satellite.PRN)
-                self.set_satlist_field(i, 1, satellite.el)
-                self.set_satlist_field(i, 2, satellite.az)
-                self.set_satlist_field(i, 3, satellite.ss)
+                # Bad PRN, skip.  NMEA uses up to 437
+                self.set_satlist_field(i, 0,
+                                       self._int_to_str(satellite.PRN, 1, 437))
+                # allow satellites 10 degree below horizon
+                self.set_satlist_field(i, 1,
+                                       self._int_to_str(satellite.el, -10, 90))
+                self.set_satlist_field(i, 2,
+                                       self._int_to_str(satellite.az, 0, 359))
+                self.set_satlist_field(i, 3, "%3d" % satellite.ss)
                 yesno = 'N'
+                data.satellites_seen += 1
                 if satellite.used:
                     yesno = 'Y'
+                    data.satellites_used += 1
                 self.set_satlist_field(i, 4, yesno)
             for i in range(len(satellites), MAXCHANNELS):
                 for j in range(0, 5):
                     self.set_satlist_field(i, j, "")
             self.skyview.redraw(satellites)
+
+        # the first 21 fields are updated using TPV data
+        # the next 7 fields are updated using SKY data
+        for (hook, widget) in Base.gpsfields[21:28]:
+            if hook:  # Remove this guard when we have all hooks
+                widget.set_text(hook(self, data))
 
     # Preferences
 
@@ -894,9 +1033,9 @@ class Base(object):
         if self.daemon.read() == -1:
             self.handle_hangup(source, condition)
         if self.daemon.valid & gps.PACKET_SET:
-            if ((self.device
-                 and "device" in self.daemon.data
-                 and self.device != self.daemon.data["device"])):
+            if ((self.device and
+                 "device" in self.daemon.data and
+                 self.device != self.daemon.data["device"])):
                 return True
             self.rawdisplay.set_text(self.daemon.response.strip())
             if self.daemon.data["class"] == "SKY":
@@ -985,8 +1124,8 @@ if __name__ == "__main__":
         try:
             daemon = gps.gps(host=host,
                              port=port,
-                             mode=gps.WATCH_ENABLE | gps.WATCH_JSON
-                             | gps.WATCH_SCALED,
+                             mode=(gps.WATCH_ENABLE | gps.WATCH_JSON |
+                                   gps.WATCH_SCALED),
                              verbose=debug)
             base.watch(daemon, device)
             base.main()
