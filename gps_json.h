@@ -13,6 +13,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct gps_device_t;
+
 void json_data_report(const gps_mask_t,
 		      const struct gps_device_t *,
 		      const struct policy_t *,
