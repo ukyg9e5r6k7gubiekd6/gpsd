@@ -10,6 +10,10 @@
 # "STANDARD REPORT FORMAT FOR GLOBAL POSITIONING SYSTEM (GPS) RECEIVERS AND
 #  SYSTEMS ACCURACY TESTS AND EVALUATIONS"
 #
+# TODO:
+#     put date from data on plot, not time of replot.
+#     add lat/lon to polar plots
+#
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
