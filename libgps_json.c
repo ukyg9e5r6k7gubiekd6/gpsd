@@ -14,6 +14,14 @@ PERMISSIONS
 
 ***************************************************************************/
 
+#ifdef __linux__
+/* isfinite() needs _POSIX_C_SOURCE >= 200112L
+ * isnan(+Inf) is false, isfinite(+Inf) is false
+ * use isfinite() to make sure a float is valid
+ */
+#define _POSIX_C_SOURCE 200112L
+#endif /* __linux__ */
+
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
@@ -461,33 +469,33 @@ int libgps_json_unpack(const char *buf,
     if (str_starts_with(classtag, "\"class\":\"TPV\"")) {
 	status = json_tpv_read(buf, gpsdata, end);
 	gpsdata->set = STATUS_SET;
-	if (isnan(gpsdata->fix.time) == 0)
+	if (isfinite(gpsdata->fix.time) != 0)
 	    gpsdata->set |= TIME_SET;
-	if (isnan(gpsdata->fix.ept) == 0)
+	if (isfinite(gpsdata->fix.ept) != 0)
 	    gpsdata->set |= TIMERR_SET;
-	if (isnan(gpsdata->fix.longitude) == 0)
+	if (isfinite(gpsdata->fix.longitude) != 0)
 	    gpsdata->set |= LATLON_SET;
-	if (isnan(gpsdata->fix.altitude) == 0)
+	if (isfinite(gpsdata->fix.altitude) != 0)
 	    gpsdata->set |= ALTITUDE_SET;
-	if (isnan(gpsdata->fix.epx) == 0 && isnan(gpsdata->fix.epy) == 0)
+	if (isfinite(gpsdata->fix.epx) != 0 && isfinite(gpsdata->fix.epy) != 0)
 	    gpsdata->set |= HERR_SET;
-	if (isnan(gpsdata->fix.epv) == 0)
+	if (isfinite(gpsdata->fix.epv) != 0)
 	    gpsdata->set |= VERR_SET;
-	if (isnan(gpsdata->fix.track) == 0)
+	if (isfinite(gpsdata->fix.track) != 0)
 	    gpsdata->set |= TRACK_SET;
-	if (isnan(gpsdata->fix.magnetic_track) == 0)
-		gpsdata->set |= MAGNETIC_TRACK_SET;
-	if (isnan(gpsdata->fix.speed) == 0)
+	if (isfinite(gpsdata->fix.magnetic_track) != 0)
+	    gpsdata->set |= MAGNETIC_TRACK_SET;
+	if (isfinite(gpsdata->fix.speed) != 0)
 	    gpsdata->set |= SPEED_SET;
-	if (isnan(gpsdata->fix.climb) == 0)
+	if (isfinite(gpsdata->fix.climb) != 0)
 	    gpsdata->set |= CLIMB_SET;
-	if (isnan(gpsdata->fix.epd) == 0)
+	if (isfinite(gpsdata->fix.epd) != 0)
 	    gpsdata->set |= TRACKERR_SET;
-	if (isnan(gpsdata->fix.eps) == 0)
+	if (isfinite(gpsdata->fix.eps) != 0)
 	    gpsdata->set |= SPEEDERR_SET;
-	if (isnan(gpsdata->fix.epc) == 0)
+	if (isfinite(gpsdata->fix.epc) != 0)
 	    gpsdata->set |= CLIMBERR_SET;
-	if (isnan(gpsdata->fix.epc) == 0)
+	if (isfinite(gpsdata->fix.epc) != 0)
 	    gpsdata->set |= CLIMBERR_SET;
 	if (gpsdata->fix.mode != MODE_NOT_SEEN)
 	    gpsdata->set |= MODE_SET;
