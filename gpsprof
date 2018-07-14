@@ -744,14 +744,13 @@ class polarplot(plotter):
         return res
 
     def plot(self):
-        ss_min = 99         # min satellite signal strength
-        ss_max = 0          # max satellite signal strength
+        ss = []
         for fix in self.fixes:
-            # collect min and max
-            if ss_max < fix[1]:
-                ss_max = fix[1]
-            if 0 < fix[1] and ss_min > fix[1]:
-                ss_min = fix[1]
+            ss.append(fix[1])
+
+        # calc sats used data: mean, min, max, sigma
+        stat_ss = stats()
+        stat_ss.min_max_mean(ss, 0)
 
         fmt = '''\
 unset border
@@ -815,8 +814,8 @@ set palette defined (100 "blue", 200 "green", 300 "red")
         count = len(self.fixes)
         fmt += '''\
 set label 11 at screen 0.01, screen 0.15 "%s\\nmin SS = %d\\nmax SS = %d\\n\
-Samples %d"
-''' % (self.name, ss_min, ss_max, count)
+mean SS = %d\\nSamples %d"
+''' % (self.name, stat_ss.min, stat_ss.max, stat_ss.mean, count)
 
         fmt += '''\
 # and finally the plot
