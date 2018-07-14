@@ -143,9 +143,9 @@ class SatTracks(gps):
             row('Longitude', deg_to_str(self.fix.longitude, 'WE'))
             row('Altitude', self.fix.mode == MODE_3D and "%f m" %
                 self.fix.altitude or 'N/A')
-            row('Speed', not isnan(self.fix.speed) and "%f m/s" %
+            row('Speed', isfinite(self.fix.speed) and "%f m/s" %
                 self.fix.speed or 'N/A')
-            row('Course', not isnan(self.fix.track) and "%f°" %
+            row('Course', isfinite(self.fix.track) and "%f°" %
                 self.fix.track or 'N/A')
         else:
             row('Latitude', 'N/A')
@@ -154,10 +154,10 @@ class SatTracks(gps):
             row('Speed', 'N/A')
             row('Course', 'N/A')
 
-        row('EPX', not isnan(self.fix.epx) and "%f m" % self.fix.epx or 'N/A')
-        row('EPY', not isnan(self.fix.epy) and "%f m" % self.fix.epy or 'N/A')
-        row('EPV', not isnan(self.fix.epv) and "%f m" % self.fix.epv or 'N/A')
-        row('Climb', self.fix.mode == MODE_3D and not isnan(self.fix.climb) and
+        row('EPX', isfinite(self.fix.epx) and "%f m" % self.fix.epx or 'N/A')
+        row('EPY', isfinite(self.fix.epy) and "%f m" % self.fix.epy or 'N/A')
+        row('EPV', isfinite(self.fix.epv) and "%f m" % self.fix.epv or 'N/A')
+        row('Climb', self.fix.mode == MODE_3D and isfinite(self.fix.climb) and
             "%f m/s" % self.fix.climb or 'N/A')
 
         if not (self.valid & ONLINE_SET):
