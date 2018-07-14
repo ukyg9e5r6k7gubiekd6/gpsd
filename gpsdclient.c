@@ -320,7 +320,7 @@ float true2magnetic(double lat, double lon, double heading)
     }
 
     /* No negative headings. */
-    if (isnan(heading)== 0 && heading < 0.0)
+    if (isfinite(heading) != 0 && heading < 0.0)
 	heading += 360.0;
 
     return (heading);
