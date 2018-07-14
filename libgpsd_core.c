@@ -724,22 +724,37 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
     memset(satpos, 0, sizeof(satpos));
 
     for (n = k = 0; k < gpsdata->satellites_visible; k++) {
-	if (gpsdata->skyview[k].used && !SBAS_PRN(gpsdata->skyview[k].PRN))
-	{
-	    const struct satellite_t *sp = &gpsdata->skyview[k];
-	    satpos[n][0] = sin(sp->azimuth * DEG_2_RAD)
-		* cos(sp->elevation * DEG_2_RAD);
-	    satpos[n][1] = cos(sp->azimuth * DEG_2_RAD)
-		* cos(sp->elevation * DEG_2_RAD);
-	    satpos[n][2] = sin(sp->elevation * DEG_2_RAD);
-	    satpos[n][3] = 1;
-	    gpsd_log(errout, LOG_INF, "PRN=%3d az=%3d el=%2d (%f, %f, %f)\n",
-		     gpsdata->skyview[k].PRN,
-		     gpsdata->skyview[k].azimuth,
-		     gpsdata->skyview[k].elevation,
-		     satpos[n][0], satpos[n][1], satpos[n][2]);
-	    n++;
-	}
+        if (!gpsdata->skyview[k].used) {
+             /* skip unused sats */
+             continue;
+        }
+        if (1 > gpsdata->skyview[k].PRN || SBAS_PRN(gpsdata->skyview[k].PRN)) {
+             /* skip bad PRN, skip SBAS sats */
+             continue;
+        }
+        if (0 > gpsdata->skyview[k].azimuth ||
+             359 < gpsdata->skyview[k].azimuth) {
+             /* skip bad azimuth */
+             continue;
+        }
+        if (-90 > gpsdata->skyview[k].elevation ||
+             90 < gpsdata->skyview[k].elevation) {
+             /* skip bad elevation */
+             continue;
+        }
+        const struct satellite_t *sp = &gpsdata->skyview[k];
+        satpos[n][0] = sin(sp->azimuth * DEG_2_RAD)
+            * cos(sp->elevation * DEG_2_RAD);
+        satpos[n][1] = cos(sp->azimuth * DEG_2_RAD)
+            * cos(sp->elevation * DEG_2_RAD);
+        satpos[n][2] = sin(sp->elevation * DEG_2_RAD);
+        satpos[n][3] = 1;
+        gpsd_log(errout, LOG_INF, "PRN=%3d az=%3d el=%2d (%f, %f, %f)\n",
+                 gpsdata->skyview[k].PRN,
+                 gpsdata->skyview[k].azimuth,
+                 gpsdata->skyview[k].elevation,
+                 satpos[n][0], satpos[n][1], satpos[n][2]);
+        n++;
     }
     /* can't use gpsdata->satellites_used as that is a counter for xxGSA,
      * and gets cleared at odd times */
@@ -1479,6 +1494,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	return session->gpsdata.set;
     }
+    /* Should never get here */
+    gpsd_log(&session->context->errout, LOG_EMERG,
+             "fell out of gps_poll()!\n");
+    return 0;
 }
 
 int gpsd_multipoll(const bool data_ready,
@@ -1640,8 +1659,17 @@ void gpsd_wrap(struct gps_device_t *session)
 
 void gpsd_zero_satellites( struct gps_data_t *out)
 {
+    int sat;
+
     (void)memset(out->skyview, '\0', sizeof(out->skyview));
     out->satellites_visible = 0;
+    /* zero is good inbound data for ss, elevation, and azimuth.  */
+    /* we need to set them to invalid values */
+    for ( sat = 0; sat < MAXCHANNELS; sat++ ) {
+        out->skyview[sat].azimuth = -1;
+        out->skyview[sat].elevation = -91;
+        out->skyview[sat].ss = -1.0;
+    }
 #if 0
     /*
      * We used to clear DOPs here, but this causes misbehavior on some
