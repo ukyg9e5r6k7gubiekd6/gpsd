@@ -37,6 +37,7 @@ extern "C" {
  *       bits less confusing. (January 2015, release 3.12).
  * 6.1 - Add navdata_t for more (nmea2000) info.
  * 7.0 - add gps_fix_t.ecef (February 2018)
+ *       changed prototype of gps_read() to add buffer parameters
  */
 #define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1816,11 +1817,11 @@ struct ais_t
 
 /* basic data, per PRN, from GPGSA and GPGSV */
 struct satellite_t {
-    double ss;		/* signal-to-noise ratio (dB) */
+    double ss;		/* signal-to-noise ratio, 0 to 254 dB, -1 for n/a */
     bool used;		/* this satellite used in solution */
-    short PRN;		/* PRN of this satellite */
-    short elevation;	/* elevation of satellite */
-    short azimuth;	/* azimuth */
+    short PRN;		/* PRN of this satellite, 1 to 437, 0 for n/a */
+    short elevation;	/* elevation of satellite, -90 to 90 deg, -91 for n/a */
+    short azimuth;	/* azimuth, 0 to 359 deg, -1 for n/a */
 };
 
 struct attitude_t {
@@ -2089,7 +2090,7 @@ extern int gps_open(const char *, const char *,
 		      struct gps_data_t *);
 extern int gps_close(struct gps_data_t *);
 extern int gps_send(struct gps_data_t *, const char *, ... );
-extern int gps_read(struct gps_data_t *);
+extern int gps_read(struct gps_data_t *, char *message, int message_len);
 extern int gps_unpack(char *, struct gps_data_t *);
 extern bool gps_waiting(const struct gps_data_t *, int);
 extern int gps_stream(struct gps_data_t *, unsigned int, void *);

@@ -146,12 +146,18 @@ int gps_close(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 	return status;
 }
 
-int gps_read(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
+int gps_read(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
+             char *message, int message_len)
 /* read from a gpsd connection */
 {
     int status = -1;
 
     libgps_debug_trace((DEBUG_CALLS, "gps_read() begins\n"));
+    if ((NULL != message) && (0 < message_len)) {
+        /* be sure message is zero length */
+        /* we do not memset() as this is time critical input path */
+        *message = '\0';
+    }
 
 #ifdef SHM_EXPORT_ENABLE
     if (BAD_SOCKET((intptr_t)(gpsdata->gps_fd))) {
@@ -161,7 +167,7 @@ int gps_read(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 
 #ifdef SOCKET_EXPORT_ENABLE
     if (status == -1 && !BAD_SOCKET((intptr_t)(gpsdata->gps_fd))) {
-        status = gps_sock_read(gpsdata);
+        status = gps_sock_read(gpsdata, message, message_len);
     }
 #endif /* SOCKET_EXPORT_ENABLE */
 

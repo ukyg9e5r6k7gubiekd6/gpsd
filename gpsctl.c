@@ -127,7 +127,7 @@ static bool gps_query(struct gps_data_t *gpsdata,
 
 	gpsd_log(&context.errout, LOG_PROG, "reading...\n");
 
-	(void)gps_read(gpsdata);
+	(void)gps_read(gpsdata, NULL, 0);
 	if (ERROR_SET & gpsdata->set) {
 	    gpsd_log(&context.errout, LOG_ERROR, "error '%s'\n", gpsdata->error);
 	    return false;
@@ -437,7 +437,7 @@ int main(int argc, char **argv)
 
 	    while (devcount > 0) {
 		errno = 0;
-		if (gps_read(&gpsdata) == -1) {
+		if (gps_read(&gpsdata, NULL, 0) == -1) {
 		    gpsd_log(&context.errout, LOG_ERROR, "data read failed.\n");
 		    (void)gps_close(&gpsdata);
 		    exit(EXIT_FAILURE);

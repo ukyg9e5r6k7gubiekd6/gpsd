@@ -101,6 +101,7 @@
 
 #include "gpsd_config.h"
 #include "gps.h"
+#include "gps_json.h"   /* for GPS_JSON_RESPONSE_MAX */
 #include "compiler.h"	/* for UNUSED */
 #include "gpsdclient.h"
 #include "revision.h"
@@ -456,7 +457,7 @@ static int sat_cmp(const void *p1, const void *p2)
 }
 
 
-static void update_gps_panel(struct gps_data_t *gpsdata)
+static void update_gps_panel(struct gps_data_t *gpsdata, char * message)
 /* This gets called once for each new GPS sentence. */
 {
     int newstate;
@@ -711,23 +712,19 @@ static void update_gps_panel(struct gps_data_t *gpsdata)
 
     }
 
-    if ( raw_flag) {
-        /* Be quiet if the user requests silence. */
-        const char *sr;
-        if (!silent_flag && (sr = gps_data(gpsdata)) != NULL) {
-            char *p, *pe;
-
-            /* make a copy of the const char *, then trim trailing spaces */
-            p = strdup(sr);
-            if ( NULL != p ) {
-		pe = p + strlen(p);
-		for ( ; --pe > p && isspace((int) *pe); *pe = '\0')
-		    ;
-		(void)wprintw(messages, "%s\n", p);
-		free(p);
+    /* Be quiet if the user requests silence. */
+    if (!silent_flag && raw_flag) {
+        if (NULL != message) {
+            size_t message_len = strlen(message);
+            if (0 < message_len) {
+                if ( '\r' == message[message_len - 1]) {
+                    /* remove any trailing \r */
+                    message[message_len - 1] = '\0';
+                }
+                (void)wprintw(messages, "\n%s", message);
+                (void)wrefresh(messages);
             }
         }
-        (void)wrefresh(messages);
     }
 
     /* Reset the status_timer if the state has changed. */
@@ -767,6 +764,8 @@ int main(int argc, char *argv[])
     int option;
     unsigned int flags = WATCH_ENABLE;
     int wait_clicks = 0;  /* cycles to wait before gpsd timeout */
+    /* buffer to hold one JSON message */
+    char message[GPS_JSON_RESPONSE_MAX];
 
     switch (gpsd_units()) {
     case imperial:
@@ -896,7 +895,8 @@ int main(int argc, char *argv[])
 	} else {
 	    wait_clicks = 0;
 	    errno = 0;
-	    if (gps_read(&gpsdata) == -1) {
+            *message = '\0';
+           if (gps_read(&gpsdata, message, sizeof(message)) == -1) {
 		(void)fprintf(stderr, "cgps: socket error 4\n");
 		die(errno == 0 ? GPS_GONE : GPS_ERROR);
 	    } else {
@@ -906,7 +906,7 @@ int main(int argc, char *argv[])
 		    update_compass_panel(&gpsdata);
 		else
 #endif /* TRUENORTH */
-		    update_gps_panel(&gpsdata);
+		    update_gps_panel(&gpsdata, message);
 	    }
 	}
 

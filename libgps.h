@@ -21,7 +21,7 @@ extern int gps_sock_open(const char *, const char *,
 		      struct gps_data_t *);
 extern int gps_sock_close(struct gps_data_t *);
 extern int gps_sock_send(struct gps_data_t *, const char *);
-extern int gps_sock_read(struct gps_data_t *);
+extern int gps_sock_read(struct gps_data_t *, char *message, int message_len);
 extern bool gps_sock_waiting(const struct gps_data_t *, int);
 extern int gps_sock_stream(struct gps_data_t *, unsigned int, void *);
 extern const char *gps_sock_data(const struct gps_data_t *);

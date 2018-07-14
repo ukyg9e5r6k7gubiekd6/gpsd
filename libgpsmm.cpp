@@ -1,9 +1,7 @@
 /*
  * Copyright (C) 2005 Alfredo Pironti
  *
- * This software is distributed under a BSD-style license. See the
- * file "COPYING" in the top-level directory of the disribution for details.
- *
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include <cstdlib>
@@ -47,7 +45,7 @@ struct gps_data_t* gpsmm::send(const char *request)
 
 struct gps_data_t* gpsmm::read(void)
 {
-    if (gps_read(gps_state())<=0) {
+    if (gps_read(gps_state(), NULL, 0)<=0) {
 	// we return null if there was a read() error, if no
 	// data was ready in POLL_NOBLOCK mode, or if the
 	// connection is closed by gpsd

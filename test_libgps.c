@@ -1,6 +1,7 @@
 /*
  * A simple command-line exerciser for the library.
  * Not really useful for anything but debugging.
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,7 +112,7 @@ int main(int argc, char *argv[])
 			"test_libgps: gps send error: %d, %s\n",
 			errno, gps_errstr(errno));
 	}
-	if (gps_read(&collect) == -1) {
+	if (gps_read(&collect, NULL, 0) == -1) {
 	  (void)fprintf(stderr,
 			"test_libgps: gps read error: %d, %s\n",
 			errno, gps_errstr(errno));
@@ -137,7 +138,7 @@ int main(int argc, char *argv[])
 	    }
 	    collect.set = 0;
 	    (void)gps_send(&collect, buf);
-	    (void)gps_read(&collect);
+	    (void)gps_read(&collect, NULL, 0);
 #ifdef SOCKET_EXPORT_ENABLE
 #ifdef LIBGPS_DEBUG
 	    libgps_dump_state(&collect);

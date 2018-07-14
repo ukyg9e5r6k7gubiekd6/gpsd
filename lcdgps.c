@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
 	    (void)fprintf(stderr, "lcdgps: error while waiting\n");
 	    exit(EXIT_FAILURE);
 	} else {
-	    (void)gps_read(&gpsdata);
+	    (void)gps_read(&gpsdata, NULL, 0);
 	    update_lcd(&gpsdata);
 	}
 
