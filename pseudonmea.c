@@ -160,7 +160,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     char *bufp2;
     bufp[0] = '\0';
 
-    if (session->device_type != NULL && (session->gpsdata.set & MODE_SET) != 0) {
+    if (session->device_type != NULL) {
 	int i, j;
 	int max_channels = session->device_type->channels;
 
