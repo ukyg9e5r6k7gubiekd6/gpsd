@@ -133,6 +133,11 @@ static char *state_table[] = {
 #define STX	(unsigned char)0x02
 #define ETX	(unsigned char)0x03
 
+#if defined(TSIP_ENABLE)
+/* Maximum length a TSIP packet can be */
+#define TSIP_MAX_PACKET 255
+#endif
+
 #ifdef ONCORE_ENABLE
 static size_t oncore_payload_cksum_length(unsigned char id1, unsigned char id2)
 {
@@ -1004,6 +1009,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	/* check last because there's no checksum */
 #if defined(TSIP_ENABLE)
 	if (c >= 0x13) {
+	    lexer->length = TSIP_MAX_PACKET;
 	    lexer->state = TSIP_PAYLOAD;
 	    break;
 	}
@@ -1357,14 +1363,19 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 #ifdef TSIP_ENABLE
     case TSIP_LEADER:
 	/* unused case */
-	if (c >= 0x13)
+	if (c >= 0x13) {
+	    lexer->length = TSIP_MAX_PACKET;
 	    lexer->state = TSIP_PAYLOAD;
-	else
+	} else
 	    return character_pushback(lexer, GROUND_STATE);
 	break;
     case TSIP_PAYLOAD:
 	if (c == DLE)
 	    lexer->state = TSIP_DLE;
+	if ( 0 >= --lexer->length ) {
+	    /* uh, oh, packet too long, probably was never TSIP */
+	    lexer->state = GROUND_STATE;
+	}
 	break;
     case TSIP_DLE:
 	switch (c) {
@@ -1372,6 +1383,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = TSIP_RECOGNIZED;
 	    break;
 	case DLE:
+	    lexer->length = TSIP_MAX_PACKET;
 	    lexer->state = TSIP_PAYLOAD;
 	    break;
 	default:
