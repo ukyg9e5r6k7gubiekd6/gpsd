@@ -49,19 +49,19 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 		       ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
 		       session->gpsdata.status,
 		       session->gpsdata.satellites_used);
-	if (isnan(session->gpsdata.dop.hdop))
+	if (0 == isfinite(session->gpsdata.dop.hdop))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    str_appendf(bufp, len, "%.2f,", session->gpsdata.dop.hdop);
-	if (isnan(session->gpsdata.fix.altitude))
+	if (0 == isfinite(session->gpsdata.fix.altitude))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    str_appendf(bufp, len, "%.2f,M,", session->gpsdata.fix.altitude);
-	if (isnan(session->gpsdata.separation))
+	if (0 == isfinite(session->gpsdata.separation))
 	    (void)strlcat(bufp, ",", len);
 	else
 	    str_appendf(bufp, len, "%.3f,M,", session->gpsdata.separation);
-	if (isnan(session->mag_var))
+	if (0 == isfinite(session->mag_var))
 	    (void)strlcat(bufp, ",", len);
 	else {
 	    str_appendf(bufp, len, "%3.2f,", fabs(session->mag_var));
@@ -80,13 +80,13 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 
     tm.tm_mday = tm.tm_mon = tm.tm_year = tm.tm_hour = tm.tm_min = tm.tm_sec =
 	0;
-    if (isnan(session->gpsdata.fix.time) == 0) {
+    if (0 != isfinite(session->gpsdata.fix.time)) {
 	intfixtime = (time_t) session->gpsdata.fix.time;
 	(void)gmtime_r(&intfixtime, &tm);
 	tm.tm_mon++;
 	tm.tm_year %= 100;
     }
-#define ZEROIZE(x)	(isnan(x)!=0 ? 0.0 : x)
+#define ZEROIZE(x)	(isfinite(x)==0 ? 0.0 : x)
     (void)snprintf(bufp, len,
 		   "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
 		   tm.tm_hour,
@@ -120,13 +120,19 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 			    1, (i / 4) + 1,
 			    session->gpsdata.satellites_visible);
 	}
-	if (i < session->gpsdata.satellites_visible)
-	    str_appendf(bufp, len,
+	if (i < session->gpsdata.satellites_visible) {
+            if ( 0 == session->gpsdata.skyview[i].PRN) {
+                /* bad prn, just make all zeros */
+                str_appendf(bufp, len, ",00,00,000,00");
+            } else {
+                str_appendf(bufp, len,
 			    ",%02d,%02d,%03d,%02.0f",
 			    session->gpsdata.skyview[i].PRN,
 			    session->gpsdata.skyview[i].elevation,
 			    session->gpsdata.skyview[i].azimuth,
 			    session->gpsdata.skyview[i].ss);
+            }
+        }
 	if (i % 4 == 3 || i == session->gpsdata.satellites_visible - 1) {
 	    nmea_add_checksum(bufp2);
 	}
@@ -182,17 +188,17 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	    (void)strlcat(bufp, ",,,", len);
 	else {
             /* output the DOPs, NaN as blanks */
-	    if ( 0 == isnan( session->gpsdata.dop.pdop ) ) {
+	    if ( 0 != isfinite( session->gpsdata.dop.pdop ) ) {
 		str_appendf(bufp, len, "%.1f,", session->gpsdata.dop.pdop);
 	    } else {
 		(void)strlcat(bufp, ",", len);
 	    }
-	    if ( 0 == isnan( session->gpsdata.dop.hdop ) ) {
+	    if ( 0 != isfinite( session->gpsdata.dop.hdop ) ) {
 		str_appendf(bufp, len, "%.1f,", session->gpsdata.dop.hdop);
 	    } else {
 		(void)strlcat(bufp, ",", len);
 	    }
-	    if ( 0 == isnan( session->gpsdata.dop.vdop ) ) {
+	    if ( 0 != isfinite( session->gpsdata.dop.vdop ) ) {
 		str_appendf(bufp, len, "%.1f*", session->gpsdata.dop.vdop);
 	    } else {
 		(void)strlcat(bufp, "*", len);
@@ -200,20 +206,20 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	}
 	nmea_add_checksum(bufp2);
     }
-    if (isfinite(session->gpsdata.fix.epx)!=0
-	&& isfinite(session->gpsdata.fix.epy)!=0
-	&& isfinite(session->gpsdata.fix.epv)!=0
-	&& isfinite(session->gpsdata.epe)!=0) {
+    if (isfinite(session->gpsdata.fix.epx) != 0
+	&& isfinite(session->gpsdata.fix.epy) != 0
+	&& isfinite(session->gpsdata.fix.epv) != 0
+	&& isfinite(session->gpsdata.epe) != 0) {
 	struct tm tm;
 	time_t intfixtime;
 
 	tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
-	if (isnan(session->gpsdata.fix.time) == 0) {
+	if (0 != isfinite(session->gpsdata.fix.time)) {
 	    intfixtime = (time_t) session->gpsdata.fix.time;
 	    (void)gmtime_r(&intfixtime, &tm);
 	}
 	bufp2 = bufp + strlen(bufp);
-#define ZEROIZE(x)      (isnan(x)!=0 ? 0.0 : x)
+#define ZEROIZE(x)      (isfinite(x)==0 ? 0.0 : x)
 	str_appendf(bufp, len,
 		       "$GPGBS,%02d%02d%02d,%.2f,M,%.2f,M,%.2f,M",
 		       tm.tm_hour, tm.tm_min, tm.tm_sec,
