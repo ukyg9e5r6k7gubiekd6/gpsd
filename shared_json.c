@@ -63,7 +63,7 @@ int json_device_read(const char *buf,
     if (status != 0)
 	return status;
 
-    if (isnan(dev->activated)!=0) {
+    if (isfinite(dev->activated) == 0) {
 	if (tbuf[0] == '\0')
 	    dev->activated = NAN;
 	else
