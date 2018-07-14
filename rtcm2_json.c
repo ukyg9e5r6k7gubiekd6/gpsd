@@ -209,15 +209,16 @@ int json_rtcm2_read(const char *buf,
     } else if (strstr(buf, "\"type\":3,") != NULL) {
 	status = json_read_object(buf, json_rtcm3, endptr);
 	if (status == 0) {
-	    rtcm2->ecef.valid = (isnan(rtcm2->ecef.x) == 0)
-		&& (isnan(rtcm2->ecef.y) == 0) && (isnan(rtcm2->ecef.z) == 0);
+	    rtcm2->ecef.valid = (isfinite(rtcm2->ecef.x) != 0)
+		&& (isfinite(rtcm2->ecef.y) != 0)
+		&& (isfinite(rtcm2->ecef.z) != 0);
 	}
     } else if (strstr(buf, "\"type\":4,") != NULL) {
 	status = json_read_object(buf, json_rtcm4, endptr);
 	if (status == 0)
-	    rtcm2->reference.valid = (isnan(rtcm2->reference.dx) == 0)
-		&& (isnan(rtcm2->reference.dy) == 0)
-		&& (isnan(rtcm2->reference.dz) == 0);
+	    rtcm2->reference.valid = (isfinite(rtcm2->reference.dx) != 0)
+		&& (isfinite(rtcm2->reference.dy) != 0)
+		&& (isfinite(rtcm2->reference.dz) != 0);
     } else if (strstr(buf, "\"type\":5,") != NULL) {
 	status = json_read_object(buf, json_rtcm5, endptr);
 	if (status == 0)
