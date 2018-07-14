@@ -240,7 +240,8 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     memset(fixp, 0, sizeof(struct gps_fix_t));
     fixp->time = NAN;
     fixp->mode = MODE_NOT_SEEN;
-    fixp->latitude = fixp->longitude = NAN;
+    fixp->latitude = NAN;
+    fixp->longitude = NAN;
     fixp->track = NAN;
     fixp->magnetic_track = NAN;
     fixp->speed = NAN;
@@ -557,7 +558,7 @@ double earth_distance_and_bearings(double lat1, double lon1, double lat2, double
 	c_SqA = 1 - s_A * s_A;
 	c_2SM = c_S - 2 * s_U1 * s_U2 / c_SqA;
 
-	if (isnan(c_2SM))
+	if (0 == isfinite(c_2SM))
 	    c_2SM = 0;
 
 	C = f / 16 * c_SqA * (4 + f * (4 - 3 * c_SqA));
