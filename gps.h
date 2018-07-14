@@ -1898,6 +1898,7 @@ struct version_t {
     char remote[GPS_PATH_MAX];		/* could be from a remote device */
 };
 
+#define HEXDATA_MAX 512                 /* hex encoded command buffer, max */
 struct devconfig_t {
     char path[GPS_PATH_MAX];
     int flags;
@@ -1907,6 +1908,8 @@ struct devconfig_t {
 #define SEEN_AIS 	0x08
     char driver[64];
     char subtype[64];
+    /* a buffer to hold data to output to GPS */
+    char hexdata[HEXDATA_MAX];
     double activated;
     unsigned int baudrate, stopbits;	/* RS232 link parameters */
     char parity;			/* 'N', 'O', or 'E' */

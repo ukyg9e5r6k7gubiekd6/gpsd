@@ -785,6 +785,41 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
     return ret;
 }
 
+/* convert hex to binary, write it, unchanged, to GPS */
+static int write_gps(char *device, char *hex) {
+    struct gps_device_t *devp;
+    size_t len;
+    int st;
+
+    if ((devp = find_device(device)) == NULL) {
+	gpsd_log(&context.errout, LOG_INF, "GPS <=: %s not active\n", device);
+	return 1;
+    }
+    if (devp->context->readonly || (devp->sourcetype <= source_blockdev)) {
+	gpsd_log(&context.errout, LOG_WARN,
+		 "GPS <=: attempted to write to a read-only device\n");
+	return 1;
+    }
+
+    len = strlen(hex);
+    /* NOTE: this destroys the original buffer contents */
+    st = gpsd_hexpack(hex, hex, len);
+    if (st <= 0) {
+	gpsd_log(&context.errout, LOG_INF,
+		 "GPS <=: invalid hex string (error %d).\n", st);
+	return 1;
+    }
+    gpsd_log(&context.errout, LOG_INF,
+	     "GPS <=: writing %d bytes fromhex(%s) to %s\n",
+	     st, hex, device);
+    if (write(devp->gpsdata.gps_fd, hex, (size_t) st) <= 0) {
+	gpsd_log(&context.errout, LOG_WARN,
+		 "GPS <=: write to device failed\n");
+	return 1;
+    }
+    return 0;
+}
+
 #ifdef CONTROL_SOCKET_ENABLE
 static char *snarfline(char *p, char **out)
 /* copy the rest of the command line, before CR-LF */
@@ -1289,6 +1324,9 @@ static void handle_request(struct subscriber_t *sub,
 			&& dt->rate_switcher != NULL)
 			if (dt->rate_switcher(device, devconf.cycle))
 			    device->gpsdata.dev.cycle = devconf.cycle;
+	            if ('\0' != devconf.hexdata[0]) {
+			write_gps(device->gpsdata.dev.path, devconf.hexdata);
+		    }
 		}
 	    }
 #else /* RECONFIGURE_ENABLE */
