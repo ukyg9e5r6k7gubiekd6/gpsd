@@ -18,7 +18,10 @@ PERMISSIONS
 /* FreeBSD chokes on this */
 /* isascii() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
-/* isfinite() needs _POSIX_C_SOURCE >= 200112L */
+/* isfinite() needs _POSIX_C_SOURCE >= 200112L
+ * check for isfinite() not isnan().
+ * isnan(+inf) returns false, isfinite(+inf) returns false.
+ */
 #define _POSIX_C_SOURCE 200112L
 #endif /* __linux__ */
 
@@ -147,13 +150,13 @@ void json_tpv_dump(const struct gps_device_t *session,
     if (gpsdata->status == STATUS_DGPS_FIX)
 	str_appendf(reply, replylen, "\"status\":2,");
     str_appendf(reply, replylen, "\"mode\":%d,", gpsdata->fix.mode);
-    if (isnan(gpsdata->fix.time) == 0) {
+    if (isfinite(gpsdata->fix.time) != 0) {
 	char tbuf[JSON_DATE_MAX+1];
 	str_appendf(reply, replylen,
 		       "\"time\":\"%s\",",
 		       unix_to_iso8601(gpsdata->fix.time, tbuf, sizeof(tbuf)));
     }
-    if (isnan(gpsdata->fix.ept) == 0)
+    if (isfinite(gpsdata->fix.ept) != 0)
 	str_appendf(reply, replylen, "\"ept\":%.3f,", gpsdata->fix.ept);
     /*
      * Suppressing TPV fields that would be invalid because the fix
@@ -166,37 +169,38 @@ void json_tpv_dump(const struct gps_device_t *session,
      * chips, which are quite common.
      */
     if (gpsdata->fix.mode >= MODE_2D) {
-	if (isnan(gpsdata->fix.latitude) == 0)
+	if (isfinite(gpsdata->fix.latitude) != 0)
 	    str_appendf(reply, replylen,
 			   "\"lat\":%.9f,", gpsdata->fix.latitude);
-	if (isnan(gpsdata->fix.longitude) == 0)
+	if (isfinite(gpsdata->fix.longitude) != 0)
 	    str_appendf(reply, replylen,
 			   "\"lon\":%.9f,", gpsdata->fix.longitude);
-	if (gpsdata->fix.mode >= MODE_3D && isnan(gpsdata->fix.altitude) == 0)
+	if (gpsdata->fix.mode >= MODE_3D && isfinite(gpsdata->fix.altitude) != 0)
 	    str_appendf(reply, replylen,
 			   "\"alt\":%.3f,", gpsdata->fix.altitude);
-	if (isnan(gpsdata->fix.epx) == 0)
+	if (isfinite(gpsdata->fix.epx) != 0)
 	    str_appendf(reply, replylen, "\"epx\":%.3f,", gpsdata->fix.epx);
-	if (isnan(gpsdata->fix.epy) == 0)
+	if (isfinite(gpsdata->fix.epy) != 0)
 	    str_appendf(reply, replylen, "\"epy\":%.3f,", gpsdata->fix.epy);
-	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.epv) == 0)
+	if ((gpsdata->fix.mode >= MODE_3D) && isfinite(gpsdata->fix.epv) != 0)
 	    str_appendf(reply, replylen, "\"epv\":%.3f,", gpsdata->fix.epv);
-	if (isnan(gpsdata->fix.track) == 0)
+	if (isfinite(gpsdata->fix.track) != 0)
 	    str_appendf(reply, replylen, "\"track\":%.4f,", gpsdata->fix.track);
-	if (isnan(gpsdata->fix.magnetic_track) == 0)
+	if (isfinite(gpsdata->fix.magnetic_track) != 0)
 		str_appendf(reply, replylen, "\"magtrack\":%.4f,",
                             gpsdata->fix.magnetic_track);
-	if (isnan(gpsdata->fix.speed) == 0)
+	if (isfinite(gpsdata->fix.speed) != 0)
 	    str_appendf(reply, replylen, "\"speed\":%.3f,", gpsdata->fix.speed);
-	if ((gpsdata->fix.mode >= MODE_3D) && isnan(gpsdata->fix.climb) == 0)
+	if ((gpsdata->fix.mode >= MODE_3D) && isfinite(gpsdata->fix.climb) != 0)
 	    str_appendf(reply, replylen, "\"climb\":%.3f,", gpsdata->fix.climb);
-	if (isnan(gpsdata->fix.epd) == 0)
+	if (isfinite(gpsdata->fix.epd) != 0)
 	    str_appendf(reply, replylen, "\"epd\":%.4f,", gpsdata->fix.epd);
-	if (isnan(gpsdata->fix.eps) == 0)
+	if (isfinite(gpsdata->fix.eps) != 0)
 	    str_appendf(reply, replylen, "\"eps\":%.2f,", gpsdata->fix.eps);
 	if (gpsdata->fix.mode >= MODE_3D) {
-            if (isnan(gpsdata->fix.epc) == 0)
+            if (isfinite(gpsdata->fix.epc) != 0)
 		str_appendf(reply, replylen, "\"epc\":%.2f,", gpsdata->fix.epc);
+	    /* ECEF is in meters, so %.3f is millimeter resolution */
 	    if (0 != isfinite(gpsdata->fix.ecef.x))
 		str_appendf(reply, replylen, "\"ecefx\":%.2f,",
 			    gpsdata->fix.ecef.x);
@@ -264,14 +268,14 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
     (void)strlcpy(reply, "{\"class\":\"GST\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
-    if (isnan(gpsdata->fix.time) == 0) {
+    if (isfinite(gpsdata->fix.time) != 0) {
 	char tbuf[JSON_DATE_MAX+1];
 	str_appendf(reply, replylen,
 		   "\"time\":\"%s\",",
 		   unix_to_iso8601(gpsdata->gst.utctime, tbuf, sizeof(tbuf)));
     }
 #define ADD_GST_FIELD(tag, field) do {                     \
-    if (isnan(gpsdata->gst.field) == 0)              \
+    if (isfinite(gpsdata->gst.field) != 0)              \
 	str_appendf(reply, replylen, "\"" tag "\":%.3f,", gpsdata->gst.field); \
     } while(0)
 
@@ -298,25 +302,25 @@ void json_sky_dump(const struct gps_data_t *datap,
     (void)strlcpy(reply, "{\"class\":\"SKY\",", replylen);
     if (datap->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", datap->dev.path);
-    if (isnan(datap->skyview_time) == 0) {
+    if (isfinite(datap->skyview_time) != 0) {
 	char tbuf[JSON_DATE_MAX+1];
 	str_appendf(reply, replylen,
 		       "\"time\":\"%s\",",
 		       unix_to_iso8601(datap->skyview_time, tbuf, sizeof(tbuf)));
     }
-    if (isnan(datap->dop.xdop) == 0)
+    if (isfinite(datap->dop.xdop) != 0)
 	str_appendf(reply, replylen, "\"xdop\":%.2f,", datap->dop.xdop);
-    if (isnan(datap->dop.ydop) == 0)
+    if (isfinite(datap->dop.ydop) != 0)
 	str_appendf(reply, replylen, "\"ydop\":%.2f,", datap->dop.ydop);
-    if (isnan(datap->dop.vdop) == 0)
+    if (isfinite(datap->dop.vdop) != 0)
 	str_appendf(reply, replylen, "\"vdop\":%.2f,", datap->dop.vdop);
-    if (isnan(datap->dop.tdop) == 0)
+    if (isfinite(datap->dop.tdop) != 0)
 	str_appendf(reply, replylen, "\"tdop\":%.2f,", datap->dop.tdop);
-    if (isnan(datap->dop.hdop) == 0)
+    if (isfinite(datap->dop.hdop) != 0)
 	str_appendf(reply, replylen, "\"hdop\":%.2f,", datap->dop.hdop);
-    if (isnan(datap->dop.gdop) == 0)
+    if (isfinite(datap->dop.gdop) != 0)
 	str_appendf(reply, replylen, "\"gdop\":%.2f,", datap->dop.gdop);
-    if (isnan(datap->dop.pdop) == 0)
+    if (isfinite(datap->dop.pdop) != 0)
 	str_appendf(reply, replylen, "\"pdop\":%.2f,", datap->dop.pdop);
     /* insurance against flaky drivers */
     for (i = 0; i < datap->satellites_visible; i++)
@@ -3328,7 +3332,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
     assert(replylen > sizeof(char *));
     (void)strlcpy(reply, "{\"class\":\"ATT\",", replylen);
     str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
-    if (isnan(gpsdata->attitude.heading) == 0) {
+    if (isfinite(gpsdata->attitude.heading) != 0) {
 	str_appendf(reply, replylen,
 		       "\"heading\":%.2f,", gpsdata->attitude.heading);
 	if (gpsdata->attitude.mag_st != '\0')
@@ -3336,7 +3340,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 			   "\"mag_st\":\"%c\",", gpsdata->attitude.mag_st);
 
     }
-    if (isnan(gpsdata->attitude.pitch) == 0) {
+    if (isfinite(gpsdata->attitude.pitch) != 0) {
 	str_appendf(reply, replylen,
 		       "\"pitch\":%.2f,", gpsdata->attitude.pitch);
 	if (gpsdata->attitude.pitch_st != '\0')
@@ -3345,7 +3349,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 			   gpsdata->attitude.pitch_st);
 
     }
-    if (isnan(gpsdata->attitude.yaw) == 0) {
+    if (isfinite(gpsdata->attitude.yaw) != 0) {
 	str_appendf(reply, replylen,
 		       "\"yaw\":%.2f,", gpsdata->attitude.yaw);
 	if (gpsdata->attitude.yaw_st != '\0')
@@ -3353,7 +3357,7 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 			   "\"yaw_st\":\"%c\",", gpsdata->attitude.yaw_st);
 
     }
-    if (isnan(gpsdata->attitude.roll) == 0) {
+    if (isfinite(gpsdata->attitude.roll) != 0) {
 	str_appendf(reply, replylen,
 		       "\"roll\":%.2f,", gpsdata->attitude.roll);
 	if (gpsdata->attitude.roll_st != '\0')
@@ -3362,47 +3366,47 @@ void json_att_dump(const struct gps_data_t *gpsdata,
 
     }
 
-    if (isnan(gpsdata->attitude.dip) == 0)
+    if (isfinite(gpsdata->attitude.dip) != 0)
 	str_appendf(reply, replylen,
 		       "\"dip\":%.3f,", gpsdata->attitude.dip);
 
-    if (isnan(gpsdata->attitude.mag_len) == 0)
+    if (isfinite(gpsdata->attitude.mag_len) != 0)
 	str_appendf(reply, replylen,
 		       "\"mag_len\":%.3f,", gpsdata->attitude.mag_len);
-    if (isnan(gpsdata->attitude.mag_x) == 0)
+    if (isfinite(gpsdata->attitude.mag_x) != 0)
 	str_appendf(reply, replylen,
 		       "\"mag_x\":%.3f,", gpsdata->attitude.mag_x);
-    if (isnan(gpsdata->attitude.mag_y) == 0)
+    if (isfinite(gpsdata->attitude.mag_y) != 0)
 	str_appendf(reply, replylen,
 		       "\"mag_y\":%.3f,", gpsdata->attitude.mag_y);
-    if (isnan(gpsdata->attitude.mag_z) == 0)
+    if (isfinite(gpsdata->attitude.mag_z) != 0)
 	str_appendf(reply, replylen,
 		       "\"mag_z\":%.3f,", gpsdata->attitude.mag_z);
 
-    if (isnan(gpsdata->attitude.acc_len) == 0)
+    if (isfinite(gpsdata->attitude.acc_len) != 0)
 	str_appendf(reply, replylen,
 		       "\"acc_len\":%.3f,", gpsdata->attitude.acc_len);
-    if (isnan(gpsdata->attitude.acc_x) == 0)
+    if (isfinite(gpsdata->attitude.acc_x) != 0)
 	str_appendf(reply, replylen,
 		       "\"acc_x\":%.3f,", gpsdata->attitude.acc_x);
-    if (isnan(gpsdata->attitude.acc_y) == 0)
+    if (isfinite(gpsdata->attitude.acc_y) != 0)
 	str_appendf(reply, replylen,
 		       "\"acc_y\":%.3f,", gpsdata->attitude.acc_y);
-    if (isnan(gpsdata->attitude.acc_z) == 0)
+    if (isfinite(gpsdata->attitude.acc_z) != 0)
 	str_appendf(reply, replylen,
 		       "\"acc_z\":%.3f,", gpsdata->attitude.acc_z);
 
-    if (isnan(gpsdata->attitude.gyro_x) == 0)
+    if (isfinite(gpsdata->attitude.gyro_x) != 0)
 	str_appendf(reply, replylen,
 		       "\"gyro_x\":%.3f,", gpsdata->attitude.gyro_x);
-    if (isnan(gpsdata->attitude.gyro_y) == 0)
+    if (isfinite(gpsdata->attitude.gyro_y) != 0)
 	str_appendf(reply, replylen,
 		       "\"gyro_y\":%.3f,", gpsdata->attitude.gyro_y);
 
-    if (isnan(gpsdata->attitude.temp) == 0)
+    if (isfinite(gpsdata->attitude.temp) != 0)
 	str_appendf(reply, replylen,
 		       "\"temp\":%.3f,", gpsdata->attitude.temp);
-    if (isnan(gpsdata->attitude.depth) == 0)
+    if (isfinite(gpsdata->attitude.depth) != 0)
 	str_appendf(reply, replylen,
 		       "\"depth\":%.3f,", gpsdata->attitude.depth);
 
