@@ -821,25 +821,27 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
 	     dop->vdop, pdop, dop->pdop, tdop, dop->tdop, gdop, dop->gdop);
 #endif
 
-    if (isnan(dop->xdop) != 0) {
+    /* Check to see which DOPs we already have.  Save values if no value
+     * from the GPS.  Do not overwrite values which came from the GPS */
+    if (isfinite(dop->xdop) == 0) {
 	dop->xdop = xdop;
     }
-    if (isnan(dop->ydop) != 0) {
+    if (isfinite(dop->ydop) == 0) {
 	dop->ydop = ydop;
     }
-    if (isnan(dop->hdop) != 0) {
+    if (isfinite(dop->hdop) == 0) {
 	dop->hdop = hdop;
     }
-    if (isnan(dop->vdop) != 0) {
+    if (isfinite(dop->vdop) == 0) {
 	dop->vdop = vdop;
     }
-    if (isnan(dop->pdop) != 0) {
+    if (isfinite(dop->pdop) == 0) {
 	dop->pdop = pdop;
     }
-    if (isnan(dop->tdop) != 0) {
+    if (isfinite(dop->tdop) == 0) {
 	dop->tdop = tdop;
     }
-    if (isnan(dop->gdop) != 0) {
+    if (isfinite(dop->gdop) == 0) {
 	dop->gdop = gdop;
     }
 
@@ -901,7 +903,7 @@ static void gpsd_error_model(struct gps_device_t *session,
      * and climb/sink in the simplest possible way.
      */
     if (fix->mode >= MODE_2D && oldfix->mode >= MODE_2D
-	&& isnan(fix->speed) != 0) {
+	&& isfinite(fix->speed) == 0) {
 	if (fix->time == oldfix->time)
 	    fix->speed = 0;
 	else
@@ -911,13 +913,13 @@ static void gpsd_error_model(struct gps_device_t *session,
 		/ (fix->time - oldfix->time);
     }
     if (fix->mode >= MODE_3D && oldfix->mode >= MODE_3D
-	&& isnan(fix->climb) != 0) {
+	&& isfinite(fix->climb) == 0) {
 	if (fix->time == oldfix->time)
 	    fix->climb = 0;
-	else if (isnan(fix->altitude) == 0 && isnan(oldfix->altitude) == 0) {
-	    fix->climb =
-		(fix->altitude - oldfix->altitude) / (fix->time -
-						      oldfix->time);
+	else if ((isfinite(fix->altitude) != 0 &&
+	         isfinite(oldfix->altitude) != 0)) {
+	    fix->climb = ((fix->altitude - oldfix->altitude) /
+	                  (fix->time - oldfix->time));
 	}
     }
 
@@ -935,21 +937,22 @@ static void gpsd_error_model(struct gps_device_t *session,
      * opened.  Also, some devices (notably plain NMEA0183 receivers)
      * never ship an indication of when they have valid leap second.
      */
-    if (isnan(fix->time) == 0 && isnan(fix->ept) != 0)
+    if (isfinite(fix->time) != 0 && isfinite(fix->ept) == 0)
 	fix->ept = 0.005;
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
-	if (isnan(fix->epx) != 0 && isfinite(session->gpsdata.dop.hdop) != 0)
+	if (isfinite(fix->epx) == 0 && isfinite(session->gpsdata.dop.hdop) != 0)
 	    fix->epx = session->gpsdata.dop.xdop * h_uere;
 
-	if (isnan(fix->epy) != 0 && isfinite(session->gpsdata.dop.hdop) != 0)
+	if (isfinite(fix->epy) == 0 && isfinite(session->gpsdata.dop.hdop) != 0)
 	    fix->epy = session->gpsdata.dop.ydop * h_uere;
 
 	if ((fix->mode >= MODE_3D)
-	    && isnan(fix->epv) != 0 && isfinite(session->gpsdata.dop.vdop) != 0)
+	    && isfinite(fix->epv) == 0
+	    && isfinite(session->gpsdata.dop.vdop) != 0)
 	    fix->epv = session->gpsdata.dop.vdop * v_uere;
 
-	if (isnan(session->gpsdata.epe) != 0
+	if (isfinite(session->gpsdata.epe) == 0
 	    && isfinite(session->gpsdata.dop.pdop) != 0)
 	    session->gpsdata.epe = session->gpsdata.dop.pdop * p_uere;
 	else
@@ -960,10 +963,10 @@ static void gpsd_error_model(struct gps_device_t *session,
 	 * didn't set the speed error and climb error members itself,
 	 * try to compute them now.
 	 */
-	if (isnan(fix->eps) != 0) {
+	if (isfinite(fix->eps) == 0) {
 	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX
-		&& isnan(oldfix->epx) == 0 && isnan(oldfix->epy) == 0
-		&& isnan(oldfix->time) == 0 && isnan(fix->time) == 0
+		&& isfinite(oldfix->epx) != 0 && isfinite(oldfix->epy) != 0
+		&& isfinite(oldfix->time) != 0 && isfinite(fix->time) != 0
 		&& fix->time > oldfix->time) {
 		timestamp_t t = fix->time - oldfix->time;
 		double e =
@@ -973,7 +976,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 		fix->eps = NAN;
 	}
 	if ((fix->mode >= MODE_3D)
-	    && isnan(fix->epc) != 0 && fix->time > oldfix->time) {
+	    && isfinite(fix->epc) == 0 && fix->time > oldfix->time) {
 	    if (oldfix->mode >= MODE_3D && fix->mode >= MODE_3D) {
 		timestamp_t t = fix->time - oldfix->time;
 		double e = oldfix->epv + fix->epv;
@@ -1001,7 +1004,7 @@ static void gpsd_error_model(struct gps_device_t *session,
 		double adj =
 		    earth_distance(oldfix->latitude, oldfix->longitude,
 				   fix->latitude, fix->longitude);
-		if (isnan(adj) == 0 && adj > EMIX(fix->epx, fix->epy)) {
+		if (isfinite(adj) != 0 && adj > EMIX(fix->epx, fix->epy)) {
 		    double opp = EMIX(fix->epx, fix->epy);
 		    double hyp = sqrt(adj * adj + opp * opp);
 		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
@@ -1657,7 +1660,7 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t *td)
     double fix_time, integral, fractional;
 
     /* this should be an invariant of the way this function is called */
-    assert(isnan(device->newdata.time)==0);
+    assert(isfinite(device->newdata.time)!=0);
 
     (void)clock_gettime(CLOCK_REALTIME, &td->clock);
     fix_time = device->newdata.time;
