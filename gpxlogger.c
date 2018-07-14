@@ -84,7 +84,7 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
 
     (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
 		 gpsdata->fix.latitude, gpsdata->fix.longitude);
-    if ((isnan(gpsdata->fix.altitude) == 0))
+    if ((isfinite(gpsdata->fix.altitude) != 0))
 	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altitude);
     (void)fprintf(logfile,"    <time>%s</time>\n",
 		 unix_to_iso8601(time, tbuf, sizeof(tbuf)));
@@ -108,11 +108,11 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
 
     if ((gpsdata->fix.mode > MODE_NO_FIX) && (gpsdata->satellites_used > 0))
 	(void)fprintf(logfile,"    <sat>%d</sat>\n", gpsdata->satellites_used);
-    if (isnan(gpsdata->dop.hdop) == 0)
+    if (isfinite(gpsdata->dop.hdop) != 0)
 	(void)fprintf(logfile,"    <hdop>%.1f</hdop>\n", gpsdata->dop.hdop);
-    if (isnan(gpsdata->dop.vdop) == 0)
+    if (isfinite(gpsdata->dop.vdop) != 0)
 	(void)fprintf(logfile,"    <vdop>%.1f</vdop>\n", gpsdata->dop.vdop);
-    if (isnan(gpsdata->dop.pdop) == 0)
+    if (isfinite(gpsdata->dop.pdop) != 0)
 	(void)fprintf(logfile,"    <pdop>%.1f</pdop>\n", gpsdata->dop.pdop);
 
     (void)fprintf(logfile,"   </trkpt>\n");
