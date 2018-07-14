@@ -425,7 +425,7 @@ void monitor_log(const char *fmt, ...)
 
 static const char *promptgen(void)
 {
-    static char buf[256];
+    static char buf[sizeof(session.gpsdata.dev.path)];
 
     if (serial)
 	(void)snprintf(buf, sizeof(buf),
@@ -858,7 +858,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 #ifdef NTP_ENABLE
     /* Update the last fix time seen for PPS if we've actually seen one,
      * and it is a new second. */
-    if ( 0 != isnan(device->newdata.time)) {
+    if ( 0 == isfinite(device->newdata.time)) {
 	// "NTP: bad new time
 #if defined(PPS_ENABLE)
     } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
