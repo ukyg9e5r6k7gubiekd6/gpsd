@@ -19,14 +19,16 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-# since Python 2.6
-from math import isnan
-
 from .client import *
 from .watch_options import *
 
 NaN = float('nan')
 
+
+def isfinite(f):
+    # Python 2 does not think +Inf or -Inf are NaN
+    # Python 2 has no easier way to test for Inf
+    return float('-inf') < float(f) < float('inf')
 
 # Don't hand-hack this list, it's generated.
 ONLINE_SET = (1 << 1)
@@ -141,15 +143,15 @@ class gpsdata(object):
     def __repr__(self):
         st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
         st += "Lat/Lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
-        if isnan(self.fix.altitude):
+        if not isfinite(self.fix.altitude):
             st += "Altitude: ?\n"
         else:
             st += "Altitude: %f\n" % (self.fix.altitude)
-        if isnan(self.fix.speed):
+        if not isfinite(self.fix.speed):
             st += "Speed:    ?\n"
         else:
             st += "Speed:    %f\n" % (self.fix.speed)
-        if isnan(self.fix.track):
+        if not isfinite(self.fix.track):
             st += "Track:    ?\n"
         else:
             st += "Track:    %f\n" % (self.fix.track)
