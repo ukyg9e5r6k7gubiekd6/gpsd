@@ -539,7 +539,7 @@ ubx_msg_nav_velecef(struct gps_device_t *session, unsigned char *buf,
 
     if (data_len < 20) {
 	gpsd_log(&session->context->errout, LOG_WARN,
-		 "Invalid NAV VELECEF message, payload len %ld", data_len);
+		 "Invalid NAV VELECEF message, payload len %zd", data_len);
 	return 0;
     }
 
