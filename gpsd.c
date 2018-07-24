@@ -928,44 +928,12 @@ static void handle_control(int sfd, char *buf)
 		     sfd);
 	    ignore_return(write(sfd, "ERROR\n", 6));
 	} else {
-	    size_t len;
 	    *eq++ = '\0';
-	    len = strlen(eq) + 5;
-	    if ((devp = find_device(stash)) != NULL) {
-		if (devp->context->readonly || (devp->sourcetype <= source_blockdev)) {
-		    gpsd_log(&context.errout, LOG_WARN,
-			     "<= control(%d): attempted to write to a read-only device\n",
-			     sfd);
-		    ignore_return(write(sfd, "ERROR\n", 6));
-                } else {
-		    int st;
-                    /* NOTE: this destroys the original buffer contents */
-                    st = gpsd_hexpack(eq, eq, len);
-                    if (st <= 0) {
-                        gpsd_log(&context.errout, LOG_INF,
-				 "<= control(%d): invalid hex string (error %d).\n",
-				 sfd, st);
-                        ignore_return(write(sfd, "ERROR\n", 6));
-                    } else {
-                        gpsd_log(&context.errout, LOG_INF,
-				 "<= control(%d): writing %d bytes fromhex(%s) to %s\n",
-				 sfd, st, eq, stash);
-                        if (write(devp->gpsdata.gps_fd, eq, (size_t) st) <= 0) {
-                            gpsd_log(&context.errout, LOG_WARN,
-				     "<= control(%d): write to device failed\n",
-				     sfd);
-                            ignore_return(write(sfd, "ERROR\n", 6));
-                        } else {
-                            ignore_return(write(sfd, "OK\n", 3));
-                        }
-                    }
-		}
-	    } else {
-		gpsd_log(&context.errout, LOG_INF,
-			 "<= control(%d): %s not active\n", sfd,
-			 stash);
+	    if (0 == write_gps(stash, eq)) {
+		ignore_return(write(sfd, "OK\n", 3));
+            } else {
 		ignore_return(write(sfd, "ERROR\n", 6));
-	    }
+            }
 	}
     } else if (strstr(buf, "?devices")==buf) {
 	/* write back devices list followed by OK */
