@@ -443,7 +443,6 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 		    size_t data_len)
 {
     unsigned int gw, iTOW, flags;
-    int fTOW;
     gps_mask_t mask = 0;
 
     if (data_len != 16)
@@ -459,7 +458,6 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 #undef VALID_TIME
     {
 	iTOW = (unsigned int)getleu32(buf, 0);
-	fTOW = (int)getles32(buf, 4);
 	gw = (unsigned int)getles16(buf, 8);
 	session->newdata.time =
 	  gpsd_gpstime_resolve(session,
