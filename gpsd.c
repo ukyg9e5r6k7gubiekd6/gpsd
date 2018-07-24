@@ -920,6 +920,7 @@ static void handle_control(int sfd, char *buf)
     } else if (buf[0] == '&') {
 	/* split line after & into dev=hexdata, send unpacked hexdata to dev */
 	char *eq;
+
 	(void)snarfline(buf + 1, &stash);
 	eq = strchr(stash, '=');
 	if (eq == NULL) {
@@ -1117,15 +1118,13 @@ static void handle_request(struct subscriber_t *sub,
     struct gps_device_t *devp;
     const char *end = NULL;
 
-    if (buf[0] == '?')
-	++buf;
-    if (str_starts_with(buf, "DEVICES;")) {
-	buf += 8;
+    if (str_starts_with(buf, "?DEVICES;")) {
+	buf += 9;
 	json_devicelist_dump(reply, replylen);
-    } else if (str_starts_with(buf, "WATCH")
-	       && (buf[5] == ';' || buf[5] == '=')) {
+    } else if (str_starts_with(buf, "?WATCH")
+	       && (buf[6] == ';' || buf[6] == '=')) {
 	const char *start = buf;
-	buf += 5;
+	buf += 6;
 	if (*buf == ';') {
 	    ++buf;
 	} else {
@@ -1152,8 +1151,9 @@ static void handle_request(struct subscriber_t *sub,
 			if (allocated_device(devp)) {
 			    (void)awaken(devp);
 			    if (devp->sourcetype == source_gpsd) {
-				(void)gpsd_write(devp, "?", 1);
-				(void)gpsd_write(devp, start, (size_t)(end-start));
+			        /* forward to master gpsd */
+				(void)gpsd_write(devp, start,
+				                 (size_t)(end-start));
 			    }
 			}
 		} else {
@@ -1167,7 +1167,6 @@ static void handle_request(struct subscriber_t *sub,
 			goto bailout;
 		    } else if (awaken(devp)) {
 			if (devp->sourcetype == source_gpsd) {
-			    (void)gpsd_write(devp, "?", 1);
 			    (void)gpsd_write(devp, start, (size_t)(end-start));
 			}
 		    } else {
@@ -1185,10 +1184,10 @@ static void handle_request(struct subscriber_t *sub,
 	json_devicelist_dump(reply + strlen(reply), replylen - strlen(reply));
 	json_watch_dump(&sub->policy,
 			reply + strlen(reply), replylen - strlen(reply));
-    } else if (str_starts_with(buf, "DEVICE")
-	       && (buf[6] == ';' || buf[6] == '=')) {
+    } else if (str_starts_with(buf, "?DEVICE")
+	       && (buf[7] == ';' || buf[7] == '=')) {
 	struct devconfig_t devconf;
-	buf += 6;
+	buf += 7;
 	devconf.path[0] = '\0';	/* initially, no device selection */
 	if (*buf == ';') {
 	    ++buf;
@@ -1314,10 +1313,10 @@ static void handle_request(struct subscriber_t *sub,
 				 reply + strlen(reply),
 				 replylen - strlen(reply));
 	    }
-    } else if (str_starts_with(buf, "POLL;")) {
+    } else if (str_starts_with(buf, "?POLL;")) {
 	char tbuf[JSON_DATE_MAX+1];
 	int active = 0;
-	buf += 5;
+	buf += 6;
 	for (devp = devices; devp < devices + MAX_DEVICES; devp++)
 	    if (allocated_device(devp) && subscribed(sub, devp))
 		if ((devp->observed & GPS_TYPEMASK) != 0)
@@ -1364,8 +1363,8 @@ static void handle_request(struct subscriber_t *sub,
 	}
 	str_rstrip_char(reply, ',');
 	(void)strlcat(reply, "]}\r\n", replylen);
-    } else if (str_starts_with(buf, "VERSION;")) {
-	buf += 8;
+    } else if (str_starts_with(buf, "?VERSION;")) {
+	buf += 9;
 	json_version_dump(reply, replylen);
     } else {
 	const char *errend;
@@ -1698,8 +1697,10 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 }
 
 #ifdef SOCKET_EXPORT_ENABLE
+/* Execute GPSD requests (?POLL, ?WATCH, etc.) from a buffer.
+ * The entire request must be in the buffer.
+ */
 static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
-/* execute GPSD requests from a buffer */
 {
     char reply[GPS_JSON_RESPONSE_MAX + 1];
 
