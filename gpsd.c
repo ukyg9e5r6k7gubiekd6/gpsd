@@ -1270,7 +1270,7 @@ static void handle_request(struct subscriber_t *sub,
 			devconf.stopbits = device->gpsdata.dev.stopbits;
 		    if (devconf.stopbits == DEVDEFAULT_STOPBITS)
 			devconf.stopbits = device->gpsdata.dev.stopbits;
-		    if (0 != isfinite(devconf.cycle))
+		    if (0 == isfinite(devconf.cycle))
 			devconf.cycle = device->gpsdata.dev.cycle;
 
 		    /* now that channel is selected, apply changes */
@@ -1560,7 +1560,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
         /* many GPS spew random times until a valid GPS fix */
         /* allow override with -r optin */
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: no fix\n");
-    } else if (0 != isfinite(device->newdata.time)) {
+    } else if (0 == isfinite(device->newdata.time)) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: bad new time\n");
 #if defined(PPS_ENABLE)
     } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
