@@ -1341,7 +1341,7 @@ if not env['python']:
     python_targets = []
     python_progs = []
 else:
-    python_progs = ["gpscat", "gpsfake", "gpsprof", "gegps"]
+    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof"]
     if env['xgps']:
         python_progs.extend(["xgps", "xgpsspeed"])
     python_modules = Glob('gps/*.py')
@@ -1601,22 +1601,22 @@ for fn in templated:
 # Documentation
 
 base_manpages = {
-    "gpsd.8": "gpsd.xml",
-    "gpsd_json.5": "gpsd_json.xml",
-    "gps.1": "gps.xml",
     "cgps.1": "gps.xml",
+    "gps.1": "gps.xml",
+    "gps2udp.1": "gps2udp.xml",
+    "gpsctl.1": "gpsctl.xml",
+    "gpsd.8": "gpsd.xml",
+    "gpsdctl.8": "gpsdctl.xml",
+    "gpsdecode.1": "gpsdecode.xml",
+    "gpsd_json.5": "gpsd_json.xml",
     "gpsinit.8": "gpsinit.xml",
-    "lcdgps.1": "gps.xml",
+    "gpsmon.1": "gpsmon.xml",
+    "gpspipe.1": "gpspipe.xml",
     "gpxlogger.1": "gpxlogger.xml",
+    "lcdgps.1": "gps.xml",
     "libgps.3": "libgps.xml",
     "libgpsmm.3": "libgpsmm.xml",
     "libQgpsmm.3": "libgpsmm.xml",
-    "gpsmon.1": "gpsmon.xml",
-    "gpsctl.1": "gpsctl.xml",
-    "gpsdctl.8": "gpsdctl.xml",
-    "gpspipe.1": "gpspipe.xml",
-    "gps2udp.1": "gps2udp.xml",
-    "gpsdecode.1": "gpsdecode.xml",
     "srec.5": "srec.xml",
 }
 
@@ -1631,10 +1631,10 @@ if tiocmiwait:
     })
 
 python_manpages = {
-    "gpsprof.1": "gpsprof.xml",
-    "gpsfake.1": "gpsfake.xml",
-    "gpscat.1": "gpscat.xml",
     "gegps.1": "gps.xml",
+    "gpscat.1": "gpscat.xml",
+    "gpsfake.1": "gpsfake.xml",
+    "gpsprof.1": "gpsprof.xml",
 }
 if env['xgps']:
     python_manpages.update({
