@@ -124,6 +124,7 @@ def isotime(s):
 
 # *** End of duplicated code ***
 
+
 verbose = 0
 
 __locations = [
@@ -431,6 +432,7 @@ def leapbound(year, month):
 def usage():
     print(__doc__)
     raise SystemExit(0)
+
 
 if __name__ == '__main__':
     import getopt
