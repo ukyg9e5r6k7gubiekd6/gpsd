@@ -496,6 +496,7 @@ def make_json_generator(wfp):
     print("        ),", file=wfp)
     print("    },", file=wfp)
 
+
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "a:tc:s:d:S:E:r:o:")
