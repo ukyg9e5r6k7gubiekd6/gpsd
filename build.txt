@@ -22,10 +22,11 @@ these lines will do, and need to be run as root:
 If you get any errors, you need to read the detailed instructions that follow.
 
 If 'scons' fails, it is possible that your target system has moved to
-Python 3 and removed the program 'python'.  Python.org says that if you
-have an installed Python, there should be a program in your path called
-'python'.  This rule is not always followed.  You can work around
-this by linking python3 to python like this
+Python 3 and removed the program 'python'.  Python.org says that if
+you have an installed Python, there should be a program in your path
+called 'python'.  This is specified in PEP 394.  This rule is not always
+followed.  You can work around this by linking python3 to python like
+this
 
     ln -s /usr/bin/python3 /usr/bin/python
 
