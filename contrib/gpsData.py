@@ -33,6 +33,7 @@ class GpsPoller(threading.Thread):
             # gpsd info to clear the buffer
             next(gpsd)
 
+
 if __name__ == '__main__':
     gpsp = GpsPoller()   # create the thread
     try:
