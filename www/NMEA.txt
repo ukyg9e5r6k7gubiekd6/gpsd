@@ -1214,8 +1214,8 @@ Field Number:
 2. 1-origin number of this GSV message  within current group
 3. total number of satellites in view (leading zeros sent)
 4. satellite PRN number (leading zeros sent)
-5. elevation in degrees (00-90) (leading zeros sent)
-6. azimuth in degrees to true north (000-359) (leading zeros sent)
+5. elevation in degrees (-90 to 90) (leading zeros sent)
+6. azimuth in degrees to true north (000 to 359) (leading zeros sent)
 7. SNR in dB (00-99) (leading zeros sent)
    more satellite info quadruples like 4-7
    n) checksum
