@@ -30,6 +30,7 @@ def isfinite(f):
     # Python 2 has no easier way to test for Inf
     return float('-inf') < float(f) < float('inf')
 
+
 # Don't hand-hack this list, it's generated.
 ONLINE_SET = (1 << 1)
 TIME_SET = (1 << 2)
@@ -286,6 +287,7 @@ class gps(gpscommon, gpsdata, gpsjson):
 def is_sbas(prn):
     "Is this the NMEA ID of an SBAS satellite?"
     return prn >= 120 and prn <= 158
+
 
 if __name__ == '__main__':
     import getopt
