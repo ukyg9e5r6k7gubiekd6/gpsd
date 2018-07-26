@@ -119,6 +119,7 @@ def filtered_spawn(sh, escape, cmd, args, env):
 # Build-control options
 #
 
+
 # without this, scons will not rebuild an existing target when the
 # source changes.
 Decider('timestamp-match')
@@ -298,9 +299,9 @@ if ARGUMENTS.get('minimal'):
 # Time-service build = stripped-down with some diagnostic tools
 if ARGUMENTS.get('timeservice'):
     timerelated = ("gpsd",
-                   "nmea0183",	# For generic hats of unknown type.
-                   "ublox",	# For the Uputronics board
-                   "mtk3301",	# For the Adafruit HAT
+                   "nmea0183",   # For generic hats of unknown type.
+                   "ublox",      # For the Uputronics board
+                   "mtk3301",    # For the Adafruit HAT
                    "ipv6",
                    "magic_hat",
                    "ncurses",
@@ -394,6 +395,7 @@ def announce(msg):
     if not env.GetOption("silent"):
         print(msg)
 
+
 # DESTDIR environment variable means user prefix the installation root.
 DESTDIR = os.environ.get('DESTDIR', '')
 
@@ -406,6 +408,7 @@ def installdir(dir, add_destdir=True):
     wrapped.replace("/usr/etc", "/etc")
     wrapped.replace("/usr/lib/systemd", "/lib/systemd")
     return wrapped
+
 
 # Honor the specified installation prefix in link paths.
 if env["sysroot"]:
@@ -476,9 +479,11 @@ if env['sysroot']:
     env.MergeFlags({"CFLAGS": ["--sysroot=%s" % env['sysroot']]})
     env.MergeFlags({"LINKFLAGS": ["--sysroot=%s" % env['sysroot']]})
 
+
 # Build help
 def cmp(a, b):
     return (a > b) - (a < b)
+
 
 Help("""Arguments may be a mixture of switches and targets in any order.
 Switches apply to the entire build regardless of where they are in the order.
@@ -500,6 +505,7 @@ def CheckPKG(context, name):
                             % (env['PKG_CONFIG'], name))[0]
     context.Result(ret)
     return ret
+
 
 # Stylesheet URLs for making HTML and man pages from DocBook XML.
 docbook_url_stem = 'http://docbook.sourceforge.net/release/xsl/current/'
@@ -1012,6 +1018,7 @@ def polystr(o):
         return str(o, encoding='latin-1')
     raise ValueError
 
+
 if env['python']:  # May have been turned off by error
     env['PYTHON'] = polystr(target_python_path)
     env['ENV']['PYTHON'] = polystr(target_python_path)  # For regress-driver
@@ -1450,6 +1457,8 @@ def timebase_h(target, source, env):
     f = open(target[0].abspath, 'w')
     f.write(make_leapsecond_include(source[0].abspath))
     f.close()
+
+
 timebase = env.Command(target="timebase.h",
                        source=["leapseconds.cache"], action=timebase_h)
 env.AlwaysBuild(timebase)
@@ -1491,6 +1500,7 @@ def FileList(patterns, exclusions=[]):
             pass
     return files
 
+
 # generate revision.h
 if 'dev' in gpsd_version:
     (st, rev) = _getstatusoutput('git describe --tags')
@@ -1521,6 +1531,8 @@ def leapseconds_cache_rebuild(target, source, env):
         sys.stdout.write("Leapsecond fetch suppressed by leapfetch=no.\n")
     elif not conditional_leapsecond_fetch(target[0].abspath, timeout=15):
         sys.stdout.write("try building with leapfetch=no.\n")
+
+
 if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
     leapseconds_cache = env.Command(target="leapseconds.cache",
                                     source="leapsecond.py",
@@ -1584,6 +1596,7 @@ def substituter(target, source, env):
     tfp = open(str(target[0]), "w")
     tfp.write(content)
     tfp.close()
+
 
 templated = glob.glob("*.in") + glob.glob("*/*.in") + glob.glob("*/*/*.in")
 
@@ -1747,6 +1760,8 @@ def Uninstall(nodes):
         else:
             deletes.append(Delete(str(node)))
     return deletes
+
+
 uninstall = env.Command('uninstall', '',
                         Flatten(Uninstall(Alias("install"))) or "")
 env.AlwaysBuild(uninstall)
@@ -1759,6 +1774,8 @@ env.Precious(uninstall)
 def error_action(target, source, env):
     from SCons.Errors import UserError
     raise UserError("Target selection for '.' is broken.")
+
+
 AlwaysBuild(Alias(".", [], error_action))
 
 # Utility productions
@@ -1775,6 +1792,7 @@ def UtilityWithHerald(herald, target, source, action):
     if not env.GetOption('silent'):
         action = ['@echo "%s"' % herald] + action
     return Utility(target=target, source=source, action=action)
+
 
 # Putting in all these -U flags speeds up cppcheck and allows it to look
 # at configurations we actually care about.
@@ -2025,20 +2043,17 @@ Utility('aivdm-makeregress', [gpsdecode], [
     '    $SRCDIR/gpsdecode -u -c <$${f} > $${f}.chk; '
     '    $SRCDIR/gpsdecode -u -j <$${f} > $${f}.ju.chk; '
     '    $SRCDIR/gpsdecode -j  <$${f} > $${f}.js.chk; '
-    'done',
-])
+    'done', ])
 
 # Regression-test the packet getter.
 packet_regress = UtilityWithHerald(
     'Testing detection of invalid packets...',
     'packet-regress', [test_packet], [
-        '$SRCDIR/test_packet | diff -u $SRCDIR/test/packet.test.chk -',
-])
+        '$SRCDIR/test_packet | diff -u $SRCDIR/test/packet.test.chk -', ])
 
 # Rebuild the packet-getter regression test
 Utility('packet-makeregress', [test_packet], [
-    '$SRCDIR/test_packet >$SRCDIR/test/packet.test.chk',
-])
+    '$SRCDIR/test_packet >$SRCDIR/test/packet.test.chk', ])
 
 # Rebuild the geoid test
 Utility('geoid-makeregress', [test_geoid], [
@@ -2049,8 +2064,7 @@ geoid_regress = UtilityWithHerald(
     'Testing the geoid model...',
     'geoid-regress', [test_geoid], [
         '$SRCDIR/test_geoid 37.371192 122.014965'
-        ' | diff -u $SRCDIR/test/geoid.test.chk -',
-])
+        ' | diff -u $SRCDIR/test/geoid.test.chk -', ])
 
 # Regression-test the Maidenhead Locator
 if not env['python']:
@@ -2060,7 +2074,7 @@ else:
         'Testing the Maidenhead Locator conversion...',
         'maidenhead-locator-regress', [python_built_extensions], [
             '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
-    ])
+])
 
 # Regression-test the calendar functions
 time_regress = Utility('time-regress', [test_mktime], [
@@ -2075,8 +2089,7 @@ else:
         'Testing the client-library sentence decoder...',
         'unpack-regress', [test_libgps], [
             '$SRCDIR/regress-driver $REGRESSOPTS -c'
-            ' $SRCDIR/test/clientlib/*.log',
-    ])
+            ' $SRCDIR/test/clientlib/*.log', ])
 
 # Build the regression test for the sentence unpacker
 Utility('unpack-makeregress', [test_libgps], [
@@ -2099,8 +2112,7 @@ timespec_regress = Utility('timespec-regress', [test_timespec], [
 method_regress = UtilityWithHerald(
     'Consistency-checking driver methods...',
     'method-regress', [test_packet], [
-        '$SRCDIR/test_packet -c >/dev/null',
-])
+        '$SRCDIR/test_packet -c >/dev/null', ])
 
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit', [
@@ -2216,7 +2228,8 @@ htmlpages = Split('''
     www/writing-a-driver.html
     ''')
 
-webpages = htmlpages + asciidocs + list(map(lambda f: f[:-3], glob.glob("www/*.in")))
+webpages = htmlpages + asciidocs + list(map(lambda f: f[:-3],
+                                            glob.glob("www/*.in")))
 
 www = env.Alias('www', webpages)
 
@@ -2231,6 +2244,8 @@ def validation_list(target, source, env):
             if "Valid HTML" in fp.read():
                 print(os.path.join(website, os.path.basename(page)))
             fp.close()
+
+
 Utility("validation-list", [www], validation_list)
 
 # How to update the website
