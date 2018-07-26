@@ -1015,6 +1015,7 @@ def generate(spec):
 """
     print(report)
 
+
 if __name__ == '__main__':
     try:
         # The --ais and --target= options are (required) placeholders.
