@@ -191,6 +191,7 @@ class gpssim(object):
 # devices, but the point of the architecture is so that we could simulate
 # others - SirF, Evermore, whatever.
 
+
 MPS_TO_KNOTS = 1.9438445      # Meters per second to knots
 
 
@@ -304,6 +305,7 @@ class NMEA(object):
         return out
 
 # The very simple main line.
+
 
 if __name__ == "__main__":
     try:
