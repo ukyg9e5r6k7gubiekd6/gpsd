@@ -62,6 +62,7 @@ class SourceExtractor(object):
         else:
             return self.in_daemon(flag)
 
+
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "cdpt")
