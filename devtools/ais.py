@@ -93,6 +93,7 @@ class dispatch(object):
 # your XML definition could in theory embed several different ones for
 # code generation in Python, Java, Perl, etc.
 
+
 cnb_status_legends = (
         "Under way using engine",
         "At anchor",
@@ -152,6 +153,7 @@ def cnb_second_format(n):
         return "inoperative"
     else:
         return str(n)
+
 
 # Common Navigation Block is the format for AIS types 1, 2, and 3
 cnb = (
@@ -400,6 +402,7 @@ type7 = (
 def type8_latlon_format(n):
     return str(n / 60000.0)
 
+
 type8_dac_or_fid_unknown = (
     bitfield("data",           952, 'raw',      None,  "Data"),
     )
@@ -440,6 +443,7 @@ def type8_dac1_fid11_cspeed_format(n):
 def type8_dac1_fid11_waveheight_format(n):
     return str(n * 0.1)
 
+
 type8_dac1_fid11_seastate_legend = (
     "Calm",
     "Light air",
@@ -463,6 +467,7 @@ type8_dac1_fid11_seastate_legend = (
 def type8_dac1_fid11_watertemp_format(n):
     return str(n * 0.1 - 10)
 
+
 type8_dac1_fid11_preciptype_legend = (
     "Reserved",
     "Rain",
@@ -477,6 +482,7 @@ type8_dac1_fid11_preciptype_legend = (
 
 def type8_dac1_fid11_salinity_format(n):
     return str(n * 0.1)
+
 
 type8_dac1_fid11_ice_legend = (
     "Yes",
@@ -575,6 +581,7 @@ def type9_speed_format(n):
     else:
         return str(n)
 
+
 type9 = (
     bitfield("alt",         12, 'unsigned', 4095,      "Altitude",
              formatter=type9_alt_format),
@@ -645,6 +652,7 @@ type16 = (
 
 def short_latlon_format(n):
     return str(n / 600.0)
+
 
 type17 = (
     spare(2),
@@ -1256,7 +1264,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 continue
             else:
                 raise
-        except:
+        except Exception:
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
             sys.stderr.write("%d: Unknown exception: %s\n" %
                              (lc, raw.strip().split()))
@@ -1266,6 +1274,7 @@ def parse_ais_messages(source, scaled=False, skiperr=False, verbose=0):
                 reraise_with_traceback(exc_type, exc_value, exc_traceback)
 
 # The rest is just sequencing and report generation.
+
 
 if __name__ == "__main__":
     import getopt
@@ -1313,8 +1322,8 @@ if __name__ == "__main__":
     if not dsv and not histogram and not json and not malformed and not quiet:
             dump = True
     try:
-        for (raw, parsed, bogon) in \
-            parse_ais_messages(sys.stdin, scaled, skiperr, verbose):
+        for ((raw, parsed, bogon) in
+             parse_ais_messages(sys.stdin, scaled, skiperr, verbose)):
             msgtype = parsed[0][1]
             if types and msgtype not in types:
                 continue
