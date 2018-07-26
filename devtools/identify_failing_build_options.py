@@ -135,6 +135,7 @@ def main(starting_number_of_options=0):
 
     return failed_configurations
 
+
 if __name__ == '__main__':
     failed = main(0)
     for row in failed:
