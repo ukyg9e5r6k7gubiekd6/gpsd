@@ -518,10 +518,10 @@ static int passivesocks(char *service, char *tcp_or_udp,
 
 struct subscriber_t
 {
-    int fd;			/* client file descriptor. -1 if unused */
-    time_t active;		/* when subscriber last polled for data */
-    struct policy_t policy;	/* configurable bits */
-    pthread_mutex_t mutex;	/* serialize access to fd */
+    int fd;			  /* client file descriptor. -1 if unused */
+    time_t active;		  /* when subscriber last polled for data */
+    struct gps_policy_t policy;	  /* configurable bits */
+    pthread_mutex_t mutex;	  /* serialize access to fd */
 };
 
 #define subscribed(sub, devp)    (sub->policy.watcher && (sub->policy.devpath[0]=='\0' || strcmp(sub->policy.devpath, devp->gpsdata.dev.path)==0))

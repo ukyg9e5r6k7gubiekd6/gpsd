@@ -18,19 +18,19 @@ struct gps_device_t;
 
 void json_data_report(const gps_mask_t,
 		      const struct gps_device_t *,
-		      const struct policy_t *,
+		      const struct gps_policy_t *,
 		      char *, size_t);
 char *json_stringify(char *, size_t, const char *);
 void json_tpv_dump(const struct gps_device_t *,
-		   const struct policy_t *, char *, size_t);
+		   const struct gps_policy_t *, char *, size_t);
 void json_noise_dump(const struct gps_data_t *, char *, size_t);
 void json_sky_dump(const struct gps_data_t *, char *, size_t);
 void json_att_dump(const struct gps_data_t *, char *, size_t);
 void json_oscillator_dump(const struct gps_data_t *, char *, size_t);
 void json_subframe_dump(const struct gps_data_t *, char buf[], size_t);
 void json_device_dump(const struct gps_device_t *, char *, size_t);
-void json_watch_dump(const struct policy_t *, char *, size_t);
-int json_watch_read(const char *, struct policy_t *,
+void json_watch_dump(const struct gps_policy_t *, char *, size_t);
+int json_watch_read(const char *, struct gps_policy_t *,
 		    const char **);
 int json_device_read(const char *, struct devconfig_t *,
 		     const char **);

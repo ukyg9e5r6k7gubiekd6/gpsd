@@ -76,7 +76,7 @@ int json_device_read(const char *buf,
 }
 
 int json_watch_read(const char *buf,
-		    struct policy_t *ccp,
+		    struct gps_policy_t *ccp,
 		    const char **endptr)
 {
     bool dummy_pps_flag;

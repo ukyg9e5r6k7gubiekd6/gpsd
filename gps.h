@@ -1917,7 +1917,7 @@ struct devconfig_t {
     int driver_mode;    		/* is driver in native mode or not? */
 };
 
-struct policy_t {
+struct gps_policy_t {
     bool watcher;			/* is watcher mode on? */
     bool json;				/* requesting JSON? */
     bool nmea;				/* requesting dumping as NMEA? */
@@ -2056,7 +2056,7 @@ struct gps_data_t {
 
     struct devconfig_t dev;	/* device that shipped last update */
 
-    struct policy_t policy;	/* our listening policy */
+    struct gps_policy_t policy;	/* our listening policy */
 
     struct {
 	timestamp_t time;

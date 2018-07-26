@@ -138,7 +138,7 @@ void json_version_dump( char *reply, size_t replylen)
 
 
 void json_tpv_dump(const struct gps_device_t *session,
-		   const struct policy_t *policy CONDITIONALLY_UNUSED,
+		   const struct gps_policy_t *policy CONDITIONALLY_UNUSED,
 		   char *reply, size_t replylen)
 {
     const struct gps_data_t *gpsdata = &session->gpsdata;
@@ -407,7 +407,7 @@ void json_device_dump(const struct gps_device_t *device,
     (void)strlcat(reply, "}\r\n", replylen);
 }
 
-void json_watch_dump(const struct policy_t *ccp,
+void json_watch_dump(const struct gps_policy_t *ccp,
 		     char *reply, size_t replylen)
 {
     (void)snprintf(reply, replylen,
@@ -3432,7 +3432,7 @@ void json_oscillator_dump(const struct gps_data_t *datap,
 
 void json_data_report(const gps_mask_t changed,
 		 const struct gps_device_t *session,
-		 const struct policy_t *policy,
+		 const struct gps_policy_t *policy,
 		 char *buf, size_t buflen)
 /* report a session state in JSON */
 {
