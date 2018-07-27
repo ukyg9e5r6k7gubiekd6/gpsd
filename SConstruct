@@ -143,6 +143,7 @@ boolopts = (
     ("garmin",        True,  "Garmin kernel driver support"),
     ("garmintxt",     True,  "Garmin Simple Text support"),
     ("geostar",       True,  "Geostar Protocol support"),
+    ("greis",         True,  "Javad GREIS support"),
     ("itrax",         True,  "iTrax hardware support"),
     ("mtk3301",       True,  "MTK-3301 support"),
     ("navcom",        True,  "Navcom NCT support"),
