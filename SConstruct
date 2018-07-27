@@ -1091,9 +1091,9 @@ libgps_version = "%d.%d.%d" % (libgps_version_soname, libgps_version_age,
 libgps_sources = [
     "ais_json.c",
     "bits.c",
-    "gpsutils.c",
     "gpsdclient.c",
     "gps_maskdump.c",
+    "gpsutils.c",
     "hex.c",
     "json.c",
     "libgps_core.c",
@@ -1114,25 +1114,6 @@ if env['libgpsmm']:
 libgpsd_sources = [
     "bsd_base64.c",
     "crc24q.c",
-    "gpsd_json.c",
-    "geoid.c",
-    "isgps.c",
-    "libgpsd_core.c",
-    "matrix.c",
-    "net_dgpsip.c",
-    "net_gnss_dispatch.c",
-    "net_ntrip.c",
-    "ntpshmread.c",
-    "ntpshmwrite.c",
-    "ppsthread.c",
-    "packet.c",
-    "pseudonmea.c",
-    "pseudoais.c",
-    "serial.c",
-    "subframe.c",
-    "timebase.c",
-    "timespec_str.c",
-    "drivers.c",
     "driver_ais.c",
     "driver_evermore.c",
     "driver_garmin.c",
@@ -1145,12 +1126,31 @@ libgpsd_sources = [
     "driver_oncore.c",
     "driver_rtcm2.c",
     "driver_rtcm3.c",
+    "drivers.c",
     "driver_sirf.c",
     "driver_skytraq.c",
     "driver_superstar2.c",
     "driver_tsip.c",
     "driver_ubx.c",
     "driver_zodiac.c",
+    "geoid.c",
+    "gpsd_json.c",
+    "isgps.c",
+    "libgpsd_core.c",
+    "matrix.c",
+    "net_dgpsip.c",
+    "net_gnss_dispatch.c",
+    "net_ntrip.c",
+    "ntpshmread.c",
+    "ntpshmwrite.c",
+    "packet.c",
+    "ppsthread.c",
+    "pseudoais.c",
+    "pseudonmea.c",
+    "serial.c",
+    "subframe.c",
+    "timebase.c",
+    "timespec_str.c",
 ]
 
 if not env["shared"]:
@@ -1231,13 +1231,19 @@ gpsdflags = usbflags + bluezflags + gpsflags
 
 # Source groups
 
-gpsd_sources = ['gpsd.c', 'timehint.c', 'shmexport.c', 'dbusexport.c']
+gpsd_sources = [
+    'dbusexport.c',
+    'gpsd.c', 
+    'shmexport.c', 
+    'timehint.c'
+]
 
 if env['systemd']:
     gpsd_sources.append("sd_socket.c")
 
 gpsmon_sources = [
     'gpsmon.c',
+    'monitor_garmin.c',
     'monitor_italk.c',
     'monitor_nmea0183.c',
     'monitor_oncore.c',
@@ -1245,7 +1251,6 @@ gpsmon_sources = [
     'monitor_superstar2.c',
     'monitor_tnt.c',
     'monitor_ubx.c',
-    'monitor_garmin.c',
 ]
 
 # Production programs
