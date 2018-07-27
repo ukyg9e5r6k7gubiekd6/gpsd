@@ -1362,11 +1362,21 @@ else:
     # Build Python binding
     #
     python_extensions = {
-        "gps" + os.sep + "packet": ["gpspacket.c", "packet.c", "isgps.c",
-                                    "driver_rtcm2.c", "os_compat.c", "hex.c",
-                                    "crc24q.c"],
-        "gps" + os.sep + "clienthelpers": ["gpsclient.c", "geoid.c",
-                                           "gpsdclient.c", "os_compat.c"]
+        "gps" + os.sep + "packet": [
+                                    "crc24q.c",
+                                    "driver_rtcm2.c",
+                                    "gpspacket.c",
+                                    "hex.c",
+                                    "isgps.c",
+                                    "os_compat.c",
+                                    "packet.c",
+                                    ],
+        "gps" + os.sep + "clienthelpers": [
+                                           "geoid.c",
+                                           "gpsclient.c",
+                                           "gpsdclient.c",
+                                           "os_compat.c",
+                                           ]
     }
 
     python_env = env.Clone()
