@@ -224,34 +224,34 @@ else:
     def_group = "dialout"
 
 nonboolopts = (
-    ("gpsd_user",        "nobody",      "privilege revocation user",),
-    ("gpsd_group",       def_group,     "privilege revocation group"),
-    ("prefix",           "/usr/local",  "installation directory prefix"),
-    ("target_python",    "python",      "target Python version as command"),
-    ("python_libdir",    "",            "Python module directory prefix"),
-    ("max_clients",      '64',          "maximum allowed clients"),
-    ("max_devices",      '4',           "maximum allowed devices"),
     ("fixed_port_speed", 0,             "fixed serial port speed"),
     ("fixed_stop_bits",  0,             "fixed serial port stop bits"),
-    ("target",           "",            "cross-development target"),
-    ("sysroot",          "",            "cross-development system root"),
-    ("qt_versioned",     "",            "version for versioned Qt"),
+    ("gpsd_group",       def_group,     "privilege revocation group"),
+    ("gpsd_user",        "nobody",      "privilege revocation user",),
+    ("max_clients",      '64',          "maximum allowed clients"),
+    ("max_devices",      '4',           "maximum allowed devices"),
+    ("prefix",           "/usr/local",  "installation directory prefix"),
     ("python_coverage",  "coverage run", "coverage command for Python progs"),
+    ("python_libdir",    "",            "Python module directory prefix"),
+    ("qt_versioned",     "",            "version for versioned Qt"),
+    ("sysroot",          "",            "cross-development system root"),
+    ("target",           "",            "cross-development target"),
+    ("target_python",    "python",      "target Python version as command"),
 )
 
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
 pathopts = (
-    ("sysconfdir",          "etc",           "system configuration directory"),
     ("bindir",              "bin",           "application binaries directory"),
+    ("docdir",              "share/doc",     "documents directory"),
     ("includedir",          "include",       "header file directory"),
     ("libdir",              "lib",           "system libraries"),
-    ("sbindir",             "sbin",          "system binaries directory"),
     ("mandir",              "share/man",     "manual pages directory"),
-    ("docdir",              "share/doc",     "documents directory"),
-    ("udevdir",             "/lib/udev",     "udev rules directory"),
     ("pkgconfig",           "$libdir/pkgconfig", "pkgconfig file directory"),
+    ("sbindir",             "sbin",          "system binaries directory"),
+    ("sysconfdir",          "etc",           "system configuration directory"),
+    ("udevdir",             "/lib/udev",     "udev rules directory"),
 )
 
 for (name, default, help) in pathopts:
@@ -297,18 +297,20 @@ if ARGUMENTS.get('minimal'):
 
 # Time-service build = stripped-down with some diagnostic tools
 if ARGUMENTS.get('timeservice'):
-    timerelated = ("gpsd",
-                   "nmea0183",   # For generic hats of unknown type.
-                   "ublox",      # For the Uputronics board
-                   "mtk3301",    # For the Adafruit HAT
+    timerelated = (
+                   "gpsd",
                    "ipv6",
                    "magic_hat",
+                   "mtk3301",    # For the Adafruit HAT
                    "ncurses",
+                   "nmea0183",   # For generic hats of unknown type.
                    "ntp",
                    "ntpshm",
                    "oscillator",
                    "pps",
-                   "socket_export", )
+                   "socket_export",
+                   "ublox",      # For the Uputronics board
+                   )
     for (name, default, help) in boolopts:
         if ((default is True
              and not ARGUMENTS.get(name)
@@ -355,8 +357,8 @@ env['SC_PYTHON'] = sys.executable  # Path to SCons Python
 # settings.
 env['STRIP'] = "strip"
 env['PKG_CONFIG'] = "pkg-config"
-for i in ["AR", "ARFLAGS", "CCFLAGS", "CFLAGS", "CC", "CXX", "CXXFLAGS",
-          "LINKFLAGS", "STRIP", "PKG_CONFIG", "LD", "TAR"]:
+for i in ["AR", "ARFLAGS", "CC", "CCFLAGS", "CFLAGS", "CXX", "CXXFLAGS", "LD",
+          "LINKFLAGS", "PKG_CONFIG", "STRIP", "TAR"]:
     if i in os.environ:
         j = i
         if i == "LD":
@@ -1556,36 +1558,36 @@ else:
 # but it doesn't seem to work in scons 1.20
 def substituter(target, source, env):
     substmap = (
-        ('@VERSION@',    gpsd_version),
-        ('@prefix@',     env['prefix']),
-        ('@libdir@',     installdir('libdir', add_destdir=False)),
-        ('@includedir@',     installdir('includedir', add_destdir=False)),
-        ('@udevcommand@',    udevcommand),
+        ('@ADMIN@',      admin),
+        ('@ANNOUNCE@',   annmail),
+        ('@BROWSEREPO@', browserepo),
+        ('@BUGTRACKER@', bugtracker),
+        ('@CGIUPLOAD@',  cgiupload),
+        ('@CLONEREPO@',  clonerepo),
         ('@DATE@',       time.asctime()),
+        ('@DEVMAIL@',    devmail),
+        ('@DOWNLOAD@',   download),
+        ('@FORMSERVER@', formserver),
+        ('@GITREPO@',    gitrepo),
+        ('@includedir@',     installdir('includedir', add_destdir=False)),
+        ('@IRCCHAN@',    ircchan),
+        ('@libdir@',     installdir('libdir', add_destdir=False)),
+        ('@LIBGPSVERSION@', libgps_version),
+        ('@MAILMAN@',    mailman),
+        ('@MAINPAGE@',   mainpage),
         ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),
+        ('@prefix@',     env['prefix']),
+        ('@SCPUPLOAD@',  scpupload),
         ('@SITENAME@',   sitename),
         ('@SITESEARCH@', sitesearch),
-        ('@WEBSITE@',    website),
-        ('@MAINPAGE@',   mainpage),
-        ('@WEBUPLOAD@',  webupload),
-        ('@CGIUPLOAD@',  cgiupload),
-        ('@SCPUPLOAD@',  scpupload),
-        ('@MAILMAN@',    mailman),
-        ('@ADMIN@',      admin),
-        ('@DOWNLOAD@',   download),
-        ('@BUGTRACKER@', bugtracker),
-        ('@BROWSEREPO@', browserepo),
-        ('@CLONEREPO@',  clonerepo),
-        ('@GITREPO@',    gitrepo),
-        ('@WEBFORM@',    webform),
-        ('@FORMSERVER@', formserver),
-        ('@USERMAIL@',   usermail),
-        ('@DEVMAIL@',    devmail),
-        ('@ANNOUNCE@',   annmail),
-        ('@IRCCHAN@',    ircchan),
-        ('@LIBGPSVERSION@', libgps_version),
         ('@TIPLINK@',    tiplink),
         ('@TIPWIDGET@',  tipwidget),
+        ('@udevcommand@',    udevcommand),
+        ('@USERMAIL@',   usermail),
+        ('@VERSION@',    gpsd_version),
+        ('@WEBFORM@',    webform),
+        ('@WEBSITE@',    website),
+        ('@WEBUPLOAD@',  webupload),
     )
 
     sfp = open(str(source[0]))
@@ -1655,8 +1657,8 @@ python_manpages = {
 }
 if env['xgps']:
     python_manpages.update({
-        "xgpsspeed.1": "gps.xml",
         "xgps.1": "gps.xml",
+        "xgpsspeed.1": "gps.xml",
     })
 all_manpages = list(base_manpages.keys()) + list(python_manpages.keys())
 
@@ -1867,11 +1869,11 @@ Utility("deheader", generated_sources, [
 
 # Perform all local code-sanity checks (but not the Coverity scan).
 audit = env.Alias('audit',
-                  ['scan-build',
-                   'cppcheck',
+                  ['cppcheck',
                    'pylint',
-                   'xmllint',
+                   'scan-build',
                    'valgrind-audit',
+                   'xmllint',
                    ])
 
 #
@@ -2140,20 +2142,20 @@ testclean = Utility('testclean', [],
                     'rm -f %s' % ' '.join(test_exes + test_objs))
 
 test_nondaemon = [
-    describe,
-    python_compilation_regress,
-    method_regress,
-    bits_regress,
-    matrix_regress,
-    rtcm_regress,
     aivdm_regress,
-    packet_regress,
+    bits_regress,
+    describe,
     geoid_regress,
-    maidenhead_locator_regress,
-    time_regress,
-    unpack_regress,
     json_regress,
+    maidenhead_locator_regress,
+    matrix_regress,
+    method_regress,
+    packet_regress,
+    python_compilation_regress,
+    rtcm_regress,
+    time_regress,
     timespec_regress,
+    unpack_regress,
 ]
 
 test_quick = test_nondaemon + [gpsfake_tests]
@@ -2186,12 +2188,15 @@ Utility('shmclean', [], ["ipcrm  -M 0x4e545030;"
 
 # asciidoc documents
 if env.WhereIs('asciidoc'):
-    txtfiles = ['AIVDM', 'NMEA',
+    txtfiles = [
+                'AIVDM',
+                'client-howto',
+                'gpsd-time-service-howto',
+                'NMEA',
                 'protocol-evolution',
                 'protocol-transition',
-                'gpsd-time-service-howto',
                 'time-service-intro',
-                'client-howto']
+                ]
     asciidocs = ["www/" + stem + ".html" for stem in txtfiles] \
         + ["www/installation.html"]
     for stem in txtfiles:
@@ -2397,9 +2402,17 @@ else:
     env.Default(build)
 
 # Tags for Emacs and vi
-misc_sources = ['cgps.c', 'gpsctl.c', 'gpsdctl.c', 'gpspipe.c',
-                'gps2udp.c', 'gpsdecode.c', 'gpxlogger.c', 'ntpshmmon.c',
-                'ppscheck.c']
+misc_sources = [
+                'cgps.c',
+                'gps2udp.c',
+                'gpsctl.c',
+                'gpsdctl.c',
+                'gpsdecode.c',
+                'gpspipe.c',
+                'gpxlogger.c',
+                'ntpshmmon.c',
+                'ppscheck.c',
+                ]
 sources = libgpsd_sources + libgps_sources + gpsd_sources + gpsmon_sources + \
     misc_sources
 env.Command('TAGS', sources, ['etags ' + " ".join(sources)])
