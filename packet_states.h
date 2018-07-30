@@ -183,6 +183,18 @@
    GEOSTAR_RECOGNIZED,      /* this is also GEOSTAR_CHECKSUM_D */
 #endif
 
+#ifdef GREIS_ENABLE
+   GREIS_EXPECTED,          /* expecting GREIS packet */
+   GREIS_REPLY_1,           /* saw first byte of a reply */
+   GREIS_REPLY_2,           /* saw second byte of a reply */
+   GREIS_ID_1,              /* saw first byte of ID */
+   GREIS_ID_2,              /* saw second byte of ID */
+   GREIS_LENGTH_1,          /* saw first length byte */
+   GREIS_LENGTH_2,          /* saw second length byte */
+   GREIS_PAYLOAD,           /* we're in a GREIS payload */
+   GREIS_RECOGNIZED,        /* found end of the GREIS packet */
+#endif
+
 /*
  * Packet formats without checksums start here.  We list them last so
  * that if a format with a conflicting structure *and* a checksum can

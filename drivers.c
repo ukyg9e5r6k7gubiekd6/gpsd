@@ -242,6 +242,15 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 	    (void)nmea_send(session, "$PMTK605");
 	    break;
 #endif /* MTK3301_ENABLE */
+#ifdef GREIS_ENABLE
+	case 9:
+	    /* probe for Javad GREIS -- expect reply with JAVAD */
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "=> Probing for Javad GREIS\n");
+	    /* TODO: confirm this actually gets JAVAD response */
+	    (void)nmea_send(session, "print,/par/rcv/vendor");
+	    break;
+#endif /* GREIS_ENABLE */
 	default:
 	    break;
 	}
@@ -1741,6 +1750,7 @@ extern const struct gps_type_t driver_evermore;
 extern const struct gps_type_t driver_garmin_ser_binary;
 extern const struct gps_type_t driver_garmin_usb_binary;
 extern const struct gps_type_t driver_geostar;
+extern const struct gps_type_t driver_greis;
 extern const struct gps_type_t driver_italk;
 extern const struct gps_type_t driver_navcom;
 extern const struct gps_type_t driver_nmea2000;
@@ -1803,6 +1813,9 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef GEOSTAR_ENABLE
     &driver_geostar,
 #endif /* GEOSTAR_ENABLE */
+#ifdef GREIS_ENABLE
+    &driver_greis,
+#endif /* GREIS_ENABLE */
 #ifdef ITRAX_ENABLE
     &driver_italk,
 #endif /* ITRAX_ENABLE */

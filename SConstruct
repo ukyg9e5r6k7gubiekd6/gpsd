@@ -1119,6 +1119,8 @@ libgpsd_sources = [
     "driver_garmin.c",
     "driver_garmin_txt.c",
     "driver_geostar.c",
+    "driver_greis.c",
+    "driver_greis_checksum.c",
     "driver_italk.c",
     "driver_navcom.c",
     "driver_nmea0183.c",
@@ -1364,6 +1366,7 @@ else:
     python_extensions = {
         "gps" + os.sep + "packet": [
                                     "crc24q.c",
+                                    "driver_greis_checksum.c",
                                     "driver_rtcm2.c",
                                     "gpspacket.c",
                                     "hex.c",
