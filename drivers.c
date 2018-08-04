@@ -1406,6 +1406,15 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 	return false;
     }
 
+    /* discard sentences with high-half characters in them, they're corrupted */
+    for (cp = buf; *cp; cp++) {
+	if (!isascii(*cp)) {
+	    gpsd_log(&session->context->errout, LOG_ERROR,
+		     "corrupted AIVDM packet.\n");
+	    return false;
+	}
+    }
+
     /* extract packet fields */
     (void)strlcpy((char *)fieldcopy, buf, sizeof(fieldcopy));
     field[nfields++] = (unsigned char *)buf;
