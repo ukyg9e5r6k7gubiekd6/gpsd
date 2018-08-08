@@ -478,7 +478,7 @@ timestamp_t iso8601_to_unix(char *isotime)
 }
 
 /* *INDENT-OFF* */
-char *unix_to_iso8601(timestamp_t fixtime, /*@ out @*/
+char *unix_to_iso8601(timestamp_t fixtime,
 				     char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.033Z */

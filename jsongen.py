@@ -1045,14 +1045,11 @@ if __name__ == '__main__':
  */
  #define NITEMS(x) (int)(sizeof(x)/sizeof(x[0]))
 
-/*@ -fullinitblock */
-
 """)
         outboard = []
         for description in spec:
             generate(description)
         print("""
-/*@ +fullinitblock */
 
 /* Generated code ends. */
 """)
