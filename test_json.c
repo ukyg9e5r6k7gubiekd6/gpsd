@@ -14,12 +14,6 @@
 #include "gpsd.h"
 #include "gps_json.h"
 
-/* GPSD is built with JSON_MINIMAL.  Any !JSON_MINIMAL tests,
- * like 17, 18 and 19 will thus fail.
- * So this define removes them, they never execute.
- */
-#define JSON_MINIMAL
-
 static int debug = 0;
 
 static void assert_case(int num, int status)
@@ -264,7 +258,6 @@ static const struct json_attr_t json_short_string[] = {
 static char json_strOver2[7 * JSON_VAL_MAX];  /* dynamically built */
 
 
-#ifndef JSON_MINIMAL
 /* Case 17: Read array of integers */
 
 static const char *json_strInt = "[23,-17,5]";
@@ -302,7 +295,6 @@ static const struct json_array_t json_array_Real = {
     .count = &realcount,
     .maxlen = sizeof(realstore)/sizeof(realstore[0]),
 };
-#endif /* JSON_MINIMAL */
 
 /* *INDENT-ON* */
 
@@ -495,9 +487,6 @@ static void jsontest(int i)
 	assert_integer("count", json_short_string_cnt, 0);
 	break;
 
-#ifdef JSON_MINIMAL
-#define MAXTEST 16
-#else
     case 17:
 	status = json_read_array(json_strInt, &json_array_Int, NULL);
 	assert_integer("count", intcount, 3);
@@ -526,7 +515,6 @@ static void jsontest(int i)
 	break;
 
 #define MAXTEST 19
-#endif /* JSON_MINIMAL */
 
     default:
 	(void)fputs("Unknown test number\n", stderr);

@@ -68,6 +68,7 @@ PERMISSIONS
 #include <stdbool.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <math.h>	/* for HUGE_VAL */
 
 #include "os_compat.h"
 #ifdef SOCKET_EXPORT_ENABLE
@@ -75,8 +76,6 @@ PERMISSIONS
 
 #include "gps.h"		/* for safe_atof() prototype */
 #include "strfuncs.h"
-
-#define JSON_MINIMAL	/* GPSD only uses a subset of the features */
 
 #ifdef CLIENTDEBUG_ENABLE
 static int debuglevel = 0;
@@ -250,10 +249,8 @@ static int json_internal_read_object(const char *cp,
 	    else {
 		json_debug_trace((1,
 				  "Non-WS when expecting object start.\n"));
-#ifndef JSON_MINIMAL
 		if (end != NULL)
 		    *end = cp;
-#endif /* JSON_MINIMAL */
 		return JSON_ERR_OBSTART;
 	    }
 	    break;
@@ -263,18 +260,14 @@ static int json_internal_read_object(const char *cp,
 	    else if (*cp == '"') {
 		state = in_attr;
 		pattr = attrbuf;
-#ifndef JSON_MINIMAL
 		if (end != NULL)
 		    *end = cp;
-#endif /* JSON_MINIMAL */
 	    } else if (*cp == '}')
 		break;
 	    else {
 		json_debug_trace((1, "Non-WS when expecting attribute.\n"));
-#ifndef JSON_MINIMAL
 		if (end != NULL)
 		    *end = cp;
-#endif /* JSON_MINIMAL */
 		return JSON_ERR_ATTRSTART;
 	    }
 	    break;
@@ -324,10 +317,8 @@ static int json_internal_read_object(const char *cp,
 		if (cursor->type != t_array) {
 		    json_debug_trace((1,
 				      "Saw [ when not expecting array.\n"));
-#ifndef JSON_MINIMAL
 		    if (end != NULL)
 			*end = cp;
-#endif /* JSON_MINIMAL */
 		    return JSON_ERR_NOARRAY;
 		}
 		substatus = json_read_array(cp, &cursor->addr.array, &cp);
@@ -337,10 +328,8 @@ static int json_internal_read_object(const char *cp,
 	    } else if (cursor->type == t_array) {
 		json_debug_trace((1,
 				  "Array element was specified, but no [.\n"));
-#ifndef JSON_MINIMAL
 		if (end != NULL)
 		    *end = cp;
-#endif /* JSON_MINIMAL */
 		return JSON_ERR_NOBRAK;
 	    } else if (*cp == '"') {
 		value_quoted = true;
@@ -575,10 +564,8 @@ static int json_internal_read_object(const char *cp,
 		goto good_parse;
 	    } else {
 		json_debug_trace((1, "Garbage while expecting comma or }\n"));
-#ifndef JSON_MINIMAL
 		if (end != NULL)
 		    *end = cp;
-#endif /* JSON_MINIMAL */
 		return JSON_ERR_BADTRAIL;
 	    }
 	    break;
@@ -624,9 +611,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	goto breakout;
 
     for (offset = 0; offset < arr->maxlen; offset++) {
-#ifndef JSON_MINIMAL
 	char *ep = NULL;
-#endif /* JSON_MINIMAL */
 	json_debug_trace((1, "Looking at %s\n", cp));
 	switch (arr->element_type) {
 	case t_string:
@@ -660,24 +645,19 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 		json_internal_read_object(cp, arr->arr.objects.subtype, arr,
 					  offset, &cp);
 	    if (substatus != 0) {
-#ifndef JSON_MINIMAL
 		if (end != NULL)
 		    end = &cp;
-#endif /* JSON_MINIMAL */
 		return substatus;
 	    }
 	    break;
 	case t_integer:
-#ifndef JSON_MINIMAL
 	    arr->arr.integers.store[offset] = (int)strtol(cp, &ep, 0);
 	    if (ep == cp)
 		return JSON_ERR_BADNUM;
 	    else
 		cp = ep;
 	    break;
-#endif /* JSON_MINIMAL */
 	case t_uinteger:
-#ifndef JSON_MINIMAL
 	    arr->arr.uintegers.store[offset] = (unsigned int)strtoul(cp,
                                                                      &ep, 0);
 	    if (ep == cp)
@@ -685,18 +665,14 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    else
 		cp = ep;
 	    break;
-#endif /* JSON_MINIMAL */
 	case t_short:
-#ifndef JSON_MINIMAL
 	    arr->arr.shorts.store[offset] = (short)strtol(cp, &ep, 0);
 	    if (ep == cp)
 		return JSON_ERR_BADNUM;
 	    else
 		cp = ep;
 	    break;
-#endif /* JSON_MINIMAL */
 	case t_ushort:
-#ifndef JSON_MINIMAL
 	    arr->arr.ushorts.store[offset] = (unsigned short)strtoul(cp,
                                                                      &ep, 0);
 	    if (ep == cp)
@@ -704,9 +680,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    else
 		cp = ep;
 	    break;
-#endif /* JSON_MINIMAL */
 	case t_time:
-#ifndef JSON_MINIMAL
 	    if (*cp != '"')
 		return JSON_ERR_BADSTRING;
 	    else
@@ -721,18 +695,14 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    else
 		++cp;
 	    break;
-#endif /* JSON_MINIMAL */
 	case t_real:
-#ifndef JSON_MINIMAL
 	    arr->arr.reals.store[offset] = strtod(cp, &ep);
 	    if (ep == cp)
 		return JSON_ERR_BADNUM;
 	    else
 		cp = ep;
 	    break;
-#endif /* JSON_MINIMAL */
 	case t_boolean:
-#ifndef JSON_MINIMAL
 	    if (str_starts_with(cp, "true")) {
 		arr->arr.booleans.store[offset] = true;
 		cp += 4;
@@ -742,7 +712,6 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 		cp += 5;
 	    }
 	    break;
-#endif /* JSON_MINIMAL */
 	case t_character:
 	case t_array:
 	case t_check:
@@ -764,10 +733,8 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	}
     }
     json_debug_trace((1, "Too many elements in array.\n"));
-#ifndef JSON_MINIMAL
     if (end != NULL)
 	*end = cp;
-#endif /* JSON_MINIMAL */
     return JSON_ERR_SUBTOOLONG;
   breakout:
     if (arr->count != NULL)
