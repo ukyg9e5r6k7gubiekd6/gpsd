@@ -1385,6 +1385,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     unsigned char *field[NMEA_MAX*2];
     unsigned char fieldcopy[NMEA_MAX*2+1];
     unsigned char *data, *cp;
+    unsigned char const *cp1;
     int pad;
     struct aivdm_context_t *ais_context;
     int i;
@@ -1407,7 +1408,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
     }
 
     /* discard sentences with high-half characters in them, they're corrupted */
-    for (cp = buf; *cp; cp++) {
+    for (cp1 = buf; *cp1; cp1++) {
 	if (!isascii(*cp)) {
 	    gpsd_log(&session->context->errout, LOG_ERROR,
 		     "corrupted AIVDM packet.\n");
