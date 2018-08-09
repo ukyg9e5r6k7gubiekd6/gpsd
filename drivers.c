@@ -1409,7 +1409,7 @@ static bool aivdm_decode(const char *buf, size_t buflen,
 
     /* discard sentences with high-half characters in them, they're corrupted */
     for (cp1 = buf; *cp1; cp1++) {
-	if (!isascii(*cp)) {
+	if (!isascii(*cp1)) {
 	    gpsd_log(&session->context->errout, LOG_ERROR,
 		     "corrupted AIVDM packet.\n");
 	    return false;
