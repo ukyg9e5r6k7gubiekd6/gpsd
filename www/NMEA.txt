@@ -170,7 +170,7 @@ In NMEA 3.01 (and possibly some earlier versions), the character "^"
 using 0-9 and A-F, expressing an ISO 8859-1 (Latin-1) character <<ANON>>.
 
 The Checksum is mandatory, and the last field in a sentance.  It is
-the 8-bit XOR of all characters in the sentance, exclusing the "$", "I",
+the 8-bit XOR of all characters in the sentance, excluding the "$", "I",
 or "*" characters; but including all "," and "^".  It is encoded as
 two hexadecimal characters (0-9, A-F), the most-significant-nibble
 being sent first.
@@ -801,7 +801,6 @@ Bearing calculated at the FROM waypoint.
 6. FROM Waypoint
 7. Checksum
 
-
 === DBK - Depth Below Keel ===
 
 ------------------------------------------------------------------------------
@@ -951,7 +950,6 @@ radiotelephone.
 3. Communications Mode (NMEA Syntax 2)
 4. Power Level
 5. Checksum
-
 
 === GBS - GPS Satellite Fault Detection ===
 
@@ -1274,7 +1272,6 @@ Field Number:
 
 (The GXA sentence is obsolete as of 3.01.)
 
-
 === HDG - Heading - Deviation & Variation ===
 
 ------------------------------------------------------------------------------
@@ -1291,7 +1288,6 @@ Field Number:
 4. Magnetic Variation degrees
 5. Magnetic Variation direction, E = Easterly, W = Westerly
 6. Checksum
-
 
 === HDM - Heading - Magnetic ===
 
@@ -1440,7 +1436,6 @@ Field Number:
 5. Unknown integer value
 6. Checksum
 
-
 === MTW - Mean Temperature of Water ===
 
 ------------------------------------------------------------------------------
@@ -1474,7 +1469,6 @@ Field Number:
 4. Wind Speed Units, K/M/N
 5. Status, A = Data Valid
 6. Checksum
-
 
 === OLN - Omega Lane Numbers ===
 
@@ -1513,7 +1507,6 @@ Field Number:
 8. Vessel drift (speed)
 9. Speed Units
 10. Checksum
-
 
 === R00 - Waypoints in active route ===
 
@@ -1555,7 +1548,6 @@ Field Number:
 11. E or W
 12. Checksum
 
-
 === RMB - Recommended Minimum Navigation Information ===
 
 To be sent by a navigation receiver when a destination waypoint is active.
@@ -1586,7 +1578,6 @@ Field Number:
 15. Checksum
 
 Example: $GPRMB,A,0.66,L,003,004,4917.24,N,12309.57,W,001.3,052.5,000.5,V*0B
-
 
 === RMC - Recommended Minimum Navigation Information ===
 
@@ -1693,7 +1684,6 @@ Field Number:
 12. Range Units
 13  Unknown
 14. Checksum
-
 
 === RTE - Routes ===
 
@@ -1828,7 +1818,6 @@ Field Number:
 
 From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
 
-
 === TPT - Trawl Position True ===
 
 ------------------------------------------------------------------------------
@@ -1848,7 +1837,6 @@ Field Number:
 7. Checksum
 
 From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
-
 
 === TRF - TRANSIT Fix Data ===
 
@@ -1876,7 +1864,6 @@ Field Number:
 13. Checksum
 
 (The TRF sentence is obsolete as of 2.3.0)
-
 
 === TTM - Tracked Target Message ===
 
@@ -2099,7 +2086,6 @@ Field Number:
 6. FROM Waypoint
 7. Checksum
 
-
 === WPL - Waypoint Location ===
 
 ------------------------------------------------------------------------------
@@ -2116,7 +2102,6 @@ Field Number:
 4. E or W (East or West)
 5. Waypoint name
 6. Checksum
-
 
 === XDR - Transducer Measurement ===
 
