@@ -1825,7 +1825,10 @@ void json_aivdm_dump(const struct ais_t *ais,
 	    switch (ais->type6.fid) {
 	    case 21:
 		str_appendf(buf, buflen,
-			       "\"country\":\"%s\",\"locode\":\"%s\",\"section\":\"%s\",\"terminal\":\"%s\",\"hectometre\":\"%s\",\"eta\":\"%u-%uT%u:%u\",\"tugs\":%u,\"airdraught\":%u}",
+		    "\"country\":\"%s\",\"locode\":\"%s\","
+		    "\"section\":\"%s\",\"terminal\":\"%s\","
+		    "\"hectometre\":\"%s\",\"eta\":\"%u-%uT%u:%u\","
+		    "\"tugs\":%u,\"airdraught\":%u}\r\n",
 		    ais->type6.dac200fid21.country,
 		    ais->type6.dac200fid21.locode,
 		    ais->type6.dac200fid21.section,
@@ -1844,7 +1847,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 			       "\"section\":\"%s\","
 			       "\"terminal\":\"%s\",\"hectometre\":\"%s\","
 			       "\"eta\":\"%u-%uT%u:%u\","
-			       "\"status\":%u,\"status_text\":\"%s\"}",
+			       "\"status\":%u,\"status_text\":\"%s\"}\r\n",
 			       ais->type6.dac200fid22.country,
 			       ais->type6.dac200fid22.locode,
 			       ais->type6.dac200fid22.section,
@@ -1859,7 +1862,7 @@ void json_aivdm_dump(const struct ais_t *ais,
 		break;
 	    case 55:
 		str_appendf(buf, buflen,
-		    "\"crew\":%u,\"passengers\":%u,\"personnel\":%u}",
+		    "\"crew\":%u,\"passengers\":%u,\"personnel\":%u}\r\n",
 
 		    ais->type6.dac200fid55.crew,
 		    ais->type6.dac200fid55.passengers,
