@@ -185,8 +185,9 @@ class stats(object):
                 m4 += pow(fix - sigma, 4)
 
         self.sigma = sigma
-        self.skewness = m3 / (len(fixes) * pow(sigma, 3))
-        self.kurtosis = m4 / (len(fixes) * pow(sigma, 4))
+        if sigma > 0.0001:
+            self.skewness = m3 / (len(fixes) * pow(sigma, 3))
+            self.kurtosis = m4 / (len(fixes) * pow(sigma, 4))
 
         return
 
