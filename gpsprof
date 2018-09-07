@@ -121,6 +121,13 @@ class stats(object):
         self.skewness = 0.0
         self.kurtosis = 0.0
 
+    def __str__(self):
+        "return a nice string, for debug"
+        return ("min %f, max %f, mean %f, median %f, sigma %f, skewedness %f, "
+                "kurtosis %f" %
+                (self.min, self.max, self.mean, self.median,
+                 self.sigma, self.skewness, self.kurtosis))
+
     def min_max_mean(self, fixes, index):
         "Find min, max, and mean of fixes[index]"
 
@@ -710,6 +717,7 @@ class polarplot(plotter):
     "Polar plot of signal strength"
     name = "polar"
     requires_time = False
+    seen_used = []          # count of seen and used in each SKY
 
     def __init__(self):
         plotter.__init__(self)
@@ -721,13 +729,17 @@ class polarplot(plotter):
             seen = 0
             used = 0
             for sat in sats:
+                seen += 1
                 # u'ss': 42, u'el': 15, u'PRN': 18, u'az': 80, u'used': True
-                if (('polarunused' == self.name) and (sat['used'] is True)):
-                    continue
+                if sat['used'] is True:
+                    used += 1
+                    if 'polarunused' == self.name:
+                        continue
                 if (('polarused' == self.name) and (sat['used'] is False)):
                     continue
                 self.fixes.append((sat['PRN'], sat['ss'], sat['az'],
                                   sat['el'], sat['used']))
+            self.seen_used.append((seen, used))
 
         return True
 
@@ -744,13 +756,21 @@ class polarplot(plotter):
         return res
 
     def plot(self):
-        ss = []
-        for fix in self.fixes:
-            ss.append(fix[1])
+
+        # calc SNR: mean, min, max, sigma
+        stat_ss = stats()
+        stat_ss.min_max_mean(self.fixes, 1)
+        stat_ss.moments(self.fixes, 1)
+
+        # calc sats seen data: mean, min, max, sigma
+        stat_seen = stats()
+        stat_seen.min_max_mean(self.seen_used, 0)
+        stat_seen.moments(self.seen_used, 0)
 
         # calc sats used data: mean, min, max, sigma
-        stat_ss = stats()
-        stat_ss.min_max_mean(ss, 0)
+        stat_used = stats()
+        stat_used.min_max_mean(self.seen_used, 1)
+        stat_used.moments(self.seen_used, 1)
 
         fmt = '''\
 unset border
@@ -813,9 +833,28 @@ set palette defined (100 "blue", 200 "green", 300 "red")
 
         count = len(self.fixes)
         fmt += '''\
-set label 11 at screen 0.01, screen 0.15 "%s\\nmin SS = %d\\nmax SS = %d\\n\
-mean SS = %d\\nSamples %d"
-''' % (self.name, stat_ss.min, stat_ss.max, stat_ss.mean, count)
+set label 10 at screen 0.01, screen 0.15 "%s plot, samples %d"
+''' % (self.name, count)
+
+        fmt += '''\
+set label 11 at screen 0.01, screen 0.10 "\\nSS\\nSeen\\nUsed"
+'''
+
+        fmt += '''\
+set label 12 at screen 0.11, screen 0.10 "min\\n%d\\n%d\\n%d"
+''' % (stat_ss.min, stat_seen.min, stat_used.min)
+
+        fmt += '''\
+set label 13 at screen 0.21, screen 0.10 "max\\n%d\\n%d\\n%d"
+''' % (stat_ss.max, stat_seen.max, stat_used.max)
+
+        fmt += '''\
+set label 14 at screen 0.31, screen 0.10 "mean\\n%.1f\\n%.1f\\n%.1f"
+''' % (stat_ss.mean, stat_seen.mean, stat_used.mean)
+
+        fmt += '''\
+set label 15 at screen 0.41, screen 0.10 "sigma\\n%.1f\\n%.1f\\n%.1f"
+''' % (stat_ss.sigma, stat_seen.sigma, stat_used.sigma)
 
         fmt += '''\
 # and finally the plot
