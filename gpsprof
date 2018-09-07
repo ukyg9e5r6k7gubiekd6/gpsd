@@ -841,19 +841,19 @@ set label 11 at screen 0.01, screen 0.10 "\\nSS\\nSeen\\nUsed"
 '''
 
         fmt += '''\
-set label 12 at screen 0.11, screen 0.10 "min\\n%d\\n%d\\n%d"
+set label 12 at screen 0.11, screen 0.10 "min\\n%d\\n%d\\n%d" right
 ''' % (stat_ss.min, stat_seen.min, stat_used.min)
 
         fmt += '''\
-set label 13 at screen 0.21, screen 0.10 "max\\n%d\\n%d\\n%d"
+set label 13 at screen 0.21, screen 0.10 "max\\n%d\\n%d\\n%d" right
 ''' % (stat_ss.max, stat_seen.max, stat_used.max)
 
         fmt += '''\
-set label 14 at screen 0.31, screen 0.10 "mean\\n%.1f\\n%.1f\\n%.1f"
+set label 14 at screen 0.31, screen 0.10 "mean\\n%.1f\\n%.1f\\n%.1f" right
 ''' % (stat_ss.mean, stat_seen.mean, stat_used.mean)
 
         fmt += '''\
-set label 15 at screen 0.41, screen 0.10 "sigma\\n%.1f\\n%.1f\\n%.1f"
+set label 15 at screen 0.41, screen 0.10 "sigma\\n%.1f\\n%.1f\\n%.1f" right
 ''' % (stat_ss.sigma, stat_seen.sigma, stat_used.sigma)
 
         fmt += '''\
