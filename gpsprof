@@ -171,15 +171,15 @@ class stats(object):
         m3 = 0.0
         m4 = 0.0
         if type(fixes[0]) == tuple:
-            sum_squares = [x[index] ** 2 for x in fixes]
-            sigma = math.sqrt(sum(sum_squares) / len(fixes))
+            sum_squares = [(x[index] - self.mean) ** 2 for x in fixes]
+            sigma = math.sqrt(sum(sum_squares) / (len(fixes) - 1))
             for fix in fixes:
                 m3 += pow(fix[index] - sigma, 3)
                 m4 += pow(fix[index] - sigma, 4)
         else:
             # must be float
-            sum_squares = [x ** 2 for x in fixes]
-            sigma = math.sqrt(sum(sum_squares) / len(fixes))
+            sum_squares = [(x - self.mean) ** 2 for x in fixes]
+            sigma = math.sqrt(sum(sum_squares) /( len(fixes) -1))
             for fix in fixes:
                 m3 += pow(fix - sigma, 3)
                 m4 += pow(fix - sigma, 4)
