@@ -3336,8 +3336,9 @@ void json_att_dump(const struct gps_data_t *gpsdata,
     (void)strlcpy(reply, "{\"class\":\"ATT\",", replylen);
     str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
     if (isfinite(gpsdata->attitude.heading) != 0) {
+        /* Trimble outputs %.3f, so we do too. */
 	str_appendf(reply, replylen,
-		       "\"heading\":%.2f,", gpsdata->attitude.heading);
+		       "\"heading\":%.3f,", gpsdata->attitude.heading);
 	if (gpsdata->attitude.mag_st != '\0')
 	    str_appendf(reply, replylen,
 			   "\"mag_st\":\"%c\",", gpsdata->attitude.mag_st);
