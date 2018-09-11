@@ -1109,9 +1109,22 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
      * It is followed by a mandatory nmea_checksum.
      */
     gps_mask_t mask;
+    double heading;
+
     mask = ONLINE_SET;
 
-    session->gpsdata.attitude.heading = safe_atof(field[1]);
+    if ( 0 == strlen(field[1])) {
+        /* no data */
+        return mask;
+    }
+    heading = safe_atof(field[1]);
+    if ((0.0 > heading) || (360.0 < heading)) {
+        /* bad data */
+        return mask;
+    }
+    /* good data */
+    session->gpsdata.attitude.heading = heading;
+
     session->gpsdata.attitude.mag_st = '\0';
     session->gpsdata.attitude.pitch = NAN;
     session->gpsdata.attitude.pitch_st = '\0';
@@ -1135,9 +1148,9 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
     mask |= (ATTITUDE_SET);
 
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "time %.3f, heading %lf.\n",
-	     session->newdata.time,
-	     session->gpsdata.attitude.heading);
+             "time %.3f, heading %lf.\n",
+             session->newdata.time,
+             session->gpsdata.attitude.heading);
     return mask;
 }
 
